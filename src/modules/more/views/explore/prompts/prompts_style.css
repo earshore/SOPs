@@ -52,20 +52,20 @@
 }
 
 .category-btn:hover {
-    border-color: var(--color-green-300);
-    background-color: var(--color-green-50);
-    color: var(--color-green-600);
+    border-color: var(--color-teal-300);
+    background-color: var(--color-teal-50);
+    color: var(--color-teal-600);
 }
 
 .category-btn.active {
-    background-color: var(--color-green-600);
+    background-color: var(--color-teal-600);
     color: white;
-    border-color: var(--color-green-600);
+    border-color: var(--color-teal-600);
 }
 
 .category-btn.active:hover {
-    background-color: var(--color-green-700);
-    border-color: var(--color-green-700);
+    background-color: var(--color-teal-700);
+    border-color: var(--color-teal-700);
 }
 
 /* 提示词卡片样式 */
@@ -80,7 +80,7 @@
 
 .prompt-card:hover {
     box-shadow: 0 10px 15px -3px var(--color-black-alpha-10);
-    border-color: var(--color-green-300);
+    border-color: var(--color-teal-300);
 }
 
 .prompt-title {
@@ -92,7 +92,7 @@
 }
 
 .prompt-card:hover .prompt-title {
-    color: var(--color-green-600);
+    color: var(--color-teal-600);
 }
 
 .prompt-description {
@@ -170,8 +170,8 @@
 }
 
 .btn-icon:hover {
-    color: var(--color-green-600);
-    background-color: var(--color-green-50);
+    color: var(--color-teal-600);
+    background-color: var(--color-teal-50);
 }
 
 
@@ -188,7 +188,7 @@
 
 .lang-btn.active {
     background-color: white;
-    color: var(--color-green-600);
+    color: var(--color-teal-600);
     font-weight: 600;
     box-shadow: 0 1px 2px 0 var(--color-black-alpha-5);
 }
@@ -196,4 +196,74 @@
 .lang-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* 资料源卡片 */
+.prompt-source-card {
+    display: block;
+    min-height: 11rem;
+    padding: 1.25rem;
+    color: var(--color-slate-600);
+    background: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--rounded-lg);
+    transition: border-color var(--duration-fast), box-shadow var(--duration-fast), transform var(--duration-fast);
+}
+
+.prompt-source-card:hover {
+    color: var(--color-slate-700);
+    border-color: var(--color-teal-200);
+    box-shadow: 0 10px 22px -18px rgba(15, 118, 110, 0.42);
+    transform: translateY(-1px);
+}
+
+.prompt-source-card__label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    color: var(--color-teal-700);
+    font-size: 0.75rem;
+    font-weight: 700;
+    background-color: var(--color-teal-50);
+    border: 1px solid var(--color-teal-100);
+    border-radius: var(--rounded-md);
+}
+
+.prompt-source-card strong {
+    display: block;
+    color: var(--color-slate-900);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.prompt-source-card p {
+    margin-top: 0.5rem;
+    color: var(--color-slate-500);
+    font-size: 0.875rem;
+    line-height: 1.625;
+}
+
+.prompt-business-rule {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: var(--color-teal-50);
+    border: 1px solid var(--color-teal-100);
+    border-radius: var(--rounded-md);
+}
+
+.prompt-business-rule span {
+    display: block;
+    color: var(--color-teal-700);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.prompt-business-rule p {
+    margin-top: 0.25rem;
+    color: var(--color-teal-900);
+    font-size: 0.8125rem;
+    line-height: 1.6;
 }

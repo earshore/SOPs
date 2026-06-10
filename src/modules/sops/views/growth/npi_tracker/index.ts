@@ -55,6 +55,16 @@ const ADS_STRATEGY_LABELS: Record<NPIProductRecord['ads_strategy'], string> = {
     mixed: '混合',
 };
 
+const FIELD_LABELS: Record<string, string> = {
+    is_pan_eu: '泛欧状态',
+    check_content: '五点 Rufus 加标题',
+    check_sensitive: '敏感词规避',
+    check_creative: '图片加 QA',
+    check_ebc: 'A+ 页面',
+    delivery_fee: 'DE 配送费',
+    ads_strategy: '广告策略',
+};
+
 interface ExportRow {
     阶段: string;
     SKU: string;
@@ -117,6 +127,8 @@ const selectedAttr = (current: string, expected: string): string => current === 
 const yesNo = (value: boolean): string => value ? '是' : '否';
 const checkMark = (value: boolean): string => value ? '✓' : '';
 const safeText = (value: unknown): string => escapeHtml(String(value ?? ''));
+const rowFieldLabel = (row: NPIProductRecord, field: keyof typeof FIELD_LABELS): string =>
+    safeText(`${row.sku} ${FIELD_LABELS[field]}`);
 
 function renderComplianceStatus(compliance: ComplianceStatus): string {
     return compliance.isComplete
@@ -194,19 +206,19 @@ function renderTableRow(row: NPIProductRecord, index: number): string {
 
             <!-- SOP合规 (6列: 泛欧 + 4项检查 + 状态) -->
             <td class="px-3 py-3 text-center border-l">
-                <input type="checkbox" ${checkedAttr(row.is_pan_eu)} class="w-4 h-4 rounded" data-action="update-field" data-field="is_pan_eu">
+                <input type="checkbox" ${checkedAttr(row.is_pan_eu)} class="w-4 h-4 rounded" data-action="update-field" data-field="is_pan_eu" aria-label="${rowFieldLabel(row, 'is_pan_eu')}">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${checkedAttr(row.check_content)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_content">
+                <input type="checkbox" ${checkedAttr(row.check_content)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_content" aria-label="${rowFieldLabel(row, 'check_content')}">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${checkedAttr(row.check_sensitive)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_sensitive">
+                <input type="checkbox" ${checkedAttr(row.check_sensitive)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_sensitive" aria-label="${rowFieldLabel(row, 'check_sensitive')}">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${checkedAttr(row.check_creative)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_creative">
+                <input type="checkbox" ${checkedAttr(row.check_creative)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_creative" aria-label="${rowFieldLabel(row, 'check_creative')}">
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${checkedAttr(row.check_ebc)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_ebc">
+                <input type="checkbox" ${checkedAttr(row.check_ebc)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_ebc" aria-label="${rowFieldLabel(row, 'check_ebc')}">
             </td>
             <td class="px-3 py-3 text-center">
                 ${renderComplianceStatus(compliance)}
@@ -216,7 +228,7 @@ function renderTableRow(row: NPIProductRecord, index: number): string {
             <td class="px-3 py-3 border-l">
                 <input type="number" step="0.1" value="${row.delivery_fee}"
                     class="w-16 px-2 py-1 border rounded text-sm text-center"
-                    data-action="update-delivery-fee">
+                    data-action="update-delivery-fee" aria-label="${rowFieldLabel(row, 'delivery_fee')}">
             </td>
             <td class="px-3 py-3 text-center text-sm text-slate-500">${deliveryPercent}%</td>
             <td class="px-3 py-3 text-center text-red-600 font-bold">€${clearancePrice}</td>
@@ -234,7 +246,7 @@ function renderTableRow(row: NPIProductRecord, index: number): string {
             <!-- 决策 (4列: Vine进度 + 广告 + 保留 + Next Step) -->
             <td class="px-3 py-3 text-center text-sm border-l">${safeText(row.vine_status)}</td>
             <td class="px-3 py-3">
-                <select class="px-2 py-1 border rounded text-xs" data-action="update-field" data-field="ads_strategy">
+                <select class="px-2 py-1 border rounded text-xs" data-action="update-field" data-field="ads_strategy" aria-label="${rowFieldLabel(row, 'ads_strategy')}">
                     ${renderAdsOptions(row.ads_strategy)}
                 </select>
             </td>

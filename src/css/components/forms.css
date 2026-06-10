@@ -25,6 +25,21 @@
    1. CSS 变量
    ======================================== */
 :root {
+  /* ---- PC 字段基线 ---- */
+  --field-height:          40px;
+  --field-height-compact:  30px;
+  --field-padding-x:       12px;
+  --field-padding-y:       8px;
+  --field-radius:          8px;
+  --field-border:          var(--color-slate-300, #cbd5e1);
+  --field-border-hover:    var(--color-slate-400, #94a3b8);
+  --field-bg:              #ffffff;
+  --field-bg-muted:        var(--color-slate-50, #f8fafc);
+  --field-text:            var(--color-slate-700, #334155);
+  --field-placeholder:     var(--color-slate-400, #94a3b8);
+  --field-focus:           var(--color-blue-500, #3b82f6);
+  --field-focus-ring:      rgba(59, 130, 246, 0.14);
+
   /* ---- 复选框 / 单选框 ---- */
   --check-size:            18px;
   --check-size-sm:         14px;
@@ -48,13 +63,14 @@
 .form-input,
 .editor-input-modern {
   width: 100%;
+  min-height: var(--field-height);
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--color-slate-200);
-  border-radius: var(--rounded-lg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
   font-size: 0.875rem;
   line-height: 1.5;
-  color: var(--color-slate-700);
-  background: white;
+  color: var(--field-text);
+  background: var(--field-bg);
   /* Requirements 6.1: 输入框聚焦边框过渡 - 200ms */
   transition: 
     border-color var(--micro-duration-smooth) var(--ease-smooth),
@@ -68,14 +84,14 @@
 .editor-input-modern:focus {
   outline: none;
   /* Requirements 6.1: 聚焦时边框颜色过渡到主色调 */
-  border-color: var(--color-blue-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  background: white;
+  border-color: var(--field-focus);
+  box-shadow: 0 0 0 3px var(--field-focus-ring);
+  background: var(--field-bg);
 }
 
 .form-input:hover,
 .editor-input-modern:hover {
-  border-color: var(--color-slate-300);
+  border-color: var(--field-border-hover);
 }
 
 .form-input:disabled,
@@ -96,26 +112,26 @@
   font-size: 0.875rem;
   line-height: 1.75;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--color-slate-200);
-  border-radius: var(--rounded-lg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
   /* Requirements 6.1: 输入框聚焦边框过渡 - 200ms */
   transition: 
     border-color var(--micro-duration-smooth) var(--ease-smooth),
     box-shadow var(--micro-duration-smooth) var(--ease-smooth),
     background-color var(--duration-normal) var(--ease-smooth);
-  background: white;
-  color: var(--color-slate-700);
+  background: var(--field-bg);
+  color: var(--field-text);
 }
 
 .form-textarea:focus {
   outline: none;
   /* Requirements 6.1: 聚焦时边框颜色过渡到主色调 */
-  border-color: var(--color-blue-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--field-focus);
+  box-shadow: 0 0 0 3px var(--field-focus-ring);
 }
 
 .form-textarea:hover {
-  border-color: var(--color-slate-300);
+  border-color: var(--field-border-hover);
 }
 
 
@@ -315,13 +331,14 @@
    ======================================== */
 .form-select {
   width: 100%;
+  min-height: var(--field-height);
   padding: 0.5rem 2rem 0.5rem 0.75rem;
-  border: 1px solid var(--color-slate-200);
-  border-radius: var(--rounded-lg);
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
   font-size: 0.875rem;
   line-height: 1.5;
-  color: var(--color-slate-700);
-  background: white url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") no-repeat right 0.5rem center/1.25rem 1.25rem;
+  color: var(--field-text);
+  background: var(--field-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") no-repeat right 0.5rem center/1.25rem 1.25rem;
   appearance: none;
   cursor: pointer;
   /* Requirements 6.1: 输入框聚焦边框过渡 - 200ms */
@@ -334,12 +351,131 @@
 .form-select:focus {
   outline: none;
   /* Requirements 6.1: 聚焦时边框颜色过渡到主色调 */
-  border-color: var(--color-blue-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--field-focus);
+  box-shadow: 0 0 0 3px var(--field-focus-ring);
 }
 
 .form-select:hover {
-  border-color: var(--color-slate-300);
+  border-color: var(--field-border-hover);
+}
+
+
+/* ========================================
+   9.1 PC 端遗留字段兼容层
+   ======================================== */
+@media (min-width: 768px) {
+  body input:is(
+    [type="text"],
+    [type="search"],
+    [type="number"],
+    [type="email"],
+    [type="password"],
+    [type="url"],
+    [type="tel"]
+  ):where(:not(.form-input):not(.sidebar-search-input):not(.amzf_search_input):not(.sr-only):not(.hidden):not(.border-none):not(.bg-transparent):not(#lab-char-limit)),
+  body textarea[class]:where(:not(.form-textarea):not(.keyword-input-textarea):not(#kt-copy-input):not(#final-prompt-output):not(.border-none):not(.bg-transparent)),
+  body select[class]:where(:not(.form-select)) {
+    min-height: var(--field-height);
+    padding: var(--field-padding-y) var(--field-padding-x);
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius);
+    background-color: var(--field-bg);
+    color: var(--field-text);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    transition:
+      border-color var(--micro-duration-smooth) var(--ease-smooth),
+      box-shadow var(--micro-duration-smooth) var(--ease-smooth),
+      background-color var(--duration-normal) var(--ease-smooth);
+  }
+
+  body select[class]:where(:not(.form-select)) {
+    padding-right: 2rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.25rem 1.25rem;
+  }
+
+  body input:is(
+    [type="text"],
+    [type="search"],
+    [type="number"],
+    [type="email"],
+    [type="password"],
+    [type="url"],
+    [type="tel"]
+  ):where(:not(.form-input):not(.sidebar-search-input):not(.amzf_search_input):not(.sr-only):not(.hidden):not(.border-none):not(.bg-transparent):not(#lab-char-limit)):hover,
+  body textarea[class]:where(:not(.form-textarea):not(.keyword-input-textarea):not(#kt-copy-input):not(#final-prompt-output):not(.border-none):not(.bg-transparent)):hover,
+  body select[class]:where(:not(.form-select)):hover {
+    border-color: var(--field-border-hover);
+  }
+
+  body input:is(
+    [type="text"],
+    [type="search"],
+    [type="number"],
+    [type="email"],
+    [type="password"],
+    [type="url"],
+    [type="tel"]
+  ):where(:not(.form-input):not(.sidebar-search-input):not(.amzf_search_input):not(.sr-only):not(.hidden):not(.border-none):not(.bg-transparent):not(#lab-char-limit)):focus,
+  body textarea[class]:where(:not(.form-textarea):not(.keyword-input-textarea):not(#kt-copy-input):not(#final-prompt-output):not(.border-none):not(.bg-transparent)):focus,
+  body select[class]:where(:not(.form-select)):focus {
+    outline: none;
+    border-color: var(--field-focus);
+    box-shadow: 0 0 0 3px var(--field-focus-ring);
+    background-color: var(--field-bg);
+  }
+
+  body input:is(
+    [type="text"],
+    [type="search"],
+    [type="number"],
+    [type="email"],
+    [type="password"],
+    [type="url"],
+    [type="tel"]
+  )::placeholder,
+  body textarea::placeholder {
+    color: var(--field-placeholder);
+  }
+
+  body .sidebar-search-input {
+    min-height: 36px;
+    font-size: 0.8125rem;
+    border-color: var(--field-border);
+  }
+
+  body .ppc-action-search input,
+  body .ppc-report-type-control select {
+    border: 0;
+    box-shadow: none;
+    background-color: transparent;
+  }
+
+  body td input:is([type="text"], [type="number"]),
+  body td select,
+  body input[data-action="update-field"],
+  body select[data-action="update-field"] {
+    min-height: var(--field-height-compact);
+    height: var(--field-height-compact);
+    padding: 0.25rem 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background-color: transparent;
+    font-size: 0.8125rem;
+    line-height: 1.25;
+  }
+
+  body td input:is([type="text"], [type="number"]):focus,
+  body td select:focus,
+  body input[data-action="update-field"]:focus,
+  body select[data-action="update-field"]:focus {
+    background-color: var(--field-bg);
+    border-color: var(--field-focus);
+    box-shadow: 0 0 0 2px var(--field-focus-ring);
+  }
 }
 
 
@@ -403,6 +539,48 @@ input[type="checkbox"]:checked {
   background-position: center;
   background-repeat: no-repeat;
   background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+}
+
+input[type="checkbox"][class*="text-blue"],
+input[type="radio"][class*="text-blue"],
+input[type="checkbox"][class*="accent-blue"],
+input[type="radio"][class*="accent-blue"] {
+  color: var(--color-blue-600, #2563eb);
+}
+
+input[type="checkbox"][class*="text-emerald"],
+input[type="radio"][class*="text-emerald"],
+input[type="checkbox"][class*="accent-emerald"],
+input[type="radio"][class*="accent-emerald"] {
+  color: var(--color-emerald-600, #059669);
+}
+
+input[type="checkbox"][class*="text-red"],
+input[type="radio"][class*="text-red"],
+input[type="checkbox"][class*="accent-red"],
+input[type="radio"][class*="accent-red"] {
+  color: var(--color-red-600, #dc2626);
+}
+
+input[type="checkbox"][class*="text-purple"],
+input[type="radio"][class*="text-purple"],
+input[type="checkbox"][class*="accent-purple"],
+input[type="radio"][class*="accent-purple"] {
+  color: var(--color-purple-600, #9333ea);
+}
+
+input[type="checkbox"][class*="text-orange"],
+input[type="radio"][class*="text-orange"],
+input[type="checkbox"][class*="accent-orange"],
+input[type="radio"][class*="accent-orange"] {
+  color: var(--color-orange-500, #f97316);
+}
+
+input[type="checkbox"][class*="text-amber"],
+input[type="radio"][class*="text-amber"],
+input[type="checkbox"][class*="accent-amber"],
+input[type="radio"][class*="accent-amber"] {
+  color: var(--color-amber-600, #d97706);
 }
 
 /* -----------------------------------------

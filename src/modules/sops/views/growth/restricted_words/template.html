@@ -61,7 +61,7 @@
                                 </div>
                                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
                                         <h3 class="font-bold text-slate-800 mb-2">检查记录模板</h3>
-                                        <textarea readonly class="w-full min-h-[120px] text-xs font-mono text-slate-600 bg-white border border-slate-200 rounded-lg p-3">ASIN:
+                                        <textarea readonly aria-label="检查记录模板" class="w-full min-h-[120px] text-xs font-mono text-slate-600 bg-white border border-slate-200 rounded-lg p-3">ASIN:
 站点/语言:
 检查范围: Title / Bullets / Description / A+ / Search Terms
 命中词:
@@ -936,6 +936,7 @@
                                 <span class="text-xs font-bold text-slate-600 px-2"><i
                                                 class="fas fa-globe mr-1"></i>目标站点:</span>
                                 <select class="bg-white border-slate-200 text-sm rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 outline-none"
+                                        aria-label="目标站点"
                                         id="rw-site-context">
                                         <option value="ALL">🇪🇺 全欧洲 (All Sites)</option>
                                         <option value="DE">🇩🇪 德国 (DE)</option>
@@ -952,6 +953,7 @@
                 <div class="p-4 bg-slate-50 border-b border-slate-200">
                         <div class="flex gap-2 max-w-3xl mx-auto">
                                 <select class="px-3 py-2 border border-slate-300 bg-white rounded-l-lg text-sm text-slate-700 outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 w-32 border-r-0"
+                                        aria-label="搜索模式"
                                         id="rw-search-mode">
                                         <option value="fuzzy">模糊搜索</option>
                                         <option value="exact">精确匹配</option>
@@ -963,6 +965,7 @@
                                                 class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                         <input class="w-full pl-9 pr-4 py-2 border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                                                 id="rw-search-input"
+                                                aria-label="高危词检索关键词"
                                                 placeholder="输入关键词检索 (如 Bamboo, Antibacterial, CE, Bio, Leder...)"
                                                 type="text" />
                                 </div>
@@ -987,6 +990,7 @@
                                                         <div class="flex flex-col gap-1">
                                                                 <span>分类</span>
                                                                 <select class="text-xs font-normal border border-slate-300 rounded px-1 py-0.5 bg-white focus:ring-1 focus:ring-blue-500 outline-none max-w-[120px]"
+                                                                        aria-label="按分类筛选"
                                                                         id="rw-filter-category">
                                                                         <option value="">全部分类</option>
                                                                 </select>
@@ -996,6 +1000,7 @@
                                                         <div class="flex flex-col gap-1 items-center">
                                                                 <span>风险等级</span>
                                                                 <select class="text-xs font-normal border border-slate-300 rounded px-1 py-0.5 bg-white focus:ring-1 focus:ring-blue-500 outline-none w-20"
+                                                                        aria-label="按风险等级筛选"
                                                                         id="rw-filter-risk">
                                                                         <option value="">全部</option>
                                                                 </select>

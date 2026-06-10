@@ -161,6 +161,7 @@ export class OverviewRenderer {
           <input 
             type="text" 
             id="overview-search-input"
+            aria-label="搜索功能模块"
             placeholder="搜索功能模块..."
             class="w-full px-4 py-2 pl-10 pr-4 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />

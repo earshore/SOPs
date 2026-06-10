@@ -81,6 +81,7 @@
  * 
  * 6. Variant:
  *    必须在 .wb-container 上显式声明 .wb-container--simple 或 .wb-container--card。
+ *    需要保留语义但隐藏视觉横幅时，可叠加 .wb-container--hidden。
  * 
  * ----------------------------------------------------------------------------
  * 依赖说明:
@@ -140,10 +141,101 @@
   margin-bottom: var(--spacing-xl, 2rem);
   max-width: 100%;
   overflow-x: hidden;
+  --wb-title-size: var(--text-xl, 1.25rem);
+  --wb-title-weight: var(--font-bold, 700);
+  --wb-title-line-height: var(--leading-snug, 1.375);
+  --wb-description-size: var(--text-base, 0.875rem);
+  --wb-description-line-height: var(--leading-normal, 1.5);
+  --wb-tag-text-size: var(--text-xs, 0.75rem);
+  --wb-tag-text-weight: var(--font-medium, 500);
+  --wb-tag-min-height: 28px;
+  --wb-tag-padding: 5px 10px;
+  --wb-tag-radius: var(--rounded-full, 9999px);
+  --wb-tag-icon-size: 10px;
+  --wb-theme-accent: #2563eb;
+  --wb-theme-accent-strong: #1d4ed8;
+  --wb-theme-accent-soft: rgba(239, 246, 255, 0.86);
+  --wb-theme-accent-border: rgba(37, 99, 235, 0.20);
+  --wb-theme-tag-dot-color: var(--wb-theme-accent);
+  --wb-theme-tag-icon-color: var(--wb-theme-accent-strong);
+  --wb-theme-tag-hover-border: var(--wb-theme-accent-border);
+  --wb-tag-dot-color: var(--wb-theme-tag-dot-color);
+  --wb-tag-icon-color: var(--wb-theme-tag-icon-color);
+  --wb-badge-text-size: var(--text-2xs, 0.625rem);
+  --wb-badge-text-weight: var(--font-bold, 700);
+  --wb-badge-icon-size: 9px;
+  --wb-theme-badge-bg: var(--wb-theme-accent-soft);
+  --wb-theme-badge-color: var(--wb-theme-accent-strong);
+  --wb-theme-badge-border: var(--wb-theme-accent-border);
+  --wb-badge-bg: var(--wb-theme-badge-bg);
+  --wb-badge-color: var(--wb-theme-badge-color);
+  --wb-badge-border: var(--wb-theme-badge-border);
+  --wb-icon-size: 52px;
+  --wb-icon-card-size: 56px;
+  --wb-icon-pc-size: 46px;
+  --wb-icon-radius: var(--rounded-lg, 12px);
+  --wb-icon-font-size: 21px;
+  --wb-icon-card-font-size: 22px;
+  --wb-icon-pc-font-size: 19px;
+  --wb-icon-gradient-1: #2563eb;
+  --wb-icon-gradient-2: #0891b2;
+  --wb-icon-color: #ffffff;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(37, 99, 235, 0.72);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(37, 99, 235, 0.78);
+  --wb-icon-badge-size: 20px;
+  --wb-icon-badge-pc-size: 18px;
+  --wb-icon-badge-offset: -4px;
+  --wb-icon-badge-radius: var(--rounded-full, 9999px);
+  --wb-icon-badge-border-width: 2px;
+  --wb-icon-badge-border-color: #ffffff;
+  --wb-icon-badge-font-size: 8px;
+  --wb-icon-badge-pc-font-size: 7px;
+  --wb-icon-badge-gradient-1: var(--color-amber-400, #fbbf24);
+  --wb-icon-badge-gradient-2: var(--color-warning, #f59e0b);
+  --wb-icon-badge-color: #ffffff;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(245, 158, 11, 0.9);
+  --wb-icon-badge-display: flex;
+  --wb-icon-ring-color: var(--wb-theme-accent-border);
 }
 
 .wb-container.mb-8 {
   margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+.wb-container--card {
+  --wb-title-size: var(--text-xl, 1.25rem);
+  --wb-title-weight: var(--font-bold, 700);
+  --wb-title-line-height: var(--leading-snug, 1.375);
+  --wb-description-size: var(--text-base, 0.875rem);
+  --wb-description-line-height: var(--leading-normal, 1.5);
+  --wb-tag-text-size: var(--text-xs, 0.75rem);
+  --wb-tag-text-weight: var(--font-medium, 500);
+}
+
+.wb-container--hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.wb-container--hidden::before,
+.wb-container--hidden::after,
+.wb-container--hidden *::before,
+.wb-container--hidden *::after {
+  display: none !important;
+}
+
+.wb-container--hidden * {
+  animation: none !important;
+  transition: none !important;
 }
 
 .wb-card {
@@ -169,11 +261,42 @@
   box-shadow: 0 14px 32px -26px rgba(15, 23, 42, 0.55);
 }
 
+.wb-card::before,
+.wb-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.wb-card::before {
+  z-index: 1;
+  background:
+    radial-gradient(circle 220px at 92% 18%, var(--wb-orb-1-color, rgba(96, 165, 250, 0.15)) 0%, transparent 72%),
+    radial-gradient(circle 170px at 4% 112%, var(--wb-orb-2-color, rgba(147, 197, 253, 0.12)) 0%, transparent 74%),
+    radial-gradient(circle 120px at 68% 46%, var(--wb-orb-3-color, rgba(59, 130, 246, 0.08)) 0%, transparent 76%);
+  opacity: var(--wb-card-orb-opacity, 0.86);
+}
+
+.wb-card::after {
+  z-index: 2;
+  background:
+    radial-gradient(circle at 91% 18%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px, transparent 3px),
+    radial-gradient(circle at 83% 56%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.6px, transparent 2.6px),
+    radial-gradient(circle at 66% 73%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.4px, transparent 2.4px),
+    radial-gradient(circle at 21% 31%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.8px, transparent 2.8px),
+    radial-gradient(circle at 37% 47%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.4px, transparent 2.4px),
+    radial-gradient(circle at 14% 66%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.8px, transparent 2.8px);
+  opacity: var(--wb-card-particle-opacity, 0.38);
+}
+
 
 /* ===== 背景装饰层 ===== */
 .wb-bg-gradient {
   position: absolute;
   inset: 0;
+  z-index: 0;
   background: linear-gradient(135deg,
       var(--wb-gradient-1, rgba(239, 246, 255, 0.95)) 0%,
       rgba(255, 255, 255, 0.92) 52%,
@@ -233,6 +356,7 @@
 .wb-grid-pattern {
   position: absolute;
   inset: 0;
+  z-index: 1;
   opacity: .035;
   background-image: radial-gradient(circle,
       rgba(100, 116, 139, 0.45) 1px,
@@ -353,10 +477,11 @@
 }
 
 .wb-icon-main {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--rounded-lg, 12px);
-  background: linear-gradient(135deg, #2563eb, #0891b2);
+  width: var(--wb-icon-card-size, 56px);
+  height: var(--wb-icon-card-size, 56px);
+  border-radius: var(--wb-icon-radius, var(--rounded-lg, 12px));
+  background: linear-gradient(135deg, var(--wb-icon-gradient-1, #2563eb), var(--wb-icon-gradient-2, #0891b2));
+  color: var(--wb-icon-color, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -374,38 +499,39 @@
 }
 
 .wb-icon-main i {
-  font-size: 22px;
-  color: white;
+  font-size: var(--wb-icon-card-font-size, 22px);
+  color: var(--wb-icon-color, #ffffff);
 }
 
 .wb-icon-badge {
   position: absolute;
-  bottom: -4px;
-  right: -4px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+  bottom: var(--wb-icon-badge-offset, -4px);
+  right: var(--wb-icon-badge-offset, -4px);
+  width: var(--wb-icon-badge-size, 20px);
+  height: var(--wb-icon-badge-size, 20px);
+  border-radius: var(--wb-icon-badge-radius, var(--rounded-full, 9999px));
   background: linear-gradient(135deg,
-      var(--color-amber-400, #fbbf24),
-      var(--color-warning, #f59e0b));
-  border: 2px solid white;
+      var(--wb-icon-badge-gradient-1, var(--color-amber-400, #fbbf24)),
+      var(--wb-icon-badge-gradient-2, var(--color-warning, #f59e0b)));
+  color: var(--wb-icon-badge-color, #ffffff);
+  border: var(--wb-icon-badge-border-width, 2px) solid var(--wb-icon-badge-border-color, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 12px -9px rgba(245, 158, 11, 0.9);
+  box-shadow: var(--wb-icon-badge-shadow, 0 6px 12px -9px rgba(245, 158, 11, 0.9));
   z-index: 3;
 }
 
 .wb-icon-badge i {
-  font-size: 8px;
-  color: white;
+  font-size: var(--wb-icon-badge-font-size, 8px);
+  color: var(--wb-icon-badge-color, #ffffff);
 }
 
 .wb-icon-ring {
   position: absolute;
   inset: -6px;
   border-radius: var(--rounded-2xl, 24px);
-  border: 2px solid var(--color-primary-light, rgba(59, 130, 246, 0.10));
+  border: 2px solid var(--wb-icon-ring-color, var(--color-primary-light, rgba(59, 130, 246, 0.10)));
   animation: pulseRing 2s ease-out infinite;
   display: block;
   z-index: 1;
@@ -431,11 +557,11 @@
 }
 
 .wb-title {
-  font-size: var(--text-xl, 1.25rem);
-  font-weight: var(--font-bold, 700);
+  font-size: var(--wb-title-size, var(--text-xl, 1.25rem));
+  font-weight: var(--wb-title-weight, var(--font-bold, 700));
   color: var(--wb-text-primary, var(--color-text-primary, #0f172a));
   letter-spacing: 0;
-  line-height: var(--leading-snug, 1.375);
+  line-height: var(--wb-title-line-height, var(--leading-snug, 1.375));
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -444,14 +570,14 @@
 .wb-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
+  gap: var(--wb-badge-gap, 5px);
+  padding: var(--wb-badge-padding, 3px 9px);
   border-radius: var(--rounded-full, 9999px);
-  font-size: var(--text-2xs, 0.625rem);
-  font-weight: var(--font-bold, 700);
-  color: var(--badge-color, #1d4ed8);
-  background: var(--badge-bg, rgba(239, 246, 255, 0.82));
-  border: 1px solid var(--badge-border, rgba(37, 99, 235, 0.18));
+  font-size: var(--wb-badge-text-size, var(--text-2xs, 0.625rem));
+  font-weight: var(--wb-badge-text-weight, var(--font-bold, 700));
+  color: var(--wb-badge-color, var(--badge-color, #1d4ed8));
+  background: var(--wb-badge-bg, var(--badge-bg, rgba(239, 246, 255, 0.82)));
+  border: 1px solid var(--wb-badge-border, var(--badge-border, rgba(37, 99, 235, 0.18)));
   box-shadow: none;
   letter-spacing: 0;
   text-transform: none;
@@ -466,7 +592,11 @@
 }
 
 .wb-badge i {
-  font-size: 9px;
+  flex: 0 0 auto;
+  width: var(--wb-badge-icon-size, 9px);
+  font-size: var(--wb-badge-icon-size, 9px);
+  color: var(--wb-badge-icon-color, currentColor);
+  text-align: center;
 }
 
 .wb-badge:hover {
@@ -488,57 +618,75 @@
 
 /* 徽章主题变体 */
 .wb-badge-ai {
-  --badge-bg: rgba(239, 246, 255, 0.86);
-  --badge-color: #1d4ed8;
-  --badge-border: rgba(37, 99, 235, 0.20);
+  --wb-badge-bg: rgba(239, 246, 255, 0.86);
+  --wb-badge-color: #1d4ed8;
+  --wb-badge-border: rgba(37, 99, 235, 0.20);
 }
 
 .wb-badge-growth {
-  --badge-bg: rgba(236, 253, 245, 0.88);
-  --badge-color: #047857;
-  --badge-border: rgba(5, 150, 105, 0.22);
+  --wb-badge-bg: rgba(236, 253, 245, 0.88);
+  --wb-badge-color: #047857;
+  --wb-badge-border: rgba(5, 150, 105, 0.22);
 }
 
 .wb-badge-safety {
-  --badge-bg: rgba(255, 247, 237, 0.9);
-  --badge-color: #c2410c;
-  --badge-border: rgba(234, 88, 12, 0.24);
+  --wb-badge-bg: rgba(254, 242, 242, 0.90);
+  --wb-badge-color: #b91c1c;
+  --wb-badge-border: rgba(220, 38, 38, 0.24);
 }
 
 .wb-badge-service {
-  --badge-bg: rgba(250, 245, 255, 0.88);
-  --badge-color: #7e22ce;
-  --badge-border: rgba(126, 34, 206, 0.20);
+  --wb-badge-bg: rgba(240, 253, 250, 0.88);
+  --wb-badge-color: #0f766e;
+  --wb-badge-border: rgba(20, 184, 166, 0.22);
 }
 
 .wb-badge-supply {
-  --badge-bg: rgba(255, 251, 235, 0.9);
-  --badge-color: #b45309;
-  --badge-border: rgba(217, 119, 6, 0.22);
+  --wb-badge-bg: rgba(255, 251, 235, 0.90);
+  --wb-badge-color: #b45309;
+  --wb-badge-border: rgba(217, 119, 6, 0.22);
 }
 
 .wb-badge-analytics {
-  --badge-bg: rgba(236, 254, 255, 0.9);
-  --badge-color: #0e7490;
-  --badge-border: rgba(8, 145, 178, 0.22);
+  --wb-badge-bg: rgba(236, 254, 255, 0.90);
+  --wb-badge-color: #0e7490;
+  --wb-badge-border: rgba(8, 145, 178, 0.22);
 }
 
 .wb-badge-pro {
-  --badge-bg: rgba(255, 251, 235, 0.9);
-  --badge-color: #b45309;
-  --badge-border: rgba(217, 119, 6, 0.22);
+  --wb-badge-bg: rgba(255, 251, 235, 0.90);
+  --wb-badge-color: #b45309;
+  --wb-badge-border: rgba(217, 119, 6, 0.22);
 }
 
 .wb-badge-hub {
-  --badge-bg: rgba(248, 250, 252, 0.9);
-  --badge-color: #475569;
-  --badge-border: rgba(100, 116, 139, 0.22);
+  --wb-badge-bg: rgba(248, 250, 252, 0.90);
+  --wb-badge-color: #475569;
+  --wb-badge-border: rgba(100, 116, 139, 0.22);
+}
+
+.wb-container[class*="wb-theme-"] .wb-badge {
+  --wb-badge-bg: var(--wb-theme-badge-bg);
+  --wb-badge-color: var(--wb-theme-badge-color);
+  --wb-badge-border: var(--wb-theme-badge-border);
+}
+
+.wb-container[class*="wb-theme-"] {
+  --wb-tag-hover-border: var(--wb-theme-tag-hover-border);
+}
+
+.wb-container[class*="wb-theme-"] .wb-tag-dot {
+  --wb-tag-dot-color: var(--wb-theme-tag-dot-color);
+}
+
+.wb-container[class*="wb-theme-"] .wb-meta > span > i {
+  --wb-tag-icon-color: var(--wb-theme-tag-icon-color);
 }
 
 .wb-description {
   color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
-  font-size: var(--text-base, 0.875rem);
-  line-height: var(--leading-normal, 1.5);
+  font-size: var(--wb-description-size, var(--text-base, 0.875rem));
+  line-height: var(--wb-description-line-height, var(--leading-normal, 1.5));
   max-width: 74ch;
   white-space: normal;
   word-wrap: break-word;
@@ -547,32 +695,41 @@
 
 
 /* ===== 特性标签样式 ===== */
-.wb-tags {
+.wb-tags,
+.wb-meta {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-xs, 0.5rem);
   margin-top: var(--spacing-md, 1rem);
+  padding: 0;
+  list-style: none;
 }
 
-.wb-tag {
+.wb-tag,
+.wb-meta > span {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs, 0.5rem);
-  padding: 5px 10px;
-  border-radius: var(--rounded-full, 9999px);
+  padding: var(--wb-tag-padding, 5px 10px);
+  border-radius: var(--wb-tag-radius, var(--rounded-full, 9999px));
   background: var(--wb-tag-bg, rgba(255, 255, 255, .7));
   border: 1px solid var(--wb-tag-border, var(--color-border-default, rgba(0, 0, 0, 0.10)));
   backdrop-filter: none;
+  font-size: var(--wb-tag-text-size, var(--text-xs, 0.75rem));
+  color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
+  font-weight: var(--wb-tag-text-weight, var(--font-medium, 500));
+  line-height: var(--leading-normal, 1.5);
   transition:
     background-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     border-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   cursor: default;
-  min-height: 28px;
+  min-height: var(--wb-tag-min-height, 28px);
 }
 
-.wb-tag:hover {
+.wb-tag:hover,
+.wb-meta > span:hover {
   background: var(--wb-tag-hover-bg, white);
-  border-color: var(--wb-tag-hover-border, var(--color-primary-light, rgba(59, 130, 246, 0.10)));
+  border-color: var(--wb-tag-hover-border, var(--wb-theme-tag-hover-border, var(--color-primary-light, rgba(59, 130, 246, 0.10))));
 }
 
 /* 7.4 标签的键盘导航支持 */
@@ -592,7 +749,7 @@
   height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: var(--wb-tag-dot-1, var(--color-green-500, #22c55e));
+  background: var(--wb-tag-dot-color, var(--wb-tag-dot-1, var(--color-green-500, #22c55e)));
   border: 1px solid rgba(255, 255, 255, 0.78);
   box-shadow: none;
   filter: saturate(.82);
@@ -600,49 +757,63 @@
 }
 
 .wb-tag-dot--cyan {
-  background: var(--color-cyan-500, #06b6d4);
+  --wb-tag-dot-color: var(--color-cyan-500, #06b6d4);
 }
 
 .wb-tag-dot--blue {
-  background: var(--color-blue-500, #3b82f6);
+  --wb-tag-dot-color: var(--color-blue-500, #3b82f6);
 }
 
 .wb-tag-dot--indigo {
-  background: var(--color-indigo-500, #6366f1);
+  --wb-tag-dot-color: var(--color-indigo-500, #6366f1);
 }
 
 .wb-tag-dot--violet {
-  background: var(--color-violet-500, #8b5cf6);
+  --wb-tag-dot-color: var(--color-violet-500, #8b5cf6);
 }
 
 .wb-tag-dot--purple {
-  background: var(--color-purple-500, #a855f7);
+  --wb-tag-dot-color: var(--color-purple-500, #a855f7);
 }
 
 .wb-tag-dot--pink {
-  background: var(--color-pink-500, #ec4899);
+  --wb-tag-dot-color: var(--color-pink-500, #ec4899);
 }
 
 .wb-tag-dot--fuchsia {
-  background: var(--color-fuchsia-500, #d946ef);
+  --wb-tag-dot-color: var(--color-fuchsia-500, #d946ef);
 }
 
 .wb-tag-dot--green {
-  background: var(--color-emerald-500, #10b981);
+  --wb-tag-dot-color: var(--color-emerald-500, #10b981);
 }
 
 .wb-tag-dot--teal {
-  background: var(--color-teal-500, #14b8a6);
+  --wb-tag-dot-color: var(--color-teal-500, #14b8a6);
 }
 
 .wb-tag-dot--amber {
-  background: var(--color-amber-500, #f59e0b);
+  --wb-tag-dot-color: var(--color-amber-500, #f59e0b);
 }
 
-.wb-tag span {
-  font-size: var(--text-xs, 0.75rem);
-  color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
-  font-weight: var(--font-medium, 500);
+.wb-tag span,
+.wb-meta > span > span {
+  font-size: inherit;
+  color: inherit;
+  font-weight: inherit;
+}
+
+.wb-meta > span > i {
+  flex: 0 0 auto;
+  width: var(--wb-tag-icon-size, 10px);
+  font-size: var(--wb-tag-icon-size, 10px);
+  color: var(--wb-tag-icon-color, var(--wb-theme-tag-icon-color, currentColor));
+  text-align: center;
+  opacity: 0.72;
+}
+
+.wb-meta > span > i.mr-1 {
+  margin-right: 0 !important;
 }
 
 
@@ -682,12 +853,14 @@
     font-size: 7px;
   }
 
-  .wb-tags {
+  .wb-tags,
+  .wb-meta {
     gap: var(--spacing-xs, 0.5rem);
     margin-top: var(--spacing-sm, 0.75rem);
   }
 
-  .wb-tag {
+  .wb-tag,
+  .wb-meta > span {
     padding: 5px 10px;
   }
 }
@@ -701,7 +874,8 @@
   }
 
   /* 6.2 小屏幕标签自然换行 */
-  .wb-tags {
+  .wb-tags,
+  .wb-meta {
     align-items: flex-start;
   }
 }
@@ -721,40 +895,6 @@
 
 
 /* ===== 徽章动画效果 ===== */
-
-/* 脉冲动画 - 用于 Safety 徽章 */
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1) translateZ(0);
-  }
-
-  50% {
-    transform: scale(1.05) translateZ(0);
-  }
-}
-
-.wb-badge-safety {
-  animation: pulse 2s ease-in-out infinite;
-  will-change: transform;
-}
-
-/* 闪烁动画 - 用于 Growth 徽章 */
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.7;
-  }
-}
-
-.wb-badge-growth {
-  animation: blink 3s ease-in-out infinite;
-  will-change: opacity;
-}
 
 /* 渐变背景动画 - 用于支持渐变动画的徽章 */
 @keyframes gradientShift {
@@ -784,8 +924,6 @@
   .wb-orb,
   .wb-particle,
   .wb-icon-ring,
-  .wb-badge-safety,
-  .wb-badge-growth,
   .wb-badge-animated {
     animation: none !important;
   }
@@ -885,6 +1023,13 @@
     box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1);
   min-height: auto;
   height: auto;
+  --wb-title-size: var(--text-xl, 1.25rem);
+  --wb-title-weight: var(--font-bold, 700);
+  --wb-title-line-height: var(--leading-snug, 1.375);
+  --wb-description-size: var(--text-base, 0.875rem);
+  --wb-description-line-height: var(--leading-normal, 1.5);
+  --wb-tag-text-size: var(--text-xs, 0.75rem);
+  --wb-tag-text-weight: var(--font-medium, 500);
 }
 
 .wb-container--simple::before,
@@ -967,11 +1112,12 @@
 /* 简化版本的图标 */
 .wb-container--simple .wb-icon {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: var(--wb-icon-size, 52px);
+  height: var(--wb-icon-size, 52px);
   flex-shrink: 0;
-  border-radius: var(--rounded-lg, 12px);
-  background: linear-gradient(135deg, #2563eb, #0891b2);
+  border-radius: var(--wb-icon-radius, var(--rounded-lg, 12px));
+  background: linear-gradient(135deg, var(--wb-icon-gradient-1, #2563eb), var(--wb-icon-gradient-2, #0891b2));
+  color: var(--wb-icon-color, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -982,30 +1128,31 @@
 }
 
 .wb-container--simple .wb-icon i {
-  font-size: 21px;
-  color: white;
+  font-size: var(--wb-icon-font-size, 21px);
+  color: var(--wb-icon-color, #ffffff);
 }
 
 /* 图标右下角的小徽章 - 使用伪元素 */
 .wb-container--simple .wb-icon::after {
   content: '\f0e7';
-  display: none;
   font-family: 'Font Awesome 6 Free';
   font-weight: 900;
   position: absolute;
-  bottom: -4px;
-  right: -4px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  border: 2px solid white;
-  display: flex;
+  bottom: var(--wb-icon-badge-offset, -4px);
+  right: var(--wb-icon-badge-offset, -4px);
+  width: var(--wb-icon-badge-size, 20px);
+  height: var(--wb-icon-badge-size, 20px);
+  border-radius: var(--wb-icon-badge-radius, var(--rounded-full, 9999px));
+  background: linear-gradient(135deg,
+      var(--wb-icon-badge-gradient-1, #fbbf24),
+      var(--wb-icon-badge-gradient-2, #f59e0b));
+  border: var(--wb-icon-badge-border-width, 2px) solid var(--wb-icon-badge-border-color, #ffffff);
+  display: var(--wb-icon-badge-display, flex);
   align-items: center;
   justify-content: center;
-  font-size: 8px;
-  color: white;
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+  font-size: var(--wb-icon-badge-font-size, 8px);
+  color: var(--wb-icon-badge-color, #ffffff);
+  box-shadow: var(--wb-icon-badge-shadow, 0 6px 12px -9px rgba(245, 158, 11, 0.9));
   z-index: 3;
 }
 
@@ -1025,11 +1172,11 @@
 
 /* 简化版本的标题 */
 .wb-container--simple .wb-title {
-  font-size: var(--text-lg, 1.125rem);
-  font-weight: var(--font-bold, 700);
+  font-size: var(--wb-title-size, var(--text-xl, 1.25rem));
+  font-weight: var(--wb-title-weight, var(--font-bold, 700));
   color: var(--wb-text-primary, var(--color-text-primary, #0f172a));
   letter-spacing: 0;
-  line-height: var(--leading-snug, 1.375);
+  line-height: var(--wb-title-line-height, var(--leading-snug, 1.375));
   margin: 0;
   white-space: normal;
   word-wrap: break-word;
@@ -1040,14 +1187,14 @@
 .wb-container--simple .wb-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
+  gap: var(--wb-badge-gap, 4px);
+  padding: var(--wb-badge-padding, 3px 10px);
   border-radius: var(--rounded-full, 9999px);
-  font-size: var(--text-2xs, 0.625rem);
-  font-weight: var(--font-bold, 700);
-  color: var(--badge-color, #1d4ed8);
-  background: var(--badge-bg, rgba(239, 246, 255, 0.82));
-  border: 1px solid var(--badge-border, rgba(37, 99, 235, 0.18));
+  font-size: var(--wb-badge-text-size, var(--text-2xs, 0.625rem));
+  font-weight: var(--wb-badge-text-weight, var(--font-bold, 700));
+  color: var(--wb-badge-color, var(--badge-color, #1d4ed8));
+  background: var(--wb-badge-bg, var(--badge-bg, rgba(239, 246, 255, 0.82)));
+  border: 1px solid var(--wb-badge-border, var(--badge-border, rgba(37, 99, 235, 0.18)));
   box-shadow: none;
   letter-spacing: 0;
   text-transform: none;
@@ -1058,7 +1205,9 @@
 }
 
 .wb-container--simple .wb-badge i {
-  font-size: 8px;
+  width: var(--wb-badge-icon-size, 8px);
+  font-size: var(--wb-badge-icon-size, 8px);
+  color: var(--wb-badge-icon-color, currentColor);
 }
 
 .wb-container--simple .wb-badge:hover {
@@ -1068,8 +1217,8 @@
 /* 简化版本的描述 */
 .wb-container--simple .wb-description {
   color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
-  font-size: var(--text-sm, 0.8125rem);
-  line-height: var(--leading-normal, 1.5);
+  font-size: var(--wb-description-size, var(--text-base, 0.875rem));
+  line-height: var(--wb-description-line-height, var(--leading-normal, 1.5));
   max-width: 74ch;
   margin: 0 0 var(--spacing-sm, 0.75rem) 0;
   white-space: normal;
@@ -1085,32 +1234,37 @@
   margin: 0;
 }
 
-.wb-container--simple .wb-meta span {
+.wb-container--simple .wb-meta > span {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs, 0.5rem);
-  padding: 5px 12px;
-  border-radius: var(--rounded-full, 9999px);
+  padding: var(--wb-tag-padding, 5px 10px);
+  border-radius: var(--wb-tag-radius, var(--rounded-full, 9999px));
   background: var(--wb-tag-bg, rgba(255, 255, 255, 0.78));
   border: 1px solid var(--wb-tag-border, rgba(148, 163, 184, 0.22));
   backdrop-filter: none;
-  font-size: var(--text-2xs, 0.6875rem);
+  font-size: var(--wb-tag-text-size, var(--text-xs, 0.75rem));
   color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
-  font-weight: var(--font-medium, 500);
+  font-weight: var(--wb-tag-text-weight, var(--font-medium, 500));
   transition:
     background-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     border-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   cursor: default;
+  min-height: var(--wb-tag-min-height, 28px);
 }
 
-.wb-container--simple .wb-meta span:hover {
+.wb-container--simple .wb-meta > span:hover {
   background: var(--wb-tag-hover-bg, white);
   border-color: var(--wb-tag-hover-border, rgba(37, 99, 235, 0.18));
 }
 
-.wb-container--simple .wb-meta span i {
-  font-size: 9px;
-  color: var(--color-primary, #3b82f6);
+.wb-container--simple .wb-meta > span > i {
+  flex: 0 0 auto;
+  width: var(--wb-tag-icon-size, 10px);
+  font-size: var(--wb-tag-icon-size, 10px);
+  color: var(--wb-tag-icon-color, var(--wb-theme-tag-icon-color, currentColor));
+  text-align: center;
+  opacity: 0.72;
 }
 
 /* 简化版本的响应式 */
@@ -1149,7 +1303,7 @@
     grid-row: 4;
   }
 
-  .wb-container--simple .wb-meta span {
+  .wb-container--simple .wb-meta > span {
     padding: 5px 10px;
     font-size: 0.625rem;
   }
@@ -1215,24 +1369,24 @@
   }
 
   .wb-card .wb-icon-main {
-    width: 46px;
-    height: 46px;
-    border-radius: var(--rounded-lg, 12px);
+    width: var(--wb-icon-pc-size, 46px);
+    height: var(--wb-icon-pc-size, 46px);
+    border-radius: var(--wb-icon-radius, var(--rounded-lg, 12px));
     box-shadow: var(--wb-icon-shadow, 0 8px 18px -14px rgba(37, 99, 235, 0.72));
   }
 
   .wb-card .wb-icon-main i {
-    font-size: 19px;
+    font-size: var(--wb-icon-pc-font-size, 19px);
   }
 
   .wb-card .wb-icon-badge {
-    width: 18px;
-    height: 18px;
-    border-width: 2px;
+    width: var(--wb-icon-badge-pc-size, 18px);
+    height: var(--wb-icon-badge-pc-size, 18px);
+    border-width: var(--wb-icon-badge-border-width, 2px);
   }
 
   .wb-card .wb-icon-badge i {
-    font-size: 7px;
+    font-size: var(--wb-icon-badge-pc-font-size, 7px);
   }
 
   .wb-card .wb-title-row {
@@ -1240,12 +1394,12 @@
   }
 
   .wb-card .wb-title {
-    font-size: 1.125rem;
+    font-size: var(--wb-title-size, 1.125rem);
     letter-spacing: 0;
   }
 
   .wb-card .wb-description {
-    line-height: 1.5;
+    line-height: var(--wb-description-line-height, 1.5);
   }
 
   .wb-card .wb-tags {
@@ -1253,14 +1407,15 @@
     margin-top: 0.75rem;
   }
 
-  .wb-card .wb-tag {
+  .wb-card .wb-tag,
+  .wb-card .wb-meta > span {
     min-height: 28px;
     padding: 5px 10px;
     backdrop-filter: none;
   }
 
   .wb-card .wb-tag span {
-    font-size: 0.6875rem;
+    font-size: var(--wb-tag-text-size, 0.75rem);
   }
 
   .wb-card .wb-orb {
@@ -1289,14 +1444,20 @@
   }
 
   .wb-container--simple .wb-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: var(--rounded-lg, 12px);
+    width: var(--wb-icon-pc-size, 46px);
+    height: var(--wb-icon-pc-size, 46px);
+    border-radius: var(--wb-icon-radius, var(--rounded-lg, 12px));
     box-shadow: var(--wb-icon-shadow, 0 8px 18px -14px rgba(37, 99, 235, 0.72));
   }
 
   .wb-container--simple .wb-icon i {
-    font-size: 19px;
+    font-size: var(--wb-icon-pc-font-size, 19px);
+  }
+
+  .wb-container--simple .wb-icon::after {
+    width: var(--wb-icon-badge-pc-size, 18px);
+    height: var(--wb-icon-badge-pc-size, 18px);
+    font-size: var(--wb-icon-badge-pc-font-size, 7px);
   }
 
   .wb-container--simple .wb-title-row {
@@ -1304,22 +1465,23 @@
   }
 
   .wb-container--simple .wb-title {
-    font-size: 1.125rem;
+    font-size: var(--wb-title-size, 1.25rem);
     letter-spacing: 0;
   }
 
   .wb-container--simple .wb-description {
     margin-bottom: 0.75rem;
-    line-height: 1.5;
+    line-height: var(--wb-description-line-height, 1.5);
   }
 
-  .wb-container--simple .wb-tags {
+  .wb-container--simple .wb-tags,
+  .wb-container--simple .wb-meta {
     gap: 0.5rem;
     margin-top: 0;
   }
 
   .wb-container--simple .wb-tag,
-  .wb-container--simple .wb-meta span {
+  .wb-container--simple .wb-meta > span {
     min-height: 28px;
     padding: 5px 10px;
     backdrop-filter: none;
@@ -1338,7 +1500,7 @@
   .wb-container--simple:hover,
   .wb-container--simple:hover .wb-icon,
   .wb-container--simple .wb-tag:hover,
-  .wb-container--simple .wb-meta span:hover {
+  .wb-container--simple .wb-meta > span:hover {
     transform: none;
   }
 }
@@ -1352,7 +1514,7 @@
     border-color: var(--wb-border-color);
   }
 
-  .wb-container--simple .wb-meta span {
+  .wb-container--simple .wb-meta > span {
     background: var(--wb-tag-bg);
     border-color: var(--wb-tag-border);
     color: var(--wb-text-secondary);
@@ -1361,96 +1523,260 @@
 
 /* ===== 主题变体：Analytics 蓝色主题 ===== */
 .wb-theme-analytics {
+  --wb-theme-accent: #2563eb;
+  --wb-theme-accent-strong: #1d4ed8;
+  --wb-theme-accent-soft: rgba(239, 246, 255, 0.86);
+  --wb-theme-accent-border: rgba(37, 99, 235, 0.20);
   --wb-gradient-1: rgba(239, 246, 255, 0.95);
   --wb-gradient-2: rgba(219, 234, 254, 0.90);
   --wb-orb-1-color: rgba(96, 165, 250, 0.15);
   --wb-orb-2-color: rgba(147, 197, 253, 0.12);
   --wb-orb-3-color: rgba(59, 130, 246, 0.08);
   --wb-particle-color: rgba(59, 130, 246, 0.6);
+  --wb-icon-gradient-1: #2563eb;
+  --wb-icon-gradient-2: #0891b2;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(37, 99, 235, 0.72);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(37, 99, 235, 0.78);
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(37, 99, 235, 0.68);
 }
 
 .wb-theme-neutral {
+  --wb-theme-accent: #64748b;
+  --wb-theme-accent-strong: #475569;
+  --wb-theme-accent-soft: rgba(248, 250, 252, 0.90);
+  --wb-theme-accent-border: rgba(100, 116, 139, 0.22);
   --wb-gradient-1: rgba(248, 250, 252, 0.95);
   --wb-gradient-2: rgba(241, 245, 249, 0.90);
   --wb-orb-1-color: rgba(148, 163, 184, 0.15);
   --wb-orb-2-color: rgba(203, 213, 225, 0.12);
   --wb-orb-3-color: rgba(100, 116, 139, 0.08);
   --wb-particle-color: rgba(100, 116, 139, 0.6);
+  --wb-icon-gradient-1: #64748b;
+  --wb-icon-gradient-2: #334155;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(71, 85, 105, 0.46);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(51, 65, 85, 0.52);
+  --wb-icon-badge-gradient-1: #94a3b8;
+  --wb-icon-badge-gradient-2: #64748b;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(71, 85, 105, 0.48);
 }
 
 .wb-theme-cyan {
+  --wb-theme-accent: #06b6d4;
+  --wb-theme-accent-strong: #0e7490;
+  --wb-theme-accent-soft: rgba(236, 254, 255, 0.90);
+  --wb-theme-accent-border: rgba(8, 145, 178, 0.22);
   --wb-gradient-1: rgba(236, 254, 255, 0.95);
   --wb-gradient-2: rgba(207, 250, 254, 0.90);
+  --wb-orb-1-color: rgba(34, 211, 238, 0.15);
+  --wb-orb-2-color: rgba(45, 212, 191, 0.12);
+  --wb-orb-3-color: rgba(14, 165, 233, 0.08);
+  --wb-particle-color: rgba(20, 184, 166, 0.5);
+  --wb-icon-gradient-1: #06b6d4;
+  --wb-icon-gradient-2: #0ea5e9;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(6, 182, 212, 0.52);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(14, 165, 233, 0.58);
+  --wb-icon-badge-gradient-1: #22c55e;
+  --wb-icon-badge-gradient-2: #059669;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(5, 150, 105, 0.58);
+}
+
+.wb-theme-fuchsia {
+  --wb-theme-accent: #d946ef;
+  --wb-theme-accent-strong: #a21caf;
+  --wb-theme-accent-soft: rgba(253, 244, 255, 0.90);
+  --wb-theme-accent-border: rgba(217, 70, 239, 0.22);
+  --wb-gradient-1: rgba(253, 244, 255, 0.95);
+  --wb-gradient-2: rgba(252, 231, 243, 0.90);
+  --wb-orb-1-color: rgba(217, 70, 239, 0.14);
+  --wb-orb-2-color: rgba(236, 72, 153, 0.12);
+  --wb-orb-3-color: rgba(192, 38, 211, 0.08);
+  --wb-particle-color: rgba(217, 70, 239, 0.5);
+  --wb-icon-gradient-1: #d946ef;
+  --wb-icon-gradient-2: #db2777;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(217, 70, 239, 0.52);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(219, 39, 119, 0.58);
+  --wb-icon-badge-gradient-1: #f0abfc;
+  --wb-icon-badge-gradient-2: #e879f9;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(217, 70, 239, 0.54);
 }
 
 .wb-theme-growth {
+  --wb-theme-accent: #10b981;
+  --wb-theme-accent-strong: #047857;
+  --wb-theme-accent-soft: rgba(236, 253, 245, 0.88);
+  --wb-theme-accent-border: rgba(5, 150, 105, 0.22);
   --wb-gradient-1: rgba(236, 253, 245, 0.95);
   --wb-gradient-2: rgba(209, 250, 229, 0.90);
   --wb-orb-1-color: rgba(52, 211, 153, 0.15);
   --wb-orb-2-color: rgba(110, 231, 183, 0.12);
   --wb-orb-3-color: rgba(16, 185, 129, 0.08);
   --wb-particle-color: rgba(16, 185, 129, 0.6);
+  --wb-icon-gradient-1: #22c55e;
+  --wb-icon-gradient-2: #059669;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(16, 185, 129, 0.52);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(5, 150, 105, 0.58);
+  --wb-icon-badge-gradient-1: #34d399;
+  --wb-icon-badge-gradient-2: #10b981;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(16, 185, 129, 0.58);
 }
 
 .wb-theme-safety {
-  --wb-gradient-1: rgba(255, 247, 237, 0.95);
-  --wb-gradient-2: rgba(255, 237, 213, 0.90);
-  --wb-orb-1-color: rgba(251, 146, 60, 0.15);
-  --wb-orb-2-color: rgba(253, 186, 116, 0.12);
-  --wb-orb-3-color: rgba(249, 115, 22, 0.08);
-  --wb-particle-color: rgba(249, 115, 22, 0.6);
+  --wb-theme-accent: #ef4444;
+  --wb-theme-accent-strong: #b91c1c;
+  --wb-theme-accent-soft: rgba(254, 242, 242, 0.90);
+  --wb-theme-accent-border: rgba(220, 38, 38, 0.24);
+  --wb-gradient-1: rgba(254, 242, 242, 0.95);
+  --wb-gradient-2: rgba(255, 228, 230, 0.90);
+  --wb-orb-1-color: rgba(248, 113, 113, 0.14);
+  --wb-orb-2-color: rgba(251, 113, 133, 0.12);
+  --wb-orb-3-color: rgba(220, 38, 38, 0.08);
+  --wb-particle-color: rgba(220, 38, 38, 0.52);
+  --wb-icon-gradient-1: #ef4444;
+  --wb-icon-gradient-2: #be123c;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(220, 38, 38, 0.52);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(190, 18, 60, 0.58);
+  --wb-icon-badge-gradient-1: #fb7185;
+  --wb-icon-badge-gradient-2: #e11d48;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(220, 38, 38, 0.58);
 }
 
 .wb-theme-supply {
+  --wb-theme-accent: #f59e0b;
+  --wb-theme-accent-strong: #b45309;
+  --wb-theme-accent-soft: rgba(255, 251, 235, 0.90);
+  --wb-theme-accent-border: rgba(217, 119, 6, 0.22);
   --wb-gradient-1: rgba(255, 251, 235, 0.95);
   --wb-gradient-2: rgba(254, 243, 199, 0.90);
   --wb-orb-1-color: rgba(251, 191, 36, 0.15);
   --wb-orb-2-color: rgba(252, 211, 77, 0.12);
   --wb-orb-3-color: rgba(245, 158, 11, 0.08);
   --wb-particle-color: rgba(245, 158, 11, 0.6);
+  --wb-icon-gradient-1: #f59e0b;
+  --wb-icon-gradient-2: #d97706;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(245, 158, 11, 0.54);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(217, 119, 6, 0.58);
+  --wb-icon-badge-gradient-1: #fbbf24;
+  --wb-icon-badge-gradient-2: #f59e0b;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(245, 158, 11, 0.58);
 }
 
+.wb-theme-teal,
 .wb-theme-service {
-  --wb-gradient-1: rgba(250, 245, 255, 0.95);
-  --wb-gradient-2: rgba(243, 232, 255, 0.90);
-  --wb-orb-1-color: rgba(192, 132, 252, 0.15);
-  --wb-orb-2-color: rgba(216, 180, 254, 0.12);
-  --wb-orb-3-color: rgba(168, 85, 247, 0.08);
-  --wb-particle-color: rgba(168, 85, 247, 0.6);
+  --wb-theme-accent: #14b8a6;
+  --wb-theme-accent-strong: #0f766e;
+  --wb-theme-accent-soft: rgba(240, 253, 250, 0.88);
+  --wb-theme-accent-border: rgba(20, 184, 166, 0.22);
+  --wb-gradient-1: rgba(240, 253, 250, 0.95);
+  --wb-gradient-2: rgba(204, 251, 241, 0.90);
+  --wb-orb-1-color: rgba(45, 212, 191, 0.15);
+  --wb-orb-2-color: rgba(34, 211, 238, 0.12);
+  --wb-orb-3-color: rgba(13, 148, 136, 0.08);
+  --wb-particle-color: rgba(20, 184, 166, 0.52);
+  --wb-icon-gradient-1: #14b8a6;
+  --wb-icon-gradient-2: #0891b2;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(20, 184, 166, 0.52);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(8, 145, 178, 0.58);
+  --wb-icon-badge-gradient-1: #2dd4bf;
+  --wb-icon-badge-gradient-2: #0d9488;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(20, 184, 166, 0.58);
 }
 
 .wb-theme-indigo {
+  --wb-theme-accent: #6366f1;
+  --wb-theme-accent-strong: #4338ca;
+  --wb-theme-accent-soft: rgba(238, 242, 255, 0.90);
+  --wb-theme-accent-border: rgba(99, 102, 241, 0.22);
   --wb-gradient-1: rgba(238, 242, 255, 0.95);
   --wb-gradient-2: rgba(224, 231, 255, 0.90);
   --wb-orb-1-color: rgba(99, 102, 241, 0.15);
   --wb-orb-2-color: rgba(139, 92, 246, 0.12);
   --wb-orb-3-color: rgba(168, 85, 247, 0.08);
   --wb-particle-color: rgba(99, 102, 241, 0.6);
+  --wb-icon-gradient-1: #6366f1;
+  --wb-icon-gradient-2: #7c3aed;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(99, 102, 241, 0.52);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(124, 58, 237, 0.58);
+  --wb-icon-badge-gradient-1: #a78bfa;
+  --wb-icon-badge-gradient-2: #8b5cf6;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(99, 102, 241, 0.58);
+}
+
+.wb-theme-violet {
+  --wb-theme-accent: #8b5cf6;
+  --wb-theme-accent-strong: #6d28d9;
+  --wb-theme-accent-soft: rgba(245, 243, 255, 0.90);
+  --wb-theme-accent-border: rgba(139, 92, 246, 0.22);
+  --wb-gradient-1: rgba(245, 243, 255, 0.95);
+  --wb-gradient-2: rgba(237, 233, 254, 0.90);
+  --wb-orb-1-color: rgba(167, 139, 250, 0.15);
+  --wb-orb-2-color: rgba(192, 132, 252, 0.12);
+  --wb-orb-3-color: rgba(124, 58, 237, 0.08);
+  --wb-particle-color: rgba(139, 92, 246, 0.55);
+  --wb-icon-gradient-1: #8b5cf6;
+  --wb-icon-gradient-2: #7e22ce;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(139, 92, 246, 0.52);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(126, 34, 206, 0.58);
+  --wb-icon-badge-gradient-1: #c084fc;
+  --wb-icon-badge-gradient-2: #9333ea;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(139, 92, 246, 0.58);
 }
 
 .wb-theme-hub-promo-tools {
+  --wb-theme-accent: #10b981;
+  --wb-theme-accent-strong: #047857;
+  --wb-theme-accent-soft: rgba(236, 253, 245, 0.90);
+  --wb-theme-accent-border: rgba(16, 185, 129, 0.22);
   --wb-gradient-1: rgba(239, 253, 248, 0.96);
   --wb-gradient-2: rgba(220, 252, 231, 0.92);
   --wb-orb-1-color: rgba(34, 197, 94, 0.16);
   --wb-orb-2-color: rgba(59, 130, 246, 0.12);
   --wb-orb-3-color: rgba(16, 185, 129, 0.08);
   --wb-particle-color: rgba(16, 185, 129, 0.45);
+  --wb-icon-gradient-1: #22c55e;
+  --wb-icon-gradient-2: #2563eb;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(34, 197, 94, 0.5);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(37, 99, 235, 0.54);
+  --wb-icon-badge-gradient-1: #34d399;
+  --wb-icon-badge-gradient-2: #10b981;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(16, 185, 129, 0.56);
 }
 
 .wb-theme-hub-promo-activities {
+  --wb-theme-accent: #22c55e;
+  --wb-theme-accent-strong: #15803d;
+  --wb-theme-accent-soft: rgba(240, 253, 244, 0.90);
+  --wb-theme-accent-border: rgba(34, 197, 94, 0.22);
   --wb-gradient-1: rgba(239, 253, 248, 0.96);
   --wb-gradient-2: rgba(220, 252, 231, 0.92);
   --wb-orb-1-color: rgba(34, 197, 94, 0.16);
   --wb-orb-2-color: rgba(249, 115, 22, 0.12);
   --wb-orb-3-color: rgba(16, 185, 129, 0.08);
   --wb-particle-color: rgba(22, 163, 74, 0.45);
+  --wb-icon-gradient-1: #22c55e;
+  --wb-icon-gradient-2: #f97316;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(34, 197, 94, 0.48);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(249, 115, 22, 0.54);
+  --wb-icon-badge-gradient-1: #34d399;
+  --wb-icon-badge-gradient-2: #16a34a;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(34, 197, 94, 0.54);
 }
 
 .wb-theme-more-agents {
+  --wb-theme-accent: #14b8a6;
+  --wb-theme-accent-strong: #0f766e;
+  --wb-theme-accent-soft: rgba(240, 253, 250, 0.90);
+  --wb-theme-accent-border: rgba(20, 184, 166, 0.22);
   --wb-gradient-1: rgba(236, 253, 245, 0.95);
   --wb-gradient-2: rgba(207, 250, 254, 0.90);
   --wb-orb-1-color: rgba(16, 185, 129, 0.14);
   --wb-orb-2-color: rgba(6, 182, 212, 0.12);
   --wb-orb-3-color: rgba(245, 158, 11, 0.08);
   --wb-particle-color: rgba(20, 184, 166, 0.55);
+  --wb-icon-gradient-1: #10b981;
+  --wb-icon-gradient-2: #06b6d4;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(20, 184, 166, 0.52);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(6, 182, 212, 0.58);
+  --wb-icon-badge-gradient-1: #f59e0b;
+  --wb-icon-badge-gradient-2: #d97706;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(245, 158, 11, 0.54);
 }

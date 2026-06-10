@@ -1,5 +1,5 @@
 <div class="playground-shell">
-  <div class="wb-container wb-container--card wb-theme-indigo playground-welcome" aria-labelledby="playground-welcome-title">
+  <div class="wb-container wb-container--card wb-container--hidden wb-theme-cyan playground-welcome" aria-labelledby="playground-welcome-title">
     <div class="wb-card">
       <div class="wb-bg-gradient"></div>
       <div class="wb-content">
@@ -47,12 +47,11 @@
   </div>
 
   <div class="playground-page">
-    <aside class="playground-thread-rail" aria-label="Deep Chat threads">
+    <aside id="playground-thread-rail" class="playground-thread-rail" aria-label="Deep Chat threads">
       <div class="playground-rail-brand">
         <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-          <div
-            class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-sm shadow-purple-500/20">
-            <i class="fa-solid far fa-comments text-white text-xs"></i>
+          <div class="playground-rail-icon">
+            <i class="far fa-comments" aria-hidden="true"></i>
           </div>
           Deep Chat
         </h2>
@@ -75,10 +74,11 @@
     <section class="playground-main" aria-label="Deep Chat">
       <header class="playground-topbar">
         <div class="playground-model-area">
-          <button class="playground-top-icon" type="button" title="Deep Chat">
+          <button id="playground-toggle-rail" class="playground-top-icon" type="button" title="收起历史会话"
+            aria-label="收起历史会话" aria-controls="playground-thread-rail" aria-expanded="true">
             <i class="far fa-window-maximize"></i>
           </button>
-          <select id="playground-model-select" class="playground-select" disabled>
+          <select id="playground-model-select" class="playground-select" aria-label="模型选择" disabled>
             <option value="">default</option>
           </select>
         </div>

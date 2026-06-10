@@ -272,9 +272,25 @@ function renderUsageNotice(): string {
     </div>`;
 }
 
-function renderModuleShell(templateHtml: string): string {
-    const shellMatch = templateHtml.match(/^\s*<div\b[^>]*>/);
-    return shellMatch?.[0].trim() || '<div class="module-container py-6">';
+interface PageShell {
+    open: string;
+    close: string;
+}
+
+function findOpeningDivWithClass(templateHtml: string, className: string): string | null {
+    const pattern = new RegExp(`<div\\b(?=[^>]*\\bclass=(["'])[^"']*\\b${className}\\b[^"']*\\1)[^>]*>`, 'i');
+    return templateHtml.match(pattern)?.[0].trim() ?? null;
+}
+
+function renderModuleShell(templateHtml: string): PageShell {
+    const fadeShell = findOpeningDivWithClass(templateHtml, 'view-fade-in');
+    const moduleShell = findOpeningDivWithClass(templateHtml, 'module-container') || '<div class="module-container py-6">';
+    const openings = fadeShell && fadeShell !== moduleShell ? [fadeShell, moduleShell] : [moduleShell];
+
+    return {
+        open: openings.join('\n'),
+        close: openings.map(() => '</div>').join('\n'),
+    };
 }
 
 const commonPhases: PhaseItem[] = [
@@ -622,7 +638,7 @@ export function renderBusinessScenarioPage(templateHtml: string, caseId: CaseId)
     const shell = renderModuleShell(templateHtml);
     const body = caseId === 'usage_notice' ? renderUsageNotice() : renderScenario(scenarioCases[caseId]);
 
-    return `${shell}
+    return `${shell.open}
 ${body}
-</div>`;
+${shell.close}`;
 }

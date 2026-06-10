@@ -323,6 +323,101 @@
 .card-accent--red    { --accent-from: #ef4444; --accent-to: #f43f5e; }
 .card-accent--rose   { --accent-from: #f43f5e; --accent-to: #ec4899; }
 
+/* --- 旧版左侧色条卡片：默认隐藏，hover/focus 时显示 --- */
+.sop-card[class*="border-l-"],
+.overview-card[class*="border-l-"] {
+  --card-left-accent: #60a5fa;
+  --card-left-accent-bg: rgba(239, 246, 255, 0.6);
+  border-left-width: 4px !important;
+  border-left-style: solid !important;
+  border-left-color: transparent !important;
+  transition:
+    background-color var(--duration-slow, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow var(--duration-slow, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform var(--duration-slow, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.sop-card[class*="border-l-"]:hover,
+.sop-card[class*="border-l-"]:focus-visible,
+.overview-card[class*="border-l-"]:hover,
+.overview-card[class*="border-l-"]:focus-visible {
+  border-color: var(--card-left-accent) !important;
+  border-left-color: var(--card-left-accent) !important;
+  background-color: var(--card-left-accent-bg) !important;
+}
+
+.sop-card.border-l-blue-400,
+.overview-card.border-l-blue-400 {
+  --card-left-accent: #60a5fa;
+  --card-left-accent-bg: rgba(239, 246, 255, 0.6);
+}
+
+.sop-card.border-l-green-400,
+.overview-card.border-l-green-400 {
+  --card-left-accent: #4ade80;
+  --card-left-accent-bg: rgba(240, 253, 244, 0.66);
+}
+
+.sop-card.border-l-emerald-400,
+.overview-card.border-l-emerald-400 {
+  --card-left-accent: #34d399;
+  --card-left-accent-bg: rgba(236, 253, 245, 0.66);
+}
+
+.sop-card.border-l-red-400,
+.overview-card.border-l-red-400 {
+  --card-left-accent: #f87171;
+  --card-left-accent-bg: rgba(254, 242, 242, 0.66);
+}
+
+.sop-card.border-l-purple-400,
+.overview-card.border-l-purple-400 {
+  --card-left-accent: #c084fc;
+  --card-left-accent-bg: rgba(250, 245, 255, 0.66);
+}
+
+.sop-card.border-l-amber-400,
+.overview-card.border-l-amber-400 {
+  --card-left-accent: #fbbf24;
+  --card-left-accent-bg: rgba(255, 251, 235, 0.7);
+}
+
+.sop-card.border-l-cyan-400,
+.overview-card.border-l-cyan-400 {
+  --card-left-accent: #22d3ee;
+  --card-left-accent-bg: rgba(236, 254, 255, 0.66);
+}
+
+.sop-card.border-l-rose-400,
+.overview-card.border-l-rose-400 {
+  --card-left-accent: #fb7185;
+  --card-left-accent-bg: rgba(255, 241, 242, 0.66);
+}
+
+.sop-card.border-l-teal-400,
+.overview-card.border-l-teal-400 {
+  --card-left-accent: #2dd4bf;
+  --card-left-accent-bg: rgba(240, 253, 250, 0.66);
+}
+
+.sop-card.border-l-indigo-400,
+.overview-card.border-l-indigo-400 {
+  --card-left-accent: #818cf8;
+  --card-left-accent-bg: rgba(238, 242, 255, 0.66);
+}
+
+.sop-card.border-l-orange-400,
+.overview-card.border-l-orange-400 {
+  --card-left-accent: #fb923c;
+  --card-left-accent-bg: rgba(255, 247, 237, 0.66);
+}
+
+.sop-card.border-l-slate-400,
+.overview-card.border-l-slate-400 {
+  --card-left-accent: #94a3b8;
+  --card-left-accent-bg: rgba(248, 250, 252, 0.82);
+}
+
 /* --- 顶部装饰条 --- */
 .card-accent--top {
   padding-left: var(--card-padding);

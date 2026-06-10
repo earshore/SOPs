@@ -1,6 +1,6 @@
 <div class="module-container" x-data="promptlabPanel">
     <!-- ========== Welcome Banner ========== -->
-    <div class="wb-container wb-container--card wb-theme-analytics mb-8">
+    <div class="wb-container wb-container--card wb-theme-indigo mb-8">
         <div class="wb-card">
             <div class="wb-bg-gradient"></div>
             <div class="wb-grid-pattern"></div>
@@ -131,7 +131,7 @@
                                 <input @input="setProfileField('keywordsTier1', $event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400 font-mono"
                                     id="lab-keywords-tier1" placeholder="humidifiers for bedroom, cool mist humidifier"
-                                    type="text" :value="profile.keywordsTier1" />
+                                    type="text" aria-label="Tier 1 核心词" :value="profile.keywordsTier1" />
                             </div>
                             <!-- Negative Keywords -->
                             <div class="group">
@@ -156,7 +156,7 @@
                                 <input @input="setProfileField('negative', $event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400"
                                     id="negative-keywords" placeholder="例如: bestseller / cure" type="text"
-                                    :value="profile.negative" />
+                                    aria-label="限制词" :value="profile.negative" />
                             </div>
                             <!-- Tier 2 Keywords -->
                             <div class="group">
@@ -183,7 +183,7 @@
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400 font-mono"
                                     id="lab-keywords-tier2"
                                     placeholder="baby humidifier, easy to clean, quiet operation" rows="1"
-                                    :value="profile.keywordsTier2"></textarea>
+                                    aria-label="Tier 2 功能词" :value="profile.keywordsTier2"></textarea>
                             </div>
                             <!-- Target Audience -->
                             <div class="group">
@@ -210,7 +210,7 @@
                                 <input @input="setProfileField('audience', $event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400"
                                     id="lab-audience" placeholder="e.g. Busy moms, Tech enthusiasts" type="text"
-                                    :value="profile.audience" />
+                                    aria-label="目标受众" :value="profile.audience" />
                             </div>
                             <!-- USPs -->
                             <div class="group">
@@ -238,7 +238,7 @@
                                     @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400"
                                     id="lab-usps" placeholder="- 专利静音技术 (&lt;28dB)
-- 360度旋转喷嘴" rows="2" :value="profile.usps"></textarea>
+- 360度旋转喷嘴" rows="2" aria-label="核心卖点" :value="profile.usps"></textarea>
                             </div>
                             <!-- Specs -->
                             <div class="group">
@@ -266,12 +266,12 @@
                                     @blur="restoreInput($event)"
                                     class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400 font-mono"
                                     id="lab-specs" placeholder="材质: ABS + PP
-尺寸: 20x20x30cm" rows="2" :value="profile.specs"></textarea>
+尺寸: 20x20x30cm" rows="2" aria-label="详细参数" :value="profile.specs"></textarea>
                             </div>
                         </div>
                         <!-- Social Hooks -->
                         <div class="group">
-                            <label class="flex items-center text-xs font-bold text-purple-600 mb-2 gap-1.5">
+                            <label class="flex items-center text-xs font-bold text-purple-600 mb-2 gap-1.5" for="lab-social-hook">
                                 <span class="w-1 h-3.5 bg-purple-400 rounded-full"></span>
                                 <i class="fab fa-instagram text-purple-400 text-[10px]"></i>
                                 植入社媒 Hook / 节日词 <span class="text-purple-400 font-normal">- 可补充</span>
@@ -351,7 +351,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
                         <!-- Tone -->
                         <div>
-                            <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5">
+                            <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5" for="lab-tone">
                                 <span class="w-1 h-3.5 bg-orange-400 rounded-full"></span>
                                 文案语气 Tone
                             </label>
@@ -366,7 +366,7 @@
                         </div>
                         <!-- Custom Rules -->
                         <div>
-                            <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5">
+                            <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5" for="lab-custom-strategy">
                                 <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
                                 自定义规则 <span class="text-slate-400 font-normal">- 有就填</span>
                             </label>
@@ -565,13 +565,13 @@
                     </div>
                     <!-- Output Body -->
                     <div class="relative flex-1 bg-white overflow-hidden">
-                        <textarea
-                            class="w-full h-full px-5 py-4 pb-10 text-xs font-mono text-slate-600 bg-transparent resize-none focus:outline-none border-0 transition-colors duration-500 leading-relaxed"
-                            id="final-prompt-output" placeholder="// 1. 填写左侧产品 DNA 信息
+                            <textarea
+                                class="w-full h-full px-5 py-4 pb-10 text-xs font-mono text-slate-600 bg-transparent resize-none focus:outline-none border-0 transition-colors duration-500 leading-relaxed"
+                                id="final-prompt-output" placeholder="// 1. 填写左侧产品 DNA 信息
 // 2. 点击上方生成按钮
 // 3. 复制 Prompt 并发送给 AI 大模型
 
-// 💡 Tip: 填写越详细，生成效果越好" readonly="" style="pointer-events: auto !important; overflow-y: auto !important;"
+// 💡 Tip: 填写越详细，生成效果越好" aria-label="最终 Prompt 输出" readonly="" style="pointer-events: auto !important; overflow-y: auto !important;"
                             :value="currentPrompt"></textarea>
                         <!-- Footer Status Bar -->
                         <div

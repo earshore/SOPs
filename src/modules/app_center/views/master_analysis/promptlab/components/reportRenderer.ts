@@ -309,6 +309,7 @@ export function renderNewFormatModules(
         <div class="flex items-center gap-3">
           <input type="checkbox"
                  class="dimension-checkbox h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                 aria-label="启用 ${escapeHtml(config.title)} 维度"
                  :checked="isDimensionEnabled('${escapeHtml(targetId)}')"
                  :indeterminate.prop="isPartiallySelected('${escapeHtml(targetId)}')"
                  @change="onDimensionToggle('${escapeHtml(targetId)}')"
@@ -373,6 +374,7 @@ function renderSubItem(data: unknown, targetId: string, key: string): string {
            ${hasContent ? `@click="toggleSubItemExpansion('${safeTargetId}', '${safeKey}')"` : ''}>
         <input type="checkbox"
                class="sub-item-checkbox h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+               aria-label="选择 ${escapeHtml(label)} 子项"
                :checked="isSubItemSelected('${safeTargetId}', '${safeKey}')"
                :indeterminate.prop="isSubItemPartiallySelected('${safeTargetId}', '${safeKey}')"
                @change="onSubItemToggle('${safeTargetId}', '${safeKey}')"
@@ -486,6 +488,7 @@ function renderSelectableContentItem(
     <div class="content-item flex items-start gap-2 py-1.5 px-2 hover:bg-slate-50 rounded text-xs">
       <input type="checkbox"
              class="content-item-checkbox h-3 w-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer mt-0.5 shrink-0"
+             aria-label="选择内容项：${escapeHtml(displayText)}"
              :checked="isContentItemSelected('${safeDimensionId}', '${safeSubItemKey}', '${safeIndex}')"
              @change="onContentItemToggle('${safeDimensionId}', '${safeSubItemKey}', '${safeIndex}')">
       <label class="flex-1 cursor-pointer select-none text-slate-600 leading-relaxed">

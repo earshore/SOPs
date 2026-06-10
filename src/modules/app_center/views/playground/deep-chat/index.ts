@@ -82,6 +82,7 @@ interface PlaygroundRequestMessages {
 const THREAD_STORAGE_KEY = 'playground_deep_chat_threads_v1';
 const MAX_THREAD_COUNT = 30;
 const MESSAGE_TOOLBAR_CLASS = 'playground-message-toolbar';
+const THREAD_RAIL_COLLAPSED_CLASS = 'is-rail-collapsed';
 const DEEP_CHAT_AUXILIARY_STYLE = `
   #messages {
     padding: 22px 24px 18px;
@@ -92,8 +93,8 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   :host(.is-empty) #chat-view {
-    align-content: start !important;
-    align-items: start !important;
+    align-content: center !important;
+    align-items: center !important;
     grid-template-rows: auto !important;
   }
 
@@ -132,8 +133,8 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     padding: 10px 14px !important;
     border: 0 !important;
     border-radius: 18px !important;
-    background: #f4f4f5 !important;
-    color: #1f2328 !important;
+    background: #ecfeff !important;
+    color: #0f172a !important;
     box-shadow: none !important;
   }
 
@@ -144,7 +145,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
-    color: #24292f !important;
+    color: #1e293b !important;
     box-shadow: none !important;
   }
 
@@ -174,7 +175,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   .message-bubble.ai-message h2,
   .message-bubble.ai-message h3 {
     margin: 18px 0 8px !important;
-    color: #111827 !important;
+    color: #0f172a !important;
     font-size: 16px !important;
     line-height: 1.45 !important;
   }
@@ -182,6 +183,24 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   .message-bubble.ai-message ul,
   .message-bubble.ai-message ol {
     padding-inline-start: 20px !important;
+  }
+
+  .input-button.inside-end {
+    background: #0891b2 !important;
+    box-shadow: 0 12px 24px -18px rgba(8, 145, 178, 0.82) !important;
+  }
+
+  .input-button.inside-end.disabled-button {
+    background: #94a3b8 !important;
+    opacity: 0.82 !important;
+    box-shadow: none !important;
+  }
+
+  #submit-icon,
+  #submit-icon * {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
   }
 
   .${MESSAGE_TOOLBAR_CLASS} {
@@ -257,7 +276,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   :host(.is-empty) #input {
-    align-items: flex-start !important;
+    align-items: center !important;
     height: auto !important;
   }
 
@@ -410,7 +429,7 @@ let messageToolbarObserver: MutationObserver | null = null;
 let messageToolbarTimer: number | null = null;
 
 const mountInternal = async (container: HTMLElement): Promise<void> => {
-  const html = await loadTemplate('src/modules/app_center/views/playground/deep-chat/template.html');
+  const html = await loadTemplate('src/modules/app_center/views/playground/deep-chat/template.html', { disableFadeIn: true });
   const renderer = SafeRenderer.getInstance();
 
   container.classList.add('fade-in');
@@ -526,14 +545,14 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
         width: '100%',
         margin: '0',
         borderRadius: '29px',
-        border: '1px solid #dedede',
+        border: '1px solid #cbd5e1',
         backgroundColor: '#ffffff',
-        boxShadow: '0 16px 38px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.06)',
+        boxShadow: '0 18px 38px -30px rgba(8, 145, 178, 0.52), 0 2px 8px rgba(15, 23, 42, 0.05)',
         minHeight: '58px',
         maxHeight: '150px',
       },
       text: {
-        color: '#111111',
+        color: '#0f172a',
         fontSize: '15px',
         lineHeight: '1.45',
         padding: '18px 62px 16px 22px',
@@ -544,7 +563,7 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
     submit: {
       container: {
         borderRadius: '999px',
-        backgroundColor: '#8d8d8d',
+        backgroundColor: '#0891b2',
         width: '34px',
         height: '34px',
       },
@@ -564,8 +583,8 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
       },
       user: {
         bubble: {
-          backgroundColor: '#f4f4f5',
-          color: '#1f2328',
+          backgroundColor: '#ecfeff',
+          color: '#0f172a',
           border: '0',
           borderRadius: '18px',
           padding: '10px 14px',
@@ -580,7 +599,7 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
           width: '100%',
           maxWidth: '100%',
           backgroundColor: 'transparent',
-          color: '#24292f',
+          color: '#1e293b',
           border: '0',
           borderRadius: '0',
           padding: '0',
@@ -603,6 +622,7 @@ function bindControls(container: HTMLElement): void {
   const modelSelect = container.querySelector<HTMLSelectElement>('#playground-model-select');
   const refreshButton = container.querySelector<HTMLButtonElement>('#playground-refresh-config');
   const clearButton = container.querySelector<HTMLButtonElement>('#playground-clear-chat');
+  const railToggleButton = container.querySelector<HTMLButtonElement>('#playground-toggle-rail');
   const systemPromptInput = container.querySelector<HTMLTextAreaElement>('#playground-system-prompt');
   const temperatureInput = container.querySelector<HTMLInputElement>('#playground-temperature');
   const temperatureValue = container.querySelector<HTMLOutputElement>('#playground-temperature-value');
@@ -622,6 +642,13 @@ function bindControls(container: HTMLElement): void {
   };
   refreshButton?.addEventListener('click', onRefresh);
   cleanupCallbacks.push(() => refreshButton?.removeEventListener('click', onRefresh));
+
+  syncThreadRailState(container);
+  const onRailToggle = (): void => {
+    toggleThreadRail(container);
+  };
+  railToggleButton?.addEventListener('click', onRailToggle);
+  cleanupCallbacks.push(() => railToggleButton?.removeEventListener('click', onRailToggle));
 
   const onClear = (): void => {
     createThread(container);
@@ -682,6 +709,36 @@ function bindControls(container: HTMLElement): void {
   resetTuningButton?.addEventListener('click', onResetTuning);
   cleanupCallbacks.push(() => resetTuningButton?.removeEventListener('click', onResetTuning));
 
+}
+
+function toggleThreadRail(container: HTMLElement): void {
+  const page = container.querySelector<HTMLElement>('.playground-page');
+  if (!page) {
+    return;
+  }
+
+  const shouldCollapse = !page.classList.contains(THREAD_RAIL_COLLAPSED_CLASS);
+  page.classList.toggle(THREAD_RAIL_COLLAPSED_CLASS, shouldCollapse);
+  syncThreadRailState(container);
+}
+
+function syncThreadRailState(container: HTMLElement): void {
+  const page = container.querySelector<HTMLElement>('.playground-page');
+  const rail = container.querySelector<HTMLElement>('#playground-thread-rail');
+  const toggle = container.querySelector<HTMLButtonElement>('#playground-toggle-rail');
+  const isCollapsed = page?.classList.contains(THREAD_RAIL_COLLAPSED_CLASS) || false;
+  const expandedText = isCollapsed ? '展开历史会话' : '收起历史会话';
+
+  if (rail) {
+    rail.setAttribute('aria-hidden', String(isCollapsed));
+    (rail as HTMLElement & { inert: boolean }).inert = isCollapsed;
+  }
+
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', String(!isCollapsed));
+    toggle.setAttribute('aria-label', expandedText);
+    toggle.title = expandedText;
+  }
 }
 
 async function handlePlaygroundRequest(

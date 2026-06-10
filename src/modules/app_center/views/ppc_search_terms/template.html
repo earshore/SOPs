@@ -4,7 +4,10 @@
             <div class="min-w-0">
                 <div class="flex items-center gap-3 mb-3">
                     <div class="ppc-hero-icon">
-                        <i class="fas fa-magnifying-glass-dollar"></i>
+                        <i class="fas fa-magnifying-glass-dollar" aria-hidden="true"></i>
+                        <span class="ppc-hero-icon-badge" aria-hidden="true">
+                            <i class="fas fa-bolt"></i>
+                        </span>
                     </div>
                     <div>
                         <div class="ppc-hero-eyebrow">PPC AI</div>
@@ -40,7 +43,7 @@
         </div>
     </section>
 
-    <section class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6 items-start">
+    <section class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6 items-stretch">
         <div class="ppc-panel ppc-import-panel xl:col-span-2">
             <div class="flex items-center justify-between gap-3 mb-4">
                 <div>
@@ -78,6 +81,7 @@
                     <input id="ppc-file-input" type="file" class="sr-only" accept=".csv,.tsv,.txt,.xlsx,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
                 </label>
                 <div>
+                    <label for="ppc-paste-input" class="sr-only">粘贴广告报表内容</label>
                     <textarea id="ppc-paste-input"
                         class="ppc-textarea w-full min-h-[150px] rounded-lg border border-slate-300 p-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         placeholder="也可以直接粘贴 Search Term 报表内容，首行需要包含列名。"></textarea>

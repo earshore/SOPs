@@ -278,25 +278,25 @@
                                 <h3 class="font-bold text-slate-700 text-sm border-b pb-2">📥 输入参数</h3>
                                 <div class="space-y-3">
                                         <div>
-                                                <label class="block text-xs text-slate-600 mb-1">原售价 (含税) €</label>
+                                                <label class="block text-xs text-slate-600 mb-1" for="calc-original-price">原售价 (含税) €</label>
                                                 <input class="w-full px-3 py-2 border rounded-lg text-sm"
                                                         id="calc-original-price"
                                                         step="0.01" type="number" value="9.99" />
                                         </div>
                                         <div>
-                                                <label class="block text-xs text-slate-600 mb-1">产品成本 (含头程) €</label>
+                                                <label class="block text-xs text-slate-600 mb-1" for="calc-cost">产品成本 (含头程) €</label>
                                                 <input class="w-full px-3 py-2 border rounded-lg text-sm" id="calc-cost"
                                                         step="0.01" type="number"
                                                         value="2.50" />
                                         </div>
                                         <div>
-                                                <label class="block text-xs text-slate-600 mb-1">FBA配送费 €</label>
+                                                <label class="block text-xs text-slate-600 mb-1" for="calc-fba-fee">FBA配送费 €</label>
                                                 <input class="w-full px-3 py-2 border rounded-lg text-sm"
                                                         id="calc-fba-fee" step="0.01"
                                                         type="number" value="3.50" />
                                         </div>
                                         <div>
-                                                <label class="block text-xs text-slate-600 mb-1">VAT税率 (按站点选择)</label>
+                                                <label class="block text-xs text-slate-600 mb-1" for="calc-vat-rate">VAT税率 (按站点选择)</label>
                                                 <select class="w-full px-3 py-2 border rounded-lg text-sm"
                                                         id="calc-vat-rate">
                                                         <optgroup label="核心五国">
@@ -322,7 +322,7 @@
                                 <div class="space-y-2">
                                         <label
                                                 class="flex items-center gap-2 p-2 bg-amber-50 rounded-lg cursor-pointer hover:bg-amber-100 border border-amber-200">
-                                                <input class="w-4 h-4 rounded" id="promo-coupon" type="checkbox" />
+                                                <input class="w-4 h-4 rounded" id="promo-coupon" type="checkbox" aria-label="启用 Coupon 优惠券" />
                                                 <div class="flex-1">
                                                         <span class="font-medium text-sm text-amber-800">Coupon
                                                                 优惠券</span>
@@ -330,7 +330,7 @@
                                                                 <input class="w-16 px-2 py-1 border rounded text-xs"
                                                                         id="coupon-percent" max="50" min="5"
                                                                         type="number"
-                                                                        value="10" />
+                                                                        value="10" aria-label="Coupon 优惠百分比" />
                                                                 <span class="text-xs text-slate-500">% OFF</span>
                                                                 <span class="text-xs text-red-600 ml-auto">费用:
                                                                         €0.50/兑换</span>
@@ -339,7 +339,7 @@
                                         </label>
                                         <label
                                                 class="flex items-center gap-2 p-2 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 border border-blue-200">
-                                                <input class="w-4 h-4 rounded" id="promo-prime" type="checkbox" />
+                                                <input class="w-4 h-4 rounded" id="promo-prime" type="checkbox" aria-label="启用 Prime Exclusive Discount" />
                                                 <div class="flex-1">
                                                         <span class="font-medium text-sm text-blue-800">Prime Exclusive
                                                                 Discount</span>
@@ -347,7 +347,7 @@
                                                                 <input class="w-16 px-2 py-1 border rounded text-xs"
                                                                         id="prime-percent" max="30" min="10"
                                                                         type="number"
-                                                                        value="15" />
+                                                                        value="15" aria-label="Prime Exclusive Discount 百分比" />
                                                                 <span class="text-xs text-slate-500">% OFF</span>
                                                                 <span class="text-xs text-emerald-600 ml-auto">费用:
                                                                         免费</span>
@@ -356,7 +356,7 @@
                                         </label>
                                         <label
                                                 class="flex items-center gap-2 p-2 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100 border border-yellow-200">
-                                                <input class="w-4 h-4 rounded" id="promo-ld" type="checkbox" />
+                                                <input class="w-4 h-4 rounded" id="promo-ld" type="checkbox" aria-label="启用 Lightning Deal" />
                                                 <div class="flex-1">
                                                         <span class="font-medium text-sm text-yellow-800">Lightning Deal
                                                                 (LD)</span>
@@ -364,7 +364,7 @@
                                                                 <input class="w-16 px-2 py-1 border rounded text-xs"
                                                                         id="ld-percent" max="40" min="15"
                                                                         type="number"
-                                                                        value="20" />
+                                                                        value="20" aria-label="Lightning Deal 百分比" />
                                                                 <span class="text-xs text-slate-500">% OFF</span>
                                                                 <span class="text-xs text-red-600 ml-auto">费用:
                                                                         €70-150</span>
@@ -373,7 +373,7 @@
                                         </label>
                                         <label
                                                 class="flex items-center gap-2 p-2 bg-purple-50 rounded-lg cursor-pointer hover:bg-purple-100 border border-purple-200">
-                                                <input class="w-4 h-4 rounded" id="promo-bd" type="checkbox" />
+                                                <input class="w-4 h-4 rounded" id="promo-bd" type="checkbox" aria-label="启用 Best Deal" />
                                                 <div class="flex-1">
                                                         <span class="font-medium text-sm text-purple-800">Best Deal
                                                                 (7DD)</span>
@@ -381,7 +381,7 @@
                                                                 <input class="w-16 px-2 py-1 border rounded text-xs"
                                                                         id="bd-percent" max="50" min="15"
                                                                         type="number"
-                                                                        value="25" />
+                                                                        value="25" aria-label="Best Deal 百分比" />
                                                                 <span class="text-xs text-slate-500">% OFF</span>
                                                                 <span class="text-xs text-red-600 ml-auto">费用:
                                                                         €150-300</span>

@@ -81,11 +81,20 @@
 .ziniao-case-shell {
   width: 100%;
   max-width: 100%;
-  margin: 1.5rem 0 0;
+  margin: 0;
   color: #1f2937;
   font-size: 15px;
   line-height: 1.7;
   letter-spacing: 0;
+  --zn-banner-title-size: 1.375rem;
+  --zn-banner-title-weight: 800;
+  --zn-banner-title-line-height: 1.35;
+  --zn-banner-description-size: 0.875rem;
+  --zn-banner-description-line-height: 1.6;
+  --zn-banner-tag-size: 0.75rem;
+  --zn-banner-tag-weight: 500;
+  --zn-banner-accent: #0891b2;
+  --zn-banner-soft: #2563eb;
 }
 
 .ziniao-case-shell *,
@@ -103,9 +112,9 @@
   color: #fff;
   background:
     radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.18), transparent 28%),
-    linear-gradient(135deg, var(--zn-accent), var(--zn-soft));
+    linear-gradient(135deg, var(--zn-banner-accent), var(--zn-banner-soft));
   border-radius: 18px;
-  box-shadow: 0 10px 30px color-mix(in srgb, var(--zn-accent) 18%, transparent);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--zn-banner-accent) 18%, transparent);
 }
 
 .zn-hero-eyebrow {
@@ -121,8 +130,8 @@
   min-height: 28px;
   padding: 4px 10px;
   color: #fff;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--zn-banner-tag-size, 0.75rem);
+  font-weight: var(--zn-banner-tag-weight, 500);
   line-height: 1.4;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -133,17 +142,17 @@
   margin: 0 0 8px;
   max-width: 1120px;
   color: #fff;
-  font-size: 26px;
-  font-weight: 700;
-  line-height: 1.55;
+  font-size: var(--zn-banner-title-size, 1.375rem);
+  font-weight: var(--zn-banner-title-weight, 800);
+  line-height: var(--zn-banner-title-line-height, 1.35);
 }
 
 .zn-hero > p {
   max-width: 1060px;
   margin: 0 0 16px;
   color: rgba(255, 255, 255, 0.94);
-  font-size: 14.5px;
-  line-height: 1.7;
+  font-size: var(--zn-banner-description-size, 0.875rem);
+  line-height: var(--zn-banner-description-line-height, 1.6);
 }
 
 .zn-hero-meta {
@@ -197,15 +206,23 @@
   padding: 20px 24px;
 }
 
+.ziniao-notice-shell .zn-notice-title {
+  border-color: rgba(8, 145, 178, 0.18);
+  background:
+    radial-gradient(circle at 84% 18%, rgba(8, 145, 178, 0.08), transparent 30%),
+    linear-gradient(135deg, rgba(236, 254, 255, 0.96), rgba(255, 255, 255, 0.94) 52%, rgba(239, 246, 255, 0.86));
+  box-shadow: 0 10px 30px -26px rgba(8, 145, 178, 0.42);
+}
+
 .zn-card h2,
 .zn-intro h2,
 .zn-summary h2,
 .zn-notice-title h2 {
   margin: 0 0 8px;
   color: rgba(0, 0, 0, 0.85);
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1.7;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .zn-lead,
@@ -214,8 +231,8 @@
 .zn-notice-title p {
   margin: 6px 0 14px;
   color: #6b7280;
-  font-size: 13.5px;
-  line-height: 1.7;
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 .zn-phase-grid {

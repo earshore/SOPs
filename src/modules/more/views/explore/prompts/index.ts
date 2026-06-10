@@ -69,6 +69,7 @@ function clearElement(element: Element): void {
 function appendIcon(parent: Element, className: string): HTMLElement {
     const icon = document.createElement('i');
     icon.className = className;
+    icon.setAttribute('aria-hidden', 'true');
     parent.appendChild(icon);
     return icon;
 }
@@ -225,8 +226,10 @@ function handleCategoryChange(category: string): void {
     moduleRoot?.querySelectorAll('.category-btn').forEach((btn) => {
         if ((btn as HTMLElement).dataset.category === category) {
             btn.classList.add('active');
+            btn.setAttribute('aria-pressed', 'true');
         } else {
             btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
         }
     });
 
@@ -246,8 +249,10 @@ function renderCategories(): void {
 
     const createButton = (category: 'all' | PromptCategory): HTMLButtonElement => {
         const button = document.createElement('button');
+        button.type = 'button';
         button.className = category === 'all' ? 'category-btn active' : 'category-btn';
         button.dataset.category = category === 'all' ? 'all' : category.id;
+        button.setAttribute('aria-pressed', category === 'all' ? 'true' : 'false');
 
         appendIcon(button, category === 'all' ? 'fas fa-th' : `fas ${category.icon}`);
 
@@ -341,6 +346,7 @@ function renderPromptList(): void {
         viewBtn.dataset.promptId = prompt.id;
         viewBtn.className = 'btn-icon';
         viewBtn.title = '查看详情';
+        viewBtn.setAttribute('aria-label', `查看${prompt.title}`);
         appendIcon(viewBtn, 'fas fa-eye');
 
         const copyBtn = document.createElement('button');
@@ -349,6 +355,7 @@ function renderPromptList(): void {
         copyBtn.dataset.promptId = prompt.id;
         copyBtn.className = 'btn-icon';
         copyBtn.title = '复制提示词';
+        copyBtn.setAttribute('aria-label', `复制${prompt.title}`);
         appendIcon(copyBtn, 'fas fa-copy');
 
         actions.appendChild(viewBtn);
