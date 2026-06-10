@@ -138,18 +138,8 @@
 /* ===== 容器样式 ===== */
 .wb-container {
   margin-bottom: var(--spacing-xl, 2rem);
-  /* 6.5 确保流式布局,避免水平滚动 */
   max-width: 100%;
   overflow-x: hidden;
-
-  /* 5.6 定义暗色模式 CSS 变量 */
-  --wb-text-primary: var(--color-text-primary, #0f172a);
-  --wb-text-secondary: var(--color-slate-600, #475569);
-  --wb-border-color: rgba(148, 163, 184, 0.24);
-  --wb-tag-bg: rgba(255, 255, 255, .78);
-  --wb-tag-border: rgba(148, 163, 184, 0.22);
-  --wb-tag-hover-bg: white;
-  --wb-tag-hover-border: rgba(37, 99, 235, 0.18);
 }
 
 .wb-container.mb-8 {
@@ -169,20 +159,9 @@
     background-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   min-height: auto;
   height: auto;
-  /* 6.5 确保流式布局,避免水平滚动 */
   max-width: 100%;
-  /* 8.3 优化渲染性能 */
   backface-visibility: hidden;
   perspective: 1000px;
-
-  /* 5.6 定义暗色模式 CSS 变量 */
-  --wb-text-primary: var(--color-text-primary, #0f172a);
-  --wb-text-secondary: var(--color-slate-600, #475569);
-  --wb-border-color: rgba(148, 163, 184, 0.24);
-  --wb-tag-bg: rgba(255, 255, 255, .78);
-  --wb-tag-border: rgba(148, 163, 184, 0.22);
-  --wb-tag-hover-bg: white;
-  --wb-tag-hover-border: rgba(37, 99, 235, 0.18);
 }
 
 .wb-card:hover {
@@ -207,19 +186,15 @@
 
 .wb-orb {
   position: absolute;
-  display: none;
+  display: block;
   border-radius: 50%;
-  /* 扁平化设计：减少模糊程度 */
   filter: blur(36px);
-  animation: none;
+  animation: floatSlow 12s ease-in-out infinite;
   transform: translateZ(0);
-  /* 8.1 为装饰元素添加 pointer-events: none */
   pointer-events: none;
-  /* 8.3 优化渲染性能 */
   contain: layout style paint;
-  /* 增强视觉效果：添加混合模式 */
   mix-blend-mode: multiply;
-  opacity: 0.18;
+  opacity: 0.28;
 }
 
 .wb-orb-1 {
@@ -269,13 +244,10 @@
 
 .wb-particle {
   position: absolute;
-  display: none;
+  display: block;
   border-radius: 50%;
-  /* 8.1 为装饰元素添加 pointer-events: none */
   pointer-events: none;
-  /* 8.3 优化渲染性能 */
   contain: layout style paint;
-  /* 增强粒子效果 */
   background: var(--wb-particle-color, rgba(59, 130, 246, 0.28));
   box-shadow: none;
 }
@@ -434,10 +406,9 @@
   inset: -6px;
   border-radius: var(--rounded-2xl, 24px);
   border: 2px solid var(--color-primary-light, rgba(59, 130, 246, 0.10));
-  animation: none;
-  display: none;
+  animation: pulseRing 2s ease-out infinite;
+  display: block;
   z-index: 1;
-  /* 8.1 添加 will-change 属性优化性能 */
   will-change: transform, opacity;
 }
 
@@ -679,13 +650,6 @@
   .wb-tag {
     padding: 5px 10px;
   }
-
-  /* 6.1 隐藏浮动光球以提升性能 */
-  .wb-orb {
-    display: none;
-  }
-
-  /* 6.4 banner 内标签为信息展示，不扩大到按钮尺寸，避免移动端高度失衡 */
 }
 
 @media (max-width: 480px) {
@@ -720,7 +684,6 @@
 
 /* 脉冲动画 - 用于 Safety 徽章 */
 @keyframes pulse {
-
   0%,
   100% {
     transform: scale(1) translateZ(0);
@@ -732,13 +695,12 @@
 }
 
 .wb-badge-safety {
-  animation: none;
-  will-change: auto;
+  animation: pulse 2s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* 闪烁动画 - 用于 Growth 徽章 */
 @keyframes blink {
-
   0%,
   100% {
     opacity: 1;
@@ -750,8 +712,8 @@
 }
 
 .wb-badge-growth {
-  animation: none;
-  will-change: auto;
+  animation: blink 3s ease-in-out infinite;
+  will-change: opacity;
 }
 
 /* 渐变背景动画 - 用于支持渐变动画的徽章 */
@@ -772,7 +734,7 @@
 /* 为支持渐变动画的徽章添加背景尺寸 */
 .wb-badge-animated {
   background-size: 200% 200%;
-  animation: none;
+  animation: gradientShift 4s ease-in-out infinite;
 }
 
 
@@ -797,29 +759,32 @@
 
 
 /* ===== 暗色模式平滑过渡 ===== */
-/* 5.5 为所有受暗色模式影响的元素添加平滑过渡 */
+/* 仅对容器级元素添加平滑过渡 */
 .wb-container,
-.wb-card,
-.wb-bg-gradient,
-.wb-orb,
-.wb-title,
-.wb-description,
-.wb-tag,
-.wb-tag span,
-.wb-badge {
-  transition: background-color 300ms ease,
+.wb-card {
+  transition:
+    background-color 300ms ease,
     color 300ms ease,
-    border-color 300ms ease,
-    background 300ms ease;
+    border-color 300ms ease;
 }
 
 
 /* ===== 暗色模式适配 ===== */
-@media (prefers-color-scheme: dark) {
+/* 统一在 :root 定义暗色模式变量 */
+:root {
+  /* 浅色模式默认值 */
+  --wb-text-primary: var(--color-text-primary, #0f172a);
+  --wb-text-secondary: var(--color-slate-600, #475569);
+  --wb-border-color: rgba(148, 163, 184, 0.24);
+  --wb-tag-bg: rgba(255, 255, 255, .78);
+  --wb-tag-border: rgba(148, 163, 184, 0.22);
+  --wb-tag-hover-bg: white;
+  --wb-tag-hover-border: rgba(37, 99, 235, 0.18);
+}
 
-  /* 5.6 使用 CSS 变量覆盖暗色模式样式 */
-  .wb-container,
-  .wb-card {
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 暗色模式变量覆盖 */
     --wb-text-primary: #f8fafc;
     --wb-text-secondary: #cbd5e1;
     --wb-border-color: rgba(148, 163, 184, 0.22);
@@ -838,84 +803,6 @@
         rgba(15, 23, 42, 0.96) 100%);
     border-color: var(--wb-border-color);
   }
-
-  .wb-bg-gradient {
-    background: linear-gradient(135deg,
-        rgba(30, 58, 138, 0.16) 0%,
-        rgba(15, 23, 42, 0.94) 52%,
-        rgba(8, 145, 178, 0.12) 100%);
-  }
-
-  .wb-orb-1 {
-    background: radial-gradient(circle,
-        rgba(59, 130, 246, 0.15) 0%,
-        transparent 70%);
-  }
-
-  .wb-orb-2 {
-    background: radial-gradient(circle,
-        rgba(34, 197, 94, 0.15) 0%,
-        transparent 70%);
-  }
-
-  .wb-orb-3 {
-    background: radial-gradient(circle,
-        rgba(251, 191, 36, 0.15) 0%,
-        transparent 70%);
-  }
-
-  /* 5.2 徽章适配 - 调整为更亮的色调以提高可见度 */
-  .wb-badge-ai {
-    --badge-bg: rgba(30, 64, 175, 0.28);
-    --badge-color: #bfdbfe;
-    --badge-border: rgba(147, 197, 253, 0.24);
-  }
-
-  .wb-badge-growth {
-    --badge-bg: rgba(6, 95, 70, 0.30);
-    --badge-color: #a7f3d0;
-    --badge-border: rgba(110, 231, 183, 0.24);
-  }
-
-  .wb-badge-safety {
-    --badge-bg: rgba(154, 52, 18, 0.30);
-    --badge-color: #fed7aa;
-    --badge-border: rgba(253, 186, 116, 0.26);
-  }
-
-  .wb-badge-service {
-    --badge-bg: rgba(88, 28, 135, 0.30);
-    --badge-color: #e9d5ff;
-    --badge-border: rgba(216, 180, 254, 0.24);
-  }
-
-  .wb-badge-supply {
-    --badge-bg: rgba(146, 64, 14, 0.30);
-    --badge-color: #fde68a;
-    --badge-border: rgba(252, 211, 77, 0.24);
-  }
-
-  .wb-badge-analytics {
-    --badge-bg: rgba(21, 94, 117, 0.30);
-    --badge-color: #a5f3fc;
-    --badge-border: rgba(103, 232, 249, 0.24);
-  }
-
-  .wb-badge-pro {
-    --badge-bg: rgba(146, 64, 14, 0.30);
-    --badge-color: #fde68a;
-    --badge-border: rgba(252, 211, 77, 0.24);
-  }
-
-  .wb-badge-hub {
-    --badge-bg: rgba(51, 65, 85, 0.78);
-    --badge-color: #e2e8f0;
-    --badge-border: rgba(148, 163, 184, 0.24);
-  }
-
-  /* 5.3 和 5.4 的样式现在通过 CSS 变量自动应用 */
-  /* 文字颜色通过 --wb-text-primary 和 --wb-text-secondary 控制 */
-  /* 边框和标签样式通过 --wb-border-color, --wb-tag-bg, --wb-tag-border 控制 */
 }
 
 
@@ -1401,4 +1288,14 @@
     border-color: var(--wb-tag-border);
     color: var(--wb-text-secondary);
   }
+}
+
+/* ===== 主题变体：Analytics 蓝色主题 ===== */
+.wb-theme-analytics {
+  --wb-gradient-1: rgba(239, 246, 255, 0.95);
+  --wb-gradient-2: rgba(219, 234, 254, 0.90);
+  --wb-orb-1-color: rgba(96, 165, 250, 0.15);
+  --wb-orb-2-color: rgba(147, 197, 253, 0.12);
+  --wb-orb-3-color: rgba(59, 130, 246, 0.08);
+  --wb-particle-color: rgba(59, 130, 246, 0.6);
 }
