@@ -291,8 +291,8 @@ function renderCard(opts: CardOptions): string {
   const href = `#${routeIdToPath(target)}`;
 
   return `
-    <a href="${href}" role="menuitem" data-action="switch-tab" data-tab="${target}"
-      class="cursor-pointer group/card relative rounded-2xl overflow-hidden
+    <a href="${href}" data-action="switch-tab" data-tab="${target}"
+      class="cursor-pointer group/card relative rounded-lg overflow-hidden
         h-full flex flex-col
         text-left no-underline
         transition-all duration-300 ease-out
@@ -305,7 +305,7 @@ function renderCard(opts: CardOptions): string {
         bg-white/60 backdrop-blur-xl
         ${g.hoverBg}
         border ${g.defaultBorder}
-        rounded-2xl
+        rounded-lg
         shadow-sm shadow-slate-200/50
         group-hover/card:shadow-md group-hover/card:shadow-slate-200/60
         transition-all duration-300"></div>
@@ -339,7 +339,7 @@ function renderCard(opts: CardOptions): string {
 
         <!-- Body -->
         <div class="flex-1 min-h-0">
-          <h4 class="text-[13px] font-bold text-slate-800 mb-1
+          <h4 class="text-sm font-bold text-slate-800 mb-1
             flex items-center gap-1.5 leading-tight">
             <span>${label}</span>
             <i class="fas fa-arrow-right text-[9px] text-slate-300
@@ -347,7 +347,7 @@ function renderCard(opts: CardOptions): string {
               group-hover/card:opacity-100 group-hover/card:translate-x-0
               transition-all duration-300 ease-out"></i>
           </h4>
-          <p class="text-[11px] text-slate-400 leading-relaxed line-clamp-2">
+          <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">
             ${description}
           </p>
         </div>
@@ -398,9 +398,9 @@ function buildFooterTags(
 function renderErrorCard(message: string = '菜单加载失败'): string {
   const safeMessage = escapeHtml(message);
   return `
-    <div class="col-span-full relative rounded-2xl overflow-hidden">
+    <div class="col-span-full relative rounded-lg overflow-hidden">
       <div class="absolute inset-0 bg-red-50/60 backdrop-blur-xl
-        border border-red-200/40 rounded-2xl"></div>
+        border border-red-200/40 rounded-lg"></div>
       <div class="relative z-10 p-5 flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-rose-600
           flex items-center justify-center shadow-lg shadow-red-500/30
@@ -571,6 +571,26 @@ export function renderMoreMenu(): void {
 
 let megaMenuAccessibilityInitialized = false;
 
+function setMegaMenuExpanded(group: HTMLElement, expanded: boolean): void {
+  const trigger = group.querySelector<HTMLButtonElement>('.nav-trigger');
+  const menu = group.querySelector<HTMLElement>('.mega-menu');
+
+  group.classList.toggle('is-open', expanded);
+  trigger?.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  menu?.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+}
+
+export function closeMegaMenus(options: { except?: HTMLElement; blurActive?: boolean } = {}): void {
+  document.querySelectorAll<HTMLElement>('.nav-group').forEach(group => {
+    if (options.except && group === options.except) return;
+    setMegaMenuExpanded(group, false);
+  });
+
+  if (options.blurActive && document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+}
+
 export function initMegaMenuAccessibility(): void {
   if (megaMenuAccessibilityInitialized) return;
   megaMenuAccessibilityInitialized = true;
@@ -580,17 +600,30 @@ export function initMegaMenuAccessibility(): void {
     const trigger = group.querySelector<HTMLButtonElement>('.nav-trigger');
     if (!trigger) return;
 
-    const setExpanded = (expanded: boolean): void => {
-      trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-    };
+    const setExpanded = (expanded: boolean): void => setMegaMenuExpanded(group, expanded);
 
-    group.addEventListener('mouseenter', () => setExpanded(true));
+    setExpanded(false);
+
+    group.addEventListener('mouseenter', () => {
+      closeMegaMenus({ except: group });
+      setExpanded(true);
+    });
     group.addEventListener('mouseleave', () => {
       if (!group.contains(document.activeElement)) {
         setExpanded(false);
       }
     });
-    group.addEventListener('focusin', () => setExpanded(true));
+    trigger.addEventListener('click', event => {
+      event.preventDefault();
+      const nextExpanded = !group.classList.contains('is-open');
+      closeMegaMenus({ except: group });
+      setExpanded(nextExpanded);
+    });
+    group.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      setExpanded(false);
+      trigger.focus();
+    });
     group.addEventListener('focusout', () => {
       requestAnimationFrame(() => {
         if (!group.contains(document.activeElement)) {
@@ -598,5 +631,12 @@ export function initMegaMenuAccessibility(): void {
         }
       });
     });
+  });
+
+  document.addEventListener('click', event => {
+    const target = event.target as HTMLElement | null;
+    if (!target?.closest('.nav-group')) {
+      closeMegaMenus();
+    }
   });
 }

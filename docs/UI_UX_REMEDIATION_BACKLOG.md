@@ -16,7 +16,7 @@
 | --- | --- | --- | --- | --- |
 | UI-P0-01 | 动态侧边栏移动端抽屉化 | SOPS、App Center、PPC、Playground、AMZ Hub、More | `index.html`、`src/common/ui/navigation.ts`、`src/css/layouts/container.css` | 375 / 390 / 430px 下侧边栏关闭时不占宽，`#main-content` 接近视口宽度。 |
 | UI-P0-02 | 移动端主内容容器修复 | 全部动态侧边栏模块 | `index.html`、模块根容器样式 | 移动截图无竖排断字，核心表单和卡片不被压缩到不可读。 |
-| UI-P0-03 | 移动端一级导航入口 | 全站导航 | `index.html`、`src/css/components/header-main.css`、`src/css/components/mega-menu.css` | 768px 以下可以进入 SOPs、应用中心、Amazon 智库、更多，不依赖 hover。 |
+| UI-P0-03 | 移动端一级导航入口 | 全站导航 | `index.html`、`src/css/components/header-main.css` | 768px 以下可以进入 SOPs、应用中心、Amazon 智库、更多，不依赖 hover。 |
 | UI-P0-04 | 壳层移动截图回归 | 首页 + 6 个模块 | `tests/visual/visual.test.ts` 或新增 smoke | 关键移动截图纳入回归，失败时能定位到具体页面。 |
 
 ## P1：核心视觉收敛

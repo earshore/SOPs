@@ -12,7 +12,8 @@ export {
   renderMoreMenu,
   renderHubMegaMenu,
   renderSopsMegaMenu,
-  initMegaMenuAccessibility
+  initMegaMenuAccessibility,
+  closeMegaMenus
 } from './megaMenu';
 
 // 导航和路由
@@ -48,7 +49,7 @@ export { navigateTo, getRouter, getCurrentRoute, hasRoute } from '../router/init
 // 向后兼容：注册到 window
 // ========================
 
-import { renderMegaMenu, renderMoreMenu, renderHubMegaMenu, renderSopsMegaMenu, initMegaMenuAccessibility } from './megaMenu';
+import { renderMegaMenu, renderMoreMenu, renderHubMegaMenu, renderSopsMegaMenu, initMegaMenuAccessibility, closeMegaMenus } from './megaMenu';
 import { showToast } from './notifications';
 import { searchSOPs, clearSOPSearch, searchHub, clearHubSearch, searchSidebar, clearSidebarSearch } from './search';
 import { navigateTo } from '../router/initRouter';
@@ -62,6 +63,7 @@ declare global {
     renderHubMegaMenu: typeof renderHubMegaMenu;
     renderMoreMenu: typeof renderMoreMenu;
     initMegaMenuAccessibility: typeof initMegaMenuAccessibility;
+    closeMegaMenus: typeof closeMegaMenus;
     showToast: typeof showToast;
     searchSOPs?: typeof searchSOPs;
     clearSOPSearch?: typeof clearSOPSearch;
@@ -78,6 +80,7 @@ window.renderSopsMegaMenu = renderSopsMegaMenu;
 window.renderHubMegaMenu = renderHubMegaMenu;
 window.renderMoreMenu = renderMoreMenu;
 window.initMegaMenuAccessibility = initMegaMenuAccessibility;
+window.closeMegaMenus = closeMegaMenus;
 window.showToast = showToast;
 window.searchSOPs = searchSOPs;
 window.clearSOPSearch = clearSOPSearch;
@@ -112,6 +115,7 @@ registerActions({
     
     const path = routeIdToPath(tab);
     
+    closeMegaMenus({ blurActive: true });
     await navigateTo(path);
   },
   'toggle-sop-group': (params: Record<string, unknown>) => toggleSOPGroup({ category: params.group as string || params.category as string }),

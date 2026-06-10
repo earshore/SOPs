@@ -599,6 +599,46 @@
   opacity: .9;
 }
 
+.wb-tag-dot--cyan {
+  background: var(--color-cyan-500, #06b6d4);
+}
+
+.wb-tag-dot--blue {
+  background: var(--color-blue-500, #3b82f6);
+}
+
+.wb-tag-dot--indigo {
+  background: var(--color-indigo-500, #6366f1);
+}
+
+.wb-tag-dot--violet {
+  background: var(--color-violet-500, #8b5cf6);
+}
+
+.wb-tag-dot--purple {
+  background: var(--color-purple-500, #a855f7);
+}
+
+.wb-tag-dot--pink {
+  background: var(--color-pink-500, #ec4899);
+}
+
+.wb-tag-dot--fuchsia {
+  background: var(--color-fuchsia-500, #d946ef);
+}
+
+.wb-tag-dot--green {
+  background: var(--color-emerald-500, #10b981);
+}
+
+.wb-tag-dot--teal {
+  background: var(--color-teal-500, #14b8a6);
+}
+
+.wb-tag-dot--amber {
+  background: var(--color-amber-500, #f59e0b);
+}
+
 .wb-tag span {
   font-size: var(--text-xs, 0.75rem);
   color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));

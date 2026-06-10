@@ -48,6 +48,7 @@ declare global {
     renderHubMegaMenu: () => void;
     renderMoreMenu: () => void;
     initMegaMenuAccessibility: () => void;
+    closeMegaMenus: (options?: { except?: HTMLElement; blurActive?: boolean }) => void;
     initRouter: () => void;
     
     // 搜索函数

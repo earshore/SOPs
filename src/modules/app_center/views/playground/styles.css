@@ -1,6 +1,16 @@
+.playground-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.playground-welcome {
+  margin-bottom: 0;
+}
+
 .playground-page {
-  height: calc(100vh - 7rem);
-  min-height: 640px;
+  height: calc(100vh - 18rem);
+  min-height: 520px;
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
   background: #ffffff;
@@ -429,33 +439,8 @@
   width: min(768px, calc(100% - 48px));
   max-width: calc(100% - 48px);
   margin: 0 auto;
-  display: grid;
-  grid-template-rows: auto auto;
-  align-content: start;
-  gap: 16px;
-  padding: 120px 0 32px;
-}
-
-.playground-hero {
-  align-self: end;
-  padding-left: 16px;
-}
-
-.playground-hero h2 {
-  margin: 0;
-  color: #111111;
-  font-size: 26px;
-  line-height: 1.18;
-  font-weight: 750;
-  letter-spacing: 0;
-}
-
-.playground-hero p {
-  margin: 4px 0 0;
-  color: #777777;
-  font-size: 21px;
-  line-height: 1.25;
-  letter-spacing: 0;
+  display: block;
+  padding: 96px 0 32px;
 }
 
 .playground-chat-wrap {
@@ -484,13 +469,7 @@
 }
 
 .playground-page.is-chatting .playground-stage {
-  grid-template-rows: minmax(0, 1fr);
-  align-content: stretch;
   padding-top: 24px;
-}
-
-.playground-page.is-chatting .playground-hero {
-  display: none;
 }
 
 .playground-page.is-chatting .playground-chat-wrap {
@@ -537,20 +516,7 @@
 
   .playground-stage {
     width: calc(100% - 32px);
-    grid-template-rows: auto auto;
     padding: 84px 0 20px;
-  }
-
-  .playground-hero {
-    padding-left: 4px;
-  }
-
-  .playground-hero h2 {
-    font-size: 24px;
-  }
-
-  .playground-hero p {
-    font-size: 18px;
   }
 
   .playground-chat-wrap {

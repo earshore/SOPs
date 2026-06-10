@@ -1582,14 +1582,6 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* --- 快捷键暗色 --- */
-.dark .mega-menu-item-shortcut kbd,
-[data-theme="dark"] .mega-menu-item-shortcut kbd {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-
 /* ========================================
    20. 响应式适配
    ======================================== */

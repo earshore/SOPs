@@ -197,21 +197,21 @@
 }
 
 .nav-group:hover .nav-trigger,
-.nav-group:focus-within .nav-trigger,
+.nav-group.is-open .nav-trigger,
 .nav-trigger:hover,
 .nav-trigger:focus-visible {
     color: var(--color-primary, #6366f1);
 }
 
 .nav-group:hover .nav-trigger::after,
-.nav-group:focus-within .nav-trigger::after,
+.nav-group.is-open .nav-trigger::after,
 .nav-trigger:hover::after,
 .nav-trigger:focus-visible::after {
     width: calc(100% - 32px);
 }
 
 .nav-group:hover .nav-trigger .nav-icon,
-.nav-group:focus-within .nav-trigger .nav-icon,
+.nav-group.is-open .nav-trigger .nav-icon,
 .nav-trigger:hover .nav-icon,
 .nav-trigger:focus-visible .nav-icon {
     opacity: 1;
@@ -219,7 +219,7 @@
 }
 
 .nav-group:hover .nav-trigger .nav-chevron,
-.nav-group:focus-within .nav-trigger .nav-chevron,
+.nav-group.is-open .nav-trigger .nav-chevron,
 .nav-trigger:hover .nav-chevron,
 .nav-trigger:focus-visible .nav-chevron {
     opacity: 0.7;
@@ -227,16 +227,17 @@
 }
 
 .nav-trigger:focus-visible {
-    outline: 2px solid rgba(99, 102, 241, 0.45);
-    outline-offset: -4px;
+    outline: none;
+    box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.35);
+    border-radius: 12px;
 }
 
 /* 确保非 hover 状态下样式被清除 */
-.nav-group:not(:hover):not(:focus-within) .nav-trigger:not(:hover):not(:focus-visible) {
+.nav-group:not(:hover):not(.is-open) .nav-trigger:not(:hover):not(:focus-visible) {
     color: var(--color-slate-500, #64748b);
 }
 
-.nav-group:not(:hover):not(:focus-within) .nav-trigger {
+.nav-group:not(:hover):not(.is-open) .nav-trigger {
     color: var(--color-slate-500, #64748b);
 }
 
@@ -245,41 +246,48 @@
    ======================================== */
 .mega-menu {
     position: fixed;
-    top: 67px;
+    top: 64px;
     left: 0;
     right: 0;
-    background: rgba(255, 255, 255, 0.985);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
-    border-bottom: 1px solid rgba(203, 213, 225, 0.9);
-    box-shadow: 0 24px 60px -24px rgba(15, 23, 42, 0.32), 0 8px 20px -18px rgba(15, 23, 42, 0.22), 0 1px 0 rgba(255,255,255,0.75) inset;
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+    background: transparent;
     z-index: var(--z-mega-menu, 60);
     
     /* 隐藏状态 */
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
     transform: translateY(-4px);
     transition: all var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .nav-group:hover .mega-menu,
-.nav-group:focus-within .mega-menu {
+.nav-group.is-open .mega-menu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
 }
 
 .mega-menu-inner {
-    max-width: 1280px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 32px 40px;
+    padding: 24px 28px;
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.965);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid rgba(203, 213, 225, 0.82);
+    border-top: 0;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 24px 60px -24px rgba(15, 23, 42, 0.32), 0 8px 20px -18px rgba(15, 23, 42, 0.22), 0 1px 0 rgba(255,255,255,0.75) inset;
 }
 
 .mega-menu-header {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .mega-menu-icon {
@@ -634,10 +642,11 @@
     color: var(--color-primary-light, #818cf8);
 }
 
-.dark .mega-menu,
-[data-theme="dark"] .mega-menu {
+.dark .mega-menu-inner,
+[data-theme="dark"] .mega-menu-inner {
     background: rgba(15, 23, 42, 0.92);
-    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255,255,255,0.06) inset;
 }
 
 .dark .model-status,

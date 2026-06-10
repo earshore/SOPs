@@ -3,18 +3,7 @@
     <div class="wb-container wb-container--card wb-theme-analytics mb-8">
         <div class="wb-card">
             <div class="wb-bg-gradient"></div>
-            <div class="wb-orb wb-orb-1"></div>
-            <div class="wb-orb wb-orb-2"></div>
-            <div class="wb-orb wb-orb-3"></div>
             <div class="wb-grid-pattern"></div>
-            <div class="wb-particle wb-particle-1"></div>
-            <div class="wb-particle wb-particle-2"></div>
-            <div class="wb-particle wb-particle-3"></div>
-            <div class="wb-particle wb-particle-4"></div>
-            <div class="wb-particle wb-particle-5"></div>
-            <div class="wb-particle wb-particle-6"></div>
-            <div class="wb-particle wb-particle-7"></div>
-            <div class="wb-particle wb-particle-8"></div>
             <div class="wb-content">
                 <div class="wb-header">
                     <div class="wb-icon-wrapper">
@@ -38,27 +27,28 @@
                         </p>
                         <div class="wb-tags">
                             <div class="wb-tag">
-                                <div class="wb-tag-dot"></div>
+                                <div class="wb-tag-dot" aria-hidden="true"></div>
                                 <span>支持 10+ 站点</span>
                             </div>
                             <div class="wb-tag">
-                                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-2, #06b6d4);"></div>
+                                <div class="wb-tag-dot wb-tag-dot--cyan" aria-hidden="true"></div>
                                 <span>批量采集 &amp; 导入</span>
                             </div>
                             <div class="wb-tag">
-                                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-3, #3b82f6);"></div>
+                                <div class="wb-tag-dot wb-tag-dot--blue" aria-hidden="true"></div>
                                 <span>产品数据管理</span>
                             </div>
                             <div class="wb-tag">
-                                <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-4, #8b5cf6);"></div>
+                                <div class="wb-tag-dot wb-tag-dot--violet" aria-hidden="true"></div>
                                 <span>历史快照</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- ===== 分割线 ===== -->
-            <div class="relative z-10 mx-8 md:mx-10 border-t border-slate-200/50"></div>
+        </div>
+    </div>
+    <div class="scraper-strategy-card mb-8 rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
             <!-- ===== 可点击的策略指南头部 ===== -->
             <div class="cursor-pointer relative z-10 hover:bg-slate-50/50 transition-colors" @click="toggleRefineGuide()">
                 <div class="px-8 md:px-10 py-5">
@@ -234,7 +224,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
                 </div>
             </div>
         </div>
