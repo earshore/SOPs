@@ -316,7 +316,7 @@
   width: 100%;
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 28px;
+  grid-template-columns: minmax(0, 1fr) 28px 28px;
   align-items: start;
   gap: var(--spacing-1, 0.25rem);
   padding: var(--spacing-1, 0.25rem);
@@ -362,6 +362,7 @@
   outline: none;
 }
 
+.playground-prompt-use,
 .playground-prompt-delete {
   width: 28px;
   height: 28px;
@@ -371,11 +372,26 @@
   border: 0;
   border-radius: var(--rounded-lg, 0.5rem);
   background: transparent;
-  color: var(--color-slate-400, #94a3b8);
   font-size: 11px;
   cursor: pointer;
-  opacity: 0;
   transition: opacity 150ms cubic-bezier(0, 0, 0.2, 1), background 150ms cubic-bezier(0, 0, 0.2, 1), color 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.playground-prompt-use {
+  background: var(--color-cyan-50, #ecfeff);
+  color: var(--color-cyan-700, #0e7490);
+}
+
+.playground-prompt-use:hover,
+.playground-prompt-use:focus-visible {
+  background: var(--color-cyan-100, #cffafe);
+  color: var(--color-cyan-800, #155e75);
+  outline: none;
+}
+
+.playground-prompt-delete {
+  color: var(--color-slate-400, #94a3b8);
+  opacity: 0;
 }
 
 .playground-prompt-item:hover .playground-prompt-delete,
@@ -577,6 +593,7 @@
 .playground-thread-select:focus-visible,
 .playground-thread-delete:focus-visible,
 .playground-prompt-draft:focus-visible,
+.playground-prompt-use:focus-visible,
 .playground-prompt-delete:focus-visible,
 .playground-rail-resizer:focus-visible,
 .playground-reset-tuning:focus-visible {
@@ -852,6 +869,10 @@
 
 .playground-page.is-chatting .playground-stage {
   padding: var(--spacing-6, 1.5rem) 0 var(--spacing-8, 2rem);
+}
+
+.playground-page.is-rail-collapsed .playground-stage {
+  width: min(920px, calc(100% - 64px));
 }
 
 .playground-page.is-chatting .playground-chat-wrap {

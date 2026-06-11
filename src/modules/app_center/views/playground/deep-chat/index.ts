@@ -13,8 +13,12 @@ import { appStore } from '@/stores/useAppStore';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 import type { LLMProviderConfig, PromptHistoryItem } from '@/types/state';
 import {
+  buildStoredThreadMessages,
+  getDeepChatMessageText,
   mergeThreadHistoryWithRequest,
+  normalizeStoredThreadMessages,
   type DeepChatMessage,
+  type DeepChatMessageStatus,
   type DeepChatRole,
 } from './conversationContext';
 
@@ -224,6 +228,18 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     padding-inline-start: 20px !important;
   }
 
+  .message-bubble.ai-message pre,
+  .message-bubble.ai-message code {
+    max-width: 100% !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  .message-bubble.ai-message pre {
+    overflow-x: auto !important;
+  }
+
   .input-button.inside-end {
     background: #0891b2 !important;
     box-shadow: 0 12px 24px -18px rgba(8, 145, 178, 0.82) !important;
@@ -267,6 +283,11 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   .playground-message-time {
     color: #9aa0a6;
     font-variant-numeric: tabular-nums;
+  }
+
+  .playground-message-status {
+    color: #b45309;
+    font-weight: 600;
   }
 
   .playground-message-tool {
@@ -469,6 +490,7 @@ let mountedContainer: HTMLElement | null = null;
 const pendingRequests = new Map<string, PendingPlaygroundRequest>();
 let messageToolbarObserver: MutationObserver | null = null;
 let messageToolbarTimer: number | null = null;
+let messageToolbarFrame: number | null = null;
 let activePromptPreviewId: string | null = null;
 let promptPreviewHideTimer: number | null = null;
 let isPromptPreviewHovered = false;
@@ -891,10 +913,17 @@ function bindThreadControls(
       return;
     }
 
-    const promptButton = target?.closest<HTMLButtonElement>('[data-prompt-draft-id]');
-    const promptId = promptButton?.dataset.promptDraftId;
+    const useButton = target?.closest<HTMLButtonElement>('[data-use-prompt-draft-id]');
+    const usePromptId = useButton?.dataset.usePromptDraftId;
+    if (usePromptId) {
+      createThreadFromPromptDraft(container, usePromptId);
+      return;
+    }
+
+    const promptButton = target?.closest<HTMLButtonElement>('[data-preview-prompt-id]');
+    const promptId = promptButton?.dataset.previewPromptId;
     if (promptId) {
-      createThreadFromPromptDraft(container, promptId);
+      showPromptPreview(container, promptId, promptButton);
     }
   };
   promptList?.addEventListener('click', onPromptListClick);
@@ -975,8 +1004,8 @@ function setupPromptPreview(container: HTMLElement, promptList: HTMLElement | nu
 
   const onPromptPointerOver = (event: PointerEvent): void => {
     const target = event.target as HTMLElement | null;
-    const promptButton = target?.closest<HTMLButtonElement>('[data-prompt-draft-id]');
-    const promptId = promptButton?.dataset.promptDraftId;
+    const promptButton = target?.closest<HTMLButtonElement>('[data-preview-prompt-id]');
+    const promptId = promptButton?.dataset.previewPromptId;
     if (promptId) {
       showPromptPreview(container, promptId, promptButton);
     }
@@ -984,8 +1013,8 @@ function setupPromptPreview(container: HTMLElement, promptList: HTMLElement | nu
 
   const onPromptFocusIn = (event: FocusEvent): void => {
     const target = event.target as HTMLElement | null;
-    const promptButton = target?.closest<HTMLButtonElement>('[data-prompt-draft-id]');
-    const promptId = promptButton?.dataset.promptDraftId;
+    const promptButton = target?.closest<HTMLButtonElement>('[data-preview-prompt-id]');
+    const promptId = promptButton?.dataset.previewPromptId;
     if (promptId) {
       showPromptPreview(container, promptId, promptButton);
     }
@@ -1092,8 +1121,8 @@ function hidePromptPreview(container: HTMLElement): void {
 
 function syncPromptPreviewHighlight(container: HTMLElement): void {
   container.querySelectorAll<HTMLElement>('.playground-prompt-item').forEach((item) => {
-    const promptButton = item.querySelector<HTMLButtonElement>('[data-prompt-draft-id]');
-    item.classList.toggle('is-preview-active', promptButton?.dataset.promptDraftId === activePromptPreviewId);
+    const promptButton = item.querySelector<HTMLButtonElement>('[data-preview-prompt-id]');
+    item.classList.toggle('is-preview-active', promptButton?.dataset.previewPromptId === activePromptPreviewId);
   });
 }
 
@@ -1279,6 +1308,7 @@ async function handlePlaygroundRequest(
     );
   } catch (error) {
     if (requestController?.signal.aborted) {
+      preserveStoppedResponse(pendingThreadId);
       return;
     }
     const message = error instanceof Error ? error.message : '模型调用失败';
@@ -1354,6 +1384,35 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
   return (finalText || streamedText).trim();
 }
 
+function preserveStoppedResponse(threadId: string | null): void {
+  if (!threadId) {
+    return;
+  }
+
+  const pendingRequest = pendingRequests.get(threadId);
+  if (!pendingRequest) {
+    return;
+  }
+
+  const assistantText = pendingRequest.assistantText.trim();
+  if (!assistantText) {
+    showToast('已停止生成', { type: 'warning' });
+    return;
+  }
+
+  saveThreadMessages(
+    getMountedRenderContainer(),
+    pendingRequest.conversationMessages,
+    assistantText,
+    {
+      threadId,
+      assistantCreatedAt: pendingRequest.startedAt,
+      assistantStatus: 'stopped',
+    }
+  );
+  showToast('已停止生成，已保留当前回复', { type: 'warning' });
+}
+
 function getChat(container: HTMLElement): DeepChatElement | null {
   return container.querySelector<DeepChatElement>('#playground-chat');
 }
@@ -1367,8 +1426,8 @@ function setupMessageToolbars(chat: DeepChatElement): void {
       return;
     }
 
-    renderMessageToolbars(chat);
-    messageToolbarObserver = new MutationObserver(() => renderMessageToolbars(chat));
+    scheduleRenderMessageToolbars(chat);
+    messageToolbarObserver = new MutationObserver(() => scheduleRenderMessageToolbars(chat));
     messageToolbarObserver.observe(root, { childList: true, subtree: true });
   };
 
@@ -1383,6 +1442,22 @@ function cleanupMessageToolbars(): void {
     window.clearTimeout(messageToolbarTimer);
     messageToolbarTimer = null;
   }
+
+  if (messageToolbarFrame !== null) {
+    window.cancelAnimationFrame(messageToolbarFrame);
+    messageToolbarFrame = null;
+  }
+}
+
+function scheduleRenderMessageToolbars(chat: DeepChatElement): void {
+  if (messageToolbarFrame !== null) {
+    return;
+  }
+
+  messageToolbarFrame = window.requestAnimationFrame(() => {
+    messageToolbarFrame = null;
+    renderMessageToolbars(chat);
+  });
 }
 
 function renderMessageToolbars(chat: DeepChatElement): void {
@@ -1392,6 +1467,8 @@ function renderMessageToolbars(chat: DeepChatElement): void {
   }
 
   const messages = Array.from(root.querySelectorAll<HTMLElement>('.outer-message-container'));
+  const storedMessages = getThreadDisplayMessages(getActiveThread());
+  const usedStoredMessageIndexes = new Set<number>();
   messages.forEach((message) => {
     if (message.querySelector(`.${MESSAGE_TOOLBAR_CLASS}`)) {
       return;
@@ -1400,12 +1477,52 @@ function renderMessageToolbars(chat: DeepChatElement): void {
     const bubble = message.querySelector<HTMLElement>('.message-bubble');
     const innerContainer = message.querySelector<HTMLElement>('.inner-message-container');
     const role = getMessageRole(message);
-    if (!bubble || !innerContainer || !role || !getMessageContent(bubble)) {
+    const content = bubble ? getMessageContent(bubble) : '';
+    if (!bubble || !innerContainer || !role || !content) {
       return;
     }
 
-    innerContainer.appendChild(createMessageToolbar(chat, bubble, role));
+    innerContainer.appendChild(createMessageToolbar(
+      chat,
+      bubble,
+      role,
+      findStoredMessageForToolbar(storedMessages, usedStoredMessageIndexes, role, content)
+    ));
   });
+}
+
+function findStoredMessageForToolbar(
+  storedMessages: DeepChatMessage[],
+  usedIndexes: Set<number>,
+  role: 'user' | 'ai',
+  content: string
+): DeepChatMessage | undefined {
+  const normalizedContent = normalizeToolbarContent(content);
+  const exactIndex = storedMessages.findIndex((message, index) =>
+    !usedIndexes.has(index) &&
+    getToolbarMessageRole(message) === role &&
+    normalizeToolbarContent(getMessageText(message)) === normalizedContent
+  );
+  const index = exactIndex >= 0
+    ? exactIndex
+    : storedMessages.findIndex((message, candidateIndex) =>
+        !usedIndexes.has(candidateIndex) && getToolbarMessageRole(message) === role
+      );
+
+  if (index < 0) {
+    return undefined;
+  }
+
+  usedIndexes.add(index);
+  return storedMessages[index];
+}
+
+function getToolbarMessageRole(message: DeepChatMessage): 'user' | 'ai' {
+  return message.role === 'user' ? 'user' : 'ai';
+}
+
+function normalizeToolbarContent(content: string): string {
+  return content.trim().replace(/\s+/g, ' ');
 }
 
 function getMessageRole(message: HTMLElement): 'user' | 'ai' | null {
@@ -1423,7 +1540,8 @@ function getMessageRole(message: HTMLElement): 'user' | 'ai' | null {
 function createMessageToolbar(
   chat: DeepChatElement,
   bubble: HTMLElement,
-  role: 'user' | 'ai'
+  role: 'user' | 'ai',
+  storedMessage?: DeepChatMessage
 ): HTMLElement {
   const toolbar = document.createElement('div');
   toolbar.className = MESSAGE_TOOLBAR_CLASS;
@@ -1431,8 +1549,14 @@ function createMessageToolbar(
 
   const time = document.createElement('span');
   time.className = 'playground-message-time';
-  time.textContent = formatToolbarTime(new Date());
+  time.textContent = formatToolbarTime(storedMessage?.createdAt);
   toolbar.appendChild(time);
+  if (storedMessage?.status === 'stopped') {
+    const status = document.createElement('span');
+    status.className = 'playground-message-status';
+    status.textContent = '已停止';
+    toolbar.appendChild(status);
+  }
   toolbar.appendChild(createToolbarButton('复制消息', getCopyIcon(), () => copyMessageContent(bubble)));
 
   if (role === 'user') {
@@ -1534,7 +1658,8 @@ function getMessageContent(bubble: HTMLElement): string {
   return (bubble.innerText || bubble.textContent || '').trim();
 }
 
-function formatToolbarTime(date: Date): string {
+function formatToolbarTime(timestamp: number | undefined): string {
+  const date = Number.isFinite(timestamp) ? new Date(timestamp as number) : new Date();
   return date.toLocaleTimeString('zh-CN', {
     hour: '2-digit',
     minute: '2-digit',
@@ -1786,12 +1911,13 @@ function renderPromptDraftList(container: HTMLElement): void {
     const iconClass = prompt.promptType === 'visual' ? 'fas fa-palette' : 'fas fa-pen-nib';
     const meta = formatPromptDraftMeta(prompt);
     const snippet = truncateText(prompt.prompt.replace(/\s+/g, ' ').trim(), 70);
-    const ariaLabel = `创建新会话并填入 ${typeLabel} Prompt`;
+    const previewAriaLabel = `预览 ${typeLabel} Prompt`;
+    const useAriaLabel = `创建新会话并填入 ${typeLabel} Prompt`;
     const isPreviewActive = prompt.id === activePromptPreviewId;
 
     return `
       <div class="playground-prompt-item playground-prompt-item--${typeLabel.toLowerCase()}${isPreviewActive ? ' is-preview-active' : ''}">
-        <button class="playground-prompt-draft" type="button" data-prompt-draft-id="${escapeHTML(prompt.id)}" aria-label="${escapeHTML(ariaLabel)}" aria-describedby="playground-prompt-preview-popover">
+        <button class="playground-prompt-draft" type="button" data-preview-prompt-id="${escapeHTML(prompt.id)}" aria-label="${escapeHTML(previewAriaLabel)}" aria-describedby="playground-prompt-preview-popover">
           <span class="playground-prompt-icon">
             <i class="${iconClass}" aria-hidden="true"></i>
           </span>
@@ -1802,6 +1928,9 @@ function renderPromptDraftList(container: HTMLElement): void {
             </span>
             <span class="playground-prompt-snippet">${escapeHTML(snippet)}</span>
           </span>
+        </button>
+        <button class="playground-prompt-use" type="button" data-use-prompt-draft-id="${escapeHTML(prompt.id)}" aria-label="${escapeHTML(useAriaLabel)}" title="使用 Prompt">
+          <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
         </button>
         <button class="playground-prompt-delete" type="button" data-delete-prompt-draft-id="${escapeHTML(prompt.id)}" aria-label="删除 ${typeLabel} Prompt" title="删除 Prompt">
           <i class="fas fa-trash" aria-hidden="true"></i>
@@ -1856,6 +1985,8 @@ function formatPromptDraftMeta(prompt: PromptHistoryItem): string {
 
 interface SaveThreadMessagesOptions {
   threadId?: string;
+  assistantCreatedAt?: number;
+  assistantStatus?: DeepChatMessageStatus;
 }
 
 function saveThreadMessages(
@@ -1865,15 +1996,18 @@ function saveThreadMessages(
   options: SaveThreadMessagesOptions = {}
 ): void {
   const activeThread = getThreadForSave(options.threadId);
-  const storedMessages = conversationMessages
-    .filter((message) => message.role !== 'system')
-    .map(toDeepChatMessage);
-
-  if (assistantText) {
-    storedMessages.push({ role: 'ai', text: assistantText });
-  }
-
   const now = Date.now();
+  const storedMessages = buildStoredThreadMessages(
+    activeThread.messages,
+    conversationMessages,
+    assistantText,
+    {
+      now,
+      assistantCreatedAt: options.assistantCreatedAt,
+      assistantStatus: options.assistantStatus,
+    }
+  );
+
   const nextThread: PlaygroundThread = {
     ...activeThread,
     title: getThreadTitle(storedMessages),
@@ -1929,11 +2063,26 @@ async function loadThreadStore(): Promise<PlaygroundThreadStore> {
 }
 
 function persistThreadStore(): void {
-  void LocalDataStore.set(`user:${THREAD_STORAGE_KEY}`, threadStore, 'user-data').then((saved) => {
+  void LocalDataStore.set(`user:${THREAD_STORAGE_KEY}`, getPersistableThreadStore(), 'user-data').then((saved) => {
     if (!saved) {
       showToast('Deep Chat 会话保存失败：空间不足，请导出备份后清理缓存', { type: 'error' });
     }
   });
+}
+
+function getPersistableThreadStore(): PlaygroundThreadStore {
+  const threads = threadStore.threads
+    .filter(isPersistableThread)
+    .slice(0, MAX_THREAD_COUNT);
+  const activeThreadId = threads.some((thread) => thread.id === threadStore.activeThreadId)
+    ? threadStore.activeThreadId
+    : threads[0]?.id || '';
+
+  return { activeThreadId, threads };
+}
+
+function isPersistableThread(thread: PlaygroundThread): boolean {
+  return thread.messages.length > 0 || Boolean(thread.draftText?.trim());
 }
 
 function createDefaultThreadStore(): PlaygroundThreadStore {
@@ -2006,6 +2155,7 @@ function getThreadDisplayMessages(thread: PlaygroundThread): DeepChatMessage[] {
     {
       role: 'ai',
       text: pendingRequest.assistantText.trim() || '正在生成回复...',
+      createdAt: pendingRequest.startedAt,
     },
   ];
 }
@@ -2034,10 +2184,13 @@ function applyPendingRequestsToThreadStore(store: PlaygroundThreadStore): Playgr
   let nextStore = store;
 
   pendingRequests.forEach((pendingRequest) => {
-    const storedMessages = pendingRequest.conversationMessages
-      .filter((message) => message.role !== 'system')
-      .map(toDeepChatMessage);
     const existingThread = nextStore.threads.find((thread) => thread.id === pendingRequest.threadId);
+    const storedMessages = buildStoredThreadMessages(
+      existingThread?.messages || [],
+      pendingRequest.conversationMessages,
+      '',
+      { now: pendingRequest.startedAt }
+    );
     const nextThread: PlaygroundThread = {
       ...(existingThread || {
         id: pendingRequest.threadId,
@@ -2140,12 +2293,12 @@ function sanitizeThread(thread: PlaygroundThread): PlaygroundThread | null {
     return null;
   }
 
-  const messages = Array.isArray(thread.messages)
-    ? thread.messages.filter(isValidDeepChatMessage)
-    : [];
   const draftText = typeof thread.draftText === 'string' ? thread.draftText : '';
   const createdAt = Number.isFinite(thread.createdAt) ? thread.createdAt : Date.now();
   const updatedAt = Number.isFinite(thread.updatedAt) ? thread.updatedAt : createdAt;
+  const messages = Array.isArray(thread.messages)
+    ? normalizeStoredThreadMessages(thread.messages, { fallbackCreatedAt: updatedAt })
+    : [];
 
   return {
     id: thread.id,
@@ -2165,17 +2318,6 @@ function isValidThreadStore(value: PlaygroundThreadStore | null): value is Playg
     typeof value.activeThreadId === 'string' &&
     Array.isArray(value.threads)
   );
-}
-
-function isValidDeepChatMessage(message: DeepChatMessage): boolean {
-  return Boolean(message && typeof getMessageText(message) === 'string' && getMessageText(message));
-}
-
-function toDeepChatMessage(message: ChatMessage): DeepChatMessage {
-  return {
-    role: message.role === 'user' ? 'user' : 'ai',
-    text: message.content,
-  };
 }
 
 function getThreadTitle(messages: DeepChatMessage[]): string {
@@ -2282,8 +2424,7 @@ function withSessionSystemPrompt(messages: ChatMessage[]): ChatMessage[] {
 }
 
 function getMessageText(message: DeepChatMessage): string {
-  const content = message.text || message.content || message.html || '';
-  return typeof content === 'string' ? content.trim() : '';
+  return getDeepChatMessageText(message);
 }
 
 function toChatRole(role: DeepChatRole | undefined): ChatMessage['role'] {

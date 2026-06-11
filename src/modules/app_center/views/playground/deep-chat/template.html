@@ -1,5 +1,5 @@
 <div class="playground-shell">
-  <div class="wb-container wb-container--card wb-container--hidden wb-theme-cyan playground-welcome" aria-labelledby="playground-welcome-title">
+  <div class="wb-container wb-container--card wb-container--hidden wb-theme-cyan playground-welcome" aria-labelledby="playground-welcome-title" aria-hidden="true">
     <div class="wb-card">
       <div class="wb-bg-gradient"></div>
       <div class="wb-content">
@@ -58,7 +58,7 @@
       </div>
 
       <button id="playground-clear-chat" class="playground-new-thread" type="button">
-        <i class="fas fa-plus"></i>
+        <i class="fas fa-plus" aria-hidden="true"></i>
         <span>New Thread</span>
       </button>
 
@@ -88,7 +88,7 @@
         <div class="playground-model-area">
           <button id="playground-toggle-rail" class="playground-top-icon" type="button" title="收起历史会话"
             aria-label="收起历史会话" aria-controls="playground-thread-rail" aria-expanded="true">
-            <i class="far fa-window-maximize"></i>
+            <i class="far fa-window-maximize" aria-hidden="true"></i>
           </button>
           <select id="playground-model-select" class="playground-select" aria-label="模型选择" disabled>
             <option value="">default</option>
@@ -96,12 +96,12 @@
         </div>
 
         <div class="playground-top-actions">
-          <button id="playground-refresh-config" class="playground-top-icon" type="button" title="刷新模型配置">
-            <i class="fas fa-rotate"></i>
+          <button id="playground-refresh-config" class="playground-top-icon" type="button" title="刷新模型配置" aria-label="刷新模型配置">
+            <i class="fas fa-rotate" aria-hidden="true"></i>
           </button>
           <details class="playground-tuning-panel">
-            <summary title="调试参数">
-              <i class="fas fa-sliders"></i>
+            <summary title="调试参数" aria-label="调试参数">
+              <i class="fas fa-sliders" aria-hidden="true"></i>
             </summary>
             <div class="playground-tuning">
               <label class="playground-field playground-field-system" for="playground-system-prompt">
