@@ -74,10 +74,16 @@
                             </div>
                             关键词列表
                         </h2>
-                        <button id="kt-btn-clean-kw"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-300 hover:shadow-sm active:scale-95">
-                            <i class="fas fa-broom text-[10px]"></i> 清理格式
-                        </button>
+                        <div class="flex items-center gap-1.5">
+                            <button id="kt-btn-clean-kw"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-300 hover:shadow-sm active:scale-95">
+                                <i class="fas fa-broom text-[10px]"></i> 清理格式
+                            </button>
+                            <button id="kt-btn-undo-kw-clean" title="撤回上一步" aria-label="撤回上一步" disabled
+                                class="w-8 h-8 inline-flex items-center justify-center bg-white hover:bg-slate-100 text-slate-500 disabled:text-slate-300 disabled:bg-slate-50 rounded-lg text-xs transition-all border border-slate-200 hover:border-slate-300 disabled:cursor-not-allowed active:scale-95">
+                                <i class="fas fa-rotate-left text-[11px]" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 

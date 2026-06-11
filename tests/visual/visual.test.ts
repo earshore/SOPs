@@ -200,15 +200,16 @@ const PAGES: PageConfig[] = [
   },
   {
     name: 'keyword-hunter',
-    path: '/#kw_input',
-    pageType: PageType.LIST,
-    waitForSelector: '#keyword-hunter-panel',
+    path: '/#/app-center/keyword-hunter/input',
+    pageType: PageType.FORM,
+    waitForSelector: '#kt-module-input',
     maskSelectors: [
       '.timestamp',
-      '#keyword-results'
+      '#kt-keyword-highlight-layer',
+      '[class*="animate-"]'
     ],
     beforeScreenshot: async (page: Page) => {
-      await page.waitForSelector('#keyword-hunter-panel');
+      await page.waitForSelector('#kt-module-input', { timeout: 15000 });
       await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
     }
   },

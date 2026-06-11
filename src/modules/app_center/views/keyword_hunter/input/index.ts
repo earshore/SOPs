@@ -31,6 +31,7 @@ let eventListeners: EventListenerRecord[] = []; // 用于清理事件监听器
 let timeouts: number[] = []; // 用于清理定时器
 let debouncedInputHandler: ((...args: unknown[]) => void) | null = null; // Debounced function reference
 let registeredActions: string[] = []; // 用于清理已注册的动作
+let lastKeywordInputSnapshot: string | null = null; // 用于撤回关键词清理操作
 
 // ========================================== 
 // Helper Functions
@@ -69,6 +70,7 @@ function cleanup(): void {
 
     // 清理 debounced handler
     debouncedInputHandler = null;
+    lastKeywordInputSnapshot = null;
 
     // 清理已注册的动作
     if (registeredActions.length > 0) {
@@ -199,6 +201,21 @@ function updateCopyCharCount(): void {
     }
 }
 
+function updateUndoKeywordButtonState(): void {
+    const undoBtn = document.getElementById('kt-btn-undo-kw-clean') as HTMLButtonElement | null;
+    if (undoBtn) {
+        undoBtn.disabled = lastKeywordInputSnapshot === null;
+    }
+}
+
+function restoreKeywordInputValue(inputEl: HTMLTextAreaElement, value: string): void {
+    inputEl.value = value;
+    updateInputStats();
+    highlightDuplicatesInInput();
+    saveInputsToState();
+    updateUndoKeywordButtonState();
+}
+
 // ========================================== 
 // Action Functions
 // ========================================== 
@@ -220,10 +237,11 @@ function cleanKeywordsUI(): void {
     let cleanedText = KeywordService.cleanKeywordsText(originalText);
     cleanedText = KeywordService.deduplicateKeywordsText(cleanedText);
 
-    inputEl.value = cleanedText;
-    updateInputStats();
-    highlightDuplicatesInInput();
-    saveInputsToState();
+    if (cleanedText !== originalText) {
+        lastKeywordInputSnapshot = originalText;
+    }
+
+    restoreKeywordInputValue(inputEl, cleanedText);
 
     const finalKeywords = KeywordService.parseKeywords(cleanedText);
     const removedCount = originalKeywords.length - finalKeywords.length;
@@ -241,11 +259,26 @@ function cleanKeywordsUI(): void {
 function removeDuplicatesUI(): void {
     const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
     if (!inputEl) return;
-    inputEl.value = KeywordService.deduplicateKeywordsText(inputEl.value);
-    updateInputStats();
-    highlightDuplicatesInInput();
-    saveInputsToState();
+    const originalText = inputEl.value;
+    const deduplicatedText = KeywordService.deduplicateKeywordsText(originalText);
+    if (deduplicatedText !== originalText) {
+        lastKeywordInputSnapshot = originalText;
+    }
+    restoreKeywordInputValue(inputEl, deduplicatedText);
     showToast("已去重");
+}
+
+function undoKeywordClean(): void {
+    const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
+    if (!inputEl || lastKeywordInputSnapshot === null) {
+        showToast("没有可撤回的关键词操作", { type: 'info' });
+        return;
+    }
+
+    const snapshot = lastKeywordInputSnapshot;
+    lastKeywordInputSnapshot = null;
+    restoreKeywordInputValue(inputEl, snapshot);
+    showToast("已撤回上一步", { type: 'success' });
 }
 
 /**
@@ -359,11 +392,12 @@ async function startAnalysis(): Promise<void> {
     // 使用 Worker 进行分析（如果可用）
     // 注意：Worker 的初始化在核心模块中完成，这里我们使用主线程回退
     try {
-        const analysisResult = KeywordService.analyzeKeywordMatching(
-            appStore.getState().keywordTracker.processedCopy,
-            appStore.getState().keywordTracker.keywords
-        );
         const tracker = appStore.getState().keywordTracker;
+        const analysisResult = KeywordService.analyzeKeywordMatching(
+            tracker.processedCopy,
+            tracker.keywords,
+            tracker.settings
+        );
         appStore.getState().updateKeywordTracker({
             matchedKeywords: analysisResult.matched,
             unmatchedKeywords: analysisResult.unmatched,
@@ -405,6 +439,10 @@ function setupEventListeners(container: HTMLElement): void {
 
     if (kwInput) {
         addEventListener(kwInput, 'input', debouncedInputHandler);
+        addEventListener(kwInput, 'input', () => {
+            lastKeywordInputSnapshot = null;
+            updateUndoKeywordButtonState();
+        });
         addEventListener(kwInput, 'scroll', () => {
             const highlight = document.getElementById('kt-keyword-highlight-layer');
             if (highlight) highlight.scrollTop = kwInput.scrollTop;
@@ -421,6 +459,9 @@ function setupEventListeners(container: HTMLElement): void {
     // Button event listeners
     const btnClean = document.getElementById('kt-btn-clean-kw');
     if (btnClean) addEventListener(btnClean, 'click', () => cleanKeywordsUI());
+
+    const btnUndoClean = document.getElementById('kt-btn-undo-kw-clean');
+    if (btnUndoClean) addEventListener(btnUndoClean, 'click', () => undoKeywordClean());
 
     const btnCleanCopy = document.getElementById('kt-btn-clean-copy');
     if (btnCleanCopy) addEventListener(btnCleanCopy, 'click', () => cleanCopyFormat());
@@ -469,6 +510,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         const actionNames = registerActionsWithLegacy({
             kt_cleanKeywords: () => cleanKeywordsUI(),
             kt_removeDuplicates: () => removeDuplicatesUI(),
+            kt_undoKeywordClean: () => undoKeywordClean(),
             kt_cleanCopyFormat: () => cleanCopyFormat(),
             kt_pasteFromClipboard: () => pasteFromClipboard(),
             kt_clearCopyInput: () => clearCopyInput(),
@@ -483,6 +525,7 @@ export async function mount(container: HTMLElement): Promise<void> {
 
         // 4. 从 state 恢复状态
         restoreInputsFromState();
+        updateUndoKeywordButtonState();
     } catch (error) {
         console.error('[Input] ❌ 子模块挂载失败:', error);
         throw error;

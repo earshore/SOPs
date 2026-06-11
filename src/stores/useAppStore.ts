@@ -92,6 +92,7 @@ type PersistedAppState = Partial<AppStore> & {
   scraper?: Partial<ScraperState>;
   ui?: Partial<UIState>;
   promptlab?: Partial<PromptLabState>;
+  keywordTracker?: Partial<KeywordTrackerState>;
 };
 
 function isPersistedAppState(state: unknown): state is PersistedAppState {
@@ -119,6 +120,18 @@ function mergePersistedAppState(persistedState: unknown, currentState: AppStore)
     promptlab: {
       ...currentState.promptlab,
       ...(persistedState.promptlab || {})
+    },
+    keywordTracker: {
+      ...currentState.keywordTracker,
+      ...(persistedState.keywordTracker || {}),
+      settings: {
+        ...currentState.keywordTracker.settings,
+        ...(persistedState.keywordTracker?.settings || {})
+      },
+      keywordLocationIndex: {},
+      isWindowMinimized: false,
+      trackingData: null,
+      isTracking: false
     }
   };
 }
@@ -430,6 +443,23 @@ export const appStore = createStore<AppStore>()(
             selectedModel: state.promptlab.selectedModel,
             temperature: state.promptlab.temperature,
             maxTokens: state.promptlab.maxTokens
+          },
+          keywordTracker: {
+            keywords: state.keywordTracker.keywords,
+            processedCopy: state.keywordTracker.processedCopy,
+            formattedCopy: state.keywordTracker.formattedCopy,
+            matchedKeywords: state.keywordTracker.matchedKeywords,
+            unmatchedKeywords: state.keywordTracker.unmatchedKeywords,
+            wordFrequency: state.keywordTracker.wordFrequency,
+            paragraphs: state.keywordTracker.paragraphs,
+            translationMode: state.keywordTracker.translationMode,
+            keywordLocationIndex: {},
+            settings: state.keywordTracker.settings,
+            isWindowMinimized: false,
+            keywordsInputText: state.keywordTracker.keywordsInputText,
+            copyInputText: state.keywordTracker.copyInputText,
+            llmAnalysisResult: state.keywordTracker.llmAnalysisResult,
+            showTranslation: state.keywordTracker.showTranslation
           }
         })
       }

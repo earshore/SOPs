@@ -18,6 +18,7 @@ import type {
   KeywordMatchResult,
   AnalysisResult,
   WordFrequency,
+  KeywordTrackerSettings,
 } from "@/types/modules-business";
 import type { ParagraphData } from "@/types/state";
 
@@ -41,11 +42,14 @@ export function parseKeywords(text: string): string[] {
  */
 export function cleanKeywordsText(text: string): string {
   if (!text) return "";
-  return text
-    .replace(/[^\w\s\-\u00C0-\u024F\u1E00-\u1EFF]/g, " ") // 允许欧洲字符
-    .split("\n")
-    .map((l) => l.trim().replace(/\s+/g, " "))
-    .filter((l) => l)
+  return parseKeywords(text)
+    .map((keyword) =>
+      keyword
+        .replace(/[^\w\s\-\u00C0-\u024F\u1E00-\u1EFF]/g, " ")
+        .trim()
+        .replace(/\s+/g, " "),
+    )
+    .filter((keyword) => keyword)
     .join("\n");
 }
 
@@ -80,6 +84,164 @@ export function findDuplicateKeywords(text: string): Set<string> {
 // 2. 核心分析逻辑 (Core Logic)
 // ==========================================
 
+const DEFAULT_MATCH_SETTINGS: KeywordTrackerSettings = {
+  matchPlural: true,
+  matchStem: true,
+  matchCase: false,
+  matchPartial: false,
+};
+
+interface KeywordToken {
+  text: string;
+  start: number;
+  end: number;
+}
+
+export interface KeywordMatchRange {
+  start: number;
+  end: number;
+}
+
+function getMatchSettings(
+  settings: Partial<KeywordTrackerSettings> = {},
+): KeywordTrackerSettings {
+  return {
+    ...DEFAULT_MATCH_SETTINGS,
+    ...settings,
+  };
+}
+
+function tokenizeKeywordText(text: string): string[] {
+  return text.match(/[\p{L}\p{N}\p{M}]+/gu) || [];
+}
+
+function tokenizeKeywordTextWithPositions(text: string): KeywordToken[] {
+  return Array.from(text.matchAll(/[\p{L}\p{N}\p{M}]+/gu), (match) => {
+    const token = match[0];
+    const start = match.index ?? 0;
+    return {
+      text: token,
+      start,
+      end: start + token.length,
+    };
+  });
+}
+
+function normalizeCase(token: string, settings: KeywordTrackerSettings): string {
+  return settings.matchCase ? token : token.toLowerCase();
+}
+
+function normalizePlural(token: string): string {
+  if (token.length <= 3) return token;
+  if (token.endsWith("ies")) return `${token.slice(0, -3)}y`;
+  if (
+    token.endsWith("ches") ||
+    token.endsWith("shes") ||
+    token.endsWith("xes") ||
+    token.endsWith("zes") ||
+    token.endsWith("ses")
+  ) {
+    return token.slice(0, -2);
+  }
+  if (token.endsWith("s") && !token.endsWith("ss")) {
+    return token.slice(0, -1);
+  }
+  return token;
+}
+
+function removeDoubledFinalConsonant(token: string): string {
+  if (token.length < 2) return token;
+  const last = token[token.length - 1];
+  const previous = token[token.length - 2];
+  if (last && previous && last === previous && !/[aeiou]/.test(last)) {
+    return token.slice(0, -1);
+  }
+  return token;
+}
+
+function normalizeStem(token: string): string {
+  if (token.length > 5 && token.endsWith("ing")) {
+    return removeDoubledFinalConsonant(token.slice(0, -3));
+  }
+  if (token.length > 4 && token.endsWith("ed")) {
+    return removeDoubledFinalConsonant(token.slice(0, -2));
+  }
+  if (token.length > 4 && token.endsWith("er")) {
+    return token.slice(0, -2);
+  }
+  return token;
+}
+
+function normalizeMatchToken(
+  token: string,
+  settings: KeywordTrackerSettings,
+): string {
+  let normalized = normalizeCase(token, settings);
+  if (settings.matchPlural) {
+    normalized = normalizePlural(normalized);
+  }
+  if (settings.matchStem) {
+    normalized = normalizeStem(normalized);
+  }
+  return normalized;
+}
+
+function tokensMatch(
+  keywordToken: string,
+  copyToken: string,
+  settings: KeywordTrackerSettings,
+): boolean {
+  const normalizedKeyword = normalizeMatchToken(keywordToken, settings);
+  const normalizedCopy = normalizeMatchToken(copyToken, settings);
+
+  if (settings.matchPartial) {
+    return normalizedCopy.includes(normalizedKeyword);
+  }
+
+  return normalizedCopy === normalizedKeyword;
+}
+
+function countKeywordMatches(
+  copyText: string,
+  keyword: string,
+  settings: KeywordTrackerSettings,
+): number {
+  return findKeywordMatchRanges(copyText, keyword, settings).length;
+}
+
+export function findKeywordMatchRanges(
+  copyText: string,
+  keyword: string,
+  settings: Partial<KeywordTrackerSettings> = {},
+): KeywordMatchRange[] {
+  const matchSettings = getMatchSettings(settings);
+  const copyTokens = tokenizeKeywordTextWithPositions(copyText);
+  const keywordTokens = tokenizeKeywordText(keyword);
+
+  if (copyTokens.length === 0 || keywordTokens.length === 0) {
+    return [];
+  }
+
+  const ranges: KeywordMatchRange[] = [];
+  for (let i = 0; i <= copyTokens.length - keywordTokens.length; i++) {
+    const isMatch = keywordTokens.every((keywordToken, offset) => {
+      const copyToken = copyTokens[i + offset];
+      return copyToken
+        ? tokensMatch(keywordToken, copyToken.text, matchSettings)
+        : false;
+    });
+    if (isMatch) {
+      const firstToken = copyTokens[i];
+      const lastToken = copyTokens[i + keywordTokens.length - 1];
+      if (firstToken && lastToken) {
+        ranges.push({ start: firstToken.start, end: lastToken.end });
+      }
+    }
+  }
+
+  return ranges;
+}
+
 /**
  * 分析关键词匹配情况
  * @param {string} copyText - 文案内容
@@ -89,20 +251,14 @@ export function findDuplicateKeywords(text: string): Set<string> {
 export function analyzeKeywordMatching(
   copyText: string,
   keywordList: string[],
+  settings: Partial<KeywordTrackerSettings> = {},
 ): AnalysisResult {
-  const textLower = copyText.toLowerCase();
+  const matchSettings = getMatchSettings(settings);
   const matched: KeywordMatchResult[] = [];
   const unmatched: string[] = [];
 
   keywordList.forEach((kw) => {
-    const kwLower = kw.toLowerCase();
-    let count = 0;
-    let pos = textLower.indexOf(kwLower);
-
-    while (pos !== -1) {
-      count++;
-      pos = textLower.indexOf(kwLower, pos + 1);
-    }
+    const count = countKeywordMatches(copyText, kw, matchSettings);
 
     if (count > 0) {
       matched.push({ keyword: kw, count: count });

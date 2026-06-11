@@ -137,13 +137,6 @@ function escapeAttr(text: string): string {
     .replace(/>/g, "&gt;");
 }
 
-/**
- * 正则表达式转义
- */
-function escapeRegex(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 function getKeywordSet(sets: Set<string>[], index: number): Set<string> {
   return sets[index] ?? new Set<string>();
 }
@@ -160,8 +153,8 @@ function getDefaultProcessKeywordTrackerState(): KeywordTrackerStoreState {
     translationMode: false,
     keywordLocationIndex: {},
     settings: {
-      matchPlural: false,
-      matchStem: false,
+      matchPlural: true,
+      matchStem: true,
       matchCase: false,
       matchPartial: false,
     },
@@ -646,19 +639,21 @@ function highlightText(text: string): string {
     charKeywords[i] = new Set();
   }
 
-  // 对每个关键词，找出它在文本中的所有匹配位置
-  appStore.getState().keywordTracker.matchedKeywords.forEach((item) => {
+  // 对每个关键词，复用 service 中的匹配规则找出文本位置
+  const tracker = appStore.getState().keywordTracker;
+  tracker.matchedKeywords.forEach((item) => {
     const kw = item.keyword;
     const kwLower = kw.toLowerCase();
-    const regex = new RegExp(escapeRegex(kw), "gi");
-    let match;
-    while ((match = regex.exec(text)) !== null) {
-      const start = match.index;
-      const end = start + match[0].length;
+    const ranges = KeywordService.findKeywordMatchRanges(
+      text,
+      kw,
+      tracker.settings,
+    );
+    ranges.forEach(({ start, end }) => {
       for (let i = start; i < end; i++) {
         charKeywords[i]?.add(kwLower);
       }
-    }
+    });
   });
 
   // 将文本按照"关键词集合相同的连续字符"分段
@@ -928,9 +923,10 @@ async function translateCopyImmersive(): Promise<void> {
       appStore.getState().keywordTracker.processedCopy,
     );
 
-    appStore.getState().keywordTracker.paragraphs = pairs;
-
-    appStore.getState().setTranslationMode(true);
+    appStore.getState().updateKeywordTracker({
+      paragraphs: pairs,
+      translationMode: true,
+    });
 
     renderProcessModule();
 
@@ -1051,8 +1047,14 @@ function updateKeywordLocationIndex(
   idx: number,
   groupCount: number,
 ): void {
-  appStore.getState().keywordTracker.keywordLocationIndex[targetKw] =
-    (idx + 1) % groupCount;
+  const keywordLocationIndex =
+    appStore.getState().keywordTracker.keywordLocationIndex || {};
+  appStore.getState().updateKeywordTracker({
+    keywordLocationIndex: {
+      ...keywordLocationIndex,
+      [targetKw]: (idx + 1) % groupCount,
+    },
+  });
 }
 
 /**
