@@ -318,7 +318,7 @@
                     <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">本地数据管理</h3>
                 </div>
 
-                <div class="p-4 bg-gradient-to-br from-blue-50 to-slate-50/60 border border-blue-100/70 rounded-2xl shadow-sm space-y-3">
+                <div class="p-4 bg-gradient-to-br from-blue-50 to-slate-50/60 border border-blue-100/70 rounded-2xl shadow-sm space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
                             <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium">localStorage</span>
@@ -336,27 +336,94 @@
                         </div>
                     </div>
 
-                    <p class="text-[11px] text-slate-500 leading-[1.7]">
-                        配置和密钥保存在 localStorage；采集历史、聊天记录和大体积缓存保存在 IndexedDB。清理缓存不会删除配置、密钥、历史或聊天。
-                    </p>
-
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="flex flex-wrap gap-2">
                         <button @click="exportLocalData()" :disabled="localData.isBusy"
-                            class="py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
+                            class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
                             <i class="fas fa-file-export text-blue-500"></i> 导出全部
                         </button>
                         <button @click="importLocalData()" :disabled="localData.isBusy"
-                            class="py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
+                            class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
                             <i class="fas fa-file-import text-emerald-500"></i> 导入恢复
                         </button>
-                        <button @click="clearLocalCache()" :disabled="localData.isBusy"
-                            class="py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
-                            <i class="fas fa-broom text-amber-500"></i> 清理缓存
-                        </button>
                         <button @click="clearAllLocalData()" :disabled="localData.isBusy"
-                            class="py-2.5 bg-red-50 border border-red-100 hover:bg-red-100 text-red-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
+                            class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-red-50 border border-red-100 hover:bg-red-100 text-red-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
                             <i class="fas fa-trash-alt"></i> 清空全部
                         </button>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        <button @click="toggleLocalDataCleanupItems()"
+                            :aria-expanded="localData.cleanupItemsExpanded"
+                            class="flex min-h-[44px] w-full items-center gap-3 rounded-xl border border-white/80 bg-white/85 p-3 text-left shadow-sm transition-all duration-200 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+                                <i class="fas fa-list-check text-[11px]"></i>
+                            </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block text-xs font-bold text-slate-700">清理项</span>
+                                <span class="block truncate text-[10px] text-slate-400"
+                                    x-text="localDataCleanupSummaryText"></span>
+                            </span>
+                            <span class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600">
+                                <span x-text="localDataCleanupToggleText"></span>
+                                <i class="fas text-[10px]" :class="localDataCleanupToggleIconClass"></i>
+                            </span>
+                        </button>
+
+                        <div x-show="localData.cleanupItemsExpanded"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 -translate-y-1"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 -translate-y-1"
+                            class="space-y-2.5">
+                            <template x-for="bucket in localDataBucketItems" :key="bucket.id">
+                                <div class="rounded-xl border border-white/80 bg-white/85 p-3 shadow-sm">
+                                    <div class="flex items-start gap-3">
+                                        <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1"
+                                            :class="bucket.iconClass">
+                                            <i class="fas text-[11px]" :class="bucket.icon"></i>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <h4 class="truncate text-xs font-bold text-slate-700"
+                                                            x-text="bucket.label"></h4>
+                                                        <span class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500"
+                                                            x-text="bucket.percentText"></span>
+                                                    </div>
+                                                    <p class="mt-0.5 text-[10px] leading-relaxed text-slate-400"
+                                                        x-text="bucket.description"></p>
+                                                </div>
+                                                <div class="shrink-0 text-right">
+                                                    <span class="block text-xs font-bold text-slate-700"
+                                                        x-text="bucket.usedText"></span>
+                                                    <span class="block text-[10px] text-slate-400"
+                                                        x-text="bucket.keysText"></span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-2.5 flex items-center gap-2">
+                                                <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                                                    <div class="h-full rounded-full transition-all duration-300"
+                                                        :class="bucket.barClass"
+                                                        :style="{ width: bucket.percentWidth }"></div>
+                                                </div>
+                                                <button @click="clearLocalDataBucket(bucket.id)"
+                                                    :disabled="localData.isBusy || bucket.isEmpty"
+                                                    class="min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-45"
+                                                    :class="bucket.buttonClass">
+                                                    <span x-show="!bucket.isClearing" x-text="bucket.actionLabel"></span>
+                                                    <span x-show="bucket.isClearing" class="inline-flex items-center gap-1">
+                                                        <i class="fas fa-circle-notch fa-spin"></i> 清理中
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </section>

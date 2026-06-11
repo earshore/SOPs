@@ -493,6 +493,45 @@ export interface GridStackWidget {
   content: string;
 }
 
+export type GeneratedPromptType = 'listing' | 'visual';
+
+export interface GeneratedPromptProfileSnapshot {
+  targetMarket?: string;
+  keywordsTier1?: string;
+  keywordsTier2?: string;
+  audience?: string;
+  usps?: string;
+  specs?: string;
+  socialHook?: string;
+  negative?: string;
+  tone?: string;
+  customStrategy?: string;
+  useCosmo?: boolean;
+  useRufus?: boolean;
+  useEmoji?: boolean;
+  selectedReportSections?: string[];
+  selectedReportItems?: Record<string, unknown>;
+  charLimit?: number;
+}
+
+export interface GeneratedPromptRecord {
+  id: string;
+  type: GeneratedPromptType;
+  prompt: string;
+  generatedAt: string;
+  historyId?: string | number | null;
+  asins: string[];
+  marketplace?: string;
+  profile: GeneratedPromptProfileSnapshot;
+}
+
+export interface HistoryPromptResults {
+  listing?: GeneratedPromptRecord;
+  visual?: GeneratedPromptRecord;
+  history: GeneratedPromptRecord[];
+  updatedAt: string;
+}
+
 /**
  * 历史记录项
  */
@@ -512,6 +551,7 @@ export interface HistoryItem {
     analyzedAt?: string;            // 分析时间戳
     analysisReport?: AnalysisReport;  // 分析报告数据
   };
+  promptResults?: HistoryPromptResults;
 }
 
 /**
@@ -917,6 +957,10 @@ export type {
   GridStackNode,
   GridStackInstance,
   GridStackWidget,
+  GeneratedPromptType,
+  GeneratedPromptProfileSnapshot,
+  GeneratedPromptRecord,
+  HistoryPromptResults,
   HistoryItem,
   KeywordMatchResult,
   AnalysisResult,

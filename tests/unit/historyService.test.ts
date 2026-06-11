@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { HistoryItem, ScrapedData } from '@/types/modules-business';
+import type { GeneratedPromptRecord, HistoryItem, ScrapedData } from '@/types/modules-business';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 
 const mocks = vi.hoisted(() => {
@@ -99,6 +99,23 @@ function createHistoryItem(id: HistoryItem['id'], timestamp: string, asins: stri
   };
 }
 
+function createPromptRecord(type: GeneratedPromptRecord['type'], prompt: string): GeneratedPromptRecord {
+  return {
+    id: `${type}-prompt`,
+    type,
+    prompt,
+    generatedAt: '2026-01-01T00:10:00.000Z',
+    historyId: null,
+    asins: ['B000000001'],
+    marketplace: 'US',
+    profile: {
+      targetMarket: 'English',
+      keywordsTier1: 'keyword',
+      keywordsTier2: 'longtail'
+    }
+  };
+}
+
 describe('HistoryService snapshot storage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -178,5 +195,63 @@ describe('HistoryService snapshot storage', () => {
     expect(deleted).toBe(false);
     expect(mocks.setScrapeHistory).not.toHaveBeenCalled();
     expect(HistoryService.getAll()).toHaveLength(1);
+  });
+
+  it('persists generated prompt results on a snapshot', async () => {
+    mocks.history = [
+      createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
+    ];
+
+    const savedListing = await HistoryService.updatePromptResultAsync(
+      'hist-001',
+      createPromptRecord('listing', 'Listing Prompt')
+    );
+    const savedVisual = await HistoryService.updatePromptResultAsync(
+      'hist-001',
+      createPromptRecord('visual', 'Visual Prompt')
+    );
+
+    expect(savedListing).toBe(true);
+    expect(savedVisual).toBe(true);
+    expect(mocks.history[0]?.promptResults?.listing?.prompt).toBe('Listing Prompt');
+    expect(mocks.history[0]?.promptResults?.visual?.prompt).toBe('Visual Prompt');
+    expect(mocks.history[0]?.promptResults?.history).toHaveLength(2);
+    expect(mocks.history[0]?.promptResults?.history[0]?.historyId).toBe('hist-001');
+  });
+
+  it('deletes generated prompt results from a snapshot', async () => {
+    mocks.history = [
+      createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
+    ];
+
+    const oldListing = {
+      ...createPromptRecord('listing', 'Old Listing Prompt'),
+      id: 'listing-old',
+      generatedAt: '2026-01-01T00:05:00.000Z'
+    };
+    const newListing = {
+      ...createPromptRecord('listing', 'New Listing Prompt'),
+      id: 'listing-new',
+      generatedAt: '2026-01-01T00:10:00.000Z'
+    };
+    const visual = {
+      ...createPromptRecord('visual', 'Visual Prompt'),
+      id: 'visual-1',
+      generatedAt: '2026-01-01T00:11:00.000Z'
+    };
+
+    await HistoryService.updatePromptResultAsync('hist-001', oldListing);
+    await HistoryService.updatePromptResultAsync('hist-001', newListing);
+    await HistoryService.updatePromptResultAsync('hist-001', visual);
+
+    const deleted = await HistoryService.deletePromptResultAsync('listing-new');
+
+    expect(deleted).toBe(true);
+    expect(mocks.history[0]?.promptResults?.listing?.id).toBe('listing-old');
+    expect(mocks.history[0]?.promptResults?.visual?.id).toBe('visual-1');
+    expect(mocks.history[0]?.promptResults?.history.map((item) => item.id)).toEqual([
+      'visual-1',
+      'listing-old'
+    ]);
   });
 });

@@ -4,7 +4,12 @@
 // 为应用状态提供完整的类型约束
 // ================================================================
 
-import type { AnalysisReport, ScrapedData } from './modules-business';
+import type {
+  AnalysisReport,
+  GeneratedPromptProfileSnapshot,
+  GeneratedPromptType,
+  ScrapedData
+} from './modules-business';
 
 // ==================== UI状态 ====================
 
@@ -146,6 +151,36 @@ export interface PromptHistoryItem {
    * 消耗的 Token 数量
    */
   tokens?: number;
+
+  /**
+   * Prompt 类型
+   */
+  promptType?: GeneratedPromptType;
+
+  /**
+   * 生成时间戳（ISO 8601 格式）
+   */
+  generatedAt?: string;
+
+  /**
+   * 关联的采集历史记录 ID
+   */
+  historyId?: string | number | null;
+
+  /**
+   * 关联的 ASIN 列表
+   */
+  asins?: string[];
+
+  /**
+   * 关联站点/市场
+   */
+  marketplace?: string;
+
+  /**
+   * 生成时的输入快照
+   */
+  profile?: GeneratedPromptProfileSnapshot;
 }
 
 /**

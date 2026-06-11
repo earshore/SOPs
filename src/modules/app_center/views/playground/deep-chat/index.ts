@@ -9,7 +9,9 @@ import { showToast } from '@/common/ui/notifications';
 import { callLLM, type ChatMessage } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
 import { LocalDataStore } from '@/services/localDataStore';
-import type { LLMProviderConfig } from '@/types/state';
+import { appStore } from '@/stores/useAppStore';
+import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
+import type { LLMProviderConfig, PromptHistoryItem } from '@/types/state';
 import {
   mergeThreadHistoryWithRequest,
   type DeepChatMessage,
@@ -81,9 +83,18 @@ interface PlaygroundRequestMessages {
 
 const THREAD_STORAGE_KEY = 'playground_deep_chat_threads_v1';
 const MAX_THREAD_COUNT = 30;
+const MAX_PROMPT_DRAFT_COUNT = 12;
+const DEFAULT_PROMPT_PANEL_HEIGHT = 240;
+const MIN_PROMPT_PANEL_HEIGHT = 150;
+const MIN_THREAD_PANEL_HEIGHT = 120;
+const EMPTY_CHAT_WRAP_HEIGHT = 168;
 const MESSAGE_TOOLBAR_CLASS = 'playground-message-toolbar';
 const THREAD_RAIL_COLLAPSED_CLASS = 'is-rail-collapsed';
 const DEEP_CHAT_AUXILIARY_STYLE = `
+  :host {
+    overflow: visible !important;
+  }
+
   #messages {
     padding: 22px 24px 18px;
   }
@@ -286,7 +297,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     min-width: 0 !important;
     max-width: 100% !important;
     min-height: 58px !important;
-    max-height: 150px !important;
+    max-height: min(42vh, 420px) !important;
     margin: 0 auto !important;
     border: 1px solid #dedede !important;
     border-radius: 29px !important;
@@ -401,6 +412,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     #text-input-container {
       width: 100% !important;
       min-height: 56px !important;
+      max-height: min(46vh, 340px) !important;
       border-radius: 28px !important;
     }
 
@@ -427,6 +439,12 @@ let sessionTemperature = 0.3;
 let threadStore: PlaygroundThreadStore = createDefaultThreadStore();
 let messageToolbarObserver: MutationObserver | null = null;
 let messageToolbarTimer: number | null = null;
+let activePromptPreviewId: string | null = null;
+let promptPreviewHideTimer: number | null = null;
+let isPromptPreviewHovered = false;
+let draftInputResizeObserver: ResizeObserver | null = null;
+let draftInputResizeRetryTimer: number | null = null;
+let cleanupDraftInputHeightListener: (() => void) | null = null;
 
 const mountInternal = async (container: HTMLElement): Promise<void> => {
   const html = await loadTemplate('src/modules/app_center/views/playground/deep-chat/template.html', { disableFadeIn: true });
@@ -436,6 +454,7 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
   renderer.renderTemplate(container, html);
   threadStore = await loadThreadStore();
   renderThreadList(container);
+  renderPromptDraftList(container);
 
   await customElements.whenDefined('deep-chat');
   initDeepChat(container);
@@ -453,6 +472,10 @@ export function unmount(): void {
   sessionSystemPrompt = '';
   sessionTemperature = 0.3;
   threadStore = createDefaultThreadStore();
+  activePromptPreviewId = null;
+  clearPromptPreviewHideTimer();
+  isPromptPreviewHovered = false;
+  clearDraftInputHeightSync();
   cleanupMessageToolbars();
 }
 
@@ -510,6 +533,7 @@ function initDeepChat(container: HTMLElement): void {
   chat.onRender?.();
   setupMessageToolbars(chat);
   setConversationActive(container, activeThread.messages.length > 0);
+  setupDraftInputHeightSync(container, chat);
 }
 
 function configureDeepChatBase(chat: DeepChatElement, activeThread: PlaygroundThread): void {
@@ -528,6 +552,7 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
   chat.chatStyle = {
     width: '100%',
     height: '100%',
+    overflow: 'visible',
     border: '0',
     borderRadius: '0',
     backgroundColor: 'transparent',
@@ -553,7 +578,7 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
         backgroundColor: '#ffffff',
         boxShadow: '0 18px 38px -30px rgba(8, 145, 178, 0.52), 0 2px 8px rgba(15, 23, 42, 0.05)',
         minHeight: '58px',
-        maxHeight: '150px',
+        maxHeight: 'min(42vh, 420px)',
       },
       text: {
         color: '#0f172a',
@@ -622,6 +647,65 @@ function configureDeepChatConnection(chat: DeepChatElement, container: HTMLEleme
   };
 }
 
+function setupDraftInputHeightSync(container: HTMLElement, chat: DeepChatElement, attempts = 8): void {
+  clearDraftInputHeightSync();
+  const root = chat.shadowRoot;
+  const inputContainer = root?.querySelector<HTMLElement>('#text-input-container');
+
+  if (!root || !inputContainer) {
+    if (attempts > 0) {
+      draftInputResizeRetryTimer = window.setTimeout(
+        () => setupDraftInputHeightSync(container, chat, attempts - 1),
+        50
+      );
+    }
+    return;
+  }
+
+  syncDraftInputHeight(container);
+
+  if (typeof ResizeObserver === 'function') {
+    draftInputResizeObserver = new ResizeObserver(() => {
+      syncDraftInputHeight(container);
+    });
+    draftInputResizeObserver.observe(inputContainer);
+  }
+
+  const onDraftInput = (): void => {
+    window.requestAnimationFrame(() => syncDraftInputHeight(container));
+  };
+  root.addEventListener('input', onDraftInput);
+  cleanupDraftInputHeightListener = () => root.removeEventListener('input', onDraftInput);
+}
+
+function syncDraftInputHeight(container: HTMLElement): void {
+  const wrap = container.querySelector<HTMLElement>('.playground-chat-wrap');
+  if (!wrap) {
+    return;
+  }
+
+  const page = container.querySelector<HTMLElement>('.playground-page');
+  if (page?.classList.contains('is-chatting')) {
+    wrap.style.removeProperty('height');
+    return;
+  }
+
+  const inputContainer = getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#text-input-container');
+  const inputHeight = Math.ceil(inputContainer?.getBoundingClientRect().height || EMPTY_CHAT_WRAP_HEIGHT);
+  wrap.style.height = `${Math.max(EMPTY_CHAT_WRAP_HEIGHT, inputHeight)}px`;
+}
+
+function clearDraftInputHeightSync(): void {
+  draftInputResizeObserver?.disconnect();
+  draftInputResizeObserver = null;
+  cleanupDraftInputHeightListener?.();
+  cleanupDraftInputHeightListener = null;
+  if (draftInputResizeRetryTimer !== null) {
+    window.clearTimeout(draftInputResizeRetryTimer);
+    draftInputResizeRetryTimer = null;
+  }
+}
+
 function bindControls(container: HTMLElement): void {
   const modelSelect = container.querySelector<HTMLSelectElement>('#playground-model-select');
   const refreshButton = container.querySelector<HTMLButtonElement>('#playground-refresh-config');
@@ -633,6 +717,9 @@ function bindControls(container: HTMLElement): void {
   const resetTuningButton = container.querySelector<HTMLButtonElement>('#playground-reset-tuning');
   const tuningPanel = container.querySelector<HTMLDetailsElement>('.playground-tuning-panel');
   const threadList = container.querySelector<HTMLElement>('#playground-thread-list');
+  const promptList = container.querySelector<HTMLElement>('#playground-prompt-list');
+
+  setupRailSectionResizer(container);
 
   const onModelChange = (): void => {
     selectedModel = modelSelect?.value || selectedModel;
@@ -678,6 +765,30 @@ function bindControls(container: HTMLElement): void {
   };
   threadList?.addEventListener('click', onThreadListClick);
   cleanupCallbacks.push(() => threadList?.removeEventListener('click', onThreadListClick));
+
+  const onPromptListClick = (event: MouseEvent): void => {
+    const target = event.target as HTMLElement | null;
+    const deleteButton = target?.closest<HTMLButtonElement>('[data-delete-prompt-draft-id]');
+    const deletePromptId = deleteButton?.dataset.deletePromptDraftId;
+    if (deletePromptId) {
+      deletePromptDraft(container, deletePromptId);
+      return;
+    }
+
+    const promptButton = target?.closest<HTMLButtonElement>('[data-prompt-draft-id]');
+    const promptId = promptButton?.dataset.promptDraftId;
+    if (promptId) {
+      createThreadFromPromptDraft(container, promptId);
+    }
+  };
+  promptList?.addEventListener('click', onPromptListClick);
+  cleanupCallbacks.push(() => promptList?.removeEventListener('click', onPromptListClick));
+  setupPromptPreview(container, promptList);
+
+  const unsubscribePromptDrafts = appStore.subscribe(() => {
+    renderPromptDraftList(container);
+  });
+  cleanupCallbacks.push(unsubscribePromptDrafts);
 
   const onSystemPromptInput = (): void => {
     sessionSystemPrompt = systemPromptInput?.value.trim() || '';
@@ -728,6 +839,232 @@ function bindControls(container: HTMLElement): void {
   };
   document.addEventListener('pointerdown', onDocumentPointerDown);
   cleanupCallbacks.push(() => document.removeEventListener('pointerdown', onDocumentPointerDown));
+}
+
+function setupPromptPreview(container: HTMLElement, promptList: HTMLElement | null): void {
+  const preview = container.querySelector<HTMLElement>('#playground-prompt-preview-popover');
+  if (!promptList || !preview) {
+    return;
+  }
+
+  const onPromptPointerOver = (event: PointerEvent): void => {
+    const target = event.target as HTMLElement | null;
+    const promptButton = target?.closest<HTMLButtonElement>('[data-prompt-draft-id]');
+    const promptId = promptButton?.dataset.promptDraftId;
+    if (promptId) {
+      showPromptPreview(container, promptId, promptButton);
+    }
+  };
+
+  const onPromptFocusIn = (event: FocusEvent): void => {
+    const target = event.target as HTMLElement | null;
+    const promptButton = target?.closest<HTMLButtonElement>('[data-prompt-draft-id]');
+    const promptId = promptButton?.dataset.promptDraftId;
+    if (promptId) {
+      showPromptPreview(container, promptId, promptButton);
+    }
+  };
+
+  const onPromptPointerLeave = (): void => {
+    schedulePromptPreviewHide(container);
+  };
+
+  const onPreviewPointerEnter = (): void => {
+    isPromptPreviewHovered = true;
+    clearPromptPreviewHideTimer();
+  };
+
+  const onPreviewPointerLeave = (): void => {
+    isPromptPreviewHovered = false;
+    schedulePromptPreviewHide(container);
+  };
+
+  promptList.addEventListener('pointerover', onPromptPointerOver);
+  promptList.addEventListener('focusin', onPromptFocusIn);
+  promptList.addEventListener('pointerleave', onPromptPointerLeave);
+  preview.addEventListener('pointerenter', onPreviewPointerEnter);
+  preview.addEventListener('pointerleave', onPreviewPointerLeave);
+  cleanupCallbacks.push(() => {
+    promptList.removeEventListener('pointerover', onPromptPointerOver);
+    promptList.removeEventListener('focusin', onPromptFocusIn);
+    promptList.removeEventListener('pointerleave', onPromptPointerLeave);
+    preview.removeEventListener('pointerenter', onPreviewPointerEnter);
+    preview.removeEventListener('pointerleave', onPreviewPointerLeave);
+  });
+}
+
+function showPromptPreview(container: HTMLElement, promptId: string, anchor?: HTMLElement): void {
+  const promptDraft = getPromptDrafts().find((item) => item.id === promptId);
+  if (!promptDraft) {
+    hidePromptPreview(container);
+    return;
+  }
+
+  clearPromptPreviewHideTimer();
+  activePromptPreviewId = promptId;
+  renderPromptPreview(container, promptDraft, anchor);
+  syncPromptPreviewHighlight(container);
+}
+
+function renderPromptPreview(container: HTMLElement, promptDraft: PromptHistoryItem, anchor?: HTMLElement): void {
+  const preview = container.querySelector<HTMLElement>('#playground-prompt-preview-popover');
+  const title = preview?.querySelector<HTMLElement>('.playground-prompt-preview-title');
+  const body = preview?.querySelector<HTMLElement>('.playground-prompt-preview-body');
+  if (!preview || !title || !body) {
+    return;
+  }
+
+  title.textContent = `${promptDraft.promptType === 'visual' ? 'Visual' : 'Listing'} Prompt`;
+  body.textContent = promptDraft.prompt;
+  body.scrollTop = 0;
+  positionPromptPreview(container, preview, anchor);
+  preview.classList.add('is-visible');
+  preview.setAttribute('aria-hidden', 'false');
+}
+
+function positionPromptPreview(container: HTMLElement, preview: HTMLElement, anchor?: HTMLElement): void {
+  const rail = container.querySelector<HTMLElement>('#playground-thread-rail');
+  const railRect = rail?.getBoundingClientRect();
+  const anchorRect = anchor?.getBoundingClientRect();
+  const gap = 12;
+  const left = Math.round((railRect?.right || 0) + gap);
+  const availableWidth = Math.max(280, window.innerWidth - left - 24);
+  const previewHeight = Math.min(520, Math.max(260, window.innerHeight - 160));
+  const preferredTop = anchorRect?.top ?? (railRect ? railRect.top + 88 : 118);
+  const minTop = 72;
+  const maxTop = Math.max(minTop, window.innerHeight - previewHeight - 24);
+  const top = Math.round(Math.min(Math.max(preferredTop, minTop), maxTop));
+
+  preview.style.left = `${left}px`;
+  preview.style.top = `${top}px`;
+  preview.style.width = `${Math.min(520, availableWidth)}px`;
+  preview.style.maxHeight = `${previewHeight}px`;
+  preview.style.setProperty('--playground-prompt-preview-body-max-height', `${Math.max(180, previewHeight - 48)}px`);
+}
+
+function schedulePromptPreviewHide(container: HTMLElement): void {
+  clearPromptPreviewHideTimer();
+  promptPreviewHideTimer = window.setTimeout(() => {
+    if (!isPromptPreviewHovered) {
+      hidePromptPreview(container);
+    }
+  }, 160);
+}
+
+function hidePromptPreview(container: HTMLElement): void {
+  clearPromptPreviewHideTimer();
+  activePromptPreviewId = null;
+  syncPromptPreviewHighlight(container);
+  const preview = container.querySelector<HTMLElement>('#playground-prompt-preview-popover');
+  if (!preview) {
+    return;
+  }
+
+  preview.classList.remove('is-visible');
+  preview.setAttribute('aria-hidden', 'true');
+}
+
+function syncPromptPreviewHighlight(container: HTMLElement): void {
+  container.querySelectorAll<HTMLElement>('.playground-prompt-item').forEach((item) => {
+    const promptButton = item.querySelector<HTMLButtonElement>('[data-prompt-draft-id]');
+    item.classList.toggle('is-preview-active', promptButton?.dataset.promptDraftId === activePromptPreviewId);
+  });
+}
+
+function clearPromptPreviewHideTimer(): void {
+  if (promptPreviewHideTimer !== null) {
+    window.clearTimeout(promptPreviewHideTimer);
+    promptPreviewHideTimer = null;
+  }
+}
+
+function setupRailSectionResizer(container: HTMLElement): void {
+  const rail = container.querySelector<HTMLElement>('#playground-thread-rail');
+  const threadPanel = container.querySelector<HTMLElement>('.playground-thread-list-wrap');
+  const promptPanel = container.querySelector<HTMLElement>('.playground-prompt-list-wrap');
+  const resizer = container.querySelector<HTMLElement>('#playground-rail-resizer');
+
+  if (!rail || !threadPanel || !promptPanel || !resizer) {
+    return;
+  }
+
+  let activePointerId: number | null = null;
+  let startY = 0;
+  let startPromptHeight = DEFAULT_PROMPT_PANEL_HEIGHT;
+
+  const applyPromptPanelHeight = (height: number): void => {
+    const availableHeight = threadPanel.getBoundingClientRect().height + promptPanel.getBoundingClientRect().height;
+    const maxPromptHeight = Math.max(MIN_PROMPT_PANEL_HEIGHT, availableHeight - MIN_THREAD_PANEL_HEIGHT);
+    const nextHeight = Math.min(Math.max(height, MIN_PROMPT_PANEL_HEIGHT), maxPromptHeight);
+
+    rail.style.setProperty('--playground-prompt-panel-height', `${Math.round(nextHeight)}px`);
+    resizer.setAttribute('aria-valuemax', String(Math.round(maxPromptHeight)));
+    resizer.setAttribute('aria-valuenow', String(Math.round(nextHeight)));
+  };
+
+  applyPromptPanelHeight(promptPanel.getBoundingClientRect().height || DEFAULT_PROMPT_PANEL_HEIGHT);
+
+  const stopResize = (): void => {
+    if (activePointerId !== null) {
+      try {
+        resizer.releasePointerCapture(activePointerId);
+      } catch {
+        // Pointer capture may already be released by the browser.
+      }
+    }
+
+    activePointerId = null;
+    document.body.classList.remove('playground-is-resizing-rail');
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerUp);
+  };
+
+  const onPointerMove = (event: PointerEvent): void => {
+    if (activePointerId === null || event.pointerId !== activePointerId) {
+      return;
+    }
+
+    applyPromptPanelHeight(startPromptHeight - (event.clientY - startY));
+  };
+
+  const onPointerUp = (event: PointerEvent): void => {
+    if (activePointerId !== null && event.pointerId !== activePointerId) {
+      return;
+    }
+
+    stopResize();
+  };
+
+  const onPointerDown = (event: PointerEvent): void => {
+    event.preventDefault();
+    activePointerId = event.pointerId;
+    startY = event.clientY;
+    startPromptHeight = promptPanel.getBoundingClientRect().height;
+    resizer.setPointerCapture(event.pointerId);
+    document.body.classList.add('playground-is-resizing-rail');
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  };
+
+  const onKeyDown = (event: KeyboardEvent): void => {
+    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
+      return;
+    }
+
+    event.preventDefault();
+    const currentHeight = promptPanel.getBoundingClientRect().height || DEFAULT_PROMPT_PANEL_HEIGHT;
+    applyPromptPanelHeight(currentHeight + (event.key === 'ArrowUp' ? 32 : -32));
+  };
+
+  resizer.addEventListener('pointerdown', onPointerDown);
+  resizer.addEventListener('keydown', onKeyDown);
+  cleanupCallbacks.push(() => {
+    stopResize();
+    resizer.removeEventListener('pointerdown', onPointerDown);
+    resizer.removeEventListener('keydown', onKeyDown);
+  });
 }
 
 function toggleThreadRail(container: HTMLElement): void {
@@ -1074,7 +1411,11 @@ function getEditIcon(): string {
   `;
 }
 
-function createThread(container: HTMLElement): void {
+interface CreateThreadOptions {
+  toastMessage?: string | null;
+}
+
+function createThread(container: HTMLElement, options: CreateThreadOptions = {}): void {
   const nextThread = createEmptyThread();
   threadStore = {
     activeThreadId: nextThread.id,
@@ -1083,7 +1424,86 @@ function createThread(container: HTMLElement): void {
   persistThreadStore();
   renderThreadList(container);
   replaceChat(container);
-  showToast('已创建新的 Deep Chat 会话', { type: 'success' });
+  if (options.toastMessage !== null) {
+    showToast(options.toastMessage || '已创建新的 Deep Chat 会话', { type: 'success' });
+  }
+}
+
+function createThreadFromPromptDraft(container: HTMLElement, promptId: string): void {
+  const promptDraft = getPromptDrafts().find((item) => item.id === promptId);
+  if (!promptDraft) {
+    showToast('未找到可用 Prompt，请回到 Prompt 生成页面重新生成', { type: 'warning' });
+    renderPromptDraftList(container);
+    return;
+  }
+
+  createThread(container, { toastMessage: null });
+  window.setTimeout(() => fillPromptDraftInput(container, promptDraft.prompt), 80);
+}
+
+function deletePromptDraft(container: HTMLElement, promptId: string): void {
+  const promptDraft = getPromptDrafts().find((item) => item.id === promptId);
+  if (!promptDraft) {
+    renderPromptDraftList(container);
+    return;
+  }
+
+  const confirmed = window.confirm('删除后将移除该 Prompt 生成记录，无法恢复。确定删除吗？');
+  if (!confirmed) {
+    return;
+  }
+
+  appStore.getState().removePromptHistory(promptId);
+  renderPromptDraftList(container);
+  showToast('已删除 Prompt 生成记录', { type: 'success' });
+
+  void HistoryService.deletePromptResultAsync(promptId).catch((error) => {
+    console.error('[DeepChat] 删除历史快照 Prompt 结果失败:', error);
+  });
+}
+
+function fillPromptDraftInput(container: HTMLElement, prompt: string, attempts = 8): void {
+  const chat = getChat(container);
+  const input = chat?.shadowRoot?.querySelector<HTMLElement>('#text-input');
+
+  if (!chat || !input) {
+    if (attempts > 0) {
+      window.setTimeout(() => fillPromptDraftInput(container, prompt, attempts - 1), 50);
+      return;
+    }
+    showToast('已创建新会话，但输入框尚未就绪，请稍后重试', { type: 'warning' });
+    return;
+  }
+
+  input.textContent = prompt;
+  input.dispatchEvent(createTextInputEvent(prompt));
+  window.setTimeout(() => {
+    const latestInput = getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#text-input');
+    if (latestInput?.textContent?.includes(prompt)) {
+      chat.focusInput?.();
+      showToast('已创建新会话并填入 Prompt，确认后可手动发送', { type: 'success' });
+      return;
+    }
+
+    if (attempts > 0) {
+      fillPromptDraftInput(container, prompt, attempts - 1);
+      return;
+    }
+
+    showToast('已创建新会话，但输入框尚未就绪，请稍后重试', { type: 'warning' });
+  }, 80);
+}
+
+function createTextInputEvent(prompt: string): Event {
+  if (typeof InputEvent === 'function') {
+    return new InputEvent('input', {
+      bubbles: true,
+      inputType: 'insertText',
+      data: prompt,
+    });
+  }
+
+  return new Event('input', { bubbles: true });
 }
 
 function switchThread(container: HTMLElement, threadId: string): void {
@@ -1184,6 +1604,96 @@ function renderThreadList(container: HTMLElement): void {
       </div>
     `;
   }).join(''));
+}
+
+function renderPromptDraftList(container: HTMLElement): void {
+  const list = container.querySelector<HTMLElement>('#playground-prompt-list');
+  if (!list) {
+    return;
+  }
+
+  const prompts = getPromptDrafts();
+  if (prompts.length === 0) {
+    setSafeHtml(list, `
+      <div class="playground-prompt-empty">
+        暂无生成 Prompt
+      </div>
+    `);
+    hidePromptPreview(container);
+    return;
+  }
+
+  setSafeHtml(list, prompts.map((prompt) => {
+    const typeLabel = prompt.promptType === 'visual' ? 'Visual' : 'Listing';
+    const iconClass = prompt.promptType === 'visual' ? 'fas fa-palette' : 'fas fa-pen-nib';
+    const meta = formatPromptDraftMeta(prompt);
+    const snippet = truncateText(prompt.prompt.replace(/\s+/g, ' ').trim(), 70);
+    const ariaLabel = `创建新会话并填入 ${typeLabel} Prompt`;
+    const isPreviewActive = prompt.id === activePromptPreviewId;
+
+    return `
+      <div class="playground-prompt-item playground-prompt-item--${typeLabel.toLowerCase()}${isPreviewActive ? ' is-preview-active' : ''}">
+        <button class="playground-prompt-draft" type="button" data-prompt-draft-id="${escapeHTML(prompt.id)}" aria-label="${escapeHTML(ariaLabel)}" aria-describedby="playground-prompt-preview-popover">
+          <span class="playground-prompt-icon">
+            <i class="${iconClass}" aria-hidden="true"></i>
+          </span>
+          <span class="playground-prompt-copy">
+            <span class="playground-prompt-row">
+              <span class="playground-prompt-badge">${typeLabel}</span>
+              <span class="playground-prompt-meta">${escapeHTML(meta)}</span>
+            </span>
+            <span class="playground-prompt-snippet">${escapeHTML(snippet)}</span>
+          </span>
+        </button>
+        <button class="playground-prompt-delete" type="button" data-delete-prompt-draft-id="${escapeHTML(prompt.id)}" aria-label="删除 ${typeLabel} Prompt" title="删除 Prompt">
+          <i class="fas fa-trash" aria-hidden="true"></i>
+        </button>
+      </div>
+    `;
+  }).join(''));
+
+  const activePrompt = activePromptPreviewId
+    ? prompts.find((prompt) => prompt.id === activePromptPreviewId)
+    : null;
+  if (activePrompt) {
+    renderPromptPreview(container, activePrompt);
+  } else if (activePromptPreviewId) {
+    hidePromptPreview(container);
+  }
+}
+
+function getPromptDrafts(): PromptHistoryItem[] {
+  const history = appStore.getState().promptlab.history || [];
+
+  return history
+    .filter((item) =>
+      Boolean(
+        item &&
+        item.prompt &&
+        (item.promptType === 'listing' || item.promptType === 'visual')
+      )
+    )
+    .sort((a, b) => getPromptDraftTime(b) - getPromptDraftTime(a))
+    .slice(0, MAX_PROMPT_DRAFT_COUNT);
+}
+
+function getPromptDraftTime(prompt: PromptHistoryItem): number {
+  if (Number.isFinite(prompt.timestamp)) {
+    return prompt.timestamp;
+  }
+
+  const generatedTime = prompt.generatedAt ? new Date(prompt.generatedAt).getTime() : 0;
+  return Number.isFinite(generatedTime) ? generatedTime : 0;
+}
+
+function formatPromptDraftMeta(prompt: PromptHistoryItem): string {
+  const parts = [
+    prompt.marketplace,
+    prompt.asins && prompt.asins.length > 0 ? prompt.asins.slice(0, 2).join(', ') : '',
+    formatThreadTime(getPromptDraftTime(prompt)),
+  ].filter(Boolean);
+
+  return parts.join(' · ');
 }
 
 function saveThreadMessages(
@@ -1380,6 +1890,7 @@ function setConversationActive(container: HTMLElement, isActive: boolean): void 
   const chat = getChat(container);
   chat?.classList.toggle('is-chatting', isActive);
   chat?.classList.toggle('is-empty', !isActive);
+  syncDraftInputHeight(container);
 }
 
 function updateTemperatureTrack(input: HTMLInputElement | null): void {

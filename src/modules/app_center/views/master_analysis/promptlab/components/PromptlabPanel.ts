@@ -423,10 +423,15 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     // ========== State Management ==========
 
     restoreState() {
-      const saved = appStore.getState().promptlab?.userProductProfile;
+      const promptlabState = appStore.getState().promptlab;
+      const saved = promptlabState?.userProductProfile;
       if (saved) {
         this.profile = { ...saved };
       }
+
+      const promptHistory = promptlabState?.history || [];
+      this.listingPromptCache = promptHistory.find((item) => item.promptType === 'listing')?.prompt || '';
+      this.visualPromptCache = promptHistory.find((item) => item.promptType === 'visual')?.prompt || '';
     },
 
     saveState() {

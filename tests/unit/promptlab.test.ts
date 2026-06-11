@@ -56,6 +56,8 @@ describe('Promptlab Module', () => {
 
     // 重置 state（使用 appStore 而不是直接设置）
     appStore.getState().updateAnalysis({ analysisReport: null });
+    appStore.getState().updateScraper({ scrapedData: null, currentHistoryId: null, selectedSite: '' });
+    appStore.getState().updatePromptLab({ currentPrompt: '', history: [] });
 
     // 重置 store
     appStore.getState().setUserProductProfile({
@@ -205,6 +207,32 @@ describe('Promptlab Module', () => {
       expect(component.profile.tone).toBe('exciting');
       expect(component.profile.useCosmo).toBe(true);
       expect(component.profile.charLimit).toBe(3000);
+    });
+
+    it('should restore generated prompt caches from store history', () => {
+      appStore.getState().updatePromptLab({
+        history: [
+          {
+            id: 'visual-1',
+            prompt: 'Saved Visual Prompt',
+            response: '',
+            timestamp: 1770000000001,
+            promptType: 'visual'
+          },
+          {
+            id: 'listing-1',
+            prompt: 'Saved Listing Prompt',
+            response: '',
+            timestamp: 1770000000000,
+            promptType: 'listing'
+          }
+        ]
+      });
+
+      component.restoreState();
+
+      expect(component.listingPromptCache).toBe('Saved Listing Prompt');
+      expect(component.visualPromptCache).toBe('Saved Visual Prompt');
     });
 
     it('should save state to store', () => {
@@ -362,6 +390,15 @@ describe('Promptlab Module', () => {
 
       expect(promptlabService.generateMasterPrompt).toHaveBeenCalled();
       expect(component.listingPromptCache).toBe('Generated Listing Prompt');
+      expect(appStore.getState().promptlab.currentPrompt).toBe('Generated Listing Prompt');
+      expect(appStore.getState().promptlab.history?.[0]).toEqual(
+        expect.objectContaining({
+          prompt: 'Generated Listing Prompt',
+          promptType: 'listing',
+          response: '',
+          historyId: null
+        })
+      );
     });
 
     it('should not generate listing prompt when not ready', async () => {
@@ -385,6 +422,15 @@ describe('Promptlab Module', () => {
 
       expect(promptlabService.generateVisualPrompt).toHaveBeenCalled();
       expect(component.visualPromptCache).toBe('Generated Visual Prompt');
+      expect(appStore.getState().promptlab.currentPrompt).toBe('Generated Visual Prompt');
+      expect(appStore.getState().promptlab.history?.[0]).toEqual(
+        expect.objectContaining({
+          prompt: 'Generated Visual Prompt',
+          promptType: 'visual',
+          response: '',
+          historyId: null
+        })
+      );
     });
 
     it('should not generate visual prompt without report', async () => {

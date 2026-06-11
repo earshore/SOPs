@@ -51,7 +51,13 @@ export const PromptHistoryItemSchema = z.object({
   response: z.string(),
   timestamp: z.number(),
   model: z.string().optional(),
-  tokens: z.number().optional()
+  tokens: z.number().optional(),
+  promptType: z.enum(['listing', 'visual']).optional(),
+  generatedAt: z.string().optional(),
+  historyId: z.union([z.string(), z.number(), z.null()]).optional(),
+  asins: z.array(z.string()).optional(),
+  marketplace: z.string().optional(),
+  profile: z.record(z.string(), z.unknown()).optional()
 });
 
 /**

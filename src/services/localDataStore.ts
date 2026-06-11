@@ -6,6 +6,13 @@
 // ================================================================
 
 export type StorageClass = 'config' | 'secret' | 'user-data' | 'cache';
+export type LocalDataBucketId =
+  | 'config'
+  | 'secrets'
+  | 'scrape-history'
+  | 'chat-history'
+  | 'cache'
+  | 'other';
 
 export interface LocalDataRecord<T = unknown> {
   key: string;
@@ -35,6 +42,21 @@ export interface LocalDataUsage {
     keys: number;
   };
   total: number;
+  buckets: LocalDataBucketUsage[];
+}
+
+export interface LocalDataBucketUsage {
+  id: LocalDataBucketId;
+  localStorage: {
+    used: number;
+    keys: number;
+  };
+  indexedDB: {
+    used: number;
+    keys: number;
+  };
+  total: number;
+  lastUpdatedAt: number | null;
 }
 
 const DB_NAME = 'SopsLocalData';
@@ -43,9 +65,91 @@ const DB_VERSION = 1;
 const STORAGE_VERSION = 'local-data-v1';
 
 const CACHE_PREFIXES = ['cache:', 'view_cache_', 'http-cache:', 'ai_analysis_'];
+const LOCAL_DATA_BUCKET_IDS: LocalDataBucketId[] = [
+  'config',
+  'secrets',
+  'scrape-history',
+  'chat-history',
+  'cache',
+  'other',
+];
+const CONFIG_KEYS = new Set([
+  'app-storage',
+  'llm_active_provider',
+  'proxy_config',
+  'proxy_key_map',
+  'scraper_proxy_config',
+  'ai_analysis_performance_settings',
+]);
+const CONFIG_PREFIXES = ['llm_', 'feature_', 'layout_config_'];
+const SCRAPE_HISTORY_KEYS = new Set(['scrape_history', 'user:scrape_history']);
+const CHAT_HISTORY_KEYS = new Set([
+  'playground_deep_chat_threads_v1',
+  'user:playground_deep_chat_threads_v1',
+]);
 
 function isCacheKey(key: string): boolean {
   return CACHE_PREFIXES.some((prefix) => key.startsWith(prefix));
+}
+
+function isLruAccessKey(key: string): boolean {
+  return key.startsWith('_lru_access_');
+}
+
+function isCacheBucketKey(key: string, storageClass?: StorageClass): boolean {
+  return storageClass === 'cache' || isCacheKey(key) || isLruAccessKey(key);
+}
+
+function isSecretBucketKey(key: string, storageClass?: StorageClass): boolean {
+  return storageClass === 'secret' || key.startsWith('secure_');
+}
+
+function isConfigBucketKey(key: string, storageClass?: StorageClass): boolean {
+  return storageClass === 'config' || CONFIG_KEYS.has(key) || CONFIG_PREFIXES.some((prefix) => key.startsWith(prefix));
+}
+
+function classifyKey(key: string, storageClass?: StorageClass): LocalDataBucketId {
+  if (isCacheBucketKey(key, storageClass)) return 'cache';
+  if (isSecretBucketKey(key, storageClass)) return 'secrets';
+  if (SCRAPE_HISTORY_KEYS.has(key)) return 'scrape-history';
+  if (CHAT_HISTORY_KEYS.has(key)) return 'chat-history';
+  if (isConfigBucketKey(key, storageClass)) return 'config';
+  return 'other';
+}
+
+function createUsageBuckets(): Record<LocalDataBucketId, LocalDataBucketUsage> {
+  return LOCAL_DATA_BUCKET_IDS.reduce((buckets, id) => {
+    buckets[id] = {
+      id,
+      localStorage: {
+        used: 0,
+        keys: 0,
+      },
+      indexedDB: {
+        used: 0,
+        keys: 0,
+      },
+      total: 0,
+      lastUpdatedAt: null,
+    };
+    return buckets;
+  }, {} as Record<LocalDataBucketId, LocalDataBucketUsage>);
+}
+
+function addToBucket(
+  buckets: Record<LocalDataBucketId, LocalDataBucketUsage>,
+  id: LocalDataBucketId,
+  layer: 'localStorage' | 'indexedDB',
+  bytes: number,
+  updatedAt: number | null = null
+): void {
+  const bucket = buckets[id];
+  bucket[layer].used += bytes;
+  bucket[layer].keys += 1;
+  bucket.total += bytes;
+  if (updatedAt !== null) {
+    bucket.lastUpdatedAt = Math.max(bucket.lastUpdatedAt || 0, updatedAt);
+  }
 }
 
 function estimateBytes(value: unknown): number {
@@ -126,21 +230,26 @@ class LocalDataStoreClass {
   }
 
   async clearCache(): Promise<number> {
+    return this.clearBucket('cache');
+  }
+
+  async clearBucket(bucketId: LocalDataBucketId): Promise<number> {
+    if (!LOCAL_DATA_BUCKET_IDS.includes(bucketId)) {
+      throw new Error('不支持的本地数据分类');
+    }
+
     let removed = 0;
 
     const indexedRecords = await this.getAllRecords();
     for (const record of indexedRecords) {
-      if (record.storageClass === 'cache' || isCacheKey(record.key)) {
+      if (classifyKey(record.key, record.storageClass) === bucketId) {
         await this.remove(record.key);
         removed += 1;
       }
     }
 
-    const localKeys = this.getLocalStorageKeys();
-    const storage = getBrowserLocalStorage();
-    for (const key of localKeys) {
-      if (isCacheKey(key)) {
-        storage.removeItem(key);
+    for (const key of this.getLocalStorageKeys()) {
+      if (classifyKey(key) === bucketId && this.removeLocalStorageKey(key)) {
         removed += 1;
       }
     }
@@ -214,15 +323,28 @@ class LocalDataStoreClass {
   async getUsage(): Promise<LocalDataUsage> {
     let localStorageUsed = 0;
     let localStorageKeys = 0;
+    const buckets = createUsageBuckets();
     const storage = getBrowserLocalStorage();
     for (const key of this.getLocalStorageKeys()) {
       const value = storage.getItem(key) || '';
-      localStorageUsed += (key.length + value.length) * 2;
+      const bytes = (key.length + value.length) * 2;
+      localStorageUsed += bytes;
       localStorageKeys += 1;
+      addToBucket(buckets, classifyKey(key), 'localStorage', bytes);
     }
 
     const records = await this.getAllRecords();
-    const indexedUsed = records.reduce((total, record) => total + estimateBytes(record), 0);
+    const indexedUsed = records.reduce((total, record) => {
+      const bytes = estimateBytes(record);
+      addToBucket(
+        buckets,
+        classifyKey(record.key, record.storageClass),
+        'indexedDB',
+        bytes,
+        Number.isFinite(record.updatedAt) ? record.updatedAt : null
+      );
+      return total + bytes;
+    }, 0);
 
     return {
       localStorage: {
@@ -234,6 +356,7 @@ class LocalDataStoreClass {
         keys: records.length,
       },
       total: localStorageUsed + indexedUsed,
+      buckets: LOCAL_DATA_BUCKET_IDS.map((id) => buckets[id]),
     };
   }
 
@@ -341,6 +464,18 @@ class LocalDataStoreClass {
       }
     }
     return keys;
+  }
+
+  private removeLocalStorageKey(key: string): boolean {
+    const storage = getBrowserLocalStorage();
+    const existed = storage.getItem(key) !== null;
+    storage.removeItem(key);
+
+    if (!isLruAccessKey(key)) {
+      storage.removeItem(`_lru_access_${key}`);
+    }
+
+    return existed;
   }
 }
 

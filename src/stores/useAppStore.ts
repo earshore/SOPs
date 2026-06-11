@@ -67,6 +67,7 @@ interface AppStore {
   // PromptLab Actions
   setCurrentPrompt: (prompt: string) => void;
   addPromptHistory: (item: NonNullable<PromptLabState['history']>[0]) => void;
+  removePromptHistory: (id: string) => void;
   setUserProductProfile: (profile: PromptLabState['userProductProfile']) => void;
   setSelectedModel: (model: string) => void;
   updatePromptLab: (updates: Partial<PromptLabState>) => void;
@@ -85,10 +86,12 @@ interface AppStore {
 }
 
 type AppStoreSet = StoreApi<AppStore>['setState'];
+const MAX_PROMPT_HISTORY_ITEMS = 20;
 
 type PersistedAppState = Partial<AppStore> & {
   scraper?: Partial<ScraperState>;
   ui?: Partial<UIState>;
+  promptlab?: Partial<PromptLabState>;
 };
 
 function isPersistedAppState(state: unknown): state is PersistedAppState {
@@ -112,6 +115,10 @@ function mergePersistedAppState(persistedState: unknown, currentState: AppStore)
       scrapedData: null,
       currentHistoryId: null,
       isScraping: false
+    },
+    promptlab: {
+      ...currentState.promptlab,
+      ...(persistedState.promptlab || {})
     }
   };
 }
@@ -232,6 +239,7 @@ type AnalysisActions = Pick<AppStore,
 type PromptLabActions = Pick<AppStore,
   'setCurrentPrompt' |
   'addPromptHistory' |
+  'removePromptHistory' |
   'setUserProductProfile' |
   'setSelectedModel' |
   'updatePromptLab' |
@@ -319,7 +327,14 @@ function createPromptLabActions(set: AppStoreSet): PromptLabActions {
       set((state) => ({
         promptlab: {
           ...state.promptlab,
-          history: [...(state.promptlab.history || []), item]
+          history: [item, ...(state.promptlab.history || [])].slice(0, MAX_PROMPT_HISTORY_ITEMS)
+        }
+      })),
+    removePromptHistory: (id) =>
+      set((state) => ({
+        promptlab: {
+          ...state.promptlab,
+          history: (state.promptlab.history || []).filter((item) => item.id !== id)
         }
       })),
     setUserProductProfile: (userProductProfile) =>
@@ -405,6 +420,14 @@ export const appStore = createStore<AppStore>()(
             inputAsins: state.scraper.inputAsins,
             expandedAsin: state.scraper.expandedAsin,
             currentDataTab: state.scraper.currentDataTab
+          },
+          promptlab: {
+            currentPrompt: state.promptlab.currentPrompt,
+            history: state.promptlab.history,
+            userProductProfile: state.promptlab.userProductProfile,
+            selectedModel: state.promptlab.selectedModel,
+            temperature: state.promptlab.temperature,
+            maxTokens: state.promptlab.maxTokens
           }
         })
       }

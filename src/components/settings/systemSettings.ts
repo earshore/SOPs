@@ -8,7 +8,7 @@ import { PROVIDERS, type ModelFeature, type ProviderConfig } from '../../common/
 import { fetchModelsFromApi, callLLM } from '../../services/llmService';
 import { showToast } from '../../common/ui';
 import { StorageService, STORAGE_KEYS } from '../../services/storageService';
-import { LocalDataStore, type LocalDataUsage } from '../../services/localDataStore';
+import { LocalDataStore, type LocalDataBucketId, type LocalDataUsage } from '../../services/localDataStore';
 import { ErrorService } from '../../services/errorService';
 import { EnvConfig } from '../../common/config/envConfig';
 import { configCenter } from '../../common/config/ConfigCenter';
@@ -51,6 +51,8 @@ interface SettingsPanelData {
     localData: {
         usage: LocalDataUsage | null;
         isBusy: boolean;
+        clearingBucketId: LocalDataBucketId | null;
+        cleanupItemsExpanded: boolean;
     };
     showDangerousEndpointWarning: boolean;
     proxyNeedsInput: boolean;
@@ -73,6 +75,10 @@ interface SettingsPanelData {
     localStorageKeysText: string;
     indexedDbUsedText: string;
     indexedDbKeysText: string;
+    localDataCleanupSummaryText: string;
+    localDataCleanupToggleText: string;
+    localDataCleanupToggleIconClass: string;
+    localDataBucketItems: LocalDataBucketView[];
     _unsubscribers?: Array<() => void>;  // 新增：存储清理函数
     init(): void;
     open(): void;
@@ -98,7 +104,9 @@ interface SettingsPanelData {
     refreshLocalDataUsage(): Promise<void>;
     exportLocalData(): Promise<void>;
     importLocalData(): Promise<void>;
+    toggleLocalDataCleanupItems(): void;
     clearLocalCache(): Promise<void>;
+    clearLocalDataBucket(bucketId: LocalDataBucketId): Promise<void>;
     clearAllLocalData(): Promise<void>;
     formatBytes(bytes: number): string;
     getProxyDisplayName(type: string): string;
@@ -122,6 +130,27 @@ interface ModelFeatureBadge {
     key: string;
     label: string;
     icon: string;
+}
+
+interface LocalDataBucketMeta {
+    label: string;
+    description: string;
+    icon: string;
+    iconClass: string;
+    barClass: string;
+    buttonClass: string;
+    actionLabel: string;
+    confirmMessage: string | null;
+}
+
+interface LocalDataBucketView extends LocalDataBucketMeta {
+    id: LocalDataBucketId;
+    usedText: string;
+    keysText: string;
+    percentText: string;
+    percentWidth: string;
+    isEmpty: boolean;
+    isClearing: boolean;
 }
 
 const MODEL_FEATURE_LABELS: Record<ModelFeature, string> = {
@@ -160,6 +189,69 @@ const OLD_PRESET_MODEL_IDS = new Set([
     ...OBSOLETE_PRESET_MODEL_IDS,
     'gpt-5.5',
 ]);
+
+const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
+    config: {
+        label: '配置与偏好',
+        description: '模型、网络、布局和功能开关',
+        icon: 'fa-sliders-h',
+        iconClass: 'bg-blue-50 text-blue-600 ring-blue-100',
+        barClass: 'bg-blue-500',
+        buttonClass: 'border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100',
+        actionLabel: '清理配置',
+        confirmMessage: '这会删除模型、网络、布局和偏好配置，保留历史、聊天与缓存。继续？',
+    },
+    secrets: {
+        label: '密钥',
+        description: '加密保存的 API Key 和敏感凭据',
+        icon: 'fa-key',
+        iconClass: 'bg-amber-50 text-amber-600 ring-amber-100',
+        barClass: 'bg-amber-500',
+        buttonClass: 'border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100',
+        actionLabel: '清理密钥',
+        confirmMessage: '这会删除本浏览器保存的 API Key，之后需要重新配置。继续？',
+    },
+    'scrape-history': {
+        label: '采集历史',
+        description: '商品采集结果、导入记录和历史报告',
+        icon: 'fa-clock-rotate-left',
+        iconClass: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+        barClass: 'bg-emerald-500',
+        buttonClass: 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
+        actionLabel: '清理历史',
+        confirmMessage: '这会删除本浏览器中的采集历史和历史报告，建议先导出备份。继续？',
+    },
+    'chat-history': {
+        label: '聊天记录',
+        description: 'Playground 对话线程和消息上下文',
+        icon: 'fa-comments',
+        iconClass: 'bg-violet-50 text-violet-600 ring-violet-100',
+        barClass: 'bg-violet-500',
+        buttonClass: 'border-violet-100 bg-violet-50 text-violet-700 hover:bg-violet-100',
+        actionLabel: '清理聊天',
+        confirmMessage: '这会删除 Playground 本地聊天线程，建议先导出备份。继续？',
+    },
+    cache: {
+        label: '缓存',
+        description: '页面模板、HTTP 响应和 AI 分析缓存',
+        icon: 'fa-broom',
+        iconClass: 'bg-slate-100 text-slate-600 ring-slate-200',
+        barClass: 'bg-slate-500',
+        buttonClass: 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
+        actionLabel: '清理缓存',
+        confirmMessage: null,
+    },
+    other: {
+        label: '其它数据',
+        description: '尚未归类的本地业务数据',
+        icon: 'fa-box-archive',
+        iconClass: 'bg-rose-50 text-rose-600 ring-rose-100',
+        barClass: 'bg-rose-500',
+        buttonClass: 'border-rose-100 bg-rose-50 text-rose-700 hover:bg-rose-100',
+        actionLabel: '清理其它',
+        confirmMessage: '这会删除尚未归类的本地数据，可能影响部分模块状态。建议先导出备份。继续？',
+    },
+};
 
 function registerSettingsWatchers(panel: SettingsPanelData & AlpineWatchContext): void {
     panel.$watch('llm.provider', (val: string) => panel.loadProviderConfig(val));
@@ -343,7 +435,9 @@ function createSettingsState(): Pick<SettingsPanelData, 'isOpen' | '_unsubscribe
 
         localData: {
             usage: null,
-            isBusy: false
+            isBusy: false,
+            clearingBucketId: null,
+            cleanupItemsExpanded: false
         }
     };
 }
@@ -476,6 +570,44 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
     get indexedDbKeysText(): string {
         return this.localData.usage ? `${this.localData.usage.indexedDB.keys} records` : '';
+    },
+
+    get localDataCleanupSummaryText(): string {
+        const total = this.localData.usage ? this.formatBytes(this.localData.usage.total) : '计算中';
+        return `${this.localDataBucketItems.length} 类数据 · 总计 ${total}`;
+    },
+
+    get localDataCleanupToggleText(): string {
+        return this.localData.cleanupItemsExpanded ? '收起清理项' : '展开清理项';
+    },
+
+    get localDataCleanupToggleIconClass(): string {
+        return this.localData.cleanupItemsExpanded ? 'fa-chevron-up' : 'fa-chevron-down';
+    },
+
+    get localDataBucketItems(): LocalDataBucketView[] {
+        const usage = this.localData.usage;
+        const total = usage?.total || 0;
+        const buckets = usage?.buckets || [];
+
+        return (Object.keys(LOCAL_DATA_BUCKET_META) as LocalDataBucketId[]).map((id) => {
+            const meta = LOCAL_DATA_BUCKET_META[id];
+            const bucket = buckets.find(item => item.id === id);
+            const used = bucket?.total || 0;
+            const keys = (bucket?.localStorage.keys || 0) + (bucket?.indexedDB.keys || 0);
+            const percent = total > 0 ? Math.round((used / total) * 100) : 0;
+
+            return {
+                id,
+                ...meta,
+                usedText: this.formatBytes(used),
+                keysText: `${keys} 项`,
+                percentText: `${percent}%`,
+                percentWidth: used > 0 ? `${Math.max(percent, 3)}%` : '0%',
+                isEmpty: used <= 0 && keys === 0,
+                isClearing: this.localData.clearingBucketId === id,
+            };
+        });
     },
 
     // Lifecycle
@@ -753,16 +885,33 @@ const settingsPanelBehavior: SettingsPanelPart = {
         input.click();
     },
 
+    toggleLocalDataCleanupItems(): void {
+        this.localData.cleanupItemsExpanded = !this.localData.cleanupItemsExpanded;
+    },
+
     async clearLocalCache(): Promise<void> {
+        await this.clearLocalDataBucket('cache');
+    },
+
+    async clearLocalDataBucket(bucketId: LocalDataBucketId): Promise<void> {
+        const meta = LOCAL_DATA_BUCKET_META[bucketId];
+        if (!meta) return;
+
+        if (meta.confirmMessage && !window.confirm(meta.confirmMessage)) {
+            return;
+        }
+
         try {
             this.localData.isBusy = true;
-            const removed = await LocalDataStore.clearCache();
+            this.localData.clearingBucketId = bucketId;
+            const removed = await LocalDataStore.clearBucket(bucketId);
             await this.refreshLocalDataUsage();
-            showToast(`缓存已清理 (${removed} 项)，配置和用户数据已保留`, { type: 'success' });
+            showToast(`${meta.label}已清理 (${removed} 项)`, { type: 'success' });
         } catch (error) {
-            ErrorService.handle(error as Error, { action: 'clearLocalCache', module: 'settings' });
+            ErrorService.handle(error as Error, { action: 'clearLocalDataBucket', module: 'settings' });
         } finally {
             this.localData.isBusy = false;
+            this.localData.clearingBucketId = null;
         }
     },
 

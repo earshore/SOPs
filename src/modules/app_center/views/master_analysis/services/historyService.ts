@@ -6,12 +6,20 @@
 import { appStore } from '@/stores/useAppStore';
 import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
-import type { HistoryItem, ScrapedProduct, ScrapedData, AnalysisReport } from "../../../../../types/modules-business";
+import type {
+  GeneratedPromptRecord,
+  HistoryItem,
+  HistoryPromptResults,
+  ScrapedProduct,
+  ScrapedData,
+  AnalysisReport
+} from "../../../../../types/modules-business";
 
 const MAX_HISTORY_ITEMS =
   configCenter.get<number>('storage.historyMaxItems') ||
   configCenter.get<number>('history.maxItems') ||
   50;
+const MAX_PROMPT_RESULT_HISTORY = 20;
 
 let historyCache: HistoryItem[] | null = null;
 
@@ -110,6 +118,68 @@ function clearCurrentHistoryId(id: HistoryItem['id']): void {
   if (currentHistoryId !== null && isSameHistoryId(currentHistoryId, id)) {
     state.setCurrentHistoryId(null);
   }
+}
+
+function upsertPromptResult(item: HistoryItem, prompt: GeneratedPromptRecord): void {
+  const promptRecord: GeneratedPromptRecord = {
+    ...prompt,
+    historyId: item.id
+  };
+  const previousResults = item.promptResults;
+  const previousHistory = previousResults?.history || [];
+  const nextResults: HistoryPromptResults = {
+    listing: previousResults?.listing,
+    visual: previousResults?.visual,
+    history: [
+      promptRecord,
+      ...previousHistory.filter((entry) => entry.id !== promptRecord.id)
+    ].slice(0, MAX_PROMPT_RESULT_HISTORY),
+    updatedAt: promptRecord.generatedAt
+  };
+
+  if (promptRecord.type === 'listing') {
+    nextResults.listing = promptRecord;
+  } else {
+    nextResults.visual = promptRecord;
+  }
+
+  item.promptResults = nextResults;
+}
+
+function deletePromptResultFromItem(item: HistoryItem, promptId: string): boolean {
+  const previousResults = item.promptResults;
+  if (!previousResults) {
+    return false;
+  }
+
+  const nextHistory = previousResults.history.filter((entry) => entry.id !== promptId);
+  const removedListing = previousResults.listing?.id === promptId;
+  const removedVisual = previousResults.visual?.id === promptId;
+  const removedFromHistory = nextHistory.length !== previousResults.history.length;
+
+  if (!removedListing && !removedVisual && !removedFromHistory) {
+    return false;
+  }
+
+  const nextResults: HistoryPromptResults = {
+    ...previousResults,
+    listing: removedListing
+      ? nextHistory.find((entry) => entry.type === 'listing')
+      : previousResults.listing,
+    visual: removedVisual
+      ? nextHistory.find((entry) => entry.type === 'visual')
+      : previousResults.visual,
+    history: nextHistory,
+    updatedAt: new Date().toISOString()
+  };
+
+  if (!nextResults.listing && !nextResults.visual && nextHistory.length === 0) {
+    delete item.promptResults;
+    return true;
+  }
+
+  item.promptResults = nextResults;
+  return true;
 }
 
 // ----------------------------------------
@@ -293,6 +363,110 @@ export const HistoryService = {
   async getByAsinAsync(asin: string, site: string): Promise<CachedProduct | null> {
     await this.getAllAsync();
     return this.getByAsin(asin, site);
+  },
+
+  getPromptResultsById(id: HistoryItem['id']): HistoryPromptResults | null {
+    return this.getById(id)?.promptResults || null;
+  },
+
+  updatePromptResult(id: HistoryItem['id'], prompt: GeneratedPromptRecord): boolean {
+    try {
+      const history = this.getAll();
+      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
+
+      if (targetIndex === -1) {
+        return false;
+      }
+
+      const targetItem = history[targetIndex];
+      if (!targetItem) {
+        return false;
+      }
+
+      upsertPromptResult(targetItem, prompt);
+
+      const saved = StorageService.setScrapeHistory(history);
+      if (!saved) return false;
+      historyCache = history;
+
+      return true;
+    } catch (error) {
+      console.error(`[HistoryService] 更新 Prompt 结果失败:`, error);
+      return false;
+    }
+  },
+
+  deletePromptResult(promptId: string): boolean {
+    try {
+      const history = this.getAll();
+      let changed = false;
+      history.forEach((item) => {
+        changed = deletePromptResultFromItem(item, promptId) || changed;
+      });
+
+      if (!changed) {
+        return false;
+      }
+
+      const saved = StorageService.setScrapeHistory(history);
+      if (!saved) return false;
+      historyCache = history;
+
+      return true;
+    } catch (error) {
+      console.error(`[HistoryService] 删除 Prompt 结果失败:`, error);
+      return false;
+    }
+  },
+
+  async deletePromptResultAsync(promptId: string): Promise<boolean> {
+    try {
+      const history = await this.getAllAsync();
+      let changed = false;
+      history.forEach((item) => {
+        changed = deletePromptResultFromItem(item, promptId) || changed;
+      });
+
+      if (!changed) {
+        return false;
+      }
+
+      const saved = await StorageService.setScrapeHistoryAsync(history);
+      if (!saved) return false;
+      historyCache = history;
+
+      return true;
+    } catch (error) {
+      console.error(`[HistoryService] 删除 Prompt 结果失败:`, error);
+      return false;
+    }
+  },
+
+  async updatePromptResultAsync(id: HistoryItem['id'], prompt: GeneratedPromptRecord): Promise<boolean> {
+    try {
+      const history = await this.getAllAsync();
+      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
+
+      if (targetIndex === -1) {
+        return false;
+      }
+
+      const targetItem = history[targetIndex];
+      if (!targetItem) {
+        return false;
+      }
+
+      upsertPromptResult(targetItem, prompt);
+
+      const saved = await StorageService.setScrapeHistoryAsync(history);
+      if (!saved) return false;
+      historyCache = history;
+
+      return true;
+    } catch (error) {
+      console.error(`[HistoryService] 更新 Prompt 结果失败:`, error);
+      return false;
+    }
   },
 
   /**

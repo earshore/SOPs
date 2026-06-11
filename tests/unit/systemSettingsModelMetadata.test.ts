@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { initAlpineSettings } from '@/components/settings/systemSettings';
+import { LocalDataStore, type LocalDataBucketId, type LocalDataUsage } from '@/services/localDataStore';
 
 interface SettingsPanelForTest {
   llm: {
@@ -7,9 +8,25 @@ interface SettingsPanelForTest {
     model: string;
     models: Array<string | { id: string; context?: number; features?: string[] }>;
   };
+  localData: {
+    usage: LocalDataUsage | null;
+    isBusy: boolean;
+    clearingBucketId: LocalDataBucketId | null;
+    cleanupItemsExpanded: boolean;
+  };
   activeContextText: string;
   activeFeaturesText: string;
   activeFeatureBadges: Array<{ label: string }>;
+  localDataBucketItems: Array<{
+    id: LocalDataBucketId;
+    label: string;
+    actionLabel: string;
+    isEmpty: boolean;
+  }>;
+  localDataCleanupSummaryText: string;
+  refreshLocalDataUsage(): Promise<void>;
+  toggleLocalDataCleanupItems(): void;
+  clearLocalDataBucket(bucketId: LocalDataBucketId): Promise<void>;
 }
 
 function createSettingsPanel(): SettingsPanelForTest {
@@ -24,8 +41,11 @@ function createSettingsPanel(): SettingsPanelForTest {
 }
 
 describe('system settings model metadata display', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    localStorage.clear();
+    await LocalDataStore.clearAll();
+    document.body.innerHTML = '<div id="toast-container"></div>';
   });
 
   it('uses preset metadata when fetched model metadata is incomplete', () => {
@@ -58,5 +78,58 @@ describe('system settings model metadata display', () => {
     expect(panel.activeContextText).toBe('1M');
     expect(panel.activeFeaturesText).toContain('音频');
     expect(panel.activeFeaturesText).toContain('视频');
+  });
+
+  it('builds detailed local data bucket rows from usage', async () => {
+    localStorage.setItem('cache:view:item', 'cached-view');
+    await LocalDataStore.set('user:scrape_history', [{ id: 1 }], 'user-data');
+
+    const panel = createSettingsPanel();
+    await panel.refreshLocalDataUsage();
+
+    const cache = panel.localDataBucketItems.find(bucket => bucket.id === 'cache');
+    const history = panel.localDataBucketItems.find(bucket => bucket.id === 'scrape-history');
+
+    expect(cache?.label).toBe('缓存');
+    expect(cache?.actionLabel).toBe('清理缓存');
+    expect(cache?.isEmpty).toBe(false);
+    expect(history?.label).toBe('采集历史');
+    expect(history?.isEmpty).toBe(false);
+  });
+
+  it('toggles the full local data cleanup list from collapsed by default', async () => {
+    localStorage.setItem('cache:view:item', 'cached-view');
+
+    const panel = createSettingsPanel();
+    await panel.refreshLocalDataUsage();
+
+    expect(panel.localData.cleanupItemsExpanded).toBe(false);
+    expect(panel.localDataCleanupSummaryText).toContain('6 类数据');
+
+    panel.toggleLocalDataCleanupItems();
+    expect(panel.localData.cleanupItemsExpanded).toBe(true);
+
+    panel.toggleLocalDataCleanupItems();
+    expect(panel.localData.cleanupItemsExpanded).toBe(false);
+  });
+
+  it('clears a selected local data bucket and refreshes usage', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    await LocalDataStore.set('user:scrape_history', [{ id: 1 }], 'user-data');
+    await LocalDataStore.set('user:playground_deep_chat_threads_v1', { threads: [] }, 'user-data');
+
+    const panel = createSettingsPanel();
+    await panel.refreshLocalDataUsage();
+    await panel.clearLocalDataBucket('scrape-history');
+
+    const history = panel.localDataBucketItems.find(bucket => bucket.id === 'scrape-history');
+    const chat = panel.localDataBucketItems.find(bucket => bucket.id === 'chat-history');
+
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(await LocalDataStore.get('user:scrape_history')).toBeNull();
+    expect(await LocalDataStore.get('user:playground_deep_chat_threads_v1')).toEqual({ threads: [] });
+    expect(panel.localData.clearingBucketId).toBeNull();
+    expect(history?.isEmpty).toBe(true);
+    expect(chat?.isEmpty).toBe(false);
   });
 });

@@ -69,4 +69,86 @@ describe('useAppStore persistence', () => {
     expect(persisted.state.scraper.scrapedData).toBeNull();
     expect(persisted.state.scraper.currentHistoryId).toBeNull();
   });
+
+  it('恢复 app-storage 时保留 PromptLab 生成历史', async () => {
+    localStorage.setItem(
+      'app-storage',
+      JSON.stringify({
+        version: 0,
+        state: {
+          promptlab: {
+            currentPrompt: 'Persisted Listing Prompt',
+            history: [
+              {
+                id: 'listing-1',
+                prompt: 'Persisted Listing Prompt',
+                response: '',
+                timestamp: 1770000000000,
+                promptType: 'listing',
+                generatedAt: '2026-02-02T00:00:00.000Z',
+                historyId: 'hist-001',
+                asins: ['B000000001'],
+                marketplace: 'US',
+                profile: {
+                  targetMarket: 'English',
+                  keywordsTier1: 'keyword',
+                  keywordsTier2: 'longtail'
+                }
+              }
+            ]
+          }
+        }
+      })
+    );
+
+    const { appStore } = await import('@/stores/useAppStore');
+    const state = appStore.getState();
+
+    expect(state.promptlab.currentPrompt).toBe('Persisted Listing Prompt');
+    expect(state.promptlab.history?.[0]?.promptType).toBe('listing');
+    expect(state.promptlab.history?.[0]?.historyId).toBe('hist-001');
+  });
+
+  it('支持删除 PromptLab 生成历史', async () => {
+    const { appStore } = await import('@/stores/useAppStore');
+
+    appStore.getState().addPromptHistory({
+      id: 'listing-1',
+      prompt: 'Listing Prompt',
+      response: '',
+      timestamp: 1770000000000,
+      promptType: 'listing',
+      generatedAt: '2026-02-02T00:00:00.000Z',
+      historyId: 'hist-001',
+      asins: ['B000000001'],
+      marketplace: 'US',
+      profile: {
+        targetMarket: 'English',
+        keywordsTier1: 'keyword',
+        keywordsTier2: 'longtail'
+      }
+    });
+    appStore.getState().addPromptHistory({
+      id: 'visual-1',
+      prompt: 'Visual Prompt',
+      response: '',
+      timestamp: 1770000001000,
+      promptType: 'visual',
+      generatedAt: '2026-02-02T00:00:01.000Z',
+      historyId: 'hist-001',
+      asins: ['B000000001'],
+      marketplace: 'US',
+      profile: {
+        targetMarket: 'English',
+        keywordsTier1: 'keyword',
+        keywordsTier2: 'longtail'
+      }
+    });
+
+    appStore.getState().removePromptHistory('listing-1');
+
+    expect(appStore.getState().promptlab.history).toEqual([
+      expect.objectContaining({ id: 'visual-1' })
+    ]);
+  });
 });
