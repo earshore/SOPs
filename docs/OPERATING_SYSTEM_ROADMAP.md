@@ -201,16 +201,16 @@
 内部项目不以注册、付费或外部增长衡量。建议跟踪：
 
 - 新人完成一条任务路径所需时间。
-- PPC/NPI/Listing 样板流每周使用次数。
+- PPC/NPI/Listing/促销/高危词/库存/采购QC/FBA发货/竞品/客服邮件/QA维护/差评/绩效通知/产品合规/GPSR/品牌侵权/账号安全/权限管理样板流每周使用次数。
 - 动作清单或复盘模板导出次数。
 - SOP 页面过期数量和按期复核比例。
 - 高风险动作是否都有人工确认标记。
-- 清仓、广告、差评、合规等复盘记录是否能被下一次任务复用。
+- 清仓、促销、高危词、库存、采购QC、FBA发货、广告、客服邮件、QA维护、差评、合规、GPSR、品牌侵权、权限管理等复盘记录是否能被下一次任务复用。
 
 当前最小落地方式：
 
 - 先用浏览器本地计数记录核心输出动作，不做后端统计、不追踪个人。
-- 已记录事件：`ppc.action_export`、`ppc.review_template_copy`、`npi.csv_export`、`npi.review_template_copy`、`listing.review_template_copy`。
+- 已记录事件：`ppc.action_export`、`ppc.review_template_copy`、`npi.csv_export`、`npi.review_template_copy`、`inventory.replenishment_template_copy`、`procurement.qc_template_copy`、`fba.shipping_template_copy`、`listing.review_template_copy`、`promotion.submission_template_copy`、`restricted_words.review_template_copy`、`competitor.review_template_copy`、`email_templates.reply_template_copy`、`qa.maintenance_template_copy`、`negative_review.review_template_copy`、`performance_notification.report_template_copy`、`product_compliance.review_template_copy`、`gpsr.compliance_template_copy`、`brand_infringement.review_template_copy`、`account_security.review_template_copy`、`permission.management_template_copy`。
 - SOP 总览页只读展示本机试运行计数，用于判断样板流是否真的被内部使用。
 - 指标只用于判断样板流是否真的被使用；当团队需要多人共享复盘数据时，再评估是否引入最小后端。
 
@@ -221,6 +221,7 @@
   - [x] 三条主线优先页面已补齐：NPI Tracker、Listing SEO、高危词检查、促销提报、PPC 广告、竞品监控。
   - [x] 高频/高风险页面已补齐：库存补货、产品合规、账号安全、绩效通知、差评处理。
   - [x] 其他后台、安全、客服作业页已补齐；SOP 总览页不按单项作业页处理。
+  - [x] 已增加测试护栏，新增真实 SOP 作业页缺少作业元信息或强制人工确认边界时会失败。
 - [x] 将 PPC 搜索词分析器输出统一标记为“建议动作”，并突出人工执行边界。
   - [x] PPC 动作清单导出补齐 `ActionItem` 字段：风险等级、人工确认、状态、Owner。
   - [x] PPC 动作清单和周复盘模板支持本地作业负责人，确保导出资产有明确归属。
@@ -228,8 +229,40 @@
   - [x] PPC 复制输出升级为固定周复盘模板，包含复盘结论、关键证据、建议动作、下周跟进和复盘记录。
 - [x] 将 NPI Tracker 的复盘模板变成可导出或可复制的固定输出。
   - [x] NPI 复盘模板支持本地复盘负责人，确保人工确认点和下次复盘有明确归属。
+- [x] 将库存补货周报补成可复制的复盘归档。
+  - [x] 库存模板支持本地负责人，并明确补货下单、物流方式、暂停补货和清仓动作必须人工确认。
+- [x] 将采购/QC 放行补成可复制的复盘归档。
+  - [x] 采购/QC 模板支持本地负责人，并明确首单下单、QC 放行、让步接收、返工/拒收和供应商切换必须人工确认。
+- [x] 将 FBA 发货放行补成可复制的复盘归档。
+  - [x] FBA 发货模板支持本地负责人，并明确超重、错标、货件拆分、异常费用和最终发货放行必须人工确认。
 - [x] 将 Listing SEO 的提交模板补成可复制的改稿复盘归档。
   - [x] Listing 复盘模板支持本地作业负责人，并明确 AI 草稿、合规复核和人工上线边界。
+- [x] 将促销活动提报补成可复制的提报/复盘归档。
+  - [x] 促销模板支持本地负责人，并明确 Omnibus 价格、利润红线、库存、广告预算和最终提报/取消必须人工确认。
+- [x] 将高危词检查补成可复制的复盘归档。
+  - [x] 高危词模板支持本地负责人，并明确 4/5 级风险词、证书依据、本地语言替换和最终上架提交必须人工确认。
+- [x] 将竞品监控周报补成可复制的复盘归档。
+  - [x] 竞品复盘模板支持本地作业负责人，并明确调价、广告、Listing 跟进动作必须人工确认。
+- [x] 将差评 VOC 登记补成可复制的复盘归档。
+  - [x] 差评复盘模板支持本地负责人，并明确公开回复、Report、补偿和质量整改必须人工确认。
+- [x] 将客服邮件处理补成可复制的回复/复盘归档。
+  - [x] 邮件模板支持本地负责人，并明确 A-to-Z、退款补偿、Review 红线、合规敏感回复和公开发送必须人工确认。
+- [x] 将 QA 问答维护补成可复制的巡检/复盘归档。
+  - [x] QA 模板支持本地负责人，并明确公开回复、医疗/安全声明、保修承诺、竞品对比和前台发布必须人工确认。
+- [x] 将绩效通知上报补成可复制的复盘归档。
+  - [x] 绩效通知模板支持本地负责人，并明确任何回复、申诉、资料提交和账号处置必须主管确认。
+- [x] 将产品合规准入补成可复制的复盘归档。
+  - [x] 产品合规模板支持本地负责人，并明确敏感品准入、证书有效性、上架提交和整改完成必须人工确认。
+- [x] 将 GPSR 合规交付件补成可复制的复盘归档。
+  - [x] GPSR 模板支持本地负责人，并明确欧代/厂家信息、安全文件、后台上传、多站点语言和整改完成必须人工确认。
+- [x] 将品牌/侵权审核补成可复制的复盘归档。
+  - [x] 品牌侵权模板支持本地负责人，并明确疑似侵权词、图片版权、授权文件和最终上架必须人工确认。
+- [x] 将账号登录异常登记补成可复制的复盘归档。
+  - [x] 账号安全模板支持本地负责人，并明确登录、凭证变更、环境调整和账号处置必须负责人或主管人工确认。
+- [x] 将后台权限管理补成可复制的变更/回收归档。
+  - [x] 权限模板支持本地负责人，并明确新增用户、权限扩大、Payments/Settings、离职回收和权限登记必须人工确认。
 - [x] 在 SOP 总览展示本地试运行计数，只看核心输出动作，不追踪个人、不做后端。
+  - [x] 已增加测试护栏，新增核心输出指标时必须在 SOP 总览展示计数和最后使用时间。
 - [x] 把 Agent Center 中未落地的 Agent 标为设计草案，优先只保留 PPC 和日报两个样板。
+  - [x] 已增加测试护栏，Agent Center 只能有 PPC 和日报两个落地样板，其余 Agent 必须保持设计草案。
 - [x] 建立 `WorkItem` 最小类型草案，但在没有真实使用前不实现复杂持久化。

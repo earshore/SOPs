@@ -239,6 +239,30 @@
             </div>
         </div>
     </div>
+    <div class="bg-rose-50 rounded-xl border border-rose-200 p-5 mb-6">
+        <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+            <div class="flex-1">
+                <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                    <i class="fas fa-file-shield text-rose-600"></i>品牌/侵权审核复盘
+                </h2>
+                <p class="text-sm text-slate-600">
+                    上架或改稿前必须留下商标查询、图片授权、高危词命中、替换建议和最终人工确认结论。
+                </p>
+            </div>
+            <label class="w-full lg:w-64 text-xs text-slate-600">
+                <span class="block font-semibold text-slate-700 mb-1">审核负责人</span>
+                <input id="brand-infringement-owner" type="text"
+                    value="品牌/合规负责人"
+                    class="w-full rounded-lg border border-rose-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-100" />
+            </label>
+            <button type="button"
+                data-action="sops_copyBrandInfringementTemplate"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">
+                <i class="fas fa-copy"></i>
+                复制侵权审核模板
+            </button>
+        </div>
+    </div>
 </div>
 <!-- Restricted Words Library -->
 <div class="bg-white rounded-xl border border-red-200 p-6 mb-6">

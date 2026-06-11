@@ -1,7 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { cwd } from 'node:process';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
 import { mount, unmount } from '@/modules/sops/views/overview/index';
+import { OPS_METRIC_NAMES } from '@/common/utils/opsMetrics';
+
+const realOverviewTemplatePath = join(cwd(), 'src/modules/sops/views/overview/template.html');
 
 const overviewTemplate = `
   <div class="sops-overview">
@@ -70,5 +76,14 @@ describe('SOPs Overview', () => {
 
     expect(container.querySelector('[data-ops-metric-count="ppc.action_export"]')?.textContent).toBe('0');
     expect(container.querySelector('[data-ops-metric-last="ppc.action_export"]')?.textContent).toBe('未记录');
+  });
+
+  it('shows every tracked output metric on the real overview page', () => {
+    const html = readFileSync(realOverviewTemplatePath, 'utf8');
+
+    OPS_METRIC_NAMES.forEach((metricName) => {
+      expect(html).toContain(`data-ops-metric-count="${metricName}"`);
+      expect(html).toContain(`data-ops-metric-last="${metricName}"`);
+    });
   });
 });

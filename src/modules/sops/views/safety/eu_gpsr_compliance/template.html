@@ -117,6 +117,37 @@
                         </div>
                 </div>
         </div>
+        <section class="bg-white rounded-xl border border-indigo-200 p-6 mb-6 shadow-sm">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+                        <div>
+                                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                        <i class="fas fa-file-pen text-indigo-600"></i>GPSR 交付件归档输出
+                                </h2>
+                                <p class="text-sm text-slate-500 mt-1">把每次补齐、驳回整改或多站点复核沉淀成可追溯记录。</p>
+                        </div>
+                        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors"
+                                type="button" data-action="sops_copyGpsrComplianceTemplate">
+                                <i class="fas fa-copy"></i>复制归档模板
+                        </button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <label class="block">
+                                <span class="text-xs font-semibold text-slate-600">作业负责人</span>
+                                <input id="gpsr-compliance-owner"
+                                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                                        type="text" value="合规负责人/运营负责人" />
+                        </label>
+                        <div class="lg:col-span-2 rounded-lg bg-indigo-50 border border-indigo-100 p-4 text-sm text-slate-700">
+                                <div class="font-semibold text-indigo-800 mb-2">模板会覆盖</div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                        <span>• ASIN/SKU 与 EU 站点范围</span>
+                                        <span>• 欧代、厂家、安全文件和标签交付件</span>
+                                        <span>• 缺失项、上传记录和整改动作</span>
+                                        <span>• 必须人工确认的最终闭环点</span>
+                                </div>
+                        </div>
+                </div>
+        </section>
         <!-- Scope Determination -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
                 <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">

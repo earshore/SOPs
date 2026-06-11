@@ -394,6 +394,30 @@
                         </div>
                 </div>
         </div>
+        <div class="bg-amber-50 rounded-xl border border-amber-200 p-5 mb-6">
+                <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+                        <div class="flex-1">
+                                <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                        <i class="fas fa-file-signature text-amber-600"></i>采购/QC 放行复盘
+                                </h2>
+                                <p class="text-sm text-slate-600">
+                                        样品、首单、返单和质量异常都要留下供应商依据、QC 证据、放行结论和人工确认人。
+                                </p>
+                        </div>
+                        <label class="w-full lg:w-64 text-xs text-slate-600">
+                                <span class="block font-semibold text-slate-700 mb-1">复盘负责人</span>
+                                <input id="procurement-qc-owner" type="text"
+                                        value="采购/质检负责人"
+                                        class="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+                        </label>
+                        <button type="button"
+                                data-action="sops_copyProcurementQcTemplate"
+                                class="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700">
+                                <i class="fas fa-copy"></i>
+                                复制采购/QC 模板
+                        </button>
+                </div>
+        </div>
         <!-- Video Resource -->
         <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
                 <div class="flex items-center gap-3">

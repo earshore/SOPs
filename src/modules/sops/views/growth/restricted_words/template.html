@@ -104,6 +104,37 @@
                         </div>
                 </div>
         </section>
+        <section class="bg-white rounded-xl border border-red-200 p-6 mb-6 shadow-sm">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+                        <div>
+                                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                        <i class="fas fa-file-shield text-red-600"></i>高危词检查归档输出
+                                </h2>
+                                <p class="text-sm text-slate-500 mt-1">把命中词、风险等级、替换动作和复查结果沉淀成可复用记录。</p>
+                        </div>
+                        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors"
+                                type="button" data-action="sops_copyRestrictedWordsTemplate">
+                                <i class="fas fa-copy"></i>复制复盘模板
+                        </button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <label class="block">
+                                <span class="text-xs font-semibold text-slate-600">作业负责人</span>
+                                <input id="restricted-words-owner"
+                                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100"
+                                        type="text" value="合规负责人/运营负责人" />
+                        </label>
+                        <div class="lg:col-span-2 rounded-lg bg-red-50 border border-red-100 p-4 text-sm text-slate-700">
+                                <div class="font-semibold text-red-800 mb-2">模板会覆盖</div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                        <span>• ASIN/SKU、站点语言和检查范围</span>
+                                        <span>• 命中词、原句位置和风险等级</span>
+                                        <span>• 删除、替换、证书依据和复查结果</span>
+                                        <span>• 4/5 级风险词必须人工确认</span>
+                                </div>
+                        </div>
+                </div>
+        </section>
         <!-- ========== 为什么这是最高优先级 ========== -->
         <div class="bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl p-5 mb-6">
                 <h3 class="font-bold text-lg mb-3 flex items-center gap-2">

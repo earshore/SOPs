@@ -417,6 +417,30 @@
                         </label>
                 </div>
         </div>
+        <div class="bg-sky-50 rounded-xl border border-sky-200 p-5 mb-6">
+                <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+                        <div class="flex-1">
+                                <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                        <i class="fas fa-clipboard-check text-sky-600"></i>FBA 发货放行/异常登记
+                                </h2>
+                                <p class="text-sm text-slate-600">
+                                        发货前必须留下标签、箱规、装箱数、重量尺寸和异常费用的核对结论，异常货件先登记再放行。
+                                </p>
+                        </div>
+                        <label class="w-full lg:w-64 text-xs text-slate-600">
+                                <span class="block font-semibold text-slate-700 mb-1">放行负责人</span>
+                                <input id="fba-shipping-owner" type="text"
+                                        value="物流/供应链负责人"
+                                        class="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100" />
+                        </label>
+                        <button type="button"
+                                data-action="sops_copyFbaShippingTemplate"
+                                class="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700">
+                                <i class="fas fa-copy"></i>
+                                复制发货登记模板
+                        </button>
+                </div>
+        </div>
         <!-- Video Resource -->
         <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
                 <div class="flex items-center gap-3">

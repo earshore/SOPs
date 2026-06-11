@@ -1,5 +1,134 @@
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 import { setSafeHtml } from "../../../../../common/utils/security";
+import { registerActionsWithLegacy, unregisterActions } from "../../../../../common/utils/actionRegistry";
+import { recordOpsMetric } from "../../../../../common/utils/opsMetrics";
+import { StorageService } from "../../../../../services/storageService";
+
+const REVIEW_OWNER_STORAGE_KEY = 'gpsr_compliance_owner_v1';
+const DEFAULT_REVIEW_OWNER = '合规负责人/运营负责人';
+
+let registeredActions: string[] = [];
+
+function normalizeReviewOwner(owner: unknown): string {
+    return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_REVIEW_OWNER;
+}
+
+function restoreReviewOwner(): void {
+    const input = document.getElementById('gpsr-compliance-owner') as HTMLInputElement | null;
+    if (input) input.value = normalizeReviewOwner(StorageService.get<string>(REVIEW_OWNER_STORAGE_KEY, DEFAULT_REVIEW_OWNER));
+}
+
+function readReviewOwner(): string {
+    const input = document.getElementById('gpsr-compliance-owner') as HTMLInputElement | null;
+    return normalizeReviewOwner(input?.value);
+}
+
+function saveReviewOwner(owner: string): void {
+    StorageService.set(REVIEW_OWNER_STORAGE_KEY, normalizeReviewOwner(owner));
+}
+
+function fallbackCopyText(text: string): boolean {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', 'true');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        return document.execCommand('copy');
+    } finally {
+        textarea.remove();
+    }
+}
+
+export function buildGpsrComplianceTemplate(owner = DEFAULT_REVIEW_OWNER): string {
+    const today = new Date().toISOString().split('T')[0];
+    const reviewOwner = normalizeReviewOwner(owner);
+
+    return [
+        `# GPSR 合规交付件复盘/整改归档 - ${today}`,
+        '',
+        '## 作业范围',
+        `- 作业负责人：${reviewOwner}`,
+        '- ASIN/SKU：',
+        '- EU 站点：DE / FR / IT / ES / NL / SE / PL / BE / 其他',
+        '- 品类：',
+        '- 变体/子 ASIN 覆盖范围：',
+        '- 审核阶段：新品上架 / 已售 ASIN 补齐 / 后台驳回整改 / 包装变更复核',
+        '',
+        '## 交付件清单',
+        '- EU Responsible Person：已确认 / 待确认',
+        '- Manufacturer / Importer 信息：已确认 / 待确认',
+        '- 安全文件 / 安全图片 / 安全证明：已确认 / 待确认',
+        '- 产品可识别标记：型号 / 批次号 / 序列号 / FNSKU / EAN / GTIN',
+        '- 包装或随附文件标签：已确认 / 待确认',
+        '',
+        '## 缺失项',
+        '- 缺失文件：',
+        '- 缺失语言或站点：',
+        '- 缺失后台上传记录：',
+        '- 缺失包装标签或实物证明：',
+        '- 供应商待补资料：',
+        '',
+        '## 上传记录',
+        '- Seller Central 路径：',
+        '- 上传站点和状态：',
+        '- 子 ASIN 上传覆盖情况：',
+        '- 截图或文件路径：',
+        '- 驳回原因或补交通知：',
+        '',
+        '## 整改动作（人工确认后执行）',
+        '- 欧代/厂家信息补齐：',
+        '- 安全文件、图片或证明补齐：',
+        '- 包装/标签/说明书整改：',
+        '- 后台重新上传或补交：',
+        '- Listing 前台展示复核：',
+        '',
+        '## 人工确认点',
+        '- 欧代/厂家信息：已确认 / 待确认',
+        '- 安全文件、图片或证明：已复核 / 待复核',
+        '- 后台上传和子 ASIN 覆盖：已确认 / 待确认',
+        '- 多站点语言和前台展示：已确认 / 待确认',
+        '- 整改完成：已确认 / 待确认',
+        `- 最终确认人：${reviewOwner}`,
+        '',
+        '## 复盘记录',
+        '- 本次缺口根因：',
+        '- 已沉淀到供应商/品类资料库：是 / 否',
+        '- 需要同步对象：运营 / 采购 / 质检 / 合规 / 设计',
+        '- 下次复核日期：',
+        '- 后续跟进动作：',
+        '',
+        '> GPSR 提交、标签变更和产品安全声明均属于高风险动作，必须人工确认后再上传或标记完成。',
+    ].join('\n');
+}
+
+async function copyGpsrComplianceTemplate(): Promise<void> {
+    const owner = readReviewOwner();
+    saveReviewOwner(owner);
+    const reviewTemplate = buildGpsrComplianceTemplate(owner);
+
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(reviewTemplate);
+        } else if (!fallbackCopyText(reviewTemplate)) {
+            throw new Error('clipboard unavailable');
+        }
+
+        recordOpsMetric('gpsr.compliance_template_copy');
+        alert('已复制 GPSR 合规交付件归档模板，可粘贴到周报或归档文档。');
+    } catch {
+        alert('复制失败，请手动复制 GPSR 合规模板或稍后重试。');
+    }
+}
+
+declare global {
+    interface Window {
+        sops_copyGpsrComplianceTemplate?: () => Promise<void>;
+    }
+}
 
 // 欧洲GPSR合规 SOP
 export async function mount(container: HTMLElement): Promise<void> {
@@ -7,7 +136,16 @@ export async function mount(container: HTMLElement): Promise<void> {
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, html);
     container.classList.add('fade-in');
+    restoreReviewOwner();
+
+    registeredActions = registerActionsWithLegacy({
+        sops_copyGpsrComplianceTemplate: copyGpsrComplianceTemplate as (...args: unknown[]) => void,
+    });
 }
 
 export function unmount(): void {
+    if (registeredActions.length > 0) {
+        unregisterActions(registeredActions);
+        registeredActions = [];
+    }
 }

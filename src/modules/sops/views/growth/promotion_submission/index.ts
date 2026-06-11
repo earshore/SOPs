@@ -6,6 +6,12 @@
 import BaseModule from '../../../../../common/BaseModule';
 import { setSafeHtml } from '../../../../../common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
+import { recordOpsMetric } from '../../../../../common/utils/opsMetrics';
+import { StorageService } from '../../../../../services/storageService';
+
+const REVIEW_OWNER_STORAGE_KEY = 'promotion_submission_owner_v1';
+const DEFAULT_REVIEW_OWNER = '运营负责人';
 
 interface PromotionInputs {
     originalPrice: number;
@@ -32,8 +38,134 @@ interface CalculationResult {
     profitMargin: number;
 }
 
+function normalizeReviewOwner(owner: unknown): string {
+    return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_REVIEW_OWNER;
+}
+
+function restoreReviewOwner(): void {
+    const input = document.getElementById('promotion-submission-owner') as HTMLInputElement | null;
+    if (input) input.value = normalizeReviewOwner(StorageService.get<string>(REVIEW_OWNER_STORAGE_KEY, DEFAULT_REVIEW_OWNER));
+}
+
+function readReviewOwner(): string {
+    const input = document.getElementById('promotion-submission-owner') as HTMLInputElement | null;
+    return normalizeReviewOwner(input?.value);
+}
+
+function saveReviewOwner(owner: string): void {
+    StorageService.set(REVIEW_OWNER_STORAGE_KEY, normalizeReviewOwner(owner));
+}
+
+function fallbackCopyText(text: string): boolean {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', 'true');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        return document.execCommand('copy');
+    } finally {
+        textarea.remove();
+    }
+}
+
+export function buildPromotionSubmissionTemplate(owner = DEFAULT_REVIEW_OWNER): string {
+    const today = new Date().toISOString().split('T')[0];
+    const reviewOwner = normalizeReviewOwner(owner);
+
+    return [
+        `# 促销提报/复盘归档 - ${today}`,
+        '',
+        '## 作业范围',
+        `- 作业负责人：${reviewOwner}`,
+        '- ASIN/SKU：',
+        '- 店铺/站点：',
+        '- 活动类型：Coupon / Prime Exclusive Discount / Lightning Deal / 7-Day Deal / 其他',
+        '- 活动目标：冲排名 / 清库存 / 利润最大化 / 日常转化',
+        '- 活动周期：',
+        '',
+        '## 提报前核算',
+        '- 原售价：',
+        '- 过去 30 天最低价：',
+        '- 活动价/折扣：',
+        '- 产品成本 + 头程：',
+        '- FBA 配送费：',
+        '- VAT 税率：',
+        '- 活动费用或单次兑换费：',
+        '- 折后单品利润和利润率：',
+        '- 利润红线：通过 / 需主管确认 / 取消',
+        '',
+        '## 提报条件',
+        '- Omnibus 价格合规：已确认 / 待确认',
+        '- 库存和泛欧分布：充足 / 风险 / 不足',
+        '- Buy Box 和前台折扣展示：已确认 / 待确认',
+        '- Listing 评分、差评和本地化：已确认 / 待确认',
+        '- 广告预算和活动承接：已确认 / 待确认',
+        '',
+        '## 决策结论',
+        '- 结论：提报 / 调价后提报 / 暂缓 / 取消',
+        '- 核心依据：',
+        '- 主要风险：',
+        '- 取消条件：',
+        '',
+        '## 执行动作（人工确认后执行）',
+        '- 活动提报或取消：',
+        '- 价格调整：',
+        '- 广告预算或出价调整：',
+        '- Coupon 接力或活动后承接：',
+        '- 库存、补货或清仓联动：',
+        '',
+        '## 人工确认点',
+        '- Omnibus 30 天最低价：已确认 / 待确认',
+        '- 利润红线和亏损活动：已确认 / 待确认',
+        '- 库存是否足够支撑活动：已复核 / 待复核',
+        '- 广告预算上调或活动取消：已确认 / 待确认',
+        '- 最终提报/取消动作：已确认 / 待确认',
+        `- 最终确认人：${reviewOwner}`,
+        '',
+        '## 复盘记录',
+        '- 实际销量、销售额和净利润：',
+        '- TACOS/ACOS 变化：',
+        '- 核心词排名变化：',
+        '- 库存消耗和断货风险：',
+        '- 下次活动建议：',
+        '- 已沉淀经验：',
+        '',
+        '> 促销提报、价格调整、广告预算上调和活动取消都会直接影响利润与排名，必须人工确认后执行。',
+    ].join('\n');
+}
+
+async function copyPromotionSubmissionTemplate(): Promise<void> {
+    const owner = readReviewOwner();
+    saveReviewOwner(owner);
+    const reviewTemplate = buildPromotionSubmissionTemplate(owner);
+
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(reviewTemplate);
+        } else if (!fallbackCopyText(reviewTemplate)) {
+            throw new Error('clipboard unavailable');
+        }
+
+        recordOpsMetric('promotion.submission_template_copy');
+        alert('已复制促销提报/复盘模板，可粘贴到周报或归档文档。');
+    } catch {
+        alert('复制失败，请手动复制促销提报模板或稍后重试。');
+    }
+}
+
+declare global {
+    interface Window {
+        sops_copyPromotionSubmissionTemplate?: () => Promise<void>;
+    }
+}
+
 class PromotionSubmissionModule extends BaseModule {
     private removeCalculatorListeners: (() => void) | null = null;
+    private registeredActions: string[] = [];
 
     /**
      * 计算利润
@@ -219,12 +351,16 @@ class PromotionSubmissionModule extends BaseModule {
         setSafeHtml(container, html);
         container.classList.add('fade-in');
         this.bindCalculatorEvents(container);
+        restoreReviewOwner();
 
         // Initialize calculator after DOM is ready
         setTimeout(() => {
             this.calculateProfit();
         }, 100);
 
+        this.registeredActions = registerActionsWithLegacy({
+            sops_copyPromotionSubmissionTemplate: copyPromotionSubmissionTemplate as (...args: unknown[]) => void,
+        });
     }
 
     /**
@@ -232,6 +368,10 @@ class PromotionSubmissionModule extends BaseModule {
      */
     unmount(): void {
         this.removeCalculatorListeners?.();
+        if (this.registeredActions.length > 0) {
+            unregisterActions(this.registeredActions);
+            this.registeredActions = [];
+        }
     }
 }
 

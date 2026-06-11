@@ -78,6 +78,32 @@
                         <div class="text-xs text-slate-600 mt-1">固定巡检日</div>
                 </div>
         </div>
+        <section class="bg-white rounded-xl border border-blue-200 p-6 mb-6 shadow-sm">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+                        <div>
+                                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                        <i class="fas fa-file-signature text-blue-500"></i>QA 维护归档输出
+                                </h2>
+                                <p class="text-sm text-slate-500 mt-1">每次巡检结束后，沉淀未回复问题、标准答案、人工确认点和 Listing 反哺项。</p>
+                        </div>
+                        <button type="button"
+                                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
+                                data-action="sops_copyQaMaintenanceTemplate">
+                                <i class="fas fa-copy"></i>复制归档模板
+                        </button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <label class="block">
+                                <span class="text-xs font-semibold text-slate-500">作业负责人</span>
+                                <input id="qa-maintenance-owner" type="text" value="客服负责人/运营负责人"
+                                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+                        </label>
+                        <div class="lg:col-span-2 rounded-lg bg-blue-50 border border-blue-100 p-3 text-sm text-blue-900">
+                                <div class="font-semibold mb-1">必须人工确认后执行</div>
+                                <p class="text-xs leading-relaxed">公开 QA 回复、医疗/安全声明、保修承诺、竞品对比、评价相关风险和最终前台发布，都需要负责人复核并留痕。</p>
+                        </div>
+                </div>
+        </section>
         <!-- ========== 为什么QA极其重要 ========== -->
         <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl p-5 mb-6">
                 <h3 class="font-bold text-lg mb-3 flex items-center gap-2">

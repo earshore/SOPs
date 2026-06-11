@@ -242,6 +242,37 @@
                         提前主动解决的成本（一个退款）远低于AZ输掉的成本（ODR+账号健康度扣分）。
                 </div>
         </div>
+        <section class="bg-white rounded-xl border border-blue-200 p-6 mb-6 shadow-sm">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+                        <div>
+                                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                        <i class="fas fa-file-lines text-blue-600"></i>客服邮件处理归档输出
+                                </h2>
+                                <p class="text-sm text-slate-500 mt-1">把消息分级、回复草稿、处理动作和人工确认点沉淀成可追溯记录。</p>
+                        </div>
+                        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+                                type="button" data-action="sops_copyEmailTemplatesReviewTemplate">
+                                <i class="fas fa-copy"></i>复制复盘模板
+                        </button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <label class="block">
+                                <span class="text-xs font-semibold text-slate-600">作业负责人</span>
+                                <input id="email-templates-owner"
+                                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                        type="text" value="客服负责人" />
+                        </label>
+                        <div class="lg:col-span-2 rounded-lg bg-blue-50 border border-blue-100 p-4 text-sm text-slate-700">
+                                <div class="font-semibold text-blue-800 mb-2">模板会覆盖</div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                        <span>• 站点语言、订单编号、场景和优先级</span>
+                                        <span>• 买家诉求摘要和历史沟通要点</span>
+                                        <span>• 回复草稿、处理方案和内部动作</span>
+                                        <span>• A-to-Z、退款补偿、Review 红线确认</span>
+                                </div>
+                        </div>
+                </div>
+        </section>
         <!-- ========== 回复黄金法则 ========== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
                 <h2 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">

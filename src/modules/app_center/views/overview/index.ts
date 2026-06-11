@@ -11,6 +11,7 @@ import eventBus from '@/common/EventBus';
 
 interface OverviewFilterState {
   category: string;
+  query: string;
 }
 
 /**
@@ -41,7 +42,8 @@ export function unmount(): void {
  */
 function initOverviewEvents(container: HTMLElement): void {
   const state: OverviewFilterState = {
-    category: 'all'
+    category: 'all',
+    query: ''
   };
 
   const filterBtns = container.querySelectorAll<HTMLElement>('.category-filter-btn');
@@ -55,6 +57,22 @@ function initOverviewEvents(container: HTMLElement): void {
         applyOverviewFilters(container, state);
       }
     });
+  });
+
+  const searchInput = container.querySelector<HTMLInputElement>('#app-overview-search');
+  const clearSearchBtn = container.querySelector<HTMLButtonElement>('#app-overview-clear-search');
+
+  searchInput?.addEventListener('input', () => {
+    state.query = searchInput.value.trim().toLowerCase();
+    clearSearchBtn?.classList.toggle('hidden', state.query.length === 0);
+    applyOverviewFilters(container, state);
+  });
+
+  clearSearchBtn?.addEventListener('click', () => {
+    state.query = '';
+    if (searchInput) searchInput.value = '';
+    clearSearchBtn.classList.add('hidden');
+    applyOverviewFilters(container, state);
   });
 
   const childLinks = container.querySelectorAll<HTMLElement>('.app-child-link[data-child-tab]');
@@ -110,7 +128,9 @@ function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState
 
   cards.forEach((card) => {
     const categoryMatches = state.category === 'all' || card.dataset.category === state.category;
-    const isVisible = categoryMatches;
+    const searchableText = `${card.dataset.search || ''} ${card.textContent || ''}`.toLowerCase();
+    const queryMatches = !state.query || searchableText.includes(state.query);
+    const isVisible = categoryMatches && queryMatches;
 
     card.style.display = isVisible ? '' : 'none';
     if (isVisible) {

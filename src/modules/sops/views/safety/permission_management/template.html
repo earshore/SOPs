@@ -265,6 +265,37 @@
             </div>
         </div>
     </div>
+    <section class="bg-white rounded-xl border border-red-200 p-6 mb-6 shadow-sm">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+            <div>
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fas fa-file-signature text-red-600"></i>权限变更归档输出
+                </h2>
+                <p class="text-sm text-slate-500 mt-1">把新增用户、扩权、调岗、离职回收和季度审计沉淀成可追溯记录。</p>
+            </div>
+            <button class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors"
+                type="button" data-action="sops_copyPermissionManagementTemplate">
+                <i class="fas fa-copy"></i>复制归档模板
+            </button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <label class="block">
+                <span class="text-xs font-semibold text-slate-600">作业负责人</span>
+                <input id="permission-management-owner"
+                    class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100"
+                    type="text" value="账号安全负责人/Boss" />
+            </label>
+            <div class="lg:col-span-2 rounded-lg bg-red-50 border border-red-100 p-4 text-sm text-slate-700">
+                <div class="font-semibold text-red-800 mb-2">模板会覆盖</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                    <span>• 员工、岗位、店铺和变更类型</span>
+                    <span>• 权限模块、级别、业务理由和复核时间</span>
+                    <span>• Payments/Settings 和跨店权限检查</span>
+                    <span>• 授权、回收、登记和人工确认点</span>
+                </div>
+            </div>
+        </div>
+    </section>
     <!-- Video Resource -->
     <div class="bg-blue-50 rounded-xl border border-blue-200 p-4">
         <div class="flex items-center gap-3">

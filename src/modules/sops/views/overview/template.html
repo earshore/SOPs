@@ -103,7 +103,7 @@
                                 <i class="fas fa-chart-simple"></i>本地记录
                         </span>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                         <div class="bg-white rounded-xl border border-slate-200 p-4">
                                 <div class="text-xs font-semibold text-slate-500 mb-2">PPC 动作导出</div>
                                 <div class="text-2xl font-bold text-teal-600" data-ops-metric-count="ppc.action_export">0</div>
@@ -125,9 +125,84 @@
                                 <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="npi.review_template_copy">未记录</span></div>
                         </div>
                         <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">库存周报复制</div>
+                                <div class="text-2xl font-bold text-sky-600" data-ops-metric-count="inventory.replenishment_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="inventory.replenishment_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">采购/QC 复制</div>
+                                <div class="text-2xl font-bold text-orange-600" data-ops-metric-count="procurement.qc_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="procurement.qc_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">FBA 发货登记</div>
+                                <div class="text-2xl font-bold text-blue-600" data-ops-metric-count="fba.shipping_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="fba.shipping_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">侵权审核复制</div>
+                                <div class="text-2xl font-bold text-rose-600" data-ops-metric-count="brand_infringement.review_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="brand_infringement.review_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
                                 <div class="text-xs font-semibold text-slate-500 mb-2">Listing 复盘复制</div>
                                 <div class="text-2xl font-bold text-indigo-600" data-ops-metric-count="listing.review_template_copy">0</div>
                                 <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="listing.review_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">促销提报复制</div>
+                                <div class="text-2xl font-bold text-emerald-600" data-ops-metric-count="promotion.submission_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="promotion.submission_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">高危词复盘复制</div>
+                                <div class="text-2xl font-bold text-red-600" data-ops-metric-count="restricted_words.review_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="restricted_words.review_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">竞品复盘复制</div>
+                                <div class="text-2xl font-bold text-purple-600" data-ops-metric-count="competitor.review_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="competitor.review_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">差评 VOC 复制</div>
+                                <div class="text-2xl font-bold text-rose-600" data-ops-metric-count="negative_review.review_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="negative_review.review_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">客服邮件复盘</div>
+                                <div class="text-2xl font-bold text-blue-600" data-ops-metric-count="email_templates.reply_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="email_templates.reply_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">QA 维护归档</div>
+                                <div class="text-2xl font-bold text-blue-600" data-ops-metric-count="qa.maintenance_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="qa.maintenance_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">绩效上报复制</div>
+                                <div class="text-2xl font-bold text-red-600" data-ops-metric-count="performance_notification.report_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="performance_notification.report_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">账号异常登记</div>
+                                <div class="text-2xl font-bold text-amber-600" data-ops-metric-count="account_security.review_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="account_security.review_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">权限变更归档</div>
+                                <div class="text-2xl font-bold text-red-600" data-ops-metric-count="permission.management_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="permission.management_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">产品合规复制</div>
+                                <div class="text-2xl font-bold text-emerald-600" data-ops-metric-count="product_compliance.review_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="product_compliance.review_template_copy">未记录</span></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">GPSR 归档复制</div>
+                                <div class="text-2xl font-bold text-indigo-600" data-ops-metric-count="gpsr.compliance_template_copy">0</div>
+                                <div class="text-xs text-slate-400 mt-1">最后：<span data-ops-metric-last="gpsr.compliance_template_copy">未记录</span></div>
                         </div>
                 </div>
         </section>
