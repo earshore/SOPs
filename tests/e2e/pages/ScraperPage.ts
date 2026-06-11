@@ -71,11 +71,10 @@ export class ScraperPage extends BasePage {
     welcomeBanner: '.mb-8 > div:first-child',
     
     // 策略指南
-    strategyGuideToggle: '#amz_refining_container',
-    strategyChevron: '#data-refine-chevron',
+    strategyGuideContent: '#amz_refining_container',
     
     // 配置卡片
-    configCard: '[x-data*="configExpanded"]',
+    configCard: '.config-header',
     configHeader: '.config-header',
     configChevron: '.chevron-animated',
     
@@ -105,7 +104,7 @@ export class ScraperPage extends BasePage {
     taskIcon: '.task-icon',
     
     // 数据管理
-    dataManagementPanel: '.rounded-2xl:has(h2:text("数据管理"))',
+    dataManagementPanel: 'h2:has-text("产品导入管理")',
     previewTab: 'button:has-text("数据预览")',
     jsonTab: 'button:has-text("JSON数据")',
     
@@ -147,47 +146,17 @@ export class ScraperPage extends BasePage {
   // ========== 策略指南方法 ==========
 
   /**
-   * 切换策略指南显示
+   * 验证策略指南内容是否可见
    */
-  async toggleStrategyGuide(): Promise<void> {
-    const container = await this.page.$('#amz_refining_container');
-    if (container) {
-      await this.page.evaluate(() => {
-        const element = document.getElementById('amz_refining_container');
-        const chevron = document.getElementById('data-refine-chevron');
-        element?.classList.toggle('hidden');
-        chevron?.classList.toggle('rotate-180');
-      });
-      await this.wait(300); // 等待动画
-    }
+  async isStrategyGuideVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.strategyGuideContent);
   }
 
   /**
-   * 显示策略指南
+   * 验证策略指南是否保留展开/收起入口
    */
-  async showStrategyGuide(): Promise<void> {
-    const isHidden = await this.page.evaluate(() => {
-      const element = document.getElementById('amz_refining_container');
-      return element?.classList.contains('hidden');
-    });
-    
-    if (isHidden) {
-      await this.toggleStrategyGuide();
-    }
-  }
-
-  /**
-   * 隐藏策略指南
-   */
-  async hideStrategyGuide(): Promise<void> {
-    const isHidden = await this.page.evaluate(() => {
-      const element = document.getElementById('amz_refining_container');
-      return element?.classList.contains('hidden');
-    });
-    
-    if (!isHidden) {
-      await this.toggleStrategyGuide();
-    }
+  async hasStrategyGuideToggle(): Promise<boolean> {
+    return await this.page.locator('#data-refine-chevron').count() > 0;
   }
 
   // ========== 配置卡片方法 ==========

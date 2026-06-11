@@ -489,21 +489,11 @@ test.describe('Scraper 模块 E2E 测试', () => {
   });
 
   test.describe('策略指南功能', () => {
-    test('应该能够展开/收起策略指南', async () => {
-      // 获取初始状态
-      const initialState = await scraper.isStrategyGuideExpanded();
+    test('应该默认显示策略指南且不提供展开/收起入口', async () => {
+      await expect(scraper.isStrategyGuideVisible(), '策略指南应该默认显示').resolves.toBe(true);
+      await expect(scraper.hasStrategyGuideToggle(), '策略指南不应保留展开/收起入口').resolves.toBe(false);
 
-      // 切换状态
-      await scraper.toggleStrategyGuide();
-      let newState = await scraper.isStrategyGuideExpanded();
-      expect(newState, '状态应该改变').toBe(!initialState);
-
-      // 再次切换
-      await scraper.toggleStrategyGuide();
-      newState = await scraper.isStrategyGuideExpanded();
-      expect(newState, '状态应该恢复').toBe(initialState);
-
-      console.log('✅ 策略指南展开/收起功能正常');
+      console.log('✅ 策略指南默认展开显示正常');
     });
   });
 

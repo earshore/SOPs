@@ -451,7 +451,7 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
                         <i class="fas fa-trash-alt text-[10px]"></i> 清空
                     </button>
                 </div>
-                <div class="p-4 space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                <div class="p-4 space-y-2 max-h-[301px] overflow-y-auto custom-scrollbar">
                     <div class="flex items-center justify-center py-10 text-slate-400"
                         x-show="showHistoryLoadingEmpty">
                         <i class="fas fa-circle-notch fa-spin text-sm mr-2"></i>
@@ -538,7 +538,7 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
                         </div>
                     </template>
                     <!-- Empty State -->
-                    <div class="empty-state flex flex-col items-center justify-center py-16 text-slate-300 border-2 border-dashed border-slate-100 rounded-2xl bg-gradient-to-b from-slate-50/50 to-white"
+                    <div class="empty-state flex min-h-[261px] flex-col items-center justify-center py-16 text-slate-300 border-2 border-dashed border-slate-100 rounded-2xl bg-gradient-to-b from-slate-50/50 to-white"
                         x-show="showHistoryEmpty" x-transition:enter="transition ease-out duration-500"
                         x-transition:enter-end="opacity-100 scale-100" x-transition:enter-start="opacity-0 scale-95">
                         <div
@@ -591,8 +591,8 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
             </div>
         </div>
         <div class="scraper-strategy-card lg:col-span-3 mb-8 rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
-            <!-- ===== 可点击的策略指南头部 ===== -->
-            <div class="cursor-pointer relative z-10 hover:bg-slate-50/50 transition-colors" @click="toggleRefineGuide()">
+            <!-- ===== 策略指南头部 ===== -->
+            <div class="relative z-10">
                 <div class="px-8 md:px-10 py-5">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -606,23 +606,15 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
                                 <i class="fas fa-book-open mr-1 text-[8px]"></i>指南
                             </span>
                         </div>
-                        <!-- Chevron -->
-                        <div class="flex-shrink-0 ml-4">
-                            <div
-                                class="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center transition-all duration-200 hover:bg-slate-200">
-                                <i :class="refineGuideChevronClass" class="fas fa-chevron-down text-slate-400 text-xs transition-transform duration-300"
-                                    id="data-refine-chevron"></i>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-            <!-- ===== 展开区域分割线 ===== -->
-            <div class="hidden relative z-10" id="strategy-divider">
+            <!-- ===== 内容区域分割线 ===== -->
+            <div class="relative z-10" id="strategy-divider">
                 <div class="mx-6 md:mx-8 border-t border-orange-200/50"></div>
             </div>
-            <!-- ===== 可展开/收起的详细内容 ===== -->
-            <div class="relative z-10" id="amz_refining_container" style="display: none;" x-show="refineGuideOpen">
+            <!-- ===== 详细内容 ===== -->
+            <div class="relative z-10" id="amz_refining_container">
                 <div class="bg-gradient-to-b from-orange-50/20 via-slate-50/50 to-white px-6 md:px-8 pb-8 pt-6">
                     <!-- 策略说明 -->
                     <p class="text-slate-500 text-xs leading-relaxed mb-5 max-w-3xl">

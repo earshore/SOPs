@@ -61,7 +61,11 @@ type AiAnalysisPanelThis = AiAnalysisPanelContext & AiAnalysisPanelState & {
   totalTokenCount: number;
   hasScraperData: boolean;
   canRunAnalysis: boolean;
+  hasNoAnalysisData: boolean;
+  hasReportWithResults: boolean;
+  analysisHeroIsComplete: boolean;
   analysisHeroIsStrong: boolean;
+  analysisHeroIsCompact: boolean;
   hasAnalysisSelection: boolean;
   reportConfidence: Record<string, number> | null;
   overallConfidence: number;
@@ -79,6 +83,48 @@ type AiAnalysisPanelThis = AiAnalysisPanelContext & AiAnalysisPanelState & {
 };
 
 type AiAnalysisPanelBehavior = Record<string, unknown> & ThisType<AiAnalysisPanelThis>;
+
+const RESULT_HEADER_CLASS_MAP: Record<string, string> = {
+  blue: 'bg-blue-50 border-b border-blue-100',
+  cyan: 'bg-cyan-50 border-b border-cyan-100',
+  red: 'bg-red-50 border-b border-red-100',
+  amber: 'bg-amber-50 border-b border-amber-100',
+  orange: 'bg-orange-50 border-b border-orange-100',
+  purple: 'bg-purple-50 border-b border-purple-100',
+  teal: 'bg-teal-50 border-b border-teal-100',
+  rose: 'bg-rose-50 border-b border-rose-100'
+};
+
+const RESULT_ICON_WRAP_CLASS_MAP: Record<string, string> = {
+  blue: 'bg-blue-100 text-blue-700 border-blue-200',
+  cyan: 'bg-cyan-100 text-cyan-700 border-cyan-200',
+  red: 'bg-red-100 text-red-700 border-red-200',
+  amber: 'bg-amber-100 text-amber-700 border-amber-200',
+  orange: 'bg-orange-100 text-orange-700 border-orange-200',
+  purple: 'bg-purple-100 text-purple-700 border-purple-200',
+  teal: 'bg-teal-100 text-teal-700 border-teal-200',
+  rose: 'bg-rose-100 text-rose-700 border-rose-200'
+};
+
+const RESULT_CATEGORY_CLASS_MAP: Record<string, string> = {
+  blue: 'bg-blue-50 text-blue-700 border border-blue-100',
+  cyan: 'bg-cyan-50 text-cyan-700 border border-cyan-100',
+  red: 'bg-red-50 text-red-700 border border-red-100',
+  amber: 'bg-amber-50 text-amber-700 border border-amber-100',
+  orange: 'bg-orange-50 text-orange-700 border border-orange-100',
+  purple: 'bg-purple-50 text-purple-700 border border-purple-100',
+  teal: 'bg-teal-50 text-teal-700 border border-teal-100',
+  rose: 'bg-rose-50 text-rose-700 border border-rose-100'
+};
+
+const DEFAULT_LISTING_RESULT_HEADER_CLASS = 'bg-blue-50 border-b border-blue-100';
+const DEFAULT_REVIEW_RESULT_HEADER_CLASS = 'bg-amber-50 border-b border-amber-100';
+const DEFAULT_RESULT_ICON_WRAP_CLASS = 'bg-blue-100 text-blue-700 border-blue-200';
+const DEFAULT_RESULT_CATEGORY_CLASS = 'bg-blue-50 text-blue-700 border border-blue-100';
+
+function getResultToneClass(map: Record<string, string>, color: string, fallback: string): string {
+  return map[color] || fallback;
+}
 
 function createAiAnalysisPanelState(): AiAnalysisPanelState {
   return {
@@ -254,7 +300,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     },
 
     get showSelectionSummary(): boolean {
-      return !this.showSelectionPanel;
+      return !this.showSelectionPanel && (this.selectedAsins.length > 0 || this.hasReport);
     },
 
     showProductSummaryTooltip(): void {
@@ -378,16 +424,30 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
     get showMissingRealDataNotice(): boolean {
       const ctx = this as unknown as AlpineContext & ComputedProperties;
-      return !ctx.hasScraperData;
+      return !ctx.hasScraperData && !this.hasReport;
+    },
+
+    get hasNoAnalysisData(): boolean {
+      const ctx = this as unknown as AlpineContext & ComputedProperties;
+      return !ctx.hasScraperData && !this.hasReport && !this.isAnalyzing;
+    },
+
+    get analysisHeroIsComplete(): boolean {
+      return this.hasReportWithResults && !this.isAnalyzing;
     },
 
     get analysisHeroIsStrong(): boolean {
-      return this.isAnalyzing || this.canRunAnalysis || this.progress >= 100;
+      return this.isAnalyzing || (this.canRunAnalysis && !this.analysisHeroIsComplete);
+    },
+
+    get analysisHeroIsCompact(): boolean {
+      return this.analysisHeroIsComplete;
     },
 
     get analysisHeroCardClass(): string {
+      if (this.analysisHeroIsCompact) return 'bg-white border border-slate-200 shadow-sm shadow-slate-200/60';
       return this.analysisHeroIsStrong
-        ? 'shadow-xl shadow-indigo-200/40'
+        ? 'shadow-lg shadow-indigo-200/30'
         : 'bg-white border border-slate-200 shadow-sm shadow-slate-200/60';
     },
 
@@ -426,19 +486,20 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     },
 
     get analysisHeroIconWrapClass(): string {
-      if (!this.analysisHeroIsStrong) return 'bg-slate-100 text-slate-500 border border-slate-200 shadow-sm';
+      if (this.analysisHeroIsComplete) return 'w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm';
+      if (!this.analysisHeroIsStrong) return 'w-14 h-14 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 shadow-sm';
       return this.isAnalyzing
-        ? 'bg-white/20 text-white border border-white/20 backdrop-blur-sm shadow-lg'
-        : 'bg-white/10 text-white border border-white/20 backdrop-blur-sm shadow-lg';
+        ? 'w-16 h-16 rounded-2xl bg-white/20 text-white border border-white/20 backdrop-blur-sm shadow-lg'
+        : 'w-16 h-16 rounded-2xl bg-white/10 text-white border border-white/20 backdrop-blur-sm shadow-lg';
     },
 
     get analysisHeroIconClass(): string {
-      if (this.progress >= 100) return 'fa-solid fa-circle-check';
+      if (this.analysisHeroIsComplete) return 'fa-solid fa-circle-check';
       return this.isAnalyzing ? 'fa-solid fa-robot animate-pulse' : 'fa-solid fa-bolt';
     },
 
     get isAnalysisComplete(): boolean {
-      return this.progress >= 100;
+      return this.analysisHeroIsComplete;
     },
 
     get isAnalysisRunning(): boolean {
@@ -446,7 +507,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     },
 
     get isAnalysisIdle(): boolean {
-      return !this.isAnalyzing && this.progress < 100;
+      return !this.isAnalyzing && !this.analysisHeroIsComplete;
     },
 
     get hasAnalysisSelection(): boolean {
@@ -476,9 +537,35 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
     get runAnalysisButtonClass(): string {
       if (this.isAnalyzing) return 'bg-white/20 text-white cursor-wait backdrop-blur-sm border border-white/30 shadow-2xl';
+      if (this.canRunAnalysis && !this.analysisHeroIsStrong) {
+        return 'bg-indigo-600 text-white hover:bg-indigo-700 border border-indigo-600 shadow-sm';
+      }
       return this.canRunAnalysis
         ? 'bg-white text-indigo-600 hover:bg-indigo-50 hover:scale-105 border border-white/50 shadow-2xl'
         : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none';
+    },
+
+    get analysisHeroBodyClass(): string {
+      return this.analysisHeroIsCompact ? 'p-5' : 'p-8';
+    },
+
+    get analysisHeroTitleClass(): string {
+      return this.analysisHeroIsCompact ? 'text-xl' : 'text-2xl';
+    },
+
+    get performanceSummaryText(): string {
+      const settings = this.perfSettings.settings;
+      const cacheText = settings.enableCache ? '缓存开' : '缓存关';
+      const failureText = settings.failureStrategy === 'continue' ? '失败继续' : '失败中止';
+      return `并发 ${settings.maxConcurrency} · ${cacheText} · ${failureText}`;
+    },
+
+    get runAnalysisNotRunningLabel(): string {
+      return this.analysisHeroIsComplete ? '重新分析' : '开始分析';
+    },
+
+    get runAnalysisNotRunningIconClass(): string {
+      return this.analysisHeroIsComplete ? 'fa-solid fa-rotate-right' : 'fa-solid fa-play';
     },
 
     get showRunDisabledHint(): boolean {
@@ -537,7 +624,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     },
 
     get reportStatusBadgeClass(): string {
-      return this.isAnalyzing ? 'bg-blue-500/20 text-blue-300 border-blue-400/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+      return this.isAnalyzing ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
     },
 
     get reportStatusIconClass(): string {
@@ -610,17 +697,17 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
     getListingResultHeaderClass(targetId: string): string {
       const color = this.getResultColor(targetId);
-      return `bg-gradient-to-r from-${color}-500 via-${color}-600 to-indigo-600`;
+      return getResultToneClass(RESULT_HEADER_CLASS_MAP, color, DEFAULT_LISTING_RESULT_HEADER_CLASS);
     },
 
     getReviewResultHeaderClass(targetId: string): string {
       const color = this.getResultColor(targetId);
-      const end = this.getResultColorEnd(targetId);
-      return `bg-gradient-to-r from-${color}-500 via-${color}-600 to-${end}-600`;
+      return getResultToneClass(RESULT_HEADER_CLASS_MAP, color, DEFAULT_REVIEW_RESULT_HEADER_CLASS);
     },
 
     getResultIconWrapClass(targetId: string): string {
-      return `bg-${this.getResultColor(targetId)}-500/20`;
+      const color = this.getResultColor(targetId);
+      return getResultToneClass(RESULT_ICON_WRAP_CLASS_MAP, color, DEFAULT_RESULT_ICON_WRAP_CLASS);
     },
 
     getResultIconDisplayClass(targetId: string): string {
@@ -629,7 +716,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
     getResultCategoryClass(targetId: string): string {
       const color = this.getResultColor(targetId);
-      return `bg-${color}-50 text-${color}-700`;
+      return getResultToneClass(RESULT_CATEGORY_CLASS_MAP, color, DEFAULT_RESULT_CATEGORY_CLASS);
     },
 
     getHighlightClass(type: string): Record<string, boolean> {
@@ -841,9 +928,9 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     },
 
     getConfidenceTextLightClass(percent: number): string {
-      if (percent >= 70) return 'confidence-high-text-light';
-      if (percent >= 50) return 'confidence-medium-text-light';
-      return 'confidence-low-text-light';
+      if (percent >= 70) return 'confidence-high-text';
+      if (percent >= 50) return 'confidence-medium-text';
+      return 'confidence-low-text';
     },
 
     getConfidenceTextBorderClass(percent: number): string {

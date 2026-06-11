@@ -33,7 +33,6 @@ type ScraperPanelState = {
     isScraping: boolean;
     currentDataTab: DataTab;
     configExpanded: boolean;
-    refineGuideOpen: boolean;
     tasks: Task[];
     dataPreview: DataPreview | null;
     historyPanel: HistoryPanel | null;
@@ -77,7 +76,6 @@ function createScraperPanelState(): ScraperPanelState {
         isScraping: false,
         currentDataTab: 'preview' as DataTab,
         configExpanded: false,
-        refineGuideOpen: false,
         tasks: [] as Task[],
         dataPreview: null,
         historyPanel: null,
@@ -195,10 +193,6 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
         get configChevronClass(): string {
             return this.configExpanded ? 'rotate-180' : '';
-        },
-
-        get refineGuideChevronClass(): string {
-            return this.refineGuideOpen ? 'rotate-180' : '';
         },
 
         get scrapeReviewsToggleClass(): string {
@@ -506,10 +500,6 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
         setInputAsins(event: Event) {
             this.inputAsins = (event.target as HTMLTextAreaElement).value;
             this.saveState();
-        },
-
-        toggleRefineGuide() {
-            this.refineGuideOpen = !this.refineGuideOpen;
         },
 
         clearAsins() {
