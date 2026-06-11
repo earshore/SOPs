@@ -14,6 +14,7 @@ import { appStore } from '@/stores/useAppStore';
 import { showToast } from '../../../../../../common/ui';
 import type { PromptlabAlpineContext, ConsoleMode } from './types';
 import type { UserProductProfile } from '@/types/state';
+import { confirmWithModal } from '../../utils/confirmModal';
 
 // ==========================================
 // 输入框高度自适应
@@ -185,8 +186,15 @@ const EMPTY_PROFILE: UserProductProfile = {
 /**
  * 弹窗确认后清空所有输入字段并保存
  */
-export function clearInputs(ctx: PromptlabAlpineContext): void {
-  if (!confirm('确定要清空所有输入框吗？')) return;
+export async function clearInputs(ctx: PromptlabAlpineContext): Promise<void> {
+  const confirmed = await confirmWithModal(
+    '清空 PromptLab 输入',
+    '确定要清空所有输入框吗？',
+    '',
+    '清空输入',
+  );
+  if (!confirmed) return;
+
   ctx.profile = { ...EMPTY_PROFILE };
   ctx.saveState();
   showToast('已清空', { type: 'success' });

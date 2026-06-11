@@ -152,7 +152,8 @@ export interface FileReadResult {
 export type ConfirmModalCallback = (
     title: string,
     content: string,
-    storageKey: string
+    storageKey: string,
+    confirmLabel?: string
 ) => Promise<boolean>;
 
 // ==================== 数据预览相关类型 ====================

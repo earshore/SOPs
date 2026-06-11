@@ -11,6 +11,7 @@ import type {
     DeleteResult
 } from '../types';
 import type { ScraperSite } from '@/types/modules-business';
+import type { ScraperState } from '@/types/state';
 import { appStore } from '@/stores/useAppStore';
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
 import { ErrorService } from '../../../../../../services/errorService';
@@ -463,28 +464,35 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
          */
         saveState() {
             // 只在状态真正改变时才保存，避免触发不必要的响应式更新
-            if (appStore.getState().scraper.selectedSite !== this.selectedSite) {
-                appStore.getState().scraper.selectedSite = this.selectedSite;
+            const state = appStore.getState();
+            const scraperUpdates: Partial<ScraperState> = {};
+
+            if (state.scraper.selectedSite !== this.selectedSite) {
+                scraperUpdates.selectedSite = this.selectedSite;
             }
 
-            if (appStore.getState().scraper.inputAsins !== this.inputAsins) {
-                appStore.getState().scraper.inputAsins = this.inputAsins;
+            if (state.scraper.inputAsins !== this.inputAsins) {
+                scraperUpdates.inputAsins = this.inputAsins;
             }
 
-            if (appStore.getState().scraper.isScraping !== this.isScraping) {
-                appStore.getState().scraper.isScraping = this.isScraping;
+            if (state.scraper.isScraping !== this.isScraping) {
+                scraperUpdates.isScraping = this.isScraping;
             }
 
             if (this.dataPreview) {
                 const previewState = this.dataPreview.getState();
 
-                if (appStore.getState().scraper.expandedAsin !== previewState.expandedAsin) {
-                    appStore.getState().scraper.expandedAsin = previewState.expandedAsin;
+                if (state.scraper.expandedAsin !== previewState.expandedAsin) {
+                    scraperUpdates.expandedAsin = previewState.expandedAsin;
                 }
 
-                if (appStore.getState().scraper.currentDataTab !== previewState.currentDataTab) {
-                    appStore.getState().scraper.currentDataTab = previewState.currentDataTab;
+                if (state.scraper.currentDataTab !== previewState.currentDataTab) {
+                    scraperUpdates.currentDataTab = previewState.currentDataTab;
                 }
+            }
+
+            if (Object.keys(scraperUpdates).length > 0) {
+                state.updateScraper(scraperUpdates);
             }
         },
 
@@ -546,8 +554,8 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
             this.loadHistory();
         },
 
-        loadHistoryItem(item: HistoryItem) {
-            const success = this.historyPanel?.loadHistoryItem(item, this.isScraping);
+        async loadHistoryItem(item: HistoryItem) {
+            const success = await this.historyPanel?.loadHistoryItem(item, this.isScraping);
             if (success) {
                 // 恢复本地状态
                 this.inputAsins = Array.isArray(item.asins) ? item.asins.join('\n') : '';
@@ -665,7 +673,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
                     // 根据新导入的数据更新选中的站点
                     const marketplace = result.data.metadata?.marketplace || 'DE';
-                    appStore.getState().scraper.selectedSite = marketplace as ScraperSite;
+                    appStore.getState().setSelectedSite(marketplace as ScraperSite);
                     this.selectedSite = marketplace as ScraperSite;
 
                     // 更新数据预览

@@ -11,6 +11,105 @@
     }
 }
 
+/* === PC Workflow Strip === */
+.ma-workflow-strip {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .ma-workflow-strip {
+        display: flex;
+        align-items: stretch;
+        gap: 0.75rem;
+        margin: -1rem 0 2rem;
+        padding: 0.75rem;
+        background: var(--color-white);
+        border: 1px solid var(--color-slate-200);
+        border-radius: var(--rounded-xl);
+        box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
+    }
+
+    .ma-workflow-step {
+        position: relative;
+        flex: 1 1 0;
+        min-height: 4.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1rem;
+        border: 1px solid var(--color-slate-200);
+        border-radius: var(--rounded-lg);
+        color: var(--color-slate-600);
+        background: var(--color-slate-50);
+        text-decoration: none;
+        transition: border-color var(--duration-fast) ease, background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+    }
+
+    .ma-workflow-step:hover {
+        color: var(--color-slate-800);
+        border-color: var(--color-indigo-200);
+        background: var(--color-indigo-50);
+    }
+
+    .ma-workflow-step:focus-visible {
+        outline: 2px solid var(--color-indigo-500);
+        outline-offset: 2px;
+    }
+
+    .ma-workflow-step[aria-current="step"] {
+        color: var(--color-indigo-700);
+        border-color: var(--color-indigo-300);
+        background: linear-gradient(135deg, var(--color-indigo-50), var(--color-white));
+    }
+
+    .ma-workflow-index {
+        width: 2rem;
+        height: 2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        border-radius: 999px;
+        color: var(--color-slate-500);
+        background: var(--color-white);
+        border: 1px solid var(--color-slate-200);
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    .ma-workflow-step[aria-current="step"] .ma-workflow-index {
+        color: var(--color-white);
+        background: var(--color-indigo-600);
+        border-color: var(--color-indigo-600);
+    }
+
+    .ma-workflow-copy {
+        min-width: 0;
+    }
+
+    .ma-workflow-label {
+        display: block;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        font-weight: 800;
+    }
+
+    .ma-workflow-meta {
+        display: block;
+        margin-top: 0.125rem;
+        color: var(--color-slate-500);
+        font-size: 0.75rem;
+        line-height: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ma-workflow-step[aria-current="step"] .ma-workflow-meta {
+        color: var(--color-indigo-600);
+    }
+}
+
 /* === Analysis Widget Card === */
 .analysis-widget-card {
     background: white;

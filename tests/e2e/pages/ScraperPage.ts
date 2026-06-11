@@ -130,7 +130,7 @@ export class ScraperPage extends BasePage {
    * 导航到 Scraper 页面
    */
   async navigate(): Promise<void> {
-    await super.navigate('/app_center/master_analysis/scraper');
+    await super.navigate('/#/app-center/scraper');
     await this.waitForPageReady();
   }
 

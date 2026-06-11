@@ -517,8 +517,8 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
     // ========== DNA Actions ==========
 
-    autoPopulateDNA() {
-      autoPopulateDNA(this as unknown as PromptlabAlpineContext);
+    async autoPopulateDNA() {
+      await autoPopulateDNA(this as unknown as PromptlabAlpineContext);
     },
 
     extractSingleField(fieldName: "keywordsTier1" | "keywordsTier2" | "negative" | "audience" | "usps" | "specs") {
@@ -535,8 +535,8 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       copyPrompt();
     },
 
-    clearInputs() {
-      clearInputs(this as unknown as PromptlabAlpineContext);
+    async clearInputs() {
+      await clearInputs(this as unknown as PromptlabAlpineContext);
     },
 
     selectAllReportSections() {

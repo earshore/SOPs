@@ -4,12 +4,13 @@
 
 import type { ScrapedData, DeleteResult, ConfirmModalCallback } from '../types';
 import { HistoryService } from '../../services/historyService';
-import { StorageService } from '../../../../../../services/storageService';
 import { showToast } from '../../../../../../common/ui';
 import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
-import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 import { ValidationError, BusinessError, SystemError } from '@common/errors/AppError';
+import { escapeHtml } from '@/common/utils/security';
+
+export { confirmWithModal } from '../../utils/confirmModal';
 
 type DeleteAction = 'deleteProduct' | 'deleteReview';
 
@@ -213,9 +214,11 @@ function handleDeleteFailure(
 }
 
 async function confirmProductDeletion(asin: string, confirmModal: ConfirmModalCallback): Promise<boolean> {
+    const safeAsin = escapeHtml(asin);
+
     return confirmModal(
         `删除产品`,
-        `确定删除 ASIN: <span class="font-bold text-red-600 bg-red-50 px-1 rounded">${asin}</span> 及其所有数据吗？<br/><span class="text-xs text-red-400 mt-1 block">此操作无法撤销</span>`,
+        `确定删除 ASIN: <span class="font-bold text-red-600 bg-red-50 px-1 rounded">${safeAsin}</span> 及其所有数据吗？<br/><span class="text-xs text-red-400 mt-1 block">此操作无法撤销</span>`,
         "ignore_del_prod_confirm"
     );
 }
@@ -299,128 +302,4 @@ export async function deleteReview(
     } catch (error) {
         return handleDeleteFailure('删除评论', error, originalData, { asin, index });
     }
-}
-
-/**
- * 显示确认对话框
- */
-export function confirmWithModal(title: string, content: string, storageKey: string): Promise<boolean> {
-    return new Promise((resolve) => {
-        // 检查是否已经选择"不再提示"
-        const ignoreKey = `modal_ignore_${storageKey}`;
-        const ignored = StorageService.get(ignoreKey);
-        if (ignored === true) {
-            resolve(true);
-            return;
-        }
-
-        const modalId = 'confirm-modal-' + Date.now();
-        const backdrop = document.createElement('div');
-        backdrop.id = modalId;
-        backdrop.className = "fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in";
-
-        const modalContent = `
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
-                <div class="bg-gradient-to-r from-red-600 to-orange-600 p-5 text-white">
-                    <h3 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-exclamation-triangle"></i> ${title}
-                    </h3>
-                </div>
-                
-                <div class="p-6">
-                    <p class="text-slate-600 text-sm mb-4">${content}</p>
-                    
-                    <label class="flex items-center gap-2 text-xs text-slate-500 mb-4 cursor-pointer">
-                        <input type="checkbox" id="dont-ask-again-${modalId}" class="rounded border-slate-300">
-                        <span>不再提示</span>
-                    </label>
-
-                    <div class="flex justify-end gap-3">
-                        <button id="btn-cancel-${modalId}" class="px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors">
-                            取消
-                        </button>
-                        <button id="btn-confirm-${modalId}" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:scale-95">
-                            确认删除
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        const renderer = SafeRenderer.getInstance();
-        renderer.renderTemplate(backdrop, modalContent);
-        document.body.appendChild(backdrop);
-
-        const btnConfirm = document.getElementById(`btn-confirm-${modalId}`) as HTMLButtonElement | null;
-        const btnCancel = document.getElementById(`btn-cancel-${modalId}`) as HTMLButtonElement | null;
-        const dontAskCheckbox = document.getElementById(`dont-ask-again-${modalId}`) as HTMLInputElement | null;
-
-        let resolved = false;
-
-        const cleanup = () => {
-            if (btnConfirm) btnConfirm.removeEventListener('click', handleConfirm);
-            if (btnCancel) btnCancel.removeEventListener('click', handleCancel);
-            backdrop.removeEventListener('click', handleBackdropClick);
-            document.removeEventListener('keydown', handleEscape);
-
-            try {
-                if (backdrop && document.body.contains(backdrop)) {
-                    document.body.removeChild(backdrop);
-                }
-            } catch (error) {
-                console.error('[Scraper] 清理确认对话框失败:', error);
-            }
-        };
-
-        const finish = (result: boolean) => {
-            if (resolved) return;
-            resolved = true;
-            cleanup();
-            resolve(result);
-        };
-
-        const handleConfirm = (e: Event) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (resolved) return;
-
-            // 保存"不再提示"选项
-            if (dontAskCheckbox && dontAskCheckbox.checked) {
-                StorageService.set(ignoreKey, true);
-            }
-
-            finish(true);
-        };
-
-        const handleCancel = (e: Event) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            finish(false);
-        };
-
-        const handleBackdropClick = (e: MouseEvent) => {
-            if (e.target === backdrop) {
-                finish(false);
-            }
-        };
-
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                finish(false);
-            }
-        };
-
-        if (!btnConfirm || !btnCancel) {
-            console.error('[Scraper] 确认对话框渲染不完整，已自动关闭');
-            finish(false);
-            return;
-        }
-
-        btnConfirm.addEventListener('click', handleConfirm, { once: true });
-        btnCancel.addEventListener('click', handleCancel, { once: true });
-        backdrop.addEventListener('click', handleBackdropClick);
-        document.addEventListener('keydown', handleEscape);
-    });
 }

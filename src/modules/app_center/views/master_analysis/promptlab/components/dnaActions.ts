@@ -16,6 +16,7 @@ import {
 import type { ExtendedDNA } from '../../types/extendedDNA';
 import type { PromptlabAlpineContext } from './types';
 import type { FullAnalysisReport } from '../../ai_analysis/config/analysisReportData';
+import { confirmWithModal } from '../../utils/confirmModal';
 
 export type ExtractableFieldName = 'keywordsTier1' | 'keywordsTier2' | 'negative' | 'audience' | 'usps' | 'specs';
 
@@ -203,7 +204,7 @@ function hasExistingDnaContent(ctx: PromptlabAlpineContext): boolean {
 /**
  * 从分析报告中提取产品 DNA，并仅自动填充置信度达标的字段
  */
-export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
+export async function autoPopulateDNA(ctx: PromptlabAlpineContext): Promise<void> {
   const dna = getRawDna(ctx);
   if (!dna) {
     showToast('未检测到分析报告或无法提取产品 DNA', { type: 'warning' });
@@ -233,8 +234,15 @@ export function autoPopulateDNA(ctx: PromptlabAlpineContext): void {
     return;
   }
 
-  if (hasExistingDnaContent(ctx) && !confirm('检测到已有内容，是否覆盖现有的高置信度产品 DNA 字段？')) {
-    return;
+  if (hasExistingDnaContent(ctx)) {
+    const confirmed = await confirmWithModal(
+      '覆盖产品 DNA',
+      '检测到已有内容，是否覆盖现有的高置信度产品 DNA 字段？',
+      '',
+      '覆盖字段',
+    );
+
+    if (!confirmed) return;
   }
 
   fillableFields.forEach(([, config]) => {

@@ -134,7 +134,7 @@ export class AIAnalysisPage extends BasePage {
    * 导航到 AI 分析页面
    */
   async navigate(): Promise<void> {
-    await super.navigate('/app_center/master_analysis');
+    await super.navigate('/#/app-center/ai-analysis');
     await this.waitForPageReady();
   }
 

@@ -10,6 +10,7 @@ import { appStore } from '@/stores/useAppStore';
 import eventBus from '../../../../../../common/EventBus';
 import { MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { SystemError } from '@common/errors/AppError';
+import { confirmWithModal } from '../../utils/confirmModal';
 /**
  * 历史记录面板类
  */
@@ -43,7 +44,13 @@ export class HistoryPanel {
      * 删除历史记录项
      */
     async deleteHistoryItem(id: HistoryItem['id']): Promise<boolean> {
-        if (!confirm("确定要删除这个历史快照吗？")) return false;
+        const confirmed = await confirmWithModal(
+            '删除历史快照',
+            '确定要删除这个历史快照吗？<br/><span class="text-xs text-red-400 mt-1 block">此操作无法撤销</span>',
+            'ignore_delete_history_snapshot',
+            '删除快照'
+        );
+        if (!confirmed) return false;
 
         try {
             const deleted = await HistoryService.deleteByIdAsync(id);
@@ -70,7 +77,14 @@ export class HistoryPanel {
      * 清空所有历史记录
      */
     async clearAllHistory(): Promise<void> {
-        if (!confirm("确定清空所有历史记录？")) return;
+        const confirmed = await confirmWithModal(
+            '清空历史记录',
+            '确定清空所有历史记录？<br/><span class="text-xs text-red-400 mt-1 block">清空后无法从本地历史恢复</span>',
+            '',
+            '清空历史'
+        );
+        if (!confirmed) return;
+
         await HistoryService.clearAsync();
         await this.loadHistoryAsync();
         showToast("历史已清空", { type: 'success' });
@@ -79,8 +93,8 @@ export class HistoryPanel {
     /**
      * 加载历史快照
      */
-    loadHistoryItem(item: HistoryItem, isScraping: boolean): boolean {
-        if (this.shouldCancelSnapshotLoad(isScraping)) return false;
+    async loadHistoryItem(item: HistoryItem, isScraping: boolean): Promise<boolean> {
+        if (await this.shouldCancelSnapshotLoad(isScraping)) return false;
 
         this.ensureSnapshotMetadata(item);
         this.restoreSnapshotState(item);
@@ -94,8 +108,17 @@ export class HistoryPanel {
         return true;
     }
 
-    private shouldCancelSnapshotLoad(isScraping: boolean): boolean {
-        return isScraping && !confirm("任务进行中，确定覆盖？");
+    private async shouldCancelSnapshotLoad(isScraping: boolean): Promise<boolean> {
+        if (!isScraping) return false;
+
+        const confirmed = await confirmWithModal(
+            '覆盖当前任务',
+            '任务进行中，确定用历史快照覆盖当前数据？',
+            '',
+            '覆盖'
+        );
+
+        return !confirmed;
     }
 
     private ensureSnapshotMetadata(item: HistoryItem): void {
@@ -131,7 +154,7 @@ export class HistoryPanel {
         state.setScrapedData(item.data);
         this.restoreAnalysisReport(item);
         state.setTranslatedReport(null);
-        state.scraper.selectedSite = item.site as ScraperSite;
+        state.setSelectedSite(item.site as ScraperSite);
     }
 
     private restoreAnalysisReport(item: HistoryItem): void {
@@ -169,7 +192,7 @@ export class HistoryPanel {
 
         try {
             // 1. 先加载历史快照数据到全局状态
-            this.loadHistoryItem(item, false);
+            await this.loadHistoryItem(item, false);
 
             // 2. 确保报告数据已正确加载到全局状态
             if (!appStore.getState().analysis.analysisReport) {

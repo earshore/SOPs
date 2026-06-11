@@ -106,8 +106,9 @@ describe('buildStoredThreadMessages', () => {
       maxMessageChars: 3,
     });
 
-    expect(stored[0].text).toContain('abc');
-    expect(stored[0].text).toContain('内容已截断');
+    expect(stored).toHaveLength(1);
+    expect(stored[0]?.text).toContain('abc');
+    expect(stored[0]?.text).toContain('内容已截断');
   });
 });
 
