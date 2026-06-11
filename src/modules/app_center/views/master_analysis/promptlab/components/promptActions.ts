@@ -52,7 +52,9 @@ function getPromptReadinessMessage(
 
 function getPromptAnalysisReport(): AnalysisReport | null {
   const analysisReport = appStore.getState().analysis.analysisReport;
-  return typeof analysisReport === 'string' || !analysisReport ? null : analysisReport;
+  return computeHasReport() && analysisReport && typeof analysisReport !== 'string'
+    ? analysisReport
+    : null;
 }
 
 function createPromptInputs(ctx: PromptlabAlpineContext): PromptInputs {

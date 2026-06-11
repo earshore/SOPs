@@ -133,6 +133,16 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
           immediate: true
         },
         {
+          selector: (state) => state.analysis.progress,
+          onChange: (progress) => { this.progress = typeof progress === 'number' ? progress : 0; },
+          immediate: true
+        },
+        {
+          selector: (state) => state.analysis.currentStep,
+          onChange: (currentStep) => { this.currentStep = typeof currentStep === 'string' ? currentStep : ''; },
+          immediate: true
+        },
+        {
           selector: (state) => state.analysis.analysisReport,
           onChange: (report) => {
             this.analysisReport = report;

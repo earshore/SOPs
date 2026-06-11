@@ -28,6 +28,19 @@ vi.mock('@/modules/app_center/views/master_analysis/services/promptlabService', 
   },
 }));
 
+const createUsableAnalysisReport = () => ({
+  'buyer-profile': {
+    demographics: ['Busy parents'],
+    usage_scenes: ['Bedroom'],
+  },
+  _metadata: {
+    confidence: {
+      'buyer-profile': 0.86,
+    },
+    overallConfidence: 0.86,
+  },
+});
+
 describe('Promptlab Module', () => {
   let container: HTMLElement;
   let mockTemplate: string;
@@ -198,6 +211,7 @@ describe('Promptlab Module', () => {
         charLimit: 3000,
       };
 
+      appStore.getState().updateAnalysis({ analysisReport: createUsableAnalysisReport() as any });
       appStore.getState().setUserProductProfile(savedProfile);
       
       component.restoreState();
@@ -205,6 +219,45 @@ describe('Promptlab Module', () => {
       expect(component.profile.targetMarket).toBe('English');
       expect(component.profile.keywordsTier1).toBe('test keyword');
       expect(component.profile.tone).toBe('exciting');
+      expect(component.profile.useCosmo).toBe(true);
+      expect(component.profile.charLimit).toBe(3000);
+    });
+
+    it('should not restore product DNA fields without a usable analysis report', () => {
+      const savedProfile: UserProductProfile = {
+        targetMarket: 'English',
+        keywordsTier1: 'persisted keyword',
+        keywordsTier2: 'persisted longtail',
+        audience: 'persisted audience',
+        usps: 'persisted usps',
+        specs: 'persisted specs',
+        socialHook: 'persisted hook',
+        negative: 'persisted negative',
+        tone: 'exciting',
+        customStrategy: 'keep strategy',
+        useCosmo: true,
+        useRufus: false,
+        useEmoji: true,
+        selectedReportSections: ['buyer-profile'],
+        charLimit: 3000,
+      };
+
+      appStore.getState().updateAnalysis({ analysisReport: null });
+      appStore.getState().setUserProductProfile(savedProfile);
+
+      component.restoreState();
+
+      expect(component.profile.targetMarket).toBe('');
+      expect(component.profile.keywordsTier1).toBe('');
+      expect(component.profile.keywordsTier2).toBe('');
+      expect(component.profile.audience).toBe('');
+      expect(component.profile.usps).toBe('');
+      expect(component.profile.specs).toBe('');
+      expect(component.profile.socialHook).toBe('');
+      expect(component.profile.negative).toBe('');
+      expect(component.profile.selectedReportSections).toEqual([]);
+      expect(component.profile.tone).toBe('exciting');
+      expect(component.profile.customStrategy).toBe('keep strategy');
       expect(component.profile.useCosmo).toBe(true);
       expect(component.profile.charLimit).toBe(3000);
     });
@@ -262,14 +315,54 @@ describe('Promptlab Module', () => {
     it('should compute hasReport correctly', () => {
       expect(component.hasReport).toBe(false);
 
-      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US', results: [] } as any });
+      appStore.getState().updateAnalysis({ analysisReport: {} as any });
+      expect(component.hasReport).toBe(false);
+
+      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US' } as any });
+      expect(component.hasReport).toBe(false);
+
+      appStore.getState().updateAnalysis({ analysisReport: { metadata: { marketplace: 'US' }, analysisReport: {} } as any });
+      expect(component.hasReport).toBe(false);
+
+      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US', results: [{ title: 'Placeholder' }] } as any });
+      expect(component.hasReport).toBe(false);
+
+      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US', analysisReport: 'raw text' } as any });
+      expect(component.hasReport).toBe(false);
+
+      appStore.getState().updateAnalysis({ analysisReport: createUsableAnalysisReport() as any });
+      expect(component.hasReport).toBe(true);
+
+      appStore.getState().updateAnalysis({
+        analysisReport: {
+          metadata: { marketplace: 'US' },
+          analysisReport: createUsableAnalysisReport(),
+        } as any
+      });
+      expect(component.hasReport).toBe(true);
+
+      appStore.getState().updateAnalysis({
+        analysisReport: {
+          marketplace: 'US',
+          target_audience: 'Young professionals',
+        } as any
+      });
+      expect(component.hasReport).toBe(true);
+
+      appStore.getState().updateAnalysis({
+        analysisReport: {
+          title_seo_roots: {
+            primary_keywords: [{ keyword: 'waterproof bag' }],
+          },
+        } as any
+      });
       expect(component.hasReport).toBe(true);
     });
 
     it('should compute isReady correctly', () => {
       expect(component.isReady).toBe(false);
 
-      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US' } as any });
+      appStore.getState().updateAnalysis({ analysisReport: createUsableAnalysisReport() as any });
       component.profile.targetMarket = 'English';
       component.profile.keywordsTier1 = 'keyword1';
       component.profile.keywordsTier2 = 'keyword2';
@@ -334,17 +427,7 @@ describe('Promptlab Module', () => {
 
     it('should render report ready state', () => {
       appStore.getState().updateAnalysis({
-        analysisReport: {
-          marketplace: 'US',
-          results: [
-            {
-              targetId: 'test-section',
-              title: 'Test Section',
-              highlights: [{ text: 'Test highlight' }],
-              details: [{ category: 'Test', items: ['Item 1'] }],
-            },
-          ],
-        } as any
+        analysisReport: createUsableAnalysisReport() as any
       });
 
       component.renderReportAnalysis();
@@ -377,7 +460,7 @@ describe('Promptlab Module', () => {
       container.innerHTML = mockTemplate;
 
       // 设置就绪状态
-      appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US' } as any });
+      appStore.getState().updateAnalysis({ analysisReport: createUsableAnalysisReport() as any });
       component.profile.targetMarket = 'English';
       component.profile.keywordsTier1 = 'test keyword';
       component.profile.keywordsTier2 = 'test longtail';

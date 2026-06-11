@@ -161,7 +161,9 @@ const initialAnalysisState: AnalysisState = {
   showTranslation: false,
   editHistory: [],
   lastTranslationModel: null,
-  isAnalyzing: false
+  isAnalyzing: false,
+  progress: 0,
+  currentStep: ''
 };
 
 /**
@@ -467,6 +469,8 @@ export const selectors = {
   isEditing: (state: AppStore) => state.analysis.isEditing,
   showTranslation: (state: AppStore) => state.analysis.showTranslation,
   isAnalyzing: (state: AppStore) => state.analysis.isAnalyzing,
+  analysisProgress: (state: AppStore) => state.analysis.progress,
+  analysisCurrentStep: (state: AppStore) => state.analysis.currentStep,
 
   // PromptLab选择器
   currentPrompt: (state: AppStore) => state.promptlab.currentPrompt,

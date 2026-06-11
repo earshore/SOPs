@@ -808,27 +808,6 @@
   transform: translateX(2px);
 }
 
-/* ---- Report Button ---- */
-.report-btn {
-  transition: all var(--duration-fast) var(--ease-smooth);
-  position: relative;
-  overflow: hidden;
-}
-.report-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.15));
-  opacity: 0;
-  transition: opacity var(--duration-fast);
-}
-.report-btn:hover::before {
-  opacity: 1;
-}
-.report-btn:active {
-  transform: scale(0.93);
-}
-
 /* ---- Delete Button ---- */
 .delete-btn {
   transition: all var(--duration-fast) var(--ease-smooth);

@@ -9,6 +9,8 @@ import { appStore } from '@/stores/useAppStore';
 import { estimateTokenCount, formatTokenCount } from '../../ai_analysis/utils/tokenCounter';
 import type { PromptlabAlpineContext } from './types';
 
+type ReportRecord = Record<string, unknown>;
+
 type AnalysisReportMetadata = {
   confidence?: Record<string, number>;
   overallConfidence?: number;
@@ -18,6 +20,109 @@ type AnalysisReportWithMetadata = {
   _metadata?: AnalysisReportMetadata;
 };
 
+const SUPPORTED_TARGET_IDS = [
+  'title-keywords',
+  'title_keywords',
+  'title_seo_roots',
+  'selling-points',
+  'selling_points',
+  'selling_proposition_deconstruction',
+  'fatal-flaws',
+  'fatal_flaws',
+  'neg_deal_breakers',
+  'wow-moments',
+  'wow_moments',
+  'pos_aha_moments',
+  'hesitation-points',
+  'hesitation_points',
+  'buying_hesitations',
+  'buyer-profile',
+  'buyer_profile',
+  'user_avatar_context',
+  'vocab-gap',
+  'vocab_gap',
+  'vocabulary_gap',
+  'promise-reality',
+  'promise_reality',
+  'promise_reality_check',
+];
+
+const LEGACY_PROMPT_REPORT_KEYS = [
+  'target_audience',
+  'key_features',
+];
+
+const DOWNLOAD_REPORT_REQUIREMENTS = [
+  [
+    ['competitor_insights', 'competitorInsights'],
+    ['feature_points', 'featurePoints'],
+    ['keyword_clusters', 'keywordClusters'],
+  ],
+  [
+    ['productOverview', 'product_overview'],
+    ['user_profile', 'userProfile'],
+    ['coreFeatures', 'core_features'],
+  ],
+  [
+    ['pain_point_gaps'],
+    ['native_voice'],
+    ['high_frequency_phrases'],
+  ],
+];
+
+function toReportRecord(value: unknown): ReportRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as ReportRecord
+    : null;
+}
+
+function unwrapAnalysisReport(report: unknown): ReportRecord | null {
+  const root = toReportRecord(report);
+  if (!root) return null;
+
+  const nestedReport = toReportRecord(root.analysisReport);
+  return nestedReport || root;
+}
+
+function hasReportContent(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (Array.isArray(value)) return value.some(hasReportContent);
+  if (typeof value === 'object') {
+    return Object.values(value as ReportRecord).some(hasReportContent);
+  }
+  return true;
+}
+
+function hasSupportedTargetContent(report: ReportRecord): boolean {
+  return SUPPORTED_TARGET_IDS.some((targetId) => hasReportContent(report[targetId]));
+}
+
+function hasLegacyPromptReportContent(report: ReportRecord): boolean {
+  return LEGACY_PROMPT_REPORT_KEYS.some((key) => hasReportContent(report[key]));
+}
+
+function hasAnyReportField(report: ReportRecord, keys: string[]): boolean {
+  return keys.some((key) => hasReportContent(report[key]));
+}
+
+function hasDownloadReportContent(report: ReportRecord): boolean {
+  return DOWNLOAD_REPORT_REQUIREMENTS.some((requirements) => {
+    return requirements.every((aliases) => hasAnyReportField(report, aliases));
+  });
+}
+
+export function getUsableAnalysisReport(report: unknown = appStore.getState().analysis.analysisReport): ReportRecord | null {
+  const unwrapped = unwrapAnalysisReport(report);
+  if (!unwrapped) return null;
+
+  return hasSupportedTargetContent(unwrapped)
+    || hasLegacyPromptReportContent(unwrapped)
+    || hasDownloadReportContent(unwrapped)
+    ? unwrapped
+    : null;
+}
+
 // ==========================================
 // 报告状态
 // ==========================================
@@ -26,8 +131,7 @@ type AnalysisReportWithMetadata = {
  * 当前 store 中是否有分析报告
  */
 export function computeHasReport(): boolean {
-  const report = appStore.getState().analysis.analysisReport;
-  return !!report;
+  return !!getUsableAnalysisReport();
 }
 
 /**

@@ -122,6 +122,10 @@
       </header>
 
       <div class="playground-stage">
+        <div id="playground-pending-status" class="playground-pending-status" aria-live="polite" hidden>
+          <span class="playground-pending-dot" aria-hidden="true"></span>
+          <span id="playground-pending-status-text">正在生成回复...</span>
+        </div>
         <div class="playground-chat-wrap">
           <deep-chat id="playground-chat" class="playground-chat"></deep-chat>
         </div>

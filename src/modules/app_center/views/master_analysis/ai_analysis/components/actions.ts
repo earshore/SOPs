@@ -213,6 +213,12 @@ function resetAnalysisReport(context: AlpineContext): void {
   syncAnalysisReport(context, null);
 }
 
+function syncAnalysisProgress(context: AlpineContext, progress: number, currentStep: string): void {
+  context.progress = progress;
+  context.currentStep = currentStep;
+  appStore.getState().updateAnalysis({ progress, currentStep });
+}
+
 /**
  * 执行分析
  */
@@ -224,8 +230,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
   const selectedTargets = [...context.selectedTargets];
 
   context.isAnalyzing = true;
-  context.progress = 0;
-  context.currentStep = '正在准备分析...';
+  syncAnalysisProgress(context, 0, '正在准备分析...');
   resetAnalysisReport(context);
   appStore.getState().updateAnalysis({ isAnalyzing: true });
 
@@ -250,8 +255,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       selectedTargets,
       mergedProduct,
       (progress: number, step: string) => {
-        context.progress = progress;
-        context.currentStep = step;
+        syncAnalysisProgress(context, progress, step);
       },
       language,
       {
@@ -266,6 +270,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
     );
 
     syncAnalysisReport(context, analysisReport);
+    syncAnalysisProgress(context, 100, '分析完成');
 
     const currentHistoryId = appStore.getState().scraper?.currentHistoryId;
     if (analysisReport && currentHistoryId) {
@@ -282,8 +287,10 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
 
     showToast('分析完成！', { type: 'success' });
   } catch (error) {
+    const message = (error as Error).message;
+    syncAnalysisProgress(context, context.progress, `分析失败: ${message}`);
     console.error('[用户动作] 分析失败:', error);
-    showToast(`分析失败: ${(error as Error).message}`, { type: 'error' });
+    showToast(`分析失败: ${message}`, { type: 'error' });
   } finally {
     context.isAnalyzing = false;
     appStore.getState().updateAnalysis({ isAnalyzing: false });

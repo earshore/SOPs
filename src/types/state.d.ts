@@ -99,6 +99,8 @@ export interface AnalysisState {
   editHistory?: Array<AnalysisReport | string>;
   lastTranslationModel?: string | null;
   isAnalyzing?: boolean;
+  progress?: number;
+  currentStep?: string;
   filters?: {
     dateRange?: [number, number];
     categories?: string[];
@@ -747,6 +749,8 @@ export type AnalysisPath =
   | 'analysis.editHistory'
   | 'analysis.lastTranslationModel'
   | 'analysis.isAnalyzing'
+  | 'analysis.progress'
+  | 'analysis.currentStep'
   | 'analysis.filters'
   | 'analysis.pendingReport';
 

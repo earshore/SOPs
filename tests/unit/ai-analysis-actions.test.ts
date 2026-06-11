@@ -24,7 +24,8 @@ import {
   copyPrompt,
   copyJson,
   copyMarkdown,
-  downloadJson
+  downloadJson,
+  runAnalysisAction
 } from '../../src/modules/app_center/views/master_analysis/ai_analysis/components/actions';
 import { AlpineContext } from '../../src/modules/app_center/views/master_analysis/ai_analysis/types';
 import type { Product } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/sampleData';
@@ -40,6 +41,8 @@ const mockAppStoreState = vi.hoisted(() => ({
   updateAnalysis: vi.fn(),
   scraper: undefined as any
 }));
+
+const mockRunParallelAIAnalysis = vi.hoisted(() => vi.fn());
 
 vi.mock('@/stores/useAppStore', () => ({
   appStore: {
@@ -57,7 +60,27 @@ vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/services
 }));
 
 vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/utils/dataTransformers', () => ({
-  mergeProducts: vi.fn((products: Product[]) => products[0])
+  mergeProducts: vi.fn((products: Product[]) => products[0]),
+  getProductsByAsins: vi.fn((_scrapedData, _asins) => [
+    {
+      asin: 'B001',
+      title: 'Test Product',
+      bulletPoints: ['Feature 1'],
+      reviews: []
+    }
+  ])
+}));
+
+vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService', () => ({
+  runParallelAIAnalysis: mockRunParallelAIAnalysis
+}));
+
+vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/components/PerformanceSettings', () => ({
+  getPerformanceSettings: vi.fn(() => ({
+    maxConcurrency: 2,
+    enableCache: false,
+    failureStrategy: 'continue'
+  }))
 }));
 
 describe('actions - ASIN 选择操作', () => {
@@ -458,5 +481,82 @@ describe('actions - 复制操作', () => {
       
       expect(mockCreateElement).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('actions - 执行分析', () => {
+  let mockContext: AlpineContext;
+  let mockProducts: Product[];
+
+  beforeEach(() => {
+    mockContext = {
+      selectedAsins: ['B001'],
+      selectedTargets: ['selling-points'],
+      isAnalyzing: false,
+      progress: 0,
+      currentStep: '',
+      analysisReport: null,
+      hasReport: false,
+      reportResults: [],
+      reportListingsResults: [],
+      reportReviewsResults: [],
+      reportTotalHighlights: 0,
+      reportTotalDetails: 0,
+      reportFullData: null,
+      reportRenderVersion: 0,
+      expandedPromptIndex: null,
+      showPromptPanel: false,
+      showJsonViewer: false,
+      dataSource: 'scraper',
+      availableAsins: ['B001'],
+      hasData: true,
+      canAnalyze: true,
+      $nextTick: vi.fn((cb) => cb()),
+      _unsubscribes: []
+    } as AlpineContext;
+
+    mockProducts = [
+      {
+        asin: 'B001',
+        title: 'Test Product',
+        bulletPoints: ['Feature 1'],
+        reviews: []
+      }
+    ];
+
+    mockAppStoreState.scraper = {
+      scrapedData: { products: mockProducts },
+      currentHistoryId: null
+    };
+    mockRunParallelAIAnalysis.mockImplementation(async (_targets, _product, onProgress, _language, options) => {
+      const partialReport = { 'selling-points': { details: [] } };
+      onProgress(45, '正在分析: selling-points...');
+      options.onTaskComplete({ report: partialReport });
+      return partialReport;
+    });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('应该把分析进度和当前步骤同步到应用 store', async () => {
+    await runAnalysisAction(mockContext, mockProducts);
+
+    expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({
+      progress: 0,
+      currentStep: '正在准备分析...'
+    });
+    expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({
+      progress: 45,
+      currentStep: '正在分析: selling-points...'
+    });
+    expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({
+      progress: 100,
+      currentStep: '分析完成'
+    });
+    expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({ isAnalyzing: false });
+    expect(mockContext.progress).toBe(100);
+    expect(mockContext.currentStep).toBe('分析完成');
   });
 });

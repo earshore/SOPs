@@ -127,6 +127,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-left: calc(var(--ppc-hero-icon-size) + 12px);
   margin-top: 16px;
   padding: 0;
   list-style: none;
@@ -243,6 +244,8 @@
 }
 
 .ppc-import-panel {
+  display: flex;
+  flex-direction: column;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.82));
 }
 
@@ -419,15 +422,19 @@
 }
 
 .ppc-import-grid {
-  align-items: start;
+  flex: 1 1 auto;
+  align-items: stretch;
 }
 
 .ppc-paste-column {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
 
 .ppc-dropzone {
   display: flex;
+  height: 100%;
   min-height: 200px;
   flex-direction: column;
   align-items: center;
@@ -445,17 +452,19 @@
   border-color: rgba(37, 99, 235, 0.52);
 }
 
-.ppc-textarea {
+.ppc-search-app .ppc-paste-column .ppc-textarea {
   display: block;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 200px;
   background: rgba(255, 255, 255, 0.88);
   color: #0f172a;
   line-height: 1.6;
-  min-height: 200px;
   resize: vertical;
   transition: border-color var(--ppc-transition), box-shadow var(--ppc-transition), background-color var(--ppc-transition);
 }
 
-.ppc-textarea:focus {
+.ppc-search-app .ppc-paste-column .ppc-textarea:focus {
   background: #ffffff;
   outline: none;
 }

@@ -95,6 +95,34 @@ const DEFAULT_PROFILE: UserProductProfile = {
   charLimit: 5000,
 };
 
+function createDefaultDnaConfidence(): DnaConfidence {
+  return {
+    audience: 0,
+    usps: 0,
+    specs: 0,
+    keywords: 0,
+    negative: 0,
+    overall: 0,
+  };
+}
+
+function withoutReportDna(profile: UserProductProfile): UserProductProfile {
+  return {
+    ...DEFAULT_PROFILE,
+    ...profile,
+    targetMarket: "",
+    keywordsTier1: "",
+    keywordsTier2: "",
+    audience: "",
+    usps: "",
+    specs: "",
+    socialHook: "",
+    negative: "",
+    selectedReportSections: [],
+    selectedReportItems: undefined,
+  };
+}
+
 type StructuredSubItemSelection = {
   enabled: boolean;
   items?: Record<string, boolean>;
@@ -195,14 +223,7 @@ function createPromptlabPanelState(): PromptlabPanelState {
     lastMarketplace: "",
     originalHeights: new Map<HTMLElement, number>(),
     profile: { ...DEFAULT_PROFILE } as UserProductProfile,
-    dnaConfidence: {
-      audience: 0,
-      usps: 0,
-      specs: 0,
-      keywords: 0,
-      negative: 0,
-      overall: 0,
-    } as DnaConfidence,
+    dnaConfidence: createDefaultDnaConfidence(),
     hasRenderedReportOnce: false,
     expandedDimensions: new Set<string>(),
     expandedSubItems: new Set<string>(),
@@ -387,16 +408,26 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
       // 订阅 appStore，分析报告变化时刷新渲染
       if (appStore && typeof appStore.subscribe === "function") {
-        this._appStoreUnsubscribe = appStore.subscribe((state) => {
-          if (state.analysis?.analysisReport) {
-            const nextTick = (
-              this as { $nextTick?: (callback: () => void) => void }
-            ).$nextTick;
-            if (typeof nextTick === "function") {
-              nextTick(() => this.renderReportAnalysis());
-            } else {
-              setTimeout(() => this.renderReportAnalysis(), 0);
-            }
+        this._appStoreUnsubscribe = appStore.subscribe((state, previousState) => {
+          if (state.analysis?.analysisReport === previousState?.analysis?.analysisReport) {
+            return;
+          }
+
+          if (!computeHasReport()) {
+            this.profile = withoutReportDna(this.profile);
+            this.dnaConfidence = createDefaultDnaConfidence();
+            this.hasRenderedReportOnce = false;
+            this.expandedDimensions.clear();
+            this.expandedSubItems.clear();
+          }
+
+          const nextTick = (
+            this as { $nextTick?: (callback: () => void) => void }
+          ).$nextTick;
+          if (typeof nextTick === "function") {
+            nextTick(() => this.renderReportAnalysis());
+          } else {
+            setTimeout(() => this.renderReportAnalysis(), 0);
           }
         });
       }
@@ -425,8 +456,20 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     restoreState() {
       const promptlabState = appStore.getState().promptlab;
       const saved = promptlabState?.userProductProfile;
+      const hasUsableReport = computeHasReport();
       if (saved) {
-        this.profile = { ...saved };
+        this.profile = hasUsableReport
+          ? { ...DEFAULT_PROFILE, ...saved }
+          : withoutReportDna(saved);
+      } else if (!hasUsableReport) {
+        this.profile = { ...DEFAULT_PROFILE };
+      }
+
+      if (!hasUsableReport) {
+        this.dnaConfidence = createDefaultDnaConfidence();
+        this.hasRenderedReportOnce = false;
+        this.expandedDimensions.clear();
+        this.expandedSubItems.clear();
       }
 
       const promptHistory = promptlabState?.history || [];
