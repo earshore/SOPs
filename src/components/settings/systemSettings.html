@@ -14,6 +14,44 @@
         visibility: visible;
         transform: translate(-50%, 0);
     }
+
+    #llm-endpoint.settings-leading-icon-input,
+    #llm-api-key.settings-secret-input,
+    #proxy-custom-url.settings-proxy-secret-input {
+        padding-left: 3rem;
+    }
+
+    #llm-api-key.settings-secret-input,
+    #proxy-custom-url.settings-proxy-secret-input {
+        padding-right: 3rem;
+    }
+
+    .settings-section-frame {
+        border: 1px solid rgba(226, 232, 240, 0.75);
+        border-radius: 1rem;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        padding: 1rem;
+    }
+
+    .settings-section-frame--llm {
+        background: linear-gradient(135deg, rgba(245, 243, 255, 0.9), rgba(248, 250, 252, 0.62));
+        border-color: rgba(221, 214, 254, 0.78);
+    }
+
+    .settings-section-frame--network {
+        background: linear-gradient(135deg, rgba(236, 254, 255, 0.9), rgba(248, 250, 252, 0.62));
+        border-color: rgba(165, 243, 252, 0.72);
+    }
+
+    .settings-section-frame--data {
+        background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(248, 250, 252, 0.62));
+        border-color: rgba(191, 219, 254, 0.72);
+    }
+
+    .settings-section-frame--performance {
+        background: linear-gradient(135deg, rgba(236, 253, 245, 0.9), rgba(248, 250, 252, 0.62));
+        border-color: rgba(167, 243, 208, 0.72);
+    }
 </style>
 <div x-data="settingsPanel" @open-settings.window="open()" @close-settings.window="close()"
     @keydown.escape.window="close()" x-show="isOpen" x-transition.opacity.duration.300ms
@@ -68,36 +106,37 @@
                     <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">LLM 模型配置</h3>
                 </div>
 
-                <!-- 🔒 Security Warning -->
-                <div x-show="showDangerousEndpointWarning"
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 -translate-y-2"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl shadow-sm">
-                    <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fas fa-exclamation-triangle text-amber-500 text-xs"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-amber-800 text-sm mb-1.5">安全警告</h4>
-                            <p class="text-xs text-amber-700/80 leading-relaxed mb-2.5">
-                                为保护您的 API 密钥安全，生产环境已禁用直接调用外部 API。
-                            </p>
-                            <div class="flex flex-wrap gap-1.5">
-                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700">
-                                    <i class="fas fa-server"></i> 使用内置代理
-                                </span>
-                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700">
-                                    <i class="fas fa-shield-alt"></i> 配置企业网关
-                                </span>
+                <div class="settings-section-frame settings-section-frame--llm space-y-4">
+                    <!-- 🔒 Security Warning -->
+                    <div x-show="showDangerousEndpointWarning"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i class="fas fa-exclamation-triangle text-amber-500 text-xs"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-amber-800 text-sm mb-1.5">安全警告</h4>
+                                <p class="text-xs text-amber-700/80 leading-relaxed mb-2.5">
+                                    为保护您的 API 密钥安全，生产环境已禁用直接调用外部 API。
+                                </p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700">
+                                        <i class="fas fa-server"></i> 使用内置代理
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700">
+                                        <i class="fas fa-shield-alt"></i> 配置企业网关
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="space-y-4">
-                    <!-- Provider Select -->
-                    <div class="group">
+                    <div class="space-y-4">
+                        <!-- Provider Select -->
+                        <div class="group">
                         <label for="llm-provider" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">AI 厂商</label>
                         <div class="relative">
                             <select id="llm-provider" name="llm-provider" :value="llm.provider" @change="setLlmProvider($event)"
@@ -114,11 +153,11 @@
                     <div class="group">
                         <label for="llm-endpoint" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">API Endpoint</label>
                         <div class="relative">
-                            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded bg-emerald-100 flex items-center justify-center">
+                            <div class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-emerald-100 flex items-center justify-center">
                                 <i class="fas fa-link text-emerald-500 text-[9px]"></i>
                             </div>
                             <input type="text" id="llm-endpoint" name="llm-endpoint" :value="llm.endpoint" @input="setLlmEndpoint($event)"
-                                class="w-full pl-11 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                                class="settings-leading-icon-input w-full pl-12 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
                                 placeholder="https://new.hongecb.store/v1" />
                         </div>
                     </div>
@@ -127,11 +166,11 @@
                     <div class="group">
                         <label for="llm-api-key" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">API Key</label>
                         <div class="relative">
-                            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center">
+                            <div class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center">
                                 <i class="fas fa-key text-amber-500 text-[9px]"></i>
                             </div>
                             <input :type="llmApiKeyInputType" id="llm-api-key" name="llm-api-key" :value="llm.apiKey" @input="setLlmApiKey($event)"
-                                class="w-full pl-11 pr-11 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                                class="settings-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
                                 placeholder="sk-..." />
                             <button @click="toggleLlmKeyVisibility()"
                                 class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200">
@@ -215,6 +254,7 @@
                         </button>
                     </div>
                 </div>
+                </div>
             </section>
 
             <!-- Decorative Divider -->
@@ -233,7 +273,7 @@
                     <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">采集网络设置</h3>
                 </div>
 
-                <div class="space-y-4">
+                <div class="settings-section-frame settings-section-frame--network space-y-4">
                     <!-- Connection Type -->
                     <div class="group">
                         <label for="proxy-type" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">连接方式</label>
@@ -264,12 +304,12 @@
                         class="space-y-3">
                         <label for="proxy-custom-url" class="block text-xs font-semibold text-slate-600" x-text="proxyInputLabel"></label>
                         <div class="flex gap-2">
-                            <div class="relative flex-1">
-                                <div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded bg-cyan-100 flex items-center justify-center">
+                            <div class="relative min-w-0 flex-1">
+                                <div class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-cyan-100 flex items-center justify-center">
                                     <i class="fas fa-globe text-cyan-500 text-[9px]"></i>
                                 </div>
                                 <input :type="proxyInputType" id="proxy-custom-url" name="proxy-custom-url" :value="proxy.customUrl" @input="setProxyCustomUrl($event)"
-                                    class="w-full pl-11 pr-11 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                                    class="settings-proxy-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
                                     :placeholder="proxyInputPlaceholder" />
                                 <button @click="toggleProxyKeyVisibility()"
                                     class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200">
@@ -318,7 +358,7 @@
                     <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">本地数据管理</h3>
                 </div>
 
-                <div class="p-4 bg-gradient-to-br from-blue-50 to-slate-50/60 border border-blue-100/70 rounded-2xl shadow-sm space-y-4">
+                <div class="settings-section-frame settings-section-frame--data space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
                             <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium">localStorage</span>
@@ -444,7 +484,7 @@
                     <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">性能监控</h3>
                 </div>
 
-                <div class="space-y-4">
+                <div class="settings-section-frame settings-section-frame--performance space-y-4">
                     <!-- Monitor Panel Button -->
                     <button @click="openPerformanceMonitor()"
                         class="w-full p-4 bg-gradient-to-br from-emerald-50 to-teal-50/30 hover:from-emerald-100 hover:to-teal-100/50 border border-emerald-200/60 hover:border-emerald-300 rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md group">
