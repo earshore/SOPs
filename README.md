@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 LLM 网关；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按最新远端 tag `v3.0.1-rc.2`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按最新远端 tag `v3.0.3-rc.7`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,13 +10,12 @@ sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团�
 
 ## 最新发布
 
-当前最新 tag 是 `v3.0.1-rc.2`（2026-06-08，release candidate）；最新稳定 tag 仍是 `v3.0.0`。`v3.0.1-rc.2` 修复了 PPC 搜索词模块的 ESLint warning gate，`v3.0.1` 系列累计带来以下面向运营的变化：
+当前最新 tag 是 `v3.0.3-rc.7`（2026-06-12，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.7` 聚焦 Master Analysis 体验和发布版本同步，`v3.0.3` 系列累计带来以下面向运营的变化：
 
-- 新增 App Center 的 `PPC 搜索词分析器`，路由为 `/app-center/ppc-search-terms`。
-- 支持 Amazon Ads 搜索词报表、ERP 广告搜索词报表和 ERP 广告活动报表，支持 CSV、TSV、TXT、XLSX 或直接粘贴表格内容。
-- 输出否精准、加精准、加预算、降竞价、Listing 词池等搜索词动作；ERP 广告活动报表会输出处理状态、暂停/降预算、活动加预算、控价降竞价和结构复盘等活动级动作。
-- 引入 PPC Agent 流程：本地规则先全量初判，模型只复核低置信高影响候选，并合并为最终动作清单。
-- Agent Center 增加 PPC Search Terms Agent 原型，用于沉淀角色、Skill、工具和输出标准。
+- 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
+- 新增工作流导向条和统一确认弹窗，减少高风险数据操作误触。
+- 调整 Scraper 历史记录、数据操作和端到端测试，覆盖新的确认流程。
+- 同步应用内版本显示到 `3.0.3-rc.7`。
 
 ## 快速开始
 

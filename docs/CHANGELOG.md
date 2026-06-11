@@ -26,6 +26,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.7] - 2026-06-12
+
+### Changed
+- 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
+- 同步应用内版本显示到 `3.0.3-rc.7`。
+
+### Fixed
+- 新增统一确认弹窗并接入 Scraper 数据操作流程，降低误清空和误覆盖风险。
+- 更新 Scraper 端到端测试和页面对象以匹配新的确认交互。
+
 ## [1.0.0] - 2026-03-22
 
 ### Added
