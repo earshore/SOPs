@@ -1,19 +1,29 @@
 # CSS 模块分析报告
 
-> 生成时间: 2026/6/8 18:00:35
+> 生成时间: 2026/6/11 17:04:35
 
 ## 📊 统计信息
 
 - 分析文件数: 10
-- 总代码行数: 4227
+- 总代码行数: 5423
 - 识别模式数: 10
 
 ## 🔍 发现的重复模式
 
 ### Cards 相关
 
-- **cards-pattern-1**: 出现 5 次
-  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
+- **cards-pattern-3**: 出现 8 次
+  - 文件: src/modules/app_center/app_center_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/more/more_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
+  - 示例:
+    ```css
+    .app-overview-card { --app-accent-shadow: rgba(124, 58, 237, 0.18); position: relative; display: fle...
+    ```
+    ```css
+    .glass-card { background: var(--color-white); backdrop-filter: blur(16px); /* 更深度的模糊 */ border: 1px ...
+    ```
+
+- **cards-pattern-1**: 出现 7 次
+  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/more/more_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css, src/modules/more/views/explore/prompts/prompts_style.css
   - 示例:
     ```css
     .sop-card { background: white; border-radius: var(--rounded-xl);...
@@ -22,24 +32,14 @@
     .amz_card-hover { position: relative; background: white; transition: all var(--duration-slow) var(--...
     ```
 
-- **cards-pattern-2**: 出现 8 次
-  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css
+- **cards-pattern-2**: 出现 9 次
+  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/more/views/explore/prompts/prompts_style.css
   - 示例:
     ```css
     .sop-card:hover { border-color: var(--color-blue-500); box-shadow: 0 10px 40px -10px var(--color-pri...
     ```
     ```css
     .amz_card-hover:hover { transform: translateY(-4px)...
-    ```
-
-- **cards-pattern-3**: 出现 5 次
-  - 文件: src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
-  - 示例:
-    ```css
-    .glass-card { background: var(--color-white); backdrop-filter: blur(16px); /* 更深度的模糊 */ border: 1px ...
-    ```
-    ```css
-    .analysis-widget-card { background: white; border-radius: var(--rounded-xl); border: 1px solid var(-...
     ```
 
 ### Buttons 相关
@@ -56,6 +56,16 @@
 
 ### Animations 相关
 
+- **animations-pattern-1**: 出现 28 次
+  - 文件: src/modules/home/homeDisplay.css, src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
+  - 示例:
+    ```css
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); }...
+    ```
+    ```css
+    @keyframes fadeIn { from { opacity: 0; }...
+    ```
+
 - **animations-pattern-2**: 出现 17 次
   - 文件: src/modules/home/homeDisplay.css, src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
   - 示例:
@@ -66,42 +76,32 @@
     animation: fadeUp 1s...
     ```
 
-- **animations-pattern-1**: 出现 24 次
-  - 文件: src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
-  - 示例:
-    ```css
-    @keyframes pulse { 0%, 100% { opacity: 1; }...
-    ```
-    ```css
-    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }...
-    ```
-
 ### Icons 相关
 
-- **icons-pattern-2**: 出现 2 次
-  - 文件: src/modules/sops/sops_style.css, src/modules/more/views/explore/prompts/prompts_style.css
+- **icons-pattern-2**: 出现 3 次
+  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/more/views/explore/prompts/prompts_style.css
   - 示例:
     ```css
     .sop-icon-container { width: 48px; height: 48px; border-radius: var(--rounded-lg); display: flex; al...
     ```
     ```css
-    .btn-icon { width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center;...
+    .sop-icon-container { display: flex; align-items: center; justify-content: center;...
     ```
 
 ### Badges 相关
 
 - **badges-pattern-1**: 出现 6 次
-  - 文件: src/modules/app_center/app_center_style.css, src/modules/sops/sops_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css, src/modules/more/views/explore/prompts/prompts_style.css
+  - 文件: src/modules/app_center/app_center_style.css, src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css, src/modules/more/views/explore/prompts/prompts_style.css
   - 示例:
-    ```css
-    .wb-badge { min-height: 1.625rem; padding: 0.25rem 0.625rem; border: 1px solid rgba(124, 58, 237, 0....
-    ```
     ```css
     .app-card-badge { display: inline-flex; align-items: center; min-height: auto; padding: 2px 8px; bor...
     ```
+    ```css
+    .stage-badge { display: inline-block; padding: 2px 8px; border-radius: var(--rounded); font-weight: ...
+    ```
 
-- **badges-pattern-2**: 出现 3 次
-  - 文件: src/modules/sops/sops_style.css
+- **badges-pattern-2**: 出现 4 次
+  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css
   - 示例:
     ```css
     .sop-status-active { background: var(--color-green-100); color: var(--color-green-600);...
@@ -113,8 +113,9 @@
 ## 💡 优化建议
 
 1. 发现 3 个重复的卡片样式模式，建议提取到 src/css/components/cards.css
-2. 发现 2 个重复的动画定义，建议移动到 src/css/animations/keyframes.css
-3. 发现 2 个重复的徽章样式，建议提取到 src/css/components/badges.css
+2. 发现 1 个重复的图标容器样式，建议使用统一的 .icon-container 类
+3. 发现 2 个重复的动画定义，建议移动到 src/css/animations/keyframes.css
+4. 发现 2 个重复的徽章样式，建议提取到 src/css/components/badges.css
 
 ## 📝 下一步行动
 

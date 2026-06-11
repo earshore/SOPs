@@ -208,7 +208,7 @@ function renderCapabilitySummary(caseData: ScenarioCase): string {
 
 function renderScenario(caseData: ScenarioCase): string {
     return `
-    <div class="ziniao-case-shell" style="--zn-accent:${caseData.accent};--zn-soft:${caseData.soft};">
+    <div class="ziniao-case-shell" style="--color-accent:${caseData.accent};--color-secondary:${caseData.soft};">
         ${renderHero(caseData)}
         ${renderPhases(caseData.phases)}
         ${renderBackground(caseData)}
@@ -228,7 +228,7 @@ function renderUsageNotice(): string {
     ];
 
     return `
-    <div class="ziniao-case-shell ziniao-notice-shell" style="--zn-accent:#dc2626;--zn-soft:#f59e0b;">
+    <div class="ziniao-case-shell ziniao-notice-shell" style="--color-accent:#dc2626;--color-secondary:#f59e0b;">
         <section class="zn-notice-title">
             <h2>使用 OpenClaw 前必读 · 两条关键须知</h2>
             <p>在跑任何自动化流程前，请先阅读以下两段说明。当前页面保留参考页信息顺序，并按项目宽版内容区重新排版。</p>

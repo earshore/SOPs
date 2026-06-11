@@ -1,23 +1,3 @@
-/* 为了防止污染全局，建议保留原本的类名命名空间 amzf_ */
-:root {
-    /* --amzf-primary: #4285f4; */
-    --amzf-primary: #667eea;
-    /* 统一主色调 */
-    --amzf-secondary: #34a853;
-    --amzf-accent: #fbbc04;
-    --amzf-danger: #ea4335;
-    --amzf-purple: #9c27b0;
-    --amzf-bg: #f8f9fa;
-    --amzf-card: #ffffff;
-    --amzf-text: #202124;
-    --amzf-text-secondary: #5f6368;
-    --amzf-border: #e8eaed;
-    --amzf-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    --amzf-shadow-hover: 0 10px 40px rgba(0, 0, 0, 0.15);
-    --amzf-radius: 16px;
-    --amzf-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 /* 容器微调：移除 min-height: 100vh，因为是嵌入在 Panel 里的 */
 /* 1. 修复滚动问题：确保容器撑满并允许内部滚动 */
 .amzf_container {
@@ -26,8 +6,8 @@
         -apple-system,
         BlinkMacSystemFont,
         sans-serif;
-    background: var(--amzf-bg);
-    color: var(--amzf-text);
+    background: var(--color-slate-50);
+    color: var(--color-slate-900);
     line-height: 1.6;
     width: 100%;
     height: 100%;
@@ -72,7 +52,7 @@
 
     /* 原本 header 的背景样式移到这里 */
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: var(--amzf-radius);
+    border-radius: 16px;
 
     /* ✅ 关键：只在背景层裁切，不影响内容层 */
     overflow: hidden;
@@ -224,7 +204,7 @@
 }
 
 .amzf_search_box:focus-within {
-    border-color: var(--amzf-primary);
+    border-color: var(--color-indigo-500);
     box-shadow:
         0 8px 32px rgba(102, 126, 234, 0.25),
         0 0 0 4px rgba(102, 126, 234, 0.1),
@@ -248,13 +228,13 @@
     background: transparent;
     font-size: 0.95rem;
     font-weight: 500;
-    color: var(--amzf-text);
+    color: var(--color-slate-900);
     outline: none;
     min-width: 0;
 }
 
 .amzf_search_input::placeholder {
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
     font-weight: 400;
     transition: opacity 0.3s ease;
 }
@@ -269,10 +249,10 @@
     justify-content: center;
     width: 24px;
     height: 24px;
-    background: var(--amzf-bg);
+    background: var(--color-slate-50);
     border: none;
     border-radius: 50%;
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
     font-size: 0.75rem;
     cursor: pointer;
     opacity: 0;
@@ -289,7 +269,7 @@
 }
 
 .amzf_search_clear:hover {
-    background: var(--amzf-danger);
+    background: var(--color-red-500);
     color: white;
     transform: scale(1.1);
 }
@@ -330,14 +310,14 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 16px 8px;
-    border-bottom: 1px solid var(--amzf-border);
+    border-bottom: 1px solid var(--color-slate-200);
     margin-bottom: 4px;
 }
 
 .amzf_history_title {
     font-size: 0.75rem;
     font-weight: 600;
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     display: flex;
@@ -347,7 +327,7 @@
 
 .amzf_history_clear_all {
     font-size: 0.7rem;
-    color: var(--amzf-danger);
+    color: var(--color-red-500);
     background: rgba(234, 67, 53, 0.1);
     border: none;
     padding: 4px 10px;
@@ -358,7 +338,7 @@
 }
 
 .amzf_history_clear_all:hover {
-    background: var(--amzf-danger);
+    background: var(--color-red-500);
     color: white;
 }
 
@@ -389,7 +369,7 @@
 .amzf_history_item_text {
     flex: 1;
     font-size: 0.9rem;
-    color: var(--amzf-text);
+    color: var(--color-slate-900);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -398,7 +378,7 @@
 .amzf_history_item_delete {
     opacity: 0;
     font-size: 0.7rem;
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
     padding: 4px 8px;
     border-radius: 8px;
     transition: all 0.2s ease;
@@ -411,13 +391,13 @@
 
 .amzf_history_item_delete:hover {
     background: rgba(234, 67, 53, 0.15);
-    color: var(--amzf-danger);
+    color: var(--color-red-500);
 }
 
 .amzf_history_empty {
     text-align: center;
     padding: 24px 16px;
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
     font-size: 0.85rem;
 }
 
@@ -433,7 +413,7 @@
     flex-wrap: wrap;
     gap: 8px;
     padding: 12px 16px;
-    border-top: 1px solid var(--amzf-border);
+    border-top: 1px solid var(--color-slate-200);
 }
 
 .amzf_quick_tag {
@@ -444,7 +424,7 @@
         rgba(102, 126, 234, 0.1) 0%,
         rgba(118, 75, 162, 0.1) 100%
     );
-    color: var(--amzf-primary);
+    color: var(--color-indigo-500);
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -491,10 +471,10 @@
 
 .amzf_view_toggle {
     display: flex;
-    background: var(--amzf-card);
+    background: var(--color-white);
     border-radius: 50px;
     padding: 5px;
-    box-shadow: var(--amzf-shadow);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
 .amzf_view_btn {
@@ -504,9 +484,9 @@
     border-radius: 50px;
     font-size: 0.95rem;
     font-weight: 500;
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
     cursor: pointer;
-    transition: var(--amzf-transition);
+    transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
     display: flex;
     align-items: center;
     gap: 8px;
@@ -519,7 +499,7 @@
 }
 
 .amzf_view_btn:hover:not(.amzf_active) {
-    background: var(--amzf-bg);
+    background: var(--color-slate-50);
 }
 
 /* Country Tabs */
@@ -531,26 +511,26 @@
 
 .amzf_country_tab {
     padding: 10px 18px;
-    border: 2px solid var(--amzf-border);
-    background: var(--amzf-card);
+    border: 2px solid var(--color-slate-200);
+    background: var(--color-white);
     border-radius: 50px;
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
-    transition: var(--amzf-transition);
+    transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .amzf_country_tab:hover {
-    border-color: var(--amzf-primary);
+    border-color: var(--color-indigo-500);
     transform: translateY(-2px);
 }
 
 .amzf_country_tab.amzf_active {
-    background: var(--amzf-primary);
-    border-color: var(--amzf-primary);
+    background: var(--color-indigo-500);
+    border-color: var(--color-indigo-500);
     color: white;
 }
 
@@ -588,7 +568,7 @@
     align-items: center;
     gap: 10px;
     min-width: 120px;
-    color: var(--amzf-text);
+    color: var(--color-slate-900);
 }
 
 .amzf_stat_icon {
@@ -610,13 +590,13 @@
 
 /* 搜索框图标微调 */
 .amzf_search_icon i {
-    color: var(--amzf-primary);
+    color: var(--color-indigo-500);
     opacity: 0.8;
 }
 
 /* 历史记录图标微调 */
 .amzf_history_item_icon i {
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
 }
 
 /* 标题图标微调 */
@@ -659,15 +639,15 @@
 }
 
 .amzf_month_section {
-    background: var(--amzf-card);
-    border-radius: var(--amzf-radius);
+    background: var(--color-white);
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: var(--amzf-shadow);
-    transition: var(--amzf-transition);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .amzf_month_section:hover {
-    box-shadow: var(--amzf-shadow-hover);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
 .amzf_month_header {
@@ -678,7 +658,7 @@
     align-items: center;
     justify-content: space-between;
     user-select: none;
-    transition: var(--amzf-transition);
+    transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .amzf_month_header:hover {
@@ -694,11 +674,11 @@
 .amzf_month_name {
     font-size: 1.3rem;
     font-weight: 600;
-    color: var(--amzf-text);
+    color: var(--color-slate-900);
 }
 
 .amzf_month_badge {
-    background: var(--amzf-primary);
+    background: var(--color-indigo-500);
     color: white;
     padding: 4px 12px;
     border-radius: 50px;
@@ -760,11 +740,11 @@
 
 /* Event Card */
 .amzf_event_card {
-    background: var(--amzf-bg);
+    background: var(--color-slate-50);
     border-radius: 12px;
     padding: 20px;
-    border-left: 4px solid var(--amzf-primary);
-    transition: var(--amzf-transition);
+    border-left: 4px solid var(--color-indigo-500);
+    transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
     cursor: pointer;
 }
 
@@ -774,19 +754,19 @@
 }
 
 .amzf_event_card.amzf_type_holiday {
-    border-left-color: var(--amzf-danger);
+    border-left-color: var(--color-red-500);
 }
 
 .amzf_event_card.amzf_type_shopping {
-    border-left-color: var(--amzf-secondary);
+    border-left-color: var(--color-green-500);
 }
 
 .amzf_event_card.amzf_type_cultural {
-    border-left-color: var(--amzf-purple);
+    border-left-color: var(--color-purple-600);
 }
 
 .amzf_event_card.amzf_type_season {
-    border-left-color: var(--amzf-accent);
+    border-left-color: var(--color-amber-400);
 }
 
 .amzf_event_header {
@@ -834,12 +814,12 @@
 .amzf_event_title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--amzf-text);
+    color: var(--color-slate-900);
 }
 
 .amzf_event_date {
     font-size: 0.85rem;
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
     background: white;
     padding: 5px 12px;
     border-radius: 20px;
@@ -870,7 +850,7 @@
 .amzf_strategy_title {
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--amzf-primary);
+    color: var(--color-indigo-500);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -879,7 +859,7 @@
 
 .amzf_strategy_content {
     font-size: 0.9rem;
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
     line-height: 1.7;
 }
 
@@ -906,10 +886,10 @@
 }
 
 .amzf_event_comparison {
-    background: var(--amzf-card);
-    border-radius: var(--amzf-radius);
+    background: var(--color-white);
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: var(--amzf-shadow);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
 .amzf_comparison_header {
@@ -953,9 +933,9 @@
     gap: 20px;
     /* ✅ 设置三列之间的固定间距 */
     padding: 15px;
-    background: var(--amzf-bg);
+    background: var(--color-slate-50);
     border-radius: 12px;
-    transition: var(--amzf-transition);
+    transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 /* 增加一点上边距，让单行时图标也能和文字第一行对齐 */
@@ -983,7 +963,7 @@
 
 .amzf_country_name {
     font-weight: 600;
-    color: var(--amzf-text);
+    color: var(--color-slate-900);
 }
 
 /* 第二列：日期 (设置固定宽，移除原本的 flex: 1) */
@@ -991,7 +971,7 @@
     flex: 0 0 140px;
     /* ✅ 关键：固定宽度 100px，紧跟在旗帜后面 */
     width: 100px;
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
     margin-top: 2px;
     /* 微调垂直对齐 */
     white-space: nowrap;
@@ -1003,7 +983,7 @@
     flex: 1;
     /* ✅ 让内容区域占据剩下的所有空间 */
     font-size: 0.9rem;
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
     /* 如果希望文字不要太宽，可以加 max-width，例如 max-width: 800px; */
 }
 
@@ -1011,8 +991,8 @@
 .amzf_empty {
     text-align: center;
     padding: 60px 20px;
-    background: var(--amzf-card);
-    border-radius: var(--amzf-radius);
+    background: var(--color-white);
+    border-radius: 16px;
 }
 
 .amzf_empty_icon {
@@ -1022,7 +1002,7 @@
 
 .amzf_empty_text {
     font-size: 1.1rem;
-    color: var(--amzf-text-secondary);
+    color: var(--color-slate-500);
 }
 
 /* Animations */

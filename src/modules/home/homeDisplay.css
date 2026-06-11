@@ -2,20 +2,9 @@
 /* 🚀 P1-7: 移除Google Fonts,使用系统字体栈 */
 
 #home-splash-container {
-    /* --- 白底科技风格配色 --- */
-    --bg-white: #ffffff;
-    --text-primary: #0f172a;
-    /* 深蓝灰 */
-    --text-secondary: #64748b;
-    /* 浅灰 */
-    --accent-blue: #2563eb;
-    /* 科技蓝 */
-    --accent-cyan: #06b6d4;
-    /* 水波青 */
-
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
-    background-color: var(--bg-white);
-    color: var(--text-primary);
+    background-color: var(--color-white);
+    color: var(--color-slate-900);
     width: 100%;
     height: 100%;
     position: relative;
@@ -113,7 +102,7 @@
 
 .time-display {
     font-family: monospace;
-    color: var(--text-secondary);
+    color: var(--color-slate-500);
     font-size: 0.9rem;
     font-weight: 600;
 }
@@ -135,12 +124,12 @@
     font-weight: 900;
     font-size: 1.4rem;
     letter-spacing: 0.1em;
-    color: var(--text-primary);
+    color: var(--color-slate-900);
 }
 
 .logo-sub {
     font-size: 0.7rem;
-    color: var(--text-secondary);
+    color: var(--color-slate-500);
     letter-spacing: 0.25em;
     text-transform: uppercase;
     margin-top: 4px;
@@ -174,7 +163,7 @@
 
 /* 实体字：蓝青渐变 - 使用全局fadeUp动画 */
 .slogan-line.highlight {
-    background: linear-gradient(120deg, var(--accent-blue), var(--accent-cyan));
+    background: linear-gradient(120deg, var(--color-blue-600), var(--color-cyan-500));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -185,7 +174,7 @@
 /* 描边字：深色空心 - 使用全局fadeUp动画 */
 .slogan-line.outline {
     color: transparent;
-    -webkit-text-stroke: 1.5px var(--text-primary);
+    -webkit-text-stroke: 1.5px var(--color-slate-900);
     opacity: 0;
     animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
     position: relative;
@@ -205,7 +194,7 @@
 
 .slogan-sub {
     font-size: clamp(1.1rem, 2vw, 1.4rem);
-    color: var(--text-secondary);
+    color: var(--color-slate-500);
     line-height: 1.8;
     margin-bottom: 40px;
     opacity: 0;
@@ -213,7 +202,7 @@
 }
 
 .slogan-sub span {
-    color: var(--accent-blue);
+    color: var(--color-blue-600);
     font-weight: 700;
 }
 
@@ -235,7 +224,7 @@
 .status-dot-inner {
     width: 8px;
     height: 8px;
-    background: var(--accent-cyan);
+    background: var(--color-cyan-500);
     border-radius: 50%;
     position: relative;
 }
@@ -248,7 +237,7 @@
     left: -4px;
     width: 16px;
     height: 16px;
-    border: 1px solid var(--accent-cyan);
+    border: 1px solid var(--color-cyan-500);
     border-radius: 50%;
     animation: pulseRing 2s infinite;
 }
@@ -257,7 +246,7 @@
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.1em;
-    color: var(--text-primary);
+    color: var(--color-slate-900);
 }
 
 /* ----------------------------------------
@@ -279,7 +268,7 @@
 .brand-text {
     font-size: 0.7rem;
     letter-spacing: 0.2em;
-    color: var(--text-secondary);
+    color: var(--color-slate-500);
     font-weight: 500;
 }
 
@@ -320,7 +309,7 @@
     left: 0;
     width: 20px;
     height: 20px;
-    border: 1px solid var(--text-primary);
+    border: 1px solid var(--color-slate-900);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;

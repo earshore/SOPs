@@ -249,7 +249,7 @@ pre code {
 /* ========== 置信度颜色系统（使用设计令牌） ========== */
 /* 高置信度 */
 .confidence-high-bg {
-  background-color: var(--confidence-high-bg);
+  background-color: var(--color-green-100);
 }
 
 .confidence-high-bg-alpha {
@@ -257,20 +257,20 @@ pre code {
 }
 
 .confidence-high-text {
-  color: var(--confidence-high-text);
+  color: var(--color-green-700);
 }
 
 .confidence-high-text-light {
-  color: var(--confidence-high-text-light);
+  color: var(--color-green-400);
 }
 
 .confidence-high-border {
-  border-color: var(--confidence-high-border);
+  border-color: var(--color-green-300);
 }
 
 /* 中等置信度 */
 .confidence-medium-bg {
-  background-color: var(--confidence-medium-bg);
+  background-color: var(--color-yellow-100);
 }
 
 .confidence-medium-bg-alpha {
@@ -278,20 +278,20 @@ pre code {
 }
 
 .confidence-medium-text {
-  color: var(--confidence-medium-text);
+  color: var(--color-yellow-700);
 }
 
 .confidence-medium-text-light {
-  color: var(--confidence-medium-text-light);
+  color: var(--color-yellow-400);
 }
 
 .confidence-medium-border {
-  border-color: var(--confidence-medium-border);
+  border-color: var(--color-yellow-300);
 }
 
 /* 低置信度 */
 .confidence-low-bg {
-  background-color: var(--confidence-low-bg);
+  background-color: var(--color-orange-100);
 }
 
 .confidence-low-bg-alpha {
@@ -299,15 +299,15 @@ pre code {
 }
 
 .confidence-low-text {
-  color: var(--confidence-low-text);
+  color: var(--color-orange-700);
 }
 
 .confidence-low-text-light {
-  color: var(--confidence-low-text-light);
+  color: var(--color-orange-400);
 }
 
 .confidence-low-border {
-  border-color: var(--confidence-low-border);
+  border-color: var(--color-orange-300);
 }
 
 /* ========== 自定义并发数滑块样式 ========== */

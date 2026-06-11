@@ -10,16 +10,6 @@
   animation: moduleHighlightGreen var(--duration-2s) var(--ease-out);
 }
 
-/* ==================== 更多总览主题 ==================== */
-.more-overview {
-  --more-primary: #22c55e;
-  --more-accent: #059669;
-  --more-primary-soft: #f0fdf4;
-  --more-accent-soft: #ecfdf5;
-  --more-border: rgba(5, 150, 105, 0.2);
-  --more-shadow: rgba(34, 197, 94, 0.56);
-}
-
 .more-overview .wb-container--simple {
   border: 1px solid rgba(148, 163, 184, 0.24) !important;
   background:
@@ -33,21 +23,21 @@
   --wb-tag-bg: rgba(255, 255, 255, 0.78) !important;
   --wb-tag-border: rgba(5, 150, 105, 0.14) !important;
   --wb-tag-hover-border: rgba(5, 150, 105, 0.24) !important;
-  --wb-icon-shadow: 0 12px 24px -18px var(--more-shadow);
-  --wb-icon-shadow-hover: 0 14px 28px -20px var(--more-shadow);
+  --wb-icon-shadow: 0 12px 24px -18px rgba(34, 197, 94, 0.56);
+  --wb-icon-shadow-hover: 0 14px 28px -20px rgba(34, 197, 94, 0.56);
 }
 
 .more-overview .wb-container--simple .wb-icon {
-  background: linear-gradient(135deg, var(--more-primary), var(--more-accent)) !important;
-  box-shadow: 0 12px 24px -18px var(--more-shadow) !important;
+  background: linear-gradient(135deg, var(--color-green-500), var(--color-emerald-600)) !important;
+  box-shadow: 0 12px 24px -18px rgba(34, 197, 94, 0.56) !important;
 }
 
 .more-overview .wb-container--simple:hover .wb-icon {
-  box-shadow: 0 14px 28px -20px var(--more-shadow) !important;
+  box-shadow: 0 14px 28px -20px rgba(34, 197, 94, 0.56) !important;
 }
 
 .more-overview .wb-badge {
-  border-color: var(--more-border) !important;
+  border-color: rgba(5, 150, 105, 0.2) !important;
   background: linear-gradient(135deg, rgba(240, 253, 244, 0.92), rgba(236, 253, 245, 0.86)) !important;
   color: #15803d !important;
 }
@@ -60,7 +50,7 @@
 
 .more-overview .category-filter-btn.active {
   border-color: transparent !important;
-  background: linear-gradient(135deg, var(--more-primary), var(--more-accent)) !important;
+  background: linear-gradient(135deg, var(--color-green-500), var(--color-emerald-600)) !important;
   color: #ffffff !important;
   box-shadow: 0 12px 22px -18px rgba(34, 197, 94, 0.75);
 }
@@ -73,7 +63,7 @@
 
 .more-overview .category-filter-btn:not(.active):hover {
   border-color: rgba(5, 150, 105, 0.24) !important;
-  background: var(--more-primary-soft) !important;
+  background: var(--color-green-50) !important;
   color: #15803d !important;
 }
 
@@ -86,15 +76,6 @@
   font-size: 15px;
   line-height: 1.7;
   letter-spacing: 0;
-  --zn-banner-title-size: 1.375rem;
-  --zn-banner-title-weight: 800;
-  --zn-banner-title-line-height: 1.35;
-  --zn-banner-description-size: 0.875rem;
-  --zn-banner-description-line-height: 1.6;
-  --zn-banner-tag-size: 0.75rem;
-  --zn-banner-tag-weight: 500;
-  --zn-banner-accent: #0891b2;
-  --zn-banner-soft: #2563eb;
 }
 
 .ziniao-case-shell *,
@@ -112,9 +93,9 @@
   color: #fff;
   background:
     radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.18), transparent 28%),
-    linear-gradient(135deg, var(--zn-banner-accent), var(--zn-banner-soft));
+    linear-gradient(135deg, var(--color-cyan-600), var(--color-blue-600));
   border-radius: 18px;
-  box-shadow: 0 10px 30px color-mix(in srgb, var(--zn-banner-accent) 18%, transparent);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--color-cyan-600) 18%, transparent);
 }
 
 .zn-hero-eyebrow {
@@ -130,8 +111,8 @@
   min-height: 28px;
   padding: 4px 10px;
   color: #fff;
-  font-size: var(--zn-banner-tag-size, 0.75rem);
-  font-weight: var(--zn-banner-tag-weight, 500);
+  font-size: 0.75rem;
+  font-weight: 500;
   line-height: 1.4;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -142,17 +123,17 @@
   margin: 0 0 8px;
   max-width: 1120px;
   color: #fff;
-  font-size: var(--zn-banner-title-size, 1.375rem);
-  font-weight: var(--zn-banner-title-weight, 800);
-  line-height: var(--zn-banner-title-line-height, 1.35);
+  font-size: 1.375rem;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 .zn-hero > p {
   max-width: 1060px;
   margin: 0 0 16px;
   color: rgba(255, 255, 255, 0.94);
-  font-size: var(--zn-banner-description-size, 0.875rem);
-  line-height: var(--zn-banner-description-line-height, 1.6);
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 .zn-hero-meta {
@@ -266,9 +247,9 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  color: var(--zn-accent);
+  color: var(--color-accent);
   font-size: 12px;
-  background: color-mix(in srgb, var(--zn-accent) 11%, white);
+  background: color-mix(in srgb, var(--color-accent) 11%, white);
   border-radius: 999px;
 }
 
@@ -356,7 +337,7 @@
   margin-bottom: 18px;
   padding: 12px 16px;
   color: #fff;
-  background: linear-gradient(135deg, var(--zn-accent), var(--zn-soft));
+  background: linear-gradient(135deg, var(--color-accent), var(--color-secondary));
   border-radius: 12px;
 }
 

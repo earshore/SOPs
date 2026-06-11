@@ -1105,12 +1105,11 @@ function clearPromptPreviewHideTimer(): void {
 }
 
 function setupRailSectionResizer(container: HTMLElement): void {
-  const rail = container.querySelector<HTMLElement>('#playground-thread-rail');
   const threadPanel = container.querySelector<HTMLElement>('.playground-thread-list-wrap');
   const promptPanel = container.querySelector<HTMLElement>('.playground-prompt-list-wrap');
   const resizer = container.querySelector<HTMLElement>('#playground-rail-resizer');
 
-  if (!rail || !threadPanel || !promptPanel || !resizer) {
+  if (!threadPanel || !promptPanel || !resizer) {
     return;
   }
 
@@ -1123,7 +1122,7 @@ function setupRailSectionResizer(container: HTMLElement): void {
     const maxPromptHeight = Math.max(MIN_PROMPT_PANEL_HEIGHT, availableHeight - MIN_THREAD_PANEL_HEIGHT);
     const nextHeight = Math.min(Math.max(height, MIN_PROMPT_PANEL_HEIGHT), maxPromptHeight);
 
-    rail.style.setProperty('--playground-prompt-panel-height', `${Math.round(nextHeight)}px`);
+    promptPanel.style.flexBasis = `${Math.round(nextHeight)}px`;
     resizer.setAttribute('aria-valuemax', String(Math.round(maxPromptHeight)));
     resizer.setAttribute('aria-valuenow', String(Math.round(nextHeight)));
   };

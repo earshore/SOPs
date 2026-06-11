@@ -144,7 +144,6 @@ export class ThemeManager {
     return {
       '--color-primary': `var(--color-${colorScheme}-500)`,
       '--color-primary-light': `var(--color-${colorScheme}-100)`,
-      '--color-primary-lighter': `var(--color-${colorScheme}-50)`,
       '--color-primary-dark': `var(--color-${colorScheme}-700)`,
       '--color-primary-darker': `var(--color-${colorScheme}-900)`,
     };

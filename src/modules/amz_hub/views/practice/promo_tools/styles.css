@@ -1,17 +1,3 @@
-/* src/modules/amz_hub/views/practice/promo_tools/styles.css */
-:root {
-    --amzpt-primary: #2563eb;
-    --amzpt-secondary: #16a34a;
-    --amzpt-accent: #f97316;
-    --amzpt-bg: #f8fafc;
-    --amzpt-card: #ffffff;
-    --amzpt-text: #0f172a;
-    --amzpt-text-light: #64748b;
-    --amzpt-border: #e2e8f0;
-    --amzpt-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-    --amzpt-radius: 20px;
-}
-
 .amzpt_content {
     display: flex;
     flex-direction: column;
@@ -50,7 +36,7 @@
     margin: 0;
     font-size: 1.2rem;
     font-weight: 700;
-    color: var(--amzpt-text);
+    color: var(--color-slate-900);
 }
 
 .amzpt_dual_desc {
@@ -58,7 +44,7 @@
     max-width: 780px;
     font-size: 0.92rem;
     line-height: 1.75;
-    color: var(--amzpt-text-light);
+    color: var(--color-slate-500);
 }
 
 .amzpt_dual_grid {
@@ -75,7 +61,7 @@
     width: 100%;
     padding: 22px;
     border-radius: 20px;
-    border: 1px solid var(--amzpt-border);
+    border: 1px solid var(--color-slate-200);
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
     text-align: left;
@@ -119,14 +105,14 @@
     font-size: 1.02rem;
     font-weight: 700;
     line-height: 1.5;
-    color: var(--amzpt-text);
+    color: var(--color-slate-900);
 }
 
 .amzpt_dual_card_desc {
     margin: 0;
     font-size: 0.92rem;
     line-height: 1.75;
-    color: var(--amzpt-text-light);
+    color: var(--color-slate-500);
 }
 
 .amzpt_dual_points {
@@ -161,7 +147,7 @@
     margin: 20px 0 16px;
     padding: 24px;
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid var(--amzpt-border);
+    border: 1px solid var(--color-slate-200);
     border-radius: 24px;
     box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
 }
@@ -191,7 +177,7 @@
     margin: 0;
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--amzpt-text);
+    color: var(--color-slate-900);
     line-height: 1.35;
 }
 
@@ -200,7 +186,7 @@
     max-width: 780px;
     font-size: 0.92rem;
     line-height: 1.75;
-    color: var(--amzpt-text-light);
+    color: var(--color-slate-500);
 }
 
 .amzpt_anchor_tip {
@@ -210,7 +196,7 @@
     padding: 10px 14px;
     border-radius: 14px;
     background: #f8fafc;
-    border: 1px solid var(--amzpt-border);
+    border: 1px solid var(--color-slate-200);
     color: #475569;
     font-size: 0.82rem;
     font-weight: 600;
@@ -334,21 +320,21 @@
     margin-bottom: 6px;
     font-size: 1rem;
     font-weight: 700;
-    color: var(--amzpt-text);
+    color: var(--color-slate-900);
     line-height: 1.4;
 }
 
 .amzpt_nav_step_desc {
     font-size: 0.84rem;
-    color: var(--amzpt-text-light);
+    color: var(--color-slate-500);
     line-height: 1.65;
 }
 
 .amzpt_card {
-    background: var(--amzpt-card);
-    border: 1px solid var(--amzpt-border);
-    border-radius: var(--amzpt-radius);
-    box-shadow: var(--amzpt-shadow);
+    background: var(--color-white);
+    border: 1px solid var(--color-slate-200);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
     padding: 32px;
     scroll-margin-top: 20px;
 }
@@ -363,7 +349,7 @@
 }
 
 .amzpt_card_icon {
-    color: var(--amzpt-primary);
+    color: var(--color-blue-600);
     font-size: 1.5rem;
 }
 
@@ -371,7 +357,7 @@
     margin: 0;
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--amzpt-text);
+    color: var(--color-slate-900);
     line-height: 1.35;
 }
 
@@ -383,7 +369,7 @@
 }
 
 .amzpt_text strong {
-    color: var(--amzpt-text);
+    color: var(--color-slate-900);
 }
 
 .amzpt_section_header {
@@ -393,11 +379,11 @@
     margin: 28px 0 14px;
     font-size: 1.08rem;
     font-weight: 700;
-    color: var(--amzpt-text);
+    color: var(--color-slate-900);
 }
 
 .amzpt_section_header i {
-    color: var(--amzpt-primary);
+    color: var(--color-blue-600);
 }
 
 .amzpt_callout {
@@ -477,7 +463,7 @@
     padding: 22px 20px;
     border-radius: 18px;
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid var(--amzpt-border);
+    border: 1px solid var(--color-slate-200);
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
     transition: all 0.2s ease;
     min-height: 100%;
@@ -503,7 +489,7 @@
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
-    color: var(--amzpt-primary);
+    color: var(--color-blue-600);
     font-size: 1rem;
     flex-shrink: 0;
 }
@@ -511,13 +497,13 @@
 .amzpt_sub_title {
     font-size: 1rem;
     font-weight: 700;
-    color: var(--amzpt-text);
+    color: var(--color-slate-900);
     line-height: 1.4;
 }
 
 .amzpt_sub_desc {
     font-size: 0.92rem;
-    color: var(--amzpt-text-light);
+    color: var(--color-slate-500);
     line-height: 1.75;
     flex: 1;
 }
@@ -554,7 +540,7 @@
     padding: 20px;
     border-radius: 18px;
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid var(--amzpt-border);
+    border: 1px solid var(--color-slate-200);
 }
 
 .amzpt_stats_icon {
@@ -564,7 +550,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--amzpt-primary);
+    color: var(--color-blue-600);
     background: #eff6ff;
     flex-shrink: 0;
 }
@@ -578,7 +564,7 @@
 .amzpt_table_wrapper {
     margin: 18px 0;
     overflow-x: auto;
-    border: 1px solid var(--amzpt-border);
+    border: 1px solid var(--color-slate-200);
     border-radius: 18px;
 }
 
@@ -612,7 +598,7 @@
 
 .amzpt_table td:first-child {
     font-weight: 700;
-    color: var(--amzpt-text);
+    color: var(--color-slate-900);
 }
 
 .amzpt_tip_list,
@@ -631,7 +617,7 @@
     gap: 12px;
     padding: 14px 16px;
     border-radius: 16px;
-    border: 1px solid var(--amzpt-border);
+    border: 1px solid var(--color-slate-200);
     background: #ffffff;
 }
 
@@ -673,7 +659,7 @@
     min-width: 128px;
     font-size: 0.9rem;
     font-weight: 700;
-    color: var(--amzpt-primary);
+    color: var(--color-blue-600);
 }
 
 .amzpt_kv_value {

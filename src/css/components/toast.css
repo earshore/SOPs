@@ -33,10 +33,10 @@
    ======================================== */
 .toast {
   padding: 14px 22px;
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--rounded-sm);
-  color: var(--text);
+  color: var(--color-text-primary);
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -69,7 +69,7 @@
 
 .toast-content .toast-desc {
   font-size: 11px;
-  color: var(--text3);
+  color: var(--color-text-tertiary);
   line-height: 1.4;
 }
 
@@ -77,44 +77,44 @@
    Toast 变体 - Success
    ======================================== */
 .toast-success {
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--color-success);
 }
 
 .toast-success > i {
-  color: var(--accent);
+  color: var(--color-success);
 }
 
 /* ========================================
    Toast 变体 - Error
    ======================================== */
 .toast-error {
-  border-left: 3px solid var(--danger);
+  border-left: 3px solid var(--color-error);
 }
 
 .toast-error > i {
-  color: var(--danger);
+  color: var(--color-error);
 }
 
 /* ========================================
    Toast 变体 - Warning
    ======================================== */
 .toast-warning {
-  border-left: 3px solid var(--warning);
+  border-left: 3px solid var(--color-warning);
 }
 
 .toast-warning > i {
-  color: var(--warning);
+  color: var(--color-warning);
 }
 
 /* ========================================
    Toast 变体 - Info
    ======================================== */
 .toast-info {
-  border-left: 3px solid var(--info);
+  border-left: 3px solid var(--color-info);
 }
 
 .toast-info > i {
-  color: var(--info);
+  color: var(--color-info);
 }
 
 
@@ -123,7 +123,7 @@
    从右侧滑入
    ======================================== */
 .toast-slide-in {
-  animation: slideRight 0.4s var(--ease);
+  animation: slideRight 0.4s var(--ease-smooth);
 }
 
 @keyframes slideRight {
@@ -144,7 +144,7 @@
 .toast-slide-out {
   opacity: 0;
   transform: translateX(40px);
-  transition: all 0.4s var(--ease);
+  transition: all 0.4s var(--ease-smooth);
 }
 
 
@@ -208,4 +208,3 @@
 [data-animation-speed="slow"] .toast-slide-out {
   transition-duration: calc(0.4s * 1.5);
 }
-

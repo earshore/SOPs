@@ -34,21 +34,27 @@ interface AuditResult {
 const NAMING_PATTERNS = {
   // 基础色板: --color-{palette}-{shade}
   colorPalette: /^--color-(slate|gray|blue|sky|indigo|violet|purple|fuchsia|pink|rose|red|orange|amber|yellow|lime|green|emerald|teal|cyan)-(\d{2,3})$/,
-  
+  colorPrimitive: /^--color-(white|black)(-alpha-(5|10|20|40|60|80))?$/,
+
   // 语义颜色: --color-{semantic}
-  colorSemantic: /^--color-(primary|secondary|accent|success|warning|danger|error|info)(-light|-dark|-darker)?$/,
+  colorSemantic: /^--color-(primary|secondary|accent|success|warning|danger|error|info)(-light|-dark|-darker|-contrast)?$/,
+  colorFocus: /^--color-focus-ring$/,
+
+  // 文本颜色: --color-text-{variant}
+  textColor: /^--color-text-(primary|secondary|tertiary|placeholder|disabled|inverse|link|link-hover)$/,
   
-  // 文本颜色: --text-{variant}
-  textColor: /^--text-(primary|secondary|tertiary|disabled|inverse)$/,
+  // 背景颜色: --color-bg-{variant}
+  bgColor: /^--color-bg-(primary|secondary|tertiary|elevated|sunken|hover|active|selected|disabled|backdrop|overlay)$/,
   
-  // 背景颜色: --bg-{variant}
-  bgColor: /^--bg-(primary|secondary|tertiary|surface|overlay)$/,
-  
-  // 边框颜色: --border-{variant}
-  borderColor: /^--border-(default|light|dark|focus)$/,
+  // 边框颜色: --color-border-{variant}
+  borderColor: /^--color-border-(lightest|light|default|strong|focus|error)$/,
+
+  // 生成文件中的短语义兼容别名
+  semanticAlias: /^--(text-(primary|secondary|tertiary|disabled|inverse)|bg-(primary|secondary|tertiary|surface|overlay)|border(-dark|-focus)?)$/,
+  confidenceAlias: /^--confidence-(high|medium|low)-(bg|bg-alpha|text|text-light|border)$/,
   
   // 间距: --spacing-{value}
-  spacing: /^--spacing-(\d+(\.\d+)?|px)$/,
+  spacing: /^--spacing-(\d+(\.\d+)?|\d+-\d+|px|2xs|xs|sm|md|lg|xl|2xl|3xl|4xl|5xl)$/,
   
   // 字体: --font-{property}
   font: /^--font-(sans|serif|mono|display|thin|extralight|light|regular|medium|semibold|bold|extrabold|black)$/,
@@ -63,22 +69,53 @@ const NAMING_PATTERNS = {
   letterSpacing: /^--tracking-(tighter|tight|normal|wide|wider|widest)$/,
   
   // 圆角: --rounded-{size}
-  borderRadius: /^--rounded(-sm|-md|-lg|-xl|-2xl|-3xl|-full)?$/,
+  borderRadius: /^--rounded(-none|-xs|-sm|-md|-lg|-xl|-2xl|-3xl|-full)?$/,
   
   // 阴影: --shadow-{size}
-  boxShadow: /^--shadow(-sm|-md|-lg|-xl|-2xl|-inner)?$/,
+  boxShadow: /^--shadow(-none|-xs|-sm|-md|-lg|-xl|-2xl|-inner|-inner-lg|-primary-sm|-primary-md|-primary-lg|-up-sm|-up-md)?$/,
+
+  // 边框宽度和边框预设
+  border: /^--border-(width-(none|thin|default|medium|thick|heavy)|light|default|strong)$/,
   
   // Z-index: --z-{level}
-  zIndex: /^--z-(auto|\d+|dropdown|sticky|fixed|modal-backdrop|modal|popover|tooltip|toast|max)$/,
+  zIndex: /^--z-(auto|\d+|hide|base|raised|dropdown|sticky|fixed|header|overlay|mega-menu|modal-backdrop|modal|popover|tooltip|toast|loading|max)$/,
   
   // 缓动: --ease-{variant}
-  easing: /^--ease-(linear|in|out|in-out|bounce|smooth)$/,
+  easing: /^--ease-(linear|in|out|in-out|bounce|smooth|spring|elastic|back-in|back-out)$/,
+  microEasing: /^--micro-ease-(button|card|modal)$/,
+  microTransform: /^--micro-(scale|translate)-(press|hover)$/,
+  animationControl: /^--animations-enabled$|^--animation-speed-multiplier$/,
   
   // 时长: --duration-{value}
-  duration: /^--duration-(\d+)$/,
+  duration: /^--duration-(\d+|fastest|fast|normal|slow|slower|slowest|1s|2s)$/,
+  microDuration: /^--micro-duration-(instant|quick|smooth|gentle)$/,
   
   // 容器: --container-{property}
-  container: /^--container-(max-width|padding(-sm|-md|-lg|-xl)?)$/,
+  container: /^--container-(xs|sm|md|lg|xl|2xl|3xl|full|default|max-width|padding(-x)?(-sm|-md|-lg|-xl)?)$/,
+
+  // 透明度、滤镜、渐变
+  opacity: /^--opacity-(\d+|disabled|placeholder|overlay|backdrop|hover|loading)$/,
+  blur: /^--blur-(none|sm|md|lg|xl|2xl|3xl)$/,
+  backdrop: /^--backdrop-blur(-sm|-lg)?$/,
+  grayscale: /^--grayscale-(none|half|full)$/,
+  gradient: /^--gradient-(primary|secondary|success|warning|danger|info|rainbow|sunset|ocean|forest|glass|text|aurora)$/,
+
+  // 布局和基础交互 token
+  layout: /^--(prose-width|sidebar-width(-collapsed|-wide)?|section-gap(-sm|-lg)?|flow-gap)$/,
+  scrollbar: /^--scrollbar-(width|width-thin|track|thumb|thumb-hover|thumb-radius)$/,
+  focusRing: /^--focus-ring-(width|offset|color|style|shadow)$/,
+  breakpoint: /^--breakpoint-(sm|md|lg|xl|2xl)$/,
+
+  // 共享组件级变量
+  componentCard: /^--card-(bg|border|radius|padding|shadow|shadow-hover|translate-hover|body-max-height|left-accent|left-accent-bg)$/,
+  componentIcon: /^--icon-(size|radius|bg|color)$/,
+  componentField: /^--field-(height|height-compact|padding-x|padding-y|radius|border|border-hover|bg|bg-muted|text|placeholder|focus|focus-ring)$/,
+  componentCheckRadio: /^--(check|radio)-(size|size-sm|size-lg|radius|border|border-hover|bg|color-active|ring-focus)$/,
+  componentHeader: /^--header-(height|height-sm|bg|bg-solid|border|text|shadow|shadow-scrolled)$/,
+  componentCode: /^--(code|syntax|json|terminal)-[\w-]+$/,
+  componentSidebar: /^--sidebar-(primary|accent|shadow|active-bg-start|active-bg-end|icon-soft|icon-soft-end|text|border|focus)$/,
+  componentStatus: /^--status-(color|glow)$/,
+  componentWelcomeBanner: /^--wb-[\w-]+$/,
 };
 
 // 已废弃的变量（需要迁移）

@@ -30,7 +30,6 @@
 }
 
 .playground-thread-rail {
-  --playground-prompt-panel-height: 240px;
   min-width: 0;
   padding: var(--spacing-5, 1.25rem) var(--spacing-4, 1rem);
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(236, 254, 255, 0.76));
@@ -129,7 +128,7 @@
 .playground-prompt-list-wrap {
   min-height: 150px;
   display: flex;
-  flex: 0 0 var(--playground-prompt-panel-height);
+  flex: 0 0 240px;
   flex-direction: column;
   gap: var(--spacing-2, 0.5rem);
   padding-top: var(--spacing-3, 0.75rem);

@@ -8,16 +8,6 @@
  * - 容器样式使用 .module-container 工具类
  */
 
-/* ==================== SOPs 总览主题 ==================== */
-.sops-overview {
-  --sops-primary: #3b82f6;
-  --sops-accent: #4f46e5;
-  --sops-primary-soft: #eff6ff;
-  --sops-accent-soft: #eef2ff;
-  --sops-border: rgba(79, 70, 229, 0.2);
-  --sops-shadow: rgba(59, 130, 246, 0.58);
-}
-
 .sops-overview .wb-container--simple {
   border: 1px solid rgba(148, 163, 184, 0.24) !important;
   background:
@@ -31,21 +21,21 @@
   --wb-tag-bg: rgba(255, 255, 255, 0.78) !important;
   --wb-tag-border: rgba(79, 70, 229, 0.14) !important;
   --wb-tag-hover-border: rgba(79, 70, 229, 0.24) !important;
-  --wb-icon-shadow: 0 12px 24px -18px var(--sops-shadow);
-  --wb-icon-shadow-hover: 0 14px 28px -20px var(--sops-shadow);
+  --wb-icon-shadow: 0 12px 24px -18px rgba(59, 130, 246, 0.58);
+  --wb-icon-shadow-hover: 0 14px 28px -20px rgba(59, 130, 246, 0.58);
 }
 
 .sops-overview .wb-container--simple .wb-icon {
-  background: linear-gradient(135deg, var(--sops-primary), var(--sops-accent)) !important;
-  box-shadow: 0 12px 24px -18px var(--sops-shadow) !important;
+  background: linear-gradient(135deg, var(--color-blue-500), var(--color-indigo-600)) !important;
+  box-shadow: 0 12px 24px -18px rgba(59, 130, 246, 0.58) !important;
 }
 
 .sops-overview .wb-container--simple:hover .wb-icon {
-  box-shadow: 0 14px 28px -20px var(--sops-shadow) !important;
+  box-shadow: 0 14px 28px -20px rgba(59, 130, 246, 0.58) !important;
 }
 
 .sops-overview .wb-badge {
-  border-color: var(--sops-border) !important;
+  border-color: rgba(79, 70, 229, 0.2) !important;
   background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(238, 242, 255, 0.86)) !important;
   color: #1d4ed8 !important;
 }
@@ -58,7 +48,7 @@
 
 .sops-overview .category-filter-btn.active {
   border-color: transparent !important;
-  background: linear-gradient(135deg, var(--sops-primary), var(--sops-accent)) !important;
+  background: linear-gradient(135deg, var(--color-blue-500), var(--color-indigo-600)) !important;
   color: #ffffff !important;
   box-shadow: 0 12px 22px -18px rgba(59, 130, 246, 0.75);
 }
@@ -71,7 +61,7 @@
 
 .sops-overview .category-filter-btn:not(.active):hover {
   border-color: rgba(79, 70, 229, 0.24) !important;
-  background: var(--sops-primary-soft) !important;
+  background: var(--color-blue-50) !important;
   color: #1d4ed8 !important;
 }
 

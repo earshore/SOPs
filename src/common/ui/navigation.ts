@@ -178,26 +178,17 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, 
  * 更新头部导航高亮
  */
 function updateHeaderNav(fullConfig: RouteFullConfig): void {
-  document.querySelectorAll(".nav-item").forEach((el) => {
+  document.querySelectorAll<HTMLElement>(".nav-trigger").forEach((el) => {
     el.classList.remove("text-blue-600", "border-blue-600");
     el.classList.add("text-slate-600", "border-transparent");
+    el.removeAttribute("aria-current");
   });
 
-  let targetId = null;
-  if (fullConfig && fullConfig.context) {
-    const contextBtn = getEl(`nav-${fullConfig.context.id}`);
-    const specificBtn = fullConfig.context.id === 'hub' ? getEl('nav-amz_hub') : null;
-
-    if (contextBtn) targetId = `nav-${fullConfig.context.id}`;
-    if (specificBtn) targetId = 'nav-amz_hub';
-  }
-
-  if (targetId) {
-    const targetBtn = getEl(targetId);
-    if (targetBtn) {
-      targetBtn.classList.remove("text-slate-600", "border-transparent");
-      targetBtn.classList.add("text-blue-600", "border-blue-600");
-    }
+  const targetBtn = getEl(`nav-${fullConfig.context.id}`);
+  if (targetBtn) {
+    targetBtn.classList.remove("text-slate-600", "border-transparent");
+    targetBtn.classList.add("text-blue-600", "border-blue-600");
+    targetBtn.setAttribute("aria-current", "page");
   }
 }
 
