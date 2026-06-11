@@ -148,6 +148,18 @@ export const MENU_CONFIG: MenuConfig = {
       themeColor: "indigo", // ✅ 靛蓝色 - 保持不变，与紫色相近
     },
 
+    // Playground 模块配置
+    playground: {
+      id: "playground",
+      contextId: "apps",
+      parentModuleId: "app_center",
+      title: "Playground",
+      version: "v1.0",
+      icon: "fas fa-paper-plane",
+      description: "轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。",
+      themeColor: "cyan",
+    },
+
     // Keyword Tracker 模块配置
     keyword_tracker: {
       id: "keyword_tracker",
@@ -170,18 +182,6 @@ export const MENU_CONFIG: MenuConfig = {
       icon: "fas fa-magnifying-glass-dollar",
       description: "广告搜索词报表分析、否词与加词建议工具。",
       themeColor: "emerald",
-    },
-
-    // Playground 模块配置
-    playground: {
-      id: "playground",
-      contextId: "apps",
-      parentModuleId: "app_center",
-      title: "Playground",
-      version: "v1.0",
-      icon: "fas fa-paper-plane",
-      description: "轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。",
-      themeColor: "cyan",
     },
 
     // [智库] Knowledge Base
@@ -321,12 +321,21 @@ export const MENU_CONFIG: MenuConfig = {
       version: "v2.1 Pro",
       description: "集成数据采集、管理、AI分析与提示词工程的一站式解决方案。",
     },
+    playground: {
+      id: "playground",
+      label: "Playground",
+      icon: "fas fa-paper-plane",
+      color: "cyan",
+      order: 2,
+      version: "v1.0",
+      description: "轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。",
+    },
     keyword_tracker: {
       id: "keyword_tracker",
       label: "Keyword Hunter",
       icon: "fas fa-search",
       color: "fuchsia", // ✅ 紫红色，与模块主题色一致
-      order: 2,
+      order: 3,
       version: "v1.0 Pro",
       description: "ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。",
     },
@@ -335,18 +344,9 @@ export const MENU_CONFIG: MenuConfig = {
       label: "PPC Tools",
       icon: "fas fa-magnifying-glass-dollar",
       color: "emerald",
-      order: 3,
-      version: "v1.0",
-      description: "广告搜索词报表分析、否词与加词建议工具。",
-    },
-    playground: {
-      id: "playground",
-      label: "Playground",
-      icon: "fas fa-paper-plane",
-      color: "cyan",
       order: 4,
       version: "v1.0",
-      description: "轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。",
+      description: "广告搜索词报表分析、否词与加词建议工具。",
     },
   },
 

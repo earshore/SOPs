@@ -267,6 +267,8 @@
 .playground-topbar {
   height: 58px;
   flex: 0 0 auto;
+  position: relative;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -501,6 +503,8 @@
   flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
+  position: relative;
+  z-index: 0;
   width: min(768px, calc(100% - 48px));
   max-width: calc(100% - 48px);
   margin: 0 auto;

@@ -88,14 +88,14 @@
                 <button class="category-filter-btn" type="button" data-category="master_analysis" aria-pressed="false">
                     <i class="fas fa-robot"></i><span>Master Analysis</span><em>3</em>
                 </button>
+                <button class="category-filter-btn" type="button" data-category="playground" aria-pressed="false">
+                    <i class="fas fa-paper-plane"></i><span>Playground</span><em>1</em>
+                </button>
                 <button class="category-filter-btn" type="button" data-category="keyword_tracker" aria-pressed="false">
                     <i class="fas fa-search"></i><span>Keyword Hunter</span><em>3</em>
                 </button>
                 <button class="category-filter-btn" type="button" data-category="ppc_tools" aria-pressed="false">
                     <i class="fas fa-magnifying-glass-dollar"></i><span>PPC Tools</span><em>1</em>
-                </button>
-                <button class="category-filter-btn" type="button" data-category="playground" aria-pressed="false">
-                    <i class="fas fa-paper-plane"></i><span>Playground</span><em>1</em>
                 </button>
             </div>
         </div>
@@ -129,6 +129,30 @@
                     </button>
                     <button class="app-child-link" type="button" data-child-tab="promptlab">
                         <i class="fas fa-wand-magic-sparkles"></i><span>Prompt 生成</span>
+                    </button>
+                </div>
+            </article>
+
+            <article class="app-overview-card app-card-cyan" data-action="switch-tab" data-tab="playground"
+                data-category="playground"
+                role="button" tabindex="0">
+                <div class="app-card-head">
+                    <div class="app-card-icon">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <span class="app-card-badge">即时对话</span>
+                </div>
+                <div class="app-card-title-row">
+                    <div>
+                        <h3>Playground</h3>
+                        <p>Deep Chat 与 Prompt 试验</p>
+                    </div>
+                    <i class="fas fa-arrow-right app-card-arrow"></i>
+                </div>
+                <p class="app-card-desc">复用系统模型配置，进行快速问答、Prompt 验证和日常分析。</p>
+                <div class="app-card-actions app-card-actions-single">
+                    <button class="app-child-link" type="button" data-child-tab="playground">
+                        <i class="fa-regular fa-comments"></i><span>Deep Chat</span>
                     </button>
                 </div>
             </article>
@@ -183,30 +207,6 @@
                 <div class="app-card-actions app-card-actions-single">
                     <button class="app-child-link" type="button" data-child-tab="ppc_search_terms">
                         <i class="fas fa-magnifying-glass-dollar"></i><span>PPC 搜索词分析器</span>
-                    </button>
-                </div>
-            </article>
-
-            <article class="app-overview-card app-card-cyan" data-action="switch-tab" data-tab="playground"
-                data-category="playground"
-                role="button" tabindex="0">
-                <div class="app-card-head">
-                    <div class="app-card-icon">
-                        <i class="fas fa-paper-plane"></i>
-                    </div>
-                    <span class="app-card-badge">即时对话</span>
-                </div>
-                <div class="app-card-title-row">
-                    <div>
-                        <h3>Playground</h3>
-                        <p>Deep Chat 与 Prompt 试验</p>
-                    </div>
-                    <i class="fas fa-arrow-right app-card-arrow"></i>
-                </div>
-                <p class="app-card-desc">复用系统模型配置，进行快速问答、Prompt 验证和日常分析。</p>
-                <div class="app-card-actions app-card-actions-single">
-                    <button class="app-child-link" type="button" data-child-tab="playground">
-                        <i class="fa-regular fa-comments"></i><span>Deep Chat</span>
                     </button>
                 </div>
             </article>

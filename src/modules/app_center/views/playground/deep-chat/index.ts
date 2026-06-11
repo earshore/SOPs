@@ -463,20 +463,22 @@ async function refreshLLMConfig(container: HTMLElement): Promise<void> {
   currentConfig = await StorageService.getLLMConfigWithKey();
   selectedModel = currentConfig?.model || getFirstModel(currentConfig) || '';
 
-  if (!statusEl || !modelSelect) {
+  if (!modelSelect) {
     return;
   }
 
   renderLLMConfigState(statusEl, modelSelect);
 }
 
-function renderLLMConfigState(statusEl: HTMLElement, modelSelect: HTMLSelectElement): void {
+function renderLLMConfigState(statusEl: HTMLElement | null, modelSelect: HTMLSelectElement): void {
   modelSelect.replaceChildren();
 
   if (!currentConfig || !currentConfig.apiKey || !selectedModel) {
-    statusEl.textContent = '未配置模型，请先在系统设置中配置 LLM';
+    if (statusEl) {
+      statusEl.textContent = '未配置模型，请先在系统设置中配置 LLM';
+    }
     modelSelect.disabled = true;
-    modelSelect.appendChild(new Option('No model configured', ''));
+    modelSelect.appendChild(new Option('未配置模型', ''));
     return;
   }
 
@@ -490,7 +492,9 @@ function renderLLMConfigState(statusEl: HTMLElement, modelSelect: HTMLSelectElem
   modelSelect.value = visibleModels.includes(selectedModel) ? selectedModel : visibleModels[0] || '';
   selectedModel = modelSelect.value;
   modelSelect.disabled = visibleModels.length <= 1;
-  statusEl.textContent = `${currentConfig.provider} / ${selectedModel}`;
+  if (statusEl) {
+    statusEl.textContent = `${currentConfig.provider} / ${selectedModel}`;
+  }
 }
 
 function initDeepChat(container: HTMLElement): void {
@@ -627,6 +631,7 @@ function bindControls(container: HTMLElement): void {
   const temperatureInput = container.querySelector<HTMLInputElement>('#playground-temperature');
   const temperatureValue = container.querySelector<HTMLOutputElement>('#playground-temperature-value');
   const resetTuningButton = container.querySelector<HTMLButtonElement>('#playground-reset-tuning');
+  const tuningPanel = container.querySelector<HTMLDetailsElement>('.playground-tuning-panel');
   const threadList = container.querySelector<HTMLElement>('#playground-thread-list');
 
   const onModelChange = (): void => {
@@ -709,6 +714,20 @@ function bindControls(container: HTMLElement): void {
   resetTuningButton?.addEventListener('click', onResetTuning);
   cleanupCallbacks.push(() => resetTuningButton?.removeEventListener('click', onResetTuning));
 
+  const onDocumentPointerDown = (event: PointerEvent): void => {
+    if (!tuningPanel?.open) {
+      return;
+    }
+
+    const target = event.target;
+    if (target instanceof Node && tuningPanel.contains(target)) {
+      return;
+    }
+
+    tuningPanel.open = false;
+  };
+  document.addEventListener('pointerdown', onDocumentPointerDown);
+  cleanupCallbacks.push(() => document.removeEventListener('pointerdown', onDocumentPointerDown));
 }
 
 function toggleThreadRail(container: HTMLElement): void {

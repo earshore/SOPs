@@ -484,6 +484,7 @@
 .version-card-copy {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 3px;
     min-width: 0;
 }
@@ -506,6 +507,33 @@
     line-height: 1.35;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.version-card-release-link {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #334155;
+    text-decoration: none;
+    transition: background var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+        color var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+        transform var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.version-card-release-link:hover,
+.version-card-release-link:focus-visible {
+    background: rgba(15, 23, 42, 0.08);
+    color: #0f172a;
+    transform: translateY(-1px);
+    outline: none;
+}
+
+.version-card-release-link i {
+    font-size: 16px;
 }
 
 /* ========================================

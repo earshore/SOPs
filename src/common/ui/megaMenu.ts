@@ -504,8 +504,17 @@ export function renderMegaMenu(): void {
   if (!container) return;
 
   try {
+    const appCategoryOrder = new Map(
+      Object.values(MENU_CONFIG.appCategories || {})
+        .map(category => [category.id, category.order])
+    );
     const modules = Object.values(MENU_CONFIG.modules || {})
-      .filter(mod => mod.contextId === 'apps');
+      .filter(mod => mod.contextId === 'apps')
+      .sort((a, b) => {
+        const orderA = a.id === 'app_center' ? 0 : appCategoryOrder.get(a.id) ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.id === 'app_center' ? 0 : appCategoryOrder.get(b.id) ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+      });
 
     const html = modules.map(mod => {
       const targetRoute = getDefaultRouteForModule(mod.id);
