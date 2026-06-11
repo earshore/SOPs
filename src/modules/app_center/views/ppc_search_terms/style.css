@@ -418,9 +418,17 @@
   box-shadow: var(--ppc-focus);
 }
 
+.ppc-import-grid {
+  align-items: start;
+}
+
+.ppc-paste-column {
+  min-width: 0;
+}
+
 .ppc-dropzone {
   display: flex;
-  min-height: 150px;
+  min-height: 200px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -438,6 +446,7 @@
 }
 
 .ppc-textarea {
+  display: block;
   background: rgba(255, 255, 255, 0.88);
   color: #0f172a;
   line-height: 1.6;

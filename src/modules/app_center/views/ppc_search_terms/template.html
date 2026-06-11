@@ -73,14 +73,14 @@
                 <li><span>2</span>确认阈值</li>
                 <li><span>3</span>生成动作</li>
             </ol>
-            <div class="grid grid-cols-1 lg:grid-cols-[280px,1fr] gap-4">
+            <div class="ppc-import-grid grid grid-cols-1 lg:grid-cols-[280px,1fr] gap-4">
                 <label class="ppc-dropzone">
                     <i class="fas fa-cloud-arrow-up text-3xl text-blue-500 mb-3"></i>
                     <span class="font-bold text-blue-800">选择报表文件</span>
                     <span class="text-xs text-blue-600 mt-1">Amazon Ads 或 ERP 导出的 CSV/TSV/XLSX</span>
                     <input id="ppc-file-input" type="file" class="sr-only" accept=".csv,.tsv,.txt,.xlsx,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
                 </label>
-                <div>
+                <div class="ppc-paste-column">
                     <label for="ppc-paste-input" class="sr-only">粘贴广告报表内容</label>
                     <textarea id="ppc-paste-input"
                         class="ppc-textarea w-full min-h-[150px] rounded-lg border border-slate-300 p-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100"

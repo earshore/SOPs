@@ -81,6 +81,14 @@ interface PlaygroundRequestMessages {
   messages: ChatMessage[];
 }
 
+interface TuningControlRefs {
+  systemPromptInput: HTMLTextAreaElement | null;
+  temperatureInput: HTMLInputElement | null;
+  temperatureValue: HTMLOutputElement | null;
+  resetTuningButton: HTMLButtonElement | null;
+  tuningPanel: HTMLDetailsElement | null;
+}
+
 const THREAD_STORAGE_KEY = 'playground_deep_chat_threads_v1';
 const MAX_THREAD_COUNT = 30;
 const MAX_PROMPT_DRAFT_COUNT = 12;
@@ -720,7 +728,24 @@ function bindControls(container: HTMLElement): void {
   const promptList = container.querySelector<HTMLElement>('#playground-prompt-list');
 
   setupRailSectionResizer(container);
+  bindModelControls(container, modelSelect, refreshButton, clearButton, railToggleButton);
+  bindThreadControls(container, threadList, promptList);
+  bindTuningControls({
+    systemPromptInput,
+    temperatureInput,
+    temperatureValue,
+    resetTuningButton,
+    tuningPanel,
+  });
+}
 
+function bindModelControls(
+  container: HTMLElement,
+  modelSelect: HTMLSelectElement | null,
+  refreshButton: HTMLButtonElement | null,
+  clearButton: HTMLButtonElement | null,
+  railToggleButton: HTMLButtonElement | null
+): void {
   const onModelChange = (): void => {
     selectedModel = modelSelect?.value || selectedModel;
     updateStatus(container);
@@ -747,7 +772,13 @@ function bindControls(container: HTMLElement): void {
   };
   clearButton?.addEventListener('click', onClear);
   cleanupCallbacks.push(() => clearButton?.removeEventListener('click', onClear));
+}
 
+function bindThreadControls(
+  container: HTMLElement,
+  threadList: HTMLElement | null,
+  promptList: HTMLElement | null
+): void {
   const onThreadListClick = (event: MouseEvent): void => {
     const target = event.target as HTMLElement | null;
     const deleteButton = target?.closest<HTMLButtonElement>('[data-delete-thread-id]');
@@ -789,6 +820,16 @@ function bindControls(container: HTMLElement): void {
     renderPromptDraftList(container);
   });
   cleanupCallbacks.push(unsubscribePromptDrafts);
+}
+
+function bindTuningControls(refs: TuningControlRefs): void {
+  const {
+    systemPromptInput,
+    temperatureInput,
+    temperatureValue,
+    resetTuningButton,
+    tuningPanel,
+  } = refs;
 
   const onSystemPromptInput = (): void => {
     sessionSystemPrompt = systemPromptInput?.value.trim() || '';
