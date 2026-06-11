@@ -48,6 +48,29 @@
             </div>
         </div>
     </div>
+    <div class="ma-workflow mb-8" aria-label="Master Analysis 工作流">
+        <button type="button" class="ma-workflow-step is-active" data-action="switch-tab" data-tab="scraper">
+            <span class="ma-workflow-index">1</span>
+            <span>
+                <span class="ma-workflow-title">数据采集</span>
+                <span class="ma-workflow-status" x-text="hasData ? '已有产品数据' : '导入 JSON 或采集 ASIN'"></span>
+            </span>
+        </button>
+        <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="ai_analysis">
+            <span class="ma-workflow-index">2</span>
+            <span>
+                <span class="ma-workflow-title">AI 分析</span>
+                <span class="ma-workflow-status" x-text="hasData ? '下一步：生成洞察报告' : '等待产品数据'"></span>
+            </span>
+        </button>
+        <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="promptlab">
+            <span class="ma-workflow-index">3</span>
+            <span>
+                <span class="ma-workflow-title">Prompt 生成</span>
+                <span class="ma-workflow-status">用报告补全产品 DNA</span>
+            </span>
+        </button>
+    </div>
     <div class="scraper-strategy-card mb-8 rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
             <!-- ===== 可点击的策略指南头部 ===== -->
             <div class="cursor-pointer relative z-10 hover:bg-slate-50/50 transition-colors" @click="toggleRefineGuide()">

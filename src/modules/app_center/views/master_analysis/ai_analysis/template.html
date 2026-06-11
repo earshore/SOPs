@@ -47,6 +47,31 @@
       </div>
     </div>
   </div>
+  <div class="ma-workflow mb-8" aria-label="Master Analysis 工作流">
+    <button type="button" class="ma-workflow-step" :class="hasScraperData ? 'is-complete' : ''"
+      data-action="switch-tab" data-tab="scraper">
+      <span class="ma-workflow-index">1</span>
+      <span>
+        <span class="ma-workflow-title">数据采集</span>
+        <span class="ma-workflow-status" x-text="hasScraperData ? '已有产品数据' : '先导入或采集产品'"></span>
+      </span>
+    </button>
+    <button type="button" class="ma-workflow-step is-active" data-action="switch-tab" data-tab="ai_analysis">
+      <span class="ma-workflow-index">2</span>
+      <span>
+        <span class="ma-workflow-title">AI 分析</span>
+        <span class="ma-workflow-status" x-text="hasReport ? '报告已生成' : '选择产品与分析维度'"></span>
+      </span>
+    </button>
+    <button type="button" class="ma-workflow-step" :class="hasReport ? 'is-complete' : ''"
+      data-action="switch-tab" data-tab="promptlab">
+      <span class="ma-workflow-index">3</span>
+      <span>
+        <span class="ma-workflow-title">Prompt 生成</span>
+        <span class="ma-workflow-status" x-text="hasReport ? '可注入报告洞察' : '等待分析报告'"></span>
+      </span>
+    </button>
+  </div>
   <!-- 主要内容区域 -->
   <div>
     <!-- ASIN 选择和分析目标 -->
@@ -512,157 +537,138 @@
         </div>
       </div>
     </div>
-    <!-- 分析按钮 -->
-    <div class="mb-10">
-      <div :class="analysisHeroCardClass" class="relative overflow-hidden rounded-2xl transition-all duration-300">
-        <div :class="analysisHeroBackdropClass" class="absolute inset-0 transition-colors duration-300"></div>
-        <div :class="analysisHeroAmbientClass" class="absolute inset-0 overflow-hidden transition-opacity duration-300">
-          <div class="absolute top-0 left-1/4 w-80 h-80 bg-white/20 rounded-full filter blur-[80px] animate-pulse">
-          </div>
-          <div class="absolute bottom-0 right-1/4 w-64 h-64 bg-pink-300/20 rounded-full filter blur-[60px]"></div>
-        </div>
-        <div :class="analysisHeroPatternClass" class="absolute inset-0 transition-opacity duration-300"
-          style="background-image: linear-gradient(rgba(255,255,255,.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px); background-size: 30px 30px;">
-        </div>
-        <div class="relative p-8">
-          <div class="flex items-center justify-between gap-8">
-            <div :class="analysisHeroTextClass" class="flex items-center gap-5 transition-colors duration-300">
-              <div class="relative">
-                <template x-if="isAnalyzing">
-                  <div class="absolute inset-0 bg-white/20 rounded-2xl animate-ping" style="animation-duration: 1.5s;">
-                  </div>
-                </template>
-                <div :class="analysisHeroIconWrapClass"
-                  class="w-16 h-16 rounded-2xl flex items-center justify-center transition-all">
-                  <i :class="analysisHeroIconClass"
-                    class="text-2xl"></i>
-                </div>
-              </div>
-              <div>
-                <h3 class="font-extrabold text-2xl flex items-center gap-3 tracking-tight">
-                  <span x-show="isAnalysisComplete">分析完成</span>
-                  <span x-show="isAnalysisRunning">AI 正在分析中</span>
-                  <span x-show="isAnalysisIdle">执行 AI 分析</span>
-                  <template x-if="isAnalysisRunning">
-                    <i class="fa-solid fa-cog animate-spin opacity-60"></i>
-                  </template>
-                </h3>
-                <p :class="analysisHeroSubtextClass" class="text-sm mt-1.5 flex items-center gap-2 transition-colors duration-300">
-                  <template x-if="isAnalyzing">
-                    <span class="flex items-center gap-2">
-                      <span class="relative flex h-2 w-2">
-                        <span
-                          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                      </span>
-                      <span x-text="currentStep"></span>
-                    </span>
-                  </template>
-                  <template
-                    x-if="hasAnalysisSelection">
-                    <span>
-                      <span :class="analysisHeroMetricPillClass" class="px-2 py-0.5 rounded-full text-xs font-semibold"
-                        x-text="selectedAsins.length"></span>
-                      个产品 ×
-                      <span :class="analysisHeroMetricPillClass" class="px-2 py-0.5 rounded-full text-xs font-semibold"
-                        x-text="selectedTargets.length"></span>
-                      个维度 = 综合洞察分析
-                    </span>
-                  </template>
-                  <template x-if="needsAnalysisSelection">
-                    <span>请先选择产品和分析目标</span>
-                  </template>
-                </p>
-              </div>
+    <!-- 分析操作栏 -->
+    <div class="mb-8">
+      <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-sm ring-1 ring-white/70">
+        <div class="flex items-center justify-between gap-6 p-5">
+          <div class="flex min-w-0 items-center gap-4">
+            <div :class="analysisHeroIconWrapClass"
+              class="h-12 w-12 flex-shrink-0 rounded-xl flex items-center justify-center transition-all">
+              <i :class="analysisHeroIconClass" class="text-lg"></i>
             </div>
-            <div class="relative flex items-center gap-3">
-              <!-- 性能设置按钮 -->
-              <button @click="perfSettings.toggleSettings()"
-                :class="analysisPerfButtonClass"
-                class="px-4 py-5 rounded-xl font-medium text-sm transition-all duration-300 flex items-center gap-2"
-                title="性能设置">
-                <i class="fa-solid fa-sliders"></i>
-                <span class="hidden sm:inline">性能设置</span>
-              </button>
+            <div class="min-w-0">
+              <h3 class="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-800">
+                <span x-show="isAnalysisComplete">分析完成</span>
+                <span x-show="isAnalysisRunning">AI 正在分析中</span>
+                <span x-show="isAnalysisIdle">执行 AI 分析</span>
+                <template x-if="isAnalysisRunning">
+                  <i class="fa-solid fa-cog animate-spin text-indigo-500"></i>
+                </template>
+              </h3>
+              <p class="mt-1 text-sm text-slate-500">
+                <template x-if="isAnalyzing">
+                  <span class="inline-flex items-center gap-2">
+                    <span class="relative flex h-2 w-2">
+                      <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75"></span>
+                      <span class="relative inline-flex h-2 w-2 rounded-full bg-indigo-500"></span>
+                    </span>
+                    <span x-text="currentStep"></span>
+                  </span>
+                </template>
+                <template x-if="!isAnalyzing && hasAnalysisSelection">
+                  <span>确认产品与维度后生成结构化洞察报告</span>
+                </template>
+                <template x-if="needsAnalysisSelection">
+                  <span>请先选择产品和分析目标</span>
+                </template>
+              </p>
+            </div>
+          </div>
+          <div class="hidden items-center gap-2 xl:flex">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-500">
+              <span class="font-bold text-slate-800" x-text="selectedAsins.length"></span>
+              个产品
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-500">
+              <span class="font-bold text-slate-800" x-text="selectedTargets.length"></span>
+              个维度
+            </div>
+            <div class="rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-700">
+              <template x-if="hasAnalysisSelection">
+                <span>综合洞察分析</span>
+              </template>
+              <template x-if="needsAnalysisSelection">
+                <span>待配置</span>
+              </template>
+            </div>
+          </div>
+          <div class="relative flex flex-shrink-0 items-center gap-3">
+            <button @click="perfSettings.toggleSettings()"
+              :class="analysisPerfButtonClass"
+              class="rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 flex items-center gap-2"
+              title="性能设置">
+              <i class="fa-solid fa-sliders"></i>
+              <span>性能设置</span>
+            </button>
 
-              <!-- 开始分析按钮 -->
-              <button
-                :class="runAnalysisButtonClass"
-                :disabled="runAnalysisDisabled"
-                @click="runAnalysis()"
-                class="relative px-10 py-5 rounded-xl font-bold text-lg transition-all duration-300 flex items-center gap-3 min-w-[200px] justify-center group">
-                <template x-if="isAnalyzing">
-                  <span class="flex items-center gap-3">
-                    <i class="fa-solid fa-spinner animate-spin"></i>
-                    分析中...
-                  </span>
-                </template>
-                <template x-if="analysisNotRunning">
-                  <span class="flex items-center gap-3">
-                    <i class="fa-solid fa-play"></i>
-                    开始分析
-                  </span>
-                </template>
-                <!-- 禁用原因提示 - Hover显示 -->
-                <template
-                  x-if="showRunDisabledHint">
-                  <div
-                    class="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 bg-slate-800 text-white rounded-lg shadow-2xl border border-slate-700 p-3 text-xs z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none">
-                    <div class="flex items-start gap-2">
-                      <i class="fa-solid fa-info-circle text-indigo-400 mt-0.5"></i>
-                      <div>
-                        <template x-if="isMissingAsinAndTarget">
-                          <span class="font-medium">请先选择 ASIN 和分析目标</span>
-                        </template>
-                        <template x-if="isMissingTargetOnly">
-                          <span class="font-medium">请选择至少一个分析目标</span>
-                        </template>
-                        <template x-if="isMissingAsinOnly">
-                          <span class="font-medium">请选择至少一个 ASIN</span>
-                        </template>
-                        <template
-                          x-if="isMissingLoadedData">
-                          <span class="font-medium">无法加载产品数据，请检查数据源</span>
-                        </template>
-                      </div>
-                    </div>
-                    <!-- 小三角箭头 -->
-                    <div
-                      class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 border-l border-t border-slate-700 rotate-45">
+            <button
+              :class="runAnalysisButtonClass"
+              :disabled="runAnalysisDisabled"
+              @click="runAnalysis()"
+              class="relative min-w-[168px] rounded-xl px-6 py-3 text-base font-bold transition-all duration-300 flex items-center justify-center gap-3 group">
+              <template x-if="isAnalyzing">
+                <span class="flex items-center gap-3">
+                  <i class="fa-solid fa-spinner animate-spin"></i>
+                  分析中...
+                </span>
+              </template>
+              <template x-if="analysisNotRunning">
+                <span class="flex items-center gap-3">
+                  <i class="fa-solid fa-play"></i>
+                  开始分析
+                </span>
+              </template>
+              <template x-if="showRunDisabledHint">
+                <div
+                  class="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 bg-slate-800 text-white rounded-lg shadow-2xl border border-slate-700 p-3 text-xs z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none">
+                  <div class="flex items-start gap-2">
+                    <i class="fa-solid fa-info-circle text-indigo-400 mt-0.5"></i>
+                    <div>
+                      <template x-if="isMissingAsinAndTarget">
+                        <span class="font-medium">请先选择 ASIN 和分析目标</span>
+                      </template>
+                      <template x-if="isMissingTargetOnly">
+                        <span class="font-medium">请选择至少一个分析目标</span>
+                      </template>
+                      <template x-if="isMissingAsinOnly">
+                        <span class="font-medium">请选择至少一个 ASIN</span>
+                      </template>
+                      <template x-if="isMissingLoadedData">
+                        <span class="font-medium">无法加载产品数据，请检查数据源</span>
+                      </template>
                     </div>
                   </div>
-                </template>
-              </button>
-            </div>
-          </div>
-          <!-- 进度条 -->
-          <template x-if="isAnalyzing">
-            <div class="mt-8">
-              <div class="flex items-center justify-between text-white/80 text-sm mb-3">
-                <span class="flex items-center gap-2 font-medium">
-                  <i class="fa-solid fa-spinner animate-spin"></i>
-                  分析进度
-                </span>
-                <span class="font-mono font-bold text-lg" x-text="progressText"></span>
-              </div>
-              <div class="h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm shadow-inner">
-                <div :style="progressStyle"
-                  class="h-full bg-gradient-to-r from-white via-indigo-200 to-white rounded-full transition-all duration-500 ease-out relative">
-                  <div class="absolute inset-0 shimmer"></div>
                   <div
-                    class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg shadow-white/50">
+                    class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 border-l border-t border-slate-700 rotate-45">
                   </div>
                 </div>
-              </div>
-              <div class="flex justify-between mt-3 text-xs text-white/50">
-                <span :class="progressDataStepClass">数据加载</span>
-                <span :class="progressNlpStepClass">NLP 处理</span>
-                <span :class="progressInsightStepClass">洞察生成</span>
-                <span :class="progressDoneStepClass">完成</span>
+              </template>
+            </button>
+          </div>
+        </div>
+        <template x-if="isAnalyzing">
+          <div class="border-t border-slate-200 bg-slate-900 px-5 py-4">
+            <div class="mb-3 flex items-center justify-between text-sm text-white/80">
+              <span class="flex items-center gap-2 font-medium">
+                <i class="fa-solid fa-spinner animate-spin"></i>
+                分析进度
+              </span>
+              <span class="font-mono text-lg font-bold" x-text="progressText"></span>
+            </div>
+            <div class="h-2.5 overflow-hidden rounded-full bg-white/15 shadow-inner">
+              <div :style="progressStyle"
+                class="relative h-full rounded-full bg-gradient-to-r from-indigo-300 via-white to-emerald-200 transition-all duration-500 ease-out">
+                <div class="absolute inset-0 shimmer"></div>
               </div>
             </div>
-          </template>
-        </div>
+            <div class="mt-3 flex justify-between text-xs text-white/50">
+              <span :class="progressDataStepClass">数据加载</span>
+              <span :class="progressNlpStepClass">NLP 处理</span>
+              <span :class="progressInsightStepClass">洞察生成</span>
+              <span :class="progressDoneStepClass">完成</span>
+            </div>
+          </div>
+        </template>
       </div>
     </div>
 

@@ -11,6 +11,90 @@
     }
 }
 
+/* === Master Analysis 工作流提示条 === */
+.ma-workflow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--rounded-2xl);
+    box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
+}
+
+.ma-workflow-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px 16px;
+    text-align: left;
+    border: 1px solid transparent;
+    border-radius: var(--rounded-xl);
+    color: var(--color-slate-500);
+    background: transparent;
+    transition: all var(--duration-fast) ease;
+}
+
+.ma-workflow-step:hover {
+    color: var(--color-slate-700);
+    background: var(--color-slate-50);
+    border-color: var(--color-slate-200);
+}
+
+.ma-workflow-step.is-active {
+    color: var(--color-indigo-700);
+    background: linear-gradient(135deg, var(--color-indigo-50), white);
+    border-color: var(--color-indigo-200);
+    box-shadow: 0 8px 20px -16px var(--color-indigo-500);
+}
+
+.ma-workflow-step.is-complete {
+    color: var(--color-emerald-700);
+    background: var(--color-emerald-50);
+    border-color: var(--color-emerald-100);
+}
+
+.ma-workflow-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--color-slate-500);
+    background: var(--color-slate-100);
+}
+
+.ma-workflow-step.is-active .ma-workflow-index {
+    color: white;
+    background: linear-gradient(135deg, var(--color-indigo-500), var(--color-violet-500));
+}
+
+.ma-workflow-step.is-complete .ma-workflow-index {
+    color: white;
+    background: var(--color-emerald-500);
+}
+
+.ma-workflow-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--color-slate-800);
+}
+
+.ma-workflow-status {
+    display: block;
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: currentColor;
+}
+
 /* === Analysis Widget Card === */
 .analysis-widget-card {
     background: white;

@@ -75,7 +75,7 @@ export class ScraperPage extends BasePage {
     strategyChevron: '#data-refine-chevron',
     
     // 配置卡片
-    configCard: '[x-data*="configExpanded"]',
+    configCard: 'h2:has-text("手动采集配置")',
     configHeader: '.config-header',
     configChevron: '.chevron-animated',
     
@@ -105,7 +105,7 @@ export class ScraperPage extends BasePage {
     taskIcon: '.task-icon',
     
     // 数据管理
-    dataManagementPanel: '.rounded-2xl:has(h2:text("数据管理"))',
+    dataManagementPanel: 'h2:has-text("产品数据管理")',
     previewTab: 'button:has-text("数据预览")',
     jsonTab: 'button:has-text("JSON数据")',
     
@@ -130,7 +130,7 @@ export class ScraperPage extends BasePage {
    * 导航到 Scraper 页面
    */
   async navigate(): Promise<void> {
-    await super.navigate('/app_center/master_analysis/scraper');
+    await super.navigate('/#/app-center/scraper');
     await this.waitForPageReady();
   }
 

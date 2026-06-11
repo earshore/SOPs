@@ -57,8 +57,8 @@ export class AIAnalysisPage extends BasePage {
   
   private readonly selectors = {
     // 主容器
-    mainContainer: '.ai-analysis-wrapper',
-    welcomeBanner: '.ai-analysis-wrapper > div:first-child',
+    mainContainer: '[x-data="aiAnalysisPanel"]',
+    welcomeBanner: '[x-data="aiAnalysisPanel"] > .wb-container',
     
     // 数据源横幅
     dataSourceBanner: '[x-show="showDataSourceBanner"]',
@@ -134,7 +134,7 @@ export class AIAnalysisPage extends BasePage {
    * 导航到 AI 分析页面
    */
   async navigate(): Promise<void> {
-    await super.navigate('/app_center/master_analysis');
+    await super.navigate('/#/app-center/ai-analysis');
     await this.waitForPageReady();
   }
 

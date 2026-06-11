@@ -24,7 +24,7 @@ test.describe('Promptlab 模块 E2E 测试', () => {
       const consoleListener = setupConsoleErrorListener(page);
 
       // 验证：页面标题正确
-      await expect(page).toHaveTitle(/Amazing Amazon Architect/);
+      await expect(page.getByText('Amazing Amazon Architect').first()).toBeVisible();
 
       // 验证：主要元素可见
       await expect(page.locator('#card-product-dna')).toBeVisible();
@@ -42,7 +42,8 @@ test.describe('Promptlab 模块 E2E 测试', () => {
       // 验证：Alpine 组件已初始化
       const alpineInitialized = await page.evaluate(() => {
         const element = document.querySelector('[x-data="promptlabPanel"]');
-        return element && (element as any).__x !== undefined;
+        const data = (element as any)?.__x?.$data || (element as any)?._x_dataStack?.[0];
+        return Boolean(data);
       });
 
       expect(alpineInitialized, 'Alpine 组件应该已初始化').toBe(true);
@@ -50,9 +51,9 @@ test.describe('Promptlab 模块 E2E 测试', () => {
       // 验证：组件状态可访问
       const hasComponentData = await page.evaluate(() => {
         const element = document.querySelector('[x-data="promptlabPanel"]') as any;
-        if (!element || !element.__x) return false;
+        if (!element) return false;
         
-        const data = element.__x.$data;
+        const data = element.__x?.$data || element._x_dataStack?.[0];
         return data && 
                typeof data.profile !== 'undefined' &&
                typeof data.generateListingPrompt === 'function';

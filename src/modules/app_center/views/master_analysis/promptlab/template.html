@@ -47,6 +47,31 @@
             </div>
         </div>
     </div>
+    <div class="ma-workflow mb-8" aria-label="Master Analysis 工作流">
+        <button type="button" class="ma-workflow-step" :class="hasReport ? 'is-complete' : ''"
+            data-action="switch-tab" data-tab="scraper">
+            <span class="ma-workflow-index">1</span>
+            <span>
+                <span class="ma-workflow-title">数据采集</span>
+                <span class="ma-workflow-status" x-text="hasReport ? '数据已接入' : '可先采集产品数据'"></span>
+            </span>
+        </button>
+        <button type="button" class="ma-workflow-step" :class="hasReport ? 'is-complete' : ''"
+            data-action="switch-tab" data-tab="ai_analysis">
+            <span class="ma-workflow-index">2</span>
+            <span>
+                <span class="ma-workflow-title">AI 分析</span>
+                <span class="ma-workflow-status" x-text="hasReport ? '报告可用' : '可选：生成洞察报告'"></span>
+            </span>
+        </button>
+        <button type="button" class="ma-workflow-step is-active" data-action="switch-tab" data-tab="promptlab">
+            <span class="ma-workflow-index">3</span>
+            <span>
+                <span class="ma-workflow-title">Prompt 生成</span>
+                <span class="ma-workflow-status" x-text="isReady ? '可生成 Prompt' : '补充产品 DNA'"></span>
+            </span>
+        </button>
+    </div>
     <!-- ========== Main Layout ========== -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative pb-10">
         <!-- ===== Left Column: Config Cards ===== -->
@@ -63,11 +88,10 @@
                                 <span class="text-xs font-bold text-white">1</span>
                             </div>
                             产品 DNA 补充
-                            <span class="text-[11px] text-slate-500 font-normal ml-1">Product DNA Supplement</span>
                         </h3>
                         <div class="flex items-center gap-2">
                             <!-- 从报告加载按钮 -->
-                            <button @click="autoPopulateDNA" :disabled="reportActionDisabled"
+                            <button x-show="hasReport" @click="autoPopulateDNA" :disabled="reportActionDisabled"
                                 :class="autoPopulateButtonClass"
                                 class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
                                 title="从AI分析报告自动提取产品DNA（仅自动填充置信度≥70%的字段）">
@@ -122,7 +146,7 @@
                                         <span x-text="getDnaConfidenceText('keywords')"></span>
                                     </span>
 
-                                    <button @click="extractSingleField('keywordsTier1')" :disabled="reportActionDisabled"
+                                    <button x-show="hasReport" @click="extractSingleField('keywordsTier1')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
                                         class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
@@ -147,7 +171,7 @@
                                         <span x-text="getDnaConfidenceText('negative')"></span>
                                     </span>
 
-                                    <button @click="extractSingleField('negative')" :disabled="reportActionDisabled"
+                                    <button x-show="hasReport" @click="extractSingleField('negative')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
                                         class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
@@ -172,7 +196,7 @@
                                         <span x-text="getDnaConfidenceText('keywords')"></span>
                                     </span>
 
-                                    <button @click="extractSingleField('keywordsTier2')" :disabled="reportActionDisabled"
+                                    <button x-show="hasReport" @click="extractSingleField('keywordsTier2')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
                                         class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
@@ -201,7 +225,7 @@
                                     </span>
 
                                     <!-- 单字段提取按钮 -->
-                                    <button @click="extractSingleField('audience')" :disabled="reportActionDisabled"
+                                    <button x-show="hasReport" @click="extractSingleField('audience')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
                                         class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
@@ -228,7 +252,7 @@
                                     </span>
 
                                     <!-- 单字段提取按钮 -->
-                                    <button @click="extractSingleField('usps')" :disabled="reportActionDisabled"
+                                    <button x-show="hasReport" @click="extractSingleField('usps')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
                                         class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
@@ -256,7 +280,7 @@
                                     </span>
 
                                     <!-- 单字段提取按钮 -->
-                                    <button @click="extractSingleField('specs')" :disabled="reportActionDisabled"
+                                    <button x-show="hasReport" @click="extractSingleField('specs')" :disabled="reportActionDisabled"
                                         :class="extractButtonClass"
                                         class="w-7 h-7 flex items-center justify-center rounded-lg transition-all" title="仅重新提取此字段">
                                         <i class="fas fa-rotate text-[8px]"></i>
@@ -296,7 +320,6 @@
                                 <span class="text-xs font-bold text-white">2</span>
                             </div>
                             AI 分析报告
-                            <span class="text-[11px] text-slate-500 font-normal ml-1">Insights Injection</span>
                         </h3>
                         <div class="flex items-center gap-3">
                             <!-- 分析报告状态 -->
@@ -343,7 +366,6 @@
                             <span class="text-xs font-bold text-white">3</span>
                         </div>
                         生成策略配置
-                        <span class="text-[11px] text-slate-500 font-normal ml-1">Strategy</span>
                     </h3>
                 </div>
                 <!-- Card Body -->
