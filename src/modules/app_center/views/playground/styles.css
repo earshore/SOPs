@@ -488,6 +488,7 @@
 }
 
 .playground-prompt-preview-popover {
+  --playground-prompt-preview-arrow-top: 28px;
   position: fixed;
   top: 118px;
   left: 280px;
@@ -512,7 +513,7 @@
 .playground-prompt-preview-popover::before {
   content: "";
   position: absolute;
-  top: 28px;
+  top: var(--playground-prompt-preview-arrow-top);
   left: -7px;
   width: 12px;
   height: 12px;

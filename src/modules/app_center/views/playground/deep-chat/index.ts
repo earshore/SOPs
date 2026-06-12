@@ -113,6 +113,11 @@ interface TuningControlRefs {
   tuningPanel: HTMLDetailsElement | null;
 }
 
+interface PromptPreviewPointer {
+  clientX: number;
+  clientY: number;
+}
+
 const THREAD_STORAGE_KEY = 'playground_deep_chat_threads_v1';
 const MAX_THREAD_COUNT = 30;
 const MAX_PROMPT_DRAFT_COUNT = 12;
@@ -1023,13 +1028,23 @@ function setupPromptPreview(container: HTMLElement, promptList: HTMLElement | nu
   if (!promptList || !preview) {
     return;
   }
+  document.body.appendChild(preview);
+  cleanupCallbacks.push(() => preview.remove());
 
   const onPromptPointerOver = (event: PointerEvent): void => {
     const target = event.target as HTMLElement | null;
     const promptButton = target?.closest<HTMLButtonElement>('[data-preview-prompt-id]');
     const promptId = promptButton?.dataset.previewPromptId;
+    const relatedTarget = event.relatedTarget as Node | null;
+    if (promptButton && relatedTarget && promptButton.contains(relatedTarget)) {
+      return;
+    }
+
     if (promptId) {
-      showPromptPreview(container, promptId, promptButton);
+      showPromptPreview(container, promptId, promptButton, {
+        clientX: event.clientX,
+        clientY: event.clientY,
+      });
     }
   };
 
@@ -1070,7 +1085,12 @@ function setupPromptPreview(container: HTMLElement, promptList: HTMLElement | nu
   });
 }
 
-function showPromptPreview(container: HTMLElement, promptId: string, anchor?: HTMLElement): void {
+function showPromptPreview(
+  container: HTMLElement,
+  promptId: string,
+  anchor?: HTMLElement,
+  pointer?: PromptPreviewPointer
+): void {
   const promptDraft = getPromptDrafts().find((item) => item.id === promptId);
   if (!promptDraft) {
     hidePromptPreview(container);
@@ -1079,12 +1099,17 @@ function showPromptPreview(container: HTMLElement, promptId: string, anchor?: HT
 
   clearPromptPreviewHideTimer();
   activePromptPreviewId = promptId;
-  renderPromptPreview(container, promptDraft, anchor);
+  renderPromptPreview(container, promptDraft, anchor, pointer);
   syncPromptPreviewHighlight(container);
 }
 
-function renderPromptPreview(container: HTMLElement, promptDraft: PromptHistoryItem, anchor?: HTMLElement): void {
-  const preview = container.querySelector<HTMLElement>('#playground-prompt-preview-popover');
+function renderPromptPreview(
+  container: HTMLElement,
+  promptDraft: PromptHistoryItem,
+  anchor?: HTMLElement,
+  pointer?: PromptPreviewPointer
+): void {
+  const preview = document.getElementById('playground-prompt-preview-popover');
   const title = preview?.querySelector<HTMLElement>('.playground-prompt-preview-title');
   const body = preview?.querySelector<HTMLElement>('.playground-prompt-preview-body');
   if (!preview || !title || !body) {
@@ -1099,28 +1124,50 @@ function renderPromptPreview(container: HTMLElement, promptDraft: PromptHistoryI
   `);
   body.textContent = promptDraft.prompt;
   body.scrollTop = 0;
-  positionPromptPreview(container, preview, anchor);
+  positionPromptPreview(container, preview, anchor, pointer);
   preview.classList.add('is-visible');
   preview.setAttribute('aria-hidden', 'false');
 }
 
-function positionPromptPreview(container: HTMLElement, preview: HTMLElement, anchor?: HTMLElement): void {
+function positionPromptPreview(
+  container: HTMLElement,
+  preview: HTMLElement,
+  anchor?: HTMLElement,
+  pointer?: PromptPreviewPointer
+): void {
   const rail = container.querySelector<HTMLElement>('#playground-thread-rail');
   const railRect = rail?.getBoundingClientRect();
   const anchorRect = anchor?.getBoundingClientRect();
-  const gap = 12;
-  const left = Math.round((railRect?.right || 0) + gap);
-  const availableWidth = Math.max(280, window.innerWidth - left - 24);
+  const viewportPadding = 16;
+  const gap = pointer ? 14 : 12;
+  const previewWidth = Math.min(520, Math.max(280, window.innerWidth - viewportPadding * 2));
   const previewHeight = Math.min(520, Math.max(260, window.innerHeight - 160));
-  const preferredTop = anchorRect?.top ?? (railRect ? railRect.top + 88 : 118);
+  const anchoredLeft = Math.round((railRect?.right || 0) + gap);
+  const pointerLeft = pointer ? pointer.clientX + gap : anchoredLeft;
+  const pointerFallbackLeft = pointer ? pointer.clientX - previewWidth - gap : anchoredLeft;
+  const preferredLeft = pointer && pointerLeft + previewWidth > window.innerWidth - viewportPadding
+    ? pointerFallbackLeft
+    : pointerLeft;
+  const maxLeft = Math.max(viewportPadding, window.innerWidth - previewWidth - viewportPadding);
+  const left = Math.round(Math.min(Math.max(preferredLeft, viewportPadding), maxLeft));
+  const anchoredTop = anchorRect?.top ?? (railRect ? railRect.top + 88 : 118);
+  const pointerTop = pointer ? pointer.clientY + gap : anchoredTop;
+  const pointerFallbackTop = pointer ? pointer.clientY - previewHeight - gap : anchoredTop;
+  const preferredTop = pointer && pointerTop + previewHeight > window.innerHeight - viewportPadding
+    ? pointerFallbackTop
+    : pointerTop;
   const minTop = 72;
   const maxTop = Math.max(minTop, window.innerHeight - previewHeight - 24);
   const top = Math.round(Math.min(Math.max(preferredTop, minTop), maxTop));
+  const arrowTop = pointer
+    ? Math.round(Math.min(Math.max(pointer.clientY - top - 6, 16), Math.max(16, previewHeight - 24)))
+    : 28;
 
   preview.style.left = `${left}px`;
   preview.style.top = `${top}px`;
-  preview.style.width = `${Math.min(520, availableWidth)}px`;
+  preview.style.width = `${previewWidth}px`;
   preview.style.maxHeight = `${previewHeight}px`;
+  preview.style.setProperty('--playground-prompt-preview-arrow-top', `${arrowTop}px`);
   preview.style.setProperty('--playground-prompt-preview-body-max-height', `${Math.max(180, previewHeight - 48)}px`);
 }
 
@@ -1137,7 +1184,7 @@ function hidePromptPreview(container: HTMLElement): void {
   clearPromptPreviewHideTimer();
   activePromptPreviewId = null;
   syncPromptPreviewHighlight(container);
-  const preview = container.querySelector<HTMLElement>('#playground-prompt-preview-popover');
+  const preview = document.getElementById('playground-prompt-preview-popover');
   if (!preview) {
     return;
   }
