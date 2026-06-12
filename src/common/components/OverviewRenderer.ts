@@ -323,7 +323,7 @@ export class OverviewRenderer {
   private _renderRouteCard(route: RouteConfig & { id: string }, color: string = 'blue'): string {
     return `
       <div 
-        class="overview-card border-l-4 border-l-${color}-400 cursor-pointer" 
+        class="overview-card overview-accent-card overview-accent-${color} cursor-pointer"
         data-action="switch-tab" 
         data-tab="${route.id}"
         data-category="${route.category || 'all'}"

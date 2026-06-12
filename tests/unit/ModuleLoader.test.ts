@@ -2,6 +2,12 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ModuleLoader, type IModule } from '@/common/utils/ModuleLoader';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 
+vi.mock('@/services/performanceService', () => ({
+  performanceService: {
+    measureModuleLoad: vi.fn((_routeId: string, loader: () => Promise<IModule>) => loader())
+  }
+}));
+
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (reason?: unknown) => void;
@@ -146,5 +152,51 @@ describe('ModuleLoader', () => {
 
     expect(module.unmount).toHaveBeenCalledTimes(1);
     expect(content.textContent).toBe('');
+  });
+
+  it('applies content enter animation when enabled', async () => {
+    const content = document.getElementById('content') as HTMLElement;
+    const module = createModule('Animated');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        app_route: vi.fn(() => Promise.resolve(module))
+      },
+      moduleName: 'TestLoader',
+      contentEnterAnimation: true
+    });
+
+    await loader.loadModule('app_route');
+
+    expect(content.classList.contains('view-fade-in-initial')).toBe(true);
+    expect(content.classList.contains('view-fade-in')).toBe(true);
+  });
+
+  it('does not duplicate content enter animation when the module already renders it', async () => {
+    const content = document.getElementById('content') as HTMLElement;
+    const module: IModule = {
+      mount: vi.fn((container: HTMLElement) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'view-fade-in-initial view-fade-in';
+        wrapper.textContent = 'PPC style wrapper';
+        container.appendChild(wrapper);
+      })
+    };
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        app_route: vi.fn(() => Promise.resolve(module))
+      },
+      moduleName: 'TestLoader',
+      contentEnterAnimation: true
+    });
+
+    await loader.loadModule('app_route');
+
+    expect(content.classList.contains('view-fade-in-initial')).toBe(false);
+    expect(content.classList.contains('view-fade-in')).toBe(false);
+    expect(content.firstElementChild?.classList.contains('view-fade-in')).toBe(true);
   });
 });

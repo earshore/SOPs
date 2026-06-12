@@ -25,6 +25,7 @@
 - [CSS 架构快速开始](./guides/css/CSS-ARCHITECTURE-README.md) - 5 分钟快速上手
 - [CSS 架构指南](./guides/css/css-architecture-guide.md) - 完整的 CSS 架构文档
 - [视觉设计规范指南](./VISUAL_DESIGN_GUIDELINES.md) - 视觉归一化、颜色映射和 welcome banner 开发规范
+- [页面访问动画规范](./PAGE_ENTRY_ANIMATION_GUIDELINES.md) - 页面进入动画审计、设计标准和接入规范
 - [CSS 快速参考](../src/css/QUICK-REFERENCE.md) - CSS 变量快速查询
 - [CSS README](../src/css/README.md) - CSS 目录说明
 

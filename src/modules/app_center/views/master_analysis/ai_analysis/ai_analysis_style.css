@@ -246,6 +246,14 @@ pre code {
   display: none !important;
 }
 
+.ai-analysis-tooltip-arrow {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid var(--color-slate-800, #1e293b);
+}
+
 /* ========== 置信度颜色系统（使用设计令牌） ========== */
 /* 高置信度 */
 .confidence-high-bg {

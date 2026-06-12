@@ -603,7 +603,7 @@ function createVariantsGrid(word: RestrictedWord): HTMLDivElement {
 
 function createRiskDescriptionSection(word: RestrictedWord): HTMLDivElement {
     const riskDiv = document.createElement('div');
-    riskDiv.className = 'border-l-4 border-red-400 bg-red-50 p-4 rounded-r-lg';
+    riskDiv.className = 'content-callout content-callout--danger p-4';
 
     const riskTitle = document.createElement('h4');
     riskTitle.className = 'font-bold text-red-800 mb-1 flex items-center gap-2';

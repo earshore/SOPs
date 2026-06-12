@@ -13,6 +13,7 @@ const moduleLoader: ModuleLoader = createModuleLoader({
   moduleMap: MODULE_MAP,
   loaderColor: "blue",
   moduleName: "AmzHub",
+  contentEnterAnimation: true,
 });
 
 /**

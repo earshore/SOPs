@@ -11,6 +11,10 @@ import { chromium, type Browser, type Locator, type Page } from 'playwright';
 const baseUrl = process.env.CARD_AUDIT_BASE_URL || 'http://127.0.0.1:5174';
 const hashBase = `${baseUrl.replace(/\/$/, '')}/#`;
 
+const sourceFilesWithoutRawBorderLeft = [
+  'src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts',
+];
+
 interface Target {
   allowedRawBorderLeftCount?: number;
   expectedCount: number;
@@ -26,6 +30,21 @@ interface CalloutState {
   boxShadow: string;
   radius: string;
   transform: string;
+}
+
+interface MarkerTarget {
+  expectedCount: number;
+  expectedPaddingLeft: string;
+  name: string;
+  path: string;
+  selector: string;
+}
+
+interface MarkerState {
+  borderLeftColor: string;
+  borderLeftStyle: string;
+  borderLeftWidth: string;
+  paddingLeft: string;
 }
 
 const targets: Target[] = [
@@ -114,7 +133,6 @@ const targets: Target[] = [
     templatePath: 'src/modules/sops/views/growth/promotion_submission/template.html',
   },
   {
-    allowedRawBorderLeftCount: 4,
     expectedCount: 4,
     name: 'Brand Infringement callout',
     path: '/sops_brand_infringement',
@@ -127,6 +145,30 @@ const targets: Target[] = [
     path: '/amz_ecosystem',
     selector: '.eco-page .content-callout',
     templatePath: 'src/modules/amz_hub/views/knowledge/ecosystem/template.html',
+  },
+  {
+    expectedCount: 4,
+    name: 'PPC Advertising callout',
+    path: '/sops_ppc_advertising',
+    selector: '.ppc-advertising-page .content-callout',
+    templatePath: 'src/modules/sops/views/growth/ppc_advertising/template.html',
+  },
+];
+
+const markerTargets: MarkerTarget[] = [
+  {
+    expectedCount: 4,
+    expectedPaddingLeft: '16px',
+    name: 'PPC phase marker',
+    path: '/sops_ppc_advertising',
+    selector: '.ppc-advertising-page .sop-phase-marker',
+  },
+  {
+    expectedCount: 4,
+    expectedPaddingLeft: '12px',
+    name: 'Brand risk heading marker',
+    path: '/sops_brand_infringement',
+    selector: '.brand-infringement-page .brand-risk-heading',
   },
 ];
 
@@ -165,7 +207,7 @@ async function readCallout(locator: Locator): Promise<CalloutState | null> {
 async function auditTarget(page: Page, target: Target): Promise<string[]> {
   const failures: string[] = [];
 
-  await page.goto(`${hashBase}${target.path}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.goto(`${hashBase}${target.path}`, { waitUntil: 'commit', timeout: 30000 });
   await page.waitForSelector(target.selector, { timeout: 10000 });
 
   const callouts = page.locator(target.selector);
@@ -219,7 +261,89 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
   return failures;
 }
 
+async function readMarker(locator: Locator): Promise<MarkerState | null> {
+  return locator.evaluate((marker) => {
+    const rect = marker.getBoundingClientRect();
+    const styles = getComputedStyle(marker);
+
+    if (
+      rect.width <= 40 ||
+      rect.height <= 16 ||
+      styles.display === 'none' ||
+      styles.visibility === 'hidden'
+    ) {
+      return null;
+    }
+
+    return {
+      borderLeftColor: styles.borderLeftColor,
+      borderLeftStyle: styles.borderLeftStyle,
+      borderLeftWidth: styles.borderLeftWidth,
+      paddingLeft: styles.paddingLeft,
+    };
+  });
+}
+
+async function auditMarkerTarget(page: Page, target: MarkerTarget): Promise<string[]> {
+  const failures: string[] = [];
+
+  await page.goto(`${hashBase}${target.path}`, { waitUntil: 'commit', timeout: 30000 });
+  await page.waitForSelector(target.selector, { timeout: 10000 });
+
+  const markers = page.locator(target.selector);
+  const count = await markers.count();
+
+  if (count !== target.expectedCount) {
+    failures.push(`${target.name}: expected ${target.expectedCount} markers, got ${count}`);
+  }
+
+  for (let index = 0; index < count; index += 1) {
+    const marker = markers.nth(index);
+
+    if (!(await marker.isVisible())) {
+      continue;
+    }
+
+    const state = await readMarker(marker);
+
+    if (!state) {
+      failures.push(`${target.name} #${index + 1}: visible marker could not be sampled`);
+      continue;
+    }
+
+    if (state.borderLeftWidth !== '4px') {
+      failures.push(`${target.name} #${index + 1}: expected 4px left marker, got ${state.borderLeftWidth}`);
+    }
+
+    if (state.borderLeftStyle !== 'solid') {
+      failures.push(`${target.name} #${index + 1}: expected solid left marker, got ${state.borderLeftStyle}`);
+    }
+
+    if (state.borderLeftColor === 'rgba(0, 0, 0, 0)') {
+      failures.push(`${target.name} #${index + 1}: expected visible semantic marker color`);
+    }
+
+    if (state.paddingLeft !== target.expectedPaddingLeft) {
+      failures.push(
+        `${target.name} #${index + 1}: expected ${target.expectedPaddingLeft} left padding, got ${state.paddingLeft}`,
+      );
+    }
+  }
+
+  return failures;
+}
+
 async function main(): Promise<void> {
+  for (const sourcePath of sourceFilesWithoutRawBorderLeft) {
+    const source = readFileSync(sourcePath, 'utf8');
+
+    if (source.includes('border-l-4')) {
+      console.error(`${sourcePath}: raw border-l-4 remains in migrated dynamic callout source.`);
+      process.exitCode = 1;
+      return;
+    }
+  }
+
   for (const target of targets) {
     const template = readFileSync(target.templatePath, 'utf8');
     const allowedRawBorderLeftCount = target.allowedRawBorderLeftCount ?? 0;
@@ -238,11 +362,21 @@ async function main(): Promise<void> {
 
   try {
     browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    const viewport = { width: 1440, height: 1000 };
+    const page = await browser.newPage({ viewport });
     const failures: string[] = [];
 
     for (const target of targets) {
       failures.push(...(await auditTarget(page, target)));
+    }
+
+    for (const target of markerTargets) {
+      const markerPage = await browser.newPage({ viewport });
+      try {
+        failures.push(...(await auditMarkerTarget(markerPage, target)));
+      } finally {
+        await markerPage.close();
+      }
     }
 
     if (failures.length > 0) {
@@ -254,7 +388,9 @@ async function main(): Promise<void> {
       return;
     }
 
-    console.log(`Callout UI audit passed for ${targets.length} migrated PC content target.`);
+    console.log(
+      `Callout UI audit passed for ${targets.length} migrated PC content target and ${markerTargets.length} semantic marker target.`,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('Callout UI audit could not run.');

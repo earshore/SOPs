@@ -80,7 +80,7 @@ npx wrangler pages deploy dist --project-name sops --branch main
 | Amazon 智库 | 市场洞察、SEO 策略、运营实践和进阶攻略 | `src/modules/amz_hub/` |
 | 更多 | Agent Center、提示词、工作流探索页 | `src/modules/more/` |
 
-业务页面的路由、菜单元数据和懒加载入口统一声明在各模块的 `module.manifest.ts`。`src/common/constants/routes.ts`、`src/common/config/menuConfig.ts` 和各核心模块的加载映射会从这些 manifest 派生。
+业务页面的路由和菜单元数据统一声明在各模块的 `module.manifest.ts`。`src/common/constants/routes.ts` 和 `src/common/config/menuConfig.ts` 会从这些 manifest 派生；子页面的动态导入入口仍需要同步维护对应模块的 `module.loaders.ts`。
 
 ### 应用中心入口
 
@@ -197,7 +197,8 @@ npm run quality:track    # 质量趋势跟踪
 新增一条业务子页面时，通常只需要同步以下位置：
 
 1. 在目标模块的 `module.manifest.ts` 添加页面声明，包括 `routeId`、`label`、`category`、`icon` 和 `loader`；App Center 这类多子应用模块按需补充 `moduleId`。
-2. 新增页面实现和测试；如果页面展示动态数据，动态内容必须经过转义或安全渲染。
+2. 在目标模块的 `module.loaders.ts` 为该 `routeId` 添加动态导入入口。
+3. 新增页面实现和测试；如果页面展示动态数据，动态内容必须经过转义或安全渲染。
 
 只有新增模块实体或侧边栏分类时，才需要补充 `src/common/config/menuConfig.ts` 中的 modules/categories 元数据。
 
@@ -253,4 +254,4 @@ export const unmount = () => instance.unmount();
 ---
 
 **维护者**: sops 开发团队  
-**最后更新**: 2026-06-08
+**最后更新**: 2026-06-12

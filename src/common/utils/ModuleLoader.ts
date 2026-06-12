@@ -15,6 +15,7 @@ import {
 } from '../../components/ErrorBoundary';
 import { ValidationError } from '@/common/errors/AppError';
 import type { DIContainer } from '../di/Container';
+import { applyPageEnterAnimation, clearPageEnterAnimation } from './pageEnterAnimation';
 
 // ==================== 类型定义 ====================
 
@@ -42,6 +43,8 @@ export interface ModuleLoaderConfig {
   moduleName?: string;
   /** DI容器实例（可选，默认使用全局容器） */
   container?: DIContainer;
+  /** 是否在子模块内容挂载完成后应用统一入口动画 */
+  contentEnterAnimation?: boolean;
 }
 
 /**
@@ -73,6 +76,7 @@ export class ModuleLoader {
   private isLoading: boolean; // 🔧 新增：标记是否正在加载
   private pendingRouteId: string | null;
   private loadSequence: number;
+  private contentEnterAnimation: boolean;
 
   constructor(config: ModuleLoaderConfig) {
     this.containerId = config.containerId;
@@ -86,6 +90,7 @@ export class ModuleLoader {
     this.isLoading = false; // 🔧 初始化
     this.pendingRouteId = null;
     this.loadSequence = 0;
+    this.contentEnterAnimation = config.contentEnterAnimation || false;
     
     // 🎯 DI容器注入（预留用于未来的模块工厂函数）
     // const diContainer = config.container || globalContainer;
@@ -274,6 +279,7 @@ export class ModuleLoader {
     }
 
     this.currentContainer = container;
+    this._clearContentEnterAnimation(container);
     this._renderLoading(container);
     return container;
   }
@@ -292,8 +298,25 @@ export class ModuleLoader {
   }
 
   private _prepareContainerForMount(container: HTMLElement): void {
+    this._clearContentEnterAnimation(container);
     container.replaceChildren();
     void container.offsetHeight;
+  }
+
+  private _clearContentEnterAnimation(container: HTMLElement): void {
+    if (!this.contentEnterAnimation) {
+      return;
+    }
+
+    clearPageEnterAnimation(container);
+  }
+
+  private _applyContentEnterAnimation(container: HTMLElement): void {
+    if (!this.contentEnterAnimation) {
+      return;
+    }
+
+    applyPageEnterAnimation(container);
   }
 
   private _renderRetryLoading(container: HTMLElement): void {
@@ -338,6 +361,7 @@ export class ModuleLoader {
 
     this.currentModule = module;
     this.currentRouteId = routeId;
+    this._applyContentEnterAnimation(container);
   }
 
   private async _scheduleRetry(routeId: string, retryCount: number, loadId: number): Promise<void> {

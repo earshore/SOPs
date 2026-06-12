@@ -9,7 +9,8 @@ const moduleLoader: ModuleLoader = createModuleLoader({
     shellId: 'panel-sops',
     moduleMap: MODULE_MAP,
     loaderColor: 'blue',
-    moduleName: 'SOPs'
+    moduleName: 'SOPs',
+    contentEnterAnimation: true
 });
 
 /**

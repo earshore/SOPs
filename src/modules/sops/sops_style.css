@@ -168,6 +168,49 @@
   color: #b91c1c;
 }
 
+/* ==================== 页面内语义标记 ==================== */
+.sop-phase-marker {
+  border-left: 4px solid var(--sop-marker-accent);
+  padding-left: 1rem;
+}
+
+.sop-phase-marker--blue {
+  --sop-marker-accent: var(--color-blue-500, #3b82f6);
+}
+
+.sop-phase-marker--emerald {
+  --sop-marker-accent: var(--color-emerald-500, #10b981);
+}
+
+.sop-phase-marker--amber {
+  --sop-marker-accent: var(--color-amber-500, #f59e0b);
+}
+
+.sop-phase-marker--purple {
+  --sop-marker-accent: var(--color-purple-500, #8b5cf6);
+}
+
+.brand-risk-heading {
+  border-left: 4px solid var(--brand-risk-heading-accent);
+  padding-left: 0.75rem;
+}
+
+.brand-risk-heading--danger {
+  --brand-risk-heading-accent: var(--color-red-500, #ef4444);
+}
+
+.brand-risk-heading--warning {
+  --brand-risk-heading-accent: var(--color-amber-500, #f59e0b);
+}
+
+.brand-risk-heading--success {
+  --brand-risk-heading-accent: var(--color-emerald-500, #10b981);
+}
+
+.brand-risk-heading--info {
+  --brand-risk-heading-accent: var(--color-blue-500, #3b82f6);
+}
+
 /* ==================== NPI 生命周期主表 ==================== */
 .npi-lifecycle-table-card {
   background: var(--surface-card, #ffffff);

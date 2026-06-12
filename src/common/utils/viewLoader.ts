@@ -10,6 +10,7 @@ import { StorageService, CACHE_PREFIXES } from '../../services/storageService';
 import { getViewPathByRoute } from '../config/menuConfig';
 import { SystemError } from '@/common/errors/AppError';
 import { escapeHtml } from '@/common/utils/security';
+import { wrapWithPageEnterAnimation } from '@/common/utils/pageEnterAnimation';
 
 const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
 const LEGACY_CACHE_PREFIX = 'view_cache_';
@@ -413,7 +414,7 @@ export async function loadTemplate(path: string, options?: ViewLoadOptions & { d
     // 2. 自动包裹淡入动画容器（系统级通用功能）
     // 除非明确禁用，否则所有页面都应用淡入动画
     if (!options?.disableFadeIn) {
-        html = `<div class="view-fade-in-initial view-fade-in">${html}</div>`;
+        html = wrapWithPageEnterAnimation(html);
     }
     
     return html;

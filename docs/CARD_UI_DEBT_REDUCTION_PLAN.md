@@ -16,15 +16,15 @@ Purpose: route users to another module or workflow.
 
 Examples:
 
-- `.sop-card[class*="border-l-"]` on SOPs, More, and Amazon Hub overview pages.
-- `.overview-card[class*="border-l-"]` emitted by `OverviewRenderer`.
+- `.sop-card.overview-accent-card` on SOPs, More, and Amazon Hub overview pages.
+- `.overview-card.overview-accent-card` emitted by `OverviewRenderer`.
 - `.app-flow-step.app-child-link` and `.app-overview-card` on App Center overview.
 
 PC standard:
 
 - Default state has a complete 1px card border.
 - Default state does not show a colored left rail.
-- Hover/focus state shows the colored left rail, matching border color, and a subtle same-family background.
+- Hover/focus state shows a rounded colored left rail, matching border color, and a subtle same-family background.
 - Border radius is 16px.
 - Hover/focus does not move the card or change layout bounds.
 - State transition duration stays in the 150-300ms range.
@@ -87,11 +87,11 @@ Acceptance:
 Target:
 
 - Move repeated rail/border/background logic into shared CSS variables and a single reusable class contract.
-- Keep existing selectors as compatibility shims until templates are migrated.
+- Use explicit `overview-accent-card` and `overview-accent-*` classes instead of Tailwind `border-l-4` as the card semantic.
 
 Acceptance:
 
-- No new page-specific `border-left` hover rules for overview navigation cards.
+- No raw `border-l-4` or page-specific `border-left` hover rules for overview navigation cards.
 - `npm run card-ui:audit` remains green.
 
 Current progress:
@@ -99,6 +99,9 @@ Current progress:
 - Shared `--overview-card-*` variables and hover/focus rail behavior now live in `src/css/components/cards.css`.
 - Amazon Hub and App Center overview pages now provide card-specific color variables instead of duplicating rail/border/background hover rules.
 - SOPs and More PC overrides only protect the overview card radius from dense-panel 8px rules.
+- Amazon Hub overview is the confirmed PC visual baseline; SOP, More, and `OverviewRenderer` overview cards now use explicit `overview-accent-*` classes.
+- Hover/focus rails are drawn by rounded `::before` elements instead of square inset shadows, so the rail aligns with the 16px card radius.
+- Overview navigation card sources have zero raw `border-l-4` usage. Keyword Hunter status list items now use `keyword-status-item` classes. PPC phase markers now use `sop-phase-marker` classes. Brand Infringement headings now use `brand-risk-heading` classes. The remaining project-wide `border-l-4` usage is an AI Analysis tooltip triangle.
 
 ### Phase 3: Define a callout card standard
 
@@ -117,9 +120,10 @@ Current progress:
 
 - Shared `.content-callout` classes now live in `src/css/components/cards.css`.
 - Callouts use a default visible 4px inset semantic rail, complete 1px border, 8px radius, and no hover movement.
-- `src/modules/amz_hub/views/advanced/new_product_30days/template.html`, `src/modules/amz_hub/views/advanced/conversion_optimization/template.html`, `src/modules/amz_hub/views/practice/quality_listing/template.html`, `src/modules/amz_hub/views/knowledge/ecosystem/template.html`, `src/modules/sops/views/growth/listing_seo/template.html`, `src/modules/sops/views/growth/npi_tracker/template.html`, `src/modules/sops/views/growth/promotion_submission/template.html`, `src/modules/sops/views/service/negative_review/template.html`, `src/modules/sops/views/service/qa_maintenance/template.html`, `src/modules/sops/views/backend/fba_shipping/template.html`, `src/modules/sops/views/backend/inventory_replenishment/template.html`, `src/modules/sops/views/safety/performance_notification/template.html`, `src/modules/sops/views/safety/account_security/template.html`, and `src/modules/sops/views/safety/brand_infringement/template.html` are the migrated high-repetition samples.
+- `src/modules/amz_hub/views/advanced/new_product_30days/template.html`, `src/modules/amz_hub/views/advanced/conversion_optimization/template.html`, `src/modules/amz_hub/views/practice/quality_listing/template.html`, `src/modules/amz_hub/views/knowledge/ecosystem/template.html`, `src/modules/sops/views/growth/listing_seo/template.html`, `src/modules/sops/views/growth/npi_tracker/template.html`, `src/modules/sops/views/growth/promotion_submission/template.html`, `src/modules/sops/views/growth/ppc_advertising/template.html`, `src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts`, `src/modules/sops/views/service/negative_review/template.html`, `src/modules/sops/views/service/qa_maintenance/template.html`, `src/modules/sops/views/backend/fba_shipping/template.html`, `src/modules/sops/views/backend/inventory_replenishment/template.html`, `src/modules/sops/views/safety/performance_notification/template.html`, `src/modules/sops/views/safety/account_security/template.html`, and `src/modules/sops/views/safety/brand_infringement/template.html` are the migrated high-repetition samples.
 - `npm run callout-ui:audit` checks migrated templates have no raw `border-l-4` and validates the rendered PC callout contract.
-- `src/modules/sops/views/safety/brand_infringement/template.html` intentionally keeps four raw `border-l-4` occurrences on section headings; those are title markers, not cards, and are counted explicitly by the audit.
+- `src/modules/sops/views/safety/brand_infringement/template.html` migrated section heading markers to `brand-risk-heading` classes.
+- `src/modules/sops/views/growth/ppc_advertising/template.html` migrated phase section markers to `sop-phase-marker` classes.
 
 ### Phase 4: Workbench panel normalization
 
@@ -151,7 +155,7 @@ Acceptance:
 | Debt | Risk | Plan |
 | --- | --- | --- |
 | Card styles are spread across global CSS and module CSS. | Same interaction is implemented differently by page. | Consolidate overview behavior first, then migrate families one at a time. |
-| `border-l-4` means both navigation accent and content callout. | Fixes for one category can damage the other. | Keep navigation audit separate; define callout class before broad migration. |
+| Remaining raw `border-l-4` usages are mixed non-card markers and legacy content patterns. | A broad replacement could damage headings, timelines, or tool-specific UI. | Keep navigation and callout audits separate; migrate only after classification. |
 | App Center and SOP PC overrides can accidentally erase shared card behavior. | Later desktop tightening can regress hover rail and radius. | Keep `npm run card-ui:audit` as the gate after PC card changes. |
 | Content card families use different hover languages. | Pages feel inconsistent even when individual cards look acceptable. | Phase 5 classifies each family before changing it. |
 

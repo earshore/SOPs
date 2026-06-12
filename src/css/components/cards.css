@@ -322,9 +322,7 @@
 .card-accent--rose   { --accent-from: #f43f5e; --accent-to: #ec4899; }
 
 /* --- 概览导航卡片：默认隐藏左侧色条，hover/focus 时显示 --- */
-.sop-card[class*="border-l-"],
-.overview-card[class*="border-l-"],
-.amz-hub-overview .sop-card,
+.overview-accent-card,
 .app-flow-step.app-child-link,
 .app-overview-card {
   --card-left-rail-width: 4px;
@@ -339,11 +337,9 @@
   border-width: 1px !important;
   border-style: solid !important;
   border-color: var(--overview-card-border) !important;
-  border-radius: var(--overview-card-radius);
+  border-radius: var(--overview-card-radius) !important;
   background: var(--overview-card-bg);
-  box-shadow:
-    inset var(--overview-card-rail-width) 0 0 transparent,
-    var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
   transition:
     border-color var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     background-color var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
@@ -351,100 +347,114 @@
     transform var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.sop-card[class*="border-l-"]::before,
-.overview-card[class*="border-l-"]::before,
-.amz-hub-overview .sop-card::before,
+.overview-accent-card::before,
 .app-flow-step.app-child-link::before,
 .app-overview-card::before {
-  content: none;
+  content: "";
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: -1px;
+  width: var(--overview-card-rail-width);
+  background: var(--overview-card-accent);
+  border-radius: var(--overview-card-radius) 0 0 var(--overview-card-radius);
+  opacity: 0;
+  pointer-events: none;
+  transform: scaleX(0.35);
+  transform-origin: left center;
+  transition:
+    opacity var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.sop-card[class*="border-l-"]:hover,
-.sop-card[class*="border-l-"]:focus-visible,
-.overview-card[class*="border-l-"]:hover,
-.overview-card[class*="border-l-"]:focus-visible,
-.amz-hub-overview .sop-card:hover,
-.amz-hub-overview .sop-card:focus-visible,
+.overview-accent-card:hover,
+.overview-accent-card:focus-visible,
 .app-flow-step.app-child-link:hover,
 .app-flow-step.app-child-link:focus-visible,
 .app-overview-card:hover,
 .app-overview-card:focus-visible {
   border-color: var(--overview-card-accent) !important;
   background: var(--overview-card-accent-bg) !important;
-  box-shadow:
-    inset var(--overview-card-rail-width) 0 0 var(--overview-card-accent),
-    var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+  box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
   transform: none;
 }
 
-.sop-card.border-l-blue-400,
-.overview-card.border-l-blue-400 {
+.overview-accent-card:hover::before,
+.overview-accent-card:focus-visible::before,
+.app-flow-step.app-child-link:hover::before,
+.app-flow-step.app-child-link:focus-visible::before,
+.app-overview-card:hover::before,
+.app-overview-card:focus-visible::before {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.overview-accent-blue {
   --card-left-accent: #60a5fa;
   --card-left-accent-bg: rgba(239, 246, 255, 0.6);
 }
 
-.sop-card.border-l-green-400,
-.overview-card.border-l-green-400 {
+.overview-accent-green {
   --card-left-accent: #4ade80;
   --card-left-accent-bg: rgba(240, 253, 244, 0.66);
 }
 
-.sop-card.border-l-emerald-400,
-.overview-card.border-l-emerald-400 {
+.overview-accent-emerald {
   --card-left-accent: #34d399;
   --card-left-accent-bg: rgba(236, 253, 245, 0.66);
 }
 
-.sop-card.border-l-red-400,
-.overview-card.border-l-red-400 {
+.overview-accent-red {
   --card-left-accent: #f87171;
   --card-left-accent-bg: rgba(254, 242, 242, 0.66);
 }
 
-.sop-card.border-l-purple-400,
-.overview-card.border-l-purple-400 {
+.overview-accent-purple {
   --card-left-accent: #c084fc;
   --card-left-accent-bg: rgba(250, 245, 255, 0.66);
 }
 
-.sop-card.border-l-amber-400,
-.overview-card.border-l-amber-400 {
+.overview-accent-violet {
+  --card-left-accent: #a78bfa;
+  --card-left-accent-bg: rgba(245, 243, 255, 0.66);
+}
+
+.overview-accent-fuchsia {
+  --card-left-accent: #e879f9;
+  --card-left-accent-bg: rgba(253, 244, 255, 0.66);
+}
+
+.overview-accent-amber {
   --card-left-accent: #fbbf24;
   --card-left-accent-bg: rgba(255, 251, 235, 0.7);
 }
 
-.sop-card.border-l-cyan-400,
-.overview-card.border-l-cyan-400 {
+.overview-accent-cyan {
   --card-left-accent: #22d3ee;
   --card-left-accent-bg: rgba(236, 254, 255, 0.66);
 }
 
-.sop-card.border-l-rose-400,
-.overview-card.border-l-rose-400 {
+.overview-accent-rose {
   --card-left-accent: #fb7185;
   --card-left-accent-bg: rgba(255, 241, 242, 0.66);
 }
 
-.sop-card.border-l-teal-400,
-.overview-card.border-l-teal-400 {
+.overview-accent-teal {
   --card-left-accent: #2dd4bf;
   --card-left-accent-bg: rgba(240, 253, 250, 0.66);
 }
 
-.sop-card.border-l-indigo-400,
-.overview-card.border-l-indigo-400 {
+.overview-accent-indigo {
   --card-left-accent: #818cf8;
   --card-left-accent-bg: rgba(238, 242, 255, 0.66);
 }
 
-.sop-card.border-l-orange-400,
-.overview-card.border-l-orange-400 {
+.overview-accent-orange {
   --card-left-accent: #fb923c;
   --card-left-accent-bg: rgba(255, 247, 237, 0.66);
 }
 
-.sop-card.border-l-slate-400,
-.overview-card.border-l-slate-400 {
+.overview-accent-slate {
   --card-left-accent: #94a3b8;
   --card-left-accent-bg: rgba(248, 250, 252, 0.82);
 }

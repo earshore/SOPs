@@ -11,6 +11,7 @@ import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
 import { getEl } from './utils';
 import { showToast } from './notifications';
 import { setSafeHtml } from '../utils/security';
+import { applyPageEnterAnimation } from '../utils/pageEnterAnimation';
 
 // ========================
 // 侧边栏渲染器注册表
@@ -225,20 +226,31 @@ function emitPanelUnloadIfNeeded(targetPanelId: string): void {
   }
 }
 
-function showRoutePanel(targetPanelId: string): void {
+function showRoutePanel(targetPanelId: string): HTMLElement | null {
   document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
 
   const targetPanel = getEl(targetPanelId);
   if (targetPanel) {
     targetPanel.classList.remove("hidden");
-    return;
+    return targetPanel;
   }
 
   console.error(`⚠️ [Navigation] 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
   const home = getEl('panel-home');
   if (home) {
     home.classList.remove("hidden");
+    return home;
   }
+
+  return null;
+}
+
+function applyTopLevelPanelEnterAnimation(panel: HTMLElement | null): void {
+  if (panel?.id !== 'panel-home') {
+    return;
+  }
+
+  applyPageEnterAnimation(panel);
 }
 
 /**
@@ -268,7 +280,8 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   emitPanelUnloadIfNeeded(targetPanelId);
   currentActivePanel = targetPanelId;
 
-  showRoutePanel(targetPanelId);
+  const activePanel = showRoutePanel(targetPanelId);
+  applyTopLevelPanelEnterAnimation(activePanel);
 
   // 更新导航高亮
   if (fullConfig) {

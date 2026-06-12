@@ -193,6 +193,18 @@
     padding-right: 0.375rem;
 }
 
+.keyword-status-item {
+    border-left: 4px solid var(--keyword-status-accent);
+}
+
+.keyword-status-item--matched {
+    --keyword-status-accent: var(--color-green-500, #22c55e);
+}
+
+.keyword-status-item--unmatched {
+    --keyword-status-accent: var(--color-red-500, #ef4444);
+}
+
 /* --- Minimized Button --- */
 .kt-minimized-btn {
     position: fixed;

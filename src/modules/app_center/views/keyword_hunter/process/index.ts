@@ -775,7 +775,7 @@ function createFloatingKeywordElement(item: KeywordItem): HTMLElement {
 function createMatchedKeywordElement(item: KeywordItem): HTMLElement {
   const div = document.createElement("div");
   div.className =
-    "keyword-item bg-green-50 border-l-4 border-green-500 rounded p-2 flex justify-between items-center cursor-pointer hover:bg-green-100 transition-colors shadow-sm";
+    "keyword-item keyword-status-item keyword-status-item--matched bg-green-50 rounded p-2 flex justify-between items-center cursor-pointer hover:bg-green-100 transition-colors shadow-sm";
   div.dataset.keyword = item.keyword.toLowerCase();
   div.addEventListener("click", () => locateKeywordInCopy(item.keyword));
 
@@ -799,7 +799,7 @@ function createMatchedKeywordElement(item: KeywordItem): HTMLElement {
 function createUnmatchedKeywordElement(item: KeywordItem): HTMLElement {
   const div = document.createElement("div");
   div.className =
-    "keyword-item keyword-unmatched bg-red-50 border-l-4 border-red-500 rounded p-2 flex items-center gap-2 shadow-sm";
+    "keyword-item keyword-status-item keyword-status-item--unmatched keyword-unmatched bg-red-50 rounded p-2 flex items-center gap-2 shadow-sm";
   div.dataset.keyword = item.keyword.toLowerCase();
 
   const icon = document.createElement("i");
