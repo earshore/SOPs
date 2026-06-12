@@ -12,7 +12,7 @@
 
 import { appStore } from '@/stores/useAppStore';
 import { showToast } from '../../../../../../common/ui';
-import type { PromptlabAlpineContext, ConsoleMode } from './types';
+import type { DnaConfidence, PromptlabAlpineContext, ConsoleMode } from './types';
 import type { UserProductProfile } from '@/types/state';
 import { confirmWithModal } from '../../utils/confirmModal';
 
@@ -183,6 +183,17 @@ const EMPTY_PROFILE: UserProductProfile = {
   charLimit: 5000,
 };
 
+const EMPTY_DNA_CONFIDENCE: DnaConfidence = {
+  audience: 0,
+  usps: 0,
+  specs: 0,
+  keywords: 0,
+  keywordsTier1: 0,
+  keywordsTier2: 0,
+  negative: 0,
+  overall: 0,
+};
+
 /**
  * 弹窗确认后清空所有输入字段并保存
  */
@@ -196,6 +207,7 @@ export async function clearInputs(ctx: PromptlabAlpineContext): Promise<void> {
   if (!confirmed) return;
 
   ctx.profile = { ...EMPTY_PROFILE };
+  ctx.dnaConfidence = { ...EMPTY_DNA_CONFIDENCE };
   ctx.saveState();
   showToast('已清空', { type: 'success' });
 }

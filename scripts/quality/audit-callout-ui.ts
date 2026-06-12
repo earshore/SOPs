@@ -180,6 +180,26 @@ function extractInsetRailColor(boxShadow: string): string | null {
   return rail.match(/rgba?\([^)]+\)/)?.[0] ?? null;
 }
 
+async function waitForVisibleTarget(page: Page, selector: string): Promise<void> {
+  await page.waitForFunction(
+    (targetSelector) => {
+      return Array.from(document.querySelectorAll<HTMLElement>(targetSelector)).some((element) => {
+        const rect = element.getBoundingClientRect();
+        const styles = getComputedStyle(element);
+
+        return (
+          rect.width > 40 &&
+          rect.height > 16 &&
+          styles.display !== 'none' &&
+          styles.visibility !== 'hidden'
+        );
+      });
+    },
+    selector,
+    { timeout: 20000 },
+  );
+}
+
 async function readCallout(locator: Locator): Promise<CalloutState | null> {
   return locator.evaluate((callout) => {
     const rect = callout.getBoundingClientRect();
@@ -208,7 +228,7 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
   const failures: string[] = [];
 
   await page.goto(`${hashBase}${target.path}`, { waitUntil: 'commit', timeout: 30000 });
-  await page.waitForSelector(target.selector, { timeout: 10000 });
+  await waitForVisibleTarget(page, target.selector);
 
   const callouts = page.locator(target.selector);
   const count = await callouts.count();
@@ -288,7 +308,7 @@ async function auditMarkerTarget(page: Page, target: MarkerTarget): Promise<stri
   const failures: string[] = [];
 
   await page.goto(`${hashBase}${target.path}`, { waitUntil: 'commit', timeout: 30000 });
-  await page.waitForSelector(target.selector, { timeout: 10000 });
+  await waitForVisibleTarget(page, target.selector);
 
   const markers = page.locator(target.selector);
   const count = await markers.count();

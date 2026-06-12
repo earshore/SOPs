@@ -24,7 +24,7 @@ PC standard:
 
 - Default state has a complete 1px card border.
 - Default state does not show a colored left rail.
-- Hover/focus state shows a rounded colored left rail, matching border color, and a subtle same-family background.
+- Hover/focus state shows a subtle inset colored left rail, matching border color, and a same-family background.
 - Border radius is 16px.
 - Hover/focus does not move the card or change layout bounds.
 - State transition duration stays in the 150-300ms range.
@@ -54,7 +54,7 @@ Examples:
 - Amazon detail pages: `.amz_card-hover`, `.amzpa_*`, `.amzpt_*`, `.amzf_event_card`.
 - More business scenario pages: `.zn-card`, `.zn-notice-card`.
 - Prompt library: `.prompt-card`, `.prompt-source-card`.
-- Static Tailwind callouts using `border-l-4`.
+- Legacy static Tailwind callouts that previously used `border-l-4`.
 
 PC standard:
 
@@ -100,20 +100,21 @@ Current progress:
 - Amazon Hub and App Center overview pages now provide card-specific color variables instead of duplicating rail/border/background hover rules.
 - SOPs and More PC overrides only protect the overview card radius from dense-panel 8px rules.
 - Amazon Hub overview is the confirmed PC visual baseline; SOP, More, and `OverviewRenderer` overview cards now use explicit `overview-accent-*` classes.
-- Hover/focus rails are drawn by rounded `::before` elements instead of square inset shadows, so the rail aligns with the 16px card radius.
-- Overview navigation card sources have zero raw `border-l-4` usage. Keyword Hunter status list items now use `keyword-status-item` classes. PPC phase markers now use `sop-phase-marker` classes. Brand Infringement headings now use `brand-risk-heading` classes. The remaining project-wide `border-l-4` usage is an AI Analysis tooltip triangle.
+- Hover/focus rails are drawn as a 2px inset shadow instead of an external `::before` strip, so the rail is clipped by the 16px card radius and does not protrude past the rounded edge.
+- Overview navigation card sources have zero raw `border-l-4` usage. Keyword Hunter status list items now use `keyword-status-item` classes. PPC phase markers now use `sop-phase-marker` classes. Brand Infringement headings now use `brand-risk-heading` classes. The AI Analysis tooltip triangle now uses `ai-analysis-tooltip-arrow`.
+- `npm run card-ui:audit` now fails if any raw `border-l-4` utility appears under `src`.
 
 ### Phase 3: Define a callout card standard
 
 Target:
 
-- Separate static `border-l-4` content blocks from navigation cards.
+- Separate static content callouts from navigation cards.
 - Introduce a documented callout class for risk/info/success/warning blocks.
 - Migrate the highest repetition templates first: SOP service/safety pages and Amazon advanced/practice pages.
 
 Acceptance:
 
-- Static content callouts no longer depend on raw Tailwind `border-l-4` combinations in newly touched files.
+- Static content callouts no longer depend on raw Tailwind `border-l-4` combinations in migrated files.
 - Navigation-card audit remains separate from callout review.
 
 Current progress:
@@ -137,6 +138,14 @@ Acceptance:
 
 - Scraper, Keyword Hunter, AI Analysis, PromptLab, and PPC pages use the same panel radius and restrained hover language.
 - Tool panels do not inherit overview card rail styles.
+- `npm run workbench-ui:audit` validates the migrated PC workbench panel families.
+
+Current progress:
+
+- `npm run workbench-ui:audit` now checks Keyword Hunter input/process/analysis panels and Scraper elevated/strategy panels.
+- Scraper `.card-elevated`, `.task-card`, `.history-card`, `.plugin-card`, and `.strategy-card` hover rules no longer move the panel layout.
+- Scraper `.history-card::before` no longer draws a decorative hover rail.
+- `npm run ui:audit` runs the card, callout, and workbench PC UI gates together.
 
 ### Phase 5: Content card migration
 
@@ -155,8 +164,9 @@ Acceptance:
 | Debt | Risk | Plan |
 | --- | --- | --- |
 | Card styles are spread across global CSS and module CSS. | Same interaction is implemented differently by page. | Consolidate overview behavior first, then migrate families one at a time. |
-| Remaining raw `border-l-4` usages are mixed non-card markers and legacy content patterns. | A broad replacement could damage headings, timelines, or tool-specific UI. | Keep navigation and callout audits separate; migrate only after classification. |
+| Future raw `border-l-4` utilities can reintroduce card/callout ambiguity. | A single utility can represent navigation rails, content callouts, markers, or CSS triangles with different standards. | `npm run card-ui:audit` now blocks raw `border-l-4`; use semantic classes for each role. |
 | App Center and SOP PC overrides can accidentally erase shared card behavior. | Later desktop tightening can regress hover rail and radius. | Keep `npm run card-ui:audit` as the gate after PC card changes. |
+| Workbench panels can regress to layout-moving hover effects. | Dense tool pages feel jumpy and reuse navigation-card motion where it does not belong. | `npm run workbench-ui:audit` blocks hover transform on migrated workbench panel families. |
 | Content card families use different hover languages. | Pages feel inconsistent even when individual cards look acceptable. | Phase 5 classifies each family before changing it. |
 
 ## Review Rule

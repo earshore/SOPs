@@ -38,6 +38,9 @@ export interface ExtendedDNA {
     usps: number;
     specs: number;
     keywords: number;
+    keywordsCore?: number;
+    keywordsLongTail?: number;
+    keywordsIntent?: number;
     restrictedWords: number;
     highFrequencyPhrases: number;
     painPoints: number;
@@ -49,6 +52,15 @@ export interface ExtendedDNA {
     extractedAt: string;
     reportType: string;
     sourceFields: string[];
+    fieldSources?: {
+      audience?: string[];
+      usps?: string[];
+      specs?: string[];
+      keywordsCore?: string[];
+      keywordsLongTail?: string[];
+      keywordsIntent?: string[];
+      restrictedWords?: string[];
+    };
     stats?: {
       totalKeywords: number;
       totalRestrictedWords: number;

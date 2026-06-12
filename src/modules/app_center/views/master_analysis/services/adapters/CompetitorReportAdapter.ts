@@ -51,6 +51,12 @@ function createEmptyKeywordClusters(): CompetitorReport["keyword_clusters"] {
   };
 }
 
+const KEYWORD_FIELD_CONFIDENCE = {
+  CORE: 0.85,
+  LONG_TAIL: 0.75,
+  INTENT: 0.65,
+} as const;
+
 /**
  * Competitor Report 适配器实现
  */
@@ -129,6 +135,9 @@ export class CompetitorReportAdapter implements ReportAdapter {
           usps: usps.confidence,
           specs: specs.confidence,
           keywords: keywords.confidence,
+          keywordsCore: keywords.data.core.length > 0 ? KEYWORD_FIELD_CONFIDENCE.CORE : 0,
+          keywordsLongTail: keywords.data.longTail.length > 0 ? KEYWORD_FIELD_CONFIDENCE.LONG_TAIL : 0,
+          keywordsIntent: keywords.data.intent.length > 0 ? KEYWORD_FIELD_CONFIDENCE.INTENT : 0,
           restrictedWords: restrictedWords.confidence,
           highFrequencyPhrases: highFrequencyPhrases.confidence,
           painPoints: painPoints.confidence,
@@ -151,6 +160,15 @@ export class CompetitorReportAdapter implements ReportAdapter {
               ...differentiation.sourceFields,
             ]),
           ],
+          fieldSources: {
+            audience: audience.sourceFields,
+            usps: usps.sourceFields,
+            specs: specs.sourceFields,
+            keywordsCore: keywords.data.core.length > 0 ? keywords.sourceFields.filter(source => source.includes("core")) : [],
+            keywordsLongTail: keywords.data.longTail.length > 0 ? keywords.sourceFields.filter(source => source.includes("long_tail")) : [],
+            keywordsIntent: keywords.data.intent.length > 0 ? keywords.sourceFields.filter(source => source === "intents") : [],
+            restrictedWords: restrictedWords.sourceFields,
+          },
           stats: {
             totalKeywords:
               keywords.data.core.length +

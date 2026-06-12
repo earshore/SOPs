@@ -18,8 +18,41 @@ export interface DnaConfidence {
   usps: number;
   specs: number;
   keywords: number;
+  keywordsTier1: number;
+  keywordsTier2: number;
   negative: number;
   overall: number;
+}
+
+export type DnaExtractionStatus = 'high' | 'low' | 'empty';
+
+export type DnaExtractionFieldName =
+  | 'keywordsTier1'
+  | 'keywordsTier2'
+  | 'negative'
+  | 'audience'
+  | 'usps'
+  | 'specs';
+
+export interface DnaExtractionFieldSummary {
+  field: DnaExtractionFieldName;
+  label: string;
+  confidence: number;
+  status: DnaExtractionStatus;
+  hasValue: boolean;
+  source: string;
+}
+
+export interface DnaExtractionSummary {
+  totalFields: number;
+  extractableFields: number;
+  highConfidenceFields: number;
+  lowConfidenceFields: number;
+  emptyFields: number;
+  overallConfidence: number;
+  reportType: string;
+  fields: DnaExtractionFieldSummary[];
+  updatedAt: string;
 }
 
 // ==========================================
@@ -41,6 +74,7 @@ export interface PromptlabAlpineContext {
   originalHeights: Map<HTMLElement, number>;
   profile: UserProductProfile;
   dnaConfidence: DnaConfidence;
+  dnaExtractionSummary: DnaExtractionSummary | null;
   hasRenderedReportOnce: boolean;
   expandedDimensions: Set<string>;
   expandedSubItems: Set<string>;

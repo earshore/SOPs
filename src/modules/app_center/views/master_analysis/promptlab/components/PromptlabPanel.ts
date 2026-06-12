@@ -27,6 +27,8 @@ import { HistoryService } from "../../services/historyService";
 import type {
   ConsoleMode,
   DnaConfidence,
+  DnaExtractionFieldName,
+  DnaExtractionFieldSummary,
   PromptlabAlpineContext,
 } from "./types";
 
@@ -56,6 +58,7 @@ import {
   canExtractDNA,
   autoPopulateDNA,
   extractSingleField,
+  refreshDnaExtractionSummary,
 } from "./dnaActions";
 
 import { generateListingPrompt, generateVisualPrompt } from "./promptActions";
@@ -102,6 +105,8 @@ function createDefaultDnaConfidence(): DnaConfidence {
     usps: 0,
     specs: 0,
     keywords: 0,
+    keywordsTier1: 0,
+    keywordsTier2: 0,
     negative: 0,
     overall: 0,
   };
@@ -170,6 +175,18 @@ const createDisabledItems = (indexes: string[]): Record<string, boolean> => {
   return items;
 };
 
+const DNA_REPORT_TYPE_LABELS: Record<string, string> = {
+  full_analysis: '完整 AI 分析报告',
+  competitor: '竞品分析报告',
+  product_overview: '产品概览报告',
+  semantic_analysis: '语义分析报告',
+  legacy: '基础分析报告',
+};
+
+function getDnaReportTypeLabel(reportType: string): string {
+  return DNA_REPORT_TYPE_LABELS[reportType] ?? '分析报告';
+}
+
 type PromptlabPanelState = Pick<
   PromptlabAlpineContext,
   | 'currentConsoleMode'
@@ -179,6 +196,7 @@ type PromptlabPanelState = Pick<
   | 'originalHeights'
   | 'profile'
   | 'dnaConfidence'
+  | 'dnaExtractionSummary'
   | 'hasRenderedReportOnce'
   | 'expandedDimensions'
   | 'expandedSubItems'
@@ -192,14 +210,19 @@ type PromptlabPanelThis = PromptlabAlpineContext & {
   isReady: boolean;
   isOverLimit: boolean;
   hasReport: boolean;
+  canExtractDNA: boolean;
+  reportActionDisabled: boolean;
+  dnaActionDisabled: boolean;
   reportConfidence: Record<string, number> | null;
   overallConfidence: number;
   hasExpandedDimensions: boolean;
   restoreState(): void;
   restorePromptCachesFromCurrentSnapshot(): void;
+  refreshDnaExtractionSummary(): void;
   onInputChange(): void;
   expandAllDimensions(): void;
   collapseAllDimensions(): void;
+  getDnaFieldSummary(field: DnaExtractionFieldName): DnaExtractionFieldSummary | null;
   getSubItemData(dimensionId: string, subItemKey: string): unknown;
   getContentItemIndexes(dimensionId: string, subItemKey: string): string[];
   ensureStructuredSubItemSelection(
@@ -226,6 +249,7 @@ function createPromptlabPanelState(): PromptlabPanelState {
     originalHeights: new Map<HTMLElement, number>(),
     profile: { ...DEFAULT_PROFILE } as UserProductProfile,
     dnaConfidence: createDefaultDnaConfidence(),
+    dnaExtractionSummary: null,
     hasRenderedReportOnce: false,
     expandedDimensions: new Set<string>(),
     expandedSubItems: new Set<string>(),
@@ -294,18 +318,22 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       return !this.hasReport;
     },
 
+    get dnaActionDisabled(): boolean {
+      return !this.canExtractDNA;
+    },
+
     get generateButtonDisabled(): boolean {
       return !this.isReady;
     },
 
     get autoPopulateButtonClass(): string {
-      return this.hasReport
+      return !this.dnaActionDisabled
         ? 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 shadow-sm shadow-blue-200 cursor-pointer'
         : 'bg-slate-100 text-slate-500 border border-slate-200 cursor-not-allowed';
     },
 
     get extractButtonClass(): string {
-      return this.hasReport
+      return !this.dnaActionDisabled
         ? 'text-blue-600 bg-blue-50/70 hover:bg-blue-100 border border-blue-100 hover:border-blue-200 cursor-pointer'
         : 'text-slate-500 bg-slate-100 border border-slate-200 cursor-not-allowed';
     },
@@ -353,6 +381,45 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       return `${this.dnaConfidence[field]}%`;
     },
 
+    showDnaExtractionSummary(): boolean {
+      return !!this.dnaExtractionSummary && !this.dnaActionDisabled;
+    },
+
+    getDnaExtractionSummaryHeadline(): string {
+      const summary = this.dnaExtractionSummary;
+      if (!summary) return '';
+      return `可提取 ${summary.extractableFields}/${summary.totalFields}，高置信 ${summary.highConfidenceFields} 个`;
+    },
+
+    getDnaLowConfidenceText(): string {
+      const summary = this.dnaExtractionSummary;
+      if (!summary) return '';
+      const lowFields = summary.fields
+        .filter(field => field.status === 'low')
+        .map(field => field.label)
+        .join('、');
+      return lowFields ? `低置信待复核：${lowFields}` : '';
+    },
+
+    getDnaReportTypeText(): string {
+      const summary = this.dnaExtractionSummary;
+      return summary ? `来源格式：${getDnaReportTypeLabel(summary.reportType)}` : '';
+    },
+
+    getDnaFieldSummary(field: DnaExtractionFieldName): DnaExtractionFieldSummary | null {
+      return this.dnaExtractionSummary?.fields.find(item => item.field === field) ?? null;
+    },
+
+    showDnaSource(field: DnaExtractionFieldName): boolean {
+      return !!this.getDnaFieldSummary(field)?.hasValue;
+    },
+
+    getDnaFieldSourceText(field: DnaExtractionFieldName): string {
+      const summary = this.getDnaFieldSummary(field);
+      if (!summary) return '';
+      return `来源：${summary.source} · 置信度：${summary.confidence}%`;
+    },
+
     toggleAllDimensions(): void {
       if (this.hasExpandedDimensions) {
         this.collapseAllDimensions();
@@ -390,6 +457,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
       // 渲染报告分析区域
       this.renderReportAnalysis();
+      this.refreshDnaExtractionSummary();
 
       // 初始化 textarea 高度自适应
       initAutoHeightInputs(this.originalHeights);
@@ -418,9 +486,12 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
           if (!computeHasReport()) {
             this.profile = withoutReportDna(this.profile);
             this.dnaConfidence = createDefaultDnaConfidence();
+            this.dnaExtractionSummary = null;
             this.hasRenderedReportOnce = false;
             this.expandedDimensions.clear();
             this.expandedSubItems.clear();
+          } else {
+            this.refreshDnaExtractionSummary();
           }
 
           const nextTick = (
@@ -469,6 +540,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
       if (!hasUsableReport) {
         this.dnaConfidence = createDefaultDnaConfidence();
+        this.dnaExtractionSummary = null;
         this.hasRenderedReportOnce = false;
         this.expandedDimensions.clear();
         this.expandedSubItems.clear();
@@ -499,6 +571,10 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     renderReportAnalysis() {
       this.restorePromptCachesFromCurrentSnapshot();
       renderReportAnalysis(this as unknown as PromptlabAlpineContext);
+    },
+
+    refreshDnaExtractionSummary() {
+      refreshDnaExtractionSummary(this as unknown as PromptlabAlpineContext);
     },
 
     autoSelectMarket(marketSelect: HTMLSelectElement | null) {
@@ -535,8 +611,8 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       await autoPopulateDNA(this as unknown as PromptlabAlpineContext);
     },
 
-    extractSingleField(fieldName: "keywordsTier1" | "keywordsTier2" | "negative" | "audience" | "usps" | "specs") {
-      extractSingleField(this as unknown as PromptlabAlpineContext, fieldName);
+    async extractSingleField(fieldName: "keywordsTier1" | "keywordsTier2" | "negative" | "audience" | "usps" | "specs") {
+      await extractSingleField(this as unknown as PromptlabAlpineContext, fieldName);
     },
 
     // ========== UI Helpers ==========
@@ -576,6 +652,9 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
         [field]: target.value,
       };
       this.onInputChange();
+      if (field === 'targetMarket') {
+        this.refreshDnaExtractionSummary();
+      }
     },
 
     setProfileBoolean(field: keyof UserProductProfile, event: Event) {

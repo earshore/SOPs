@@ -695,13 +695,15 @@
     </div>
 
     <!-- 性能设置模态框 -->
-    <template x-if="perfSettings.showSettings">
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+    <template x-teleport="#modal-container">
+      <div x-show="perfSettings.showSettings" x-cloak
+        class="fixed inset-0 z-[1000] flex items-center justify-center overflow-y-auto p-4 bg-black/40"
+        style="display: none;"
         @click.self="perfSettings.toggleSettings()">
-        <div class="bg-white rounded-lg border border-slate-200 shadow-xl max-w-xl w-full max-h-[88vh] overflow-y-auto"
+        <div class="flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl sm:max-h-[88vh]"
           role="dialog" aria-modal="true" aria-labelledby="performance-settings-title" @click.stop>
           <!-- Header -->
-          <div class="px-5 py-4 border-b border-slate-200">
+          <div class="shrink-0 px-5 py-4 border-b border-slate-200">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <i class="fa-solid fa-sliders text-slate-500"></i>
@@ -719,7 +721,7 @@
           </div>
 
           <!-- Content -->
-          <div class="px-5 py-4 space-y-4">
+          <div class="min-h-0 overflow-y-auto px-5 py-4 space-y-4">
             <!-- 调度偏好 -->
             <section class="space-y-3">
               <div class="flex items-center justify-between gap-3">
@@ -816,7 +818,7 @@
           </div>
 
           <!-- Footer -->
-          <div class="bg-slate-50 px-5 py-3 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-200">
+          <div class="shrink-0 bg-slate-50 px-5 py-3 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-200">
             <button type="button" @click="perfSettings.resetSettings()"
               class="min-h-11 px-3 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors">
               <i class="fa-solid fa-rotate-left mr-2"></i>

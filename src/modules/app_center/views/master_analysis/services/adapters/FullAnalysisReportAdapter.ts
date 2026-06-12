@@ -71,6 +71,12 @@ const SPEC_PATTERNS = [
   /(\d+\s*[x×]\s*\d+(?:\s*[x×]\s*\d+)?)\s*([a-zA-Z]+|厘米|米)/g,
 ];
 
+const KEYWORD_FIELD_CONFIDENCE = {
+  CORE: 0.9,
+  LONG_TAIL: 0.8,
+  INTENT: 0.7,
+} as const;
+
 function pickReportField<T>(
   reportObj: FullAnalysisReportInput,
   keys: FullAnalysisReportInputKey[],
@@ -234,6 +240,9 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
           usps: usps.confidence,
           specs: specs.confidence,
           keywords: keywords.confidence,
+          keywordsCore: keywords.data.core.length > 0 ? KEYWORD_FIELD_CONFIDENCE.CORE : 0,
+          keywordsLongTail: keywords.data.longTail.length > 0 ? KEYWORD_FIELD_CONFIDENCE.LONG_TAIL : 0,
+          keywordsIntent: keywords.data.intent.length > 0 ? KEYWORD_FIELD_CONFIDENCE.INTENT : 0,
           restrictedWords: restrictedWords.confidence,
           highFrequencyPhrases: highFrequencyPhrases.confidence,
           painPoints: painPoints.confidence,
@@ -254,6 +263,15 @@ export class FullAnalysisReportAdapter implements ReportAdapter {
               ...differentiation.sourceFields,
             ]),
           ],
+          fieldSources: {
+            audience: audience.sourceFields,
+            usps: usps.sourceFields,
+            specs: specs.sourceFields,
+            keywordsCore: keywords.data.core.length > 0 ? keywords.sourceFields.filter(source => source.includes("primary")) : [],
+            keywordsLongTail: keywords.data.longTail.length > 0 ? keywords.sourceFields.filter(source => source.includes("secondary")) : [],
+            keywordsIntent: keywords.data.intent.length > 0 ? keywords.sourceFields.filter(source => source.includes("scene")) : [],
+            restrictedWords: restrictedWords.sourceFields,
+          },
           stats: {
             totalKeywords:
               keywords.data.core.length +

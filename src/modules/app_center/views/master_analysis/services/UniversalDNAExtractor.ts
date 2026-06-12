@@ -61,7 +61,6 @@ import { FullAnalysisReportAdapter } from './adapters/FullAnalysisReportAdapter'
 import { CompetitorReportAdapter } from './adapters/CompetitorReportAdapter';
 import { ProductOverviewAdapter } from './adapters/ProductOverviewAdapter';
 import { SemanticAnalysisAdapter } from './adapters/SemanticAnalysisAdapter';
-import { isSupportedReport } from './reportTypeDetector';
 /**
  * 通用 DNA 提取器类
  *
@@ -158,7 +157,13 @@ export class UniversalDNAExtractor {
       return false;
     }
 
-    return isSupportedReport(report);
+    return this.adapters.some((adapter) => {
+      try {
+        return adapter.canHandle(report);
+      } catch {
+        return false;
+      }
+    });
   }
 
   /**

@@ -282,7 +282,7 @@
   transition: all var(--duration-normal) var(--ease-smooth);
 }
 .card-elevated:hover {
-  transform: translateY(-2px);
+  transform: none;
   box-shadow: 
     0 12px 28px -8px var(--color-black-alpha-10),
     0 4px 10px -4px var(--color-black-alpha-5);
@@ -434,7 +434,7 @@
   contain: layout paint;
 }
 .task-card:hover {
-  transform: translateY(-1px);
+  transform: none;
   box-shadow: 0 6px 14px -12px rgba(15, 23, 42, 0.35);
 }
 .task-card .task-icon {
@@ -492,7 +492,7 @@
   position: relative;
 }
 .history-card::before {
-  content: '';
+  content: none;
   position: absolute;
   left: 0;
   top: 50%;
@@ -507,7 +507,7 @@
   height: 60%;
 }
 .history-card:hover {
-  transform: translateX(4px);
+  transform: none;
   border-color: rgba(99, 102, 241, 0.25);
   box-shadow: 
     0 8px 24px -8px var(--color-indigo-200),
@@ -590,7 +590,7 @@
   opacity: 1;
 }
 .plugin-card:hover {
-  transform: translateY(-2px);
+  transform: none;
   border-color: rgba(99, 102, 241, 0.3);
   box-shadow: 
     0 12px 28px -8px var(--color-indigo-200),
@@ -675,7 +675,7 @@
   transition: all var(--duration-normal) var(--ease-smooth);
 }
 .strategy-card:hover {
-  transform: translateY(-3px);
+  transform: none;
 }
 
 .strategy-item {
@@ -1274,12 +1274,9 @@
     align-items: flex-start;
   }
   
-  .strategy-card:hover {
-    transform: translateY(-1px);
-  }
-  
+  .strategy-card:hover,
   .history-card:hover {
-    transform: translateX(2px);
+    transform: none;
   }
 }
 

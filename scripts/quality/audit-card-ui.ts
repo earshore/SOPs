@@ -6,7 +6,8 @@
  * standards.
  */
 
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { chromium, type Browser, type Locator, type Page } from 'playwright';
 
 const baseUrl = process.env.CARD_AUDIT_BASE_URL || 'http://127.0.0.1:5174';
@@ -22,13 +23,7 @@ interface Target {
 interface CardState {
   accentReferenceColor: string;
   background: string;
-  beforeBackground: string;
-  beforeBottom: string;
   beforeContent: string;
-  beforeLeft: string;
-  beforeOpacity: string;
-  beforeTop: string;
-  beforeWidth: string;
   borderColor: string;
   borderLeftWidth: string;
   boxShadow: string;
@@ -86,6 +81,9 @@ const overviewSourcePaths = [
 ];
 
 const keywordStatusSourcePath = 'src/modules/app_center/views/keyword_hunter/process/index.ts';
+const sourceRoot = 'src';
+const sourceExtensions = new Set(['.css', '.html', '.js', '.jsx', '.ts', '.tsx', '.vue']);
+const hoverRailShadowSignature = '2px 0px 0px 0px';
 
 function normalizeColor(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
@@ -117,8 +115,19 @@ function colorDistance(a: string, b: string): number {
   );
 }
 
-function hasVisibleRail(state: CardState): boolean {
-  return Number(state.beforeOpacity) >= 0.9 && !state.beforeBackground.includes('rgba(0, 0, 0, 0)');
+function extractInsetRailColor(boxShadow: string): string | null {
+  const shadows = boxShadow.split(/,\s(?=(?:rgb|rgba)\()/);
+  const rail = shadows.find((shadow) => shadow.includes('inset') && shadow.includes(hoverRailShadowSignature));
+
+  if (!rail || rail.includes('rgba(0, 0, 0, 0)')) return null;
+  return rail.match(/rgba?\([^)]+\)/)?.[0] ?? null;
+}
+
+function hasTransparentInsetRail(boxShadow: string): boolean {
+  const shadows = boxShadow.split(/,\s(?=(?:rgb|rgba)\()/);
+  const rail = shadows.find((shadow) => shadow.includes('inset') && shadow.includes(hoverRailShadowSignature));
+
+  return Boolean(rail?.includes('rgba(0, 0, 0, 0)'));
 }
 
 async function readCard(locator: Locator): Promise<CardSample | null> {
@@ -149,13 +158,7 @@ async function readCard(locator: Locator): Promise<CardSample | null> {
       state: {
         accentReferenceColor: accentStyles.color,
         background: styles.backgroundColor,
-        beforeBackground: before.backgroundColor,
-        beforeBottom: before.bottom,
         beforeContent: before.content,
-        beforeLeft: before.left,
-        beforeOpacity: before.opacity,
-        beforeTop: before.top,
-        beforeWidth: before.width,
         borderColor: styles.borderTopColor,
         borderLeftWidth: styles.borderLeftWidth,
         boxShadow: styles.boxShadow,
@@ -178,7 +181,7 @@ async function readHoverState(page: Page, locator: Locator, base: CardSample): P
 
     if (
       latest &&
-      hasVisibleRail(latest.state) &&
+      extractInsetRailColor(latest.state.boxShadow) &&
       normalizeColor(latest.state.borderColor) !== normalizeColor(base.state.borderColor) &&
       normalizeColor(latest.state.background) !== normalizeColor(base.state.background)
     ) {
@@ -253,7 +256,7 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
     }
 
     const cardLabel = `${target.name} #${index + 1} "${base.text}"`;
-    const railColor = hasVisibleRail(hover.state) ? hover.state.beforeBackground : null;
+    const railColor = extractInsetRailColor(hover.state.boxShadow);
 
     if (base.state.radius !== '16px') {
       failures.push(`${cardLabel}: expected 16px default radius, got ${base.state.radius}`);
@@ -263,26 +266,12 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
       failures.push(`${cardLabel}: expected default left border width 1px, got ${base.state.borderLeftWidth}`);
     }
 
-    if (base.state.beforeContent === 'none') {
-      failures.push(`${cardLabel}: expected ::before rail element to exist`);
+    if (base.state.beforeContent !== 'none') {
+      failures.push(`${cardLabel}: expected disabled ::before rail, got ${base.state.beforeContent}`);
     }
 
-    if (base.state.beforeOpacity !== '0') {
-      failures.push(`${cardLabel}: expected hidden default rail opacity 0, got ${base.state.beforeOpacity}`);
-    }
-
-    if (base.state.beforeWidth !== '4px') {
-      failures.push(`${cardLabel}: expected 4px rail width, got ${base.state.beforeWidth}`);
-    }
-
-    if (
-      base.state.beforeTop !== '-1px' ||
-      base.state.beforeBottom !== '-1px' ||
-      base.state.beforeLeft !== '-1px'
-    ) {
-      failures.push(
-        `${cardLabel}: expected rail to cover card outer edge at -1px offsets, got top ${base.state.beforeTop}, bottom ${base.state.beforeBottom}, left ${base.state.beforeLeft}`,
-      );
+    if (!hasTransparentInsetRail(base.state.boxShadow)) {
+      failures.push(`${cardLabel}: expected hidden default inset rail`);
     }
 
     if (hover.state.radius !== '16px') {
@@ -290,7 +279,7 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
     }
 
     if (!railColor) {
-      failures.push(`${cardLabel}: expected visible 4px rounded rail on hover`);
+      failures.push(`${cardLabel}: expected visible 2px inset rail on hover`);
     }
 
     if (normalizeColor(hover.state.borderColor) === normalizeColor(base.state.borderColor)) {
@@ -362,13 +351,51 @@ function auditKeywordStatusSource(): string[] {
   ];
 }
 
+function collectSourceFiles(directory: string): string[] {
+  const files: string[] = [];
+
+  for (const entry of readdirSync(directory)) {
+    const path = join(directory, entry);
+    const stat = statSync(path);
+
+    if (stat.isDirectory()) {
+      files.push(...collectSourceFiles(path));
+      continue;
+    }
+
+    if (sourceExtensions.has(path.slice(path.lastIndexOf('.')))) {
+      files.push(path);
+    }
+  }
+
+  return files;
+}
+
+function auditProjectRawBorderLeftUtilities(): string[] {
+  const offenders = collectSourceFiles(sourceRoot).filter((sourcePath) => {
+    return /\bborder-l-4\b/.test(readFileSync(sourcePath, 'utf8'));
+  });
+
+  if (offenders.length === 0) {
+    return [];
+  }
+
+  return offenders.map(
+    (sourcePath) => `${sourcePath}: raw border-l-4 utility must be replaced with a semantic component class.`,
+  );
+}
+
 async function main(): Promise<void> {
   let browser: Browser | null = null;
 
   try {
     browser = await chromium.launch({ headless: true });
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-    const failures: string[] = [...auditOverviewSources(), ...auditKeywordStatusSource()];
+    const failures: string[] = [
+      ...auditProjectRawBorderLeftUtilities(),
+      ...auditOverviewSources(),
+      ...auditKeywordStatusSource(),
+    ];
 
     for (const target of targets) {
       failures.push(...(await auditTarget(page, target)));

@@ -104,6 +104,12 @@ function createEmptyKeywordClusters(): ProductOverviewReport["keywordClusters"] 
   };
 }
 
+const KEYWORD_FIELD_CONFIDENCE = {
+  CORE: 0.85,
+  LONG_TAIL: 0.75,
+  INTENT: 0.7,
+} as const;
+
 /**
  * Product Overview Report 适配器实现
  */
@@ -174,6 +180,9 @@ export class ProductOverviewAdapter implements ReportAdapter {
           usps: usps.confidence,
           specs: specs.confidence,
           keywords: keywords.confidence,
+          keywordsCore: keywords.data.core.length > 0 ? KEYWORD_FIELD_CONFIDENCE.CORE : 0,
+          keywordsLongTail: keywords.data.longTail.length > 0 ? KEYWORD_FIELD_CONFIDENCE.LONG_TAIL : 0,
+          keywordsIntent: keywords.data.intent.length > 0 ? KEYWORD_FIELD_CONFIDENCE.INTENT : 0,
           restrictedWords: restrictedWords.confidence,
           highFrequencyPhrases: highFrequencyPhrases.confidence,
           painPoints: painPoints.confidence,
@@ -194,6 +203,15 @@ export class ProductOverviewAdapter implements ReportAdapter {
               ...differentiation.sourceFields,
             ]),
           ],
+          fieldSources: {
+            audience: audience.sourceFields,
+            usps: usps.sourceFields,
+            specs: specs.sourceFields,
+            keywordsCore: keywords.data.core.length > 0 ? keywords.sourceFields.filter(source => source.includes("core")) : [],
+            keywordsLongTail: keywords.data.longTail.length > 0 ? keywords.sourceFields.filter(source => source.includes("longTail")) : [],
+            keywordsIntent: keywords.data.intent.length > 0 ? keywords.sourceFields.filter(source => source.includes("intent")) : [],
+            restrictedWords: restrictedWords.sourceFields,
+          },
           stats: {
             totalKeywords:
               keywords.data.core.length +
