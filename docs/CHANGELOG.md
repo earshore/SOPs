@@ -26,6 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.8] - 2026-06-12
+
+### Added
+- 新增 Card、Callout、Workbench UI 审计脚本和 `ui:audit` 聚合命令。
+- 新增页面进入动画工具和使用指南。
+- 新增回归测试审计脚本，用于汇总覆盖率、Playwright 结果和显式 skip。
+
+### Changed
+- 优化卡片、工作台和多个模块页面的边框、动效与视觉一致性。
+- 将报告、站点标识和状态文案中的结构性 emoji 替换为文本或 Font Awesome 图标。
+- 同步应用内版本显示到 `3.0.3-rc.8`。
+
+### Fixed
+- 稳定 Restricted Words E2E 的导航、搜索和详情断言。
+
 ## [3.0.3-rc.7] - 2026-06-12
 
 ### Changed
