@@ -5,17 +5,43 @@
 
 import { StorageService } from '../../../../../../services/storageService';
 import { getCacheStatsAsync, clearAnalysisCacheAsync } from '../services/parallelAnalysisService';
+import {
+  isSchedulingPreference,
+  resolveAnalysisSchedule,
+  type AnalysisSchedulePlan,
+  type FailureStrategy,
+  type SchedulingPreference,
+  type ScheduleTier
+} from '../services/analysisScheduler';
 import { showToast } from '@common/ui/index';
 const SETTINGS_KEY = 'ai_analysis_performance_settings';
-const SETTINGS_VERSION = 2;
+const SETTINGS_VERSION = 3;
+
+export type { AnalysisSchedulePlan, FailureStrategy, SchedulingPreference, ScheduleTier };
+export { resolveAnalysisSchedule };
+
+const SCHEDULE_OPTION_ACTIVE_CLASS: Record<SchedulingPreference, string> = {
+  recommended: 'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-sm',
+  reliability: 'border-blue-500 bg-blue-50 text-blue-900 shadow-sm',
+  speed: 'border-purple-500 bg-purple-50 text-purple-900 shadow-sm'
+};
+
+const INACTIVE_SCHEDULE_OPTION_CLASS = 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/40';
+const INACTIVE_SCHEDULE_TIER_CLASS = 'border-slate-200 bg-white text-slate-500';
+const SCHEDULE_TIER_CONFIG: Record<ScheduleTier, { label: string; activeClass: string }> = {
+  stable: { label: '稳定', activeClass: 'border-blue-200 bg-blue-50 text-blue-700 shadow-sm' },
+  recommended: { label: '推荐', activeClass: 'border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm' },
+  extreme: { label: '极速', activeClass: 'border-purple-200 bg-purple-50 text-purple-700 shadow-sm' }
+};
 
 /**
  * 性能设置接口
  */
 export interface PerformanceSettings {
-  maxConcurrency: number; // 最大并发数 (1-8)
+  schedulingPreference: SchedulingPreference; // 用户调度偏好
   enableCache: boolean; // 是否启用缓存
-  failureStrategy: 'abort' | 'continue'; // 失败策略
+  maxConcurrency: number; // 由调度算法派生的最大并发数
+  failureStrategy: FailureStrategy; // 由调度算法派生的失败处理策略
   settingsVersion?: number;
 }
 
@@ -30,28 +56,49 @@ type PanelMixin<T extends object> = T & ThisType<PerformanceSettingsPanelContext
 type PerformanceSettingsPanel =
   PerformanceSettingsPanelContext &
   ReturnType<typeof createPerformanceSettingsActions> &
-  ReturnType<typeof createConcurrencyLabelGetters> &
-  ReturnType<typeof createConcurrencyClassGetters> &
-  ReturnType<typeof createStrategyGetters>;
+  ReturnType<typeof createScheduleGetters>;
 
 /**
  * 默认设置
  */
 const DEFAULT_SETTINGS: PerformanceSettings = {
+  schedulingPreference: 'recommended',
   maxConcurrency: 4,
   enableCache: true,
   failureStrategy: 'continue',
   settingsVersion: SETTINGS_VERSION
 };
 
-function normalizeSettings(settings: PerformanceSettings): PerformanceSettings {
-  const maxConcurrency = Number.isFinite(settings.maxConcurrency)
-    ? Math.max(1, Math.min(8, Math.floor(settings.maxConcurrency)))
-    : DEFAULT_SETTINGS.maxConcurrency;
+function inferSchedulingPreference(settings: Partial<PerformanceSettings>): SchedulingPreference {
+  if (isSchedulingPreference(settings.schedulingPreference)) {
+    return settings.schedulingPreference;
+  }
+
+  if (settings.failureStrategy === 'abort') {
+    return 'reliability';
+  }
+
+  const legacyConcurrency = Number(settings.maxConcurrency);
+  if (Number.isFinite(legacyConcurrency) && legacyConcurrency <= 2) {
+    return 'reliability';
+  }
+  if (Number.isFinite(legacyConcurrency) && legacyConcurrency >= 7) {
+    return 'speed';
+  }
+
+  return DEFAULT_SETTINGS.schedulingPreference;
+}
+
+function normalizeSettings(settings: Partial<PerformanceSettings>): PerformanceSettings {
+  const schedulingPreference = inferSchedulingPreference(settings);
+  const schedule = resolveAnalysisSchedule({ schedulingPreference });
 
   return {
     ...settings,
-    maxConcurrency,
+    schedulingPreference,
+    enableCache: settings.enableCache ?? DEFAULT_SETTINGS.enableCache,
+    maxConcurrency: schedule.maxConcurrency,
+    failureStrategy: schedule.failureStrategy,
     settingsVersion: SETTINGS_VERSION
   };
 }
@@ -64,11 +111,7 @@ export function getPerformanceSettings(): PerformanceSettings {
     const saved = StorageService.get(SETTINGS_KEY);
     if (saved && typeof saved === 'object') {
       const savedSettings = saved as Partial<PerformanceSettings>;
-      const mergedSettings = { ...DEFAULT_SETTINGS, ...savedSettings };
-      if (!savedSettings.settingsVersion && savedSettings.maxConcurrency === 4) {
-        mergedSettings.maxConcurrency = DEFAULT_SETTINGS.maxConcurrency;
-      }
-      return normalizeSettings(mergedSettings);
+      return normalizeSettings(savedSettings);
     }
   } catch {
     return { ...DEFAULT_SETTINGS };
@@ -94,9 +137,8 @@ function createPerformanceSettingsActions(): PanelMixin<{
   toggleSettings(): void;
   saveSettings(): void;
   resetSettings(): void;
-  setMaxConcurrency(event: Event): void;
+  setSchedulingPreference(event: Event): void;
   setEnableCache(event: Event): void;
-  setFailureStrategy(event: Event): void;
   clearCache(): Promise<void>;
   formatSize(bytes: number): string;
 }> {
@@ -122,18 +164,11 @@ function createPerformanceSettingsActions(): PanelMixin<{
     // 保存设置
     saveSettings() {
       try {
-        // 验证并发数范围
-        if (this.settings.maxConcurrency < 1) {
-          this.settings.maxConcurrency = 1;
-        } else if (this.settings.maxConcurrency > 8) {
-          this.settings.maxConcurrency = 8;
-        }
-
-        savePerformanceSettings(this.settings);
+        savePerformanceSettings(normalizeSettings(this.settings));
         this.showSettings = false;
 
         // 显示成功提示
-        showToast('性能设置已保存', { type: 'success' });
+        showToast('分析设置已保存', { type: 'success' });
       } catch (error) {
         showToast('保存失败: ' + (error as Error).message, { type: 'error' });
       }
@@ -144,14 +179,16 @@ function createPerformanceSettingsActions(): PanelMixin<{
       this.settings = { ...DEFAULT_SETTINGS };
     },
 
-    setMaxConcurrency(event: Event) {
+    setSchedulingPreference(event: Event) {
       const target = event.target as HTMLInputElement;
-      const value = Number(target.value);
+      const schedulingPreference = isSchedulingPreference(target.value)
+        ? target.value
+        : DEFAULT_SETTINGS.schedulingPreference;
+
       this.settings = normalizeSettings({
         ...this.settings,
-        maxConcurrency: Number.isFinite(value) ? value : this.settings.maxConcurrency
+        schedulingPreference
       });
-      void this.updateCacheStats();
     },
 
     setEnableCache(event: Event) {
@@ -159,15 +196,6 @@ function createPerformanceSettingsActions(): PanelMixin<{
       this.settings = {
         ...this.settings,
         enableCache: target.checked
-      };
-    },
-
-    setFailureStrategy(event: Event) {
-      const target = event.target as HTMLInputElement;
-      const value = target.value === 'abort' ? 'abort' : 'continue';
-      this.settings = {
-        ...this.settings,
-        failureStrategy: value
       };
     },
 
@@ -192,133 +220,74 @@ function createPerformanceSettingsActions(): PanelMixin<{
   };
 }
 
-function createConcurrencyLabelGetters(): PanelMixin<{
-  readonly concurrencyTrackStyle: string;
-  readonly slowLabelClass: string;
-  readonly standardLabelClass: string;
-  readonly fastLabelClass: string;
-  readonly extremeLabelClass: string;
-  readonly expectedSpeedText: string;
-  readonly expectedDurationText: string;
+function createScheduleGetters(): PanelMixin<{
+  readonly schedulePreferenceLabel: string;
+  readonly scheduleTierLabel: string;
+  readonly scheduleTierBadgeClass: string;
+  readonly scheduleGoalText: string;
+  readonly scheduleDetailText: string;
+  readonly scheduleFailureHandlingText: string;
+  readonly scheduleIconClass: string;
+  readonly scheduleRuntimeText: string;
+  readonly speedLevelText: string;
+  readonly reliabilityLevelText: string;
+  getSchedulePreferenceClass(preference: SchedulingPreference): string;
+  getScheduleTierClass(tier: ScheduleTier): string;
 }> {
   return {
-    get concurrencyTrackStyle(): string {
-      return `width: calc(${((this.settings.maxConcurrency - 1) / 7) * 100}%)`;
+    get schedulePreferenceLabel(): string {
+      return resolveAnalysisSchedule(this.settings).label;
     },
 
-    get slowLabelClass(): string {
-      return this.settings.maxConcurrency <= 2 ? 'text-blue-600' : 'text-slate-400';
+    get scheduleTierLabel(): string {
+      return SCHEDULE_TIER_CONFIG[resolveAnalysisSchedule(this.settings).tier].label;
     },
 
-    get standardLabelClass(): string {
-      return this.settings.maxConcurrency >= 3 && this.settings.maxConcurrency <= 4 ? 'text-indigo-600' : 'text-slate-400';
+    get scheduleTierBadgeClass(): string {
+      return SCHEDULE_TIER_CONFIG[resolveAnalysisSchedule(this.settings).tier].activeClass;
     },
 
-    get fastLabelClass(): string {
-      return this.settings.maxConcurrency >= 5 && this.settings.maxConcurrency <= 6 ? 'text-purple-600' : 'text-slate-400';
+    get scheduleGoalText(): string {
+      return resolveAnalysisSchedule(this.settings).goalText;
     },
 
-    get extremeLabelClass(): string {
-      return this.settings.maxConcurrency >= 7 ? 'text-purple-700' : 'text-slate-400';
+    get scheduleDetailText(): string {
+      return resolveAnalysisSchedule(this.settings).detailText;
     },
 
-    get expectedSpeedText(): string {
-      return `${this.settings.maxConcurrency}x`;
+    get scheduleFailureHandlingText(): string {
+      return resolveAnalysisSchedule(this.settings).failureHandlingText;
     },
 
-    get expectedDurationText(): string {
-      return `${Math.round(120 / this.settings.maxConcurrency)}秒`;
-    },
-  };
-}
-
-function createConcurrencyClassGetters(): PanelMixin<{
-  readonly concurrencyValueWrapClass: string;
-  readonly concurrencyIconClass: string;
-  readonly concurrencyTextClass: string;
-  readonly concurrencyHintCardClass: string;
-  readonly concurrencyHintTextClass: string;
-}> {
-  return {
-    get concurrencyValueWrapClass(): string {
-      const n = this.settings.maxConcurrency;
-      if (n <= 2) return 'bg-blue-50 border-2 border-blue-200';
-      if (n <= 4) return 'bg-indigo-50 border-2 border-indigo-200';
-      if (n <= 6) return 'bg-purple-50 border-2 border-purple-200';
-      return 'bg-purple-100 border-2 border-purple-300';
+    get scheduleIconClass(): string {
+      return resolveAnalysisSchedule(this.settings).iconClass;
     },
 
-    get concurrencyIconClass(): string {
-      const n = this.settings.maxConcurrency;
-      if (n <= 2) return 'fa-solid fa-hourglass-start text-blue-600';
-      if (n <= 4) return 'fa-solid fa-gauge text-indigo-600';
-      if (n <= 6) return 'fa-solid fa-bolt text-purple-600';
-      return 'fa-solid fa-rocket text-purple-700';
+    get scheduleRuntimeText(): string {
+      const preference = this.settings.schedulingPreference;
+      if (preference === 'reliability') return '稳态调度';
+      if (preference === 'speed') return '动态提速';
+      return '自动调度';
     },
 
-    get concurrencyTextClass(): string {
-      const n = this.settings.maxConcurrency;
-      if (n <= 2) return 'text-blue-600';
-      if (n <= 4) return 'text-indigo-600';
-      if (n <= 6) return 'text-purple-600';
-      return 'text-purple-700';
+    get speedLevelText(): string {
+      return resolveAnalysisSchedule(this.settings).speedLevelText;
     },
 
-    get concurrencyHintCardClass(): string {
-      const n = this.settings.maxConcurrency;
-      if (n <= 2) return 'bg-blue-50 border-blue-200';
-      if (n <= 4) return 'bg-indigo-50 border-indigo-200';
-      if (n <= 6) return 'bg-purple-50 border-purple-200';
-      return 'bg-purple-100 border-purple-300';
+    get reliabilityLevelText(): string {
+      return resolveAnalysisSchedule(this.settings).reliabilityLevelText;
     },
 
-    get concurrencyHintTextClass(): string {
-      const n = this.settings.maxConcurrency;
-      if (n <= 2) return 'text-blue-800';
-      if (n <= 4) return 'text-indigo-800';
-      if (n <= 6) return 'text-purple-800';
-      return 'text-purple-900';
-    },
-  };
-}
-
-function createStrategyGetters(): PanelMixin<{
-  readonly continueStrategyClass: string;
-  readonly abortStrategyClass: string;
-  getConcurrencyDotClass(index: number): string;
-  getSpeedBarClass(index: number): string;
-  getStabilityBarClass(index: number): string;
-  getConcurrencyHint(): string;
-}> {
-  return {
-    get continueStrategyClass(): string {
-      return this.settings.failureStrategy === 'continue' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 hover:border-slate-300';
+    getSchedulePreferenceClass(preference: SchedulingPreference): string {
+      return this.settings.schedulingPreference === preference
+        ? SCHEDULE_OPTION_ACTIVE_CLASS[preference]
+        : INACTIVE_SCHEDULE_OPTION_CLASS;
     },
 
-    get abortStrategyClass(): string {
-      return this.settings.failureStrategy === 'abort' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 hover:border-slate-300';
-    },
-
-    getConcurrencyDotClass(index: number): string {
-      return index <= this.settings.maxConcurrency ? 'bg-white shadow-lg scale-110' : 'bg-slate-300';
-    },
-
-    getSpeedBarClass(index: number): string {
-      return index <= this.settings.maxConcurrency ? 'bg-current opacity-100' : 'bg-current opacity-20';
-    },
-
-    getStabilityBarClass(index: number): string {
-      return index <= (9 - this.settings.maxConcurrency) ? 'bg-current opacity-100' : 'bg-current opacity-20';
-    },
-
-    // 获取并发数建议
-    getConcurrencyHint(): string {
-      const n = this.settings.maxConcurrency;
-      if (n === 1) return '串行执行，最慢但最稳定';
-      if (n === 2) return '2倍加速，适合网络不稳定时';
-      if (n <= 4) return '推荐设置，平衡速度与稳定性';
-      if (n <= 6) return '高速模式，需要良好的网络';
-      return '极速模式，可能触发API限流';
+    getScheduleTierClass(tier: ScheduleTier): string {
+      return resolveAnalysisSchedule(this.settings).tier === tier
+        ? SCHEDULE_TIER_CONFIG[tier].activeClass
+        : INACTIVE_SCHEDULE_TIER_CLASS;
     },
   };
 }
@@ -339,9 +308,7 @@ export function createPerformanceSettingsPanel(): PerformanceSettingsPanel {
   } as PerformanceSettingsPanel;
 
   applyPanelMixin(panel, createPerformanceSettingsActions());
-  applyPanelMixin(panel, createConcurrencyLabelGetters());
-  applyPanelMixin(panel, createConcurrencyClassGetters());
-  applyPanelMixin(panel, createStrategyGetters());
+  applyPanelMixin(panel, createScheduleGetters());
 
   return panel;
 }

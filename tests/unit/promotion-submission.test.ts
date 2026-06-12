@@ -33,7 +33,6 @@ describe('Promotion submission archive workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'promotion_submission_owner_v1') return '运营负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -63,7 +62,7 @@ describe('Promotion submission archive workflow', () => {
     expect(template).toContain('必须人工确认后执行');
   });
 
-  it('copies the archive template and records local usage', async () => {
+  it('copies the archive template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('promotion-submission-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '运营小周';
@@ -73,9 +72,6 @@ describe('Promotion submission archive workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/growth/promotion_submission/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：运营小周'));
     expect(StorageService.set).toHaveBeenCalledWith('promotion_submission_owner_v1', '运营小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'promotion.submission_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制促销提报/复盘模板，可粘贴到周报或归档文档。');
   });
 });

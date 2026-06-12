@@ -39,6 +39,10 @@ export interface PromptItem {
     title: string;
     description: string;
     recommendedModel: RecommendedModelKey;
+    requiredData: readonly string[];
+    doNotGuess: readonly string[];
+    outputContract: string;
+    riskLevel: 'low' | 'medium' | 'high';
     prompt: string;
     promptEn: string;
 }
@@ -93,6 +97,10 @@ export const PROMPT_LIBRARY: readonly PromptItem[] = [
         title: '提示词Brief生成器',
         description: '把模糊需求整理成角色、输入、约束、输出和验收标准齐全的可执行提示词。',
         recommendedModel: 'BALANCED_WORKHORSE',
+        requiredData: ['业务问题', '使用场景', '可用数据', '期望输出', '不可猜测的数据'],
+        doNotGuess: ['实时数据', '平台政策', '费用', '搜索量', '销量', '排名'],
+        outputContract: 'Markdown sections with task fit, data gaps, short prompt, strict prompt, and 3 acceptance checks.',
+        riskLevel: 'medium',
         prompt: `# Role
 你是跨境电商AI工作流设计师，负责把运营需求转成可复用、可验收的提示词。
 
@@ -184,6 +192,10 @@ Create a production-ready prompt from the user input and mark any data that must
         title: '提示词评估集',
         description: '为关键提示词设计测试用例、评分表和回归检查，避免“一次好结果”误判为稳定能力。',
         recommendedModel: 'FLAGSHIP_REASONING',
+        requiredData: ['待评估提示词', '业务目标', '样本类型', '失败模式', '最终使用者'],
+        doNotGuess: ['真实样本表现', '上线阈值是否已达成', '合规结论'],
+        outputContract: 'Markdown evaluation pack with capabilities, 8 sample cases, 100-point rubric, release threshold, and regression steps.',
+        riskLevel: 'medium',
         prompt: `# Role
 你是AI输出质量评审负责人，专门为亚马逊运营提示词建立测试集。
 
@@ -265,6 +277,10 @@ Create a minimum viable evaluation pack for the prompt below, suitable for pre-r
         title: '关键词到Listing初稿',
         description: '把关键词库、竞品页和评论痛点转成标题、五点、A+结构，并附带合规自检。',
         recommendedModel: 'BALANCED_WORKHORSE',
+        requiredData: ['产品事实', '目标站点/语言', '关键词库', '竞品文案', 'Review/QA痛点', '禁用词/禁用声明'],
+        doNotGuess: ['搜索量', '销量', '排名', '认证', '测试报告', '医疗/健康/环保/质保声明'],
+        outputContract: 'Markdown tables for keyword grouping, title options, bullets, A+ plan, and compliance checks.',
+        riskLevel: 'high',
         prompt: `# Role
 你是亚马逊Listing转化优化负责人，熟悉搜索意图、详情页规则和多语言本地化。
 
@@ -364,6 +380,10 @@ Use real keyword and competitor data to create an editable listing draft. Do not
         title: 'VOC评论行动地图',
         description: '从评论、QA和退货原因中提炼产品改进、Listing表达和客服动作。',
         recommendedModel: 'LONG_CONTEXT',
+        requiredData: ['评论数据', 'QA数据', '退货/客服原因', '时间范围', '产品版本变化'],
+        doNotGuess: ['样本量', '用户身份', '产品缺陷根因', '退货真实原因', '可立即改产品的结论'],
+        outputContract: 'Markdown report with data health, topic clusters, action map, listing rewrite opportunities, and confirmation needs.',
+        riskLevel: 'high',
         prompt: `# Role
 你是VOC分析师，负责把用户原话转成运营、产品和客服可以执行的行动地图。
 
@@ -457,6 +477,10 @@ Analyze reviews, QA, and return reasons. Produce topic clusters, severity, evide
         title: 'PPC搜索词分诊',
         description: '用搜索词报表做加词、否词、降价、提预算和Listing承接问题识别。',
         recommendedModel: 'DATA_REVIEW',
+        requiredData: ['搜索词报表', '目标ACOS/ROAS', '毛利率/底线ACOS', '活动结构', '当前Listing关键词'],
+        doNotGuess: ['搜索量', '竞品出价', '转化归因', '毛利率', '预算限制', '平台实时竞价'],
+        outputContract: 'Markdown tables for data quality, search-term actions, bid/budget changes, listing fit issues, and execution order.',
+        riskLevel: 'high',
         prompt: `# Role
 你是Amazon Sponsored Products投放分析师，目标是在不牺牲有效曝光的前提下降低浪费和提升转化。
 
@@ -560,6 +584,10 @@ Analyze a search term report and produce actionable harvesting, negation, bid, a
         title: '竞品详情页拆解',
         description: '拆解头部ASIN的关键词、页面叙事、图片顺序、评价风险和可差异化机会。',
         recommendedModel: 'LONG_CONTEXT',
+        requiredData: ['我方产品资料', '竞品详情页资料', '目标站点', '商业目标', '可调整资源'],
+        doNotGuess: ['竞品销量', '排名', '广告投入', '未提供的价格变化', '知识产权结论'],
+        outputContract: 'Markdown tables for competitor patterns, gap diagnosis, differentiation opportunities, risky tactics, and 30-day actions.',
+        riskLevel: 'medium',
         prompt: `# Role
 你是亚马逊竞品情报分析师，擅长从头部ASIN中提炼可落地的差异化策略。
 
@@ -647,6 +675,10 @@ Analyze 1-5 competitor detail pages and produce shared patterns, our gaps, diffe
         title: '客服回复与升级SOP',
         description: '针对买家消息、差评和Seller Support沟通生成合规、克制、可升级的回复。',
         recommendedModel: 'BALANCED_WORKHORSE',
+        requiredData: ['场景', '原始消息', '订单/物流/产品事实', '可提供方案', '不可承诺内容', '目标语言'],
+        doNotGuess: ['订单隐私', '物流状态', '退款承诺', '评价引导', '外部联系方式', '平台政策结论'],
+        outputContract: 'Markdown sections for situation assessment, customer reply draft, internal actions, escalation conditions, and risky wording replacements.',
+        riskLevel: 'high',
         prompt: `# Role
 你是跨境电商客服质检负责人，熟悉亚马逊站内沟通边界和欧洲客户沟通礼仪。
 
@@ -742,6 +774,10 @@ Tone: professional, concise, empathetic
         title: '产品声明合规审查',
         description: '审查标题、五点、A+和图片文案中的性能、认证、环保、医疗等高风险声明。',
         recommendedModel: 'FLAGSHIP_REASONING',
+        requiredData: ['产品类别', '销售站点', 'Listing/图片文案', '证书/测试报告', '包装/说明书/标签', '已知限制'],
+        doNotGuess: ['法律结论', '认证有效性', '测试数据', '平台禁词清单', '专利/商标/版权状态'],
+        outputContract: 'Markdown tables for risk overview, claim-by-claim review, evidence checklist, must-fix items, and professional review needs.',
+        riskLevel: 'high',
         prompt: `# Role
 你是亚马逊欧盟站合规审查顾问，关注平台详情页规则、证据链和消费者误导风险。
 
@@ -856,6 +892,10 @@ export function searchPrompts(
             prompt.id,
             prompt.title,
             prompt.description,
+            prompt.requiredData.join(' '),
+            prompt.doNotGuess.join(' '),
+            prompt.outputContract,
+            prompt.riskLevel,
             prompt.prompt,
             prompt.promptEn,
             category?.name || '',

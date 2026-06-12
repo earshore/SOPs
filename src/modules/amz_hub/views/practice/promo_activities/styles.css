@@ -718,3 +718,89 @@
     }
 }
 
+@media (min-width: 1024px) {
+    .amzpa_card,
+    .amzpa_dual_guide,
+    .amzpa_anchor_nav,
+    .amzpa_anchor_tip,
+    .amzpa_dual_card,
+    .amzpa_nav_step,
+    .amzpa_metric,
+    .amzpa_sub_item,
+    .amzpa_callout,
+    .amzpa_timeline_step,
+    .amzpa_formula,
+    .amzpa_stats_box,
+    .amzpa_highlight_box {
+        border-radius: var(--radius-card, var(--rounded-md));
+        box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+    }
+
+    .amzpa_card,
+    .amzpa_dual_guide,
+    .amzpa_anchor_nav,
+    .amzpa_dual_card,
+    .amzpa_nav_step,
+    .amzpa_metric,
+    .amzpa_sub_item,
+    .amzpa_timeline_step,
+    .amzpa_stats_box,
+    .amzpa_battle_card {
+        background: var(--surface-card, #ffffff);
+        border-color: var(--border-muted, var(--color-slate-200));
+    }
+
+    .amzpa_dual_card.is-current,
+    .amzpa_highlight_box,
+    .amzpa_callout {
+        background: var(--surface-card-hover, var(--color-slate-50));
+    }
+
+    .amzpa_dual_card--link:hover,
+    .amzpa_nav_step:hover,
+    .amzpa_sub_item:hover {
+        transform: none;
+        border-color: var(--color-border-default, rgba(148, 163, 184, 0.32));
+        box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+    }
+
+    .amzpa_nav_step::before {
+        display: none;
+    }
+
+    .amzpa_nav_step::after,
+    .amzpa_nav_step:hover::after {
+        transform: translateY(-50%);
+        box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+    }
+
+    .amzpa_nav_step:hover .amzpa_nav_step_no {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .amzpa_nav_step_no,
+    .amzpa_sub_icon {
+        box-shadow: none;
+    }
+
+    .amzpa_formula {
+        box-shadow: none;
+    }
+
+    .module-container > :nth-child(n + 2) [class*="rounded-2xl"] {
+        border-radius: var(--radius-card, var(--rounded-md)) !important;
+    }
+
+    .module-container > :nth-child(n + 2) :where(.rounded-xl, .rounded-lg) {
+        border-radius: var(--radius-card, var(--rounded-md)) !important;
+    }
+
+    .module-container > :nth-child(n + 2) [class*="bg-gradient-to-r"][class*="from-slate-900"] {
+        background: var(--color-slate-900) !important;
+    }
+
+    .amzpa_formula {
+        background: var(--color-slate-900);
+    }
+}

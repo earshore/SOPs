@@ -33,7 +33,6 @@ describe('FBA shipping release workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'fba_shipping_owner_v1') return '物流/供应链负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -62,7 +61,7 @@ describe('FBA shipping release workflow', () => {
     expect(template).toContain('必须人工确认后执行');
   });
 
-  it('copies the release template and records local usage', async () => {
+  it('copies the release template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('fba-shipping-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '物流小周';
@@ -72,9 +71,6 @@ describe('FBA shipping release workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/backend/fba_shipping/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：物流小周'));
     expect(StorageService.set).toHaveBeenCalledWith('fba_shipping_owner_v1', '物流小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'fba.shipping_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制 FBA 发货放行/异常登记模板，可粘贴到周报或归档文档。');
   });
 });

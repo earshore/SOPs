@@ -22,6 +22,7 @@ import {
   MODULE_EVENTS,
 } from "../../../../../../common/constants/eventConstants";
 import eventBus from "../../../../../../common/EventBus";
+import { HistoryService } from "../../services/historyService";
 // ── 子模块导入 ────────────────────────────────────────────────────────────────
 import type {
   ConsoleMode,
@@ -195,6 +196,7 @@ type PromptlabPanelThis = PromptlabAlpineContext & {
   overallConfidence: number;
   hasExpandedDimensions: boolean;
   restoreState(): void;
+  restorePromptCachesFromCurrentSnapshot(): void;
   onInputChange(): void;
   expandAllDimensions(): void;
   collapseAllDimensions(): void;
@@ -472,9 +474,20 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
         this.expandedSubItems.clear();
       }
 
-      const promptHistory = promptlabState?.history || [];
-      this.listingPromptCache = promptHistory.find((item) => item.promptType === 'listing')?.prompt || '';
-      this.visualPromptCache = promptHistory.find((item) => item.promptType === 'visual')?.prompt || '';
+      this.restorePromptCachesFromCurrentSnapshot();
+    },
+
+    restorePromptCachesFromCurrentSnapshot() {
+      const currentHistoryId = appStore.getState().scraper.currentHistoryId;
+      if (currentHistoryId === null || currentHistoryId === undefined) {
+        this.listingPromptCache = '';
+        this.visualPromptCache = '';
+        return;
+      }
+
+      const promptResults = HistoryService.getPromptResultsById(currentHistoryId);
+      this.listingPromptCache = promptResults?.listing?.prompt || '';
+      this.visualPromptCache = promptResults?.visual?.prompt || '';
     },
 
     saveState() {
@@ -484,6 +497,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     // ========== Report Rendering ==========
 
     renderReportAnalysis() {
+      this.restorePromptCachesFromCurrentSnapshot();
       renderReportAnalysis(this as unknown as PromptlabAlpineContext);
     },
 

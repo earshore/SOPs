@@ -1074,3 +1074,133 @@
         margin-top: 15px;
     }
 }
+
+@media (min-width: 1024px) {
+    .amzf_search_box,
+    .amzf_search_history,
+    .amzf_view_toggle,
+    .amzf_country_tab,
+    .amzf_month_section,
+    .amzf_event_comparison,
+    .amzf_event_card,
+    .amzf_event_strategy,
+    .amzf_country_event,
+    .amzf_empty {
+        border-radius: var(--radius-card, var(--rounded-md));
+        box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+    }
+
+    .amzf_search_box,
+    .amzf_view_toggle,
+    .amzf_country_tab,
+    .amzf_month_section,
+    .amzf_event_comparison,
+    .amzf_event_card,
+    .amzf_event_strategy,
+    .amzf_country_event,
+    .amzf_empty {
+        background: var(--surface-card, #ffffff);
+        border-color: var(--color-border-default, rgba(148, 163, 184, 0.32));
+    }
+
+    .amzf_search_box {
+        border-width: 1px;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .amzf_search_box:hover,
+    .amzf_search_box:focus-within {
+        transform: none;
+        box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+    }
+
+    .amzf_search_box:focus-within {
+        border-color: var(--color-border-focus, var(--color-primary));
+    }
+
+    .amzf_search_box:focus-within .amzf_search_icon {
+        transform: none;
+    }
+
+    .amzf_view_toggle {
+        border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32));
+    }
+
+    .amzf_view_btn {
+        border-radius: calc(var(--radius-card, var(--rounded-md)) - 2px);
+    }
+
+    .amzf_view_btn.amzf_active,
+    .amzf_country_tab.amzf_active {
+        background: var(--color-primary, var(--color-blue-500));
+        border-color: var(--color-primary, var(--color-blue-500));
+        box-shadow: none;
+        color: var(--color-primary-contrast, #ffffff);
+    }
+
+    .amzf_country_tab {
+        border-width: 1px;
+    }
+
+    .amzf_country_tab:hover,
+    .amzf_quick_tag:hover,
+    .amzf_event_card:hover,
+    .amzf_event_card:hover .amzf_event_emoji {
+        transform: none;
+    }
+
+    .amzf_month_section:hover,
+    .amzf_event_card:hover {
+        box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+    }
+
+    .amzf_month_header,
+    .amzf_month_header:hover,
+    .amzf_comparison_header {
+        background: var(--surface-card-hover, var(--color-slate-50));
+        color: var(--color-text-primary, var(--color-slate-900));
+    }
+
+    .amzf_event_card {
+        border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32));
+        border-left-width: 3px;
+    }
+
+    .amzf_event_card.amzf_type_holiday {
+        border-left-color: var(--color-red-500);
+    }
+
+    .amzf_event_card.amzf_type_shopping {
+        border-left-color: var(--color-green-500);
+    }
+
+    .amzf_event_card.amzf_type_cultural {
+        border-left-color: var(--color-purple-600);
+    }
+
+    .amzf_event_card.amzf_type_season {
+        border-left-color: var(--color-amber-400);
+    }
+
+    .amzf_event_emoji {
+        border-radius: var(--radius-card, var(--rounded-md));
+        box-shadow: none;
+    }
+
+    .amzf_event_date {
+        border-radius: var(--radius-card, var(--rounded-md));
+    }
+
+    .amzf_tag,
+    .amzf_quick_tag {
+        background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
+        border-radius: var(--radius-card, var(--rounded-md));
+        color: var(--color-primary-dark, var(--color-blue-600));
+    }
+
+    .amzf_history_item:hover,
+    .amzf_country_event:hover {
+        background: var(--surface-card-hover, var(--color-slate-50));
+    }
+}

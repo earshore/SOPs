@@ -67,11 +67,15 @@
 
 /* ==================== SOP 卡片特有样式 ==================== */
 .sop-card {
-  background: white;
-  border-radius: var(--rounded-xl);
-  border: 1px solid var(--color-slate-200);
+  background: var(--surface-card, #ffffff);
+  border-radius: var(--radius-card, 8px);
+  border: 1px solid var(--border-subtle, var(--color-slate-200));
   padding: var(--spacing-lg);
-  transition: all var(--duration-slow) var(--ease-smooth);
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  transition:
+    background-color var(--duration-fast, 200ms) var(--ease-smooth),
+    border-color var(--duration-fast, 200ms) var(--ease-smooth),
+    box-shadow var(--duration-fast, 200ms) var(--ease-smooth);
   cursor: pointer;
   position: relative;
   display: flex;
@@ -81,9 +85,9 @@
 }
 
 .sop-card:hover {
-  border-color: var(--color-blue-500);
-  box-shadow: 0 10px 40px -10px var(--color-primary-light);
-  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.42);
+  background: var(--surface-card-hover, var(--color-slate-50));
+  box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
 }
 
 /* ==================== SOP 卡片网格 ==================== */
@@ -107,7 +111,7 @@
 }
 
 .sop-card:hover .sop-icon-container {
-  transform: scale(1.1);
+  transform: none;
 }
 
 /* ==================== 状态徽章 ==================== */
@@ -164,6 +168,204 @@
   color: #b91c1c;
 }
 
+/* ==================== NPI 生命周期主表 ==================== */
+.npi-lifecycle-table-card {
+  background: var(--surface-card, #ffffff);
+}
+
+.npi-lifecycle-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-slate-400) var(--color-slate-100);
+}
+
+.npi-lifecycle-table-scroll:focus-visible {
+  outline: 2px solid var(--color-blue-500);
+  outline-offset: -2px;
+}
+
+.npi-lifecycle-table-scroll::-webkit-scrollbar {
+  height: 0.75rem;
+}
+
+.npi-lifecycle-table-scroll::-webkit-scrollbar-track {
+  background: var(--color-slate-100);
+}
+
+.npi-lifecycle-table-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-slate-400);
+  border: 3px solid var(--color-slate-100);
+  border-radius: var(--rounded-full);
+}
+
+.npi-lifecycle-table {
+  min-width: 182rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  color: var(--color-slate-700);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.npi-lifecycle-table th,
+.npi-lifecycle-table td {
+  padding: 0.8125rem 0.875rem;
+  border-bottom: 1px solid var(--border-subtle, var(--color-slate-200));
+  vertical-align: middle;
+}
+
+.npi-lifecycle-table thead tr:first-child th {
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--border-subtle, var(--color-slate-200));
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.npi-lifecycle-table thead tr:first-child th:nth-child(1) {
+  background: var(--color-blue-50);
+}
+
+.npi-lifecycle-table thead tr:first-child th:nth-child(2) {
+  background: var(--color-purple-50);
+}
+
+.npi-lifecycle-table thead tr:first-child th:nth-child(3) {
+  background: var(--color-emerald-50);
+}
+
+.npi-lifecycle-table thead tr:first-child th:nth-child(4) {
+  background: var(--color-amber-50);
+}
+
+.npi-lifecycle-table thead tr:first-child th:nth-child(5) {
+  background: var(--color-red-50);
+}
+
+.npi-lifecycle-table thead tr:nth-child(2) th {
+  background: var(--surface-card, #ffffff);
+  color: var(--color-slate-600);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.npi-lifecycle-table tbody tr:nth-child(even) td:not([class*="bg-"]) {
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.npi-lifecycle-table tbody tr:hover td:not([class*="bg-"]) {
+  background: var(--color-blue-50);
+}
+
+.npi-lifecycle-table tbody td:not(:nth-child(29)) {
+  white-space: nowrap;
+}
+
+.npi-lifecycle-table tbody td:nth-child(29) {
+  white-space: normal;
+}
+
+.npi-lifecycle-table thead tr:nth-child(2) th:first-child,
+.npi-lifecycle-table thead tr:nth-child(2) th:nth-child(2),
+.npi-lifecycle-table tbody td:first-child,
+.npi-lifecycle-table tbody td:nth-child(2) {
+  position: sticky;
+  z-index: 3;
+  background: var(--surface-card, #ffffff);
+}
+
+.npi-lifecycle-table thead tr:nth-child(2) th:first-child,
+.npi-lifecycle-table tbody td:first-child {
+  left: 0;
+}
+
+.npi-lifecycle-table thead tr:nth-child(2) th:nth-child(2),
+.npi-lifecycle-table tbody td:nth-child(2) {
+  left: 7.5rem;
+  box-shadow: 10px 0 18px -18px rgba(15, 23, 42, 0.55);
+}
+
+.npi-lifecycle-table tbody tr:nth-child(even) td:first-child,
+.npi-lifecycle-table tbody tr:nth-child(even) td:nth-child(2) {
+  background: var(--color-slate-50);
+}
+
+.npi-lifecycle-table tbody tr:hover td:first-child,
+.npi-lifecycle-table tbody tr:hover td:nth-child(2) {
+  background: var(--color-blue-50);
+}
+
+.npi-lifecycle-table :is(th, td):nth-child(9),
+.npi-lifecycle-table :is(th, td):nth-child(15),
+.npi-lifecycle-table :is(th, td):nth-child(21),
+.npi-lifecycle-table :is(th, td):nth-child(26) {
+  border-left: 2px solid var(--color-slate-200);
+}
+
+.npi-lifecycle-table .npi-col-stage {
+  width: 7.5rem;
+}
+
+.npi-lifecycle-table .npi-col-sku {
+  width: 9.5rem;
+}
+
+.npi-lifecycle-table .npi-col-name,
+.npi-lifecycle-table .npi-col-store {
+  width: 8.5rem;
+}
+
+.npi-lifecycle-table .npi-col-asin {
+  width: 10rem;
+}
+
+.npi-lifecycle-table .npi-col-site {
+  width: 4rem;
+}
+
+.npi-lifecycle-table .npi-col-volume,
+.npi-lifecycle-table .npi-col-inventory {
+  width: 5.25rem;
+}
+
+.npi-lifecycle-table .npi-col-check,
+.npi-lifecycle-table .npi-col-check-status,
+.npi-lifecycle-table .npi-col-traffic,
+.npi-lifecycle-table .npi-col-vine,
+.npi-lifecycle-table .npi-col-decision {
+  width: 5.5rem;
+}
+
+.npi-lifecycle-table .npi-col-money {
+  width: 5.75rem;
+}
+
+.npi-lifecycle-table .npi-col-ads {
+  width: 7rem;
+}
+
+.npi-lifecycle-table .npi-col-next-step {
+  width: 16rem;
+}
+
+.npi-lifecycle-table input[type="number"],
+.npi-lifecycle-table select {
+  min-height: 2rem;
+  border-color: var(--color-slate-300);
+  background: var(--surface-card, #ffffff);
+}
+
+.npi-lifecycle-table input[type="checkbox"] {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
 /* ==================== 步骤圆圈样式 ==================== */
 /* 用于显示步骤编号的圆形标识 */
 .step-circle {
@@ -180,8 +382,8 @@
 
 /* ==================== SOP 详情视图 ==================== */
 .sop-detail-header {
-  background: linear-gradient(135deg, var(--color-slate-50) 0%, var(--color-slate-200) 100%);
-  border-radius: var(--rounded-xl);
+  background: var(--surface-workbench, var(--color-slate-50));
+  border-radius: var(--radius-panel, 8px);
   padding: 2rem;
   margin-bottom: 2rem;
 }
@@ -285,19 +487,22 @@
   min-width: 180px;
   max-width: 220px;
   background: var(--color-bg-primary, #ffffff);
-  border: 1.5px solid var(--color-border-default, rgba(0, 0, 0, 0.10));
-  border-radius: var(--rounded-xl, 16px);
+  border: 1px solid var(--border-subtle, var(--color-border-default, rgba(0, 0, 0, 0.10)));
+  border-radius: var(--radius-card, 8px);
   padding: var(--spacing-lg, 1.5rem) var(--spacing-md, 1rem);
   text-align: center;
-  transition: all var(--duration-normal, var(--duration-normal)) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
-  box-shadow: var(--shadow-xs, 0 1px 2px var(--color-black-alpha-5));
+  transition:
+    background-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  box-shadow: var(--shadow-card, 0 1px 2px var(--color-black-alpha-5));
   cursor: pointer;
 }
 
 .sop-process-step:hover {
-  transform: translateY(-4px);
   border-color: var(--color-primary, var(--color-blue-500));
-  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.07));
+  background: var(--surface-card-hover, var(--color-slate-50));
+  box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
 }
 
 /* 步骤编号 */
@@ -306,20 +511,19 @@
   height: 40px;
   margin: 0 auto var(--spacing-sm, 0.75rem);
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary, var(--color-blue-500)), #6366f1);
+  background: var(--color-primary, var(--color-blue-500));
   color: white;
   font-size: var(--text-md, 1rem);
   font-weight: var(--font-bold, 700);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-  transition: all var(--duration-normal, var(--duration-normal)) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  box-shadow: none;
+  transition: background-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .sop-process-step:hover .sop-step-number {
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+  background: var(--color-primary-dark, var(--color-blue-600));
 }
 
 /* 步骤内容 */
@@ -382,23 +586,23 @@
 
 /* 步骤编号颜色变体 */
 .sop-process-step:nth-child(4n+1) .sop-step-number {
-  background: linear-gradient(135deg, var(--color-blue-500), #6366f1);
+  background: var(--color-blue-500);
 }
 
 .sop-process-step:nth-child(4n+3) .sop-step-number {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: var(--color-emerald-500);
 }
 
 .sop-process-step:nth-child(4n+5) .sop-step-number {
-  background: linear-gradient(135deg, var(--color-amber-500), var(--color-amber-600));
+  background: var(--color-amber-500);
 }
 
 .sop-process-step:nth-child(4n+7) .sop-step-number {
-  background: linear-gradient(135deg, #8b5cf6, var(--color-purple-600));
+  background: var(--color-purple-500);
 }
 
 .sop-process-step:nth-child(4n+9) .sop-step-number {
-  background: linear-gradient(135deg, #ec4899, #db2777);
+  background: var(--color-rose-500);
 }
 
 /* ==================== 响应式适配 ==================== */
@@ -544,5 +748,137 @@
 
   .sop-process-arrow {
     transform: none;
+  }
+}
+
+/* ==================== PC 端内容表面收紧 ==================== */
+@media screen and (min-width: 1024px) {
+  #sops_content_area .module-container > * + *:where(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl),
+  #sops_content_area .module-container > * + * :where(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl) {
+    border-radius: var(--radius-card, 8px) !important;
+  }
+
+  #sops_content_area .sops-overview > * + * :where(.sop-icon-container) {
+    border-radius: var(--radius-card, 8px) !important;
+  }
+
+  #sops_content_area .sops-overview > * + * .sop-card[class*="border-l-"] {
+    border-radius: var(--rounded-xl, 16px) !important;
+  }
+
+  #sops_content_area .sops-overview > * + * .category-filter-btn.active {
+    background: var(--color-blue-600, #2563eb) !important;
+    box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where(.shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl),
+  #sops_content_area .module-container > * + * :where(.shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl) {
+    box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="bg-gradient-to-"]),
+  #sops_content_area .module-container > * + * :where([class*="bg-gradient-to-"]) {
+    background-image: none !important;
+    background-color: var(--surface-card, #ffffff) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-blue-50"]),
+  #sops_content_area .module-container > * + * :where([class*="from-blue-50"]) {
+    background-color: var(--color-blue-50, #eff6ff) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-indigo-50"]),
+  #sops_content_area .module-container > * + * :where([class*="from-indigo-50"]) {
+    background-color: var(--color-indigo-50, #eef2ff) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-emerald-50"]),
+  #sops_content_area .module-container > * + * :where([class*="from-emerald-50"]) {
+    background-color: var(--color-emerald-50, #ecfdf5) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-amber-50"], [class*="from-orange-50"], [class*="from-yellow-50"]),
+  #sops_content_area .module-container > * + * :where([class*="from-amber-50"], [class*="from-orange-50"], [class*="from-yellow-50"]) {
+    background-color: var(--color-amber-50, #fffbeb) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-red-50"], [class*="from-rose-50"]),
+  #sops_content_area .module-container > * + * :where([class*="from-red-50"], [class*="from-rose-50"]) {
+    background-color: var(--color-red-50, #fef2f2) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-purple-50"], [class*="from-pink-50"]),
+  #sops_content_area .module-container > * + * :where([class*="from-purple-50"], [class*="from-pink-50"]) {
+    background-color: var(--color-purple-50, #faf5ff) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-teal-50"], [class*="from-cyan-50"]),
+  #sops_content_area .module-container > * + * :where([class*="from-teal-50"], [class*="from-cyan-50"]) {
+    background-color: var(--color-teal-50, #f0fdfa) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-slate-50"], [class*="from-gray-"]),
+  #sops_content_area .module-container > * + * :where([class*="from-slate-50"], [class*="from-gray-"]) {
+    background-color: var(--color-slate-50, #f8fafc) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="bg-gradient-to-"].text-white),
+  #sops_content_area .module-container > * + * :where([class*="bg-gradient-to-"].text-white) {
+    background-color: var(--color-slate-900, #0f172a) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-red-"].text-white, [class*="from-rose-"].text-white),
+  #sops_content_area .module-container > * + * :where([class*="from-red-"].text-white, [class*="from-rose-"].text-white) {
+    background-color: var(--color-red-600, #dc2626) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-amber-"].text-white, [class*="from-orange-"].text-white),
+  #sops_content_area .module-container > * + * :where([class*="from-amber-"].text-white, [class*="from-orange-"].text-white) {
+    background-color: var(--color-amber-600, #d97706) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-emerald-"].text-white, [class*="from-teal-"].text-white),
+  #sops_content_area .module-container > * + * :where([class*="from-emerald-"].text-white, [class*="from-teal-"].text-white) {
+    background-color: var(--color-emerald-600, #059669) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-blue-"].text-white, [class*="from-indigo-"].text-white),
+  #sops_content_area .module-container > * + * :where([class*="from-blue-"].text-white, [class*="from-indigo-"].text-white) {
+    background-color: var(--color-blue-600, #2563eb) !important;
+  }
+
+  #sops_content_area .module-container > * + *:where([class*="from-purple-"].text-white, [class*="from-pink-"].text-white),
+  #sops_content_area .module-container > * + * :where([class*="from-purple-"].text-white, [class*="from-pink-"].text-white) {
+    background-color: var(--color-purple-600, #9333ea) !important;
+  }
+
+  #sops_content_area .module-container > * + * :where(.overflow-hidden:has(> table), .overflow-hidden:has(table.whitespace-nowrap)) {
+    overflow-x: auto !important;
+  }
+
+  #sops_content_area .module-container > * + * :where(table.whitespace-nowrap) {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed;
+    white-space: normal !important;
+  }
+
+  #sops_content_area .module-container > * + * :where(table.whitespace-nowrap th, table.whitespace-nowrap td) {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+  }
+
+  #sops_content_area .sop-process-container {
+    gap: 0.75rem;
+  }
+
+  #sops_content_area .sop-process-step {
+    min-width: 0;
+    max-width: none;
+  }
+
+  #sops_content_area .sop-process-arrow {
+    width: 1rem;
   }
 }

@@ -672,3 +672,48 @@
     max-width: calc(100% - 46px);
   }
 }
+
+@media (min-width: 1024px) {
+  .more-overview > * + * :where(
+    .sop-icon-container,
+    .category-filter-btn,
+    .bg-white.rounded-xl
+  ),
+  .ziniao-case-shell :where(
+    .zn-card,
+    .zn-chat-card,
+    .zn-notice-title,
+    .zn-notice-card,
+    .zn-bubble,
+    .zn-tool,
+    .zn-phase-grid article,
+    .zn-summary-grid article,
+    .zn-rule-grid article,
+    .zn-notice-grid article
+  ) {
+    border-radius: 8px !important;
+  }
+
+  .more-overview > * + * .sop-card[class*="border-l-"] {
+    border-radius: var(--rounded-xl, 16px) !important;
+  }
+
+  .more-overview > * + * :where(.bg-white.rounded-xl),
+  .ziniao-case-shell :where(.zn-card, .zn-chat-card, .zn-notice-title, .zn-notice-card) {
+    box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  }
+
+  .ziniao-notice-shell .zn-notice-title {
+    background: var(--surface-card, #ffffff);
+    box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  }
+
+  .zn-msg--user .zn-bubble {
+    border-radius: 8px !important;
+  }
+
+  .more-overview > * + * .category-filter-btn.active {
+    background: var(--color-green-600, #16a34a) !important;
+    box-shadow: none;
+  }
+}

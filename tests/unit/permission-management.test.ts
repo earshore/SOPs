@@ -33,7 +33,6 @@ describe('Permission management archive workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'permission_management_owner_v1') return '账号安全负责人/Boss';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -62,7 +61,7 @@ describe('Permission management archive workflow', () => {
     expect(template).toContain('必须人工确认后执行并留痕');
   });
 
-  it('copies the archive template and records local usage', async () => {
+  it('copies the archive template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('permission-management-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '安全小周';
@@ -72,9 +71,6 @@ describe('Permission management archive workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/safety/permission_management/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：安全小周'));
     expect(StorageService.set).toHaveBeenCalledWith('permission_management_owner_v1', '安全小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'permission.management_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制后台权限变更归档模板，可粘贴到工作群或归档文档。');
   });
 });

@@ -530,9 +530,6 @@ describe('NPI Tracker Module', () => {
                 
                 // 验证：显示了成功提示
                 expect(global.alert).toHaveBeenCalled();
-                expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-                    'npi.csv_export': expect.objectContaining({ count: 1 }),
-                }));
             }
         });
 
@@ -627,9 +624,6 @@ describe('NPI Tracker Module', () => {
             expect(writeText).toHaveBeenCalledWith(expect.stringContaining('NPI 周复盘归档'));
             expect(writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：运营小李'));
             expect(StorageService.set).toHaveBeenCalledWith('npi_review_owner_v1', '运营小李');
-            expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-                'npi.review_template_copy': expect.objectContaining({ count: 1 }),
-            }));
             expect(global.alert).toHaveBeenCalledWith('已复制 NPI 复盘模板，可粘贴到周报或归档文档。');
         });
     });

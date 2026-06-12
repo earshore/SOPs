@@ -33,7 +33,6 @@ describe('Procurement QC review workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'procurement_qc_owner_v1') return '采购/质检负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -62,7 +61,7 @@ describe('Procurement QC review workflow', () => {
     expect(template).toContain('必须人工确认后执行');
   });
 
-  it('copies the review template and records local usage', async () => {
+  it('copies the review template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('procurement-qc-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '质检小周';
@@ -72,9 +71,6 @@ describe('Procurement QC review workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/backend/procurement_qc/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：质检小周'));
     expect(StorageService.set).toHaveBeenCalledWith('procurement_qc_owner_v1', '质检小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'procurement.qc_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制采购/QC 放行复盘模板，可粘贴到周报或归档文档。');
   });
 });

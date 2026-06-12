@@ -81,6 +81,8 @@
         "generate:css-vars": "tsx scripts/build/generate-css-variables.ts",
         "generate:tailwind": "tsx scripts/build/generate-tailwind-config.ts",
         "generate:types": "tsx scripts/build/generate-design-token-types.ts",
+        "card-ui:audit": "tsx scripts/quality/audit-card-ui.ts",
+        "callout-ui:audit": "tsx scripts/quality/audit-callout-ui.ts",
         "css:audit": "tsx scripts/quality/audit-css-variables.ts",
         "css:analyze": "tsx scripts/quality/analyze-module-css.ts",
         "css:cleanup": "tsx scripts/dev/cleanup-unused-css.ts",

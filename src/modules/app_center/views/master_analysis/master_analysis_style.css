@@ -23,10 +23,10 @@
         gap: 0.75rem;
         margin: -1rem 0 2rem;
         padding: 0.75rem;
-        background: var(--color-white);
-        border: 1px solid var(--color-slate-200);
-        border-radius: var(--rounded-xl);
-        box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
+        background: var(--surface-panel, var(--color-white));
+        border: 1px solid var(--border-muted, var(--color-slate-200));
+        border-radius: var(--radius-panel, var(--rounded-md));
+        box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
     }
 
     .ma-workflow-step {
@@ -37,10 +37,10 @@
         align-items: center;
         gap: 0.75rem;
         padding: 0.875rem 1rem;
-        border: 1px solid var(--color-slate-200);
-        border-radius: var(--rounded-lg);
+        border: 1px solid var(--border-muted, var(--color-slate-200));
+        border-radius: var(--radius-card, var(--rounded-md));
         color: var(--color-slate-600);
-        background: var(--color-slate-50);
+        background: var(--surface-card-hover, var(--color-slate-50));
         text-decoration: none;
         transition: border-color var(--duration-fast) ease, background-color var(--duration-fast) ease, color var(--duration-fast) ease;
     }
@@ -59,7 +59,7 @@
     .ma-workflow-step[aria-current="step"] {
         color: var(--color-indigo-700);
         border-color: var(--color-indigo-300);
-        background: linear-gradient(135deg, var(--color-indigo-50), var(--color-white));
+        background: var(--color-indigo-50);
     }
 
     .ma-workflow-index {
@@ -223,4 +223,108 @@
 
 #console-card-inner[style*="rotateY(180deg)"]>div:first-child {
     pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+    [x-data="promptlabPanel"] > * + * :where(
+        .rounded-xl,
+        .rounded-2xl,
+        .rounded-3xl,
+        input,
+        select,
+        textarea,
+        button
+    ) {
+        border-radius: 8px !important;
+    }
+
+    [x-data="promptlabPanel"] > * + * [class*="bg-gradient-to-"] {
+        background-image: none !important;
+    }
+
+    [x-data="promptlabPanel"] > * + * [class*="shadow-"] {
+        box-shadow: none !important;
+    }
+
+    [x-data="promptlabPanel"] > * + * :where(
+        [class*="from-slate-900"],
+        [class*="from-blue-"],
+        [class*="from-indigo-"],
+        [class*="from-orange-"],
+        [class*="from-pink-"]
+    ) {
+        background-color: var(--color-slate-800, #1e293b);
+    }
+
+    [x-data="promptlabPanel"] > * + * :where(#btn-generate-prompt, #btn-generate-visual) {
+        background: var(--color-blue-600, #2563eb) !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    [x-data="promptlabPanel"] > * + * :where(#embed-toggle-container, #mode-toggle-glider) {
+        border-radius: 8px !important;
+        box-shadow: none !important;
+    }
+
+    [x-data="promptlabPanel"] > * + * :where(#btn-generate-prompt, #btn-generate-visual) > .absolute {
+        display: none;
+    }
+
+    [x-data="promptlabPanel"] > * + * :where(
+        .absolute.inset-0,
+        .absolute[class*="blur-"][class*="rounded-full"]
+    ) {
+        background-image: none !important;
+        display: none !important;
+    }
+
+    #console-card-inner > div:first-child > div {
+        background-image: linear-gradient(to bottom right, #0f172a, #1e293b, #1e3a8a) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 20px 25px -5px rgb(30 58 138 / 0.30), 0 8px 10px -6px rgb(30 58 138 / 0.30) !important;
+    }
+
+    #console-card-inner > div:last-child > div {
+        background-image: linear-gradient(to bottom right, #0f172a, #1e293b, #831843) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 20px 25px -5px rgb(131 24 67 / 0.30), 0 8px 10px -6px rgb(131 24 67 / 0.30) !important;
+    }
+
+    #console-card-inner :where(.absolute[class*="blur-"][class*="rounded-full"], .absolute.inset-0),
+    #console-card-inner :where(#btn-generate-prompt, #btn-generate-visual) > .absolute {
+        display: block !important;
+    }
+
+    #console-card-inner > div:first-child > div > .absolute.inset-0 {
+        background-image: radial-gradient(circle, #3b82f6 1px, transparent 1px) !important;
+        background-size: 20px 20px;
+    }
+
+    #console-card-inner > div:last-child > div > .absolute.inset-0 {
+        background-image: radial-gradient(circle, #ec4899 1px, transparent 1px) !important;
+        background-size: 20px 20px;
+    }
+
+    #console-card-inner #btn-generate-prompt > .absolute,
+    #console-card-inner #btn-generate-visual > .absolute {
+        background-image: linear-gradient(to right, transparent, rgb(255 255 255 / 0.10), transparent) !important;
+    }
+
+    #console-card-inner #btn-generate-prompt:not(:disabled) {
+        background-image: linear-gradient(to right, #3b82f6, #4f46e5) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.30), 0 4px 6px -4px rgb(59 130 246 / 0.30) !important;
+    }
+
+    #console-card-inner #btn-generate-visual:not(:disabled) {
+        background-image: linear-gradient(to right, #db2777, #e11d48) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 15px -3px rgb(190 24 93 / 0.40), 0 4px 6px -4px rgb(190 24 93 / 0.40) !important;
+    }
+
+    #console-card-inner :where(#btn-generate-prompt, #btn-generate-visual):disabled {
+        background: var(--color-slate-300, #cbd5e1) !important;
+        box-shadow: none !important;
+    }
 }

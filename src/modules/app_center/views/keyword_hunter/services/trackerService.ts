@@ -14,6 +14,7 @@ import {
   StorageService,
   STORAGE_KEYS,
 } from "../../../../../services/storageService";
+import { sanitizePromptInput } from "../../master_analysis/ai_analysis/prompts/promptSanitizer";
 import type {
   KeywordMatchResult,
   AnalysisResult,
@@ -291,6 +292,33 @@ export function calculateWordFrequency(text: string): WordFrequency[] {
     .slice(0, 50);
 }
 
+export function buildListingAnalysisUserPrompt(
+  copyText: string,
+  matchedKeywords: KeywordMatchResult[],
+  unmatchedKeywords: string[],
+): string {
+  const safeListingText = sanitizePromptInput(copyText);
+  const safeMatchedKeywords = matchedKeywords
+    .map((k) => sanitizePromptInput(k.keyword))
+    .join(", ");
+  const safeUnmatchedKeywords = unmatchedKeywords
+    .map((keyword) => sanitizePromptInput(keyword))
+    .join(", ");
+
+  return `
+    # INPUT DATA
+    **Amazon Listing:** ${safeListingText}
+    **Matched Keywords:** ${safeMatchedKeywords}
+    **Unmatched Keywords:** ${safeUnmatchedKeywords}
+    `;
+}
+
+export function buildNumberedTranslationInput(paragraphs: string[]): string {
+  return paragraphs
+    .map((p, i) => `【${i + 1}】 ${sanitizePromptInput(p)}`)
+    .join("\n");
+}
+
 // ==========================================
 // 3. LLM 服务封装
 // ==========================================
@@ -446,14 +474,11 @@ export async function fetchListingAnalysis(
   }
 
   const systemPrompt = ANALYSIS_PROMPT_TEMPLATE;
-
-  // 截取部分文案防止 token 超限
-  const userPrompt = `
-    # INPUT DATA
-    **Amazon Listing:** ${copyText}
-    **Matched Keywords:** ${matchedKeywords.map((k) => k.keyword).join(", ")}
-    **Unmatched Keywords:** ${unmatchedKeywords.join(", ")}
-    `;
+  const userPrompt = buildListingAnalysisUserPrompt(
+    copyText,
+    matchedKeywords,
+    unmatchedKeywords,
+  );
 
   // 🔥 调整：temperature 0.5 -> 0.1 提高稳定性
   return await bridgeCallLLM(systemPrompt, userPrompt, { temperature: 0.1 });
@@ -569,9 +594,7 @@ export async function fetchImmersionTranslation(
   }
 
   // 2. 给每段加编号，构造结构化输入
-  const numberedInput = paragraphs
-    .map((p, i) => `【${i + 1}】 ${p}`)
-    .join("\n");
+  const numberedInput = buildNumberedTranslationInput(paragraphs);
 
   const systemPrompt = TRANSLATE_PROMPT_TEMPLATE2;
   const userPrompt = `## 待翻译内容：\n\n${numberedInput}`;
@@ -579,6 +602,7 @@ export async function fetchImmersionTranslation(
   // 3. 调用 LLM
   const response = await bridgeCallLLM(systemPrompt, userPrompt, {
     jsonMode: false,
+    temperature: 0,
   });
 
   // 4. 解析编号格式响应

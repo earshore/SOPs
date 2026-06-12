@@ -2,13 +2,24 @@
  * 并行分析服务测试
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+
+const llmMocks = vi.hoisted(() => ({
+  callLLM: vi.fn(),
+}));
+
+vi.mock("@/services/llmService", () => ({
+  callLLM: llmMocks.callLLM,
+}));
+
 import {
   generateCacheKey,
   getCachedResult,
+  runParallelAIAnalysis,
   setCachedResult,
 } from "../parallelAnalysisService";
 import { LocalDataStore } from "@/services/localDataStore";
+import { StorageService, STORAGE_KEYS } from "@/services/storageService";
 import type { Product } from "../../config/sampleData";
 
 // Mock localStorage
@@ -36,7 +47,65 @@ Object.defineProperty(global, "localStorage", {
 beforeEach(async () => {
   localStorageMock.clear();
   await LocalDataStore.clearAll();
+  llmMocks.callLLM.mockReset();
 });
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+function createProduct(): Product {
+  return {
+    asin: "B0DNMZ2MLG",
+    productTitle: "Test Product Title",
+    customer_reviews: [
+      {
+        body: "test review body",
+        headline: "test headline",
+        origin_country: "US",
+        review_date: "2026-01-01",
+        star_rating: 5,
+        _origin_site: "US",
+      },
+    ],
+    feature_bullets: ["Feature 1"],
+    scrape_status: "success",
+    metadata: {},
+  };
+}
+
+function mockLlmConfig(): void {
+  vi.spyOn(StorageService, "get").mockImplementation((key: string, defaultValue: unknown = null) => {
+    if (key === STORAGE_KEYS.LLM_ACTIVE_PROVIDER) {
+      return "openai";
+    }
+    return defaultValue;
+  });
+  vi.spyOn(StorageService, "getLLMConfigWithKey").mockResolvedValue({
+    provider: "openai",
+    endpoint: "https://example.com/v1/chat/completions",
+    apiKey: "test-key",
+    model: "test-model",
+  } as never);
+}
+
+function mockSuccessfulLlmResponses(): void {
+  llmMocks.callLLM.mockImplementation(async (messages: Array<{ content: string }>) => {
+    const prompt = messages[1]?.content || "";
+    if (prompt.includes("selling-points")) {
+      return JSON.stringify({
+        bullet_analysis: [],
+        overall_strategy: {},
+        function_scene_matrix: {},
+      });
+    }
+
+    return JSON.stringify({
+      primary_keywords: [],
+      secondary_keywords: [],
+    });
+  });
+}
 
 describe("缓存功能", () => {
   it("应该能够生成唯一的缓存键", () => {
@@ -66,6 +135,40 @@ describe("缓存功能", () => {
     expect(key1).not.toBe(key3); // 不同语言
     expect(key1).toContain("title-keywords");
     expect(key1).toContain("B0DNMZ2MLG");
+  });
+
+  it("应该在内容变化但评论数量不变时生成不同缓存键", () => {
+    const product: Product = {
+      asin: "B0DNMZ2MLG",
+      productTitle: "Test Product Title",
+      customer_reviews: [
+        {
+          body: "first review body",
+          headline: "test",
+          origin_country: "US",
+          review_date: "2026-01-01",
+          star_rating: 5,
+          _origin_site: "US",
+        },
+      ],
+      feature_bullets: ["Feature 1"],
+      scrape_status: "success",
+      metadata: {},
+    };
+    const baseReview = product.customer_reviews[0]!;
+    const updatedProduct: Product = {
+      ...product,
+      customer_reviews: [
+        {
+          ...baseReview,
+          body: "updated review body",
+        },
+      ],
+    };
+
+    expect(generateCacheKey("title-keywords", product, "en")).not.toBe(
+      generateCacheKey("title-keywords", updatedProduct, "en")
+    );
   });
 
   it("应该能够保存和读取缓存", async () => {
@@ -112,6 +215,88 @@ describe("缓存功能", () => {
 
     const cached = await getCachedResult(cacheKey);
     expect(cached).toEqual(testData);
+  });
+});
+
+describe("运行时调度", () => {
+  it("全量命中缓存时不读取 LLM 配置且不调用模型", async () => {
+    const product = createProduct();
+    const cachedTitleKeywords = {
+      primary_keywords: [],
+      secondary_keywords: [],
+    };
+    const cachedSellingPoints = {
+      bullet_analysis: [],
+      overall_strategy: {},
+      function_scene_matrix: {},
+    };
+    await setCachedResult(generateCacheKey("title-keywords", product, "en"), cachedTitleKeywords);
+    await setCachedResult(generateCacheKey("selling-points", product, "en"), cachedSellingPoints);
+    const getLLMConfigWithKeySpy = vi.spyOn(StorageService, "getLLMConfigWithKey");
+
+    const report = await runParallelAIAnalysis(
+      ["title-keywords", "selling-points"],
+      product,
+      vi.fn(),
+      "en",
+      {
+        enableCache: true,
+        maxConcurrency: 2,
+        streamResults: true,
+      }
+    );
+
+    expect(report["title-keywords"]).toEqual(cachedTitleKeywords);
+    expect(report["selling-points"]).toEqual(cachedSellingPoints);
+    expect(getLLMConfigWithKeySpy).not.toHaveBeenCalled();
+    expect(llmMocks.callLLM).not.toHaveBeenCalled();
+  });
+
+  it("可靠性优先失败后停止继续排队后续任务", async () => {
+    const product = createProduct();
+    mockLlmConfig();
+    llmMocks.callLLM.mockRejectedValue(new Error("model failed"));
+
+    await expect(runParallelAIAnalysis(
+      ["title-keywords", "selling-points"],
+      product,
+      vi.fn(),
+      "en",
+      {
+        enableCache: false,
+        maxConcurrency: 1,
+        streamResults: false,
+        failureStrategy: "abort",
+        stopOnFailure: true,
+        retryBudget: 0,
+      }
+    )).rejects.toThrow("分析失败");
+
+    expect(llmMocks.callLLM).toHaveBeenCalledTimes(1);
+  });
+
+  it("final_only 模式不推送局部成功报告", async () => {
+    const product = createProduct();
+    const onTaskComplete = vi.fn();
+    mockLlmConfig();
+    mockSuccessfulLlmResponses();
+
+    await runParallelAIAnalysis(
+      ["title-keywords", "selling-points"],
+      product,
+      vi.fn(),
+      "en",
+      {
+        enableCache: false,
+        maxConcurrency: 2,
+        streamResults: false,
+        failureStrategy: "continue",
+        onTaskComplete,
+      }
+    );
+
+    expect(onTaskComplete).not.toHaveBeenCalled();
+    expect(llmMocks.callLLM).toHaveBeenCalledTimes(2);
   });
 });
 

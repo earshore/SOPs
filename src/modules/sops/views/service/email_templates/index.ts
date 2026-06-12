@@ -7,7 +7,6 @@ import BaseModule from '../../../../../common/BaseModule';
 import { setSafeHtml } from '../../../../../common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
-import { recordOpsMetric } from '../../../../../common/utils/opsMetrics';
 import { StorageService } from '../../../../../services/storageService';
 
 const REVIEW_OWNER_STORAGE_KEY = 'email_templates_owner_v1';
@@ -106,7 +105,6 @@ async function copyEmailTemplatesReviewTemplate(): Promise<void> {
             throw new Error('clipboard unavailable');
         }
 
-        recordOpsMetric('email_templates.reply_template_copy');
         alert('已复制客服邮件处理复盘模板，可粘贴到周报或归档文档。');
     } catch {
         alert('复制失败，请手动复制邮件处理模板或稍后重试。');

@@ -33,7 +33,6 @@ describe('Performance notification report workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'performance_notification_owner_v1') return '账号安全负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -62,7 +61,7 @@ describe('Performance notification report workflow', () => {
     expect(template).toContain('不得私自回复');
   });
 
-  it('copies the report template and records local usage', async () => {
+  it('copies the report template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('performance-notification-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '主管小周';
@@ -72,9 +71,6 @@ describe('Performance notification report workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/safety/performance_notification/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('上报负责人：主管小周'));
     expect(StorageService.set).toHaveBeenCalledWith('performance_notification_owner_v1', '主管小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'performance_notification.report_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制绩效通知上报复盘模板，可粘贴到工作群或归档文档。');
   });
 });

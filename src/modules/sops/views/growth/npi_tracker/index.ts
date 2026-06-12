@@ -12,7 +12,6 @@
 import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
-import { recordOpsMetric } from '../../../../../common/utils/opsMetrics';
 import { escapeHtml } from '../../../../../common/utils/security';
 import { StorageService } from '../../../../../services/storageService';
 import type {
@@ -607,7 +606,6 @@ function exportToExcel(): void {
     }
 
     downloadCsv(csvContent);
-    recordOpsMetric('npi.csv_export');
 
     // Show notification
     alert(
@@ -643,7 +641,6 @@ async function copyNpiReviewTemplate(): Promise<void> {
             throw new Error('clipboard unavailable');
         }
 
-        recordOpsMetric('npi.review_template_copy');
         alert('已复制 NPI 复盘模板，可粘贴到周报或归档文档。');
     } catch {
         alert('复制失败，请使用导出 CSV 或手动复制复盘模板。');

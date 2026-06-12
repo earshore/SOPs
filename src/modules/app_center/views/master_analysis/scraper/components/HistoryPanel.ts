@@ -4,6 +4,7 @@
 
 import type { HistoryItem, ScraperSite } from '@/types/modules-business';
 import { HistoryService } from '../../services/historyService';
+import { emitHistoryUpdated } from '../../services/historyEvents';
 import { showToast } from '../../../../../../common/ui';
 import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
 import { appStore } from '@/stores/useAppStore';
@@ -62,6 +63,7 @@ export class HistoryPanel {
             }
 
             showToast("快照已删除", { type: 'success' });
+            emitHistoryUpdated();
             return true;
         } catch (error) {
             console.error('[Scraper] 删除历史快照失败:', error);
@@ -87,6 +89,7 @@ export class HistoryPanel {
 
         await HistoryService.clearAsync();
         await this.loadHistoryAsync();
+        emitHistoryUpdated();
         showToast("历史已清空", { type: 'success' });
     }
 
@@ -96,7 +99,10 @@ export class HistoryPanel {
     async loadHistoryItem(item: HistoryItem, isScraping: boolean): Promise<boolean> {
         if (await this.shouldCancelSnapshotLoad(isScraping)) return false;
 
-        this.ensureSnapshotMetadata(item);
+        const metadataChanged = this.ensureSnapshotMetadata(item);
+        if (metadataChanged) {
+            void this.persistNormalizedSnapshot(item);
+        }
         this.restoreSnapshotState(item);
 
         // 通知其他模块数据已更新
@@ -121,8 +127,8 @@ export class HistoryPanel {
         return !confirmed;
     }
 
-    private ensureSnapshotMetadata(item: HistoryItem): void {
-        if (!item.data) return;
+    private ensureSnapshotMetadata(item: HistoryItem): boolean {
+        if (!item.data) return false;
 
         if (!item.data.metadata) {
             const languageHeader = this.getLanguageHeader(item.site);
@@ -133,12 +139,23 @@ export class HistoryPanel {
                 language: languageHeader?.name || 'English (US)',
                 total_asins: item.asins?.length || 0,
             };
-            return;
+            return true;
         }
 
         if (!item.data.metadata.marketplace) {
             // 如果 metadata 存在但缺少 marketplace 字段
             item.data.metadata.marketplace = item.site || 'US';
+            return true;
+        }
+
+        return false;
+    }
+
+    private async persistNormalizedSnapshot(item: HistoryItem): Promise<void> {
+        try {
+            await HistoryService.updateSnapshotDataAsync(item.id, item.data);
+        } catch (error) {
+            console.warn('[Scraper] 持久化历史快照 metadata 失败:', error);
         }
     }
 

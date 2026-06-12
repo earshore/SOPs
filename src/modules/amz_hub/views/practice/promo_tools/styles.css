@@ -753,3 +753,94 @@
         min-width: 0;
     }
 }
+
+@media (min-width: 1024px) {
+    .amzpt_dual_guide,
+    .amzpt_anchor_nav,
+    .amzpt_anchor_tip,
+    .amzpt_dual_card,
+    .amzpt_nav_step,
+    .amzpt_card,
+    .amzpt_callout,
+    .amzpt_sub_item,
+    .amzpt_stats_box,
+    .amzpt_table_wrapper,
+    .amzpt_tip_item,
+    .amzpt_kv_row,
+    .amzpt_check_item {
+        border-radius: var(--radius-card, var(--rounded-md));
+        box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+    }
+
+    .amzpt_dual_guide,
+    .amzpt_anchor_nav,
+    .amzpt_dual_card,
+    .amzpt_nav_step,
+    .amzpt_card,
+    .amzpt_sub_item,
+    .amzpt_stats_box,
+    .amzpt_tip_item,
+    .amzpt_kv_row,
+    .amzpt_check_item {
+        background: var(--surface-card, #ffffff);
+        border-color: var(--border-muted, var(--color-slate-200));
+    }
+
+    .amzpt_dual_card.is-current,
+    .amzpt_callout--insight,
+    .amzpt_callout--core,
+    .amzpt_callout--warning,
+    .amzpt_callout--success,
+    .amzpt_callout--tip {
+        background: var(--surface-card-hover, var(--color-slate-50));
+    }
+
+    .amzpt_callout--insight,
+    .amzpt_callout--core {
+        border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32));
+        color: var(--color-text-secondary, var(--color-slate-600));
+    }
+
+    .amzpt_callout--insight .amzpt_callout__title,
+    .amzpt_callout--core .amzpt_callout__title {
+        color: var(--color-text-primary, var(--color-slate-900));
+    }
+
+    .amzpt_dual_card--link:hover,
+    .amzpt_nav_step:hover,
+    .amzpt_sub_item:hover {
+        transform: none;
+        border-color: var(--color-border-default, rgba(148, 163, 184, 0.32));
+        box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+    }
+
+    .amzpt_nav_step::before,
+    .amzpt_callout::before {
+        display: none;
+    }
+
+    .amzpt_nav_step::after,
+    .amzpt_nav_step:hover::after {
+        transform: translateY(-50%);
+        box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+    }
+
+    .amzpt_nav_step:hover .amzpt_nav_step_no {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .amzpt_nav_step_no,
+    .amzpt_sub_icon,
+    .amzpt_stats_icon {
+        box-shadow: none;
+    }
+
+    .amzpt_callout--formula {
+        background: var(--color-slate-900);
+    }
+
+    .amzpt_table thead {
+        background: var(--color-primary, var(--color-blue-500));
+    }
+}

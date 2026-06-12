@@ -10,7 +10,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import eventBus from '@/common/EventBus';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { showToast } from '@/common/ui';
-import { updateTask, handleScrapeComplete } from '@/modules/app_center/views/master_analysis/scraper/handlers/scrapeHandler';
+import { updateTask, handleScrapeComplete, saveScrapeSnapshot } from '@/modules/app_center/views/master_analysis/scraper/handlers/scrapeHandler';
 import { deleteProduct, deleteReview } from '@/modules/app_center/views/master_analysis/scraper/handlers/dataOperations';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 import type { Task } from '@/modules/app_center/views/master_analysis/scraper/types';
@@ -508,6 +508,27 @@ describe('Scraper 处理器', () => {
       expect(result.products[1].scrape_status).toBe('failed');
       expect(tasks[0].status).toBe('success');
       expect(tasks[1].status).toBe('failed');
+    });
+  });
+
+  describe('saveScrapeSnapshot - 保存采集快照', () => {
+    it('应该等待异步历史保存完成', async () => {
+      const data = createScrapedData();
+
+      await saveScrapeSnapshot(data);
+
+      expect(HistoryService.saveAsync).toHaveBeenCalledWith(data);
+      expect(HistoryService.save).not.toHaveBeenCalled();
+    });
+
+    it('异步保存失败时应该回退到同步保存', async () => {
+      const data = createScrapedData();
+      vi.mocked(HistoryService.saveAsync).mockRejectedValueOnce(new Error('indexeddb failed'));
+
+      await saveScrapeSnapshot(data);
+
+      expect(HistoryService.saveAsync).toHaveBeenCalledWith(data);
+      expect(HistoryService.save).toHaveBeenCalledWith(data);
     });
   });
 

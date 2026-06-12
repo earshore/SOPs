@@ -40,7 +40,6 @@ describe('Restricted words review workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'restricted_words_owner_v1') return '合规负责人/运营负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -71,7 +70,7 @@ describe('Restricted words review workflow', () => {
     expect(template).toContain('4/5 级风险词、证书依据和最终上架提交必须人工确认');
   });
 
-  it('copies the review template and records local usage', async () => {
+  it('copies the review template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('restricted-words-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '合规小周';
@@ -82,9 +81,6 @@ describe('Restricted words review workflow', () => {
     expect(mocks.initPanel).toHaveBeenCalled();
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：合规小周'));
     expect(StorageService.set).toHaveBeenCalledWith('restricted_words_owner_v1', '合规小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'restricted_words.review_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制高危词检查复盘模板，可粘贴到周报或归档文档。');
   });
 });

@@ -1,7 +1,6 @@
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 import { setSafeHtml } from "../../../../../common/utils/security";
 import { registerActionsWithLegacy, unregisterActions } from "../../../../../common/utils/actionRegistry";
-import { recordOpsMetric } from "../../../../../common/utils/opsMetrics";
 import { StorageService } from "../../../../../services/storageService";
 
 const REVIEW_OWNER_STORAGE_KEY = 'procurement_qc_owner_v1';
@@ -116,7 +115,6 @@ async function copyProcurementQcTemplate(): Promise<void> {
             throw new Error('clipboard unavailable');
         }
 
-        recordOpsMetric('procurement.qc_template_copy');
         alert('已复制采购/QC 放行复盘模板，可粘贴到周报或归档文档。');
     } catch {
         alert('复制失败，请手动复制采购/QC 模板或稍后重试。');

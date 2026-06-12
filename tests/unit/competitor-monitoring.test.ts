@@ -33,7 +33,6 @@ describe('Competitor monitoring review workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'competitor_review_owner_v1') return '运营负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -62,7 +61,7 @@ describe('Competitor monitoring review workflow', () => {
     expect(template).toContain('必须由人工确认后执行');
   });
 
-  it('copies the review template and records local usage', async () => {
+  it('copies the review template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('competitor-review-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '运营小李';
@@ -72,9 +71,6 @@ describe('Competitor monitoring review workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/growth/competitor_monitoring/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：运营小李'));
     expect(StorageService.set).toHaveBeenCalledWith('competitor_review_owner_v1', '运营小李');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'competitor.review_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制竞品周复盘模板，可粘贴到周报或归档文档。');
   });
 });

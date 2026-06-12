@@ -230,105 +230,121 @@
                     </div>
                 </div>
                 <!-- Collapsible Content -->
-                <div class="p-6" x-show="configExpandedState" x-transition:enter="transition ease-out duration-400"
+                <div class="manual-config-panel p-6" x-show="configExpandedState" x-transition:enter="transition ease-out duration-400"
                     x-transition:enter-end="opacity-100 max-h-[2000px]" x-transition:enter-start="opacity-0 max-h-0"
                     x-transition:leave="transition ease-in duration-300" x-transition:leave-end="opacity-0"
                     x-transition:leave-start="opacity-100">
-                    <!-- Site Selection -->
-                    <div class="mb-7">
-                        <label class="flex items-center text-sm font-bold text-slate-700 mb-3">
-                            <span class="w-1 h-4 bg-blue-500 rounded-full mr-2"></span>
-                            目标站点
-                        </label>
-                        <div class="grid grid-cols-5 2xl:grid-cols-10 gap-2">
-                            <template :key="site" x-for="(site, index) in sites">
-                                <button :class="getSiteButtonClass(site)"
-                                    :style="getAnimationDelayStyle(index, 40)" @click="selectSite(site)"
-                                    class="site-btn group relative flex flex-col items-center p-3 rounded-xl border-2">
-                                    <!-- 选中指示器 -->
-                                    <div class="site-check-badge absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center shadow-sm z-10"
-                                        x-show="isSelectedSite(site)"
-                                        x-transition:enter="transition ease-out duration-300"
-                                        x-transition:enter-end="scale-100 rotate-0"
-                                        x-transition:enter-start="scale-0 rotate-180">
-                                        <i class="fas fa-check text-[7px] text-white"></i>
-                                    </div>
-                                    <span class="site-flag text-2xl" x-text="getFlag(site)"></span>
-                                    <span
-                                        :class="getSiteNameClass(site)"
-                                        class="text-[11px] font-semibold mt-1.5 transition-colors duration-200"
-                                        x-text="getSiteName(site)"></span>
-                                </button>
-                            </template>
-                        </div>
-                    </div>
-                    <!-- Input Area -->
-                    <div class="flex flex-col md:flex-row items-start gap-6 mb-7">
-                        <!-- ASIN Input -->
-                        <div class="flex-1 flex flex-col w-full">
-                            <label class="flex items-center text-sm font-bold text-slate-700 mb-2.5" for="scraper-asin-input">
-                                <span class="w-1 h-4 bg-violet-500 rounded-full mr-2"></span>
-                                ASIN列表
-                                <span class="text-slate-400 font-normal ml-1.5 text-xs">(逗号或换行分隔)</span>
+                    <div class="manual-config-grid">
+                        <!-- Site Selection -->
+                        <div class="manual-config-section manual-site-list-card">
+                            <label class="manual-config-label flex items-center text-sm font-bold text-slate-700 mb-3">
+                                <span class="w-1 h-4 bg-blue-500 rounded-full mr-2"></span>
+                                目标站点
                             </label>
-                            <div class="textarea-wrapper">
-                                <textarea
-                                    id="scraper-asin-input"
-                                    class="w-full px-4 py-3.5 border-2 border-slate-200 rounded-xl resize-none font-mono text-sm bg-slate-50/50 placeholder:text-slate-300"
-                                    placeholder="B0FMGTGMK4
+                            <div class="manual-site-grid" aria-label="目标站点列表">
+                                <template :key="site" x-for="(site, index) in sites">
+                                    <button :class="getSiteButtonClass(site)"
+                                        :style="getAnimationDelayStyle(index, 24)" @click="selectSite(site)"
+                                        class="manual-site-btn site-btn group relative flex items-center gap-2 p-2.5 rounded-xl border-2">
+                                        <!-- 选中指示器 -->
+                                        <div class="site-check-badge absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center shadow-sm z-10"
+                                            x-show="isSelectedSite(site)"
+                                            x-transition:enter="transition ease-out duration-300"
+                                            x-transition:enter-end="scale-100 rotate-0"
+                                            x-transition:enter-start="scale-0 rotate-180">
+                                            <i class="fas fa-check text-[7px] text-white"></i>
+                                        </div>
+                                        <span class="site-flag text-2xl" x-text="getFlag(site)"></span>
+                                        <span
+                                            :class="getSiteNameClass(site)"
+                                            :title="getSiteUrl(site)"
+                                            class="manual-site-name manual-site-url text-[11px] font-semibold transition-colors duration-200"
+                                            x-text="getSiteUrl(site)"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="manual-form-stack">
+                            <!-- ASIN Input -->
+                            <div class="manual-input-card flex flex-col w-full">
+                                <div class="manual-input-header">
+                                    <label class="manual-config-label flex items-center text-sm font-bold text-slate-700" for="scraper-asin-input">
+                                        <span class="w-1 h-4 bg-violet-500 rounded-full mr-2"></span>
+                                        ASIN列表
+                                        <span class="text-slate-400 font-normal ml-1.5 text-xs">(逗号或换行分隔)</span>
+                                    </label>
+                                </div>
+                                <div class="manual-textarea-wrapper textarea-wrapper">
+                                    <textarea
+                                        id="scraper-asin-input"
+                                        class="manual-asin-textarea w-full px-4 py-3.5 border-2 border-slate-200 rounded-xl resize-none font-mono text-sm bg-slate-50/50 placeholder:text-slate-300"
+                                        placeholder="B0FMGTGMK4
 B09XBHXKKL
 B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textarea>
-                            </div>
-                            <!-- Input Footer -->
-                            <div class="flex items-center justify-between mt-2.5 px-0.5">
-                                <span :class="validAsinStatusClass"
-                                    class="text-xs flex items-center gap-1.5">
-                                    <template x-if="hasValidAsins">
-                                        <span class="flex items-center gap-1"
+                                </div>
+                                <!-- Input Footer -->
+                                <div class="manual-input-footer flex items-end justify-between mt-3 px-0.5">
+                                    <div class="manual-input-meta">
+                                        <span :class="validAsinStatusClass"
+                                            class="text-xs flex items-center gap-1.5">
+                                            <template x-if="hasValidAsins">
+                                                <span class="flex items-center gap-1"
+                                                    x-transition:enter="transition ease-out duration-300"
+                                                    x-transition:enter-end="opacity-100 scale-100"
+                                                    x-transition:enter-start="opacity-0 scale-90">
+                                                    <span
+                                                        class="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center">
+                                                        <i class="fas fa-check text-[8px] text-emerald-600"></i>
+                                                    </span>
+                                                    <span class="font-semibold">已识别 <span class="text-emerald-700 font-bold"
+                                                            x-text="validAsins.length"></span> 个 ASIN</span>
+                                                </span>
+                                            </template>
+                                            <template x-if="hasNoValidAsins">
+                                                <span class="text-slate-400 italic flex items-center gap-1">
+                                                    <span class="inline-block w-1 h-3 bg-slate-300 rounded-full"
+                                                        style="animation: cursorBlink 1s infinite;"></span>
+                                                    等待输入...
+                                                </span>
+                                            </template>
+                                        </span>
+                                        <span
+                                            class="text-xs text-amber-600 font-medium flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full"
+                                            x-show="hasInvalidAsins"
                                             x-transition:enter="transition ease-out duration-300"
-                                            x-transition:enter-end="opacity-100 scale-100"
-                                            x-transition:enter-start="opacity-0 scale-90">
-                                            <span
-                                                class="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center">
-                                                <i class="fas fa-check text-[8px] text-emerald-600"></i>
-                                            </span>
-                                            <span class="font-semibold">已识别 <span class="text-emerald-700 font-bold"
-                                                    x-text="validAsins.length"></span> 个 ASIN</span>
+                                            x-transition:enter-end="opacity-100 translate-x-0"
+                                            x-transition:enter-start="opacity-0 translate-x-2">
+                                            <i class="fas fa-filter text-[9px]"></i>
+                                            过滤 <span class="font-bold" x-text="invalidCount"></span> 个无效项
                                         </span>
-                                    </template>
-                                    <template x-if="hasNoValidAsins">
-                                        <span class="text-slate-400 italic flex items-center gap-1">
-                                            <span class="inline-block w-1 h-3 bg-slate-300 rounded-full"
-                                                style="animation: cursorBlink 1s infinite;"></span>
-                                            等待输入...
-                                        </span>
-                                    </template>
-                                </span>
-                                <div class="flex items-center gap-3">
-                                    <span
-                                        class="text-xs text-amber-600 font-medium flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full"
-                                        x-show="hasInvalidAsins"
-                                        x-transition:enter="transition ease-out duration-300"
-                                        x-transition:enter-end="opacity-100 translate-x-0"
-                                        x-transition:enter-start="opacity-0 translate-x-2">
-                                        <i class="fas fa-filter text-[9px]"></i>
-                                        过滤 <span class="font-bold" x-text="invalidCount"></span> 个无效项
-                                    </span>
-                                    <button @click="clearAsins()"
-                                        class="clear-btn text-xs text-slate-400 hover:text-rose-500 font-medium flex items-center gap-1"
-                                        x-show="hasInputAsins" x-transition="">
-                                        <i class="fas fa-eraser text-[10px]"></i> 清空
-                                    </button>
+                                    </div>
+                                    <div class="manual-input-actions">
+                                        <button @click="clearAsins()"
+                                            class="manual-clear-button clear-btn text-xs font-semibold flex items-center justify-center gap-1"
+                                            x-show="hasInputAsins" x-transition="">
+                                            <i class="fas fa-eraser text-[10px]"></i> 清空
+                                        </button>
+                                        <button :disabled="startDisabled" @click="startScrape()"
+                                            class="manual-start-button btn-start relative text-white font-bold flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed overflow-hidden">
+                                            <i :class="scrapingIconClass"
+                                                class="fas relative z-10 text-sm"></i>
+                                            <span class="relative z-10 text-xs" x-text="scrapingButtonText"></span>
+                                            <template x-if="showStartCount">
+                                                <span
+                                                    class="relative z-10 bg-white/20 text-white/90 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                                                    x-text="startCountText" x-transition:enter="transition ease-out duration-200"
+                                                    x-transition:enter-end="opacity-100 scale-100"
+                                                    x-transition:enter-start="opacity-0 scale-75"></span>
+                                            </template>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- Right Options Panel -->
-                        <div class="flex-1 w-full md:pt-[28px] space-y-5">
                             <!-- Review Toggle -->
                             <div
-                                class="p-4 rounded-xl bg-slate-50/70 border border-slate-100 transition-all duration-300 hover:border-blue-200 hover:bg-blue-50/30">
+                                class="manual-option-card p-4 rounded-xl bg-slate-50/70 border border-slate-100 transition-all duration-300 hover:border-blue-200 hover:bg-blue-50/30">
                                 <label @click="toggleScrapeReviews()"
-                                    class="flex items-center justify-between cursor-pointer group">
+                                    class="manual-option-row flex items-center justify-between cursor-pointer group">
                                     <div class="flex items-center gap-3">
                                         <div
                                             class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:border-blue-300 transition-all duration-300">
@@ -349,20 +365,6 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
                             </div>
                         </div>
                     </div>
-                    <!-- Start Button -->
-                    <button :disabled="startDisabled" @click="startScrape()"
-                        class="btn-start relative w-full py-4 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2.5 cursor-pointer disabled:cursor-not-allowed overflow-hidden">
-                        <i :class="scrapingIconClass"
-                            class="fas relative z-10 text-lg"></i>
-                        <span class="relative z-10 text-[15px]" x-text="scrapingButtonText"></span>
-                        <template x-if="showStartCount">
-                            <span
-                                class="relative z-10 bg-white/20 text-white/90 text-xs font-bold px-2 py-0.5 rounded-full"
-                                x-text="startCountText" x-transition:enter="transition ease-out duration-200"
-                                x-transition:enter-end="opacity-100 scale-100"
-                                x-transition:enter-start="opacity-0 scale-75"></span>
-                        </template>
-                    </button>
                 </div>
             </div>
             <!-- Task Status Panel -->

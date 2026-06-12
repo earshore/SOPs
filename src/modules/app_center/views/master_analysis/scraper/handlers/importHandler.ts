@@ -12,6 +12,7 @@ import type { ScrapedProduct, CustomerReview, ScraperSite } from '@/types/module
 import { validateScrapedData } from '../utils/validators';
 import { getFlag } from '../utils/formatters';
 import { HistoryService } from '../../services/historyService';
+import { emitHistoryUpdated } from '../../services/historyEvents';
 import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
 import { showToast } from '../../../../../../common/ui';
 import eventBus from '../../../../../../common/EventBus';
@@ -589,7 +590,7 @@ export async function handleImportFiles(
         // 触发事件通知其他模块更新
         eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, scrapedData);
         eventBus.emit(APP_EVENTS.DATA_UPDATED);
-        eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
+        emitHistoryUpdated();
 
         showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, { type: 'success' });
 

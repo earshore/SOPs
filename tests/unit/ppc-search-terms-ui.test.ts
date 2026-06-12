@@ -203,9 +203,6 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     expect(container.querySelector('#ppc-result-count')?.textContent).toBe('共 10 行，当前筛选 2 行。');
     expect(anchorClick).toHaveBeenCalled();
     expect(mocks.storageSet).toHaveBeenCalledWith('ppc_action_owner_v1', '广告负责人');
-    expect(mocks.storageSet).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'ppc.action_export': expect.objectContaining({ count: 1 }),
-    }));
     expect(showToast).toHaveBeenCalledWith('导出完成', { type: 'success', description: '2 行动作已导出' });
   });
 
@@ -250,7 +247,7 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     });
   });
 
-  it('复制复盘模板成功时记录本地使用次数', async () => {
+  it('复制复盘模板成功时保留负责人', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -266,9 +263,6 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining('# PPC 搜索词周复盘'));
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining('Owner：广告小张'));
     expect(mocks.storageSet).toHaveBeenCalledWith('ppc_action_owner_v1', '广告小张');
-    expect(mocks.storageSet).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'ppc.review_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(showToast).toHaveBeenCalledWith('复盘模板已复制', { type: 'success' });
   });
 

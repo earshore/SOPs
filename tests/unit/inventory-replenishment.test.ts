@@ -33,7 +33,6 @@ describe('Inventory replenishment report workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'inventory_replenishment_owner_v1') return '供应链/运营负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -62,7 +61,7 @@ describe('Inventory replenishment report workflow', () => {
     expect(template).toContain('必须人工确认后执行');
   });
 
-  it('copies the report template and records local usage', async () => {
+  it('copies the report template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('inventory-replenishment-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '供应链小周';
@@ -72,9 +71,6 @@ describe('Inventory replenishment report workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/backend/inventory_replenishment/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：供应链小周'));
     expect(StorageService.set).toHaveBeenCalledWith('inventory_replenishment_owner_v1', '供应链小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'inventory.replenishment_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制库存补货周报复盘模板，可粘贴到周报或归档文档。');
   });
 });

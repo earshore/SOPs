@@ -18,13 +18,14 @@ import { ErrorService } from '../../../../../../services/errorService';
 import { showToast } from '../../../../../../common/ui';
 import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { extractValidAsins } from '../utils/validators';
-import { getFlag, getSiteName, formatDate } from '../utils/formatters';
-import { startScrape, handleScrapeComplete, updateTask } from '../handlers/scrapeHandler';
+import { getFlag, getSiteName, getSiteUrl, formatDate } from '../utils/formatters';
+import { startScrape, handleScrapeComplete, saveScrapeSnapshot, updateTask } from '../handlers/scrapeHandler';
 import { handleImportFiles as handleImportFilesCore } from '../handlers/importHandler';
 import { deleteProduct as deleteProductCore, deleteReview as deleteReviewCore, confirmWithModal } from '../handlers/dataOperations';
 import type { ScrapedData, ScrapedProduct, HistoryItem } from '@/types/modules-business';
 import { DataPreview, DataPreviewState } from './DataPreview';
 import { HistoryPanel } from './HistoryPanel';
+import { emitHistoryUpdated } from '../../services/historyEvents';
 
 type ScraperPanelState = {
     inputAsins: string;
@@ -395,18 +396,12 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
                 this.loadHistory();
             };
             
-            const customHistoryHandler = () => {
-                this.loadHistory();
-            };
-            
             // 添加事件监听器
             window.addEventListener(APP_EVENTS.HISTORY_UPDATED, historyUpdatedHandler);
-            window.addEventListener('history-updated', customHistoryHandler);
             
             // 保存清理函数
             this._unsubscribers.push(
-                () => window.removeEventListener(APP_EVENTS.HISTORY_UPDATED, historyUpdatedHandler),
-                () => window.removeEventListener('history-updated', customHistoryHandler)
+                () => window.removeEventListener(APP_EVENTS.HISTORY_UPDATED, historyUpdatedHandler)
             );
         },
 
@@ -601,6 +596,14 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
                 appStore.getState().setScrapedData(scrapedData);
                 appStore.getState().setAnalysisReport(null); // 重置分析报告
 
+                try {
+                    await saveScrapeSnapshot(scrapedData);
+                    emitHistoryUpdated();
+                } catch (saveError) {
+                    console.error('[Scraper] 保存历史快照失败:', saveError);
+                    showToast("采集结果已生成，但保存历史快照失败", { type: 'error' });
+                }
+
                 const successCount = products.filter((p: unknown) => (p as ScrapedProduct).scrape_status === 'success').length;
                 if (successCount > 0) {
                     showToast(`采集完成: ${successCount} 成功`, { type: 'success' });
@@ -612,9 +615,6 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
                 if (this.dataPreview) {
                     this.updateDataPreview(scrapedData);
                 }
-
-                // 重新加载历史记录
-                this.loadHistory();
 
                 this.isScraping = false;
                 this.saveState();
@@ -800,6 +800,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
         getFlag,
         getSiteName,
+        getSiteUrl,
         formatDate
 };
 

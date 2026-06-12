@@ -50,7 +50,8 @@ vi.mock('@/common/ui', () => ({
 vi.mock('@/common/constants/eventConstants', () => ({
   APP_EVENTS: {
     HISTORY_UPDATED: 'history-updated'
-  }
+  },
+  emitAppEvent: vi.fn()
 }));
 
 describe('ScraperPanel 组件', () => {

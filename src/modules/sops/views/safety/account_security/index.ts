@@ -1,7 +1,6 @@
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 import { setSafeHtml } from "../../../../../common/utils/security";
 import { registerActionsWithLegacy, unregisterActions } from "../../../../../common/utils/actionRegistry";
-import { recordOpsMetric } from "../../../../../common/utils/opsMetrics";
 import { StorageService } from "../../../../../services/storageService";
 
 const ACCOUNT_SECURITY_OWNER_STORAGE_KEY = 'account_security_owner_v1';
@@ -108,7 +107,6 @@ async function copyAccountSecurityTemplate(): Promise<void> {
             throw new Error('clipboard unavailable');
         }
 
-        recordOpsMetric('account_security.review_template_copy');
         alert('已复制账号登录异常登记模板，可粘贴到工作群或归档文档。');
     } catch {
         alert('复制失败，请手动复制账号安全模板或稍后重试。');

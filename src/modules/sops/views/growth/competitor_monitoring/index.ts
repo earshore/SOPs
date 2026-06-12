@@ -1,7 +1,6 @@
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 import { setSafeHtml } from "../../../../../common/utils/security";
 import { registerActionsWithLegacy, unregisterActions } from "../../../../../common/utils/actionRegistry";
-import { recordOpsMetric } from "../../../../../common/utils/opsMetrics";
 import { StorageService } from "../../../../../services/storageService";
 
 const REVIEW_OWNER_STORAGE_KEY = 'competitor_review_owner_v1';
@@ -103,7 +102,6 @@ async function copyCompetitorReviewTemplate(): Promise<void> {
             throw new Error('clipboard unavailable');
         }
 
-        recordOpsMetric('competitor.review_template_copy');
         alert('已复制竞品周复盘模板，可粘贴到周报或归档文档。');
     } catch {
         alert('复制失败，请手动复制周报模板或稍后重试。');

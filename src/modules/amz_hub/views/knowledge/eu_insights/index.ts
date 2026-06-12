@@ -6,6 +6,7 @@ import { escapeHtml, setSafeHtml } from "@/common/utils/security";
 import BaseModule from "../../../../../common/BaseModule";
 import { AMZ_COUNTRY_DATA, type CountryCode } from "../../../constants/amz_hub_constants";
 import templateHTML from "./template.html?raw";
+import "./styles.css";
 import { loadChartJs, type ChartJS } from "../../../../../common/utils/lazyLibs";
 
 // Chart.js 实例类型定义

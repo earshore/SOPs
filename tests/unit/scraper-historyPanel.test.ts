@@ -15,7 +15,11 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
   HistoryService: {
     save: vi.fn(),
     getAll: vi.fn(() => []),
-    clear: vi.fn()
+    getAllAsync: vi.fn(async () => []),
+    deleteByIdAsync: vi.fn(async () => true),
+    clear: vi.fn(),
+    clearAsync: vi.fn(async () => undefined),
+    updateSnapshotDataAsync: vi.fn(async () => true)
   }
 }));
 
@@ -58,11 +62,15 @@ vi.mock('@/common/constants/constants', () => ({
 }));
 
 vi.mock('@/common/constants/eventConstants', () => ({
+  APP_EVENTS: {
+    HISTORY_UPDATED: 'history-updated'
+  },
   MODULE_EVENTS: {
     SCRAPER: {
       SCRAPE_SUCCESS: 'scraper:scrape-success'
     }
-  }
+  },
+  emitAppEvent: vi.fn()
 }));
 
 describe('HistoryPanel 组件', () => {

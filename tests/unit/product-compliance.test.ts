@@ -33,7 +33,6 @@ describe('Product compliance review workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'product_compliance_owner_v1') return '合规负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -62,7 +61,7 @@ describe('Product compliance review workflow', () => {
     expect(template).toContain('整改完成必须由人工确认');
   });
 
-  it('copies the review template and records local usage', async () => {
+  it('copies the review template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('product-compliance-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '合规小周';
@@ -72,9 +71,6 @@ describe('Product compliance review workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/safety/product_compliance/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：合规小周'));
     expect(StorageService.set).toHaveBeenCalledWith('product_compliance_owner_v1', '合规小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'product_compliance.review_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制产品合规复盘模板，可粘贴到周报或归档文档。');
   });
 });

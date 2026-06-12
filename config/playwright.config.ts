@@ -54,6 +54,9 @@ export default defineConfig({
     '**/visual/**/*.test.ts',
     '**/performance/**/*.test.ts'
   ],
+  testIgnore: [
+    '**/*.perf.test.ts'
+  ],
 
   // 最大失败次数（0 = 不限制）
   maxFailures: 0,

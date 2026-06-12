@@ -281,7 +281,6 @@
   /* ---- 主色 (Primary) ---- */
   --color-primary:           var(--color-blue-500);
   --color-primary-light:     rgba(59, 130, 246, 0.10);
-  --color-primary-light:   rgba(59, 130, 246, 0.06);
   --color-primary-dark:      var(--color-blue-600);
   --color-primary-darker:    var(--color-blue-700);
   --color-primary-contrast:  #ffffff;   /* 主色上的文字色 */
@@ -320,6 +319,12 @@
   --color-bg-backdrop:       rgba(0, 0, 0, 0.40);
   --color-bg-overlay:        rgba(0, 0, 0, 0.50);
 
+  /* ---- 工作台表面 ---- */
+  --surface-workbench:        var(--color-slate-50);
+  --surface-panel:            #ffffff;
+  --surface-card:             #ffffff;
+  --surface-card-hover:       var(--color-slate-50);
+
   /* ---- 边框 ---- */
   --color-border-lightest:   rgba(0, 0, 0, 0.03);
   --color-border-light:      rgba(0, 0, 0, 0.06);
@@ -327,9 +332,12 @@
   --color-border-strong:     rgba(0, 0, 0, 0.16);
   --color-border-focus:      var(--color-primary);
   --color-border-error:      var(--color-red-500);
+  --border-subtle:           rgba(148, 163, 184, 0.24);
+  --border-muted:            rgba(203, 213, 225, 0.72);
 
   /* ---- 焦点环 ---- */
   --color-focus-ring:        var(--color-primary);
+  --focus-ring-soft:         rgba(37, 99, 235, 0.16);
 
   /* ---- 状态色 ---- */
   --color-success:           var(--color-green-500);
@@ -338,7 +346,7 @@
   --color-success-contrast:  #ffffff;
 
   --color-warning:           var(--color-amber-500);
-  --color-amber-400:     rgba(245, 158, 11, 0.10);
+  --color-warning-light:     rgba(245, 158, 11, 0.10);
   --color-warning-dark:      var(--color-amber-600);
   --color-warning-contrast:  var(--color-slate-900);
 
@@ -419,6 +427,8 @@
   --rounded-2xl:  24px;
   --rounded-3xl:  32px;
   --rounded-full: 9999px;
+  --radius-card:  var(--rounded-md);
+  --radius-panel: var(--rounded-md);
 
 
   /* ========================================
@@ -434,6 +444,9 @@
                  0 4px 10px -5px rgba(0, 0, 0, 0.03);
   --shadow-xl:   0 20px 40px -10px rgba(0, 0, 0, 0.10);
   --shadow-2xl:  0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  --shadow-card:       0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-card-hover: 0 8px 22px -20px rgba(15, 23, 42, 0.36);
+  --shadow-panel:      0 12px 30px -28px rgba(15, 23, 42, 0.45);
 
   /* 内阴影 */
   --shadow-inner:    inset 0 2px 4px rgba(0, 0, 0, 0.04);
@@ -675,7 +688,6 @@
   /* ---- 主色 ---- */
   --color-primary:           var(--color-indigo-400);
   --color-primary-light:     rgba(129, 140, 248, 0.12);
-  --color-primary-light:   rgba(129, 140, 248, 0.06);
   --color-primary-dark:      var(--color-indigo-500);
   --color-primary-darker:    var(--color-indigo-600);
   --color-primary-contrast:  #ffffff;
@@ -713,6 +725,12 @@
   --color-bg-backdrop:       rgba(0, 0, 0, 0.60);
   --color-bg-overlay:        rgba(0, 0, 0, 0.70);
 
+  /* ---- 工作台表面 ---- */
+  --surface-workbench:        var(--color-slate-950);
+  --surface-panel:            var(--color-slate-900);
+  --surface-card:             var(--color-slate-900);
+  --surface-card-hover:       var(--color-slate-800);
+
   /* ---- 边框 ---- */
   --color-border-lightest:   rgba(255, 255, 255, 0.03);
   --color-border-light:      rgba(255, 255, 255, 0.06);
@@ -720,9 +738,12 @@
   --color-border-strong:     rgba(255, 255, 255, 0.16);
   --color-border-focus:      var(--color-indigo-400);
   --color-border-error:      var(--color-red-400);
+  --border-subtle:           rgba(148, 163, 184, 0.18);
+  --border-muted:            rgba(148, 163, 184, 0.22);
 
   /* ---- 焦点环 ---- */
   --color-focus-ring:        var(--color-indigo-400);
+  --focus-ring-soft:         rgba(129, 140, 248, 0.18);
 
   /* ---- 状态色 ---- */
   --color-success:           var(--color-green-400);
@@ -730,7 +751,7 @@
   --color-success-dark:      var(--color-green-500);
 
   --color-warning:           var(--color-amber-400);
-  --color-amber-400:     rgba(251, 191, 36, 0.12);
+  --color-warning-light:     rgba(251, 191, 36, 0.12);
   --color-warning-dark:      var(--color-amber-500);
   --color-warning-contrast:  var(--color-slate-900);
 
@@ -748,6 +769,9 @@
                  0 1px 2px rgba(0, 0, 0, 0.20);
   --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.35),
                  0 2px 4px -1px rgba(0, 0, 0, 0.20);
+  --shadow-card:       0 1px 2px rgba(0, 0, 0, 0.26);
+  --shadow-card-hover: 0 8px 22px -20px rgba(0, 0, 0, 0.72);
+  --shadow-panel:      0 12px 30px -28px rgba(0, 0, 0, 0.78);
   --shadow-lg:   0 10px 25px -5px rgba(0, 0, 0, 0.40),
                  0 4px 10px -5px rgba(0, 0, 0, 0.20);
   --shadow-xl:   0 20px 40px -10px rgba(0, 0, 0, 0.50);

@@ -28,14 +28,13 @@
    1. 基础卡片
    ======================================== */
 .card {
-  --card-bg: #ffffff;
-  --card-border: var(--color-border-light, rgba(0, 0, 0, 0.06));
-  --card-radius: var(--rounded-xl, 16px);
+  --card-bg: var(--surface-card, #ffffff);
+  --card-border: var(--border-subtle, var(--color-border-light, rgba(0, 0, 0, 0.06)));
+  --card-radius: var(--radius-card, var(--rounded-md, 8px));
   --card-padding: var(--spacing-lg, 24px);
-  --card-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04));
-  --card-shadow-hover: 0 10px 40px -10px rgba(59, 130, 246, 0.15),
-                       0 4px 12px -2px rgba(0, 0, 0, 0.08);
-  --card-translate-hover: -4px;
+  --card-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  --card-shadow-hover: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+  --card-translate-hover: -1px;
 
   position: relative;
   display: flex;
@@ -46,18 +45,17 @@
   padding: var(--card-padding);
   box-shadow: var(--card-shadow);
   transition:
-    transform var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1)),
-    box-shadow var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1)),
-    border-color var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1)),
-    background-color var(--duration-slow, 400ms) var(--ease-smooth);
-  will-change: transform, box-shadow;
+    transform var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   overflow: hidden;
 }
 
 .card:hover {
-  transform: translateY(var(--micro-translate-hover, -4px));
+  transform: translateY(var(--card-translate-hover, -1px));
   box-shadow: var(--card-shadow-hover);
-  border-color: var(--color-primary-light, rgba(59, 130, 246, 0.3));
+  border-color: var(--color-border-strong, rgba(15, 23, 42, 0.16));
 }
 
 /* 无悬停效果（静态展示卡片） */
@@ -323,27 +321,60 @@
 .card-accent--red    { --accent-from: #ef4444; --accent-to: #f43f5e; }
 .card-accent--rose   { --accent-from: #f43f5e; --accent-to: #ec4899; }
 
-/* --- 旧版左侧色条卡片：默认隐藏，hover/focus 时显示 --- */
+/* --- 概览导航卡片：默认隐藏左侧色条，hover/focus 时显示 --- */
 .sop-card[class*="border-l-"],
-.overview-card[class*="border-l-"] {
-  --card-left-accent: #60a5fa;
-  --card-left-accent-bg: rgba(239, 246, 255, 0.6);
-  border-left-width: 4px !important;
-  border-left-style: solid !important;
-  border-left-color: transparent !important;
+.overview-card[class*="border-l-"],
+.amz-hub-overview .sop-card,
+.app-flow-step.app-child-link,
+.app-overview-card {
+  --card-left-rail-width: 4px;
+  --overview-card-accent: var(--card-left-accent, var(--color-accent, #60a5fa));
+  --overview-card-accent-bg: var(--card-left-accent-bg, var(--color-bg-selected, rgba(239, 246, 255, 0.6)));
+  --overview-card-bg: var(--surface-card, #ffffff);
+  --overview-card-border: var(--border-subtle, var(--color-slate-200, #e2e8f0));
+  --overview-card-radius: var(--rounded-xl, 16px);
+  --overview-card-rail-width: var(--card-left-rail-width, 4px);
+  --overview-card-transition-duration: var(--duration-fast, 200ms);
+  position: relative;
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: var(--overview-card-border) !important;
+  border-radius: var(--overview-card-radius);
+  background: var(--overview-card-bg);
+  box-shadow:
+    inset var(--overview-card-rail-width) 0 0 transparent,
+    var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
   transition:
-    background-color var(--duration-slow, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    box-shadow var(--duration-slow, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    transform var(--duration-slow, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+    border-color var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.sop-card[class*="border-l-"]::before,
+.overview-card[class*="border-l-"]::before,
+.amz-hub-overview .sop-card::before,
+.app-flow-step.app-child-link::before,
+.app-overview-card::before {
+  content: none;
 }
 
 .sop-card[class*="border-l-"]:hover,
 .sop-card[class*="border-l-"]:focus-visible,
 .overview-card[class*="border-l-"]:hover,
-.overview-card[class*="border-l-"]:focus-visible {
-  border-color: var(--card-left-accent) !important;
-  border-left-color: var(--card-left-accent) !important;
-  background-color: var(--card-left-accent-bg) !important;
+.overview-card[class*="border-l-"]:focus-visible,
+.amz-hub-overview .sop-card:hover,
+.amz-hub-overview .sop-card:focus-visible,
+.app-flow-step.app-child-link:hover,
+.app-flow-step.app-child-link:focus-visible,
+.app-overview-card:hover,
+.app-overview-card:focus-visible {
+  border-color: var(--overview-card-accent) !important;
+  background: var(--overview-card-accent-bg) !important;
+  box-shadow:
+    inset var(--overview-card-rail-width) 0 0 var(--overview-card-accent),
+    var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+  transform: none;
 }
 
 .sop-card.border-l-blue-400,
@@ -416,6 +447,91 @@
 .overview-card.border-l-slate-400 {
   --card-left-accent: #94a3b8;
   --card-left-accent-bg: rgba(248, 250, 252, 0.82);
+}
+
+/* --- 内容提示卡：默认显示语义左侧色条 --- */
+.content-callout {
+  --callout-accent: var(--color-blue-500, #3b82f6);
+  --callout-bg: var(--color-blue-50, #eff6ff);
+  --callout-border: rgba(59, 130, 246, 0.22);
+  --callout-rail-width: 4px;
+
+  position: relative;
+  border: 1px solid var(--callout-border) !important;
+  border-radius: var(--radius-card, 8px) !important;
+  background: var(--callout-bg) !important;
+  box-shadow:
+    inset var(--callout-rail-width) 0 0 var(--callout-accent),
+    var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
+  overflow: hidden;
+  transition:
+    border-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.content-callout:hover {
+  transform: none;
+}
+
+.content-callout--info {
+  --callout-accent: var(--color-blue-500, #3b82f6);
+  --callout-bg: var(--color-blue-50, #eff6ff);
+  --callout-border: rgba(59, 130, 246, 0.22);
+}
+
+.content-callout--success {
+  --callout-accent: var(--color-emerald-500, #10b981);
+  --callout-bg: var(--color-emerald-50, #ecfdf5);
+  --callout-border: rgba(16, 185, 129, 0.22);
+}
+
+.content-callout--warning {
+  --callout-accent: var(--color-amber-500, #f59e0b);
+  --callout-bg: var(--color-amber-50, #fffbeb);
+  --callout-border: rgba(245, 158, 11, 0.24);
+}
+
+.content-callout--danger {
+  --callout-accent: var(--color-red-500, #ef4444);
+  --callout-bg: var(--color-red-50, #fef2f2);
+  --callout-border: rgba(239, 68, 68, 0.24);
+}
+
+.content-callout--purple {
+  --callout-accent: var(--color-purple-500, #8b5cf6);
+  --callout-bg: var(--color-purple-50, #faf5ff);
+  --callout-border: rgba(139, 92, 246, 0.22);
+}
+
+.content-callout--indigo {
+  --callout-accent: var(--color-indigo-500, #6366f1);
+  --callout-bg: var(--color-indigo-50, #eef2ff);
+  --callout-border: rgba(99, 102, 241, 0.22);
+}
+
+.content-callout--orange {
+  --callout-accent: var(--color-orange-500, #f97316);
+  --callout-bg: var(--color-orange-50, #fff7ed);
+  --callout-border: rgba(249, 115, 22, 0.22);
+}
+
+.content-callout--teal {
+  --callout-accent: var(--color-teal-500, #14b8a6);
+  --callout-bg: var(--color-teal-50, #f0fdfa);
+  --callout-border: rgba(20, 184, 166, 0.22);
+}
+
+.content-callout--rose {
+  --callout-accent: var(--color-rose-500, #f43f5e);
+  --callout-bg: var(--color-rose-50, #fff1f2);
+  --callout-border: rgba(244, 63, 94, 0.22);
+}
+
+.content-callout--neutral {
+  --callout-accent: var(--color-slate-400, #94a3b8);
+  --callout-bg: var(--color-slate-50, #f8fafc);
+  --callout-border: rgba(148, 163, 184, 0.26);
 }
 
 /* --- 顶部装饰条 --- */

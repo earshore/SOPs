@@ -33,7 +33,6 @@ describe('QA maintenance archive workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'qa_maintenance_owner_v1') return '客服负责人/运营负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -62,7 +61,7 @@ describe('QA maintenance archive workflow', () => {
     expect(template).toContain('必须人工确认后执行并留痕');
   });
 
-  it('copies the archive template and records local usage', async () => {
+  it('copies the archive template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('qa-maintenance-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '客服小周';
@@ -72,9 +71,6 @@ describe('QA maintenance archive workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/service/qa_maintenance/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：客服小周'));
     expect(StorageService.set).toHaveBeenCalledWith('qa_maintenance_owner_v1', '客服小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'qa.maintenance_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制 QA 维护归档模板，可粘贴到周报或归档文档。');
   });
 });

@@ -8,9 +8,8 @@
 import { appStore } from '@/stores/useAppStore';
 import { promptlabService } from '../../services/promptlabService';
 import { HistoryService } from '../../services/historyService';
+import { emitHistoryUpdated } from '../../services/historyEvents';
 import { showToast } from '../../../../../../common/ui';
-import eventBus from '../../../../../../common/EventBus';
-import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { computeIsReady, computeHasReport } from './computed';
 import type { PromptlabAlpineContext } from './types';
 import type {
@@ -132,7 +131,7 @@ function persistPromptRecord(ctx: PromptlabAlpineContext, type: GeneratedPromptT
   void HistoryService.updatePromptResultAsync(record.historyId, record)
     .then((success) => {
       if (success) {
-        eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
+        emitHistoryUpdated();
       }
     })
     .catch((error) => {

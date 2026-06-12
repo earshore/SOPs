@@ -1,4 +1,4 @@
-<div class="module-container">
+<div class="module-container npi-tracker-page">
         <!-- Welcome Banner -->
         <div class="wb-container wb-container--simple wb-theme-growth">
                 <div class="wb-content">
@@ -131,7 +131,7 @@
                         </h3>
                         <div class="space-y-2 text-xs">
                                 <div
-                                        class="flex items-start gap-2 p-2 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                                        class="content-callout content-callout--info flex items-start gap-2 p-2">
                                         <div class="flex-1">
                                                 <span class="font-bold text-blue-700">测款期 (0-30天)</span>
                                                 <p class="text-slate-600 mt-0.5">
@@ -139,7 +139,7 @@
                                         </div>
                                 </div>
                                 <div
-                                        class="flex items-start gap-2 p-2 bg-emerald-50 rounded-lg border-l-4 border-emerald-400">
+                                        class="content-callout content-callout--success flex items-start gap-2 p-2">
                                         <div class="flex-1">
                                                 <span class="font-bold text-emerald-700">成长期 (30-90天)</span>
                                                 <p class="text-slate-600 mt-0.5">
@@ -147,13 +147,13 @@
                                         </div>
                                 </div>
                                 <div
-                                        class="flex items-start gap-2 p-2 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+                                        class="content-callout content-callout--purple flex items-start gap-2 p-2">
                                         <div class="flex-1">
                                                 <span class="font-bold text-purple-700">稳定期 (90天+)</span>
                                                 <p class="text-slate-600 mt-0.5">稳定出单，控制广告预算。目标：自然单占比&gt;50%，利润率达标。</p>
                                         </div>
                                 </div>
-                                <div class="flex items-start gap-2 p-2 bg-red-50 rounded-lg border-l-4 border-red-400">
+                                <div class="content-callout content-callout--danger flex items-start gap-2 p-2">
                                         <div class="flex-1">
                                                 <span class="font-bold text-red-700">清仓期</span>
                                                 <p class="text-slate-600 mt-0.5">库存周转&gt;60天或持续亏损触发。降价至动销价或清仓红线止损。</p>
@@ -805,9 +805,40 @@
                 </div>
         </div>
         <!-- Data Table -->
-        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6 shadow-sm">
-                <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left text-xs whitespace-nowrap">
+        <div class="npi-lifecycle-table-card bg-white rounded-xl border border-slate-200 overflow-hidden mb-6 shadow-sm">
+                <div class="npi-lifecycle-table-scroll custom-scrollbar" tabindex="0" aria-label="新品生命周期跟踪明细表">
+                        <table class="npi-lifecycle-table w-full text-left">
+                                <colgroup>
+                                        <col class="npi-col-stage">
+                                        <col class="npi-col-sku">
+                                        <col class="npi-col-name">
+                                        <col class="npi-col-store">
+                                        <col class="npi-col-asin">
+                                        <col class="npi-col-site">
+                                        <col class="npi-col-volume">
+                                        <col class="npi-col-inventory">
+                                        <col class="npi-col-check">
+                                        <col class="npi-col-check">
+                                        <col class="npi-col-check">
+                                        <col class="npi-col-check">
+                                        <col class="npi-col-check">
+                                        <col class="npi-col-check-status">
+                                        <col class="npi-col-money">
+                                        <col class="npi-col-money">
+                                        <col class="npi-col-money">
+                                        <col class="npi-col-money">
+                                        <col class="npi-col-money">
+                                        <col class="npi-col-money">
+                                        <col class="npi-col-traffic">
+                                        <col class="npi-col-traffic">
+                                        <col class="npi-col-traffic">
+                                        <col class="npi-col-traffic">
+                                        <col class="npi-col-traffic">
+                                        <col class="npi-col-vine">
+                                        <col class="npi-col-ads">
+                                        <col class="npi-col-decision">
+                                        <col class="npi-col-next-step">
+                                </colgroup>
                                 <thead>
                                         <tr class="bg-slate-50 border-b border-slate-200">
                                                 <th class="px-2 py-1.5 text-xs font-bold text-blue-700 text-center border-r border-slate-100 bg-blue-50/50"

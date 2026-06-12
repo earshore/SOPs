@@ -57,7 +57,7 @@ describe('Listing SEO review workflow', () => {
     expect(template).toContain('AI 输出只作为草稿和检查辅助');
   });
 
-  it('copies the review template and records local usage', async () => {
+  it('copies the review template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('listing-review-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '内容小李';
@@ -67,9 +67,6 @@ describe('Listing SEO review workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/growth/listing_seo/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：内容小李'));
     expect(StorageService.set).toHaveBeenCalledWith('listing_review_owner_v1', '内容小李');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'listing.review_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制 Listing 改稿复盘模板，可粘贴到周报或归档文档。');
   });
 });

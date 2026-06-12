@@ -4,6 +4,7 @@
 
 import type { ScrapedData, DeleteResult, ConfirmModalCallback } from '../types';
 import { HistoryService } from '../../services/historyService';
+import { emitHistoryUpdated } from '../../services/historyEvents';
 import { showToast } from '../../../../../../common/ui';
 import eventBus from '../../../../../../common/EventBus';
 import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
@@ -179,7 +180,7 @@ async function saveDeletion(scrapedData: ScrapedData, context: DeleteContext): P
 function emitDeletionEvents(): void {
     try {
         eventBus.emit(APP_EVENTS.DATA_UPDATED);
-        eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
+        emitHistoryUpdated();
     } catch (eventError) {
         console.error('[Scraper] 触发事件失败:', eventError);
     }

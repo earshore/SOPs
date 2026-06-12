@@ -9,6 +9,8 @@ import { callLLM } from "../../../../../services/llmService";
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import { ApiError, ValidationError } from '@common/errors/AppError';
 import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
+import { jsonrepair } from 'jsonrepair';
+import { sanitizePromptInput } from "../ai_analysis/prompts/promptSanitizer";
 import type {
   ProductData,
   DataOptions,
@@ -19,6 +21,10 @@ import type {
 // ======================== 
 // 辅助函数
 // ======================== 
+
+function sanitizePromptValue(value: string | undefined, maxLength = 10000): string {
+  return sanitizePromptInput(value || '').slice(0, maxLength);
+}
 
 /**
  * 鲁棒性 JSON 提取器
@@ -41,7 +47,10 @@ function robustParseJSON(text: string): unknown {
     const braceMatch = text.match(/\{[\s\S]*\}/);
     if (braceMatch) {
       try { return JSON.parse(braceMatch[0]); } catch (e3) { /* ignore */ }
+      try { return JSON.parse(jsonrepair(braceMatch[0])); } catch (e4) { /* ignore */ }
     }
+
+    try { return JSON.parse(jsonrepair(text)); } catch (e5) { /* ignore */ }
   }
   
   throw new ValidationError(
@@ -88,16 +97,16 @@ export const AnalysisService = {
     // 1. 动态构建数据字符串
     const productsData = products
       .map((p) => {
-        const parts: string[] = [`ASIN: ${p.asin}`];
+        const parts: string[] = [`ASIN: ${sanitizePromptValue(p.asin, 120)}`];
 
         if (includeTitle) {
-          parts.push(`Title: ${p.productTitle || "N/A"}`);
+          parts.push(`Title: ${sanitizePromptValue(p.productTitle) || "N/A"}`);
         }
 
         if (includeBullets) {
           const bullets =
             p.feature_bullets && p.feature_bullets.length > 0
-              ? p.feature_bullets.join("; ")
+              ? p.feature_bullets.map((bullet) => sanitizePromptValue(bullet)).join("; ")
               : "N/A";
           parts.push(`Feature Bullets: ${bullets}`);
         }
@@ -105,7 +114,7 @@ export const AnalysisService = {
         if (includeReviews) {
           const reviews = (p.customer_reviews || [])
             .slice(0, 5)
-            .map((r) => r.body.substring(0, 150))
+            .map((r) => sanitizePromptValue(r.body, 150))
             .join(" | ");
           parts.push(`Top Reviews: ${reviews || "No reviews found"}`);
         }
@@ -115,8 +124,9 @@ export const AnalysisService = {
       .join("\n\n---\n\n");
 
     // 2. 替换模板变量
+    const safeLanguage = sanitizePromptValue(language, 80) || 'English';
     const finalPrompt = promptTemplate
-      .replace(/{{language}}/g, language)
+      .replace(/{{language}}/g, safeLanguage)
       .replace("{{productsData}}", productsData)
       .replace("{{category}}", "General");
 
@@ -128,7 +138,7 @@ export const AnalysisService = {
       llmConfig.endpoint,
       llmConfig.apiKey,
       llmConfig.model,
-      { jsonMode: false, timeout: configCenter.get<number>('llm.analysisTimeout') || 120000 }
+      { jsonMode: true, timeout: configCenter.get<number>('llm.analysisTimeout') || 120000 }
     );
 
     try {
@@ -167,10 +177,12 @@ export const AnalysisService = {
     const toTranslate = JSON.parse(JSON.stringify(report));
     if (toTranslate.meta) delete toTranslate.meta;
 
+    const safeLanguage = sanitizePromptValue(language, 80) || 'English';
+    const safeReport = sanitizePromptInput(JSON.stringify(toTranslate, null, 2));
     const translatePrompt = TRANSLATE_PROMPT_TEMPLATE.replace(
       /{{language}}/g,
-      language
-    ).replace("{{report}}", JSON.stringify(toTranslate, null, 2));
+      safeLanguage
+    ).replace("{{report}}", safeReport);
 
     const response = await callLLM(
       [{ role: "user", content: translatePrompt }],
@@ -178,7 +190,7 @@ export const AnalysisService = {
       llmConfig.endpoint,
       llmConfig.apiKey,
       llmConfig.model,
-      { jsonMode: false, timeout: configCenter.get<number>('llm.defaultTimeout') || 60000 }
+      { jsonMode: true, timeout: configCenter.get<number>('llm.defaultTimeout') || 60000 }
     );
 
     try {

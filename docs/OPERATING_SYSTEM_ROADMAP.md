@@ -209,10 +209,9 @@
 
 当前最小落地方式：
 
-- 先用浏览器本地计数记录核心输出动作，不做后端统计、不追踪个人。
-- 已记录事件：`ppc.action_export`、`ppc.review_template_copy`、`npi.csv_export`、`npi.review_template_copy`、`inventory.replenishment_template_copy`、`procurement.qc_template_copy`、`fba.shipping_template_copy`、`listing.review_template_copy`、`promotion.submission_template_copy`、`restricted_words.review_template_copy`、`competitor.review_template_copy`、`email_templates.reply_template_copy`、`qa.maintenance_template_copy`、`negative_review.review_template_copy`、`performance_notification.report_template_copy`、`product_compliance.review_template_copy`、`gpsr.compliance_template_copy`、`brand_infringement.review_template_copy`、`account_security.review_template_copy`、`permission.management_template_copy`。
-- SOP 总览页只读展示本机试运行计数，用于判断样板流是否真的被内部使用。
-- 指标只用于判断样板流是否真的被使用；当团队需要多人共享复盘数据时，再评估是否引入最小后端。
+- 只保留可复制或可导出的固定输出，以及本地作业负责人记忆。
+- 不再维护浏览器本地试运行计数，避免把单机按钮点击误当作业务采用数据。
+- 当团队需要多人共享复盘数据或真实使用统计时，再基于任务/复盘记录评估最小后端。
 
 ## 第一批任务清单
 
@@ -261,8 +260,8 @@
   - [x] 账号安全模板支持本地负责人，并明确登录、凭证变更、环境调整和账号处置必须负责人或主管人工确认。
 - [x] 将后台权限管理补成可复制的变更/回收归档。
   - [x] 权限模板支持本地负责人，并明确新增用户、权限扩大、Payments/Settings、离职回收和权限登记必须人工确认。
-- [x] 在 SOP 总览展示本地试运行计数，只看核心输出动作，不追踪个人、不做后端。
-  - [x] 已增加测试护栏，新增核心输出指标时必须在 SOP 总览展示计数和最后使用时间。
+- [x] 移除 SOP 总览本地试运行计数，避免过度设计和误导性单机指标。
+  - [x] 已移除计数工具、业务页计数写入、总览计数展示和对应测试护栏。
 - [x] 把 Agent Center 中未落地的 Agent 标为设计草案，优先只保留 PPC 和日报两个样板。
   - [x] 已增加测试护栏，Agent Center 只能有 PPC 和日报两个落地样板，其余 Agent 必须保持设计草案。
 - [x] 建立 `WorkItem` 最小类型草案，但在没有真实使用前不实现复杂持久化。

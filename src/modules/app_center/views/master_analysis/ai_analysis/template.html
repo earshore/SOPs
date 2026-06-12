@@ -697,231 +697,139 @@
 
     <!-- 性能设置模态框 -->
     <template x-if="perfSettings.showSettings">
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
         @click.self="perfSettings.toggleSettings()">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" @click.stop>
+        <div class="bg-white rounded-lg border border-slate-200 shadow-xl max-w-xl w-full max-h-[88vh] overflow-y-auto"
+          role="dialog" aria-modal="true" aria-labelledby="performance-settings-title" @click.stop>
           <!-- Header -->
-          <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+          <div class="px-5 py-4 border-b border-slate-200">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <i class="fa-solid fa-sliders text-2xl"></i>
-                <h2 class="text-2xl font-bold">性能设置</h2>
+                <i class="fa-solid fa-sliders text-slate-500"></i>
+                <div>
+                  <h2 id="performance-settings-title" class="text-lg font-semibold text-slate-900">性能设置</h2>
+                  <p class="mt-0.5 text-sm text-slate-500">选择调度偏好和缓存。</p>
+                </div>
               </div>
-              <button @click="perfSettings.toggleSettings()" class="hover:bg-white/20 rounded-lg p-2 transition-colors">
-                <i class="fa-solid fa-times text-xl"></i>
+              <button type="button" @click="perfSettings.toggleSettings()"
+                class="w-11 h-11 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                aria-label="关闭性能设置">
+                <i class="fa-solid fa-times"></i>
               </button>
             </div>
-            <p class="mt-2 text-white/80 text-sm">优化 AI 分析速度和质量平衡</p>
           </div>
 
           <!-- Content -->
-          <div class="p-6 space-y-6">
-            <!-- 并发数设置 -->
-            <div class="space-y-4">
-              <label class="block text-sm font-semibold text-slate-700">
-                <i class="fa-solid fa-gauge-high text-indigo-600 mr-2"></i>
-                最大并发数
-              </label>
-              <!-- 自定义滑块容器 -->
-              <div class="relative py-6">
-
-                <!-- 渐变轨道背景 -->
-                <div
-                  class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-3 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 rounded-full shadow-inner pointer-events-none">
+          <div class="px-5 py-4 space-y-4">
+            <!-- 调度偏好 -->
+            <section class="space-y-3">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <div class="text-sm font-semibold text-slate-900">调度偏好</div>
+                  <p class="mt-0.5 text-xs text-slate-500">系统会自动控制并发与失败处理。</p>
                 </div>
-
-                <!-- 激活部分的渐变轨道 -->
-                <div
-                  class="absolute left-0 top-1/2 -translate-y-1/2 h-3 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 rounded-full transition-all duration-300 shadow-md pointer-events-none"
-                  :style="perfSettings.concurrencyTrackStyle"></div>
-
-                <!-- 刻度标记 -->
-                <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
-                  <template x-for="i in 8" :key="i">
-                    <div class="relative flex flex-col items-center">
-                      <!-- 刻度点 -->
-                      <div class="w-2.5 h-2.5 rounded-full transition-all duration-200"
-                        :class="perfSettings.getConcurrencyDotClass(i)">
-                      </div>
-                    </div>
-                  </template>
-                </div>
-
-                <!-- 原生滑块（透明覆盖） -->
-                <input type="range" min="1" max="8" step="1" :value="perfSettings.settings.maxConcurrency"
-                  class="concurrency-slider absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full bg-transparent appearance-none cursor-pointer z-10"
-                  aria-label="最大并发数" @input="perfSettings.setMaxConcurrency($event)">
-
-                <!-- 档位标签 -->
-                <div class="absolute left-0 right-0 -bottom-6 flex justify-between text-xs font-medium">
-                  <span class="transition-colors duration-200"
-                    :class="perfSettings.slowLabelClass">
-                    <i class="fa-solid fa-hourglass-start mr-1"></i>慢速
-                  </span>
-                  <span class="transition-colors duration-200"
-                    :class="perfSettings.standardLabelClass">
-                    <i class="fa-solid fa-gauge mr-1"></i>标准
-                  </span>
-                  <span class="transition-colors duration-200"
-                    :class="perfSettings.fastLabelClass">
-                    <i class="fa-solid fa-bolt mr-1"></i>快速
-                  </span>
-                  <span class="transition-colors duration-200"
-                    :class="perfSettings.extremeLabelClass">
-                    <i class="fa-solid fa-rocket mr-1"></i>极速
-                  </span>
-                </div>
+                <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold"
+                  :class="perfSettings.scheduleTierBadgeClass">
+                  <i :class="perfSettings.scheduleIconClass"></i>
+                  <span x-text="perfSettings.scheduleTierLabel"></span>
+                </span>
               </div>
 
-              <!-- 当前值显示 -->
-              <div class="flex items-center justify-center gap-3">
-                <div class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300" :class="perfSettings.concurrencyValueWrapClass">
-                  <i class="text-xl transition-colors duration-300" :class="perfSettings.concurrencyIconClass"></i>
-                  <span class="text-3xl font-bold transition-colors duration-300" :class="perfSettings.concurrencyTextClass" x-text="perfSettings.settings.maxConcurrency"></span>
-                  <span class="text-sm font-medium transition-colors duration-300" :class="perfSettings.concurrencyTextClass">并发</span>
-                </div>
+              <div class="grid gap-2 md:grid-cols-3">
+                <label class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
+                  :class="perfSettings.getSchedulePreferenceClass('recommended')">
+                  <input type="radio" name="schedulingPreference" value="recommended"
+                    :checked="perfSettings.settings.schedulingPreference === 'recommended'"
+                    @change="perfSettings.setSchedulingPreference($event)" class="sr-only">
+                  <div class="flex items-center gap-2 text-sm font-semibold">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    推荐档
+                  </div>
+                  <p class="mt-1.5 text-xs leading-snug opacity-75">平衡速度和稳定性</p>
+                </label>
+                <label class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
+                  :class="perfSettings.getSchedulePreferenceClass('reliability')">
+                  <input type="radio" name="schedulingPreference" value="reliability"
+                    :checked="perfSettings.settings.schedulingPreference === 'reliability'"
+                    @change="perfSettings.setSchedulingPreference($event)" class="sr-only">
+                  <div class="flex items-center gap-2 text-sm font-semibold">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    可靠性优先
+                  </div>
+                  <p class="mt-1.5 text-xs leading-snug opacity-75">优先完整结果</p>
+                </label>
+                <label class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
+                  :class="perfSettings.getSchedulePreferenceClass('speed')">
+                  <input type="radio" name="schedulingPreference" value="speed"
+                    :checked="perfSettings.settings.schedulingPreference === 'speed'"
+                    @change="perfSettings.setSchedulingPreference($event)" class="sr-only">
+                  <div class="flex items-center gap-2 text-sm font-semibold">
+                    <i class="fa-solid fa-bolt"></i>
+                    速度优先
+                  </div>
+                  <p class="mt-1.5 text-xs leading-snug opacity-75">优先快速完成</p>
+                </label>
               </div>
-              <!-- 档位说明卡片 -->
-              <div class="relative overflow-hidden rounded-xl border-1 transition-all duration-300" :class="perfSettings.concurrencyHintCardClass">
-                <div class="p-4">
-                  <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-lightbulb text-amber-500 text-lg"></i>
-                    <p class="text-sm font-semibold transition-colors duration-300 flex-shrink-0" :class="perfSettings.concurrencyHintTextClass" x-text="perfSettings.getConcurrencyHint()"></p>
-                    <div class="flex items-center gap-4 text-xs ml-auto">
-                      <div class="flex items-center gap-1.5">
-                        <i class="fa-solid fa-gauge-high"></i>
-                        <span class="font-medium">速度:</span>
-                        <div class="flex gap-0.5">
-                          <template x-for="i in 8" :key="i">
-                            <div class="w-1 h-3 rounded-full transition-all duration-200"
-                              :class="perfSettings.getSpeedBarClass(i)">
-                            </div>
-                          </template>
-                        </div>
-                      </div>
-                      <div class="flex items-center gap-1.5">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <span class="font-medium">稳定:</span>
-                        <div class="flex gap-0.5">
-                          <template x-for="i in 8" :key="i">
-                            <div class="w-1 h-3 rounded-full transition-all duration-200"
-                              :class="perfSettings.getStabilityBarClass(i)">
-                            </div>
-                          </template>
-                        </div>
-                      </div>
-                    </div>
+
+              <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+                <div class="grid grid-cols-3 gap-3">
+                  <div>
+                    <div class="text-[11px] font-medium text-slate-500">当前策略</div>
+                    <div class="mt-0.5 text-sm font-semibold text-slate-900" x-text="perfSettings.schedulePreferenceLabel"></div>
+                  </div>
+                  <div>
+                    <div class="text-[11px] font-medium text-slate-500">调度方式</div>
+                    <div class="mt-0.5 text-sm font-semibold text-slate-900" x-text="perfSettings.scheduleRuntimeText"></div>
+                  </div>
+                  <div>
+                    <div class="text-[11px] font-medium text-slate-500">失败处理</div>
+                    <div class="mt-0.5 text-sm font-semibold text-slate-900" x-text="perfSettings.scheduleFailureHandlingText"></div>
                   </div>
                 </div>
               </div>
-
-              <!-- 性能预览卡片 -->
-              <!-- <div class="grid grid-cols-2 gap-3">
-                <div
-                  class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
-                  <div class="font-semibold text-emerald-700 mb-1 flex items-center gap-1.5">
-                    <i class="fa-solid fa-rocket"></i>
-                    <span>预计加速</span>
-                  </div>
-                  <div class="text-2xl font-bold text-emerald-600 transition-all duration-300"
-                    x-text="perfSettings.expectedSpeedText"></div>
-                  <div class="text-xs text-emerald-600 mt-1">相比串行执行</div>
-                </div>
-                <div
-                  class="bg-blue-50 border border-blue-200 rounded-xl p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
-                  <div class="font-semibold text-blue-700 mb-1 flex items-center gap-1.5">
-                    <i class="fa-solid fa-clock"></i>
-                    <span>预计耗时</span>
-                  </div>
-                  <div class="text-2xl font-bold text-blue-600 transition-all duration-300"
-                    x-text="perfSettings.expectedDurationText"></div>
-                  <div class="text-xs text-blue-600 mt-1">基于平均速度</div>
-                </div>
-              </div> -->
-            </div>
+            </section>
 
             <!-- 缓存设置 -->
-            <div class="space-y-3">
-              <label class="flex items-center justify-between cursor-pointer group">
-                <div class="flex items-center gap-3">
-                  <i class="fa-solid fa-database text-indigo-600 text-lg"></i>
+            <section class="rounded-lg border border-slate-200 bg-white p-3">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <label class="flex min-h-11 cursor-pointer items-start gap-3">
+                  <input type="checkbox" :checked="perfSettings.settings.enableCache" @change="perfSettings.setEnableCache($event)"
+                    class="mt-1 w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                   <div>
-                    <div class="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 transition-colors">
-                      启用智能缓存
-                    </div>
-                    <div class="text-xs text-slate-500 mt-0.5">
-                      相同产品的分析结果将被缓存 24 小时
+                    <div class="text-sm font-semibold text-slate-900">智能缓存</div>
+                    <div class="mt-1 text-xs text-slate-500">
+                      已缓存
+                      <span class="font-semibold text-slate-900" x-text="perfSettings.cacheStats.count"></span>
+                      项 ·
+                      <span class="font-semibold text-slate-900"
+                        x-text="perfSettings.formatSize(perfSettings.cacheStats.totalSize)"></span>
                     </div>
                   </div>
-                </div>
-                <input type="checkbox" :checked="perfSettings.settings.enableCache" @change="perfSettings.setEnableCache($event)"
-                  class="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-              </label>
-
-              <!-- 缓存统计 -->
-              <div class="bg-slate-50 rounded-lg p-4 space-y-2">
-                <div class="flex items-center justify-between text-sm">
-                  <span class="text-slate-600">缓存项数量</span>
-                  <span class="font-semibold text-slate-800" x-text="perfSettings.cacheStats.count"></span>
-                </div>
-                <div class="flex items-center justify-between text-sm">
-                  <span class="text-slate-600">占用空间</span>
-                  <span class="font-semibold text-slate-800"
-                    x-text="perfSettings.formatSize(perfSettings.cacheStats.totalSize)"></span>
-                </div>
-                <button @click="perfSettings.clearCache()"
-                  class="w-full mt-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-colors">
+                </label>
+                <button type="button" @click="perfSettings.clearCache()"
+                  class="min-h-10 px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-600 text-sm font-medium transition-colors">
                   <i class="fa-solid fa-trash mr-2"></i>
-                  清除所有缓存
+                  清除缓存
                 </button>
               </div>
-            </div>
+            </section>
 
-            <!-- 失败策略 -->
-            <div class="space-y-3">
-              <label class="block text-sm font-semibold text-slate-700">
-                <i class="fa-solid fa-shield-halved text-indigo-600 mr-2"></i>
-                失败处理策略
-              </label>
-              <div class="space-y-2">
-                <label class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all"
-                  :class="perfSettings.continueStrategyClass">
-                  <input type="radio" name="failureStrategy" value="continue"
-                    :checked="perfSettings.settings.failureStrategy === 'continue'" @change="perfSettings.setFailureStrategy($event)"
-                    class="w-4 h-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500">
-                  <div class="flex-1">
-                    <div class="font-medium text-slate-800">继续执行（推荐）</div>
-                    <div class="text-xs text-slate-500 mt-0.5">单个目标失败不影响其他目标</div>
-                  </div>
-                </label>
-                <label class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all"
-                  :class="perfSettings.abortStrategyClass">
-                  <input type="radio" name="failureStrategy" value="abort"
-                    :checked="perfSettings.settings.failureStrategy === 'abort'" @change="perfSettings.setFailureStrategy($event)"
-                    class="w-4 h-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500">
-                  <div class="flex-1">
-                    <div class="font-medium text-slate-800">立即中止</div>
-                    <div class="text-xs text-slate-500 mt-0.5">任何失败都会终止整个分析</div>
-                  </div>
-                </label>
-              </div>
-            </div>
           </div>
 
           <!-- Footer -->
-          <div class="bg-slate-50 p-6 flex items-center justify-between gap-3 border-t">
-            <button @click="perfSettings.resetSettings()"
-              class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors">
+          <div class="bg-slate-50 px-5 py-3 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-200">
+            <button type="button" @click="perfSettings.resetSettings()"
+              class="min-h-11 px-3 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors">
               <i class="fa-solid fa-rotate-left mr-2"></i>
               恢复默认
             </button>
-            <div class="flex gap-3">
-              <button @click="perfSettings.toggleSettings()"
-                class="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 font-medium transition-colors">
+            <div class="flex gap-3 justify-end">
+              <button type="button" @click="perfSettings.toggleSettings()"
+                class="min-h-11 px-5 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 font-medium transition-colors">
                 取消
               </button>
-              <button @click="perfSettings.saveSettings()"
-                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-lg">
+              <button type="button" @click="perfSettings.saveSettings()"
+                class="min-h-11 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
                 <i class="fa-solid fa-check mr-2"></i>
                 保存设置
               </button>
@@ -943,8 +851,8 @@
               <div class="flex items-center gap-5">
                 <div class="relative">
                   <div
-                    class="relative w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-200 shadow-sm">
-                    <i class="fa-solid fa-circle-check text-emerald-600 text-xl"></i>
+                    class="relative w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-200 shadow-sm">
+                    <i class="fa-solid fa-file-lines text-indigo-600 text-xl"></i>
                   </div>
                 </div>
                 <div>

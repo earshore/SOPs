@@ -48,6 +48,15 @@ interface HistoryDraft {
   shouldUpdateCurrent: boolean;
 }
 
+interface CreateHistoryItemInput {
+  data: ScrapedData;
+  report: AnalysisReport | undefined;
+  currentState: AppState;
+  previousItem: HistoryItem | undefined;
+  id: HistoryItem['id'];
+  timestamp: string;
+}
+
 function getCurrentHistoryIndex(history: HistoryItem[], currentHistoryId: HistoryItem['id'] | null): number {
   return currentHistoryId !== null
     ? history.findIndex((h) => isSameHistoryId(h.id, currentHistoryId))
@@ -64,6 +73,28 @@ function getHistoryItemId(
     : createHistoryId(history);
 }
 
+function getHistoryItemAt(history: HistoryItem[], index: number): HistoryItem | undefined {
+  return index >= 0 ? history[index] : undefined;
+}
+
+function shouldUpdateHistoryItem(currentHistoryItem: HistoryItem | undefined, timestamp: string): boolean {
+  return currentHistoryItem !== undefined && currentHistoryItem.timestamp === timestamp;
+}
+
+function createHistoryItem(input: CreateHistoryItemInput): HistoryItem {
+  const { data, report, currentState, previousItem, id, timestamp } = input;
+
+  return {
+    ...(previousItem || {}),
+    id,
+    timestamp,
+    site: data.metadata?.marketplace || previousItem?.site || currentState.scraper?.selectedSite || 'US',
+    asins: data.products?.map(p => p.asin) || [],
+    data,
+    report: report ?? previousItem?.report,
+  };
+}
+
 function createHistoryDraft(
   data: ScrapedData,
   report: AnalysisReport | undefined,
@@ -73,21 +104,15 @@ function createHistoryDraft(
   const timestamp = data.metadata?.scrape_timestamp || new Date().toISOString();
   const currentHistoryId = currentState.scraper.currentHistoryId;
   const currentHistoryIndex = getCurrentHistoryIndex(history, currentHistoryId);
-  const currentHistoryItem = currentHistoryIndex >= 0 ? history[currentHistoryIndex] : undefined;
-  const shouldUpdateCurrent = !!currentHistoryItem && currentHistoryItem.timestamp === timestamp;
+  const currentHistoryItem = getHistoryItemAt(history, currentHistoryIndex);
+  const shouldUpdateCurrent = shouldUpdateHistoryItem(currentHistoryItem, timestamp);
   const id = getHistoryItemId(shouldUpdateCurrent, currentHistoryItem, history);
+  const previousItem = shouldUpdateCurrent ? currentHistoryItem : undefined;
 
   return {
     currentHistoryIndex,
     shouldUpdateCurrent,
-    historyItem: {
-      id,
-      timestamp,
-      site: data.metadata?.marketplace || currentState.scraper?.selectedSite || 'US',
-      asins: data.products?.map(p => p.asin) || [],
-      data,
-      report,
-    }
+    historyItem: createHistoryItem({ data, report, currentState, previousItem, id, timestamp })
   };
 }
 
@@ -111,12 +136,21 @@ function removeHistoryItem(history: HistoryItem[], id: HistoryItem['id']): Histo
   return nextHistory.length === history.length ? null : nextHistory;
 }
 
-function clearCurrentHistoryId(id: HistoryItem['id']): void {
+function clearCurrentSnapshotState(): void {
+  const state = appStore.getState();
+
+  state.setCurrentHistoryId(null);
+  state.setScrapedData(null);
+  state.setAnalysisReport(null);
+  state.setTranslatedReport(null);
+}
+
+function clearCurrentSnapshotStateIfMatches(id: HistoryItem['id']): void {
   const state = appStore.getState();
   const currentHistoryId = state.scraper.currentHistoryId;
 
   if (currentHistoryId !== null && isSameHistoryId(currentHistoryId, id)) {
-    state.setCurrentHistoryId(null);
+    clearCurrentSnapshotState();
   }
 }
 
@@ -284,11 +318,13 @@ export const HistoryService = {
   clear(): void {
     StorageService.remove(STORAGE_KEYS.SCRAPE_HISTORY);
     historyCache = [];
+    clearCurrentSnapshotState();
   },
 
   async clearAsync(): Promise<void> {
     await StorageService.removeScrapeHistoryAsync();
     historyCache = [];
+    clearCurrentSnapshotState();
   },
 
   /**
@@ -308,7 +344,7 @@ export const HistoryService = {
     }
 
     historyCache = nextHistory;
-    clearCurrentHistoryId(id);
+    clearCurrentSnapshotStateIfMatches(id);
     return true;
   },
 
@@ -326,8 +362,38 @@ export const HistoryService = {
     }
 
     historyCache = nextHistory;
-    clearCurrentHistoryId(id);
+    clearCurrentSnapshotStateIfMatches(id);
     return true;
+  },
+
+  async updateSnapshotDataAsync(id: HistoryItem['id'], data: ScrapedData): Promise<boolean> {
+    try {
+      const history = await this.getAllAsync();
+      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
+
+      if (targetIndex === -1) {
+        return false;
+      }
+
+      const targetItem = history[targetIndex];
+      if (!targetItem) {
+        return false;
+      }
+
+      targetItem.data = data;
+      targetItem.timestamp = data.metadata?.scrape_timestamp || targetItem.timestamp;
+      targetItem.site = data.metadata?.marketplace || targetItem.site;
+      targetItem.asins = data.products?.map((product) => product.asin) || targetItem.asins;
+
+      const saved = await StorageService.setScrapeHistoryAsync(history);
+      if (!saved) return false;
+      historyCache = history;
+
+      return true;
+    } catch (error) {
+      console.error(`[HistoryService] 更新快照数据失败:`, error);
+      return false;
+    }
   },
 
   /**

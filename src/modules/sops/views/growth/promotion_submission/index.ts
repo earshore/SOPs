@@ -7,7 +7,6 @@ import BaseModule from '../../../../../common/BaseModule';
 import { setSafeHtml } from '../../../../../common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
-import { recordOpsMetric } from '../../../../../common/utils/opsMetrics';
 import { StorageService } from '../../../../../services/storageService';
 
 const REVIEW_OWNER_STORAGE_KEY = 'promotion_submission_owner_v1';
@@ -150,7 +149,6 @@ async function copyPromotionSubmissionTemplate(): Promise<void> {
             throw new Error('clipboard unavailable');
         }
 
-        recordOpsMetric('promotion.submission_template_copy');
         alert('已复制促销提报/复盘模板，可粘贴到周报或归档文档。');
     } catch {
         alert('复制失败，请手动复制促销提报模板或稍后重试。');

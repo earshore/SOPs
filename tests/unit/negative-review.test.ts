@@ -33,7 +33,6 @@ describe('Negative review VOC workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'negative_review_owner_v1') return '客服负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -62,7 +61,7 @@ describe('Negative review VOC workflow', () => {
     expect(template).toContain('严禁诱导买家修改或删除评价');
   });
 
-  it('copies the VOC template and records local usage', async () => {
+  it('copies the VOC template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('negative-review-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '客服小王';
@@ -72,9 +71,6 @@ describe('Negative review VOC workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/service/negative_review/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：客服小王'));
     expect(StorageService.set).toHaveBeenCalledWith('negative_review_owner_v1', '客服小王');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'negative_review.review_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制差评 VOC 复盘模板，可粘贴到周报或归档文档。');
   });
 });

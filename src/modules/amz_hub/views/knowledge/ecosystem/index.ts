@@ -5,6 +5,7 @@
 import BaseModule from "../../../../../common/BaseModule";
 import { A10_CHART_DATA } from "../../../constants/amz_hub_constants";
 import templateHTML from "./template.html?raw";
+import "./styles.css";
 import { loadChartJs, type ChartJS } from "../../../../../common/utils/lazyLibs";
 import { setSafeHtml } from "../../../../../common/utils/security";
 

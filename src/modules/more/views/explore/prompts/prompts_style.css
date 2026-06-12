@@ -267,3 +267,19 @@
     font-size: 0.8125rem;
     line-height: 1.6;
 }
+
+@media (min-width: 1024px) {
+    .prompt-card,
+    .prompt-source-card,
+    .prompt-business-rule,
+    .category-btn,
+    .btn-icon {
+        border-radius: 8px;
+    }
+
+    .prompt-card:hover,
+    .prompt-source-card:hover {
+        box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+        transform: none;
+    }
+}

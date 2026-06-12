@@ -1,7 +1,6 @@
 import { loadTemplate } from "../../../../common/utils/viewLoader";
 import { safeMount } from "../../../../common/utils/safeMount";
 import { setSafeHtml } from "../../../../common/utils/security";
-import { readOpsMetrics, type OpsMetricName } from "../../../../common/utils/opsMetrics";
 
 // SOPs Overview - 总览页面
 const mountInternal = async (container: HTMLElement): Promise<void> => {
@@ -12,7 +11,6 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
 
     // 初始化事件监听
     initOverviewEvents(container);
-    renderOpsMetrics(container);
 };
 
 export const mount = safeMount(mountInternal, { moduleName: 'SOPs Overview' });
@@ -93,33 +91,6 @@ function initOverviewEvents(container: HTMLElement): void {
             searchSOPs(container, (e.target as HTMLInputElement).value);
         });
     }
-}
-
-function renderOpsMetrics(container: HTMLElement): void {
-    const metrics = readOpsMetrics();
-
-    container.querySelectorAll<HTMLElement>('[data-ops-metric-count]').forEach((element) => {
-        const metricName = element.dataset.opsMetricCount as OpsMetricName | undefined;
-        element.textContent = metricName ? String(metrics[metricName]?.count || 0) : '0';
-    });
-
-    container.querySelectorAll<HTMLElement>('[data-ops-metric-last]').forEach((element) => {
-        const metricName = element.dataset.opsMetricLast as OpsMetricName | undefined;
-        element.textContent = metricName ? formatMetricLastAt(metrics[metricName]?.lastAt) : '未记录';
-    });
-}
-
-function formatMetricLastAt(lastAt?: string): string {
-    if (!lastAt) return '未记录';
-
-    const date = new Date(lastAt);
-    if (Number.isNaN(date.getTime())) return '未记录';
-
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${month}-${day} ${hours}:${minutes}`;
 }
 
 function filterByCategory(container: HTMLElement, category: string): void {

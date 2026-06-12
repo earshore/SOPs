@@ -4,6 +4,7 @@
 
 import BaseModule from "../../../../../common/BaseModule";
 import { setSafeHtml } from "../../../../../common/utils/security";
+import "./styles.css";
 import templateHTML from "./template.html?raw";
 
 // Module class

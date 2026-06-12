@@ -47,7 +47,7 @@
   </div>
 
   <div class="playground-page">
-    <aside id="playground-thread-rail" class="playground-thread-rail" aria-label="Deep Chat threads">
+    <aside id="playground-thread-rail" class="playground-thread-rail" aria-label="Deep Chat 会话">
       <div class="playground-rail-brand">
         <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
           <div class="playground-rail-icon">
@@ -59,20 +59,20 @@
 
       <button id="playground-clear-chat" class="playground-new-thread" type="button">
         <i class="fas fa-plus" aria-hidden="true"></i>
-        <span>New Thread</span>
+        <span>新建会话</span>
       </button>
 
       <div class="playground-thread-list-wrap">
-        <div class="playground-thread-list-title">History</div>
+        <div class="playground-thread-list-title">历史会话</div>
         <div id="playground-thread-list" class="playground-thread-list" aria-label="历史会话"></div>
       </div>
 
       <div id="playground-rail-resizer" class="playground-rail-resizer" role="separator"
-        aria-label="调整 History 和 Generated Prompts 空间占比" aria-orientation="horizontal"
+        aria-label="调整历史会话和生成 Prompt 的空间占比" aria-orientation="horizontal"
         aria-valuemin="150" aria-valuenow="240" tabindex="0"></div>
 
       <div class="playground-prompt-list-wrap">
-        <div class="playground-thread-list-title">Generated Prompts</div>
+        <div class="playground-thread-list-title">生成的 Prompt</div>
         <div id="playground-prompt-list" class="playground-prompt-list" aria-label="Prompt 生成记录"></div>
       </div>
 
@@ -91,7 +91,7 @@
             <i class="far fa-window-maximize" aria-hidden="true"></i>
           </button>
           <select id="playground-model-select" class="playground-select" aria-label="模型选择" disabled>
-            <option value="">default</option>
+            <option value="">默认</option>
           </select>
         </div>
 
@@ -105,16 +105,16 @@
             </summary>
             <div class="playground-tuning">
               <label class="playground-field playground-field-system" for="playground-system-prompt">
-                <span>System</span>
+                <span>系统提示词</span>
                 <textarea id="playground-system-prompt" rows="3"
-                  placeholder="Optional system prompt for this Deep Chat session"></textarea>
+                  placeholder="可选：仅用于当前 Deep Chat 会话"></textarea>
               </label>
               <label class="playground-field playground-field-temperature" for="playground-temperature">
-                <span>Temperature <output id="playground-temperature-value">0.3</output></span>
+                <span>随机性 <output id="playground-temperature-value">0.3</output></span>
                 <input id="playground-temperature" type="range" min="0" max="1" step="0.1" value="0.3">
               </label>
               <button id="playground-reset-tuning" class="playground-reset-tuning" type="button">
-                Reset tuning
+                重置参数
               </button>
             </div>
           </details>

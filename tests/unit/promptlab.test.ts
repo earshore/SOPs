@@ -14,7 +14,9 @@ import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 import { appStore } from '@/stores/useAppStore';
 import eventBus from '@/common/EventBus';
 import { MODULE_EVENTS, APP_EVENTS } from '@/common/constants/eventConstants';
+import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 import type { UserProductProfile } from '@/types/state';
+import type { GeneratedPromptRecord, HistoryItem } from '@/types/modules-business';
 
 // Mock 依赖
 vi.mock('@/common/ui', () => ({
@@ -38,6 +40,26 @@ const createUsableAnalysisReport = () => ({
       'buyer-profile': 0.86,
     },
     overallConfidence: 0.86,
+  },
+});
+
+const createPromptRecord = (
+  id: string,
+  type: GeneratedPromptRecord['type'],
+  prompt: string,
+  historyId: HistoryItem['id']
+): GeneratedPromptRecord => ({
+  id,
+  type,
+  prompt,
+  generatedAt: '2026-01-01T00:10:00.000Z',
+  historyId,
+  asins: ['B000000001'],
+  marketplace: 'US',
+  profile: {
+    targetMarket: 'English',
+    keywordsTier1: 'keyword',
+    keywordsTier2: 'longtail',
   },
 });
 
@@ -71,6 +93,7 @@ describe('Promptlab Module', () => {
     appStore.getState().updateAnalysis({ analysisReport: null });
     appStore.getState().updateScraper({ scrapedData: null, currentHistoryId: null, selectedSite: '' });
     appStore.getState().updatePromptLab({ currentPrompt: '', history: [] });
+    HistoryService.clear();
 
     // 重置 store
     appStore.getState().setUserProductProfile({
@@ -262,7 +285,7 @@ describe('Promptlab Module', () => {
       expect(component.profile.charLimit).toBe(3000);
     });
 
-    it('should restore generated prompt caches from store history', () => {
+    it('should not restore generated prompt caches from store history', () => {
       appStore.getState().updatePromptLab({
         history: [
           {
@@ -284,8 +307,91 @@ describe('Promptlab Module', () => {
 
       component.restoreState();
 
-      expect(component.listingPromptCache).toBe('Saved Listing Prompt');
-      expect(component.visualPromptCache).toBe('Saved Visual Prompt');
+      expect(component.listingPromptCache).toBe('');
+      expect(component.visualPromptCache).toBe('');
+      expect(appStore.getState().promptlab.history).toHaveLength(2);
+    });
+
+    it('should restore generated prompt caches from the loaded snapshot', () => {
+      const [snapshot] = HistoryService.save({
+        metadata: {
+          scrape_timestamp: '2026-01-01T00:00:00.000Z',
+          marketplace: 'US',
+          domain: 'amazon.com',
+          language: 'English',
+          total_asins: 1
+        },
+        products: [
+          {
+            asin: 'B000000001',
+            url: '',
+            language: 'English',
+            productTitle: 'Snapshot Product',
+            feature_bullets: [],
+            customer_reviews: [],
+            scrape_status: 'success',
+            error: ''
+          }
+        ]
+      });
+      const snapshotId = snapshot!.id;
+
+      HistoryService.updatePromptResult(
+        snapshotId,
+        createPromptRecord('listing-1', 'listing', 'Snapshot Listing Prompt', snapshotId)
+      );
+      HistoryService.updatePromptResult(
+        snapshotId,
+        createPromptRecord('visual-1', 'visual', 'Snapshot Visual Prompt', snapshotId)
+      );
+
+      component.restoreState();
+
+      expect(appStore.getState().scraper.currentHistoryId).toBe(snapshotId);
+      expect(component.listingPromptCache).toBe('Snapshot Listing Prompt');
+      expect(component.visualPromptCache).toBe('Snapshot Visual Prompt');
+    });
+
+    it('should clear generated prompt caches when the loaded snapshot has no prompt results', () => {
+      HistoryService.save({
+        metadata: {
+          scrape_timestamp: '2026-01-01T00:00:00.000Z',
+          marketplace: 'US',
+          domain: 'amazon.com',
+          language: 'English',
+          total_asins: 1
+        },
+        products: [
+          {
+            asin: 'B000000001',
+            url: '',
+            language: 'English',
+            productTitle: 'Snapshot Product',
+            feature_bullets: [],
+            customer_reviews: [],
+            scrape_status: 'success',
+            error: ''
+          }
+        ]
+      });
+      component.listingPromptCache = 'Stale Listing Prompt';
+      component.visualPromptCache = 'Stale Visual Prompt';
+
+      component.restoreState();
+
+      expect(component.listingPromptCache).toBe('');
+      expect(component.visualPromptCache).toBe('');
+    });
+
+    it('should clear generated prompt caches when no snapshot is selected', () => {
+      component.listingPromptCache = 'Stale Listing Prompt';
+      component.visualPromptCache = 'Stale Visual Prompt';
+      appStore.getState().setCurrentHistoryId(null);
+
+      component.restorePromptCachesFromCurrentSnapshot();
+
+      expect(component.listingPromptCache).toBe('');
+      expect(component.visualPromptCache).toBe('');
     });
 
     it('should save state to store', () => {
@@ -680,30 +786,26 @@ describe('Promptlab Module', () => {
       execCommandSpy.mockRestore();
     });
 
-    it('should clear inputs with confirmation', () => {
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-      
+    it('should clear inputs with confirmation', async () => {
       component.profile.targetMarket = 'English';
       component.profile.keywordsTier1 = 'test';
       
-      component.clearInputs();
+      const clearPromise = component.clearInputs();
+      document.querySelector<HTMLButtonElement>('[id^="btn-confirm-confirm-modal-"]')?.click();
+      await clearPromise;
 
       expect(component.profile.targetMarket).toBe('');
       expect(component.profile.keywordsTier1).toBe('');
-
-      confirmSpy.mockRestore();
     });
 
-    it('should not clear inputs without confirmation', () => {
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-      
+    it('should not clear inputs without confirmation', async () => {
       component.profile.targetMarket = 'English';
       
-      component.clearInputs();
+      const clearPromise = component.clearInputs();
+      document.querySelector<HTMLButtonElement>('[id^="btn-cancel-confirm-modal-"]')?.click();
+      await clearPromise;
 
       expect(component.profile.targetMarket).toBe('English');
-
-      confirmSpy.mockRestore();
     });
 
     it('should select all report sections', () => {

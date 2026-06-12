@@ -43,6 +43,8 @@ const mockAppStoreState = vi.hoisted(() => ({
 }));
 
 const mockRunParallelAIAnalysis = vi.hoisted(() => vi.fn());
+const mockGetCachedAnalysisResults = vi.hoisted(() => vi.fn());
+const mockResolveAnalysisSchedulePlan = vi.hoisted(() => vi.fn());
 
 vi.mock('@/stores/useAppStore', () => ({
   appStore: {
@@ -72,13 +74,19 @@ vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/utils/da
 }));
 
 vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService', () => ({
+  getCachedAnalysisResults: mockGetCachedAnalysisResults,
   runParallelAIAnalysis: mockRunParallelAIAnalysis
+}));
+
+vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/services/analysisScheduler', () => ({
+  resolveAnalysisSchedulePlan: mockResolveAnalysisSchedulePlan
 }));
 
 vi.mock('../../src/modules/app_center/views/master_analysis/ai_analysis/components/PerformanceSettings', () => ({
   getPerformanceSettings: vi.fn(() => ({
+    schedulingPreference: 'reliability',
     maxConcurrency: 2,
-    enableCache: false,
+    enableCache: true,
     failureStrategy: 'continue'
   }))
 }));
@@ -528,10 +536,21 @@ describe('actions - 执行分析', () => {
       scrapedData: { products: mockProducts },
       currentHistoryId: null
     };
+    mockGetCachedAnalysisResults.mockResolvedValue({
+      'selling-points': { details: [] }
+    });
+    mockResolveAnalysisSchedulePlan.mockReturnValue({
+      taskOrder: ['selling-points'],
+      maxConcurrency: 1,
+      failureStrategy: 'abort',
+      retryBudget: 2,
+      failureMode: 'complete_required',
+      streamMode: 'final_only'
+    });
     mockRunParallelAIAnalysis.mockImplementation(async (_targets, _product, onProgress, _language, options) => {
       const partialReport = { 'selling-points': { details: [] } };
       onProgress(45, '正在分析: selling-points...');
-      options.onTaskComplete({ report: partialReport });
+      options.onTaskComplete?.({ report: partialReport });
       return partialReport;
     });
   });
@@ -558,5 +577,40 @@ describe('actions - 执行分析', () => {
     expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({ isAnalyzing: false });
     expect(mockContext.progress).toBe(100);
     expect(mockContext.currentStep).toBe('分析完成');
+  });
+
+  it('应该使用调度计划执行分析', async () => {
+    await runAnalysisAction(mockContext, mockProducts);
+
+    expect(mockGetCachedAnalysisResults).toHaveBeenCalledWith(
+      ['selling-points'],
+      expect.objectContaining({ asin: 'B001' }),
+      expect.any(String),
+      true
+    );
+    expect(mockResolveAnalysisSchedulePlan).toHaveBeenCalledWith(expect.objectContaining({
+      preference: 'reliability',
+      targetIds: ['selling-points'],
+      cachedTargetIds: ['selling-points'],
+      enableCache: true
+    }));
+    expect(mockRunParallelAIAnalysis).toHaveBeenCalledWith(
+      ['selling-points'],
+      expect.objectContaining({ asin: 'B001' }),
+      expect.any(Function),
+      expect.any(String),
+      expect.objectContaining({
+        maxConcurrency: 1,
+        enableCache: true,
+        streamResults: false,
+        failureStrategy: 'abort',
+        preloadedCachedResults: {
+          'selling-points': { details: [] }
+        },
+        retryBudget: 2,
+        stopOnFailure: true,
+        onTaskComplete: undefined
+      })
+    );
   });
 });

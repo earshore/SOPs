@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GeneratedPromptRecord, HistoryItem, ScrapedData } from '@/types/modules-business';
+import type { AnalysisReport, GeneratedPromptRecord, HistoryItem, ScrapedData } from '@/types/modules-business';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 
 const mocks = vi.hoisted(() => {
@@ -10,9 +10,17 @@ const mocks = vi.hoisted(() => {
     state: {
       scraper: {
         currentHistoryId: null as HistoryItem['id'] | null,
-        selectedSite: 'US'
+        selectedSite: 'US',
+        scrapedData: null as ScrapedData | null
       },
-      setCurrentHistoryId: vi.fn()
+      analysis: {
+        analysisReport: null as unknown,
+        translatedReport: null as unknown
+      },
+      setCurrentHistoryId: vi.fn(),
+      setScrapedData: vi.fn(),
+      setAnalysisReport: vi.fn(),
+      setTranslatedReport: vi.fn()
     }
   };
 
@@ -22,6 +30,15 @@ const mocks = vi.hoisted(() => {
   });
   mockStore.state.setCurrentHistoryId.mockImplementation((id: HistoryItem['id'] | null) => {
     mockStore.state.scraper.currentHistoryId = id;
+  });
+  mockStore.state.setScrapedData.mockImplementation((data: ScrapedData | null) => {
+    mockStore.state.scraper.scrapedData = data;
+  });
+  mockStore.state.setAnalysisReport.mockImplementation((report: unknown) => {
+    mockStore.state.analysis.analysisReport = report;
+  });
+  mockStore.state.setTranslatedReport.mockImplementation((report: unknown) => {
+    mockStore.state.analysis.translatedReport = report;
   });
 
   return mockStore;
@@ -122,6 +139,9 @@ describe('HistoryService snapshot storage', () => {
     mocks.history = [];
     mocks.state.scraper.currentHistoryId = null;
     mocks.state.scraper.selectedSite = 'US';
+    mocks.state.scraper.scrapedData = null;
+    mocks.state.analysis.analysisReport = null;
+    mocks.state.analysis.translatedReport = null;
     HistoryService.clear();
   });
 
@@ -145,6 +165,25 @@ describe('HistoryService snapshot storage', () => {
     expect(updated).toHaveLength(1);
     expect(updated[0]?.id).toBe(firstId);
     expect(updated[0]?.asins).toEqual(['B000000001', 'B000000002']);
+  });
+
+  it('preserves analysis status and prompt results when updating the current snapshot', () => {
+    const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+    const firstId = first[0]!.id;
+    const analysisReport = { type: 'analysis', data: 'report' } as AnalysisReport;
+
+    HistoryService.updateAnalysisStatus(firstId, analysisReport);
+    HistoryService.updatePromptResult(
+      firstId,
+      createPromptRecord('listing', 'Listing Prompt')
+    );
+
+    const updated = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001', 'B000000002']));
+
+    expect(updated).toHaveLength(1);
+    expect(updated[0]?.id).toBe(firstId);
+    expect(updated[0]?.analysisStatus?.analysisReport).toBe(analysisReport);
+    expect(updated[0]?.promptResults?.listing?.prompt).toBe('Listing Prompt');
   });
 
   it('keeps the newest 50 snapshots', () => {
@@ -177,13 +216,37 @@ describe('HistoryService snapshot storage', () => {
       createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
     ];
     mocks.state.scraper.currentHistoryId = 'hist-001';
+    mocks.state.scraper.scrapedData = mocks.history[0]!.data;
+    mocks.state.analysis.analysisReport = { type: 'analysis', data: 'report' };
+    mocks.state.analysis.translatedReport = { type: 'translated', data: 'report' };
 
     const deleted = await HistoryService.deleteByIdAsync('hist-001');
 
     expect(deleted).toBe(true);
     expect(mocks.state.scraper.currentHistoryId).toBeNull();
+    expect(mocks.state.scraper.scrapedData).toBeNull();
+    expect(mocks.state.analysis.analysisReport).toBeNull();
+    expect(mocks.state.analysis.translatedReport).toBeNull();
     expect(mocks.state.setCurrentHistoryId).toHaveBeenCalledWith(null);
     expect(mocks.history).toEqual([]);
+  });
+
+  it('clears current snapshot workspace state when clearing all history', async () => {
+    mocks.history = [
+      createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
+    ];
+    mocks.state.scraper.currentHistoryId = 'hist-001';
+    mocks.state.scraper.scrapedData = mocks.history[0]!.data;
+    mocks.state.analysis.analysisReport = { type: 'analysis', data: 'report' };
+    mocks.state.analysis.translatedReport = { type: 'translated', data: 'report' };
+
+    await HistoryService.clearAsync();
+
+    expect(mocks.history).toEqual([]);
+    expect(mocks.state.scraper.currentHistoryId).toBeNull();
+    expect(mocks.state.scraper.scrapedData).toBeNull();
+    expect(mocks.state.analysis.analysisReport).toBeNull();
+    expect(mocks.state.analysis.translatedReport).toBeNull();
   });
 
   it('does not persist when deleting a missing snapshot id', () => {

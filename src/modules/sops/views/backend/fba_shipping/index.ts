@@ -1,7 +1,6 @@
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 import { setSafeHtml } from "../../../../../common/utils/security";
 import { registerActionsWithLegacy, unregisterActions } from "../../../../../common/utils/actionRegistry";
-import { recordOpsMetric } from "../../../../../common/utils/opsMetrics";
 import { StorageService } from "../../../../../services/storageService";
 
 const RELEASE_OWNER_STORAGE_KEY = 'fba_shipping_owner_v1';
@@ -114,7 +113,6 @@ async function copyFbaShippingTemplate(): Promise<void> {
             throw new Error('clipboard unavailable');
         }
 
-        recordOpsMetric('fba.shipping_template_copy');
         alert('已复制 FBA 发货放行/异常登记模板，可粘贴到周报或归档文档。');
     } catch {
         alert('复制失败，请手动复制 FBA 发货模板或稍后重试。');

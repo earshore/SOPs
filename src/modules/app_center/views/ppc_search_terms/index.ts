@@ -1,6 +1,5 @@
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui/notifications';
-import { recordOpsMetric } from '@/common/utils/opsMetrics';
 import { safeMount } from '@/common/utils/safeMount';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
@@ -1566,7 +1565,6 @@ function exportRows(container: HTMLElement, filter: FilterType, includeSearch = 
   saveActionOwner(owner);
   const csv = buildActionCsv(rows, owner);
   downloadText(`ppc-${activeReportType}-actions-${filter}-${today()}.csv`, csv);
-  recordOpsMetric('ppc.action_export');
   showToast('导出完成', { type: 'success', description: `${rows.length} 行动作已导出` });
 }
 
@@ -1722,7 +1720,6 @@ async function copySummary(container: HTMLElement): Promise<void> {
       throw new Error('Clipboard API unavailable');
     }
     await navigator.clipboard.writeText(summary);
-    recordOpsMetric('ppc.review_template_copy');
     showToast('复盘模板已复制', { type: 'success' });
   } catch {
     showToast('复制失败', { type: 'error', description: '当前浏览器没有开放剪贴板写入权限' });

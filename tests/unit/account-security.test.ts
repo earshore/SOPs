@@ -33,7 +33,6 @@ describe('Account security review workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'account_security_owner_v1') return '账号安全负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -62,7 +61,7 @@ describe('Account security review workflow', () => {
     expect(template).toContain('异常账号处置均属于高风险动作');
   });
 
-  it('copies the review template and records local usage', async () => {
+  it('copies the review template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('account-security-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '安全小周';
@@ -72,9 +71,6 @@ describe('Account security review workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/safety/account_security/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：安全小周'));
     expect(StorageService.set).toHaveBeenCalledWith('account_security_owner_v1', '安全小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'account_security.review_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制账号登录异常登记模板，可粘贴到工作群或归档文档。');
   });
 });

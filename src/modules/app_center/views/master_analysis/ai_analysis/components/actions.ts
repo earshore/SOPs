@@ -7,7 +7,8 @@ import { showToast } from '@common/ui/index';
 import { analysisTargets } from '../config/analysisTargets';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { parseAnalysisReport } from '../services/analysisService';
-import { runParallelAIAnalysis } from '../services/parallelAnalysisService';
+import { getCachedAnalysisResults, runParallelAIAnalysis } from '../services/parallelAnalysisService';
+import { resolveAnalysisSchedulePlan } from '../services/analysisScheduler';
 import { generateMarkdownReport, generateJsonReportData } from '../services/reportGenerator';
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
 import { getMarketLanguage } from './helpers';
@@ -18,8 +19,7 @@ import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { AnalysisReport } from '@/types/modules-business';
 import { BusinessError } from '@common/errors/AppError';
 import { getPerformanceSettings } from './PerformanceSettings';
-import eventBus from '@common/EventBus';
-import { APP_EVENTS } from '@common/constants/eventConstants';
+import { emitHistoryUpdated } from '../../services/historyEvents';
 /**
  * 切换 ASIN 选择
  */
@@ -250,22 +250,41 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
     const mergedProduct = mergeProducts(products);
     const language = getMarketLanguage();
     const perfSettings = getPerformanceSettings();
+    const preloadedCachedResults = await getCachedAnalysisResults(
+      selectedTargets,
+      mergedProduct,
+      language,
+      perfSettings.enableCache
+    );
+    const cachedTargetIds = Object.keys(preloadedCachedResults);
+    const schedulePlan = resolveAnalysisSchedulePlan({
+      preference: perfSettings.schedulingPreference,
+      targetIds: selectedTargets,
+      product: mergedProduct,
+      language,
+      enableCache: perfSettings.enableCache,
+      cachedTargetIds
+    });
+    const streamResults = schedulePlan.streamMode === 'progressive';
 
     const analysisReport = await runParallelAIAnalysis(
-      selectedTargets,
+      schedulePlan.taskOrder,
       mergedProduct,
       (progress: number, step: string) => {
         syncAnalysisProgress(context, progress, step);
       },
       language,
       {
-        maxConcurrency: perfSettings.maxConcurrency,
+        maxConcurrency: schedulePlan.maxConcurrency,
         enableCache: perfSettings.enableCache,
-        streamResults: true,
-        failureStrategy: perfSettings.failureStrategy,
-        onTaskComplete: ({ report }) => {
+        streamResults,
+        failureStrategy: schedulePlan.failureStrategy,
+        preloadedCachedResults,
+        retryBudget: schedulePlan.retryBudget,
+        stopOnFailure: schedulePlan.failureMode === 'complete_required',
+        onTaskComplete: streamResults ? ({ report }) => {
           syncAnalysisReport(context, report);
-        }
+        } : undefined
       }
     );
 
@@ -281,7 +300,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       );
 
       if (success) {
-        eventBus.emit(APP_EVENTS.HISTORY_UPDATED);
+        emitHistoryUpdated();
       }
     }
 

@@ -1,7 +1,6 @@
 import { loadTemplate } from "../../../../../common/utils/viewLoader";
 import { setSafeHtml } from "../../../../../common/utils/security";
 import { registerActionsWithLegacy, unregisterActions } from "../../../../../common/utils/actionRegistry";
-import { recordOpsMetric } from "../../../../../common/utils/opsMetrics";
 import { StorageService } from "../../../../../services/storageService";
 
 const REVIEW_OWNER_STORAGE_KEY = 'permission_management_owner_v1';
@@ -108,7 +107,6 @@ async function copyPermissionManagementTemplate(): Promise<void> {
             throw new Error('clipboard unavailable');
         }
 
-        recordOpsMetric('permission.management_template_copy');
         alert('已复制后台权限变更归档模板，可粘贴到工作群或归档文档。');
     } catch {
         alert('复制失败，请手动复制权限管理模板或稍后重试。');

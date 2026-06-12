@@ -238,11 +238,33 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
 
   .message-bubble.ai-message pre {
     overflow-x: auto !important;
+    padding: 12px 14px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+    color: #334155 !important;
+    font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace !important;
+    font-size: 12px !important;
+    line-height: 1.65 !important;
+  }
+
+  .message-bubble.ai-message code {
+    border-radius: 4px !important;
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace !important;
+    font-size: 0.92em !important;
+    padding: 1px 4px !important;
+  }
+
+  .message-bubble.ai-message pre code {
+    padding: 0 !important;
+    background: transparent !important;
   }
 
   .input-button.inside-end {
     background: #0891b2 !important;
-    box-shadow: 0 12px 24px -18px rgba(8, 145, 178, 0.82) !important;
+    box-shadow: none !important;
   }
 
   .input-button.inside-end.disabled-button {
@@ -348,10 +370,10 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     min-height: 58px !important;
     max-height: min(42vh, 420px) !important;
     margin: 0 auto !important;
-    border: 1px solid #dedede !important;
+    border: 1px solid #cbd5e1 !important;
     border-radius: 29px !important;
     background: #ffffff !important;
-    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
     overflow-y: auto !important;
   }
 
@@ -361,7 +383,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     max-width: 100% !important;
     min-height: 24px !important;
     padding: 18px 62px 16px 22px !important;
-    color: #111111 !important;
+    color: #0f172a !important;
     font-size: 15px !important;
     line-height: 1.45 !important;
     overflow-wrap: anywhere !important;
@@ -410,7 +432,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     align-items: center !important;
     justify-content: center !important;
     border-radius: 50% !important;
-    background: #050505 !important;
+    background: #0891b2 !important;
     box-shadow: none !important;
   }
 
@@ -422,7 +444,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   .inside-end.loading-button:focus-visible,
   .inside-end.disabled-button:hover,
   .inside-end.disabled-button:focus-visible {
-    background: #111111 !important;
+    background: #0e7490 !important;
   }
 
   .inside-end #submit-icon {
@@ -437,7 +459,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     width: 36px !important;
     height: 36px !important;
     border-radius: 50% !important;
-    background: #050505 !important;
+    background: #0891b2 !important;
     pointer-events: none !important;
   }
 
@@ -637,7 +659,7 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
         borderRadius: '29px',
         border: '1px solid #cbd5e1',
         backgroundColor: '#ffffff',
-        boxShadow: '0 18px 38px -30px rgba(8, 145, 178, 0.52), 0 2px 8px rgba(15, 23, 42, 0.05)',
+        boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)',
         minHeight: '58px',
         maxHeight: 'min(42vh, 420px)',
       },
@@ -1069,7 +1091,12 @@ function renderPromptPreview(container: HTMLElement, promptDraft: PromptHistoryI
     return;
   }
 
-  title.textContent = `${promptDraft.promptType === 'visual' ? 'Visual' : 'Listing'} Prompt`;
+  const typeLabel = `${promptDraft.promptType === 'visual' ? 'Visual' : 'Listing'} Prompt`;
+  const previewMeta = formatPromptDraftPreviewMeta(promptDraft);
+  setSafeHtml(title, `
+    <span class="playground-prompt-preview-title-main">${escapeHTML(typeLabel)}</span>
+    ${previewMeta ? `<span class="playground-prompt-preview-title-meta">${escapeHTML(previewMeta)}</span>` : ''}
+  `);
   body.textContent = promptDraft.prompt;
   body.scrollTop = 0;
   positionPromptPreview(container, preview, anchor);
@@ -1133,6 +1160,11 @@ function clearPromptPreviewHideTimer(): void {
   }
 }
 
+function getPanelMinHeight(panel: HTMLElement, fallback: number): number {
+  const minHeight = Number.parseFloat(window.getComputedStyle(panel).minHeight);
+  return Number.isFinite(minHeight) ? minHeight : fallback;
+}
+
 function setupRailSectionResizer(container: HTMLElement): void {
   const threadPanel = container.querySelector<HTMLElement>('.playground-thread-list-wrap');
   const promptPanel = container.querySelector<HTMLElement>('.playground-prompt-list-wrap');
@@ -1148,10 +1180,13 @@ function setupRailSectionResizer(container: HTMLElement): void {
 
   const applyPromptPanelHeight = (height: number): void => {
     const availableHeight = threadPanel.getBoundingClientRect().height + promptPanel.getBoundingClientRect().height;
-    const maxPromptHeight = Math.max(MIN_PROMPT_PANEL_HEIGHT, availableHeight - MIN_THREAD_PANEL_HEIGHT);
-    const nextHeight = Math.min(Math.max(height, MIN_PROMPT_PANEL_HEIGHT), maxPromptHeight);
+    const minPromptHeight = getPanelMinHeight(promptPanel, MIN_PROMPT_PANEL_HEIGHT);
+    const minThreadHeight = getPanelMinHeight(threadPanel, MIN_THREAD_PANEL_HEIGHT);
+    const maxPromptHeight = Math.max(minPromptHeight, availableHeight - minThreadHeight);
+    const nextHeight = Math.min(Math.max(height, minPromptHeight), maxPromptHeight);
 
     promptPanel.style.flexBasis = `${Math.round(nextHeight)}px`;
+    resizer.setAttribute('aria-valuemin', String(Math.round(minPromptHeight)));
     resizer.setAttribute('aria-valuemax', String(Math.round(maxPromptHeight)));
     resizer.setAttribute('aria-valuenow', String(Math.round(nextHeight)));
   };
@@ -1863,12 +1898,12 @@ function renderThreadList(container: HTMLElement): void {
     const pendingRequest = pendingRequests.get(thread.id);
     const hasDraft = !!thread.draftText?.trim();
     const meta = pendingRequest
-      ? `Generating · ${formatThreadTime(pendingRequest.updatedAt)}`
+      ? `生成中 · ${formatThreadTime(pendingRequest.updatedAt)}`
       : hasDraft
-      ? `Draft · ${formatThreadTime(thread.updatedAt)}`
+      ? `草稿 · ${formatThreadTime(thread.updatedAt)}`
       : messageCount > 0
-      ? `${messageCount} messages · ${formatThreadTime(thread.updatedAt)}`
-      : `Empty · ${formatThreadTime(thread.updatedAt)}`;
+      ? `${messageCount} 条 · ${formatThreadTime(thread.updatedAt)}`
+      : `空会话 · ${formatThreadTime(thread.updatedAt)}`;
 
     return `
       <div class="playground-thread-item${isActive ? ' is-active' : ''}">
@@ -1977,6 +2012,17 @@ function formatPromptDraftMeta(prompt: PromptHistoryItem): string {
   const parts = [
     prompt.marketplace,
     prompt.asins && prompt.asins.length > 0 ? prompt.asins.slice(0, 2).join(', ') : '',
+    formatThreadTime(getPromptDraftTime(prompt)),
+  ].filter(Boolean);
+
+  return parts.join(' · ');
+}
+
+function formatPromptDraftPreviewMeta(prompt: PromptHistoryItem): string {
+  const asins = prompt.asins?.filter(Boolean).join(', ') || '';
+  const parts = [
+    prompt.marketplace,
+    asins,
     formatThreadTime(getPromptDraftTime(prompt)),
   ].filter(Boolean);
 

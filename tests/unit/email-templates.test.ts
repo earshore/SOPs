@@ -35,7 +35,6 @@ describe('Email templates review workflow', () => {
     document.body.appendChild(container);
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
       if (key === 'email_templates_owner_v1') return '客服负责人';
-      if (key === 'ops_metrics_v1') return {};
       return fallback;
     });
     mocks.storageSet.mockClear();
@@ -64,7 +63,7 @@ describe('Email templates review workflow', () => {
     expect(template).toContain('公开发送必须人工确认后执行');
   });
 
-  it('copies the review template and records local usage', async () => {
+  it('copies the review template', async () => {
     await mount(container);
     const ownerInput = document.getElementById('email-templates-owner') as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '客服小周';
@@ -74,9 +73,6 @@ describe('Email templates review workflow', () => {
     expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/service/email_templates/template.html');
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：客服小周'));
     expect(StorageService.set).toHaveBeenCalledWith('email_templates_owner_v1', '客服小周');
-    expect(StorageService.set).toHaveBeenCalledWith('ops_metrics_v1', expect.objectContaining({
-      'email_templates.reply_template_copy': expect.objectContaining({ count: 1 }),
-    }));
     expect(global.alert).toHaveBeenCalledWith('已复制客服邮件处理复盘模板，可粘贴到周报或归档文档。');
   });
 

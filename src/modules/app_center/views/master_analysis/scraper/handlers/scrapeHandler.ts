@@ -90,10 +90,13 @@ export function handleScrapeComplete(
         products: finalProducts,
     };
 
-    // 保存历史记录
-    void HistoryService.saveAsync(scrapedData).catch(() => {
-        HistoryService.save(scrapedData);
-    });
-
     return scrapedData;
+}
+
+export async function saveScrapeSnapshot(scrapedData: ScrapedData): Promise<void> {
+    try {
+        await HistoryService.saveAsync(scrapedData);
+    } catch {
+        HistoryService.save(scrapedData);
+    }
 }

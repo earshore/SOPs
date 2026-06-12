@@ -59,3 +59,10 @@ export function getSiteDomain(site: string): string {
     };
     return SITE_DOMAIN_MAP[site] || 'amazon.com';
 }
+
+/**
+ * 获取站点网址
+ */
+export function getSiteUrl(site: string): string {
+    return `www.${getSiteDomain(site)}`;
+}
