@@ -17,9 +17,9 @@ export class NPITrackerPage extends BasePage {
     // ========================================
 
     async navigate(): Promise<void> {
-        await this.page.goto('/app_center/sops_npi_tracker');
-        await this.page.waitForLoadState('networkidle');
-        await this.wait(500);
+        await this.page.goto('/#sops_npi_tracker', { waitUntil: 'domcontentloaded' });
+        await expect(this.page.locator('#npi-table-body')).toBeVisible({ timeout: 10000 });
+        await expect(this.page.locator('#npi-table-body tr').first()).toBeVisible({ timeout: 10000 });
     }
 
     // ========================================
@@ -61,26 +61,30 @@ export class NPITrackerPage extends BasePage {
     // ========================================
 
     async filterByStore(store: string): Promise<void> {
-        const select = this.page.locator('select[onchange*="filterByStore"]');
+        const select = this.page.locator('#npi-filter-store');
         await select.selectOption(store);
         await this.wait(500);
     }
 
     async filterByStage(stage: string): Promise<void> {
-        const select = this.page.locator('select[onchange*="filterByStage"]');
+        const select = this.page.locator('#npi-filter-stage');
         await select.selectOption(stage);
         await this.wait(500);
     }
 
     async getAvailableStores(): Promise<string[]> {
-        const select = this.page.locator('select[onchange*="filterByStore"]');
-        const options = await select.locator('option').allTextContents();
+        const select = this.page.locator('#npi-filter-store');
+        const options = await select.locator('option').evaluateAll(options =>
+            options.map(option => (option as HTMLOptionElement).value)
+        );
         return options.filter(opt => opt.trim() !== '');
     }
 
     async getAvailableStages(): Promise<string[]> {
-        const select = this.page.locator('select[onchange*="filterByStage"]');
-        const options = await select.locator('option').allTextContents();
+        const select = this.page.locator('#npi-filter-stage');
+        const options = await select.locator('option').evaluateAll(options =>
+            options.map(option => (option as HTMLOptionElement).value)
+        );
         return options.filter(opt => opt.trim() !== '');
     }
 
@@ -109,6 +113,22 @@ export class NPITrackerPage extends BasePage {
         await this.wait(300);
     }
 
+    async setComplianceCheck(rowIndex: number, checkType: 'content' | 'sensitive' | 'creative' | 'ebc', checked: boolean): Promise<void> {
+        const row = this.page.locator('#npi-table-body tr').nth(rowIndex);
+        const checkboxIndex = {
+            'content': 1,
+            'sensitive': 2,
+            'creative': 3,
+            'ebc': 4
+        }[checkType];
+
+        const checkbox = row.locator('input[type="checkbox"]').nth(checkboxIndex);
+        if (await checkbox.isChecked() !== checked) {
+            await checkbox.click();
+            await this.wait(300);
+        }
+    }
+
     async getComplianceStatus(rowIndex: number): Promise<string> {
         const row = this.page.locator('#npi-table-body tr').nth(rowIndex);
         const statusCell = row.locator('td').nth(13); // SOP合规状态列
@@ -116,8 +136,10 @@ export class NPITrackerPage extends BasePage {
     }
 
     async isComplianceComplete(rowIndex: number): Promise<boolean> {
-        const status = await this.getComplianceStatus(rowIndex);
-        return status.includes('✓') || status.includes('check-circle');
+        const row = this.page.locator('#npi-table-body tr').nth(rowIndex);
+        const statusCell = row.locator('td').nth(13);
+        const status = await statusCell.textContent() || '';
+        return status.includes('✓') || await statusCell.locator('.fa-check-circle').count() > 0;
     }
 
     // ========================================
@@ -173,28 +195,28 @@ export class NPITrackerPage extends BasePage {
 
     async toggleDecision(rowIndex: number): Promise<void> {
         const row = this.page.locator('#npi-table-body tr').nth(rowIndex);
-        const button = row.locator('button[onclick*="toggleDecision"]');
+        const button = row.locator('button[data-action="toggle-decision"]');
         await button.click();
         await this.wait(300);
     }
 
     async getDecision(rowIndex: number): Promise<'keep' | 'kill'> {
         const row = this.page.locator('#npi-table-body tr').nth(rowIndex);
-        const button = row.locator('button[onclick*="toggleDecision"]');
+        const button = row.locator('button[data-action="toggle-decision"]');
         const text = await button.textContent() || '';
         return text.includes('保留') ? 'keep' : 'kill';
     }
 
     async updateAdsStrategy(rowIndex: number, strategy: 'auto' | 'manual' | 'mixed'): Promise<void> {
         const row = this.page.locator('#npi-table-body tr').nth(rowIndex);
-        const select = row.locator('select[onchange*="ads_strategy"]');
+        const select = row.locator('select[data-action="update-field"][data-field="ads_strategy"]');
         await select.selectOption(strategy);
         await this.wait(300);
     }
 
     async getAdsStrategy(rowIndex: number): Promise<string> {
         const row = this.page.locator('#npi-table-body tr').nth(rowIndex);
-        const select = row.locator('select[onchange*="ads_strategy"]');
+        const select = row.locator('select[data-action="update-field"][data-field="ads_strategy"]');
         return await select.inputValue();
     }
 
@@ -204,7 +226,7 @@ export class NPITrackerPage extends BasePage {
 
     async openNextStepEditor(rowIndex: number): Promise<void> {
         const row = this.page.locator('#npi-table-body tr').nth(rowIndex);
-        const button = row.locator('button[onclick*="openNextStepEditor"]');
+        const button = row.locator('button[data-action="open-next-step-editor"]');
         await button.click();
         await this.wait(500);
     }
@@ -227,13 +249,13 @@ export class NPITrackerPage extends BasePage {
     }
 
     async saveNextSteps(): Promise<void> {
-        const button = this.page.locator('button[onclick*="saveNextSteps"]');
+        const button = this.page.locator('button[data-action="saveNextSteps"]');
         await button.click();
         await this.wait(500);
     }
 
     async closeNextStepModal(): Promise<void> {
-        const button = this.page.locator('button[onclick*="closeNextStepModal"]');
+        const button = this.page.locator('button[data-action="closeNextStepModal"]');
         await button.click();
         await this.wait(300);
     }
@@ -251,7 +273,7 @@ export class NPITrackerPage extends BasePage {
 
     async exportToExcel(): Promise<any> {
         const downloadPromise = this.page.waitForEvent('download');
-        await this.page.locator('button[onclick*="exportToExcel"]').click();
+        await this.page.locator('button[data-action="exportToExcel"]').click();
         return await downloadPromise;
     }
 

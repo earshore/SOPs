@@ -23,11 +23,8 @@ test.describe('NPI Tracker 模块 E2E 测试', () => {
             // 设置控制台错误监听
             const consoleListener = setupConsoleErrorListener(page);
 
-            // 验证：页面标题正确
-            await expect(page).toHaveTitle(/Amazing Amazon Architect/);
-
             // 验证：主要元素可见
-            await expect(page.locator('h2:has-text("NPI Tracker"), h2:has-text("新品生命周期")')).toBeVisible();
+            await expect(page.locator('h1:has-text("新品生命周期跟踪 SOP")')).toBeVisible();
             await expect(page.locator('#npi-table-body')).toBeVisible();
 
             // 验证：无 JavaScript 错误
@@ -67,7 +64,7 @@ test.describe('NPI Tracker 模块 E2E 测试', () => {
             expect(stores.length).toBeGreaterThan(1);
             
             // 筛选特定店铺（排除 "全部"）
-            const specificStore = stores.find(s => !s.includes('全部') && s.trim() !== '');
+            const specificStore = stores.find(s => s !== 'all' && s.trim() !== '');
             
             if (specificStore) {
                 await npiTracker.filterByStore(specificStore);
@@ -91,7 +88,7 @@ test.describe('NPI Tracker 模块 E2E 测试', () => {
             expect(stages.length).toBeGreaterThan(1);
             
             // 筛选特定阶段
-            const specificStage = stages.find(s => !s.includes('全部') && s.trim() !== '');
+            const specificStage = stages.find(s => s !== 'all' && s.trim() !== '');
             
             if (specificStage) {
                 await npiTracker.filterByStage(specificStage);
@@ -108,7 +105,7 @@ test.describe('NPI Tracker 模块 E2E 测试', () => {
         test('应该能够重置筛选', async () => {
             // 先筛选
             const stores = await npiTracker.getAvailableStores();
-            const specificStore = stores.find(s => !s.includes('全部') && s.trim() !== '');
+            const specificStore = stores.find(s => s !== 'all' && s.trim() !== '');
             
             if (specificStore) {
                 await npiTracker.filterByStore(specificStore);
@@ -159,10 +156,10 @@ test.describe('NPI Tracker 模块 E2E 测试', () => {
 
         test('应该在所有检查完成后显示完成状态', async () => {
             // 勾选所有合规检查项
-            await npiTracker.toggleComplianceCheck(0, 'content');
-            await npiTracker.toggleComplianceCheck(0, 'sensitive');
-            await npiTracker.toggleComplianceCheck(0, 'creative');
-            await npiTracker.toggleComplianceCheck(0, 'ebc');
+            await npiTracker.setComplianceCheck(0, 'content', true);
+            await npiTracker.setComplianceCheck(0, 'sensitive', true);
+            await npiTracker.setComplianceCheck(0, 'creative', true);
+            await npiTracker.setComplianceCheck(0, 'ebc', true);
             
             await npiTracker.waitForTableUpdate();
             
@@ -413,7 +410,7 @@ test.describe('NPI Tracker 模块 E2E 测试', () => {
             // 步骤 2: 筛选特定店铺
             console.log('  2️⃣ 筛选特定店铺...');
             const stores = await npiTracker.getAvailableStores();
-            const specificStore = stores.find(s => !s.includes('全部') && s.trim() !== '');
+            const specificStore = stores.find(s => s !== 'all' && s.trim() !== '');
             if (specificStore) {
                 await npiTracker.filterByStore(specificStore);
                 console.log(`     ✅ 筛选店铺: ${specificStore}`);

@@ -306,7 +306,10 @@ function setupTableEventDelegation(tbody: HTMLElement): void {
     
     // 创建新的事件处理器
     const eventHandler: EventListener = (e) => {
-        const target = e.target as HTMLElement;
+        const rawTarget = e.target as HTMLElement;
+        const target = rawTarget.closest('[data-action]') as HTMLElement | null;
+        if (!target) return;
+
         const row = target.closest('tr[data-index]') as HTMLElement;
         if (!row) return;
         
