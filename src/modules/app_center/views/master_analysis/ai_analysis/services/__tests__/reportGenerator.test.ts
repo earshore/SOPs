@@ -40,13 +40,13 @@ describe('reportGenerator', () => {
     expect(markdown).toContain('**产品 ASIN**: B001, B002');
     expect(markdown).toContain('**市场**: DE');
     expect(markdown).toContain('**数据源**: Scraper');
-    expect(markdown).toContain('## 📦 Listings 分析');
+    expect(markdown).toContain('## Listings 分析');
     expect(markdown).toContain('### Listing 质量');
     expect(markdown).toContain('- 标题长度: 128');
     expect(markdown).toContain('- 标题覆盖核心关键词');
     expect(markdown).toContain('#### 标题');
     expect(markdown).toContain('- 保留核心词');
-    expect(markdown).toContain('## ⭐ Reviews 分析');
+    expect(markdown).toContain('## Reviews 分析');
     expect(markdown).toContain('### Review 洞察');
     expect(markdown).toContain('- 用户关注安装便利性');
   });
@@ -54,8 +54,8 @@ describe('reportGenerator', () => {
   it('omits empty analysis sections', () => {
     const markdown = generateMarkdownReport([listingResult], ['B001'], 'US', 'Fixture');
 
-    expect(markdown).toContain('## 📦 Listings 分析');
-    expect(markdown).not.toContain('## ⭐ Reviews 分析');
+    expect(markdown).toContain('## Listings 分析');
+    expect(markdown).not.toContain('## Reviews 分析');
   });
 
   it('generates json report metadata', () => {

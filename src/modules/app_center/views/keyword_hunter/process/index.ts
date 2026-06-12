@@ -371,9 +371,9 @@ function createWordFrequencySpan(
   if (isMatched) {
     span.className =
       "px-2 py-1 bg-green-100 text-green-700 text-xs rounded-md flex items-center gap-1";
-    const checkIcon = document.createElement("span");
-    checkIcon.className = "font-bold";
-    checkIcon.textContent = "✓";
+    const checkIcon = document.createElement("i");
+    checkIcon.className = "fa-solid fa-check text-[10px]";
+    checkIcon.setAttribute("aria-hidden", "true");
     span.appendChild(checkIcon);
     span.appendChild(document.createTextNode(` ${word} `));
     countSpan.className = "opacity-60";
@@ -438,9 +438,9 @@ function createUnmatchedRootTag(root: string): HTMLElement {
   span.title = "点击在关键词监控中定位";
   span.addEventListener("click", () => locateUnmatchedRootInList(root));
 
-  const icon = document.createElement("span");
-  icon.className = "font-bold";
-  icon.textContent = "✗";
+  const icon = document.createElement("i");
+  icon.className = "fa-solid fa-xmark text-[10px]";
+  icon.setAttribute("aria-hidden", "true");
   span.appendChild(icon);
 
   const text = document.createElement("span");

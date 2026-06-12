@@ -64,11 +64,11 @@ export class DataPreview {
         const productCount = this.totalProducts;
 
         if (productCount > 100) {
-            showToast(`⚠️ 数据集较大 (${productCount} 个产品)，已启用分页显示以优化性能`, { type: 'info' });
+            showToast(`数据集较大 (${productCount} 个产品)，已启用分页显示以优化性能`, { type: 'info' });
         }
 
         if (productCount > 500) {
-            showToast(`⚠️ 数据集非常大 (${productCount} 个产品)，建议定期清理历史记录以释放内存`, { type: 'warning' });
+            showToast(`数据集非常大 (${productCount} 个产品)，建议定期清理历史记录以释放内存`, { type: 'warning' });
         }
     }
 

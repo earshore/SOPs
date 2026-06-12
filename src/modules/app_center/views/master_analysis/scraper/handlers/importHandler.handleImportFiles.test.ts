@@ -69,7 +69,7 @@ describe('handleImportFiles', () => {
         expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.DATA_UPDATED);
         expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.HISTORY_UPDATED);
         expect(showToast).toHaveBeenCalledWith(
-            '✅ 成功导入并合并 1 个ASIN (基准站点: FR)',
+            '成功导入并合并 1 个ASIN (基准站点: FR)',
             { type: 'success' }
         );
     });

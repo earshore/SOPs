@@ -377,7 +377,7 @@ async function getCachedScrapedProduct(context: ScrapeContext): Promise<ScrapedP
         }
 
         const age = ((now - cachedTime) / 3600000).toFixed(1);
-        context.updateStatusCallback(context.asin, "success", `⚡ 命中缓存 (${age}小时前)`);
+        context.updateStatusCallback(context.asin, "success", `命中缓存 (${age}小时前)`);
         return cachedItem.product;
     } catch (err) {
         console.warn("缓存读取失败，转为网络请求");
@@ -497,7 +497,7 @@ async function runScrapeAttempts(context: ScrapeContext, result: ScrapedProduct)
 function createScrapeSummary(result: ScrapedProduct): string {
     return result.scrape_status === "failed"
         ? getErrorSummary(result.error)
-        : `标题:✓, 描述:${result.feature_bullets.length}, 评论:${result.customer_reviews.length}`;
+        : `标题:已采集, 描述:${result.feature_bullets.length}, 评论:${result.customer_reviews.length}`;
 }
 
 /**

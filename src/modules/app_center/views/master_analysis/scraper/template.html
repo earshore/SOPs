@@ -254,7 +254,9 @@
                                             x-transition:enter-start="scale-0 rotate-180">
                                             <i class="fas fa-check text-[7px] text-white"></i>
                                         </div>
-                                        <span class="site-flag text-2xl" x-text="getFlag(site)"></span>
+                                        <span
+                                            class="site-flag inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-2 font-mono text-[11px] font-bold text-slate-600"
+                                            x-text="getFlag(site)"></span>
                                         <span
                                             :class="getSiteNameClass(site)"
                                             :title="getSiteUrl(site)"
@@ -477,7 +479,7 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
                             <div class="flex items-start justify-between mb-2">
                                 <div @click="loadHistoryItem(item)" class="flex items-center gap-2 cursor-pointer">
                                     <span
-                                        class="text-lg flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-150 shrink-0 shadow-sm transition-transform duration-300 hover:scale-110"
+                                        class="flex h-8 min-w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-2 font-mono text-[11px] font-bold text-slate-600 shadow-sm transition-transform duration-300 hover:scale-105"
                                         x-text="getFlag(item.site)"></span>
                                     <div class="flex flex-col">
                                         <div class="flex items-center gap-1.5">

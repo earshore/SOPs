@@ -924,6 +924,10 @@ describe('Promptlab Module', () => {
       const container = document.getElementById('report-sections-container');
       expect(container?.innerHTML).toContain('标题核心词根');
       expect(container?.innerHTML).toContain('核心关键词');
+      expect(container?.querySelector('i.fa-solid.fa-font')).toBeTruthy();
+      expect(container?.textContent ?? '').not.toMatch(
+        /(?:\u{1F511}|\u{1F48E}|\u26A0\uFE0F?|\u2728|\u{1F914}|\u{1F464}|\u{1F4DD}|\u{1F3AF})/u
+      );
     });
 
     it('should handle legacy format report (旧版AI分析)', () => {

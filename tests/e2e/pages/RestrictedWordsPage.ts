@@ -37,8 +37,7 @@ export class RestrictedWordsPage {
      * 导航到 Restricted Words 页面
      */
     async navigate() {
-        await this.page.goto('/#sops_restricted_words');
-        await this.page.waitForLoadState('networkidle');
+        await this.page.goto('/#sops_restricted_words', { waitUntil: 'domcontentloaded' });
         
         // 等待主要元素加载
         await this.searchInput.waitFor({ state: 'visible', timeout: 10000 });
@@ -48,8 +47,8 @@ export class RestrictedWordsPage {
      * 执行搜索
      */
     async search(keyword: string, mode: 'fuzzy' | 'exact' | 'fulltext' | 'regex' = 'fuzzy') {
-        await this.searchInput.fill(keyword);
         await this.searchModeSelect.selectOption(mode);
+        await this.searchInput.fill(keyword);
         await this.searchButton.click();
         
         // 等待结果更新
@@ -159,7 +158,8 @@ export class RestrictedWordsPage {
      */
     async getDetailRiskDescription(): Promise<string> {
         const content = this.detailModal.locator('#rw-detail-content');
-        const riskSection = content.locator('.border-red-400');
+        const riskSection = content.locator('.content-callout--danger').first();
+        await riskSection.waitFor({ state: 'visible', timeout: 3000 });
         
         return await riskSection.textContent() || '';
     }
@@ -314,8 +314,12 @@ export class RestrictedWordsPage {
      * 检查是否显示"没有找到"消息
      */
     async hasNoResultsMessage(): Promise<boolean> {
-        const text = await this.resultsTable.textContent();
-        return text?.includes('没有找到') || false;
+        try {
+            await expect(this.resultsTable).toContainText('没有找到', { timeout: 3000 });
+            return true;
+        } catch {
+            return (await this.getResultsCount()) === 0;
+        }
     }
 
     /**

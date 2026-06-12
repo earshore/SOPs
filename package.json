@@ -34,6 +34,7 @@
         "lighthouse:local": "lhci autorun --config=tests/config/lighthouserc.js",
         "quality:check": "node tests/quality/code-quality-check.ts",
         "quality:coverage": "node tests/quality/coverage-stats.js",
+        "quality:regression": "node tests/quality/regression-audit.js",
         "quality:dashboard": "node tests/quality/generate-dashboard.js",
         "quality:baseline": "node tests/quality/run-all-checks.js",
         "quality:track": "tsx scripts/quality/track-quality-progress.ts",

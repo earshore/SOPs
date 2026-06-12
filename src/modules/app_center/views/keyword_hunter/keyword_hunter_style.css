@@ -520,21 +520,21 @@
     background: linear-gradient(to right, rgba(241, 245, 249, 1), transparent 70%);
 }
 
-/* 📊 评分类 H3 - 靛蓝 */
+/* 评分类 H3 - 靛蓝 */
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(1) {
     border-left-color: var(--color-indigo-500);
     background: linear-gradient(to right, rgba(238, 242, 255, 0.9), transparent 60%);
     color: var(--color-indigo-700);
 }
 
-/* 🚨 致命问题 H3 - 红色 */
+/* 致命问题 H3 - 红色 */
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(2) {
     border-left-color: var(--color-red-500);
     background: linear-gradient(to right, rgba(254, 242, 242, 0.9), transparent 60%);
     color: var(--color-red-600);
 }
 
-/* 🔧 改写建议 H3 - 紫色 */
+/* 改写建议 H3 - 紫色 */
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(3) {
     border-left-color: var(--color-violet-500);
     background: linear-gradient(to right, rgba(245, 243, 255, 0.9), transparent 60%);
@@ -575,7 +575,9 @@
 /* === Blockquote 装饰图标 === */
 #kt-llm-analysis-result.markdown-content blockquote:first-of-type::before,
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(1)+blockquote::before {
-    content: '💡';
+    content: '\f0eb';
+    font-family: "Font Awesome 7 Free";
+    font-weight: 900;
     position: absolute;
     top: -0.625rem;
     left: 1rem;
@@ -587,7 +589,9 @@
 }
 
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(2)+blockquote::before {
-    content: '⚠️';
+    content: '\f071';
+    font-family: "Font Awesome 7 Free";
+    font-weight: 900;
     position: absolute;
     top: -0.625rem;
     left: 1rem;
@@ -620,14 +624,15 @@
     position: relative;
 }
 
-/* 🔴 原文 / 问题 */
+/* 原文 / 问题 */
 #kt-llm-analysis-result.markdown-content li:nth-child(3n+1)::before {
-    content: '✕';
+    content: '\f00d';
+    font-family: "Font Awesome 7 Free";
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
     font-size: 0.65rem;
-    font-weight: 800;
+    font-weight: 900;
     color: var(--color-red-300);
     width: 1.25rem;
     height: 1.25rem;
@@ -638,14 +643,15 @@
     background: rgba(254, 226, 226, 0.6);
 }
 
-/* 🟢 改写 / 建议 */
+/* 改写 / 建议 */
 #kt-llm-analysis-result.markdown-content li:nth-child(3n+2)::before {
-    content: '✓';
+    content: '\f00c';
+    font-family: "Font Awesome 7 Free";
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
     font-size: 0.7rem;
-    font-weight: 800;
+    font-weight: 900;
     color: var(--color-emerald-300);
     width: 1.25rem;
     height: 1.25rem;
@@ -656,14 +662,15 @@
     background: rgba(209, 250, 229, 0.6);
 }
 
-/* 🔵 说明 / 注释 */
+/* 说明 / 注释 */
 #kt-llm-analysis-result.markdown-content li:nth-child(3n)::before {
-    content: 'ℹ';
+    content: '\f05a';
+    font-family: "Font Awesome 7 Free";
     position: absolute;
     top: 0.625rem;
     right: 0.75rem;
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 900;
     color: var(--color-indigo-300);
     width: 1.25rem;
     height: 1.25rem;

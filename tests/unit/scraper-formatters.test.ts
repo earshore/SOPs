@@ -16,31 +16,30 @@ import {
 } from '@/modules/app_center/views/master_analysis/scraper/utils/formatters';
 
 describe('Scraper 格式化工具', () => {
-  describe('getFlag - 获取国旗 emoji', () => {
-    it('应该返回正确的国旗 emoji', () => {
-      expect(getFlag('DE')).toBe('🇩🇪');
-      expect(getFlag('FR')).toBe('🇫🇷');
-      expect(getFlag('IT')).toBe('🇮🇹');
-      expect(getFlag('ES')).toBe('🇪🇸');
-      expect(getFlag('NL')).toBe('🇳🇱');
-      expect(getFlag('SE')).toBe('🇸🇪');
-      expect(getFlag('PL')).toBe('🇵🇱');
-      expect(getFlag('BE')).toBe('🇧🇪');
-      expect(getFlag('IE')).toBe('🇮🇪');
-      expect(getFlag('UK')).toBe('🇬🇧');
-      expect(getFlag('GB')).toBe('🇬🇧');
+  describe('getFlag - 获取站点代码徽章文本', () => {
+    it('应该返回正确的站点代码', () => {
+      expect(getFlag('DE')).toBe('DE');
+      expect(getFlag('FR')).toBe('FR');
+      expect(getFlag('IT')).toBe('IT');
+      expect(getFlag('ES')).toBe('ES');
+      expect(getFlag('NL')).toBe('NL');
+      expect(getFlag('SE')).toBe('SE');
+      expect(getFlag('PL')).toBe('PL');
+      expect(getFlag('BE')).toBe('BE');
+      expect(getFlag('IE')).toBe('IE');
+      expect(getFlag('UK')).toBe('UK');
+      expect(getFlag('GB')).toBe('GB');
     });
 
-    it('应该为未知站点返回默认国旗', () => {
-      expect(getFlag('US')).toBe('🏳️');
-      expect(getFlag('UNKNOWN')).toBe('🏳️');
-      expect(getFlag('')).toBe('🏳️');
+    it('应该为标准未知站点代码返回原代码', () => {
+      expect(getFlag('US')).toBe('US');
     });
 
-    it('应该处理大小写', () => {
-      // 当前实现区分大小写，如果需要不区分需要修改实现
-      expect(getFlag('de')).toBe('🏳️');
-      expect(getFlag('De')).toBe('🏳️');
+    it('应该为无效站点返回占位文本', () => {
+      expect(getFlag('UNKNOWN')).toBe('--');
+      expect(getFlag('')).toBe('--');
+      expect(getFlag('de')).toBe('--');
+      expect(getFlag('De')).toBe('--');
     });
   });
 
@@ -226,7 +225,7 @@ describe('Scraper 格式化工具', () => {
       const name = getSiteName(site);
       const domain = getSiteDomain(site);
 
-      expect(flag).toBe('🇩🇪');
+      expect(flag).toBe('DE');
       expect(name).toBe('德国');
       expect(domain).toBe('amazon.de');
     });
@@ -235,7 +234,7 @@ describe('Scraper 格式化工具', () => {
       const sites = ['DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'IE', 'UK'];
 
       sites.forEach(site => {
-        expect(getFlag(site)).not.toBe('🏳️');
+        expect(getFlag(site)).toBe(site);
         expect(getSiteName(site)).not.toBe(site);
         expect(getSiteDomain(site)).toContain('amazon.');
       });
@@ -244,7 +243,7 @@ describe('Scraper 格式化工具', () => {
     it('应该为未知站点提供合理的默认值', () => {
       const unknownSite = 'UNKNOWN';
 
-      expect(getFlag(unknownSite)).toBe('🏳️');
+      expect(getFlag(unknownSite)).toBe('--');
       expect(getSiteName(unknownSite)).toBe(unknownSite);
       expect(getSiteDomain(unknownSite)).toBe('amazon.com');
     });

@@ -125,7 +125,7 @@ const pushRecordListField = (
  * title-keywords → Markdown
  */
 const titleKeywordsToMarkdown = (data: Record<string, unknown>): string => {
-  const lines: string[] = ["#### 🔑 Title Core Keywords"];
+  const lines: string[] = ["#### Title Core Keywords"];
 
   pushRecordArrayField(
     lines,
@@ -170,7 +170,7 @@ const titleKeywordsToMarkdown = (data: Record<string, unknown>): string => {
  * selling-points → Markdown
  */
 const sellingPointsToMarkdown = (data: Record<string, unknown>): string => {
-  const lines: string[] = ["#### 💎 Selling Points Structure"];
+  const lines: string[] = ["#### Selling Points Structure"];
 
   pushSellingStrategyLines(lines, data.overall_strategy);
   pushSellingSceneMatrixLines(lines, data.function_scene_matrix);
@@ -233,7 +233,7 @@ const formatBulletAnalysisLine = (bullet: Record<string, unknown>): string => {
  * fatal-flaws → Markdown
  */
 const fatalFlawsToMarkdown = (data: Record<string, unknown>): string => {
-  const lines: string[] = ["#### ⚠️ Fatal Flaws (Competitor Issues)"];
+  const lines: string[] = ["#### Fatal Flaws (Competitor Issues)"];
 
   pushRiskAssessmentLine(lines, data.risk_assessment);
   pushCriticalIssueLines(lines, data.critical_issues);
@@ -287,7 +287,7 @@ const pushExpectationGapLines = (lines: string[], gaps: unknown): void => {
  * wow-moments → Markdown
  */
 const wowMomentsToMarkdown = (data: Record<string, unknown>): string => {
-  const lines: string[] = ["#### ✨ Wow Moments (Customer Delight)"];
+  const lines: string[] = ["#### Wow Moments (Customer Delight)"];
 
   pushInlineArrayField(lines, data, "high_conversion_phrases", "High Conversion Phrases");
   pushInlineArrayField(lines, data, "copywriting_angles", "Copywriting Angles");
@@ -319,7 +319,7 @@ const pushWowMomentLines = (lines: string[], moments: unknown): void => {
  * hesitation-points → Markdown
  */
 const hesitationPointsToMarkdown = (data: Record<string, unknown>): string => {
-  const lines: string[] = ["#### 🤔 Hesitation Points (Pre-Purchase Worries)"];
+  const lines: string[] = ["#### Hesitation Points (Pre-Purchase Worries)"];
 
   pushInlineArrayField(lines, data, "common_doubts", "Common Doubts");
   pushInlineArrayField(lines, data, "trust_builders", "Trust Builders");
@@ -356,7 +356,7 @@ const pushQaOptimizationLines = (lines: string[], qaItems: unknown): void => {
  * buyer-profile → Markdown
  */
 const buyerProfileToMarkdown = (data: Record<string, unknown>): string => {
-  const lines: string[] = ["#### 👤 Buyer Profile"];
+  const lines: string[] = ["#### Buyer Profile"];
 
   pushBuyerDemographicsLine(lines, data.demographics);
   pushBuyerGeographyLines(lines, data.geographic_insights);
@@ -407,7 +407,7 @@ const pushBuyerGeographyLines = (
  * vocab-gap → Markdown
  */
 const vocabGapToMarkdown = (data: Record<string, unknown>): string => {
-  const lines: string[] = ["#### 📝 Vocabulary Gap Analysis"];
+  const lines: string[] = ["#### Vocabulary Gap Analysis"];
 
   pushRecordListField(
     lines,
@@ -444,7 +444,7 @@ const pushListingOptimizationLines = (
  * promise-reality → Markdown
  */
 const promiseRealityToMarkdown = (data: Record<string, unknown>): string => {
-  const lines: string[] = ["#### 🎯 Promise vs Reality"];
+  const lines: string[] = ["#### Promise vs Reality"];
 
   pushOverallCredibilityLine(lines, data.overall_credibility);
   pushRecordListField(lines, data.gaps, "Critical Gaps", 4, formatRealityGapLine);

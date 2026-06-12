@@ -3,14 +3,10 @@
  */
 
 /**
- * 获取国旗emoji
+ * 获取站点代码徽章文本
  */
 export function getFlag(site: string): string {
-    const map: Record<string, string> = {
-        DE: '🇩🇪', FR: '🇫🇷', IT: '🇮🇹', ES: '🇪🇸', NL: '🇳🇱',
-        SE: '🇸🇪', PL: '🇵🇱', BE: '🇧🇪', IE: '🇮🇪', UK: '🇬🇧', GB: '🇬🇧'
-    };
-    return map[site] || '🏳️';
+    return /^[A-Z]{2}$/.test(site) ? site : '--';
 }
 
 /**

@@ -456,7 +456,7 @@ function warnLargeImportFiles(files: File[]): void {
     const largeFiles = files.filter(file => file.size > LARGE_IMPORT_FILE_SIZE && file.size <= MAX_IMPORT_FILE_SIZE);
     if (largeFiles.length === 0) return;
 
-    showToast(`⚠️ 检测到大文件，处理可能需要较长时间`, { type: 'warning' });
+    showToast(`检测到大文件，处理可能需要较长时间`, { type: 'warning' });
 }
 
 function validateNonEmptyImportFiles(files: File[]): void {
@@ -533,18 +533,18 @@ function createImportedScrapedData(finalProducts: ProductData[], targetMarketpla
 
 function createImportUserMessage(errorMessage: string): string {
     if (errorMessage.includes('格式错误') || errorMessage.includes('JSON')) {
-        return `❌ JSON格式错误: ${errorMessage}`;
+        return `JSON格式错误: ${errorMessage}`;
     }
 
     if (errorMessage.includes('读取文件')) {
-        return `❌ 文件读取失败: ${errorMessage}`;
+        return `文件读取失败: ${errorMessage}`;
     }
 
     if (errorMessage.includes('未找到有效')) {
-        return `❌ ${errorMessage}`;
+        return errorMessage;
     }
 
-    return `❌ 导入出错: ${errorMessage}`;
+    return `导入出错: ${errorMessage}`;
 }
 
 /**
@@ -558,7 +558,7 @@ export async function handleImportFiles(
     try {
         validateImportFiles(files);
 
-        showToast(`📂 正在解析 ${files.length} 个文件...`, { type: 'info' });
+        showToast(`正在解析 ${files.length} 个文件...`, { type: 'info' });
 
         const fileContents = await Promise.all(files.map(f => readFileAsJSON(f)));
         const productPool: ImportedProductPool = new Map();
@@ -592,7 +592,7 @@ export async function handleImportFiles(
         eventBus.emit(APP_EVENTS.DATA_UPDATED);
         emitHistoryUpdated();
 
-        showToast(`✅ 成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, { type: 'success' });
+        showToast(`成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, { type: 'success' });
 
         return { success: true, data: scrapedData };
 

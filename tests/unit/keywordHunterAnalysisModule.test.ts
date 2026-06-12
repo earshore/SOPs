@@ -180,6 +180,7 @@ describe('Keyword Hunter analysis module', () => {
     expect(container.querySelector('h2')?.style.color).toBe('rgb(255, 255, 255)');
     expect(container.querySelector('.score-progress-bar')).not.toBeNull();
     expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
+    expect(container.querySelector('#kt-llm-analysis-result')?.textContent).not.toContain('✅');
     expect(container.querySelector('.row-risk')).not.toBeNull();
     expect(container.querySelector('.row-low')).not.toBeNull();
 
@@ -232,7 +233,7 @@ describe('Keyword Hunter analysis module', () => {
     );
     expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
     expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
-    expect(showToast).toHaveBeenCalledWith('报告生成成功 ✨', { type: 'success' });
+    expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
   });
 
   it('warns on empty copy and renders validation errors without reporting to ErrorService', async () => {

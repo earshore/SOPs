@@ -81,6 +81,16 @@ function escapeHtml(text: string): string {
   return div.innerHTML;
 }
 
+function normalizeReportMarkdown(markdown: string): string {
+  const structuralEmoji =
+    "(?:\\u{1F3C6}|\\u{1F4CA}|\\u{1F50D}|\\u{1F3AF}|\\u{1F916}|\\u270D\\uFE0F?|\\u26A0\\uFE0F?|\\u{1F6A8}|\\u{1F527}|\\u2705|\\u{1F7E2}|\\u{1F7E1}|\\u{1F534}|\\u2728|\\u{1F4A1})";
+  return markdown
+    .replace(new RegExp(`^(#{1,6}\\s*)${structuralEmoji}\\s*`, "gmu"), "$1")
+    .replace(new RegExp(`^(\\|\\s*)${structuralEmoji}\\s*`, "gmu"), "$1")
+    .replace(new RegExp(`(\\|\\s*)${structuralEmoji}\\s*`, "gu"), "$1")
+    .replace(new RegExp(`^(>\\s*)${structuralEmoji}\\s*`, "gmu"), "$1");
+}
+
 // ==========================================
 // Markdown 渲染工具
 // ==========================================
@@ -92,20 +102,21 @@ function escapeHtml(text: string): string {
  */
 function parseMarkdownToHtml(markdown: string): string {
   if (!markdown || !markdown.trim()) return "";
+  const normalizedMarkdown = normalizeReportMarkdown(markdown);
   try {
-    const result = marked.parse(markdown);
+    const result = marked.parse(normalizedMarkdown);
     if (typeof result === "string" && result.trim()) {
       return result;
     }
     // result 是 Promise（不应发生，但做保护）
-    return `<pre class="whitespace-pre-wrap text-sm text-slate-600 leading-relaxed">${escapeHtml(markdown)}</pre>`;
+    return `<pre class="whitespace-pre-wrap text-sm text-slate-600 leading-relaxed">${escapeHtml(normalizedMarkdown)}</pre>`;
   } catch (err) {
     ErrorService.handle(err as Error, {
       action: "parseMarkdownToHtml",
       module: "keywordAnalysis",
       notify: false,
     });
-    return `<pre class="whitespace-pre-wrap text-sm text-slate-600 leading-relaxed">${escapeHtml(markdown)}</pre>`;
+    return `<pre class="whitespace-pre-wrap text-sm text-slate-600 leading-relaxed">${escapeHtml(normalizedMarkdown)}</pre>`;
   }
 }
 
@@ -136,7 +147,7 @@ function renderReport(container: HTMLElement, markdown: string): void {
 
 /**
  * 保存分析状态到 state。
- * ⚠️ 只保存原始 Markdown 文本，不保存渲染后的 HTML，
+ * 只保存原始 Markdown 文本，不保存渲染后的 HTML，
  * 以避免恢复时 highlightScores 二次处理产生重复徽章。
  */
 function saveAnalysisStateToState(): void {
@@ -365,7 +376,7 @@ function handleAnalysisSuccess(
   // 保存原始 Markdown 到 state
   saveAnalysisStateToState();
 
-  showToast("报告生成成功 ✨", { type: "success" });
+  showToast("报告生成成功", { type: "success" });
 }
 
 function isValidationAnalysisError(error: Error): boolean {
@@ -492,7 +503,6 @@ interface ScoreRatio {
 
 interface ScoreBadgeStyle {
   badgeClass: string;
-  icon: string;
   rowClass?: string;
 }
 
@@ -518,24 +528,24 @@ function parseScoreRatio(rawText: string): ScoreRatio | null {
 
 function getScoreBadgeStyle(ratio: number): ScoreBadgeStyle {
   if (ratio >= 0.75) {
-    return { badgeClass: "score-badge-high", icon: "🟢" };
+    return { badgeClass: "score-badge-high" };
   }
 
   if (ratio >= 0.5) {
-    return { badgeClass: "score-badge-mid", icon: "🟡" };
+    return { badgeClass: "score-badge-mid" };
   }
 
-  return { badgeClass: "score-badge-low", icon: "🔴", rowClass: "row-low" };
+  return { badgeClass: "score-badge-low", rowClass: "row-low" };
 }
 
 function isRiskScoreText(rawText: string): boolean {
-  return rawText.includes("-10") || rawText.includes("🚨");
+  return rawText.includes("-10") || rawText.includes("\u{1F6A8}");
 }
 
 function isPassingScoreText(rawText: string): boolean {
   return (
     rawText.includes("+0") ||
-    rawText.includes("✅") ||
+    rawText.includes("\u2705") ||
     rawText.includes("通过") ||
     rawText === "0"
   );
@@ -553,7 +563,7 @@ function highlightRatioScore(tr: Element, td: HTMLElement, rawText: string): voi
   setScoreBadge(
     td,
     style.badgeClass,
-    `${style.icon} ${scoreRatio.score}/${scoreRatio.max}`,
+    `${scoreRatio.score}/${scoreRatio.max}`,
   );
 }
 
@@ -567,16 +577,16 @@ function highlightScoreRow(tr: Element): void {
   // 清除旧状态类，防止重复调用时污染
   tr.classList.remove("row-total", "row-low", "row-risk");
 
-  // —— 违规触发（-10 / 🚨） ——
+  // 违规触发
   if (isRiskScoreText(rawText)) {
     tr.classList.add("row-risk");
-    setScoreBadge(td2, "score-badge-low", "🚨 -10");
+    setScoreBadge(td2, "score-badge-low", "-10");
     return;
   }
 
-  // —— 违规通过（+0 / ✅ / 通过 / 0） ——
+  // 违规通过
   if (isPassingScoreText(rawText)) {
-    setScoreBadge(td2, "score-badge-high", "✅ +0");
+    setScoreBadge(td2, "score-badge-high", "+0");
     return;
   }
 
@@ -643,8 +653,8 @@ function highlightTotalScoreTitle(container: HTMLElement): void {
  * 增强评分表格和总分标题的视觉呈现。
  *
  * 行分类规则（按内容语义，不依赖行位置）：
- *  1. 包含 -10 / 🚨 → 违规触发行（红色）
- *  2. 包含 +0 / ✅ / 通过，或以 "0" 结尾 → 违规通过行（绿色）
+ *  1. 包含 -10 或风险提示 → 违规触发行（红色）
+ *  2. 包含 +0 / 通过，或以 "0" 结尾 → 违规通过行（绿色）
  *  3. 包含 N/M 数字比 → 按得分率显示彩色徽章
  */
 function highlightScores(container: HTMLElement): void {

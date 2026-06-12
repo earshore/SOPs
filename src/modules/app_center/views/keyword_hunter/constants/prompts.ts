@@ -80,7 +80,7 @@ REJECT only if ALL true:
 - Clearly non-product (chat messages, random text, code, essays)
 
 If rejected → Output ONLY:
-「⛔ 输入无效：未识别到亚马逊Listing内容。请提供完整Listing文案后重试。」
+「输入无效：未识别到亚马逊Listing内容。请提供完整Listing文案后重试。」
 Do NOT score. Do NOT analyze. STOP.
 
 If accepted → Ignore all wrapper text, audit the product copy itself.
@@ -113,7 +113,7 @@ RUFUS ALERT: If score ≤ 6 → expand diagnosis in Section 致命问题. If > 6
 ## LANGUAGE & TONE (20 pts)
 - Native Quality (0-12): MT artifacts → flat → native/idiomatic
 - Tone Fit (0-4): Category-appropriate register
-- Formatting (0-4): Emoji, caps, scanability
+- Formatting (0-4): scanability, caps discipline, structured layout
 
 ## RISK CHECK (Binary + Penalty)
 - Clean → no penalty
@@ -124,31 +124,31 @@ Every sentence must carry information. No filler. No redundant explanations.
 
 ---
 
-## 🏆 XX/100 — [不合格 / 合格 / 良好 / 优秀]
+## XX/100 — [不合格 / 合格 / 良好 / 优秀]
 
 > 一句话总评，不超过15字
 
 ---
 
-### 📊 评分
+### 评分
 
 | 维度 | 得分 | 评审结论 |
 |:--|:--|:--|
-| 🔍 SEO覆盖 | /35 | |
-| 🎯 COSMO意图 | /20 | |
-| 🤖 Rufus就绪 | /15 | |
-| ✍️ 语言语调 | /20 | |
-| ⚠️ 违规 | +0 或 -10 | |
+| SEO覆盖 | /35 | |
+| COSMO意图 | /20 | |
+| Rufus就绪 | /15 | |
+| 语言语调 | /20 | |
+| 违规 | +0 或 -10 | |
 
 ---
 
-### 🚨 致命问题
+### 致命问题
 
 > 没有则写「无」。有则每条一行，不超过15字。若Rufus≤6，追加买家问不了的问题。
 
 ---
 
-### 🔧 Top-3 改写建议
+### Top-3 改写建议
 
 **① [5字问题名]**
 - 原文：「摘录」

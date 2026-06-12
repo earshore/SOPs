@@ -4,7 +4,7 @@
 // 在所有测试运行前执行
 // ================================================================
 
-import { chromium, FullConfig } from '@playwright/test';
+import { FullConfig } from '@playwright/test';
 import { ScreenshotManager } from './helpers/screenshot-manager';
 
 /**
@@ -29,15 +29,19 @@ async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0].use.baseURL || 'http://localhost:5173';
   
   try {
-    const browser = await chromium.launch();
-    const page = await browser.newPage();
-    
-    console.log(`📡 检查开发服务器: ${baseURL}`);
-    await page.goto(baseURL, { timeout: 10000 });
-    
-    console.log('✅ 开发服务器已就绪');
-    
-    await browser.close();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    try {
+      console.log(`📡 检查开发服务器: ${baseURL}`);
+      const response = await fetch(baseURL, { signal: controller.signal });
+      if (!response.ok) {
+        throw new Error(`开发服务器响应异常: ${response.status} ${response.statusText}`);
+      }
+      
+      console.log('✅ 开发服务器已就绪');
+    } finally {
+      clearTimeout(timeoutId);
+    }
   } catch (error) {
     console.error('❌ 开发服务器未启动或无法访问');
     console.error('请先运行: npm run dev');

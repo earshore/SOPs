@@ -10,11 +10,13 @@ import { appStore } from '@/stores/useAppStore';
 import SITE_CONFIGS from '../../../../../../common/constants/constants';
 import type { TargetMarket } from '@/types/state';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
+import { analysisTargets } from '../../ai_analysis/config/analysisTargets';
 import { getFieldTitle, getPreviewText } from './previewExtractor';
 import { getTargetConfidence, getConfidenceColorClass, getConfidenceAriaLabel, computeHasReport } from './computed';
 import type { PromptlabAlpineContext } from './types';
 
 type ReportRecord = Record<string, unknown>;
+type TargetConfig = { title: string; iconClass: string; color: string };
 type WrappedAnalysisReport = ReportRecord & {
   analysisReport: unknown;
 };
@@ -194,19 +196,39 @@ export function renderReportModules(
 // 新格式报告模块渲染
 // ==========================================
 
-const TARGET_CONFIG: Record<string, { title: string; icon: string }> = {
-  'title-keywords':    { title: '标题核心词根', icon: '🔑' },
-  'selling-points':    { title: '卖点结构拆解', icon: '💎' },
-  'fatal-flaws':       { title: '致命缺陷',     icon: '⚠️' },
-  'wow-moments':       { title: 'Wow时刻',       icon: '✨' },
-  'hesitation-points': { title: '犹豫点',        icon: '🤔' },
-  'buyer-profile':     { title: '买家画像',      icon: '👤' },
-  'vocab-gap':         { title: '词汇缺口',      icon: '📝' },
-  'promise-reality':   { title: '承诺与现实',    icon: '🎯' },
+const TARGET_CONFIG = Object.fromEntries(
+  analysisTargets.map(({ id, name, icon, color }) => [
+    id,
+    { title: name, iconClass: icon, color },
+  ]),
+) as Record<string, TargetConfig>;
+
+const DEFAULT_TARGET_ICON_TONE_CLASS = 'bg-blue-50 text-blue-600 border-blue-100';
+
+const TARGET_ICON_TONE_CLASSES: Record<string, string> = {
+  amber: 'bg-amber-50 text-amber-600 border-amber-100',
+  blue: DEFAULT_TARGET_ICON_TONE_CLASS,
+  cyan: 'bg-cyan-50 text-cyan-600 border-cyan-100',
+  orange: 'bg-orange-50 text-orange-600 border-orange-100',
+  purple: 'bg-purple-50 text-purple-600 border-purple-100',
+  red: 'bg-red-50 text-red-600 border-red-100',
+  rose: 'bg-rose-50 text-rose-600 border-rose-100',
+  teal: 'bg-teal-50 text-teal-600 border-teal-100',
 };
 
 function hasNewFormatTargets(report: ReportRecord | null): boolean {
   return !!report && Object.keys(report).some((key) => TARGET_CONFIG[key] && report[key]);
+}
+
+function renderTargetIcon(config: TargetConfig): string {
+  const toneClass = TARGET_ICON_TONE_CLASSES[config.color] ?? DEFAULT_TARGET_ICON_TONE_CLASS;
+
+  return `
+    <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border ${escapeHtml(toneClass)}"
+          aria-hidden="true">
+      <i class="${escapeHtml(config.iconClass)} text-xs"></i>
+    </span>
+  `;
 }
 
 // Display-only labels; raw report keys still drive selection and prompt injection.
@@ -314,8 +336,9 @@ export function renderNewFormatModules(
                  :indeterminate.prop="isPartiallySelected('${escapeHtml(targetId)}')"
                  @change="onDimensionToggle('${escapeHtml(targetId)}')"
                  @click.stop>
-          <label class="flex-1 font-medium text-slate-700 cursor-pointer select-none">
-            ${config.icon} ${escapeHtml(config.title)}
+          <label class="flex-1 inline-flex items-center gap-2 font-medium text-slate-700 cursor-pointer select-none min-w-0">
+            ${renderTargetIcon(config)}
+            <span class="truncate">${escapeHtml(config.title)}</span>
           </label>
           ${hasConfidence ? `
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border shrink-0 ${escapeHtml(getConfidenceColorClass(confidencePct))}"

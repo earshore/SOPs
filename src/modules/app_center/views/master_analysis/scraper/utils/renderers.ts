@@ -57,10 +57,6 @@ type ProductCardViewModel = ProductCardOptions & {
     status: StatusBadgeConfig;
 };
 
-const LANGUAGE_FLAG_MAP: Record<string, string> = {
-    DE: '🇩🇪', FR: '🇫🇷', IT: '🇮🇹', ES: '🇪🇸', NL: '🇳🇱',
-    SE: '🇸🇪', PL: '🇵🇱', BE: '🇧🇪', IE: '🇮🇪', UK: '🇬🇧', GB: '🇬🇧'
-};
 const DEFAULT_STATUS: StatusBadgeConfig = {
     className: "bg-amber-100 text-amber-700 border-amber-200",
     icon: "fa-exclamation-circle",
@@ -85,7 +81,7 @@ function createProductCardViewModel(options: ProductCardOptions): ProductCardVie
         ...options,
         product,
         siteKey,
-        flag: LANGUAGE_FLAG_MAP[siteKey] || "🌐",
+        flag: siteKey,
         status: STATUS_CONFIG[product.scrape_status || 'partial'] || DEFAULT_STATUS,
     };
 }
@@ -105,7 +101,7 @@ function renderProductCardHeader(viewModel: ProductCardViewModel): string {
     return `
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-3">
-                    <span class="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-br from-black-500 to-white-600 rounded-xl shadow-md">${flag}</span>
+                    <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-2 font-mono text-[10px] font-bold text-slate-600 shadow-sm">${flag}</span>
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="font-mono text-base font-bold text-slate-800 tracking-tight">${product.asin}</span>

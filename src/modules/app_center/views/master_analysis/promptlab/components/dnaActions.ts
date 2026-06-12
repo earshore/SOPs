@@ -592,7 +592,7 @@ export async function autoPopulateDNA(ctx: PromptlabAlpineContext): Promise<void
     : '';
 
   showToast(
-    `✅ 已从报告填充高置信度 DNA 字段：${filledLabels}${blockedHint}`,
+    `已从报告填充高置信度 DNA 字段：${filledLabels}${blockedHint}`,
     { type: 'success' },
   );
 
@@ -644,7 +644,7 @@ export async function extractSingleField(
     ? '，低于自动填充阈值，请人工复核'
     : '';
   showToast(
-    `✅ 已重新提取${config.label} (置信度: ${confidence}%)${lowConfidenceHint}`,
+    `已重新提取${config.label} (置信度: ${confidence}%)${lowConfidenceHint}`,
     { type: confidence >= AUTO_POPULATE_CONFIDENCE_THRESHOLD ? 'success' : 'warning' },
   );
 }
