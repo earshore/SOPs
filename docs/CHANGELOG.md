@@ -26,6 +26,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.9] - 2026-06-13
+
+### Changed
+- NPI Tracker 改用 `data-action` 操作绑定，并更新页面对象和端到端测试。
+- Deep Chat prompt preview 支持 pointer-aware 交互。
+- 同步应用内版本显示到 `3.0.3-rc.9`。
+
+### Fixed
+- 为 NPI Tracker 高风险操作增加确认弹窗覆盖。
+- 放宽表格渲染耗时断言到 5000ms，降低环境抖动导致的误报。
+
 ## [3.0.3-rc.8] - 2026-06-12
 
 ### Added

@@ -1143,25 +1143,15 @@ function positionPromptPreview(
   const previewWidth = Math.min(520, Math.max(280, window.innerWidth - viewportPadding * 2));
   const previewHeight = Math.min(520, Math.max(260, window.innerHeight - 160));
   const anchoredLeft = Math.round((railRect?.right || 0) + gap);
-  const pointerLeft = pointer ? pointer.clientX + gap : anchoredLeft;
-  const pointerFallbackLeft = pointer ? pointer.clientX - previewWidth - gap : anchoredLeft;
-  const preferredLeft = pointer && pointerLeft + previewWidth > window.innerWidth - viewportPadding
-    ? pointerFallbackLeft
-    : pointerLeft;
   const maxLeft = Math.max(viewportPadding, window.innerWidth - previewWidth - viewportPadding);
-  const left = Math.round(Math.min(Math.max(preferredLeft, viewportPadding), maxLeft));
+  const preferredLeft = resolvePromptPreviewLeft(pointer, anchoredLeft, previewWidth, gap, viewportPadding);
+  const left = Math.round(clampNumber(preferredLeft, viewportPadding, maxLeft));
   const anchoredTop = anchorRect?.top ?? (railRect ? railRect.top + 88 : 118);
-  const pointerTop = pointer ? pointer.clientY + gap : anchoredTop;
-  const pointerFallbackTop = pointer ? pointer.clientY - previewHeight - gap : anchoredTop;
-  const preferredTop = pointer && pointerTop + previewHeight > window.innerHeight - viewportPadding
-    ? pointerFallbackTop
-    : pointerTop;
   const minTop = 72;
   const maxTop = Math.max(minTop, window.innerHeight - previewHeight - 24);
-  const top = Math.round(Math.min(Math.max(preferredTop, minTop), maxTop));
-  const arrowTop = pointer
-    ? Math.round(Math.min(Math.max(pointer.clientY - top - 6, 16), Math.max(16, previewHeight - 24)))
-    : 28;
+  const preferredTop = resolvePromptPreviewTop(pointer, anchoredTop, previewHeight, gap, viewportPadding);
+  const top = Math.round(clampNumber(preferredTop, minTop, maxTop));
+  const arrowTop = resolvePromptPreviewArrowTop(pointer, top, previewHeight);
 
   preview.style.left = `${left}px`;
   preview.style.top = `${top}px`;
@@ -1169,6 +1159,60 @@ function positionPromptPreview(
   preview.style.maxHeight = `${previewHeight}px`;
   preview.style.setProperty('--playground-prompt-preview-arrow-top', `${arrowTop}px`);
   preview.style.setProperty('--playground-prompt-preview-body-max-height', `${Math.max(180, previewHeight - 48)}px`);
+}
+
+function resolvePromptPreviewLeft(
+  pointer: PromptPreviewPointer | undefined,
+  anchoredLeft: number,
+  previewWidth: number,
+  gap: number,
+  viewportPadding: number
+): number {
+  if (!pointer) {
+    return anchoredLeft;
+  }
+
+  const pointerLeft = pointer.clientX + gap;
+  if (pointerLeft + previewWidth > window.innerWidth - viewportPadding) {
+    return pointer.clientX - previewWidth - gap;
+  }
+
+  return pointerLeft;
+}
+
+function resolvePromptPreviewTop(
+  pointer: PromptPreviewPointer | undefined,
+  anchoredTop: number,
+  previewHeight: number,
+  gap: number,
+  viewportPadding: number
+): number {
+  if (!pointer) {
+    return anchoredTop;
+  }
+
+  const pointerTop = pointer.clientY + gap;
+  if (pointerTop + previewHeight > window.innerHeight - viewportPadding) {
+    return pointer.clientY - previewHeight - gap;
+  }
+
+  return pointerTop;
+}
+
+function resolvePromptPreviewArrowTop(
+  pointer: PromptPreviewPointer | undefined,
+  top: number,
+  previewHeight: number
+): number {
+  if (!pointer) {
+    return 28;
+  }
+
+  return Math.round(clampNumber(pointer.clientY - top - 6, 16, Math.max(16, previewHeight - 24)));
+}
+
+function clampNumber(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
 }
 
 function schedulePromptPreviewHide(container: HTMLElement): void {
