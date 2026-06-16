@@ -217,6 +217,9 @@ test-new-llm-service.html
 # ==============================================================================
 # 10. Project Specific
 # ==============================================================================
+# Vercel
+.vercel
+
 # Cloudflare Workers
 .wrangler/
 wrangler.toml.local
