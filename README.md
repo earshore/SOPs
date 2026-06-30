@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 LLM 网关；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按最新远端 tag `v3.0.3-rc.9`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按最新远端 tag `v3.0.3-rc.10`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,7 +10,7 @@ sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团�
 
 ## 最新发布
 
-当前最新 tag 是 `v3.0.3-rc.9`（2026-06-13，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.9` 聚焦 NPI Tracker 操作安全、Deep Chat prompt preview 交互和测试稳定性，`v3.0.3` 系列累计带来以下面向运营的变化：
+当前最新 tag 是 `v3.0.3-rc.10`（2026-06-30，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.10` 聚焦 Master Analysis 数据一致性、Promptlab 生成上下文和部署兼容性，`v3.0.3` 系列累计带来以下面向运营的变化：
 
 - 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
 - 新增工作流导向条和统一确认弹窗，减少高风险数据操作误触。
@@ -19,7 +19,10 @@ sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团�
 - 统一报告与状态文案中的图标渲染，减少 emoji 依赖。
 - NPI Tracker 改用 `data-action` 操作绑定并增加确认弹窗覆盖。
 - Deep Chat prompt preview 支持 pointer-aware 交互并补充回归测试。
-- 同步应用内版本显示到 `3.0.3-rc.9`。
+- AI Analysis 报告绑定 scraped-data 指纹，减少旧报告与新采集数据混用。
+- Promptlab 拆分 readiness 状态并补充 SEO context，提升生成提示词的输入完整性。
+- 增加 Vercel 部署兼容配置，同时保留 Cloudflare Pages 作为生产部署链路。
+- 同步应用内版本显示到 `3.0.3-rc.10`。
 
 ## 快速开始
 

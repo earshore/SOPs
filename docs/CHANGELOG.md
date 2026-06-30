@@ -26,6 +26,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.10] - 2026-06-30
+
+### Added
+- 新增 Vercel 部署配置和静态资源路由兼容设置。
+- 新增 Master Analysis 报告身份指纹服务及相关单元测试。
+
+### Changed
+- AI Analysis 报告绑定 scraped-data 指纹，减少旧报告与新采集数据混用。
+- Promptlab 拆分 readiness 状态并补充 SEO context。
+- 同步应用内版本显示到 `3.0.3-rc.10`。
+
+### Fixed
+- 将构建配置文件从符号链接转换为常规文件，提升 Vercel 构建兼容性。
+
 ## [3.0.3-rc.9] - 2026-06-13
 
 ### Changed
