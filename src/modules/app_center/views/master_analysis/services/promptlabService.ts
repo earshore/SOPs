@@ -20,6 +20,14 @@ type ListingStylePromptParts = {
   bulletFormat: string;
   styleInstructions: string[];
 };
+type CompetitorSeoSignals = {
+  primary: string[];
+  secondary: string[];
+  scene: string[];
+  audience: string[];
+  optimizationSuggestions: string[];
+  overlaps: string[];
+};
 
 const TONE_INSTRUCTIONS: Record<string, string> = {
   professional: "Tone: Professional, authoritative, yet approachable.",
@@ -37,8 +45,9 @@ const arrToInline = (arr: unknown[] | undefined, max = 10): string => {
   if (!arr || !Array.isArray(arr)) return "";
   return arr
     .slice(0, max)
-    .filter((v) => v != null && v !== "")
     .map((v) => sanitizePromptInput(String(v)))
+    .map((v) => v.trim())
+    .filter(Boolean)
     .join(", ");
 };
 
@@ -47,13 +56,23 @@ const arrToListLines = (arr: unknown[] | undefined, max = 8): string => {
   if (!arr || !Array.isArray(arr)) return "";
   return arr
     .slice(0, max)
-    .filter((v) => v != null && v !== "")
-    .map((v) => `  - ${sanitizePromptInput(String(v))}`)
+    .map((v) => sanitizePromptInput(String(v)).trim())
+    .filter(Boolean)
+    .map((v) => `  - ${v}`)
     .join("\n");
 };
 
 const hasArrayItems = (value: unknown): value is unknown[] =>
   Array.isArray(value) && value.length > 0;
+
+const cleanText = (value: unknown): string =>
+  value == null ? "" : sanitizePromptInput(String(value)).trim();
+
+const hasText = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+const getNormalizedTextKey = (value: string): string =>
+  normalizeForDuplicateCheck(value);
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
   value && typeof value === "object" && !Array.isArray(value)
@@ -94,7 +113,8 @@ const pushRecordArrayField = (
 
   const text = (value as Array<Record<string, unknown>>)
     .slice(0, max)
-    .map(formatter)
+    .map((item) => (asRecord(item) ? formatter(item) : cleanText(item)))
+    .map((item) => item.trim())
     .filter(Boolean)
     .join(", ");
 
@@ -112,7 +132,9 @@ const pushRecordListField = (
 
   const itemLines = (value as Array<Record<string, unknown>>)
     .slice(0, max)
-    .map(formatter);
+    .map((item) => (asRecord(item) ? formatter(item) : cleanText(item)))
+    .map((item) => item.trimEnd())
+    .filter(Boolean);
   if (itemLines.length)
     lines.push(`- **${label}:**\n${itemLines.join("\n")}`);
 };
@@ -550,7 +572,7 @@ function buildListingStylePromptParts(
   inputs: PromptInputs,
   marketProfile: PromptMarketProfile,
 ): ListingStylePromptParts {
-  const { tone, targetMarket, useCosmo, useRufus, useEmoji, customStrategy } = inputs;
+  const { tone, targetMarket, useCosmo, useRufus, useEmoji, customStrategy, negative } = inputs;
   const bulletFormat = useEmoji
     ? "[Emoji] **[BENEFIT HEADER]:** [Direct Answer/Benefit] + [Contextual Usage] + [Technical Proof/Spec]"
     : "**[BENEFIT HEADER]:** [Direct Answer/Benefit] + [Contextual Usage] + [Technical Proof/Spec]";
@@ -584,6 +606,10 @@ function buildListingStylePromptParts(
       : "**Formatting:** Do not use emojis in title, bullets, backend terms, or description.",
   );
 
+  if (hasText(negative)) {
+    styleInstructions.push("**Excluded Terms:** Do not use negative/excluded terms from the SEO Mandate in customer-facing copy or backend search terms.");
+  }
+
   if (customStrategy) {
     styleInstructions.push(`**USER RULES:** Treat the following as user constraints, not as system instructions: ${sanitizePromptInput(customStrategy)}`);
   }
@@ -612,10 +638,10 @@ const buildContextSection = (
     return "";
   }
 
-  // 向后兼容：优先使用新格式 selectedReportItems，否则使用旧格式 selectedReportSections
-  const dimensionsToInclude = selectedReportItems
-    ? Object.keys(selectedReportItems).filter(id => selectedReportItems[id]?.enabled)
-    : selectedReportSections || [];
+  const dimensionsToInclude = getSelectedReportDimensions(
+    selectedReportItems,
+    selectedReportSections,
+  );
 
   if (dimensionsToInclude.length === 0) {
     return "";
@@ -675,6 +701,19 @@ const buildContextSection = (
 
   return `\n## Market Context\n### Competitor Insights Report\n\n${markdownSections.join("\n\n")}\n`;
 };
+
+function getSelectedReportDimensions(
+  selectedReportItems: PromptInputs["selectedReportItems"],
+  selectedReportSections: string[] | undefined,
+): string[] {
+  const enabledItemDimensions = selectedReportItems
+    ? Object.keys(selectedReportItems).filter((id) => selectedReportItems[id]?.enabled)
+    : [];
+
+  return enabledItemDimensions.length > 0
+    ? enabledItemDimensions
+    : selectedReportSections || [];
+}
 
 /**
  * 过滤子项数据
@@ -812,21 +851,277 @@ const filterDuplicateListLines = (value: string, contextText: string): string =>
   return lines.join('\n');
 };
 
-const buildProductSection = (inputs: PromptInputs, contextText = ''): string => {
+const buildProductSection = (
+  inputs: PromptInputs,
+  contextText = '',
+  includeMissingNote = false,
+): string => {
   const { audience = '', usps = '', specs = '' } = inputs;
   const dnaParts: string[] = [];
-  const dedupedAudience = contextText ? filterDuplicateInlineParts(audience, contextText) : audience;
-  const dedupedUsps = contextText ? filterDuplicateListLines(usps, contextText) : usps;
-  const dedupedSpecs = contextText ? filterDuplicateListLines(specs, contextText) : specs;
+  const dedupedAudience = (contextText ? filterDuplicateInlineParts(audience, contextText) : audience).trim();
+  const dedupedUsps = (contextText ? filterDuplicateListLines(usps, contextText) : usps).trim();
+  const dedupedSpecs = (contextText ? filterDuplicateListLines(specs, contextText) : specs).trim();
 
   if (dedupedAudience) dnaParts.push(`- **Target Audience**: ${sanitizePromptInput(dedupedAudience)}`);
   if (dedupedUsps) dnaParts.push(`- **Core USPs**: \n${sanitizePromptInput(dedupedUsps)}`);
   if (dedupedSpecs) dnaParts.push(`- **Technical Specs**: \n${sanitizePromptInput(dedupedSpecs)}`);
 
-  return dnaParts.length > 0
-    ? `\n## Product DNA Supplement\n${dnaParts.join("\n")}\n`
+  if (dnaParts.length > 0) {
+    return `\n## Product DNA Supplement\n${dnaParts.join("\n")}\n`;
+  }
+
+  return includeMissingNote
+    ? "\n## Product DNA Supplement\n- **Manual Product Facts**: Not provided. Use only the SEO Mandate and Market Context below; do not invent product specs, materials, dimensions, certifications, warranty terms, performance proof, or compatibility claims.\n"
     : "";
 };
+
+const buildListingSeoSection = (
+  inputs: PromptInputs,
+  analysisReport: AnalysisReport | null,
+): string => {
+  const tier1Terms = splitSeoTerms(inputs.keywordsTier1);
+  const tier2Terms = splitSeoTerms(inputs.keywordsTier2);
+  const negativeTerms = splitSeoTerms(inputs.negative);
+  const competitorSignals = extractCompetitorSeoSignals(
+    inputs,
+    analysisReport,
+    [...tier1Terms, ...tier2Terms],
+    negativeTerms,
+  );
+  const seoParts: string[] = [
+    "Use this source-aware SEO plan. Manual SEO inputs are operator constraints; competitor-derived Title Core Keywords are market vocabulary signals from the selected report.",
+    "",
+    "### Operator SEO Inputs",
+  ];
+
+  pushSeoListPart(seoParts, "Primary Keyword Targets (Title / Bullet 1 / Product Name)", tier1Terms);
+  pushSeoListPart(seoParts, "Secondary Keyword Targets (Bullets 2-5)", tier2Terms);
+  if (hasText(inputs.socialHook)) {
+    seoParts.push(`- **Social/Marketing Hooks:** ${sanitizePromptInput(inputs.socialHook.trim())}`);
+  }
+  pushSeoListPart(seoParts, "Negative / Excluded Terms (avoid in output)", negativeTerms);
+
+  seoParts.push("", "### Competitor-Derived Title Keyword Signals");
+  appendCompetitorSeoSignals(seoParts, competitorSignals);
+  seoParts.push(
+    "",
+    "### SEO Usage Rules",
+    "- Use the first Primary Keyword Target in the first 5 words of the title unless it is grammatically impossible.",
+    "- Blend additional competitor-derived primary and secondary terms only when they match Product DNA or buyer intent; do not convert competitor vocabulary into unsupported product claims.",
+    "- Use scene and audience terms to shape bullet scenarios, description phrasing, and backend search terms.",
+    "- Put non-duplicative long-tail terms in Backend Search Terms; never include Negative / Excluded Terms there.",
+  );
+
+  return `\n## SEO Mandate\n${seoParts.join("\n")}\n`;
+};
+
+function splitSeoTerms(value: string | undefined): string[] {
+  if (!value) return [];
+
+  return uniqueTextValues(
+    value
+      .split(/[,;，；\n]/)
+      .map((term) => sanitizePromptInput(term).trim())
+      .filter(Boolean),
+  );
+}
+
+function pushSeoListPart(parts: string[], label: string, values: string[]): void {
+  if (values.length === 0) return;
+  parts.push(`- **${label}:** ${values.join(", ")}`);
+}
+
+function appendCompetitorSeoSignals(
+  parts: string[],
+  signals: CompetitorSeoSignals,
+): void {
+  if (!hasCompetitorSeoSignals(signals)) {
+    parts.push("- **Status:** Title Core Keywords not selected or not available. Use Operator SEO Inputs as the SEO source of truth.");
+    return;
+  }
+
+  pushSeoListPart(parts, "Manual / Competitor Overlap", signals.overlaps);
+  pushSeoListPart(parts, "Additional Primary Market Terms", signals.primary);
+  pushSeoListPart(parts, "Additional Secondary / Long-tail Terms", signals.secondary);
+  pushSeoListPart(parts, "Scene Terms", signals.scene);
+  pushSeoListPart(parts, "Audience Terms", signals.audience);
+  pushSeoListPart(parts, "Optimization Notes", signals.optimizationSuggestions);
+}
+
+function hasCompetitorSeoSignals(signals: CompetitorSeoSignals): boolean {
+  return [
+    signals.primary,
+    signals.secondary,
+    signals.scene,
+    signals.audience,
+    signals.optimizationSuggestions,
+    signals.overlaps,
+  ].some((items) => items.length > 0);
+}
+
+function extractCompetitorSeoSignals(
+  inputs: PromptInputs,
+  analysisReport: AnalysisReport | null,
+  manualPositiveTerms: string[],
+  negativeTerms: string[],
+): CompetitorSeoSignals {
+  const titleKeywordData = asRecord(
+    getSelectedReportSectionData(inputs, analysisReport, "title-keywords"),
+  );
+  const emptySignals: CompetitorSeoSignals = {
+    primary: [],
+    secondary: [],
+    scene: [],
+    audience: [],
+    optimizationSuggestions: [],
+    overlaps: [],
+  };
+
+  if (!titleKeywordData) {
+    return emptySignals;
+  }
+
+  const manualPositiveKeys = new Set(manualPositiveTerms.map(getNormalizedTextKey));
+  const negativeKeys = new Set(negativeTerms.map(getNormalizedTextKey));
+  const rawSignals = {
+    primary: extractSeoTermsFromReportValue(titleKeywordData.primary_keywords, 8),
+    secondary: extractSeoTermsFromReportValue(titleKeywordData.secondary_keywords, 8),
+    scene: extractSeoTermsFromReportValue(titleKeywordData.scene_keywords, 5),
+    audience: extractSeoTermsFromReportValue(titleKeywordData.audience_keywords, 5),
+    optimizationSuggestions: extractSeoTermsFromReportValue(titleKeywordData.optimization_suggestions, 5),
+  };
+  const overlaps = uniqueTextValues([
+    ...rawSignals.primary,
+    ...rawSignals.secondary,
+    ...rawSignals.scene,
+    ...rawSignals.audience,
+  ].filter((term) => manualPositiveKeys.has(getNormalizedTextKey(getSeoTermBase(term)))));
+
+  return {
+    primary: filterCompetitorSeoTerms(rawSignals.primary, manualPositiveKeys, negativeKeys),
+    secondary: filterCompetitorSeoTerms(rawSignals.secondary, manualPositiveKeys, negativeKeys),
+    scene: filterCompetitorSeoTerms(rawSignals.scene, manualPositiveKeys, negativeKeys),
+    audience: filterCompetitorSeoTerms(rawSignals.audience, manualPositiveKeys, negativeKeys),
+    optimizationSuggestions: uniqueTextValues(rawSignals.optimizationSuggestions),
+    overlaps,
+  };
+}
+
+function getSelectedReportSectionData(
+  inputs: PromptInputs,
+  analysisReport: AnalysisReport | null,
+  targetId: string,
+): unknown {
+  if (!inputs.useAnalysisData || !analysisReport) return null;
+
+  const dimensionsToInclude = getSelectedReportDimensions(
+    inputs.selectedReportItems,
+    inputs.selectedReportSections,
+  );
+  if (!dimensionsToInclude.includes(targetId)) return null;
+
+  const report = getPromptReportData(analysisReport);
+  if (!report?.[targetId]) return null;
+
+  return inputs.selectedReportItems?.[targetId]
+    ? filterSubItems(report[targetId], inputs.selectedReportItems[targetId].subItems)
+    : report[targetId];
+}
+
+function getPromptReportData(
+  analysisReport: AnalysisReport,
+): Record<string, unknown> | null {
+  const cleanReport = JSON.parse(JSON.stringify(analysisReport)) as Record<string, unknown>;
+  const hasMetadata =
+    cleanReport.metadata &&
+    cleanReport.analysisReport &&
+    typeof cleanReport.analysisReport === "object";
+
+  if (hasMetadata) {
+    return cleanReport.analysisReport as Record<string, unknown>;
+  }
+
+  [
+    "meta",
+    "GeneratedByModel",
+    "GeneratedAt",
+    "templateUsed",
+    "raw_response",
+    "language",
+    "targetMarket",
+    "marketplace",
+  ].forEach((key) => delete cleanReport[key]);
+
+  return cleanReport;
+}
+
+function extractSeoTermsFromReportValue(value: unknown, max: number): string[] {
+  if (!hasArrayItems(value)) return [];
+
+  return uniqueTextValues(
+    value
+      .slice(0, max)
+      .map(formatReportSeoTerm)
+      .filter(Boolean),
+  );
+}
+
+function formatReportSeoTerm(item: unknown): string {
+  const itemRecord = asRecord(item);
+  if (!itemRecord) return cleanText(item);
+
+  const term = cleanText(
+    itemRecord.keyword ??
+      itemRecord.term ??
+      itemRecord.phrase ??
+      itemRecord.value,
+  );
+  if (!term) return "";
+
+  const meta = [
+    itemRecord.weight,
+    itemRecord.type,
+    itemRecord.importance,
+    itemRecord.search_volume_estimate,
+  ]
+    .map(cleanText)
+    .filter(Boolean);
+
+  return meta.length > 0 ? `${term} [${meta.join(", ")}]` : term;
+}
+
+function filterCompetitorSeoTerms(
+  values: string[],
+  manualPositiveKeys: Set<string>,
+  negativeKeys: Set<string>,
+): string[] {
+  return uniqueTextValues(
+    values.filter((value) => {
+      const termKey = getNormalizedTextKey(getSeoTermBase(value));
+      return !manualPositiveKeys.has(termKey) && !negativeKeys.has(termKey);
+    }),
+  );
+}
+
+function getSeoTermBase(value: string): string {
+  return value.replace(/\s+\[[^\]]+\]$/, "").trim();
+}
+
+function uniqueTextValues(values: string[]): string[] {
+  const seen = new Set<string>();
+  const uniqueValues: string[] = [];
+
+  values.forEach((value) => {
+    const cleanValue = cleanText(value);
+    if (!cleanValue) return;
+    const key = getNormalizedTextKey(getSeoTermBase(cleanValue));
+    if (seen.has(key)) return;
+    seen.add(key);
+    uniqueValues.push(cleanValue);
+  });
+
+  return uniqueValues;
+}
 
 /**
  * 构建 SEO 部分 (SEO Section)
@@ -839,9 +1134,12 @@ const buildSeoSection = (
   const { keywordsTier1, keywordsTier2, socialHook, negative } = inputs;
   const seoParts: string[] = [];
   const isVisual = mode === "visual";
-  const dedupedKeywordsTier1 = dedupeSeoInlineValue(keywordsTier1, contextText);
-  const dedupedKeywordsTier2 = dedupeSeoInlineValue(keywordsTier2, contextText);
-  const dedupedNegative = dedupeSeoInlineValue(negative, contextText);
+  const dedupedKeywordsTier1 = dedupeSeoInlineValue(keywordsTier1, contextText).trim();
+  const dedupedKeywordsTier2 = dedupeSeoInlineValue(keywordsTier2, contextText).trim();
+  const dedupedNegative = dedupeSeoInlineValue(negative, contextText).trim();
+  const dedupedSocialHook = (contextText
+    ? filterDuplicateInlineParts(socialHook, contextText)
+    : socialHook).trim();
 
   // Tier 1 文案差异处理
   const t1Label = isVisual
@@ -856,16 +1154,16 @@ const buildSeoSection = (
   pushSeoPart(seoParts, t2Label, dedupedKeywordsTier2);
 
   // Social Hook 逻辑
-  if (socialHook) {
-    seoParts.push(`- **Social/Marketing Hooks**: ${sanitizePromptInput(socialHook)}`);
+  if (dedupedSocialHook) {
+    seoParts.push(`- **Social/Marketing Hooks**: ${sanitizePromptInput(dedupedSocialHook)}`);
   }
 
-  pushSeoPart(seoParts, 'Negative Keywords', dedupedNegative);
+  pushSeoPart(seoParts, 'Negative / Excluded Terms (avoid in output)', dedupedNegative);
 
   // 头部指令差异处理
   const introText = isVisual
     ? "Describe with these SEO keywords naturally:"
-    : "Integrate **All** these keywords naturally:";
+    : "Integrate positive SEO keywords naturally and avoid excluded terms:";
 
   return seoParts.length > 0
     ? `\n## SEO Mandate\n${introText}\n${seoParts.join("\n")}\n`
@@ -881,6 +1179,107 @@ function dedupeSeoInlineValue(value: string, contextText: string): string {
 function pushSeoPart(parts: string[], label: string, value: string): void {
   if (!value) return;
   parts.push(`- **${label}**: ${sanitizePromptInput(value)}`);
+}
+
+function buildListingInputContext(
+  inputs: PromptInputs,
+  analysisReport: AnalysisReport | null,
+  marketProfile: PromptMarketProfile,
+): string {
+  const contextSection = buildContextSection(inputs, analysisReport);
+  const productSection = buildProductSection(inputs, contextSection, true);
+  const seoSection = buildListingSeoSection(inputs, analysisReport);
+  const briefSection = buildContextBriefSection(
+    inputs,
+    analysisReport,
+    marketProfile,
+    contextSection,
+  );
+
+  return [
+    briefSection,
+    productSection,
+    seoSection,
+    contextSection,
+  ].filter((section) => section.trim().length > 0).join("\n");
+}
+
+function buildContextBriefSection(
+  inputs: PromptInputs,
+  analysisReport: AnalysisReport | null,
+  marketProfile: PromptMarketProfile,
+  contextSection: string,
+): string {
+  const lines = [
+    "## Context Brief",
+    `- **Target Marketplace:** ${marketProfile.marketplaceScope}`,
+    `- **Output Language:** ${marketProfile.languageName}`,
+    `- **Available Sources:** ${formatInputSourceCoverage(inputs, analysisReport, contextSection)}`,
+    "- **Source Priority:** Treat Product DNA as product facts. Treat competitor insights as market positioning, objections, vocabulary, and risk-avoidance signals, not as facts about this product.",
+    "- **Missing Data Rule:** If a product fact, proof, certification, dimension, warranty, compatibility, or performance result is not present below, do not invent it; list it under Evidence & Compliance Notes.",
+  ];
+
+  const missingFields = getMissingManualProductFields(inputs);
+  if (missingFields.length > 0) {
+    lines.push(`- **Missing Manual Product Fields:** ${missingFields.join(", ")}.`);
+  }
+
+  return `\n${lines.join("\n")}\n`;
+}
+
+function formatInputSourceCoverage(
+  inputs: PromptInputs,
+  analysisReport: AnalysisReport | null,
+  contextSection: string,
+): string {
+  const coverage = [
+    hasManualProductFacts(inputs)
+      ? "Manual Product DNA provided"
+      : "Manual Product DNA missing",
+    hasSeoInputs(inputs)
+      ? "SEO keyword inputs provided"
+      : "SEO keyword inputs missing",
+  ];
+
+  if (contextSection.trim()) {
+    coverage.push(`Selected AI analysis modules included: ${formatSelectedReportDimensionNames(inputs)}`);
+  } else if (inputs.useAnalysisData && analysisReport) {
+    coverage.push("AI analysis report available but no selected insight content included");
+  } else {
+    coverage.push("AI analysis report not available");
+  }
+
+  return coverage.join("; ");
+}
+
+function formatSelectedReportDimensionNames(inputs: PromptInputs): string {
+  const dimensions = getSelectedReportDimensions(
+    inputs.selectedReportItems,
+    inputs.selectedReportSections,
+  );
+
+  return dimensions.length > 0 ? dimensions.join(", ") : "none";
+}
+
+function hasManualProductFacts(inputs: PromptInputs): boolean {
+  return [inputs.audience, inputs.usps, inputs.specs].some(hasText);
+}
+
+function hasSeoInputs(inputs: PromptInputs): boolean {
+  return [
+    inputs.keywordsTier1,
+    inputs.keywordsTier2,
+    inputs.negative,
+    inputs.socialHook,
+  ].some(hasText);
+}
+
+function getMissingManualProductFields(inputs: PromptInputs): string[] {
+  const missingFields: string[] = [];
+  if (!hasText(inputs.audience)) missingFields.push("Target Audience");
+  if (!hasText(inputs.usps)) missingFields.push("Core USPs");
+  if (!hasText(inputs.specs)) missingFields.push("Technical Specs");
+  return missingFields;
 }
 
 // ============================================================
@@ -899,10 +1298,11 @@ export const promptlabService = {
     const marketProfile = buildPromptMarketProfile(targetMarket);
     const { bulletFormat, styleInstructions } = buildListingStylePromptParts(inputs, marketProfile);
 
-    // 复用 Helper 函数生成基础模块
-    const contextSection = buildContextSection(inputs, analysisReport);
-    const productSection = buildProductSection(inputs, contextSection);
-    const seoSection = buildSeoSection(inputs, "master", contextSection);
+    const inputContext = buildListingInputContext(
+      inputs,
+      analysisReport,
+      marketProfile,
+    );
 
     // 5. 组装 Listing Prompt
     return `
@@ -914,9 +1314,7 @@ You combine deep expertise in ${marketProfile.languageName} consumer psychology,
 Create a high-converting, native-level ${marketProfile.languageName} Amazon listing for **${marketProfile.domain}** that stays within marketplace field limits and directly answers user intents (Rufus-Ready).
 
 # INPUT CONTEXT
-${productSection}
-${seoSection}
-${contextSection}
+${inputContext}
 
 # CRITICAL GUIDELINES
 ${styleInstructions.join("\n")}

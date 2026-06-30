@@ -672,6 +672,30 @@ describe('Promptlab Module', () => {
       );
     });
 
+    it('should generate listing prompt from manual DNA without an analysis report', async () => {
+      const { promptlabService } = await import('@/modules/app_center/views/master_analysis/services/promptlabService');
+
+      appStore.getState().updateAnalysis({ analysisReport: null });
+      component.profile.targetMarket = 'English';
+      component.profile.keywordsTier1 = 'manual keyword';
+      component.profile.keywordsTier2 = 'manual longtail';
+
+      expect(component.generateButtonDisabled).toBe(false);
+
+      component.generateListingPrompt();
+
+      expect(promptlabService.generateMasterPrompt).toHaveBeenCalledWith(
+        expect.objectContaining({
+          targetMarket: 'English',
+          keywordsTier1: 'manual keyword',
+          keywordsTier2: 'manual longtail',
+          useAnalysisData: true
+        }),
+        null
+      );
+      expect(component.listingPromptCache).toBe('Generated Listing Prompt');
+    });
+
     it('should not generate listing prompt when not ready', async () => {
       const { showToast } = await import('@/common/ui');
       const { promptlabService } = await import('@/modules/app_center/views/master_analysis/services/promptlabService');

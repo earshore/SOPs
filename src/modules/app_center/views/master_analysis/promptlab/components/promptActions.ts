@@ -11,7 +11,7 @@ import { HistoryService } from '../../services/historyService';
 import { emitHistoryUpdated } from '../../services/historyEvents';
 import { getReportFingerprint, getScrapedDataFingerprint } from '../../services/reportIdentity';
 import { showToast } from '../../../../../../common/ui';
-import { computeIsReady, computeHasReport } from './computed';
+import { computeIsListingReady, computeIsReady, computeHasReport } from './computed';
 import type { PromptlabAlpineContext } from './types';
 import type {
   AnalysisReport,
@@ -159,10 +159,9 @@ function persistPromptRecord(ctx: PromptlabAlpineContext, type: GeneratedPromptT
  * 生成 Listing Prompt 并写入 ctx.listingPromptCache
  */
 export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
-  if (!computeIsReady(ctx)) {
+  if (!computeIsListingReady(ctx)) {
     showToast(getPromptReadinessMessage(ctx, {
       defaultMessage: '未就绪',
-      missingReportMessage: '请先前往 [AI 分析] 模块生成竞品报告',
       missingTargetMarketMessage: '请先在产品 DNA 补充区域选择目标语言/站点'
     }), { type: 'warning' });
     return;

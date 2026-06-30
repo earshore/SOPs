@@ -135,17 +135,35 @@ export function computeHasReport(): boolean {
 }
 
 /**
- * Promptlab 是否满足生成 Prompt 的全部前置条件
+ * Listing Prompt 是否满足生成所需的手动输入前置条件。
  */
-export function computeIsReady(
+export function computeIsListingReady(
   ctx: Pick<PromptlabAlpineContext, 'profile'>,
 ): boolean {
   return (
-    computeHasReport() &&
     ctx.profile.targetMarket !== '' &&
     ctx.profile.keywordsTier1.trim().length > 0 &&
     ctx.profile.keywordsTier2.trim().length > 0
   );
+}
+
+/**
+ * Visual Prompt 依赖竞品报告来提取视觉洞察。
+ */
+export function computeIsVisualReady(
+  ctx: Pick<PromptlabAlpineContext, 'profile'>,
+): boolean {
+  return computeHasReport() && computeIsListingReady(ctx);
+}
+
+/**
+ * Promptlab 旧入口的通用就绪判断。
+ * 保留报告依赖语义，供 Visual Prompt 和旧调用方使用。
+ */
+export function computeIsReady(
+  ctx: Pick<PromptlabAlpineContext, 'profile'>,
+): boolean {
+  return computeIsVisualReady(ctx);
 }
 
 /**

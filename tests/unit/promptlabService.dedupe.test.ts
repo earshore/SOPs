@@ -64,10 +64,15 @@ const makeKeywordReport = (): any => ({
       ],
       secondary_keywords: [
         { keyword: 'service counter bell', type: 'longtail' },
+        { keyword: 'front desk chime', type: 'longtail' },
       ],
-      scene_keywords: [],
-      audience_keywords: [],
-      optimization_suggestions: [],
+      scene_keywords: [
+        { keyword: 'reception desk' },
+      ],
+      audience_keywords: [
+        { keyword: 'hotel staff' },
+      ],
+      optimization_suggestions: ['Use buyer-facing desk service wording in the title.'],
     },
     'fatal-flaws': {
       risk_assessment: {
@@ -94,6 +99,55 @@ const getSection = (prompt: string, start: string, end: string): string => {
 };
 
 describe('promptlabService product DNA de-duplication', () => {
+  it('builds a complete Listing input context from manual inputs without an analysis report', () => {
+    const prompt = promptlabService.generateMasterPrompt(
+      makeInputs({
+        selectedReportSections: [],
+        audience: 'Weekend travelers and gym users',
+        usps: '- Leak-resistant lid\n- Fits standard cup holders',
+        specs: 'Capacity: 500 ml\nMaterial: stainless steel',
+        socialHook: 'easy hydration for commute and workouts',
+      }),
+      null,
+    );
+
+    expect(prompt).toContain('# INPUT CONTEXT');
+    expect(prompt).toContain('## Context Brief');
+    expect(prompt).toContain('Manual Product DNA provided');
+    expect(prompt).toContain('SEO keyword inputs provided');
+    expect(prompt).toContain('AI analysis report not available');
+    expect(prompt).toContain('## Product DNA Supplement');
+    expect(prompt).toContain('Weekend travelers and gym users');
+    expect(prompt).toContain('## SEO Mandate');
+    expect(prompt).toContain('Autobeschichtungsspray');
+    expect(prompt).not.toContain('## Market Context');
+  });
+
+  it('adds missing-data boundaries when manual Product DNA facts are empty', () => {
+    const prompt = promptlabService.generateMasterPrompt(
+      makeInputs({ selectedReportSections: [] }),
+      null,
+    );
+
+    expect(prompt).toContain('Manual Product DNA missing');
+    expect(prompt).toContain('Manual Product Facts**: Not provided');
+    expect(prompt).toContain('Missing Manual Product Fields:** Target Audience, Core USPs, Technical Specs');
+    expect(prompt).toContain('do not invent product specs');
+  });
+
+  it('falls back to selectedReportSections when selectedReportItems is empty', () => {
+    const prompt = promptlabService.generateMasterPrompt(
+      makeInputs({
+        selectedReportSections: ['title-keywords'],
+        selectedReportItems: {},
+      }),
+      makeKeywordReport(),
+    );
+
+    expect(prompt).toContain('Selected AI analysis modules included: title-keywords');
+    expect(prompt).toContain('desk bell');
+  });
+
   it.each(REPORT_CASES)('does not repeat report-loaded USP in Listing or Visual prompt: $name', (reportCase) => {
     const wrapper = makeReport(reportCase.primaryDifferentiation, reportCase.targetPositioning);
     const duplicateLine = reportCase.primaryDifferentiation;
@@ -125,7 +179,7 @@ describe('promptlabService product DNA de-duplication', () => {
     expect(countOccurrences(prompt, duplicateLine)).toBe(1);
   });
 
-  it('removes report-loaded SEO terms that are already present in the selected report context', () => {
+  it('connects selected Title Core Keywords to the Listing SEO Mandate', () => {
     const report = makeKeywordReport();
     const prompt = promptlabService.generateMasterPrompt(
       makeInputs({
@@ -138,15 +192,64 @@ describe('promptlabService product DNA de-duplication', () => {
     );
     const seoSection = getSection(prompt, '## SEO Mandate', '## Market Context');
 
-    expect(seoSection).not.toContain('desk bell');
+    expect(seoSection).toContain('source-aware SEO plan');
+    expect(seoSection).toContain('Operator SEO Inputs');
+    expect(seoSection).toContain('Primary Keyword Targets');
+    expect(seoSection).toContain('desk bell, reception bell');
+    expect(seoSection).toContain('Competitor-Derived Title Keyword Signals');
+    expect(seoSection).toContain('Manual / Competitor Overlap');
+    expect(seoSection).toContain('desk bell [high]');
+    expect(seoSection).toContain('service counter bell [longtail]');
+    expect(seoSection).toContain('Additional Secondary / Long-tail Terms');
+    expect(seoSection).toContain('front desk chime [longtail]');
+    expect(seoSection).toContain('Scene Terms');
+    expect(seoSection).toContain('reception desk');
+    expect(seoSection).toContain('Audience Terms');
+    expect(seoSection).toContain('hotel staff');
+    expect(seoSection).toContain('Optimization Notes');
+    expect(seoSection).toContain('Use buyer-facing desk service wording in the title.');
+    expect(seoSection).toContain('Negative / Excluded Terms');
+    expect(seoSection).toContain('water seepage, fragile');
+    expect(seoSection).toContain('do not convert competitor vocabulary into unsupported product claims');
+  });
+
+  it('does not inject Title Core Keywords into SEO Mandate when the dimension is not selected', () => {
+    const report = makeKeywordReport();
+    const prompt = promptlabService.generateMasterPrompt(
+      makeInputs({
+        keywordsTier1: 'desk bell, reception bell',
+        keywordsTier2: 'service counter bell, loud ring',
+        selectedReportSections: ['fatal-flaws'],
+      }),
+      report,
+    );
+    const seoSection = getSection(prompt, '## SEO Mandate', '## Market Context');
+
+    expect(seoSection).toContain('Title Core Keywords not selected or not available');
+    expect(seoSection).not.toContain('desk bell [high]');
+    expect(seoSection).not.toContain('front desk chime');
+    expect(seoSection).not.toContain('reception desk');
+  });
+
+  it('keeps manual SEO terms as operator constraints even when they appear in report context', () => {
+    const report = makeKeywordReport();
+    const prompt = promptlabService.generateMasterPrompt(
+      makeInputs({
+        keywordsTier1: 'desk bell, reception bell',
+        keywordsTier2: 'service counter bell, loud ring',
+        negative: 'water seepage, fragile',
+        selectedReportSections: ['title-keywords', 'fatal-flaws'],
+      }),
+      report,
+    );
+    const seoSection = getSection(prompt, '## SEO Mandate', '## Market Context');
+
+    expect(seoSection).toContain('desk bell, reception bell');
     expect(seoSection).toContain('reception bell');
-    expect(seoSection).not.toContain('service counter bell');
+    expect(seoSection).toContain('service counter bell, loud ring');
     expect(seoSection).toContain('loud ring');
-    expect(seoSection).not.toContain('water seepage');
+    expect(seoSection).toContain('water seepage, fragile');
     expect(seoSection).toContain('fragile');
-    expect(countOccurrences(prompt, 'desk bell')).toBe(1);
-    expect(countOccurrences(prompt, 'service counter bell')).toBe(1);
-    expect(countOccurrences(prompt, 'water seepage')).toBe(1);
   });
 
   it('localizes the prompt role without German/DACH hardcoding for non-German markets', () => {

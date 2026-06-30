@@ -35,7 +35,9 @@ import type {
 
 import {
   computeHasReport,
+  computeIsListingReady,
   computeIsReady,
+  computeIsVisualReady,
   computeCurrentPrompt,
   computeTokenCount,
   computeFormattedTokenCount,
@@ -235,6 +237,8 @@ type PromptlabPanelThis = PromptlabAlpineContext & {
   $nextTick?: (callback: () => void) => void;
   currentPrompt: string;
   isReady: boolean;
+  isListingReady: boolean;
+  isVisualReady: boolean;
   isOverLimit: boolean;
   hasReport: boolean;
   canExtractDNA: boolean;
@@ -305,6 +309,14 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       return computeIsReady(this as unknown as PromptlabAlpineContext);
     },
 
+    get isListingReady(): boolean {
+      return computeIsListingReady(this as unknown as PromptlabAlpineContext);
+    },
+
+    get isVisualReady(): boolean {
+      return computeIsVisualReady(this as unknown as PromptlabAlpineContext);
+    },
+
     get currentPrompt(): string {
       return computeCurrentPrompt(this as unknown as PromptlabAlpineContext);
     },
@@ -350,7 +362,11 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     },
 
     get generateButtonDisabled(): boolean {
-      return !this.isReady;
+      return !this.isListingReady;
+    },
+
+    get visualGenerateButtonDisabled(): boolean {
+      return !this.isVisualReady;
     },
 
     get autoPopulateButtonClass(): string {
@@ -378,13 +394,13 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     },
 
     get listingGenerateButtonClass(): string {
-      return this.isReady
+      return this.isListingReady
         ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 cursor-pointer'
         : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none';
     },
 
     get visualGenerateButtonClass(): string {
-      return this.isReady
+      return this.isVisualReady
         ? 'bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-lg shadow-pink-700/40 hover:shadow-xl hover:shadow-pink-600/50 cursor-pointer'
         : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none opacity-50';
     },
