@@ -261,10 +261,27 @@
 
 #kt-btn-start-analysis:hover,
 #kt-analyze-btn:hover,
-#kt-translate-btn:hover,
+#kt-translate-btn:hover:not(:disabled),
 #kt-btn-start-analysis:active {
     box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
     transform: none;
+}
+
+/* AI 翻译按钮激活状态 */
+#kt-translate-btn.kt-btn-active {
+    background: linear-gradient(to right, rgb(79 70 229), rgb(147 51 234));
+    color: white;
+    cursor: pointer;
+}
+
+#kt-translate-btn.kt-btn-active:hover {
+    background: linear-gradient(to right, rgb(67 56 202), rgb(126 34 206));
+}
+
+#kt-translate-btn.kt-btn-disabled {
+    background-color: rgb(209 213 219);
+    color: rgb(107 114 128);
+    cursor: not-allowed;
 }
 
 #kt-btn-start-analysis > .absolute {

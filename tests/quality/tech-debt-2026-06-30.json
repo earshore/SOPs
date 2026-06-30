@@ -1,0 +1,665 @@
+{
+  "summary": {
+    "totalIssues": 68,
+    "bySeverity": {
+      "low": 52,
+      "medium": 16,
+      "high": 0,
+      "critical": 0
+    },
+    "byFile": {
+      "src\\common\\errors\\AppError.ts": 1,
+      "src\\common\\errors\\GlobalErrorHandler.ts": 4,
+      "src\\common\\infrastructure\\AlpineRegistry.ts": 3,
+      "src\\common\\router\\navigo\\LegacyAdapter.ts": 3,
+      "src\\common\\utils\\actionRegistry.ts": 4,
+      "src\\common\\utils\\cssLoader.ts": 2,
+      "src\\common\\utils\\security.ts": 1,
+      "src\\common\\utils\\typeGuards.ts": 1,
+      "src\\common\\utils\\xssFixer.ts": 3,
+      "src\\main.ts": 1,
+      "src\\modules\\app_center\\views\\keyword_hunter\\services\\trackerService.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\ai_analysis\\prompts\\analysisPrompts.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\ai_analysis\\services\\__tests__\\analysisScheduler.test.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\ai_analysis\\services\\__tests__\\parallelAnalysisService.test.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\scraper\\components\\HistoryPanel.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\scraper\\handlers\\dataOperations.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\scraper\\handlers\\importHandler.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\scraper\\utils\\sanitizers.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\services\\adapters\\FullAnalysisReportAdapter.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\services\\analysisService.ts": 2,
+      "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts": 13,
+      "src\\modules\\app_center\\views\\master_analysis\\services\\parserService.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\services\\promptlabService.ts": 1,
+      "src\\modules\\app_center\\views\\master_analysis\\services\\scraperService.ts": 3,
+      "src\\modules\\app_center\\views\\playground\\deep-chat\\index.ts": 1,
+      "src\\services\\errorTracker.ts": 1,
+      "src\\services\\llmServiceWithTimeout.ts": 1,
+      "src\\services\\localDataStore.ts": 6,
+      "src\\services\\loggerService.ts": 3,
+      "src\\services\\PriorityRequestPool.ts": 1,
+      "src\\stores\\middleware\\devtools.ts": 2,
+      "src\\stores\\middleware\\persist.ts": 1
+    }
+  },
+  "issues": [
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\errors\\AppError.ts",
+      "line": 211,
+      "column": 7,
+      "code": "console.warn('[AppError] Failed to capture stack trace:', e);"
+    },
+    {
+      "ruleId": "console-log",
+      "severity": "low",
+      "message": "存在调试用的 console 语句",
+      "file": "src\\common\\errors\\GlobalErrorHandler.ts",
+      "line": 87,
+      "column": 5,
+      "code": "console.log('✅ [GlobalErrorHandler] 全局错误处理器已初始化');"
+    },
+    {
+      "ruleId": "console-log",
+      "severity": "low",
+      "message": "存在调试用的 console 语句",
+      "file": "src\\common\\errors\\GlobalErrorHandler.ts",
+      "line": 186,
+      "column": 40,
+      "code": "return (...data: unknown[]) => console.log(...data);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\errors\\GlobalErrorHandler.ts",
+      "line": 183,
+      "column": 40,
+      "code": "return (...data: unknown[]) => console.warn(...data);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\errors\\GlobalErrorHandler.ts",
+      "line": 227,
+      "column": 7,
+      "code": "console.warn('[GlobalErrorHandler] 上报错误失败:', e);"
+    },
+    {
+      "ruleId": "console-log",
+      "severity": "low",
+      "message": "存在调试用的 console 语句",
+      "file": "src\\common\\infrastructure\\AlpineRegistry.ts",
+      "line": 70,
+      "column": 36,
+      "code": "debug: (...data: unknown[]) => console.log(...data),"
+    },
+    {
+      "ruleId": "console-log",
+      "severity": "low",
+      "message": "存在调试用的 console 语句",
+      "file": "src\\common\\infrastructure\\AlpineRegistry.ts",
+      "line": 71,
+      "column": 35,
+      "code": "info: (...data: unknown[]) => console.log(...data),"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\infrastructure\\AlpineRegistry.ts",
+      "line": 72,
+      "column": 35,
+      "code": "warn: (...data: unknown[]) => console.warn(...data),"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\router\\navigo\\LegacyAdapter.ts",
+      "line": 51,
+      "column": 7,
+      "code": "console.warn("
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\router\\navigo\\LegacyAdapter.ts",
+      "line": 156,
+      "column": 5,
+      "code": "console.warn("
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\router\\navigo\\LegacyAdapter.ts",
+      "line": 227,
+      "column": 5,
+      "code": "console.warn("
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\actionRegistry.ts",
+      "line": 123,
+      "column": 5,
+      "code": "console.warn("
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\actionRegistry.ts",
+      "line": 140,
+      "column": 5,
+      "code": "console.warn(`[ActionRegistry] 动作 \"${actionName}\" 已存在，将被覆盖`);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\actionRegistry.ts",
+      "line": 182,
+      "column": 5,
+      "code": "console.warn(`[ActionRegistry] 未注册的动作: \"${actionName}\"`);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\actionRegistry.ts",
+      "line": 258,
+      "column": 9,
+      "code": "console.warn("
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\cssLoader.ts",
+      "line": 91,
+      "column": 11,
+      "code": "console.warn(`CSS加载超时，使用降级方案: ${href}`);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\cssLoader.ts",
+      "line": 137,
+      "column": 11,
+      "code": "console.warn(`CSS加载失败，使用降级方案: ${href}`);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\security.ts",
+      "line": 175,
+      "column": 5,
+      "code": "console.warn('[Security] markdownParser not provided, returning escaped text');"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\typeGuards.ts",
+      "line": 153,
+      "column": 3,
+      "code": "console.warn('[TypeGuard] Parse failed, using default:', result.error);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\xssFixer.ts",
+      "line": 30,
+      "column": 5,
+      "code": "console.warn('[XSSFixer] Element is null or undefined');"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\xssFixer.ts",
+      "line": 126,
+      "column": 7,
+      "code": "console.warn(`[XSSFixer] Unsafe URL blocked: ${value}`);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\common\\utils\\xssFixer.ts",
+      "line": 133,
+      "column": 5,
+      "code": "console.warn(`[XSSFixer] Event handler attribute blocked: ${attr}`);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\main.ts",
+      "line": 24,
+      "column": 18,
+      "code": "globalThis.console.warn('[Main] Failed to expose marked', error);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\keyword_hunter\\services\\trackerService.ts",
+      "line": 547,
+      "column": 3,
+      "code": "console.warn(\"[TrackerService] LLM 未遵守编号格式，退回行数对齐模式\");"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\ai_analysis\\prompts\\analysisPrompts.ts",
+      "line": 499,
+      "column": 5,
+      "code": "console.warn(`[${action}] Unusual language code: ${language}. Expected one of: ${VALID_LANGUAGES.join(', ')}`);"
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\ai_analysis\\services\\__tests__\\analysisScheduler.test.ts",
+      "line": 54,
+      "column": 1,
+      "code": "      targetIds: [\r\n        'title-keywords',\r\n        'selling-points',\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\ai_analysis\\services\\__tests__\\parallelAnalysisService.test.ts",
+      "line": 65,
+      "column": 1,
+      "code": "        origin_country: \"US\",\r\n        review_date: \"2026-01-01\",\r\n        star_rating: 5,\r\n..."
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\scraper\\components\\HistoryPanel.ts",
+      "line": 159,
+      "column": 13,
+      "code": "console.warn('[Scraper] 持久化历史快照 metadata 失败:', error);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\scraper\\handlers\\dataOperations.ts",
+      "line": 210,
+      "column": 9,
+      "code": "console.warn('[Scraper] 正在回滚数据...');"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\scraper\\handlers\\importHandler.ts",
+      "line": 401,
+      "column": 9,
+      "code": "console.warn(`[Scraper] 文件 ${filename} 数据为空，跳过`);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\scraper\\utils\\sanitizers.ts",
+      "line": 50,
+      "column": 13,
+      "code": "console.warn('[Scraper] 检测到危险URL协议:', url);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\adapters\\FullAnalysisReportAdapter.ts",
+      "line": 224,
+      "column": 9,
+      "code": "console.warn(\"[FullAnalysisReportAdapter] 提取置信度过低，放弃提取\");"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\analysisService.ts",
+      "line": 150,
+      "column": 7,
+      "code": "console.warn(\"Analysis JSON Parse Failed:\", error.message);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\analysisService.ts",
+      "line": 202,
+      "column": 7,
+      "code": "console.warn(\"Translation JSON Parse Failed:\", error.message);"
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 3 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 552,
+      "column": 1,
+      "code": "    try {\r\n      const history = await this.getAllAsync();\r\n      const targetIndex = history.findIndex((h) => isSameHis..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 3 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 553,
+      "column": 1,
+      "code": "      const history = await this.getAllAsync();\r\n      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 4 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 554,
+      "column": 1,
+      "code": "      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));\r\n\r\n      if (targetIndex === -1) {\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 4 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 555,
+      "column": 1,
+      "code": "\r\n      if (targetIndex === -1) {\r\n        return false;\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 634,
+      "column": 1,
+      "code": "      if (targetIndex === -1) {\r\n        return false;\r\n      }\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 635,
+      "column": 1,
+      "code": "        return false;\r\n      }\r\n\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 636,
+      "column": 1,
+      "code": "      }\r\n\r\n      const targetItem = history[targetIndex];\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 637,
+      "column": 1,
+      "code": "\r\n      const targetItem = history[targetIndex];\r\n      if (!targetItem) {\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 638,
+      "column": 1,
+      "code": "      const targetItem = history[targetIndex];\r\n      if (!targetItem) {\r\n        return false;\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 639,
+      "column": 1,
+      "code": "      if (!targetItem) {\r\n        return false;\r\n      }\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 650,
+      "column": 1,
+      "code": "      if (!saved) return false;\r\n      historyCache = history;\r\n\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 673,
+      "column": 1,
+      "code": "      if (!saved) return false;\r\n      historyCache = history;\r\n\r\n..."
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\historyService.ts",
+      "line": 751,
+      "column": 1,
+      "code": "      // 获取目标历史记录\r\n      const targetItem = history[targetIndex];\r\n      if (!targetItem) {\r\n..."
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\parserService.ts",
+      "line": 181,
+      "column": 5,
+      "code": "console.warn("
+    },
+    {
+      "ruleId": "duplicate-code",
+      "severity": "medium",
+      "message": "发现重复代码块（共 2 处，行数 ≥ 10）",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\promptlabService.ts",
+      "line": 664,
+      "column": 1,
+      "code": "      // 旧格式：删除不必要的元数据字段后直接使用\r\n      [\r\n        \"meta\",\r\n..."
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\scraperService.ts",
+      "line": 272,
+      "column": 9,
+      "code": "console.warn(`请求超时 (attempt ${attempt + 1})`);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\scraperService.ts",
+      "line": 276,
+      "column": 5,
+      "code": "console.warn(`Fetch attempt ${attempt + 1} failed:`, error.message);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\master_analysis\\services\\scraperService.ts",
+      "line": 383,
+      "column": 9,
+      "code": "console.warn(\"缓存读取失败，转为网络请求\");"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\modules\\app_center\\views\\playground\\deep-chat\\index.ts",
+      "line": 2424,
+      "column": 5,
+      "code": "console.warn('[Deep Chat] 忽略已卸载会话的响应更新:', error);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\services\\errorTracker.ts",
+      "line": 383,
+      "column": 7,
+      "code": "console.warn('[ErrorTracker] Failed to report error:', e);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\services\\llmServiceWithTimeout.ts",
+      "line": 88,
+      "column": 9,
+      "code": "console.warn(`LLM调用超时，正在重试: ${description}`, {"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\services\\localDataStore.ts",
+      "line": 220,
+      "column": 9,
+      "code": "console.warn('[LocalDataStore] 删除 IndexedDB 记录失败:', request.error || undefined);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\services\\localDataStore.ts",
+      "line": 275,
+      "column": 9,
+      "code": "console.warn('[LocalDataStore] 清空 IndexedDB 失败:', request.error || undefined);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\services\\localDataStore.ts",
+      "line": 387,
+      "column": 7,
+      "code": "console.warn(`[LocalDataStore] 迁移 localStorage 键失败: ${localStorageKey}`, error);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\services\\localDataStore.ts",
+      "line": 404,
+      "column": 9,
+      "code": "console.warn('[LocalDataStore] 读取 IndexedDB 记录失败:', request.error || undefined);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\services\\localDataStore.ts",
+      "line": 422,
+      "column": 9,
+      "code": "console.warn('[LocalDataStore] 列出 IndexedDB 记录失败:', request.error || undefined);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\services\\localDataStore.ts",
+      "line": 448,
+      "column": 11,
+      "code": "console.warn('[LocalDataStore] IndexedDB 不可用，降级为内存存储:', request.error || undefined);"
+    },
+    {
+      "ruleId": "console-log",
+      "severity": "low",
+      "message": "存在调试用的 console 语句",
+      "file": "src\\services\\loggerService.ts",
+      "line": 259,
+      "column": 9,
+      "code": "console.debug(fullMessage, style, data);"
+    },
+    {
+      "ruleId": "console-log",
+      "severity": "low",
+      "message": "存在调试用的 console 语句",
+      "file": "src\\services\\loggerService.ts",
+      "line": 262,
+      "column": 9,
+      "code": "console.info(fullMessage, style, data);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\services\\loggerService.ts",
+      "line": 265,
+      "column": 9,
+      "code": "console.warn(fullMessage, style, data);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\services\\PriorityRequestPool.ts",
+      "line": 199,
+      "column": 9,
+      "code": "console.warn(`[RequestPool] 慢请求 (${duration}ms):`, task.meta);"
+    },
+    {
+      "ruleId": "console-log",
+      "severity": "low",
+      "message": "存在调试用的 console 语句",
+      "file": "src\\stores\\middleware\\devtools.ts",
+      "line": 127,
+      "column": 7,
+      "code": "console.log('Previous State:', prevState);"
+    },
+    {
+      "ruleId": "console-log",
+      "severity": "low",
+      "message": "存在调试用的 console 语句",
+      "file": "src\\stores\\middleware\\devtools.ts",
+      "line": 128,
+      "column": 7,
+      "code": "console.log('Next State:', nextState);"
+    },
+    {
+      "ruleId": "console-warn",
+      "severity": "low",
+      "message": "存在 console.warn 语句",
+      "file": "src\\stores\\middleware\\persist.ts",
+      "line": 99,
+      "column": 11,
+      "code": "console.warn('[Persist] 持久化状态验证失败，使用初始状态:', name);"
+    }
+  ],
+  "metrics": {
+    "totalFiles": 297,
+    "totalLines": 88717,
+    "debtRatio": 0.0007664821849250989
+  },
+  "generatedAt": "2026-06-30T14:58:59.837Z"
+}

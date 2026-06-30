@@ -496,19 +496,8 @@ function updateTranslateActionButton(
   if (state.hasContent && !state.hasTranslationData) {
     transBtn.disabled = false;
     transBtnText.textContent = "AI 沉浸式翻译";
-    transBtn.classList.remove(
-      "bg-gray-300",
-      "text-gray-500",
-      "cursor-not-allowed",
-    );
-    transBtn.classList.add(
-      "bg-gradient-to-r",
-      "from-purple-500",
-      "to-pink-500",
-      "text-white",
-      "shadow-md",
-      "hover:shadow-lg",
-    );
+    transBtn.classList.remove("kt-btn-disabled");
+    transBtn.classList.add("kt-btn-active");
     return;
   }
 
@@ -516,19 +505,8 @@ function updateTranslateActionButton(
   transBtnText.textContent = state.hasTranslationData
     ? "翻译已完成"
     : "AI 沉浸式翻译";
-  transBtn.classList.add(
-    "bg-gray-300",
-    "text-gray-500",
-    "cursor-not-allowed",
-  );
-  transBtn.classList.remove(
-    "bg-gradient-to-r",
-    "from-purple-500",
-    "to-pink-500",
-    "text-white",
-    "shadow-md",
-    "hover:shadow-lg",
-  );
+  transBtn.classList.add("kt-btn-disabled");
+  transBtn.classList.remove("kt-btn-active");
 }
 
 function updateTranslationCheckbox(

@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>技术债务扫描报告</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f4f6;
+      padding: 2rem;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    h1 { color: #111827; margin-bottom: 0.5rem; }
+    .meta { color: #6b7280; font-size: 0.875rem; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-label { color: #6b7280; font-size: 0.875rem; margin-bottom: 0.5rem; }
+    .stat-value { font-size: 2rem; font-weight: bold; color: #111827; }
+    .severity-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+    }
+    .issues {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .issues-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .issue {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .issue:last-child { border-bottom: none; }
+    .issue-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .issue-message { font-weight: 500; color: #111827; }
+    .issue-location { color: #6b7280; font-size: 0.875rem; }
+    .issue-code {
+      background: #f9fafb;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 技术债务扫描报告</h1>
+      <div class="meta">生成时间: 2026/6/30 22:58:59</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">总问题数</div>
+        <div class="stat-value">68</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">扫描文件数</div>
+        <div class="stat-value">297</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">总代码行数</div>
+        <div class="stat-value">88,717</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">债务比率</div>
+        <div class="stat-value">0.08%</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">🔴 严重</div>
+        <div class="stat-value" style="color: #dc2626">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🟠 高</div>
+        <div class="stat-value" style="color: #ea580c">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🟡 中</div>
+        <div class="stat-value" style="color: #f59e0b">16</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🟢 低</div>
+        <div class="stat-value" style="color: #10b981">52</div>
+      </div>
+    </div>
+
+    <div class="issues">
+      <div class="issues-header">
+        <h2>问题详情</h2>
+      </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\errors\AppError.ts (行 211, 列 7)
+          </div>
+          <div class="issue-code">console.warn(&#039;[AppError] Failed to capture stack trace:&#039;, e);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在调试用的 console 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\errors\GlobalErrorHandler.ts (行 87, 列 5)
+          </div>
+          <div class="issue-code">console.log(&#039;✅ [GlobalErrorHandler] 全局错误处理器已初始化&#039;);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在调试用的 console 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\errors\GlobalErrorHandler.ts (行 186, 列 40)
+          </div>
+          <div class="issue-code">return (...data: unknown[]) =&gt; console.log(...data);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\errors\GlobalErrorHandler.ts (行 183, 列 40)
+          </div>
+          <div class="issue-code">return (...data: unknown[]) =&gt; console.warn(...data);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\errors\GlobalErrorHandler.ts (行 227, 列 7)
+          </div>
+          <div class="issue-code">console.warn(&#039;[GlobalErrorHandler] 上报错误失败:&#039;, e);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在调试用的 console 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\infrastructure\AlpineRegistry.ts (行 70, 列 36)
+          </div>
+          <div class="issue-code">debug: (...data: unknown[]) =&gt; console.log(...data),</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在调试用的 console 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\infrastructure\AlpineRegistry.ts (行 71, 列 35)
+          </div>
+          <div class="issue-code">info: (...data: unknown[]) =&gt; console.log(...data),</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\infrastructure\AlpineRegistry.ts (行 72, 列 35)
+          </div>
+          <div class="issue-code">warn: (...data: unknown[]) =&gt; console.warn(...data),</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\router\navigo\LegacyAdapter.ts (行 51, 列 7)
+          </div>
+          <div class="issue-code">console.warn(</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\router\navigo\LegacyAdapter.ts (行 156, 列 5)
+          </div>
+          <div class="issue-code">console.warn(</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\router\navigo\LegacyAdapter.ts (行 227, 列 5)
+          </div>
+          <div class="issue-code">console.warn(</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\actionRegistry.ts (行 123, 列 5)
+          </div>
+          <div class="issue-code">console.warn(</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\actionRegistry.ts (行 140, 列 5)
+          </div>
+          <div class="issue-code">console.warn(`[ActionRegistry] 动作 &quot;${actionName}&quot; 已存在，将被覆盖`);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\actionRegistry.ts (行 182, 列 5)
+          </div>
+          <div class="issue-code">console.warn(`[ActionRegistry] 未注册的动作: &quot;${actionName}&quot;`);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\actionRegistry.ts (行 258, 列 9)
+          </div>
+          <div class="issue-code">console.warn(</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\cssLoader.ts (行 91, 列 11)
+          </div>
+          <div class="issue-code">console.warn(`CSS加载超时，使用降级方案: ${href}`);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\cssLoader.ts (行 137, 列 11)
+          </div>
+          <div class="issue-code">console.warn(`CSS加载失败，使用降级方案: ${href}`);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\security.ts (行 175, 列 5)
+          </div>
+          <div class="issue-code">console.warn(&#039;[Security] markdownParser not provided, returning escaped text&#039;);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\typeGuards.ts (行 153, 列 3)
+          </div>
+          <div class="issue-code">console.warn(&#039;[TypeGuard] Parse failed, using default:&#039;, result.error);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\xssFixer.ts (行 30, 列 5)
+          </div>
+          <div class="issue-code">console.warn(&#039;[XSSFixer] Element is null or undefined&#039;);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\xssFixer.ts (行 126, 列 7)
+          </div>
+          <div class="issue-code">console.warn(`[XSSFixer] Unsafe URL blocked: ${value}`);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\common\utils\xssFixer.ts (行 133, 列 5)
+          </div>
+          <div class="issue-code">console.warn(`[XSSFixer] Event handler attribute blocked: ${attr}`);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\main.ts (行 24, 列 18)
+          </div>
+          <div class="issue-code">globalThis.console.warn(&#039;[Main] Failed to expose marked&#039;, error);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\keyword_hunter\services\trackerService.ts (行 547, 列 3)
+          </div>
+          <div class="issue-code">console.warn(&quot;[TrackerService] LLM 未遵守编号格式，退回行数对齐模式&quot;);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\ai_analysis\prompts\analysisPrompts.ts (行 499, 列 5)
+          </div>
+          <div class="issue-code">console.warn(`[${action}] Unusual language code: ${language}. Expected one of: ${VALID_LANGUAGES.join(&#039;, &#039;)}`);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\ai_analysis\services\__tests__\analysisScheduler.test.ts (行 54, 列 1)
+          </div>
+          <div class="issue-code">      targetIds: [
+        &#039;title-keywords&#039;,
+        &#039;selling-points&#039;,
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\ai_analysis\services\__tests__\parallelAnalysisService.test.ts (行 65, 列 1)
+          </div>
+          <div class="issue-code">        origin_country: &quot;US&quot;,
+        review_date: &quot;2026-01-01&quot;,
+        star_rating: 5,
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\scraper\components\HistoryPanel.ts (行 159, 列 13)
+          </div>
+          <div class="issue-code">console.warn(&#039;[Scraper] 持久化历史快照 metadata 失败:&#039;, error);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\scraper\handlers\dataOperations.ts (行 210, 列 9)
+          </div>
+          <div class="issue-code">console.warn(&#039;[Scraper] 正在回滚数据...&#039;);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\scraper\handlers\importHandler.ts (行 401, 列 9)
+          </div>
+          <div class="issue-code">console.warn(`[Scraper] 文件 ${filename} 数据为空，跳过`);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\scraper\utils\sanitizers.ts (行 50, 列 13)
+          </div>
+          <div class="issue-code">console.warn(&#039;[Scraper] 检测到危险URL协议:&#039;, url);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\adapters\FullAnalysisReportAdapter.ts (行 224, 列 9)
+          </div>
+          <div class="issue-code">console.warn(&quot;[FullAnalysisReportAdapter] 提取置信度过低，放弃提取&quot;);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\analysisService.ts (行 150, 列 7)
+          </div>
+          <div class="issue-code">console.warn(&quot;Analysis JSON Parse Failed:&quot;, error.message);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\analysisService.ts (行 202, 列 7)
+          </div>
+          <div class="issue-code">console.warn(&quot;Translation JSON Parse Failed:&quot;, error.message);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 3 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 552, 列 1)
+          </div>
+          <div class="issue-code">    try {
+      const history = await this.getAllAsync();
+      const targetIndex = history.findIndex((h) =&gt; isSameHis...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 3 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 553, 列 1)
+          </div>
+          <div class="issue-code">      const history = await this.getAllAsync();
+      const targetIndex = history.findIndex((h) =&gt; isSameHistoryId(h.id...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 4 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 554, 列 1)
+          </div>
+          <div class="issue-code">      const targetIndex = history.findIndex((h) =&gt; isSameHistoryId(h.id, id));
+
+      if (targetIndex === -1) {
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 4 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 555, 列 1)
+          </div>
+          <div class="issue-code">
+      if (targetIndex === -1) {
+        return false;
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 634, 列 1)
+          </div>
+          <div class="issue-code">      if (targetIndex === -1) {
+        return false;
+      }
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 635, 列 1)
+          </div>
+          <div class="issue-code">        return false;
+      }
+
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 636, 列 1)
+          </div>
+          <div class="issue-code">      }
+
+      const targetItem = history[targetIndex];
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 637, 列 1)
+          </div>
+          <div class="issue-code">
+      const targetItem = history[targetIndex];
+      if (!targetItem) {
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 638, 列 1)
+          </div>
+          <div class="issue-code">      const targetItem = history[targetIndex];
+      if (!targetItem) {
+        return false;
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 639, 列 1)
+          </div>
+          <div class="issue-code">      if (!targetItem) {
+        return false;
+      }
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 650, 列 1)
+          </div>
+          <div class="issue-code">      if (!saved) return false;
+      historyCache = history;
+
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 673, 列 1)
+          </div>
+          <div class="issue-code">      if (!saved) return false;
+      historyCache = history;
+
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\historyService.ts (行 751, 列 1)
+          </div>
+          <div class="issue-code">      // 获取目标历史记录
+      const targetItem = history[targetIndex];
+      if (!targetItem) {
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\parserService.ts (行 181, 列 5)
+          </div>
+          <div class="issue-code">console.warn(</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #f59e0b">
+              🟡 MEDIUM
+            </span>
+            <span class="issue-message">发现重复代码块（共 2 处，行数 ≥ 10）</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\promptlabService.ts (行 664, 列 1)
+          </div>
+          <div class="issue-code">      // 旧格式：删除不必要的元数据字段后直接使用
+      [
+        &quot;meta&quot;,
+...</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\scraperService.ts (行 272, 列 9)
+          </div>
+          <div class="issue-code">console.warn(`请求超时 (attempt ${attempt + 1})`);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\scraperService.ts (行 276, 列 5)
+          </div>
+          <div class="issue-code">console.warn(`Fetch attempt ${attempt + 1} failed:`, error.message);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\master_analysis\services\scraperService.ts (行 383, 列 9)
+          </div>
+          <div class="issue-code">console.warn(&quot;缓存读取失败，转为网络请求&quot;);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\modules\app_center\views\playground\deep-chat\index.ts (行 2424, 列 5)
+          </div>
+          <div class="issue-code">console.warn(&#039;[Deep Chat] 忽略已卸载会话的响应更新:&#039;, error);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\errorTracker.ts (行 383, 列 7)
+          </div>
+          <div class="issue-code">console.warn(&#039;[ErrorTracker] Failed to report error:&#039;, e);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\llmServiceWithTimeout.ts (行 88, 列 9)
+          </div>
+          <div class="issue-code">console.warn(`LLM调用超时，正在重试: ${description}`, {</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\localDataStore.ts (行 220, 列 9)
+          </div>
+          <div class="issue-code">console.warn(&#039;[LocalDataStore] 删除 IndexedDB 记录失败:&#039;, request.error || undefined);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\localDataStore.ts (行 275, 列 9)
+          </div>
+          <div class="issue-code">console.warn(&#039;[LocalDataStore] 清空 IndexedDB 失败:&#039;, request.error || undefined);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\localDataStore.ts (行 387, 列 7)
+          </div>
+          <div class="issue-code">console.warn(`[LocalDataStore] 迁移 localStorage 键失败: ${localStorageKey}`, error);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\localDataStore.ts (行 404, 列 9)
+          </div>
+          <div class="issue-code">console.warn(&#039;[LocalDataStore] 读取 IndexedDB 记录失败:&#039;, request.error || undefined);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\localDataStore.ts (行 422, 列 9)
+          </div>
+          <div class="issue-code">console.warn(&#039;[LocalDataStore] 列出 IndexedDB 记录失败:&#039;, request.error || undefined);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\localDataStore.ts (行 448, 列 11)
+          </div>
+          <div class="issue-code">console.warn(&#039;[LocalDataStore] IndexedDB 不可用，降级为内存存储:&#039;, request.error || undefined);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在调试用的 console 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\loggerService.ts (行 259, 列 9)
+          </div>
+          <div class="issue-code">console.debug(fullMessage, style, data);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在调试用的 console 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\loggerService.ts (行 262, 列 9)
+          </div>
+          <div class="issue-code">console.info(fullMessage, style, data);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\loggerService.ts (行 265, 列 9)
+          </div>
+          <div class="issue-code">console.warn(fullMessage, style, data);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\services\PriorityRequestPool.ts (行 199, 列 9)
+          </div>
+          <div class="issue-code">console.warn(`[RequestPool] 慢请求 (${duration}ms):`, task.meta);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在调试用的 console 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\stores\middleware\devtools.ts (行 127, 列 7)
+          </div>
+          <div class="issue-code">console.log(&#039;Previous State:&#039;, prevState);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在调试用的 console 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\stores\middleware\devtools.ts (行 128, 列 7)
+          </div>
+          <div class="issue-code">console.log(&#039;Next State:&#039;, nextState);</div>
+        </div>
+      
+        <div class="issue">
+          <div class="issue-header">
+            <span class="severity-badge" style="background: #10b981">
+              🟢 LOW
+            </span>
+            <span class="issue-message">存在 console.warn 语句</span>
+          </div>
+          <div class="issue-location">
+            📁 src\stores\middleware\persist.ts (行 99, 列 11)
+          </div>
+          <div class="issue-code">console.warn(&#039;[Persist] 持久化状态验证失败，使用初始状态:&#039;, name);</div>
+        </div>
+      
+    </div>
+  </div>
+</body>
+</html>

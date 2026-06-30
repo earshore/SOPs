@@ -1,0 +1,33 @@
+[
+  {
+    "date": "2026-06-30",
+    "metrics": {
+      "timestamp": "2026-06-30T14:56:46.950Z",
+      "complexity": {
+        "average": 0,
+        "max": 0,
+        "violations": []
+      },
+      "duplication": {
+        "percentage": 0,
+        "lines": 0,
+        "tokens": 0,
+        "files": 0
+      },
+      "coverage": {
+        "statements": 0,
+        "branches": 0,
+        "functions": 0,
+        "lines": 0
+      },
+      "typeCoverage": {
+        "percentage": 67.34,
+        "total": 13024,
+        "covered": 8771,
+        "uncovered": 4253
+      },
+      "lintErrors": 0,
+      "lintWarnings": 100
+    }
+  }
+]
