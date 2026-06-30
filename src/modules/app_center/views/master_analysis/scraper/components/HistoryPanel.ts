@@ -5,6 +5,7 @@
 import type { HistoryItem, ScraperSite } from '@/types/modules-business';
 import { HistoryService } from '../../services/historyService';
 import { emitHistoryUpdated } from '../../services/historyEvents';
+import { getScrapedDataFingerprint } from '../../services/reportIdentity';
 import { showToast } from '../../../../../../common/ui';
 import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
 import { appStore } from '@/stores/useAppStore';
@@ -176,9 +177,12 @@ export class HistoryPanel {
 
     private restoreAnalysisReport(item: HistoryItem): void {
         const state = appStore.getState();
+        const dataFingerprint = item.dataFingerprint || getScrapedDataFingerprint(item.data);
+        const analysisStatusMatchesData = !item.analysisStatus?.sourceDataFingerprint
+            || item.analysisStatus.sourceDataFingerprint === dataFingerprint;
 
         // 优先加载"AI智能分析"的报告，如果不存在则回退到旧的"AI分析"报告
-        if (item.analysisStatus?.isAnalyzed && item.analysisStatus?.analysisReport) {
+        if (analysisStatusMatchesData && item.analysisStatus?.isAnalyzed && item.analysisStatus?.analysisReport) {
             state.setAnalysisReport(item.analysisStatus.analysisReport);
             return;
         }
@@ -202,7 +206,11 @@ export class HistoryPanel {
      * 从历史快照载入分析报告（跳转到AI智能分析页面查看）
      */
     async loadAnalysisReport(item: HistoryItem): Promise<void> {
-        if (!item.analysisStatus || !item.analysisStatus.isAnalyzed) {
+        const dataFingerprint = item.dataFingerprint || getScrapedDataFingerprint(item.data);
+        const analysisStatusMatchesData = !item.analysisStatus?.sourceDataFingerprint
+            || item.analysisStatus.sourceDataFingerprint === dataFingerprint;
+
+        if (!item.analysisStatus || !item.analysisStatus.isAnalyzed || !analysisStatusMatchesData) {
             showToast("该快照没有分析报告", { type: 'warning' });
             return;
         }

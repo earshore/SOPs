@@ -26,6 +26,7 @@ export const UserProductProfileSchema = z.object({
   useEmoji: z.boolean(),
   useCosmo: z.boolean(),
   selectedReportSections: z.array(z.string()),
+  reportFingerprint: z.string().optional(),
   charLimit: z.number().min(100).max(10000)
 });
 
@@ -55,6 +56,9 @@ export const PromptHistoryItemSchema = z.object({
   promptType: z.enum(['listing', 'visual']).optional(),
   generatedAt: z.string().optional(),
   historyId: z.union([z.string(), z.number(), z.null()]).optional(),
+  sourceHistoryId: z.union([z.string(), z.number(), z.null()]).optional(),
+  sourceDataFingerprint: z.string().optional(),
+  reportFingerprint: z.string().optional(),
   asins: z.array(z.string()).optional(),
   marketplace: z.string().optional(),
   profile: z.record(z.string(), z.unknown()).optional()

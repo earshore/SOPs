@@ -167,7 +167,26 @@ describe('HistoryService snapshot storage', () => {
     expect(updated[0]?.asins).toEqual(['B000000001', 'B000000002']);
   });
 
-  it('preserves analysis status and prompt results when updating the current snapshot', () => {
+  it('preserves analysis status and prompt results when current snapshot data is unchanged', () => {
+    const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+    const firstId = first[0]!.id;
+    const analysisReport = { type: 'analysis', data: 'report' } as AnalysisReport;
+
+    HistoryService.updateAnalysisStatus(firstId, analysisReport);
+    HistoryService.updatePromptResult(
+      firstId,
+      createPromptRecord('listing', 'Listing Prompt')
+    );
+
+    const updated = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+
+    expect(updated).toHaveLength(1);
+    expect(updated[0]?.id).toBe(firstId);
+    expect(updated[0]?.analysisStatus?.analysisReport).toBe(analysisReport);
+    expect(updated[0]?.promptResults?.listing?.prompt).toBe('Listing Prompt');
+  });
+
+  it('clears analysis status and prompt results when current snapshot data changes', () => {
     const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
     const firstId = first[0]!.id;
     const analysisReport = { type: 'analysis', data: 'report' } as AnalysisReport;
@@ -182,8 +201,25 @@ describe('HistoryService snapshot storage', () => {
 
     expect(updated).toHaveLength(1);
     expect(updated[0]?.id).toBe(firstId);
-    expect(updated[0]?.analysisStatus?.analysisReport).toBe(analysisReport);
-    expect(updated[0]?.promptResults?.listing?.prompt).toBe('Listing Prompt');
+    expect(updated[0]?.analysisStatus).toBeUndefined();
+    expect(updated[0]?.promptResults).toBeUndefined();
+    expect(updated[0]?.report).toBeUndefined();
+  });
+
+  it('clears prompt results when replacing a snapshot analysis report', () => {
+    const [snapshot] = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+    const snapshotId = snapshot!.id;
+
+    HistoryService.updateAnalysisStatus(snapshotId, { type: 'analysis', data: 'old report' } as AnalysisReport);
+    HistoryService.updatePromptResult(
+      snapshotId,
+      createPromptRecord('listing', 'Listing Prompt')
+    );
+    HistoryService.updateAnalysisStatus(snapshotId, { type: 'analysis', data: 'new report' } as AnalysisReport);
+
+    const updated = HistoryService.getById(snapshotId);
+    expect(updated?.analysisStatus?.analysisReport).toEqual({ type: 'analysis', data: 'new report' });
+    expect(updated?.promptResults).toBeUndefined();
   });
 
   it('keeps the newest 50 snapshots', () => {

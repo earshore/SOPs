@@ -1,4 +1,9 @@
-/assets/*  /assets/:splat  200
-/downloads/*  /downloads/:splat  200
-/logo.svg  /logo.svg  200
-/*  /index.html  200
+# Static files are served directly by Cloudflare Pages.
+# Keep SPA fallback scoped so missing /assets/* chunks return 404 instead of
+# index.html with JavaScript MIME/cache headers.
+/home  /index.html  200
+/app-center  /index.html  200
+/app-center/*  /index.html  200
+/sops_*  /index.html  200
+/amz_*  /index.html  200
+/more_*  /index.html  200

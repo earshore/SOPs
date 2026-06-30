@@ -23,6 +23,7 @@ import {
 } from "../../../../../../common/constants/eventConstants";
 import eventBus from "../../../../../../common/EventBus";
 import { HistoryService } from "../../services/historyService";
+import { getReportFingerprint } from "../../services/reportIdentity";
 // ── 子模块导入 ────────────────────────────────────────────────────────────────
 import type {
   ConsoleMode,
@@ -113,7 +114,7 @@ function createDefaultDnaConfidence(): DnaConfidence {
 }
 
 function withoutReportDna(profile: UserProductProfile): UserProductProfile {
-  return {
+  const nextProfile: UserProductProfile = {
     ...DEFAULT_PROFILE,
     ...profile,
     targetMarket: "",
@@ -127,6 +128,32 @@ function withoutReportDna(profile: UserProductProfile): UserProductProfile {
     selectedReportSections: [],
     selectedReportItems: undefined,
   };
+
+  delete nextProfile.reportFingerprint;
+  return nextProfile;
+}
+
+function withReportFingerprint(
+  profile: UserProductProfile,
+  reportFingerprint: string,
+): UserProductProfile {
+  return {
+    ...profile,
+    reportFingerprint,
+  };
+}
+
+function getCurrentReportFingerprint(): string | null {
+  return computeHasReport()
+    ? getReportFingerprint(appStore.getState().analysis.analysisReport)
+    : null;
+}
+
+function hasMatchingReportFingerprint(
+  profile: UserProductProfile,
+  reportFingerprint: string | null,
+): boolean {
+  return !!reportFingerprint && profile.reportFingerprint === reportFingerprint;
 }
 
 type StructuredSubItemSelection = {
@@ -479,18 +506,32 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       // 订阅 appStore，分析报告变化时刷新渲染
       if (appStore && typeof appStore.subscribe === "function") {
         this._appStoreUnsubscribe = appStore.subscribe((state, previousState) => {
-          if (state.analysis?.analysisReport === previousState?.analysis?.analysisReport) {
+          const currentReportFingerprint = getReportFingerprint(state.analysis?.analysisReport);
+          const previousReportFingerprint = getReportFingerprint(previousState?.analysis?.analysisReport);
+          if (currentReportFingerprint === previousReportFingerprint) {
             return;
           }
 
-          if (!computeHasReport()) {
+          const hasUsableReport = computeHasReport();
+          if (!hasUsableReport) {
             this.profile = withoutReportDna(this.profile);
             this.dnaConfidence = createDefaultDnaConfidence();
             this.dnaExtractionSummary = null;
             this.hasRenderedReportOnce = false;
             this.expandedDimensions.clear();
             this.expandedSubItems.clear();
+            this.saveState();
           } else {
+            if (!hasMatchingReportFingerprint(this.profile, currentReportFingerprint)) {
+              this.profile = currentReportFingerprint
+                ? withReportFingerprint(withoutReportDna(this.profile), currentReportFingerprint)
+                : withoutReportDna(this.profile);
+              this.dnaConfidence = createDefaultDnaConfidence();
+              this.hasRenderedReportOnce = false;
+              this.expandedDimensions.clear();
+              this.expandedSubItems.clear();
+              this.saveState();
+            }
             this.refreshDnaExtractionSummary();
           }
 
@@ -530,10 +571,17 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       const promptlabState = appStore.getState().promptlab;
       const saved = promptlabState?.userProductProfile;
       const hasUsableReport = computeHasReport();
+      const currentReportFingerprint = getCurrentReportFingerprint();
       if (saved) {
-        this.profile = hasUsableReport
-          ? { ...DEFAULT_PROFILE, ...saved }
-          : withoutReportDna(saved);
+        if (hasUsableReport && hasMatchingReportFingerprint(saved, currentReportFingerprint)) {
+          this.profile = { ...DEFAULT_PROFILE, ...saved };
+        } else if (hasUsableReport && currentReportFingerprint) {
+          this.profile = withReportFingerprint(withoutReportDna(saved), currentReportFingerprint);
+          this.saveState();
+        } else {
+          this.profile = withoutReportDna(saved);
+          this.saveState();
+        }
       } else if (!hasUsableReport) {
         this.profile = { ...DEFAULT_PROFILE };
       }
@@ -557,13 +605,30 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
         return;
       }
 
-      const promptResults = HistoryService.getPromptResultsById(currentHistoryId);
+      const currentReportFingerprint = getCurrentReportFingerprint();
+      if (!currentReportFingerprint) {
+        this.listingPromptCache = '';
+        this.visualPromptCache = '';
+        return;
+      }
+
+      const promptResults = HistoryService.getPromptResultsById(currentHistoryId, currentReportFingerprint);
       this.listingPromptCache = promptResults?.listing?.prompt || '';
       this.visualPromptCache = promptResults?.visual?.prompt || '';
     },
 
     saveState() {
-      appStore.getState().setUserProductProfile(this.profile);
+      const currentReportFingerprint = getCurrentReportFingerprint();
+      const profileToSave = currentReportFingerprint
+        ? withReportFingerprint(this.profile, currentReportFingerprint)
+        : { ...this.profile };
+
+      if (!currentReportFingerprint) {
+        delete profileToSave.reportFingerprint;
+      }
+
+      this.profile = profileToSave;
+      appStore.getState().setUserProductProfile(profileToSave);
     },
 
     // ========== Report Rendering ==========

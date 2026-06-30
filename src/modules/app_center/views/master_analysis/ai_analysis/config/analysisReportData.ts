@@ -156,6 +156,9 @@ export interface AnalysisReportMetadata {
   analyzedAt: string; // 分析时间
   targetIds: string[]; // 分析的目标ID列表
   language: string; // 分析语言
+  sourceHistoryId?: string | number | null; // 源采集历史记录 ID
+  sourceDataFingerprint?: string; // 源采集数据指纹
+  sourceAsins?: string[]; // 分析时选中的 ASIN
 }
 
 /**

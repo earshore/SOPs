@@ -9,6 +9,7 @@ import { appStore } from '@/stores/useAppStore';
 import { promptlabService } from '../../services/promptlabService';
 import { HistoryService } from '../../services/historyService';
 import { emitHistoryUpdated } from '../../services/historyEvents';
+import { getReportFingerprint, getScrapedDataFingerprint } from '../../services/reportIdentity';
 import { showToast } from '../../../../../../common/ui';
 import { computeIsReady, computeHasReport } from './computed';
 import type { PromptlabAlpineContext } from './types';
@@ -89,6 +90,11 @@ function createPromptRecord(
 ): GeneratedPromptRecord {
   const state = appStore.getState();
   const scrapedData = state.scraper.scrapedData;
+  const sourceDataFingerprint = getScrapedDataFingerprint(scrapedData) || undefined;
+  const reportFingerprint = getReportFingerprint(analysisReport) || undefined;
+  const asins = state.analysis.selectedAsins.length > 0
+    ? [...state.analysis.selectedAsins]
+    : scrapedData?.products?.map((product) => product.asin) || [];
 
   return {
     id: createPromptId(type),
@@ -96,7 +102,10 @@ function createPromptRecord(
     prompt,
     generatedAt: new Date().toISOString(),
     historyId: state.scraper.currentHistoryId,
-    asins: scrapedData?.products?.map((product) => product.asin) || [],
+    sourceHistoryId: state.scraper.currentHistoryId,
+    sourceDataFingerprint,
+    reportFingerprint,
+    asins,
     marketplace: scrapedData?.metadata?.marketplace || state.scraper.selectedSite || getReportMarketplace(analysisReport),
     profile: cloneProfileSnapshot(ctx)
   };
@@ -111,6 +120,9 @@ function createPromptHistoryItem(record: GeneratedPromptRecord): PromptHistoryIt
     promptType: record.type,
     generatedAt: record.generatedAt,
     historyId: record.historyId,
+    sourceHistoryId: record.sourceHistoryId,
+    sourceDataFingerprint: record.sourceDataFingerprint,
+    reportFingerprint: record.reportFingerprint,
     asins: record.asins,
     marketplace: record.marketplace,
     profile: record.profile
@@ -151,7 +163,7 @@ export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
     showToast(getPromptReadinessMessage(ctx, {
       defaultMessage: '未就绪',
       missingReportMessage: '请先前往 [AI 分析] 模块生成竞品报告',
-      missingTargetMarketMessage: '请先选择目标语言/站点 (Card 1)'
+      missingTargetMarketMessage: '请先在产品 DNA 补充区域选择目标语言/站点'
     }), { type: 'warning' });
     return;
   }

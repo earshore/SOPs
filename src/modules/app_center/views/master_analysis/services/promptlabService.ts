@@ -766,6 +766,7 @@ function filterObjectByItemSelections(
   return filteredObject;
 }
 const DUPLICATE_TEXT_MIN_LENGTH = 24;
+const SEO_DUPLICATE_TEXT_MIN_LENGTH = 5;
 
 const normalizeForDuplicateCheck = (value: string): string => value
   .toLowerCase()
@@ -774,21 +775,29 @@ const normalizeForDuplicateCheck = (value: string): string => value
   .replace(/\s+/g, ' ')
   .trim();
 
-const isDuplicateAgainstContext = (value: string, contextText: string): boolean => {
+const isDuplicateAgainstContext = (
+  value: string,
+  contextText: string,
+  minLength = DUPLICATE_TEXT_MIN_LENGTH,
+): boolean => {
   const normalizedValue = normalizeForDuplicateCheck(value);
-  if (normalizedValue.length < DUPLICATE_TEXT_MIN_LENGTH) {
+  if (normalizedValue.length < minLength) {
     return false;
   }
 
   return normalizeForDuplicateCheck(contextText).includes(normalizedValue);
 };
 
-const filterDuplicateInlineParts = (value: string, contextText: string): string => {
+const filterDuplicateInlineParts = (
+  value: string,
+  contextText: string,
+  minLength = DUPLICATE_TEXT_MIN_LENGTH,
+): string => {
   const parts = value
     .split(/[,;，；]/)
     .map(part => part.trim())
     .filter(Boolean)
-    .filter(part => !isDuplicateAgainstContext(part, contextText));
+    .filter(part => !isDuplicateAgainstContext(part, contextText, minLength));
 
   return parts.join(', ');
 };
@@ -825,31 +834,33 @@ const buildProductSection = (inputs: PromptInputs, contextText = ''): string => 
 const buildSeoSection = (
   inputs: PromptInputs,
   mode: "master" | "visual" = "master",
+  contextText = '',
 ): string => {
   const { keywordsTier1, keywordsTier2, socialHook, negative } = inputs;
   const seoParts: string[] = [];
   const isVisual = mode === "visual";
+  const dedupedKeywordsTier1 = dedupeSeoInlineValue(keywordsTier1, contextText);
+  const dedupedKeywordsTier2 = dedupeSeoInlineValue(keywordsTier2, contextText);
+  const dedupedNegative = dedupeSeoInlineValue(negative, contextText);
 
   // Tier 1 文案差异处理
   const t1Label = isVisual
     ? "Tier 1 (Main Keyword / Product Definition)"
     : "Tier 1 (Title / Bullet 1 / Product Name)";
-  if (keywordsTier1) seoParts.push(`- **${t1Label}**: ${sanitizePromptInput(keywordsTier1)}`);
+  pushSeoPart(seoParts, t1Label, dedupedKeywordsTier1);
 
   // Tier 2 文案差异处理
   const t2Label = isVisual
     ? "Tier 2 (Longtail Keyword)"
     : "Tier 2 (Bullet 2-5)";
-  if (keywordsTier2) seoParts.push(`- **${t2Label}**: ${sanitizePromptInput(keywordsTier2)}`);
+  pushSeoPart(seoParts, t2Label, dedupedKeywordsTier2);
 
   // Social Hook 逻辑
   if (socialHook) {
     seoParts.push(`- **Social/Marketing Hooks**: ${sanitizePromptInput(socialHook)}`);
   }
 
-  if (negative) {
-    seoParts.push(`- **Negative Keywords**: ${sanitizePromptInput(negative)}`);
-  }
+  pushSeoPart(seoParts, 'Negative Keywords', dedupedNegative);
 
   // 头部指令差异处理
   const introText = isVisual
@@ -860,6 +871,17 @@ const buildSeoSection = (
     ? `\n## SEO Mandate\n${introText}\n${seoParts.join("\n")}\n`
     : "";
 };
+
+function dedupeSeoInlineValue(value: string, contextText: string): string {
+  return contextText
+    ? filterDuplicateInlineParts(value, contextText, SEO_DUPLICATE_TEXT_MIN_LENGTH)
+    : value;
+}
+
+function pushSeoPart(parts: string[], label: string, value: string): void {
+  if (!value) return;
+  parts.push(`- **${label}**: ${sanitizePromptInput(value)}`);
+}
 
 // ============================================================
 // 主服务导出
@@ -880,7 +902,7 @@ export const promptlabService = {
     // 复用 Helper 函数生成基础模块
     const contextSection = buildContextSection(inputs, analysisReport);
     const productSection = buildProductSection(inputs, contextSection);
-    const seoSection = buildSeoSection(inputs, "master");
+    const seoSection = buildSeoSection(inputs, "master", contextSection);
 
     // 5. 组装 Listing Prompt
     return `
@@ -931,7 +953,7 @@ Generate the complete Amazon Listing following the structure below:
     // 复用 Helper 函数生成基础模块
     const contextSection = buildContextSection(inputs, analysisReport);
     const productSection = buildProductSection(inputs, contextSection);
-    const seoSection = buildSeoSection(inputs, "visual");
+    const seoSection = buildSeoSection(inputs, "visual", contextSection);
 
     // 2. 组装 Visual Prompt
     return `

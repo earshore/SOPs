@@ -8,6 +8,7 @@ import { showToast } from '@common/ui/index';
 import { formatHistoryDate } from '../services/reportGenerator';
 import { AlpineContext, HistoricalReportDetail } from '../types';
 import type { AnalysisReport, ScrapedData } from '@/types/modules-business';
+import { unwrapReportPayload } from '../../services/reportIdentity';
 
 function isHistoricalAnalysisReport(report: unknown): report is AnalysisReport | string {
   return typeof report === 'string' || (typeof report === 'object' && report !== null);
@@ -73,7 +74,7 @@ export function checkLoadedReport(context: AlpineContext): void {
 
   // 检测报告格式：标准 FullAnalysisReport 格式
   // 检查是否包含任何分析目标字段
-  const reportObj = report as Record<string, unknown>;
+  const reportObj = unwrapReportPayload(report) as Record<string, unknown>;
   const hasAnalysisData = [
     'title-keywords',
     'selling-points',
@@ -89,6 +90,7 @@ export function checkLoadedReport(context: AlpineContext): void {
     // 加载报告数据到当前组件
     context.analysisReport = reportObj;
     context.hasReport = true;
+    appStore.getState().setAnalysisReport(reportObj);
 
     showToast('已加载历史分析报告', { type: 'success' });
   }

@@ -542,7 +542,7 @@ describe('Scraper 处理器', () => {
       expect(result.success).toBe(true);
       expect(result.data?.products.map((product) => product.asin)).toEqual(['B000000002']);
       expect(result.data?.metadata?.total_asins).toBe(1);
-      expect(HistoryService.saveAsync).toHaveBeenCalledWith(data);
+      expect(HistoryService.saveAsync).toHaveBeenCalledWith(data, undefined, { invalidateDerived: true });
       expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.DATA_UPDATED);
       expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.HISTORY_UPDATED);
       expect(showToast).toHaveBeenCalledWith('ASIN B000000001 已移除', { type: 'info' });
@@ -584,7 +584,7 @@ describe('Scraper 处理器', () => {
 
       expect(result.success).toBe(true);
       expect(result.data?.products[0].customer_reviews.map((review) => review.id)).toEqual(['R2']);
-      expect(HistoryService.saveAsync).toHaveBeenCalledWith(data);
+      expect(HistoryService.saveAsync).toHaveBeenCalledWith(data, undefined, { invalidateDerived: true });
       expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.DATA_UPDATED);
       expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.HISTORY_UPDATED);
       expect(showToast).toHaveBeenCalledWith('评论已删除', { type: 'info' });

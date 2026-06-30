@@ -165,7 +165,7 @@ function removeReview(
 
 async function saveDeletion(scrapedData: ScrapedData, context: DeleteContext): Promise<void> {
     try {
-        await HistoryService.saveAsync(scrapedData);
+        await HistoryService.saveAsync(scrapedData, undefined, { invalidateDerived: true });
     } catch (saveError) {
         console.error('[Scraper] 保存历史记录失败:', saveError);
         throw new SystemError(

@@ -170,6 +170,21 @@ export interface PromptHistoryItem {
   historyId?: string | number | null;
 
   /**
+   * 生成时关联的源采集历史记录 ID
+   */
+  sourceHistoryId?: string | number | null;
+
+  /**
+   * 生成时关联的采集数据指纹
+   */
+  sourceDataFingerprint?: string;
+
+  /**
+   * 生成时关联的分析报告指纹
+   */
+  reportFingerprint?: string;
+
+  /**
    * 关联的 ASIN 列表
    */
   asins?: string[];
@@ -214,6 +229,15 @@ export type ToneStyle =
   | 'emotional'
   | 'minimalist'
   | '';
+
+export type UserProductDnaField =
+  | 'keywordsTier1'
+  | 'keywordsTier2'
+  | 'negative'
+  | 'audience'
+  | 'usps'
+  | 'specs'
+  | 'socialHook';
 
 /**
  * 用户产品配置
@@ -392,6 +416,15 @@ export interface UserProductProfile {
       };
     };
   };
+
+  /**
+   * 当前产品 DNA / 报告选择绑定的分析报告指纹
+   *
+   * @remarks
+   * PromptLab 中从报告派生或在报告上下文下编辑的产品 DNA 不应跨报告复用。
+   * 当当前报告指纹与该值不一致时，报告派生字段会被清空并重新初始化。
+   */
+  reportFingerprint?: string;
 
   /**
    * 字符限制
@@ -968,6 +1001,7 @@ export type {
   AnalysisState,
   PromptHistoryItem,
   UserProductProfile,
+  UserProductDnaField,
   PromptInputs,
   PromptLabState,
   KeywordData,

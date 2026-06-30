@@ -511,6 +511,7 @@ export interface GeneratedPromptProfileSnapshot {
   useEmoji?: boolean;
   selectedReportSections?: string[];
   selectedReportItems?: Record<string, unknown>;
+  reportFingerprint?: string;
   charLimit?: number;
 }
 
@@ -520,6 +521,9 @@ export interface GeneratedPromptRecord {
   prompt: string;
   generatedAt: string;
   historyId?: string | number | null;
+  sourceHistoryId?: string | number | null;
+  sourceDataFingerprint?: string;
+  reportFingerprint?: string;
   asins: string[];
   marketplace?: string;
   profile: GeneratedPromptProfileSnapshot;
@@ -541,6 +545,7 @@ export interface HistoryItem {
   site: string;
   asins: string[];
   data: ScrapedData;
+  dataFingerprint?: string;
   report?: AnalysisReport;
   // 向后兼容旧格式
   asin?: string;
@@ -550,6 +555,11 @@ export interface HistoryItem {
     isAnalyzed: boolean;           // 是否已分析
     analyzedAt?: string;            // 分析时间戳
     analysisReport?: AnalysisReport;  // 分析报告数据
+    sourceHistoryId?: string | number | null;
+    sourceDataFingerprint?: string;
+    sourceAsins?: string[];
+    sourceTargets?: string[];
+    reportFingerprint?: string;
   };
   promptResults?: HistoryPromptResults;
 }

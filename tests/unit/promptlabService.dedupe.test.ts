@@ -55,6 +55,33 @@ const makeReport = (primaryDifferentiation: string, targetPositioning: string): 
   };
 };
 
+const makeKeywordReport = (): any => ({
+  metadata: {},
+  analysisReport: {
+    'title-keywords': {
+      primary_keywords: [
+        { keyword: 'desk bell', weight: 'high' },
+      ],
+      secondary_keywords: [
+        { keyword: 'service counter bell', type: 'longtail' },
+      ],
+      scene_keywords: [],
+      audience_keywords: [],
+      optimization_suggestions: [],
+    },
+    'fatal-flaws': {
+      risk_assessment: {
+        overall_risk_level: 'high',
+        primary_concern: 'seal failure under pressure',
+      },
+      critical_issues: [],
+      return_triggers: ['water seepage'],
+      expectation_gaps: [],
+      actionable_fixes: [],
+    },
+  },
+});
+
 const countOccurrences = (text: string, phrase: string): number => {
   return text.split(phrase).length - 1;
 };
@@ -96,6 +123,30 @@ describe('promptlabService product DNA de-duplication', () => {
     expect(productSection).toContain(uniqueLine);
     expect(productSection).not.toContain(duplicateLine);
     expect(countOccurrences(prompt, duplicateLine)).toBe(1);
+  });
+
+  it('removes report-loaded SEO terms that are already present in the selected report context', () => {
+    const report = makeKeywordReport();
+    const prompt = promptlabService.generateMasterPrompt(
+      makeInputs({
+        keywordsTier1: 'desk bell, reception bell',
+        keywordsTier2: 'service counter bell, loud ring',
+        negative: 'water seepage, fragile',
+        selectedReportSections: ['title-keywords', 'fatal-flaws'],
+      }),
+      report,
+    );
+    const seoSection = getSection(prompt, '## SEO Mandate', '## Market Context');
+
+    expect(seoSection).not.toContain('desk bell');
+    expect(seoSection).toContain('reception bell');
+    expect(seoSection).not.toContain('service counter bell');
+    expect(seoSection).toContain('loud ring');
+    expect(seoSection).not.toContain('water seepage');
+    expect(seoSection).toContain('fragile');
+    expect(countOccurrences(prompt, 'desk bell')).toBe(1);
+    expect(countOccurrences(prompt, 'service counter bell')).toBe(1);
+    expect(countOccurrences(prompt, 'water seepage')).toBe(1);
   });
 
   it('localizes the prompt role without German/DACH hardcoding for non-German markets', () => {

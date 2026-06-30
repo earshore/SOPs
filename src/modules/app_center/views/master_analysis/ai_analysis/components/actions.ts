@@ -20,6 +20,7 @@ import type { AnalysisReport } from '@/types/modules-business';
 import { BusinessError } from '@common/errors/AppError';
 import { getPerformanceSettings } from './PerformanceSettings';
 import { emitHistoryUpdated } from '../../services/historyEvents';
+import { getScrapedDataFingerprint } from '../../services/reportIdentity';
 /**
  * 切换 ASIN 选择
  */
@@ -32,6 +33,7 @@ export function toggleAsin(context: AlpineContext, asin: string): void {
   }
   // 直接更新 Zustand store
   appStore.getState().setSelectedAsins([...context.selectedAsins]);
+  clearReportForAnalysisInputChange(context);
 }
 
 /**
@@ -40,6 +42,7 @@ export function toggleAsin(context: AlpineContext, asin: string): void {
 export function selectAllAsins(context: AlpineContext, availableAsins: string[]): void {
   context.selectedAsins = [...availableAsins];
   appStore.getState().setSelectedAsins(context.selectedAsins);
+  clearReportForAnalysisInputChange(context);
 }
 
 /**
@@ -48,6 +51,7 @@ export function selectAllAsins(context: AlpineContext, availableAsins: string[])
 export function clearAllAsins(context: AlpineContext): void {
   context.selectedAsins = [];
   appStore.getState().setSelectedAsins([]);
+  clearReportForAnalysisInputChange(context);
 }
 
 /**
@@ -209,8 +213,81 @@ function syncAnalysisReport(context: AlpineContext, report: FullAnalysisReport |
   appStore.getState().setAnalysisReport(report as AnalysisReport | null);
 }
 
+interface AnalysisSourceBinding {
+  sourceHistoryId: string | number | null;
+  sourceDataFingerprint: string | null;
+  sourceAsins: string[];
+  sourceTargets: string[];
+}
+
+function createAnalysisSourceBinding(context: AlpineContext): AnalysisSourceBinding {
+  const state = appStore.getState();
+  return {
+    sourceHistoryId: state.scraper?.currentHistoryId ?? null,
+    sourceDataFingerprint: getScrapedDataFingerprint(state.scraper?.scrapedData),
+    sourceAsins: [...context.selectedAsins],
+    sourceTargets: [...context.selectedTargets]
+  };
+}
+
+function isCurrentAnalysisSource(binding: AnalysisSourceBinding): boolean {
+  const state = appStore.getState();
+  return (state.scraper?.currentHistoryId ?? null) === binding.sourceHistoryId
+    && getScrapedDataFingerprint(state.scraper?.scrapedData) === binding.sourceDataFingerprint;
+}
+
+function withAnalysisSourceBinding(
+  report: FullAnalysisReport,
+  binding: AnalysisSourceBinding,
+  language: string
+): FullAnalysisReport {
+  return {
+    ...report,
+    _metadata: {
+      ...report._metadata,
+      confidence: report._metadata?.confidence || {},
+      overallConfidence: report._metadata?.overallConfidence || 0,
+      analyzedAt: report._metadata?.analyzedAt || new Date().toISOString(),
+      targetIds: report._metadata?.targetIds || binding.sourceTargets,
+      language: report._metadata?.language || language,
+      sourceHistoryId: binding.sourceHistoryId,
+      sourceDataFingerprint: binding.sourceDataFingerprint || undefined,
+      sourceAsins: [...binding.sourceAsins]
+    }
+  };
+}
+
+async function persistAnalysisReportToSource(
+  binding: AnalysisSourceBinding,
+  analysisReport: FullAnalysisReport
+): Promise<void> {
+  if (!binding.sourceHistoryId) {
+    return;
+  }
+
+  const { HistoryService } = await import('../../services/historyService');
+  const success = await HistoryService.updateAnalysisStatusAsync(
+    binding.sourceHistoryId,
+    analysisReport as AnalysisReport,
+    binding
+  );
+
+  if (success) {
+    emitHistoryUpdated();
+  }
+}
+
 function resetAnalysisReport(context: AlpineContext): void {
   syncAnalysisReport(context, null);
+}
+
+function clearReportForAnalysisInputChange(context: AlpineContext): void {
+  if (!context.analysisReport && !appStore.getState().analysis?.analysisReport) {
+    return;
+  }
+
+  resetAnalysisReport(context);
+  appStore.getState().setTranslatedReport(null);
 }
 
 function syncAnalysisProgress(context: AlpineContext, progress: number, currentStep: string): void {
@@ -228,6 +305,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
   }
 
   const selectedTargets = [...context.selectedTargets];
+  const sourceBinding = createAnalysisSourceBinding(context);
 
   context.isAnalyzing = true;
   syncAnalysisProgress(context, 0, '正在准备分析...');
@@ -283,26 +361,24 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
         retryBudget: schedulePlan.retryBudget,
         stopOnFailure: schedulePlan.failureMode === 'complete_required',
         onTaskComplete: streamResults ? ({ report }) => {
-          syncAnalysisReport(context, report);
+          if (isCurrentAnalysisSource(sourceBinding)) {
+            syncAnalysisReport(context, withAnalysisSourceBinding(report, sourceBinding, language));
+          }
         } : undefined
       }
     );
 
-    syncAnalysisReport(context, analysisReport);
+    if (!isCurrentAnalysisSource(sourceBinding)) {
+      resetAnalysisReport(context);
+      showToast('采集数据已变更，本次分析结果已丢弃，请重新分析', { type: 'warning' });
+      return;
+    }
+
+    const boundAnalysisReport = withAnalysisSourceBinding(analysisReport, sourceBinding, language);
+    syncAnalysisReport(context, boundAnalysisReport);
     syncAnalysisProgress(context, 100, '分析完成');
 
-    const currentHistoryId = appStore.getState().scraper?.currentHistoryId;
-    if (analysisReport && currentHistoryId) {
-      const { HistoryService } = await import('../../services/historyService');
-      const success = await HistoryService.updateAnalysisStatusAsync(
-        currentHistoryId,
-        analysisReport as AnalysisReport
-      );
-
-      if (success) {
-        emitHistoryUpdated();
-      }
-    }
+    await persistAnalysisReportToSource(sourceBinding, boundAnalysisReport);
 
     showToast('分析完成！', { type: 'success' });
   } catch (error) {

@@ -14,6 +14,7 @@ import {
   extractDNAFromDownloadsReport,
   canExtractDNAFromDownloadsReport,
 } from '../../services/UniversalDNAExtractor';
+import { getReportFingerprint, unwrapReportPayload } from '../../services/reportIdentity';
 import type { ExtendedDNA } from '../../types/extendedDNA';
 import type {
   DnaExtractionFieldName,
@@ -227,12 +228,7 @@ function getSourceText(sources: string[]): string {
 }
 
 function getStoredAnalysisReport(): unknown {
-  const report = appStore.getState().analysis.analysisReport;
-  if (!isRecord(report)) {
-    return report;
-  }
-
-  return report.analysisReport ?? report;
+  return unwrapReportPayload(appStore.getState().analysis.analysisReport);
 }
 
 function normalizeLanguageCode(value: unknown): string | null {
@@ -320,6 +316,13 @@ function getRawDna(ctx: PromptlabAlpineContext): ExtendedDNA | ExtractedDNA | nu
 
   const legacy = extractProductDNA(unwrappedReport as FullAnalysisReport | null);
   return legacy;
+}
+
+function bindProfileToCurrentReport(ctx: PromptlabAlpineContext): void {
+  const fingerprint = getReportFingerprint(appStore.getState().analysis.analysisReport);
+  if (fingerprint) {
+    ctx.profile.reportFingerprint = fingerprint;
+  }
 }
 
 function normalizeConfidenceValue(value: unknown): number {
@@ -583,6 +586,7 @@ export async function autoPopulateDNA(ctx: PromptlabAlpineContext): Promise<void
     overall: normalized.confidence.overall,
   };
 
+  bindProfileToCurrentReport(ctx);
   ctx.saveState();
 
   const filledLabels = fillableFields.map(([, config]) => config.label).join('、');
@@ -637,6 +641,7 @@ export async function extractSingleField(
 
   config.apply(ctx, normalized);
   ctx.dnaConfidence.overall = normalized.confidence.overall;
+  bindProfileToCurrentReport(ctx);
   ctx.saveState();
 
   highlightAutoFilledFields([config.inputId], 'green');

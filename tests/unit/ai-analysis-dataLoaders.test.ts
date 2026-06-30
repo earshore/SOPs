@@ -206,6 +206,32 @@ describe('dataLoaders - checkLoadedReport', () => {
     expect(mockContext.hasReport).toBe(true);
   });
 
+  it('应该加载导出格式中的 analysisReport 内容', () => {
+    const innerReport = {
+      'title-keywords': {
+        title: 'Wrapped Result'
+      }
+    };
+
+    mockAppStoreState.scraper = {
+      scrapedData: {
+        products: [{ asin: 'B001', title: 'Product 1' }]
+      }
+    };
+    mockAppStoreState.analysis = {
+      analysisReport: {
+        metadata: { asins: ['B001'] },
+        analysisReport: innerReport
+      }
+    };
+
+    checkLoadedReport(mockContext);
+
+    expect(mockContext.analysisReport).toEqual(innerReport);
+    expect(mockContext.hasReport).toBe(true);
+    expect(mockAppStoreState.setAnalysisReport).toHaveBeenCalledWith(innerReport);
+  });
+
   it('应该在当前产品数据为空时不加载历史报告', () => {
     const mockReport = {
       'title-keywords': {

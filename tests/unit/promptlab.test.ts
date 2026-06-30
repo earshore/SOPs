@@ -8,13 +8,13 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount, unmount } from '@/modules/app_center/views/master_analysis/promptlab/index';
 import { createPromptlabPanel } from '@/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel';
 import { generateLanguageOptions } from '@/modules/app_center/views/master_analysis/promptlab/components/reportRenderer';
-import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 import { appStore } from '@/stores/useAppStore';
 import eventBus from '@/common/EventBus';
 import { MODULE_EVENTS, APP_EVENTS } from '@/common/constants/eventConstants';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
+import { getReportFingerprint } from '@/modules/app_center/views/master_analysis/services/reportIdentity';
 import type { UserProductProfile } from '@/types/state';
 import type { GeneratedPromptRecord, HistoryItem } from '@/types/modules-business';
 
@@ -114,9 +114,6 @@ describe('Promptlab Module', () => {
       charLimit: 5000,
     });
 
-    // Mock SafeModuleLoader
-    vi.spyOn(SafeModuleLoader.getInstance(), 'loadTemplate').mockResolvedValue(mockTemplate);
-
     // Mock SafeRenderer
     vi.spyOn(SafeRenderer.getInstance(), 'renderTemplate').mockImplementation((el, html) => {
       el.innerHTML = html;
@@ -141,14 +138,12 @@ describe('Promptlab Module', () => {
     it('should mount module successfully', async () => {
       await mount(container);
 
-      expect(SafeModuleLoader.getInstance().loadTemplate).toHaveBeenCalledWith(
-        'src/modules/app_center/views/master_analysis/promptlab/template.html',
-        expect.any(Object)
-      );
       expect(SafeRenderer.getInstance().renderTemplate).toHaveBeenCalledWith(
         container,
-        mockTemplate
+        expect.stringContaining('x-data="promptlabPanel"')
       );
+      expect(container.querySelector('#card-analysis')?.textContent).toContain('未检测到 AI 分析报告');
+      expect(container.querySelector('#card-product-dna')?.textContent).not.toContain('未检测到 AI 分析报告');
       expect(AlpineRegistry.getInstance().register).toHaveBeenCalledWith(
         'promptlabPanel',
         createPromptlabPanel
@@ -157,11 +152,13 @@ describe('Promptlab Module', () => {
 
     it('should handle mount errors gracefully', async () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      const mockError = new Error('Template load failed');
+      const mockError = new Error('Render failed');
       
-      vi.spyOn(SafeModuleLoader.getInstance(), 'loadTemplate').mockRejectedValue(mockError);
+      vi.spyOn(SafeRenderer.getInstance(), 'renderTemplate').mockImplementation(() => {
+        throw mockError;
+      });
 
-      await expect(mount(container)).rejects.toThrow('Template load failed');
+      await expect(mount(container)).rejects.toThrow('Render failed');
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('[Promptlab]'),
         mockError
@@ -216,6 +213,7 @@ describe('Promptlab Module', () => {
     });
 
     it('should restore state from store on init', () => {
+      const report = createUsableAnalysisReport();
       const savedProfile: UserProductProfile = {
         targetMarket: 'English',
         keywordsTier1: 'test keyword',
@@ -231,10 +229,11 @@ describe('Promptlab Module', () => {
         useRufus: false,
         useEmoji: true,
         selectedReportSections: ['section1', 'section2'],
+        reportFingerprint: getReportFingerprint(report) ?? undefined,
         charLimit: 3000,
       };
 
-      appStore.getState().updateAnalysis({ analysisReport: createUsableAnalysisReport() as any });
+      appStore.getState().updateAnalysis({ analysisReport: report as any });
       appStore.getState().setUserProductProfile(savedProfile);
       
       component.restoreState();
@@ -244,6 +243,52 @@ describe('Promptlab Module', () => {
       expect(component.profile.tone).toBe('exciting');
       expect(component.profile.useCosmo).toBe(true);
       expect(component.profile.charLimit).toBe(3000);
+    });
+
+    it('should clear report-bound DNA when the saved profile belongs to another report', () => {
+      const oldReport = createUsableAnalysisReport();
+      const nextReport = {
+        ...createUsableAnalysisReport(),
+        'selling-points': {
+          overall_strategy: {
+            primary_differentiation: 'New report USP',
+          },
+        },
+      };
+      const savedProfile: UserProductProfile = {
+        targetMarket: 'English',
+        keywordsTier1: 'old keyword',
+        keywordsTier2: 'old longtail',
+        audience: 'old audience',
+        usps: 'old usps',
+        specs: 'old specs',
+        socialHook: 'old hook',
+        negative: 'old negative',
+        tone: 'exciting',
+        customStrategy: 'keep strategy',
+        useCosmo: true,
+        useRufus: false,
+        useEmoji: true,
+        selectedReportSections: ['buyer-profile'],
+        reportFingerprint: getReportFingerprint(oldReport) ?? undefined,
+        charLimit: 3000,
+      };
+
+      appStore.getState().updateAnalysis({ analysisReport: nextReport as any });
+      appStore.getState().setUserProductProfile(savedProfile);
+
+      component.restoreState();
+
+      expect(component.profile.keywordsTier1).toBe('');
+      expect(component.profile.keywordsTier2).toBe('');
+      expect(component.profile.audience).toBe('');
+      expect(component.profile.usps).toBe('');
+      expect(component.profile.specs).toBe('');
+      expect(component.profile.negative).toBe('');
+      expect(component.profile.selectedReportSections).toEqual([]);
+      expect(component.profile.reportFingerprint).toBe(getReportFingerprint(nextReport));
+      expect(component.profile.tone).toBe('exciting');
+      expect(component.profile.customStrategy).toBe('keep strategy');
     });
 
     it('should not restore product DNA fields without a usable analysis report', () => {
@@ -345,11 +390,48 @@ describe('Promptlab Module', () => {
         createPromptRecord('visual-1', 'visual', 'Snapshot Visual Prompt', snapshotId)
       );
 
+      appStore.getState().updateAnalysis({ analysisReport: createUsableAnalysisReport() as any });
       component.restoreState();
 
       expect(appStore.getState().scraper.currentHistoryId).toBe(snapshotId);
       expect(component.listingPromptCache).toBe('Snapshot Listing Prompt');
       expect(component.visualPromptCache).toBe('Snapshot Visual Prompt');
+    });
+
+    it('should not restore snapshot prompt caches without a current report', () => {
+      const [snapshot] = HistoryService.save({
+        metadata: {
+          scrape_timestamp: '2026-01-01T00:00:00.000Z',
+          marketplace: 'US',
+          domain: 'amazon.com',
+          language: 'English',
+          total_asins: 1
+        },
+        products: [
+          {
+            asin: 'B000000001',
+            url: '',
+            language: 'English',
+            productTitle: 'Snapshot Product',
+            feature_bullets: [],
+            customer_reviews: [],
+            scrape_status: 'success',
+            error: ''
+          }
+        ]
+      });
+      const snapshotId = snapshot!.id;
+
+      HistoryService.updatePromptResult(
+        snapshotId,
+        createPromptRecord('listing-1', 'listing', 'Snapshot Listing Prompt', snapshotId)
+      );
+
+      appStore.getState().updateAnalysis({ analysisReport: null });
+      component.restoreState();
+
+      expect(component.listingPromptCache).toBe('');
+      expect(component.visualPromptCache).toBe('');
     });
 
     it('should clear generated prompt caches when the loaded snapshot has no prompt results', () => {

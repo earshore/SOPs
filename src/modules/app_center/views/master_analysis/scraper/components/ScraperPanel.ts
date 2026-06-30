@@ -90,6 +90,17 @@ function createScraperPanelState(): ScraperPanelState {
     };
 }
 
+function clearDerivedAnalysisStateAfterDataChange(data: ScrapedData): void {
+    const state = appStore.getState();
+    const availableAsins = new Set((data.products || []).map((product) => product.asin).filter(Boolean));
+    const selectedAsins = (state.analysis?.selectedAsins || []).filter((asin) => availableAsins.has(asin));
+
+    state.setAnalysisReport(null);
+    state.setTranslatedReport?.(null);
+    state.setSelectedAsins?.(selectedAsins);
+    state.setCurrentPrompt?.('');
+}
+
 function attachScraperPanelBehavior(panel: ScraperPanelState): ScraperPanelState & Record<string, unknown> {
     Object.defineProperties(panel, Object.getOwnPropertyDescriptors(scraperPanelBehavior));
     return panel;
@@ -594,7 +605,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
                 // 更新全局状态
                 appStore.getState().setScrapedData(scrapedData);
-                appStore.getState().setAnalysisReport(null); // 重置分析报告
+                clearDerivedAnalysisStateAfterDataChange(scrapedData);
 
                 try {
                     await saveScrapeSnapshot(scrapedData);
@@ -659,7 +670,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
                 if (result.success && result.data) {
                     // 更新全局状态
                     appStore.getState().setScrapedData(result.data);
-                    appStore.getState().setAnalysisReport(null);
+                    clearDerivedAnalysisStateAfterDataChange(result.data);
 
                     // 根据新导入的数据更新选中的站点
                     const marketplace = result.data.metadata?.marketplace || 'DE';
@@ -787,6 +798,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
             if (!result.data) return;
 
             appStore.getState().setScrapedData(result.data);
+            clearDerivedAnalysisStateAfterDataChange(result.data);
             if (this.dataPreview) {
                 this.updateDataPreview(result.data);
             }

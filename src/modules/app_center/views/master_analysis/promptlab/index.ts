@@ -9,11 +9,11 @@
  * - 使用 AlpineRegistry 统一管理组件注册
  */
 
-import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 import { createPromptlabPanel } from './components/PromptlabPanel';
 import { destroyAlpineComponent } from '../utils/alpineLifecycle';
+import templateHTML from './template.html?raw&inline';
 import '../master_analysis_style.css';
 
 // ========================================== 
@@ -33,23 +33,13 @@ export async function mount(container: HTMLElement): Promise<void> {
     }
 
     try {
-        // 1. 使用 SafeModuleLoader 加载模板
-        const loader = SafeModuleLoader.getInstance();
+        // 1. 使用构建期 raw import，避免生产环境独立模板 chunk 被 SPA fallback 缓存污染
         const renderer = SafeRenderer.getInstance();
-
-        const html = await loader.loadTemplate(
-            'src/modules/app_center/views/master_analysis/promptlab/template.html',
-            {
-                onError: (error) => {
-                    console.error('[Promptlab] 模板加载失败:', error);
-                }
-            }
-        );
 
         // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
         // 添加淡入动画（在渲染前添加）
         container.classList.add('fade-in');
-        renderer.renderTemplate(container, html);
+        renderer.renderTemplate(container, templateHTML);
 
         // 3. 使用 AlpineRegistry 注册组件
         const registry = AlpineRegistry.getInstance();
