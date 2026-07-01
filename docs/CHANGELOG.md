@@ -26,6 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.11] - 2026-07-01
+
+### Added
+- 新增 AMZ_HUB 成熟期运营视图。
+- 新增质量报告、技术债务报告和知识库评审执行报告。
+
+### Changed
+- 统一 AMZ_HUB 与 SOPS 内容、元数据和页面脚手架。
+- 调整 AMZ_HUB 模块命名和导航内容呈现。
+- 优化 AI 翻译 UI。
+- 同步应用内版本显示到 `3.0.3-rc.11`。
+
+### Fixed
+- 修复暗色 tile 对比度和标签重叠问题。
+
 ## [3.0.3-rc.10] - 2026-06-30
 
 ### Added
