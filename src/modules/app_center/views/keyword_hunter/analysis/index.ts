@@ -749,12 +749,6 @@ function setupEventListeners(container: HTMLElement): void {
     );
   }
 
-  const btnSaveSnapshot = document.getElementById("kt-save-analysis-snapshot-btn");
-  if (btnSaveSnapshot) {
-    addEventListener(btnSaveSnapshot, "click", () => {
-      void saveAnalysisSnapshot(true);
-    });
-  }
 }
 
 // ==========================================

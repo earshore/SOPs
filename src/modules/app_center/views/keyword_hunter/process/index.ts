@@ -16,7 +16,6 @@ import * as KeywordService from "../services/trackerService";
 import { appStore } from "../../../../../stores/useAppStore";
 import { ErrorService } from "../../../../../services/errorService";
 import { createSafeFragment } from "../../../../../common/utils/security";
-import { KeywordHunterSnapshotService } from "../services/snapshotService";
 import "../keyword_hunter_style.css";
 
 // ==========================================
@@ -922,22 +921,6 @@ async function translateCopyImmersive(): Promise<void> {
   }
 }
 
-async function saveProcessSnapshot(): Promise<void> {
-  saveProcessStateToState();
-  try {
-    const hasReport = !!appStore.getState().keywordTracker.llmAnalysisResult?.trim();
-    await KeywordHunterSnapshotService.saveCurrentAsync({
-      status: hasReport ? "reported" : "matched",
-    });
-    showToast("快照已保存", { type: "success" });
-  } catch (error) {
-    console.error("[Process] 保存快照失败:", error);
-    showToast(error instanceof Error ? error.message : "保存快照失败", {
-      type: "error",
-    });
-  }
-}
-
 /**
  * 定位关键词在文案中的位置
  */
@@ -1300,13 +1283,6 @@ function setupEventListeners(container: HTMLElement): void {
   if (syncBtn) {
     addEventListener(syncBtn, "click", () => {
       void syncToInput();
-    });
-  }
-
-  const saveSnapshotBtn = document.getElementById("kt-save-process-snapshot-btn");
-  if (saveSnapshotBtn) {
-    addEventListener(saveSnapshotBtn, "click", () => {
-      void saveProcessSnapshot();
     });
   }
 

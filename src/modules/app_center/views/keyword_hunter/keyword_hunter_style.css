@@ -80,18 +80,6 @@
     color: var(--color-red-600, #dc2626);
 }
 
-.kt-title-icon-btn--accent {
-    border-color: var(--color-blue-200, #bfdbfe);
-    background: var(--color-blue-50, #eff6ff);
-    color: var(--color-blue-700, #1d4ed8);
-}
-
-.kt-title-icon-btn--accent:hover,
-.kt-title-icon-btn--accent:focus-visible {
-    border-color: var(--color-blue-300, #93c5fd);
-    background: var(--color-blue-100, #dbeafe);
-}
-
 .kt-title-icon-btn--primary {
     width: 2.25rem;
     height: 2.25rem;

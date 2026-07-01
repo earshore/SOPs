@@ -113,14 +113,6 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
-vi.mock('@/modules/app_center/views/keyword_hunter/services/snapshotService', () => ({
-  KeywordHunterSnapshotService: {
-    saveCurrentAsync: vi.fn(async () => ({
-      id: 'kh-test',
-    })),
-  },
-}));
-
 vi.mock('@/stores/useAppStore', () => ({
   appStore: {
     getState: () => processMocks.state,

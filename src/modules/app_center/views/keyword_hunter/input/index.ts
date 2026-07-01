@@ -658,11 +658,6 @@ function bindActionButtons(): void {
 }
 
 function bindSnapshotButtons(): void {
-    const btnSaveSnapshot = document.getElementById('kt-btn-save-input-snapshot');
-    if (btnSaveSnapshot) addEventListener(btnSaveSnapshot, 'click', () => {
-        void saveCurrentSnapshot('draft');
-    });
-
     const btnPanelSaveSnapshot = document.getElementById('kt-input-snapshot-save');
     if (btnPanelSaveSnapshot) addEventListener(btnPanelSaveSnapshot, 'click', () => {
         void saveCurrentSnapshot('draft');
