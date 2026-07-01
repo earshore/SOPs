@@ -178,7 +178,7 @@ export function searchHub(query: string): void {
     clearBtnId: 'hub-search-clear',
     clearSearchKey: 'hub',
     emptyMessage: '未找到匹配的内容',
-    moduleId: 'amz_hub_core',
+    moduleId: 'amz_hub',
     navContainerId: 'hub-nav-container',
     resultsContainerId: 'hub-search-results',
   });

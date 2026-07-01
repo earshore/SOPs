@@ -185,8 +185,8 @@ export const MENU_CONFIG: MenuConfig = {
     },
 
     // [智库] Knowledge Base
-    amz_hub_core: {
-      id: "amz_hub_core",
+    amz_hub: {
+      id: "amz_hub",
       contextId: "hub",
       title: "Amazon 智库",
       version: "KB v1.0",

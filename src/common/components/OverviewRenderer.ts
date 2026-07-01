@@ -65,7 +65,7 @@ export class OverviewRenderer {
 
   /**
    * @param container - 容器元素
-   * @param moduleId - 模块ID (如 'sops', 'app_center', 'amz_hub_core', 'more_core')
+   * @param moduleId - 模块ID (如 'sops', 'app_center', 'amz_hub', 'more_core')
    * @param options - 配置选项
    */
   constructor(container: HTMLElement, moduleId: string, options: OverviewOptions = {}) {

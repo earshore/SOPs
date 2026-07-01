@@ -175,7 +175,7 @@ export class RouteConfigConverter {
     const moduleAliases: Record<string, string> = {
       sops: 'sops_overview',
       app_center: 'app_center_overview',
-      amz_hub_core: 'amz_hub_overview',
+      amz_hub: 'amz_hub_overview',
       more_core: 'more_overview',
     };
 

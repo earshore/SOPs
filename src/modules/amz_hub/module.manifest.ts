@@ -1,7 +1,7 @@
 import { defineModuleManifest } from "@/common/config/moduleManifest";
 
 export const amzHubManifest = defineModuleManifest({
-  moduleId: "amz_hub_core",
+  moduleId: "amz_hub",
   panelId: "panel-amz_hub",
   routes: [
     {
@@ -71,6 +71,13 @@ export const amzHubManifest = defineModuleManifest({
       routeId: "amz_conversion_optimization",
       label: "链接转化率低自查优化",
       icon: "fas fa-chart-line",
+      category: "advanced",
+    },
+    {
+      key: "MATURE_PHASE",
+      routeId: "amz_mature_phase",
+      label: "成熟期运营策略",
+      icon: "fas fa-trophy",
       category: "advanced",
     },
   ],

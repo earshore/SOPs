@@ -12,4 +12,5 @@ export const MODULE_MAP: ModuleMap = {
   amz_new_product_30days: () => import("./views/advanced/new_product_30days/index"),
   amz_conversion_optimization: () =>
     import("./views/advanced/conversion_optimization/index"),
+  amz_mature_phase: () => import("./views/advanced/mature_phase/index"),
 };

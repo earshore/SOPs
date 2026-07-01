@@ -34,7 +34,7 @@ const appCenterRenderer = createSidebarRenderer({
 });
 
 const hubRenderer = createSidebarRenderer({
-  moduleId: 'amz_hub_core',
+  moduleId: 'amz_hub',
   categories: MENU_CONFIG.hubCategories,
   overviewRouteId: 'amz_hub_overview',
   enableSearch: true,
@@ -52,7 +52,7 @@ const moreRenderer = createSidebarRenderer({
 const SIDEBAR_RENDERER_REGISTRY: Record<string, SidebarRenderer> = {
   'sops': sopsRenderer,
   'app_center': appCenterRenderer,
-  'amz_hub_core': hubRenderer,
+  'amz_hub': hubRenderer,
   'more_core': moreRenderer
 };
 

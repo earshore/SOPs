@@ -553,7 +553,7 @@ export function renderSopsMegaMenu(): void {
 }
 
 export function renderHubMegaMenu(): void {
-  const hubModule = MENU_CONFIG.modules['amz_hub_core'];
+  const hubModule = MENU_CONFIG.modules['amz_hub'];
   renderCategoryMenu({
     containerId: 'hub-mega-menu-content',
     overviewRouteId: 'amz_hub_overview',
