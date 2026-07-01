@@ -63,18 +63,70 @@
         background: var(--surface-card-hover, var(--color-slate-50)) !important;
     }
 
-    .ql-page > :nth-child(n + 2) :where(.bg-slate-900, .bg-slate-800) {
-        border-radius: var(--radius-card, var(--rounded-md)) !important;
-        background: var(--color-slate-900) !important;
-        box-shadow: none !important;
-    }
-
-    .ql-page > :nth-child(n + 2) :where(.bg-slate-900, .bg-slate-800) :where(.bg-white, [class*="bg-white"]) {
-        background: rgba(255, 255, 255, 0.08) !important;
-    }
-
     .ql-page > :nth-child(n + 2) [class*="hover:"]:hover {
         transform: none !important;
         box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36)) !important;
     }
+
+    /* ====================================================================
+       深色背景容器修复
+       --------------------------------------------------------------------
+       根因：styles.css 第35-50行"卡片化规则"会匹配所有同时拥有
+       p-* 类和 bg-white 类的元素，把背景覆盖为纯白。
+       深色容器内的半透明白色子卡片（bg-white bg-opacity-10）被命中后，
+       背景从 rgba(255,255,255,0.1) 变为 #ffffff，文字继承 text-white
+       为白色，导致白底白字。
+
+       修复方案：用专属 class .ql-dark-tile 替代 bg-white bg-opacity-10，
+       使其不再被通用 .bg-white 卡片化规则匹配。
+       ==================================================================== */
+
+    /* 1. 深色背景容器本身：保持深色背景 + 白色文字 */
+    .ql-page > :nth-child(n + 2) .bg-slate-800,
+    .ql-page > :nth-child(n + 2) .bg-slate-900,
+    .ql-page > :nth-child(n + 2) [class*="from-slate-8"][class*="to-slate-"],
+    .ql-page > :nth-child(n + 2) [class*="from-slate-9"][class*="to-slate-"] {
+        background: var(--color-slate-900, #0f172a) !important;
+        color: #ffffff !important;
+    }
+
+    /* 2. 深色容器内的半透明白色子卡片（专属 class，不触发通用卡片化规则） */
+    .ql-page .ql-dark-tile {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: none !important;
+    }
+
+    /* 3. 深色容器内所有文字：强制白色（防止继承被打断） */
+    .ql-page > :nth-child(n + 2) .bg-slate-800 :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong),
+    .ql-page > :nth-child(n + 2) .bg-slate-900 :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong),
+    .ql-page > :nth-child(n + 2) [class*="from-slate-8"] :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong),
+    .ql-page > :nth-child(n + 2) [class*="from-slate-9"] :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong) {
+        color: #ffffff !important;
+    }
+
+    /* 4. amber/emerald 高亮色在深色背景上保持高亮 */
+    .ql-page > :nth-child(n + 2) .bg-slate-800 [class*="text-amber"],
+    .ql-page > :nth-child(n + 2) .bg-slate-900 [class*="text-amber"],
+    .ql-page > :nth-child(n + 2) [class*="from-slate-8"] [class*="text-amber"],
+    .ql-page > :nth-child(n + 2) [class*="from-slate-9"] [class*="text-amber"] {
+        color: #fcd34d !important;
+    }
+
+    .ql-page > :nth-child(n + 2) .bg-slate-800 [class*="text-emerald"],
+    .ql-page > :nth-child(n + 2) .bg-slate-900 [class*="text-emerald"],
+    .ql-page > :nth-child(n + 2) [class*="from-slate-8"] [class*="text-emerald"],
+    .ql-page > :nth-child(n + 2) [class*="from-slate-9"] [class*="text-emerald"] {
+        color: #6ee7b7 !important;
+    }
+}
+
+/* ====================================================================
+   .ql-dark-tile 基础样式（不限制在 @media 内，移动端也生效）
+   ==================================================================== */
+.ql-dark-tile {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
