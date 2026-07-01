@@ -67,14 +67,6 @@ export const appCenterManifest = defineModuleManifest({
       category: "keyword_tracker",
     },
     {
-      key: "KW_HISTORY",
-      routeId: "kw_history",
-      moduleId: "keyword_tracker",
-      label: "历史快照",
-      icon: "fas fa-clock-rotate-left",
-      category: "keyword_tracker",
-    },
-    {
       key: "PPC_SEARCH_TERMS",
       routeId: "ppc_search_terms",
       moduleId: "ppc_tools",

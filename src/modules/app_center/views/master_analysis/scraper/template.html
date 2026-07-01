@@ -531,12 +531,6 @@ B0EXAMPLE1" rows="5" :value="inputAsins" @input="setInputAsins($event)"></textar
                                     </span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <button @click="sendHistoryItemToKeywordHunter(item)"
-                                        class="load-btn w-7 h-7 flex items-center justify-center rounded-lg bg-blue-50 text-blue-400 hover:bg-blue-600 hover:text-white transition-all duration-200 border border-blue-100 hover:border-blue-600 hover:shadow-md hover:shadow-blue-200"
-                                        title="发送到 Keyword Hunter"
-                                        aria-label="发送到 Keyword Hunter">
-                                        <i class="fas fa-share-nodes text-[10px]"></i>
-                                    </button>
                                     <button @click="loadHistoryItem(item)"
                                         class="load-btn w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 text-slate-300 hover:bg-indigo-600 hover:text-white transition-all duration-200 border border-slate-100 hover:border-indigo-600 hover:shadow-md hover:shadow-indigo-200"
                                         title="加载快照"

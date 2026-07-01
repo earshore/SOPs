@@ -675,7 +675,7 @@
   transition: all var(--duration-normal) var(--ease-smooth);
 }
 .strategy-card:hover {
-  transform: none;
+  transform: translateY(-3px);
 }
 
 .strategy-item {
@@ -1337,5 +1337,45 @@ textarea:focus-visible {
 
   [x-data="scraperPanel"] .upload-area::before {
     border-radius: 8px !important;
+  }
+
+  [x-data="scraperPanel"] .scraper-strategy-card.rounded-2xl {
+    border-radius: var(--rounded-2xl, 1rem) !important;
+  }
+
+  [x-data="scraperPanel"] .scraper-strategy-card .rounded-xl {
+    border-radius: var(--rounded-xl, 0.75rem) !important;
+  }
+
+  [x-data="scraperPanel"] .scraper-strategy-card .rounded-lg {
+    border-radius: var(--rounded-lg, 0.5rem) !important;
+  }
+
+  [x-data="scraperPanel"] .scraper-strategy-card .strategy-card:hover {
+    transform: translateY(-3px) !important;
+  }
+
+  [x-data="scraperPanel"] .scraper-strategy-card .strategy-item {
+    background-image: none;
+    transform: none;
+  }
+
+  [x-data="scraperPanel"] .scraper-strategy-card .shadow-sm,
+  [x-data="scraperPanel"] .scraper-strategy-card .shadow-md {
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+      var(--tw-ring-shadow, 0 0 #0000),
+      var(--tw-shadow) !important;
+  }
+
+  [x-data="scraperPanel"] .scraper-strategy-card .bg-gradient-to-b {
+    background-image: linear-gradient(to bottom, var(--tw-gradient-stops)) !important;
+  }
+
+  [x-data="scraperPanel"] .scraper-strategy-card .bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops)) !important;
+  }
+
+  [x-data="scraperPanel"] .scraper-strategy-card .bg-gradient-to-br {
+    background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)) !important;
   }
 }

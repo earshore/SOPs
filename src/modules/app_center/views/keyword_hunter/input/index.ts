@@ -35,7 +35,6 @@ let debouncedInputHandler: ((...args: unknown[]) => void) | null = null; // Debo
 let registeredActions: string[] = []; // 用于清理已注册的动作
 let lastKeywordInputSnapshot: string | null = null; // 用于撤回关键词清理操作
 let inputSnapshots: KeywordHunterSnapshot[] = [];
-let inputSnapshotFilter: 'all' | 'master-analysis' = 'all';
 
 // ========================================== 
 // Helper Functions
@@ -76,7 +75,6 @@ function cleanup(): void {
     debouncedInputHandler = null;
     lastKeywordInputSnapshot = null;
     inputSnapshots = [];
-    inputSnapshotFilter = 'all';
 
     // 清理已注册的动作
     if (registeredActions.length > 0) {
@@ -261,18 +259,7 @@ function getSnapshotSourceLabel(snapshot: KeywordHunterSnapshot): string {
 }
 
 function getVisibleInputSnapshots(): KeywordHunterSnapshot[] {
-    return inputSnapshots
-        .filter((snapshot) =>
-            inputSnapshotFilter === 'all' || snapshot.source.type === inputSnapshotFilter,
-        )
-        .slice(0, 6);
-}
-
-function updateInputSnapshotFilterButtons(): void {
-    document.querySelectorAll<HTMLButtonElement>('[data-kh-snapshot-filter]').forEach((button) => {
-        const filter = button.dataset.khSnapshotFilter || 'all';
-        button.classList.toggle('active', filter === inputSnapshotFilter);
-    });
+    return inputSnapshots.slice(0, 6);
 }
 
 function createSnapshotActionButton(
@@ -362,19 +349,12 @@ function renderInputSnapshots(): void {
     if (!list || !empty || !count) return;
 
     const visible = getVisibleInputSnapshots();
-    const filteredCount = inputSnapshotFilter === 'all'
-        ? inputSnapshots.length
-        : inputSnapshots.filter((snapshot) => snapshot.source.type === inputSnapshotFilter).length;
-
-    count.textContent = inputSnapshotFilter === 'all'
-        ? `${inputSnapshots.length} 个快照`
-        : `${filteredCount} / ${inputSnapshots.length} 个快照`;
+    count.textContent = `${inputSnapshots.length} 个快照`;
     list.replaceChildren();
     empty.classList.toggle('hidden', visible.length > 0);
     visible.forEach((snapshot) => {
         list.appendChild(renderInputSnapshotItem(snapshot));
     });
-    updateInputSnapshotFilterButtons();
 }
 
 async function loadInputSnapshots(): Promise<void> {
@@ -686,19 +666,6 @@ function bindSnapshotButtons(): void {
     const btnPanelSaveSnapshot = document.getElementById('kt-input-snapshot-save');
     if (btnPanelSaveSnapshot) addEventListener(btnPanelSaveSnapshot, 'click', () => {
         void saveCurrentSnapshot('draft');
-    });
-
-    document.querySelectorAll<HTMLButtonElement>('[data-kh-snapshot-filter]').forEach((button) => {
-        addEventListener(button, 'click', () => {
-            const filter = button.dataset.khSnapshotFilter;
-            inputSnapshotFilter = filter === 'master-analysis' ? 'master-analysis' : 'all';
-            renderInputSnapshots();
-        });
-    });
-
-    const btnOpenSnapshotHistory = document.getElementById('kt-input-snapshot-open-history');
-    if (btnOpenSnapshotHistory) addEventListener(btnOpenSnapshotHistory, 'click', () => {
-        void window.navigateTo('/app-center/keyword-hunter/history');
     });
 
     const btnPaste = document.getElementById('kt-btn-paste');

@@ -9,6 +9,5 @@ export const MODULE_MAP: ModuleMap = {
   kw_input: () => import("./views/keyword_hunter/input/index"),
   kw_process: () => import("./views/keyword_hunter/process/index"),
   kw_analysis: () => import("./views/keyword_hunter/analysis/index"),
-  kw_history: () => import("./views/keyword_hunter/history/index"),
   playground: () => import("./views/playground/deep-chat/index"),
 };

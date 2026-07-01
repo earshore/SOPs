@@ -77,13 +77,13 @@
                             关键词列表
                         </h2>
                         <div class="flex items-center gap-1.5">
-                            <button id="kt-btn-clean-kw"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-300 hover:shadow-sm active:scale-95">
-                                <i class="fas fa-broom text-[10px]"></i> 清理格式
+                            <button id="kt-btn-clean-kw" type="button" class="kt-title-icon-btn"
+                                title="清理格式" aria-label="清理格式">
+                                <i class="fas fa-broom" aria-hidden="true"></i>
                             </button>
-                            <button id="kt-btn-undo-kw-clean" title="撤回上一步" aria-label="撤回上一步" disabled
-                                class="w-8 h-8 inline-flex items-center justify-center bg-white hover:bg-slate-100 text-slate-500 disabled:text-slate-300 disabled:bg-slate-50 rounded-lg text-xs transition-all border border-slate-200 hover:border-slate-300 disabled:cursor-not-allowed active:scale-95">
-                                <i class="fas fa-rotate-left text-[11px]" aria-hidden="true"></i>
+                            <button id="kt-btn-undo-kw-clean" type="button" class="kt-title-icon-btn"
+                                title="撤回上一步" aria-label="撤回上一步" disabled>
+                                <i class="fas fa-rotate-left" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
@@ -137,34 +137,30 @@
 
                         <!-- Action Buttons -->
                         <div class="flex items-center gap-2">
-                            <button id="kt-btn-clean-copy"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-300 hover:shadow-sm active:scale-95">
-                                <i class="fas fa-broom text-[10px]"></i> 清理格式
+                            <button id="kt-btn-clean-copy" type="button" class="kt-title-icon-btn"
+                                title="清理文案格式" aria-label="清理文案格式">
+                                <i class="fas fa-broom" aria-hidden="true"></i>
                             </button>
-                            <button id="kt-btn-paste"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-slate-300 hover:shadow-sm active:scale-95">
-                                <i class="fas fa-paste text-[10px]"></i> 粘贴
+                            <button id="kt-btn-paste" type="button" class="kt-title-icon-btn"
+                                title="粘贴文案" aria-label="粘贴文案">
+                                <i class="fas fa-paste" aria-hidden="true"></i>
                             </button>
-                            <button id="kt-btn-clear-copy"
-                                class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-rose-200 active:scale-95">
-                                <i class="fa-solid fa-trash-can text-[10px]"></i> 清空文案
+                            <button id="kt-btn-clear-copy" type="button" class="kt-title-icon-btn kt-title-icon-btn--danger"
+                                title="清空文案" aria-label="清空文案">
+                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                             </button>
-                            <button id="kt-btn-save-input-snapshot"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold transition-all border border-blue-200 hover:border-blue-300 hover:shadow-sm active:scale-95">
-                                <i class="fas fa-floppy-disk text-[10px]"></i> 保存快照
+                            <button id="kt-btn-save-input-snapshot" type="button" class="kt-title-icon-btn kt-title-icon-btn--accent"
+                                title="保存快照" aria-label="保存快照">
+                                <i class="fas fa-floppy-disk" aria-hidden="true"></i>
                             </button>
 
                             <!-- Divider -->
                             <div class="w-px h-6 bg-slate-200 mx-0.5"></div>
 
                             <!-- Start Analysis Button -->
-                            <button id="kt-btn-start-analysis"
-                                class="relative inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:via-blue-400 hover:to-indigo-500 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-0.5 group cursor-pointer overflow-hidden active:scale-[0.98]">
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700">
-                                </div>
-                                <i class="fas fa-play text-[10px] relative z-10"></i>
-                                <span class="relative z-10">开始分析</span>
+                            <button id="kt-btn-start-analysis" type="button" class="kt-title-icon-btn kt-title-icon-btn--primary"
+                                title="开始分析" aria-label="开始分析">
+                                <i class="fas fa-play" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
@@ -214,18 +210,9 @@
                             <p id="kt-input-snapshot-count">0 个快照</p>
                         </div>
                     </div>
-                    <button id="kt-input-snapshot-save" type="button" class="kh-input-snapshot-save">
+                    <button id="kt-input-snapshot-save" type="button" class="kh-input-snapshot-save"
+                        title="保存当前快照" aria-label="保存当前快照">
                         <i class="fas fa-floppy-disk" aria-hidden="true"></i>
-                        <span>保存</span>
-                    </button>
-                </div>
-
-                <div class="kh-input-snapshot-toolbar">
-                    <button id="kt-input-snapshot-filter-all" type="button" class="active" data-kh-snapshot-filter="all">
-                        全部
-                    </button>
-                    <button id="kt-input-snapshot-filter-master" type="button" data-kh-snapshot-filter="master-analysis">
-                        Master
                     </button>
                 </div>
 
@@ -236,12 +223,6 @@
                 </div>
 
                 <div id="kt-input-snapshot-list" class="kh-input-snapshot-list"></div>
-
-                <button id="kt-input-snapshot-open-history" type="button" class="kh-input-snapshot-open">
-                    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
-                    <span>查看全部历史</span>
-                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                </button>
             </aside>
         </div>
     </div>

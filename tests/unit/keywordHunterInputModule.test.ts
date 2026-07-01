@@ -22,12 +22,9 @@ const inputMocks = vi.hoisted(() => {
       <button id="kt-btn-paste"></button>
       <button id="kt-btn-start-analysis"></button>
       <button id="kt-input-snapshot-save"></button>
-      <button id="kt-input-snapshot-filter-all" data-kh-snapshot-filter="all"></button>
-      <button id="kt-input-snapshot-filter-master" data-kh-snapshot-filter="master-analysis"></button>
       <span id="kt-input-snapshot-count"></span>
       <div id="kt-input-snapshot-empty" class="hidden"></div>
       <div id="kt-input-snapshot-list"></div>
-      <button id="kt-input-snapshot-open-history"></button>
     </section>
   `;
 
@@ -308,11 +305,8 @@ describe('Keyword Hunter input module', () => {
     expect(container.querySelector('#kt-input-snapshot-count')?.textContent).toBe('2 个快照');
     expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Master Coffee Snapshot');
     expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Manual Draft Snapshot');
-
-    click(container.querySelector('#kt-input-snapshot-filter-master'));
-    expect(container.querySelector('#kt-input-snapshot-count')?.textContent).toBe('1 / 2 个快照');
-    expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Master Coffee Snapshot');
-    expect(container.querySelector('#kt-input-snapshot-list')?.textContent).not.toContain('Manual Draft Snapshot');
+    expect(container.querySelector('[data-kh-snapshot-filter]')).toBeNull();
+    expect(container.querySelector('#kt-input-snapshot-open-history')).toBeNull();
 
     click(container.querySelector('button[title="恢复到输入页"]'));
     expect(KeywordHunterSnapshotService.restore).toHaveBeenCalledWith(
@@ -325,9 +319,6 @@ describe('Keyword Hunter input module', () => {
       'Master coffee grinder copy',
     );
 
-    click(container.querySelector('#kt-input-snapshot-open-history'));
-    expect(inputMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/history');
-
     click(container.querySelector('button[title="删除快照"]'));
     await vi.waitFor(() => {
       expect(KeywordHunterSnapshotService.deleteByIdAsync).toHaveBeenCalledWith('kh-master');
@@ -335,6 +326,8 @@ describe('Keyword Hunter input module', () => {
     await vi.waitFor(() => {
       expect(container.querySelector('#kt-input-snapshot-list')?.textContent).not.toContain('Master Coffee Snapshot');
     });
+    expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Manual Draft Snapshot');
+    expect(inputMocks.navigateTo).not.toHaveBeenCalled();
 
     click(container.querySelector('#kt-input-snapshot-save'));
     await vi.waitFor(() => {
