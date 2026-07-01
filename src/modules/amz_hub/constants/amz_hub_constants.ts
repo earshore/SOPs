@@ -14,73 +14,81 @@ export interface CountryData {
 }
 
 /**
- * 国家代码类型
+ * 国家代码类型（统一使用 ISO 3166-1 alpha-2 大写代码）
+ * 注意：英国使用 GB（非 uk），与营销日历保持一致
  */
-export type CountryCode = 'de' | 'uk' | 'fr' | 'it' | 'es' | 'nl' | 'se' | 'pl' | 'be' | 'tr';
+export type CountryCode = 'DE' | 'GB' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'TR' | 'IE';
 
 /**
  * 欧洲国家画像数据
+ * 雷达图维度顺序：[质量要求, 环保意识, 价格敏感, 外观设计, 品牌信任]
  */
 export const AMZ_COUNTRY_DATA: Record<CountryCode, CountryData> = {
-  de: {
+  DE: {
     name: '德国',
     traits: '严谨、注重参数、低退货容忍度、环保意识极强。',
     tips: '文案避免空洞形容词，强调TUV认证、保修条款和具体材质参数。Review中常见抱怨点为物流包装和说明书不清晰。',
     radarData: [90, 85, 40, 60, 95]
   },
-  uk: {
+  GB: {
     name: '英国',
     traits: '礼貌、幽默、价格敏感度中等、重视配送时效。',
     tips: '使用英式拼写 (Colour, Organise)。文案语调可适当轻松。特别关注 Prime 配送标识。',
     radarData: [70, 60, 80, 70, 75]
   },
-  fr: {
+  FR: {
     name: '法国',
     traits: '追求美感、感性消费、重视母语纯正度。',
     tips: '图片审美必须高。绝对不能使用机翻法语，法国人对语言错误容忍度极低。包装设计很重要。',
     radarData: [75, 50, 65, 90, 60]
   },
-  it: {
+  IT: {
     name: '意大利',
     traits: '热情、重视设计感、价格敏感度较高。',
     tips: '强调产品的时尚感和设计风格。客户服务回复速度要快。',
     radarData: [60, 40, 85, 80, 50]
   },
-  es: {
+  ES: {
     name: '西班牙',
     traits: '价格极其敏感、喜欢促销、家庭观念重。',
     tips: '强调性价比 (Value for money)。促销活动和Coupon效果最好。',
     radarData: [50, 30, 95, 60, 55]
   },
-  nl: {
+  NL: {
     name: '荷兰',
     traits: '务实直爽、英语极好但偏好母语、精打细算、不仅看价格也看质量。',
     tips: '物流必须快（对标本土Bol.com）。文案要直接（No Nonsense），强调环保和实用性。虽然有钱，但非常喜欢比价。',
     radarData: [80, 80, 85, 65, 85]
   },
-  se: {
+  SE: {
     name: '瑞典',
     traits: '高信任社会、极度环保主义、偏好极简北欧风、高客单价接受度。',
     tips: '产品必须符合可持续发展标准。设计风格需简洁冷淡。任何隐形费用都会导致差评。',
     radarData: [85, 90, 45, 85, 90]
   },
-  pl: {
+  PL: {
     name: '波兰',
     traits: '电商发展极快、价格敏感度极高、年轻化。',
     tips: '主要竞争对手是Allegro。低价策略渗透效果好。必须使用波兰语客服，不要试图用英语沟通。',
     radarData: [55, 35, 90, 50, 60]
   },
-  be: {
+  BE: {
     name: '比利时',
     traits: '语言复杂（荷/法双语）、生活标准高、低调谦逊。',
     tips: '必须提供双语（法/荷）Listing和说明书。相比荷兰人更含蓄，避免过于激进的营销措辞。',
     radarData: [75, 75, 65, 70, 80]
   },
-  tr: {
+  TR: {
     name: '土耳其',
     traits: '年轻人口多、通胀导致的价格极度敏感、喜欢分期付款。',
     tips: '退货率通常较高（尤其是时尚类）。紧跟当地流行趋势。注意汇率波动对定价的影响。',
     radarData: [50, 25, 95, 65, 45]
+  },
+  IE: {
+    name: '爱尔兰',
+    traits: '英语国家、消费力强、重视节日文化、对品质有要求。',
+    tips: '英语Listing即可，但语调可偏英式。圣帕特里克节是核心营销节点。物流对标英国，需注意爱尔兰岛末端配送时效。',
+    radarData: [70, 65, 60, 70, 80]
   }
 };
 
@@ -167,7 +175,7 @@ export interface CountryInfo {
 }
 
 /**
- * 营销日历 - 国家列表
+ * 营销日历 - 国家列表（统一大写 ISO 代码，与 AMZ_COUNTRY_DATA 对齐）
  */
 export const amzf_countries: CountryInfo[] = [
   { code: 'DE', name: '德国', flag: '<span class="fi fi-de"></span>' },
@@ -179,7 +187,8 @@ export const amzf_countries: CountryInfo[] = [
   { code: 'GB', name: '英国', flag: '<span class="fi fi-gb"></span>' },
   { code: 'SE', name: '瑞典', flag: '<span class="fi fi-se"></span>' },
   { code: 'BE', name: '比利时', flag: '<span class="fi fi-be"></span>' },
-  { code: 'IE', name: '爱尔兰', flag: '<span class="fi fi-ie"></span>' }
+  { code: 'IE', name: '爱尔兰', flag: '<span class="fi fi-ie"></span>' },
+  { code: 'TR', name: '土耳其', flag: '<span class="fi fi-tr"></span>' }
 ];
 
 /**
@@ -264,9 +273,9 @@ export const amzf_events: MarketingEvent[] = [
     },
     {
         id: 7, name: '斋月开始', nameEn: 'Ramadan Start', emoji: '<i class="fas fa-moon" style="color: #673AB7;"></i>', date: '2月18日', month: 2,
-        countries: ['FR', 'DE', 'GB'], type: 'cultural',
+        countries: ['FR', 'DE', 'GB', 'TR'], type: 'cultural',
         description: '斋戒月是精神反思和成长的时刻，人们会帮助有需要的人，并且与亲人共度时光。整个斋戒月期间，穆斯林会在白天封斋。',
-        strategy: '2026年斋月从2月18日开始。针对穆斯林社区推广家居装饰(灯笼)、餐具、祈祷垫及开斋礼品。',
+        strategy: '2026年斋月从2月18日开始。针对穆斯林社区推广家居装饰(灯笼)、餐具、祈祷垫及开斋礼品。土耳其市场尤为重视。',
         tags: ['家居', '灯饰', '餐具']
     },
 
@@ -294,9 +303,9 @@ export const amzf_events: MarketingEvent[] = [
     },
     {
         id: 11, name: '开斋节', nameEn: 'Eid al-Fitr', emoji: '<i class="fas fa-mosque" style="color: #4CAF50;"></i>', date: '3月19日', month: 3,
-        countries: ['FR', 'DE', 'GB'], type: 'cultural',
+        countries: ['FR', 'DE', 'GB', 'TR'], type: 'cultural',
         description: '这是庆祝斋戒月结束的宗教节日。庆祝活动包括慈善捐赠、互赠礼物、与家人和朋友聚会以及享用节日大餐。',
-        strategy: '2026年开斋节在3月19日。斋月结束的盛大庆祝,互赠礼物、糖果盒、新衣、家庭聚会用品需求大爆发。',
+        strategy: '2026年开斋节在3月19日。斋月结束的盛大庆祝,互赠礼物、糖果盒、新衣、家庭聚会用品需求大爆发。土耳其市场为最重要节点之一。',
         tags: ['礼品', '糖果', '服饰']
     },
     {
@@ -487,6 +496,13 @@ export const amzf_events: MarketingEvent[] = [
         description: '10 月 31 日万圣节是西方基督教盛宴前夜举行的庆祝活动。按照传统，人们会打扮成妖魔鬼怪、玩“不给糖就捣蛋”的游戏，并享用化妆舞会。',
         strategy: '南瓜灯、骷髅装饰、Cosplay服饰、特效化妆品、糖果袋。英国和德国市场尤为火爆。',
         tags: ['装饰', '变装', '糖果', '派对']
+    },
+    {
+        id: 48, name: '土耳其共和国日', nameEn: 'Republic Day TR', emoji: '<i class="fas fa-flag" style="color: #E30A17;"></i>', date: '10月29日', month: 10,
+        countries: ['TR'], type: 'holiday',
+        description: '纪念1923年土耳其共和国成立。土耳其最重要的国庆节日，全国各地有游行、烟花和庆典活动。',
+        strategy: '土耳其国庆日。红白色主题装饰、国旗相关周边、户外派对用品需求上涨。注意土耳其市场对价格极度敏感，建议用Coupon而非直接降价。',
+        tags: ['装饰', '派对', '国旗']
     },
 
     // ==================== November (十一月) ====================

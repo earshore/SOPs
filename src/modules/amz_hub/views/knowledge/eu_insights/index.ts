@@ -54,8 +54,8 @@ class EuInsightsModule extends BaseModule {
       this.addEventListener(selector, "change", (e) =>
         this.updateCountryInfo((e.target as HTMLSelectElement).value),
       );
-      // 默认初始化
-      this.updateCountryInfo("de");
+      // 默认初始化（使用大写 ISO 代码）
+      this.updateCountryInfo("DE");
     }
   }
 
