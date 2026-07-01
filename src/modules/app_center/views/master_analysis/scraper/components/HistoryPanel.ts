@@ -170,6 +170,9 @@ export class HistoryPanel {
         // 恢复全局状态（供所有页面使用）
         state.setCurrentHistoryId(item.id);
         state.setScrapedData(item.data);
+        state.setUserProductProfile(item.userProductProfile
+            ? JSON.parse(JSON.stringify(item.userProductProfile))
+            : undefined);
         this.restoreAnalysisReport(item);
         state.setTranslatedReport(null);
         state.setSelectedSite(item.site as ScraperSite);

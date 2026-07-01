@@ -8,8 +8,14 @@ import type {
   AnalysisReport,
   GeneratedPromptProfileSnapshot,
   GeneratedPromptType,
+  KeywordHunterSnapshotSource,
   ScrapedData
 } from './modules-business';
+import type {
+  TargetMarket,
+  ToneStyle,
+  UserProductDnaField
+} from './prompt-profile';
 
 // ==================== UI状态 ====================
 
@@ -199,45 +205,6 @@ export interface PromptHistoryItem {
    */
   profile?: GeneratedPromptProfileSnapshot;
 }
-
-/**
- * 目标市场类型
- * 支持的语言市场列表
- */
-export type TargetMarket = 
-  | 'English'
-  | 'German'
-  | 'French'
-  | 'Italian'
-  | 'Spanish'
-  | 'Japanese'
-  | 'Chinese'
-  | '';
-
-/**
- * 语气风格类型
- * 定义 Prompt 生成时的语气风格
- */
-export type ToneStyle = 
-  | 'professional'
-  | 'casual'
-  | 'friendly'
-  | 'formal'
-  | 'enthusiastic'
-  | 'persuasive'
-  | 'exciting'
-  | 'emotional'
-  | 'minimalist'
-  | '';
-
-export type UserProductDnaField =
-  | 'keywordsTier1'
-  | 'keywordsTier2'
-  | 'negative'
-  | 'audience'
-  | 'usps'
-  | 'specs'
-  | 'socialHook';
 
 /**
  * 用户产品配置
@@ -601,6 +568,8 @@ export interface KeywordTrackerState {
   llmAnalysisResult?: string;
   // Process 模块状态
   showTranslation?: boolean;
+  currentSnapshotId?: string | null;
+  snapshotSource?: KeywordHunterSnapshotSource;
 }
 
 // ==================== User状态 ====================
@@ -1000,6 +969,8 @@ export type {
   ReportData,
   AnalysisState,
   PromptHistoryItem,
+  TargetMarket,
+  ToneStyle,
   UserProductProfile,
   UserProductDnaField,
   PromptInputs,

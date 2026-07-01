@@ -32,6 +32,7 @@ export const STORAGE_KEYS = {
 
   // === 采集历史 ===
   SCRAPE_HISTORY: 'scrape_history',
+  KEYWORD_HUNTER_SNAPSHOTS: 'keyword_hunter_snapshots',
 
   // === 布局配置 ===
   LAYOUT_CONFIG_PREFIX: 'layout_config_',

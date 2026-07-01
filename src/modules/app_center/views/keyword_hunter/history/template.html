@@ -1,0 +1,103 @@
+<!-- Keyword Hunter History Snapshot Module -->
+<section id="kt-module-history" class="flex-1 overflow-y-auto pb-20">
+    <div class="module-container kh-history-module">
+        <div class="wb-container wb-container--card wb-theme-blue mb-6">
+            <div class="wb-card">
+                <div class="wb-bg-gradient"></div>
+                <div class="wb-grid-pattern"></div>
+
+                <div class="wb-content">
+                    <div class="wb-header">
+                        <div class="wb-icon-wrapper">
+                            <div class="wb-icon-main" aria-label="历史快照功能图标">
+                                <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+                            </div>
+                            <div class="wb-icon-badge" aria-label="快照状态">
+                                <i class="fas fa-link" aria-hidden="true"></i>
+                            </div>
+                        </div>
+
+                        <div class="wb-text">
+                            <div class="wb-title-row">
+                                <h2 class="wb-title">Keyword Hunter 历史快照</h2>
+                                <span class="wb-badge wb-badge-analytics" aria-label="历史功能">
+                                    <i class="fas fa-database" aria-hidden="true"></i>STEP 4
+                                </span>
+                            </div>
+                            <p class="wb-description">
+                                保存关键词覆盖分析现场，恢复 Listing、匹配结果、AI 报告，并追踪它来自哪个 Master Analysis 数据快照。
+                            </p>
+
+                            <ul class="wb-tags" role="list">
+                                <li class="wb-tag" role="listitem">
+                                    <div class="wb-tag-dot" aria-hidden="true"></div>
+                                    <span>现场恢复</span>
+                                </li>
+                                <li class="wb-tag" role="listitem">
+                                    <div class="wb-tag-dot wb-tag-dot--green" aria-hidden="true"></div>
+                                    <span>Master 关联</span>
+                                </li>
+                                <li class="wb-tag" role="listitem">
+                                    <div class="wb-tag-dot wb-tag-dot--indigo" aria-hidden="true"></div>
+                                    <span>覆盖率对比</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="kh-history-toolbar kt-surface-card">
+            <label class="kh-filter-field" for="kh-history-search">
+                <span>搜索</span>
+                <input id="kh-history-search" type="search" placeholder="标题、关键词、ASIN" autocomplete="off" />
+            </label>
+
+            <label class="kh-filter-field" for="kh-history-status">
+                <span>状态</span>
+                <select id="kh-history-status">
+                    <option value="all">全部状态</option>
+                    <option value="draft">草稿</option>
+                    <option value="matched">已匹配</option>
+                    <option value="reported">有报告</option>
+                </select>
+            </label>
+
+            <div class="kh-history-toolbar-meta">
+                <span id="kh-history-count">0 个快照</span>
+                <button id="kh-btn-clear-compare" type="button" class="kh-secondary-action" disabled>
+                    <i class="fas fa-code-compare" aria-hidden="true"></i>
+                    <span>清空对比</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="kh-history-layout">
+            <aside class="kh-history-list-panel kt-surface-card" aria-label="Keyword Hunter 快照列表">
+                <div class="kh-history-list-head">
+                    <div>
+                        <h3>快照列表</h3>
+                        <p>按更新时间倒序排列</p>
+                    </div>
+                </div>
+                <div id="kh-history-empty" class="kh-history-empty hidden">
+                    <i class="fas fa-folder-open" aria-hidden="true"></i>
+                    <span>暂无匹配的快照</span>
+                </div>
+                <div id="kh-history-list" class="kh-history-list"></div>
+            </aside>
+
+            <section class="kh-history-detail-panel kt-surface-card" aria-label="Keyword Hunter 快照详情">
+                <div id="kh-history-detail" class="kh-history-detail">
+                    <div class="kh-history-detail-empty">
+                        <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+                        <h3>选择一个快照</h3>
+                        <p>查看覆盖率、关键词差异、AI 报告和 Master 来源。</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</section>

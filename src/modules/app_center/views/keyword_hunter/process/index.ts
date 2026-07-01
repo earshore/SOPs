@@ -16,6 +16,7 @@ import * as KeywordService from "../services/trackerService";
 import { appStore } from "../../../../../stores/useAppStore";
 import { ErrorService } from "../../../../../services/errorService";
 import { createSafeFragment } from "../../../../../common/utils/security";
+import { KeywordHunterSnapshotService } from "../services/snapshotService";
 import "../keyword_hunter_style.css";
 
 // ==========================================
@@ -869,10 +870,10 @@ async function syncToInput(): Promise<void> {
     return;
   }
 
+  showToast("已同步原文到输入模块");
+
   // 切换到输入模块
   await window.navigateTo("/app-center/keyword-hunter/input");
-
-  showToast("已同步原文到输入模块");
 }
 
 /**
@@ -918,6 +919,22 @@ async function translateCopyImmersive(): Promise<void> {
     if (progress) progress.classList.add("hidden");
     if (btnText) btnText.textContent = "AI 沉浸式翻译";
     if (btn) btn.disabled = false;
+  }
+}
+
+async function saveProcessSnapshot(): Promise<void> {
+  saveProcessStateToState();
+  try {
+    const hasReport = !!appStore.getState().keywordTracker.llmAnalysisResult?.trim();
+    await KeywordHunterSnapshotService.saveCurrentAsync({
+      status: hasReport ? "reported" : "matched",
+    });
+    showToast("快照已保存", { type: "success" });
+  } catch (error) {
+    console.error("[Process] 保存快照失败:", error);
+    showToast(error instanceof Error ? error.message : "保存快照失败", {
+      type: "error",
+    });
   }
 }
 
@@ -1283,6 +1300,13 @@ function setupEventListeners(container: HTMLElement): void {
   if (syncBtn) {
     addEventListener(syncBtn, "click", () => {
       void syncToInput();
+    });
+  }
+
+  const saveSnapshotBtn = document.getElementById("kt-save-process-snapshot-btn");
+  if (saveSnapshotBtn) {
+    addEventListener(saveSnapshotBtn, "click", () => {
+      void saveProcessSnapshot();
     });
   }
 

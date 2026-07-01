@@ -9,8 +9,10 @@ export type StorageClass = 'config' | 'secret' | 'user-data' | 'cache';
 export type LocalDataBucketId =
   | 'config'
   | 'secrets'
+  | 'workspace-state'
   | 'scrape-history'
   | 'chat-history'
+  | 'keyword-history'
   | 'cache'
   | 'other';
 
@@ -30,6 +32,10 @@ export interface LocalDataExport {
     app: 'sops';
     storageVersion: string;
   };
+}
+
+export interface LocalDataImportOptions {
+  mode?: 'merge' | 'replace';
 }
 
 export interface LocalDataUsage {
@@ -68,24 +74,44 @@ const CACHE_PREFIXES = ['cache:', 'view_cache_', 'http-cache:', 'ai_analysis_'];
 const LOCAL_DATA_BUCKET_IDS: LocalDataBucketId[] = [
   'config',
   'secrets',
+  'workspace-state',
   'scrape-history',
   'chat-history',
+  'keyword-history',
   'cache',
   'other',
 ];
 const CONFIG_KEYS = new Set([
-  'app-storage',
   'llm_active_provider',
   'proxy_config',
   'proxy_key_map',
   'scraper_proxy_config',
   'ai_analysis_performance_settings',
+  'app_theme',
+  'app-theme',
+  'app:animation-settings',
+  'performance_metrics',
+  'debug_events',
+  'enable_legacy_warnings',
 ]);
-const CONFIG_PREFIXES = ['llm_', 'feature_', 'layout_config_'];
-const SCRAPE_HISTORY_KEYS = new Set(['scrape_history', 'user:scrape_history']);
+const CONFIG_PREFIXES = ['llm_', 'feature_', 'layout_config_', 'modal_ignore_', 'ignore_', 'ppc_'];
+const CONFIG_SUFFIXES = ['_owner_v1'];
+const WORKSPACE_STATE_KEYS = new Set(['app-storage']);
+const SCRAPE_HISTORY_KEYS = new Set([
+  'scrape_history',
+  'user:scrape_history',
+  'scrape_history_migrated_to_indexeddb',
+  'amzf_search_history',
+]);
 const CHAT_HISTORY_KEYS = new Set([
   'playground_deep_chat_threads_v1',
   'user:playground_deep_chat_threads_v1',
+  'playground_deep_chat_threads_v1_migrated_to_indexeddb',
+]);
+const KEYWORD_HISTORY_KEYS = new Set([
+  'keyword_hunter_snapshots',
+  'user:keyword_hunter_snapshots',
+  'keyword_hunter_snapshots_migrated_to_indexeddb',
 ]);
 
 function isCacheKey(key: string): boolean {
@@ -96,8 +122,12 @@ function isLruAccessKey(key: string): boolean {
   return key.startsWith('_lru_access_');
 }
 
+function getLruTargetKey(key: string): string | null {
+  return isLruAccessKey(key) ? key.slice('_lru_access_'.length) || null : null;
+}
+
 function isCacheBucketKey(key: string, storageClass?: StorageClass): boolean {
-  return storageClass === 'cache' || isCacheKey(key) || isLruAccessKey(key);
+  return storageClass === 'cache' || isCacheKey(key);
 }
 
 function isSecretBucketKey(key: string, storageClass?: StorageClass): boolean {
@@ -105,16 +135,36 @@ function isSecretBucketKey(key: string, storageClass?: StorageClass): boolean {
 }
 
 function isConfigBucketKey(key: string, storageClass?: StorageClass): boolean {
-  return storageClass === 'config' || CONFIG_KEYS.has(key) || CONFIG_PREFIXES.some((prefix) => key.startsWith(prefix));
+  return storageClass === 'config' ||
+    CONFIG_KEYS.has(key) ||
+    CONFIG_PREFIXES.some((prefix) => key.startsWith(prefix)) ||
+    CONFIG_SUFFIXES.some((suffix) => key.endsWith(suffix));
+}
+
+function isWorkspaceStateBucketKey(key: string): boolean {
+  return WORKSPACE_STATE_KEYS.has(key);
 }
 
 function classifyKey(key: string, storageClass?: StorageClass): LocalDataBucketId {
+  const lruTargetKey = getLruTargetKey(key);
+  if (lruTargetKey) return classifyKey(lruTargetKey, storageClass);
   if (isCacheBucketKey(key, storageClass)) return 'cache';
   if (isSecretBucketKey(key, storageClass)) return 'secrets';
+  if (isWorkspaceStateBucketKey(key)) return 'workspace-state';
   if (SCRAPE_HISTORY_KEYS.has(key)) return 'scrape-history';
   if (CHAT_HISTORY_KEYS.has(key)) return 'chat-history';
+  if (KEYWORD_HISTORY_KEYS.has(key)) return 'keyword-history';
   if (isConfigBucketKey(key, storageClass)) return 'config';
   return 'other';
+}
+
+function normalizeStorageClass(storageClass: unknown): StorageClass {
+  return storageClass === 'config' ||
+    storageClass === 'secret' ||
+    storageClass === 'user-data' ||
+    storageClass === 'cache'
+    ? storageClass
+    : 'user-data';
 }
 
 function createUsageBuckets(): Record<LocalDataBucketId, LocalDataBucketUsage> {
@@ -248,7 +298,12 @@ class LocalDataStoreClass {
       }
     }
 
+    const storage = getBrowserLocalStorage();
     for (const key of this.getLocalStorageKeys()) {
+      const lruTargetKey = getLruTargetKey(key);
+      if (lruTargetKey && storage.getItem(lruTargetKey) !== null) {
+        continue;
+      }
       if (classifyKey(key) === bucketId && this.removeLocalStorageKey(key)) {
         removed += 1;
       }
@@ -302,9 +357,13 @@ class LocalDataStoreClass {
     };
   }
 
-  async importAll(data: LocalDataExport): Promise<void> {
+  async importAll(data: LocalDataExport, options: LocalDataImportOptions = {}): Promise<void> {
     if (!data || data.version !== 1) {
       throw new Error('不支持的本地数据备份格式');
+    }
+
+    if (options.mode === 'replace') {
+      await this.clearAll();
     }
 
     const storage = getBrowserLocalStorage();
@@ -315,7 +374,7 @@ class LocalDataStoreClass {
     const records = Array.isArray(data.indexedDB) ? data.indexedDB : [];
     for (const record of records) {
       if (record && typeof record.key === 'string') {
-        await this.set(record.key, record.value, record.storageClass || 'user-data');
+        await this.set(record.key, record.value, normalizeStorageClass(record.storageClass));
       }
     }
   }

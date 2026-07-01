@@ -80,6 +80,14 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/modules/app_center/views/keyword_hunter/services/snapshotService', () => ({
+  KeywordHunterSnapshotService: {
+    saveCurrentAsync: vi.fn(async () => ({
+      id: 'kh-test',
+    })),
+  },
+}));
+
 vi.mock('@/stores/useAppStore', () => ({
   appStore: {
     getState: () => analysisMocks.state,
@@ -209,7 +217,9 @@ describe('Keyword Hunter analysis module', () => {
 
     expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('分析中…');
     expect(container.querySelector('#kt-loading-state')?.textContent).toContain('正在读取文案与关键词数据');
-    expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => {
+      expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+    });
 
     vi.advanceTimersByTime(3500);
     expect(container.querySelector('#kt-loading-state')?.textContent).toContain('AI 正在深度分析 Listing');

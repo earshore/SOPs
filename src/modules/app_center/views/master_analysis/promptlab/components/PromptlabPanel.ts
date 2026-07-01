@@ -72,6 +72,7 @@ import {
   restoreInput,
   toggleConsoleMode,
   copyPrompt,
+  copySeoKeywords,
   clearInputs,
   selectAllReportSections,
   clearReportSections,
@@ -149,6 +150,15 @@ function getCurrentReportFingerprint(): string | null {
   return computeHasReport()
     ? getReportFingerprint(appStore.getState().analysis.analysisReport)
     : null;
+}
+
+function getCurrentSnapshotProfile(): UserProductProfile | null {
+  const currentHistoryId = appStore.getState().scraper.currentHistoryId;
+  if (currentHistoryId === null || currentHistoryId === undefined) {
+    return null;
+  }
+
+  return HistoryService.getUserProductProfileById(currentHistoryId);
 }
 
 function hasMatchingReportFingerprint(
@@ -509,11 +519,13 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
       const unsubScrape = eventBus.on(
         MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS,
         () => {
+          this.restoreState();
           this.renderReportAnalysis();
         },
       );
 
       const unsubHistory = eventBus.on(APP_EVENTS.HISTORY_UPDATED, () => {
+        this.restoreState();
         this.renderReportAnalysis();
       });
 
@@ -585,7 +597,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
     restoreState() {
       const promptlabState = appStore.getState().promptlab;
-      const saved = promptlabState?.userProductProfile;
+      const saved = getCurrentSnapshotProfile() ?? promptlabState?.userProductProfile;
       const hasUsableReport = computeHasReport();
       const currentReportFingerprint = getCurrentReportFingerprint();
       if (saved) {
@@ -595,8 +607,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
           this.profile = withReportFingerprint(withoutReportDna(saved), currentReportFingerprint);
           this.saveState();
         } else {
-          this.profile = withoutReportDna(saved);
-          this.saveState();
+          this.profile = { ...DEFAULT_PROFILE, ...saved };
         }
       } else if (!hasUsableReport) {
         this.profile = { ...DEFAULT_PROFILE };
@@ -645,6 +656,14 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
       this.profile = profileToSave;
       appStore.getState().setUserProductProfile(profileToSave);
+
+      const currentHistoryId = appStore.getState().scraper.currentHistoryId;
+      if (currentHistoryId !== null && currentHistoryId !== undefined) {
+        void HistoryService.updateUserProductProfileAsync(currentHistoryId, profileToSave)
+          .catch((error) => {
+            console.error('[Promptlab] 保存产品 DNA 快照失败:', error);
+          });
+      }
     },
 
     // ========== Report Rendering ==========
@@ -704,6 +723,10 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
 
     copyPrompt() {
       copyPrompt();
+    },
+
+    async copySeoKeywords() {
+      await copySeoKeywords(this as unknown as PromptlabAlpineContext);
     },
 
     async clearInputs() {

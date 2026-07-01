@@ -216,7 +216,11 @@ const initialKeywordTrackerState: KeywordTrackerState = {
   keywordsInputText: '',
   copyInputText: '',
   llmAnalysisResult: '',
-  showTranslation: false
+  showTranslation: false,
+  currentSnapshotId: null,
+  snapshotSource: {
+    type: 'manual'
+  }
 };
 
 type UIActions = Pick<AppStore,
@@ -459,7 +463,9 @@ export const appStore = createStore<AppStore>()(
             keywordsInputText: state.keywordTracker.keywordsInputText,
             copyInputText: state.keywordTracker.copyInputText,
             llmAnalysisResult: state.keywordTracker.llmAnalysisResult,
-            showTranslation: state.keywordTracker.showTranslation
+            showTranslation: state.keywordTracker.showTranslation,
+            currentSnapshotId: state.keywordTracker.currentSnapshotId,
+            snapshotSource: state.keywordTracker.snapshotSource
           }
         })
       }

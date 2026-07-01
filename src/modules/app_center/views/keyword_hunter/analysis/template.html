@@ -75,13 +75,22 @@
                         </span>
                     </div>
 
-                    <!-- Generate Button -->
-                    <button
-                        class="relative overflow-hidden inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-100 text-slate-400 border-2 border-slate-200 cursor-not-allowed disabled:opacity-50"
-                        disabled id="kt-analyze-btn">
-                        <i class="fas fa-magic relative z-10"></i>
-                        <span class="relative z-10" id="kt-analyze-btn-text">生成报告</span>
-                    </button>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button
+                            class="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 hover:border-blue-300"
+                            type="button" id="kt-save-analysis-snapshot-btn">
+                            <i class="fas fa-floppy-disk"></i>
+                            <span>保存快照</span>
+                        </button>
+
+                        <!-- Generate Button -->
+                        <button
+                            class="relative overflow-hidden inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-100 text-slate-400 border-2 border-slate-200 cursor-not-allowed disabled:opacity-50"
+                            disabled id="kt-analyze-btn">
+                            <i class="fas fa-magic relative z-10"></i>
+                            <span class="relative z-10" id="kt-analyze-btn-text">生成报告</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 

@@ -231,6 +231,41 @@ describe('promptlabService product DNA de-duplication', () => {
     expect(seoSection).not.toContain('reception desk');
   });
 
+  it('builds Keyword Hunter-ready copy text with plain SEO keywords only', () => {
+    const report = makeKeywordReport();
+    const text = promptlabService.buildSeoKeywordCopyText(
+      makeInputs({
+        keywordsTier1: 'desk bell, reception bell',
+        keywordsTier2: 'service counter bell, loud ring',
+        negative: 'fragile',
+        selectedReportSections: ['fatal-flaws'],
+      }),
+      report,
+    );
+    const lines = text.split('\n').filter(Boolean);
+
+    expect(lines).toEqual(expect.arrayContaining([
+      'desk bell',
+      'reception bell',
+      'service counter bell',
+      'loud ring',
+      'front desk chime',
+      'reception desk',
+      'hotel staff',
+    ]));
+    expect(lines).not.toContain('fragile');
+    expect(text).not.toContain('Product DNA Tier 1 Core Keywords');
+    expect(text).not.toContain('Product DNA Tier 2 Functional Keywords');
+    expect(text).not.toContain('AI Report Core Keywords');
+    expect(text).not.toContain('AI Report Functional / Long-tail Keywords');
+    expect(text).not.toContain('AI Report Scene / Intent Keywords');
+    expect(text).not.toContain('AI Report Audience Keywords');
+    expect(text).not.toContain('Negative / Excluded Terms');
+    expect(lines.every((line) => !line.includes(':'))).toBe(true);
+    expect(text).not.toContain('[high]');
+    expect(text).not.toContain('[longtail]');
+  });
+
   it('keeps manual SEO terms as operator constraints even when they appear in report context', () => {
     const report = makeKeywordReport();
     const prompt = promptlabService.generateMasterPrompt(

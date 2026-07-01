@@ -38,6 +38,15 @@ const deps = vi.hoisted(() => {
       clearBucket: vi.fn(),
       clearAll: vi.fn(),
     },
+    appStoreState: {
+      resetScraper: vi.fn(),
+      resetAnalysis: vi.fn(),
+      resetPromptLab: vi.fn(),
+      resetKeywordTracker: vi.fn(),
+    },
+    historyClearAsync: vi.fn(),
+    clearPlaygroundThreadStore: vi.fn(),
+    keywordHistoryClearAsync: vi.fn(),
     performanceMonitor: {
       isInitialized: vi.fn(),
       initialize: vi.fn(),
@@ -111,6 +120,28 @@ vi.mock('@/services/localDataStore', () => ({
   LocalDataStore: deps.localData,
 }));
 
+vi.mock('@/stores/useAppStore', () => ({
+  appStore: {
+    getState: () => deps.appStoreState,
+  },
+}));
+
+vi.mock('@/modules/app_center/views/master_analysis/services/historyService', () => ({
+  HistoryService: {
+    clearAsync: deps.historyClearAsync,
+  },
+}));
+
+vi.mock('@/modules/app_center/views/playground/deep-chat', () => ({
+  clearPlaygroundThreadStore: deps.clearPlaygroundThreadStore,
+}));
+
+vi.mock('@/modules/app_center/views/keyword_hunter/services/snapshotService', () => ({
+  KeywordHunterSnapshotService: {
+    clearAsync: deps.keywordHistoryClearAsync,
+  },
+}));
+
 vi.mock('@/common/config/envConfig', () => ({
   EnvConfig: {
     get isProduction() {
@@ -152,6 +183,7 @@ const usage = {
 };
 
 beforeEach(() => {
+  vi.restoreAllMocks();
   vi.useRealTimers();
   deps.values.clear();
   deps.secureValues.clear();
@@ -166,13 +198,19 @@ beforeEach(() => {
   deps.localData.importAll.mockReset().mockResolvedValue(undefined);
   deps.localData.clearBucket.mockReset().mockResolvedValue(2);
   deps.localData.clearAll.mockReset().mockResolvedValue(undefined);
+  deps.appStoreState.resetScraper.mockReset();
+  deps.appStoreState.resetAnalysis.mockReset();
+  deps.appStoreState.resetPromptLab.mockReset();
+  deps.appStoreState.resetKeywordTracker.mockReset();
+  deps.historyClearAsync.mockReset().mockResolvedValue(undefined);
+  deps.clearPlaygroundThreadStore.mockReset().mockResolvedValue(undefined);
+  deps.keywordHistoryClearAsync.mockReset().mockResolvedValue(undefined);
   deps.performanceMonitor.isInitialized.mockReset().mockReturnValue(false);
   deps.performanceMonitor.initialize.mockReset();
   deps.performanceMonitor.show.mockReset();
   deps.configGet.mockReset().mockReturnValue(15000);
   document.body.innerHTML = '';
   delete (window as unknown as { Alpine?: unknown }).Alpine;
-  vi.restoreAllMocks();
 });
 
 describe('system settings current behavior', () => {
@@ -181,7 +219,7 @@ describe('system settings current behavior', () => {
     panel.$watch = vi.fn();
 
     panel.init();
-    await Promise.resolve();
+    await panel.refreshLocalDataUsage();
 
     expect(panel.$watch).toHaveBeenCalledWith('llm.provider', expect.any(Function));
     expect(panel.$watch).toHaveBeenCalledWith('proxy.type', expect.any(Function));
@@ -422,11 +460,79 @@ describe('system settings current behavior', () => {
 
     expect(confirm).toHaveBeenCalledTimes(2);
     expect(LocalDataStore.clearAll).toHaveBeenCalledTimes(1);
+    expect(deps.appStoreState.resetScraper).toHaveBeenCalledTimes(1);
+    expect(deps.appStoreState.resetAnalysis).toHaveBeenCalledTimes(1);
+    expect(deps.appStoreState.resetPromptLab).toHaveBeenCalledTimes(1);
+    expect(deps.appStoreState.resetKeywordTracker).toHaveBeenCalledTimes(1);
+    expect(deps.historyClearAsync).toHaveBeenCalledTimes(1);
+    expect(deps.clearPlaygroundThreadStore).toHaveBeenCalledTimes(1);
+    expect(deps.keywordHistoryClearAsync).toHaveBeenCalledTimes(1);
     expect(LocalDataStore.getUsage).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(LocalDataStore.clearAll).mock.invocationCallOrder[0]).toBeGreaterThan(
+      deps.keywordHistoryClearAsync.mock.invocationCallOrder[0],
+    );
+    expect(vi.mocked(LocalDataStore.getUsage).mock.invocationCallOrder[0]).toBeGreaterThan(
+      vi.mocked(LocalDataStore.clearAll).mock.invocationCallOrder[0],
+    );
     expect(showToast).toHaveBeenCalledWith(
       '全部本地数据已清空，请刷新页面重新初始化',
       { type: 'success' }
     );
+    expect(panel.localData.isBusy).toBe(false);
+  });
+
+  it('clears selected local data buckets through runtime-aware cleanup', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const panel = createPanel();
+
+    await panel.clearLocalDataBucket('keyword-history');
+
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(LocalDataStore.clearBucket).toHaveBeenCalledWith('keyword-history');
+    expect(deps.keywordHistoryClearAsync).toHaveBeenCalledTimes(1);
+    expect(LocalDataStore.getUsage).toHaveBeenCalledTimes(1);
+    expect(panel.localData.isBusy).toBe(false);
+    expect(panel.localData.clearingBucketId).toBeNull();
+  });
+
+  it('imports local data in replace mode and schedules a reload', async () => {
+    const panel = createPanel();
+    const backup = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      localStorage: {},
+      indexedDB: [],
+      metadata: { app: 'sops', storageVersion: 'local-data-v1' },
+    };
+    const file = { text: vi.fn(async () => JSON.stringify(backup)) };
+    const input = document.createElement('input');
+    const createElement = document.createElement.bind(document);
+    let changeHandler: ((event: Event) => void | Promise<void>) | null = null;
+    Object.defineProperty(input, 'files', { value: [file], configurable: true });
+    vi.spyOn(input, 'click').mockImplementation(() => undefined);
+    vi.spyOn(input, 'addEventListener').mockImplementation((type: string, listener: EventListenerOrEventListenerObject) => {
+      if (type === 'change' && typeof listener === 'function') {
+        changeHandler = listener as (event: Event) => void | Promise<void>;
+      }
+    });
+    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => (
+      tagName === 'input' ? input : createElement(tagName)
+    ));
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const setTimeoutSpy = vi.spyOn(window, 'setTimeout').mockImplementation(() => 1);
+
+    await panel.importLocalData();
+    expect(changeHandler).toBeTypeOf('function');
+    await changeHandler?.(new Event('change'));
+    await Promise.resolve();
+
+    expect(LocalDataStore.importAll).toHaveBeenCalledWith(backup, { mode: 'replace' });
+    expect(LocalDataStore.getUsage).toHaveBeenCalledTimes(1);
+    expect(showToast).toHaveBeenCalledWith(
+      '本地数据已导入，页面即将刷新以应用恢复结果',
+      { type: 'success' }
+    );
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 800);
     expect(panel.localData.isBusy).toBe(false);
   });
 

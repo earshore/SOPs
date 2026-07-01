@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AnalysisReport, GeneratedPromptRecord, HistoryItem, ScrapedData } from '@/types/modules-business';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
+import type { UserProductProfile } from '@/types/state';
 
 const mocks = vi.hoisted(() => {
   const mockStore = {
@@ -133,6 +134,27 @@ function createPromptRecord(type: GeneratedPromptRecord['type'], prompt: string)
   };
 }
 
+function createUserProductProfile(overrides: Partial<UserProductProfile> = {}): UserProductProfile {
+  return {
+    targetMarket: 'English',
+    keywordsTier1: 'keyword',
+    keywordsTier2: 'longtail',
+    audience: 'audience',
+    usps: 'usp',
+    specs: 'spec',
+    socialHook: '',
+    negative: '',
+    tone: 'professional',
+    customStrategy: '',
+    useCosmo: true,
+    useRufus: true,
+    useEmoji: true,
+    selectedReportSections: [],
+    charLimit: 5000,
+    ...overrides
+  };
+}
+
 describe('HistoryService snapshot storage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -204,6 +226,36 @@ describe('HistoryService snapshot storage', () => {
     expect(updated[0]?.analysisStatus).toBeUndefined();
     expect(updated[0]?.promptResults).toBeUndefined();
     expect(updated[0]?.report).toBeUndefined();
+  });
+
+  it('persists product DNA profile on a snapshot', async () => {
+    mocks.history = [
+      createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
+    ];
+
+    const saved = await HistoryService.updateUserProductProfileAsync(
+      'hist-001',
+      createUserProductProfile({ keywordsTier1: 'snapshot keyword' })
+    );
+
+    expect(saved).toBe(true);
+    expect(mocks.history[0]?.userProductProfile?.keywordsTier1).toBe('snapshot keyword');
+    expect(HistoryService.getUserProductProfileById('hist-001')?.keywordsTier1).toBe('snapshot keyword');
+  });
+
+  it('clears product DNA profile when current snapshot data changes', async () => {
+    const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+    const firstId = first[0]!.id;
+
+    await HistoryService.updateUserProductProfileAsync(
+      firstId,
+      createUserProductProfile({ keywordsTier1: 'old snapshot keyword' })
+    );
+
+    const updated = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001', 'B000000002']));
+
+    expect(updated[0]?.id).toBe(firstId);
+    expect(updated[0]?.userProductProfile).toBeUndefined();
   });
 
   it('clears prompt results when replacing a snapshot analysis report', () => {

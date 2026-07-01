@@ -211,6 +211,16 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
         actionLabel: '清理密钥',
         confirmMessage: '这会删除本浏览器保存的 API Key，之后需要重新配置。继续？',
     },
+    'workspace-state': {
+        label: '工作台状态',
+        description: '页面状态、草稿、PromptLab 与关键词工具工作区',
+        icon: 'fa-layer-group',
+        iconClass: 'bg-cyan-50 text-cyan-600 ring-cyan-100',
+        barClass: 'bg-cyan-500',
+        buttonClass: 'border-cyan-100 bg-cyan-50 text-cyan-700 hover:bg-cyan-100',
+        actionLabel: '清理状态',
+        confirmMessage: '这会重置本浏览器保存的工作台状态、草稿和工具输入，但保留模型配置、密钥、采集历史、聊天和缓存。继续？',
+    },
     'scrape-history': {
         label: '采集历史',
         description: '商品采集结果、导入记录和历史报告',
@@ -230,6 +240,16 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
         buttonClass: 'border-violet-100 bg-violet-50 text-violet-700 hover:bg-violet-100',
         actionLabel: '清理聊天',
         confirmMessage: '这会删除 Playground 本地聊天线程，建议先导出备份。继续？',
+    },
+    'keyword-history': {
+        label: '关键词历史',
+        description: 'Keyword Hunter 快照、对比记录和迁移备份',
+        icon: 'fa-magnifying-glass-chart',
+        iconClass: 'bg-teal-50 text-teal-600 ring-teal-100',
+        barClass: 'bg-teal-500',
+        buttonClass: 'border-teal-100 bg-teal-50 text-teal-700 hover:bg-teal-100',
+        actionLabel: '清理关键词',
+        confirmMessage: '这会删除 Keyword Hunter 本地快照和历史对比记录，建议先导出备份。继续？',
     },
     cache: {
         label: '缓存',
@@ -258,6 +278,63 @@ function registerSettingsWatchers(panel: SettingsPanelData & AlpineWatchContext)
     panel.$watch('proxy.type', (val: string) => {
         panel.proxy.customUrl = panel.proxy.savedKeyMap[val] || '';
     });
+}
+
+async function resetAppStoreRuntimeState(): Promise<void> {
+    const { appStore } = await import('../../stores/useAppStore');
+    const state = appStore.getState();
+
+    state.resetScraper();
+    state.resetAnalysis();
+    state.resetPromptLab();
+    state.resetKeywordTracker();
+}
+
+async function resetWorkspaceRuntimeState(): Promise<void> {
+    await resetAppStoreRuntimeState();
+
+    await LocalDataStore.clearBucket('workspace-state');
+}
+
+async function syncLocalDataRuntimeAfterBucketClear(bucketId: LocalDataBucketId): Promise<void> {
+    if (bucketId === 'workspace-state') {
+        await resetWorkspaceRuntimeState();
+        return;
+    }
+
+    if (bucketId === 'scrape-history') {
+        const { HistoryService } = await import('../../modules/app_center/views/master_analysis/services/historyService');
+        await HistoryService.clearAsync();
+        return;
+    }
+
+    if (bucketId === 'chat-history') {
+        const { clearPlaygroundThreadStore } = await import('../../modules/app_center/views/playground/deep-chat');
+        await clearPlaygroundThreadStore();
+        return;
+    }
+
+    if (bucketId === 'keyword-history') {
+        const { KeywordHunterSnapshotService } = await import('../../modules/app_center/views/keyword_hunter/services/snapshotService');
+        await KeywordHunterSnapshotService.clearAsync();
+    }
+}
+
+async function clearLocalDataBucketWithRuntimeSync(bucketId: LocalDataBucketId): Promise<number> {
+    const removed = await LocalDataStore.clearBucket(bucketId);
+    await syncLocalDataRuntimeAfterBucketClear(bucketId);
+    return removed;
+}
+
+async function syncRuntimeAfterClearAllLocalData(): Promise<void> {
+    await resetAppStoreRuntimeState();
+    await syncLocalDataRuntimeAfterBucketClear('scrape-history');
+    await syncLocalDataRuntimeAfterBucketClear('chat-history');
+    await syncLocalDataRuntimeAfterBucketClear('keyword-history');
+}
+
+function reloadAfterLocalDataImport(): void {
+    window.setTimeout(() => window.location.reload(), 800);
 }
 
 function getModelId(model: ModelOption): string {
@@ -873,9 +950,13 @@ const settingsPanelBehavior: SettingsPanelPart = {
             try {
                 this.localData.isBusy = true;
                 const text = await file.text();
-                await LocalDataStore.importAll(JSON.parse(text));
+                const mode = window.confirm('导入前是否先清空当前本地数据？确定=完整恢复到备份状态；取消=合并导入并保留备份外数据。')
+                    ? 'replace'
+                    : 'merge';
+                await LocalDataStore.importAll(JSON.parse(text), { mode });
                 await this.refreshLocalDataUsage();
-                showToast('本地数据已导入，请刷新页面确认恢复结果', { type: 'success' });
+                showToast('本地数据已导入，页面即将刷新以应用恢复结果', { type: 'success' });
+                reloadAfterLocalDataImport();
             } catch (error) {
                 ErrorService.handle(error as Error, { action: 'importLocalData', module: 'settings' });
             } finally {
@@ -904,7 +985,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
         try {
             this.localData.isBusy = true;
             this.localData.clearingBucketId = bucketId;
-            const removed = await LocalDataStore.clearBucket(bucketId);
+            const removed = await clearLocalDataBucketWithRuntimeSync(bucketId);
             await this.refreshLocalDataUsage();
             showToast(`${meta.label}已清理 (${removed} 项)`, { type: 'success' });
         } catch (error) {
@@ -923,6 +1004,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
         try {
             this.localData.isBusy = true;
+            await syncRuntimeAfterClearAllLocalData();
             await LocalDataStore.clearAll();
             this.localData.usage = await LocalDataStore.getUsage();
             showToast('全部本地数据已清空，请刷新页面重新初始化', { type: 'success' });

@@ -9,6 +9,7 @@ const APP_CENTER_ROUTE_PATHS: Record<string, string> = {
   [APP_CENTER_ROUTES.KW_INPUT]: '/app-center/keyword-hunter/input',
   [APP_CENTER_ROUTES.KW_PROCESS]: '/app-center/keyword-hunter/process',
   [APP_CENTER_ROUTES.KW_ANALYSIS]: '/app-center/keyword-hunter/analysis',
+  [APP_CENTER_ROUTES.KW_HISTORY]: '/app-center/keyword-hunter/history',
   [APP_CENTER_ROUTES.PLAYGROUND]: '/app-center/playground/deep-chat',
 };
 

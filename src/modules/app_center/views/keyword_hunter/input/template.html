@@ -55,8 +55,10 @@
             </div>
         </div>
 
-        <!-- ========== Input Cards Grid ========== -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 kt-input-grid">
+        <!-- ========== Input Workspace ========== -->
+        <div class="kt-input-workspace">
+            <!-- ========== Input Cards Grid ========== -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 kt-input-grid">
 
             <!-- ===== Keywords Input (1/3) ===== -->
             <div
@@ -147,6 +149,10 @@
                                 class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-lg text-xs font-semibold transition-all border border-slate-200 hover:border-rose-200 active:scale-95">
                                 <i class="fa-solid fa-trash-can text-[10px]"></i> 清空文案
                             </button>
+                            <button id="kt-btn-save-input-snapshot"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold transition-all border border-blue-200 hover:border-blue-300 hover:shadow-sm active:scale-95">
+                                <i class="fas fa-floppy-disk text-[10px]"></i> 保存快照
+                            </button>
 
                             <!-- Divider -->
                             <div class="w-px h-6 bg-slate-200 mx-0.5"></div>
@@ -194,6 +200,49 @@
                     </div>
                 </div>
             </div>
+            </div>
+
+            <!-- ========== History Snapshots ========== -->
+            <aside class="kh-input-snapshot-panel" aria-label="Keyword Hunter 历史快照">
+                <div class="kh-input-snapshot-head">
+                    <div class="kh-input-snapshot-title">
+                        <div class="kh-input-snapshot-icon">
+                            <i class="fas fa-history" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h3>历史快照</h3>
+                            <p id="kt-input-snapshot-count">0 个快照</p>
+                        </div>
+                    </div>
+                    <button id="kt-input-snapshot-save" type="button" class="kh-input-snapshot-save">
+                        <i class="fas fa-floppy-disk" aria-hidden="true"></i>
+                        <span>保存</span>
+                    </button>
+                </div>
+
+                <div class="kh-input-snapshot-toolbar">
+                    <button id="kt-input-snapshot-filter-all" type="button" class="active" data-kh-snapshot-filter="all">
+                        全部
+                    </button>
+                    <button id="kt-input-snapshot-filter-master" type="button" data-kh-snapshot-filter="master-analysis">
+                        Master
+                    </button>
+                </div>
+
+                <div id="kt-input-snapshot-empty" class="kh-input-snapshot-empty hidden">
+                    <i class="far fa-folder-open" aria-hidden="true"></i>
+                    <strong>暂无历史快照</strong>
+                    <span>保存当前输入后会出现在这里</span>
+                </div>
+
+                <div id="kt-input-snapshot-list" class="kh-input-snapshot-list"></div>
+
+                <button id="kt-input-snapshot-open-history" type="button" class="kh-input-snapshot-open">
+                    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+                    <span>查看全部历史</span>
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </aside>
         </div>
     </div>
 </section>

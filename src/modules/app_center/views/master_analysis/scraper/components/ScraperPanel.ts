@@ -23,6 +23,7 @@ import { startScrape, handleScrapeComplete, saveScrapeSnapshot, updateTask } fro
 import { handleImportFiles as handleImportFilesCore } from '../handlers/importHandler';
 import { deleteProduct as deleteProductCore, deleteReview as deleteReviewCore, confirmWithModal } from '../handlers/dataOperations';
 import type { ScrapedData, ScrapedProduct, HistoryItem } from '@/types/modules-business';
+import { getScrapedDataFingerprint } from '../../services/reportIdentity';
 import { DataPreview, DataPreviewState } from './DataPreview';
 import { HistoryPanel } from './HistoryPanel';
 import { emitHistoryUpdated } from '../../services/historyEvents';
@@ -65,6 +66,7 @@ type ScraperPanelThis = ScraperPanelState & {
     handleDeleteResult(result: DeleteResult): void;
     deleteProduct(asin: string): Promise<void>;
     deleteReview(asin: string, index: number): Promise<void>;
+    sendHistoryItemToKeywordHunter(item: HistoryItem): Promise<void>;
 };
 
 type ScraperPanelBehavior = Record<string, unknown> & ThisType<ScraperPanelThis>;
@@ -99,6 +101,97 @@ function clearDerivedAnalysisStateAfterDataChange(data: ScrapedData): void {
     state.setTranslatedReport?.(null);
     state.setSelectedAsins?.(selectedAsins);
     state.setCurrentPrompt?.('');
+}
+
+type KeywordHunterSourceProduct = ScrapedProduct & {
+    title?: string;
+    bulletPoints?: string[];
+    bullet_points?: string[];
+    description?: string;
+    productDescription?: string;
+    product_description?: string;
+};
+
+const KEYWORD_HUNTER_STOP_WORDS = new Set([
+    'the', 'and', 'for', 'with', 'your', 'you', 'are', 'from', 'that', 'this',
+    'our', 'into', 'have', 'has', 'not', 'but', 'all', 'can', 'will', 'use',
+    'und', 'der', 'die', 'das', 'des', 'pour', 'avec', 'les', 'los', 'las',
+]);
+
+function getProductTitle(product: KeywordHunterSourceProduct): string {
+    return product.productTitle || product.title || product.asin || '';
+}
+
+function getProductBullets(product: KeywordHunterSourceProduct): string[] {
+    if (Array.isArray(product.feature_bullets)) return product.feature_bullets;
+    if (Array.isArray(product.bulletPoints)) return product.bulletPoints;
+    if (Array.isArray(product.bullet_points)) return product.bullet_points;
+    return [];
+}
+
+function getProductDescription(product: KeywordHunterSourceProduct): string {
+    return product.description || product.productDescription || product.product_description || '';
+}
+
+function buildKeywordHunterCopy(item: HistoryItem): string {
+    return (item.data.products || [])
+        .map((product) => {
+            const sourceProduct = product as KeywordHunterSourceProduct;
+            return [
+                getProductTitle(sourceProduct),
+                ...getProductBullets(sourceProduct),
+                getProductDescription(sourceProduct)
+            ].filter((part) => part && part.trim()).join('\n');
+        })
+        .filter((text) => text.trim())
+        .join('\n\n');
+}
+
+function extractKeywordHunterSeeds(text: string): string[] {
+    const counts = new Map<string, number>();
+    const words = text
+        .toLowerCase()
+        .match(/[\p{L}\p{N}\p{M}][\p{L}\p{N}\p{M}-]{2,}/gu) || [];
+
+    words.forEach((word) => {
+        if (KEYWORD_HUNTER_STOP_WORDS.has(word)) return;
+        counts.set(word, (counts.get(word) || 0) + 1);
+    });
+
+    return [...counts.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, 40)
+        .map(([word]) => word);
+}
+
+function resetKeywordHunterDerivedState(item: HistoryItem, copy: string, keywords: string[]): void {
+    const firstProduct = item.data.products?.[0] as KeywordHunterSourceProduct | undefined;
+
+    appStore.getState().updateKeywordTracker({
+        keywordsInputText: keywords.join('\n'),
+        copyInputText: copy,
+        keywords: [],
+        processedCopy: '',
+        formattedCopy: '',
+        matchedKeywords: [],
+        unmatchedKeywords: [],
+        wordFrequency: [],
+        paragraphs: [],
+        translationMode: false,
+        keywordLocationIndex: {},
+        isWindowMinimized: false,
+        llmAnalysisResult: '',
+        showTranslation: false,
+        currentSnapshotId: null,
+        snapshotSource: {
+            type: 'master-analysis',
+            masterHistoryId: item.id,
+            sourceDataFingerprint: item.dataFingerprint || getScrapedDataFingerprint(item.data),
+            site: item.site,
+            asins: item.asins,
+            productTitle: firstProduct ? getProductTitle(firstProduct) : undefined
+        }
+    });
 }
 
 function attachScraperPanelBehavior(panel: ScraperPanelState): ScraperPanelState & Record<string, unknown> {
@@ -568,6 +661,19 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
         async loadAnalysisReport(item: HistoryItem) {
             await this.historyPanel?.loadAnalysisReport(item);
+        },
+
+        async sendHistoryItemToKeywordHunter(item: HistoryItem): Promise<void> {
+            const copy = buildKeywordHunterCopy(item);
+            if (!copy.trim()) {
+                showToast('该 Master 快照没有可发送的 Listing 文案', { type: 'warning' });
+                return;
+            }
+
+            const keywords = extractKeywordHunterSeeds(copy);
+            resetKeywordHunterDerivedState(item, copy, keywords);
+            await window.navigateTo('/app-center/keyword-hunter/input');
+            showToast('已发送到 Keyword Hunter 输入页', { type: 'success' });
         },
 
         // ========== Scraping Logic ==========

@@ -14,6 +14,7 @@ import type {
   ScrapedData,
   AnalysisReport
 } from "../../../../../types/modules-business";
+import type { UserProductProfile } from "../../../../../types/state";
 import { getReportFingerprint, getScrapedDataFingerprint } from './reportIdentity';
 
 const MAX_HISTORY_ITEMS =
@@ -102,6 +103,7 @@ function clearSnapshotDerivedState(item: HistoryItem): void {
   delete item.report;
   delete item.analysisStatus;
   delete item.promptResults;
+  delete item.userProductProfile;
 }
 
 function hasSameSnapshotData(previousItem: HistoryItem | undefined, dataFingerprint: string | null): boolean {
@@ -398,6 +400,10 @@ function deletePromptResultFromItem(item: HistoryItem, promptId: string): boolea
   return true;
 }
 
+function cloneUserProductProfile(profile: UserProductProfile): UserProductProfile {
+  return JSON.parse(JSON.stringify(profile)) as UserProductProfile;
+}
+
 // ----------------------------------------
 // 类型定义
 // ----------------------------------------
@@ -624,6 +630,67 @@ export const HistoryService = {
   getPromptResultsById(id: HistoryItem['id'], reportFingerprint?: string | null): HistoryPromptResults | null {
     const item = this.getById(id);
     return item ? filterPromptResultsForSnapshot(item, reportFingerprint) : null;
+  },
+
+  getUserProductProfileById(id: HistoryItem['id']): UserProductProfile | null {
+    const item = this.getById(id);
+    return item?.userProductProfile
+      ? cloneUserProductProfile(item.userProductProfile)
+      : null;
+  },
+
+  updateUserProductProfile(id: HistoryItem['id'], profile: UserProductProfile): boolean {
+    try {
+      const history = this.getAll();
+      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
+
+      if (targetIndex === -1) {
+        return false;
+      }
+
+      const targetItem = history[targetIndex];
+      if (!targetItem) {
+        return false;
+      }
+
+      targetItem.userProductProfile = cloneUserProductProfile(profile);
+
+      const saved = StorageService.setScrapeHistory(history);
+      if (!saved) return false;
+      historyCache = history;
+
+      return true;
+    } catch (error) {
+      console.error(`[HistoryService] 更新产品 DNA 快照失败:`, error);
+      return false;
+    }
+  },
+
+  async updateUserProductProfileAsync(id: HistoryItem['id'], profile: UserProductProfile): Promise<boolean> {
+    try {
+      const history = await this.getAllAsync();
+      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
+
+      if (targetIndex === -1) {
+        return false;
+      }
+
+      const targetItem = history[targetIndex];
+      if (!targetItem) {
+        return false;
+      }
+
+      targetItem.userProductProfile = cloneUserProductProfile(profile);
+
+      const saved = await StorageService.setScrapeHistoryAsync(history);
+      if (!saved) return false;
+      historyCache = history;
+
+      return true;
+    } catch (error) {
+      console.error(`[HistoryService] 更新产品 DNA 快照失败:`, error);
+      return false;
+    }
   },
 
   updatePromptResult(id: HistoryItem['id'], prompt: GeneratedPromptRecord): boolean {

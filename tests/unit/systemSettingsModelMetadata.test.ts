@@ -27,6 +27,7 @@ interface SettingsPanelForTest {
   refreshLocalDataUsage(): Promise<void>;
   toggleLocalDataCleanupItems(): void;
   clearLocalDataBucket(bucketId: LocalDataBucketId): Promise<void>;
+  clearAllLocalData(): Promise<void>;
 }
 
 function createSettingsPanel(): SettingsPanelForTest {
@@ -104,7 +105,7 @@ describe('system settings model metadata display', () => {
     await panel.refreshLocalDataUsage();
 
     expect(panel.localData.cleanupItemsExpanded).toBe(false);
-    expect(panel.localDataCleanupSummaryText).toContain('6 类数据');
+    expect(panel.localDataCleanupSummaryText).toContain('8 类数据');
 
     panel.toggleLocalDataCleanupItems();
     expect(panel.localData.cleanupItemsExpanded).toBe(true);
@@ -131,5 +132,21 @@ describe('system settings model metadata display', () => {
     expect(panel.localData.clearingBucketId).toBeNull();
     expect(history?.isEmpty).toBe(true);
     expect(chat?.isEmpty).toBe(false);
+  });
+
+  it('clears runtime-persisted workspace state when clearing all local data', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    localStorage.setItem('app-storage', JSON.stringify({ state: { promptlab: { history: [{ id: 'p1' }] } } }));
+    localStorage.setItem('llm_active_provider', JSON.stringify('new_api'));
+    await LocalDataStore.set('user:scrape_history', [{ id: 1 }], 'user-data');
+
+    const panel = createSettingsPanel();
+    await panel.clearAllLocalData();
+
+    expect(confirmSpy).toHaveBeenCalledTimes(2);
+    expect(localStorage.getItem('app-storage')).toBeNull();
+    expect(localStorage.getItem('llm_active_provider')).toBeNull();
+    expect(await LocalDataStore.get('user:scrape_history')).toBeNull();
+    expect(panel.localData.usage?.total).toBe(0);
   });
 });

@@ -19,8 +19,12 @@ const scraperMocks = vi.hoisted(() => {
       expandedAsin: null as string | null,
       currentDataTab: 'preview' as 'preview' | 'json',
     },
+    keywordTracker: {},
     updateScraper: vi.fn((patch: Record<string, unknown>) => {
       Object.assign(appState.scraper, patch);
+    }),
+    updateKeywordTracker: vi.fn((patch: Record<string, unknown>) => {
+      Object.assign(appState.keywordTracker, patch);
     }),
     setScrapedData: vi.fn((data: unknown) => {
       appState.scraper.scrapedData = data;
@@ -177,10 +181,12 @@ function resetAppState(): void {
     expandedAsin: null,
     currentDataTab: 'preview',
   };
+  scraperMocks.appState.keywordTracker = {};
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
+  window.navigateTo = vi.fn(async () => undefined);
   resetAppState();
   scraperMocks.storageGet.mockReturnValue({ type: 'scraperapi', customUrl: '' });
   scraperMocks.handleScrapeComplete.mockReturnValue({
@@ -376,6 +382,53 @@ describe('ScraperPanel current factory', () => {
 
     expect(panel._unsubscribers).toEqual([]);
     expect(panel.dataPreview.cleanup).toHaveBeenCalled();
+  });
+
+  it('sends a Master history item into Keyword Hunter input state', async () => {
+    const panel = createScraperPanel() as ScraperPanel;
+    const item = {
+      id: 'hist-kw-1',
+      timestamp: '2026-06-12T08:00:00.000Z',
+      site: 'FR',
+      asins: ['B08N5WRWNW'],
+      dataFingerprint: 'fingerprint-1',
+      data: {
+        metadata: { marketplace: 'FR' },
+        products: [
+          {
+            asin: 'B08N5WRWNW',
+            productTitle: 'Stainless Coffee Grinder',
+            feature_bullets: [
+              'Precision burr grinder for espresso and filter coffee',
+              'Compact stainless housing with quiet motor',
+            ],
+            description: 'Consistent grind settings for home barista workflows.',
+          },
+        ],
+        reviews: [],
+      },
+    };
+
+    await panel.sendHistoryItemToKeywordHunter(item);
+
+    expect(scraperMocks.appState.updateKeywordTracker).toHaveBeenCalledWith(expect.objectContaining({
+      copyInputText: expect.stringContaining('Stainless Coffee Grinder'),
+      keywordsInputText: expect.stringContaining('grinder'),
+      keywords: [],
+      matchedKeywords: [],
+      currentSnapshotId: null,
+      snapshotSource: expect.objectContaining({
+        type: 'master-analysis',
+        masterHistoryId: 'hist-kw-1',
+        sourceDataFingerprint: 'fingerprint-1',
+        site: 'FR',
+        asins: ['B08N5WRWNW'],
+        productTitle: 'Stainless Coffee Grinder',
+      }),
+    }));
+    expect(scraperMocks.appState.keywordTracker.copyInputText).toContain('Precision burr grinder');
+    expect(window.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/input');
+    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Keyword Hunter'), { type: 'success' });
   });
 
   it('imports files, deletes data, and handles delete results', async () => {

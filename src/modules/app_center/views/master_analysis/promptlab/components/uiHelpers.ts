@@ -13,8 +13,10 @@
 import { appStore } from '@/stores/useAppStore';
 import { showToast } from '../../../../../../common/ui';
 import type { DnaConfidence, PromptlabAlpineContext, ConsoleMode } from './types';
-import type { UserProductProfile } from '@/types/state';
+import type { PromptInputs, UserProductProfile } from '@/types/state';
+import type { AnalysisReport } from '@/types/modules-business';
 import { confirmWithModal } from '../../utils/confirmModal';
+import { promptlabService } from '../../services/promptlabService';
 
 // ==========================================
 // 输入框高度自适应
@@ -163,6 +165,54 @@ export function copyPrompt(): void {
 // ==========================================
 // 清空输入
 // ==========================================
+
+function getPromptAnalysisReport(): AnalysisReport | null {
+  const analysisReport = appStore.getState().analysis.analysisReport;
+  return analysisReport && typeof analysisReport !== 'string'
+    ? analysisReport
+    : null;
+}
+
+function createSeoCopyInputs(ctx: PromptlabAlpineContext): PromptInputs {
+  return { ...ctx.profile, useAnalysisData: true };
+}
+
+async function writeTextToClipboard(text: string): Promise<void> {
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', 'true');
+  textarea.style.position = 'fixed';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand('copy');
+  document.body.removeChild(textarea);
+}
+
+export async function copySeoKeywords(ctx: PromptlabAlpineContext): Promise<void> {
+  const text = promptlabService.buildSeoKeywordCopyText(
+    createSeoCopyInputs(ctx),
+    getPromptAnalysisReport(),
+  );
+
+  if (!text.trim()) {
+    showToast('暂无可复制的 SEO 关键词', { type: 'warning' });
+    return;
+  }
+
+  try {
+    await writeTextToClipboard(text);
+    showToast('SEO 关键词已复制', { type: 'success' });
+  } catch (error) {
+    console.error('[Promptlab] 复制 SEO 关键词失败:', error);
+    showToast('复制失败，请重试', { type: 'error' });
+  }
+}
 
 /** 默认空白 profile，用于清空操作 */
 const EMPTY_PROFILE: UserProductProfile = {

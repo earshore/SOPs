@@ -245,6 +245,61 @@ describe('Promptlab Module', () => {
       expect(component.profile.charLimit).toBe(3000);
     });
 
+    it('should restore product DNA from the loaded snapshot before global profile', () => {
+      const report = createUsableAnalysisReport();
+      const [snapshot] = HistoryService.save({
+        metadata: {
+          scrape_timestamp: '2026-01-01T00:00:00.000Z',
+          marketplace: 'US',
+          domain: 'amazon.com',
+          language: 'English',
+          total_asins: 1
+        },
+        products: [
+          {
+            asin: 'B000000001',
+            url: '',
+            language: 'English',
+            productTitle: 'Snapshot Product',
+            feature_bullets: [],
+            customer_reviews: [],
+            scrape_status: 'success',
+            error: ''
+          }
+        ]
+      });
+      const snapshotProfile: UserProductProfile = {
+        targetMarket: 'English',
+        keywordsTier1: 'snapshot keyword',
+        keywordsTier2: 'snapshot longtail',
+        audience: 'snapshot audience',
+        usps: 'snapshot usps',
+        specs: 'snapshot specs',
+        socialHook: '',
+        negative: '',
+        tone: 'professional',
+        customStrategy: '',
+        useCosmo: true,
+        useRufus: true,
+        useEmoji: true,
+        selectedReportSections: [],
+        reportFingerprint: getReportFingerprint(report) ?? undefined,
+        charLimit: 5000,
+      };
+
+      appStore.getState().updateAnalysis({ analysisReport: report as any });
+      appStore.getState().setUserProductProfile({
+        ...snapshotProfile,
+        keywordsTier1: 'global keyword',
+      });
+      HistoryService.updateUserProductProfile(snapshot!.id, snapshotProfile);
+
+      component.restoreState();
+
+      expect(component.profile.keywordsTier1).toBe('snapshot keyword');
+      expect(component.profile.audience).toBe('snapshot audience');
+    });
+
     it('should clear report-bound DNA when the saved profile belongs to another report', () => {
       const oldReport = createUsableAnalysisReport();
       const nextReport = {
@@ -291,7 +346,7 @@ describe('Promptlab Module', () => {
       expect(component.profile.customStrategy).toBe('keep strategy');
     });
 
-    it('should not restore product DNA fields without a usable analysis report', () => {
+    it('should restore manually entered product DNA fields without a usable analysis report', () => {
       const savedProfile: UserProductProfile = {
         targetMarket: 'English',
         keywordsTier1: 'persisted keyword',
@@ -315,15 +370,15 @@ describe('Promptlab Module', () => {
 
       component.restoreState();
 
-      expect(component.profile.targetMarket).toBe('');
-      expect(component.profile.keywordsTier1).toBe('');
-      expect(component.profile.keywordsTier2).toBe('');
-      expect(component.profile.audience).toBe('');
-      expect(component.profile.usps).toBe('');
-      expect(component.profile.specs).toBe('');
-      expect(component.profile.socialHook).toBe('');
-      expect(component.profile.negative).toBe('');
-      expect(component.profile.selectedReportSections).toEqual([]);
+      expect(component.profile.targetMarket).toBe('English');
+      expect(component.profile.keywordsTier1).toBe('persisted keyword');
+      expect(component.profile.keywordsTier2).toBe('persisted longtail');
+      expect(component.profile.audience).toBe('persisted audience');
+      expect(component.profile.usps).toBe('persisted usps');
+      expect(component.profile.specs).toBe('persisted specs');
+      expect(component.profile.socialHook).toBe('persisted hook');
+      expect(component.profile.negative).toBe('persisted negative');
+      expect(component.profile.selectedReportSections).toEqual(['buyer-profile']);
       expect(component.profile.tone).toBe('exciting');
       expect(component.profile.customStrategy).toBe('keep strategy');
       expect(component.profile.useCosmo).toBe(true);
@@ -485,6 +540,48 @@ describe('Promptlab Module', () => {
       const savedProfile = appStore.getState().promptlab.userProductProfile;
       expect(savedProfile?.targetMarket).toBe('German');
       expect(savedProfile?.keywordsTier1).toBe('new keyword');
+    });
+
+    it('should persist saved state to the current snapshot', () => {
+      const [snapshot] = HistoryService.save({
+        metadata: {
+          scrape_timestamp: '2026-01-01T00:00:00.000Z',
+          marketplace: 'US',
+          domain: 'amazon.com',
+          language: 'English',
+          total_asins: 1
+        },
+        products: [
+          {
+            asin: 'B000000001',
+            url: '',
+            language: 'English',
+            productTitle: 'Snapshot Product',
+            feature_bullets: [],
+            customer_reviews: [],
+            scrape_status: 'success',
+            error: ''
+          }
+        ]
+      });
+      const persistSpy = vi
+        .spyOn(HistoryService, 'updateUserProductProfileAsync')
+        .mockResolvedValue(true);
+
+      component.profile.targetMarket = 'German';
+      component.profile.keywordsTier1 = 'saved to snapshot';
+
+      component.saveState();
+
+      expect(persistSpy).toHaveBeenCalledWith(
+        snapshot!.id,
+        expect.objectContaining({
+          targetMarket: 'German',
+          keywordsTier1: 'saved to snapshot'
+        })
+      );
+
+      persistSpy.mockRestore();
     });
   });
 

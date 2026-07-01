@@ -1,0 +1,32 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - button "Amazing Amazon Architect Prompt by Prompt" [ref=e4] [cursor=pointer]:
+        - generic [ref=e5]:
+          - img
+        - generic [ref=e6]:
+          - generic [ref=e7]: Amazing Amazon Architect
+          - generic [ref=e8]: Prompt by Prompt
+      - navigation "主导航" [ref=e9]:
+        - button " SOPs 流程中心 " [ref=e11] [cursor=pointer]:
+          - generic [ref=e12]: 
+          - text: SOPs 流程中心
+          - generic [ref=e13]: 
+        - button " 应用中心 " [ref=e15] [cursor=pointer]:
+          - generic [ref=e16]: 
+          - text: 应用中心
+          - generic [ref=e17]: 
+        - button " Amazon 智库 " [ref=e19] [cursor=pointer]:
+          - generic [ref=e20]: 
+          - text: Amazon 智库
+          - generic [ref=e21]: 
+        - button " 更多 " [ref=e23] [cursor=pointer]:
+          - generic [ref=e24]: 
+          - text: 更多
+          - generic [ref=e25]: 
+      - generic [ref=e29]: 等待API配置...
+  - main [ref=e31]: 无限可能
+  - generic:
+    - text:                                                          
+    - generic:        
+    - generic:     

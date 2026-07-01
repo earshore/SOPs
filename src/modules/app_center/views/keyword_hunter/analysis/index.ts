@@ -17,6 +17,7 @@ import * as KeywordService from "../services/trackerService";
 import { appStore } from "@/stores/useAppStore";
 import { ErrorService } from "../../../../../services/errorService";
 import { createSafeFragment, setSafeHtml } from "../../../../../common/utils/security";
+import { KeywordHunterSnapshotService } from "../services/snapshotService";
 import "../keyword_hunter_style.css";
 
 // ==========================================
@@ -155,6 +156,23 @@ function saveAnalysisStateToState(): void {
     appStore.getState().updateKeywordTracker({
       llmAnalysisResult: rawMarkdownCache,
     });
+  }
+}
+
+async function saveAnalysisSnapshot(showSuccessToast = true): Promise<void> {
+  saveAnalysisStateToState();
+  try {
+    await KeywordHunterSnapshotService.saveCurrentAsync({ status: 'reported' });
+    if (showSuccessToast) {
+      showToast("快照已保存", { type: "success" });
+    }
+  } catch (error) {
+    console.error("[Analysis] 保存快照失败:", error);
+    if (showSuccessToast) {
+      showToast(error instanceof Error ? error.message : "保存快照失败", {
+        type: "error",
+      });
+    }
   }
 }
 
@@ -375,6 +393,7 @@ function handleAnalysisSuccess(
 
   // 保存原始 Markdown 到 state
   saveAnalysisStateToState();
+  void saveAnalysisSnapshot(false);
 
   showToast("报告生成成功", { type: "success" });
 }
@@ -728,6 +747,13 @@ function setupEventListeners(container: HTMLElement): void {
       (async () =>
         await runLLMAnalysis()) as EventListenerOrEventListenerObject,
     );
+  }
+
+  const btnSaveSnapshot = document.getElementById("kt-save-analysis-snapshot-btn");
+  if (btnSaveSnapshot) {
+    addEventListener(btnSaveSnapshot, "click", () => {
+      void saveAnalysisSnapshot(true);
+    });
   }
 }
 

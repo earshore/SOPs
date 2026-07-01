@@ -562,6 +562,24 @@ export function unmount(): void {
   cleanupMessageToolbars();
 }
 
+export async function clearPlaygroundThreadStore(): Promise<void> {
+  pendingRequests.clear();
+  threadStore = createDefaultThreadStore();
+
+  await LocalDataStore.remove(`user:${THREAD_STORAGE_KEY}`);
+  StorageService.remove(THREAD_STORAGE_KEY);
+  StorageService.remove(`${THREAD_STORAGE_KEY}_migrated_to_indexeddb`);
+
+  const container = getMountedRenderContainer();
+  if (!container) {
+    return;
+  }
+
+  renderThreadList(container);
+  replaceChat(container);
+  syncPendingStatus(container);
+}
+
 async function refreshLLMConfig(container: HTMLElement): Promise<void> {
   const statusEl = container.querySelector<HTMLElement>('#playground-provider-status');
   const modelSelect = container.querySelector<HTMLSelectElement>('#playground-model-select');

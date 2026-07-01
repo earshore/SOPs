@@ -4,6 +4,7 @@ import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showProgress, showToast } from '@/common/ui';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
+import { KeywordHunterSnapshotService } from '@/modules/app_center/views/keyword_hunter/services/snapshotService';
 
 const inputMocks = vi.hoisted(() => {
   const template = `
@@ -20,6 +21,13 @@ const inputMocks = vi.hoisted(() => {
       <button id="kt-btn-clear-copy"></button>
       <button id="kt-btn-paste"></button>
       <button id="kt-btn-start-analysis"></button>
+      <button id="kt-input-snapshot-save"></button>
+      <button id="kt-input-snapshot-filter-all" data-kh-snapshot-filter="all"></button>
+      <button id="kt-input-snapshot-filter-master" data-kh-snapshot-filter="master-analysis"></button>
+      <span id="kt-input-snapshot-count"></span>
+      <div id="kt-input-snapshot-empty" class="hidden"></div>
+      <div id="kt-input-snapshot-list"></div>
+      <button id="kt-input-snapshot-open-history"></button>
     </section>
   `;
 
@@ -46,16 +54,123 @@ const inputMocks = vi.hoisted(() => {
     }),
   };
 
+  const snapshots: Array<Record<string, any>> = [];
+  const resetSnapshots = () => {
+    snapshots.splice(0, snapshots.length,
+      {
+        id: 'kh-master',
+        schemaVersion: 1,
+        title: 'Master Coffee Snapshot',
+        status: 'matched',
+        createdAt: '2026-06-12T08:00:00.000Z',
+        updatedAt: '2026-06-12T09:00:00.000Z',
+        source: {
+          type: 'master-analysis',
+          masterHistoryId: 'hist-1',
+          site: 'FR',
+          asins: ['B08N5WRWNW'],
+          productTitle: 'Coffee Grinder',
+        },
+        input: {
+          keywordsInputText: 'coffee grinder\nespresso',
+          copyInputText: 'Master coffee grinder copy',
+          settings: {
+            matchPlural: true,
+            matchStem: true,
+            matchCase: false,
+            matchPartial: false,
+          },
+        },
+        result: {
+          keywords: ['coffee grinder', 'espresso'],
+          processedCopy: 'Master coffee grinder copy',
+          matchedKeywords: [{ keyword: 'coffee grinder', count: 2 }],
+          unmatchedKeywords: ['espresso'],
+          wordFrequency: [['coffee', 2]],
+          paragraphs: [],
+          llmAnalysisResult: '',
+          showTranslation: false,
+          translationMode: false,
+          coverageRate: 50,
+        },
+        derived: {
+          keywordCount: 2,
+          matchedCount: 1,
+          unmatchedCount: 1,
+          copyHash: 'copy',
+          snapshotFingerprint: 'fp',
+        },
+      },
+      {
+        id: 'kh-manual',
+        schemaVersion: 1,
+        title: 'Manual Draft Snapshot',
+        status: 'draft',
+        createdAt: '2026-06-11T08:00:00.000Z',
+        updatedAt: '2026-06-11T09:00:00.000Z',
+        source: { type: 'manual' },
+        input: {
+          keywordsInputText: 'manual',
+          copyInputText: 'manual copy',
+          settings: {
+            matchPlural: true,
+            matchStem: true,
+            matchCase: false,
+            matchPartial: false,
+          },
+        },
+        result: {
+          keywords: ['manual'],
+          processedCopy: 'manual copy',
+          matchedKeywords: [],
+          unmatchedKeywords: ['manual'],
+          wordFrequency: [],
+          paragraphs: [],
+          llmAnalysisResult: '',
+          showTranslation: false,
+          translationMode: false,
+          coverageRate: 0,
+        },
+        derived: {
+          keywordCount: 1,
+          matchedCount: 0,
+          unmatchedCount: 1,
+          copyHash: 'manual',
+          snapshotFingerprint: 'manual',
+        },
+      },
+    );
+  };
+  resetSnapshots();
+
   return {
     actions: {} as Record<string, (...args: unknown[]) => unknown>,
+    deleteByIdAsync: vi.fn(async (id: string) => {
+      const index = snapshots.findIndex((snapshot) => snapshot.id === id);
+      if (index >= 0) snapshots.splice(index, 1);
+      return index >= 0;
+    }),
+    getAllAsync: vi.fn(async () => snapshots),
     loadTemplate: vi.fn(async () => template),
     navigateTo: vi.fn(async () => undefined),
     readText: vi.fn(async () => 'clipboard copy'),
     renderTemplate: vi.fn((container: HTMLElement, html: string) => {
       container.innerHTML = html;
     }),
+    resetSnapshots,
+    restore: vi.fn((snapshot: Record<string, any>) => {
+      Object.assign(state.keywordTracker, {
+        keywordsInputText: snapshot.input.keywordsInputText,
+        copyInputText: snapshot.input.copyInputText,
+      });
+      return snapshot;
+    }),
+    saveCurrentAsync: vi.fn(async () => ({
+      id: 'kh-test',
+    })),
     showProgress: vi.fn(),
     showToast: vi.fn(),
+    snapshots,
     state,
     unregisterActions: vi.fn(),
   };
@@ -88,6 +203,15 @@ vi.mock('@/common/utils/actionRegistry', () => ({
     return Object.keys(actions);
   }),
   unregisterActions: inputMocks.unregisterActions,
+}));
+
+vi.mock('@/modules/app_center/views/keyword_hunter/services/snapshotService', () => ({
+  KeywordHunterSnapshotService: {
+    deleteByIdAsync: inputMocks.deleteByIdAsync,
+    getAllAsync: inputMocks.getAllAsync,
+    restore: inputMocks.restore,
+    saveCurrentAsync: inputMocks.saveCurrentAsync,
+  },
 }));
 
 vi.mock('@/stores/useAppStore', () => ({
@@ -123,15 +247,25 @@ async function mountInput(): Promise<HTMLElement> {
   return container;
 }
 
+function click(element: Element | null): void {
+  expect(element).not.toBeNull();
+  element?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+}
+
 beforeEach(() => {
   unmount();
   document.body.innerHTML = '';
   vi.clearAllMocks();
   inputMocks.actions = {};
   resetTrackerState();
+  inputMocks.resetSnapshots();
   Object.defineProperty(window, 'navigateTo', {
     configurable: true,
     value: inputMocks.navigateTo,
+  });
+  Object.defineProperty(window, 'confirm', {
+    configurable: true,
+    value: vi.fn(() => true),
   });
   Object.defineProperty(navigator, 'clipboard', {
     configurable: true,
@@ -165,6 +299,47 @@ describe('Keyword Hunter input module', () => {
       kt_cleanKeywords: expect.any(Function),
       kt_startAnalysis: expect.any(Function),
     }));
+  });
+
+  it('renders the embedded history snapshot panel on the input page', async () => {
+    const container = await mountInput();
+
+    expect(KeywordHunterSnapshotService.getAllAsync).toHaveBeenCalled();
+    expect(container.querySelector('#kt-input-snapshot-count')?.textContent).toBe('2 个快照');
+    expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Master Coffee Snapshot');
+    expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Manual Draft Snapshot');
+
+    click(container.querySelector('#kt-input-snapshot-filter-master'));
+    expect(container.querySelector('#kt-input-snapshot-count')?.textContent).toBe('1 / 2 个快照');
+    expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Master Coffee Snapshot');
+    expect(container.querySelector('#kt-input-snapshot-list')?.textContent).not.toContain('Manual Draft Snapshot');
+
+    click(container.querySelector('button[title="恢复到输入页"]'));
+    expect(KeywordHunterSnapshotService.restore).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'kh-master' }),
+    );
+    expect(container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')?.value).toBe(
+      'coffee grinder\nespresso',
+    );
+    expect(container.querySelector<HTMLTextAreaElement>('#kt-copy-input')?.value).toBe(
+      'Master coffee grinder copy',
+    );
+
+    click(container.querySelector('#kt-input-snapshot-open-history'));
+    expect(inputMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/history');
+
+    click(container.querySelector('button[title="删除快照"]'));
+    await vi.waitFor(() => {
+      expect(KeywordHunterSnapshotService.deleteByIdAsync).toHaveBeenCalledWith('kh-master');
+    });
+    await vi.waitFor(() => {
+      expect(container.querySelector('#kt-input-snapshot-list')?.textContent).not.toContain('Master Coffee Snapshot');
+    });
+
+    click(container.querySelector('#kt-input-snapshot-save'));
+    await vi.waitFor(() => {
+      expect(KeywordHunterSnapshotService.saveCurrentAsync).toHaveBeenCalledWith({ status: 'draft' });
+    });
   });
 
   it('cleans duplicate keywords and restores the previous value with undo', async () => {

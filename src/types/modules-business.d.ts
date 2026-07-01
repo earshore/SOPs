@@ -1,4 +1,5 @@
 // src/types/modules-business.d.ts
+import type { UserProductProfile } from './prompt-profile';
 // ================================================================
 // 业务模块类型定义
 // 为各业务模块提供完整的类型约束
@@ -562,6 +563,83 @@ export interface HistoryItem {
     reportFingerprint?: string;
   };
   promptResults?: HistoryPromptResults;
+  userProductProfile?: UserProductProfile;
+}
+
+// ==================== Keyword Hunter History ====================
+
+export type KeywordHunterSnapshotStatus = 'draft' | 'matched' | 'reported';
+export type KeywordHunterSnapshotSourceType = 'manual' | 'master-analysis';
+
+export interface KeywordHunterSnapshotSource {
+  type: KeywordHunterSnapshotSourceType;
+  masterHistoryId?: string | number | null;
+  sourceDataFingerprint?: string | null;
+  site?: string;
+  asins?: string[];
+  productTitle?: string;
+}
+
+export interface KeywordHunterSnapshotSettings {
+  matchPlural: boolean;
+  matchStem: boolean;
+  matchCase: boolean;
+  matchPartial: boolean;
+}
+
+export interface KeywordHunterSnapshotParagraph {
+  original: string;
+  translation?: string;
+}
+
+export interface KeywordHunterSnapshotInput {
+  keywordsInputText: string;
+  copyInputText: string;
+  settings: KeywordHunterSnapshotSettings;
+}
+
+export interface KeywordHunterSnapshotResult {
+  keywords: string[];
+  processedCopy: string;
+  matchedKeywords: Array<{ keyword: string; count: number }>;
+  unmatchedKeywords: string[];
+  wordFrequency: Array<[string, number]>;
+  paragraphs: Array<string | KeywordHunterSnapshotParagraph>;
+  llmAnalysisResult?: string;
+  showTranslation?: boolean;
+  translationMode?: boolean;
+  coverageRate: number;
+}
+
+export interface KeywordHunterSnapshotDerived {
+  keywordCount: number;
+  matchedCount: number;
+  unmatchedCount: number;
+  copyHash: string;
+  snapshotFingerprint: string;
+}
+
+export interface KeywordHunterSnapshot {
+  id: string;
+  schemaVersion: 1;
+  title: string;
+  status: KeywordHunterSnapshotStatus;
+  createdAt: string;
+  updatedAt: string;
+  source: KeywordHunterSnapshotSource;
+  input: KeywordHunterSnapshotInput;
+  result: KeywordHunterSnapshotResult;
+  derived: KeywordHunterSnapshotDerived;
+}
+
+export interface KeywordHunterSnapshotDiff {
+  addedKeywords: string[];
+  removedKeywords: string[];
+  newlyMatchedKeywords: string[];
+  newlyUnmatchedKeywords: string[];
+  improvedKeywords: Array<{ keyword: string; before: number; after: number }>;
+  declinedKeywords: Array<{ keyword: string; before: number; after: number }>;
+  coverageDelta: number;
 }
 
 /**
