@@ -190,8 +190,10 @@ describe('Keyword Hunter analysis module', () => {
     const container = await mountAnalysis();
 
     expect(container.querySelector('h2')?.textContent).toContain('88/100');
-    expect(container.querySelector('h2')?.style.color).toBe('rgb(255, 255, 255)');
+    expect(container.querySelector('h2')?.classList.contains('kh-report-score-title')).toBe(true);
+    expect(container.querySelector('h2')?.classList.contains('kh-report-score-title--excellent')).toBe(true);
     expect(container.querySelector('.score-progress-bar')).not.toBeNull();
+    expect(container.querySelector('.score-progress-fill')).not.toBeNull();
     expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
     expect(container.querySelector('#kt-llm-analysis-result')?.textContent).not.toContain('✅');
     expect(container.querySelector('.row-risk')).not.toBeNull();

@@ -326,39 +326,19 @@ function showLoadingState(container: HTMLElement): () => void {
 
 const BTN_CLASSES = {
   active: [
-    "bg-gradient-to-r",
-    "from-purple-600",
-    "via-purple-500",
-    "to-pink-600",
-    "hover:from-purple-500",
-    "hover:via-purple-400",
-    "hover:to-pink-500",
-    "text-white",
-    "border-purple-500",
-    "shadow-md",
-    "shadow-purple-500/20",
-    "hover:shadow-lg",
-    "hover:shadow-purple-500/30",
+    "kh-analysis-action--active",
     "cursor-pointer",
-    "hover:scale-[1.02]",
-    "hover:-translate-y-0.5",
   ],
   disabled: [
-    "bg-slate-100",
-    "text-slate-400",
-    "border-slate-200",
+    "kh-analysis-action--disabled",
     "cursor-not-allowed",
   ],
   loading: [
-    "bg-slate-300",
-    "text-slate-500",
-    "border-slate-300",
+    "kh-analysis-action--loading",
     "cursor-wait",
   ],
   success: [
-    "bg-emerald-500",
-    "text-white",
-    "border-emerald-500",
+    "kh-analysis-action--success",
     "cursor-not-allowed",
   ],
 } as const;
@@ -619,20 +599,22 @@ function highlightScoreRow(tr: Element): void {
   highlightRatioScore(tr, td2, rawText);
 }
 
-function getTotalScoreGradient(total: number): string {
+type TotalScoreTone = "excellent" | "good" | "warning" | "critical";
+
+function getTotalScoreTone(total: number): TotalScoreTone {
   if (total >= 85) {
-    return "linear-gradient(135deg, #065f46, #059669, #34d399)";
+    return "excellent";
   }
 
   if (total >= 75) {
-    return "linear-gradient(135deg, #1e1b4b, #4c1d95, #7c3aed)";
+    return "good";
   }
 
   if (total >= 70) {
-    return "linear-gradient(135deg, #78350f, #d97706, #fbbf24)";
+    return "warning";
   }
 
-  return "linear-gradient(135deg, #7f1d1d, #dc2626, #f87171)";
+  return "critical";
 }
 
 function appendTotalScoreProgressBar(h2: HTMLHeadingElement, total: number): void {
@@ -641,14 +623,9 @@ function appendTotalScoreProgressBar(h2: HTMLHeadingElement, total: number): voi
 
   const bar = document.createElement("div");
   bar.className = "score-progress-bar";
-  bar.style.cssText =
-    "margin-top:0.75rem;background:rgba(255,255,255,0.15);" +
-    "border-radius:1rem;height:6px;overflow:hidden;width:100%;";
 
   const fill = document.createElement("div");
-  fill.style.cssText =
-    "width:0%;height:100%;background:rgba(255,255,255,0.7);" +
-    "border-radius:1rem;transition:width 1s ease-out;";
+  fill.className = "score-progress-fill";
 
   bar.appendChild(fill);
   h2.appendChild(bar);
@@ -670,8 +647,18 @@ function highlightTotalScoreTitle(container: HTMLElement): void {
   if (!totalText) return;
 
   const total = parseInt(totalText, 10);
-  h2.style.background = getTotalScoreGradient(total);
-  h2.style.color = "#ffffff";
+  h2.style.removeProperty("background");
+  h2.style.removeProperty("color");
+  h2.classList.remove(
+    "kh-report-score-title--excellent",
+    "kh-report-score-title--good",
+    "kh-report-score-title--warning",
+    "kh-report-score-title--critical",
+  );
+  h2.classList.add(
+    "kh-report-score-title",
+    `kh-report-score-title--${getTotalScoreTone(total)}`,
+  );
   appendTotalScoreProgressBar(h2, total);
 }
 

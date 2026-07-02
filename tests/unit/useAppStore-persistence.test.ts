@@ -109,7 +109,7 @@ describe('useAppStore persistence', () => {
     expect(state.promptlab.history?.[0]?.historyId).toBe('hist-001');
   });
 
-  it('恢复 app-storage 时保留 Keyword Hunter 工作数据并重置临时状态', async () => {
+  it('恢复 app-storage 时清空 Keyword Hunter 页面工作数据并保留设置', async () => {
     localStorage.setItem(
       'app-storage',
       JSON.stringify({
@@ -145,7 +145,8 @@ describe('useAppStore persistence', () => {
             keywordsInputText: 'wireless earbuds\nnoise cancelling',
             copyInputText: 'Wireless earbuds with active noise cancelling.',
             llmAnalysisResult: '## 80/100 — 良好',
-            showTranslation: true
+            showTranslation: true,
+            currentSnapshotId: 'kh-history'
           }
         }
       })
@@ -154,26 +155,43 @@ describe('useAppStore persistence', () => {
     const { appStore } = await import('@/stores/useAppStore');
     const state = appStore.getState().keywordTracker;
 
-    expect(state.keywords).toEqual(['wireless earbuds', 'noise cancelling']);
-    expect(state.processedCopy).toBe('Wireless earbuds with active noise cancelling.');
-    expect(state.matchedKeywords).toEqual([{ keyword: 'wireless earbuds', count: 1 }]);
-    expect(state.paragraphs[0]).toEqual({
-      original: 'Wireless earbuds with active noise cancelling.',
-      translation: '带主动降噪的无线耳机。'
-    });
-    expect(state.translationMode).toBe(true);
+    expect(state.keywords).toEqual([]);
+    expect(state.processedCopy).toBe('');
+    expect(state.formattedCopy).toBe('');
+    expect(state.matchedKeywords).toEqual([]);
+    expect(state.unmatchedKeywords).toEqual([]);
+    expect(state.wordFrequency).toEqual([]);
+    expect(state.paragraphs).toEqual([]);
+    expect(state.translationMode).toBe(false);
     expect(state.settings.matchCase).toBe(true);
-    expect(state.keywordsInputText).toBe('wireless earbuds\nnoise cancelling');
-    expect(state.llmAnalysisResult).toBe('## 80/100 — 良好');
-    expect(state.showTranslation).toBe(true);
-
+    expect(state.settings.matchPartial).toBe(true);
     expect(state.keywordLocationIndex).toEqual({});
     expect(state.isWindowMinimized).toBe(false);
     expect(state.trackingData).toBeNull();
     expect(state.isTracking).toBe(false);
+    expect(state.keywordsInputText).toBe('');
+    expect(state.copyInputText).toBe('');
+    expect(state.llmAnalysisResult).toBe('');
+    expect(state.showTranslation).toBe(false);
+    expect(state.currentSnapshotId).toBeNull();
+
+    const persisted = JSON.parse(localStorage.getItem('app-storage') || '{}');
+    expect(persisted.state.keywordTracker).toEqual(
+      expect.objectContaining({
+        keywords: [],
+        processedCopy: '',
+        matchedKeywords: [],
+        paragraphs: [],
+        keywordsInputText: '',
+        copyInputText: '',
+        llmAnalysisResult: '',
+        showTranslation: false,
+        currentSnapshotId: null
+      })
+    );
   });
 
-  it('保存状态时持久化 Keyword Hunter 工作数据', async () => {
+  it('保存状态时不持久化 Keyword Hunter 页面工作数据', async () => {
     const { appStore } = await import('@/stores/useAppStore');
 
     appStore.getState().updateKeywordTracker({
@@ -189,22 +207,39 @@ describe('useAppStore persistence', () => {
       keywordsInputText: 'wireless earbuds',
       copyInputText: 'Wireless earbuds copy',
       llmAnalysisResult: '## 80/100 — 良好',
-      showTranslation: true
+      showTranslation: true,
+      currentSnapshotId: 'kh-current',
+      settings: {
+        matchPlural: false,
+        matchStem: false,
+        matchCase: true,
+        matchPartial: true
+      }
     });
 
     const persisted = JSON.parse(localStorage.getItem('app-storage') || '{}');
 
     expect(persisted.state.keywordTracker).toEqual(
       expect.objectContaining({
-        keywords: ['wireless earbuds'],
-        processedCopy: 'Wireless earbuds copy',
-        matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
-        paragraphs: [{ original: 'Wireless earbuds copy', translation: '无线耳机文案' }],
-        translationMode: true,
-        keywordsInputText: 'wireless earbuds',
-        copyInputText: 'Wireless earbuds copy',
-        llmAnalysisResult: '## 80/100 — 良好',
-        showTranslation: true
+        keywords: [],
+        processedCopy: '',
+        formattedCopy: '',
+        matchedKeywords: [],
+        unmatchedKeywords: [],
+        wordFrequency: [],
+        paragraphs: [],
+        translationMode: false,
+        keywordsInputText: '',
+        copyInputText: '',
+        llmAnalysisResult: '',
+        showTranslation: false,
+        currentSnapshotId: null,
+        settings: {
+          matchPlural: false,
+          matchStem: false,
+          matchCase: true,
+          matchPartial: true
+        }
       })
     );
     expect(persisted.state.keywordTracker.keywordLocationIndex).toEqual({});

@@ -746,7 +746,6 @@
 }
 
 #kt-btn-start-analysis,
-#kt-analyze-btn,
 #kt-translate-btn {
     border-width: 1px;
     border-radius: var(--radius-card, var(--rounded-md));
@@ -755,7 +754,6 @@
 }
 
 #kt-btn-start-analysis:hover,
-#kt-analyze-btn:hover,
 #kt-translate-btn:hover:not(:disabled),
 #kt-btn-start-analysis:active {
     box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
@@ -783,6 +781,66 @@
     display: none;
 }
 
+.kh-analysis-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.375rem;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-card, var(--rounded-md));
+    font-size: 0.875rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+}
+
+.kh-analysis-action i {
+    font-size: 0.75rem;
+}
+
+.kh-analysis-action--active {
+    border-color: var(--color-purple-600, #9333ea);
+    background: var(--color-purple-600, #9333ea);
+    color: white;
+    box-shadow: 0 10px 20px -18px rgba(126, 34, 206, 0.65);
+}
+
+.kh-analysis-action--active:hover,
+.kh-analysis-action--active:focus-visible {
+    border-color: var(--color-purple-700, #7e22ce);
+    background: var(--color-purple-700, #7e22ce);
+    color: white;
+    box-shadow: 0 12px 24px -18px rgba(126, 34, 206, 0.72);
+}
+
+.kh-analysis-action--disabled {
+    border-color: var(--color-slate-200, #e2e8f0);
+    background: var(--color-slate-50, #f8fafc);
+    color: var(--color-slate-400, #94a3b8);
+    box-shadow: none;
+}
+
+.kh-analysis-action--loading {
+    border-color: var(--color-purple-200, #e9d5ff);
+    background: var(--color-purple-50, #faf5ff);
+    color: var(--color-purple-700, #7e22ce);
+    box-shadow: none;
+}
+
+.kh-analysis-action--success {
+    border-color: var(--color-emerald-500, #10b981);
+    background: var(--color-emerald-500, #10b981);
+    color: white;
+    box-shadow: 0 10px 20px -18px rgba(5, 150, 105, 0.65);
+}
+
+.kh-analysis-action:focus-visible {
+    outline: 2px solid var(--color-purple-500, #a855f7);
+    outline-offset: 2px;
+}
 
 /* ==================== Copy Content (Listing 编辑器) ==================== */
 
@@ -967,281 +1025,324 @@
 /* ------------------------------------------------------------------
    AI 评审报告 - Keyword Hunter 专属渲染样式
    容器: #kt-llm-analysis-result.markdown-content
-   基于通用 .markdown-content，添加模块特定定制
    ------------------------------------------------------------------ */
 
-/* === 报告容器基础 === */
 #kt-llm-analysis-result.markdown-content {
-    font-size: 0.9rem;
-    padding: 0;
+    color: var(--color-slate-700, #334155);
+    font-size: 0.925rem;
+    line-height: 1.72;
+    padding: 1.25rem 2rem 2rem;
 }
 
-/* === H2 首个标题 - Keyword Hunter 紫粉主题 === */
+#kt-llm-analysis-result.markdown-content > :where(p, ul, ol, blockquote, h3, h4, pre) {
+    max-width: 78ch;
+}
+
 #kt-llm-analysis-result.markdown-content h2:first-of-type {
-    font-size: 1.3rem;
-    padding: 1.5rem 1.75rem;
-    /* Keyword Hunter 紫粉主题渐变 */
-    background: linear-gradient(135deg, var(--color-indigo-950) 0%, var(--color-indigo-900) 40%, var(--color-purple-900) 100%);
-    box-shadow:
-        0 12px 28px -8px rgba(76, 29, 149, 0.25),
-        0 4px 10px -4px rgba(30, 27, 75, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    gap: 0.75rem;
+    --kh-report-score-color: var(--color-purple-600, #9333ea);
+    --kh-report-score-surface: var(--color-slate-50, #f8fafc);
+    display: block;
+    margin: 0 0 1.5rem;
+    padding: 1rem 1.125rem;
+    border: 1px solid var(--color-slate-200, #e2e8f0);
+    border-left: 4px solid var(--kh-report-score-color);
+    border-radius: var(--radius-card, 8px);
+    background: var(--kh-report-score-surface);
+    box-shadow: none;
+    color: var(--color-slate-950, #020617);
+    font-size: 1.125rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    overflow: visible;
 }
 
-/* 多层装饰光晕 */
-#kt-llm-analysis-result.markdown-content h2:first-of-type::before {
-    background:
-        radial-gradient(ellipse at 85% 20%, rgba(168, 85, 247, 0.2) 0%, transparent 50%),
-        radial-gradient(ellipse at 15% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 80%);
-}
-
+#kt-llm-analysis-result.markdown-content h2:first-of-type::before,
 #kt-llm-analysis-result.markdown-content h2:first-of-type::after {
-    width: 180px;
-    height: 180px;
+    display: none;
 }
 
-/* === H2 后续标题 - 底线渐变装饰 === */
+#kt-llm-analysis-result.markdown-content h2.kh-report-score-title--excellent {
+    --kh-report-score-color: var(--color-emerald-600, #059669);
+    --kh-report-score-surface: var(--color-emerald-50, #ecfdf5);
+}
+
+#kt-llm-analysis-result.markdown-content h2.kh-report-score-title--good {
+    --kh-report-score-color: var(--color-purple-600, #9333ea);
+    --kh-report-score-surface: var(--color-purple-50, #faf5ff);
+}
+
+#kt-llm-analysis-result.markdown-content h2.kh-report-score-title--warning {
+    --kh-report-score-color: var(--color-amber-600, #d97706);
+    --kh-report-score-surface: var(--color-amber-50, #fffbeb);
+}
+
+#kt-llm-analysis-result.markdown-content h2.kh-report-score-title--critical {
+    --kh-report-score-color: var(--color-red-600, #dc2626);
+    --kh-report-score-surface: var(--color-red-50, #fef2f2);
+}
+
+#kt-llm-analysis-result .score-progress-bar {
+    width: min(100%, 24rem);
+    height: 0.25rem;
+    margin-top: 0.75rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: rgba(148, 163, 184, 0.24);
+}
+
+#kt-llm-analysis-result .score-progress-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--kh-report-score-color, var(--color-purple-600, #9333ea));
+    transition: width 0.6s ease;
+}
+
 #kt-llm-analysis-result.markdown-content h2:not(:first-of-type) {
-    font-size: 1.15rem;
-    position: relative;
+    display: block;
+    margin: 2rem 0 0.875rem;
+    padding: 0 0 0.5rem;
+    border-bottom: 1px solid var(--color-slate-200, #e2e8f0);
+    color: var(--color-slate-950, #020617);
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0;
 }
 
 #kt-llm-analysis-result.markdown-content h2:not(:first-of-type)::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 3rem;
-    height: 2px;
-    background: linear-gradient(to right, var(--color-purple-600), var(--color-pink-500));
-    border-radius: 1px;
+    display: none;
 }
 
-/* === H3 - 功能性章节标题 === */
-#kt-llm-analysis-result.markdown-content h3 {
+#kt-llm-analysis-result.markdown-content h3,
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(1),
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(2),
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(3),
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(4),
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(5),
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(n+6) {
+    display: block;
+    margin: 1.625rem 0 0.625rem;
+    padding: 0 0 0 0.75rem;
+    border-left: 3px solid var(--color-slate-300, #cbd5e1);
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-slate-900, #0f172a);
     font-size: 0.975rem;
-    padding: 0.75rem 1rem;
-    border-left: 4px solid var(--color-slate-300);
-    background: linear-gradient(to right, rgba(241, 245, 249, 0.8), transparent 70%);
+    font-weight: 800;
+    letter-spacing: 0;
 }
 
 #kt-llm-analysis-result.markdown-content h3:hover {
-    padding-left: 1.125rem;
-    background: linear-gradient(to right, rgba(241, 245, 249, 1), transparent 70%);
+    padding-left: 0.75rem;
+    background: transparent;
 }
 
-/* 评分类 H3 - 靛蓝 */
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(1) {
-    border-left-color: var(--color-indigo-500);
-    background: linear-gradient(to right, rgba(238, 242, 255, 0.9), transparent 60%);
-    color: var(--color-indigo-700);
-}
-
-/* 致命问题 H3 - 红色 */
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(2) {
-    border-left-color: var(--color-red-500);
-    background: linear-gradient(to right, rgba(254, 242, 242, 0.9), transparent 60%);
-    color: var(--color-red-600);
-}
-
-/* 改写建议 H3 - 紫色 */
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(3) {
-    border-left-color: var(--color-violet-500);
-    background: linear-gradient(to right, rgba(245, 243, 255, 0.9), transparent 60%);
-    color: var(--color-purple-600);
-}
-
-/* 后续 H3 - 交替色系 */
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(4) {
-    border-left-color: var(--color-amber-500);
-    background: linear-gradient(to right, rgba(255, 251, 235, 0.9), transparent 60%);
-    color: var(--color-amber-600);
-}
-
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(5) {
-    border-left-color: var(--color-cyan-500);
-    background: linear-gradient(to right, rgba(236, 254, 255, 0.9), transparent 60%);
-    color: var(--color-cyan-600);
-}
-
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(n+6) {
-    border-left-color: var(--color-slate-500);
-    background: linear-gradient(to right, rgba(248, 250, 252, 0.9), transparent 60%);
-    color: var(--color-slate-600);
-}
-
-/* === H4 - 子章节 === */
 #kt-llm-analysis-result.markdown-content h4 {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--color-slate-700);
-    margin: 1.25rem 0 0.5rem 0;
+    display: block;
+    margin: 1rem 0 0.375rem;
     padding: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-}
-
-/* === Blockquote 装饰图标 === */
-#kt-llm-analysis-result.markdown-content blockquote:first-of-type::before,
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(1)+blockquote::before {
-    content: '\f0eb';
-    font-family: "Font Awesome 7 Free";
-    font-weight: 900;
-    position: absolute;
-    top: -0.625rem;
-    left: 1rem;
-    font-size: 1.1rem;
-    background: white;
-    padding: 0 0.25rem;
-    border-radius: 0.25rem;
-    line-height: 1;
-}
-
-#kt-llm-analysis-result.markdown-content h3:nth-of-type(2)+blockquote::before {
-    content: '\f071';
-    font-family: "Font Awesome 7 Free";
-    font-weight: 900;
-    position: absolute;
-    top: -0.625rem;
-    left: 1rem;
-    font-size: 1.1rem;
-    background: white;
-    padding: 0 0.25rem;
-    border-radius: 0.25rem;
-    line-height: 1;
-}
-
-/* === 表格 - 总分行特殊样式 === */
-#kt-llm-analysis-result.markdown-content tbody tr:last-child td {
-    background: linear-gradient(135deg, var(--color-indigo-950) 0%, var(--color-indigo-900) 100%);
-    color: var(--color-slate-50);
+    color: var(--color-slate-800, #1e293b);
+    font-size: 0.9rem;
     font-weight: 700;
-    font-size: 0.925rem;
-    border-top: 2px solid var(--color-indigo-700);
+    letter-spacing: 0;
 }
 
-#kt-llm-analysis-result.markdown-content tbody tr:last-child td:first-child {
-    border-radius: 0 0 0 0.75rem;
+#kt-llm-analysis-result.markdown-content p {
+    margin: 0.5rem 0;
+    color: var(--color-slate-700, #334155);
 }
 
-#kt-llm-analysis-result.markdown-content tbody tr:last-child td:last-child {
-    border-radius: 0 0 0.75rem 0;
+#kt-llm-analysis-result.markdown-content blockquote,
+#kt-llm-analysis-result.markdown-content blockquote:first-of-type,
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(1)+blockquote,
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(2)+blockquote {
+    margin: 0.75rem 0 1rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-slate-200, #e2e8f0);
+    border-left: 3px solid var(--color-slate-400, #94a3b8);
+    border-radius: var(--radius-card, 8px);
+    background: var(--color-slate-50, #f8fafc);
+    box-shadow: none;
+    color: var(--color-slate-700, #334155);
+    font-size: 0.9rem;
+    line-height: 1.7;
 }
 
-/* === 列表 - Diff 对比图标 === */
-#kt-llm-analysis-result.markdown-content li {
-    position: relative;
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(2)+blockquote {
+    border-left-color: var(--color-red-500, #ef4444);
+    background: var(--color-red-50, #fef2f2);
+    color: var(--color-red-800, #991b1b);
 }
 
-/* 原文 / 问题 */
-#kt-llm-analysis-result.markdown-content li:nth-child(3n+1)::before {
-    content: '\f00d';
-    font-family: "Font Awesome 7 Free";
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    font-size: 0.65rem;
-    font-weight: 900;
-    color: var(--color-red-300);
-    width: 1.25rem;
-    height: 1.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(254, 226, 226, 0.6);
+#kt-llm-analysis-result.markdown-content blockquote:hover {
+    box-shadow: none;
 }
 
-/* 改写 / 建议 */
-#kt-llm-analysis-result.markdown-content li:nth-child(3n+2)::before {
-    content: '\f00c';
-    font-family: "Font Awesome 7 Free";
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    font-size: 0.7rem;
-    font-weight: 900;
-    color: var(--color-emerald-300);
-    width: 1.25rem;
-    height: 1.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(209, 250, 229, 0.6);
+#kt-llm-analysis-result.markdown-content blockquote::before,
+#kt-llm-analysis-result.markdown-content blockquote:first-of-type::before,
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(1)+blockquote::before,
+#kt-llm-analysis-result.markdown-content h3:nth-of-type(2)+blockquote::before {
+    display: none;
 }
 
-/* 说明 / 注释 */
-#kt-llm-analysis-result.markdown-content li:nth-child(3n)::before {
-    content: '\f05a';
-    font-family: "Font Awesome 7 Free";
-    position: absolute;
-    top: 0.625rem;
-    right: 0.75rem;
-    font-size: 0.7rem;
-    font-weight: 900;
-    color: var(--color-indigo-300);
-    width: 1.25rem;
-    height: 1.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(224, 231, 255, 0.6);
+#kt-llm-analysis-result.markdown-content table {
+    width: 100%;
+    margin: 1rem 0 1.25rem;
+    border: 1px solid var(--color-slate-200, #e2e8f0);
+    border-radius: var(--radius-card, 8px);
+    box-shadow: none;
+    font-size: 0.875rem;
 }
 
-/* 嵌套列表隐藏图标 */
+#kt-llm-analysis-result.markdown-content thead th {
+    padding: 0.75rem 0.875rem;
+    border-bottom: 1px solid var(--color-slate-200, #e2e8f0);
+    background: var(--color-slate-50, #f8fafc);
+    color: var(--color-slate-600, #475569);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+#kt-llm-analysis-result.markdown-content tbody td {
+    padding: 0.75rem 0.875rem;
+    border-bottom: 1px solid var(--color-slate-100, #f1f5f9);
+    color: var(--color-slate-700, #334155);
+}
+
+#kt-llm-analysis-result.markdown-content tbody tr:hover td {
+    background: var(--color-slate-50, #f8fafc);
+}
+
+#kt-llm-analysis-result.markdown-content tbody tr:last-child td,
+#kt-llm-analysis-result.markdown-content tbody tr.row-total td {
+    border-top: 1px solid var(--color-slate-200, #e2e8f0);
+    background: var(--color-slate-50, #f8fafc);
+    color: var(--color-slate-900, #0f172a);
+    font-size: 0.875rem;
+    font-weight: 800;
+}
+
+#kt-llm-analysis-result.markdown-content tbody tr.row-risk td {
+    background: var(--color-red-50, #fef2f2);
+    color: var(--color-red-800, #991b1b);
+}
+
+#kt-llm-analysis-result.markdown-content tbody tr.row-low td {
+    background: var(--color-amber-50, #fffbeb);
+    color: var(--color-amber-800, #92400e);
+}
+
+#kt-llm-analysis-result.markdown-content tbody td:first-child,
+#kt-llm-analysis-result.markdown-content tbody tr.row-low td:first-child {
+    color: var(--color-slate-800, #1e293b);
+    font-weight: 700;
+}
+
+#kt-llm-analysis-result.markdown-content ul,
+#kt-llm-analysis-result.markdown-content ol {
+    display: block;
+    margin: 0.625rem 0 1rem;
+    padding: 0 0 0 1.25rem;
+}
+
+#kt-llm-analysis-result.markdown-content ul {
+    list-style: disc;
+}
+
+#kt-llm-analysis-result.markdown-content ol {
+    list-style: decimal;
+}
+
+#kt-llm-analysis-result.markdown-content li,
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+1),
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+2),
+#kt-llm-analysis-result.markdown-content li:nth-child(3n) {
+    margin: 0.375rem 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--color-slate-700, #334155);
+    font-size: 0.9rem;
+    line-height: 1.72;
+    transition: none;
+}
+
+#kt-llm-analysis-result.markdown-content li::marker {
+    color: var(--color-slate-400, #94a3b8);
+}
+
+#kt-llm-analysis-result.markdown-content li:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+#kt-llm-analysis-result.markdown-content li::before,
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+1)::before,
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+2)::before,
+#kt-llm-analysis-result.markdown-content li:nth-child(3n)::before,
 #kt-llm-analysis-result.markdown-content li li::before {
     display: none;
 }
 
-/* === 内联代码特殊样式 === */
-#kt-llm-analysis-result.markdown-content li:nth-child(3n) code {
-    background: var(--color-indigo-100);
-    color: var(--color-indigo-700);
-    border: 1px solid rgba(99, 102, 241, 0.1);
+#kt-llm-analysis-result.markdown-content li ul,
+#kt-llm-analysis-result.markdown-content li ol {
+    margin-top: 0.375rem;
 }
 
-/* === 分数徽章系统 === */
+#kt-llm-analysis-result.markdown-content code,
+#kt-llm-analysis-result.markdown-content p code,
+#kt-llm-analysis-result.markdown-content blockquote code,
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+1) code,
+#kt-llm-analysis-result.markdown-content li:nth-child(3n+2) code,
+#kt-llm-analysis-result.markdown-content li:nth-child(3n) code {
+    border: 1px solid var(--color-slate-200, #e2e8f0);
+    background: var(--color-slate-100, #f1f5f9);
+    color: var(--color-slate-800, #1e293b);
+    font-weight: 600;
+    text-decoration: none;
+    opacity: 1;
+}
+
 #kt-llm-analysis-result .score-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 2.75rem;
-    padding: 0.2rem 0.625rem;
-    border-radius: 9999px;
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.02em;
-    font-variant-numeric: tabular-nums;
+    min-width: 2.625rem;
+    padding: 0.1875rem 0.5rem;
     border: 1px solid transparent;
-    transition: all var(--duration-fast) ease;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
 #kt-llm-analysis-result .score-badge:hover {
+    box-shadow: none;
     transform: none;
-    box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
 }
 
 #kt-llm-analysis-result .score-badge-high {
-    background: linear-gradient(135deg, var(--color-green-100), var(--color-green-200));
-    color: var(--color-green-700);
-    border-color: rgba(34, 197, 94, 0.2);
+    border-color: rgba(5, 150, 105, 0.24);
+    background: var(--color-emerald-50, #ecfdf5);
+    color: var(--color-emerald-700, #047857);
 }
 
 #kt-llm-analysis-result .score-badge-mid {
-    background: linear-gradient(135deg, var(--color-amber-100), var(--color-amber-200));
-    color: var(--color-amber-700);
-    border-color: var(--color-amber-200);
+    border-color: var(--color-amber-200, #fde68a);
+    background: var(--color-amber-50, #fffbeb);
+    color: var(--color-amber-700, #b45309);
 }
 
 #kt-llm-analysis-result .score-badge-low {
-    background: linear-gradient(135deg, var(--color-red-100), var(--color-red-200));
-    color: var(--color-red-700);
-    border-color: rgba(239, 68, 68, 0.2);
+    border-color: rgba(220, 38, 38, 0.22);
+    background: var(--color-red-50, #fef2f2);
+    color: var(--color-red-700, #b91c1c);
 }
 
 /* ==================== History Snapshots ==================== */
@@ -1803,50 +1904,50 @@
     }
 }
 
-/* === 胶囊标签 (改写建议编号) === */
+/* === 改写建议编号：保留文本权重，不额外做胶囊装饰 === */
 #kt-llm-analysis-result.markdown-content h3:nth-of-type(3)~p>strong:first-child {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: linear-gradient(135deg, var(--color-purple-100), var(--color-violet-100));
-    color: var(--color-purple-600);
-    padding: 0.2rem 0.75rem;
-    border-radius: 0.375rem;
-    font-size: 0.8rem;
+    display: inline;
+    margin-bottom: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-slate-900, #0f172a);
+    font-size: inherit;
     font-weight: 700;
-    margin-bottom: 0.25rem;
-    border: 1px solid var(--color-violet-200);
 }
 
 /* === 响应式适配 === */
 @media (max-width: 640px) {
     #kt-llm-analysis-result.markdown-content {
-        font-size: 0.85rem;
+        padding: 1rem;
+        font-size: 0.875rem;
     }
 
     #kt-llm-analysis-result.markdown-content h2:first-of-type {
-        padding: 1.125rem 1.25rem;
-        font-size: 1.15rem;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
     }
 
     #kt-llm-analysis-result.markdown-content h3 {
-        font-size: 0.9rem;
-        padding: 0.625rem 0.75rem;
+        padding-left: 0.625rem;
+        font-size: 0.925rem;
     }
 
-    #kt-llm-analysis-result.markdown-content li::before {
-        display: none;
+    #kt-llm-analysis-result.markdown-content table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
     }
 
-    #kt-llm-analysis-result.markdown-content blockquote::before {
-        display: none;
+    #kt-llm-analysis-result.markdown-content blockquote {
+        padding: 0.75rem 0.875rem;
     }
 }
 
 @media (max-width: 480px) {
     #kt-llm-analysis-result.markdown-content h2:first-of-type {
-        padding: 1rem;
-        font-size: 1.05rem;
+        padding: 0.75rem 0.875rem;
     }
 }
 

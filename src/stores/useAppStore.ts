@@ -104,6 +104,8 @@ function mergePersistedAppState(persistedState: unknown, currentState: AppStore)
     return currentState;
   }
 
+  const persistedKeywordSettings = persistedState.keywordTracker?.settings;
+
   return {
     ...currentState,
     ui: {
@@ -121,18 +123,7 @@ function mergePersistedAppState(persistedState: unknown, currentState: AppStore)
       ...currentState.promptlab,
       ...(persistedState.promptlab || {})
     },
-    keywordTracker: {
-      ...currentState.keywordTracker,
-      ...(persistedState.keywordTracker || {}),
-      settings: {
-        ...currentState.keywordTracker.settings,
-        ...(persistedState.keywordTracker?.settings || {})
-      },
-      keywordLocationIndex: {},
-      isWindowMinimized: false,
-      trackingData: null,
-      isTracking: false
-    }
+    keywordTracker: createRefreshSafeKeywordTrackerState(persistedKeywordSettings)
   };
 }
 
@@ -222,6 +213,19 @@ const initialKeywordTrackerState: KeywordTrackerState = {
     type: 'manual'
   }
 };
+
+function createRefreshSafeKeywordTrackerState(
+  settings?: Partial<KeywordTrackerState['settings']>
+): KeywordTrackerState {
+  return {
+    ...initialKeywordTrackerState,
+    settings: {
+      ...initialKeywordTrackerState.settings,
+      ...(settings || {})
+    },
+    snapshotSource: { type: 'manual' }
+  };
+}
 
 type UIActions = Pick<AppStore,
   'setCurrentTab' |
@@ -448,25 +452,7 @@ export const appStore = createStore<AppStore>()(
             temperature: state.promptlab.temperature,
             maxTokens: state.promptlab.maxTokens
           },
-          keywordTracker: {
-            keywords: state.keywordTracker.keywords,
-            processedCopy: state.keywordTracker.processedCopy,
-            formattedCopy: state.keywordTracker.formattedCopy,
-            matchedKeywords: state.keywordTracker.matchedKeywords,
-            unmatchedKeywords: state.keywordTracker.unmatchedKeywords,
-            wordFrequency: state.keywordTracker.wordFrequency,
-            paragraphs: state.keywordTracker.paragraphs,
-            translationMode: state.keywordTracker.translationMode,
-            keywordLocationIndex: {},
-            settings: state.keywordTracker.settings,
-            isWindowMinimized: false,
-            keywordsInputText: state.keywordTracker.keywordsInputText,
-            copyInputText: state.keywordTracker.copyInputText,
-            llmAnalysisResult: state.keywordTracker.llmAnalysisResult,
-            showTranslation: state.keywordTracker.showTranslation,
-            currentSnapshotId: state.keywordTracker.currentSnapshotId,
-            snapshotSource: state.keywordTracker.snapshotSource
-          }
+          keywordTracker: createRefreshSafeKeywordTrackerState(state.keywordTracker.settings)
         })
       }
     ),
