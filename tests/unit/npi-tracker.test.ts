@@ -80,7 +80,6 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
     }
 }));
 
-describe('NPI Tracker Module', () => {
     let container: HTMLElement;
     let mockTemplate: string;
     let anchorClick: ReturnType<typeof vi.spyOn>;
@@ -755,4 +754,3 @@ describe('NPI Tracker Module', () => {
             }
         });
     });
-});
