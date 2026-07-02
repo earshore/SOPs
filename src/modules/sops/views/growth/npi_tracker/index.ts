@@ -99,6 +99,22 @@ interface ExportRow {
   NextStep: string;
 }
 
+interface TableRowRenderContext {
+  stageConfig: StageConfig;
+  clearancePrice: string;
+  movingPrice: string;
+  suggestedPrice: string;
+  deliveryPercent: string;
+  compliance: ComplianceStatus;
+  domain: string;
+  flag: string;
+  inventoryClass: string;
+  suggestedPriceClass: string;
+  ctrClass: string;
+  acoasClass: string;
+  decisionClass: string;
+}
+
 // 模块状态
 let tableData: NPIProductRecord[] = [...SAMPLE_DATA];
 let registeredActions: string[] = [];
@@ -191,7 +207,7 @@ function renderTableRows(tbody: HTMLElement, tableHTML: string): void {
   }
 }
 
-function renderTableRow(row: NPIProductRecord, index: number): string {
+function buildTableRowContext(row: NPIProductRecord): TableRowRenderContext {
   const stageConfig: StageConfig = stageConfigMap[row.stage] || stageConfigMap['new-test'];
   const clearancePrice = calcClearancePrice(row.delivery_fee);
   const movingPrice = calcMovingPrice(row.delivery_fee);
@@ -210,28 +226,48 @@ function renderTableRow(row: NPIProductRecord, index: number): string {
   const decisionClass =
     row.decision === 'keep' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
 
+  return {
+    stageConfig,
+    clearancePrice,
+    movingPrice,
+    suggestedPrice,
+    deliveryPercent,
+    compliance,
+    domain,
+    flag,
+    inventoryClass,
+    suggestedPriceClass,
+    ctrClass,
+    acoasClass,
+    decisionClass,
+  };
+}
+
+function renderProfileCells(row: NPIProductRecord, context: TableRowRenderContext): string {
   return `
-        <tr class="hover:bg-slate-50 border-b border-slate-100" data-index="${index}">
             <!-- 基础档案 (8列) -->
             <td class="px-3 py-3 sticky left-0 bg-white z-10 border-r">
-                <span class="px-2 py-1 rounded text-xs font-medium ${safeText(stageConfig.color)}">${safeText(stageConfig.label)}</span>
+                <span class="px-2 py-1 rounded text-xs font-medium ${safeText(context.stageConfig.color)}">${safeText(context.stageConfig.label)}</span>
             </td>
-            <td class="px-3 py-3 text-sm font-mono text-blue-600 cursor-pointer hover:underline" data-action="open-product" data-domain="${safeText(domain)}" data-asin="${safeText(row.asin)}">
+            <td class="px-3 py-3 text-sm font-mono text-blue-600 cursor-pointer hover:underline" data-action="open-product" data-domain="${safeText(context.domain)}" data-asin="${safeText(row.asin)}">
                 ${safeText(row.sku)}
             </td>
             <td class="px-3 py-3 text-sm">${safeText(row.cn_name)}</td>
             <td class="px-3 py-3 text-sm">${safeText(row.store)}</td>
             <td class="px-3 py-3 text-sm font-mono">
-                <a href="https://www.${safeText(domain)}/dp/${safeText(row.asin)}" target="_blank" class="text-blue-600 hover:underline">${safeText(row.asin)}</a>
+                <a href="https://www.${safeText(context.domain)}/dp/${safeText(row.asin)}" target="_blank" class="text-blue-600 hover:underline">${safeText(row.asin)}</a>
             </td>
             <td class="px-3 py-3 text-sm text-center">
                 <span class="inline-flex items-center gap-1" title="${safeText(row.site)}">
-                    ${safeText(flag)}
+                    ${safeText(context.flag)}
                 </span>
             </td>
             <td class="px-3 py-3 text-sm text-center">${row.qty_shipped}</td>
-            <td class="px-3 py-3 text-sm text-center ${inventoryClass}">${row.inventory_days}天</td>
+            <td class="px-3 py-3 text-sm text-center ${context.inventoryClass}">${row.inventory_days}天</td>`;
+}
 
+function renderComplianceCells(row: NPIProductRecord, compliance: ComplianceStatus): string {
+  return `
             <!-- SOP合规 (6列: 泛欧 + 4项检查 + 状态) -->
             <td class="px-3 py-3 text-center border-l">
                 <input type="checkbox" ${checkedAttr(row.is_pan_eu)} class="w-4 h-4 rounded" data-action="update-field" data-field="is_pan_eu" aria-label="${rowFieldLabel(row, 'is_pan_eu')}">
@@ -250,27 +286,36 @@ function renderTableRow(row: NPIProductRecord, index: number): string {
             </td>
             <td class="px-3 py-3 text-center">
                 ${renderComplianceStatus(compliance)}
-            </td>
+            </td>`;
+}
 
+function renderPricingCells(row: NPIProductRecord, context: TableRowRenderContext): string {
+  return `
             <!-- 财务模型 (6列) -->
             <td class="px-3 py-3 border-l">
                 <input type="number" step="0.1" value="${row.delivery_fee}"
                     class="w-16 px-2 py-1 border rounded text-sm text-center"
                     data-action="update-delivery-fee" aria-label="${rowFieldLabel(row, 'delivery_fee')}">
             </td>
-            <td class="px-3 py-3 text-center text-sm text-slate-500">${deliveryPercent}%</td>
-            <td class="px-3 py-3 text-center text-red-600 font-bold">€${clearancePrice}</td>
-            <td class="px-3 py-3 text-center text-amber-600 font-medium">€${movingPrice}</td>
-            <td class="px-3 py-3 text-center ${suggestedPriceClass}">€${suggestedPrice}</td>
-            <td class="px-3 py-3 text-center text-sm">€${safeText(row.break_even)}</td>
+            <td class="px-3 py-3 text-center text-sm text-slate-500">${context.deliveryPercent}%</td>
+            <td class="px-3 py-3 text-center text-red-600 font-bold">€${context.clearancePrice}</td>
+            <td class="px-3 py-3 text-center text-amber-600 font-medium">€${context.movingPrice}</td>
+            <td class="px-3 py-3 text-center ${context.suggestedPriceClass}">€${context.suggestedPrice}</td>
+            <td class="px-3 py-3 text-center text-sm">€${safeText(row.break_even)}</td>`;
+}
 
+function renderTrafficCells(row: NPIProductRecord, context: TableRowRenderContext): string {
+  return `
             <!-- 流量转化 (5列) -->
             <td class="px-3 py-3 text-center border-l text-sm">${row.sessions.toLocaleString()}</td>
-            <td class="px-3 py-3 text-center text-sm ${ctrClass}">${row.ctr_7d}%</td>
+            <td class="px-3 py-3 text-center text-sm ${context.ctrClass}">${row.ctr_7d}%</td>
             <td class="px-3 py-3 text-center text-sm">${row.cvr_7d}%</td>
-            <td class="px-3 py-3 text-center text-sm ${acoasClass}">${row.acoas}%</td>
-            <td class="px-3 py-3 text-center text-sm">${row.organic_ratio}%</td>
+            <td class="px-3 py-3 text-center text-sm ${context.acoasClass}">${row.acoas}%</td>
+            <td class="px-3 py-3 text-center text-sm">${row.organic_ratio}%</td>`;
+}
 
+function renderDecisionCells(row: NPIProductRecord, context: TableRowRenderContext): string {
+  return `
             <!-- 决策 (4列: Vine进度 + 广告 + 保留 + Next Step) -->
             <td class="px-3 py-3 text-center text-sm border-l">${safeText(row.vine_status)}</td>
             <td class="px-3 py-3">
@@ -279,7 +324,7 @@ function renderTableRow(row: NPIProductRecord, index: number): string {
                 </select>
             </td>
             <td class="px-3 py-3 text-center">
-                <button data-action="toggle-decision" class="px-2 py-1 rounded text-xs font-medium ${decisionClass}">
+                <button data-action="toggle-decision" class="px-2 py-1 rounded text-xs font-medium ${context.decisionClass}">
                     ${row.decision === 'keep' ? '保留' : '放弃'}
                 </button>
             </td>
@@ -290,7 +335,19 @@ function renderTableRow(row: NPIProductRecord, index: number): string {
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
-            </td>
+            </td>`;
+}
+
+function renderTableRow(row: NPIProductRecord, index: number): string {
+  const context = buildTableRowContext(row);
+
+  return `
+        <tr class="hover:bg-slate-50 border-b border-slate-100" data-index="${index}">
+            ${renderProfileCells(row, context)}
+            ${renderComplianceCells(row, context.compliance)}
+            ${renderPricingCells(row, context)}
+            ${renderTrafficCells(row, context)}
+            ${renderDecisionCells(row, context)}
         </tr>
         `;
 }

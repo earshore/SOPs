@@ -52,6 +52,15 @@ interface RetryLoadResult<T> {
   retryAttempts: number;
 }
 
+interface ResolvedModuleLoadOptions {
+  retryCount: number;
+  timeout: number;
+  fallbackUI?: string;
+  onError?: (error: Error) => void;
+  showLoading: boolean;
+  loadingText: string;
+}
+
 /**
  * 错误类型枚举
  */
@@ -162,6 +171,132 @@ export class SafeModuleLoader {
     return SafeModuleLoader.instance;
   }
 
+  private resolveModuleLoadOptions(options: ModuleLoadOptions): ResolvedModuleLoadOptions {
+    const {
+      retryCount = 3,
+      timeout = 5000,
+      fallbackUI,
+      onError,
+      showLoading = true,
+      loadingText = '加载中...',
+    } = options;
+
+    return {
+      retryCount,
+      timeout,
+      fallbackUI,
+      onError,
+      showLoading,
+      loadingText,
+    };
+  }
+
+  private showModuleLoadingIndicator(
+    container: HTMLElement,
+    options: ResolvedModuleLoadOptions
+  ): void {
+    if (options.showLoading) {
+      this.showLoadingIndicator(container, options.loadingText);
+    }
+  }
+
+  private async waitForExistingModuleLoad(modulePath: string): Promise<void> {
+    const existingLoad = this.loadingModules.get(modulePath);
+    if (existingLoad) {
+      await existingLoad;
+    }
+  }
+
+  private renderCachedModuleIfAvailable(
+    container: HTMLElement,
+    modulePath: string,
+    startTime: number
+  ): ModuleLoadResult | null {
+    if (!this.loadedModules.has(modulePath)) {
+      return null;
+    }
+
+    const cachedModule = this.loadedModules.get(modulePath);
+    this.renderModule(container, cachedModule);
+
+    return this.createModuleLoadSuccessResult(cachedModule, startTime, 0);
+  }
+
+  private async loadAndCacheModule(
+    modulePath: string,
+    timeout: number,
+    retryCount: number
+  ): Promise<RetryLoadResult<unknown>> {
+    const loadResult = await this.retryLoad(
+      () => this.loadModuleWithTimeout(modulePath, timeout),
+      retryCount
+    );
+
+    this.loadingModules.set(modulePath, Promise.resolve(loadResult.data));
+    this.loadedModules.set(modulePath, loadResult.data);
+    this.loadingModules.delete(modulePath);
+
+    return loadResult;
+  }
+
+  private createModuleLoadSuccessResult(
+    data: unknown,
+    startTime: number,
+    retryAttempts: number
+  ): ModuleLoadResult {
+    return {
+      success: true,
+      loadTime: performance.now() - startTime,
+      retryAttempts,
+      data,
+    };
+  }
+
+  private handleErrorCallback(
+    onError: ((error: Error) => void) | undefined,
+    classifiedError: AppError,
+    modulePath: string
+  ): void {
+    if (!onError) {
+      return;
+    }
+
+    try {
+      onError(classifiedError);
+    } catch (callbackError) {
+      this.errorTrackerInstance.captureAppError(
+        new SystemError(
+          '错误回调执行失败',
+          'ERROR_CALLBACK_FAILED',
+          { modulePath },
+          callbackError as Error
+        )
+      );
+    }
+  }
+
+  private handleModuleLoadFailure(
+    container: HTMLElement,
+    modulePath: string,
+    error: unknown,
+    startTime: number,
+    options: ResolvedModuleLoadOptions
+  ): ModuleLoadResult {
+    this.loadingModules.delete(modulePath);
+
+    const classifiedError = this.classifyError(error as Error, modulePath);
+    this.errorTrackerInstance.captureAppError(classifiedError);
+    this.handleErrorCallback(options.onError, classifiedError, modulePath);
+    this.renderErrorUI(container, classifiedError, modulePath, options.fallbackUI);
+
+    return {
+      success: false,
+      error: classifiedError,
+      loadTime: performance.now() - startTime,
+      retryAttempts: options.retryCount,
+    };
+  }
+
   /**
    * 加载模块到容器
    * @param container - 目标容器元素
@@ -175,100 +310,30 @@ export class SafeModuleLoader {
     options: ModuleLoadOptions = {}
   ): Promise<ModuleLoadResult> {
     const startTime = performance.now();
-    const {
-      retryCount = 3,
-      timeout = 5000,
-      fallbackUI,
-      onError,
-      showLoading = true,
-      loadingText = '加载中...',
-    } = options;
-
-    // 显示加载指示器
-    if (showLoading) {
-      this.showLoadingIndicator(container, loadingText);
-    }
+    const loadOptions = this.resolveModuleLoadOptions(options);
+    this.showModuleLoadingIndicator(container, loadOptions);
 
     try {
-      // 检查是否正在加载
-      const existingLoad = this.loadingModules.get(modulePath);
-      if (existingLoad) {
-        await existingLoad;
+      await this.waitForExistingModuleLoad(modulePath);
+
+      const cachedResult = this.renderCachedModuleIfAvailable(container, modulePath, startTime);
+      if (cachedResult) {
+        return cachedResult;
       }
 
-      // 检查缓存
-      if (this.loadedModules.has(modulePath)) {
-        const cachedModule = this.loadedModules.get(modulePath);
-        this.renderModule(container, cachedModule);
-
-        return {
-          success: true,
-          loadTime: performance.now() - startTime,
-          retryAttempts: 0,
-          data: cachedModule,
-        };
-      }
-
-      // 加载模块（带重试）
-      const loadResult = await this.retryLoad(
-        () => this.loadModuleWithTimeout(modulePath, timeout),
-        retryCount
+      const loadResult = await this.loadAndCacheModule(
+        modulePath,
+        loadOptions.timeout,
+        loadOptions.retryCount
       );
-
-      this.loadingModules.set(modulePath, Promise.resolve(loadResult.data));
-
-      const moduleData = loadResult.data;
-
-      // 缓存模块
-      this.loadedModules.set(modulePath, moduleData);
-      this.loadingModules.delete(modulePath);
-
-      // 渲染模块
-      this.renderModule(container, moduleData);
-
-      const loadTime = performance.now() - startTime;
-
-      return {
-        success: true,
-        loadTime,
-        retryAttempts: loadResult.retryAttempts,
-        data: moduleData,
-      };
+      this.renderModule(container, loadResult.data);
+      return this.createModuleLoadSuccessResult(
+        loadResult.data,
+        startTime,
+        loadResult.retryAttempts
+      );
     } catch (error) {
-      this.loadingModules.delete(modulePath);
-      const loadTime = performance.now() - startTime;
-
-      // 分类错误
-      const classifiedError = this.classifyError(error as Error, modulePath);
-
-      // 上报错误
-      this.errorTrackerInstance.captureAppError(classifiedError);
-
-      // 调用错误回调
-      if (onError) {
-        try {
-          onError(classifiedError);
-        } catch (callbackError) {
-          this.errorTrackerInstance.captureAppError(
-            new SystemError(
-              '错误回调执行失败',
-              'ERROR_CALLBACK_FAILED',
-              { modulePath },
-              callbackError as Error
-            )
-          );
-        }
-      }
-
-      // 渲染降级 UI
-      this.renderErrorUI(container, classifiedError, modulePath, fallbackUI);
-
-      return {
-        success: false,
-        error: classifiedError,
-        loadTime,
-        retryAttempts: retryCount,
-      };
+      return this.handleModuleLoadFailure(container, modulePath, error, startTime, loadOptions);
     }
   }
 

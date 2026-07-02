@@ -242,6 +242,7 @@ tools/patches/
 test-new-llm-service.html
 *.local.html
 *.test.local.*
+public/downloads/amazon-scraper-*.zip
 
 # ==============================================================================
 # 10. Project Specific

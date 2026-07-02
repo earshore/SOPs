@@ -118,6 +118,7 @@ interface LegacyDebugWindow {
   Alpine: typeof Alpine;
   useAppStore?: typeof appStore;
   appStore?: typeof appStore;
+  state?: ReturnType<typeof appStore.getState>;
   eventBus?: unknown;
   EventBus?: unknown;
   actionRegistry?: unknown;
@@ -469,6 +470,10 @@ if (import.meta.env.DEV) {
   // 🔧 暴露 Zustand Store 到 window (仅用于开发调试和测试)
   legacyWindow['useAppStore'] = appStore;
   legacyWindow['appStore'] = appStore;
+  Object.defineProperty(legacyWindow, 'state', {
+    configurable: true,
+    get: () => appStore.getState(),
+  });
   mainLogger.info('[Alpine] Alpine.js loaded and exposed to window');
   mainLogger.info('[Store] Zustand store exposed to window');
 }

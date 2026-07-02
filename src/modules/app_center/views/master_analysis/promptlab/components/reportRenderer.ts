@@ -33,6 +33,12 @@ type SubItemContentRenderOptions = {
   safeTargetId: string;
   safeKey: string;
 };
+type ReportModuleRenderOptions = {
+  renderer: SafeRenderer;
+  targetId: string;
+  config: TargetConfig;
+  data: unknown;
+};
 
 function toReportRecord(value: unknown): ReportRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -300,20 +306,8 @@ export function renderNewFormatModules(
     key => TARGET_CONFIG[key] && reportObj[key]
   );
 
-  // 首次加载时初始化 selectedReportItems
   if (isFirstLoad) {
-    ctx.profile.selectedReportSections = [...availableTargets];
-
-    // 初始化细粒度选择结构
-    if (!ctx.profile.selectedReportItems) {
-      ctx.profile.selectedReportItems = {};
-    }
-
-    availableTargets.forEach(targetId => {
-      ctx.initializeGranularSelections(targetId);
-    });
-
-    ctx.saveState();
+    initializeNewFormatSelections(ctx, availableTargets);
   }
 
   ctx.hasRenderedReportOnce = true;
@@ -322,70 +316,125 @@ export function renderNewFormatModules(
     const config = TARGET_CONFIG[targetId];
     if (!config) return;
 
-    const data = reportObj[targetId];
-    const subItemKeys = data && typeof data === 'object' ? Object.keys(data) : [];
-    const confidencePct = getTargetConfidence(targetId);
-    const hasConfidence = !!confidencePct;
-
-    const div = document.createElement('div');
-    div.className = 'dimension-card border border-slate-200 rounded-lg overflow-hidden bg-white';
-
-    const template = `
-      <div class="dimension-header p-3 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors"
-           @click="toggleExpansion('${escapeHtml(targetId)}')">
-        <div class="flex items-center gap-3">
-          <input type="checkbox"
-                 class="dimension-checkbox h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                 aria-label="启用 ${escapeHtml(config.title)} 维度"
-                 :checked="isDimensionEnabled('${escapeHtml(targetId)}')"
-                 :indeterminate.prop="isPartiallySelected('${escapeHtml(targetId)}')"
-                 @change="onDimensionToggle('${escapeHtml(targetId)}')"
-                 @click.stop>
-          <label class="flex-1 inline-flex items-center gap-2 font-medium text-slate-700 cursor-pointer select-none min-w-0">
-            ${renderTargetIcon(config)}
-            <span class="truncate">${escapeHtml(config.title)}</span>
-          </label>
-          ${
-            hasConfidence
-              ? `
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border shrink-0 ${escapeHtml(getConfidenceColorClass(confidencePct))}"
-                role="status"
-                aria-label="${escapeHtml(getConfidenceAriaLabel(confidencePct))}">
-            <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
-            <span>${confidencePct}%</span>
-          </span>`
-              : ''
-          }
-          <i class="fas transition-transform text-slate-400"
-             :class="isExpanded('${escapeHtml(targetId)}') ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-        </div>
-      </div>
-
-      <div class="sub-items"
-           x-show="isExpanded('${escapeHtml(targetId)}')"
-           x-collapse>
-        <div class="sub-items-header flex justify-between px-4 py-2 bg-slate-50 border-t border-slate-200">
-          <span class="text-xs text-slate-600 font-medium">子项选择</span>
-          <div class="flex gap-3">
-            <button @click.stop="selectAllSubItems('${escapeHtml(targetId)}')"
-                    class="text-xs text-blue-600 hover:underline font-medium">
-              全选
-            </button>
-            <button @click.stop="deselectAllSubItems('${escapeHtml(targetId)}')"
-                    class="text-xs text-slate-600 hover:underline">
-              取消全选
-            </button>
-          </div>
-        </div>
-        <div class="px-4 py-2">
-          ${renderSubItems(data, targetId, subItemKeys)}
-        </div>
-      </div>
-    `;
-
-    renderer.renderTemplate(div, template);
-    container.appendChild(div);
+    container.appendChild(
+      renderNewFormatModule({
+        renderer,
+        targetId,
+        config,
+        data: reportObj[targetId],
+      })
+    );
   });
+}
+
+function initializeNewFormatSelections(
+  ctx: PromptlabAlpineContext,
+  availableTargets: string[]
+): void {
+  ctx.profile.selectedReportSections = [...availableTargets];
+
+  if (!ctx.profile.selectedReportItems) {
+    ctx.profile.selectedReportItems = {};
+  }
+
+  availableTargets.forEach(targetId => {
+    ctx.initializeGranularSelections(targetId);
+  });
+
+  ctx.saveState();
+}
+
+function renderNewFormatModule(options: ReportModuleRenderOptions): HTMLElement {
+  const { renderer, targetId, config, data } = options;
+  const div = document.createElement('div');
+  div.className = 'dimension-card border border-slate-200 rounded-lg overflow-hidden bg-white';
+  renderer.renderTemplate(div, renderNewFormatModuleTemplate(targetId, config, data));
+  return div;
+}
+
+function renderNewFormatModuleTemplate(
+  targetId: string,
+  config: TargetConfig,
+  data: unknown
+): string {
+  const safeTargetId = escapeHtml(targetId);
+  const subItemKeys = data && typeof data === 'object' ? Object.keys(data) : [];
+
+  return `
+    ${renderModuleHeader(targetId, safeTargetId, config)}
+    ${renderModuleSubItems(targetId, safeTargetId, data, subItemKeys)}
+  `;
+}
+
+function renderModuleHeader(targetId: string, safeTargetId: string, config: TargetConfig): string {
+  const confidencePct = getTargetConfidence(targetId);
+
+  return `
+    <div class="dimension-header p-3 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors"
+         @click="toggleExpansion('${safeTargetId}')">
+      <div class="flex items-center gap-3">
+        <input type="checkbox"
+               class="dimension-checkbox h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+               aria-label="启用 ${escapeHtml(config.title)} 维度"
+               :checked="isDimensionEnabled('${safeTargetId}')"
+               :indeterminate.prop="isPartiallySelected('${safeTargetId}')"
+               @change="onDimensionToggle('${safeTargetId}')"
+               @click.stop>
+        <label class="flex-1 inline-flex items-center gap-2 font-medium text-slate-700 cursor-pointer select-none min-w-0">
+          ${renderTargetIcon(config)}
+          <span class="truncate">${escapeHtml(config.title)}</span>
+        </label>
+        ${renderConfidenceBadge(confidencePct)}
+        <i class="fas transition-transform text-slate-400"
+           :class="isExpanded('${safeTargetId}') ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+      </div>
+    </div>
+  `;
+}
+
+function renderConfidenceBadge(confidencePct: number): string {
+  if (!confidencePct) {
+    return '';
+  }
+
+  return `
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border shrink-0 ${escapeHtml(getConfidenceColorClass(confidencePct))}"
+          role="status"
+          aria-label="${escapeHtml(getConfidenceAriaLabel(confidencePct))}">
+      <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
+      <span>${confidencePct}%</span>
+    </span>
+  `;
+}
+
+function renderModuleSubItems(
+  targetId: string,
+  safeTargetId: string,
+  data: unknown,
+  subItemKeys: string[]
+): string {
+  return `
+    <div class="sub-items"
+         x-show="isExpanded('${safeTargetId}')"
+         x-collapse>
+      <div class="sub-items-header flex justify-between px-4 py-2 bg-slate-50 border-t border-slate-200">
+        <span class="text-xs text-slate-600 font-medium">子项选择</span>
+        <div class="flex gap-3">
+          <button @click.stop="selectAllSubItems('${safeTargetId}')"
+                  class="text-xs text-blue-600 hover:underline font-medium">
+            全选
+          </button>
+          <button @click.stop="deselectAllSubItems('${safeTargetId}')"
+                  class="text-xs text-slate-600 hover:underline">
+            取消全选
+          </button>
+        </div>
+      </div>
+      <div class="px-4 py-2">
+        ${renderSubItems(data, targetId, subItemKeys)}
+      </div>
+    </div>
+  `;
 }
 
 function renderSubItems(data: unknown, targetId: string, subItemKeys: string[]): string {

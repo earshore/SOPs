@@ -57,6 +57,23 @@ const KEYWORD_FIELD_CONFIDENCE = {
   INTENT: 0.65,
 } as const;
 
+type CompetitorKeywordData = {
+  core: string[];
+  longTail: string[];
+  intent: string[];
+};
+
+interface CompetitorExtractionParts {
+  keywords: ExtractionResult<CompetitorKeywordData>;
+  highFrequencyPhrases: ExtractionResult<string[]>;
+  audience: ExtractionResult<string>;
+  usps: ExtractionResult<string>;
+  specs: ExtractionResult<string>;
+  restrictedWords: ExtractionResult<string[]>;
+  painPoints: ExtractionResult<string[]>;
+  differentiation: ExtractionResult<string[]>;
+}
+
 /**
  * Competitor Report 适配器实现
  */
@@ -95,100 +112,108 @@ export class CompetitorReportAdapter implements ReportAdapter {
     const competitorReport = this.normalizeReport(report);
 
     try {
-      // 移除 "开始提取" debug 日志，减少生产环境噪音
-
-      // 提取各个部分
-      const keywords = this.extractKeywords(competitorReport);
-      const highFrequencyPhrases = this.extractHighFrequencyPhrases(competitorReport);
-      const audience = this.extractAudience(competitorReport);
-      const usps = this.extractUSPs(competitorReport);
-      const specs = this.extractSpecs(competitorReport);
-      const restrictedWords = this.extractRestrictedWords(competitorReport);
-      const painPoints = this.extractPainPoints(competitorReport);
-      const differentiation = this.extractDifferentiation(competitorReport);
-
-      // 构建 DNA 对象
-      const dna: ExtendedDNA = {
-        // 原有字段
-        audience: audience.data,
-        usps: usps.data,
-        specs: specs.data,
-
-        // 新增字段
-        keywords: keywords.data,
-        restrictedWords: restrictedWords.data,
-        highFrequencyPhrases: highFrequencyPhrases.data,
-        painPoints: painPoints.data,
-        differentiationAngles: differentiation.data,
-
-        // 置信度
-        confidence: {
-          audience: audience.confidence,
-          usps: usps.confidence,
-          specs: specs.confidence,
-          keywords: keywords.confidence,
-          keywordsCore: keywords.data.core.length > 0 ? KEYWORD_FIELD_CONFIDENCE.CORE : 0,
-          keywordsLongTail:
-            keywords.data.longTail.length > 0 ? KEYWORD_FIELD_CONFIDENCE.LONG_TAIL : 0,
-          keywordsIntent: keywords.data.intent.length > 0 ? KEYWORD_FIELD_CONFIDENCE.INTENT : 0,
-          restrictedWords: restrictedWords.confidence,
-          highFrequencyPhrases: highFrequencyPhrases.confidence,
-          painPoints: painPoints.confidence,
-          differentiationAngles: differentiation.confidence,
-        },
-
-        // 元数据
-        metadata: {
-          extractedAt: new Date().toISOString(),
-          reportType: 'competitor',
-          sourceFields: [
-            ...new Set([
-              ...keywords.sourceFields,
-              ...highFrequencyPhrases.sourceFields,
-              ...audience.sourceFields,
-              ...usps.sourceFields,
-              ...specs.sourceFields,
-              ...restrictedWords.sourceFields,
-              ...painPoints.sourceFields,
-              ...differentiation.sourceFields,
-            ]),
-          ],
-          fieldSources: {
-            audience: audience.sourceFields,
-            usps: usps.sourceFields,
-            specs: specs.sourceFields,
-            keywordsCore:
-              keywords.data.core.length > 0
-                ? keywords.sourceFields.filter(source => source.includes('core'))
-                : [],
-            keywordsLongTail:
-              keywords.data.longTail.length > 0
-                ? keywords.sourceFields.filter(source => source.includes('long_tail'))
-                : [],
-            keywordsIntent:
-              keywords.data.intent.length > 0
-                ? keywords.sourceFields.filter(source => source === 'intents')
-                : [],
-            restrictedWords: restrictedWords.sourceFields,
-          },
-          stats: {
-            totalKeywords:
-              keywords.data.core.length +
-              keywords.data.longTail.length +
-              keywords.data.intent.length,
-            totalRestrictedWords: restrictedWords.data.length,
-            totalPhrases: highFrequencyPhrases.data.length,
-            totalPainPoints: painPoints.data.length,
-            totalDifferentiationAngles: differentiation.data.length,
-          },
-        },
-      };
-
-      return dna;
+      return this.buildCompetitorDNA(this.extractCompetitorParts(competitorReport));
     } catch (error) {
       console.error('[CompetitorAdapter] 提取失败:', error);
       return null;
     }
+  }
+
+  private extractCompetitorParts(report: CompetitorReport): CompetitorExtractionParts {
+    return {
+      keywords: this.extractKeywords(report),
+      highFrequencyPhrases: this.extractHighFrequencyPhrases(report),
+      audience: this.extractAudience(report),
+      usps: this.extractUSPs(report),
+      specs: this.extractSpecs(report),
+      restrictedWords: this.extractRestrictedWords(report),
+      painPoints: this.extractPainPoints(report),
+      differentiation: this.extractDifferentiation(report),
+    };
+  }
+
+  private buildCompetitorDNA(parts: CompetitorExtractionParts): ExtendedDNA {
+    return {
+      audience: parts.audience.data,
+      usps: parts.usps.data,
+      specs: parts.specs.data,
+      keywords: parts.keywords.data,
+      restrictedWords: parts.restrictedWords.data,
+      highFrequencyPhrases: parts.highFrequencyPhrases.data,
+      painPoints: parts.painPoints.data,
+      differentiationAngles: parts.differentiation.data,
+      confidence: this.buildCompetitorConfidence(parts),
+      metadata: this.buildCompetitorMetadata(parts),
+    };
+  }
+
+  private buildCompetitorConfidence(parts: CompetitorExtractionParts): ExtendedDNA['confidence'] {
+    const { keywords } = parts;
+
+    return {
+      audience: parts.audience.confidence,
+      usps: parts.usps.confidence,
+      specs: parts.specs.confidence,
+      keywords: keywords.confidence,
+      keywordsCore: keywords.data.core.length > 0 ? KEYWORD_FIELD_CONFIDENCE.CORE : 0,
+      keywordsLongTail: keywords.data.longTail.length > 0 ? KEYWORD_FIELD_CONFIDENCE.LONG_TAIL : 0,
+      keywordsIntent: keywords.data.intent.length > 0 ? KEYWORD_FIELD_CONFIDENCE.INTENT : 0,
+      restrictedWords: parts.restrictedWords.confidence,
+      highFrequencyPhrases: parts.highFrequencyPhrases.confidence,
+      painPoints: parts.painPoints.confidence,
+      differentiationAngles: parts.differentiation.confidence,
+    };
+  }
+
+  private buildCompetitorMetadata(parts: CompetitorExtractionParts): ExtendedDNA['metadata'] {
+    const { keywords } = parts;
+
+    return {
+      extractedAt: new Date().toISOString(),
+      reportType: 'competitor',
+      sourceFields: this.getCompetitorSourceFields(parts),
+      fieldSources: {
+        audience: parts.audience.sourceFields,
+        usps: parts.usps.sourceFields,
+        specs: parts.specs.sourceFields,
+        keywordsCore:
+          keywords.data.core.length > 0
+            ? keywords.sourceFields.filter(source => source.includes('core'))
+            : [],
+        keywordsLongTail:
+          keywords.data.longTail.length > 0
+            ? keywords.sourceFields.filter(source => source.includes('long_tail'))
+            : [],
+        keywordsIntent:
+          keywords.data.intent.length > 0
+            ? keywords.sourceFields.filter(source => source === 'intents')
+            : [],
+        restrictedWords: parts.restrictedWords.sourceFields,
+      },
+      stats: {
+        totalKeywords:
+          keywords.data.core.length + keywords.data.longTail.length + keywords.data.intent.length,
+        totalRestrictedWords: parts.restrictedWords.data.length,
+        totalPhrases: parts.highFrequencyPhrases.data.length,
+        totalPainPoints: parts.painPoints.data.length,
+        totalDifferentiationAngles: parts.differentiation.data.length,
+      },
+    };
+  }
+
+  private getCompetitorSourceFields(parts: CompetitorExtractionParts): string[] {
+    return [
+      ...new Set([
+        ...parts.keywords.sourceFields,
+        ...parts.highFrequencyPhrases.sourceFields,
+        ...parts.audience.sourceFields,
+        ...parts.usps.sourceFields,
+        ...parts.specs.sourceFields,
+        ...parts.restrictedWords.sourceFields,
+        ...parts.painPoints.sourceFields,
+        ...parts.differentiation.sourceFields,
+      ]),
+    ];
   }
 
   /**
