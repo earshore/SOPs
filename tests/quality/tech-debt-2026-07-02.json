@@ -12,8 +12,8 @@
   "issues": [],
   "metrics": {
     "totalFiles": 397,
-    "totalLines": 98908,
+    "totalLines": 98932,
     "debtRatio": 0
   },
-  "generatedAt": "2026-07-02T16:50:09.578Z"
+  "generatedAt": "2026-07-02T16:52:39.162Z"
 }
