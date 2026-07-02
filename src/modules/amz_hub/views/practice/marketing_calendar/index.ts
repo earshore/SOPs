@@ -25,6 +25,9 @@ const AMZF_QUICK_TAGS = [
   "圣诞",
   "Prime Day",
   "Spring Deal Days",
+  "德国",
+  "3月",
+  "电商大促",
   "黑五",
   "复活节",
   "情人节",
@@ -38,6 +41,43 @@ const AMZF_EVENT_TYPE_META: Record<string, { label: string; icon: string }> = {
   financial: { label: "消费力窗口", icon: "fas fa-coins" },
   season: { label: "季节需求", icon: "fas fa-seedling" },
 };
+
+const AMZF_COUNTRY_SEARCH_ALIASES: Record<string, string[]> = {
+  DE: ["德国", "德國", "germany", "deutschland", "amazon.de"],
+  FR: ["法国", "法國", "france", "amazon.fr"],
+  IT: ["意大利", "italy", "italia", "amazon.it"],
+  ES: ["西班牙", "spain", "espana", "españa", "amazon.es"],
+  NL: ["荷兰", "荷蘭", "netherlands", "holland", "amazon.nl"],
+  PL: ["波兰", "波蘭", "poland", "polska", "amazon.pl"],
+  GB: ["英国", "英國", "uk", "united kingdom", "great britain", "amazon.co.uk"],
+  SE: ["瑞典", "sweden", "sverige", "amazon.se"],
+  BE: ["比利时", "比利時", "belgium", "belgie", "belgië", "amazon.com.be"],
+  IE: ["爱尔兰", "愛爾蘭", "ireland", "amazon.ie"],
+  TR: ["土耳其", "turkey", "turkiye", "türkiye", "amazon.com.tr"],
+};
+
+const AMZF_EVENT_TYPE_SEARCH_ALIASES: Record<string, string[]> = {
+  holiday: ["节日", "节假日", "礼品", "礼赠", "holiday"],
+  shopping: ["电商", "大促", "促销", "购物", "deal", "deals", "sale", "sales", "shopping", "官方活动"],
+  cultural: ["文化", "场景", "cultural"],
+  financial: ["消费力", "工资", "奖金", "financial", "holiday money"],
+  season: ["季节", "季节性", "返校", "season", "seasonal"],
+};
+
+const AMZF_MONTH_SEARCH_ALIASES: string[][] = [
+  ["一月", "1月", "01月", "january", "jan"],
+  ["二月", "2月", "02月", "february", "feb"],
+  ["三月", "3月", "03月", "march", "mar"],
+  ["四月", "4月", "04月", "april", "apr"],
+  ["五月", "5月", "05月", "may"],
+  ["六月", "6月", "06月", "june", "jun"],
+  ["七月", "7月", "07月", "july", "jul"],
+  ["八月", "8月", "08月", "august", "aug"],
+  ["九月", "9月", "09月", "september", "sep"],
+  ["十月", "10月", "october", "oct"],
+  ["十一月", "11月", "november", "nov"],
+  ["十二月", "12月", "december", "dec"],
+];
 
 interface MarketingCalendarState {
   currentView: "country" | "event";
@@ -139,29 +179,68 @@ class MarketingCalendarModule extends BaseModule {
     this.saveSearchHistory();
   }
 
+  private normalizeSearchText(value: string): string {
+    return value
+      .toLowerCase()
+      .replace(/[，,、;；|/]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  private tokenizeSearchTerm(value: string): string[] {
+    const normalized = this.normalizeSearchText(value);
+    return normalized ? normalized.split(" ").filter(Boolean) : [];
+  }
+
+  private getCountrySearchText(codes: string[]): string {
+    return codes
+      .map((code) => {
+        const country = (amzf_countries as CountryInfo[]).find(
+          (item) => item.code === code,
+        );
+        return [code, country?.name, ...(AMZF_COUNTRY_SEARCH_ALIASES[code] ?? [])]
+          .filter(Boolean)
+          .join(" ");
+      })
+      .join(" ");
+  }
+
+  private getEventTypeSearchText(type: string): string {
+    const meta = this.getEventTypeMeta(type);
+    return [type, meta.label, ...(AMZF_EVENT_TYPE_SEARCH_ALIASES[type] ?? [])].join(" ");
+  }
+
+  private getMonthSearchText(month: number): string {
+    return [
+      (amzf_months as string[])[month - 1],
+      ...(AMZF_MONTH_SEARCH_ALIASES[month - 1] ?? []),
+    ].join(" ");
+  }
+
   calculateScore(event: MarketingEvent, terms: string[]): number {
     let score = 0;
-    const textFields = {
-      title: (event.name + " " + event.nameEn).toLowerCase(),
-      core: (event.strategy + " " + (event.tags || []).join(" ")).toLowerCase(),
-      desc: (event.description + " " + event.date).toLowerCase(),
-    };
+    const searchFields = [
+      { weight: 120, text: `${event.name} ${event.nameEn}` },
+      { weight: 80, text: this.getCountrySearchText(event.countries) },
+      { weight: 70, text: (event.tags || []).join(" ") },
+      { weight: 55, text: event.strategy },
+      { weight: 45, text: this.getEventTypeSearchText(event.type) },
+      { weight: 35, text: `${event.date} ${this.getMonthSearchText(event.month)}` },
+      { weight: 20, text: event.description },
+    ].map((field) => ({
+      ...field,
+      text: this.normalizeSearchText(field.text),
+    }));
 
     for (const term of terms) {
-      let termMatched = false;
-      if (textFields.title.includes(term)) {
-        score += 100;
-        termMatched = true;
+      let termScore = 0;
+      for (const field of searchFields) {
+        if (field.text.includes(term)) {
+          termScore += field.weight;
+        }
       }
-      if (textFields.core.includes(term)) {
-        score += 50;
-        termMatched = true;
-      }
-      if (textFields.desc.includes(term)) {
-        score += 10;
-        termMatched = true;
-      }
-      if (!termMatched) return 0;
+      if (termScore === 0) return 0;
+      score += termScore;
     }
     return score;
   }
@@ -177,7 +256,7 @@ class MarketingCalendarModule extends BaseModule {
       return candidates;
     }
 
-    const terms = this.state.searchTerm.trim().toLowerCase().split(/\s+/);
+    const terms = this.tokenizeSearchTerm(this.state.searchTerm);
     return candidates
       .map((event) => ({ event, score: this.calculateScore(event, terms) }))
       .filter((item) => item.score > 0)
@@ -252,13 +331,14 @@ class MarketingCalendarModule extends BaseModule {
     if (clearBtn) clearBtn.classList.remove("amzf_visible");
 
     this.state.searchTerm = "";
+    this.hideSearchHistory();
     this.renderStats();
     this.renderContent();
   }
 
   // ==================== Search History Actions ====================
 
-  selectHistoryItem(term: string): void {
+  selectHistoryItem(term: string, saveToHistory = false): void {
     const input = document.getElementById("amzf_search") as HTMLInputElement;
     const clearBtn = document.getElementById("amzf_clear");
 
@@ -268,7 +348,8 @@ class MarketingCalendarModule extends BaseModule {
     }
     if (clearBtn) clearBtn.classList.add("amzf_visible");
 
-    this.state.searchTerm = term.toLowerCase();
+    this.state.searchTerm = this.normalizeSearchText(term);
+    if (saveToHistory) this.addToHistory(term);
     this.hideSearchHistory();
     this.renderStats();
     this.renderContent();
@@ -315,12 +396,13 @@ class MarketingCalendarModule extends BaseModule {
       // 计算垂直位置
       let top = searchRect.bottom + 8;
       const availableHeight = viewportHeight - top - 20;
-      const maxHeight = Math.min(320, availableHeight);
+      let maxHeight = Math.max(120, Math.min(320, availableHeight));
 
       // 如果下方空间不足，尝试显示在上方
       if (maxHeight < 200 && searchRect.top > 220) {
         const topSpace = searchRect.top - 20;
-        top = searchRect.top - Math.min(320, topSpace);
+        maxHeight = Math.min(320, topSpace);
+        top = searchRect.top - maxHeight - 8;
       }
 
       // 应用样式 - 先设置位置和尺寸，再显示
@@ -335,6 +417,9 @@ class MarketingCalendarModule extends BaseModule {
       requestAnimationFrame(() => {
         container.style.maxHeight = `${maxHeight}px`;
         container.classList.add("amzf_show");
+        document
+          .getElementById("amzf_search")
+          ?.setAttribute("aria-expanded", "true");
       });
     }
   }
@@ -343,6 +428,9 @@ class MarketingCalendarModule extends BaseModule {
     const container = document.getElementById("amzf_search_history");
     if (container) {
       container.classList.remove("amzf_show");
+      document
+        .getElementById("amzf_search")
+        ?.setAttribute("aria-expanded", "false");
     }
   }
 
@@ -411,7 +499,7 @@ class MarketingCalendarModule extends BaseModule {
     const quickTag = this.findCalendarTarget(target, "[data-amzf-quick-tag]");
     if (quickTag) {
       const term = quickTag.dataset.amzfQuickTag;
-      if (term) this.selectHistoryItem(term);
+      if (term) this.selectHistoryItem(term, true);
       return true;
     }
 
@@ -454,7 +542,11 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     this.addEventListener(document, "click", (e) => {
-      if (searchWrapper && !searchWrapper.contains(e.target as Node)) {
+      if (
+        searchWrapper &&
+        !searchWrapper.contains(e.target as Node) &&
+        !searchHistory?.contains(e.target as Node)
+      ) {
         this.hideSearchHistory();
       }
     });
@@ -468,7 +560,7 @@ class MarketingCalendarModule extends BaseModule {
       // 使用 BaseModule 的 setTimeout 实现自动清理的防抖
       if (this.debounceTimer) clearTimeout(this.debounceTimer);
       this.debounceTimer = this.setTimeout(() => {
-        this.state.searchTerm = val.toLowerCase();
+        this.state.searchTerm = this.normalizeSearchText(val);
         this.renderStats();
         this.renderContent();
       }, 300);
@@ -477,8 +569,8 @@ class MarketingCalendarModule extends BaseModule {
     this.addEventListener(input, "keydown", (e) => {
       const keyEvent = e as KeyboardEvent;
       if (keyEvent.key === "Enter" && input.value.trim()) {
-        this.addToHistory(input.value.trim());
-        this.hideSearchHistory();
+        keyEvent.preventDefault();
+        this.selectHistoryItem(input.value.trim(), true);
         input.blur();
       }
       if (keyEvent.key === "Escape") {
@@ -547,10 +639,14 @@ class MarketingCalendarModule extends BaseModule {
       this.state.searchHistory.forEach((item, index) => {
         const safeItem = escapeHtml(item);
         html += `
-                    <div class="amzf_history_item" data-amzf-history-item="${safeItem}">
-                        <span class="amzf_history_item_icon"><i class="fas fa-search"></i></span>
-                        <span class="amzf_history_item_text">${safeItem}</span>
-                        <span class="amzf_history_item_delete" data-amzf-delete-history-index="${index}"><i class="fas fa-times"></i></span>
+                    <div class="amzf_history_row">
+                        <button type="button" class="amzf_history_item" data-amzf-history-item="${safeItem}">
+                            <span class="amzf_history_item_icon"><i class="fas fa-search"></i></span>
+                            <span class="amzf_history_item_text">${safeItem}</span>
+                        </button>
+                        <button type="button" class="amzf_history_item_delete" data-amzf-delete-history-index="${index}" aria-label="删除搜索历史 ${safeItem}">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 `;
       });
@@ -567,13 +663,48 @@ class MarketingCalendarModule extends BaseModule {
             <div class="amzf_quick_tags">
                 ${AMZF_QUICK_TAGS.map(
       (tag) => `
-                    <span class="amzf_quick_tag" data-amzf-quick-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</span>
+                    <button type="button" class="amzf_quick_tag" data-amzf-quick-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</button>
                 `,
     ).join("")}
             </div>
         `;
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, html);
+  }
+
+  renderSearchStatus(filteredCount: number): void {
+    const container = document.getElementById("amzf_search_status");
+    if (!container) return;
+
+    const term = this.state.searchTerm.trim();
+    if (!term) {
+      container.classList.remove("amzf_visible");
+      setSafeHtml(container, "");
+      return;
+    }
+
+    const selectedCountry =
+      this.state.selectedCountry === "ALL"
+        ? "全部站点"
+        : (amzf_countries as CountryInfo[]).find(
+            (country) => country.code === this.state.selectedCountry,
+          )?.name || this.state.selectedCountry;
+
+    container.classList.add("amzf_visible");
+    setSafeHtml(
+      container,
+      `
+        <div class="amzf_search_status_text">
+          <i class="fas fa-filter"></i>
+          <span>当前搜索：<strong>${escapeHtml(term)}</strong></span>
+          <span>${escapeHtml(selectedCountry)}</span>
+          <span>${escapeHtml(filteredCount.toString())} 个节点</span>
+        </div>
+        <button type="button" class="amzf_search_status_clear" data-action="amzf_clearSearch">
+          清除搜索
+        </button>
+      `,
+    );
   }
 
   renderStats(): void {
@@ -615,13 +746,17 @@ class MarketingCalendarModule extends BaseModule {
     if (!container) return;
 
     const filtered = this.getFilteredEvents();
+    this.renderSearchStatus(filtered.length);
 
     if (filtered.length === 0) {
       // ✅ 安全: 静态HTML模板，无用户输入
+      const term = this.state.searchTerm.trim();
       setSafeHtml(container, `
                 <div class="amzf_empty amzf_animate">
                     <div class="amzf_empty_icon"><i class="fas fa-search"></i></div>
-                    <div class="amzf_empty_text">未找到匹配的活动，请尝试关键词如 "圣诞"、"Prime" 或 "德国"</div>
+                    <div class="amzf_empty_text">未找到${term ? ` “${escapeHtml(term)}” ` : ""}匹配的活动</div>
+                    <p class="amzf_empty_hint">可尝试国家名/代码、月份、活动类型或品类词，例如“德国”“3月”“电商大促”“玩具”。</p>
+                    ${term ? '<button type="button" class="amzf_empty_action" data-action="amzf_clearSearch">清除搜索</button>' : ""}
                 </div>
             `);
       return;

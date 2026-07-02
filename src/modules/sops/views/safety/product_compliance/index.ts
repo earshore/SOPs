@@ -52,7 +52,7 @@ export function buildProductComplianceTemplate(owner = DEFAULT_REVIEW_OWNER): st
         '## 作业范围',
         `- 作业负责人：${reviewOwner}`,
         '- 产品/ASIN/SKU：',
-        '- 目标站点：EU / UK / 其他',
+        '- 目标站点：EU / GB / 其他',
         '- 品类：生物杀虫剂 / 电子 3C / 儿童玩具 / 化妆品 / 纺织品 / 其他',
         '- 上架阶段：选品 / 打样 / 采购 / 上架前 / 已上架复核',
         '',

@@ -290,8 +290,8 @@ export const amzf_events: MarketingEvent[] = [
     {
         id: 9, name: '圣帕特里克节', nameEn: "St. Patrick’s Day", emoji: '<i class="fas fa-clover" style="color: #2E7D32;"></i>', date: '3月17日', month: 3,
         countries: ['IE'], type: 'holiday',
-        description: '爱尔兰国庆日，纪念守护神圣帕特里克。全球爱尔兰人和爱尔兰文化爱好者的盛大庆典，以绿色、三叶草和游行为标志。',
-        strategy: '2026年圣帕特里克节在3月17日（周二）。爱尔兰最重要节日！绿色服饰、三叶草装饰、派对用品、爱尔兰威士忌周边全球热销。',
+        description: '爱尔兰国庆日，纪念守护神圣帕特里克。欧洲爱尔兰社群和爱尔兰文化爱好者会以绿色、三叶草和游行为核心符号庆祝。',
+        strategy: '2026年圣帕特里克节在3月17日（周二）。IE站重点关注绿色服饰、三叶草装饰、派对用品、爱尔兰威士忌周边等本地化需求。',
         tags: ['绿色服饰', '装饰品', '派对用品', '酒具']
     },
     {
@@ -309,7 +309,7 @@ export const amzf_events: MarketingEvent[] = [
         tags: ['礼品', '糖果', '服饰']
     },
     {
-        id: 12, name: '母亲节(英国/爱尔兰)', nameEn: "Mother’s Day UK/IE", emoji: '<i class="fas fa-female" style="color: #F44336;"></i>', date: '3月15日', month: 3,
+        id: 12, name: '母亲节(英国/爱尔兰)', nameEn: "Mother’s Day GB/IE", emoji: '<i class="fas fa-female" style="color: #F44336;"></i>', date: '3月15日', month: 3,
         countries: ['GB', 'IE'], type: 'holiday',
         description: '赞颂母亲、母爱、母系纽带以及母亲的社会影响力的节日。赠送礼物是常见的庆祝方式，顾客通常会提前几周挑选礼物。',
         strategy: '2026年英国和爱尔兰母亲节(Mothering Sunday)在3月15日。礼品、园艺工具、定制相框、美容仪热销。',
@@ -447,8 +447,8 @@ export const amzf_events: MarketingEvent[] = [
     {
         id: 29, name: 'Tomorrowland音乐节', nameEn: 'Tomorrowland Festival', emoji: '<i class="fas fa-music" style="color: #FF1493;"></i>', date: '7月17-19/24-26日', month: 7,
         countries: ['BE'], type: 'cultural',
-        description: '全球最大电子音乐节，在比利时Boom举办。吸引全球数十万乐迷，门票秒杀，对周边商品、旅行装备、派对服饰需求巨大。',
-        strategy: '2026年Tomorrowland在7月17-19日和24-26日两个周末举办。荧光服饰、LED配件、便携充电宝、防水包、音乐周边全球热销。',
+        description: '比利时Boom举办的大型电子音乐节，能带动欧洲站旅行装备、派对服饰和音乐周边的短期需求。',
+        strategy: '2026年Tomorrowland在7月17-19日和24-26日两个周末举办。BE及周边站点重点关注荧光服饰、LED配件、便携充电宝、防水包、音乐周边。',
         tags: ['音乐周边', '荧光服饰', '电子配件', '旅行装备']
     },
     {
@@ -546,8 +546,8 @@ export const amzf_events: MarketingEvent[] = [
     {
         id: 41, name: '黑色星期五', nameEn: 'Black Friday', emoji: '<i class="fas fa-tag" style="color: #212121;"></i>', date: '11月27日', month: 11,
         countries: ['DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'GB', 'SE'], type: 'shopping',
-        description: '这场促销活动为期四天，通常发生在美国感恩节之后（一般是 11 月的第四个星期五）。它标志着圣诞购物季的开始。',
-        strategy: '2026年黑色星期五在11月27日。全年最疯狂大促!电子、家电、时尚、家居全线爆发。务必保证库存充足。',
+        description: 'Q4核心购物节点，欧洲站通常在11月下旬进入黑五到圣诞的连续大促窗口。',
+        strategy: '2026年黑色星期五在11月27日。欧洲站全年最关键大促之一，电子、家电、时尚、家居需求集中爆发，务必保证库存充足。',
         tags: ['全品类', '大促', '电子', '家居']
     },
 
