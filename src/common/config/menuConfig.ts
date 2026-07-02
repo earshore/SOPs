@@ -133,7 +133,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: "v1.0",
       icon: "fas fa-cubes",
       description: "集成多个专业工具的应用中心，提供数据采集、分析与优化功能。",
-      themeColor: "purple", // ✅ 紫色 - 应用中心主题
+      themeColor: "cyan", // ✅ 青色 - 应用中心容器主题，避开 Keyword Hunter 紫红色
     },
 
     // [应用 A] Master Analysis
@@ -157,7 +157,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: "v1.0",
       icon: "fas fa-paper-plane",
       description: "轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。",
-      themeColor: "cyan",
+      themeColor: "slate",
     },
 
     // Keyword Tracker 模块配置
@@ -276,7 +276,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: "advanced",
       label: "运营提升全攻略",
       icon: "fas fa-chart-line",
-      color: "violet", // ✅ 调整为 violet，避免与 keyword_tracker 冲突
+      color: "rose", // ✅ 调整为 rose，避免与 Amazon知识早知道 的 indigo 过近
       order: 3,
       version: "v1.0",
       description: "进阶运营策略，提升转化率与销售表现的系统方法论。",
@@ -325,7 +325,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: "playground",
       label: "Playground",
       icon: "fas fa-paper-plane",
-      color: "cyan",
+      color: "slate",
       order: 2,
       version: "v1.0",
       description: "轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。",

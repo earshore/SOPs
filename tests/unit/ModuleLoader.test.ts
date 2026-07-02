@@ -156,6 +156,7 @@ describe('ModuleLoader', () => {
 
   it('applies content enter animation when enabled', async () => {
     const content = document.getElementById('content') as HTMLElement;
+    content.classList.add('fade-in');
     const module = createModule('Animated');
     const loader = new ModuleLoader({
       containerId: 'content',
@@ -168,6 +169,40 @@ describe('ModuleLoader', () => {
     });
 
     await loader.loadModule('app_route');
+
+    expect(content.classList.contains('view-fade-in-initial')).toBe(true);
+    expect(content.classList.contains('view-fade-in')).toBe(true);
+    expect(content.classList.contains('fade-in')).toBe(false);
+  });
+
+  it('keeps async mounted content hidden until the content enter animation starts', async () => {
+    const content = document.getElementById('content') as HTMLElement;
+    const mountPending = deferred<void>();
+    const module: IModule = {
+      mount: vi.fn((container: HTMLElement) => {
+        container.textContent = 'Async content';
+        return mountPending.promise;
+      })
+    };
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        app_route: vi.fn(() => Promise.resolve(module))
+      },
+      moduleName: 'TestLoader',
+      contentEnterAnimation: true
+    });
+
+    const load = loader.loadModule('app_route');
+    await vi.waitFor(() => expect(module.mount).toHaveBeenCalledTimes(1));
+
+    expect(content.textContent).toBe('Async content');
+    expect(content.classList.contains('view-fade-in-initial')).toBe(true);
+    expect(content.classList.contains('view-fade-in')).toBe(false);
+
+    mountPending.resolve();
+    await load;
 
     expect(content.classList.contains('view-fade-in-initial')).toBe(true);
     expect(content.classList.contains('view-fade-in')).toBe(true);

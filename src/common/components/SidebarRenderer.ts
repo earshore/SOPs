@@ -40,6 +40,7 @@ export interface SidebarConfig {
 interface SidebarTheme {
   primary: string;
   accent: string;
+  active: string;
   text: string;
   activeBgStart: string;
   activeBgEnd: string;
@@ -56,11 +57,7 @@ type PaletteStep = keyof typeof COLOR_PALETTES.blue;
 interface SidebarThemeDefinition {
   primary: PaletteName;
   accent?: PaletteName;
-  text?: PaletteName;
-  activeStart?: PaletteName;
-  activeEnd?: PaletteName;
   activeEndStep?: PaletteStep;
-  iconSoftEndStep?: PaletteStep;
   activeStartAlpha?: number;
   activeEndAlpha?: number;
   borderAlpha?: number;
@@ -76,8 +73,6 @@ const SIDEBAR_THEME_DEFINITIONS: Record<ColorSchemeName, SidebarThemeDefinition>
   purple: {
     primary: 'purple',
     accent: 'pink',
-    text: 'pink',
-    activeStart: 'fuchsia',
     borderAlpha: 0.42,
     focusAlpha: 0.18,
     shadowAlpha: 0.72,
@@ -96,7 +91,6 @@ const SIDEBAR_THEME_DEFINITIONS: Record<ColorSchemeName, SidebarThemeDefinition>
   slate: {
     primary: 'slate',
     activeEndStep: 100,
-    iconSoftEndStep: 200,
     activeStartAlpha: 0.96,
     activeEndAlpha: 0.8,
     borderAlpha: 0.32,
@@ -132,24 +126,22 @@ function resolveAlpha(alpha: number | undefined, fallback: number): number {
 function createSidebarTheme(definition: SidebarThemeDefinition): SidebarTheme {
   const primary = definition.primary;
   const accent = resolvePaletteName(definition.accent, primary);
-  const text = resolvePaletteName(definition.text, primary);
-  const activeStart = resolvePaletteName(definition.activeStart, primary);
-  const activeEnd = resolvePaletteName(definition.activeEnd, accent);
 
   return {
     primary: paletteColor(primary, 500),
     accent: paletteColor(accent, 600),
-    text: paletteColor(text, 700),
-    activeBgStart: paletteRgba(activeStart, 50, resolveAlpha(definition.activeStartAlpha, 0.94)),
+    active: paletteColor(primary, 600),
+    text: paletteColor(primary, 700),
+    activeBgStart: paletteRgba(primary, 50, resolveAlpha(definition.activeStartAlpha, 0.96)),
     activeBgEnd: paletteRgba(
-      activeEnd,
-      resolvePaletteStep(definition.activeEndStep, 50),
-      resolveAlpha(definition.activeEndAlpha, 0.74)
+      primary,
+      resolvePaletteStep(definition.activeEndStep, 100),
+      resolveAlpha(definition.activeEndAlpha, 0.8)
     ),
     iconSoft: paletteColor(primary, 100),
-    iconSoftEnd: paletteColor(accent, resolvePaletteStep(definition.iconSoftEndStep, 100)),
-    border: paletteRgba(accent, 600, resolveAlpha(definition.borderAlpha, 0.36)),
-    focus: paletteRgba(accent, 600, resolveAlpha(definition.focusAlpha, 0.16)),
+    iconSoftEnd: paletteColor(primary, 50),
+    border: paletteRgba(primary, 600, resolveAlpha(definition.borderAlpha, 0.32)),
+    focus: paletteRgba(primary, 600, resolveAlpha(definition.focusAlpha, 0.14)),
     shadow: paletteRgba(primary, 500, resolveAlpha(definition.shadowAlpha, 0.62)),
   };
 }
@@ -650,6 +642,7 @@ export class SidebarRenderer {
     currentTab: string
   ): string {
     const isActive = currentTab === route.id;
+    const itemThemeStyle = this._getThemeStyleForColor(this.categories[route.category || '']?.color);
     const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } =
       this._getRouteItemClasses(
         isActive,
@@ -661,6 +654,7 @@ export class SidebarRenderer {
       <button type="button" data-action="switch-tab" data-tab="${route.id}"
         id="sidebar-btn-${route.id}"
         ${isActive ? 'aria-current="page"' : ''}
+        style="${itemThemeStyle}"
         class="sidebar-btn group w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg
           ${containerCls} transition-all duration-200">
         <div class="sidebar-icon-container w-5.5 h-5.5 rounded-md ${iconContainerCls}
@@ -720,10 +714,16 @@ export class SidebarRenderer {
   }
 
   private _getThemeStyle(): string {
-    const theme = SIDEBAR_THEMES[this.moduleColor] || SIDEBAR_THEMES.blue;
+    return this._getThemeStyleForColor(this.moduleColor);
+  }
+
+  private _getThemeStyleForColor(color?: string): string {
+    const resolvedColor = this._resolveThemeColor(color);
+    const theme = SIDEBAR_THEMES[resolvedColor] || SIDEBAR_THEMES.blue;
     return [
       `--sidebar-primary:${theme.primary}`,
       `--sidebar-accent:${theme.accent}`,
+      `--sidebar-active:${theme.active}`,
       `--sidebar-text:${theme.text}`,
       `--sidebar-active-bg-start:${theme.activeBgStart}`,
       `--sidebar-active-bg-end:${theme.activeBgEnd}`,

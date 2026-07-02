@@ -10,6 +10,11 @@ export function clearPageEnterAnimation(container: HTMLElement): void {
   container.classList.remove(...PAGE_ENTER_ANIMATION_CLASSES);
 }
 
+export function preparePageEnterAnimation(container: HTMLElement): void {
+  clearPageEnterAnimation(container);
+  container.classList.add(PAGE_ENTER_ANIMATION_INITIAL_CLASS);
+}
+
 export function applyPageEnterAnimation(container: HTMLElement): void {
   const firstChild = container.firstElementChild;
   if (firstChild?.classList.contains(PAGE_ENTER_ANIMATION_ACTIVE_CLASS)) {

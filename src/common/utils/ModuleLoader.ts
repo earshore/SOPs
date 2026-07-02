@@ -15,7 +15,13 @@ import {
 } from '../../components/ErrorBoundary';
 import { ValidationError } from '@/common/errors/AppError';
 import type { DIContainer } from '../di/Container';
-import { applyPageEnterAnimation, clearPageEnterAnimation } from './pageEnterAnimation';
+import {
+  applyPageEnterAnimation,
+  clearPageEnterAnimation,
+  preparePageEnterAnimation
+} from './pageEnterAnimation';
+
+const LEGACY_CONTENT_ENTER_ANIMATION_CLASS = 'fade-in';
 
 // ==================== 类型定义 ====================
 
@@ -300,6 +306,7 @@ export class ModuleLoader {
   private _prepareContainerForMount(container: HTMLElement): void {
     this._clearContentEnterAnimation(container);
     container.replaceChildren();
+    this._prepareContentEnterAnimation(container);
     void container.offsetHeight;
   }
 
@@ -309,6 +316,7 @@ export class ModuleLoader {
     }
 
     clearPageEnterAnimation(container);
+    container.classList.remove(LEGACY_CONTENT_ENTER_ANIMATION_CLASS);
   }
 
   private _applyContentEnterAnimation(container: HTMLElement): void {
@@ -316,7 +324,16 @@ export class ModuleLoader {
       return;
     }
 
+    container.classList.remove(LEGACY_CONTENT_ENTER_ANIMATION_CLASS);
     applyPageEnterAnimation(container);
+  }
+
+  private _prepareContentEnterAnimation(container: HTMLElement): void {
+    if (!this.contentEnterAnimation) {
+      return;
+    }
+
+    preparePageEnterAnimation(container);
   }
 
   private _renderRetryLoading(container: HTMLElement): void {
@@ -371,6 +388,7 @@ export class ModuleLoader {
     }
 
     if (container) {
+      this._clearContentEnterAnimation(container);
       this._renderRetryLoading(container);
     }
 
@@ -403,6 +421,7 @@ export class ModuleLoader {
       return;
     }
     if (container) {
+      this._clearContentEnterAnimation(container);
       this._renderErrorBoundary(container, routeId, err as Error);
     }
   }

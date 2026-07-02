@@ -1721,6 +1721,26 @@
   --wb-icon-badge-shadow: 0 6px 12px -9px rgba(139, 92, 246, 0.58);
 }
 
+.wb-theme-rose {
+  --wb-theme-accent: #f43f5e;
+  --wb-theme-accent-strong: #be123c;
+  --wb-theme-accent-soft: rgba(255, 241, 242, 0.90);
+  --wb-theme-accent-border: rgba(244, 63, 94, 0.22);
+  --wb-gradient-1: rgba(255, 241, 242, 0.95);
+  --wb-gradient-2: rgba(255, 228, 230, 0.90);
+  --wb-orb-1-color: rgba(251, 113, 133, 0.15);
+  --wb-orb-2-color: rgba(244, 63, 94, 0.12);
+  --wb-orb-3-color: rgba(190, 18, 60, 0.08);
+  --wb-particle-color: rgba(244, 63, 94, 0.5);
+  --wb-icon-gradient-1: #f43f5e;
+  --wb-icon-gradient-2: #be123c;
+  --wb-icon-shadow: 0 8px 18px -14px rgba(244, 63, 94, 0.5);
+  --wb-icon-shadow-hover: 0 10px 22px -16px rgba(190, 18, 60, 0.56);
+  --wb-icon-badge-gradient-1: #fb7185;
+  --wb-icon-badge-gradient-2: #e11d48;
+  --wb-icon-badge-shadow: 0 6px 12px -9px rgba(244, 63, 94, 0.56);
+}
+
 .wb-theme-hub-promo-tools {
   --wb-theme-accent: #10b981;
   --wb-theme-accent-strong: #047857;

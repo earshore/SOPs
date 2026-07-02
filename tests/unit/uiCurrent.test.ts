@@ -246,27 +246,47 @@ describe('current UI mega menu helpers', () => {
     document.body.innerHTML = `
       <div class="nav-group">
         <button class="nav-trigger" aria-expanded="true">Apps</button>
-        <div class="mega-menu" aria-hidden="false"></div>
+        <div class="mega-menu" aria-hidden="false">
+          <div class="mega-menu-inner">
+            <a id="menu-action" href="#page-a" data-action="switch-tab" data-tab="page-a">Page A</a>
+          </div>
+        </div>
       </div>
       <button id="outside">Outside</button>
     `;
     const group = document.querySelector<HTMLElement>('.nav-group');
     const trigger = document.querySelector<HTMLButtonElement>('.nav-trigger');
     const menu = document.querySelector<HTMLElement>('.mega-menu');
+    const action = document.querySelector<HTMLAnchorElement>('#menu-action');
+    const actionClick = vi.fn();
+    action?.addEventListener('click', actionClick);
 
     initMegaMenuAccessibility();
     expect(trigger?.getAttribute('aria-expanded')).toBe('false');
     expect(menu?.getAttribute('aria-hidden')).toBe('true');
+    expect(menu?.hasAttribute('inert')).toBe(true);
 
     group?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
     expect(group?.classList.contains('is-open')).toBe(true);
     expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+    expect(menu?.hasAttribute('inert')).toBe(false);
+
+    const openClick = new MouseEvent('click', { bubbles: true, cancelable: true });
+    expect(action?.dispatchEvent(openClick)).toBe(true);
+    expect(openClick.defaultPrevented).toBe(false);
+    expect(actionClick).toHaveBeenCalledTimes(1);
 
     trigger?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     expect(group?.classList.contains('is-open')).toBe(true);
 
     trigger?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     expect(group?.classList.contains('is-open')).toBe(false);
+    expect(menu?.hasAttribute('inert')).toBe(true);
+
+    const hiddenClick = new MouseEvent('click', { bubbles: true, cancelable: true });
+    expect(action?.dispatchEvent(hiddenClick)).toBe(false);
+    expect(hiddenClick.defaultPrevented).toBe(true);
+    expect(actionClick).toHaveBeenCalledTimes(1);
 
     trigger?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     group?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
@@ -291,6 +311,7 @@ describe('current UI mega menu helpers', () => {
       const css = readFileSync(file, 'utf8');
       expect(css).not.toMatch(/\.nav-group:hover\s+\.mega-menu/);
       expect(css).toMatch(/\.nav-group\.is-open\s+\.mega-menu/);
+      expect(css).toMatch(/\.nav-group:not\(\.is-open\)\s+\.mega-menu \*/);
     });
   });
 });

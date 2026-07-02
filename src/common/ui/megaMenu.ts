@@ -586,7 +586,11 @@ function setMegaMenuExpanded(group: HTMLElement, expanded: boolean): void {
 
   group.classList.toggle('is-open', expanded);
   trigger?.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-  menu?.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+  if (menu) {
+    menu.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+    menu.toggleAttribute('inert', !expanded);
+    (menu as HTMLElement & { inert?: boolean }).inert = !expanded;
+  }
 }
 
 export function closeMegaMenus(options: { except?: HTMLElement; blurActive?: boolean } = {}): void {
@@ -637,6 +641,11 @@ export function initMegaMenuAccessibility(): void {
       setExpanded(false);
       trigger.focus();
     });
+    group.querySelector<HTMLElement>('.mega-menu')?.addEventListener('click', event => {
+      if (group.classList.contains('is-open')) return;
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
     group.addEventListener('focusout', () => {
       requestAnimationFrame(() => {
         if (!group.contains(document.activeElement)) {

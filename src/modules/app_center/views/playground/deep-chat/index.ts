@@ -178,7 +178,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     padding: 10px 14px !important;
     border: 0 !important;
     border-radius: 18px !important;
-    background: #ecfeff !important;
+    background: var(--playground-accent-soft, #f8fafc) !important;
     color: #0f172a !important;
     box-shadow: none !important;
   }
@@ -265,7 +265,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .input-button.inside-end {
-    background: #0891b2 !important;
+    background: var(--playground-accent, #334155) !important;
     box-shadow: none !important;
   }
 
@@ -434,7 +434,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     align-items: center !important;
     justify-content: center !important;
     border-radius: 50% !important;
-    background: #0891b2 !important;
+    background: var(--playground-accent, #334155) !important;
     box-shadow: none !important;
   }
 
@@ -446,7 +446,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
   .inside-end.loading-button:focus-visible,
   .inside-end.disabled-button:hover,
   .inside-end.disabled-button:focus-visible {
-    background: #0e7490 !important;
+    background: var(--playground-accent-hover, #1e293b) !important;
   }
 
   .inside-end #submit-icon {
@@ -461,7 +461,7 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     width: 36px !important;
     height: 36px !important;
     border-radius: 50% !important;
-    background: #0891b2 !important;
+    background: var(--playground-accent, #334155) !important;
     pointer-events: none !important;
   }
 
@@ -527,7 +527,6 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
   const renderer = SafeRenderer.getInstance();
 
   mountedContainer = container;
-  container.classList.add('fade-in');
   renderer.renderTemplate(container, html);
   threadStore = applyPendingRequestsToThreadStore(await loadThreadStore());
   renderThreadList(container);
@@ -695,7 +694,7 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
     submit: {
       container: {
         borderRadius: '999px',
-        backgroundColor: '#0891b2',
+        backgroundColor: 'var(--playground-accent, #334155)',
         width: '34px',
         height: '34px',
       },
@@ -715,7 +714,7 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
       },
       user: {
         bubble: {
-          backgroundColor: '#ecfeff',
+          backgroundColor: 'var(--playground-accent-soft, #f8fafc)',
           color: '#0f172a',
           border: '0',
           borderRadius: '18px',

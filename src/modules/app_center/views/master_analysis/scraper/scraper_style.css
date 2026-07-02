@@ -675,7 +675,7 @@
   transition: all var(--duration-normal) var(--ease-smooth);
 }
 .strategy-card:hover {
-  transform: translateY(-3px);
+  transform: none;
 }
 
 .strategy-item {
@@ -1339,20 +1339,17 @@ textarea:focus-visible {
     border-radius: 8px !important;
   }
 
-  [x-data="scraperPanel"] .scraper-strategy-card.rounded-2xl {
-    border-radius: var(--rounded-2xl, 1rem) !important;
+  [x-data="scraperPanel"] .scraper-strategy-card.rounded-2xl,
+  [x-data="scraperPanel"] .scraper-strategy-card .strategy-card {
+    border-radius: 8px !important;
   }
 
   [x-data="scraperPanel"] .scraper-strategy-card .rounded-xl {
-    border-radius: var(--rounded-xl, 0.75rem) !important;
+    border-radius: 8px !important;
   }
 
   [x-data="scraperPanel"] .scraper-strategy-card .rounded-lg {
-    border-radius: var(--rounded-lg, 0.5rem) !important;
-  }
-
-  [x-data="scraperPanel"] .scraper-strategy-card .strategy-card:hover {
-    transform: translateY(-3px) !important;
+    border-radius: 8px !important;
   }
 
   [x-data="scraperPanel"] .scraper-strategy-card .strategy-item {

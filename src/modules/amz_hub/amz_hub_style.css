@@ -45,7 +45,7 @@
   right: 0;
   height: 4px;
   /* 顶部光条 */
-  background: linear-gradient(90deg, var(--color-blue-500), var(--color-violet-500), var(--color-orange-500));
+  background: linear-gradient(90deg, var(--color-blue-500), var(--color-rose-500), var(--color-orange-500));
   opacity: 0;
   transition: opacity var(--duration-normal) ease;
 }
@@ -412,15 +412,15 @@
 }
 
 .amz-hub-overview section[data-category="advanced"] .sop-card:nth-child(1) {
-  --color-accent: var(--color-orange-500);
-  --color-bg-selected: rgba(249, 115, 22, 0.08);
-  --color-border-light: rgba(249, 115, 22, 0.3);
+  --color-accent: var(--color-rose-500);
+  --color-bg-selected: rgba(244, 63, 94, 0.08);
+  --color-border-light: rgba(244, 63, 94, 0.3);
 }
 
 .amz-hub-overview section[data-category="advanced"] .sop-card:nth-child(2) {
-  --color-accent: var(--color-violet-500);
-  --color-bg-selected: rgba(139, 92, 246, 0.08);
-  --color-border-light: rgba(139, 92, 246, 0.3);
+  --color-accent: var(--color-rose-500);
+  --color-bg-selected: rgba(244, 63, 94, 0.08);
+  --color-border-light: rgba(244, 63, 94, 0.3);
 }
 
 .amz-hub-overview .sop-card .sop-icon-container {

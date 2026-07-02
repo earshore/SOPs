@@ -91,6 +91,10 @@
 /* ==================== 应用总览样式 ==================== */
 .app-overview-container {
   color: var(--color-slate-900);
+  --color-primary: var(--color-cyan-700);
+  --color-primary-light: var(--color-cyan-100);
+  --color-primary-dark: var(--color-cyan-800);
+  --focus-ring-soft: rgba(8, 145, 178, 0.16);
 }
 
 .app-overview-hero {
@@ -100,14 +104,14 @@
   border: 1px solid rgba(148, 163, 184, 0.24) !important;
   border-radius: var(--rounded-xl, 16px) !important;
   background:
-    radial-gradient(circle at 82% 18%, rgba(219, 39, 119, 0.08), transparent 32%),
-    linear-gradient(135deg, rgba(253, 244, 255, 0.98), rgba(255, 255, 255, 0.94) 52%, rgba(252, 231, 243, 0.86)) !important;
+    radial-gradient(circle at 82% 18%, rgba(8, 145, 178, 0.10), transparent 32%),
+    linear-gradient(135deg, rgba(236, 254, 255, 0.98), rgba(255, 255, 255, 0.94) 52%, rgba(224, 242, 254, 0.86)) !important;
   box-shadow: 0 18px 40px -32px rgba(15, 23, 42, 0.42) !important;
   overflow: hidden;
-  --wb-orb-1-color: rgba(168, 85, 247, 0.14);
-  --wb-orb-2-color: rgba(219, 39, 119, 0.11);
-  --wb-orb-3-color: rgba(190, 24, 93, 0.08);
-  --wb-particle-color: rgba(219, 39, 119, 0.45);
+  --wb-orb-1-color: rgba(6, 182, 212, 0.13);
+  --wb-orb-2-color: rgba(14, 165, 233, 0.10);
+  --wb-orb-3-color: rgba(2, 132, 199, 0.08);
+  --wb-particle-color: rgba(8, 145, 178, 0.42);
   --wb-text-primary: var(--color-slate-900) !important;
   --wb-text-secondary: var(--color-slate-600) !important;
   --wb-border-color: rgba(148, 163, 184, 0.24) !important;
@@ -122,8 +126,8 @@
   --wb-tag-text-weight: var(--font-medium, 500) !important;
   --wb-badge-text-size: var(--text-xs, 0.75rem) !important;
   --wb-badge-text-weight: var(--font-extrabold, 800) !important;
-  --wb-icon-shadow: 0 12px 24px -18px rgba(219, 39, 119, 0.72);
-  --wb-icon-shadow-hover: 0 14px 28px -20px rgba(219, 39, 119, 0.72);
+  --wb-icon-shadow: 0 12px 24px -18px rgba(8, 145, 178, 0.62);
+  --wb-icon-shadow-hover: 0 14px 28px -20px rgba(8, 145, 178, 0.62);
 }
 
 .app-overview-hero .wb-content {
@@ -153,9 +157,9 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--rounded-md, 8px) !important;
-  background: linear-gradient(135deg, var(--color-purple-500), var(--color-pink-600)) !important;
+  background: linear-gradient(135deg, var(--color-cyan-600), var(--color-blue-700)) !important;
   color: #ffffff;
-  box-shadow: 0 12px 24px -18px rgba(219, 39, 119, 0.72) !important;
+  box-shadow: 0 12px 24px -18px rgba(8, 145, 178, 0.62) !important;
 }
 
 .app-overview-hero .wb-title-row {
@@ -171,10 +175,10 @@
 .app-overview-hero .wb-badge {
   min-height: 1.625rem;
   padding: 0.25rem 0.625rem;
-  border: 1px solid rgba(219, 39, 119, 0.2);
+  border: 1px solid rgba(8, 145, 178, 0.2);
   border-radius: 999px;
-  background: var(--color-fuchsia-50) !important;
-  color: #be185d !important;
+  background: var(--color-cyan-50) !important;
+  color: var(--color-cyan-700) !important;
 }
 
 .app-overview-hero .wb-badge i,
@@ -210,7 +214,7 @@
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--color-purple-500), var(--color-pink-600));
+  background: linear-gradient(135deg, var(--color-cyan-600), var(--color-blue-700));
 }
 
 .app-overview-flow,
@@ -289,9 +293,9 @@
 
 .app-flow-step.app-child-link {
   --card-left-accent: currentColor;
-  --card-left-accent-bg: var(--color-fuchsia-50);
+  --card-left-accent-bg: var(--color-cyan-50);
   --overview-card-accent: currentColor;
-  --overview-card-accent-bg: var(--color-fuchsia-50);
+  --overview-card-accent-bg: var(--color-cyan-50);
   --overview-card-border: var(--border-muted, rgba(203, 213, 225, 0.72));
   --overview-card-transition-duration: 180ms;
 
@@ -299,7 +303,7 @@
   justify-content: flex-start;
   min-height: 7rem;
   padding: 1rem;
-  color: var(--color-purple-500);
+  color: var(--color-cyan-600);
   text-align: left;
 }
 
@@ -310,9 +314,9 @@
 }
 
 .app-flow-step.app-child-link:nth-child(2) {
-  --card-left-accent-bg: var(--color-fuchsia-50);
-  --overview-card-accent-bg: var(--color-fuchsia-50);
-  color: var(--color-purple-500);
+  --card-left-accent-bg: var(--color-emerald-50);
+  --overview-card-accent-bg: var(--color-emerald-50);
+  color: var(--color-emerald-600);
 }
 
 .app-flow-step.app-child-link:nth-child(3) {
@@ -345,9 +349,9 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--rounded-lg, 12px);
-  border: 1px solid var(--color-pink-100);
-  background: var(--color-fuchsia-50);
-  color: var(--color-purple-500);
+  border: 1px solid var(--color-cyan-100);
+  background: var(--color-cyan-50);
+  color: var(--color-cyan-600);
 }
 
 .app-flow-step.app-child-link:nth-child(1) .app-flow-icon {
@@ -357,9 +361,9 @@
 }
 
 .app-flow-step.app-child-link:nth-child(2) .app-flow-icon {
-  border-color: var(--color-pink-100);
-  background: var(--color-fuchsia-50);
-  color: var(--color-purple-500);
+  border-color: var(--color-emerald-100);
+  background: var(--color-emerald-50);
+  color: var(--color-emerald-600);
 }
 
 .app-flow-step.app-child-link:nth-child(3) .app-flow-icon {
@@ -498,9 +502,9 @@
 }
 
 .app-overview-card {
-  --color-accent: var(--color-purple-500);
-  --color-bg-selected: var(--color-fuchsia-50);
-  --color-border-light: var(--color-pink-100);
+  --color-accent: var(--color-cyan-600);
+  --color-bg-selected: var(--color-cyan-50);
+  --color-border-light: var(--color-cyan-100);
   --card-left-accent: var(--color-accent);
   --card-left-accent-bg: var(--color-bg-selected);
   --overview-card-accent: var(--color-accent);
@@ -538,6 +542,12 @@
   --color-accent: var(--color-cyan-600);
   --color-bg-selected: var(--color-cyan-50);
   --color-border-light: var(--color-cyan-100);
+}
+
+.app-card-slate {
+  --color-accent: var(--color-slate-700);
+  --color-bg-selected: var(--color-slate-100);
+  --color-border-light: var(--color-slate-200);
 }
 
 .app-card-head,

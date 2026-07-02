@@ -1,13 +1,12 @@
-@media (min-width: 1024px) {
+﻿@media (min-width: 1024px) {
     .np30-page > :nth-child(n + 2):where(
         .bg-white,
         .bg-slate-50,
         .bg-blue-50,
         .bg-emerald-50,
-        .bg-purple-50,
+        .bg-rose-50,
         .bg-orange-50,
         .bg-amber-50,
-        .bg-indigo-50,
         .bg-teal-50,
         .rounded-xl,
         .rounded-lg,
@@ -34,10 +33,9 @@
         .bg-slate-50,
         .bg-blue-50,
         .bg-emerald-50,
-        .bg-purple-50,
+        .bg-rose-50,
         .bg-orange-50,
         .bg-amber-50,
-        .bg-indigo-50,
         .bg-teal-50,
         [class*="bg-gradient-to-"]
     ) {
@@ -50,10 +48,9 @@
         .bg-slate-50,
         .bg-blue-50,
         .bg-emerald-50,
-        .bg-purple-50,
+        .bg-rose-50,
         .bg-orange-50,
         .bg-amber-50,
-        .bg-indigo-50,
         .bg-teal-50,
         [class*="from-"][class*="to-"]
     ) {

@@ -4,6 +4,7 @@ import {
   PAGE_ENTER_ANIMATION_INITIAL_CLASS,
   applyPageEnterAnimation,
   clearPageEnterAnimation,
+  preparePageEnterAnimation,
   wrapWithPageEnterAnimation
 } from '@/common/utils/pageEnterAnimation';
 
@@ -38,6 +39,16 @@ describe('pageEnterAnimation', () => {
     clearPageEnterAnimation(container);
 
     expect(container.classList.contains(PAGE_ENTER_ANIMATION_INITIAL_CLASS)).toBe(false);
+    expect(container.classList.contains(PAGE_ENTER_ANIMATION_ACTIVE_CLASS)).toBe(false);
+  });
+
+  it('prepares a container without starting the page enter animation', () => {
+    const container = document.createElement('div');
+    container.classList.add(PAGE_ENTER_ANIMATION_ACTIVE_CLASS);
+
+    preparePageEnterAnimation(container);
+
+    expect(container.classList.contains(PAGE_ENTER_ANIMATION_INITIAL_CLASS)).toBe(true);
     expect(container.classList.contains(PAGE_ENTER_ANIMATION_ACTIVE_CLASS)).toBe(false);
   });
 

@@ -1,10 +1,15 @@
 .playground-shell {
-  --playground-accent: var(--color-cyan-600, #0891b2);
-  --playground-accent-hover: var(--color-cyan-700, #0e7490);
-  --playground-accent-soft: var(--color-cyan-50, #ecfeff);
-  --playground-accent-border: rgba(6, 182, 212, 0.24);
+  --playground-accent: var(--color-slate-700, #334155);
+  --playground-accent-hover: var(--color-slate-800, #1e293b);
+  --playground-accent-active: var(--color-slate-900, #0f172a);
+  --playground-accent-light: var(--color-slate-500, #64748b);
+  --playground-accent-muted: var(--color-slate-200, #e2e8f0);
+  --playground-accent-soft: var(--color-slate-50, #f8fafc);
+  --playground-accent-border: rgba(51, 65, 85, 0.24);
+  --playground-accent-border-hover: rgba(51, 65, 85, 0.35);
+  --playground-accent-shadow: rgba(51, 65, 85, 0.12);
   --playground-border: var(--border-muted, rgba(203, 213, 225, 0.72));
-  --playground-focus-ring: var(--focus-ring-soft, rgba(6, 182, 212, 0.18));
+  --playground-focus-ring: var(--focus-ring-soft, rgba(51, 65, 85, 0.18));
   --playground-surface-hover: var(--surface-card-hover, var(--color-slate-50, #f8fafc));
   display: flex;
   flex-direction: column;
@@ -39,7 +44,7 @@
 .playground-thread-rail {
   min-width: 0;
   padding: var(--spacing-5, 1.25rem) var(--spacing-4, 1rem);
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(236, 254, 255, 0.76));
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(241, 245, 249, 0.82));
   border-right: 1px solid var(--color-slate-200, #e2e8f0);
   display: flex;
   flex-direction: column;
@@ -91,10 +96,10 @@
   justify-content: center;
   flex: 0 0 32px;
   border-radius: var(--rounded-lg, 0.5rem);
-  background: linear-gradient(135deg, var(--color-cyan-600, #0891b2), var(--color-cyan-400, #22d3ee));
+  background: linear-gradient(135deg, var(--playground-accent), var(--playground-accent-light));
   color: #ffffff;
   font-size: 13px;
-  box-shadow: 0 8px 18px -14px rgba(6, 182, 212, 0.6);
+  box-shadow: 0 8px 18px -14px rgba(51, 65, 85, 0.6);
 }
 
 .playground-logo {
@@ -113,10 +118,10 @@
   align-items: center;
   gap: var(--spacing-2-5, 0.625rem);
   padding: 0 var(--spacing-3-5, 0.875rem);
-  border: 1px solid rgba(6, 182, 212, 0.2);
+  border: 1px solid var(--playground-accent-border);
   border-radius: var(--rounded-lg, 0.5rem);
-  background: linear-gradient(135deg, #ffffff, var(--color-cyan-50, #ecfeff));
-  color: var(--color-cyan-700, #0e7490);
+  background: linear-gradient(135deg, #ffffff, var(--playground-accent-soft));
+  color: var(--playground-accent-hover);
   font-size: var(--text-base, 0.875rem);
   font-weight: 700;
   line-height: 1;
@@ -126,8 +131,8 @@
 }
 
 .playground-new-thread:hover {
-  border-color: rgba(6, 182, 212, 0.35);
-  box-shadow: 0 4px 6px -1px rgba(6, 182, 212, 0.15), 0 2px 4px -2px rgba(6, 182, 212, 0.1);
+  border-color: var(--playground-accent-border-hover);
+  box-shadow: 0 4px 6px -1px rgba(51, 65, 85, 0.15), 0 2px 4px -2px rgba(51, 65, 85, 0.1);
 }
 
 .playground-new-thread:active {
@@ -181,7 +186,7 @@
 }
 
 .playground-panel-title--prompt::before {
-  background: var(--color-indigo-600, #4f46e5);
+  background: var(--playground-accent);
 }
 
 .playground-thread-list {
@@ -221,13 +226,13 @@
 .playground-thread-item:hover,
 .playground-thread-item:focus-within {
   background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(6, 182, 212, 0.16);
+  border-color: rgba(51, 65, 85, 0.16);
 }
 
 .playground-thread-item.is-active {
   background: #ffffff;
-  border-color: rgba(6, 182, 212, 0.24);
-  box-shadow: inset 3px 0 0 var(--color-cyan-600, #0891b2), 0 4px 6px -1px rgba(6, 182, 212, 0.1), 0 2px 4px -2px rgba(6, 182, 212, 0.1);
+  border-color: var(--playground-accent-border);
+  box-shadow: inset 3px 0 0 var(--playground-accent), 0 4px 6px -1px rgba(51, 65, 85, 0.1), 0 2px 4px -2px rgba(51, 65, 85, 0.1);
 }
 
 .playground-thread-select {
@@ -253,8 +258,8 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--rounded-lg, 0.5rem);
-  background: var(--color-cyan-100, #cffafe);
-  color: var(--color-cyan-700, #0e7490);
+  background: var(--playground-accent-muted);
+  color: var(--playground-accent-hover);
   font-size: 12px;
   margin-top: 1px;
 }
@@ -337,14 +342,14 @@
 .playground-prompt-item:hover,
 .playground-prompt-item:focus-within {
   background: #ffffff;
-  border-color: rgba(6, 182, 212, 0.2);
-  box-shadow: 0 4px 6px -1px rgba(6, 182, 212, 0.08), 0 2px 4px -2px rgba(6, 182, 212, 0.08);
+  border-color: rgba(51, 65, 85, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(51, 65, 85, 0.08), 0 2px 4px -2px rgba(51, 65, 85, 0.08);
 }
 
 .playground-prompt-item.is-preview-active {
   background: #ffffff;
-  border-color: rgba(6, 182, 212, 0.24);
-  box-shadow: inset 3px 0 0 var(--color-cyan-600, #0891b2), 0 4px 6px -1px rgba(6, 182, 212, 0.1), 0 2px 4px -2px rgba(6, 182, 212, 0.1);
+  border-color: var(--playground-accent-border);
+  box-shadow: inset 3px 0 0 var(--playground-accent), 0 4px 6px -1px rgba(51, 65, 85, 0.1), 0 2px 4px -2px rgba(51, 65, 85, 0.1);
 }
 
 .playground-prompt-draft:active {
@@ -385,14 +390,14 @@
 }
 
 .playground-prompt-use {
-  background: var(--color-cyan-50, #ecfeff);
-  color: var(--color-cyan-700, #0e7490);
+  background: var(--playground-accent-soft);
+  color: var(--playground-accent-hover);
 }
 
 .playground-prompt-use:hover,
 .playground-prompt-use:focus-visible {
-  background: var(--color-cyan-100, #cffafe);
-  color: var(--color-cyan-800, #155e75);
+  background: var(--playground-accent-muted);
+  color: var(--playground-accent-active);
   outline: none;
 }
 
@@ -421,8 +426,8 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--rounded-lg, 0.5rem);
-  background: var(--color-indigo-50, #eef2ff);
-  color: var(--color-indigo-600, #4f46e5);
+  background: var(--color-slate-100, #f1f5f9);
+  color: var(--color-slate-700, #334155);
   font-size: 12px;
 }
 
@@ -616,9 +621,9 @@
 
 .playground-top-icon:hover,
 .playground-tuning-panel summary:hover {
-  border-color: rgba(6, 182, 212, 0.18);
-  background: var(--color-cyan-50, #ecfeff);
-  color: var(--color-cyan-700, #0e7490);
+  border-color: rgba(51, 65, 85, 0.18);
+  background: var(--playground-accent-soft);
+  color: var(--playground-accent-hover);
 }
 
 .playground-top-icon:focus-visible,
@@ -635,9 +640,9 @@
 }
 
 .playground-top-icon[aria-expanded="false"] {
-  border-color: rgba(6, 182, 212, 0.24);
-  background: var(--color-cyan-50, #ecfeff);
-  color: var(--color-cyan-700, #0e7490);
+  border-color: var(--playground-accent-border);
+  background: var(--playground-accent-soft);
+  color: var(--playground-accent-hover);
 }
 
 .playground-select {
@@ -658,8 +663,8 @@
 }
 
 .playground-select:focus {
-  border-color: rgba(6, 182, 212, 0.5);
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+  border-color: rgba(51, 65, 85, 0.5);
+  box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.2);
 }
 
 .playground-select:disabled {
@@ -728,8 +733,8 @@
 }
 
 .playground-field textarea:focus {
-  border-color: rgba(6, 182, 212, 0.5);
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+  border-color: rgba(51, 65, 85, 0.5);
+  box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.2);
 }
 
 .playground-field textarea::placeholder {
@@ -742,15 +747,15 @@
   margin: 0;
   appearance: none;
   background: transparent;
-  accent-color: var(--color-cyan-600, #0891b2);
+  accent-color: var(--playground-accent);
 }
 
 .playground-field-temperature input::-webkit-slider-runnable-track {
   height: 2px;
   border-radius: 999px;
   background: linear-gradient(90deg,
-      var(--color-cyan-600, #0891b2) 0 var(--playground-temperature-percent, 30%),
-      var(--color-cyan-100, #cffafe) var(--playground-temperature-percent, 30%) 100%);
+      var(--playground-accent) 0 var(--playground-temperature-percent, 30%),
+      var(--playground-accent-muted) var(--playground-temperature-percent, 30%) 100%);
 }
 
 .playground-field-temperature input::-webkit-slider-thumb {
@@ -760,7 +765,7 @@
   appearance: none;
   border: 0;
   border-radius: 50%;
-  background: var(--color-cyan-600, #0891b2);
+  background: var(--playground-accent);
   box-shadow: 0 0 0 4px #ffffff;
 }
 
@@ -773,7 +778,7 @@
 .playground-field-temperature input::-moz-range-progress {
   height: 2px;
   border-radius: 999px;
-  background: var(--color-cyan-600, #0891b2);
+  background: var(--playground-accent);
 }
 
 .playground-field-temperature input::-moz-range-thumb {
@@ -781,11 +786,11 @@
   height: 14px;
   border: 0;
   border-radius: 50%;
-  background: var(--color-cyan-600, #0891b2);
+  background: var(--playground-accent);
 }
 
 .playground-field-temperature output {
-  color: var(--color-cyan-700, #0e7490);
+  color: var(--playground-accent-hover);
   font-weight: 700;
   font-family: 'JetBrains Mono', monospace;
 }
@@ -808,10 +813,10 @@
 }
 
 .playground-reset-tuning:hover {
-  border-color: rgba(6, 182, 212, 0.3);
-  background: var(--color-cyan-50, #ecfeff);
-  color: var(--color-cyan-700, #0e7490);
-  box-shadow: 0 4px 6px -1px rgba(6, 182, 212, 0.1), 0 2px 4px -2px rgba(6, 182, 212, 0.1);
+  border-color: var(--playground-accent-border-hover);
+  background: var(--playground-accent-soft);
+  color: var(--playground-accent-hover);
+  box-shadow: 0 4px 6px -1px rgba(51, 65, 85, 0.1), 0 2px 4px -2px rgba(51, 65, 85, 0.1);
 }
 
 .playground-stage {
@@ -855,10 +860,10 @@
   gap: var(--spacing-2, 0.5rem);
   margin-bottom: var(--spacing-3, 0.75rem);
   padding: 0 var(--spacing-3, 0.75rem);
-  border: 1px solid rgba(6, 182, 212, 0.22);
+  border: 1px solid rgba(51, 65, 85, 0.22);
   border-radius: var(--rounded-lg, 0.5rem);
-  background: rgba(236, 254, 255, 0.78);
-  color: var(--color-cyan-800, #155e75);
+  background: rgba(248, 250, 252, 0.86);
+  color: var(--playground-accent-active);
   font-size: var(--text-sm, 0.8125rem);
   font-weight: 700;
   line-height: 1;
@@ -873,8 +878,8 @@
   height: 8px;
   flex: 0 0 8px;
   border-radius: 999px;
-  background: var(--color-cyan-600, #0891b2);
-  box-shadow: 0 0 0 5px rgba(8, 145, 178, 0.12);
+  background: var(--playground-accent);
+  box-shadow: 0 0 0 5px var(--playground-accent-shadow);
   animation: playground-pending-pulse 1s ease-in-out infinite;
 }
 

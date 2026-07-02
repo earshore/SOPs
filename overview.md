@@ -1,47 +1,26 @@
-# 残留 CSP Parser 报错修复概览
+# 知识内容评审任务概览
 
-## 本轮完成
+## 已完成内容
 
-- 继续沿用长期安全方向：不回退到普通 Alpine，不在 CSP 中重新加入 `unsafe-eval`。
-- 针对数据采集、AI 智能分析、Prompt 生产三个页面，进一步清理 `@alpinejs/csp` 可能无法解析的模板内联表达式。
-- 将剩余风险表达式迁移到 TypeScript getter/method，包括：
-  - `!xxx` 否定表达式；
-  - `> 0` / `tasks.length > 0`；
-  - `x-data="{ ... }"` 局部对象字面量；
-  - `target.icon + ' ...'` 字符串拼接；
-  - `x-for="renderVersion in [reportRenderVersion]"` 数组表达式；
-  - 性能设置区域复杂对象型 `:class`。
+- 继续完成对项目中三大知识模块的专业评审：
+  - `src/modules/sops`：SOPS流程中心
+  - `src/modules/amz_hub`：AMAZON智库
+  - `src/modules/more`：更多/业务场景
+- 基于六个维度输出完整评审报告：内容准确性、完整性与覆盖度、结构合理性、时效性、一致性、可用性。
+- 形成模块评分、核心发现、问题清单、统一术语对照、逐项优化建议与落地优先级。
 
-## 关键改动
+## 关键结论
 
-- `scraper/template.html` / `ScraperPanel.ts`
-  - 新增 `hasNoValidAsins`、`hasInvalidAsins`、`startDisabled`、`hasTasks` 等 getter。
-  - 模板中改用简单属性读取。
+- SOPS流程中心：78/100，流程框架较完整，但存在FBA限重冲突、利润模型过简、QA关键词/互动边界需修订等问题。
+- AMAZON智库：82/100，欧洲站定位清晰、内容较新，但需区分官方规则与经验模型；新品30天页面中合规标识相关表述为高风险，建议立即修改。
+- 更多模块：72/100，自动化场景演示价值高，但差评/Feedback/Product Review/Brand Review边界不清，需增加自动化安全闸与人工确认机制。
 
-- `ai_analysis/template.html` / `AlpinePanel.ts` / `computedProperties.ts` / `PerformanceSettings.ts`
-  - 用 `showSelectionSummary`、`hasNoScraperData`、`runAnalysisDisabled`、`analysisNotRunning`、`jsonViewerCollapsed` 等替代否定表达式。
-  - 用组件级 `productSummaryTooltipVisible` 替代局部 `x-data`。
-  - 用 `getListingTargetIconClass()`、`getReviewTargetIconClass()` 替代字符串拼接。
-  - 用性能设置 getter 替代复杂对象型 `:class`。
-  - 移除仅为强制重渲染使用的数组型 `x-for="renderVersion in [reportRenderVersion]"` 包装。
+## 主要交付物
 
-- `promptlab/template.html` / `PromptlabPanel.ts`
-  - 用 `reportActionDisabled` 替代 `!hasReport`。
-  - 用 `generateButtonDisabled` 替代 `!isReady`。
-
-## 验证结果
-
-- `npm run build`：通过。
-- 针对三页模板复扫：未再命中目标高风险 Alpine 表达式模式。
-- `<template>` 标签数量检查：三页均 open/close 平衡。
-- `npm run type-check`：未通过，但失败集中在既有测试文件类型问题：
-  - `analysisPrompts.test.ts`
-  - `promptSanitizer.test.ts`
-  - `dnaExtractor.test.ts`
-
-这些 type-check 失败与本轮 CSP 模板迁移无直接关系，生产构建已验证通过。
+- `knowledge-content-review-report.md`：完整知识内容评审报告。
 
 ## 后续建议
 
-- 部署后重点回归三条路由：数据采集、AI 智能分析、Prompt 生产。
-- 如线上仍出现 `CSP Parser Error`，下一步应基于新的 console 堆栈继续收敛其它动态模板或运行时渲染片段。
+- 优先修复合规红线、FBA费用/限重口径、Review/Feedback术语边界。
+- 第二阶段补齐产品准入合规矩阵与SKU利润测算SOP。
+- 第三阶段优化过长页面结构、政策来源字段、跨模块互链与数据一致性测试。

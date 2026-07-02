@@ -247,6 +247,7 @@ body {
 .nav-group.is-open .mega-menu {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
   transform: translateY(0);
   transition:
     opacity var(--duration-normal) var(--ease-smooth),
@@ -264,6 +265,11 @@ body {
   border-top: 0;
   border-radius: 0 0 12px 12px;
   box-shadow: 0 24px 60px -24px rgba(15, 23, 42, 0.32);
+}
+
+.nav-group:not(.is-open) .mega-menu,
+.nav-group:not(.is-open) .mega-menu * {
+  pointer-events: none !important;
 }
 
 .mega-menu-header {
