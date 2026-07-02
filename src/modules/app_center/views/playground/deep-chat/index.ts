@@ -121,9 +121,6 @@ interface PromptPreviewPointer {
 const THREAD_STORAGE_KEY = 'playground_deep_chat_threads_v1';
 const MAX_THREAD_COUNT = 30;
 const MAX_PROMPT_DRAFT_COUNT = 12;
-const DEFAULT_PROMPT_PANEL_HEIGHT = 240;
-const MIN_PROMPT_PANEL_HEIGHT = 150;
-const MIN_THREAD_PANEL_HEIGHT = 120;
 const EMPTY_CHAT_WRAP_HEIGHT = 168;
 const MESSAGE_TOOLBAR_CLASS = 'playground-message-toolbar';
 const THREAD_RAIL_COLLAPSED_CLASS = 'is-rail-collapsed';
@@ -879,7 +876,6 @@ function bindControls(container: HTMLElement): void {
   const threadList = container.querySelector<HTMLElement>('#playground-thread-list');
   const promptList = container.querySelector<HTMLElement>('#playground-prompt-list');
 
-  setupRailSectionResizer(container);
   bindModelControls(container, modelSelect, refreshButton, clearButton, railToggleButton);
   bindThreadControls(container, threadList, promptList);
   bindTuningControls({
@@ -1153,49 +1149,66 @@ function positionPromptPreview(
   anchor?: HTMLElement,
   pointer?: PromptPreviewPointer
 ): void {
-  const rail = container.querySelector<HTMLElement>('#playground-thread-rail');
-  const railRect = rail?.getBoundingClientRect();
+  const promptRail = container.querySelector<HTMLElement>('#playground-prompt-rail');
+  const promptRailRect = promptRail?.getBoundingClientRect();
   const anchorRect = anchor?.getBoundingClientRect();
   const viewportPadding = 16;
   const gap = pointer ? 14 : 12;
-  const previewWidth = Math.min(520, Math.max(280, window.innerWidth - viewportPadding * 2));
+  const previewWidth = Math.min(480, Math.max(280, window.innerWidth - viewportPadding * 2));
   const previewHeight = Math.min(520, Math.max(260, window.innerHeight - 160));
-  const anchoredLeft = Math.round((railRect?.right || 0) + gap);
   const maxLeft = Math.max(viewportPadding, window.innerWidth - previewWidth - viewportPadding);
-  const preferredLeft = resolvePromptPreviewLeft(pointer, anchoredLeft, previewWidth, gap, viewportPadding);
+  const preferredLeft = resolvePromptPreviewLeft(
+    pointer,
+    anchorRect,
+    promptRailRect,
+    previewWidth,
+    gap,
+    viewportPadding
+  );
   const left = Math.round(clampNumber(preferredLeft, viewportPadding, maxLeft));
-  const anchoredTop = anchorRect?.top ?? (railRect ? railRect.top + 88 : 118);
+  const anchoredTop = anchorRect?.top ?? (promptRailRect ? promptRailRect.top + 56 : 118);
   const minTop = 72;
   const maxTop = Math.max(minTop, window.innerHeight - previewHeight - 24);
   const preferredTop = resolvePromptPreviewTop(pointer, anchoredTop, previewHeight, gap, viewportPadding);
   const top = Math.round(clampNumber(preferredTop, minTop, maxTop));
-  const arrowTop = resolvePromptPreviewArrowTop(pointer, top, previewHeight);
+  const anchorY = pointer?.clientY;
+  const arrowTop = resolvePromptPreviewArrowTop(anchorY, top, previewHeight);
+  const anchorX = pointer?.clientX ?? anchorRect?.left ?? promptRailRect?.left;
+  const isLeftOfAnchor = Number.isFinite(anchorX) && left + previewWidth <= Number(anchorX) - 2;
 
   preview.style.left = `${left}px`;
   preview.style.top = `${top}px`;
   preview.style.width = `${previewWidth}px`;
   preview.style.maxHeight = `${previewHeight}px`;
+  preview.classList.toggle('is-left-of-anchor', isLeftOfAnchor);
   preview.style.setProperty('--playground-prompt-preview-arrow-top', `${arrowTop}px`);
   preview.style.setProperty('--playground-prompt-preview-body-max-height', `${Math.max(180, previewHeight - 48)}px`);
 }
 
 function resolvePromptPreviewLeft(
   pointer: PromptPreviewPointer | undefined,
-  anchoredLeft: number,
+  anchorRect: DOMRect | undefined,
+  promptRailRect: DOMRect | undefined,
   previewWidth: number,
   gap: number,
   viewportPadding: number
 ): number {
-  if (!pointer) {
-    return anchoredLeft;
+  const anchorLeft = pointer?.clientX ?? anchorRect?.left ?? promptRailRect?.left ?? viewportPadding;
+  const anchorRight = pointer?.clientX ?? anchorRect?.right ?? promptRailRect?.right ?? viewportPadding;
+  const leftSide = anchorLeft - previewWidth - gap;
+  const rightSide = anchorRight + gap;
+  const canShowLeft = leftSide >= viewportPadding;
+  const canShowRight = rightSide + previewWidth <= window.innerWidth - viewportPadding;
+
+  if (canShowLeft) {
+    return leftSide;
   }
 
-  const pointerLeft = pointer.clientX + gap;
-  if (pointerLeft + previewWidth > window.innerWidth - viewportPadding) {
-    return pointer.clientX - previewWidth - gap;
+  if (canShowRight) {
+    return rightSide;
   }
 
-  return pointerLeft;
+  return leftSide;
 }
 
 function resolvePromptPreviewTop(
@@ -1217,16 +1230,12 @@ function resolvePromptPreviewTop(
   return pointerTop;
 }
 
-function resolvePromptPreviewArrowTop(
-  pointer: PromptPreviewPointer | undefined,
-  top: number,
-  previewHeight: number
-): number {
-  if (!pointer) {
+function resolvePromptPreviewArrowTop(anchorY: number | undefined, top: number, previewHeight: number): number {
+  if (!Number.isFinite(anchorY)) {
     return 28;
   }
 
-  return Math.round(clampNumber(pointer.clientY - top - 6, 16, Math.max(16, previewHeight - 24)));
+  return Math.round(clampNumber(Number(anchorY) - top - 6, 16, Math.max(16, previewHeight - 24)));
 }
 
 function clampNumber(value: number, min: number, max: number): number {
@@ -1267,102 +1276,6 @@ function clearPromptPreviewHideTimer(): void {
     window.clearTimeout(promptPreviewHideTimer);
     promptPreviewHideTimer = null;
   }
-}
-
-function getPanelMinHeight(panel: HTMLElement, fallback: number): number {
-  const minHeight = Number.parseFloat(window.getComputedStyle(panel).minHeight);
-  return Number.isFinite(minHeight) ? minHeight : fallback;
-}
-
-function setupRailSectionResizer(container: HTMLElement): void {
-  const threadPanel = container.querySelector<HTMLElement>('.playground-thread-list-wrap');
-  const promptPanel = container.querySelector<HTMLElement>('.playground-prompt-list-wrap');
-  const resizer = container.querySelector<HTMLElement>('#playground-rail-resizer');
-
-  if (!threadPanel || !promptPanel || !resizer) {
-    return;
-  }
-
-  let activePointerId: number | null = null;
-  let startY = 0;
-  let startPromptHeight = DEFAULT_PROMPT_PANEL_HEIGHT;
-
-  const applyPromptPanelHeight = (height: number): void => {
-    const availableHeight = threadPanel.getBoundingClientRect().height + promptPanel.getBoundingClientRect().height;
-    const minPromptHeight = getPanelMinHeight(promptPanel, MIN_PROMPT_PANEL_HEIGHT);
-    const minThreadHeight = getPanelMinHeight(threadPanel, MIN_THREAD_PANEL_HEIGHT);
-    const maxPromptHeight = Math.max(minPromptHeight, availableHeight - minThreadHeight);
-    const nextHeight = Math.min(Math.max(height, minPromptHeight), maxPromptHeight);
-
-    promptPanel.style.flexBasis = `${Math.round(nextHeight)}px`;
-    resizer.setAttribute('aria-valuemin', String(Math.round(minPromptHeight)));
-    resizer.setAttribute('aria-valuemax', String(Math.round(maxPromptHeight)));
-    resizer.setAttribute('aria-valuenow', String(Math.round(nextHeight)));
-  };
-
-  applyPromptPanelHeight(promptPanel.getBoundingClientRect().height || DEFAULT_PROMPT_PANEL_HEIGHT);
-
-  const stopResize = (): void => {
-    if (activePointerId !== null) {
-      try {
-        resizer.releasePointerCapture(activePointerId);
-      } catch {
-        // Pointer capture may already be released by the browser.
-      }
-    }
-
-    activePointerId = null;
-    document.body.classList.remove('playground-is-resizing-rail');
-    window.removeEventListener('pointermove', onPointerMove);
-    window.removeEventListener('pointerup', onPointerUp);
-    window.removeEventListener('pointercancel', onPointerUp);
-  };
-
-  const onPointerMove = (event: PointerEvent): void => {
-    if (activePointerId === null || event.pointerId !== activePointerId) {
-      return;
-    }
-
-    applyPromptPanelHeight(startPromptHeight - (event.clientY - startY));
-  };
-
-  const onPointerUp = (event: PointerEvent): void => {
-    if (activePointerId !== null && event.pointerId !== activePointerId) {
-      return;
-    }
-
-    stopResize();
-  };
-
-  const onPointerDown = (event: PointerEvent): void => {
-    event.preventDefault();
-    activePointerId = event.pointerId;
-    startY = event.clientY;
-    startPromptHeight = promptPanel.getBoundingClientRect().height;
-    resizer.setPointerCapture(event.pointerId);
-    document.body.classList.add('playground-is-resizing-rail');
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-    window.addEventListener('pointercancel', onPointerUp);
-  };
-
-  const onKeyDown = (event: KeyboardEvent): void => {
-    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
-      return;
-    }
-
-    event.preventDefault();
-    const currentHeight = promptPanel.getBoundingClientRect().height || DEFAULT_PROMPT_PANEL_HEIGHT;
-    applyPromptPanelHeight(currentHeight + (event.key === 'ArrowUp' ? 32 : -32));
-  };
-
-  resizer.addEventListener('pointerdown', onPointerDown);
-  resizer.addEventListener('keydown', onKeyDown);
-  cleanupCallbacks.push(() => {
-    stopResize();
-    resizer.removeEventListener('pointerdown', onPointerDown);
-    resizer.removeEventListener('keydown', onKeyDown);
-  });
 }
 
 function toggleThreadRail(container: HTMLElement): void {

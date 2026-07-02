@@ -22,7 +22,7 @@
   height: 100%;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(240px, 260px) minmax(0, 1fr);
+  grid-template-columns: minmax(220px, 240px) minmax(0, 1fr) minmax(240px, 280px);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), var(--color-slate-50, #f8fafc));
   color: var(--color-slate-900, #0f172a);
   border: 1px solid var(--color-slate-200, #e2e8f0);
@@ -33,7 +33,7 @@
 }
 
 .playground-page.is-rail-collapsed {
-  grid-template-columns: 0 minmax(0, 1fr);
+  grid-template-columns: 0 minmax(0, 1fr) minmax(240px, 280px);
 }
 
 .playground-thread-rail {
@@ -51,6 +51,16 @@
     padding 200ms cubic-bezier(0, 0, 0.2, 1),
     transform 200ms cubic-bezier(0, 0, 0.2, 1),
     border-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.playground-prompt-rail {
+  min-width: 0;
+  padding: var(--spacing-5, 1.25rem) var(--spacing-4, 1rem);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  border-left: 1px solid var(--color-slate-200, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .playground-page.is-rail-collapsed .playground-thread-rail {
@@ -133,71 +143,45 @@
 }
 
 .playground-prompt-list-wrap {
-  min-height: 150px;
+  min-height: 0;
   display: flex;
-  flex: 0 0 240px;
+  flex: 1 1 auto;
   flex-direction: column;
-  gap: var(--spacing-2, 0.5rem);
-  padding-top: var(--spacing-3, 0.75rem);
-  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  gap: var(--spacing-2-5, 0.625rem);
 }
 
-.playground-rail-resizer {
-  height: 14px;
-  flex: 0 0 14px;
+.playground-panel-title {
+  min-height: 28px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin: calc(var(--spacing-3, 0.75rem) * -1) 0;
-  border: 0;
-  background: transparent;
-  cursor: row-resize;
-  touch-action: none;
-}
-
-.playground-rail-resizer::before {
-  content: "";
-  width: 44px;
-  height: 3px;
-  border-radius: 999px;
-  background: rgba(148, 163, 184, 0.45);
-  transition: background 150ms cubic-bezier(0, 0, 0.2, 1), width 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.playground-rail-resizer:hover::before,
-.playground-rail-resizer:focus-visible::before {
-  width: 58px;
-  background: rgba(6, 182, 212, 0.65);
-}
-
-.playground-rail-resizer:focus-visible {
-  outline: none;
-}
-
-.playground-is-resizing-rail {
-  cursor: row-resize;
-  user-select: none;
-}
-
-.playground-thread-list-title {
-  display: inline-flex;
-  align-items: center;
   gap: var(--spacing-2, 0.5rem);
+  margin: 0;
   padding: 0 var(--spacing-2-5, 0.625rem);
-  color: var(--color-slate-600, #475569);
-  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-slate-900, #0f172a);
+  font-size: 13px;
   line-height: 1.2;
   font-weight: 800;
   text-transform: none;
   letter-spacing: 0;
 }
 
-.playground-thread-list-title::before {
+.playground-panel-title::before {
   content: "";
   width: 0.25rem;
-  height: 0.875rem;
+  height: 1rem;
   border-radius: 999px;
   background: var(--playground-accent);
+}
+
+.playground-panel-title::after {
+  content: "";
+  height: 1px;
+  flex: 1 1 auto;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.32), rgba(148, 163, 184, 0));
+}
+
+.playground-panel-title--prompt::before {
+  background: var(--color-indigo-600, #4f46e5);
 }
 
 .playground-thread-list {
@@ -224,7 +208,7 @@
   width: 100%;
   min-width: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-1, 0.25rem);
   padding: var(--spacing-1, 0.25rem);
   border: 1px solid transparent;
@@ -250,9 +234,10 @@
   min-width: 0;
   flex: 1 1 auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-2-5, 0.625rem);
-  padding: var(--spacing-1-5, 0.375rem);
+  min-height: 76px;
+  padding: var(--spacing-2, 0.5rem) var(--spacing-1-5, 0.375rem);
   border: 0;
   background: transparent;
   color: inherit;
@@ -271,6 +256,7 @@
   background: var(--color-cyan-100, #cffafe);
   color: var(--color-cyan-700, #0e7490);
   font-size: 12px;
+  margin-top: 1px;
 }
 
 .playground-thread-copy {
@@ -283,22 +269,25 @@
   display: block;
   max-width: 100%;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .playground-thread-name {
+  display: -webkit-box;
   color: var(--color-slate-900, #0f172a);
   font-size: 13px;
-  line-height: 1.2;
-  font-weight: 600;
+  line-height: 1.35;
+  font-weight: 700;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .playground-thread-meta {
-  margin-top: 3px;
+  margin-top: 4px;
   color: var(--color-slate-500, #64748b);
   font-size: 11px;
-  line-height: 1.2;
+  line-height: 1.35;
 }
 
 .playground-thread-delete {
@@ -523,6 +512,15 @@
   transform: rotate(45deg);
 }
 
+.playground-prompt-preview-popover.is-left-of-anchor::before {
+  right: -7px;
+  left: auto;
+  border-top: 1px solid rgba(148, 163, 184, 0.28);
+  border-right: 1px solid rgba(148, 163, 184, 0.28);
+  border-bottom: 0;
+  border-left: 0;
+}
+
 .playground-prompt-preview-title {
   display: flex;
   flex-wrap: wrap;
@@ -631,7 +629,6 @@
 .playground-prompt-draft:focus-visible,
 .playground-prompt-use:focus-visible,
 .playground-prompt-delete:focus-visible,
-.playground-rail-resizer:focus-visible,
 .playground-reset-tuning:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--playground-focus-ring);
@@ -919,6 +916,21 @@
   box-shadow: none;
 }
 
+@media (max-width: 1180px) and (min-width: 901px) {
+  .playground-page {
+    grid-template-columns: minmax(216px, 232px) minmax(0, 1fr) minmax(232px, 260px);
+  }
+
+  .playground-page.is-rail-collapsed {
+    grid-template-columns: 0 minmax(0, 1fr) minmax(232px, 260px);
+  }
+
+  .playground-thread-rail,
+  .playground-prompt-rail {
+    padding-inline: var(--spacing-3, 0.75rem);
+  }
+}
+
 @media (max-width: 900px) {
   .playground-page {
     grid-template-columns: 1fr;
@@ -929,6 +941,10 @@
   }
 
   .playground-thread-rail {
+    display: none;
+  }
+
+  .playground-prompt-rail {
     display: none;
   }
 
@@ -990,6 +1006,11 @@
     border-right-color: var(--playground-border);
   }
 
+  .playground-prompt-rail {
+    background: var(--surface-card, #ffffff);
+    border-left-color: var(--playground-border);
+  }
+
   .playground-main {
     background: var(--surface-card, #ffffff);
   }
@@ -1001,31 +1022,30 @@
   }
 
   .playground-prompt-list-wrap {
-    min-height: 220px;
-    flex: 0 0 320px;
+    min-height: 0;
+    flex: 1 1 auto;
     gap: var(--spacing-2, 0.5rem);
-    padding-top: var(--spacing-2-5, 0.625rem);
   }
 
   .playground-thread-list {
     gap: var(--spacing-1, 0.25rem);
   }
 
-  .playground-thread-list-title {
+  .playground-panel-title {
     padding: 0 var(--spacing-1-5, 0.375rem);
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .playground-thread-item {
-    min-height: 34px;
+    min-height: 80px;
     gap: 2px;
     padding: 2px;
   }
 
   .playground-thread-select {
-    min-height: 30px;
+    min-height: 76px;
     gap: var(--spacing-1-5, 0.375rem);
-    padding: 3px var(--spacing-1-5, 0.375rem);
+    padding: var(--spacing-2, 0.5rem) var(--spacing-1-5, 0.375rem);
   }
 
   .playground-thread-icon {
@@ -1036,23 +1056,21 @@
   }
 
   .playground-thread-copy {
-    display: flex;
+    display: block;
     min-width: 0;
-    align-items: center;
-    gap: var(--spacing-1-5, 0.375rem);
   }
 
   .playground-thread-name {
-    flex: 1 1 auto;
     min-width: 0;
     font-size: 12px;
+    line-height: 1.35;
   }
 
   .playground-thread-meta {
-    flex: 0 0 86px;
-    max-width: 86px;
-    margin-top: 0;
+    max-width: 100%;
+    margin-top: 4px;
     font-size: 10px;
+    line-height: 1.35;
   }
 
   .playground-thread-delete {
@@ -1082,7 +1100,6 @@
     border-radius: 8px !important;
   }
 
-  .playground-thread-name,
   .playground-prompt-meta {
     min-width: 0;
     overflow: hidden;
