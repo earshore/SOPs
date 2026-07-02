@@ -31,7 +31,6 @@ const PERFORMANCE_BASELINE = {
   }
 };
 
-test.describe('Scraper 模块性能测试', () => {
   let scraper: ScraperPage;
 
   test.beforeEach(async ({ page }) => {
@@ -670,4 +669,3 @@ test.describe('Scraper 模块性能测试', () => {
       ).toBeLessThan(5);
     });
   });
-});
