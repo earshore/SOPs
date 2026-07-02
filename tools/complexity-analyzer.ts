@@ -348,15 +348,59 @@ class ComplexityAnalyzer {
 
   generateHtmlReport(result: ScanResult): string {
     const timestamp = new Date().toISOString();
-    
-    let html = `<!DOCTYPE html>
+
+    return [
+      this.generateHtmlHeader(result, timestamp),
+      this.generateHtmlIssueContent(result.issues),
+      '\n</body>\n</html>'
+    ].join('');
+  }
+
+  private generateHtmlHeader(result: ScanResult, timestamp: string): string {
+    return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>代码复杂度分析报告</title>
-  <style>
-    body {
+${this.generateHtmlStyles()}
+</head>
+<body>
+  <div class="header">
+    <h1>📊 代码复杂度分析报告</h1>
+    <p>生成时间: ${timestamp}</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value">${result.totalFiles}</div>
+      <div class="stat-label">扫描文件总数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${result.totalFunctions}</div>
+      <div class="stat-label">函数总数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${result.longFunctions}</div>
+      <div class="stat-label">过长函数 (> ${this.maxLines} 行)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${result.complexFunctions}</div>
+      <div class="stat-label">高复杂度函数 (> ${this.maxComplexity})</div>
+    </div>
+  </div>
+`;
+  }
+
+  private generateHtmlStyles(): string {
+    return `  <style>
+${this.generateLayoutStyles()}
+${this.generateIssueStyles()}
+  </style>`;
+  }
+
+  private generateLayoutStyles(): string {
+    return `    body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       line-height: 1.6;
       max-width: 1200px;
@@ -394,8 +438,11 @@ class ComplexityAnalyzer {
     .stat-label {
       color: #666;
       font-size: 14px;
-    }
-    .issue-card {
+    }`;
+  }
+
+  private generateIssueStyles(): string {
+    return `    .issue-card {
       background: white;
       padding: 20px;
       border-radius: 8px;
@@ -471,52 +518,35 @@ class ComplexityAnalyzer {
       border-radius: 8px;
       text-align: center;
       font-size: 18px;
+    }`;
+  }
+
+  private generateHtmlIssueContent(issues: ComplexityIssue[]): string {
+    if (issues.length === 0) {
+      return `<div class="success">✅ 未发现复杂度问题</div>`;
     }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>📊 代码复杂度分析报告</h1>
-    <p>生成时间: ${timestamp}</p>
-  </div>
 
-  <div class="stats">
-    <div class="stat-card">
-      <div class="stat-value">${result.totalFiles}</div>
-      <div class="stat-label">扫描文件总数</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${result.totalFunctions}</div>
-      <div class="stat-label">函数总数</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${result.longFunctions}</div>
-      <div class="stat-label">过长函数 (> ${this.maxLines} 行)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${result.complexFunctions}</div>
-      <div class="stat-label">高复杂度函数 (> ${this.maxComplexity})</div>
-    </div>
-  </div>
-`;
+    return [
+      this.sortIssuesBySeverity(issues).map(issue => this.generateIssueCard(issue)).join(''),
+      this.generateRecommendationsHtml()
+    ].join('');
+  }
 
-    if (result.issues.length === 0) {
-      html += `<div class="success">✅ 未发现复杂度问题</div>`;
-    } else {
-      // 按严重程度排序
-      const sorted = [...result.issues].sort((a, b) => {
-        if (a.issueType === 'both' && b.issueType !== 'both') return -1;
-        if (a.issueType !== 'both' && b.issueType === 'both') return 1;
-        return b.linesCount - a.linesCount;
-      });
+  private sortIssuesBySeverity(issues: ComplexityIssue[]): ComplexityIssue[] {
+    return [...issues].sort((a, b) => {
+      if (a.issueType === 'both' && b.issueType !== 'both') return -1;
+      if (a.issueType !== 'both' && b.issueType === 'both') return 1;
+      return b.linesCount - a.linesCount;
+    });
+  }
 
-      for (const issue of sorted) {
-        const isSevere = issue.issueType === 'both';
-        const severityClass = isSevere ? 'severe' : 'moderate';
-        const severityLabel = isSevere ? '严重' : '中等';
-        const severityBadgeClass = isSevere ? 'severity-severe' : 'severity-moderate';
+  private generateIssueCard(issue: ComplexityIssue): string {
+    const isSevere = issue.issueType === 'both';
+    const severityClass = isSevere ? 'severe' : 'moderate';
+    const severityLabel = isSevere ? '严重' : '中等';
+    const severityBadgeClass = isSevere ? 'severity-severe' : 'severity-moderate';
 
-        html += `
+    return `
   <div class="issue-card ${severityClass}">
     <div class="issue-header">
       <span class="severity-badge ${severityBadgeClass}">${severityLabel}</span>
@@ -528,31 +558,38 @@ class ComplexityAnalyzer {
         <div class="detail-label">行数</div>
         <div class="detail-value">${issue.linesCount}</div>
       </div>
-`;
-        
-        if (issue.cyclomaticComplexity > 0) {
-          html += `
-      <div class="detail-item">
-        <div class="detail-label">圈复杂度</div>
-        <div class="detail-value">${issue.cyclomaticComplexity}</div>
-      </div>
-`;
-        }
-
-        html += `
+${this.generateComplexityDetail(issue)}
       <div class="detail-item">
         <div class="detail-label">问题类型</div>
         <div class="detail-value" style="font-size: 14px;">
-          ${issue.issueType === 'both' ? '过长且复杂' : 
-            issue.issueType === 'long-function' ? '函数过长' : '复杂度过高'}
+          ${this.formatIssueType(issue.issueType)}
         </div>
       </div>
     </div>
   </div>
 `;
-      }
+  }
 
-      html += `
+  private generateComplexityDetail(issue: ComplexityIssue): string {
+    if (issue.cyclomaticComplexity <= 0) {
+      return '';
+    }
+
+    return `      <div class="detail-item">
+        <div class="detail-label">圈复杂度</div>
+        <div class="detail-value">${issue.cyclomaticComplexity}</div>
+      </div>
+`;
+  }
+
+  private formatIssueType(issueType: ComplexityIssue['issueType']): string {
+    if (issueType === 'both') return '过长且复杂';
+    if (issueType === 'long-function') return '函数过长';
+    return '复杂度过高';
+  }
+
+  private generateRecommendationsHtml(): string {
+    return `
   <div class="recommendations">
     <h3>💡 重构建议</h3>
     <h4>重构过长函数</h4>
@@ -570,13 +607,6 @@ class ComplexityAnalyzer {
     </ul>
   </div>
 `;
-    }
-
-    html += `
-</body>
-</html>`;
-
-    return html;
   }
 
   private escapeHtml(text: string): string {

@@ -98,7 +98,6 @@ beforeEach(() => {
   vi.mocked(HistoryService.saveAsync).mockResolvedValue([]);
 });
 
-describe('Scraper 处理器', () => {
   describe('updateTask - 更新任务状态', () => {
     let tasks: Task[];
 
@@ -602,4 +601,3 @@ describe('Scraper 处理器', () => {
       expect(HistoryService.saveAsync).not.toHaveBeenCalled();
     });
   });
-});

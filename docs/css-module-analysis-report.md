@@ -1,11 +1,11 @@
 # CSS 模块分析报告
 
-> 生成时间: 2026/7/2 23:36:00
+> 生成时间: 2026/7/3 01:36:09
 
 ## 📊 统计信息
 
 - 分析文件数: 10
-- 总代码行数: 7872
+- 总代码行数: 7808
 - 识别模式数: 11
 
 ## 🔍 发现的重复模式
@@ -56,16 +56,6 @@
 
 ### Animations 相关
 
-- **animations-pattern-1**: 出现 28 次
-  - 文件: src/modules/home/homeDisplay.css, src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
-  - 示例:
-    ```css
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); }...
-    ```
-    ```css
-    @keyframes fadeIn { from { opacity: 0; }...
-    ```
-
 - **animations-pattern-2**: 出现 17 次
   - 文件: src/modules/home/homeDisplay.css, src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
   - 示例:
@@ -74,6 +64,16 @@
     ```
     ```css
     animation: fadeUp 1s...
+    ```
+
+- **animations-pattern-1**: 出现 22 次
+  - 文件: src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
+  - 示例:
+    ```css
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }...
+    ```
+    ```css
+    @keyframes float { 0%, 100% { transform: translateY(0); }...
     ```
 
 ### Icons 相关

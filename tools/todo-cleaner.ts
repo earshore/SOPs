@@ -234,15 +234,56 @@ class TodoCleaner {
 
   generateHtmlReport(result: ScanResult): string {
     const timestamp = new Date().toISOString();
-    
-    let html = `<!DOCTYPE html>
+
+    return [
+      this.generateHtmlHeader(result, timestamp),
+      this.generateTodoSectionsHtml(result),
+      this.generateRecommendationsHtml(),
+      '\n</body>\n</html>'
+    ].join('');
+  }
+
+  private generateHtmlHeader(result: ScanResult, timestamp: string): string {
+    return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TODO 清理报告</title>
-  <style>
-    body {
+${this.generateHtmlStyles()}
+</head>
+<body>
+  <div class="header">
+    <h1>📝 TODO 清理报告</h1>
+    <p>生成时间: ${timestamp}</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value">${result.totalFiles}</div>
+      <div class="stat-label">扫描文件总数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${result.totalTodos}</div>
+      <div class="stat-label">TODO 总数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${result.outdatedTodos}</div>
+      <div class="stat-label">过时 TODO (> 6个月)</div>
+    </div>
+  </div>
+`;
+  }
+
+  private generateHtmlStyles(): string {
+    return `  <style>
+${this.generateLayoutStyles()}
+${this.generateTodoStyles()}
+  </style>`;
+  }
+
+  private generateLayoutStyles(): string {
+    return `    body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       line-height: 1.6;
       max-width: 1200px;
@@ -295,8 +336,11 @@ class TodoCleaner {
       border-radius: 20px;
       font-size: 14px;
       font-weight: bold;
-    }
-    .type-TODO { background: #ffd93d; color: #333; }
+    }`;
+  }
+
+  private generateTodoStyles(): string {
+    return `    .type-TODO { background: #ffd93d; color: #333; }
     .type-FIXME { background: #ff6b6b; color: white; }
     .type-HACK { background: #ff8c42; color: white; }
     .type-XXX { background: #a8dadc; color: #333; }
@@ -357,63 +401,51 @@ class TodoCleaner {
     .recommendations h3 {
       margin-top: 0;
       color: #1976d2;
+    }`;
+  }
+
+  private generateTodoSectionsHtml(result: ScanResult): string {
+    if (result.totalTodos === 0) {
+      return '';
     }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>📝 TODO 清理报告</h1>
-    <p>生成时间: ${timestamp}</p>
-  </div>
 
-  <div class="stats">
-    <div class="stat-card">
-      <div class="stat-value">${result.totalFiles}</div>
-      <div class="stat-label">扫描文件总数</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${result.totalTodos}</div>
-      <div class="stat-label">TODO 总数</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${result.outdatedTodos}</div>
-      <div class="stat-label">过时 TODO (> 6个月)</div>
-    </div>
-  </div>
-`;
+    const outdated = result.issues.filter(issue => this.isOutdated(issue));
 
-    if (result.totalTodos > 0) {
-      // 按类型统计
-      const byType = new Map<string, TodoIssue[]>();
-      for (const issue of result.issues) {
-        if (!byType.has(issue.type)) {
-          byType.set(issue.type, []);
-        }
-        byType.get(issue.type)!.push(issue);
-      }
+    return [
+      this.generateTypeStatsHtml(result.issues),
+      this.generateOutdatedSectionHtml(outdated),
+      this.generateFileSectionsHtml(result.issues)
+    ].join('');
+  }
 
-      html += `
+  private generateTypeStatsHtml(issues: TodoIssue[]): string {
+    const byType = this.groupIssuesBy(issues, issue => issue.type);
+    const badges = Array.from(byType)
+      .map(([type, typeIssues]) => `    <span class="type-badge type-${type}">${type}: ${typeIssues.length}</span>\n`)
+      .join('');
+
+    return `
   <div class="type-stats">
     <h3>按类型统计</h3>
+${badges}  </div>
 `;
-      for (const [type, issues] of byType) {
-        html += `    <span class="type-badge type-${type}">${type}: ${issues.length}</span>\n`;
-      }
-      html += `  </div>\n`;
+  }
 
-      // 过时的 TODO
-      const outdated = result.issues.filter(
-        i => i.age && i.age > this.outdatedThresholdDays
-      );
+  private generateOutdatedSectionHtml(outdated: TodoIssue[]): string {
+    if (outdated.length === 0) {
+      return '';
+    }
 
-      if (outdated.length > 0) {
-        html += `
+    return `
   <div class="outdated-section">
     <h3>⚠️ 过时的 TODO (> 6个月)</h3>
     <p>这些 TODO 已经存在超过 6 个月,需要优先处理</p>
+${outdated.map(issue => this.generateOutdatedTodoItem(issue)).join('')}  </div>
 `;
-        for (const issue of outdated) {
-          html += `
+  }
+
+  private generateOutdatedTodoItem(issue: TodoIssue): string {
+    return `
     <div class="todo-item outdated">
       <strong>${issue.file}:${issue.line}</strong>
       <span class="type-badge type-${issue.type}">${issue.type}</span>
@@ -425,42 +457,39 @@ class TodoCleaner {
       </div>
     </div>
 `;
-        }
-        html += `  </div>\n`;
-      }
+  }
 
-      // 按文件分组
-      const byFile = new Map<string, TodoIssue[]>();
-      for (const issue of result.issues) {
-        if (!byFile.has(issue.file)) {
-          byFile.set(issue.file, []);
-        }
-        byFile.get(issue.file)!.push(issue);
-      }
+  private generateFileSectionsHtml(issues: TodoIssue[]): string {
+    return Array.from(this.groupIssuesBy(issues, issue => issue.file))
+      .map(([file, fileIssues]) => this.generateFileSectionHtml(file, fileIssues))
+      .join('');
+  }
 
-      for (const [file, issues] of byFile) {
-        html += `
+  private generateFileSectionHtml(file: string, issues: TodoIssue[]): string {
+    const items = issues.map(issue => this.generateTodoItem(issue)).join('');
+
+    return `
   <div class="file-section">
     <div class="file-header">${file}</div>
+${items}  </div>
 `;
-        for (const issue of issues) {
-          const isOutdated = issue.age && issue.age > this.outdatedThresholdDays;
-          const ageStr = issue.age ? `<span class="age-badge">${issue.age} 天</span>` : '';
-          
-          html += `
-    <div class="todo-item${isOutdated ? ' outdated' : ''}">
+  }
+
+  private generateTodoItem(issue: TodoIssue): string {
+    const ageStr = issue.age ? `<span class="age-badge">${issue.age} 天</span>` : '';
+
+    return `
+    <div class="todo-item${this.isOutdated(issue) ? ' outdated' : ''}">
       <strong>行 ${issue.line}</strong>
       <span class="type-badge type-${issue.type}">${issue.type}</span>
       ${ageStr}
       <div>${this.escapeHtml(issue.content)}</div>
     </div>
 `;
-        }
-        html += `  </div>\n`;
-      }
-    }
+  }
 
-    html += `
+  private generateRecommendationsHtml(): string {
+    return `
   <div class="recommendations">
     <h3>💡 建议</h3>
     <ul>
@@ -471,11 +500,24 @@ class TodoCleaner {
       <li>定期审查和清理 TODO 列表</li>
     </ul>
   </div>
+`;
+  }
 
-</body>
-</html>`;
+  private groupIssuesBy(issues: TodoIssue[], keyOf: (issue: TodoIssue) => string): Map<string, TodoIssue[]> {
+    const grouped = new Map<string, TodoIssue[]>();
 
-    return html;
+    for (const issue of issues) {
+      if (!grouped.has(keyOf(issue))) {
+        grouped.set(keyOf(issue), []);
+      }
+      grouped.get(keyOf(issue))!.push(issue);
+    }
+
+    return grouped;
+  }
+
+  private isOutdated(issue: TodoIssue): boolean {
+    return Boolean(issue.age && issue.age > this.outdatedThresholdDays);
   }
 
   private escapeHtml(text: string): string {

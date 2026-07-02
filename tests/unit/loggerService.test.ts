@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Logger, LOG_LEVELS } from '@/services/loggerService';
 import type { LogLevel } from '@/services/loggerService';
 
-describe('LoggerService', () => {
   beforeEach(() => {
     Logger.clear();
     Logger.setMinLevel(LOG_LEVELS.DEBUG);
@@ -474,4 +473,3 @@ describe('LoggerService', () => {
       expect(console.error).toHaveBeenCalled();
     });
   });
-});

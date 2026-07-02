@@ -23,6 +23,85 @@ function sanitizePromptValue(value: string | undefined, maxLength = 10000): stri
   return sanitizePromptInput(value || '').slice(0, maxLength);
 }
 
+function buildProductDataSection(product: ProductData, dataOptions: DataOptions): string {
+  const { includeTitle = true, includeBullets = true, includeReviews = true } = dataOptions;
+  const parts: string[] = [`ASIN: ${sanitizePromptValue(product.asin, 120)}`];
+
+  if (includeTitle) {
+    parts.push(`Title: ${sanitizePromptValue(product.productTitle) || 'N/A'}`);
+  }
+
+  if (includeBullets) {
+    parts.push(`Feature Bullets: ${buildFeatureBullets(product)}`);
+  }
+
+  if (includeReviews) {
+    parts.push(`Top Reviews: ${buildTopReviews(product)}`);
+  }
+
+  return parts.join('\n');
+}
+
+function buildFeatureBullets(product: ProductData): string {
+  if (!product.feature_bullets || product.feature_bullets.length === 0) return 'N/A';
+  return product.feature_bullets.map(bullet => sanitizePromptValue(bullet)).join('; ');
+}
+
+function buildTopReviews(product: ProductData): string {
+  const reviews = (product.customer_reviews || [])
+    .slice(0, 5)
+    .map(review => sanitizePromptValue(review.body, 150))
+    .join(' | ');
+
+  return reviews || 'No reviews found';
+}
+
+function buildProductsData(products: ProductData[], dataOptions: DataOptions): string {
+  return products.map(product => buildProductDataSection(product, dataOptions)).join('\n\n---\n\n');
+}
+
+function buildAnalysisPrompt(
+  promptTemplate: string,
+  productsData: string,
+  language: string
+): string {
+  const safeLanguage = sanitizePromptValue(language, 80) || 'English';
+  return promptTemplate
+    .replace(/{{language}}/g, safeLanguage)
+    .replace('{{productsData}}', productsData)
+    .replace('{{category}}', 'General');
+}
+
+async function callAnalysisLLM(prompt: string, llmConfig: LLMConfig): Promise<string> {
+  return callLLM(
+    [{ role: 'user', content: prompt }],
+    llmConfig.provider,
+    llmConfig.endpoint,
+    llmConfig.apiKey,
+    llmConfig.model,
+    { jsonMode: true, timeout: configCenter.get<number>('llm.analysisTimeout') || 120000 }
+  );
+}
+
+function parseAnalysisResponse(response: string, language: string): AnalysisReport {
+  try {
+    const parsed = robustParseJSON(response);
+    return parsed as AnalysisReport;
+  } catch (e) {
+    const error = e as Error;
+    nativeLoggerConsole.warn('Analysis JSON Parse Failed:', error.message);
+
+    throw new ApiError(
+      'AI分析响应解析失败',
+      'ERR_ANALYSIS_PARSE_FAILED',
+      500,
+      { raw_response: response },
+      { module: 'AnalysisService', action: 'generateReport', language },
+      error
+    );
+  }
+}
+
 /**
  * 鲁棒性 JSON 提取器
  * 处理 Markdown 代码块及杂余文本
@@ -101,72 +180,11 @@ export const AnalysisService = {
     llmConfig: LLMConfig,
     dataOptions: DataOptions = {}
   ): Promise<AnalysisReport> {
-    const { includeTitle = true, includeBullets = true, includeReviews = true } = dataOptions;
+    const productsData = buildProductsData(products, dataOptions);
+    const finalPrompt = buildAnalysisPrompt(promptTemplate, productsData, language);
+    const response = await callAnalysisLLM(finalPrompt, llmConfig);
 
-    // 1. 动态构建数据字符串
-    const productsData = products
-      .map(p => {
-        const parts: string[] = [`ASIN: ${sanitizePromptValue(p.asin, 120)}`];
-
-        if (includeTitle) {
-          parts.push(`Title: ${sanitizePromptValue(p.productTitle) || 'N/A'}`);
-        }
-
-        if (includeBullets) {
-          const bullets =
-            p.feature_bullets && p.feature_bullets.length > 0
-              ? p.feature_bullets.map(bullet => sanitizePromptValue(bullet)).join('; ')
-              : 'N/A';
-          parts.push(`Feature Bullets: ${bullets}`);
-        }
-
-        if (includeReviews) {
-          const reviews = (p.customer_reviews || [])
-            .slice(0, 5)
-            .map(r => sanitizePromptValue(r.body, 150))
-            .join(' | ');
-          parts.push(`Top Reviews: ${reviews || 'No reviews found'}`);
-        }
-
-        return parts.join('\n');
-      })
-      .join('\n\n---\n\n');
-
-    // 2. 替换模板变量
-    const safeLanguage = sanitizePromptValue(language, 80) || 'English';
-    const finalPrompt = promptTemplate
-      .replace(/{{language}}/g, safeLanguage)
-      .replace('{{productsData}}', productsData)
-      .replace('{{category}}', 'General');
-
-    // 3. 调用 LLM
-    // 增加超时至 120s，因为分析通常涉及大量上下文
-    const response = await callLLM(
-      [{ role: 'user', content: finalPrompt }],
-      llmConfig.provider,
-      llmConfig.endpoint,
-      llmConfig.apiKey,
-      llmConfig.model,
-      { jsonMode: true, timeout: configCenter.get<number>('llm.analysisTimeout') || 120000 }
-    );
-
-    try {
-      const parsed = robustParseJSON(response);
-      // 类型断言：robustParseJSON 返回的对象作为 AnalysisReport
-      return parsed as AnalysisReport;
-    } catch (e) {
-      const error = e as Error;
-      nativeLoggerConsole.warn('Analysis JSON Parse Failed:', error.message);
-
-      throw new ApiError(
-        'AI分析响应解析失败',
-        'ERR_ANALYSIS_PARSE_FAILED',
-        500,
-        { raw_response: response },
-        { module: 'AnalysisService', action: 'generateReport', language },
-        error
-      );
-    }
+    return parseAnalysisResponse(response, language);
   },
 
   /**

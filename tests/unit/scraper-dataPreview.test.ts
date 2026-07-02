@@ -27,7 +27,6 @@ vi.mock('@/common/infrastructure/SafeRenderer', () => ({
   }
 }));
 
-describe('DataPreview 组件', () => {
   let initialState: DataPreviewState;
   let mockScrapedData: ScrapedData;
 
@@ -590,4 +589,3 @@ describe('DataPreview 组件', () => {
       expect(page1Products[0].asin).not.toBe(page2Products[0].asin);
     });
   });
-});

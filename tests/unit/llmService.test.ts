@@ -62,7 +62,6 @@ vi.mock('../../src/common/config/envConfig', () => ({
   },
 }));
 
-describe('LLMService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // 重置 _configLogged 标志
@@ -453,4 +452,3 @@ describe('LLMService', () => {
       await expect(promise).rejects.toThrow();
     });
   });
-});

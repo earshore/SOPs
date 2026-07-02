@@ -602,32 +602,60 @@ const buildContextSection = (
     return '';
   }
 
-  const markdownSections: string[] = [];
+  const markdownSections = buildSelectedReportMarkdownSections(
+    report,
+    dimensionsToInclude,
+    selectedReportItems
+  );
 
-  dimensionsToInclude.forEach(targetId => {
-    if (!report[targetId]) return;
-
-    // 新功能：根据细粒度选择过滤子项
-    const filteredData = selectedReportItems?.[targetId]
-      ? filterSubItems(report[targetId], selectedReportItems[targetId].subItems)
-      : report[targetId]; // 向后兼容：包含所有子项
-
-    if (
-      filteredData &&
-      typeof filteredData === 'object' &&
-      Object.keys(filteredData as Record<string, unknown>).length === 0
-    ) {
-      return;
-    }
-
-    const md = sanitizePromptInput(convertSectionToMarkdown(targetId, filteredData));
-    if (md) markdownSections.push(md);
-  });
-
-  if (markdownSections.length === 0) return '';
-
-  return `\n## Market Context\n### Competitor Insights Report\n\n${markdownSections.join('\n\n')}\n`;
+  return formatMarketContextSection(markdownSections);
 };
+
+function buildSelectedReportMarkdownSections(
+  report: Record<string, unknown>,
+  dimensionsToInclude: string[],
+  selectedReportItems: PromptInputs['selectedReportItems']
+): string[] {
+  return dimensionsToInclude
+    .map(targetId => buildReportMarkdownSection(report, targetId, selectedReportItems))
+    .filter((markdown): markdown is string => Boolean(markdown));
+}
+
+function buildReportMarkdownSection(
+  report: Record<string, unknown>,
+  targetId: string,
+  selectedReportItems: PromptInputs['selectedReportItems']
+): string {
+  const filteredData = getFilteredReportSection(report, targetId, selectedReportItems);
+  if (!filteredData || isEmptyRecord(filteredData)) return '';
+
+  return sanitizePromptInput(convertSectionToMarkdown(targetId, filteredData));
+}
+
+function getFilteredReportSection(
+  report: Record<string, unknown>,
+  targetId: string,
+  selectedReportItems: PromptInputs['selectedReportItems']
+): unknown {
+  const section = report[targetId];
+  if (!section) return null;
+
+  const selectedItem = selectedReportItems?.[targetId];
+  return selectedItem ? filterSubItems(section, selectedItem.subItems) : section;
+}
+
+function isEmptyRecord(value: unknown): boolean {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    Object.keys(value as Record<string, unknown>).length === 0
+  );
+}
+
+function formatMarketContextSection(markdownSections: string[]): string {
+  if (markdownSections.length === 0) return '';
+  return `\n## Market Context\n### Competitor Insights Report\n\n${markdownSections.join('\n\n')}\n`;
+}
 
 function getSelectedReportDimensions(
   selectedReportItems: PromptInputs['selectedReportItems'],

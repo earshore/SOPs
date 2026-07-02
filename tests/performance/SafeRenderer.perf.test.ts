@@ -11,7 +11,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { SafeRenderer } from '../../src/common/infrastructure/SafeRenderer';
 
-describe('SafeRenderer 性能测试', () => {
   let renderer: SafeRenderer;
   let container: HTMLElement;
 
@@ -506,4 +505,3 @@ describe('SafeRenderer 性能测试', () => {
       expect(true).toBe(true);
     });
   });
-});

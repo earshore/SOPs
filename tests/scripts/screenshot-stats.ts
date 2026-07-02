@@ -8,6 +8,8 @@ import { ScreenshotManager } from '../helpers/screenshot-manager';
 import * as fs from 'fs';
 import * as path from 'path';
 
+type ScreenshotStats = ReturnType<ScreenshotManager['getStats']>;
+
 /**
  * 显示截图统计信息
  */
@@ -16,11 +18,25 @@ async function main() {
 
   const manager = ScreenshotManager.getInstance();
   const stats = manager.getStats();
+  const screenshotDir = 'tests/screenshots';
 
-  // 基本统计
+  printBasicStats(stats);
+  printBrowserDistribution(stats);
+  printTestFileDistribution(stats, path.join(screenshotDir, 'index.json'));
+  printDiskUsage(screenshotDir);
+  printRecommendations(stats);
+  printHtmlIndexLink(screenshotDir);
+  console.log('\n' + '='.repeat(60));
+}
+
+function printSection(title: string, leadingBlank = true): void {
+  console.log(`${leadingBlank ? '\n' : ''}${'='.repeat(60)}`);
+  console.log(`${title}:`);
   console.log('='.repeat(60));
-  console.log('基本信息:');
-  console.log('='.repeat(60));
+}
+
+function printBasicStats(stats: ScreenshotStats): void {
+  printSection('基本信息', false);
   console.log(`总截图数:     ${stats.total}`);
   console.log(`总大小:       ${(stats.totalSize / 1024 / 1024).toFixed(2)} MB`);
   
@@ -37,12 +53,11 @@ async function main() {
       console.log(`时间跨度:     ${daysDiff} 天`);
     }
   }
+}
 
-  // 按浏览器分布
+function printBrowserDistribution(stats: ScreenshotStats): void {
   if (Object.keys(stats.byBrowser).length > 0) {
-    console.log('\n' + '='.repeat(60));
-    console.log('按浏览器分布:');
-    console.log('='.repeat(60));
+    printSection('按浏览器分布');
     
     const sortedBrowsers = Object.entries(stats.byBrowser)
       .sort((a, b) => b[1] - a[1]);
@@ -53,13 +68,11 @@ async function main() {
       console.log(`${browser.padEnd(15)} ${count.toString().padStart(4)} (${percentage}%) ${bar}`);
     }
   }
+}
 
-  // 按测试文件分布
-  console.log('\n' + '='.repeat(60));
-  console.log('按测试文件分布 (Top 10):');
-  console.log('='.repeat(60));
-  
-  const indexPath = path.join('tests/screenshots', 'index.json');
+function printTestFileDistribution(stats: ScreenshotStats, indexPath: string): void {
+  printSection('按测试文件分布 (Top 10)');
+
   if (fs.existsSync(indexPath)) {
     const indexData = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
     const byFile: Record<string, number> = {};
@@ -84,13 +97,11 @@ async function main() {
   } else {
     console.log('索引文件不存在');
   }
+}
 
-  // 磁盘使用情况
-  console.log('\n' + '='.repeat(60));
-  console.log('磁盘使用情况:');
-  console.log('='.repeat(60));
-  
-  const screenshotDir = 'tests/screenshots';
+function printDiskUsage(screenshotDir: string): void {
+  printSection('磁盘使用情况');
+
   if (fs.existsSync(screenshotDir)) {
     const totalSize = calculateDirectorySize(screenshotDir);
     console.log(`截图目录总大小: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
@@ -106,12 +117,11 @@ async function main() {
       }
     }
   }
+}
 
-  // 建议
-  console.log('\n' + '='.repeat(60));
-  console.log('建议:');
-  console.log('='.repeat(60));
-  
+function printRecommendations(stats: ScreenshotStats): void {
+  printSection('建议');
+
   if (stats.total === 0) {
     console.log('✅ 太棒了！没有失败的测试。');
   } else if (stats.total > 50) {
@@ -123,15 +133,14 @@ async function main() {
   } else {
     console.log('✅ 截图数量和大小在合理范围内。');
   }
+}
 
-  // HTML 索引链接
+function printHtmlIndexLink(screenshotDir: string): void {
   const htmlIndexPath = path.join(screenshotDir, 'index.html');
   if (fs.existsSync(htmlIndexPath)) {
     console.log('\n📄 查看详细信息:');
     console.log(`   file:///${path.resolve(htmlIndexPath).replace(/\\/g, '/')}`);
   }
-
-  console.log('\n' + '='.repeat(60));
 }
 
 /**

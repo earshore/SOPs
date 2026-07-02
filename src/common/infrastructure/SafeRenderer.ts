@@ -411,70 +411,79 @@ export class SafeRenderer {
 
     const allowedTags = options?.allowedTags || DEFAULT_ALLOWED_TAGS;
     const allowedAttrs = options?.allowedAttrs || DEFAULT_ALLOWED_ATTRS;
-
-    // 创建临时 DOM 解析 HTML，后续会通过白名单过滤
     const doc = new DOMParser().parseFromString(html, 'text/html');
+    const cleanedFragment = this.sanitizeChildNodes(doc.body, allowedTags, allowedAttrs);
+    const cleanedDiv = document.createElement('div');
 
-    // 递归清理节点
-    const cleanNode = (node: Node): Node | null => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return node.cloneNode(true);
-      }
+    cleanedDiv.appendChild(cleanedFragment);
+    return cleanedDiv.innerHTML;
+  }
 
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node as Element;
-        const tagName = element.tagName.toLowerCase();
+  private sanitizeChildNodes(
+    parent: Node,
+    allowedTags: string[],
+    allowedAttrs: string[]
+  ): DocumentFragment {
+    const fragment = document.createDocumentFragment();
 
-        // 检查标签是否在白名单中
-        if (!allowedTags.includes(tagName)) {
-          return null;
-        }
-
-        // 创建新元素
-        const newElement = document.createElement(tagName);
-
-        // 复制允许的属性
-        Array.from(element.attributes).forEach(attr => {
-          if (allowedAttrs.includes(attr.name)) {
-            // 额外检查 href 和 src 属性，防止 javascript: 协议
-            if (attr.name === 'href' || attr.name === 'src') {
-              const value = attr.value.trim().toLowerCase();
-              if (!value.startsWith('javascript:') && !value.startsWith('data:')) {
-                newElement.setAttribute(attr.name, attr.value);
-              }
-            } else {
-              newElement.setAttribute(attr.name, attr.value);
-            }
-          }
-        });
-
-        // 递归处理子节点
-        Array.from(element.childNodes).forEach(child => {
-          const cleanedChild = cleanNode(child);
-          if (cleanedChild) {
-            newElement.appendChild(cleanedChild);
-          }
-        });
-
-        return newElement;
-      }
-
-      return null;
-    };
-
-    // 清理所有子节点
-    const cleanedFragment = document.createDocumentFragment();
-    Array.from(doc.body.childNodes).forEach(child => {
-      const cleanedChild = cleanNode(child);
+    Array.from(parent.childNodes).forEach(child => {
+      const cleanedChild = this.cleanHtmlNode(child, allowedTags, allowedAttrs);
       if (cleanedChild) {
-        cleanedFragment.appendChild(cleanedChild);
+        fragment.appendChild(cleanedChild);
       }
     });
 
-    // 转换回 HTML 字符串
-    const cleanedDiv = document.createElement('div');
-    cleanedDiv.appendChild(cleanedFragment);
-    return cleanedDiv.innerHTML;
+    return fragment;
+  }
+
+  private cleanHtmlNode(node: Node, allowedTags: string[], allowedAttrs: string[]): Node | null {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.cloneNode(true);
+    }
+
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return null;
+    }
+
+    return this.cleanHtmlElement(node as Element, allowedTags, allowedAttrs);
+  }
+
+  private cleanHtmlElement(
+    element: Element,
+    allowedTags: string[],
+    allowedAttrs: string[]
+  ): HTMLElement | null {
+    const tagName = element.tagName.toLowerCase();
+    if (!allowedTags.includes(tagName)) {
+      return null;
+    }
+
+    const newElement = document.createElement(tagName);
+    this.copyAllowedAttributes(element, newElement, allowedAttrs);
+    newElement.appendChild(this.sanitizeChildNodes(element, allowedTags, allowedAttrs));
+
+    return newElement;
+  }
+
+  private copyAllowedAttributes(
+    source: Element,
+    target: HTMLElement,
+    allowedAttrs: string[]
+  ): void {
+    Array.from(source.attributes).forEach(attr => {
+      if (allowedAttrs.includes(attr.name) && this.isSafeAttribute(attr)) {
+        target.setAttribute(attr.name, attr.value);
+      }
+    });
+  }
+
+  private isSafeAttribute(attr: Attr): boolean {
+    if (attr.name !== 'href' && attr.name !== 'src') {
+      return true;
+    }
+
+    const value = attr.value.trim().toLowerCase();
+    return !value.startsWith('javascript:') && !value.startsWith('data:');
   }
 
   /**

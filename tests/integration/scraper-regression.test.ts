@@ -37,7 +37,6 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
   HistoryService: mockHistoryService
 }));
 
-describe('回归测试 - 确保现有功能未受影响', () => {
   let mockState: any;
 
   beforeEach(() => {
@@ -584,4 +583,3 @@ describe('回归测试 - 确保现有功能未受影响', () => {
       expect(mockState.scraper.currentDataTab).toBe('preview');
     });
   });
-});

@@ -7,17 +7,6 @@
 /* 注意：fadeInUp、fadeIn、scaleIn 等通用动画辅助类已统一定义在全局 CSS（src/css/animations/keyframes.css） */
 /* 只保留模块特有的动画，避免覆盖全局动画 */
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.5;
-  }
-}
-
 @keyframes pulse-glow {
   0%,
   100% {
@@ -26,16 +15,6 @@
 
   50% {
     box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
   }
 }
 
@@ -62,7 +41,7 @@
 .shimmer {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   background-size: 200% 100%;
-  animation: shimmer var(--duration-2s) infinite;
+  animation: skeletonShimmer var(--duration-2s) infinite;
 }
 
 /* ========== 文本截断 ========== */

@@ -18,7 +18,6 @@ import {
   type ErrorContext
 } from '@/common/errors/AppError';
 
-describe('AppError', () => {
   // ================================================================
   // AppError基类
   // ================================================================
@@ -590,4 +589,3 @@ describe('AppError', () => {
       expect(() => JSON.stringify(json)).not.toThrow();
     });
   });
-});

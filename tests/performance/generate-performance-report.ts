@@ -373,16 +373,18 @@ function generateMarkdownReport(report: PerformanceReport): string {
   return md;
 }
 
-function generateHTMLReport(report: PerformanceReport): string {
-  const { summary, pages, recommendations } = report;
-  
-  let html = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>性能测试报告 - ${new Date(report.timestamp).toLocaleDateString('zh-CN')}</title>
-  <style>
+function getStatusClass(score: number): string {
+  if (score >= 90) return 'status-excellent';
+  if (score >= 50) return 'status-good';
+  return 'status-poor';
+}
+
+function getPassClass(passed: boolean): string {
+  return passed ? 'pass' : 'fail';
+}
+
+function generateHTMLStyles(): string {
+  return `  <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -458,7 +460,19 @@ function generateHTMLReport(report: PerformanceReport): string {
     .badge-excellent { background: #d4edda; color: #155724; }
     .badge-good { background: #fff3cd; color: #856404; }
     .badge-poor { background: #f8d7da; color: #721c24; }
-  </style>
+  </style>`;
+}
+
+function generateHTMLHeader(report: PerformanceReport): string {
+  const { summary } = report;
+
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>性能测试报告 - ${new Date(report.timestamp).toLocaleDateString('zh-CN')}</title>
+${generateHTMLStyles()}
 </head>
 <body>
   <div class="container">
@@ -468,7 +482,13 @@ function generateHTMLReport(report: PerformanceReport): string {
       <span>📄 测试页面: ${summary.totalPages}</span>
       <span>✅ 通过: ${summary.passedPages}/${summary.totalPages}</span>
     </div>
+`;
+}
 
+function generateSummaryScoresTable(summary: PerformanceReport['summary']): string {
+  const { avgScores } = summary;
+
+  return `
     <h2>📊 总体平均评分</h2>
     <table>
       <thead>
@@ -481,27 +501,33 @@ function generateHTMLReport(report: PerformanceReport): string {
       <tbody>
         <tr>
           <td>性能 (Performance)</td>
-          <td>${summary.avgScores.performance}</td>
-          <td class="${summary.avgScores.performance >= 90 ? 'status-excellent' : summary.avgScores.performance >= 50 ? 'status-good' : 'status-poor'}">${getStatus(summary.avgScores.performance)}</td>
+          <td>${avgScores.performance}</td>
+          <td class="${getStatusClass(avgScores.performance)}">${getStatus(avgScores.performance)}</td>
         </tr>
         <tr>
           <td>可访问性 (Accessibility)</td>
-          <td>${summary.avgScores.accessibility}</td>
-          <td class="${summary.avgScores.accessibility >= 90 ? 'status-excellent' : summary.avgScores.accessibility >= 50 ? 'status-good' : 'status-poor'}">${getStatus(summary.avgScores.accessibility)}</td>
+          <td>${avgScores.accessibility}</td>
+          <td class="${getStatusClass(avgScores.accessibility)}">${getStatus(avgScores.accessibility)}</td>
         </tr>
         <tr>
           <td>最佳实践 (Best Practices)</td>
-          <td>${summary.avgScores.bestPractices}</td>
-          <td class="${summary.avgScores.bestPractices >= 90 ? 'status-excellent' : summary.avgScores.bestPractices >= 50 ? 'status-good' : 'status-poor'}">${getStatus(summary.avgScores.bestPractices)}</td>
+          <td>${avgScores.bestPractices}</td>
+          <td class="${getStatusClass(avgScores.bestPractices)}">${getStatus(avgScores.bestPractices)}</td>
         </tr>
         <tr>
           <td>SEO</td>
-          <td>${summary.avgScores.seo}</td>
-          <td class="${summary.avgScores.seo >= 90 ? 'status-excellent' : summary.avgScores.seo >= 50 ? 'status-good' : 'status-poor'}">${getStatus(summary.avgScores.seo)}</td>
+          <td>${avgScores.seo}</td>
+          <td class="${getStatusClass(avgScores.seo)}">${getStatus(avgScores.seo)}</td>
         </tr>
       </tbody>
     </table>
+`;
+}
 
+function generateSummaryVitalsTable(summary: PerformanceReport['summary']): string {
+  const { avgAudits } = summary;
+
+  return `
     <h2>🎯 Core Web Vitals 平均值</h2>
     <table>
       <thead>
@@ -515,45 +541,114 @@ function generateHTMLReport(report: PerformanceReport): string {
       <tbody>
         <tr>
           <td>FCP (First Contentful Paint)</td>
-          <td>${formatMs(summary.avgAudits.fcp)}</td>
+          <td>${formatMs(avgAudits.fcp)}</td>
           <td>&lt; 1500ms</td>
-          <td class="${summary.avgAudits.fcp < 1500 ? 'pass' : 'fail'}">${getStatusIcon(summary.avgAudits.fcp < 1500)}</td>
+          <td class="${getPassClass(avgAudits.fcp < 1500)}">${getStatusIcon(avgAudits.fcp < 1500)}</td>
         </tr>
         <tr>
           <td>LCP (Largest Contentful Paint)</td>
-          <td>${formatMs(summary.avgAudits.lcp)}</td>
+          <td>${formatMs(avgAudits.lcp)}</td>
           <td>&lt; 2500ms</td>
-          <td class="${summary.avgAudits.lcp < 2500 ? 'pass' : 'fail'}">${getStatusIcon(summary.avgAudits.lcp < 2500)}</td>
+          <td class="${getPassClass(avgAudits.lcp < 2500)}">${getStatusIcon(avgAudits.lcp < 2500)}</td>
         </tr>
         <tr>
           <td>CLS (Cumulative Layout Shift)</td>
-          <td>${summary.avgAudits.cls.toFixed(3)}</td>
+          <td>${avgAudits.cls.toFixed(3)}</td>
           <td>&lt; 0.1</td>
-          <td class="${summary.avgAudits.cls < 0.1 ? 'pass' : 'fail'}">${getStatusIcon(summary.avgAudits.cls < 0.1)}</td>
+          <td class="${getPassClass(avgAudits.cls < 0.1)}">${getStatusIcon(avgAudits.cls < 0.1)}</td>
         </tr>
         <tr>
           <td>TBT (Total Blocking Time)</td>
-          <td>${formatMs(summary.avgAudits.tbt)}</td>
+          <td>${formatMs(avgAudits.tbt)}</td>
           <td>&lt; 300ms</td>
-          <td class="${summary.avgAudits.tbt < 300 ? 'pass' : 'fail'}">${getStatusIcon(summary.avgAudits.tbt < 300)}</td>
+          <td class="${getPassClass(avgAudits.tbt < 300)}">${getStatusIcon(avgAudits.tbt < 300)}</td>
         </tr>
         <tr>
           <td>SI (Speed Index)</td>
-          <td>${formatMs(summary.avgAudits.si)}</td>
+          <td>${formatMs(avgAudits.si)}</td>
           <td>&lt; 3500ms</td>
-          <td class="${summary.avgAudits.si < 3500 ? 'pass' : 'fail'}">${getStatusIcon(summary.avgAudits.si < 3500)}</td>
+          <td class="${getPassClass(avgAudits.si < 3500)}">${getStatusIcon(avgAudits.si < 3500)}</td>
         </tr>
       </tbody>
     </table>
-
-    <h2>📄 各页面详细报告</h2>
 `;
+}
 
-  pages.forEach(page => {
-    const scores = page.current.scores;
-    const audits = page.current.audits;
-    
-    html += `
+function generatePageScoreRows(page: ComparisonResult): string {
+  const scores = page.current.scores;
+
+  return `          <tr>
+            <td>性能</td>
+            <td>${scores.performance}</td>
+            <td>${page.baseline?.scores.performance || 'N/A'}</td>
+            <td>${page.diff?.scores.performance ? calculateDiff(scores.performance, page.baseline!.scores.performance) : 'N/A'}</td>
+            <td class="${getStatusClass(scores.performance)}">${getStatus(scores.performance)}</td>
+          </tr>
+          <tr>
+            <td>可访问性</td>
+            <td>${scores.accessibility}</td>
+            <td>${page.baseline?.scores.accessibility || 'N/A'}</td>
+            <td>${page.diff?.scores.accessibility ? calculateDiff(scores.accessibility, page.baseline!.scores.accessibility) : 'N/A'}</td>
+            <td class="${getStatusClass(scores.accessibility)}">${getStatus(scores.accessibility)}</td>
+          </tr>
+          <tr>
+            <td>最佳实践</td>
+            <td>${scores.bestPractices}</td>
+            <td>${page.baseline?.scores.bestPractices || 'N/A'}</td>
+            <td>${page.diff?.scores.bestPractices ? calculateDiff(scores.bestPractices, page.baseline!.scores.bestPractices) : 'N/A'}</td>
+            <td class="${getStatusClass(scores.bestPractices)}">${getStatus(scores.bestPractices)}</td>
+          </tr>
+          <tr>
+            <td>SEO</td>
+            <td>${scores.seo}</td>
+            <td>${page.baseline?.scores.seo || 'N/A'}</td>
+            <td>${page.diff?.scores.seo ? calculateDiff(scores.seo, page.baseline!.scores.seo) : 'N/A'}</td>
+            <td class="${getStatusClass(scores.seo)}">${getStatus(scores.seo)}</td>
+          </tr>`;
+}
+
+function generatePageVitalsRows(page: ComparisonResult): string {
+  const audits = page.current.audits;
+
+  return `          <tr>
+            <td>FCP</td>
+            <td>${formatMs(audits.fcp)}</td>
+            <td>${page.baseline ? formatMs(page.baseline.audits.fcp) : 'N/A'}</td>
+            <td>${page.diff?.audits.fcp ? formatMs(page.diff.audits.fcp) : 'N/A'}</td>
+            <td class="${getPassClass(audits.fcp < 1500)}">${getStatusIcon(audits.fcp < 1500)}</td>
+          </tr>
+          <tr>
+            <td>LCP</td>
+            <td>${formatMs(audits.lcp)}</td>
+            <td>${page.baseline ? formatMs(page.baseline.audits.lcp) : 'N/A'}</td>
+            <td>${page.diff?.audits.lcp ? formatMs(page.diff.audits.lcp) : 'N/A'}</td>
+            <td class="${getPassClass(audits.lcp < 2500)}">${getStatusIcon(audits.lcp < 2500)}</td>
+          </tr>
+          <tr>
+            <td>CLS</td>
+            <td>${audits.cls.toFixed(3)}</td>
+            <td>${page.baseline ? page.baseline.audits.cls.toFixed(3) : 'N/A'}</td>
+            <td>${page.diff?.audits.cls ? page.diff.audits.cls.toFixed(3) : 'N/A'}</td>
+            <td class="${getPassClass(audits.cls < 0.1)}">${getStatusIcon(audits.cls < 0.1)}</td>
+          </tr>
+          <tr>
+            <td>TBT</td>
+            <td>${formatMs(audits.tbt)}</td>
+            <td>${page.baseline ? formatMs(page.baseline.audits.tbt) : 'N/A'}</td>
+            <td>${page.diff?.audits.tbt ? formatMs(page.diff.audits.tbt) : 'N/A'}</td>
+            <td class="${getPassClass(audits.tbt < 300)}">${getStatusIcon(audits.tbt < 300)}</td>
+          </tr>
+          <tr>
+            <td>SI</td>
+            <td>${formatMs(audits.si)}</td>
+            <td>${page.baseline ? formatMs(page.baseline.audits.si) : 'N/A'}</td>
+            <td>${page.diff?.audits.si ? formatMs(page.diff.audits.si) : 'N/A'}</td>
+            <td class="${getPassClass(audits.si < 3500)}">${getStatusIcon(audits.si < 3500)}</td>
+          </tr>`;
+}
+
+function generatePageSection(page: ComparisonResult): string {
+  return `
     <div class="page-section">
       <h3>${page.current.name}</h3>
       <p><strong>URL:</strong> ${page.current.url}</p>
@@ -571,34 +666,7 @@ function generateHTMLReport(report: PerformanceReport): string {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>性能</td>
-            <td>${scores.performance}</td>
-            <td>${page.baseline?.scores.performance || 'N/A'}</td>
-            <td>${page.diff?.scores.performance ? calculateDiff(scores.performance, page.baseline!.scores.performance) : 'N/A'}</td>
-            <td class="${scores.performance >= 90 ? 'status-excellent' : scores.performance >= 50 ? 'status-good' : 'status-poor'}">${getStatus(scores.performance)}</td>
-          </tr>
-          <tr>
-            <td>可访问性</td>
-            <td>${scores.accessibility}</td>
-            <td>${page.baseline?.scores.accessibility || 'N/A'}</td>
-            <td>${page.diff?.scores.accessibility ? calculateDiff(scores.accessibility, page.baseline!.scores.accessibility) : 'N/A'}</td>
-            <td class="${scores.accessibility >= 90 ? 'status-excellent' : scores.accessibility >= 50 ? 'status-good' : 'status-poor'}">${getStatus(scores.accessibility)}</td>
-          </tr>
-          <tr>
-            <td>最佳实践</td>
-            <td>${scores.bestPractices}</td>
-            <td>${page.baseline?.scores.bestPractices || 'N/A'}</td>
-            <td>${page.diff?.scores.bestPractices ? calculateDiff(scores.bestPractices, page.baseline!.scores.bestPractices) : 'N/A'}</td>
-            <td class="${scores.bestPractices >= 90 ? 'status-excellent' : scores.bestPractices >= 50 ? 'status-good' : 'status-poor'}">${getStatus(scores.bestPractices)}</td>
-          </tr>
-          <tr>
-            <td>SEO</td>
-            <td>${scores.seo}</td>
-            <td>${page.baseline?.scores.seo || 'N/A'}</td>
-            <td>${page.diff?.scores.seo ? calculateDiff(scores.seo, page.baseline!.scores.seo) : 'N/A'}</td>
-            <td class="${scores.seo >= 90 ? 'status-excellent' : scores.seo >= 50 ? 'status-good' : 'status-poor'}">${getStatus(scores.seo)}</td>
-          </tr>
+${generatePageScoreRows(page)}
         </tbody>
       </table>
       
@@ -614,61 +682,27 @@ function generateHTMLReport(report: PerformanceReport): string {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>FCP</td>
-            <td>${formatMs(audits.fcp)}</td>
-            <td>${page.baseline ? formatMs(page.baseline.audits.fcp) : 'N/A'}</td>
-            <td>${page.diff?.audits.fcp ? formatMs(page.diff.audits.fcp) : 'N/A'}</td>
-            <td class="${audits.fcp < 1500 ? 'pass' : 'fail'}">${getStatusIcon(audits.fcp < 1500)}</td>
-          </tr>
-          <tr>
-            <td>LCP</td>
-            <td>${formatMs(audits.lcp)}</td>
-            <td>${page.baseline ? formatMs(page.baseline.audits.lcp) : 'N/A'}</td>
-            <td>${page.diff?.audits.lcp ? formatMs(page.diff.audits.lcp) : 'N/A'}</td>
-            <td class="${audits.lcp < 2500 ? 'pass' : 'fail'}">${getStatusIcon(audits.lcp < 2500)}</td>
-          </tr>
-          <tr>
-            <td>CLS</td>
-            <td>${audits.cls.toFixed(3)}</td>
-            <td>${page.baseline ? page.baseline.audits.cls.toFixed(3) : 'N/A'}</td>
-            <td>${page.diff?.audits.cls ? page.diff.audits.cls.toFixed(3) : 'N/A'}</td>
-            <td class="${audits.cls < 0.1 ? 'pass' : 'fail'}">${getStatusIcon(audits.cls < 0.1)}</td>
-          </tr>
-          <tr>
-            <td>TBT</td>
-            <td>${formatMs(audits.tbt)}</td>
-            <td>${page.baseline ? formatMs(page.baseline.audits.tbt) : 'N/A'}</td>
-            <td>${page.diff?.audits.tbt ? formatMs(page.diff.audits.tbt) : 'N/A'}</td>
-            <td class="${audits.tbt < 300 ? 'pass' : 'fail'}">${getStatusIcon(audits.tbt < 300)}</td>
-          </tr>
-          <tr>
-            <td>SI</td>
-            <td>${formatMs(audits.si)}</td>
-            <td>${page.baseline ? formatMs(page.baseline.audits.si) : 'N/A'}</td>
-            <td>${page.diff?.audits.si ? formatMs(page.diff.audits.si) : 'N/A'}</td>
-            <td class="${audits.si < 3500 ? 'pass' : 'fail'}">${getStatusIcon(audits.si < 3500)}</td>
-          </tr>
+${generatePageVitalsRows(page)}
         </tbody>
       </table>
     </div>
 `;
-  });
+}
 
-  html += `
+function generateRecommendationsSection(recommendations: string[]): string {
+  const items = recommendations.map(rec => `        <li>${rec}</li>\n`).join('');
+
+  return `
     <h2>💡 改进建议</h2>
     <div class="recommendations">
       <ol>
-`;
-
-  recommendations.forEach(rec => {
-    html += `        <li>${rec}</li>\n`;
-  });
-
-  html += `
-      </ol>
+${items}      </ol>
     </div>
+`;
+}
 
+function generateReportNotesSection(): string {
+  return `
     <h2>📌 说明</h2>
     <ul>
       <li>🟢 优秀: 90-100 分</li>
@@ -681,8 +715,20 @@ function generateHTMLReport(report: PerformanceReport): string {
 </body>
 </html>
 `;
+}
 
-  return html;
+function generateHTMLReport(report: PerformanceReport): string {
+  const { summary, pages, recommendations } = report;
+
+  return [
+    generateHTMLHeader(report),
+    generateSummaryScoresTable(summary),
+    generateSummaryVitalsTable(summary),
+    `    <h2>📄 各页面详细报告</h2>\n`,
+    pages.map(generatePageSection).join(''),
+    generateRecommendationsSection(recommendations),
+    generateReportNotesSection()
+  ].join('');
 }
 
 // ================================================================

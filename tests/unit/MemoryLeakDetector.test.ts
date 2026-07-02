@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { MemoryLeakDetector } from '@/common/utils/MemoryLeakDetector';
 import eventBus from '@/common/EventBus';
 
-describe('MemoryLeakDetector', () => {
   let detector: MemoryLeakDetector;
 
   beforeEach(() => {
@@ -347,4 +346,3 @@ describe('MemoryLeakDetector', () => {
       expect(() => detector.stop()).not.toThrow();
     });
   });
-});

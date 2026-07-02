@@ -24,6 +24,11 @@ interface LazyLoadConfig {
   fadeInDuration?: number;
 }
 
+interface LazyImageSources {
+  src?: string;
+  srcset?: string;
+}
+
 /**
  * 图片懒加载管理器
  */
@@ -93,63 +98,71 @@ class ImageLazyLoader {
       return;
     }
 
+    const sources = this.getLazySources(img);
+    if (!sources) return;
+
+    // 设置加载状态
+    this.prepareImageLoading(img);
+    this.bindImageLoadHandlers(img);
+    this.applyLazySources(img, sources);
+  }
+
+  private getLazySources(img: HTMLImageElement): LazyImageSources | null {
     const src = img.dataset.src;
     const srcset = img.dataset.srcset;
 
-    if (!src && !srcset) {
-      return;
-    }
+    return src || srcset ? { src, srcset } : null;
+  }
 
-    // 设置淡入动画
+  private prepareImageLoading(img: HTMLImageElement): void {
     if (this.config.fadeIn) {
       img.style.opacity = '0';
       img.style.transition = `opacity ${this.config.fadeInDuration}ms ease-in-out`;
     }
 
-    // 加载成功处理
-    const onLoad = () => {
-      this.loadedImages.add(img);
-      img.classList.add('lazy-loaded');
-      img.classList.remove('lazy-loading', 'lazy-error');
-
-      if (this.config.fadeIn) {
-        img.style.opacity = '1';
-      }
-
-      // 停止观察
-      if (this.observer) {
-        this.observer.unobserve(img);
-      }
-    };
-
-    // 加载失败处理
-    const onError = () => {
-      img.classList.add('lazy-error');
-      img.classList.remove('lazy-loading');
-
-      if (this.config.errorImage) {
-        img.src = this.config.errorImage;
-      }
-
-      // 停止观察
-      if (this.observer) {
-        this.observer.unobserve(img);
-      }
-    };
-
-    // 设置加载状态
     img.classList.add('lazy-loading');
+  }
 
-    // 绑定事件
-    img.addEventListener('load', onLoad, { once: true });
-    img.addEventListener('error', onError, { once: true });
+  private bindImageLoadHandlers(img: HTMLImageElement): void {
+    img.addEventListener('load', () => this.handleImageLoaded(img), { once: true });
+    img.addEventListener('error', () => this.handleImageError(img), { once: true });
+  }
 
-    // 开始加载
-    if (srcset) {
-      img.srcset = srcset;
+  private handleImageLoaded(img: HTMLImageElement): void {
+    this.loadedImages.add(img);
+    img.classList.add('lazy-loaded');
+    img.classList.remove('lazy-loading', 'lazy-error');
+
+    if (this.config.fadeIn) {
+      img.style.opacity = '1';
     }
-    if (src) {
-      img.src = src;
+
+    this.stopObserving(img);
+  }
+
+  private handleImageError(img: HTMLImageElement): void {
+    img.classList.add('lazy-error');
+    img.classList.remove('lazy-loading');
+
+    if (this.config.errorImage) {
+      img.src = this.config.errorImage;
+    }
+
+    this.stopObserving(img);
+  }
+
+  private stopObserving(img: HTMLImageElement): void {
+    if (this.observer) {
+      this.observer.unobserve(img);
+    }
+  }
+
+  private applyLazySources(img: HTMLImageElement, sources: LazyImageSources): void {
+    if (sources.srcset) {
+      img.srcset = sources.srcset;
+    }
+    if (sources.src) {
+      img.src = sources.src;
     }
   }
 

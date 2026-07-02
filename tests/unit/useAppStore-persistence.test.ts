@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-describe('useAppStore persistence', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.resetModules();
@@ -380,4 +379,3 @@ describe('useAppStore persistence', () => {
       expect.objectContaining({ id: 'visual-1' })
     ]);
   });
-});

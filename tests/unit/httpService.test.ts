@@ -16,7 +16,6 @@ vi.mock('../../src/services/performanceService', () => ({
   },
 }));
 
-describe('HttpService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -716,4 +715,3 @@ describe('HttpService', () => {
       );
     });
   });
-});

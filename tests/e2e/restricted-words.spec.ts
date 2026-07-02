@@ -8,7 +8,6 @@ import { test, expect } from '@playwright/test';
 import { RestrictedWordsPage } from './pages/RestrictedWordsPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
-test.describe('Restricted Words 模块 E2E 测试', () => {
     test.describe.configure({ mode: 'serial' });
 
     let restrictedWords: RestrictedWordsPage;
@@ -578,4 +577,3 @@ test.describe('Restricted Words 模块 E2E 测试', () => {
             console.log('✅ 平板端显示正常');
         });
     });
-});

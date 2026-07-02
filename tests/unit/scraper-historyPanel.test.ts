@@ -73,7 +73,6 @@ vi.mock('@/common/constants/eventConstants', () => ({
   emitAppEvent: vi.fn()
 }));
 
-describe('HistoryPanel 组件', () => {
   let historyPanel: HistoryPanel;
   let mockHistory: HistoryItem[];
   let mockHistoryService: any;
@@ -529,4 +528,3 @@ describe('HistoryPanel 组件', () => {
       expect(mockState.scraper.selectedSite).toBe('UNKNOWN');
     });
   });
-});

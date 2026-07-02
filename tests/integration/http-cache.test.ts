@@ -11,7 +11,6 @@ import { HttpCacheService } from '@/services/HttpCacheService';
 // Mock fetch
 global.fetch = vi.fn();
 
-describe('HTTP+缓存集成测试', () => {
   let cacheService: HttpCacheService;
 
   beforeEach(() => {
@@ -441,4 +440,3 @@ describe('HTTP+缓存集成测试', () => {
       expect(endTime - startTime).toBeLessThan(100);
     });
   });
-});

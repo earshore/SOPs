@@ -265,7 +265,6 @@ const PERFORMANCE_BASELINE = {
     });
   });
 
-  test.describe('内存占用', () => {
     test('页面内存占用应该在基线范围内', async ({ page }) => {
       await promptlab.navigate();
       
@@ -367,8 +366,6 @@ const PERFORMANCE_BASELINE = {
         console.log('   ⚠️ 注意：内存增长 > 10%，建议检查是否有内存泄漏');
       }
     });
-  });
-
   test.describe('渲染性能', () => {
     test('SafeRenderer 渲染性能应该可接受', async ({ page }) => {
       await promptlab.navigate();

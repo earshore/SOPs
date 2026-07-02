@@ -8,7 +8,6 @@ import { describe, it, expect } from 'vitest';
 import { extractProductDNA } from '../../src/modules/app_center/views/master_analysis/services/dnaExtractor';
 import type { FullAnalysisReport } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/analysisReportData';
 
-describe('DNA 提取器 - 多品类支持', () => {
   describe('假发产品', () => {
     it('应该正确提取假发产品的技术参数', () => {
       const wigReport: any = {
@@ -614,4 +613,3 @@ describe('DNA 提取器 - 多品类支持', () => {
       expect(dna!.confidence.specs).toBeGreaterThan(0.5);
     });
   });
-});

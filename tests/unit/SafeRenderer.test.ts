@@ -7,7 +7,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { SafeRenderer } from '../../src/common/infrastructure/SafeRenderer';
 
-describe('SafeRenderer', () => {
   let renderer: SafeRenderer;
   let container: HTMLElement;
 
@@ -608,4 +607,3 @@ describe('SafeRenderer', () => {
       expect(safeRenderer).toBe(SafeRenderer.getInstance());
     });
   });
-});

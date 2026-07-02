@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createStore } from 'zustand/vanilla';
 import { persist, clearPersistedState } from '@/stores/middleware/persist';
 
-describe('Persist中间件', () => {
   const STORAGE_KEY = 'test-store';
 
   beforeEach(() => {
@@ -571,4 +570,3 @@ describe('Persist中间件', () => {
       expect(saved).not.toBeNull();
     });
   });
-});

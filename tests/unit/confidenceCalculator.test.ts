@@ -29,7 +29,6 @@ import type {
   PromiseRealityReport
 } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/analysisReportData';
 
-describe('置信度计算器', () => {
   describe('calculateTitleKeywordsConfidence', () => {
     it('应该为完整的报告返回高置信度', () => {
       const report: TitleKeywordsReport = {
@@ -618,4 +617,3 @@ describe('置信度计算器', () => {
       expect(getConfidenceColorClass(0.3)).toContain('orange');
     });
   });
-});

@@ -12,7 +12,6 @@ const mockContainer = document.createElement('div');
 mockContainer.id = 'main-content';
 document.body.appendChild(mockContainer);
 
-describe('RouteErrorHandlerManager', () => {
   let manager: RouteErrorHandlerManager;
 
   beforeEach(() => {
@@ -439,4 +438,3 @@ describe('RouteErrorHandlerManager', () => {
       expect(innerHandler).toHaveBeenCalled();
     });
   });
-});

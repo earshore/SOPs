@@ -93,6 +93,14 @@ interface MarketingCalendarState {
   searchHistory: string[];
 }
 
+interface MarketingCalendarSearchElements {
+  input: HTMLInputElement;
+  clearBtn: HTMLElement | null;
+  searchBox: HTMLElement | null;
+  searchWrapper: Element | null;
+  searchHistory: HTMLElement | null;
+}
+
 class MarketingCalendarModule extends BaseModule {
   private state: MarketingCalendarState;
   private debounceTimer: number | null = null;
@@ -508,82 +516,116 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   bindSearchEvents(): void {
-    const input = document.getElementById('amzf_search') as HTMLInputElement;
-    const clearBtn = document.getElementById('amzf_clear');
-    const searchBox = document.getElementById('amzf_search_box');
-    const searchWrapper = document.querySelector('.amzf_search_wrapper');
-    const searchHistory = document.getElementById('amzf_search_history');
+    const elements = this.getSearchElements();
+    if (!elements) return;
 
-    if (!input) return;
+    this.bindSearchFocusEvents(elements);
+    this.bindSearchDismissEvents(elements);
+    this.bindSearchInputEvents(elements);
+    this.bindSearchKeyboardEvents(elements.input);
+    this.bindSearchClearEvent(elements.clearBtn);
+    this.bindSearchWindowEvents(elements.searchHistory);
+  }
 
-    // BaseModule.addEventListener handles cleanup automatically
-    this.addEventListener(input, 'focus', () => this.showSearchHistory());
+  private getSearchElements(): MarketingCalendarSearchElements | null {
+    const input = document.getElementById('amzf_search') as HTMLInputElement | null;
+    if (!input) return null;
 
-    if (searchBox) {
-      this.addEventListener(searchBox, 'click', () => input.focus());
+    return {
+      input,
+      clearBtn: document.getElementById('amzf_clear'),
+      searchBox: document.getElementById('amzf_search_box'),
+      searchWrapper: document.querySelector('.amzf_search_wrapper'),
+      searchHistory: document.getElementById('amzf_search_history'),
+    };
+  }
+
+  private bindSearchFocusEvents(elements: MarketingCalendarSearchElements): void {
+    this.addEventListener(elements.input, 'focus', () => this.showSearchHistory());
+    if (elements.searchBox) {
+      this.addEventListener(elements.searchBox, 'click', () => elements.input.focus());
     }
+  }
 
+  private bindSearchDismissEvents(elements: MarketingCalendarSearchElements): void {
     this.addEventListener(document, 'click', e => {
-      if (
-        searchWrapper &&
-        !searchWrapper.contains(e.target as Node) &&
-        !searchHistory?.contains(e.target as Node)
-      ) {
+      if (this.shouldHideSearchHistory(e.target, elements)) {
         this.hideSearchHistory();
       }
     });
+  }
 
-    this.addEventListener(input, 'input', e => {
-      const val = (e.target as HTMLInputElement).value;
-      if (clearBtn) {
-        clearBtn.classList.toggle('amzf_visible', val.length > 0);
-      }
+  private shouldHideSearchHistory(
+    target: EventTarget | null,
+    elements: MarketingCalendarSearchElements
+  ): boolean {
+    if (!elements.searchWrapper || !(target instanceof Node)) return false;
+    return !elements.searchWrapper.contains(target) && !elements.searchHistory?.contains(target);
+  }
 
-      // 使用 BaseModule 的 setTimeout 实现自动清理的防抖
-      if (this.debounceTimer) clearTimeout(this.debounceTimer);
-      this.debounceTimer = this.setTimeout(() => {
-        this.state.searchTerm = this.normalizeSearchText(val);
-        this.renderStats();
-        this.renderContent();
-      }, 300);
+  private bindSearchInputEvents(elements: MarketingCalendarSearchElements): void {
+    this.addEventListener(elements.input, 'input', e => {
+      const value = (e.target as HTMLInputElement).value;
+      this.updateClearButtonVisibility(elements.clearBtn, value);
+      this.scheduleSearchRender(value);
     });
+  }
 
+  private updateClearButtonVisibility(clearBtn: HTMLElement | null, value: string): void {
+    clearBtn?.classList.toggle('amzf_visible', value.length > 0);
+  }
+
+  private scheduleSearchRender(value: string): void {
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    this.debounceTimer = this.setTimeout(() => {
+      this.state.searchTerm = this.normalizeSearchText(value);
+      this.renderStats();
+      this.renderContent();
+    }, 300);
+  }
+
+  private bindSearchKeyboardEvents(input: HTMLInputElement): void {
     this.addEventListener(input, 'keydown', e => {
       const keyEvent = e as KeyboardEvent;
-      if (keyEvent.key === 'Enter' && input.value.trim()) {
-        keyEvent.preventDefault();
-        this.selectHistoryItem(input.value.trim(), true);
-        input.blur();
-      }
-      if (keyEvent.key === 'Escape') {
-        this.hideSearchHistory();
-        input.blur();
-      }
+      if (this.handleSearchEnter(keyEvent, input)) return;
+      this.handleSearchEscape(keyEvent, input);
     });
+  }
 
-    if (clearBtn) {
-      this.addEventListener(clearBtn, 'click', e => {
-        e.stopPropagation();
-        this.clearSearch();
-      });
+  private handleSearchEnter(event: KeyboardEvent, input: HTMLInputElement): boolean {
+    if (event.key !== 'Enter' || !input.value.trim()) return false;
+
+    event.preventDefault();
+    this.selectHistoryItem(input.value.trim(), true);
+    input.blur();
+    return true;
+  }
+
+  private handleSearchEscape(event: KeyboardEvent, input: HTMLInputElement): void {
+    if (event.key !== 'Escape') return;
+
+    this.hideSearchHistory();
+    input.blur();
+  }
+
+  private bindSearchClearEvent(clearBtn: HTMLElement | null): void {
+    if (!clearBtn) return;
+
+    this.addEventListener(clearBtn, 'click', e => {
+      e.stopPropagation();
+      this.clearSearch();
+    });
+  }
+
+  private bindSearchWindowEvents(searchHistory: HTMLElement | null): void {
+    this.addEventListener(window, 'resize', () => this.repositionSearchHistory(searchHistory));
+    this.addEventListener(window, 'scroll', () => this.hideSearchHistory(), true);
+  }
+
+  private repositionSearchHistory(searchHistory: HTMLElement | null): void {
+    if (searchHistory?.classList.contains('amzf_show')) {
+      this.showSearchHistory();
     }
-
-    // 窗口大小变化时重新计算下拉框位置
-    this.addEventListener(window, 'resize', () => {
-      if (searchHistory?.classList.contains('amzf_show')) {
-        this.showSearchHistory();
-      }
-    });
-
-    // 滚动时隐藏下拉框
-    this.addEventListener(
-      window,
-      'scroll',
-      () => {
-        this.hideSearchHistory();
-      },
-      true
-    );
   }
 
   // ==================== Rendering ====================

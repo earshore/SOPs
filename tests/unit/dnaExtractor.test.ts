@@ -8,7 +8,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { extractProductDNA, canExtractDNA } from '../../src/modules/app_center/views/master_analysis/services/dnaExtractor';
 import type { FullAnalysisReport } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/analysisReportData';
 
-describe('DNA 提取器', () => {
   describe('canExtractDNA', () => {
     it('应该在报告为 null 时返回 false', () => {
       expect(canExtractDNA(null)).toBe(false);
@@ -474,4 +473,3 @@ describe('DNA 提取器', () => {
       expect(dna!.specs).toMatch(/\d+|[A-Z]+\d+/);
     });
   });
-});

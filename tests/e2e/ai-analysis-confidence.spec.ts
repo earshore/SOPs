@@ -179,7 +179,6 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
     });
   });
 
-  test.describe('3. 单个报告置信度徽章测试', () => {
     test('每个分析结果卡片应该显示置信度徽章', async ({ page }) => {
       const hasData = await aiAnalysis.hasAvailableData();
 
@@ -283,8 +282,6 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       console.log('✅ 徽章颜色与分数匹配');
     });
-  });
-
   test.describe('4. 数据更新测试', () => {
     test('重新分析后置信度应该更新', async ({ page }) => {
       const hasData = await aiAnalysis.hasAvailableData();

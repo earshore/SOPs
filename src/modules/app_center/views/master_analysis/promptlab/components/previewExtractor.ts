@@ -236,28 +236,48 @@ export function getFieldTitle(key: string): string {
   return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
+function truncatePreviewText(text: string, limit: number): string {
+  return text.length > limit ? text.slice(0, limit) + '...' : text;
+}
+
+function stringifyPreviewItem(item: unknown): string {
+  if (typeof item === 'object' && item !== null) return Object.values(item).join(' ');
+  return String(item ?? '');
+}
+
+function getArrayPreviewText(value: unknown[]): string {
+  const str = value
+    .map(stringifyPreviewItem)
+    .filter(text => text.trim())
+    .join(' | ');
+
+  return truncatePreviewText(str, 60);
+}
+
+function getObjectPreviewText(value: object): string {
+  return truncatePreviewText(Object.values(value).join(', '), 60);
+}
+
+function getPrimitivePreviewText(value: unknown): string {
+  return JSON.stringify(value).slice(0, 60) + '...';
+}
+
 /**
  * 将任意值格式化为短预览字符串（用于旧格式报告）
  */
 export function getPreviewText(val: unknown): string {
   if (!val) return '';
   if (typeof val === 'string') {
-    return val.length > 50 ? val.slice(0, 50) + '...' : val;
+    return truncatePreviewText(val, 50);
   }
   try {
     if (Array.isArray(val)) {
-      const texts = val.map(item => {
-        if (typeof item === 'object' && item !== null) return Object.values(item).join(' ');
-        return String(item ?? '');
-      });
-      const str = texts.filter(t => t.trim()).join(' | ');
-      return str.length > 60 ? str.slice(0, 60) + '...' : str;
+      return getArrayPreviewText(val);
     }
     if (typeof val === 'object') {
-      const str = Object.values(val).join(', ');
-      return str.length > 60 ? str.slice(0, 60) + '...' : str;
+      return getObjectPreviewText(val);
     }
-    return JSON.stringify(val).slice(0, 60) + '...';
+    return getPrimitivePreviewText(val);
   } catch {
     return 'Data...';
   }

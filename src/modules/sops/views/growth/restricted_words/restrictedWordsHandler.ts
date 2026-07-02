@@ -33,6 +33,11 @@ interface ActiveFilters {
   searchQuery: string;
 }
 
+interface SearchCriteria {
+  query: string;
+  mode: SearchMode;
+}
+
 /**
  * Restricted Words Panel Alpine 组件接口
  */
@@ -235,82 +240,111 @@ function bindEventListeners(): void {
  * 执行综合搜索与筛选
  */
 function executeSearch(): void {
+  const criteria = readSearchCriteria();
+  updateActiveSearchFilters(criteria);
+
+  currentResults = applyAttributeFilters(
+    applyKeywordSearch(applySiteContextFilter(RESTRICTED_WORDS_DATABASE), criteria)
+  );
+  renderResults();
+}
+
+function readSearchCriteria(): SearchCriteria {
   const input = document.getElementById('rw-search-input') as HTMLInputElement | null;
   const modeSelect = document.getElementById('rw-search-mode') as HTMLSelectElement | null;
 
-  const query = input?.value.trim() || '';
-  const searchMode = (modeSelect?.value as SearchMode) || 'fuzzy';
+  return {
+    query: input?.value.trim() || '',
+    mode: (modeSelect?.value as SearchMode) || 'fuzzy',
+  };
+}
 
-  activeFilters.searchQuery = query;
-  activeFilters.searchMode = searchMode;
+function updateActiveSearchFilters(criteria: SearchCriteria): void {
+  activeFilters.searchQuery = criteria.query;
+  activeFilters.searchMode = criteria.mode;
+}
 
-  // 1. 站点预筛选
-  let filtered = RESTRICTED_WORDS_DATABASE;
+function applySiteContextFilter(words: RestrictedWord[]): RestrictedWord[] {
+  if (currentSiteContext === 'ALL') return words;
 
-  if (currentSiteContext !== 'ALL') {
-    filtered = filtered.filter(
-      word => word.affectedSites.includes(currentSiteContext) || word.affectedSites.includes('EU')
-    );
+  return words.filter(
+    word => word.affectedSites.includes(currentSiteContext) || word.affectedSites.includes('EU')
+  );
+}
+
+function applyKeywordSearch(words: RestrictedWord[], criteria: SearchCriteria): RestrictedWord[] {
+  if (!criteria.query) return words;
+
+  const lowerQuery = criteria.query.toLowerCase();
+  return words.filter(word => matchesSearchCriteria(word, criteria, lowerQuery));
+}
+
+function getSearchKeywords(word: RestrictedWord): string[] {
+  const mainKeyword = word.keyword.toLowerCase();
+  const variants = (word.variants || []).map(value => value.toLowerCase());
+  const localizedKeywords = Object.values(word.localizedKeywords || {}).map(value =>
+    value.toLowerCase()
+  );
+
+  return [mainKeyword, ...variants, ...localizedKeywords];
+}
+
+function matchesSearchCriteria(
+  word: RestrictedWord,
+  criteria: SearchCriteria,
+  lowerQuery: string
+): boolean {
+  const keywords = getSearchKeywords(word);
+
+  switch (criteria.mode) {
+    case 'exact':
+      return keywords.includes(lowerQuery);
+    case 'fuzzy':
+      return keywords.some(keyword => keyword.includes(lowerQuery));
+    case 'fulltext':
+      return getFullTextSearchValue(word, keywords).includes(lowerQuery);
+    case 'regex':
+      return matchesRegexSearch(word, criteria.query);
+    default:
+      return false;
   }
+}
 
-  // 2. 关键词搜索
-  if (query) {
-    const lowerQuery = query.toLowerCase();
+function getFullTextSearchValue(word: RestrictedWord, keywords: string[]): string {
+  return [
+    ...keywords,
+    word.riskDescription,
+    word.legalBasis,
+    (word.alternatives || []).join(' '),
+    word.tips,
+  ]
+    .join(' ')
+    .toLowerCase();
+}
 
-    filtered = filtered.filter(word => {
-      const mainKw = word.keyword.toLowerCase();
-      // 获取当前所有相关文本用于搜索
-      const variants = (word.variants || []).map(v => v.toLowerCase());
-      const localKws = Object.values(word.localizedKeywords || {}).map(v => v.toLowerCase());
-      const allKeywords = [mainKw, ...variants, ...localKws];
-
-      switch (searchMode) {
-        case 'exact':
-          return allKeywords.includes(lowerQuery);
-
-        case 'fuzzy':
-          return allKeywords.some(k => k.includes(lowerQuery));
-
-        case 'fulltext': {
-          const fullText = [
-            ...allKeywords,
-            word.riskDescription,
-            word.legalBasis,
-            (word.alternatives || []).join(' '),
-            word.tips,
-          ]
-            .join(' ')
-            .toLowerCase();
-          return fullText.includes(lowerQuery);
-        }
-
-        case 'regex':
-          try {
-            const regex = new RegExp(query, 'i');
-            return regex.test(word.keyword) || variants.some(v => regex.test(v));
-          } catch (e) {
-            return false;
-          }
-
-        default:
-          return false;
-      }
-    });
+function matchesRegexSearch(word: RestrictedWord, query: string): boolean {
+  try {
+    const regex = new RegExp(query, 'i');
+    const variants = (word.variants || []).map(value => value.toLowerCase());
+    return regex.test(word.keyword) || variants.some(variant => regex.test(variant));
+  } catch {
+    return false;
   }
+}
 
-  // 3. 属性筛选
-  if (activeFilters.category) {
-    filtered = filtered.filter(w => w.category === activeFilters.category);
-  }
+function applyAttributeFilters(words: RestrictedWord[]): RestrictedWord[] {
+  return words.filter(word => matchesCategoryFilter(word) && matchesRiskFilter(word));
+}
 
-  if (activeFilters.riskLevel) {
-    // 转换成数字比较
-    const targetLevel = parseInt(activeFilters.riskLevel);
-    filtered = filtered.filter(w => w.riskLevel === targetLevel);
-  }
+function matchesCategoryFilter(word: RestrictedWord): boolean {
+  return !activeFilters.category || word.category === activeFilters.category;
+}
 
-  currentResults = filtered;
-  renderResults();
+function matchesRiskFilter(word: RestrictedWord): boolean {
+  if (!activeFilters.riskLevel) return true;
+
+  const targetLevel = parseInt(activeFilters.riskLevel);
+  return word.riskLevel === targetLevel;
 }
 
 /**

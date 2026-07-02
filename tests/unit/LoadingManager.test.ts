@@ -6,7 +6,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { LoadingManager } from '@/common/utils/LoadingManager';
 
-describe('LoadingManager', () => {
   let manager: LoadingManager;
 
   beforeEach(() => {
@@ -392,4 +391,3 @@ describe('LoadingManager', () => {
       expect(elapsed).toBeLessThan(50);
     });
   });
-});

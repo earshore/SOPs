@@ -8,7 +8,6 @@ import { WorkingStateManager } from '@/common/utils/WorkingStateManager';
 import eventBus from '@/common/EventBus';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 
-describe('WorkingStateManager', () => {
   let manager: WorkingStateManager;
 
   beforeEach(() => {
@@ -476,4 +475,3 @@ describe('WorkingStateManager', () => {
       expect(onFinalFailure).toHaveBeenCalledTimes(1);
     });
   });
-});

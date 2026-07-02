@@ -294,8 +294,8 @@
   height: 100%;
   background: linear-gradient(
     180deg,
-    var(--accent-from, var(--color-primary, #3b82f6)),
-    var(--accent-to, #8b5cf6)
+    var(--card-accent-from, var(--color-primary, #3b82f6)),
+    var(--card-accent-to, #8b5cf6)
   );
   opacity: 0;
   transition: opacity var(--duration-slow, 400ms) var(--ease-smooth);
@@ -312,28 +312,28 @@
 
 /* 装饰条颜色变体 */
 .card-accent--blue {
-  --accent-from: #3b82f6;
-  --accent-to: #06b6d4;
+  --card-accent-from: #3b82f6;
+  --card-accent-to: #06b6d4;
 }
 .card-accent--green {
-  --accent-from: #22c55e;
-  --accent-to: #10b981;
+  --card-accent-from: #22c55e;
+  --card-accent-to: #10b981;
 }
 .card-accent--purple {
-  --accent-from: #8b5cf6;
-  --accent-to: #a855f7;
+  --card-accent-from: #8b5cf6;
+  --card-accent-to: #a855f7;
 }
 .card-accent--amber {
-  --accent-from: #f59e0b;
-  --accent-to: #f97316;
+  --card-accent-from: #f59e0b;
+  --card-accent-to: #f97316;
 }
 .card-accent--red {
-  --accent-from: #ef4444;
-  --accent-to: #f43f5e;
+  --card-accent-from: #ef4444;
+  --card-accent-to: #f43f5e;
 }
 .card-accent--rose {
-  --accent-from: #f43f5e;
-  --accent-to: #ec4899;
+  --card-accent-from: #f43f5e;
+  --card-accent-to: #ec4899;
 }
 
 /* --- 概览导航卡片：默认隐藏左侧色条，hover/focus 时显示 --- */

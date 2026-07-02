@@ -282,6 +282,82 @@ function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
   };
 }
 
+function getLikelyGenderLabel(gender: string | undefined): string {
+  if (gender === 'male') return '男性';
+  if (gender === 'female') return '女性';
+  return '';
+}
+
+function buildBuyerProfileStats(
+  buyerTypes: BuyerProfileReport['buyer_types'],
+  usageScenes: BuyerProfileReport['usage_scenes'],
+  primaryMarkets: string[]
+): AnalysisResult['stats'] {
+  return [
+    { label: '买家类型', value: `${buyerTypes.length}类` },
+    { label: '使用场景', value: `${usageScenes.length}个` },
+    { label: '覆盖市场', value: `${primaryMarkets.length}个` },
+  ];
+}
+
+function buildBuyerTypeHighlights(
+  buyerTypes: BuyerProfileReport['buyer_types']
+): AnalysisResult['highlights'] {
+  return buyerTypes.slice(0, ANALYSIS_DISPLAY_LIMITS.BUYER_TYPES).map(t => ({
+    text: `${t.type || '未知'} (${t.percentage_estimate || '未知'}) - ${(t.evidence || '').substring(0, 40)}...`,
+    type: 'info' as const,
+  }));
+}
+
+function buildBuyerProfileHighlights(
+  demographics: BuyerProfileReport['demographics'],
+  buyerTypes: BuyerProfileReport['buyer_types'],
+  primaryMarkets: string[]
+): AnalysisResult['highlights'] {
+  return [
+    {
+      text: `核心用户：${demographics.age_range_estimate || '未知'}${getLikelyGenderLabel(demographics.likely_gender)}`,
+      type: 'info',
+    },
+    ...buildBuyerTypeHighlights(buyerTypes),
+    {
+      text: `主要市场：${primaryMarkets.join('、') || '未知'}`,
+      type: 'success',
+    },
+  ];
+}
+
+function buildBuyerProfileDetails(
+  lifestyleIndicators: string[],
+  buyerTypes: BuyerProfileReport['buyer_types'],
+  usageScenes: BuyerProfileReport['usage_scenes'],
+  purchaseMotivations: string[],
+  culturalConsiderations: string[]
+): AnalysisResult['details'] {
+  return [
+    {
+      category: '生活方式特征',
+      items: lifestyleIndicators,
+    },
+    {
+      category: '买家类型分布',
+      items: buyerTypes.map(t => `${t.type || '未知'} (${t.percentage_estimate || '未知'})`),
+    },
+    {
+      category: '使用场景',
+      items: usageScenes.map(s => `${s.scene || '未知'} [${s.frequency || '未知'}]`),
+    },
+    {
+      category: '购买动机',
+      items: purchaseMotivations,
+    },
+    {
+      category: '市场文化洞察',
+      items: culturalConsiderations,
+    },
+  ];
+}
+
 /**
  * 将买家画像报告转换为展示格式
  */
@@ -300,47 +376,15 @@ function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
     targetId: 'buyer-profile',
     title: '画像与场景侧写',
     source: 'Reviews',
-    stats: [
-      { label: '买家类型', value: `${buyerTypes.length}类` },
-      { label: '使用场景', value: `${usageScenes.length}个` },
-      { label: '覆盖市场', value: `${primaryMarkets.length}个` },
-    ],
-    highlights: [
-      {
-        text: `核心用户：${demographics.age_range_estimate || '未知'}${demographics.likely_gender === 'male' ? '男性' : demographics.likely_gender === 'female' ? '女性' : ''}`,
-        type: 'info',
-      },
-      ...buyerTypes.slice(0, ANALYSIS_DISPLAY_LIMITS.BUYER_TYPES).map(t => ({
-        text: `${t.type || '未知'} (${t.percentage_estimate || '未知'}) - ${(t.evidence || '').substring(0, 40)}...`,
-        type: 'info' as const,
-      })),
-      {
-        text: `主要市场：${primaryMarkets.join('、') || '未知'}`,
-        type: 'success',
-      },
-    ],
-    details: [
-      {
-        category: '生活方式特征',
-        items: lifestyleIndicators,
-      },
-      {
-        category: '买家类型分布',
-        items: buyerTypes.map(t => `${t.type || '未知'} (${t.percentage_estimate || '未知'})`),
-      },
-      {
-        category: '使用场景',
-        items: usageScenes.map(s => `${s.scene || '未知'} [${s.frequency || '未知'}]`),
-      },
-      {
-        category: '购买动机',
-        items: purchaseMotivations,
-      },
-      {
-        category: '市场文化洞察',
-        items: culturalConsiderations,
-      },
-    ],
+    stats: buildBuyerProfileStats(buyerTypes, usageScenes, primaryMarkets),
+    highlights: buildBuyerProfileHighlights(demographics, buyerTypes, primaryMarkets),
+    details: buildBuyerProfileDetails(
+      lifestyleIndicators,
+      buyerTypes,
+      usageScenes,
+      purchaseMotivations,
+      culturalConsiderations
+    ),
   };
 }
 

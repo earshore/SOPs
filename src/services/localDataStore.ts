@@ -239,7 +239,7 @@ interface PreparedLocalDataImport {
   indexedRecords: Array<LocalDataRecord>;
 }
 
-function prepareLocalDataImport(data: LocalDataExport): PreparedLocalDataImport {
+function assertSupportedLocalDataExport(data: LocalDataExport): void {
   if (
     !data ||
     data.version !== 1 ||
@@ -250,9 +250,13 @@ function prepareLocalDataImport(data: LocalDataExport): PreparedLocalDataImport 
   ) {
     throw new Error('不支持的本地数据备份格式');
   }
+}
 
+function collectImportLocalStorageEntries(
+  localStorageData: LocalDataExport['localStorage']
+): Array<[string, string]> {
   const localStorageEntries: Array<[string, string]> = [];
-  for (const [key, value] of Object.entries(data.localStorage)) {
+  for (const [key, value] of Object.entries(localStorageData)) {
     if (typeof value !== 'string') {
       throw new Error('本地数据备份中包含无效的 localStorage 值');
     }
@@ -261,7 +265,13 @@ function prepareLocalDataImport(data: LocalDataExport): PreparedLocalDataImport 
     }
   }
 
-  const indexedRecords = data.indexedDB
+  return localStorageEntries;
+}
+
+function normalizeImportIndexedRecords(
+  indexedDB: LocalDataExport['indexedDB']
+): Array<LocalDataRecord> {
+  return indexedDB
     .filter((record): record is LocalDataRecord => !!record && typeof record.key === 'string')
     .map(record => ({
       key: record.key,
@@ -269,10 +279,14 @@ function prepareLocalDataImport(data: LocalDataExport): PreparedLocalDataImport 
       storageClass: normalizeStorageClass(record.storageClass),
       updatedAt: Number.isFinite(record.updatedAt) ? record.updatedAt : Date.now(),
     }));
+}
+
+function prepareLocalDataImport(data: LocalDataExport): PreparedLocalDataImport {
+  assertSupportedLocalDataExport(data);
 
   return {
-    localStorageEntries,
-    indexedRecords,
+    localStorageEntries: collectImportLocalStorageEntries(data.localStorage),
+    indexedRecords: normalizeImportIndexedRecords(data.indexedDB),
   };
 }
 

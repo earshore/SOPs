@@ -6,7 +6,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 
-describe('StorageService', () => {
   beforeEach(() => {
     localStorage.clear();
   });
@@ -448,4 +447,3 @@ describe('StorageService', () => {
       expect(STORAGE_KEYS.LAYOUT_CONFIG_PREFIX).toBe('layout_config_');
     });
   });
-});

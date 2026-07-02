@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import {
   closeSettings,
   fetchModels,
@@ -213,7 +213,6 @@ beforeEach(() => {
   delete (window as unknown as { Alpine?: unknown }).Alpine;
 });
 
-describe('system settings current behavior', () => {
   it('registers Alpine settings and initializes subscriptions', async () => {
     const panel = createPanel();
     panel.$watch = vi.fn();
@@ -640,4 +639,3 @@ describe('system settings current behavior', () => {
     unsubscribeOpen();
     unsubscribeClose();
   });
-});

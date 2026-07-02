@@ -114,39 +114,12 @@ export function calculateTitleKeywordsConfidence(report: TitleKeywordsReport | n
     return 0;
   }
 
-  const scores: number[] = [];
-
   try {
-    // 检查主关键词
-    if (report.primary_keywords && Array.isArray(report.primary_keywords)) {
-      const validPrimary = report.primary_keywords.filter(
-        k => k.keyword && k.keyword.trim().length > 0
-      );
-      scores.push(validPrimary.length > 0 ? Math.min(validPrimary.length / 3, 1.0) : 0);
-    } else {
-      scores.push(0);
-    }
-
-    // 检查次要关键词
-    if (report.secondary_keywords && Array.isArray(report.secondary_keywords)) {
-      const validSecondary = report.secondary_keywords.filter(
-        k => k.keyword && k.keyword.trim().length > 0
-      );
-      scores.push(validSecondary.length > 0 ? Math.min(validSecondary.length / 5, 1.0) : 0);
-    } else {
-      scores.push(0);
-    }
-
-    // 检查优化建议
-    scores.push(checkDataQuality(report.optimization_suggestions));
-
-    if (scores.length === 0) {
-      return 0;
-    }
-
-    const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-    const clampedScore = Math.max(0, Math.min(1, avgScore));
-    return clampedScore;
+    return finalizeConfidence([
+      scoreByValidText(report.primary_keywords, keyword => keyword.keyword, 3),
+      scoreByValidText(report.secondary_keywords, keyword => keyword.keyword, 5),
+      checkDataQuality(report.optimization_suggestions),
+    ]);
   } catch (error) {
     console.error('[置信度] Title Keywords 计算失败:', error);
     return 0;

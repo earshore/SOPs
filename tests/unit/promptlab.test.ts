@@ -63,7 +63,6 @@ const createPromptRecord = (
   },
 });
 
-describe('Promptlab Module', () => {
   let container: HTMLElement;
   let mockTemplate: string;
 
@@ -1162,4 +1161,3 @@ describe('Promptlab Module', () => {
       expect(component.profile.audience).toBe('Young professionals');
     });
   });
-});

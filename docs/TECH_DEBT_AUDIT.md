@@ -3,7 +3,7 @@
 **审计日期**: 2026-06-08
 **最新更新**: 2026-07-03
 **审计范围**: 当前 CI 门禁、依赖审计、`src/` 代码质量、CSS 变量与模块样式、技术债扫描、单元/集成测试。
-**结论**: 当前没有仍阻塞 `ci:all` 的 P0 债务；本轮已消除循环依赖门禁、生产依赖漏洞、开发依赖漏洞、`ConfigCenter` 构建导入 warning、构建性能 warning、ESLint warning 基线、格式化基线、技术债扫描基线、Vitest 输出噪声和质量脚本失效问题。剩余债务按优先级集中在 Playground 权限边界执行源、`src/` 复杂度热点、CSS 令牌治理、测试/工具复杂度噪声和浏览器类验证补齐。
+**结论**: 当前没有仍阻塞 `ci:all` 的 P0 债务；本轮已消除循环依赖门禁、生产依赖漏洞、开发依赖漏洞、`ConfigCenter` 构建导入 warning、构建性能 warning、ESLint warning 基线、格式化基线、技术债扫描基线、Vitest 输出噪声、质量脚本失效问题、`src/` 非测试运行时代码复杂度热点和 CSS 变量命名基线。剩余债务按优先级集中在 Playground 权限边界执行源、CSS 模块重复、测试/工具复杂度噪声和浏览器类验证补齐。
 
 ---
 
@@ -56,7 +56,14 @@
 | 已完成 | 技术债扫描基线清零                    | 抽取重复测试 fixture、导航开关状态、并行分析进度更新、历史 Prompt 指纹匹配和 LLM 响应错误构造；`tech-debt:scan` 当前 0 issue。                                                                        |
 | 已完成 | ESLint warning baseline 清零          | `config/eslint-warning-baseline.json` 从 342 收敛到 0，`lint:warning-gate` 当前为 0/0 warning。                                                                                                       |
 | 已完成 | 质量脚本可运行性                      | 修复 CSS 审计根目录、CSS 模块分析失效路径、注释代码清理器 `glob` 导入、质量检查 ESLint 输出缓冲和失败处理。                                                                                           |
-| 已完成 | 审计报告产物                          | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-07-02.json`、`tests/quality/tech-debt-2026-07-02.html` 和最新复杂度报告 `complexity-report-2026-07-02T16-51-10.*`。          |
+| 已完成 | Marketing Calendar 搜索复杂度收敛     | 拆分搜索框 focus/dismiss/input/keyboard/clear/resize/scroll 事件绑定，`bindSearchEvents` 不再出现在最新复杂度报告。                                                                                   |
+| 已完成 | Restricted Words 搜索复杂度收敛       | 拆分搜索条件读取、站点上下文过滤、关键词匹配和属性过滤，`executeSearch` 不再出现在最新复杂度报告。                                                                                                    |
+| 已完成 | Master Analysis 报告生成复杂度收敛    | 拆分 legacy `generateReport` 的产品数据 section、Prompt 构造、LLM 调用和响应解析，`analysisService.ts` 不再出现在最新复杂度报告。                                                                      |
+| 已完成 | SafeRenderer sanitizer 复杂度收敛     | 拆分 `sanitizeHtml` 的子节点遍历、元素清理、属性复制和 URL 属性检查，`SafeRenderer.ts` 不再出现在最新复杂度报告。                                                                                     |
+| 已完成 | `src/` 运行时代码复杂度热点清空       | 继续拆分 `ImageLazyLoader.loadImage`、`parseReviews`、`parseBuyerProfile`、`buildContextSection`、`extractUSPs`、`calculateTitleKeywordsConfidence`、`renderMegaMenu` 和 `getPreviewText`；最新复杂度报告中剩余 `src/` 项均为测试文件。 |
+| 已完成 | CSS 变量命名基线清零                  | 冻结全局语义 token、组件 token 和模块命名空间 token 规则；将卡片渐变变量迁入 `--card-*` 命名空间，`css:audit` 当前 0 个不合规变量。                                                                  |
+| 已完成 | CSS 动画重复小批收敛                  | 将 Home 重复 keyframes 移除并复用全局动画库，AI Analysis 复用全局 `skeletonShimmer`；模块 CSS 动画重复次数从 45 降到 39。                                                                            |
+| 已完成 | 审计报告产物                          | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-07-02.json`、`tests/quality/tech-debt-2026-07-02.html` 和最新复杂度报告 `complexity-report-2026-07-02T17-36-27.*`。          |
 
 ## 验证快照
 
@@ -80,30 +87,27 @@
 | 生产依赖审计             | `npm audit --omit=dev`                                                                                                                                                                                                                                                                                                                                                                                                | 0 vulnerabilities                                                                                                                    |
 | 全量依赖审计             | `npm audit`                                                                                                                                                                                                                                                                                                                                                                                                           | 0 vulnerabilities                                                                                                                    |
 | 格式化检查               | `npm run format:check`                                                                                                                                                                                                                                                                                                                                                                                                | 通过，所有匹配的 `src` 文件符合 Prettier                                                                                             |
-| CSS 变量审计             | `npm run css:audit`                                                                                                                                                                                                                                                                                                                                                                                                   | 75 个 CSS 文件，4499 次变量使用，4235 次符合规范，264 次不符合规范，0 deprecated                                                     |
-| CSS 模块分析             | `npm run css:analyze`                                                                                                                                                                                                                                                                                                                                                                                                 | 10 个模块 CSS 文件，7872 行；卡片 3 类/21 次、按钮 2 类/5 次、动画 2 类/45 次、图标 2 类/4 次、徽章 2 类/13 次；4 条优化建议         |
+| CSS 变量审计             | `npm run css:audit`                                                                                                                                                                                                                                                                                                                                                                                                   | 75 个 CSS 文件，4499 次变量使用，4499 次符合规范，0 次不符合规范，0 deprecated                                                       |
+| CSS 模块分析             | `npm run css:analyze`                                                                                                                                                                                                                                                                                                                                                                                                 | 10 个模块 CSS 文件，7808 行；卡片 3 类/21 次、按钮 2 类/5 次、动画 2 类/39 次、图标 2 类/4 次、徽章 2 类/13 次；4 条优化建议         |
 | 质量基线                 | `npm run quality:check`                                                                                                                                                                                                                                                                                                                                                                                               | ESLint 检查 412 个文件，0 error、0 warning；TypeScript 0 error；统计 412 个文件，平均复杂度 19.4，最大复杂度 261，175 个文件超过阈值 |
-| 复杂度分析               | `npm run code:analyze:complexity`                                                                                                                                                                                                                                                                                                                                                                                     | 690 个文件，12,960 个函数，163 个过长函数、65 个高复杂度函数，212 个问题函数                                                         |
-| 技术债扫描               | `npm run tech-debt:scan`                                                                                                                                                                                                                                                                                                                                                                                              | 397 个文件，98,908 行，0 issue，债务比率 0.00%                                                                                       |
+| 复杂度分析               | `npm run code:analyze:complexity`                                                                                                                                                                                                                                                                                                                                                                                     | 690 个文件，13,050 个函数，120 个过长函数、37 个高复杂度函数，157 个问题函数；最新报告无 `src/` 非测试运行时代码热点                 |
+| 技术债扫描               | `npm run tech-debt:scan`                                                                                                                                                                                                                                                                                                                                                                                              | 397 个文件，99,187 行，0 issue，债务比率 0.00%                                                                                       |
 
 ## 剩余技术债务
 
 | ID    | 优先级 | 债务                          | 当前证据                                                                                                                                                 | 验收条件                                                                                                  |
 | ----- | ------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| TD-04 | P2     | `src/` 复杂度热点             | `quality:check` 显示平均复杂度 19.4，最大复杂度 261，175 个文件超过阈值；`code:analyze:complexity` 显示 212 个问题函数，其中 163 个过长、65 个高复杂度；当前 `src/` 热点集中在 Marketing Calendar、Restricted Words、Analysis Service 等局部函数。 | 按 top 文件拆分长函数和深嵌套，补回局部测试，复杂度指标下降且 ESLint warning gate 保持 0。                |
-| TD-05 | P2     | CSS 变量体系不统一            | `css:audit` 显示 264 次不符合变量命名规范，合规率 94.1%。                                                                                                | 先建立变量别名/迁移表，再按 foundation、components、modules 分批替换；每批运行 `css:audit` 并记录下降量。 |
-| TD-06 | P2     | 模块 CSS 重复                 | `css:analyze` 发现卡片 3 类、按钮 2 类、动画 2 类、图标 2 类、徽章 2 类重复模式，共 88 次出现。                                                          | 抽取到已有 `src/css/components/*` 和 `src/css/animations/*`，模块样式只保留差异化规则，视觉回归测试通过。 |
+| TD-06 | P2     | 模块 CSS 重复                 | `css:analyze` 发现卡片 3 类/21 次、按钮 2 类/5 次、动画 2 类/39 次、图标 2 类/4 次、徽章 2 类/13 次，共 82 次重复模式。                                  | 抽取到已有 `src/css/components/*` 和 `src/css/animations/*`，模块样式只保留差异化规则，视觉回归测试通过。 |
 | TD-08 | P3     | 全量浏览器类验证未纳入本轮    | 已补跑 Playground Deep Chat 专项 e2e；仍未执行全量 `test:e2e`、`test:visual`、`test:performance`、`lighthouse`。                                         | 依赖升级、CSS 抽取或路由加载改动后补跑对应浏览器类验证，并归档失败截图/报告。                             |
 | TD-09 | P1     | Playground 权限边界与发布开关 | Deep Chat 请求生命周期和请求预算已收紧；Playground 路由已声明产品级无认证放行策略，但仍缺少真实身份/权限或 feature flag 执行源。                         | 接入用户身份/权限服务或 feature flag 源后，路由守卫能执行 Playground 声明；补充拒绝访问和放行路径测试。   |
-| TD-10 | P3     | 测试/工具复杂度噪声           | 最新复杂度报告顶部仍主要是大块 e2e/performance/startup 测试和 HTML report generator；这些不直接影响运行时代码，但会掩盖真实 `src/` 热点。                 | 拆分长 `describe`/fixture/report builder，保持测试语义不变；复杂度报告能更快暴露运行时代码问题。          |
+| TD-10 | P3     | 测试/工具复杂度噪声           | `code:analyze:complexity` 当前仍有 157 个问题函数，其中顶部为大块单测、e2e/performance 测试和 HTML report generator；最新报告中剩余 `src/` 命中均为测试文件。 | 拆分长 `describe`/fixture/report builder，保持测试语义不变；复杂度报告能更快暴露运行时代码问题。          |
 
 ## 修复执行顺序
 
 1. **先处理 TD-09 Playground 权限边界**：如果已有真实身份/权限服务或 feature flag 源，接入路由守卫执行路径并补齐拒绝访问/放行测试；如果仍没有执行源，不做假的权限实现，只保留当前产品级放行声明和测试锁定。
-2. **继续 TD-04 `src/` 复杂度热点**：按最新复杂度报告逐个处理 `bindSearchEvents`、`executeSearch`、`generateReport` 等局部函数。每批只拆一个业务边界，验收为目标函数退出复杂度报告、相关专项测试通过、`type-check` 和 `lint:warning-gate` 通过。
-3. **推进 TD-05/TD-06 CSS 治理**：先冻结变量命名和别名表，再按 foundation、components、modules 分批替换；重复样式先抽卡片、动画、徽章、图标容器。每批验收为 `css:audit` 或 `css:analyze` 指标下降，并补跑受影响页面的视觉/浏览器验证。
-4. **清理 TD-10 测试/工具噪声**：在运行时代码热点下降后，再拆 e2e/performance/startup 长测试和报告生成器，避免为“报告好看”优先改动低业务风险文件。
-5. **补齐 TD-08 浏览器验证**：对权限、CSS、路由加载、分包相关改动执行 `test:e2e`、`test:visual`、`test:performance`、`lighthouse` 中对应项目，并归档失败截图或报告。
+2. **推进 TD-05/TD-06 CSS 治理**：先冻结变量命名和别名表，再按 foundation、components、modules 分批替换；重复样式先抽卡片、动画、徽章、图标容器。每批验收为 `css:audit` 或 `css:analyze` 指标下降，并补跑受影响页面的视觉/浏览器验证。
+3. **清理 TD-10 测试/工具噪声**：在运行时代码热点已清空的基础上，拆 e2e/performance/startup 长测试和报告生成器，避免为“报告好看”优先改动低业务风险文件。
+4. **补齐 TD-08 浏览器验证**：对权限、CSS、路由加载、分包相关改动执行 `test:e2e`、`test:visual`、`test:performance`、`lighthouse` 中对应项目，并归档失败截图或报告。
 
 ## 消除计划清单
 
@@ -156,9 +160,18 @@
 ### 第 4 批：复杂度热点
 
 - [x] `src/modules/more/views/explore/prompts/index.ts`：拆分 `registerWindowActions` 的查看、语言切换、关闭和复制动作，`registerWindowActions` 不再出现在复杂度报告。
-- [ ] `src/modules/amz_hub/views/practice/marketing_calendar/index.ts`：拆分 `bindSearchEvents` 的输入监听、筛选执行和空态刷新。
-- [ ] `src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts`：拆分 `executeSearch` 的条件收集、匹配执行和结果渲染。
-- [ ] `src/modules/app_center/views/master_analysis/services/analysisService.ts`：拆分 `generateReport` 的 section 组装和缺省值处理。
+- [x] `src/modules/amz_hub/views/practice/marketing_calendar/index.ts`：拆分 `bindSearchEvents` 的输入监听、筛选执行和空态刷新，`bindSearchEvents` 不再出现在复杂度报告。
+- [x] `src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts`：拆分 `executeSearch` 的条件收集、匹配执行和结果渲染，`executeSearch` 不再出现在复杂度报告。
+- [x] `src/modules/app_center/views/master_analysis/services/analysisService.ts`：拆分 `generateReport` 的 section 组装和缺省值处理，`analysisService.ts` 不再出现在复杂度报告。
+- [x] `src/common/infrastructure/SafeRenderer.ts`：拆分 `sanitizeHtml` 的节点清理和属性过滤，`SafeRenderer.ts` 不再出现在复杂度报告。
+- [x] `src/common/utils/ImageLazyLoader.ts`：拆分 `loadImage` 的加载状态、事件处理、失败图和资源赋值，`loadImage` 不再出现在复杂度报告。
+- [x] `src/modules/app_center/views/master_analysis/services/parserService.ts`：拆分 `parseReviews` 的容器定位、兜底解析和标准解析，`parseReviews` 不再出现在复杂度报告。
+- [x] `src/modules/app_center/views/master_analysis/ai_analysis/services/analysisService.ts`：拆分 `parseBuyerProfile` 的统计、亮点和明细构造，`parseBuyerProfile` 不再出现在复杂度报告。
+- [x] `src/modules/app_center/views/master_analysis/services/promptlabService.ts`：拆分 `buildContextSection` 的报告段过滤、Markdown 转换和上下文格式化，`buildContextSection` 不再出现在复杂度报告。
+- [x] `src/modules/app_center/views/master_analysis/services/dnaExtractor.ts`：拆分 `extractUSPs` 的功能卖点、差异化和 bullet analysis 来源追加，`extractUSPs` 不再出现在复杂度报告。
+- [x] `src/modules/app_center/views/master_analysis/ai_analysis/services/confidenceCalculator.ts`：复用通用计分 helper 收敛 `calculateTitleKeywordsConfidence`，目标函数不再出现在复杂度报告。
+- [x] `src/common/ui/megaMenu.ts`：拆分 App 模块排序、单卡片渲染和 HTML 拼接，`renderMegaMenu` 不再出现在复杂度报告。
+- [x] `src/modules/app_center/views/master_analysis/promptlab/components/previewExtractor.ts`：拆分旧格式预览的数组、对象和 primitive 文本格式化，`getPreviewText` 不再出现在复杂度报告。
 - [x] `src/modules/app_center/views/keyword_hunter/process/index.ts`：继续拆分 `highlightText`、`renderCopyDisplay` 的文本切片和 DOM 片段构造，目标函数不再出现在复杂度报告。
 - [x] `src/modules/app_center/views/keyword_hunter/process/index.ts`：拆分统计渲染、词云 DOM、浮动列表、翻译按钮和关键词定位，文件级 ESLint warning 清零。
 - [x] `src/modules/app_center/views/master_analysis/services/promptlabService.ts`：拆分报告 Markdown 转换、通用字段渲染和子项过滤，文件级 ESLint warning 清零。
@@ -180,10 +193,10 @@
 
 ### 第 5 批：CSS 令牌和模块样式
 
-- [ ] 先冻结新变量命名规则，避免继续增加非规范变量。
-- [ ] 从高频变量开始迁移：duration、spacing、color、shadow、card、code、module-local token。
-- [ ] 抽取卡片、动画、徽章、图标容器的重复模式到全局组件 CSS。
-- [ ] 每批运行 `css:audit`、`css:analyze`，记录不合规变量和重复模式下降量。
+- [x] 先冻结新变量命名规则，避免继续增加非规范变量；已覆盖全局语义 token、组件 token 和模块命名空间 token。
+- [x] 从高频变量开始迁移：card 渐变变量迁入 `--card-*`，module-local token 通过命名空间规则收敛，`css:audit` 清零。
+- [ ] 抽取卡片、动画、徽章、图标容器的重复模式到全局组件 CSS；已先移除 Home/AI Analysis 可复用动画重复。
+- [x] 每批运行 `css:audit`、`css:analyze`，记录不合规变量和重复模式下降量。
 
 ### 第 6 批：构建和浏览器验证
 

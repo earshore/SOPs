@@ -54,7 +54,6 @@ vi.mock('@/common/constants/eventConstants', () => ({
   emitAppEvent: vi.fn()
 }));
 
-describe('ScraperPanel 组件', () => {
   let panel: ReturnType<typeof createScraperPanel>;
   let mockState: any;
 
@@ -577,4 +576,3 @@ describe('ScraperPanel 组件', () => {
       expect(panel.validAsins).toHaveLength(1);
     });
   });
-});

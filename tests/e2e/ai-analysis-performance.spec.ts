@@ -130,7 +130,6 @@ const PERFORMANCE_BASELINE = {
     });
   });
 
-  test.describe('交互性能', () => {
     test('ASIN 选择响应时间应该 < 100ms', async ({ page }) => {
       await aiAnalysis.navigate();
       
@@ -315,9 +314,6 @@ const PERFORMANCE_BASELINE = {
         `全选操作响应时间应该 < ${PERFORMANCE_BASELINE.interactionDelay}ms，实际: ${selectAllDelay.toFixed(2)}ms`
       ).toBeLessThan(PERFORMANCE_BASELINE.interactionDelay);
     });
-  });
-
-  test.describe('内存占用', () => {
     test('页面内存占用应该在基线范围内', async ({ page }) => {
       await aiAnalysis.navigate();
       
@@ -423,8 +419,6 @@ const PERFORMANCE_BASELINE = {
         console.log('   ⚠️ 注意：内存增长 > 10%，建议检查是否有内存泄漏');
       }
     });
-  });
-
   test.describe('渲染性能', () => {
     test('SafeRenderer 渲染性能应该可接受', async ({ page }) => {
       await aiAnalysis.navigate();

@@ -70,6 +70,139 @@ function loadConfig(configPath?: string): ValidatorConfig {
   return defaultConfig;
 }
 
+function resolveExistingPath(targetPath: string): string {
+  const absolutePath = path.resolve(process.cwd(), targetPath);
+
+  if (!fs.existsSync(absolutePath)) {
+    console.error(chalk.red(`错误: 路径不存在: ${absolutePath}`));
+    process.exit(1);
+  }
+
+  return absolutePath;
+}
+
+async function validateBeforeMigration(
+  validator: Validator,
+  absolutePath: string
+) {
+  console.log(chalk.gray('步骤 1/3: 验证命名规范...\n'));
+  return validator.scanDirectory(absolutePath);
+}
+
+function collectMigrationFiles(rootPath: string, config: ValidatorConfig): string[] {
+  const allFiles: string[] = [];
+
+  const collectFiles = (dir: string) => {
+    const entries = fs.readdirSync(dir);
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry);
+      const stat = fs.statSync(fullPath);
+
+      if (stat.isDirectory()) {
+        if (!config.exclude.some(pattern => fullPath.includes(pattern.replace('**/', '')))) {
+          collectFiles(fullPath);
+        }
+      } else if (stat.isFile()) {
+        allFiles.push(fullPath);
+      }
+    }
+  };
+
+  collectFiles(rootPath);
+  return allFiles;
+}
+
+async function runMigration(
+  migrator: Migrator,
+  report: any,
+  allFiles: string[],
+  options: any
+): Promise<any | null> {
+  console.log(chalk.gray('步骤 2/3: 创建迁移计划...\n'));
+
+  if (options.dryRun) {
+    await migrator.preview(report, allFiles);
+    console.log(chalk.yellow('\n⚠️  预览模式 - 未实际修改文件'));
+    return null;
+  }
+
+  console.log(chalk.gray('步骤 3/3: 执行迁移...\n'));
+  return migrator.migrate(report, allFiles, {
+    dryRun: false,
+    createBackup: options.backup !== false,
+    projectRoot: process.cwd(),
+  });
+}
+
+function printMigrationResult(result: any): void {
+  if (result.success) {
+    console.log(chalk.green('\n✅ 迁移完成！'));
+    console.log(chalk.gray(`  应用变更: ${result.changesApplied}`));
+    console.log(chalk.gray(`  修改文件: ${result.filesModified.length}`));
+
+    if (result.backupPath) {
+      console.log(chalk.gray(`  备份位置: ${result.backupPath}`));
+      console.log(chalk.yellow(`  如需回滚，请运行: naming-validator rollback ${result.backupPath}`));
+    }
+
+    return;
+  }
+
+  console.log(chalk.red('\n❌ 迁移失败'));
+  console.log(chalk.gray(`  成功变更: ${result.changesApplied}`));
+  console.log(chalk.gray(`  失败数量: ${result.errors.length}`));
+
+  result.errors.forEach((error: any) => {
+    console.log(chalk.red(`  - ${error.filePath}: ${error.error}`));
+  });
+
+  process.exit(1);
+}
+
+function saveMigrationReport(result: any, output?: string): void {
+  if (!output) {
+    return;
+  }
+
+  const outputPath = path.resolve(process.cwd(), output);
+  fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf-8');
+  console.log(chalk.green(`\n报告已保存到: ${outputPath}`));
+}
+
+async function handleMigrateCommand(targetPath: string, options: any): Promise<void> {
+  console.log(chalk.blue('🚀 开始迁移命名...\n'));
+
+  try {
+    const config = loadConfig(options.config);
+    const validator = new Validator(config);
+    const migrator = new Migrator();
+    const absolutePath = resolveExistingPath(targetPath);
+    const report = await validateBeforeMigration(validator, absolutePath);
+
+    if (report.totalIssues === 0) {
+      console.log(chalk.green('✅ 未发现命名问题，无需迁移'));
+      return;
+    }
+
+    console.log(chalk.yellow(`发现 ${report.totalIssues} 个命名问题\n`));
+
+    const allFiles = collectMigrationFiles(absolutePath, config);
+    const result = await runMigration(migrator, report, allFiles, options);
+
+    if (!result) {
+      return;
+    }
+
+    printMigrationResult(result);
+    saveMigrationReport(result, options.output);
+  } catch (error) {
+    console.error(chalk.red('迁移过程中发生错误:'));
+    console.error(error);
+    process.exit(1);
+  }
+}
+
 /**
  * validate命令：验证命名规范
  */
@@ -176,107 +309,7 @@ program
   .option('--dry-run', '预览模式，不实际修改文件')
   .option('--no-backup', '不创建备份')
   .option('-o, --output <path>', '迁移报告输出文件路径')
-  .action(async (targetPath: string, options: any) => {
-    console.log(chalk.blue('🚀 开始迁移命名...\n'));
-
-    try {
-      // 加载配置
-      const config = loadConfig(options.config);
-
-      // 创建验证器和迁移器
-      const validator = new Validator(config);
-      const migrator = new Migrator();
-
-      // 获取绝对路径
-      const absolutePath = path.resolve(process.cwd(), targetPath);
-
-      // 检查路径是否存在
-      if (!fs.existsSync(absolutePath)) {
-        console.error(chalk.red(`错误: 路径不存在: ${absolutePath}`));
-        process.exit(1);
-      }
-
-      // 先执行验证
-      console.log(chalk.gray('步骤 1/3: 验证命名规范...\n'));
-      const report = await validator.scanDirectory(absolutePath);
-
-      if (report.totalIssues === 0) {
-        console.log(chalk.green('✅ 未发现命名问题，无需迁移'));
-        return;
-      }
-
-      console.log(chalk.yellow(`发现 ${report.totalIssues} 个命名问题\n`));
-
-      // 收集所有文件
-      const allFiles: string[] = [];
-      const collectFiles = (dir: string) => {
-        const entries = fs.readdirSync(dir);
-        for (const entry of entries) {
-          const fullPath = path.join(dir, entry);
-          const stat = fs.statSync(fullPath);
-          
-          if (stat.isDirectory()) {
-            if (!config.exclude.some(pattern => fullPath.includes(pattern.replace('**/', '')))) {
-              collectFiles(fullPath);
-            }
-          } else if (stat.isFile()) {
-            allFiles.push(fullPath);
-          }
-        }
-      };
-      collectFiles(absolutePath);
-
-      // 执行迁移
-      console.log(chalk.gray('步骤 2/3: 创建迁移计划...\n'));
-      
-      if (options.dryRun) {
-        await migrator.preview(report, allFiles);
-        console.log(chalk.yellow('\n⚠️  预览模式 - 未实际修改文件'));
-        return;
-      }
-
-      console.log(chalk.gray('步骤 3/3: 执行迁移...\n'));
-      const result = await migrator.migrate(report, allFiles, {
-        dryRun: false,
-        createBackup: options.backup !== false,
-        projectRoot: process.cwd(),
-      });
-
-      // 输出结果
-      if (result.success) {
-        console.log(chalk.green('\n✅ 迁移完成！'));
-        console.log(chalk.gray(`  应用变更: ${result.changesApplied}`));
-        console.log(chalk.gray(`  修改文件: ${result.filesModified.length}`));
-        
-        if (result.backupPath) {
-          console.log(chalk.gray(`  备份位置: ${result.backupPath}`));
-          console.log(chalk.yellow(`  如需回滚，请运行: naming-validator rollback ${result.backupPath}`));
-        }
-      } else {
-        console.log(chalk.red('\n❌ 迁移失败'));
-        console.log(chalk.gray(`  成功变更: ${result.changesApplied}`));
-        console.log(chalk.gray(`  失败数量: ${result.errors.length}`));
-        
-        result.errors.forEach(error => {
-          console.log(chalk.red(`  - ${error.filePath}: ${error.error}`));
-        });
-        
-        process.exit(1);
-      }
-
-      // 保存报告
-      if (options.output) {
-        const outputPath = path.resolve(process.cwd(), options.output);
-        fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf-8');
-        console.log(chalk.green(`\n报告已保存到: ${outputPath}`));
-      }
-
-    } catch (error) {
-      console.error(chalk.red('迁移过程中发生错误:'));
-      console.error(error);
-      process.exit(1);
-    }
-  });
+  .action(handleMigrateCommand);
 
 /**
  * rollback命令：回滚迁移

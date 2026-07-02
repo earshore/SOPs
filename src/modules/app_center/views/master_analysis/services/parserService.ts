@@ -123,6 +123,74 @@ function appendUniqueReview(
   reviews.push(review);
 }
 
+function findFirstMatchingElements(root: Element | Document, selectors: string[]): Element[] {
+  for (const sel of selectors) {
+    const elements = root.querySelectorAll(sel);
+    if (elements.length > 0) return Array.from(elements);
+  }
+
+  return [];
+}
+
+function findReviewContainers(doc: Document): Element[] {
+  return findFirstMatchingElements(doc, SELECTOR_MAP.reviewContainers || []);
+}
+
+function appendFallbackReview(
+  reviews: ParsedReview[],
+  seenContents: Set<string>,
+  content: string | undefined
+): void {
+  if (!content || content.length <= 20) return;
+
+  const key = getReviewDedupeKey(content);
+  if (seenContents.has(key)) return;
+
+  seenContents.add(key);
+  reviews.push({
+    title: 'User Review',
+    content,
+    rating: 0,
+    isVerified: false,
+  });
+}
+
+function parseFallbackReviews(doc: Document): ParsedReview[] {
+  nativeLoggerConsole.warn(
+    'Parser: No review containers found, fallback to direct body extraction.'
+  );
+
+  const reviews: ParsedReview[] = [];
+  const seenContents = new Set<string>();
+  const bodyElements = findFirstMatchingElements(doc, SELECTOR_MAP.reviewBody || []);
+
+  bodyElements.forEach(element => {
+    appendFallbackReview(reviews, seenContents, element.textContent?.trim());
+  });
+
+  return reviews.slice(0, 20);
+}
+
+function parseReviewContainer(container: Element): ParsedReview {
+  return {
+    content: extractReviewContent(container),
+    title: normalizeReviewTitle(container),
+    rating: extractRating(container, SELECTOR_MAP.reviewRating || []),
+    isVerified: isVerifiedPurchase(container),
+  };
+}
+
+function parseStandardReviews(reviewContainers: Element[]): ParsedReview[] {
+  const reviews: ParsedReview[] = [];
+  const seenContents = new Set<string>();
+
+  reviewContainers.forEach(container => {
+    appendUniqueReview(reviews, seenContents, parseReviewContainer(container));
+  });
+
+  return reviews.slice(0, 20);
+}
+
 // ----------------------------------------
 // 3. 主解析逻辑 (Main Logic)
 // ----------------------------------------
@@ -166,57 +234,11 @@ export function parseProductPage(html: string, _asin: string, _site: string): Pa
 export function parseReviews(html: string): ParsedReview[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
-  const reviews: ParsedReview[] = [];
-  const seenContents = new Set<string>(); // 用于去重
+  const reviewContainers = findReviewContainers(doc);
 
-  // 1. 定位评论容器
-  let reviewContainers: Element[] = [];
-  const containerSelectors = SELECTOR_MAP.reviewContainers || [];
-  for (const sel of containerSelectors) {
-    const containers = doc.querySelectorAll(sel);
-    if (containers.length > 0) {
-      reviewContainers = Array.from(containers); // 转为数组方便操作
-      break;
-    }
-  }
-
-  // 2. 兜底策略：未找到容器，尝试直接提取 Body
   if (reviewContainers.length === 0) {
-    nativeLoggerConsole.warn(
-      'Parser: No review containers found, fallback to direct body extraction.'
-    );
-    // 这种情况下通常无法提取评分和标题，只能提取内容
-    const bodySelectors = SELECTOR_MAP.reviewBody || [];
-    for (const sel of bodySelectors) {
-      const els = doc.querySelectorAll(sel);
-      if (els.length > 0) {
-        els.forEach(el => {
-          const content = el.textContent?.trim();
-          if (content && content.length > 20 && !seenContents.has(content.substring(0, 50))) {
-            seenContents.add(content.substring(0, 50));
-            reviews.push({
-              title: 'User Review', // 占位符
-              content,
-              rating: 0,
-              isVerified: false,
-            });
-          }
-        });
-        if (reviews.length > 0) break;
-      }
-    }
-    return reviews.slice(0, 20);
+    return parseFallbackReviews(doc);
   }
 
-  // 3. 标准解析流程
-  reviewContainers.forEach(container => {
-    const content = extractReviewContent(container);
-    const title = normalizeReviewTitle(container);
-    const rating = extractRating(container, SELECTOR_MAP.reviewRating || []);
-    const isVerified = isVerifiedPurchase(container);
-
-    appendUniqueReview(reviews, seenContents, { title, content, rating, isVerified });
-  });
-
-  return reviews.slice(0, 20);
+  return parseStandardReviews(reviewContainers);
 }

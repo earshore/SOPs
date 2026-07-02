@@ -12,7 +12,6 @@ import {
   type ErrorCode
 } from '@/common/errors/errorCodes';
 
-describe('ErrorCodes', () => {
   // ================================================================
   // ERROR_CODES常量
   // ================================================================
@@ -369,4 +368,3 @@ describe('ErrorCodes', () => {
       expect(uniqueMessages.size).toBeGreaterThan(messages.length * 0.8);
     });
   });
-});

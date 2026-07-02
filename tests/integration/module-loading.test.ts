@@ -47,7 +47,6 @@ class DependentModule extends BaseModule {
   }
 }
 
-describe('模块加载集成测试', () => {
   let container: Container;
   let moduleLoader: ModuleLoader;
 
@@ -504,4 +503,3 @@ describe('模块加载集成测试', () => {
       expect(endTime - startTime).toBeLessThan(50);
     });
   });
-});

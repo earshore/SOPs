@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 import { strToU8, zipSync } from 'fflate';
 import {
   analyzeReport,
@@ -109,7 +109,6 @@ function escapeXml(value: string): string {
     .replace(/'/g, '&apos;');
 }
 
-describe('PPC 搜索词分析器', () => {
   it('兼容 Amazon Ads 常见表头并生成动作建议', () => {
     const report = [
       [
@@ -562,4 +561,3 @@ describe('PPC 搜索词分析器', () => {
     expect(summary).toContain('下次动作负责人：广告小张');
     expect(summary).toContain('状态：pending_human_review');
   });
-});

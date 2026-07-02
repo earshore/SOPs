@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createStore } from 'zustand/vanilla';
 import { devtools, devtoolsHelper } from '@/stores/middleware/devtools';
 
-describe('DevTools中间件', () => {
   let mockDevtools: any;
 
   beforeEach(() => {
@@ -562,4 +561,3 @@ describe('DevTools中间件', () => {
       expect(store.getState().count).toBe(3);
     });
   });
-});

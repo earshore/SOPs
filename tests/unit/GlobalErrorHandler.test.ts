@@ -36,7 +36,6 @@ vi.mock('@/services/monitoringService', () => ({
   }
 }));
 
-describe('GlobalErrorHandler', () => {
   let handler: GlobalErrorHandler;
 
   beforeEach(() => {
@@ -589,4 +588,3 @@ describe('GlobalErrorHandler', () => {
       expect((window as any).__GlobalErrorHandler).toBe(globalErrorHandler);
     });
   });
-});

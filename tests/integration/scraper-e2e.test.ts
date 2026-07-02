@@ -43,7 +43,6 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
   HistoryService: mockHistoryService
 }));
 
-describe('端到端测试 - 数据采集页面集成', () => {
   let mockState: any;
 
   beforeEach(() => {
@@ -583,4 +582,3 @@ describe('端到端测试 - 数据采集页面集成', () => {
       expect(hasDataNow).toBe(true);
     });
   });
-});

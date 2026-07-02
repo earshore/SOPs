@@ -19,7 +19,6 @@ import {
   ValidationUtils
 } from '@/common/utils/validation';
 
-describe('Validation工具函数', () => {
   // ================================================================
   // validateString
   // ================================================================
@@ -556,4 +555,3 @@ describe('Validation工具函数', () => {
       expect(validateNumber(-Infinity).valid).toBe(true);
     });
   });
-});

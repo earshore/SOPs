@@ -48,6 +48,11 @@ interface SpecsExtractionState {
   techSpecsCount: number;
 }
 
+interface USPExtractionState {
+  usps: string[];
+  confidence: number;
+}
+
 const GENDER_LABELS: Record<string, string> = {
   male: '男性',
   female: '女性',
@@ -148,6 +153,55 @@ function extractAudience(report: BuyerProfileReport): {
   }
 }
 
+function createUSPResult(state: USPExtractionState): {
+  text: string;
+  confidence: number;
+} {
+  return {
+    text: state.usps.join('\n') || '',
+    confidence: Math.min(state.confidence, 1.0),
+  };
+}
+
+function appendFunctionUSPs(
+  state: USPExtractionState,
+  functionSceneMatrix: SellingPointsReport['function_scene_matrix'] | undefined
+): void {
+  if (!functionSceneMatrix?.functions) return;
+
+  state.usps.push(...functionSceneMatrix.functions.slice(0, 5).map(value => `- ${value}`));
+  state.confidence += 0.4;
+}
+
+function appendDifferentiationUSP(
+  state: USPExtractionState,
+  overallStrategy: SellingPointsReport['overall_strategy'] | undefined
+): void {
+  if (!overallStrategy?.primary_differentiation) return;
+
+  state.usps.push(`- ${overallStrategy.primary_differentiation}`);
+  state.confidence += 0.3;
+}
+
+function appendBulletAnalysisUSPs(
+  state: USPExtractionState,
+  bulletAnalysis: SellingPointsReport['bullet_analysis'] | undefined
+): void {
+  if (state.usps.length >= 3 || !bulletAnalysis) return;
+
+  const bullets = bulletAnalysis
+    .filter(bullet => bullet.credibility_score === 'high' || bullet.credibility_score === 'medium')
+    .slice(0, 3 - state.usps.length);
+
+  bullets.forEach(bullet => {
+    if (bullet.functions && bullet.functions.length > 0) {
+      state.usps.push(`- ${bullet.functions[0]}`);
+    }
+  });
+
+  state.confidence += 0.3;
+}
+
 /**
  * 从 selling-points 提取核心卖点
  *
@@ -173,44 +227,13 @@ function extractUSPs(report: SellingPointsReport): {
   text: string;
   confidence: number;
 } {
-  const usps: string[] = [];
-  let confidence = 0;
-
   try {
-    // 1. 提取功能卖点
-    const functionSceneMatrix = report.function_scene_matrix;
-    if (functionSceneMatrix && functionSceneMatrix.functions) {
-      const functions = functionSceneMatrix.functions.slice(0, 5);
-      usps.push(...functions.map(f => `- ${f}`));
-      confidence += 0.4;
-    }
+    const state: USPExtractionState = { usps: [], confidence: 0 };
+    appendFunctionUSPs(state, report.function_scene_matrix);
+    appendDifferentiationUSP(state, report.overall_strategy);
+    appendBulletAnalysisUSPs(state, report.bullet_analysis);
 
-    // 2. 提取核心差异化
-    const overallStrategy = report.overall_strategy;
-    if (overallStrategy && overallStrategy.primary_differentiation) {
-      usps.push(`- ${overallStrategy.primary_differentiation}`);
-      confidence += 0.3;
-    }
-
-    // 3. 如果卖点不足，从 bullet_analysis 补充
-    if (usps.length < 3 && report.bullet_analysis) {
-      const bullets = report.bullet_analysis
-        .filter(b => b.credibility_score === 'high' || b.credibility_score === 'medium')
-        .slice(0, 3 - usps.length);
-
-      bullets.forEach(b => {
-        if (b.functions && b.functions.length > 0) {
-          usps.push(`- ${b.functions[0]}`);
-        }
-      });
-      confidence += 0.3;
-    }
-
-    const text = usps.join('\n');
-    return {
-      text: text || '',
-      confidence: Math.min(confidence, 1.0),
-    };
+    return createUSPResult(state);
   } catch (error) {
     console.error('[DNA提取器] 提取卖点失败:', error);
     return { text: '', confidence: 0 };

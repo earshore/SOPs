@@ -198,8 +198,6 @@ function printPerformanceSummary(audits: any) {
 // 测试套件
 // ================================================================
 
-test.describe('Promptlab 页面性能测试', () => {
-  
   test.beforeAll(() => {
     console.log('\n🚀 开始 Promptlab 页面性能测试...');
     console.log(`报告输出目录: ${REPORTS_DIR}\n`);
@@ -512,5 +510,3 @@ test.describe('Promptlab 页面性能测试', () => {
     console.log('\n✅ Promptlab 页面性能测试完成');
     console.log(`📁 报告保存在: ${REPORTS_DIR}\n`);
   });
-  
-});

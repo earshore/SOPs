@@ -24,7 +24,6 @@ vi.mock('@/common/EventBus', () => ({
   }
 }));
 
-describe('UI自动化测试 - 数据采集页面', () => {
   let mockState: any;
   let container: HTMLElement;
 
@@ -665,4 +664,3 @@ describe('UI自动化测试 - 数据采集页面', () => {
       expect(button.getAttribute('tabindex')).toBe('0');
     });
   });
-});

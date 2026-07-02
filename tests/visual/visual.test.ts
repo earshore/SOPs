@@ -251,7 +251,6 @@ const PAGES: PageConfig[] = [
 /**
  * 视觉回归测试套件
  */
-test.describe("Visual Regression Tests", () => {
   test.describe.configure({ mode: "parallel" });
 
   // 桌面端视觉测试
@@ -559,8 +558,6 @@ test.describe("Visual Regression Tests", () => {
       });
     });
   });
-});
-
 /**
  * 视觉测试工具函数
  */

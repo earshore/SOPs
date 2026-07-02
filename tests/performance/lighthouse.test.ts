@@ -185,8 +185,6 @@ function printPerformanceSummary(pageName: string, audits: any) {
 // 测试套件
 // ================================================================
 
-test.describe('Lighthouse 性能测试', () => {
-  
   test.beforeAll(() => {
     console.log('\n🚀 开始 Lighthouse 性能测试...');
     console.log(`测试页面数: ${TEST_PAGES.length}`);
@@ -460,5 +458,3 @@ test.describe('Lighthouse 性能测试', () => {
     console.log('\n✅ Lighthouse 性能测试完成');
     console.log(`📁 报告保存在: ${REPORTS_DIR}\n`);
   });
-  
-});

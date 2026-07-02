@@ -14,7 +14,6 @@ import {
   validateScrapedData
 } from '@/modules/app_center/views/master_analysis/scraper/utils/validators';
 
-describe('Scraper 验证器', () => {
   describe('isValidAsin - ASIN 格式验证', () => {
     it('应该接受有效的 ASIN 格式', () => {
       const validAsins = [
@@ -403,4 +402,3 @@ B012345678`;
       expect(result.products).toHaveLength(2);
     });
   });
-});

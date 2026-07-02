@@ -12,6 +12,8 @@ import { escapeHtml, setSafeHtml } from '../utils/security';
 import type { ColorSchemeName } from '../constants/colorSchemes';
 import { routeIdToPath } from '../router/routePaths';
 
+type MenuModule = (typeof MENU_CONFIG.modules)[keyof typeof MENU_CONFIG.modules];
+
 // ═══════════════════════════════════════════════════════════
 // Utilities
 // ═══════════════════════════════════════════════════════════
@@ -493,6 +495,48 @@ function renderCategoryMenu(config: MenuRendererConfig): void {
   }
 }
 
+function getAppCategoryOrder(): Map<string, number> {
+  return new Map(
+    Object.values(MENU_CONFIG.appCategories || {}).map(category => [category.id, category.order])
+  );
+}
+
+function getAppModuleOrder(moduleId: string, appCategoryOrder: Map<string, number>): number {
+  return moduleId === 'app_center'
+    ? 0
+    : (appCategoryOrder.get(moduleId) ?? Number.MAX_SAFE_INTEGER);
+}
+
+function getOrderedAppModules(): MenuModule[] {
+  const appCategoryOrder = getAppCategoryOrder();
+
+  return Object.values(MENU_CONFIG.modules || {})
+    .filter(mod => mod.contextId === 'apps')
+    .sort(
+      (a, b) =>
+        getAppModuleOrder(a.id, appCategoryOrder) - getAppModuleOrder(b.id, appCategoryOrder)
+    );
+}
+
+function renderAppModuleCard(mod: MenuModule): string {
+  const targetRoute = getDefaultRouteForModule(mod.id);
+  if (!targetRoute) return '';
+
+  const module = mod as unknown as { themeColor?: string };
+  return renderCard({
+    target: targetRoute,
+    label: mod.title || 'Unknown Module',
+    icon: mod.icon || 'fas fa-cube',
+    color: (module.themeColor || 'blue') as ColorSchemeName,
+    version: mod.version || 'v1.0',
+    description: mod.description || '暂无描述',
+  });
+}
+
+function renderMegaMenuHtml(): string {
+  return getOrderedAppModules().map(renderAppModuleCard).join('');
+}
+
 // ═══════════════════════════════════════════════════════════
 // Public API
 // ═══════════════════════════════════════════════════════════
@@ -502,37 +546,8 @@ export function renderMegaMenu(): void {
   if (!container) return;
 
   try {
-    const appCategoryOrder = new Map(
-      Object.values(MENU_CONFIG.appCategories || {}).map(category => [category.id, category.order])
-    );
-    const modules = Object.values(MENU_CONFIG.modules || {})
-      .filter(mod => mod.contextId === 'apps')
-      .sort((a, b) => {
-        const orderA =
-          a.id === 'app_center' ? 0 : (appCategoryOrder.get(a.id) ?? Number.MAX_SAFE_INTEGER);
-        const orderB =
-          b.id === 'app_center' ? 0 : (appCategoryOrder.get(b.id) ?? Number.MAX_SAFE_INTEGER);
-        return orderA - orderB;
-      });
-
-    const html = modules
-      .map(mod => {
-        const targetRoute = getDefaultRouteForModule(mod.id);
-        if (!targetRoute) return '';
-        const module = mod as unknown as { themeColor?: string };
-        return renderCard({
-          target: targetRoute,
-          label: mod.title || 'Unknown Module',
-          icon: mod.icon || 'fas fa-cube',
-          color: (module.themeColor || 'blue') as ColorSchemeName,
-          version: mod.version || 'v1.0',
-          description: mod.description || '暂无描述',
-        });
-      })
-      .join('');
-
     // ✅ 安全: renderCard返回的HTML使用内部数据和配置，modules来自MENU_CONFIG
-    setSafeHtml(container, html);
+    setSafeHtml(container, renderMegaMenuHtml());
   } catch (e) {
     console.error('❌ MegaMenu 渲染失败:', e);
     // ✅ 安全: renderErrorCard仅输出静态模板，message会被escapeHtml转义

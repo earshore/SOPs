@@ -8,7 +8,6 @@ import { test, expect } from '@playwright/test';
 import { QALabPage } from './pages/QALabPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
-test.describe('QA Lab 模块 E2E 测试', () => {
     let qalab: QALabPage;
 
     test.beforeEach(async ({ page }) => {
@@ -547,4 +546,3 @@ test.describe('QA Lab 模块 E2E 测试', () => {
             console.log('✅ 平板端显示正常');
         });
     });
-});
