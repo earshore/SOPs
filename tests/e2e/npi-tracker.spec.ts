@@ -183,12 +183,12 @@ test.describe('NPI Tracker 模块 E2E 测试', () => {
             console.log(`✅ 配送费更新功能正常: ${updatedFee}`);
         });
 
-        test('应该自动计算清仓红线价格', async () => {
+        test('应该自动计算配送费35%红线价格', async () => {
             const deliveryFee = 5.0;
             await npiTracker.updateDeliveryFee(0, deliveryFee.toString());
             
             const clearancePrice = await npiTracker.getClearancePrice(0);
-            const expectedPrice = deliveryFee / 0.5;
+            const expectedPrice = deliveryFee / 0.35;
             
             // 允许小数点误差
             expect(Math.abs(clearancePrice - expectedPrice)).toBeLessThan(0.1);
@@ -196,24 +196,24 @@ test.describe('NPI Tracker 模块 E2E 测试', () => {
             console.log(`✅ 清仓红线计算正确: ${clearancePrice} (预期: ${expectedPrice})`);
         });
 
-        test('应该自动计算动销价格', async () => {
+        test('应该自动计算配送费30%复核价', async () => {
             const deliveryFee = 5.0;
             await npiTracker.updateDeliveryFee(0, deliveryFee.toString());
             
             const movingPrice = await npiTracker.getMovingPrice(0);
-            const expectedPrice = deliveryFee / 0.5 + 1;
+            const expectedPrice = deliveryFee / 0.3;
             
             expect(Math.abs(movingPrice - expectedPrice)).toBeLessThan(0.1);
             
             console.log(`✅ 动销价格计算正确: ${movingPrice} (预期: ${expectedPrice})`);
         });
 
-        test('应该自动计算建议售价', async () => {
+        test('应该自动计算配送费25%参考价', async () => {
             const deliveryFee = 5.0;
             await npiTracker.updateDeliveryFee(0, deliveryFee.toString());
             
             const suggestedPrice = await npiTracker.getSuggestedPrice(0);
-            const expectedPrice = deliveryFee / 0.5 + 2;
+            const expectedPrice = deliveryFee / 0.25;
             
             expect(Math.abs(suggestedPrice - expectedPrice)).toBeLessThan(0.1);
             
@@ -276,6 +276,25 @@ test.describe('NPI Tracker 模块 E2E 测试', () => {
             expect(isVisible).toBe(true);
             
             console.log('✅ Next Step 编辑器打开成功');
+        });
+
+        test('滚动表格后 Next Step 编辑器应该保持在视口内', async ({ page }) => {
+            await page.locator('#sops_content_area').evaluate((element) => {
+                element.scrollTop = 900;
+            });
+            await page.locator('.npi-lifecycle-table-scroll').evaluate((element) => {
+                element.scrollLeft = element.scrollWidth;
+            });
+
+            await npiTracker.openNextStepEditor(0);
+
+            const dialogBox = await page.locator('#next-step-modal > div').boundingBox();
+            const viewport = page.viewportSize();
+
+            expect(dialogBox).not.toBeNull();
+            expect(viewport).not.toBeNull();
+            expect(dialogBox!.y).toBeGreaterThanOrEqual(0);
+            expect(dialogBox!.y + dialogBox!.height).toBeLessThanOrEqual(viewport!.height);
         });
 
         test('应该能够选择 Next Step 选项', async () => {

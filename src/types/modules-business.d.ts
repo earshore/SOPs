@@ -748,7 +748,7 @@ export type NPIStage = 'new-test' | 'growth' | 'stable' | 'clearance';
 /**
  * 站点代码
  */
-export type SiteCode = 'DE' | 'FR' | 'IT' | 'ES' | 'UK' | 'NL' | 'SE' | 'PL' | 'BE' | 'US' | 'JP';
+export type SiteCode = 'DE' | 'FR' | 'IT' | 'ES' | 'GB' | 'NL' | 'SE' | 'PL' | 'BE';
 
 /**
  * 广告策略

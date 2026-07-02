@@ -12,7 +12,7 @@ export type ProductStage = 'new-test' | 'growth' | 'stable' | 'clearance';
 /**
  * 站点代码类型
  */
-export type SiteCode = 'DE' | 'FR' | 'IT' | 'ES' | 'UK' | 'NL' | 'SE' | 'PL' | 'BE' | 'US' | 'JP';
+export type SiteCode = 'DE' | 'FR' | 'IT' | 'ES' | 'GB' | 'NL' | 'SE' | 'PL' | 'BE';
 
 /**
  * 广告策略类型
@@ -143,12 +143,12 @@ export const MOCK_PRODUCTS: Product[] = [
         stage: 'stable',
         arrival_date: '2023-10-01',
         product_attr: '稳定款',
-        sku: 'UK-HOME-003',
+        sku: 'GB-HOME-003',
         cn_name: '厨房收纳架',
         store: '1组-Altear',
         asin: 'B0CXXXXXXX3',
         fnsku: 'X001234570',
-        site: 'UK',
+        site: 'GB',
         qty_shipped: 800,
         inventory_days: 35,
         is_pan_eu: false,
@@ -245,18 +245,16 @@ export const STAGE_CONFIG: Record<ProductStage, StageConfig> = {
  * 站点标志
  */
 export const SITE_FLAGS: Record<SiteCode, string> = {
-    'DE': '🇩🇪', 'FR': '🇫🇷', 'IT': '🇮🇹', 'ES': '🇪🇸', 'UK': '🇬🇧',
-    'NL': '🇳🇱', 'SE': '🇸🇪', 'PL': '🇵🇱', 'BE': '🇧🇪',
-    'US': '🇺🇸', 'JP': '🇯🇵'
+    'DE': '🇩🇪', 'FR': '🇫🇷', 'IT': '🇮🇹', 'ES': '🇪🇸', 'GB': '🇬🇧',
+    'NL': '🇳🇱', 'SE': '🇸🇪', 'PL': '🇵🇱', 'BE': '🇧🇪'
 };
 
 /**
  * 站点域名
  */
 export const SITE_DOMAINS: Record<SiteCode, string> = {
-    'DE': 'amazon.de', 'FR': 'amazon.fr', 'IT': 'amazon.it', 'ES': 'amazon.es', 'UK': 'amazon.co.uk',
-    'NL': 'amazon.nl', 'SE': 'amazon.se', 'PL': 'amazon.pl', 'BE': 'amazon.com.be',
-    'US': 'amazon.com', 'JP': 'amazon.co.jp'
+    'DE': 'amazon.de', 'FR': 'amazon.fr', 'IT': 'amazon.it', 'ES': 'amazon.es', 'GB': 'amazon.co.uk',
+    'NL': 'amazon.nl', 'SE': 'amazon.se', 'PL': 'amazon.pl', 'BE': 'amazon.com.be'
 };
 
 /**
@@ -278,7 +276,7 @@ export const SITE_LIST: SiteInfo[] = [
     { code: 'FR', name: '法国', flag: '🇫🇷' },
     { code: 'IT', name: '意大利', flag: '🇮🇹' },
     { code: 'ES', name: '西班牙', flag: '🇪🇸' },
-    { code: 'UK', name: '英国', flag: '🇬🇧' },
+    { code: 'GB', name: '英国', flag: '🇬🇧' },
     { code: 'NL', name: '荷兰', flag: '🇳🇱' },
     { code: 'PL', name: '波兰', flag: '🇵🇱' },
     { code: 'SE', name: '瑞典', flag: '🇸🇪' }

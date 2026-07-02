@@ -223,7 +223,7 @@ export interface MarketingEvent {
 
 /**
  * 营销日历 - 事件列表
- * 包含全年47个重要营销节点
+ * 包含全年50个重要营销节点
  */
 export const amzf_events: MarketingEvent[] = [
      // ==================== January (一月) ====================
@@ -314,6 +314,13 @@ export const amzf_events: MarketingEvent[] = [
         description: '赞颂母亲、母爱、母系纽带以及母亲的社会影响力的节日。赠送礼物是常见的庆祝方式，顾客通常会提前几周挑选礼物。',
         strategy: '2026年英国和爱尔兰母亲节(Mothering Sunday)在3月15日。礼品、园艺工具、定制相框、美容仪热销。',
         tags: ['礼品', '珠宝', '园艺', '美妆']
+    },
+    {
+        id: 49, name: 'Amazon春季大促', nameEn: 'Amazon Spring Deal Days', emoji: '<i class="fa-brands fa-amazon" style="color: #00A8E1;"></i>', date: '3月10-16日', month: 3,
+        countries: ['BE', 'DE', 'ES', 'FR', 'IE', 'IT', 'NL', 'PL', 'SE', 'TR', 'GB'], type: 'shopping',
+        description: 'Amazon官方公告的2026春季促销活动，覆盖欧洲多个站点，是Prime Day前的重要流量窗口。',
+        strategy: '主推春季焕新、家居收纳、园艺户外、运动健康和换季服饰。用Coupon、Best Deal和Sponsored Products承接流量，提前核对活动资格、库存和利润底线。',
+        tags: ['Amazon官方活动', '春季焕新', 'Coupon', '库存']
     },
 
     // ==================== April (四月) ====================
@@ -420,14 +427,16 @@ export const amzf_events: MarketingEvent[] = [
         tags: ['服装', '家居', '清仓']
     },
 
-    // ==================== July (七月) ====================<i class="fa-brands fa-amazon"></i>
+    // ==================== June / Prime Day (六月) ====================
     {
-        id: 27, name: 'Prime Day', nameEn: 'Amazon Prime Day', emoji: '<i class="fa-brands fa-amazon" style="color: #00A8E1;"></i>', date: '7月中旬', month: 7,
+        id: 27, name: 'Prime Day', nameEn: 'Amazon Prime Day', emoji: '<i class="fa-brands fa-amazon" style="color: #00A8E1;"></i>', date: '6月23-26日', month: 6,
         countries: ['DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'GB', 'SE'], type: 'shopping',
-        description: '亚马逊年度盛大的会员购物节，为Prime会员提供涵盖所有品类的独家折扣和限时优惠。',
-        strategy: '亚马逊年度大促。全品类参与，建议提前2个月备货，重点关注电子、智能家居、时尚品类。',
+        description: '亚马逊年度盛大的Prime会员购物节，为Prime会员提供涵盖所有品类的独家折扣和限时优惠。2026年官方公告活动期为6月23日至26日。',
+        strategy: '2026年Prime Day为4天活动。全品类参与，建议提前2个月备货，重点关注电子、智能家居、时尚、家居和季节性高需求品类。',
         tags: ['全品类', '大促', '备货']
     },
+
+    // ==================== July (七月) ====================
     {
         id: 28, name: '比利时国庆日', nameEn: 'Belgian National Day', emoji: '<i class="fas fa-flag" style="color: #000000;"></i>', date: '7月21日', month: 7,
         countries: ['BE'], type: 'holiday',
@@ -563,6 +572,13 @@ export const amzf_events: MarketingEvent[] = [
         description: '按照传统，在这一天，许多孩子都会收到礼物，尤其是在瑞典和意大利北部。',
         strategy: '瑞典和意大利北部传统。白色长袍、蜡烛头冠、烘焙模具、姜饼。',
         tags: ['蜡烛', '装饰', '烘焙']
+    },
+    {
+        id: 50, name: '平安夜/圣诞前夜', nameEn: 'Christmas Eve', emoji: '<i class="fas fa-star" style="color: #F59E0B;"></i>', date: '12月24日', month: 12,
+        countries: ['DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'GB', 'SE', 'IE'], type: 'holiday',
+        description: '欧洲年末假日购物的最后冲刺日之一，家庭聚会、礼物交换和节庆装饰需求集中释放。',
+        strategy: '重点做最后一公里时效承诺、礼品包装、数字礼品卡、派对餐桌和家居氛围品。广告文案必须明确配送截单和Prime可达时效，避免节前迟配差评。',
+        tags: ['圣诞礼品', '物流截单', '家居氛围', '派对']
     },
     {
         id: 45, name: '圣诞节', nameEn: 'Christmas', emoji: '<i class="fas fa-tree" style="color: #2E7D32;"></i>', date: '12月25日', month: 12,

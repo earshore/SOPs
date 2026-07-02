@@ -5,7 +5,7 @@
                 <span class="px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-semibold">紫鸟开放平台</span>
                 <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">场景示例 · 分步引导版</span>
                 <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">v2.0 · 教会 → 沉淀 → 定时</span>
-                <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">适用：Amazon US / UK / DE / JP</span>
+                <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">适用：Amazon DE / FR / IT / ES / GB</span>
             </div>
             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
@@ -93,7 +93,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold text-slate-400 mb-1">店铺</div>
-                    <p class="text-sm text-slate-700">NOVA-US-02，Amazon US。</p>
+                    <p class="text-sm text-slate-700">NOVA-DE-02，Amazon DE。</p>
                 </div>
                 <div>
                     <div class="text-xs font-semibold text-slate-400 mb-1">阈值</div>
@@ -111,7 +111,7 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div class="bg-white border border-slate-200 rounded-lg p-5">
                 <div class="text-xs font-semibold text-slate-400 mb-2">示例店铺</div>
-                <div class="text-2xl font-bold text-slate-900">NOVA-US-02</div>
+                <div class="text-2xl font-bold text-slate-900">NOVA-DE-02</div>
                 <p class="text-sm text-slate-500 mt-1">广告运营 Alex</p>
             </div>
             <div class="bg-white border border-slate-200 rounded-lg p-5">
@@ -148,7 +148,7 @@
                     <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 text-sm font-bold flex items-center justify-center flex-shrink-0">1</span>
                     <div>
                         <h3 class="font-bold text-slate-900">打开店铺与广告控制台</h3>
-                        <p class="text-sm text-slate-600 mt-1">先确认 Seller Central 和 advertising.amazon.com 都可达，没有二次验证或店铺切错。</p>
+                        <p class="text-sm text-slate-600 mt-1">先确认 Seller Central 和 advertising.amazon.de 都可达，没有二次验证或店铺切错。</p>
                     </div>
                 </div>
             </article>
@@ -175,7 +175,7 @@
                     <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 text-sm font-bold flex items-center justify-center flex-shrink-0">4</span>
                     <div>
                         <h3 class="font-bold text-slate-900">ACOS 分层打标</h3>
-                        <p class="text-sm text-slate-600 mt-1">严重超标、轻度超标、良好与暂不评估分开看。示例中把“花费过低暂不评估”的门槛从 5 美元调到 10 美元，避免低样本噪音。</p>
+                        <p class="text-sm text-slate-600 mt-1">严重超标、轻度超标、良好与暂不评估分开看。示例中把“花费过低暂不评估”的门槛从 5 欧元调到 10 欧元，避免低样本噪音。</p>
                     </div>
                 </div>
             </article>
@@ -214,29 +214,29 @@
             <div class="space-y-4">
                 <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
                     <div class="text-xs font-semibold text-slate-400 mb-2">09:10 · 阶段一：先拆广告日审</div>
-                    <p class="text-sm text-slate-700"><span class="font-semibold text-slate-900">Alex：</span>我要做广告 ACOS 日审，目标 NOVA-US-02，本次阈值先用 35%。不要一口气跑完，也不要自动改竞价。</p>
+                    <p class="text-sm text-slate-700"><span class="font-semibold text-slate-900">Alex：</span>我要做广告 ACOS 日审，目标 NOVA-DE-02，本次阈值先用 35%。不要一口气跑完，也不要自动改竞价。</p>
                     <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-amber-700">OpenClaw：</span>我会拆成 6 步：打开店铺和广告控制台、抓进行中 Campaign、对有花费且超阈的层级下钻 Ad Group 与 Targeting、按 ACOS 分层、生成手动调价指南、识别无关搜索词并输出 HTML 报告。所有改价只给手册，不直接动后台。</p>
                 </div>
                 <div class="rounded-lg border border-slate-200 bg-white p-4">
                     <div class="text-xs font-semibold text-slate-400 mb-2">09:11-09:17 · Step 1-3：从 Campaign 下钻到 Targeting</div>
-                    <p class="text-sm text-slate-700"><span class="font-semibold text-amber-700">OpenClaw：</span>已打开 Seller Central 和 advertising.amazon.com，广告控制台可达。Campaign Manager 使用虚拟滚动 grid，我先触发表格完整渲染，再按表头与单元格索引对齐。进行中 Campaign 14 个，其中 9 个最近 7 天有花费，昨日整体 ACOS 为 42.7%。</p>
+                    <p class="text-sm text-slate-700"><span class="font-semibold text-amber-700">OpenClaw：</span>已打开 Seller Central 和 advertising.amazon.de，广告控制台可达。Campaign Manager 使用虚拟滚动 grid，我先触发表格完整渲染，再按表头与单元格索引对齐。进行中 Campaign 14 个，其中 9 个最近 7 天有花费，昨日整体 ACOS 为 42.7%。</p>
                     <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-slate-900">Alex：</span>数量对，只看有花费的 9 个。</p>
-                    <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-amber-700">OpenClaw：</span>继续下钻 23 个 Ad Group，11 个超过 35% 阈值，再进入 Targeting。最终得到 187 行 Targeting，并落盘三张表：Campaign、Ad Group、Targeting。抽样行显示建议竞价是范围值，如 $0.68-$0.95，后续会用建议上限判断是否竞价过高。</p>
+                    <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-amber-700">OpenClaw：</span>继续下钻 23 个 Ad Group，11 个超过 35% 阈值，再进入 Targeting。最终得到 187 行 Targeting，并落盘三张表：Campaign、Ad Group、Targeting。抽样行显示建议竞价是范围值，如 €0.68-€0.95，后续会用建议上限判断是否竞价过高。</p>
                 </div>
                 <div class="rounded-lg border border-slate-200 bg-white p-4">
                     <div class="text-xs font-semibold text-slate-400 mb-2">09:18-09:25 · Step 4-6：分层、手册、否定词</div>
-                    <p class="text-sm text-slate-700"><span class="font-semibold text-amber-700">OpenClaw：</span>初始规则为 ACOS 大于 50% 严重超标、35%-50% 轻度超标、低于 30% 良好，花费小于 5 美元暂不评估。187 行中严重超标 41 行、轻度超标 58 行、良好 73 行。</p>
-                    <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-slate-900">Alex：</span>分层没问题，但 5 美元门槛太低，改成 10 美元，避免低样本进调价方案。</p>
+                    <p class="text-sm text-slate-700"><span class="font-semibold text-amber-700">OpenClaw：</span>初始规则为 ACOS 大于 50% 严重超标、35%-50% 轻度超标、低于 30% 良好，花费小于 5 欧元暂不评估。187 行中严重超标 41 行、轻度超标 58 行、良好 73 行。</p>
+                    <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-slate-900">Alex：</span>分层没问题，但 5 欧元门槛太低，改成 10 欧元，避免低样本进调价方案。</p>
                     <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-amber-700">OpenClaw：</span>已重算：严重超标 35 行、轻度超标 49 行、良好 66 行、暂不评估 37 行。调价手册按层级生成：严重超标优先降到建议上限或降 30%，轻度超标降 10%-15%，高 ROAS Campaign 才进入加预算候选。</p>
                     <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-slate-900">Alex：</span>格式 OK，但 ACOS 大于 150% 的 Ad Group 不要写暂停，改成人工复盘。</p>
                     <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-amber-700">OpenClaw：</span>规则已改。随后抓自动投放搜索词，识别竞品品牌词、无关品类词和 cheap/free/diy 等低意图词，输出精确否定 8 条、词组否定 13 条。HTML 报告里保留“预计省花费”，但标注为理论上限，实际取决于后续流量。</p>
                 </div>
                 <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
                     <div class="text-xs font-semibold text-slate-400 mb-2">09:27-09:32 · SOP、低频定时与多站复用</div>
-                    <p class="text-sm text-slate-700"><span class="font-semibold text-slate-900">Alex：</span>沉淀为“NOVA 广告 ACOS 日审”，必须包含 10 美元门槛、人工复盘、理论省花费注脚。</p>
+                    <p class="text-sm text-slate-700"><span class="font-semibold text-slate-900">Alex：</span>沉淀为“NOVA 广告 ACOS 日审”，必须包含 10 欧元门槛、人工复盘、理论省花费注脚。</p>
                     <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-amber-700">OpenClaw：</span>SOP v1 已固化：Campaign 虚拟滚动采集、三级下钻、Targeting 分层、调价手册、否定词清单、异常兜底和参数化阈值。定时建议周一/三/五 09:00，默认 ACOS 40%，调用时可传更低阈值；严重超标 Targeting 大于等于 20 条才 @ Alex。</p>
-                    <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-slate-900">Alex：</span>UK 和 JP 也要上，JP 的花费门槛要换日元。</p>
-                    <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-amber-700">OpenClaw：</span>复用同一 SOP，UK 切 advertising.amazon.co.uk，JP 切 advertising.amazon.co.jp；币种门槛从 $10 换算到约 ¥1500，并通过币种表维护，避免单站补丁漂移。</p>
+                    <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-slate-900">Alex：</span>FR、IT 和 GB 也要上，GB 的花费门槛要换英镑。</p>
+                    <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-amber-700">OpenClaw：</span>复用同一 SOP，FR/IT 继续走欧元门槛，GB 切 advertising.amazon.co.uk 并维护 GBP 门槛；非欧洲站点不纳入当前复用范围，避免单站补丁漂移。</p>
                 </div>
             </div>
         </div>
@@ -278,9 +278,9 @@
                     <h2 class="text-xl font-bold text-slate-900">SOP 沉淀重点</h2>
                 </div>
                 <ul class="space-y-3 text-sm text-slate-600">
-                    <li><i class="fa-solid fa-check text-blue-500 mr-2"></i>参数化 shop、acos_threshold、min_spend_usd，默认 ACOS 阈值回到 40%。</li>
+                    <li><i class="fa-solid fa-check text-blue-500 mr-2"></i>参数化 shop、acos_threshold、min_spend_eur，默认 ACOS 阈值回到 40%。</li>
                     <li><i class="fa-solid fa-check text-blue-500 mr-2"></i>虚拟滚动表格必须触发完整渲染，并保留字段对齐逻辑。</li>
-                    <li><i class="fa-solid fa-check text-blue-500 mr-2"></i>花费小于 10 美元暂不评估，避免低样本误判。</li>
+                    <li><i class="fa-solid fa-check text-blue-500 mr-2"></i>花费小于 10 欧元暂不评估，避免低样本误判。</li>
                     <li><i class="fa-solid fa-check text-blue-500 mr-2"></i>高 ACOS Ad Group 改为人工复盘，不自动建议暂停。</li>
                     <li><i class="fa-solid fa-check text-blue-500 mr-2"></i>理论省花费必须带注脚，避免被误解成 KPI 承诺。</li>
                     <li><i class="fa-solid fa-check text-blue-500 mr-2"></i>广告控制台 504、虚拟滚动超时、数据不全都要在报告里明示。</li>
@@ -297,7 +297,7 @@
                 <div class="space-y-4 text-sm text-slate-600">
                     <p><span class="font-semibold text-slate-900">频率：</span>广告类任务不建议每天跑，示例定为每周一/三/五 09:00（Asia/Shanghai），留出 3-5 天观察期。</p>
                     <p><span class="font-semibold text-slate-900">推送：</span>飞书广告群，严重超标 Targeting 达到阈值时 @ 广告负责人，其他情况只推日审小结。</p>
-                    <p><span class="font-semibold text-slate-900">复用：</span>复制到 UK / JP 时切换广告域名、时区和币种；日元门槛按币种换算表替换，不硬套美元。</p>
+                    <p><span class="font-semibold text-slate-900">复用：</span>复制到 FR / IT / GB 时切换广告域名、时区和币种；GB 门槛单独维护，不硬套欧元。</p>
                     <p><span class="font-semibold text-slate-900">维护：</span>调价幅度、否定词规则、报告字段统一走 SOP 版本升级，避免单站补丁漂移。</p>
                 </div>
             </article>

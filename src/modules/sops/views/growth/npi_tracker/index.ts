@@ -86,9 +86,9 @@ interface ExportRow {
     SOP合规状态: string;
     DE配送费欧元: number;
     配送占比百分号: string;
-    清仓红线欧元: string;
-    动销价格欧元: string;
-    建议售价欧元: string;
+    配送费35红线欧元: string;
+    配送费30复核价欧元: string;
+    配送费25参考价欧元: string;
     盈亏平衡点欧元: string;
     流量: number;
     七天CTR百分号: number;
@@ -107,10 +107,29 @@ let registeredActions: string[] = [];
 let removeFilterListener: (() => void) | null = null;
 const tableEventHandlers = new WeakMap<HTMLElement, EventListener>();
 
-// Pricing calculation functions
-const calcClearancePrice = (deliveryFee: number): string => (deliveryFee / 0.5).toFixed(2);
-const calcMovingPrice = (deliveryFee: number): string => (deliveryFee / 0.5 + 1).toFixed(2);
-const calcCurrentPrice = (deliveryFee: number): string => (deliveryFee / 0.5 + 2).toFixed(2);
+function moveNextStepModalToBody(container: HTMLElement): void {
+    const modal = container.querySelector('#next-step-modal');
+    if (!modal) return;
+
+    const existingBodyModal = document.body.querySelector('#next-step-modal');
+    if (existingBodyModal && existingBodyModal !== modal) {
+        existingBodyModal.remove();
+    }
+
+    if (modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+}
+
+function removeNextStepModalFromBody(): void {
+    const modal = document.body.querySelector('#next-step-modal');
+    modal?.remove();
+}
+
+// Pricing guardrails based only on delivery-fee ratio. These are not net-profit prices.
+const calcClearancePrice = (deliveryFee: number): string => (deliveryFee / 0.35).toFixed(2);
+const calcMovingPrice = (deliveryFee: number): string => (deliveryFee / 0.3).toFixed(2);
+const calcCurrentPrice = (deliveryFee: number): string => (deliveryFee / 0.25).toFixed(2);
 const calcDeliveryPercent = (deliveryFee: number, currentPrice: number): string =>
     ((deliveryFee / currentPrice) * 100).toFixed(1);
 
@@ -449,9 +468,9 @@ function formatReviewLine(row: NPIProductRecord): string {
         `阶段：${getStageLabel(row.stage)}`,
         `库存：${row.inventory_days}天`,
         `合规：${getComplianceLabel(row)}`,
-        `清仓线：€${calcClearancePrice(row.delivery_fee)}`,
-        `动销价：€${calcMovingPrice(row.delivery_fee)}`,
-        `建议价：€${calcCurrentPrice(row.delivery_fee)}`,
+        `配送费35%红线：€${calcClearancePrice(row.delivery_fee)}`,
+        `配送费30%复核价：€${calcMovingPrice(row.delivery_fee)}`,
+        `配送费25%参考价：€${calcCurrentPrice(row.delivery_fee)}`,
         `ACOS：${row.acoas}%`,
         `自然单：${row.organic_ratio}%`,
         `结论：${getDecisionLabel(row.decision)}`,
@@ -543,9 +562,9 @@ function buildExportRow(row: NPIProductRecord, idx: number): ExportRow {
         SOP合规状态: getComplianceLabel(row),
         DE配送费欧元: row.delivery_fee,
         配送占比百分号: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/${EXCEL_COLUMNS.SUGGESTED}${excelRow}*100`,
-        清仓红线欧元: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/0.5`,
-        动销价格欧元: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/0.5+1`,
-        建议售价欧元: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/0.5+2`,
+        配送费35红线欧元: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/0.35`,
+        配送费30复核价欧元: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/0.3`,
+        配送费25参考价欧元: `=${EXCEL_COLUMNS.DELIVERY_FEE}${excelRow}/0.25`,
         盈亏平衡点欧元: row.break_even,
         流量: row.sessions,
         七天CTR百分号: row.ctr_7d,
@@ -612,7 +631,7 @@ function exportToExcel(): void {
 
     // Show notification
     alert(
-        '导出成功！CSV文件包含Excel兼容公式，使用Excel打开后公式会自动计算。\n\n提示：清仓红线/动销价格/建议售价列包含公式，修改配送费后会自动更新。'
+        '导出成功！CSV文件包含Excel兼容公式，使用Excel打开后公式会自动计算。\n\n提示：价格列仅为配送费占比预警，不代表净利润；正式定价必须进入欧洲站SKU利润表复核。'
     );
 }
 
@@ -757,6 +776,7 @@ export async function mount(container: HTMLElement): Promise<void> {
         // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
         renderer.renderTemplate(container, html);
         container.classList.add('fade-in');
+        moveNextStepModalToBody(container);
         restoreReviewOwner();
 
         // 3. 注册全局操作
@@ -797,6 +817,7 @@ export function unmount(): void {
 
         // 2. 重置表格数据
         tableData = [...SAMPLE_DATA];
+        removeNextStepModalFromBody();
     } catch (error) {
         console.error('[NPITracker] ❌ 模块卸载失败:', error);
     }

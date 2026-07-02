@@ -1,45 +1,45 @@
 # CSS 模块分析报告
 
-> 生成时间: 2026/6/11 17:04:35
+> 生成时间: 2026/7/2 16:45:04
 
 ## 📊 统计信息
 
 - 分析文件数: 10
-- 总代码行数: 5423
-- 识别模式数: 10
+- 总代码行数: 7639
+- 识别模式数: 11
 
 ## 🔍 发现的重复模式
 
 ### Cards 相关
 
-- **cards-pattern-3**: 出现 8 次
-  - 文件: src/modules/app_center/app_center_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/more/more_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
+- **cards-pattern-1**: 出现 9 次
+  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/more/more_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css, src/modules/more/views/explore/prompts/prompts_style.css
   - 示例:
     ```css
-    .app-overview-card { --app-accent-shadow: rgba(124, 58, 237, 0.18); position: relative; display: fle...
-    ```
-    ```css
-    .glass-card { background: var(--color-white); backdrop-filter: blur(16px); /* 更深度的模糊 */ border: 1px ...
-    ```
-
-- **cards-pattern-1**: 出现 7 次
-  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/more/more_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css, src/modules/more/views/explore/prompts/prompts_style.css
-  - 示例:
-    ```css
-    .sop-card { background: white; border-radius: var(--rounded-xl);...
+    .sop-card { background: var(--surface-card, #ffffff); border-radius: var(--radius-card, 8px);...
     ```
     ```css
     .amz_card-hover { position: relative; background: white; transition: all var(--duration-slow) var(--...
     ```
 
-- **cards-pattern-2**: 出现 9 次
-  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/more/views/explore/prompts/prompts_style.css
+- **cards-pattern-3**: 出现 9 次
+  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/more/more_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
   - 示例:
     ```css
-    .sop-card:hover { border-color: var(--color-blue-500); box-shadow: 0 10px 40px -10px var(--color-pri...
+    .sop-card { background: var(--surface-card, #ffffff); border-radius: var(--radius-card, 8px); border...
     ```
     ```css
+    .glass-card { background: var(--color-white); backdrop-filter: blur(16px); /* 更深度的模糊 */ border: 1px ...
+    ```
+
+- **cards-pattern-2**: 出现 3 次
+  - 文件: src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/more/views/explore/prompts/prompts_style.css
+  - 示例:
+    ```css
     .amz_card-hover:hover { transform: translateY(-4px)...
+    ```
+    ```css
+    .card-hover:hover { transform: translateY(-4px)...
     ```
 
 ### Buttons 相关
@@ -100,8 +100,8 @@
     .stage-badge { display: inline-block; padding: 2px 8px; border-radius: var(--rounded); font-weight: ...
     ```
 
-- **badges-pattern-2**: 出现 4 次
-  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css
+- **badges-pattern-2**: 出现 7 次
+  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
   - 示例:
     ```css
     .sop-status-active { background: var(--color-green-100); color: var(--color-green-600);...

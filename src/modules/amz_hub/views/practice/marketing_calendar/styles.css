@@ -167,6 +167,63 @@
     max-width: 600px;
 }
 
+.amzf_source_panel {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0 20px;
+    padding: 14px 16px;
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    border-radius: 8px;
+    background: #f7fefb;
+    color: #134e4a;
+}
+
+.amzf_source_label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #047857;
+    white-space: nowrap;
+}
+
+.amzf_source_panel p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.amzf_source_links {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.amzf_source_links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 5px 10px;
+    border: 1px solid rgba(4, 120, 87, 0.22);
+    border-radius: 6px;
+    background: #ffffff;
+    color: #047857;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.amzf_source_links a:hover,
+.amzf_source_links a:focus-visible {
+    border-color: #047857;
+    outline: none;
+}
+
 /* ==================== Enhanced Search Bar ==================== */
 .amzf_search_wrapper {
     position: relative;
@@ -640,29 +697,41 @@
 
 .amzf_month_section {
     background: var(--color-white);
-    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .amzf_month_section:hover {
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border-color: rgba(16, 185, 129, 0.42);
+    box-shadow: 0 12px 30px -24px rgba(15, 23, 42, 0.42);
 }
 
 .amzf_month_header {
+    width: 100%;
+    border: 0;
     padding: 20px 25px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    background: #f8fafc;
+    color: inherit;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    text-align: left;
     user-select: none;
     transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .amzf_month_header:hover {
-    background: linear-gradient(135deg, #e8ecf0 0%, #d8dce0 100%);
+    background: #eefbf5;
+}
+
+.amzf_month_header:focus-visible,
+.amzf_comparison_header:focus-visible {
+    outline: 3px solid rgba(16, 185, 129, 0.34);
+    outline-offset: -3px;
 }
 
 .amzf_month_info {
@@ -678,12 +747,12 @@
 }
 
 .amzf_month_badge {
-    background: var(--color-indigo-500);
-    color: white;
+    background: #dcfce7;
+    color: #166534;
     padding: 4px 12px;
     border-radius: 50px;
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 700;
 }
 
 /* 箭头旋转动画 */
@@ -717,7 +786,7 @@
 /* 展开状态 */
 .amzf_expanded .amzf_month_content,
 .amzf_expanded .amzf_comparison_content {
-    max-height: 3000px;
+    max-height: 5000px;
     /* 稍微给大一点，防止内容截断 */
     opacity: 1;
 }
@@ -729,28 +798,30 @@
 }
 
 .amzf_month_section.amzf_expanded .amzf_month_content {
-    max-height: 2000px;
+    max-height: 5000px;
 }
 
 .amzf_events_grid {
-    padding: 20px;
+    padding: 16px;
     display: grid;
-    gap: 15px;
+    gap: 12px;
 }
 
 /* Event Card */
 .amzf_event_card {
-    background: var(--color-slate-50);
-    border-radius: 12px;
-    padding: 20px;
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.28);
     border-left: 4px solid var(--color-indigo-500);
-    transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
-    cursor: pointer;
+    border-radius: 8px;
+    padding: 16px;
+    transition:
+        border-color var(--duration-fast, 180ms) ease,
+        box-shadow var(--duration-fast, 180ms) ease;
+    cursor: default;
 }
 
 .amzf_event_card:hover {
-    transform: translateX(5px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 26px -22px rgba(15, 23, 42, 0.42);
 }
 
 .amzf_event_card.amzf_type_holiday {
@@ -769,88 +840,165 @@
     border-left-color: var(--color-amber-400);
 }
 
+.amzf_event_card.amzf_type_financial {
+    border-left-color: var(--color-yellow-500);
+}
+
 .amzf_event_header {
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .amzf_event_title_wrapper {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+    width: 100%;
 }
 
-/* ✅ 优化点 1：增强图标的视觉效果 */
 .amzf_event_emoji {
-    font-size: 1.6rem;
-    /* 稍微加大一点 */
-    width: 45px;
-    height: 45px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fff;
-    border-radius: 12px;
-    /* 圆角背景 */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    /* 轻微的浮起感 */
-    margin-right: 12px;
+    background: #f8fafc;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 8px;
+    font-size: 1.35rem;
     flex-shrink: 0;
-    transition: transform 0.3s ease;
 }
 
-/* 鼠标悬停时图标放大 */
-.amzf_event_card:hover .amzf_event_emoji {
-    transform: scale(1.1) rotate(5deg);
-}
-
-/* 图标内部的 i 标签添加滤镜，使其有轻微发光感 */
 .amzf_event_emoji i {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    filter: none;
+}
+
+.amzf_event_title_stack {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.amzf_event_meta_row,
+.amzf_country_event_meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.amzf_event_type {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 26px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.amzf_event_type_holiday {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.amzf_event_type_shopping {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.amzf_event_type_cultural {
+    background: #f5f3ff;
+    color: #6d28d9;
+}
+
+.amzf_event_type_financial {
+    background: #fefce8;
+    color: #a16207;
+}
+
+.amzf_event_type_season {
+    background: #fff7ed;
+    color: #c2410c;
 }
 
 .amzf_event_title {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-slate-900);
+    line-height: 1.35;
+}
+
+.amzf_event_title span,
+.amzf_country_event_title span {
+    margin-left: 6px;
+    color: var(--color-slate-500);
+    font-size: 0.86em;
+    font-weight: 600;
+}
+
+.amzf_event_desc {
+    margin: 0;
+    color: var(--color-slate-600);
+    font-size: 0.88rem;
+    line-height: 1.65;
 }
 
 .amzf_event_date {
-    font-size: 0.85rem;
-    color: var(--color-slate-500);
-    background: white;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 26px;
+    color: var(--color-slate-700);
+    background: #f8fafc;
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .amzf_event_countries {
     display: flex;
-    gap: 5px;
+    gap: 6px;
     margin-bottom: 12px;
     flex-wrap: wrap;
 }
 
 .amzf_country_badge {
-    font-size: 1.1rem;
-    background: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 28px;
+    background: #f8fafc;
+    border: 1px solid rgba(148, 163, 184, 0.22);
     padding: 3px 8px;
     border-radius: 6px;
+    color: var(--color-slate-700);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .amzf_event_strategy {
-    background: white;
+    background: #fffbeb;
+    border: 1px solid rgba(245, 158, 11, 0.22);
     border-radius: 8px;
-    padding: 15px;
-    margin-top: 10px;
+    padding: 12px;
+    margin-top: 8px;
 }
 
 .amzf_strategy_title {
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--color-indigo-500);
+    color: #92400e;
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -859,7 +1007,7 @@
 
 .amzf_strategy_content {
     font-size: 0.9rem;
-    color: var(--color-slate-500);
+    color: var(--color-slate-700);
     line-height: 1.7;
 }
 
@@ -871,10 +1019,11 @@
 }
 
 .amzf_tag {
-    background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-    color: #667eea;
+    background: #ffffff;
+    border: 1px solid rgba(245, 158, 11, 0.22);
+    color: #92400e;
     padding: 4px 10px;
-    border-radius: 15px;
+    border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 500;
 }
@@ -887,19 +1036,23 @@
 
 .amzf_event_comparison {
     background: var(--color-white);
-    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .amzf_comparison_header {
+    width: 100%;
+    border: 0;
     padding: 20px 25px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: #f8fafc;
+    color: var(--color-slate-900);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    text-align: left;
 }
 
 .amzf_comparison_title {
@@ -917,48 +1070,68 @@
 }
 
 .amzf_event_comparison.amzf_expanded .amzf_comparison_content {
-    max-height: 1500px;
+    max-height: 5000px;
 }
 
 .amzf_country_list {
-    padding: 20px;
+    padding: 16px;
     display: grid;
-    gap: 10px;
+    gap: 12px;
 }
 
 .amzf_country_event {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(170px, 240px) minmax(0, 1fr);
     align-items: flex-start;
-    /* 顶部对齐 */
-    gap: 20px;
-    /* ✅ 设置三列之间的固定间距 */
-    padding: 15px;
-    background: var(--color-slate-50);
-    border-radius: 12px;
-    transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
+    gap: 16px;
+    padding: 14px;
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    border-left: 4px solid var(--color-indigo-500);
+    border-radius: 8px;
+    transition:
+        background var(--duration-fast, 180ms) ease,
+        border-color var(--duration-fast, 180ms) ease,
+        box-shadow var(--duration-fast, 180ms) ease;
 }
 
-/* 增加一点上边距，让单行时图标也能和文字第一行对齐 */
+.amzf_country_event.amzf_type_holiday {
+    border-left-color: var(--color-red-500);
+}
+
+.amzf_country_event.amzf_type_shopping {
+    border-left-color: var(--color-green-500);
+}
+
+.amzf_country_event.amzf_type_cultural {
+    border-left-color: var(--color-purple-600);
+}
+
+.amzf_country_event.amzf_type_financial {
+    border-left-color: var(--color-yellow-500);
+}
+
+.amzf_country_event.amzf_type_season {
+    border-left-color: var(--color-amber-400);
+}
+
 .amzf_country_info,
 .amzf_country_date {
-    margin-top: 2px;
+    margin-top: 0;
 }
 
 .amzf_country_event:hover {
-    background: #e8ecf0;
+    background: #f8fafc;
+    border-color: rgba(16, 185, 129, 0.38);
+    box-shadow: 0 10px 26px -22px rgba(15, 23, 42, 0.42);
 }
 
-/* 第一列：国家旗帜 (设置固定宽) */
 .amzf_country_info {
-    flex: 0 0 160px;
-    /* ✅ 关键：固定宽度 160px，确保竖列对齐 */
-    width: 160px;
-    /* 兼容性写法 */
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-top: 2px;
-    /* 微调垂直对齐 */
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
 }
 
 .amzf_country_name {
@@ -966,25 +1139,34 @@
     color: var(--color-slate-900);
 }
 
-/* 第二列：日期 (设置固定宽，移除原本的 flex: 1) */
 .amzf_country_date {
-    flex: 0 0 140px;
-    /* ✅ 关键：固定宽度 100px，紧跟在旗帜后面 */
-    width: 100px;
     color: var(--color-slate-500);
-    margin-top: 2px;
-    /* 微调垂直对齐 */
     white-space: nowrap;
-    /* 防止日期换行 */
 }
 
-/* 第三列：策略内容 (占据剩余空间) */
 .amzf_country_strategy_brief {
-    flex: 1;
-    /* ✅ 让内容区域占据剩下的所有空间 */
+    display: grid;
+    gap: 6px;
     font-size: 0.9rem;
-    color: var(--color-slate-500);
-    /* 如果希望文字不要太宽，可以加 max-width，例如 max-width: 800px; */
+    color: var(--color-slate-600);
+    min-width: 0;
+}
+
+.amzf_country_event_title {
+    color: var(--color-slate-900);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.amzf_country_strategy_brief p {
+    margin: 0;
+    line-height: 1.65;
+}
+
+.amzf_country_event_strategy {
+    color: var(--color-slate-700);
+    line-height: 1.65;
 }
 
 /* Empty State */
@@ -1036,6 +1218,15 @@
         font-size: 1.8rem;
     }
 
+    .amzf_source_panel {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .amzf_source_links {
+        justify-content: flex-start;
+    }
+
     .amzf_controls {
         flex-direction: column;
         align-items: stretch;
@@ -1057,8 +1248,14 @@
     }
 
     .amzf_country_event {
-        flex-direction: column;
+        grid-template-columns: 1fr;
+    }
+
+    .amzf_comparison_title,
+    .amzf_event_meta_row,
+    .amzf_country_event_meta {
         align-items: flex-start;
+        flex-wrap: wrap;
     }
 
     .amzf_header {
@@ -1183,6 +1380,10 @@
         border-left-color: var(--color-amber-400);
     }
 
+    .amzf_event_card.amzf_type_financial {
+        border-left-color: var(--color-yellow-500);
+    }
+
     .amzf_event_emoji {
         border-radius: var(--radius-card, var(--rounded-md));
         box-shadow: none;
@@ -1192,7 +1393,18 @@
         border-radius: var(--radius-card, var(--rounded-md));
     }
 
-    .amzf_tag,
+    .amzf_event_strategy {
+        background: #fffbeb;
+        border-color: rgba(245, 158, 11, 0.22);
+    }
+
+    .amzf_tag {
+        background: #ffffff;
+        border-color: rgba(245, 158, 11, 0.22);
+        border-radius: var(--radius-card, var(--rounded-md));
+        color: #92400e;
+    }
+
     .amzf_quick_tag {
         background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
         border-radius: var(--radius-card, var(--rounded-md));

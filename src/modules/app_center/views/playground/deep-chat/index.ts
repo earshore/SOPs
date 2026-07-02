@@ -1156,14 +1156,14 @@ function positionPromptPreview(
   const previewWidth = Math.min(480, Math.max(280, window.innerWidth - viewportPadding * 2));
   const previewHeight = Math.min(520, Math.max(260, window.innerHeight - 160));
   const maxLeft = Math.max(viewportPadding, window.innerWidth - previewWidth - viewportPadding);
-  const preferredLeft = resolvePromptPreviewLeft(
+  const preferredLeft = resolvePromptPreviewLeft({
     pointer,
     anchorRect,
     promptRailRect,
     previewWidth,
     gap,
     viewportPadding
-  );
+  });
   const left = Math.round(clampNumber(preferredLeft, viewportPadding, maxLeft));
   const anchoredTop = anchorRect?.top ?? (promptRailRect ? promptRailRect.top + 56 : 118);
   const minTop = 72;
@@ -1184,14 +1184,23 @@ function positionPromptPreview(
   preview.style.setProperty('--playground-prompt-preview-body-max-height', `${Math.max(180, previewHeight - 48)}px`);
 }
 
-function resolvePromptPreviewLeft(
-  pointer: PromptPreviewPointer | undefined,
-  anchorRect: DOMRect | undefined,
-  promptRailRect: DOMRect | undefined,
-  previewWidth: number,
-  gap: number,
-  viewportPadding: number
-): number {
+interface PromptPreviewLeftOptions {
+  pointer: PromptPreviewPointer | undefined;
+  anchorRect: DOMRect | undefined;
+  promptRailRect: DOMRect | undefined;
+  previewWidth: number;
+  gap: number;
+  viewportPadding: number;
+}
+
+function resolvePromptPreviewLeft({
+  pointer,
+  anchorRect,
+  promptRailRect,
+  previewWidth,
+  gap,
+  viewportPadding
+}: PromptPreviewLeftOptions): number {
   const anchorLeft = pointer?.clientX ?? anchorRect?.left ?? promptRailRect?.left ?? viewportPadding;
   const anchorRight = pointer?.clientX ?? anchorRect?.right ?? promptRailRect?.right ?? viewportPadding;
   const leftSide = anchorLeft - previewWidth - gap;

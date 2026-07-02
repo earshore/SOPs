@@ -335,26 +335,26 @@ describe('NPI Tracker Module', () => {
     describe('Financial Calculations', () => {
         it('should calculate clearance price correctly', () => {
             const deliveryFee = 5.0;
-            const expectedClearance = deliveryFee / 0.5;
+            const expectedClearance = deliveryFee / 0.35;
             
-            // 计算公式：配送费 / 0.5
-            expect(expectedClearance).toBe(10.0);
+            // 计算公式：配送费 / 0.35
+            expect(expectedClearance).toBeCloseTo(14.29, 2);
         });
 
         it('should calculate moving price correctly', () => {
             const deliveryFee = 5.0;
-            const expectedMoving = deliveryFee / 0.5 + 1;
+            const expectedMoving = deliveryFee / 0.3;
             
-            // 计算公式：配送费 / 0.5 + 1
-            expect(expectedMoving).toBe(11.0);
+            // 计算公式：配送费 / 0.3
+            expect(expectedMoving).toBeCloseTo(16.67, 2);
         });
 
         it('should calculate suggested price correctly', () => {
             const deliveryFee = 5.0;
-            const expectedSuggested = deliveryFee / 0.5 + 2;
+            const expectedSuggested = deliveryFee / 0.25;
             
-            // 计算公式：配送费 / 0.5 + 2
-            expect(expectedSuggested).toBe(12.0);
+            // 计算公式：配送费 / 0.25
+            expect(expectedSuggested).toBe(20.0);
         });
 
         it('should calculate delivery percent correctly', () => {
@@ -548,9 +548,9 @@ describe('NPI Tracker Module', () => {
             const deliveryFee = 5.0;
             const row = 2; // Excel 行号（1-indexed，row 1 是表头）
             
-            const expectedFormula = `=O${row}/0.5`;
+            const expectedFormula = `=O${row}/0.35`;
             expect(expectedFormula).toContain('O');
-            expect(expectedFormula).toContain('/0.5');
+            expect(expectedFormula).toContain('/0.35');
         });
 
         it('should handle empty data gracefully', () => {
@@ -601,7 +601,7 @@ describe('NPI Tracker Module', () => {
             expect(template).toContain('作业负责人：运营小李');
             expect(template).toContain('SKU 数：1');
             expect(template).toContain('TEST-SKU-002');
-            expect(template).toContain('清仓线：€12.00');
+            expect(template).toContain('配送费35%红线：€17.14');
             expect(template).toContain('当前结论为放弃');
             expect(template).toContain('需 运营小李 确认下一步动作');
             expect(template).toContain('清仓 (扶不起)');
@@ -655,8 +655,8 @@ describe('NPI Tracker Module', () => {
     describe('Price Warnings', () => {
         it('should identify price below clearance', () => {
             const deliveryFee = 5.0;
-            const clearancePrice = deliveryFee / 0.5;
-            const suggestedPrice = deliveryFee / 0.5 + 2;
+            const clearancePrice = deliveryFee / 0.35;
+            const suggestedPrice = deliveryFee / 0.25;
             
             const isPriceBelowClearance = suggestedPrice < clearancePrice;
             
@@ -665,7 +665,7 @@ describe('NPI Tracker Module', () => {
 
         it('should flag dangerously low prices', () => {
             const deliveryFee = 10.0;
-            const clearancePrice = deliveryFee / 0.5; // 20.0
+            const clearancePrice = deliveryFee / 0.35;
             const currentPrice = 15.0;
             
             const isPriceBelowClearance = currentPrice < clearancePrice;

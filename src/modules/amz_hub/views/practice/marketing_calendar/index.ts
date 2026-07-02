@@ -24,11 +24,20 @@ const AMZF_MAX_HISTORY =
 const AMZF_QUICK_TAGS = [
   "圣诞",
   "Prime Day",
+  "Spring Deal Days",
   "黑五",
   "复活节",
   "情人节",
   "母亲节",
 ]; // 快捷搜索标签
+
+const AMZF_EVENT_TYPE_META: Record<string, { label: string; icon: string }> = {
+  holiday: { label: "节日礼赠", icon: "fas fa-gift" },
+  shopping: { label: "电商大促", icon: "fas fa-cart-shopping" },
+  cultural: { label: "文化场景", icon: "fas fa-masks-theater" },
+  financial: { label: "消费力窗口", icon: "fas fa-coins" },
+  season: { label: "季节需求", icon: "fas fa-seedling" },
+};
 
 interface MarketingCalendarState {
   currentView: "country" | "event";
@@ -218,6 +227,13 @@ class MarketingCalendarModule extends BaseModule {
     const element = document.getElementById(id);
     if (element) {
       element.classList.toggle("amzf_expanded");
+      const trigger = document.querySelector(
+        `[data-amzf-toggle-section="${id}"]`,
+      );
+      trigger?.setAttribute(
+        "aria-expanded",
+        element.classList.contains("amzf_expanded").toString(),
+      );
     }
     if (this.state.expandedSections.has(id)) {
       this.state.expandedSections.delete(id);
@@ -640,14 +656,14 @@ class MarketingCalendarModule extends BaseModule {
 
       html += `
                 <div id="${sectionId}" class="amzf_month_section ${isExpanded ? "amzf_expanded" : ""}" style="animation-delay: ${(m - 1) * 0.03}s">
-                    <div class="amzf_month_header" data-amzf-toggle-section="${escapeHtml(sectionId)}">
+                    <button type="button" class="amzf_month_header" data-amzf-toggle-section="${escapeHtml(sectionId)}" aria-expanded="${isExpanded}" aria-controls="${escapeHtml(sectionId)}_content">
                         <div class="amzf_month_info">
                             <span class="amzf_month_name">${(amzf_months as string[])[m - 1]}</span>
                             <span class="amzf_month_badge">${monthEvents.length} 个活动</span>
                         </div>
                         <div class="amzf_month_toggle"><i class="fas fa-chevron-down"></i></div>
-                    </div>
-                    <div class="amzf_month_content">
+                    </button>
+                    <div id="${escapeHtml(sectionId)}_content" class="amzf_month_content">
                         <div class="amzf_events_grid">
                             ${monthEvents.map((e) => this.renderEventCard(e)).join("")}
                         </div>
@@ -674,7 +690,9 @@ class MarketingCalendarModule extends BaseModule {
     }
     const eventGroups: Record<string, EventGroup> = {};
     events.forEach((event) => {
-      let groupKey = event.nameEn.replace(/ (UK|IT|ES|FR|PL|EU)$/i, "").trim();
+      let groupKey = event.nameEn
+        .replace(/\s+(DE|UK|GB|IT|ES|FR|PL|EU|NL|BE|SE|IE|TR)(\/(DE|UK|GB|IT|ES|FR|PL|EU|NL|BE|SE|IE|TR))*$/i, "")
+        .trim();
       const group = eventGroups[groupKey] ?? {
           emoji: event.emoji,
           events: [],
@@ -696,19 +714,19 @@ class MarketingCalendarModule extends BaseModule {
       const sectionId = `amzf_group_event_${safeKey}`;
       const isExpanded =
         isSearchActive || this.state.expandedSections.has(sectionId);
-      const displayName = `${group.name}(${group.nameEn})`;
+      const displayName = `${escapeHtml(group.name)}(${escapeHtml(group.nameEn)})`;
 
       html += `
                 <div id="${sectionId}" class="amzf_event_comparison ${isExpanded ? "amzf_expanded" : ""}" style="animation-delay: ${idx * 0.03}s">
-                    <div class="amzf_comparison_header" data-amzf-toggle-section="${escapeHtml(sectionId)}">
+                    <button type="button" class="amzf_comparison_header" data-amzf-toggle-section="${escapeHtml(sectionId)}" aria-expanded="${isExpanded}" aria-controls="${escapeHtml(sectionId)}_content">
                         <div class="amzf_comparison_title">
                             <span>${group.emoji}</span>
                             <span>${displayName}</span>
                             <span class="amzf_month_badge">${new Set(group.events.flatMap((e) => e.countries)).size} 个站点</span>
                         </div>
                         <div class="amzf_month_toggle"><i class="fas fa-chevron-down"></i></div>
-                    </div>
-                    <div class="amzf_comparison_content">
+                    </button>
+                    <div id="${escapeHtml(sectionId)}_content" class="amzf_comparison_content">
                         <div class="amzf_country_list">
                             ${group.events.map((e) => this.renderCountryEvent(e)).join("")}
                         </div>
@@ -725,35 +743,51 @@ class MarketingCalendarModule extends BaseModule {
     );
   }
 
-  renderEventCard(event: MarketingEvent): string {
-    const typeClass = `amzf_type_${event.type}`;
-    const countryBadges = event.countries
+  private getEventTypeMeta(type: string): { label: string; icon: string } {
+    return AMZF_EVENT_TYPE_META[type] ?? { label: "营销节点", icon: "fas fa-calendar-day" };
+  }
+
+  private renderCountryBadges(codes: string[], labelMode: "code" | "name" = "code"): string {
+    return codes
       .map((code: string) => {
-        const c = (amzf_countries as CountryInfo[]).find(
-          (x) => x.code === code,
+        const country = (amzf_countries as CountryInfo[]).find(
+          (item) => item.code === code,
         );
-        return `<span class="amzf_country_badge" title="${c?.name}">${c?.flag}</span>`;
+        const safeCode = escapeHtml(code);
+        const safeName = escapeHtml(country?.name ?? code);
+        const visibleLabel = labelMode === "name" ? safeName : safeCode;
+        const flag = country?.flag ?? safeCode;
+        return `<span class="amzf_country_badge" title="${safeName}" aria-label="${safeName}">${flag}<span>${visibleLabel}</span></span>`;
       })
       .join("");
+  }
+
+  renderEventCard(event: MarketingEvent): string {
+    const typeClass = `amzf_type_${event.type}`;
+    const typeMeta = this.getEventTypeMeta(event.type);
+    const countryBadges = this.renderCountryBadges(event.countries);
 
     return `
             <div class="amzf_event_card ${typeClass}">
                 <div class="amzf_event_header">
                     <div class="amzf_event_title_wrapper">
-                        <span class="amzf_event_emoji">${event.emoji}</span>
-                        <div>
-                            <span class="amzf_event_title">${event.name}(${event.nameEn})</span>
-                            <div style="font-size:0.8rem; color:#666; margin-top:2px;">${event.description}</div>
+                        <span class="amzf_event_emoji" aria-hidden="true">${event.emoji}</span>
+                        <div class="amzf_event_title_stack">
+                            <div class="amzf_event_meta_row">
+                                <span class="amzf_event_type amzf_event_type_${escapeHtml(event.type)}"><i class="${typeMeta.icon}"></i>${typeMeta.label}</span>
+                                <span class="amzf_event_date"><i class="fas fa-calendar-alt"></i> ${escapeHtml(event.date)}</span>
+                            </div>
+                            <div class="amzf_event_title">${escapeHtml(event.name)}<span>${escapeHtml(event.nameEn)}</span></div>
+                            <p class="amzf_event_desc">${escapeHtml(event.description)}</p>
                         </div>
                     </div>
-                    <span class="amzf_event_date"><i class="fas fa-calendar-alt"></i> ${event.date}</span>
                 </div>
                 <div class="amzf_event_countries">${countryBadges}</div>
                 <div class="amzf_event_strategy">
                     <div class="amzf_strategy_title"><i class="fas fa-lightbulb text-yellow-500"></i> 电商切入策略</div>
-                    <div class="amzf_strategy_content">${event.strategy}</div>
+                    <div class="amzf_strategy_content">${escapeHtml(event.strategy)}</div>
                     <div class="amzf_strategy_tags">
-                        ${(event.tags || []).map((t: string) => `<span class="amzf_tag">#${t}</span>`).join("")}
+                        ${(event.tags || []).map((t: string) => `<span class="amzf_tag">#${escapeHtml(t)}</span>`).join("")}
                     </div>
                 </div>
             </div>
@@ -761,26 +795,22 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   renderCountryEvent(event: MarketingEvent): string {
-    const flags = event.countries
-      .map((code: string) => {
-        const c = (amzf_countries as CountryInfo[]).find(
-          (x) => x.code === code,
-        );
-        return `<span title="${c?.name}">${c?.flag}</span>`;
-      })
-      .join(" ");
+    const typeMeta = this.getEventTypeMeta(event.type);
+    const countryBadges = this.renderCountryBadges(event.countries, "name");
 
     return `
-            <div class="amzf_country_event">
+            <div class="amzf_country_event amzf_type_${escapeHtml(event.type)}">
                 <div class="amzf_country_info">
-                    <span style="font-size:1.3rem">${flags}</span>
-                </div>
-                <div class="amzf_country_date">
-                    <strong><i class="fas fa-calendar-alt"></i> ${event.date}</strong>
+                    ${countryBadges}
                 </div>
                 <div class="amzf_country_strategy_brief">
-                    <div style="margin-bottom:4px;font-weight:600;">${event.name}(${event.nameEn})</div>
-                    <i class="fas fa-lightbulb text-yellow-500"></i> ${event.strategy}
+                    <div class="amzf_country_event_meta">
+                        <span class="amzf_event_type amzf_event_type_${escapeHtml(event.type)}"><i class="${typeMeta.icon}"></i>${typeMeta.label}</span>
+                        <span class="amzf_country_date"><i class="fas fa-calendar-alt"></i> ${escapeHtml(event.date)}</span>
+                    </div>
+                    <div class="amzf_country_event_title">${escapeHtml(event.name)}<span>${escapeHtml(event.nameEn)}</span></div>
+                    <p>${escapeHtml(event.description)}</p>
+                    <div class="amzf_country_event_strategy"><i class="fas fa-lightbulb text-yellow-500"></i> ${escapeHtml(event.strategy)}</div>
                 </div>
             </div>
         `;

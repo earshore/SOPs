@@ -1502,7 +1502,7 @@ export const RESTRICTED_WORDS_DATABASE = [
     riskDescription: 'Bluetooth SIG拥有商标权和认证体系(BQB)。未通过BQB认证的产品不得使用Bluetooth名称/Logo。仅说"Compatible"也有灰色地带。',
     legalBasis: 'Bluetooth SIG Trademark Policy, RED Directive',
     alternatives: ['Wireless', 'BT compatible (谨慎使用)'],
-    tips: 'BQB认证费用约$8,000起。无证时标题和图片都不要出现Bluetooth字样和Logo'
+    tips: 'BQB认证费用较高且会随机构与服务商报价变化。无证时标题和图片都不要出现Bluetooth字样和Logo'
   },
   {
     id: 'ELE-002',

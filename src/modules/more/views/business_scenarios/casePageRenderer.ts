@@ -149,6 +149,28 @@ function renderBackground(caseData: ScenarioCase): string {
         </section>`;
 }
 
+function renderOperationalMeta(caseData: ScenarioCase): string {
+    const items: Array<[string, string]> = [
+        ['Owner', '对应业务负责人；自动化仅输出草稿、报告和提醒。'],
+        ['更新时间', '2026-07；Seller Central 页面和权限变化后必须复核。'],
+        ['适用站点', caseData.market.replace(/^适用：/, '')],
+        ['输入', '店铺、市场、时间窗口、数据入口、阈值、语言和人工确认人。'],
+        ['输出', 'SOP实例、结构化报告、回复/调价草稿、失败记录和推送提醒。'],
+        ['禁止自动动作', '公开回复、广告改价、暂停广告、合规确认、绩效申诉和权限变更。'],
+    ];
+
+    return `
+        <section class="zn-card zn-intro">
+            <h2>场景元信息</h2>
+            <p>以下边界适用于本页自动化示例：先只读试跑，再人工确认，最后才允许绑定定时任务。</p>
+            <dl>
+                ${items.map(([label, value]) => `
+                    <dt>${escapeHtml(label)}</dt>
+                    <dd>${escapeHtml(value)}</dd>`).join('')}
+            </dl>
+        </section>`;
+}
+
 function renderStages(caseData: ScenarioCase): string {
     return caseData.stages.map(stage => `
         <section class="zn-chat-stage">
@@ -210,6 +232,7 @@ function renderScenario(caseData: ScenarioCase): string {
     return `
     <div class="ziniao-case-shell" style="--color-accent:${caseData.accent};--color-secondary:${caseData.soft};">
         ${renderHero(caseData)}
+        ${renderOperationalMeta(caseData)}
         ${renderPhases(caseData.phases)}
         ${renderBackground(caseData)}
         ${renderChat(caseData)}
@@ -222,7 +245,7 @@ function renderUsageNotice(): string {
         ['任务拆解 & 计划能力', '弱模型可能把 6 步任务一次性混跑；强模型会主动拆成可验证小步，并在每步结束时等待确认。'],
         ['工具调用稳定性', '差评抓取、SPA 等待、去重指纹、HTML 渲染都依赖工具链编排，模型弱时容易漏调或参数错。'],
         ['分类 / 归因准确度', '产品质量、期望偏差、详情页误导这类细分判定依赖语义理解和规则记忆。'],
-        ['多语种话术质量', '英文、德语、日语回复是否得体，是否避免过度承诺，不同模型差异很明显。'],
+        ['多语种话术质量', '德语、法语、意大利语和英语回复是否得体，是否避免过度承诺，不同模型差异很明显。'],
         ['长上下文 / 多轮记忆', '示例横跨多轮修正规则，模型必须记住“不要默认补寄”“公开回复不放邮箱”等共识。'],
         ['沉淀为 SOP 的概括能力', '把对话压缩成参数化、可复用、可调度的工作流，是独立能力，不是简单摘要。'],
     ];
@@ -307,7 +330,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
         title: '差评 24 小时闪电响应 — 先教会 OpenClaw，再让它定时帮你跑',
         subtitle: '差评响应不能一句话全自动。参考页按 6 步把店铺打开、Feedback 抓取、Brand / Product Reviews 补充、分类、S/A/B 草稿和 HTML 看板逐步跑通，再沉淀 SOP 与定时任务。',
         sourceUrl: 'https://open.ziniao.com/ziniao-cases/scenario-bad-review',
-        market: '适用：Amazon US / UK / DE / JP',
+        market: '适用：Amazon DE / FR / IT / ES / GB',
         metrics: [
             { label: '交互方式', value: '自然语言 · 分步引导', detail: '每一步结束后停下来，等运营确认。' },
             { label: '演示节奏', value: '6 步教 · 1 步沉淀 · 1 步定时', detail: '先跑通，再标准化，最后自动执行。' },
@@ -315,10 +338,10 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
             { label: '交付物', value: 'SOP + 定时任务 + 看板', detail: 'HTML 看板、JSON 数据和回复草稿。' },
         ],
         phases: commonPhases,
-        backgroundText: '你是 AURA-US-01 的运营 Lily，KPI 是 1-3 星差评 24 小时内必须有处理动作。你不想每天人工切后台，也不希望一上来就让 OpenClaw 全自动回复。',
+        backgroundText: '你是 AURA-DE-01 的运营 Lily，KPI 是 1-3 星差评 24 小时内必须有处理动作。你不想每天人工切后台，也不希望一上来就让 OpenClaw 全自动回复。',
         background: [
             { label: '角色', value: '运营 Lily / OpenClaw，已连接 ZClaw 浏览器、飞书、邮件。' },
-            { label: '店铺', value: 'AURA-US-01，Amazon US。' },
+            { label: '店铺', value: 'AURA-DE-01，Amazon DE，主语种德语。' },
             { label: 'SLA', value: '1-3 星差评 24 小时内必须有回复草稿或处理动作。' },
             { label: '目标', value: '把 6 步教学沉淀为“AURA 差评 24h 闪电响应”。' },
         ],
@@ -330,10 +353,10 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
                 title: '阶段一 · 分步引导 + 单步验证',
                 summary: '先拆 6 步，再从店铺打开、Feedback 抓取和评论入口扩展开始逐步确认。',
                 messages: [
-                    { role: 'user', actor: 'L', time: '08:58', text: ['OpenClaw，我想做“差评 24 小时闪电响应”。先别一次跑完，我要一步一步看你能不能做对。目标店铺：AURA-US-01。'] },
+                    { role: 'user', actor: 'L', time: '08:58', text: ['OpenClaw，我想做“差评 24 小时闪电响应”。先别一次跑完，我要一步一步看你能不能做对。目标店铺：AURA-DE-01。'] },
                     { role: 'assistant', actor: 'OC', time: '08:58', text: ['我会拆成 6 步：打开店铺并验证桥接；抓 Feedback Manager 最近 24 小时 1-3 星；补充 Brand Customer Reviews 与 Product Reviews；按原因分类；生成 S/A/B 回复草稿；最后渲染 HTML 看板。每一步完成后我都会停下来等你确认。'] },
                     { role: 'user', actor: 'L', time: '08:59', text: ['从 Step 1 开始。店铺打开后我先确认登录态。'] },
-                    { role: 'assistant', actor: 'OC', time: '08:59', text: ['已打开 Seller Central，ZClaw 桥接握手正常，店铺头像匹配 AURA-US-01，没有二次验证。'], tool: { name: 'ziniao-assistant · open_store', status: '✓ 完成 1.4s', lines: ['shop=AURA-US-01', 'url=sellercentral.amazon.com/home', 'bridge=connected', 'next=等待人工确认'] } },
+                    { role: 'assistant', actor: 'OC', time: '08:59', text: ['已打开 Seller Central DE，ZClaw 桥接握手正常，店铺头像匹配 AURA-DE-01，没有二次验证。'], tool: { name: 'ziniao-assistant · open_store', status: '✓ 完成 1.4s', lines: ['shop=AURA-DE-01', 'url=sellercentral.amazon.de/home', 'bridge=connected', 'next=等待人工确认'] } },
                     { role: 'user', actor: 'L', time: '09:00', text: ['OK，继续抓 Feedback。只看最近 24 小时 1-3 星。'] },
                     { role: 'assistant', actor: 'OC', time: '09:02', text: ['Feedback Manager 已按最近 24 小时和 1-3 星过滤，命中 3 条。我先不分类，先把数量、星级和样本字段给你确认。'], tool: { name: 'sellercentral · feedback_manager', status: '✓ 命中 3 条', lines: ['1 星=1，2 星=1，3 星=1', '字段=reviewer/order/date/rating/body/status', '采集口径=最近 24h'] } },
                     { role: 'user', actor: 'L', time: '09:03', text: ['数量对。继续补 Brand 和 Product Reviews，但记得三个入口口径不同，要去重。'] },
@@ -371,7 +394,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
                 messages: [
                     { role: 'user', actor: 'L', time: '09:15', text: ['每天早晚跑，S 档要立刻提醒。'] },
                     { role: 'assistant', actor: 'OC', time: '09:16', text: ['已配置每天 09:00 和 21:00（Asia/Shanghai）触发，推送 AURA 运营群。S 档大于等于 1 条立即 @ Lily，否则只在晚班汇总。'] },
-                    { role: 'user', actor: 'L', time: '09:17', text: ['UK 和 DE 也要用。'] },
+                    { role: 'user', actor: 'L', time: '09:17', text: ['FR、IT 和 GB 也要用。'] },
                     { role: 'assistant', actor: 'OC', time: '09:18', text: ['无需重教。复制 SOP instance，切换市场域名、时区、语言和推送群即可；母版规则通过 SOP 版本统一升级。'] },
                 ],
             },
@@ -383,7 +406,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
             { title: '定时调度', body: '已验证 SOP 才能挂定时，并且保留人工提醒与异常兜底。' },
         ],
         sop: ['三入口抓取并保留来源字段。', '按 reviewer + date + body 指纹去重。', '分类包含详情页误导子标签。', 'S 档不默认承诺补寄。', 'HTML 看板固定包含环比变化列。'],
-        schedule: ['每天 09:00 / 21:00 运行。', 'S 档大于等于 1 条立即 @ 负责人。', 'UK / DE 复制 SOP instance，不改母版规则。'],
+        schedule: ['每天 09:00 / 21:00 运行。', 'S 档大于等于 1 条立即 @ 负责人。', 'FR / IT / GB 复制 SOP instance，不改母版规则。'],
         footer: '场景示例 · 差评 24 小时闪电响应 · 本页面对话、订单号和看板数字均为演示数据，非真实执行结果。',
     },
     ad_acos_diagnosis: {
@@ -392,7 +415,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
         title: '广告 ACOS 日审 — 从一句“先看一眼”到周一/三/五自动跑',
         subtitle: '广告优化涉及 Campaign / Ad Group / Targeting / 搜索词多层下钻。参考页强调先审后跑，只输出人工可复核的调价手册和否定词清单，不直接自动改后台。',
         sourceUrl: 'https://open.ziniao.com/ziniao-cases/scenario-ad-optimization',
-        market: '适用：Amazon US / UK / DE / JP',
+        market: '适用：Amazon DE / FR / IT / ES / GB',
         metrics: [
             { label: '交互方式', value: '自然语言 · 分步引导', detail: '每层数据先给广告负责人确认。' },
             { label: '演示节奏', value: '6 步教 · 1 步沉淀 · 1 步定时', detail: '低频定时，避免过度调价。' },
@@ -400,10 +423,10 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
             { label: '交付物', value: 'SOP + 定时任务 + 调价手册', detail: '三张数据表、调价 xlsx、否定词清单和 HTML 报告。' },
         ],
         phases: commonPhases,
-        backgroundText: '你是 NOVA-US-02 的广告负责人 Alex，KPI 是广告 ACOS 不能连续两天超过 40%。本轮试跑临时把阈值收紧到 35%，但不允许 OpenClaw 自动调价。',
+        backgroundText: '你是 NOVA-DE-02 的广告负责人 Alex，KPI 是广告 ACOS 不能连续两天超过 40%。本轮试跑临时把阈值收紧到 35%，但不允许 OpenClaw 自动调价。',
         background: [
             { label: '角色', value: '广告运营 Alex / OpenClaw，已连接 ZClaw 浏览器和飞书。' },
-            { label: '店铺', value: 'NOVA-US-02，Amazon US。' },
+            { label: '店铺', value: 'NOVA-DE-02，Amazon DE。' },
             { label: '阈值', value: '默认 ACOS 40%，本次审核临时使用 35%。' },
             { label: '目标', value: '把广告日审沉淀为“NOVA 广告 ACOS 日审”。' },
         ],
@@ -415,9 +438,9 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
                 title: '阶段一 · 先拆广告日审',
                 summary: '从店铺与广告控制台打开开始，只抓有花费并超过阈值的层级。',
                 messages: [
-                    { role: 'user', actor: 'A', time: '09:10', text: ['我要做 NOVA-US-02 的广告 ACOS 日审。阈值先用 35%，不要一口气跑完，也不要自动改竞价。'] },
+                    { role: 'user', actor: 'A', time: '09:10', text: ['我要做 NOVA-DE-02 的广告 ACOS 日审。阈值先用 35%，不要一口气跑完，也不要自动改竞价。'] },
                     { role: 'assistant', actor: 'OC', time: '09:10', text: ['我会拆成 6 步：打开店铺和广告控制台；抓进行中 Campaign；对有花费且超阈值的层级下钻 Ad Group 与 Targeting；按 ACOS 分层；生成手动调价指南；识别无关搜索词并输出报告。所有改价只给手册，不直接执行。'] },
-                    { role: 'assistant', actor: 'OC', time: '09:12', text: ['Seller Central 和 advertising.amazon.com 均可达。Campaign Manager 是虚拟滚动表格，我已先触发完整渲染再读取列。进行中 Campaign 14 个，其中 9 个最近 7 天有花费，昨日整体 ACOS 42.7%。'], tool: { name: 'ads-console · campaign_grid', status: '✓ 已采集', lines: ['active_campaigns=14', 'spent_campaigns=9', 'yesterday_acos=42.7%', 'grid=virtual_scroll_aligned'] } },
+                    { role: 'assistant', actor: 'OC', time: '09:12', text: ['Seller Central 和 advertising.amazon.de 均可达。Campaign Manager 是虚拟滚动表格，我已先触发完整渲染再读取列。进行中 Campaign 14 个，其中 9 个最近 7 天有花费，昨日整体 ACOS 42.7%。'], tool: { name: 'ads-console · campaign_grid', status: '✓ 已采集', lines: ['active_campaigns=14', 'spent_campaigns=9', 'yesterday_acos=42.7%', 'grid=virtual_scroll_aligned'] } },
                     { role: 'user', actor: 'A', time: '09:13', text: ['数量对，只看有花费的 9 个。'] },
                     { role: 'assistant', actor: 'OC', time: '09:16', text: ['继续下钻 23 个 Ad Group，其中 11 个超过 35%。再进入 Targeting，得到 187 行，字段包括匹配类型、建议竞价范围、实际竞价、展示、点击、花费、销售、ACOS 和 ROAS。'] },
                 ],
@@ -427,11 +450,11 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
                 title: '阶段二 · 分层和调价手册',
                 summary: '用户现场调整花费门槛和高 ACOS 处理口径，避免低样本误判和自动暂停。',
                 messages: [
-                    { role: 'assistant', actor: 'OC', time: '09:18', text: ['初始规则：ACOS > 50% 为严重超标，35%-50% 为轻度超标，<30% 为良好，花费低于 5 美元暂不评估。187 行中严重超标 41 行、轻度超标 58 行、良好 73 行。'] },
-                    { role: 'user', actor: 'A', time: '09:19', text: ['5 美元门槛太低，改成 10 美元，避免低样本进入调价方案。'] },
+                    { role: 'assistant', actor: 'OC', time: '09:18', text: ['初始规则：ACOS > 50% 为严重超标，35%-50% 为轻度超标，<30% 为良好，花费低于 5 欧元暂不评估。187 行中严重超标 41 行、轻度超标 58 行、良好 73 行。'] },
+                    { role: 'user', actor: 'A', time: '09:19', text: ['5 欧元门槛太低，改成 10 欧元，避免低样本进入调价方案。'] },
                     { role: 'assistant', actor: 'OC', time: '09:20', text: ['已重算：严重超标 35 行、轻度超标 49 行、良好 66 行、暂不评估 37 行。调价手册会按层级输出建议竞价、预期影响和后台操作路径。'] },
                     { role: 'user', actor: 'A', time: '09:22', text: ['ACOS 大于 150% 的 Ad Group 不要写暂停，改成人工复盘。'] },
-                    { role: 'assistant', actor: 'OC', time: '09:23', text: ['规则已改：高 ACOS Ad Group 标红并进入人工复盘，不写暂停动作。Targeting 层仍输出降价建议，但由广告负责人执行。'], tool: { name: 'ads-audit · bidding_manual', status: '✓ 已生成', lines: ['min_spend=10 USD', 'manual_review=ACOS>150% Ad Group', 'output=Campaign / AdGroup / Targeting sheets'] } },
+                    { role: 'assistant', actor: 'OC', time: '09:23', text: ['规则已改：高 ACOS Ad Group 标红并进入人工复盘，不写暂停动作。Targeting 层仍输出降价建议，但由广告负责人执行。'], tool: { name: 'ads-audit · bidding_manual', status: '✓ 已生成', lines: ['min_spend=10 EUR', 'manual_review=ACOS>150% Ad Group', 'output=Campaign / AdGroup / Targeting sheets'] } },
                 ],
             },
             {
@@ -442,7 +465,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
                     { role: 'assistant', actor: 'OC', time: '09:25', text: ['搜索词分析完成：识别竞品品牌词、无关品类词和 cheap/free/diy 等低意图词，建议精确否定 8 条、词组否定 13 条。'] },
                     { role: 'user', actor: 'A', time: '09:26', text: ['报告里的预计省花费别写得像承诺，要加注脚。'] },
                     { role: 'assistant', actor: 'OC', time: '09:26', text: ['HTML 报告保留预计省花费，但标注为理论上限，实际节省取决于后续流量和转化。'] },
-                    { role: 'user', actor: 'A', time: '09:27', text: ['沉淀 SOP。必须包含 10 美元门槛、人工复盘、理论省花费注脚。'] },
+                    { role: 'user', actor: 'A', time: '09:27', text: ['沉淀 SOP。必须包含 10 欧元门槛、人工复盘、理论省花费注脚。'] },
                     { role: 'assistant', actor: 'OC', time: '09:28', text: ['SOP v1 已保存：Campaign 虚拟滚动采集、三级下钻、Targeting 分层、调价手册、否定词清单、异常兜底和参数化阈值都已写入。'] },
                 ],
             },
@@ -452,8 +475,8 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
                 summary: '广告日审不高频自动跑，按周一/三/五输出报告和提醒。',
                 messages: [
                     { role: 'assistant', actor: 'OC', time: '09:30', text: ['建议周一/三/五 09:00 运行，默认 ACOS 阈值回到 40%，调用时可传更低阈值。严重超标 Targeting 大于等于 20 条才 @ Alex。'] },
-                    { role: 'user', actor: 'A', time: '09:31', text: ['UK 和 JP 也要上，JP 的花费门槛要换日元。'] },
-                    { role: 'assistant', actor: 'OC', time: '09:32', text: ['复用同一 SOP。UK 切 advertising.amazon.co.uk，JP 切 advertising.amazon.co.jp；币种门槛从 $10 换算到约 ¥1500，并通过币种表维护，避免单站补丁漂移。'] },
+                    { role: 'user', actor: 'A', time: '09:31', text: ['FR、IT 和 GB 也要上，GB 的币种门槛要换英镑。'] },
+                    { role: 'assistant', actor: 'OC', time: '09:32', text: ['复用同一 SOP。FR/IT 继续走欧元门槛，GB 切 advertising.amazon.co.uk 并按 GBP 维护门槛，通过币种表维护，避免单站补丁漂移。'] },
                 ],
             },
         ],
@@ -463,8 +486,8 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
             { title: '动态规则修正', body: '花费门槛、人工复盘、理论注脚都在会话中即时更新。' },
             { title: '低频调度', body: '广告变更需要观察期，示例采用周一/三/五而不是每日高频。' },
         ],
-        sop: ['虚拟滚动表格必须完整渲染。', '花费低于 10 美元暂不评估。', '高 ACOS Ad Group 改成人工复盘。', '预计省花费必须标注理论上限。'],
-        schedule: ['每周一/三/五 09:00 运行。', '默认 ACOS 阈值 40%，可参数覆盖。', 'JP 使用日元门槛和 JP 广告域名。'],
+        sop: ['虚拟滚动表格必须完整渲染。', '花费低于 10 欧元暂不评估。', '高 ACOS Ad Group 改成人工复盘。', '预计省花费必须标注理论上限。'],
+        schedule: ['每周一/三/五 09:00 运行。', '默认 ACOS 阈值 40%，可参数覆盖。', 'GB 使用GBP门槛和英国广告域名。'],
         footer: '场景示例 · 广告 ACOS 日审 · 调价建议仅供人工复核，非自动执行结果。',
     },
     review_monitor: {
@@ -473,7 +496,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
         title: '本店评论健康周报 — 把“挨条翻评论”变成一周一次的自动巡检',
         subtitle: '评论监控参考页覆盖 Feedback Manager、Brand Customer Reviews 与 Product Reviews，强调多语种原文保留、分类校验、回复草稿不自动发送，以及周报和每日红线任务拆分。',
         sourceUrl: 'https://open.ziniao.com/ziniao-cases/scenario-review-monitor',
-        market: '适用：Amazon DE / US / UK / JP',
+        market: '适用：Amazon DE / FR / IT / ES / GB',
         metrics: [
             { label: '交互方式', value: '自然语言 · 分步引导', detail: '先验翻译质量，再验分类和预警。' },
             { label: '演示节奏', value: '6 步教 · 1 步沉淀 · 1 步定时', detail: '主周报每周一次，红线轻量每日一次。' },
@@ -553,9 +576,9 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
         accent: '#4f46e5',
         soft: '#14b8a6',
         title: '亚马逊店铺日报 — 12 个后台模块，一份早 08:30 的运营晨会日报',
-        subtitle: '店铺日报参考页把 Seller Central、Ads 与 Performance 中的 12 个模块拆成 6 组验证，保留 JP/EN 字段映射、广告 7 日均值对比、重要提醒固定优先级和失败分级兜底。',
+        subtitle: '店铺日报参考页把 Seller Central、Ads 与 Performance 中的 12 个模块拆成 6 组验证，保留 DE/EN 字段映射、广告 7 日均值对比、重要提醒固定优先级和失败分级兜底。',
         sourceUrl: 'https://open.ziniao.com/ziniao-cases/scenario-amazon-report',
-        market: '适用：Amazon US / UK / DE / JP',
+        market: '适用：Amazon DE / FR / IT / ES / GB',
         metrics: [
             { label: '交互方式', value: '自然语言 · 分步引导', detail: '12 模块按 6 组验证，不一次并发。' },
             { label: '演示节奏', value: '6 步教 · 1 步沉淀 · 1 步定时', detail: '晨会前 30 分钟自动输出日报。' },
@@ -563,22 +586,22 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
             { label: '交付物', value: 'SOP + 日报 HTML + 飞书卡片', detail: '含取数状态、重要提醒和完整日报链接。' },
         ],
         phases: commonPhases,
-        backgroundText: '你是 BREEZE-JP-01 日本站店长 Tom，每天 09:00 要开运营晨会。你希望晨会前拿到覆盖销售、库存、FBA、广告、口碑和合规的一份日报，但不想一开始就让 OpenClaw 并发打开 12 个后台页面。',
+        backgroundText: '你是 BREEZE-DE-01 德国站店长 Tom，每天 09:00 要开运营晨会。你希望晨会前拿到覆盖销售、库存、FBA、广告、口碑和合规的一份日报，但不想一开始就让 OpenClaw 并发打开 12 个后台页面。',
         background: [
             { label: '角色', value: '店长 Tom / OpenClaw，已连接 ZClaw 浏览器和飞书。' },
-            { label: '店铺', value: 'BREEZE-JP-01，Amazon JP，Asia/Tokyo，JPY。' },
+            { label: '店铺', value: 'BREEZE-DE-01，Amazon DE，Europe/Berlin，EUR。' },
             { label: '模块', value: '销售、库存、FBA、货件、业务报告、未发货、广告、评论、反馈、账户健康、绩效通知、重要提醒。' },
-            { label: '目标', value: '沉淀“BREEZE 店铺日报”，每天 08:30 JST 自动运行。' },
+            { label: '目标', value: '沉淀“BREEZE 店铺日报”，每天 08:30 Europe/Berlin 自动运行。' },
         ],
         assistantInitial: 'OC',
-        assistantLine: '已连接 ZClaw 浏览器 · Seller Central · Ads · 飞书',
+        assistantLine: '已连接 ZClaw 浏览器 · Seller Central EU · Ads · 飞书',
         stages: [
             {
                 marker: '①',
                 title: '阶段一 · 12 个模块先分组',
                 summary: '先定义 6 组顺序，广告只取汇总，并加入前 7 日均值对比。',
                 messages: [
-                    { role: 'user', actor: 'T', time: '07:45', text: ['我要做 BREEZE-JP-01 的亚马逊店铺日报，09:00 晨会要用，覆盖 12 个后台模块。不要一上来全开并发，先分组慢慢跑。'] },
+                    { role: 'user', actor: 'T', time: '07:45', text: ['我要做 BREEZE-DE-01 的亚马逊店铺日报，09:00 晨会要用，覆盖 12 个后台模块。不要一上来全开并发，先分组慢慢跑。'] },
                     { role: 'assistant', actor: 'OC', time: '07:45', text: ['我会拆成 6 组：店铺校验、销售与订单、库存与 FBA、广告汇总、口碑与合规、HTML 日报与重要提醒。广告只取汇总，不做下钻。'] },
                     { role: 'user', actor: 'T', time: '07:46', text: ['广告不要只看昨日孤值，要跟前 7 日均值对比，否则晨会看不出异常。'] },
                     { role: 'assistant', actor: 'OC', time: '07:46', text: ['已把广告组改为昨日五大指标对比前 7 日均值，ACOS 偏离超过阈值就加波动提示。'] },
@@ -586,12 +609,12 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
             },
             {
                 marker: '②',
-                title: '阶段二 · JP 环境、销售、库存和货件',
-                summary: '保留日语 UI 和 JP/EN 字段映射，发现货件差异后加入调查窗口倒计时。',
+                title: '阶段二 · DE 环境、销售、库存和货件',
+                summary: '保留德语 UI 和 DE/EN 字段映射，发现货件差异后加入调查窗口倒计时。',
                 messages: [
-                    { role: 'assistant', actor: 'OC', time: '07:48', text: ['已打开 sellercentral.amazon.co.jp，语言为日本语，日期按 Asia/Tokyo，币种 JPY。是否切英文？'] },
-                    { role: 'user', actor: 'T', time: '07:48', text: ['不要切英文。英文字段有时会变体，用日语 UI + JP/EN 字段映射表抓。'] },
-                    { role: 'assistant', actor: 'OC', time: '07:52', text: ['销售与订单组完成：昨日销售、周/月累计、PV、会话、转化率和未发货订单都按 JST 日历日口径输出。库存与 FBA 组完成：在售 SKU、可售/不可售/在途、IPI、超龄库存、潜在仓储费、补货建议和货件进度。发现 FBA17X9PLM2 声明 200 件、接收 187 件，差异 13 件。'], tool: { name: 'sellercentral.jp · inventory_fba_shipments', status: '✓ 已采集', lines: ['timezone=Asia/Tokyo', 'currency=JPY', 'shipment=FBA17X9PLM2', 'declared=200 / received=187 / diff=13'] } },
+                    { role: 'assistant', actor: 'OC', time: '07:48', text: ['已打开 sellercentral.amazon.de，语言为 Deutsch，日期按 Europe/Berlin，币种 EUR。是否切英文？'] },
+                    { role: 'user', actor: 'T', time: '07:48', text: ['不要切英文。英文字段有时会变体，用德语 UI + DE/EN 字段映射表抓。'] },
+                    { role: 'assistant', actor: 'OC', time: '07:52', text: ['销售与订单组完成：昨日销售、周/月累计、PV、会话、转化率和未发货订单都按 CET/CEST 日历日口径输出。库存与 FBA 组完成：在售 SKU、可售/不可售/在途、IPI、超龄库存、潜在仓储费、补货建议和货件进度。发现 FBA17X9PLM2 声明 200 件、接收 187 件，差异 13 件。'], tool: { name: 'sellercentral.de · inventory_fba_shipments', status: '✓ 已采集', lines: ['timezone=Europe/Berlin', 'currency=EUR', 'shipment=FBA17X9PLM2', 'declared=200 / received=187 / diff=13'] } },
                     { role: 'user', actor: 'T', time: '07:53', text: ['货件差异必须放在日报顶部，而且要显示剩余调查申请窗口。'] },
                     { role: 'assistant', actor: 'OC', time: '07:53', text: ['已规则化：货件差异会计算 24h 调查窗口剩余时间，并作为重要提醒优先展示。'] },
                 ],
@@ -613,23 +636,23 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
             {
                 marker: '④',
                 title: '阶段四 · 08:30 定时与多站复用',
-                summary: '日报按模块失败数量分级处理，US/UK 切换字段映射、时区和币种。',
+                summary: '日报按模块失败数量分级处理，FR/IT/GB 切换字段映射、时区和币种。',
                 messages: [
-                    { role: 'user', actor: 'T', time: '08:00', text: ['沉淀为“BREEZE 店铺日报”，写入 JP/EN 字段映射、广告 7 日均值、货件窗口倒计时、绩效通知 3 天后升红和提醒优先级。'] },
-                    { role: 'assistant', actor: 'OC', time: '08:02', text: ['SOP v1 已保存：6 组串行、组内并发不超过 2、字段映射、异常兜底、HTML 日报路径和重要提醒规则都已参数化。每天 08:30 JST 触发；1-2 个模块失败仍推日报并标失败，3 个及以上失败先延迟重跑，仍失败则推占位卡片并 @ Tom。'] },
-                    { role: 'user', actor: 'T', time: '08:03', text: ['美国和英国店也要用，JP 是日语映射表。'] },
-                    { role: 'assistant', actor: 'OC', time: '08:03', text: ['SOP 可复用，US/UK 切 EN 字段映射、当地时区和对应币种。亚马逊 UI 高频变化，后续需要升 SOP 版本并多站一起回归。'] },
+                    { role: 'user', actor: 'T', time: '08:00', text: ['沉淀为“BREEZE 店铺日报”，写入 DE/EN 字段映射、广告 7 日均值、货件窗口倒计时、绩效通知 3 天后升红和提醒优先级。'] },
+                    { role: 'assistant', actor: 'OC', time: '08:02', text: ['SOP v1 已保存：6 组串行、组内并发不超过 2、字段映射、异常兜底、HTML 日报路径和重要提醒规则都已参数化。每天 08:30 Europe/Berlin 触发；1-2 个模块失败仍推日报并标失败，3 个及以上失败先延迟重跑，仍失败则推占位卡片并 @ Tom。'] },
+                    { role: 'user', actor: 'T', time: '08:03', text: ['法国、意大利和英国店也要用，DE 是德语映射表。'] },
+                    { role: 'assistant', actor: 'OC', time: '08:03', text: ['SOP 可复用，FR/IT/GB 分别维护当地语言字段映射、时区和币种。亚马逊 UI 高频变化，后续需要升 SOP 版本并多站一起回归。'] },
                 ],
             },
         ],
         capabilities: [
             { title: '多模块分组', body: '12 个后台模块按运营优先级分 6 组串行，降低风控和错列风险。' },
-            { title: '字段映射', body: 'JP 使用日语 UI 和 JP/EN 映射表，跨站再切换映射。' },
+            { title: '字段映射', body: 'DE 使用德语 UI 和 DE/EN 映射表，跨站再切换当地语言映射。' },
             { title: '重要提醒', body: '货件窗口、账户健康、广告波动等优先级固化，不靠模型主观排序。' },
             { title: '失败兜底', body: '按失败模块数量决定继续推送、重跑或占位提醒。' },
         ],
-        sop: ['12 模块拆成 6 组，组内并发不超过 2。', 'JP/EN 字段映射表独立维护。', '广告汇总对比前 7 日均值。', '重要提醒优先级写死。', '绩效通知 3 天未处理升红。'],
-        schedule: ['每天 08:30 JST 触发。', '1-2 个模块失败仍推日报并标出失败。', '3 个及以上失败先重跑，仍失败推占位卡片并 @ 店长。', 'US/UK 切 EN 映射、当地时区和币种。'],
+        sop: ['12 模块拆成 6 组，组内并发不超过 2。', 'DE/EN 字段映射表独立维护。', '广告汇总对比前 7 日均值。', '重要提醒优先级写死。', '绩效通知 3 天未处理升红。'],
+        schedule: ['每天 08:30 Europe/Berlin 触发。', '1-2 个模块失败仍推日报并标出失败。', '3 个及以上失败先重跑，仍失败推占位卡片并 @ 店长。', 'FR/IT/GB 切当地语言映射、时区和币种。'],
         footer: '场景示例 · 亚马逊店铺日报 · 所有模块数据与提醒均为演示口径，非真实后台执行结果。',
     },
 };

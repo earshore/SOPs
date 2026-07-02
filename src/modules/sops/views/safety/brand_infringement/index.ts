@@ -58,7 +58,7 @@ export function buildBrandInfringementTemplate(owner = DEFAULT_REVIEW_OWNER): st
         '- 审核阶段：新品上架 / Listing 改稿 / 竞品参考 / 投诉后复核',
         '',
         '## 关键证据',
-        '- USPTO/EUIPO/WIPO 查询结果：',
+        '- EUIPO/UKIPO/WIPO 查询结果（必要时补充全球品牌历史商标核查）：',
         '- 命中商标或近似词：',
         '- 图片/素材来源和授权文件：',
         '- 高危词库命中项：',
