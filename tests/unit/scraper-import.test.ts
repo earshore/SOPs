@@ -31,7 +31,6 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
   }
 }));
 
-describe('Scraper数据导入功能', () => {
   let scraperPanel: any;
   let mockState: any;
 
@@ -417,4 +416,3 @@ describe('Scraper数据导入功能', () => {
       expect(result.data.products[0].metadata.level1.level2.level3.value).toBe('deep');
     });
   });
-});
