@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { NetworkError, SystemError } from '@/common/errors/AppError';
 
-describe('SafeModuleLoader', () => {
   let loader: SafeModuleLoader;
   let container: HTMLElement;
 
@@ -188,4 +187,3 @@ describe('SafeModuleLoader', () => {
       expect(stats.cachedModules).toBe(0);
     });
   });
-});

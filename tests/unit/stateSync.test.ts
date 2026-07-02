@@ -13,7 +13,6 @@ import {
 } from '@/common/utils/stateSync';
 import { appStore } from '@/stores/useAppStore';
 
-describe('stateSync', () => {
   beforeEach(() => {
     // 重置状态
     appStore.getState().resetAnalysis();
@@ -203,4 +202,3 @@ describe('stateSync', () => {
       }).not.toThrow();
     });
   });
-});

@@ -6,7 +6,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { DIContainer } from '@/common/di/Container';
 
-describe('DIContainer', () => {
   let container: DIContainer;
 
   beforeEach(() => {
@@ -226,4 +225,3 @@ describe('DIContainer', () => {
       expect(validation.valid).toBe(true);
     });
   });
-});

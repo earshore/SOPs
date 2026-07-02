@@ -15,7 +15,6 @@ import {
   getSiteDomain
 } from '@/modules/app_center/views/master_analysis/scraper/utils/formatters';
 
-describe('Scraper 格式化工具', () => {
   describe('getFlag - 获取站点代码徽章文本', () => {
     it('应该返回正确的站点代码', () => {
       expect(getFlag('DE')).toBe('DE');
@@ -248,4 +247,3 @@ describe('Scraper 格式化工具', () => {
       expect(getSiteDomain(unknownSite)).toBe('amazon.com');
     });
   });
-});

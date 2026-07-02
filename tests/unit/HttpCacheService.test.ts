@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { httpCacheService } from '@/services/HttpCacheService';
 import type { CacheConfig } from '@/services/HttpCacheService';
 
-describe('HttpCacheService', () => {
   // 每个测试前清空缓存和统计
   beforeEach(() => {
     httpCacheService.clear();
@@ -268,4 +267,3 @@ describe('HttpCacheService', () => {
       Storage.prototype.setItem = originalSetItem;
     });
   });
-});

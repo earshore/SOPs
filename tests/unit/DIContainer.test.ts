@@ -6,7 +6,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DIContainer } from '@/common/di/Container';
 
-describe('DIContainer', () => {
   let container: DIContainer;
 
   beforeEach(() => {
@@ -164,4 +163,3 @@ describe('DIContainer', () => {
       expect(container.getRegisteredServices().length).toBe(0);
     });
   });
-});

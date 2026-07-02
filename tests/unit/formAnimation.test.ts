@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { ANIMATION_CLASSES } from '@/config/animation-config';
 
 type AnimationManagerMock = {
@@ -40,7 +40,6 @@ function appendInput(name = 'email', value = ''): HTMLInputElement {
   return input;
 }
 
-describe('form animation', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
@@ -205,4 +204,3 @@ describe('form animation', () => {
     expect(input.classList.contains('error')).toBe(false);
     expect(input.classList.contains('success')).toBe(false);
   });
-});

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import {
   ActionType,
   AnalyticsService,
@@ -33,7 +33,6 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-describe('AnalyticsService', () => {
   it('initializes sessions, tracks page views, and records previous duration', () => {
     vi.useFakeTimers();
     const service = createAnalyticsService(logger());
@@ -222,4 +221,3 @@ describe('AnalyticsService', () => {
     expect(service.getAllEvents()).toHaveLength(1);
     expect(AnalyticsService.getInstance()).toBeInstanceOf(AnalyticsService);
   });
-});

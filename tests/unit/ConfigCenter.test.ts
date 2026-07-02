@@ -6,7 +6,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ConfigCenter } from '@/common/config/ConfigCenter';
 
-describe('ConfigCenter', () => {
   let configCenter: ConfigCenter;
 
   beforeEach(() => {
@@ -204,4 +203,3 @@ describe('ConfigCenter', () => {
       expect(() => unwatch()).not.toThrow();
     });
   });
-});

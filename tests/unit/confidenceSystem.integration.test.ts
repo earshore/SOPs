@@ -3,11 +3,10 @@
  * 验证从分析到 UI 展示的完整流程
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { it, expect, beforeEach } from 'vitest';
 import { appStore } from '../../src/stores/useAppStore';
 import { calculateFullReportConfidence, calculateOverallConfidence } from '../../src/modules/app_center/views/master_analysis/ai_analysis/services/confidenceCalculator';
 
-describe('AI 分析置信度系统集成测试', () => {
   beforeEach(() => {
     // 重置 store 状态
     appStore.getState().setAnalysisReport(null);
@@ -247,4 +246,3 @@ describe('AI 分析置信度系统集成测试', () => {
     // 低置信度
     expect(0.3 < 0.5).toBe(true);
   });
-});

@@ -8,7 +8,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { appStore } from '../../src/stores/useAppStore';
 import { storeCompat } from '../../src/stores/storeCompat';
 
-describe('Zustand迁移集成测试', () => {
   beforeEach(() => {
     // 重置store到初始状态
     appStore.getState().updateUI({
@@ -247,4 +246,3 @@ describe('Zustand迁移集成测试', () => {
       }).not.toThrow();
     });
   });
-});

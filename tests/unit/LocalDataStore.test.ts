@@ -1,7 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { LocalDataStore } from '@/services/localDataStore';
 
-describe('LocalDataStore', () => {
   beforeEach(async () => {
     vi.restoreAllMocks();
     localStorage.clear();
@@ -318,4 +317,3 @@ describe('LocalDataStore', () => {
     expect(await LocalDataStore.get('user:scrape_history')).toEqual([{ id: 'legacy' }]);
     expect(localStorage.getItem('scrape_history')).toBe(JSON.stringify([{ id: 'legacy' }]));
   });
-});

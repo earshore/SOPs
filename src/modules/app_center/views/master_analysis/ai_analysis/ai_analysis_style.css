@@ -7,34 +7,12 @@
 /* 注意：fadeInUp、fadeIn、scaleIn 等通用动画辅助类已统一定义在全局 CSS（src/css/animations/keyframes.css） */
 /* 只保留模块特有的动画，避免覆盖全局动画 */
 
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
-  }
-
-  50% {
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
 .animate-pulse-glow {
   animation: pulse-glow var(--duration-2s) var(--ease-in-out) infinite;
 }
 
 .animate-float {
-  animation: float 3s var(--ease-in-out) infinite;
+  animation: aiAnalysisFloat 3s var(--ease-in-out) infinite;
 }
 
 /* ========== Shimmer 效果 ========== */

@@ -642,19 +642,7 @@
 .kt-floating-window.show {
   display: flex;
   flex-direction: column;
-  animation: slideInUp var(--duration-normal) var(--ease-spring);
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  animation: keywordSlideInUp var(--duration-normal) var(--ease-spring);
 }
 
 .floating-header {
@@ -738,22 +726,6 @@
 .kt-minimized-btn.show {
   display: flex;
   animation: none;
-}
-
-@keyframes bounceIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3) translateY(10px);
-  }
-
-  60% {
-    opacity: 1;
-    transform: scale(1.05) translateY(-2px);
-  }
-
-  100% {
-    transform: scale(1) translateY(0);
-  }
 }
 
 .kt-minimized-btn:hover {
@@ -960,23 +932,6 @@
   position: relative;
 }
 
-@keyframes highlightPulse {
-  0% {
-    box-shadow: 0 0 0 0 var(--color-amber-400);
-    transform: none;
-  }
-
-  50% {
-    box-shadow: 0 0 0 6px var(--color-amber-100);
-    transform: none;
-  }
-
-  100% {
-    box-shadow: 0 0 0 3px var(--color-amber-200);
-    transform: none;
-  }
-}
-
 /* ==================== 翻译模式 ==================== */
 
 .paragraph-original {
@@ -1031,23 +986,6 @@
 .keyword-root-highlight .fa-times-circle {
   color: var(--color-amber-500) !important;
   font-size: 1.05rem !important;
-}
-
-@keyframes keyword-root-pulse {
-  0% {
-    box-shadow: 0 0 0 0 var(--color-amber-500);
-    transform: none;
-  }
-
-  50% {
-    box-shadow: 0 0 0 6px var(--color-amber-200);
-    transform: none;
-  }
-
-  100% {
-    box-shadow: 0 0 0 3px var(--color-amber-300);
-    transform: none;
-  }
 }
 
 /* ------------------------------------------------------------------

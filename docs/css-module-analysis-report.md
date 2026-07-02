@@ -1,12 +1,12 @@
 # CSS 模块分析报告
 
-> 生成时间: 2026/7/3 01:36:09
+> 生成时间: 2026/7/3 01:47:26
 
 ## 📊 统计信息
 
 - 分析文件数: 10
-- 总代码行数: 7808
-- 识别模式数: 11
+- 总代码行数: 7526
+- 识别模式数: 10
 
 ## 🔍 发现的重复模式
 
@@ -66,16 +66,6 @@
     animation: fadeUp 1s...
     ```
 
-- **animations-pattern-1**: 出现 22 次
-  - 文件: src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
-  - 示例:
-    ```css
-    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }...
-    ```
-    ```css
-    @keyframes float { 0%, 100% { transform: translateY(0); }...
-    ```
-
 ### Icons 相关
 
 - **icons-pattern-2**: 出现 3 次
@@ -114,7 +104,7 @@
 
 1. 发现 3 个重复的卡片样式模式，建议提取到 src/css/components/cards.css
 2. 发现 1 个重复的图标容器样式，建议使用统一的 .icon-container 类
-3. 发现 2 个重复的动画定义，建议移动到 src/css/animations/keyframes.css
+3. 发现 1 个重复的动画定义，建议移动到 src/css/animations/keyframes.css
 4. 发现 2 个重复的徽章样式，建议提取到 src/css/components/badges.css
 
 ## 📝 下一步行动

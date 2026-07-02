@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ModuleLoader, type IModule } from '@/common/utils/ModuleLoader';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 
@@ -42,7 +42,6 @@ function waitForRouteEvent(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-describe('ModuleLoader', () => {
   beforeEach(() => {
     setupContainers();
     vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -234,4 +233,3 @@ describe('ModuleLoader', () => {
     expect(content.classList.contains('view-fade-in')).toBe(false);
     expect(content.firstElementChild?.classList.contains('view-fade-in')).toBe(true);
   });
-});

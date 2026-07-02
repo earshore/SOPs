@@ -16,7 +16,6 @@ vi.mock('@/common/utils/viewLoader', () => ({
   ensureViewLoaded: vi.fn().mockResolvedValue(true)
 }));
 
-describe('路由+状态管理集成测试', () => {
   beforeEach(() => {
     // 重置状态
     appStore.getState().updateUI({
@@ -312,4 +311,3 @@ describe('路由+状态管理集成测试', () => {
       expect(appStore.getState().ui.currentTab).toBe('home');
     });
   });
-});

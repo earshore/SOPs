@@ -10,7 +10,6 @@ import { routeGuard } from '@/common/router/RouteGuard';
 import { routeMiddleware } from '@/common/router/RouteMiddleware';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 
-describe('路由导航集成测试', () => {
   beforeEach(() => {
     // 清理状态
     router.clearHistory();
@@ -226,4 +225,3 @@ describe('路由导航集成测试', () => {
       expect(currentRoute?.state).toEqual(customState);
     });
   });
-});

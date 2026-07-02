@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RouteMiddlewareManager } from '@/common/router/RouteMiddleware';
 import type { Route, RouteMiddlewareFunction } from '@/types/config';
 
-describe('RouteMiddlewareManager', () => {
   let manager: RouteMiddlewareManager;
   let mockToRoute: Route;
   let mockFromRoute: Route;
@@ -306,4 +305,3 @@ describe('RouteMiddlewareManager', () => {
       expect(mockToRoute.state.modified).toBe(true);
     });
   });
-});

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import { mount, unmount } from '@/modules/app_center/views/keyword_hunter/input';
 import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
@@ -284,7 +284,6 @@ beforeEach(() => {
   });
 });
 
-describe('Keyword Hunter input module', () => {
   it('mounts the template, restores inputs, updates counters, and registers actions', async () => {
     inputMocks.state.keywordTracker.keywordsInputText = 'alpha\nbeta\nalpha';
     inputMocks.state.keywordTracker.copyInputText = 'short copy';
@@ -492,4 +491,3 @@ describe('Keyword Hunter input module', () => {
       'kt_startAnalysis',
     ]);
   });
-});

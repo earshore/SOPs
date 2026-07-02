@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { ANIMATION_CLASSES } from '@/config/animation-config';
 import {
   addAnimation,
@@ -39,7 +39,6 @@ class MockIntersectionObserver {
   takeRecords = vi.fn(() => []);
 }
 
-describe('animation-utils', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     document.documentElement.removeAttribute('data-animations');
@@ -245,4 +244,3 @@ describe('animation-utils', () => {
     expect((list.firstElementChild as HTMLElement).classList.contains(ANIMATION_CLASSES.listStaggerItem)).toBe(true);
     expect(instance.unobserve).toHaveBeenCalledWith(list);
   });
-});
