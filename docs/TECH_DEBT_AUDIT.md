@@ -48,11 +48,12 @@
 | 已完成 | 竞争分析 DNA Adapter 复杂度收敛       | 拆分竞品关键词、metadata、source fields 和 DNA 构造流程，`extractDNA` 不再出现在最新复杂度报告；最新复杂度报告问题函数从 245 降到 239。                                                               |
 | 已完成 | NPI Tracker 行渲染复杂度收敛          | 拆分 `renderTableRow` 的行上下文、基础档案、合规、财务、流量和决策单元格渲染，`renderTableRow` 不再出现在最新复杂度报告；问题函数从 236 降到 234。                                                    |
 | 已完成 | SafeModuleLoader 加载入口复杂度收敛   | 拆分 `loadModule` 的选项归一化、加载指示器、并发等待、缓存命中、加载缓存、成功结果和错误收尾，`loadModule` 不再出现在最新复杂度报告；问题函数从 232 降到 231。                                          |
+| 已完成 | Scraper 导入处理复杂度收敛            | 拆分 marketplace 选择弹窗的渲染/事件/清理流程，以及 `mergeProducts` 的主版本选择、Review 来源收集、去重和临时字段清理，`importHandler.ts` 不再出现在最新复杂度报告。                                   |
 | 已完成 | 格式化基线收敛                        | `format:check` 显式使用项目 Prettier 配置和 ignore 文件，`src/**/*.{js,ts,jsx,tsx,json,css,md}` 当前全部符合 Prettier。                                                                               |
 | 已完成 | 技术债扫描基线清零                    | 抽取重复测试 fixture、导航开关状态、并行分析进度更新、历史 Prompt 指纹匹配和 LLM 响应错误构造；`tech-debt:scan` 当前 0 issue。                                                                        |
 | 已完成 | ESLint warning baseline 清零          | `config/eslint-warning-baseline.json` 从 342 收敛到 0，`lint:warning-gate` 当前为 0/0 warning。                                                                                                       |
 | 已完成 | 质量脚本可运行性                      | 修复 CSS 审计根目录、CSS 模块分析失效路径、注释代码清理器 `glob` 导入、质量检查 ESLint 输出缓冲和失败处理。                                                                                           |
-| 已完成 | 审计报告产物                          | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-07-02.json`、`tests/quality/tech-debt-2026-07-02.html` 和最新复杂度报告 `complexity-report-2026-07-02T16-22-57.*`。          |
+| 已完成 | 审计报告产物                          | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-07-02.json`、`tests/quality/tech-debt-2026-07-02.html` 和最新复杂度报告 `complexity-report-2026-07-02T16-39-29.*`。          |
 
 ## 验证快照
 
@@ -79,14 +80,14 @@
 | CSS 变量审计             | `npm run css:audit`                                                                                                                                                                                                                                                                                                                                                                                                   | 75 个 CSS 文件，4499 次变量使用，4235 次符合规范，264 次不符合规范，0 deprecated                                                     |
 | CSS 模块分析             | `npm run css:analyze`                                                                                                                                                                                                                                                                                                                                                                                                 | 10 个模块 CSS 文件，7872 行；卡片 3 类/21 次、按钮 2 类/5 次、动画 2 类/45 次、图标 2 类/4 次、徽章 2 类/13 次；4 条优化建议         |
 | 质量基线                 | `npm run quality:check`                                                                                                                                                                                                                                                                                                                                                                                               | ESLint 检查 412 个文件，0 error、0 warning；TypeScript 0 error；统计 412 个文件，平均复杂度 19.4，最大复杂度 261，175 个文件超过阈值 |
-| 复杂度分析               | `npm run code:analyze:complexity`                                                                                                                                                                                                                                                                                                                                                                                     | 690 个文件，12,936 个函数，176 个过长函数、84 个高复杂度函数，231 个问题函数                                                         |
-| 技术债扫描               | `npm run tech-debt:scan`                                                                                                                                                                                                                                                                                                                                                                                              | 397 个文件，98,730 行，0 issue，债务比率 0.00%                                                                                       |
+| 复杂度分析               | `npm run code:analyze:complexity`                                                                                                                                                                                                                                                                                                                                                                                     | 690 个文件，12,950 个函数，171 个过长函数、76 个高复杂度函数，223 个问题函数                                                         |
+| 技术债扫描               | `npm run tech-debt:scan`                                                                                                                                                                                                                                                                                                                                                                                              | 397 个文件，98,847 行，0 issue，债务比率 0.00%                                                                                       |
 
 ## 剩余技术债务
 
 | ID    | 优先级 | 债务                          | 当前证据                                                                                                                                                 | 验收条件                                                                                                  |
 | ----- | ------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| TD-04 | P2     | `src/` 复杂度热点             | `quality:check` 显示平均复杂度 19.4，最大复杂度 261，175 个文件超过阈值；`code:analyze:complexity` 显示 231 个问题函数，其中 176 个过长、84 个高复杂度；当前 `src/` 热点集中在 Scraper import、More prompts、Keyword Hunter 等局部函数。 | 按 top 文件拆分长函数和深嵌套，补回局部测试，复杂度指标下降且 ESLint warning gate 保持 0。                |
+| TD-04 | P2     | `src/` 复杂度热点             | `quality:check` 显示平均复杂度 19.4，最大复杂度 261，175 个文件超过阈值；`code:analyze:complexity` 显示 223 个问题函数，其中 171 个过长、76 个高复杂度；当前 `src/` 热点集中在 More prompts、Keyword Hunter、Marketing Calendar、Restricted Words 等局部函数。 | 按 top 文件拆分长函数和深嵌套，补回局部测试，复杂度指标下降且 ESLint warning gate 保持 0。                |
 | TD-05 | P2     | CSS 变量体系不统一            | `css:audit` 显示 264 次不符合变量命名规范，合规率 94.1%。                                                                                                | 先建立变量别名/迁移表，再按 foundation、components、modules 分批替换；每批运行 `css:audit` 并记录下降量。 |
 | TD-06 | P2     | 模块 CSS 重复                 | `css:analyze` 发现卡片 3 类、按钮 2 类、动画 2 类、图标 2 类、徽章 2 类重复模式，共 88 次出现。                                                          | 抽取到已有 `src/css/components/*` 和 `src/css/animations/*`，模块样式只保留差异化规则，视觉回归测试通过。 |
 | TD-08 | P3     | 全量浏览器类验证未纳入本轮    | 已补跑 Playground Deep Chat 专项 e2e；仍未执行全量 `test:e2e`、`test:visual`、`test:performance`、`lighthouse`。                                         | 依赖升级、CSS 抽取或路由加载改动后补跑对应浏览器类验证，并归档失败截图/报告。                             |
@@ -96,7 +97,7 @@
 ## 修复执行顺序
 
 1. **先处理 TD-09 Playground 权限边界**：如果已有真实身份/权限服务或 feature flag 源，接入路由守卫执行路径并补齐拒绝访问/放行测试；如果仍没有执行源，不做假的权限实现，只保留当前产品级放行声明和测试锁定。
-2. **继续 TD-04 `src/` 复杂度热点**：按最新复杂度报告逐个处理 `showMarketplaceSelectionModal`/`mergeProducts`、`registerWindowActions`、`highlightText`/`renderCopyDisplay` 等局部函数。每批只拆一个业务边界，验收为目标函数退出复杂度报告、相关专项测试通过、`type-check` 和 `lint:warning-gate` 通过。
+2. **继续 TD-04 `src/` 复杂度热点**：按最新复杂度报告逐个处理 `registerWindowActions`、`highlightText`/`renderCopyDisplay`、`bindSearchEvents`、`executeSearch` 等局部函数。每批只拆一个业务边界，验收为目标函数退出复杂度报告、相关专项测试通过、`type-check` 和 `lint:warning-gate` 通过。
 3. **推进 TD-05/TD-06 CSS 治理**：先冻结变量命名和别名表，再按 foundation、components、modules 分批替换；重复样式先抽卡片、动画、徽章、图标容器。每批验收为 `css:audit` 或 `css:analyze` 指标下降，并补跑受影响页面的视觉/浏览器验证。
 4. **清理 TD-10 测试/工具噪声**：在运行时代码热点下降后，再拆 e2e/performance/startup 长测试和报告生成器，避免为“报告好看”优先改动低业务风险文件。
 5. **补齐 TD-08 浏览器验证**：对权限、CSS、路由加载、分包相关改动执行 `test:e2e`、`test:visual`、`test:performance`、`lighthouse` 中对应项目，并归档失败截图或报告。
@@ -151,7 +152,6 @@
 
 ### 第 4 批：复杂度热点
 
-- [ ] `src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts`：拆分 marketplace selection modal、产品合并和去重策略。
 - [ ] `src/modules/more/views/explore/prompts/index.ts`：拆分 `registerWindowActions` 的批量动作、导入导出、删除和编辑入口。
 - [ ] `src/modules/app_center/views/keyword_hunter/process/index.ts`：继续拆分 `highlightText`、`renderCopyDisplay` 的文本切片和 DOM 片段构造。
 - [ ] `src/modules/amz_hub/views/practice/marketing_calendar/index.ts`：拆分 `bindSearchEvents` 的输入监听、筛选执行和空态刷新。
@@ -168,6 +168,7 @@
 - [x] `src/modules/app_center/views/master_analysis/services/adapters/CompetitorReportAdapter.ts`：拆分竞品 DNA 提取和构造流程，`extractDNA` 不再出现在复杂度报告。
 - [x] `src/modules/sops/views/growth/npi_tracker/index.ts`：继续拆分 `renderTableRow` 单行模板、状态徽章、竞品字段和操作按钮，`renderTableRow` 不再出现在复杂度报告。
 - [x] `src/common/infrastructure/SafeModuleLoader.ts`：继续拆分 `loadModule` 的缓存命中、动态导入、模块解析和错误收尾，`loadModule` 不再出现在复杂度报告。
+- [x] `src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts`：拆分 marketplace selection modal、产品合并和去重策略，`importHandler.ts` 不再出现在复杂度报告。
 - [x] `src/main.ts`：减少启动流程中的 console 和长流程分支，文件级 ESLint warning 清零。
 - [x] `src/common/ui/navigation.ts`：拆分视图加载、主面板切换和卸载事件分发，文件级复杂度 warning 清零。
 - [x] `src/common/infrastructure/SafeModuleLoader.ts`：拆分错误分类和模块渲染分派，文件级 ESLint warning 清零。
