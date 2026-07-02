@@ -6,7 +6,6 @@ import type {
   KeywordHunterSnapshot,
   KeywordHunterSnapshotDiff,
   KeywordHunterSnapshotResult,
-  KeywordHunterSnapshotSource,
   KeywordHunterSnapshotStatus,
 } from '../../../../../types/modules-business';
 import type { KeywordTrackerState } from '../../../../../types/state';
@@ -17,10 +16,10 @@ const MAX_SNAPSHOT_ITEMS =
   configCenter.get<number>('storage.keywordHunterSnapshotMaxItems') ||
   configCenter.get<number>('keywordHunter.historyMaxItems') ||
   50;
+const MANUAL_SOURCE = { type: 'manual' as const };
 
 interface SaveSnapshotOptions {
   title?: string;
-  source?: KeywordHunterSnapshotSource;
   status?: KeywordHunterSnapshotStatus;
   updateCurrent?: boolean;
 }
@@ -91,12 +90,7 @@ function getSnapshotStatus(
 
 function getDefaultTitle(
   tracker: KeywordTrackerState,
-  source: KeywordHunterSnapshotSource,
 ): string {
-  if (source.productTitle?.trim()) {
-    return source.productTitle.trim().slice(0, 80);
-  }
-
   const firstKeyword =
     tracker.keywords[0] ||
     tracker.keywordsInputText?.split(/\n|,|;/).find(Boolean);
@@ -126,7 +120,6 @@ function createResult(tracker: KeywordTrackerState): KeywordHunterSnapshotResult
 
 function createSnapshotFingerprint(
   tracker: KeywordTrackerState,
-  source: KeywordHunterSnapshotSource,
 ): string {
   return hashText(JSON.stringify({
     keywords: tracker.keywords,
@@ -135,7 +128,6 @@ function createSnapshotFingerprint(
     unmatched: tracker.unmatchedKeywords,
     report: tracker.llmAnalysisResult || '',
     settings: tracker.settings,
-    source,
   }));
 }
 
@@ -151,14 +143,13 @@ function getCurrentSnapshot(
 
 function getSnapshotTitle(
   tracker: KeywordTrackerState,
-  source: KeywordHunterSnapshotSource,
   currentSnapshot: KeywordHunterSnapshot | undefined,
   options: SaveSnapshotOptions,
 ): string {
   const title = options.title?.trim();
   if (title) return title;
   if (currentSnapshot?.title) return currentSnapshot.title;
-  return getDefaultTitle(tracker, source);
+  return getDefaultTitle(tracker);
 }
 
 function getSnapshotCopyText(tracker: KeywordTrackerState): string {
@@ -171,7 +162,6 @@ function createSnapshotFromTracker(
   options: SaveSnapshotOptions = {},
 ): KeywordHunterSnapshot {
   const now = new Date().toISOString();
-  const source = options.source || tracker.snapshotSource || { type: 'manual' };
   const currentSnapshot = getCurrentSnapshot(tracker, existing, options);
   const id = currentSnapshot?.id || createSnapshotId(existing);
   const result = createResult(tracker);
@@ -180,11 +170,11 @@ function createSnapshotFromTracker(
   return {
     id,
     schemaVersion: 1,
-    title: getSnapshotTitle(tracker, source, currentSnapshot, options),
+    title: getSnapshotTitle(tracker, currentSnapshot, options),
     status: getSnapshotStatus(tracker, options.status),
     createdAt: currentSnapshot?.createdAt || now,
     updatedAt: now,
-    source,
+    source: { ...MANUAL_SOURCE },
     input: {
       keywordsInputText: tracker.keywordsInputText || tracker.keywords.join('\n'),
       copyInputText: copyText,
@@ -196,7 +186,7 @@ function createSnapshotFromTracker(
       matchedCount: result.matchedKeywords.length,
       unmatchedCount: result.unmatchedKeywords.length,
       copyHash: hashText(copyText),
-      snapshotFingerprint: createSnapshotFingerprint(tracker, source),
+      snapshotFingerprint: createSnapshotFingerprint(tracker),
     },
   };
 }
@@ -208,6 +198,17 @@ function upsertSnapshot(
   const next = snapshots.filter((item) => item.id !== snapshot.id);
   next.unshift(snapshot);
   return trimSnapshots(next);
+}
+
+function normalizeSnapshot(snapshot: KeywordHunterSnapshot): KeywordHunterSnapshot {
+  return {
+    ...snapshot,
+    source: { ...MANUAL_SOURCE },
+  };
+}
+
+function normalizeSnapshots(snapshots: KeywordHunterSnapshot[]): KeywordHunterSnapshot[] {
+  return snapshots.map(normalizeSnapshot);
 }
 
 function restoreSnapshotToState(snapshot: KeywordHunterSnapshot): void {
@@ -227,7 +228,7 @@ function restoreSnapshotToState(snapshot: KeywordHunterSnapshot): void {
     llmAnalysisResult: snapshot.result.llmAnalysisResult || '',
     settings: { ...snapshot.input.settings },
     currentSnapshotId: snapshot.id,
-    snapshotSource: { ...snapshot.source },
+    snapshotSource: { ...MANUAL_SOURCE },
     keywordLocationIndex: {},
     isWindowMinimized: false,
   });
@@ -241,7 +242,9 @@ export const KeywordHunterSnapshotService = {
   getAll(): KeywordHunterSnapshot[] {
     try {
       return sortSnapshots(
-        StorageService.get<KeywordHunterSnapshot[]>(SNAPSHOT_STORAGE_KEY, []) || [],
+        normalizeSnapshots(
+          StorageService.get<KeywordHunterSnapshot[]>(SNAPSHOT_STORAGE_KEY, []) || [],
+        ),
       );
     } catch (error) {
       console.error('[KeywordHunterSnapshotService] 读取历史快照失败:', error);
@@ -258,11 +261,13 @@ export const KeywordHunterSnapshotService = {
       );
 
       if (migrated) {
-        return sortSnapshots(migrated);
+        return sortSnapshots(normalizeSnapshots(migrated));
       }
 
       return sortSnapshots(
-        (await LocalDataStore.get<KeywordHunterSnapshot[]>(INDEXED_SNAPSHOT_STORAGE_KEY, [])) || [],
+        normalizeSnapshots(
+          (await LocalDataStore.get<KeywordHunterSnapshot[]>(INDEXED_SNAPSHOT_STORAGE_KEY, [])) || [],
+        ),
       );
     } catch (error) {
       console.error('[KeywordHunterSnapshotService] 读取 IndexedDB 历史快照失败:', error);
@@ -272,19 +277,6 @@ export const KeywordHunterSnapshotService = {
 
   getById(id: string): KeywordHunterSnapshot | undefined {
     return this.getAll().find((snapshot) => snapshot.id === id);
-  },
-
-  getByMasterHistoryId(masterHistoryId: string | number): KeywordHunterSnapshot[] {
-    return this.getAll().filter(
-      (snapshot) => String(snapshot.source.masterHistoryId) === String(masterHistoryId),
-    );
-  },
-
-  async getByMasterHistoryIdAsync(masterHistoryId: string | number): Promise<KeywordHunterSnapshot[]> {
-    const snapshots = await this.getAllAsync();
-    return snapshots.filter(
-      (snapshot) => String(snapshot.source.masterHistoryId) === String(masterHistoryId),
-    );
   },
 
   saveCurrent(options: SaveSnapshotOptions = {}): KeywordHunterSnapshot {
@@ -301,7 +293,7 @@ export const KeywordHunterSnapshotService = {
 
     appStore.getState().updateKeywordTracker({
       currentSnapshotId: snapshot.id,
-      snapshotSource: { ...snapshot.source },
+      snapshotSource: { ...MANUAL_SOURCE },
     });
 
     return snapshot;
@@ -323,7 +315,7 @@ export const KeywordHunterSnapshotService = {
     StorageService.set(SNAPSHOT_STORAGE_KEY, next);
     appStore.getState().updateKeywordTracker({
       currentSnapshotId: snapshot.id,
-      snapshotSource: { ...snapshot.source },
+      snapshotSource: { ...MANUAL_SOURCE },
     });
 
     return snapshot;
@@ -332,7 +324,7 @@ export const KeywordHunterSnapshotService = {
   restore(snapshotOrId: KeywordHunterSnapshot | string): KeywordHunterSnapshot | null {
     const snapshot = typeof snapshotOrId === 'string'
       ? this.getById(snapshotOrId)
-      : snapshotOrId;
+      : normalizeSnapshot(snapshotOrId);
 
     if (!snapshot) {
       return null;

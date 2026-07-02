@@ -159,20 +159,27 @@ function saveAnalysisStateToState(): void {
   }
 }
 
-async function saveAnalysisSnapshot(showSuccessToast = true): Promise<void> {
+async function saveAnalysisSnapshot(showSuccessToast = true): Promise<boolean> {
   saveAnalysisStateToState();
   try {
     await KeywordHunterSnapshotService.saveCurrentAsync({ status: 'reported' });
     if (showSuccessToast) {
       showToast("快照已保存", { type: "success" });
     }
+    return true;
   } catch (error) {
     console.error("[Analysis] 保存快照失败:", error);
+    const message = error instanceof Error ? error.message : "保存快照失败";
     if (showSuccessToast) {
-      showToast(error instanceof Error ? error.message : "保存快照失败", {
+      showToast(message, {
         type: "error",
       });
+    } else {
+      showToast(`报告已生成，但历史快照自动保存失败：${message}`, {
+        type: "warning",
+      });
     }
+    return false;
   }
 }
 

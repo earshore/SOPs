@@ -205,10 +205,20 @@ export default defineConfig({
         emptyOutDir: true,
         sourcemap: false, // 生产环境关闭sourcemap减小体积
         // 代码分割优化
-        rollupOptions: {
+        rolldownOptions: {
             // 确保.ts文件被正确处理为.js
             external: [],
             output: {
+                minify: {
+                    compress: {
+                        dropConsole: true,
+                        dropDebugger: true
+                    },
+                    mangle: true,
+                    codegen: {
+                        legalComments: 'none'
+                    }
+                },
                 manualChunks(id) {
                     const normalizedId = id.replace(/\\/g, '/');
                     if (!normalizedId.includes('/node_modules/')) {
@@ -253,52 +263,7 @@ export default defineConfig({
             }
         },
         // 生产环境压缩
-        minify: 'terser',
-        terserOptions: {
-            compress: {
-                drop_console: true,
-                drop_debugger: true,
-                pure_funcs: ['console.log', 'console.info', 'console.debug'],
-                passes: 3,
-                arrows: true,
-                booleans: true,
-                collapse_vars: true,
-                comparisons: true,
-                computed_props: true,
-                hoist_funs: true,
-                hoist_props: true,
-                if_return: true,
-                join_vars: true,
-                keep_fargs: false,
-                keep_fnames: false,
-                loops: true,
-                negate_iife: true,
-                properties: true,
-                reduce_funcs: true,
-                reduce_vars: true,
-                sequences: true,
-                side_effects: true,
-                switches: true,
-                typeofs: true,
-                unused: true,
-                conditionals: true,
-                dead_code: true,
-                evaluate: true,
-                inline: 3,
-                unsafe: false,
-                unsafe_comps: false,
-                unsafe_math: false,
-                unsafe_proto: false
-            },
-            mangle: {
-                safari10: true,
-                keep_fnames: false
-            },
-            format: {
-                comments: false,
-                ascii_only: true
-            }
-        },
+        minify: 'oxc',
         // Chunk大小警告阈值
         chunkSizeWarningLimit: 300,
         // CSS代码分割

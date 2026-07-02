@@ -16,6 +16,7 @@ import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { appStore } from '../../../../../stores/useAppStore';
 import { registerActionsWithLegacy, unregisterActions } from '../../../../../common/utils/actionRegistry';
 import type { KeywordHunterSnapshot } from '../../../../../types/modules-business';
+import type { KeywordTrackerState } from '../../../../../types/state';
 
 import '../keyword_hunter_style.css';
 
@@ -35,6 +36,20 @@ let debouncedInputHandler: ((...args: unknown[]) => void) | null = null; // Debo
 let registeredActions: string[] = []; // 用于清理已注册的动作
 let lastKeywordInputSnapshot: string | null = null; // 用于撤回关键词清理操作
 let inputSnapshots: KeywordHunterSnapshot[] = [];
+let inputSnapshotsLoading = false;
+let inputSnapshotLoadSeq = 0;
+let snapshotSaveInProgress = false;
+
+interface InputValues {
+    keywordsInputText: string;
+    copyInputText: string;
+}
+
+interface SnapshotStatusView {
+    label: string;
+    detail: string;
+    className: string;
+}
 
 // ========================================== 
 // Helper Functions
@@ -75,6 +90,9 @@ function cleanup(): void {
     debouncedInputHandler = null;
     lastKeywordInputSnapshot = null;
     inputSnapshots = [];
+    inputSnapshotsLoading = false;
+    inputSnapshotLoadSeq += 1;
+    snapshotSaveInProgress = false;
 
     // 清理已注册的动作
     if (registeredActions.length > 0) {
@@ -94,6 +112,100 @@ function debounce<T extends (...args: unknown[]) => void>(func: T, wait: number)
     };
 }
 
+function getCurrentInputValues(): InputValues {
+    const kwInput = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
+    const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
+
+    return {
+        keywordsInputText: kwInput?.value || '',
+        copyInputText: copyInput?.value || '',
+    };
+}
+
+function hasInputValues(values: InputValues = getCurrentInputValues()): boolean {
+    return !!values.keywordsInputText.trim() || !!values.copyInputText.trim();
+}
+
+function parseUniqueKeywords(text: string): string[] {
+    const seen = new Set<string>();
+    return KeywordService.parseKeywords(text).filter((keyword) => {
+        const normalized = keyword.trim().toLowerCase();
+        if (!normalized || seen.has(normalized)) return false;
+        seen.add(normalized);
+        return true;
+    });
+}
+
+function getCurrentSnapshot(): KeywordHunterSnapshot | undefined {
+    const currentSnapshotId = appStore.getState().keywordTracker.currentSnapshotId;
+    if (!currentSnapshotId) return undefined;
+    return inputSnapshots.find((snapshot) => snapshot.id === currentSnapshotId);
+}
+
+function isInputDifferentFromSnapshot(snapshot: KeywordHunterSnapshot, values: InputValues = getCurrentInputValues()): boolean {
+    return (
+        snapshot.input.keywordsInputText !== values.keywordsInputText ||
+        snapshot.input.copyInputText !== values.copyInputText
+    );
+}
+
+function getSnapshotStatusView(): SnapshotStatusView {
+    if (snapshotSaveInProgress) {
+        return { label: '保存中', detail: '正在写入快照', className: 'saving' };
+    }
+
+    if (inputSnapshotsLoading) {
+        return { label: '加载中', detail: '读取本机历史', className: 'loading' };
+    }
+
+    const values = getCurrentInputValues();
+    const currentSnapshot = getCurrentSnapshot();
+
+    if (currentSnapshot) {
+        const isDirty = isInputDifferentFromSnapshot(currentSnapshot, values);
+        return {
+            label: isDirty ? '有修改' : '已载入',
+            detail: currentSnapshot.title,
+            className: isDirty ? 'dirty' : 'current',
+        };
+    }
+
+    if (hasInputValues(values)) {
+        return { label: '自动保存', detail: '本机草稿', className: 'draft' };
+    }
+
+    return { label: '空白', detail: '本机草稿为空', className: 'idle' };
+}
+
+function updateSnapshotPanelState(): void {
+    const status = document.getElementById('kt-input-draft-status');
+    const statusLabel = document.getElementById('kt-input-draft-label');
+    const statusDetail = document.getElementById('kt-input-draft-detail');
+    const saveButton = document.getElementById('kt-input-snapshot-save') as HTMLButtonElement | null;
+    const statusView = getSnapshotStatusView();
+    const accessibleText = `${statusView.label}，${statusView.detail}`;
+
+    if (status) {
+        if (statusLabel && statusDetail) {
+            statusLabel.textContent = statusView.label;
+            statusDetail.textContent = statusView.detail;
+        } else {
+            status.textContent = `${statusView.label} ${statusView.detail}`;
+        }
+        status.className = `kh-input-draft-status ${statusView.className}`;
+        status.setAttribute('aria-label', accessibleText);
+        status.title = statusView.detail;
+    }
+
+    if (saveButton) {
+        const disabled = inputSnapshotsLoading || snapshotSaveInProgress;
+        const label = getCurrentSnapshot() ? '更新快照' : '保存当前快照';
+        saveButton.disabled = disabled;
+        saveButton.title = disabled ? accessibleText : label;
+        saveButton.setAttribute('aria-label', disabled ? accessibleText : label);
+    }
+}
+
 // ========================================== 
 // State Management
 // ========================================== 
@@ -102,13 +214,37 @@ function debounce<T extends (...args: unknown[]) => void>(func: T, wait: number)
  * 保存输入到 state
  */
 function saveInputsToState(): void {
-    const kwInput = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
-    const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
+    const values = getCurrentInputValues();
+    const tracker = appStore.getState().keywordTracker;
+    const inputChanged =
+        values.keywordsInputText !== (tracker.keywordsInputText || '') ||
+        values.copyInputText !== (tracker.copyInputText || '');
+    const updates: Partial<KeywordTrackerState> = {
+        keywordsInputText: values.keywordsInputText,
+        copyInputText: values.copyInputText,
+    };
 
-    appStore.getState().updateKeywordTracker({
-        keywordsInputText: kwInput?.value || '',
-        copyInputText: copyInput?.value || ''
-    });
+    if (inputChanged) {
+        const parsedKeywords = parseUniqueKeywords(values.keywordsInputText);
+        Object.assign(updates, {
+            keywords: parsedKeywords,
+            processedCopy: values.copyInputText,
+            formattedCopy: '',
+            matchedKeywords: [],
+            unmatchedKeywords: parsedKeywords,
+            wordFrequency: [],
+            paragraphs: [],
+            translationMode: false,
+            showTranslation: false,
+            llmAnalysisResult: '',
+            keywordLocationIndex: {},
+            currentSnapshotId: null,
+            snapshotSource: { type: 'manual' },
+        });
+    }
+
+    appStore.getState().updateKeywordTracker(updates);
+    updateSnapshotPanelState();
 }
 
 /**
@@ -130,6 +266,7 @@ function restoreInputsFromState(): void {
     updateInputStats();
     highlightDuplicatesInInput();
     updateCopyCharCount();
+    updateSnapshotPanelState();
 }
 
 // ========================================== 
@@ -249,12 +386,7 @@ function getSnapshotStatusLabel(status: KeywordHunterSnapshot['status']): string
     return labels[status];
 }
 
-function getSnapshotSourceLabel(snapshot: KeywordHunterSnapshot): string {
-    if (snapshot.source.type === 'master-analysis') {
-        const asins = snapshot.source.asins?.slice(0, 1).join(', ');
-        return asins ? `Master · ${asins}` : 'Master Analysis';
-    }
-
+function getSnapshotSourceLabel(): string {
     return '手动输入';
 }
 
@@ -284,6 +416,16 @@ function createSnapshotActionButton(
 
 function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
     const item = createElement('article', 'kh-input-snapshot-item');
+    const currentSnapshotId = appStore.getState().keywordTracker.currentSnapshotId;
+    const isCurrent = snapshot.id === currentSnapshotId;
+
+    if (isCurrent) {
+        item.classList.add('current');
+    }
+
+    item.tabIndex = 0;
+    item.setAttribute('role', 'button');
+    item.setAttribute('aria-label', `${isCurrent ? '当前快照，' : ''}恢复快照 ${snapshot.title}`);
 
     const header = createElement('div', 'kh-input-snapshot-item-head');
     const title = createElement('h4');
@@ -297,7 +439,7 @@ function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
 
     const meta = createElement('div', 'kh-input-snapshot-meta');
     const source = createElement('span');
-    source.textContent = getSnapshotSourceLabel(snapshot);
+    source.textContent = getSnapshotSourceLabel();
     const time = createElement('span');
     time.textContent = formatSnapshotDate(snapshot.updatedAt);
     meta.appendChild(source);
@@ -315,7 +457,9 @@ function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
         'kh-input-snapshot-action restore',
         'fas fa-arrow-rotate-left',
         '恢复到输入页',
-        () => restoreInputSnapshot(snapshot),
+        () => {
+            void restoreInputSnapshot(snapshot);
+        },
     ));
     actions.appendChild(createSnapshotActionButton(
         'kh-input-snapshot-action delete',
@@ -327,7 +471,15 @@ function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
     ));
     item.appendChild(actions);
 
-    addEventListener(item, 'click', () => restoreInputSnapshot(snapshot));
+    addEventListener(item, 'click', () => {
+        void restoreInputSnapshot(snapshot);
+    });
+    addEventListener(item, 'keydown', (event) => {
+        if (!(event instanceof KeyboardEvent)) return;
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        void restoreInputSnapshot(snapshot);
+    });
     return item;
 }
 
@@ -345,36 +497,81 @@ function createSnapshotStat(label: string, value: string): HTMLElement {
 function renderInputSnapshots(): void {
     const list = document.getElementById('kt-input-snapshot-list');
     const empty = document.getElementById('kt-input-snapshot-empty');
+    const loading = document.getElementById('kt-input-snapshot-loading');
     const count = document.getElementById('kt-input-snapshot-count');
     if (!list || !empty || !count) return;
 
     const visible = getVisibleInputSnapshots();
-    count.textContent = `${inputSnapshots.length} 个快照`;
+    count.textContent = inputSnapshotsLoading ? '正在加载快照...' : `${inputSnapshots.length} 个快照`;
     list.replaceChildren();
-    empty.classList.toggle('hidden', visible.length > 0);
+    loading?.classList.toggle('hidden', !inputSnapshotsLoading);
+    empty.classList.toggle('hidden', inputSnapshotsLoading || visible.length > 0);
     visible.forEach((snapshot) => {
         list.appendChild(renderInputSnapshotItem(snapshot));
     });
+    updateSnapshotPanelState();
 }
 
 async function loadInputSnapshots(): Promise<void> {
+    const loadSeq = ++inputSnapshotLoadSeq;
+    inputSnapshotsLoading = true;
+    renderInputSnapshots();
+
     try {
-        inputSnapshots = await KeywordHunterSnapshotService.getAllAsync();
+        const snapshots = await KeywordHunterSnapshotService.getAllAsync();
+        if (loadSeq !== inputSnapshotLoadSeq) return;
+        inputSnapshots = snapshots;
         renderInputSnapshots();
     } catch (error) {
+        if (loadSeq !== inputSnapshotLoadSeq) return;
         console.error('[Input] 加载历史快照失败:', error);
         showToast(error instanceof Error ? error.message : '加载历史快照失败', { type: 'error' });
+    } finally {
+        if (loadSeq === inputSnapshotLoadSeq) {
+            inputSnapshotsLoading = false;
+            renderInputSnapshots();
+        }
     }
 }
 
-function restoreInputSnapshot(snapshot: KeywordHunterSnapshot): void {
-    KeywordHunterSnapshotService.restore(snapshot);
+async function confirmBeforeRestore(snapshot: KeywordHunterSnapshot): Promise<boolean> {
+    saveInputsToState();
+
+    const values = getCurrentInputValues();
+    if (!hasInputValues(values) || !isInputDifferentFromSnapshot(snapshot, values)) {
+        return true;
+    }
+
+    const currentSnapshot = getCurrentSnapshot();
+    if (currentSnapshot && !isInputDifferentFromSnapshot(currentSnapshot, values)) {
+        return true;
+    }
+
+    return window.confirm(
+        '当前输入与目标快照不同。恢复后，页面中的关键词和 Listing 文案会被该快照覆盖。确定恢复快照吗？',
+    );
+}
+
+async function restoreInputSnapshot(snapshot: KeywordHunterSnapshot): Promise<void> {
+    const confirmed = await confirmBeforeRestore(snapshot);
+    if (!confirmed) return;
+
+    const restored = KeywordHunterSnapshotService.restore(snapshot);
+    if (!restored) {
+        showToast('快照不存在，无法恢复', { type: 'error' });
+        return;
+    }
+
     restoreInputsFromState();
+    renderInputSnapshots();
     showToast('快照已载入输入页', { type: 'success' });
 }
 
 async function deleteInputSnapshot(id: string): Promise<void> {
-    if (!window.confirm('确定删除这个 Keyword Hunter 快照吗？此操作无法撤回。')) {
+    const confirmed = window.confirm(
+        '确定删除这个 Keyword Hunter 快照吗？删除后无法从本地历史恢复该快照。',
+    );
+    if (!confirmed) {
         return;
     }
 
@@ -485,13 +682,26 @@ function clearCopyInput(): void {
 
 async function saveCurrentSnapshot(status: 'draft' | 'matched' = 'draft'): Promise<void> {
     saveInputsToState();
+
+    if (!hasInputValues()) {
+        showToast("当前输入为空，无法保存快照", { type: 'warning' });
+        return;
+    }
+
+    const wasUpdatingSnapshot = !!getCurrentSnapshot();
+    snapshotSaveInProgress = true;
+    updateSnapshotPanelState();
+
     try {
         await KeywordHunterSnapshotService.saveCurrentAsync({ status });
         await loadInputSnapshots();
-        showToast("快照已保存", { type: 'success' });
+        showToast(wasUpdatingSnapshot ? "快照已更新" : "快照已保存", { type: 'success' });
     } catch (error) {
         console.error('[Input] 保存快照失败:', error);
         showToast(error instanceof Error ? error.message : "保存快照失败", { type: 'error' });
+    } finally {
+        snapshotSaveInProgress = false;
+        updateSnapshotPanelState();
     }
 }
 
@@ -565,7 +775,7 @@ async function startAnalysis(): Promise<void> {
 
     // 更新全局状态
     appStore.getState().updateKeywordTracker({
-        keywords: KeywordService.parseKeywords(kwText),
+        keywords: parseUniqueKeywords(kwText),
         processedCopy: copyText,
         translationMode: false,
         paragraphs: []
@@ -627,6 +837,7 @@ function bindKeywordInputEvents(kwInput: HTMLTextAreaElement | null): void {
     addEventListener(kwInput, 'input', () => {
         lastKeywordInputSnapshot = null;
         updateUndoKeywordButtonState();
+        updateSnapshotPanelState();
     });
     addEventListener(kwInput, 'scroll', () => {
         const highlight = document.getElementById('kt-keyword-highlight-layer');
@@ -640,6 +851,7 @@ function bindCopyInputEvents(copyInput: HTMLTextAreaElement | null): void {
     addEventListener(copyInput, 'input', () => {
         updateCopyCharCount();
         saveInputsToState();
+        updateSnapshotPanelState();
     });
 }
 

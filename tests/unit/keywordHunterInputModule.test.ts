@@ -23,6 +23,11 @@ const inputMocks = vi.hoisted(() => {
       <button id="kt-btn-start-analysis"></button>
       <button id="kt-input-snapshot-save"></button>
       <span id="kt-input-snapshot-count"></span>
+      <span id="kt-input-draft-status">
+        <span id="kt-input-draft-label"></span>
+        <span id="kt-input-draft-detail"></span>
+      </span>
+      <div id="kt-input-snapshot-loading" class="hidden"></div>
       <div id="kt-input-snapshot-empty" class="hidden"></div>
       <div id="kt-input-snapshot-list"></div>
     </section>
@@ -45,6 +50,10 @@ const inputMocks = vi.hoisted(() => {
         matchCase: false,
         matchPartial: false,
       },
+      currentSnapshotId: null as string | null,
+      snapshotSource: {
+        type: 'manual' as const,
+      },
     },
     updateKeywordTracker: vi.fn((patch: Record<string, unknown>) => {
       Object.assign(state.keywordTracker, patch);
@@ -55,22 +64,16 @@ const inputMocks = vi.hoisted(() => {
   const resetSnapshots = () => {
     snapshots.splice(0, snapshots.length,
       {
-        id: 'kh-master',
+        id: 'kh-coffee',
         schemaVersion: 1,
-        title: 'Master Coffee Snapshot',
+        title: 'Coffee Snapshot',
         status: 'matched',
         createdAt: '2026-06-12T08:00:00.000Z',
         updatedAt: '2026-06-12T09:00:00.000Z',
-        source: {
-          type: 'master-analysis',
-          masterHistoryId: 'hist-1',
-          site: 'FR',
-          asins: ['B08N5WRWNW'],
-          productTitle: 'Coffee Grinder',
-        },
+        source: { type: 'manual' },
         input: {
           keywordsInputText: 'coffee grinder\nespresso',
-          copyInputText: 'Master coffee grinder copy',
+          copyInputText: 'Manual coffee grinder copy',
           settings: {
             matchPlural: true,
             matchStem: true,
@@ -80,7 +83,7 @@ const inputMocks = vi.hoisted(() => {
         },
         result: {
           keywords: ['coffee grinder', 'espresso'],
-          processedCopy: 'Master coffee grinder copy',
+          processedCopy: 'Manual coffee grinder copy',
           matchedKeywords: [{ keyword: 'coffee grinder', count: 2 }],
           unmatchedKeywords: ['espresso'],
           wordFrequency: [['coffee', 2]],
@@ -145,8 +148,13 @@ const inputMocks = vi.hoisted(() => {
     deleteByIdAsync: vi.fn(async (id: string) => {
       const index = snapshots.findIndex((snapshot) => snapshot.id === id);
       if (index >= 0) snapshots.splice(index, 1);
+      const tracker = state.keywordTracker as Record<string, any>;
+      if (tracker.currentSnapshotId === id) {
+        tracker.currentSnapshotId = null;
+      }
       return index >= 0;
     }),
+    confirm: vi.fn(() => true),
     getAllAsync: vi.fn(async () => snapshots),
     loadTemplate: vi.fn(async () => template),
     navigateTo: vi.fn(async () => undefined),
@@ -159,6 +167,7 @@ const inputMocks = vi.hoisted(() => {
       Object.assign(state.keywordTracker, {
         keywordsInputText: snapshot.input.keywordsInputText,
         copyInputText: snapshot.input.copyInputText,
+        currentSnapshotId: snapshot.id,
       });
       return snapshot;
     }),
@@ -234,6 +243,10 @@ function resetTrackerState(): void {
       matchCase: false,
       matchPartial: false,
     },
+    currentSnapshotId: null,
+    snapshotSource: {
+      type: 'manual',
+    },
   };
 }
 
@@ -253,6 +266,7 @@ beforeEach(() => {
   unmount();
   document.body.innerHTML = '';
   vi.clearAllMocks();
+  inputMocks.confirm.mockReturnValue(true);
   inputMocks.actions = {};
   resetTrackerState();
   inputMocks.resetSnapshots();
@@ -262,7 +276,7 @@ beforeEach(() => {
   });
   Object.defineProperty(window, 'confirm', {
     configurable: true,
-    value: vi.fn(() => true),
+    value: inputMocks.confirm,
   });
   Object.defineProperty(navigator, 'clipboard', {
     configurable: true,
@@ -291,6 +305,7 @@ describe('Keyword Hunter input module', () => {
     expect(container.querySelector('#kt-duplicate-badge')?.classList.contains('hidden')).toBe(false);
     expect(container.querySelector('#kt-duplicate-count')?.textContent).toBe('1');
     expect(container.querySelector('#copy-char-count')?.textContent).toBe('10');
+    expect(container.querySelector('#kt-input-draft-status')?.textContent).toContain('本机草稿');
     expect(container.querySelector<HTMLButtonElement>('#kt-btn-undo-kw-clean')?.disabled).toBe(true);
     expect(registerActionsWithLegacy).toHaveBeenCalledWith(expect.objectContaining({
       kt_cleanKeywords: expect.any(Function),
@@ -303,28 +318,35 @@ describe('Keyword Hunter input module', () => {
 
     expect(KeywordHunterSnapshotService.getAllAsync).toHaveBeenCalled();
     expect(container.querySelector('#kt-input-snapshot-count')?.textContent).toBe('2 个快照');
-    expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Master Coffee Snapshot');
+    expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Coffee Snapshot');
     expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Manual Draft Snapshot');
     expect(container.querySelector('[data-kh-snapshot-filter]')).toBeNull();
     expect(container.querySelector('#kt-input-snapshot-open-history')).toBeNull();
 
     click(container.querySelector('button[title="恢复到输入页"]'));
-    expect(KeywordHunterSnapshotService.restore).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'kh-master' }),
-    );
+    await vi.waitFor(() => {
+      expect(KeywordHunterSnapshotService.restore).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'kh-coffee' }),
+      );
+    });
     expect(container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')?.value).toBe(
       'coffee grinder\nespresso',
     );
     expect(container.querySelector<HTMLTextAreaElement>('#kt-copy-input')?.value).toBe(
-      'Master coffee grinder copy',
+      'Manual coffee grinder copy',
     );
+    expect(container.querySelector('#kt-input-draft-label')?.textContent).toBe('已载入');
+    expect(container.querySelector('#kt-input-draft-detail')?.textContent).toBe('Coffee Snapshot');
 
     click(container.querySelector('button[title="删除快照"]'));
     await vi.waitFor(() => {
-      expect(KeywordHunterSnapshotService.deleteByIdAsync).toHaveBeenCalledWith('kh-master');
+      expect(inputMocks.confirm).toHaveBeenCalledWith(expect.stringContaining('删除后无法从本地历史恢复'));
     });
     await vi.waitFor(() => {
-      expect(container.querySelector('#kt-input-snapshot-list')?.textContent).not.toContain('Master Coffee Snapshot');
+      expect(KeywordHunterSnapshotService.deleteByIdAsync).toHaveBeenCalledWith('kh-coffee');
+    });
+    await vi.waitFor(() => {
+      expect(container.querySelector('#kt-input-snapshot-list')?.textContent).not.toContain('Coffee Snapshot');
     });
     expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain('Manual Draft Snapshot');
     expect(inputMocks.navigateTo).not.toHaveBeenCalled();
@@ -333,6 +355,53 @@ describe('Keyword Hunter input module', () => {
     await vi.waitFor(() => {
       expect(KeywordHunterSnapshotService.saveCurrentAsync).toHaveBeenCalledWith({ status: 'draft' });
     });
+  });
+
+  it('asks before restoring a snapshot over the local draft', async () => {
+    inputMocks.confirm.mockReturnValueOnce(false);
+    const container = await mountInput();
+    container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')!.value = 'unsaved keyword';
+    container.querySelector<HTMLTextAreaElement>('#kt-copy-input')!.value = 'unsaved copy';
+
+    click(container.querySelector('button[title="恢复到输入页"]'));
+
+    await vi.waitFor(() => {
+      expect(inputMocks.confirm).toHaveBeenCalledWith(expect.stringContaining('确定恢复快照吗'));
+    });
+    expect(KeywordHunterSnapshotService.restore).not.toHaveBeenCalled();
+    expect(container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')?.value).toBe('unsaved keyword');
+    expect(container.querySelector<HTMLTextAreaElement>('#kt-copy-input')?.value).toBe('unsaved copy');
+  });
+
+  it('clears stale analysis results before saving edited input as a draft snapshot', async () => {
+    Object.assign(inputMocks.state.keywordTracker, {
+      keywords: ['old keyword'],
+      processedCopy: 'old copy',
+      matchedKeywords: [{ keyword: 'old keyword', count: 1 }],
+      unmatchedKeywords: [],
+      wordFrequency: [['old', 1]],
+      llmAnalysisResult: '# Old report',
+      currentSnapshotId: 'kh-stale',
+      snapshotSource: { type: 'manual' },
+    });
+
+    const container = await mountInput();
+    container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')!.value = 'fresh keyword';
+    container.querySelector<HTMLTextAreaElement>('#kt-copy-input')!.value = 'fresh copy';
+
+    click(container.querySelector('#kt-input-snapshot-save'));
+
+    await vi.waitFor(() => {
+      expect(KeywordHunterSnapshotService.saveCurrentAsync).toHaveBeenCalledWith({ status: 'draft' });
+    });
+    expect(inputMocks.state.keywordTracker.keywords).toEqual(['fresh keyword']);
+    expect(inputMocks.state.keywordTracker.processedCopy).toBe('fresh copy');
+    expect(inputMocks.state.keywordTracker.matchedKeywords).toEqual([]);
+    expect(inputMocks.state.keywordTracker.unmatchedKeywords).toEqual(['fresh keyword']);
+    expect(inputMocks.state.keywordTracker.wordFrequency).toEqual([]);
+    expect(inputMocks.state.keywordTracker.llmAnalysisResult).toBe('');
+    expect(inputMocks.state.keywordTracker.currentSnapshotId).toBeNull();
+    expect(inputMocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
   });
 
   it('cleans duplicate keywords and restores the previous value with undo', async () => {
@@ -387,7 +456,7 @@ describe('Keyword Hunter input module', () => {
     expect(inputMocks.navigateTo).not.toHaveBeenCalled();
 
     container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')!.value =
-      'wireless earbuds\nwaterproof';
+      'wireless earbuds\nwaterproof\nWireless Earbuds';
     container.querySelector<HTMLTextAreaElement>('#kt-copy-input')!.value =
       'These wireless earbuds are comfortable wireless earbuds for travel.';
 

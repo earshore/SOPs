@@ -11,6 +11,7 @@ const processMocks = vi.hoisted(() => {
   const template = `
     <section>
       <button id="kt-sync-to-input-btn"></button>
+      <button id="kt-go-analysis-btn"></button>
       <button id="kt-translate-btn"><span id="kt-translate-btn-text"></span></button>
       <div id="kt-translate-progress" class="hidden"></div>
       <input id="kt-show-translation" type="checkbox" />
@@ -231,8 +232,28 @@ describe('Keyword Hunter process module', () => {
     expect(document.querySelectorAll('#kt-all-keywords .keyword-status-item')).toHaveLength(2);
     expect(document.querySelector('#kt-tab-matched-count')?.textContent).toBe('1');
     expect(document.querySelector('#kt-tab-unmatched-count')?.textContent).toBe('1');
-    expect(document.querySelector('#kt-minimized-badge')?.textContent).toBe('1');
+    expect(document.querySelector('#kt-minimized-badge')?.textContent).toBe('2');
     expect(document.querySelector<HTMLButtonElement>('#kt-translate-btn')?.disabled).toBe(false);
+  });
+
+  it('keeps the floating keyword monitor visible when all keywords are unmatched', async () => {
+    vi.useFakeTimers();
+    Object.assign(processMocks.state.keywordTracker, {
+      keywords: ['waterproof shell'],
+      matchedKeywords: [],
+      unmatchedKeywords: ['waterproof shell'],
+      wordFrequency: [['wireless', 1]],
+    });
+
+    await mountProcess();
+    vi.advanceTimersByTime(100);
+
+    expect(document.querySelector('#kt-keywords-floating')?.classList.contains('show')).toBe(true);
+    expect(document.querySelector('#kt-keywords-minimized')?.classList.contains('show')).toBe(false);
+    expect(document.querySelector('#kt-tab-matched-count')?.textContent).toBe('0');
+    expect(document.querySelector('#kt-tab-unmatched-count')?.textContent).toBe('1');
+    expect(document.querySelector('#kt-minimized-badge')?.textContent).toBe('1');
+    expect(document.querySelectorAll('#kt-all-keywords .keyword-status-item--unmatched')).toHaveLength(1);
   });
 
   it('locates matched keywords and unmatched roots from rendered controls', async () => {
@@ -327,6 +348,19 @@ describe('Keyword Hunter process module', () => {
     click(document.querySelector('#kt-keywords-minimized'));
     expect(document.querySelector('#kt-keywords-floating')?.classList.contains('show')).toBe(true);
     expect(processMocks.state.keywordTracker.isWindowMinimized).toBe(false);
+  });
+
+  it('navigates from process to analysis with the current copy', async () => {
+    await mountProcess();
+
+    click(document.querySelector('#kt-go-analysis-btn'));
+
+    await vi.waitFor(() => {
+      expect(processMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/analysis');
+    });
+    expect(processMocks.state.setProcessedCopy).toHaveBeenCalledWith(
+      expect.stringContaining('Wireless earbuds'),
+    );
   });
 
   it('saves display state and removes floating DOM on unmount', async () => {

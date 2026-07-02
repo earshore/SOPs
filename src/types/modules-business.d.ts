@@ -569,15 +569,10 @@ export interface HistoryItem {
 // ==================== Keyword Hunter History ====================
 
 export type KeywordHunterSnapshotStatus = 'draft' | 'matched' | 'reported';
-export type KeywordHunterSnapshotSourceType = 'manual' | 'master-analysis';
+export type KeywordHunterSnapshotSourceType = 'manual';
 
 export interface KeywordHunterSnapshotSource {
   type: KeywordHunterSnapshotSourceType;
-  masterHistoryId?: string | number | null;
-  sourceDataFingerprint?: string | null;
-  site?: string;
-  asins?: string[];
-  productTitle?: string;
 }
 
 export interface KeywordHunterSnapshotSettings {

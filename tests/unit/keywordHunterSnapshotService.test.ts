@@ -125,25 +125,23 @@ describe('KeywordHunterSnapshotService', () => {
   });
 
   it('saves the current Keyword Hunter state as a snapshot', () => {
+    mocks.state.keywordTracker.snapshotSource = {
+      type: 'legacy-external',
+      externalId: 'legacy-001',
+    } as never;
+
     const snapshot = KeywordHunterSnapshotService.saveCurrent({
       title: 'Travel earbuds coverage',
-      source: {
-        type: 'master-analysis',
-        masterHistoryId: 'hist-001',
-        sourceDataFingerprint: 'fp-001',
-        site: 'US',
-        asins: ['B000000001'],
-        productTitle: 'Travel Earbuds',
-      },
     });
 
     expect(snapshot.title).toBe('Travel earbuds coverage');
     expect(snapshot.status).toBe('matched');
-    expect(snapshot.source.masterHistoryId).toBe('hist-001');
+    expect(snapshot.source).toEqual({ type: 'manual' });
     expect(snapshot.result.coverageRate).toBe(50);
     expect(snapshot.derived.keywordCount).toBe(2);
     expect(mocks.snapshots).toEqual([snapshot]);
     expect(mocks.state.keywordTracker.currentSnapshotId).toBe(snapshot.id);
+    expect(mocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
   });
 
   it('updates the loaded snapshot instead of creating duplicates', () => {
@@ -159,9 +157,7 @@ describe('KeywordHunterSnapshotService', () => {
   });
 
   it('restores a saved snapshot into Keyword Hunter state', () => {
-    const snapshot = KeywordHunterSnapshotService.saveCurrent({
-      source: { type: 'master-analysis', masterHistoryId: 42 },
-    });
+    const snapshot = KeywordHunterSnapshotService.saveCurrent();
 
     mocks.state.keywordTracker.keywords = [];
     mocks.state.keywordTracker.matchedKeywords = [];
@@ -174,20 +170,24 @@ describe('KeywordHunterSnapshotService', () => {
     expect(mocks.state.keywordTracker.matchedKeywords).toEqual([
       { keyword: 'wireless earbuds', count: 1 },
     ]);
-    expect(mocks.state.keywordTracker.snapshotSource?.masterHistoryId).toBe(42);
+    expect(mocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
   });
 
-  it('finds snapshots linked to a Master Analysis history item', () => {
-    const linked = KeywordHunterSnapshotService.saveCurrent({
-      source: { type: 'master-analysis', masterHistoryId: 'hist-001' },
-      updateCurrent: false,
-    });
-    KeywordHunterSnapshotService.saveCurrent({
-      source: { type: 'master-analysis', masterHistoryId: 'hist-002' },
-      updateCurrent: false,
-    });
+  it('normalizes legacy external source metadata to manual input', () => {
+    const snapshot = KeywordHunterSnapshotService.saveCurrent({ title: 'Legacy' });
+    mocks.snapshots[0] = {
+      ...snapshot,
+      source: {
+        type: 'legacy-external',
+        externalId: 'legacy-001',
+      } as never,
+    };
 
-    expect(KeywordHunterSnapshotService.getByMasterHistoryId('hist-001')).toEqual([linked]);
+    const restored = KeywordHunterSnapshotService.restore(snapshot.id);
+
+    expect(KeywordHunterSnapshotService.getAll()[0]?.source).toEqual({ type: 'manual' });
+    expect(restored?.source).toEqual({ type: 'manual' });
+    expect(mocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
   });
 
   it('deletes a snapshot and clears the current snapshot pointer when needed', () => {

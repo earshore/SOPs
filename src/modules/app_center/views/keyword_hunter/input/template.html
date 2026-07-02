@@ -102,21 +102,19 @@
                         </div>
 
                         <!-- Stats Bar -->
-                        <div class="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between">
-                            <div class="flex gap-2">
-                                <span
-                                    class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full font-semibold text-[11px] border border-blue-100">
-                                    <i class="fas fa-hashtag text-[8px] text-blue-400"></i>
-                                    <span id="kt-keyword-count">0</span>
-                                    <span class="text-blue-400 font-normal">词</span>
-                                </span>
-                                <span id="kt-duplicate-badge"
-                                    class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full font-semibold text-[11px] border border-amber-100 hidden">
-                                    <i class="fas fa-copy text-[8px] text-amber-400"></i>
-                                    <span id="kt-duplicate-count">0</span>
-                                    <span class="text-amber-400 font-normal">重复</span>
-                                </span>
-                            </div>
+                        <div class="kt-editor-meta kt-editor-meta--right">
+                            <span
+                                class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full font-semibold text-[11px] border border-blue-100">
+                                <i class="fas fa-hashtag text-[8px] text-blue-400"></i>
+                                <span id="kt-keyword-count">0</span>
+                                <span class="text-blue-400 font-normal">词</span>
+                            </span>
+                            <span id="kt-duplicate-badge"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full font-semibold text-[11px] border border-amber-100 hidden">
+                                <i class="fas fa-copy text-[8px] text-amber-400"></i>
+                                <span id="kt-duplicate-count">0</span>
+                                <span class="text-amber-400 font-normal">重复</span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -173,19 +171,17 @@
                         </div>
 
                         <!-- Stats Bar -->
-                        <div
-                            class="textarea-stats absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between">
+                        <div class="kt-editor-meta kt-editor-meta--right">
+                            <!-- Quick tip -->
+                            <span class="kt-editor-tip text-[10px] text-slate-300 font-medium hidden sm:flex items-center gap-1">
+                                <i class="fas fa-lightbulb text-[9px]"></i>
+                                Tip: 包含完整 Listing 内容可提升分析精度
+                            </span>
                             <span
                                 class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full font-semibold text-[11px] border border-emerald-100">
                                 <i class="fas fa-font text-[8px] text-emerald-400"></i>
                                 <span id="copy-char-count">0</span>
                                 <span class="text-emerald-400 font-normal">字符</span>
-                            </span>
-
-                            <!-- Quick tip -->
-                            <span class="text-[10px] text-slate-300 font-medium hidden sm:flex items-center gap-1">
-                                <i class="fas fa-lightbulb text-[9px]"></i>
-                                Tip: 包含完整 Listing 内容可提升分析精度
                             </span>
                         </div>
                     </div>
@@ -200,15 +196,27 @@
                         <div class="kh-input-snapshot-icon">
                             <i class="fas fa-history" aria-hidden="true"></i>
                         </div>
-                        <div>
-                            <h3>历史快照</h3>
-                            <p id="kt-input-snapshot-count">0 个快照</p>
+                        <div class="kh-input-snapshot-copy">
+                            <div class="kh-input-snapshot-title-row">
+                                <h3>历史快照</h3>
+                                <p id="kt-input-snapshot-count" class="kh-input-snapshot-count">0 个快照</p>
+                            </div>
+                            <div id="kt-input-draft-status" class="kh-input-draft-status idle" aria-live="polite">
+                                <span class="kh-input-draft-dot" aria-hidden="true"></span>
+                                <span id="kt-input-draft-label" class="kh-input-draft-label">空白</span>
+                                <span id="kt-input-draft-detail" class="kh-input-draft-detail">本机草稿为空</span>
+                            </div>
                         </div>
                     </div>
                     <button id="kt-input-snapshot-save" type="button" class="kh-input-snapshot-save"
                         title="保存当前快照" aria-label="保存当前快照">
                         <i class="fas fa-floppy-disk" aria-hidden="true"></i>
                     </button>
+                </div>
+
+                <div id="kt-input-snapshot-loading" class="kh-input-snapshot-loading hidden" role="status" aria-live="polite">
+                    <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
+                    <span>正在加载快照</span>
                 </div>
 
                 <div id="kt-input-snapshot-empty" class="kh-input-snapshot-empty hidden">

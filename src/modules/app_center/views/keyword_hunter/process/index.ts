@@ -823,10 +823,12 @@ function updateFloatingKeywordCounts(): void {
  */
 function updateMinimizedBadge(): void {
   const badge = document.getElementById("kt-minimized-badge");
-  if (badge && appStore.getState().keywordTracker.matchedKeywords) {
-    badge.textContent = appStore
-      .getState()
-      .keywordTracker.matchedKeywords.length.toString();
+  if (badge) {
+    const tracker = appStore.getState().keywordTracker;
+    const totalKeywords =
+      (tracker.matchedKeywords?.length || 0) +
+      (tracker.unmatchedKeywords?.length || 0);
+    badge.textContent = totalKeywords.toString();
   }
 }
 
@@ -873,6 +875,18 @@ async function syncToInput(): Promise<void> {
 
   // 切换到输入模块
   await window.navigateTo("/app-center/keyword-hunter/input");
+}
+
+async function goToAnalysis(): Promise<void> {
+  saveProcessStateToState();
+
+  const processedCopy = appStore.getState().keywordTracker.processedCopy;
+  if (!processedCopy || !processedCopy.trim()) {
+    showToast("没有可分析的文案", { type: "warning" });
+    return;
+  }
+
+  await window.navigateTo("/app-center/keyword-hunter/analysis");
 }
 
 /**
@@ -1236,10 +1250,11 @@ function manageFloatingWindowVisibility(): void {
     appStore.getState().updateKeywordTracker({ isWindowMinimized: false });
   }
 
-  // 只有在有分析数据时才显示浮动窗口
-  const hasAnalysisData =
-    appStore.getState().keywordTracker.matchedKeywords &&
-    appStore.getState().keywordTracker.matchedKeywords.length > 0;
+  const tracker = appStore.getState().keywordTracker;
+  const keywordCount =
+    (tracker.matchedKeywords?.length || 0) +
+    (tracker.unmatchedKeywords?.length || 0);
+  const hasAnalysisData = keywordCount > 0;
 
   if (!hasAnalysisData) {
     // 没有数据时隐藏浮动窗口和最小化按钮
@@ -1283,6 +1298,13 @@ function setupEventListeners(container: HTMLElement): void {
   if (syncBtn) {
     addEventListener(syncBtn, "click", () => {
       void syncToInput();
+    });
+  }
+
+  const goAnalysisBtn = document.getElementById("kt-go-analysis-btn");
+  if (goAnalysisBtn) {
+    addEventListener(goAnalysisBtn, "click", () => {
+      void goToAnalysis();
     });
   }
 

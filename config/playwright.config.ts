@@ -206,7 +206,7 @@ export default defineConfig({
 
   // Web Server 配置（自动启动开发服务器）
   webServer: process.env.SKIP_WEBSERVER ? undefined : {
-    command: 'npm run dev',
+    command: 'npm run dev:simple -- --host 127.0.0.1',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,

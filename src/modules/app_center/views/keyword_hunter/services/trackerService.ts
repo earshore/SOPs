@@ -14,7 +14,7 @@ import {
   StorageService,
   STORAGE_KEYS,
 } from "../../../../../services/storageService";
-import { sanitizePromptInput } from "../../master_analysis/ai_analysis/prompts/promptSanitizer";
+import { sanitizePromptInput } from "../../../../../common/utils/promptSanitizer";
 import type {
   KeywordMatchResult,
   AnalysisResult,

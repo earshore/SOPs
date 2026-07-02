@@ -1,4 +1,4 @@
-import 'deep-chat';
+import 'deep-chat/dist/deepChat.bundle.js';
 import '../styles.css';
 
 import { loadTemplate } from '@/common/utils/viewLoader';

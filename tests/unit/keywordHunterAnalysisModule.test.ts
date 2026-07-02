@@ -6,6 +6,7 @@ import { showToast } from '@/common/ui';
 import { ErrorService } from '@/services/errorService';
 import { callLLM } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
+import { KeywordHunterSnapshotService } from '@/modules/app_center/views/keyword_hunter/services/snapshotService';
 
 const analysisMocks = vi.hoisted(() => {
   const template = `
@@ -35,6 +36,9 @@ const analysisMocks = vi.hoisted(() => {
       container.innerHTML = html;
     }),
     showToast: vi.fn(),
+    saveCurrentAsync: vi.fn(async () => ({
+      id: 'kh-test',
+    })),
     state,
   };
 });
@@ -82,9 +86,7 @@ vi.mock('@/services/storageService', () => ({
 
 vi.mock('@/modules/app_center/views/keyword_hunter/services/snapshotService', () => ({
   KeywordHunterSnapshotService: {
-    saveCurrentAsync: vi.fn(async () => ({
-      id: 'kh-test',
-    })),
+    saveCurrentAsync: analysisMocks.saveCurrentAsync,
   },
 }));
 
@@ -147,6 +149,9 @@ beforeEach(() => {
     model: 'gpt-test',
   } as never);
   mockedCallLLM.mockResolvedValue(scoredMarkdown);
+  analysisMocks.saveCurrentAsync.mockResolvedValue({
+    id: 'kh-test',
+  });
   Object.defineProperty(window, 'requestAnimationFrame', {
     configurable: true,
     writable: true,
@@ -243,7 +248,30 @@ describe('Keyword Hunter analysis module', () => {
     );
     expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
     expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
+    await vi.waitFor(() => {
+      expect(KeywordHunterSnapshotService.saveCurrentAsync).toHaveBeenCalledWith({ status: 'reported' });
+    });
     expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
+  });
+
+  it('warns when the generated report cannot be archived automatically', async () => {
+    analysisMocks.state.keywordTracker.processedCopy = validListing;
+    analysisMocks.saveCurrentAsync.mockRejectedValueOnce(new Error('IndexedDB 不可写'));
+    const container = await mountAnalysis();
+
+    click(container.querySelector('#kt-analyze-btn'));
+
+    await vi.waitFor(() => {
+      expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('报告已生成');
+    });
+    expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
+    expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
+    await vi.waitFor(() => {
+      expect(showToast).toHaveBeenCalledWith(
+        '报告已生成，但历史快照自动保存失败：IndexedDB 不可写',
+        { type: 'warning' },
+      );
+    });
   });
 
   it('warns on empty copy and renders validation errors without reporting to ErrorService', async () => {
