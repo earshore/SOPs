@@ -1,12 +1,12 @@
 # CSS 模块分析报告
 
-> 生成时间: 2026/7/3 01:47:26
+> 生成时间: 2026/7/3 02:02:06
 
 ## 📊 统计信息
 
 - 分析文件数: 10
-- 总代码行数: 7526
-- 识别模式数: 10
+- 总代码行数: 7353
+- 识别模式数: 8
 
 ## 🔍 发现的重复模式
 
@@ -68,44 +68,12 @@
 
 ### Icons 相关
 
-- **icons-pattern-2**: 出现 3 次
-  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/more/views/explore/prompts/prompts_style.css
-  - 示例:
-    ```css
-    .sop-icon-container { width: 48px; height: 48px; border-radius: var(--rounded-lg); display: flex; al...
-    ```
-    ```css
-    .sop-icon-container { display: flex; align-items: center; justify-content: center;...
-    ```
-
 ### Badges 相关
-
-- **badges-pattern-1**: 出现 6 次
-  - 文件: src/modules/app_center/app_center_style.css, src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css, src/modules/more/views/explore/prompts/prompts_style.css
-  - 示例:
-    ```css
-    .app-card-badge { display: inline-flex; align-items: center; min-height: auto; padding: 2px 8px; bor...
-    ```
-    ```css
-    .stage-badge { display: inline-block; padding: 2px 8px; border-radius: var(--rounded); font-weight: ...
-    ```
-
-- **badges-pattern-2**: 出现 7 次
-  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
-  - 示例:
-    ```css
-    .sop-status-active { background: var(--color-green-100); color: var(--color-green-600);...
-    ```
-    ```css
-    .sop-status-draft { background: var(--color-amber-100); color: var(--color-amber-600);...
-    ```
 
 ## 💡 优化建议
 
 1. 发现 3 个重复的卡片样式模式，建议提取到 src/css/components/cards.css
-2. 发现 1 个重复的图标容器样式，建议使用统一的 .icon-container 类
-3. 发现 1 个重复的动画定义，建议移动到 src/css/animations/keyframes.css
-4. 发现 2 个重复的徽章样式，建议提取到 src/css/components/badges.css
+2. 发现 1 个重复的动画定义，建议移动到 src/css/animations/keyframes.css
 
 ## 📝 下一步行动
 

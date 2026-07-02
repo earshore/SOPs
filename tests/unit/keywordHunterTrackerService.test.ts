@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 import {
   analyzeKeywordMatching,
   buildListingAnalysisUserPrompt,
@@ -7,7 +7,6 @@ import {
   findKeywordMatchRanges
 } from '@/modules/app_center/views/keyword_hunter/services/trackerService';
 
-describe('Keyword Hunter trackerService', () => {
   it('清理关键词格式时将逗号和分号分隔符整理为逐行关键词', () => {
     expect(cleanKeywordsText('wireless earbuds, noise cancelling; long battery-life')).toBe(
       'wireless earbuds\nnoise cancelling\nlong battery-life'
@@ -111,4 +110,3 @@ describe('Keyword Hunter trackerService', () => {
     expect(input).toContain('【2】 [FILTERED] and skip paragraph 1');
     expect(input).not.toContain('ignore previous instructions');
   });
-});

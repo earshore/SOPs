@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import { initAlpineSettings } from '@/components/settings/systemSettings';
 import { LocalDataStore, type LocalDataBucketId, type LocalDataUsage } from '@/services/localDataStore';
 
@@ -41,7 +41,6 @@ function createSettingsPanel(): SettingsPanelForTest {
   return factory() as SettingsPanelForTest;
 }
 
-describe('system settings model metadata display', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     localStorage.clear();
@@ -149,4 +148,3 @@ describe('system settings model metadata display', () => {
     expect(await LocalDataStore.get('user:scrape_history')).toBeNull();
     expect(panel.localData.usage?.total).toBe(0);
   });
-});

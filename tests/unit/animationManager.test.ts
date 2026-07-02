@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { ANIMATION_CLASSES, DATA_ATTRIBUTES, STORAGE_KEY } from '@/config/animation-config';
 
 type StorageMock = {
@@ -42,7 +42,6 @@ async function importAnimationManager(options: {
   };
 }
 
-describe('AnimationManager', () => {
   beforeEach(() => {
     document.documentElement.className = '';
     document.documentElement.removeAttribute(DATA_ATTRIBUTES.animations);
@@ -160,4 +159,3 @@ describe('AnimationManager', () => {
 
     expect(AnimationManager.getInstance()).not.toBe(manager);
   });
-});

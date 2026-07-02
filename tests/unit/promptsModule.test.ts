@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import { mount, unmount } from '@/modules/more/views/explore/prompts';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { showToast } from '@/common/ui';
@@ -62,7 +62,6 @@ beforeEach(() => {
   unmount();
 });
 
-describe('PromptsModule', () => {
   it('mounts template content, renders categories, and lists prompt cards', async () => {
     const container = await mountPrompts();
 
@@ -169,4 +168,3 @@ describe('PromptsModule', () => {
     expect(window.copyPrompt).toBeUndefined();
     expect(window.copyModalPrompt).toBeUndefined();
   });
-});

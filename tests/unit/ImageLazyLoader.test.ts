@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
 class MockIntersectionObserver {
   static instances: MockIntersectionObserver[] = [];
@@ -25,7 +25,6 @@ async function importImageLazyLoader() {
   return import('@/common/utils/ImageLazyLoader');
 }
 
-describe('ImageLazyLoader', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     MockIntersectionObserver.instances = [];
@@ -141,4 +140,3 @@ describe('ImageLazyLoader', () => {
     imageLazyLoader.cleanup();
     expect(latestObserver?.disconnect).toHaveBeenCalled();
   });
-});

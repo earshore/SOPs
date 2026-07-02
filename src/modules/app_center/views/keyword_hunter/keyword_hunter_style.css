@@ -1560,36 +1560,6 @@
   line-height: 1.35;
 }
 
-.kh-status-pill {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  height: 1.5rem;
-  padding: 0 0.5rem;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  font-size: 0.6875rem;
-  font-weight: 800;
-}
-
-.kh-status-draft {
-  color: var(--color-slate-600);
-  background: var(--color-slate-100);
-  border-color: var(--color-slate-200);
-}
-
-.kh-status-matched {
-  color: var(--color-blue-700);
-  background: var(--color-blue-50);
-  border-color: var(--color-blue-200);
-}
-
-.kh-status-reported {
-  color: var(--color-emerald-700);
-  background: var(--color-emerald-50);
-  border-color: var(--color-emerald-200);
-}
-
 .kh-snapshot-item-meta {
   display: flex;
   flex-wrap: wrap;

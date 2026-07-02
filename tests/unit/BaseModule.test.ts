@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import BaseModule, { type ActionMap, type DisposeFn } from '@/common/BaseModule';
 import eventBus from '@/common/EventBus';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
@@ -90,7 +90,6 @@ function createContainer() {
   return { container, unregisterAction };
 }
 
-describe('BaseModule', () => {
   let host: HTMLElement;
 
   beforeEach(() => {
@@ -247,4 +246,3 @@ describe('BaseModule', () => {
 
     await expect(module.callRender()).rejects.toThrow('BaseModule.render() must be implemented');
   });
-});

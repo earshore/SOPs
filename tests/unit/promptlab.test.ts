@@ -243,6 +243,17 @@ const createPromptRecord = (
       expect(component.profile.useCosmo).toBe(true);
       expect(component.profile.charLimit).toBe(3000);
     });
+  });
+
+  describe('Alpine Component Snapshot DNA Restoration', () => {
+    let component: ReturnType<typeof createPromptlabPanel>;
+
+    beforeEach(() => {
+      component = createPromptlabPanel();
+      
+      // 添加必要的 DOM 元素
+      container.innerHTML = mockTemplate;
+    });
 
     it('should restore product DNA from the loaded snapshot before global profile', () => {
       const report = createUsableAnalysisReport();
@@ -297,6 +308,17 @@ const createPromptRecord = (
 
       expect(component.profile.keywordsTier1).toBe('snapshot keyword');
       expect(component.profile.audience).toBe('snapshot audience');
+    });
+  });
+
+  describe('Alpine Component Report DNA Restoration', () => {
+    let component: ReturnType<typeof createPromptlabPanel>;
+
+    beforeEach(() => {
+      component = createPromptlabPanel();
+      
+      // 添加必要的 DOM 元素
+      container.innerHTML = mockTemplate;
     });
 
     it('should clear report-bound DNA when the saved profile belongs to another report', () => {
@@ -383,6 +405,17 @@ const createPromptRecord = (
       expect(component.profile.useCosmo).toBe(true);
       expect(component.profile.charLimit).toBe(3000);
     });
+  });
+
+  describe('Alpine Component Prompt Cache Restoration', () => {
+    let component: ReturnType<typeof createPromptlabPanel>;
+
+    beforeEach(() => {
+      component = createPromptlabPanel();
+      
+      // 添加必要的 DOM 元素
+      container.innerHTML = mockTemplate;
+    });
 
     it('should not restore generated prompt caches from store history', () => {
       appStore.getState().updatePromptLab({
@@ -450,6 +483,17 @@ const createPromptRecord = (
       expect(appStore.getState().scraper.currentHistoryId).toBe(snapshotId);
       expect(component.listingPromptCache).toBe('Snapshot Listing Prompt');
       expect(component.visualPromptCache).toBe('Snapshot Visual Prompt');
+    });
+  });
+
+  describe('Alpine Component Prompt Cache Clearing', () => {
+    let component: ReturnType<typeof createPromptlabPanel>;
+
+    beforeEach(() => {
+      component = createPromptlabPanel();
+      
+      // 添加必要的 DOM 元素
+      container.innerHTML = mockTemplate;
     });
 
     it('should not restore snapshot prompt caches without a current report', () => {
@@ -528,6 +572,17 @@ const createPromptRecord = (
 
       expect(component.listingPromptCache).toBe('');
       expect(component.visualPromptCache).toBe('');
+    });
+  });
+
+  describe('Alpine Component State Persistence', () => {
+    let component: ReturnType<typeof createPromptlabPanel>;
+
+    beforeEach(() => {
+      component = createPromptlabPanel();
+      
+      // 添加必要的 DOM 元素
+      container.innerHTML = mockTemplate;
     });
 
     it('should save state to store', () => {

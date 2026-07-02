@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 
 type CssImporter = () => Promise<unknown>;
 
@@ -40,7 +40,6 @@ function createConfig(moduleId: string, overrides: Partial<MockCssConfig> = {}):
   };
 }
 
-describe('moduleCssLoader', () => {
   afterEach(() => {
     vi.doUnmock('@/common/config/moduleCssRegistry');
     vi.restoreAllMocks();
@@ -174,4 +173,3 @@ describe('moduleCssLoader', () => {
     expect(highLazyImporter).not.toHaveBeenCalled();
     expect(loader.isModuleLoaded('app_center')).toBe(true);
   });
-});

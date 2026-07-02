@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import {
   METRIC_TYPES,
   PerformanceService,
@@ -12,7 +12,6 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
-describe('PerformanceService', () => {
   let service: PerformanceService;
 
   beforeEach(() => {
@@ -133,4 +132,3 @@ describe('PerformanceService', () => {
   it('creates independent instances through the factory', () => {
     expect(createPerformanceService()).toBeInstanceOf(PerformanceService);
   });
-});

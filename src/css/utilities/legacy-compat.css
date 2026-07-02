@@ -99,8 +99,7 @@
 }
 
 /* ==================== 图标容器兼容 ==================== */
-.app-center-icon-container,
-.sop-icon-container {
+.app-center-icon-container {
   /* 映射到 .card-icon 样式 */
   width: 3rem;
   height: 3rem;
@@ -110,6 +109,23 @@
   justify-content: center;
   font-size: 1.25rem;
   flex-shrink: 0;
+}
+
+.sop-icon-container {
+  /* 旧模板类名，结构统一到图标容器兼容层 */
+  width: var(--sop-icon-size, 3rem);
+  height: var(--sop-icon-size, 3rem);
+  border: var(--sop-icon-border, 0);
+  border-radius: var(--sop-icon-radius, var(--rounded-lg, 12px));
+  background: var(--sop-icon-bg);
+  color: var(--sop-icon-color);
+  box-shadow: var(--sop-icon-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: var(--sop-icon-font-size, 1.25rem);
+  transition: var(--sop-icon-transition, transform var(--duration-slow) var(--ease-smooth));
 }
 
 /* ==================== 搜索框兼容 ==================== */

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 import {
   createSafeFragment,
   escapeHtml,
@@ -11,7 +11,6 @@ import {
   setTextContent,
 } from '@/common/utils/security';
 
-describe('security utilities', () => {
   it('escapes HTML special characters and ignores non-string values', () => {
     expect(escapeHtml('<script>alert("XSS")</script>')).toBe(
       '&lt;script&gt;alert(&quot;XSS&quot;)&lt;&#x2F;script&gt;'
@@ -120,4 +119,3 @@ describe('security utilities', () => {
   it('escapes markdown when no parser is provided', () => {
     expect(safeMarkdown('<b>plain</b>')).toBe('&lt;b&gt;plain&lt;&#x2F;b&gt;');
   });
-});

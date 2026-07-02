@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import eventBus from '@/common/EventBus';
 import {
   AlertLevel,
@@ -16,7 +16,6 @@ function createLogger() {
   };
 }
 
-describe('AlertService', () => {
   let logger: ReturnType<typeof createLogger>;
   let service: AlertService;
 
@@ -133,4 +132,3 @@ describe('AlertService', () => {
   it('creates independent instances through the factory', () => {
     expect(createAlertService(logger)).toBeInstanceOf(AlertService);
   });
-});

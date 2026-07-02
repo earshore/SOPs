@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { ANIMATION_CLASSES } from '@/config/animation-config';
 
 type AnimationManagerMock = {
@@ -26,7 +26,6 @@ async function importNavigationAnimation(options: {
   };
 }
 
-describe('navigation animation', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
@@ -168,4 +167,3 @@ describe('navigation animation', () => {
 
     expect(getPageTransitionController(page)).toBeNull();
   });
-});

@@ -6,7 +6,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EventBus } from '@/common/EventBus';
 
-describe('EventBus', () => {
   let eventBus: EventBus;
 
   beforeEach(() => {
@@ -150,4 +149,3 @@ describe('EventBus', () => {
       expect(stats.eventCounts['other-event']).toBe(1);
     });
   });
-});

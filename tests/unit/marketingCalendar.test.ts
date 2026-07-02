@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import { mount, unmount } from '@/modules/amz_hub/views/practice/marketing_calendar';
 
 const mocks = vi.hoisted(() => ({
@@ -58,7 +58,6 @@ beforeEach(() => {
   unmount();
 });
 
-describe('MarketingCalendarModule', () => {
   it('mounts the calendar and renders countries, stats, and event cards', async () => {
     const container = await mountCalendar();
 
@@ -158,4 +157,3 @@ describe('MarketingCalendarModule', () => {
     unmount();
     expect(document.body.querySelector('#amzf_search_history')).toBeNull();
   });
-});

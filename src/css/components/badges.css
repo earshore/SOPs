@@ -209,6 +209,136 @@
 }
 
 /* ========================================
+   SOP 状态徽章（跨模块复用）
+   ======================================== */
+.sop-status-badge {
+  display: var(--sop-status-display, inline);
+  align-items: center;
+  min-height: var(--sop-status-min-height, auto);
+  padding: var(--sop-status-padding, 2px 8px);
+  border: var(--sop-status-border, 0);
+  border-radius: var(--sop-status-radius, var(--rounded-full));
+  font-size: var(--sop-status-font-size, 10px);
+  font-weight: var(--sop-status-font-weight, 500);
+  line-height: var(--sop-status-line-height, normal);
+}
+
+.sop-status-active {
+  background: var(--sop-status-active-bg, var(--color-green-100));
+  color: var(--sop-status-active-color, var(--color-green-600));
+  border-color: var(--sop-status-active-border-color, currentColor);
+}
+
+.sop-status-draft {
+  background: var(--sop-status-draft-bg, var(--color-amber-100));
+  color: var(--sop-status-draft-color, var(--color-amber-600));
+  border-color: var(--sop-status-draft-border-color, currentColor);
+}
+
+.sop-status-pending {
+  background: var(--sop-status-pending-bg, var(--color-indigo-100));
+  color: var(--sop-status-pending-color, var(--color-indigo-600));
+  border-color: var(--sop-status-pending-border-color, currentColor);
+}
+
+/* ========================================
+   模块旧类名兼容徽章
+   ======================================== */
+.app-card-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: auto;
+  padding: 2px 8px;
+  border-radius: var(--rounded-full, 9999px);
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-selected);
+  color: var(--color-accent);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.stage-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--rounded);
+  font-weight: 700;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.stage-test {
+  background: var(--color-blue-100);
+  color: var(--color-blue-700);
+}
+
+.stage-growth {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.stage-stable {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.stage-clearance {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.category-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.category-badge.blue {
+  background-color: var(--color-blue-100);
+  color: var(--color-blue-700);
+}
+
+.category-badge.purple {
+  background-color: var(--color-purple-100);
+  color: var(--color-purple-600);
+}
+
+.category-badge.green {
+  background-color: var(--color-green-100);
+  color: var(--color-green-600);
+}
+
+.category-badge.orange {
+  background-color: var(--color-orange-100);
+  color: var(--color-orange-600);
+}
+
+.category-badge.red {
+  background-color: var(--color-red-100);
+  color: var(--color-red-600);
+}
+
+.category-badge.indigo {
+  background-color: var(--color-indigo-100);
+  color: var(--color-indigo-600);
+}
+
+.model-badge {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  background-color: var(--color-amber-100);
+  color: var(--color-amber-700);
+  border: 1px solid var(--color-amber-200);
+}
+
+/* ========================================
    版本徽章
    ======================================== */
 .badge-version {

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { ServiceBootstrap } from '@/common/bootstrap/ServiceBootstrap';
 import type { DIContainer } from '@/common/di/Container';
 import type { ServiceName, ServiceRegistry } from '@/common/di/ServiceRegistry';
@@ -83,7 +83,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('ServiceBootstrap', () => {
   it('initializes services by dependency level and starts monitoring services', async () => {
     const calls: string[] = [];
     const di = container({
@@ -211,4 +210,3 @@ describe('ServiceBootstrap', () => {
     expect(bootstrap.getInitializedServices()).toEqual([]);
     expect(bootstrap.isInitialized('core')).toBe(false);
   });
-});

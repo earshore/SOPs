@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createWebVitalsService, type Metric } from '@/services/webVitalsService';
 
 class MockPerformanceObserver {
@@ -23,7 +23,6 @@ function emitEntries(observer: MockPerformanceObserver, entries: PerformanceEntr
   } as PerformanceObserverEntryList, observer as unknown as PerformanceObserver);
 }
 
-describe('webVitalsService', () => {
   beforeEach(() => {
     MockPerformanceObserver.instances = [];
     vi.stubGlobal('PerformanceObserver', MockPerformanceObserver);
@@ -143,4 +142,3 @@ describe('webVitalsService', () => {
 
     expect(console.error).toHaveBeenCalledWith('[WebVitals] 指标上报失败:', expect.any(Error));
   });
-});

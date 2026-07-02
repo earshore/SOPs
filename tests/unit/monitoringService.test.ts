@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { configCenter } from '@/common/config/ConfigCenter';
 import {
   MonitoringService,
@@ -37,7 +37,6 @@ function createSentryMock() {
   };
 }
 
-describe('MonitoringService', () => {
   let logger: ReturnType<typeof createLogger>;
 
   beforeEach(() => {
@@ -159,4 +158,3 @@ describe('MonitoringService', () => {
   it('creates independent instances through the factory', () => {
     expect(createMonitoringService(logger)).toBeInstanceOf(MonitoringService);
   });
-});

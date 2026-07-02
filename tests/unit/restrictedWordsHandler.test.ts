@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import {
   cleanupRestrictedWordsPanel,
   initRestrictedWordsPanel,
@@ -70,7 +70,6 @@ beforeEach(() => {
   cleanupRestrictedWordsPanel();
 });
 
-describe('restrictedWordsHandler', () => {
   it('initializes filters, renders all rows, and registers legacy actions', () => {
     initFreshPanel();
 
@@ -174,4 +173,3 @@ describe('restrictedWordsHandler', () => {
     setSearch('anything');
     expect(document.getElementById('rw-stats-display')?.textContent).toBe(statsBefore);
   });
-});

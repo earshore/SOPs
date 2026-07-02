@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import {
   fetchImmersionTranslation,
   fetchListingAnalysis,
@@ -38,7 +38,6 @@ beforeEach(() => {
   } as never);
 });
 
-describe('Keyword Hunter trackerService LLM flows', () => {
   it('rejects empty and invalid Listing text before reading LLM settings', async () => {
     await expect(fetchListingAnalysis('', [], [], [])).rejects.toMatchObject({
       code: 'ERR_EMPTY_LISTING_TEXT',
@@ -151,4 +150,3 @@ describe('Keyword Hunter trackerService LLM flows', () => {
       { original: 'Second', translation: '' },
     ]);
   });
-});

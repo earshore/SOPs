@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, expect, it } from 'vitest';
 import { createPromptlabPanel } from '@/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel';
 import { promptlabService } from '@/modules/app_center/views/master_analysis/services/promptlabService';
 import { appStore } from '@/stores/useAppStore';
@@ -107,7 +107,6 @@ const makeFatalInputs = (): PromptInputs => ({
   useAnalysisData: true,
 });
 
-describe('promptlab granular buyer profile selections', () => {
   beforeEach(() => {
     appStore.getState().updateAnalysis({ analysisReport: buyerProfileReport as any });
     appStore.getState().setUserProductProfile({
@@ -230,4 +229,3 @@ describe('promptlab granular buyer profile selections', () => {
     expect(masterPrompt).not.toContain('Fatal Flaws');
     expect(visualPrompt).not.toContain('Fatal Flaws');
   });
-});

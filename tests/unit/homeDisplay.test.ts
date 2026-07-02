@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
 const homeTemplate = `
   <div id="home-splash-container">
@@ -51,7 +51,6 @@ function createCanvasContext(): CanvasRenderingContext2D {
   } as unknown as CanvasRenderingContext2D;
 }
 
-describe('homeDisplay', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     resizeCallback = null;
@@ -163,4 +162,3 @@ describe('homeDisplay', () => {
 
     unmount();
   });
-});

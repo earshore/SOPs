@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import { appStore } from '@/stores/useAppStore';
 import { showToast } from '../../../../../../common/ui';
 import {
@@ -117,107 +117,105 @@ function fullReportWithSizeSpec() {
   };
 }
 
-describe('Promptlab DNA actions', () => {
-  beforeEach(() => {
-    document.body.innerHTML = '';
-    setAnalysisReport(null);
-    vi.clearAllMocks();
-    vi.mocked(confirmWithModal).mockResolvedValue(true);
+beforeEach(() => {
+  document.body.innerHTML = '';
+  setAnalysisReport(null);
+  vi.clearAllMocks();
+  vi.mocked(confirmWithModal).mockResolvedValue(true);
+});
+
+it('uses field-level keyword confidence when auto-populating DNA', async () => {
+  const ctx = createContext();
+  setAnalysisReport(semanticReport());
+
+  await autoPopulateDNA(ctx);
+
+  expect(ctx.profile.keywordsTier1).toBe('desk bell');
+  expect(ctx.profile.keywordsTier2).toBe('');
+  expect(ctx.dnaConfidence.keywords).toBe(70);
+  expect(ctx.dnaConfidence.keywordsTier1).toBe(75);
+  expect(ctx.dnaConfidence.keywordsTier2).toBe(65);
+  expect(ctx.saveState).toHaveBeenCalledOnce();
+  expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Tier 2 长尾词'), {
+    type: 'success',
+  });
+});
+
+it('builds extraction summary without mutating profile fields', () => {
+  const ctx = createContext();
+  setAnalysisReport(semanticReport());
+
+  refreshDnaExtractionSummary(ctx);
+
+  expect(ctx.profile.keywordsTier1).toBe('');
+  expect(ctx.profile.usps).toBe('');
+  expect(ctx.dnaExtractionSummary).toMatchObject({
+    extractableFields: 3,
+    highConfidenceFields: 2,
+    lowConfidenceFields: 1,
+    reportType: 'semantic_analysis',
+  });
+  expect(ctx.dnaExtractionSummary?.fields).toContainEqual(
+    expect.objectContaining({
+      field: 'keywordsTier1',
+      confidence: 75,
+      source: '高频短语-属性词',
+      status: 'high',
+    })
+  );
+  expect(ctx.saveState).not.toHaveBeenCalled();
+});
+
+it('does not overwrite an existing single field with an empty extraction result', async () => {
+  const ctx = createContext({ keywordsTier2: 'manual longtail' });
+  setAnalysisReport({
+    ...semanticReport(),
+    native_voice: {
+      native_phrasing: [],
+      emotional_hook: [],
+    },
   });
 
-  it('uses field-level keyword confidence when auto-populating DNA', async () => {
-    const ctx = createContext();
-    setAnalysisReport(semanticReport());
+  await extractSingleField(ctx, 'keywordsTier2');
 
-    await autoPopulateDNA(ctx);
+  expect(ctx.profile.keywordsTier2).toBe('manual longtail');
+  expect(ctx.saveState).not.toHaveBeenCalled();
+  expect(showToast).toHaveBeenCalledWith('报告中未找到Tier 2 长尾词，已保留现有内容', {
+    type: 'warning',
+  });
+});
 
-    expect(ctx.profile.keywordsTier1).toBe('desk bell');
-    expect(ctx.profile.keywordsTier2).toBe('');
-    expect(ctx.dnaConfidence.keywords).toBe(70);
-    expect(ctx.dnaConfidence.keywordsTier1).toBe(75);
-    expect(ctx.dnaConfidence.keywordsTier2).toBe(65);
-    expect(ctx.saveState).toHaveBeenCalledOnce();
-    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Tier 2 长尾词'), {
-      type: 'success',
-    });
+it('asks before overwriting with a low-confidence single-field extraction', async () => {
+  vi.mocked(confirmWithModal).mockResolvedValue(false);
+  const ctx = createContext({ keywordsTier2: 'manual longtail' });
+  setAnalysisReport(semanticReport());
+
+  await extractSingleField(ctx, 'keywordsTier2');
+
+  expect(ctx.profile.keywordsTier2).toBe('manual longtail');
+  expect(confirmWithModal).toHaveBeenCalledWith(
+    '低置信度字段',
+    '字段“Tier 2 长尾词”的提取置信度为 65%，低于自动填充阈值。是否仍然覆盖当前内容？',
+    '',
+    '仍然覆盖'
+  );
+  expect(ctx.saveState).not.toHaveBeenCalled();
+});
+
+it('normalizes PromptLab target market names before localized spec extraction', async () => {
+  const ctx = createContext({ targetMarket: 'German' });
+  setAnalysisReport(fullReportWithSizeSpec());
+
+  await extractSingleField(ctx, 'specs');
+
+  expect(ctx.profile.specs).toContain('Kapazität: 50ml');
+});
+
+it('checks extractability against the unwrapped report payload', () => {
+  setAnalysisReport({
+    metadata: { marketplace: 'DE' },
+    analysisReport: semanticReport(),
   });
 
-  it('builds extraction summary without mutating profile fields', () => {
-    const ctx = createContext();
-    setAnalysisReport(semanticReport());
-
-    refreshDnaExtractionSummary(ctx);
-
-    expect(ctx.profile.keywordsTier1).toBe('');
-    expect(ctx.profile.usps).toBe('');
-    expect(ctx.dnaExtractionSummary).toMatchObject({
-      extractableFields: 3,
-      highConfidenceFields: 2,
-      lowConfidenceFields: 1,
-      reportType: 'semantic_analysis',
-    });
-    expect(ctx.dnaExtractionSummary?.fields).toContainEqual(
-      expect.objectContaining({
-        field: 'keywordsTier1',
-        confidence: 75,
-        source: '高频短语-属性词',
-        status: 'high',
-      })
-    );
-    expect(ctx.saveState).not.toHaveBeenCalled();
-  });
-
-  it('does not overwrite an existing single field with an empty extraction result', async () => {
-    const ctx = createContext({ keywordsTier2: 'manual longtail' });
-    setAnalysisReport({
-      ...semanticReport(),
-      native_voice: {
-        native_phrasing: [],
-        emotional_hook: [],
-      },
-    });
-
-    await extractSingleField(ctx, 'keywordsTier2');
-
-    expect(ctx.profile.keywordsTier2).toBe('manual longtail');
-    expect(ctx.saveState).not.toHaveBeenCalled();
-    expect(showToast).toHaveBeenCalledWith('报告中未找到Tier 2 长尾词，已保留现有内容', {
-      type: 'warning',
-    });
-  });
-
-  it('asks before overwriting with a low-confidence single-field extraction', async () => {
-    vi.mocked(confirmWithModal).mockResolvedValue(false);
-    const ctx = createContext({ keywordsTier2: 'manual longtail' });
-    setAnalysisReport(semanticReport());
-
-    await extractSingleField(ctx, 'keywordsTier2');
-
-    expect(ctx.profile.keywordsTier2).toBe('manual longtail');
-    expect(confirmWithModal).toHaveBeenCalledWith(
-      '低置信度字段',
-      '字段“Tier 2 长尾词”的提取置信度为 65%，低于自动填充阈值。是否仍然覆盖当前内容？',
-      '',
-      '仍然覆盖'
-    );
-    expect(ctx.saveState).not.toHaveBeenCalled();
-  });
-
-  it('normalizes PromptLab target market names before localized spec extraction', async () => {
-    const ctx = createContext({ targetMarket: 'German' });
-    setAnalysisReport(fullReportWithSizeSpec());
-
-    await extractSingleField(ctx, 'specs');
-
-    expect(ctx.profile.specs).toContain('Kapazität: 50ml');
-  });
-
-  it('checks extractability against the unwrapped report payload', () => {
-    setAnalysisReport({
-      metadata: { marketplace: 'DE' },
-      analysisReport: semanticReport(),
-    });
-
-    expect(canExtractDNA()).toBe(true);
-  });
+  expect(canExtractDNA()).toBe(true);
 });

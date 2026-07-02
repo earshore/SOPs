@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { cssLoader } from '@/common/utils/cssLoader';
 
 const usedHrefs: string[] = [];
@@ -20,7 +20,6 @@ function dispatchLinkEvent(href: string, type: 'load' | 'error'): void {
   getLink(href).dispatchEvent(new Event(type));
 }
 
-describe('cssLoader', () => {
   beforeEach(() => {
     document.head.innerHTML = '';
     vi.spyOn(performance, 'now').mockReturnValue(100);
@@ -139,4 +138,3 @@ describe('cssLoader', () => {
     expect([...document.head.querySelectorAll('link')].some((link) => link.getAttribute('href') === href)).toBe(false);
     expect(cssLoader.getStats().loading).toBe(0);
   });
-});

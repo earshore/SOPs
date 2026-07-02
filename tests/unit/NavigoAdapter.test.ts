@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import {
   NavigoAdapter,
   createRouter,
@@ -91,7 +91,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('NavigoAdapter', () => {
   it('constructs Navigo and registers normalized routes', () => {
     const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
     const adapter = new NavigoAdapter({
@@ -262,4 +261,3 @@ describe('NavigoAdapter', () => {
     expect(adapter.hasRoute('/orders')).toBe(false);
     expect(adapter.getCurrentRoute()).toBeNull();
   });
-});

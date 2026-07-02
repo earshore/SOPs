@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import type { KeywordHunterSnapshot } from '@/types/modules-business';
 import { KeywordHunterSnapshotService } from '@/modules/app_center/views/keyword_hunter/services/snapshotService';
 import { LocalDataStore } from '@/services/localDataStore';
@@ -121,7 +121,6 @@ function resetTracker(): void {
   };
 }
 
-describe('KeywordHunterSnapshotService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetTracker();
@@ -255,4 +254,3 @@ describe('KeywordHunterSnapshotService', () => {
 
     expect(mocks.removeStorage).toHaveBeenCalledWith('keyword_hunter_snapshots');
   });
-});

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import { createScraperPanel } from '@/modules/app_center/views/master_analysis/scraper/components/ScraperPanel';
 import { StorageService } from '@/services/storageService';
 import { showToast } from '@/common/ui';
@@ -195,7 +195,6 @@ beforeEach(() => {
   scraperMocks.deleteReviewCore.mockResolvedValue({ success: true, data: { products: [] } });
 });
 
-describe('ScraperPanel current factory', () => {
   it('computes input, task, site, and history branch states', () => {
     const panel = createScraperPanel() as ScraperPanel;
     panel.inputAsins = 'B08N5WRWNW invalid B0ABCDEFGH';
@@ -520,4 +519,3 @@ describe('ScraperPanel current factory', () => {
     expect(scraperMocks.emitHistoryUpdated).not.toHaveBeenCalled();
     expect(panel.isScraping).toBe(false);
   });
-});
