@@ -1,10 +1,5 @@
-export {
-  readThresholds,
-  renderThresholdFields,
-  restoreThresholds,
-  saveThresholds,
-  getThresholdInputs,
-} from './thresholdSettings';
+export { readThresholds, restoreThresholds, saveThresholds } from './thresholdSettings';
+export { renderThresholdFields, getThresholdInputs } from './thresholdFieldsRenderer';
 export {
   readAnalysisSettings,
   restoreAnalysisSettings,

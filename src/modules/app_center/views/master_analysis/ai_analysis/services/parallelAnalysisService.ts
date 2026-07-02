@@ -169,6 +169,15 @@ interface AnalysisRunContext {
   onTaskFailed?: (update: ParallelAnalysisResultUpdate) => void;
 }
 
+interface PendingAnalysisExecutionContext {
+  context: AnalysisRunContext;
+  tasks: AnalysisTask[];
+  cachedTasks: AnalysisTask[];
+  product: Product;
+  language: string;
+  config: ParallelAnalysisConfig;
+}
+
 const TARGET_TO_FIELD: Record<string, keyof FullAnalysisReport> = {
   'title-keywords': 'title-keywords',
   'selling-points': 'selling-points',
@@ -860,6 +869,122 @@ function handleFirstAnalysisResponse(
   );
 }
 
+function resolveParallelAnalysisConfig(
+  config: Partial<ParallelAnalysisConfig>
+): ParallelAnalysisConfig {
+  return {
+    maxConcurrency: config.maxConcurrency ?? DEFAULT_ANALYSIS_CONCURRENCY,
+    enableCache: config.enableCache ?? true,
+    streamResults: config.streamResults ?? false,
+    failureStrategy: config.failureStrategy ?? 'continue',
+    preloadedCachedResults: config.preloadedCachedResults,
+    retryBudget: config.retryBudget,
+    stopOnFailure: config.stopOnFailure ?? false,
+    onTaskComplete: config.onTaskComplete,
+    onTaskFailed: config.onTaskFailed,
+  };
+}
+
+function createAnalysisTasks(targetIds: string[]): AnalysisTask[] {
+  return targetIds.map(targetId => ({
+    targetId,
+    status: 'pending' as const,
+  }));
+}
+
+function createAnalysisRunContext(
+  targetIds: string[],
+  product: Product,
+  language: string,
+  config: ParallelAnalysisConfig,
+  onProgress: (progress: number, step: string) => void
+): AnalysisRunContext {
+  return {
+    report: {},
+    targetIds,
+    language,
+    reviewSampling: getReviewSamplingMetadata(product),
+    totalTasks: targetIds.length,
+    successCount: 0,
+    failedCount: 0,
+    streamResults: config.streamResults,
+    onProgress,
+    onTaskComplete: config.onTaskComplete,
+    onTaskFailed: config.onTaskFailed,
+  };
+}
+
+function replayCachedAnalysisTasks(
+  context: AnalysisRunContext,
+  tasks: AnalysisTask[],
+  cachedTasks: AnalysisTask[]
+): void {
+  cachedTasks.forEach((task, index) => {
+    handleSettledAnalysisTask(context, task, index + 1, getCurrentRunningTaskIds(tasks));
+  });
+}
+
+async function executePendingAnalysisTasks(input: PendingAnalysisExecutionContext): Promise<void> {
+  const { context, tasks, cachedTasks, product, language, config } = input;
+  const pendingTasks = tasks.filter(task => task.status === 'pending');
+  if (pendingTasks.length === 0) {
+    return;
+  }
+
+  const effectiveMaxConcurrency = normalizeMaxConcurrency(
+    config.maxConcurrency,
+    pendingTasks.length
+  );
+  const llmConfig = await getLLMConfig();
+
+  await executeTasksWithConcurrency({
+    tasks: pendingTasks,
+    product,
+    config: llmConfig,
+    language,
+    maxConcurrency: effectiveMaxConcurrency,
+    enableCache: config.enableCache,
+    skipCacheRead: true,
+    retryBudget: config.retryBudget,
+    stopOnFailure: config.stopOnFailure,
+    onTaskSettled: (task, completedCount, _totalCount, currentTasks) => {
+      handleSettledAnalysisTask(context, task, cachedTasks.length + completedCount, currentTasks);
+    },
+    onTaskFirstResponse: (task, completedCount, _totalCount, currentTasks) => {
+      handleFirstAnalysisResponse(context, task, cachedTasks.length + completedCount, currentTasks);
+    },
+  });
+}
+
+function assertParallelAnalysisSucceeded(
+  context: AnalysisRunContext,
+  failureStrategy: ParallelAnalysisConfig['failureStrategy']
+): void {
+  if (context.failedCount === 0 || failureStrategy !== 'abort') {
+    return;
+  }
+
+  throw new BusinessError(
+    `分析失败: ${context.failedCount}/${context.totalTasks} 个目标分析失败`,
+    'PARALLEL_ANALYSIS_001',
+    {
+      module: 'ParallelAnalysisService',
+      action: 'runParallelAnalysis',
+      failedCount: context.failedCount,
+      totalTasks: context.totalTasks,
+    }
+  );
+}
+
+function buildFinalAnalysisReport(context: AnalysisRunContext): FullAnalysisReport {
+  return buildReportSnapshot(
+    context.report,
+    context.targetIds,
+    context.language,
+    context.reviewSampling
+  );
+}
+
 /**
  * 并行 AI 分析主函数
  */
@@ -870,102 +995,34 @@ export async function runParallelAIAnalysis(
   language: string = 'en',
   config: Partial<ParallelAnalysisConfig> = {}
 ): Promise<FullAnalysisReport> {
-  const {
-    maxConcurrency = DEFAULT_ANALYSIS_CONCURRENCY,
-    enableCache = true,
-    streamResults = false,
-    failureStrategy = 'continue',
-    preloadedCachedResults,
-    retryBudget,
-    stopOnFailure = false,
-    onTaskComplete,
-    onTaskFailed,
-  } = config;
-
-  const tasks: AnalysisTask[] = targetIds.map(targetId => ({
-    targetId,
-    status: 'pending' as const,
-  }));
+  const analysisConfig = resolveParallelAnalysisConfig(config);
+  const tasks = createAnalysisTasks(targetIds);
   const cacheIdentity = getConfiguredCacheIdentity();
   const cachedTasks = await hydrateCachedAnalysisTasks(tasks, product, language, {
-    enableCache,
-    preloadedCachedResults,
+    enableCache: analysisConfig.enableCache,
+    preloadedCachedResults: analysisConfig.preloadedCachedResults,
     cacheIdentity,
   });
-
-  const runContext: AnalysisRunContext = {
-    report: {},
+  const runContext = createAnalysisRunContext(
     targetIds,
+    product,
     language,
-    reviewSampling: getReviewSamplingMetadata(product),
-    totalTasks: tasks.length,
-    successCount: 0,
-    failedCount: 0,
-    streamResults,
-    onProgress,
-    onTaskComplete,
-    onTaskFailed,
-  };
-
-  cachedTasks.forEach((task, index) => {
-    handleSettledAnalysisTask(runContext, task, index + 1, getCurrentRunningTaskIds(tasks));
-  });
-
-  const pendingTasks = tasks.filter(task => task.status === 'pending');
-
-  if (pendingTasks.length > 0) {
-    const effectiveMaxConcurrency = normalizeMaxConcurrency(maxConcurrency, pendingTasks.length);
-    const llmConfig = await getLLMConfig();
-
-    await executeTasksWithConcurrency({
-      tasks: pendingTasks,
-      product,
-      config: llmConfig,
-      language,
-      maxConcurrency: effectiveMaxConcurrency,
-      enableCache,
-      skipCacheRead: true,
-      retryBudget,
-      stopOnFailure,
-      onTaskSettled: (task, completedCount, _totalCount, currentTasks) => {
-        handleSettledAnalysisTask(
-          runContext,
-          task,
-          cachedTasks.length + completedCount,
-          currentTasks
-        );
-      },
-      onTaskFirstResponse: (task, completedCount, _totalCount, currentTasks) => {
-        handleFirstAnalysisResponse(
-          runContext,
-          task,
-          cachedTasks.length + completedCount,
-          currentTasks
-        );
-      },
-    });
-  }
-
-  const finalReport = buildReportSnapshot(
-    runContext.report,
-    targetIds,
-    language,
-    runContext.reviewSampling
+    analysisConfig,
+    onProgress
   );
 
-  if (runContext.failedCount > 0 && failureStrategy === 'abort') {
-    throw new BusinessError(
-      `分析失败: ${runContext.failedCount}/${runContext.totalTasks} 个目标分析失败`,
-      'PARALLEL_ANALYSIS_001',
-      {
-        module: 'ParallelAnalysisService',
-        action: 'runParallelAnalysis',
-        failedCount: runContext.failedCount,
-        totalTasks: runContext.totalTasks,
-      }
-    );
-  }
+  replayCachedAnalysisTasks(runContext, tasks, cachedTasks);
+  await executePendingAnalysisTasks({
+    context: runContext,
+    tasks,
+    cachedTasks,
+    product,
+    language,
+    config: analysisConfig,
+  });
 
+  const finalReport = buildFinalAnalysisReport(runContext);
+  assertParallelAnalysisSucceeded(runContext, analysisConfig.failureStrategy);
   onProgress(100, `分析完成! 成功: ${runContext.successCount}, 失败: ${runContext.failedCount}`);
 
   return finalReport;

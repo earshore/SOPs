@@ -64,6 +64,7 @@ tests/test-results/
 /playwright-report/
 /test-results/
 playwright/.cache/
+.playwright-cli/
 /output/
 
 # Screenshots (保留目录结构，忽略截图文件)
@@ -87,11 +88,29 @@ tests/**/*.png
 
 # ESLint 和代码质量报告
 eslint-report.json
+eslint-fix-report-*.md
 eslint-unused*.json
+commented-code-report-*.html
+commented-code-report-*.md
+todo-report-*.html
+todo-report-*.md
+page-load-report.json
 tests/quality/eslint-output.json
+tests/quality/jscpd-report.*
+tests/quality/quality-history.json
+tests/quality/quality-report-*.html
+tests/quality/quality-report-*.json
+tests/quality/quality-trend.html
+tests/quality/tech-debt-*.html
+tests/quality/tech-debt-*.json
+tests/quality/unused-code-report.html
+tests/quality/unused-code-report.json
 tests/quality/reports/
+complexity-report-*.html
+complexity-report-*.md
 unused-imports-report-*.html
 unused-imports-report-*.json
+docs/css-module-analysis-report.md
 test-output.txt
 
 # ==============================================================================
@@ -198,6 +217,7 @@ temp/
 **/*.bak
 **/*.html.backup
 tools/backups/
+tools/patches/
 **/backups/
 
 # ==============================================================================
@@ -205,9 +225,18 @@ tools/backups/
 # ==============================================================================
 # AI Assistants
 .agent/
+.claude/
+.codebuddy/
+.codex/
 .gemini/
 .cursor/
 .copilot/
+.workbuddy/
+.mcp.json
+
+# Kiro local machine state
+.kiro/hooks/
+.kiro/settings/
 
 # Development artifacts
 test-new-llm-service.html
@@ -228,6 +257,10 @@ wrangler.toml.local
 tools/naming-validator/dist/
 tools/naming-validator/node_modules/
 tools/naming-validator/css_report.md
+
+# Generated example exports
+examples/Amz_*.json
+examples/analysis-report-*.json
 
 # Performance test reports
 tests/performance/baseline-reports/

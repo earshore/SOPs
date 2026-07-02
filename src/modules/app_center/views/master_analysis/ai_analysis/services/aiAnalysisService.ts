@@ -17,6 +17,18 @@ import type { ILoggerService } from '@/types/services';
 // 获取 logger 实例
 const logger = container.resolve<ILoggerService>('logger');
 
+// 目标ID到报告字段的映射
+const TARGET_TO_FIELD: Record<string, keyof FullAnalysisReport> = {
+  'title-keywords': 'title-keywords',
+  'selling-points': 'selling-points',
+  'fatal-flaws': 'fatal-flaws',
+  'wow-moments': 'wow-moments',
+  'hesitation-points': 'hesitation-points',
+  'buyer-profile': 'buyer-profile',
+  'vocab-gap': 'vocab-gap',
+  'promise-reality': 'promise-reality',
+};
+
 /**
  * LLM 配置接口
  */
@@ -166,74 +178,66 @@ async function analyzeTarget(
   }
 }
 
-/**
- * 执行完整的 AI 分析
- * @returns 返回完整的原始报告
- */
-export async function runAIAnalysis(
+function appendTargetResult(
+  report: Partial<FullAnalysisReport>,
+  targetId: string,
+  result: unknown
+): void {
+  const fieldName = TARGET_TO_FIELD[targetId];
+  if (!fieldName || !result) {
+    return;
+  }
+
+  const actualResult = unwrapAnalysisResult(result, fieldName);
+  if (!actualResult) {
+    return;
+  }
+
+  (report as Record<string, unknown>)[fieldName] = actualResult;
+  logger.debug('[AI分析] 分析成功，数据已添加到报告', undefined, 'AIAnalysisService');
+}
+
+async function analyzeTargets(
   targetIds: string[],
   product: Product,
-  onProgress: (progress: number, step: string) => void,
-  language: string = 'en'
-): Promise<FullAnalysisReport> {
-  const config = await getLLMConfig();
+  config: LLMConfig,
+  language: string,
+  onProgress: (progress: number, step: string) => void
+): Promise<Partial<FullAnalysisReport>> {
   const report: Partial<FullAnalysisReport> = {};
-
   const totalTargets = targetIds.length;
   let completedTargets = 0;
 
-  // 目标ID到报告字段的映射
-  const targetToField: Record<string, keyof FullAnalysisReport> = {
-    'title-keywords': 'title-keywords',
-    'selling-points': 'selling-points',
-    'fatal-flaws': 'fatal-flaws',
-    'wow-moments': 'wow-moments',
-    'hesitation-points': 'hesitation-points',
-    'buyer-profile': 'buyer-profile',
-    'vocab-gap': 'vocab-gap',
-    'promise-reality': 'promise-reality',
-  };
-
-  // 逐个分析目标
   for (const targetId of targetIds) {
+    const progress = Math.round((completedTargets / totalTargets) * 100);
     try {
-      const progress = Math.round((completedTargets / totalTargets) * 100);
       onProgress(progress, `正在分析: ${targetId}...`);
-
       const result = await analyzeTarget(targetId, product, config, language, step => {
         onProgress(progress, step);
       });
 
-      // 验证并添加结果到报告中
-      const fieldName = targetToField[targetId];
-      if (fieldName && result) {
-        const actualResult = unwrapAnalysisResult(result, fieldName);
-        if (actualResult) {
-          (report as Record<string, unknown>)[fieldName] = actualResult;
-          logger.debug('[AI分析] 分析成功，数据已添加到报告', undefined, 'AIAnalysisService');
-        }
-      }
-
-      completedTargets++;
+      appendTargetResult(report, targetId, result);
     } catch (error) {
       logger.error('[AI分析] 失败:', error, 'AIAnalysisService');
       // 继续分析其他目标,不中断整个流程
+    } finally {
       completedTargets++;
     }
   }
 
-  onProgress(100, '分析完成!');
+  return report;
+}
 
-  // 计算置信度
+function calculateReportConfidence(report: Partial<FullAnalysisReport>): {
+  confidenceScores: Record<string, number>;
+  overallConfidence: number;
+} {
   logger.debug('[AI分析] 开始计算置信度...', undefined, 'AIAnalysisService');
   logger.debug('[AI分析] 报告键:', Object.keys(report).join(', '), 'AIAnalysisService');
 
-  let confidenceScores: Record<string, number> = {};
-  let overallConfidence = 0;
-
   try {
-    confidenceScores = calculateFullReportConfidence(report as Record<string, unknown>);
-    overallConfidence = calculateOverallConfidence(confidenceScores);
+    const confidenceScores = calculateFullReportConfidence(report as Record<string, unknown>);
+    const overallConfidence = calculateOverallConfidence(confidenceScores);
 
     logger.debug(
       '[AI分析] 置信度计算完成:',
@@ -244,27 +248,33 @@ export async function runAIAnalysis(
       },
       'AIAnalysisService'
     );
+
+    return { confidenceScores, overallConfidence };
   } catch (error) {
     logger.error('[AI分析] 置信度计算失败:', error, 'AIAnalysisService');
-    // 使用默认值
-    confidenceScores = {};
-    overallConfidence = 0;
+    return { confidenceScores: {}, overallConfidence: 0 };
   }
+}
 
-  // 将置信度附加到报告元数据
+function buildReportWithMetadata(
+  report: Partial<FullAnalysisReport>,
+  targetIds: string[],
+  product: Product,
+  language: string
+): FullAnalysisReport {
+  const { confidenceScores, overallConfidence } = calculateReportConfidence(report);
   const reportWithConfidence = {
     ...report,
     _metadata: {
       confidence: confidenceScores,
-      overallConfidence: overallConfidence,
+      overallConfidence,
       analyzedAt: new Date().toISOString(),
-      targetIds: targetIds,
-      language: language,
+      targetIds,
+      language,
       reviewSampling: getReviewSamplingMetadata(product),
     },
   };
 
-  // 验证 _metadata 已正确附加
   logger.debug(
     '[AI分析] 报告包含 _metadata:',
     !!reportWithConfidence._metadata,
@@ -281,8 +291,24 @@ export async function runAIAnalysis(
     'AIAnalysisService'
   );
 
-  // 返回完整的原始报告（包含置信度）
   return reportWithConfidence as FullAnalysisReport;
+}
+
+/**
+ * 执行完整的 AI 分析
+ * @returns 返回完整的原始报告
+ */
+export async function runAIAnalysis(
+  targetIds: string[],
+  product: Product,
+  onProgress: (progress: number, step: string) => void,
+  language: string = 'en'
+): Promise<FullAnalysisReport> {
+  const config = await getLLMConfig();
+  const report = await analyzeTargets(targetIds, product, config, language, onProgress);
+
+  onProgress(100, '分析完成!');
+  return buildReportWithMetadata(report, targetIds, product, language);
 }
 
 export { validateAnalysisResult };

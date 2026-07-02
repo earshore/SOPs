@@ -17,6 +17,7 @@ import { getGrowthExportFilter, getWasteExportFilter } from './filters';
 import { getInput, getTextarea, setAnalyzeButtonState, setText } from './dom';
 import { bindPpcEvents } from './eventBindings';
 import { inferReportTypeFromText } from './reportTypeInference';
+import { createListenerRegistry } from './listenerRegistry';
 import {
   readAnalysisSettings,
   readReportSelection,
@@ -42,16 +43,10 @@ export { parseReport } from './delimitedReport';
 export { buildActionCsv, buildSummaryText } from './exporters';
 export { xlsxArrayBufferToDelimitedText } from './xlsx';
 
-interface ListenerRecord {
-  element: EventTarget;
-  type: string;
-  handler: EventListenerOrEventListenerObject;
-}
-
-let listeners: ListenerRecord[] = [];
 let analyzedRows: AnalyzedRow[] = [];
 let sourceText = '';
 let activeReportType: ReportType = 'search_term';
+const listenerRegistry = createListenerRegistry();
 
 const actionListState = createActionListState({
   getRows: () => analyzedRows,
@@ -112,12 +107,11 @@ export const mount = safeMount(mountInternal, { moduleName: 'PPC 搜索词分析
 
 export function unmount(): void {
   cancelActiveAnalysis();
-  listeners.forEach(({ element, type, handler }) => element.removeEventListener(type, handler));
-  listeners = [];
+  listenerRegistry.clear();
 }
 
 function bindEvents(container: HTMLElement): void {
-  bindPpcEvents(container, addListener, {
+  bindPpcEvents(container, listenerRegistry.add, {
     importReport: () => handleReportFileImport(container, reportImportCallbacks),
     analyzeTextarea: () => analyzeTextarea(container),
     loadSample: () => loadSampleReport(container, reportImportCallbacks),
@@ -149,16 +143,6 @@ function bindEvents(container: HTMLElement): void {
     handleThresholdChange: () => handleThresholdChange(container),
     handleAnalysisSettingsChange: () => handleAnalysisSettingsChange(container),
   });
-}
-
-function addListener(
-  element: EventTarget | null,
-  type: string,
-  handler: EventListenerOrEventListenerObject
-): void {
-  if (!element) return;
-  element.addEventListener(type, handler);
-  listeners.push({ element, type, handler });
 }
 
 async function analyzeTextarea(container: HTMLElement): Promise<void> {

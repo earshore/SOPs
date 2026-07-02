@@ -1,0 +1,60 @@
+.ppc-import-grid {
+  flex: 1 1 auto;
+  align-items: stretch;
+}
+
+.ppc-paste-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ppc-dropzone {
+  display: flex;
+  height: 100%;
+  min-height: 200px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed rgba(37, 99, 235, 0.28);
+  border-radius: 8px;
+  background: var(--color-blue-50);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.ppc-dropzone:hover {
+  border-color: rgba(37, 99, 235, 0.52);
+}
+
+.ppc-search-app .ppc-paste-column .ppc-textarea {
+  display: block;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 200px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #0f172a;
+  line-height: 1.6;
+  resize: vertical;
+  transition:
+    border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.ppc-search-app .ppc-paste-column .ppc-textarea:focus {
+  background: #ffffff;
+  outline: none;
+}
+
+.ppc-status-line {
+  min-height: 22px;
+  margin-top: 14px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}

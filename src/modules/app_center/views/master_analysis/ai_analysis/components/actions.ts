@@ -9,6 +9,7 @@ import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { parseAnalysisReport } from '../services/analysisService';
 import {
   getCachedAnalysisResults,
+  type ParallelAnalysisResultUpdate,
   runParallelAIAnalysis,
 } from '../services/parallelAnalysisService';
 import { resolveAnalysisSchedulePlan } from '../services/analysisScheduler';
@@ -24,6 +25,21 @@ import { BusinessError } from '@common/errors/AppError';
 import { getPerformanceSettings } from './PerformanceSettings';
 import { emitHistoryUpdated } from '../../services/historyEvents';
 import { getScrapedDataFingerprint } from '../../services/reportIdentity';
+
+type AnalysisSchedulePlan = ReturnType<typeof resolveAnalysisSchedulePlan>;
+type PerformanceSettings = ReturnType<typeof getPerformanceSettings>;
+
+interface PreparedAnalysisRun {
+  selectedTargets: string[];
+  sourceBinding: AnalysisSourceBinding;
+  mergedProduct: Product;
+  language: string;
+  perfSettings: PerformanceSettings;
+  preloadedCachedResults: Record<string, unknown>;
+  schedulePlan: AnalysisSchedulePlan;
+  streamResults: boolean;
+}
+
 /**
  * 切换 ASIN 选择
  */
@@ -318,6 +334,152 @@ function syncAnalysisProgress(context: AlpineContext, progress: number, currentS
   appStore.getState().updateAnalysis({ progress, currentStep });
 }
 
+function shouldSkipAnalysisAction(context: AlpineContext, currentProducts: Product[]): boolean {
+  return (
+    context.selectedTargets.length === 0 || currentProducts.length === 0 || context.isAnalyzing
+  );
+}
+
+function startAnalysisAction(context: AlpineContext): void {
+  context.isAnalyzing = true;
+  syncAnalysisProgress(context, 0, '正在准备分析...');
+  resetAnalysisReport(context);
+  appStore.getState().updateAnalysis({ isAnalyzing: true });
+}
+
+function finishAnalysisAction(context: AlpineContext): void {
+  context.isAnalyzing = false;
+  appStore.getState().updateAnalysis({ isAnalyzing: false });
+}
+
+function getProductsForAnalysis(context: AlpineContext): Product[] {
+  const products = getRealProducts(context.selectedAsins);
+  if (products.length > 0) {
+    return products;
+  }
+
+  throw new BusinessError(
+    '无法获取产品数据,请确保已从数据采集或数据管理导入数据',
+    'AI_ACTIONS_001',
+    {
+      module: 'AIAnalysisActions',
+      action: 'runAnalysisAction',
+      selectedAsins: context.selectedAsins,
+    }
+  );
+}
+
+async function prepareAnalysisRun(
+  context: AlpineContext,
+  selectedTargets: string[],
+  sourceBinding: AnalysisSourceBinding
+): Promise<PreparedAnalysisRun> {
+  const products = getProductsForAnalysis(context);
+  showToast(`正在调用 AI 分析 ${products.length} 个产品...`, { type: 'info' });
+
+  const mergedProduct = mergeProducts(products);
+  const language = getMarketLanguage();
+  const perfSettings = getPerformanceSettings();
+  const preloadedCachedResults = await getCachedAnalysisResults(
+    selectedTargets,
+    mergedProduct,
+    language,
+    perfSettings.enableCache
+  );
+  const schedulePlan = resolveAnalysisSchedulePlan({
+    preference: perfSettings.schedulingPreference,
+    targetIds: selectedTargets,
+    product: mergedProduct,
+    language,
+    enableCache: perfSettings.enableCache,
+    cachedTargetIds: Object.keys(preloadedCachedResults),
+  });
+
+  return {
+    selectedTargets,
+    sourceBinding,
+    mergedProduct,
+    language,
+    perfSettings,
+    preloadedCachedResults,
+    schedulePlan,
+    streamResults: schedulePlan.streamMode === 'progressive',
+  };
+}
+
+function createStreamingReportHandler(
+  context: AlpineContext,
+  sourceBinding: AnalysisSourceBinding,
+  language: string,
+  streamResults: boolean
+): ((update: ParallelAnalysisResultUpdate) => void) | undefined {
+  if (!streamResults) {
+    return undefined;
+  }
+
+  return ({ report }) => {
+    if (isCurrentAnalysisSource(sourceBinding)) {
+      syncAnalysisReport(context, withAnalysisSourceBinding(report, sourceBinding, language));
+    }
+  };
+}
+
+async function runPreparedParallelAnalysis(
+  context: AlpineContext,
+  preparedRun: PreparedAnalysisRun
+): Promise<FullAnalysisReport | null> {
+  const { schedulePlan, perfSettings, preloadedCachedResults, streamResults } = preparedRun;
+  const analysisReport = await runParallelAIAnalysis(
+    schedulePlan.taskOrder,
+    preparedRun.mergedProduct,
+    (progress: number, step: string) => {
+      syncAnalysisProgress(context, progress, step);
+    },
+    preparedRun.language,
+    {
+      maxConcurrency: schedulePlan.maxConcurrency,
+      enableCache: perfSettings.enableCache,
+      streamResults,
+      failureStrategy: schedulePlan.failureStrategy,
+      preloadedCachedResults,
+      retryBudget: schedulePlan.retryBudget,
+      stopOnFailure: schedulePlan.failureMode === 'complete_required',
+      onTaskComplete: createStreamingReportHandler(
+        context,
+        preparedRun.sourceBinding,
+        preparedRun.language,
+        streamResults
+      ),
+    }
+  );
+
+  if (!isCurrentAnalysisSource(preparedRun.sourceBinding)) {
+    resetAnalysisReport(context);
+    showToast('采集数据已变更，本次分析结果已丢弃，请重新分析', { type: 'warning' });
+    return null;
+  }
+
+  return withAnalysisSourceBinding(analysisReport, preparedRun.sourceBinding, preparedRun.language);
+}
+
+async function completeAnalysisAction(
+  context: AlpineContext,
+  sourceBinding: AnalysisSourceBinding,
+  analysisReport: FullAnalysisReport
+): Promise<void> {
+  syncAnalysisReport(context, analysisReport);
+  syncAnalysisProgress(context, 100, '分析完成');
+  await persistAnalysisReportToSource(sourceBinding, analysisReport);
+  showToast('分析完成！', { type: 'success' });
+}
+
+function handleAnalysisActionError(context: AlpineContext, error: unknown): void {
+  const message = (error as Error).message;
+  syncAnalysisProgress(context, context.progress, `分析失败: ${message}`);
+  console.error('[用户动作] 分析失败:', error);
+  showToast(`分析失败: ${message}`, { type: 'error' });
+}
+
 /**
  * 执行分析
  */
@@ -325,104 +487,27 @@ export async function runAnalysisAction(
   context: AlpineContext,
   currentProducts: Product[]
 ): Promise<void> {
-  if (context.selectedTargets.length === 0 || currentProducts.length === 0 || context.isAnalyzing) {
+  if (shouldSkipAnalysisAction(context, currentProducts)) {
     return;
   }
 
   const selectedTargets = [...context.selectedTargets];
   const sourceBinding = createAnalysisSourceBinding(context);
 
-  context.isAnalyzing = true;
-  syncAnalysisProgress(context, 0, '正在准备分析...');
-  resetAnalysisReport(context);
-  appStore.getState().updateAnalysis({ isAnalyzing: true });
+  startAnalysisAction(context);
 
   try {
-    const products = getRealProducts(context.selectedAsins);
-
-    if (products.length === 0) {
-      throw new BusinessError(
-        '无法获取产品数据,请确保已从数据采集或数据管理导入数据',
-        'AI_ACTIONS_001',
-        {
-          module: 'AIAnalysisActions',
-          action: 'runAnalysisAction',
-          selectedAsins: context.selectedAsins,
-        }
-      );
-    }
-
-    showToast(`正在调用 AI 分析 ${products.length} 个产品...`, { type: 'info' });
-
-    const mergedProduct = mergeProducts(products);
-    const language = getMarketLanguage();
-    const perfSettings = getPerformanceSettings();
-    const preloadedCachedResults = await getCachedAnalysisResults(
-      selectedTargets,
-      mergedProduct,
-      language,
-      perfSettings.enableCache
-    );
-    const cachedTargetIds = Object.keys(preloadedCachedResults);
-    const schedulePlan = resolveAnalysisSchedulePlan({
-      preference: perfSettings.schedulingPreference,
-      targetIds: selectedTargets,
-      product: mergedProduct,
-      language,
-      enableCache: perfSettings.enableCache,
-      cachedTargetIds,
-    });
-    const streamResults = schedulePlan.streamMode === 'progressive';
-
-    const analysisReport = await runParallelAIAnalysis(
-      schedulePlan.taskOrder,
-      mergedProduct,
-      (progress: number, step: string) => {
-        syncAnalysisProgress(context, progress, step);
-      },
-      language,
-      {
-        maxConcurrency: schedulePlan.maxConcurrency,
-        enableCache: perfSettings.enableCache,
-        streamResults,
-        failureStrategy: schedulePlan.failureStrategy,
-        preloadedCachedResults,
-        retryBudget: schedulePlan.retryBudget,
-        stopOnFailure: schedulePlan.failureMode === 'complete_required',
-        onTaskComplete: streamResults
-          ? ({ report }) => {
-              if (isCurrentAnalysisSource(sourceBinding)) {
-                syncAnalysisReport(
-                  context,
-                  withAnalysisSourceBinding(report, sourceBinding, language)
-                );
-              }
-            }
-          : undefined,
-      }
-    );
-
-    if (!isCurrentAnalysisSource(sourceBinding)) {
-      resetAnalysisReport(context);
-      showToast('采集数据已变更，本次分析结果已丢弃，请重新分析', { type: 'warning' });
+    const preparedRun = await prepareAnalysisRun(context, selectedTargets, sourceBinding);
+    const boundAnalysisReport = await runPreparedParallelAnalysis(context, preparedRun);
+    if (!boundAnalysisReport) {
       return;
     }
 
-    const boundAnalysisReport = withAnalysisSourceBinding(analysisReport, sourceBinding, language);
-    syncAnalysisReport(context, boundAnalysisReport);
-    syncAnalysisProgress(context, 100, '分析完成');
-
-    await persistAnalysisReportToSource(sourceBinding, boundAnalysisReport);
-
-    showToast('分析完成！', { type: 'success' });
+    await completeAnalysisAction(context, sourceBinding, boundAnalysisReport);
   } catch (error) {
-    const message = (error as Error).message;
-    syncAnalysisProgress(context, context.progress, `分析失败: ${message}`);
-    console.error('[用户动作] 分析失败:', error);
-    showToast(`分析失败: ${message}`, { type: 'error' });
+    handleAnalysisActionError(context, error);
   } finally {
-    context.isAnalyzing = false;
-    appStore.getState().updateAnalysis({ isAnalyzing: false });
+    finishAnalysisAction(context);
   }
 }
 

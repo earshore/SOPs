@@ -1,0 +1,36 @@
+.ppc-flow-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.ppc-flow-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
+  border-radius: 8px;
+  background: var(--surface-card, #ffffff);
+  color: #334155;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ppc-flow-steps span {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 22px;
+  border-radius: 999px;
+  background: #cffafe;
+  color: #0e7490;
+  font-size: 12px;
+  font-weight: 900;
+}
