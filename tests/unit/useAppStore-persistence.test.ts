@@ -70,6 +70,57 @@ describe('useAppStore persistence', () => {
     expect(persisted.state.scraper.currentHistoryId).toBeNull();
   });
 
+  it('恢复 app-storage 时重置刷新后的瞬态 UI 和 Scraper 状态', async () => {
+    localStorage.setItem(
+      'app-storage',
+      JSON.stringify({
+        version: 0,
+        state: {
+          ui: {
+            currentTab: 'app-center',
+            currentDataTab: 'preview',
+            currentReportTab: 'report',
+            theme: 'dark',
+            loading: true
+          },
+          scraper: {
+            isScraping: true,
+            status: 'scraping',
+            selectedSite: 'US',
+            scrapedData: { products: [] },
+            currentHistoryId: 'running-history',
+            inputAsins: 'B000000001',
+            progress: 72,
+            error: 'still running',
+            currentDataTab: 'json'
+          }
+        }
+      })
+    );
+
+    const { appStore } = await import('@/stores/useAppStore');
+    const state = appStore.getState();
+
+    expect(state.ui.loading).toBe(false);
+    expect(state.scraper.selectedSite).toBe('US');
+    expect(state.scraper.inputAsins).toBe('B000000001');
+    expect(state.scraper.currentDataTab).toBe('json');
+    expect(state.scraper.isScraping).toBe(false);
+    expect(state.scraper.status).toBe('idle');
+    expect(state.scraper.progress).toBe(0);
+    expect(state.scraper.error).toBeUndefined();
+    expect(state.scraper.scrapedData).toBeNull();
+    expect(state.scraper.currentHistoryId).toBeNull();
+
+    const persisted = JSON.parse(localStorage.getItem('app-storage') || '{}');
+    expect(persisted.state.ui.loading).toBe(false);
+    expect(persisted.state.scraper.status).toBe('idle');
+    expect(persisted.state.scraper.progress).toBe(0);
+    expect(persisted.state.scraper.error).toBeUndefined();
+    expect(persisted.state.scraper.scrapedData).toBeNull();
+    expect(persisted.state.scraper.currentHistoryId).toBeNull();
+  });
+
   it('恢复 app-storage 时保留 PromptLab 生成历史', async () => {
     localStorage.setItem(
       'app-storage',
@@ -107,6 +158,47 @@ describe('useAppStore persistence', () => {
     expect(state.promptlab.currentPrompt).toBe('Persisted Listing Prompt');
     expect(state.promptlab.history?.[0]?.promptType).toBe('listing');
     expect(state.promptlab.history?.[0]?.historyId).toBe('hist-001');
+  });
+
+  it('恢复旧 app-storage 时限制 PromptLab 生成历史数量', async () => {
+    const history = Array.from({ length: 25 }, (_, index) => ({
+      id: `prompt-${index}`,
+      prompt: `Prompt ${index}`,
+      response: '',
+      timestamp: 1770000000000 + index,
+      promptType: 'listing' as const,
+      generatedAt: '2026-02-02T00:00:00.000Z',
+      historyId: `hist-${index}`,
+      asins: ['B000000001'],
+      marketplace: 'US',
+      profile: {
+        targetMarket: 'English',
+        keywordsTier1: 'keyword',
+        keywordsTier2: 'longtail'
+      }
+    }));
+
+    localStorage.setItem(
+      'app-storage',
+      JSON.stringify({
+        version: 0,
+        state: {
+          promptlab: {
+            history
+          }
+        }
+      })
+    );
+
+    const { appStore } = await import('@/stores/useAppStore');
+    const restoredHistory = appStore.getState().promptlab.history || [];
+
+    expect(restoredHistory).toHaveLength(20);
+    expect(restoredHistory[0].id).toBe('prompt-0');
+    expect(restoredHistory[19].id).toBe('prompt-19');
+
+    const persisted = JSON.parse(localStorage.getItem('app-storage') || '{}');
+    expect(persisted.state.promptlab.history).toHaveLength(20);
   });
 
   it('恢复 app-storage 时清空 Keyword Hunter 页面工作数据并保留设置', async () => {

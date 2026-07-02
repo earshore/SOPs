@@ -108,21 +108,9 @@ function mergePersistedAppState(persistedState: unknown, currentState: AppStore)
 
   return {
     ...currentState,
-    ui: {
-      ...currentState.ui,
-      ...(persistedState.ui || {})
-    },
-    scraper: {
-      ...currentState.scraper,
-      ...(persistedState.scraper || {}),
-      scrapedData: null,
-      currentHistoryId: null,
-      isScraping: false
-    },
-    promptlab: {
-      ...currentState.promptlab,
-      ...(persistedState.promptlab || {})
-    },
+    ui: createRefreshSafeUIState(persistedState.ui),
+    scraper: createRefreshSafeScraperState(persistedState.scraper),
+    promptlab: createPersistedPromptLabState(persistedState.promptlab),
     keywordTracker: createRefreshSafeKeywordTrackerState(persistedKeywordSettings)
   };
 }
@@ -213,6 +201,39 @@ const initialKeywordTrackerState: KeywordTrackerState = {
     type: 'manual'
   }
 };
+
+function createRefreshSafeUIState(ui?: Partial<UIState>): UIState {
+  return {
+    ...initialUIState,
+    ...(ui || {}),
+    loading: false
+  };
+}
+
+function createRefreshSafeScraperState(scraper?: Partial<ScraperState>): ScraperState {
+  return {
+    ...initialScraperState,
+    ...(scraper || {}),
+    isScraping: false,
+    status: initialScraperState.status,
+    scrapedData: null,
+    currentHistoryId: null,
+    progress: initialScraperState.progress,
+    error: undefined
+  };
+}
+
+function createPersistedPromptLabState(promptlab?: Partial<PromptLabState>): PromptLabState {
+  const history = Array.isArray(promptlab?.history)
+    ? promptlab.history.slice(0, MAX_PROMPT_HISTORY_ITEMS)
+    : initialPromptLabState.history;
+
+  return {
+    ...initialPromptLabState,
+    ...(promptlab || {}),
+    history
+  };
+}
 
 function createRefreshSafeKeywordTrackerState(
   settings?: Partial<KeywordTrackerState['settings']>
@@ -426,32 +447,9 @@ export const appStore = createStore<AppStore>()(
         name: 'app-storage',
         merge: mergePersistedAppState,
         partialize: (state) => ({
-          ui: {
-            currentTab: state.ui.currentTab,
-            currentDataTab: state.ui.currentDataTab,
-            currentReportTab: state.ui.currentReportTab,
-            theme: state.ui.theme,
-            sidebarCollapsed: state.ui.sidebarCollapsed,
-            loading: state.ui.loading
-          },
-          scraper: {
-            isScraping: false,
-            status: state.scraper.status,
-            selectedSite: state.scraper.selectedSite,
-            scrapedData: null,
-            currentHistoryId: null,
-            inputAsins: state.scraper.inputAsins,
-            expandedAsin: state.scraper.expandedAsin,
-            currentDataTab: state.scraper.currentDataTab
-          },
-          promptlab: {
-            currentPrompt: state.promptlab.currentPrompt,
-            history: state.promptlab.history,
-            userProductProfile: state.promptlab.userProductProfile,
-            selectedModel: state.promptlab.selectedModel,
-            temperature: state.promptlab.temperature,
-            maxTokens: state.promptlab.maxTokens
-          },
+          ui: createRefreshSafeUIState(state.ui),
+          scraper: createRefreshSafeScraperState(state.scraper),
+          promptlab: createPersistedPromptLabState(state.promptlab),
           keywordTracker: createRefreshSafeKeywordTrackerState(state.keywordTracker.settings)
         })
       }

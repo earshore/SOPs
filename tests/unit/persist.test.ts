@@ -385,7 +385,11 @@ describe('Persist中间件', () => {
 
     it('应该处理存储写入错误', () => {
       const mockStorage: Storage = {
-        ...localStorage,
+        length: 0,
+        clear: vi.fn(),
+        getItem: vi.fn(() => null),
+        key: vi.fn(() => null),
+        removeItem: vi.fn(),
         setItem: vi.fn(() => {
           throw new Error('Storage full');
         })
