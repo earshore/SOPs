@@ -206,6 +206,10 @@ export default defineConfig({
         sourcemap: false, // 生产环境关闭sourcemap减小体积
         // 代码分割优化
         rolldownOptions: {
+            // 常规构建保留真实 warning，只关闭 Rolldown 的插件耗时占比诊断。
+            checks: {
+                pluginTimings: false
+            },
             // 确保.ts文件被正确处理为.js
             external: [],
             output: {
