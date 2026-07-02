@@ -105,7 +105,6 @@ function cleanupBrowserEnvironment() {
   delete (global as any).navigator;
 }
 
-describe('浏览器兼容性测试', () => {
   afterEach(() => {
     cleanupBrowserEnvironment();
     vi.restoreAllMocks();
@@ -635,4 +634,3 @@ describe('浏览器兼容性测试', () => {
       expect(checkBrowserSupport('Edg/89.0')).toBe(false);
     });
   });
-});

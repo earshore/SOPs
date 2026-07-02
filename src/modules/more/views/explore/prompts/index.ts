@@ -410,6 +410,96 @@ function updateLangButtons(): void {
   });
 }
 
+function renderPromptCategory(categoryEl: HTMLElement, category: PromptCategory): void {
+  clearElement(categoryEl);
+  appendIcon(categoryEl, `fas ${category.icon}`);
+  categoryEl.appendChild(document.createTextNode(` ${category.name}`));
+}
+
+function updatePromptModalHeader(prompt: Prompt, category: PromptCategory): void {
+  const titleEl = document.getElementById('modal-prompt-title');
+  const categoryEl = document.getElementById('modal-prompt-category');
+  const modelEl = document.getElementById('modal-prompt-model');
+  const descEl = document.getElementById('modal-prompt-description');
+  const model = getModelInfo(prompt.recommendedModel);
+
+  if (titleEl) titleEl.textContent = prompt.title;
+  if (categoryEl) renderPromptCategory(categoryEl, category);
+  if (modelEl) modelEl.textContent = model.name;
+  if (descEl) descEl.textContent = prompt.description;
+}
+
+function showPromptModal(modal: HTMLElement): void {
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function handleViewPrompt(promptId: string): void {
+  const prompt = getPromptById(promptId);
+  if (!prompt) return;
+
+  currentPrompt = prompt as Prompt;
+  currentLang = 'zh';
+
+  const modal = getPromptModal();
+  if (!modal) return;
+
+  const category = getCategoryById(prompt.category);
+  if (!category) return;
+
+  updatePromptModalHeader(prompt, category);
+  updatePromptContent();
+  updateLangButtons();
+  showPromptModal(modal);
+}
+
+function handleSwitchPromptLang(lang: 'zh' | 'en'): void {
+  currentLang = lang;
+  updatePromptContent();
+  updateLangButtons();
+}
+
+function handleClosePromptModal(): void {
+  const modal = getPromptModal();
+  if (!modal) return;
+
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+function copyTextToClipboard(text: string, successMessage: string): void {
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      showToast(successMessage, { type: 'success' });
+    })
+    .catch(() => {
+      showToast('复制失败,请手动复制', { type: 'error' });
+    });
+}
+
+function handleCopyPrompt(promptId: string): void {
+  const prompt = getPromptById(promptId);
+  if (!prompt) return;
+
+  copyTextToClipboard(prompt.prompt, '提示词已复制到剪贴板');
+}
+
+function getCurrentPromptText(): string | null {
+  if (!currentPrompt) return null;
+  return currentLang === 'zh'
+    ? currentPrompt.prompt
+    : currentPrompt.promptEn || currentPrompt.prompt;
+}
+
+function handleCopyModalPrompt(): void {
+  const promptText = getCurrentPromptText();
+  if (!promptText) return;
+
+  const langName = currentLang === 'zh' ? '中文' : '英文';
+  copyTextToClipboard(promptText, `${langName}提示词已复制到剪贴板`);
+}
+
 // 扩展Window接口
 declare global {
   interface Window {
@@ -422,86 +512,11 @@ declare global {
 }
 
 function registerWindowActions(): void {
-  window.viewPrompt = (promptId: string): void => {
-    const prompt = getPromptById(promptId);
-    if (!prompt) return;
-
-    currentPrompt = prompt as Prompt;
-    currentLang = 'zh';
-
-    const modal = getPromptModal();
-    if (!modal) return;
-
-    const category = getCategoryById(prompt.category);
-    const model = getModelInfo(prompt.recommendedModel);
-
-    if (!category) return;
-
-    const titleEl = document.getElementById('modal-prompt-title');
-    const categoryEl = document.getElementById('modal-prompt-category');
-    const modelEl = document.getElementById('modal-prompt-model');
-    const descEl = document.getElementById('modal-prompt-description');
-
-    if (titleEl) titleEl.textContent = prompt.title;
-    if (categoryEl) {
-      clearElement(categoryEl);
-      appendIcon(categoryEl, `fas ${category.icon}`);
-      categoryEl.appendChild(document.createTextNode(` ${category.name}`));
-    }
-    if (modelEl) modelEl.textContent = model.name;
-    if (descEl) descEl.textContent = prompt.description;
-
-    updatePromptContent();
-    updateLangButtons();
-
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  };
-
-  window.switchPromptLang = (lang: 'zh' | 'en'): void => {
-    currentLang = lang;
-    updatePromptContent();
-    updateLangButtons();
-  };
-
-  window.closePromptModal = (): void => {
-    const modal = getPromptModal();
-    if (modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-  };
-
-  window.copyPrompt = (promptId: string): void => {
-    const prompt = getPromptById(promptId);
-    if (!prompt) return;
-
-    navigator.clipboard
-      .writeText(prompt.prompt)
-      .then(() => {
-        showToast('提示词已复制到剪贴板', { type: 'success' });
-      })
-      .catch(() => {
-        showToast('复制失败,请手动复制', { type: 'error' });
-      });
-  };
-
-  window.copyModalPrompt = (): void => {
-    if (!currentPrompt) return;
-
-    const promptText =
-      currentLang === 'zh' ? currentPrompt.prompt : currentPrompt.promptEn || currentPrompt.prompt;
-
-    navigator.clipboard
-      .writeText(promptText)
-      .then(() => {
-        const langName = currentLang === 'zh' ? '中文' : '英文';
-        showToast(`${langName}提示词已复制到剪贴板`, { type: 'success' });
-      })
-      .catch(() => {
-        showToast('复制失败,请手动复制', { type: 'error' });
-      });
-  };
+  window.viewPrompt = handleViewPrompt;
+  window.switchPromptLang = handleSwitchPromptLang;
+  window.closePromptModal = handleClosePromptModal;
+  window.copyPrompt = handleCopyPrompt;
+  window.copyModalPrompt = handleCopyModalPrompt;
 }
 
 function unregisterWindowActions(): void {

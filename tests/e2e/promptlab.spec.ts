@@ -8,7 +8,6 @@ import { test, expect } from '@playwright/test';
 import { PromptlabPage } from './pages/PromptlabPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
-test.describe('Promptlab 模块 E2E 测试', () => {
   let promptlab: PromptlabPage;
 
   test.beforeEach(async ({ page }) => {
@@ -569,4 +568,3 @@ test.describe('Promptlab 模块 E2E 测试', () => {
       console.log('✅ 平板端显示正常');
     });
   });
-});

@@ -31,7 +31,6 @@ const PERFORMANCE_BASELINE = {
   }
 };
 
-test.describe('Promptlab 模块性能测试', () => {
   let promptlab: PromptlabPage;
 
   test.beforeEach(async ({ page }) => {
@@ -589,4 +588,3 @@ test.describe('Promptlab 模块性能测试', () => {
       ).toBeLessThan(5);
     });
   });
-});

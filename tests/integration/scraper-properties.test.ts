@@ -85,7 +85,6 @@ const sitesArbitrary = fc.array(
 
 // ==================== 测试套件 ====================
 
-describe('综合属性测试 - 数据采集页面集成', () => {
   let mockState: any;
   let EventBus: any;
 
@@ -698,4 +697,3 @@ describe('综合属性测试 - 数据采集页面集成', () => {
       });
     });
   });
-});
