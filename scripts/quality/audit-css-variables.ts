@@ -69,7 +69,7 @@ const NAMING_PATTERNS = {
   letterSpacing: /^--tracking-(tighter|tight|normal|wide|wider|widest)$/,
   
   // 圆角: --rounded-{size}
-  borderRadius: /^--rounded(-none|-xs|-sm|-md|-lg|-xl|-2xl|-3xl|-full)?$/,
+  borderRadius: /^--rounded(-none|-xs|-sm|-md|-lg|-xl|-2xl|-3xl|-full|-card|-panel)?$/,
   
   // 阴影: --shadow-{size}
   boxShadow: /^--shadow(-none|-xs|-sm|-md|-lg|-xl|-2xl|-inner|-inner-lg|-primary-sm|-primary-md|-primary-lg|-up-sm|-up-md)?$/,

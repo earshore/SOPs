@@ -153,11 +153,13 @@ export class LegacyAdapter {
     // 挂载 router
     windowWithLegacy.router = this.createLegacyRouter();
 
-    console.warn(
-      '[LegacyAdapter] Global APIs installed. ' +
-        'Please migrate to ES modules: import { router } from "@router/navigo". ' +
-        `These APIs will be removed on ${LegacyAdapter.REMOVAL_DATE}.`
-    );
+    if (this.showWarnings) {
+      console.warn(
+        '[LegacyAdapter] Global APIs installed. ' +
+          'Please migrate to ES modules: import { router } from "@router/navigo". ' +
+          `These APIs will be removed on ${LegacyAdapter.REMOVAL_DATE}.`
+      );
+    }
   }
 
   /**

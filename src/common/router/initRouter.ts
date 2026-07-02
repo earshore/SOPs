@@ -81,7 +81,7 @@ function configureRouteMiddlewares(router: NavigoAdapter): void {
 }
 
 function installLegacyCompatibility(router: NavigoAdapter): void {
-  legacyInstance = createLegacyAdapter(router, true);
+  legacyInstance = createLegacyAdapter(router, false);
   legacyInstance.installGlobalAPI();
 }
 

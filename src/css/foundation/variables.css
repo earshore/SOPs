@@ -346,7 +346,6 @@
   --color-success-contrast:  #ffffff;
 
   --color-warning:           var(--color-amber-500);
-  --color-warning-light:     rgba(245, 158, 11, 0.10);
   --color-warning-dark:      var(--color-amber-600);
   --color-warning-contrast:  var(--color-slate-900);
 
@@ -427,8 +426,8 @@
   --rounded-2xl:  24px;
   --rounded-3xl:  32px;
   --rounded-full: 9999px;
-  --radius-card:  var(--rounded-md);
-  --radius-panel: var(--rounded-md);
+  --rounded-card:  var(--rounded-md);
+  --rounded-panel: var(--rounded-md);
 
 
   /* ========================================
@@ -751,7 +750,6 @@
   --color-success-dark:      var(--color-green-500);
 
   --color-warning:           var(--color-amber-400);
-  --color-warning-light:     rgba(251, 191, 36, 0.12);
   --color-warning-dark:      var(--color-amber-500);
   --color-warning-contrast:  var(--color-slate-900);
 

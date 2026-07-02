@@ -50,6 +50,7 @@ const NAMING_CONVENTIONS: NamingConventions = {
     // 通用 UI
     'showToast',
     'close',
+    'clear-sidebar-search',
     // 设置相关
     'openSettings',
     'closeSettings',
@@ -59,8 +60,16 @@ const NAMING_CONVENTIONS: NamingConventions = {
     'toggleApiKeyVisibility',
     'testConnection',
     'saveProxyConfig',
+    'openPerformanceMonitor',
+    'showPerformanceReport',
+    'switchTheme',
+    'getAllThemes',
+    'getCurrentTheme',
+    'showLogs',
+    'showErrors',
+    'clearLogs',
+    'downloadLogs',
     // 全局 UI 交互
-    'switch-tab',
     'toggle-sop-group',
     'clear-sop-search',
     'clear-hub-search',

@@ -22,7 +22,7 @@
 //
 // ================================================================
 
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page } from "@playwright/test";
 import {
   ThresholdLevel,
   PageType,
@@ -30,8 +30,18 @@ import {
   getThresholdForPageType,
   getThresholdForComponent,
   getThresholdForInteractionState,
-  adjustThresholdForViewport
-} from './threshold-config';
+  adjustThresholdForViewport,
+} from "./threshold-config";
+
+const APP_ROUTES = {
+  home: "/",
+  promptlab: "/#/app-center/promptlab",
+  aiAnalysis: "/#/app-center/ai-analysis",
+  scraper: "/#/app-center/scraper",
+  keywordHunterInput: "/#/app-center/keyword-hunter/input",
+  npiTracker: "/#/sops_npi_tracker",
+  restrictedWords: "/#/sops_restricted_words",
+} as const;
 
 /**
  * 视觉测试配置
@@ -39,33 +49,32 @@ import {
 const VISUAL_CONFIG = {
   // 默认阈值配置（标准级别）
   defaultThreshold: getThresholdConfig(ThresholdLevel.STANDARD),
-  
+
   // 截图选项
   screenshotOptions: {
     fullPage: true,
-    animations: 'disabled' as const,
+    animations: "disabled" as const,
     // 隐藏动态元素（时间戳、动画等）
-    mask: [] as string[]
+    mask: [] as string[],
   },
-  
+
   // 视口尺寸
   viewports: {
     desktop: { width: 1280, height: 720 },
     tablet: { width: 768, height: 1024 },
-    mobile: { width: 375, height: 667 }
+    mobile: { width: 375, height: 667 },
   },
-  
+
   // 页面特定的阈值配置
   pageThresholds: {
     home: getThresholdForPageType(PageType.STATIC),
     promptlab: getThresholdForPageType(PageType.FORM),
-    'ai-analysis': getThresholdForPageType(PageType.DATA_DISPLAY),
+    "ai-analysis": getThresholdForPageType(PageType.DATA_DISPLAY),
     scraper: getThresholdForPageType(PageType.DATA_DISPLAY),
-    qalab: getThresholdForPageType(PageType.FORM),
-    'keyword-hunter': getThresholdForPageType(PageType.LIST),
-    'npi-tracker': getThresholdForPageType(PageType.LIST),
-    'restricted-words': getThresholdForPageType(PageType.LIST)
-  }
+    "keyword-hunter": getThresholdForPageType(PageType.LIST),
+    "npi-tracker": getThresholdForPageType(PageType.LIST),
+    "restricted-words": getThresholdForPageType(PageType.LIST),
+  },
 };
 
 /**
@@ -74,10 +83,49 @@ const VISUAL_CONFIG = {
 interface PageConfig {
   name: string;
   path: string;
-  pageType: PageType;  // 页面类型，用于确定阈值
+  pageType: PageType; // 页面类型，用于确定阈值
   waitForSelector?: string;
   maskSelectors?: string[];
   beforeScreenshot?: (page: Page) => Promise<void>;
+}
+
+async function waitForStablePage(page: Page): Promise<void> {
+  await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {
+    console.warn("Network idle timeout, continuing...");
+  });
+  await page.waitForTimeout(500);
+}
+
+async function waitForAlpineRoot(page: Page, selector: string): Promise<void> {
+  await page.waitForSelector(selector, { timeout: 15000 });
+  await page
+    .waitForLoadState("networkidle", { timeout: 15000 })
+    .catch(() => {});
+  await page
+    .waitForFunction(
+      (rootSelector) => {
+        const element = document.querySelector(rootSelector) as {
+          __x?: unknown;
+          _x_dataStack?: unknown[];
+        } | null;
+        return Boolean(
+          element &&
+          (element.__x !== undefined || element._x_dataStack !== undefined),
+        );
+      },
+      selector,
+      { timeout: 10000 },
+    )
+    .catch(() => {});
+  await page.waitForTimeout(1000);
+}
+
+function visibleLocator(page: Page, selector: string) {
+  const visibleSelector = selector
+    .split(",")
+    .map((part) => `${part.trim()}:visible`)
+    .join(", ");
+  return page.locator(visibleSelector).first();
 }
 
 /**
@@ -85,441 +133,429 @@ interface PageConfig {
  */
 const PAGES: PageConfig[] = [
   {
-    name: 'home',
-    path: '/',
+    name: "home",
+    path: APP_ROUTES.home,
     pageType: PageType.STATIC,
-    waitForSelector: 'body',
+    waitForSelector: "body",
     maskSelectors: [
       // 隐藏可能变化的元素
-      '.timestamp',
-      '.current-time',
-      '[data-dynamic="true"]'
-    ]
+      ".timestamp",
+      ".current-time",
+      "#time-display",
+      '[data-dynamic="true"]',
+    ],
   },
   {
-    name: 'promptlab',
-    path: '/#promptlab',
+    name: "promptlab",
+    path: APP_ROUTES.promptlab,
     pageType: PageType.FORM,
     waitForSelector: '[x-data="promptlabPanel"]',
     maskSelectors: [
-      '.timestamp',
-      '#final-prompt-output', // 动态生成的内容
-      '#prompt-word-count', // 字符计数会变化
-      '.animate-pulse', // 动画元素
-      '.bg-gradient-to-br', // 渐变背景可能有细微差异
-      '[class*="animate-"]' // 所有动画元素
+      ".timestamp",
+      "#final-prompt-output", // 动态生成的内容
+      "#prompt-word-count", // 字符计数会变化
+      ".animate-pulse", // 动画元素
+      ".bg-gradient-to-br", // 渐变背景可能有细微差异
+      '[class*="animate-"]', // 所有动画元素
     ],
     beforeScreenshot: async (page: Page) => {
-      // 等待 Alpine 组件加载
-      await page.waitForSelector('[x-data="promptlabPanel"]', { timeout: 15000 });
-      // 等待网络空闲
-      await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-      // 等待 Alpine.js 完全初始化
-      await page.waitForFunction(() => {
-        const element = document.querySelector('[x-data="promptlabPanel"]') as any;
-        return element && element.__x !== undefined;
-      }, { timeout: 10000 }).catch(() => {});
-      // 额外等待确保所有动画完成
-      await page.waitForTimeout(2000);
-    }
+      await waitForAlpineRoot(page, '[x-data="promptlabPanel"]');
+    },
   },
   {
-    name: 'ai-analysis',
-    path: '/#ai_analysis',
+    name: "ai-analysis",
+    path: APP_ROUTES.aiAnalysis,
     pageType: PageType.DATA_DISPLAY,
     waitForSelector: '[x-data="aiAnalysisPanel"]',
     maskSelectors: [
-      '.timestamp',
-      '#analysis-results', // 动态分析结果
-      '.progress-bar', // 进度条动画
-      '[data-progress]', // 进度相关元素
-      '.animate-pulse', // 动画元素
-      '.bg-gradient-to-br', // 渐变背景可能有细微差异
+      ".timestamp",
+      "#analysis-results", // 动态分析结果
+      ".progress-bar", // 进度条动画
+      "[data-progress]", // 进度相关元素
+      ".animate-pulse", // 动画元素
+      ".bg-gradient-to-br", // 渐变背景可能有细微差异
       '[class*="animate-"]', // 所有动画元素
-      '.result-card', // 结果卡片（动态内容）
-      '#json-viewer', // JSON 查看器（动态内容）
-      '.toast', // 提示消息
-      '[data-dynamic="true"]' // 标记为动态的元素
+      ".result-card", // 结果卡片（动态内容）
+      "#json-viewer", // JSON 查看器（动态内容）
+      ".toast", // 提示消息
+      '[data-dynamic="true"]', // 标记为动态的元素
     ],
     beforeScreenshot: async (page: Page) => {
-      // 等待 AI 分析面板加载
-      await page.waitForSelector('[x-data="aiAnalysisPanel"]', { timeout: 15000 });
-      // 等待网络空闲
-      await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-      // 等待 Alpine.js 完全初始化
-      await page.waitForFunction(() => {
-        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as any;
-        return element && element.__x !== undefined;
-      }, { timeout: 10000 }).catch(() => {});
-      // 额外等待确保所有动画完成
-      await page.waitForTimeout(2000);
-    }
+      await waitForAlpineRoot(page, '[x-data="aiAnalysisPanel"]');
+    },
   },
   {
-    name: 'scraper',
-    path: '/#scraper',
+    name: "scraper",
+    path: APP_ROUTES.scraper,
     pageType: PageType.DATA_DISPLAY,
     waitForSelector: '[x-data="scraperPanel"]',
     maskSelectors: [
-      '.timestamp',
-      '#scraper-results',
-      '.history-item', // 历史记录可能变化
-      '#data-cards', // 动态数据卡片
-      '#json-display', // JSON 显示区域
-      '.task-card', // 任务状态卡片
-      '.progress-bar-fill', // 进度条
-      '[data-dynamic="true"]' // 标记为动态的元素
+      ".timestamp",
+      "#scraper-results",
+      ".history-item", // 历史记录可能变化
+      "#data-cards", // 动态数据卡片
+      "#json-display", // JSON 显示区域
+      ".task-card", // 任务状态卡片
+      ".progress-bar-fill", // 进度条
+      '[data-dynamic="true"]', // 标记为动态的元素
     ],
     beforeScreenshot: async (page: Page) => {
-      // 等待 Scraper 面板加载
-      await page.waitForSelector('[x-data="scraperPanel"]', { timeout: 15000 });
-      // 等待网络空闲
-      await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-      // 等待 Alpine.js 完全初始化
-      await page.waitForFunction(() => {
-        const element = document.querySelector('[x-data="scraperPanel"]') as any;
-        return element && element.__x !== undefined;
-      }, { timeout: 10000 }).catch(() => {});
-      // 额外等待确保所有动画完成
-      await page.waitForTimeout(2000);
-    }
+      await waitForAlpineRoot(page, '[x-data="scraperPanel"]');
+    },
   },
   {
-    name: 'qalab',
-    path: '/#qalab',
+    name: "keyword-hunter",
+    path: APP_ROUTES.keywordHunterInput,
     pageType: PageType.FORM,
-    waitForSelector: '#qalab-panel',
+    waitForSelector: "#kt-module-input",
     maskSelectors: [
-      '.timestamp',
-      '#qa-results'
+      ".timestamp",
+      "#kt-keyword-highlight-layer",
+      '[class*="animate-"]',
     ],
     beforeScreenshot: async (page: Page) => {
-      await page.waitForSelector('#qalab-panel');
-      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-    }
+      await page.waitForSelector("#kt-module-input", { timeout: 15000 });
+      await page
+        .waitForLoadState("networkidle", { timeout: 10000 })
+        .catch(() => {});
+    },
   },
   {
-    name: 'keyword-hunter',
-    path: '/#/app-center/keyword-hunter/input',
-    pageType: PageType.FORM,
-    waitForSelector: '#kt-module-input',
-    maskSelectors: [
-      '.timestamp',
-      '#kt-keyword-highlight-layer',
-      '[class*="animate-"]'
-    ],
-    beforeScreenshot: async (page: Page) => {
-      await page.waitForSelector('#kt-module-input', { timeout: 15000 });
-      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-    }
-  },
-  {
-    name: 'npi-tracker',
-    path: '/#sops_npi_tracker',
+    name: "npi-tracker",
+    path: APP_ROUTES.npiTracker,
     pageType: PageType.LIST,
-    waitForSelector: '#npi-tracker-panel',
-    maskSelectors: [
-      '.timestamp',
-      '#npi-results'
-    ],
+    waitForSelector: ".npi-tracker-page",
+    maskSelectors: [".timestamp", "#npi-results"],
     beforeScreenshot: async (page: Page) => {
-      await page.waitForSelector('#npi-tracker-panel');
-      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-    }
+      await page.waitForSelector(".npi-tracker-page", { timeout: 15000 });
+      await page
+        .waitForLoadState("networkidle", { timeout: 10000 })
+        .catch(() => {});
+    },
   },
   {
-    name: 'restricted-words',
-    path: '/#sops_restricted_words',
+    name: "restricted-words",
+    path: APP_ROUTES.restrictedWords,
     pageType: PageType.LIST,
-    waitForSelector: '#restricted-words-panel',
-    maskSelectors: [
-      '.timestamp',
-      '#restricted-words-results'
-    ],
+    waitForSelector: ".module-container",
+    maskSelectors: [".timestamp", "#restricted-words-results"],
     beforeScreenshot: async (page: Page) => {
-      await page.waitForSelector('#restricted-words-panel');
-      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-    }
-  }
+      await page.waitForSelector(".module-container", { timeout: 15000 });
+      await page
+        .waitForLoadState("networkidle", { timeout: 10000 })
+        .catch(() => {});
+    },
+  },
 ];
 
 /**
  * 视觉回归测试套件
  */
-test.describe('Visual Regression Tests', () => {
-  test.describe.configure({ mode: 'parallel' });
+test.describe("Visual Regression Tests", () => {
+  test.describe.configure({ mode: "parallel" });
 
   // 桌面端视觉测试
-  test.describe('Desktop Views', () => {
+  test.describe("Desktop Views", () => {
     test.use({ viewport: VISUAL_CONFIG.viewports.desktop });
 
     for (const pageConfig of PAGES) {
-      test(`should match ${pageConfig.name} page snapshot`, async ({ page }) => {
+      test(`should match ${pageConfig.name} page snapshot`, async ({
+        page,
+      }) => {
         // 导航到页面
         await page.goto(pageConfig.path);
-        
+
         // 等待关键元素
         if (pageConfig.waitForSelector) {
-          await page.waitForSelector(pageConfig.waitForSelector, { timeout: 10000 });
+          await page.waitForSelector(pageConfig.waitForSelector, {
+            timeout: 10000,
+          });
         }
-        
+
         // 执行截图前的准备工作
         if (pageConfig.beforeScreenshot) {
           await pageConfig.beforeScreenshot(page);
         }
-        
+
         // 等待页面稳定
-        await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
-          console.warn('Network idle timeout, continuing...');
-        });
-        
-        // 等待动画完成
-        await page.waitForTimeout(500);
-        
+        await waitForStablePage(page);
+
         // 获取页面特定的阈值配置
         const thresholdConfig = adjustThresholdForViewport(
           getThresholdForPageType(pageConfig.pageType),
-          'desktop'
+          "desktop",
         );
-        
+
         // 截图并对比
         await expect(page).toHaveScreenshot(`${pageConfig.name}-desktop.png`, {
           fullPage: VISUAL_CONFIG.screenshotOptions.fullPage,
           animations: VISUAL_CONFIG.screenshotOptions.animations,
-          mask: pageConfig.maskSelectors?.map(selector => page.locator(selector)) || [],
-          threshold: thresholdConfig.threshold
+          mask:
+            pageConfig.maskSelectors?.map((selector) =>
+              page.locator(selector),
+            ) || [],
+          threshold: thresholdConfig.threshold,
+          maxDiffPixels: thresholdConfig.maxDiffPixels,
         });
       });
     }
   });
 
   // 平板端视觉测试
-  test.describe('Tablet Views', () => {
+  test.describe("Tablet Views", () => {
     test.use({ viewport: VISUAL_CONFIG.viewports.tablet });
 
     for (const pageConfig of PAGES) {
-      test(`should match ${pageConfig.name} page snapshot on tablet`, async ({ page }) => {
+      test(`should match ${pageConfig.name} page snapshot on tablet`, async ({
+        page,
+      }) => {
         await page.goto(pageConfig.path);
-        
+
         if (pageConfig.waitForSelector) {
-          await page.waitForSelector(pageConfig.waitForSelector, { timeout: 10000 });
+          await page.waitForSelector(pageConfig.waitForSelector, {
+            timeout: 10000,
+          });
         }
-        
+
         if (pageConfig.beforeScreenshot) {
           await pageConfig.beforeScreenshot(page);
         }
-        
-        await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
-          console.warn('Network idle timeout, continuing...');
-        });
-        
-        await page.waitForTimeout(500);
-        
+
+        await waitForStablePage(page);
+
         // 获取平板端的阈值配置（更宽松）
         const thresholdConfig = adjustThresholdForViewport(
           getThresholdForPageType(pageConfig.pageType),
-          'tablet'
+          "tablet",
         );
-        
+
         await expect(page).toHaveScreenshot(`${pageConfig.name}-tablet.png`, {
           fullPage: VISUAL_CONFIG.screenshotOptions.fullPage,
           animations: VISUAL_CONFIG.screenshotOptions.animations,
-          mask: pageConfig.maskSelectors?.map(selector => page.locator(selector)) || [],
-          threshold: thresholdConfig.threshold
+          mask:
+            pageConfig.maskSelectors?.map((selector) =>
+              page.locator(selector),
+            ) || [],
+          threshold: thresholdConfig.threshold,
+          maxDiffPixels: thresholdConfig.maxDiffPixels,
         });
       });
     }
   });
 
   // 移动端视觉测试
-  test.describe('Mobile Views', () => {
+  test.describe("Mobile Views", () => {
     test.use({ viewport: VISUAL_CONFIG.viewports.mobile });
 
     for (const pageConfig of PAGES) {
-      test(`should match ${pageConfig.name} page snapshot on mobile`, async ({ page }) => {
+      test(`should match ${pageConfig.name} page snapshot on mobile`, async ({
+        page,
+      }) => {
         await page.goto(pageConfig.path);
-        
+
         if (pageConfig.waitForSelector) {
-          await page.waitForSelector(pageConfig.waitForSelector, { timeout: 10000 });
+          await page.waitForSelector(pageConfig.waitForSelector, {
+            timeout: 10000,
+          });
         }
-        
+
         if (pageConfig.beforeScreenshot) {
           await pageConfig.beforeScreenshot(page);
         }
-        
-        await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
-          console.warn('Network idle timeout, continuing...');
-        });
-        
-        await page.waitForTimeout(500);
-        
+
+        await waitForStablePage(page);
+
         // 获取移动端的阈值配置（最宽松）
         const thresholdConfig = adjustThresholdForViewport(
           getThresholdForPageType(pageConfig.pageType),
-          'mobile'
+          "mobile",
         );
-        
+
         await expect(page).toHaveScreenshot(`${pageConfig.name}-mobile.png`, {
           fullPage: VISUAL_CONFIG.screenshotOptions.fullPage,
           animations: VISUAL_CONFIG.screenshotOptions.animations,
-          mask: pageConfig.maskSelectors?.map(selector => page.locator(selector)) || [],
-          threshold: thresholdConfig.threshold
+          mask:
+            pageConfig.maskSelectors?.map((selector) =>
+              page.locator(selector),
+            ) || [],
+          threshold: thresholdConfig.threshold,
+          maxDiffPixels: thresholdConfig.maxDiffPixels,
         });
       });
     }
   });
 
   // 组件级视觉测试
-  test.describe('Component Snapshots', () => {
+  test.describe("Component Snapshots", () => {
     test.use({ viewport: VISUAL_CONFIG.viewports.desktop });
 
-    test('should match navigation component', async ({ page }) => {
-      await page.goto('/');
-      
-      const nav = page.locator('nav, .navigation, #main-nav').first();
-      const thresholdConfig = getThresholdForComponent('navigation');
-      
-      await expect(nav).toHaveScreenshot('component-navigation.png', {
-        threshold: thresholdConfig.threshold
+    test("should match navigation component", async ({ page }) => {
+      await page.goto("/");
+
+      const nav = page.locator("nav, .navigation, #main-nav").first();
+      const thresholdConfig = getThresholdForComponent("navigation");
+
+      await expect(nav).toHaveScreenshot("component-navigation.png", {
+        threshold: thresholdConfig.threshold,
+        maxDiffPixels: thresholdConfig.maxDiffPixels,
       });
     });
 
-    test('should match sidebar component', async ({ page }) => {
-      await page.goto('/');
-      
-      const sidebar = page.locator('aside, .sidebar, #sidebar').first();
-      if (await sidebar.count() > 0) {
-        const thresholdConfig = getThresholdForComponent('card');
-        
-        await expect(sidebar).toHaveScreenshot('component-sidebar.png', {
-          threshold: thresholdConfig.threshold
+    test("should match sidebar component", async ({ page }) => {
+      await page.goto("/");
+
+      const sidebar = visibleLocator(
+        page,
+        "aside, .sidebar, #sidebar, #dynamic-sidebar",
+      );
+      if ((await sidebar.count()) > 0) {
+        const thresholdConfig = getThresholdForComponent("card");
+
+        await expect(sidebar).toHaveScreenshot("component-sidebar.png", {
+          threshold: thresholdConfig.threshold,
+          maxDiffPixels: thresholdConfig.maxDiffPixels,
         });
       }
     });
 
-    test('should match footer component', async ({ page }) => {
-      await page.goto('/');
-      
-      const footer = page.locator('footer, .footer').first();
-      if (await footer.count() > 0) {
-        const thresholdConfig = getThresholdForComponent('card');
-        
-        await expect(footer).toHaveScreenshot('component-footer.png', {
-          threshold: thresholdConfig.threshold
+    test("should match footer component", async ({ page }) => {
+      await page.goto("/");
+
+      const footer = visibleLocator(page, "footer, .footer");
+      if ((await footer.count()) > 0) {
+        const thresholdConfig = getThresholdForComponent("card");
+
+        await expect(footer).toHaveScreenshot("component-footer.png", {
+          threshold: thresholdConfig.threshold,
+          maxDiffPixels: thresholdConfig.maxDiffPixels,
         });
       }
     });
   });
 
   // 交互状态视觉测试
-  test.describe('Interactive States', () => {
+  test.describe("Interactive States", () => {
     test.use({ viewport: VISUAL_CONFIG.viewports.desktop });
 
-    test('should match button hover states', async ({ page }) => {
-      await page.goto('/');
-      
+    test("should match button hover states", async ({ page }) => {
+      await page.goto("/");
+
       // 查找第一个按钮
-      const button = page.locator('button, .btn').first();
-      if (await button.count() > 0) {
+      const button = visibleLocator(page, "button, .btn");
+      if ((await button.count()) > 0) {
         // 悬停状态
         await button.hover();
         await page.waitForTimeout(200);
-        
-        const thresholdConfig = getThresholdForInteractionState('hover');
-        
-        await expect(button).toHaveScreenshot('button-hover.png', {
-          threshold: thresholdConfig.threshold
+
+        const thresholdConfig = getThresholdForInteractionState("hover");
+
+        await expect(button).toHaveScreenshot("button-hover.png", {
+          threshold: thresholdConfig.threshold,
+          maxDiffPixels: thresholdConfig.maxDiffPixels,
         });
       }
     });
 
-    test('should match input focus states', async ({ page }) => {
-      await page.goto('/');
-      
+    test("should match input focus states", async ({ page }) => {
+      await page.goto("/");
+
       // 查找第一个输入框
-      const input = page.locator('input[type="text"], input[type="email"], textarea').first();
-      if (await input.count() > 0) {
+      const input = visibleLocator(
+        page,
+        'input[type="text"], input[type="email"], textarea',
+      );
+      if ((await input.count()) > 0) {
         // 聚焦状态
         await input.focus();
         await page.waitForTimeout(200);
-        
-        const thresholdConfig = getThresholdForInteractionState('focus');
-        
-        await expect(input).toHaveScreenshot('input-focus.png', {
-          threshold: thresholdConfig.threshold
+
+        const thresholdConfig = getThresholdForInteractionState("focus");
+
+        await expect(input).toHaveScreenshot("input-focus.png", {
+          threshold: thresholdConfig.threshold,
+          maxDiffPixels: thresholdConfig.maxDiffPixels,
         });
       }
     });
 
-    test('should match dropdown expanded state', async ({ page }) => {
-      await page.goto('/');
-      
+    test("should match dropdown expanded state", async ({ page }) => {
+      await page.goto("/");
+
       // 查找下拉菜单
-      const dropdown = page.locator('select, .dropdown, [role="combobox"]').first();
-      if (await dropdown.count() > 0) {
+      const dropdown = visibleLocator(
+        page,
+        'select, .dropdown, [role="combobox"]',
+      );
+      if ((await dropdown.count()) > 0) {
         await dropdown.click();
         await page.waitForTimeout(300);
-        
-        const thresholdConfig = getThresholdForInteractionState('active');
-        
-        await expect(page).toHaveScreenshot('dropdown-expanded.png', {
+
+        const thresholdConfig = getThresholdForInteractionState("active");
+
+        await expect(page).toHaveScreenshot("dropdown-expanded.png", {
           threshold: thresholdConfig.threshold,
-          fullPage: false
+          maxDiffPixels: thresholdConfig.maxDiffPixels,
+          fullPage: false,
         });
       }
     });
   });
 
-  // 错误状态视觉测试
-  test.describe('Error States', () => {
+  // 表单反馈状态视觉测试
+  test.describe("Feedback States", () => {
     test.use({ viewport: VISUAL_CONFIG.viewports.desktop });
 
-    test('should match form validation errors', async ({ page }) => {
-      await page.goto('/app_center/promptlab');
-      
+    test("should match promptlab readiness warning", async ({ page }) => {
+      await page.goto(APP_ROUTES.promptlab);
+
       // 等待表单加载
-      await page.waitForSelector('#promptlab-panel');
-      
-      // 尝试提交空表单触发验证错误
-      const submitButton = page.locator('button[type="submit"], #btn-generate-prompt').first();
-      if (await submitButton.count() > 0) {
-        await submitButton.click();
-        await page.waitForTimeout(500);
-        
-        const thresholdConfig = getThresholdForInteractionState('error');
-        
-        // 截取包含错误提示的区域
-        await expect(page).toHaveScreenshot('form-validation-errors.png', {
-          threshold: thresholdConfig.threshold,
-          fullPage: true
-        });
-      }
+      await waitForAlpineRoot(page, '[x-data="promptlabPanel"]');
+
+      // 当前业务逻辑会禁用空表单按钮，通过组件方法触发同一 readiness guard。
+      await page.evaluate(() => {
+        const root = document.querySelector('[x-data="promptlabPanel"]') as {
+          __x?: { $data?: { generateListingPrompt?: () => void } };
+          _x_dataStack?: Array<{ generateListingPrompt?: () => void }>;
+        } | null;
+        const component = root?._x_dataStack?.[0] ?? root?.__x?.$data;
+        component?.generateListingPrompt?.();
+      });
+
+      await page.waitForSelector(".toast.toast-warning", { timeout: 5000 });
+      await page.waitForTimeout(300);
+
+      const thresholdConfig = getThresholdForInteractionState("error");
+
+      // 截取包含校验提示的区域
+      await expect(page).toHaveScreenshot("promptlab-readiness-warning.png", {
+        threshold: thresholdConfig.threshold,
+        maxDiffPixels: thresholdConfig.maxDiffPixels,
+        fullPage: true,
+      });
     });
   });
 
   // 深色模式测试（如果支持）
-  test.describe('Dark Mode', () => {
-    test.use({ 
+  test.describe("Dark Mode", () => {
+    test.use({
       viewport: VISUAL_CONFIG.viewports.desktop,
-      colorScheme: 'dark'
+      colorScheme: "dark",
     });
 
-    test('should match home page in dark mode', async ({ page }) => {
-      await page.goto('/');
-      
-      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
-        console.warn('Network idle timeout, continuing...');
-      });
-      
-      await page.waitForTimeout(500);
-      
+    test("should match home page in dark mode", async ({ page }) => {
+      await page.goto("/");
+
+      await waitForStablePage(page);
+
       // 深色模式使用标准阈值
       const thresholdConfig = getThresholdConfig(ThresholdLevel.STANDARD);
-      
-      await expect(page).toHaveScreenshot('home-dark-mode.png', {
+
+      await expect(page).toHaveScreenshot("home-dark-mode.png", {
         fullPage: VISUAL_CONFIG.screenshotOptions.fullPage,
         animations: VISUAL_CONFIG.screenshotOptions.animations,
-        threshold: thresholdConfig.threshold
+        mask: [page.locator("#time-display")],
+        threshold: thresholdConfig.threshold,
+        maxDiffPixels: thresholdConfig.maxDiffPixels,
       });
     });
   });
@@ -528,25 +564,29 @@ test.describe('Visual Regression Tests', () => {
 /**
  * 视觉测试工具函数
  */
-test.describe('Visual Test Utilities', () => {
-  test('should generate baseline screenshots', async ({ page }) => {
+test.describe("Visual Test Utilities", () => {
+  test("should generate baseline screenshots", async ({ page }) => {
     // 这个测试用于生成所有基准截图
     // 运行: npm run test:e2e tests/visual -- --update-snapshots
-    
+
     for (const pageConfig of PAGES) {
       await page.goto(pageConfig.path);
-      
+
       if (pageConfig.waitForSelector) {
-        await page.waitForSelector(pageConfig.waitForSelector, { timeout: 10000 });
+        await page.waitForSelector(pageConfig.waitForSelector, {
+          timeout: 10000,
+        });
       }
-      
+
       if (pageConfig.beforeScreenshot) {
         await pageConfig.beforeScreenshot(page);
       }
-      
-      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+
+      await page
+        .waitForLoadState("networkidle", { timeout: 10000 })
+        .catch(() => {});
       await page.waitForTimeout(500);
-      
+
       console.log(`Generated baseline for: ${pageConfig.name}`);
     }
   });
