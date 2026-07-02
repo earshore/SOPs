@@ -8,7 +8,6 @@ import { test, expect } from '@playwright/test';
 import { NPITrackerPage } from './pages/NPITrackerPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
-test.describe('NPI Tracker 模块 E2E 测试', () => {
     let npiTracker: NPITrackerPage;
 
     test.beforeEach(async ({ page }) => {
@@ -534,4 +533,3 @@ test.describe('NPI Tracker 模块 E2E 测试', () => {
             console.log('✅ 平板端显示正常');
         });
     });
-});

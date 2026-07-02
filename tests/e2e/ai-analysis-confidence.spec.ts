@@ -8,7 +8,6 @@ import { test, expect } from '@playwright/test';
 import { AIAnalysisPage } from './pages/AIAnalysisPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
-test.describe('AI 分析置信度系统 E2E 测试', () => {
   let aiAnalysis: AIAnalysisPage;
 
   test.beforeEach(async ({ page }) => {
@@ -533,4 +532,3 @@ test.describe('AI 分析置信度系统 E2E 测试', () => {
       console.log('✅ 性能测试通过');
     });
   });
-});

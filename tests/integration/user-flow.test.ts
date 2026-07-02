@@ -19,7 +19,6 @@ vi.mock('@/common/utils/viewLoader', () => ({
 
 global.fetch = vi.fn();
 
-describe('完整用户流程集成测试', () => {
   let cacheService: HttpCacheService;
 
   beforeEach(() => {
@@ -504,4 +503,3 @@ describe('完整用户流程集成测试', () => {
       expect(events).toContain('module_loaded');
     });
   });
-});

@@ -54,6 +54,17 @@ interface AnalysisStats {
   rate: number;
 }
 
+interface HighlightSegment {
+  text: string;
+  keywords: Set<string>;
+  isHighlight: boolean;
+}
+
+interface HighlightedTranslationParagraph {
+  original: string;
+  translation: string | null;
+}
+
 type KeywordTrackerStoreState = ReturnType<typeof appStore.getState>['keywordTracker'];
 type MatchedKeywordEntry = KeywordTrackerStoreState['matchedKeywords'][number] | string;
 
@@ -572,63 +583,82 @@ function renderCopyDisplay(): void {
   const display = document.getElementById('kt-copy-display');
   if (!display) return;
 
-  const renderer = SafeRenderer.getInstance();
   const showTrans = (document.getElementById('kt-show-translation') as HTMLInputElement | null)
     ?.checked;
+  const tracker = appStore.getState().keywordTracker;
 
-  // 如果是翻译模式且有翻译数据
-  if (
-    appStore.getState().keywordTracker.translationMode &&
-    appStore.getState().keywordTracker.paragraphs &&
-    appStore.getState().keywordTracker.paragraphs.length > 0
-  ) {
-    const paragraphs = appStore
-      .getState()
-      .keywordTracker.paragraphs.filter(p => typeof p === 'object' && 'original' in p)
-      .map(p => ({
-        original: highlightText(p.original),
-        translation: showTrans && p.translation ? p.translation : null,
-      }));
-
-    // 清空容器
-    display.replaceChildren();
-    const fragment = document.createDocumentFragment();
-
-    paragraphs.forEach(para => {
-      const div = document.createElement('div');
-      div.className = 'mb-4';
-
-      const originalDiv = document.createElement('div');
-      originalDiv.className = 'paragraph-original leading-relaxed';
-      const tempDiv = document.createElement('div');
-      // ✅ 安全: para.original来自highlightText()，文本已escapeHtml且属性已escapeAttr
-      tempDiv.appendChild(createSafeFragment(para.original));
-      while (tempDiv.firstChild) {
-        originalDiv.appendChild(tempDiv.firstChild);
-      }
-      div.appendChild(originalDiv);
-
-      if (para.translation) {
-        const transDiv = document.createElement('div');
-        transDiv.className = 'sentence-translation';
-        transDiv.textContent = para.translation;
-        div.appendChild(transDiv);
-      }
-
-      fragment.appendChild(div);
-    });
-
-    display.appendChild(fragment);
+  if (shouldRenderTranslationParagraphs(tracker)) {
+    renderTranslationParagraphs(display, getHighlightedTranslationParagraphs(tracker, showTrans));
     return;
   }
 
-  // 普通模式：显示高亮的文案
-  if (appStore.getState().keywordTracker.processedCopy) {
-    const highlighted = highlightText(appStore.getState().keywordTracker.processedCopy);
-    renderer.renderTemplate(display, highlighted);
-  } else {
-    display.replaceChildren();
+  renderProcessedCopy(display, tracker.processedCopy);
+}
+
+function shouldRenderTranslationParagraphs(tracker: KeywordTrackerStoreState): boolean {
+  return Boolean(tracker.translationMode && tracker.paragraphs && tracker.paragraphs.length > 0);
+}
+
+function getHighlightedTranslationParagraphs(
+  tracker: KeywordTrackerStoreState,
+  showTranslation: boolean | undefined
+): HighlightedTranslationParagraph[] {
+  return (tracker.paragraphs || [])
+    .filter(p => typeof p === 'object' && 'original' in p)
+    .map(p => ({
+      original: highlightText(p.original),
+      translation: showTranslation && p.translation ? p.translation : null,
+    }));
+}
+
+function appendSafeHighlightedHtml(container: HTMLElement, html: string): void {
+  const tempDiv = document.createElement('div');
+  tempDiv.appendChild(createSafeFragment(html));
+  while (tempDiv.firstChild) {
+    container.appendChild(tempDiv.firstChild);
   }
+}
+
+function createTranslationParagraphElement(para: HighlightedTranslationParagraph): HTMLElement {
+  const div = document.createElement('div');
+  div.className = 'mb-4';
+
+  const originalDiv = document.createElement('div');
+  originalDiv.className = 'paragraph-original leading-relaxed';
+  // ✅ 安全: para.original来自highlightText()，文本已escapeHtml且属性已escapeAttr
+  appendSafeHighlightedHtml(originalDiv, para.original);
+  div.appendChild(originalDiv);
+
+  if (para.translation) {
+    const transDiv = document.createElement('div');
+    transDiv.className = 'sentence-translation';
+    transDiv.textContent = para.translation;
+    div.appendChild(transDiv);
+  }
+
+  return div;
+}
+
+function renderTranslationParagraphs(
+  display: HTMLElement,
+  paragraphs: HighlightedTranslationParagraph[]
+): void {
+  display.replaceChildren();
+  const fragment = document.createDocumentFragment();
+  paragraphs.forEach(para => {
+    fragment.appendChild(createTranslationParagraphElement(para));
+  });
+  display.appendChild(fragment);
+}
+
+function renderProcessedCopy(display: HTMLElement, processedCopy: string): void {
+  if (processedCopy) {
+    const renderer = SafeRenderer.getInstance();
+    renderer.renderTemplate(display, highlightText(processedCopy));
+    return;
+  }
+
+  display.replaceChildren();
 }
 
 /**
@@ -636,84 +666,124 @@ function renderCopyDisplay(): void {
  */
 function highlightText(text: string): string {
   if (!text) return '';
-  if (
-    !appStore.getState().keywordTracker.matchedKeywords ||
-    appStore.getState().keywordTracker.matchedKeywords.length === 0
-  ) {
-    return escapeHtml(text).replace(/\n/g, '<br>');
+  const tracker = appStore.getState().keywordTracker;
+
+  if (!tracker.matchedKeywords || tracker.matchedKeywords.length === 0) {
+    return renderPlainHighlightedText(text);
   }
 
-  const len = text.length;
-  const SEP = '\x01';
+  const charKeywords = buildCharacterKeywordMap(text, tracker);
+  const segments = createHighlightSegments(text, charKeywords);
+  return renderHighlightSegments(segments);
+}
 
-  // 为每个字符位置记录它属于哪些关键词
+function renderPlainHighlightedText(text: string): string {
+  return escapeHtml(text).replace(/\n/g, '<br>');
+}
+
+function buildEmptyCharacterKeywordMap(length: number): Set<string>[] {
   const charKeywords: Set<string>[] = [];
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < length; i++) {
     charKeywords[i] = new Set();
   }
+  return charKeywords;
+}
 
-  // 对每个关键词，复用 service 中的匹配规则找出文本位置
-  const tracker = appStore.getState().keywordTracker;
+function addKeywordRanges(
+  charKeywords: Set<string>[],
+  text: string,
+  tracker: KeywordTrackerStoreState,
+  keyword: string
+): void {
+  const kwLower = keyword.toLowerCase();
+  const ranges = KeywordService.findKeywordMatchRanges(text, keyword, tracker.settings);
+
+  ranges.forEach(({ start, end }) => {
+    for (let i = start; i < end; i++) {
+      charKeywords[i]?.add(kwLower);
+    }
+  });
+}
+
+function buildCharacterKeywordMap(text: string, tracker: KeywordTrackerStoreState): Set<string>[] {
+  const charKeywords = buildEmptyCharacterKeywordMap(text.length);
+
   tracker.matchedKeywords.forEach(item => {
-    const kw = item.keyword;
-    const kwLower = kw.toLowerCase();
-    const ranges = KeywordService.findKeywordMatchRanges(text, kw, tracker.settings);
-    ranges.forEach(({ start, end }) => {
-      for (let i = start; i < end; i++) {
-        charKeywords[i]?.add(kwLower);
-      }
-    });
+    addKeywordRanges(charKeywords, text, tracker, item.keyword);
   });
 
-  // 将文本按照"关键词集合相同的连续字符"分段
-  interface Segment {
-    text: string;
-    keywords: Set<string>;
-    isHighlight: boolean;
-  }
+  return charKeywords;
+}
 
-  const segments: Segment[] = [];
+function createHighlightSegment(
+  text: string,
+  start: number,
+  end: number,
+  keywords: Set<string>
+): HighlightSegment {
+  return {
+    text: text.substring(start, end),
+    keywords,
+    isHighlight: keywords.size > 0,
+  };
+}
+
+function createHighlightSegments(text: string, charKeywords: Set<string>[]): HighlightSegment[] {
+  const segments: HighlightSegment[] = [];
   let segStart = 0;
 
-  for (let i = 1; i <= len; i++) {
+  for (let i = 1; i <= text.length; i++) {
     const previousKeywords = getKeywordSet(charKeywords, i - 1);
-    if (i === len || !setsEqual(getKeywordSet(charKeywords, i), previousKeywords)) {
-      const segmentKeywords = getKeywordSet(charKeywords, segStart);
-      segments.push({
-        text: text.substring(segStart, i),
-        keywords: segmentKeywords,
-        isHighlight: segmentKeywords.size > 0,
-      });
+    if (i === text.length || !setsEqual(getKeywordSet(charKeywords, i), previousKeywords)) {
+      segments.push(
+        createHighlightSegment(text, segStart, i, getKeywordSet(charKeywords, segStart))
+      );
       segStart = i;
     }
   }
 
-  // 渲染各段，为连续高亮段标记位置
-  const htmlParts = segments.map((seg, idx) => {
-    if (!seg.isHighlight) {
-      return escapeHtml(seg.text);
-    }
+  return segments;
+}
 
-    const allKw = Array.from(seg.keywords).join(SEP);
-    const prevIsHighlight = idx > 0 && !!segments[idx - 1]?.isHighlight;
-    const nextIsHighlight = idx < segments.length - 1 && !!segments[idx + 1]?.isHighlight;
+function getHighlightPositionClass(segments: HighlightSegment[], index: number): string {
+  const prevIsHighlight = index > 0 && !!segments[index - 1]?.isHighlight;
+  const nextIsHighlight = index < segments.length - 1 && !!segments[index + 1]?.isHighlight;
 
-    // 确定在连续高亮区域中的位置
-    let posClass = '';
-    if (!prevIsHighlight && !nextIsHighlight) {
-      posClass = 'kw-solo'; // 独立段
-    } else if (!prevIsHighlight && nextIsHighlight) {
-      posClass = 'kw-start'; // 起始段
-    } else if (prevIsHighlight && nextIsHighlight) {
-      posClass = 'kw-mid'; // 中间段
-    } else {
-      posClass = 'kw-end'; // 结束段
-    }
+  if (!prevIsHighlight && !nextIsHighlight) {
+    return 'kw-solo';
+  }
 
-    return `<span class="keyword-bold highlightable ${posClass}" data-kw-all="${escapeAttr(allKw)}">${escapeHtml(seg.text)}</span>`;
-  });
+  if (!prevIsHighlight && nextIsHighlight) {
+    return 'kw-start';
+  }
 
-  return htmlParts.join('').replace(/\n/g, '<br>');
+  if (prevIsHighlight && nextIsHighlight) {
+    return 'kw-mid';
+  }
+
+  return 'kw-end';
+}
+
+function renderHighlightSegment(
+  segment: HighlightSegment,
+  segments: HighlightSegment[],
+  index: number
+): string {
+  if (!segment.isHighlight) {
+    return escapeHtml(segment.text);
+  }
+
+  const allKeywords = Array.from(segment.keywords).join('\x01');
+  const positionClass = getHighlightPositionClass(segments, index);
+
+  return `<span class="keyword-bold highlightable ${positionClass}" data-kw-all="${escapeAttr(allKeywords)}">${escapeHtml(segment.text)}</span>`;
+}
+
+function renderHighlightSegments(segments: HighlightSegment[]): string {
+  return segments
+    .map((segment, index) => renderHighlightSegment(segment, segments, index))
+    .join('')
+    .replace(/\n/g, '<br>');
 }
 
 /**
