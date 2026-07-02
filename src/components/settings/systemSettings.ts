@@ -14,6 +14,7 @@ import { EnvConfig } from '../../common/config/envConfig';
 import { configCenter } from '../../common/config/ConfigCenter';
 import { APP_EVENTS } from '../../common/constants/eventConstants';
 import type { LLMProviderConfig } from '../../types/state';
+import { appStore } from '../../stores/useAppStore';
 import eventBus from '@common/EventBus';
 import { ApiError } from '@common/errors/AppError';
 
@@ -281,7 +282,6 @@ function registerSettingsWatchers(panel: SettingsPanelData & AlpineWatchContext)
 }
 
 async function resetAppStoreRuntimeState(): Promise<void> {
-    const { appStore } = await import('../../stores/useAppStore');
     const state = appStore.getState();
 
     state.resetScraper();

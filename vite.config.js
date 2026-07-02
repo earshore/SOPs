@@ -3,18 +3,23 @@ import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { execFileSync } from 'child_process';
 import { createRequire } from 'module';
-import viteCompression from 'vite-plugin-compression';
+import { promisify } from 'util';
+import { gzip, brotliCompress, constants as zlibConstants } from 'zlib';
+import { readdir, readFile, stat, writeFile } from 'fs/promises';
 
 // ES 模块兼容的 __dirname 定义
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const require = createRequire(import.meta.url);
 const packageJson = require('./package.json');
+const gzipAsync = promisify(gzip);
+const brotliCompressAsync = promisify(brotliCompress);
 const devServerForwardConsole = {
     enabled: true,
     unhandledErrors: true,
     logLevels: ['error', 'warn']
 };
+const compressibleAssetPattern = /\.(js|mjs|json|css|html)$/i;
 
 function getAppVersion() {
     try {
@@ -34,6 +39,59 @@ function getAppVersion() {
     return packageJson.version;
 }
 
+async function collectCompressibleFiles(directory) {
+    const entries = await readdir(directory, { withFileTypes: true });
+    const nestedFiles = await Promise.all(entries.map(async (entry) => {
+        const fullPath = resolve(directory, entry.name);
+
+        if (entry.isDirectory()) {
+            return collectCompressibleFiles(fullPath);
+        }
+
+        return entry.isFile() && compressibleAssetPattern.test(entry.name) ? [fullPath] : [];
+    }));
+
+    return nestedFiles.flat();
+}
+
+function createPrecompressPlugin({ threshold = 10240 } = {}) {
+    let outputDir;
+
+    return {
+        name: 'sops:precompress-assets',
+        apply: 'build',
+        configResolved(config) {
+            outputDir = resolve(config.root, config.build.outDir);
+        },
+        async closeBundle() {
+            const files = await collectCompressibleFiles(outputDir);
+
+            await Promise.all(files.map(async (filePath) => {
+                const { size } = await stat(filePath);
+                if (size < threshold) {
+                    return;
+                }
+
+                const input = await readFile(filePath);
+                const [gzipSource, brotliSource] = await Promise.all([
+                    gzipAsync(input, { level: zlibConstants.Z_BEST_COMPRESSION }),
+                    brotliCompressAsync(input, {
+                        params: {
+                            [zlibConstants.BROTLI_PARAM_QUALITY]: zlibConstants.BROTLI_MAX_QUALITY,
+                            [zlibConstants.BROTLI_PARAM_MODE]: zlibConstants.BROTLI_MODE_TEXT
+                        }
+                    })
+                ]);
+
+                await Promise.all([
+                    writeFile(`${filePath}.gz`, gzipSource),
+                    writeFile(`${filePath}.br`, brotliSource)
+                ]);
+            }));
+        }
+    };
+}
+
 export default defineConfig({
     publicDir: 'public',
     define: {
@@ -42,24 +100,7 @@ export default defineConfig({
         __SERVER_FORWARD_CONSOLE__: JSON.stringify(devServerForwardConsole)
     },
     plugins: [
-        // Gzip 压缩
-        viteCompression({
-            verbose: true,
-            disable: false,
-            threshold: 10240, // 大于 10KB 的文件才压缩
-            algorithm: 'gzip',
-            ext: '.gz',
-            deleteOriginFile: false
-        }),
-        // Brotli 压缩（更高压缩率）
-        viteCompression({
-            verbose: true,
-            disable: false,
-            threshold: 10240,
-            algorithm: 'brotliCompress',
-            ext: '.br',
-            deleteOriginFile: false
-        })
+        createPrecompressPlugin()
     ],
 
     // ================================================================

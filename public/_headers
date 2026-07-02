@@ -8,8 +8,7 @@
   Permissions-Policy: geolocation=(), microphone=(), camera=()
 
 /assets/*
-  # Avoid long-lived browser cache for transient HTML/404 responses during deploy propagation.
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: public, max-age=31536000, immutable
 
 # JavaScript 模块 MIME 类型
 /*.js

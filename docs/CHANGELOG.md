@@ -26,6 +26,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.12] - 2026-07-02
+
+### Added
+- Keyword Hunter 输入页新增历史快照面板与快照服务，支持保存、恢复和删除分析状态。
+- 为 Keyword Hunter 快照服务、输入页和 Scraper 当前数据渲染补充单元测试。
+
+### Changed
+- Keyword Hunter 分析结果改为自动归档，减少手动快照操作和跨步骤状态丢失。
+- Scraper 页面挂载时渲染当前采集数据。
+- 同步应用内版本显示到 `3.0.3-rc.12`。
+
 ## [3.0.3-rc.11] - 2026-07-01
 
 ### Added
