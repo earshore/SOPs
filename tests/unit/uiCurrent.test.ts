@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MENU_CONFIG } from '@/common/config/menuConfig';
 import { appStore } from '@/stores/useAppStore';
@@ -262,6 +263,9 @@ describe('current UI mega menu helpers', () => {
     expect(trigger?.getAttribute('aria-expanded')).toBe('true');
 
     trigger?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(group?.classList.contains('is-open')).toBe(true);
+
+    trigger?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     expect(group?.classList.contains('is-open')).toBe(false);
 
     trigger?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
@@ -275,6 +279,19 @@ describe('current UI mega menu helpers', () => {
     group?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
     closeMegaMenus({ blurActive: true });
     expect(group?.classList.contains('is-open')).toBe(false);
+  });
+
+  it('keeps mega menu visibility controlled by is-open instead of CSS hover', () => {
+    const cssFiles = [
+      'src/css/critical.css',
+      'src/css/components/header-main.css',
+    ];
+
+    cssFiles.forEach(file => {
+      const css = readFileSync(file, 'utf8');
+      expect(css).not.toMatch(/\.nav-group:hover\s+\.mega-menu/);
+      expect(css).toMatch(/\.nav-group\.is-open\s+\.mega-menu/);
+    });
   });
 });
 

@@ -322,15 +322,31 @@ async function syncLocalDataRuntimeAfterBucketClear(bucketId: LocalDataBucketId)
 
 async function clearLocalDataBucketWithRuntimeSync(bucketId: LocalDataBucketId): Promise<number> {
     const removed = await LocalDataStore.clearBucket(bucketId);
-    await syncLocalDataRuntimeAfterBucketClear(bucketId);
+    try {
+        await syncLocalDataRuntimeAfterBucketClear(bucketId);
+    } catch (error) {
+        ErrorService.handle(error as Error, { action: 'syncLocalDataRuntimeAfterBucketClear', module: 'settings', notify: false });
+    }
     return removed;
 }
 
 async function syncRuntimeAfterClearAllLocalData(): Promise<void> {
-    await resetAppStoreRuntimeState();
-    await syncLocalDataRuntimeAfterBucketClear('scrape-history');
-    await syncLocalDataRuntimeAfterBucketClear('chat-history');
-    await syncLocalDataRuntimeAfterBucketClear('keyword-history');
+    try {
+        await resetAppStoreRuntimeState();
+    } catch (error) {
+        ErrorService.handle(error as Error, { action: 'resetAppStoreRuntimeState', module: 'settings', notify: false });
+    }
+
+    const runtimeBuckets: LocalDataBucketId[] = ['scrape-history', 'chat-history', 'keyword-history'];
+    for (const bucketId of runtimeBuckets) {
+        try {
+            await syncLocalDataRuntimeAfterBucketClear(bucketId);
+        } catch (error) {
+            ErrorService.handle(error as Error, { action: 'syncRuntimeAfterClearAllLocalData', module: 'settings', notify: false });
+        }
+    }
+
+    await LocalDataStore.clearBucket('workspace-state');
 }
 
 function reloadAfterLocalDataImport(): void {
@@ -846,7 +862,10 @@ const settingsPanelBehavior: SettingsPanelPart = {
     // --- Proxy Logic ---
 
     loadProxyConfig(): void {
-        const savedConfig = StorageService.get(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, {}) as { type?: string; customUrl?: string } | null;
+        const savedConfig = (
+            StorageService.get(STORAGE_KEYS.PROXY_CONFIG, null) ||
+            StorageService.get(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, {})
+        ) as { type?: string; customUrl?: string } | null;
         this.proxy.savedKeyMap = (StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {}) as Record<string, string>) || {};
 
         this.proxy.type = savedConfig?.type || 'scraperapi';
@@ -866,6 +885,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
         // Save active config
         const config = { type: this.proxy.type, customUrl: this.proxy.customUrl };
         StorageService.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, config);
+        StorageService.set(STORAGE_KEYS.PROXY_CONFIG, config);
 
         showToast('网络配置已更新', { type: 'success' });
     },
@@ -919,6 +939,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
     },
 
     async exportLocalData(): Promise<void> {
+        const confirmed = window.confirm('导出的备份文件可能包含 API Key、代理凭据、配置和历史记录等敏感本地数据。请仅保存在可信位置。继续导出？');
+        if (!confirmed) return;
+
         try {
             this.localData.isBusy = true;
             const data = await LocalDataStore.exportAll();
@@ -1004,8 +1027,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
         try {
             this.localData.isBusy = true;
-            await syncRuntimeAfterClearAllLocalData();
             await LocalDataStore.clearAll();
+            await syncRuntimeAfterClearAllLocalData();
             this.localData.usage = await LocalDataStore.getUsage();
             showToast('全部本地数据已清空，请刷新页面重新初始化', { type: 'success' });
         } catch (error) {

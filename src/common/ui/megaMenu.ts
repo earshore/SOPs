@@ -610,22 +610,26 @@ export function initMegaMenuAccessibility(): void {
     if (!trigger) return;
 
     const setExpanded = (expanded: boolean): void => setMegaMenuExpanded(group, expanded);
+    let openedByHover = false;
 
     setExpanded(false);
 
     group.addEventListener('mouseenter', () => {
       closeMegaMenus({ except: group });
+      openedByHover = true;
       setExpanded(true);
     });
     group.addEventListener('mouseleave', () => {
+      openedByHover = false;
       if (!group.contains(document.activeElement)) {
         setExpanded(false);
       }
     });
     trigger.addEventListener('click', event => {
       event.preventDefault();
-      const nextExpanded = !group.classList.contains('is-open');
+      const nextExpanded = openedByHover || !group.classList.contains('is-open');
       closeMegaMenus({ except: group });
+      openedByHover = false;
       setExpanded(nextExpanded);
     });
     group.addEventListener('keydown', event => {

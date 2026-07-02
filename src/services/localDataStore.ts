@@ -83,9 +83,6 @@ const LOCAL_DATA_BUCKET_IDS: LocalDataBucketId[] = [
 ];
 const CONFIG_KEYS = new Set([
   'llm_active_provider',
-  'proxy_config',
-  'proxy_key_map',
-  'scraper_proxy_config',
   'ai_analysis_performance_settings',
   'app_theme',
   'app-theme',
@@ -96,6 +93,11 @@ const CONFIG_KEYS = new Set([
 ]);
 const CONFIG_PREFIXES = ['llm_', 'feature_', 'layout_config_', 'modal_ignore_', 'ignore_', 'ppc_'];
 const CONFIG_SUFFIXES = ['_owner_v1'];
+const SECRET_KEYS = new Set([
+  'proxy_config',
+  'proxy_key_map',
+  'scraper_proxy_config',
+]);
 const WORKSPACE_STATE_KEYS = new Set(['app-storage']);
 const SCRAPE_HISTORY_KEYS = new Set([
   'scrape_history',
@@ -131,7 +133,7 @@ function isCacheBucketKey(key: string, storageClass?: StorageClass): boolean {
 }
 
 function isSecretBucketKey(key: string, storageClass?: StorageClass): boolean {
-  return storageClass === 'secret' || key.startsWith('secure_');
+  return storageClass === 'secret' || key.startsWith('secure_') || SECRET_KEYS.has(key);
 }
 
 function isConfigBucketKey(key: string, storageClass?: StorageClass): boolean {
@@ -156,6 +158,18 @@ function classifyKey(key: string, storageClass?: StorageClass): LocalDataBucketI
   if (KEYWORD_HISTORY_KEYS.has(key)) return 'keyword-history';
   if (isConfigBucketKey(key, storageClass)) return 'config';
   return 'other';
+}
+
+function classifyLocalStorageKey(key: string): LocalDataBucketId | null {
+  const lruTargetKey = getLruTargetKey(key);
+  if (lruTargetKey) return classifyLocalStorageKey(lruTargetKey);
+
+  const bucketId = classifyKey(key);
+  if (bucketId !== 'other') return bucketId;
+
+  return key.startsWith('user:') || key.startsWith('sops:') || key.startsWith('sops_')
+    ? 'other'
+    : null;
 }
 
 function normalizeStorageClass(storageClass: unknown): StorageClass {
@@ -212,6 +226,51 @@ function estimateBytes(value: unknown): number {
 
 function getBrowserLocalStorage(): Storage {
   return globalThis.localStorage;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+interface PreparedLocalDataImport {
+  localStorageEntries: Array<[string, string]>;
+  indexedRecords: Array<LocalDataRecord>;
+}
+
+function prepareLocalDataImport(data: LocalDataExport): PreparedLocalDataImport {
+  if (!data ||
+    data.version !== 1 ||
+    data.metadata?.app !== 'sops' ||
+    data.metadata?.storageVersion !== STORAGE_VERSION ||
+    !isRecord(data.localStorage) ||
+    !Array.isArray(data.indexedDB)
+  ) {
+    throw new Error('不支持的本地数据备份格式');
+  }
+
+  const localStorageEntries: Array<[string, string]> = [];
+  for (const [key, value] of Object.entries(data.localStorage)) {
+    if (typeof value !== 'string') {
+      throw new Error('本地数据备份中包含无效的 localStorage 值');
+    }
+    if (classifyLocalStorageKey(key) !== null) {
+      localStorageEntries.push([key, value]);
+    }
+  }
+
+  const indexedRecords = data.indexedDB
+    .filter((record): record is LocalDataRecord => !!record && typeof record.key === 'string')
+    .map(record => ({
+      key: record.key,
+      value: record.value,
+      storageClass: normalizeStorageClass(record.storageClass),
+      updatedAt: Number.isFinite(record.updatedAt) ? record.updatedAt : Date.now(),
+    }));
+
+  return {
+    localStorageEntries,
+    indexedRecords,
+  };
 }
 
 class LocalDataStoreClass {
@@ -304,7 +363,7 @@ class LocalDataStoreClass {
       if (lruTargetKey && storage.getItem(lruTargetKey) !== null) {
         continue;
       }
-      if (classifyKey(key) === bucketId && this.removeLocalStorageKey(key)) {
+      if (classifyLocalStorageKey(key) === bucketId && this.removeLocalStorageKey(key)) {
         removed += 1;
       }
     }
@@ -314,10 +373,9 @@ class LocalDataStoreClass {
 
   async clearAll(): Promise<void> {
     const db = await this.getDb();
-    const storage = getBrowserLocalStorage();
     if (!db) {
       this.memoryStore.clear();
-      storage.clear();
+      this.clearAppLocalStorageKeys();
       return;
     }
 
@@ -332,13 +390,16 @@ class LocalDataStoreClass {
       };
     });
 
-    storage.clear();
+    this.clearAppLocalStorageKeys();
   }
 
   async exportAll(): Promise<LocalDataExport> {
     const localStorageData: Record<string, string> = {};
     const storage = getBrowserLocalStorage();
     for (const key of this.getLocalStorageKeys()) {
+      if (classifyLocalStorageKey(key) === null) {
+        continue;
+      }
       const value = storage.getItem(key);
       if (value !== null) {
         localStorageData[key] = value;
@@ -358,24 +419,43 @@ class LocalDataStoreClass {
   }
 
   async importAll(data: LocalDataExport, options: LocalDataImportOptions = {}): Promise<void> {
-    if (!data || data.version !== 1) {
-      throw new Error('不支持的本地数据备份格式');
-    }
+    const prepared = prepareLocalDataImport(data);
+    const previousData = options.mode === 'replace' ? await this.exportAll() : null;
 
-    if (options.mode === 'replace') {
-      await this.clearAll();
-    }
+    try {
+      if (options.mode === 'replace') {
+        await this.clearAll();
+      }
 
+      await this.writePreparedImport(prepared);
+    } catch (error) {
+      if (previousData) {
+        await this.rollbackImport(previousData);
+      }
+      throw error;
+    }
+  }
+
+  private async writePreparedImport(prepared: PreparedLocalDataImport): Promise<void> {
     const storage = getBrowserLocalStorage();
-    for (const [key, value] of Object.entries(data.localStorage || {})) {
+    for (const [key, value] of prepared.localStorageEntries) {
       storage.setItem(key, value);
     }
 
-    const records = Array.isArray(data.indexedDB) ? data.indexedDB : [];
-    for (const record of records) {
-      if (record && typeof record.key === 'string') {
-        await this.set(record.key, record.value, normalizeStorageClass(record.storageClass));
+    for (const record of prepared.indexedRecords) {
+      const saved = await this.set(record.key, record.value, record.storageClass);
+      if (!saved) {
+        throw new Error(`导入 IndexedDB 记录失败: ${record.key}`);
       }
+    }
+  }
+
+  private async rollbackImport(data: LocalDataExport): Promise<void> {
+    try {
+      await this.clearAll();
+      await this.writePreparedImport(prepareLocalDataImport(data));
+    } catch (rollbackError) {
+      console.warn('[LocalDataStore] 导入失败后回滚本地数据失败:', rollbackError);
     }
   }
 
@@ -385,11 +465,15 @@ class LocalDataStoreClass {
     const buckets = createUsageBuckets();
     const storage = getBrowserLocalStorage();
     for (const key of this.getLocalStorageKeys()) {
+      const bucketId = classifyLocalStorageKey(key);
+      if (bucketId === null) {
+        continue;
+      }
       const value = storage.getItem(key) || '';
       const bytes = (key.length + value.length) * 2;
       localStorageUsed += bytes;
       localStorageKeys += 1;
-      addToBucket(buckets, classifyKey(key), 'localStorage', bytes);
+      addToBucket(buckets, bucketId, 'localStorage', bytes);
     }
 
     const records = await this.getAllRecords();
@@ -535,6 +619,16 @@ class LocalDataStoreClass {
     }
 
     return existed;
+  }
+
+  private clearAppLocalStorageKeys(): number {
+    let removed = 0;
+    for (const key of this.getLocalStorageKeys()) {
+      if (classifyLocalStorageKey(key) !== null && this.removeLocalStorageKey(key)) {
+        removed += 1;
+      }
+    }
+    return removed;
   }
 }
 

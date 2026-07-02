@@ -529,7 +529,9 @@ class StorageServiceClass implements IStorageService {
    * 🎯 P0-4.1.8: 在数据边界使用类型守卫
    */
   getProxyConfig(): ProxyConfig {
-    const config = this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null);
+    const config =
+      this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null) ||
+      this.get<ProxyConfig>(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, null);
 
     // 🎯 数据边界验证：已在 get() 方法中验证
     // 如果验证失败，返回默认配置
@@ -551,6 +553,7 @@ class StorageServiceClass implements IStorageService {
     }
 
     this.set(STORAGE_KEYS.PROXY_CONFIG, config);
+    this.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, config);
   }
 
   /**

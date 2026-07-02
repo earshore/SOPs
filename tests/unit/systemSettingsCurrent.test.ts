@@ -414,7 +414,30 @@ describe('system settings current behavior', () => {
       type: 'scraperapi',
       customUrl: 'new-scraper-key',
     });
+    expect(StorageService.set).toHaveBeenCalledWith(STORAGE_KEYS.PROXY_CONFIG, {
+      type: 'scraperapi',
+      customUrl: 'new-scraper-key',
+    });
     expect(showToast).toHaveBeenCalledWith('网络配置已更新', { type: 'success' });
+  });
+
+  it('prefers the scraper runtime proxy key when legacy scraper settings are stale', () => {
+    deps.values.set(STORAGE_KEYS.PROXY_CONFIG, {
+      type: 'scraperapi',
+      customUrl: 'current-scraper-key',
+    });
+    deps.values.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, {
+      type: 'zenrows',
+      customUrl: 'stale-zen-key',
+    });
+    const panel = createPanel();
+
+    panel.loadProxyConfig();
+
+    expect(panel.proxy).toMatchObject({
+      type: 'scraperapi',
+      customUrl: 'current-scraper-key',
+    });
   });
 
   it('updates form state through DOM event setters', () => {
@@ -467,18 +490,47 @@ describe('system settings current behavior', () => {
     expect(deps.historyClearAsync).toHaveBeenCalledTimes(1);
     expect(deps.clearPlaygroundThreadStore).toHaveBeenCalledTimes(1);
     expect(deps.keywordHistoryClearAsync).toHaveBeenCalledTimes(1);
+    expect(LocalDataStore.clearBucket).toHaveBeenCalledWith('workspace-state');
     expect(LocalDataStore.getUsage).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(LocalDataStore.clearAll).mock.invocationCallOrder[0]).toBeGreaterThan(
+    expect(deps.appStoreState.resetScraper.mock.invocationCallOrder[0]).toBeGreaterThan(
+      vi.mocked(LocalDataStore.clearAll).mock.invocationCallOrder[0],
+    );
+    expect(vi.mocked(LocalDataStore.clearBucket).mock.invocationCallOrder[0]).toBeGreaterThan(
       deps.keywordHistoryClearAsync.mock.invocationCallOrder[0],
     );
     expect(vi.mocked(LocalDataStore.getUsage).mock.invocationCallOrder[0]).toBeGreaterThan(
-      vi.mocked(LocalDataStore.clearAll).mock.invocationCallOrder[0],
+      vi.mocked(LocalDataStore.clearBucket).mock.invocationCallOrder[0],
     );
     expect(showToast).toHaveBeenCalledWith(
       '全部本地数据已清空，请刷新页面重新初始化',
       { type: 'success' }
     );
     expect(panel.localData.isBusy).toBe(false);
+  });
+
+  it('clears persisted local data even when runtime cleanup fails', async () => {
+    vi.spyOn(window, 'confirm')
+      .mockReturnValueOnce(true)
+      .mockReturnValueOnce(true);
+    deps.historyClearAsync.mockRejectedValueOnce(new Error('history cleanup failed'));
+    const panel = createPanel();
+
+    await panel.clearAllLocalData();
+
+    expect(LocalDataStore.clearAll).toHaveBeenCalledTimes(1);
+    expect(deps.appStoreState.resetScraper.mock.invocationCallOrder[0]).toBeGreaterThan(
+      vi.mocked(LocalDataStore.clearAll).mock.invocationCallOrder[0],
+    );
+    expect(ErrorService.handle).toHaveBeenCalledWith(expect.any(Error), {
+      action: 'syncRuntimeAfterClearAllLocalData',
+      module: 'settings',
+      notify: false,
+    });
+    expect(LocalDataStore.clearBucket).toHaveBeenCalledWith('workspace-state');
+    expect(showToast).toHaveBeenCalledWith(
+      '全部本地数据已清空，请刷新页面重新初始化',
+      { type: 'success' }
+    );
   });
 
   it('clears selected local data buckets through runtime-aware cleanup', async () => {
@@ -493,6 +545,17 @@ describe('system settings current behavior', () => {
     expect(LocalDataStore.getUsage).toHaveBeenCalledTimes(1);
     expect(panel.localData.isBusy).toBe(false);
     expect(panel.localData.clearingBucketId).toBeNull();
+  });
+
+  it('warns before exporting sensitive local data backups', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const panel = createPanel();
+
+    await panel.exportLocalData();
+
+    expect(confirm).toHaveBeenCalledWith(expect.stringContaining('敏感本地数据'));
+    expect(LocalDataStore.exportAll).not.toHaveBeenCalled();
+    expect(panel.localData.isBusy).toBe(false);
   });
 
   it('imports local data in replace mode and schedules a reload', async () => {

@@ -1,9 +1,15 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LocalDataStore } from '@/services/localDataStore';
 
 describe('LocalDataStore', () => {
   beforeEach(async () => {
+    vi.restoreAllMocks();
+    localStorage.clear();
     await LocalDataStore.clearAll();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('stores, reads, removes, and lists IndexedDB-layer records', async () => {
@@ -36,8 +42,11 @@ describe('LocalDataStore', () => {
     localStorage.setItem('llm_active_provider', JSON.stringify('new_api'));
     localStorage.setItem('negative_review_owner_v1', JSON.stringify('客服小王'));
     localStorage.setItem('secure_llm_key_new_api', JSON.stringify({ encrypted: true }));
+    localStorage.setItem('proxy_key_map', JSON.stringify({ scraperapi: 'scraper-key' }));
+    localStorage.setItem('scraper_proxy_config', JSON.stringify({ type: 'scraperapi', customUrl: 'scraper-key' }));
     localStorage.setItem('cache:view:item', 'cached-view');
     localStorage.setItem('app-storage', JSON.stringify({ state: { promptlab: { history: [{ id: 'p1' }] } } }));
+    localStorage.setItem('external-app-key', 'not-owned');
     await LocalDataStore.set('user:scrape_history', [{ id: 1 }], 'user-data');
     await LocalDataStore.set('user:playground_deep_chat_threads_v1', { threads: [] }, 'user-data');
     await LocalDataStore.set('user:keyword_hunter_snapshots', [{ id: 'kh1' }], 'user-data');
@@ -57,7 +66,7 @@ describe('LocalDataStore', () => {
       'other',
     ]);
     expect(buckets.config.localStorage.keys).toBe(2);
-    expect(buckets.secrets.localStorage.keys).toBe(1);
+    expect(buckets.secrets.localStorage.keys).toBe(3);
     expect(buckets['workspace-state'].localStorage.keys).toBe(1);
     expect(buckets.cache.localStorage.keys).toBe(1);
     expect(buckets['scrape-history'].indexedDB.keys).toBe(1);
@@ -65,6 +74,37 @@ describe('LocalDataStore', () => {
     expect(buckets['keyword-history'].indexedDB.keys).toBe(1);
     expect(buckets.other.indexedDB.keys).toBe(1);
     expect(buckets['scrape-history'].total).toBeGreaterThan(0);
+  });
+
+  it('preserves non-SOPS origin keys during usage, export, and clear all', async () => {
+    localStorage.setItem('app_theme', JSON.stringify('dark'));
+    localStorage.setItem('external-app-key', 'keep-me');
+
+    const usage = await LocalDataStore.getUsage();
+    const exported = await LocalDataStore.exportAll();
+
+    expect(usage.localStorage.keys).toBe(1);
+    expect(exported.localStorage).toEqual({ app_theme: JSON.stringify('dark') });
+
+    await LocalDataStore.clearAll();
+
+    expect(localStorage.getItem('app_theme')).toBeNull();
+    expect(localStorage.getItem('external-app-key')).toBe('keep-me');
+  });
+
+  it('treats proxy credentials as secrets', async () => {
+    localStorage.setItem('proxy_key_map', JSON.stringify({ scraperapi: 'scraper-key' }));
+    localStorage.setItem('scraper_proxy_config', JSON.stringify({ type: 'scraperapi', customUrl: 'scraper-key' }));
+    localStorage.setItem('proxy_config', JSON.stringify({ type: 'scraperapi', customUrl: 'scraper-key' }));
+    localStorage.setItem('llm_active_provider', JSON.stringify('new_api'));
+
+    const removed = await LocalDataStore.clearBucket('secrets');
+
+    expect(removed).toBe(3);
+    expect(localStorage.getItem('proxy_key_map')).toBeNull();
+    expect(localStorage.getItem('scraper_proxy_config')).toBeNull();
+    expect(localStorage.getItem('proxy_config')).toBeNull();
+    expect(localStorage.getItem('llm_active_provider')).toBe(JSON.stringify('new_api'));
   });
 
   it('clears only the selected data bucket', async () => {
@@ -157,14 +197,16 @@ describe('LocalDataStore', () => {
   });
 
   it('can replace current data during import', async () => {
-    localStorage.setItem('keep_before_import', 'stale');
+    localStorage.setItem('app_theme', JSON.stringify('stale'));
+    localStorage.setItem('external-app-key', 'keep-me');
     await LocalDataStore.set('user:stale', { stale: true }, 'user-data');
 
     const backup = {
       version: 1 as const,
       exportedAt: new Date().toISOString(),
       localStorage: {
-        restored_key: 'restored',
+        app_theme: JSON.stringify('restored'),
+        'external-import-key': 'skip-me',
       },
       indexedDB: [
         {
@@ -182,10 +224,85 @@ describe('LocalDataStore', () => {
 
     await LocalDataStore.importAll(backup, { mode: 'replace' });
 
-    expect(localStorage.getItem('keep_before_import')).toBeNull();
-    expect(localStorage.getItem('restored_key')).toBe('restored');
+    expect(localStorage.getItem('app_theme')).toBe(JSON.stringify('restored'));
+    expect(localStorage.getItem('external-app-key')).toBe('keep-me');
+    expect(localStorage.getItem('external-import-key')).toBeNull();
     expect(await LocalDataStore.get('user:stale')).toBeNull();
     expect(await LocalDataStore.get('user:restored')).toEqual({ ok: true });
+  });
+
+  it('rejects non-SOPS backup files before replacing current data', async () => {
+    localStorage.setItem('app_theme', JSON.stringify('old'));
+    await LocalDataStore.set('user:stale', { stale: true }, 'user-data');
+    const backup = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      localStorage: {
+        app_theme: JSON.stringify('new'),
+      },
+      indexedDB: [],
+      metadata: {
+        app: 'external-tool',
+        storageVersion: 'local-data-v1',
+      },
+    } as unknown as Parameters<typeof LocalDataStore.importAll>[0];
+
+    await expect(LocalDataStore.importAll(backup, { mode: 'replace' }))
+      .rejects.toThrow('不支持的本地数据备份格式');
+
+    expect(localStorage.getItem('app_theme')).toBe(JSON.stringify('old'));
+    expect(await LocalDataStore.get('user:stale')).toEqual({ stale: true });
+  });
+
+  it('rejects malformed localStorage values before replacing current data', async () => {
+    localStorage.setItem('app_theme', JSON.stringify('old'));
+    await LocalDataStore.set('user:stale', { stale: true }, 'user-data');
+    const backup = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      localStorage: {
+        app_theme: { value: 'not-a-storage-string' },
+      },
+      indexedDB: [],
+      metadata: {
+        app: 'sops',
+        storageVersion: 'local-data-v1',
+      },
+    } as unknown as Parameters<typeof LocalDataStore.importAll>[0];
+
+    await expect(LocalDataStore.importAll(backup, { mode: 'replace' }))
+      .rejects.toThrow('本地数据备份中包含无效的 localStorage 值');
+
+    expect(localStorage.getItem('app_theme')).toBe(JSON.stringify('old'));
+    expect(await LocalDataStore.get('user:stale')).toEqual({ stale: true });
+  });
+
+  it('rolls back replace imports when writing prepared localStorage data fails', async () => {
+    localStorage.setItem('app_theme', JSON.stringify('old'));
+    await LocalDataStore.set('user:stale', { stale: true }, 'user-data');
+    const originalSetItem = Storage.prototype.setItem;
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function setItem(key: string, value: string) {
+      if (key === 'app_theme' && value === JSON.stringify('new')) {
+        throw new Error('quota exceeded');
+      }
+      return originalSetItem.call(this, key, value);
+    });
+
+    await expect(LocalDataStore.importAll({
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      localStorage: {
+        app_theme: JSON.stringify('new'),
+      },
+      indexedDB: [],
+      metadata: {
+        app: 'sops',
+        storageVersion: 'local-data-v1',
+      },
+    }, { mode: 'replace' })).rejects.toThrow('quota exceeded');
+
+    expect(localStorage.getItem('app_theme')).toBe(JSON.stringify('old'));
+    expect(await LocalDataStore.get('user:stale')).toEqual({ stale: true });
   });
 
   it('migrates a legacy localStorage key without deleting the source', async () => {

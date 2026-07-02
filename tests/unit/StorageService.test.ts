@@ -230,6 +230,19 @@ describe('StorageService', () => {
       const result = StorageService.getProxyConfig();
 
       expect(result).toEqual(config);
+      expect(StorageService.get(STORAGE_KEYS.SCRAPER_PROXY_CONFIG)).toEqual(config);
+    });
+
+    it('应该兼容旧的采集代理配置键', () => {
+      const config = {
+        type: 'scraperapi' as const,
+        enabled: true,
+        customUrl: 'legacy-key'
+      };
+
+      StorageService.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, config);
+
+      expect(StorageService.getProxyConfig()).toEqual(config);
     });
 
     it('应该返回默认代理配置', () => {

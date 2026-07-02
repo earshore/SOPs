@@ -278,7 +278,6 @@
     transition: all var(--duration-normal, 250ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.nav-group:hover .mega-menu,
 .nav-group.is-open .mega-menu {
     opacity: 1;
     visibility: visible;
