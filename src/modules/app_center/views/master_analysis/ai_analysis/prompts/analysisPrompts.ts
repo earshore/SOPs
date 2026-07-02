@@ -52,6 +52,8 @@
 import type { Product } from '../config/sampleData';
 import { sanitizePromptInput } from './promptSanitizer';
 import { ValidationError } from '@common/errors/AppError';
+
+const nativeLoggerConsole = globalThis.console;
 // 核心 JSON 规则
 export const CORE_JSON_RULES = `
 ## Critical JSON Rules
@@ -103,7 +105,7 @@ Input Title: {{productTitle}}
   "removed_brand_terms": ["string"],
   "optimization_suggestions": ["string"]
 }
-`
+`,
   },
 
   'selling-points': {
@@ -149,7 +151,7 @@ Input Bullet Points:
     "pain_points": ["string"]
   }
 }
-`
+`,
   },
 
   'fatal-flaws': {
@@ -196,7 +198,7 @@ Input Reviews (filtered 1-3 stars):
     "primary_concern": "string"
   }
 }
-`
+`,
   },
 
   'wow-moments': {
@@ -233,7 +235,7 @@ Input Reviews (5 stars only):
   "unexpected_benefits": ["string"],
   "copywriting_angles": ["string"]
 }
-`
+`,
   },
 
   'hesitation-points': {
@@ -272,7 +274,7 @@ Input Reviews:
     }
   ]
 }
-`
+`,
   },
 
   'buyer-profile': {
@@ -322,7 +324,7 @@ Reviewer Countries: {{reviewerCountries}}
     "cultural_considerations": ["string"]
   }
 }
-`
+`,
   },
 
   'vocab-gap': {
@@ -370,7 +372,7 @@ Buyer Reviews:
     "keyword_opportunities": ["string"]
   }
 }
-`
+`,
   },
 
   'promise-reality': {
@@ -413,8 +415,8 @@ Customer Reviews:
   },
   "listing_revision_suggestions": ["string"]
 }
-`
-  }
+`,
+  },
 };
 
 /**
@@ -436,14 +438,31 @@ type PromptData = {
   featureBullets: string;
 };
 
+export interface ReviewSamplingBucketMetadata {
+  totalReviews: number;
+  includedReviews: number;
+  omittedReviews: number;
+  bodyCharLimit: number;
+}
+
+export interface ReviewSamplingMetadata {
+  totalReviews: number;
+  lowStar: ReviewSamplingBucketMetadata;
+  highStar: ReviewSamplingBucketMetadata;
+  general: ReviewSamplingBucketMetadata & { strategy: 'representative' };
+}
+
 const REVIEW_LIMITS = {
   lowStar: { count: 24, bodyChars: 700 },
   highStar: { count: 24, bodyChars: 700 },
-  general: { count: 40, bodyChars: 520 }
+  general: { count: 40, bodyChars: 520 },
 };
 const VALID_LANGUAGES = ['en', 'zh', 'de', 'fr', 'es', 'ja', 'it'];
 
-function createPromptContext(action: string, extraContext: Record<string, unknown> = {}): Record<string, unknown> {
+function createPromptContext(
+  action: string,
+  extraContext: Record<string, unknown> = {}
+): Record<string, unknown> {
   return { module: 'AnalysisPrompts', action, ...extraContext };
 }
 
@@ -451,7 +470,7 @@ function assertValidProductForPrompt(
   product: Product,
   action: string,
   codes: ProductPromptValidationCodes,
-  extraContext: Record<string, unknown> = {},
+  extraContext: Record<string, unknown> = {}
 ): void {
   const context = createPromptContext(action, extraContext);
 
@@ -460,7 +479,13 @@ function assertValidProductForPrompt(
   }
 
   if (!product.asin) {
-    throw new ValidationError('产品对象缺少必需字段: asin', codes.missingAsin, 'product.asin', product.asin, context);
+    throw new ValidationError(
+      '产品对象缺少必需字段: asin',
+      codes.missingAsin,
+      'product.asin',
+      product.asin,
+      context
+    );
   }
 
   if (!product.productTitle) {
@@ -469,7 +494,7 @@ function assertValidProductForPrompt(
       codes.missingTitle,
       'product.productTitle',
       product.productTitle,
-      context,
+      context
     );
   }
 
@@ -479,7 +504,7 @@ function assertValidProductForPrompt(
       codes.invalidReviews,
       'product.customer_reviews',
       product.customer_reviews,
-      context,
+      context
     );
   }
 
@@ -489,14 +514,16 @@ function assertValidProductForPrompt(
       codes.invalidBullets,
       'product.feature_bullets',
       product.feature_bullets,
-      context,
+      context
     );
   }
 }
 
 function warnForUnusualLanguage(action: string, language: string): void {
   if (language && !VALID_LANGUAGES.includes(language)) {
-    console.warn(`[${action}] Unusual language code: ${language}. Expected one of: ${VALID_LANGUAGES.join(', ')}`);
+    nativeLoggerConsole.warn(
+      `[${action}] Unusual language code: ${language}. Expected one of: ${VALID_LANGUAGES.join(', ')}`
+    );
   }
 }
 
@@ -564,11 +591,66 @@ function selectRepresentativeReviews(reviews: PromptReview[], limit: number): Pr
   const lowStarLimit = Math.ceil(limit * 0.35);
   const highStarLimit = Math.ceil(limit * 0.25);
 
-  takeUniqueReviews(reviews.filter(review => review.star_rating <= 3), lowStarLimit, selected, seen);
-  takeUniqueReviews(reviews.filter(review => review.star_rating === 5), lowStarLimit + highStarLimit, selected, seen);
+  takeUniqueReviews(
+    reviews.filter(review => review.star_rating <= 3),
+    lowStarLimit,
+    selected,
+    seen
+  );
+  takeUniqueReviews(
+    reviews.filter(review => review.star_rating === 5),
+    lowStarLimit + highStarLimit,
+    selected,
+    seen
+  );
   takeUniqueReviews(reviews, limit, selected, seen);
 
   return selected.slice(0, limit);
+}
+
+function createReviewSamplingBucket(
+  totalReviews: number,
+  limit: number,
+  bodyCharLimit: number
+): ReviewSamplingBucketMetadata {
+  const includedReviews = Math.min(totalReviews, limit);
+  return {
+    totalReviews,
+    includedReviews,
+    omittedReviews: Math.max(0, totalReviews - includedReviews),
+    bodyCharLimit,
+  };
+}
+
+export function getReviewSamplingMetadata(product: Product): ReviewSamplingMetadata {
+  const reviews = Array.isArray(product.customer_reviews) ? product.customer_reviews : [];
+  const lowStarReviews = reviews.filter(review => review.star_rating <= 3);
+  const highStarReviews = reviews.filter(review => review.star_rating === 5);
+  const representativeReviews = selectRepresentativeReviews(reviews, REVIEW_LIMITS.general.count);
+
+  return {
+    totalReviews: reviews.length,
+    lowStar: createReviewSamplingBucket(
+      lowStarReviews.length,
+      REVIEW_LIMITS.lowStar.count,
+      REVIEW_LIMITS.lowStar.bodyChars
+    ),
+    highStar: createReviewSamplingBucket(
+      highStarReviews.length,
+      REVIEW_LIMITS.highStar.count,
+      REVIEW_LIMITS.highStar.bodyChars
+    ),
+    general: {
+      ...createReviewSamplingBucket(
+        reviews.length,
+        REVIEW_LIMITS.general.count,
+        REVIEW_LIMITS.general.bodyChars
+      ),
+      includedReviews: representativeReviews.length,
+      omittedReviews: Math.max(0, reviews.length - representativeReviews.length),
+      strategy: 'representative',
+    },
+  };
 }
 
 function formatReviewsForPrompt(
@@ -587,7 +669,9 @@ function formatReviewsForPrompt(
   const lines = selected.map(review => formatReview(review, bodyChars));
 
   if (omittedCount > 0) {
-    lines.push(`[sample note] ${omittedCount} additional reviews omitted to keep the analysis request fast.`);
+    lines.push(
+      `[sample note] ${omittedCount} additional reviews omitted to keep the analysis request fast.`
+    );
   }
 
   return lines.join('\n');
@@ -614,7 +698,11 @@ function createPromptData(product: Product): PromptData {
       'No reviews available',
       product.customer_reviews.length
     ),
-    reviewerCountries: [...new Set(product.customer_reviews.map(r => truncateForPrompt(r.origin_country || 'unknown', 80)))].join(', '),
+    reviewerCountries: [
+      ...new Set(
+        product.customer_reviews.map(r => truncateForPrompt(r.origin_country || 'unknown', 80))
+      ),
+    ].join(', '),
     featureBullets: product.feature_bullets
       .map((bullet, index) => `${index + 1}. ${sanitizePromptInput(bullet)}`)
       .join('\n'),
@@ -661,7 +749,7 @@ function buildSingleAnalysisPrompt(
   taskDef: AnalysisTaskDefinition,
   taskPrompt: string,
   product: Product,
-  language: string,
+  language: string
 ): string {
   return `
 ${buildExtractionPromptPreamble(language)}
@@ -687,7 +775,7 @@ function getValidAnalysisTasks(taskIds: string[]): AnalysisTaskDefinition[] {
 function buildDynamicTaskPrompts(
   tasks: AnalysisTaskDefinition[],
   product: Product,
-  promptData: PromptData,
+  promptData: PromptData
 ): string {
   return tasks
     .map(task => applyPromptData(task.taskPrompt, product, promptData))
@@ -699,7 +787,7 @@ function buildBatchAnalysisPromptTemplate(
   language: string,
   promptData: PromptData,
   dynamicTasks: string,
-  dynamicSchema: string,
+  dynamicSchema: string
 ): string {
   return `
 ${buildExtractionPromptPreamble(language)}
@@ -749,7 +837,7 @@ export function generateAnalysisPrompt(
       invalidReviews: 'ANALYSIS_PROMPT_005',
       invalidBullets: 'ANALYSIS_PROMPT_006',
     },
-    { taskId },
+    { taskId }
   );
   warnForUnusualLanguage('generateAnalysisPrompt', language);
   const safeLanguage = sanitizeLanguage(language);
@@ -791,24 +879,26 @@ export function generateBatchAnalysisPrompt(
     );
   }
 
-  assertValidProductForPrompt(
-    product,
-    'generateBatchAnalysisPrompt',
-    {
-      invalidProduct: 'ANALYSIS_PROMPT_009',
-      missingAsin: 'ANALYSIS_PROMPT_010',
-      missingTitle: 'ANALYSIS_PROMPT_011',
-      invalidReviews: 'ANALYSIS_PROMPT_012',
-      invalidBullets: 'ANALYSIS_PROMPT_013',
-    },
-  );
+  assertValidProductForPrompt(product, 'generateBatchAnalysisPrompt', {
+    invalidProduct: 'ANALYSIS_PROMPT_009',
+    missingAsin: 'ANALYSIS_PROMPT_010',
+    missingTitle: 'ANALYSIS_PROMPT_011',
+    invalidReviews: 'ANALYSIS_PROMPT_012',
+    invalidBullets: 'ANALYSIS_PROMPT_013',
+  });
   warnForUnusualLanguage('generateBatchAnalysisPrompt', language);
   const safeLanguage = sanitizeLanguage(language);
 
   const promptData = createPromptData(product);
   const dynamicTasks = buildDynamicTaskPrompts(tasks, product, promptData);
   const dynamicSchema = tasks.map(task => task?.schemaTemplate || '').join(',\n');
-  return buildBatchAnalysisPromptTemplate(product, safeLanguage, promptData, dynamicTasks, dynamicSchema);
+  return buildBatchAnalysisPromptTemplate(
+    product,
+    safeLanguage,
+    promptData,
+    dynamicTasks,
+    dynamicSchema
+  );
 }
 
 // 导出便捷方法

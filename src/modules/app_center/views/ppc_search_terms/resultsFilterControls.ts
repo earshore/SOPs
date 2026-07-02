@@ -1,0 +1,63 @@
+import { ACTION_ICONS, ACTION_LABELS, REPORT_FILTERS } from './actionMetadata';
+import { createIcon, getElement } from './dom';
+import { isFilterType, type FilterType } from './filters';
+import type { ActionType, AnalyzedRow, ReportType } from './types';
+
+export function renderFilterButtons(
+  container: HTMLElement,
+  reportType: ReportType,
+  activeFilter: FilterType
+): FilterType {
+  const wrapper = getElement(container, 'ppc-filter-buttons');
+  if (!wrapper) return activeFilter;
+
+  const filters: FilterType[] = ['all', ...REPORT_FILTERS[reportType]];
+  const nextFilter = filters.includes(activeFilter) ? activeFilter : 'all';
+
+  wrapper.replaceChildren(
+    ...filters.map(filter => createFilterButton(filter, filter === nextFilter))
+  );
+  return nextFilter;
+}
+
+export function setActiveFilterButton(container: HTMLElement, filter: FilterType): void {
+  container.querySelectorAll<HTMLElement>('.ppc-filter-btn').forEach(item => {
+    const isActive = item.dataset.filter === filter;
+    item.classList.toggle('active', isActive);
+    item.setAttribute('aria-pressed', String(isActive));
+  });
+}
+
+export function updateFilterCounts(container: HTMLElement, rows: AnalyzedRow[]): void {
+  const counts = new Map<FilterType, number>([['all', rows.length]]);
+  (Object.keys(ACTION_LABELS) as ActionType[]).forEach(action => counts.set(action, 0));
+
+  rows.forEach(row => {
+    counts.set(row.action, (counts.get(row.action) || 0) + 1);
+  });
+
+  container.querySelectorAll<HTMLElement>('.ppc-filter-btn').forEach(button => {
+    const filter = button.dataset.filter;
+    if (!isFilterType(filter)) return;
+
+    const count = button.querySelector<HTMLElement>('.ppc-filter-count');
+    if (count) count.textContent = String(counts.get(filter) || 0);
+  });
+}
+
+function createFilterButton(filter: FilterType, isActive: boolean): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.className = `ppc-filter-btn${isActive ? ' active' : ''}`;
+  button.type = 'button';
+  button.dataset.filter = filter;
+  button.setAttribute('aria-pressed', String(isActive));
+
+  const icon = createIcon(filter === 'all' ? 'fas fa-layer-group' : ACTION_ICONS[filter]);
+  const label = document.createElement('span');
+  label.textContent = filter === 'all' ? '全部' : ACTION_LABELS[filter];
+  const count = document.createElement('span');
+  count.className = 'ppc-filter-count';
+  count.textContent = '0';
+  button.append(icon, label, count);
+  return button;
+}

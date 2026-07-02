@@ -16,7 +16,11 @@
   gap: var(--spacing-5, 1.25rem);
   height: 100%;
   min-height: 0;
-  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  font-family:
+    'DM Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .playground-welcome {
@@ -33,8 +37,14 @@
   border: 1px solid var(--color-slate-200, #e2e8f0);
   border-radius: var(--rounded-xl, 0.75rem);
   overflow: hidden;
-  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1));
-  transition: grid-template-columns 200ms cubic-bezier(0, 0, 0.2, 1), box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+  box-shadow: var(
+    --shadow-lg,
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1)
+  );
+  transition:
+    grid-template-columns 200ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-page.is-rail-collapsed {
@@ -126,13 +136,20 @@
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  transition: border-color 150ms cubic-bezier(0, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0, 0, 0.2, 1), transform 150ms cubic-bezier(0, 0, 0.2, 1);
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  transition:
+    border-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0, 0, 0.2, 1),
+    transform 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-new-thread:hover {
   border-color: var(--playground-accent-border-hover);
-  box-shadow: 0 4px 6px -1px rgba(51, 65, 85, 0.15), 0 2px 4px -2px rgba(51, 65, 85, 0.1);
+  box-shadow:
+    0 4px 6px -1px rgba(51, 65, 85, 0.15),
+    0 2px 4px -2px rgba(51, 65, 85, 0.1);
 }
 
 .playground-new-thread:active {
@@ -171,7 +188,7 @@
 }
 
 .playground-panel-title::before {
-  content: "";
+  content: '';
   width: 0.25rem;
   height: 1rem;
   border-radius: 999px;
@@ -179,7 +196,7 @@
 }
 
 .playground-panel-title::after {
-  content: "";
+  content: '';
   height: 1px;
   flex: 1 1 auto;
   background: linear-gradient(90deg, rgba(148, 163, 184, 0.32), rgba(148, 163, 184, 0));
@@ -220,7 +237,10 @@
   border-radius: var(--rounded-lg, 0.5rem);
   background: transparent;
   color: var(--color-slate-700, #334155);
-  transition: background 150ms cubic-bezier(0, 0, 0.2, 1), border-color 150ms cubic-bezier(0, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
+  transition:
+    background 150ms cubic-bezier(0, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-thread-item:hover,
@@ -232,7 +252,10 @@
 .playground-thread-item.is-active {
   background: #ffffff;
   border-color: var(--playground-accent-border);
-  box-shadow: inset 3px 0 0 var(--playground-accent), 0 4px 6px -1px rgba(51, 65, 85, 0.1), 0 2px 4px -2px rgba(51, 65, 85, 0.1);
+  box-shadow:
+    inset 3px 0 0 var(--playground-accent),
+    0 4px 6px -1px rgba(51, 65, 85, 0.1),
+    0 2px 4px -2px rgba(51, 65, 85, 0.1);
 }
 
 .playground-thread-select {
@@ -309,7 +332,10 @@
   font-size: 11px;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 150ms cubic-bezier(0, 0, 0.2, 1), background 150ms cubic-bezier(0, 0, 0.2, 1), color 150ms cubic-bezier(0, 0, 0.2, 1);
+  transition:
+    opacity 150ms cubic-bezier(0, 0, 0.2, 1),
+    background 150ms cubic-bezier(0, 0, 0.2, 1),
+    color 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-thread-item:hover .playground-thread-delete,
@@ -336,20 +362,28 @@
   border-radius: var(--rounded-lg, 0.5rem);
   background: rgba(255, 255, 255, 0.62);
   color: var(--color-slate-700, #334155);
-  transition: background 150ms cubic-bezier(0, 0, 0.2, 1), border-color 150ms cubic-bezier(0, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
+  transition:
+    background 150ms cubic-bezier(0, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-prompt-item:hover,
 .playground-prompt-item:focus-within {
   background: #ffffff;
   border-color: rgba(51, 65, 85, 0.2);
-  box-shadow: 0 4px 6px -1px rgba(51, 65, 85, 0.08), 0 2px 4px -2px rgba(51, 65, 85, 0.08);
+  box-shadow:
+    0 4px 6px -1px rgba(51, 65, 85, 0.08),
+    0 2px 4px -2px rgba(51, 65, 85, 0.08);
 }
 
 .playground-prompt-item.is-preview-active {
   background: #ffffff;
   border-color: var(--playground-accent-border);
-  box-shadow: inset 3px 0 0 var(--playground-accent), 0 4px 6px -1px rgba(51, 65, 85, 0.1), 0 2px 4px -2px rgba(51, 65, 85, 0.1);
+  box-shadow:
+    inset 3px 0 0 var(--playground-accent),
+    0 4px 6px -1px rgba(51, 65, 85, 0.1),
+    0 2px 4px -2px rgba(51, 65, 85, 0.1);
 }
 
 .playground-prompt-draft:active {
@@ -386,7 +420,10 @@
   background: transparent;
   font-size: 11px;
   cursor: pointer;
-  transition: opacity 150ms cubic-bezier(0, 0, 0.2, 1), background 150ms cubic-bezier(0, 0, 0.2, 1), color 150ms cubic-bezier(0, 0, 0.2, 1);
+  transition:
+    opacity 150ms cubic-bezier(0, 0, 0.2, 1),
+    background 150ms cubic-bezier(0, 0, 0.2, 1),
+    color 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-prompt-use {
@@ -496,7 +533,9 @@
   border-radius: var(--rounded-xl, 0.75rem);
   background: rgba(255, 255, 255, 0.98);
   color: var(--color-slate-700, #334155);
-  box-shadow: 0 18px 48px -24px rgba(15, 23, 42, 0.38), 0 8px 18px -12px rgba(15, 23, 42, 0.22);
+  box-shadow:
+    0 18px 48px -24px rgba(15, 23, 42, 0.38),
+    0 8px 18px -12px rgba(15, 23, 42, 0.22);
   pointer-events: auto;
 }
 
@@ -505,7 +544,7 @@
 }
 
 .playground-prompt-preview-popover::before {
-  content: "";
+  content: '';
   position: absolute;
   top: var(--playground-prompt-preview-arrow-top);
   left: -7px;
@@ -616,7 +655,11 @@
   color: var(--color-slate-700, #334155);
   font-size: 14px;
   cursor: pointer;
-  transition: background 150ms cubic-bezier(0, 0, 0.2, 1), border-color 150ms cubic-bezier(0, 0, 0.2, 1), color 150ms cubic-bezier(0, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
+  transition:
+    background 150ms cubic-bezier(0, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    color 150ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-top-icon:hover,
@@ -639,7 +682,7 @@
   box-shadow: 0 0 0 3px var(--playground-focus-ring);
 }
 
-.playground-top-icon[aria-expanded="false"] {
+.playground-top-icon[aria-expanded='false'] {
   border-color: var(--playground-accent-border);
   background: var(--playground-accent-soft);
   color: var(--playground-accent-hover);
@@ -659,7 +702,10 @@
   line-height: 1;
   outline: none;
   box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
-  transition: border-color 200ms cubic-bezier(0, 0, 0.2, 1), box-shadow 200ms cubic-bezier(0, 0, 0.2, 1), background 200ms cubic-bezier(0, 0, 0.2, 1);
+  transition:
+    border-color 200ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0, 0, 0.2, 1),
+    background 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-select:focus {
@@ -694,7 +740,11 @@
   border: 1px solid var(--color-slate-200, #e2e8f0);
   border-radius: var(--rounded-xl, 0.75rem);
   background: #ffffff;
-  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1));
+  box-shadow: var(
+    --shadow-lg,
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1)
+  );
   display: grid;
   gap: var(--spacing-3, 0.75rem);
 }
@@ -753,9 +803,11 @@
 .playground-field-temperature input::-webkit-slider-runnable-track {
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg,
-      var(--playground-accent) 0 var(--playground-temperature-percent, 30%),
-      var(--playground-accent-muted) var(--playground-temperature-percent, 30%) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 var(--playground-temperature-percent, 30%),
+    var(--playground-accent-muted) var(--playground-temperature-percent, 30%) 100%
+  );
 }
 
 .playground-field-temperature input::-webkit-slider-thumb {
@@ -809,14 +861,19 @@
   font-family: 'DM Sans', system-ui, sans-serif;
   cursor: pointer;
   box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
-  transition: border-color 150ms cubic-bezier(0, 0, 0.2, 1), background 150ms cubic-bezier(0, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
+  transition:
+    border-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    background 150ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-reset-tuning:hover {
   border-color: var(--playground-accent-border-hover);
   background: var(--playground-accent-soft);
   color: var(--playground-accent-hover);
-  box-shadow: 0 4px 6px -1px rgba(51, 65, 85, 0.1), 0 2px 4px -2px rgba(51, 65, 85, 0.1);
+  box-shadow:
+    0 4px 6px -1px rgba(51, 65, 85, 0.1),
+    0 2px 4px -2px rgba(51, 65, 85, 0.1);
 }
 
 .playground-stage {
@@ -832,7 +889,9 @@
   flex-direction: column;
   justify-content: flex-start;
   padding: var(--spacing-24, 6rem) 0 var(--spacing-8, 2rem);
-  transition: width 200ms cubic-bezier(0, 0, 0.2, 1), padding 200ms cubic-bezier(0, 0, 0.2, 1);
+  transition:
+    width 200ms cubic-bezier(0, 0, 0.2, 1),
+    padding 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-chat-wrap {

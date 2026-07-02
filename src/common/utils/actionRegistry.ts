@@ -8,6 +8,8 @@ import { StorageService } from '../../services/storageService';
 import eventBus from '../EventBus';
 import { APP_EVENTS } from '../constants/eventConstants';
 
+const nativeLoggerConsole = globalThis.console;
+
 /**
  * 动作处理函数类型
  */
@@ -124,12 +126,12 @@ function _validateActionName(actionName: string): boolean {
   }
 
   // 检查是否有模块前缀
-  const hasPrefix = Object.keys(NAMING_CONVENTIONS.prefixes).some((prefix) =>
+  const hasPrefix = Object.keys(NAMING_CONVENTIONS.prefixes).some(prefix =>
     actionName.startsWith(prefix)
   );
 
   if (!hasPrefix && !actionName.startsWith('_')) {
-    console.warn(
+    nativeLoggerConsole.warn(
       `⚠️ [ActionRegistry] 动作 "${actionName}" 未使用模块前缀。\n` +
         `   推荐格式: <prefix>_<action>，例如: kt_syncToInput\n` +
         `   可用前缀: ${Object.keys(NAMING_CONVENTIONS.prefixes).join(', ')}`
@@ -146,7 +148,7 @@ export function registerAction(actionName: string, handler: ActionHandler): void
   _validateActionName(actionName);
 
   if (ActionRegistry[actionName]) {
-    console.warn(`[ActionRegistry] 动作 "${actionName}" 已存在，将被覆盖`);
+    nativeLoggerConsole.warn(`[ActionRegistry] 动作 "${actionName}" 已存在，将被覆盖`);
   }
   ActionRegistry[actionName] = handler;
 }
@@ -179,16 +181,20 @@ export function unregisterAction(actionName: string): void {
  * 批量注销动作
  */
 export function unregisterActions(actionNames: string[]): void {
-  actionNames.forEach((name) => unregisterAction(name));
+  actionNames.forEach(name => unregisterAction(name));
 }
 
 /**
  * 执行动作
  */
-export function executeAction(actionName: string, params: Record<string, unknown>, event: Event): unknown {
+export function executeAction(
+  actionName: string,
+  params: Record<string, unknown>,
+  event: Event
+): unknown {
   const handler = ActionRegistry[actionName];
   if (!handler) {
-    console.warn(`[ActionRegistry] 未注册的动作: "${actionName}"`);
+    nativeLoggerConsole.warn(`[ActionRegistry] 未注册的动作: "${actionName}"`);
     return;
   }
   return handler(params, event);
@@ -209,7 +215,7 @@ export function getRegisteredActions(): string[] {
  * 初始化全局事件委托
  */
 export function initGlobalEventDelegation(): void {
-  document.addEventListener('click', (event) => {
+  document.addEventListener('click', event => {
     // 从点击目标向上查找带有 data-action 的元素
     const target = event.target as HTMLElement;
     const actionElement = target.closest('[data-action]') as HTMLElement;
@@ -225,7 +231,6 @@ export function initGlobalEventDelegation(): void {
     // 执行动作
     executeAction(actionName, params, event);
   });
-
 }
 
 // ================================================================
@@ -264,7 +269,7 @@ export function registerActionWithLegacy(actionName: string, handler: ActionHand
       // 弃用警告 (每个函数只警告一次)
       if (ENABLE_DEPRECATION_WARNINGS() && !warnedFunctions.has(actionName)) {
         warnedFunctions.add(actionName);
-        console.warn(
+        nativeLoggerConsole.warn(
           `⚠️ [Deprecated] window.${actionName}() 即将弃用。\n` +
             `   请迁移到: <button data-action="${actionName}">...\n` +
             `   (此警告已手动开启，关闭: StorageService.remove('enable_legacy_warnings'))`

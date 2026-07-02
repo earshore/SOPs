@@ -18,7 +18,7 @@ export enum AlertLevel {
   INFO = 'info',
   WARNING = 'warning',
   ERROR = 'error',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 /**
@@ -28,7 +28,7 @@ export enum AlertType {
   PERFORMANCE = 'performance',
   ERROR_RATE = 'error_rate',
   MEMORY_LEAK = 'memory_leak',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 /**
@@ -90,7 +90,7 @@ export class AlertService {
       showToast: true,
       showBrowserNotification: false,
       maxAlerts: 100,
-      defaultCooldown: 60000 // 1分钟
+      defaultCooldown: 60000, // 1分钟
     };
     this.rules = new Map();
     this.alerts = new Map();
@@ -110,7 +110,11 @@ export class AlertService {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+  private _log(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    data: Record<string, unknown> = {}
+  ): void {
     if (this.logger) {
       this.logger[level](message, data, 'AlertService');
     } else {
@@ -144,7 +148,11 @@ export class AlertService {
     }
 
     this.isInitialized = true;
-    this._log('info', '✅ AlertService initialized', this.config as unknown as Record<string, unknown>);
+    this._log(
+      'info',
+      '✅ AlertService initialized',
+      this.config as unknown as Record<string, unknown>
+    );
   }
 
   /**
@@ -156,18 +164,18 @@ export class AlertService {
       id: 'lcp_threshold',
       type: AlertType.PERFORMANCE,
       enabled: true,
-      condition: (data) => {
+      condition: data => {
         const perfData = data as { lcp: number };
         return perfData.lcp > 4000;
       },
       level: AlertLevel.WARNING,
       title: 'LCP性能告警',
-      message: (data) => {
+      message: data => {
         const perfData = data as { lcp: number };
         return `LCP超过阈值: ${(perfData.lcp / 1000).toFixed(2)}s (阈值: 4s)`;
       },
       cooldown: 300000, // 5分钟
-      lastTriggered: 0
+      lastTriggered: 0,
     });
 
     // FID性能告警
@@ -175,18 +183,18 @@ export class AlertService {
       id: 'fid_threshold',
       type: AlertType.PERFORMANCE,
       enabled: true,
-      condition: (data) => {
+      condition: data => {
         const perfData = data as { fid: number };
         return perfData.fid > 300;
       },
       level: AlertLevel.WARNING,
       title: 'FID性能告警',
-      message: (data) => {
+      message: data => {
         const perfData = data as { fid: number };
         return `FID超过阈值: ${perfData.fid}ms (阈值: 300ms)`;
       },
       cooldown: 300000,
-      lastTriggered: 0
+      lastTriggered: 0,
     });
 
     // CLS性能告警
@@ -194,18 +202,18 @@ export class AlertService {
       id: 'cls_threshold',
       type: AlertType.PERFORMANCE,
       enabled: true,
-      condition: (data) => {
+      condition: data => {
         const perfData = data as { cls: number };
         return perfData.cls > 0.25;
       },
       level: AlertLevel.WARNING,
       title: 'CLS性能告警',
-      message: (data) => {
+      message: data => {
         const perfData = data as { cls: number };
         return `CLS超过阈值: ${perfData.cls.toFixed(3)} (阈值: 0.25)`;
       },
       cooldown: 300000,
-      lastTriggered: 0
+      lastTriggered: 0,
     });
 
     // 错误率告警
@@ -213,18 +221,18 @@ export class AlertService {
       id: 'error_rate_threshold',
       type: AlertType.ERROR_RATE,
       enabled: true,
-      condition: (data) => {
+      condition: data => {
         const errorData = data as { errorRate: number };
         return errorData.errorRate > 0.01;
       },
       level: AlertLevel.ERROR,
       title: '错误率告警',
-      message: (data) => {
+      message: data => {
         const errorData = data as { errorRate: number };
         return `错误率超过阈值: ${(errorData.errorRate * 100).toFixed(2)}% (阈值: 1%)`;
       },
       cooldown: 600000, // 10分钟
-      lastTriggered: 0
+      lastTriggered: 0,
     });
 
     // 内存泄漏告警
@@ -232,18 +240,18 @@ export class AlertService {
       id: 'memory_leak_threshold',
       type: AlertType.MEMORY_LEAK,
       enabled: true,
-      condition: (data) => {
+      condition: data => {
         const memData = data as { memoryGrowth: number };
         return memData.memoryGrowth > 50 * 1024 * 1024;
       },
       level: AlertLevel.CRITICAL,
       title: '内存泄漏告警',
-      message: (data) => {
+      message: data => {
         const memData = data as { memoryGrowth: number };
         return `内存增长超过阈值: ${(memData.memoryGrowth / 1024 / 1024).toFixed(2)}MB (阈值: 50MB)`;
       },
       cooldown: 600000,
-      lastTriggered: 0
+      lastTriggered: 0,
     });
   }
 
@@ -297,9 +305,9 @@ export class AlertService {
         title: rule.title,
         message: rule.message(data),
         timestamp: Date.now(),
-        data: (typeof data === 'object' && data !== null) ? data as Record<string, unknown> : {},
+        data: typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {},
         acknowledged: false,
-        count: 1
+        count: 1,
       };
 
       this.alerts.set(alertId, alert);
@@ -325,20 +333,23 @@ export class AlertService {
    */
   private notify(alert: Alert): void {
     // Toast通知
-    const showToast = typeof window !== 'undefined'
-      ? (window as WindowWithToast).showToast
-      : undefined;
+    const showToast =
+      typeof window !== 'undefined' ? (window as WindowWithToast).showToast : undefined;
     if (this.config.showToast && typeof showToast === 'function') {
       const toastType = this.getToastType(alert.level);
       showToast(alert.message, { type: toastType });
     }
 
     // 浏览器通知
-    if (this.config.showBrowserNotification && 'Notification' in window && Notification.permission === 'granted') {
+    if (
+      this.config.showBrowserNotification &&
+      'Notification' in window &&
+      Notification.permission === 'granted'
+    ) {
       new Notification(alert.title, {
         body: alert.message,
         icon: '/favicon.ico',
-        tag: alert.id
+        tag: alert.id,
       });
     }
   }
@@ -364,19 +375,14 @@ export class AlertService {
    * 记录告警日志
    */
   private logAlert(alert: Alert): void {
-    const logLevel = alert.level === AlertLevel.CRITICAL || alert.level === AlertLevel.ERROR
-      ? 'error'
-      : 'warn';
+    const logLevel =
+      alert.level === AlertLevel.CRITICAL || alert.level === AlertLevel.ERROR ? 'error' : 'warn';
 
-    this._log(
-      logLevel,
-      `[${alert.type}] ${alert.message}`,
-      {
-        id: alert.id,
-        level: alert.level,
-        data: alert.data
-      } as Record<string, unknown>
-    );
+    this._log(logLevel, `[${alert.type}] ${alert.message}`, {
+      id: alert.id,
+      level: alert.level,
+      data: alert.data,
+    } as Record<string, unknown>);
   }
 
   /**
@@ -404,8 +410,7 @@ export class AlertService {
    * 清理旧告警
    */
   private pruneOldAlerts(): void {
-    const sortedAlerts = Array.from(this.alerts.values())
-      .sort((a, b) => a.timestamp - b.timestamp);
+    const sortedAlerts = Array.from(this.alerts.values()).sort((a, b) => a.timestamp - b.timestamp);
 
     const toRemove = sortedAlerts.slice(0, sortedAlerts.length - this.config.maxAlerts);
     toRemove.forEach(alert => this.alerts.delete(alert.id));
@@ -422,8 +427,7 @@ export class AlertService {
    * 获取所有告警
    */
   getAllAlerts(): Alert[] {
-    return Array.from(this.alerts.values())
-      .sort((a, b) => b.timestamp - a.timestamp);
+    return Array.from(this.alerts.values()).sort((a, b) => b.timestamp - a.timestamp);
   }
 
   /**
@@ -444,15 +448,21 @@ export class AlertService {
   } {
     const alerts = this.getAllAlerts();
 
-    const byLevel = alerts.reduce((acc, alert) => {
-      acc[alert.level] = (acc[alert.level] || 0) + 1;
-      return acc;
-    }, {} as Record<AlertLevel, number>);
+    const byLevel = alerts.reduce(
+      (acc, alert) => {
+        acc[alert.level] = (acc[alert.level] || 0) + 1;
+        return acc;
+      },
+      {} as Record<AlertLevel, number>
+    );
 
-    const byType = alerts.reduce((acc, alert) => {
-      acc[alert.type] = (acc[alert.type] || 0) + 1;
-      return acc;
-    }, {} as Record<AlertType, number>);
+    const byType = alerts.reduce(
+      (acc, alert) => {
+        acc[alert.type] = (acc[alert.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<AlertType, number>
+    );
 
     const unacknowledged = alerts.filter(a => !a.acknowledged).length;
 
@@ -460,7 +470,7 @@ export class AlertService {
       total: alerts.length,
       byLevel,
       byType,
-      unacknowledged
+      unacknowledged,
     };
   }
 
@@ -488,7 +498,11 @@ export class AlertService {
    */
   updateConfig(config: Partial<AlertConfig>): void {
     this.config = { ...this.config, ...config };
-    this._log('info', 'AlertService config updated', this.config as unknown as Record<string, unknown>);
+    this._log(
+      'info',
+      'AlertService config updated',
+      this.config as unknown as Record<string, unknown>
+    );
   }
 
   /**

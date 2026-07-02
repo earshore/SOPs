@@ -13,7 +13,7 @@ export enum EventType {
   PAGE_VIEW = 'page_view',
   USER_ACTION = 'user_action',
   ROUTE_CHANGE = 'route_change',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 /**
@@ -24,7 +24,7 @@ export enum ActionType {
   INPUT = 'input',
   SUBMIT = 'submit',
   SCROLL = 'scroll',
-  RESIZE = 'resize'
+  RESIZE = 'resize',
 }
 
 /**
@@ -127,7 +127,7 @@ export class AnalyticsService {
       trackPageViews: true,
       trackUserActions: true,
       sessionTimeout: 30 * 60 * 1000, // 30分钟
-      sampleRate: 1.0
+      sampleRate: 1.0,
     };
     this.events = [];
     this.currentSession = null;
@@ -150,7 +150,11 @@ export class AnalyticsService {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+  private _log(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    data: Record<string, unknown> = {}
+  ): void {
     if (this.logger) {
       this.logger[level](message, data, 'Analytics');
     } else {
@@ -171,7 +175,7 @@ export class AnalyticsService {
       sessionId: this.currentSession?.id || '',
       userId: this.currentSession?.userId,
       properties,
-      context: this.getContext()
+      context: this.getContext(),
     };
   }
 
@@ -204,7 +208,11 @@ export class AnalyticsService {
     this.setupSessionTimeout();
 
     this.isInitialized = true;
-    this._log('info', '✅ AnalyticsService initialized', this.config as unknown as Record<string, unknown>);
+    this._log(
+      'info',
+      '✅ AnalyticsService initialized',
+      this.config as unknown as Record<string, unknown>
+    );
   }
 
   /**
@@ -217,7 +225,7 @@ export class AnalyticsService {
       lastActivity: Date.now(),
       pageViews: 0,
       events: 0,
-      userId
+      userId,
     };
 
     this._log('debug', 'New session created', { sessionId: this.currentSession.id });
@@ -242,48 +250,61 @@ export class AnalyticsService {
    */
   private setupEventListeners(): void {
     // 点击事件
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      
-      // 🔥 排除外部链接和下载按钮，避免拦截 window.open()
-      // 检查是否是带有 onclick 的外部链接按钮
-      const hasOnclick = target.hasAttribute('onclick') || target.closest('[onclick]');
-      const isExternalLink = target.closest('a[target="_blank"]') || target.closest('button[onclick*="window.open"]');
-      
-      if (hasOnclick || isExternalLink) {
-        // 不追踪，让事件正常传播
-        return;
-      }
-      
-      this.trackUserAction({
-        action: ActionType.CLICK,
-        target: this.getElementSelector(target),
-        value: target.textContent?.trim()
-      });
-    }, true);
+    document.addEventListener(
+      'click',
+      e => {
+        const target = e.target as HTMLElement;
+
+        // 🔥 排除外部链接和下载按钮，避免拦截 window.open()
+        // 检查是否是带有 onclick 的外部链接按钮
+        const hasOnclick = target.hasAttribute('onclick') || target.closest('[onclick]');
+        const isExternalLink =
+          target.closest('a[target="_blank"]') || target.closest('button[onclick*="window.open"]');
+
+        if (hasOnclick || isExternalLink) {
+          // 不追踪，让事件正常传播
+          return;
+        }
+
+        this.trackUserAction({
+          action: ActionType.CLICK,
+          target: this.getElementSelector(target),
+          value: target.textContent?.trim(),
+        });
+      },
+      true
+    );
 
     // 输入事件(节流)
     let inputTimeout: number;
-    document.addEventListener('input', (e) => {
-      clearTimeout(inputTimeout);
-      inputTimeout = window.setTimeout(() => {
-        const target = e.target as HTMLInputElement;
-        this.trackUserAction({
-          action: ActionType.INPUT,
-          target: this.getElementSelector(target),
-          value: target.type === 'password' ? '[REDACTED]' : target.value?.length
-        });
-      }, 1000);
-    }, true);
+    document.addEventListener(
+      'input',
+      e => {
+        clearTimeout(inputTimeout);
+        inputTimeout = window.setTimeout(() => {
+          const target = e.target as HTMLInputElement;
+          this.trackUserAction({
+            action: ActionType.INPUT,
+            target: this.getElementSelector(target),
+            value: target.type === 'password' ? '[REDACTED]' : target.value?.length,
+          });
+        }, 1000);
+      },
+      true
+    );
 
     // 表单提交
-    document.addEventListener('submit', (e) => {
-      const target = e.target as HTMLFormElement;
-      this.trackUserAction({
-        action: ActionType.SUBMIT,
-        target: this.getElementSelector(target)
-      });
-    }, true);
+    document.addEventListener(
+      'submit',
+      e => {
+        const target = e.target as HTMLFormElement;
+        this.trackUserAction({
+          action: ActionType.SUBMIT,
+          target: this.getElementSelector(target),
+        });
+      },
+      true
+    );
 
     // 滚动事件(节流)
     let scrollTimeout: number;
@@ -295,8 +316,8 @@ export class AnalyticsService {
           target: 'window',
           value: {
             scrollY: window.scrollY,
-            scrollX: window.scrollX
-          }
+            scrollX: window.scrollX,
+          },
         });
       }, 1000);
     });
@@ -311,8 +332,8 @@ export class AnalyticsService {
           target: 'window',
           value: {
             width: window.innerWidth,
-            height: window.innerHeight
-          }
+            height: window.innerHeight,
+          },
         });
       }, 1000);
     });
@@ -364,7 +385,7 @@ export class AnalyticsService {
     // 创建新的页面浏览事件
     const event: PageViewEvent = this.createEvent(EventType.PAGE_VIEW, 'page_view', {
       path,
-      title
+      title,
     });
 
     this.currentPageView = event;
@@ -383,15 +404,15 @@ export class AnalyticsService {
   /**
    * 追踪用户操作
    */
-  trackUserAction(properties: {
-    action: ActionType;
-    target: string;
-    value?: unknown;
-  }): void {
+  trackUserAction(properties: { action: ActionType; target: string; value?: unknown }): void {
     if (!this.config.enabled || !this.config.trackUserActions) return;
     if (!this.shouldSample()) return;
 
-    const event: UserActionEvent = this.createEvent(EventType.USER_ACTION, properties.action, properties);
+    const event: UserActionEvent = this.createEvent(
+      EventType.USER_ACTION,
+      properties.action,
+      properties
+    );
 
     this.recordEvent(event);
 
@@ -448,9 +469,9 @@ export class AnalyticsService {
       await fetch(this.config.endpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(event)
+        body: JSON.stringify(event),
       });
     } catch {
       // 静默失败
@@ -466,7 +487,7 @@ export class AnalyticsService {
       referrer: document.referrer,
       userAgent: navigator.userAgent,
       screenResolution: `${screen.width}x${screen.height}`,
-      viewport: `${window.innerWidth}x${window.innerHeight}`
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
     };
   }
 
@@ -495,11 +516,14 @@ export class AnalyticsService {
     const actions = this.events.filter(e => e.type === EventType.USER_ACTION);
 
     // 统计页面浏览
-    const pageViewCounts = pageViews.reduce((acc, event) => {
-      const path = (event as PageViewEvent).properties.path;
-      acc[path] = (acc[path] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const pageViewCounts = pageViews.reduce(
+      (acc, event) => {
+        const path = (event as PageViewEvent).properties.path;
+        acc[path] = (acc[path] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     const topPages = Object.entries(pageViewCounts)
       .map(([path, views]) => ({ path, views }))
@@ -507,11 +531,14 @@ export class AnalyticsService {
       .slice(0, 10);
 
     // 统计用户操作
-    const actionCounts = actions.reduce((acc, event) => {
-      const action = (event as UserActionEvent).properties.action;
-      acc[action] = (acc[action] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const actionCounts = actions.reduce(
+      (acc, event) => {
+        const action = (event as UserActionEvent).properties.action;
+        acc[action] = (acc[action] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     const topActions = Object.entries(actionCounts)
       .map(([action, count]) => ({ action, count }))
@@ -529,7 +556,7 @@ export class AnalyticsService {
       totalSessions: 1,
       averageSessionDuration,
       topPages,
-      topActions
+      topActions,
     };
   }
 
@@ -560,7 +587,11 @@ export class AnalyticsService {
    */
   updateConfig(config: Partial<AnalyticsConfig>): void {
     this.config = { ...this.config, ...config };
-    this._log('info', 'Analytics config updated', this.config as unknown as Record<string, unknown>);
+    this._log(
+      'info',
+      'Analytics config updated',
+      this.config as unknown as Record<string, unknown>
+    );
   }
 
   /**

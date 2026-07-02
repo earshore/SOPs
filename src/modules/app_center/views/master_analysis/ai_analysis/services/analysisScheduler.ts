@@ -58,7 +58,13 @@ interface ScheduleMetrics {
   complexityScore: number;
 }
 
-type ComplexityMetric = 'targetCount' | 'reviewTargetCount' | 'reviewCount' | 'bulletCount' | 'asinCount' | 'estimatedInputTokens';
+type ComplexityMetric =
+  | 'targetCount'
+  | 'reviewTargetCount'
+  | 'reviewCount'
+  | 'bulletCount'
+  | 'asinCount'
+  | 'estimatedInputTokens';
 
 interface ComplexityRule {
   metric: ComplexityMetric;
@@ -75,7 +81,7 @@ const REVIEW_TARGETS = new Set([
   'hesitation-points',
   'buyer-profile',
   'vocab-gap',
-  'promise-reality'
+  'promise-reality',
 ]);
 
 const TARGET_COMPLEXITY: Record<string, number> = {
@@ -86,16 +92,34 @@ const TARGET_COMPLEXITY: Record<string, number> = {
   'hesitation-points': 4,
   'buyer-profile': 4,
   'vocab-gap': 4,
-  'promise-reality': 4
+  'promise-reality': 4,
 };
 
 const COMPLEXITY_RULES: readonly ComplexityRule[] = [
   { metric: 'targetCount', levels: [{ min: 7, score: 1 }] },
   { metric: 'reviewTargetCount', levels: [{ min: 4, score: 1 }] },
-  { metric: 'reviewCount', levels: [{ min: 200, score: 2 }, { min: 80, score: 1 }] },
+  {
+    metric: 'reviewCount',
+    levels: [
+      { min: 200, score: 2 },
+      { min: 80, score: 1 },
+    ],
+  },
   { metric: 'bulletCount', levels: [{ min: 12, score: 1 }] },
-  { metric: 'asinCount', levels: [{ min: 3, score: 2 }, { min: 2, score: 1 }] },
-  { metric: 'estimatedInputTokens', levels: [{ min: 12000, score: 2 }, { min: 6000, score: 1 }] }
+  {
+    metric: 'asinCount',
+    levels: [
+      { min: 3, score: 2 },
+      { min: 2, score: 1 },
+    ],
+  },
+  {
+    metric: 'estimatedInputTokens',
+    levels: [
+      { min: 12000, score: 2 },
+      { min: 6000, score: 1 },
+    ],
+  },
 ];
 
 const SCHEDULE_DEFINITIONS: Record<SchedulingPreference, ScheduleDefinition> = {
@@ -110,7 +134,7 @@ const SCHEDULE_DEFINITIONS: Record<SchedulingPreference, ScheduleDefinition> = {
     speedLevelText: '均衡提速',
     reliabilityLevelText: '推荐',
     failureHandlingText: '失败隔离',
-    iconClass: 'fa-solid fa-gauge-high'
+    iconClass: 'fa-solid fa-gauge-high',
   },
   reliability: {
     preference: 'reliability',
@@ -123,7 +147,7 @@ const SCHEDULE_DEFINITIONS: Record<SchedulingPreference, ScheduleDefinition> = {
     speedLevelText: '稳态执行',
     reliabilityLevelText: '高',
     failureHandlingText: '完整性校验',
-    iconClass: 'fa-solid fa-shield-halved'
+    iconClass: 'fa-solid fa-shield-halved',
   },
   speed: {
     preference: 'speed',
@@ -136,8 +160,8 @@ const SCHEDULE_DEFINITIONS: Record<SchedulingPreference, ScheduleDefinition> = {
     speedLevelText: '极速吞吐',
     reliabilityLevelText: '依赖网络',
     failureHandlingText: '快速跳过失败',
-    iconClass: 'fa-solid fa-bolt'
-  }
+    iconClass: 'fa-solid fa-bolt',
+  },
 };
 
 export function isSchedulingPreference(value: unknown): value is SchedulingPreference {
@@ -152,17 +176,25 @@ export function resolveAnalysisSchedule(
     ? settings.schedulingPreference
     : 'recommended';
   const definition = SCHEDULE_DEFINITIONS[preference];
-  const normalizedTaskCount = Number.isFinite(taskCount) ? Math.max(1, Math.floor(taskCount)) : MAX_ANALYSIS_CONCURRENCY;
+  const normalizedTaskCount = Number.isFinite(taskCount)
+    ? Math.max(1, Math.floor(taskCount))
+    : MAX_ANALYSIS_CONCURRENCY;
 
   return {
     ...definition,
-    maxConcurrency: Math.max(1, Math.min(definition.baseConcurrency, MAX_ANALYSIS_CONCURRENCY, normalizedTaskCount))
+    maxConcurrency: Math.max(
+      1,
+      Math.min(definition.baseConcurrency, MAX_ANALYSIS_CONCURRENCY, normalizedTaskCount)
+    ),
   };
 }
 
-export function resolveAnalysisSchedulePlan(input: AnalysisScheduleInput): AnalysisRuntimeSchedulePlan {
+export function resolveAnalysisSchedulePlan(
+  input: AnalysisScheduleInput
+): AnalysisRuntimeSchedulePlan {
   const targetIds = uniqueTargetIds(input.targetIds);
-  const cachedTargetIds = input.enableCache === false ? [] : filterCachedTargets(input.cachedTargetIds || [], targetIds);
+  const cachedTargetIds =
+    input.enableCache === false ? [] : filterCachedTargets(input.cachedTargetIds || [], targetIds);
   const metrics = getScheduleMetrics(input.product, targetIds, cachedTargetIds);
   const preference = isSchedulingPreference(input.preference) ? input.preference : 'recommended';
   const decision = resolveRuntimeDecision(preference, metrics);
@@ -172,7 +204,14 @@ export function resolveAnalysisSchedulePlan(input: AnalysisScheduleInput): Analy
   return {
     ...basePlan,
     tier: decision.tier,
-    maxConcurrency: Math.max(1, Math.min(decision.maxConcurrency, MAX_ANALYSIS_CONCURRENCY, Math.max(1, metrics.uncachedTaskCount))),
+    maxConcurrency: Math.max(
+      1,
+      Math.min(
+        decision.maxConcurrency,
+        MAX_ANALYSIS_CONCURRENCY,
+        Math.max(1, metrics.uncachedTaskCount)
+      )
+    ),
     failureStrategy: decision.failureStrategy,
     failureMode: decision.failureMode,
     streamMode: decision.streamMode,
@@ -182,7 +221,7 @@ export function resolveAnalysisSchedulePlan(input: AnalysisScheduleInput): Analy
     cachedTargetIds,
     uncachedTaskCount: metrics.uncachedTaskCount,
     estimatedInputTokens: metrics.estimatedInputTokens,
-    complexityScore: metrics.complexityScore
+    complexityScore: metrics.complexityScore,
   };
 }
 
@@ -195,7 +234,11 @@ function filterCachedTargets(cachedTargetIds: string[], targetIds: string[]): st
   return uniqueTargetIds(cachedTargetIds).filter(targetId => targetSet.has(targetId));
 }
 
-function getScheduleMetrics(product: Product, targetIds: string[], cachedTargetIds: string[]): ScheduleMetrics {
+function getScheduleMetrics(
+  product: Product,
+  targetIds: string[],
+  cachedTargetIds: string[]
+): ScheduleMetrics {
   const reviewTargetCount = targetIds.filter(targetId => REVIEW_TARGETS.has(targetId)).length;
   const reviewCount = product.customer_reviews?.length || 0;
   const bulletCount = product.feature_bullets?.length || 0;
@@ -211,7 +254,7 @@ function getScheduleMetrics(product: Product, targetIds: string[], cachedTargetI
     bulletCount,
     asinCount,
     estimatedInputTokens,
-    complexityScore: 0
+    complexityScore: 0,
   });
 
   return {
@@ -223,7 +266,7 @@ function getScheduleMetrics(product: Product, targetIds: string[], cachedTargetI
     bulletCount,
     asinCount,
     estimatedInputTokens,
-    complexityScore
+    complexityScore,
   };
 }
 
@@ -239,14 +282,22 @@ function getAsinCount(product: Product): number {
     return metadataAsins.length;
   }
 
-  return Math.max(1, String(product.asin || '').split(',').filter(Boolean).length);
+  return Math.max(
+    1,
+    String(product.asin || '')
+      .split(',')
+      .filter(Boolean).length
+  );
 }
 
 function estimateProductInputTokens(product: Product): number {
   const reviewChars = (product.customer_reviews || []).reduce((sum, review) => {
     return sum + (review.headline?.length || 0) + (review.body?.length || 0);
   }, 0);
-  const bulletChars = (product.feature_bullets || []).reduce((sum, bullet) => sum + bullet.length, 0);
+  const bulletChars = (product.feature_bullets || []).reduce(
+    (sum, bullet) => sum + bullet.length,
+    0
+  );
   const titleChars = product.productTitle?.length || 0;
 
   return Math.ceil((titleChars + bulletChars + reviewChars) / 4);
@@ -283,7 +334,7 @@ function resolveRuntimeDecision(
       failureStrategy: 'abort',
       failureMode: 'complete_required',
       streamMode: 'final_only',
-      retryBudget: 2
+      retryBudget: 2,
     };
   }
 
@@ -296,7 +347,7 @@ function resolveRuntimeDecision(
       failureStrategy: 'continue',
       failureMode: 'best_effort',
       streamMode: 'progressive',
-      retryBudget: highRisk ? 1 : 0
+      retryBudget: highRisk ? 1 : 0,
     };
   }
 
@@ -307,7 +358,7 @@ function resolveRuntimeDecision(
       failureStrategy: 'continue',
       failureMode: 'best_effort',
       streamMode: 'progressive',
-      retryBudget: 2
+      retryBudget: 2,
     };
   }
 
@@ -317,7 +368,7 @@ function resolveRuntimeDecision(
     failureStrategy: 'continue',
     failureMode: 'best_effort',
     streamMode: 'progressive',
-    retryBudget: 1
+    retryBudget: 1,
   };
 }
 

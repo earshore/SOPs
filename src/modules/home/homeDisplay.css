@@ -2,320 +2,323 @@
 /* 🚀 P1-7: 移除Google Fonts,使用系统字体栈 */
 
 #home-splash-container {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
-    background-color: var(--color-white);
-    color: var(--color-slate-900);
-    width: 100%;
-    height: 100%;
-    position: relative;
-    overflow: hidden;
-    cursor: none;
-    /* 隐藏默认光标 */
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC',
+    'Hiragino Sans GB', sans-serif;
+  background-color: var(--color-white);
+  color: var(--color-slate-900);
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  cursor: none;
+  /* 隐藏默认光标 */
 }
 
 @keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes pulseRing {
-    0% {
-        transform: scale(0.8);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(2.2);
-        opacity: 0;
-    }
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }
 
 @keyframes breathe {
-    0%, 100% {
-        opacity: 0.4;
-        transform: scale(0.96);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1);
-    }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ----------------------------------------
    1. 背景层
    ---------------------------------------- */
 .clean-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* 极其淡雅的网格背景 */
-    background-image:
-        linear-gradient(rgba(15, 23, 42, 0) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(15, 23, 42, 0) 1px, transparent 1px);
-    background-size: 100px 100px;
-    z-index: 1;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* 极其淡雅的网格背景 */
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0) 1px, transparent 1px);
+  background-size: 100px 100px;
+  z-index: 1;
+  pointer-events: none;
 }
 
 #particles-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    pointer-events: none;
-    /* 粒子在网格之上 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  /* 粒子在网格之上 */
 }
 
 /* ----------------------------------------
    2. 顶部导航 (Minimal Header)
    ---------------------------------------- */
 .top-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 30px 50px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 20;
-    /* 保持原样即可，因为 justify-content: space-between 会负责左右两边的元素位置 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 30px 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 20;
+  /* 保持原样即可，因为 justify-content: space-between 会负责左右两边的元素位置 */
 }
 
 .time-display {
-    font-family: monospace;
-    color: var(--color-slate-500);
-    font-size: 0.9rem;
-    font-weight: 600;
+  font-family: monospace;
+  color: var(--color-slate-500);
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .logo-section {
-    position: absolute;
-    /* 1. 开启绝对定位 */
-    left: 50%;
-    /* 2. 移动到父容器宽度的 50% 处 */
-    transform: translateX(-50%);
-    /* 3. 向左回退自身宽度的 50%，实现完美居中 */
-    text-align: center;
-    /* 文字内部居中 */
+  position: absolute;
+  /* 1. 开启绝对定位 */
+  left: 50%;
+  /* 2. 移动到父容器宽度的 50% 处 */
+  transform: translateX(-50%);
+  /* 3. 向左回退自身宽度的 50%，实现完美居中 */
+  text-align: center;
+  /* 文字内部居中 */
 
-    /*以此保证不管左边的时间多长，它都永远在屏幕正中间*/
+  /*以此保证不管左边的时间多长，它都永远在屏幕正中间*/
 }
 
 .logo-text {
-    font-weight: 900;
-    font-size: 1.4rem;
-    letter-spacing: 0.1em;
-    color: var(--color-slate-900);
+  font-weight: 900;
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  color: var(--color-slate-900);
 }
 
 .logo-sub {
-    font-size: 0.7rem;
-    color: var(--color-slate-500);
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    margin-top: 4px;
+  font-size: 0.7rem;
+  color: var(--color-slate-500);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-top: 4px;
 }
 
 /* ----------------------------------------
    3. 主视觉 (Hero) - 干净、锐利
    ---------------------------------------- */
 .splash-content-wrapper {
-    position: relative;
-    z-index: 10;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  position: relative;
+  z-index: 10;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .hero-container {
-    text-align: center;
-    transition: transform 0.1s ease-out;
+  text-align: center;
+  transition: transform 0.1s ease-out;
 }
 
 .slogan-main {
-    font-size: clamp(3.5rem, 8vw, 7.5rem);
-    font-weight: 900;
-    line-height: 1.05;
-    margin-bottom: 2rem;
-    position: relative;
+  font-size: clamp(3.5rem, 8vw, 7.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  margin-bottom: 2rem;
+  position: relative;
 }
 
 /* 实体字：蓝青渐变 - 使用全局fadeUp动画 */
 .slogan-line.highlight {
-    background: linear-gradient(120deg, var(--color-blue-600), var(--color-cyan-500));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    opacity: 0;
-    animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  background: linear-gradient(120deg, var(--color-blue-600), var(--color-cyan-500));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 /* 描边字：深色空心 - 使用全局fadeUp动画 */
 .slogan-line.outline {
-    color: transparent;
-    -webkit-text-stroke: 1.5px var(--color-slate-900);
-    opacity: 0;
-    animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
-    position: relative;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-slate-900);
+  opacity: 0;
+  animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+  position: relative;
 }
 
 /* 错位效果 - 灰色 */
 .slogan-line.outline::before {
-    content: attr(data-text);
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 100%;
-    height: 100%;
-    -webkit-text-stroke: 1.5px rgba(15, 23, 42, 0.1);
-    z-index: -1;
+  content: attr(data-text);
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 100%;
+  height: 100%;
+  -webkit-text-stroke: 1.5px rgba(15, 23, 42, 0.1);
+  z-index: -1;
 }
 
 .slogan-sub {
-    font-size: clamp(1.1rem, 2vw, 1.4rem);
-    color: var(--color-slate-500);
-    line-height: 1.8;
-    margin-bottom: 40px;
-    opacity: 0;
-    animation: fadeIn 1s ease 0.6s forwards;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  color: var(--color-slate-500);
+  line-height: 1.8;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeIn 1s ease 0.6s forwards;
 }
 
 .slogan-sub span {
-    color: var(--color-blue-600);
-    font-weight: 700;
+  color: var(--color-blue-600);
+  font-weight: 700;
 }
 
 /* 状态胶囊 - 极简风格 - 使用全局fadeIn动画 */
 .ai-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 24px;
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 100px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    /* 柔和阴影 */
-    opacity: 0;
-    animation: fadeIn 1s ease 0.9s forwards;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 100px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  /* 柔和阴影 */
+  opacity: 0;
+  animation: fadeIn 1s ease 0.9s forwards;
 }
 
 .status-dot-inner {
-    width: 8px;
-    height: 8px;
-    background: var(--color-cyan-500);
-    border-radius: 50%;
-    position: relative;
+  width: 8px;
+  height: 8px;
+  background: var(--color-cyan-500);
+  border-radius: 50%;
+  position: relative;
 }
 
 /* 使用全局pulseRing动画 */
 .status-dot-inner::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    width: 16px;
-    height: 16px;
-    border: 1px solid var(--color-cyan-500);
-    border-radius: 50%;
-    animation: pulseRing 2s infinite;
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--color-cyan-500);
+  border-radius: 50%;
+  animation: pulseRing 2s infinite;
 }
 
 .status-text {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    color: var(--color-slate-900);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--color-slate-900);
 }
 
 /* ----------------------------------------
    4. 底部 & 装饰 - 使用全局fadeIn和breathe动画
    ---------------------------------------- */
 .brand-footer {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    opacity: 0;
-    animation: fadeIn 1s ease 1.2s forwards;
-    z-index: 20;
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  opacity: 0;
+  animation: fadeIn 1s ease 1.2s forwards;
+  z-index: 20;
 }
 
 .brand-text {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    color: var(--color-slate-500);
-    font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--color-slate-500);
+  font-weight: 500;
 }
 
 .brand-line {
-    width: 30px;
-    height: 1px;
-    background: #cbd5e1;
+  width: 30px;
+  height: 1px;
+  background: #cbd5e1;
 }
 
 .geometric-decor {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 800px;
-    height: 800px;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.6;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.6;
 }
 
 /* 使用全局breathe动画 */
 .pulse-ring {
-    transform-origin: center;
-    animation: breathe 8s ease-in-out infinite;
+  transform-origin: center;
+  animation: breathe 8s ease-in-out infinite;
 }
 
 .delay-1 {
-    animation-delay: -4s;
+  animation-delay: -4s;
 }
 
 /* ----------------------------------------
    5. 光标 (深色)
    ---------------------------------------- */
 #cursor-follower {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 20px;
-    height: 20px;
-    border: 1px solid var(--color-slate-900);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    z-index: 999;
-    transition: transform 0.1s linear;
-    /* 略微延迟 */
-    background: rgba(15, 23, 42, 0.05);
-    backdrop-filter: blur(2px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--color-slate-900);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 999;
+  transition: transform 0.1s linear;
+  /* 略微延迟 */
+  background: rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(2px);
 }

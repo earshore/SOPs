@@ -236,7 +236,7 @@ export function getAllThemes(): ThemeConfig[] {
 export function applyTheme(themeId: string): void {
   const theme = getThemeOrDefault(themeId);
   const root = document.documentElement;
-  
+
   // 设置CSS变量
   root.style.setProperty('--theme-primary', theme.colors.primary);
   root.style.setProperty('--theme-primary-hover', theme.colors.primaryHover);
@@ -244,7 +244,7 @@ export function applyTheme(themeId: string): void {
   root.style.setProperty('--theme-light', theme.colors.light);
   root.style.setProperty('--theme-border', theme.colors.border);
   root.style.setProperty('--theme-text', theme.colors.text);
-  
+
   // 设置data属性（用于TailwindCSS）
   root.setAttribute('data-theme', themeId);
 }

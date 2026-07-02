@@ -1,3 +1,5 @@
+import './common/utils/nativeLoggerConsole';
+
 // src/main.ts
 // ================================================================
 // 🎯 P1 重构: 使用 ActionRegistry 替代散落的 window.xxx 赋值
@@ -8,6 +10,8 @@
 
 // 🎯 性能优化: 首屏关键CSS由 index.html 提前加载，其他CSS在 DOMContentLoaded 后异步加载
 // 模块特定样式改为按需懒加载,不在启动时导入
+
+const bootstrapConsole = globalThis.console;
 
 // 🎯 CSS性能监控（仅开发环境）
 if (import.meta.env.DEV) {
@@ -20,8 +24,8 @@ if (import.meta.env.DEV) {
     .then(({ marked }) => {
       (window as unknown as { marked?: typeof marked }).marked = marked;
     })
-    .catch((error) => {
-      globalThis.console.warn('[Main] Failed to expose marked', error);
+    .catch(error => {
+      bootstrapConsole.warn('[Main] Failed to expose marked', error);
     });
 }
 
@@ -52,7 +56,7 @@ import { initializeAnimationStore } from './stores/animation-settings';
 // ✅ P1: 导入动作注册中心
 import {
   registerActionsWithLegacy,
-  initGlobalEventDelegation
+  initGlobalEventDelegation,
 } from './common/utils/actionRegistry';
 
 import { AlpineRegistry } from './common/infrastructure/AlpineRegistry';
@@ -75,13 +79,20 @@ import {
   toggleApiKeyVisibility, // [RESTORED]
   testConnection,
   saveProxyConfig,
-  openPerformanceMonitor // [NEW] 性能监控面板
-} from "./components/settings/systemSettings";
+  openPerformanceMonitor, // [NEW] 性能监控面板
+} from './components/settings/systemSettings';
 
-import { renderMegaMenu, renderSopsMegaMenu, renderHubMegaMenu, renderMoreMenu, initMegaMenuAccessibility, showToast } from "./common/ui";
+import {
+  renderMegaMenu,
+  renderSopsMegaMenu,
+  renderHubMegaMenu,
+  renderMoreMenu,
+  initMegaMenuAccessibility,
+  showToast,
+} from './common/ui';
 import { APP_EVENTS } from './common/constants/eventConstants';
 import { APP_VERSION } from './common/constants/constants';
-import { initHomeSplash } from "./modules/home/homeDisplay";
+import { initHomeSplash } from './modules/home/homeDisplay';
 
 // ✅ 自动注册事件监听器的模块 (事件驱动模式)
 import './modules/amz_hub/amz_hub';
@@ -153,7 +164,9 @@ let hasInitializedHomeSplash = false;
 let deferredStylesReady: Promise<void> | null = null;
 
 function isClosableModalElement(element: Element | null): element is ClosableModalElement {
-  return element instanceof HTMLElement && typeof (element as { close?: unknown }).close === 'function';
+  return (
+    element instanceof HTMLElement && typeof (element as { close?: unknown }).close === 'function'
+  );
 }
 
 function updateAppVersionLabel(): void {
@@ -166,7 +179,7 @@ function updateAppVersionLabel(): void {
 async function loadMainStyles(): Promise<void> {
   try {
     await import('./css/main.css');
-    mainLogger.info("Main styles loaded");
+    mainLogger.info('Main styles loaded');
   } catch (e) {
     mainLogger.warn('主样式加载失败', e);
   }
@@ -181,7 +194,7 @@ function loadDeferredStyles(): void {
     .then(() => {
       mainLogger.info('Deferred styles loaded');
     })
-    .catch((error) => {
+    .catch(error => {
       mainLogger.warn('延后样式加载失败', error);
     });
 }
@@ -203,8 +216,11 @@ async function exposeCoreServicesForDebug(): Promise<void> {
     const routerResult = container.resolve('router');
 
     const eventBus = eventBusResult instanceof Promise ? await eventBusResult : eventBusResult;
-    const actionRegistry = actionRegistryResult instanceof Promise ? await actionRegistryResult : actionRegistryResult;
-    const router = (routerResult instanceof Promise ? await routerResult : routerResult) as RouterDebugApi;
+    const actionRegistry =
+      actionRegistryResult instanceof Promise ? await actionRegistryResult : actionRegistryResult;
+    const router = (
+      routerResult instanceof Promise ? await routerResult : routerResult
+    ) as RouterDebugApi;
 
     legacyWindow['eventBus'] = eventBus;
     legacyWindow['EventBus'] = eventBus;
@@ -223,8 +239,8 @@ async function exposeCoreServicesForDebug(): Promise<void> {
         navigate: typeof router?.navigate,
         back: typeof router?.back,
         forward: typeof router?.forward,
-        getCurrentRoute: typeof router?.getCurrentRoute
-      }
+        getCurrentRoute: typeof router?.getCurrentRoute,
+      },
     });
   } catch (e) {
     mainLogger.error('[Services] Failed to expose some services to window', e);
@@ -232,17 +248,17 @@ async function exposeCoreServicesForDebug(): Promise<void> {
 }
 
 function initializeAlpineRuntime(): void {
-  mainLogger.info("Initializing Alpine.js...");
+  mainLogger.info('Initializing Alpine.js...');
   initAlpineSettings();
-  mainLogger.info("Alpine components registered");
+  mainLogger.info('Alpine components registered');
 
   Alpine.start();
-  mainLogger.info("Alpine.js started");
+  mainLogger.info('Alpine.js started');
 
   try {
     const registry = AlpineRegistry.getInstance();
     registry.init();
-    mainLogger.info("AlpineRegistry initialized");
+    mainLogger.info('AlpineRegistry initialized');
   } catch (e) {
     mainLogger.error('AlpineRegistry initialization failed', e);
   }
@@ -278,7 +294,7 @@ function initializeHomeSplashOnce(): void {
 }
 
 function preloadDeferredViews(): void {
-  initDeferredViews().catch((error) => {
+  initDeferredViews().catch(error => {
     mainLogger.warn('Deferred views preload failed', error);
   });
 }
@@ -288,14 +304,14 @@ async function loadCriticalViewsAndNavigate(
   shouldWaitForHomeView: boolean
 ): Promise<void> {
   if (shouldWaitForHomeView) {
-    mainLogger.info("Waiting for initial home view...");
+    mainLogger.info('Waiting for initial home view...');
     await homeViewReady;
-    mainLogger.info("Initial home view ready");
+    mainLogger.info('Initial home view ready');
   }
 
   try {
     triggerInitialNavigation();
-    mainLogger.info("Initial navigation triggered");
+    mainLogger.info('Initial navigation triggered');
   } catch (e) {
     mainLogger.error('Initial navigation failed', e);
   }
@@ -305,7 +321,7 @@ async function loadCriticalViewsAndNavigate(
   if (!shouldWaitForHomeView) {
     homeViewReady
       .then(() => initializeHomeSplashOnce())
-      .catch((error) => {
+      .catch(error => {
         mainLogger.warn('Home splash initialization skipped', error);
       });
   }
@@ -317,7 +333,7 @@ function initializeStartupUtilities(): void {
   const globalLoading = document.getElementById('global-loading');
   if (globalLoading) {
     loadingManager.setGlobalLoadingElement(globalLoading);
-    mainLogger.info("LoadingManager initialized");
+    mainLogger.info('LoadingManager initialized');
   }
 
   try {
@@ -341,7 +357,7 @@ function initializeAnimationSystem(): void {
       enabled: animationManager.getSettings().enabled,
       speed: animationManager.getSettings().speed,
       respectSystemPreference: animationManager.getSettings().respectSystemPreference,
-      reducedMotion: animationManager.shouldReduceMotion()
+      reducedMotion: animationManager.shouldReduceMotion(),
     });
   } catch (error) {
     mainLogger.error('Animation System initialization failed', error);
@@ -360,32 +376,38 @@ function initializeLazyEnhancements(): void {
       rootMargin: '50px',
       threshold: 0.01,
       fadeIn: true,
-      fadeInDuration: 300
+      fadeInDuration: 300,
     });
   });
 
-  import('./components/button-ripple').then(({ initButtonRipple, observeButtonChanges, observeAnimationSettings }) => {
-    initButtonRipple();
-    observeButtonChanges();
-    observeAnimationSettings();
-    mainLogger.info('Button ripple effects initialized');
-  }).catch((error) => {
-    mainLogger.warn('按钮涟漪效果初始化失败', error);
-  });
+  import('./components/button-ripple')
+    .then(({ initButtonRipple, observeButtonChanges, observeAnimationSettings }) => {
+      initButtonRipple();
+      observeButtonChanges();
+      observeAnimationSettings();
+      mainLogger.info('Button ripple effects initialized');
+    })
+    .catch(error => {
+      mainLogger.warn('按钮涟漪效果初始化失败', error);
+    });
 
-  import('./components/form-animation').then(({ initializeFormAnimations }) => {
-    initializeFormAnimations();
-    mainLogger.info('Form input animations initialized');
-  }).catch((error) => {
-    mainLogger.warn('表单输入动画初始化失败', error);
-  });
+  import('./components/form-animation')
+    .then(({ initializeFormAnimations }) => {
+      initializeFormAnimations();
+      mainLogger.info('Form input animations initialized');
+    })
+    .catch(error => {
+      mainLogger.warn('表单输入动画初始化失败', error);
+    });
 
-  import('./utils/animation-utils').then(({ observeListAnimations }) => {
-    observeListAnimations();
-    mainLogger.info('List stagger animations observer initialized');
-  }).catch((error) => {
-    mainLogger.warn('列表交错动画观察器初始化失败', error);
-  });
+  import('./utils/animation-utils')
+    .then(({ observeListAnimations }) => {
+      observeListAnimations();
+      mainLogger.info('List stagger animations observer initialized');
+    })
+    .catch(error => {
+      mainLogger.warn('列表交错动画观察器初始化失败', error);
+    });
 }
 
 function renderGlobalMenus(): void {
@@ -398,7 +420,9 @@ function renderGlobalMenus(): void {
 
 async function emitAppInitialized(): Promise<void> {
   const eventBusResult = container.resolve('eventBus');
-  const eventBus = (eventBusResult instanceof Promise ? await eventBusResult : eventBusResult) as EventBusDebugApi;
+  const eventBus = (
+    eventBusResult instanceof Promise ? await eventBusResult : eventBusResult
+  ) as EventBusDebugApi;
   eventBus.emit(APP_EVENTS.INITIALIZED, { timestamp: Date.now() });
 }
 
@@ -414,7 +438,7 @@ function initializeDebugInterface(): void {
       const router = container.resolve('router');
       debugInterface.registerRouter(router);
     })
-    .catch((error) => {
+    .catch(error => {
       mainLogger.warn('调试接口初始化失败', error);
     });
 }
@@ -453,8 +477,8 @@ if (import.meta.env.DEV) {
 // APP STARTUP (程序启动)
 // ========================
 
-document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
-  mainLogger.info("System: Application Booting...");
+document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
+  mainLogger.info('System: Application Booting...');
 
   const shouldWaitForHomeView = isInitialHomeRoute();
   const homeViewReady = initHomeView();
@@ -488,8 +512,7 @@ document.addEventListener("DOMContentLoaded", async (): Promise<void> => {
     // ================================================================
     await continueStartup(homeViewReady, shouldWaitForHomeView);
 
-    mainLogger.info("System: Ready");
-
+    mainLogger.info('System: Ready');
   } catch (error) {
     mainLogger.error('应用启动失败', error);
     showToast('应用启动失败，请刷新页面重试', { type: 'error' });
@@ -628,4 +651,4 @@ registerActionsWithLegacy({
   // Scraper, Data, Analysis actions are now self-registered by their respective modules
 });
 
-mainLogger.info("[ActionRegistry] 全局动作已注册");
+mainLogger.info('[ActionRegistry] 全局动作已注册');

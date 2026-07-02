@@ -1,0 +1,42 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - button "Amazing Amazon Architect Prompt by Prompt" [ref=e4] [cursor=pointer]:
+        - img [ref=e6]
+        - generic [ref=e8]:
+          - generic [ref=e9]: Amazing Amazon Architect
+          - generic [ref=e10]: Prompt by Prompt
+      - navigation "主导航" [ref=e11]:
+        - button " SOPs 流程中心 " [ref=e13] [cursor=pointer]:
+          - generic [ref=e14]: 
+          - text: SOPs 流程中心
+          - generic [ref=e15]: 
+        - button " 应用中心 " [ref=e17] [cursor=pointer]:
+          - generic [ref=e18]: 
+          - text: 应用中心
+          - generic [ref=e19]: 
+        - button " Amazon 智库 " [ref=e21] [cursor=pointer]:
+          - generic [ref=e22]: 
+          - text: Amazon 智库
+          - generic [ref=e23]: 
+        - button " 更多 " [ref=e25] [cursor=pointer]:
+          - generic [ref=e26]: 
+          - text: 更多
+          - generic [ref=e27]: 
+      - generic [ref=e30]: 未配置模型
+  - main [ref=e32]:
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e36]: 2026.07.02 | 22:38
+        - generic [ref=e37]:
+          - generic [ref=e38]: AMAZON WORKFLOW
+          - generic [ref=e39]: Standard Operating Procedure
+      - main [ref=e40]:
+        - generic [ref=e41]:
+          - heading "规范流程 无限可能 无限可能" [level=1] [ref=e42]:
+            - generic [ref=e43]: 规范流程
+            - generic [ref=e44]: 无限可能 无限可能
+          - paragraph [ref=e45]: 把混乱变成秩序， 把经验变成指令。
+          - generic [ref=e48]: AI SYSTEM ONLINE · READY TO TRANSFORM
+      - generic [ref=e51]: AI DRIVEN | HUMAN CENTERED | PROCESS AS CODE | DECISION AT SPEED
+      - img

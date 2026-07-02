@@ -1,12 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { appStore } from '@/stores/useAppStore';
 import { showToast } from '../../../../../../common/ui';
-import { autoPopulateDNA, canExtractDNA, extractSingleField, refreshDnaExtractionSummary } from './dnaActions';
+import {
+  autoPopulateDNA,
+  canExtractDNA,
+  extractSingleField,
+  refreshDnaExtractionSummary,
+} from './dnaActions';
 import type { PromptlabAlpineContext } from './types';
 import type { UserProductProfile } from '@/types/state';
 import { confirmWithModal } from '../../utils/confirmModal';
 
-type AnalysisReportStateValue = Parameters<ReturnType<typeof appStore.getState>['setAnalysisReport']>[0];
+type AnalysisReportStateValue = Parameters<
+  ReturnType<typeof appStore.getState>['setAnalysisReport']
+>[0];
 
 vi.mock('../../../../../../common/ui', () => ({
   showToast: vi.fn(),
@@ -100,9 +107,7 @@ function fullReportWithSizeSpec() {
     },
     title_keywords: {
       primary_keywords: [],
-      secondary_keywords: [
-        { keyword: '50ml', type: 'size', importance: 'spec' },
-      ],
+      secondary_keywords: [{ keyword: '50ml', type: 'size', importance: 'spec' }],
       scene_keywords: [],
       audience_keywords: [],
       removed_modifiers: [],
@@ -132,10 +137,9 @@ describe('Promptlab DNA actions', () => {
     expect(ctx.dnaConfidence.keywordsTier1).toBe(75);
     expect(ctx.dnaConfidence.keywordsTier2).toBe(65);
     expect(ctx.saveState).toHaveBeenCalledOnce();
-    expect(showToast).toHaveBeenCalledWith(
-      expect.stringContaining('Tier 2 长尾词'),
-      { type: 'success' },
-    );
+    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Tier 2 长尾词'), {
+      type: 'success',
+    });
   });
 
   it('builds extraction summary without mutating profile fields', () => {
@@ -158,7 +162,7 @@ describe('Promptlab DNA actions', () => {
         confidence: 75,
         source: '高频短语-属性词',
         status: 'high',
-      }),
+      })
     );
     expect(ctx.saveState).not.toHaveBeenCalled();
   });
@@ -177,10 +181,9 @@ describe('Promptlab DNA actions', () => {
 
     expect(ctx.profile.keywordsTier2).toBe('manual longtail');
     expect(ctx.saveState).not.toHaveBeenCalled();
-    expect(showToast).toHaveBeenCalledWith(
-      '报告中未找到Tier 2 长尾词，已保留现有内容',
-      { type: 'warning' },
-    );
+    expect(showToast).toHaveBeenCalledWith('报告中未找到Tier 2 长尾词，已保留现有内容', {
+      type: 'warning',
+    });
   });
 
   it('asks before overwriting with a low-confidence single-field extraction', async () => {
@@ -195,7 +198,7 @@ describe('Promptlab DNA actions', () => {
       '低置信度字段',
       '字段“Tier 2 长尾词”的提取置信度为 65%，低于自动填充阈值。是否仍然覆盖当前内容？',
       '',
-      '仍然覆盖',
+      '仍然覆盖'
     );
     expect(ctx.saveState).not.toHaveBeenCalled();
   });

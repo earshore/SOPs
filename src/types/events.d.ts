@@ -726,13 +726,13 @@ export interface EventPayloadMap {
   // 应用生命周期
   INITIALIZED: InitializedEventPayload;
   READY: ReadyEventPayload;
-  
+
   // 路由事件
   ROUTE_CHANGED: RouteChangedEventPayload;
   ROUTE_BEFORE_CHANGE: RouteBeforeChangeEventPayload;
   ROUTE_ERROR: RouteErrorEventPayload;
   ROUTE_REDIRECT: RouteRedirectEventPayload;
-  
+
   // 模块生命周期
   MODULE_LOAD: ModuleLoadEventPayload;
   MODULE_LOADED: ModuleLoadedEventPayload;
@@ -740,81 +740,81 @@ export interface EventPayloadMap {
   MODULE_UNLOAD: ModuleUnloadEventPayload;
   MODULE_UNMOUNTED: ModuleUnmountedEventPayload;
   MODULE_ERROR: ModuleErrorEventPayload;
-  
+
   // 状态变化
   STATE_CHANGED: StateChangedEventPayload;
   STATE_UPDATED: StateUpdatedEventPayload;
   STATE_RESET: StateResetEventPayload;
-  
+
   // 错误处理
   ERROR_OCCURRED: ErrorOccurredEventPayload;
   ERROR: ErrorEventPayload;
   ERROR_RECOVERED: ErrorRecoveredEventPayload;
-  
+
   // 性能监控
   PERFORMANCE_METRIC: PerformanceMetricEventPayload;
-  
+
   // 数据操作
   DATA_LOADED: DataLoadedEventPayload;
   DATA_SAVED: DataSavedEventPayload;
   DATA_DELETED: DataDeletedEventPayload;
   DATA_UPDATED: DataUpdatedEventPayload;
-  
+
   // LLM相关
   LLM_REQUEST_START: LLMRequestStartEventPayload;
   LLM_REQUEST_SUCCESS: LLMRequestSuccessEventPayload;
   LLM_REQUEST_ERROR: LLMRequestErrorEventPayload;
-  
+
   // 搜索相关
   SEARCH_START: SearchStartEventPayload;
   SEARCH_COMPLETE: SearchCompleteEventPayload;
   SEARCH_CLEAR: SearchClearEventPayload;
-  
+
   // 加载状态
   LOADING_START: LoadingStartEventPayload;
   LOADING_STOP: LoadingStopEventPayload;
-  
+
   // 设置相关
   SETTINGS_OPEN: SettingsOpenEventPayload;
   SETTINGS_CLOSE: SettingsCloseEventPayload;
-  
+
   // 历史记录
   HISTORY_UPDATED: HistoryUpdatedEventPayload;
-  
+
   // 配置相关
   CONFIG_CHANGE: ConfigChangeEventPayload;
   CONFIG_CHANGED: ConfigChangedEventPayload;
   CONFIG_RELOAD: ConfigReloadEventPayload;
   CONFIG_VALIDATE: ConfigValidateEventPayload;
-  
+
   // 服务相关
   SERVICE_INIT: ServiceInitEventPayload;
   SERVICE_READY: ServiceReadyEventPayload;
   SERVICE_ERROR: ServiceErrorEventPayload;
-  
+
   // UI相关
   UI_MODAL_OPEN: UIModalOpenEventPayload;
   UI_MODAL_CLOSE: UIModalCloseEventPayload;
   UI_TOAST_SHOW: UIToastShowEventPayload;
-  
+
   // 工作状态
   WORKING_STATE_START: WorkingStateStartEventPayload;
   WORKING_STATE_SUCCESS: WorkingStateSuccessEventPayload;
   WORKING_STATE_FAILURE: WorkingStateFailureEventPayload;
   WORKING_STATE_TIMEOUT: WorkingStateTimeoutEventPayload;
   WORKING_STATE_RETRY: WorkingStateRetryEventPayload;
-  
+
   // 网络状态
   NETWORK_ONLINE: NetworkOnlineEventPayload;
   NETWORK_OFFLINE: NetworkOfflineEventPayload;
-  
+
   // 用户交互
   USER_ACTION: UserActionEventPayload;
-  
+
   // 动作注册
   REGISTER_ACTIONS: RegisterActionsEventPayload;
   UNREGISTER_ACTIONS: UnregisterActionsEventPayload;
-  
+
   // 模块特定事件
   SOPS_SEARCH_UPDATED: SOPsSearchUpdatedEventPayload;
   SOPS_CATEGORY_CHANGED: SOPsCategoryChangedEventPayload;
@@ -850,12 +850,12 @@ export interface EventSubscribeOptions {
    * 是否只触发一次
    */
   once?: boolean;
-  
+
   /**
    * 优先级（数字越大优先级越高）
    */
   priority?: number;
-  
+
   /**
    * 过滤器函数
    */
@@ -881,7 +881,7 @@ export interface IEventBus {
     callback: TypedEventHandler<K>,
     options?: EventSubscribeOptions
   ): EventUnsubscribe;
-  
+
   /**
    * 订阅事件（通用版本）
    */
@@ -890,38 +890,32 @@ export interface IEventBus {
     callback: GenericEventHandler,
     options?: EventSubscribeOptions
   ): EventUnsubscribe;
-  
+
   /**
    * 取消订阅
    */
-  off<K extends keyof EventPayloadMap>(
-    event: K,
-    callback: TypedEventHandler<K>
-  ): void;
-  
+  off<K extends keyof EventPayloadMap>(event: K, callback: TypedEventHandler<K>): void;
+
   /**
    * 取消订阅（通用版本）
    */
   off(event: string, callback: GenericEventHandler): void;
-  
+
   /**
    * 发布事件
    */
-  emit<K extends keyof EventPayloadMap>(
-    event: K,
-    payload: EventPayloadMap[K]
-  ): void;
-  
+  emit<K extends keyof EventPayloadMap>(event: K, payload: EventPayloadMap[K]): void;
+
   /**
    * 发布事件（通用版本）
    */
   emit(event: string, payload: unknown): void;
-  
+
   /**
    * 移除事件的所有监听器
    */
   removeAllListeners(event: string): void;
-  
+
   /**
    * 获取统计信息
    */
@@ -935,7 +929,7 @@ export interface IEventBus {
       isError: boolean;
     }>;
   };
-  
+
   /**
    * 检测内存泄漏
    */
@@ -945,12 +939,12 @@ export interface IEventBus {
     severity: 'warning' | 'critical';
     message: string;
   }>;
-  
+
   /**
    * 调试信息
    */
   debug(): void;
-  
+
   /**
    * 配置EventBus
    */
@@ -984,7 +978,7 @@ export interface IEventValidator {
     event: K,
     schema: EventSchema<EventPayloadMap[K]>
   ): void;
-  
+
   /**
    * 验证事件Payload
    */
@@ -992,12 +986,12 @@ export interface IEventValidator {
     event: K,
     payload: unknown
   ): payload is EventPayloadMap[K];
-  
+
   /**
    * 获取事件Schema
    */
   getSchema(event: string): EventSchema | undefined;
-  
+
   /**
    * 获取所有注册的Schema
    */
@@ -1024,7 +1018,7 @@ export interface EventMiddleware {
    * 中间件名称
    */
   name: string;
-  
+
   /**
    * 在事件发布前执行
    */
@@ -1032,7 +1026,7 @@ export interface EventMiddleware {
     event: K,
     payload: EventPayloadMap[K]
   ) => EventPayloadMap[K] | Promise<EventPayloadMap[K]>;
-  
+
   /**
    * 在事件发布后执行
    */
@@ -1040,7 +1034,7 @@ export interface EventMiddleware {
     event: K,
     payload: EventPayloadMap[K]
   ) => void | Promise<void>;
-  
+
   /**
    * 错误处理
    */
@@ -1068,12 +1062,12 @@ export interface BatchOptions {
    * 批处理窗口时间（毫秒）
    */
   windowMs?: number;
-  
+
   /**
    * 最大批量大小
    */
   maxSize?: number;
-  
+
   /**
    * 是否立即刷新
    */
@@ -1090,17 +1084,17 @@ export interface EventRecord<K extends keyof EventPayloadMap = keyof EventPayloa
    * 事件名称
    */
   event: K;
-  
+
   /**
    * 事件负载
    */
   payload: EventPayloadMap[K];
-  
+
   /**
    * 时间戳
    */
   timestamp: number;
-  
+
   /**
    * 序列号
    */
@@ -1115,22 +1109,22 @@ export interface IEventReplayer {
    * 开始记录
    */
   startRecording(): void;
-  
+
   /**
    * 停止记录
    */
   stopRecording(): void;
-  
+
   /**
    * 获取记录的事件
    */
   getRecords(): EventRecord[];
-  
+
   /**
    * 重放事件
    */
   replay(records: EventRecord[], speed?: number): Promise<void>;
-  
+
   /**
    * 清除记录
    */
@@ -1147,22 +1141,22 @@ export interface EventDebugInfo {
    * 事件名称
    */
   event: string;
-  
+
   /**
    * 监听器数量
    */
   listenerCount: number;
-  
+
   /**
    * 触发次数
    */
   emitCount: number;
-  
+
   /**
    * 最后触发时间
    */
   lastEmitTime?: number;
-  
+
   /**
    * 平均处理时间
    */
@@ -1177,27 +1171,27 @@ export interface IEventDebugger {
    * 启用调试
    */
   enable(): void;
-  
+
   /**
    * 禁用调试
    */
   disable(): void;
-  
+
   /**
    * 获取调试信息
    */
   getDebugInfo(): EventDebugInfo[];
-  
+
   /**
    * 监控特定事件
    */
   watch(event: string): void;
-  
+
   /**
    * 取消监控
    */
   unwatch(event: string): void;
-  
+
   /**
    * 导出日志
    */
@@ -1212,17 +1206,17 @@ export type {
   ModuleEventName,
   CustomEventName,
   EventName,
-  
+
   // 应用生命周期事件
   InitializedEventPayload,
   ReadyEventPayload,
-  
+
   // 路由事件
   RouteChangedEventPayload,
   RouteBeforeChangeEventPayload,
   RouteErrorEventPayload,
   RouteRedirectEventPayload,
-  
+
   // 模块生命周期事件
   ModuleLoadEventPayload,
   ModuleLoadedEventPayload,
@@ -1230,81 +1224,81 @@ export type {
   ModuleUnloadEventPayload,
   ModuleUnmountedEventPayload,
   ModuleErrorEventPayload,
-  
+
   // 状态事件
   StateChangedEventPayload,
   StateUpdatedEventPayload,
   StateResetEventPayload,
-  
+
   // 错误事件
   ErrorOccurredEventPayload,
   ErrorEventPayload,
   ErrorRecoveredEventPayload,
-  
+
   // 性能事件
   PerformanceMetricEventPayload,
-  
+
   // 数据操作事件
   DataLoadedEventPayload,
   DataSavedEventPayload,
   DataDeletedEventPayload,
   DataUpdatedEventPayload,
-  
+
   // LLM事件
   LLMRequestStartEventPayload,
   LLMRequestSuccessEventPayload,
   LLMRequestErrorEventPayload,
-  
+
   // 搜索事件
   SearchStartEventPayload,
   SearchCompleteEventPayload,
   SearchClearEventPayload,
-  
+
   // 加载状态事件
   LoadingStartEventPayload,
   LoadingStopEventPayload,
-  
+
   // 设置事件
   SettingsOpenEventPayload,
   SettingsCloseEventPayload,
-  
+
   // 历史记录事件
   HistoryUpdatedEventPayload,
-  
+
   // 配置事件
   ConfigChangeEventPayload,
   ConfigChangedEventPayload,
   ConfigReloadEventPayload,
   ConfigValidateEventPayload,
-  
+
   // 服务事件
   ServiceInitEventPayload,
   ServiceReadyEventPayload,
   ServiceErrorEventPayload,
-  
+
   // UI事件
   UIModalOpenEventPayload,
   UIModalCloseEventPayload,
   UIToastShowEventPayload,
-  
+
   // 工作状态事件
   WorkingStateStartEventPayload,
   WorkingStateSuccessEventPayload,
   WorkingStateFailureEventPayload,
   WorkingStateTimeoutEventPayload,
   WorkingStateRetryEventPayload,
-  
+
   // 网络状态事件
   NetworkOnlineEventPayload,
   NetworkOfflineEventPayload,
-  
+
   // 用户交互事件
   UserActionEventPayload,
-  
+
   // 动作注册事件
   RegisterActionsEventPayload,
   UnregisterActionsEventPayload,
-  
+
   // 模块特定事件
   SOPsSearchUpdatedEventPayload,
   SOPsCategoryChangedEventPayload,
@@ -1314,7 +1308,7 @@ export type {
   AnalysisAnalyzeStartEventPayload,
   AnalysisAnalyzeSuccessEventPayload,
   AnalysisAnalyzeErrorEventPayload,
-  
+
   // 事件系统类型
   EventPayloadMap,
   TypedEventHandler,
@@ -1322,25 +1316,25 @@ export type {
   EventSubscribeOptions,
   EventUnsubscribe,
   IEventBus,
-  
+
   // 事件验证
   EventSchema,
   IEventValidator,
-  
+
   // 事件过滤和转换
   EventFilter,
   EventTransformer,
   EventMiddleware,
-  
+
   // 事件批处理
   BatchEvent,
   BatchOptions,
-  
+
   // 事件重放
   EventRecord,
   IEventReplayer,
-  
+
   // 事件调试
   EventDebugInfo,
-  IEventDebugger
+  IEventDebugger,
 };

@@ -14,6 +14,12 @@ describe('Keyword Hunter trackerService', () => {
     );
   });
 
+  it('清理关键词格式时保留非拉丁语种关键词', () => {
+    expect(cleanKeywordsText('无线耳机, 日本語キーワード; كلمة عربية')).toBe(
+      '无线耳机\n日本語キーワード\nكلمة عربية'
+    );
+  });
+
   it('默认按完整词匹配，避免词内子串误报', () => {
     const result = analyzeKeywordMatching('The redesign uses a red shell.', ['red']);
     const ranges = findKeywordMatchRanges('The redesign uses a red shell.', 'red');
@@ -75,6 +81,12 @@ describe('Keyword Hunter trackerService', () => {
 
     expect(enabled.matched).toEqual([{ keyword: 'noise cancelling', count: 1 }]);
     expect(disabled.unmatched).toEqual(['noise cancelling']);
+  });
+
+  it('英文词干规则不影响非 ASCII 关键词', () => {
+    const result = analyzeKeywordMatching('日本語キーワード ケース', ['日本語キーワード']);
+
+    expect(result.matched).toEqual([{ keyword: '日本語キーワード', count: 1 }]);
   });
 
   it('构建 Listing 诊断 Prompt 时清洗注入式输入', () => {

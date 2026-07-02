@@ -14,7 +14,9 @@ function isHistoricalAnalysisReport(report: unknown): report is AnalysisReport |
   return typeof report === 'string' || (typeof report === 'object' && report !== null);
 }
 
-function hasScrapedProducts(scrapedData: ScrapedData | null): scrapedData is ScrapedData & { products: NonNullable<ScrapedData['products']> } {
+function hasScrapedProducts(
+  scrapedData: ScrapedData | null
+): scrapedData is ScrapedData & { products: NonNullable<ScrapedData['products']> } {
   return Array.isArray(scrapedData?.products) && scrapedData.products.length > 0;
 }
 
@@ -43,9 +45,7 @@ export function checkAndLoadScraperData(context: AlpineContext): void {
   }
 
   // 如果有 Scraper 数据，自动选中所有产品的 ASIN
-  const asins = scrapedData.products
-    .map(p => p.asin)
-    .filter((asin): asin is string => !!asin);
+  const asins = scrapedData.products.map(p => p.asin).filter((asin): asin is string => !!asin);
 
   if (asins.length > 0 && JSON.stringify(asins) !== JSON.stringify(context.selectedAsins)) {
     context.selectedAsins = asins;
@@ -83,7 +83,7 @@ export function checkLoadedReport(context: AlpineContext): void {
     'hesitation-points',
     'buyer-profile',
     'vocab-gap',
-    'promise-reality'
+    'promise-reality',
   ].some(key => reportObj[key]);
 
   if (hasAnalysisData) {
@@ -99,10 +99,7 @@ export function checkLoadedReport(context: AlpineContext): void {
 /**
  * 加载历史分析报告
  */
-export function loadHistoricalReport(
-  context: AlpineContext,
-  detail: HistoricalReportDetail
-): void {
+export function loadHistoricalReport(context: AlpineContext, detail: HistoricalReportDetail): void {
   try {
     if (!detail || !isHistoricalAnalysisReport(detail.report)) {
       showToast('历史报告数据无效', { type: 'error' });

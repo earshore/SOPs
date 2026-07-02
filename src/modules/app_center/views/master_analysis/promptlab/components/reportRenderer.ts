@@ -12,7 +12,12 @@ import type { TargetMarket } from '@/types/state';
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 import { analysisTargets } from '../../ai_analysis/config/analysisTargets';
 import { getFieldTitle, getPreviewText } from './previewExtractor';
-import { getTargetConfidence, getConfidenceColorClass, getConfidenceAriaLabel, computeHasReport } from './computed';
+import {
+  getTargetConfidence,
+  getConfidenceColorClass,
+  getConfidenceAriaLabel,
+  computeHasReport,
+} from './computed';
 import type { PromptlabAlpineContext } from './types';
 
 type ReportRecord = Record<string, unknown>;
@@ -31,7 +36,7 @@ type SubItemContentRenderOptions = {
 
 function toReportRecord(value: unknown): ReportRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value as ReportRecord
+    ? (value as ReportRecord)
     : null;
 }
 
@@ -87,16 +92,24 @@ export function renderReportAnalysis(ctx: PromptlabAlpineContext): void {
 
   if (!computeHasReport()) {
     if (statusDiv) {
-      statusDiv.className = 'px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1';
-      renderer.renderTemplate(statusDiv, '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告');
+      statusDiv.className =
+        'px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1';
+      renderer.renderTemplate(
+        statusDiv,
+        '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告'
+      );
     }
-    renderer.renderTemplate(container, '<p class="text-xs text-slate-400 italic p-2">暂无可用数据...</p>');
+    renderer.renderTemplate(
+      container,
+      '<p class="text-xs text-slate-400 italic p-2">暂无可用数据...</p>'
+    );
     container.className = 'mt-3';
     return;
   }
 
   if (statusDiv) {
-    statusDiv.className = 'px-2 py-1 bg-green-100 text-green-700 rounded text-xs flex items-center gap-1';
+    statusDiv.className =
+      'px-2 py-1 bg-green-100 text-green-700 rounded text-xs flex items-center gap-1';
     renderer.renderTemplate(statusDiv, '<i class="fas fa-check-circle"></i> 分析报告已就绪');
   }
 
@@ -113,7 +126,7 @@ export function renderReportAnalysis(ctx: PromptlabAlpineContext): void {
  */
 export function autoSelectMarket(
   ctx: PromptlabAlpineContext,
-  marketSelect: HTMLSelectElement | null,
+  marketSelect: HTMLSelectElement | null
 ): void {
   if (!marketSelect) return;
 
@@ -134,23 +147,23 @@ function getCurrentMarketplace(): string {
   const analysisReport = toReportRecord(currentState.analysis.analysisReport);
   const reportMarketplace = getStringField(analysisReport, 'marketplace');
   const scrapedMarketplace = currentState.scraper?.scrapedData?.metadata?.marketplace;
-  return reportMarketplace
-    || scrapedMarketplace
-    || getStringField(analysisReport, 'targetMarket')
-    || getStringField(analysisReport, 'language');
+  return (
+    reportMarketplace ||
+    scrapedMarketplace ||
+    getStringField(analysisReport, 'targetMarket') ||
+    getStringField(analysisReport, 'language')
+  );
 }
 
 function selectMarketplaceOption(
   ctx: PromptlabAlpineContext,
   marketSelect: HTMLSelectElement,
-  currentMarketplace: string,
+  currentMarketplace: string
 ): void {
   const siteConfig = SITE_CONFIGS[currentMarketplace];
   if (!siteConfig) return;
 
-  const match = Array.from(marketSelect.options).find(
-    (opt) => opt.value === siteConfig.name,
-  );
+  const match = Array.from(marketSelect.options).find(opt => opt.value === siteConfig.name);
   if (!match) return;
 
   marketSelect.value = match.value;
@@ -166,18 +179,14 @@ function selectMarketplaceOption(
 /**
  * 根据报告格式分发到新格式/旧格式渲染器
  */
-export function renderReportModules(
-  ctx: PromptlabAlpineContext,
-  container: HTMLElement,
-): void {
+export function renderReportModules(ctx: PromptlabAlpineContext, container: HTMLElement): void {
   const report = toReportRecord(appStore.getState().analysis.analysisReport);
 
   const renderer = SafeRenderer.getInstance();
   renderer.renderTemplate(container, '');
   container.className = 'mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3';
 
-  const isFirstLoad =
-    !ctx.hasRenderedReportOnce && ctx.profile.selectedReportSections.length === 0;
+  const isFirstLoad = !ctx.hasRenderedReportOnce && ctx.profile.selectedReportSections.length === 0;
 
   if (isWrappedAnalysisReport(report)) {
     if (hasNewFormatTargets(toReportRecord(report.analysisReport))) {
@@ -197,10 +206,7 @@ export function renderReportModules(
 // ==========================================
 
 const TARGET_CONFIG = Object.fromEntries(
-  analysisTargets.map(({ id, name, icon, color }) => [
-    id,
-    { title: name, iconClass: icon, color },
-  ]),
+  analysisTargets.map(({ id, name, icon, color }) => [id, { title: name, iconClass: icon, color }])
 ) as Record<string, TargetConfig>;
 
 const DEFAULT_TARGET_ICON_TONE_CLASS = 'bg-blue-50 text-blue-600 border-blue-100';
@@ -217,7 +223,7 @@ const TARGET_ICON_TONE_CLASSES: Record<string, string> = {
 };
 
 function hasNewFormatTargets(report: ReportRecord | null): boolean {
-  return !!report && Object.keys(report).some((key) => TARGET_CONFIG[key] && report[key]);
+  return !!report && Object.keys(report).some(key => TARGET_CONFIG[key] && report[key]);
 }
 
 function renderTargetIcon(config: TargetConfig): string {
@@ -281,7 +287,7 @@ export function renderNewFormatModules(
   ctx: PromptlabAlpineContext,
   container: HTMLElement,
   analysisReport: unknown,
-  isFirstLoad: boolean,
+  isFirstLoad: boolean
 ): void {
   const reportObj = toReportRecord(analysisReport);
   if (!reportObj) {
@@ -291,7 +297,7 @@ export function renderNewFormatModules(
   const renderer = SafeRenderer.getInstance();
 
   const availableTargets = Object.keys(reportObj).filter(
-    (key) => TARGET_CONFIG[key] && reportObj[key],
+    key => TARGET_CONFIG[key] && reportObj[key]
   );
 
   // 首次加载时初始化 selectedReportItems
@@ -312,8 +318,7 @@ export function renderNewFormatModules(
 
   ctx.hasRenderedReportOnce = true;
 
-
-  availableTargets.forEach((targetId) => {
+  availableTargets.forEach(targetId => {
     const config = TARGET_CONFIG[targetId];
     if (!config) return;
 
@@ -340,13 +345,17 @@ export function renderNewFormatModules(
             ${renderTargetIcon(config)}
             <span class="truncate">${escapeHtml(config.title)}</span>
           </label>
-          ${hasConfidence ? `
+          ${
+            hasConfidence
+              ? `
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border shrink-0 ${escapeHtml(getConfidenceColorClass(confidencePct))}"
                 role="status"
                 aria-label="${escapeHtml(getConfidenceAriaLabel(confidencePct))}">
             <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
             <span>${confidencePct}%</span>
-          </span>` : ''}
+          </span>`
+              : ''
+          }
           <i class="fas transition-transform text-slate-400"
              :class="isExpanded('${escapeHtml(targetId)}') ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
         </div>
@@ -421,9 +430,7 @@ function renderSubItem(data: unknown, targetId: string, key: string): string {
 }
 
 function renderItemCount(itemCount: number): string {
-  return itemCount > 0
-    ? `<span class="text-slate-400 text-xs">(${itemCount} items)</span>`
-    : '';
+  return itemCount > 0 ? `<span class="text-slate-400 text-xs">(${itemCount} items)</span>` : '';
 }
 
 function renderSubItemChevron(hasContent: boolean, safeTargetId: string, safeKey: string): string {
@@ -528,10 +535,12 @@ function renderSelectableContent(data: unknown, dimensionId: string, subItemKey:
   if (Array.isArray(data)) {
     if (data.length === 0) return '<div class="text-xs text-slate-400 py-2">空列表</div>';
 
-    return data.map((item, index) => {
-      const displayText = formatContentItem(item);
-      return renderSelectableContentItem(dimensionId, subItemKey, index, displayText);
-    }).join('');
+    return data
+      .map((item, index) => {
+        const displayText = formatContentItem(item);
+        return renderSelectableContentItem(dimensionId, subItemKey, index, displayText);
+      })
+      .join('');
   }
 
   // 对象类型 - 将每个字段作为可选项
@@ -540,10 +549,12 @@ function renderSelectableContent(data: unknown, dimensionId: string, subItemKey:
     const entries = Object.entries(obj);
     if (entries.length === 0) return '<div class="text-xs text-slate-400 py-2">空对象</div>';
 
-    return entries.map(([key, value], index) => {
-      const displayText = `${formatSubItemLabel(key)}: ${formatValue(value)}`;
-      return renderSelectableContentItem(dimensionId, subItemKey, index, displayText);
-    }).join('');
+    return entries
+      .map(([key, value]) => {
+        const displayText = `${formatSubItemLabel(key)}: ${formatValue(value)}`;
+        return renderSelectableContentItem(dimensionId, subItemKey, key, displayText);
+      })
+      .join('');
   }
 
   // 基本类型 - 作为单个可选项
@@ -566,7 +577,10 @@ function formatValue(value: unknown): string {
 function formatArrayValue(value: unknown[]): string {
   if (value.length === 0) return '[]';
   if (value.length <= 3) return value.map(item => formatValue(item)).join(', ');
-  return `${value.slice(0, 3).map(item => formatValue(item)).join(', ')}... (${value.length} items)`;
+  return `${value
+    .slice(0, 3)
+    .map(item => formatValue(item))
+    .join(', ')}... (${value.length} items)`;
 }
 
 /**
@@ -628,7 +642,7 @@ export function renderLegacyFormatModules(
   ctx: PromptlabAlpineContext,
   container: HTMLElement,
   report: unknown,
-  isFirstLoad: boolean,
+  isFirstLoad: boolean
 ): void {
   const reportObj = toReportRecord(report);
   if (!reportObj) {
@@ -636,15 +650,22 @@ export function renderLegacyFormatModules(
   }
 
   const renderer = SafeRenderer.getInstance();
-  const ignoreKeys = ['meta', 'generatedByModel', 'generatedAt', 'templateUsed', 'templateId', 'raw_response'];
-  const keys = Object.keys(reportObj).filter((k) => !ignoreKeys.includes(k));
+  const ignoreKeys = [
+    'meta',
+    'generatedByModel',
+    'generatedAt',
+    'templateUsed',
+    'templateId',
+    'raw_response',
+  ];
+  const keys = Object.keys(reportObj).filter(k => !ignoreKeys.includes(k));
 
   if (isFirstLoad) {
     ctx.profile.selectedReportSections = [...keys];
     ctx.saveState();
   }
 
-  keys.forEach((key) => {
+  keys.forEach(key => {
     // 自动填充 audience 字段（向后兼容）
     if (key === 'target_audience' && !ctx.profile.audience) {
       let val = reportObj[key];

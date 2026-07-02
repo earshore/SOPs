@@ -14,7 +14,12 @@
   border: 1px solid rgba(148, 163, 184, 0.24) !important;
   background:
     radial-gradient(circle at 82% 18%, rgba(5, 150, 105, 0.08), transparent 32%),
-    linear-gradient(135deg, rgba(240, 253, 244, 0.98), rgba(255, 255, 255, 0.94) 54%, rgba(236, 253, 245, 0.88)) !important;
+    linear-gradient(
+      135deg,
+      rgba(240, 253, 244, 0.98),
+      rgba(255, 255, 255, 0.94) 54%,
+      rgba(236, 253, 245, 0.88)
+    ) !important;
   box-shadow: 0 18px 40px -32px rgba(15, 23, 42, 0.42) !important;
   --wb-orb-1-color: rgba(34, 197, 94, 0.14) !important;
   --wb-orb-2-color: rgba(16, 185, 129, 0.12) !important;
@@ -38,7 +43,11 @@
 
 .more-overview .wb-badge {
   border-color: rgba(5, 150, 105, 0.2) !important;
-  background: linear-gradient(135deg, rgba(240, 253, 244, 0.92), rgba(236, 253, 245, 0.86)) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(240, 253, 244, 0.92),
+    rgba(236, 253, 245, 0.86)
+  ) !important;
   color: #15803d !important;
 }
 
@@ -191,7 +200,12 @@
   border-color: rgba(8, 145, 178, 0.18);
   background:
     radial-gradient(circle at 84% 18%, rgba(8, 145, 178, 0.08), transparent 30%),
-    linear-gradient(135deg, rgba(236, 254, 255, 0.96), rgba(255, 255, 255, 0.94) 52%, rgba(239, 246, 255, 0.86));
+    linear-gradient(
+      135deg,
+      rgba(236, 254, 255, 0.96),
+      rgba(255, 255, 255, 0.94) 52%,
+      rgba(239, 246, 255, 0.86)
+    );
   box-shadow: 0 10px 30px -26px rgba(8, 145, 178, 0.42);
 }
 
@@ -674,27 +688,24 @@
 }
 
 @media (min-width: 1024px) {
-  .more-overview > * + * :where(
-    .sop-icon-container,
-    .category-filter-btn,
-    .bg-white.rounded-xl
-  ),
-  .ziniao-case-shell :where(
-    .zn-card,
-    .zn-chat-card,
-    .zn-notice-title,
-    .zn-notice-card,
-    .zn-bubble,
-    .zn-tool,
-    .zn-phase-grid article,
-    .zn-summary-grid article,
-    .zn-rule-grid article,
-    .zn-notice-grid article
-  ) {
+  .more-overview > * + * :where(.sop-icon-container, .category-filter-btn, .bg-white.rounded-xl),
+  .ziniao-case-shell
+    :where(
+      .zn-card,
+      .zn-chat-card,
+      .zn-notice-title,
+      .zn-notice-card,
+      .zn-bubble,
+      .zn-tool,
+      .zn-phase-grid article,
+      .zn-summary-grid article,
+      .zn-rule-grid article,
+      .zn-notice-grid article
+    ) {
     border-radius: 8px !important;
   }
 
-  .more-overview > * + * .sop-card[class*="border-l-"] {
+  .more-overview > * + * .sop-card[class*='border-l-'] {
     border-radius: var(--rounded-xl, 16px) !important;
   }
 

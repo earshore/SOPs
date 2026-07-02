@@ -166,7 +166,7 @@ class HomeModule extends BaseModule {
     if (!this.ctx) return;
 
     // 1. 绑定事件 (自动清理)
-    this.addEventListener(document, 'mousemove', (e) => this.handleMouseMove(e as MouseEvent));
+    this.addEventListener(document, 'mousemove', e => this.handleMouseMove(e as MouseEvent));
 
     // 2. 初始化尺寸监听 (手动清理)
     this.initResizeObserver();
@@ -207,7 +207,7 @@ class HomeModule extends BaseModule {
     const container = document.getElementById('home-splash-container');
     if (!container) return;
 
-    this.resizeObserver = new ResizeObserver((entries) => {
+    this.resizeObserver = new ResizeObserver(entries => {
       // 使用 requestAnimationFrame 避免 Resize Loop Error
       window.requestAnimationFrame(() => {
         if (!entries.length || !entries[0]) return;
@@ -333,7 +333,7 @@ class HomeModule extends BaseModule {
     // 🎯 性能优化: 帧率控制，避免过度渲染
     const elapsed = currentTime - this.lastFrameTime;
     if (elapsed < this.frameInterval) {
-      this.animationFrameId = requestAnimationFrame((t) => this.animate(t));
+      this.animationFrameId = requestAnimationFrame(t => this.animate(t));
       return;
     }
     this.lastFrameTime = currentTime - (elapsed % this.frameInterval);
@@ -347,7 +347,7 @@ class HomeModule extends BaseModule {
     this.grid.clear();
 
     // 更新粒子并重新加入网格
-    this.particles.forEach((p) => {
+    this.particles.forEach(p => {
       p.update(this.mouse);
       this.addToGrid(p);
       p.draw(ctx);
@@ -355,7 +355,7 @@ class HomeModule extends BaseModule {
 
     this.drawConnections();
 
-    this.animationFrameId = requestAnimationFrame((t) => this.animate(t));
+    this.animationFrameId = requestAnimationFrame(t => this.animate(t));
   }
 
   /**
@@ -374,7 +374,7 @@ class HomeModule extends BaseModule {
     const mouseRadiusSq = Math.pow(this.CONFIG.mouseRadius + 50, 2);
     const drawn = new Set<string>(); // 避免重复绘制
 
-    this.particles.forEach((p) => {
+    this.particles.forEach(p => {
       const dToMouseSq = Math.pow(p.x - this.mouse.x, 2) + Math.pow(p.y - this.mouse.y, 2);
 
       // 只处理鼠标附近的粒子
@@ -382,7 +382,7 @@ class HomeModule extends BaseModule {
         // 🎯 只检查附近网格的粒子，而不是全部粒子
         const nearby = this.getNearbyParticles(p);
 
-        nearby.forEach((p2) => {
+        nearby.forEach(p2 => {
           if (p === p2) return;
 
           // 避免重复绘制 (A->B 和 B->A)

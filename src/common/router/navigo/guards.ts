@@ -21,10 +21,7 @@ import type {
 import { ValidationError } from '@/common/errors/AppError';
 
 type OptionalTypeName = 'string' | 'number' | 'boolean' | 'function';
-type FieldValidator<T extends object> = readonly [
-  keyof T,
-  (value: unknown) => boolean
-];
+type FieldValidator<T extends object> = readonly [keyof T, (value: unknown) => boolean];
 
 // ==================== 基础类型守卫 ====================
 
@@ -88,14 +85,14 @@ const ROUTE_CONFIG_REQUIRED_STRING_FIELDS: readonly (keyof Partial<RouteConfig>)
   'moduleId',
   'label',
   'icon',
-  'panelId'
+  'panelId',
 ];
 
 const ROUTE_CONFIG_FIELD_VALIDATORS: readonly FieldValidator<Partial<RouteConfig>>[] = [
   ['category', value => isOptionalType(value, 'string')],
   ['viewPath', value => isOptionalType(value, 'string')],
   ['meta', value => value === undefined || isRouteMeta(value)],
-  ['params', value => value === undefined || isRouteParams(value)]
+  ['params', value => value === undefined || isRouteParams(value)],
 ];
 
 const ROUTE_META_FIELD_VALIDATORS: readonly FieldValidator<Partial<RouteMeta>>[] = [
@@ -105,7 +102,7 @@ const ROUTE_META_FIELD_VALIDATORS: readonly FieldValidator<Partial<RouteMeta>>[]
   ['preload', value => isOptionalType(value, 'function')],
   ['preloadRequired', value => isOptionalType(value, 'boolean')],
   ['dependencies', isOptionalStringArray],
-  ['keepAlive', value => isOptionalType(value, 'boolean')]
+  ['keepAlive', value => isOptionalType(value, 'boolean')],
 ];
 
 const NAVIGATE_OPTIONS_FIELD_VALIDATORS: readonly FieldValidator<Partial<NavigateOptions>>[] = [
@@ -113,7 +110,7 @@ const NAVIGATE_OPTIONS_FIELD_VALIDATORS: readonly FieldValidator<Partial<Navigat
   ['updateHistory', value => isOptionalType(value, 'boolean')],
   ['state', isOptionalObject],
   ['skipGuards', value => isOptionalType(value, 'boolean')],
-  ['skipMiddleware', value => isOptionalType(value, 'boolean')]
+  ['skipMiddleware', value => isOptionalType(value, 'boolean')],
 ];
 
 const ROUTER_CONFIG_FIELD_VALIDATORS: readonly FieldValidator<Partial<RouterConfig>>[] = [
@@ -123,7 +120,7 @@ const ROUTER_CONFIG_FIELD_VALIDATORS: readonly FieldValidator<Partial<RouterConf
   ['enableLogging', value => isOptionalType(value, 'boolean')],
   ['defaultRoute', value => isOptionalType(value, 'string')],
   ['notFoundRoute', value => isOptionalType(value, 'string')],
-  ['maxHistorySize', value => isOptionalType(value, 'number')]
+  ['maxHistorySize', value => isOptionalType(value, 'number')],
 ];
 
 // ==================== 路由配置守卫 ====================

@@ -392,7 +392,7 @@ describe('UI自动化测试 - 数据采集页面', () => {
       const invalidAsins = ['invalid', '123', 'ASIN123', 'B0', 'B0TOOLONG123456'];
 
       invalidAsins.forEach(asin => {
-        const isValid = /^B0[A-Z0-9]{8}$/.test(asin);
+        const isValid = /^[A-Z0-9]{10}$/.test(asin);
         expect(isValid).toBe(false);
       });
     });

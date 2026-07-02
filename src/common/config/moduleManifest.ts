@@ -1,4 +1,5 @@
-import type { ModuleLoaderFn, ModuleMap } from "@/types/modules-business";
+import type { ModuleLoaderFn, ModuleMap } from '@/types/modules-business';
+import type { RouteMeta } from '@/common/router/navigo/types';
 
 export interface ModuleManifestRoute {
   key: string;
@@ -9,6 +10,7 @@ export interface ModuleManifestRoute {
   category?: string;
   panelId?: string;
   viewPath?: string;
+  meta?: RouteMeta;
   loader?: ModuleLoaderFn;
 }
 
@@ -25,36 +27,35 @@ export interface ManifestRouteConfig {
   panelId: string;
   category?: string;
   viewPath?: string;
+  meta?: RouteMeta;
 }
 
 type RouteConstants<T extends ModuleManifest> = {
-  [Route in T["routes"][number] as Route["key"]]: Route["routeId"];
+  [Route in T['routes'][number] as Route['key']]: Route['routeId'];
 };
 
-export function defineModuleManifest<const T extends ModuleManifest>(
-  manifest: T,
-): T {
+export function defineModuleManifest<const T extends ModuleManifest>(manifest: T): T {
   return manifest;
 }
 
 export function buildRouteConstants<const T extends ModuleManifest>(
-  manifest: T,
+  manifest: T
 ): RouteConstants<T> {
   return Object.fromEntries(
-    manifest.routes.map((route) => [route.key, route.routeId]),
+    manifest.routes.map(route => [route.key, route.routeId])
   ) as RouteConstants<T>;
 }
 
 export function collectRouteIds<const T extends readonly ModuleManifest[]>(
-  manifests: T,
-): readonly T[number]["routes"][number]["routeId"][] {
-  return manifests.flatMap((manifest) =>
-    manifest.routes.map((route) => route.routeId),
-  ) as readonly T[number]["routes"][number]["routeId"][];
+  manifests: T
+): readonly T[number]['routes'][number]['routeId'][] {
+  return manifests.flatMap(manifest =>
+    manifest.routes.map(route => route.routeId)
+  ) as readonly T[number]['routes'][number]['routeId'][];
 }
 
 export function buildMenuRoutes(
-  manifests: readonly ModuleManifest[],
+  manifests: readonly ModuleManifest[]
 ): Record<string, ManifestRouteConfig> {
   const routes: Record<string, ManifestRouteConfig> = {};
 
@@ -73,6 +74,10 @@ export function buildMenuRoutes(
 
       if (route.viewPath) {
         routeConfig.viewPath = route.viewPath;
+      }
+
+      if (route.meta) {
+        routeConfig.meta = route.meta;
       }
 
       routes[route.routeId] = routeConfig;

@@ -24,63 +24,60 @@
  * 18. 暗色模式覆盖
  */
 
-
 :root {
-
   /* ========================================
      1. 字体系统
      ======================================== */
 
   /* ---- Font Family ---- */
-  --font-sans:    'DM Sans', system-ui, -apple-system, sans-serif;
-  --font-serif:   Georgia, Cambria, 'Times New Roman', Times, serif;
-  --font-mono:    'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-serif: Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
   --font-display: 'Syne', 'DM Sans', sans-serif;
 
   /* ---- Font Size (基于 1rem = 16px 的模块化缩放) ---- */
-  --text-2xs:  0.625rem;    /* 10px */
-  --text-xs:   0.75rem;     /* 12px */
-  --text-sm:   0.8125rem;   /* 13px */
-  --text-base: 0.875rem;    /* 14px — 应用默认 */
-  --text-md:   1rem;        /* 16px */
-  --text-lg:   1.125rem;    /* 18px */
-  --text-xl:   1.25rem;     /* 20px */
-  --text-2xl:  1.5rem;      /* 24px */
-  --text-3xl:  1.875rem;    /* 30px */
-  --text-4xl:  2.25rem;     /* 36px */
-  --text-5xl:  3rem;        /* 48px */
-  --text-6xl:  3.75rem;     /* 60px */
+  --text-2xs: 0.625rem; /* 10px */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.8125rem; /* 13px */
+  --text-base: 0.875rem; /* 14px — 应用默认 */
+  --text-md: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+  --text-4xl: 2.25rem; /* 36px */
+  --text-5xl: 3rem; /* 48px */
+  --text-6xl: 3.75rem; /* 60px */
 
   /* ---- Font Weight ---- */
-  --font-thin:       100;
+  --font-thin: 100;
   --font-extralight: 200;
-  --font-light:      300;
-  --font-regular:    400;
-  --font-medium:     500;
-  --font-semibold:   600;
-  --font-bold:       700;
-  --font-extrabold:  800;
-  --font-black:      900;
+  --font-light: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
 
   /* ---- Line Height ---- */
-  --leading-none:    1;
-  --leading-tight:   1.25;
-  --leading-snug:    1.375;
-  --leading-normal:  1.5;
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
   --leading-relaxed: 1.625;
-  --leading-loose:   2;
+  --leading-loose: 2;
 
   /* ---- Letter Spacing ---- */
   --tracking-tighter: -0.05em;
-  --tracking-tight:   -0.025em;
-  --tracking-normal:  0em;
-  --tracking-wide:    0.025em;
-  --tracking-wider:   0.05em;
-  --tracking-widest:  0.1em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
 
   /* ---- Paragraph / Reading Width ---- */
   --prose-width: 72ch;
-
 
   /* ========================================
      2. 色彩系统 — 基础色板
@@ -88,7 +85,7 @@
      ======================================== */
 
   /* ---- Slate (灰度基础) ---- */
-  --color-slate-50:  #f8fafc;
+  --color-slate-50: #f8fafc;
   --color-slate-100: #f1f5f9;
   --color-slate-200: #e2e8f0;
   --color-slate-300: #cbd5e1;
@@ -101,7 +98,7 @@
   --color-slate-950: #020617;
 
   /* ---- Blue ---- */
-  --color-blue-50:  #eff6ff;
+  --color-blue-50: #eff6ff;
   --color-blue-100: #dbeafe;
   --color-blue-200: #bfdbfe;
   --color-blue-300: #93c5fd;
@@ -114,7 +111,7 @@
   --color-blue-950: #172554;
 
   /* ---- Indigo ---- */
-  --color-indigo-50:  #eef2ff;
+  --color-indigo-50: #eef2ff;
   --color-indigo-100: #e0e7ff;
   --color-indigo-200: #c7d2fe;
   --color-indigo-300: #a5b4fc;
@@ -127,7 +124,7 @@
   --color-indigo-950: #1e1b4b;
 
   /* ---- Purple ---- */
-  --color-purple-50:  #faf5ff;
+  --color-purple-50: #faf5ff;
   --color-purple-100: #f3e8ff;
   --color-purple-200: #e9d5ff;
   --color-purple-300: #d8b4fe;
@@ -140,7 +137,7 @@
   --color-purple-950: #3b0764;
 
   /* ---- Pink ---- */
-  --color-pink-50:  #fdf2f8;
+  --color-pink-50: #fdf2f8;
   --color-pink-100: #fce7f3;
   --color-pink-200: #fbcfe8;
   --color-pink-300: #f9a8d4;
@@ -153,7 +150,7 @@
   --color-pink-950: #500724;
 
   /* ---- Rose ---- */
-  --color-rose-50:  #fff1f2;
+  --color-rose-50: #fff1f2;
   --color-rose-100: #ffe4e6;
   --color-rose-200: #fecdd3;
   --color-rose-300: #fda4af;
@@ -166,7 +163,7 @@
   --color-rose-950: #4c0519;
 
   /* ---- Red ---- */
-  --color-red-50:  #fef2f2;
+  --color-red-50: #fef2f2;
   --color-red-100: #fee2e2;
   --color-red-200: #fecaca;
   --color-red-300: #fca5a5;
@@ -179,7 +176,7 @@
   --color-red-950: #450a0a;
 
   /* ---- Orange ---- */
-  --color-orange-50:  #fff7ed;
+  --color-orange-50: #fff7ed;
   --color-orange-100: #ffedd5;
   --color-orange-200: #fed7aa;
   --color-orange-300: #fdba74;
@@ -192,7 +189,7 @@
   --color-orange-950: #431407;
 
   /* ---- Amber ---- */
-  --color-amber-50:  #fffbeb;
+  --color-amber-50: #fffbeb;
   --color-amber-100: #fef3c7;
   --color-amber-200: #fde68a;
   --color-amber-300: #fcd34d;
@@ -205,7 +202,7 @@
   --color-amber-950: #451a03;
 
   /* ---- Yellow ---- */
-  --color-yellow-50:  #fefce8;
+  --color-yellow-50: #fefce8;
   --color-yellow-100: #fef9c3;
   --color-yellow-200: #fef08a;
   --color-yellow-300: #fde047;
@@ -218,7 +215,7 @@
   --color-yellow-950: #422006;
 
   /* ---- Green ---- */
-  --color-green-50:  #f0fdf4;
+  --color-green-50: #f0fdf4;
   --color-green-100: #dcfce7;
   --color-green-200: #bbf7d0;
   --color-green-300: #86efac;
@@ -231,7 +228,7 @@
   --color-green-950: #052e16;
 
   /* ---- Teal ---- */
-  --color-teal-50:  #f0fdfa;
+  --color-teal-50: #f0fdfa;
   --color-teal-100: #ccfbf1;
   --color-teal-200: #99f6e4;
   --color-teal-300: #5eead4;
@@ -244,7 +241,7 @@
   --color-teal-950: #042f2e;
 
   /* ---- Cyan ---- */
-  --color-cyan-50:  #ecfeff;
+  --color-cyan-50: #ecfeff;
   --color-cyan-100: #cffafe;
   --color-cyan-200: #a5f3fc;
   --color-cyan-300: #67e8f9;
@@ -257,21 +254,20 @@
   --color-cyan-950: #083344;
 
   /* ---- White / Black with Alpha ---- */
-  --color-white:       #ffffff;
-  --color-black:       #000000;
-  --color-white-alpha-5:  rgba(255, 255, 255, 0.05);
-  --color-white-alpha-10: rgba(255, 255, 255, 0.10);
-  --color-white-alpha-20: rgba(255, 255, 255, 0.20);
-  --color-white-alpha-40: rgba(255, 255, 255, 0.40);
-  --color-white-alpha-60: rgba(255, 255, 255, 0.60);
-  --color-white-alpha-80: rgba(255, 255, 255, 0.80);
-  --color-black-alpha-5:  rgba(0, 0, 0, 0.05);
-  --color-black-alpha-10: rgba(0, 0, 0, 0.10);
-  --color-black-alpha-20: rgba(0, 0, 0, 0.20);
-  --color-black-alpha-40: rgba(0, 0, 0, 0.40);
-  --color-black-alpha-60: rgba(0, 0, 0, 0.60);
-  --color-black-alpha-80: rgba(0, 0, 0, 0.80);
-
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-white-alpha-5: rgba(255, 255, 255, 0.05);
+  --color-white-alpha-10: rgba(255, 255, 255, 0.1);
+  --color-white-alpha-20: rgba(255, 255, 255, 0.2);
+  --color-white-alpha-40: rgba(255, 255, 255, 0.4);
+  --color-white-alpha-60: rgba(255, 255, 255, 0.6);
+  --color-white-alpha-80: rgba(255, 255, 255, 0.8);
+  --color-black-alpha-5: rgba(0, 0, 0, 0.05);
+  --color-black-alpha-10: rgba(0, 0, 0, 0.1);
+  --color-black-alpha-20: rgba(0, 0, 0, 0.2);
+  --color-black-alpha-40: rgba(0, 0, 0, 0.4);
+  --color-black-alpha-60: rgba(0, 0, 0, 0.6);
+  --color-black-alpha-80: rgba(0, 0, 0, 0.8);
 
   /* ========================================
      3. 色彩系统 — 语义令牌
@@ -279,306 +275,292 @@
      ======================================== */
 
   /* ---- 主色 (Primary) ---- */
-  --color-primary:           var(--color-blue-500);
-  --color-primary-light:     rgba(59, 130, 246, 0.10);
-  --color-primary-dark:      var(--color-blue-600);
-  --color-primary-darker:    var(--color-blue-700);
-  --color-primary-contrast:  #ffffff;   /* 主色上的文字色 */
+  --color-primary: var(--color-blue-500);
+  --color-primary-light: rgba(59, 130, 246, 0.1);
+  --color-primary-dark: var(--color-blue-600);
+  --color-primary-darker: var(--color-blue-700);
+  --color-primary-contrast: #ffffff; /* 主色上的文字色 */
 
   /* ---- 次要色 (Secondary) ---- */
-  --color-secondary:           var(--color-slate-600);
-  --color-secondary-light:     rgba(100, 116, 139, 0.10);
-  --color-secondary-dark:      var(--color-slate-700);
-  --color-secondary-contrast:  #ffffff;
+  --color-secondary: var(--color-slate-600);
+  --color-secondary-light: rgba(100, 116, 139, 0.1);
+  --color-secondary-dark: var(--color-slate-700);
+  --color-secondary-contrast: #ffffff;
 
   /* ---- 强调色 (Accent) ---- */
-  --color-accent:            var(--color-indigo-500);
-  --color-accent-light:      rgba(99, 102, 241, 0.10);
-  --color-accent-dark:       var(--color-indigo-600);
+  --color-accent: var(--color-indigo-500);
+  --color-accent-light: rgba(99, 102, 241, 0.1);
+  --color-accent-dark: var(--color-indigo-600);
 
   /* ---- 文字 ---- */
-  --color-text-primary:      var(--color-slate-900);
-  --color-text-secondary:    var(--color-slate-500);
-  --color-text-tertiary:     var(--color-slate-400);
-  --color-text-placeholder:  var(--color-slate-400);
-  --color-text-disabled:     var(--color-slate-300);
-  --color-text-inverse:      #ffffff;
-  --color-text-link:         var(--color-primary);
-  --color-text-link-hover:   var(--color-primary-dark);
+  --color-text-primary: var(--color-slate-900);
+  --color-text-secondary: var(--color-slate-500);
+  --color-text-tertiary: var(--color-slate-400);
+  --color-text-placeholder: var(--color-slate-400);
+  --color-text-disabled: var(--color-slate-300);
+  --color-text-inverse: #ffffff;
+  --color-text-link: var(--color-primary);
+  --color-text-link-hover: var(--color-primary-dark);
 
   /* ---- 背景 ---- */
-  --color-bg-primary:        #ffffff;
-  --color-bg-secondary:      var(--color-slate-50);
-  --color-bg-tertiary:       var(--color-slate-100);
-  --color-bg-elevated:       #ffffff;
-  --color-bg-sunken:         var(--color-slate-100);
-  --color-bg-hover:          rgba(0, 0, 0, 0.04);
-  --color-bg-active:         rgba(0, 0, 0, 0.08);
-  --color-bg-selected:       var(--color-primary-light);
-  --color-bg-disabled:       var(--color-slate-100);
-  --color-bg-backdrop:       rgba(0, 0, 0, 0.40);
-  --color-bg-overlay:        rgba(0, 0, 0, 0.50);
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: var(--color-slate-50);
+  --color-bg-tertiary: var(--color-slate-100);
+  --color-bg-elevated: #ffffff;
+  --color-bg-sunken: var(--color-slate-100);
+  --color-bg-hover: rgba(0, 0, 0, 0.04);
+  --color-bg-active: rgba(0, 0, 0, 0.08);
+  --color-bg-selected: var(--color-primary-light);
+  --color-bg-disabled: var(--color-slate-100);
+  --color-bg-backdrop: rgba(0, 0, 0, 0.4);
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
 
   /* ---- 工作台表面 ---- */
-  --surface-workbench:        var(--color-slate-50);
-  --surface-panel:            #ffffff;
-  --surface-card:             #ffffff;
-  --surface-card-hover:       var(--color-slate-50);
+  --surface-workbench: var(--color-slate-50);
+  --surface-panel: #ffffff;
+  --surface-card: #ffffff;
+  --surface-card-hover: var(--color-slate-50);
 
   /* ---- 边框 ---- */
-  --color-border-lightest:   rgba(0, 0, 0, 0.03);
-  --color-border-light:      rgba(0, 0, 0, 0.06);
-  --color-border-default:    rgba(0, 0, 0, 0.10);
-  --color-border-strong:     rgba(0, 0, 0, 0.16);
-  --color-border-focus:      var(--color-primary);
-  --color-border-error:      var(--color-red-500);
-  --border-subtle:           rgba(148, 163, 184, 0.24);
-  --border-muted:            rgba(203, 213, 225, 0.72);
+  --color-border-lightest: rgba(0, 0, 0, 0.03);
+  --color-border-light: rgba(0, 0, 0, 0.06);
+  --color-border-default: rgba(0, 0, 0, 0.1);
+  --color-border-strong: rgba(0, 0, 0, 0.16);
+  --color-border-focus: var(--color-primary);
+  --color-border-error: var(--color-red-500);
+  --border-subtle: rgba(148, 163, 184, 0.24);
+  --border-muted: rgba(203, 213, 225, 0.72);
 
   /* ---- 焦点环 ---- */
-  --color-focus-ring:        var(--color-primary);
-  --focus-ring-soft:         rgba(37, 99, 235, 0.16);
+  --color-focus-ring: var(--color-primary);
+  --focus-ring-soft: rgba(37, 99, 235, 0.16);
 
   /* ---- 状态色 ---- */
-  --color-success:           var(--color-green-500);
-  --color-success-light:     rgba(34, 197, 94, 0.10);
-  --color-success-dark:      var(--color-green-600);
-  --color-success-contrast:  #ffffff;
+  --color-success: var(--color-green-500);
+  --color-success-light: rgba(34, 197, 94, 0.1);
+  --color-success-dark: var(--color-green-600);
+  --color-success-contrast: #ffffff;
 
-  --color-warning:           var(--color-amber-500);
-  --color-warning-dark:      var(--color-amber-600);
-  --color-warning-contrast:  var(--color-slate-900);
+  --color-warning: var(--color-amber-500);
+  --color-warning-dark: var(--color-amber-600);
+  --color-warning-contrast: var(--color-slate-900);
 
-  --color-error:             var(--color-red-500);
-  --color-error-light:       rgba(239, 68, 68, 0.10);
-  --color-error-dark:        var(--color-red-600);
-  --color-error-contrast:    #ffffff;
+  --color-error: var(--color-red-500);
+  --color-error-light: rgba(239, 68, 68, 0.1);
+  --color-error-dark: var(--color-red-600);
+  --color-error-contrast: #ffffff;
 
-  --color-info:              var(--color-blue-500);
-  --color-info-light:        rgba(59, 130, 246, 0.10);
-  --color-info-dark:         var(--color-blue-600);
-  --color-info-contrast:     #ffffff;
+  --color-info: var(--color-blue-500);
+  --color-info-light: rgba(59, 130, 246, 0.1);
+  --color-info-dark: var(--color-blue-600);
+  --color-info-contrast: #ffffff;
 
   /* ========================================
      4. 间距系统
      基于 4px 倍数递增
      ======================================== */
-  --spacing-0:   0;
-  --spacing-px:  1px;
-  --spacing-0\.5: 0.125rem;  /* 2px */
-  --spacing-1:   0.25rem;    /* 4px */
-  --spacing-2xs: 0.375rem;   /* 6px */
-  --spacing-xs:  0.5rem;     /* 8px */
-  --spacing-sm:  0.75rem;    /* 12px */
-  --spacing-md:  1rem;       /* 16px */
-  --spacing-lg:  1.5rem;     /* 24px */
-  --spacing-xl:  2rem;       /* 32px */
-  --spacing-2xl: 3rem;       /* 48px */
-  --spacing-3xl: 4rem;       /* 64px */
-  --spacing-4xl: 6rem;       /* 96px */
-  --spacing-5xl: 8rem;       /* 128px */
-
+  --spacing-0: 0;
+  --spacing-px: 1px;
+  --spacing-0\.5: 0.125rem; /* 2px */
+  --spacing-1: 0.25rem; /* 4px */
+  --spacing-2xs: 0.375rem; /* 6px */
+  --spacing-xs: 0.5rem; /* 8px */
+  --spacing-sm: 0.75rem; /* 12px */
+  --spacing-md: 1rem; /* 16px */
+  --spacing-lg: 1.5rem; /* 24px */
+  --spacing-xl: 2rem; /* 32px */
+  --spacing-2xl: 3rem; /* 48px */
+  --spacing-3xl: 4rem; /* 64px */
+  --spacing-4xl: 6rem; /* 96px */
+  --spacing-5xl: 8rem; /* 128px */
 
   /* ========================================
      5. 布局尺寸
      ======================================== */
 
   /* ---- 容器最大宽度 ---- */
-  --container-xs:    480px;
-  --container-sm:    640px;
-  --container-md:    768px;
-  --container-lg:    1024px;
-  --container-xl:    1280px;
-  --container-2xl:   1450px;
-  --container-3xl:   1680px;
-  --container-full:  100%;
+  --container-xs: 480px;
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1450px;
+  --container-3xl: 1680px;
+  --container-full: 100%;
   --container-default: var(--container-2xl);
 
   /* ---- 容器内边距 ---- */
-  --container-padding-x:    var(--spacing-md);
+  --container-padding-x: var(--spacing-md);
   --container-padding-x-sm: var(--spacing-sm);
   --container-padding-x-lg: var(--spacing-lg);
 
   /* ---- 侧栏 ---- */
-  --sidebar-width:           260px;
+  --sidebar-width: 260px;
   --sidebar-width-collapsed: 64px;
-  --sidebar-width-wide:      320px;
+  --sidebar-width-wide: 320px;
 
   /* ---- Header ---- */
-  --header-height:    64px;
+  --header-height: 64px;
   --header-height-sm: 56px;
 
   /* ---- 区块间距 ---- */
-  --section-gap:    var(--spacing-xl);
+  --section-gap: var(--spacing-xl);
   --section-gap-sm: var(--spacing-lg);
   --section-gap-lg: var(--spacing-2xl);
-
 
   /* ========================================
      6. 圆角
      ======================================== */
   --rounded-none: 0;
-  --rounded-xs:   2px;
-  --rounded-sm:   4px;
-  --rounded-md:   8px;
-  --rounded-lg:   12px;
-  --rounded-xl:   16px;
-  --rounded-2xl:  24px;
-  --rounded-3xl:  32px;
+  --rounded-xs: 2px;
+  --rounded-sm: 4px;
+  --rounded-md: 8px;
+  --rounded-lg: 12px;
+  --rounded-xl: 16px;
+  --rounded-2xl: 24px;
+  --rounded-3xl: 32px;
   --rounded-full: 9999px;
-  --rounded-card:  var(--rounded-md);
+  --rounded-card: var(--rounded-md);
   --rounded-panel: var(--rounded-md);
-
 
   /* ========================================
      7. 阴影
      ======================================== */
   --shadow-none: none;
-  --shadow-xs:   0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.06),
-                 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.07),
-                 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg:   0 10px 25px -5px rgba(0, 0, 0, 0.08),
-                 0 4px 10px -5px rgba(0, 0, 0, 0.03);
-  --shadow-xl:   0 20px 40px -10px rgba(0, 0, 0, 0.10);
-  --shadow-2xl:  0 25px 50px -12px rgba(0, 0, 0, 0.15);
-  --shadow-card:       0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -5px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow-card-hover: 0 8px 22px -20px rgba(15, 23, 42, 0.36);
-  --shadow-panel:      0 12px 30px -28px rgba(15, 23, 42, 0.45);
+  --shadow-panel: 0 12px 30px -28px rgba(15, 23, 42, 0.45);
 
   /* 内阴影 */
-  --shadow-inner:    inset 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.04);
   --shadow-inner-lg: inset 0 4px 8px rgba(0, 0, 0, 0.06);
 
   /* 彩色阴影 (主色投影) */
   --shadow-primary-sm: 0 2px 8px rgba(59, 130, 246, 0.15);
-  --shadow-primary-md: 0 4px 14px rgba(59, 130, 246, 0.20);
+  --shadow-primary-md: 0 4px 14px rgba(59, 130, 246, 0.2);
   --shadow-primary-lg: 0 8px 25px rgba(59, 130, 246, 0.25);
 
   /* 上方阴影 */
-  --shadow-up-sm:  0 -1px 3px rgba(0, 0, 0, 0.06),
-                   0 -1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-up-md:  0 -4px 6px -1px rgba(0, 0, 0, 0.07),
-                   0 -2px 4px -1px rgba(0, 0, 0, 0.04);
-
+  --shadow-up-sm: 0 -1px 3px rgba(0, 0, 0, 0.06), 0 -1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-up-md: 0 -4px 6px -1px rgba(0, 0, 0, 0.07), 0 -2px 4px -1px rgba(0, 0, 0, 0.04);
 
   /* ========================================
      8. 边框
      ======================================== */
-  --border-width-none:   0;
-  --border-width-thin:   1px;
+  --border-width-none: 0;
+  --border-width-thin: 1px;
   --border-width-default: 1px;
   --border-width-medium: 1.5px;
-  --border-width-thick:  2px;
-  --border-width-heavy:  3px;
+  --border-width-thick: 2px;
+  --border-width-heavy: 3px;
 
   /* 预设边框 */
-  --border-light:   var(--border-width-thin) solid var(--color-border-light);
+  --border-light: var(--border-width-thin) solid var(--color-border-light);
   --border-default: var(--border-width-thin) solid var(--color-border-default);
-  --border-strong:  var(--border-width-thin) solid var(--color-border-strong);
-
+  --border-strong: var(--border-width-thin) solid var(--color-border-strong);
 
   /* ========================================
      9. 透明度
      ======================================== */
-  --opacity-0:   0;
-  --opacity-5:   0.05;
-  --opacity-10:  0.10;
-  --opacity-20:  0.20;
-  --opacity-25:  0.25;
-  --opacity-30:  0.30;
-  --opacity-40:  0.40;
-  --opacity-50:  0.50;
-  --opacity-60:  0.60;
-  --opacity-70:  0.70;
-  --opacity-75:  0.75;
-  --opacity-80:  0.80;
-  --opacity-90:  0.90;
-  --opacity-95:  0.95;
+  --opacity-0: 0;
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-25: 0.25;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-75: 0.75;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-95: 0.95;
   --opacity-100: 1;
 
   /* 语义化透明度 */
-  --opacity-disabled:    0.50;
-  --opacity-placeholder: 0.50;
-  --opacity-overlay:     0.50;
-  --opacity-backdrop:    0.40;
-  --opacity-hover:       0.85;
-  --opacity-loading:     0.60;
-
+  --opacity-disabled: 0.5;
+  --opacity-placeholder: 0.5;
+  --opacity-overlay: 0.5;
+  --opacity-backdrop: 0.4;
+  --opacity-hover: 0.85;
+  --opacity-loading: 0.6;
 
   /* ========================================
      10. Z-index 层级
      规范化层叠顺序，避免 z-index 冲突
      ======================================== */
-  --z-hide:            -1;
-  --z-base:            0;
-  --z-raised:          1;
-  --z-dropdown:        30;
-  --z-sticky:          35;
-  --z-header:          40;
-  --z-overlay:         50;
-  --z-modal-backdrop:  55;
-  --z-modal:           60;
-  --z-popover:         70;
-  --z-toast:           80;
-  --z-tooltip:         90;
-  --z-max:             9999;
-
+  --z-hide: -1;
+  --z-base: 0;
+  --z-raised: 1;
+  --z-dropdown: 30;
+  --z-sticky: 35;
+  --z-header: 40;
+  --z-overlay: 50;
+  --z-modal-backdrop: 55;
+  --z-modal: 60;
+  --z-popover: 70;
+  --z-toast: 80;
+  --z-tooltip: 90;
+  --z-max: 9999;
 
   /* ========================================
      11. 缓动函数
      ======================================== */
-  --ease-linear:    linear;
-  --ease-smooth:    cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-bounce:    cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  --ease-elastic:   cubic-bezier(0.68, -0.6, 0.32, 1.6);
-  --ease-in:        cubic-bezier(0.4, 0, 1, 1);
-  --ease-out:       cubic-bezier(0, 0, 0.2, 1);
-  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-back-in:   cubic-bezier(0.6, -0.28, 0.735, 0.045);
-  --ease-back-out:  cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-linear: linear;
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-back-in: cubic-bezier(0.6, -0.28, 0.735, 0.045);
+  --ease-back-out: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   /* ---- 微交互缓动函数 ---- */
   --micro-ease-button: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --micro-ease-card:   cubic-bezier(0.22, 1, 0.36, 1);
-  --micro-ease-modal:  cubic-bezier(0.16, 1, 0.3, 1);
-
+  --micro-ease-card: cubic-bezier(0.22, 1, 0.36, 1);
+  --micro-ease-modal: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ========================================
      12. 动画时长
      ======================================== */
-  --duration-0:        0ms;
-  --duration-fastest:  100ms;
-  --duration-fast:     200ms;
-  --duration-normal:   300ms;
-  --duration-slow:     400ms;
-  --duration-slower:   500ms;
-  --duration-slowest:  700ms;
-  --duration-1s:       1000ms;
-  --duration-2s:       2000ms;
+  --duration-0: 0ms;
+  --duration-fastest: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 400ms;
+  --duration-slower: 500ms;
+  --duration-slowest: 700ms;
+  --duration-1s: 1000ms;
+  --duration-2s: 2000ms;
 
   /* ---- 微交互动画时长 ---- */
   --micro-duration-instant: 100ms;
-  --micro-duration-quick:   150ms;
-  --micro-duration-smooth:  250ms;
-  --micro-duration-gentle:  350ms;
-
+  --micro-duration-quick: 150ms;
+  --micro-duration-smooth: 250ms;
+  --micro-duration-gentle: 350ms;
 
   /* ========================================
      13. 模糊 & 滤镜
      ======================================== */
   --blur-none: 0;
-  --blur-sm:   4px;
-  --blur-md:   8px;
-  --blur-lg:   12px;
-  --blur-xl:   16px;
-  --blur-2xl:  24px;
-  --blur-3xl:  40px;
+  --blur-sm: 4px;
+  --blur-md: 8px;
+  --blur-lg: 12px;
+  --blur-xl: 16px;
+  --blur-2xl: 24px;
+  --blur-3xl: 40px;
 
   /* 背景模糊预设 */
-  --backdrop-blur:    blur(var(--blur-lg)) saturate(1.8);
+  --backdrop-blur: blur(var(--blur-lg)) saturate(1.8);
   --backdrop-blur-sm: blur(var(--blur-sm));
   --backdrop-blur-lg: blur(var(--blur-xl)) saturate(2);
 
@@ -587,218 +569,200 @@
   --grayscale-half: grayscale(0.5);
   --grayscale-full: grayscale(1);
 
-
   /* ========================================
      14. 渐变预设
      ======================================== */
-  --gradient-primary:    linear-gradient(135deg, var(--color-blue-500), var(--color-indigo-500));
-  --gradient-secondary:  linear-gradient(135deg, var(--color-slate-500), var(--color-slate-700));
-  --gradient-success:    linear-gradient(135deg, var(--color-green-400), var(--color-teal-500));
-  --gradient-warning:    linear-gradient(135deg, var(--color-amber-400), var(--color-orange-500));
-  --gradient-danger:     linear-gradient(135deg, var(--color-red-400), var(--color-rose-500));
-  --gradient-info:       linear-gradient(135deg, var(--color-cyan-400), var(--color-blue-500));
+  --gradient-primary: linear-gradient(135deg, var(--color-blue-500), var(--color-indigo-500));
+  --gradient-secondary: linear-gradient(135deg, var(--color-slate-500), var(--color-slate-700));
+  --gradient-success: linear-gradient(135deg, var(--color-green-400), var(--color-teal-500));
+  --gradient-warning: linear-gradient(135deg, var(--color-amber-400), var(--color-orange-500));
+  --gradient-danger: linear-gradient(135deg, var(--color-red-400), var(--color-rose-500));
+  --gradient-info: linear-gradient(135deg, var(--color-cyan-400), var(--color-blue-500));
 
   /* 装饰性渐变 */
-  --gradient-rainbow:    linear-gradient(
-                           90deg,
-                           #3b82f6 0%, #8b5cf6 25%,
-                           #ec4899 50%, #f59e0b 75%,
-                           #10b981 100%
-                         );
-  --gradient-sunset:     linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
-  --gradient-ocean:      linear-gradient(135deg, #06b6d4, #3b82f6, #8b5cf6);
-  --gradient-forest:     linear-gradient(135deg, #22c55e, #14b8a6, #06b6d4);
+  --gradient-rainbow: linear-gradient(
+    90deg,
+    #3b82f6 0%,
+    #8b5cf6 25%,
+    #ec4899 50%,
+    #f59e0b 75%,
+    #10b981 100%
+  );
+  --gradient-sunset: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
+  --gradient-ocean: linear-gradient(135deg, #06b6d4, #3b82f6, #8b5cf6);
+  --gradient-forest: linear-gradient(135deg, #22c55e, #14b8a6, #06b6d4);
 
   /* 玻璃效果背景 */
-  --gradient-glass:      linear-gradient(
-                           135deg,
-                           rgba(255, 255, 255, 0.1),
-                           rgba(255, 255, 255, 0.05)
-                         );
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
 
   /* 文字渐变 */
-  --gradient-text:       linear-gradient(135deg, var(--color-blue-500), var(--color-purple-600));
-
+  --gradient-text: linear-gradient(135deg, var(--color-blue-500), var(--color-purple-600));
 
   /* ========================================
      15. 滚动条
      ======================================== */
-  --scrollbar-width:        15px;
-  --scrollbar-width-thin:   6px;
-  --scrollbar-track:        transparent;
-  --scrollbar-thumb:        rgba(0, 0, 0, 0.15);
-  --scrollbar-thumb-hover:  rgba(0, 0, 0, 0.25);
+  --scrollbar-width: 15px;
+  --scrollbar-width-thin: 6px;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
   --scrollbar-thumb-radius: 3px;
-
 
   /* ========================================
      16. 焦点环
      ======================================== */
-  --focus-ring-width:  2px;
+  --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
-  --focus-ring-color:  var(--color-focus-ring);
-  --focus-ring-style:  var(--focus-ring-width) solid var(--focus-ring-color);
+  --focus-ring-color: var(--color-focus-ring);
+  --focus-ring-style: var(--focus-ring-width) solid var(--focus-ring-color);
 
   /* 阴影式焦点环（不影响布局） */
-  --focus-ring-shadow: 0 0 0 var(--focus-ring-offset) var(--color-bg-primary),
-                       0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
-
+  --focus-ring-shadow:
+    0 0 0 var(--focus-ring-offset) var(--color-bg-primary),
+    0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
 
   /* ========================================
      17. 断点参考值
      仅供 JS 或 calc() 参考，CSS media query 仍需硬编码
      ======================================== */
-  --breakpoint-sm:  640px;
-  --breakpoint-md:  768px;
-  --breakpoint-lg:  1024px;
-  --breakpoint-xl:  1280px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
-
 
   /* ========================================
      18. 微交互动画变换值
      ======================================== */
-  
+
   /* ---- 缩放变换 ---- */
   --micro-scale-press: 0.98;
   --micro-scale-hover: 1.02;
-  
+
   /* ---- 位移变换 ---- */
   --micro-translate-hover: -4px;
   --micro-translate-press: 0px;
-
 
   /* ========================================
      19. 动画控制标志
      ======================================== */
   --animations-enabled: 1;
   --animation-speed-multiplier: 1;
-
 }
-
 
 /* ========================================
    18. 暗色模式覆盖
    仅覆盖语义令牌，基础色板不变
    ======================================== */
 .dark,
-[data-theme="dark"] {
-
+[data-theme='dark'] {
   /* ---- 主色 ---- */
-  --color-primary:           var(--color-indigo-400);
-  --color-primary-light:     rgba(129, 140, 248, 0.12);
-  --color-primary-dark:      var(--color-indigo-500);
-  --color-primary-darker:    var(--color-indigo-600);
-  --color-primary-contrast:  #ffffff;
+  --color-primary: var(--color-indigo-400);
+  --color-primary-light: rgba(129, 140, 248, 0.12);
+  --color-primary-dark: var(--color-indigo-500);
+  --color-primary-darker: var(--color-indigo-600);
+  --color-primary-contrast: #ffffff;
 
   /* ---- 次要色 ---- */
-  --color-secondary:         var(--color-slate-400);
-  --color-secondary-light:   rgba(148, 163, 184, 0.12);
-  --color-secondary-dark:    var(--color-slate-500);
+  --color-secondary: var(--color-slate-400);
+  --color-secondary-light: rgba(148, 163, 184, 0.12);
+  --color-secondary-dark: var(--color-slate-500);
 
   /* ---- 强调色 ---- */
-  --color-accent:            var(--color-indigo-400);
-  --color-accent-light:      rgba(129, 140, 248, 0.12);
-  --color-accent-dark:       var(--color-indigo-500);
+  --color-accent: var(--color-indigo-400);
+  --color-accent-light: rgba(129, 140, 248, 0.12);
+  --color-accent-dark: var(--color-indigo-500);
 
   /* ---- 文字 ---- */
-  --color-text-primary:      var(--color-slate-50);
-  --color-text-secondary:    var(--color-slate-300);
-  --color-text-tertiary:     var(--color-slate-400);
-  --color-text-placeholder:  var(--color-slate-500);
-  --color-text-disabled:     var(--color-slate-600);
-  --color-text-inverse:      var(--color-slate-900);
-  --color-text-link:         var(--color-indigo-400);
-  --color-text-link-hover:   var(--color-indigo-300);
+  --color-text-primary: var(--color-slate-50);
+  --color-text-secondary: var(--color-slate-300);
+  --color-text-tertiary: var(--color-slate-400);
+  --color-text-placeholder: var(--color-slate-500);
+  --color-text-disabled: var(--color-slate-600);
+  --color-text-inverse: var(--color-slate-900);
+  --color-text-link: var(--color-indigo-400);
+  --color-text-link-hover: var(--color-indigo-300);
 
   /* ---- 背景 ---- */
-  --color-bg-primary:        var(--color-slate-900);
-  --color-bg-secondary:      var(--color-slate-800);
-  --color-bg-tertiary:       rgba(255, 255, 255, 0.06);
-  --color-bg-elevated:       var(--color-slate-800);
-  --color-bg-sunken:         var(--color-slate-950);
-  --color-bg-hover:          rgba(255, 255, 255, 0.06);
-  --color-bg-active:         rgba(255, 255, 255, 0.10);
-  --color-bg-selected:       rgba(129, 140, 248, 0.12);
-  --color-bg-disabled:       rgba(255, 255, 255, 0.04);
-  --color-bg-backdrop:       rgba(0, 0, 0, 0.60);
-  --color-bg-overlay:        rgba(0, 0, 0, 0.70);
+  --color-bg-primary: var(--color-slate-900);
+  --color-bg-secondary: var(--color-slate-800);
+  --color-bg-tertiary: rgba(255, 255, 255, 0.06);
+  --color-bg-elevated: var(--color-slate-800);
+  --color-bg-sunken: var(--color-slate-950);
+  --color-bg-hover: rgba(255, 255, 255, 0.06);
+  --color-bg-active: rgba(255, 255, 255, 0.1);
+  --color-bg-selected: rgba(129, 140, 248, 0.12);
+  --color-bg-disabled: rgba(255, 255, 255, 0.04);
+  --color-bg-backdrop: rgba(0, 0, 0, 0.6);
+  --color-bg-overlay: rgba(0, 0, 0, 0.7);
 
   /* ---- 工作台表面 ---- */
-  --surface-workbench:        var(--color-slate-950);
-  --surface-panel:            var(--color-slate-900);
-  --surface-card:             var(--color-slate-900);
-  --surface-card-hover:       var(--color-slate-800);
+  --surface-workbench: var(--color-slate-950);
+  --surface-panel: var(--color-slate-900);
+  --surface-card: var(--color-slate-900);
+  --surface-card-hover: var(--color-slate-800);
 
   /* ---- 边框 ---- */
-  --color-border-lightest:   rgba(255, 255, 255, 0.03);
-  --color-border-light:      rgba(255, 255, 255, 0.06);
-  --color-border-default:    rgba(255, 255, 255, 0.10);
-  --color-border-strong:     rgba(255, 255, 255, 0.16);
-  --color-border-focus:      var(--color-indigo-400);
-  --color-border-error:      var(--color-red-400);
-  --border-subtle:           rgba(148, 163, 184, 0.18);
-  --border-muted:            rgba(148, 163, 184, 0.22);
+  --color-border-lightest: rgba(255, 255, 255, 0.03);
+  --color-border-light: rgba(255, 255, 255, 0.06);
+  --color-border-default: rgba(255, 255, 255, 0.1);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+  --color-border-focus: var(--color-indigo-400);
+  --color-border-error: var(--color-red-400);
+  --border-subtle: rgba(148, 163, 184, 0.18);
+  --border-muted: rgba(148, 163, 184, 0.22);
 
   /* ---- 焦点环 ---- */
-  --color-focus-ring:        var(--color-indigo-400);
-  --focus-ring-soft:         rgba(129, 140, 248, 0.18);
+  --color-focus-ring: var(--color-indigo-400);
+  --focus-ring-soft: rgba(129, 140, 248, 0.18);
 
   /* ---- 状态色 ---- */
-  --color-success:           var(--color-green-400);
-  --color-success-light:     rgba(74, 222, 128, 0.12);
-  --color-success-dark:      var(--color-green-500);
+  --color-success: var(--color-green-400);
+  --color-success-light: rgba(74, 222, 128, 0.12);
+  --color-success-dark: var(--color-green-500);
 
-  --color-warning:           var(--color-amber-400);
-  --color-warning-dark:      var(--color-amber-500);
-  --color-warning-contrast:  var(--color-slate-900);
+  --color-warning: var(--color-amber-400);
+  --color-warning-dark: var(--color-amber-500);
+  --color-warning-contrast: var(--color-slate-900);
 
-  --color-error:             var(--color-red-400);
-  --color-error-light:       rgba(248, 113, 113, 0.12);
-  --color-error-dark:        var(--color-red-500);
+  --color-error: var(--color-red-400);
+  --color-error-light: rgba(248, 113, 113, 0.12);
+  --color-error-dark: var(--color-red-500);
 
-  --color-info:              var(--color-blue-400);
-  --color-info-light:        rgba(96, 165, 250, 0.12);
-  --color-info-dark:         var(--color-blue-500);
+  --color-info: var(--color-blue-400);
+  --color-info-light: rgba(96, 165, 250, 0.12);
+  --color-info-dark: var(--color-blue-500);
 
   /* ---- 阴影 ---- */
-  --shadow-xs:   0 1px 2px rgba(0, 0, 0, 0.20);
-  --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.30),
-                 0 1px 2px rgba(0, 0, 0, 0.20);
-  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.35),
-                 0 2px 4px -1px rgba(0, 0, 0, 0.20);
-  --shadow-card:       0 1px 2px rgba(0, 0, 0, 0.26);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.26);
   --shadow-card-hover: 0 8px 22px -20px rgba(0, 0, 0, 0.72);
-  --shadow-panel:      0 12px 30px -28px rgba(0, 0, 0, 0.78);
-  --shadow-lg:   0 10px 25px -5px rgba(0, 0, 0, 0.40),
-                 0 4px 10px -5px rgba(0, 0, 0, 0.20);
-  --shadow-xl:   0 20px 40px -10px rgba(0, 0, 0, 0.50);
-  --shadow-2xl:  0 25px 50px -12px rgba(0, 0, 0, 0.60);
+  --shadow-panel: 0 12px 30px -28px rgba(0, 0, 0, 0.78);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 4px 10px -5px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 
-  --shadow-inner:    inset 0 2px 4px rgba(0, 0, 0, 0.15);
-  --shadow-inner-lg: inset 0 4px 8px rgba(0, 0, 0, 0.20);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-inner-lg: inset 0 4px 8px rgba(0, 0, 0, 0.2);
 
-  --shadow-primary-sm: 0 2px 8px rgba(129, 140, 248, 0.20);
+  --shadow-primary-sm: 0 2px 8px rgba(129, 140, 248, 0.2);
   --shadow-primary-md: 0 4px 14px rgba(129, 140, 248, 0.25);
-  --shadow-primary-lg: 0 8px 25px rgba(129, 140, 248, 0.30);
+  --shadow-primary-lg: 0 8px 25px rgba(129, 140, 248, 0.3);
 
-  --shadow-up-sm:  0 -1px 3px rgba(0, 0, 0, 0.30),
-                   0 -1px 2px rgba(0, 0, 0, 0.20);
-  --shadow-up-md:  0 -4px 6px -1px rgba(0, 0, 0, 0.35),
-                   0 -2px 4px -1px rgba(0, 0, 0, 0.20);
+  --shadow-up-sm: 0 -1px 3px rgba(0, 0, 0, 0.3), 0 -1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-up-md: 0 -4px 6px -1px rgba(0, 0, 0, 0.35), 0 -2px 4px -1px rgba(0, 0, 0, 0.2);
 
   /* ---- 滚动条 ---- */
-  --scrollbar-thumb:       rgba(255, 255, 255, 0.15);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
 
   /* ---- 玻璃渐变 ---- */
-  --gradient-glass: linear-gradient(
-                      135deg,
-                      rgba(255, 255, 255, 0.05),
-                      rgba(255, 255, 255, 0.02)
-                    );
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
 
   /* ---- 焦点环阴影 (暗色 bg 适配) ---- */
-  --focus-ring-shadow: 0 0 0 var(--focus-ring-offset) var(--color-bg-primary),
-                       0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
+  --focus-ring-shadow:
+    0 0 0 var(--focus-ring-offset) var(--color-bg-primary),
+    0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-ring-color);
 }

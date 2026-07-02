@@ -417,10 +417,78 @@ describe('PPC 搜索词分析器', () => {
     expect(byCampaign['结构复盘活动']?.action).toBe('campaign_structure');
   });
 
+  it('将 ERP 活动报表的小数比例 ACOS 归一为百分比后再判断', () => {
+    const report = [
+      [
+        '店铺名称',
+        '广告活动',
+        '服务状态',
+        '每日预算',
+        '投放类型',
+        '广告类型',
+        '广告活动竞价策略',
+        '广告曝光量',
+        '广告点击量',
+        '广告花费',
+        '广告订单量',
+        '广告销售额',
+        'ACoS',
+        'ROAS',
+        '广告点击率',
+        '广告转化率',
+      ].join(','),
+      ['DE Store', '比例高 ACOS 活动', '正在投放', '30', '手动', 'SP', '固定竞价', '2000', '20', '70', '2', '100', '0.7', '1.43', '0.01', '0.1'].join(','),
+      ['DE Store', '比例低 ACOS 活动', '正在投放', '30', '手动', 'SP', '固定竞价', '2000', '20', '20', '3', '120', '0.167', '6', '1%', '10%'].join(','),
+    ].join('\n');
+
+    const result = analyzeReport(report, thresholds, 'auto');
+    const byCampaign = Object.fromEntries(result.rows.map((row) => [row.searchTerm, row]));
+
+    expect(byCampaign['比例高 ACOS 活动']?.acos).toBeCloseTo(70);
+    expect(byCampaign['比例高 ACOS 活动']?.action).toBe('campaign_bid_down');
+    expect(byCampaign['比例低 ACOS 活动']?.acos).toBeCloseTo(16.7);
+    expect(byCampaign['比例低 ACOS 活动']?.action).toBe('campaign_scale');
+  });
+
+  it('同时使用有效状态和服务状态识别活动状态', () => {
+    const report = [
+      [
+        '店铺名称',
+        '广告活动',
+        '有效状态',
+        '每日预算',
+        '投放类型',
+        '广告曝光量',
+        '广告点击量',
+        '广告花费',
+        '广告订单量',
+        '广告销售额',
+        'ACoS',
+      ].join(','),
+      ['DE Store', '已暂停活动', 'Paused', '30', '手动', '1000', '10', '10', '1', '100', '10%'].join(','),
+      ['DE Store', '英文投放活动', 'Enabled', '30', '手动', '1000', '10', '10', '1', '100', '10%'].join(','),
+    ].join('\n');
+
+    const result = analyzeReport(report, thresholds, 'erp_campaign');
+    const byCampaign = Object.fromEntries(result.rows.map((row) => [row.searchTerm, row]));
+
+    expect(byCampaign['已暂停活动']?.action).toBe('campaign_fix_status');
+    expect(byCampaign['英文投放活动']?.action).not.toBe('campaign_fix_status');
+  });
+
   it('保留 CSV 引号内的分隔符', () => {
     const parsed = parseReport('Search Term,Clicks,Spend,Sales,Orders\n"dog, coat",2,3,4,1');
 
     expect(parsed.records[0]?.['Search Term']).toBe('dog, coat');
+  });
+
+  it('粘贴报表超过行数上限时停止解析', () => {
+    const rows = [
+      'Search Term,Clicks,Spend,Sales,Orders',
+      ...Array.from({ length: 20001 }, (_, index) => `term ${index},1,1,0,0`),
+    ].join('\n');
+
+    expect(() => parseReport(rows)).toThrow('报表行数超过上限');
   });
 
   it('缺少必要列时给出明确错误', () => {
@@ -434,6 +502,23 @@ describe('PPC 搜索词分析器', () => {
     expect(csv).toContain('"dog, ""winter"" coat"');
   });
 
+  it('导出 CSV 时阻断 Excel 公式注入', () => {
+    const result = analyzeSearchTermReport(
+      [
+        'Campaign,Ad Group,Search Term,Keyword,Clicks,Spend,Sales,Orders',
+        '=HYPERLINK("https://evil.example"),+cmd,@SUM(A1:A2),-payload,12,20,0,0',
+      ].join('\n'),
+      thresholds,
+    );
+    const csv = buildActionCsv(result.rows, '=owner');
+
+    expect(csv).toContain('\'=HYPERLINK');
+    expect(csv).toContain('\'+cmd');
+    expect(csv).toContain('\'@SUM(A1:A2)');
+    expect(csv).toContain('\'-payload');
+    expect(csv).toContain('\'=owner');
+  });
+
   it('导出 CSV 时包含 ActionItem 和人工确认字段', () => {
     const result = analyzeSearchTermReport('Search Term,Clicks,Spend,Sales,Orders\nwaste term,12,20,0,0\nobserve term,1,1,0,0', thresholds);
     const csv = buildActionCsv(result.rows);
@@ -443,6 +528,20 @@ describe('PPC 搜索词分析器', () => {
     expect(csv).toContain('ppc-search_term-0-waste-term,high,TRUE,pending_human_review,广告负责人');
     expect(csv).toContain('ppc-search_term-1-observe-term,low,FALSE,monitoring,广告负责人');
     expect(customOwnerCsv).toContain('ppc-search_term-0-waste-term,high,TRUE,pending_human_review,广告小张');
+  });
+
+  it('多币种报表生成周报时不汇总 ACOS', () => {
+    const result = analyzeSearchTermReport(
+      [
+        'Currency,Search Term,Clicks,Spend,Sales,Orders',
+        'EUR,euro term,20,20,100,2',
+        'USD,usd term,20,20,100,2',
+      ].join('\n'),
+      thresholds,
+    );
+    const summary = buildSummaryText(result.rows, '广告小张');
+
+    expect(summary).toContain('ACOS：多币种不汇总');
   });
 
   it('生成周报摘要动作计数', () => {

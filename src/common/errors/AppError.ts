@@ -1,3 +1,4 @@
+const nativeLoggerConsole = globalThis.console;
 // src/common/errors/AppError.ts
 // ================================================================
 // 🎯 P0-4: 统一错误处理 - 应用错误类型体系
@@ -17,7 +18,7 @@ export enum ErrorLevel {
   /** 错误 */
   ERROR = 'error',
   /** 致命错误 */
-  FATAL = 'fatal'
+  FATAL = 'fatal',
 }
 
 /**
@@ -35,7 +36,7 @@ export enum ErrorCategory {
   /** 系统错误 */
   SYSTEM = 'system',
   /** 未知错误 */
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }
 
 /**
@@ -71,7 +72,7 @@ type AppErrorConstructorArgs =
       category?: ErrorCategory,
       context?: ErrorContext,
       originalError?: Error,
-      notify?: boolean
+      notify?: boolean,
     ];
 
 interface NormalizedAppErrorArgs {
@@ -100,7 +101,7 @@ function normalizeAppErrorArgs(args: AppErrorConstructorArgs): NormalizedAppErro
       category: options.category ?? ErrorCategory.UNKNOWN,
       context: options.context ?? {},
       originalError: options.originalError,
-      notify: options.notify ?? true
+      notify: options.notify ?? true,
     };
   }
 
@@ -113,7 +114,7 @@ function normalizeAppErrorArgs(args: AppErrorConstructorArgs): NormalizedAppErro
     category: category ?? ErrorCategory.UNKNOWN,
     context: context ?? {},
     originalError,
-    notify: notify ?? true
+    notify: notify ?? true,
   };
 }
 
@@ -132,13 +133,16 @@ type ApiErrorConstructorArgs =
       statusCode?: number,
       response?: unknown,
       context?: ErrorContext,
-      originalError?: Error
+      originalError?: Error,
     ];
 
-function normalizeApiErrorArgs(args: ApiErrorConstructorArgs): Required<Pick<ApiErrorOptions, 'context'>> & ApiErrorOptions & {
-  message: string;
-  code: string;
-} {
+function normalizeApiErrorArgs(args: ApiErrorConstructorArgs): Required<
+  Pick<ApiErrorOptions, 'context'>
+> &
+  ApiErrorOptions & {
+    message: string;
+    code: string;
+  } {
   const [message, code, third, response, context, originalError] = args;
 
   if (isOptionsObject(third)) {
@@ -149,7 +153,7 @@ function normalizeApiErrorArgs(args: ApiErrorConstructorArgs): Required<Pick<Api
       statusCode: options.statusCode,
       response: options.response,
       context: options.context ?? {},
-      originalError: options.originalError
+      originalError: options.originalError,
     };
   }
 
@@ -161,7 +165,7 @@ function normalizeApiErrorArgs(args: ApiErrorConstructorArgs): Required<Pick<Api
     statusCode,
     response,
     context: context ?? {},
-    originalError
+    originalError,
   };
 }
 
@@ -185,7 +189,8 @@ export class AppError extends Error {
   public readonly notify: boolean;
 
   constructor(...args: AppErrorConstructorArgs) {
-    const { message, code, level, category, context, originalError, notify } = normalizeAppErrorArgs(args);
+    const { message, code, level, category, context, originalError, notify } =
+      normalizeAppErrorArgs(args);
 
     super(message);
     this.name = 'AppError';
@@ -208,7 +213,7 @@ export class AppError extends Error {
       }
     } catch (e) {
       // 静默失败，避免在错误处理中再次触发错误
-      console.warn('[AppError] Failed to capture stack trace:', e);
+      nativeLoggerConsole.warn('[AppError] Failed to capture stack trace:', e);
     }
   }
 
@@ -227,11 +232,13 @@ export class AppError extends Error {
         context: this.context,
         timestamp: this.timestamp,
         stack: this.stack,
-        originalError: this.originalError ? {
-          name: this.originalError.name,
-          message: this.originalError.message,
-          // 不包含stack，避免可能的循环引用
-        } : undefined
+        originalError: this.originalError
+          ? {
+              name: this.originalError.name,
+              message: this.originalError.message,
+              // 不包含stack，避免可能的循环引用
+            }
+          : undefined,
       };
     } catch (e) {
       // 如果序列化失败，返回最小信息
@@ -241,7 +248,7 @@ export class AppError extends Error {
         code: this.code,
         level: this.level,
         category: this.category,
-        timestamp: this.timestamp
+        timestamp: this.timestamp,
       };
     }
   }
@@ -258,21 +265,8 @@ export class AppError extends Error {
  * 网络错误
  */
 export class NetworkError extends AppError {
-  constructor(
-    message: string,
-    code: string,
-    context: ErrorContext = {},
-    originalError?: Error
-  ) {
-    super(
-      message,
-      code,
-      ErrorLevel.ERROR,
-      ErrorCategory.NETWORK,
-      context,
-      originalError,
-      true
-    );
+  constructor(message: string, code: string, context: ErrorContext = {}, originalError?: Error) {
+    super(message, code, ErrorLevel.ERROR, ErrorCategory.NETWORK, context, originalError, true);
     this.name = 'NetworkError';
     // 确保原型链正确
     Object.setPrototypeOf(this, NetworkError.prototype);
@@ -287,7 +281,8 @@ export class ApiError extends AppError {
   public readonly response?: unknown;
 
   constructor(...args: ApiErrorConstructorArgs) {
-    const { message, code, statusCode, response, context, originalError } = normalizeApiErrorArgs(args);
+    const { message, code, statusCode, response, context, originalError } =
+      normalizeApiErrorArgs(args);
 
     super(
       message,
@@ -341,21 +336,8 @@ export class ValidationError extends AppError {
  * 业务逻辑错误
  */
 export class BusinessError extends AppError {
-  constructor(
-    message: string,
-    code: string,
-    context: ErrorContext = {},
-    notify: boolean = true
-  ) {
-    super(
-      message,
-      code,
-      ErrorLevel.WARNING,
-      ErrorCategory.BUSINESS,
-      context,
-      undefined,
-      notify
-    );
+  constructor(message: string, code: string, context: ErrorContext = {}, notify: boolean = true) {
+    super(message, code, ErrorLevel.WARNING, ErrorCategory.BUSINESS, context, undefined, notify);
     this.name = 'BusinessError';
     // 确保原型链正确
     Object.setPrototypeOf(this, BusinessError.prototype);
@@ -366,21 +348,8 @@ export class BusinessError extends AppError {
  * 系统错误
  */
 export class SystemError extends AppError {
-  constructor(
-    message: string,
-    code: string,
-    context: ErrorContext = {},
-    originalError?: Error
-  ) {
-    super(
-      message,
-      code,
-      ErrorLevel.FATAL,
-      ErrorCategory.SYSTEM,
-      context,
-      originalError,
-      true
-    );
+  constructor(message: string, code: string, context: ErrorContext = {}, originalError?: Error) {
+    super(message, code, ErrorLevel.FATAL, ErrorCategory.SYSTEM, context, originalError, true);
     this.name = 'SystemError';
     // 确保原型链正确
     Object.setPrototypeOf(this, SystemError.prototype);

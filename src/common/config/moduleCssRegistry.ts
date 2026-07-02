@@ -2,9 +2,9 @@
  * 模块CSS注册表
  * 定义每个模块需要加载的CSS文件
  * 支持按需懒加载和预加载策略
- * 
+ *
  * 注意：生产环境中CSS通过import动态导入，路径由Vite处理
- * 
+ *
  * Phase 3 优化：
  * - 所有模块自动依赖全局组件CSS (timeline, icon-container, badges, containers)
  * - 全局动画已整合到 keyframes.css
@@ -37,87 +37,89 @@ export const MODULE_CSS_REGISTRY: Record<string, ModuleCssConfig> = {
     moduleId: 'home',
     cssImporter: () => import('../../modules/home/homeDisplay.css'),
     priority: 'high',
-    preload: true
+    preload: true,
   },
-  
+
   // 应用中心
   app_center: {
     moduleId: 'app_center',
     cssImporter: () => import('../../modules/app_center/app_center_style.css'),
     priority: 'high',
-    preload: true
+    preload: true,
   },
-  
+
   // 关键词猎手
   keyword_hunter: {
     moduleId: 'keyword_hunter',
-    cssImporter: () => import('../../modules/app_center/views/keyword_hunter/keyword_hunter_style.css'),
+    cssImporter: () =>
+      import('../../modules/app_center/views/keyword_hunter/keyword_hunter_style.css'),
     priority: 'normal',
     preload: false,
     dependencies: [
       () => import('../../css/components/code-highlight.css'),
-      () => import('../../css/components/markdown.css')
-    ]
+      () => import('../../css/components/markdown.css'),
+    ],
   },
-  
+
   // Master Analysis
   master_analysis: {
     moduleId: 'master_analysis',
-    cssImporter: () => import('../../modules/app_center/views/master_analysis/master_analysis_style.css'),
+    cssImporter: () =>
+      import('../../modules/app_center/views/master_analysis/master_analysis_style.css'),
     priority: 'normal',
-    preload: false
+    preload: false,
   },
-  
+
   // Scraper
   scraper: {
     moduleId: 'scraper',
-    cssImporter: () => import('../../modules/app_center/views/master_analysis/scraper/scraper_style.css'),
+    cssImporter: () =>
+      import('../../modules/app_center/views/master_analysis/scraper/scraper_style.css'),
     priority: 'normal',
-    preload: false
+    preload: false,
   },
-  
+
   // AI Analysis
   ai_analysis: {
     moduleId: 'ai_analysis',
-    cssImporter: () => import('../../modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css'),
+    cssImporter: () =>
+      import('../../modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css'),
     priority: 'normal',
     preload: false,
-    dependencies: [
-      () => import('../../css/components/markdown.css')
-    ]
+    dependencies: [() => import('../../css/components/markdown.css')],
   },
-  
+
   // SOPs模块
   sops: {
     moduleId: 'sops',
     cssImporter: () => import('../../modules/sops/sops_style.css'),
     priority: 'high',
-    preload: true
+    preload: true,
   },
-  
+
   // Amazon Hub
   amz_hub: {
     moduleId: 'amz_hub',
     cssImporter: () => import('../../modules/amz_hub/amz_hub_style.css'),
     priority: 'normal',
-    preload: false
+    preload: false,
   },
-  
+
   // More模块
   more: {
     moduleId: 'more',
     cssImporter: () => import('../../modules/more/more_style.css'),
     priority: 'normal',
-    preload: false
+    preload: false,
   },
-  
+
   // Prompts探索
   prompts: {
     moduleId: 'prompts',
     cssImporter: () => import('../../modules/more/views/explore/prompts/prompts_style.css'),
     priority: 'low',
-    preload: false
-  }
+    preload: false,
+  },
 };
 
 /**
@@ -147,13 +149,13 @@ export function getModulesByPriority(priority: ModuleCssConfig['priority']): Mod
 export function getModuleAllCssImporters(moduleId: string): (() => Promise<unknown>)[] {
   const config = MODULE_CSS_REGISTRY[moduleId];
   if (!config) return [];
-  
+
   const allImporters = [config.cssImporter];
-  
+
   // 添加依赖导入函数
   if (config.dependencies) {
     allImporters.push(...config.dependencies);
   }
-  
+
   return allImporters;
 }

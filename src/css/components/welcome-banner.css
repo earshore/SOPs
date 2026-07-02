@@ -135,7 +135,6 @@
  * ----------------------------------------------------------------------------
  */
 
-
 /* ===== 容器样式 ===== */
 .wb-container {
   margin-bottom: var(--spacing-xl, 2rem);
@@ -155,7 +154,7 @@
   --wb-theme-accent: #2563eb;
   --wb-theme-accent-strong: #1d4ed8;
   --wb-theme-accent-soft: rgba(239, 246, 255, 0.86);
-  --wb-theme-accent-border: rgba(37, 99, 235, 0.20);
+  --wb-theme-accent-border: rgba(37, 99, 235, 0.2);
   --wb-theme-tag-dot-color: var(--wb-theme-accent);
   --wb-theme-tag-icon-color: var(--wb-theme-accent-strong);
   --wb-theme-tag-hover-border: var(--wb-theme-accent-border);
@@ -248,7 +247,8 @@
   transition:
     border-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     box-shadow var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    background-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+    background-color var(--duration-normal, 300ms)
+      var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   min-height: auto;
   height: auto;
   max-width: 100%;
@@ -273,34 +273,71 @@
 .wb-card::before {
   z-index: 1;
   background:
-    radial-gradient(circle 220px at 92% 18%, var(--wb-orb-1-color, rgba(96, 165, 250, 0.15)) 0%, transparent 72%),
-    radial-gradient(circle 170px at 4% 112%, var(--wb-orb-2-color, rgba(147, 197, 253, 0.12)) 0%, transparent 74%),
-    radial-gradient(circle 120px at 68% 46%, var(--wb-orb-3-color, rgba(59, 130, 246, 0.08)) 0%, transparent 76%);
+    radial-gradient(
+      circle 220px at 92% 18%,
+      var(--wb-orb-1-color, rgba(96, 165, 250, 0.15)) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      circle 170px at 4% 112%,
+      var(--wb-orb-2-color, rgba(147, 197, 253, 0.12)) 0%,
+      transparent 74%
+    ),
+    radial-gradient(
+      circle 120px at 68% 46%,
+      var(--wb-orb-3-color, rgba(59, 130, 246, 0.08)) 0%,
+      transparent 76%
+    );
   opacity: var(--wb-card-orb-opacity, 0.86);
 }
 
 .wb-card::after {
   z-index: 2;
   background:
-    radial-gradient(circle at 91% 18%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px, transparent 3px),
-    radial-gradient(circle at 83% 56%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.6px, transparent 2.6px),
-    radial-gradient(circle at 66% 73%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.4px, transparent 2.4px),
-    radial-gradient(circle at 21% 31%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.8px, transparent 2.8px),
-    radial-gradient(circle at 37% 47%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.4px, transparent 2.4px),
-    radial-gradient(circle at 14% 66%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.8px, transparent 2.8px);
+    radial-gradient(
+      circle at 91% 18%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at 83% 56%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.6px,
+      transparent 2.6px
+    ),
+    radial-gradient(
+      circle at 66% 73%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.4px,
+      transparent 2.4px
+    ),
+    radial-gradient(
+      circle at 21% 31%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.8px,
+      transparent 2.8px
+    ),
+    radial-gradient(
+      circle at 37% 47%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.4px,
+      transparent 2.4px
+    ),
+    radial-gradient(
+      circle at 14% 66%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.8px,
+      transparent 2.8px
+    );
   opacity: var(--wb-card-particle-opacity, 0.38);
 }
-
 
 /* ===== 背景装饰层 ===== */
 .wb-bg-gradient {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(135deg,
-      var(--wb-gradient-1, rgba(239, 246, 255, 0.95)) 0%,
-      rgba(255, 255, 255, 0.92) 52%,
-      var(--wb-gradient-2, rgba(219, 234, 254, 0.90)) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--wb-gradient-1, rgba(239, 246, 255, 0.95)) 0%,
+    rgba(255, 255, 255, 0.92) 52%,
+    var(--wb-gradient-2, rgba(219, 234, 254, 0.9)) 100%
+  );
   /* 8.1 为装饰元素添加 pointer-events: none */
   pointer-events: none;
   /* 8.3 优化渲染性能 */
@@ -325,9 +362,11 @@
   right: -5%;
   width: 380px;
   height: 380px;
-  background: radial-gradient(circle,
-      var(--wb-orb-1-color, rgba(96, 165, 250, 0.15)) 0%,
-      transparent 70%);
+  background: radial-gradient(
+    circle,
+    var(--wb-orb-1-color, rgba(96, 165, 250, 0.15)) 0%,
+    transparent 70%
+  );
   animation-delay: 0s;
 }
 
@@ -336,9 +375,11 @@
   left: -5%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle,
-      var(--wb-orb-2-color, rgba(147, 197, 253, 0.12)) 0%,
-      transparent 70%);
+  background: radial-gradient(
+    circle,
+    var(--wb-orb-2-color, rgba(147, 197, 253, 0.12)) 0%,
+    transparent 70%
+  );
   animation-delay: -4s;
 }
 
@@ -347,9 +388,11 @@
   right: 30%;
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle,
-      var(--wb-orb-3-color, rgba(59, 130, 246, 0.08)) 0%,
-      transparent 70%);
+  background: radial-gradient(
+    circle,
+    var(--wb-orb-3-color, rgba(59, 130, 246, 0.08)) 0%,
+    transparent 70%
+  );
   animation-delay: -8s;
 }
 
@@ -357,10 +400,8 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  opacity: .035;
-  background-image: radial-gradient(circle,
-      rgba(100, 116, 139, 0.45) 1px,
-      transparent 1px);
+  opacity: 0.035;
+  background-image: radial-gradient(circle, rgba(100, 116, 139, 0.45) 1px, transparent 1px);
   background-size: 32px 32px;
   /* 8.1 为装饰元素添加 pointer-events: none */
   pointer-events: none;
@@ -391,7 +432,8 @@
   right: 18%;
   width: 6px;
   height: 6px;
-  animation: twinkle 3s var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)) var(--duration-slower, 500ms) infinite;
+  animation: twinkle 3s var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1))
+    var(--duration-slower, 500ms) infinite;
   /* 8.1 添加 will-change 属性优化性能 */
   will-change: opacity;
 }
@@ -411,7 +453,8 @@
   left: 20%;
   width: 6px;
   height: 6px;
-  animation: twinkle 3s var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)) var(--duration-2s, 2000ms) infinite;
+  animation: twinkle 3s var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)) var(--duration-2s, 2000ms)
+    infinite;
   /* 8.1 添加 will-change 属性优化性能 */
   will-change: opacity;
 }
@@ -453,7 +496,6 @@
   will-change: transform, opacity;
 }
 
-
 /* ===== 内容区样式 ===== */
 .wb-content {
   position: relative;
@@ -469,7 +511,6 @@
   gap: var(--spacing-lg, 1.5rem);
 }
 
-
 /* ===== 图标徽章样式 ===== */
 .wb-icon-wrapper {
   position: relative;
@@ -480,7 +521,11 @@
   width: var(--wb-icon-card-size, 56px);
   height: var(--wb-icon-card-size, 56px);
   border-radius: var(--wb-icon-radius, var(--rounded-lg, 12px));
-  background: linear-gradient(135deg, var(--wb-icon-gradient-1, #2563eb), var(--wb-icon-gradient-2, #0891b2));
+  background: linear-gradient(
+    135deg,
+    var(--wb-icon-gradient-1, #2563eb),
+    var(--wb-icon-gradient-2, #0891b2)
+  );
   color: var(--wb-icon-color, #ffffff);
   display: flex;
   align-items: center;
@@ -510,9 +555,11 @@
   width: var(--wb-icon-badge-size, 20px);
   height: var(--wb-icon-badge-size, 20px);
   border-radius: var(--wb-icon-badge-radius, var(--rounded-full, 9999px));
-  background: linear-gradient(135deg,
-      var(--wb-icon-badge-gradient-1, var(--color-amber-400, #fbbf24)),
-      var(--wb-icon-badge-gradient-2, var(--color-warning, #f59e0b)));
+  background: linear-gradient(
+    135deg,
+    var(--wb-icon-badge-gradient-1, var(--color-amber-400, #fbbf24)),
+    var(--wb-icon-badge-gradient-2, var(--color-warning, #f59e0b))
+  );
   color: var(--wb-icon-badge-color, #ffffff);
   border: var(--wb-icon-badge-border-width, 2px) solid var(--wb-icon-badge-border-color, #ffffff);
   display: flex;
@@ -531,13 +578,12 @@
   position: absolute;
   inset: -6px;
   border-radius: var(--rounded-2xl, 24px);
-  border: 2px solid var(--wb-icon-ring-color, var(--color-primary-light, rgba(59, 130, 246, 0.10)));
+  border: 2px solid var(--wb-icon-ring-color, var(--color-primary-light, rgba(59, 130, 246, 0.1)));
   animation: pulseRing 2s ease-out infinite;
   display: block;
   z-index: 1;
   will-change: transform, opacity;
 }
-
 
 /* ===== 文本内容样式 ===== */
 .wb-text {
@@ -620,7 +666,7 @@
 .wb-badge-ai {
   --wb-badge-bg: rgba(239, 246, 255, 0.86);
   --wb-badge-color: #1d4ed8;
-  --wb-badge-border: rgba(37, 99, 235, 0.20);
+  --wb-badge-border: rgba(37, 99, 235, 0.2);
 }
 
 .wb-badge-growth {
@@ -630,7 +676,7 @@
 }
 
 .wb-badge-safety {
-  --wb-badge-bg: rgba(254, 242, 242, 0.90);
+  --wb-badge-bg: rgba(254, 242, 242, 0.9);
   --wb-badge-color: #b91c1c;
   --wb-badge-border: rgba(220, 38, 38, 0.24);
 }
@@ -642,44 +688,44 @@
 }
 
 .wb-badge-supply {
-  --wb-badge-bg: rgba(255, 251, 235, 0.90);
+  --wb-badge-bg: rgba(255, 251, 235, 0.9);
   --wb-badge-color: #b45309;
   --wb-badge-border: rgba(217, 119, 6, 0.22);
 }
 
 .wb-badge-analytics {
-  --wb-badge-bg: rgba(236, 254, 255, 0.90);
+  --wb-badge-bg: rgba(236, 254, 255, 0.9);
   --wb-badge-color: #0e7490;
   --wb-badge-border: rgba(8, 145, 178, 0.22);
 }
 
 .wb-badge-pro {
-  --wb-badge-bg: rgba(255, 251, 235, 0.90);
+  --wb-badge-bg: rgba(255, 251, 235, 0.9);
   --wb-badge-color: #b45309;
   --wb-badge-border: rgba(217, 119, 6, 0.22);
 }
 
 .wb-badge-hub {
-  --wb-badge-bg: rgba(248, 250, 252, 0.90);
+  --wb-badge-bg: rgba(248, 250, 252, 0.9);
   --wb-badge-color: #475569;
   --wb-badge-border: rgba(100, 116, 139, 0.22);
 }
 
-.wb-container[class*="wb-theme-"] .wb-badge {
+.wb-container[class*='wb-theme-'] .wb-badge {
   --wb-badge-bg: var(--wb-theme-badge-bg);
   --wb-badge-color: var(--wb-theme-badge-color);
   --wb-badge-border: var(--wb-theme-badge-border);
 }
 
-.wb-container[class*="wb-theme-"] {
+.wb-container[class*='wb-theme-'] {
   --wb-tag-hover-border: var(--wb-theme-tag-hover-border);
 }
 
-.wb-container[class*="wb-theme-"] .wb-tag-dot {
+.wb-container[class*='wb-theme-'] .wb-tag-dot {
   --wb-tag-dot-color: var(--wb-theme-tag-dot-color);
 }
 
-.wb-container[class*="wb-theme-"] .wb-meta > span > i {
+.wb-container[class*='wb-theme-'] .wb-meta > span > i {
   --wb-tag-icon-color: var(--wb-theme-tag-icon-color);
 }
 
@@ -692,7 +738,6 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
-
 
 /* ===== 特性标签样式 ===== */
 .wb-tags,
@@ -712,15 +757,16 @@
   gap: var(--spacing-xs, 0.5rem);
   padding: var(--wb-tag-padding, 5px 10px);
   border-radius: var(--wb-tag-radius, var(--rounded-full, 9999px));
-  background: var(--wb-tag-bg, rgba(255, 255, 255, .7));
-  border: 1px solid var(--wb-tag-border, var(--color-border-default, rgba(0, 0, 0, 0.10)));
+  background: var(--wb-tag-bg, rgba(255, 255, 255, 0.7));
+  border: 1px solid var(--wb-tag-border, var(--color-border-default, rgba(0, 0, 0, 0.1)));
   backdrop-filter: none;
   font-size: var(--wb-tag-text-size, var(--text-xs, 0.75rem));
   color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
   font-weight: var(--wb-tag-text-weight, var(--font-medium, 500));
   line-height: var(--leading-normal, 1.5);
   transition:
-    background-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color var(--duration-normal, 300ms)
+      var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     border-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   cursor: default;
   min-height: var(--wb-tag-min-height, 28px);
@@ -729,7 +775,10 @@
 .wb-tag:hover,
 .wb-meta > span:hover {
   background: var(--wb-tag-hover-bg, white);
-  border-color: var(--wb-tag-hover-border, var(--wb-theme-tag-hover-border, var(--color-primary-light, rgba(59, 130, 246, 0.10))));
+  border-color: var(
+    --wb-tag-hover-border,
+    var(--wb-theme-tag-hover-border, var(--color-primary-light, rgba(59, 130, 246, 0.1)))
+  );
 }
 
 /* 7.4 标签的键盘导航支持 */
@@ -752,8 +801,8 @@
   background: var(--wb-tag-dot-color, var(--wb-tag-dot-1, var(--color-green-500, #22c55e)));
   border: 1px solid rgba(255, 255, 255, 0.78);
   box-shadow: none;
-  filter: saturate(.82);
-  opacity: .9;
+  filter: saturate(0.82);
+  opacity: 0.9;
 }
 
 .wb-tag-dot--cyan {
@@ -816,7 +865,6 @@
   margin-right: 0 !important;
 }
 
-
 /* ===== 响应式样式 ===== */
 @media (max-width: 768px) {
   .wb-content {
@@ -866,7 +914,6 @@
 }
 
 @media (max-width: 480px) {
-
   /* 6.2 移动端断点样式 */
   .wb-badge {
     padding: 2px 7px;
@@ -881,7 +928,6 @@
 }
 
 @media (max-width: 375px) {
-
   /* 6.3 超小屏幕断点样式 */
   .wb-icon-main {
     width: 48px;
@@ -892,7 +938,6 @@
     font-size: 1rem;
   }
 }
-
 
 /* ===== 徽章动画效果 ===== */
 
@@ -917,10 +962,8 @@
   animation: gradientShift 4s ease-in-out infinite;
 }
 
-
 /* ===== 无障碍支持 ===== */
 @media (prefers-reduced-motion: reduce) {
-
   .wb-orb,
   .wb-particle,
   .wb-icon-ring,
@@ -935,7 +978,6 @@
   }
 }
 
-
 /* ===== 暗色模式平滑过渡 ===== */
 /* 仅对容器级元素添加平滑过渡 */
 .wb-container,
@@ -946,7 +988,6 @@
     border-color 300ms ease;
 }
 
-
 /* ===== 暗色模式适配 ===== */
 /* 统一在 :root 定义暗色模式变量 */
 :root {
@@ -954,7 +995,7 @@
   --wb-text-primary: var(--color-text-primary, #0f172a);
   --wb-text-secondary: var(--color-slate-600, #475569);
   --wb-border-color: rgba(148, 163, 184, 0.24);
-  --wb-tag-bg: rgba(255, 255, 255, .78);
+  --wb-tag-bg: rgba(255, 255, 255, 0.78);
   --wb-tag-border: rgba(148, 163, 184, 0.22);
   --wb-tag-hover-bg: white;
   --wb-tag-hover-border: rgba(37, 99, 235, 0.18);
@@ -969,20 +1010,21 @@
     --wb-tag-bg: rgba(30, 41, 59, 0.78);
     --wb-tag-border: rgba(148, 163, 184, 0.18);
     --wb-tag-hover-bg: rgba(30, 41, 59, 0.92);
-    --wb-tag-hover-border: rgba(148, 163, 184, 0.30);
+    --wb-tag-hover-border: rgba(148, 163, 184, 0.3);
   }
 
   /* 5.1 背景适配 */
   .wb-container,
   .wb-card {
-    background: linear-gradient(135deg,
-        rgba(15, 23, 42, 0.96) 0%,
-        rgba(30, 41, 59, 0.94) 50%,
-        rgba(15, 23, 42, 0.96) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.96) 0%,
+      rgba(30, 41, 59, 0.94) 50%,
+      rgba(15, 23, 42, 0.96) 100%
+    );
     border-color: var(--wb-border-color);
   }
 }
-
 
 /* ----------------------------------------------------------------------------
  * 简化版本样式
@@ -1011,10 +1053,12 @@
   border-radius: var(--rounded-lg, 12px);
   border: 1px solid var(--wb-border-color, rgba(148, 163, 184, 0.24));
   overflow: hidden;
-  background: linear-gradient(135deg,
-      var(--wb-gradient-1, rgba(59, 130, 246, 0.08)) 0%,
-      rgba(255, 255, 255, 0.94) 48%,
-      var(--wb-gradient-2, rgba(34, 197, 94, 0.08)) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--wb-gradient-1, rgba(59, 130, 246, 0.08)) 0%,
+    rgba(255, 255, 255, 0.94) 48%,
+    var(--wb-gradient-2, rgba(34, 197, 94, 0.08)) 100%
+  );
   box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.48);
   margin-bottom: var(--spacing-xl, 2rem);
   padding: var(--spacing-lg, 1.5rem);
@@ -1043,21 +1087,57 @@
 
 .wb-container--simple::before {
   background:
-    radial-gradient(circle 190px at 94% 14%, var(--wb-orb-1-color, rgba(96, 165, 250, 0.15)) 0%, transparent 70%),
-    radial-gradient(circle 150px at 2% 108%, var(--wb-orb-2-color, rgba(147, 197, 253, 0.12)) 0%, transparent 72%),
-    radial-gradient(circle 110px at 70% 42%, var(--wb-orb-3-color, rgba(59, 130, 246, 0.08)) 0%, transparent 74%);
+    radial-gradient(
+      circle 190px at 94% 14%,
+      var(--wb-orb-1-color, rgba(96, 165, 250, 0.15)) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      circle 150px at 2% 108%,
+      var(--wb-orb-2-color, rgba(147, 197, 253, 0.12)) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      circle 110px at 70% 42%,
+      var(--wb-orb-3-color, rgba(59, 130, 246, 0.08)) 0%,
+      transparent 74%
+    );
   mix-blend-mode: multiply;
   opacity: 0.9;
 }
 
 .wb-container--simple::after {
   background:
-    radial-gradient(circle at 90% 16%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px, transparent 3px),
-    radial-gradient(circle at 82% 54%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px, transparent 3px),
-    radial-gradient(circle at 64% 72%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.5px, transparent 2.5px),
-    radial-gradient(circle at 20% 32%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px, transparent 3px),
-    radial-gradient(circle at 36% 46%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.5px, transparent 2.5px),
-    radial-gradient(circle at 15% 66%, var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px, transparent 3px);
+    radial-gradient(
+      circle at 90% 16%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at 82% 54%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at 64% 72%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.5px,
+      transparent 2.5px
+    ),
+    radial-gradient(
+      circle at 20% 32%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at 36% 46%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 1.5px,
+      transparent 2.5px
+    ),
+    radial-gradient(
+      circle at 15% 66%,
+      var(--wb-particle-color, rgba(59, 130, 246, 0.28)) 0 2px,
+      transparent 3px
+    );
   opacity: 0.46;
 }
 
@@ -1116,7 +1196,11 @@
   height: var(--wb-icon-size, 52px);
   flex-shrink: 0;
   border-radius: var(--wb-icon-radius, var(--rounded-lg, 12px));
-  background: linear-gradient(135deg, var(--wb-icon-gradient-1, #2563eb), var(--wb-icon-gradient-2, #0891b2));
+  background: linear-gradient(
+    135deg,
+    var(--wb-icon-gradient-1, #2563eb),
+    var(--wb-icon-gradient-2, #0891b2)
+  );
   color: var(--wb-icon-color, #ffffff);
   display: flex;
   align-items: center;
@@ -1143,9 +1227,11 @@
   width: var(--wb-icon-badge-size, 20px);
   height: var(--wb-icon-badge-size, 20px);
   border-radius: var(--wb-icon-badge-radius, var(--rounded-full, 9999px));
-  background: linear-gradient(135deg,
-      var(--wb-icon-badge-gradient-1, #fbbf24),
-      var(--wb-icon-badge-gradient-2, #f59e0b));
+  background: linear-gradient(
+    135deg,
+    var(--wb-icon-badge-gradient-1, #fbbf24),
+    var(--wb-icon-badge-gradient-2, #f59e0b)
+  );
   border: var(--wb-icon-badge-border-width, 2px) solid var(--wb-icon-badge-border-color, #ffffff);
   display: var(--wb-icon-badge-display, flex);
   align-items: center;
@@ -1247,7 +1333,8 @@
   color: var(--wb-text-secondary, var(--color-text-secondary, #64748b));
   font-weight: var(--wb-tag-text-weight, var(--font-medium, 500));
   transition:
-    background-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color var(--duration-normal, 300ms)
+      var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     border-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   cursor: default;
   min-height: var(--wb-tag-min-height, 28px);
@@ -1507,10 +1594,12 @@
 
 @media (prefers-color-scheme: dark) {
   .wb-container--simple {
-    background: linear-gradient(135deg,
-        rgba(15, 23, 42, 0.96) 0%,
-        rgba(30, 41, 59, 0.94) 50%,
-        rgba(15, 23, 42, 0.96) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.96) 0%,
+      rgba(30, 41, 59, 0.94) 50%,
+      rgba(15, 23, 42, 0.96) 100%
+    );
     border-color: var(--wb-border-color);
   }
 
@@ -1526,9 +1615,9 @@
   --wb-theme-accent: #2563eb;
   --wb-theme-accent-strong: #1d4ed8;
   --wb-theme-accent-soft: rgba(239, 246, 255, 0.86);
-  --wb-theme-accent-border: rgba(37, 99, 235, 0.20);
+  --wb-theme-accent-border: rgba(37, 99, 235, 0.2);
   --wb-gradient-1: rgba(239, 246, 255, 0.95);
-  --wb-gradient-2: rgba(219, 234, 254, 0.90);
+  --wb-gradient-2: rgba(219, 234, 254, 0.9);
   --wb-orb-1-color: rgba(96, 165, 250, 0.15);
   --wb-orb-2-color: rgba(147, 197, 253, 0.12);
   --wb-orb-3-color: rgba(59, 130, 246, 0.08);
@@ -1543,10 +1632,10 @@
 .wb-theme-neutral {
   --wb-theme-accent: #64748b;
   --wb-theme-accent-strong: #475569;
-  --wb-theme-accent-soft: rgba(248, 250, 252, 0.90);
+  --wb-theme-accent-soft: rgba(248, 250, 252, 0.9);
   --wb-theme-accent-border: rgba(100, 116, 139, 0.22);
   --wb-gradient-1: rgba(248, 250, 252, 0.95);
-  --wb-gradient-2: rgba(241, 245, 249, 0.90);
+  --wb-gradient-2: rgba(241, 245, 249, 0.9);
   --wb-orb-1-color: rgba(148, 163, 184, 0.15);
   --wb-orb-2-color: rgba(203, 213, 225, 0.12);
   --wb-orb-3-color: rgba(100, 116, 139, 0.08);
@@ -1563,10 +1652,10 @@
 .wb-theme-cyan {
   --wb-theme-accent: #06b6d4;
   --wb-theme-accent-strong: #0e7490;
-  --wb-theme-accent-soft: rgba(236, 254, 255, 0.90);
+  --wb-theme-accent-soft: rgba(236, 254, 255, 0.9);
   --wb-theme-accent-border: rgba(8, 145, 178, 0.22);
   --wb-gradient-1: rgba(236, 254, 255, 0.95);
-  --wb-gradient-2: rgba(207, 250, 254, 0.90);
+  --wb-gradient-2: rgba(207, 250, 254, 0.9);
   --wb-orb-1-color: rgba(34, 211, 238, 0.15);
   --wb-orb-2-color: rgba(45, 212, 191, 0.12);
   --wb-orb-3-color: rgba(14, 165, 233, 0.08);
@@ -1583,10 +1672,10 @@
 .wb-theme-fuchsia {
   --wb-theme-accent: #d946ef;
   --wb-theme-accent-strong: #a21caf;
-  --wb-theme-accent-soft: rgba(253, 244, 255, 0.90);
+  --wb-theme-accent-soft: rgba(253, 244, 255, 0.9);
   --wb-theme-accent-border: rgba(217, 70, 239, 0.22);
   --wb-gradient-1: rgba(253, 244, 255, 0.95);
-  --wb-gradient-2: rgba(252, 231, 243, 0.90);
+  --wb-gradient-2: rgba(252, 231, 243, 0.9);
   --wb-orb-1-color: rgba(217, 70, 239, 0.14);
   --wb-orb-2-color: rgba(236, 72, 153, 0.12);
   --wb-orb-3-color: rgba(192, 38, 211, 0.08);
@@ -1606,7 +1695,7 @@
   --wb-theme-accent-soft: rgba(236, 253, 245, 0.88);
   --wb-theme-accent-border: rgba(5, 150, 105, 0.22);
   --wb-gradient-1: rgba(236, 253, 245, 0.95);
-  --wb-gradient-2: rgba(209, 250, 229, 0.90);
+  --wb-gradient-2: rgba(209, 250, 229, 0.9);
   --wb-orb-1-color: rgba(52, 211, 153, 0.15);
   --wb-orb-2-color: rgba(110, 231, 183, 0.12);
   --wb-orb-3-color: rgba(16, 185, 129, 0.08);
@@ -1623,10 +1712,10 @@
 .wb-theme-safety {
   --wb-theme-accent: #ef4444;
   --wb-theme-accent-strong: #b91c1c;
-  --wb-theme-accent-soft: rgba(254, 242, 242, 0.90);
+  --wb-theme-accent-soft: rgba(254, 242, 242, 0.9);
   --wb-theme-accent-border: rgba(220, 38, 38, 0.24);
   --wb-gradient-1: rgba(254, 242, 242, 0.95);
-  --wb-gradient-2: rgba(255, 228, 230, 0.90);
+  --wb-gradient-2: rgba(255, 228, 230, 0.9);
   --wb-orb-1-color: rgba(248, 113, 113, 0.14);
   --wb-orb-2-color: rgba(251, 113, 133, 0.12);
   --wb-orb-3-color: rgba(220, 38, 38, 0.08);
@@ -1643,10 +1732,10 @@
 .wb-theme-supply {
   --wb-theme-accent: #f59e0b;
   --wb-theme-accent-strong: #b45309;
-  --wb-theme-accent-soft: rgba(255, 251, 235, 0.90);
+  --wb-theme-accent-soft: rgba(255, 251, 235, 0.9);
   --wb-theme-accent-border: rgba(217, 119, 6, 0.22);
   --wb-gradient-1: rgba(255, 251, 235, 0.95);
-  --wb-gradient-2: rgba(254, 243, 199, 0.90);
+  --wb-gradient-2: rgba(254, 243, 199, 0.9);
   --wb-orb-1-color: rgba(251, 191, 36, 0.15);
   --wb-orb-2-color: rgba(252, 211, 77, 0.12);
   --wb-orb-3-color: rgba(245, 158, 11, 0.08);
@@ -1667,7 +1756,7 @@
   --wb-theme-accent-soft: rgba(240, 253, 250, 0.88);
   --wb-theme-accent-border: rgba(20, 184, 166, 0.22);
   --wb-gradient-1: rgba(240, 253, 250, 0.95);
-  --wb-gradient-2: rgba(204, 251, 241, 0.90);
+  --wb-gradient-2: rgba(204, 251, 241, 0.9);
   --wb-orb-1-color: rgba(45, 212, 191, 0.15);
   --wb-orb-2-color: rgba(34, 211, 238, 0.12);
   --wb-orb-3-color: rgba(13, 148, 136, 0.08);
@@ -1684,10 +1773,10 @@
 .wb-theme-indigo {
   --wb-theme-accent: #6366f1;
   --wb-theme-accent-strong: #4338ca;
-  --wb-theme-accent-soft: rgba(238, 242, 255, 0.90);
+  --wb-theme-accent-soft: rgba(238, 242, 255, 0.9);
   --wb-theme-accent-border: rgba(99, 102, 241, 0.22);
   --wb-gradient-1: rgba(238, 242, 255, 0.95);
-  --wb-gradient-2: rgba(224, 231, 255, 0.90);
+  --wb-gradient-2: rgba(224, 231, 255, 0.9);
   --wb-orb-1-color: rgba(99, 102, 241, 0.15);
   --wb-orb-2-color: rgba(139, 92, 246, 0.12);
   --wb-orb-3-color: rgba(168, 85, 247, 0.08);
@@ -1704,10 +1793,10 @@
 .wb-theme-violet {
   --wb-theme-accent: #8b5cf6;
   --wb-theme-accent-strong: #6d28d9;
-  --wb-theme-accent-soft: rgba(245, 243, 255, 0.90);
+  --wb-theme-accent-soft: rgba(245, 243, 255, 0.9);
   --wb-theme-accent-border: rgba(139, 92, 246, 0.22);
   --wb-gradient-1: rgba(245, 243, 255, 0.95);
-  --wb-gradient-2: rgba(237, 233, 254, 0.90);
+  --wb-gradient-2: rgba(237, 233, 254, 0.9);
   --wb-orb-1-color: rgba(167, 139, 250, 0.15);
   --wb-orb-2-color: rgba(192, 132, 252, 0.12);
   --wb-orb-3-color: rgba(124, 58, 237, 0.08);
@@ -1724,10 +1813,10 @@
 .wb-theme-rose {
   --wb-theme-accent: #f43f5e;
   --wb-theme-accent-strong: #be123c;
-  --wb-theme-accent-soft: rgba(255, 241, 242, 0.90);
+  --wb-theme-accent-soft: rgba(255, 241, 242, 0.9);
   --wb-theme-accent-border: rgba(244, 63, 94, 0.22);
   --wb-gradient-1: rgba(255, 241, 242, 0.95);
-  --wb-gradient-2: rgba(255, 228, 230, 0.90);
+  --wb-gradient-2: rgba(255, 228, 230, 0.9);
   --wb-orb-1-color: rgba(251, 113, 133, 0.15);
   --wb-orb-2-color: rgba(244, 63, 94, 0.12);
   --wb-orb-3-color: rgba(190, 18, 60, 0.08);
@@ -1744,7 +1833,7 @@
 .wb-theme-hub-promo-tools {
   --wb-theme-accent: #10b981;
   --wb-theme-accent-strong: #047857;
-  --wb-theme-accent-soft: rgba(236, 253, 245, 0.90);
+  --wb-theme-accent-soft: rgba(236, 253, 245, 0.9);
   --wb-theme-accent-border: rgba(16, 185, 129, 0.22);
   --wb-gradient-1: rgba(239, 253, 248, 0.96);
   --wb-gradient-2: rgba(220, 252, 231, 0.92);
@@ -1764,7 +1853,7 @@
 .wb-theme-hub-promo-activities {
   --wb-theme-accent: #22c55e;
   --wb-theme-accent-strong: #15803d;
-  --wb-theme-accent-soft: rgba(240, 253, 244, 0.90);
+  --wb-theme-accent-soft: rgba(240, 253, 244, 0.9);
   --wb-theme-accent-border: rgba(34, 197, 94, 0.22);
   --wb-gradient-1: rgba(239, 253, 248, 0.96);
   --wb-gradient-2: rgba(220, 252, 231, 0.92);
@@ -1784,10 +1873,10 @@
 .wb-theme-more-agents {
   --wb-theme-accent: #14b8a6;
   --wb-theme-accent-strong: #0f766e;
-  --wb-theme-accent-soft: rgba(240, 253, 250, 0.90);
+  --wb-theme-accent-soft: rgba(240, 253, 250, 0.9);
   --wb-theme-accent-border: rgba(20, 184, 166, 0.22);
   --wb-gradient-1: rgba(236, 253, 245, 0.95);
-  --wb-gradient-2: rgba(207, 250, 254, 0.90);
+  --wb-gradient-2: rgba(207, 250, 254, 0.9);
   --wb-orb-1-color: rgba(16, 185, 129, 0.14);
   --wb-orb-2-color: rgba(6, 182, 212, 0.12);
   --wb-orb-3-color: rgba(245, 158, 11, 0.08);

@@ -12,7 +12,16 @@ import { z } from 'zod';
  * UserProductProfile Schema
  */
 export const UserProductProfileSchema = z.object({
-  targetMarket: z.enum(['English', 'German', 'French', 'Italian', 'Spanish', 'Japanese', 'Chinese', '']),
+  targetMarket: z.enum([
+    'English',
+    'German',
+    'French',
+    'Italian',
+    'Spanish',
+    'Japanese',
+    'Chinese',
+    '',
+  ]),
   keywordsTier1: z.string(),
   keywordsTier2: z.string(),
   audience: z.string(),
@@ -27,21 +36,23 @@ export const UserProductProfileSchema = z.object({
   useCosmo: z.boolean(),
   selectedReportSections: z.array(z.string()),
   reportFingerprint: z.string().optional(),
-  charLimit: z.number().min(100).max(10000)
+  charLimit: z.number().min(100).max(10000),
 });
 
 /**
  * ScrapedDataItem Schema
  */
-export const ScrapedDataItemSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  price: z.number().optional(),
-  rating: z.number().optional(),
-  reviews: z.number().optional(),
-  url: z.string().optional(),
-  image: z.string().optional()
-}).passthrough(); // 允许额外的字段
+export const ScrapedDataItemSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    price: z.number().optional(),
+    rating: z.number().optional(),
+    reviews: z.number().optional(),
+    url: z.string().optional(),
+    image: z.string().optional(),
+  })
+  .passthrough(); // 允许额外的字段
 
 /**
  * PromptHistoryItem Schema
@@ -61,7 +72,7 @@ export const PromptHistoryItemSchema = z.object({
   reportFingerprint: z.string().optional(),
   asins: z.array(z.string()).optional(),
   marketplace: z.string().optional(),
-  profile: z.record(z.string(), z.unknown()).optional()
+  profile: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**
@@ -72,7 +83,7 @@ export const KeywordDataSchema = z.object({
   searchVolume: z.number().optional(),
   competition: z.enum(['low', 'medium', 'high']).optional(),
   cpc: z.number().optional(),
-  trend: z.array(z.number()).optional()
+  trend: z.array(z.number()).optional(),
 });
 
 /**
@@ -82,7 +93,7 @@ export const TrackingDataSchema = z.object({
   asin: z.string(),
   keywords: z.array(KeywordDataSchema),
   lastUpdated: z.number(),
-  coverage: z.number().optional()
+  coverage: z.number().optional(),
 });
 
 /**
@@ -94,7 +105,7 @@ export const UIStateSchema = z.object({
   currentReportTab: z.string(),
   sidebarCollapsed: z.boolean().optional(),
   theme: z.enum(['light', 'dark', 'auto']).optional(),
-  loading: z.boolean().optional()
+  loading: z.boolean().optional(),
 });
 
 /**
@@ -104,17 +115,17 @@ export const ScraperStateSchema = z.object({
   isScraping: z.boolean(),
   selectedSite: z.union([
     z.enum(['US', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'IE', 'UK', 'CA', 'JP']),
-    z.literal('')
+    z.literal(''),
   ]),
   scrapedData: z.union([z.array(ScrapedDataItemSchema), z.any(), z.null()]),
-  currentHistoryId: z.union([z.string(), z.number(), z.null()])
+  currentHistoryId: z.union([z.string(), z.number(), z.null()]),
 });
 
 /**
  * AnalysisState Schema
  */
 export const AnalysisStateSchema = z.object({
-  selectedAsins: z.array(z.string())
+  selectedAsins: z.array(z.string()),
 });
 
 /**
@@ -123,7 +134,7 @@ export const AnalysisStateSchema = z.object({
 export const PromptLabStateSchema = z.object({
   currentPrompt: z.string().optional(),
   history: z.array(PromptHistoryItemSchema).optional(),
-  userProductProfile: UserProductProfileSchema.optional()
+  userProductProfile: UserProductProfileSchema.optional(),
 });
 
 /**
@@ -134,7 +145,7 @@ export const LLMProviderConfigSchema = z.object({
   endpoint: z.string(),
   apiKey: z.string(),
   model: z.string(),
-  enabled: z.boolean()
+  enabled: z.boolean(),
 });
 
 /**
@@ -143,7 +154,7 @@ export const LLMProviderConfigSchema = z.object({
 export const ProxyConfigSchema = z.object({
   enabled: z.boolean(),
   host: z.string().optional(),
-  port: z.number().optional()
+  port: z.number().optional(),
 });
 
 // ==================== API Schemas ====================
@@ -155,7 +166,7 @@ export const ApiErrorSchema = z.object({
   code: z.string(),
   message: z.string(),
   details: z.string().optional(),
-  statusCode: z.number().optional()
+  statusCode: z.number().optional(),
 });
 
 /**
@@ -165,7 +176,7 @@ export const createApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =
   z.object({
     success: z.boolean(),
     data: dataSchema.optional(),
-    error: ApiErrorSchema.optional()
+    error: ApiErrorSchema.optional(),
   });
 
 /**
@@ -173,7 +184,7 @@ export const createApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =
  */
 export const LLMMessageSchema = z.object({
   role: z.enum(['system', 'user', 'assistant']),
-  content: z.string()
+  content: z.string(),
 });
 
 /**
@@ -181,7 +192,7 @@ export const LLMMessageSchema = z.object({
  */
 export const LLMModelSchema = z.object({
   id: z.string(),
-  object: z.literal('model')
+  object: z.literal('model'),
 });
 
 /**
@@ -192,19 +203,21 @@ export const LLMChatCompletionResponseSchema = z.object({
   object: z.literal('chat.completion'),
   created: z.number(),
   model: z.string(),
-  choices: z.array(
-    z.object({
-      index: z.number(),
-      message: LLMMessageSchema,
-      finish_reason: z.union([
-        z.literal('stop'),
-        z.literal('length'),
-        z.literal('function_call'),
-        z.literal('content_filter'),
-        z.null()
-      ])
-    })
-  ).min(1)
+  choices: z
+    .array(
+      z.object({
+        index: z.number(),
+        message: LLMMessageSchema,
+        finish_reason: z.union([
+          z.literal('stop'),
+          z.literal('length'),
+          z.literal('function_call'),
+          z.literal('content_filter'),
+          z.null(),
+        ]),
+      })
+    )
+    .min(1),
 });
 
 /**
@@ -216,7 +229,7 @@ export const AmazonProductDataSchema = z.object({
   scrapedAt: z.number(),
   price: z.number().optional(),
   rating: z.number().optional(),
-  reviewCount: z.number().optional()
+  reviewCount: z.number().optional(),
 });
 
 /**
@@ -233,7 +246,7 @@ export const AnalysisSectionSchema: z.ZodType<{
     id: z.string(),
     title: z.string(),
     content: z.string(),
-    subsections: z.array(AnalysisSectionSchema).optional()
+    subsections: z.array(AnalysisSectionSchema).optional(),
   })
 );
 
@@ -245,7 +258,7 @@ export const AnalysisReportResponseSchema = z.object({
   type: z.enum(['overview', 'detailed', 'comparison', 'trend']),
   title: z.string(),
   generatedAt: z.number(),
-  sections: z.array(AnalysisSectionSchema)
+  sections: z.array(AnalysisSectionSchema),
 });
 
 /**
@@ -253,7 +266,7 @@ export const AnalysisReportResponseSchema = z.object({
  */
 export const AnalysisReportSchema = z.object({
   marketplace: z.string(),
-  results: z.array(z.any())
+  results: z.array(z.any()),
 });
 
 // ==================== Event Schemas ====================
@@ -265,8 +278,8 @@ export const RouteChangedEventPayloadSchema = z.object({
   routeId: z.string(),
   config: z.any(),
   to: z.object({
-    path: z.string()
-  })
+    path: z.string(),
+  }),
 });
 
 /**
@@ -277,7 +290,7 @@ export const ModuleLoadedEventPayloadSchema = z.object({
   moduleName: z.string(),
   timestamp: z.number(),
   duration: z.number(),
-  success: z.boolean()
+  success: z.boolean(),
 });
 
 /**
@@ -288,7 +301,7 @@ export const createStateChangedEventPayloadSchema = <T extends z.ZodTypeAny>(val
     path: z.string(),
     newValue: valueSchema,
     oldValue: valueSchema,
-    timestamp: z.number()
+    timestamp: z.number(),
   });
 
 /**
@@ -298,7 +311,7 @@ export const ErrorOccurredEventPayloadSchema = z.object({
   error: z.instanceof(Error),
   timestamp: z.number(),
   module: z.string().optional(),
-  action: z.string().optional()
+  action: z.string().optional(),
 });
 
 /**
@@ -308,7 +321,7 @@ export const PerformanceMetricEventPayloadSchema = z.object({
   name: z.string(),
   duration: z.number(),
   timestamp: z.number(),
-  type: z.enum(['module-load', 'api-call', 'render', 'custom'])
+  type: z.enum(['module-load', 'api-call', 'render', 'custom']),
 });
 
 // ==================== 导出类型推断 ====================

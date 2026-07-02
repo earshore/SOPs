@@ -1,6 +1,6 @@
 /**
  * SidebarRenderer.ts - 统一侧边栏渲染器 v2.0
- * 
+ *
  * 视觉升级要点:
  * - 渐变图标容器 + 带色阴影 (与设置面板/指南统一)
  * - 左侧激活色条指示器
@@ -10,7 +10,12 @@
  * - 微交互动效 (scale, translate, opacity)
  */
 
-import { MENU_CONFIG, type RouteConfig, type CategoryConfig, type ModuleConfig } from '../config/menuConfig';
+import {
+  MENU_CONFIG,
+  type RouteConfig,
+  type CategoryConfig,
+  type ModuleConfig,
+} from '../config/menuConfig';
 import { appStore } from '@/stores/useAppStore';
 import { COLOR_SCHEMES, type ColorSchemeName } from '../constants/colorSchemes';
 import { COLOR_PALETTES } from '../config/design-tokens';
@@ -67,7 +72,13 @@ interface SidebarThemeDefinition {
 
 const SIDEBAR_THEME_DEFINITIONS: Record<ColorSchemeName, SidebarThemeDefinition> = {
   blue: { primary: 'blue', accent: 'indigo' },
-  sky: { primary: 'sky', accent: 'blue', activeEndAlpha: 0.72, borderAlpha: 0.34, shadowAlpha: 0.58 },
+  sky: {
+    primary: 'sky',
+    accent: 'blue',
+    activeEndAlpha: 0.72,
+    borderAlpha: 0.34,
+    shadowAlpha: 0.58,
+  },
   indigo: { primary: 'indigo', accent: 'violet' },
   violet: { primary: 'violet', accent: 'purple' },
   purple: {
@@ -81,13 +92,25 @@ const SIDEBAR_THEME_DEFINITIONS: Record<ColorSchemeName, SidebarThemeDefinition>
   emerald: { primary: 'emerald', accent: 'teal', activeEndAlpha: 0.7, shadowAlpha: 0.58 },
   teal: { primary: 'teal', accent: 'cyan', activeEndAlpha: 0.7, shadowAlpha: 0.58 },
   green: { primary: 'green', accent: 'emerald', activeEndAlpha: 0.72, shadowAlpha: 0.56 },
-  lime: { primary: 'lime', accent: 'green', activeEndAlpha: 0.72, borderAlpha: 0.34, shadowAlpha: 0.56 },
+  lime: {
+    primary: 'lime',
+    accent: 'green',
+    activeEndAlpha: 0.72,
+    borderAlpha: 0.34,
+    shadowAlpha: 0.56,
+  },
   amber: { primary: 'amber', accent: 'orange', shadowAlpha: 0.58 },
   orange: { primary: 'orange', accent: 'red' },
   red: { primary: 'red', accent: 'rose' },
   rose: { primary: 'rose', accent: 'pink', activeEndAlpha: 0.72 },
   pink: { primary: 'pink', accent: 'rose', activeEndAlpha: 0.72, borderAlpha: 0.34 },
-  cyan: { primary: 'cyan', accent: 'blue', activeEndAlpha: 0.72, borderAlpha: 0.34, shadowAlpha: 0.56 },
+  cyan: {
+    primary: 'cyan',
+    accent: 'blue',
+    activeEndAlpha: 0.72,
+    borderAlpha: 0.34,
+    shadowAlpha: 0.56,
+  },
   slate: {
     primary: 'slate',
     activeEndStep: 100,
@@ -172,7 +195,7 @@ export class SidebarRenderer {
     this.overviewRouteId = config.overviewRouteId;
     this.enableSearch = config.enableSearch !== false;
     this.searchPlaceholder = config.searchPlaceholder || '搜索...';
-    
+
     // ✅ 自动推断模块颜色
     this.moduleColor = ColorContext.inferColorFromModule(this.moduleId);
   }
@@ -266,11 +289,7 @@ export class SidebarRenderer {
       const el = btn as HTMLElement;
       // Remove active classes
       el.removeAttribute('aria-current');
-      el.classList.remove(
-        'border-l-2',
-        'shadow-sm',
-        'sidebar-btn--active'
-      );
+      el.classList.remove('border-l-2', 'shadow-sm', 'sidebar-btn--active');
       // Add default classes
       el.classList.add('text-slate-600', 'border-l-2', 'border-transparent');
 
@@ -297,7 +316,11 @@ export class SidebarRenderer {
       const dot = el.querySelector('.sidebar-active-dot');
       if (dot) {
         (dot as HTMLElement).classList.add('opacity-0', 'scale-0');
-        (dot as HTMLElement).classList.remove('opacity-100', 'scale-100', 'sidebar-active-dot--active');
+        (dot as HTMLElement).classList.remove(
+          'opacity-100',
+          'scale-100',
+          'sidebar-active-dot--active'
+        );
       }
     });
 
@@ -306,11 +329,7 @@ export class SidebarRenderer {
     if (activeBtn) {
       activeBtn.setAttribute('aria-current', 'page');
       activeBtn.classList.remove('text-slate-600', 'border-transparent');
-      activeBtn.classList.add(
-        'border-l-2',
-        'shadow-sm',
-        'sidebar-btn--active'
-      );
+      activeBtn.classList.add('border-l-2', 'shadow-sm', 'sidebar-btn--active');
 
       const iconContainer = activeBtn.querySelector('.sidebar-icon-container');
       if (iconContainer) {
@@ -332,7 +351,11 @@ export class SidebarRenderer {
       const dot = activeBtn.querySelector('.sidebar-active-dot');
       if (dot) {
         (dot as HTMLElement).classList.remove('opacity-0', 'scale-0');
-        (dot as HTMLElement).classList.add('opacity-100', 'scale-100', 'sidebar-active-dot--active');
+        (dot as HTMLElement).classList.add(
+          'opacity-100',
+          'scale-100',
+          'sidebar-active-dot--active'
+        );
       }
     }
   }
@@ -345,7 +368,7 @@ export class SidebarRenderer {
     const categoryBtns = sidebar.querySelectorAll('[data-action="toggle-category"]');
 
     categoryBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', e => {
         e.stopPropagation();
         this._toggleCategory(sidebar, btn as HTMLElement);
       });
@@ -356,9 +379,7 @@ export class SidebarRenderer {
     const categoryId = btn.dataset.category;
     if (!categoryId) return;
 
-    const group = sidebar.querySelector(
-      `.sidebar-category-group[data-category="${categoryId}"]`
-    );
+    const group = sidebar.querySelector(`.sidebar-category-group[data-category="${categoryId}"]`);
     const children = group?.querySelector('.sidebar-category-children') as HTMLElement | null;
     const chevron = btn.querySelector('.category-chevron') as HTMLElement | null;
     const countBadge = btn.querySelector('.category-count') as HTMLElement | null;
@@ -432,9 +453,7 @@ export class SidebarRenderer {
   }
 
   private _expandCategory(sidebar: HTMLElement, categoryId: string): void {
-    const group = sidebar.querySelector(
-      `.sidebar-category-group[data-category="${categoryId}"]`
-    );
+    const group = sidebar.querySelector(`.sidebar-category-group[data-category="${categoryId}"]`);
     if (!group) return;
 
     const children = group.querySelector('.sidebar-category-children') as HTMLElement;
@@ -470,7 +489,7 @@ export class SidebarRenderer {
     _activeCategory: string | null
   ): string {
     const themeStyle = this._getThemeStyle();
-    
+
     return `
       <div class="sidebar-shell flex flex-col h-full bg-gradient-to-b from-white to-slate-50/50" style="${themeStyle}">
 
@@ -535,7 +554,9 @@ export class SidebarRenderer {
       containerCls: isActive
         ? 'sidebar-btn--active border-l-2 shadow-sm'
         : 'border-l-2 border-transparent hover:bg-slate-50/80 hover:border-slate-200',
-      iconContainerCls: isActive ? 'sidebar-icon-container--active scale-105' : inactiveIconContainerCls,
+      iconContainerCls: isActive
+        ? 'sidebar-icon-container--active scale-105'
+        : inactiveIconContainerCls,
       iconCls: isActive ? 'sidebar-icon--active' : inactiveIconCls,
       labelCls: isActive
         ? 'sidebar-label--active font-semibold'
@@ -549,12 +570,11 @@ export class SidebarRenderer {
     const overviewRoute = MENU_CONFIG.routes[this.overviewRouteId];
     const label = overviewRoute?.label || '总览';
 
-    const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } =
-      this._getRouteItemClasses(
-        isActive,
-        'bg-slate-100 group-hover:bg-slate-200',
-        'text-slate-400 group-hover:text-slate-600'
-      );
+    const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } = this._getRouteItemClasses(
+      isActive,
+      'bg-slate-100 group-hover:bg-slate-200',
+      'text-slate-400 group-hover:text-slate-600'
+    );
 
     return `
       <button type="button" data-action="switch-tab" data-tab="${this.overviewRouteId}"
@@ -626,9 +646,7 @@ export class SidebarRenderer {
             <!-- Vertical accent line - 使用分类自己的颜色 -->
             <div class="absolute left-0 top-1 bottom-1 w-[2px] rounded-full opacity-30" style="background-color: ${lineColor}"></div>
 
-            ${category.children.map(route =>
-              this._buildChildRouteItem(route, currentTab)
-            ).join('')}
+            ${category.children.map(route => this._buildChildRouteItem(route, currentTab)).join('')}
           </div>
         </div>
       </div>
@@ -637,18 +655,16 @@ export class SidebarRenderer {
 
   // ── Child Route Item ──
 
-  private _buildChildRouteItem(
-    route: RouteConfig & { id: string },
-    currentTab: string
-  ): string {
+  private _buildChildRouteItem(route: RouteConfig & { id: string }, currentTab: string): string {
     const isActive = currentTab === route.id;
-    const itemThemeStyle = this._getThemeStyleForColor(this.categories[route.category || '']?.color);
-    const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } =
-      this._getRouteItemClasses(
-        isActive,
-        'bg-slate-100 group-hover:bg-slate-200',
-        'text-slate-400 group-hover:text-slate-500'
-      );
+    const itemThemeStyle = this._getThemeStyleForColor(
+      this.categories[route.category || '']?.color
+    );
+    const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } = this._getRouteItemClasses(
+      isActive,
+      'bg-slate-100 group-hover:bg-slate-200',
+      'text-slate-400 group-hover:text-slate-500'
+    );
 
     return `
       <button type="button" data-action="switch-tab" data-tab="${route.id}"
@@ -736,7 +752,8 @@ export class SidebarRenderer {
   }
 
   private _getCategoryLineColor(categoryColor: string): string {
-    const palette = COLOR_PALETTES[categoryColor as keyof typeof COLOR_PALETTES] || COLOR_PALETTES.blue;
+    const palette =
+      COLOR_PALETTES[categoryColor as keyof typeof COLOR_PALETTES] || COLOR_PALETTES.blue;
     return palette[200];
   }
 
@@ -756,9 +773,11 @@ export class SidebarRenderer {
   }
 
   private _prefersReducedMotion(): boolean {
-    return typeof window !== 'undefined'
-      && typeof window.matchMedia === 'function'
-      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return (
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
   }
 }
 

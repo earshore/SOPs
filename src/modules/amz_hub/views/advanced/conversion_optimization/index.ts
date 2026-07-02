@@ -2,15 +2,15 @@
  * 链接转化率低自查优化的五大方面 视图模块
  */
 
-import BaseModule from "../../../../../common/BaseModule";
-import { setSafeHtml } from "../../../../../common/utils/security";
-import "./styles.css";
-import templateHTML from "./template.html?raw";
+import BaseModule from '../../../../../common/BaseModule';
+import { setSafeHtml } from '../../../../../common/utils/security';
+import './styles.css';
+import templateHTML from './template.html?raw';
 
 // Module class
 class ConversionOptimizationModule extends BaseModule {
   constructor() {
-    super("amz_conversion_optimization");
+    super('amz_conversion_optimization');
   }
 
   async render(): Promise<void> {
@@ -19,7 +19,7 @@ class ConversionOptimizationModule extends BaseModule {
 
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, templateHTML);
-    container.classList.add("fade-in");
+    container.classList.add('fade-in');
   }
 }
 

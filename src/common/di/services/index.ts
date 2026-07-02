@@ -17,7 +17,7 @@ import { registerBusinessServices } from './businessServices';
 export function registerAllServices(registry: ServiceRegistry): void {
   // 注册核心服务
   registerCoreServices(registry);
-  
+
   // 注册业务服务
   registerBusinessServices(registry);
 }

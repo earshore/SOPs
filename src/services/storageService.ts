@@ -11,10 +11,7 @@ import type { IStorageService } from '../types/services';
 import type { LLMProviderConfig } from '../types/state';
 import type { HistoryItem, ProxyConfig } from '../types/modules-business';
 import { handleSystemError } from '../common/errors';
-import {
-  isLLMProviderConfig,
-  isProxyConfig
-} from '../common/guards/typeGuards';
+import { isLLMProviderConfig, isProxyConfig } from '../common/guards/typeGuards';
 import { LocalDataStore } from './localDataStore';
 
 /**
@@ -117,7 +114,10 @@ class StorageServiceClass implements IStorageService {
       // 🎯 数据边界验证：对于已知类型，使用类型守卫验证
       // 注意：这里只对特定的已知键进行验证，避免过度验证影响性能
       // 排除 llm_active_provider，它存储的是字符串而不是配置对象
-      if (key.startsWith(STORAGE_KEYS.LLM_CONFIG_PREFIX) && key !== STORAGE_KEYS.LLM_ACTIVE_PROVIDER) {
+      if (
+        key.startsWith(STORAGE_KEYS.LLM_CONFIG_PREFIX) &&
+        key !== STORAGE_KEYS.LLM_ACTIVE_PROVIDER
+      ) {
         if (!isLLMProviderConfig(parsed)) {
           this.remove(key);
           return defaultValue;
@@ -131,14 +131,19 @@ class StorageServiceClass implements IStorageService {
 
       return parsed as T;
     } catch (e) {
-      handleSystemError('SYS_PARSE_ERROR', {
-        module: 'StorageService',
-        action: 'get',
-        key
-      }, e as Error, {
-        log: true,
-        notify: false // 静默失败,返回默认值
-      });
+      handleSystemError(
+        'SYS_PARSE_ERROR',
+        {
+          module: 'StorageService',
+          action: 'get',
+          key,
+        },
+        e as Error,
+        {
+          log: true,
+          notify: false, // 静默失败,返回默认值
+        }
+      );
       return defaultValue;
     }
   }
@@ -159,7 +164,13 @@ class StorageServiceClass implements IStorageService {
 
       return true;
     } catch (e) {
-      return this._handleStorageWriteError('set', key, serialized, serialized.length, e as Error & { name?: string });
+      return this._handleStorageWriteError(
+        'set',
+        key,
+        serialized,
+        serialized.length,
+        e as Error & { name?: string }
+      );
     }
   }
 
@@ -176,14 +187,19 @@ class StorageServiceClass implements IStorageService {
 
       return raw !== null ? raw : defaultValue;
     } catch (e) {
-      handleSystemError('SYS_STORAGE_ERROR', {
-        module: 'StorageService',
-        action: 'getRaw',
-        key
-      }, e as Error, {
-        log: true,
-        notify: false
-      });
+      handleSystemError(
+        'SYS_STORAGE_ERROR',
+        {
+          module: 'StorageService',
+          action: 'getRaw',
+          key,
+        },
+        e as Error,
+        {
+          log: true,
+          notify: false,
+        }
+      );
       return defaultValue;
     }
   }
@@ -200,7 +216,13 @@ class StorageServiceClass implements IStorageService {
 
       return true;
     } catch (e) {
-      return this._handleStorageWriteError('setRaw', key, value, value.length, e as Error & { name?: string });
+      return this._handleStorageWriteError(
+        'setRaw',
+        key,
+        value,
+        value.length,
+        e as Error & { name?: string }
+      );
     }
   }
 
@@ -212,15 +234,20 @@ class StorageServiceClass implements IStorageService {
     error: Error & { name?: string }
   ): boolean {
     if (error.name === 'QuotaExceededError') {
-      handleSystemError('SYS_STORAGE_FULL', {
-        module: 'StorageService',
-        action,
-        key,
-        valueSize
-      }, error, {
-        log: true,
-        notify: true
-      });
+      handleSystemError(
+        'SYS_STORAGE_FULL',
+        {
+          module: 'StorageService',
+          action,
+          key,
+          valueSize,
+        },
+        error,
+        {
+          log: true,
+          notify: true,
+        }
+      );
 
       this._handleQuotaExceeded();
       try {
@@ -243,15 +270,20 @@ class StorageServiceClass implements IStorageService {
     error: Error,
     retry: boolean
   ): void {
-    handleSystemError('SYS_STORAGE_ERROR', {
-      module: 'StorageService',
-      action,
-      key,
-      ...(retry ? { retry: true } : {})
-    }, error, {
-      log: true,
-      notify: retry
-    });
+    handleSystemError(
+      'SYS_STORAGE_ERROR',
+      {
+        module: 'StorageService',
+        action,
+        key,
+        ...(retry ? { retry: true } : {}),
+      },
+      error,
+      {
+        log: true,
+        notify: retry,
+      }
+    );
   }
 
   /**
@@ -338,13 +370,18 @@ class StorageServiceClass implements IStorageService {
         }
       }
     } catch (e) {
-      handleSystemError('SYS_STORAGE_ERROR', {
-        module: 'StorageService',
-        action: 'getAccessTimes'
-      }, e as Error, {
-        log: true,
-        notify: false
-      });
+      handleSystemError(
+        'SYS_STORAGE_ERROR',
+        {
+          module: 'StorageService',
+          action: 'getAccessTimes',
+        },
+        e as Error,
+        {
+          log: true,
+          notify: false,
+        }
+      );
     }
 
     return items.sort((a, b) => a.accessTime - b.accessTime);
@@ -387,13 +424,18 @@ class StorageServiceClass implements IStorageService {
         }
       }
     } catch (e) {
-      handleSystemError('SYS_STORAGE_ERROR', {
-        module: 'StorageService',
-        action: 'cleanupLRU'
-      }, e as Error, {
-        log: true,
-        notify: false
-      });
+      handleSystemError(
+        'SYS_STORAGE_ERROR',
+        {
+          module: 'StorageService',
+          action: 'cleanupLRU',
+        },
+        e as Error,
+        {
+          log: true,
+          notify: false,
+        }
+      );
     }
   }
 
@@ -401,14 +443,7 @@ class StorageServiceClass implements IStorageService {
    * 判断是否为受保护的键
    */
   private _isProtectedKey(key: string): boolean {
-    const protectedPrefixes = [
-      'llm_',
-      'secure_',
-      'proxy_',
-      'feature_',
-      'layout_config_',
-      'user:',
-    ];
+    const protectedPrefixes = ['llm_', 'secure_', 'proxy_', 'feature_', 'layout_config_', 'user:'];
 
     const protectedKeys = [
       'app-storage',
@@ -440,7 +475,7 @@ class StorageServiceClass implements IStorageService {
     return {
       used,
       total,
-      percent: Math.round((used / total) * 100)
+      percent: Math.round((used / total) * 100),
     };
   }
 
@@ -482,14 +517,19 @@ class StorageServiceClass implements IStorageService {
 
       return fullConfig;
     } catch (error) {
-      handleSystemError('SYS_STORAGE_ERROR', {
-        module: 'StorageService',
-        action: 'getLLMConfigWithKey',
-        key: `llm_key_${activeProvider}`
-      }, error as Error, {
-        log: true,
-        notify: false
-      });
+      handleSystemError(
+        'SYS_STORAGE_ERROR',
+        {
+          module: 'StorageService',
+          action: 'getLLMConfigWithKey',
+          key: `llm_key_${activeProvider}`,
+        },
+        error as Error,
+        {
+          log: true,
+          notify: false,
+        }
+      );
       return { ...config, apiKey: '' } as LLMProviderConfig;
     }
   }
@@ -502,7 +542,10 @@ class StorageServiceClass implements IStorageService {
     const activeProvider = provider || this.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
     if (!activeProvider) return null;
 
-    const config = this.get<LLMProviderConfig>(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`, {} as LLMProviderConfig);
+    const config = this.get<LLMProviderConfig>(
+      `${STORAGE_KEYS.LLM_CONFIG_PREFIX}${activeProvider}`,
+      {} as LLMProviderConfig
+    );
 
     // 🎯 数据边界验证：已在 get() 方法中验证
     if (!config) return null;
@@ -608,17 +651,24 @@ class StorageServiceClass implements IStorageService {
   /**
    * 获取布局配置
    */
-  getLayoutConfig(templateId: string): Array<{ id: string; x: number; y: number; w: number; h: number }> {
-    return this.get<Array<{ id: string; x: number; y: number; w: number; h: number }>>(
-      `${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`,
-      []
-    ) || [];
+  getLayoutConfig(
+    templateId: string
+  ): Array<{ id: string; x: number; y: number; w: number; h: number }> {
+    return (
+      this.get<Array<{ id: string; x: number; y: number; w: number; h: number }>>(
+        `${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`,
+        []
+      ) || []
+    );
   }
 
   /**
    * 保存布局配置
    */
-  setLayoutConfig(templateId: string, layout: Array<{ id: string; x: number; y: number; w: number; h: number }>): void {
+  setLayoutConfig(
+    templateId: string,
+    layout: Array<{ id: string; x: number; y: number; w: number; h: number }>
+  ): void {
     this.set(`${STORAGE_KEYS.LAYOUT_CONFIG_PREFIX}${templateId}`, layout);
   }
 

@@ -4,7 +4,14 @@
  */
 
 import { appStore } from '@/stores/useAppStore';
-import { MENU_CONFIG, getRoutesByModule, getRouteFullConfig, type RouteWithId, type ModuleConfig, type RouteFullConfig } from '../config/menuConfig';
+import {
+  MENU_CONFIG,
+  getRoutesByModule,
+  getRouteFullConfig,
+  type RouteWithId,
+  type ModuleConfig,
+  type RouteFullConfig,
+} from '../config/menuConfig';
 import { createSidebarRenderer, type SidebarRenderer } from '../components/SidebarRenderer';
 import { ensureViewLoaded } from '../utils/viewLoader';
 import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
@@ -22,7 +29,7 @@ const sopsRenderer = createSidebarRenderer({
   categories: MENU_CONFIG.sopCategories,
   overviewRouteId: 'sops_overview',
   enableSearch: true,
-  searchPlaceholder: '搜索全站 SOP...'
+  searchPlaceholder: '搜索全站 SOP...',
 });
 
 const appCenterRenderer = createSidebarRenderer({
@@ -30,7 +37,7 @@ const appCenterRenderer = createSidebarRenderer({
   categories: MENU_CONFIG.appCategories,
   overviewRouteId: 'app_center_overview',
   enableSearch: true,
-  searchPlaceholder: '搜索应用...'
+  searchPlaceholder: '搜索应用...',
 });
 
 const hubRenderer = createSidebarRenderer({
@@ -38,7 +45,7 @@ const hubRenderer = createSidebarRenderer({
   categories: MENU_CONFIG.hubCategories,
   overviewRouteId: 'amz_hub_overview',
   enableSearch: true,
-  searchPlaceholder: '搜索智库内容...'
+  searchPlaceholder: '搜索智库内容...',
 });
 
 const moreRenderer = createSidebarRenderer({
@@ -46,14 +53,14 @@ const moreRenderer = createSidebarRenderer({
   categories: MENU_CONFIG.moreCategories,
   overviewRouteId: 'more_overview',
   enableSearch: true,
-  searchPlaceholder: '搜索功能...'
+  searchPlaceholder: '搜索功能...',
 });
 
 const SIDEBAR_RENDERER_REGISTRY: Record<string, SidebarRenderer> = {
-  'sops': sopsRenderer,
-  'app_center': appCenterRenderer,
-  'amz_hub': hubRenderer,
-  'more_core': moreRenderer
+  sops: sopsRenderer,
+  app_center: appCenterRenderer,
+  amz_hub: hubRenderer,
+  more_core: moreRenderer,
 };
 
 /**
@@ -71,13 +78,13 @@ export function registerSidebarRenderer(moduleId: string, renderer: SidebarRende
  * 渲染侧边栏
  */
 function renderSidebar(moduleId: string | null): void {
-  const sidebar = getEl("dynamic-sidebar");
+  const sidebar = getEl('dynamic-sidebar');
   if (!sidebar) return;
 
   // 隐藏逻辑：无模块ID或home模块不显示侧边栏
   if (!moduleId || moduleId === 'home') {
-    sidebar.classList.add("hidden", "-ml-64");
-    sidebar.removeAttribute("aria-label");
+    sidebar.classList.add('hidden', '-ml-64');
+    sidebar.removeAttribute('aria-label');
     // ✅ 安全: 清空侧边栏
     sidebar.replaceChildren();
     return;
@@ -91,8 +98,8 @@ function renderSidebar(moduleId: string | null): void {
   const effectiveModuleConfig = MENU_CONFIG.modules[effectiveModuleId];
   if (!effectiveModuleConfig) {
     console.error(`⚠️ 未找到模块配置: ${effectiveModuleId}`);
-    sidebar.classList.add("hidden", "-ml-64");
-    sidebar.removeAttribute("aria-label");
+    sidebar.classList.add('hidden', '-ml-64');
+    sidebar.removeAttribute('aria-label');
     return;
   }
 
@@ -100,9 +107,9 @@ function renderSidebar(moduleId: string | null): void {
 
   // 统一渲染：优先使用SidebarRenderer，自动降级到默认渲染
   renderSidebarContent(sidebar, effectiveModuleId, effectiveModuleConfig, routes);
-  sidebar.setAttribute("aria-label", `${effectiveModuleConfig.title} 侧边栏`);
+  sidebar.setAttribute('aria-label', `${effectiveModuleConfig.title} 侧边栏`);
 
-  sidebar.classList.remove("hidden", "-ml-64");
+  sidebar.classList.remove('hidden', '-ml-64');
 }
 
 /**
@@ -128,7 +135,11 @@ function renderSidebarContent(
 /**
  * 默认侧边栏渲染（平铺列表）
  */
-function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, routes: RouteWithId[]): void {
+function renderDefaultSidebar(
+  sidebar: HTMLElement,
+  moduleConfig: ModuleConfig,
+  routes: RouteWithId[]
+): void {
   try {
     const currentTab = appStore.getState().ui.currentTab || '';
 
@@ -139,13 +150,14 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, 
             ${moduleConfig.title}
           </h2>
           <nav class="space-y-1" aria-label="${moduleConfig.title} 导航">
-            ${routes.map(route => {
-              const isActive = currentTab === route.id;
-              const activeClasses = isActive
-                ? 'bg-blue-50 text-blue-600 font-semibold'
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900';
+            ${routes
+              .map(route => {
+                const isActive = currentTab === route.id;
+                const activeClasses = isActive
+                  ? 'bg-blue-50 text-blue-600 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900';
 
-              return `
+                return `
                 <button type="button" data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
                   ${isActive ? 'aria-current="page"' : ''}
                   class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${activeClasses} transition-all duration-200">
@@ -153,7 +165,8 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, 
                   ${route.label}
                 </button>
               `;
-            }).join('')}
+              })
+              .join('')}
           </nav>
         </div>
         <div class="mt-auto p-6 border-t border-slate-100 bg-slate-50/50">
@@ -179,17 +192,17 @@ function renderDefaultSidebar(sidebar: HTMLElement, moduleConfig: ModuleConfig, 
  * 更新头部导航高亮
  */
 function updateHeaderNav(fullConfig: RouteFullConfig): void {
-  document.querySelectorAll<HTMLElement>(".nav-trigger").forEach((el) => {
-    el.classList.remove("text-blue-600", "border-blue-600");
-    el.classList.add("text-slate-600", "border-transparent");
-    el.removeAttribute("aria-current");
+  document.querySelectorAll<HTMLElement>('.nav-trigger').forEach(el => {
+    el.classList.remove('text-blue-600', 'border-blue-600');
+    el.classList.add('text-slate-600', 'border-transparent');
+    el.removeAttribute('aria-current');
   });
 
   const targetBtn = getEl(`nav-${fullConfig.context.id}`);
   if (targetBtn) {
-    targetBtn.classList.remove("text-slate-600", "border-transparent");
-    targetBtn.classList.add("text-blue-600", "border-blue-600");
-    targetBtn.setAttribute("aria-current", "page");
+    targetBtn.classList.remove('text-slate-600', 'border-transparent');
+    targetBtn.classList.add('text-blue-600', 'border-blue-600');
+    targetBtn.setAttribute('aria-current', 'page');
   }
 }
 
@@ -203,12 +216,12 @@ let currentActivePanel: string | null = null;
 async function loadRouteView(routeId: string): Promise<void> {
   try {
     await ensureViewLoaded(routeId);
-    
+
     // 等待 DOM 更新完成
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   } catch (err) {
-    console.error("[Navigation] ❌ View lazy load failed:", err);
-    showToast("页面资源加载失败，请重试", { type: 'error' });
+    console.error('[Navigation] ❌ View lazy load failed:', err);
+    showToast('页面资源加载失败，请重试', { type: 'error' });
     throw err;
   }
 }
@@ -221,24 +234,24 @@ function emitPanelUnloadIfNeeded(targetPanelId: string): void {
   if (currentActivePanel && currentActivePanel !== targetPanelId) {
     emitAppEvent(APP_EVENTS.MODULE_UNLOAD, {
       panelId: currentActivePanel,
-      nextPanelId: targetPanelId
+      nextPanelId: targetPanelId,
     });
   }
 }
 
 function showRoutePanel(targetPanelId: string): HTMLElement | null {
-  document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
+  document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
 
   const targetPanel = getEl(targetPanelId);
   if (targetPanel) {
-    targetPanel.classList.remove("hidden");
+    targetPanel.classList.remove('hidden');
     return targetPanel;
   }
 
   console.error(`⚠️ [Navigation] 目标面板 [${targetPanelId}] 未找到，回退至 Home`);
   const home = getEl('panel-home');
   if (home) {
-    home.classList.remove("hidden");
+    home.classList.remove('hidden');
     return home;
   }
 
@@ -292,7 +305,7 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   emitAppEvent(APP_EVENTS.ROUTE_CHANGED, {
     routeId: cleanTab,
     moduleId: targetModuleId,
-    config: fullConfig
+    config: fullConfig,
   });
 }
 
@@ -331,7 +344,7 @@ export function scrollToSOPModule(categoryId: string): void {
     moduleElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
-      inline: 'nearest'
+      inline: 'nearest',
     });
 
     moduleElement.classList.add('sop-module-highlight');
@@ -356,7 +369,7 @@ export function scrollToHubModule(categoryId: string): void {
     moduleElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
-      inline: 'nearest'
+      inline: 'nearest',
     });
 
     moduleElement.classList.add('hub-module-highlight');
@@ -381,7 +394,7 @@ export function scrollToMoreModule(categoryId: string): void {
     moduleElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
-      inline: 'nearest'
+      inline: 'nearest',
     });
 
     moduleElement.classList.add('more-module-highlight');

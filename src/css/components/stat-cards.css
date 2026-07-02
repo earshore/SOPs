@@ -39,24 +39,24 @@
 }
 
 /* ===== 颜色变体 ===== */
-.stat-card.purple::before { 
-  background: linear-gradient(90deg, var(--color-indigo-500), var(--color-indigo-400)); 
+.stat-card.purple::before {
+  background: linear-gradient(90deg, var(--color-indigo-500), var(--color-indigo-400));
 }
 
-.stat-card.green::before { 
-  background: linear-gradient(90deg, var(--color-green-500), var(--color-green-400)); 
+.stat-card.green::before {
+  background: linear-gradient(90deg, var(--color-green-500), var(--color-green-400));
 }
 
-.stat-card.orange::before { 
-  background: linear-gradient(90deg, var(--color-orange-500), var(--color-amber-400)); 
+.stat-card.orange::before {
+  background: linear-gradient(90deg, var(--color-orange-500), var(--color-amber-400));
 }
 
-.stat-card.red::before { 
-  background: linear-gradient(90deg, var(--color-red-500), var(--color-rose-400)); 
+.stat-card.red::before {
+  background: linear-gradient(90deg, var(--color-red-500), var(--color-rose-400));
 }
 
-.stat-card.blue::before { 
-  background: linear-gradient(90deg, var(--color-blue-500), var(--color-cyan-400)); 
+.stat-card.blue::before {
+  background: linear-gradient(90deg, var(--color-blue-500), var(--color-cyan-400));
 }
 
 /* ===== Stat Icon ===== */
@@ -71,29 +71,29 @@
   margin-bottom: var(--spacing-sm);
 }
 
-.stat-card.purple .stat-icon { 
-  background: var(--color-indigo-100); 
-  color: var(--color-indigo-600); 
+.stat-card.purple .stat-icon {
+  background: var(--color-indigo-100);
+  color: var(--color-indigo-600);
 }
 
-.stat-card.green .stat-icon { 
-  background: var(--color-green-100); 
-  color: var(--color-green-600); 
+.stat-card.green .stat-icon {
+  background: var(--color-green-100);
+  color: var(--color-green-600);
 }
 
-.stat-card.orange .stat-icon { 
-  background: var(--color-orange-100); 
-  color: var(--color-orange-600); 
+.stat-card.orange .stat-icon {
+  background: var(--color-orange-100);
+  color: var(--color-orange-600);
 }
 
-.stat-card.red .stat-icon { 
-  background: var(--color-red-100); 
-  color: var(--color-red-600); 
+.stat-card.red .stat-icon {
+  background: var(--color-red-100);
+  color: var(--color-red-600);
 }
 
-.stat-card.blue .stat-icon { 
-  background: var(--color-blue-100); 
-  color: var(--color-blue-600); 
+.stat-card.blue .stat-icon {
+  background: var(--color-blue-100);
+  color: var(--color-blue-600);
 }
 
 /* ===== Stat Value ===== */
@@ -104,11 +104,21 @@
   letter-spacing: var(--tracking-tight);
 }
 
-.stat-card.purple .stat-value { color: var(--color-indigo-600); }
-.stat-card.green .stat-value { color: var(--color-green-600); }
-.stat-card.orange .stat-value { color: var(--color-orange-600); }
-.stat-card.red .stat-value { color: var(--color-red-600); }
-.stat-card.blue .stat-value { color: var(--color-blue-600); }
+.stat-card.purple .stat-value {
+  color: var(--color-indigo-600);
+}
+.stat-card.green .stat-value {
+  color: var(--color-green-600);
+}
+.stat-card.orange .stat-value {
+  color: var(--color-orange-600);
+}
+.stat-card.red .stat-value {
+  color: var(--color-red-600);
+}
+.stat-card.blue .stat-value {
+  color: var(--color-blue-600);
+}
 
 /* ===== Stat Label ===== */
 .stat-label {
@@ -121,13 +131,13 @@
 
 /* ===== 响应式 ===== */
 @media (max-width: 768px) {
-  .dashboard-stats { 
-    grid-template-columns: repeat(2, 1fr); 
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 480px) {
-  .dashboard-stats { 
-    grid-template-columns: 1fr; 
+  .dashboard-stats {
+    grid-template-columns: 1fr;
   }
 }

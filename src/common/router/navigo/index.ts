@@ -34,11 +34,7 @@ export type { ErrorHandlerConfig, ErrorContext } from './ErrorHandler';
 export { LegacyAdapter, createLegacyAdapter } from './LegacyAdapter';
 
 // 状态管理集成
-export {
-  createRouterStore,
-  createRouterStoreSync,
-  RouterStoreSync,
-} from './RouterStore';
+export { createRouterStore, createRouterStoreSync, RouterStoreSync } from './RouterStore';
 export type { RouterState, RouterActions, RouterStore } from './RouterStore';
 
 // 类型定义

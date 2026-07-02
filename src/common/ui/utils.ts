@@ -14,7 +14,7 @@ export const getEl = (id: string): HTMLElement | null => document.getElementById
  * 获取错误摘要信息
  */
 export function getErrorSummary(errorMsg: string): string {
-  if (!errorMsg) return "未知错误";
+  if (!errorMsg) return '未知错误';
   for (const [key, msg] of Object.entries(ERROR_MESSAGES)) {
     if (errorMsg.includes(key)) return msg;
   }
@@ -25,5 +25,5 @@ export function getErrorSummary(errorMsg: string): string {
  * 延迟函数
  */
 export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

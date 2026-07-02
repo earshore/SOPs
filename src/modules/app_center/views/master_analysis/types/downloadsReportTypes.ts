@@ -125,9 +125,9 @@ export type DownloadsReport = CompetitorReport | ProductOverviewReport | Semanti
  * 报告类型枚举
  */
 export enum ReportType {
-  FULL_ANALYSIS = 'full_analysis',      // AI 分析生成的报告（应用实际使用）
+  FULL_ANALYSIS = 'full_analysis', // AI 分析生成的报告（应用实际使用）
   COMPETITOR = 'competitor',
   PRODUCT_OVERVIEW = 'product_overview',
   SEMANTIC_ANALYSIS = 'semantic_analysis',
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }

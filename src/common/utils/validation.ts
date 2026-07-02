@@ -30,7 +30,7 @@ type StringRuleValidator = (value: string, rules: ValidationRule) => ValidationR
 function getValidationError(rules: ValidationRule, defaultMessage: string): ValidationResult {
   return {
     valid: false,
-    error: rules.errorMessage || defaultMessage
+    error: rules.errorMessage || defaultMessage,
   };
 }
 
@@ -70,7 +70,7 @@ const STRING_RULE_VALIDATORS: StringRuleValidator[] = [
   validateMinLength,
   validateMaxLength,
   validatePattern,
-  validateCustomRule
+  validateCustomRule,
 ];
 
 /**
@@ -110,7 +110,7 @@ export function validateEmail(email: string): ValidationResult {
   return validateString(email, {
     required: true,
     pattern: emailPattern,
-    errorMessage: '请输入有效的邮箱地址'
+    errorMessage: '请输入有效的邮箱地址',
   });
 }
 
@@ -126,7 +126,7 @@ export function validateUrl(url: string): ValidationResult {
   } catch {
     return {
       valid: false,
-      error: '请输入有效的URL地址'
+      error: '请输入有效的URL地址',
     };
   }
 }
@@ -141,7 +141,7 @@ export function validateApiKey(apiKey: string): ValidationResult {
   if (!apiKey || apiKey.trim() === '') {
     return {
       valid: false,
-      error: 'API Key为必填项'
+      error: 'API Key为必填项',
     };
   }
 
@@ -151,7 +151,7 @@ export function validateApiKey(apiKey: string): ValidationResult {
   if (trimmed.length < 10) {
     return {
       valid: false,
-      error: 'API Key最少需要 10 个字符'
+      error: 'API Key最少需要 10 个字符',
     };
   }
 
@@ -159,7 +159,7 @@ export function validateApiKey(apiKey: string): ValidationResult {
   if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
     return {
       valid: false,
-      error: 'API Key格式不正确'
+      error: 'API Key格式不正确',
     };
   }
 
@@ -206,7 +206,7 @@ export function validateJson(jsonString: string): ValidationResult {
   } catch (error) {
     return {
       valid: false,
-      error: 'JSON格式不正确: ' + (error as Error).message
+      error: 'JSON格式不正确: ' + (error as Error).message,
     };
   }
 }
@@ -218,29 +218,25 @@ export function validateJson(jsonString: string): ValidationResult {
  * @param max - 最大值
  * @returns 验证结果
  */
-export function validateNumber(
-  value: number,
-  min?: number,
-  max?: number
-): ValidationResult {
+export function validateNumber(value: number, min?: number, max?: number): ValidationResult {
   if (typeof value !== 'number' || isNaN(value)) {
     return {
       valid: false,
-      error: '请输入有效的数字'
+      error: '请输入有效的数字',
     };
   }
 
   if (min !== undefined && value < min) {
     return {
       valid: false,
-      error: `数值不能小于 ${min}`
+      error: `数值不能小于 ${min}`,
     };
   }
 
   if (max !== undefined && value > max) {
     return {
       valid: false,
-      error: `数值不能大于 ${max}`
+      error: `数值不能大于 ${max}`,
     };
   }
 
@@ -304,7 +300,7 @@ export const ValidationUtils = {
   isAllValid,
   getFirstError,
   sanitizeFilename,
-  sanitizePath
+  sanitizePath,
 };
 
 export default ValidationUtils;

@@ -18,7 +18,9 @@ function denyGuard(reason: string): GuardResult {
 function showGuardToast(message: string): void {
   const windowWithToast = window as unknown as Record<string, unknown>;
   if (typeof windowWithToast.showToast === 'function') {
-    (windowWithToast.showToast as (msg: string, opts: { type: string }) => void)(message, { type: 'warning' });
+    (windowWithToast.showToast as (msg: string, opts: { type: string }) => void)(message, {
+      type: 'warning',
+    });
   }
 }
 

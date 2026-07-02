@@ -151,8 +151,8 @@ export function createErrorHandlingMiddleware(): RouteMiddleware {
       console.error('[Router] Middleware error:', error);
 
       // 显示错误提示
-      const windowWithToast = window as unknown as { 
-        showToast?: (message: string, options: { type: string }) => void 
+      const windowWithToast = window as unknown as {
+        showToast?: (message: string, options: { type: string }) => void;
       };
       if (typeof windowWithToast.showToast === 'function') {
         windowWithToast.showToast('页面加载失败', { type: 'error' });

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AnalysisReport, GeneratedPromptRecord, HistoryItem, ScrapedData } from '@/types/modules-business';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
+import { StorageService } from '@/services/storageService';
 import type { UserProductProfile } from '@/types/state';
 
 const mocks = vi.hoisted(() => {
@@ -404,5 +405,25 @@ describe('HistoryService snapshot storage', () => {
       'visual-1',
       'listing-old'
     ]);
+  });
+
+  it('treats deleting a missing prompt result as idempotent', async () => {
+    HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+    vi.mocked(StorageService.setScrapeHistoryAsync).mockClear();
+
+    const deleted = await HistoryService.deletePromptResultAsync('missing-prompt');
+
+    expect(deleted).toBe(true);
+    expect(StorageService.setScrapeHistoryAsync).not.toHaveBeenCalled();
+  });
+
+  it('reports prompt result delete persistence failures', async () => {
+    const [snapshot] = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+    await HistoryService.updatePromptResultAsync(snapshot!.id, createPromptRecord('listing', 'Listing Prompt'));
+    vi.mocked(StorageService.setScrapeHistoryAsync).mockResolvedValueOnce(false);
+
+    const deleted = await HistoryService.deletePromptResultAsync('listing-prompt');
+
+    expect(deleted).toBe(false);
   });
 });

@@ -133,15 +133,39 @@ describe('promptlab granular buyer profile selections', () => {
     const component = createPromptlabPanel();
     component.initializeGranularSelections('buyer-profile');
 
+    expect(component.getContentItemIndexes('buyer-profile', 'demographics')).toEqual([
+      'likely_gender',
+      'age_range_estimate',
+      'lifestyle_indicators',
+    ]);
+
     component.onSubItemToggle('buyer-profile', 'demographics');
 
     expect(component.isSubItemSelected('buyer-profile', 'demographics')).toBe(false);
-    expect(component.isContentItemSelected('buyer-profile', 'demographics', '0')).toBe(false);
-    expect(component.isContentItemSelected('buyer-profile', 'demographics', '1')).toBe(false);
-    expect(component.isContentItemSelected('buyer-profile', 'demographics', '2')).toBe(false);
+    expect(component.isContentItemSelected('buyer-profile', 'demographics', 'likely_gender')).toBe(false);
+    expect(component.isContentItemSelected('buyer-profile', 'demographics', 'age_range_estimate')).toBe(false);
+    expect(component.isContentItemSelected('buyer-profile', 'demographics', 'lifestyle_indicators')).toBe(false);
   });
 
-  it('keeps unchecked demographic fields out of generated prompts', () => {
+  it('keeps unchecked demographic fields out of generated prompts by stable field key', () => {
+    const masterPrompt = promptlabService.generateMasterPrompt(
+      makeInputs({ likely_gender: false, age_range_estimate: false }),
+      buyerProfileReport as any,
+    );
+    const visualPrompt = promptlabService.generateVisualPrompt(
+      makeInputs({ likely_gender: false, age_range_estimate: false }),
+      buyerProfileReport as any,
+    );
+
+    expect(masterPrompt).not.toContain('Gender: mixed');
+    expect(masterPrompt).not.toContain('Age: 25-34');
+    expect(masterPrompt).toContain('Lifestyle: sportlich aktiv, familienorientiert');
+    expect(visualPrompt).not.toContain('Gender: mixed');
+    expect(visualPrompt).not.toContain('Age: 25-34');
+    expect(visualPrompt).toContain('Lifestyle: sportlich aktiv, familienorientiert');
+  });
+
+  it('keeps legacy numeric object selections working for saved profiles', () => {
     const masterPrompt = promptlabService.generateMasterPrompt(
       makeInputs({ '0': false, '1': false }),
       buyerProfileReport as any,

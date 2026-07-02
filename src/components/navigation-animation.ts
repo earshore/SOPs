@@ -1,7 +1,7 @@
 /**
  * 导航动画控制
  * 负责页面过渡、侧边栏、下拉菜单等导航相关的动画控制
- * 
+ *
  * Requirements: 8.1, 8.2, 8.3, 8.4
  */
 
@@ -57,7 +57,10 @@ export interface DropdownAnimationOptions {
   skipAnimation?: boolean;
 }
 
-type NavigationAnimationOptions = PageTransitionOptions | SidebarAnimationOptions | DropdownAnimationOptions;
+type NavigationAnimationOptions =
+  | PageTransitionOptions
+  | SidebarAnimationOptions
+  | DropdownAnimationOptions;
 
 interface NavigationTransitionRunner {
   isComplete: () => boolean;
@@ -68,9 +71,11 @@ interface NavigationTransitionRunner {
 }
 
 function shouldSkipNavigationAnimation(skipAnimation = false): boolean {
-  return skipAnimation ||
+  return (
+    skipAnimation ||
     animationManager.shouldReduceMotion() ||
-    !animationManager.isCategoryEnabled('navigation');
+    !animationManager.isCategoryEnabled('navigation')
+  );
 }
 
 async function runNavigationTransition(
@@ -101,7 +106,7 @@ async function runNavigationTransition(
 }
 
 function waitForAnimationEnd(element: HTMLElement, timeoutMs: number): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const handleAnimationEnd = (event: AnimationEvent) => {
       if (event.target === element) {
         element.removeEventListener('animationend', handleAnimationEnd);
@@ -119,7 +124,7 @@ function waitForAnimationEnd(element: HTMLElement, timeoutMs: number): Promise<v
 }
 
 function waitForStateIdle(isBusy: () => boolean, timeoutMs: number): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const checkInterval = setInterval(() => {
       if (!isBusy()) {
         clearInterval(checkInterval);
@@ -145,6 +150,30 @@ async function toggleNavigationState<T extends NavigationAnimationOptions>(
     return;
   }
   await open(options);
+}
+
+abstract class ToggleableNavigationAnimation<T extends NavigationAnimationOptions> {
+  protected isAnimating: boolean = false;
+  protected isOpen: boolean = false;
+
+  abstract open(options?: T): Promise<void>;
+  abstract close(options?: T): Promise<void>;
+
+  async toggle(options: T = {} as T): Promise<void> {
+    await toggleNavigationState(this.isOpen, options, this.open.bind(this), this.close.bind(this));
+  }
+
+  isInProgress(): boolean {
+    return this.isAnimating;
+  }
+
+  getState(): boolean {
+    return this.isOpen;
+  }
+
+  protected waitForCurrentAnimation(timeoutMs: number): Promise<void> {
+    return waitForStateIdle(() => this.isAnimating, timeoutMs);
+  }
 }
 
 /**
@@ -270,16 +299,15 @@ export class PageTransitionController {
  * 侧边栏动画控制器
  * Requirements 8.2: 侧边栏在300ms内从边缘滑入
  */
-export class SidebarAnimationController {
+export class SidebarAnimationController extends ToggleableNavigationAnimation<SidebarAnimationOptions> {
   private sidebar: HTMLElement;
-  private isAnimating: boolean = false;
-  private isOpen: boolean = false;
 
   /**
    * 创建侧边栏动画控制器
    * @param sidebar - 侧边栏元素
    */
   constructor(sidebar: HTMLElement) {
+    super();
     this.sidebar = sidebar;
     // 检查初始状态
     this.isOpen = !sidebar.classList.contains('sidebar-hidden');
@@ -293,7 +321,7 @@ export class SidebarAnimationController {
     await runNavigationTransition(options, {
       isComplete: () => this.isOpen,
       isBusy: () => this.isAnimating,
-      waitForCurrent: () => waitForStateIdle(() => this.isAnimating, 1000),
+      waitForCurrent: () => this.waitForCurrentAnimation(1000),
       applyInstant: () => this.showSidebar(),
       applyAnimated: () => this.animateSidebarOpen(),
     });
@@ -307,7 +335,7 @@ export class SidebarAnimationController {
     await runNavigationTransition(options, {
       isComplete: () => !this.isOpen,
       isBusy: () => this.isAnimating,
-      waitForCurrent: () => waitForStateIdle(() => this.isAnimating, 1000),
+      waitForCurrent: () => this.waitForCurrentAnimation(1000),
       applyInstant: () => this.hideSidebar(),
       applyAnimated: () => this.animateSidebarClose(),
     });
@@ -346,30 +374,21 @@ export class SidebarAnimationController {
     this.isAnimating = false;
     this.isOpen = false;
   }
-
-  async toggle(options: SidebarAnimationOptions = {}): Promise<void> {
-    await toggleNavigationState(this.isOpen, options, this.open.bind(this), this.close.bind(this));
-  }
-
-  isInProgress(): boolean { return this.isAnimating; }
-
-  getState(): boolean { return this.isOpen; }
 }
 
 /**
  * 下拉菜单动画控制器
  * Requirements 8.3: 下拉菜单展开时height和opacity同时动画
  */
-export class DropdownAnimationController {
+export class DropdownAnimationController extends ToggleableNavigationAnimation<DropdownAnimationOptions> {
   private dropdown: HTMLElement;
-  private isAnimating: boolean = false;
-  private isOpen: boolean = false;
 
   /**
    * 创建下拉菜单动画控制器
    * @param dropdown - 下拉菜单元素
    */
   constructor(dropdown: HTMLElement) {
+    super();
     this.dropdown = dropdown;
     // 检查初始状态
     this.isOpen = dropdown.classList.contains('dropdown-open');
@@ -383,7 +402,7 @@ export class DropdownAnimationController {
     await runNavigationTransition(options, {
       isComplete: () => this.isOpen,
       isBusy: () => this.isAnimating,
-      waitForCurrent: () => waitForStateIdle(() => this.isAnimating, 1000),
+      waitForCurrent: () => this.waitForCurrentAnimation(1000),
       applyInstant: () => this.showDropdown(),
       applyAnimated: () => this.animateDropdownOpen(),
     });
@@ -397,7 +416,7 @@ export class DropdownAnimationController {
     await runNavigationTransition(options, {
       isComplete: () => !this.isOpen,
       isBusy: () => this.isAnimating,
-      waitForCurrent: () => waitForStateIdle(() => this.isAnimating, 1000),
+      waitForCurrent: () => this.waitForCurrentAnimation(1000),
       applyInstant: () => this.hideDropdown(),
       applyAnimated: () => this.animateDropdownClose(),
     });
@@ -432,23 +451,13 @@ export class DropdownAnimationController {
     this.isAnimating = false;
     this.isOpen = false;
   }
-
-  async toggle(options: DropdownAnimationOptions = {}): Promise<void> {
-    await toggleNavigationState(this.isOpen, options, this.open.bind(this), this.close.bind(this));
-  }
-
-  isInProgress(): boolean { return this.isAnimating; }
-
-  getState(): boolean { return this.isOpen; }
 }
 
 /**
  * 创建页面过渡控制器
  * @param container - 页面容器元素
  */
-export function createPageTransitionController(
-  container: HTMLElement
-): PageTransitionController {
+export function createPageTransitionController(container: HTMLElement): PageTransitionController {
   return new PageTransitionController(container);
 }
 
@@ -456,9 +465,7 @@ export function createPageTransitionController(
  * 创建侧边栏动画控制器
  * @param sidebar - 侧边栏元素
  */
-export function createSidebarAnimationController(
-  sidebar: HTMLElement
-): SidebarAnimationController {
+export function createSidebarAnimationController(sidebar: HTMLElement): SidebarAnimationController {
   return new SidebarAnimationController(sidebar);
 }
 
@@ -498,7 +505,7 @@ export function initializeNavigationAnimations(): void {
 function initializePageContainers(): void {
   const containers = document.querySelectorAll<HTMLElement>('.page-container');
 
-  containers.forEach((container) => {
+  containers.forEach(container => {
     const controller = createPageTransitionController(container);
     // 将控制器附加到元素上，方便外部访问
     (container as PageTransitionElement).__pageTransitionController = controller;
@@ -511,7 +518,7 @@ function initializePageContainers(): void {
 function initializeSidebars(): void {
   const sidebars = document.querySelectorAll<HTMLElement>('.sidebar, .sidebar-right');
 
-  sidebars.forEach((sidebar) => {
+  sidebars.forEach(sidebar => {
     const controller = createSidebarAnimationController(sidebar);
     // 将控制器附加到元素上，方便外部访问
     (sidebar as SidebarAnimationElement).__sidebarAnimationController = controller;
@@ -535,7 +542,7 @@ function initializeSidebars(): void {
 function initializeDropdowns(): void {
   const dropdowns = document.querySelectorAll<HTMLElement>('.dropdown-menu');
 
-  dropdowns.forEach((dropdown) => {
+  dropdowns.forEach(dropdown => {
     const controller = createDropdownAnimationController(dropdown);
     // 将控制器附加到元素上，方便外部访问
     (dropdown as DropdownAnimationElement).__dropdownAnimationController = controller;
@@ -544,14 +551,14 @@ function initializeDropdowns(): void {
     const trigger = dropdown.previousElementSibling;
 
     if (trigger instanceof HTMLElement) {
-      trigger.addEventListener('click', (e) => {
+      trigger.addEventListener('click', e => {
         e.stopPropagation();
         controller.toggle();
       });
     }
 
     // 点击外部关闭下拉菜单
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       const target = e.target;
       if (!(target instanceof Node)) return;
 

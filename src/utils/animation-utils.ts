@@ -1,7 +1,7 @@
 /**
  * 动画工具函数集合
  * 提供微交互动画系统的核心工具函数
- * 
+ *
  * Requirements: 1.3, 5.1, 5.2
  */
 
@@ -9,12 +9,12 @@ import { ANIMATION_CLASSES } from '../config/animation-config';
 
 /**
  * 为元素添加动画类
- * 
+ *
  * @param element - 目标元素
  * @param animationClass - 动画类名
  * @param duration - 动画时长（可选，毫秒）
  * @returns Promise，在动画结束时resolve
- * 
+ *
  * @example
  * ```typescript
  * await addAnimation(button, 'fade-in', 300);
@@ -25,7 +25,7 @@ export async function addAnimation(
   animationClass: string,
   duration?: number
 ): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     // 添加动画类
     element.classList.add(animationClass);
 
@@ -52,10 +52,10 @@ export async function addAnimation(
 
 /**
  * 移除元素的动画类
- * 
+ *
  * @param element - 目标元素
  * @param animationClass - 动画类名
- * 
+ *
  * @example
  * ```typescript
  * removeAnimation(button, 'fade-in');
@@ -68,11 +68,11 @@ export function removeAnimation(element: HTMLElement, animationClass: string): v
 /**
  * 交错动画应用
  * 为多个元素按顺序应用动画，每个元素之间有延迟
- * 
+ *
  * @param elements - 元素列表
  * @param animationClass - 动画类名
  * @param delay - 每个元素的延迟（毫秒）
- * 
+ *
  * @example
  * ```typescript
  * const items = document.querySelectorAll('.list-item');
@@ -95,10 +95,10 @@ export function staggerAnimation(
 /**
  * 创建涟漪效果
  * 在点击位置创建扩散的圆形波纹动画
- * 
+ *
  * @param element - 目标元素（必须有相对定位）
  * @param event - 鼠标点击事件
- * 
+ *
  * @example
  * ```typescript
  * button.addEventListener('click', (e) => {
@@ -114,10 +114,10 @@ export function createRipple(element: HTMLElement, event: MouseEvent): void {
 
   // 获取元素的边界矩形
   const rect = element.getBoundingClientRect();
-  
+
   // 计算涟漪的大小（取宽高中的较大值）
   const size = Math.max(rect.width, rect.height);
-  
+
   // 计算点击位置相对于元素的坐标
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
@@ -141,11 +141,11 @@ export function createRipple(element: HTMLElement, event: MouseEvent): void {
 
 /**
  * 检查元素是否在视口中
- * 
+ *
  * @param element - 目标元素
  * @param threshold - 可见度阈值（0-1），默认0表示任何部分可见即返回true
  * @returns 元素是否在视口中
- * 
+ *
  * @example
  * ```typescript
  * if (isInViewport(element)) {
@@ -183,10 +183,10 @@ export function isInViewport(element: HTMLElement, threshold: number = 0): boole
 /**
  * 等待动画结束
  * 返回一个Promise，在元素的动画或过渡结束时resolve
- * 
+ *
  * @param element - 目标元素
  * @returns Promise，在动画结束时resolve
- * 
+ *
  * @example
  * ```typescript
  * element.classList.add('fade-out');
@@ -195,7 +195,7 @@ export function isInViewport(element: HTMLElement, threshold: number = 0): boole
  * ```
  */
 export function waitForAnimation(element: HTMLElement): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     let resolved = false;
 
     const handleAnimationEnd = (event: AnimationEvent) => {
@@ -235,10 +235,10 @@ export function waitForAnimation(element: HTMLElement): Promise<void> {
 /**
  * 批量添加动画类
  * 为多个元素同时添加相同的动画类
- * 
+ *
  * @param elements - 元素列表
  * @param animationClass - 动画类名
- * 
+ *
  * @example
  * ```typescript
  * const cards = document.querySelectorAll('.card');
@@ -246,7 +246,7 @@ export function waitForAnimation(element: HTMLElement): Promise<void> {
  * ```
  */
 export function batchAddAnimation(elements: HTMLElement[], animationClass: string): void {
-  elements.forEach((element) => {
+  elements.forEach(element => {
     element.classList.add(animationClass);
   });
 }
@@ -254,10 +254,10 @@ export function batchAddAnimation(elements: HTMLElement[], animationClass: strin
 /**
  * 批量移除动画类
  * 为多个元素同时移除相同的动画类
- * 
+ *
  * @param elements - 元素列表
  * @param animationClass - 动画类名
- * 
+ *
  * @example
  * ```typescript
  * const cards = document.querySelectorAll('.card');
@@ -265,7 +265,7 @@ export function batchAddAnimation(elements: HTMLElement[], animationClass: strin
  * ```
  */
 export function batchRemoveAnimation(elements: HTMLElement[], animationClass: string): void {
-  elements.forEach((element) => {
+  elements.forEach(element => {
     element.classList.remove(animationClass);
   });
 }
@@ -273,11 +273,11 @@ export function batchRemoveAnimation(elements: HTMLElement[], animationClass: st
 /**
  * 切换动画类
  * 如果元素有该类则移除，否则添加
- * 
+ *
  * @param element - 目标元素
  * @param animationClass - 动画类名
  * @returns 切换后是否包含该类
- * 
+ *
  * @example
  * ```typescript
  * const isActive = toggleAnimation(element, 'active');
@@ -291,10 +291,10 @@ export function toggleAnimation(element: HTMLElement, animationClass: string): b
 /**
  * 安全执行动画
  * 使用try-catch包装动画执行，失败时静默降级
- * 
+ *
  * @param callback - 动画执行回调
  * @param onError - 错误处理回调（可选）
- * 
+ *
  * @example
  * ```typescript
  * safeAnimate(() => {
@@ -304,10 +304,7 @@ export function toggleAnimation(element: HTMLElement, animationClass: string): b
  * });
  * ```
  */
-export function safeAnimate(
-  callback: () => void,
-  onError?: (error: Error) => void
-): void {
+export function safeAnimate(callback: () => void, onError?: (error: Error) => void): void {
   try {
     callback();
   } catch (error) {
@@ -319,10 +316,10 @@ export function safeAnimate(
 
 /**
  * 获取元素的计算样式中的动画时长
- * 
+ *
  * @param element - 目标元素
  * @returns 动画时长（毫秒）
- * 
+ *
  * @example
  * ```typescript
  * const duration = getAnimationDuration(element);
@@ -332,24 +329,24 @@ export function safeAnimate(
 export function getAnimationDuration(element: HTMLElement): number {
   const style = window.getComputedStyle(element);
   const duration = style.animationDuration || style.transitionDuration || '0s';
-  
+
   // 解析时长字符串（支持s和ms单位）
   const match = duration.match(/^([\d.]+)(m?s)$/);
   if (!match || !match[1] || !match[2]) return 0;
-  
+
   const value = parseFloat(match[1]);
   const unit = match[2];
-  
+
   return unit === 'ms' ? value : value * 1000;
 }
 
 /**
  * 预加载动画
  * 通过添加和立即移除类来触发浏览器预加载动画资源
- * 
+ *
  * @param element - 目标元素
  * @param animationClass - 动画类名
- * 
+ *
  * @example
  * ```typescript
  * // 在用户可能触发动画前预加载
@@ -405,7 +402,7 @@ export function applyStaggerAnimation(
     // 设置CSS变量控制延迟
     item.style.setProperty('--stagger-index', index.toString());
     item.style.setProperty('--stagger-delay', `${delay}ms`);
-    
+
     // 添加动画类
     item.classList.add(animationClass);
   });
@@ -453,8 +450,8 @@ export function observeListAnimations(options?: {
 
   // 创建Intersection Observer
   const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
+    entries => {
+      entries.forEach(entry => {
         // 当元素进入视口时
         if (entry.isIntersecting) {
           const container = entry.target as HTMLElement;
@@ -475,7 +472,7 @@ export function observeListAnimations(options?: {
 
   // 查找并观察所有匹配的列表
   const lists = document.querySelectorAll(selector);
-  lists.forEach((list) => {
+  lists.forEach(list => {
     observer.observe(list);
   });
 
@@ -550,7 +547,7 @@ export function resetListAnimation(
 ): void {
   const items = Array.from(container.children) as HTMLElement[];
 
-  items.forEach((item) => {
+  items.forEach(item => {
     // 移除动画类
     item.classList.remove(animationClass);
 

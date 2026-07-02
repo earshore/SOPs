@@ -14,7 +14,6 @@
  * - 支持动画禁用和速度调节
  */
 
-
 /* ========================================
    1. 按钮涟漪效果
    ======================================== */
@@ -35,7 +34,6 @@
     opacity: 0;
   }
 }
-
 
 /* ========================================
    2. Toast通知动画
@@ -74,7 +72,6 @@
     transform: translateX(100%) scale(0.95);
   }
 }
-
 
 /* ========================================
    3. 模态框动画
@@ -142,7 +139,6 @@
   }
 }
 
-
 /* ========================================
    4. 列表项交错动画
    ======================================== */
@@ -188,7 +184,6 @@
   }
 }
 
-
 /* ========================================
    5. 输入框错误抖动动画
    ======================================== */
@@ -200,17 +195,24 @@
  * 缓动: smooth
  */
 @keyframes input-shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-4px);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(4px);
   }
 }
-
 
 /* ========================================
    6. 通用淡入淡出动画
@@ -256,7 +258,6 @@
     transform: scale(1);
   }
 }
-
 
 /* ========================================
    7. 页面和导航动画
@@ -386,7 +387,6 @@
   }
 }
 
-
 /* ========================================
    8. 加载动画
    ======================================== */
@@ -406,7 +406,8 @@
  * 透明度循环变化
  */
 @keyframes skeleton-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -420,7 +421,9 @@
  * 配合不同的 animation-delay 使用
  */
 @keyframes dot-bounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {
@@ -440,7 +443,6 @@
     stroke-dashoffset: 0;
   }
 }
-
 
 /* ========================================
    9. 动画工具类
@@ -500,26 +502,66 @@
  * 提供预定义的延迟值，避免JavaScript计算
  * Requirements 5.2: 每项延迟50ms
  */
-.list-stagger-item:nth-child(1) { --stagger-index: 0; }
-.list-stagger-item:nth-child(2) { --stagger-index: 1; }
-.list-stagger-item:nth-child(3) { --stagger-index: 2; }
-.list-stagger-item:nth-child(4) { --stagger-index: 3; }
-.list-stagger-item:nth-child(5) { --stagger-index: 4; }
-.list-stagger-item:nth-child(6) { --stagger-index: 5; }
-.list-stagger-item:nth-child(7) { --stagger-index: 6; }
-.list-stagger-item:nth-child(8) { --stagger-index: 7; }
-.list-stagger-item:nth-child(9) { --stagger-index: 8; }
-.list-stagger-item:nth-child(10) { --stagger-index: 9; }
-.list-stagger-item:nth-child(11) { --stagger-index: 10; }
-.list-stagger-item:nth-child(12) { --stagger-index: 11; }
-.list-stagger-item:nth-child(13) { --stagger-index: 12; }
-.list-stagger-item:nth-child(14) { --stagger-index: 13; }
-.list-stagger-item:nth-child(15) { --stagger-index: 14; }
-.list-stagger-item:nth-child(16) { --stagger-index: 15; }
-.list-stagger-item:nth-child(17) { --stagger-index: 16; }
-.list-stagger-item:nth-child(18) { --stagger-index: 17; }
-.list-stagger-item:nth-child(19) { --stagger-index: 18; }
-.list-stagger-item:nth-child(20) { --stagger-index: 19; }
+.list-stagger-item:nth-child(1) {
+  --stagger-index: 0;
+}
+.list-stagger-item:nth-child(2) {
+  --stagger-index: 1;
+}
+.list-stagger-item:nth-child(3) {
+  --stagger-index: 2;
+}
+.list-stagger-item:nth-child(4) {
+  --stagger-index: 3;
+}
+.list-stagger-item:nth-child(5) {
+  --stagger-index: 4;
+}
+.list-stagger-item:nth-child(6) {
+  --stagger-index: 5;
+}
+.list-stagger-item:nth-child(7) {
+  --stagger-index: 6;
+}
+.list-stagger-item:nth-child(8) {
+  --stagger-index: 7;
+}
+.list-stagger-item:nth-child(9) {
+  --stagger-index: 8;
+}
+.list-stagger-item:nth-child(10) {
+  --stagger-index: 9;
+}
+.list-stagger-item:nth-child(11) {
+  --stagger-index: 10;
+}
+.list-stagger-item:nth-child(12) {
+  --stagger-index: 11;
+}
+.list-stagger-item:nth-child(13) {
+  --stagger-index: 12;
+}
+.list-stagger-item:nth-child(14) {
+  --stagger-index: 13;
+}
+.list-stagger-item:nth-child(15) {
+  --stagger-index: 14;
+}
+.list-stagger-item:nth-child(16) {
+  --stagger-index: 15;
+}
+.list-stagger-item:nth-child(17) {
+  --stagger-index: 16;
+}
+.list-stagger-item:nth-child(18) {
+  --stagger-index: 17;
+}
+.list-stagger-item:nth-child(19) {
+  --stagger-index: 18;
+}
+.list-stagger-item:nth-child(20) {
+  --stagger-index: 19;
+}
 
 /**
  * 列表容器样式
@@ -535,7 +577,7 @@
  * 禁用列表动画
  * 当列表动画被禁用时使用
  */
-[data-animations="disabled"] .list-stagger-item,
+[data-animations='disabled'] .list-stagger-item,
 .no-list-animations .list-stagger-item {
   opacity: 1;
   animation: none;
@@ -631,16 +673,15 @@
   animation: ripple-expand 600ms var(--ease-out);
 }
 
-
 /* ========================================
    10. 动画禁用支持
    当动画被禁用时，移除所有动画效果
    ======================================== */
 
 /* 全局动画禁用 */
-[data-animations="disabled"] *,
-[data-animations="disabled"] *::before,
-[data-animations="disabled"] *::after {
+[data-animations='disabled'] *,
+[data-animations='disabled'] *::before,
+[data-animations='disabled'] *::after {
   animation-duration: 0ms !important;
   animation-delay: 0ms !important;
   transition-duration: 0ms !important;
@@ -659,24 +700,22 @@
   }
 }
 
-
 /* ========================================
    11. 动画速度调节
    通过CSS变量调整动画速度
    ======================================== */
 
 /* 快速模式 (0.7x) */
-[data-animation-speed="fast"] * {
+[data-animation-speed='fast'] * {
   animation-duration: calc(var(--animation-speed-multiplier, 1) * 0.7);
   transition-duration: calc(var(--animation-speed-multiplier, 1) * 0.7);
 }
 
 /* 慢速模式 (1.5x) */
-[data-animation-speed="slow"] * {
+[data-animation-speed='slow'] * {
   animation-duration: calc(var(--animation-speed-multiplier, 1) * 1.5);
   transition-duration: calc(var(--animation-speed-multiplier, 1) * 1.5);
 }
-
 
 /* ========================================
    12. 导航组件过渡样式
@@ -735,7 +774,7 @@
   opacity: 0;
   transform: translateY(-8px) scale(0.95);
   transform-origin: top;
-  transition: 
+  transition:
     opacity var(--micro-duration-smooth) var(--micro-ease-button),
     transform var(--micro-duration-smooth) var(--micro-ease-button);
   pointer-events: none;
@@ -749,7 +788,7 @@
 
 /* 下拉菜单项 */
 .dropdown-item {
-  transition: 
+  transition:
     background-color var(--micro-duration-quick) var(--ease-smooth),
     color var(--micro-duration-quick) var(--ease-smooth);
 }
@@ -773,7 +812,7 @@
 }
 
 .breadcrumb-item {
-  transition: 
+  transition:
     color var(--micro-duration-smooth) var(--ease-smooth),
     opacity var(--micro-duration-smooth) var(--ease-smooth);
 }
@@ -798,7 +837,7 @@
  */
 .nav-link {
   position: relative;
-  transition: 
+  transition:
     color var(--micro-duration-smooth) var(--ease-smooth),
     background-color var(--micro-duration-smooth) var(--ease-smooth);
 }
@@ -832,7 +871,7 @@
 }
 
 .tab-item {
-  transition: 
+  transition:
     color var(--micro-duration-smooth) var(--ease-smooth),
     background-color var(--micro-duration-smooth) var(--ease-smooth);
 }
@@ -852,7 +891,7 @@
   bottom: 0;
   height: 2px;
   background-color: var(--color-primary);
-  transition: 
+  transition:
     transform var(--micro-duration-smooth) var(--micro-ease-card),
     width var(--micro-duration-smooth) var(--micro-ease-card);
   will-change: transform, width;
@@ -882,7 +921,7 @@
 .mobile-nav-item {
   opacity: 0;
   transform: translateX(-20px);
-  transition: 
+  transition:
     opacity var(--micro-duration-gentle) var(--micro-ease-card),
     transform var(--micro-duration-gentle) var(--micro-ease-card);
 }
@@ -893,14 +932,30 @@
 }
 
 /* 为每个导航项添加递增延迟 */
-.mobile-nav-item:nth-child(1) { transition-delay: 50ms; }
-.mobile-nav-item:nth-child(2) { transition-delay: 100ms; }
-.mobile-nav-item:nth-child(3) { transition-delay: 150ms; }
-.mobile-nav-item:nth-child(4) { transition-delay: 200ms; }
-.mobile-nav-item:nth-child(5) { transition-delay: 250ms; }
-.mobile-nav-item:nth-child(6) { transition-delay: 300ms; }
-.mobile-nav-item:nth-child(7) { transition-delay: 350ms; }
-.mobile-nav-item:nth-child(8) { transition-delay: 400ms; }
+.mobile-nav-item:nth-child(1) {
+  transition-delay: 50ms;
+}
+.mobile-nav-item:nth-child(2) {
+  transition-delay: 100ms;
+}
+.mobile-nav-item:nth-child(3) {
+  transition-delay: 150ms;
+}
+.mobile-nav-item:nth-child(4) {
+  transition-delay: 200ms;
+}
+.mobile-nav-item:nth-child(5) {
+  transition-delay: 250ms;
+}
+.mobile-nav-item:nth-child(6) {
+  transition-delay: 300ms;
+}
+.mobile-nav-item:nth-child(7) {
+  transition-delay: 350ms;
+}
+.mobile-nav-item:nth-child(8) {
+  transition-delay: 400ms;
+}
 
 /**
  * 汉堡菜单图标动画
@@ -917,7 +972,7 @@
   width: 24px;
   height: 2px;
   background-color: var(--color-text-primary);
-  transition: 
+  transition:
     transform var(--micro-duration-smooth) var(--micro-ease-button),
     opacity var(--micro-duration-smooth) var(--ease-smooth);
   transform-origin: center;
@@ -972,24 +1027,24 @@
  * 导航动画禁用支持
  * 当动画被禁用时，导航元素立即显示/隐藏
  */
-[data-animations="disabled"] .sidebar,
-[data-animations="disabled"] .sidebar-right,
-[data-animations="disabled"] .mobile-nav,
-[data-animations="disabled"] .dropdown-menu,
-[data-animations="disabled"] .page-container {
+[data-animations='disabled'] .sidebar,
+[data-animations='disabled'] .sidebar-right,
+[data-animations='disabled'] .mobile-nav,
+[data-animations='disabled'] .dropdown-menu,
+[data-animations='disabled'] .page-container {
   transition: none;
 }
 
-[data-animations="disabled"] .sidebar.sidebar-hidden,
-[data-animations="disabled"] .sidebar-right.sidebar-hidden {
+[data-animations='disabled'] .sidebar.sidebar-hidden,
+[data-animations='disabled'] .sidebar-right.sidebar-hidden {
   display: none;
 }
 
-[data-animations="disabled"] .mobile-nav:not(.mobile-nav-open) {
+[data-animations='disabled'] .mobile-nav:not(.mobile-nav-open) {
   display: none;
 }
 
-[data-animations="disabled"] .dropdown-menu:not(.dropdown-open) {
+[data-animations='disabled'] .dropdown-menu:not(.dropdown-open) {
   display: none;
 }
 
@@ -1010,7 +1065,7 @@
   .hamburger-line {
     transition-duration: 0.01ms !important;
   }
-  
+
   .mobile-nav-item {
     transition-delay: 0ms !important;
   }

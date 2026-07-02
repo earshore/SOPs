@@ -1,284 +1,296 @@
 <div class="module-container ppc-search-app">
-    <section class="ppc-hero p-5 mb-6" role="region" aria-labelledby="ppc-page-title">
-        <div class="relative z-10 flex flex-col xl:flex-row xl:items-start justify-between gap-5">
-            <div class="min-w-0">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="ppc-hero-icon">
-                        <i class="fas fa-magnifying-glass-dollar" aria-hidden="true"></i>
-                        <span class="ppc-hero-icon-badge" aria-hidden="true">
-                            <i class="fas fa-bolt"></i>
-                        </span>
-                    </div>
-                    <div>
-                        <div class="ppc-hero-eyebrow">PPC AI</div>
-                        <h1 id="ppc-page-title" class="text-2xl font-bold text-slate-950">PPC 搜索词分析器</h1>
-                        <p class="text-sm text-slate-600 mt-1 leading-relaxed">导入广告 Search Term 报表，输出否词、加精准词、降竞价和 Listing 词池动作。</p>
-                    </div>
-                </div>
-                <ul class="ppc-hero-tags" role="list">
-                    <li class="ppc-hero-tag"><span class="ppc-tag-dot ppc-tag-dot-blue" aria-hidden="true"></span>Amazon Ads CSV/TSV</li>
-                    <li class="ppc-hero-tag"><span class="ppc-tag-dot ppc-tag-dot-green" aria-hidden="true"></span>ERP 导出表</li>
-                    <li class="ppc-hero-tag"><span class="ppc-tag-dot ppc-tag-dot-violet" aria-hidden="true"></span>Agent 分流分析</li>
-                    <li class="ppc-hero-tag"><span class="ppc-tag-dot ppc-tag-dot-orange" aria-hidden="true"></span>可导出动作清单</li>
-                </ul>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 xl:w-[560px]">
-                <div class="ppc-stat-tile ppc-stat-tile-blue">
-                    <div class="ppc-stat-label"><i class="fas fa-table-list"></i><span id="ppc-stat-rows-label">搜索词行</span></div>
-                    <div id="ppc-stat-rows" class="ppc-stat-number">0</div>
-                </div>
-                <div class="ppc-stat-tile ppc-stat-tile-green">
-                    <div class="ppc-stat-label"><i class="fas fa-coins"></i><span>花费</span></div>
-                    <div id="ppc-stat-spend" class="ppc-stat-number">0</div>
-                </div>
-                <div class="ppc-stat-tile ppc-stat-tile-orange">
-                    <div class="ppc-stat-label"><i class="fas fa-percent"></i><span>ACOS</span></div>
-                    <div id="ppc-stat-acos" class="ppc-stat-number">-</div>
-                </div>
-                <div class="ppc-stat-tile ppc-stat-tile-violet">
-                    <div class="ppc-stat-label"><i class="fas fa-bolt"></i><span>需处理</span></div>
-                    <div id="ppc-stat-actions" class="ppc-stat-number">0</div>
-                </div>
-            </div>
+  <section class="ppc-hero p-5 mb-6" role="region" aria-labelledby="ppc-page-title">
+    <div class="relative z-10 flex flex-col xl:flex-row xl:items-start justify-between gap-5">
+      <div class="min-w-0">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="ppc-hero-icon">
+            <i class="fas fa-magnifying-glass-dollar" aria-hidden="true"></i>
+            <span class="ppc-hero-icon-badge" aria-hidden="true">
+              <i class="fas fa-bolt"></i>
+            </span>
+          </div>
+          <div>
+            <div class="ppc-hero-eyebrow">PPC AI</div>
+            <h1 id="ppc-page-title" class="text-2xl font-bold text-slate-950">PPC 搜索词分析器</h1>
+            <p class="text-sm text-slate-600 mt-1 leading-relaxed">
+              导入广告 Search Term 报表，输出否词、加精准词、降竞价和 Listing 词池动作。
+            </p>
+          </div>
         </div>
-    </section>
-
-    <section class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6 items-stretch">
-        <div class="ppc-panel ppc-import-panel xl:col-span-2">
-            <div class="flex items-center justify-between gap-3 mb-4">
-                <div>
-                    <h2 class="font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fas fa-file-import text-blue-500"></i>数据导入
-                    </h2>
-                    <p id="ppc-file-name" class="text-xs text-slate-500 mt-1">支持 CSV、TSV、XLSX 或直接粘贴表格内容。</p>
-                </div>
-                <div class="ppc-import-actions">
-                    <button id="ppc-btn-sample" type="button"
-                        class="ppc-secondary-action">
-                        <i class="fas fa-flask"></i>加载样例
-                    </button>
-                    <label class="ppc-report-type-control">
-                        <span>报表类型</span>
-                        <select id="ppc-report-type">
-                            <option value="auto">自动识别</option>
-                            <option value="search_term">店铺搜索广告 / 商品推广搜索词报告</option>
-                            <option value="erp_search_term">ERP 广告搜索词报表</option>
-                            <option value="erp_campaign">ERP 广告活动报表</option>
-                        </select>
-                    </label>
-                </div>
-            </div>
-            <ol class="ppc-flow-steps" aria-label="分析流程">
-                <li><span>1</span>导入报表</li>
-                <li><span>2</span>确认阈值</li>
-                <li><span>3</span>生成动作</li>
-            </ol>
-            <div class="ppc-import-grid grid grid-cols-1 lg:grid-cols-[280px,1fr] gap-4">
-                <label class="ppc-dropzone">
-                    <i class="fas fa-cloud-arrow-up text-3xl text-blue-500 mb-3"></i>
-                    <span class="font-bold text-blue-800">选择报表文件</span>
-                    <span class="text-xs text-blue-600 mt-1">Amazon Ads 或 ERP 导出的 CSV/TSV/XLSX</span>
-                    <input id="ppc-file-input" type="file" class="sr-only" accept=".csv,.tsv,.txt,.xlsx,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-                </label>
-                <div class="ppc-paste-column">
-                    <label for="ppc-paste-input" class="sr-only">粘贴广告报表内容</label>
-                    <textarea id="ppc-paste-input"
-                        class="ppc-textarea w-full min-h-[150px] rounded-lg border border-slate-300 p-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        placeholder="也可以直接粘贴 Search Term 报表内容，首行需要包含列名。"></textarea>
-                    <div class="flex flex-wrap gap-2 mt-3">
-                        <button id="ppc-btn-parse" type="button"
-                            class="ppc-primary-action">
-                            <i class="fas fa-chart-line"></i>分析当前数据
-                        </button>
-                        <button id="ppc-btn-clear" type="button"
-                            class="ppc-ghost-action">
-                            <i class="fas fa-eraser"></i>清空
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div id="ppc-mapping-status" class="ppc-status-line"></div>
+        <ul class="ppc-hero-tags" role="list">
+          <li class="ppc-hero-tag">
+            <span class="ppc-tag-dot ppc-tag-dot-blue" aria-hidden="true"></span>Amazon Ads CSV/TSV
+          </li>
+          <li class="ppc-hero-tag">
+            <span class="ppc-tag-dot ppc-tag-dot-green" aria-hidden="true"></span>ERP 导出表
+          </li>
+          <li class="ppc-hero-tag">
+            <span class="ppc-tag-dot ppc-tag-dot-violet" aria-hidden="true"></span>Agent 分流分析
+          </li>
+          <li class="ppc-hero-tag">
+            <span class="ppc-tag-dot ppc-tag-dot-orange" aria-hidden="true"></span>可导出动作清单
+          </li>
+        </ul>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 xl:w-[560px]">
+        <div class="ppc-stat-tile ppc-stat-tile-blue">
+          <div class="ppc-stat-label">
+            <i class="fas fa-table-list"></i><span id="ppc-stat-rows-label">搜索词行</span>
+          </div>
+          <div id="ppc-stat-rows" class="ppc-stat-number">0</div>
         </div>
+        <div class="ppc-stat-tile ppc-stat-tile-green">
+          <div class="ppc-stat-label"><i class="fas fa-coins"></i><span>花费</span></div>
+          <div id="ppc-stat-spend" class="ppc-stat-number">0</div>
+        </div>
+        <div class="ppc-stat-tile ppc-stat-tile-orange">
+          <div class="ppc-stat-label"><i class="fas fa-percent"></i><span>ACOS</span></div>
+          <div id="ppc-stat-acos" class="ppc-stat-number">-</div>
+        </div>
+        <div class="ppc-stat-tile ppc-stat-tile-violet">
+          <div class="ppc-stat-label"><i class="fas fa-bolt"></i><span>需处理</span></div>
+          <div id="ppc-stat-actions" class="ppc-stat-number">0</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="ppc-panel ppc-settings-panel">
-            <h2 class="font-bold text-slate-900 flex items-center gap-2 mb-4">
-                <i class="fas fa-sliders text-emerald-500"></i>分析阈值
-            </h2>
-            <div class="ppc-threshold-grid grid grid-cols-2 gap-3">
-                <label class="text-xs font-semibold text-slate-600">
-                    目标 ACOS %
-                    <input id="ppc-target-acos" type="number" value="35" min="1" step="1"
-                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                </label>
-                <label class="text-xs font-semibold text-slate-600">
-                    高 ACOS %
-                    <input id="ppc-high-acos" type="number" value="55" min="1" step="1"
-                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                </label>
-                <label class="text-xs font-semibold text-slate-600">
-                    无单点击
-                    <input id="ppc-min-clicks" type="number" value="12" min="1" step="1"
-                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                </label>
-                <label class="text-xs font-semibold text-slate-600">
-                    无单花费
-                    <input id="ppc-min-spend" type="number" value="15" min="1" step="1"
-                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                </label>
-                <label class="text-xs font-semibold text-slate-600">
-                    收割订单
-                    <input id="ppc-min-orders" type="number" value="2" min="1" step="1"
-                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                </label>
-                <label class="text-xs font-semibold text-slate-600">
-                    低 CTR %
-                    <input id="ppc-min-ctr" type="number" value="0.35" min="0" step="0.05"
-                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                </label>
-            </div>
-            <label class="text-xs font-semibold text-slate-600 block mt-4">
-                作业负责人
-                <input id="ppc-action-owner" type="text" value="广告负责人"
-                    class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                    placeholder="例如：广告负责人 / 运营同学">
-                <span class="block text-slate-500 mt-1">用于动作清单 Owner 和周复盘的下次动作负责人。</span>
+  <section class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6 items-stretch">
+    <div class="ppc-panel ppc-import-panel xl:col-span-2">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 class="font-bold text-slate-900 flex items-center gap-2">
+            <i class="fas fa-file-import text-blue-500"></i>数据导入
+          </h2>
+          <p id="ppc-file-name" class="text-xs text-slate-500 mt-1">
+            支持 CSV、TSV、XLSX 或直接粘贴表格内容。
+          </p>
+        </div>
+        <div class="ppc-import-actions">
+          <button id="ppc-btn-sample" type="button" class="ppc-secondary-action">
+            <i class="fas fa-flask"></i>加载样例
+          </button>
+          <label class="ppc-report-type-control">
+            <span>报表类型</span>
+            <select id="ppc-report-type">
+              <option value="auto">自动识别</option>
+              <option value="search_term">店铺搜索广告 / 商品推广搜索词报告</option>
+              <option value="erp_search_term">ERP 广告搜索词报表</option>
+              <option value="erp_campaign">ERP 广告活动报表</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <ol class="ppc-flow-steps" aria-label="分析流程">
+        <li><span>1</span>导入报表</li>
+        <li><span>2</span>确认阈值</li>
+        <li><span>3</span>生成动作</li>
+      </ol>
+      <div class="ppc-import-grid grid grid-cols-1 lg:grid-cols-[280px,1fr] gap-4">
+        <label class="ppc-dropzone">
+          <i class="fas fa-cloud-arrow-up text-3xl text-blue-500 mb-3"></i>
+          <span class="font-bold text-blue-800">选择报表文件</span>
+          <span class="text-xs text-blue-600 mt-1">Amazon Ads 或 ERP 导出的 CSV/TSV/XLSX</span>
+          <input
+            id="ppc-file-input"
+            type="file"
+            class="sr-only"
+            accept=".csv,.tsv,.txt,.xlsx,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          />
+        </label>
+        <div class="ppc-paste-column">
+          <label for="ppc-paste-input" class="sr-only">粘贴广告报表内容</label>
+          <textarea
+            id="ppc-paste-input"
+            class="ppc-textarea w-full min-h-[150px] rounded-lg border border-slate-300 p-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            placeholder="也可以直接粘贴 Search Term 报表内容，首行需要包含列名。"
+          ></textarea>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <button id="ppc-btn-parse" type="button" class="ppc-primary-action">
+              <i class="fas fa-chart-line"></i>分析当前数据
+            </button>
+            <button id="ppc-btn-clear" type="button" class="ppc-ghost-action">
+              <i class="fas fa-eraser"></i>清空
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="ppc-mapping-status" class="ppc-status-line"></div>
+    </div>
+
+    <div class="ppc-panel ppc-settings-panel">
+      <h2 class="font-bold text-slate-900 flex items-center gap-2 mb-4">
+        <i class="fas fa-sliders text-emerald-500"></i>分析阈值
+      </h2>
+      <div id="ppc-threshold-grid" class="ppc-threshold-grid grid grid-cols-2 gap-3"></div>
+      <label class="text-xs font-semibold text-slate-600 block mt-4">
+        作业负责人
+        <input
+          id="ppc-action-owner"
+          type="text"
+          value="广告负责人"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          placeholder="例如：广告负责人 / 运营同学"
+        />
+        <span class="block text-slate-500 mt-1">用于动作清单 Owner 和周复盘的下次动作负责人。</span>
+      </label>
+      <div class="ppc-delivery-note">
+        <div class="font-bold text-emerald-800 text-sm mb-1">交付口径</div>
+        <p class="text-xs text-emerald-700 leading-relaxed">
+          本工具只输出建议动作，最终改价、否词、加词仍在 ERP 或广告后台执行。
+        </p>
+      </div>
+      <div class="ppc-analysis-settings mt-4 border-t border-slate-200 pt-4">
+        <button
+          id="ppc-analysis-settings-toggle"
+          type="button"
+          class="ppc-settings-toggle"
+          aria-expanded="false"
+          aria-controls="ppc-analysis-settings-body"
+        >
+          <span class="inline-flex items-center gap-2">
+            <i class="fas fa-gear text-emerald-500"></i>
+            <span>分析设置</span>
+          </span>
+          <i class="fas fa-chevron-down ppc-settings-toggle-icon" aria-hidden="true"></i>
+        </button>
+        <div id="ppc-analysis-settings-body" class="ppc-analysis-settings-body hidden">
+          <label class="ppc-check-row mb-3">
+            <input id="ppc-use-agent" type="checkbox" class="mt-0.5 rounded border-slate-300" />
+            <span>
+              <span class="font-semibold">启用 Agent 语义复核</span>
+              <span class="block text-slate-500 mt-0.5"
+                >开启后会将候选搜索词和指标发送到已配置模型端点。</span
+              >
+            </span>
+          </label>
+          <label class="ppc-check-row mb-3">
+            <input
+              id="ppc-allow-local-fallback"
+              type="checkbox"
+              class="mt-0.5 rounded border-slate-300"
+            />
+            <span>
+              <span class="font-semibold">模型失败时使用本地规则</span>
+              <span class="block text-slate-500 mt-0.5"
+                >Agent 默认先跑本地工具，仅在语义复核失败时降级。</span
+              >
+            </span>
+          </label>
+          <label class="ppc-check-row">
+            <input id="ppc-use-context" type="checkbox" class="mt-0.5 rounded border-slate-300" />
+            <span>
+              <span class="font-semibold">加入产品上下文</span>
+              <span class="block text-slate-500 mt-0.5"
+                >可选，Agent 会把产品信息用于少量语义候选复核。</span
+              >
+            </span>
+          </label>
+          <div id="ppc-context-fields" class="ppc-context-fields hidden mt-3 space-y-3">
+            <label class="text-xs font-semibold text-slate-600 block">
+              ASIN
+              <input
+                id="ppc-context-asin"
+                type="text"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
             </label>
-            <div class="ppc-delivery-note">
-                <div class="font-bold text-emerald-800 text-sm mb-1">交付口径</div>
-                <p class="text-xs text-emerald-700 leading-relaxed">本工具只输出建议动作，最终改价、否词、加词仍在 ERP 或广告后台执行。</p>
-            </div>
-            <div class="ppc-analysis-settings mt-4 border-t border-slate-200 pt-4">
-                <button id="ppc-analysis-settings-toggle" type="button" class="ppc-settings-toggle" aria-expanded="false" aria-controls="ppc-analysis-settings-body">
-                    <span class="inline-flex items-center gap-2">
-                        <i class="fas fa-gear text-emerald-500"></i>
-                        <span>分析设置</span>
-                    </span>
-                    <i class="fas fa-chevron-down ppc-settings-toggle-icon" aria-hidden="true"></i>
-                </button>
-                <div id="ppc-analysis-settings-body" class="ppc-analysis-settings-body hidden">
-                    <label class="ppc-check-row mb-3">
-                        <input id="ppc-allow-local-fallback" type="checkbox" class="mt-0.5 rounded border-slate-300">
-                        <span>
-                            <span class="font-semibold">模型失败时使用本地规则</span>
-                            <span class="block text-slate-500 mt-0.5">Agent 默认先跑本地工具，仅在语义复核失败时降级。</span>
-                        </span>
-                    </label>
-                    <label class="ppc-check-row">
-                        <input id="ppc-use-context" type="checkbox" class="mt-0.5 rounded border-slate-300">
-                        <span>
-                            <span class="font-semibold">加入产品上下文</span>
-                            <span class="block text-slate-500 mt-0.5">可选，Agent 会把产品信息用于少量语义候选复核。</span>
-                        </span>
-                    </label>
-                    <div id="ppc-context-fields" class="ppc-context-fields hidden mt-3 space-y-3">
-                        <label class="text-xs font-semibold text-slate-600 block">
-                            ASIN
-                            <input id="ppc-context-asin" type="text"
-                                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        </label>
-                        <label class="text-xs font-semibold text-slate-600 block">
-                            类目
-                            <input id="ppc-context-category" type="text"
-                                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                        </label>
-                        <label class="text-xs font-semibold text-slate-600 block">
-                            Listing
-                            <textarea id="ppc-context-listing"
-                                class="mt-1 w-full min-h-[90px] rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                                placeholder="可粘贴标题、五点或描述，用于辅助判断搜索词相关性。"></textarea>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="ppc-panel ppc-results-panel">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-            <div>
-                <h2 class="font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fas fa-list-check text-purple-500"></i>动作清单
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-50 border border-amber-100 text-xs font-semibold text-amber-700">建议动作 · 人工执行</span>
-                </h2>
-                <p id="ppc-result-count" class="text-xs text-slate-500 mt-1">等待导入数据。</p>
-            </div>
-            <div id="ppc-filter-buttons" class="flex flex-wrap gap-2">
-                <button class="ppc-filter-btn active" type="button" data-filter="all" aria-pressed="true">
-                    <i class="fas fa-layer-group"></i><span>全部</span><span class="ppc-filter-count">0</span>
-                </button>
-                <button class="ppc-filter-btn" type="button" data-filter="negative_exact" aria-pressed="false">
-                    <i class="fas fa-ban"></i><span>否词</span><span class="ppc-filter-count">0</span>
-                </button>
-                <button class="ppc-filter-btn" type="button" data-filter="harvest_exact" aria-pressed="false">
-                    <i class="fas fa-bullseye"></i><span>加精准</span><span class="ppc-filter-count">0</span>
-                </button>
-                <button class="ppc-filter-btn" type="button" data-filter="scale_budget" aria-pressed="false">
-                    <i class="fas fa-arrow-trend-up"></i><span>加预算</span><span class="ppc-filter-count">0</span>
-                </button>
-                <button class="ppc-filter-btn" type="button" data-filter="bid_down" aria-pressed="false">
-                    <i class="fas fa-arrow-down-short-wide"></i><span>降竞价</span><span class="ppc-filter-count">0</span>
-                </button>
-                <button class="ppc-filter-btn" type="button" data-filter="listing_term" aria-pressed="false">
-                    <i class="fas fa-bookmark"></i><span>Listing 词池</span><span class="ppc-filter-count">0</span>
-                </button>
-                <button class="ppc-filter-btn" type="button" data-filter="observe" aria-pressed="false">
-                    <i class="fas fa-eye"></i><span>观察</span><span class="ppc-filter-count">0</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="ppc-action-toolbar">
-            <label class="ppc-action-search">
-                <span class="sr-only">搜索动作清单</span>
-                <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-                <input id="ppc-action-search" type="search" autocomplete="off" placeholder="搜索词 / 活动 / 店铺 / 原因">
+            <label class="text-xs font-semibold text-slate-600 block">
+              类目
+              <input
+                id="ppc-context-category"
+                type="text"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
             </label>
-            <button id="ppc-action-search-clear" type="button" class="ppc-search-clear-btn" disabled>
-                <i class="fas fa-xmark"></i>清除
-            </button>
+            <label class="text-xs font-semibold text-slate-600 block">
+              Listing
+              <textarea
+                id="ppc-context-listing"
+                class="mt-1 w-full min-h-[90px] rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                placeholder="可粘贴标题、五点或描述，用于辅助判断搜索词相关性。"
+              ></textarea>
+            </label>
+          </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="flex flex-wrap gap-2 mb-4">
-            <button id="ppc-export-all" type="button" class="ppc-export-btn">
-                <i class="fas fa-file-csv"></i>导出全部动作
-            </button>
-            <button id="ppc-export-current" type="button" class="ppc-export-btn">
-                <i class="fas fa-filter"></i>导出当前筛选
-            </button>
-            <button id="ppc-export-negative" type="button" class="ppc-export-btn">
-                <i class="fas fa-ban"></i>导出否词
-            </button>
-            <button id="ppc-export-harvest" type="button" class="ppc-export-btn">
-                <i class="fas fa-bullseye"></i>导出加词
-            </button>
-            <button id="ppc-copy-summary" type="button" class="ppc-export-btn">
-                <i class="fas fa-copy"></i>复制复盘模板
-            </button>
-        </div>
+  <section class="ppc-panel ppc-results-panel">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+      <div>
+        <h2 class="font-bold text-slate-900 flex items-center gap-2">
+          <i class="fas fa-list-check text-purple-500"></i>动作清单
+          <span
+            class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-50 border border-amber-100 text-xs font-semibold text-amber-700"
+            >建议动作 · 人工执行</span
+          >
+        </h2>
+        <p id="ppc-result-count" class="text-xs text-slate-500 mt-1">等待导入数据。</p>
+      </div>
+      <div id="ppc-filter-buttons" class="flex flex-wrap gap-2"></div>
+    </div>
 
-        <div id="ppc-empty-state" class="ppc-empty-state">
-            <i class="fas fa-table text-3xl text-slate-300 mb-3"></i>
-            <div id="ppc-empty-title" class="font-bold text-slate-700">还没有分析结果</div>
-            <p id="ppc-empty-description" class="text-sm text-slate-500 mt-1">导入报表或加载样例数据后，会在这里生成可执行动作。</p>
-        </div>
+    <div class="ppc-action-toolbar">
+      <label class="ppc-action-search">
+        <span class="sr-only">搜索动作清单</span>
+        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+        <input
+          id="ppc-action-search"
+          type="search"
+          autocomplete="off"
+          placeholder="搜索词 / 活动 / 店铺 / 原因"
+        />
+      </label>
+      <button id="ppc-action-search-clear" type="button" class="ppc-search-clear-btn" disabled>
+        <i class="fas fa-xmark"></i>清除
+      </button>
+    </div>
 
-        <div id="ppc-table-wrapper" class="hidden overflow-x-auto ppc-table-wrapper">
-            <table class="w-full text-sm ppc-results-table">
-                <thead>
-                    <tr class="bg-slate-100 text-slate-600">
-                        <th id="ppc-object-header" class="px-3 py-2 text-left font-bold">搜索词</th>
-                        <th class="px-3 py-2 text-left font-bold">动作</th>
-                        <th class="px-3 py-2 text-right font-bold">花费</th>
-                        <th class="px-3 py-2 text-right font-bold">销售额</th>
-                        <th class="px-3 py-2 text-right font-bold">订单</th>
-                        <th class="px-3 py-2 text-right font-bold">ACOS</th>
-                        <th class="px-3 py-2 text-right font-bold">CTR</th>
-                        <th class="px-3 py-2 text-right font-bold">CVR</th>
-                        <th class="px-3 py-2 text-left font-bold">原因</th>
-                    </tr>
-                </thead>
-                <tbody id="ppc-results-body"></tbody>
-            </table>
-        </div>
-    </section>
+    <div class="flex flex-wrap gap-2 mb-4">
+      <button id="ppc-export-all" type="button" class="ppc-export-btn">
+        <i class="fas fa-file-csv"></i>导出全部动作
+      </button>
+      <button id="ppc-export-current" type="button" class="ppc-export-btn">
+        <i class="fas fa-filter"></i>导出当前筛选
+      </button>
+      <button id="ppc-export-negative" type="button" class="ppc-export-btn">
+        <i class="fas fa-ban"></i>导出否词
+      </button>
+      <button id="ppc-export-harvest" type="button" class="ppc-export-btn">
+        <i class="fas fa-bullseye"></i>导出加词
+      </button>
+      <button id="ppc-copy-summary" type="button" class="ppc-export-btn">
+        <i class="fas fa-copy"></i>复制复盘模板
+      </button>
+    </div>
+
+    <div id="ppc-empty-state" class="ppc-empty-state">
+      <i class="fas fa-table text-3xl text-slate-300 mb-3"></i>
+      <div id="ppc-empty-title" class="font-bold text-slate-700">还没有分析结果</div>
+      <p id="ppc-empty-description" class="text-sm text-slate-500 mt-1">
+        导入报表或加载样例数据后，会在这里生成可执行动作。
+      </p>
+    </div>
+
+    <div id="ppc-table-wrapper" class="hidden overflow-x-auto ppc-table-wrapper">
+      <table class="w-full text-sm ppc-results-table">
+        <thead>
+          <tr class="bg-slate-100 text-slate-600">
+            <th id="ppc-object-header" class="px-3 py-2 text-left font-bold">搜索词</th>
+            <th class="px-3 py-2 text-left font-bold">动作</th>
+            <th class="px-3 py-2 text-right font-bold">花费</th>
+            <th class="px-3 py-2 text-right font-bold">销售额</th>
+            <th class="px-3 py-2 text-right font-bold">订单</th>
+            <th class="px-3 py-2 text-right font-bold">ACOS</th>
+            <th class="px-3 py-2 text-right font-bold">CTR</th>
+            <th class="px-3 py-2 text-right font-bold">CVR</th>
+            <th class="px-3 py-2 text-left font-bold">原因</th>
+          </tr>
+        </thead>
+        <tbody id="ppc-results-body"></tbody>
+      </table>
+    </div>
+  </section>
 </div>

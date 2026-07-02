@@ -13,7 +13,7 @@ export {
   renderHubMegaMenu,
   renderSopsMegaMenu,
   initMegaMenuAccessibility,
-  closeMegaMenus
+  closeMegaMenus,
 } from './megaMenu';
 
 // 导航和路由
@@ -23,15 +23,11 @@ export {
   toggleSOPGroup,
   scrollToSOPModule,
   scrollToHubModule,
-  scrollToMoreModule
+  scrollToMoreModule,
 } from './navigation';
 
 // 通知
-export {
-  showToast,
-  showProgress,
-  type ToastType
-} from './notifications';
+export { showToast, showProgress, type ToastType } from './notifications';
 
 // 搜索
 export {
@@ -40,7 +36,7 @@ export {
   searchHub,
   clearHubSearch,
   searchSidebar,
-  clearSidebarSearch
+  clearSidebarSearch,
 } from './search';
 
 // 新路由系统（推荐使用）
@@ -49,9 +45,23 @@ export { navigateTo, getRouter, getCurrentRoute, hasRoute } from '../router/init
 // 向后兼容：注册到 window
 // ========================
 
-import { renderMegaMenu, renderMoreMenu, renderHubMegaMenu, renderSopsMegaMenu, initMegaMenuAccessibility, closeMegaMenus } from './megaMenu';
+import {
+  renderMegaMenu,
+  renderMoreMenu,
+  renderHubMegaMenu,
+  renderSopsMegaMenu,
+  initMegaMenuAccessibility,
+  closeMegaMenus,
+} from './megaMenu';
 import { showToast } from './notifications';
-import { searchSOPs, clearSOPSearch, searchHub, clearHubSearch, searchSidebar, clearSidebarSearch } from './search';
+import {
+  searchSOPs,
+  clearSOPSearch,
+  searchHub,
+  clearHubSearch,
+  searchSidebar,
+  clearSidebarSearch,
+} from './search';
 import { navigateTo } from '../router/initRouter';
 
 // 挂载到 window 供 legacy 代码使用
@@ -89,7 +99,7 @@ window.clearHubSearch = clearHubSearch;
 window.searchSidebar = searchSidebar;
 window.clearSidebarSearch = clearSidebarSearch;
 
-document.addEventListener('input', (event) => {
+document.addEventListener('input', event => {
   const target = event.target as HTMLInputElement | null;
   if (target?.id === 'sidebar-search-input') {
     searchSidebar(target.value);
@@ -101,7 +111,12 @@ document.addEventListener('input', (event) => {
 // ========================
 
 import { registerActions } from '../utils/actionRegistry';
-import { toggleSOPGroup, scrollToSOPModule, scrollToHubModule, scrollToMoreModule } from './navigation';
+import {
+  toggleSOPGroup,
+  scrollToSOPModule,
+  scrollToHubModule,
+  scrollToMoreModule,
+} from './navigation';
 import { routeIdToPath } from '../router/routePaths';
 
 registerActions({
@@ -112,17 +127,21 @@ registerActions({
     if (!tab) {
       return;
     }
-    
+
     const path = routeIdToPath(tab);
-    
+
     closeMegaMenus({ blurActive: true });
     await navigateTo(path);
   },
-  'toggle-sop-group': (params: Record<string, unknown>) => toggleSOPGroup({ category: params.group as string || params.category as string }),
+  'toggle-sop-group': (params: Record<string, unknown>) =>
+    toggleSOPGroup({ category: (params.group as string) || (params.category as string) }),
   'clear-sop-search': clearSOPSearch,
   'clear-hub-search': clearHubSearch,
   'clear-sidebar-search': clearSidebarSearch,
-  'scroll-to-sop-module': (params: Record<string, unknown>) => scrollToSOPModule(params.category as string),
-  'scroll-to-hub-module': (params: Record<string, unknown>) => scrollToHubModule(params.category as string),
-  'scroll-to-more-module': (params: Record<string, unknown>) => scrollToMoreModule(params.category as string),
+  'scroll-to-sop-module': (params: Record<string, unknown>) =>
+    scrollToSOPModule(params.category as string),
+  'scroll-to-hub-module': (params: Record<string, unknown>) =>
+    scrollToHubModule(params.category as string),
+  'scroll-to-more-module': (params: Record<string, unknown>) =>
+    scrollToMoreModule(params.category as string),
 });

@@ -5,22 +5,19 @@
 // 🎯 P0优化: 使用统一类型定义
 // ================================================================
 
-import { callLLM } from "../../../../../services/llmService";
+import { callLLM } from '../../../../../services/llmService';
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import { ApiError, ValidationError } from '@common/errors/AppError';
-import { TRANSLATE_PROMPT_TEMPLATE } from "../constants/prompts";
+import { TRANSLATE_PROMPT_TEMPLATE } from '../constants/prompts';
 import { jsonrepair } from 'jsonrepair';
-import { sanitizePromptInput } from "../ai_analysis/prompts/promptSanitizer";
-import type {
-  ProductData,
-  DataOptions,
-  LLMConfig,
-  AnalysisReport
-} from '@/types/modules-business';
+import { sanitizePromptInput } from '../ai_analysis/prompts/promptSanitizer';
+import type { ProductData, DataOptions, LLMConfig, AnalysisReport } from '@/types/modules-business';
 
-// ======================== 
+const nativeLoggerConsole = globalThis.console;
+
+// ========================
 // 辅助函数
-// ======================== 
+// ========================
 
 function sanitizePromptValue(value: string | undefined, maxLength = 10000): string {
   return sanitizePromptInput(value || '').slice(0, maxLength);
@@ -40,21 +37,37 @@ function robustParseJSON(text: string): unknown {
     // 2. 尝试提取 Markdown JSON 块 ```json ... ```
     const mdMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
     if (mdMatch && mdMatch[1]) {
-      try { return JSON.parse(mdMatch[1]); } catch (e2) { /* ignore */ }
+      try {
+        return JSON.parse(mdMatch[1]);
+      } catch (e2) {
+        /* ignore */
+      }
     }
 
     // 3. 尝试使用花括号匹配提取最外层的 {}
     const braceMatch = text.match(/\{[\s\S]*\}/);
     if (braceMatch) {
-      try { return JSON.parse(braceMatch[0]); } catch (e3) { /* ignore */ }
-      try { return JSON.parse(jsonrepair(braceMatch[0])); } catch (e4) { /* ignore */ }
+      try {
+        return JSON.parse(braceMatch[0]);
+      } catch (e3) {
+        /* ignore */
+      }
+      try {
+        return JSON.parse(jsonrepair(braceMatch[0]));
+      } catch (e4) {
+        /* ignore */
+      }
     }
 
-    try { return JSON.parse(jsonrepair(text)); } catch (e5) { /* ignore */ }
+    try {
+      return JSON.parse(jsonrepair(text));
+    } catch (e5) {
+      /* ignore */
+    }
   }
-  
+
   throw new ValidationError(
-    "无法从响应中解析有效的 JSON 数据",
+    '无法从响应中解析有效的 JSON 数据',
     'ERR_JSON_PARSE_FAILED',
     'response',
     text,
@@ -62,9 +75,9 @@ function robustParseJSON(text: string): unknown {
   );
 }
 
-// ======================== 
+// ========================
 // 核心分析服务
-// ======================== 
+// ========================
 
 /**
  * 分析服务模块
@@ -88,52 +101,48 @@ export const AnalysisService = {
     llmConfig: LLMConfig,
     dataOptions: DataOptions = {}
   ): Promise<AnalysisReport> {
-    const {
-      includeTitle = true,
-      includeBullets = true,
-      includeReviews = true,
-    } = dataOptions;
+    const { includeTitle = true, includeBullets = true, includeReviews = true } = dataOptions;
 
     // 1. 动态构建数据字符串
     const productsData = products
-      .map((p) => {
+      .map(p => {
         const parts: string[] = [`ASIN: ${sanitizePromptValue(p.asin, 120)}`];
 
         if (includeTitle) {
-          parts.push(`Title: ${sanitizePromptValue(p.productTitle) || "N/A"}`);
+          parts.push(`Title: ${sanitizePromptValue(p.productTitle) || 'N/A'}`);
         }
 
         if (includeBullets) {
           const bullets =
             p.feature_bullets && p.feature_bullets.length > 0
-              ? p.feature_bullets.map((bullet) => sanitizePromptValue(bullet)).join("; ")
-              : "N/A";
+              ? p.feature_bullets.map(bullet => sanitizePromptValue(bullet)).join('; ')
+              : 'N/A';
           parts.push(`Feature Bullets: ${bullets}`);
         }
 
         if (includeReviews) {
           const reviews = (p.customer_reviews || [])
             .slice(0, 5)
-            .map((r) => sanitizePromptValue(r.body, 150))
-            .join(" | ");
-          parts.push(`Top Reviews: ${reviews || "No reviews found"}`);
+            .map(r => sanitizePromptValue(r.body, 150))
+            .join(' | ');
+          parts.push(`Top Reviews: ${reviews || 'No reviews found'}`);
         }
 
-        return parts.join("\n");
+        return parts.join('\n');
       })
-      .join("\n\n---\n\n");
+      .join('\n\n---\n\n');
 
     // 2. 替换模板变量
     const safeLanguage = sanitizePromptValue(language, 80) || 'English';
     const finalPrompt = promptTemplate
       .replace(/{{language}}/g, safeLanguage)
-      .replace("{{productsData}}", productsData)
-      .replace("{{category}}", "General");
+      .replace('{{productsData}}', productsData)
+      .replace('{{category}}', 'General');
 
     // 3. 调用 LLM
     // 增加超时至 120s，因为分析通常涉及大量上下文
     const response = await callLLM(
-      [{ role: "user", content: finalPrompt }],
+      [{ role: 'user', content: finalPrompt }],
       llmConfig.provider,
       llmConfig.endpoint,
       llmConfig.apiKey,
@@ -147,8 +156,8 @@ export const AnalysisService = {
       return parsed as AnalysisReport;
     } catch (e) {
       const error = e as Error;
-      console.warn("Analysis JSON Parse Failed:", error.message);
-      
+      nativeLoggerConsole.warn('Analysis JSON Parse Failed:', error.message);
+
       throw new ApiError(
         'AI分析响应解析失败',
         'ERR_ANALYSIS_PARSE_FAILED',
@@ -182,10 +191,10 @@ export const AnalysisService = {
     const translatePrompt = TRANSLATE_PROMPT_TEMPLATE.replace(
       /{{language}}/g,
       safeLanguage
-    ).replace("{{report}}", safeReport);
+    ).replace('{{report}}', safeReport);
 
     const response = await callLLM(
-      [{ role: "user", content: translatePrompt }],
+      [{ role: 'user', content: translatePrompt }],
       llmConfig.provider,
       llmConfig.endpoint,
       llmConfig.apiKey,
@@ -199,8 +208,8 @@ export const AnalysisService = {
       return parsed as AnalysisReport;
     } catch (e) {
       const error = e as Error;
-      console.warn("Translation JSON Parse Failed:", error.message);
-      
+      nativeLoggerConsole.warn('Translation JSON Parse Failed:', error.message);
+
       throw new ApiError(
         '翻译响应解析失败',
         'ERR_TRANSLATION_PARSE_FAILED',

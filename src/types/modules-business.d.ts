@@ -35,7 +35,20 @@ export type ModuleRegisterFn = (routeId: string, loader: ModuleLoaderFn) => void
 /**
  * 采集站点类型（简短代码）
  */
-export type ScraperSite = 'US' | 'DE' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'IE' | 'UK' | 'CA' | 'JP';
+export type ScraperSite =
+  | 'US'
+  | 'DE'
+  | 'FR'
+  | 'IT'
+  | 'ES'
+  | 'NL'
+  | 'SE'
+  | 'PL'
+  | 'BE'
+  | 'IE'
+  | 'UK'
+  | 'CA'
+  | 'JP';
 
 /**
  * 采集状态
@@ -330,10 +343,10 @@ export interface AnalysisReportMetadata {
 
 /**
  * 分析报告
- * 
+ *
  * 这是 AI 分析服务生成的完整报告结构。
  * 报告可能包含多个分析模块，每个模块都是可选的。
- * 
+ *
  * @example
  * ```typescript
  * const report: AnalysisReport = {
@@ -350,62 +363,62 @@ export interface AnalysisReportMetadata {
  */
 export interface AnalysisReport {
   // ==================== 基础信息 ====================
-  
+
   /** ASIN（单个或逗号分隔的多个） */
   asin?: string;
-  
+
   /** 产品标题 */
   product_title?: string;
-  
+
   /** 分析时间戳（ISO 8601 格式） */
   analysis_timestamp?: string;
-  
+
   /** 市场代码（如 US, DE, UK） */
   market?: string;
-  
+
   /** 目标市场（用于 Promptlab） */
   targetMarket?: string;
-  
+
   /** 语言 */
   language?: string;
-  
+
   /** 使用的模板 */
   templateUsed?: string;
-  
+
   /** 模板 ID */
   templateId?: string;
-  
+
   /** 生成时间（Unix 时间戳） */
   generatedAt?: number;
-  
+
   /** 元数据 */
   meta?: AnalysisReportMetadata;
-  
+
   // ==================== 分析模块 ====================
-  
+
   /** 卖点分析 */
   'selling-points'?: SellingPoints;
-  
+
   /** 致命缺陷分析 */
   'fatal-flaws'?: FatalFlaws;
-  
+
   /** 惊喜时刻分析 */
   'wow-moments'?: WowMoments;
-  
+
   /** 犹豫点分析 */
   'hesitation-points'?: HesitationPoints;
-  
+
   /** 买家画像 */
   'buyer-profile'?: BuyerProfile;
-  
+
   // ==================== 错误处理 ====================
-  
+
   /** 是否解析错误 */
   parse_error?: boolean;
-  
+
   /** 原始响应（当解析失败时） */
   raw_response?: string;
-  
+
   /** 错误详情 */
   error_detail?: string;
 
@@ -423,10 +436,33 @@ export interface AnalysisReport {
     targetIds?: string[];
     /** 分析语言 */
     language?: string;
+    /** Review 采样透明度 */
+    reviewSampling?: {
+      totalReviews: number;
+      lowStar: {
+        totalReviews: number;
+        includedReviews: number;
+        omittedReviews: number;
+        bodyCharLimit: number;
+      };
+      highStar: {
+        totalReviews: number;
+        includedReviews: number;
+        omittedReviews: number;
+        bodyCharLimit: number;
+      };
+      general: {
+        totalReviews: number;
+        includedReviews: number;
+        omittedReviews: number;
+        bodyCharLimit: number;
+        strategy: 'representative';
+      };
+    };
   };
 
   // ==================== 扩展字段 ====================
-  
+
   /**
    * 允许动态添加其他分析模块
    * 例如：'price-analysis', 'review-sentiment', 'seo-keywords' 等
@@ -553,9 +589,9 @@ export interface HistoryItem {
   product?: ScrapedProduct;
   // AI分析状态
   analysisStatus?: {
-    isAnalyzed: boolean;           // 是否已分析
-    analyzedAt?: string;            // 分析时间戳
-    analysisReport?: AnalysisReport;  // 分析报告数据
+    isAnalyzed: boolean; // 是否已分析
+    analyzedAt?: string; // 分析时间戳
+    analysisReport?: AnalysisReport; // 分析报告数据
     sourceHistoryId?: string | number | null;
     sourceDataFingerprint?: string;
     sourceAsins?: string[];
@@ -644,31 +680,31 @@ export interface KeywordHunterSnapshotDiff {
 export interface ScrapedDataMetadata {
   /** 采集时间戳（ISO 8601 格式） */
   scrape_timestamp: string;
-  
+
   /** 市场代码（如 US, DE, UK） */
   marketplace: string;
-  
+
   /** Amazon 域名（如 amazon.com, amazon.de） */
   domain: string;
-  
+
   /** 语言名称（如 English, German） */
   language: string;
-  
+
   /** 采集的 ASIN 总数 */
   total_asins: number;
-  
+
   /** 总产品数量（已废弃，使用 total_asins） */
   total_count?: number;
-  
+
   /** 扩展字段：允许添加其他元数据 */
   [key: string]: unknown;
 }
 
 /**
  * 抓取数据结构
- * 
+ *
  * 这是 Scraper 模块的核心数据结构，包含采集的产品列表和元数据。
- * 
+ *
  * @example
  * ```typescript
  * const scrapedData: ScrapedData = {
@@ -697,10 +733,10 @@ export interface ScrapedDataMetadata {
 export interface ScrapedData {
   /** 采集的产品列表 */
   products: ScrapedProduct[];
-  
+
   /** 采集元数据（可选，但强烈建议提供） */
   metadata?: ScrapedDataMetadata;
-  
+
   /** 扩展字段：允许添加其他数据 */
   [key: string]: unknown;
 }
@@ -825,7 +861,12 @@ export interface ComplianceStatus {
 /**
  * 邮件模板类型
  */
-export type EmailTemplateType = 'order_confirmation' | 'shipping_notification' | 'review_request' | 'customer_service' | 'refund_policy';
+export type EmailTemplateType =
+  | 'order_confirmation'
+  | 'shipping_notification'
+  | 'review_request'
+  | 'customer_service'
+  | 'refund_policy';
 
 /**
  * 邮件模板
@@ -842,7 +883,12 @@ export interface EmailTemplate {
 /**
  * 限制词类别
  */
-export type RestrictedWordCategory = 'medical' | 'safety' | 'performance' | 'legal' | 'environmental';
+export type RestrictedWordCategory =
+  | 'medical'
+  | 'safety'
+  | 'performance'
+  | 'legal'
+  | 'environmental';
 
 /**
  * 限制词
@@ -1073,5 +1119,5 @@ export type {
   WorkflowStep,
   ParticleConfig,
   MousePosition,
-  IParticle
+  IParticle,
 };

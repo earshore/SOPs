@@ -36,10 +36,7 @@ export type ToastType = 'info' | 'success' | 'warning' | 'error';
  * @param moduleId - 模块ID
  * @param renderer - 渲染器实例
  */
-export function registerSidebarRenderer(
-  moduleId: string,
-  renderer: SidebarRenderer
-): void;
+export function registerSidebarRenderer(moduleId: string, renderer: SidebarRenderer): void;
 
 /**
  * 渲染大型菜单（Mega Menu）

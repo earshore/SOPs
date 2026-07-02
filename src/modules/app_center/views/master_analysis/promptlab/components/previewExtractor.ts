@@ -16,10 +16,7 @@ import { PROMPTLAB_DISPLAY_LIMITS } from '../../config/displayLimits';
  * @param obj   任意值
  * @param depth 当前递归深度（内部使用，限制为 3）
  */
-export function findFirstStringValue(
-  obj: unknown,
-  depth: number = 0,
-): string | null {
+export function findFirstStringValue(obj: unknown, depth: number = 0): string | null {
   if (depth > 3) return null;
 
   if (typeof obj === 'string' && obj.trim().length > 0) {
@@ -32,10 +29,7 @@ export function findFirstStringValue(
 
   if (obj && typeof obj === 'object') {
     for (const key of Object.keys(obj)) {
-      const result = findFirstStringValue(
-        (obj as Record<string, unknown>)[key],
-        depth + 1,
-      );
+      const result = findFirstStringValue((obj as Record<string, unknown>)[key], depth + 1);
       if (result) return result;
     }
   }
@@ -61,7 +55,7 @@ function joinObjectFieldValues(
   values: unknown[],
   limit: number,
   field: string,
-  separator: string,
+  separator: string
 ): string {
   return values
     .slice(0, limit)
@@ -77,7 +71,7 @@ function extractTitleKeywordsPreview(data: PreviewData): string | undefined {
     data.primary_keywords,
     PROMPTLAB_DISPLAY_LIMITS.HIGH_FREQUENCY_PHRASES,
     'keyword',
-    ', ',
+    ', '
   );
   return keywords || '无主要关键词';
 }
@@ -100,7 +94,7 @@ function extractFatalFlawsPreview(data: PreviewData): string | undefined {
       data.critical_issues,
       PROMPTLAB_DISPLAY_LIMITS.PAIN_POINTS,
       'issue',
-      '; ',
+      '; '
     );
     return issues || '无致命缺陷';
   }
@@ -146,7 +140,7 @@ function extractBuyerProfilePreview(data: PreviewData): string | undefined {
       data.buyer_types,
       PROMPTLAB_DISPLAY_LIMITS.PAIN_POINTS,
       'type',
-      ', ',
+      ', '
     );
     return types || '买家画像分析';
   }
@@ -237,9 +231,9 @@ export function extractPreviewText(targetId: string, data: unknown): string {
  * 根据字段 key 查找中文标题（用于旧格式报告）
  */
 export function getFieldTitle(key: string): string {
-  const module = ANALYSIS_MODULES.find((m) => m.id === key);
+  const module = ANALYSIS_MODULES.find(m => m.id === key);
   if (module) return module.label_cn;
-  return key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
 /**
@@ -252,11 +246,11 @@ export function getPreviewText(val: unknown): string {
   }
   try {
     if (Array.isArray(val)) {
-      const texts = val.map((item) => {
+      const texts = val.map(item => {
         if (typeof item === 'object' && item !== null) return Object.values(item).join(' ');
         return String(item ?? '');
       });
-      const str = texts.filter((t) => t.trim()).join(' | ');
+      const str = texts.filter(t => t.trim()).join(' | ');
       return str.length > 60 ? str.slice(0, 60) + '...' : str;
     }
     if (typeof val === 'object') {

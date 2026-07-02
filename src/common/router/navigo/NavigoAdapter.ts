@@ -260,7 +260,7 @@ export class NavigoAdapter {
       if (!target) return false;
 
       const { to, from, normalizedPath } = target;
-      if (!await this._runBeforeNavigation(to, from, options)) return false;
+      if (!(await this._runBeforeNavigation(to, from, options))) return false;
 
       const guardOutcome = await this._runNavigationGuards(to, from, options);
       if (!guardOutcome.allowed) {
@@ -322,7 +322,11 @@ export class NavigoAdapter {
     const currentUrl = window.location.href;
     const parsedParams = this.paramParser.parseUrl(currentUrl, null, config.params);
     if (parsedParams.errors.length > 0) {
-      this._log(`Parameter validation errors: ${parsedParams.errors.join(', ')}`, undefined, 'error');
+      this._log(
+        `Parameter validation errors: ${parsedParams.errors.join(', ')}`,
+        undefined,
+        'error'
+      );
     }
 
     return {
@@ -411,7 +415,11 @@ export class NavigoAdapter {
     this.navigo.navigate(normalizedPath);
   }
 
-  private async _runAfterNavigation(to: Route, from: Route | null, options: NavigateOptions): Promise<void> {
+  private async _runAfterNavigation(
+    to: Route,
+    from: Route | null,
+    options: NavigateOptions
+  ): Promise<void> {
     if (options.skipMiddleware) return;
     this._log('Running after middleware...');
     await this.middlewareManager.runAfter(to, from);

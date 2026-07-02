@@ -1,74 +1,78 @@
 @media (min-width: 1024px) {
-    .ql-page {
-        color: var(--color-text-primary, var(--color-slate-900));
-    }
+  .ql-page {
+    color: var(--color-text-primary, var(--color-slate-900));
+  }
 
-    .ql-page > :nth-child(n + 2) {
-        border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32)) !important;
-        border-radius: var(--radius-card, var(--rounded-md)) !important;
-        background: var(--surface-card, #ffffff) !important;
-        box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
-    }
+  .ql-page > :nth-child(n + 2) {
+    border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32)) !important;
+    border-radius: var(--radius-card, var(--rounded-md)) !important;
+    background: var(--surface-card, #ffffff) !important;
+    box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
+  }
 
-    .ql-page > :nth-child(n + 2).text-white,
-    .ql-page > :nth-child(n + 2).text-white :where(h1, h2, h3, h4, p, div) {
-        color: var(--color-text-primary, var(--color-slate-900)) !important;
-    }
+  .ql-page > :nth-child(n + 2).text-white,
+  .ql-page > :nth-child(n + 2).text-white :where(h1, h2, h3, h4, p, div) {
+    color: var(--color-text-primary, var(--color-slate-900)) !important;
+  }
 
-    .ql-page > :nth-child(n + 2).text-white :where(strong, [class*="text-amber"]) {
-        color: var(--color-warning-dark, #b45309) !important;
-    }
+  .ql-page > :nth-child(n + 2).text-white :where(strong, [class*='text-amber']) {
+    color: var(--color-warning-dark, #b45309) !important;
+  }
 
-    .ql-page > :nth-child(n + 2).text-white :where(.bg-white, [class*="bg-white"]) {
-        background: var(--surface-card-hover, var(--color-slate-50)) !important;
-        color: var(--color-text-secondary, var(--color-slate-600)) !important;
-    }
+  .ql-page > :nth-child(n + 2).text-white :where(.bg-white, [class*='bg-white']) {
+    background: var(--surface-card-hover, var(--color-slate-50)) !important;
+    color: var(--color-text-secondary, var(--color-slate-600)) !important;
+  }
 
-    .ql-page > :nth-child(n + 2) :where(.rounded-xl, .rounded-lg) {
-        border-radius: var(--radius-card, var(--rounded-md)) !important;
-    }
+  .ql-page > :nth-child(n + 2) :where(.rounded-xl, .rounded-lg) {
+    border-radius: var(--radius-card, var(--rounded-md)) !important;
+  }
 
-    .ql-page > :nth-child(n + 2) :where(.border-2) {
-        border-width: 1px !important;
-    }
+  .ql-page > :nth-child(n + 2) :where(.border-2) {
+    border-width: 1px !important;
+  }
 
-    .ql-page > :nth-child(n + 2) :is([class^="p-"], [class*=" p-"]):where(
-        .bg-white,
-        .bg-slate-50,
-        .bg-blue-50,
-        .bg-emerald-50,
-        .bg-purple-50,
-        .bg-orange-50,
-        .bg-amber-50,
-        .bg-indigo-50,
-        .bg-teal-50,
-        [class*="bg-gradient-to-"]
+  .ql-page
+    > :nth-child(n + 2)
+    :is([class^='p-'], [class*=' p-']):where(
+      .bg-white,
+      .bg-slate-50,
+      .bg-blue-50,
+      .bg-emerald-50,
+      .bg-purple-50,
+      .bg-orange-50,
+      .bg-amber-50,
+      .bg-indigo-50,
+      .bg-teal-50,
+      [class*='bg-gradient-to-']
     ) {
-        border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32)) !important;
-        background: var(--surface-card, #ffffff) !important;
-        box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
-    }
+    border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32)) !important;
+    background: var(--surface-card, #ffffff) !important;
+    box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
+  }
 
-    .ql-page > :nth-child(n + 2) :is([class^="p-"], [class*=" p-"]):where(
-        .bg-slate-50,
-        .bg-blue-50,
-        .bg-emerald-50,
-        .bg-purple-50,
-        .bg-orange-50,
-        .bg-amber-50,
-        .bg-indigo-50,
-        .bg-teal-50,
-        [class*="from-"][class*="to-"]
+  .ql-page
+    > :nth-child(n + 2)
+    :is([class^='p-'], [class*=' p-']):where(
+      .bg-slate-50,
+      .bg-blue-50,
+      .bg-emerald-50,
+      .bg-purple-50,
+      .bg-orange-50,
+      .bg-amber-50,
+      .bg-indigo-50,
+      .bg-teal-50,
+      [class*='from-'][class*='to-']
     ) {
-        background: var(--surface-card-hover, var(--color-slate-50)) !important;
-    }
+    background: var(--surface-card-hover, var(--color-slate-50)) !important;
+  }
 
-    .ql-page > :nth-child(n + 2) [class*="hover:"]:hover {
-        transform: none !important;
-        box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36)) !important;
-    }
+  .ql-page > :nth-child(n + 2) [class*='hover:']:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36)) !important;
+  }
 
-    /* ====================================================================
+  /* ====================================================================
        深色背景容器修复
        --------------------------------------------------------------------
        根因：styles.css 第35-50行"卡片化规则"会匹配所有同时拥有
@@ -81,52 +85,64 @@
        使其不再被通用 .bg-white 卡片化规则匹配。
        ==================================================================== */
 
-    /* 1. 深色背景容器本身：保持深色背景 + 白色文字 */
-    .ql-page > :nth-child(n + 2) .bg-slate-800,
-    .ql-page > :nth-child(n + 2) .bg-slate-900,
-    .ql-page > :nth-child(n + 2) [class*="from-slate-8"][class*="to-slate-"],
-    .ql-page > :nth-child(n + 2) [class*="from-slate-9"][class*="to-slate-"] {
-        background: var(--color-slate-900, #0f172a) !important;
-        color: #ffffff !important;
-    }
+  /* 1. 深色背景容器本身：保持深色背景 + 白色文字 */
+  .ql-page > :nth-child(n + 2) .bg-slate-800,
+  .ql-page > :nth-child(n + 2) .bg-slate-900,
+  .ql-page > :nth-child(n + 2) [class*='from-slate-8'][class*='to-slate-'],
+  .ql-page > :nth-child(n + 2) [class*='from-slate-9'][class*='to-slate-'] {
+    background: var(--color-slate-900, #0f172a) !important;
+    color: #ffffff !important;
+  }
 
-    /* 2. 深色容器内的半透明白色子卡片（专属 class，不触发通用卡片化规则） */
-    .ql-page .ql-dark-tile {
-        background: rgba(255, 255, 255, 0.1) !important;
-        color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        box-shadow: none !important;
-    }
+  /* 2. 深色容器内的半透明白色子卡片（专属 class，不触发通用卡片化规则） */
+  .ql-page .ql-dark-tile {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: none !important;
+  }
 
-    /* 3. 深色容器内所有文字：强制白色（防止继承被打断） */
-    .ql-page > :nth-child(n + 2) .bg-slate-800 :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong),
-    .ql-page > :nth-child(n + 2) .bg-slate-900 :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong),
-    .ql-page > :nth-child(n + 2) [class*="from-slate-8"] :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong),
-    .ql-page > :nth-child(n + 2) [class*="from-slate-9"] :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong) {
-        color: #ffffff !important;
-    }
+  /* 3. 深色容器内所有文字：强制白色（防止继承被打断） */
+  .ql-page
+    > :nth-child(n + 2)
+    .bg-slate-800
+    :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong),
+  .ql-page
+    > :nth-child(n + 2)
+    .bg-slate-900
+    :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong),
+  .ql-page
+    > :nth-child(n + 2)
+    [class*='from-slate-8']
+    :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong),
+  .ql-page
+    > :nth-child(n + 2)
+    [class*='from-slate-9']
+    :where(h1, h2, h3, h4, h5, h6, p, div, span, li, strong) {
+    color: #ffffff !important;
+  }
 
-    /* 4. amber/emerald 高亮色在深色背景上保持高亮 */
-    .ql-page > :nth-child(n + 2) .bg-slate-800 [class*="text-amber"],
-    .ql-page > :nth-child(n + 2) .bg-slate-900 [class*="text-amber"],
-    .ql-page > :nth-child(n + 2) [class*="from-slate-8"] [class*="text-amber"],
-    .ql-page > :nth-child(n + 2) [class*="from-slate-9"] [class*="text-amber"] {
-        color: #fcd34d !important;
-    }
+  /* 4. amber/emerald 高亮色在深色背景上保持高亮 */
+  .ql-page > :nth-child(n + 2) .bg-slate-800 [class*='text-amber'],
+  .ql-page > :nth-child(n + 2) .bg-slate-900 [class*='text-amber'],
+  .ql-page > :nth-child(n + 2) [class*='from-slate-8'] [class*='text-amber'],
+  .ql-page > :nth-child(n + 2) [class*='from-slate-9'] [class*='text-amber'] {
+    color: #fcd34d !important;
+  }
 
-    .ql-page > :nth-child(n + 2) .bg-slate-800 [class*="text-emerald"],
-    .ql-page > :nth-child(n + 2) .bg-slate-900 [class*="text-emerald"],
-    .ql-page > :nth-child(n + 2) [class*="from-slate-8"] [class*="text-emerald"],
-    .ql-page > :nth-child(n + 2) [class*="from-slate-9"] [class*="text-emerald"] {
-        color: #6ee7b7 !important;
-    }
+  .ql-page > :nth-child(n + 2) .bg-slate-800 [class*='text-emerald'],
+  .ql-page > :nth-child(n + 2) .bg-slate-900 [class*='text-emerald'],
+  .ql-page > :nth-child(n + 2) [class*='from-slate-8'] [class*='text-emerald'],
+  .ql-page > :nth-child(n + 2) [class*='from-slate-9'] [class*='text-emerald'] {
+    color: #6ee7b7 !important;
+  }
 }
 
 /* ====================================================================
    .ql-dark-tile 基础样式（不限制在 @media 内，移动端也生效）
    ==================================================================== */
 .ql-dark-tile {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }

@@ -21,7 +21,10 @@ describe('Scraper 验证器', () => {
         'B08N5WRWNW',
         'B0ABCDEFGH',
         'B012345678',
-        'B0ZZZZZ999'
+        'B0ZZZZZ999',
+        'B000000001',
+        '059035342X',
+        'A08N5WRWNW'
       ];
 
       validAsins.forEach(asin => {
@@ -31,8 +34,7 @@ describe('Scraper 验证器', () => {
 
     it('应该拒绝无效的 ASIN 格式', () => {
       const invalidAsins = [
-        'A08N5WRWNW',  // 不以 B0 开头
-        'B8N5WRWNW',   // 缺少 0
+        'B8N5WRWNW',   // 长度不足
         'B08N5WRWN',   // 长度不足
         'B08N5WRWNWX', // 长度过长
         'B08n5wrwnw',  // 小写字母

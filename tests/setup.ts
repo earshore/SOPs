@@ -2,6 +2,7 @@
  * Vitest 测试环境设置
  */
 
+import '../src/common/utils/nativeLoggerConsole';
 import { vi } from 'vitest';
 
 // Mock import.meta.env

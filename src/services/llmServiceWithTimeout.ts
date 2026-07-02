@@ -8,6 +8,8 @@ import { callLLM, type ChatMessage, type LLMOptions, type LLMConfig } from './ll
 import { workingStateManager } from '../common/utils/WorkingStateManager';
 import { showToast } from '../common/ui/notifications';
 
+const nativeLoggerConsole = globalThis.console;
+
 /**
  * 带超时重试的LLM调用选项
  */
@@ -26,10 +28,7 @@ export interface LLMWithTimeoutRequest extends LLMConfig {
   messages: ChatMessage[];
 }
 
-function callLLMFromRequest(
-  request: LLMWithTimeoutRequest,
-  options: LLMOptions
-): Promise<string> {
+function callLLMFromRequest(request: LLMWithTimeoutRequest, options: LLMOptions): Promise<string> {
   return callLLM(
     request.messages,
     request.provider,
@@ -42,11 +41,11 @@ function callLLMFromRequest(
 
 /**
  * 带超时自动重试的LLM调用
- * 
+ *
  * @param request - LLM请求配置
  * @param options - 配置选项
  * @returns LLM响应
- * 
+ *
  * @example
  * ```typescript
  * const response = await callLLMWithTimeout(
@@ -85,9 +84,13 @@ export async function callLLMWithTimeout(
       maxRetries,
       onTimeout: async () => {
         // 超时后的重试逻辑
-        console.warn(`LLM调用超时，正在重试: ${description}`, {
-          taskId
-        }, 'LLMService');
+        nativeLoggerConsole.warn(
+          `LLM调用超时，正在重试: ${description}`,
+          {
+            taskId,
+          },
+          'LLMService'
+        );
 
         if (showUserNotification) {
           showToast('请求超时，正在自动重试...', { type: 'warning' });
@@ -104,13 +107,13 @@ export async function callLLMWithTimeout(
           showToast('请求成功', { type: 'success' });
         }
       },
-      onFinalFailure: (error) => {
+      onFinalFailure: error => {
         console.error(`LLM调用最终失败: ${description}`, error, 'LLMService');
         if (showUserNotification) {
           showToast(`请求失败: ${error.message}`, { type: 'error' });
         }
         reject(error);
-      }
+      },
     });
 
     // 执行初始调用
@@ -130,7 +133,7 @@ export async function callLLMWithTimeout(
 
 /**
  * 带超时重试的LLM配置调用
- * 
+ *
  * @param messages - 消息列表
  * @param config - LLM配置
  * @param options - 配置选项
@@ -141,15 +144,12 @@ export async function callLLMWithConfigAndTimeout(
   config: LLMConfig,
   options: LLMWithTimeoutOptions = {}
 ): Promise<string> {
-  return callLLMWithTimeout(
-    { ...config, messages },
-    options
-  );
+  return callLLMWithTimeout({ ...config, messages }, options);
 }
 
 /**
  * 取消LLM调用
- * 
+ *
  * @param taskId - 任务ID
  */
 export function cancelLLMCall(taskId: string): void {
@@ -158,7 +158,7 @@ export function cancelLLMCall(taskId: string): void {
 
 /**
  * 获取LLM调用状态
- * 
+ *
  * @param taskId - 任务ID
  * @returns 状态信息或null
  */

@@ -349,6 +349,25 @@ describe('SafeRenderer', () => {
     });
   });
 
+  describe('renderSanitizedHtml', () => {
+    it('应该渲染运行时 HTML 并移除危险内容', () => {
+      renderer.renderSanitizedHtml(
+        container,
+        '<div class="card" onclick="bad()">Dynamic</div><script>bad()</script>',
+      );
+
+      expect(container.innerHTML).toContain('Dynamic');
+      expect(container.innerHTML).not.toContain('<script>');
+      expect(container.innerHTML).not.toContain('onclick');
+    });
+
+    it('应该抛出错误（HTML 不是字符串）', () => {
+      expect(() => {
+        renderer.renderSanitizedHtml(container, 123 as any);
+      }).toThrow('SafeRenderer: html must be a string');
+    });
+  });
+
   describe('renderDynamic', () => {
     it('应该渲染动态内容并转义', () => {
       const template = '<div>Hello {{name}}</div>';

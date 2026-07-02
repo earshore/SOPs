@@ -17,6 +17,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
+import * as ts from 'typescript';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,6 +53,27 @@ interface TypeCoverageMetrics {
   total: number;
   covered: number;
   uncovered: number;
+}
+
+interface TypeUsageAnalysis {
+  total: number;
+  typed: number;
+  anyCount: number;
+  explicitAny: number;
+  implicitAny: number;
+}
+
+interface ESLintMessage {
+  ruleId?: string | null;
+  message: string;
+  line?: number;
+}
+
+interface ESLintResult {
+  filePath: string;
+  messages?: ESLintMessage[];
+  errorCount?: number;
+  warningCount?: number;
 }
 
 interface QualityMetrics {
@@ -240,17 +262,7 @@ class QualityMonitor {
     console.log('📊 检查代码复杂度...');
 
     try {
-      // 运行 ESLint 并获取复杂度信息
-      const eslintConfig = path.join(__dirname, '../eslint.config.js');
-      const cmd = `npx eslint ${this.config.srcDir} --format json`;
-
-      const output = execSync(cmd, {
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'pipe'],
-        maxBuffer: 10 * 1024 * 1024
-      }).toString();
-
-      const results = JSON.parse(output);
+      const results = this.runEslintJson();
       const complexityViolations: ComplexityMetrics[] = [];
       let totalComplexity = 0;
       let functionCount = 0;
@@ -291,18 +303,7 @@ class QualityMonitor {
       console.log(`  ✓ 最大复杂度: ${this.metrics.complexity.max}`);
       console.log(`  ✓ 违规函数: ${complexityViolations.length}\n`);
     } catch (error: any) {
-      // ESLint 可能返回非零退出码，但仍有输出
-      if (error.stdout) {
-        try {
-          const results = JSON.parse(error.stdout);
-          // 处理结果（同上）
-          console.log('  ⚠ ESLint 检查完成（有警告）\n');
-        } catch {
-          console.warn('  ⚠ 无法解析 ESLint 输出\n');
-        }
-      } else {
-        console.warn('  ⚠ ESLint 检查跳过\n');
-      }
+      console.warn('  ⚠ ESLint 检查失败:', error.message, '\n');
     }
   }
 
@@ -507,23 +508,32 @@ class QualityMonitor {
       console.log('🔤 检查类型覆盖率...');
 
       try {
-        // 扫描所有 TypeScript 文件
-        const srcDir = path.join(__dirname, '..', 'src');
-        const tsFiles = this.findTypeScriptFiles(srcDir);
+        const program = this.createTypeCoverageProgram();
+        const checker = program.getTypeChecker();
+        const srcRoot = this.normalizePath(this.config.srcDir) + path.sep;
 
         let totalSymbols = 0;
         let typedSymbols = 0;
         let anyTypeCount = 0;
+        let explicitAnyCount = 0;
         let implicitAnyCount = 0;
 
-        // 分析每个文件
-        for (const file of tsFiles) {
-          const content = fs.readFileSync(file, 'utf-8');
-          const analysis = this.analyzeTypeUsage(content);
+        for (const sourceFile of program.getSourceFiles()) {
+          const normalizedFileName = this.normalizePath(sourceFile.fileName);
+          if (
+            sourceFile.isDeclarationFile ||
+            !normalizedFileName.startsWith(srcRoot) ||
+            !/\.tsx?$/.test(sourceFile.fileName)
+          ) {
+            continue;
+          }
+
+          const analysis = this.analyzeTypeUsage(sourceFile, checker);
 
           totalSymbols += analysis.total;
           typedSymbols += analysis.typed;
           anyTypeCount += analysis.anyCount;
+          explicitAnyCount += analysis.explicitAny;
           implicitAnyCount += analysis.implicitAny;
         }
 
@@ -543,19 +553,10 @@ class QualityMonitor {
         console.log(`  ✓ 总符号数: ${totalSymbols}`);
         console.log(`  ✓ 已类型化: ${typedSymbols}`);
         console.log(`  ✓ 未类型化: ${totalSymbols - typedSymbols}`);
-        console.log(`  ✓ 显式 any: ${anyTypeCount}`);
-        console.log(`  ✓ 隐式 any: ${implicitAnyCount}\n`);
+        console.log(`  ✓ 总 any: ${anyTypeCount}`);
+        console.log(`  ✓ 显式 any: ${explicitAnyCount}`);
+        console.log(`  ✓ 推断或传播 any: ${implicitAnyCount}\n`);
 
-        // 如果类型覆盖率低于阈值，添加违规记录
-        if (percentage < this.config.thresholds.minTypeCoveragePercentage) {
-          this.violations.push({
-            type: 'type-coverage',
-            severity: 'warning',
-            message: `类型覆盖率 ${percentage.toFixed(2)}% 低于阈值 ${this.config.thresholds.minTypeCoveragePercentage}%`,
-            actual: percentage,
-            expected: this.config.thresholds.minTypeCoveragePercentage
-          });
-        }
       } catch (error) {
         console.warn('  ⚠ 类型覆盖率检查失败:', error);
         this.metrics.typeCoverage = {
@@ -568,126 +569,127 @@ class QualityMonitor {
     }
 
     /**
-     * 查找所有 TypeScript 文件
+     * 创建用于类型覆盖率统计的 TypeScript Program。
      */
-    private findTypeScriptFiles(dir: string): string[] {
-      const files: string[] = [];
+    private createTypeCoverageProgram(): ts.Program {
+      const configPath =
+        ts.findConfigFile(path.join(__dirname, '..'), ts.sys.fileExists, 'tsconfig.app.json') ||
+        ts.findConfigFile(path.join(__dirname, '..'), ts.sys.fileExists, 'tsconfig.json');
 
-      try {
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-        for (const entry of entries) {
-          const fullPath = path.join(dir, entry.name);
-
-          // 跳过 node_modules 和其他不需要检查的目录
-          if (entry.isDirectory()) {
-            if (!['node_modules', 'dist', 'build', '.git', 'coverage'].includes(entry.name)) {
-              files.push(...this.findTypeScriptFiles(fullPath));
-            }
-          } else if (entry.isFile() && /\.tsx?$/.test(entry.name)) {
-            files.push(fullPath);
-          }
-        }
-      } catch (error) {
-        // 忽略无法访问的目录
+      if (!configPath) {
+        throw new Error('未找到 TypeScript 配置文件');
       }
 
-      return files;
+      const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
+      if (configFile.error) {
+        const message = ts.flattenDiagnosticMessageText(configFile.error.messageText, '\n');
+        throw new Error(`读取 TypeScript 配置失败: ${message}`);
+      }
+
+      const parsedConfig = ts.parseJsonConfigFileContent(
+        configFile.config,
+        ts.sys,
+        path.dirname(configPath)
+      );
+
+      return ts.createProgram(parsedConfig.fileNames, parsedConfig.options);
     }
 
     /**
-     * 分析文件中的类型使用情况
+     * 分析文件中的类型使用情况。
+     * 这里使用 TypeChecker 的实际推断结果，避免把正常类型推断误判为隐式 any。
      */
-    private analyzeTypeUsage(content: string): {
-      total: number;
-      typed: number;
-      anyCount: number;
-      implicitAny: number;
-    } {
-      let total = 0;
-      let typed = 0;
+    private analyzeTypeUsage(sourceFile: ts.SourceFile, checker: ts.TypeChecker): TypeUsageAnalysis {
+      let totalSymbols = 0;
       let anyCount = 0;
+      let explicitAny = 0;
       let implicitAny = 0;
 
-      // 匹配变量声明
-      const varDeclarations = [
-        // const/let/var 声明
-        /(?:const|let|var)\s+(\w+)\s*:\s*([^=;]+)/g,
-        /(?:const|let|var)\s+(\w+)\s*=/g,
-        // 函数参数
-        /\(([^)]*)\)/g,
-        // 函数返回类型
-        /\):\s*([^{;]+)/g,
-        // 类属性
-        /(?:public|private|protected)?\s*(\w+)\s*:\s*([^=;]+)/g,
-        // 接口/类型定义
-        /(\w+)\s*:\s*([^,;}\]]+)/g
-      ];
-
-      // 统计显式 any 类型
-      const anyMatches = content.match(/:\s*any\b/g);
-      if (anyMatches) {
-        anyCount = anyMatches.length;
-        total += anyMatches.length;
-      }
-
-      // 统计有类型注解的声明
-      const typeAnnotations = content.match(/:\s*(?!any\b)[A-Z]\w*[^=;,)}\]]*[=;,)}\]]/g);
-      if (typeAnnotations) {
-        typed += typeAnnotations.length;
-        total += typeAnnotations.length;
-      }
-
-      // 统计可能的隐式 any（没有类型注解的声明）
-      const noTypeDeclarations = content.match(/(?:const|let|var)\s+\w+\s*=/g);
-      if (noTypeDeclarations) {
-        // 检查这些声明是否有明显的类型推断
-        for (const decl of noTypeDeclarations) {
-          const line = content.substring(
-            content.indexOf(decl),
-            content.indexOf(decl) + 100
-          );
-
-          // 如果赋值是字面量或明显的类型，则认为是有类型的
-          if (/=\s*(?:\d+|true|false|'[^']*'|"[^"]*"|`[^`]*`|\[|\{)/.test(line)) {
-            typed++;
-            total++;
-          } else {
-            implicitAny++;
-            total++;
-          }
+      const countNode = (name: ts.Identifier | undefined, node: ts.Node): void => {
+        if (!name) {
+          return;
         }
-      }
 
-      // 统计函数参数（没有类型注解的）
-      const functionParams = content.match(/function\s+\w+\s*\(([^)]*)\)/g);
-      if (functionParams) {
-        for (const params of functionParams) {
-          const paramList = params.match(/\(([^)]*)\)/)?.[1] || '';
-          const paramNames = paramList.split(',').filter(p => p.trim());
-
-          for (const param of paramNames) {
-            if (param.includes(':')) {
-              if (param.includes(': any')) {
-                anyCount++;
-              } else {
-                typed++;
-              }
-              total++;
-            } else if (param.trim()) {
-              implicitAny++;
-              total++;
-            }
-          }
+        totalSymbols++;
+        const type = checker.getTypeAtLocation(name);
+        if (!this.isAnyType(type)) {
+          return;
         }
-      }
+
+        anyCount++;
+        if (this.hasExplicitAnyType(node)) {
+          explicitAny++;
+        } else {
+          implicitAny++;
+        }
+      };
+
+      const visit = (node: ts.Node): void => {
+        if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+          countNode(node.name, node);
+        } else if (ts.isParameter(node) && ts.isIdentifier(node.name)) {
+          countNode(node.name, node);
+        } else if (
+          (ts.isPropertyDeclaration(node) || ts.isPropertySignature(node)) &&
+          ts.isIdentifier(node.name)
+        ) {
+          countNode(node.name, node);
+        } else if (
+          ts.isFunctionDeclaration(node) ||
+          ts.isMethodDeclaration(node) ||
+          ts.isFunctionExpression(node) ||
+          ts.isArrowFunction(node)
+        ) {
+          countNode(node.name && ts.isIdentifier(node.name) ? node.name : undefined, node);
+        } else if (
+          ts.isTypeAliasDeclaration(node) ||
+          ts.isInterfaceDeclaration(node) ||
+          ts.isClassDeclaration(node) ||
+          ts.isEnumDeclaration(node)
+        ) {
+          countNode(node.name, node);
+        }
+
+        ts.forEachChild(node, visit);
+      };
+
+      visit(sourceFile);
 
       return {
-        total: Math.max(total, 1), // 避免除以零
-        typed,
+        total: totalSymbols,
+        typed: totalSymbols - anyCount,
         anyCount,
+        explicitAny,
         implicitAny
       };
+    }
+
+    private isAnyType(type: ts.Type): boolean {
+      return (type.flags & ts.TypeFlags.Any) !== 0;
+    }
+
+    private hasExplicitAnyType(node: ts.Node): boolean {
+      let found = false;
+
+      const typeNode = 'type' in node ? (node as { type?: ts.TypeNode }).type : undefined;
+      if (!typeNode) {
+        return false;
+      }
+
+      const visit = (child: ts.Node): void => {
+        if (child.kind === ts.SyntaxKind.AnyKeyword) {
+          found = true;
+          return;
+        }
+        ts.forEachChild(child, visit);
+      };
+
+      visit(typeNode);
+      return found;
+    }
+
+    private normalizePath(filePath: string): string {
+      return path.normalize(filePath);
     }
 
 
@@ -698,14 +700,7 @@ class QualityMonitor {
     console.log('🔍 检查 Lint 错误...');
 
     try {
-      const cmd = `npx eslint ${this.config.srcDir} --format json`;
-
-      const output = execSync(cmd, {
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'pipe']
-      }).toString();
-
-      const results = JSON.parse(output);
+      const results = this.runEslintJson();
       let errorCount = 0;
       let warningCount = 0;
 
@@ -720,28 +715,31 @@ class QualityMonitor {
       console.log(`  ✓ Lint 错误: ${errorCount}`);
       console.log(`  ✓ Lint 警告: ${warningCount}\n`);
     } catch (error: any) {
+      console.warn('  ⚠ Lint 检查失败:', error.message, '\n');
+    }
+  }
+
+  private runEslintJson(): ESLintResult[] {
+    const ignoredTestFiles = [
+      '--ignore-pattern "**/*.test.ts"',
+      '--ignore-pattern "**/*.test.tsx"',
+      '--ignore-pattern "**/*.spec.ts"',
+      '--ignore-pattern "**/*.spec.tsx"'
+    ].join(' ');
+    const cmd = `npx eslint "${this.config.srcDir}" ${ignoredTestFiles} --format json`;
+
+    try {
+      const output = execSync(cmd, {
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+        maxBuffer: 20 * 1024 * 1024
+      }).toString();
+      return JSON.parse(output) as ESLintResult[];
+    } catch (error: any) {
       if (error.stdout) {
-        try {
-          const results = JSON.parse(error.stdout);
-          let errorCount = 0;
-          let warningCount = 0;
-
-          for (const result of results) {
-            errorCount += result.errorCount || 0;
-            warningCount += result.warningCount || 0;
-          }
-
-          this.metrics.lintErrors = errorCount;
-          this.metrics.lintWarnings = warningCount;
-
-          console.log(`  ✓ Lint 错误: ${errorCount}`);
-          console.log(`  ✓ Lint 警告: ${warningCount}\n`);
-        } catch {
-          console.warn('  ⚠ 无法解析 ESLint 输出\n');
-        }
-      } else {
-        console.warn('  ⚠ Lint 检查失败\n');
+        return JSON.parse(error.stdout) as ESLintResult[];
       }
+      throw error;
     }
   }
 

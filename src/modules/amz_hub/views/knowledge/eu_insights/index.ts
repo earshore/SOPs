@@ -2,12 +2,12 @@
  * 欧洲站市场洞察 - 各国消费者画像雷达图
  */
 
-import { escapeHtml, setSafeHtml } from "@/common/utils/security";
-import BaseModule from "../../../../../common/BaseModule";
-import { AMZ_COUNTRY_DATA, type CountryCode } from "../../../constants/amz_hub_constants";
-import templateHTML from "./template.html?raw";
-import "./styles.css";
-import { loadChartJs, type ChartJS } from "../../../../../common/utils/lazyLibs";
+import { escapeHtml, setSafeHtml } from '@/common/utils/security';
+import BaseModule from '../../../../../common/BaseModule';
+import { AMZ_COUNTRY_DATA, type CountryCode } from '../../../constants/amz_hub_constants';
+import templateHTML from './template.html?raw';
+import './styles.css';
+import { loadChartJs, type ChartJS } from '../../../../../common/utils/lazyLibs';
 
 // Chart.js 实例类型定义
 interface ChartInstance {
@@ -32,7 +32,7 @@ class EuInsightsModule extends BaseModule {
   private radarChart: ChartInstance | null = null;
 
   constructor() {
-    super("amz_eu_insights");
+    super('amz_eu_insights');
   }
 
   protected async render(): Promise<void> {
@@ -41,21 +41,19 @@ class EuInsightsModule extends BaseModule {
 
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, templateHTML);
-    container.classList.add("fade-in");
+    container.classList.add('fade-in');
   }
 
   async init(): Promise<void> {
     await loadChartJs();
-    const selector = document.getElementById(
-      "amz_countrySelector",
-    ) as HTMLSelectElement;
+    const selector = document.getElementById('amz_countrySelector') as HTMLSelectElement;
     if (selector) {
       // 使用 BaseModule 提供的 addEventListener，卸载时会自动清理
-      this.addEventListener(selector, "change", (e) =>
-        this.updateCountryInfo((e.target as HTMLSelectElement).value),
+      this.addEventListener(selector, 'change', e =>
+        this.updateCountryInfo((e.target as HTMLSelectElement).value)
       );
       // 默认初始化（使用大写 ISO 代码）
-      this.updateCountryInfo("DE");
+      this.updateCountryInfo('DE');
     }
   }
 
@@ -70,10 +68,12 @@ class EuInsightsModule extends BaseModule {
     if (!isCountryCode(code)) return;
     const data = AMZ_COUNTRY_DATA[code];
 
-    const details = document.getElementById("amz_countryDetails");
+    const details = document.getElementById('amz_countryDetails');
     if (details) {
       // ✅ 安全: data来自内部AMZ_COUNTRY_DATA，动态文本已通过escapeHtml转义
-      setSafeHtml(details, `
+      setSafeHtml(
+        details,
+        `
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
                         <span class="text-3xl">${this.getFlagEmoji(code)}</span> ${escapeHtml(data.name)}
@@ -92,16 +92,15 @@ class EuInsightsModule extends BaseModule {
                         </div>
                     </div>
                 </div>
-            `);
+            `
+      );
     }
 
     this.updateChart(data.radarData);
   }
 
   updateChart(dataset: number[]): void {
-    const ctx = document.getElementById(
-      "amz_euRadarChart",
-    ) as HTMLCanvasElement;
+    const ctx = document.getElementById('amz_euRadarChart') as HTMLCanvasElement;
     if (!ctx) return;
 
     if (this.radarChart) {
@@ -115,17 +114,17 @@ class EuInsightsModule extends BaseModule {
       if (!Chart) return;
 
       this.radarChart = new Chart(ctx, {
-        type: "radar",
+        type: 'radar',
         data: {
-          labels: ["质量要求", "环保意识", "价格敏感", "外观设计", "品牌信任"],
+          labels: ['质量要求', '环保意识', '价格敏感', '外观设计', '品牌信任'],
           datasets: [
             {
-              label: "市场倾向指数",
+              label: '市场倾向指数',
               data: dataset,
               fill: true,
-              backgroundColor: "rgba(99, 102, 241, 0.2)",
-              borderColor: "rgb(99, 102, 241)",
-              pointBackgroundColor: "rgb(99, 102, 241)",
+              backgroundColor: 'rgba(99, 102, 241, 0.2)',
+              borderColor: 'rgb(99, 102, 241)',
+              pointBackgroundColor: 'rgb(99, 102, 241)',
             },
           ],
         },
@@ -143,8 +142,8 @@ class EuInsightsModule extends BaseModule {
   getFlagEmoji(countryCode: string): string {
     const codePoints = countryCode
       .toUpperCase()
-      .split("")
-      .map((char) => 127397 + char.charCodeAt(0));
+      .split('')
+      .map(char => 127397 + char.charCodeAt(0));
     return String.fromCodePoint(...codePoints);
   }
 }

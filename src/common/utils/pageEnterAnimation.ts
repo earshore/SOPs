@@ -3,7 +3,7 @@ export const PAGE_ENTER_ANIMATION_ACTIVE_CLASS = 'view-fade-in';
 
 export const PAGE_ENTER_ANIMATION_CLASSES = [
   PAGE_ENTER_ANIMATION_INITIAL_CLASS,
-  PAGE_ENTER_ANIMATION_ACTIVE_CLASS
+  PAGE_ENTER_ANIMATION_ACTIVE_CLASS,
 ] as const;
 
 export function clearPageEnterAnimation(container: HTMLElement): void {

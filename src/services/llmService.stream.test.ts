@@ -9,14 +9,14 @@ function createSseResponse(lines: string[]): Response {
         controller.enqueue(encoder.encode(`${line}\n\n`));
       }
       controller.close();
-    }
+    },
   });
 
   return new Response(stream, {
     status: 200,
     headers: {
-      'Content-Type': 'text/event-stream'
-    }
+      'Content-Type': 'text/event-stream',
+    },
   });
 }
 
@@ -29,11 +29,16 @@ describe('callLLM streaming', () => {
     const firstResponse = vi.fn();
     const streamUpdate = vi.fn();
 
-    vi.stubGlobal('fetch', vi.fn(async () => createSseResponse([
-      'data: {"choices":[{"delta":{"reasoning_content":"**Generating plan**"}}]}',
-      'data: {"choices":[{"delta":{"content":"{\\"ok\\":true}"}}]}',
-      'data: [DONE]'
-    ])));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        createSseResponse([
+          'data: {"choices":[{"delta":{"reasoning_content":"**Generating plan**"}}]}',
+          'data: {"choices":[{"delta":{"content":"{\\"ok\\":true}"}}]}',
+          'data: [DONE]',
+        ])
+      )
+    );
 
     const response = await callLLM(
       [{ role: 'user', content: 'Return JSON.' }],
@@ -46,7 +51,7 @@ describe('callLLM streaming', () => {
         jsonMode: true,
         retries: 0,
         onFirstResponse: firstResponse,
-        onStreamUpdate: streamUpdate
+        onStreamUpdate: streamUpdate,
       }
     );
 

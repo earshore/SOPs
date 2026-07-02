@@ -6,6 +6,8 @@
 
 import type { StoreApi } from 'zustand/vanilla';
 
+const nativeLoggerConsole = globalThis.console;
+
 type StateUpdater<T> = T | Partial<T> | ((state: T) => T | Partial<T>);
 type StateReplacer<T> = T | ((state: T) => T);
 
@@ -49,7 +51,7 @@ export const devtools = <T extends object>(
   const {
     name = 'AppStore',
     enabled = process.env.NODE_ENV === 'development',
-    anonymousActionType = 'anonymous'
+    anonymousActionType = 'anonymous',
   } = options;
 
   return (set: StoreApi<T>['setState'], get: StoreApi<T>['getState']): T => {
@@ -60,7 +62,7 @@ export const devtools = <T extends object>(
 
     // 连接DevTools
     const extension = window.__REDUX_DEVTOOLS_EXTENSION__.connect({ name });
-    
+
     // 包装set方法以发送action到DevTools
     const devtoolsSet: typeof set = (partial, replace) => {
       // 先调用原始set
@@ -69,7 +71,7 @@ export const devtools = <T extends object>(
       } else {
         set(partial as StateUpdater<T>, false);
       }
-      
+
       // 获取更新后的状态
       const nextState = get();
 
@@ -77,7 +79,7 @@ export const devtools = <T extends object>(
       extension.send(
         {
           type: anonymousActionType,
-          payload: typeof partial === 'function' ? undefined : partial
+          payload: typeof partial === 'function' ? undefined : partial,
         },
         nextState
       );
@@ -85,7 +87,7 @@ export const devtools = <T extends object>(
 
     // 使用包装后的set创建初始状态
     const initialState = config(devtoolsSet, get);
-    
+
     // 初始化DevTools
     extension.init(initialState);
 
@@ -124,9 +126,9 @@ export const devtoolsHelper = {
   logStateChange(storeName: string, action: string, prevState: unknown, nextState: unknown): void {
     if (process.env.NODE_ENV === 'development') {
       console.group(`[${storeName}] ${action}`);
-      console.log('Previous State:', prevState);
-      console.log('Next State:', nextState);
+      nativeLoggerConsole.log('Previous State:', prevState);
+      nativeLoggerConsole.log('Next State:', nextState);
       console.groupEnd();
     }
-  }
+  },
 };

@@ -3,10 +3,7 @@
 // 路由 ID 常量由各模块 module.manifest.ts 派生。
 // ================================================================
 
-import {
-  buildRouteConstants,
-  collectRouteIds,
-} from "../config/moduleManifest";
+import { buildRouteConstants, collectRouteIds } from '../config/moduleManifest';
 import {
   amzHubManifest,
   appCenterManifest,
@@ -14,7 +11,7 @@ import {
   moreManifest,
   ROUTE_MANIFESTS,
   sopsManifest,
-} from "../config/routeManifests";
+} from '../config/routeManifests';
 
 export const SOPS_ROUTES = buildRouteConstants(sopsManifest);
 export const APP_CENTER_ROUTES = buildRouteConstants(appCenterManifest);
@@ -54,23 +51,25 @@ export function isValidRouteId(id: string): id is RouteId {
  * 根据路由 ID 获取顶层模块前缀。
  */
 export function getRouteModule(routeId: RouteId): string {
-  if (routeId.startsWith("sops_")) return "sops";
-  if (routeId.startsWith("amz_")) return "amz_hub";
-  if (routeId.startsWith("more_")) return "more";
+  if (routeId.startsWith('sops_')) return 'sops';
+  if (routeId.startsWith('amz_')) return 'amz_hub';
+  if (routeId.startsWith('more_')) return 'more';
   if (
-    routeId.startsWith("kw_") ||
-    ([
-      APP_CENTER_ROUTES.SCRAPER,
-      APP_CENTER_ROUTES.AI_ANALYSIS,
-      APP_CENTER_ROUTES.PROMPTLAB,
-      APP_CENTER_ROUTES.PPC_SEARCH_TERMS,
-      APP_CENTER_ROUTES.PLAYGROUND,
-      APP_CENTER_ROUTES.OVERVIEW,
-    ] as readonly string[]).includes(routeId)
+    routeId.startsWith('kw_') ||
+    (
+      [
+        APP_CENTER_ROUTES.SCRAPER,
+        APP_CENTER_ROUTES.AI_ANALYSIS,
+        APP_CENTER_ROUTES.PROMPTLAB,
+        APP_CENTER_ROUTES.PPC_SEARCH_TERMS,
+        APP_CENTER_ROUTES.PLAYGROUND,
+        APP_CENTER_ROUTES.OVERVIEW,
+      ] as readonly string[]
+    ).includes(routeId)
   ) {
-    return "app_center";
+    return 'app_center';
   }
-  return "system";
+  return 'system';
 }
 
 export default ALL_ROUTE_IDS;

@@ -26,31 +26,29 @@
  * 21. 减少动画偏好 (无障碍)
  */
 
-
 /* ========================================
    1. CSS 变量 — 缓动函数 & 时长
    ======================================== */
 :root {
   /* 缓动函数 */
-  --ease-smooth:    cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-bounce:    cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  --ease-elastic:   cubic-bezier(0.68, -0.6, 0.32, 1.6);
-  --ease-in:        cubic-bezier(0.4, 0, 1, 1);
-  --ease-out:       cubic-bezier(0, 0, 0.2, 1);
-  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-back-in:   cubic-bezier(0.6, -0.28, 0.735, 0.045);
-  --ease-back-out:  cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-back-in: cubic-bezier(0.6, -0.28, 0.735, 0.045);
+  --ease-back-out: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   /* 时长 */
   --duration-fastest: 100ms;
-  --duration-fast:    200ms;
-  --duration-normal:  300ms;
-  --duration-slow:    400ms;
-  --duration-slower:  500ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 400ms;
+  --duration-slower: 500ms;
   --duration-slowest: 700ms;
 }
-
 
 /* ========================================
    2. 淡入 / 淡出动画
@@ -212,7 +210,6 @@
   animation: fadeOutDown var(--duration-normal) var(--ease-in) forwards;
 }
 
-
 /* ========================================
    3. 滑入 / 滑出动画
    ======================================== */
@@ -314,7 +311,6 @@
   animation: slideOutLeft var(--duration-normal) var(--ease-in) forwards;
 }
 
-
 /* ========================================
    4. 缩放动画
    ======================================== */
@@ -410,7 +406,6 @@
   animation: elasticScale var(--duration-slower) var(--ease-smooth) forwards;
 }
 
-
 /* ========================================
    5. 弹跳动画
    ======================================== */
@@ -442,7 +437,8 @@
 
 /* --- 持续弹跳 --- */
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
@@ -458,9 +454,15 @@
 
 /* --- 轻微弹跳 (按钮反馈) --- */
 @keyframes tapBounce {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(0.95); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .tap-bounce {
@@ -469,19 +471,32 @@
 
 /* --- 橡皮筋效果 --- */
 @keyframes rubberBand {
-  0%   { transform: scale3d(1, 1, 1); }
-  30%  { transform: scale3d(1.15, 0.85, 1); }
-  40%  { transform: scale3d(0.85, 1.15, 1); }
-  50%  { transform: scale3d(1.08, 0.92, 1); }
-  65%  { transform: scale3d(0.97, 1.03, 1); }
-  75%  { transform: scale3d(1.02, 0.98, 1); }
-  100% { transform: scale3d(1, 1, 1); }
+  0% {
+    transform: scale3d(1, 1, 1);
+  }
+  30% {
+    transform: scale3d(1.15, 0.85, 1);
+  }
+  40% {
+    transform: scale3d(0.85, 1.15, 1);
+  }
+  50% {
+    transform: scale3d(1.08, 0.92, 1);
+  }
+  65% {
+    transform: scale3d(0.97, 1.03, 1);
+  }
+  75% {
+    transform: scale3d(1.02, 0.98, 1);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
 }
 
 .rubber-band {
   animation: rubberBand 0.8s var(--ease-smooth);
 }
-
 
 /* ========================================
    6. 旋转动画
@@ -534,11 +549,22 @@
 
 /* --- 摆动 (钟摆) --- */
 @keyframes swing {
-  0%, 100% { transform: rotate(0deg); }
-  20%      { transform: rotate(12deg); }
-  40%      { transform: rotate(-8deg); }
-  60%      { transform: rotate(4deg); }
-  80%      { transform: rotate(-3deg); }
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(12deg);
+  }
+  40% {
+    transform: rotate(-8deg);
+  }
+  60% {
+    transform: rotate(4deg);
+  }
+  80% {
+    transform: rotate(-3deg);
+  }
 }
 
 .swing {
@@ -546,14 +572,14 @@
   animation: swing 1.2s var(--ease-smooth);
 }
 
-
 /* ========================================
    7. 脉冲 & 心跳动画
    ======================================== */
 
 /* --- 脉冲 --- */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -569,7 +595,8 @@
 
 /* --- 轻脉冲 (不缩放) --- */
 @keyframes pulseSoft {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -583,7 +610,8 @@
 
 /* --- 心跳 --- */
 @keyframes heartbeat {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   14% {
@@ -606,7 +634,8 @@
 
 /* --- 呼吸灯 --- */
 @keyframes breathe {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.4;
     transform: scale(0.96);
   }
@@ -636,16 +665,25 @@
   animation: pulseRing 1.5s infinite ease-out;
 }
 
-
 /* ========================================
    8. 摇晃 & 抖动动画
    ======================================== */
 
 /* --- 水平摇晃 (错误提示) --- */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 50%, 90% { transform: translateX(-4px); }
-  30%, 70% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  50%,
+  90% {
+    transform: translateX(-4px);
+  }
+  30%,
+  70% {
+    transform: translateX(4px);
+  }
 }
 
 .shake {
@@ -654,9 +692,19 @@
 
 /* --- 强烈摇晃 --- */
 @keyframes shakeHard {
-  0%, 100% { transform: translateX(0); }
-  10%, 50%, 90% { transform: translateX(-8px); }
-  30%, 70% { transform: translateX(8px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  50%,
+  90% {
+    transform: translateX(-8px);
+  }
+  30%,
+  70% {
+    transform: translateX(8px);
+  }
 }
 
 .shake-hard {
@@ -665,12 +713,25 @@
 
 /* --- 抖动 (引起注意) --- */
 @keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  15%      { transform: rotate(-5deg); }
-  30%      { transform: rotate(4deg); }
-  45%      { transform: rotate(-3deg); }
-  60%      { transform: rotate(2deg); }
-  75%      { transform: rotate(-1deg); }
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  15% {
+    transform: rotate(-5deg);
+  }
+  30% {
+    transform: rotate(4deg);
+  }
+  45% {
+    transform: rotate(-3deg);
+  }
+  60% {
+    transform: rotate(2deg);
+  }
+  75% {
+    transform: rotate(-1deg);
+  }
 }
 
 .wiggle {
@@ -679,20 +740,36 @@
 
 /* --- 果冻效果 --- */
 @keyframes jello {
-  0%, 100%  { transform: skewX(0deg) skewY(0deg); }
-  11.1%     { transform: skewX(-4deg) skewY(-4deg); }
-  22.2%     { transform: skewX(3deg) skewY(3deg); }
-  33.3%     { transform: skewX(-2deg) skewY(-2deg); }
-  44.4%     { transform: skewX(1.5deg) skewY(1.5deg); }
-  55.5%     { transform: skewX(-1deg) skewY(-1deg); }
-  66.6%     { transform: skewX(0.5deg) skewY(0.5deg); }
-  77.7%     { transform: skewX(-0.2deg) skewY(-0.2deg); }
+  0%,
+  100% {
+    transform: skewX(0deg) skewY(0deg);
+  }
+  11.1% {
+    transform: skewX(-4deg) skewY(-4deg);
+  }
+  22.2% {
+    transform: skewX(3deg) skewY(3deg);
+  }
+  33.3% {
+    transform: skewX(-2deg) skewY(-2deg);
+  }
+  44.4% {
+    transform: skewX(1.5deg) skewY(1.5deg);
+  }
+  55.5% {
+    transform: skewX(-1deg) skewY(-1deg);
+  }
+  66.6% {
+    transform: skewX(0.5deg) skewY(0.5deg);
+  }
+  77.7% {
+    transform: skewX(-0.2deg) skewY(-0.2deg);
+  }
 }
 
 .jello {
   animation: jello 0.9s var(--ease-smooth);
 }
-
 
 /* ========================================
    9. 翻转动画
@@ -743,7 +820,6 @@
   backface-visibility: visible;
   animation: flipInY var(--duration-slowest) var(--ease-smooth) forwards;
 }
-
 
 /* ========================================
    10. 页面视图过渡动画
@@ -838,7 +914,6 @@
   animation: pageLeave var(--duration-normal) var(--ease-in) forwards;
 }
 
-
 /* ========================================
    11. 骨架屏 & 加载动画
    ======================================== */
@@ -855,10 +930,18 @@
 
 /* --- 加载点动画 --- */
 @keyframes dots {
-  0%  { content: ''; }
-  25% { content: '.'; }
-  50% { content: '..'; }
-  75% { content: '...'; }
+  0% {
+    content: '';
+  }
+  25% {
+    content: '.';
+  }
+  50% {
+    content: '..';
+  }
+  75% {
+    content: '...';
+  }
 }
 
 .loading-dots::after {
@@ -868,7 +951,9 @@
 
 /* --- 三点跳跃加载 --- */
 @keyframes dotBounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
     opacity: 0.4;
   }
@@ -892,9 +977,15 @@
   animation: dotBounce 1.4s ease-in-out infinite both;
 }
 
-.loading-bounce-dots > span:nth-child(1) { animation-delay: -0.32s; }
-.loading-bounce-dots > span:nth-child(2) { animation-delay: -0.16s; }
-.loading-bounce-dots > span:nth-child(3) { animation-delay: 0s; }
+.loading-bounce-dots > span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.loading-bounce-dots > span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+.loading-bounce-dots > span:nth-child(3) {
+  animation-delay: 0s;
+}
 
 /* --- 环形加载器 --- */
 @keyframes spinnerDash {
@@ -913,7 +1004,9 @@
 }
 
 .spinner-svg circle {
-  animation: spin 2s linear infinite, spinnerDash 1.5s ease-in-out infinite;
+  animation:
+    spin 2s linear infinite,
+    spinnerDash 1.5s ease-in-out infinite;
 }
 
 /* --- 进度条动画 --- */
@@ -961,7 +1054,6 @@
   background-size: 1rem 1rem;
   animation: progressStripe 0.8s linear infinite;
 }
-
 
 /* ========================================
    12. 涟漪 & 光效动画
@@ -1023,23 +1115,20 @@
   left: -50%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   animation: shine 2.5s ease-in-out infinite;
 }
 
 /* --- 光晕效果 --- */
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 4px rgba(59, 130, 246, 0.3);
   }
   50% {
-    box-shadow: 0 0 16px rgba(59, 130, 246, 0.6),
-                0 0 32px rgba(59, 130, 246, 0.2);
+    box-shadow:
+      0 0 16px rgba(59, 130, 246, 0.6),
+      0 0 32px rgba(59, 130, 246, 0.2);
   }
 }
 
@@ -1049,12 +1138,14 @@
 
 /* --- 文字光晕 --- */
 @keyframes textGlow {
-  0%, 100% {
+  0%,
+  100% {
     text-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
   }
   50% {
-    text-shadow: 0 0 12px rgba(59, 130, 246, 0.7),
-                 0 0 24px rgba(59, 130, 246, 0.3);
+    text-shadow:
+      0 0 12px rgba(59, 130, 246, 0.7),
+      0 0 24px rgba(59, 130, 246, 0.3);
   }
 }
 
@@ -1062,14 +1153,14 @@
   animation: textGlow 2s ease-in-out infinite;
 }
 
-
 /* ========================================
    13. 浮动 & 悬停动画
    ======================================== */
 
 /* --- 上下浮动 --- */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -1083,7 +1174,8 @@
 
 /* --- 轻微悬浮 --- */
 @keyframes hoverFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
@@ -1099,14 +1191,16 @@
 
 /* --- 悬停提升 (需配合 hover) --- */
 .hover-lift {
-  transition: transform var(--duration-normal) var(--ease-smooth),
-              box-shadow var(--duration-normal) var(--ease-smooth);
+  transition:
+    transform var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth);
 }
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1),
-              0 4px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 8px 25px -5px rgba(0, 0, 0, 0.1),
+    0 4px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .hover-lift:active {
@@ -1125,7 +1219,6 @@
 .hover-scale:active {
   transform: scale(0.98);
 }
-
 
 /* ========================================
    14. 折叠 & 展开动画
@@ -1174,15 +1267,15 @@
 /* --- 高度自适应过渡 (配合 JS) --- */
 .height-transition {
   overflow: hidden;
-  transition: height var(--duration-normal) var(--ease-smooth),
-              opacity var(--duration-normal) var(--ease-smooth);
+  transition:
+    height var(--duration-normal) var(--ease-smooth),
+    opacity var(--duration-normal) var(--ease-smooth);
 }
 
-.height-transition[data-collapsed="true"] {
+.height-transition[data-collapsed='true'] {
   height: 0 !important;
   opacity: 0;
 }
-
 
 /* ========================================
    15. 抽屉 & 模态框动画
@@ -1190,13 +1283,21 @@
 
 /* --- 遮罩层 --- */
 @keyframes overlayIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes overlayOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .overlay-enter {
@@ -1240,13 +1341,21 @@
 
 /* --- 右侧抽屉 --- */
 @keyframes drawerRightIn {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes drawerRightOut {
-  from { transform: translateX(0); }
-  to   { transform: translateX(100%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 
 .drawer-right-enter {
@@ -1259,13 +1368,21 @@
 
 /* --- 左侧抽屉 --- */
 @keyframes drawerLeftIn {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes drawerLeftOut {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-100%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
 }
 
 .drawer-left-enter {
@@ -1302,7 +1419,6 @@
 .sheet-leave {
   animation: sheetDown var(--duration-fast) var(--ease-in) forwards;
 }
-
 
 /* ========================================
    16. 通知 & Toast 动画
@@ -1358,22 +1474,40 @@
 
 /* --- 通知铃铛摇晃 --- */
 @keyframes bellRing {
-  0%   { transform: rotate(0deg); }
-  10%  { transform: rotate(14deg); }
-  20%  { transform: rotate(-12deg); }
-  30%  { transform: rotate(10deg); }
-  40%  { transform: rotate(-8deg); }
-  50%  { transform: rotate(5deg); }
-  60%  { transform: rotate(-3deg); }
-  70%  { transform: rotate(1deg); }
-  80%, 100% { transform: rotate(0deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-12deg);
+  }
+  30% {
+    transform: rotate(10deg);
+  }
+  40% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  60% {
+    transform: rotate(-3deg);
+  }
+  70% {
+    transform: rotate(1deg);
+  }
+  80%,
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 .bell-ring {
   transform-origin: top center;
   animation: bellRing 1s var(--ease-smooth);
 }
-
 
 /* ========================================
    17. 徽章 & 提示动画
@@ -1385,7 +1519,8 @@
     transform: scale(1);
     opacity: 1;
   }
-  75%, 100% {
+  75%,
+  100% {
     transform: scale(2);
     opacity: 0;
   }
@@ -1432,8 +1567,12 @@
 
 /* --- 高亮闪烁 (新内容提示) --- */
 @keyframes highlightFlash {
-  0%   { background-color: rgba(59, 130, 246, 0.2); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 .highlight-flash {
@@ -1457,20 +1596,28 @@
   animation: countUp var(--duration-normal) var(--ease-spring) forwards;
 }
 
-
 /* ========================================
    18. 打字机 & 文字动画
    ======================================== */
 
 /* --- 打字机效果 --- */
 @keyframes typing {
-  from { width: 0; }
-  to   { width: 100%; }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @keyframes blinkCaret {
-  0%, 100% { border-color: transparent; }
-  50%      { border-color: currentColor; }
+  0%,
+  100% {
+    border-color: transparent;
+  }
+  50% {
+    border-color: currentColor;
+  }
 }
 
 .typing-effect {
@@ -1541,17 +1688,36 @@
 }
 
 /* 使用 CSS 变量为每个字符设置递增延迟 */
-.char-reveal > *:nth-child(1)  { animation-delay: 0.03s; }
-.char-reveal > *:nth-child(2)  { animation-delay: 0.06s; }
-.char-reveal > *:nth-child(3)  { animation-delay: 0.09s; }
-.char-reveal > *:nth-child(4)  { animation-delay: 0.12s; }
-.char-reveal > *:nth-child(5)  { animation-delay: 0.15s; }
-.char-reveal > *:nth-child(6)  { animation-delay: 0.18s; }
-.char-reveal > *:nth-child(7)  { animation-delay: 0.21s; }
-.char-reveal > *:nth-child(8)  { animation-delay: 0.24s; }
-.char-reveal > *:nth-child(9)  { animation-delay: 0.27s; }
-.char-reveal > *:nth-child(10) { animation-delay: 0.30s; }
-
+.char-reveal > *:nth-child(1) {
+  animation-delay: 0.03s;
+}
+.char-reveal > *:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.char-reveal > *:nth-child(3) {
+  animation-delay: 0.09s;
+}
+.char-reveal > *:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.char-reveal > *:nth-child(5) {
+  animation-delay: 0.15s;
+}
+.char-reveal > *:nth-child(6) {
+  animation-delay: 0.18s;
+}
+.char-reveal > *:nth-child(7) {
+  animation-delay: 0.21s;
+}
+.char-reveal > *:nth-child(8) {
+  animation-delay: 0.24s;
+}
+.char-reveal > *:nth-child(9) {
+  animation-delay: 0.27s;
+}
+.char-reveal > *:nth-child(10) {
+  animation-delay: 0.3s;
+}
 
 /* ========================================
    19. 列表交错动画
@@ -1563,18 +1729,42 @@
   animation: fadeInUp var(--duration-slow) var(--ease-smooth) forwards;
 }
 
-.stagger-fade-in > *:nth-child(1)  { animation-delay: 0.00s; }
-.stagger-fade-in > *:nth-child(2)  { animation-delay: 0.05s; }
-.stagger-fade-in > *:nth-child(3)  { animation-delay: 0.10s; }
-.stagger-fade-in > *:nth-child(4)  { animation-delay: 0.15s; }
-.stagger-fade-in > *:nth-child(5)  { animation-delay: 0.20s; }
-.stagger-fade-in > *:nth-child(6)  { animation-delay: 0.25s; }
-.stagger-fade-in > *:nth-child(7)  { animation-delay: 0.30s; }
-.stagger-fade-in > *:nth-child(8)  { animation-delay: 0.35s; }
-.stagger-fade-in > *:nth-child(9)  { animation-delay: 0.40s; }
-.stagger-fade-in > *:nth-child(10) { animation-delay: 0.45s; }
-.stagger-fade-in > *:nth-child(11) { animation-delay: 0.50s; }
-.stagger-fade-in > *:nth-child(12) { animation-delay: 0.55s; }
+.stagger-fade-in > *:nth-child(1) {
+  animation-delay: 0s;
+}
+.stagger-fade-in > *:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.stagger-fade-in > *:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.stagger-fade-in > *:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.stagger-fade-in > *:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.stagger-fade-in > *:nth-child(6) {
+  animation-delay: 0.25s;
+}
+.stagger-fade-in > *:nth-child(7) {
+  animation-delay: 0.3s;
+}
+.stagger-fade-in > *:nth-child(8) {
+  animation-delay: 0.35s;
+}
+.stagger-fade-in > *:nth-child(9) {
+  animation-delay: 0.4s;
+}
+.stagger-fade-in > *:nth-child(10) {
+  animation-delay: 0.45s;
+}
+.stagger-fade-in > *:nth-child(11) {
+  animation-delay: 0.5s;
+}
+.stagger-fade-in > *:nth-child(12) {
+  animation-delay: 0.55s;
+}
 
 /* --- 列表项交错滑入 --- */
 .stagger-slide-in > * {
@@ -1582,14 +1772,30 @@
   animation: slideInRight var(--duration-slow) var(--ease-spring) forwards;
 }
 
-.stagger-slide-in > *:nth-child(1)  { animation-delay: 0.00s; }
-.stagger-slide-in > *:nth-child(2)  { animation-delay: 0.06s; }
-.stagger-slide-in > *:nth-child(3)  { animation-delay: 0.12s; }
-.stagger-slide-in > *:nth-child(4)  { animation-delay: 0.18s; }
-.stagger-slide-in > *:nth-child(5)  { animation-delay: 0.24s; }
-.stagger-slide-in > *:nth-child(6)  { animation-delay: 0.30s; }
-.stagger-slide-in > *:nth-child(7)  { animation-delay: 0.36s; }
-.stagger-slide-in > *:nth-child(8)  { animation-delay: 0.42s; }
+.stagger-slide-in > *:nth-child(1) {
+  animation-delay: 0s;
+}
+.stagger-slide-in > *:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.stagger-slide-in > *:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.stagger-slide-in > *:nth-child(4) {
+  animation-delay: 0.18s;
+}
+.stagger-slide-in > *:nth-child(5) {
+  animation-delay: 0.24s;
+}
+.stagger-slide-in > *:nth-child(6) {
+  animation-delay: 0.3s;
+}
+.stagger-slide-in > *:nth-child(7) {
+  animation-delay: 0.36s;
+}
+.stagger-slide-in > *:nth-child(8) {
+  animation-delay: 0.42s;
+}
 
 /* --- 列表项交错缩放弹入 --- */
 .stagger-scale-in > * {
@@ -1597,66 +1803,144 @@
   animation: scaleIn var(--duration-slow) var(--ease-spring) forwards;
 }
 
-.stagger-scale-in > *:nth-child(1)  { animation-delay: 0.00s; }
-.stagger-scale-in > *:nth-child(2)  { animation-delay: 0.04s; }
-.stagger-scale-in > *:nth-child(3)  { animation-delay: 0.08s; }
-.stagger-scale-in > *:nth-child(4)  { animation-delay: 0.12s; }
-.stagger-scale-in > *:nth-child(5)  { animation-delay: 0.16s; }
-.stagger-scale-in > *:nth-child(6)  { animation-delay: 0.20s; }
-.stagger-scale-in > *:nth-child(7)  { animation-delay: 0.24s; }
-.stagger-scale-in > *:nth-child(8)  { animation-delay: 0.28s; }
-.stagger-scale-in > *:nth-child(9)  { animation-delay: 0.32s; }
-.stagger-scale-in > *:nth-child(10) { animation-delay: 0.36s; }
-
+.stagger-scale-in > *:nth-child(1) {
+  animation-delay: 0s;
+}
+.stagger-scale-in > *:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.stagger-scale-in > *:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.stagger-scale-in > *:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.stagger-scale-in > *:nth-child(5) {
+  animation-delay: 0.16s;
+}
+.stagger-scale-in > *:nth-child(6) {
+  animation-delay: 0.2s;
+}
+.stagger-scale-in > *:nth-child(7) {
+  animation-delay: 0.24s;
+}
+.stagger-scale-in > *:nth-child(8) {
+  animation-delay: 0.28s;
+}
+.stagger-scale-in > *:nth-child(9) {
+  animation-delay: 0.32s;
+}
+.stagger-scale-in > *:nth-child(10) {
+  animation-delay: 0.36s;
+}
 
 /* ========================================
    20. 工具类 — 时长 / 延迟 / 填充 / 状态
    ======================================== */
 
 /* --- 动画时长 --- */
-.duration-fastest { animation-duration: var(--duration-fastest) !important; }
-.duration-fast    { animation-duration: var(--duration-fast) !important; }
-.duration-normal  { animation-duration: var(--duration-normal) !important; }
-.duration-slow    { animation-duration: var(--duration-slow) !important; }
-.duration-slower  { animation-duration: var(--duration-slower) !important; }
-.duration-slowest { animation-duration: var(--duration-slowest) !important; }
+.duration-fastest {
+  animation-duration: var(--duration-fastest) !important;
+}
+.duration-fast {
+  animation-duration: var(--duration-fast) !important;
+}
+.duration-normal {
+  animation-duration: var(--duration-normal) !important;
+}
+.duration-slow {
+  animation-duration: var(--duration-slow) !important;
+}
+.duration-slower {
+  animation-duration: var(--duration-slower) !important;
+}
+.duration-slowest {
+  animation-duration: var(--duration-slowest) !important;
+}
 
 /* --- 动画延迟 --- */
-.delay-0    { animation-delay: 0ms !important; }
-.delay-75   { animation-delay: 75ms !important; }
-.delay-100  { animation-delay: 100ms !important; }
-.delay-150  { animation-delay: 150ms !important; }
-.delay-200  { animation-delay: 200ms !important; }
-.delay-300  { animation-delay: 300ms !important; }
-.delay-500  { animation-delay: 500ms !important; }
-.delay-700  { animation-delay: 700ms !important; }
-.delay-1000 { animation-delay: 1000ms !important; }
+.delay-0 {
+  animation-delay: 0ms !important;
+}
+.delay-75 {
+  animation-delay: 75ms !important;
+}
+.delay-100 {
+  animation-delay: 100ms !important;
+}
+.delay-150 {
+  animation-delay: 150ms !important;
+}
+.delay-200 {
+  animation-delay: 200ms !important;
+}
+.delay-300 {
+  animation-delay: 300ms !important;
+}
+.delay-500 {
+  animation-delay: 500ms !important;
+}
+.delay-700 {
+  animation-delay: 700ms !important;
+}
+.delay-1000 {
+  animation-delay: 1000ms !important;
+}
 
 /* --- 动画填充模式 --- */
-.fill-none      { animation-fill-mode: none !important; }
-.fill-forwards  { animation-fill-mode: forwards !important; }
-.fill-backwards { animation-fill-mode: backwards !important; }
-.fill-both      { animation-fill-mode: both !important; }
+.fill-none {
+  animation-fill-mode: none !important;
+}
+.fill-forwards {
+  animation-fill-mode: forwards !important;
+}
+.fill-backwards {
+  animation-fill-mode: backwards !important;
+}
+.fill-both {
+  animation-fill-mode: both !important;
+}
 
 /* --- 动画播放状态 --- */
-.anim-paused  { animation-play-state: paused !important; }
-.anim-running { animation-play-state: running !important; }
+.anim-paused {
+  animation-play-state: paused !important;
+}
+.anim-running {
+  animation-play-state: running !important;
+}
 
 /* --- 动画迭代次数 --- */
-.anim-once     { animation-iteration-count: 1 !important; }
-.anim-infinite { animation-iteration-count: infinite !important; }
-.anim-twice    { animation-iteration-count: 2 !important; }
+.anim-once {
+  animation-iteration-count: 1 !important;
+}
+.anim-infinite {
+  animation-iteration-count: infinite !important;
+}
+.anim-twice {
+  animation-iteration-count: 2 !important;
+}
 
 /* --- 动画缓动函数覆盖 --- */
-.ease-smooth  { animation-timing-function: var(--ease-smooth) !important; }
-.ease-spring  { animation-timing-function: var(--ease-spring) !important; }
-.ease-bounce  { animation-timing-function: var(--ease-bounce) !important; }
-.ease-linear  { animation-timing-function: linear !important; }
+.ease-smooth {
+  animation-timing-function: var(--ease-smooth) !important;
+}
+.ease-spring {
+  animation-timing-function: var(--ease-spring) !important;
+}
+.ease-bounce {
+  animation-timing-function: var(--ease-bounce) !important;
+}
+.ease-linear {
+  animation-timing-function: linear !important;
+}
 
 /* --- 动画方向 --- */
-.anim-reverse   { animation-direction: reverse !important; }
-.anim-alternate { animation-direction: alternate !important; }
-
+.anim-reverse {
+  animation-direction: reverse !important;
+}
+.anim-alternate {
+  animation-direction: alternate !important;
+}
 
 /* ========================================
    21. 减少动画偏好 (无障碍)
@@ -1687,11 +1971,10 @@
   }
 
   .dark .skeleton,
-  [data-theme="dark"] .skeleton {
+  [data-theme='dark'] .skeleton {
     background: rgba(255, 255, 255, 0.08);
   }
 }
-
 
 /* ========================================
    22. 统一动画辅助类
@@ -1720,11 +2003,18 @@
 }
 
 /* 延迟类（用于交错动画） */
-.delay-100 { animation-delay: 0.1s; }
-.delay-200 { animation-delay: 0.2s; }
-.delay-300 { animation-delay: 0.3s; }
-.delay-400 { animation-delay: 0.4s; }
-
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+}
+.delay-400 {
+  animation-delay: 0.4s;
+}
 
 /* ========================================
    22. 模块特有动画 (Phase 3 整合)
@@ -1748,7 +2038,8 @@
 
 /* --- 边框发光 (borderGlow) --- */
 @keyframes borderGlow {
-  0%, 100% {
+  0%,
+  100% {
     border-color: var(--color-border-default);
   }
   50% {
@@ -1762,7 +2053,8 @@
 
 /* --- 闪烁 (twinkle) --- */
 @keyframes twinkle {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
     transform: scale(1);
   }
@@ -1778,7 +2070,8 @@
 
 /* --- 缓慢浮动 (floatSlow) --- */
 @keyframes floatSlow {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
   33% {
@@ -1855,13 +2148,21 @@
 
 /* --- 输入框抖动 (input-shake) --- */
 @keyframes inputShake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-4px);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(4px);
   }
 }
@@ -1872,7 +2173,8 @@
 
 /* --- 卡片脉冲 (card-pulse) --- */
 @keyframes cardPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0;
   }
   50% {
@@ -1884,67 +2186,158 @@
    23. 延迟工具类 (Phase 3 扩展)
    ======================================== */
 
-.delay-50 { animation-delay: 50ms; }
-.delay-75 { animation-delay: 75ms; }
-.delay-150 { animation-delay: 150ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-250 { animation-delay: 250ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
-.delay-600 { animation-delay: 600ms; }
-.delay-700 { animation-delay: 700ms; }
-.delay-800 { animation-delay: 800ms; }
-.delay-900 { animation-delay: 900ms; }
-.delay-1000 { animation-delay: 1000ms; }
-.delay-1500 { animation-delay: 1500ms; }
-.delay-2000 { animation-delay: 2000ms; }
+.delay-50 {
+  animation-delay: 50ms;
+}
+.delay-75 {
+  animation-delay: 75ms;
+}
+.delay-150 {
+  animation-delay: 150ms;
+}
+.delay-200 {
+  animation-delay: 200ms;
+}
+.delay-250 {
+  animation-delay: 250ms;
+}
+.delay-300 {
+  animation-delay: 300ms;
+}
+.delay-400 {
+  animation-delay: 400ms;
+}
+.delay-500 {
+  animation-delay: 500ms;
+}
+.delay-600 {
+  animation-delay: 600ms;
+}
+.delay-700 {
+  animation-delay: 700ms;
+}
+.delay-800 {
+  animation-delay: 800ms;
+}
+.delay-900 {
+  animation-delay: 900ms;
+}
+.delay-1000 {
+  animation-delay: 1000ms;
+}
+.delay-1500 {
+  animation-delay: 1500ms;
+}
+.delay-2000 {
+  animation-delay: 2000ms;
+}
 
 /* 负延迟 (提前开始) */
-.delay-n-100 { animation-delay: -100ms; }
-.delay-n-200 { animation-delay: -200ms; }
-.delay-n-300 { animation-delay: -300ms; }
-.delay-n-400 { animation-delay: -400ms; }
-.delay-n-500 { animation-delay: -500ms; }
+.delay-n-100 {
+  animation-delay: -100ms;
+}
+.delay-n-200 {
+  animation-delay: -200ms;
+}
+.delay-n-300 {
+  animation-delay: -300ms;
+}
+.delay-n-400 {
+  animation-delay: -400ms;
+}
+.delay-n-500 {
+  animation-delay: -500ms;
+}
 
 /* ========================================
    24. 时长工具类 (Phase 3 扩展)
    ======================================== */
 
-.duration-75 { animation-duration: 75ms; }
-.duration-100 { animation-duration: 100ms; }
-.duration-150 { animation-duration: 150ms; }
-.duration-200 { animation-duration: 200ms; }
-.duration-250 { animation-duration: 250ms; }
-.duration-300 { animation-duration: 300ms; }
-.duration-400 { animation-duration: 400ms; }
-.duration-500 { animation-duration: 500ms; }
-.duration-600 { animation-duration: 600ms; }
-.duration-700 { animation-duration: 700ms; }
-.duration-800 { animation-duration: 800ms; }
-.duration-1000 { animation-duration: 1000ms; }
-.duration-1500 { animation-duration: 1500ms; }
-.duration-2000 { animation-duration: 2000ms; }
-.duration-3000 { animation-duration: 3000ms; }
+.duration-75 {
+  animation-duration: 75ms;
+}
+.duration-100 {
+  animation-duration: 100ms;
+}
+.duration-150 {
+  animation-duration: 150ms;
+}
+.duration-200 {
+  animation-duration: 200ms;
+}
+.duration-250 {
+  animation-duration: 250ms;
+}
+.duration-300 {
+  animation-duration: 300ms;
+}
+.duration-400 {
+  animation-duration: 400ms;
+}
+.duration-500 {
+  animation-duration: 500ms;
+}
+.duration-600 {
+  animation-duration: 600ms;
+}
+.duration-700 {
+  animation-duration: 700ms;
+}
+.duration-800 {
+  animation-duration: 800ms;
+}
+.duration-1000 {
+  animation-duration: 1000ms;
+}
+.duration-1500 {
+  animation-duration: 1500ms;
+}
+.duration-2000 {
+  animation-duration: 2000ms;
+}
+.duration-3000 {
+  animation-duration: 3000ms;
+}
 
 /* ========================================
    25. 缓动函数工具类 (Phase 3 扩展)
    ======================================== */
 
-.ease-linear { animation-timing-function: linear; }
-.ease-in { animation-timing-function: var(--ease-in); }
-.ease-out { animation-timing-function: var(--ease-out); }
-.ease-in-out { animation-timing-function: var(--ease-in-out); }
-.ease-smooth { animation-timing-function: var(--ease-smooth); }
-.ease-spring { animation-timing-function: var(--ease-spring); }
-.ease-bounce { animation-timing-function: var(--ease-bounce); }
-.ease-elastic { animation-timing-function: var(--ease-elastic); }
-.ease-back-in { animation-timing-function: var(--ease-back-in); }
-.ease-back-out { animation-timing-function: var(--ease-back-out); }
+.ease-linear {
+  animation-timing-function: linear;
+}
+.ease-in {
+  animation-timing-function: var(--ease-in);
+}
+.ease-out {
+  animation-timing-function: var(--ease-out);
+}
+.ease-in-out {
+  animation-timing-function: var(--ease-in-out);
+}
+.ease-smooth {
+  animation-timing-function: var(--ease-smooth);
+}
+.ease-spring {
+  animation-timing-function: var(--ease-spring);
+}
+.ease-bounce {
+  animation-timing-function: var(--ease-bounce);
+}
+.ease-elastic {
+  animation-timing-function: var(--ease-elastic);
+}
+.ease-back-in {
+  animation-timing-function: var(--ease-back-in);
+}
+.ease-back-out {
+  animation-timing-function: var(--ease-back-out);
+}
 
 /* --- 粒子浮动动画 (floatParticle) --- */
 @keyframes floatParticle {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0);
     opacity: 0.6;
   }

@@ -103,7 +103,7 @@
   background: var(--color-bg-secondary);
   font-size: var(--text-sm);
   color: var(--color-text-tertiary);
-  transition: all .4s var(--ease-smooth);
+  transition: all 0.4s var(--ease-smooth);
 }
 
 .progress-step .step-indicator {
@@ -122,8 +122,8 @@
   font-weight: var(--font-semibold);
 }
 
-.progress-step.active .step-indicator { 
-  color: var(--color-primary); 
+.progress-step.active .step-indicator {
+  color: var(--color-primary);
 }
 
 .progress-step.done {
@@ -131,8 +131,8 @@
   background: var(--color-success-light);
 }
 
-.progress-step.done .step-indicator { 
-  color: var(--color-success); 
+.progress-step.done .step-indicator {
+  color: var(--color-success);
 }
 
 /* ===== Progress Bar ===== */
@@ -150,7 +150,7 @@
   background: linear-gradient(90deg, var(--color-primary), var(--color-success));
   border-radius: var(--rounded-full);
   width: 0;
-  transition: width .8s var(--ease-smooth);
+  transition: width 0.8s var(--ease-smooth);
   position: relative;
 }
 
@@ -158,7 +158,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   background-size: 200% 100%;
   animation: shimmer var(--duration-2s) infinite;
 }

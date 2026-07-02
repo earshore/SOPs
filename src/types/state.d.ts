@@ -9,13 +9,9 @@ import type {
   GeneratedPromptProfileSnapshot,
   GeneratedPromptType,
   KeywordHunterSnapshotSource,
-  ScrapedData
+  ScrapedData,
 } from './modules-business';
-import type {
-  TargetMarket,
-  ToneStyle,
-  UserProductDnaField
-} from './prompt-profile';
+import type { TargetMarket, ToneStyle, UserProductDnaField } from './prompt-profile';
 
 // ==================== UI状态 ====================
 
@@ -36,7 +32,20 @@ export interface UIState {
 /**
  * 采集站点类型（简短代码）
  */
-export type ScraperSite = 'US' | 'DE' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'IE' | 'UK' | 'CA' | 'JP';
+export type ScraperSite =
+  | 'US'
+  | 'DE'
+  | 'FR'
+  | 'IT'
+  | 'ES'
+  | 'NL'
+  | 'SE'
+  | 'PL'
+  | 'BE'
+  | 'IE'
+  | 'UK'
+  | 'CA'
+  | 'JP';
 
 /**
  * 采集状态
@@ -123,7 +132,7 @@ export interface AnalysisState {
 /**
  * Prompt 历史记录项
  * 记录每次 Prompt 生成的历史
- * 
+ *
  * @remarks
  * 用于追踪和管理用户的 Prompt 生成历史
  */
@@ -150,7 +159,7 @@ export interface PromptHistoryItem {
 
   /**
    * 使用的 AI 模型
-   * 
+   *
    * @example 'gpt-4', 'claude-3'
    */
   model?: string;
@@ -209,10 +218,10 @@ export interface PromptHistoryItem {
 /**
  * 用户产品配置
  * 用于 PromptLab 模块的产品 DNA 配置
- * 
+ *
  * @remarks
  * 此接口定义了生成 Amazon Listing 和 Visual Prompt 所需的所有产品信息
- * 
+ *
  * @example
  * ```typescript
  * const profile: UserProductProfile = {
@@ -244,7 +253,7 @@ export interface UserProductProfile {
   /**
    * 一级关键词（核心关键词）
    * 产品的主要搜索词，用逗号分隔
-   * 
+   *
    * @example 'wireless earbuds, bluetooth headphones'
    */
   keywordsTier1: string;
@@ -252,7 +261,7 @@ export interface UserProductProfile {
   /**
    * 二级关键词（长尾关键词）
    * 产品的次要搜索词和特性描述，用逗号分隔
-   * 
+   *
    * @example 'noise cancelling, waterproof, long battery'
    */
   keywordsTier2: string;
@@ -260,7 +269,7 @@ export interface UserProductProfile {
   /**
    * 目标受众
    * 产品的目标用户群体描述
-   * 
+   *
    * @example 'Young professionals and fitness enthusiasts'
    */
   audience: string;
@@ -268,7 +277,7 @@ export interface UserProductProfile {
   /**
    * 独特卖点（USPs - Unique Selling Points）
    * 产品的核心竞争优势
-   * 
+   *
    * @example 'Premium sound quality, 48-hour battery life'
    */
   usps: string;
@@ -276,7 +285,7 @@ export interface UserProductProfile {
   /**
    * 产品规格
    * 技术参数和规格说明
-   * 
+   *
    * @example 'Bluetooth 5.3, IPX7 waterproof, USB-C charging'
    */
   specs: string;
@@ -284,7 +293,7 @@ export interface UserProductProfile {
   /**
    * 社交钩子
    * 吸引用户注意力的营销语句
-   * 
+   *
    * @example 'Experience studio-quality sound on the go'
    */
   socialHook: string;
@@ -292,7 +301,7 @@ export interface UserProductProfile {
   /**
    * 负面关键词
    * 需要避免的词汇或竞品缺点
-   * 
+   *
    * @example 'cheap plastic, poor battery life'
    */
   negative: string;
@@ -300,7 +309,7 @@ export interface UserProductProfile {
   /**
    * 语气风格
    * Prompt 生成时使用的语气
-   * 
+   *
    * @default 'professional'
    */
   tone: ToneStyle;
@@ -314,7 +323,7 @@ export interface UserProductProfile {
   /**
    * 是否使用 Rufus 优化
    * 启用 Amazon Rufus AI 助手优化
-   * 
+   *
    * @default true
    */
   useRufus: boolean;
@@ -322,7 +331,7 @@ export interface UserProductProfile {
   /**
    * 是否使用 Emoji
    * 在生成的内容中包含 Emoji 表情
-   * 
+   *
    * @default true
    */
   useEmoji: boolean;
@@ -330,7 +339,7 @@ export interface UserProductProfile {
   /**
    * 是否使用 Cosmo 优化
    * 启用 Cosmo AI 优化功能
-   * 
+   *
    * @default true
    */
   useCosmo: boolean;
@@ -374,12 +383,14 @@ export interface UserProductProfile {
     [dimensionId: string]: {
       enabled: boolean;
       subItems: {
-        [subItemKey: string]: boolean | {
-          enabled: boolean;
-          items?: {
-            [itemIndex: string]: boolean;
-          };
-        };
+        [subItemKey: string]:
+          | boolean
+          | {
+              enabled: boolean;
+              items?: {
+                [itemIndex: string]: boolean;
+              };
+            };
       };
     };
   };
@@ -437,12 +448,14 @@ export interface PromptInputs extends UserProductProfile {
     [dimensionId: string]: {
       enabled: boolean;
       subItems: {
-        [subItemKey: string]: boolean | {
-          enabled: boolean;
-          items?: {
-            [itemIndex: string]: boolean;
-          };
-        };
+        [subItemKey: string]:
+          | boolean
+          | {
+              enabled: boolean;
+              items?: {
+                [itemIndex: string]: boolean;
+              };
+            };
       };
     };
   };
@@ -451,7 +464,7 @@ export interface PromptInputs extends UserProductProfile {
 /**
  * PromptLab 状态
  * 管理 PromptLab 模块的所有状态数据
- * 
+ *
  * @remarks
  * 包含当前 Prompt、历史记录、用户配置等信息
  */
@@ -474,7 +487,7 @@ export interface PromptLabState {
 
   /**
    * 选中的 AI 模型
-   * 
+   *
    * @example 'gpt-4-turbo', 'claude-3-opus'
    */
   selectedModel?: string;
@@ -482,7 +495,7 @@ export interface PromptLabState {
   /**
    * AI 生成温度参数
    * 控制生成内容的随机性
-   * 
+   *
    * @default 0.7
    * @minimum 0
    * @maximum 2
@@ -492,7 +505,7 @@ export interface PromptLabState {
   /**
    * 最大 Token 数量
    * 限制 AI 生成内容的长度
-   * 
+   *
    * @default 4000
    */
   maxTokens?: number;
@@ -701,19 +714,18 @@ export type TypedStatePath = NestedKeyOf<AppState>;
 /**
  * 根据路径获取值类型
  */
-export type PathValue<T, P extends string> = 
-  P extends `${infer K}.${infer Rest}`
-    ? K extends keyof T
-      ? PathValue<T[K], Rest>
-      : never
-    : P extends keyof T
-      ? T[P]
-      : never;
+export type PathValue<T, P extends string> = P extends `${infer K}.${infer Rest}`
+  ? K extends keyof T
+    ? PathValue<T[K], Rest>
+    : never
+  : P extends keyof T
+    ? T[P]
+    : never;
 
 /**
  * UI模块路径
  */
-export type UIPath = 
+export type UIPath =
   | 'ui'
   | 'ui.currentTab'
   | 'ui.currentDataTab'
@@ -725,7 +737,7 @@ export type UIPath =
 /**
  * Scraper模块路径
  */
-export type ScraperPath = 
+export type ScraperPath =
   | 'scraper'
   | 'scraper.isScraping'
   | 'scraper.status'
@@ -739,7 +751,7 @@ export type ScraperPath =
 /**
  * Analysis模块路径
  */
-export type AnalysisPath = 
+export type AnalysisPath =
   | 'analysis'
   | 'analysis.selectedAsins'
   | 'analysis.reportData'
@@ -759,7 +771,7 @@ export type AnalysisPath =
 /**
  * PromptLab模块路径
  */
-export type PromptLabPath = 
+export type PromptLabPath =
   | 'promptlab'
   | 'promptlab.currentPrompt'
   | 'promptlab.history'
@@ -771,7 +783,7 @@ export type PromptLabPath =
 /**
  * KeywordTracker模块路径
  */
-export type KeywordTrackerPath = 
+export type KeywordTrackerPath =
   | 'keywordTracker'
   | 'keywordTracker.keywords'
   | 'keywordTracker.processedCopy'
@@ -795,11 +807,11 @@ export type KeywordTrackerPath =
 /**
  * 所有可用的状态路径(类型安全)
  */
-export type ValidStatePath = 
-  | UIPath 
-  | ScraperPath 
-  | AnalysisPath 
-  | PromptLabPath 
+export type ValidStatePath =
+  | UIPath
+  | ScraperPath
+  | AnalysisPath
+  | PromptLabPath
   | KeywordTrackerPath;
 
 // ==================== 状态操作类型 ====================
@@ -866,47 +878,47 @@ export interface IStateManager {
    * 获取状态
    */
   get<T = unknown>(path?: StatePath): T;
-  
+
   /**
    * 设置状态
    */
   set<T = unknown>(path: StatePath, value: T, meta?: Record<string, unknown>): void;
-  
+
   /**
    * 批量更新
    */
   batchUpdate(updates: Record<StatePath, unknown>): void;
-  
+
   /**
    * 订阅状态变化
    */
   subscribe<T = unknown>(path: StatePath, callback: StateSubscriber<T>): () => void;
-  
+
   /**
    * 添加中间件
    */
   use(middleware: StateMiddleware): void;
-  
+
   /**
    * 创建快照
    */
   snapshot(): AppState;
-  
+
   /**
    * 恢复快照
    */
   restore(snapshot: AppState): void;
-  
+
   /**
    * 撤销
    */
   undo(): boolean;
-  
+
   /**
    * 获取历史记录
    */
   getHistory(): Array<StateAction | BatchUpdateAction>;
-  
+
   /**
    * 清空历史记录
    */
@@ -940,17 +952,17 @@ export interface IPersistMiddleware {
    * 加载持久化状态
    */
   load(): Partial<AppState> | null;
-  
+
   /**
    * 保存状态
    */
   save(state: AppState): void;
-  
+
   /**
    * 清除持久化数据
    */
   clear(): void;
-  
+
   /**
    * 配置持久化
    */
@@ -996,7 +1008,7 @@ export type {
   IStateManager,
   PersistStrategy,
   PersistConfig,
-  IPersistMiddleware
+  IPersistMiddleware,
 };
 
 // ==================== 完整应用状态 ====================

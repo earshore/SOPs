@@ -16,13 +16,13 @@ export type AnimationSpeed = 'fast' | 'normal' | 'slow';
  * 用于独立控制不同类型的动画
  */
 export type AnimationCategory =
-  | 'button'      // 按钮交互动画
-  | 'card'        // 卡片悬停效果
-  | 'toast'       // Toast通知动画
-  | 'modal'       // 模态框动画
-  | 'list'        // 列表项动画
-  | 'form'        // 表单输入动画
-  | 'loading'     // 加载状态动画
+  | 'button' // 按钮交互动画
+  | 'card' // 卡片悬停效果
+  | 'toast' // Toast通知动画
+  | 'modal' // 模态框动画
+  | 'list' // 列表项动画
+  | 'form' // 表单输入动画
+  | 'loading' // 加载状态动画
   | 'navigation'; // 导航动画
 
 /**

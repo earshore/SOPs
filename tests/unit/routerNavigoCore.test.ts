@@ -227,6 +227,32 @@ describe('RouteConfigConverter', () => {
     });
   });
 
+  it('preserves declared route meta while applying defaults', () => {
+    const result = convertMenuConfig(menuConfig({
+      routes: {
+        playground: {
+          moduleId: 'app_center',
+          label: 'Deep Chat',
+          icon: 'comments',
+          panelId: 'panel-app',
+          meta: {
+            requiresAuth: true,
+            permissions: ['app_center.playground'],
+            accessPolicy: 'permission_required',
+          },
+        },
+      },
+    }));
+
+    expect(result.routes.playground?.meta).toEqual({
+      requiresAuth: true,
+      permissions: ['app_center.playground'],
+      accessPolicy: 'permission_required',
+      title: 'Deep Chat',
+      keepAlive: false,
+    });
+  });
+
   it('validates converted route configs and exposes factory helpers', () => {
     const converter = createConverter({ enableLogging: true });
     const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});

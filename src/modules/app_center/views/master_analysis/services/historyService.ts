@@ -4,7 +4,7 @@
 // ================================================================
 
 import { appStore } from '@/stores/useAppStore';
-import { StorageService, STORAGE_KEYS } from "../../../../../services/storageService";
+import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import type {
   GeneratedPromptRecord,
@@ -12,9 +12,9 @@ import type {
   HistoryPromptResults,
   ScrapedProduct,
   ScrapedData,
-  AnalysisReport
-} from "../../../../../types/modules-business";
-import type { UserProductProfile } from "../../../../../types/state";
+  AnalysisReport,
+} from '../../../../../types/modules-business';
+import type { UserProductProfile } from '../../../../../types/state';
 import { getReportFingerprint, getScrapedDataFingerprint } from './reportIdentity';
 
 const MAX_HISTORY_ITEMS =
@@ -31,7 +31,7 @@ function isSameHistoryId(left: HistoryItem['id'], right: HistoryItem['id']): boo
 
 function createHistoryId(history: HistoryItem[]): number {
   let id = Date.now();
-  while (history.some((item) => isSameHistoryId(item.id, id))) {
+  while (history.some(item => isSameHistoryId(item.id, id))) {
     id += 1;
   }
   return id;
@@ -71,9 +71,23 @@ interface AnalysisSourceBinding {
   sourceTargets?: string[];
 }
 
-function getCurrentHistoryIndex(history: HistoryItem[], currentHistoryId: HistoryItem['id'] | null): number {
+type HistoryItemMutation = (item: HistoryItem, history: HistoryItem[]) => boolean;
+
+function readHistoryFromStorage(): HistoryItem[] {
+  return historyCache || StorageService.getScrapeHistory();
+}
+
+async function readHistoryFromStorageAsync(): Promise<HistoryItem[]> {
+  historyCache = await StorageService.getScrapeHistoryAsync();
+  return historyCache;
+}
+
+function getCurrentHistoryIndex(
+  history: HistoryItem[],
+  currentHistoryId: HistoryItem['id'] | null
+): number {
   return currentHistoryId !== null
-    ? history.findIndex((h) => isSameHistoryId(h.id, currentHistoryId))
+    ? history.findIndex(h => isSameHistoryId(h.id, currentHistoryId))
     : -1;
 }
 
@@ -91,11 +105,21 @@ function getHistoryItemAt(history: HistoryItem[], index: number): HistoryItem | 
   return index >= 0 ? history[index] : undefined;
 }
 
-function shouldUpdateHistoryItem(currentHistoryItem: HistoryItem | undefined, timestamp: string): boolean {
+function getMutableHistoryItem(history: HistoryItem[], id: HistoryItem['id']): HistoryItem | null {
+  const targetIndex = history.findIndex(h => isSameHistoryId(h.id, id));
+  return targetIndex >= 0 ? history[targetIndex] || null : null;
+}
+
+function shouldUpdateHistoryItem(
+  currentHistoryItem: HistoryItem | undefined,
+  timestamp: string
+): boolean {
   return currentHistoryItem !== undefined && currentHistoryItem.timestamp === timestamp;
 }
 
-function getHistoryDataFingerprint(item: Pick<HistoryItem, 'data' | 'dataFingerprint'>): string | null {
+function getHistoryDataFingerprint(
+  item: Pick<HistoryItem, 'data' | 'dataFingerprint'>
+): string | null {
   return item.dataFingerprint || getScrapedDataFingerprint(item.data);
 }
 
@@ -106,7 +130,10 @@ function clearSnapshotDerivedState(item: HistoryItem): void {
   delete item.userProductProfile;
 }
 
-function hasSameSnapshotData(previousItem: HistoryItem | undefined, dataFingerprint: string | null): boolean {
+function hasSameSnapshotData(
+  previousItem: HistoryItem | undefined,
+  dataFingerprint: string | null
+): boolean {
   if (!previousItem || !dataFingerprint) {
     return false;
   }
@@ -123,11 +150,27 @@ function promptMatchesSnapshot(
     return false;
   }
 
-  if (prompt.sourceDataFingerprint && dataFingerprint && prompt.sourceDataFingerprint !== dataFingerprint) {
+  return promptFingerprintMatchesSnapshot(prompt, dataFingerprint, reportFingerprint);
+}
+
+function promptFingerprintMatchesSnapshot(
+  prompt: GeneratedPromptRecord,
+  dataFingerprint: string | null,
+  reportFingerprint?: string | null
+): boolean {
+  if (
+    prompt.sourceDataFingerprint &&
+    dataFingerprint &&
+    prompt.sourceDataFingerprint !== dataFingerprint
+  ) {
     return false;
   }
 
-  if (prompt.reportFingerprint && reportFingerprint && prompt.reportFingerprint !== reportFingerprint) {
+  if (
+    prompt.reportFingerprint &&
+    reportFingerprint &&
+    prompt.reportFingerprint !== reportFingerprint
+  ) {
     return false;
   }
 
@@ -144,15 +187,15 @@ function filterPromptResultsForSnapshot(
   }
 
   const dataFingerprint = getHistoryDataFingerprint(item);
-  const history = previousResults.history.filter((entry) =>
+  const history = previousResults.history.filter(entry =>
     promptMatchesSnapshot(entry, dataFingerprint, reportFingerprint)
   );
   const listing = promptMatchesSnapshot(previousResults.listing, dataFingerprint, reportFingerprint)
     ? previousResults.listing
-    : history.find((entry) => entry.type === 'listing');
+    : history.find(entry => entry.type === 'listing');
   const visual = promptMatchesSnapshot(previousResults.visual, dataFingerprint, reportFingerprint)
     ? previousResults.visual
-    : history.find((entry) => entry.type === 'visual');
+    : history.find(entry => entry.type === 'visual');
 
   if (!listing && !visual && history.length === 0) {
     return null;
@@ -162,7 +205,7 @@ function filterPromptResultsForSnapshot(
     listing,
     visual,
     history,
-    updatedAt: previousResults.updatedAt
+    updatedAt: previousResults.updatedAt,
   };
 }
 
@@ -170,19 +213,17 @@ function canAttachPromptToSnapshot(item: HistoryItem, prompt: GeneratedPromptRec
   const dataFingerprint = getHistoryDataFingerprint(item);
   const itemReportFingerprint = getSnapshotReportFingerprint(item);
 
-  if (prompt.sourceDataFingerprint && dataFingerprint && prompt.sourceDataFingerprint !== dataFingerprint) {
-    return false;
-  }
-
-  if (prompt.reportFingerprint && itemReportFingerprint && prompt.reportFingerprint !== itemReportFingerprint) {
-    return false;
-  }
-
-  return true;
+  return promptFingerprintMatchesSnapshot(prompt, dataFingerprint, itemReportFingerprint);
 }
 
-function resolveHistorySite(data: ScrapedData, previousItem: HistoryItem | undefined, currentState: AppState): string {
-  return data.metadata?.marketplace || previousItem?.site || currentState.scraper?.selectedSite || 'US';
+function resolveHistorySite(
+  data: ScrapedData,
+  previousItem: HistoryItem | undefined,
+  currentState: AppState
+): string {
+  return (
+    data.metadata?.marketplace || previousItem?.site || currentState.scraper?.selectedSite || 'US'
+  );
 }
 
 function getHistoryAsins(data: ScrapedData): string[] {
@@ -202,21 +243,32 @@ function resolveHistoryReport(
 }
 
 function getSnapshotReportFingerprint(item: HistoryItem): string | null {
-  return item.analysisStatus?.reportFingerprint
-    || getReportFingerprint(item.analysisStatus?.analysisReport)
-    || getReportFingerprint(item.report);
+  return (
+    item.analysisStatus?.reportFingerprint ||
+    getReportFingerprint(item.analysisStatus?.analysisReport) ||
+    getReportFingerprint(item.report)
+  );
 }
 
 function hasBindingDataMismatch(
   currentDataFingerprint: string | null,
   binding?: AnalysisSourceBinding
 ): boolean {
-  return !!binding?.sourceDataFingerprint && binding.sourceDataFingerprint !== currentDataFingerprint;
+  return (
+    !!binding?.sourceDataFingerprint && binding.sourceDataFingerprint !== currentDataFingerprint
+  );
 }
 
-function clearPromptResultsIfReportChanged(item: HistoryItem, reportFingerprint: string | undefined): void {
+function clearPromptResultsIfReportChanged(
+  item: HistoryItem,
+  reportFingerprint: string | undefined
+): void {
   const previousReportFingerprint = getSnapshotReportFingerprint(item);
-  if (previousReportFingerprint && reportFingerprint && previousReportFingerprint !== reportFingerprint) {
+  if (
+    previousReportFingerprint &&
+    reportFingerprint &&
+    previousReportFingerprint !== reportFingerprint
+  ) {
     delete item.promptResults;
   }
 }
@@ -231,7 +283,8 @@ function applyAnalysisStatus(
     return false;
   }
 
-  const sourceDataFingerprint = binding?.sourceDataFingerprint || currentDataFingerprint || undefined;
+  const sourceDataFingerprint =
+    binding?.sourceDataFingerprint || currentDataFingerprint || undefined;
   const reportFingerprint = getReportFingerprint(analysisReport) || undefined;
   clearPromptResultsIfReportChanged(item, reportFingerprint);
 
@@ -243,7 +296,7 @@ function applyAnalysisStatus(
     sourceDataFingerprint,
     sourceAsins: binding?.sourceAsins ?? item.asins,
     sourceTargets: binding?.sourceTargets,
-    reportFingerprint
+    reportFingerprint,
   };
 
   return true;
@@ -252,7 +305,8 @@ function applyAnalysisStatus(
 function createHistoryItem(input: CreateHistoryItemInput): HistoryItem {
   const { data, report, options, currentState, previousItem, id, timestamp } = input;
   const dataFingerprint = getScrapedDataFingerprint(data) || undefined;
-  const shouldPreserveDerived = !options?.invalidateDerived && hasSameSnapshotData(previousItem, dataFingerprint || null);
+  const shouldPreserveDerived =
+    !options?.invalidateDerived && hasSameSnapshotData(previousItem, dataFingerprint || null);
 
   const historyItem: HistoryItem = {
     ...(previousItem || {}),
@@ -293,7 +347,15 @@ function createHistoryDraft(
   return {
     currentHistoryIndex,
     shouldUpdateCurrent,
-    historyItem: createHistoryItem({ data, report, options, currentState, previousItem, id, timestamp })
+    historyItem: createHistoryItem({
+      data,
+      report,
+      options,
+      currentState,
+      previousItem,
+      id,
+      timestamp,
+    }),
   };
 }
 
@@ -307,13 +369,11 @@ function upsertHistoryItem(history: HistoryItem[], draft: HistoryDraft): void {
 }
 
 function trimHistory(history: HistoryItem[]): HistoryItem[] {
-  return history
-    .sort((a, b) => getHistoryTime(b) - getHistoryTime(a))
-    .slice(0, MAX_HISTORY_ITEMS);
+  return history.sort((a, b) => getHistoryTime(b) - getHistoryTime(a)).slice(0, MAX_HISTORY_ITEMS);
 }
 
 function removeHistoryItem(history: HistoryItem[], id: HistoryItem['id']): HistoryItem[] | null {
-  const nextHistory = history.filter((item) => !isSameHistoryId(item.id, id));
+  const nextHistory = history.filter(item => !isSameHistoryId(item.id, id));
   return nextHistory.length === history.length ? null : nextHistory;
 }
 
@@ -341,18 +401,18 @@ function upsertPromptResult(item: HistoryItem, prompt: GeneratedPromptRecord): v
     ...prompt,
     historyId: item.id,
     sourceHistoryId: prompt.sourceHistoryId ?? item.id,
-    sourceDataFingerprint: prompt.sourceDataFingerprint ?? dataFingerprint
+    sourceDataFingerprint: prompt.sourceDataFingerprint ?? dataFingerprint,
   };
   const previousResults = item.promptResults;
   const previousHistory = previousResults?.history || [];
   const nextResults: HistoryPromptResults = {
     listing: previousResults?.listing,
     visual: previousResults?.visual,
-    history: [
-      promptRecord,
-      ...previousHistory.filter((entry) => entry.id !== promptRecord.id)
-    ].slice(0, MAX_PROMPT_RESULT_HISTORY),
-    updatedAt: promptRecord.generatedAt
+    history: [promptRecord, ...previousHistory.filter(entry => entry.id !== promptRecord.id)].slice(
+      0,
+      MAX_PROMPT_RESULT_HISTORY
+    ),
+    updatedAt: promptRecord.generatedAt,
   };
 
   if (promptRecord.type === 'listing') {
@@ -370,7 +430,7 @@ function deletePromptResultFromItem(item: HistoryItem, promptId: string): boolea
     return false;
   }
 
-  const nextHistory = previousResults.history.filter((entry) => entry.id !== promptId);
+  const nextHistory = previousResults.history.filter(entry => entry.id !== promptId);
   const removedListing = previousResults.listing?.id === promptId;
   const removedVisual = previousResults.visual?.id === promptId;
   const removedFromHistory = nextHistory.length !== previousResults.history.length;
@@ -382,13 +442,13 @@ function deletePromptResultFromItem(item: HistoryItem, promptId: string): boolea
   const nextResults: HistoryPromptResults = {
     ...previousResults,
     listing: removedListing
-      ? nextHistory.find((entry) => entry.type === 'listing')
+      ? nextHistory.find(entry => entry.type === 'listing')
       : previousResults.listing,
     visual: removedVisual
-      ? nextHistory.find((entry) => entry.type === 'visual')
+      ? nextHistory.find(entry => entry.type === 'visual')
       : previousResults.visual,
     history: nextHistory,
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
 
   if (!nextResults.listing && !nextResults.visual && nextHistory.length === 0) {
@@ -402,6 +462,76 @@ function deletePromptResultFromItem(item: HistoryItem, promptId: string): boolea
 
 function cloneUserProductProfile(profile: UserProductProfile): UserProductProfile {
   return JSON.parse(JSON.stringify(profile)) as UserProductProfile;
+}
+
+function persistHistory(history: HistoryItem[]): boolean {
+  const saved = StorageService.setScrapeHistory(history);
+  if (!saved) return false;
+  historyCache = history;
+  return true;
+}
+
+async function persistHistoryAsync(history: HistoryItem[]): Promise<boolean> {
+  const saved = await StorageService.setScrapeHistoryAsync(history);
+  if (!saved) return false;
+  historyCache = history;
+  return true;
+}
+
+function applyHistoryItemMutation(
+  history: HistoryItem[],
+  id: HistoryItem['id'],
+  mutation: HistoryItemMutation
+): boolean {
+  const targetItem = getMutableHistoryItem(history, id);
+  return targetItem ? mutation(targetItem, history) : false;
+}
+
+function createPromptResultMutation(prompt: GeneratedPromptRecord): HistoryItemMutation {
+  return targetItem => {
+    if (!canAttachPromptToSnapshot(targetItem, prompt)) {
+      return false;
+    }
+
+    upsertPromptResult(targetItem, prompt);
+    return true;
+  };
+}
+
+function updateHistoryItem(
+  id: HistoryItem['id'],
+  mutation: HistoryItemMutation,
+  errorMessage: string
+): boolean {
+  try {
+    const history = readHistoryFromStorage();
+    if (!applyHistoryItemMutation(history, id, mutation)) {
+      return false;
+    }
+
+    return persistHistory(history);
+  } catch (error) {
+    console.error(`[HistoryService] ${errorMessage}:`, error);
+    return false;
+  }
+}
+
+async function updateHistoryItemAsync(
+  id: HistoryItem['id'],
+  mutation: HistoryItemMutation,
+  errorMessage: string
+): Promise<boolean> {
+  try {
+    const history = await readHistoryFromStorageAsync();
+    if (!applyHistoryItemMutation(history, id, mutation)) {
+      return false;
+    }
+
+    return await persistHistoryAsync(history);
+  } catch (error) {
+    console.error(`[HistoryService] ${errorMessage}:`, error);
+    return false;
+  }
 }
 
 // ----------------------------------------
@@ -424,9 +554,9 @@ export const HistoryService = {
    */
   getAll(): HistoryItem[] {
     try {
-      return historyCache || StorageService.getScrapeHistory();
+      return readHistoryFromStorage();
     } catch (e) {
-      console.error("读取历史记录失败", e);
+      console.error('读取历史记录失败', e);
       return [];
     }
   },
@@ -436,10 +566,9 @@ export const HistoryService = {
    */
   async getAllAsync(): Promise<HistoryItem[]> {
     try {
-      historyCache = await StorageService.getScrapeHistoryAsync();
-      return historyCache;
+      return await readHistoryFromStorageAsync();
     } catch (e) {
-      console.error("读取 IndexedDB 历史记录失败", e);
+      console.error('读取 IndexedDB 历史记录失败', e);
       historyCache = StorageService.getScrapeHistory();
       return historyCache;
     }
@@ -472,7 +601,11 @@ export const HistoryService = {
   /**
    * 异步保存历史记录（IndexedDB 主存储）
    */
-  async saveAsync(data: ScrapedData, report?: AnalysisReport, options?: SaveHistoryOptions): Promise<HistoryItem[]> {
+  async saveAsync(
+    data: ScrapedData,
+    report?: AnalysisReport,
+    options?: SaveHistoryOptions
+  ): Promise<HistoryItem[]> {
     const history = await this.getAllAsync();
     const currentState = appStore.getState();
     const draft = createHistoryDraft(data, report, history, currentState, options);
@@ -497,7 +630,7 @@ export const HistoryService = {
    */
   getById(id: number | string): HistoryItem | undefined {
     const history = this.getAll();
-    return history.find((h) => isSameHistoryId(h.id, id));
+    return history.find(h => isSameHistoryId(h.id, id));
   },
 
   /**
@@ -555,41 +688,26 @@ export const HistoryService = {
   },
 
   async updateSnapshotDataAsync(id: HistoryItem['id'], data: ScrapedData): Promise<boolean> {
-    try {
-      const history = await this.getAllAsync();
-      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
+    return updateHistoryItemAsync(
+      id,
+      targetItem => {
+        const previousFingerprint = getHistoryDataFingerprint(targetItem);
+        const nextFingerprint = getScrapedDataFingerprint(data) || undefined;
 
-      if (targetIndex === -1) {
-        return false;
-      }
+        targetItem.data = data;
+        targetItem.dataFingerprint = nextFingerprint;
+        targetItem.timestamp = data.metadata?.scrape_timestamp || targetItem.timestamp;
+        targetItem.site = data.metadata?.marketplace || targetItem.site;
+        targetItem.asins = data.products?.map(product => product.asin) || targetItem.asins;
 
-      const targetItem = history[targetIndex];
-      if (!targetItem) {
-        return false;
-      }
+        if (previousFingerprint !== nextFingerprint) {
+          clearSnapshotDerivedState(targetItem);
+        }
 
-      const previousFingerprint = getHistoryDataFingerprint(targetItem);
-      const nextFingerprint = getScrapedDataFingerprint(data) || undefined;
-
-      targetItem.data = data;
-      targetItem.dataFingerprint = nextFingerprint;
-      targetItem.timestamp = data.metadata?.scrape_timestamp || targetItem.timestamp;
-      targetItem.site = data.metadata?.marketplace || targetItem.site;
-      targetItem.asins = data.products?.map((product) => product.asin) || targetItem.asins;
-
-      if (previousFingerprint !== nextFingerprint) {
-        clearSnapshotDerivedState(targetItem);
-      }
-
-      const saved = await StorageService.setScrapeHistoryAsync(history);
-      if (!saved) return false;
-      historyCache = history;
-
-      return true;
-    } catch (error) {
-      console.error(`[HistoryService] 更新快照数据失败:`, error);
-      return false;
-    }
+        return true;
+      },
+      '更新快照数据失败'
+    );
   },
 
   /**
@@ -607,14 +725,14 @@ export const HistoryService = {
       // 2. 检查该任务是否包含此 ASIN 且状态为 success
       if (record.data && record.data.products) {
         const product = record.data.products.find(
-          p => p.asin === asin && p.scrape_status === "success"
+          p => p.asin === asin && p.scrape_status === 'success'
         );
 
         if (product) {
           // 返回找到的产品数据和该条记录的时间戳
           return {
             product: product,
-            timestamp: record.timestamp
+            timestamp: record.timestamp,
           };
         }
       }
@@ -627,120 +745,61 @@ export const HistoryService = {
     return this.getByAsin(asin, site);
   },
 
-  getPromptResultsById(id: HistoryItem['id'], reportFingerprint?: string | null): HistoryPromptResults | null {
+  getPromptResultsById(
+    id: HistoryItem['id'],
+    reportFingerprint?: string | null
+  ): HistoryPromptResults | null {
     const item = this.getById(id);
     return item ? filterPromptResultsForSnapshot(item, reportFingerprint) : null;
   },
 
   getUserProductProfileById(id: HistoryItem['id']): UserProductProfile | null {
     const item = this.getById(id);
-    return item?.userProductProfile
-      ? cloneUserProductProfile(item.userProductProfile)
-      : null;
+    return item?.userProductProfile ? cloneUserProductProfile(item.userProductProfile) : null;
   },
 
   updateUserProductProfile(id: HistoryItem['id'], profile: UserProductProfile): boolean {
-    try {
-      const history = this.getAll();
-      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
-
-      if (targetIndex === -1) {
-        return false;
-      }
-
-      const targetItem = history[targetIndex];
-      if (!targetItem) {
-        return false;
-      }
-
-      targetItem.userProductProfile = cloneUserProductProfile(profile);
-
-      const saved = StorageService.setScrapeHistory(history);
-      if (!saved) return false;
-      historyCache = history;
-
-      return true;
-    } catch (error) {
-      console.error(`[HistoryService] 更新产品 DNA 快照失败:`, error);
-      return false;
-    }
+    return updateHistoryItem(
+      id,
+      targetItem => {
+        targetItem.userProductProfile = cloneUserProductProfile(profile);
+        return true;
+      },
+      '更新产品 DNA 快照失败'
+    );
   },
 
-  async updateUserProductProfileAsync(id: HistoryItem['id'], profile: UserProductProfile): Promise<boolean> {
-    try {
-      const history = await this.getAllAsync();
-      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
-
-      if (targetIndex === -1) {
-        return false;
-      }
-
-      const targetItem = history[targetIndex];
-      if (!targetItem) {
-        return false;
-      }
-
-      targetItem.userProductProfile = cloneUserProductProfile(profile);
-
-      const saved = await StorageService.setScrapeHistoryAsync(history);
-      if (!saved) return false;
-      historyCache = history;
-
-      return true;
-    } catch (error) {
-      console.error(`[HistoryService] 更新产品 DNA 快照失败:`, error);
-      return false;
-    }
+  async updateUserProductProfileAsync(
+    id: HistoryItem['id'],
+    profile: UserProductProfile
+  ): Promise<boolean> {
+    return updateHistoryItemAsync(
+      id,
+      targetItem => {
+        targetItem.userProductProfile = cloneUserProductProfile(profile);
+        return true;
+      },
+      '更新产品 DNA 快照失败'
+    );
   },
 
   updatePromptResult(id: HistoryItem['id'], prompt: GeneratedPromptRecord): boolean {
-    try {
-      const history = this.getAll();
-      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
-
-      if (targetIndex === -1) {
-        return false;
-      }
-
-      const targetItem = history[targetIndex];
-      if (!targetItem) {
-        return false;
-      }
-
-      if (!canAttachPromptToSnapshot(targetItem, prompt)) {
-        return false;
-      }
-
-      upsertPromptResult(targetItem, prompt);
-
-      const saved = StorageService.setScrapeHistory(history);
-      if (!saved) return false;
-      historyCache = history;
-
-      return true;
-    } catch (error) {
-      console.error(`[HistoryService] 更新 Prompt 结果失败:`, error);
-      return false;
-    }
+    return updateHistoryItem(id, createPromptResultMutation(prompt), '更新 Prompt 结果失败');
   },
 
   deletePromptResult(promptId: string): boolean {
     try {
       const history = this.getAll();
       let changed = false;
-      history.forEach((item) => {
+      history.forEach(item => {
         changed = deletePromptResultFromItem(item, promptId) || changed;
       });
 
       if (!changed) {
-        return false;
+        return true;
       }
 
-      const saved = StorageService.setScrapeHistory(history);
-      if (!saved) return false;
-      historyCache = history;
-
-      return true;
+      return persistHistory(history);
     } catch (error) {
       console.error(`[HistoryService] 删除 Prompt 结果失败:`, error);
       return false;
@@ -751,54 +810,26 @@ export const HistoryService = {
     try {
       const history = await this.getAllAsync();
       let changed = false;
-      history.forEach((item) => {
+      history.forEach(item => {
         changed = deletePromptResultFromItem(item, promptId) || changed;
       });
 
       if (!changed) {
-        return false;
+        return true;
       }
 
-      const saved = await StorageService.setScrapeHistoryAsync(history);
-      if (!saved) return false;
-      historyCache = history;
-
-      return true;
+      return await persistHistoryAsync(history);
     } catch (error) {
       console.error(`[HistoryService] 删除 Prompt 结果失败:`, error);
       return false;
     }
   },
 
-  async updatePromptResultAsync(id: HistoryItem['id'], prompt: GeneratedPromptRecord): Promise<boolean> {
-    try {
-      const history = await this.getAllAsync();
-      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
-
-      if (targetIndex === -1) {
-        return false;
-      }
-
-      const targetItem = history[targetIndex];
-      if (!targetItem) {
-        return false;
-      }
-
-      if (!canAttachPromptToSnapshot(targetItem, prompt)) {
-        return false;
-      }
-
-      upsertPromptResult(targetItem, prompt);
-
-      const saved = await StorageService.setScrapeHistoryAsync(history);
-      if (!saved) return false;
-      historyCache = history;
-
-      return true;
-    } catch (error) {
-      console.error(`[HistoryService] 更新 Prompt 结果失败:`, error);
-      return false;
-    }
+  async updatePromptResultAsync(
+    id: HistoryItem['id'],
+    prompt: GeneratedPromptRecord
+  ): Promise<boolean> {
+    return updateHistoryItemAsync(id, createPromptResultMutation(prompt), '更新 Prompt 结果失败');
   },
 
   /**
@@ -806,63 +837,27 @@ export const HistoryService = {
    * @param id - 历史记录ID
    * @param analysisReport - 分析报告数据
    */
-  updateAnalysisStatus(id: number | string, analysisReport: AnalysisReport, binding?: AnalysisSourceBinding): boolean {
-    try {
-      const history = this.getAll();
-      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
-
-      if (targetIndex === -1) {
-        return false;
-      }
-
-      // 获取目标历史记录
-      const targetItem = history[targetIndex];
-      if (!targetItem) {
-        return false;
-      }
-
-      if (!applyAnalysisStatus(targetItem, analysisReport, binding)) {
-        return false;
-      }
-
-      // 保存更新后的历史记录
-      const saved = StorageService.setScrapeHistory(history);
-      if (!saved) return false;
-      historyCache = history;
-
-      return true;
-    } catch (error) {
-      console.error(`[HistoryService] 更新分析状态失败:`, error);
-      return false;
-    }
+  updateAnalysisStatus(
+    id: number | string,
+    analysisReport: AnalysisReport,
+    binding?: AnalysisSourceBinding
+  ): boolean {
+    return updateHistoryItem(
+      id,
+      targetItem => applyAnalysisStatus(targetItem, analysisReport, binding),
+      '更新分析状态失败'
+    );
   },
 
-  async updateAnalysisStatusAsync(id: number | string, analysisReport: AnalysisReport, binding?: AnalysisSourceBinding): Promise<boolean> {
-    try {
-      const history = await this.getAllAsync();
-      const targetIndex = history.findIndex((h) => isSameHistoryId(h.id, id));
-
-      if (targetIndex === -1) {
-        return false;
-      }
-
-      const targetItem = history[targetIndex];
-      if (!targetItem) {
-        return false;
-      }
-
-      if (!applyAnalysisStatus(targetItem, analysisReport, binding)) {
-        return false;
-      }
-
-      const saved = await StorageService.setScrapeHistoryAsync(history);
-      if (!saved) return false;
-      historyCache = history;
-
-      return true;
-    } catch (error) {
-      console.error(`[HistoryService] 更新分析状态失败:`, error);
-      return false;
-    }
-  }
+  async updateAnalysisStatusAsync(
+    id: number | string,
+    analysisReport: AnalysisReport,
+    binding?: AnalysisSourceBinding
+  ): Promise<boolean> {
+    return updateHistoryItemAsync(
+      id,
+      targetItem => applyAnalysisStatus(targetItem, analysisReport, binding),
+      '更新分析状态失败'
+    );
+  },
 };

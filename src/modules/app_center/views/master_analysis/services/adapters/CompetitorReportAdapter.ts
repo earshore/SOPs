@@ -3,21 +3,21 @@
  * 从竞品分析报告中提取产品 DNA
  */
 
-import type { ReportAdapter, ExtractionResult } from "./ReportAdapter";
-import type { CompetitorReport } from "../../types/downloadsReportTypes";
-import type { ExtendedDNA } from "../../types/extendedDNA";
-import { isTechnicalSpec } from "../../utils/specUtils";
-import { ValidationError } from "../../../../../../common/errors/AppError";
+import type { ReportAdapter, ExtractionResult } from './ReportAdapter';
+import type { CompetitorReport } from '../../types/downloadsReportTypes';
+import type { ExtendedDNA } from '../../types/extendedDNA';
+import { isTechnicalSpec } from '../../utils/specUtils';
+import { ValidationError } from '../../../../../../common/errors/AppError';
 
 type CompetitorReportInput = Partial<CompetitorReport> & {
-  productSummary?: CompetitorReport["product_summary"];
-  featurePoints?: CompetitorReport["feature_points"];
-  competitorInsights?: CompetitorReport["competitor_insights"];
-  keywordClusters?: CompetitorReport["keyword_clusters"];
-  highFrequencyPhrases?: CompetitorReport["high_frequency_phrases"];
-  negativeDrivers?: CompetitorReport["negative_drivers"];
-  complianceRisks?: CompetitorReport["compliance_risks"];
-  qaOpportunities?: CompetitorReport["qa_opportunities"];
+  productSummary?: CompetitorReport['product_summary'];
+  featurePoints?: CompetitorReport['feature_points'];
+  competitorInsights?: CompetitorReport['competitor_insights'];
+  keywordClusters?: CompetitorReport['keyword_clusters'];
+  highFrequencyPhrases?: CompetitorReport['high_frequency_phrases'];
+  negativeDrivers?: CompetitorReport['negative_drivers'];
+  complianceRisks?: CompetitorReport['compliance_risks'];
+  qaOpportunities?: CompetitorReport['qa_opportunities'];
 };
 
 type CompetitorReportInputKey = keyof CompetitorReportInput;
@@ -25,7 +25,7 @@ type CompetitorReportInputKey = keyof CompetitorReportInput;
 function pickCompetitorField<T>(
   reportObj: CompetitorReportInput,
   keys: CompetitorReportInputKey[],
-  fallback: T,
+  fallback: T
 ): T {
   for (const key of keys) {
     const value = reportObj[key];
@@ -34,7 +34,7 @@ function pickCompetitorField<T>(
   return fallback;
 }
 
-function createEmptyCompetitorInsights(): CompetitorReport["competitor_insights"] {
+function createEmptyCompetitorInsights(): CompetitorReport['competitor_insights'] {
   return {
     strengths: [],
     weaknesses: [],
@@ -43,7 +43,7 @@ function createEmptyCompetitorInsights(): CompetitorReport["competitor_insights"
   };
 }
 
-function createEmptyKeywordClusters(): CompetitorReport["keyword_clusters"] {
+function createEmptyKeywordClusters(): CompetitorReport['keyword_clusters'] {
   return {
     core: [],
     attribute: [],
@@ -62,38 +62,31 @@ const KEYWORD_FIELD_CONFIDENCE = {
  */
 export class CompetitorReportAdapter implements ReportAdapter {
   getName(): string {
-    return "CompetitorReportAdapter";
+    return 'CompetitorReportAdapter';
   }
 
   canHandle(report: unknown): boolean {
     // 类型守卫：确保 report 是对象
-    if (!report || typeof report !== "object") {
+    if (!report || typeof report !== 'object') {
       return false;
     }
 
     const reportObj = report as Record<string, unknown>;
 
     // 放宽条件：支持字段命名变体（snake_case 和 camelCase）
-    const hasCompetitorInsights = !!(
-      reportObj.competitor_insights || reportObj.competitorInsights
-    );
-    const hasFeaturePoints = !!(
-      reportObj.feature_points || reportObj.featurePoints
-    );
-    const hasKeywordClusters = !!(
-      reportObj.keyword_clusters || reportObj.keywordClusters
-    );
+    const hasCompetitorInsights = !!(reportObj.competitor_insights || reportObj.competitorInsights);
+    const hasFeaturePoints = !!(reportObj.feature_points || reportObj.featurePoints);
+    const hasKeywordClusters = !!(reportObj.keyword_clusters || reportObj.keywordClusters);
 
     // 只要有 competitor_insights 和其他任意一个字段即可
-    const result =
-      hasCompetitorInsights && (hasFeaturePoints || hasKeywordClusters);
+    const result = hasCompetitorInsights && (hasFeaturePoints || hasKeywordClusters);
 
     // 移除频繁调用的 debug 日志，减少生产环境性能开销
 
     return result;
   }
 
-  extractDNA(report: unknown, _language: string = "zh"): ExtendedDNA | null {
+  extractDNA(report: unknown, _language: string = 'zh'): ExtendedDNA | null {
     if (!this.canHandle(report)) {
       return null;
     }
@@ -106,8 +99,7 @@ export class CompetitorReportAdapter implements ReportAdapter {
 
       // 提取各个部分
       const keywords = this.extractKeywords(competitorReport);
-      const highFrequencyPhrases =
-        this.extractHighFrequencyPhrases(competitorReport);
+      const highFrequencyPhrases = this.extractHighFrequencyPhrases(competitorReport);
       const audience = this.extractAudience(competitorReport);
       const usps = this.extractUSPs(competitorReport);
       const specs = this.extractSpecs(competitorReport);
@@ -136,7 +128,8 @@ export class CompetitorReportAdapter implements ReportAdapter {
           specs: specs.confidence,
           keywords: keywords.confidence,
           keywordsCore: keywords.data.core.length > 0 ? KEYWORD_FIELD_CONFIDENCE.CORE : 0,
-          keywordsLongTail: keywords.data.longTail.length > 0 ? KEYWORD_FIELD_CONFIDENCE.LONG_TAIL : 0,
+          keywordsLongTail:
+            keywords.data.longTail.length > 0 ? KEYWORD_FIELD_CONFIDENCE.LONG_TAIL : 0,
           keywordsIntent: keywords.data.intent.length > 0 ? KEYWORD_FIELD_CONFIDENCE.INTENT : 0,
           restrictedWords: restrictedWords.confidence,
           highFrequencyPhrases: highFrequencyPhrases.confidence,
@@ -147,7 +140,7 @@ export class CompetitorReportAdapter implements ReportAdapter {
         // 元数据
         metadata: {
           extractedAt: new Date().toISOString(),
-          reportType: "competitor",
+          reportType: 'competitor',
           sourceFields: [
             ...new Set([
               ...keywords.sourceFields,
@@ -164,9 +157,18 @@ export class CompetitorReportAdapter implements ReportAdapter {
             audience: audience.sourceFields,
             usps: usps.sourceFields,
             specs: specs.sourceFields,
-            keywordsCore: keywords.data.core.length > 0 ? keywords.sourceFields.filter(source => source.includes("core")) : [],
-            keywordsLongTail: keywords.data.longTail.length > 0 ? keywords.sourceFields.filter(source => source.includes("long_tail")) : [],
-            keywordsIntent: keywords.data.intent.length > 0 ? keywords.sourceFields.filter(source => source === "intents") : [],
+            keywordsCore:
+              keywords.data.core.length > 0
+                ? keywords.sourceFields.filter(source => source.includes('core'))
+                : [],
+            keywordsLongTail:
+              keywords.data.longTail.length > 0
+                ? keywords.sourceFields.filter(source => source.includes('long_tail'))
+                : [],
+            keywordsIntent:
+              keywords.data.intent.length > 0
+                ? keywords.sourceFields.filter(source => source === 'intents')
+                : [],
             restrictedWords: restrictedWords.sourceFields,
           },
           stats: {
@@ -184,7 +186,7 @@ export class CompetitorReportAdapter implements ReportAdapter {
 
       return dna;
     } catch (error) {
-      console.error("[CompetitorAdapter] 提取失败:", error);
+      console.error('[CompetitorAdapter] 提取失败:', error);
       return null;
     }
   }
@@ -194,41 +196,41 @@ export class CompetitorReportAdapter implements ReportAdapter {
    */
   private normalizeReport(report: unknown): CompetitorReport {
     // 类型守卫
-    if (!report || typeof report !== "object") {
+    if (!report || typeof report !== 'object') {
       throw new ValidationError(
-        "[CompetitorAdapter] Invalid report object",
-        "COMPETITOR_ADAPTER_001",
-        "report",
+        '[CompetitorAdapter] Invalid report object',
+        'COMPETITOR_ADAPTER_001',
+        'report',
         report,
-        { module: "CompetitorReportAdapter", action: "normalizeReport" },
+        { module: 'CompetitorReportAdapter', action: 'normalizeReport' }
       );
     }
 
     const reportObj = report as CompetitorReportInput;
 
     return {
-      product_summary: pickCompetitorField(reportObj, ["product_summary", "productSummary"], ""),
-      feature_points: pickCompetitorField(reportObj, ["feature_points", "featurePoints"], []),
-      intents: pickCompetitorField(reportObj, ["intents"], []),
+      product_summary: pickCompetitorField(reportObj, ['product_summary', 'productSummary'], ''),
+      feature_points: pickCompetitorField(reportObj, ['feature_points', 'featurePoints'], []),
+      intents: pickCompetitorField(reportObj, ['intents'], []),
       competitor_insights: pickCompetitorField(
         reportObj,
-        ["competitor_insights", "competitorInsights"],
-        createEmptyCompetitorInsights(),
+        ['competitor_insights', 'competitorInsights'],
+        createEmptyCompetitorInsights()
       ),
       keyword_clusters: pickCompetitorField(
         reportObj,
-        ["keyword_clusters", "keywordClusters"],
-        createEmptyKeywordClusters(),
+        ['keyword_clusters', 'keywordClusters'],
+        createEmptyKeywordClusters()
       ),
       high_frequency_phrases: pickCompetitorField(
         reportObj,
-        ["high_frequency_phrases", "highFrequencyPhrases"],
-        [],
+        ['high_frequency_phrases', 'highFrequencyPhrases'],
+        []
       ),
-      negative_drivers: pickCompetitorField(reportObj, ["negative_drivers", "negativeDrivers"], []),
-      compliance_risks: pickCompetitorField(reportObj, ["compliance_risks", "complianceRisks"], []),
-      qa_opportunities: pickCompetitorField(reportObj, ["qa_opportunities", "qaOpportunities"], []),
-      meta: pickCompetitorField(reportObj, ["meta"], {} as CompetitorReport["meta"]),
+      negative_drivers: pickCompetitorField(reportObj, ['negative_drivers', 'negativeDrivers'], []),
+      compliance_risks: pickCompetitorField(reportObj, ['compliance_risks', 'complianceRisks'], []),
+      qa_opportunities: pickCompetitorField(reportObj, ['qa_opportunities', 'qaOpportunities'], []),
+      meta: pickCompetitorField(reportObj, ['meta'], {} as CompetitorReport['meta']),
     };
   }
 
@@ -253,18 +255,18 @@ export class CompetitorReportAdapter implements ReportAdapter {
     // 计算置信度
     if (data.core.length > 0) {
       confidence += 0.4;
-      sourceFields.push("keyword_clusters.core");
+      sourceFields.push('keyword_clusters.core');
     }
     if (data.longTail.length > 0) {
       confidence += 0.4;
-      sourceFields.push("keyword_clusters.long_tail");
+      sourceFields.push('keyword_clusters.long_tail');
     }
 
     // 从 intents 字段提取意图关键词（如果有）
     if (report.intents && report.intents.length > 0) {
       data.intent = report.intents;
       confidence += 0.2;
-      sourceFields.push("intents");
+      sourceFields.push('intents');
     }
 
     return { data, confidence: Math.min(confidence, 1.0), sourceFields };
@@ -278,25 +280,28 @@ export class CompetitorReportAdapter implements ReportAdapter {
     let confidence = 0;
     const sourceFields: string[] = [];
 
-    if (Array.isArray(report.keyword_clusters?.banned) && report.keyword_clusters.banned.length > 0) {
+    if (
+      Array.isArray(report.keyword_clusters?.banned) &&
+      report.keyword_clusters.banned.length > 0
+    ) {
       report.keyword_clusters.banned
         .map(word => word?.trim())
         .filter((word): word is string => !!word)
         .forEach(word => restrictedWords.add(word));
       confidence += 0.6;
-      sourceFields.push("keyword_clusters.banned");
+      sourceFields.push('keyword_clusters.banned');
     }
 
     if (Array.isArray(report.compliance_risks) && report.compliance_risks.length > 0) {
       report.compliance_risks
-        .flatMap(risk => Array.isArray(risk.examples) ? risk.examples : [])
+        .flatMap(risk => (Array.isArray(risk.examples) ? risk.examples : []))
         .map(word => word?.trim())
         .filter((word): word is string => !!word)
         .forEach(word => restrictedWords.add(word));
 
       if (Array.from(restrictedWords).length > 0) {
         confidence += 0.4;
-        sourceFields.push("compliance_risks.examples");
+        sourceFields.push('compliance_risks.examples');
       }
     }
 
@@ -310,17 +315,14 @@ export class CompetitorReportAdapter implements ReportAdapter {
   /**
    * 提取高频短语
    */
-  private extractHighFrequencyPhrases(
-    report: CompetitorReport,
-  ): ExtractionResult<string[]> {
+  private extractHighFrequencyPhrases(report: CompetitorReport): ExtractionResult<string[]> {
     const phrases = report.high_frequency_phrases || [];
-    const confidence =
-      phrases.length > 0 ? Math.min(phrases.length / 10, 1.0) : 0;
+    const confidence = phrases.length > 0 ? Math.min(phrases.length / 10, 1.0) : 0;
 
     return {
       data: phrases,
       confidence,
-      sourceFields: phrases.length > 0 ? ["high_frequency_phrases"] : [],
+      sourceFields: phrases.length > 0 ? ['high_frequency_phrases'] : [],
     };
   }
 
@@ -332,10 +334,9 @@ export class CompetitorReportAdapter implements ReportAdapter {
     const confidence = userProfile.length > 0 ? 0.8 : 0;
 
     return {
-      data: userProfile.join(", ") || "",
+      data: userProfile.join(', ') || '',
       confidence,
-      sourceFields:
-        userProfile.length > 0 ? ["competitor_insights.user_profile"] : [],
+      sourceFields: userProfile.length > 0 ? ['competitor_insights.user_profile'] : [],
     };
   }
 
@@ -349,27 +350,20 @@ export class CompetitorReportAdapter implements ReportAdapter {
 
     // 从 feature_points 提取
     if (report.feature_points && report.feature_points.length > 0) {
-      usps.push(...report.feature_points.slice(0, 5).map((f) => `- ${f}`));
+      usps.push(...report.feature_points.slice(0, 5).map(f => `- ${f}`));
       confidence += 0.5;
-      sourceFields.push("feature_points");
+      sourceFields.push('feature_points');
     }
 
     // 从 strengths 补充
-    if (
-      report.competitor_insights?.strengths &&
-      report.competitor_insights.strengths.length > 0
-    ) {
-      usps.push(
-        ...report.competitor_insights.strengths
-          .slice(0, 3)
-          .map((s) => `- ${s}`),
-      );
+    if (report.competitor_insights?.strengths && report.competitor_insights.strengths.length > 0) {
+      usps.push(...report.competitor_insights.strengths.slice(0, 3).map(s => `- ${s}`));
       confidence += 0.5;
-      sourceFields.push("competitor_insights.strengths");
+      sourceFields.push('competitor_insights.strengths');
     }
 
     return {
-      data: usps.join("\n") || "",
+      data: usps.join('\n') || '',
       confidence: Math.min(confidence, 1.0),
       sourceFields,
     };
@@ -383,28 +377,25 @@ export class CompetitorReportAdapter implements ReportAdapter {
     const attributes = report.keyword_clusters?.attribute || [];
 
     // 使用技术规格模式匹配
-    const techSpecs = attributes.filter((attr) => isTechnicalSpec(attr));
+    const techSpecs = attributes.filter(attr => isTechnicalSpec(attr));
 
     if (techSpecs.length > 0) {
-      specs.push(...techSpecs.map((s) => `- ${s}`));
+      specs.push(...techSpecs.map(s => `- ${s}`));
     }
 
-    const confidence =
-      techSpecs.length > 0 ? Math.min(techSpecs.length / 5, 1.0) : 0;
+    const confidence = techSpecs.length > 0 ? Math.min(techSpecs.length / 5, 1.0) : 0;
 
     return {
-      data: specs.join("\n") || "",
+      data: specs.join('\n') || '',
       confidence,
-      sourceFields: techSpecs.length > 0 ? ["keyword_clusters.attribute"] : [],
+      sourceFields: techSpecs.length > 0 ? ['keyword_clusters.attribute'] : [],
     };
   }
 
   /**
    * 提取痛点
    */
-  private extractPainPoints(
-    report: CompetitorReport,
-  ): ExtractionResult<string[]> {
+  private extractPainPoints(report: CompetitorReport): ExtractionResult<string[]> {
     const painPoints: string[] = [];
     let confidence = 0;
     const sourceFields: string[] = [];
@@ -416,14 +407,14 @@ export class CompetitorReportAdapter implements ReportAdapter {
     ) {
       painPoints.push(...report.competitor_insights.weaknesses);
       confidence += 0.5;
-      sourceFields.push("competitor_insights.weaknesses");
+      sourceFields.push('competitor_insights.weaknesses');
     }
 
     // 从 negative_drivers 补充
     if (report.negative_drivers && report.negative_drivers.length > 0) {
       painPoints.push(...report.negative_drivers);
       confidence += 0.5;
-      sourceFields.push("negative_drivers");
+      sourceFields.push('negative_drivers');
     }
 
     return {
@@ -436,17 +427,14 @@ export class CompetitorReportAdapter implements ReportAdapter {
   /**
    * 提取差异化角度
    */
-  private extractDifferentiation(
-    report: CompetitorReport,
-  ): ExtractionResult<string[]> {
+  private extractDifferentiation(report: CompetitorReport): ExtractionResult<string[]> {
     const angles = report.competitor_insights?.differentiation_angles || [];
     const confidence = angles.length > 0 ? 0.9 : 0;
 
     return {
       data: angles,
       confidence,
-      sourceFields:
-        angles.length > 0 ? ["competitor_insights.differentiation_angles"] : [],
+      sourceFields: angles.length > 0 ? ['competitor_insights.differentiation_angles'] : [],
     };
   }
 }

@@ -7,7 +7,10 @@ import { showToast } from '@common/ui/index';
 import { analysisTargets } from '../config/analysisTargets';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { parseAnalysisReport } from '../services/analysisService';
-import { getCachedAnalysisResults, runParallelAIAnalysis } from '../services/parallelAnalysisService';
+import {
+  getCachedAnalysisResults,
+  runParallelAIAnalysis,
+} from '../services/parallelAnalysisService';
 import { resolveAnalysisSchedulePlan } from '../services/analysisScheduler';
 import { generateMarkdownReport, generateJsonReportData } from '../services/reportGenerator';
 import { mergeProducts, getProductsByAsins } from '../utils/dataTransformers';
@@ -104,28 +107,39 @@ export function toggleJsonViewer(context: AlpineContext): void {
 /**
  * 复制提示词
  */
-export function copyPrompt(context: AlpineContext, currentProducts: Product[], index: number): void {
+export function copyPrompt(
+  context: AlpineContext,
+  currentProducts: Product[],
+  index: number
+): void {
   if (currentProducts.length === 0) return;
 
   const targetId = context.selectedTargets[index];
   if (!targetId) return;
 
   // 如果有多个产品，合并后生成提示词
-  const mergedProduct = currentProducts.length > 1 ? mergeProducts(currentProducts) : currentProducts[0];
+  const mergedProduct =
+    currentProducts.length > 1 ? mergeProducts(currentProducts) : currentProducts[0];
   if (!mergedProduct) return;
 
   // 获取正确的语言代码
   const language = getMarketLanguage();
   const prompt = generateAnalysisPrompt(targetId, mergedProduct, language);
 
-  navigator.clipboard.writeText(prompt).then(() => {
-    showToast('提示词已复制', { type: 'success' });
-  }).catch(() => {
-    showToast('复制失败', { type: 'error' });
-  });
+  navigator.clipboard
+    .writeText(prompt)
+    .then(() => {
+      showToast('提示词已复制', { type: 'success' });
+    })
+    .catch(() => {
+      showToast('复制失败', { type: 'error' });
+    });
 }
 
-function createJsonReportData(context: AlpineContext, dataSourceMarketplace: string): FullReportData {
+function createJsonReportData(
+  context: AlpineContext,
+  dataSourceMarketplace: string
+): FullReportData {
   return generateJsonReportData(
     context.selectedAsins,
     context.selectedTargets,
@@ -143,11 +157,14 @@ export function copyJson(context: AlpineContext, dataSourceMarketplace: string):
 
   const reportData = createJsonReportData(context, dataSourceMarketplace);
   const json = JSON.stringify(reportData, null, 2);
-  navigator.clipboard.writeText(json).then(() => {
-    showToast('完整 JSON 报告已复制', { type: 'success' });
-  }).catch(() => {
-    showToast('复制失败', { type: 'error' });
-  });
+  navigator.clipboard
+    .writeText(json)
+    .then(() => {
+      showToast('完整 JSON 报告已复制', { type: 'success' });
+    })
+    .catch(() => {
+      showToast('复制失败', { type: 'error' });
+    });
 }
 
 /**
@@ -176,11 +193,14 @@ export function copyMarkdown(
     dataSourceLabel
   );
 
-  navigator.clipboard.writeText(markdown).then(() => {
-    showToast('Markdown 报告已复制', { type: 'success' });
-  }).catch(() => {
-    showToast('复制失败', { type: 'error' });
-  });
+  navigator.clipboard
+    .writeText(markdown)
+    .then(() => {
+      showToast('Markdown 报告已复制', { type: 'success' });
+    })
+    .catch(() => {
+      showToast('复制失败', { type: 'error' });
+    });
 }
 
 /**
@@ -226,14 +246,16 @@ function createAnalysisSourceBinding(context: AlpineContext): AnalysisSourceBind
     sourceHistoryId: state.scraper?.currentHistoryId ?? null,
     sourceDataFingerprint: getScrapedDataFingerprint(state.scraper?.scrapedData),
     sourceAsins: [...context.selectedAsins],
-    sourceTargets: [...context.selectedTargets]
+    sourceTargets: [...context.selectedTargets],
   };
 }
 
 function isCurrentAnalysisSource(binding: AnalysisSourceBinding): boolean {
   const state = appStore.getState();
-  return (state.scraper?.currentHistoryId ?? null) === binding.sourceHistoryId
-    && getScrapedDataFingerprint(state.scraper?.scrapedData) === binding.sourceDataFingerprint;
+  return (
+    (state.scraper?.currentHistoryId ?? null) === binding.sourceHistoryId &&
+    getScrapedDataFingerprint(state.scraper?.scrapedData) === binding.sourceDataFingerprint
+  );
 }
 
 function withAnalysisSourceBinding(
@@ -252,8 +274,8 @@ function withAnalysisSourceBinding(
       language: report._metadata?.language || language,
       sourceHistoryId: binding.sourceHistoryId,
       sourceDataFingerprint: binding.sourceDataFingerprint || undefined,
-      sourceAsins: [...binding.sourceAsins]
-    }
+      sourceAsins: [...binding.sourceAsins],
+    },
   };
 }
 
@@ -299,7 +321,10 @@ function syncAnalysisProgress(context: AlpineContext, progress: number, currentS
 /**
  * 执行分析
  */
-export async function runAnalysisAction(context: AlpineContext, currentProducts: Product[]): Promise<void> {
+export async function runAnalysisAction(
+  context: AlpineContext,
+  currentProducts: Product[]
+): Promise<void> {
   if (context.selectedTargets.length === 0 || currentProducts.length === 0 || context.isAnalyzing) {
     return;
   }
@@ -319,7 +344,11 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       throw new BusinessError(
         '无法获取产品数据,请确保已从数据采集或数据管理导入数据',
         'AI_ACTIONS_001',
-        { module: 'AIAnalysisActions', action: 'runAnalysisAction', selectedAsins: context.selectedAsins }
+        {
+          module: 'AIAnalysisActions',
+          action: 'runAnalysisAction',
+          selectedAsins: context.selectedAsins,
+        }
       );
     }
 
@@ -341,7 +370,7 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
       product: mergedProduct,
       language,
       enableCache: perfSettings.enableCache,
-      cachedTargetIds
+      cachedTargetIds,
     });
     const streamResults = schedulePlan.streamMode === 'progressive';
 
@@ -360,11 +389,16 @@ export async function runAnalysisAction(context: AlpineContext, currentProducts:
         preloadedCachedResults,
         retryBudget: schedulePlan.retryBudget,
         stopOnFailure: schedulePlan.failureMode === 'complete_required',
-        onTaskComplete: streamResults ? ({ report }) => {
-          if (isCurrentAnalysisSource(sourceBinding)) {
-            syncAnalysisReport(context, withAnalysisSourceBinding(report, sourceBinding, language));
-          }
-        } : undefined
+        onTaskComplete: streamResults
+          ? ({ report }) => {
+              if (isCurrentAnalysisSource(sourceBinding)) {
+                syncAnalysisReport(
+                  context,
+                  withAnalysisSourceBinding(report, sourceBinding, language)
+                );
+              }
+            }
+          : undefined,
       }
     );
 

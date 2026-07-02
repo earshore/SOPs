@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { KeywordHunterSnapshot } from '@/types/modules-business';
 import { KeywordHunterSnapshotService } from '@/modules/app_center/views/keyword_hunter/services/snapshotService';
+import { LocalDataStore } from '@/services/localDataStore';
 
 const mocks = vi.hoisted(() => {
   const snapshots: KeywordHunterSnapshot[] = [];
@@ -86,6 +87,8 @@ vi.mock('@/stores/useAppStore', () => ({
     getState: vi.fn(() => mocks.state),
   },
 }));
+
+const mockedLocalDataStore = vi.mocked(LocalDataStore);
 
 function resetTracker(): void {
   mocks.snapshots.splice(0, mocks.snapshots.length);
@@ -228,5 +231,28 @@ describe('KeywordHunterSnapshotService', () => {
       after: 2,
     });
     expect(diff.coverageDelta).toBe(17);
+  });
+
+  it('saves async snapshots in IndexedDB and removes the localStorage mirror', async () => {
+    const snapshot = await KeywordHunterSnapshotService.saveCurrentAsync({
+      title: 'Indexed snapshot',
+    });
+
+    expect(mocks.indexedSnapshots).toEqual([snapshot]);
+    expect(mocks.removeStorage).toHaveBeenCalledWith('keyword_hunter_snapshots');
+    expect(mocks.state.keywordTracker.currentSnapshotId).toBe(snapshot.id);
+  });
+
+  it('removes legacy localStorage snapshots after a successful migration', async () => {
+    const snapshot = KeywordHunterSnapshotService.saveCurrent({
+      title: 'Legacy snapshot',
+      updateCurrent: false,
+    });
+    mocks.removeStorage.mockClear();
+    mockedLocalDataStore.migrateLocalStorageKey.mockResolvedValueOnce([snapshot]);
+
+    await expect(KeywordHunterSnapshotService.getAllAsync()).resolves.toEqual([snapshot]);
+
+    expect(mocks.removeStorage).toHaveBeenCalledWith('keyword_hunter_snapshots');
   });
 });

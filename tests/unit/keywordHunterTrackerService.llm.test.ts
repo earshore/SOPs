@@ -105,6 +105,21 @@ describe('Keyword Hunter trackerService LLM flows', () => {
     );
   });
 
+  it('accepts substantive no-space Listing text before calling the LLM', async () => {
+    mockedCallLLM.mockResolvedValueOnce('analysis result');
+
+    await expect(
+      fetchListingAnalysis(
+        '便携式无线降噪蓝牙耳机长续航运动通勤入耳式耳塞适合旅行办公健身',
+        ['无线耳机'],
+        [{ keyword: '无线耳机', count: 1 }],
+        [],
+      ),
+    ).resolves.toBe('analysis result');
+
+    expect(mockedCallLLM).toHaveBeenCalled();
+  });
+
   it('parses primary and square-bracket numbered translation responses', async () => {
     mockedCallLLM.mockResolvedValueOnce('【1】 第一段翻译\n【2】 第二段翻译');
 

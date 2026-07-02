@@ -44,6 +44,8 @@ export interface LLMOptions {
   jsonMode?: boolean;
   /** 超时时间 (毫秒) */
   timeout?: number;
+  /** 最大输出 token 数 */
+  maxTokens?: number;
   /** 最大重试次数 */
   retries?: number;
   /** 初始重试延迟 (ms) */
@@ -91,7 +93,7 @@ type PositionalLLMCallArgs = [
   endpoint: string,
   apiKey: string,
   model: string,
-  options?: LLMOptions
+  options?: LLMOptions,
 ];
 
 type LLMCallArgs = PositionalLLMCallArgs | [request: LLMCallRequest];
@@ -116,7 +118,7 @@ export interface ModelInfo {
 /**
  * 睡眠函数
  */
-const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
 const DEFAULT_NEW_API_ENDPOINT = 'https://new.hongecb.store/v1';
 
@@ -225,7 +227,7 @@ function notifyFirstStreamChunk(context: OpenAIStreamLineContext): void {
   context.options.onFirstResponse?.({
     elapsedMs: context.state.firstChunkMs,
     firstChunkMs: context.state.firstChunkMs,
-    chunkCount: context.state.chunkCount
+    chunkCount: context.state.chunkCount,
   });
 }
 
@@ -239,13 +241,10 @@ function assertStreamPayloadIsOk(
     return;
   }
 
-  throw new ApiError(
-    errorPayload.message,
-    'API_STREAM_ERROR',
-    response.status,
-    data,
-    { module: 'LLMService', action: 'readOpenAIStream' }
-  );
+  throw new ApiError(errorPayload.message, 'API_STREAM_ERROR', response.status, data, {
+    module: 'LLMService',
+    action: 'readOpenAIStream',
+  });
 }
 
 function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext): void {
@@ -275,7 +274,7 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
     content: context.state.content,
     elapsedMs: Date.now() - context.requestStartedAt,
     firstChunkMs: context.state.firstChunkMs,
-    chunkCount: context.state.chunkCount
+    chunkCount: context.state.chunkCount,
   });
 }
 
@@ -285,15 +284,11 @@ async function readBufferedOpenAIResponse(response: Response): Promise<OpenAIStr
   return {
     content: getCompletionContent(fallbackJson, rawText),
     fallbackJson,
-    chunkCount: 0
+    chunkCount: 0,
   };
 }
 
-function processStreamText(
-  text: string,
-  buffer: string,
-  context: OpenAIStreamLineContext
-): string {
+function processStreamText(text: string, buffer: string, context: OpenAIStreamLineContext): string {
   const lines = `${buffer}${text}`.split(/\r?\n/);
   const nextBuffer = lines.pop() || '';
 
@@ -352,7 +347,7 @@ function createOpenAIStreamResult(
     content: state.content || getCompletionContent(fallbackJson),
     fallbackJson,
     firstChunkMs: state.firstChunkMs,
-    chunkCount: state.chunkCount
+    chunkCount: state.chunkCount,
   };
 }
 
@@ -377,6 +372,7 @@ interface ResolvedLLMOptions {
   temperature: number;
   jsonMode: boolean;
   timeout: number;
+  maxTokens: number | undefined;
   retries: number;
   retryDelay: number;
   signal: AbortSignal | undefined;
@@ -414,12 +410,13 @@ function resolveLLMOptions(options: LLMOptions): ResolvedLLMOptions {
     temperature: options.temperature ?? 0.3,
     jsonMode: options.jsonMode ?? false,
     timeout: options.timeout ?? 90000,
+    maxTokens: options.maxTokens,
     retries: options.retries ?? 2,
     retryDelay: options.retryDelay ?? 1000,
     signal: options.signal,
     stream: options.stream ?? true,
     onFirstResponse: options.onFirstResponse,
-    onStreamUpdate: options.onStreamUpdate
+    onStreamUpdate: options.onStreamUpdate,
   };
 }
 
@@ -431,21 +428,21 @@ function assertSafeLLMEndpoint(endpoint: string): void {
   const dangerousEndpoints = getDangerousEndpoints();
   throw new SystemError(
     '⛔ 安全限制: 生产环境禁止直接调用外部API\n\n' +
-    '可能的原因:\n' +
-    '1. 未配置代理服务器\n' +
-    '2. API端点配置错误\n\n' +
-    '解决方案:\n' +
-    '- 请在设置中配置企业代理\n' +
-    '- 或联系管理员配置 Cloudflare Workers 代理\n\n' +
-    `检测到的危险端点: ${dangerousEndpoints.join(', ')}\n` +
-    '这是为了保护您的API密钥安全。',
+      '可能的原因:\n' +
+      '1. 未配置代理服务器\n' +
+      '2. API端点配置错误\n\n' +
+      '解决方案:\n' +
+      '- 请在设置中配置企业代理\n' +
+      '- 或联系管理员配置 Cloudflare Workers 代理\n\n' +
+      `检测到的危险端点: ${dangerousEndpoints.join(', ')}\n` +
+      '这是为了保护您的API密钥安全。',
     'LLM_DANGEROUS_ENDPOINT',
     {
       module: 'LLMService',
       action: 'callLLM',
       endpoint,
       dangerousEndpoints: dangerousEndpoints.join(', '),
-      environment: 'production'
+      environment: 'production',
     }
   );
 }
@@ -459,6 +456,7 @@ function createLLMRequestBody(
     model,
     messages,
     temperature: options.temperature,
+    ...(options.maxTokens !== undefined && { max_tokens: options.maxTokens }),
     ...(options.stream && { stream: true }),
     ...(options.jsonMode && { response_format: { type: 'json_object' } }),
   };
@@ -473,14 +471,20 @@ async function waitBeforeLLMRetry(attempt: number, options: ResolvedLLMOptions):
   await sleep(delay);
 }
 
-function createLLMAbortResources(options: ResolvedLLMOptions): { controller: AbortController; timeoutId: ReturnType<typeof setTimeout> } {
+function createLLMAbortResources(options: ResolvedLLMOptions): {
+  controller: AbortController;
+  timeoutId: ReturnType<typeof setTimeout>;
+} {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), options.timeout);
   options.signal?.addEventListener('abort', () => controller.abort(), { once: true });
   return { controller, timeoutId };
 }
 
-async function fetchLLMResponse(context: LLMCallContext, controller: AbortController): Promise<Response> {
+async function fetchLLMResponse(
+  context: LLMCallContext,
+  controller: AbortController
+): Promise<Response> {
   return fetch(`${context.normalizedEndpoint}/chat/completions`, {
     method: 'POST',
     headers: {
@@ -492,13 +496,16 @@ async function fetchLLMResponse(context: LLMCallContext, controller: AbortContro
   });
 }
 
-function getLLMStatusError(status: number, errorMsg: string): { errorCode: string; errorMsg: string } {
+function getLLMStatusError(
+  status: number,
+  errorMsg: string
+): { errorCode: string; errorMsg: string } {
   if (status === 401) {
     return {
       errorCode: 'API_INVALID_KEY',
       errorMsg: configCenter.isProduction()
         ? `认证失败: ${errorMsg}\n\n可能的原因:\n1. 未配置访问密码\n2. API Key 格式不正确\n3. API Key 已过期或无效`
-        : `API Key 认证失败: ${errorMsg}`
+        : `API Key 认证失败: ${errorMsg}`,
     };
   }
 
@@ -527,19 +534,13 @@ async function createLLMResponseError(
   const errorMsg = getLLMErrorMessage(errorText, fallbackErrorMsg);
   const statusError = getLLMStatusError(response.status, errorMsg);
 
-  return new ApiError(
-    statusError.errorMsg,
-    statusError.errorCode,
-    response.status,
-    errorText,
-    {
-      module: 'LLMService',
-      action: 'callLLM',
-      model: context.model,
-      endpoint: context.normalizedEndpoint,
-      attempt: attempt + 1
-    }
-  );
+  return new ApiError(statusError.errorMsg, statusError.errorCode, response.status, errorText, {
+    module: 'LLMService',
+    action: 'callLLM',
+    model: context.model,
+    endpoint: context.normalizedEndpoint,
+    attempt: attempt + 1,
+  });
 }
 
 async function readLLMResponsePayload(
@@ -553,7 +554,7 @@ async function readLLMResponsePayload(
 
   const streamResult = await readOpenAIStream(response, requestStartedAt, {
     onFirstResponse: context.options.onFirstResponse,
-    onStreamUpdate: context.options.onStreamUpdate
+    onStreamUpdate: context.options.onStreamUpdate,
   });
 
   return {
@@ -561,13 +562,33 @@ async function readLLMResponsePayload(
     content: streamResult.content,
     streamMetrics: {
       firstChunkMs: streamResult.firstChunkMs,
-      chunkCount: streamResult.chunkCount
-    }
+      chunkCount: streamResult.chunkCount,
+    },
   };
 }
 
 function hasLLMMessage(data: LLMChatCompletionResponse): boolean {
   return !!data.choices?.[0]?.message;
+}
+
+function createInvalidLLMResponseError(
+  message: string,
+  data: unknown,
+  response: Response,
+  context: LLMCallContext
+): ApiError {
+  return new ApiError(
+    message,
+    'API_INVALID_RESPONSE',
+    response.status,
+    JSON.stringify(data).substring(0, 200),
+    {
+      module: 'LLMService',
+      action: 'callLLM',
+      model: context.model,
+      endpoint: context.normalizedEndpoint,
+    }
+  );
 }
 
 function assertValidLLMResponse(
@@ -581,22 +602,15 @@ function assertValidLLMResponse(
   }
 
   if (!isLLMChatCompletionResponse(data)) {
-    throw new ApiError(
-      'LLM API 返回格式异常',
-      'API_INVALID_RESPONSE',
-      response.status,
-      JSON.stringify(data).substring(0, 200),
-      { module: 'LLMService', action: 'callLLM', model: context.model, endpoint: context.normalizedEndpoint }
-    );
+    throw createInvalidLLMResponseError('LLM API 返回格式异常', data, response, context);
   }
 
   if (!hasLLMMessage(data)) {
-    throw new ApiError(
+    throw createInvalidLLMResponseError(
       `API 返回格式异常: 缺少 choices 或 message 字段`,
-      'API_INVALID_RESPONSE',
-      response.status,
-      JSON.stringify(data).substring(0, 200),
-      { module: 'LLMService', action: 'callLLM', model: context.model, endpoint: context.normalizedEndpoint }
+      data,
+      response,
+      context
     );
   }
 }
@@ -627,11 +641,17 @@ async function executeLLMAttempt(context: LLMCallContext, attempt: number): Prom
 }
 
 function shouldRetryApiError(error: ApiError, context: LLMCallContext, attempt: number): boolean {
-  return attempt < context.options.retries
-    && (error.statusCode === 429 || (error.statusCode !== undefined && error.statusCode >= 500));
+  return (
+    attempt < context.options.retries &&
+    (error.statusCode === 429 || (error.statusCode !== undefined && error.statusCode >= 500))
+  );
 }
 
-function createLLMTimeoutError(error: Error, context: LLMCallContext, attempt: number): NetworkError {
+function createLLMTimeoutError(
+  error: Error,
+  context: LLMCallContext,
+  attempt: number
+): NetworkError {
   return new NetworkError(
     `模型响应超时(${context.options.timeout / 1000}秒)`,
     'LLM_TIMEOUT',
@@ -640,13 +660,17 @@ function createLLMTimeoutError(error: Error, context: LLMCallContext, attempt: n
       action: 'callLLM',
       model: context.model,
       timeout: context.options.timeout,
-      attempt: attempt + 1
+      attempt: attempt + 1,
     },
     error
   );
 }
 
-function createLLMNetworkError(error: Error, context: LLMCallContext, attempt: number): NetworkError {
+function createLLMNetworkError(
+  error: Error,
+  context: LLMCallContext,
+  attempt: number
+): NetworkError {
   return new NetworkError(
     error.message || '网络请求失败',
     'NET_REQUEST_FAILED',
@@ -654,13 +678,17 @@ function createLLMNetworkError(error: Error, context: LLMCallContext, attempt: n
       module: 'LLMService',
       action: 'callLLM',
       model: context.model,
-      attempt: attempt + 1
+      attempt: attempt + 1,
     },
     error
   );
 }
 
-function resolveLLMAttemptFailure(errorValue: unknown, context: LLMCallContext, attempt: number): LLMAttemptFailure {
+function resolveLLMAttemptFailure(
+  errorValue: unknown,
+  context: LLMCallContext,
+  attempt: number
+): LLMAttemptFailure {
   const error = errorValue as Error & { name?: string; status?: number };
 
   if (error instanceof ApiError) {
@@ -681,17 +709,13 @@ function resolveLLMAttemptFailure(errorValue: unknown, context: LLMCallContext, 
 }
 
 function createUnknownLLMFailure(context: LLMCallContext): SystemError {
-  return new SystemError(
-    'LLM 调用失败 (未知原因)',
-    'LLM_UNKNOWN_FAILURE',
-    {
-      module: 'LLMService',
-      action: 'callLLM',
-      model: context.model,
-      endpoint: context.normalizedEndpoint,
-      retries: context.options.retries
-    }
-  );
+  return new SystemError('LLM 调用失败 (未知原因)', 'LLM_UNKNOWN_FAILURE', {
+    module: 'LLMService',
+    action: 'callLLM',
+    model: context.model,
+    endpoint: context.normalizedEndpoint,
+    retries: context.options.retries,
+  });
 }
 
 function normalizeLLMCallArgs(args: LLMCallArgs): LLMCallRequest {
@@ -713,8 +737,8 @@ function normalizeLLMCallArgs(args: LLMCallArgs): LLMCallRequest {
 export async function callLLM(...args: LLMCallArgs): Promise<string> {
   const request = normalizeLLMCallArgs(args);
   const resolvedOptions = resolveLLMOptions(request.options || {});
-  assertSafeLLMEndpoint(request.endpoint);
   const normalizedEndpoint = resolveProviderEndpoint(request.provider, request.endpoint);
+  assertSafeLLMEndpoint(normalizedEndpoint);
 
   const context: LLMCallContext = {
     endpoint: request.endpoint,
@@ -723,7 +747,7 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
     model: request.model,
     messages: request.messages,
     options: resolvedOptions,
-    requestBody: createLLMRequestBody(request.messages, request.model, resolvedOptions)
+    requestBody: createLLMRequestBody(request.messages, request.model, resolvedOptions),
   };
 
   let lastError: Error | null = null;
@@ -762,14 +786,13 @@ function assertSafeModelsEndpoint(endpoint: string): void {
   }
 
   throw new SystemError(
-    '⛔ 安全限制: 生产环境禁止直接调用外部API\n' +
-    '请配置企业代理或联系管理员',
+    '⛔ 安全限制: 生产环境禁止直接调用外部API\n' + '请配置企业代理或联系管理员',
     'LLM_DANGEROUS_ENDPOINT',
     {
       module: 'LLMService',
       action: 'fetchModelsFromApi',
       endpoint,
-      environment: 'production'
+      environment: 'production',
     }
   );
 }
@@ -792,7 +815,12 @@ async function fetchModelsRawText(context: FetchModelsContext): Promise<string> 
       'LLM_API_ERROR',
       response.status,
       errorText,
-      { module: 'LLMService', action: 'fetchModelsFromApi', provider: context.provider, endpoint: context.endpoint }
+      {
+        module: 'LLMService',
+        action: 'fetchModelsFromApi',
+        provider: context.provider,
+        endpoint: context.endpoint,
+      }
     );
   }
 
@@ -809,7 +837,12 @@ function parseModelsJson(rawText: string, context: FetchModelsContext): unknown 
       'LLM_JSON_PARSE_ERROR',
       undefined,
       rawText.substring(0, 100),
-      { module: 'LLMService', action: 'fetchModelsFromApi', provider: context.provider, endpoint: context.endpoint },
+      {
+        module: 'LLMService',
+        action: 'fetchModelsFromApi',
+        provider: context.provider,
+        endpoint: context.endpoint,
+      },
       parseError instanceof Error ? parseError : undefined
     );
   }
@@ -872,7 +905,11 @@ function extractModelList(data: unknown): unknown[] {
   return longest.value;
 }
 
-function assertModelListNotEmpty(list: unknown[], data: unknown, context: FetchModelsContext): void {
+function assertModelListNotEmpty(
+  list: unknown[],
+  data: unknown,
+  context: FetchModelsContext
+): void {
   if (list.length > 0) {
     return;
   }
@@ -886,7 +923,7 @@ function assertModelListNotEmpty(list: unknown[], data: unknown, context: FetchM
       module: 'LLMService',
       action: 'fetchModelsFromApi',
       provider: context.provider,
-      endpoint: context.normalizedEndpoint
+      endpoint: context.normalizedEndpoint,
     }
   );
 }
@@ -902,17 +939,14 @@ function normalizeModelInfo(model: unknown): ModelInfo | null {
       return null;
     }
 
-    const context = typeof model.context === 'number' && Number.isFinite(model.context)
-      ? model.context
-      : 128000;
-    const features = Array.isArray(model.features)
-      ? model.features.map(String)
-      : [];
+    const context =
+      typeof model.context === 'number' && Number.isFinite(model.context) ? model.context : 128000;
+    const features = Array.isArray(model.features) ? model.features.map(String) : [];
 
     return {
       id: String(id),
       context,
-      features
+      features,
     };
   }
 
@@ -946,8 +980,8 @@ export async function fetchModelsFromApi(
   apiKey: string
 ): Promise<ModelInfo[]> {
   try {
-    assertSafeModelsEndpoint(endpoint);
     const normalizedEndpoint = resolveProviderEndpoint(provider, endpoint);
+    assertSafeModelsEndpoint(normalizedEndpoint);
     const context: FetchModelsContext = { provider, endpoint, normalizedEndpoint, apiKey };
 
     const rawText = await fetchModelsRawText(context);

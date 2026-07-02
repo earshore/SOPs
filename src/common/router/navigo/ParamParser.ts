@@ -96,7 +96,10 @@ export class ParamParser {
 
     const converted = this._convertType(rawValue, paramConfig.type);
     if (converted === null) {
-      return { status: 'error', error: `Invalid type for parameter "${key}": expected ${paramConfig.type}` };
+      return {
+        status: 'error',
+        error: `Invalid type for parameter "${key}": expected ${paramConfig.type}`,
+      };
     }
 
     if (paramConfig.validate && !paramConfig.validate(converted)) {

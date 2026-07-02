@@ -79,8 +79,8 @@ export function initEventLogger(): boolean {
     return true;
   }
 
-  TRACKED_EVENTS.forEach((eventName) => {
-    window.addEventListener(eventName, (event) => {
+  TRACKED_EVENTS.forEach(eventName => {
+    window.addEventListener(eventName, event => {
       const customEvent = event as CustomEvent;
       const logEntry = formatEventForLog(customEvent, 'window');
 

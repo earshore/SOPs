@@ -16,7 +16,7 @@ export const defaultRoutesConfig: Partial<MenuConfig> = {
     sops: { id: 'sops', label: 'SOPs 流程中心' },
     app_center: { id: 'app_center', label: '应用中心' },
     hub: { id: 'hub', label: 'Amazon 智库' },
-    more: { id: 'more', label: '更多' }
+    more: { id: 'more', label: '更多' },
   },
   modules: {
     home: {
@@ -25,7 +25,7 @@ export const defaultRoutesConfig: Partial<MenuConfig> = {
       title: '首页',
       version: '1.0',
       icon: 'fa-home',
-      description: '系统首页'
+      description: '系统首页',
     },
     sops: {
       id: 'sops',
@@ -33,7 +33,7 @@ export const defaultRoutesConfig: Partial<MenuConfig> = {
       title: 'SOPs 流程中心',
       version: '1.0',
       icon: 'fa-project-diagram',
-      description: '标准操作流程管理'
+      description: '标准操作流程管理',
     },
     app_center: {
       id: 'app_center',
@@ -41,8 +41,8 @@ export const defaultRoutesConfig: Partial<MenuConfig> = {
       title: '应用中心',
       version: '1.0',
       icon: 'fa-th-large',
-      description: '应用管理中心'
-    }
+      description: '应用管理中心',
+    },
   },
   routes: {
     home: {
@@ -50,23 +50,23 @@ export const defaultRoutesConfig: Partial<MenuConfig> = {
       label: '首页',
       icon: 'fa-home',
       panelId: 'home',
-      viewPath: '/modules/home/homeDisplay.html'
+      viewPath: '/modules/home/homeDisplay.html',
     },
     sops: {
       moduleId: 'sops',
       label: 'SOPs',
       icon: 'fa-project-diagram',
       panelId: 'sops',
-      viewPath: '/modules/sops/sops.html'
+      viewPath: '/modules/sops/sops.html',
     },
     app_center: {
       moduleId: 'app_center',
       label: '应用中心',
       icon: 'fa-th-large',
       panelId: 'app_center',
-      viewPath: '/modules/app_center/app_center.html'
-    }
-  }
+      viewPath: '/modules/app_center/app_center.html',
+    },
+  },
 };
 
 export default defaultRoutesConfig;

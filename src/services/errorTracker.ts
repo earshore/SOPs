@@ -7,6 +7,8 @@
 import type { AppError } from '@/common/errors/AppError';
 import type { ILoggerService } from '../types/services';
 
+const nativeLoggerConsole = globalThis.console;
+
 /**
  * 错误类型
  */
@@ -15,7 +17,7 @@ export enum ErrorType {
   PROMISE = 'promise',
   RESOURCE = 'resource',
   NETWORK = 'network',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 /**
@@ -25,7 +27,7 @@ export enum ErrorSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 /**
@@ -71,9 +73,11 @@ export interface ErrorTrackerConfig {
 type ResourceElement = HTMLImageElement | HTMLScriptElement | HTMLLinkElement;
 
 function isResourceElement(target: EventTarget | null): target is ResourceElement {
-  return target instanceof HTMLImageElement
-    || target instanceof HTMLScriptElement
-    || target instanceof HTMLLinkElement;
+  return (
+    target instanceof HTMLImageElement ||
+    target instanceof HTMLScriptElement ||
+    target instanceof HTMLLinkElement
+  );
 }
 
 function getResourceUrl(target: ResourceElement): string {
@@ -97,10 +101,7 @@ export class ErrorTracker {
       enabled: true,
       maxErrors: 100,
       sampleRate: 1.0,
-      ignorePatterns: [
-        /ResizeObserver loop/i,
-        /Script error/i
-      ]
+      ignorePatterns: [/ResizeObserver loop/i, /Script error/i],
     };
     this.errors = new Map();
     this.errorQueue = [];
@@ -124,7 +125,11 @@ export class ErrorTracker {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+  private _log(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    data: Record<string, unknown> = {}
+  ): void {
     if (this.logger) {
       this.logger[level](message, data, 'ErrorTracker');
     } else {
@@ -153,7 +158,11 @@ export class ErrorTracker {
     this.setupGlobalErrorHandlers();
 
     this.isInitialized = true;
-    this._log('info', '✅ ErrorTracker initialized', this.config as unknown as Record<string, unknown>);
+    this._log(
+      'info',
+      '✅ ErrorTracker initialized',
+      this.config as unknown as Record<string, unknown>
+    );
   }
 
   /**
@@ -169,8 +178,8 @@ export class ErrorTracker {
         context: {
           filename: event.filename,
           lineno: event.lineno,
-          colno: event.colno
-        }
+          colno: event.colno,
+        },
       });
     });
 
@@ -181,26 +190,30 @@ export class ErrorTracker {
         message: String(event.reason),
         stack: event.reason?.stack,
         context: {
-          reason: event.reason
-        }
+          reason: event.reason,
+        },
       });
     });
 
     // 资源加载错误
-    window.addEventListener('error', (event: Event) => {
-      const target = event.target;
-      if (isResourceElement(target)) {
-        const resourceUrl = getResourceUrl(target);
-        this.captureError({
-          type: ErrorType.RESOURCE,
-          message: `Failed to load resource: ${resourceUrl}`,
-          context: {
-            tagName: target.tagName,
-            src: resourceUrl
-          }
-        });
-      }
-    }, true);
+    window.addEventListener(
+      'error',
+      (event: Event) => {
+        const target = event.target;
+        if (isResourceElement(target)) {
+          const resourceUrl = getResourceUrl(target);
+          this.captureError({
+            type: ErrorType.RESOURCE,
+            message: `Failed to load resource: ${resourceUrl}`,
+            context: {
+              tagName: target.tagName,
+              src: resourceUrl,
+            },
+          });
+        }
+      },
+      true
+    );
   }
 
   /**
@@ -246,7 +259,7 @@ export class ErrorTracker {
         context: error.context || {},
         count: 1,
         firstOccurrence: now,
-        lastOccurrence: now
+        lastOccurrence: now,
       };
 
       this.errors.set(errorId, errorRecord);
@@ -279,9 +292,9 @@ export class ErrorTracker {
         code: error.code,
         level: error.level,
         category: error.category,
-        ...error.context
+        ...error.context,
       },
-      severity: this.mapErrorLevelToSeverity(error.level)
+      severity: this.mapErrorLevelToSeverity(error.level),
     });
   }
 
@@ -300,7 +313,7 @@ export class ErrorTracker {
     let hash = 0;
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash;
     }
     return `error_${Math.abs(hash)}`;
@@ -348,16 +361,17 @@ export class ErrorTracker {
   private logError(error: ErrorRecord): void {
     // 🔧 修复：避免循环调用 - 直接使用console而不是Logger
     // Logger可能会触发错误，导致无限递归
-    const logLevel = error.severity === ErrorSeverity.CRITICAL || error.severity === ErrorSeverity.HIGH
-      ? 'error'
-      : 'warn';
+    const logLevel =
+      error.severity === ErrorSeverity.CRITICAL || error.severity === ErrorSeverity.HIGH
+        ? 'error'
+        : 'warn';
 
     const logData = {
       id: error.id,
       severity: error.severity,
       count: error.count,
       stack: error.stack,
-      context: error.context
+      context: error.context,
     };
 
     // 直接使用console，避免通过Logger触发新的错误
@@ -374,13 +388,13 @@ export class ErrorTracker {
       await fetch(this.config.reportEndpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(error)
+        body: JSON.stringify(error),
       });
     } catch (e) {
       // 静默失败,避免递归错误
-      console.warn('[ErrorTracker] Failed to report error:', e);
+      nativeLoggerConsole.warn('[ErrorTracker] Failed to report error:', e);
     }
   }
 
@@ -389,8 +403,9 @@ export class ErrorTracker {
    */
   private pruneOldErrors(): void {
     // 按时间排序,删除最旧的错误
-    const sortedErrors = Array.from(this.errors.values())
-      .sort((a, b) => a.lastOccurrence - b.lastOccurrence);
+    const sortedErrors = Array.from(this.errors.values()).sort(
+      (a, b) => a.lastOccurrence - b.lastOccurrence
+    );
 
     const toRemove = sortedErrors.slice(0, sortedErrors.length - this.config.maxErrors);
     toRemove.forEach(error => this.errors.delete(error.id));
@@ -402,30 +417,32 @@ export class ErrorTracker {
   getStats(): ErrorStats {
     const errors = Array.from(this.errors.values());
 
-    const byType = errors.reduce((acc, error) => {
-      acc[error.type] = (acc[error.type] || 0) + error.count;
-      return acc;
-    }, {} as Record<ErrorType, number>);
+    const byType = errors.reduce(
+      (acc, error) => {
+        acc[error.type] = (acc[error.type] || 0) + error.count;
+        return acc;
+      },
+      {} as Record<ErrorType, number>
+    );
 
-    const bySeverity = errors.reduce((acc, error) => {
-      acc[error.severity] = (acc[error.severity] || 0) + error.count;
-      return acc;
-    }, {} as Record<ErrorSeverity, number>);
+    const bySeverity = errors.reduce(
+      (acc, error) => {
+        acc[error.severity] = (acc[error.severity] || 0) + error.count;
+        return acc;
+      },
+      {} as Record<ErrorSeverity, number>
+    );
 
-    const recentErrors = errors
-      .sort((a, b) => b.lastOccurrence - a.lastOccurrence)
-      .slice(0, 10);
+    const recentErrors = errors.sort((a, b) => b.lastOccurrence - a.lastOccurrence).slice(0, 10);
 
-    const topErrors = errors
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
+    const topErrors = errors.sort((a, b) => b.count - a.count).slice(0, 10);
 
     return {
       total: errors.reduce((sum, error) => sum + error.count, 0),
       byType,
       bySeverity,
       recentErrors,
-      topErrors
+      topErrors,
     };
   }
 
@@ -457,7 +474,11 @@ export class ErrorTracker {
    */
   updateConfig(config: Partial<ErrorTrackerConfig>): void {
     this.config = { ...this.config, ...config };
-    this._log('info', 'ErrorTracker config updated', this.config as unknown as Record<string, unknown>);
+    this._log(
+      'info',
+      'ErrorTracker config updated',
+      this.config as unknown as Record<string, unknown>
+    );
   }
 
   /**

@@ -67,7 +67,7 @@ export function buildStoredThreadMessages(
   const now = getFiniteTimestamp(options.now, Date.now());
   const usedExistingIndexes = new Set<number>();
   const storedMessages: DeepChatMessage[] = conversationMessages
-    .filter((message) => message.role !== 'system')
+    .filter(message => message.role !== 'system')
     .map((message): DeepChatMessage => {
       const role = fromChatRole(message.role);
       const text = truncateStoredMessage(message.content, options.maxMessageChars);
@@ -115,10 +115,12 @@ export function normalizeStoredThreadMessages(
 ): DeepChatMessage[] {
   const fallbackCreatedAt = getFiniteTimestamp(options.fallbackCreatedAt, Date.now());
   const normalizedMessages = messages
-    .map((message) => normalizeStoredMessage(message, {
-      fallbackCreatedAt,
-      maxMessageChars: options.maxMessageChars,
-    }))
+    .map(message =>
+      normalizeStoredMessage(message, {
+        fallbackCreatedAt,
+        maxMessageChars: options.maxMessageChars,
+      })
+    )
     .filter((message): message is DeepChatMessage => message !== null);
 
   return limitStoredMessages(normalizedMessages, options.maxMessages);
@@ -131,7 +133,8 @@ export function getDeepChatMessageText(message: DeepChatMessage): string {
 
 function normalizeStoredMessage(
   message: DeepChatMessage,
-  options: Required<Pick<NormalizeStoredThreadMessagesOptions, 'fallbackCreatedAt'>> & Pick<NormalizeStoredThreadMessagesOptions, 'maxMessageChars'>
+  options: Required<Pick<NormalizeStoredThreadMessagesOptions, 'fallbackCreatedAt'>> &
+    Pick<NormalizeStoredThreadMessagesOptions, 'maxMessageChars'>
 ): DeepChatMessage | null {
   const text = truncateStoredMessage(getDeepChatMessageText(message), options.maxMessageChars);
   if (!text || message.role === 'system') {
@@ -166,7 +169,10 @@ function findExistingStoredMessage(
     }
 
     const existingRole = existingMessage.role === 'user' ? 'user' : 'ai';
-    const existingText = truncateStoredMessage(getDeepChatMessageText(existingMessage), maxMessageChars);
+    const existingText = truncateStoredMessage(
+      getDeepChatMessageText(existingMessage),
+      maxMessageChars
+    );
     if (existingRole === role && existingText === normalizedText) {
       usedExistingIndexes.add(index);
       return existingMessage;
@@ -180,7 +186,10 @@ function fromChatRole(role: ChatMessage['role']): DeepChatMessage['role'] {
   return role === 'user' ? 'user' : 'ai';
 }
 
-function truncateStoredMessage(value: string, maxMessageChars = DEFAULT_MAX_STORED_MESSAGE_CHARS): string {
+function truncateStoredMessage(
+  value: string,
+  maxMessageChars = DEFAULT_MAX_STORED_MESSAGE_CHARS
+): string {
   const normalizedValue = value.trim();
   if (normalizedValue.length <= maxMessageChars) {
     return normalizedValue;
@@ -197,7 +206,7 @@ function limitStoredMessages(
 }
 
 function getFiniteTimestamp(value: number | undefined, fallback: number): number {
-  return Number.isFinite(value) ? value as number : fallback;
+  return Number.isFinite(value) ? (value as number) : fallback;
 }
 
 function requestContainsHistory(

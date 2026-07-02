@@ -8,10 +8,10 @@ import { StorageService, CACHE_PREFIXES } from './storageService';
 /**
  * 缓存策略
  */
-export type CacheStrategy = 
-  | 'no-cache'        // 不缓存
-  | 'memory'          // 内存缓存
-  | 'storage'         // 持久化缓存
+export type CacheStrategy =
+  | 'no-cache' // 不缓存
+  | 'memory' // 内存缓存
+  | 'storage' // 持久化缓存
   | 'memory-storage'; // 内存+持久化
 
 /**
@@ -58,18 +58,18 @@ interface CacheStats {
 class HttpCacheService {
   /** 内存缓存 */
   private memoryCache: Map<string, CacheEntry> = new Map();
-  
+
   /** 缓存统计 */
   private stats = {
     hits: 0,
-    misses: 0
+    misses: 0,
   };
-  
+
   /** 默认配置 */
   private defaultConfig: CacheConfig = {
     strategy: 'memory',
     ttl: 5 * 60 * 1000, // 5分钟
-    staleWhileRevalidate: false
+    staleWhileRevalidate: false,
   };
 
   /**
@@ -107,11 +107,7 @@ class HttpCacheService {
   /**
    * 设置缓存
    */
-  async set<T = unknown>(
-    key: string, 
-    data: T, 
-    config?: Partial<CacheConfig>
-  ): Promise<void> {
+  async set<T = unknown>(key: string, data: T, config?: Partial<CacheConfig>): Promise<void> {
     const cfg = { ...this.defaultConfig, ...config };
     const cacheKey = this.buildKey(key, cfg.prefix);
 
@@ -124,7 +120,7 @@ class HttpCacheService {
       data,
       timestamp: Date.now(),
       expiresAt: Date.now() + cfg.ttl,
-      key: cacheKey
+      key: cacheKey,
     };
 
     // 存入内存缓存
@@ -143,10 +139,10 @@ class HttpCacheService {
    */
   async delete(key: string, prefix?: string): Promise<void> {
     const cacheKey = this.buildKey(key, prefix);
-    
+
     // 从内存删除
     this.memoryCache.delete(cacheKey);
-    
+
     // 从持久化删除
     try {
       StorageService.remove(cacheKey);
@@ -176,7 +172,7 @@ class HttpCacheService {
       hits: this.stats.hits,
       misses: this.stats.misses,
       size: this.memoryCache.size,
-      hitRate: total > 0 ? this.stats.hits / total : 0
+      hitRate: total > 0 ? this.stats.hits / total : 0,
     };
   }
 
@@ -220,14 +216,14 @@ class HttpCacheService {
     // 清空指定前缀的缓存
     const pattern = this.buildKey('', prefix);
 
-    this.clearMemoryKeys((key) => key.startsWith(pattern));
-    this.removeStorageKeys((key) => key.startsWith(pattern));
+    this.clearMemoryKeys(key => key.startsWith(pattern));
+    this.removeStorageKeys(key => key.startsWith(pattern));
   }
 
   private clearAll(): void {
     // 清空所有缓存
     this.memoryCache.clear();
-    this.removeStorageKeys((key) => this.isHttpCacheKey(key));
+    this.removeStorageKeys(key => this.isHttpCacheKey(key));
   }
 
   private clearMemoryKeys(shouldRemove: (key: string) => boolean): void {
@@ -361,9 +357,12 @@ export const httpCacheService = new HttpCacheService();
  * 定期清理过期缓存(每10分钟)
  */
 if (typeof window !== 'undefined') {
-  setInterval(() => {
-    httpCacheService.cleanup();
-  }, 10 * 60 * 1000);
+  setInterval(
+    () => {
+      httpCacheService.cleanup();
+    },
+    10 * 60 * 1000
+  );
 }
 
 /**

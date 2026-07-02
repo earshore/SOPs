@@ -2,12 +2,12 @@
  * Amazon 生态系统 - A10算法权重分析
  */
 
-import BaseModule from "../../../../../common/BaseModule";
-import { A10_CHART_DATA } from "../../../constants/amz_hub_constants";
-import templateHTML from "./template.html?raw";
-import "./styles.css";
-import { loadChartJs, type ChartJS } from "../../../../../common/utils/lazyLibs";
-import { setSafeHtml } from "../../../../../common/utils/security";
+import BaseModule from '../../../../../common/BaseModule';
+import { A10_CHART_DATA } from '../../../constants/amz_hub_constants';
+import templateHTML from './template.html?raw';
+import './styles.css';
+import { loadChartJs, type ChartJS } from '../../../../../common/utils/lazyLibs';
+import { setSafeHtml } from '../../../../../common/utils/security';
 
 // Chart.js 实例类型定义
 interface ChartInstance {
@@ -22,7 +22,7 @@ class EcosystemModule extends BaseModule {
   private chartInstance: ChartInstance | null = null;
 
   constructor() {
-    super("amz_ecosystem");
+    super('amz_ecosystem');
   }
 
   protected async render(): Promise<void> {
@@ -31,7 +31,7 @@ class EcosystemModule extends BaseModule {
 
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, templateHTML);
-    container.classList.add("fade-in");
+    container.classList.add('fade-in');
   }
 
   async init(): Promise<void> {
@@ -47,28 +47,28 @@ class EcosystemModule extends BaseModule {
   }
 
   initChart(): void {
-    const ctx = document.getElementById("amz_a10Chart") as HTMLCanvasElement;
+    const ctx = document.getElementById('amz_a10Chart') as HTMLCanvasElement;
     if (!ctx) return;
 
     const Chart = (window as WindowWithChart).Chart;
     if (!Chart) return;
 
-    const context = ctx.getContext("2d");
+    const context = ctx.getContext('2d');
     if (!context) return;
 
     this.chartInstance = new Chart(context, {
-      type: "doughnut",
+      type: 'doughnut',
       data: A10_CHART_DATA,
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            position: "right",
+            position: 'right',
             labels: { usePointStyle: true, boxWidth: 8 },
           },
         },
-        cutout: "70%",
+        cutout: '70%',
       },
     });
   }

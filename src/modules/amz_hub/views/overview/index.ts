@@ -2,29 +2,29 @@
  * Amazon智库总览 视图模块
  */
 
-import BaseModule from "../../../../common/BaseModule";
-import { setSafeHtml } from "../../../../common/utils/security";
-import templateHTML from "./template.html?raw";
+import BaseModule from '../../../../common/BaseModule';
+import { setSafeHtml } from '../../../../common/utils/security';
+import templateHTML from './template.html?raw';
 
 /**
  * 初始化事件监听
  */
 function initOverviewEvents(container: HTMLElement): void {
   // 分类筛选按钮事件
-  const filterBtns = container.querySelectorAll(".category-filter-btn");
-  filterBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
+  const filterBtns = container.querySelectorAll('.category-filter-btn');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
       // 移除所有按钮的 active 状态
-      filterBtns.forEach((b) => {
-        b.classList.remove("active", "bg-blue-500", "text-white", "hover:bg-blue-600");
-        b.classList.add("bg-white", "text-slate-700", "border-slate-300");
-        b.setAttribute("aria-pressed", "false");
+      filterBtns.forEach(b => {
+        b.classList.remove('active', 'bg-blue-500', 'text-white', 'hover:bg-blue-600');
+        b.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
+        b.setAttribute('aria-pressed', 'false');
       });
 
       // 添加当前按钮的 active 状态
-      btn.classList.add("active");
-      btn.classList.remove("bg-white", "text-slate-700", "border-slate-300");
-      btn.setAttribute("aria-pressed", "true");
+      btn.classList.add('active');
+      btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
+      btn.setAttribute('aria-pressed', 'true');
 
       // 执行筛选
       const category = (btn as HTMLElement).dataset.category;
@@ -39,19 +39,19 @@ function initOverviewEvents(container: HTMLElement): void {
  * 按分类筛选
  */
 function filterByCategory(container: HTMLElement, category: string): void {
-  const sections = container.querySelectorAll("section[data-category]");
+  const sections = container.querySelectorAll('section[data-category]');
 
-  sections.forEach((section) => {
+  sections.forEach(section => {
     const sectionEl = section as HTMLElement;
-    if (category === "all") {
-      sectionEl.style.display = "";
-      sectionEl.classList.add("fade-in");
+    if (category === 'all') {
+      sectionEl.style.display = '';
+      sectionEl.classList.add('fade-in');
     } else {
       if (sectionEl.dataset.category === category) {
-        sectionEl.style.display = "";
-        sectionEl.classList.add("fade-in");
+        sectionEl.style.display = '';
+        sectionEl.classList.add('fade-in');
       } else {
-        sectionEl.style.display = "none";
+        sectionEl.style.display = 'none';
       }
     }
   });
@@ -72,24 +72,23 @@ export function scrollToModule(categoryId: string): void {
   if (moduleElement) {
     // 使用平滑滚动
     moduleElement.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-      inline: "nearest",
+      behavior: 'smooth',
+      block: 'start',
+      inline: 'nearest',
     });
 
     // 添加高亮效果
-    moduleElement.classList.add("hub-module-highlight");
+    moduleElement.classList.add('hub-module-highlight');
     setTimeout(() => {
-      moduleElement.classList.remove("hub-module-highlight");
+      moduleElement.classList.remove('hub-module-highlight');
     }, 2000);
-
   }
 }
 
 // Module class
 class HubOverviewModule extends BaseModule {
   constructor() {
-    super("amz_hub_overview");
+    super('amz_hub_overview');
   }
 
   protected async render(): Promise<void> {
@@ -98,7 +97,7 @@ class HubOverviewModule extends BaseModule {
 
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, templateHTML);
-    container.classList.add("fade-in");
+    container.classList.add('fade-in');
   }
 
   protected async init(): Promise<void> {
@@ -112,6 +111,5 @@ class HubOverviewModule extends BaseModule {
 // 导出模块实例
 const hubOverviewModule = new HubOverviewModule();
 
-export const mount = (container: HTMLElement) =>
-  hubOverviewModule.mount(container);
+export const mount = (container: HTMLElement) => hubOverviewModule.mount(container);
 export const unmount = () => hubOverviewModule.unmount();

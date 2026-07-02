@@ -497,13 +497,13 @@ describe('ScraperPanel current factory', () => {
     expect(showToast).toHaveBeenCalledWith('采集完成: 1 成功', { type: 'success' });
     expect(panel.isScraping).toBe(false);
 
+    scraperMocks.handleScrapeComplete.mockClear();
+    scraperMocks.saveScrapeSnapshot.mockClear();
+    scraperMocks.appState.setScrapedData.mockClear();
+    scraperMocks.appState.setAnalysisReport.mockClear();
+    scraperMocks.emitHistoryUpdated.mockClear();
+    scraperMocks.showToast.mockClear();
     scraperMocks.startScrape.mockRejectedValueOnce(new Error('network'));
-    scraperMocks.saveScrapeSnapshot.mockRejectedValueOnce(new Error('quota'));
-    scraperMocks.handleScrapeComplete.mockReturnValueOnce({
-      metadata: { marketplace: 'DE' },
-      products: [],
-      reviews: [],
-    });
 
     await panel.startScrape();
 
@@ -512,6 +512,12 @@ describe('ScraperPanel current factory', () => {
       module: 'scraper',
     });
     expect(showToast).toHaveBeenCalledWith('采集任务异常中断', { type: 'error' });
-    expect(showToast).toHaveBeenCalledWith('采集完成，但全部失败', { type: 'error' });
+    expect(showToast).not.toHaveBeenCalledWith('采集完成，但全部失败', { type: 'error' });
+    expect(scraperMocks.handleScrapeComplete).not.toHaveBeenCalled();
+    expect(saveScrapeSnapshot).not.toHaveBeenCalled();
+    expect(scraperMocks.appState.setScrapedData).not.toHaveBeenCalled();
+    expect(scraperMocks.appState.setAnalysisReport).not.toHaveBeenCalled();
+    expect(scraperMocks.emitHistoryUpdated).not.toHaveBeenCalled();
+    expect(panel.isScraping).toBe(false);
   });
 });

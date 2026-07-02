@@ -58,7 +58,7 @@ export class MemoryLeakDetector {
       memoryGrowthThreshold: 50, // 50MB
       listenerThreshold: 30,
       enabled: true,
-      ...config
+      ...config,
     };
   }
 
@@ -123,13 +123,13 @@ export class MemoryLeakDetector {
         jsHeapSizeLimit: number;
       };
     };
-    
+
     const memory = perfWithMemory.memory;
     const snapshot: MemorySnapshot = {
       timestamp: Date.now(),
       heapUsed: memory.usedJSHeapSize / 1024 / 1024, // MB
       heapTotal: memory.totalJSHeapSize / 1024 / 1024,
-      external: memory.jsHeapSizeLimit / 1024 / 1024
+      external: memory.jsHeapSizeLimit / 1024 / 1024,
     };
 
     this.snapshots.push(snapshot);
@@ -160,9 +160,9 @@ export class MemoryLeakDetector {
           growth,
           duration,
           currentHeapUsed: last.heapUsed,
-          snapshots: this.snapshots
+          snapshots: this.snapshots,
         },
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
   }
@@ -185,9 +185,9 @@ export class MemoryLeakDetector {
         message: `检测到 ${problematicEvents.length} 个事件的监听器数量过多`,
         details: {
           events: problematicEvents,
-          totalListeners: stats.totalListeners
+          totalListeners: stats.totalListeners,
         },
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -199,7 +199,7 @@ export class MemoryLeakDetector {
         severity: leaks.some(l => l.severity === 'critical') ? 'critical' : 'warning',
         message: `检测到 ${leaks.length} 个潜在的EventBus内存泄漏`,
         details: { leaks },
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
   }
@@ -216,9 +216,11 @@ export class MemoryLeakDetector {
    * 检查是否支持Memory API
    */
   private _isMemoryAPIAvailable(): boolean {
-    return typeof performance !== 'undefined' && 
-           'memory' in performance &&
-           typeof (performance as unknown as { memory?: unknown }).memory === 'object';
+    return (
+      typeof performance !== 'undefined' &&
+      'memory' in performance &&
+      typeof (performance as unknown as { memory?: unknown }).memory === 'object'
+    );
   }
 
   /**
@@ -237,12 +239,12 @@ export class MemoryLeakDetector {
         totalJSHeapSize: number;
       };
     };
-    
+
     const memory = perfWithMemory.memory;
     return {
       heapUsed: memory.usedJSHeapSize / 1024 / 1024,
       heapTotal: memory.totalJSHeapSize / 1024 / 1024,
-      percentage: (memory.usedJSHeapSize / memory.totalJSHeapSize) * 100
+      percentage: (memory.usedJSHeapSize / memory.totalJSHeapSize) * 100,
     };
   }
 
@@ -295,6 +297,9 @@ export const memoryLeakDetector = new MemoryLeakDetector();
 export default memoryLeakDetector;
 
 // 向后兼容：暴露到 window (开发调试用)
-if (typeof window !== 'undefined' && (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) {
+if (
+  typeof window !== 'undefined' &&
+  (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV
+) {
   (window as unknown as Record<string, unknown>).__MemoryLeakDetector = memoryLeakDetector;
 }

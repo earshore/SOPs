@@ -9,13 +9,20 @@
 }
 
 .sidebar-shell .sidebar-btn--active {
-  background:
-    linear-gradient(90deg, var(--sidebar-active-bg-start), var(--sidebar-active-bg-end)) !important;
+  background: linear-gradient(
+    90deg,
+    var(--sidebar-active-bg-start),
+    var(--sidebar-active-bg-end)
+  ) !important;
   border-left-color: var(--sidebar-active, var(--sidebar-primary)) !important;
 }
 
 .sidebar-shell .sidebar-icon-container--active {
-  background: linear-gradient(135deg, var(--sidebar-icon-soft), var(--sidebar-icon-soft-end)) !important;
+  background: linear-gradient(
+    135deg,
+    var(--sidebar-icon-soft),
+    var(--sidebar-icon-soft-end)
+  ) !important;
 }
 
 .sidebar-shell .sidebar-icon--active {

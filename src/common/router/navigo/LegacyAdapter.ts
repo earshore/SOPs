@@ -2,12 +2,12 @@
  * LegacyAdapter.ts - 向后兼容适配器
  *
  * 提供与旧路由系统的兼容接口，确保平滑迁移
- * 
+ *
  * ⚠️ 移除计划：
  * - 阶段 1 (2026-03-01 ~ 2026-05-31): 保留，显示弃用警告
  * - 阶段 2 (2026-06-01 ~ 2026-08-31): 仅保留核心 API，增强警告
  * - 阶段 3 (2026-09-01): 完全移除
- * 
+ *
  * 当前阶段: 阶段 1
  * 预计移除日期: 2026-09-01
  */
@@ -15,6 +15,8 @@
 import type { NavigoAdapter } from './NavigoAdapter';
 import type { Route } from './types';
 import { routeIdToPath } from '../routePaths';
+
+const nativeLoggerConsole = globalThis.console;
 
 /**
  * 旧版 switchTab 函数签名
@@ -29,14 +31,14 @@ type LegacySwitchTabFn = (
 
 /**
  * 向后兼容适配器
- * 
+ *
  * ⚠️ 此类将在 2026-09-01 移除
  */
 export class LegacyAdapter {
   private router: NavigoAdapter;
   private deprecationWarnings: Set<string>;
   private showWarnings: boolean;
-  
+
   /** 移除计划阶段 */
   private static readonly REMOVAL_PHASE = 1;
   private static readonly REMOVAL_DATE = '2026-09-01';
@@ -45,12 +47,12 @@ export class LegacyAdapter {
     this.router = router;
     this.deprecationWarnings = new Set();
     this.showWarnings = showWarnings;
-    
+
     // 显示移除计划警告
     if (showWarnings && LegacyAdapter.REMOVAL_PHASE === 1) {
-      console.warn(
+      nativeLoggerConsole.warn(
         `[LegacyAdapter] 向后兼容层将在 ${LegacyAdapter.REMOVAL_DATE} 移除。` +
-        `请尽快迁移到新的路由 API。`
+          `请尽快迁移到新的路由 API。`
       );
     }
   }
@@ -140,7 +142,7 @@ export class LegacyAdapter {
    * 安装全局兼容 API
    *
    * 将兼容函数挂载到 window 对象
-   * 
+   *
    * ⚠️ 此方法将在 2026-09-01 移除
    */
   installGlobalAPI(): void {
@@ -154,7 +156,7 @@ export class LegacyAdapter {
     windowWithLegacy.router = this.createLegacyRouter();
 
     if (this.showWarnings) {
-      console.warn(
+      nativeLoggerConsole.warn(
         '[LegacyAdapter] Global APIs installed. ' +
           'Please migrate to ES modules: import { router } from "@router/navigo". ' +
           `These APIs will be removed on ${LegacyAdapter.REMOVAL_DATE}.`
@@ -226,7 +228,7 @@ export class LegacyAdapter {
 
     this.deprecationWarnings.add(key);
 
-    console.warn(
+    nativeLoggerConsole.warn(
       `[DEPRECATED] "${oldAPI}" is deprecated and will be removed in the next major version. ` +
         `Please use "${newAPI}" instead.`
     );

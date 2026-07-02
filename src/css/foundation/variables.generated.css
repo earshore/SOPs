@@ -6,7 +6,6 @@
  */
 
 :root {
-
   /* ========================================
      颜色系统 - 基础色板
      ======================================== */
@@ -434,7 +433,6 @@
   --container-padding-md: 2rem;
   --container-padding-lg: 2.5rem;
   --container-padding-xl: 3rem;
-
 }
 
 /* ========================================
@@ -477,7 +475,6 @@
   --border-dark: var(--color-slate-300);
   --border-focus: var(--color-blue-500);
 
-
   /* 置信度色系 */
   --confidence-high-bg: var(--color-green-100);
   --confidence-high-bg-alpha: var(--color-green-500);
@@ -494,5 +491,4 @@
   --confidence-low-text: var(--color-orange-700);
   --confidence-low-text-light: var(--color-orange-400);
   --confidence-low-border: var(--color-orange-300);
-
 }

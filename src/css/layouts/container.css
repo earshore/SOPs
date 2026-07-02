@@ -20,19 +20,18 @@
  * 15. 打印适配
  */
 
-
 /* ----------------------------------------
    1. 布局变量
    ---------------------------------------- */
 :root {
   /* 容器最大宽度 */
-  --container-xs:   480px;
-  --container-sm:   640px;
-  --container-md:   768px;
-  --container-lg:   1024px;
-  --container-xl:   1280px;
-  --container-2xl:  1450px;
-  --container-3xl:  1680px;
+  --container-xs: 480px;
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1450px;
+  --container-3xl: 1680px;
   --container-full: 100%;
 
   /* 默认容器宽度 */
@@ -58,7 +57,6 @@
   --section-gap-lg: var(--spacing-2xl, 48px);
 }
 
-
 /* ----------------------------------------
    2. 基础容器
    ---------------------------------------- */
@@ -70,7 +68,6 @@
   padding-left: var(--container-padding-x);
   padding-right: var(--container-padding-x);
 }
-
 
 /* ----------------------------------------
    3. 容器宽度变体
@@ -165,7 +162,6 @@
   padding-right: var(--container-padding-x);
 }
 
-
 /* ----------------------------------------
    4. 容器对齐变体
    ---------------------------------------- */
@@ -178,7 +174,6 @@
   margin-left: auto;
   margin-right: 0;
 }
-
 
 /* ----------------------------------------
    5. 内容区域容器
@@ -209,7 +204,6 @@
 .content-area--spacious > * + * {
   margin-top: var(--section-gap-lg);
 }
-
 
 /* ----------------------------------------
    6. Section 区块
@@ -287,7 +281,6 @@
   gap: var(--spacing-sm, 12px);
   flex-shrink: 0;
 }
-
 
 /* ----------------------------------------
    7. 双栏布局（侧栏 + 主内容）
@@ -441,7 +434,6 @@
   overflow: hidden;
 }
 
-
 /* ----------------------------------------
    8. 圣杯布局（Header + Sidebar + Main + Footer）
    ---------------------------------------- */
@@ -496,7 +488,6 @@
   display: none;
 }
 
-
 /* ----------------------------------------
    9. 粘性布局辅助
    ---------------------------------------- */
@@ -528,7 +519,6 @@
   -webkit-backdrop-filter: blur(12px) saturate(1.8);
 }
 
-
 /* ----------------------------------------
    10. 间距系统
    ---------------------------------------- */
@@ -538,11 +528,21 @@
   margin-top: var(--flow-gap, var(--spacing-md, 16px));
 }
 
-.flow--xs > * + * { margin-top: var(--spacing-xs, 8px); }
-.flow--sm > * + * { margin-top: var(--spacing-sm, 12px); }
-.flow--md > * + * { margin-top: var(--spacing-md, 16px); }
-.flow--lg > * + * { margin-top: var(--spacing-lg, 24px); }
-.flow--xl > * + * { margin-top: var(--spacing-xl, 32px); }
+.flow--xs > * + * {
+  margin-top: var(--spacing-xs, 8px);
+}
+.flow--sm > * + * {
+  margin-top: var(--spacing-sm, 12px);
+}
+.flow--md > * + * {
+  margin-top: var(--spacing-md, 16px);
+}
+.flow--lg > * + * {
+  margin-top: var(--spacing-lg, 24px);
+}
+.flow--xl > * + * {
+  margin-top: var(--spacing-xl, 32px);
+}
 
 /* 页面内容通用内边距 */
 .page-padding {
@@ -556,7 +556,6 @@
 .page-padding--lg {
   padding: var(--spacing-xl, 32px) var(--container-padding-x-lg);
 }
-
 
 /* ----------------------------------------
    11. 全宽突破容器（Breakout）
@@ -584,7 +583,6 @@
   margin-left: calc(var(--spacing-xl, 32px) * -1);
   margin-right: calc(var(--spacing-xl, 32px) * -1);
 }
-
 
 /* ----------------------------------------
    12. 安全区域
@@ -614,67 +612,65 @@
   z-index: var(--z-sticky, 35);
 }
 
-
 /* ----------------------------------------
    13. 暗色模式
    ---------------------------------------- */
 .dark .layout-sidebar__aside,
 .dark .layout-app__sidebar,
-[data-theme="dark"] .layout-sidebar__aside,
-[data-theme="dark"] .layout-app__sidebar {
+[data-theme='dark'] .layout-sidebar__aside,
+[data-theme='dark'] .layout-app__sidebar {
   background: var(--color-bg-secondary, #1e293b);
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .layout-sidebar--right .layout-sidebar__aside,
-[data-theme="dark"] .layout-sidebar--right .layout-sidebar__aside {
+[data-theme='dark'] .layout-sidebar--right .layout-sidebar__aside {
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .layout-app__footer,
-[data-theme="dark"] .layout-app__footer {
+[data-theme='dark'] .layout-app__footer {
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .section--divided,
-[data-theme="dark"] .section--divided {
+[data-theme='dark'] .section--divided {
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .section-title,
-[data-theme="dark"] .section-title {
+[data-theme='dark'] .section-title {
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .section-subtitle,
-[data-theme="dark"] .section-subtitle {
+[data-theme='dark'] .section-subtitle {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 .dark .sidebar-nav-item,
-[data-theme="dark"] .sidebar-nav-item {
+[data-theme='dark'] .sidebar-nav-item {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 .dark .sidebar-nav-item:hover,
-[data-theme="dark"] .sidebar-nav-item:hover {
+[data-theme='dark'] .sidebar-nav-item:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .sidebar-nav-item--active,
-[data-theme="dark"] .sidebar-nav-item--active {
+[data-theme='dark'] .sidebar-nav-item--active {
   background: rgba(129, 140, 248, 0.1);
   color: var(--color-primary, #818cf8);
 }
 
 .dark .sidebar-header,
 .dark .sidebar-footer,
-[data-theme="dark"] .sidebar-header,
-[data-theme="dark"] .sidebar-footer {
+[data-theme='dark'] .sidebar-header,
+[data-theme='dark'] .sidebar-footer {
   border-color: rgba(255, 255, 255, 0.06);
 }
-
 
 /* ----------------------------------------
    14. 响应式适配
@@ -782,7 +778,6 @@
     max-width: var(--container-3xl);
   }
 }
-
 
 /* ----------------------------------------
    15. 打印适配

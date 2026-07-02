@@ -131,18 +131,18 @@ export class RouteConfigConverter {
     // 获取模块信息
     const module = menuConfig.modules[menuRoute.moduleId];
     if (!module) {
-      throw new SystemError(
-        `Module not found: ${menuRoute.moduleId}`,
-        'ROUTE_MODULE_NOT_FOUND',
-        { module: 'RouteConfigConverter', action: 'convertRoute', moduleId: menuRoute.moduleId }
-      );
+      throw new SystemError(`Module not found: ${menuRoute.moduleId}`, 'ROUTE_MODULE_NOT_FOUND', {
+        module: 'RouteConfigConverter',
+        action: 'convertRoute',
+        moduleId: menuRoute.moduleId,
+      });
     }
 
     // 构建路由元信息
     const meta: NavigoRouteConfig['meta'] = {
-      title: menuRoute.label,
-      // 可以根据需要添加更多元信息
-      keepAlive: false,
+      ...menuRoute.meta,
+      title: menuRoute.meta?.title ?? menuRoute.label,
+      keepAlive: menuRoute.meta?.keepAlive ?? false,
     };
 
     // 构建 Navigo 路由配置

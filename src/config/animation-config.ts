@@ -10,9 +10,9 @@ import type { AnimationConfig, AnimationSettings } from '../types/animation-type
  * 定义不同速度预设对应的时长倍数
  */
 export const SPEED_MULTIPLIERS: Record<'fast' | 'normal' | 'slow', number> = {
-  fast: 0.7,    // 快速: 70%的正常时长
-  normal: 1.0,  // 正常: 100%的正常时长
-  slow: 1.5,    // 慢速: 150%的正常时长
+  fast: 0.7, // 快速: 70%的正常时长
+  normal: 1.0, // 正常: 100%的正常时长
+  slow: 1.5, // 慢速: 150%的正常时长
 };
 
 /**
@@ -33,13 +33,13 @@ export const DEFAULT_ANIMATION_SETTINGS: AnimationSettings = {
 export const PERFORMANCE_CONFIG = {
   /** FPS阈值: 低于55fps时触发性能降级 */
   fpsThreshold: 55,
-  
+
   /** 最大动画数量: 同时执行的动画不应超过此数量 */
   maxAnimationCount: 20,
-  
+
   /** 连续低帧数阈值: 连续N次低于阈值才触发降级 */
   consecutiveLowFramesThreshold: 3,
-  
+
   /** 性能检查间隔(ms): 每隔N毫秒检查一次性能 */
   checkInterval: 1000,
 };
@@ -49,10 +49,10 @@ export const PERFORMANCE_CONFIG = {
  * 对应CSS变量中定义的时长
  */
 export const ANIMATION_DURATIONS = {
-  instant: 100,   // --micro-duration-instant
-  quick: 150,     // --micro-duration-quick
-  smooth: 250,    // --micro-duration-smooth
-  gentle: 350,    // --micro-duration-gentle
+  instant: 100, // --micro-duration-instant
+  quick: 150, // --micro-duration-quick
+  smooth: 250, // --micro-duration-smooth
+  gentle: 350, // --micro-duration-gentle
 } as const;
 
 /**
@@ -60,9 +60,9 @@ export const ANIMATION_DURATIONS = {
  * 对应CSS变量中定义的缓动函数
  */
 export const ANIMATION_EASINGS = {
-  button: 'cubic-bezier(0.34, 1.56, 0.64, 1)',  // --micro-ease-button (弹性)
-  card: 'cubic-bezier(0.22, 1, 0.36, 1)',       // --micro-ease-card (平滑)
-  modal: 'cubic-bezier(0.16, 1, 0.3, 1)',       // --micro-ease-modal (柔和)
+  button: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // --micro-ease-button (弹性)
+  card: 'cubic-bezier(0.22, 1, 0.36, 1)', // --micro-ease-card (平滑)
+  modal: 'cubic-bezier(0.16, 1, 0.3, 1)', // --micro-ease-modal (柔和)
 } as const;
 
 /**
@@ -70,10 +70,10 @@ export const ANIMATION_EASINGS = {
  * 对应CSS变量中定义的变换值
  */
 export const ANIMATION_TRANSFORMS = {
-  scalePress: 0.98,      // --micro-scale-press (按下缩小)
-  scaleHover: 1.02,      // --micro-scale-hover (悬停放大)
-  translateHover: -4,    // --micro-translate-hover (悬停上浮, px)
-  translatePress: 0,     // --micro-translate-press (按下位置)
+  scalePress: 0.98, // --micro-scale-press (按下缩小)
+  scaleHover: 1.02, // --micro-scale-hover (悬停放大)
+  translateHover: -4, // --micro-translate-hover (悬停上浮, px)
+  translatePress: 0, // --micro-translate-press (按下位置)
 } as const;
 
 /**
@@ -82,7 +82,7 @@ export const ANIMATION_TRANSFORMS = {
 export const STAGGER_CONFIG = {
   /** 每个列表项的延迟间隔(ms) */
   delay: 50,
-  
+
   /** 列表项滑入距离(px) */
   translateDistance: 20,
 } as const;
@@ -93,13 +93,13 @@ export const STAGGER_CONFIG = {
 export const TOAST_CONFIG = {
   /** Toast进入动画时长(ms) */
   enterDuration: 400,
-  
+
   /** Toast退出动画时长(ms) */
   exitDuration: 300,
-  
+
   /** Toast堆叠间距(px) */
   stackSpacing: 8,
-  
+
   /** Toast默认显示时长(ms) */
   defaultDuration: 3000,
 } as const;
@@ -110,10 +110,10 @@ export const TOAST_CONFIG = {
 export const MODAL_CONFIG = {
   /** 遮罩淡入时长(ms) */
   backdropDuration: 250,
-  
+
   /** 内容动画时长(ms) */
   contentDuration: 300,
-  
+
   /** 退出动画时长(ms) */
   exitDuration: 200,
 } as const;
@@ -124,10 +124,10 @@ export const MODAL_CONFIG = {
 export const RIPPLE_CONFIG = {
   /** 涟漪动画时长(ms) */
   duration: 600,
-  
+
   /** 涟漪扩散倍数 */
   scale: 4,
-  
+
   /** 涟漪初始透明度 */
   initialOpacity: 0.5,
 } as const;
@@ -176,7 +176,7 @@ export const ANIMATION_CLASSES = {
   noAnimations: 'no-animations',
   animationsFast: 'animations-fast',
   animationsSlow: 'animations-slow',
-  
+
   // 分类控制
   noButtonAnimations: 'no-button-animations',
   noCardAnimations: 'no-card-animations',
@@ -186,37 +186,37 @@ export const ANIMATION_CLASSES = {
   noFormAnimations: 'no-form-animations',
   noLoadingAnimations: 'no-loading-animations',
   noNavigationAnimations: 'no-navigation-animations',
-  
+
   // 涟漪效果
   btnRipple: 'btn-ripple',
   btnRippleEffect: 'btn-ripple-effect',
-  
+
   // Toast动画
   toastEnter: 'toast-enter',
   toastExit: 'toast-exit',
   toastStackShift: 'toast-stack-shift',
-  
+
   // 模态框动画
   modalBackdropEnter: 'modal-backdrop-enter',
   modalBackdropExit: 'modal-backdrop-exit',
   modalContentEnter: 'modal-content-enter',
   modalContentExit: 'modal-content-exit',
-  
+
   // 列表动画
   listStaggerItem: 'list-stagger-item',
-  
+
   // 页面过渡
   pageEnter: 'page-enter',
   pageExit: 'page-exit',
-  
+
   // 侧边栏
   sidebarEnter: 'sidebar-enter',
   sidebarExit: 'sidebar-exit',
-  
+
   // 下拉菜单
   dropdownEnter: 'dropdown-enter',
   dropdownExit: 'dropdown-exit',
-  
+
   // 表单
   formInputError: 'form-input-error',
   formInputSuccessIcon: 'form-input-success-icon',

@@ -9,27 +9,27 @@ import { ValidationError } from '@/common/errors/AppError';
 /**
  * 骨架屏类型
  */
-export type SkeletonType = 
-  | 'text'        // 文本行
-  | 'title'       // 标题
-  | 'paragraph'   // 段落
-  | 'avatar'      // 头像
-  | 'image'       // 图片
-  | 'card'        // 卡片
-  | 'list'        // 列表
-  | 'table'       // 表格
-  | 'custom';     // 自定义
+export type SkeletonType =
+  | 'text' // 文本行
+  | 'title' // 标题
+  | 'paragraph' // 段落
+  | 'avatar' // 头像
+  | 'image' // 图片
+  | 'card' // 卡片
+  | 'list' // 列表
+  | 'table' // 表格
+  | 'custom'; // 自定义
 
 /**
  * 骨架屏配置
  */
 export interface SkeletonConfig {
   type: SkeletonType;
-  count?: number;           // 重复次数
-  width?: string;           // 宽度
-  height?: string;          // 高度
-  animated?: boolean;       // 是否启用动画
-  className?: string;       // 自定义类名
+  count?: number; // 重复次数
+  width?: string; // 宽度
+  height?: string; // 高度
+  animated?: boolean; // 是否启用动画
+  className?: string; // 自定义类名
   style?: Partial<CSSStyleDeclaration>; // 自定义样式
 }
 
@@ -41,7 +41,7 @@ type SkeletonBuilder = (element: HTMLElement) => HTMLElement;
 export class SkeletonLoader {
   private static readonly DEFAULT_CONFIG: Partial<SkeletonConfig> = {
     count: 1,
-    animated: true
+    animated: true,
   };
 
   private static readonly BUILDERS: Record<SkeletonType, SkeletonBuilder> = {
@@ -53,7 +53,7 @@ export class SkeletonLoader {
     card: element => SkeletonLoader.createCardSkeleton(element),
     list: element => SkeletonLoader.createListSkeleton(element),
     table: element => SkeletonLoader.createTableSkeleton(element),
-    custom: element => element
+    custom: element => element,
   };
 
   /**
@@ -121,7 +121,7 @@ export class SkeletonLoader {
    */
   private static createParagraphSkeleton(element: HTMLElement): HTMLElement {
     const lines = [100, 95, 90, 60]; // 不同宽度的行
-    
+
     lines.forEach((width, index) => {
       const line = document.createElement('div');
       line.className = 'skeleton skeleton-text skeleton-animated';
@@ -284,9 +284,8 @@ export class SkeletonLoader {
    * 在目标元素中显示骨架屏
    */
   static show(target: HTMLElement | string, config: SkeletonConfig): HTMLElement {
-    const element = typeof target === 'string' 
-      ? document.querySelector(target) as HTMLElement
-      : target;
+    const element =
+      typeof target === 'string' ? (document.querySelector(target) as HTMLElement) : target;
 
     if (!element) {
       throw new ValidationError(
@@ -316,9 +315,8 @@ export class SkeletonLoader {
    * 隐藏目标元素中的所有骨架屏
    */
   static hideAll(target: HTMLElement | string): void {
-    const element = typeof target === 'string'
-      ? document.querySelector(target) as HTMLElement
-      : target;
+    const element =
+      typeof target === 'string' ? (document.querySelector(target) as HTMLElement) : target;
 
     if (!element) return;
 

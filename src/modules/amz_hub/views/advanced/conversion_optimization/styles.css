@@ -1,64 +1,69 @@
 ﻿@media (min-width: 1024px) {
-    .cvo-page > :nth-child(n + 2):where(
-        .bg-white,
-        .bg-slate-50,
-        .bg-blue-50,
-        .bg-emerald-50,
-        .bg-rose-50,
-        .bg-orange-50,
-        .bg-amber-50,
-        .bg-teal-50,
-        .rounded-xl,
-        .rounded-lg,
-        .border,
-        .border-2,
-        [class*="bg-gradient-to-"]
+  .cvo-page
+    > :nth-child(n + 2):where(
+      .bg-white,
+      .bg-slate-50,
+      .bg-blue-50,
+      .bg-emerald-50,
+      .bg-rose-50,
+      .bg-orange-50,
+      .bg-amber-50,
+      .bg-teal-50,
+      .rounded-xl,
+      .rounded-lg,
+      .border,
+      .border-2,
+      [class*='bg-gradient-to-']
     ) {
-        border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32)) !important;
-        border-radius: var(--radius-card, var(--rounded-md)) !important;
-        background: var(--surface-card, #ffffff) !important;
-        box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
-    }
+    border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32)) !important;
+    border-radius: var(--radius-card, var(--rounded-md)) !important;
+    background: var(--surface-card, #ffffff) !important;
+    box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
+  }
 
-    .cvo-page > :nth-child(n + 2) :where(.rounded-xl, .rounded-lg) {
-        border-radius: var(--radius-card, var(--rounded-md)) !important;
-    }
+  .cvo-page > :nth-child(n + 2) :where(.rounded-xl, .rounded-lg) {
+    border-radius: var(--radius-card, var(--rounded-md)) !important;
+  }
 
-    .cvo-page > :nth-child(n + 2) :where(.border-2) {
-        border-width: 1px !important;
-    }
+  .cvo-page > :nth-child(n + 2) :where(.border-2) {
+    border-width: 1px !important;
+  }
 
-    .cvo-page > :nth-child(n + 2) :is([class^="p-"], [class*=" p-"]):where(
-        .bg-white,
-        .bg-slate-50,
-        .bg-blue-50,
-        .bg-emerald-50,
-        .bg-rose-50,
-        .bg-orange-50,
-        .bg-amber-50,
-        .bg-teal-50,
-        [class*="bg-gradient-to-"]
+  .cvo-page
+    > :nth-child(n + 2)
+    :is([class^='p-'], [class*=' p-']):where(
+      .bg-white,
+      .bg-slate-50,
+      .bg-blue-50,
+      .bg-emerald-50,
+      .bg-rose-50,
+      .bg-orange-50,
+      .bg-amber-50,
+      .bg-teal-50,
+      [class*='bg-gradient-to-']
     ) {
-        border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32)) !important;
-        background: var(--surface-card, #ffffff) !important;
-        box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
-    }
+    border: 1px solid var(--color-border-default, rgba(148, 163, 184, 0.32)) !important;
+    background: var(--surface-card, #ffffff) !important;
+    box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
+  }
 
-    .cvo-page > :nth-child(n + 2) :is([class^="p-"], [class*=" p-"]):where(
-        .bg-slate-50,
-        .bg-blue-50,
-        .bg-emerald-50,
-        .bg-rose-50,
-        .bg-orange-50,
-        .bg-amber-50,
-        .bg-teal-50,
-        [class*="from-"][class*="to-"]
+  .cvo-page
+    > :nth-child(n + 2)
+    :is([class^='p-'], [class*=' p-']):where(
+      .bg-slate-50,
+      .bg-blue-50,
+      .bg-emerald-50,
+      .bg-rose-50,
+      .bg-orange-50,
+      .bg-amber-50,
+      .bg-teal-50,
+      [class*='from-'][class*='to-']
     ) {
-        background: var(--surface-card-hover, var(--color-slate-50)) !important;
-    }
+    background: var(--surface-card-hover, var(--color-slate-50)) !important;
+  }
 
-    .cvo-page > :nth-child(n + 2) [class*="hover:"]:hover {
-        transform: none !important;
-        box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36)) !important;
-    }
+  .cvo-page > :nth-child(n + 2) [class*='hover:']:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36)) !important;
+  }
 }

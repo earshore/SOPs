@@ -5,8 +5,11 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { glob } from 'glob';
+import globModule from 'glob';
 import * as ts from 'typescript';
+import { promisify } from 'util';
+
+const glob = promisify(globModule);
 
 interface ComplexityIssue {
   file: string;

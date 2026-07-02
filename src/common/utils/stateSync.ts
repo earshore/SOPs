@@ -21,7 +21,7 @@ interface StateSyncConfig<T = unknown> {
 /**
  * 创建状态同步器
  * 自动订阅 Zustand 状态变化并同步到 Alpine 组件
- * 
+ *
  * @example
  * ```typescript
  * // 在 Alpine 组件的 init() 中
@@ -32,38 +32,38 @@ interface StateSyncConfig<T = unknown> {
  *   },
  *   immediate: true
  * });
- * 
+ *
  * // 在 destroy() 中清理
  * this._unsubscribe?.();
  * ```
  */
 export function createStateSync<T>(config: StateSyncConfig<T>): () => void {
   const { selector, onChange, immediate = false } = config;
-  
+
   let previousValue = selector(appStore.getState());
-  
+
   // 立即执行一次
   if (immediate) {
     onChange(previousValue, previousValue);
   }
-  
+
   // 订阅状态变化
-  const unsubscribe = appStore.subscribe((state) => {
+  const unsubscribe = appStore.subscribe(state => {
     const currentValue = selector(state);
-    
+
     // 只在值真正改变时触发回调
     if (currentValue !== previousValue) {
       onChange(currentValue, previousValue);
       previousValue = currentValue;
     }
   });
-  
+
   return unsubscribe;
 }
 
 /**
  * 创建多个状态同步器
- * 
+ *
  * @example
  * ```typescript
  * this._unsubscribes = createMultipleStateSyncs([
@@ -76,7 +76,7 @@ export function createStateSync<T>(config: StateSyncConfig<T>): () => void {
  *     onChange: (isAnalyzing) => { this.isAnalyzing = isAnalyzing; }
  *   }
  * ]);
- * 
+ *
  * // 清理所有订阅
  * this._unsubscribes.forEach(fn => fn());
  * ```
@@ -88,13 +88,13 @@ export function createMultipleStateSyncs(configs: StateSyncConfig[]): Array<() =
 /**
  * 创建双向状态绑定
  * 自动在 Alpine 组件和 Zustand 之间双向同步
- * 
+ *
  * @example
  * ```typescript
  * // 在 Alpine 组件中
  * Alpine.data('myComponent', () => ({
  *   selectedAsins: [],
- *   
+ *
  *   init() {
  *     this._binding = createTwoWayBinding({
  *       get: () => appStore.getState().analysis.selectedAsins,
@@ -102,7 +102,7 @@ export function createMultipleStateSyncs(configs: StateSyncConfig[]): Array<() =
  *       onChange: (value) => { this.selectedAsins = value; }
  *     });
  *   },
- *   
+ *
  *   destroy() {
  *     this._binding?.();
  *   }
@@ -115,10 +115,10 @@ export function createTwoWayBinding<T>(config: {
   onChange: (value: T) => void;
 }): () => void {
   const { get, onChange } = config;
-  
+
   let previousValue = get();
   onChange(previousValue);
-  
+
   const unsubscribe = appStore.subscribe(() => {
     const currentValue = get();
     if (currentValue !== previousValue) {
@@ -126,14 +126,14 @@ export function createTwoWayBinding<T>(config: {
       previousValue = currentValue;
     }
   });
-  
+
   return unsubscribe;
 }
 
 /**
  * 创建计算属性同步器
  * 当依赖的状态变化时，自动重新计算并更新
- * 
+ *
  * @example
  * ```typescript
  * this._computed = createComputedSync({
@@ -156,17 +156,17 @@ export function createComputedSync<T extends unknown[], R>(config: {
   onChange: (value: R) => void;
 }): () => void {
   const { deps, compute, onChange } = config;
-  
+
   let previousDeps: unknown[] = [];
   let previousResult: R;
-  
+
   const update = () => {
     const state = appStore.getState();
     const currentDeps = deps.map(dep => dep(state));
-    
+
     // 检查依赖是否变化
     const depsChanged = currentDeps.some((dep, i) => dep !== previousDeps[i]);
-    
+
     if (depsChanged) {
       const result = compute(...(currentDeps as T));
       if (result !== previousResult) {
@@ -176,19 +176,19 @@ export function createComputedSync<T extends unknown[], R>(config: {
       previousDeps = currentDeps;
     }
   };
-  
+
   // 立即执行一次
   update();
-  
+
   // 订阅状态变化
   const unsubscribe = appStore.subscribe(update);
-  
+
   return unsubscribe;
 }
 
 /**
  * 批量清理订阅
- * 
+ *
  * @example
  * ```typescript
  * const unsubscribes = [
@@ -196,7 +196,7 @@ export function createComputedSync<T extends unknown[], R>(config: {
  *   createStateSync(...),
  *   createStateSync(...)
  * ];
- * 
+ *
  * // 清理所有订阅
  * cleanupSubscriptions(unsubscribes);
  * ```

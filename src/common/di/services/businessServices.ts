@@ -23,14 +23,14 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   // PerformanceService - 性能监控服务
   registry.register({
     name: SERVICE_NAMES.PERFORMANCE,
-    factory: async (c) => {
+    factory: async c => {
       const { createPerformanceService } = await import('@/services/performanceService');
       const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createPerformanceService(logger);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
-    optional: true
+    optional: true,
   });
 
   // AnalyticsService - 用户行为分析服务
@@ -41,32 +41,32 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER, SERVICE_NAMES.STORAGE],
-    optional: true
+    optional: true,
   });
 
   // ErrorTracker - 错误追踪服务
   registry.register({
     name: SERVICE_NAMES.ERROR_TRACKER,
-    factory: async (c) => {
+    factory: async c => {
       const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createErrorTracker(logger);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
-    optional: true
+    optional: true,
   });
 
   // MonitoringService - 监控服务
   registry.register({
     name: SERVICE_NAMES.MONITORING,
-    factory: async (c) => {
+    factory: async c => {
       const { createMonitoringService } = await import('@/services/monitoringService');
       const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createMonitoringService(logger);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
-    optional: true
+    optional: true,
   });
 
   // WebVitalsService - Web性能指标服务
@@ -78,30 +78,30 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
     },
     lifetime: 'singleton',
     dependencies: [],
-    optional: true
+    optional: true,
   });
 
   // AlertService - 告警服务
   registry.register({
     name: SERVICE_NAMES.ALERT,
-    factory: async (c) => {
+    factory: async c => {
       const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createAlertService(logger);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
-    optional: true
+    optional: true,
   });
 
   // PerformanceStorage - 性能数据存储
   registry.register({
     name: SERVICE_NAMES.PERFORMANCE_STORAGE,
-    factory: async (c) => {
+    factory: async c => {
       const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createPerformanceStorage(logger);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
-    optional: true
+    optional: true,
   });
 }

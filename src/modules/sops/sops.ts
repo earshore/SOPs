@@ -5,12 +5,12 @@ import { MODULE_MAP } from './module.loaders';
 
 // ================= 使用通用ModuleLoader =================
 const moduleLoader: ModuleLoader = createModuleLoader({
-    containerId: 'sops_content_area',
-    shellId: 'panel-sops',
-    moduleMap: MODULE_MAP,
-    loaderColor: 'blue',
-    moduleName: 'SOPs',
-    contentEnterAnimation: true
+  containerId: 'sops_content_area',
+  shellId: 'panel-sops',
+  moduleMap: MODULE_MAP,
+  loaderColor: 'blue',
+  moduleName: 'SOPs',
+  contentEnterAnimation: true,
 });
 
 /**
@@ -19,5 +19,5 @@ const moduleLoader: ModuleLoader = createModuleLoader({
  * @param loader - 动态导入函数
  */
 export function registerSubModule(routeId: string, loader: ModuleLoaderFn): void {
-    moduleLoader.registerSubModule(routeId, loader);
+  moduleLoader.registerSubModule(routeId, loader);
 }

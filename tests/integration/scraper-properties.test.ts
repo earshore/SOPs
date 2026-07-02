@@ -38,7 +38,7 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
 /**
  * 生成有效的ASIN
  */
-const asinArbitrary = fc.stringMatching(/^B0[A-Z0-9]{8}$/);
+const asinArbitrary = fc.stringMatching(/^[A-Z0-9]{10}$/);
 
 /**
  * 生成产品数据

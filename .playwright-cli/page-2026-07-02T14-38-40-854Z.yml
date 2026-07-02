@@ -1,0 +1,109 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - button "Amazing Amazon Architect Prompt by Prompt" [ref=e4] [cursor=pointer]:
+        - generic [ref=e5]:
+          - img
+        - generic [ref=e8]:
+          - generic [ref=e9]: Amazing Amazon Architect
+          - generic [ref=e10]: Prompt by Prompt
+      - navigation "主导航" [ref=e11]:
+        - button " SOPs 流程中心 " [ref=e13] [cursor=pointer]:
+          - generic [ref=e14]: 
+          - text: SOPs 流程中心
+          - generic [ref=e15]: 
+        - generic [ref=e16]:
+          - button " 应用中心 " [expanded] [active] [ref=e17] [cursor=pointer]:
+            - generic [ref=e18]: 
+            - text: 应用中心
+            - generic [ref=e19]: 
+          - generic " 应用中心 " [ref=e55]:
+            - generic [ref=e56]:
+              - generic [ref=e57]:
+                - generic [ref=e59]: 
+                - heading "核心应用模块" [level=3] [ref=e60]
+              - generic "核心应用模块" [ref=e61]:
+                - link " v1.0 应用中心  集成多个专业工具的应用中心，提供数据采集、分析与优化功能。" [ref=e62] [cursor=pointer]:
+                  - /url: "#/app-center"
+                  - generic [ref=e64]:
+                    - generic [ref=e65]:
+                      - generic [ref=e67]: 
+                      - generic [ref=e68]: v1.0
+                    - generic [ref=e69]:
+                      - heading "应用中心 " [level=4] [ref=e70]:
+                        - generic [ref=e71]: 应用中心
+                        - generic [ref=e72]: 
+                      - paragraph [ref=e73]: 集成多个专业工具的应用中心，提供数据采集、分析与优化功能。
+                - link " v2.1 Pro Master Analysis  集成数据采集、管理、AI分析与提示词工程的一站式解决方案。" [ref=e74] [cursor=pointer]:
+                  - /url: "#/app-center/scraper"
+                  - generic [ref=e76]:
+                    - generic [ref=e77]:
+                      - generic [ref=e79]: 
+                      - generic [ref=e80]: v2.1 Pro
+                    - generic [ref=e81]:
+                      - heading "Master Analysis " [level=4] [ref=e82]:
+                        - generic [ref=e83]: Master Analysis
+                        - generic [ref=e84]: 
+                      - paragraph [ref=e85]: 集成数据采集、管理、AI分析与提示词工程的一站式解决方案。
+                - link " v1.0 Playground  轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。" [ref=e86] [cursor=pointer]:
+                  - /url: "#/app-center/playground/deep-chat"
+                  - generic [ref=e88]:
+                    - generic [ref=e89]:
+                      - generic [ref=e91]: 
+                      - generic [ref=e92]: v1.0
+                    - generic [ref=e93]:
+                      - heading "Playground " [level=4] [ref=e94]:
+                        - generic [ref=e95]: Playground
+                        - generic [ref=e96]: 
+                      - paragraph [ref=e97]: 轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。
+                - link " v1.0 Pro Keyword Hunter  ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。" [ref=e98] [cursor=pointer]:
+                  - /url: "#/app-center/keyword-hunter/input"
+                  - generic [ref=e100]:
+                    - generic [ref=e101]:
+                      - generic [ref=e103]: 
+                      - generic [ref=e104]: v1.0 Pro
+                    - generic [ref=e105]:
+                      - heading "Keyword Hunter " [level=4] [ref=e106]:
+                        - generic [ref=e107]: Keyword Hunter
+                        - generic [ref=e108]: 
+                      - paragraph [ref=e109]: ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。
+                - link " v1.0 PPC Tools  广告搜索词报表分析、否词与加词建议工具。" [ref=e110] [cursor=pointer]:
+                  - /url: "#/app-center/ppc-search-terms"
+                  - generic [ref=e112]:
+                    - generic [ref=e113]:
+                      - generic [ref=e115]: 
+                      - generic [ref=e116]: v1.0
+                    - generic [ref=e117]:
+                      - heading "PPC Tools " [level=4] [ref=e118]:
+                        - generic [ref=e119]: PPC Tools
+                        - generic [ref=e120]: 
+                      - paragraph [ref=e121]: 广告搜索词报表分析、否词与加词建议工具。
+        - button " Amazon 智库 " [ref=e21] [cursor=pointer]:
+          - generic [ref=e22]: 
+          - text: Amazon 智库
+          - generic [ref=e23]: 
+        - button " 更多 " [ref=e25] [cursor=pointer]:
+          - generic [ref=e26]: 
+          - text: 更多
+          - generic [ref=e27]: 
+      - generic [ref=e54]: 等待API配置...
+  - main [ref=e32]:
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e36]: 2026.07.02 | 22:38
+        - generic [ref=e37]:
+          - generic [ref=e38]: AMAZON WORKFLOW
+          - generic [ref=e39]: Standard Operating Procedure
+      - main [ref=e40]:
+        - generic [ref=e41]:
+          - heading "规范流程 无限可能 无限可能" [level=1] [ref=e42]:
+            - generic [ref=e43]: 规范流程
+            - generic [ref=e44]: 无限可能 无限可能
+          - paragraph [ref=e45]: 把混乱变成秩序， 把经验变成指令。
+          - generic [ref=e48]: AI SYSTEM ONLINE · READY TO TRANSFORM
+      - generic [ref=e51]: AI DRIVEN | HUMAN CENTERED | PROCESS AS CODE | DECISION AT SPEED
+      - img
+  - generic:
+    - generic:        
+    - generic:     
+    - text:                                                          

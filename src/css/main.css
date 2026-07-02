@@ -19,14 +19,12 @@
  * 非首屏组件样式在 deferred.css 中由 JS 后台加载。
  */
 
-
 /* ----------------------------------------
    1. 基础层 - Foundation
    ---------------------------------------- */
-@import './foundation/variables.generated.css';  /* 自动生成的设计令牌 */
-@import './foundation/variables.css';            /* 手动维护的变量（逐步迁移） */
+@import './foundation/variables.generated.css'; /* 自动生成的设计令牌 */
+@import './foundation/variables.css'; /* 手动维护的变量（逐步迁移） */
 @import './foundation/reset.css';
-
 
 /* ----------------------------------------
    2. 启动组件层 - Startup Components
@@ -34,11 +32,10 @@
 @import './components/buttons.css';
 @import './components/header.css';
 @import './components/loading.css';
-@import './components/progress.css';         /* Phase 4: 进度组件 */
+@import './components/progress.css'; /* Phase 4: 进度组件 */
 @import './components/scrollbar.css';
 @import './components/status.css';
 @import './components/toast.css';
-
 
 /* ----------------------------------------
    4. 动画层 - Animations
@@ -46,12 +43,10 @@
 @import './animations/keyframes.css';
 @import './animations/micro-interactions.css';
 
-
 /* ----------------------------------------
    5. 工具层 - Utilities
    ---------------------------------------- */
 @import './utilities/print.css';
-
 
 /* ----------------------------------------
    6. Tailwind 组件和工具类 (最后加载)

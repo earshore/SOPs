@@ -1,15 +1,12 @@
 /**
  * 模态框动画控制
  * 负责模态框的打开和关闭动画序列
- * 
+ *
  * Requirements: 4.1, 4.2, 4.3
  */
 
 import { animationManager } from '../services/animation-manager';
-import {
-  ANIMATION_CLASSES,
-  MODAL_CONFIG,
-} from '../config/animation-config';
+import { ANIMATION_CLASSES, MODAL_CONFIG } from '../config/animation-config';
 
 type ModalBackdropElement = HTMLElement & {
   __modalAnimationController?: ModalAnimationController;
@@ -28,9 +25,11 @@ export interface ModalAnimationOptions {
 }
 
 function shouldSkipModalAnimation(skipAnimation = false): boolean {
-  return skipAnimation ||
+  return (
+    skipAnimation ||
     animationManager.shouldReduceMotion() ||
-    !animationManager.isCategoryEnabled('modal');
+    !animationManager.isCategoryEnabled('modal')
+  );
 }
 
 /**
@@ -152,7 +151,7 @@ export class ModalAnimationController {
    * @param element - 目标元素
    */
   private waitForAnimationEnd(element: HTMLElement): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const handleAnimationEnd = (event: AnimationEvent) => {
         // 确保事件来自目标元素
         if (event.target === element) {
@@ -176,7 +175,7 @@ export class ModalAnimationController {
    * 等待当前动画完成
    */
   private waitForAnimation(): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const checkInterval = setInterval(() => {
         if (!this.isAnimating) {
           clearInterval(checkInterval);
@@ -238,7 +237,7 @@ export function initializeModalAnimations(): void {
   // 查找所有模态框
   const backdrops = document.querySelectorAll<HTMLElement>('.modal-backdrop');
 
-  backdrops.forEach((backdrop) => {
+  backdrops.forEach(backdrop => {
     const modal = backdrop.querySelector<HTMLElement>('.modal');
     if (!modal) return;
 

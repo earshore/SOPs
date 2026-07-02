@@ -3,23 +3,23 @@
  * 从语义分析报告中提取产品 DNA
  */
 
-import type { ReportAdapter, ExtractionResult } from "./ReportAdapter";
-import type { SemanticAnalysisReport } from "../../types/downloadsReportTypes";
-import type { ExtendedDNA } from "../../types/extendedDNA";
-import { isTechnicalSpec } from "../../utils/specUtils";
-import { ValidationError } from "../../../../../../common/errors/AppError";
+import type { ReportAdapter, ExtractionResult } from './ReportAdapter';
+import type { SemanticAnalysisReport } from '../../types/downloadsReportTypes';
+import type { ExtendedDNA } from '../../types/extendedDNA';
+import { isTechnicalSpec } from '../../utils/specUtils';
+import { ValidationError } from '../../../../../../common/errors/AppError';
 
 function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 }
 
 function stringFrom(value: unknown): string {
-  return typeof value === "string" ? value : "";
+  return typeof value === 'string' ? value : '';
 }
 
 function stringArrayFrom(value: unknown): string[] {
   return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
+    ? value.filter((item): item is string => typeof item === 'string')
     : [];
 }
 
@@ -34,9 +34,9 @@ function firstValue(record: Record<string, unknown>, ...keys: string[]): unknown
 }
 
 function isSemanticTemplateMeta(meta: Record<string, unknown>): boolean {
-  const templateId = stringFrom(firstValue(meta, "templateId", "template_id"));
-  const templateUsed = stringFrom(firstValue(meta, "templateUsed", "template_used"));
-  return templateId === "semantic" || templateUsed.includes("语义");
+  const templateId = stringFrom(firstValue(meta, 'templateId', 'template_id'));
+  const templateUsed = stringFrom(firstValue(meta, 'templateUsed', 'template_used'));
+  return templateId === 'semantic' || templateUsed.includes('语义');
 }
 
 const KEYWORD_FIELD_CONFIDENCE = {
@@ -50,21 +50,19 @@ const KEYWORD_FIELD_CONFIDENCE = {
  */
 export class SemanticAnalysisAdapter implements ReportAdapter {
   getName(): string {
-    return "SemanticAnalysisAdapter";
+    return 'SemanticAnalysisAdapter';
   }
 
   canHandle(report: unknown): boolean {
     // 类型守卫：确保 report 是对象
-    if (!report || typeof report !== "object") {
+    if (!report || typeof report !== 'object') {
       return false;
     }
 
     const reportObj = report as Record<string, unknown>;
 
     // 放宽条件：支持字段命名变体
-    const hasPainPointGaps = !!(
-      reportObj.pain_point_gaps || reportObj.painPointGaps
-    );
+    const hasPainPointGaps = !!(reportObj.pain_point_gaps || reportObj.painPointGaps);
     const hasNativeVoice = !!(reportObj.native_voice || reportObj.nativeVoice);
     const hasHighFrequencyPhrases = !!(
       reportObj.high_frequency_phrases || reportObj.highFrequencyPhrases
@@ -72,20 +70,17 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
     const isSemanticTemplate = isSemanticTemplateMeta(asRecord(reportObj.meta));
 
     // 只要有核心字段的任意两个，或者有明确的语义模板标识即可
-    const coreFieldsCount = [
-      hasPainPointGaps,
-      hasNativeVoice,
-      hasHighFrequencyPhrases,
-    ].filter(Boolean).length;
-    const result =
-      coreFieldsCount >= 2 || (coreFieldsCount >= 1 && isSemanticTemplate);
+    const coreFieldsCount = [hasPainPointGaps, hasNativeVoice, hasHighFrequencyPhrases].filter(
+      Boolean
+    ).length;
+    const result = coreFieldsCount >= 2 || (coreFieldsCount >= 1 && isSemanticTemplate);
 
     // 移除频繁调用的 debug 日志，减少生产环境性能开销
 
     return result;
   }
 
-  extractDNA(report: unknown, _language: string = "zh"): ExtendedDNA | null {
+  extractDNA(report: unknown, _language: string = 'zh'): ExtendedDNA | null {
     if (!this.canHandle(report)) {
       return null;
     }
@@ -98,8 +93,7 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
 
       // 提取各个部分
       const keywords = this.extractKeywords(semanticReport);
-      const highFrequencyPhrases =
-        this.extractHighFrequencyPhrases(semanticReport);
+      const highFrequencyPhrases = this.extractHighFrequencyPhrases(semanticReport);
       const audience = this.extractAudience(semanticReport);
       const usps = this.extractUSPs(semanticReport);
       const specs = this.extractSpecs(semanticReport);
@@ -122,7 +116,8 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
           specs: specs.confidence,
           keywords: keywords.confidence,
           keywordsCore: keywords.data.core.length > 0 ? KEYWORD_FIELD_CONFIDENCE.CORE : 0,
-          keywordsLongTail: keywords.data.longTail.length > 0 ? KEYWORD_FIELD_CONFIDENCE.LONG_TAIL : 0,
+          keywordsLongTail:
+            keywords.data.longTail.length > 0 ? KEYWORD_FIELD_CONFIDENCE.LONG_TAIL : 0,
           keywordsIntent: keywords.data.intent.length > 0 ? KEYWORD_FIELD_CONFIDENCE.INTENT : 0,
           restrictedWords: 0,
           highFrequencyPhrases: highFrequencyPhrases.confidence,
@@ -131,7 +126,7 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
         },
         metadata: {
           extractedAt: new Date().toISOString(),
-          reportType: "semantic_analysis",
+          reportType: 'semantic_analysis',
           sourceFields: [
             ...new Set([
               ...keywords.sourceFields,
@@ -147,9 +142,18 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
             audience: audience.sourceFields,
             usps: usps.sourceFields,
             specs: specs.sourceFields,
-            keywordsCore: keywords.data.core.length > 0 ? keywords.sourceFields.filter(source => source.includes("attribute")) : [],
-            keywordsLongTail: keywords.data.longTail.length > 0 ? keywords.sourceFields.filter(source => source.includes("native_phrasing")) : [],
-            keywordsIntent: keywords.data.intent.length > 0 ? keywords.sourceFields.filter(source => source.includes("use_cases")) : [],
+            keywordsCore:
+              keywords.data.core.length > 0
+                ? keywords.sourceFields.filter(source => source.includes('attribute'))
+                : [],
+            keywordsLongTail:
+              keywords.data.longTail.length > 0
+                ? keywords.sourceFields.filter(source => source.includes('native_phrasing'))
+                : [],
+            keywordsIntent:
+              keywords.data.intent.length > 0
+                ? keywords.sourceFields.filter(source => source.includes('use_cases'))
+                : [],
             restrictedWords: [],
           },
           stats: {
@@ -167,7 +171,7 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
 
       return dna;
     } catch (error) {
-      console.error("[SemanticAnalysisAdapter] 提取失败:", error);
+      console.error('[SemanticAnalysisAdapter] 提取失败:', error);
       return null;
     }
   }
@@ -197,17 +201,14 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
     ) {
       data.core = report.high_frequency_phrases.attribute;
       confidence += 0.5;
-      sourceFields.push("high_frequency_phrases.attribute");
+      sourceFields.push('high_frequency_phrases.attribute');
     }
 
     // 从 native_voice.native_phrasing 提取长尾关键词
-    if (
-      report.native_voice?.native_phrasing &&
-      report.native_voice.native_phrasing.length > 0
-    ) {
+    if (report.native_voice?.native_phrasing && report.native_voice.native_phrasing.length > 0) {
       data.longTail = report.native_voice.native_phrasing;
       confidence += 0.3;
-      sourceFields.push("native_voice.native_phrasing");
+      sourceFields.push('native_voice.native_phrasing');
     }
 
     // 从 high_frequency_phrases.use_cases 提取意图关键词
@@ -217,7 +218,7 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
     ) {
       data.intent = report.high_frequency_phrases.use_cases;
       confidence += 0.2;
-      sourceFields.push("high_frequency_phrases.use_cases");
+      sourceFields.push('high_frequency_phrases.use_cases');
     }
 
     return { data, confidence: Math.min(confidence, 1.0), sourceFields };
@@ -226,9 +227,7 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
   /**
    * 提取高频短语
    */
-  private extractHighFrequencyPhrases(
-    report: SemanticAnalysisReport,
-  ): ExtractionResult<string[]> {
+  private extractHighFrequencyPhrases(report: SemanticAnalysisReport): ExtractionResult<string[]> {
     const phrases: string[] = [];
     let confidence = 0;
     const sourceFields: string[] = [];
@@ -237,13 +236,13 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
     if (report.high_frequency_phrases?.attribute) {
       phrases.push(...report.high_frequency_phrases.attribute);
       confidence += 0.5;
-      sourceFields.push("high_frequency_phrases.attribute");
+      sourceFields.push('high_frequency_phrases.attribute');
     }
 
     if (report.high_frequency_phrases?.use_cases) {
       phrases.push(...report.high_frequency_phrases.use_cases);
       confidence += 0.5;
-      sourceFields.push("high_frequency_phrases.use_cases");
+      sourceFields.push('high_frequency_phrases.use_cases');
     }
 
     return {
@@ -257,26 +256,21 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
    * 提取目标受众
    * Semantic Analysis 没有直接的 user_profile，从 use_cases 推断
    */
-  private extractAudience(
-    report: SemanticAnalysisReport,
-  ): ExtractionResult<string> {
+  private extractAudience(report: SemanticAnalysisReport): ExtractionResult<string> {
     const useCases = report.high_frequency_phrases?.use_cases || [];
     const confidence = useCases.length > 0 ? 0.5 : 0;
 
     return {
-      data: useCases.join(", ") || "",
+      data: useCases.join(', ') || '',
       confidence,
-      sourceFields:
-        useCases.length > 0 ? ["high_frequency_phrases.use_cases"] : [],
+      sourceFields: useCases.length > 0 ? ['high_frequency_phrases.use_cases'] : [],
     };
   }
 
   /**
    * 提取核心卖点
    */
-  private extractUSPs(
-    report: SemanticAnalysisReport,
-  ): ExtractionResult<string> {
+  private extractUSPs(report: SemanticAnalysisReport): ExtractionResult<string> {
     const usps: string[] = [];
     let confidence = 0;
     const sourceFields: string[] = [];
@@ -286,25 +280,20 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
       report.pain_point_gaps?.differentiation_angles &&
       report.pain_point_gaps.differentiation_angles.length > 0
     ) {
-      usps.push(
-        ...report.pain_point_gaps.differentiation_angles.map((a) => `- ${a}`),
-      );
+      usps.push(...report.pain_point_gaps.differentiation_angles.map(a => `- ${a}`));
       confidence += 0.7;
-      sourceFields.push("pain_point_gaps.differentiation_angles");
+      sourceFields.push('pain_point_gaps.differentiation_angles');
     }
 
     // 从 emotional_hook 补充
-    if (
-      report.native_voice?.emotional_hook &&
-      report.native_voice.emotional_hook.length > 0
-    ) {
-      usps.push(...report.native_voice.emotional_hook.map((h) => `- ${h}`));
+    if (report.native_voice?.emotional_hook && report.native_voice.emotional_hook.length > 0) {
+      usps.push(...report.native_voice.emotional_hook.map(h => `- ${h}`));
       confidence += 0.3;
-      sourceFields.push("native_voice.emotional_hook");
+      sourceFields.push('native_voice.emotional_hook');
     }
 
     return {
-      data: usps.join("\n") || "",
+      data: usps.join('\n') || '',
       confidence: Math.min(confidence, 1.0),
       sourceFields,
     };
@@ -313,36 +302,30 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
   /**
    * 提取技术规格
    */
-  private extractSpecs(
-    report: SemanticAnalysisReport,
-  ): ExtractionResult<string> {
+  private extractSpecs(report: SemanticAnalysisReport): ExtractionResult<string> {
     const specs: string[] = [];
     const attributes = report.high_frequency_phrases?.attribute || [];
 
     // 使用技术规格模式匹配
-    const techSpecs = attributes.filter((attr) => isTechnicalSpec(attr));
+    const techSpecs = attributes.filter(attr => isTechnicalSpec(attr));
 
     if (techSpecs.length > 0) {
-      specs.push(...techSpecs.map((s) => `- ${s}`));
+      specs.push(...techSpecs.map(s => `- ${s}`));
     }
 
-    const confidence =
-      techSpecs.length > 0 ? Math.min(techSpecs.length / 5, 1.0) : 0;
+    const confidence = techSpecs.length > 0 ? Math.min(techSpecs.length / 5, 1.0) : 0;
 
     return {
-      data: specs.join("\n") || "",
+      data: specs.join('\n') || '',
       confidence,
-      sourceFields:
-        techSpecs.length > 0 ? ["high_frequency_phrases.attribute"] : [],
+      sourceFields: techSpecs.length > 0 ? ['high_frequency_phrases.attribute'] : [],
     };
   }
 
   /**
    * 提取痛点
    */
-  private extractPainPoints(
-    report: SemanticAnalysisReport,
-  ): ExtractionResult<string[]> {
+  private extractPainPoints(report: SemanticAnalysisReport): ExtractionResult<string[]> {
     const painPoints: string[] = [];
     let confidence = 0;
     const sourceFields: string[] = [];
@@ -354,17 +337,14 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
     ) {
       painPoints.push(...report.pain_point_gaps.top_quality_issues);
       confidence += 0.5;
-      sourceFields.push("pain_point_gaps.top_quality_issues");
+      sourceFields.push('pain_point_gaps.top_quality_issues');
     }
 
     // 从 unmet_need 补充
-    if (
-      report.pain_point_gaps?.unmet_need &&
-      report.pain_point_gaps.unmet_need.length > 0
-    ) {
+    if (report.pain_point_gaps?.unmet_need && report.pain_point_gaps.unmet_need.length > 0) {
       painPoints.push(...report.pain_point_gaps.unmet_need);
       confidence += 0.5;
-      sourceFields.push("pain_point_gaps.unmet_need");
+      sourceFields.push('pain_point_gaps.unmet_need');
     }
 
     return {
@@ -377,17 +357,14 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
   /**
    * 提取差异化角度
    */
-  private extractDifferentiation(
-    report: SemanticAnalysisReport,
-  ): ExtractionResult<string[]> {
+  private extractDifferentiation(report: SemanticAnalysisReport): ExtractionResult<string[]> {
     const angles = report.pain_point_gaps?.differentiation_angles || [];
     const confidence = angles.length > 0 ? 0.9 : 0;
 
     return {
       data: angles,
       confidence,
-      sourceFields:
-        angles.length > 0 ? ["pain_point_gaps.differentiation_angles"] : [],
+      sourceFields: angles.length > 0 ? ['pain_point_gaps.differentiation_angles'] : [],
     };
   }
 
@@ -396,60 +373,52 @@ export class SemanticAnalysisAdapter implements ReportAdapter {
    */
   private normalizeReport(report: unknown): SemanticAnalysisReport {
     // 类型守卫
-    if (!report || typeof report !== "object") {
+    if (!report || typeof report !== 'object') {
       throw new ValidationError(
-        "[SemanticAnalysisAdapter] Invalid report object",
-        "SEMANTIC_ADAPTER_001",
-        "report",
+        '[SemanticAnalysisAdapter] Invalid report object',
+        'SEMANTIC_ADAPTER_001',
+        'report',
         report,
-        { module: "SemanticAnalysisAdapter", action: "normalizeReport" },
+        { module: 'SemanticAnalysisAdapter', action: 'normalizeReport' }
       );
     }
 
     const reportObj = report as Record<string, unknown>;
     const highFrequencyPhrases = asRecord(
-      firstValue(reportObj, "high_frequency_phrases", "highFrequencyPhrases"),
+      firstValue(reportObj, 'high_frequency_phrases', 'highFrequencyPhrases')
     );
-    const painPointGaps = asRecord(
-      firstValue(reportObj, "pain_point_gaps", "painPointGaps"),
-    );
-    const nativeVoice = asRecord(firstValue(reportObj, "native_voice", "nativeVoice"));
+    const painPointGaps = asRecord(firstValue(reportObj, 'pain_point_gaps', 'painPointGaps'));
+    const nativeVoice = asRecord(firstValue(reportObj, 'native_voice', 'nativeVoice'));
     const meta = asRecord(reportObj.meta);
 
     return {
       high_frequency_phrases: {
         attribute: stringArrayFrom(highFrequencyPhrases.attribute),
-        use_cases: stringArrayFrom(
-          firstValue(highFrequencyPhrases, "use_cases", "useCases"),
-        ),
+        use_cases: stringArrayFrom(firstValue(highFrequencyPhrases, 'use_cases', 'useCases')),
       },
       pain_point_gaps: {
         top_quality_issues: stringArrayFrom(
-          firstValue(painPointGaps, "top_quality_issues", "topQualityIssues"),
+          firstValue(painPointGaps, 'top_quality_issues', 'topQualityIssues')
         ),
-        unmet_need: stringArrayFrom(
-          firstValue(painPointGaps, "unmet_need", "unmetNeed"),
-        ),
+        unmet_need: stringArrayFrom(firstValue(painPointGaps, 'unmet_need', 'unmetNeed')),
         differentiation_angles: stringArrayFrom(
-          firstValue(painPointGaps, "differentiation_angles", "differentiationAngles"),
+          firstValue(painPointGaps, 'differentiation_angles', 'differentiationAngles')
         ),
       },
       native_voice: {
         native_phrasing: stringArrayFrom(
-          firstValue(nativeVoice, "native_phrasing", "nativePhrasing"),
+          firstValue(nativeVoice, 'native_phrasing', 'nativePhrasing')
         ),
-        emotional_hook: stringArrayFrom(
-          firstValue(nativeVoice, "emotional_hook", "emotionalHook"),
-        ),
+        emotional_hook: stringArrayFrom(firstValue(nativeVoice, 'emotional_hook', 'emotionalHook')),
       },
       meta: {
         targetMarket: stringFrom(meta.targetMarket),
         analyzedASINs: stringArrayFrom(meta.analyzedASINs),
         generatedByModel: stringFrom(meta.generatedByModel),
         generatedAt: stringFrom(meta.generatedAt),
-        templateUsed: stringFrom(firstValue(meta, "templateUsed", "template_used")),
-        templateId: stringFrom(firstValue(meta, "templateId", "template_id")),
-        dataScope: stringArrayFrom(firstValue(meta, "dataScope", "data_scope")),
+        templateUsed: stringFrom(firstValue(meta, 'templateUsed', 'template_used')),
+        templateId: stringFrom(firstValue(meta, 'templateId', 'template_id')),
+        dataScope: stringArrayFrom(firstValue(meta, 'dataScope', 'data_scope')),
       },
     };
   }

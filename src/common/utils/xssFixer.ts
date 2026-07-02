@@ -6,6 +6,8 @@
 
 import { escapeHtml, setSafeHtml, createSafeFragment } from './security';
 
+const nativeLoggerConsole = globalThis.console;
+
 /**
  * XSS风险点类型
  */
@@ -27,7 +29,7 @@ function setTrustedHtml(element: HTMLElement, html: string): void {
  */
 export function setInnerHTML(element: HTMLElement, html: string, trusted: boolean = false): void {
   if (!element) {
-    console.warn('[XSSFixer] Element is null or undefined');
+    nativeLoggerConsole.warn('[XSSFixer] Element is null or undefined');
     return;
   }
 
@@ -123,14 +125,14 @@ export function setAttr(element: HTMLElement, attr: string, value: string): void
   if (attr === 'href' || attr === 'src') {
     // 验证URL安全性
     if (value && !isSafeUrl(value)) {
-      console.warn(`[XSSFixer] Unsafe URL blocked: ${value}`);
+      nativeLoggerConsole.warn(`[XSSFixer] Unsafe URL blocked: ${value}`);
       return;
     }
   }
 
   // 禁止设置事件处理器属性
   if (attr.startsWith('on')) {
-    console.warn(`[XSSFixer] Event handler attribute blocked: ${attr}`);
+    nativeLoggerConsole.warn(`[XSSFixer] Event handler attribute blocked: ${attr}`);
     return;
   }
 
@@ -144,7 +146,7 @@ function isSafeUrl(url: string): boolean {
   if (!url || typeof url !== 'string') return false;
   const normalized = url.trim().toLowerCase();
   const dangerousProtocols = ['javascript:', 'data:', 'vbscript:'];
-  return !dangerousProtocols.some((protocol) => normalized.startsWith(protocol));
+  return !dangerousProtocols.some(protocol => normalized.startsWith(protocol));
 }
 
 /**
@@ -157,10 +159,10 @@ export function scanXSSRisks(root: HTMLElement = document.body): XSSRisk[] {
   // 扫描所有元素
   const allElements = root.querySelectorAll('*');
 
-  allElements.forEach((element) => {
+  allElements.forEach(element => {
     // 检查危险属性
     const dangerousAttrs = ['onclick', 'onerror', 'onload', 'onmouseover'];
-    dangerousAttrs.forEach((attr) => {
+    dangerousAttrs.forEach(attr => {
       if (element.hasAttribute(attr)) {
         risks.push({
           type: 'dangerous-attribute',

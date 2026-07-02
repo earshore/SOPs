@@ -5,7 +5,11 @@
 // ================================================================
 
 import { configCenter } from '../common/config/ConfigCenter';
-import type { ILoggerService, PerformanceMetric as IPerformanceMetric, PerformanceReport as IPerformanceReport } from '../types/services';
+import type {
+  ILoggerService,
+  PerformanceMetric as IPerformanceMetric,
+  PerformanceReport as IPerformanceReport,
+} from '../types/services';
 
 /**
  * 性能指标类型
@@ -31,7 +35,7 @@ export const METRIC_TYPES = {
   USER_ACTION: 'user_action',
 } as const;
 
-export type MetricType = typeof METRIC_TYPES[keyof typeof METRIC_TYPES];
+export type MetricType = (typeof METRIC_TYPES)[keyof typeof METRIC_TYPES];
 
 /**
  * 性能指标（使用接口类型）
@@ -91,7 +95,11 @@ export class PerformanceService {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+  private _log(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    data: Record<string, unknown> = {}
+  ): void {
     if (this.logger) {
       this.logger[level](message, data, 'Performance');
     }
@@ -171,9 +179,11 @@ export class PerformanceService {
     if (!('PerformanceObserver' in window)) return;
 
     try {
-      const observer = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1] as LargestContentfulPaintPerformanceEntry | undefined;
+        const lastEntry = entries[entries.length - 1] as
+          | LargestContentfulPaintPerformanceEntry
+          | undefined;
         if (!lastEntry) return;
 
         const value = Math.round(lastEntry.renderTime || lastEntry.loadTime || lastEntry.startTime);
@@ -199,7 +209,7 @@ export class PerformanceService {
     if (!('PerformanceObserver' in window)) return;
 
     try {
-      const observer = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
         entries.forEach((entry: unknown) => {
           const perfEntry = entry as PerformanceEntry & { processingStart?: number };
@@ -229,11 +239,14 @@ export class PerformanceService {
     let clsEntries: PerformanceEntry[] = [];
 
     try {
-      const observer = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
 
         entries.forEach((entry: unknown) => {
-          const layoutShift = entry as PerformanceEntry & { value?: number; hadRecentInput?: boolean };
+          const layoutShift = entry as PerformanceEntry & {
+            value?: number;
+            hadRecentInput?: boolean;
+          };
           // 只统计非用户输入导致的布局偏移
           if (!layoutShift.hadRecentInput) {
             clsValue += layoutShift.value || 0;
@@ -261,9 +274,9 @@ export class PerformanceService {
     if (!('PerformanceObserver' in window)) return;
 
     try {
-      const observer = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           if (entry.name === 'first-contentful-paint') {
             const value = Math.round(entry.startTime);
 
@@ -286,9 +299,9 @@ export class PerformanceService {
     if (!('PerformanceObserver' in window)) return;
 
     try {
-      const observer = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           const duration = Math.round(entry.duration);
 
           if (duration > 50) {
@@ -424,7 +437,7 @@ export class PerformanceService {
   getReport(): PerformanceReport {
     const durations = this.metrics.map(m => m.duration);
     const byCategory: Record<string, PerformanceMetric[]> = {};
-    
+
     // 按名称分组
     this.metrics.forEach(metric => {
       const categoryMetrics = byCategory[metric.name] ?? [];
@@ -435,7 +448,10 @@ export class PerformanceService {
     const report: PerformanceReport = {
       summary: {
         totalMetrics: this.metrics.length,
-        avgDuration: durations.length > 0 ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0,
+        avgDuration:
+          durations.length > 0
+            ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
+            : 0,
         maxDuration: durations.length > 0 ? Math.max(...durations) : 0,
         minDuration: durations.length > 0 ? Math.min(...durations) : 0,
       },
@@ -486,7 +502,7 @@ export class PerformanceService {
    * 清理资源
    */
   destroy(): void {
-    this.observers.forEach((observer) => observer.disconnect());
+    this.observers.forEach(observer => observer.disconnect());
     this.observers = [];
     this.metrics = [];
     this.isInitialized = false;
@@ -519,5 +535,6 @@ export function createPerformanceService(logger?: ILoggerService): PerformanceSe
 // 🔄 向后兼容：暴露到 window
 // ================================================================
 if (typeof window !== 'undefined') {
-  (window as Window & { PerformanceService?: PerformanceService }).PerformanceService = performanceService;
+  (window as Window & { PerformanceService?: PerformanceService }).PerformanceService =
+    performanceService;
 }

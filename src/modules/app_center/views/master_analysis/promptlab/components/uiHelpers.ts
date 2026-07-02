@@ -26,18 +26,16 @@ import { promptlabService } from '../../services/promptlabService';
  * 初始化所有 DNA / Strategy 卡片 textarea 的原始高度记录
  * 需在 DOM 渲染完成后（setTimeout 100ms）调用
  */
-export function initAutoHeightInputs(
-  originalHeights: Map<HTMLElement, number>,
-): void {
+export function initAutoHeightInputs(originalHeights: Map<HTMLElement, number>): void {
   setTimeout(() => {
     if (typeof document === 'undefined' || typeof window === 'undefined') {
       return;
     }
 
     const textareas = document.querySelectorAll(
-      '#card-product-dna textarea, #card-strategy textarea',
+      '#card-product-dna textarea, #card-strategy textarea'
     );
-    textareas.forEach((textarea) => {
+    textareas.forEach(textarea => {
       const el = textarea as HTMLTextAreaElement;
       if (!originalHeights.has(el)) {
         const h = parseInt(window.getComputedStyle(el).height, 10);
@@ -50,10 +48,7 @@ export function initAutoHeightInputs(
 /**
  * 输入框获得焦点时自动扩展到内容所需高度（最大 300px）
  */
-export function expandInput(
-  originalHeights: Map<HTMLElement, number>,
-  event: FocusEvent,
-): void {
+export function expandInput(originalHeights: Map<HTMLElement, number>, event: FocusEvent): void {
   const target = event.target as HTMLTextAreaElement;
 
   if (!originalHeights.has(target)) {
@@ -74,10 +69,7 @@ export function expandInput(
 /**
  * 输入框失去焦点时恢复到原始高度
  */
-export function restoreInput(
-  originalHeights: Map<HTMLElement, number>,
-  event: FocusEvent,
-): void {
+export function restoreInput(originalHeights: Map<HTMLElement, number>, event: FocusEvent): void {
   const target = event.target as HTMLTextAreaElement;
   const originalHeight = originalHeights.get(target);
 
@@ -97,23 +89,23 @@ export function restoreInput(
  */
 export function toggleConsoleMode(
   ctx: Pick<PromptlabAlpineContext, 'currentConsoleMode'>,
-  mode: ConsoleMode,
+  mode: ConsoleMode
 ): void {
   if (ctx.currentConsoleMode === mode) return;
   ctx.currentConsoleMode = mode;
 
-  const cardInner       = document.getElementById('console-card-inner');
+  const cardInner = document.getElementById('console-card-inner');
   const toggleContainer = document.getElementById('embed-toggle-container');
-  const glider          = document.getElementById('mode-toggle-glider');
-  const btnListing      = document.getElementById('btn-mode-listing');
-  const btnVisual       = document.getElementById('btn-mode-visual');
-  const outputTitle     = document.querySelector('#output-preview-title');
+  const glider = document.getElementById('mode-toggle-glider');
+  const btnListing = document.getElementById('btn-mode-listing');
+  const btnVisual = document.getElementById('btn-mode-visual');
+  const outputTitle = document.querySelector('#output-preview-title');
 
   if (!cardInner || !glider) return;
 
   if (mode === 'visual') {
     cardInner.style.transform = 'rotateY(180deg)';
-    glider.style.transform    = 'translateX(100%)';
+    glider.style.transform = 'translateX(100%)';
     glider.classList.add('bg-white');
     glider.classList.remove('bg-pink-500');
 
@@ -129,7 +121,7 @@ export function toggleConsoleMode(
     if (outputTitle) outputTitle.textContent = 'Visual Prompt';
   } else {
     cardInner.style.transform = 'rotateY(0deg)';
-    glider.style.transform    = 'translateX(0)';
+    glider.style.transform = 'translateX(0)';
     glider.classList.add('bg-white');
     glider.classList.remove('bg-pink-500');
 
@@ -168,9 +160,7 @@ export function copyPrompt(): void {
 
 function getPromptAnalysisReport(): AnalysisReport | null {
   const analysisReport = appStore.getState().analysis.analysisReport;
-  return analysisReport && typeof analysisReport !== 'string'
-    ? analysisReport
-    : null;
+  return analysisReport && typeof analysisReport !== 'string' ? analysisReport : null;
 }
 
 function createSeoCopyInputs(ctx: PromptlabAlpineContext): PromptInputs {
@@ -197,7 +187,7 @@ async function writeTextToClipboard(text: string): Promise<void> {
 export async function copySeoKeywords(ctx: PromptlabAlpineContext): Promise<void> {
   const text = promptlabService.buildSeoKeywordCopyText(
     createSeoCopyInputs(ctx),
-    getPromptAnalysisReport(),
+    getPromptAnalysisReport()
   );
 
   if (!text.trim()) {
@@ -252,7 +242,7 @@ export async function clearInputs(ctx: PromptlabAlpineContext): Promise<void> {
     '清空 PromptLab 输入',
     '确定要清空所有输入框吗？',
     '',
-    '清空输入',
+    '清空输入'
   );
   if (!confirmed) return;
 
@@ -277,7 +267,7 @@ export function selectAllReportSections(ctx: PromptlabAlpineContext): void {
   }
 
   const reportObj = report as Record<string, unknown>;
-  const availableTargets = Object.keys(reportObj).filter((id) => id !== '_metadata');
+  const availableTargets = Object.keys(reportObj).filter(id => id !== '_metadata');
 
   ctx.profile.selectedReportSections = [...availableTargets];
   ctx.saveState();
@@ -308,7 +298,7 @@ export function onReportSectionChange(ctx: PromptlabAlpineContext): void {
   const checked: string[] = [];
   document
     .querySelectorAll<HTMLInputElement>('input[name="report-section"]:checked')
-    .forEach((cb) => checked.push(cb.value));
+    .forEach(cb => checked.push(cb.value));
 
   ctx.profile.selectedReportSections = checked;
   ctx.saveState();

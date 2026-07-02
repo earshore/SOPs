@@ -3,6 +3,8 @@ import {
   SELECTOR_MAP,
   VERIFIED_PURCHASE_PATTERNS,
 } from '../../../../../common/constants/constants';
+
+const nativeLoggerConsole = globalThis.console;
 // ----------------------------------------
 // 1. 类型定义
 // ----------------------------------------
@@ -36,7 +38,7 @@ function safeExtractText(root: Element | Document, selector: string | string[]):
     const text = el?.textContent?.trim();
     if (text) return text;
   }
-  return "";
+  return '';
 }
 
 /**
@@ -50,14 +52,14 @@ function extractRating(container: Element, selectors: string[]): number {
     if (!el) continue;
 
     // 尝试1: 文本解析 (e.g. "4.5 out of 5 stars")
-    const text = el.textContent || el.className || "";
+    const text = el.textContent || el.className || '';
     const textMatch = text.match(/(\d)([.,](\d))?/);
-    if (textMatch) return parseFloat(textMatch[0].replace(",", "."));
+    if (textMatch) return parseFloat(textMatch[0].replace(',', '.'));
 
     // 尝试2: aria-label (Accessibility属性)
-    const label = el.getAttribute("aria-label") || "";
+    const label = el.getAttribute('aria-label') || '';
     const labelMatch = label.match(/(\d)([.,](\d))?/);
-    if (labelMatch) return parseFloat(labelMatch[0].replace(",", "."));
+    if (labelMatch) return parseFloat(labelMatch[0].replace(',', '.'));
   }
   return 0; // 默认0分
 }
@@ -67,14 +69,16 @@ function getTextLength(element: Element): number {
 }
 
 function extractLongestSpanText(element: Element): string {
-  const spans = Array.from(element.querySelectorAll("span"));
-  if (spans.length === 0) return "";
+  const spans = Array.from(element.querySelectorAll('span'));
+  if (spans.length === 0) return '';
 
-  return spans
-    .reduce((longest, current) =>
-      getTextLength(longest) > getTextLength(current) ? longest : current
-    )
-    .textContent?.trim() || "";
+  return (
+    spans
+      .reduce((longest, current) =>
+        getTextLength(longest) > getTextLength(current) ? longest : current
+      )
+      .textContent?.trim() || ''
+  );
 }
 
 function extractReviewContent(container: Element): string {
@@ -83,22 +87,22 @@ function extractReviewContent(container: Element): string {
     const bodyEl = container.querySelector(sel);
     if (!bodyEl) continue;
 
-    const content = extractLongestSpanText(bodyEl) || bodyEl.textContent?.trim() || "";
+    const content = extractLongestSpanText(bodyEl) || bodyEl.textContent?.trim() || '';
     if (content.length > 10) return content;
   }
-  return "";
+  return '';
 }
 
 function normalizeReviewTitle(container: Element): string {
   return safeExtractText(container, SELECTOR_MAP.reviewTitle || []).replace(
     /^\d+([.,]\d)?\s*(von|out of|sur|su|de)\s*\d+\s*(Sternen?|stars?|étoiles?|stelle|estrellas)?\s*-?\s*/i,
-    ""
+    ''
   );
 }
 
 function isVerifiedPurchase(container: Element): boolean {
-  const containerText = container.textContent || "";
-  return VERIFIED_PURCHASE_PATTERNS.some((p) => containerText.includes(p));
+  const containerText = container.textContent || '';
+  return VERIFIED_PURCHASE_PATTERNS.some(p => containerText.includes(p));
 }
 
 function getReviewDedupeKey(content: string): string {
@@ -128,7 +132,7 @@ function appendUniqueReview(
  */
 export function parseProductPage(html: string, _asin: string, _site: string): ParsedProduct {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
+  const doc = parser.parseFromString(html, 'text/html');
 
   // 1. 提取标题
   const title = safeExtractText(doc, SELECTOR_MAP.productTitle || []);
@@ -139,7 +143,7 @@ export function parseProductPage(html: string, _asin: string, _site: string): Pa
   for (const sel of bulletSelectors) {
     const els = doc.querySelectorAll(sel);
     if (els.length > 0) {
-      els.forEach((el) => {
+      els.forEach(el => {
         const text = el.textContent?.trim();
         // 过滤掉无效或重复的描述
         if (text && text.length > 5 && !bullets.includes(text)) {
@@ -161,7 +165,7 @@ export function parseProductPage(html: string, _asin: string, _site: string): Pa
  */
 export function parseReviews(html: string): ParsedReview[] {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
+  const doc = parser.parseFromString(html, 'text/html');
   const reviews: ParsedReview[] = [];
   const seenContents = new Set<string>(); // 用于去重
 
@@ -178,24 +182,20 @@ export function parseReviews(html: string): ParsedReview[] {
 
   // 2. 兜底策略：未找到容器，尝试直接提取 Body
   if (reviewContainers.length === 0) {
-    console.warn(
-      "Parser: No review containers found, fallback to direct body extraction."
+    nativeLoggerConsole.warn(
+      'Parser: No review containers found, fallback to direct body extraction.'
     );
     // 这种情况下通常无法提取评分和标题，只能提取内容
     const bodySelectors = SELECTOR_MAP.reviewBody || [];
     for (const sel of bodySelectors) {
       const els = doc.querySelectorAll(sel);
       if (els.length > 0) {
-        els.forEach((el) => {
+        els.forEach(el => {
           const content = el.textContent?.trim();
-          if (
-            content &&
-            content.length > 20 &&
-            !seenContents.has(content.substring(0, 50))
-          ) {
+          if (content && content.length > 20 && !seenContents.has(content.substring(0, 50))) {
             seenContents.add(content.substring(0, 50));
             reviews.push({
-              title: "User Review", // 占位符
+              title: 'User Review', // 占位符
               content,
               rating: 0,
               isVerified: false,
@@ -209,7 +209,7 @@ export function parseReviews(html: string): ParsedReview[] {
   }
 
   // 3. 标准解析流程
-  reviewContainers.forEach((container) => {
+  reviewContainers.forEach(container => {
     const content = extractReviewContent(container);
     const title = normalizeReviewTitle(container);
     const rating = extractRating(container, SELECTOR_MAP.reviewRating || []);

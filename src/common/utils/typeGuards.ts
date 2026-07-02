@@ -12,8 +12,10 @@ import {
   LLMConfigSchema,
   ProxyConfigSchema,
   HTTPRequestOptionsSchema,
-  LLMRequestOptionsSchema
+  LLMRequestOptionsSchema,
 } from '../validators/schemas';
+
+const nativeLoggerConsole = globalThis.console;
 
 // ==================== 类型定义 ====================
 
@@ -141,7 +143,7 @@ export function validateProxyConfig(config: unknown): boolean {
  * @param schema - Zod Schema
  * @param defaultValue - 默认值
  * @returns 解析后的值或默认值
- * 
+ *
  * @example
  * const config = safeParse(userInput, LLMConfigSchema, defaultConfig);
  */
@@ -150,7 +152,7 @@ export function safeParse<T>(value: unknown, schema: ZodSchema<T>, defaultValue:
   if (result.success) {
     return result.data;
   }
-  console.warn('[TypeGuard] Parse failed, using default:', result.error);
+  nativeLoggerConsole.warn('[TypeGuard] Parse failed, using default:', result.error);
   return defaultValue;
 }
 
@@ -164,7 +166,7 @@ export function safeParseHTTPOptions(options: unknown): HTTPRequestOptions {
     method: 'GET',
     headers: {},
     timeout: 30000,
-    retries: 0
+    retries: 0,
   });
 }
 
@@ -179,7 +181,7 @@ export function safeParseLLMOptions(options: unknown): LLMRequestOptions {
     jsonMode: false,
     timeout: 30000,
     retries: 2,
-    retryDelay: 1000
+    retryDelay: 1000,
   });
 }
 
@@ -236,7 +238,10 @@ export function isFunction(value: unknown): value is (...args: unknown[]) => unk
  * @returns 类型守卫结果
  */
 export function isPromise(value: unknown): value is Promise<unknown> {
-  return value instanceof Promise || (isObject(value) && isFunction((value as Record<string, unknown>).then));
+  return (
+    value instanceof Promise ||
+    (isObject(value) && isFunction((value as Record<string, unknown>).then))
+  );
 }
 
 /**
@@ -267,7 +272,7 @@ export const TypeGuards = {
   isArray,
   isFunction,
   isPromise,
-  isHTMLElement
+  isHTMLElement,
 };
 
 // 暴露到 window（浏览器环境）

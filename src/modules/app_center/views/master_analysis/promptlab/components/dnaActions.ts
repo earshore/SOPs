@@ -8,7 +8,10 @@
 import { appStore } from '@/stores/useAppStore';
 import SITE_CONFIGS from '../../../../../../common/constants/constants';
 import { showToast } from '../../../../../../common/ui';
-import { extractProductDNA, canExtractDNA as canExtractDNALegacy } from '../../services/dnaExtractor';
+import {
+  extractProductDNA,
+  canExtractDNA as canExtractDNALegacy,
+} from '../../services/dnaExtractor';
 import type { ExtractedDNA } from '../../services/dnaExtractor';
 import {
   extractDNAFromDownloadsReport,
@@ -44,11 +47,14 @@ interface NormalizedDnaResult {
   };
 }
 
-const FIELD_CONFIG: Record<ExtractableFieldName, {
-  inputId: string;
-  label: string;
-  apply: (ctx: PromptlabAlpineContext, normalized: NormalizedDnaResult) => void;
-}> = {
+const FIELD_CONFIG: Record<
+  ExtractableFieldName,
+  {
+    inputId: string;
+    label: string;
+    apply: (ctx: PromptlabAlpineContext, normalized: NormalizedDnaResult) => void;
+  }
+> = {
   keywordsTier1: {
     inputId: 'lab-keywords-tier1',
     label: 'Tier 1 核心大词',
@@ -103,7 +109,10 @@ const FIELD_CONFIG: Record<ExtractableFieldName, {
 
 const AUTO_POPULATE_CONFIDENCE_THRESHOLD = 70;
 
-const FIELD_CONFIDENCE_KEY_MAP: Record<ExtractableFieldName, keyof NormalizedDnaResult['confidence']> = {
+const FIELD_CONFIDENCE_KEY_MAP: Record<
+  ExtractableFieldName,
+  keyof NormalizedDnaResult['confidence']
+> = {
   keywordsTier1: 'keywordsTier1',
   keywordsTier2: 'keywordsTier2',
   negative: 'negative',
@@ -122,10 +131,28 @@ const FIELD_SOURCE_KEY_MAP: Record<ExtractableFieldName, string> = {
 };
 
 const AGGREGATE_SOURCE_HINTS: Record<ExtractableFieldName, string[]> = {
-  keywordsTier1: ['primary_keywords', 'keyword_clusters.core', 'keywordClusters.core', 'attribute', 'title-keywords'],
-  keywordsTier2: ['secondary_keywords', 'long_tail', 'longTail', 'native_phrasing', 'title-keywords'],
+  keywordsTier1: [
+    'primary_keywords',
+    'keyword_clusters.core',
+    'keywordClusters.core',
+    'attribute',
+    'title-keywords',
+  ],
+  keywordsTier2: [
+    'secondary_keywords',
+    'long_tail',
+    'longTail',
+    'native_phrasing',
+    'title-keywords',
+  ],
   negative: ['removed_modifiers', 'removed_brand_terms', 'banned', 'compliance'],
-  audience: ['buyer-profile', 'user_profile', 'userProfile', 'competitor_insights.user_profile', 'use_cases'],
+  audience: [
+    'buyer-profile',
+    'user_profile',
+    'userProfile',
+    'competitor_insights.user_profile',
+    'use_cases',
+  ],
   usps: ['selling-points', 'feature_points', 'coreFeatures', 'differentiation_angles', 'strengths'],
   specs: ['secondary_keywords', 'bullet_analysis', 'attribute', 'coreFeatures', 'title-keywords'],
 };
@@ -192,7 +219,7 @@ const SOURCE_LABELS: Record<string, string> = {
   'user_profile.demographics.household': '用户画像-家庭特征',
   'user_profile.scenarios': '用户画像-使用场景',
   'user_profile.pain_points': '用户画像-痛点',
-  'high_frequency_phrases': '高频短语',
+  high_frequency_phrases: '高频短语',
   'high_frequency_phrases.attribute': '高频短语-属性词',
   'high_frequency_phrases.use_cases': '高频短语-使用场景',
   'native_voice.native_phrasing': '本土表达-自然说法',
@@ -202,7 +229,10 @@ const SOURCE_LABELS: Record<string, string> = {
   'pain_point_gaps.unmet_need': '痛点缺口-未满足需求',
 };
 
-function getNormalizedFieldConfidence(normalized: NormalizedDnaResult, fieldName: ExtractableFieldName): number {
+function getNormalizedFieldConfidence(
+  normalized: NormalizedDnaResult,
+  fieldName: ExtractableFieldName
+): number {
   return normalized.confidence[FIELD_CONFIDENCE_KEY_MAP[fieldName]];
 }
 
@@ -212,7 +242,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function getStringArrayField(record: Record<string, unknown>, key: string): string[] {
   const value = record[key];
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
 }
 
 function getSourceLabel(source: string): string {
@@ -242,11 +274,14 @@ function normalizeLanguageCode(value: unknown): string | null {
   }
 
   const normalized = trimmed.toLowerCase().replace('_', '-');
-  const siteConfig = SITE_CONFIG_RECORD[trimmed.toUpperCase()]
-    || Object.values(SITE_CONFIG_RECORD).find((config) => {
-      return config.name?.toLowerCase() === normalized
-        || config.domain?.toLowerCase() === normalized
-        || config.locale?.toLowerCase().replace('_', '-') === normalized;
+  const siteConfig =
+    SITE_CONFIG_RECORD[trimmed.toUpperCase()] ||
+    Object.values(SITE_CONFIG_RECORD).find(config => {
+      return (
+        config.name?.toLowerCase() === normalized ||
+        config.domain?.toLowerCase() === normalized ||
+        config.locale?.toLowerCase().replace('_', '-') === normalized
+      );
     });
 
   if (siteConfig?.locale) {
@@ -264,7 +299,7 @@ function normalizeLanguageCode(value: unknown): string | null {
 function resolveExtractionLanguage(
   ctx: PromptlabAlpineContext,
   report: unknown,
-  unwrappedReport: unknown,
+  unwrappedReport: unknown
 ): string {
   const reportRecord = isRecord(report) ? report : {};
   const rootMetadata = isRecord(reportRecord.metadata) ? reportRecord.metadata : {};
@@ -297,7 +332,10 @@ function resolveExtractionLanguage(
  */
 export function canExtractDNA(): boolean {
   const report = getStoredAnalysisReport();
-  return canExtractDNAFromDownloadsReport(report) || canExtractDNALegacy(report as FullAnalysisReport | null);
+  return (
+    canExtractDNAFromDownloadsReport(report) ||
+    canExtractDNALegacy(report as FullAnalysisReport | null)
+  );
 }
 
 function getRawDna(ctx: PromptlabAlpineContext): ExtendedDNA | ExtractedDNA | null {
@@ -336,7 +374,7 @@ function normalizeConfidenceValue(value: unknown): number {
 
 function normalizeDnaFields(
   dnaRecord: Record<string, unknown>,
-  keywords: Record<string, unknown>,
+  keywords: Record<string, unknown>
 ): Record<ExtractableFieldName, string> {
   return {
     keywordsTier1: getStringArrayField(keywords, 'core').filter(Boolean).join(', '),
@@ -358,7 +396,7 @@ function averagePositive(values: number[]): number {
 function normalizeKeywordConfidence(
   fieldValue: string,
   fieldConfidence: unknown,
-  fallbackConfidence: number,
+  fallbackConfidence: number
 ): number {
   if (!fieldValue) {
     return 0;
@@ -369,25 +407,27 @@ function normalizeKeywordConfidence(
 
 function normalizeDnaConfidence(
   fields: Record<ExtractableFieldName, string>,
-  confidence: Record<string, unknown>,
+  confidence: Record<string, unknown>
 ): NormalizedDnaResult['confidence'] {
   const fallbackKeywordConfidence = normalizeConfidenceValue(confidence.keywords);
   const keywordsTier1Confidence = normalizeKeywordConfidence(
     fields.keywordsTier1,
     confidence.keywordsCore,
-    fallbackKeywordConfidence,
+    fallbackKeywordConfidence
   );
   const keywordsTier2Confidence = normalizeKeywordConfidence(
     fields.keywordsTier2,
     confidence.keywordsLongTail,
-    fallbackKeywordConfidence,
+    fallbackKeywordConfidence
   );
 
   const normalizedConfidence: NormalizedDnaResult['confidence'] = {
     audience: normalizeConfidenceValue(confidence.audience),
     usps: normalizeConfidenceValue(confidence.usps),
     specs: normalizeConfidenceValue(confidence.specs),
-    keywords: averagePositive([keywordsTier1Confidence, keywordsTier2Confidence]) || fallbackKeywordConfidence,
+    keywords:
+      averagePositive([keywordsTier1Confidence, keywordsTier2Confidence]) ||
+      fallbackKeywordConfidence,
     keywordsTier1: keywordsTier1Confidence,
     keywordsTier2: keywordsTier2Confidence,
     negative: normalizeConfidenceValue(confidence.restrictedWords),
@@ -408,7 +448,7 @@ function normalizeDnaConfidence(
 
 function getAggregateSourceFallback(
   metadata: Record<string, unknown>,
-  fieldName: ExtractableFieldName,
+  fieldName: ExtractableFieldName
 ): string[] {
   const sourceFields = getStringArrayField(metadata, 'sourceFields');
   if (sourceFields.length === 0) {
@@ -416,14 +456,14 @@ function getAggregateSourceFallback(
   }
 
   const hints = AGGREGATE_SOURCE_HINTS[fieldName];
-  return sourceFields.filter((source) => {
-    return hints.some((hint) => source.includes(hint));
+  return sourceFields.filter(source => {
+    return hints.some(hint => source.includes(hint));
   });
 }
 
 function getDnaFieldSources(
   metadata: Record<string, unknown>,
-  fieldName: ExtractableFieldName,
+  fieldName: ExtractableFieldName
 ): string[] {
   const fieldSources = isRecord(metadata.fieldSources) ? metadata.fieldSources : {};
   const sourceKey = FIELD_SOURCE_KEY_MAP[fieldName];
@@ -432,7 +472,7 @@ function getDnaFieldSources(
 }
 
 function normalizeDnaSources(
-  dnaRecord: Record<string, unknown>,
+  dnaRecord: Record<string, unknown>
 ): Record<ExtractableFieldName, string[]> {
   const metadata = isRecord(dnaRecord.metadata) ? dnaRecord.metadata : {};
   return {
@@ -474,7 +514,7 @@ function getDnaExtractionStatus(hasValue: boolean, confidence: number): DnaExtra
 
 function createFieldSummary(
   normalized: NormalizedDnaResult,
-  fieldName: ExtractableFieldName,
+  fieldName: ExtractableFieldName
 ): DnaExtractionFieldSummary {
   const value = normalized.fields[fieldName].trim();
   const confidence = getNormalizedFieldConfidence(normalized, fieldName);
@@ -492,7 +532,7 @@ function createFieldSummary(
 
 function createDnaExtractionSummary(normalized: NormalizedDnaResult): DnaExtractionSummary {
   const fieldEntries = Object.keys(FIELD_CONFIG) as ExtractableFieldName[];
-  const fields = fieldEntries.map((fieldName) => createFieldSummary(normalized, fieldName));
+  const fields = fieldEntries.map(fieldName => createFieldSummary(normalized, fieldName));
 
   return {
     totalFields: fields.length,
@@ -509,9 +549,7 @@ function createDnaExtractionSummary(normalized: NormalizedDnaResult): DnaExtract
 
 export function refreshDnaExtractionSummary(ctx: PromptlabAlpineContext): void {
   const dna = getRawDna(ctx);
-  ctx.dnaExtractionSummary = dna
-    ? createDnaExtractionSummary(normalizeDnaResult(dna))
-    : null;
+  ctx.dnaExtractionSummary = dna ? createDnaExtractionSummary(normalizeDnaResult(dna)) : null;
 }
 
 function hasExistingDnaContent(ctx: PromptlabAlpineContext): boolean {
@@ -538,7 +576,9 @@ export async function autoPopulateDNA(ctx: PromptlabAlpineContext): Promise<void
 
   const normalized = normalizeDnaResult(dna);
   ctx.dnaExtractionSummary = createDnaExtractionSummary(normalized);
-  const fieldEntries = Object.entries(FIELD_CONFIG) as Array<[ExtractableFieldName, typeof FIELD_CONFIG[ExtractableFieldName]]>;
+  const fieldEntries = Object.entries(FIELD_CONFIG) as Array<
+    [ExtractableFieldName, (typeof FIELD_CONFIG)[ExtractableFieldName]]
+  >;
 
   const fillableFields = fieldEntries.filter(([fieldName]) => {
     const value = normalized.fields[fieldName].trim();
@@ -555,7 +595,7 @@ export async function autoPopulateDNA(ctx: PromptlabAlpineContext): Promise<void
   if (fillableFields.length === 0) {
     showToast(
       `当前可提取字段置信度均低于 ${AUTO_POPULATE_CONFIDENCE_THRESHOLD}% ，请使用“仅重新提取此字段”逐项填充`,
-      { type: 'warning' },
+      { type: 'warning' }
     );
     return;
   }
@@ -565,7 +605,7 @@ export async function autoPopulateDNA(ctx: PromptlabAlpineContext): Promise<void
       '覆盖产品 DNA',
       '检测到已有内容，是否覆盖现有的高置信度产品 DNA 字段？',
       '',
-      '覆盖字段',
+      '覆盖字段'
     );
 
     if (!confirmed) return;
@@ -595,10 +635,7 @@ export async function autoPopulateDNA(ctx: PromptlabAlpineContext): Promise<void
     ? `\n以下字段置信度低于 ${AUTO_POPULATE_CONFIDENCE_THRESHOLD}% ，请使用“仅重新提取此字段”：${blockedLabels}`
     : '';
 
-  showToast(
-    `已从报告填充高置信度 DNA 字段：${filledLabels}${blockedHint}`,
-    { type: 'success' },
-  );
+  showToast(`已从报告填充高置信度 DNA 字段：${filledLabels}${blockedHint}`, { type: 'success' });
 
   highlightAutoFilledFields(fillableFields.map(([, config]) => config.inputId));
 }
@@ -608,7 +645,7 @@ export async function autoPopulateDNA(ctx: PromptlabAlpineContext): Promise<void
  */
 export async function extractSingleField(
   ctx: PromptlabAlpineContext,
-  fieldName: ExtractableFieldName,
+  fieldName: ExtractableFieldName
 ): Promise<void> {
   const dna = getRawDna(ctx);
   if (!dna) {
@@ -633,7 +670,7 @@ export async function extractSingleField(
       '低置信度字段',
       `字段“${config.label}”的提取置信度为 ${confidence}%，低于自动填充阈值。是否仍然覆盖当前内容？`,
       '',
-      '仍然覆盖',
+      '仍然覆盖'
     );
 
     if (!confirmed) return;
@@ -645,13 +682,11 @@ export async function extractSingleField(
   ctx.saveState();
 
   highlightAutoFilledFields([config.inputId], 'green');
-  const lowConfidenceHint = confidence < AUTO_POPULATE_CONFIDENCE_THRESHOLD
-    ? '，低于自动填充阈值，请人工复核'
-    : '';
-  showToast(
-    `已重新提取${config.label} (置信度: ${confidence}%)${lowConfidenceHint}`,
-    { type: confidence >= AUTO_POPULATE_CONFIDENCE_THRESHOLD ? 'success' : 'warning' },
-  );
+  const lowConfidenceHint =
+    confidence < AUTO_POPULATE_CONFIDENCE_THRESHOLD ? '，低于自动填充阈值，请人工复核' : '';
+  showToast(`已重新提取${config.label} (置信度: ${confidence}%)${lowConfidenceHint}`, {
+    type: confidence >= AUTO_POPULATE_CONFIDENCE_THRESHOLD ? 'success' : 'warning',
+  });
 }
 
 /**
@@ -659,12 +694,12 @@ export async function extractSingleField(
  */
 export function highlightAutoFilledFields(
   fieldIds: string[],
-  color: 'blue' | 'green' = 'blue',
+  color: 'blue' | 'green' = 'blue'
 ): void {
   const bgClass = color === 'blue' ? 'bg-blue-50' : 'bg-green-50';
   const borderClass = color === 'blue' ? 'border-blue-300' : 'border-green-300';
 
-  fieldIds.forEach((id) => {
+  fieldIds.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.classList.add(bgClass, borderClass);

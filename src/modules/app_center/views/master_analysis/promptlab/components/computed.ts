@@ -47,10 +47,7 @@ const SUPPORTED_TARGET_IDS = [
   'promise_reality_check',
 ];
 
-const LEGACY_PROMPT_REPORT_KEYS = [
-  'target_audience',
-  'key_features',
-];
+const LEGACY_PROMPT_REPORT_KEYS = ['target_audience', 'key_features'];
 
 const DOWNLOAD_REPORT_REQUIREMENTS = [
   [
@@ -63,16 +60,12 @@ const DOWNLOAD_REPORT_REQUIREMENTS = [
     ['user_profile', 'userProfile'],
     ['coreFeatures', 'core_features'],
   ],
-  [
-    ['pain_point_gaps'],
-    ['native_voice'],
-    ['high_frequency_phrases'],
-  ],
+  [['pain_point_gaps'], ['native_voice'], ['high_frequency_phrases']],
 ];
 
 function toReportRecord(value: unknown): ReportRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value as ReportRecord
+    ? (value as ReportRecord)
     : null;
 }
 
@@ -95,30 +88,32 @@ function hasReportContent(value: unknown): boolean {
 }
 
 function hasSupportedTargetContent(report: ReportRecord): boolean {
-  return SUPPORTED_TARGET_IDS.some((targetId) => hasReportContent(report[targetId]));
+  return SUPPORTED_TARGET_IDS.some(targetId => hasReportContent(report[targetId]));
 }
 
 function hasLegacyPromptReportContent(report: ReportRecord): boolean {
-  return LEGACY_PROMPT_REPORT_KEYS.some((key) => hasReportContent(report[key]));
+  return LEGACY_PROMPT_REPORT_KEYS.some(key => hasReportContent(report[key]));
 }
 
 function hasAnyReportField(report: ReportRecord, keys: string[]): boolean {
-  return keys.some((key) => hasReportContent(report[key]));
+  return keys.some(key => hasReportContent(report[key]));
 }
 
 function hasDownloadReportContent(report: ReportRecord): boolean {
-  return DOWNLOAD_REPORT_REQUIREMENTS.some((requirements) => {
-    return requirements.every((aliases) => hasAnyReportField(report, aliases));
+  return DOWNLOAD_REPORT_REQUIREMENTS.some(requirements => {
+    return requirements.every(aliases => hasAnyReportField(report, aliases));
   });
 }
 
-export function getUsableAnalysisReport(report: unknown = appStore.getState().analysis.analysisReport): ReportRecord | null {
+export function getUsableAnalysisReport(
+  report: unknown = appStore.getState().analysis.analysisReport
+): ReportRecord | null {
   const unwrapped = unwrapAnalysisReport(report);
   if (!unwrapped) return null;
 
-  return hasSupportedTargetContent(unwrapped)
-    || hasLegacyPromptReportContent(unwrapped)
-    || hasDownloadReportContent(unwrapped)
+  return hasSupportedTargetContent(unwrapped) ||
+    hasLegacyPromptReportContent(unwrapped) ||
+    hasDownloadReportContent(unwrapped)
     ? unwrapped
     : null;
 }
@@ -137,9 +132,7 @@ export function computeHasReport(): boolean {
 /**
  * Listing Prompt 是否满足生成所需的手动输入前置条件。
  */
-export function computeIsListingReady(
-  ctx: Pick<PromptlabAlpineContext, 'profile'>,
-): boolean {
+export function computeIsListingReady(ctx: Pick<PromptlabAlpineContext, 'profile'>): boolean {
   return (
     ctx.profile.targetMarket !== '' &&
     ctx.profile.keywordsTier1.trim().length > 0 &&
@@ -150,9 +143,7 @@ export function computeIsListingReady(
 /**
  * Visual Prompt 依赖竞品报告来提取视觉洞察。
  */
-export function computeIsVisualReady(
-  ctx: Pick<PromptlabAlpineContext, 'profile'>,
-): boolean {
+export function computeIsVisualReady(ctx: Pick<PromptlabAlpineContext, 'profile'>): boolean {
   return computeHasReport() && computeIsListingReady(ctx);
 }
 
@@ -160,9 +151,7 @@ export function computeIsVisualReady(
  * Promptlab 旧入口的通用就绪判断。
  * 保留报告依赖语义，供 Visual Prompt 和旧调用方使用。
  */
-export function computeIsReady(
-  ctx: Pick<PromptlabAlpineContext, 'profile'>,
-): boolean {
+export function computeIsReady(ctx: Pick<PromptlabAlpineContext, 'profile'>): boolean {
   return computeIsVisualReady(ctx);
 }
 
@@ -173,11 +162,9 @@ export function computeCurrentPrompt(
   ctx: Pick<
     PromptlabAlpineContext,
     'currentConsoleMode' | 'listingPromptCache' | 'visualPromptCache'
-  >,
+  >
 ): string {
-  return ctx.currentConsoleMode === 'listing'
-    ? ctx.listingPromptCache
-    : ctx.visualPromptCache;
+  return ctx.currentConsoleMode === 'listing' ? ctx.listingPromptCache : ctx.visualPromptCache;
 }
 
 // ==========================================

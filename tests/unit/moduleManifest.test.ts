@@ -20,6 +20,13 @@ describe("module manifests", () => {
     expect(ALL_ROUTE_ID_VALUES).toEqual(manifestRouteIds);
   });
 
+  it("preserves route meta from manifests", () => {
+    expect(MENU_CONFIG.routes.playground?.meta).toMatchObject({
+      requiresAuth: false,
+      accessPolicy: "product_allowed_without_auth",
+    });
+  });
+
   it("derive module maps from manifest loaders", () => {
     for (const manifest of BUSINESS_ROUTE_MANIFESTS) {
       const routesWithLoaders = manifest.routes

@@ -88,7 +88,7 @@ export class UniversalDNAExtractor {
       new FullAnalysisReportAdapter(),
       new CompetitorReportAdapter(),
       new ProductOverviewAdapter(),
-      new SemanticAnalysisAdapter()
+      new SemanticAnalysisAdapter(),
     ];
   }
 
@@ -113,14 +113,14 @@ export class UniversalDNAExtractor {
    *
    * // 德国市场
    * const dna = extractor.extractDNA(report, 'de');
- *
- * // 检查提取结果
- * if (dna) {
- *   const audienceText = dna.audience.join(', ');
- *   const confidence = dna.confidence;
- * } else {
- *   console.error('DNA 提取失败');
- * }
+   *
+   * // 检查提取结果
+   * if (dna) {
+   *   const audienceText = dna.audience.join(', ');
+   *   const confidence = dna.confidence;
+   * } else {
+   *   console.error('DNA 提取失败');
+   * }
    * ```
    *
    * @throws 不会抛出异常，所有错误都会被捕获并记录日志
@@ -157,7 +157,7 @@ export class UniversalDNAExtractor {
       return false;
     }
 
-    return this.adapters.some((adapter) => {
+    return this.adapters.some(adapter => {
       try {
         return adapter.canHandle(report);
       } catch {
@@ -195,7 +195,10 @@ export const universalDNAExtractor = new UniversalDNAExtractor();
  * @param language 目标语言代码（如 'zh', 'en', 'de'），默认 'zh'
  * @returns 提取的 DNA 数据，如果失败返回 null
  */
-export function extractDNAFromDownloadsReport(report: unknown, language: string = 'zh'): ExtendedDNA | null {
+export function extractDNAFromDownloadsReport(
+  report: unknown,
+  language: string = 'zh'
+): ExtendedDNA | null {
   return universalDNAExtractor.extractDNA(report, language);
 }
 

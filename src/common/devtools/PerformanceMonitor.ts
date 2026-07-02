@@ -34,7 +34,7 @@ export class PerformanceMonitor {
     this.unsubscribe = webVitalsService.onMetric(this.updateMetric.bind(this));
 
     // 键盘快捷键
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
         this.toggle();
       }
@@ -110,11 +110,13 @@ export class PerformanceMonitor {
       { id: 'performance', label: '性能', icon: '⚡' },
       { id: 'errors', label: '错误', icon: '❌' },
       { id: 'analytics', label: '分析', icon: '📈' },
-      { id: 'alerts', label: '告警', icon: '🔔' }
+      { id: 'alerts', label: '告警', icon: '🔔' },
     ];
 
     // ✅ 安全: tab.id/icon/label来自本地常量数组，this.currentTab是内部状态
-    tabsDiv.innerHTML = tabs.map(tab => `
+    tabsDiv.innerHTML = tabs
+      .map(
+        tab => `
       <button
         data-tab="${tab.id}"
         style="
@@ -130,7 +132,9 @@ export class PerformanceMonitor {
       >
         ${tab.icon} ${tab.label}
       </button>
-    `).join('');
+    `
+      )
+      .join('');
 
     tabsDiv.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -218,12 +222,12 @@ export class PerformanceMonitor {
    */
   private renderPerformance(): string {
     const summary = webVitalsService.getSummary();
-    
+
     const metricsHtml = Object.entries(summary.metrics)
       .map(([name, data]) => {
-        const color = data.rating === 'good' ? '#0f0' : 
-                     data.rating === 'needs-improvement' ? '#ff0' : '#f00';
-        
+        const color =
+          data.rating === 'good' ? '#0f0' : data.rating === 'needs-improvement' ? '#ff0' : '#f00';
+
         return `
           <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px;">
             <div>
@@ -252,19 +256,26 @@ export class PerformanceMonitor {
    */
   private renderErrors(): string {
     const stats = errorTracker.getStats();
-    
+
     if (stats.total === 0) {
       return '<div style="text-align: center; color: #888; padding: 20px;">暂无错误记录</div>';
     }
 
-    const errorsHtml = stats.recentErrors.slice(0, 10).map(error => {
-      const severityColor = error.severity === 'critical' ? '#f00' :
-                           error.severity === 'high' ? '#f80' :
-                           error.severity === 'medium' ? '#ff0' : '#0af';
-      const errorType = escapeHtml(error.type);
-      const errorMessage = escapeHtml(error.message);
+    const errorsHtml = stats.recentErrors
+      .slice(0, 10)
+      .map(error => {
+        const severityColor =
+          error.severity === 'critical'
+            ? '#f00'
+            : error.severity === 'high'
+              ? '#f80'
+              : error.severity === 'medium'
+                ? '#ff0'
+                : '#0af';
+        const errorType = escapeHtml(error.type);
+        const errorMessage = escapeHtml(error.message);
 
-      return `
+        return `
         <div style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; border-left: 3px solid ${severityColor};">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
             <span style="font-weight: bold; font-size: 11px;">${errorType}</span>
@@ -274,7 +285,8 @@ export class PerformanceMonitor {
           <div style="font-size: 10px; color: #888;">${new Date(error.lastOccurrence).toLocaleTimeString()}</div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     return `
       <div style="margin-bottom: 12px;">
@@ -302,16 +314,19 @@ export class PerformanceMonitor {
     const minutes = Math.floor(sessionDuration / 60);
     const seconds = sessionDuration % 60;
 
-    const topPagesHtml = stats.topPages.slice(0, 5).map((page: { path: string; views: number }) => {
-      const path = escapeHtml(page.path);
+    const topPagesHtml = stats.topPages
+      .slice(0, 5)
+      .map((page: { path: string; views: number }) => {
+        const path = escapeHtml(page.path);
 
-      return `
+        return `
         <div style="display: flex; justify-content: space-between; margin: 4px 0; padding: 4px; background: rgba(255,255,255,0.05); border-radius: 2px;">
           <span style="font-size: 11px;">${path}</span>
           <span style="color: #0af;">${page.views}</span>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     return `
       <div style="margin-bottom: 12px;">
@@ -349,15 +364,22 @@ export class PerformanceMonitor {
       return '<div style="text-align: center; color: #888; padding: 20px;">暂无告警</div>';
     }
 
-    const alertsHtml = alerts.slice(0, 10).map(alert => {
-      const levelColor = alert.level === 'critical' ? '#f00' :
-                        alert.level === 'error' ? '#f80' :
-                        alert.level === 'warning' ? '#ff0' : '#0af';
-      const title = escapeHtml(alert.title);
-      const level = escapeHtml(alert.level);
-      const message = escapeHtml(alert.message);
+    const alertsHtml = alerts
+      .slice(0, 10)
+      .map(alert => {
+        const levelColor =
+          alert.level === 'critical'
+            ? '#f00'
+            : alert.level === 'error'
+              ? '#f80'
+              : alert.level === 'warning'
+                ? '#ff0'
+                : '#0af';
+        const title = escapeHtml(alert.title);
+        const level = escapeHtml(alert.level);
+        const message = escapeHtml(alert.message);
 
-      return `
+        return `
         <div style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; border-left: 3px solid ${levelColor};">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
             <span style="font-weight: bold; font-size: 11px;">${title}</span>
@@ -367,7 +389,8 @@ export class PerformanceMonitor {
           <div style="font-size: 10px; color: #888;">${new Date(alert.timestamp).toLocaleTimeString()}</div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     const html = `
       <div style="margin-bottom: 12px;">
@@ -383,7 +406,7 @@ export class PerformanceMonitor {
         ${alertsHtml}
       </div>
     `;
-    
+
     // 延迟绑定事件处理器
     setTimeout(() => {
       const btn = this.container?.querySelector('[data-action="acknowledge-all-alerts"]');
@@ -393,7 +416,7 @@ export class PerformanceMonitor {
         });
       }
     }, 0);
-    
+
     return html;
   }
 
@@ -401,7 +424,9 @@ export class PerformanceMonitor {
    * 渲染内存信息
    */
   private renderMemoryInfo(): string {
-    const performanceWithMemory = performance as unknown as { memory?: { usedJSHeapSize: number; jsHeapSizeLimit: number } };
+    const performanceWithMemory = performance as unknown as {
+      memory?: { usedJSHeapSize: number; jsHeapSizeLimit: number };
+    };
     const memory = performanceWithMemory.memory;
     if (!memory) {
       return '<div style="color: #888; font-size: 11px; margin-top: 12px;">Memory API不可用</div>';

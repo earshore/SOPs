@@ -1,7 +1,7 @@
 /**
  * 动画管理服务
  * 负责全局动画配置和控制
- * 
+ *
  * Requirements: 10.1, 10.2, 11.1, 11.2, 11.3, 11.4, 11.5
  */
 
@@ -158,7 +158,16 @@ export class AnimationManager {
       this.settings.enabled = storedSettings.enabled;
       this.settings.speed = storedSettings.speed;
       // 验证并过滤有效的动画类别
-      const validCategories: AnimationCategory[] = ['button', 'card', 'toast', 'modal', 'list', 'form', 'loading', 'navigation'];
+      const validCategories: AnimationCategory[] = [
+        'button',
+        'card',
+        'toast',
+        'modal',
+        'list',
+        'form',
+        'loading',
+        'navigation',
+      ];
       const filteredCategories = storedSettings.disabledCategories.filter(
         (cat): cat is AnimationCategory => validCategories.includes(cat as AnimationCategory)
       );
@@ -201,8 +210,6 @@ export class AnimationManager {
     }
     return !this.settings.disabledCategories.has(category);
   }
-
-
 
   /**
    * 应用当前配置到DOM
@@ -321,7 +328,7 @@ export class AnimationManager {
       enabled: settings.enabled,
       reducedMotion: this.shouldReduceMotion(),
       speed: settings.speed,
-      disabledCategories: Array.from(settings.disabledCategories)
+      disabledCategories: Array.from(settings.disabledCategories),
     });
   }
 }

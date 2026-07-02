@@ -22,9 +22,9 @@ let hasCleanedOldViewCache = false;
  * 视图配置接口
  */
 export interface ViewConfig {
-    path: string;
-    target: string;
-    isLoaded: boolean;
+  path: string;
+  target: string;
+  isLoaded: boolean;
 }
 
 /**
@@ -42,66 +42,66 @@ export type HtmlModules = Record<string, HtmlModuleLoader>;
  * 缓存统计信息
  */
 export interface CacheStats {
-    count: number;
+  count: number;
+  size: number;
+  items: Array<{
+    key: string;
     size: number;
-    items: Array<{
-        key: string;
-        size: number;
-        sizeKB: string;
-    }>;
+    sizeKB: string;
+  }>;
 }
 
 /**
  * 视图加载选项
  */
 export interface ViewLoadOptions {
-    useCache?: boolean;
-    forceReload?: boolean;
+  useCache?: boolean;
+  forceReload?: boolean;
 }
 
 /**
  * 获取带版本的缓存键
  */
 function getCacheKey(path: string): string {
-    return `${CACHE_PREFIX}${VIEW_CACHE_VERSION}_${path}`;
+  return `${CACHE_PREFIX}${VIEW_CACHE_VERSION}_${path}`;
 }
 
 /**
  * 检查缓存
  */
 function checkCache(path: string): string | null {
-    // 开发环境下禁用缓存，确保模板修改后能立即生效
-    if (import.meta.env.DEV) {
-        return null;
-    }
-    
-    try {
-        const key = getCacheKey(path);
-        const cached = StorageService.getRaw(key, null);
-        if (cached) {
-            return cached;
-        }
-    } catch {
-        return null;
-    }
+  // 开发环境下禁用缓存，确保模板修改后能立即生效
+  if (import.meta.env.DEV) {
     return null;
+  }
+
+  try {
+    const key = getCacheKey(path);
+    const cached = StorageService.getRaw(key, null);
+    if (cached) {
+      return cached;
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 /**
  * 设置缓存
  */
 function setCache(path: string, content: string): void {
-    // 开发环境下禁用缓存写入
-    if (import.meta.env.DEV) {
-        return;
-    }
-    
-    try {
-        const key = getCacheKey(path);
-        StorageService.setRaw(key, content);
-    } catch {
-        // 缓存写入失败不应阻塞视图加载。
-    }
+  // 开发环境下禁用缓存写入
+  if (import.meta.env.DEV) {
+    return;
+  }
+
+  try {
+    const key = getCacheKey(path);
+    StorageService.setRaw(key, content);
+  } catch {
+    // 缓存写入失败不应阻塞视图加载。
+  }
 }
 
 /**
@@ -109,67 +109,70 @@ function setCache(path: string, content: string): void {
  * 🔧 优化: 智能清理，只删除旧版本缓存，保留当前版本
  */
 export function clearOldCache(): void {
-    try {
-        const keysToRemove: string[] = [];
-        const currentVersionPrefix = `${CACHE_PREFIX}${VIEW_CACHE_VERSION}_`;
+  try {
+    const keysToRemove: string[] = [];
+    const currentVersionPrefix = `${CACHE_PREFIX}${VIEW_CACHE_VERSION}_`;
 
-        // 获取所有存储的键
-        const allKeys = StorageService.keys();
+    // 获取所有存储的键
+    const allKeys = StorageService.keys();
 
-        // 只清除旧版本的缓存，保留当前版本
-        for (const key of allKeys) {
-            if ((key.startsWith(CACHE_PREFIX) && !key.startsWith(currentVersionPrefix)) || key.startsWith(LEGACY_CACHE_PREFIX)) {
-                keysToRemove.push(key);
-            }
-        }
-
-        keysToRemove.forEach(k => StorageService.remove(k));
-    } catch {
-        // 旧缓存清理失败不影响当前版本视图加载。
+    // 只清除旧版本的缓存，保留当前版本
+    for (const key of allKeys) {
+      if (
+        (key.startsWith(CACHE_PREFIX) && !key.startsWith(currentVersionPrefix)) ||
+        key.startsWith(LEGACY_CACHE_PREFIX)
+      ) {
+        keysToRemove.push(key);
+      }
     }
+
+    keysToRemove.forEach(k => StorageService.remove(k));
+  } catch {
+    // 旧缓存清理失败不影响当前版本视图加载。
+  }
 }
 
 function clearOldCacheOnce(): void {
-    if (hasCleanedOldViewCache) {
-        return;
-    }
+  if (hasCleanedOldViewCache) {
+    return;
+  }
 
-    clearOldCache();
-    hasCleanedOldViewCache = true;
+  clearOldCache();
+  hasCleanedOldViewCache = true;
 }
 
 /**
  * 获取缓存使用情况
  */
 export function getCacheStats(): CacheStats {
-    const stats: CacheStats = {
-        count: 0,
-        size: 0,
-        items: []
-    };
+  const stats: CacheStats = {
+    count: 0,
+    size: 0,
+    items: [],
+  };
 
-    try {
-        const allKeys = StorageService.keys();
+  try {
+    const allKeys = StorageService.keys();
 
-        for (const key of allKeys) {
-            if (key.startsWith(CACHE_PREFIX) || key.startsWith(LEGACY_CACHE_PREFIX)) {
-                const value = StorageService.getRaw(key, null);
-                const itemSize = value ? value.length * 2 : 0; // UTF-16编码，每字符2字节
+    for (const key of allKeys) {
+      if (key.startsWith(CACHE_PREFIX) || key.startsWith(LEGACY_CACHE_PREFIX)) {
+        const value = StorageService.getRaw(key, null);
+        const itemSize = value ? value.length * 2 : 0; // UTF-16编码，每字符2字节
 
-                stats.count++;
-                stats.size += itemSize;
-                stats.items.push({
-                    key,
-                    size: itemSize,
-                    sizeKB: (itemSize / 1024).toFixed(2)
-                });
-            }
-        }
-    } catch {
-        return stats;
+        stats.count++;
+        stats.size += itemSize;
+        stats.items.push({
+          key,
+          size: itemSize,
+          sizeKB: (itemSize / 1024).toFixed(2),
+        });
+      }
     }
-
+  } catch {
     return stats;
+  }
+
+  return stats;
 }
 
 /**
@@ -178,21 +181,18 @@ export function getCacheStats(): CacheStats {
  * import: 'default' 仅获取内容字符串
  * eager: false (默认) 保持懒加载，只在需要时请求网络 (在构建后变为分开的 chunk)
  */
-const rawHtmlModules = import.meta.glob([
-    '../../modules/**/*.html',
-    '../../components/**/*.html'
-], {
-    query: '?raw',
-    import: 'default'
+const rawHtmlModules = import.meta.glob(['../../modules/**/*.html', '../../components/**/*.html'], {
+  query: '?raw',
+  import: 'default',
 }) as Record<string, HtmlModuleLoader>;
 
 const htmlModules = Object.fromEntries(
-    Object.entries(rawHtmlModules).map(([path, loader]) => {
-        const normalizedPath = path.startsWith('../../')
-            ? `/src/${path.replace(/^\.\.\/\.\.\//, '')}`
-            : path;
-        return [normalizedPath, loader];
-    })
+  Object.entries(rawHtmlModules).map(([path, loader]) => {
+    const normalizedPath = path.startsWith('../../')
+      ? `/src/${path.replace(/^\.\.\/\.\.\//, '')}`
+      : path;
+    return [normalizedPath, loader];
+  })
 ) as HtmlModules;
 
 /**
@@ -200,27 +200,35 @@ const htmlModules = Object.fromEntries(
  * URL 现在是用来在 htmlModules 中查找的 key
  */
 const VIEW_REGISTRY: ViewRegistry = {
-    // === 核心视图 (Critical) ===
-    'home': { path: '/src/modules/home/homeDisplay.html', target: 'main', isLoaded: false },
-    'settings': { path: '/src/components/settings/systemSettings.html', target: '#modal-container', isLoaded: false },
-    'modals': { path: '/src/components/modal/sharedModals.html', target: '#modal-container', isLoaded: false },
+  // === 核心视图 (Critical) ===
+  home: { path: '/src/modules/home/homeDisplay.html', target: 'main', isLoaded: false },
+  settings: {
+    path: '/src/components/settings/systemSettings.html',
+    target: '#modal-container',
+    isLoaded: false,
+  },
+  modals: {
+    path: '/src/components/modal/sharedModals.html',
+    target: '#modal-container',
+    isLoaded: false,
+  },
 
-    // === 业务视图 (Lazy) ===
-    'sops': { path: '/src/modules/sops/sops.html', target: 'main', isLoaded: false },
-    'amz_hub': { path: '/src/modules/amz_hub/amz_hub.html', target: 'main', isLoaded: false },
-    'more': { path: '/src/modules/more/more.html', target: 'main', isLoaded: false },
+  // === 业务视图 (Lazy) ===
+  sops: { path: '/src/modules/sops/sops.html', target: 'main', isLoaded: false },
+  amz_hub: { path: '/src/modules/amz_hub/amz_hub.html', target: 'main', isLoaded: false },
+  more: { path: '/src/modules/more/more.html', target: 'main', isLoaded: false },
 
-    // App Center 统一 Shell HTML
-    'app_center': { path: '/src/modules/app_center/app_center.html', target: 'main', isLoaded: false },
+  // App Center 统一 Shell HTML
+  app_center: { path: '/src/modules/app_center/app_center.html', target: 'main', isLoaded: false },
 };
 
 /**
  * 渲染错误占位视图
  */
 function renderErrorPlaceholder(container: HTMLElement, key: string, error: Error): void {
-    const safeKey = escapeHtml(key);
-    const safeMessage = escapeHtml(error.message || '未知错误');
-    const errorHtml = `
+  const safeKey = escapeHtml(key);
+  const safeMessage = escapeHtml(error.message || '未知错误');
+  const errorHtml = `
         <div class="view-error-placeholder p-8 flex flex-col items-center justify-center text-center space-y-4 border-2 border-dashed border-red-200 rounded-xl bg-red-50/30 m-4">
             <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
                 <i class="fas fa-exclamation-triangle text-2xl"></i>
@@ -237,16 +245,16 @@ function renderErrorPlaceholder(container: HTMLElement, key: string, error: Erro
             </button>
         </div>
     `;
-    // ✅ 安全: errorHtml仅包含静态模板和已转义的key/error.message
-    container.insertAdjacentHTML('beforeend', errorHtml);
-    
-    // 绑定事件处理器
-    const reloadBtn = container.querySelector('[data-action="reload-page-viewloader"]');
-    if (reloadBtn) {
-        reloadBtn.addEventListener('click', () => {
-            location.reload();
-        });
-    }
+  // ✅ 安全: errorHtml仅包含静态模板和已转义的key/error.message
+  container.insertAdjacentHTML('beforeend', errorHtml);
+
+  // 绑定事件处理器
+  const reloadBtn = container.querySelector('[data-action="reload-page-viewloader"]');
+  if (reloadBtn) {
+    reloadBtn.addEventListener('click', () => {
+      location.reload();
+    });
+  }
 }
 
 /**
@@ -254,54 +262,54 @@ function renderErrorPlaceholder(container: HTMLElement, key: string, error: Erro
  * @returns 返回目标容器元素，失败返回 null
  */
 async function loadHtml(key: string): Promise<HTMLElement | null> {
-    const config = VIEW_REGISTRY[key];
-    // 如果配置不存在或已加载，尝试直接返回容器
-    if (!config) return null;
-    
-    if (config.isLoaded) {
-        return document.querySelector<HTMLElement>(config.target);
+  const config = VIEW_REGISTRY[key];
+  // 如果配置不存在或已加载，尝试直接返回容器
+  if (!config) return null;
+
+  if (config.isLoaded) {
+    return document.querySelector<HTMLElement>(config.target);
+  }
+
+  const container = document.querySelector<HTMLElement>(config.target);
+  if (!container) {
+    console.error(`[ViewLoader] Target container not found: ${config.target}`);
+    return null;
+  }
+
+  try {
+    const path = config.path;
+
+    // 1. Check Cache
+    const cachedHtml = checkCache(path);
+    let html: string;
+
+    if (cachedHtml) {
+      html = cachedHtml;
+    } else {
+      const loader = htmlModules[path];
+      if (!loader) {
+        throw new SystemError(
+          `Module path not found in glob registry: ${path}`,
+          'VIEW_MODULE_NOT_FOUND',
+          { module: 'viewLoader', action: 'loadView', path }
+        );
+      }
+      // 2. Load
+      html = await loader();
+      // 3. Set Cache
+      setCache(path, html);
     }
 
-    const container = document.querySelector<HTMLElement>(config.target);
-    if (!container) {
-        console.error(`[ViewLoader] Target container not found: ${config.target}`);
-        return null;
-    }
-
-    try {
-        const path = config.path;
-        
-        // 1. Check Cache
-        const cachedHtml = checkCache(path);
-        let html: string;
-
-        if (cachedHtml) {
-            html = cachedHtml;
-        } else {
-            const loader = htmlModules[path];
-            if (!loader) {
-                throw new SystemError(
-                    `Module path not found in glob registry: ${path}`,
-                    'VIEW_MODULE_NOT_FOUND',
-                    { module: 'viewLoader', action: 'loadView', path }
-                );
-            }
-            // 2. Load
-            html = await loader();
-            // 3. Set Cache
-            setCache(path, html);
-        }
-
-        // ✅ 安全: html来自Vite raw导入的本地静态模板，不包含用户输入
-        container.insertAdjacentHTML('beforeend', html);
-        config.isLoaded = true;
-        return container;
-    } catch (e) {
-        const error = e instanceof Error ? e : new Error(String(e));
-        console.error(`[ViewLoader] Failed to load [${key}]:`, error);
-        renderErrorPlaceholder(container, key, error);
-        return null;
-    }
+    // ✅ 安全: html来自Vite raw导入的本地静态模板，不包含用户输入
+    container.insertAdjacentHTML('beforeend', html);
+    config.isLoaded = true;
+    return container;
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    console.error(`[ViewLoader] Failed to load [${key}]:`, error);
+    renderErrorPlaceholder(container, key, error);
+    return null;
+  }
 }
 
 /**
@@ -309,13 +317,9 @@ async function loadHtml(key: string): Promise<HTMLElement | null> {
  * 只加载 Home 和 全局模态框
  */
 export async function initViews(): Promise<void> {
-    clearOldCacheOnce();
+  clearOldCacheOnce();
 
-    await Promise.all([
-        loadHtml('home'),
-        loadHtml('settings'),
-        loadHtml('modals')
-    ]);
+  await Promise.all([loadHtml('home'), loadHtml('settings'), loadHtml('modals')]);
 }
 
 /**
@@ -323,19 +327,16 @@ export async function initViews(): Promise<void> {
  * 用于启动阶段优先挂载首屏内容，避免等待设置/共享弹窗模板。
  */
 export async function initHomeView(): Promise<void> {
-    clearOldCacheOnce();
+  clearOldCacheOnce();
 
-    await loadHtml('home');
+  await loadHtml('home');
 }
 
 /**
  * 后台预热非首屏但常用的全局视图。
  */
 export async function initDeferredViews(): Promise<void> {
-    await Promise.all([
-        loadHtml('settings'),
-        loadHtml('modals')
-    ]);
+  await Promise.all([loadHtml('settings'), loadHtml('modals')]);
 }
 
 /**
@@ -343,29 +344,29 @@ export async function initDeferredViews(): Promise<void> {
  * @param routeId - 路由ID
  */
 export async function ensureViewLoaded(routeId: string): Promise<void> {
-    // 获取视图路径
-    const viewPath = getViewPathByRoute(routeId);
-    
-    if (!viewPath) {
-        // 不再警告，因为很多路由是子模块路由，不需要加载主视图
-        return;
-    }
+  // 获取视图路径
+  const viewPath = getViewPathByRoute(routeId);
 
-    // 从路径中提取模块key
-    const moduleKey = viewPath.split('/').filter(Boolean)[2]; // 例如: sops, app_center, amz_hub, more
-    
-    if (moduleKey && VIEW_REGISTRY[moduleKey]) {
-        if (!VIEW_REGISTRY[moduleKey].isLoaded) {
-            await loadHtml(moduleKey);
-        }
+  if (!viewPath) {
+    // 不再警告，因为很多路由是子模块路由，不需要加载主视图
+    return;
+  }
+
+  // 从路径中提取模块key
+  const moduleKey = viewPath.split('/').filter(Boolean)[2]; // 例如: sops, app_center, amz_hub, more
+
+  if (moduleKey && VIEW_REGISTRY[moduleKey]) {
+    if (!VIEW_REGISTRY[moduleKey].isLoaded) {
+      await loadHtml(moduleKey);
     }
+  }
 }
 
 /**
  * 动态注册新视图 (保留 API 兼容)
  */
 export function registerView(_viewConfig: Partial<ViewConfig>): void {
-    // 暂不处理动态注册，现有逻辑不需要
+  // 暂不处理动态注册，现有逻辑不需要
 }
 
 /**
@@ -374,48 +375,52 @@ export function registerView(_viewConfig: Partial<ViewConfig>): void {
  * @param options - 加载选项
  * @param options.disableFadeIn - 是否禁用淡入动画（默认false，即启用动画）
  */
-export async function loadTemplate(path: string, options?: ViewLoadOptions & { disableFadeIn?: boolean }): Promise<string> {
-    // 尝试标准化路径
-    if (!path.startsWith('/')) path = '/' + path;
+export async function loadTemplate(
+  path: string,
+  options?: ViewLoadOptions & { disableFadeIn?: boolean }
+): Promise<string> {
+  // 尝试标准化路径
+  if (!path.startsWith('/')) path = '/' + path;
 
-    // 1. Check Cache
-    const shouldUseCache = options?.useCache !== false && !options?.forceReload;
-    const cachedHtml = shouldUseCache ? checkCache(path) : null;
-    let html: string;
-    
-    if (cachedHtml) {
-        html = cachedHtml;
-    } else {
-        const loader = htmlModules[path];
-        if (!loader) {
-            console.error(`[ViewLoader] Template not found in registry: ${path}`);
-            // Fallback: 尝试不带前导斜杠
-            const altPath = path.substring(1);
-            if (htmlModules[altPath]) {
-                html = await htmlModules[altPath]();
-                if (shouldUseCache) {
-                    setCache(path, html); // Cache for original path to avoid retry
-                }
-            } else {
-                throw new SystemError(
-                    `Template path not found: ${path}`,
-                    'VIEW_TEMPLATE_NOT_FOUND',
-                    { module: 'viewLoader', action: 'loadView', path, attemptedPaths: [path, altPath] }
-                );
-            }
-        } else {
-            html = await loader();
-            if (shouldUseCache) {
-                setCache(path, html);
-            }
+  // 1. Check Cache
+  const shouldUseCache = options?.useCache !== false && !options?.forceReload;
+  const cachedHtml = shouldUseCache ? checkCache(path) : null;
+  let html: string;
+
+  if (cachedHtml) {
+    html = cachedHtml;
+  } else {
+    const loader = htmlModules[path];
+    if (!loader) {
+      console.error(`[ViewLoader] Template not found in registry: ${path}`);
+      // Fallback: 尝试不带前导斜杠
+      const altPath = path.substring(1);
+      if (htmlModules[altPath]) {
+        html = await htmlModules[altPath]();
+        if (shouldUseCache) {
+          setCache(path, html); // Cache for original path to avoid retry
         }
+      } else {
+        throw new SystemError(`Template path not found: ${path}`, 'VIEW_TEMPLATE_NOT_FOUND', {
+          module: 'viewLoader',
+          action: 'loadView',
+          path,
+          attemptedPaths: [path, altPath],
+        });
+      }
+    } else {
+      html = await loader();
+      if (shouldUseCache) {
+        setCache(path, html);
+      }
     }
-    
-    // 2. 自动包裹淡入动画容器（系统级通用功能）
-    // 除非明确禁用，否则所有页面都应用淡入动画
-    if (!options?.disableFadeIn) {
-        html = wrapWithPageEnterAnimation(html);
-    }
-    
-    return html;
+  }
+
+  // 2. 自动包裹淡入动画容器（系统级通用功能）
+  // 除非明确禁用，否则所有页面都应用淡入动画
+  if (!options?.disableFadeIn) {
+    html = wrapWithPageEnterAnimation(html);
+  }
+
+  return html;
 }

@@ -221,8 +221,15 @@ export interface IHttpService {
   get<T = unknown>(url: string, options?: HttpOptions): Promise<T>;
   post<T = unknown>(url: string, body?: unknown, options?: HttpOptions): Promise<T>;
   loadTemplate(url: string): Promise<string>;
-  apiRequest<T = unknown>(url: string, options?: HttpOptions, dataGuard?: (data: unknown) => data is T): Promise<import('./api').ApiResponse<T>>;
-  createClient(baseUrl: string, defaultHeaders?: Record<string, string>): {
+  apiRequest<T = unknown>(
+    url: string,
+    options?: HttpOptions,
+    dataGuard?: (data: unknown) => data is T
+  ): Promise<import('./api').ApiResponse<T>>;
+  createClient(
+    baseUrl: string,
+    defaultHeaders?: Record<string, string>
+  ): {
     get<T = unknown>(path: string, options?: HttpOptions): Promise<T>;
     post<T = unknown>(path: string, body?: unknown, options?: HttpOptions): Promise<T>;
   };

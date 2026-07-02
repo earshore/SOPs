@@ -200,7 +200,7 @@ export function triggerInitialNavigation(): void {
   }
 
   const currentHash = window.location.hash.replace('#', '');
-  
+
   if (!currentHash || currentHash === '/' || currentHash === '') {
     routerInstance.navigate('/home', {
       updateHistory: true,

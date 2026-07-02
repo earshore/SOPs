@@ -29,7 +29,7 @@ export type {
   ConfigResponse,
   LLMProviderConfigResponse,
   HealthCheckResponse,
-  BatchOperationResult
+  BatchOperationResult,
 } from './api';
 
 // 状态类型
@@ -82,7 +82,7 @@ export type {
   PersistConfig,
   IPersistMiddleware,
   StateSchema,
-  StateHistory
+  StateHistory,
 } from './state';
 
 // 服务接口类型
@@ -93,11 +93,8 @@ export type {
   IStorageService,
   IErrorService,
   IPerformanceService,
-  IAnalyticsService
+  IAnalyticsService,
 } from './services';
 
 // 业务模块类型
-export type {
-  AnalysisReport,
-  AnalysisResult
-} from './modules-business';
+export type { AnalysisReport, AnalysisResult } from './modules-business';

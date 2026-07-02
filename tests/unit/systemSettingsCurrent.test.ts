@@ -253,6 +253,8 @@ describe('system settings current behavior', () => {
     expect(panel.fetchModelsIconClass).toBe('fa-sync-alt');
     expect(panel.testConnectionIconClass).toContain('fa-plug');
     expect(panel.proxyHintText).toContain('商业 API Key');
+    expect(panel.localSecretBoundaryText).toContain('浏览器本地加密保存');
+    expect(panel.localSecretBoundaryText).toContain('不是服务端密钥托管');
     expect(panel.localStorageUsedText).toBe('1.0 KB');
     expect(panel.indexedDbKeysText).toBe('3 records');
     expect(panel.localDataCleanupToggleText).toBe('展开清理项');
@@ -554,6 +556,7 @@ describe('system settings current behavior', () => {
     await panel.exportLocalData();
 
     expect(confirm).toHaveBeenCalledWith(expect.stringContaining('敏感本地数据'));
+    expect(confirm).toHaveBeenCalledWith(expect.stringContaining('不是服务端密钥托管'));
     expect(LocalDataStore.exportAll).not.toHaveBeenCalled();
     expect(panel.localData.isBusy).toBe(false);
   });

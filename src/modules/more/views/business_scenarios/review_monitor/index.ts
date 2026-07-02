@@ -8,15 +8,16 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import { renderBusinessScenarioPage } from '../casePageRenderer';
 
 class ReviewMonitorModule extends BaseModule {
-    async mount(container: HTMLElement): Promise<void> {
-        const html = await loadTemplate('src/modules/more/views/business_scenarios/review_monitor/template.html');
-        // ✅ 安全: 静态HTML模板，无用户输入
-        setSafeHtml(container, renderBusinessScenarioPage(html, 'review_monitor'));
-        container.classList.add('fade-in');
-    }
+  async mount(container: HTMLElement): Promise<void> {
+    const html = await loadTemplate(
+      'src/modules/more/views/business_scenarios/review_monitor/template.html'
+    );
+    // ✅ 安全: 静态HTML模板，无用户输入
+    setSafeHtml(container, renderBusinessScenarioPage(html, 'review_monitor'));
+    container.classList.add('fade-in');
+  }
 
-    unmount(): void {
-    }
+  unmount(): void {}
 }
 
 const reviewMonitorModule = new ReviewMonitorModule('more_review_monitor');

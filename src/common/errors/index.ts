@@ -15,7 +15,7 @@ export {
   ErrorLevel,
   ErrorCategory,
   isAppError,
-  toAppError
+  toAppError,
 } from './AppError';
 
 // 导出错误码
@@ -40,7 +40,7 @@ import {
   ValidationError,
   BusinessError,
   SystemError,
-  ErrorContext
+  ErrorContext,
 } from './AppError';
 import { ERROR_CODES } from './errorCodes';
 import type { ErrorCode } from './errorCodes';
@@ -77,10 +77,7 @@ export function handleNetworkError(
 /**
  * 创建并处理API错误
  */
-export function handleApiError(
-  code: ErrorCode,
-  options: HandleApiErrorOptions = {}
-): void {
+export function handleApiError(code: ErrorCode, options: HandleApiErrorOptions = {}): void {
   const { statusCode, response, context, originalError, handlerOptions } = options;
   const errorInfo = ERROR_CODES[code] || ERROR_CODES.API_SERVER_ERROR;
   const error = new ApiError(errorInfo.message, code, statusCode, response, context, originalError);

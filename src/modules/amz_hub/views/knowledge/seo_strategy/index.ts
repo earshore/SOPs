@@ -2,12 +2,12 @@
  * Amazon SEO 策略 - 关键词优化雷达图
  */
 
-import BaseModule from "../../../../../common/BaseModule";
-import { SEO_RADAR_DATA } from "../../../constants/amz_hub_constants";
-import templateHTML from "./template.html?raw";
-import "./styles.css";
-import { loadChartJs, type ChartJS } from "../../../../../common/utils/lazyLibs";
-import { setSafeHtml } from "../../../../../common/utils/security";
+import BaseModule from '../../../../../common/BaseModule';
+import { SEO_RADAR_DATA } from '../../../constants/amz_hub_constants';
+import templateHTML from './template.html?raw';
+import './styles.css';
+import { loadChartJs, type ChartJS } from '../../../../../common/utils/lazyLibs';
+import { setSafeHtml } from '../../../../../common/utils/security';
 
 // Chart.js 实例类型定义
 interface ChartInstance {
@@ -22,7 +22,7 @@ class SeoStrategyModule extends BaseModule {
   private chartInstance: ChartInstance | null = null;
 
   constructor() {
-    super("amz_seo_strategy");
+    super('amz_seo_strategy');
   }
 
   protected async render(): Promise<void> {
@@ -31,7 +31,7 @@ class SeoStrategyModule extends BaseModule {
 
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, templateHTML);
-    container.classList.add("fade-in");
+    container.classList.add('fade-in');
   }
 
   async init(): Promise<void> {
@@ -47,9 +47,7 @@ class SeoStrategyModule extends BaseModule {
   }
 
   initChart(): void {
-    const ctx = document.getElementById(
-      "amz_keywordRadarChart",
-    ) as HTMLCanvasElement;
+    const ctx = document.getElementById('amz_keywordRadarChart') as HTMLCanvasElement;
     if (!ctx) return;
 
     if (this.chartInstance) this.chartInstance.destroy();
@@ -59,22 +57,22 @@ class SeoStrategyModule extends BaseModule {
       return;
     }
 
-    const context = ctx.getContext("2d");
+    const context = ctx.getContext('2d');
     if (!context) return;
 
     this.chartInstance = new Chart(context, {
-      type: "radar",
+      type: 'radar',
       data: SEO_RADAR_DATA,
       options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
           r: {
-            angleLines: { display: true, color: "#f1f5f9" },
-            grid: { color: "#f1f5f9" },
+            angleLines: { display: true, color: '#f1f5f9' },
+            grid: { color: '#f1f5f9' },
             suggestedMin: 0,
             suggestedMax: 100,
-            ticks: { display: false, backdropColor: "transparent" },
+            ticks: { display: false, backdropColor: 'transparent' },
           },
         },
       },

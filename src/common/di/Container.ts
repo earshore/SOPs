@@ -48,16 +48,16 @@ export interface ServiceMetadata {
 export class DIContainer {
   /** 服务工厂函数 */
   private factories: Map<string, ServiceFactory>;
-  
+
   /** 单例实例缓存 */
   private singletons: Map<string, unknown>;
-  
+
   /** 服务生命周期 */
   private lifetimes: Map<string, ServiceLifetime>;
-  
+
   /** 服务依赖关系 */
   private dependencies: Map<string, string[]>;
-  
+
   /** 服务元信息 */
   private metadata: Map<string, ServiceMetadata>;
 
@@ -81,16 +81,16 @@ export class DIContainer {
     options: RegisterOptions = {}
   ): void {
     if (typeof factory !== 'function') {
-      throw new SystemError(
-        `Factory must be a function: ${name}`,
-        'DI_INVALID_FACTORY',
-        { module: 'DIContainer', action: 'register', serviceName: name }
-      );
+      throw new SystemError(`Factory must be a function: ${name}`, 'DI_INVALID_FACTORY', {
+        module: 'DIContainer',
+        action: 'register',
+        serviceName: name,
+      });
     }
 
     const lifetime = options.lifetime || 'singleton';
     const deps = options.dependencies || [];
-    
+
     this.factories.set(name, factory);
     this.lifetimes.set(name, lifetime);
     this.dependencies.set(name, deps);
@@ -99,9 +99,8 @@ export class DIContainer {
       lifetime,
       dependencies: deps,
       registered: Date.now(),
-      resolved: 0
+      resolved: 0,
     });
-    
   }
 
   /**
@@ -113,21 +112,21 @@ export class DIContainer {
   resolve<T = unknown>(name: string): T {
     // 1. 检查服务是否已注册
     if (!this.factories.has(name)) {
-      throw new SystemError(
-        `服务未注册: ${name}`,
-        'DI_SERVICE_NOT_FOUND',
-        { module: 'DIContainer', action: 'resolve', serviceName: name }
-      );
+      throw new SystemError(`服务未注册: ${name}`, 'DI_SERVICE_NOT_FOUND', {
+        module: 'DIContainer',
+        action: 'resolve',
+        serviceName: name,
+      });
     }
 
     const lifetime = this.lifetimes.get(name);
     const factory = this.factories.get(name);
     if (!factory) {
-      throw new SystemError(
-        `服务未注册: ${name}`,
-        'DI_SERVICE_NOT_FOUND',
-        { module: 'DIContainer', action: 'resolve', serviceName: name }
-      );
+      throw new SystemError(`服务未注册: ${name}`, 'DI_SERVICE_NOT_FOUND', {
+        module: 'DIContainer',
+        action: 'resolve',
+        serviceName: name,
+      });
     }
 
     // 2. 单例模式：返回缓存的实例
@@ -139,13 +138,13 @@ export class DIContainer {
       // 创建新实例并缓存
       const instance = factory(this);
       this.singletons.set(name, instance);
-      
+
       // 更新元信息
       const meta = this.metadata.get(name);
       if (meta) {
         meta.resolved = Date.now();
       }
-      
+
       return instance as T;
     }
 
@@ -179,7 +178,7 @@ export class DIContainer {
   getRegisteredServices(): string[] {
     return Array.from(this.factories.keys());
   }
-  
+
   /**
    * 获取服务元信息
    * @param name - 服务名称
@@ -187,14 +186,14 @@ export class DIContainer {
   getMetadata(name: string): ServiceMetadata | undefined {
     return this.metadata.get(name);
   }
-  
+
   /**
    * 获取所有服务元信息
    */
   getAllMetadata(): ServiceMetadata[] {
     return Array.from(this.metadata.values());
   }
-  
+
   /**
    * 检查循环依赖
    * @param name - 服务名称
@@ -205,24 +204,29 @@ export class DIContainer {
       throw new SystemError(
         `检测到循环依赖: ${Array.from(visited).join(' -> ')} -> ${name}`,
         'DI_CIRCULAR_DEPENDENCY',
-        { module: 'DIContainer', action: 'checkCircularDependency', serviceName: name, chain: Array.from(visited) }
+        {
+          module: 'DIContainer',
+          action: 'checkCircularDependency',
+          serviceName: name,
+          chain: Array.from(visited),
+        }
       );
     }
-    
+
     visited.add(name);
     const deps = this.dependencies.get(name) || [];
-    
+
     for (const dep of deps) {
       this.checkCircularDependency(dep, new Set(visited));
     }
   }
-  
+
   /**
    * 验证所有依赖
    */
   validateDependencies(): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
+
     for (const [name, deps] of this.dependencies.entries()) {
       // 检查循环依赖
       try {
@@ -230,7 +234,7 @@ export class DIContainer {
       } catch (error) {
         errors.push((error as Error).message);
       }
-      
+
       // 检查依赖是否已注册
       for (const dep of deps) {
         if (!this.has(dep)) {
@@ -238,10 +242,10 @@ export class DIContainer {
         }
       }
     }
-    
+
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 

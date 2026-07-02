@@ -151,16 +151,16 @@ export class ConfigCenter implements IConfigService {
    */
   private loadConfig(): AppConfig {
     const env = this.getEnvironment();
-    
+
     // 加载基础配置
     const baseConfig = this.getBaseConfig(env);
-    
+
     // 加载环境特定配置
     const envConfig = this.getEnvConfig(env);
-    
+
     // 加载路由配置
     const routeConfig = loadRouteConfig();
-    
+
     // 合并配置
     return this.mergeConfig(baseConfig, { ...envConfig, routes: routeConfig });
   }
@@ -183,18 +183,18 @@ export class ConfigCenter implements IConfigService {
         baseUrl: import.meta.env.VITE_API_BASE_URL || '/v1',
         timeout: 30000,
         retryAttempts: 3,
-        retryDelay: 1000
+        retryDelay: 1000,
       },
       performance: {
         enableMonitoring: true,
         enableDevTools: env === 'development',
         logLevel: env === 'development' ? 'debug' : 'info',
-        maxCacheSize: 100
+        maxCacheSize: 100,
       },
       features: {
         enableExperimentalFeatures: false,
         enableBetaFeatures: env === 'development',
-        enableDebugMode: env === 'development'
+        enableDebugMode: env === 'development',
       },
       routes: {} as MenuConfig, // 将在后续加载
       scraper: {
@@ -204,33 +204,33 @@ export class ConfigCenter implements IConfigService {
         retryDelay: 500,
         batchSize: 3,
         batchDelay: 1500,
-        cacheDuration: 24 * 60 * 60 * 1000 // 24小时
+        cacheDuration: 24 * 60 * 60 * 1000, // 24小时
       },
       llm: {
         defaultTimeout: 30000,
         analysisTimeout: 120000,
         testConnectionTimeout: 15000,
         maxRetries: 2,
-        retryDelay: 1000
+        retryDelay: 1000,
       },
       history: {
         maxItems: 50,
         maxEventHistory: 100,
-        maxSearchHistory: 10
+        maxSearchHistory: 10,
       },
       logger: {
         maxLogs: 100,
         minLevel: env === 'development' ? 'debug' : 'info',
         batchSize: 10,
-        batchTimeout: 5000
+        batchTimeout: 5000,
       },
       storage: {
         lruMaxSize: 4 * 1024 * 1024, // 4MB
         lruWarningThreshold: 0.8,
         lruCleanupRatio: 0.3,
         localStorageTotalSize: 5 * 1024 * 1024, // 5MB
-        historyMaxItems: 50
-      }
+        historyMaxItems: 50,
+      },
     };
   }
 
@@ -243,65 +243,65 @@ export class ConfigCenter implements IConfigService {
         return {
           api: {
             timeout: 60000,
-            retryAttempts: 1
+            retryAttempts: 1,
           },
           performance: {
             enableMonitoring: true,
             enableDevTools: true,
-            logLevel: 'debug'
+            logLevel: 'debug',
           },
           scraper: {
             requestTimeout: 30000,
-            maxRetries: 1
+            maxRetries: 1,
           },
           llm: {
             defaultTimeout: 60000,
-            analysisTimeout: 180000
-          }
+            analysisTimeout: 180000,
+          },
         } as Partial<AppConfig>;
-        
+
       case 'production':
         return {
           api: {
             timeout: 30000,
-            retryAttempts: 3
+            retryAttempts: 3,
           },
           performance: {
             enableMonitoring: true,
             enableDevTools: false,
-            logLevel: 'error'
+            logLevel: 'error',
           },
           scraper: {
             requestTimeout: 15000,
-            maxRetries: 3
+            maxRetries: 3,
           },
           llm: {
             defaultTimeout: 30000,
-            analysisTimeout: 120000
-          }
+            analysisTimeout: 120000,
+          },
         } as Partial<AppConfig>;
-        
+
       case 'test':
         return {
           api: {
             timeout: 10000,
-            retryAttempts: 0
+            retryAttempts: 0,
           },
           performance: {
             enableMonitoring: false,
             enableDevTools: false,
-            logLevel: 'warn'
+            logLevel: 'warn',
           },
           scraper: {
             requestTimeout: 5000,
-            maxRetries: 0
+            maxRetries: 0,
           },
           llm: {
             defaultTimeout: 5000,
-            analysisTimeout: 10000
-          }
+            analysisTimeout: 10000,
+          },
         } as Partial<AppConfig>;
-        
+
       default:
         return {};
     }
@@ -321,7 +321,7 @@ export class ConfigCenter implements IConfigService {
       llm: { ...base.llm, ...override.llm },
       history: { ...base.history, ...override.history },
       logger: { ...base.logger, ...override.logger },
-      storage: { ...base.storage, ...override.storage }
+      storage: { ...base.storage, ...override.storage },
     };
   }
 
@@ -339,7 +339,7 @@ export class ConfigCenter implements IConfigService {
   public get<T = unknown>(path: string, defaultValue?: T): T {
     const keys = path.split('.');
     let value: unknown = this.config;
-    
+
     for (const key of keys) {
       if (value && typeof value === 'object' && key in value) {
         value = (value as Record<string, unknown>)[key];
@@ -347,7 +347,7 @@ export class ConfigCenter implements IConfigService {
         return defaultValue as T;
       }
     }
-    
+
     return (value !== undefined ? value : defaultValue) as T;
   }
 
@@ -361,7 +361,7 @@ export class ConfigCenter implements IConfigService {
       return;
     }
     let target: Record<string, unknown> = this.config as unknown as Record<string, unknown>;
-    
+
     // 导航到目标对象
     for (const key of keys) {
       if (!(key in target)) {
@@ -369,10 +369,10 @@ export class ConfigCenter implements IConfigService {
       }
       target = target[key] as Record<string, unknown>;
     }
-    
+
     // 保存旧值
     const oldValue = target[lastKey];
-    
+
     // 设置新值
     target[lastKey] = value;
 
@@ -389,9 +389,9 @@ export class ConfigCenter implements IConfigService {
       listeners = new Set();
       this.listeners.set(path, listeners);
     }
-    
+
     listeners.add(listener);
-    
+
     // 返回取消监听函数
     return () => {
       const listeners = this.listeners.get(path);
@@ -473,7 +473,7 @@ export class ConfigCenter implements IConfigService {
   public has(path: string): boolean {
     const keys = path.split('.');
     let value: unknown = this.config;
-    
+
     for (const key of keys) {
       if (value && typeof value === 'object' && key in value) {
         value = (value as Record<string, unknown>)[key];
@@ -481,7 +481,7 @@ export class ConfigCenter implements IConfigService {
         return false;
       }
     }
-    
+
     return value !== undefined;
   }
 

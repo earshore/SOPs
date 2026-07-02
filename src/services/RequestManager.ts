@@ -193,7 +193,7 @@ export class RequestManager {
   } {
     return {
       pending: this.deduplicator.pendingCount,
-      active: this.canceller.activeCount
+      active: this.canceller.activeCount,
     };
   }
 }

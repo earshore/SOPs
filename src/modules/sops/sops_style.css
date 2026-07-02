@@ -12,7 +12,12 @@
   border: 1px solid rgba(148, 163, 184, 0.24) !important;
   background:
     radial-gradient(circle at 82% 18%, rgba(79, 70, 229, 0.08), transparent 32%),
-    linear-gradient(135deg, rgba(239, 246, 255, 0.98), rgba(255, 255, 255, 0.94) 54%, rgba(238, 242, 255, 0.88)) !important;
+    linear-gradient(
+      135deg,
+      rgba(239, 246, 255, 0.98),
+      rgba(255, 255, 255, 0.94) 54%,
+      rgba(238, 242, 255, 0.88)
+    ) !important;
   box-shadow: 0 18px 40px -32px rgba(15, 23, 42, 0.42) !important;
   --wb-orb-1-color: rgba(59, 130, 246, 0.14) !important;
   --wb-orb-2-color: rgba(99, 102, 241, 0.12) !important;
@@ -36,7 +41,11 @@
 
 .sops-overview .wb-badge {
   border-color: rgba(79, 70, 229, 0.2) !important;
-  background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(238, 242, 255, 0.86)) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(239, 246, 255, 0.92),
+    rgba(238, 242, 255, 0.86)
+  ) !important;
   color: #1d4ed8 !important;
 }
 
@@ -298,11 +307,11 @@
   white-space: nowrap;
 }
 
-.npi-lifecycle-table tbody tr:nth-child(even) td:not([class*="bg-"]) {
+.npi-lifecycle-table tbody tr:nth-child(even) td:not([class*='bg-']) {
   background: rgba(248, 250, 252, 0.72);
 }
 
-.npi-lifecycle-table tbody tr:hover td:not([class*="bg-"]) {
+.npi-lifecycle-table tbody tr:hover td:not([class*='bg-']) {
   background: var(--color-blue-50);
 }
 
@@ -397,14 +406,14 @@
   width: 16rem;
 }
 
-.npi-lifecycle-table input[type="number"],
+.npi-lifecycle-table input[type='number'],
 .npi-lifecycle-table select {
   min-height: 2rem;
   border-color: var(--color-slate-300);
   background: var(--surface-card, #ffffff);
 }
 
-.npi-lifecycle-table input[type="checkbox"] {
+.npi-lifecycle-table input[type='checkbox'] {
   width: 1.125rem;
   height: 1.125rem;
 }
@@ -530,7 +539,7 @@
   min-width: 180px;
   max-width: 220px;
   background: var(--color-bg-primary, #ffffff);
-  border: 1px solid var(--border-subtle, var(--color-border-default, rgba(0, 0, 0, 0.10)));
+  border: 1px solid var(--border-subtle, var(--color-border-default, rgba(0, 0, 0, 0.1)));
   border-radius: var(--radius-card, 8px);
   padding: var(--spacing-lg, 1.5rem) var(--spacing-md, 1rem);
   text-align: center;
@@ -562,7 +571,8 @@
   align-items: center;
   justify-content: center;
   box-shadow: none;
-  transition: background-color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: background-color var(--duration-fast, 200ms)
+    var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .sop-process-step:hover .sop-step-number {
@@ -583,7 +593,8 @@
   color: var(--color-text-primary, #0f172a);
   line-height: 1.4;
   margin: 0;
-  transition: color var(--duration-fast, var(--duration-fast)) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: color var(--duration-fast, var(--duration-fast))
+    var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .sop-process-step:hover .sop-step-title {
@@ -609,11 +620,13 @@
   justify-content: center;
   color: var(--color-text-tertiary, var(--color-slate-400));
   font-size: var(--text-sm, 0.875rem);
-  transition: all var(--duration-fast, var(--duration-fast)) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: all var(--duration-fast, var(--duration-fast))
+    var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .sop-process-arrow i {
-  transition: transform var(--duration-fast, var(--duration-fast)) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: transform var(--duration-fast, var(--duration-fast))
+    var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 /* 当相邻步骤悬停时，箭头也有动画效果 */
@@ -628,23 +641,23 @@
 }
 
 /* 步骤编号颜色变体 */
-.sop-process-step:nth-child(4n+1) .sop-step-number {
+.sop-process-step:nth-child(4n + 1) .sop-step-number {
   background: var(--color-blue-500);
 }
 
-.sop-process-step:nth-child(4n+3) .sop-step-number {
+.sop-process-step:nth-child(4n + 3) .sop-step-number {
   background: var(--color-emerald-500);
 }
 
-.sop-process-step:nth-child(4n+5) .sop-step-number {
+.sop-process-step:nth-child(4n + 5) .sop-step-number {
   background: var(--color-amber-500);
 }
 
-.sop-process-step:nth-child(4n+7) .sop-step-number {
+.sop-process-step:nth-child(4n + 7) .sop-step-number {
   background: var(--color-purple-500);
 }
 
-.sop-process-step:nth-child(4n+9) .sop-step-number {
+.sop-process-step:nth-child(4n + 9) .sop-step-number {
   background: var(--color-rose-500);
 }
 
@@ -796,8 +809,15 @@
 
 /* ==================== PC 端内容表面收紧 ==================== */
 @media screen and (min-width: 1024px) {
-  #sops_content_area .module-container > * + *:where(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl),
-  #sops_content_area .module-container > * + * :where(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl) {
     border-radius: var(--radius-card, 8px) !important;
   }
 
@@ -805,7 +825,7 @@
     border-radius: var(--radius-card, 8px) !important;
   }
 
-  #sops_content_area .sops-overview > * + * .sop-card[class*="border-l-"] {
+  #sops_content_area .sops-overview > * + * .sop-card[class*='border-l-'] {
     border-radius: var(--rounded-xl, 16px) !important;
   }
 
@@ -814,88 +834,169 @@
     box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
   }
 
-  #sops_content_area .module-container > * + *:where(.shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl),
-  #sops_content_area .module-container > * + * :where(.shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where(.shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where(.shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl) {
     box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="bg-gradient-to-"]),
-  #sops_content_area .module-container > * + * :where([class*="bg-gradient-to-"]) {
+  #sops_content_area .module-container > * + *:where([class*='bg-gradient-to-']),
+  #sops_content_area .module-container > * + * :where([class*='bg-gradient-to-']) {
     background-image: none !important;
     background-color: var(--surface-card, #ffffff) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-blue-50"]),
-  #sops_content_area .module-container > * + * :where([class*="from-blue-50"]) {
+  #sops_content_area .module-container > * + *:where([class*='from-blue-50']),
+  #sops_content_area .module-container > * + * :where([class*='from-blue-50']) {
     background-color: var(--color-blue-50, #eff6ff) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-indigo-50"]),
-  #sops_content_area .module-container > * + * :where([class*="from-indigo-50"]) {
+  #sops_content_area .module-container > * + *:where([class*='from-indigo-50']),
+  #sops_content_area .module-container > * + * :where([class*='from-indigo-50']) {
     background-color: var(--color-indigo-50, #eef2ff) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-emerald-50"]),
-  #sops_content_area .module-container > * + * :where([class*="from-emerald-50"]) {
+  #sops_content_area .module-container > * + *:where([class*='from-emerald-50']),
+  #sops_content_area .module-container > * + * :where([class*='from-emerald-50']) {
     background-color: var(--color-emerald-50, #ecfdf5) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-amber-50"], [class*="from-orange-50"], [class*="from-yellow-50"]),
-  #sops_content_area .module-container > * + * :where([class*="from-amber-50"], [class*="from-orange-50"], [class*="from-yellow-50"]) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-amber-50'], [class*='from-orange-50'], [class*='from-yellow-50']),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-amber-50'], [class*='from-orange-50'], [class*='from-yellow-50']) {
     background-color: var(--color-amber-50, #fffbeb) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-red-50"], [class*="from-rose-50"]),
-  #sops_content_area .module-container > * + * :where([class*="from-red-50"], [class*="from-rose-50"]) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-red-50'], [class*='from-rose-50']),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-red-50'], [class*='from-rose-50']) {
     background-color: var(--color-red-50, #fef2f2) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-purple-50"], [class*="from-pink-50"]),
-  #sops_content_area .module-container > * + * :where([class*="from-purple-50"], [class*="from-pink-50"]) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-purple-50'], [class*='from-pink-50']),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-purple-50'], [class*='from-pink-50']) {
     background-color: var(--color-purple-50, #faf5ff) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-teal-50"], [class*="from-cyan-50"]),
-  #sops_content_area .module-container > * + * :where([class*="from-teal-50"], [class*="from-cyan-50"]) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-teal-50'], [class*='from-cyan-50']),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-teal-50'], [class*='from-cyan-50']) {
     background-color: var(--color-teal-50, #f0fdfa) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-slate-50"], [class*="from-gray-"]),
-  #sops_content_area .module-container > * + * :where([class*="from-slate-50"], [class*="from-gray-"]) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-slate-50'], [class*='from-gray-']),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-slate-50'], [class*='from-gray-']) {
     background-color: var(--color-slate-50, #f8fafc) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="bg-gradient-to-"].text-white),
-  #sops_content_area .module-container > * + * :where([class*="bg-gradient-to-"].text-white) {
+  #sops_content_area .module-container > * + *:where([class*='bg-gradient-to-'].text-white),
+  #sops_content_area .module-container > * + * :where([class*='bg-gradient-to-'].text-white) {
     background-color: var(--color-slate-900, #0f172a) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-red-"].text-white, [class*="from-rose-"].text-white),
-  #sops_content_area .module-container > * + * :where([class*="from-red-"].text-white, [class*="from-rose-"].text-white) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-red-'].text-white, [class*='from-rose-'].text-white),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-red-'].text-white, [class*='from-rose-'].text-white) {
     background-color: var(--color-red-600, #dc2626) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-amber-"].text-white, [class*="from-orange-"].text-white),
-  #sops_content_area .module-container > * + * :where([class*="from-amber-"].text-white, [class*="from-orange-"].text-white) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-amber-'].text-white, [class*='from-orange-'].text-white),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-amber-'].text-white, [class*='from-orange-'].text-white) {
     background-color: var(--color-amber-600, #d97706) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-emerald-"].text-white, [class*="from-teal-"].text-white),
-  #sops_content_area .module-container > * + * :where([class*="from-emerald-"].text-white, [class*="from-teal-"].text-white) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-emerald-'].text-white, [class*='from-teal-'].text-white),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-emerald-'].text-white, [class*='from-teal-'].text-white) {
     background-color: var(--color-emerald-600, #059669) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-blue-"].text-white, [class*="from-indigo-"].text-white),
-  #sops_content_area .module-container > * + * :where([class*="from-blue-"].text-white, [class*="from-indigo-"].text-white) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-blue-'].text-white, [class*='from-indigo-'].text-white),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-blue-'].text-white, [class*='from-indigo-'].text-white) {
     background-color: var(--color-blue-600, #2563eb) !important;
   }
 
-  #sops_content_area .module-container > * + *:where([class*="from-purple-"].text-white, [class*="from-pink-"].text-white),
-  #sops_content_area .module-container > * + * :where([class*="from-purple-"].text-white, [class*="from-pink-"].text-white) {
+  #sops_content_area
+    .module-container
+    > *
+    + *:where([class*='from-purple-'].text-white, [class*='from-pink-'].text-white),
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where([class*='from-purple-'].text-white, [class*='from-pink-'].text-white) {
     background-color: var(--color-purple-600, #9333ea) !important;
   }
 
-  #sops_content_area .module-container > * + * :where(.overflow-hidden:has(> table), .overflow-hidden:has(table.whitespace-nowrap)) {
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where(.overflow-hidden:has(> table), .overflow-hidden:has(table.whitespace-nowrap)) {
     overflow-x: auto !important;
   }
 
@@ -906,7 +1007,11 @@
     white-space: normal !important;
   }
 
-  #sops_content_area .module-container > * + * :where(table.whitespace-nowrap th, table.whitespace-nowrap td) {
+  #sops_content_area
+    .module-container
+    > *
+    + *
+    :where(table.whitespace-nowrap th, table.whitespace-nowrap td) {
     white-space: normal !important;
     overflow-wrap: anywhere;
     vertical-align: top;

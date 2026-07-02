@@ -21,7 +21,7 @@ function registerBaseServices(registry: ServiceRegistry): void {
     name: SERVICE_NAMES.CONFIG,
     factory: async () => ConfigCenter.getInstance(),
     lifetime: 'singleton',
-    dependencies: []
+    dependencies: [],
   });
 
   // StorageService - 存储服务
@@ -31,7 +31,7 @@ function registerBaseServices(registry: ServiceRegistry): void {
       return createStorageService();
     },
     lifetime: 'singleton',
-    dependencies: []
+    dependencies: [],
   });
 
   // EventBus - 事件总线
@@ -41,21 +41,21 @@ function registerBaseServices(registry: ServiceRegistry): void {
       return eventBus;
     },
     lifetime: 'singleton',
-    dependencies: []
+    dependencies: [],
   });
 }
 
 function registerRuntimeServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.LOGGER,
-    factory: async (c) => {
+    factory: async c => {
       const { createLoggerService } = await import('@/services/loggerService');
       const storage = c.resolve<IStorageService>(SERVICE_NAMES.STORAGE);
       const config = c.resolve<IConfigService>(SERVICE_NAMES.CONFIG);
       return createLoggerService(storage, config);
     },
     lifetime: 'singleton',
-    dependencies: [SERVICE_NAMES.STORAGE, SERVICE_NAMES.CONFIG]
+    dependencies: [SERVICE_NAMES.STORAGE, SERVICE_NAMES.CONFIG],
   });
 
   // WorkingStateManager - 工作状态管理器
@@ -66,7 +66,7 @@ function registerRuntimeServices(registry: ServiceRegistry): void {
       return workingStateManager;
     },
     lifetime: 'singleton',
-    dependencies: []
+    dependencies: [],
   });
 
   // GlobalErrorHandler - 全局错误处理器
@@ -76,21 +76,21 @@ function registerRuntimeServices(registry: ServiceRegistry): void {
       return globalErrorHandler;
     },
     lifetime: 'singleton',
-    dependencies: []
+    dependencies: [],
   });
 }
 
 function registerApplicationServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.HTTP,
-    factory: async (c) => {
+    factory: async c => {
       const { createHttpService } = await import('@/services/httpService');
       const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
       const config = c.resolve<IConfigService>(SERVICE_NAMES.CONFIG);
       return createHttpService(logger, config);
     },
     lifetime: 'singleton',
-    dependencies: [SERVICE_NAMES.LOGGER, SERVICE_NAMES.CONFIG]
+    dependencies: [SERVICE_NAMES.LOGGER, SERVICE_NAMES.CONFIG],
   });
 
   // ActionRegistry - 动作注册中心
@@ -100,7 +100,7 @@ function registerApplicationServices(registry: ServiceRegistry): void {
       return actionRegistry;
     },
     lifetime: 'singleton',
-    dependencies: [SERVICE_NAMES.EVENT_BUS]
+    dependencies: [SERVICE_NAMES.EVENT_BUS],
   });
 
   // Router - 路由器（Navigo 适配器）
@@ -110,7 +110,7 @@ function registerApplicationServices(registry: ServiceRegistry): void {
       return initRouter();
     },
     lifetime: 'singleton',
-    dependencies: [SERVICE_NAMES.EVENT_BUS]
+    dependencies: [SERVICE_NAMES.EVENT_BUS],
   });
 
   // LoadingManager - 加载管理器
@@ -120,7 +120,7 @@ function registerApplicationServices(registry: ServiceRegistry): void {
       return loadingManager;
     },
     lifetime: 'singleton',
-    dependencies: []
+    dependencies: [],
   });
 }
 

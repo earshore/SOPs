@@ -27,7 +27,7 @@ function isStoreAction(value: unknown): value is StoreAction {
  * 解析状态路径
  * @param path - 点分隔的路径,如 'ui.currentTab'
  * @returns 解析后的模块和属性
- * 
+ *
  * @example
  * parsePath('ui.currentTab') // { module: 'ui', property: 'currentTab', isValid: true }
  * parsePath('ui') // { module: 'ui', property: undefined, isValid: true }
@@ -62,14 +62,14 @@ const MODULE_SETTERS: Record<string, Record<string, string>> = {
     currentReportTab: 'setCurrentReportTab',
     sidebarCollapsed: 'setSidebarCollapsed',
     theme: 'setTheme',
-    loading: 'setLoading'
+    loading: 'setLoading',
   },
   scraper: {
     isScraping: 'setIsScraping',
     status: 'setScraperStatus',
     selectedSite: 'setSelectedSite',
     scrapedData: 'setScrapedData',
-    currentHistoryId: 'setCurrentHistoryId'
+    currentHistoryId: 'setCurrentHistoryId',
   },
   analysis: {
     selectedAsins: 'setSelectedAsins',
@@ -78,12 +78,12 @@ const MODULE_SETTERS: Record<string, Record<string, string>> = {
     translatedReport: 'setTranslatedReport',
     expandedAsin: 'setExpandedAsin',
     isEditing: 'setIsEditing',
-    showTranslation: 'setShowTranslation'
+    showTranslation: 'setShowTranslation',
   },
   promptlab: {
     currentPrompt: 'setCurrentPrompt',
     userProductProfile: 'setUserProductProfile',
-    selectedModel: 'setSelectedModel'
+    selectedModel: 'setSelectedModel',
   },
   keywordTracker: {
     keywords: 'setKeywords',
@@ -92,8 +92,8 @@ const MODULE_SETTERS: Record<string, Record<string, string>> = {
     matchedKeywords: 'setMatchedKeywords',
     unmatchedKeywords: 'setUnmatchedKeywords',
     translationMode: 'setTranslationMode',
-    settings: 'updateKeywordTrackerSettings'
-  }
+    settings: 'updateKeywordTrackerSettings',
+  },
 };
 
 /**
@@ -104,20 +104,20 @@ const MODULE_UPDATERS: Record<string, string> = {
   scraper: 'updateScraper',
   analysis: 'updateAnalysis',
   promptlab: 'updatePromptLab',
-  keywordTracker: 'updateKeywordTracker'
+  keywordTracker: 'updateKeywordTracker',
 };
 
 /**
  * Zustand兼容层
  * 提供get/set/subscribe API,底层使用appStore
- * 
+ *
  * @example
  * // 读取状态
  * const tab = storeCompat.get('ui.currentTab');
- * 
+ *
  * // 设置状态
  * storeCompat.set('ui.currentTab', 'scraper');
- * 
+ *
  * // 订阅变化
  * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal, oldVal) => {
  *   const changed = { oldVal, newVal };
@@ -127,10 +127,10 @@ export class StoreCompat {
   /**
    * 获取状态值
    * 支持点分隔路径,如 'ui.currentTab'
-   * 
+   *
    * @param path - 状态路径,不传则返回完整状态
    * @returns 状态值
-   * 
+   *
    * @example
    * storeCompat.get('ui.currentTab') // 'home'
    * storeCompat.get('scraper') // { isScraping: false, ... }
@@ -172,10 +172,10 @@ export class StoreCompat {
    * 设置状态值
    * 支持点分隔路径,如 'ui.currentTab'
    * 自动路由到对应的setter方法
-   * 
+   *
    * @param path - 状态路径
    * @param value - 新值
-   * 
+   *
    * @example
    * storeCompat.set('ui.currentTab', 'scraper');
    * storeCompat.set('scraper.isScraping', true);
@@ -231,16 +231,16 @@ export class StoreCompat {
   /**
    * 订阅状态变化
    * 支持点分隔路径,如 'ui.currentTab'
-   * 
+   *
    * @param path - 状态路径
    * @param callback - 变化回调,接收新值和旧值
    * @returns 取消订阅函数
- * 
- * @example
- * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal, oldVal) => {
- *   const changed = { oldVal, newVal };
- * });
- * 
+   *
+   * @example
+   * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal, oldVal) => {
+   *   const changed = { oldVal, newVal };
+   * });
+   *
    * // 取消订阅
    * unsubscribe();
    */
@@ -267,9 +267,9 @@ export class StoreCompat {
   /**
    * 批量更新
    * 一次性更新多个状态路径
-   * 
+   *
    * @param updates - 路径-值映射对象
-   * 
+   *
    * @example
    * storeCompat.batchUpdate({
    *   'ui.currentTab': 'scraper',
@@ -286,13 +286,13 @@ export class StoreCompat {
 
   /**
    * 获取完整状态快照
-   * 
+   *
    * @returns 完整状态对象
- * 
- * @example
- * const snapshot = storeCompat.snapshot();
- * const currentTab = snapshot.ui.currentTab;
- */
+   *
+   * @example
+   * const snapshot = storeCompat.snapshot();
+   * const currentTab = snapshot.ui.currentTab;
+   */
   snapshot(): AppState {
     return appStore.getState();
   }
@@ -328,10 +328,10 @@ export class StoreCompat {
 
   /**
    * 检查路径是否有效
-   * 
+   *
    * @param path - 状态路径
    * @returns 是否有效
-   * 
+   *
    * @example
    * storeCompat.isValidPath('ui.currentTab') // true
    * storeCompat.isValidPath('invalid.path') // false
@@ -346,9 +346,9 @@ export class StoreCompat {
 
   /**
    * 获取模块列表
-   * 
+   *
    * @returns 所有可用的模块名称
-   * 
+   *
    * @example
    * storeCompat.getModules() // ['ui', 'scraper', 'analysis', 'promptlab', 'keywordTracker']
    */
@@ -360,16 +360,16 @@ export class StoreCompat {
 /**
  * 全局兼容层实例
  * 可以作为StateManager的替代品
- * 
+ *
  * @example
  * import { storeCompat } from '@/stores/storeCompat';
- * 
+ *
  * // 读取状态
  * const tab = storeCompat.get('ui.currentTab');
- * 
+ *
  * // 设置状态
  * storeCompat.set('ui.currentTab', 'scraper');
- * 
+ *
  * // 订阅变化
  * const unsubscribe = storeCompat.subscribe('ui.currentTab', (newVal) => {
  *   const currentTab = newVal;
@@ -380,7 +380,7 @@ export const storeCompat = new StoreCompat();
 /**
  * 向后兼容: 导出为stateManager别名
  * 让现有代码可以无缝切换
- * 
+ *
  * @deprecated 推荐使用 storeCompat
  */
 export const compatStateManager = storeCompat;

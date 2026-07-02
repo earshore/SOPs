@@ -12,7 +12,7 @@ interface MarkdownSectionConfig {
 
 const MARKDOWN_SECTIONS: MarkdownSectionConfig[] = [
   { source: 'Listings', heading: 'Listings 分析' },
-  { source: 'Reviews', heading: 'Reviews 分析' }
+  { source: 'Reviews', heading: 'Reviews 分析' },
 ];
 
 function appendStats(lines: string[], result: AnalysisResult): void {
@@ -139,9 +139,9 @@ export function generateJsonReportData(
       targets: selectedTargets,
       timestamp: new Date().toISOString(),
       dataSource: dataSource,
-      marketplace: dataSourceMarketplace
+      marketplace: dataSourceMarketplace,
     },
-    analysisReport: analysisReport
+    analysisReport: analysisReport,
   };
 }
 

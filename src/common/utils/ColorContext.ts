@@ -8,7 +8,12 @@
  * - 支持运行时主题切换（阶段4新增）
  */
 
-import { MENU_CONFIG, getRoutesByModule, type ModuleConfig, type MenuConfig } from '../config/menuConfig';
+import {
+  MENU_CONFIG,
+  getRoutesByModule,
+  type ModuleConfig,
+  type MenuConfig,
+} from '../config/menuConfig';
 import type { ColorSchemeName } from '../constants/colorSchemes';
 
 // 定义CategoryConfig类型，避免从SidebarRenderer导入造成循环依赖
@@ -49,13 +54,13 @@ export class ColorContext {
 
   /**
    * 从模块配置自动推断颜色
-   * 
+   *
    * 推断优先级:
    * 1. 模块配置中的 themeColor
    * 2. 模块第一个分类的颜色
    * 3. 父模块的颜色
    * 4. 默认颜色 (blue)
-   * 
+   *
    * @param moduleId - 模块ID
    * @returns 推断出的颜色方案名称
    */
@@ -126,8 +131,13 @@ export class ColorContext {
    */
   private static _findCategoryById(categoryId: string): CategoryConfig | null {
     // 搜索所有分类配置
-    const categoryKeys: Array<keyof MenuConfig> = ['sopCategories', 'hubCategories', 'moreCategories', 'appCategories'];
-    
+    const categoryKeys: Array<keyof MenuConfig> = [
+      'sopCategories',
+      'hubCategories',
+      'moreCategories',
+      'appCategories',
+    ];
+
     for (const key of categoryKeys) {
       const categories = MENU_CONFIG[key] as Record<string, CategoryConfig> | undefined;
       if (categories && categories[categoryId]) {
@@ -146,11 +156,21 @@ export class ColorContext {
    */
   private static _validateColor(color: string): ColorSchemeName {
     const validColors: ColorSchemeName[] = [
-      'blue', 'indigo', 'violet', 'purple',
-      'emerald', 'teal', 'green',
-      'amber', 'orange',
-      'red', 'rose', 'pink',
-      'cyan', 'slate', 'lime'
+      'blue',
+      'indigo',
+      'violet',
+      'purple',
+      'emerald',
+      'teal',
+      'green',
+      'amber',
+      'orange',
+      'red',
+      'rose',
+      'pink',
+      'cyan',
+      'slate',
+      'lime',
     ];
 
     if (validColors.includes(color as ColorSchemeName)) {
@@ -199,7 +219,7 @@ export class ColorContext {
     return {
       color,
       module: module || null,
-      source
+      source,
     };
   }
 
@@ -209,7 +229,7 @@ export class ColorContext {
    */
   static onThemeChange(listener: (color: ColorSchemeName) => void): () => void {
     this.themeChangeListeners.push(listener);
-    
+
     // 返回取消订阅函数
     return () => {
       const index = this.themeChangeListeners.indexOf(listener);

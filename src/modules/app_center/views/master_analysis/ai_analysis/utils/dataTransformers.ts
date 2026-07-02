@@ -19,30 +19,26 @@ function normalizeReview(reviewData: unknown): Product['customer_reviews'][numbe
       body: '',
       origin_country: '',
       review_date: '',
-      _origin_site: ''
+      _origin_site: '',
     };
   }
 
   const review = reviewData as Record<string, unknown>;
   return {
-    star_rating: pickFirst(
-      review.star_rating as number,
-      review.rating as number
-    ) || 5,
-    headline: pickFirst(
-      review.headline as string,
-      review.review_title as string,
-      review.title as string
-    ) || '',
-    body: pickFirst(
-      review.body as string,
-      review.review_text as string,
-      review.text as string,
-      review.content as string
-    ) || '',
+    star_rating: pickFirst(review.star_rating as number, review.rating as number) || 5,
+    headline:
+      pickFirst(review.headline as string, review.review_title as string, review.title as string) ||
+      '',
+    body:
+      pickFirst(
+        review.body as string,
+        review.review_text as string,
+        review.text as string,
+        review.content as string
+      ) || '',
     origin_country: (review.origin_country as string) || '',
     review_date: (review.review_date as string) || '',
-    _origin_site: (review._origin_site as string) || ''
+    _origin_site: (review._origin_site as string) || '',
   };
 }
 
@@ -51,11 +47,7 @@ function getProductTitle(product: ScraperProduct): string {
 }
 
 function getFeatureBullets(product: ScraperProduct): Product['feature_bullets'] {
-  return pickFirst(
-    product.feature_bullets,
-    product.bulletPoints,
-    product.bullet_points
-  ) || [];
+  return pickFirst(product.feature_bullets, product.bulletPoints, product.bullet_points) || [];
 }
 
 function getCustomerReviews(product: ScraperProduct): Product['customer_reviews'] {
@@ -80,7 +72,7 @@ export function convertScraperDataToProduct(productData: unknown): Product | nul
       feature_bullets: getFeatureBullets(product),
       customer_reviews: getCustomerReviews(product),
       scrape_status: 'success',
-      metadata: {}
+      metadata: {},
     };
 
     return converted;
@@ -114,8 +106,8 @@ export function mergeProducts(products: Product[]): Product {
     metadata: {
       merged: true,
       product_count: products.length,
-      asins: products.map(p => p.asin)
-    }
+      asins: products.map(p => p.asin),
+    },
   };
 
   return mergedProduct;
@@ -128,13 +120,13 @@ export function extractAsinsFromScraperData(scrapedData: unknown): string[] {
   if (!scrapedData || typeof scrapedData !== 'object') {
     return [];
   }
-  
+
   const data = scrapedData as ScraperData;
-  
+
   if (!data.products || !Array.isArray(data.products)) {
     return [];
   }
-  
+
   return data.products
     .map(p => p.asin)
     .filter((asin): asin is string => !!asin && typeof asin === 'string');
@@ -145,17 +137,17 @@ export function extractAsinsFromScraperData(scrapedData: unknown): string[] {
  */
 export function getProductsByAsins(scrapedData: unknown, asins: string[]): Product[] {
   const products: Product[] = [];
-  
+
   if (!scrapedData || typeof scrapedData !== 'object') {
     return products;
   }
-  
+
   const data = scrapedData as ScraperData;
-  
+
   if (!data.products || !Array.isArray(data.products)) {
     return products;
   }
-  
+
   for (const asin of asins) {
     const matchedProduct = data.products.find(p => p.asin === asin);
     if (matchedProduct) {
@@ -165,6 +157,6 @@ export function getProductsByAsins(scrapedData: unknown, asins: string[]): Produ
       }
     }
   }
-  
+
   return products;
 }

@@ -1,6 +1,6 @@
 /**
  * envConfig.ts - 环境配置管理
- * 
+ *
  * 基于 ConfigCenter 的向后兼容环境配置接口
  */
 
@@ -84,7 +84,7 @@ export const EnvConfig = {
       const candidate = (endpoint || this.baseUrl || '/v1').trim();
       if (candidate === '/') return candidate;
       return candidate.replace(/\/+$/, '');
-    }
+    },
   },
 
   /**
@@ -110,7 +110,7 @@ export const EnvConfig = {
      */
     get logLevel(): LogLevel {
       return configCenter.get('performance.logLevel') as LogLevel;
-    }
+    },
   },
 
   /**
@@ -143,7 +143,7 @@ export const EnvConfig = {
      */
     get performance(): boolean {
       return configCenter.get('performance.enableMonitoring') as boolean;
-    }
+    },
   },
 
   /**
@@ -162,7 +162,7 @@ export const EnvConfig = {
      */
     get verbose(): boolean {
       return this.level === 'debug' || EnvConfig.features.enableDebugMode;
-    }
+    },
   },
 
   /**
@@ -174,7 +174,7 @@ export const EnvConfig = {
      */
     get sentryDsn(): string | null {
       return import.meta.env.VITE_SENTRY_DSN || null;
-    }
+    },
   },
 
   /**
@@ -188,24 +188,24 @@ export const EnvConfig = {
       api: {
         baseUrl: this.api.baseUrl,
         timeout: this.api.timeout,
-        retryAttempts: this.api.retryAttempts
+        retryAttempts: this.api.retryAttempts,
       },
       features: {
         enableExperimentalFeatures: this.features.enableExperimentalFeatures,
         enableBetaFeatures: this.features.enableBetaFeatures,
-        enableDebugMode: this.features.enableDebugMode
+        enableDebugMode: this.features.enableDebugMode,
       },
       performance: {
         enableMonitoring: this.performance.enableMonitoring,
         enableDevTools: this.performance.enableDevTools,
-        logLevel: this.performance.logLevel
+        logLevel: this.performance.logLevel,
       },
       logging: {
         level: this.logging.level,
-        verbose: this.logging.verbose
-      }
+        verbose: this.logging.verbose,
+      },
     };
-  }
+  },
 };
 
 export default EnvConfig;

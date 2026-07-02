@@ -1,3 +1,4 @@
+const nativeLoggerConsole = globalThis.console;
 // src/services/localDataStore.ts
 // ================================================================
 // LocalDataStore
@@ -93,11 +94,7 @@ const CONFIG_KEYS = new Set([
 ]);
 const CONFIG_PREFIXES = ['llm_', 'feature_', 'layout_config_', 'modal_ignore_', 'ignore_', 'ppc_'];
 const CONFIG_SUFFIXES = ['_owner_v1'];
-const SECRET_KEYS = new Set([
-  'proxy_config',
-  'proxy_key_map',
-  'scraper_proxy_config',
-]);
+const SECRET_KEYS = new Set(['proxy_config', 'proxy_key_map', 'scraper_proxy_config']);
 const WORKSPACE_STATE_KEYS = new Set(['app-storage']);
 const SCRAPE_HISTORY_KEYS = new Set([
   'scrape_history',
@@ -117,7 +114,7 @@ const KEYWORD_HISTORY_KEYS = new Set([
 ]);
 
 function isCacheKey(key: string): boolean {
-  return CACHE_PREFIXES.some((prefix) => key.startsWith(prefix));
+  return CACHE_PREFIXES.some(prefix => key.startsWith(prefix));
 }
 
 function isLruAccessKey(key: string): boolean {
@@ -137,10 +134,12 @@ function isSecretBucketKey(key: string, storageClass?: StorageClass): boolean {
 }
 
 function isConfigBucketKey(key: string, storageClass?: StorageClass): boolean {
-  return storageClass === 'config' ||
+  return (
+    storageClass === 'config' ||
     CONFIG_KEYS.has(key) ||
-    CONFIG_PREFIXES.some((prefix) => key.startsWith(prefix)) ||
-    CONFIG_SUFFIXES.some((suffix) => key.endsWith(suffix));
+    CONFIG_PREFIXES.some(prefix => key.startsWith(prefix)) ||
+    CONFIG_SUFFIXES.some(suffix => key.endsWith(suffix))
+  );
 }
 
 function isWorkspaceStateBucketKey(key: string): boolean {
@@ -182,22 +181,25 @@ function normalizeStorageClass(storageClass: unknown): StorageClass {
 }
 
 function createUsageBuckets(): Record<LocalDataBucketId, LocalDataBucketUsage> {
-  return LOCAL_DATA_BUCKET_IDS.reduce((buckets, id) => {
-    buckets[id] = {
-      id,
-      localStorage: {
-        used: 0,
-        keys: 0,
-      },
-      indexedDB: {
-        used: 0,
-        keys: 0,
-      },
-      total: 0,
-      lastUpdatedAt: null,
-    };
-    return buckets;
-  }, {} as Record<LocalDataBucketId, LocalDataBucketUsage>);
+  return LOCAL_DATA_BUCKET_IDS.reduce(
+    (buckets, id) => {
+      buckets[id] = {
+        id,
+        localStorage: {
+          used: 0,
+          keys: 0,
+        },
+        indexedDB: {
+          used: 0,
+          keys: 0,
+        },
+        total: 0,
+        lastUpdatedAt: null,
+      };
+      return buckets;
+    },
+    {} as Record<LocalDataBucketId, LocalDataBucketUsage>
+  );
 }
 
 function addToBucket(
@@ -238,7 +240,8 @@ interface PreparedLocalDataImport {
 }
 
 function prepareLocalDataImport(data: LocalDataExport): PreparedLocalDataImport {
-  if (!data ||
+  if (
+    !data ||
     data.version !== 1 ||
     data.metadata?.app !== 'sops' ||
     data.metadata?.storageVersion !== STORAGE_VERSION ||
@@ -300,7 +303,7 @@ class LocalDataStoreClass {
       return true;
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const transaction = db.transaction([STORE_NAME], 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.put(record);
@@ -320,13 +323,16 @@ class LocalDataStoreClass {
       return;
     }
 
-    await new Promise<void>((resolve) => {
+    await new Promise<void>(resolve => {
       const transaction = db.transaction([STORE_NAME], 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.delete(key);
       request.onsuccess = () => resolve();
       request.onerror = () => {
-        console.warn('[LocalDataStore] 删除 IndexedDB 记录失败:', request.error || undefined);
+        nativeLoggerConsole.warn(
+          '[LocalDataStore] 删除 IndexedDB 记录失败:',
+          request.error || undefined
+        );
         resolve();
       };
     });
@@ -334,8 +340,8 @@ class LocalDataStoreClass {
 
   async keys(prefix?: string): Promise<string[]> {
     const records = await this.getAllRecords();
-    const keys = records.map((record) => record.key);
-    return prefix ? keys.filter((key) => key.startsWith(prefix)) : keys;
+    const keys = records.map(record => record.key);
+    return prefix ? keys.filter(key => key.startsWith(prefix)) : keys;
   }
 
   async clearCache(): Promise<number> {
@@ -379,13 +385,16 @@ class LocalDataStoreClass {
       return;
     }
 
-    await new Promise<void>((resolve) => {
+    await new Promise<void>(resolve => {
       const transaction = db.transaction([STORE_NAME], 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.clear();
       request.onsuccess = () => resolve();
       request.onerror = () => {
-        console.warn('[LocalDataStore] 清空 IndexedDB 失败:', request.error || undefined);
+        nativeLoggerConsole.warn(
+          '[LocalDataStore] 清空 IndexedDB 失败:',
+          request.error || undefined
+        );
         resolve();
       };
     });
@@ -455,7 +464,7 @@ class LocalDataStoreClass {
       await this.clearAll();
       await this.writePreparedImport(prepareLocalDataImport(data));
     } catch (rollbackError) {
-      console.warn('[LocalDataStore] 导入失败后回滚本地数据失败:', rollbackError);
+      nativeLoggerConsole.warn('[LocalDataStore] 导入失败后回滚本地数据失败:', rollbackError);
     }
   }
 
@@ -499,7 +508,7 @@ class LocalDataStoreClass {
         keys: records.length,
       },
       total: localStorageUsed + indexedUsed,
-      buckets: LOCAL_DATA_BUCKET_IDS.map((id) => buckets[id]),
+      buckets: LOCAL_DATA_BUCKET_IDS.map(id => buckets[id]),
     };
   }
 
@@ -527,7 +536,10 @@ class LocalDataStoreClass {
       }
       return parsed;
     } catch (error) {
-      console.warn(`[LocalDataStore] 迁移 localStorage 键失败: ${localStorageKey}`, error);
+      nativeLoggerConsole.warn(
+        `[LocalDataStore] 迁移 localStorage 键失败: ${localStorageKey}`,
+        error
+      );
       return null;
     }
   }
@@ -538,13 +550,16 @@ class LocalDataStoreClass {
       return (this.memoryStore.get(key) as LocalDataRecord<T> | undefined) || null;
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const transaction = db.transaction([STORE_NAME], 'readonly');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.get(key);
       request.onsuccess = () => resolve((request.result as LocalDataRecord<T>) || null);
       request.onerror = () => {
-        console.warn('[LocalDataStore] 读取 IndexedDB 记录失败:', request.error || undefined);
+        nativeLoggerConsole.warn(
+          '[LocalDataStore] 读取 IndexedDB 记录失败:',
+          request.error || undefined
+        );
         resolve(null);
       };
     });
@@ -556,13 +571,16 @@ class LocalDataStoreClass {
       return Array.from(this.memoryStore.values());
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const transaction = db.transaction([STORE_NAME], 'readonly');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.getAll();
       request.onsuccess = () => resolve((request.result as Array<LocalDataRecord>) || []);
       request.onerror = () => {
-        console.warn('[LocalDataStore] 列出 IndexedDB 记录失败:', request.error || undefined);
+        nativeLoggerConsole.warn(
+          '[LocalDataStore] 列出 IndexedDB 记录失败:',
+          request.error || undefined
+        );
         resolve([]);
       };
     });
@@ -574,7 +592,7 @@ class LocalDataStoreClass {
     }
 
     if (!this.dbPromise) {
-      this.dbPromise = new Promise((resolve) => {
+      this.dbPromise = new Promise(resolve => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
 
         request.onupgradeneeded = () => {
@@ -588,7 +606,10 @@ class LocalDataStoreClass {
 
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => {
-          console.warn('[LocalDataStore] IndexedDB 不可用，降级为内存存储:', request.error || undefined);
+          nativeLoggerConsole.warn(
+            '[LocalDataStore] IndexedDB 不可用，降级为内存存储:',
+            request.error || undefined
+          );
           resolve(null);
         };
       });

@@ -12,46 +12,46 @@
  * 值：语言代码到本地化标签的映射
  */
 export const SPEC_LABELS: Record<string, Record<string, string>> = {
-  'size': {
-    'zh': '容量',
-    'en': 'Capacity',
-    'de': 'Kapazität'
+  size: {
+    zh: '容量',
+    en: 'Capacity',
+    de: 'Kapazität',
   },
-  'volume': {
-    'zh': '体积',
-    'en': 'Volume',
-    'de': 'Volumen'
+  volume: {
+    zh: '体积',
+    en: 'Volume',
+    de: 'Volumen',
   },
-  'weight': {
-    'zh': '重量',
-    'en': 'Weight',
-    'de': 'Gewicht'
+  weight: {
+    zh: '重量',
+    en: 'Weight',
+    de: 'Gewicht',
   },
-  'dimensions': {
-    'zh': '尺寸',
-    'en': 'Dimensions',
-    'de': 'Abmessungen'
+  dimensions: {
+    zh: '尺寸',
+    en: 'Dimensions',
+    de: 'Abmessungen',
   },
-  'quantity': {
-    'zh': '数量',
-    'en': 'Quantity',
-    'de': 'Menge'
+  quantity: {
+    zh: '数量',
+    en: 'Quantity',
+    de: 'Menge',
   },
-  'material': {
-    'zh': '材质',
-    'en': 'Material',
-    'de': 'Material'
+  material: {
+    zh: '材质',
+    en: 'Material',
+    de: 'Material',
   },
-  'concentration': {
-    'zh': '浓度',
-    'en': 'Concentration',
-    'de': 'Konzentration'
+  concentration: {
+    zh: '浓度',
+    en: 'Concentration',
+    de: 'Konzentration',
   },
-  'capacity': {
-    'zh': '容量',
-    'en': 'Capacity',
-    'de': 'Kapazität'
-  }
+  capacity: {
+    zh: '容量',
+    en: 'Capacity',
+    de: 'Kapazität',
+  },
 };
 
 /**

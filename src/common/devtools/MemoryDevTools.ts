@@ -54,7 +54,8 @@ export class MemoryDevTools {
   private _createPanel(): HTMLElement {
     const panel = document.createElement('div');
     panel.id = 'memory-devtools';
-    panel.className = 'fixed top-20 right-4 w-96 bg-white border-2 border-purple-500 shadow-2xl z-[10000] rounded-lg hidden';
+    panel.className =
+      'fixed top-20 right-4 w-96 bg-white border-2 border-purple-500 shadow-2xl z-[10000] rounded-lg hidden';
     panel.style.cssText = 'font-family: monospace; font-size: 12px; max-height: 600px;';
 
     // ✅ 安全: 静态HTML模板，无用户输入
@@ -130,7 +131,9 @@ export class MemoryDevTools {
     // 绑定事件
     panel.querySelector('#memory-devtools-close')?.addEventListener('click', () => this.toggle());
     panel.querySelector('#memory-force-gc')?.addEventListener('click', () => this._forceGC());
-    panel.querySelector('#memory-clear-snapshots')?.addEventListener('click', () => this._clearSnapshots());
+    panel
+      .querySelector('#memory-clear-snapshots')
+      ?.addEventListener('click', () => this._clearSnapshots());
 
     return panel;
   }
@@ -172,7 +175,7 @@ export class MemoryDevTools {
       if (heapPercentageEl) {
         const percentage = memoryUsage.percentage;
         heapPercentageEl.textContent = `${percentage.toFixed(1)}%`;
-        
+
         // 根据使用率改变颜色
         if (percentage > 80) {
           (heapPercentageEl as HTMLElement).style.color = '#ef4444';
@@ -215,7 +218,8 @@ export class MemoryDevTools {
 
     if (snapshots.length === 0) {
       // ✅ 安全: 静态HTML模板
-      snapshotsEl.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">暂无快照</div>';
+      snapshotsEl.innerHTML =
+        '<div style="color: #9ca3af; text-align: center; padding: 20px;">暂无快照</div>';
       return;
     }
 

@@ -2,12 +2,7 @@
  * 数据导入处理器
  */
 
-import type {
-    ScrapedData,
-    ProductData,
-    ImportResult,
-    FileReadResult
-} from '../types';
+import type { ScrapedData, ProductData, ImportResult, FileReadResult } from '../types';
 import type { ScrapedProduct, CustomerReview, ScraperSite } from '@/types/modules-business';
 import { validateScrapedData } from '../utils/validators';
 import { getFlag } from '../utils/formatters';
@@ -20,204 +15,225 @@ import { APP_EVENTS, MODULE_EVENTS } from '../../../../../../common/constants/ev
 import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
 import { ValidationError, BusinessError, SystemError } from '@common/errors/AppError';
 
+const nativeLoggerConsole = globalThis.console;
+
 type FileReadResolve = (value: FileReadResult) => void;
 type FileReadReject = (reason?: unknown) => void;
 type ImportedProductWithSource = ScrapedProduct & { _source_site?: string; _filename?: string };
 type ImportedProductPool = Map<string, ImportedProductWithSource[]>;
 
 interface ImportCollectionContext {
-    productPool: ImportedProductPool;
-    detectedSites: Set<string>;
+  productPool: ImportedProductPool;
+  detectedSites: Set<string>;
 }
 
 const MAX_IMPORT_FILE_SIZE = 10 * 1024 * 1024;
 const LARGE_IMPORT_FILE_SIZE = 5 * 1024 * 1024;
 
 function createEmptyFileError(file: File, content: string): ValidationError {
-    return new ValidationError(
-        `文件 ${file.name} 内容为空`,
-        'SCRAPER_IMP_001',
-        'content',
-        content,
-        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name }
-    );
+  return new ValidationError(`文件 ${file.name} 内容为空`, 'SCRAPER_IMP_001', 'content', content, {
+    module: 'ScraperImportHandler',
+    action: 'readFileAsJSON',
+    filename: file.name,
+  });
 }
 
 function parseJsonContent(file: File, content: string): unknown {
-    try {
-        return JSON.parse(content);
-    } catch (parseError) {
-        throw new SystemError(
-            `文件 ${file.name} 不是有效的JSON格式: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
-            'SCRAPER_IMP_002',
-            { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name, contentPreview: content.substring(0, 100) },
-            parseError instanceof Error ? parseError : undefined
-        );
-    }
+  try {
+    return JSON.parse(content);
+  } catch (parseError) {
+    throw new SystemError(
+      `文件 ${file.name} 不是有效的JSON格式: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
+      'SCRAPER_IMP_002',
+      {
+        module: 'ScraperImportHandler',
+        action: 'readFileAsJSON',
+        filename: file.name,
+        contentPreview: content.substring(0, 100),
+      },
+      parseError instanceof Error ? parseError : undefined
+    );
+  }
 }
 
 function createInvalidJsonError(file: File, json: unknown): ValidationError {
-    return new ValidationError(
-        `文件 ${file.name} JSON内容无效`,
-        'SCRAPER_IMP_003',
-        'json',
-        json,
-        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name }
-    );
+  return new ValidationError(`文件 ${file.name} JSON内容无效`, 'SCRAPER_IMP_003', 'json', json, {
+    module: 'ScraperImportHandler',
+    action: 'readFileAsJSON',
+    filename: file.name,
+  });
 }
 
 function parseFileReadResult(file: File, content: string): FileReadResult {
-    if (!content || content.trim().length === 0) {
-        throw createEmptyFileError(file, content);
-    }
+  if (!content || content.trim().length === 0) {
+    throw createEmptyFileError(file, content);
+  }
 
-    const json = parseJsonContent(file, content);
-    if (json === null || json === undefined) {
-        throw createInvalidJsonError(file, json);
-    }
+  const json = parseJsonContent(file, content);
+  if (json === null || json === undefined) {
+    throw createInvalidJsonError(file, json);
+  }
 
-    return { data: json, filename: file.name };
+  return { data: json, filename: file.name };
 }
 
 function isExpectedFileReadError(error: unknown): boolean {
-    return error instanceof ValidationError || error instanceof SystemError;
+  return error instanceof ValidationError || error instanceof SystemError;
 }
 
 function createUnexpectedFileReadError(file: File, error: unknown): SystemError {
-    return new SystemError(
-        `文件 ${file.name} 解析失败: ${error instanceof Error ? error.message : String(error)}`,
-        'SCRAPER_IMP_004',
-        { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name },
-        error instanceof Error ? error : undefined
-    );
+  return new SystemError(
+    `文件 ${file.name} 解析失败: ${error instanceof Error ? error.message : String(error)}`,
+    'SCRAPER_IMP_004',
+    { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name },
+    error instanceof Error ? error : undefined
+  );
 }
 
 function handleFileLoad(
-    file: File,
-    event: ProgressEvent<FileReader>,
-    resolve: FileReadResolve,
-    reject: FileReadReject
+  file: File,
+  event: ProgressEvent<FileReader>,
+  resolve: FileReadResolve,
+  reject: FileReadReject
 ): void {
-    try {
-        const content = event.target?.result as string;
-        resolve(parseFileReadResult(file, content));
-    } catch (error) {
-        if (isExpectedFileReadError(error)) {
-            reject(error);
-            return;
-        }
-
-        console.error(`[Scraper] 解析文件 ${file.name} 失败:`, error);
-        reject(createUnexpectedFileReadError(file, error));
+  try {
+    const content = event.target?.result as string;
+    resolve(parseFileReadResult(file, content));
+  } catch (error) {
+    if (isExpectedFileReadError(error)) {
+      reject(error);
+      return;
     }
+
+    console.error(`[Scraper] 解析文件 ${file.name} 失败:`, error);
+    reject(createUnexpectedFileReadError(file, error));
+  }
 }
 /**
  * 读取文件为JSON
  */
 export function readFileAsJSON(file: File): Promise<FileReadResult> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
-        reader.onload = (e) => {
-            handleFileLoad(file, e, resolve, reject);
-        };
+    reader.onload = e => {
+      handleFileLoad(file, e, resolve, reject);
+    };
 
-        reader.onerror = () => {
-            console.error(`[Scraper] 读取文件 ${file.name} 失败:`, reader.error);
-            reject(new SystemError(
-                `无法读取文件 ${file.name}: ${reader.error?.message || '未知错误'}`,
-                'SCRAPER_IMP_005',
-                { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name },
-                reader.error || undefined
-            ));
-        };
+    reader.onerror = () => {
+      console.error(`[Scraper] 读取文件 ${file.name} 失败:`, reader.error);
+      reject(
+        new SystemError(
+          `无法读取文件 ${file.name}: ${reader.error?.message || '未知错误'}`,
+          'SCRAPER_IMP_005',
+          { module: 'ScraperImportHandler', action: 'readFileAsJSON', filename: file.name },
+          reader.error || undefined
+        )
+      );
+    };
 
-        reader.readAsText(file);
-    });
+    reader.readAsText(file);
+  });
 }
 
 /**
  * 获取评论签名（用于去重）
  */
 export function getReviewSignature(review: CustomerReview): string {
-    // 优先使用 review ID
-    if ('id' in review && review.id) return String(review.id);
+  // 优先使用 review ID
+  if ('id' in review && review.id) return String(review.id);
 
-    // 构建签名
-    const date = ('review_date' in review ? review.review_date : '') || '';
-    const author = review.author || '';
-    const headline = review.headline || review.title || '';
+  // 构建签名
+  const date = ('review_date' in review ? review.review_date : '') || '';
+  const author = review.author || '';
+  const headline = review.headline || review.title || '';
 
-    return `${date}_${author}_${headline.substring(0, 20)}`.trim();
+  return `${date}_${author}_${headline.substring(0, 20)}`.trim();
 }
 
 /**
  * 合并多站点产品数据
  */
 export function mergeProducts(
-    productPool: Map<string, Array<ScrapedProduct & { _source_site?: string; _filename?: string }>>,
-    targetMarketplace: string,
-    currentProductsMap: Map<string, ScrapedProduct>
+  productPool: Map<string, Array<ScrapedProduct & { _source_site?: string; _filename?: string }>>,
+  targetMarketplace: string,
+  currentProductsMap: Map<string, ScrapedProduct>
 ): ProductData[] {
-    const finalProducts: ProductData[] = [];
+  const finalProducts: ProductData[] = [];
 
-    for (const [asin, versions] of productPool.entries()) {
-        const masterVersion = versions.find(v => v._source_site === targetMarketplace);
-        const existingVersion = currentProductsMap.get(asin);
-        const baseProduct = existingVersion || masterVersion || versions[0];
+  for (const [asin, versions] of productPool.entries()) {
+    const masterVersion = versions.find(v => v._source_site === targetMarketplace);
+    const existingVersion = currentProductsMap.get(asin);
+    const baseProduct = masterVersion || existingVersion || versions[0];
 
-        if (!baseProduct) continue;
+    if (!baseProduct) continue;
 
-        const mergedProduct: ScrapedProduct = JSON.parse(JSON.stringify(baseProduct));
-        if (!mergedProduct.metadata) mergedProduct.metadata = {};
+    const mergedProduct: ScrapedProduct = JSON.parse(JSON.stringify(baseProduct));
+    if (!mergedProduct.metadata) mergedProduct.metadata = {};
 
-        const allReviewSources: Array<ScrapedProduct & { _source_site?: string }> = [];
-        if (existingVersion) allReviewSources.push(existingVersion);
-        allReviewSources.push(...versions);
-
-        const uniqueReviewsMap = new Map<string, CustomerReview>();
-
-        allReviewSources.forEach(ver => {
-            if (Array.isArray(ver.customer_reviews)) {
-                ver.customer_reviews.forEach((r: CustomerReview) => {
-                    const sig = getReviewSignature(r);
-                    if (!uniqueReviewsMap.has(sig)) {
-                        const reviewWithOrigin = { ...r } as CustomerReview & { _origin_site?: string };
-                        if (ver._source_site && ver._source_site !== "Unknown") {
-                            reviewWithOrigin._origin_site = ver._source_site;
-                        }
-                        uniqueReviewsMap.set(sig, reviewWithOrigin);
-                    }
-                });
-            }
-        });
-
-        mergedProduct.customer_reviews = Array.from(uniqueReviewsMap.values());
-
-        // 清理临时字段
-        const cleanProduct = { ...mergedProduct };
-        delete (cleanProduct as ScrapedProduct & { _source_site?: string; _filename?: string })._source_site;
-        delete (cleanProduct as ScrapedProduct & { _source_site?: string; _filename?: string })._filename;
-
-        finalProducts.push(cleanProduct);
+    const allReviewSources: Array<ScrapedProduct & { _source_site?: string }> = [];
+    if (masterVersion) {
+      allReviewSources.push(masterVersion);
+      allReviewSources.push(...versions.filter(version => version !== masterVersion));
+      if (existingVersion) allReviewSources.push(existingVersion);
+    } else {
+      if (existingVersion) allReviewSources.push(existingVersion);
+      allReviewSources.push(...versions);
     }
 
-    return finalProducts;
+    const uniqueReviewsMap = new Map<string, CustomerReview>();
+
+    allReviewSources.forEach(ver => {
+      if (Array.isArray(ver.customer_reviews)) {
+        ver.customer_reviews.forEach((r: CustomerReview) => {
+          const sig = getReviewSignature(r);
+          if (!uniqueReviewsMap.has(sig)) {
+            const reviewWithOrigin = { ...r } as CustomerReview & { _origin_site?: string };
+            if (ver._source_site && ver._source_site !== 'Unknown') {
+              reviewWithOrigin._origin_site = ver._source_site;
+            }
+            uniqueReviewsMap.set(sig, reviewWithOrigin);
+          }
+        });
+      }
+    });
+
+    mergedProduct.customer_reviews = Array.from(uniqueReviewsMap.values());
+
+    // 清理临时字段
+    const cleanProduct = { ...mergedProduct };
+    delete (cleanProduct as ScrapedProduct & { _source_site?: string; _filename?: string })
+      ._source_site;
+    delete (cleanProduct as ScrapedProduct & { _source_site?: string; _filename?: string })
+      ._filename;
+
+    finalProducts.push(cleanProduct);
+  }
+
+  return finalProducts;
 }
 
 const MARKETPLACE_SITE_NAME_MAP: Record<string, string> = {
-    DE: '德国', FR: '法国', IT: '意大利', ES: '西班牙', NL: '荷兰',
-    SE: '瑞典', PL: '波兰', BE: '比利时', IE: '爱尔兰', UK: '英国'
+  DE: '德国',
+  FR: '法国',
+  IT: '意大利',
+  ES: '西班牙',
+  NL: '荷兰',
+  SE: '瑞典',
+  PL: '波兰',
+  BE: '比利时',
+  IE: '爱尔兰',
+  UK: '英国',
 };
 
 function createMarketplaceSelectionContent(sites: string[], modalId: string): string {
-    return `
+  return `
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
                 <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-5 text-white">
                     <h3 class="text-lg font-bold flex items-center gap-2">
                         <i class="fas fa-globe"></i> 检测到多站点数据
                     </h3>
-                    <p class="text-blue-100 text-xs mt-1">您导入的文件包含多个市场的数据 (${sites.join(", ")})</p>
+                    <p class="text-blue-100 text-xs mt-1">您导入的文件包含多个市场的数据 (${sites.join(', ')})</p>
                 </div>
                 
                 <div class="p-6">
@@ -227,7 +243,9 @@ function createMarketplaceSelectionContent(sites: string[], modalId: string): st
                     </p>
                     
                     <div class="space-y-3 mb-6">
-                        ${sites.map((site, index) => `
+                        ${sites
+                          .map(
+                            (site, index) => `
                             <label class="flex items-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
                                 <input type="radio" name="site_choice" value="${site}" ${index === 0 ? 'checked' : ''} 
                                     class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
@@ -236,7 +254,9 @@ function createMarketplaceSelectionContent(sites: string[], modalId: string): st
                                     ${getFlag(site)}
                                 </span>
                             </label>
-                        `).join('')}
+                        `
+                          )
+                          .join('')}
                     </div>
 
                     <div class="flex justify-end gap-3">
@@ -256,357 +276,390 @@ function createMarketplaceSelectionContent(sites: string[], modalId: string): st
  * 显示站点选择弹窗
  */
 export function showMarketplaceSelectionModal(sites: string[]): Promise<string | null> {
-    return new Promise((resolve) => {
-        const modalId = 'site-select-modal-' + Date.now();
-        const backdrop = document.createElement('div');
-        backdrop.id = modalId;
-        backdrop.className = "fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in";
-        const content = createMarketplaceSelectionContent(sites, modalId);
+  return new Promise(resolve => {
+    const modalId = 'site-select-modal-' + Date.now();
+    const backdrop = document.createElement('div');
+    backdrop.id = modalId;
+    backdrop.className =
+      'fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in';
+    const content = createMarketplaceSelectionContent(sites, modalId);
 
-        const renderer = SafeRenderer.getInstance();
-        renderer.renderTemplate(backdrop, content);
-        document.body.appendChild(backdrop);
+    const renderer = SafeRenderer.getInstance();
+    renderer.renderTemplate(backdrop, content);
+    document.body.appendChild(backdrop);
 
-        const btnConfirm = document.getElementById(`btn-confirm-${modalId}`) as HTMLButtonElement | null;
-        const btnCancel = document.getElementById(`btn-cancel-${modalId}`) as HTMLButtonElement | null;
+    const btnConfirm = document.getElementById(
+      `btn-confirm-${modalId}`
+    ) as HTMLButtonElement | null;
+    const btnCancel = document.getElementById(`btn-cancel-${modalId}`) as HTMLButtonElement | null;
 
-        let resolved = false;
+    let resolved = false;
 
-        const cleanup = () => {
-            if (btnConfirm) btnConfirm.removeEventListener('click', handleConfirm);
-            if (btnCancel) btnCancel.removeEventListener('click', handleCancel);
-            backdrop.removeEventListener('click', handleBackdropClick);
-            document.removeEventListener('keydown', handleEscape);
+    const cleanup = () => {
+      if (btnConfirm) btnConfirm.removeEventListener('click', handleConfirm);
+      if (btnCancel) btnCancel.removeEventListener('click', handleCancel);
+      backdrop.removeEventListener('click', handleBackdropClick);
+      document.removeEventListener('keydown', handleEscape);
 
-            try {
-                if (backdrop && document.body.contains(backdrop)) {
-                    document.body.removeChild(backdrop);
-                }
-            } catch (error) {
-                console.error('[Scraper] 清理弹窗失败:', error);
-            }
-        };
-
-        const finish = (selected: string | null) => {
-            if (resolved) return;
-            resolved = true;
-            cleanup();
-            resolve(selected);
-        };
-
-        const handleConfirm = (e: Event) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (resolved) return;
-
-            const selectedInput = backdrop.querySelector('input[name="site_choice"]:checked') as HTMLInputElement;
-            const selected = selectedInput ? selectedInput.value : null;
-
-            finish(selected);
-        };
-
-        const handleCancel = (e: Event) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            finish(null);
-        };
-
-        const handleBackdropClick = (e: MouseEvent) => {
-            if (e.target === backdrop) {
-                finish(null);
-            }
-        };
-
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                finish(null);
-            }
-        };
-
-        if (!btnConfirm || !btnCancel) {
-            console.error('[Scraper] 站点选择弹窗渲染不完整，已自动关闭');
-            finish(null);
-            return;
+      try {
+        if (backdrop && document.body.contains(backdrop)) {
+          document.body.removeChild(backdrop);
         }
+      } catch (error) {
+        console.error('[Scraper] 清理弹窗失败:', error);
+      }
+    };
 
-        btnConfirm.addEventListener('click', handleConfirm, { once: true });
-        btnCancel.addEventListener('click', handleCancel, { once: true });
-        backdrop.addEventListener('click', handleBackdropClick);
-        document.addEventListener('keydown', handleEscape);
-    });
+    const finish = (selected: string | null) => {
+      if (resolved) return;
+      resolved = true;
+      cleanup();
+      resolve(selected);
+    };
+
+    const handleConfirm = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (resolved) return;
+
+      const selectedInput = backdrop.querySelector(
+        'input[name="site_choice"]:checked'
+      ) as HTMLInputElement;
+      const selected = selectedInput ? selectedInput.value : null;
+
+      finish(selected);
+    };
+
+    const handleCancel = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      finish(null);
+    };
+
+    const handleBackdropClick = (e: MouseEvent) => {
+      if (e.target === backdrop) {
+        finish(null);
+      }
+    };
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        finish(null);
+      }
+    };
+
+    if (!btnConfirm || !btnCancel) {
+      console.error('[Scraper] 站点选择弹窗渲染不完整，已自动关闭');
+      finish(null);
+      return;
+    }
+
+    btnConfirm.addEventListener('click', handleConfirm, { once: true });
+    btnCancel.addEventListener('click', handleCancel, { once: true });
+    backdrop.addEventListener('click', handleBackdropClick);
+    document.addEventListener('keydown', handleEscape);
+  });
 }
 
 function createImportValidationError(filename: string, error: string | undefined): ValidationError {
-    return new ValidationError(
-        `文件 ${filename} 数据验证失败`,
-        'SCRAPER_IMP_009',
-        'data',
-        error,
-        { module: 'ScraperImportHandler', action: 'handleImportFiles', filename }
-    );
+  return new ValidationError(`文件 ${filename} 数据验证失败`, 'SCRAPER_IMP_009', 'data', error, {
+    module: 'ScraperImportHandler',
+    action: 'handleImportFiles',
+    filename,
+  });
 }
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function getMetadataMarketplace(value: unknown): string | null {
-    if (!isObjectRecord(value) || !isObjectRecord(value.metadata)) return null;
-    return typeof value.metadata.marketplace === 'string' ? value.metadata.marketplace : null;
+  if (!isObjectRecord(value) || !isObjectRecord(value.metadata)) return null;
+  return typeof value.metadata.marketplace === 'string' ? value.metadata.marketplace : null;
 }
 
 function getImportedFileSite(data: unknown): string | null {
-    if (isObjectRecord(data)) {
-        return getMetadataMarketplace(data);
-    }
+  if (isObjectRecord(data)) {
+    return getMetadataMarketplace(data);
+  }
 
-    if (Array.isArray(data) && data.length > 0) {
-        return getMetadataMarketplace(data[0]);
-    }
+  if (Array.isArray(data) && data.length > 0) {
+    return getMetadataMarketplace(data[0]);
+  }
 
-    return null;
+  return null;
 }
 
 function addProductToPool(
-    productPool: ImportedProductPool,
-    product: ScrapedProduct,
-    site: string,
-    filename: string
+  productPool: ImportedProductPool,
+  product: ScrapedProduct,
+  site: string,
+  filename: string
 ): void {
-    if (!product.asin) return;
+  if (!product.asin) return;
 
-    const productWithSource = {
-        ...product,
-        _source_site: site,
-        _filename: filename
-    };
-    const productsForAsin = productPool.get(product.asin);
+  const productWithSource = {
+    ...product,
+    _source_site: site,
+    _filename: filename,
+  };
+  const productsForAsin = productPool.get(product.asin);
 
-    if (productsForAsin) {
-        productsForAsin.push(productWithSource);
-        return;
-    }
+  if (productsForAsin) {
+    productsForAsin.push(productWithSource);
+    return;
+  }
 
-    productPool.set(product.asin, [productWithSource]);
+  productPool.set(product.asin, [productWithSource]);
 }
 
 function collectImportedFileProducts(
-    fileContent: FileReadResult,
-    context: ImportCollectionContext
+  fileContent: FileReadResult,
+  context: ImportCollectionContext
 ): void {
-    const { data, filename } = fileContent;
-    if (!data) {
-        console.warn(`[Scraper] 文件 ${filename} 数据为空，跳过`);
-        return;
-    }
+  const { data, filename } = fileContent;
+  if (!data) {
+    nativeLoggerConsole.warn(`[Scraper] 文件 ${filename} 数据为空，跳过`);
+    return;
+  }
 
-    // 验证数据结构
-    const validation = validateScrapedData(data);
-    if (!validation.valid) {
-        console.error(`[Scraper] 文件 ${filename} 数据验证失败:`, validation.error);
-        throw createImportValidationError(filename, validation.error);
-    }
+  // 验证数据结构
+  const validation = validateScrapedData(data);
+  if (!validation.valid) {
+    console.error(`[Scraper] 文件 ${filename} 数据验证失败:`, validation.error);
+    throw createImportValidationError(filename, validation.error);
+  }
 
-    const fileSite = getImportedFileSite(data);
-    const site = fileSite || "Unknown";
-    if (fileSite) context.detectedSites.add(fileSite);
+  const fileSite = getImportedFileSite(data);
+  const site = fileSite || 'Unknown';
+  if (fileSite) context.detectedSites.add(fileSite);
 
-    // 使用验证后的产品列表
-    const list: ScrapedProduct[] = validation.products || [];
-    list.forEach((product: ScrapedProduct) => {
-        addProductToPool(context.productPool, product, site, filename);
-    });
+  // 使用验证后的产品列表
+  const list: ScrapedProduct[] = validation.products || [];
+  list.forEach((product: ScrapedProduct) => {
+    addProductToPool(context.productPool, product, site, filename);
+  });
 }
 
 function formatFileSize(file: File): string {
-    return `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`;
+  return `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`;
 }
 
 function validateJsonFileExtensions(files: File[]): void {
-    const invalidFiles = files.filter(file => !file.name.toLowerCase().endsWith('.json'));
-    if (invalidFiles.length === 0) return;
+  const invalidFiles = files.filter(file => !file.name.toLowerCase().endsWith('.json'));
+  if (invalidFiles.length === 0) return;
 
-    console.error('[Scraper] 文件类型错误:', invalidFiles.map(file => file.name));
-    throw new ValidationError(
-        `只支持JSON文件`,
-        'SCRAPER_IMP_006',
-        'files',
-        invalidFiles.map(file => file.name),
-        { module: 'ScraperImportHandler', action: 'handleImportFiles', invalidFiles: invalidFiles.map(file => file.name) }
-    );
+  console.error(
+    '[Scraper] 文件类型错误:',
+    invalidFiles.map(file => file.name)
+  );
+  throw new ValidationError(
+    `只支持JSON文件`,
+    'SCRAPER_IMP_006',
+    'files',
+    invalidFiles.map(file => file.name),
+    {
+      module: 'ScraperImportHandler',
+      action: 'handleImportFiles',
+      invalidFiles: invalidFiles.map(file => file.name),
+    }
+  );
 }
 
 function validateImportFileSizes(files: File[]): void {
-    const oversizedFiles = files.filter(file => file.size > MAX_IMPORT_FILE_SIZE);
-    if (oversizedFiles.length === 0) return;
+  const oversizedFiles = files.filter(file => file.size > MAX_IMPORT_FILE_SIZE);
+  if (oversizedFiles.length === 0) return;
 
-    console.error('[Scraper] 文件过大:', oversizedFiles.map(formatFileSize));
-    throw new ValidationError(
-        `文件大小不能超过10MB`,
-        'SCRAPER_IMP_007',
-        'files',
-        oversizedFiles.map(file => ({ name: file.name, size: file.size })),
-        { module: 'ScraperImportHandler', action: 'handleImportFiles', maxSize: MAX_IMPORT_FILE_SIZE }
-    );
+  console.error('[Scraper] 文件过大:', oversizedFiles.map(formatFileSize));
+  throw new ValidationError(
+    `文件大小不能超过10MB`,
+    'SCRAPER_IMP_007',
+    'files',
+    oversizedFiles.map(file => ({ name: file.name, size: file.size })),
+    { module: 'ScraperImportHandler', action: 'handleImportFiles', maxSize: MAX_IMPORT_FILE_SIZE }
+  );
 }
 
 function warnLargeImportFiles(files: File[]): void {
-    const largeFiles = files.filter(file => file.size > LARGE_IMPORT_FILE_SIZE && file.size <= MAX_IMPORT_FILE_SIZE);
-    if (largeFiles.length === 0) return;
+  const largeFiles = files.filter(
+    file => file.size > LARGE_IMPORT_FILE_SIZE && file.size <= MAX_IMPORT_FILE_SIZE
+  );
+  if (largeFiles.length === 0) return;
 
-    showToast(`检测到大文件，处理可能需要较长时间`, { type: 'warning' });
+  showToast(`检测到大文件，处理可能需要较长时间`, { type: 'warning' });
 }
 
 function validateNonEmptyImportFiles(files: File[]): void {
-    const emptyFiles = files.filter(file => file.size === 0);
-    if (emptyFiles.length === 0) return;
+  const emptyFiles = files.filter(file => file.size === 0);
+  if (emptyFiles.length === 0) return;
 
-    console.error('[Scraper] 空文件:', emptyFiles.map(file => file.name));
-    throw new ValidationError(
-        `文件内容为空`,
-        'SCRAPER_IMP_008',
-        'files',
-        emptyFiles.map(file => file.name),
-        { module: 'ScraperImportHandler', action: 'handleImportFiles', emptyFiles: emptyFiles.map(file => file.name) }
-    );
+  console.error(
+    '[Scraper] 空文件:',
+    emptyFiles.map(file => file.name)
+  );
+  throw new ValidationError(
+    `文件内容为空`,
+    'SCRAPER_IMP_008',
+    'files',
+    emptyFiles.map(file => file.name),
+    {
+      module: 'ScraperImportHandler',
+      action: 'handleImportFiles',
+      emptyFiles: emptyFiles.map(file => file.name),
+    }
+  );
 }
 
 function validateImportFiles(files: File[]): void {
-    validateJsonFileExtensions(files);
-    validateImportFileSizes(files);
-    warnLargeImportFiles(files);
-    validateNonEmptyImportFiles(files);
+  validateJsonFileExtensions(files);
+  validateImportFileSizes(files);
+  warnLargeImportFiles(files);
+  validateNonEmptyImportFiles(files);
 }
 
 function hasExistingProducts(scrapedData: ScrapedData | null): boolean {
-    return !!scrapedData?.products?.length;
+  return !!scrapedData?.products?.length;
 }
 
 async function resolveTargetMarketplace(
-    detectedSites: Set<string>,
-    currentScrapedData: ScrapedData | null,
-    selectedSite: ScraperSite
+  detectedSites: Set<string>,
+  currentScrapedData: ScrapedData | null,
+  selectedSite: ScraperSite
 ): Promise<string | null> {
-    if (detectedSites.size > 1) {
-        const selected = await showMarketplaceSelectionModal([...detectedSites]);
-        if (!selected) {
-            showToast("用户取消导入", { type: 'info' });
-            return null;
-        }
-
-        return selected;
+  if (detectedSites.size > 1) {
+    const selected = await showMarketplaceSelectionModal([...detectedSites]);
+    if (!selected) {
+      showToast('用户取消导入', { type: 'info' });
+      return null;
     }
 
-    const singleDetectedSite = [...detectedSites][0];
-    if (singleDetectedSite) {
-        return singleDetectedSite;
-    }
+    return selected;
+  }
 
-    if (hasExistingProducts(currentScrapedData)) {
-        return currentScrapedData?.metadata?.marketplace || '';
-    }
+  const singleDetectedSite = [...detectedSites][0];
+  if (singleDetectedSite) {
+    return singleDetectedSite;
+  }
 
-    return selectedSite || '';
+  if (hasExistingProducts(currentScrapedData)) {
+    return currentScrapedData?.metadata?.marketplace || '';
+  }
+
+  return selectedSite || '';
 }
 
-function getMarketplaceHeader(targetMarketplace: string): { domain: string; name: string } | undefined {
-    return (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[targetMarketplace];
+function getMarketplaceHeader(
+  targetMarketplace: string
+): { domain: string; name: string } | undefined {
+  return (LANGUAGE_HEADERS as Record<string, { domain: string; name: string }>)[targetMarketplace];
 }
 
-function createImportedScrapedData(finalProducts: ProductData[], targetMarketplace: string): ScrapedData {
-    const marketplaceHeader = getMarketplaceHeader(targetMarketplace);
+function createImportedScrapedData(
+  finalProducts: ProductData[],
+  targetMarketplace: string
+): ScrapedData {
+  const marketplaceHeader = getMarketplaceHeader(targetMarketplace);
 
-    return {
-        metadata: {
-            marketplace: targetMarketplace,
-            scrape_timestamp: new Date().toISOString(),
-            total_asins: finalProducts.length,
-            last_action: "multi_site_import_merge",
-            domain: marketplaceHeader?.domain || "unknown",
-            language: marketplaceHeader?.name || "unknown"
-        },
-        products: finalProducts
-    };
+  return {
+    metadata: {
+      marketplace: targetMarketplace,
+      scrape_timestamp: new Date().toISOString(),
+      total_asins: finalProducts.length,
+      last_action: 'multi_site_import_merge',
+      domain: marketplaceHeader?.domain || 'unknown',
+      language: marketplaceHeader?.name || 'unknown',
+    },
+    products: finalProducts,
+  };
 }
 
 function createImportUserMessage(errorMessage: string): string {
-    if (errorMessage.includes('格式错误') || errorMessage.includes('JSON')) {
-        return `JSON格式错误: ${errorMessage}`;
-    }
+  if (errorMessage.includes('格式错误') || errorMessage.includes('JSON')) {
+    return `JSON格式错误: ${errorMessage}`;
+  }
 
-    if (errorMessage.includes('读取文件')) {
-        return `文件读取失败: ${errorMessage}`;
-    }
+  if (errorMessage.includes('读取文件')) {
+    return `文件读取失败: ${errorMessage}`;
+  }
 
-    if (errorMessage.includes('未找到有效')) {
-        return errorMessage;
-    }
+  if (errorMessage.includes('未找到有效')) {
+    return errorMessage;
+  }
 
-    return `导入出错: ${errorMessage}`;
+  return `导入出错: ${errorMessage}`;
 }
 
 /**
  * 处理文件导入主流程
  */
 export async function handleImportFiles(
-    files: File[],
-    currentScrapedData: ScrapedData | null,
-    selectedSite: ScraperSite
+  files: File[],
+  currentScrapedData: ScrapedData | null,
+  selectedSite: ScraperSite
 ): Promise<ImportResult> {
-    try {
-        validateImportFiles(files);
+  try {
+    validateImportFiles(files);
 
-        showToast(`正在解析 ${files.length} 个文件...`, { type: 'info' });
+    showToast(`正在解析 ${files.length} 个文件...`, { type: 'info' });
 
-        const fileContents = await Promise.all(files.map(f => readFileAsJSON(f)));
-        const productPool: ImportedProductPool = new Map();
-        const detectedSites = new Set<string>();
-        const collectionContext = { productPool, detectedSites };
+    const fileContents = await Promise.all(files.map(f => readFileAsJSON(f)));
+    const productPool: ImportedProductPool = new Map();
+    const detectedSites = new Set<string>();
+    const collectionContext = { productPool, detectedSites };
 
-        fileContents.forEach(fileContent => collectImportedFileProducts(fileContent, collectionContext));
+    fileContents.forEach(fileContent =>
+      collectImportedFileProducts(fileContent, collectionContext)
+    );
 
-        if (productPool.size === 0) {
-            throw new BusinessError(
-                "未找到有效的产品数据",
-                'SCRAPER_IMP_010',
-                { module: 'ScraperImportHandler', action: 'handleImportFiles', filesCount: files.length }
-            );
-        }
-
-        const targetMarketplace = await resolveTargetMarketplace(detectedSites, currentScrapedData, selectedSite);
-        if (targetMarketplace === null) {
-            return { success: false };
-        }
-
-        const currentProductsMap = new Map<string, ScrapedProduct>((currentScrapedData?.products || []).map((p: ScrapedProduct) => [p.asin, p]));
-        const finalProducts = mergeProducts(productPool, targetMarketplace, currentProductsMap);
-
-        const scrapedData = createImportedScrapedData(finalProducts, targetMarketplace);
-
-        await HistoryService.saveAsync(scrapedData);
-
-        // 触发事件通知其他模块更新
-        eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, scrapedData);
-        eventBus.emit(APP_EVENTS.DATA_UPDATED);
-        emitHistoryUpdated();
-
-        showToast(`成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, { type: 'success' });
-
-        return { success: true, data: scrapedData };
-
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('[Scraper] 导入失败:', {
-            error: error,
-            errorMessage: errorMessage,
-            filesCount: files.length,
-            fileNames: files.map(f => f.name)
-        });
-
-        showToast(createImportUserMessage(errorMessage), { type: 'error' });
-
-        return { success: false, error: errorMessage };
+    if (productPool.size === 0) {
+      throw new BusinessError('未找到有效的产品数据', 'SCRAPER_IMP_010', {
+        module: 'ScraperImportHandler',
+        action: 'handleImportFiles',
+        filesCount: files.length,
+      });
     }
+
+    const targetMarketplace = await resolveTargetMarketplace(
+      detectedSites,
+      currentScrapedData,
+      selectedSite
+    );
+    if (targetMarketplace === null) {
+      return { success: false };
+    }
+
+    const currentProductsMap = new Map<string, ScrapedProduct>(
+      (currentScrapedData?.products || []).map((p: ScrapedProduct) => [p.asin, p])
+    );
+    const finalProducts = mergeProducts(productPool, targetMarketplace, currentProductsMap);
+
+    const scrapedData = createImportedScrapedData(finalProducts, targetMarketplace);
+
+    await HistoryService.saveAsync(scrapedData);
+
+    // 触发事件通知其他模块更新
+    eventBus.emit(MODULE_EVENTS.SCRAPER.SCRAPE_SUCCESS, scrapedData);
+    eventBus.emit(APP_EVENTS.DATA_UPDATED);
+    emitHistoryUpdated();
+
+    showToast(`成功导入并合并 ${finalProducts.length} 个ASIN (基准站点: ${targetMarketplace})`, {
+      type: 'success',
+    });
+
+    return { success: true, data: scrapedData };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('[Scraper] 导入失败:', {
+      error: error,
+      errorMessage: errorMessage,
+      filesCount: files.length,
+      fileNames: files.map(f => f.name),
+    });
+
+    showToast(createImportUserMessage(errorMessage), { type: 'error' });
+
+    return { success: false, error: errorMessage };
+  }
 }

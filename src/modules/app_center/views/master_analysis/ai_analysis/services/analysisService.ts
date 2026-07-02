@@ -12,7 +12,7 @@ import {
   HesitationPointsReport,
   BuyerProfileReport,
   VocabGapReport,
-  PromiseRealityReport
+  PromiseRealityReport,
 } from '../config/analysisReportData';
 import { ANALYSIS_DISPLAY_LIMITS } from '../../config/displayLimits';
 
@@ -46,40 +46,40 @@ function parseTitleKeywords(report: TitleKeywordsReport): AnalysisResult {
     stats: [
       { label: '核心词根', value: `${primaryKeywords.length}个` },
       { label: '场景词', value: `${sceneKeywords.length}个` },
-      { label: '已剔除', value: `${removedBrandTerms.length + removedModifiers.length}个` }
+      { label: '已剔除', value: `${removedBrandTerms.length + removedModifiers.length}个` },
     ],
     highlights: [
       ...primaryKeywords.slice(0, ANALYSIS_DISPLAY_LIMITS.PRIMARY_KEYWORDS).map(k => ({
         text: `${k.keyword} - ${k.search_volume_estimate}`,
-        type: 'info' as const
+        type: 'info' as const,
       })),
       ...secondaryKeywords.slice(0, ANALYSIS_DISPLAY_LIMITS.SECONDARY_KEYWORDS).map(k => ({
         text: `${k.keyword} - ${k.importance}`,
-        type: 'success' as const
-      }))
+        type: 'success' as const,
+      })),
     ],
     details: [
       {
         category: '一级核心词（高权重）',
-        items: primaryKeywords.map(k => `${k.keyword} [${k.weight}]`)
+        items: primaryKeywords.map(k => `${k.keyword} [${k.weight}]`),
       },
       {
         category: '二级功能词',
-        items: secondaryKeywords.map(k => k.keyword)
+        items: secondaryKeywords.map(k => k.keyword),
       },
       {
         category: '场景/人群词',
-        items: [...sceneKeywords.map(k => k.keyword), ...audienceKeywords.map(k => k.keyword)]
+        items: [...sceneKeywords.map(k => k.keyword), ...audienceKeywords.map(k => k.keyword)],
       },
       {
         category: '已剔除的修饰词和品牌词',
-        items: [...removedBrandTerms, ...removedModifiers]
+        items: [...removedBrandTerms, ...removedModifiers],
       },
       {
         category: '优化建议',
-        items: optimizationSuggestions
-      }
-    ]
+        items: optimizationSuggestions,
+      },
+    ],
   };
 }
 
@@ -102,44 +102,46 @@ function parseSellingPoints(report: SellingPointsReport): AnalysisResult {
     stats: [
       { label: '功能卖点', value: `${funcCount}个` },
       { label: '场景覆盖', value: `${sceneCount}个` },
-      { label: '痛点解决', value: `${painCount}个` }
+      { label: '痛点解决', value: `${painCount}个` },
     ],
     highlights: [
       {
         text: `核心差异化：${overallStrategy.primary_differentiation || '未知'}`,
-        type: 'success'
+        type: 'success',
       },
       {
         text: `目标人群：${overallStrategy.target_positioning || '未知'}`,
-        type: 'info'
+        type: 'info',
       },
-      ...safeArray(overallStrategy.missing_elements).slice(0, ANALYSIS_DISPLAY_LIMITS.MISSING_ELEMENTS).map(m => ({
-        text: `缺失：${m}`,
-        type: 'warning' as const
-      }))
+      ...safeArray(overallStrategy.missing_elements)
+        .slice(0, ANALYSIS_DISPLAY_LIMITS.MISSING_ELEMENTS)
+        .map(m => ({
+          text: `缺失：${m}`,
+          type: 'warning' as const,
+        })),
     ],
     details: [
       {
         category: '功能维度',
-        items: safeArray(functionSceneMatrix.functions)
+        items: safeArray(functionSceneMatrix.functions),
       },
       {
         category: '场景维度',
-        items: safeArray(functionSceneMatrix.scenes)
+        items: safeArray(functionSceneMatrix.scenes),
       },
       {
         category: '痛点解决',
-        items: safeArray(functionSceneMatrix.pain_points)
+        items: safeArray(functionSceneMatrix.pain_points),
       },
       {
         category: '情感钩子',
-        items: safeArray(overallStrategy.emotional_hooks)
+        items: safeArray(overallStrategy.emotional_hooks),
       },
       {
         category: '待改进项',
-        items: safeArray(overallStrategy.missing_elements)
-      }
-    ]
+        items: safeArray(overallStrategy.missing_elements),
+      },
+    ],
   };
 }
 
@@ -164,30 +166,30 @@ function parseFatalFlaws(report: FatalFlawsReport): AnalysisResult {
     stats: [
       { label: '严重问题', value: `${criticalCount}个` },
       { label: '一般问题', value: `${majorCount}个` },
-      { label: '风险等级', value: (riskAssessment.overall_risk_level || 'unknown').toUpperCase() }
+      { label: '风险等级', value: (riskAssessment.overall_risk_level || 'unknown').toUpperCase() },
     ],
     highlights: criticalIssues.map(issue => ({
       text: `${issue.issue} - ${safeArray(issue.user_quotes)[0] || ''}`,
-      type: issue.severity === 'critical' ? 'danger' as const : 'warning' as const
+      type: issue.severity === 'critical' ? ('danger' as const) : ('warning' as const),
     })),
     details: [
       {
         category: '退货触发原因',
-        items: returnTriggers
+        items: returnTriggers,
       },
       {
         category: '期望落差',
-        items: expectationGaps.map(g => `期望: ${g.expected} → 现实: ${g.reality}`)
+        items: expectationGaps.map(g => `期望: ${g.expected} → 现实: ${g.reality}`),
       },
       {
         category: '用户原话',
-        items: criticalIssues.flatMap(i => safeArray(i.user_quotes))
+        items: criticalIssues.flatMap(i => safeArray(i.user_quotes)),
       },
       {
         category: '改进建议',
-        items: actionableFixes
-      }
-    ]
+        items: actionableFixes,
+      },
+    ],
   };
 }
 
@@ -209,30 +211,30 @@ function parseWowMoments(report: WowMomentsReport): AnalysisResult {
     stats: [
       { label: '惊喜时刻', value: `${moments.length}个` },
       { label: '情感触发词', value: `${emotionalTriggers.length}个` },
-      { label: '高转化素材', value: `${highConversionPhrases.length}条` }
+      { label: '高转化素材', value: `${highConversionPhrases.length}条` },
     ],
     highlights: moments.map(m => ({
       text: `"${m.user_quote}" - ${m.moment_description}`,
-      type: 'success' as const
+      type: 'success' as const,
     })),
     details: [
       {
         category: '情感触发词',
-        items: emotionalTriggers
+        items: emotionalTriggers,
       },
       {
         category: '高转化文案素材',
-        items: highConversionPhrases
+        items: highConversionPhrases,
       },
       {
         category: '超预期亮点',
-        items: unexpectedBenefits
+        items: unexpectedBenefits,
       },
       {
         category: '文案创意角度',
-        items: copywritingAngles
-      }
-    ]
+        items: copywritingAngles,
+      },
+    ],
   };
 }
 
@@ -253,30 +255,30 @@ function parseHesitationPoints(report: HesitationPointsReport): AnalysisResult {
     stats: [
       { label: '识别犹豫点', value: `${hesitations.length}个` },
       { label: '常见疑虑', value: `${commonDoubts.length}个` },
-      { label: 'Q&A优化项', value: `${qaOptimizationItems.length}条` }
+      { label: 'Q&A优化项', value: `${qaOptimizationItems.length}条` },
     ],
     highlights: hesitations.slice(0, ANALYSIS_DISPLAY_LIMITS.HESITATION_POINTS).map(h => ({
       text: `${h.pre_purchase_worry || '未知'} → ${(h.post_purchase_resolution || '').substring(0, 50)}...`,
-      type: 'warning' as const
+      type: 'warning' as const,
     })),
     details: [
       {
         category: '购前常见疑虑',
-        items: commonDoubts
+        items: commonDoubts,
       },
       {
         category: '信任建立要素',
-        items: trustBuilders
+        items: trustBuilders,
       },
       {
         category: 'Q&A优化建议',
-        items: qaOptimizationItems.map(q => `Q: ${q.question || '未知'}`)
+        items: qaOptimizationItems.map(q => `Q: ${q.question || '未知'}`),
       },
       {
         category: '建议回答要点',
-        items: qaOptimizationItems.map(q => (q.suggested_answer || '').substring(0, 60) + '...')
-      }
-    ]
+        items: qaOptimizationItems.map(q => (q.suggested_answer || '').substring(0, 60) + '...'),
+      },
+    ],
   };
 }
 
@@ -301,44 +303,44 @@ function parseBuyerProfile(report: BuyerProfileReport): AnalysisResult {
     stats: [
       { label: '买家类型', value: `${buyerTypes.length}类` },
       { label: '使用场景', value: `${usageScenes.length}个` },
-      { label: '覆盖市场', value: `${primaryMarkets.length}个` }
+      { label: '覆盖市场', value: `${primaryMarkets.length}个` },
     ],
     highlights: [
       {
         text: `核心用户：${demographics.age_range_estimate || '未知'}${demographics.likely_gender === 'male' ? '男性' : demographics.likely_gender === 'female' ? '女性' : ''}`,
-        type: 'info'
+        type: 'info',
       },
       ...buyerTypes.slice(0, ANALYSIS_DISPLAY_LIMITS.BUYER_TYPES).map(t => ({
         text: `${t.type || '未知'} (${t.percentage_estimate || '未知'}) - ${(t.evidence || '').substring(0, 40)}...`,
-        type: 'info' as const
+        type: 'info' as const,
       })),
       {
         text: `主要市场：${primaryMarkets.join('、') || '未知'}`,
-        type: 'success'
-      }
+        type: 'success',
+      },
     ],
     details: [
       {
         category: '生活方式特征',
-        items: lifestyleIndicators
+        items: lifestyleIndicators,
       },
       {
         category: '买家类型分布',
-        items: buyerTypes.map(t => `${t.type || '未知'} (${t.percentage_estimate || '未知'})`)
+        items: buyerTypes.map(t => `${t.type || '未知'} (${t.percentage_estimate || '未知'})`),
       },
       {
         category: '使用场景',
-        items: usageScenes.map(s => `${s.scene || '未知'} [${s.frequency || '未知'}]`)
+        items: usageScenes.map(s => `${s.scene || '未知'} [${s.frequency || '未知'}]`),
       },
       {
         category: '购买动机',
-        items: purchaseMotivations
+        items: purchaseMotivations,
       },
       {
         category: '市场文化洞察',
-        items: culturalConsiderations
-      }
-    ]
+        items: culturalConsiderations,
+      },
+    ],
   };
 }
 
@@ -362,34 +364,37 @@ function parseVocabGap(report: VocabGapReport): AnalysisResult {
     stats: [
       { label: '商家词汇', value: `${sellerTerms.length}个` },
       { label: '买家词汇', value: `${buyerTerms.length}个` },
-      { label: '待覆盖词', value: `${uncoveredBuyerTerms.length}个` }
+      { label: '待覆盖词', value: `${uncoveredBuyerTerms.length}个` },
     ],
     highlights: termTranslations.slice(0, ANALYSIS_DISPLAY_LIMITS.TERM_TRANSLATIONS).map(t => ({
       text: `商家说 "${t.seller_says || '未知'}" → 买家说 "${t.buyer_says || '未知'}"`,
-      type: (t.buyer_says || '').includes('scam') || (t.buyer_says || '').includes('doesn\'t') ? 'danger' as const : 'warning' as const
+      type:
+        (t.buyer_says || '').includes('scam') || (t.buyer_says || '').includes("doesn't")
+          ? ('danger' as const)
+          : ('warning' as const),
     })),
     details: [
       {
         category: '商家高频词（Listing）',
-        items: sellerTerms
+        items: sellerTerms,
       },
       {
         category: '买家高频词（Reviews）',
-        items: buyerTerms
+        items: buyerTerms,
       },
       {
         category: '未覆盖的买家词（需关注）',
-        items: uncoveredBuyerTerms.map(t => `${t.term || '未知'} - ${t.recommendation || '未知'}`)
+        items: uncoveredBuyerTerms.map(t => `${t.term || '未知'} - ${t.recommendation || '未知'}`),
       },
       {
         category: '标题优化建议',
-        items: titleAdditions
+        items: titleAdditions,
       },
       {
         category: '关键词机会',
-        items: keywordOpportunities
-      }
-    ]
+        items: keywordOpportunities,
+      },
+    ],
   };
 }
 
@@ -413,31 +418,37 @@ function parsePromiseReality(report: PromiseRealityReport): AnalysisResult {
     stats: [
       { label: '严重断层', value: `${severeCount}处` },
       { label: '可信度评分', value: overallCredibility.score || '未知' },
-      { label: '待验证承诺', value: `${unverifiedClaims.length}个` }
+      { label: '待验证承诺', value: `${unverifiedClaims.length}个` },
     ],
     highlights: gaps.map(gap => ({
       text: `宣称 "${(gap.listing_claim || '').substring(0, 25)}..." → 现实 "${(gap.review_reality || '').substring(0, 30)}..."`,
-      type: gap.contradiction_severity === 'severe' ? 'danger' as const :
-        gap.contradiction_severity === 'moderate' ? 'warning' as const : 'info' as const
+      type:
+        gap.contradiction_severity === 'severe'
+          ? ('danger' as const)
+          : gap.contradiction_severity === 'moderate'
+            ? ('warning' as const)
+            : ('info' as const),
     })),
     details: [
       {
         category: '严重断层点',
-        items: gaps.filter(g => g.contradiction_severity === 'severe').map(g => g.listing_claim || '未知')
+        items: gaps
+          .filter(g => g.contradiction_severity === 'severe')
+          .map(g => g.listing_claim || '未知'),
       },
       {
         category: '已验证的真实承诺',
-        items: verifiedClaims
+        items: verifiedClaims,
       },
       {
         category: '待验证的承诺',
-        items: unverifiedClaims
+        items: unverifiedClaims,
       },
       {
         category: 'Listing修订建议',
-        items: listingRevisionSuggestions
-      }
-    ]
+        items: listingRevisionSuggestions,
+      },
+    ],
   };
 }
 
@@ -448,37 +459,37 @@ interface AnalysisReportParser {
 
 const analysisReportParsers: Record<string, AnalysisReportParser> = {
   'title-keywords': {
-    get: (report) => report['title-keywords'],
-    parse: (section) => parseTitleKeywords(section as TitleKeywordsReport)
+    get: report => report['title-keywords'],
+    parse: section => parseTitleKeywords(section as TitleKeywordsReport),
   },
   'selling-points': {
-    get: (report) => report['selling-points'],
-    parse: (section) => parseSellingPoints(section as SellingPointsReport)
+    get: report => report['selling-points'],
+    parse: section => parseSellingPoints(section as SellingPointsReport),
   },
   'fatal-flaws': {
-    get: (report) => report['fatal-flaws'],
-    parse: (section) => parseFatalFlaws(section as FatalFlawsReport)
+    get: report => report['fatal-flaws'],
+    parse: section => parseFatalFlaws(section as FatalFlawsReport),
   },
   'wow-moments': {
-    get: (report) => report['wow-moments'],
-    parse: (section) => parseWowMoments(section as WowMomentsReport)
+    get: report => report['wow-moments'],
+    parse: section => parseWowMoments(section as WowMomentsReport),
   },
   'hesitation-points': {
-    get: (report) => report['hesitation-points'],
-    parse: (section) => parseHesitationPoints(section as HesitationPointsReport)
+    get: report => report['hesitation-points'],
+    parse: section => parseHesitationPoints(section as HesitationPointsReport),
   },
   'buyer-profile': {
-    get: (report) => report['buyer-profile'],
-    parse: (section) => parseBuyerProfile(section as BuyerProfileReport)
+    get: report => report['buyer-profile'],
+    parse: section => parseBuyerProfile(section as BuyerProfileReport),
   },
   'vocab-gap': {
-    get: (report) => report['vocab-gap'],
-    parse: (section) => parseVocabGap(section as VocabGapReport)
+    get: report => report['vocab-gap'],
+    parse: section => parseVocabGap(section as VocabGapReport),
   },
   'promise-reality': {
-    get: (report) => report['promise-reality'],
-    parse: (section) => parsePromiseReality(section as PromiseRealityReport)
-  }
+    get: report => report['promise-reality'],
+    parse: section => parsePromiseReality(section as PromiseRealityReport),
+  },
 };
 
 function parseAnalysisTarget(report: FullAnalysisReport, targetId: string): AnalysisResult | null {

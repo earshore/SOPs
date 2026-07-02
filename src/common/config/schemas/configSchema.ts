@@ -17,7 +17,7 @@ const ApiConfigSchema = z.object({
   baseUrl: z.string().min(1, 'API baseUrl不能为空'),
   timeout: z.number().positive('timeout必须为正数'),
   retryAttempts: z.number().min(0, 'retryAttempts不能为负数'),
-  retryDelay: z.number().positive('retryDelay必须为正数')
+  retryDelay: z.number().positive('retryDelay必须为正数'),
 });
 
 /**
@@ -27,7 +27,7 @@ const PerformanceConfigSchema = z.object({
   enableMonitoring: z.boolean(),
   enableDevTools: z.boolean(),
   logLevel: z.enum(['debug', 'info', 'warn', 'error']),
-  maxCacheSize: z.number().positive('maxCacheSize必须为正数')
+  maxCacheSize: z.number().positive('maxCacheSize必须为正数'),
 });
 
 /**
@@ -36,7 +36,7 @@ const PerformanceConfigSchema = z.object({
 const FeatureFlagsSchema = z.object({
   enableExperimentalFeatures: z.boolean(),
   enableBetaFeatures: z.boolean(),
-  enableDebugMode: z.boolean()
+  enableDebugMode: z.boolean(),
 });
 
 /**
@@ -47,7 +47,7 @@ export const AppConfigSchema = z.object({
   api: ApiConfigSchema,
   performance: PerformanceConfigSchema,
   features: FeatureFlagsSchema,
-  routes: z.any() // MenuConfig类型复杂,暂时使用any
+  routes: z.any(), // MenuConfig类型复杂,暂时使用any
 });
 
 /**
@@ -62,7 +62,7 @@ export function validateConfig(config: unknown): boolean {
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error('[ConfigSchema] 配置验证失败:', error.issues);
-      error.issues.forEach((issue) => {
+      error.issues.forEach(issue => {
         console.error(`  - ${issue.path.join('.')}: ${issue.message}`);
       });
     }
@@ -80,7 +80,7 @@ export function validateConfigWithErrors(config: unknown): {
   errors?: z.ZodError;
 } {
   const result = AppConfigSchema.safeParse(config);
-  
+
   if (result.success) {
     return { success: true };
   } else {

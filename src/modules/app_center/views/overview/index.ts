@@ -18,7 +18,9 @@ interface OverviewFilterState {
  * 挂载 App Center 总览模块
  */
 const mountInternal = async (container: HTMLElement): Promise<void> => {
-  const html = await loadTemplate('src/modules/app_center/views/overview/template.html', { useCache: false });
+  const html = await loadTemplate('src/modules/app_center/views/overview/template.html', {
+    useCache: false,
+  });
   // ✅ 安全: 静态HTML模板，无用户输入
   // 为overview页面添加淡入动画（在渲染前添加）
   container.classList.add('fade-in');
@@ -34,8 +36,7 @@ export const mount = safeMount(mountInternal, { moduleName: 'App Center Overview
 /**
  * 卸载 App Center 总览模块
  */
-export function unmount(): void {
-}
+export function unmount(): void {}
 
 /**
  * 初始化总览页面事件
@@ -43,12 +44,12 @@ export function unmount(): void {
 function initOverviewEvents(container: HTMLElement): void {
   const state: OverviewFilterState = {
     category: 'all',
-    query: ''
+    query: '',
   };
 
   const filterBtns = container.querySelectorAll<HTMLElement>('.category-filter-btn');
 
-  filterBtns.forEach((btn) => {
+  filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const category = btn.dataset.category;
       if (category) {
@@ -76,8 +77,8 @@ function initOverviewEvents(container: HTMLElement): void {
   });
 
   const childLinks = container.querySelectorAll<HTMLElement>('.app-child-link[data-child-tab]');
-  childLinks.forEach((link) => {
-    link.addEventListener('click', (event) => {
+  childLinks.forEach(link => {
+    link.addEventListener('click', event => {
       event.stopPropagation();
       const targetTab = link.dataset.childTab;
       if (targetTab) {
@@ -88,7 +89,7 @@ function initOverviewEvents(container: HTMLElement): void {
 
   // 应用卡片点击事件
   const appCards = container.querySelectorAll<HTMLElement>('[data-action="switch-tab"]');
-  appCards.forEach((card) => {
+  appCards.forEach(card => {
     const switchToTab = () => {
       const targetTab = card.dataset.tab;
       if (targetTab) {
@@ -97,7 +98,7 @@ function initOverviewEvents(container: HTMLElement): void {
     };
 
     card.addEventListener('click', switchToTab);
-    card.addEventListener('keydown', (event) => {
+    card.addEventListener('keydown', event => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         switchToTab();
@@ -112,7 +113,7 @@ function initOverviewEvents(container: HTMLElement): void {
  * 更新分类按钮选中状态
  */
 function setActiveCategory(filterBtns: NodeListOf<HTMLElement>, activeBtn: HTMLElement): void {
-  filterBtns.forEach((btn) => {
+  filterBtns.forEach(btn => {
     const isActive = btn === activeBtn;
     btn.classList.toggle('active', isActive);
     btn.setAttribute('aria-pressed', String(isActive));
@@ -123,10 +124,12 @@ function setActiveCategory(filterBtns: NodeListOf<HTMLElement>, activeBtn: HTMLE
  * 按分类筛选应用卡片
  */
 function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState): void {
-  const cards = container.querySelectorAll<HTMLElement>('.app-center-card-grid > [data-action="switch-tab"][data-category]');
+  const cards = container.querySelectorAll<HTMLElement>(
+    '.app-center-card-grid > [data-action="switch-tab"][data-category]'
+  );
   let visibleCount = 0;
 
-  cards.forEach((card) => {
+  cards.forEach(card => {
     const categoryMatches = state.category === 'all' || card.dataset.category === state.category;
     const searchableText = `${card.dataset.search || ''} ${card.textContent || ''}`.toLowerCase();
     const queryMatches = !state.query || searchableText.includes(state.query);

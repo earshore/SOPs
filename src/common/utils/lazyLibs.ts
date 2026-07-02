@@ -31,11 +31,11 @@ export function loadChartJs(): Promise<ChartJS> {
 
   if (!chartJsPromise) {
     chartJsPromise = import('chart.js/auto')
-      .then((module) => {
+      .then(module => {
         win.Chart = module.default;
         return win.Chart as ChartJS;
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('Failed to load Chart.js', err);
         chartJsPromise = null; // Allow retry
         throw err;
@@ -56,11 +56,11 @@ export function loadGridStack(): Promise<GridStack> {
     import('gridstack/dist/gridstack.min.css');
 
     gridStackPromise = import('gridstack')
-      .then((module) => {
+      .then(module => {
         win.GridStack = module.GridStack;
         return win.GridStack as GridStack;
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('Failed to load GridStack', err);
         gridStackPromise = null;
         throw err;

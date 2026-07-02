@@ -11,14 +11,14 @@ import {
   renderErrorBoundary,
   renderLoading,
   renderNotRegistered,
-  renderTimeout
+  renderTimeout,
 } from '../../components/ErrorBoundary';
 import { ValidationError } from '@/common/errors/AppError';
 import type { DIContainer } from '../di/Container';
 import {
   applyPageEnterAnimation,
   clearPageEnterAnimation,
-  preparePageEnterAnimation
+  preparePageEnterAnimation,
 } from './pageEnterAnimation';
 
 const LEGACY_CONTENT_ENTER_ANIMATION_CLASS = 'fade-in';
@@ -97,10 +97,10 @@ export class ModuleLoader {
     this.pendingRouteId = null;
     this.loadSequence = 0;
     this.contentEnterAnimation = config.contentEnterAnimation || false;
-    
+
     // 🎯 DI容器注入（预留用于未来的模块工厂函数）
     // const diContainer = config.container || globalContainer;
-    
+
     // 🎯 P1 优化：提取路由前缀用于快速过滤
     this.routePrefixes = this._extractRoutePrefixes();
 
@@ -157,7 +157,7 @@ export class ModuleLoader {
    * @private
    */
   private _waitForContainer(id: string, timeout: number = 3000): Promise<HTMLElement | null> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const el = document.getElementById(id);
       if (el) return resolve(el);
 
@@ -228,7 +228,7 @@ export class ModuleLoader {
       color: this.loaderColor,
       showReload: true,
       showRetry: true,
-      onRetry: () => this.loadModule(routeId, 0)
+      onRetry: () => this.loadModule(routeId, 0),
     } as ErrorBoundaryOptions);
   }
 
@@ -471,7 +471,10 @@ export class ModuleLoader {
    * @returns 加载的模块
    * @private
    */
-  private async _measureModuleLoad(routeId: string, loader: () => Promise<IModule>): Promise<IModule> {
+  private async _measureModuleLoad(
+    routeId: string,
+    loader: () => Promise<IModule>
+  ): Promise<IModule> {
     // 动态导入性能服务（避免循环依赖）
     try {
       const { performanceService } = await import('../../services/performanceService');
@@ -515,7 +518,7 @@ export class ModuleLoader {
     window.addEventListener(APP_EVENTS.MODULE_UNLOAD, (e: Event) => {
       const customEvent = e as CustomEvent;
       const { panelId } = customEvent.detail;
-      
+
       // 只处理当前模块的卸载
       if (panelId === this.shellId) {
         this._unmountCurrentModule();

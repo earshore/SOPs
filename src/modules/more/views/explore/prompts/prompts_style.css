@@ -2,284 +2,286 @@
 
 /* 详情模态框 */
 .prompt-detail-modal {
-    position: fixed;
-    top: var(--header-height, 64px);
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: var(--z-modal-backdrop, 55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: clamp(1rem, 2vw, 1.5rem);
-    background: rgba(15, 23, 42, 0.52);
-    backdrop-filter: var(--backdrop-blur-sm, blur(4px));
-    -webkit-backdrop-filter: var(--backdrop-blur-sm, blur(4px));
-    overflow-y: auto;
+  position: fixed;
+  top: var(--header-height, 64px);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-modal-backdrop, 55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  background: rgba(15, 23, 42, 0.52);
+  backdrop-filter: var(--backdrop-blur-sm, blur(4px));
+  -webkit-backdrop-filter: var(--backdrop-blur-sm, blur(4px));
+  overflow-y: auto;
 }
 
 .prompt-detail-modal.hidden {
-    display: none;
+  display: none;
 }
 
 .prompt-detail-modal__dialog {
-    position: relative;
-    margin: auto;
-    max-height: calc(100dvh - var(--header-height, 64px) - clamp(2rem, 4vw, 3rem));
+  position: relative;
+  margin: auto;
+  max-height: calc(100dvh - var(--header-height, 64px) - clamp(2rem, 4vw, 3rem));
 }
 
 @supports not (height: 100dvh) {
-    .prompt-detail-modal__dialog {
-        max-height: calc(100vh - var(--header-height, 64px) - clamp(2rem, 4vw, 3rem));
-    }
+  .prompt-detail-modal__dialog {
+    max-height: calc(100vh - var(--header-height, 64px) - clamp(2rem, 4vw, 3rem));
+  }
 }
 
 /* 分类按钮样式 */
 
 .category-btn {
-    padding: 0.5rem 1rem;
-    border-radius: var(--rounded-md);
-    border: 1px solid var(--color-slate-200);
-    background-color: white;
-    color: var(--color-slate-500);
-    transition: all var(--duration-fast);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: var(--rounded-md);
+  border: 1px solid var(--color-slate-200);
+  background-color: white;
+  color: var(--color-slate-500);
+  transition: all var(--duration-fast);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .category-btn:hover {
-    border-color: var(--color-teal-300);
-    background-color: var(--color-teal-50);
-    color: var(--color-teal-600);
+  border-color: var(--color-teal-300);
+  background-color: var(--color-teal-50);
+  color: var(--color-teal-600);
 }
 
 .category-btn.active {
-    background-color: var(--color-teal-600);
-    color: white;
-    border-color: var(--color-teal-600);
+  background-color: var(--color-teal-600);
+  color: white;
+  border-color: var(--color-teal-600);
 }
 
 .category-btn.active:hover {
-    background-color: var(--color-teal-700);
-    border-color: var(--color-teal-700);
+  background-color: var(--color-teal-700);
+  border-color: var(--color-teal-700);
 }
 
 /* 提示词卡片样式 */
 .prompt-card {
-    background-color: white;
-    border-radius: var(--rounded-lg);
-    border: 1px solid var(--color-slate-200);
-    padding: 1.25rem;
-    transition: all var(--duration-fast);
-    cursor: pointer;
+  background-color: white;
+  border-radius: var(--rounded-lg);
+  border: 1px solid var(--color-slate-200);
+  padding: 1.25rem;
+  transition: all var(--duration-fast);
+  cursor: pointer;
 }
 
 .prompt-card:hover {
-    box-shadow: 0 10px 15px -3px var(--color-black-alpha-10);
-    border-color: var(--color-teal-300);
+  box-shadow: 0 10px 15px -3px var(--color-black-alpha-10);
+  border-color: var(--color-teal-300);
 }
 
 .prompt-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--color-slate-800);
-    margin-bottom: 0.5rem;
-    transition: color var(--duration-fast);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-slate-800);
+  margin-bottom: 0.5rem;
+  transition: color var(--duration-fast);
 }
 
 .prompt-card:hover .prompt-title {
-    color: var(--color-teal-600);
+  color: var(--color-teal-600);
 }
 
 .prompt-description {
-    font-size: 0.875rem;
-    color: var(--color-slate-500);
-    line-height: 1.625;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  font-size: 0.875rem;
+  color: var(--color-slate-500);
+  line-height: 1.625;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* 分类徽章样式 */
 .category-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
 }
 
 .category-badge.blue {
-    background-color: var(--color-blue-100);
-    color: var(--color-blue-700);
+  background-color: var(--color-blue-100);
+  color: var(--color-blue-700);
 }
 
 .category-badge.purple {
-    background-color: var(--color-purple-100);
-    color: var(--color-purple-600);
+  background-color: var(--color-purple-100);
+  color: var(--color-purple-600);
 }
 
 .category-badge.green {
-    background-color: var(--color-green-100);
-    color: var(--color-green-600);
+  background-color: var(--color-green-100);
+  color: var(--color-green-600);
 }
 
 .category-badge.orange {
-    background-color: var(--color-orange-100);
-    color: var(--color-orange-600);
+  background-color: var(--color-orange-100);
+  color: var(--color-orange-600);
 }
 
 .category-badge.red {
-    background-color: var(--color-red-100);
-    color: var(--color-red-600);
+  background-color: var(--color-red-100);
+  color: var(--color-red-600);
 }
 
 .category-badge.indigo {
-    background-color: var(--color-indigo-100);
-    color: var(--color-indigo-600);
+  background-color: var(--color-indigo-100);
+  color: var(--color-indigo-600);
 }
 
 /* 模型徽章样式 */
 .model-badge {
-    padding: 0.125rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.625rem;
-    font-weight: 700;
-    background-color: var(--color-amber-100);
-    color: var(--color-amber-700);
-    border: 1px solid var(--color-amber-200);
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  background-color: var(--color-amber-100);
+  color: var(--color-amber-700);
+  border: 1px solid var(--color-amber-200);
 }
 
 /* 按钮图标样式 */
 .btn-icon {
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--rounded-md);
-    color: var(--color-slate-400);
-    transition: all var(--duration-fast);
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rounded-md);
+  color: var(--color-slate-400);
+  transition: all var(--duration-fast);
 }
 
 .btn-icon:hover {
-    color: var(--color-teal-600);
-    background-color: var(--color-teal-50);
+  color: var(--color-teal-600);
+  background-color: var(--color-teal-50);
 }
-
 
 /* 语言切换按钮样式 */
 .lang-btn {
-    color: var(--color-slate-500);
-    background-color: transparent;
-    cursor: pointer;
+  color: var(--color-slate-500);
+  background-color: transparent;
+  cursor: pointer;
 }
 
 .lang-btn:hover {
-    color: var(--color-slate-800);
+  color: var(--color-slate-800);
 }
 
 .lang-btn.active {
-    background-color: white;
-    color: var(--color-teal-600);
-    font-weight: 600;
-    box-shadow: 0 1px 2px 0 var(--color-black-alpha-5);
+  background-color: white;
+  color: var(--color-teal-600);
+  font-weight: 600;
+  box-shadow: 0 1px 2px 0 var(--color-black-alpha-5);
 }
 
 .lang-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 资料源卡片 */
 .prompt-source-card {
-    display: block;
-    min-height: 11rem;
-    padding: 1.25rem;
-    color: var(--color-slate-600);
-    background: white;
-    border: 1px solid var(--color-slate-200);
-    border-radius: var(--rounded-lg);
-    transition: border-color var(--duration-fast), box-shadow var(--duration-fast), transform var(--duration-fast);
+  display: block;
+  min-height: 11rem;
+  padding: 1.25rem;
+  color: var(--color-slate-600);
+  background: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--rounded-lg);
+  transition:
+    border-color var(--duration-fast),
+    box-shadow var(--duration-fast),
+    transform var(--duration-fast);
 }
 
 .prompt-source-card:hover {
-    color: var(--color-slate-700);
-    border-color: var(--color-teal-200);
-    box-shadow: 0 10px 22px -18px rgba(15, 118, 110, 0.42);
-    transform: translateY(-1px);
+  color: var(--color-slate-700);
+  border-color: var(--color-teal-200);
+  box-shadow: 0 10px 22px -18px rgba(15, 118, 110, 0.42);
+  transform: translateY(-1px);
 }
 
 .prompt-source-card__label {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.5rem;
-    margin-bottom: 0.75rem;
-    padding: 0.125rem 0.5rem;
-    color: var(--color-teal-700);
-    font-size: 0.75rem;
-    font-weight: 700;
-    background-color: var(--color-teal-50);
-    border: 1px solid var(--color-teal-100);
-    border-radius: var(--rounded-md);
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  color: var(--color-teal-700);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: var(--color-teal-50);
+  border: 1px solid var(--color-teal-100);
+  border-radius: var(--rounded-md);
 }
 
 .prompt-source-card strong {
-    display: block;
-    color: var(--color-slate-900);
-    font-size: 1rem;
-    line-height: 1.5;
+  display: block;
+  color: var(--color-slate-900);
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .prompt-source-card p {
-    margin-top: 0.5rem;
-    color: var(--color-slate-500);
-    font-size: 0.875rem;
-    line-height: 1.625;
+  margin-top: 0.5rem;
+  color: var(--color-slate-500);
+  font-size: 0.875rem;
+  line-height: 1.625;
 }
 
 .prompt-business-rule {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background-color: var(--color-teal-50);
-    border: 1px solid var(--color-teal-100);
-    border-radius: var(--rounded-md);
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: var(--color-teal-50);
+  border: 1px solid var(--color-teal-100);
+  border-radius: var(--rounded-md);
 }
 
 .prompt-business-rule span {
-    display: block;
-    color: var(--color-teal-700);
-    font-size: 0.75rem;
-    font-weight: 700;
-    line-height: 1.5;
+  display: block;
+  color: var(--color-teal-700);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 .prompt-business-rule p {
-    margin-top: 0.25rem;
-    color: var(--color-teal-900);
-    font-size: 0.8125rem;
-    line-height: 1.6;
+  margin-top: 0.25rem;
+  color: var(--color-teal-900);
+  font-size: 0.8125rem;
+  line-height: 1.6;
 }
 
 @media (min-width: 1024px) {
-    .prompt-card,
-    .prompt-source-card,
-    .prompt-business-rule,
-    .category-btn,
-    .btn-icon {
-        border-radius: 8px;
-    }
+  .prompt-card,
+  .prompt-source-card,
+  .prompt-business-rule,
+  .category-btn,
+  .btn-icon {
+    border-radius: 8px;
+  }
 
-    .prompt-card:hover,
-    .prompt-source-card:hover {
-        box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
-        transform: none;
-    }
+  .prompt-card:hover,
+  .prompt-source-card:hover {
+    box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+    transform: none;
+  }
 }

@@ -40,13 +40,13 @@
   box-shadow: var(--shadow-primary-sm);
 }
 
-.lang-flag { 
-  font-size: 15px; 
+.lang-flag {
+  font-size: 15px;
 }
 
 /* ===== 响应式 ===== */
 @media (max-width: 768px) {
-  .lang-selector { 
-    flex-wrap: wrap; 
+  .lang-selector {
+    flex-wrap: wrap;
   }
 }

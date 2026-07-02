@@ -107,12 +107,12 @@
 }
 
 .dark .tabs-container--pill,
-[data-theme="dark"] .tabs-container--pill {
+[data-theme='dark'] .tabs-container--pill {
   background: rgba(255, 255, 255, 0.06);
 }
 
 .dark .tabs-container--pill .tab-item--active,
-[data-theme="dark"] .tabs-container--pill .tab-item--active {
+[data-theme='dark'] .tabs-container--pill .tab-item--active {
   background: rgba(255, 255, 255, 0.1);
   color: #f9fafb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -130,7 +130,6 @@
   padding: 12px 20px;
   font-size: 1rem;
 }
-
 
 /* ========================================
    分类标签（Category Tabs）
@@ -171,12 +170,12 @@
 }
 
 .cat-tab .count {
-  background: rgba(255, 255, 255, .15);
+  background: rgba(255, 255, 255, 0.15);
   padding: 1px 7px;
   border-radius: var(--rounded-md);
   font-size: var(--text-2xs);
 }
 
 .cat-tab.active .count {
-  background: rgba(255, 255, 255, .25);
+  background: rgba(255, 255, 255, 0.25);
 }

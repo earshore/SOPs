@@ -79,16 +79,20 @@ function getCurrentProducts(context: AlpineContext): Product[] {
   return products;
 }
 
-function createProductComputedProperties(context: AlpineContext): ComputedMixin<Pick<
-  ComputedProperties,
-  | 'currentProducts'
-  | 'availableAsins'
-  | 'hasData'
-  | 'canAnalyze'
-  | 'analysisTargets'
-  | 'listingAnalysisTargets'
-  | 'reviewAnalysisTargets'
->> {
+function createProductComputedProperties(
+  context: AlpineContext
+): ComputedMixin<
+  Pick<
+    ComputedProperties,
+    | 'currentProducts'
+    | 'availableAsins'
+    | 'hasData'
+    | 'canAnalyze'
+    | 'analysisTargets'
+    | 'listingAnalysisTargets'
+    | 'reviewAnalysisTargets'
+  >
+> {
   return {
     get currentProducts(): Product[] {
       return getCurrentProducts(context);
@@ -97,9 +101,7 @@ function createProductComputedProperties(context: AlpineContext): ComputedMixin<
     get availableAsins(): string[] {
       const scrapedData = getScrapedData();
       if (scrapedData && scrapedData.products && scrapedData.products.length > 0) {
-        return scrapedData.products
-          .map(p => p.asin)
-          .filter((asin): asin is string => !!asin);
+        return scrapedData.products.map(p => p.asin).filter((asin): asin is string => !!asin);
       }
       return [];
     },
@@ -128,26 +130,33 @@ function createProductComputedProperties(context: AlpineContext): ComputedMixin<
   };
 }
 
-function createSummaryComputedProperties(context: AlpineContext): ComputedMixin<Pick<
-  ComputedProperties,
-  | 'totalFeatureBulletCount'
-  | 'totalCustomerReviewCount'
-  | 'productSummaryText'
-  | 'dataSourceMetaText'
-  | 'hasNoAvailableAsins'
-  | 'hasNoScraperData'
-  | 'hasSelectedAnalysisInput'
-  | 'hasMissingAnalysisInput'
-  | 'selectedTaskCountText'
-  | 'promptPanelToggleText'
->> {
+function createSummaryComputedProperties(
+  context: AlpineContext
+): ComputedMixin<
+  Pick<
+    ComputedProperties,
+    | 'totalFeatureBulletCount'
+    | 'totalCustomerReviewCount'
+    | 'productSummaryText'
+    | 'dataSourceMetaText'
+    | 'hasNoAvailableAsins'
+    | 'hasNoScraperData'
+    | 'hasSelectedAnalysisInput'
+    | 'hasMissingAnalysisInput'
+    | 'selectedTaskCountText'
+    | 'promptPanelToggleText'
+  >
+> {
   return {
     get totalFeatureBulletCount(): number {
       return this.currentProducts.reduce((sum, product) => sum + product.feature_bullets.length, 0);
     },
 
     get totalCustomerReviewCount(): number {
-      return this.currentProducts.reduce((sum, product) => sum + product.customer_reviews.length, 0);
+      return this.currentProducts.reduce(
+        (sum, product) => sum + product.customer_reviews.length,
+        0
+      );
     },
 
     get productSummaryText(): string {
@@ -184,13 +193,21 @@ function createSummaryComputedProperties(context: AlpineContext): ComputedMixin<
   };
 }
 
-function createResultComputedProperties(context: AlpineContext): ComputedMixin<Pick<
-  ComputedProperties,
-  'results' | 'listingsResults' | 'reviewsResults' | 'totalHighlights' | 'totalDetails'
->> {
+function createResultComputedProperties(
+  context: AlpineContext
+): ComputedMixin<
+  Pick<
+    ComputedProperties,
+    'results' | 'listingsResults' | 'reviewsResults' | 'totalHighlights' | 'totalDetails'
+  >
+> {
   return {
     get results(): AnalysisResult[] {
-      if (!context.analysisReport || !context.selectedTargets || context.selectedTargets.length === 0) {
+      if (
+        !context.analysisReport ||
+        !context.selectedTargets ||
+        context.selectedTargets.length === 0
+      ) {
         return [];
       }
 
@@ -226,10 +243,18 @@ function createResultComputedProperties(context: AlpineContext): ComputedMixin<P
   };
 }
 
-function createDataSourceComputedProperties(context: AlpineContext): ComputedMixin<Pick<
-  ComputedProperties,
-  'hasScraperData' | 'dataSourceLabel' | 'dataSourceMarketplace' | 'dataSourceTimestamp' | 'fullReportData'
->> {
+function createDataSourceComputedProperties(
+  context: AlpineContext
+): ComputedMixin<
+  Pick<
+    ComputedProperties,
+    | 'hasScraperData'
+    | 'dataSourceLabel'
+    | 'dataSourceMarketplace'
+    | 'dataSourceTimestamp'
+    | 'fullReportData'
+  >
+> {
   return {
     get hasScraperData(): boolean {
       const scrapedData = getScrapedData();
@@ -259,9 +284,10 @@ function createDataSourceComputedProperties(context: AlpineContext): ComputedMix
     get fullReportData(): FullReportData | null {
       if (!context.analysisReport) return null;
 
-      const productTitle = this.currentProducts.length > 0
-        ? this.currentProducts.map(p => p.productTitle).join(' | ')
-        : undefined;
+      const productTitle =
+        this.currentProducts.length > 0
+          ? this.currentProducts.map(p => p.productTitle).join(' | ')
+          : undefined;
 
       return {
         metadata: {
@@ -270,18 +296,17 @@ function createDataSourceComputedProperties(context: AlpineContext): ComputedMix
           timestamp: new Date().toISOString(),
           dataSource: context.dataSource,
           marketplace: this.dataSourceMarketplace,
-          productTitle
+          productTitle,
         },
-        analysisReport: context.analysisReport
+        analysisReport: context.analysisReport,
       };
     },
   };
 }
 
-function createTokenComputedProperties(): ComputedMixin<Pick<
-  ComputedProperties,
-  'totalTokenCount' | 'formattedTotalTokenCount'
->> {
+function createTokenComputedProperties(): ComputedMixin<
+  Pick<ComputedProperties, 'totalTokenCount' | 'formattedTotalTokenCount'>
+> {
   return {
     get totalTokenCount(): number {
       const ctx = this as unknown as AlpineContext & ComputedProperties;

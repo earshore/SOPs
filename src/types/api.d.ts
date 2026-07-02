@@ -616,5 +616,5 @@ export type {
   ConfigResponse,
   LLMProviderConfigResponse,
   HealthCheckResponse,
-  BatchOperationResult
+  BatchOperationResult,
 };

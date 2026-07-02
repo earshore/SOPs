@@ -17,7 +17,7 @@ import type {
   BuyerProfileReport,
   SellingPointsReport,
   TitleKeywordsReport,
-} from "../ai_analysis/config/analysisReportData";
+} from '../ai_analysis/config/analysisReportData';
 /**
  * 提取的产品 DNA 接口
  */
@@ -49,8 +49,8 @@ interface SpecsExtractionState {
 }
 
 const GENDER_LABELS: Record<string, string> = {
-  male: "男性",
-  female: "女性",
+  male: '男性',
+  female: '女性',
 };
 
 function createAudienceResult(state: AudienceExtractionState): {
@@ -58,18 +58,18 @@ function createAudienceResult(state: AudienceExtractionState): {
   confidence: number;
 } {
   return {
-    text: state.parts.join(", ") || "",
+    text: state.parts.join(', ') || '',
     confidence: Math.min(state.confidence, 1.0),
   };
 }
 
 function appendAudienceDemographics(
   state: AudienceExtractionState,
-  demographics: BuyerProfileReport["demographics"] | undefined,
+  demographics: BuyerProfileReport['demographics'] | undefined
 ): void {
   if (!demographics) return;
 
-  const demographic = `${demographics.age_range_estimate || ""}${GENDER_LABELS[demographics.likely_gender] || ""}`;
+  const demographic = `${demographics.age_range_estimate || ''}${GENDER_LABELS[demographics.likely_gender] || ''}`;
   if (demographic) {
     state.parts.push(demographic);
     state.confidence += 0.3;
@@ -84,11 +84,11 @@ function appendAudienceDemographics(
 
 function appendAudienceBuyerTypes(
   state: AudienceExtractionState,
-  buyerTypes: BuyerProfileReport["buyer_types"] | undefined,
+  buyerTypes: BuyerProfileReport['buyer_types'] | undefined
 ): void {
   const topTypes = (buyerTypes || [])
     .slice(0, 2)
-    .map((buyerType) => buyerType.type)
+    .map(buyerType => buyerType.type)
     .filter(Boolean);
 
   if (topTypes.length === 0) return;
@@ -99,7 +99,7 @@ function appendAudienceBuyerTypes(
 
 function appendAudienceMotivations(
   state: AudienceExtractionState,
-  motivations: BuyerProfileReport["purchase_motivations"] | undefined,
+  motivations: BuyerProfileReport['purchase_motivations'] | undefined
 ): void {
   if (!motivations?.length || state.parts.length >= 5) return;
 
@@ -143,8 +143,8 @@ function extractAudience(report: BuyerProfileReport): {
 
     return createAudienceResult(state);
   } catch (error) {
-    console.error("[DNA提取器] 提取受众失败:", error);
-    return { text: "", confidence: 0 };
+    console.error('[DNA提取器] 提取受众失败:', error);
+    return { text: '', confidence: 0 };
   }
 }
 
@@ -181,7 +181,7 @@ function extractUSPs(report: SellingPointsReport): {
     const functionSceneMatrix = report.function_scene_matrix;
     if (functionSceneMatrix && functionSceneMatrix.functions) {
       const functions = functionSceneMatrix.functions.slice(0, 5);
-      usps.push(...functions.map((f) => `- ${f}`));
+      usps.push(...functions.map(f => `- ${f}`));
       confidence += 0.4;
     }
 
@@ -195,13 +195,10 @@ function extractUSPs(report: SellingPointsReport): {
     // 3. 如果卖点不足，从 bullet_analysis 补充
     if (usps.length < 3 && report.bullet_analysis) {
       const bullets = report.bullet_analysis
-        .filter(
-          (b) =>
-            b.credibility_score === "high" || b.credibility_score === "medium",
-        )
+        .filter(b => b.credibility_score === 'high' || b.credibility_score === 'medium')
         .slice(0, 3 - usps.length);
 
-      bullets.forEach((b) => {
+      bullets.forEach(b => {
         if (b.functions && b.functions.length > 0) {
           usps.push(`- ${b.functions[0]}`);
         }
@@ -209,14 +206,14 @@ function extractUSPs(report: SellingPointsReport): {
       confidence += 0.3;
     }
 
-    const text = usps.join("\n");
+    const text = usps.join('\n');
     return {
-      text: text || "",
+      text: text || '',
       confidence: Math.min(confidence, 1.0),
     };
   } catch (error) {
-    console.error("[DNA提取器] 提取卖点失败:", error);
-    return { text: "", confidence: 0 };
+    console.error('[DNA提取器] 提取卖点失败:', error);
+    return { text: '', confidence: 0 };
   }
 }
 
@@ -289,16 +286,14 @@ function isTechnicalSpec(text: string): boolean {
  * @param keywords secondary_keywords 数组
  * @returns 按 type 分组的规格列表（格式：type: keyword1, keyword2）
  */
-function extractSpecsByType(
-  keywords: TitleKeywordsReport["secondary_keywords"],
-): string[] {
+function extractSpecsByType(keywords: TitleKeywordsReport['secondary_keywords']): string[] {
   const specs: string[] = [];
 
   // 按 type 分组
   const grouped = new Map<string, string[]>();
 
-  keywords.forEach((k) => {
-    const type = k.type || "other";
+  keywords.forEach(k => {
+    const type = k.type || 'other';
     const keywordsForType = grouped.get(type);
     if (keywordsForType) {
       keywordsForType.push(k.keyword);
@@ -309,7 +304,7 @@ function extractSpecsByType(
 
   // 为每个 type 生成一行规格（直接使用原始 type）
   grouped.forEach((kws, type) => {
-    specs.push(`${type}: ${kws.join(", ")}`);
+    specs.push(`${type}: ${kws.join(', ')}`);
   });
 
   return specs;
@@ -336,28 +331,26 @@ function extractSpecsByType(
  * @param bulletAnalysis bullet_analysis 数组
  * @returns 技术规格列表（带 "- " 前缀）
  */
-function extractTechnicalSpecs(
-  bulletAnalysis: SellingPointsReport["bullet_analysis"],
-): string[] {
+function extractTechnicalSpecs(bulletAnalysis: SellingPointsReport['bullet_analysis']): string[] {
   if (!bulletAnalysis) return [];
 
   // 提取所有 functions
   const allFunctions = bulletAnalysis
-    .filter((b) => b.functions && b.functions.length > 0)
-    .flatMap((b) => b.functions);
+    .filter(b => b.functions && b.functions.length > 0)
+    .flatMap(b => b.functions);
 
   // 使用智能模式匹配筛选技术规格
   const techSpecs = allFunctions
-    .filter((f) => isTechnicalSpec(f))
+    .filter(f => isTechnicalSpec(f))
     .slice(0, 5)
-    .map((s) => `- ${s}`);
+    .map(s => `- ${s}`);
 
   return techSpecs;
 }
 
 function appendKeywordSpecs(
   state: SpecsExtractionState,
-  titleKeywords: TitleKeywordsReport | undefined,
+  titleKeywords: TitleKeywordsReport | undefined
 ): void {
   const secondaryKeywords = titleKeywords?.secondary_keywords;
   if (!secondaryKeywords?.length) return;
@@ -369,7 +362,7 @@ function appendKeywordSpecs(
 
 function appendTechnicalSpecs(
   state: SpecsExtractionState,
-  sellingPoints: SellingPointsReport | undefined,
+  sellingPoints: SellingPointsReport | undefined
 ): void {
   const bulletAnalysis = sellingPoints?.bullet_analysis;
   if (!bulletAnalysis || state.specs.length >= 8) return;
@@ -431,7 +424,7 @@ function calculateSpecsConfidence(state: SpecsExtractionState): number {
  */
 function extractSpecs(
   titleKeywords: TitleKeywordsReport | undefined,
-  sellingPoints: SellingPointsReport | undefined,
+  sellingPoints: SellingPointsReport | undefined
 ): { text: string; confidence: number } {
   try {
     const state: SpecsExtractionState = {
@@ -442,14 +435,14 @@ function extractSpecs(
     appendKeywordSpecs(state, titleKeywords);
     appendTechnicalSpecs(state, sellingPoints);
 
-    const text = state.specs.join("\n");
+    const text = state.specs.join('\n');
     return {
-      text: text || "",
+      text: text || '',
       confidence: calculateSpecsConfidence(state),
     };
   } catch (error) {
-    console.error("[DNA提取器] 提取规格失败:", error);
-    return { text: "", confidence: 0 };
+    console.error('[DNA提取器] 提取规格失败:', error);
+    return { text: '', confidence: 0 };
   }
 }
 
@@ -460,7 +453,7 @@ function extractSpecs(
  * @returns 提取的产品 DNA，如果提取失败返回 null
  */
 export function extractProductDNA(
-  report: FullAnalysisReport | null | undefined,
+  report: FullAnalysisReport | null | undefined
 ): ExtractedDNA | null {
   if (!report) {
     return null;
@@ -468,25 +461,19 @@ export function extractProductDNA(
 
   try {
     // 提取各个部分
-    const audienceResult = report["buyer-profile"]
-      ? extractAudience(report["buyer-profile"])
-      : { text: "", confidence: 0 };
+    const audienceResult = report['buyer-profile']
+      ? extractAudience(report['buyer-profile'])
+      : { text: '', confidence: 0 };
 
-    const uspsResult = report["selling-points"]
-      ? extractUSPs(report["selling-points"])
-      : { text: "", confidence: 0 };
+    const uspsResult = report['selling-points']
+      ? extractUSPs(report['selling-points'])
+      : { text: '', confidence: 0 };
 
-    const specsResult = extractSpecs(
-      report["title-keywords"],
-      report["selling-points"],
-    );
+    const specsResult = extractSpecs(report['title-keywords'], report['selling-points']);
 
     // 计算总体置信度
     const avgConfidence =
-      (audienceResult.confidence +
-        uspsResult.confidence +
-        specsResult.confidence) /
-      3;
+      (audienceResult.confidence + uspsResult.confidence + specsResult.confidence) / 3;
 
     // 如果总体置信度太低，返回 null
     if (avgConfidence < 0.2) {
@@ -505,16 +492,16 @@ export function extractProductDNA(
       metadata: {
         extractedAt: new Date().toISOString(),
         sourceFields: [
-          report["buyer-profile"] ? "buyer-profile" : "",
-          report["selling-points"] ? "selling-points" : "",
-          report["title-keywords"] ? "title-keywords" : "",
+          report['buyer-profile'] ? 'buyer-profile' : '',
+          report['selling-points'] ? 'selling-points' : '',
+          report['title-keywords'] ? 'title-keywords' : '',
         ].filter(Boolean),
       },
     };
 
     return dna;
   } catch (error) {
-    console.error("[DNA提取器] 提取过程出错:", error);
+    console.error('[DNA提取器] 提取过程出错:', error);
     return null;
   }
 }
@@ -522,11 +509,9 @@ export function extractProductDNA(
 /**
  * 检查报告是否包含足够的数据用于 DNA 提取
  */
-export function canExtractDNA(
-  report: FullAnalysisReport | null | undefined,
-): boolean {
+export function canExtractDNA(report: FullAnalysisReport | null | undefined): boolean {
   if (!report) return false;
 
   // 至少需要有 buyer-profile 或 selling-points 之一
-  return !!(report["buyer-profile"] || report["selling-points"]);
+  return !!(report['buyer-profile'] || report['selling-points']);
 }

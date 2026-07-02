@@ -15,18 +15,18 @@ export const SERVICE_NAMES = {
   CONFIG: 'config',
   STORAGE: 'storage',
   EVENT_BUS: 'eventBus',
-  
+
   // 核心服务（依赖基础服务）
   LOGGER: 'logger',
   WORKING_STATE_MANAGER: 'workingStateManager',
   GLOBAL_ERROR_HANDLER: 'globalErrorHandler',
-  
+
   // 应用服务（依赖核心服务）
   HTTP: 'http',
   ACTION_REGISTRY: 'actionRegistry',
   ROUTER: 'router',
   LOADING_MANAGER: 'loadingManager',
-  
+
   // 业务服务
   LLM: 'llm',
   PERFORMANCE: 'performance',
@@ -41,7 +41,7 @@ export const SERVICE_NAMES = {
 /**
  * 服务名称类型
  */
-export type ServiceName = typeof SERVICE_NAMES[keyof typeof SERVICE_NAMES];
+export type ServiceName = (typeof SERVICE_NAMES)[keyof typeof SERVICE_NAMES];
 
 /**
  * 服务配置定义
@@ -101,14 +101,10 @@ export class ServiceRegistry {
    */
   registerAll(container: DIContainer): void {
     for (const config of this.configs.values()) {
-      container.register(
-        config.name,
-        config.factory,
-        {
-          lifetime: config.lifetime,
-          dependencies: config.dependencies
-        }
-      );
+      container.register(config.name, config.factory, {
+        lifetime: config.lifetime,
+        dependencies: config.dependencies,
+      });
     }
   }
 

@@ -202,7 +202,11 @@ class HttpServiceClass implements IHttpService {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+  private _log(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    data: Record<string, unknown> = {}
+  ): void {
     if (this.logger) {
       this.logger[level](message, data, 'HttpService');
     } else {
@@ -210,16 +214,14 @@ class HttpServiceClass implements IHttpService {
     }
   }
 
-  private async _getCachedResponse<T>(
-    context: HttpCacheContext
-  ): Promise<CacheLookup<T>> {
+  private async _getCachedResponse<T>(context: HttpCacheContext): Promise<CacheLookup<T>> {
     if (context.method !== 'GET' || !context.cache || context.forceRefresh) {
       return { hit: false };
     }
 
     const cached = await httpCacheService.get(context.cacheKey, {
       strategy: context.cache,
-      ttl: context.cacheTTL
+      ttl: context.cacheTTL,
     });
 
     if (cached === null) {
@@ -230,27 +232,30 @@ class HttpServiceClass implements IHttpService {
     return { hit: true, value: cached as T };
   }
 
-  private async _cacheResponse<T>(
-    context: HttpCacheContext,
-    result: T
-  ): Promise<void> {
+  private async _cacheResponse<T>(context: HttpCacheContext, result: T): Promise<void> {
     if (context.method !== 'GET' || !context.cache) {
       return;
     }
 
     await httpCacheService.set(context.cacheKey, result, {
       strategy: context.cache,
-      ttl: context.cacheTTL
+      ttl: context.cacheTTL,
     });
   }
 
-  private _attachAbortSignal(signal: AbortSignal | null | undefined, controller: AbortController): void {
+  private _attachAbortSignal(
+    signal: AbortSignal | null | undefined,
+    controller: AbortController
+  ): void {
     if (signal) {
       signal.addEventListener('abort', () => controller.abort(), { once: true });
     }
   }
 
-  private _createFetchOptions(options: HttpRequestExecutionOptions, controller: AbortController): RequestInit {
+  private _createFetchOptions(
+    options: HttpRequestExecutionOptions,
+    controller: AbortController
+  ): RequestInit {
     const fetchOptions: RequestInit = {
       method: options.method,
       headers: options.headers,
@@ -258,7 +263,8 @@ class HttpServiceClass implements IHttpService {
     };
 
     if (options.body) {
-      fetchOptions.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+      fetchOptions.body =
+        typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
     }
 
     return fetchOptions;
@@ -271,7 +277,7 @@ class HttpServiceClass implements IHttpService {
     }
 
     if (!json) {
-      return await response.text() as T;
+      return (await response.text()) as T;
     }
 
     const data = await response.json();
@@ -321,24 +327,35 @@ class HttpServiceClass implements IHttpService {
         }
 
         await this._delay(options.retryDelay * (attempt + 1));
-        this._log('debug', 'Retry request', { attempt: attempt + 1, retries: options.retries, url });
+        this._log('debug', 'Retry request', {
+          attempt: attempt + 1,
+          retries: options.retries,
+          url,
+        });
       }
     }
 
     throw lastError;
   }
 
-  private _runRequest<T>(
-    context: HttpRunContext<T>
-  ): Promise<T> {
+  private _runRequest<T>(context: HttpRunContext<T>): Promise<T> {
     const run = () => context.executeRequest(context.signal);
 
     if (context.measurePerformance) {
-      return this._executeWithPerformance(context.url, context.method, context.usePool, context.priority, run);
+      return this._executeWithPerformance(
+        context.url,
+        context.method,
+        context.usePool,
+        context.priority,
+        run
+      );
     }
 
     if (context.usePool) {
-      return priorityRequestPool.add(run, context.priority, { url: context.url, method: context.method });
+      return priorityRequestPool.add(run, context.priority, {
+        url: context.url,
+        method: context.method,
+      });
     }
 
     return run();
@@ -379,7 +396,7 @@ class HttpServiceClass implements IHttpService {
       cacheKey: finalCacheKey,
       cacheTTL,
       forceRefresh,
-      url
+      url,
     };
     const cached = await this._getCachedResponse<T>(cacheContext);
     if (cached.hit) {
@@ -403,19 +420,27 @@ class HttpServiceClass implements IHttpService {
     if (deduplicate || cancelPrevious) {
       result = await requestManager.execute(
         requestKey,
-        (signal) => this._runRequest({
-          url,
-          method,
-          usePool,
-          priority,
-          measurePerformance,
-          executeRequest,
-          signal
-        }),
+        signal =>
+          this._runRequest({
+            url,
+            method,
+            usePool,
+            priority,
+            measurePerformance,
+            executeRequest,
+            signal,
+          }),
         { deduplicate, cancelPrevious }
       );
     } else {
-      result = await this._runRequest({ url, method, usePool, priority, measurePerformance, executeRequest });
+      result = await this._runRequest({
+        url,
+        method,
+        usePool,
+        priority,
+        measurePerformance,
+        executeRequest,
+      });
     }
 
     await this._cacheResponse(cacheContext, result);
@@ -481,7 +506,7 @@ class HttpServiceClass implements IHttpService {
   /**
    * 发送 API 请求并验证响应格式
    * 🎯 P0-4.1.8: 在数据边界使用类型守卫
-   * 
+   *
    * @param url - 请求 URL
    * @param options - 请求选项
    * @param dataGuard - 可选的数据类型守卫函数
@@ -518,10 +543,14 @@ class HttpServiceClass implements IHttpService {
    * 带授权的 API 请求（已废弃，使用 apiRequest 代替）
    * @deprecated 使用 apiRequest 方法代替
    */
-  async apiRequestWithAuth<T = unknown>(url: string, token: string, options: HttpOptions = {}): Promise<T> {
+  async apiRequestWithAuth<T = unknown>(
+    url: string,
+    token: string,
+    options: HttpOptions = {}
+  ): Promise<T> {
     const headers = {
       ...options.headers,
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     };
     return this.request<T>(url, { ...options, headers });
   }
@@ -542,14 +571,14 @@ class HttpServiceClass implements IHttpService {
         this.request<T>(`${baseUrl}${path}`, {
           ...options,
           method: 'GET',
-          headers: { ...defaultHeaders, ...options.headers }
+          headers: { ...defaultHeaders, ...options.headers },
         }),
       post: <T = unknown>(path: string, body?: unknown, options: HttpOptions = {}) =>
         this.request<T>(`${baseUrl}${path}`, {
           ...options,
           method: 'POST',
           body,
-          headers: { ...defaultHeaders, ...options.headers }
+          headers: { ...defaultHeaders, ...options.headers },
         }),
     };
   }

@@ -17,19 +17,19 @@
 }
 
 .chat-messages-container::-webkit-scrollbar,
-.rufus-messages-container::-webkit-scrollbar { 
-  width: 5px; 
+.rufus-messages-container::-webkit-scrollbar {
+  width: 5px;
 }
 
 .chat-messages-container::-webkit-scrollbar-track,
-.rufus-messages-container::-webkit-scrollbar-track { 
-  background: transparent; 
+.rufus-messages-container::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .chat-messages-container::-webkit-scrollbar-thumb,
-.rufus-messages-container::-webkit-scrollbar-thumb { 
-  background: var(--color-text-placeholder); 
-  border-radius: var(--rounded-md); 
+.rufus-messages-container::-webkit-scrollbar-thumb {
+  background: var(--color-text-placeholder);
+  border-radius: var(--rounded-md);
 }
 
 /* ===== 空状态 ===== */
@@ -162,18 +162,18 @@
 }
 
 .chat-message.user .message-role,
-.rufus-message.user .message-role { 
-  color: rgba(255, 255, 255, .9); 
+.rufus-message.user .message-role {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .chat-message.assistant .message-role,
-.rufus-message.assistant .message-role { 
-  color: var(--color-primary); 
+.rufus-message.assistant .message-role {
+  color: var(--color-primary);
 }
 
-.message-time { 
-  opacity: .6; 
-  font-size: var(--text-2xs); 
+.message-time {
+  opacity: 0.6;
+  font-size: var(--text-2xs);
 }
 
 /* ===== 消息内容 ===== */
@@ -185,13 +185,13 @@
 }
 
 .chat-message.user .message-content,
-.rufus-message.user .message-content { 
-  color: white; 
+.rufus-message.user .message-content {
+  color: white;
 }
 
 .chat-message.assistant .message-content,
-.rufus-message.assistant .message-content { 
-  color: var(--color-text-primary); 
+.rufus-message.assistant .message-content {
+  color: var(--color-text-primary);
 }
 
 /* ===== 输入区域 ===== */
@@ -238,8 +238,8 @@
 }
 
 .chat-input::placeholder,
-.rufus-input::placeholder { 
-  color: var(--color-text-placeholder); 
+.rufus-input::placeholder {
+  color: var(--color-text-placeholder);
 }
 
 .chat-send-btn,
@@ -268,7 +268,7 @@
 
 .chat-send-btn:active,
 .rufus-send-btn:active {
-  transform: scale(.95);
+  transform: scale(0.95);
 }
 
 /* ===== 提示信息 ===== */

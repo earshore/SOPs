@@ -1,19 +1,24 @@
 /**
  * OverviewRenderer.ts - 统一总览页面渲染器
- * 
+ *
  * 功能特性:
  * - 从 menuConfig 自动读取配置
  * - 支持多种布局模板
  * - 统一的搜索/筛选/导航功能
  * - 响应式设计
- * 
+ *
  * 使用方式:
  * import { OverviewRenderer } from '../../common/components/OverviewRenderer';
  * const renderer = new OverviewRenderer(container, moduleId, options);
  * await renderer.render();
  */
 
-import { MENU_CONFIG, getRoutesByModule, type RouteConfig, type ModuleConfig } from '../config/menuConfig';
+import {
+  MENU_CONFIG,
+  getRoutesByModule,
+  type RouteConfig,
+  type ModuleConfig,
+} from '../config/menuConfig';
 import { APP_EVENTS } from '../constants/eventConstants';
 import type { CategoryConfig } from './SidebarRenderer';
 import { SystemError } from '@/common/errors/AppError';
@@ -79,26 +84,28 @@ export class OverviewRenderer {
       showGuide: true,
       customGuide: null,
       categoryKey: null,
-      ...options
+      ...options,
     };
 
     // 从配置中获取模块信息
     const moduleConfig = MENU_CONFIG.modules[moduleId];
     if (!moduleConfig) {
-      throw new SystemError(
-        `模块配置未找到: ${moduleId}`,
-        'MODULE_CONFIG_NOT_FOUND',
-        { module: 'OverviewRenderer', action: 'constructor', moduleId }
-      );
+      throw new SystemError(`模块配置未找到: ${moduleId}`, 'MODULE_CONFIG_NOT_FOUND', {
+        module: 'OverviewRenderer',
+        action: 'constructor',
+        moduleId,
+      });
     }
     this.moduleConfig = moduleConfig;
 
     // 获取该模块的所有路由
     this.routes = getRoutesByModule(moduleId);
-    
+
     // 获取分类配置
-    this.categories = this.options.categoryKey 
-      ? ((MENU_CONFIG as unknown as Record<string, unknown>)[this.options.categoryKey] as Record<string, CategoryConfig> | undefined) || null
+    this.categories = this.options.categoryKey
+      ? ((MENU_CONFIG as unknown as Record<string, unknown>)[this.options.categoryKey] as
+          | Record<string, CategoryConfig>
+          | undefined) || null
       : null;
 
     // 按分类分组路由
@@ -113,7 +120,7 @@ export class OverviewRenderer {
     // ✅ 安全: _generateHTML返回的HTML使用内部配置数据(moduleConfig, routes来自MENU_CONFIG)
     setSafeHtml(this.container, html);
     this.container.classList.add('fade-in');
-    
+
     // 初始化事件监听
     this._initEvents();
   }
@@ -204,7 +211,7 @@ export class OverviewRenderer {
   private _renderQuickLinks(): string {
     // 获取前4个路由作为快速入口
     const quickRoutes = this.routes.filter(r => r.id !== `${this.moduleId}_overview`).slice(0, 4);
-    
+
     if (quickRoutes.length === 0) return '';
 
     return `
@@ -214,7 +221,9 @@ export class OverviewRenderer {
           快速入口
         </h4>
         <div class="flex gap-3 flex-wrap">
-          ${quickRoutes.map(route => `
+          ${quickRoutes
+            .map(
+              route => `
             <button 
               class="px-4 py-2 bg-white text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
               data-action="switch-tab"
@@ -222,7 +231,9 @@ export class OverviewRenderer {
             >
               <i class="${route.icon} mr-2"></i>${route.label}
             </button>
-          `).join('')}
+          `
+            )
+            .join('')}
         </div>
       </div>
     `;
@@ -244,14 +255,18 @@ export class OverviewRenderer {
         >
           <i class="fas fa-th mr-2"></i>全部
         </button>
-        ${sortedCategories.map(cat => `
+        ${sortedCategories
+          .map(
+            cat => `
           <button 
             class="category-filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
             data-category="${cat.id}"
           >
             <i class="${cat.icon} mr-2"></i>${cat.label}
           </button>
-        `).join('')}
+        `
+          )
+          .join('')}
       </div>
     `;
   }
@@ -280,12 +295,13 @@ export class OverviewRenderer {
     if (this.categories) {
       // 按分类分组显示
       const sortedCategories = Object.values(this.categories).sort((a, b) => a.order - b.order);
-      
-      return sortedCategories.map(category => {
-        const categoryRoutes = this.routesByCategory[category.id] || [];
-        if (categoryRoutes.length === 0) return '';
 
-        return `
+      return sortedCategories
+        .map(category => {
+          const categoryRoutes = this.routesByCategory[category.id] || [];
+          if (categoryRoutes.length === 0) return '';
+
+          return `
           <section id="overview-module-${category.id}" class="mb-10" data-category="${category.id}">
             <div class="overview-module-section">
               <div class="flex items-center gap-3 mb-4">
@@ -303,7 +319,8 @@ export class OverviewRenderer {
             </div>
           </section>
         `;
-      }).join('');
+        })
+        .join('');
     } else {
       // 无分类,直接显示所有路由
       const routes = this.routes.filter(r => r.id !== `${this.moduleId}_overview`);
@@ -345,10 +362,12 @@ export class OverviewRenderer {
    */
   private _renderListLayout(): string {
     const routes = this.routes.filter(r => r.id !== `${this.moduleId}_overview`);
-    
+
     return `
       <div class="space-y-3">
-        ${routes.map(route => `
+        ${routes
+          .map(
+            route => `
           <div 
             class="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-all cursor-pointer flex items-center gap-4"
             data-action="switch-tab"
@@ -364,7 +383,9 @@ export class OverviewRenderer {
             </div>
             <i class="fas fa-chevron-right text-slate-400"></i>
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
       </div>
     `;
   }
@@ -374,10 +395,12 @@ export class OverviewRenderer {
    */
   private _renderGridLayout(): string {
     const routes = this.routes.filter(r => r.id !== `${this.moduleId}_overview`);
-    
+
     return `
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        ${routes.map(route => `
+        ${routes
+          .map(
+            route => `
           <div 
             class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all cursor-pointer group"
             data-action="switch-tab"
@@ -394,7 +417,9 @@ export class OverviewRenderer {
             </div>
             <p class="text-sm text-slate-500">点击进入查看详情</p>
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
       </div>
     `;
   }
@@ -404,12 +429,14 @@ export class OverviewRenderer {
    */
   private _renderTimelineLayout(): string {
     const routes = this.routes.filter(r => r.id !== `${this.moduleId}_overview`);
-    
+
     return `
       <div class="relative">
         <div class="absolute left-6 top-0 bottom-0 w-0.5 bg-slate-200"></div>
         <div class="space-y-6">
-          ${routes.map((route) => `
+          ${routes
+            .map(
+              route => `
             <div 
               class="relative pl-16 cursor-pointer group"
               data-action="switch-tab"
@@ -426,7 +453,9 @@ export class OverviewRenderer {
                 <p class="text-sm text-slate-500">点击进入查看详情</p>
               </div>
             </div>
-          `).join('')}
+          `
+            )
+            .join('')}
         </div>
       </div>
     `;
@@ -441,14 +470,21 @@ export class OverviewRenderer {
 
     const stats = [
       { label: '功能模块', value: totalRoutes, color: 'blue', icon: 'fas fa-cube' },
-      { label: '分类数量', value: categoryCount || '-', color: 'purple', icon: 'fas fa-layer-group' },
+      {
+        label: '分类数量',
+        value: categoryCount || '-',
+        color: 'purple',
+        icon: 'fas fa-layer-group',
+      },
       { label: '可用性', value: '100%', color: 'green', icon: 'fas fa-check-circle' },
-      { label: '版本', value: this.moduleConfig.version, color: 'orange', icon: 'fas fa-tag' }
+      { label: '版本', value: this.moduleConfig.version, color: 'orange', icon: 'fas fa-tag' },
     ];
 
     return `
       <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-        ${stats.map(stat => `
+        ${stats
+          .map(
+            stat => `
           <div class="bg-gradient-to-br from-${stat.color}-50 to-${stat.color}-100 rounded-xl p-4 border border-${stat.color}-200">
             <div class="flex items-center gap-2 mb-2">
               <i class="${stat.icon} text-${stat.color}-600"></i>
@@ -456,7 +492,9 @@ export class OverviewRenderer {
             </div>
             <div class="text-2xl font-bold text-${stat.color}-600">${stat.value}</div>
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
       </div>
     `;
   }
@@ -466,10 +504,10 @@ export class OverviewRenderer {
    */
   private _groupRoutesByCategory(): RoutesByCategory {
     const grouped: RoutesByCategory = {};
-    
+
     this.routes.forEach(route => {
       if (route.id === `${this.moduleId}_overview`) return;
-      
+
       const category = route.category || 'uncategorized';
       if (!grouped[category]) {
         grouped[category] = [];
@@ -497,9 +535,11 @@ export class OverviewRenderer {
 
     // 搜索功能
     if (this.options.showSearch) {
-      const searchInput = this.container.querySelector('#overview-search-input') as HTMLInputElement;
+      const searchInput = this.container.querySelector(
+        '#overview-search-input'
+      ) as HTMLInputElement;
       if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
+        searchInput.addEventListener('input', e => {
           this._handleSearch((e.target as HTMLInputElement).value);
         });
       }
@@ -555,7 +595,7 @@ export class OverviewRenderer {
         (card as HTMLElement).style.display = '';
         card.classList.add('fade-in');
       });
-      sections.forEach(section => (section as HTMLElement).style.display = '');
+      sections.forEach(section => ((section as HTMLElement).style.display = ''));
     } else {
       cards.forEach(card => {
         const cardCategory = (card as HTMLElement).dataset.category;
@@ -580,12 +620,12 @@ export class OverviewRenderer {
   scrollToCategory(categoryId: string): void {
     const element = this.container.querySelector(`#overview-module-${categoryId}`);
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
+      element.scrollIntoView({
+        behavior: 'smooth',
         block: 'start',
-        inline: 'nearest'
+        inline: 'nearest',
       });
-      
+
       element.classList.add('overview-module-highlight');
       setTimeout(() => {
         element.classList.remove('overview-module-highlight');
@@ -596,6 +636,5 @@ export class OverviewRenderer {
   /**
    * 卸载
    */
-  unmount(): void {
-  }
+  unmount(): void {}
 }

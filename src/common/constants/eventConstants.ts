@@ -18,94 +18,94 @@ export const APP_EVENTS = {
   ROUTE_BEFORE_CHANGE: 'app:route-before-change',
   ROUTE_ERROR: 'app:route-error',
   ROUTE_REDIRECT: 'route-redirect', // 路由重定向
-  
+
   // 应用生命周期
   INITIALIZED: 'app:initialized',
   READY: 'app:ready',
-  
+
   // 模块生命周期
   MODULE_MOUNTED: 'app:module-mounted',
   MODULE_UNMOUNTED: 'app:module-unmounted',
   MODULE_UNLOAD: 'app:module-unload', // 主模块卸载请求（在切换前触发）
   MODULE_LOADED: 'app:module-loaded',
   MODULE_ERROR: 'app:module-error',
-  
+
   // 状态变化
   STATE_UPDATED: 'app:state-updated',
   STATE_RESET: 'app:state-reset',
-  
+
   // 用户交互
   USER_ACTION: 'app:user-action',
-  
+
   // 错误处理
   ERROR_OCCURRED: 'app:error-occurred',
   ERROR: 'app:error',
   ERROR_RECOVERED: 'app:error-recovered',
-  
+
   // 数据操作
   DATA_LOADED: 'app:data-loaded',
   DATA_SAVED: 'app:data-saved',
   DATA_DELETED: 'app:data-deleted',
   DATA_UPDATED: 'app:data-updated',
-  
+
   // LLM 相关
   LLM_REQUEST_START: 'app:llm-request-start',
   LLM_REQUEST_SUCCESS: 'app:llm-request-success',
   LLM_REQUEST_ERROR: 'app:llm-request-error',
-  
+
   // 搜索相关
   SEARCH_START: 'app:search-start',
   SEARCH_COMPLETE: 'app:search-complete',
   SEARCH_CLEAR: 'app:search-clear',
-  
+
   // 加载状态相关
   LOADING_START: 'app:loading-start',
   LOADING_STOP: 'app:loading-stop',
-  
+
   // 设置相关
   SETTINGS_OPEN: 'open-settings',
   SETTINGS_CLOSE: 'close-settings',
-  
+
   // 历史记录相关
   HISTORY_UPDATED: 'history-updated',
 
   // 导航相关
   NAVIGATE_TO_SCRAPER: 'navigate-to-scraper',
   NAVIGATE_TO_AI_ANALYSIS: 'navigate-to-ai-analysis',
-  
+
   // 动作注册
   REGISTER_ACTIONS: 'registerActions',
   UNREGISTER_ACTIONS: 'unregisterActions',
-  
+
   // 动画相关
   ANIMATION_SETTINGS_CHANGED: 'app:animation-settings-changed',
-  
+
   // 配置相关
   CONFIG_CHANGE: 'app:config-change',
   CONFIG_CHANGED: 'app:config-changed',
   CONFIG_RELOAD: 'app:config-reload',
   CONFIG_VALIDATE: 'app:config-validate',
-  
+
   // 服务相关
   SERVICE_INIT: 'app:service-init',
   SERVICE_READY: 'app:service-ready',
   SERVICE_ERROR: 'app:service-error',
-  
+
   // UI相关
   UI_MODAL_OPEN: 'app:ui-modal-open',
   UI_MODAL_CLOSE: 'app:ui-modal-close',
   UI_TOAST_SHOW: 'app:ui-toast-show',
-  
+
   // 工作状态相关 (P0优化)
   WORKING_STATE_START: 'app:working-state-start',
   WORKING_STATE_SUCCESS: 'app:working-state-success',
   WORKING_STATE_FAILURE: 'app:working-state-failure',
   WORKING_STATE_TIMEOUT: 'app:working-state-timeout',
   WORKING_STATE_RETRY: 'app:working-state-retry',
-  
+
   // 网络状态相关 (P0优化)
   NETWORK_ONLINE: 'app:network-online',
-  NETWORK_OFFLINE: 'app:network-offline'
+  NETWORK_OFFLINE: 'app:network-offline',
 } as const;
 
 /**
@@ -115,22 +115,22 @@ export const MODULE_EVENTS = {
   // SOPs 模块
   SOPS: {
     SEARCH_UPDATED: 'sops:search-updated',
-    CATEGORY_CHANGED: 'sops:category-changed'
+    CATEGORY_CHANGED: 'sops:category-changed',
   },
-  
+
   // Scraper 模块
   SCRAPER: {
     SCRAPE_START: 'scraper:scrape-start',
     SCRAPE_SUCCESS: 'scraper:scrape-success',
-    SCRAPE_ERROR: 'scraper:scrape-error'
+    SCRAPE_ERROR: 'scraper:scrape-error',
   },
-  
+
   // Analysis 模块
   ANALYSIS: {
     ANALYZE_START: 'analysis:analyze-start',
     ANALYZE_SUCCESS: 'analysis:analyze-success',
-    ANALYZE_ERROR: 'analysis:analyze-error'
-  }
+    ANALYZE_ERROR: 'analysis:analyze-error',
+  },
 } as const;
 
 // ==================== 类型定义 ====================
@@ -138,7 +138,7 @@ export const MODULE_EVENTS = {
 /**
  * 应用事件类型
  */
-export type AppEventType = typeof APP_EVENTS[keyof typeof APP_EVENTS];
+export type AppEventType = (typeof APP_EVENTS)[keyof typeof APP_EVENTS];
 
 /**
  * 路由变更事件详情
@@ -217,8 +217,8 @@ export function emitAppEvent<T extends AppEventDetail = AppEventDetail>(
     new CustomEvent(eventName, {
       detail: {
         ...detail,
-        timestamp: Date.now()
-      }
+        timestamp: Date.now(),
+      },
     })
   );
 }

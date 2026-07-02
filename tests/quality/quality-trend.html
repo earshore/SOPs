@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>代码质量趋势</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f4f6;
+      padding: 2rem;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    h1 { color: #111827; }
+    .chart-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    canvas { max-height: 400px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📈 代码质量趋势</h1>
+    </div>
+
+    <div class="chart-container">
+      <h2>代码复杂度趋势</h2>
+      <canvas id="complexityChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>代码重复率趋势</h2>
+      <canvas id="duplicationChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>测试覆盖率趋势</h2>
+      <canvas id="coverageChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>类型覆盖率趋势</h2>
+      <canvas id="typeCoverageChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const dates = ["2026-06-30","2026-07-02","2026-07-02","2026-07-02","2026-07-02","2026-07-02","2026-07-02"];
+
+    // 复杂度图表
+    new Chart(document.getElementById('complexityChart'), {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: '平均复杂度',
+          data: [0,0,0,0,0,0,0],
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: true }
+        }
+      }
+    });
+
+    // 重复率图表
+    new Chart(document.getElementById('duplicationChart'), {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: '重复率 (%)',
+          data: [0,0,0,0,0,0,0],
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: true }
+        }
+      }
+    });
+
+    // 测试覆盖率图表
+    new Chart(document.getElementById('coverageChart'), {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: '覆盖率 (%)',
+          data: [0,65.83,65.83,68.84,68.84,68.84,80.19],
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: true }
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: 100
+          }
+        }
+      }
+    });
+
+    // 类型覆盖率图表
+    new Chart(document.getElementById('typeCoverageChart'), {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: '类型覆盖率 (%)',
+          data: [67.34,67.62,67.62,67.61,99.78,99.78,99.78],
+          borderColor: '#8b5cf6',
+          backgroundColor: 'rgba(139, 92, 246, 0.1)',
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: true }
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: 100
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

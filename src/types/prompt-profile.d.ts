@@ -48,12 +48,14 @@ export interface UserProductProfile {
     [dimensionId: string]: {
       enabled: boolean;
       subItems: {
-        [subItemKey: string]: boolean | {
-          enabled: boolean;
-          items?: {
-            [itemIndex: string]: boolean;
-          };
-        };
+        [subItemKey: string]:
+          | boolean
+          | {
+              enabled: boolean;
+              items?: {
+                [itemIndex: string]: boolean;
+              };
+            };
       };
     };
   };

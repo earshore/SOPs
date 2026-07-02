@@ -1,8 +1,8 @@
 /**
  * colorSchemes.ts - 统一颜色方案配置 v2.0
- * 
+ *
  * 基于全局设计系统升级，与系统设置面板、使用指南等组件保持视觉一致性
- * 
+ *
  * 设计规范:
  * - 渐变图标容器 (gradient icon containers with colored shadows)
  * - 左侧渐变色条 (left accent bar)
@@ -116,8 +116,8 @@ export type ColorSchemeName =
 function createScheme(
   color: string,
   options?: {
-    gradientTo?: string;      // 渐变终止色，默认同色系深一档
-    secondaryColor?: string;  // 双色渐变的第二色
+    gradientTo?: string; // 渐变终止色，默认同色系深一档
+    secondaryColor?: string; // 双色渐变的第二色
   }
 ): ColorScheme {
   const to = options?.gradientTo || color;
@@ -194,7 +194,6 @@ function createScheme(
 // ═══════════════════════════════════════════════════════════
 
 export const COLOR_SCHEMES: Record<ColorSchemeName, ColorScheme> = {
-
   // ── Primary Blues ──
   blue: createScheme('blue', { gradientTo: 'indigo', secondaryColor: 'indigo' }),
 
@@ -250,7 +249,7 @@ export function getColorScheme(color: string): ColorScheme {
 /**
  * 获取卡片完整样式类名
  * 用于生成统一风格的卡片容器
- * 
+ *
  * @example
  * ```ts
  * const classes = getCardClasses('blue');
@@ -269,7 +268,7 @@ export function getCardClasses(color: ColorSchemeName): string {
 
 /**
  * 获取卡片顶部悬浮线样式
- * 
+ *
  * @example
  * ```html
  * <div class="${getTopLineClasses('emerald')}"></div>
@@ -289,16 +288,13 @@ export function getTopLineClasses(color: ColorSchemeName): string {
  */
 export function getAccentBarClasses(color: ColorSchemeName): string {
   const s = getColorScheme(color);
-  return [
-    'absolute top-0 left-0 w-1 h-full rounded-l',
-    s.accentBar,
-  ].join(' ');
+  return ['absolute top-0 left-0 w-1 h-full rounded-l', s.accentBar].join(' ');
 }
 
 /**
  * 获取渐变图标容器样式
  * 用于 section header 中的图标
- * 
+ *
  * @param color - 颜色名称
  * @param size - 尺寸: 'sm' (7×7) | 'md' (9×9) | 'lg' (10×10)
  */
@@ -327,10 +323,7 @@ export function getIconContainerClasses(
  */
 export function getIconBadgeClasses(color: ColorSchemeName): string {
   const s = getColorScheme(color);
-  return [
-    'w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0',
-    s.badgeBg,
-  ].join(' ');
+  return ['w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0', s.badgeBg].join(' ');
 }
 
 /**
@@ -338,11 +331,9 @@ export function getIconBadgeClasses(color: ColorSchemeName): string {
  */
 export function getVersionTagClasses(color: ColorSchemeName): string {
   const s = getColorScheme(color);
-  return [
-    'px-2 py-0.5 rounded-full text-[10px] font-semibold',
-    s.versionBg,
-    s.versionText,
-  ].join(' ');
+  return ['px-2 py-0.5 rounded-full text-[10px] font-semibold', s.versionBg, s.versionText].join(
+    ' '
+  );
 }
 
 /**
@@ -350,11 +341,7 @@ export function getVersionTagClasses(color: ColorSchemeName): string {
  */
 export function getSectionHeaderClasses(color: ColorSchemeName): string {
   const s = getColorScheme(color);
-  return [
-    'relative px-5 py-4 border-b',
-    s.headerBg,
-    s.headerBorder,
-  ].join(' ');
+  return ['relative px-5 py-4 border-b', s.headerBg, s.headerBorder].join(' ');
 }
 
 /**
@@ -375,11 +362,7 @@ export function getListItemClasses(color: ColorSchemeName): string {
  */
 export function getTipCardClasses(color: ColorSchemeName): string {
   const s = getColorScheme(color);
-  return [
-    'p-3.5 rounded-2xl border flex gap-3',
-    s.tipBg,
-    s.tipBorder,
-  ].join(' ');
+  return ['p-3.5 rounded-2xl border flex gap-3', s.tipBg, s.tipBorder].join(' ');
 }
 
 /**
@@ -430,10 +413,10 @@ export function getSidebarItemClasses(color: ColorSchemeName, isActive = false):
  * SOP 体系颜色映射
  */
 export const SOP_COLORS = {
-  operations: 'emerald' as ColorSchemeName,   // 运营与推广
-  supplyChain: 'amber' as ColorSchemeName,    // 供应链与物流
-  security: 'red' as ColorSchemeName,          // 账号安全与风控
-  customerService: 'blue' as ColorSchemeName,  // 客服与客户体验
+  operations: 'emerald' as ColorSchemeName, // 运营与推广
+  supplyChain: 'amber' as ColorSchemeName, // 供应链与物流
+  security: 'red' as ColorSchemeName, // 账号安全与风控
+  customerService: 'blue' as ColorSchemeName, // 客服与客户体验
 } as const;
 
 /**

@@ -7,6 +7,8 @@
 
 import type { StoreApi } from 'zustand/vanilla';
 
+const nativeLoggerConsole = globalThis.console;
+
 type StateUpdater<T> = T | Partial<T> | ((state: T) => T | Partial<T>);
 type StateReplacer<T> = T | ((state: T) => T);
 
@@ -35,7 +37,7 @@ export interface PersistOptions<T> {
  */
 const defaultMerge = <T>(persistedState: unknown, currentState: T): T => ({
   ...currentState,
-  ...(persistedState as Partial<T>)
+  ...(persistedState as Partial<T>),
 });
 
 /**
@@ -49,11 +51,11 @@ export const persist = <T extends object>(
   const {
     name,
     storage = localStorage,
-    partialize = (state) => state,
+    partialize = state => state,
     merge = defaultMerge,
     version = 0,
     migrate,
-    validate
+    validate,
   } = options;
 
   return (set: StoreApi<T>['setState'], get: StoreApi<T>['getState']): T => {
@@ -64,14 +66,14 @@ export const persist = <T extends object>(
       } else {
         set(partial as StateUpdater<T>, false);
       }
-      
+
       // 持久化状态
       try {
         const state = get();
         const stateToPersist = partialize(state);
         const item = JSON.stringify({
           state: stateToPersist,
-          version
+          version,
         });
         storage.setItem(name, item);
       } catch (error) {
@@ -87,26 +89,26 @@ export const persist = <T extends object>(
       const item = storage.getItem(name);
       if (item) {
         const parsed = JSON.parse(item);
-        
+
         // 处理版本迁移
         let persistedState = parsed.state;
         if (migrate && parsed.version !== version) {
           persistedState = migrate(persistedState, parsed.version);
         }
-        
+
         // 🎯 数据边界验证：如果提供了验证函数，验证持久化状态
         if (validate && !validate(persistedState)) {
-          console.warn('[Persist] 持久化状态验证失败，使用初始状态:', name);
+          nativeLoggerConsole.warn('[Persist] 持久化状态验证失败，使用初始状态:', name);
           storage.removeItem(name);
           return initialState;
         }
-        
+
         // 合并持久化状态和初始状态
         const restoredState = merge(persistedState, initialState);
-        
+
         // 使用set更新状态（这会触发持久化）
         persistedSet(restoredState, true);
-        
+
         return restoredState;
       }
     } catch (error) {

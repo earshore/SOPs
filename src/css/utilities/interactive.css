@@ -23,7 +23,6 @@
  * 19. 减少动画偏好
  */
 
-
 /* ========================================
    1. 可复制内容
    ======================================== */
@@ -86,7 +85,6 @@
   }
 }
 
-
 /* ========================================
    2. 冻结 & 禁用状态
    ======================================== */
@@ -111,7 +109,7 @@
 /* --- 禁用状态 --- */
 .disabled,
 [disabled],
-[aria-disabled="true"] {
+[aria-disabled='true'] {
   opacity: 0.5;
   pointer-events: none;
   cursor: not-allowed;
@@ -162,7 +160,6 @@
   overflow: hidden !important;
   padding-right: var(--scrollbar-width, 15px);
 }
-
 
 /* ========================================
    3. 选中 & 点击效果
@@ -325,7 +322,6 @@
   opacity: 1;
 }
 
-
 /* ========================================
    4. 拖拽交互
    ======================================== */
@@ -440,7 +436,6 @@
   opacity: 0.3;
 }
 
-
 /* ========================================
    5. 焦点管理
    ======================================== */
@@ -514,7 +509,6 @@
   top: 0;
 }
 
-
 /* ========================================
    6. 文本溢出 & 截断
    ======================================== */
@@ -574,11 +568,7 @@
   left: 0;
   right: 0;
   height: 2em;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    var(--color-bg-primary, #ffffff)
-  );
+  background: linear-gradient(to bottom, transparent, var(--color-bg-primary, #ffffff));
   pointer-events: none;
 }
 
@@ -617,7 +607,6 @@
   white-space: pre-line;
 }
 
-
 /* ========================================
    7. 用户选择控制
    ======================================== */
@@ -655,7 +644,6 @@
   -webkit-user-drag: none;
   user-drag: none;
 }
-
 
 /* ========================================
    8. 滚动控制
@@ -806,33 +794,71 @@
   display: none;
 }
 
-
 /* ========================================
    9. 指针 & 光标
    ======================================== */
-.cursor-pointer  { cursor: pointer; }
-.cursor-default  { cursor: default; }
-.cursor-text     { cursor: text; }
-.cursor-move     { cursor: move; }
-.cursor-grab     { cursor: grab; }
-.cursor-grabbing { cursor: grabbing; }
-.cursor-wait     { cursor: wait; }
-.cursor-progress { cursor: progress; }
-.cursor-help     { cursor: help; }
-.cursor-crosshair { cursor: crosshair; }
-.cursor-not-allowed { cursor: not-allowed; }
-.cursor-none     { cursor: none; }
-.cursor-zoom-in  { cursor: zoom-in; }
-.cursor-zoom-out { cursor: zoom-out; }
+.cursor-pointer {
+  cursor: pointer;
+}
+.cursor-default {
+  cursor: default;
+}
+.cursor-text {
+  cursor: text;
+}
+.cursor-move {
+  cursor: move;
+}
+.cursor-grab {
+  cursor: grab;
+}
+.cursor-grabbing {
+  cursor: grabbing;
+}
+.cursor-wait {
+  cursor: wait;
+}
+.cursor-progress {
+  cursor: progress;
+}
+.cursor-help {
+  cursor: help;
+}
+.cursor-crosshair {
+  cursor: crosshair;
+}
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+.cursor-none {
+  cursor: none;
+}
+.cursor-zoom-in {
+  cursor: zoom-in;
+}
+.cursor-zoom-out {
+  cursor: zoom-out;
+}
 
 /* --- 调整大小 --- */
-.cursor-resize-ns { cursor: ns-resize; }
-.cursor-resize-ew { cursor: ew-resize; }
-.cursor-resize-nwse { cursor: nwse-resize; }
-.cursor-resize-nesw { cursor: nesw-resize; }
-.cursor-resize-col { cursor: col-resize; }
-.cursor-resize-row { cursor: row-resize; }
-
+.cursor-resize-ns {
+  cursor: ns-resize;
+}
+.cursor-resize-ew {
+  cursor: ew-resize;
+}
+.cursor-resize-nwse {
+  cursor: nwse-resize;
+}
+.cursor-resize-nesw {
+  cursor: nesw-resize;
+}
+.cursor-resize-col {
+  cursor: col-resize;
+}
+.cursor-resize-row {
+  cursor: row-resize;
+}
 
 /* ========================================
    10. 可见性控制
@@ -862,7 +888,6 @@
 .hide-empty:not(:empty) {
   display: block;
 }
-
 
 /* ========================================
    11. 触摸优化
@@ -917,7 +942,6 @@
   inset: -12px;
 }
 
-
 /* ========================================
    12. 可交互区域扩展
    ======================================== */
@@ -933,9 +957,15 @@
   inset: calc(var(--hit-area-expand, 8px) * -1);
 }
 
-.hit-area--sm { --hit-area-expand: 4px; }
-.hit-area--md { --hit-area-expand: 8px; }
-.hit-area--lg { --hit-area-expand: 16px; }
+.hit-area--sm {
+  --hit-area-expand: 4px;
+}
+.hit-area--md {
+  --hit-area-expand: 8px;
+}
+.hit-area--lg {
+  --hit-area-expand: 16px;
+}
 
 /* 整行可点击 (如列表项中的链接覆盖) */
 .stretch-link {
@@ -948,7 +978,6 @@
   inset: 0;
   z-index: 1;
 }
-
 
 /* ========================================
    13. 键盘导航
@@ -970,7 +999,7 @@
   outline-offset: 2px;
 }
 
-[tabindex="-1"]:focus {
+[tabindex='-1']:focus {
   outline: none;
 }
 
@@ -980,13 +1009,12 @@
   transition: background-color var(--duration-fast, 200ms) var(--ease-smooth);
 }
 
-.nav-focus[data-focus="true"],
+.nav-focus[data-focus='true'],
 .nav-focus.is-focused {
   background: var(--color-primary-light, rgba(59, 130, 246, 0.08));
   outline: 2px solid var(--color-primary, #3b82f6);
   outline-offset: -2px;
 }
-
 
 /* ========================================
    14. 加载 & 占位状态
@@ -1070,7 +1098,6 @@
   animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-
 /* ========================================
    15. 文本选中样式
    ======================================== */
@@ -1105,7 +1132,6 @@
   background: transparent;
   color: inherit;
 }
-
 
 /* ========================================
    16. 链接 & 锚点
@@ -1171,7 +1197,6 @@
   }
 }
 
-
 /* ========================================
    17. 分组交互 (Group Hover / Focus)
    ======================================== */
@@ -1231,89 +1256,84 @@
   transform: scale(1.1);
 }
 
-
 /* ========================================
    18. 暗色模式适配
    ======================================== */
 .dark .hoverable:hover,
-[data-theme="dark"] .hoverable:hover {
+[data-theme='dark'] .hoverable:hover {
   background-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .hoverable:active,
-[data-theme="dark"] .hoverable:active {
+[data-theme='dark'] .hoverable:active {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark .drag-handle:hover,
-[data-theme="dark"] .drag-handle:hover {
+[data-theme='dark'] .drag-handle:hover {
   color: var(--color-text-secondary, #d1d5db);
   background: rgba(255, 255, 255, 0.06);
 }
 
 .dark .drop-zone,
-[data-theme="dark"] .drop-zone {
+[data-theme='dark'] .drop-zone {
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark .drop-zone--active,
-[data-theme="dark"] .drop-zone--active {
+[data-theme='dark'] .drop-zone--active {
   border-color: var(--color-primary, #818cf8);
   background: rgba(129, 140, 248, 0.06);
 }
 
 .dark .thin-scrollbar,
-[data-theme="dark"] .thin-scrollbar {
+[data-theme='dark'] .thin-scrollbar {
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 .dark .thin-scrollbar::-webkit-scrollbar-thumb,
-[data-theme="dark"] .thin-scrollbar::-webkit-scrollbar-thumb {
+[data-theme='dark'] .thin-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
 }
 
 .dark .thin-scrollbar::-webkit-scrollbar-thumb:hover,
-[data-theme="dark"] .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+[data-theme='dark'] .thin-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
 .dark .scroll-fade-x::before,
-[data-theme="dark"] .scroll-fade-x::before {
+[data-theme='dark'] .scroll-fade-x::before {
   background: linear-gradient(to right, var(--color-bg-primary, #0f172a), transparent);
 }
 
 .dark .scroll-fade-x::after,
-[data-theme="dark"] .scroll-fade-x::after {
+[data-theme='dark'] .scroll-fade-x::after {
   background: linear-gradient(to left, var(--color-bg-primary, #0f172a), transparent);
 }
 
 .dark .scroll-fade-y::before,
-[data-theme="dark"] .scroll-fade-y::before {
+[data-theme='dark'] .scroll-fade-y::before {
   background: linear-gradient(to bottom, var(--color-bg-primary, #0f172a), transparent);
 }
 
 .dark .scroll-fade-y::after,
-[data-theme="dark"] .scroll-fade-y::after {
+[data-theme='dark'] .scroll-fade-y::after {
   background: linear-gradient(to top, var(--color-bg-primary, #0f172a), transparent);
 }
 
 .dark .text-expandable.is-clamped::after,
-[data-theme="dark"] .text-expandable.is-clamped::after {
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    var(--color-bg-primary, #0f172a)
-  );
+[data-theme='dark'] .text-expandable.is-clamped::after {
+  background: linear-gradient(to bottom, transparent, var(--color-bg-primary, #0f172a));
 }
 
 .dark .is-loading::after,
-[data-theme="dark"] .is-loading::after {
+[data-theme='dark'] .is-loading::after {
   border-color: rgba(255, 255, 255, 0.1);
   border-top-color: var(--color-primary, #818cf8);
 }
 
 .dark .is-stale::before,
-[data-theme="dark"] .is-stale::before {
+[data-theme='dark'] .is-stale::before {
   background: repeating-linear-gradient(
     -45deg,
     transparent,
@@ -1324,56 +1344,55 @@
 }
 
 .dark .is-new::after,
-[data-theme="dark"] .is-new::after {
+[data-theme='dark'] .is-new::after {
   background: var(--color-primary, #818cf8);
   box-shadow: 0 0 0 2px var(--color-bg-primary, #0f172a);
 }
 
 .dark .sortable-item:hover,
-[data-theme="dark"] .sortable-item:hover {
+[data-theme='dark'] .sortable-item:hover {
   background: rgba(255, 255, 255, 0.04);
 }
 
 .dark .sortable-item.is-dragging,
-[data-theme="dark"] .sortable-item.is-dragging {
+[data-theme='dark'] .sortable-item.is-dragging {
   background: var(--color-bg-secondary, #1e293b);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .dark .drag-placeholder,
-[data-theme="dark"] .drag-placeholder {
+[data-theme='dark'] .drag-placeholder {
   border-color: var(--color-primary, #818cf8);
   background: rgba(129, 140, 248, 0.06);
 }
 
 .dark .card-loading::after,
-[data-theme="dark"] .card-loading::after {
+[data-theme='dark'] .card-loading::after {
   background: rgba(15, 23, 42, 0.6);
 }
 
 .dark .link,
-[data-theme="dark"] .link {
+[data-theme='dark'] .link {
   color: var(--color-primary, #818cf8);
 }
 
 .dark .link:hover,
-[data-theme="dark"] .link:hover {
+[data-theme='dark'] .link:hover {
   color: #a5b4fc;
 }
 
 .dark ::selection,
-[data-theme="dark"] ::selection {
+[data-theme='dark'] ::selection {
   background: var(--color-primary, #818cf8);
 }
 
-.dark .nav-focus[data-focus="true"],
+.dark .nav-focus[data-focus='true'],
 .dark .nav-focus.is-focused,
-[data-theme="dark"] .nav-focus[data-focus="true"],
-[data-theme="dark"] .nav-focus.is-focused {
+[data-theme='dark'] .nav-focus[data-focus='true'],
+[data-theme='dark'] .nav-focus.is-focused {
   background: rgba(129, 140, 248, 0.1);
   outline-color: var(--color-primary, #818cf8);
 }
-
 
 /* ========================================
    19. 减少动画偏好

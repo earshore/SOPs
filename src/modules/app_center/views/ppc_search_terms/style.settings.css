@@ -1,0 +1,82 @@
+.ppc-threshold-grid input,
+.ppc-context-fields input,
+.ppc-context-fields textarea {
+  background: #ffffff;
+  transition:
+    border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.ppc-threshold-grid input:focus,
+.ppc-context-fields input:focus,
+.ppc-context-fields textarea:focus {
+  border-color: var(--color-emerald-600);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
+}
+
+.ppc-delivery-note {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid rgba(5, 150, 105, 0.16);
+  border-radius: 8px;
+  background: var(--color-green-50);
+}
+
+.ppc-settings-toggle {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 10px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 800;
+  transition:
+    background-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.ppc-settings-toggle:hover {
+  border-color: rgba(5, 150, 105, 0.28);
+  background: #ffffff;
+}
+
+.ppc-settings-toggle-icon {
+  color: #64748b;
+  font-size: 12px;
+  transition: transform 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.ppc-settings-toggle[aria-expanded='true'] .ppc-settings-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.ppc-analysis-settings-body {
+  margin-top: 12px;
+}
+
+.ppc-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.64);
+  color: #334155;
+  font-size: 12px;
+}
+
+.ppc-check-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-emerald-600);
+}

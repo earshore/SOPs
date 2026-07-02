@@ -14,7 +14,8 @@ const DECORATIVE_SELECTOR = [
   '.ppc-tag-dot',
   '.ppc-stat-label i',
 ].join(', ');
-const SIMPLE_BANNER_STATIC_DECORATION_SELECTOR = '.wb-orb, .wb-particle, .wb-grid-pattern, .wb-bg-gradient';
+const SIMPLE_BANNER_STATIC_DECORATION_SELECTOR =
+  '.wb-orb, .wb-particle, .wb-grid-pattern, .wb-bg-gradient';
 
 let generatedTitleId = 0;
 
@@ -41,7 +42,7 @@ function collectBanners(root: HTMLElement): HTMLElement[] {
 }
 
 export function normalizeWelcomeBanners(root: HTMLElement): void {
-  collectBanners(root).forEach((banner) => {
+  collectBanners(root).forEach(banner => {
     if (!banner.hasAttribute('role') && banner.tagName !== 'SECTION') {
       banner.setAttribute('role', 'region');
     }
@@ -53,15 +54,17 @@ export function normalizeWelcomeBanners(root: HTMLElement): void {
       }
     }
 
-    banner.querySelectorAll<HTMLElement>(DECORATIVE_SELECTOR).forEach((decorativeElement) => {
+    banner.querySelectorAll<HTMLElement>(DECORATIVE_SELECTOR).forEach(decorativeElement => {
       decorativeElement.setAttribute('aria-hidden', 'true');
       decorativeElement.setAttribute('role', 'presentation');
     });
 
     if (banner.classList.contains('wb-container--simple')) {
-      banner.querySelectorAll<HTMLElement>(SIMPLE_BANNER_STATIC_DECORATION_SELECTOR).forEach((decorativeElement) => {
-        decorativeElement.remove();
-      });
+      banner
+        .querySelectorAll<HTMLElement>(SIMPLE_BANNER_STATIC_DECORATION_SELECTOR)
+        .forEach(decorativeElement => {
+          decorativeElement.remove();
+        });
     }
   });
 }

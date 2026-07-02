@@ -11,7 +11,7 @@ import {
   type AnalysisSchedulePlan,
   type FailureStrategy,
   type SchedulingPreference,
-  type ScheduleTier
+  type ScheduleTier,
 } from '../services/analysisScheduler';
 import { showToast } from '@common/ui/index';
 const SETTINGS_KEY = 'ai_analysis_performance_settings';
@@ -23,15 +23,22 @@ export { resolveAnalysisSchedule };
 const SCHEDULE_OPTION_ACTIVE_CLASS: Record<SchedulingPreference, string> = {
   recommended: 'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-sm',
   reliability: 'border-blue-500 bg-blue-50 text-blue-900 shadow-sm',
-  speed: 'border-purple-500 bg-purple-50 text-purple-900 shadow-sm'
+  speed: 'border-purple-500 bg-purple-50 text-purple-900 shadow-sm',
 };
 
-const INACTIVE_SCHEDULE_OPTION_CLASS = 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/40';
+const INACTIVE_SCHEDULE_OPTION_CLASS =
+  'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/40';
 const INACTIVE_SCHEDULE_TIER_CLASS = 'border-slate-200 bg-white text-slate-500';
 const SCHEDULE_TIER_CONFIG: Record<ScheduleTier, { label: string; activeClass: string }> = {
   stable: { label: '稳定', activeClass: 'border-blue-200 bg-blue-50 text-blue-700 shadow-sm' },
-  recommended: { label: '推荐', activeClass: 'border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm' },
-  extreme: { label: '极速', activeClass: 'border-purple-200 bg-purple-50 text-purple-700 shadow-sm' }
+  recommended: {
+    label: '推荐',
+    activeClass: 'border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm',
+  },
+  extreme: {
+    label: '极速',
+    activeClass: 'border-purple-200 bg-purple-50 text-purple-700 shadow-sm',
+  },
 };
 
 /**
@@ -53,8 +60,7 @@ interface PerformanceSettingsPanelContext {
 }
 
 type PanelMixin<T extends object> = T & ThisType<PerformanceSettingsPanelContext>;
-type PerformanceSettingsPanel =
-  PerformanceSettingsPanelContext &
+type PerformanceSettingsPanel = PerformanceSettingsPanelContext &
   ReturnType<typeof createPerformanceSettingsActions> &
   ReturnType<typeof createScheduleGetters>;
 
@@ -66,7 +72,7 @@ const DEFAULT_SETTINGS: PerformanceSettings = {
   maxConcurrency: 4,
   enableCache: true,
   failureStrategy: 'continue',
-  settingsVersion: SETTINGS_VERSION
+  settingsVersion: SETTINGS_VERSION,
 };
 
 function inferSchedulingPreference(settings: Partial<PerformanceSettings>): SchedulingPreference {
@@ -99,7 +105,7 @@ function normalizeSettings(settings: Partial<PerformanceSettings>): PerformanceS
     enableCache: settings.enableCache ?? DEFAULT_SETTINGS.enableCache,
     maxConcurrency: schedule.maxConcurrency,
     failureStrategy: schedule.failureStrategy,
-    settingsVersion: SETTINGS_VERSION
+    settingsVersion: SETTINGS_VERSION,
   };
 }
 
@@ -187,7 +193,7 @@ function createPerformanceSettingsActions(): PanelMixin<{
 
       this.settings = normalizeSettings({
         ...this.settings,
-        schedulingPreference
+        schedulingPreference,
       });
     },
 
@@ -195,7 +201,7 @@ function createPerformanceSettingsActions(): PanelMixin<{
       const target = event.target as HTMLInputElement;
       this.settings = {
         ...this.settings,
-        enableCache: target.checked
+        enableCache: target.checked,
       };
     },
 

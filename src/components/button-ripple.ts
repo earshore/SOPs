@@ -1,7 +1,7 @@
 /**
  * 按钮涟漪效果初始化模块
  * 为所有按钮添加涟漪效果事件监听
- * 
+ *
  * Requirements: 1.3
  */
 
@@ -32,7 +32,7 @@ export function initButtonRipple(): void {
     '.btn:not([data-ripple-initialized]):not(.btn-link):not(.btn-link-neutral):not(.btn-link-danger):not([disabled])'
   );
 
-  buttons.forEach((button) => {
+  buttons.forEach(button => {
     addRippleToButton(button);
   });
 }
@@ -109,7 +109,7 @@ export function removeRippleFromButton(button: HTMLElement): void {
 
   // 清理可能残留的涟漪元素
   const ripples = button.querySelectorAll('.btn-ripple-effect');
-  ripples.forEach((ripple) => ripple.remove());
+  ripples.forEach(ripple => ripple.remove());
 }
 
 /**
@@ -122,10 +122,10 @@ export function observeButtonChanges(): void {
   }
 
   // 创建MutationObserver
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
       // 检查新添加的节点
-      mutation.addedNodes.forEach((node) => {
+      mutation.addedNodes.forEach(node => {
         // 只处理元素节点
         if (node.nodeType !== Node.ELEMENT_NODE) {
           return;
@@ -142,7 +142,7 @@ export function observeButtonChanges(): void {
         const buttons = element.querySelectorAll<HTMLElement>(
           '.btn:not([data-ripple-initialized]):not(.btn-link):not(.btn-link-neutral):not(.btn-link-danger):not([disabled])'
         );
-        buttons.forEach((button) => {
+        buttons.forEach(button => {
           addRippleToButton(button);
         });
       });
@@ -162,8 +162,10 @@ export function observeButtonChanges(): void {
  */
 export function reinitButtonRipple(): void {
   // 移除所有现有的涟漪效果
-  const initializedButtons = document.querySelectorAll<HTMLElement>('[data-ripple-initialized="true"]');
-  initializedButtons.forEach((button) => {
+  const initializedButtons = document.querySelectorAll<HTMLElement>(
+    '[data-ripple-initialized="true"]'
+  );
+  initializedButtons.forEach(button => {
     removeRippleFromButton(button);
   });
 
@@ -180,22 +182,22 @@ export function observeAnimationSettings(): void {
   if (animationSettingsUnsubscribe) {
     return;
   }
-  
+
   let isReinitializing = false;
   let lastReinitTime = 0;
-  
+
   // 监听EventBus事件（由AnimationManager触发）
   animationSettingsUnsubscribe = eventBus.on(APP_EVENTS.ANIMATION_SETTINGS_CHANGED, () => {
     const now = Date.now();
-    
+
     // 防止短时间内重复初始化（1秒内只初始化一次）
-    if (isReinitializing || (now - lastReinitTime < 1000)) {
+    if (isReinitializing || now - lastReinitTime < 1000) {
       return;
     }
-    
+
     isReinitializing = true;
     lastReinitTime = now;
-    
+
     // 使用 requestAnimationFrame 延迟执行，避免阻塞主线程
     requestAnimationFrame(() => {
       reinitButtonRipple();
@@ -214,10 +216,12 @@ export function cleanupButtonRipple(): void {
     animationSettingsUnsubscribe();
     animationSettingsUnsubscribe = null;
   }
-  
+
   // 移除所有按钮的涟漪效果
-  const initializedButtons = document.querySelectorAll<HTMLElement>('[data-ripple-initialized="true"]');
-  initializedButtons.forEach((button) => {
+  const initializedButtons = document.querySelectorAll<HTMLElement>(
+    '[data-ripple-initialized="true"]'
+  );
+  initializedButtons.forEach(button => {
     removeRippleFromButton(button);
   });
 }

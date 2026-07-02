@@ -267,7 +267,7 @@ export interface IConfigValidator {
    * 验证配置
    */
   validate<T>(config: unknown, schema: unknown): config is T;
-  
+
   /**
    * 获取验证错误
    */
@@ -284,32 +284,32 @@ export interface IConfigCenter {
    * 获取配置
    */
   get<T = unknown>(path: string): T | undefined;
-  
+
   /**
    * 设置配置
    */
   set<T = unknown>(path: string, value: T): void;
-  
+
   /**
    * 合并配置
    */
   merge(config: Partial<AppConfig>): void;
-  
+
   /**
    * 重置配置
    */
   reset(): void;
-  
+
   /**
    * 验证配置
    */
   validate(): boolean;
-  
+
   /**
    * 获取完整配置
    */
   getAll(): AppConfig;
-  
+
   /**
    * 监听配置变化
    */
@@ -339,7 +339,7 @@ export type {
   OverviewRendererConfig,
   AppConfig,
   IConfigValidator,
-  IConfigCenter
+  IConfigCenter,
 };
 
 // ==================== 路由系统类型 ====================

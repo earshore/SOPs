@@ -1,8 +1,8 @@
 /**
  * SafeRenderer - 安全的 DOM 渲染器
- * 
+ *
  * 提供安全的 DOM 渲染方法，防止 XSS 攻击
- * 
+ *
  * @module SafeRenderer
  */
 
@@ -40,27 +40,22 @@ const DEFAULT_ESCAPE_MAP: Record<string, string> = {
   '>': '&gt;',
   '"': '&quot;',
   "'": '&#x27;',
-  '/': '&#x2F;'
+  '/': '&#x2F;',
 };
 
 /**
  * 默认允许的 HTML 标签（用于富文本）
  */
-const DEFAULT_ALLOWED_TAGS = [
-  'p', 'br', 'strong', 'em', 'u', 'span',
-  'ul', 'ol', 'li', 'a', 'img'
-];
+const DEFAULT_ALLOWED_TAGS = ['p', 'br', 'strong', 'em', 'u', 'span', 'ul', 'ol', 'li', 'a', 'img'];
 
 /**
  * 默认允许的 HTML 属性
  */
-const DEFAULT_ALLOWED_ATTRS = [
-  'href', 'src', 'alt', 'title', 'class'
-];
+const DEFAULT_ALLOWED_ATTRS = ['href', 'src', 'alt', 'title', 'class'];
 
 /**
  * SafeRenderer 类
- * 
+ *
  * 单例模式，提供安全的 DOM 渲染方法
  */
 export class SafeRenderer {
@@ -73,7 +68,7 @@ export class SafeRenderer {
 
   /**
    * 获取 SafeRenderer 单例实例
-   * 
+   *
    * @returns SafeRenderer 实例
    */
   public static getInstance(): SafeRenderer {
@@ -123,15 +118,45 @@ export class SafeRenderer {
   }
 
   /**
+   * 渲染运行时生成的 HTML（保留安全标签，移除危险内容）
+   *
+   * 用于渲染已经由业务渲染器生成、但包含运行时数据的 HTML。
+   * 与 renderTemplate 的区别是语义边界：调用点明确声明这里不是静态模板。
+   */
+  public renderSanitizedHtml(container: HTMLElement, html: string): void {
+    if (!container) {
+      throw new ValidationError(
+        'SafeRenderer: container is required',
+        'SAFE_RENDERER_NO_CONTAINER',
+        'container',
+        container,
+        { module: 'SafeRenderer', action: 'renderSanitizedHtml' }
+      );
+    }
+
+    if (typeof html !== 'string') {
+      throw new ValidationError(
+        'SafeRenderer: html must be a string',
+        'SAFE_RENDERER_INVALID_HTML',
+        'html',
+        typeof html,
+        { module: 'SafeRenderer', action: 'renderSanitizedHtml' }
+      );
+    }
+
+    setSafeHtml(container, html);
+  }
+
+  /**
    * 渲染动态内容（自动转义）
-   * 
+   *
    * 用于渲染包含用户输入或动态数据的内容，自动进行 XSS 防护
-   * 
+   *
    * @param container - 目标容器元素
    * @param template - 模板字符串，支持 {{key}} 插值语法
    * @param data - 数据对象
    * @param options - 渲染选项
-   * 
+   *
    * @example
    * ```typescript
    * const renderer = SafeRenderer.getInstance();
@@ -186,14 +211,14 @@ export class SafeRenderer {
 
   /**
    * 渲染列表（使用 DocumentFragment 优化性能）
-   * 
+   *
    * 高效渲染大量列表项，避免多次 DOM 操作
-   * 
+   *
    * @param container - 目标容器元素
    * @param items - 数据数组
    * @param renderer - 渲染函数，接收 item 和 index，返回 HTML 字符串
    * @param options - 列表渲染选项
-   * 
+   *
    * @example
    * ```typescript
    * const renderer = SafeRenderer.getInstance();
@@ -285,13 +310,13 @@ export class SafeRenderer {
 
   /**
    * 渲染组件
-   * 
+   *
    * 渲染预定义的组件模板
-   * 
+   *
    * @param container - 目标容器元素
    * @param componentName - 组件名称
    * @param props - 组件属性
-   * 
+   *
    * @example
    * ```typescript
    * const renderer = SafeRenderer.getInstance();
@@ -326,7 +351,7 @@ export class SafeRenderer {
     // 创建组件容器
     const componentDiv = document.createElement('div');
     componentDiv.setAttribute('data-component', componentName);
-    
+
     // 设置属性
     if (props) {
       Object.keys(props).forEach(key => {
@@ -342,12 +367,12 @@ export class SafeRenderer {
 
   /**
    * 转义 HTML 特殊字符
-   * 
+   *
    * 将 HTML 特殊字符转换为实体编码，防止 XSS 攻击
-   * 
+   *
    * @param text - 要转义的文本
    * @returns 转义后的文本
-   * 
+   *
    * @example
    * ```typescript
    * const renderer = SafeRenderer.getInstance();
@@ -360,16 +385,16 @@ export class SafeRenderer {
       return String(text);
     }
 
-    return text.replace(/[&<>"'/]/g, (char) => DEFAULT_ESCAPE_MAP[char] || char);
+    return text.replace(/[&<>"'/]/g, char => DEFAULT_ESCAPE_MAP[char] || char);
   }
 
   /**
    * 清理 HTML，只保留白名单中的标签和属性
-   * 
+   *
    * @param html - 要清理的 HTML 字符串
    * @param options - 清理选项
    * @returns 清理后的 HTML
-   * 
+   *
    * @example
    * ```typescript
    * const renderer = SafeRenderer.getInstance();
@@ -454,14 +479,14 @@ export class SafeRenderer {
 
   /**
    * 模板插值
-   * 
+   *
    * 将模板字符串中的 {{key}} 替换为数据对象中的值
-   * 
+   *
    * @param template - 模板字符串
    * @param data - 数据对象
    * @param sanitize - 是否转义值，默认 true
    * @returns 插值后的字符串
-   * 
+   *
    * @private
    */
   private interpolate(
@@ -471,7 +496,7 @@ export class SafeRenderer {
   ): string {
     return template.replace(/\{\{(\w+)\}\}/g, (_match, key) => {
       const value = data[key];
-      
+
       if (value === undefined || value === null) {
         return '';
       }

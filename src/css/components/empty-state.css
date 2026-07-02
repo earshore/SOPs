@@ -12,7 +12,7 @@
   font-size: var(--text-5xl);
   color: var(--color-text-placeholder);
   margin-bottom: var(--spacing-md);
-  opacity: .4;
+  opacity: 0.4;
 }
 
 .empty-title {

@@ -49,9 +49,15 @@
 /* ========================================
    过渡时长覆盖
    ======================================== */
-.transition-fast    { transition-duration: var(--duration-fast) !important; }
-.transition-normal  { transition-duration: var(--duration-normal) !important; }
-.transition-slow    { transition-duration: var(--duration-slow) !important; }
+.transition-fast {
+  transition-duration: var(--duration-fast) !important;
+}
+.transition-normal {
+  transition-duration: var(--duration-normal) !important;
+}
+.transition-slow {
+  transition-duration: var(--duration-slow) !important;
+}
 
 /* ========================================
    GPU 加速

@@ -6,14 +6,10 @@
 
 import eventBus from '../EventBus';
 import { APP_EVENTS } from '../constants/eventConstants';
-import {
-  AppError,
-  ErrorLevel,
-  ErrorContext,
-  isAppError,
-  toAppError
-} from './AppError';
+import { AppError, ErrorLevel, ErrorContext, isAppError, toAppError } from './AppError';
 import { errorTracker } from '@/services/errorTracker';
+
+const nativeLoggerConsole = globalThis.console;
 
 /**
  * 错误处理选项
@@ -69,8 +65,8 @@ export class GlobalErrorHandler {
           action: 'window.onerror',
           filename: event.filename,
           lineno: event.lineno,
-          colno: event.colno
-        }
+          colno: event.colno,
+        },
       });
     });
 
@@ -79,12 +75,12 @@ export class GlobalErrorHandler {
       this.handleGlobalError(event.reason, {
         context: {
           module: 'System',
-          action: 'unhandledrejection'
-        }
+          action: 'unhandledrejection',
+        },
       });
     });
 
-    console.log('✅ [GlobalErrorHandler] 全局错误处理器已初始化');
+    nativeLoggerConsole.log('✅ [GlobalErrorHandler] 全局错误处理器已初始化');
   }
 
   /**
@@ -142,7 +138,7 @@ export class GlobalErrorHandler {
       // 触发错误事件
       eventBus.emit(APP_EVENTS.ERROR_OCCURRED, {
         error: appError,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     } catch (innerError) {
       // 如果错误处理本身出错，直接输出到console
@@ -161,7 +157,7 @@ export class GlobalErrorHandler {
       category: error.category,
       context: error.context,
       stack: error.stack,
-      originalError: error.originalError
+      originalError: error.originalError,
     };
     const moduleName = error.context.module || 'System';
     const logMethod = this.getLogMethod(error.level);
@@ -180,10 +176,10 @@ export class GlobalErrorHandler {
       case ErrorLevel.ERROR:
         return (...data: unknown[]) => console.error(...data);
       case ErrorLevel.WARNING:
-        return (...data: unknown[]) => console.warn(...data);
+        return (...data: unknown[]) => nativeLoggerConsole.warn(...data);
       case ErrorLevel.INFO:
       case ErrorLevel.DEBUG:
-        return (...data: unknown[]) => console.log(...data);
+        return (...data: unknown[]) => nativeLoggerConsole.log(...data);
     }
   }
 
@@ -219,12 +215,12 @@ export class GlobalErrorHandler {
         tags: {
           code: error.code,
           category: error.category,
-          level: error.level
-        }
+          level: error.level,
+        },
       });
     } catch (e) {
       // 静默失败,避免监控服务错误影响主流程
-      console.warn('[GlobalErrorHandler] 上报错误失败:', e);
+      nativeLoggerConsole.warn('[GlobalErrorHandler] 上报错误失败:', e);
     }
   }
 
@@ -234,7 +230,7 @@ export class GlobalErrorHandler {
   getStats(): { errorCount: number; lastErrorTime: number } {
     return {
       errorCount: this.errorCount,
-      lastErrorTime: this.lastErrorTime
+      lastErrorTime: this.lastErrorTime,
     };
   }
 

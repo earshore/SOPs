@@ -8,7 +8,7 @@ const listingResult: AnalysisResult = {
   source: 'Listings',
   stats: [{ label: '标题长度', value: '128' }],
   highlights: [{ text: '标题覆盖核心关键词', type: 'success' }],
-  details: [{ category: '标题', items: ['保留核心词', '减少重复词'] }]
+  details: [{ category: '标题', items: ['保留核心词', '减少重复词'] }],
 };
 
 const reviewResult: AnalysisResult = {
@@ -17,7 +17,7 @@ const reviewResult: AnalysisResult = {
   source: 'Reviews',
   stats: [],
   highlights: [{ text: '用户关注安装便利性', type: 'info' }],
-  details: []
+  details: [],
 };
 
 describe('reportGenerator', () => {
@@ -63,7 +63,7 @@ describe('reportGenerator', () => {
     vi.setSystemTime(new Date('2026-06-09T08:30:00.000Z'));
 
     const report = generateJsonReportData(['B001'], ['listing-quality'], 'scraper', 'DE', {
-      ok: true
+      ok: true,
     });
 
     expect(report).toEqual({
@@ -72,9 +72,9 @@ describe('reportGenerator', () => {
         targets: ['listing-quality'],
         timestamp: '2026-06-09T08:30:00.000Z',
         dataSource: 'scraper',
-        marketplace: 'DE'
+        marketplace: 'DE',
       },
-      analysisReport: { ok: true }
+      analysisReport: { ok: true },
     });
   });
 });

@@ -12,12 +12,42 @@
 /**
  * 颜色色板名称
  */
-export type ColorPaletteName = 'slate' | 'gray' | 'blue' | 'sky' | 'indigo' | 'violet' | 'purple' | 'fuchsia' | 'pink' | 'rose' | 'red' | 'orange' | 'amber' | 'yellow' | 'lime' | 'green' | 'emerald' | 'teal' | 'cyan';
+export type ColorPaletteName =
+  | 'slate'
+  | 'gray'
+  | 'blue'
+  | 'sky'
+  | 'indigo'
+  | 'violet'
+  | 'purple'
+  | 'fuchsia'
+  | 'pink'
+  | 'rose'
+  | 'red'
+  | 'orange'
+  | 'amber'
+  | 'yellow'
+  | 'lime'
+  | 'green'
+  | 'emerald'
+  | 'teal'
+  | 'cyan';
 
 /**
  * 颜色色阶 (50-950)
  */
-export type ColorShade = '50' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900' | '950';
+export type ColorShade =
+  | '50'
+  | '100'
+  | '200'
+  | '300'
+  | '400'
+  | '500'
+  | '600'
+  | '700'
+  | '800'
+  | '900'
+  | '950';
 
 /**
  * 语义颜色名称
@@ -39,7 +69,42 @@ export type SemanticColorName =
 /**
  * 间距值 (0-96)
  */
-export type SpacingValue = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | '14' | '16' | '20' | '24' | '28' | '32' | '36' | '40' | '44' | '48' | '52' | '56' | '60' | '64' | '72' | '80' | '96' | 'px' | '0.5' | '1.5' | '2.5' | '3.5';
+export type SpacingValue =
+  | '0'
+  | '1'
+  | '2'
+  | '3'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9'
+  | '10'
+  | '11'
+  | '12'
+  | '14'
+  | '16'
+  | '20'
+  | '24'
+  | '28'
+  | '32'
+  | '36'
+  | '40'
+  | '44'
+  | '48'
+  | '52'
+  | '56'
+  | '60'
+  | '64'
+  | '72'
+  | '80'
+  | '96'
+  | 'px'
+  | '0.5'
+  | '1.5'
+  | '2.5'
+  | '3.5';
 
 // ═══════════════════════════════════════════════════════════
 // 字体系统类型
@@ -53,12 +118,33 @@ export type FontFamilyName = 'sans' | 'serif' | 'mono' | 'display';
 /**
  * 字体大小名称
  */
-export type FontSizeName = '2xs' | 'xs' | 'sm' | 'base' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl';
+export type FontSizeName =
+  | '2xs'
+  | 'xs'
+  | 'sm'
+  | 'base'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | '2xl'
+  | '3xl'
+  | '4xl'
+  | '5xl'
+  | '6xl';
 
 /**
  * 字重名称
  */
-export type FontWeightName = 'thin' | 'extralight' | 'light' | 'regular' | 'medium' | 'semibold' | 'bold' | 'extrabold' | 'black';
+export type FontWeightName =
+  | 'thin'
+  | 'extralight'
+  | 'light'
+  | 'regular'
+  | 'medium'
+  | 'semibold'
+  | 'bold'
+  | 'extrabold'
+  | 'black';
 
 // ═══════════════════════════════════════════════════════════
 // 圆角系统类型
@@ -67,7 +153,16 @@ export type FontWeightName = 'thin' | 'extralight' | 'light' | 'regular' | 'medi
 /**
  * 圆角大小名称
  */
-export type BorderRadiusName = 'none' | 'sm' | 'DEFAULT' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
+export type BorderRadiusName =
+  | 'none'
+  | 'sm'
+  | 'DEFAULT'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | '2xl'
+  | '3xl'
+  | 'full';
 
 // ═══════════════════════════════════════════════════════════
 // 阴影系统类型
@@ -85,7 +180,23 @@ export type BoxShadowName = 'sm' | 'DEFAULT' | 'md' | 'lg' | 'xl' | '2xl' | 'inn
 /**
  * Z-index 层级名称
  */
-export type ZIndexName = '0' | '10' | '20' | '30' | '40' | '50' | 'auto' | 'dropdown' | 'sticky' | 'fixed' | 'modal-backdrop' | 'modal' | 'popover' | 'tooltip' | 'toast' | 'max';
+export type ZIndexName =
+  | '0'
+  | '10'
+  | '20'
+  | '30'
+  | '40'
+  | '50'
+  | 'auto'
+  | 'dropdown'
+  | 'sticky'
+  | 'fixed'
+  | 'modal-backdrop'
+  | 'modal'
+  | 'popover'
+  | 'tooltip'
+  | 'toast'
+  | 'max';
 
 // ═══════════════════════════════════════════════════════════
 // 动画系统类型

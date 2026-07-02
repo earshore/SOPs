@@ -46,12 +46,13 @@ const CORE_JSON_RULES = `
 export const ANALYSIS_MODULES: AnalysisModule[] = [
   // --- 1. Listing Base Analysis (文案基建) ---
   {
-    id: "title_seo_roots",
-    category: "listing",
-    label_cn: "标题核心词根",
-    desc_cn: "分析竞品标题，剔除品牌与修饰词，提取决定流量属性的绝对核心词根。",
-    label_en: "Title Core Root",
-    desc_en: "Analyze titles to isolate absolute core keyword roots that determine traffic relevance, stripping brands/modifiers.",
+    id: 'title_seo_roots',
+    category: 'listing',
+    label_cn: '标题核心词根',
+    desc_cn: '分析竞品标题，剔除品牌与修饰词，提取决定流量属性的绝对核心词根。',
+    label_en: 'Title Core Root',
+    desc_en:
+      'Analyze titles to isolate absolute core keyword roots that determine traffic relevance, stripping brands/modifiers.',
     taskPrompt: `
 ### Task: Title Core Keywords Extraction (标题核心词根)
 Analyze the product title to extract absolute core keywords that determine traffic attributes.
@@ -114,15 +115,16 @@ Input Title: {{productTitle}}
     "optimization_suggestions": ["string"]
   }
 `,
-    color: "blue"
+    color: 'blue',
   },
   {
-    id: "selling_proposition_deconstruction",
-    category: "listing",
-    label_cn: "卖点结构拆解",
+    id: 'selling_proposition_deconstruction',
+    category: 'listing',
+    label_cn: '卖点结构拆解',
     desc_cn: "将五点描述解构为'功能-场景-痛点'矩阵，识别竞品主打的差异化策略。",
-    label_en: "USP",
-    desc_en: "Deconstruct bullet points into a 'Feature-Scenario-Pain' matrix to identify competitor differentiation strategies.",
+    label_en: 'USP',
+    desc_en:
+      "Deconstruct bullet points into a 'Feature-Scenario-Pain' matrix to identify competitor differentiation strategies.",
     taskPrompt: `
 ### Task: Selling Points Structure Analysis (卖点结构拆解)
 Deconstruct the 5-bullet description into a "Function-Scene-Pain Point" matrix.
@@ -173,17 +175,18 @@ Input Bullet Points: {{featureBullets}}
     }
   }
 `,
-    color: "cyan"
+    color: 'cyan',
   },
 
   // --- 2. Deep Review Intelligence (评论深挖 - 补偿缺失数据) ---
   {
-    id: "neg_deal_breakers",
-    category: "reviews",
-    label_cn: "致命劝退点",
-    desc_cn: "从1-3星评论中提炼导致退货的根本原因（非物流），用于规避产品缺陷。",
-    label_en: "Deal Breakers",
-    desc_en: "Extract root causes for returns/dissatisfaction from 1-3 star reviews (ignoring shipping) to identify fatal flaws.",
+    id: 'neg_deal_breakers',
+    category: 'reviews',
+    label_cn: '致命劝退点',
+    desc_cn: '从1-3星评论中提炼导致退货的根本原因（非物流），用于规避产品缺陷。',
+    label_en: 'Deal Breakers',
+    desc_en:
+      'Extract root causes for returns/dissatisfaction from 1-3 star reviews (ignoring shipping) to identify fatal flaws.',
     taskPrompt: `
 ### Task: Fatal Flaws Extraction (致命劝退点)
 Extract root causes of returns from 1-3 star reviews (exclude logistics issues).
@@ -237,15 +240,16 @@ Input Reviews (filtered 1-3 stars): {{lowStarReviews}}
     }
   }
 `,
-    color: "red"
+    color: 'red',
   },
   {
-    id: "pos_aha_moments",
-    category: "reviews",
-    label_cn: "惊喜顿悟时刻",
+    id: 'pos_aha_moments',
+    category: 'reviews',
+    label_cn: '惊喜顿悟时刻',
     desc_cn: "提取5星评论中用户表示'超出预期'的具体瞬间，这是高转化率文案的核心素材。",
-    label_en: "Aha Moments",
-    desc_en: "Extract specific moments from 5-star reviews where value exceeded expectations. These are gold for conversion copy.",
+    label_en: 'Aha Moments',
+    desc_en:
+      'Extract specific moments from 5-star reviews where value exceeded expectations. These are gold for conversion copy.',
     taskPrompt: `
 ### Task: Wow Moments Extraction (惊喜顿悟时刻)
 Extract specific moments where users expressed "exceeded expectations" from 5-star reviews.
@@ -289,15 +293,16 @@ Input Reviews (5 stars only): {{highStarReviews}}
     "copywriting_angles": ["string"]
   }
 `,
-    color: "amber"
+    color: 'amber',
   },
   {
-    id: "buying_hesitations",
-    category: "reviews",
-    label_cn: "购买前犹豫点",
+    id: 'buying_hesitations',
+    category: 'reviews',
+    label_cn: '购买前犹豫点',
     desc_cn: "挖掘'购买前曾担心，但收到后放心了'的评论，用于替代Q&A填补信息盲区。",
-    label_en: "Hesitations",
-    desc_en: "Identify 'I was worried about X, but...' comments to substitute missing Q&A data and address objections.",
+    label_en: 'Hesitations',
+    desc_en:
+      "Identify 'I was worried about X, but...' comments to substitute missing Q&A data and address objections.",
     taskPrompt: `
 ### Task: Pre-Purchase Hesitation Points (购买前犹豫点)
 Extract "was worried before buying, but relieved after receiving" patterns.
@@ -342,15 +347,16 @@ Input Reviews: {{allReviews}}
     ]
   }
 `,
-    color: "orange"
+    color: 'orange',
   },
   {
-    id: "user_avatar_context",
-    category: "reviews",
-    label_cn: "画像与场景侧写",
-    desc_cn: "基于评论用语推断买家身份（谁在买）和具体使用场景（在哪里用）。",
-    label_en: "User Context",
-    desc_en: "Infer the buyer's identity (Who) and specific usage environment (Where) based on review vocabulary.",
+    id: 'user_avatar_context',
+    category: 'reviews',
+    label_cn: '画像与场景侧写',
+    desc_cn: '基于评论用语推断买家身份（谁在买）和具体使用场景（在哪里用）。',
+    label_en: 'User Context',
+    desc_en:
+      "Infer the buyer's identity (Who) and specific usage environment (Where) based on review vocabulary.",
     taskPrompt: `
 ### Task: Buyer Profile & Scene Profiling (画像与场景侧写)
 Infer buyer identity and specific usage scenarios from review language.
@@ -407,15 +413,16 @@ Reviewer Countries: {{reviewerCountries}}
     }
   }
 `,
-    color: "purple"
+    color: 'purple',
   },
   {
-    id: "vocabulary_gap",
-    category: "reviews",
-    label_cn: "词汇鸿沟分析",
+    id: 'vocabulary_gap',
+    category: 'reviews',
+    label_cn: '词汇鸿沟分析',
     desc_cn: "对比'商家用词'与'买家黑话'，找出Listing未覆盖但买家高频使用的词汇。",
-    label_en: "Vocabulary Gap",
-    desc_en: "Contrast 'Seller Jargon' vs 'Buyer Slang'. Identify high-frequency buyer terms missing from the listing.",
+    label_en: 'Vocabulary Gap',
+    desc_en:
+      "Contrast 'Seller Jargon' vs 'Buyer Slang'. Identify high-frequency buyer terms missing from the listing.",
     taskPrompt: `
 ### Task: Vocabulary Gap Analysis (词汇鸿沟分析)
 Compare "seller vocabulary" vs "buyer slang" to find uncovered high-frequency buyer terms.
@@ -471,15 +478,16 @@ Buyer Reviews:
     }
   }
 `,
-    color: "teal"
+    color: 'teal',
   },
   {
-    id: "promise_reality_check",
-    category: "reviews",
-    label_cn: "承诺/现实断层",
-    desc_cn: "识别Listing过度承诺但Review频繁打脸的功能点，防止虚假宣传。",
-    label_en: "Promise-Reality Gap",
-    desc_en: "Identify features heavily promoted in listings that are frequently cited as failures in reviews.",
+    id: 'promise_reality_check',
+    category: 'reviews',
+    label_cn: '承诺/现实断层',
+    desc_cn: '识别Listing过度承诺但Review频繁打脸的功能点，防止虚假宣传。',
+    label_en: 'Promise-Reality Gap',
+    desc_en:
+      'Identify features heavily promoted in listings that are frequently cited as failures in reviews.',
     taskPrompt: `
 ### Task: Promise vs Reality Gap Analysis (承诺/现实断层)
 Identify Listing over-promises that Reviews frequently contradict.
@@ -530,8 +538,8 @@ Customer Reviews:
     "listing_revision_suggestions": ["string"]
   }
 `,
-    color: "rose"
-  }
+    color: 'rose',
+  },
 ];
 
 /**

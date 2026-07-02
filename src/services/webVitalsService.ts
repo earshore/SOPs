@@ -32,9 +32,15 @@ type LayoutShiftPerformanceEntry = PerformanceEntry & {
   value: number;
 };
 
-function isLayoutShiftPerformanceEntry(entry: PerformanceEntry): entry is LayoutShiftPerformanceEntry {
-  return 'hadRecentInput' in entry && typeof entry.hadRecentInput === 'boolean'
-    && 'value' in entry && typeof entry.value === 'number';
+function isLayoutShiftPerformanceEntry(
+  entry: PerformanceEntry
+): entry is LayoutShiftPerformanceEntry {
+  return (
+    'hadRecentInput' in entry &&
+    typeof entry.hadRecentInput === 'boolean' &&
+    'value' in entry &&
+    typeof entry.value === 'number'
+  );
 }
 
 /**
@@ -52,7 +58,7 @@ const THRESHOLDS: Record<MetricName, { good: number; poor: number }> = {
   // Time to First Byte (首字节时间)
   TTFB: { good: 800, poor: 1800 },
   // Interaction to Next Paint (交互到下次绘制)
-  INP: { good: 200, poor: 500 }
+  INP: { good: 200, poor: 500 },
 };
 
 /**
@@ -124,7 +130,7 @@ class WebVitalsService {
         rating: getRating('FCP', fcpEntry.startTime),
         delta: fcpEntry.startTime,
         id: `v1-${Date.now()}-${Math.random()}`,
-        navigationType: 'navigate'
+        navigationType: 'navigate',
       });
     }
   }
@@ -133,9 +139,12 @@ class WebVitalsService {
    * 收集LCP指标
    */
   private collectLCP(): void {
-    const observer = new PerformanceObserver((list) => {
+    const observer = new PerformanceObserver(list => {
       const entries = list.getEntries();
-      const lastEntry = entries[entries.length - 1] as PerformanceEntry & { renderTime?: number; loadTime?: number };
+      const lastEntry = entries[entries.length - 1] as PerformanceEntry & {
+        renderTime?: number;
+        loadTime?: number;
+      };
 
       if (lastEntry) {
         const value = lastEntry.renderTime || lastEntry.loadTime || lastEntry.startTime;
@@ -145,7 +154,7 @@ class WebVitalsService {
           rating: getRating('LCP', value),
           delta: value,
           id: `v1-${Date.now()}-${Math.random()}`,
-          navigationType: 'navigate'
+          navigationType: 'navigate',
         });
       }
     });
@@ -161,7 +170,9 @@ class WebVitalsService {
    * 收集TTFB指标
    */
   private collectTTFB(): void {
-    const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    const navigationEntry = performance.getEntriesByType(
+      'navigation'
+    )[0] as PerformanceNavigationTiming;
 
     if (navigationEntry) {
       const value = navigationEntry.responseStart - navigationEntry.requestStart;
@@ -171,7 +182,7 @@ class WebVitalsService {
         rating: getRating('TTFB', value),
         delta: value,
         id: `v1-${Date.now()}-${Math.random()}`,
-        navigationType: 'navigate'
+        navigationType: 'navigate',
       });
     }
   }
@@ -185,7 +196,7 @@ class WebVitalsService {
     let lastLoggedValue = 0;
     const LOG_THRESHOLD = 0.05; // 只在 CLS 变化超过 0.05 时才触发回调
 
-    const observer = new PerformanceObserver((list) => {
+    const observer = new PerformanceObserver(list => {
       for (const entry of list.getEntries()) {
         if (isLayoutShiftPerformanceEntry(entry) && !entry.hadRecentInput) {
           clsValue += entry.value;
@@ -201,7 +212,7 @@ class WebVitalsService {
           rating: getRating('CLS', clsValue),
           delta: clsValue,
           id: `v1-${Date.now()}-${Math.random()}`,
-          navigationType: 'navigate'
+          navigationType: 'navigate',
         });
         lastLoggedValue = clsValue;
       }
@@ -229,7 +240,6 @@ class WebVitalsService {
         console.error('[WebVitals] 回调执行失败:', error);
       }
     });
-
   }
 
   /**
@@ -268,7 +278,7 @@ class WebVitalsService {
     this.metrics.forEach((metric, name) => {
       summary[name] = {
         value: Math.round(metric.value),
-        rating: metric.rating
+        rating: metric.rating,
       };
 
       totalCount++;
@@ -301,8 +311,8 @@ class WebVitalsService {
           ...summary,
           timestamp: Date.now(),
           url: window.location.href,
-          userAgent: navigator.userAgent
-        })
+          userAgent: navigator.userAgent,
+        }),
       });
     } catch (error) {
       console.error('[WebVitals] 指标上报失败:', error);

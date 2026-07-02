@@ -24,9 +24,9 @@ export async function mount(container: HTMLElement): Promise<void> {
       {
         retryCount: 3,
         timeout: 5000,
-        onError: (error) => {
+        onError: error => {
           console.error('[AI智能分析] 模板加载失败:', error);
-        }
+        },
       }
     );
 

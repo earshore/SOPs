@@ -12,6 +12,7 @@ interface LlmMockRow {
 
 interface LlmMockInput {
   rows: LlmMockRow[];
+  signal?: AbortSignal;
   onProgress?: (progress: { completedBatches: number; totalBatches: number; decisions?: LlmMockRow[] }) => void;
 }
 
@@ -54,13 +55,9 @@ const mocks = vi.hoisted(() => ({
       </select>
       <textarea id="ppc-paste-input"></textarea>
       <input id="ppc-file-input" type="file" />
-      <input id="ppc-target-acos" value="35" />
-      <input id="ppc-high-acos" value="55" />
-      <input id="ppc-min-clicks" value="12" />
-      <input id="ppc-min-spend" value="15" />
-      <input id="ppc-min-orders" value="2" />
-      <input id="ppc-min-ctr" value="0.35" />
+      <div id="ppc-threshold-grid"></div>
       <input id="ppc-action-owner" value="广告负责人" />
+      <input id="ppc-use-agent" type="checkbox" />
       <input id="ppc-allow-local-fallback" type="checkbox" />
       <input id="ppc-use-context" type="checkbox" />
       <button id="ppc-analysis-settings-toggle" type="button" aria-expanded="false"></button>
@@ -135,6 +132,11 @@ function createDeferred<T>(): { promise: Promise<T>; resolve: (value: T) => void
 }
 
 async function loadSampleAndAnalyze(container: HTMLElement): Promise<void> {
+  const useAgent = container.querySelector<HTMLInputElement>('#ppc-use-agent');
+  if (useAgent) {
+    useAgent.checked = true;
+    useAgent.dispatchEvent(new Event('change'));
+  }
   container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
   container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
   await flushAnalysis();
@@ -206,6 +208,20 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     expect(showToast).toHaveBeenCalledWith('导出完成', { type: 'success', description: '2 行动作已导出' });
   });
 
+  it('默认仅使用本地规则，不调用 Agent 语义复核', async () => {
+    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
+    await flushAnalysis();
+
+    expect(mocks.analyzeWithAgent).not.toHaveBeenCalled();
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('本地规则分析完成');
+    expect(showToast).toHaveBeenCalledWith('PPC 本地分析完成', {
+      type: 'success',
+      description: '已识别 10 行搜索词',
+    });
+  });
+
   it('清空时重置结果和筛选状态', async () => {
     await loadSampleAndAnalyze(container);
     container.querySelector<HTMLButtonElement>('[data-filter="scale_budget"]')?.click();
@@ -274,6 +290,11 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('0');
     expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('请点击“分析当前数据”');
 
+    const useAgent = container.querySelector<HTMLInputElement>('#ppc-use-agent');
+    if (useAgent) {
+      useAgent.checked = true;
+      useAgent.dispatchEvent(new Event('change'));
+    }
     container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
     await flushAnalysis();
 
@@ -296,6 +317,11 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     expect(mocks.analyzeWithAgent).not.toHaveBeenCalled();
     expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('0');
 
+    const useAgent = container.querySelector<HTMLInputElement>('#ppc-use-agent');
+    if (useAgent) {
+      useAgent.checked = true;
+      useAgent.dispatchEvent(new Event('change'));
+    }
     container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
     await flushAnalysis();
 
@@ -311,6 +337,11 @@ describe('PPC 搜索词分析器 UI 行为', () => {
       return deferred.promise;
     });
 
+    const useAgent = container.querySelector<HTMLInputElement>('#ppc-use-agent');
+    if (useAgent) {
+      useAgent.checked = true;
+      useAgent.dispatchEvent(new Event('change'));
+    }
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
     container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
 
@@ -366,9 +397,62 @@ describe('PPC 搜索词分析器 UI 行为', () => {
     expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('PPC Agent 完成');
   });
 
+  it('清空时取消进行中的 Agent 分析并忽略过期返回', async () => {
+    const deferred = createDeferred<LlmMockAgentResult>();
+    let capturedRows: LlmMockRow[] = [];
+    let capturedSignal: AbortSignal | undefined;
+    mocks.analyzeWithAgent.mockImplementationOnce(({ rows, signal }: LlmMockInput) => {
+      capturedRows = rows;
+      capturedSignal = signal;
+      return deferred.promise;
+    });
+
+    const useAgent = container.querySelector<HTMLInputElement>('#ppc-use-agent');
+    if (useAgent) {
+      useAgent.checked = true;
+      useAgent.dispatchEvent(new Event('change'));
+    }
+    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
+
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
+    expect(container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.disabled).toBe(true);
+
+    container.querySelector<HTMLButtonElement>('#ppc-btn-clear')?.click();
+    expect(capturedSignal?.aborted).toBe(true);
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('0');
+    expect(container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.disabled).toBe(false);
+
+    deferred.resolve({
+      decisions: capturedRows.map((row) => ({
+        id: row.id,
+        action: row.action,
+        reason: '过期 Agent 结果',
+        priority: row.priority,
+      })),
+      modelDecisionIds: capturedRows.map((row) => row.id),
+      toolCalls: [],
+      summary: {
+        totalRows: capturedRows.length,
+        localRows: 0,
+        modelRows: capturedRows.length,
+        skippedModelRows: 0,
+      },
+    });
+    await flushAnalysis();
+
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('0');
+    expect(container.querySelector('#ppc-results-body')?.textContent).not.toContain('过期 Agent 结果');
+  });
+
   it('模型失败且未开启降级时保留本地初判', async () => {
     mocks.analyzeWithAgent.mockRejectedValueOnce(new Error('LLM unavailable'));
 
+    const useAgent = container.querySelector<HTMLInputElement>('#ppc-use-agent');
+    if (useAgent) {
+      useAgent.checked = true;
+      useAgent.dispatchEvent(new Event('change'));
+    }
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
     container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
     await flushAnalysis();
@@ -380,6 +464,11 @@ describe('PPC 搜索词分析器 UI 行为', () => {
 
   it('模型失败且开启降级时使用本地规则', async () => {
     mocks.analyzeWithAgent.mockRejectedValueOnce(new Error('LLM unavailable'));
+    const useAgent = container.querySelector<HTMLInputElement>('#ppc-use-agent');
+    if (useAgent) {
+      useAgent.checked = true;
+      useAgent.dispatchEvent(new Event('change'));
+    }
     const fallback = container.querySelector<HTMLInputElement>('#ppc-allow-local-fallback');
     if (fallback) {
       fallback.checked = true;

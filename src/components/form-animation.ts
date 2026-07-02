@@ -1,7 +1,7 @@
 /**
  * 表单动画组件
  * 负责表单输入的动画效果控制
- * 
+ *
  * Requirements: 6.1, 6.2, 6.3, 6.4
  */
 
@@ -33,7 +33,7 @@ export function initializeFormAnimations(): void {
 function initializeFloatingLabels(): void {
   const floatGroups = document.querySelectorAll('.form-group-float');
 
-  floatGroups.forEach((group) => {
+  floatGroups.forEach(group => {
     const input = group.querySelector<HTMLInputElement | HTMLTextAreaElement>(
       '.form-input, .form-textarea'
     );
@@ -102,10 +102,10 @@ function initializeFocusAnimations(): void {
     '.form-input, .form-textarea, .form-select'
   );
 
-  inputs.forEach((input) => {
+  inputs.forEach(input => {
     // 焦点动画已经通过CSS处理
     // 这里可以添加额外的JavaScript逻辑（如果需要）
-    
+
     // 监听焦点事件以触发自定义事件
     input.addEventListener('focus', () => {
       const event = new CustomEvent('form-input-focus', {
@@ -128,7 +128,7 @@ function initializeFocusAnimations(): void {
 /**
  * 显示输入错误动画
  * Requirements 6.3: 输入验证失败时的抖动动画
- * 
+ *
  * @param input - 输入元素
  * @param errorMessage - 错误消息（可选）
  */
@@ -177,10 +177,7 @@ export function showInputError(
 /**
  * 显示错误消息
  */
-function showErrorMessage(
-  input: HTMLInputElement | HTMLTextAreaElement,
-  message: string
-): void {
+function showErrorMessage(input: HTMLInputElement | HTMLTextAreaElement, message: string): void {
   // 查找或创建错误消息元素
   let errorElement = input.parentElement?.querySelector<HTMLElement>('.form-error');
 
@@ -196,7 +193,7 @@ function showErrorMessage(
 
 /**
  * 清除输入错误状态
- * 
+ *
  * @param input - 输入元素
  */
 export function clearInputError(input: HTMLInputElement | HTMLTextAreaElement): void {
@@ -213,7 +210,7 @@ export function clearInputError(input: HTMLInputElement | HTMLTextAreaElement): 
 /**
  * 显示输入成功动画
  * Requirements 6.4: 输入验证成功时的勾选图标动画
- * 
+ *
  * @param input - 输入元素
  */
 export function showInputSuccess(input: HTMLInputElement | HTMLTextAreaElement): void {
@@ -244,10 +241,7 @@ export function showInputSuccess(input: HTMLInputElement | HTMLTextAreaElement):
 /**
  * 显示成功图标
  */
-function showSuccessIcon(
-  input: HTMLInputElement | HTMLTextAreaElement,
-  animate: boolean
-): void {
+function showSuccessIcon(input: HTMLInputElement | HTMLTextAreaElement, animate: boolean): void {
   // 查找或创建成功图标容器
   const parent = input.parentElement;
   if (!parent) return;
@@ -258,9 +252,7 @@ function showSuccessIcon(
   }
 
   // 查找现有图标
-  let iconElement = parent.querySelector<HTMLElement>(
-    `.${ANIMATION_CLASSES.formInputSuccessIcon}`
-  );
+  let iconElement = parent.querySelector<HTMLElement>(`.${ANIMATION_CLASSES.formInputSuccessIcon}`);
 
   if (!iconElement) {
     // 创建成功图标
@@ -306,7 +298,7 @@ function createCheckmarkSVG(): string {
 
 /**
  * 清除输入成功状态
- * 
+ *
  * @param input - 输入元素
  */
 export function clearInputSuccess(input: HTMLInputElement | HTMLTextAreaElement): void {
@@ -316,9 +308,7 @@ export function clearInputSuccess(input: HTMLInputElement | HTMLTextAreaElement)
   const parent = input.parentElement;
   if (!parent) return;
 
-  const iconElement = parent.querySelector(
-    `.${ANIMATION_CLASSES.formInputSuccessIcon}`
-  );
+  const iconElement = parent.querySelector(`.${ANIMATION_CLASSES.formInputSuccessIcon}`);
   if (iconElement) {
     iconElement.remove();
   }
@@ -328,7 +318,7 @@ export function clearInputSuccess(input: HTMLInputElement | HTMLTextAreaElement)
 
 /**
  * 验证输入并显示相应动画
- * 
+ *
  * @param input - 输入元素
  * @param validator - 验证函数
  * @param errorMessage - 错误消息
@@ -359,7 +349,7 @@ export async function validateInput(
 
 /**
  * 为输入框添加实时验证
- * 
+ *
  * @param input - 输入元素
  * @param validator - 验证函数
  * @param errorMessage - 错误消息
@@ -398,16 +388,19 @@ export function addLiveValidation(
 
 /**
  * 批量初始化表单验证
- * 
+ *
  * @param form - 表单元素
  * @param validators - 验证器映射（字段名 -> 验证函数）
  */
 export function initializeFormValidation(
   form: HTMLFormElement,
-  validators: Record<string, {
-    validator: (value: string) => boolean | Promise<boolean>;
-    errorMessage: string;
-  }>
+  validators: Record<
+    string,
+    {
+      validator: (value: string) => boolean | Promise<boolean>;
+      errorMessage: string;
+    }
+  >
 ): void {
   Object.entries(validators).forEach(([fieldName, config]) => {
     const input = form.querySelector<HTMLInputElement | HTMLTextAreaElement>(
@@ -420,25 +413,23 @@ export function initializeFormValidation(
   });
 
   // 表单提交时验证所有字段
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
 
-    const validationPromises = Object.entries(validators).map(
-      async ([fieldName, config]) => {
-        const input = form.querySelector<HTMLInputElement | HTMLTextAreaElement>(
-          `[name="${fieldName}"]`
-        );
+    const validationPromises = Object.entries(validators).map(async ([fieldName, config]) => {
+      const input = form.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+        `[name="${fieldName}"]`
+      );
 
-        if (input) {
-          return validateInput(input, config.validator, config.errorMessage);
-        }
-
-        return true;
+      if (input) {
+        return validateInput(input, config.validator, config.errorMessage);
       }
-    );
+
+      return true;
+    });
 
     const results = await Promise.all(validationPromises);
-    const allValid = results.every((result) => result);
+    const allValid = results.every(result => result);
 
     if (allValid) {
       // 所有字段验证通过，触发自定义事件
@@ -461,7 +452,7 @@ export function initializeFormValidation(
 /**
  * 重置表单状态
  * 清除所有验证状态和动画
- * 
+ *
  * @param form - 表单元素
  */
 export function resetFormState(form: HTMLFormElement): void {
@@ -469,7 +460,7 @@ export function resetFormState(form: HTMLFormElement): void {
     '.form-input, .form-textarea'
   );
 
-  inputs.forEach((input) => {
+  inputs.forEach(input => {
     clearInputError(input);
     clearInputSuccess(input);
   });

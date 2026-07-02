@@ -14,9 +14,7 @@ describe('mergeThreadHistoryWithRequest', () => {
       { role: 'user', text: '第一轮问题' },
       { role: 'ai', text: '第一轮回答' },
     ];
-    const request: ChatMessage[] = [
-      { role: 'user', content: '第二轮问题' },
-    ];
+    const request: ChatMessage[] = [{ role: 'user', content: '第二轮问题' }];
 
     expect(mergeThreadHistoryWithRequest(history, request)).toEqual([
       { role: 'user', content: '第一轮问题' },
@@ -44,17 +42,13 @@ describe('mergeThreadHistoryWithRequest', () => {
       { role: 'system', text: '系统提示' },
       { role: 'user', text: '   ' },
     ];
-    const request: ChatMessage[] = [
-      { role: 'user', content: '新的问题' },
-    ];
+    const request: ChatMessage[] = [{ role: 'user', content: '新的问题' }];
 
     expect(mergeThreadHistoryWithRequest(history, request)).toEqual(request);
   });
 
   it('returns an empty list when there is no request message to send', () => {
-    expect(mergeThreadHistoryWithRequest([
-      { role: 'user', text: '已有历史' },
-    ], [])).toEqual([]);
+    expect(mergeThreadHistoryWithRequest([{ role: 'user', text: '已有历史' }], [])).toEqual([]);
   });
 });
 
@@ -70,11 +64,13 @@ describe('buildStoredThreadMessages', () => {
       { role: 'user', content: '第二轮问题' },
     ];
 
-    expect(buildStoredThreadMessages(existing, conversation, '部分回复', {
-      now: 3000,
-      assistantCreatedAt: 4000,
-      assistantStatus: 'stopped',
-    })).toEqual([
+    expect(
+      buildStoredThreadMessages(existing, conversation, '部分回复', {
+        now: 3000,
+        assistantCreatedAt: 4000,
+        assistantStatus: 'stopped',
+      })
+    ).toEqual([
       { role: 'user', text: '第一轮问题', createdAt: 1000 },
       { role: 'ai', text: '第一轮回答', createdAt: 2000 },
       { role: 'user', text: '第二轮问题', createdAt: 3000 },
@@ -89,19 +85,19 @@ describe('buildStoredThreadMessages', () => {
       { role: 'user', content: '3' },
     ];
 
-    expect(buildStoredThreadMessages([], conversation, '', {
-      now: 1000,
-      maxMessages: 2,
-    })).toEqual([
+    expect(
+      buildStoredThreadMessages([], conversation, '', {
+        now: 1000,
+        maxMessages: 2,
+      })
+    ).toEqual([
       { role: 'ai', text: '2', createdAt: 1000 },
       { role: 'user', text: '3', createdAt: 1000 },
     ]);
   });
 
   it('truncates oversized stored messages', () => {
-    const stored = buildStoredThreadMessages([], [
-      { role: 'user', content: 'abcdef' },
-    ], '', {
+    const stored = buildStoredThreadMessages([], [{ role: 'user', content: 'abcdef' }], '', {
       now: 1000,
       maxMessageChars: 3,
     });
@@ -114,14 +110,17 @@ describe('buildStoredThreadMessages', () => {
 
 describe('normalizeStoredThreadMessages', () => {
   it('drops invalid messages and fills missing timestamps', () => {
-    expect(normalizeStoredThreadMessages([
-      { role: 'system', text: '系统' },
-      { role: 'user', text: '   ' },
-      { role: 'assistant', text: '保留' },
-    ], {
-      fallbackCreatedAt: 5000,
-    })).toEqual([
-      { role: 'ai', text: '保留', createdAt: 5000 },
-    ]);
+    expect(
+      normalizeStoredThreadMessages(
+        [
+          { role: 'system', text: '系统' },
+          { role: 'user', text: '   ' },
+          { role: 'assistant', text: '保留' },
+        ],
+        {
+          fallbackCreatedAt: 5000,
+        }
+      )
+    ).toEqual([{ role: 'ai', text: '保留', createdAt: 5000 }]);
   });
 });

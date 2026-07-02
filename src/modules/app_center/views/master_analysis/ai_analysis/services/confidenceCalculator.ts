@@ -11,7 +11,7 @@ import type {
   HesitationPointsReport,
   BuyerProfileReport,
   VocabGapReport,
-  PromiseRealityReport
+  PromiseRealityReport,
 } from '../config/analysisReportData';
 
 /**
@@ -20,7 +20,7 @@ import type {
 const CONFIDENCE_THRESHOLDS = {
   MIN_ACCEPTABLE: 0.2, // 最低可接受置信度
   HIGH_QUALITY: 0.7, // 高质量阈值
-  MEDIUM_QUALITY: 0.5 // 中等质量阈值
+  MEDIUM_QUALITY: 0.5, // 中等质量阈值
 };
 
 function checkStringQuality(value: string): number {
@@ -77,7 +77,11 @@ function scoreByArrayLength(items: unknown, targetCount: number, emptyScore = 0)
   return Math.min(items.length / targetCount, 1.0);
 }
 
-function scoreByValidText<T>(items: T[] | undefined, getText: (item: T) => string | undefined, targetCount: number): number {
+function scoreByValidText<T>(
+  items: T[] | undefined,
+  getText: (item: T) => string | undefined,
+  targetCount: number
+): number {
   if (!Array.isArray(items)) return 0;
 
   const validItems = items.filter(item => {
@@ -115,7 +119,9 @@ export function calculateTitleKeywordsConfidence(report: TitleKeywordsReport | n
   try {
     // 检查主关键词
     if (report.primary_keywords && Array.isArray(report.primary_keywords)) {
-      const validPrimary = report.primary_keywords.filter(k => k.keyword && k.keyword.trim().length > 0);
+      const validPrimary = report.primary_keywords.filter(
+        k => k.keyword && k.keyword.trim().length > 0
+      );
       scores.push(validPrimary.length > 0 ? Math.min(validPrimary.length / 3, 1.0) : 0);
     } else {
       scores.push(0);
@@ -123,7 +129,9 @@ export function calculateTitleKeywordsConfidence(report: TitleKeywordsReport | n
 
     // 检查次要关键词
     if (report.secondary_keywords && Array.isArray(report.secondary_keywords)) {
-      const validSecondary = report.secondary_keywords.filter(k => k.keyword && k.keyword.trim().length > 0);
+      const validSecondary = report.secondary_keywords.filter(
+        k => k.keyword && k.keyword.trim().length > 0
+      );
       scores.push(validSecondary.length > 0 ? Math.min(validSecondary.length / 5, 1.0) : 0);
     } else {
       scores.push(0);
@@ -159,10 +167,12 @@ export function calculateSellingPointsConfidence(report: SellingPointsReport | n
   try {
     scores.push(scoreByValidText(report.bullet_analysis, b => b.original_text_summary, 3));
     scores.push(scoreOptionalQuality(report.overall_strategy?.primary_differentiation));
-    scores.push(scoreAnyArrayContent(
-      report.function_scene_matrix?.functions,
-      report.function_scene_matrix?.scenes
-    ));
+    scores.push(
+      scoreAnyArrayContent(
+        report.function_scene_matrix?.functions,
+        report.function_scene_matrix?.scenes
+      )
+    );
 
     return finalizeConfidence(scores);
   } catch (error) {
@@ -186,7 +196,9 @@ export function calculateFatalFlawsConfidence(report: FatalFlawsReport | null): 
     // 检查致命缺陷
     if (report.critical_issues && Array.isArray(report.critical_issues)) {
       // 致命缺陷可能为空（产品很好），所以空数组也给一定分数
-      scores.push(report.critical_issues.length === 0 ? 0.8 : Math.min(report.critical_issues.length / 2, 1.0));
+      scores.push(
+        report.critical_issues.length === 0 ? 0.8 : Math.min(report.critical_issues.length / 2, 1.0)
+      );
     } else {
       scores.push(0);
     }
@@ -228,7 +240,9 @@ export function calculateWowMomentsConfidence(report: WowMomentsReport | null): 
   try {
     // 检查惊喜时刻
     if (report.moments && Array.isArray(report.moments)) {
-      const validMoments = report.moments.filter(m => m.moment_description && m.moment_description.trim().length > 0);
+      const validMoments = report.moments.filter(
+        m => m.moment_description && m.moment_description.trim().length > 0
+      );
       scores.push(validMoments.length > 0 ? Math.min(validMoments.length / 2, 1.0) : 0);
     } else {
       scores.push(0);
@@ -267,7 +281,9 @@ export function calculateHesitationPointsConfidence(report: HesitationPointsRepo
   try {
     // 检查犹豫点
     if (report.hesitations && Array.isArray(report.hesitations)) {
-      const validPoints = report.hesitations.filter(p => p.pre_purchase_worry && p.pre_purchase_worry.trim().length > 0);
+      const validPoints = report.hesitations.filter(
+        p => p.pre_purchase_worry && p.pre_purchase_worry.trim().length > 0
+      );
       scores.push(validPoints.length > 0 ? Math.min(validPoints.length / 3, 1.0) : 0);
     } else {
       scores.push(0);
@@ -331,10 +347,12 @@ export function calculateVocabGapConfidence(report: VocabGapReport | null): numb
     // 未覆盖术语可能为空（词汇很完整），所以空数组也给一定分数
     scores.push(scoreByArrayLength(report.uncovered_buyer_terms, 5, 0.8));
     scores.push(checkDataQuality(report.term_translations));
-    scores.push(scoreAnyArrayContent(
-      report.listing_optimization?.title_additions,
-      report.listing_optimization?.bullet_additions
-    ));
+    scores.push(
+      scoreAnyArrayContent(
+        report.listing_optimization?.title_additions,
+        report.listing_optimization?.bullet_additions
+      )
+    );
 
     return finalizeConfidence(scores);
   } catch (error) {
@@ -357,7 +375,9 @@ export function calculatePromiseRealityConfidence(report: PromiseRealityReport |
   try {
     // 检查承诺现实差距
     if (report.gaps && Array.isArray(report.gaps)) {
-      const validGaps = report.gaps.filter(g => g.listing_claim && g.listing_claim.trim().length > 0);
+      const validGaps = report.gaps.filter(
+        g => g.listing_claim && g.listing_claim.trim().length > 0
+      );
       scores.push(validGaps.length > 0 ? Math.min(validGaps.length / 3, 1.0) : 0);
     } else {
       scores.push(0);
@@ -389,31 +409,45 @@ export function calculatePromiseRealityConfidence(report: PromiseRealityReport |
 /**
  * 计算完整报告的置信度
  */
-export function calculateFullReportConfidence(report: Record<string, unknown>): Record<string, number> {
+export function calculateFullReportConfidence(
+  report: Record<string, unknown>
+): Record<string, number> {
   const confidence: Record<string, number> = {};
 
   if (report['title-keywords']) {
-    confidence['title-keywords'] = calculateTitleKeywordsConfidence(report['title-keywords'] as TitleKeywordsReport);
+    confidence['title-keywords'] = calculateTitleKeywordsConfidence(
+      report['title-keywords'] as TitleKeywordsReport
+    );
   }
 
   if (report['selling-points']) {
-    confidence['selling-points'] = calculateSellingPointsConfidence(report['selling-points'] as SellingPointsReport);
+    confidence['selling-points'] = calculateSellingPointsConfidence(
+      report['selling-points'] as SellingPointsReport
+    );
   }
 
   if (report['fatal-flaws']) {
-    confidence['fatal-flaws'] = calculateFatalFlawsConfidence(report['fatal-flaws'] as FatalFlawsReport);
+    confidence['fatal-flaws'] = calculateFatalFlawsConfidence(
+      report['fatal-flaws'] as FatalFlawsReport
+    );
   }
 
   if (report['wow-moments']) {
-    confidence['wow-moments'] = calculateWowMomentsConfidence(report['wow-moments'] as WowMomentsReport);
+    confidence['wow-moments'] = calculateWowMomentsConfidence(
+      report['wow-moments'] as WowMomentsReport
+    );
   }
 
   if (report['hesitation-points']) {
-    confidence['hesitation-points'] = calculateHesitationPointsConfidence(report['hesitation-points'] as HesitationPointsReport);
+    confidence['hesitation-points'] = calculateHesitationPointsConfidence(
+      report['hesitation-points'] as HesitationPointsReport
+    );
   }
 
   if (report['buyer-profile']) {
-    confidence['buyer-profile'] = calculateBuyerProfileConfidence(report['buyer-profile'] as BuyerProfileReport);
+    confidence['buyer-profile'] = calculateBuyerProfileConfidence(
+      report['buyer-profile'] as BuyerProfileReport
+    );
   }
 
   if (report['vocab-gap']) {
@@ -421,7 +455,9 @@ export function calculateFullReportConfidence(report: Record<string, unknown>): 
   }
 
   if (report['promise-reality']) {
-    confidence['promise-reality'] = calculatePromiseRealityConfidence(report['promise-reality'] as PromiseRealityReport);
+    confidence['promise-reality'] = calculatePromiseRealityConfidence(
+      report['promise-reality'] as PromiseRealityReport
+    );
   }
 
   return confidence;

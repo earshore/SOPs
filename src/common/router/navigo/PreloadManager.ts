@@ -338,7 +338,7 @@ export class PreloadManager {
       this.stats.failedCount++;
 
       this._log(`Preload failed: ${task.path}`, error, 'error');
-      
+
       // 抛出标准错误以便上层处理
       throw new AppError(
         '路由预加载失败',

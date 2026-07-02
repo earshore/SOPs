@@ -1,13 +1,17 @@
 /**
  * 动画设置状态管理
  * 使用Zustand管理动画配置状态
- * 
+ *
  * Requirements: 11.1, 11.2, 11.3
  */
 
 import { createStore } from 'zustand/vanilla';
 import { devtools } from './middleware/devtools';
-import type { AnimationSettings, AnimationSpeed, AnimationCategory } from '../types/animation-types';
+import type {
+  AnimationSettings,
+  AnimationSpeed,
+  AnimationCategory,
+} from '../types/animation-types';
 import { animationManager } from '../services/animation-manager';
 
 /**
@@ -115,25 +119,25 @@ export const animationSettingsStore = createStore<AnimationSettingsStore>()(
       },
 
       // 设置动画速度
-      setAnimationSpeed: (speed) => {
+      setAnimationSpeed: speed => {
         animationManager.setAnimationSpeed(speed);
         set({ settings: animationManager.getSettings() });
       },
 
       // 禁用特定类别
-      disableCategory: (category) => {
+      disableCategory: category => {
         animationManager.disableCategory(category);
         set({ settings: animationManager.getSettings() });
       },
 
       // 启用特定类别
-      enableCategory: (category) => {
+      enableCategory: category => {
         animationManager.enableCategory(category);
         set({ settings: animationManager.getSettings() });
       },
 
       // 切换特定类别
-      toggleCategory: (category) => {
+      toggleCategory: category => {
         const { settings } = get();
         if (settings.disabledCategories.has(category)) {
           animationManager.enableCategory(category);
@@ -144,7 +148,7 @@ export const animationSettingsStore = createStore<AnimationSettingsStore>()(
       },
 
       // 设置是否尊重系统偏好
-      setRespectSystemPreference: (respect) => {
+      setRespectSystemPreference: respect => {
         animationManager.setRespectSystemPreference(respect);
         set({ settings: animationManager.getSettings() });
       },
@@ -165,11 +169,11 @@ export const animationSettingsStore = createStore<AnimationSettingsStore>()(
       // 从AnimationManager同步设置
       syncFromManager: () => {
         set({ settings: animationManager.getSettings() });
-      }
+      },
     }),
     {
       name: 'AnimationSettingsStore',
-      enabled: process.env.NODE_ENV === 'development'
+      enabled: process.env.NODE_ENV === 'development',
     }
   )
 );
@@ -192,7 +196,8 @@ export const animationSelectors = {
   disabledCategories: (state: AnimationSettingsStore) => state.settings.disabledCategories,
 
   /** 是否尊重系统偏好 */
-  respectSystemPreference: (state: AnimationSettingsStore) => state.settings.respectSystemPreference,
+  respectSystemPreference: (state: AnimationSettingsStore) =>
+    state.settings.respectSystemPreference,
 
   /** 检查特定类别是否启用 */
   isCategoryEnabled: (category: AnimationCategory) => (state: AnimationSettingsStore) =>
@@ -202,7 +207,7 @@ export const animationSelectors = {
   shouldReduceMotion: (state: AnimationSettingsStore) =>
     !state.settings.enabled ||
     (state.settings.respectSystemPreference &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches),
 };
 
 /**
@@ -231,7 +236,7 @@ export function subscribeToAnimationSettings(
 ): () => void {
   let previousSettings = animationSettingsStore.getState().settings;
 
-  return animationSettingsStore.subscribe((state) => {
+  return animationSettingsStore.subscribe(state => {
     const currentSettings = state.settings;
     if (currentSettings !== previousSettings) {
       previousSettings = currentSettings;

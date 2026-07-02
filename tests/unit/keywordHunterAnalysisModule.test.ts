@@ -39,6 +39,8 @@ const analysisMocks = vi.hoisted(() => {
     saveCurrentAsync: vi.fn(async () => ({
       id: 'kh-test',
     })),
+    getAllSnapshotsAsync: vi.fn(async () => []),
+    restoreSnapshot: vi.fn(),
     state,
   };
 });
@@ -87,6 +89,8 @@ vi.mock('@/services/storageService', () => ({
 vi.mock('@/modules/app_center/views/keyword_hunter/services/snapshotService', () => ({
   KeywordHunterSnapshotService: {
     saveCurrentAsync: analysisMocks.saveCurrentAsync,
+    getAllAsync: analysisMocks.getAllSnapshotsAsync,
+    restore: analysisMocks.restoreSnapshot,
   },
 }));
 
@@ -149,6 +153,8 @@ beforeEach(() => {
     model: 'gpt-test',
   } as never);
   mockedCallLLM.mockResolvedValue(scoredMarkdown);
+  analysisMocks.getAllSnapshotsAsync.mockResolvedValue([]);
+  analysisMocks.restoreSnapshot.mockReturnValue(null);
   analysisMocks.saveCurrentAsync.mockResolvedValue({
     id: 'kh-test',
   });
@@ -202,6 +208,54 @@ describe('Keyword Hunter analysis module', () => {
     unmount();
 
     expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
+  });
+
+  it('restores the latest reported snapshot when analysis state is empty', async () => {
+    const snapshot = {
+      id: 'kh-reported',
+      status: 'reported',
+      input: {
+        keywordsInputText: 'wireless earbuds',
+        copyInputText: validListing,
+        settings: {
+          matchPlural: true,
+          matchStem: true,
+          matchCase: false,
+          matchPartial: false,
+        },
+      },
+      result: {
+        keywords: ['wireless earbuds'],
+        processedCopy: validListing,
+        matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
+        unmatchedKeywords: [],
+        wordFrequency: [['wireless', 1]],
+        paragraphs: [],
+        llmAnalysisResult: scoredMarkdown,
+        coverageRate: 100,
+      },
+      derived: {
+        matchedCount: 1,
+        unmatchedCount: 0,
+      },
+    };
+    analysisMocks.getAllSnapshotsAsync.mockResolvedValueOnce([snapshot]);
+    analysisMocks.restoreSnapshot.mockImplementationOnce(() => {
+      Object.assign(analysisMocks.state.keywordTracker, {
+        processedCopy: validListing,
+        keywords: ['wireless earbuds'],
+        matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
+        unmatchedKeywords: [],
+        llmAnalysisResult: scoredMarkdown,
+      });
+      return snapshot;
+    });
+
+    const container = await mountAnalysis();
+
+    expect(KeywordHunterSnapshotService.restore).toHaveBeenCalledWith(snapshot);
+    expect(container.querySelector('h2')?.textContent).toContain('88/100');
+    expect(container.querySelector('#kt-analyze-btn')?.classList.contains('cursor-pointer')).toBe(true);
   });
 
   it('shows loading phases, renders successful analysis, and stores raw markdown', async () => {

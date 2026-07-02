@@ -72,7 +72,7 @@ export interface WorkingStateStats {
 
 /**
  * 工作状态管理器
- * 
+ *
  * 功能：
  * - 自动检测工作状态超时
  * - 指数退避重试
@@ -86,7 +86,7 @@ export class WorkingStateManager {
     totalCount: 0,
     successCount: 0,
     failureCount: 0,
-    timeoutCount: 0
+    timeoutCount: 0,
   };
 
   /**
@@ -101,7 +101,7 @@ export class WorkingStateManager {
       onTimeout,
       onSuccess,
       onFinalFailure,
-      retryDelay = 1000
+      retryDelay = 1000,
     } = options;
 
     // 如果任务已存在，先清除
@@ -120,7 +120,7 @@ export class WorkingStateManager {
       onSuccess,
       onFinalFailure,
       retryDelay,
-      timerId: null
+      timerId: null,
     };
 
     this.states.set(id, state);
@@ -253,7 +253,7 @@ export class WorkingStateManager {
     eventBus.emit(APP_EVENTS.WORKING_STATE_TIMEOUT, {
       id,
       elapsed,
-      retryCount: state.retryCount
+      retryCount: state.retryCount,
     });
 
     // 检查是否还能重试
@@ -281,9 +281,8 @@ export class WorkingStateManager {
           // 触发重试事件
           eventBus.emit(APP_EVENTS.WORKING_STATE_RETRY, {
             id,
-            retryCount: currentState.retryCount
+            retryCount: currentState.retryCount,
           });
-
         } catch (error) {
           console.error(`重试失败: ${id}`, error as Error, 'WorkingStateManager');
 
@@ -339,7 +338,7 @@ export class WorkingStateManager {
       remaining,
       retryCount: state.retryCount,
       maxRetries: state.maxRetries,
-      progress
+      progress,
     };
   }
 
@@ -368,7 +367,7 @@ export class WorkingStateManager {
       totalCount: 0,
       successCount: 0,
       failureCount: 0,
-      timeoutCount: 0
+      timeoutCount: 0,
     };
   }
 
@@ -389,7 +388,7 @@ export class WorkingStateManager {
         任务ID: id,
         已用时: `${Date.now() - state.startTime}ms`,
         超时时间: `${state.timeout}ms`,
-        重试次数: `${state.retryCount}/${state.maxRetries}`
+        重试次数: `${state.retryCount}/${state.maxRetries}`,
       }))
     );
     console.groupEnd();
@@ -403,6 +402,9 @@ export const workingStateManager = new WorkingStateManager();
 export default workingStateManager;
 
 // 向后兼容：暴露到 window (开发调试用)
-if (typeof window !== 'undefined' && (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) {
+if (
+  typeof window !== 'undefined' &&
+  (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV
+) {
   (window as unknown as Record<string, unknown>).__WorkingStateManager = workingStateManager;
 }

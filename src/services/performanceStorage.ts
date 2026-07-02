@@ -45,7 +45,7 @@ export class PerformanceStorage {
       storeName: 'performance_records',
       version: 1,
       retentionDays: 7,
-      maxRecords: 10000
+      maxRecords: 10000,
     };
     this.logger = logger || null;
   }
@@ -67,7 +67,11 @@ export class PerformanceStorage {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+  private _log(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    data: Record<string, unknown> = {}
+  ): void {
     if (this.logger) {
       this.logger[level](message, data, 'PerformanceStorage');
     } else {
@@ -96,12 +100,18 @@ export class PerformanceStorage {
     try {
       this.db = await this.openDatabase();
       this.isInitialized = true;
-      this._log('info', '✅ PerformanceStorage initialized', this.config as unknown as Record<string, unknown>);
+      this._log(
+        'info',
+        '✅ PerformanceStorage initialized',
+        this.config as unknown as Record<string, unknown>
+      );
 
       // 清理过期数据
       await this.cleanupOldRecords();
     } catch (error) {
-      this._log('error', 'Failed to initialize PerformanceStorage', { error: (error as Error).message });
+      this._log('error', 'Failed to initialize PerformanceStorage', {
+        error: (error as Error).message,
+      });
       throw error;
     }
   }
@@ -121,14 +131,14 @@ export class PerformanceStorage {
         resolve(request.result);
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         // 创建对象存储
         if (!db.objectStoreNames.contains(this.config.storeName)) {
           const objectStore = db.createObjectStore(this.config.storeName, {
             keyPath: 'id',
-            autoIncrement: false
+            autoIncrement: false,
           });
 
           // 创建索引
@@ -144,17 +154,16 @@ export class PerformanceStorage {
    */
   async save(record: Omit<PerformanceRecord, 'id'>): Promise<string> {
     if (!this.db) {
-      throw new SystemError(
-        'Database not initialized',
-        'PERF_STORAGE_001',
-        { module: 'PerformanceStorage', action: 'save' }
-      );
+      throw new SystemError('Database not initialized', 'PERF_STORAGE_001', {
+        module: 'PerformanceStorage',
+        action: 'save',
+      });
     }
 
     const id = this.generateId();
     const fullRecord: PerformanceRecord = {
       id,
-      ...record
+      ...record,
     };
 
     const db = this.db;
@@ -179,11 +188,10 @@ export class PerformanceStorage {
    */
   async saveBatch(records: Array<Omit<PerformanceRecord, 'id'>>): Promise<string[]> {
     if (!this.db) {
-      throw new SystemError(
-        'Database not initialized',
-        'PERF_STORAGE_002',
-        { module: 'PerformanceStorage', action: 'saveBatch' }
-      );
+      throw new SystemError('Database not initialized', 'PERF_STORAGE_002', {
+        module: 'PerformanceStorage',
+        action: 'saveBatch',
+      });
     }
 
     const ids: string[] = [];
@@ -216,11 +224,11 @@ export class PerformanceStorage {
    */
   async get(id: string): Promise<PerformanceRecord | null> {
     if (!this.db) {
-      throw new SystemError(
-        'Database not initialized',
-        'PERF_STORAGE_003',
-        { module: 'PerformanceStorage', action: 'get', id }
-      );
+      throw new SystemError('Database not initialized', 'PERF_STORAGE_003', {
+        module: 'PerformanceStorage',
+        action: 'get',
+        id,
+      });
     }
 
     const db = this.db;
@@ -250,11 +258,11 @@ export class PerformanceStorage {
     limit?: number;
   }): Promise<PerformanceRecord[]> {
     if (!this.db) {
-      throw new SystemError(
-        'Database not initialized',
-        'PERF_STORAGE_004',
-        { module: 'PerformanceStorage', action: 'getAll', options }
-      );
+      throw new SystemError('Database not initialized', 'PERF_STORAGE_004', {
+        module: 'PerformanceStorage',
+        action: 'getAll',
+        options,
+      });
     }
 
     const db = this.db;
@@ -262,7 +270,7 @@ export class PerformanceStorage {
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.config.storeName], 'readonly');
       const objectStore = transaction.objectStore(this.config.storeName);
-      
+
       let request: IDBRequest;
 
       if (options?.type) {
@@ -303,9 +311,7 @@ export class PerformanceStorage {
    */
   async getRecent(count: number = 100, type?: string): Promise<PerformanceRecord[]> {
     const records = await this.getAll({ type });
-    return records
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, count);
+    return records.sort((a, b) => b.timestamp - a.timestamp).slice(0, count);
   }
 
   /**
@@ -313,11 +319,11 @@ export class PerformanceStorage {
    */
   async delete(id: string): Promise<void> {
     if (!this.db) {
-      throw new SystemError(
-        'Database not initialized',
-        'PERF_STORAGE_005',
-        { module: 'PerformanceStorage', action: 'delete', id }
-      );
+      throw new SystemError('Database not initialized', 'PERF_STORAGE_005', {
+        module: 'PerformanceStorage',
+        action: 'delete',
+        id,
+      });
     }
 
     const db = this.db;
@@ -342,11 +348,10 @@ export class PerformanceStorage {
    */
   async clear(): Promise<void> {
     if (!this.db) {
-      throw new SystemError(
-        'Database not initialized',
-        'PERF_STORAGE_006',
-        { module: 'PerformanceStorage', action: 'clear' }
-      );
+      throw new SystemError('Database not initialized', 'PERF_STORAGE_006', {
+        module: 'PerformanceStorage',
+        action: 'clear',
+      });
     }
 
     const db = this.db;
@@ -372,14 +377,13 @@ export class PerformanceStorage {
    */
   async cleanupOldRecords(): Promise<number> {
     if (!this.db) {
-      throw new SystemError(
-        'Database not initialized',
-        'PERF_STORAGE_007',
-        { module: 'PerformanceStorage', action: 'cleanupOldRecords' }
-      );
+      throw new SystemError('Database not initialized', 'PERF_STORAGE_007', {
+        module: 'PerformanceStorage',
+        action: 'cleanupOldRecords',
+      });
     }
 
-    const cutoffTime = Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000);
+    const cutoffTime = Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000;
     let deletedCount = 0;
 
     const db = this.db;
@@ -391,7 +395,7 @@ export class PerformanceStorage {
       const range = IDBKeyRange.upperBound(cutoffTime);
       const request = index.openCursor(range);
 
-      request.onsuccess = (event) => {
+      request.onsuccess = event => {
         const cursor = (event.target as IDBRequest).result;
         if (cursor) {
           cursor.delete();
@@ -425,10 +429,13 @@ export class PerformanceStorage {
   }> {
     const records = await this.getAll();
 
-    const byType = records.reduce((acc, record) => {
-      acc[record.type] = (acc[record.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const byType = records.reduce(
+      (acc, record) => {
+        acc[record.type] = (acc[record.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     const timestamps = records.map(r => r.timestamp);
     const oldestRecord = Math.min(...timestamps);
@@ -442,7 +449,7 @@ export class PerformanceStorage {
       byType,
       oldestRecord,
       newestRecord,
-      estimatedSize
+      estimatedSize,
     };
   }
 
@@ -480,7 +487,11 @@ export class PerformanceStorage {
    */
   updateConfig(config: Partial<StorageConfig>): void {
     this.config = { ...this.config, ...config };
-    this._log('info', 'PerformanceStorage config updated', this.config as unknown as Record<string, unknown>);
+    this._log(
+      'info',
+      'PerformanceStorage config updated',
+      this.config as unknown as Record<string, unknown>
+    );
   }
 
   /**

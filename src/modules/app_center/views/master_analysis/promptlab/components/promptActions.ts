@@ -17,7 +17,7 @@ import type {
   AnalysisReport,
   GeneratedPromptProfileSnapshot,
   GeneratedPromptRecord,
-  GeneratedPromptType
+  GeneratedPromptType,
 } from '../../../../../../types/modules-business';
 import type { PromptHistoryItem, PromptInputs } from '../../../../../../types/state';
 
@@ -92,9 +92,10 @@ function createPromptRecord(
   const scrapedData = state.scraper.scrapedData;
   const sourceDataFingerprint = getScrapedDataFingerprint(scrapedData) || undefined;
   const reportFingerprint = getReportFingerprint(analysisReport) || undefined;
-  const asins = state.analysis.selectedAsins.length > 0
-    ? [...state.analysis.selectedAsins]
-    : scrapedData?.products?.map((product) => product.asin) || [];
+  const asins =
+    state.analysis.selectedAsins.length > 0
+      ? [...state.analysis.selectedAsins]
+      : scrapedData?.products?.map(product => product.asin) || [];
 
   return {
     id: createPromptId(type),
@@ -106,8 +107,11 @@ function createPromptRecord(
     sourceDataFingerprint,
     reportFingerprint,
     asins,
-    marketplace: scrapedData?.metadata?.marketplace || state.scraper.selectedSite || getReportMarketplace(analysisReport),
-    profile: cloneProfileSnapshot(ctx)
+    marketplace:
+      scrapedData?.metadata?.marketplace ||
+      state.scraper.selectedSite ||
+      getReportMarketplace(analysisReport),
+    profile: cloneProfileSnapshot(ctx),
   };
 }
 
@@ -125,11 +129,16 @@ function createPromptHistoryItem(record: GeneratedPromptRecord): PromptHistoryIt
     reportFingerprint: record.reportFingerprint,
     asins: record.asins,
     marketplace: record.marketplace,
-    profile: record.profile
+    profile: record.profile,
   };
 }
 
-function persistPromptRecord(ctx: PromptlabAlpineContext, type: GeneratedPromptType, prompt: string, analysisReport: AnalysisReport | null): void {
+function persistPromptRecord(
+  ctx: PromptlabAlpineContext,
+  type: GeneratedPromptType,
+  prompt: string,
+  analysisReport: AnalysisReport | null
+): void {
   const record = createPromptRecord(ctx, type, prompt, analysisReport);
   const state = appStore.getState();
 
@@ -141,12 +150,12 @@ function persistPromptRecord(ctx: PromptlabAlpineContext, type: GeneratedPromptT
   }
 
   void HistoryService.updatePromptResultAsync(record.historyId, record)
-    .then((success) => {
+    .then(success => {
       if (success) {
         emitHistoryUpdated();
       }
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('[Promptlab] 保存 Prompt 结果失败:', error);
     });
 }
@@ -160,17 +169,23 @@ function persistPromptRecord(ctx: PromptlabAlpineContext, type: GeneratedPromptT
  */
 export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
   if (!computeIsListingReady(ctx)) {
-    showToast(getPromptReadinessMessage(ctx, {
-      defaultMessage: '未就绪',
-      missingTargetMarketMessage: '请先在产品 DNA 补充区域选择目标语言/站点'
-    }), { type: 'warning' });
+    showToast(
+      getPromptReadinessMessage(ctx, {
+        defaultMessage: '未就绪',
+        missingTargetMarketMessage: '请先在产品 DNA 补充区域选择目标语言/站点',
+      }),
+      { type: 'warning' }
+    );
     return;
   }
 
   ctx.saveState();
 
   const analysisReport = getPromptAnalysisReport();
-  ctx.listingPromptCache = promptlabService.generateMasterPrompt(createPromptInputs(ctx), analysisReport);
+  ctx.listingPromptCache = promptlabService.generateMasterPrompt(
+    createPromptInputs(ctx),
+    analysisReport
+  );
   persistPromptRecord(ctx, 'listing', ctx.listingPromptCache, analysisReport);
   showToast('Listing Prompt 已生成', { type: 'success' });
 }
@@ -189,17 +204,23 @@ export function generateVisualPrompt(ctx: PromptlabAlpineContext): void {
   }
 
   if (!computeIsReady(ctx)) {
-    showToast(getPromptReadinessMessage(ctx, {
-      defaultMessage: '配置信息不完整',
-      missingTargetMarketMessage: '请先选择目标语言/站点'
-    }), { type: 'warning' });
+    showToast(
+      getPromptReadinessMessage(ctx, {
+        defaultMessage: '配置信息不完整',
+        missingTargetMarketMessage: '请先选择目标语言/站点',
+      }),
+      { type: 'warning' }
+    );
     return;
   }
 
   ctx.saveState();
 
   const analysisReport = getPromptAnalysisReport();
-  ctx.visualPromptCache = promptlabService.generateVisualPrompt(createPromptInputs(ctx), analysisReport);
+  ctx.visualPromptCache = promptlabService.generateVisualPrompt(
+    createPromptInputs(ctx),
+    analysisReport
+  );
   persistPromptRecord(ctx, 'visual', ctx.visualPromptCache, analysisReport);
   showToast('Visual Prompt 已生成', { type: 'success' });
 }

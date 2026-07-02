@@ -29,23 +29,19 @@ export interface ToastOptions {
  * @param options 配置选项
  */
 export function showToast(title: string, options: ToastOptions = {}): void {
-  const {
-    type = 'info',
-    description,
-    duration = 3500
-  } = options;
+  const { type = 'info', description, duration = 3500 } = options;
 
-  const container = getEl("toast-container");
+  const container = getEl('toast-container');
   if (!container) return;
 
-  const toast = document.createElement("div");
+  const toast = document.createElement('div');
   toast.className = `toast toast-${type} toast-slide-in`;
 
   const iconMap: Record<ToastType, string> = {
     success: 'fa-circle-check',
     error: 'fa-circle-xmark',
     info: 'fa-circle-info',
-    warning: 'fa-triangle-exclamation'
+    warning: 'fa-triangle-exclamation',
   };
 
   const icon = iconMap[type];
@@ -72,8 +68,8 @@ export function showToast(title: string, options: ToastOptions = {}): void {
   container.appendChild(toast);
 
   setTimeout(() => {
-    toast.classList.remove("toast-slide-in");
-    toast.classList.add("toast-slide-out");
+    toast.classList.remove('toast-slide-in');
+    toast.classList.add('toast-slide-out');
     setTimeout(() => toast.remove(), 400);
   }, duration);
 }
@@ -82,16 +78,16 @@ export function showToast(title: string, options: ToastOptions = {}): void {
  * 显示/隐藏全局进度条
  */
 export function showProgress(show: boolean, percent: number = 0): void {
-  const bar = getEl("global-progress");
-  const fill = getEl("progress-fill");
+  const bar = getEl('global-progress');
+  const fill = getEl('progress-fill');
 
   if (!bar || !fill) return;
 
   if (show) {
-    bar.classList.remove("hidden");
+    bar.classList.remove('hidden');
     (fill as HTMLElement).style.width = `${Math.min(100, Math.max(0, percent))}%`;
   } else {
-    bar.classList.add("hidden");
-    (fill as HTMLElement).style.width = "0%";
+    bar.classList.add('hidden');
+    (fill as HTMLElement).style.width = '0%';
   }
 }

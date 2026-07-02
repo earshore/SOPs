@@ -68,7 +68,7 @@ export class LoadingManager {
       id: taskId,
       message: options.message ?? this.defaultMessage,
       priority: options.priority ?? 0,
-      startTime: Date.now()
+      startTime: Date.now(),
     };
 
     this.tasks.set(taskId, task);
@@ -163,7 +163,7 @@ export class LoadingManager {
       // 显示Loading
       this.globalLoadingElement.classList.remove('hidden');
       this.globalLoadingElement.classList.add('flex');
-      
+
       // 更新消息
       const messageEl = this.globalLoadingElement.querySelector('[data-loading-message]');
       if (messageEl) {
@@ -182,13 +182,17 @@ export class LoadingManager {
    * @param asyncFn - 异步函数
    * @param options - 配置选项
    * @returns 异步函数的返回值
-   * 
+   *
    * @example
    * const result = await loadingManager.wrap('fetch-data', async () => {
    *   return await fetchData();
    * }, { message: '正在获取数据...' });
    */
-  async wrap<T>(taskId: string, asyncFn: () => Promise<T>, options: LoadingTaskOptions = {}): Promise<T> {
+  async wrap<T>(
+    taskId: string,
+    asyncFn: () => Promise<T>,
+    options: LoadingTaskOptions = {}
+  ): Promise<T> {
     this.start(taskId, options);
     try {
       const result = await asyncFn();
@@ -202,7 +206,7 @@ export class LoadingManager {
    * 创建带作用域的加载管理器
    * @param scope - 作用域名称
    * @returns 作用域加载管理器
-   * 
+   *
    * @example
    * const scraperLoading = loadingManager.createScope('scraper');
    * scraperLoading.start('fetch'); // 实际任务ID: scraper:fetch
@@ -210,12 +214,11 @@ export class LoadingManager {
    */
   createScope(scope: string): ScopedLoadingManager {
     return {
-      start: (taskId: string, options?: LoadingTaskOptions) => 
+      start: (taskId: string, options?: LoadingTaskOptions) =>
         this.start(`${scope}:${taskId}`, options),
-      stop: (taskId: string) => 
-        this.stop(`${scope}:${taskId}`),
-      wrap: <T>(taskId: string, asyncFn: () => Promise<T>, options?: LoadingTaskOptions) => 
-        this.wrap(`${scope}:${taskId}`, asyncFn, options)
+      stop: (taskId: string) => this.stop(`${scope}:${taskId}`),
+      wrap: <T>(taskId: string, asyncFn: () => Promise<T>, options?: LoadingTaskOptions) =>
+        this.wrap(`${scope}:${taskId}`, asyncFn, options),
     };
   }
 }

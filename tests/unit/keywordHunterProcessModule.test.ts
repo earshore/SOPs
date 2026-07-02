@@ -52,6 +52,9 @@ const processMocks = vi.hoisted(() => {
       },
       isWindowMinimized: false,
       showTranslation: undefined as boolean | undefined,
+      copyInputText: '',
+      llmAnalysisResult: '',
+      currentSnapshotId: null as string | null,
     },
     updateKeywordTracker: vi.fn((patch: Record<string, unknown>) => {
       Object.assign(state.keywordTracker, patch);
@@ -69,6 +72,8 @@ const processMocks = vi.hoisted(() => {
       container.innerHTML = html;
     }),
     showToast: vi.fn(),
+    getAllSnapshotsAsync: vi.fn(async () => []),
+    restoreSnapshot: vi.fn(),
     state,
   };
 });
@@ -114,6 +119,13 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/modules/app_center/views/keyword_hunter/services/snapshotService', () => ({
+  KeywordHunterSnapshotService: {
+    getAllAsync: processMocks.getAllSnapshotsAsync,
+    restore: processMocks.restoreSnapshot,
+  },
+}));
+
 vi.mock('@/stores/useAppStore', () => ({
   appStore: {
     getState: () => processMocks.state,
@@ -147,6 +159,9 @@ function resetTrackerState(): void {
     },
     isWindowMinimized: false,
     showTranslation: undefined,
+    copyInputText: '',
+    llmAnalysisResult: '',
+    currentSnapshotId: null,
   };
 }
 
@@ -167,6 +182,8 @@ beforeEach(() => {
   document.body.innerHTML = '';
   vi.clearAllMocks();
   resetTrackerState();
+  processMocks.getAllSnapshotsAsync.mockResolvedValue([]);
+  processMocks.restoreSnapshot.mockReturnValue(null);
   mockedStorage.get.mockReturnValue('openai');
   mockedStorage.getLLMConfigWithKey.mockResolvedValue({
     apiKey: 'test-key',
@@ -334,7 +351,7 @@ describe('Keyword Hunter process module', () => {
       expect(processMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/input');
     });
 
-    expect(processMocks.state.setProcessedCopy).toHaveBeenCalledWith('Original one\nOriginal two');
+    expect(processMocks.state.keywordTracker.processedCopy).toBe('Original one\nOriginal two');
     expect(processMocks.state.keywordTracker.copyInputText).toBe('Original one\nOriginal two');
     expect(processMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/input');
     expect(showToast).toHaveBeenCalledWith('已同步原文到输入模块');
@@ -358,9 +375,82 @@ describe('Keyword Hunter process module', () => {
     await vi.waitFor(() => {
       expect(processMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/analysis');
     });
-    expect(processMocks.state.setProcessedCopy).toHaveBeenCalledWith(
-      expect.stringContaining('Wireless earbuds'),
+    expect(processMocks.state.keywordTracker.processedCopy).toContain('Wireless earbuds');
+  });
+
+  it('restores the latest matched snapshot when process state is empty', async () => {
+    Object.assign(processMocks.state.keywordTracker, {
+      processedCopy: '',
+      keywords: [],
+      matchedKeywords: [],
+      unmatchedKeywords: [],
+      wordFrequency: [],
+    });
+    const snapshot = {
+      id: 'kh-restored',
+      status: 'matched',
+      input: {
+        keywordsInputText: 'wireless earbuds',
+        copyInputText: 'Wireless earbuds restored copy.',
+        settings: processMocks.state.keywordTracker.settings,
+      },
+      result: {
+        processedCopy: 'Wireless earbuds restored copy.',
+        keywords: ['wireless earbuds'],
+        matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
+        unmatchedKeywords: [],
+        wordFrequency: [['wireless', 1]],
+        paragraphs: [],
+        coverageRate: 100,
+      },
+      derived: {
+        matchedCount: 1,
+        unmatchedCount: 0,
+      },
+    };
+    processMocks.getAllSnapshotsAsync.mockResolvedValueOnce([snapshot]);
+    processMocks.restoreSnapshot.mockImplementationOnce(() => {
+      Object.assign(processMocks.state.keywordTracker, {
+        processedCopy: snapshot.result.processedCopy,
+        keywords: snapshot.result.keywords,
+        matchedKeywords: snapshot.result.matchedKeywords,
+        unmatchedKeywords: snapshot.result.unmatchedKeywords,
+        wordFrequency: snapshot.result.wordFrequency,
+        paragraphs: [],
+        translationMode: false,
+      });
+      return snapshot;
+    });
+
+    await mountProcess();
+
+    expect(processMocks.restoreSnapshot).toHaveBeenCalledWith(snapshot);
+    expect(document.querySelector('#kt-copy-display')?.textContent).toContain('Wireless earbuds restored copy');
+    expect(document.querySelector('#kt-coverage-rate')?.textContent).toBe('100%');
+  });
+
+  it('recomputes keyword coverage from edited process copy before analysis', async () => {
+    processMocks.state.keywordTracker.llmAnalysisResult = '# Old report';
+    await mountProcess();
+
+    const display = document.querySelector<HTMLElement>('#kt-copy-display');
+    expect(display).not.toBeNull();
+    display!.innerText = 'Wireless earbuds now include a waterproof shell.';
+
+    click(document.querySelector('#kt-go-analysis-btn'));
+
+    await vi.waitFor(() => {
+      expect(processMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/analysis');
+    });
+    expect(processMocks.state.keywordTracker.processedCopy).toBe(
+      'Wireless earbuds now include a waterproof shell.',
     );
+    expect(processMocks.state.keywordTracker.matchedKeywords).toEqual([
+      { keyword: 'wireless earbuds', count: 1 },
+      { keyword: 'waterproof shell', count: 1 },
+    ]);
+    expect(processMocks.state.keywordTracker.unmatchedKeywords).toEqual([]);
+    expect(processMocks.state.keywordTracker.llmAnalysisResult).toBe('');
   });
 
   it('saves display state and removes floating DOM on unmount', async () => {

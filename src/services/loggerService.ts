@@ -6,9 +6,16 @@
 // ================================================================
 
 // 从types/services导入统一的类型定义
-import type { IStorageService, IConfigService, ILoggerService, LogEntry as ILogEntry } from '../types/services';
+import type {
+  IStorageService,
+  IConfigService,
+  ILoggerService,
+  LogEntry as ILogEntry,
+} from '../types/services';
 import { ValidationError } from '../common/errors/AppError';
 import type { LoggerConfig } from '../common/config/ConfigCenter';
+
+const nativeLoggerConsole = globalThis.console;
 /**
  * 日志级别（数字枚举，用于内部比较）
  */
@@ -20,7 +27,7 @@ export const LOG_LEVELS = {
   FATAL: 4,
 } as const;
 
-export type LogLevelValue = typeof LOG_LEVELS[keyof typeof LOG_LEVELS];
+export type LogLevelValue = (typeof LOG_LEVELS)[keyof typeof LOG_LEVELS];
 
 /**
  * 日志级别名称映射
@@ -107,7 +114,7 @@ export class LoggerService implements ILoggerService {
     this.batchTimer = null;
     this.storageService = storage || null;
     this.configService = config || null;
-    
+
     // 如果提供了config服务，使用它
     if (config) {
       try {
@@ -126,7 +133,7 @@ export class LoggerService implements ILoggerService {
       maxLogs: 100,
       minLevel: 'info',
       batchSize: 10,
-      batchTimeout: 5000
+      batchTimeout: 5000,
     };
   }
 
@@ -164,12 +171,18 @@ export class LoggerService implements ILoggerService {
    */
   private getMinLogLevel(): LogLevelValue {
     switch (this.config.minLevel) {
-      case 'debug': return LOG_LEVELS.DEBUG;
-      case 'info': return LOG_LEVELS.INFO;
-      case 'warn': return LOG_LEVELS.WARN;
-      case 'error': return LOG_LEVELS.ERROR;
-      case 'fatal': return LOG_LEVELS.FATAL;
-      default: return LOG_LEVELS.INFO;
+      case 'debug':
+        return LOG_LEVELS.DEBUG;
+      case 'info':
+        return LOG_LEVELS.INFO;
+      case 'warn':
+        return LOG_LEVELS.WARN;
+      case 'error':
+        return LOG_LEVELS.ERROR;
+      case 'fatal':
+        return LOG_LEVELS.FATAL;
+      default:
+        return LOG_LEVELS.INFO;
     }
   }
 
@@ -209,7 +222,7 @@ export class LoggerService implements ILoggerService {
     // 安全转换 data 为 Record<string, unknown>
     const safeData: Record<string, unknown> =
       data && typeof data === 'object' && !Array.isArray(data)
-        ? data as Record<string, unknown>
+        ? (data as Record<string, unknown>)
         : { value: data };
 
     const entry: LogEntry = {
@@ -253,16 +266,16 @@ export class LoggerService implements ILoggerService {
 
     // 🔧 修复：直接使用原生 console 方法，避免递归调用
     const fullMessage = `${prefix} ${message}`;
-    
+
     switch (level) {
       case LOG_LEVELS.DEBUG:
-        console.debug(fullMessage, style, data);
+        nativeLoggerConsole.debug(fullMessage, style, data);
         break;
       case LOG_LEVELS.INFO:
-        console.info(fullMessage, style, data);
+        nativeLoggerConsole.info(fullMessage, style, data);
         break;
       case LOG_LEVELS.WARN:
-        console.warn(fullMessage, style, data);
+        nativeLoggerConsole.warn(fullMessage, style, data);
         break;
       case LOG_LEVELS.ERROR:
       case LOG_LEVELS.FATAL:
@@ -466,7 +479,7 @@ export class LoggerService implements ILoggerService {
         log.levelName.toUpperCase(),
         log.module,
         log.message,
-        log.url || ''
+        log.url || '',
       ]);
 
       // CSV转义：将双引号转义为两个双引号
@@ -477,19 +490,13 @@ export class LoggerService implements ILoggerService {
         return cell;
       };
 
-      return [
-        headers.join(','),
-        ...rows.map(row => row.map(escapeCSV).join(','))
-      ].join('\n');
+      return [headers.join(','), ...rows.map(row => row.map(escapeCSV).join(','))].join('\n');
     }
 
-    throw new ValidationError(
-      `不支持的导出格式: ${format}`,
-      'LOGGER_001',
-      'format',
-      format,
-      { module: 'LoggerService', action: 'export' }
-    );
+    throw new ValidationError(`不支持的导出格式: ${format}`, 'LOGGER_001', 'format', format, {
+      module: 'LoggerService',
+      action: 'export',
+    });
   }
 
   /**
@@ -497,8 +504,8 @@ export class LoggerService implements ILoggerService {
    */
   download(format: 'json' | 'csv' = 'json'): void {
     const content = this.export(format);
-    const blob = new Blob([content], { 
-      type: format === 'json' ? 'application/json' : 'text/csv' 
+    const blob = new Blob([content], {
+      type: format === 'json' ? 'application/json' : 'text/csv',
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -519,7 +526,8 @@ export default Logger;
 // 向后兼容：暴露到 window
 if (typeof window !== 'undefined') {
   (window as Window & { Logger?: LoggerService; LOG_LEVELS?: typeof LOG_LEVELS }).Logger = Logger;
-  (window as Window & { Logger?: LoggerService; LOG_LEVELS?: typeof LOG_LEVELS }).LOG_LEVELS = LOG_LEVELS;
+  (window as Window & { Logger?: LoggerService; LOG_LEVELS?: typeof LOG_LEVELS }).LOG_LEVELS =
+    LOG_LEVELS;
 }
 
 // ================================================================

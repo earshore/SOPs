@@ -12,7 +12,6 @@
  * - JavaScript 通过 AnimationManager 动态控制这些类
  */
 
-
 /* ========================================
    1. 全局动画禁用
    ======================================== */
@@ -33,17 +32,16 @@
 .no-animations *,
 .no-animations *::before,
 .no-animations *::after,
-[data-animations="disabled"],
-[data-animations="disabled"] *,
-[data-animations="disabled"] *::before,
-[data-animations="disabled"] *::after {
+[data-animations='disabled'],
+[data-animations='disabled'] *,
+[data-animations='disabled'] *::before,
+[data-animations='disabled'] *::after {
   animation-duration: 0ms !important;
   animation-delay: 0ms !important;
   transition-duration: 0ms !important;
   transition-delay: 0ms !important;
   will-change: auto !important;
 }
-
 
 /* ========================================
    2. 动画速度调节
@@ -60,16 +58,16 @@
  * - 所有动画和过渡时长乘以 0.7
  */
 .animations-fast,
-[data-animation-speed="fast"] {
+[data-animation-speed='fast'] {
   --animation-speed-multiplier: 0.7;
 }
 
 .animations-fast *,
 .animations-fast *::before,
 .animations-fast *::after,
-[data-animation-speed="fast"] *,
-[data-animation-speed="fast"] *::before,
-[data-animation-speed="fast"] *::after {
+[data-animation-speed='fast'] *,
+[data-animation-speed='fast'] *::before,
+[data-animation-speed='fast'] *::after {
   animation-duration: calc(var(--animation-speed-multiplier) * 1s) !important;
   transition-duration: calc(var(--animation-speed-multiplier) * 1s) !important;
 }
@@ -85,16 +83,16 @@
  * - 所有动画和过渡时长乘以 1.5
  */
 .animations-slow,
-[data-animation-speed="slow"] {
+[data-animation-speed='slow'] {
   --animation-speed-multiplier: 1.5;
 }
 
 .animations-slow *,
 .animations-slow *::before,
 .animations-slow *::after,
-[data-animation-speed="slow"] *,
-[data-animation-speed="slow"] *::before,
-[data-animation-speed="slow"] *::after {
+[data-animation-speed='slow'] *,
+[data-animation-speed='slow'] *::before,
+[data-animation-speed='slow'] *::after {
   animation-duration: calc(var(--animation-speed-multiplier) * 1s) !important;
   transition-duration: calc(var(--animation-speed-multiplier) * 1s) !important;
 }
@@ -110,10 +108,9 @@
  * - 恢复默认动画速度
  */
 .animations-normal,
-[data-animation-speed="normal"] {
+[data-animation-speed='normal'] {
   --animation-speed-multiplier: 1;
 }
-
 
 /* ========================================
    3. 分类动画禁用
@@ -134,8 +131,8 @@
 .no-button-animations .btn *,
 .no-button-animations button,
 .no-button-animations button *,
-.no-button-animations [role="button"],
-.no-button-animations [role="button"] * {
+.no-button-animations [role='button'],
+.no-button-animations [role='button'] * {
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
@@ -157,8 +154,8 @@
  */
 .no-card-animations .card,
 .no-card-animations .card *,
-.no-card-animations [class*="card-"],
-.no-card-animations [class*="card-"] * {
+.no-card-animations [class*='card-'],
+.no-card-animations [class*='card-'] * {
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
@@ -177,8 +174,8 @@
  */
 .no-toast-animations .toast,
 .no-toast-animations .toast *,
-.no-toast-animations [class*="toast-"],
-.no-toast-animations [class*="toast-"] * {
+.no-toast-animations [class*='toast-'],
+.no-toast-animations [class*='toast-'] * {
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
@@ -196,10 +193,10 @@
  */
 .no-modal-animations .modal,
 .no-modal-animations .modal *,
-.no-modal-animations [class*="modal-"],
-.no-modal-animations [class*="modal-"] *,
-.no-modal-animations [role="dialog"],
-.no-modal-animations [role="dialog"] * {
+.no-modal-animations [class*='modal-'],
+.no-modal-animations [class*='modal-'] *,
+.no-modal-animations [role='dialog'],
+.no-modal-animations [role='dialog'] * {
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
@@ -264,8 +261,8 @@
 .no-loading-animations .skeleton,
 .no-loading-animations .loading-dot,
 .no-loading-animations .progress-bar,
-.no-loading-animations [class*="loading-"],
-.no-loading-animations [class*="loading-"] * {
+.no-loading-animations [class*='loading-'],
+.no-loading-animations [class*='loading-'] * {
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
@@ -288,13 +285,12 @@
 .no-navigation-animations .dropdown-enter,
 .no-navigation-animations nav,
 .no-navigation-animations nav *,
-.no-navigation-animations [role="navigation"],
-.no-navigation-animations [role="navigation"] * {
+.no-navigation-animations [role='navigation'],
+.no-navigation-animations [role='navigation'] * {
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
 }
-
 
 /* ========================================
    4. 可访问性支持
@@ -355,7 +351,6 @@
   transition-duration: revert !important;
 }
 
-
 /* ========================================
    5. 性能优化类
    ======================================== */
@@ -374,12 +369,11 @@
 .performance-mode .card *,
 .performance-mode .list-stagger-item,
 .performance-mode .skeleton,
-.performance-mode [class*="card-"] {
+.performance-mode [class*='card-'] {
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
 }
-
 
 /* ========================================
    6. 调试工具类
@@ -395,10 +389,10 @@
  * - 为所有有动画的元素添加边框
  * - 方便调试动画效果
  */
-.debug-animations [class*="animate-"],
-.debug-animations [class*="-enter"],
-.debug-animations [class*="-exit"],
-.debug-animations [class*="stagger"] {
+.debug-animations [class*='animate-'],
+.debug-animations [class*='-enter'],
+.debug-animations [class*='-exit'],
+.debug-animations [class*='stagger'] {
   outline: 2px dashed rgba(255, 0, 0, 0.5) !important;
   outline-offset: 2px;
 }
@@ -420,7 +414,6 @@
   animation-duration: calc(var(--animation-speed-multiplier, 1) * 10s) !important;
   transition-duration: calc(var(--animation-speed-multiplier, 1) * 10s) !important;
 }
-
 
 /* ========================================
    7. 组合控制类
@@ -456,9 +449,10 @@
 .minimal-animations .btn:hover,
 .minimal-animations .btn:active,
 .minimal-animations .form-input:focus {
-  transition: background-color 150ms ease, border-color 150ms ease !important;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease !important;
 }
-
 
 /* ========================================
    8. 打印样式

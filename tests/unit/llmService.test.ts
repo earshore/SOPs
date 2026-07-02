@@ -171,6 +171,49 @@ describe('LLMService', () => {
       const body = JSON.parse(callArgs[1].body);
       expect(body.temperature).toBe(0.8);
     });
+
+    it('应该支持最大输出token限制', async () => {
+      const mockResponse = createChatCompletion('response');
+
+      (global.fetch as any).mockResolvedValueOnce(createJsonResponse(mockResponse));
+
+      const { callLLM } = await import('../../src/services/llmService');
+
+      await callLLM(
+        [{ role: 'user' as const, content: 'Test' }],
+        'openai',
+        'https://api.example.com/v1',
+        'test-api-key',
+        'gpt-4',
+        { maxTokens: 1200, stream: false }
+      );
+
+      const callArgs = (global.fetch as any).mock.calls[0];
+      const body = JSON.parse(callArgs[1].body);
+      expect(body.max_tokens).toBe(1200);
+    });
+
+    it('应该先规范化端点再执行生产安全检查', async () => {
+      const { configCenter } = await import('../../src/common/config/ConfigCenter');
+      const { EnvConfig } = await import('../../src/common/config/envConfig');
+      vi.mocked(configCenter.isProduction).mockReturnValueOnce(true);
+      vi.mocked(EnvConfig.api.normalizeEndpoint).mockReturnValueOnce('https://api.openai.com/v1');
+
+      const { callLLM } = await import('../../src/services/llmService');
+
+      await expect(
+        callLLM(
+          [{ role: 'user' as const, content: 'Test' }],
+          'openai',
+          '/openai-compatible',
+          'test-api-key',
+          'gpt-4',
+          { stream: false }
+        )
+      ).rejects.toThrow('安全限制');
+
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
   });
 
   describe('模型列表同步', () => {
@@ -196,6 +239,21 @@ describe('LLMService', () => {
           features: ['vision', 'function', 'structured', 'streaming']
         }
       ]);
+    });
+
+    it('同步模型前应该用规范化后的端点执行生产安全检查', async () => {
+      const { configCenter } = await import('../../src/common/config/ConfigCenter');
+      const { EnvConfig } = await import('../../src/common/config/envConfig');
+      vi.mocked(configCenter.isProduction).mockReturnValueOnce(true);
+      vi.mocked(EnvConfig.api.normalizeEndpoint).mockReturnValueOnce('https://api.openai.com/v1');
+
+      const { fetchModelsFromApi } = await import('../../src/services/llmService');
+
+      await expect(
+        fetchModelsFromApi('openai', '/openai-compatible', 'test-api-key')
+      ).rejects.toThrow('安全限制');
+
+      expect(global.fetch).not.toHaveBeenCalled();
     });
   });
 

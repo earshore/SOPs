@@ -16,14 +16,14 @@ export function estimateTokenCount(text: string): number {
   // 分离中文字符和其他字符
   const chineseChars = text.match(/[\u4e00-\u9fa5]/g) || [];
   const chineseCount = chineseChars.length;
-  
+
   // 其他字符(英文、数字、符号等)
   const otherCharsCount = text.length - chineseCount;
-  
+
   // 计算 token 数量
   const chineseTokens = chineseCount * 1.75; // 中文字符
-  const otherTokens = otherCharsCount / 4;   // 英文等字符
-  
+  const otherTokens = otherCharsCount / 4; // 英文等字符
+
   return Math.ceil(chineseTokens + otherTokens);
 }
 
@@ -45,7 +45,10 @@ export function formatTokenCount(count: number): string {
  * @param model 模型类型
  * @returns 成本估算(美元)
  */
-export function estimateTokenCost(tokenCount: number, model: 'gpt-4' | 'gpt-3.5' = 'gpt-4'): number {
+export function estimateTokenCost(
+  tokenCount: number,
+  model: 'gpt-4' | 'gpt-3.5' = 'gpt-4'
+): number {
   // GPT-4: $0.03 / 1K tokens (input)
   // GPT-3.5: $0.0015 / 1K tokens (input)
   const pricePerK = model === 'gpt-4' ? 0.03 : 0.0015;

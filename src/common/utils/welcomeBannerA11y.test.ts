@@ -18,7 +18,7 @@ describe('welcome banner normalization', () => {
             </div>
           </div>
         </div>
-      `,
+      `
     );
 
     const banner = container.querySelector<HTMLElement>('.wb-container');
@@ -50,7 +50,7 @@ describe('welcome banner normalization', () => {
             </div>
           </div>
         </div>
-      `,
+      `
     );
 
     const banner = container.querySelector<HTMLElement>('.wb-container');
@@ -74,7 +74,7 @@ describe('welcome banner normalization', () => {
           <h1 id="ppc-page-title">PPC Search Terms</h1>
           <span class="ppc-tag-dot"></span>
         </section>
-      `,
+      `
     );
 
     const hero = container.querySelector<HTMLElement>('.ppc-hero');
@@ -95,7 +95,7 @@ describe('welcome banner normalization', () => {
           <h2>使用 OpenClaw 前必读</h2>
           <p>先确认模型能力和人工确认边界。</p>
         </section>
-      `,
+      `
     );
 
     const banner = container.querySelector<HTMLElement>('.zn-notice-title');

@@ -35,7 +35,7 @@ export interface IModule extends ModuleLifecycle {
   readonly version: string;
   /** 模块元信息 */
   readonly metadata?: ModuleMetadata;
-  
+
   /** 挂载模块到容器 */
   mount(container: HTMLElement): Promise<void> | void;
   /** 卸载模块 */
@@ -44,7 +44,7 @@ export interface IModule extends ModuleLifecycle {
   getState(): ModuleState;
   /** 模块是否已挂载 */
   isMounted(): boolean;
-  
+
   /** 向后兼容 */
   onUnmount?(): void;
 }

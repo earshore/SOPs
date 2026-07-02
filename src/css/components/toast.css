@@ -117,7 +117,6 @@
   color: var(--color-info);
 }
 
-
 /* ========================================
    Toast 进入动画
    从右侧滑入
@@ -147,7 +146,6 @@
   transition: all 0.4s var(--ease-smooth);
 }
 
-
 /* ========================================
    动画完成后清理 will-change
    ======================================== */
@@ -164,47 +162,47 @@
     animation: none;
     transition: none;
   }
-  
+
   .toast-slide-in {
     opacity: 1;
     transform: translateX(0);
   }
-  
+
   .toast-slide-out {
     opacity: 0;
   }
 }
 
-[data-animations="disabled"] .toast-slide-in,
-[data-animations="disabled"] .toast-slide-out {
+[data-animations='disabled'] .toast-slide-in,
+[data-animations='disabled'] .toast-slide-out {
   animation: none;
   transition: none;
 }
 
-[data-animations="disabled"] .toast-slide-in {
+[data-animations='disabled'] .toast-slide-in {
   opacity: 1;
   transform: translateX(0);
 }
 
-[data-animations="disabled"] .toast-slide-out {
+[data-animations='disabled'] .toast-slide-out {
   opacity: 0;
 }
 
 /* ========================================
    动画速度调节
    ======================================== */
-[data-animation-speed="fast"] .toast-slide-in {
+[data-animation-speed='fast'] .toast-slide-in {
   animation-duration: calc(0.4s * 0.7);
 }
 
-[data-animation-speed="fast"] .toast-slide-out {
+[data-animation-speed='fast'] .toast-slide-out {
   transition-duration: calc(0.4s * 0.7);
 }
 
-[data-animation-speed="slow"] .toast-slide-in {
+[data-animation-speed='slow'] .toast-slide-in {
   animation-duration: calc(0.4s * 1.5);
 }
 
-[data-animation-speed="slow"] .toast-slide-out {
+[data-animation-speed='slow'] .toast-slide-out {
   transition-duration: calc(0.4s * 1.5);
 }

@@ -6,7 +6,7 @@
 import type {
   CompetitorReport,
   ProductOverviewReport,
-  SemanticAnalysisReport
+  SemanticAnalysisReport,
 } from '../types/downloadsReportTypes';
 import type { FullAnalysisReport } from '../ai_analysis/config/analysisReportData';
 import { ReportType } from '../types/downloadsReportTypes';
@@ -157,12 +157,15 @@ export function getReportMetadata(report: unknown): {
   const meta = isReportRecord(report) ? getRecordField(report, 'meta') : null;
   if (meta) {
     const metaAsins = meta.analyzedASINs || meta.asins;
-    asins = Array.isArray(metaAsins) ? metaAsins.filter((asin): asin is string => typeof asin === 'string') : [];
-    market = typeof meta.targetMarket === 'string'
-      ? meta.targetMarket
-      : typeof meta.market === 'string'
-        ? meta.market
-        : 'unknown';
+    asins = Array.isArray(metaAsins)
+      ? metaAsins.filter((asin): asin is string => typeof asin === 'string')
+      : [];
+    market =
+      typeof meta.targetMarket === 'string'
+        ? meta.targetMarket
+        : typeof meta.market === 'string'
+          ? meta.market
+          : 'unknown';
     generatedAt = typeof meta.generatedAt === 'string' ? meta.generatedAt : '';
   }
 

@@ -143,7 +143,11 @@ export class MonitoringService {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data: Record<string, unknown> = {}): void {
+  private _log(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    data: Record<string, unknown> = {}
+  ): void {
     if (this.logger) {
       this.logger[level](message, data, 'Monitoring');
     } else {
@@ -291,9 +295,9 @@ export class MonitoringService {
    */
   captureException(error: Error, context: ErrorContext = {}): void {
     if (!this.isInitialized || !this.Sentry) {
-      this._log('error', '捕获异常（监控服务未启用）', { 
+      this._log('error', '捕获异常（监控服务未启用）', {
         error: error.message,
-        module: context.module || 'App'
+        module: context.module || 'App',
       });
       return;
     }
@@ -306,9 +310,9 @@ export class MonitoringService {
 
     this.Sentry.captureException(error, captureContext);
 
-    this._log('error', '捕获异常', { 
+    this._log('error', '捕获异常', {
       error: error.message,
-      module: context.module || 'App'
+      module: context.module || 'App',
     });
   }
 
@@ -421,5 +425,6 @@ export function createMonitoringService(logger?: ILoggerService): MonitoringServ
 // 🔄 向后兼容：暴露到 window
 // ================================================================
 if (typeof window !== 'undefined') {
-  (window as Window & { MonitoringService?: MonitoringService }).MonitoringService = monitoringService;
+  (window as Window & { MonitoringService?: MonitoringService }).MonitoringService =
+    monitoringService;
 }

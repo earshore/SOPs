@@ -1,6 +1,6 @@
 /**
  * schemas.ts - 运行时类型校验 Schema
- * 
+ *
  * 使用 Zod 进行运行时类型检查
  */
 
@@ -16,7 +16,7 @@ export const RouteConfigSchema = z.object({
   label: z.string(),
   icon: z.string(),
   panelId: z.string(),
-  category: z.string().optional()
+  category: z.string().optional(),
 });
 
 /**
@@ -28,7 +28,7 @@ export const ModuleConfigSchema = z.object({
   title: z.string(),
   version: z.string(),
   icon: z.string(),
-  description: z.string()
+  description: z.string(),
 });
 
 /**
@@ -37,7 +37,7 @@ export const ModuleConfigSchema = z.object({
 export const ContextConfigSchema = z.object({
   id: z.string(),
   name: z.string(),
-  description: z.string()
+  description: z.string(),
 });
 
 // ==================== 状态管理 Schema ====================
@@ -48,7 +48,7 @@ export const ContextConfigSchema = z.object({
 export const UIStateSchema = z.object({
   currentTab: z.string(),
   currentDataTab: z.string(),
-  currentReportTab: z.string()
+  currentReportTab: z.string(),
 });
 
 /**
@@ -58,7 +58,7 @@ export const ScraperStateSchema = z.object({
   isScraping: z.boolean(),
   selectedSite: z.string(),
   scrapedData: z.any().nullable(),
-  currentHistoryId: z.union([z.string(), z.number(), z.null()])
+  currentHistoryId: z.union([z.string(), z.number(), z.null()]),
 });
 
 /**
@@ -66,7 +66,7 @@ export const ScraperStateSchema = z.object({
  */
 export const StateSchema = z.object({
   ui: UIStateSchema,
-  scraper: ScraperStateSchema
+  scraper: ScraperStateSchema,
   // 可以继续添加其他命名空间
 });
 
@@ -82,8 +82,8 @@ export const LLMModelSchema = z.union([
     name: z.string().optional(),
     context: z.number().positive().optional(),
     features: z.array(z.string()).optional(),
-    description: z.string().optional()
-  })
+    description: z.string().optional(),
+  }),
 ]);
 
 /**
@@ -93,7 +93,7 @@ export const LLMConfigSchema = z.object({
   endpoint: z.string().url(),
   apiKey: z.string().min(1),
   model: z.string(),
-  models: z.array(LLMModelSchema)
+  models: z.array(LLMModelSchema),
 });
 
 /**
@@ -105,7 +105,7 @@ export const LLMRequestOptionsSchema = z.object({
   jsonMode: z.boolean().optional(),
   timeout: z.number().positive().optional(),
   retries: z.number().int().nonnegative().optional(),
-  retryDelay: z.number().positive().optional()
+  retryDelay: z.number().positive().optional(),
 });
 
 // ==================== 代理配置 Schema ====================
@@ -115,7 +115,7 @@ export const LLMRequestOptionsSchema = z.object({
  */
 export const ProxyConfigSchema = z.object({
   type: z.enum(['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy']),
-  customUrl: z.string().optional()
+  customUrl: z.string().optional(),
 });
 
 // ==================== HTTP 请求 Schema ====================
@@ -128,7 +128,7 @@ export const HTTPRequestOptionsSchema = z.object({
   headers: z.record(z.string(), z.string()).optional(),
   body: z.any().optional(),
   timeout: z.number().positive().optional(),
-  retries: z.number().int().nonnegative().optional()
+  retries: z.number().int().nonnegative().optional(),
 });
 
 // ==================== 事件日志 Schema ====================
@@ -140,7 +140,7 @@ export const EventLogEntrySchema = z.object({
   timestamp: z.string(),
   eventName: z.string(),
   detail: z.any(),
-  target: z.string()
+  target: z.string(),
 });
 
 // ==================== 导出所有 Schema ====================
@@ -157,5 +157,5 @@ export default {
   LLMRequestOptionsSchema,
   ProxyConfigSchema,
   HTTPRequestOptionsSchema,
-  EventLogEntrySchema
+  EventLogEntrySchema,
 };

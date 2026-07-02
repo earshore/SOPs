@@ -36,6 +36,6 @@ export function getTargetStyle(targetId: string): { icon: string; color: string 
   const target = getTargetConfig(targetId);
   return {
     icon: target?.icon || 'fa-solid fa-circle-question',
-    color: target?.color || 'slate'
+    color: target?.color || 'slate',
   };
 }

@@ -1,3 +1,4 @@
+const nativeLoggerConsole = globalThis.console;
 // src/services/PriorityRequestPool.ts
 // ================================================================
 // 🎯 优先级请求池 (TypeScript版本)
@@ -15,7 +16,7 @@ export const REQUEST_PRIORITY = {
   IDLE: 4, // 空闲时执行（分析、日志上报）
 } as const;
 
-export type RequestPriority = typeof REQUEST_PRIORITY[keyof typeof REQUEST_PRIORITY];
+export type RequestPriority = (typeof REQUEST_PRIORITY)[keyof typeof REQUEST_PRIORITY];
 
 /**
  * 任务元数据
@@ -196,7 +197,7 @@ export class PriorityRequestPool {
 
       // 调试日志
       if (duration > 1000) {
-        console.warn(`[RequestPool] 慢请求 (${duration}ms):`, task.meta);
+        nativeLoggerConsole.warn(`[RequestPool] 慢请求 (${duration}ms):`, task.meta);
       }
 
       task.resolve(result);
@@ -272,8 +273,8 @@ export class PriorityRequestPool {
    * 清空所有队列（用于测试）
    */
   clear(): void {
-    Object.values(this.queues).forEach((queue) => {
-      queue.forEach((task) => {
+    Object.values(this.queues).forEach(queue => {
+      queue.forEach(task => {
         task.reject(new Error('Request pool cleared'));
       });
       queue.length = 0;

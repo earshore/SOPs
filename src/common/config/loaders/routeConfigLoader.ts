@@ -56,7 +56,7 @@ export function validateRouteConfig(): {
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -72,6 +72,6 @@ export function getConfigStats() {
     sopCategories: Object.keys(MENU_CONFIG.sopCategories || {}).length,
     hubCategories: Object.keys(MENU_CONFIG.hubCategories || {}).length,
     moreCategories: Object.keys(MENU_CONFIG.moreCategories || {}).length,
-    appCategories: Object.keys(MENU_CONFIG.appCategories || {}).length
+    appCategories: Object.keys(MENU_CONFIG.appCategories || {}).length,
   };
 }

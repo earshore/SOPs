@@ -35,7 +35,6 @@
  * 24. 打印基础
  */
 
-
 /* ========================================
    1. 盒模型统一
    所有元素使用 border-box，padding/border 包含在 width 内
@@ -51,7 +50,6 @@
   margin: 0;
   padding: 0;
 }
-
 
 /* ========================================
    2. 根元素 (html)
@@ -106,7 +104,6 @@ html:focus-within {
   scroll-behavior: smooth;
 }
 
-
 /* ========================================
    3. Body 基础
    ======================================== */
@@ -116,7 +113,16 @@ body {
   min-height: 100dvh;
 
   /* 字体 */
-  font-family: var(--font-sans, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+  font-family: var(
+    --font-sans,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif
+  );
   font-size: var(--text-base, 0.875rem);
   font-weight: var(--font-regular, 400);
   line-height: var(--leading-normal, 1.6);
@@ -144,13 +150,17 @@ body:empty {
   min-height: 0;
 }
 
-
 /* ========================================
    4. 排版重置
    ======================================== */
 
 /* --- 标题 --- */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-size: inherit;
   font-weight: inherit;
   line-height: var(--leading-tight, 1.25);
@@ -167,7 +177,8 @@ p {
 }
 
 /* --- 列表 --- */
-ul, ol {
+ul,
+ol {
   list-style: none;
   padding: 0;
 }
@@ -192,11 +203,13 @@ dd {
 }
 
 /* --- 文本级语义 --- */
-strong, b {
+strong,
+b {
   font-weight: var(--font-bold, 700);
 }
 
-em, i {
+em,
+i {
   font-style: italic;
 }
 
@@ -205,7 +218,8 @@ small {
 }
 
 /* 上下标不影响行高 */
-sub, sup {
+sub,
+sup {
   font-size: 0.75em;
   line-height: 0;
   position: relative;
@@ -225,7 +239,7 @@ abbr[title] {
   text-decoration: underline dotted;
   text-underline-offset: 2px;
   cursor: help;
-  border-bottom: none;  /* 移除旧浏览器的边框 */
+  border-bottom: none; /* 移除旧浏览器的边框 */
 }
 
 /* --- 标记 (高亮) --- */
@@ -253,7 +267,6 @@ figcaption {
   margin-top: 0.5em;
 }
 
-
 /* ========================================
    5. 链接
    ======================================== */
@@ -272,7 +285,6 @@ a > img {
 a:not([class]) {
   text-decoration-skip-ink: auto;
 }
-
 
 /* ========================================
    6. 媒体元素
@@ -303,7 +315,7 @@ img:not([src]):not([srcset]) {
 }
 
 /* 懒加载图片淡入 */
-img[loading="lazy"] {
+img[loading='lazy'] {
   opacity: 1;
 }
 
@@ -313,7 +325,7 @@ svg {
 }
 
 /* 可点击的 SVG 保留 pointer */
-svg[role="img"] {
+svg[role='img'] {
   pointer-events: none;
 }
 
@@ -348,7 +360,6 @@ video[height] {
   height: auto;
 }
 
-
 /* ========================================
    7. 表单元素
    ======================================== */
@@ -380,45 +391,45 @@ input {
 }
 
 /* 搜索框取消按钮 */
-input[type="search"]::-webkit-search-cancel-button,
-input[type="search"]::-webkit-search-decoration {
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-decoration {
   -webkit-appearance: none;
 }
 
 /* 数字输入框取消增减按钮 */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type="number"] {
+input[type='number'] {
   -moz-appearance: textfield;
 }
 
 /* 文件输入框 */
-input[type="file"] {
+input[type='file'] {
   cursor: pointer;
 }
 
 /* 颜色选择器 */
-input[type="color"] {
+input[type='color'] {
   cursor: pointer;
   border: none;
   padding: 0;
 }
 
-input[type="color"]::-webkit-color-swatch-wrapper {
+input[type='color']::-webkit-color-swatch-wrapper {
   padding: 0;
 }
 
-input[type="color"]::-webkit-color-swatch {
+input[type='color']::-webkit-color-swatch {
   border: none;
   border-radius: var(--rounded-sm, 4px);
 }
 
 /* 范围滑块 */
-input[type="range"] {
+input[type='range'] {
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
@@ -426,19 +437,19 @@ input[type="range"] {
 }
 
 /* 日期选择器 */
-input[type="date"],
-input[type="time"],
-input[type="datetime-local"],
-input[type="month"],
-input[type="week"] {
+input[type='date'],
+input[type='time'],
+input[type='datetime-local'],
+input[type='month'],
+input[type='week'] {
   -webkit-appearance: none;
   appearance: none;
 }
 
 /* 文本域 */
 textarea {
-  resize: vertical;    /* 仅允许纵向拉伸 */
-  overflow: auto;      /* 移除 IE 默认滚动条 */
+  resize: vertical; /* 仅允许纵向拉伸 */
+  overflow: auto; /* 移除 IE 默认滚动条 */
   border-radius: 0;
 }
 
@@ -498,7 +509,7 @@ output {
 /* 禁用状态 */
 :disabled,
 [disabled],
-[aria-disabled="true"] {
+[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
@@ -506,7 +517,6 @@ output {
 [readonly] {
   cursor: default;
 }
-
 
 /* ========================================
    8. 按钮重置
@@ -528,26 +538,25 @@ button {
 
 /* 移除 Firefox 内部边框/内边距 */
 button::-moz-focus-inner,
-[type="button"]::-moz-focus-inner,
-[type="reset"]::-moz-focus-inner,
-[type="submit"]::-moz-focus-inner {
+[type='button']::-moz-focus-inner,
+[type='reset']::-moz-focus-inner,
+[type='submit']::-moz-focus-inner {
   border-style: none;
   padding: 0;
 }
 
 /* 恢复 Firefox focus 样式 */
 button:-moz-focusring,
-[type="button"]:-moz-focusring,
-[type="reset"]:-moz-focusring,
-[type="submit"]:-moz-focusring {
+[type='button']:-moz-focusring,
+[type='reset']:-moz-focusring,
+[type='submit']:-moz-focusring {
   outline: 1px dotted ButtonText;
 }
 
 /* 可交互按钮使用 pointer */
-[role="button"] {
+[role='button'] {
   cursor: pointer;
 }
-
 
 /* ========================================
    9. 表格重置
@@ -556,7 +565,7 @@ table {
   border-collapse: collapse;
   border-spacing: 0;
   width: 100%;
-  text-indent: 0;   /* Chrome 修复 */
+  text-indent: 0; /* Chrome 修复 */
   border-color: inherit; /* Firefox 修复 */
   caption-side: top;
 }
@@ -586,7 +595,6 @@ td {
   border: 0;
   padding: 0;
 }
-
 
 /* ========================================
    10. 对话框 & Details
@@ -639,7 +647,6 @@ summary::marker {
   color: inherit;
 }
 
-
 /* ========================================
    11. 水平线
    ======================================== */
@@ -652,7 +659,6 @@ hr {
   box-sizing: content-box; /* Firefox 修复 */
 }
 
-
 /* ========================================
    12. 引用 & 代码
    ======================================== */
@@ -661,7 +667,15 @@ hr {
 code,
 kbd,
 samp {
-  font-family: var(--font-mono, 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace);
+  font-family: var(
+    --font-mono,
+    'Fira Code',
+    'Cascadia Code',
+    'JetBrains Mono',
+    'SF Mono',
+    Consolas,
+    monospace
+  );
   font-size: 0.875em;
 }
 
@@ -698,7 +712,6 @@ q {
   quotes: '"' '"' "'" "'";
 }
 
-
 /* ========================================
    13. 文本选中样式
    ======================================== */
@@ -714,13 +727,12 @@ q {
   text-shadow: none;
 }
 
-
 /* ========================================
    14. 占位符样式
    ======================================== */
 ::placeholder {
   color: var(--color-text-placeholder, #9ca3af);
-  opacity: 1;  /* Firefox 默认 opacity < 1 */
+  opacity: 1; /* Firefox 默认 opacity < 1 */
   font-weight: var(--font-regular, 400);
 }
 
@@ -737,7 +749,6 @@ q {
   color: var(--color-text-placeholder, #9ca3af);
 }
 
-
 /* ========================================
    15. 自动填充 (Autofill)
    防止浏览器自动填充改变背景色
@@ -753,10 +764,11 @@ select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--color-text-primary, #1a1a2e);
   -webkit-box-shadow: 0 0 0 1000px var(--color-bg-primary, #ffffff) inset;
-  transition: background-color 600000s 0s, color 600000s 0s;
+  transition:
+    background-color 600000s 0s,
+    color 600000s 0s;
   caret-color: var(--color-text-primary, #1a1a2e);
 }
-
 
 /* ========================================
    16. 滚动条基础
@@ -765,8 +777,7 @@ select:-webkit-autofill:focus {
 /* 全局滚动条宽度 */
 :root {
   scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb, rgba(0, 0, 0, 0.15))
-                   var(--scrollbar-track, transparent);
+  scrollbar-color: var(--scrollbar-thumb, rgba(0, 0, 0, 0.15)) var(--scrollbar-track, transparent);
 }
 
 /* Webkit 滚动条 */
@@ -798,7 +809,6 @@ select:-webkit-autofill:focus {
   height: 4px;
 }
 
-
 /* ========================================
    17. 无障碍 — 焦点可见性
    ======================================== */
@@ -818,7 +828,6 @@ select:-webkit-autofill:focus {
 :focus-visible {
   box-shadow: none; /* 防止与焦点环冲突 */
 }
-
 
 /* ========================================
    18. 无障碍 — 跳过导航
@@ -844,7 +853,6 @@ select:-webkit-autofill:focus {
   top: 0;
   outline: none;
 }
-
 
 /* ========================================
    19. 无障碍 — 屏幕阅读器专用
@@ -879,18 +887,17 @@ select:-webkit-autofill:focus {
 }
 
 /* ARIA Live 区域 */
-[aria-live="polite"],
-[aria-live="assertive"] {
+[aria-live='polite'],
+[aria-live='assertive'] {
   /* 不做视觉样式，仅确保存在于 DOM */
 }
 
 /* ARIA 隐藏 */
-[aria-hidden="true"] {
+[aria-hidden='true'] {
   /* 视觉可见但屏幕阅读器忽略 */
   pointer-events: none;
   user-select: none;
 }
-
 
 /* ========================================
    20. 触摸优化
@@ -902,10 +909,10 @@ button,
 input,
 select,
 textarea,
-[role="button"],
-[role="tab"],
-[role="link"],
-[tabindex]:not([tabindex="-1"]) {
+[role='button'],
+[role='tab'],
+[role='link'],
+[tabindex]:not([tabindex='-1']) {
   touch-action: manipulation;
 }
 
@@ -920,54 +927,53 @@ a {
   /* 粗指针设备 (触摸屏) 上增大最小尺寸 */
   a,
   button,
-  input:not([type="hidden"]),
+  input:not([type='hidden']),
   select,
   textarea,
-  [role="button"] {
+  [role='button'] {
     min-height: 44px;
     min-width: 44px;
   }
 
   /* 表单输入行高增大 */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="search"],
-  input[type="tel"],
-  input[type="url"],
-  input[type="number"],
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='search'],
+  input[type='tel'],
+  input[type='url'],
+  input[type='number'],
   textarea,
   select {
     font-size: 16px; /* 防止 iOS 自动缩放 */
   }
 
   /* 复选框/单选框增大 - 仅在移动端 */
-  input[type="checkbox"]:not(.w-4):not(.h-4),
-  input[type="radio"]:not(.w-4):not(.h-4) {
+  input[type='checkbox']:not(.w-4):not(.h-4),
+  input[type='radio']:not(.w-4):not(.h-4) {
     min-height: 20px;
     min-width: 20px;
   }
 }
 
-
 /* ========================================
    21. 暗色模式基础
    ======================================== */
 .dark,
-[data-theme="dark"] {
+[data-theme='dark'] {
   color-scheme: dark;
 }
 
 /* 暗色模式下的选中色 */
 .dark ::selection,
-[data-theme="dark"] ::selection {
+[data-theme='dark'] ::selection {
   background: var(--color-primary, #818cf8);
   color: var(--color-primary-contrast, #ffffff);
 }
 
 /* 暗色模式下的占位符 */
 .dark ::placeholder,
-[data-theme="dark"] ::placeholder {
+[data-theme='dark'] ::placeholder {
   color: var(--color-text-placeholder, #6b7280);
 }
 
@@ -975,9 +981,9 @@ a {
 .dark input:-webkit-autofill,
 .dark textarea:-webkit-autofill,
 .dark select:-webkit-autofill,
-[data-theme="dark"] input:-webkit-autofill,
-[data-theme="dark"] textarea:-webkit-autofill,
-[data-theme="dark"] select:-webkit-autofill {
+[data-theme='dark'] input:-webkit-autofill,
+[data-theme='dark'] textarea:-webkit-autofill,
+[data-theme='dark'] select:-webkit-autofill {
   -webkit-text-fill-color: var(--color-text-primary, #f9fafb);
   -webkit-box-shadow: 0 0 0 1000px var(--color-bg-primary, #0f172a) inset;
   caret-color: var(--color-text-primary, #f9fafb);
@@ -985,51 +991,50 @@ a {
 
 /* 暗色模式下的滚动条 */
 .dark,
-[data-theme="dark"] {
+[data-theme='dark'] {
   scrollbar-color: var(--scrollbar-thumb, rgba(255, 255, 255, 0.15))
-                   var(--scrollbar-track, transparent);
+    var(--scrollbar-track, transparent);
 }
 
 .dark ::-webkit-scrollbar-thumb,
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover,
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
 /* 暗色模式下的水平线 */
 .dark hr,
-[data-theme="dark"] hr {
+[data-theme='dark'] hr {
   background: var(--color-border-light, rgba(255, 255, 255, 0.06));
 }
 
 /* 暗色模式下的 mark */
 .dark mark,
-[data-theme="dark"] mark {
+[data-theme='dark'] mark {
   background: rgba(250, 204, 21, 0.2);
   color: inherit;
 }
 
 /* 暗色模式下的 dialog */
 .dark dialog,
-[data-theme="dark"] dialog {
+[data-theme='dark'] dialog {
   background: var(--color-bg-elevated, #1e293b);
 }
 
 .dark dialog::backdrop,
-[data-theme="dark"] dialog::backdrop {
+[data-theme='dark'] dialog::backdrop {
   background: var(--color-bg-backdrop, rgba(0, 0, 0, 0.6));
 }
 
 /* 暗色模式下的 figcaption */
 .dark figcaption,
-[data-theme="dark"] figcaption {
+[data-theme='dark'] figcaption {
   color: var(--color-text-secondary, #d1d5db);
 }
-
 
 /* ========================================
    22. 减少动画偏好
@@ -1061,14 +1066,13 @@ a {
     transform: none !important;
     animation: none !important;
   }
-  
+
   /* 保留Logo旋转动画 (品牌标识) */
   .logo-icon-wrapper svg {
     animation-duration: 12s !important;
     animation-iteration-count: infinite !important;
   }
 }
-
 
 /* ========================================
    23. 高对比度模式
@@ -1120,7 +1124,6 @@ a {
   }
 }
 
-
 /* ========================================
    24. 打印基础
    ======================================== */
@@ -1157,26 +1160,38 @@ a {
   }
 
   /* 内部链接不显示 URL */
-  a[href^="#"]::after,
-  a[href^="javascript"]::after,
-  a[href^="mailto"]::after,
-  a[href^="tel"]::after {
+  a[href^='#']::after,
+  a[href^='javascript']::after,
+  a[href^='mailto']::after,
+  a[href^='tel']::after {
     content: '';
   }
 
   /* 禁止分页断裂 */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     page-break-after: avoid;
     break-after: avoid;
   }
 
-  p, li, blockquote, pre, table, figure {
+  p,
+  li,
+  blockquote,
+  pre,
+  table,
+  figure {
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
   /* 标题后避免分页 */
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     orphans: 3;
     widows: 3;
   }

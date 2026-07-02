@@ -11,6 +11,11 @@ import { DataPreview } from '@/modules/app_center/views/master_analysis/scraper/
 import type { DataPreviewState, ScrapedData } from '@/modules/app_center/views/master_analysis/scraper/types';
 import type { ScrapedProduct } from '@/types/modules-business';
 
+const rendererMocks = vi.hoisted(() => ({
+  renderTemplate: vi.fn(),
+  renderSanitizedHtml: vi.fn(),
+}));
+
 // Mock dependencies
 vi.mock('@/common/ui', () => ({
   showToast: vi.fn()
@@ -18,9 +23,7 @@ vi.mock('@/common/ui', () => ({
 
 vi.mock('@/common/infrastructure/SafeRenderer', () => ({
   SafeRenderer: {
-    getInstance: () => ({
-      renderTemplate: vi.fn()
-    })
+    getInstance: () => rendererMocks
   }
 }));
 
@@ -29,6 +32,10 @@ describe('DataPreview 组件', () => {
   let mockScrapedData: ScrapedData;
 
   beforeEach(() => {
+    rendererMocks.renderTemplate.mockReset();
+    rendererMocks.renderSanitizedHtml.mockReset();
+    document.body.innerHTML = '';
+
     initialState = {
       expandedAsin: null,
       currentDataTab: 'preview',
@@ -380,6 +387,33 @@ describe('DataPreview 组件', () => {
 
       // 页码应该保持，但显示的数据会变化
       expect(preview.totalProducts).toBe(3);
+    });
+  });
+
+  describe('渲染方法', () => {
+    it('应该通过动态 HTML 渲染边界输出卡片和 JSON 视图', () => {
+      document.body.innerHTML = `
+        <div id="no-data-msg"></div>
+        <div id="data-cards-wrapper" class="hidden"></div>
+        <div id="data-cards"></div>
+        <pre id="json-display"></pre>
+      `;
+      const preview = new DataPreview(initialState, mockScrapedData);
+
+      preview.renderDataPanel(vi.fn(), vi.fn(), vi.fn());
+
+      expect(rendererMocks.renderTemplate).toHaveBeenCalledWith(
+        document.getElementById('data-cards'),
+        ''
+      );
+      expect(rendererMocks.renderSanitizedHtml).toHaveBeenCalledWith(
+        document.getElementById('data-cards'),
+        expect.stringContaining('Product 1')
+      );
+      expect(rendererMocks.renderSanitizedHtml).toHaveBeenCalledWith(
+        document.getElementById('json-display'),
+        expect.stringContaining('Product 1')
+      );
     });
   });
 

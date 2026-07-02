@@ -17,7 +17,7 @@ function omitVolatileScrapeMetadata(value: unknown): unknown {
 
   return {
     ...value,
-    metadata
+    metadata,
   };
 }
 

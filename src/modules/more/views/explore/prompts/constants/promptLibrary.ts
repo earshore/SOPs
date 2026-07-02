@@ -4,104 +4,105 @@
 // ================================================================
 
 export type PromptCategoryId =
-    | 'framework'
-    | 'listing'
-    | 'review'
-    | 'ppc'
-    | 'competitor'
-    | 'customer'
-    | 'compliance';
+  | 'framework'
+  | 'listing'
+  | 'review'
+  | 'ppc'
+  | 'competitor'
+  | 'customer'
+  | 'compliance';
 
 export type RecommendedModelKey =
-    | 'FLAGSHIP_REASONING'
-    | 'BALANCED_WORKHORSE'
-    | 'FAST_DRAFT'
-    | 'LONG_CONTEXT'
-    | 'DATA_REVIEW';
+  | 'FLAGSHIP_REASONING'
+  | 'BALANCED_WORKHORSE'
+  | 'FAST_DRAFT'
+  | 'LONG_CONTEXT'
+  | 'DATA_REVIEW';
 
 export interface PromptCategory {
-    id: PromptCategoryId;
-    name: string;
-    icon: string;
-    color: string;
+  id: PromptCategoryId;
+  name: string;
+  icon: string;
+  color: string;
 }
 
 export interface RecommendedModel {
-    id: string;
-    name: string;
-    provider: string;
-    badge: string;
+  id: string;
+  name: string;
+  provider: string;
+  badge: string;
 }
 
 export interface PromptItem {
-    id: string;
-    category: PromptCategoryId;
-    title: string;
-    description: string;
-    recommendedModel: RecommendedModelKey;
-    requiredData: readonly string[];
-    doNotGuess: readonly string[];
-    outputContract: string;
-    riskLevel: 'low' | 'medium' | 'high';
-    prompt: string;
-    promptEn: string;
+  id: string;
+  category: PromptCategoryId;
+  title: string;
+  description: string;
+  recommendedModel: RecommendedModelKey;
+  requiredData: readonly string[];
+  doNotGuess: readonly string[];
+  outputContract: string;
+  riskLevel: 'low' | 'medium' | 'high';
+  prompt: string;
+  promptEn: string;
 }
 
 export const PROMPT_CATEGORIES: Record<string, PromptCategory> = {
-    FRAMEWORK: { id: 'framework', name: '方法框架', icon: 'fa-layer-group', color: 'indigo' },
-    LISTING: { id: 'listing', name: 'Listing转化', icon: 'fa-file-lines', color: 'blue' },
-    REVIEW: { id: 'review', name: 'VOC评论', icon: 'fa-comments', color: 'purple' },
-    PPC: { id: 'ppc', name: 'PPC投放', icon: 'fa-bullseye', color: 'orange' },
-    COMPETITOR: { id: 'competitor', name: '竞品洞察', icon: 'fa-chart-line', color: 'red' },
-    CUSTOMER: { id: 'customer', name: '客服售后', icon: 'fa-headset', color: 'green' },
-    COMPLIANCE: { id: 'compliance', name: '合规风控', icon: 'fa-shield-halved', color: 'indigo' },
+  FRAMEWORK: { id: 'framework', name: '方法框架', icon: 'fa-layer-group', color: 'indigo' },
+  LISTING: { id: 'listing', name: 'Listing转化', icon: 'fa-file-lines', color: 'blue' },
+  REVIEW: { id: 'review', name: 'VOC评论', icon: 'fa-comments', color: 'purple' },
+  PPC: { id: 'ppc', name: 'PPC投放', icon: 'fa-bullseye', color: 'orange' },
+  COMPETITOR: { id: 'competitor', name: '竞品洞察', icon: 'fa-chart-line', color: 'red' },
+  CUSTOMER: { id: 'customer', name: '客服售后', icon: 'fa-headset', color: 'green' },
+  COMPLIANCE: { id: 'compliance', name: '合规风控', icon: 'fa-shield-halved', color: 'indigo' },
 };
 
 export const RECOMMENDED_MODELS: Record<RecommendedModelKey, RecommendedModel> = {
-    FLAGSHIP_REASONING: {
-        id: 'flagship-reasoning',
-        name: '旗舰推理模型',
-        provider: 'OpenAI / Anthropic / Google',
-        badge: '深度',
-    },
-    BALANCED_WORKHORSE: {
-        id: 'balanced-workhorse',
-        name: '均衡工作模型',
-        provider: 'OpenAI / Anthropic / Google',
-        badge: '推荐',
-    },
-    FAST_DRAFT: {
-        id: 'fast-draft',
-        name: '快速草稿模型',
-        provider: 'OpenAI / Anthropic / Google',
-        badge: '快速',
-    },
-    LONG_CONTEXT: {
-        id: 'long-context',
-        name: '长上下文模型',
-        provider: 'OpenAI / Anthropic / Google',
-        badge: '长文',
-    },
-    DATA_REVIEW: {
-        id: 'data-review',
-        name: '数据审阅模型',
-        provider: 'OpenAI / Anthropic / Google',
-        badge: '审阅',
-    },
+  FLAGSHIP_REASONING: {
+    id: 'flagship-reasoning',
+    name: '旗舰推理模型',
+    provider: 'OpenAI / Anthropic / Google',
+    badge: '深度',
+  },
+  BALANCED_WORKHORSE: {
+    id: 'balanced-workhorse',
+    name: '均衡工作模型',
+    provider: 'OpenAI / Anthropic / Google',
+    badge: '推荐',
+  },
+  FAST_DRAFT: {
+    id: 'fast-draft',
+    name: '快速草稿模型',
+    provider: 'OpenAI / Anthropic / Google',
+    badge: '快速',
+  },
+  LONG_CONTEXT: {
+    id: 'long-context',
+    name: '长上下文模型',
+    provider: 'OpenAI / Anthropic / Google',
+    badge: '长文',
+  },
+  DATA_REVIEW: {
+    id: 'data-review',
+    name: '数据审阅模型',
+    provider: 'OpenAI / Anthropic / Google',
+    badge: '审阅',
+  },
 };
 
 export const PROMPT_LIBRARY: readonly PromptItem[] = [
-    {
-        id: 'prompt_brief_builder',
-        category: 'framework',
-        title: '提示词Brief生成器',
-        description: '把模糊需求整理成角色、输入、约束、输出和验收标准齐全的可执行提示词。',
-        recommendedModel: 'BALANCED_WORKHORSE',
-        requiredData: ['业务问题', '使用场景', '可用数据', '期望输出', '不可猜测的数据'],
-        doNotGuess: ['实时数据', '平台政策', '费用', '搜索量', '销量', '排名'],
-        outputContract: 'Markdown sections with task fit, data gaps, short prompt, strict prompt, and 3 acceptance checks.',
-        riskLevel: 'medium',
-        prompt: `# Role
+  {
+    id: 'prompt_brief_builder',
+    category: 'framework',
+    title: '提示词Brief生成器',
+    description: '把模糊需求整理成角色、输入、约束、输出和验收标准齐全的可执行提示词。',
+    recommendedModel: 'BALANCED_WORKHORSE',
+    requiredData: ['业务问题', '使用场景', '可用数据', '期望输出', '不可猜测的数据'],
+    doNotGuess: ['实时数据', '平台政策', '费用', '搜索量', '销量', '排名'],
+    outputContract:
+      'Markdown sections with task fit, data gaps, short prompt, strict prompt, and 3 acceptance checks.',
+    riskLevel: 'medium',
+    prompt: `# Role
 你是跨境电商AI工作流设计师，负责把运营需求转成可复用、可验收的提示词。
 
 # Task
@@ -143,7 +144,7 @@ export const PROMPT_LIBRARY: readonly PromptItem[] = [
 1.
 2.
 3.`,
-        promptEn: `# Role
+    promptEn: `# Role
 You are an AI workflow designer for cross-border ecommerce teams. Your job is to turn messy operator requests into reusable, testable prompts.
 
 # Task
@@ -185,18 +186,19 @@ Create a production-ready prompt from the user input and mark any data that must
 1.
 2.
 3.`,
-    },
-    {
-        id: 'prompt_eval_pack',
-        category: 'framework',
-        title: '提示词评估集',
-        description: '为关键提示词设计测试用例、评分表和回归检查，避免“一次好结果”误判为稳定能力。',
-        recommendedModel: 'FLAGSHIP_REASONING',
-        requiredData: ['待评估提示词', '业务目标', '样本类型', '失败模式', '最终使用者'],
-        doNotGuess: ['真实样本表现', '上线阈值是否已达成', '合规结论'],
-        outputContract: 'Markdown evaluation pack with capabilities, 8 sample cases, 100-point rubric, release threshold, and regression steps.',
-        riskLevel: 'medium',
-        prompt: `# Role
+  },
+  {
+    id: 'prompt_eval_pack',
+    category: 'framework',
+    title: '提示词评估集',
+    description: '为关键提示词设计测试用例、评分表和回归检查，避免“一次好结果”误判为稳定能力。',
+    recommendedModel: 'FLAGSHIP_REASONING',
+    requiredData: ['待评估提示词', '业务目标', '样本类型', '失败模式', '最终使用者'],
+    doNotGuess: ['真实样本表现', '上线阈值是否已达成', '合规结论'],
+    outputContract:
+      'Markdown evaluation pack with capabilities, 8 sample cases, 100-point rubric, release threshold, and regression steps.',
+    riskLevel: 'medium',
+    prompt: `# Role
 你是AI输出质量评审负责人，专门为亚马逊运营提示词建立测试集。
 
 # Task
@@ -233,7 +235,7 @@ Create a production-ready prompt from the user input and mark any data that must
 - 通过标准:
 - 需要人工复核的触发条件:
 - 模型或提示词升级后的回归步骤:`,
-        promptEn: `# Role
+    promptEn: `# Role
 You are the AI output QA owner for Amazon operations prompts.
 
 # Task
@@ -270,18 +272,26 @@ Create a minimum viable evaluation pack for the prompt below, suitable for pre-r
 - Pass criteria:
 - Human review triggers:
 - Regression steps after model or prompt changes:`,
-    },
-    {
-        id: 'listing_keyword_to_copy',
-        category: 'listing',
-        title: '关键词到Listing初稿',
-        description: '把关键词库、竞品页和评论痛点转成标题、五点、A+结构，并附带合规自检。',
-        recommendedModel: 'BALANCED_WORKHORSE',
-        requiredData: ['产品事实', '目标站点/语言', '关键词库', '竞品文案', 'Review/QA痛点', '禁用词/禁用声明'],
-        doNotGuess: ['搜索量', '销量', '排名', '认证', '测试报告', '医疗/健康/环保/质保声明'],
-        outputContract: 'Markdown tables for keyword grouping, title options, bullets, A+ plan, and compliance checks.',
-        riskLevel: 'high',
-        prompt: `# Role
+  },
+  {
+    id: 'listing_keyword_to_copy',
+    category: 'listing',
+    title: '关键词到Listing初稿',
+    description: '把关键词库、竞品页和评论痛点转成标题、五点、A+结构，并附带合规自检。',
+    recommendedModel: 'BALANCED_WORKHORSE',
+    requiredData: [
+      '产品事实',
+      '目标站点/语言',
+      '关键词库',
+      '竞品文案',
+      'Review/QA痛点',
+      '禁用词/禁用声明',
+    ],
+    doNotGuess: ['搜索量', '销量', '排名', '认证', '测试报告', '医疗/健康/环保/质保声明'],
+    outputContract:
+      'Markdown tables for keyword grouping, title options, bullets, A+ plan, and compliance checks.',
+    riskLevel: 'high',
+    prompt: `# Role
 你是亚马逊Listing转化优化负责人，熟悉搜索意图、详情页规则和多语言本地化。
 
 # Task
@@ -327,7 +337,7 @@ Create a minimum viable evaluation pack for the prompt below, suitable for pre-r
 - 需要证据的字段:
 - 建议A/B测试项:
 - 不建议上线的内容:`,
-        promptEn: `# Role
+    promptEn: `# Role
 You are an Amazon listing conversion lead with expertise in search intent, detail page rules, and localization.
 
 # Task
@@ -373,18 +383,19 @@ Use real keyword and competitor data to create an editable listing draft. Do not
 - Evidence required:
 - Suggested A/B test items:
 - Content not recommended for publishing:`,
-    },
-    {
-        id: 'review_voc_action_map',
-        category: 'review',
-        title: 'VOC评论行动地图',
-        description: '从评论、QA和退货原因中提炼产品改进、Listing表达和客服动作。',
-        recommendedModel: 'LONG_CONTEXT',
-        requiredData: ['评论数据', 'QA数据', '退货/客服原因', '时间范围', '产品版本变化'],
-        doNotGuess: ['样本量', '用户身份', '产品缺陷根因', '退货真实原因', '可立即改产品的结论'],
-        outputContract: 'Markdown report with data health, topic clusters, action map, listing rewrite opportunities, and confirmation needs.',
-        riskLevel: 'high',
-        prompt: `# Role
+  },
+  {
+    id: 'review_voc_action_map',
+    category: 'review',
+    title: 'VOC评论行动地图',
+    description: '从评论、QA和退货原因中提炼产品改进、Listing表达和客服动作。',
+    recommendedModel: 'LONG_CONTEXT',
+    requiredData: ['评论数据', 'QA数据', '退货/客服原因', '时间范围', '产品版本变化'],
+    doNotGuess: ['样本量', '用户身份', '产品缺陷根因', '退货真实原因', '可立即改产品的结论'],
+    outputContract:
+      'Markdown report with data health, topic clusters, action map, listing rewrite opportunities, and confirmation needs.',
+    riskLevel: 'high',
+    prompt: `# Role
 你是VOC分析师，负责把用户原话转成运营、产品和客服可以执行的行动地图。
 
 # Task
@@ -427,7 +438,7 @@ Use real keyword and competitor data to create an editable listing draft. Do not
 - 数据不足的判断:
 - 需要补抓的数据:
 - 不应立即行动的结论:`,
-        promptEn: `# Role
+    promptEn: `# Role
 You are a VOC analyst turning customer language into actions for operations, product, and support teams.
 
 # Task
@@ -470,18 +481,25 @@ Analyze reviews, QA, and return reasons. Produce topic clusters, severity, evide
 - Judgments with weak data:
 - Data to collect:
 - Conclusions not ready for action:`,
-    },
-    {
-        id: 'ppc_search_term_triage',
-        category: 'ppc',
-        title: 'PPC搜索词分诊',
-        description: '用搜索词报表做加词、否词、降价、提预算和Listing承接问题识别。',
-        recommendedModel: 'DATA_REVIEW',
-        requiredData: ['搜索词报表', '目标ACOS/ROAS', '毛利率/底线ACOS', '活动结构', '当前Listing关键词'],
-        doNotGuess: ['搜索量', '竞品出价', '转化归因', '毛利率', '预算限制', '平台实时竞价'],
-        outputContract: 'Markdown tables for data quality, search-term actions, bid/budget changes, listing fit issues, and execution order.',
-        riskLevel: 'high',
-        prompt: `# Role
+  },
+  {
+    id: 'ppc_search_term_triage',
+    category: 'ppc',
+    title: 'PPC搜索词分诊',
+    description: '用搜索词报表做加词、否词、降价、提预算和Listing承接问题识别。',
+    recommendedModel: 'DATA_REVIEW',
+    requiredData: [
+      '搜索词报表',
+      '目标ACOS/ROAS',
+      '毛利率/底线ACOS',
+      '活动结构',
+      '当前Listing关键词',
+    ],
+    doNotGuess: ['搜索量', '竞品出价', '转化归因', '毛利率', '预算限制', '平台实时竞价'],
+    outputContract:
+      'Markdown tables for data quality, search-term actions, bid/budget changes, listing fit issues, and execution order.',
+    riskLevel: 'high',
+    prompt: `# Role
 你是Amazon Sponsored Products投放分析师，目标是在不牺牲有效曝光的前提下降低浪费和提升转化。
 
 # Task
@@ -529,7 +547,7 @@ Analyze reviews, QA, and return reasons. Produce topic clusters, severity, evide
 1. 今日处理:
 2. 3天后复查:
 3. 7天后判断:`,
-        promptEn: `# Role
+    promptEn: `# Role
 You are an Amazon Sponsored Products analyst. Your goal is to reduce waste and improve conversion without killing useful discovery.
 
 # Task
@@ -577,18 +595,19 @@ Analyze a search term report and produce actionable harvesting, negation, bid, a
 1. Do today:
 2. Review in 3 days:
 3. Decide in 7 days:`,
-    },
-    {
-        id: 'competitor_detail_page_teardown',
-        category: 'competitor',
-        title: '竞品详情页拆解',
-        description: '拆解头部ASIN的关键词、页面叙事、图片顺序、评价风险和可差异化机会。',
-        recommendedModel: 'LONG_CONTEXT',
-        requiredData: ['我方产品资料', '竞品详情页资料', '目标站点', '商业目标', '可调整资源'],
-        doNotGuess: ['竞品销量', '排名', '广告投入', '未提供的价格变化', '知识产权结论'],
-        outputContract: 'Markdown tables for competitor patterns, gap diagnosis, differentiation opportunities, risky tactics, and 30-day actions.',
-        riskLevel: 'medium',
-        prompt: `# Role
+  },
+  {
+    id: 'competitor_detail_page_teardown',
+    category: 'competitor',
+    title: '竞品详情页拆解',
+    description: '拆解头部ASIN的关键词、页面叙事、图片顺序、评价风险和可差异化机会。',
+    recommendedModel: 'LONG_CONTEXT',
+    requiredData: ['我方产品资料', '竞品详情页资料', '目标站点', '商业目标', '可调整资源'],
+    doNotGuess: ['竞品销量', '排名', '广告投入', '未提供的价格变化', '知识产权结论'],
+    outputContract:
+      'Markdown tables for competitor patterns, gap diagnosis, differentiation opportunities, risky tactics, and 30-day actions.',
+    riskLevel: 'medium',
+    prompt: `# Role
 你是亚马逊竞品情报分析师，擅长从头部ASIN中提炼可落地的差异化策略。
 
 # Task
@@ -628,7 +647,7 @@ Analyze a search term report and produce actionable harvesting, negation, bid, a
 ## 30天行动清单
 | 时间 | 动作 | 负责人 | 验证指标 |
 | --- | --- | --- | --- |`,
-        promptEn: `# Role
+    promptEn: `# Role
 You are an Amazon competitive intelligence analyst who turns top-ASIN detail pages into actionable differentiation strategy.
 
 # Task
@@ -668,18 +687,26 @@ Analyze 1-5 competitor detail pages and produce shared patterns, our gaps, diffe
 ## 30-Day Action List
 | Timing | Action | Owner | Validation metric |
 | --- | --- | --- | --- |`,
-    },
-    {
-        id: 'customer_support_reply',
-        category: 'customer',
-        title: '客服回复与升级SOP',
-        description: '针对买家消息、差评和Seller Support沟通生成合规、克制、可升级的回复。',
-        recommendedModel: 'BALANCED_WORKHORSE',
-        requiredData: ['场景', '原始消息', '订单/物流/产品事实', '可提供方案', '不可承诺内容', '目标语言'],
-        doNotGuess: ['订单隐私', '物流状态', '退款承诺', '评价引导', '外部联系方式', '平台政策结论'],
-        outputContract: 'Markdown sections for situation assessment, customer reply draft, internal actions, escalation conditions, and risky wording replacements.',
-        riskLevel: 'high',
-        prompt: `# Role
+  },
+  {
+    id: 'customer_support_reply',
+    category: 'customer',
+    title: '客服回复与升级SOP',
+    description: '针对买家消息、差评和Seller Support沟通生成合规、克制、可升级的回复。',
+    recommendedModel: 'BALANCED_WORKHORSE',
+    requiredData: [
+      '场景',
+      '原始消息',
+      '订单/物流/产品事实',
+      '可提供方案',
+      '不可承诺内容',
+      '目标语言',
+    ],
+    doNotGuess: ['订单隐私', '物流状态', '退款承诺', '评价引导', '外部联系方式', '平台政策结论'],
+    outputContract:
+      'Markdown sections for situation assessment, customer reply draft, internal actions, escalation conditions, and risky wording replacements.',
+    riskLevel: 'high',
+    prompt: `# Role
 你是跨境电商客服质检负责人，熟悉亚马逊站内沟通边界和欧洲客户沟通礼仪。
 
 # Task
@@ -723,7 +750,7 @@ Analyze 1-5 competitor detail pages and produce shared patterns, our gaps, diffe
 ## 风险表达替换
 | 避免表达 | 替代表达 |
 | --- | --- |`,
-        promptEn: `# Role
+    promptEn: `# Role
 You are a cross-border ecommerce support QA lead familiar with Amazon message boundaries and European customer etiquette.
 
 # Task
@@ -767,18 +794,26 @@ Tone: professional, concise, empathetic
 ## Risky Wording Replacement
 | Avoid | Safer wording |
 | --- | --- |`,
-    },
-    {
-        id: 'compliance_claim_audit',
-        category: 'compliance',
-        title: '产品声明合规审查',
-        description: '审查标题、五点、A+和图片文案中的性能、认证、环保、医疗等高风险声明。',
-        recommendedModel: 'FLAGSHIP_REASONING',
-        requiredData: ['产品类别', '销售站点', 'Listing/图片文案', '证书/测试报告', '包装/说明书/标签', '已知限制'],
-        doNotGuess: ['法律结论', '认证有效性', '测试数据', '平台禁词清单', '专利/商标/版权状态'],
-        outputContract: 'Markdown tables for risk overview, claim-by-claim review, evidence checklist, must-fix items, and professional review needs.',
-        riskLevel: 'high',
-        prompt: `# Role
+  },
+  {
+    id: 'compliance_claim_audit',
+    category: 'compliance',
+    title: '产品声明合规审查',
+    description: '审查标题、五点、A+和图片文案中的性能、认证、环保、医疗等高风险声明。',
+    recommendedModel: 'FLAGSHIP_REASONING',
+    requiredData: [
+      '产品类别',
+      '销售站点',
+      'Listing/图片文案',
+      '证书/测试报告',
+      '包装/说明书/标签',
+      '已知限制',
+    ],
+    doNotGuess: ['法律结论', '认证有效性', '测试数据', '平台禁词清单', '专利/商标/版权状态'],
+    outputContract:
+      'Markdown tables for risk overview, claim-by-claim review, evidence checklist, must-fix items, and professional review needs.',
+    riskLevel: 'high',
+    prompt: `# Role
 你是亚马逊欧盟站合规审查顾问，关注平台详情页规则、证据链和消费者误导风险。
 
 # Task
@@ -821,7 +856,7 @@ Tone: professional, concise, empathetic
 - 法规或类目不确定项:
 - 高风险语言:
 - 可能涉及商标/专利/版权的内容:`,
-        promptEn: `# Role
+    promptEn: `# Role
 You are an Amazon EU listing compliance reviewer focused on detail page rules, evidence chains, and consumer-misleading risk.
 
 # Task
@@ -864,52 +899,53 @@ Review product claims in a listing and produce risk levels, evidence requirement
 - Uncertain regulation/category items:
 - High-risk wording:
 - Potential trademark/patent/copyright issues:`,
-    },
+  },
 ];
 
 export function getPromptsByCategory(categoryId?: PromptCategoryId | 'all'): readonly PromptItem[] {
-    if (!categoryId || categoryId === 'all') {
-        return PROMPT_LIBRARY;
-    }
+  if (!categoryId || categoryId === 'all') {
+    return PROMPT_LIBRARY;
+  }
 
-    return PROMPT_LIBRARY.filter((prompt) => prompt.category === categoryId);
+  return PROMPT_LIBRARY.filter(prompt => prompt.category === categoryId);
 }
 
 export function getPromptById(promptId: string): PromptItem | undefined {
-    return PROMPT_LIBRARY.find((prompt) => prompt.id === promptId);
+  return PROMPT_LIBRARY.find(prompt => prompt.id === promptId);
 }
 
 export function searchPrompts(
-    keyword: string,
-    categoryId: PromptCategoryId | 'all' = 'all'
+  keyword: string,
+  categoryId: PromptCategoryId | 'all' = 'all'
 ): PromptItem[] {
-    const lowerKeyword = keyword.toLowerCase();
+  const lowerKeyword = keyword.toLowerCase();
 
-    return getPromptsByCategory(categoryId).filter((prompt) => {
-        const category = Object.values(PROMPT_CATEGORIES).find((cat) => cat.id === prompt.category);
-        const model = RECOMMENDED_MODELS[prompt.recommendedModel] || RECOMMENDED_MODELS.BALANCED_WORKHORSE;
-        const searchableText = [
-            prompt.id,
-            prompt.title,
-            prompt.description,
-            prompt.requiredData.join(' '),
-            prompt.doNotGuess.join(' '),
-            prompt.outputContract,
-            prompt.riskLevel,
-            prompt.prompt,
-            prompt.promptEn,
-            category?.name || '',
-            model.name,
-            model.provider,
-            model.badge,
-        ]
-            .join('\n')
-            .toLowerCase();
+  return getPromptsByCategory(categoryId).filter(prompt => {
+    const category = Object.values(PROMPT_CATEGORIES).find(cat => cat.id === prompt.category);
+    const model =
+      RECOMMENDED_MODELS[prompt.recommendedModel] || RECOMMENDED_MODELS.BALANCED_WORKHORSE;
+    const searchableText = [
+      prompt.id,
+      prompt.title,
+      prompt.description,
+      prompt.requiredData.join(' '),
+      prompt.doNotGuess.join(' '),
+      prompt.outputContract,
+      prompt.riskLevel,
+      prompt.prompt,
+      prompt.promptEn,
+      category?.name || '',
+      model.name,
+      model.provider,
+      model.badge,
+    ]
+      .join('\n')
+      .toLowerCase();
 
-        return searchableText.includes(lowerKeyword);
-    });
+    return searchableText.includes(lowerKeyword);
+  });
 }
 
 export function getModelInfo(modelKey: RecommendedModelKey): RecommendedModel {
-    return RECOMMENDED_MODELS[modelKey] || RECOMMENDED_MODELS.BALANCED_WORKHORSE;
+  return RECOMMENDED_MODELS[modelKey] || RECOMMENDED_MODELS.BALANCED_WORKHORSE;
 }

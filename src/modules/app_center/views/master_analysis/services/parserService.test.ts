@@ -3,7 +3,8 @@ import { parseReviews } from './parserService';
 
 describe('parserService', () => {
   it('parses review content, metadata, and dedupes by content', () => {
-    const reviewBody = 'This verified review body is long enough to be selected as the main content.';
+    const reviewBody =
+      'This verified review body is long enough to be selected as the main content.';
     const html = `
       <div id="cm_cr-review_list">
         <div data-hook="review">

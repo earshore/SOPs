@@ -9,22 +9,20 @@ import { loadTemplate } from '../../../../../common/utils/viewLoader';
 
 // Module class
 class AgentsModule extends BaseModule {
-    /**
-     * 挂载模块
-     */
-    async mount(container: HTMLElement): Promise<void> {
-        const html = await loadTemplate('src/modules/more/views/explore/agents/template.html');
-        // ✅ 安全: 静态HTML模板，无用户输入
-        setSafeHtml(container, html);
-        container.classList.add('fade-in');
+  /**
+   * 挂载模块
+   */
+  async mount(container: HTMLElement): Promise<void> {
+    const html = await loadTemplate('src/modules/more/views/explore/agents/template.html');
+    // ✅ 安全: 静态HTML模板，无用户输入
+    setSafeHtml(container, html);
+    container.classList.add('fade-in');
+  }
 
-    }
-
-    /**
-     * 卸载模块
-     */
-    unmount(): void {
-    }
+  /**
+   * 卸载模块
+   */
+  unmount(): void {}
 }
 
 // 导出模块实例

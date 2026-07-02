@@ -58,7 +58,7 @@ function renderErrorFallback(container: HTMLElement, moduleName: string, error: 
 
 /**
  * 安全挂载包装器
- * 
+ *
  * 用法示例:
  * ```typescript
  * export const mount = safeMount(async (container: HTMLElement) => {
@@ -67,29 +67,22 @@ function renderErrorFallback(container: HTMLElement, moduleName: string, error: 
  *   // ... 其他初始化逻辑
  * }, { moduleName: 'MyModule' });
  * ```
- * 
+ *
  * @param mountFn - 原始挂载函数
  * @param options - 安全挂载选项
  * @returns 包装后的安全挂载函数
  */
-export function safeMount(
-  mountFn: MountFunction,
-  options: SafeMountOptions = {}
-): MountFunction {
-  const {
-    moduleName = 'Unknown Module',
-    renderFallback = true,
-    onError
-  } = options;
+export function safeMount(mountFn: MountFunction, options: SafeMountOptions = {}): MountFunction {
+  const { moduleName = 'Unknown Module', renderFallback = true, onError } = options;
 
   return async (container: HTMLElement): Promise<void> => {
     try {
       await mountFn(container);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      
+
       console.error(`❌ ${moduleName} 模块挂载失败:`, err);
-      
+
       // 调用自定义错误处理
       if (onError) {
         try {
@@ -98,12 +91,12 @@ export function safeMount(
           console.error(`${moduleName} 错误回调执行失败:`, callbackError);
         }
       }
-      
+
       // 渲染降级UI
       if (renderFallback) {
         renderErrorFallback(container, moduleName, err);
       }
-      
+
       // 重新抛出错误，让上层也能感知
       throw err;
     }
@@ -112,7 +105,7 @@ export function safeMount(
 
 /**
  * 批量包装多个挂载函数
- * 
+ *
  * @param mounts - 挂载函数映射
  * @param defaultOptions - 默认选项
  * @returns 包装后的挂载函数映射
@@ -122,13 +115,13 @@ export function safeMountAll<T extends Record<string, MountFunction>>(
   defaultOptions: Omit<SafeMountOptions, 'moduleName'> = {}
 ): T {
   const wrapped = {} as T;
-  
+
   for (const [key, mountFn] of Object.entries(mounts)) {
     wrapped[key as keyof T] = safeMount(mountFn, {
       ...defaultOptions,
-      moduleName: key
+      moduleName: key,
     }) as T[keyof T];
   }
-  
+
   return wrapped;
 }

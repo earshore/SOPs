@@ -16,7 +16,7 @@ import type {
   AnalysisState,
   PromptLabState,
   LLMProviderConfig,
-  ProxyConfig
+  ProxyConfig,
 } from '../../types/state';
 
 import type {
@@ -27,7 +27,7 @@ import type {
   LLMModel,
   AmazonProductData,
   AnalysisReportResponse,
-  AnalysisSection
+  AnalysisSection,
 } from '../../types/api';
 
 import type {
@@ -35,7 +35,7 @@ import type {
   ModuleLoadedEventPayload,
   StateChangedEventPayload,
   ErrorOccurredEventPayload,
-  PerformanceMetricEventPayload
+  PerformanceMetricEventPayload,
 } from '../../types/events';
 
 import type { AnalysisReport } from '../../types/modules-business';
@@ -64,7 +64,7 @@ import {
   RouteChangedEventPayloadSchema,
   ModuleLoadedEventPayloadSchema,
   ErrorOccurredEventPayloadSchema,
-  PerformanceMetricEventPayloadSchema
+  PerformanceMetricEventPayloadSchema,
 } from './zodSchemas';
 
 // ==================== 基础类型守卫工具 ====================
@@ -107,20 +107,14 @@ function isArray(value: unknown): value is unknown[] {
 /**
  * 检查对象是否包含指定的键
  */
-function hasKey<K extends string>(
-  obj: unknown,
-  key: K
-): obj is Record<K, unknown> {
+function hasKey<K extends string>(obj: unknown, key: K): obj is Record<K, unknown> {
   return isObject(obj) && key in obj;
 }
 
 /**
  * 检查对象是否包含所有指定的键
  */
-function hasKeys<K extends string>(
-  obj: unknown,
-  keys: K[]
-): obj is Record<K, unknown> {
+function hasKeys<K extends string>(obj: unknown, keys: K[]): obj is Record<K, unknown> {
   return isObject(obj) && keys.every(key => key in obj);
 }
 
@@ -246,9 +240,12 @@ export function isApiResponse<T = unknown>(
   if (!isObject(value)) return false;
 
   const hasSuccess = hasKey(value, 'success') && isBoolean(value.success);
-  const hasValidData = !hasKey(value, 'data') || value.data === undefined || 
+  const hasValidData =
+    !hasKey(value, 'data') ||
+    value.data === undefined ||
     (dataGuard ? dataGuard(value.data) : true);
-  const hasValidError = !hasKey(value, 'error') || value.error === undefined || isApiError(value.error);
+  const hasValidError =
+    !hasKey(value, 'error') || value.error === undefined || isApiError(value.error);
 
   return hasSuccess && hasValidData && hasValidError;
 }
@@ -345,13 +342,18 @@ export function isStateChangedEventPayload<T = unknown>(
 ): value is StateChangedEventPayload<T> {
   if (!isObject(value)) return false;
 
-  const hasValidValues = !valueGuard || 
-    (hasKey(value, 'newValue') && valueGuard(value.newValue) &&
-     hasKey(value, 'oldValue') && valueGuard(value.oldValue));
+  const hasValidValues =
+    !valueGuard ||
+    (hasKey(value, 'newValue') &&
+      valueGuard(value.newValue) &&
+      hasKey(value, 'oldValue') &&
+      valueGuard(value.oldValue));
 
   return (
-    hasKey(value, 'path') && isString(value.path) &&
-    hasKey(value, 'timestamp') && isNumber(value.timestamp) &&
+    hasKey(value, 'path') &&
+    isString(value.path) &&
+    hasKey(value, 'timestamp') &&
+    isNumber(value.timestamp) &&
     hasValidValues
   );
 }
@@ -369,7 +371,9 @@ export function isErrorOccurredEventPayload(value: unknown): value is ErrorOccur
  * 检查是否为 PerformanceMetricEventPayload
  * 使用 Zod 进行运行时验证
  */
-export function isPerformanceMetricEventPayload(value: unknown): value is PerformanceMetricEventPayload {
+export function isPerformanceMetricEventPayload(
+  value: unknown
+): value is PerformanceMetricEventPayload {
   const result = PerformanceMetricEventPayloadSchema.safeParse(value);
   return result.success;
 }
@@ -379,10 +383,7 @@ export function isPerformanceMetricEventPayload(value: unknown): value is Perfor
 /**
  * 检查数组中的所有元素是否符合类型守卫
  */
-export function isArrayOf<T>(
-  value: unknown,
-  guard: (item: unknown) => item is T
-): value is T[] {
+export function isArrayOf<T>(value: unknown, guard: (item: unknown) => item is T): value is T[] {
   return isArray(value) && value.every(guard);
 }
 
@@ -426,7 +427,7 @@ export {
   isBoolean,
   isArray,
   hasKey,
-  hasKeys
+  hasKeys,
 };
 
 // 默认导出所有类型守卫
@@ -439,7 +440,7 @@ export default {
   isArray,
   hasKey,
   hasKeys,
-  
+
   // State 类型守卫
   isUserProductProfile,
   isScrapedDataItem,
@@ -452,7 +453,7 @@ export default {
   isPromptLabState,
   isLLMProviderConfig,
   isProxyConfig,
-  
+
   // API 类型守卫
   isApiError,
   isApiResponse,
@@ -463,17 +464,17 @@ export default {
   isAnalysisSection,
   isAnalysisReportResponse,
   isAnalysisReport,
-  
+
   // Event 类型守卫
   isRouteChangedEventPayload,
   isModuleLoadedEventPayload,
   isStateChangedEventPayload,
   isErrorOccurredEventPayload,
   isPerformanceMetricEventPayload,
-  
+
   // 组合类型守卫
   isArrayOf,
   isOptional,
   isNullable,
-  isOptionalNullable
+  isOptionalNullable,
 };

@@ -53,7 +53,7 @@ function appendEmptyResult(container: Element, message: string, withIcon = false
 function resetSearchView(
   resultsContainer: HTMLElement | null,
   navContainer: HTMLElement | null,
-  clearBtn: HTMLElement | null,
+  clearBtn: HTMLElement | null
 ): void {
   resultsContainer?.classList.add('hidden');
   navContainer?.classList.remove('hidden');
@@ -63,16 +63,17 @@ function resetSearchView(
 function appendSearchMatches(
   container: Element,
   matches: SearchRoute[],
-  clearSearchKey: 'sop' | 'hub' | 'sidebar',
+  clearSearchKey: 'sop' | 'hub' | 'sidebar'
 ): void {
   clearElement(container);
 
-  matches.forEach((route) => {
+  matches.forEach(route => {
     const button = document.createElement('button');
     button.dataset.action = 'switch-tab';
     button.dataset.tab = route.id;
     button.dataset.clearSearch = clearSearchKey;
-    button.className = 'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all';
+    button.className =
+      'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all';
 
     const icon = document.createElement('i');
     icon.className = `${route.icon || 'fas fa-circle'} w-4 text-center`;
@@ -110,7 +111,10 @@ function routeMatchesQuery(route: SearchRoute, lowerQuery: string): boolean {
   if (label === lowerQuery) return true;
   if (label.includes(lowerQuery)) return true;
 
-  const initials = label.split(/[\s-]+/).map(w => w[0]).join('');
+  const initials = label
+    .split(/[\s-]+/)
+    .map(w => w[0])
+    .join('');
   if (initials.includes(lowerQuery)) return true;
 
   return category.includes(lowerQuery);
@@ -128,8 +132,9 @@ function searchMenuRoutes(query: string, config: MenuSearchConfig): void {
 
   clearBtn?.classList.remove('hidden');
   const lowerQuery = query.toLowerCase();
-  const matches = findModuleRoutes(config.moduleId)
-    .filter(route => routeMatchesQuery(route, lowerQuery));
+  const matches = findModuleRoutes(config.moduleId).filter(route =>
+    routeMatchesQuery(route, lowerQuery)
+  );
 
   if (!resultsContainer) return;
 
@@ -239,9 +244,7 @@ export function searchSidebar(query: string): void {
 
   // 搜索匹配
   const lowerQuery = query.toLowerCase();
-  const matches = allRoutes.filter(route =>
-    route.label.toLowerCase().includes(lowerQuery)
-  );
+  const matches = allRoutes.filter(route => route.label.toLowerCase().includes(lowerQuery));
 
   // 显示结果
   if (matches.length === 0) {
@@ -250,7 +253,7 @@ export function searchSidebar(query: string): void {
     navContainer.classList.add('hidden');
   } else {
     appendSearchMatches(resultsContainer, matches, 'sidebar');
-    
+
     resultsContainer.classList.remove('hidden');
     navContainer.classList.add('hidden');
   }

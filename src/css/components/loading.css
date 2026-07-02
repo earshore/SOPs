@@ -78,7 +78,7 @@
 }
 
 .dark .loading-overlay,
-[data-theme="dark"] .loading-overlay {
+[data-theme='dark'] .loading-overlay {
   background: rgba(0, 0, 0, 0.6);
 }
 
@@ -119,7 +119,8 @@
  * 优化后的脉冲效果更加平滑自然
  */
 @keyframes skeleton-pulse-optimized {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -166,12 +167,12 @@
 }
 
 .dark .loading-skeleton,
-[data-theme="dark"] .loading-skeleton {
+[data-theme='dark'] .loading-skeleton {
   background: rgba(255, 255, 255, 0.06);
 }
 
 .dark .loading-skeleton::after,
-[data-theme="dark"] .loading-skeleton::after {
+[data-theme='dark'] .loading-skeleton::after {
   background: linear-gradient(
     90deg,
     transparent 0%,
@@ -211,7 +212,8 @@
   border-radius: var(--rounded-full, 9999px);
   transform-origin: left center;
   /* 平滑过渡 */
-  transition: transform var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: transform var(--micro-duration-gentle, 350ms)
+    var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1));
   /* GPU加速提示 */
   will-change: transform;
 }
@@ -265,7 +267,9 @@
  * 优化后的跳动效果更加流畅
  */
 @keyframes loading-dot-bounce-optimized {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: translateY(0) scale(1);
     opacity: 0.4;
   }
@@ -331,10 +335,18 @@
    加载文字省略点
    ======================================== */
 @keyframes loadingDots {
-  0%  { content: ''; }
-  25% { content: '.'; }
-  50% { content: '..'; }
-  75% { content: '...'; }
+  0% {
+    content: '';
+  }
+  25% {
+    content: '.';
+  }
+  50% {
+    content: '..';
+  }
+  75% {
+    content: '...';
+  }
 }
 
 .loading-text::after {
@@ -350,30 +362,30 @@
 /**
  * 全局动画禁用
  */
-[data-animations="disabled"] .loading-ring,
-[data-animations="disabled"] .loading-inline::before,
-[data-animations="disabled"] .spinner {
+[data-animations='disabled'] .loading-ring,
+[data-animations='disabled'] .loading-inline::before,
+[data-animations='disabled'] .spinner {
   animation: none;
   /* 静态显示旋转状态 */
   transform: rotate(45deg);
 }
 
-[data-animations="disabled"] .loading-skeleton {
+[data-animations='disabled'] .loading-skeleton {
   animation: none;
   opacity: 0.7;
 }
 
-[data-animations="disabled"] .loading-skeleton::after {
+[data-animations='disabled'] .loading-skeleton::after {
   display: none;
 }
 
-[data-animations="disabled"] .loading-dots-bounce > span {
+[data-animations='disabled'] .loading-dots-bounce > span {
   animation: none;
   opacity: 1;
   transform: none;
 }
 
-[data-animations="disabled"] .progress-bar {
+[data-animations='disabled'] .progress-bar {
   transition: none;
 }
 
@@ -388,22 +400,22 @@
     animation-duration: 0.01ms;
     animation-iteration-count: 1;
   }
-  
+
   .loading-skeleton {
     animation: none;
     opacity: 0.7;
   }
-  
+
   .loading-skeleton::after {
     animation: none;
   }
-  
+
   .loading-dots-bounce > span {
     animation: none;
     opacity: 1;
     transform: none;
   }
-  
+
   .progress-bar {
     transition-duration: 0.01ms;
   }

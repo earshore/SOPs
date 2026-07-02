@@ -40,22 +40,61 @@ export function createKeywordHunterState(overrides: Record<string, unknown> = {}
   };
 }
 
+function createKeywordHunterSnapshot(keywordTracker: Record<string, unknown>): Record<string, unknown> {
+  const keywords = (keywordTracker.keywords as string[] | undefined) || [];
+  const matchedKeywords =
+    (keywordTracker.matchedKeywords as Array<{ keyword: string; count: number }> | undefined) || [];
+  const unmatchedKeywords = (keywordTracker.unmatchedKeywords as string[] | undefined) || [];
+  const processedCopy = String(keywordTracker.processedCopy || keywordTracker.copyInputText || '');
+  const llmAnalysisResult = String(keywordTracker.llmAnalysisResult || '');
+  const now = new Date().toISOString();
+
+  return {
+    id: 'kh-e2e-seeded',
+    schemaVersion: 1,
+    title: 'Seeded Keyword Hunter Snapshot',
+    status: llmAnalysisResult ? 'reported' : 'matched',
+    createdAt: now,
+    updatedAt: now,
+    source: { type: 'manual' },
+    input: {
+      keywordsInputText: String(keywordTracker.keywordsInputText || keywords.join('\n')),
+      copyInputText: String(keywordTracker.copyInputText || processedCopy),
+      settings: keywordTracker.settings
+    },
+    result: {
+      keywords,
+      processedCopy,
+      matchedKeywords,
+      unmatchedKeywords,
+      wordFrequency: keywordTracker.wordFrequency || [],
+      paragraphs: keywordTracker.paragraphs || [],
+      llmAnalysisResult,
+      showTranslation: keywordTracker.showTranslation,
+      translationMode: keywordTracker.translationMode,
+      coverageRate: keywords.length === 0 ? 0 : Math.round((matchedKeywords.length / keywords.length) * 100)
+    },
+    derived: {
+      keywordCount: keywords.length,
+      matchedCount: matchedKeywords.length,
+      unmatchedCount: unmatchedKeywords.length,
+      copyHash: 'e2e',
+      snapshotFingerprint: 'e2e'
+    }
+  };
+}
+
 export async function seedKeywordHunterStorage(
   page: Page,
   keywordTracker: Record<string, unknown> = createKeywordHunterState()
 ): Promise<void> {
-  await page.addInitScript((state) => {
+  await page.addInitScript((snapshot) => {
     window.localStorage.clear();
     window.localStorage.setItem(
-      'app-storage',
-      JSON.stringify({
-        version: 0,
-        state: {
-          keywordTracker: state
-        }
-      })
+      'keyword_hunter_snapshots',
+      JSON.stringify([snapshot])
     );
-  }, keywordTracker);
+  }, createKeywordHunterSnapshot(keywordTracker));
 }
 
 export async function clearAppStorage(page: Page): Promise<void> {

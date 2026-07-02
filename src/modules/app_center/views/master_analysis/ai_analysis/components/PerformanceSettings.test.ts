@@ -1,22 +1,26 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { showToast } from '@common/ui/index';
 import { StorageService } from '../../../../../../services/storageService';
-import { createPerformanceSettingsPanel, getPerformanceSettings, resolveAnalysisSchedule } from './PerformanceSettings';
+import {
+  createPerformanceSettingsPanel,
+  getPerformanceSettings,
+  resolveAnalysisSchedule,
+} from './PerformanceSettings';
 
 vi.mock('../../../../../../services/storageService', () => ({
   StorageService: {
     get: vi.fn(),
-    set: vi.fn()
-  }
+    set: vi.fn(),
+  },
 }));
 
 vi.mock('../services/parallelAnalysisService', () => ({
   getCacheStatsAsync: vi.fn(() => Promise.resolve({ count: 2, totalSize: 2048 })),
-  clearAnalysisCacheAsync: vi.fn(() => Promise.resolve())
+  clearAnalysisCacheAsync: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('@common/ui/index', () => ({
-  showToast: vi.fn()
+  showToast: vi.fn(),
 }));
 
 describe('PerformanceSettings', () => {
@@ -28,7 +32,7 @@ describe('PerformanceSettings', () => {
     vi.mocked(StorageService.get).mockReturnValue({
       maxConcurrency: 1,
       enableCache: false,
-      failureStrategy: 'abort'
+      failureStrategy: 'abort',
     });
 
     expect(getPerformanceSettings()).toMatchObject({
@@ -36,7 +40,7 @@ describe('PerformanceSettings', () => {
       maxConcurrency: 2,
       enableCache: false,
       failureStrategy: 'abort',
-      settingsVersion: 3
+      settingsVersion: 3,
     });
   });
 
@@ -44,17 +48,17 @@ describe('PerformanceSettings', () => {
     expect(resolveAnalysisSchedule({ schedulingPreference: 'recommended' })).toMatchObject({
       tier: 'recommended',
       maxConcurrency: 4,
-      failureStrategy: 'continue'
+      failureStrategy: 'continue',
     });
     expect(resolveAnalysisSchedule({ schedulingPreference: 'reliability' })).toMatchObject({
       tier: 'stable',
       maxConcurrency: 2,
-      failureStrategy: 'abort'
+      failureStrategy: 'abort',
     });
     expect(resolveAnalysisSchedule({ schedulingPreference: 'speed' }, 3)).toMatchObject({
       tier: 'extreme',
       maxConcurrency: 3,
-      failureStrategy: 'continue'
+      failureStrategy: 'continue',
     });
   });
 
@@ -73,7 +77,11 @@ describe('PerformanceSettings', () => {
     panel.saveSettings();
     expect(StorageService.set).toHaveBeenCalledWith(
       'ai_analysis_performance_settings',
-      expect.objectContaining({ schedulingPreference: 'speed', maxConcurrency: 8, settingsVersion: 3 })
+      expect.objectContaining({
+        schedulingPreference: 'speed',
+        maxConcurrency: 8,
+        settingsVersion: 3,
+      })
     );
     expect(showToast).toHaveBeenCalledWith('分析设置已保存', { type: 'success' });
   });

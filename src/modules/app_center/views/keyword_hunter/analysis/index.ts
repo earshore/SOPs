@@ -9,16 +9,17 @@
  * - 三阶段加载动画提升体验感
  */
 
-import { marked } from "marked";
-import { SafeModuleLoader } from "../../../../../common/infrastructure/SafeModuleLoader";
-import { SafeRenderer } from "../../../../../common/infrastructure/SafeRenderer";
-import { showToast } from "../../../../../common/ui";
-import * as KeywordService from "../services/trackerService";
-import { appStore } from "@/stores/useAppStore";
-import { ErrorService } from "../../../../../services/errorService";
-import { createSafeFragment, setSafeHtml } from "../../../../../common/utils/security";
-import { KeywordHunterSnapshotService } from "../services/snapshotService";
-import "../keyword_hunter_style.css";
+import { marked } from 'marked';
+import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import { showToast } from '../../../../../common/ui';
+import * as KeywordService from '../services/trackerService';
+import { appStore } from '@/stores/useAppStore';
+import { ErrorService } from '../../../../../services/errorService';
+import { createSafeFragment, setSafeHtml } from '../../../../../common/utils/security';
+import { KeywordHunterSnapshotService } from '../services/snapshotService';
+import type { KeywordHunterSnapshot } from '../../../../../types/modules-business';
+import '../keyword_hunter_style.css';
 
 // ==========================================
 // marked 配置
@@ -40,7 +41,7 @@ interface EventListenerRecord {
 }
 
 /** 存放当次分析的原始 Markdown 文本（未渲染 HTML） */
-let rawMarkdownCache = "";
+let rawMarkdownCache = '';
 
 let eventListeners: EventListenerRecord[] = [];
 let timeouts: number[] = [];
@@ -52,7 +53,7 @@ let timeouts: number[] = [];
 function addEventListener(
   element: HTMLElement | Document,
   event: string,
-  handler: EventListenerOrEventListenerObject,
+  handler: EventListenerOrEventListenerObject
 ): void {
   element.addEventListener(event, handler);
   eventListeners.push({ element, event, handler });
@@ -70,26 +71,25 @@ function cleanup(): void {
   });
   eventListeners = [];
 
-  timeouts.forEach((id) => clearTimeout(id));
+  timeouts.forEach(id => clearTimeout(id));
   timeouts = [];
-
 }
 
 function escapeHtml(text: string): string {
-  if (!text) return "";
-  const div = document.createElement("div");
+  if (!text) return '';
+  const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 }
 
 function normalizeReportMarkdown(markdown: string): string {
   const structuralEmoji =
-    "(?:\\u{1F3C6}|\\u{1F4CA}|\\u{1F50D}|\\u{1F3AF}|\\u{1F916}|\\u270D\\uFE0F?|\\u26A0\\uFE0F?|\\u{1F6A8}|\\u{1F527}|\\u2705|\\u{1F7E2}|\\u{1F7E1}|\\u{1F534}|\\u2728|\\u{1F4A1})";
+    '(?:\\u{1F3C6}|\\u{1F4CA}|\\u{1F50D}|\\u{1F3AF}|\\u{1F916}|\\u270D\\uFE0F?|\\u26A0\\uFE0F?|\\u{1F6A8}|\\u{1F527}|\\u2705|\\u{1F7E2}|\\u{1F7E1}|\\u{1F534}|\\u2728|\\u{1F4A1})';
   return markdown
-    .replace(new RegExp(`^(#{1,6}\\s*)${structuralEmoji}\\s*`, "gmu"), "$1")
-    .replace(new RegExp(`^(\\|\\s*)${structuralEmoji}\\s*`, "gmu"), "$1")
-    .replace(new RegExp(`(\\|\\s*)${structuralEmoji}\\s*`, "gu"), "$1")
-    .replace(new RegExp(`^(>\\s*)${structuralEmoji}\\s*`, "gmu"), "$1");
+    .replace(new RegExp(`^(#{1,6}\\s*)${structuralEmoji}\\s*`, 'gmu'), '$1')
+    .replace(new RegExp(`^(\\|\\s*)${structuralEmoji}\\s*`, 'gmu'), '$1')
+    .replace(new RegExp(`(\\|\\s*)${structuralEmoji}\\s*`, 'gu'), '$1')
+    .replace(new RegExp(`^(>\\s*)${structuralEmoji}\\s*`, 'gmu'), '$1');
 }
 
 // ==========================================
@@ -102,19 +102,19 @@ function normalizeReportMarkdown(markdown: string): string {
  * 若意外返回 Promise 或解析失败，降级为 <pre> 原文展示。
  */
 function parseMarkdownToHtml(markdown: string): string {
-  if (!markdown || !markdown.trim()) return "";
+  if (!markdown || !markdown.trim()) return '';
   const normalizedMarkdown = normalizeReportMarkdown(markdown);
   try {
     const result = marked.parse(normalizedMarkdown);
-    if (typeof result === "string" && result.trim()) {
+    if (typeof result === 'string' && result.trim()) {
       return result;
     }
     // result 是 Promise（不应发生，但做保护）
     return `<pre class="whitespace-pre-wrap text-sm text-slate-600 leading-relaxed">${escapeHtml(normalizedMarkdown)}</pre>`;
   } catch (err) {
     ErrorService.handle(err as Error, {
-      action: "parseMarkdownToHtml",
-      module: "keywordAnalysis",
+      action: 'parseMarkdownToHtml',
+      module: 'keywordAnalysis',
       notify: false,
     });
     return `<pre class="whitespace-pre-wrap text-sm text-slate-600 leading-relaxed">${escapeHtml(normalizedMarkdown)}</pre>`;
@@ -159,24 +159,52 @@ function saveAnalysisStateToState(): void {
   }
 }
 
+function getLatestReportedSnapshot(
+  snapshots: KeywordHunterSnapshot[]
+): KeywordHunterSnapshot | undefined {
+  return snapshots.find(
+    snapshot => snapshot.status === 'reported' && !!snapshot.result.llmAnalysisResult?.trim()
+  );
+}
+
+async function restoreLatestAnalysisSnapshotIfNeeded(): Promise<void> {
+  const tracker = appStore.getState().keywordTracker;
+  if (tracker?.llmAnalysisResult?.trim()) {
+    return;
+  }
+
+  try {
+    const snapshot = getLatestReportedSnapshot(await KeywordHunterSnapshotService.getAllAsync());
+    if (snapshot) {
+      KeywordHunterSnapshotService.restore(snapshot);
+    }
+  } catch (error) {
+    ErrorService.handle(error as Error, {
+      action: 'restoreLatestAnalysisSnapshot',
+      module: 'keywordAnalysis',
+      notify: false,
+    });
+  }
+}
+
 async function saveAnalysisSnapshot(showSuccessToast = true): Promise<boolean> {
   saveAnalysisStateToState();
   try {
     await KeywordHunterSnapshotService.saveCurrentAsync({ status: 'reported' });
     if (showSuccessToast) {
-      showToast("快照已保存", { type: "success" });
+      showToast('快照已保存', { type: 'success' });
     }
     return true;
   } catch (error) {
-    console.error("[Analysis] 保存快照失败:", error);
-    const message = error instanceof Error ? error.message : "保存快照失败";
+    console.error('[Analysis] 保存快照失败:', error);
+    const message = error instanceof Error ? error.message : '保存快照失败';
     if (showSuccessToast) {
       showToast(message, {
-        type: "error",
+        type: 'error',
       });
     } else {
       showToast(`报告已生成，但历史快照自动保存失败：${message}`, {
-        type: "warning",
+        type: 'warning',
       });
     }
     return false;
@@ -187,16 +215,18 @@ async function saveAnalysisSnapshot(showSuccessToast = true): Promise<boolean> {
  * 从 state 恢复分析状态。
  * 读取原始 Markdown 文本重新渲染，而非直接注入保存的 HTML。
  */
-function restoreAnalysisStateFromState(): void {
+async function restoreAnalysisStateFromState(): Promise<void> {
+  await restoreLatestAnalysisSnapshotIfNeeded();
+
   const currentState = appStore.getState();
   const savedMarkdown = currentState.keywordTracker?.llmAnalysisResult;
 
   if (savedMarkdown && savedMarkdown.trim()) {
     // 判断保存的是原始 Markdown 还是旧版本保存的 HTML
     // 简单启发式：以 '<' 开头的大概率是 HTML（旧版本兼容）
-    const isLikelyHtml = savedMarkdown.trimStart().startsWith("<");
+    const isLikelyHtml = savedMarkdown.trimStart().startsWith('<');
 
-    const resultDiv = document.getElementById("kt-llm-analysis-result");
+    const resultDiv = document.getElementById('kt-llm-analysis-result');
     if (!resultDiv) {
       renderAnalysisModule();
       return;
@@ -228,15 +258,12 @@ function renderAnalysisModule(): void {
  * 更新"生成报告"按钮的激活/禁用状态
  */
 function updateAnalyzeButtonState(): void {
-  const btn = document.getElementById(
-    "kt-analyze-btn",
-  ) as HTMLButtonElement | null;
-  const hasContent =
-    appStore.getState().keywordTracker?.processedCopy?.trim().length > 0;
+  const btn = document.getElementById('kt-analyze-btn') as HTMLButtonElement | null;
+  const hasContent = appStore.getState().keywordTracker?.processedCopy?.trim().length > 0;
 
   if (!btn) return;
 
-  setBtnState(btn, hasContent ? "active" : "disabled");
+  setBtnState(btn, hasContent ? 'active' : 'disabled');
 }
 
 // ==========================================
@@ -249,19 +276,19 @@ function updateAnalyzeButtonState(): void {
 function showLoadingState(container: HTMLElement): () => void {
   const phases = [
     {
-      icon: "fa-database",
-      text: "正在读取文案与关键词数据…",
-      color: "text-slate-500",
+      icon: 'fa-database',
+      text: '正在读取文案与关键词数据…',
+      color: 'text-slate-500',
     },
     {
-      icon: "fa-brain",
-      text: "AI 正在深度分析 Listing…",
-      color: "text-purple-600",
+      icon: 'fa-brain',
+      text: 'AI 正在深度分析 Listing…',
+      color: 'text-purple-600',
     },
     {
-      icon: "fa-file-medical",
-      text: "正在生成评审报告…",
-      color: "text-pink-600",
+      icon: 'fa-file-medical',
+      text: '正在生成评审报告…',
+      color: 'text-pink-600',
     },
   ] as const;
 
@@ -297,7 +324,7 @@ function showLoadingState(container: HTMLElement): () => void {
   // 阶段切换计时器
   const advancePhase = () => {
     phaseIndex = Math.min(phaseIndex + 1, phases.length - 1);
-    const loadingEl = document.getElementById("kt-loading-state");
+    const loadingEl = document.getElementById('kt-loading-state');
     if (loadingEl) {
       const phase = phases[phaseIndex];
       if (!phase) return;
@@ -325,26 +352,14 @@ function showLoadingState(container: HTMLElement): () => void {
 // ==========================================
 
 const BTN_CLASSES = {
-  active: [
-    "kh-analysis-action--active",
-    "cursor-pointer",
-  ],
-  disabled: [
-    "kh-analysis-action--disabled",
-    "cursor-not-allowed",
-  ],
-  loading: [
-    "kh-analysis-action--loading",
-    "cursor-wait",
-  ],
-  success: [
-    "kh-analysis-action--success",
-    "cursor-not-allowed",
-  ],
+  active: ['kh-analysis-action--active', 'cursor-pointer'],
+  disabled: ['kh-analysis-action--disabled', 'cursor-not-allowed'],
+  loading: ['kh-analysis-action--loading', 'cursor-wait'],
+  success: ['kh-analysis-action--success', 'cursor-not-allowed'],
 } as const;
 
 function getProcessedCopy(): string {
-  return appStore.getState().keywordTracker?.processedCopy ?? "";
+  return appStore.getState().keywordTracker?.processedCopy ?? '';
 }
 
 async function fetchListingAnalysis(processedCopy: string): Promise<string> {
@@ -354,17 +369,17 @@ async function fetchListingAnalysis(processedCopy: string): Promise<string> {
     processedCopy,
     keywordTracker?.keywords ?? [],
     keywordTracker?.matchedKeywords ?? [],
-    keywordTracker?.unmatchedKeywords ?? [],
+    keywordTracker?.unmatchedKeywords ?? []
   );
 }
 
 function handleAnalysisSuccess(
   response: string,
   resultDiv: HTMLElement | null,
-  btn: HTMLButtonElement | null,
+  btn: HTMLButtonElement | null
 ): void {
   if (!response || !response.trim()) {
-    throw new Error("AI 返回内容为空，请重试");
+    throw new Error('AI 返回内容为空，请重试');
   }
 
   // 缓存原始 Markdown
@@ -376,47 +391,44 @@ function handleAnalysisSuccess(
   }
 
   // 更新按钮为"已完成"
-  if (btn) setBtnState(btn, "success", "报告已生成");
+  if (btn) setBtnState(btn, 'success', '报告已生成');
 
   // 保存原始 Markdown 到 state
   saveAnalysisStateToState();
   void saveAnalysisSnapshot(false);
 
-  showToast("报告生成成功", { type: "success" });
+  showToast('报告生成成功', { type: 'success' });
 }
 
 function isValidationAnalysisError(error: Error): boolean {
-  return (
-    error.message.includes("输入内容过短") ||
-    error.message.includes("文案内容为空")
-  );
+  return error.message.includes('输入内容过短') || error.message.includes('文案内容为空');
 }
 
 function createAnalysisUserMessage(errorMessage: string): string {
-  if (errorMessage.includes("503")) {
-    return "服务暂时不可用 (503)，可能是模型过载，请稍后重试。";
+  if (errorMessage.includes('503')) {
+    return '服务暂时不可用 (503)，可能是模型过载，请稍后重试。';
   }
 
-  if (errorMessage.includes("429")) {
-    return "请求频率超限 (429)，请稍等片刻后重试。";
+  if (errorMessage.includes('429')) {
+    return '请求频率超限 (429)，请稍等片刻后重试。';
   }
 
-  if (errorMessage.includes("timeout") || errorMessage.includes("Timeout")) {
-    return "请求超时，请检查网络后重试。";
+  if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+    return '请求超时，请检查网络后重试。';
   }
 
   return errorMessage;
 }
 
-function createAnalysisRetryButton(colorScheme: "yellow" | "red"): HTMLButtonElement {
-  const retryBtn = document.createElement("button");
+function createAnalysisRetryButton(colorScheme: 'yellow' | 'red'): HTMLButtonElement {
+  const retryBtn = document.createElement('button');
   retryBtn.className =
     `inline-flex items-center gap-1.5 px-3 py-1.5 ` +
     `bg-white border border-${colorScheme}-200 text-${colorScheme}-700 ` +
     `text-xs rounded-lg hover:bg-${colorScheme}-50 transition-colors font-medium`;
   // ✅ 安全: 静态HTML模板，无用户输入
   setSafeHtml(retryBtn, '<i class="fas fa-redo text-[10px]"></i> 重试');
-  addEventListener(retryBtn, "click", () => {
+  addEventListener(retryBtn, 'click', () => {
     void runLLMAnalysis();
   });
 
@@ -424,23 +436,21 @@ function createAnalysisRetryButton(colorScheme: "yellow" | "red"): HTMLButtonEle
 }
 
 function renderAnalysisError(resultDiv: HTMLElement, userMsg: string, isValidation: boolean): void {
-  const colorScheme = isValidation ? "yellow" : "red";
-  const icon = isValidation
-    ? "fa-exclamation-circle"
-    : "fa-exclamation-triangle";
-  const title = isValidation ? "无法进行分析" : "分析失败";
+  const colorScheme = isValidation ? 'yellow' : 'red';
+  const icon = isValidation ? 'fa-exclamation-circle' : 'fa-exclamation-triangle';
+  const title = isValidation ? '无法进行分析' : '分析失败';
 
-  const errorDiv = document.createElement("div");
+  const errorDiv = document.createElement('div');
   errorDiv.className = `p-5 bg-${colorScheme}-50 border border-${colorScheme}-200 rounded-xl`;
 
-  const headerDiv = document.createElement("div");
+  const headerDiv = document.createElement('div');
   headerDiv.className = `flex items-center gap-2 text-${colorScheme}-700 font-bold mb-2`;
-  const iconEl = document.createElement("i");
+  const iconEl = document.createElement('i');
   iconEl.className = `fas ${icon}`;
   headerDiv.appendChild(iconEl);
   headerDiv.appendChild(document.createTextNode(` ${title}`));
 
-  const msgP = document.createElement("p");
+  const msgP = document.createElement('p');
   msgP.className = `text-sm text-${colorScheme}-800 mb-3 leading-relaxed`;
   msgP.textContent = userMsg;
 
@@ -456,14 +466,14 @@ function renderAnalysisError(resultDiv: HTMLElement, userMsg: string, isValidati
 function handleAnalysisFailure(
   error: Error,
   resultDiv: HTMLElement | null,
-  btn: HTMLButtonElement | null,
+  btn: HTMLButtonElement | null
 ): void {
   const isValidation = isValidationAnalysisError(error);
 
   if (!isValidation) {
     ErrorService.handle(error, {
-      action: "runLLMAnalysis",
-      module: "keywordTracker",
+      action: 'runLLMAnalysis',
+      module: 'keywordTracker',
       notify: false,
     });
   }
@@ -473,13 +483,13 @@ function handleAnalysisFailure(
   }
 
   // 恢复按钮为可点击
-  if (btn) setBtnState(btn, "active", "生成报告");
+  if (btn) setBtnState(btn, 'active', '生成报告');
 }
 
 function setBtnState(
   btn: HTMLButtonElement,
-  state: "active" | "disabled" | "loading" | "success",
-  labelText?: string,
+  state: 'active' | 'disabled' | 'loading' | 'success',
+  labelText?: string
 ): void {
   // 先移除所有状态类
   const allClasses = [
@@ -489,10 +499,10 @@ function setBtnState(
     ...BTN_CLASSES.success,
   ];
   btn.classList.remove(...allClasses);
-  btn.disabled = state !== "active";
+  btn.disabled = state !== 'active';
   btn.classList.add(...BTN_CLASSES[state]);
 
-  const textEl = document.getElementById("kt-analyze-btn-text");
+  const textEl = document.getElementById('kt-analyze-btn-text');
   if (textEl && labelText !== undefined) {
     textEl.textContent = labelText;
   }
@@ -515,7 +525,7 @@ interface ScoreBadgeStyle {
 function setScoreBadge(td: HTMLElement, badgeClass: string, text: string): void {
   // ✅ 安全: 清空内容
   td.replaceChildren();
-  const span = document.createElement("span");
+  const span = document.createElement('span');
   span.className = `score-badge ${badgeClass}`;
   span.textContent = text;
   td.appendChild(span);
@@ -534,26 +544,26 @@ function parseScoreRatio(rawText: string): ScoreRatio | null {
 
 function getScoreBadgeStyle(ratio: number): ScoreBadgeStyle {
   if (ratio >= 0.75) {
-    return { badgeClass: "score-badge-high" };
+    return { badgeClass: 'score-badge-high' };
   }
 
   if (ratio >= 0.5) {
-    return { badgeClass: "score-badge-mid" };
+    return { badgeClass: 'score-badge-mid' };
   }
 
-  return { badgeClass: "score-badge-low", rowClass: "row-low" };
+  return { badgeClass: 'score-badge-low', rowClass: 'row-low' };
 }
 
 function isRiskScoreText(rawText: string): boolean {
-  return rawText.includes("-10") || rawText.includes("\u{1F6A8}");
+  return rawText.includes('-10') || rawText.includes('\u{1F6A8}');
 }
 
 function isPassingScoreText(rawText: string): boolean {
   return (
-    rawText.includes("+0") ||
-    rawText.includes("\u2705") ||
-    rawText.includes("通过") ||
-    rawText === "0"
+    rawText.includes('+0') ||
+    rawText.includes('\u2705') ||
+    rawText.includes('通过') ||
+    rawText === '0'
   );
 }
 
@@ -566,66 +576,62 @@ function highlightRatioScore(tr: Element, td: HTMLElement, rawText: string): voi
     tr.classList.add(style.rowClass);
   }
 
-  setScoreBadge(
-    td,
-    style.badgeClass,
-    `${scoreRatio.score}/${scoreRatio.max}`,
-  );
+  setScoreBadge(td, style.badgeClass, `${scoreRatio.score}/${scoreRatio.max}`);
 }
 
 function highlightScoreRow(tr: Element): void {
-  const tds = tr.querySelectorAll("td");
+  const tds = tr.querySelectorAll('td');
   if (tds.length < 2) return;
 
   const td2 = tds[1] as HTMLElement; // 分数列
-  const rawText = td2.textContent?.trim() ?? "";
+  const rawText = td2.textContent?.trim() ?? '';
 
   // 清除旧状态类，防止重复调用时污染
-  tr.classList.remove("row-total", "row-low", "row-risk");
+  tr.classList.remove('row-total', 'row-low', 'row-risk');
 
   // 违规触发
   if (isRiskScoreText(rawText)) {
-    tr.classList.add("row-risk");
-    setScoreBadge(td2, "score-badge-low", "-10");
+    tr.classList.add('row-risk');
+    setScoreBadge(td2, 'score-badge-low', '-10');
     return;
   }
 
   // 违规通过
   if (isPassingScoreText(rawText)) {
-    setScoreBadge(td2, "score-badge-high", "+0");
+    setScoreBadge(td2, 'score-badge-high', '+0');
     return;
   }
 
   highlightRatioScore(tr, td2, rawText);
 }
 
-type TotalScoreTone = "excellent" | "good" | "warning" | "critical";
+type TotalScoreTone = 'excellent' | 'good' | 'warning' | 'critical';
 
 function getTotalScoreTone(total: number): TotalScoreTone {
   if (total >= 85) {
-    return "excellent";
+    return 'excellent';
   }
 
   if (total >= 75) {
-    return "good";
+    return 'good';
   }
 
   if (total >= 70) {
-    return "warning";
+    return 'warning';
   }
 
-  return "critical";
+  return 'critical';
 }
 
 function appendTotalScoreProgressBar(h2: HTMLHeadingElement, total: number): void {
   // 移除旧进度条（防止重复追加）
-  h2.querySelector(".score-progress-bar")?.remove();
+  h2.querySelector('.score-progress-bar')?.remove();
 
-  const bar = document.createElement("div");
-  bar.className = "score-progress-bar";
+  const bar = document.createElement('div');
+  bar.className = 'score-progress-bar';
 
-  const fill = document.createElement("div");
-  fill.className = "score-progress-fill";
+  const fill = document.createElement('div');
+  fill.className = 'score-progress-fill';
 
   bar.appendChild(fill);
   h2.appendChild(bar);
@@ -639,26 +645,23 @@ function appendTotalScoreProgressBar(h2: HTMLHeadingElement, total: number): voi
 }
 
 function highlightTotalScoreTitle(container: HTMLElement): void {
-  const h2 = container.querySelector("h2");
+  const h2 = container.querySelector('h2');
   if (!h2) return;
 
-  const totalMatch = (h2.textContent ?? "").match(/(\d+)\s*\/\s*100/);
+  const totalMatch = (h2.textContent ?? '').match(/(\d+)\s*\/\s*100/);
   const totalText = totalMatch?.[1];
   if (!totalText) return;
 
   const total = parseInt(totalText, 10);
-  h2.style.removeProperty("background");
-  h2.style.removeProperty("color");
+  h2.style.removeProperty('background');
+  h2.style.removeProperty('color');
   h2.classList.remove(
-    "kh-report-score-title--excellent",
-    "kh-report-score-title--good",
-    "kh-report-score-title--warning",
-    "kh-report-score-title--critical",
+    'kh-report-score-title--excellent',
+    'kh-report-score-title--good',
+    'kh-report-score-title--warning',
+    'kh-report-score-title--critical'
   );
-  h2.classList.add(
-    "kh-report-score-title",
-    `kh-report-score-title--${getTotalScoreTone(total)}`,
-  );
+  h2.classList.add('kh-report-score-title', `kh-report-score-title--${getTotalScoreTone(total)}`);
   appendTotalScoreProgressBar(h2, total);
 }
 
@@ -674,8 +677,8 @@ function highlightScores(container: HTMLElement): void {
   if (!container) return;
 
   // ——— 1. 处理评分表格 ———
-  const rows = container.querySelectorAll("tbody tr");
-  rows.forEach((tr) => highlightScoreRow(tr));
+  const rows = container.querySelectorAll('tbody tr');
+  rows.forEach(tr => highlightScoreRow(tr));
 
   // ——— 2. 处理总分 H2 标题 ———
   highlightTotalScoreTitle(container);
@@ -689,20 +692,18 @@ function highlightScores(container: HTMLElement): void {
  * 运行 LLM 分析
  */
 async function runLLMAnalysis(): Promise<void> {
-  const btn = document.getElementById(
-    "kt-analyze-btn",
-  ) as HTMLButtonElement | null;
-  const resultDiv = document.getElementById("kt-llm-analysis-result");
+  const btn = document.getElementById('kt-analyze-btn') as HTMLButtonElement | null;
+  const resultDiv = document.getElementById('kt-llm-analysis-result');
 
   // 内容为空时快速失败
   const processedCopy = getProcessedCopy();
   if (!processedCopy.trim()) {
-    showToast("文案内容为空，无法进行 AI 分析", { type: "warning" });
+    showToast('文案内容为空，无法进行 AI 分析', { type: 'warning' });
     return;
   }
 
   // ——— 进入加载状态 ———
-  if (btn) setBtnState(btn, "loading", "分析中…");
+  if (btn) setBtnState(btn, 'loading', '分析中…');
 
   let cancelLoading: (() => void) | null = null;
   if (resultDiv) {
@@ -733,16 +734,14 @@ async function runLLMAnalysis(): Promise<void> {
 function setupEventListeners(container: HTMLElement): void {
   if (!container) return;
 
-  const btnAnalyze = document.getElementById("kt-analyze-btn");
+  const btnAnalyze = document.getElementById('kt-analyze-btn');
   if (btnAnalyze) {
     addEventListener(
       btnAnalyze as HTMLElement,
-      "click",
-      (async () =>
-        await runLLMAnalysis()) as EventListenerOrEventListenerObject,
+      'click',
+      (async () => await runLLMAnalysis()) as EventListenerOrEventListenerObject
     );
   }
-
 }
 
 // ==========================================
@@ -758,29 +757,29 @@ export async function mount(container: HTMLElement): Promise<void> {
     const renderer = SafeRenderer.getInstance();
 
     const html = await loader.loadTemplate(
-      "src/modules/app_center/views/keyword_hunter/analysis/template.html",
+      'src/modules/app_center/views/keyword_hunter/analysis/template.html',
       {
         retryCount: 3,
         timeout: 5000,
-        onError: (error) => {
+        onError: error => {
           ErrorService.handle(error as Error, {
-            action: "loadAnalysisTemplate",
-            module: "keywordAnalysis",
+            action: 'loadAnalysisTemplate',
+            module: 'keywordAnalysis',
             notify: false,
           });
         },
-      },
+      }
     );
 
-    container.classList.add("fade-in");
+    container.classList.add('fade-in');
     renderer.renderTemplate(container, html);
 
     setupEventListeners(container);
-    restoreAnalysisStateFromState();
+    await restoreAnalysisStateFromState();
   } catch (error) {
     ErrorService.handle(error as Error, {
-      action: "mountAnalysisModule",
-      module: "keywordAnalysis",
+      action: 'mountAnalysisModule',
+      module: 'keywordAnalysis',
       notify: false,
     });
     throw error;
@@ -796,8 +795,8 @@ export function unmount(): void {
     cleanup();
   } catch (error) {
     ErrorService.handle(error as Error, {
-      action: "unmountAnalysisModule",
-      module: "keywordAnalysis",
+      action: 'unmountAnalysisModule',
+      module: 'keywordAnalysis',
       notify: false,
     });
   }

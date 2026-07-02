@@ -1,69 +1,91 @@
 # 技术债务审计与消除计划
 
 **审计日期**: 2026-06-08
+**最新更新**: 2026-07-02
 **审计范围**: 当前 CI 门禁、依赖审计、`src/` 代码质量、CSS 变量与模块样式、技术债扫描、单元/集成测试。
-**结论**: 当前没有仍阻塞 `ci:all` 的 P0 债务；本轮已消除循环依赖门禁、生产依赖漏洞、开发依赖漏洞、`ConfigCenter` 构建导入 warning、Vitest 输出噪声和部分质量脚本失效问题。剩余债务主要集中在格式化基线、ESLint warning 基线、复杂度热点、CSS 令牌治理和构建性能 warning。
+**结论**: 当前没有仍阻塞 `ci:all` 的 P0 债务；本轮已消除循环依赖门禁、生产依赖漏洞、开发依赖漏洞、`ConfigCenter` 构建导入 warning、构建性能 warning、ESLint warning 基线、格式化基线、技术债扫描基线、Vitest 输出噪声和质量脚本失效问题。剩余债务主要集中在复杂度热点、CSS 令牌治理、浏览器类验证补齐和 Playground 权限边界执行源。
 
 ---
 
 ## 本轮已执行
 
-| 状态 | 项目 | 结果 |
-|------|------|------|
-| 已完成 | 循环依赖门禁 | `circular:check` 改为携带 `tsconfig.json`，模块 manifest 不再持有动态 view loader；真实循环依赖清零。 |
-| 已完成 | Vitest 异步/输出噪声 | `uiHelpers.ts` 的延迟 DOM 操作增加无 DOM 环境保护；NPI Tracker 导出测试 mock 下载 anchor 点击，全量 Vitest 不再出现 jsdom navigation 噪声。 |
-| 已完成 | 生产依赖漏洞 | 移除 `xlsx`，用 `fflate` 加最小 XLSX XML 解析替代 PPC 搜索词导入；`npm audit --omit=dev` 为 0 漏洞。 |
-| 已完成 | 开发依赖漏洞 | 升级 `vite`/`vitest`/`@vitest/*`/`vite-plugin-singlefile`，显式引入安全版 `esbuild`，并用 `overrides` 固定 LHCI 链上的 `tmp`/`uuid`；`npm audit` 为 0 漏洞。 |
-| 已完成 | 构建导入 warning | 将 DI 注册中的 `ConfigCenter` 改为静态导入，消除 Vite 8/Rolldown 的动态/静态 import 混用 warning。 |
-| 已完成 | NPI Tracker warning 压降 | 拆分表格渲染、导出构造和事件分发，`npi_tracker/index.ts` ESLint warning 从 5 降到 0。 |
-| 已完成 | 公共错误 UI 安全渲染 | `BaseModule` 和 `safeMount` 的错误降级 UI 改用 `setSafeHtml`，并转义错误文案，公共错误 UI 直接 `innerHTML` warning 清零。 |
-| 已完成 | 公共导航/菜单安全渲染 | `ErrorBoundary`、`OverviewRenderer`、`SidebarRenderer`、`navigation` 和 `megaMenu` 切到安全渲染入口，并拆分 `updateUIForRoute` 复杂度。 |
-| 已完成 | 模板页安全渲染收敛 | AMZ Hub、More、SOP 静态模板页和组件单点渲染改用 `setSafeHtml`/安全片段/`replaceChildren`，SOP 视图目录直接 `innerHTML` warning 清零。 |
-| 已完成 | Playground Deep Chat 安全收敛 | 会话列表、工具栏 SVG、模型下拉清空和删除 fallback 改用安全渲染/显式分支，业务模块 `no-restricted-syntax` 和 `no-non-null-assertion` 清零。 |
-| 已完成 | 本地存储与 LLM 单点规则清理 | `LocalDataStore` 内部集中访问浏览器存储，移除 `no-restricted-globals`；LLM 流读取和超时重试清掉常量循环/无效 catch。 |
-| 已完成 | 安全基础设施直接渲染压降 | `security`、`xssFixer`、`SafeModuleLoader` 和 `SafeRenderer` 的清空/静态 UI 路径改用 `replaceChildren` 或 `setSafeHtml`。 |
-| 已完成 | 入口启动流程收敛 | `main.ts` 的裸 `console` 改为入口局部日志适配器，并拆分启动编排函数，文件级 ESLint warning 清零。 |
-| 已完成 | SafeModuleLoader 复杂度收敛 | 拆分错误分类、模块 render/mount 分派和 HTTP/DOM/解析判断，文件级 ESLint warning 从 3 降到 0。 |
-| 已完成 | 路由类型守卫收敛 | `guards.ts` 改为字段验证器复用，4 个类型守卫复杂度 warning 清零。 |
-| 已完成 | Keyword Hunter Process 收敛 | 拆分统计渲染、词云 DOM、浮动关键词列表、翻译按钮状态和关键词定位，`process/index.ts` warning 从 5 降到 0。 |
-| 已完成 | PromptLab 服务复杂度收敛 | 拆分报告 Markdown 转换器、细粒度子项过滤和通用字段渲染 helper，`promptlabService.ts` warning 从 13 降到 0。 |
-| 已完成 | HTTP 缓存服务复杂度收敛 | 拆分内存/持久化读取、按前缀清理和过期项清理 helper，`HttpCacheService.ts` warning 从 4 降到 0。 |
-| 已完成 | AI 置信度计算复杂度收敛 | 拆分通用质量检查、数组长度计分、文本有效项计分和平均置信度收尾 helper，`confidenceCalculator.ts` warning 从 4 降到 0。 |
-| 已完成 | ESLint warning baseline 收紧 | `config/eslint-warning-baseline.json` 从 342 下调到 102，`lint:warning-gate` 锁定当前剩余 warning。 |
-| 已完成 | 质量脚本可运行性 | 修复 CSS 审计根目录、CSS 模块分析失效路径、注释代码清理器 `glob` 导入、质量检查 ESLint 输出缓冲和失败处理。 |
-| 已完成 | 审计报告产物 | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-06-08.json`、`tests/quality/tech-debt-2026-06-08.html`。 |
+| 状态   | 项目                                  | 结果                                                                                                                                                                                                  |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 已完成 | 循环依赖门禁                          | `circular:check` 改为携带 `tsconfig.json`，模块 manifest 不再持有动态 view loader；真实循环依赖清零。                                                                                                 |
+| 已完成 | Vitest 异步/输出噪声                  | `uiHelpers.ts` 的延迟 DOM 操作增加无 DOM 环境保护；NPI Tracker 导出测试 mock 下载 anchor 点击，全量 Vitest 不再出现 jsdom navigation 噪声。                                                           |
+| 已完成 | 生产依赖漏洞                          | 移除 `xlsx`，用 `fflate` 加最小 XLSX XML 解析替代 PPC 搜索词导入；`npm audit --omit=dev` 为 0 漏洞。                                                                                                  |
+| 已完成 | 开发依赖漏洞                          | 升级 `vite`/`vitest`/`@vitest/*`/`vite-plugin-singlefile`，显式引入 `esbuild@0.28.1`，并用 `overrides` 固定 LHCI/tsx 链上的风险传递依赖；`npm audit` 为 0 漏洞。                                      |
+| 已完成 | 构建导入 warning                      | 将 DI 注册中的 `ConfigCenter` 改为静态导入，消除 Vite 8/Rolldown 的动态/静态 import 混用 warning。                                                                                                    |
+| 已完成 | NPI Tracker warning 压降              | 拆分表格渲染、导出构造和事件分发，`npi_tracker/index.ts` ESLint warning 从 5 降到 0。                                                                                                                 |
+| 已完成 | 公共错误 UI 安全渲染                  | `BaseModule` 和 `safeMount` 的错误降级 UI 改用 `setSafeHtml`，并转义错误文案，公共错误 UI 直接 `innerHTML` warning 清零。                                                                             |
+| 已完成 | 公共导航/菜单安全渲染                 | `ErrorBoundary`、`OverviewRenderer`、`SidebarRenderer`、`navigation` 和 `megaMenu` 切到安全渲染入口，并拆分 `updateUIForRoute` 复杂度。                                                               |
+| 已完成 | 模板页安全渲染收敛                    | AMZ Hub、More、SOP 静态模板页和组件单点渲染改用 `setSafeHtml`/安全片段/`replaceChildren`，SOP 视图目录直接 `innerHTML` warning 清零。                                                                 |
+| 已完成 | Playground Deep Chat 安全收敛         | 会话列表、工具栏 SVG、模型下拉清空和删除 fallback 改用安全渲染/显式分支，业务模块 `no-restricted-syntax` 和 `no-non-null-assertion` 清零。                                                            |
+| 已完成 | Playground Deep Chat 请求生命周期收紧 | 生成中会话删除/清空会标记并取消 pending 请求；停止生成仅在用户主动停止时保留 partial response；显式 thread 保存不再重建已删除会话。                                                                   |
+| 已完成 | Playground Deep Chat 请求预算收紧     | 前端拒绝超长用户消息和系统提示词；历史上下文按预算保留最新消息；LLM 请求携带输出 token 上限。                                                                                                         |
+| 已完成 | Playground 路由边界元数据透传         | 模块 manifest、菜单 route 和 Navigo route 保留 `meta`；Playground 声明当前产品级无认证放行策略，并用单测锁定转换行为。                                                                                |
+| 已完成 | Playground 草稿保存降噪               | Deep Chat 输入草稿改为延迟持久化；卸载时 flush、清空时 cancel，避免高频输入持续写入 IndexedDB。                                                                                                       |
+| 已完成 | Playground Prompt 删除一致性          | Prompt 删除先确认历史快照引用删除成功，再更新 Playground Prompt 列表；缺少快照引用按幂等成功处理，保存失败保留 UI 记录。                                                                              |
+| 已完成 | Playground Deep Chat 构建分包         | `deep-chat` 第三方 bundle 改为按需静态资产脚本加载，Playground 路由 chunk 从约 420 kB 降到约 42 kB，Vite 大 chunk warning 清零。                                                                      |
+| 已完成 | 构建性能 warning 收敛                 | 确认 Node `DEP0190` 在 Node 24.11.1 + Vite 8.0.16 下不可复现；Rolldown `pluginTimings` 是内置 asset/CSS 插件耗时占比诊断，已用 `checks.pluginTimings=false` 只关闭该诊断，其他构建 warning 保持开启。 |
+| 已完成 | PPC 搜索词拆分收口                    | 清理 `ppc_search_terms/index.ts` 拆分后残留的重复分析/筛选/设置实现，保留 `analysisEngine.ts`、`filters.ts`、`settings.ts` 等单一来源，恢复 type-check、lint 和 Vite 构建。                           |
+| 已完成 | 测试 lint 非空断言清理                | `dnaExtractor.test.ts` 和 `universalDNAExtractor.test.ts` 改为显式断言收窄，`lint:tests` 从 99 条 `no-non-null-assertion` warning 收敛到 0。                                                          |
+| 已完成 | 原生日志全局兜底                      | 为 `nativeLoggerConsole` 增加入口/测试 bootstrap 和全局类型声明，修复替换裸 `console` 后的类型与运行时兜底缺口。                                                                                      |
+| 已完成 | PPC Agent/报表控件拆分收口            | 将分析流程、Agent 复核合并逻辑和报表控件渲染从 `index.ts` 拆到 `analysisFlow.ts`、`agentReview.ts`、`reportControls.ts`，清理拆分中间态的重复定义和漏导入。                                           |
+| 已完成 | PPC 规则单一来源                      | 将搜索词规则和 ERP 活动规则拆到 `searchTermRules.ts`、`campaignRules.ts`，`analysisEngine.ts` 只保留报表解析和行级编排。                                                                              |
+| 已完成 | 复杂度分析脚本恢复                    | `tools/complexity-analyzer.ts` 改为与仓库其他工具一致的 `glob@7` 默认导入 + `promisify`，`code:analyze:complexity` 恢复可运行。                                                                       |
+| 已完成 | 本地存储与 LLM 单点规则清理           | `LocalDataStore` 内部集中访问浏览器存储，移除 `no-restricted-globals`；LLM 流读取和超时重试清掉常量循环/无效 catch。                                                                                  |
+| 已完成 | 安全基础设施直接渲染压降              | `security`、`xssFixer`、`SafeModuleLoader` 和 `SafeRenderer` 的清空/静态 UI 路径改用 `replaceChildren` 或 `setSafeHtml`。                                                                             |
+| 已完成 | 入口启动流程收敛                      | `main.ts` 的裸 `console` 改为入口局部日志适配器，并拆分启动编排函数，文件级 ESLint warning 清零。                                                                                                     |
+| 已完成 | SafeModuleLoader 复杂度收敛           | 拆分错误分类、模块 render/mount 分派和 HTTP/DOM/解析判断，文件级 ESLint warning 从 3 降到 0。                                                                                                         |
+| 已完成 | 路由类型守卫收敛                      | `guards.ts` 改为字段验证器复用，4 个类型守卫复杂度 warning 清零。                                                                                                                                     |
+| 已完成 | Keyword Hunter Process 收敛           | 拆分统计渲染、词云 DOM、浮动关键词列表、翻译按钮状态和关键词定位，`process/index.ts` warning 从 5 降到 0。                                                                                            |
+| 已完成 | PromptLab 服务复杂度收敛              | 拆分报告 Markdown 转换器、细粒度子项过滤和通用字段渲染 helper，`promptlabService.ts` warning 从 13 降到 0。                                                                                           |
+| 已完成 | HTTP 缓存服务复杂度收敛               | 拆分内存/持久化读取、按前缀清理和过期项清理 helper，`HttpCacheService.ts` warning 从 4 降到 0。                                                                                                       |
+| 已完成 | AI 置信度计算复杂度收敛               | 拆分通用质量检查、数组长度计分、文本有效项计分和平均置信度收尾 helper，`confidenceCalculator.ts` warning 从 4 降到 0。                                                                                |
+| 已完成 | 格式化基线收敛                        | `format:check` 显式使用项目 Prettier 配置和 ignore 文件，`src/**/*.{js,ts,jsx,tsx,json,css,md}` 当前全部符合 Prettier。                                                                               |
+| 已完成 | 技术债扫描基线清零                    | 抽取重复测试 fixture、导航开关状态、并行分析进度更新、历史 Prompt 指纹匹配和 LLM 响应错误构造；`tech-debt:scan` 当前 0 issue。                                                                        |
+| 已完成 | ESLint warning baseline 清零          | `config/eslint-warning-baseline.json` 从 342 收敛到 0，`lint:warning-gate` 当前为 0/0 warning。                                                                                                       |
+| 已完成 | 质量脚本可运行性                      | 修复 CSS 审计根目录、CSS 模块分析失效路径、注释代码清理器 `glob` 导入、质量检查 ESLint 输出缓冲和失败处理。                                                                                           |
+| 已完成 | 审计报告产物                          | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-07-02.json`、`tests/quality/tech-debt-2026-07-02.html` 和最新复杂度报告 `complexity-report-2026-07-02T13-42-36.*`。          |
 
 ## 验证快照
 
-| 验证项 | 命令 | 当前结果 |
-|--------|------|----------|
-| 完整 CI 门禁 | `npm run ci:all` | 通过 |
-| XSS 高危门禁 | `npm run xss:gate` | 329 个源文件，0 风险点 |
-| 循环依赖 | `npm run circular:check` | 331 个文件，0 循环依赖，1 个 Vite/raw import warning |
-| 应用类型检查 | `npm run type-check` | 通过 |
-| 测试类型检查 | `npm run type-check:tests` | 通过 |
-| ESLint warning gate | `npm run lint:warning-gate` | 102/102 warning，基线内通过 |
-| 全量单元/集成测试 | `npx vitest run --silent` | 65 个文件，1372 个测试，通过 |
-| 构建 | `npm run build` | 通过，`ConfigCenter` 动态/静态导入 warning 已消除；仍有大 chunk、plugin timing 和 `DEP0190` warning |
-| 生产依赖审计 | `npm audit --omit=dev` | 0 vulnerabilities |
-| 全量依赖审计 | `npm audit` | 0 vulnerabilities |
-| 格式化检查 | `npm run format:check` | 失败，308 个既有文件不符合 Prettier |
-| CSS 变量审计 | `npm run css:audit` | 53 个 CSS 文件，3738 次变量使用，2008 次不符合规范 |
-| CSS 模块分析 | `npm run css:analyze` | 10 个模块 CSS 文件，4227 行，3 条优化建议 |
-| 质量基线 | `npm run quality:check` | 280 个文件，0 error，437 warning，162 个文件复杂度超阈值 |
-| 技术债扫描 | `npm run tech-debt:scan` | 1188 项：0 critical、0 high、301 medium、887 low，债务比率 1.51% |
+| 验证项                   | 命令                                                                                                                                                                                                                                                                                                                                                                                                                  | 当前结果                                                                                                                 |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 完整 CI 门禁             | `npm run ci:all`                                                                                                                                                                                                                                                                                                                                                                                                      | 通过；包含 XSS、循环依赖、应用类型检查、生产 ESLint、warning gate 和构建                                                 |
+| XSS 高危门禁             | `npm run xss:gate`                                                                                                                                                                                                                                                                                                                                                                                                    | 451 个源文件，0 风险点；已审计安全跳过 13 处、清空 DOM 跳过 6 处                                                        |
+| 循环依赖                 | `npm run circular:check`                                                                                                                                                                                                                                                                                                                                                                                              | 455 个文件，0 循环依赖，madge 输出 3 个解析 warning                                                                      |
+| 应用类型检查             | `npm run type-check`                                                                                                                                                                                                                                                                                                                                                                                                  | 通过                                                                                                                     |
+| 测试类型检查             | `npm run type-check:tests`                                                                                                                                                                                                                                                                                                                                                                                            | 通过                                                                                                                     |
+| 生产 ESLint              | `npm run lint`                                                                                                                                                                                                                                                                                                                                                                                                        | 通过                                                                                                                     |
+| 测试 ESLint              | `npm run lint:tests`                                                                                                                                                                                                                                                                                                                                                                                                  | 通过；0 error、0 warning                                                                                                 |
+| ESLint warning gate      | `npm run lint:warning-gate`                                                                                                                                                                                                                                                                                                                                                                                           | 0/0 warning，通过                                                                                                        |
+| 全量单元/集成测试        | `npx vitest run --reporter=dot`                                                                                                                                                                                                                                                                                                                                                                                       | 176 个文件，1997 个测试，通过                                                                                            |
+| 构建                     | `npm run build:app`                                                                                                                                                                                                                                                                                                                                                                                                   | 通过，`deepChat.bundle` 为独立资产 403.54 kB；未出现 Vite chunk size warning、`DEP0190` 或 Rolldown `pluginTimings` 提示 |
+| PPC 搜索词专项测试       | `npx vitest run tests/unit/ppc-search-terms.test.ts tests/unit/ppc-search-terms-ui.test.ts tests/unit/ppcLlmAnalysisService.test.ts`                                                                                                                                                                                                                                                                                  | 3 个文件，32 个测试，通过                                                                                                |
+| 公共错误处理专项测试     | `npx vitest run tests/unit/AppError.test.ts tests/unit/GlobalErrorHandler.test.ts tests/unit/errorCodes.test.ts`                                                                                                                                                                                                                                                                                                      | 3 个文件，122 个测试，通过                                                                                               |
+| 安全渲染专项测试         | `npx vitest run tests/unit/SafeRenderer.test.ts`                                                                                                                                                                                                                                                                                                                                                                      | 1 个文件，59 个测试，通过                                                                                                |
+| 公共模块专项测试         | `npx vitest run tests/unit/AppError.test.ts tests/unit/GlobalErrorHandler.test.ts tests/unit/errorCodes.test.ts tests/unit/SafeRenderer.test.ts tests/unit/commonRenderers.test.ts tests/unit/SkeletonLoader.test.ts src/common/components/SkeletonLoader.test.ts tests/unit/routerNavigoCore.test.ts tests/unit/moduleManifest.test.ts tests/unit/StandardModule.test.ts src/common/utils/welcomeBannerA11y.test.ts` | 11 个文件，225 个测试，通过                                                                                              |
+| Playground Deep Chat E2E | `npx playwright test tests/e2e/deep-chat-prompt-preview.spec.ts --project=chromium`                                                                                                                                                                                                                                                                                                                                   | 3 个测试通过；仅 Playwright runner 输出 `NO_COLOR`/`FORCE_COLOR` 环境变量提示                                            |
+| 生产依赖审计             | `npm audit --omit=dev`                                                                                                                                                                                                                                                                                                                                                                                                | 0 vulnerabilities                                                                                                        |
+| 全量依赖审计             | `npm audit`                                                                                                                                                                                                                                                                                                                                                                                                           | 0 vulnerabilities                                                                                                        |
+| 格式化检查               | `npm run format:check`                                                                                                                                                                                                                                                                                                                                                                                                | 通过，所有匹配的 `src` 文件符合 Prettier                                                                                 |
+| CSS 变量审计             | `npm run css:audit`                                                                                                                                                                                                                                                                                                                                                                                                   | 61 个 CSS 文件，4499 次变量使用，4235 次符合规范，264 次不符合规范，0 deprecated                                         |
+| CSS 模块分析             | `npm run css:analyze`                                                                                                                                                                                                                                                                                                                                                                                                 | 10 个模块 CSS 文件，7872 行；卡片 3 类/21 次、按钮 2 类/5 次、动画 2 类/45 次、图标 2 类/4 次、徽章 2 类/13 次；4 条优化建议 |
+| 质量基线                 | `npm run quality:check`                                                                                                                                                                                                                                                                                                                                                                                               | ESLint 检查 396 个文件，0 error、0 warning；TypeScript 0 error；统计 398 个文件，平均复杂度 20.1，最大复杂度 261，178 个文件超过阈值 |
+| 复杂度分析               | `npm run code:analyze:complexity`                                                                                                                                                                                                                                                                                                                                                                                     | 668 个文件，12,760 个函数，192 个过长函数、95 个高复杂度函数，249 个问题函数                                             |
+| 技术债扫描               | `npm run tech-debt:scan`                                                                                                                                                                                                                                                                                                                                                                                              | 386 个文件，98,097 行，0 issue，债务比率 0.00%                                                                           |
 
 ## 剩余技术债务
 
-| ID | 优先级 | 债务 | 当前证据 | 验收条件 |
-|----|--------|------|----------|----------|
-| TD-02 | P1 | 格式化基线未收敛 | `npm run format:check` 失败，308 个既有文件不符合 Prettier。 | 选定 Prettier 配置后按目录分批格式化，最终 `format:check` 通过，并避免混入功能改动。 |
-| TD-03 | P2 | ESLint warning 基线仍高 | warning gate 为 102/102；Top 规则：`complexity` 59、`max-lines-per-function` 30、`max-params` 8、`max-depth` 5。 | 每个 PR 只压低一个规则或一个模块的 warning 基线，更新 warning baseline，保持 `ci:all` 通过。 |
-| TD-04 | P2 | 复杂度热点 | `quality:check` 显示平均复杂度 26，最大复杂度 207，162 个文件超过阈值。当前 lint warning top 文件包括 `llmService.ts`、`reportRenderer.ts`、`parallelAnalysisService.ts`、`dataOperations.ts`、`importHandler.ts` 和 `FullAnalysisReportAdapter.ts`。 | 按 top 文件拆分长函数和深嵌套，补回局部测试，复杂度和 warning 数量同步下降。 |
-| TD-05 | P2 | CSS 变量体系不统一 | `css:audit` 显示 2008 次不符合变量命名规范，合规率 46.3%。 | 先建立变量别名/迁移表，再按 foundation、components、modules 分批替换；每批运行 `css:audit` 并记录下降量。 |
-| TD-06 | P2 | 模块 CSS 重复 | `css:analyze` 发现卡片 3 类、按钮 1 类、动画 2 类、图标 2 类、徽章 2 类重复模式。 | 抽取到已有 `src/css/components/*` 和 `src/css/animations/*`，模块样式只保留差异化规则，视觉回归测试通过。 |
-| TD-07 | P2 | 构建性能 warning | Vite 8 构建仍提示 `deep-chat` chunk 超过 300 kB、插件耗时集中在 checker/terser，并保留 Node `DEP0190` warning。 | 复查大 chunk 拆分和工具链 warning 来源，构建 warning 数量下降且路由懒加载仍正常。 |
-| TD-08 | P3 | 全量浏览器类验证未纳入本轮 | 本轮未执行 `test:e2e`、`test:visual`、`test:performance`、`lighthouse`。 | 依赖升级、CSS 抽取或路由加载改动后补跑对应浏览器类验证，并归档失败截图/报告。 |
+| ID    | 优先级 | 债务                          | 当前证据                                                                                                                                                 | 验收条件                                                                                                  |
+| ----- | ------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| TD-04 | P2     | 复杂度热点                    | `quality:check` 显示平均复杂度 20.1，最大复杂度 261，178 个文件超过阈值；`code:analyze:complexity` 显示 249 个问题函数，其中 192 个过长、95 个高复杂度。 | 按 top 文件拆分长函数和深嵌套，补回局部测试，复杂度指标下降且 ESLint warning gate 保持 0。                |
+| TD-05 | P2     | CSS 变量体系不统一            | `css:audit` 显示 264 次不符合变量命名规范，合规率 94.1%。                                                                                                | 先建立变量别名/迁移表，再按 foundation、components、modules 分批替换；每批运行 `css:audit` 并记录下降量。 |
+| TD-06 | P2     | 模块 CSS 重复                 | `css:analyze` 发现卡片 3 类、按钮 2 类、动画 2 类、图标 2 类、徽章 2 类重复模式，共 88 次出现。                                                          | 抽取到已有 `src/css/components/*` 和 `src/css/animations/*`，模块样式只保留差异化规则，视觉回归测试通过。 |
+| TD-08 | P3     | 全量浏览器类验证未纳入本轮    | 已补跑 Playground Deep Chat 专项 e2e；仍未执行全量 `test:e2e`、`test:visual`、`test:performance`、`lighthouse`。                                         | 依赖升级、CSS 抽取或路由加载改动后补跑对应浏览器类验证，并归档失败截图/报告。                             |
+| TD-09 | P1     | Playground 权限边界与发布开关 | Deep Chat 请求生命周期和请求预算已收紧；Playground 路由已声明产品级无认证放行策略，但仍缺少真实身份/权限或 feature flag 执行源。                         | 接入用户身份/权限服务或 feature flag 源后，路由守卫能执行 Playground 声明；补充拒绝访问和放行路径测试。   |
 
 ## 消除计划清单
 
@@ -86,10 +108,14 @@
 
 ### 第 2 批：格式化基线
 
-- [ ] 确认 Prettier 配置，不直接用默认配置重排全仓。
-- [ ] 按 `src/common`、`src/components`、`src/services`、`src/modules/*` 分批格式化。
-- [ ] 每批只做格式化，不混入逻辑改动；每批运行 `type-check`、`lint:warning-gate`。
-- [ ] 最终将 `format:check` 纳入 CI 或明确为独立质量门禁。
+- [x] 确认 Prettier 配置，不直接用默认配置重排全仓；`format`/`format:check` 已显式指定 `config/.prettierrc.json` 和 `config/.prettierignore`。
+- [x] 完成 `src/modules/app_center/views/ppc_search_terms/**/*.{ts,html,css}` 格式化，并通过 PPC 专项测试、`type-check` 和 `lint:warning-gate`。
+- [x] 完成 `src/common/errors/**/*.{ts,js,css,md,json}` 格式化，并通过公共错误处理专项测试、`type-check` 和 `lint:warning-gate`。
+- [x] 完成 `src/common/infrastructure/**/*.{ts,js,css,md,json}` 格式化，并通过安全渲染专项测试、`type-check` 和 `lint:warning-gate`。
+- [x] 完成 `src/common/**/*.{ts,js,css,md,json}` 格式化，并通过公共模块专项测试、`type-check` 和 `lint:warning-gate`。
+- [x] 按 `src/common`、`src/components`、`src/services`、`src/modules/*` 分批格式化。
+- [x] 每批只做格式化，不混入逻辑改动；每批运行 `type-check`、`lint:warning-gate`。
+- [x] `format:check` 当前作为独立质量门禁，使用项目 Prettier 配置且验证通过。
 
 ### 第 3 批：ESLint warning 基线压降
 
@@ -105,8 +131,9 @@
 - [x] 将 `promptlabService.ts` 报告 Markdown 转换和细粒度子项过滤复杂度收敛，文件级 ESLint warning 清零。
 - [x] 将 `HttpCacheService.ts` 内存/持久化读取和清理流程拆分，文件级 ESLint warning 清零。
 - [x] 将 `confidenceCalculator.ts` 通用质量检查和报告计分分支拆分，文件级 ESLint warning 清零。
-- [x] 将 ESLint warning baseline 收紧到 102，避免后续新增 warning 回流。
-- [ ] 对 `max-lines-per-function`、`complexity`、`max-depth` 只处理 top 文件，避免大范围重构。
+- [x] 将 ESLint warning baseline 收紧到 0，避免后续新增 warning 回流。
+- [x] 将测试长函数和扫描器重复代码基线收敛到 0，`lint:tests` 与 `tech-debt:scan` 均不再报告问题。
+- [x] 对 `max-lines-per-function`、`complexity`、`max-depth` 只处理 top 文件，避免大范围重构。
 
 ### 第 4 批：复杂度热点
 
@@ -133,12 +160,24 @@
 ### 第 6 批：构建和浏览器验证
 
 - [x] 处理 `ConfigCenter` 的动态/静态 import 混用，确认 `npm run build` 不再出现该 warning。
-- [ ] 复查 Vite 8/Rolldown 下的大 chunk 拆分，优先拆分 `deep-chat` 等大模块而不是单纯提高 `chunkSizeWarningLimit`。
-- [ ] 对依赖升级、CSS 抽取和路由加载改动补跑 `test:e2e`、`test:visual`、`test:performance`、`lighthouse`。
+- [x] 将 `deep-chat` 第三方 bundle 从 Playground chunk 中移出，改为按需静态资产脚本加载，未提高 `chunkSizeWarningLimit`。
+- [x] 复查 plugin timing 和 Node `DEP0190` warning 来源；`DEP0190` 未复现，`pluginTimings` 已按 Rolldown check 精准关闭。
+- [ ] 已补跑 Playground Deep Chat prompt preview 专项 e2e；后续对依赖升级、CSS 抽取和路由加载改动继续补跑全量 `test:e2e`、`test:visual`、`test:performance`、`lighthouse`。
+
+### 第 7 批：Playground 边界收紧
+
+- [x] 删除/清空会话时取消 pending LLM 请求，避免 late response 复活已删除会话。
+- [x] 停止生成只在用户主动停止时保留 partial response。
+- [x] 增加 Playground 请求预算：用户消息、系统提示词、上下文和输出 token 上限。
+- [x] 为 Playground route manifest 增加访问策略元数据，并让 route converter 保留该 meta。
+- [x] 记录当前产品层无认证放行策略并用测试锁定行为。
+- [x] Deep Chat 草稿输入改为 debounce 持久化，卸载/清空边界分别 flush/cancel。
+- [x] Prompt 删除改为等待历史快照引用删除结果，避免持久层失败时 UI 先显示已删除。
+- [ ] 接入真实身份/权限服务或 feature flag 源后，补充拒绝访问和放行路径守卫测试。
 
 ## 本轮不建议直接执行
 
-- 不建议一次性格式化 308 个文件并混入功能修复：审查成本过高，也容易掩盖行为变更。
+- 不建议将后续复杂度、CSS 或权限边界修复混入格式化批次：格式化基线已清零，后续应保持行为改动可审查。
 - 不建议在未补充浏览器验证前大改 CSS 抽象或构建分包：这类改动容易产生视觉和懒加载回归。
 
 ---

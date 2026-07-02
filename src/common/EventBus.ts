@@ -8,7 +8,7 @@ import type {
   EventPayloadMap,
   TypedEventHandler,
   GenericEventHandler,
-  EventUnsubscribe
+  EventUnsubscribe,
 } from '../types/events';
 /**
  * EventBus配置选项
@@ -75,10 +75,10 @@ type EventListener = (...args: never[]) => unknown;
 class EventBus {
   /** 事件监听器映射 */
   private events: Record<string, EventListener[]>;
-  
+
   /** 配置选项 */
   private _config: EventBusConfig;
-  
+
   /** 统计信息 */
   private _stats: EventStats;
 
@@ -87,13 +87,13 @@ class EventBus {
 
   constructor() {
     this.events = {};
-    
+
     this._config = {
       maxListenersPerEvent: 50,
       warningThreshold: 30,
       enableLeakDetection: true,
     };
-    
+
     this._stats = {
       totalListeners: 0,
       eventCounts: {},
@@ -108,11 +108,8 @@ class EventBus {
    * @param callback - 回调函数
    * @returns 取消订阅函数
    */
-  on<K extends keyof EventPayloadMap>(
-    event: K,
-    callback: TypedEventHandler<K>
-  ): EventUnsubscribe;
-  
+  on<K extends keyof EventPayloadMap>(event: K, callback: TypedEventHandler<K>): EventUnsubscribe;
+
   /**
    * 订阅事件（通用版本）
    * @param event - 事件名称
@@ -120,7 +117,7 @@ class EventBus {
    * @returns 取消订阅函数
    */
   on(event: string, callback: GenericEventHandler): EventUnsubscribe;
-  
+
   /**
    * 订阅事件实现
    */
@@ -129,10 +126,10 @@ class EventBus {
       this.events[event] = [];
       this._stats.eventCounts[event] = 0;
     }
-    
+
     // 检查监听器数量
     const currentCount = this.events[event].length;
-    
+
     if (currentCount >= this._config.maxListenersPerEvent) {
       return () => {}; // 返回空函数，防止添加更多监听器
     }
@@ -152,31 +149,31 @@ class EventBus {
    * @param event - 事件名称
    * @param callback - 回调函数
    */
-  off<K extends keyof EventPayloadMap>(
-    event: K,
-    callback: TypedEventHandler<K>
-  ): void;
-  
+  off<K extends keyof EventPayloadMap>(event: K, callback: TypedEventHandler<K>): void;
+
   /**
    * 取消订阅（通用版本）
    * @param event - 事件名称
    * @param callback - 回调函数
    */
   off(event: string, callback: GenericEventHandler): void;
-  
+
   /**
    * 取消订阅实现
    */
   off(event: string, callback: EventListener): void {
     if (!this.events[event]) return;
-    
+
     const initialLength = this.events[event].length;
     this.events[event] = this.events[event].filter(cb => cb !== callback);
     const removedCount = initialLength - this.events[event].length;
-    
+
     if (removedCount > 0) {
       this._stats.totalListeners -= removedCount;
-      this._stats.eventCounts[event] = Math.max(0, (this._stats.eventCounts[event] || 0) - removedCount);
+      this._stats.eventCounts[event] = Math.max(
+        0,
+        (this._stats.eventCounts[event] || 0) - removedCount
+      );
     }
   }
 
@@ -185,24 +182,21 @@ class EventBus {
    * @param event - 事件名称
    * @param data - 事件数据
    */
-  emit<K extends keyof EventPayloadMap>(
-    event: K,
-    data: EventPayloadMap[K]
-  ): void;
-  
+  emit<K extends keyof EventPayloadMap>(event: K, data: EventPayloadMap[K]): void;
+
   /**
    * 发布事件（通用版本）
    * @param event - 事件名称
    * @param data - 事件数据
    */
   emit(event: string, data?: unknown): void;
-  
+
   /**
    * 发布事件实现
    */
   emit(event: string, data?: unknown): void {
     if (!this.events[event]) return;
-    
+
     this.events[event].forEach(callback => {
       try {
         (callback as GenericEventHandler)(data);
@@ -215,20 +209,20 @@ class EventBus {
       }
     });
   }
-  
+
   /**
    * 移除事件的所有监听器
    * @param event - 事件名称
    */
   removeAllListeners(event: string): void {
     if (!this.events[event]) return;
-    
+
     const count = this.events[event].length;
     this._stats.totalListeners -= count;
     delete this.events[event];
     delete this._stats.eventCounts[event];
   }
-  
+
   /**
    * 获取监听器统计信息
    */
@@ -247,7 +241,7 @@ class EventBus {
           isError: false,
         };
       }
-      
+
       return {
         name: event,
         listenerCount: eventListeners.length,
@@ -255,14 +249,14 @@ class EventBus {
         isError: eventListeners.length >= this._config.maxListenersPerEvent,
       };
     });
-    
+
     return {
       totalListeners: this._stats.totalListeners,
       eventCounts: { ...this._stats.eventCounts },
       events,
     };
   }
-  
+
   /**
    * 检测潜在的内存泄漏
    */
@@ -270,12 +264,12 @@ class EventBus {
     if (!this._config.enableLeakDetection) {
       return [];
     }
-    
+
     const leaks: LeakDetection[] = [];
-    
+
     for (const [event, listeners] of Object.entries(this.events)) {
       const count = listeners.length;
-      
+
       if (count >= this._config.maxListenersPerEvent) {
         leaks.push({
           event,
@@ -292,7 +286,7 @@ class EventBus {
         });
       }
     }
-    
+
     return leaks;
   }
 
@@ -309,7 +303,7 @@ class EventBus {
   clearListenerErrors(): void {
     this._listenerErrors = [];
   }
-  
+
   /**
    * 获取调试信息
    */
@@ -320,7 +314,7 @@ class EventBus {
       listenerErrors: this.getListenerErrors(),
     };
   }
-  
+
   /**
    * 配置EventBus
    * @param config - 配置选项
@@ -338,4 +332,11 @@ export default eventBus;
 
 // 命名导出
 export { EventBus };
-export type { EventBusConfig, EventStats, EventStatsDetail, LeakDetection, EventListenerError, EventBusDebugInfo };
+export type {
+  EventBusConfig,
+  EventStats,
+  EventStatsDetail,
+  LeakDetection,
+  EventListenerError,
+  EventBusDebugInfo,
+};

@@ -36,14 +36,14 @@ export interface DebugUnavailableResult {
 export interface DebugInterface {
   // 容器相关
   container?: unknown;
-  
+
   // 状态相关
   state?: unknown;
   stores?: unknown;
-  
+
   // 路由相关
   router?: unknown;
-  
+
   // 服务相关
   services?: {
     [key: string]: unknown;
@@ -52,7 +52,7 @@ export interface DebugInterface {
     logger?: unknown;
     performance?: unknown;
   };
-  
+
   // 工具函数
   utils?: {
     showState?: () => unknown;
@@ -98,20 +98,20 @@ class DebugInterfaceManager {
         showState: () => {
           return appStore.getState();
         },
-        
+
         showRoutes: () => {
           return Object.entries(MENU_CONFIG.routes).map(([id, config]) => ({
             id,
             label: config.label,
             moduleId: config.moduleId,
-            panelId: config.panelId
+            panelId: config.panelId,
           }));
         },
-        
+
         showServices: () => {
           return { services: container.getRegisteredServices() };
         },
-        
+
         clearStorage: () => {
           if (confirm('确定要清除所有本地存储吗？')) {
             StorageService.clear();
@@ -119,14 +119,14 @@ class DebugInterfaceManager {
           }
           return { cleared: false, reason: 'cancelled' };
         },
-        
+
         exportLogs: () => {
           return {
             available: false,
-            reason: 'Logger.download() is deprecated, logs export not available'
+            reason: 'Logger.download() is deprecated, logs export not available',
           };
-        }
-      }
+        },
+      },
     };
   }
 

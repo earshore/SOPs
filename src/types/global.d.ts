@@ -27,19 +27,19 @@ declare global {
       store: <T>(name: string, value: T) => T;
       [key: string]: unknown;
     };
-    
+
     // Marked
     marked: {
       parse: (markdown: string, options?: Record<string, unknown>) => string;
       [key: string]: unknown;
     };
-    
+
     // 全局状态
     state: Record<string, unknown>;
-    
+
     // 路由
     router: import('../common/router/navigo/NavigoAdapter').NavigoAdapter;
-    
+
     // 工具函数
     showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void;
     navigateTo: (path: string, options?: { replace?: boolean }) => Promise<boolean>;
@@ -50,7 +50,7 @@ declare global {
     initMegaMenuAccessibility: () => void;
     closeMegaMenus: (options?: { except?: HTMLElement; blurActive?: boolean }) => void;
     initRouter: () => void;
-    
+
     // 搜索函数
     searchSOPs?: (query: string) => void;
     clearSOPSearch?: () => void;
@@ -58,7 +58,7 @@ declare global {
     clearHubSearch?: () => void;
     searchSidebar?: (query: string) => void;
     clearSidebarSearch?: () => void;
-    
+
     // 设置相关
     openSettings?: () => void;
     closeSettings?: () => void;
@@ -69,14 +69,14 @@ declare global {
     testConnection?: () => void;
     saveProxyConfig?: () => void;
     updateModelStatus?: () => void;
-    
+
     // 调试工具
     __DIContainer?: import('../common/di/Container').DIContainer;
     __acknowledgeAllAlerts?: () => void;
-    
+
     // 错误节流
     _errorThrottle?: number;
-    
+
     // Promotions 滚动函数
     amzp_scrollTo?: (target: string) => void;
     amzp_scrollTo_Name?: (targetName: string) => void;

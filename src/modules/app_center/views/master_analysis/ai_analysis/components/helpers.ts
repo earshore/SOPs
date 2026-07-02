@@ -37,7 +37,7 @@ export function getTargetColorClass(color: string): string {
     orange: 'orange',
     purple: 'purple',
     teal: 'teal',
-    rose: 'rose'
+    rose: 'rose',
   };
   return colorMap[color] || 'blue';
 }
@@ -67,17 +67,13 @@ export function getMarketLanguage(): string {
 /**
  * 生成提示词文本
  */
-export function getPromptText(
-  targetId: string,
-  currentProducts: Product[]
-): string {
+export function getPromptText(targetId: string, currentProducts: Product[]): string {
   if (currentProducts.length === 0) return '无产品数据';
 
   try {
     // 如果有多个产品，合并后生成提示词
-    const mergedProduct = currentProducts.length > 1
-      ? mergeProducts(currentProducts)
-      : currentProducts[0];
+    const mergedProduct =
+      currentProducts.length > 1 ? mergeProducts(currentProducts) : currentProducts[0];
 
     // 确保 mergedProduct 存在
     if (!mergedProduct) {
@@ -96,10 +92,7 @@ export function getPromptText(
 /**
  * 获取提示词的 token 数量
  */
-export function getPromptTokenCount(
-  targetId: string,
-  currentProducts: Product[]
-): number {
+export function getPromptTokenCount(targetId: string, currentProducts: Product[]): number {
   const promptText = getPromptText(targetId, currentProducts);
   return estimateTokenCount(promptText);
 }
@@ -107,10 +100,7 @@ export function getPromptTokenCount(
 /**
  * 获取格式化的 token 数量显示
  */
-export function getFormattedTokenCount(
-  targetId: string,
-  currentProducts: Product[]
-): string {
+export function getFormattedTokenCount(targetId: string, currentProducts: Product[]): string {
   const count = getPromptTokenCount(targetId, currentProducts);
   return formatTokenCount(count);
 }

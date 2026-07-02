@@ -1,6 +1,6 @@
 ﻿/**
  * megaMenu.ts - Mega Menu 渲染器 v3.1
- * 
+ *
  * v3.1 变更: hover 时显示契合配色的细边框
  * - 默认: border-white/60 (几乎不可见的玻璃边)
  * - hover: border-{color}-300/50 (柔和的配色边框浮现)
@@ -18,20 +18,19 @@ import { routeIdToPath } from '../router/routePaths';
 
 function getDefaultRouteForModule(moduleId: string): string | null {
   if (!MENU_CONFIG.routes) return null;
-  const entry = Object.entries(MENU_CONFIG.routes)
-    .find(([_, config]) => config.moduleId === moduleId);
+  const entry = Object.entries(MENU_CONFIG.routes).find(
+    ([_, config]) => config.moduleId === moduleId
+  );
   return entry ? entry[0] : null;
 }
 
 function getFirstRouteForCategory(categoryId: string): string | null {
-  const entry = Object.entries(MENU_CONFIG.routes)
-    .find(([_, r]) => r.category === categoryId);
+  const entry = Object.entries(MENU_CONFIG.routes).find(([_, r]) => r.category === categoryId);
   return entry ? entry[0] : null;
 }
 
 function countCategoryRoutes(categoryId: string): number {
-  return Object.values(MENU_CONFIG.routes)
-    .filter(r => r.category === categoryId).length;
+  return Object.values(MENU_CONFIG.routes).filter(r => r.category === categoryId).length;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -374,14 +373,16 @@ function buildFooterTags(
     </span>
   `;
 
-  const overviewTag = isOverview ? `
+  const overviewTag = isOverview
+    ? `
     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md
       bg-slate-500/6 backdrop-blur-sm
       text-[10px] font-medium text-slate-500/80">
       <i class="fas fa-compass text-[8px]"></i>
       总览
     </span>
-  ` : '';
+  `
+    : '';
 
   return `
     <div class="flex items-center gap-1.5 pt-2 mt-auto
@@ -436,22 +437,19 @@ function renderCategoryMenu(config: MenuRendererConfig): void {
 
   try {
     const overviewRoute = MENU_CONFIG.routes[config.overviewRouteId];
-    const categories = Object.values(config.categories || {})
-      .sort((a: unknown, b: unknown) => {
-        const catA = a as { order: number };
-        const catB = b as { order: number };
-        return catA.order - catB.order;
-      });
+    const categories = Object.values(config.categories || {}).sort((a: unknown, b: unknown) => {
+      const catA = a as { order: number };
+      const catB = b as { order: number };
+      return catA.order - catB.order;
+    });
 
     let html = '';
 
     if (overviewRoute) {
-      const totalRoutes = categories.reduce(
-        (sum: number, cat: unknown) => {
-          const category = cat as { id: string };
-          return sum + countCategoryRoutes(category.id);
-        }, 0
-      );
+      const totalRoutes = categories.reduce((sum: number, cat: unknown) => {
+        const category = cat as { id: string };
+        return sum + countCategoryRoutes(category.id);
+      }, 0);
       html += renderCard({
         target: config.overviewRouteId,
         label: config.overviewLabel,
@@ -505,30 +503,33 @@ export function renderMegaMenu(): void {
 
   try {
     const appCategoryOrder = new Map(
-      Object.values(MENU_CONFIG.appCategories || {})
-        .map(category => [category.id, category.order])
+      Object.values(MENU_CONFIG.appCategories || {}).map(category => [category.id, category.order])
     );
     const modules = Object.values(MENU_CONFIG.modules || {})
       .filter(mod => mod.contextId === 'apps')
       .sort((a, b) => {
-        const orderA = a.id === 'app_center' ? 0 : appCategoryOrder.get(a.id) ?? Number.MAX_SAFE_INTEGER;
-        const orderB = b.id === 'app_center' ? 0 : appCategoryOrder.get(b.id) ?? Number.MAX_SAFE_INTEGER;
+        const orderA =
+          a.id === 'app_center' ? 0 : (appCategoryOrder.get(a.id) ?? Number.MAX_SAFE_INTEGER);
+        const orderB =
+          b.id === 'app_center' ? 0 : (appCategoryOrder.get(b.id) ?? Number.MAX_SAFE_INTEGER);
         return orderA - orderB;
       });
 
-    const html = modules.map(mod => {
-      const targetRoute = getDefaultRouteForModule(mod.id);
-      if (!targetRoute) return '';
-      const module = mod as unknown as { themeColor?: string };
-      return renderCard({
-        target: targetRoute,
-        label: mod.title || 'Unknown Module',
-        icon: mod.icon || 'fas fa-cube',
-        color: (module.themeColor || 'blue') as ColorSchemeName,
-        version: mod.version || 'v1.0',
-        description: mod.description || '暂无描述',
-      });
-    }).join('');
+    const html = modules
+      .map(mod => {
+        const targetRoute = getDefaultRouteForModule(mod.id);
+        if (!targetRoute) return '';
+        const module = mod as unknown as { themeColor?: string };
+        return renderCard({
+          target: targetRoute,
+          label: mod.title || 'Unknown Module',
+          icon: mod.icon || 'fas fa-cube',
+          color: (module.themeColor || 'blue') as ColorSchemeName,
+          version: mod.version || 'v1.0',
+          description: mod.description || '暂无描述',
+        });
+      })
+      .join('');
 
     // ✅ 安全: renderCard返回的HTML使用内部数据和配置，modules来自MENU_CONFIG
     setSafeHtml(container, html);
@@ -641,11 +642,15 @@ export function initMegaMenuAccessibility(): void {
       setExpanded(false);
       trigger.focus();
     });
-    group.querySelector<HTMLElement>('.mega-menu')?.addEventListener('click', event => {
-      if (group.classList.contains('is-open')) return;
-      event.preventDefault();
-      event.stopPropagation();
-    }, true);
+    group.querySelector<HTMLElement>('.mega-menu')?.addEventListener(
+      'click',
+      event => {
+        if (group.classList.contains('is-open')) return;
+        event.preventDefault();
+        event.stopPropagation();
+      },
+      true
+    );
     group.addEventListener('focusout', () => {
       requestAnimationFrame(() => {
         if (!group.contains(document.activeElement)) {

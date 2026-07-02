@@ -5,11 +5,7 @@
 // ================================================================
 
 import { createErrorTracker } from '@/services/errorTracker';
-import {
-  AppError,
-  NetworkError,
-  SystemError
-} from '@/common/errors/AppError';
+import { AppError, NetworkError, SystemError } from '@/common/errors/AppError';
 import { setSafeHtml } from '@/common/utils/security';
 
 /**
@@ -69,7 +65,7 @@ export enum ModuleErrorType {
   /** 超时错误 */
   TIMEOUT = 'timeout',
   /** 未知错误 */
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }
 
 interface ErrorClassificationDetails {
@@ -90,12 +86,12 @@ const HOME_ERROR_ACTION: ErrorUIAction = { label: '返回首页', action: 'home'
 
 const RETRY_ERROR_ACTIONS: ErrorUIAction[] = [
   { label: '重试', action: 'retry', primary: true },
-  HOME_ERROR_ACTION
+  HOME_ERROR_ACTION,
 ];
 
 const RELOAD_ERROR_ACTIONS: ErrorUIAction[] = [
   { label: '刷新页面', action: 'reload', primary: true },
-  HOME_ERROR_ACTION
+  HOME_ERROR_ACTION,
 ];
 
 const NETWORK_ERROR_KEYWORDS = [
@@ -109,7 +105,7 @@ const NETWORK_ERROR_KEYWORDS = [
   'ajax',
   'socket',
   'offline',
-  'unreachable'
+  'unreachable',
 ] as const;
 
 const RENDER_ERROR_KEYWORDS = [
@@ -125,14 +121,14 @@ const RENDER_ERROR_KEYWORDS = [
   'insertbefore',
   'removechild',
   'innerhtml',
-  'textcontent'
+  'textcontent',
 ] as const;
 
 const ELEMENT_NOT_FOUND_STACK_KEYWORDS = [
   'queryselector',
   'getelementby',
   'appendchild',
-  'innerhtml'
+  'innerhtml',
 ] as const;
 
 /**
@@ -185,7 +181,7 @@ export class SafeModuleLoader {
       fallbackUI,
       onError,
       showLoading = true,
-      loadingText = '加载中...'
+      loadingText = '加载中...',
     } = options;
 
     // 显示加载指示器
@@ -204,12 +200,12 @@ export class SafeModuleLoader {
       if (this.loadedModules.has(modulePath)) {
         const cachedModule = this.loadedModules.get(modulePath);
         this.renderModule(container, cachedModule);
-        
+
         return {
           success: true,
           loadTime: performance.now() - startTime,
           retryAttempts: 0,
-          data: cachedModule
+          data: cachedModule,
         };
       }
 
@@ -222,7 +218,7 @@ export class SafeModuleLoader {
       this.loadingModules.set(modulePath, Promise.resolve(loadResult.data));
 
       const moduleData = loadResult.data;
-      
+
       // 缓存模块
       this.loadedModules.set(modulePath, moduleData);
       this.loadingModules.delete(modulePath);
@@ -236,16 +232,15 @@ export class SafeModuleLoader {
         success: true,
         loadTime,
         retryAttempts: loadResult.retryAttempts,
-        data: moduleData
+        data: moduleData,
       };
-
     } catch (error) {
       this.loadingModules.delete(modulePath);
       const loadTime = performance.now() - startTime;
-      
+
       // 分类错误
       const classifiedError = this.classifyError(error as Error, modulePath);
-      
+
       // 上报错误
       this.errorTrackerInstance.captureAppError(classifiedError);
 
@@ -254,12 +249,14 @@ export class SafeModuleLoader {
         try {
           onError(classifiedError);
         } catch (callbackError) {
-          this.errorTrackerInstance.captureAppError(new SystemError(
-            '错误回调执行失败',
-            'ERROR_CALLBACK_FAILED',
-            { modulePath },
-            callbackError as Error
-          ));
+          this.errorTrackerInstance.captureAppError(
+            new SystemError(
+              '错误回调执行失败',
+              'ERROR_CALLBACK_FAILED',
+              { modulePath },
+              callbackError as Error
+            )
+          );
         }
       }
 
@@ -270,7 +267,7 @@ export class SafeModuleLoader {
         success: false,
         error: classifiedError,
         loadTime,
-        retryAttempts: retryCount
+        retryAttempts: retryCount,
       };
     }
   }
@@ -281,30 +278,23 @@ export class SafeModuleLoader {
    * @param options - 加载选项
    * @returns 模板内容
    */
-  async loadTemplate(
-    templatePath: string,
-    options: ModuleLoadOptions = {}
-  ): Promise<string> {
-    const {
-      retryCount = 3,
-      timeout = 5000
-    } = options;
+  async loadTemplate(templatePath: string, options: ModuleLoadOptions = {}): Promise<string> {
+    const { retryCount = 3, timeout = 5000 } = options;
 
     try {
       // 开发环境下禁用缓存，确保模板修改后能立即生效
       const isDevelopment = import.meta.env.DEV;
-      
+
       // 检查缓存（生产环境）
       if (!isDevelopment && this.loadedModules.has(templatePath)) {
         const cached = this.loadedModules.get(templatePath);
         if (typeof cached === 'string') {
           return cached;
         }
-        throw new SystemError(
-          `缓存的模板类型错误: ${templatePath}`,
-          'INVALID_CACHE_TYPE',
-          { templatePath, cachedType: typeof cached }
-        );
+        throw new SystemError(`缓存的模板类型错误: ${templatePath}`, 'INVALID_CACHE_TYPE', {
+          templatePath,
+          cachedType: typeof cached,
+        });
       }
 
       // 加载模板（带重试）
@@ -321,12 +311,11 @@ export class SafeModuleLoader {
       }
 
       return template;
-
     } catch (error) {
       const classifiedError = this.classifyError(error as Error, templatePath);
-      
+
       this.errorTrackerInstance.captureAppError(classifiedError);
-      
+
       throw classifiedError;
     }
   }
@@ -337,13 +326,10 @@ export class SafeModuleLoader {
    * @param timeout - 超时时间
    * @returns 模块数据
    */
-  private async loadModuleWithTimeout(
-    modulePath: string,
-    timeout: number
-  ): Promise<unknown> {
+  private async loadModuleWithTimeout(modulePath: string, timeout: number): Promise<unknown> {
     return Promise.race([
       this.loadModuleInternal(modulePath),
-      this.createTimeoutPromise(timeout, modulePath)
+      this.createTimeoutPromise(timeout, modulePath),
     ]);
   }
 
@@ -353,13 +339,10 @@ export class SafeModuleLoader {
    * @param timeout - 超时时间
    * @returns 模板内容
    */
-  private async loadTemplateWithTimeout(
-    templatePath: string,
-    timeout: number
-  ): Promise<string> {
+  private async loadTemplateWithTimeout(templatePath: string, timeout: number): Promise<string> {
     return Promise.race([
       this.loadTemplateInternal(templatePath),
-      this.createTimeoutPromise<string>(timeout, templatePath)
+      this.createTimeoutPromise<string>(timeout, templatePath),
     ]);
   }
 
@@ -393,22 +376,22 @@ export class SafeModuleLoader {
       // 🎯 修复: 使用 viewLoader 的 loadTemplate 函数，它使用 Vite glob 导入
       // 避免在生产环境中使用 fetch 导致返回整个 index.html
       const { loadTemplate: viewLoaderLoadTemplate } = await import('@/common/utils/viewLoader');
-      
+
       // 标准化路径：确保以 / 开头
       let normalizedPath = templatePath;
       if (!normalizedPath.startsWith('/')) {
         normalizedPath = '/' + normalizedPath;
       }
-      
+
       // 使用 viewLoader 的 loadTemplate，禁用淡入动画（SafeRenderer 会处理）
       const html = await viewLoaderLoadTemplate(normalizedPath, { disableFadeIn: true });
-      
+
       return html;
     } catch (error) {
       if (error instanceof AppError) {
         throw error;
       }
-      
+
       throw new NetworkError(
         `无法加载模板: ${templatePath}`,
         'TEMPLATE_LOAD_FAILED',
@@ -427,11 +410,9 @@ export class SafeModuleLoader {
   private createTimeoutPromise<T>(timeout: number, resourcePath: string): Promise<T> {
     return new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new SystemError(
-          `加载超时: ${resourcePath}`,
-          'LOAD_TIMEOUT',
-          { resourcePath, timeout }
-        ));
+        reject(
+          new SystemError(`加载超时: ${resourcePath}`, 'LOAD_TIMEOUT', { resourcePath, timeout })
+        );
       }, timeout);
     });
   }
@@ -454,42 +435,38 @@ export class SafeModuleLoader {
    * - 第3次重试：400ms + 抖动
    * - 抖动范围：±20% 随机值，防止惊群效应
    */
-  private async retryLoad<T>(
-    fn: () => Promise<T>,
-    retries: number
-  ): Promise<RetryLoadResult<T>> {
+  private async retryLoad<T>(fn: () => Promise<T>, retries: number): Promise<RetryLoadResult<T>> {
     let lastError: Error | null = null;
     let actualRetries = 0;
-    
+
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         if (attempt > 0) {
           actualRetries++;
-          
+
           // 指数退避：2^(attempt-1) * 100ms
           const baseDelay = Math.pow(2, attempt - 1) * 100;
-          
+
           // 添加 ±20% 的随机抖动，防止惊群效应
           const jitter = baseDelay * 0.2 * (Math.random() * 2 - 1);
           const delay = Math.round(baseDelay + jitter);
-          
+
           await this.sleep(delay);
         }
 
         // 执行加载函数
         const result = await fn();
-        
+
         return {
           data: result,
-          retryAttempts: actualRetries
+          retryAttempts: actualRetries,
         };
-        
       } catch (error) {
         lastError = error as Error;
-        
+
         // 判断是否应该重试
         const shouldRetry = this.shouldRetryError(error as Error, attempt, retries);
-        
+
         if (!shouldRetry) {
           throw error;
         }
@@ -573,7 +550,7 @@ export class SafeModuleLoader {
       {
         resourcePath,
         originalMessage: error.message,
-        errorType: details.errorType
+        errorType: details.errorType,
       },
       error
     );
@@ -633,12 +610,10 @@ export class SafeModuleLoader {
   ): boolean {
     return (
       error instanceof TypeError &&
-      (
-        errorMessage.includes('null') ||
+      (errorMessage.includes('null') ||
         errorMessage.includes('undefined') ||
         errorMessage.includes('cannot read property') ||
-        errorMessage.includes('cannot read properties')
-      ) &&
+        errorMessage.includes('cannot read properties')) &&
       this.hasAnyKeyword(errorStack, ELEMENT_NOT_FOUND_STACK_KEYWORDS)
     );
   }
@@ -650,36 +625,49 @@ export class SafeModuleLoader {
   ): AppError | null {
     if (
       error instanceof TypeError &&
-      (
-        errorMessage.includes('failed to fetch') ||
-        errorMessage.includes('network request failed')
-      )
+      (errorMessage.includes('failed to fetch') || errorMessage.includes('network request failed'))
     ) {
-      return this.createNetworkClassificationError({
-        message: `网络请求失败: ${resourcePath}`,
-        code: 'NETWORK_REQUEST_FAILED'
-      }, resourcePath, error);
+      return this.createNetworkClassificationError(
+        {
+          message: `网络请求失败: ${resourcePath}`,
+          code: 'NETWORK_REQUEST_FAILED',
+        },
+        resourcePath,
+        error
+      );
     }
 
     if (this.isTimeoutError(error, errorMessage)) {
-      return this.createNetworkClassificationError({
-        message: `加载超时: ${resourcePath}`,
-        code: 'LOAD_TIMEOUT'
-      }, resourcePath, error);
+      return this.createNetworkClassificationError(
+        {
+          message: `加载超时: ${resourcePath}`,
+          code: 'LOAD_TIMEOUT',
+        },
+        resourcePath,
+        error
+      );
     }
 
     if (this.hasAnyKeyword(errorMessage, NETWORK_ERROR_KEYWORDS)) {
-      return this.createNetworkClassificationError({
-        message: `网络错误: ${error.message}`,
-        code: 'NETWORK_ERROR'
-      }, resourcePath, error);
+      return this.createNetworkClassificationError(
+        {
+          message: `网络错误: ${error.message}`,
+          code: 'NETWORK_ERROR',
+        },
+        resourcePath,
+        error
+      );
     }
 
     if (this.isHttpStatusError(errorMessage)) {
-      return this.createNetworkClassificationError({
-        message: `HTTP 错误: ${error.message}`,
-        code: 'HTTP_ERROR'
-      }, resourcePath, error);
+      return this.createNetworkClassificationError(
+        {
+          message: `HTTP 错误: ${error.message}`,
+          code: 'HTTP_ERROR',
+        },
+        resourcePath,
+        error
+      );
     }
 
     return null;
@@ -692,35 +680,51 @@ export class SafeModuleLoader {
     errorName: string
   ): AppError | null {
     if (error instanceof SyntaxError || errorName === 'syntaxerror') {
-      return this.createSystemClassificationError({
-        message: `JavaScript 语法错误: ${error.message}`,
-        code: 'SYNTAX_ERROR',
-        errorType: ModuleErrorType.PARSE
-      }, resourcePath, error);
+      return this.createSystemClassificationError(
+        {
+          message: `JavaScript 语法错误: ${error.message}`,
+          code: 'SYNTAX_ERROR',
+          errorType: ModuleErrorType.PARSE,
+        },
+        resourcePath,
+        error
+      );
     }
 
     if (this.isModuleResolutionError(errorMessage)) {
-      return this.createSystemClassificationError({
-        message: `模块解析失败: ${error.message}`,
-        code: 'MODULE_RESOLUTION_ERROR',
-        errorType: ModuleErrorType.PARSE
-      }, resourcePath, error);
+      return this.createSystemClassificationError(
+        {
+          message: `模块解析失败: ${error.message}`,
+          code: 'MODULE_RESOLUTION_ERROR',
+          errorType: ModuleErrorType.PARSE,
+        },
+        resourcePath,
+        error
+      );
     }
 
     if (this.isJsonParseError(errorMessage)) {
-      return this.createSystemClassificationError({
-        message: `JSON 解析错误: ${error.message}`,
-        code: 'JSON_PARSE_ERROR',
-        errorType: ModuleErrorType.PARSE
-      }, resourcePath, error);
+      return this.createSystemClassificationError(
+        {
+          message: `JSON 解析错误: ${error.message}`,
+          code: 'JSON_PARSE_ERROR',
+          errorType: ModuleErrorType.PARSE,
+        },
+        resourcePath,
+        error
+      );
     }
 
     if (this.isGenericParseError(errorMessage)) {
-      return this.createSystemClassificationError({
-        message: `解析错误: ${error.message}`,
-        code: 'PARSE_ERROR',
-        errorType: ModuleErrorType.PARSE
-      }, resourcePath, error);
+      return this.createSystemClassificationError(
+        {
+          message: `解析错误: ${error.message}`,
+          code: 'PARSE_ERROR',
+          errorType: ModuleErrorType.PARSE,
+        },
+        resourcePath,
+        error
+      );
     }
 
     return null;
@@ -734,27 +738,39 @@ export class SafeModuleLoader {
     errorStack: string
   ): AppError | null {
     if (error instanceof DOMException || errorName === 'domexception') {
-      return this.createSystemClassificationError({
-        message: `DOM 操作错误: ${error.message}`,
-        code: 'DOM_ERROR',
-        errorType: ModuleErrorType.RENDER
-      }, resourcePath, error);
+      return this.createSystemClassificationError(
+        {
+          message: `DOM 操作错误: ${error.message}`,
+          code: 'DOM_ERROR',
+          errorType: ModuleErrorType.RENDER,
+        },
+        resourcePath,
+        error
+      );
     }
 
     if (this.hasAnyKeyword(errorMessage, RENDER_ERROR_KEYWORDS)) {
-      return this.createSystemClassificationError({
-        message: `渲染错误: ${error.message}`,
-        code: 'RENDER_ERROR',
-        errorType: ModuleErrorType.RENDER
-      }, resourcePath, error);
+      return this.createSystemClassificationError(
+        {
+          message: `渲染错误: ${error.message}`,
+          code: 'RENDER_ERROR',
+          errorType: ModuleErrorType.RENDER,
+        },
+        resourcePath,
+        error
+      );
     }
 
     if (this.isMissingElementReference(error, errorMessage, errorStack)) {
-      return this.createSystemClassificationError({
-        message: `渲染错误（元素不存在）: ${error.message}`,
-        code: 'ELEMENT_NOT_FOUND',
-        errorType: ModuleErrorType.RENDER
-      }, resourcePath, error);
+      return this.createSystemClassificationError(
+        {
+          message: `渲染错误（元素不存在）: ${error.message}`,
+          code: 'ELEMENT_NOT_FOUND',
+          errorType: ModuleErrorType.RENDER,
+        },
+        resourcePath,
+        error
+      );
     }
 
     return null;
@@ -768,7 +784,7 @@ export class SafeModuleLoader {
         resourcePath,
         originalMessage: error.message,
         errorName: error.name,
-        errorType: ModuleErrorType.UNKNOWN
+        errorType: ModuleErrorType.UNKNOWN,
       },
       error
     );
@@ -842,14 +858,8 @@ export class SafeModuleLoader {
         setSafeHtml(container, moduleData);
         return;
       }
-
     } catch (error) {
-      throw new SystemError(
-        '渲染模块失败',
-        'RENDER_ERROR',
-        {},
-        error as Error
-      );
+      throw new SystemError('渲染模块失败', 'RENDER_ERROR', {}, error as Error);
     }
   }
 
@@ -860,14 +870,17 @@ export class SafeModuleLoader {
    */
   private showLoadingIndicator(container: HTMLElement, text: string): void {
     // ✅ 安全: 静态HTML模板，text参数已通过escapeHtml转义
-    setSafeHtml(container, `
+    setSafeHtml(
+      container,
+      `
       <div class="flex items-center justify-center p-8">
         <div class="text-center">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
           <p class="text-gray-600">${this.escapeHtml(text)}</p>
         </div>
       </div>
-    `);
+    `
+    );
   }
 
   /**
@@ -919,15 +932,15 @@ export class SafeModuleLoader {
     if (error.code.includes('TIMEOUT') || error.message.includes('timeout')) {
       return this.getTimeoutErrorUI(error, modulePath);
     }
-    
+
     if (error.code.includes('PARSE') || error.message.includes('parse')) {
       return this.getParseErrorUI(error, modulePath);
     }
-    
+
     if (error.code.includes('RENDER') || error.message.includes('render')) {
       return this.getRenderErrorUI(error, modulePath);
     }
-    
+
     // 根据 ErrorCategory 判断
     switch (error.category) {
       case 'network':
@@ -949,7 +962,7 @@ export class SafeModuleLoader {
       suggestion: '请确保您的网络连接正常，然后点击重试按钮',
       actions: RETRY_ERROR_ACTIONS,
       error,
-      modulePath
+      modulePath,
     });
   }
 
@@ -965,7 +978,7 @@ export class SafeModuleLoader {
       suggestion: '这可能是系统更新导致的问题，请刷新页面或联系技术支持',
       actions: RELOAD_ERROR_ACTIONS,
       error,
-      modulePath
+      modulePath,
     });
   }
 
@@ -981,7 +994,7 @@ export class SafeModuleLoader {
       suggestion: '请尝试刷新页面，如果问题持续存在，请联系技术支持',
       actions: RELOAD_ERROR_ACTIONS,
       error,
-      modulePath
+      modulePath,
     });
   }
 
@@ -997,7 +1010,7 @@ export class SafeModuleLoader {
       suggestion: '这可能是网络较慢或服务器响应缓慢导致的，请重试',
       actions: RETRY_ERROR_ACTIONS,
       error,
-      modulePath
+      modulePath,
     });
   }
 
@@ -1016,7 +1029,7 @@ export class SafeModuleLoader {
       suggestion: '请尝试刷新页面，如果问题持续存在，请联系技术支持',
       actions: RELOAD_ERROR_ACTIONS,
       error,
-      modulePath
+      modulePath,
     });
   }
 
@@ -1069,17 +1082,15 @@ export class SafeModuleLoader {
   /**
    * 获取操作按钮 HTML
    */
-  private getActionsHTML(
-    actions: ErrorUIAction[],
-    modulePath: string
-  ): string {
-    return actions.map(action => {
-      const baseClass = 'px-4 py-2 rounded transition-colors';
-      const colorClass = action.primary
-        ? 'bg-blue-500 text-white hover:bg-blue-600'
-        : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
-      
-      return `
+  private getActionsHTML(actions: ErrorUIAction[], modulePath: string): string {
+    return actions
+      .map(action => {
+        const baseClass = 'px-4 py-2 rounded transition-colors';
+        const colorClass = action.primary
+          ? 'bg-blue-500 text-white hover:bg-blue-600'
+          : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+
+        return `
         <button 
           data-error-action="${this.escapeHtml(action.action)}"
           data-module-path="${this.escapeHtml(modulePath)}"
@@ -1088,7 +1099,8 @@ export class SafeModuleLoader {
           ${this.escapeHtml(action.label)}
         </button>
       `;
-    }).join('');
+      })
+      .join('');
   }
 
   /**
@@ -1133,7 +1145,7 @@ export class SafeModuleLoader {
     // 为所有操作按钮添加事件监听
     const actionButtons = container.querySelectorAll('[data-error-action]');
     actionButtons.forEach(button => {
-      button.addEventListener('click', (e) => {
+      button.addEventListener('click', e => {
         const target = e.currentTarget as HTMLElement;
         const action = target.getAttribute('data-error-action');
         this.handleErrorUIAction(action, modulePath, container);
@@ -1237,7 +1249,7 @@ export class SafeModuleLoader {
       '>': '&gt;',
       '"': '&quot;',
       "'": '&#x27;',
-      '/': '&#x2F;'
+      '/': '&#x2F;',
     };
     return text.replace(/[&<>"'/]/g, char => map[char] || char);
   }
@@ -1265,7 +1277,7 @@ export class SafeModuleLoader {
     return {
       cachedModules: this.loadedModules.size,
       loadingModules: this.loadingModules.size,
-      moduleList: Array.from(this.loadedModules.keys())
+      moduleList: Array.from(this.loadedModules.keys()),
     };
   }
 
@@ -1281,7 +1293,7 @@ export class SafeModuleLoader {
     results.forEach((result, index) => {
       const modulePath = modulePaths[index];
       if (!modulePath) return;
-      
+
       if (result.status === 'fulfilled') {
         this.loadedModules.set(modulePath, result.value);
       }

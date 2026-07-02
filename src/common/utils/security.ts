@@ -6,6 +6,8 @@
 
 import { normalizeWelcomeBanners } from './welcomeBannerA11y';
 
+const nativeLoggerConsole = globalThis.console;
+
 // ==================== 类型定义 ====================
 
 /**
@@ -23,10 +25,10 @@ type MarkdownParser = (markdown: string) => string;
 /**
  * HTML 实体转义
  * 将特殊字符转换为 HTML 实体，防止 XSS 注入
- * 
+ *
  * @param str - 需要转义的字符串
  * @returns 转义后的安全字符串
- * 
+ *
  * @example
  * escapeHtml('<script>alert("XSS")</script>')
  * // 返回: '&lt;script&gt;alert("XSS")&lt;/script&gt;'
@@ -42,7 +44,7 @@ export function escapeHtml(str: string): string {
     "'": '&#x27;',
     '/': '&#x2F;',
     '`': '&#x60;',
-    '=': '&#x3D;'
+    '=': '&#x3D;',
   };
 
   return str.replace(/[&<>"'`=/]/g, char => escapeMap[char] ?? char);
@@ -50,7 +52,7 @@ export function escapeHtml(str: string): string {
 
 /**
  * 批量转义对象中的字符串值
- * 
+ *
  * @param obj - 包含字符串值的对象
  * @returns 转义后的对象
  */
@@ -80,7 +82,7 @@ export function escapeObject<T>(obj: T): T {
 /**
  * 安全的 innerHTML 设置
  * 使用文本节点替代直接 innerHTML 赋值
- * 
+ *
  * @param element - 目标元素
  * @param text - 纯文本内容
  */
@@ -92,11 +94,11 @@ export function setTextContent(element: HTMLElement | null, text: string): void 
 /**
  * 安全的模板渲染
  * 转义所有变量后再插入 HTML
- * 
+ *
  * @param template - HTML 模板字符串
  * @param data - 变量数据
  * @returns 渲染后的安全 HTML
- * 
+ *
  * @example
  * safeTemplate('<div class="item">${title}</div>', { title: '<script>bad</script>' })
  * // 返回: '<div class="item">&lt;script&gt;bad&lt;/script&gt;</div>'
@@ -112,7 +114,7 @@ export function safeTemplate(template: string, data: Record<string, unknown>): s
 /**
  * 安全的 HTML 片段创建
  * 使用 DOMParser 解析 HTML，自动移除危险元素
- * 
+ *
  * @param html - HTML 字符串
  * @returns 安全的文档片段
  */
@@ -148,7 +150,7 @@ export function createSafeFragment(html: string): DocumentFragment {
 /**
  * 安全地设置元素 innerHTML
  * 先清理危险内容再设置
- * 
+ *
  * @param element - 目标元素
  * @param html - HTML 字符串
  */
@@ -165,14 +167,14 @@ export function setSafeHtml(element: HTMLElement | null, html: string): void {
 /**
  * Markdown 安全渲染
  * 配合 marked.js 使用，清理输出
- * 
+ *
  * @param markdown - Markdown 字符串
  * @param markdownParser - marked.parse 或类似函数
  * @returns 安全的 HTML 字符串
  */
 export function safeMarkdown(markdown: string, markdownParser?: MarkdownParser): string {
   if (!markdownParser) {
-    console.warn('[Security] markdownParser not provided, returning escaped text');
+    nativeLoggerConsole.warn('[Security] markdownParser not provided, returning escaped text');
     return escapeHtml(markdown);
   }
 
@@ -191,7 +193,7 @@ export function safeMarkdown(markdown: string, markdownParser?: MarkdownParser):
 /**
  * URL 安全检查
  * 验证 URL 是否安全（非 javascript: 等伪协议）
- * 
+ *
  * @param url - URL 字符串
  * @returns 是否安全
  */
@@ -206,7 +208,7 @@ export function isSafeUrl(url: string | null | undefined): boolean {
 
 /**
  * 安全的链接创建
- * 
+ *
  * @param url - 链接地址
  * @param text - 链接文本
  * @returns 安全的 <a> 标签 HTML
@@ -232,7 +234,7 @@ export const SecurityUtils = {
   setSafeHtml,
   safeMarkdown,
   isSafeUrl,
-  safeLink
+  safeLink,
 };
 
 // 向后兼容：暴露到 window

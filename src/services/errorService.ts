@@ -4,11 +4,7 @@
 // 🎯 P0-4: 重构为GlobalErrorHandler的包装器,保持向后兼容
 // ================================================================
 
-import {
-  globalErrorHandler,
-  toAppError,
-  type ErrorHandlerOptions
-} from '../common/errors';
+import { globalErrorHandler, toAppError, type ErrorHandlerOptions } from '../common/errors';
 
 /**
  * 错误类型枚举 (向后兼容)
@@ -23,7 +19,7 @@ export const ERROR_TYPES = {
   UNKNOWN: 'UNKNOWN',
 } as const;
 
-export type ErrorType = typeof ERROR_TYPES[keyof typeof ERROR_TYPES];
+export type ErrorType = (typeof ERROR_TYPES)[keyof typeof ERROR_TYPES];
 
 /**
  * 用户友好的错误消息映射 (向后兼容)
@@ -61,16 +57,20 @@ function isTimeoutError({ message, name }: ErrorSignal): boolean {
 }
 
 function isNetworkError({ message, name }: ErrorSignal): boolean {
-  return (name === 'TypeError' && message.includes('fetch')) ||
+  return (
+    (name === 'TypeError' && message.includes('fetch')) ||
     message.includes('network') ||
-    message.includes('网络');
+    message.includes('网络')
+  );
 }
 
 function isAuthError({ message }: ErrorSignal): boolean {
-  return message.includes('401') ||
+  return (
+    message.includes('401') ||
     message.includes('403') ||
     message.includes('unauthorized') ||
-    message.includes('认证');
+    message.includes('认证')
+  );
 }
 
 function isParseError({ message, name }: ErrorSignal): boolean {
@@ -151,7 +151,7 @@ class ErrorServiceClass {
       log: true,
       report: true,
       userMessage: customMessage || undefined,
-      context: { module, action }
+      context: { module, action },
     };
 
     globalErrorHandler.handle(appError, options);

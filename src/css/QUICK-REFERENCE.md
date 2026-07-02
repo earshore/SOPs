@@ -156,11 +156,9 @@ var(--duration-slow)    /* 300ms */
 .my-custom-card {
   /* 基于通用卡片扩展 */
   @apply card;
-  
+
   /* 使用CSS变量 */
-  background: linear-gradient(135deg, 
-    var(--color-blue-50), 
-    var(--color-purple-50));
+  background: linear-gradient(135deg, var(--color-blue-50), var(--color-purple-50));
   padding: var(--spacing-xl);
   border-radius: var(--radius-2xl);
 }

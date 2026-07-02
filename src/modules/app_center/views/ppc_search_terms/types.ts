@@ -46,6 +46,7 @@ export interface AnalyzedRow {
   priority: number;
   reviewStatus?: 'model_reviewed';
   store?: string;
+  currency?: string;
   serviceStatus?: string;
   targetingType?: string;
   dailyBudget?: number;

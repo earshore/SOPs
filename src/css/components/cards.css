@@ -23,7 +23,6 @@
  * 18. 无障碍 & 减少动画
  */
 
-
 /* ========================================
    1. 基础卡片
    ======================================== */
@@ -69,7 +68,6 @@
 .card-static:hover {
   border-color: var(--card-border);
 }
-
 
 /* ========================================
    2. 卡片内容区域
@@ -189,7 +187,6 @@
   border: none;
 }
 
-
 /* ========================================
    3. 卡片图标容器
    ======================================== */
@@ -205,7 +202,8 @@
   justify-content: center;
   font-size: 1.25rem;
   flex-shrink: 0;
-  transition: transform var(--micro-duration-smooth, 250ms) var(--micro-ease-button, cubic-bezier(0.34, 1.56, 0.64, 1));
+  transition: transform var(--micro-duration-smooth, 250ms)
+    var(--micro-ease-button, cubic-bezier(0.34, 1.56, 0.64, 1));
   will-change: transform;
 }
 
@@ -278,7 +276,6 @@
   color: #64748b;
 }
 
-
 /* ========================================
    4. 装饰变体
    ======================================== */
@@ -314,12 +311,30 @@
 }
 
 /* 装饰条颜色变体 */
-.card-accent--blue   { --accent-from: #3b82f6; --accent-to: #06b6d4; }
-.card-accent--green  { --accent-from: #22c55e; --accent-to: #10b981; }
-.card-accent--purple { --accent-from: #8b5cf6; --accent-to: #a855f7; }
-.card-accent--amber  { --accent-from: #f59e0b; --accent-to: #f97316; }
-.card-accent--red    { --accent-from: #ef4444; --accent-to: #f43f5e; }
-.card-accent--rose   { --accent-from: #f43f5e; --accent-to: #ec4899; }
+.card-accent--blue {
+  --accent-from: #3b82f6;
+  --accent-to: #06b6d4;
+}
+.card-accent--green {
+  --accent-from: #22c55e;
+  --accent-to: #10b981;
+}
+.card-accent--purple {
+  --accent-from: #8b5cf6;
+  --accent-to: #a855f7;
+}
+.card-accent--amber {
+  --accent-from: #f59e0b;
+  --accent-to: #f97316;
+}
+.card-accent--red {
+  --accent-from: #ef4444;
+  --accent-to: #f43f5e;
+}
+.card-accent--rose {
+  --accent-from: #f43f5e;
+  --accent-to: #ec4899;
+}
 
 /* --- 概览导航卡片：默认隐藏左侧色条，hover/focus 时显示 --- */
 .overview-accent-card,
@@ -327,7 +342,10 @@
 .app-overview-card {
   --card-left-rail-width: 2px;
   --overview-card-accent: var(--card-left-accent, var(--color-accent, #60a5fa));
-  --overview-card-accent-bg: var(--card-left-accent-bg, var(--color-bg-selected, rgba(239, 246, 255, 0.6)));
+  --overview-card-accent-bg: var(
+    --card-left-accent-bg,
+    var(--color-bg-selected, rgba(239, 246, 255, 0.6))
+  );
   --overview-card-bg: var(--surface-card, #ffffff);
   --overview-card-border: var(--border-subtle, var(--color-slate-200, #e2e8f0));
   --overview-card-radius: var(--rounded-xl, 16px);
@@ -343,10 +361,14 @@
     inset var(--overview-card-rail-width) 0 0 transparent,
     var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
   transition:
-    border-color var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    background-color var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    box-shadow var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    transform var(--overview-card-transition-duration) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+    border-color var(--overview-card-transition-duration)
+      var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color var(--overview-card-transition-duration)
+      var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow var(--overview-card-transition-duration)
+      var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform var(--overview-card-transition-duration)
+      var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .overview-accent-card::before,
@@ -550,7 +572,6 @@
   border-color: transparent;
 }
 
-
 /* ========================================
    5. 视觉变体
    ======================================== */
@@ -621,7 +642,6 @@
   --card-translate-hover: 0;
 }
 
-
 /* ========================================
    6. 间距变体
    ======================================== */
@@ -679,21 +699,21 @@
 }
 
 /* 选中状态 */
-.card-selectable[aria-selected="true"],
+.card-selectable[aria-selected='true'],
 .card-selectable.is-selected,
 .card-selectable--selected {
   --card-border: var(--color-primary, #3b82f6);
   --card-bg: var(--color-primary-light, rgba(59, 130, 246, 0.04));
 }
 
-.card-selectable[aria-selected="true"]::after,
+.card-selectable[aria-selected='true']::after,
 .card-selectable.is-selected::after,
 .card-selectable--selected::after {
   border-color: var(--color-primary, #3b82f6);
 }
 
 /* 选中指示器 (勾选角标) */
-.card-selectable[aria-selected="true"]::before,
+.card-selectable[aria-selected='true']::before,
 .card-selectable.is-selected::before,
 .card-selectable--selected::before {
   content: '✓';
@@ -711,7 +731,8 @@
   align-items: center;
   justify-content: center;
   z-index: 1;
-  animation: scaleIn var(--duration-fast, 200ms) var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) forwards;
+  animation: scaleIn var(--duration-fast, 200ms)
+    var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) forwards;
 }
 
 /* --- 可拖拽卡片 --- */
@@ -745,7 +766,6 @@
 .card-drag-handle:active {
   cursor: grabbing;
 }
-
 
 /* ========================================
    8. 状态变体
@@ -799,7 +819,7 @@
 
 /* --- 禁用 --- */
 .card-disabled,
-.card[aria-disabled="true"] {
+.card[aria-disabled='true'] {
   opacity: 0.55;
   pointer-events: none;
   cursor: not-allowed;
@@ -827,8 +847,9 @@
 /* --- 高亮 / 推荐 --- */
 .card-highlight {
   --card-border: var(--color-primary, #3b82f6);
-  box-shadow: 0 0 0 1px var(--color-primary, #3b82f6),
-              var(--card-shadow);
+  box-shadow:
+    0 0 0 1px var(--color-primary, #3b82f6),
+    var(--card-shadow);
 }
 
 /* 推荐标签 */
@@ -844,7 +865,6 @@
   border-radius: 0 0 6px 6px;
   letter-spacing: 0.02em;
 }
-
 
 /* ========================================
    9. 方向变体
@@ -882,7 +902,6 @@
   justify-content: center;
 }
 
-
 /* ========================================
    10. 媒体卡片
    ======================================== */
@@ -901,7 +920,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--micro-duration-gentle, 350ms) var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: transform var(--micro-duration-gentle, 350ms)
+    var(--micro-ease-card, cubic-bezier(0.22, 1, 0.36, 1));
   will-change: transform;
 }
 
@@ -913,11 +933,7 @@
 .card-media-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.6) 0%,
-    transparent 60%
-  );
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 60%);
   display: flex;
   align-items: flex-end;
   padding: var(--spacing-md, 16px);
@@ -934,8 +950,14 @@
   border: 2px solid var(--card-bg);
 }
 
-.card-avatar--sm { width: 32px; height: 32px; }
-.card-avatar--lg { width: 56px; height: 56px; }
+.card-avatar--sm {
+  width: 32px;
+  height: 32px;
+}
+.card-avatar--lg {
+  width: 56px;
+  height: 56px;
+}
 
 /* --- 头像组 --- */
 .card-avatar-group {
@@ -949,7 +971,6 @@
 .card-avatar-group .card-avatar:first-child {
   margin-left: 0;
 }
-
 
 /* ========================================
    11. 统计数据卡片
@@ -1012,7 +1033,6 @@
   opacity: 0.8;
 }
 
-
 /* ========================================
    12. 空状态卡片
    ======================================== */
@@ -1055,7 +1075,6 @@
 .card-empty-action {
   margin-top: var(--spacing-lg, 24px);
 }
-
 
 /* ========================================
    13. 卡片组 & 堆叠
@@ -1134,7 +1153,6 @@
   opacity: 0.4;
 }
 
-
 /* ========================================
    14. 卡片网格布局
    ======================================== */
@@ -1190,7 +1208,6 @@
     align-tracks: stretch;
   }
 }
-
 
 /* ========================================
    15. 卡片骨架屏
@@ -1299,96 +1316,94 @@
   animation: skeletonShimmer 1.8s ease-in-out infinite;
 }
 
-
 /* ========================================
    16. 暗色模式
    ======================================== */
 .dark .card,
-[data-theme="dark"] .card {
+[data-theme='dark'] .card {
   --card-bg: var(--color-bg-secondary, #1e293b);
   --card-border: var(--color-border-light, rgba(255, 255, 255, 0.06));
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --card-shadow-hover: 0 10px 40px -10px rgba(0, 0, 0, 0.5),
-                       0 4px 12px -2px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 10px 40px -10px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
 }
 
 .dark .card:hover,
-[data-theme="dark"] .card:hover {
+[data-theme='dark'] .card:hover {
   --card-border: rgba(129, 140, 248, 0.2);
 }
 
 .dark .card-title,
-[data-theme="dark"] .card-title {
+[data-theme='dark'] .card-title {
   color: var(--color-text-primary, #f9fafb);
 }
 
 .dark .card-subtitle,
-[data-theme="dark"] .card-subtitle {
+[data-theme='dark'] .card-subtitle {
   color: var(--color-text-tertiary, #9ca3af);
 }
 
 .dark .card-body,
 .dark .card-description,
-[data-theme="dark"] .card-body,
-[data-theme="dark"] .card-description {
+[data-theme='dark'] .card-body,
+[data-theme='dark'] .card-description {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 .dark .card-footer,
 .dark .card-header--bordered,
 .dark .card-divider,
-[data-theme="dark"] .card-footer,
-[data-theme="dark"] .card-header--bordered,
-[data-theme="dark"] .card-divider {
+[data-theme='dark'] .card-footer,
+[data-theme='dark'] .card-header--bordered,
+[data-theme='dark'] .card-divider {
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 /* 暗色 - 玻璃卡片 */
 .dark .card-glass,
-[data-theme="dark"] .card-glass {
+[data-theme='dark'] .card-glass {
   --card-bg: rgba(30, 41, 59, 0.7);
   --card-border: rgba(255, 255, 255, 0.08);
 }
 
 /* 暗色 - 扁平卡片 */
 .dark .card-flat,
-[data-theme="dark"] .card-flat {
+[data-theme='dark'] .card-flat {
   --card-bg: rgba(255, 255, 255, 0.04);
 }
 
 .dark .card-flat:hover,
-[data-theme="dark"] .card-flat:hover {
+[data-theme='dark'] .card-flat:hover {
   --card-bg: rgba(255, 255, 255, 0.06);
 }
 
 /* 暗色 - 嵌套卡片 */
 .dark .card-inset,
-[data-theme="dark"] .card-inset {
+[data-theme='dark'] .card-inset {
   --card-bg: rgba(0, 0, 0, 0.15);
   --card-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* 暗色 - 虚线卡片 */
 .dark .card-dashed,
-[data-theme="dark"] .card-dashed {
+[data-theme='dark'] .card-dashed {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
 .dark .card-dashed:hover,
-[data-theme="dark"] .card-dashed:hover {
+[data-theme='dark'] .card-dashed:hover {
   border-color: var(--color-primary, #818cf8);
   background: rgba(129, 140, 248, 0.04);
 }
 
 /* 暗色 - 加载遮罩 */
 .dark .card-loading::after,
-[data-theme="dark"] .card-loading::after {
+[data-theme='dark'] .card-loading::after {
   background: rgba(15, 23, 42, 0.6);
 }
 
 /* 暗色 - 统计值 */
 .dark .card-stat-value,
-[data-theme="dark"] .card-stat-value {
+[data-theme='dark'] .card-stat-value {
   color: var(--color-text-primary, #f9fafb);
 }
 
@@ -1396,18 +1411,18 @@
 .dark .card-skeleton-line,
 .dark .card-skeleton-circle,
 .dark .card-skeleton-rect,
-[data-theme="dark"] .card-skeleton-line,
-[data-theme="dark"] .card-skeleton-circle,
-[data-theme="dark"] .card-skeleton-rect {
+[data-theme='dark'] .card-skeleton-line,
+[data-theme='dark'] .card-skeleton-circle,
+[data-theme='dark'] .card-skeleton-rect {
   background: rgba(255, 255, 255, 0.06);
 }
 
 .dark .card-skeleton-line::after,
 .dark .card-skeleton-circle::after,
 .dark .card-skeleton-rect::after,
-[data-theme="dark"] .card-skeleton-line::after,
-[data-theme="dark"] .card-skeleton-circle::after,
-[data-theme="dark"] .card-skeleton-rect::after {
+[data-theme='dark'] .card-skeleton-line::after,
+[data-theme='dark'] .card-skeleton-circle::after,
+[data-theme='dark'] .card-skeleton-rect::after {
   background: linear-gradient(
     90deg,
     transparent 25%,
@@ -1419,24 +1434,23 @@
 
 /* 暗色 - 空状态 */
 .dark .card-empty-icon,
-[data-theme="dark"] .card-empty-icon {
+[data-theme='dark'] .card-empty-icon {
   color: rgba(255, 255, 255, 0.2);
 }
 
 .dark .card-empty-title,
-[data-theme="dark"] .card-empty-title {
+[data-theme='dark'] .card-empty-title {
   color: var(--color-text-secondary, #d1d5db);
 }
 
 /* 暗色 - 堆叠 */
 .dark .card-stack::before,
 .dark .card-stack::after,
-[data-theme="dark"] .card-stack::before,
-[data-theme="dark"] .card-stack::after {
+[data-theme='dark'] .card-stack::before,
+[data-theme='dark'] .card-stack::after {
   background: var(--color-bg-secondary, #1e293b);
   border-color: rgba(255, 255, 255, 0.06);
 }
-
 
 /* ========================================
    17. 响应式适配
@@ -1524,7 +1538,6 @@
   }
 }
 
-
 /* ========================================
    18. 无障碍 & 减少动画
    ======================================== */
@@ -1559,7 +1572,7 @@
     will-change: auto;
   }
 
-  .card-selectable[aria-selected="true"]::before,
+  .card-selectable[aria-selected='true']::before,
   .card-selectable.is-selected::before,
   .card-selectable--selected::before {
     animation: none;
@@ -1583,7 +1596,7 @@
     opacity: 1;
   }
 
-  .card-selectable[aria-selected="true"],
+  .card-selectable[aria-selected='true'],
   .card-selectable.is-selected {
     border-color: Highlight;
   }
@@ -1594,9 +1607,9 @@
    ======================================== */
 
 /* 动画禁用时移除will-change */
-[data-animations="disabled"] .card,
-[data-animations="disabled"] .card-icon,
-[data-animations="disabled"] .card-media img {
+[data-animations='disabled'] .card,
+[data-animations='disabled'] .card-icon,
+[data-animations='disabled'] .card-media img {
   will-change: auto;
   transition: none;
 }

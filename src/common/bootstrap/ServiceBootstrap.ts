@@ -1,6 +1,6 @@
 /**
  * ServiceBootstrap.ts - 服务初始化管理器
- * 
+ *
  * 按依赖顺序初始化所有核心服务，确保启动流程可控
  * 🎯 重构: 使用DI容器作为底层依赖管理
  */
@@ -76,7 +76,7 @@ export class ServiceBootstrap {
       return {
         success: this.failedServices.length === 0,
         failed: this.failedServices,
-        initialized: Array.from(this.initializedServices)
+        initialized: Array.from(this.initializedServices),
       };
     } catch (error) {
       console.error('❌ [Bootstrap] 初始化流程失败:', error);
@@ -98,9 +98,7 @@ export class ServiceBootstrap {
       if (!level || level.length === 0) continue;
 
       // 同层服务并行初始化
-      await Promise.all(
-        level.map(serviceName => this._initService(serviceName))
-      );
+      await Promise.all(level.map(serviceName => this._initService(serviceName)));
     }
   }
 
@@ -112,35 +110,33 @@ export class ServiceBootstrap {
   private _groupByDependencyLevel(): string[][] {
     const levels: string[][] = [];
     const levelMap = new Map<string, number>();
-    
+
     // 计算每个服务的依赖层级
     const calculateLevel = (name: string): number => {
       const cachedLevel = levelMap.get(name);
       if (cachedLevel !== undefined) {
         return cachedLevel;
       }
-      
+
       const config = this.registry.getConfig(name as ServiceName);
       if (!config || config.dependencies.length === 0) {
         levelMap.set(name, 0);
         return 0;
       }
-      
+
       // 层级 = max(依赖层级) + 1
-      const maxDepLevel = Math.max(
-        ...config.dependencies.map(dep => calculateLevel(dep))
-      );
+      const maxDepLevel = Math.max(...config.dependencies.map(dep => calculateLevel(dep)));
       const level = maxDepLevel + 1;
       levelMap.set(name, level);
       return level;
     };
-    
+
     // 计算所有服务的层级
     const allConfigs = this.registry.getAllConfigs();
     for (const config of allConfigs) {
       calculateLevel(config.name);
     }
-    
+
     // 按层级分组
     for (const [name, level] of levelMap.entries()) {
       if (level !== undefined) {
@@ -150,10 +146,9 @@ export class ServiceBootstrap {
         levels[level].push(name);
       }
     }
-    
+
     return levels;
   }
-
 
   /**
    * 初始化单个服务
@@ -164,11 +159,11 @@ export class ServiceBootstrap {
   private async _initService(name: string): Promise<unknown> {
     const config = this.registry.getConfig(name as ServiceName);
     if (!config) {
-      throw new SystemError(
-        `服务 "${name}" 未在注册表中找到`,
-        'BOOTSTRAP_SERVICE_NOT_FOUND',
-        { module: 'ServiceBootstrap', action: '_initService', serviceName: name }
-      );
+      throw new SystemError(`服务 "${name}" 未在注册表中找到`, 'BOOTSTRAP_SERVICE_NOT_FOUND', {
+        module: 'ServiceBootstrap',
+        action: '_initService',
+        serviceName: name,
+      });
     }
 
     // 跳过已初始化的服务
@@ -183,12 +178,11 @@ export class ServiceBootstrap {
       const timeout = config.timeout || 5000;
       const result = await Promise.race([
         this.container.resolve(name),
-        this._timeout(timeout, name)
+        this._timeout(timeout, name),
       ]);
 
       this.initializedServices.add(name);
       return result;
-
     } catch (error) {
       const duration = Math.round(performance.now() - startTime);
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -200,12 +194,12 @@ export class ServiceBootstrap {
       }
 
       // 如果是必需服务，记录失败
-      this.failedServices.push({ 
-        name, 
+      this.failedServices.push({
+        name,
         error: errorMessage,
-        duration 
+        duration,
       });
-      
+
       throw error;
     }
   }
@@ -220,11 +214,14 @@ export class ServiceBootstrap {
   private _timeout(ms: number, serviceName: string): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new SystemError(
-          `服务 ${serviceName} 初始化超时 (${ms}ms)`,
-          'BOOTSTRAP_SERVICE_TIMEOUT',
-          { module: 'ServiceBootstrap', action: '_timeout', serviceName, timeout: ms }
-        ));
+        reject(
+          new SystemError(`服务 ${serviceName} 初始化超时 (${ms}ms)`, 'BOOTSTRAP_SERVICE_TIMEOUT', {
+            module: 'ServiceBootstrap',
+            action: '_timeout',
+            serviceName,
+            timeout: ms,
+          })
+        );
       }, ms);
     });
   }
@@ -238,27 +235,27 @@ export class ServiceBootstrap {
       // 1. 错误追踪
       errorTracker.init({
         enabled: true,
-        sampleRate: 1.0
+        sampleRate: 1.0,
       });
 
       // 2. 用户行为分析
       analyticsService.init({
         enabled: true,
         trackPageViews: true,
-        trackUserActions: true
+        trackUserActions: true,
       });
 
       // 3. 性能数据存储
       await performanceStorage.init({
         retentionDays: 7,
-        maxRecords: 10000
+        maxRecords: 10000,
       });
 
       // 4. 告警服务
       alertService.init({
         enabled: true,
         showToast: true,
-        showBrowserNotification: false
+        showBrowserNotification: false,
       });
 
       // 5. 连接数据流: webVitals -> storage
@@ -277,7 +274,7 @@ export class ServiceBootstrap {
     const { webVitalsService } = await import('@/services/webVitalsService');
 
     // Web Vitals指标自动保存到存储
-    webVitalsService.onMetric(async (metric) => {
+    webVitalsService.onMetric(async metric => {
       try {
         await performanceStorage.save({
           timestamp: Date.now(),
@@ -287,8 +284,8 @@ export class ServiceBootstrap {
             value: metric.value,
             rating: metric.rating,
             delta: metric.delta,
-            id: metric.id
-          }
+            id: metric.id,
+          },
         });
 
         // 触发告警检查
@@ -308,7 +305,7 @@ export class ServiceBootstrap {
     setInterval(() => {
       const stats = errorTracker.getStats();
       const total = stats.total;
-      
+
       if (total > 0) {
         // 计算错误率(假设每分钟100次操作)
         const errorRate = total / 100;
@@ -327,12 +324,12 @@ export class ServiceBootstrap {
 
     if (perfWithMemory.memory) {
       let lastMemory = perfWithMemory.memory.usedJSHeapSize;
-      
+
       setInterval(() => {
         if (perfWithMemory.memory) {
           const currentMemory = perfWithMemory.memory.usedJSHeapSize;
           const memoryGrowth = currentMemory - lastMemory;
-          
+
           alertService.check(AlertType.MEMORY_LEAK, { memoryGrowth });
           lastMemory = currentMemory;
         }

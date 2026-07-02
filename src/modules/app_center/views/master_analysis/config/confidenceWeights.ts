@@ -18,7 +18,7 @@ export const AUDIENCE_CONFIDENCE_WEIGHTS = {
   /** 购买动机 - 推断性数据，可靠性中等 */
   MOTIVATIONS: 0.2,
   /** 使用场景 - 基于评论分析，可靠性中等 */
-  USE_CASES: 0.5
+  USE_CASES: 0.5,
 } as const;
 
 /**
@@ -34,7 +34,7 @@ export const USPS_CONFIDENCE_WEIGHTS = {
   /** 差异化角度 - 战略性分析，高可靠性 */
   DIFFERENTIATION_ANGLES: 0.7,
   /** 情感钩子 - 推断性数据，可靠性中等 */
-  EMOTIONAL_HOOKS: 0.3
+  EMOTIONAL_HOOKS: 0.3,
 } as const;
 
 /**
@@ -50,7 +50,7 @@ export const SPECS_CONFIDENCE_WEIGHTS = {
   /** 来源分：从关键词提取 */
   FROM_KEYWORDS: 0.15,
   /** 来源分：从技术规格提取 */
-  FROM_TECH_SPECS: 0.15
+  FROM_TECH_SPECS: 0.15,
 } as const;
 
 /**
@@ -62,7 +62,7 @@ export const KEYWORDS_CONFIDENCE_WEIGHTS = {
   /** 长尾关键词 - 来自次要关键词，可靠性中等 */
   LONG_TAIL: 0.3,
   /** 意图关键词 - 来自场景分析，可靠性较低 */
-  INTENT: 0.2
+  INTENT: 0.2,
 } as const;
 
 /**
@@ -74,7 +74,7 @@ export const PHRASES_CONFIDENCE_WEIGHTS = {
   /** 使用场景短语 - 来自评论分析，可靠性中等 */
   USE_CASES: 0.5,
   /** 决策驱动因素 - 推断性数据，可靠性中等 */
-  DECISION_DRIVERS: 0.6
+  DECISION_DRIVERS: 0.6,
 } as const;
 
 /**
@@ -92,7 +92,7 @@ export const PAIN_POINTS_CONFIDENCE_WEIGHTS = {
   /** 弱点 - 来自竞品分析，可靠性中等 */
   WEAKNESSES: 0.5,
   /** 负面驱动因素 - 来自评论分析，可靠性中等 */
-  NEGATIVE_DRIVERS: 0.5
+  NEGATIVE_DRIVERS: 0.5,
 } as const;
 
 /**
@@ -106,7 +106,7 @@ export const DIFFERENTIATION_CONFIDENCE_WEIGHTS = {
   /** 目标定位 - 战略性分析，可靠性中等 */
   POSITIONING: 0.3,
   /** 情感钩子 - 推断性数据，可靠性中等 */
-  EMOTIONAL_HOOKS: 0.3
+  EMOTIONAL_HOOKS: 0.3,
 } as const;
 
 /**
@@ -118,5 +118,5 @@ export const CONFIDENCE_THRESHOLDS = {
   /** 高置信度阈值 - 用于 UI 显示 */
   HIGH: 0.7,
   /** 中等置信度阈值 - 用于 UI 显示 */
-  MEDIUM: 0.5
+  MEDIUM: 0.5,
 } as const;

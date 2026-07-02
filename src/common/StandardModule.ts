@@ -30,12 +30,12 @@ export interface StandardModuleConfig {
 
 /**
  * 标准化模块基类
- * 
+ *
  * 提供统一的模块接口实现,包括:
  * - 完整的生命周期钩子
  * - 状态管理
  * - 错误处理
- * 
+ *
  * @example
  * ```typescript
  * export class MyModule extends StandardModule {
@@ -46,20 +46,20 @@ export interface StandardModuleConfig {
  *       version: '1.0.0'
  *     });
  *   }
- * 
+ *
  *   async onInit() {
  *     // 初始化逻辑
  *   }
- * 
+ *
  *   async mount(container: HTMLElement) {
  *     await super.mount(container);
  *     // 挂载逻辑
  *   }
- * 
+ *
  *   protected async doMount(container: HTMLElement) {
  *     // 实际挂载逻辑
  *   }
- * 
+ *
  *   protected async doUnmount() {
  *     // 实际卸载逻辑
  *   }
@@ -69,25 +69,25 @@ export interface StandardModuleConfig {
 export abstract class StandardModule implements IModule {
   /** 模块ID */
   public readonly id: string;
-  
+
   /** 模块名称 */
   public readonly name: string;
-  
+
   /** 模块版本 */
   public readonly version: string;
-  
+
   /** 模块元信息 */
   public readonly metadata?: ModuleMetadata;
-  
+
   /** DI容器实例 */
   protected readonly diContainer: DIContainer;
-  
+
   /** 模块状态 */
   protected state: ModuleState;
-  
+
   /** 挂载容器 */
   protected container: HTMLElement | null = null;
-  
+
   /** 清理函数列表 */
   private disposables: Array<() => void> = [];
 
@@ -97,12 +97,12 @@ export abstract class StandardModule implements IModule {
     this.version = config.version;
     this.metadata = config.metadata;
     this.diContainer = config.container || globalContainer;
-    
+
     this.state = {
       mounted: false,
       loading: false,
       error: null,
-      data: null
+      data: null,
     };
   }
 
@@ -132,10 +132,10 @@ export abstract class StandardModule implements IModule {
     } catch (error) {
       this.state.loading = false;
       this.state.error = error as Error;
-      
+
       // 生命周期: 错误处理
       this.onError?.(error as Error);
-      
+
       throw error;
     }
   }
@@ -163,7 +163,7 @@ export abstract class StandardModule implements IModule {
 
       // 生命周期: 卸载完成
       await this.onUnmounted?.();
-      
+
       // 向后兼容
       this.onUnmount?.();
     } catch (error) {
@@ -351,7 +351,7 @@ export abstract class StandardModule implements IModule {
    * 模块错误处理
    */
   onError?(error: Error): void;
-  
+
   /**
    * 向后兼容: 旧的卸载钩子
    */

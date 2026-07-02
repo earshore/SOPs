@@ -8,7 +8,11 @@ type DestroyableComponent = {
 };
 
 function isDestroyableComponent(value: unknown): value is DestroyableComponent {
-  return !!value && typeof value === 'object' && typeof (value as DestroyableComponent).destroy === 'function';
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    typeof (value as DestroyableComponent).destroy === 'function'
+  );
 }
 
 export function getAlpineData(element: Element | null): unknown {

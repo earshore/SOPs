@@ -131,60 +131,60 @@
    5. 暗色模式适配
    ======================================== */
 .dark ::-webkit-scrollbar-thumb,
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover,
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
 .dark .scrollbar-thin::-webkit-scrollbar-track,
-[data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-track {
+[data-theme='dark'] .scrollbar-thin::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.06);
 }
 
 .dark .scrollbar-thin::-webkit-scrollbar-thumb,
-[data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb {
+[data-theme='dark'] .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
 }
 
 .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover,
-[data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+[data-theme='dark'] .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
 .dark .scrollbar-custom::-webkit-scrollbar-track,
-[data-theme="dark"] .scrollbar-custom::-webkit-scrollbar-track {
+[data-theme='dark'] .scrollbar-custom::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.04);
 }
 
 .dark .scrollbar-custom::-webkit-scrollbar-thumb,
-[data-theme="dark"] .scrollbar-custom::-webkit-scrollbar-thumb {
+[data-theme='dark'] .scrollbar-custom::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark .scrollbar-custom::-webkit-scrollbar-thumb:hover,
-[data-theme="dark"] .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+[data-theme='dark'] .scrollbar-custom::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
 /* Firefox 暗色 */
 .dark,
-[data-theme="dark"] {
+[data-theme='dark'] {
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 .dark .scrollbar-thin,
-[data-theme="dark"] .scrollbar-thin {
+[data-theme='dark'] .scrollbar-thin {
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 .dark .scrollbar-custom,
-[data-theme="dark"] .scrollbar-custom {
+[data-theme='dark'] .scrollbar-custom {
   scrollbar-color: rgba(255, 255, 255, 0.1) rgba(255, 255, 255, 0.04);
 }
 

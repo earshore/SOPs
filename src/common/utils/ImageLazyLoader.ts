@@ -31,15 +31,17 @@ class ImageLazyLoader {
   private observer: IntersectionObserver | null = null;
   private observedImages = new WeakSet<HTMLImageElement>();
   private loadedImages = new WeakSet<HTMLImageElement>();
-  
+
   private config: Required<LazyLoadConfig> = {
     root: null,
     rootMargin: '50px',
     threshold: 0.01,
-    placeholder: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23f0f0f0" width="400" height="300"/%3E%3C/svg%3E',
-    errorImage: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23ffebee" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23c62828" font-size="16"%3E加载失败%3C/text%3E%3C/svg%3E',
+    placeholder:
+      'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23f0f0f0" width="400" height="300"/%3E%3C/svg%3E',
+    errorImage:
+      'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23ffebee" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23c62828" font-size="16"%3E加载失败%3C/text%3E%3C/svg%3E',
     fadeIn: true,
-    fadeInDuration: 300
+    fadeInDuration: 300,
   };
 
   /**
@@ -57,21 +59,17 @@ class ImageLazyLoader {
     }
 
     // 创建Intersection Observer
-    this.observer = new IntersectionObserver(
-      (entries) => this.handleIntersection(entries),
-      {
-        root: this.config.root,
-        rootMargin: this.config.rootMargin,
-        threshold: this.config.threshold
-      }
-    );
+    this.observer = new IntersectionObserver(entries => this.handleIntersection(entries), {
+      root: this.config.root,
+      rootMargin: this.config.rootMargin,
+      threshold: this.config.threshold,
+    });
 
     // 观察现有图片
     this.observeExistingImages();
 
     // 监听DOM变化，自动观察新图片
     this.setupMutationObserver();
-
   }
 
   /**
@@ -113,7 +111,7 @@ class ImageLazyLoader {
       this.loadedImages.add(img);
       img.classList.add('lazy-loaded');
       img.classList.remove('lazy-loading', 'lazy-error');
-      
+
       if (this.config.fadeIn) {
         img.style.opacity = '1';
       }
@@ -128,7 +126,7 @@ class ImageLazyLoader {
     const onError = () => {
       img.classList.add('lazy-error');
       img.classList.remove('lazy-loading');
-      
+
       if (this.config.errorImage) {
         img.src = this.config.errorImage;
       }
@@ -167,17 +165,20 @@ class ImageLazyLoader {
    * 设置DOM变化监听
    */
   private setupMutationObserver(): void {
-    const mutationObserver = new MutationObserver((mutations) => {
+    const mutationObserver = new MutationObserver(mutations => {
       mutations.forEach(mutation => {
         mutation.addedNodes.forEach(node => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             const element = node as HTMLElement;
-            
+
             // 检查是否为懒加载图片
-            if (element.tagName === 'IMG' && (element.hasAttribute('data-src') || element.hasAttribute('data-srcset'))) {
+            if (
+              element.tagName === 'IMG' &&
+              (element.hasAttribute('data-src') || element.hasAttribute('data-srcset'))
+            ) {
               this.observe(element as HTMLImageElement);
             }
-            
+
             // 检查子元素
             const lazyImages = element.querySelectorAll('img[data-src], img[data-srcset]');
             lazyImages.forEach(img => this.observe(img as HTMLImageElement));
@@ -188,7 +189,7 @@ class ImageLazyLoader {
 
     mutationObserver.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
   }
 
@@ -222,7 +223,7 @@ class ImageLazyLoader {
       const element = img as HTMLImageElement;
       const src = element.dataset.src;
       const srcset = element.dataset.srcset;
-      
+
       if (srcset) element.srcset = srcset;
       if (src) element.src = src;
     });
@@ -240,7 +241,7 @@ class ImageLazyLoader {
    */
   updateConfig(config: Partial<LazyLoadConfig>): void {
     this.config = { ...this.config, ...config };
-    
+
     // 重新创建observer
     if (this.observer) {
       this.observer.disconnect();
@@ -254,10 +255,10 @@ class ImageLazyLoader {
   getStats(): { observed: number; loaded: number } {
     const allImages = document.querySelectorAll('img[data-src], img[data-srcset]');
     const loadedCount = document.querySelectorAll('img.lazy-loaded').length;
-    
+
     return {
       observed: allImages.length,
-      loaded: loadedCount
+      loaded: loadedCount,
     };
   }
 
@@ -269,7 +270,6 @@ class ImageLazyLoader {
       this.observer.disconnect();
       this.observer = null;
     }
-    
   }
 }
 
@@ -284,7 +284,7 @@ export function makeLazyImage(img: HTMLImageElement): void {
     img.dataset.src = img.src;
     img.removeAttribute('src');
   }
-  
+
   imageLazyLoader.observe(img);
 }
 

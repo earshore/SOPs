@@ -7,14 +7,14 @@ import BaseModule from '../../../../../common/BaseModule';
 import { setSafeHtml } from '../../../../../common/utils/security';
 import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import {
-    PROMPT_CATEGORIES,
-    getPromptsByCategory,
-    getPromptById,
-    searchPrompts,
-    getModelInfo,
-    type PromptItem,
-    type PromptCategory,
-    type PromptCategoryId,
+  PROMPT_CATEGORIES,
+  getPromptsByCategory,
+  getPromptById,
+  searchPrompts,
+  getModelInfo,
+  type PromptItem,
+  type PromptCategory,
+  type PromptCategoryId,
 } from './constants/promptLibrary';
 import { showToast } from '../../../../../common/ui';
 import './prompts_style.css';
@@ -31,537 +31,526 @@ let searchInputRef: HTMLInputElement | null = null;
 let promptModalRef: HTMLElement | null = null;
 
 function getPromptModal(): HTMLElement | null {
-    return promptModalRef || (document.getElementById('prompt-detail-modal') as HTMLElement | null);
+  return promptModalRef || (document.getElementById('prompt-detail-modal') as HTMLElement | null);
 }
 
 function mountPromptModal(root: HTMLElement): void {
-    const modal = root.querySelector('#prompt-detail-modal') as HTMLElement | null;
-    if (!modal) return;
+  const modal = root.querySelector('#prompt-detail-modal') as HTMLElement | null;
+  if (!modal) return;
 
-    promptModalRef = modal;
-    document.body.appendChild(modal);
+  promptModalRef = modal;
+  document.body.appendChild(modal);
 }
 
 function removePromptModal(): void {
-    promptModalRef?.remove();
-    promptModalRef = null;
+  promptModalRef?.remove();
+  promptModalRef = null;
 }
 
 function getCategoryById(categoryId: PromptCategoryId): PromptCategory | undefined {
-
-    return Object.values(PROMPT_CATEGORIES as Record<string, PromptCategory>).find(
-        (cat) => cat.id === categoryId
-    );
+  return Object.values(PROMPT_CATEGORIES as Record<string, PromptCategory>).find(
+    cat => cat.id === categoryId
+  );
 }
 
 function getVisiblePrompts(): readonly Prompt[] {
-    if (currentKeyword) {
-        return searchPrompts(currentKeyword, currentCategory);
-    }
+  if (currentKeyword) {
+    return searchPrompts(currentKeyword, currentCategory);
+  }
 
-    return getPromptsByCategory(currentCategory);
+  return getPromptsByCategory(currentCategory);
 }
 
 function clearElement(element: Element): void {
-    element.textContent = '';
+  element.textContent = '';
 }
 
 function appendIcon(parent: Element, className: string): HTMLElement {
-    const icon = document.createElement('i');
-    icon.className = className;
-    icon.setAttribute('aria-hidden', 'true');
-    parent.appendChild(icon);
-    return icon;
+  const icon = document.createElement('i');
+  icon.className = className;
+  icon.setAttribute('aria-hidden', 'true');
+  parent.appendChild(icon);
+  return icon;
 }
 
-function findContainedTarget(target: HTMLElement, selector: string, container: HTMLElement): HTMLElement | null {
-    const element = target.closest<HTMLElement>(selector);
-    return element && container.contains(element) ? element : null;
+function findContainedTarget(
+  target: HTMLElement,
+  selector: string,
+  container: HTMLElement
+): HTMLElement | null {
+  const element = target.closest<HTMLElement>(selector);
+  return element && container.contains(element) ? element : null;
 }
 
 function handlePromptActionButton(target: HTMLElement): boolean {
-    if (!moduleRoot) return false;
+  if (!moduleRoot) return false;
 
-    const actionBtn = findContainedTarget(target, '[data-action][data-prompt-id]', moduleRoot);
-    if (!actionBtn) return false;
+  const actionBtn = findContainedTarget(target, '[data-action][data-prompt-id]', moduleRoot);
+  if (!actionBtn) return false;
 
-    const promptId = actionBtn.dataset.promptId;
-    const action = actionBtn.dataset.action;
+  const promptId = actionBtn.dataset.promptId;
+  const action = actionBtn.dataset.action;
 
-    if (!promptId) return true;
+  if (!promptId) return true;
 
-    if (action === 'view-prompt') {
-        window.viewPrompt?.(promptId);
-    } else if (action === 'copy-prompt') {
-        window.copyPrompt?.(promptId);
-    }
+  if (action === 'view-prompt') {
+    window.viewPrompt?.(promptId);
+  } else if (action === 'copy-prompt') {
+    window.copyPrompt?.(promptId);
+  }
 
-    return true;
+  return true;
 }
 
 function handleCategoryButton(target: HTMLElement): boolean {
-    if (!moduleRoot) return false;
+  if (!moduleRoot) return false;
 
-    const categoryBtn = findContainedTarget(target, '.category-btn', moduleRoot);
-    if (!categoryBtn) return false;
+  const categoryBtn = findContainedTarget(target, '.category-btn', moduleRoot);
+  if (!categoryBtn) return false;
 
-    const category = categoryBtn.dataset.category;
-    if (category) {
-        handleCategoryChange(category);
-    }
+  const category = categoryBtn.dataset.category;
+  if (category) {
+    handleCategoryChange(category);
+  }
 
-    return true;
+  return true;
 }
 
 function handlePromptCard(target: HTMLElement): void {
-    if (!moduleRoot) return;
+  if (!moduleRoot) return;
 
-    const promptCard = findContainedTarget(target, '.prompt-card[data-prompt-id]', moduleRoot);
-    const promptId = promptCard?.dataset.promptId;
+  const promptCard = findContainedTarget(target, '.prompt-card[data-prompt-id]', moduleRoot);
+  const promptId = promptCard?.dataset.promptId;
 
-    if (promptId) {
-        window.viewPrompt?.(promptId);
-    }
+  if (promptId) {
+    window.viewPrompt?.(promptId);
+  }
 }
 
 function handleModuleClick(e: Event): void {
-    const target = e.target as HTMLElement | null;
-    if (!target || !moduleRoot) return;
+  const target = e.target as HTMLElement | null;
+  if (!target || !moduleRoot) return;
 
-    if (handlePromptActionButton(target)) return;
-    if (handleCategoryButton(target)) return;
+  if (handlePromptActionButton(target)) return;
+  if (handleCategoryButton(target)) return;
 
-    handlePromptCard(target);
+  handlePromptCard(target);
 }
 
 function handlePromptModalAction(target: HTMLElement, modal: HTMLElement): boolean {
-    const actionBtn = findContainedTarget(target, '[data-prompt-modal-action]', modal);
-    if (!actionBtn) return false;
+  const actionBtn = findContainedTarget(target, '[data-prompt-modal-action]', modal);
+  if (!actionBtn) return false;
 
-    const action = actionBtn.dataset.promptModalAction;
-    if (action === 'close') {
-        window.closePromptModal?.();
-    } else if (action === 'copy') {
-        window.copyModalPrompt?.();
-    }
+  const action = actionBtn.dataset.promptModalAction;
+  if (action === 'close') {
+    window.closePromptModal?.();
+  } else if (action === 'copy') {
+    window.copyModalPrompt?.();
+  }
 
-    return true;
+  return true;
 }
 
 function handlePromptModalLang(target: HTMLElement, modal: HTMLElement): boolean {
-    const langBtn = findContainedTarget(target, '[data-prompt-lang]', modal);
-    if (!langBtn) return false;
+  const langBtn = findContainedTarget(target, '[data-prompt-lang]', modal);
+  if (!langBtn) return false;
 
-    const lang = langBtn.dataset.promptLang;
-    if (lang === 'zh' || lang === 'en') {
-        window.switchPromptLang?.(lang);
-    }
+  const lang = langBtn.dataset.promptLang;
+  if (lang === 'zh' || lang === 'en') {
+    window.switchPromptLang?.(lang);
+  }
 
-    return true;
+  return true;
 }
 
 function handleModalBackdropClick(e: Event): void {
-    const modal = getPromptModal();
-    const target = e.target as HTMLElement | null;
-    if (!modal || !target) return;
+  const modal = getPromptModal();
+  const target = e.target as HTMLElement | null;
+  if (!modal || !target) return;
 
-    if (handlePromptModalAction(target, modal)) return;
-    if (handlePromptModalLang(target, modal)) return;
+  if (handlePromptModalAction(target, modal)) return;
+  if (handlePromptModalLang(target, modal)) return;
 
-    if (target === modal) {
-        window.closePromptModal?.();
-    }
+  if (target === modal) {
+    window.closePromptModal?.();
+  }
 }
 
 function handleDocumentKeydown(e: KeyboardEvent): void {
-    if (e.key !== 'Escape') return;
+  if (e.key !== 'Escape') return;
 
-    const modal = getPromptModal();
-    if (modal && !modal.classList.contains('hidden')) {
-        window.closePromptModal?.();
-    }
+  const modal = getPromptModal();
+  if (modal && !modal.classList.contains('hidden')) {
+    window.closePromptModal?.();
+  }
 }
 
 /**
  * 初始化事件监听
  */
 function initEventListeners(root: HTMLElement): void {
-    moduleRoot = root;
-    searchInputRef = root.querySelector('#prompt-search');
+  moduleRoot = root;
+  searchInputRef = root.querySelector('#prompt-search');
 
-    searchInputRef?.addEventListener('input', handleSearch);
-    root.addEventListener('click', handleModuleClick);
-    getPromptModal()?.addEventListener('click', handleModalBackdropClick);
-    document.addEventListener('keydown', handleDocumentKeydown);
+  searchInputRef?.addEventListener('input', handleSearch);
+  root.addEventListener('click', handleModuleClick);
+  getPromptModal()?.addEventListener('click', handleModalBackdropClick);
+  document.addEventListener('keydown', handleDocumentKeydown);
 }
 
 function removeEventListeners(): void {
-    searchInputRef?.removeEventListener('input', handleSearch);
-    moduleRoot?.removeEventListener('click', handleModuleClick);
-    getPromptModal()?.removeEventListener('click', handleModalBackdropClick);
-    document.removeEventListener('keydown', handleDocumentKeydown);
+  searchInputRef?.removeEventListener('input', handleSearch);
+  moduleRoot?.removeEventListener('click', handleModuleClick);
+  getPromptModal()?.removeEventListener('click', handleModalBackdropClick);
+  document.removeEventListener('keydown', handleDocumentKeydown);
 
-    searchInputRef = null;
-    moduleRoot = null;
+  searchInputRef = null;
+  moduleRoot = null;
 }
-
-
 
 /**
  * 处理搜索
  */
 function handleSearch(e: Event): void {
-    const target = e.target as HTMLInputElement;
-    currentKeyword = target.value.trim();
-    renderPromptList();
+  const target = e.target as HTMLInputElement;
+  currentKeyword = target.value.trim();
+  renderPromptList();
 }
-
 
 /**
  * 处理分类切换
  */
 function handleCategoryChange(category: string): void {
-    currentCategory = category as PromptCategoryId | 'all';
+  currentCategory = category as PromptCategoryId | 'all';
 
-    moduleRoot?.querySelectorAll('.category-btn').forEach((btn) => {
-        if ((btn as HTMLElement).dataset.category === category) {
-            btn.classList.add('active');
-            btn.setAttribute('aria-pressed', 'true');
-        } else {
-            btn.classList.remove('active');
-            btn.setAttribute('aria-pressed', 'false');
-        }
-    });
+  moduleRoot?.querySelectorAll('.category-btn').forEach(btn => {
+    if ((btn as HTMLElement).dataset.category === category) {
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+    } else {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    }
+  });
 
-    renderPromptList();
+  renderPromptList();
 }
-
 
 /**
  * 渲染分类按钮
  */
 function renderCategories(): void {
-    const container = moduleRoot?.querySelector('#category-container') as HTMLElement | null;
+  const container = moduleRoot?.querySelector('#category-container') as HTMLElement | null;
 
-    if (!container) return;
+  if (!container) return;
 
-    clearElement(container);
+  clearElement(container);
 
-    const createButton = (category: 'all' | PromptCategory): HTMLButtonElement => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = category === 'all' ? 'category-btn active' : 'category-btn';
-        button.dataset.category = category === 'all' ? 'all' : category.id;
-        button.setAttribute('aria-pressed', category === 'all' ? 'true' : 'false');
+  const createButton = (category: 'all' | PromptCategory): HTMLButtonElement => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = category === 'all' ? 'category-btn active' : 'category-btn';
+    button.dataset.category = category === 'all' ? 'all' : category.id;
+    button.setAttribute('aria-pressed', category === 'all' ? 'true' : 'false');
 
-        appendIcon(button, category === 'all' ? 'fas fa-th' : `fas ${category.icon}`);
+    appendIcon(button, category === 'all' ? 'fas fa-th' : `fas ${category.icon}`);
 
-        const label = document.createElement('span');
-        label.textContent = category === 'all' ? '全部' : category.name;
-        button.appendChild(label);
+    const label = document.createElement('span');
+    label.textContent = category === 'all' ? '全部' : category.name;
+    button.appendChild(label);
 
-        return button;
-    };
+    return button;
+  };
 
-    container.appendChild(createButton('all'));
-    Object.values(PROMPT_CATEGORIES as Record<string, PromptCategory>).forEach((cat) => {
-        container.appendChild(createButton(cat));
-    });
+  container.appendChild(createButton('all'));
+  Object.values(PROMPT_CATEGORIES as Record<string, PromptCategory>).forEach(cat => {
+    container.appendChild(createButton(cat));
+  });
 }
 
 /**
  * 渲染提示词列表
  */
 function renderPromptList(): void {
-    const container = moduleRoot?.querySelector('#prompt-list') as HTMLElement | null;
-    if (!container) return;
+  const container = moduleRoot?.querySelector('#prompt-list') as HTMLElement | null;
+  if (!container) return;
 
-    const promptsToRender = getVisiblePrompts();
+  const promptsToRender = getVisiblePrompts();
 
-    clearElement(container);
+  clearElement(container);
 
-    if (promptsToRender.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'col-span-full text-center py-12';
-        appendIcon(empty, 'fas fa-search text-4xl text-slate-300 mb-4');
+  if (promptsToRender.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'col-span-full text-center py-12';
+    appendIcon(empty, 'fas fa-search text-4xl text-slate-300 mb-4');
 
-        const text = document.createElement('p');
-        text.className = 'text-slate-500';
-        text.textContent = '未找到匹配的提示词';
-        empty.appendChild(text);
+    const text = document.createElement('p');
+    text.className = 'text-slate-500';
+    text.textContent = '未找到匹配的提示词';
+    empty.appendChild(text);
 
-        container.appendChild(empty);
-        return;
-    }
+    container.appendChild(empty);
+    return;
+  }
 
-    promptsToRender.forEach((prompt) => {
-        const category = getCategoryById(prompt.category);
-        const model = getModelInfo(prompt.recommendedModel);
+  promptsToRender.forEach(prompt => {
+    const category = getCategoryById(prompt.category);
+    const model = getModelInfo(prompt.recommendedModel);
 
-        if (!category) return;
+    if (!category) return;
 
-        const card = document.createElement('div');
-        card.className = 'prompt-card group';
-        card.dataset.promptId = prompt.id;
+    const card = document.createElement('div');
+    card.className = 'prompt-card group';
+    card.dataset.promptId = prompt.id;
 
-        const header = document.createElement('div');
-        header.className = 'flex items-start justify-between mb-3';
+    const header = document.createElement('div');
+    header.className = 'flex items-start justify-between mb-3';
 
-        const categoryBadge = document.createElement('span');
-        categoryBadge.className = `category-badge ${category.color}`;
-        appendIcon(categoryBadge, `fas ${category.icon}`);
-        categoryBadge.appendChild(document.createTextNode(` ${category.name}`));
+    const categoryBadge = document.createElement('span');
+    categoryBadge.className = `category-badge ${category.color}`;
+    appendIcon(categoryBadge, `fas ${category.icon}`);
+    categoryBadge.appendChild(document.createTextNode(` ${category.name}`));
 
-        const modelBadge = document.createElement('span');
-        modelBadge.className = 'model-badge';
-        modelBadge.textContent = model.badge;
+    const modelBadge = document.createElement('span');
+    modelBadge.className = 'model-badge';
+    modelBadge.textContent = model.badge;
 
-        header.appendChild(categoryBadge);
-        header.appendChild(modelBadge);
+    header.appendChild(categoryBadge);
+    header.appendChild(modelBadge);
 
-        const title = document.createElement('h3');
-        title.className = 'prompt-title';
-        title.textContent = prompt.title;
+    const title = document.createElement('h3');
+    title.className = 'prompt-title';
+    title.textContent = prompt.title;
 
-        const description = document.createElement('p');
-        description.className = 'prompt-description';
-        description.textContent = prompt.description;
+    const description = document.createElement('p');
+    description.className = 'prompt-description';
+    description.textContent = prompt.description;
 
-        const footer = document.createElement('div');
-        footer.className = 'flex items-center justify-between mt-4 pt-4 border-t border-slate-100';
+    const footer = document.createElement('div');
+    footer.className = 'flex items-center justify-between mt-4 pt-4 border-t border-slate-100';
 
-        const modelInfo = document.createElement('div');
-        modelInfo.className = 'flex items-center gap-2 text-xs text-slate-500';
-        appendIcon(modelInfo, 'fas fa-robot');
-        const modelName = document.createElement('span');
-        modelName.textContent = model.name;
-        modelInfo.appendChild(modelName);
+    const modelInfo = document.createElement('div');
+    modelInfo.className = 'flex items-center gap-2 text-xs text-slate-500';
+    appendIcon(modelInfo, 'fas fa-robot');
+    const modelName = document.createElement('span');
+    modelName.textContent = model.name;
+    modelInfo.appendChild(modelName);
 
-        const actions = document.createElement('div');
-        actions.className = 'flex gap-2';
+    const actions = document.createElement('div');
+    actions.className = 'flex gap-2';
 
-        const viewBtn = document.createElement('button');
-        viewBtn.type = 'button';
-        viewBtn.dataset.action = 'view-prompt';
-        viewBtn.dataset.promptId = prompt.id;
-        viewBtn.className = 'btn-icon';
-        viewBtn.title = '查看详情';
-        viewBtn.setAttribute('aria-label', `查看${prompt.title}`);
-        appendIcon(viewBtn, 'fas fa-eye');
+    const viewBtn = document.createElement('button');
+    viewBtn.type = 'button';
+    viewBtn.dataset.action = 'view-prompt';
+    viewBtn.dataset.promptId = prompt.id;
+    viewBtn.className = 'btn-icon';
+    viewBtn.title = '查看详情';
+    viewBtn.setAttribute('aria-label', `查看${prompt.title}`);
+    appendIcon(viewBtn, 'fas fa-eye');
 
-        const copyBtn = document.createElement('button');
-        copyBtn.type = 'button';
-        copyBtn.dataset.action = 'copy-prompt';
-        copyBtn.dataset.promptId = prompt.id;
-        copyBtn.className = 'btn-icon';
-        copyBtn.title = '复制提示词';
-        copyBtn.setAttribute('aria-label', `复制${prompt.title}`);
-        appendIcon(copyBtn, 'fas fa-copy');
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.dataset.action = 'copy-prompt';
+    copyBtn.dataset.promptId = prompt.id;
+    copyBtn.className = 'btn-icon';
+    copyBtn.title = '复制提示词';
+    copyBtn.setAttribute('aria-label', `复制${prompt.title}`);
+    appendIcon(copyBtn, 'fas fa-copy');
 
-        actions.appendChild(viewBtn);
-        actions.appendChild(copyBtn);
-        footer.appendChild(modelInfo);
-        footer.appendChild(actions);
+    actions.appendChild(viewBtn);
+    actions.appendChild(copyBtn);
+    footer.appendChild(modelInfo);
+    footer.appendChild(actions);
 
-        card.appendChild(header);
-        card.appendChild(title);
-        card.appendChild(description);
-        card.appendChild(footer);
-        container.appendChild(card);
-    });
+    card.appendChild(header);
+    card.appendChild(title);
+    card.appendChild(description);
+    card.appendChild(footer);
+    container.appendChild(card);
+  });
 }
-
 
 /**
  * 更新提示词内容
  */
 function updatePromptContent(): void {
-    if (!currentPrompt) return;
+  if (!currentPrompt) return;
 
-    const contentEl = document.getElementById('modal-prompt-content');
-    const promptText =
-        currentLang === 'zh' ? currentPrompt.prompt : currentPrompt.promptEn || currentPrompt.prompt;
+  const contentEl = document.getElementById('modal-prompt-content');
+  const promptText =
+    currentLang === 'zh' ? currentPrompt.prompt : currentPrompt.promptEn || currentPrompt.prompt;
 
-    if (contentEl) {
-        contentEl.textContent = promptText;
+  if (contentEl) {
+    contentEl.textContent = promptText;
+  }
+
+  // 如果没有英文版本,显示提示
+  const enBtn = document.querySelector('[data-lang="en"]') as HTMLButtonElement;
+  if (enBtn) {
+    if (!currentPrompt.promptEn) {
+      enBtn.disabled = true;
+      enBtn.title = '英文版本开发中';
+    } else {
+      enBtn.disabled = false;
+      enBtn.title = 'English Version';
     }
-
-    // 如果没有英文版本,显示提示
-    const enBtn = document.querySelector('[data-lang="en"]') as HTMLButtonElement;
-    if (enBtn) {
-        if (!currentPrompt.promptEn) {
-            enBtn.disabled = true;
-            enBtn.title = '英文版本开发中';
-        } else {
-            enBtn.disabled = false;
-            enBtn.title = 'English Version';
-        }
-    }
+  }
 }
 
 /**
  * 更新语言按钮状态
  */
 function updateLangButtons(): void {
-    document.querySelectorAll('.lang-btn').forEach((btn) => {
-        if ((btn as HTMLElement).dataset.lang === currentLang) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    if ((btn as HTMLElement).dataset.lang === currentLang) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
 }
 
 // 扩展Window接口
 declare global {
-    interface Window {
-        viewPrompt?: (promptId: string) => void;
-        switchPromptLang?: (lang: 'zh' | 'en') => void;
-        closePromptModal?: () => void;
-        copyPrompt?: (promptId: string) => void;
-        copyModalPrompt?: () => void;
-    }
+  interface Window {
+    viewPrompt?: (promptId: string) => void;
+    switchPromptLang?: (lang: 'zh' | 'en') => void;
+    closePromptModal?: () => void;
+    copyPrompt?: (promptId: string) => void;
+    copyModalPrompt?: () => void;
+  }
 }
 
 function registerWindowActions(): void {
-    window.viewPrompt = (promptId: string): void => {
-        const prompt = getPromptById(promptId);
-        if (!prompt) return;
+  window.viewPrompt = (promptId: string): void => {
+    const prompt = getPromptById(promptId);
+    if (!prompt) return;
 
-        currentPrompt = prompt as Prompt;
-        currentLang = 'zh';
+    currentPrompt = prompt as Prompt;
+    currentLang = 'zh';
 
-        const modal = getPromptModal();
-        if (!modal) return;
+    const modal = getPromptModal();
+    if (!modal) return;
 
+    const category = getCategoryById(prompt.category);
+    const model = getModelInfo(prompt.recommendedModel);
 
-        const category = getCategoryById(prompt.category);
-        const model = getModelInfo(prompt.recommendedModel);
+    if (!category) return;
 
-        if (!category) return;
+    const titleEl = document.getElementById('modal-prompt-title');
+    const categoryEl = document.getElementById('modal-prompt-category');
+    const modelEl = document.getElementById('modal-prompt-model');
+    const descEl = document.getElementById('modal-prompt-description');
 
-        const titleEl = document.getElementById('modal-prompt-title');
-        const categoryEl = document.getElementById('modal-prompt-category');
-        const modelEl = document.getElementById('modal-prompt-model');
-        const descEl = document.getElementById('modal-prompt-description');
+    if (titleEl) titleEl.textContent = prompt.title;
+    if (categoryEl) {
+      clearElement(categoryEl);
+      appendIcon(categoryEl, `fas ${category.icon}`);
+      categoryEl.appendChild(document.createTextNode(` ${category.name}`));
+    }
+    if (modelEl) modelEl.textContent = model.name;
+    if (descEl) descEl.textContent = prompt.description;
 
-        if (titleEl) titleEl.textContent = prompt.title;
-        if (categoryEl) {
-            clearElement(categoryEl);
-            appendIcon(categoryEl, `fas ${category.icon}`);
-            categoryEl.appendChild(document.createTextNode(` ${category.name}`));
-        }
-        if (modelEl) modelEl.textContent = model.name;
-        if (descEl) descEl.textContent = prompt.description;
+    updatePromptContent();
+    updateLangButtons();
 
-        updatePromptContent();
-        updateLangButtons();
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  };
 
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    };
+  window.switchPromptLang = (lang: 'zh' | 'en'): void => {
+    currentLang = lang;
+    updatePromptContent();
+    updateLangButtons();
+  };
 
-    window.switchPromptLang = (lang: 'zh' | 'en'): void => {
-        currentLang = lang;
-        updatePromptContent();
-        updateLangButtons();
-    };
+  window.closePromptModal = (): void => {
+    const modal = getPromptModal();
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  };
 
-    window.closePromptModal = (): void => {
-        const modal = getPromptModal();
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-    };
+  window.copyPrompt = (promptId: string): void => {
+    const prompt = getPromptById(promptId);
+    if (!prompt) return;
 
+    navigator.clipboard
+      .writeText(prompt.prompt)
+      .then(() => {
+        showToast('提示词已复制到剪贴板', { type: 'success' });
+      })
+      .catch(() => {
+        showToast('复制失败,请手动复制', { type: 'error' });
+      });
+  };
 
-    window.copyPrompt = (promptId: string): void => {
-        const prompt = getPromptById(promptId);
-        if (!prompt) return;
+  window.copyModalPrompt = (): void => {
+    if (!currentPrompt) return;
 
-        navigator.clipboard
-            .writeText(prompt.prompt)
-            .then(() => {
-                showToast('提示词已复制到剪贴板', { type: 'success' });
-            })
-            .catch(() => {
-                showToast('复制失败,请手动复制', { type: 'error' });
-            });
-    };
+    const promptText =
+      currentLang === 'zh' ? currentPrompt.prompt : currentPrompt.promptEn || currentPrompt.prompt;
 
-    window.copyModalPrompt = (): void => {
-        if (!currentPrompt) return;
-
-        const promptText =
-            currentLang === 'zh' ? currentPrompt.prompt : currentPrompt.promptEn || currentPrompt.prompt;
-
-        navigator.clipboard
-            .writeText(promptText)
-            .then(() => {
-                const langName = currentLang === 'zh' ? '中文' : '英文';
-                showToast(`${langName}提示词已复制到剪贴板`, { type: 'success' });
-            })
-            .catch(() => {
-                showToast('复制失败,请手动复制', { type: 'error' });
-            });
-    };
+    navigator.clipboard
+      .writeText(promptText)
+      .then(() => {
+        const langName = currentLang === 'zh' ? '中文' : '英文';
+        showToast(`${langName}提示词已复制到剪贴板`, { type: 'success' });
+      })
+      .catch(() => {
+        showToast('复制失败,请手动复制', { type: 'error' });
+      });
+  };
 }
 
 function unregisterWindowActions(): void {
-    delete window.viewPrompt;
-    delete window.switchPromptLang;
-    delete window.closePromptModal;
-    delete window.copyPrompt;
-    delete window.copyModalPrompt;
+  delete window.viewPrompt;
+  delete window.switchPromptLang;
+  delete window.closePromptModal;
+  delete window.copyPrompt;
+  delete window.copyModalPrompt;
 }
-
 
 // Module class
 class PromptsModule extends BaseModule {
-    /**
-     * 挂载模块
-     */
-    async mount(container: HTMLElement): Promise<void> {
-        const html = await loadTemplate('src/modules/more/views/explore/prompts/template.html');
+  /**
+   * 挂载模块
+   */
+  async mount(container: HTMLElement): Promise<void> {
+    const html = await loadTemplate('src/modules/more/views/explore/prompts/template.html');
 
-        currentCategory = 'all';
-        currentPrompt = null;
-        currentLang = 'zh';
-        currentKeyword = '';
-        removePromptModal();
+    currentCategory = 'all';
+    currentPrompt = null;
+    currentLang = 'zh';
+    currentKeyword = '';
+    removePromptModal();
 
-        // ✅ 安全: html来自本地静态template.html，无用户输入
-        setSafeHtml(container, html);
-        container.classList.add('fade-in');
+    // ✅ 安全: html来自本地静态template.html，无用户输入
+    setSafeHtml(container, html);
+    container.classList.add('fade-in');
 
-        mountPromptModal(container);
-        registerWindowActions();
-        initEventListeners(container);
-        renderCategories();
-        renderPromptList();
+    mountPromptModal(container);
+    registerWindowActions();
+    initEventListeners(container);
+    renderCategories();
+    renderPromptList();
+  }
 
-    }
+  /**
+   * 卸载模块
+   */
+  unmount(): void {
+    window.closePromptModal?.();
+    removeEventListeners();
+    unregisterWindowActions();
+    removePromptModal();
 
-
-
-    /**
-     * 卸载模块
-     */
-    unmount(): void {
-        window.closePromptModal?.();
-        removeEventListeners();
-        unregisterWindowActions();
-        removePromptModal();
-
-        currentCategory = 'all';
-        currentPrompt = null;
-        currentLang = 'zh';
-        currentKeyword = '';
-
-    }
-
-
+    currentCategory = 'all';
+    currentPrompt = null;
+    currentLang = 'zh';
+    currentKeyword = '';
+  }
 }
 
 // 导出模块实例

@@ -26,48 +26,48 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     domain: 'api.openai.com',
     requiresProxy: true,
     displayName: 'OpenAI',
-    isDangerous: true
+    isDangerous: true,
   },
   anthropic: {
     domain: 'api.anthropic.com',
     requiresProxy: true,
     displayName: 'Anthropic',
-    isDangerous: true
+    isDangerous: true,
   },
   deepseek: {
     domain: 'api.deepseek.com',
     requiresProxy: true,
     displayName: 'DeepSeek',
-    isDangerous: true
+    isDangerous: true,
   },
   google: {
     domain: 'generativelanguage.googleapis.com',
     requiresProxy: true,
     displayName: 'Google AI',
-    isDangerous: true
+    isDangerous: true,
   },
   scraperapi: {
     domain: 'api.scraperapi.com',
     requiresProxy: false,
-    displayName: 'ScraperAPI'
+    displayName: 'ScraperAPI',
   },
   zenrows: {
     domain: 'api.zenrows.com',
     requiresProxy: false,
-    displayName: 'ZenRows'
+    displayName: 'ZenRows',
   },
   brightdata: {
     domain: 'api.brightdata.com',
     requiresProxy: false,
-    displayName: 'Bright Data'
+    displayName: 'Bright Data',
   },
   // 自部署 OpenAI 兼容网关，浏览器直连。
   new_api: {
     domain: 'new.hongecb.store',
     requiresProxy: false,
     displayName: 'NEW API',
-    isDangerous: false
-  }
+    isDangerous: false,
+  },
 };
 
 /**
@@ -84,7 +84,7 @@ export const AMAZON_DOMAINS = [
   'amazon.se',
   'amazon.pl',
   'amazon.be',
-  'amazon.ie'
+  'amazon.ie',
 ] as const;
 
 /**
@@ -124,7 +124,7 @@ export function generateCSPConnectSrc(): string {
   const domains = [
     "'self'",
     ...Object.values(API_ENDPOINTS).map(config => `https://${config.domain}`),
-    ...AMAZON_DOMAINS.map(domain => `https://*.${domain}`)
+    ...AMAZON_DOMAINS.map(domain => `https://*.${domain}`),
   ];
   return domains.join(' ');
 }

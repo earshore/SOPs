@@ -13,6 +13,9 @@ interface EncryptedData {
   version: string;
 }
 
+export const SECURE_STORAGE_SECURITY_BOUNDARY =
+  '浏览器本地加密保存，密钥仍会在当前页面运行时解密；这不是服务端密钥托管，也不能隔离同源脚本、浏览器扩展或本机访问。';
+
 /**
  * 获取设备指纹作为加密密钥
  */
@@ -35,7 +38,7 @@ async function getDeviceFingerprint(): Promise<string> {
 
   // 转换为 hex 字符串
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 /**
@@ -55,6 +58,8 @@ async function importKey(keyString: string): Promise<CryptoKey> {
  * 安全存储服务
  */
 export const SecureStorage = {
+  securityBoundary: SECURE_STORAGE_SECURITY_BOUNDARY,
+
   /**
    * 加密并存储数据
    */
