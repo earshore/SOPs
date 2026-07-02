@@ -379,6 +379,22 @@ describe('ScraperPanel current factory', () => {
     expect(panel.dataPreview.cleanup).toHaveBeenCalled();
   });
 
+  it('renders existing scraper data when the page is mounted again', () => {
+    scraperMocks.appState.scraper.scrapedData = {
+      metadata: { marketplace: 'DE' },
+      products: [{ asin: 'B08N5WRWNW' }],
+    };
+
+    const panel = createScraperPanel() as ScraperPanel;
+    panel.init();
+
+    expect(panel.dataPreview.checkLargeDataset).toHaveBeenCalled();
+    expect(panel.dataPreview.setupEventDelegation).toHaveBeenCalled();
+    expect(panel.dataPreview.renderDataPanel).toHaveBeenCalled();
+
+    panel.destroy();
+  });
+
   it('imports files, deletes data, and handles delete results', async () => {
     const panel = createScraperPanel() as ScraperPanel;
     panel.dataPreview = new scraperMocks.MockDataPreview();

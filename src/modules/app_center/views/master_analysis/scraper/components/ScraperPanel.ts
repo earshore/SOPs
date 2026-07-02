@@ -59,6 +59,7 @@ type ScraperPanelThis = ScraperPanelState & {
     loadHistory(): void;
     restoreState(): void;
     saveState(): void;
+    _renderInitialData(): void;
     updateDataPreview(data: ScrapedData | null): void;
     renderDataPanel(): void;
     toggleCardExpand(asin: string): void;
@@ -401,6 +402,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
             // 从 state 恢复状态
             this.restoreState();
+            this._renderInitialData();
 
             // 保存事件处理函数引用
             const historyUpdatedHandler = () => {
