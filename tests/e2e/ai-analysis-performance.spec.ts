@@ -31,7 +31,6 @@ const PERFORMANCE_BASELINE = {
   }
 };
 
-test.describe('AI 分析模块性能测试', () => {
   let aiAnalysis: AIAnalysisPage;
 
   test.beforeEach(async ({ page }) => {
@@ -657,4 +656,3 @@ test.describe('AI 分析模块性能测试', () => {
       ).toBeLessThan(5);
     });
   });
-});

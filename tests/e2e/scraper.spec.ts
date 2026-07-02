@@ -8,7 +8,6 @@ import { test, expect } from '@playwright/test';
 import { ScraperPage } from './pages/ScraperPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
-test.describe('Scraper 模块 E2E 测试', () => {
   let scraper: ScraperPage;
 
   test.beforeEach(async ({ page }) => {
@@ -639,4 +638,3 @@ test.describe('Scraper 模块 E2E 测试', () => {
       console.log('✅ 平板端显示正常');
     });
   });
-});

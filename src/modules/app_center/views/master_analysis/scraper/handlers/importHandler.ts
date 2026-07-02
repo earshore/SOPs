@@ -27,6 +27,15 @@ interface ImportCollectionContext {
   detectedSites: Set<string>;
 }
 
+interface MarketplaceSelectionElements {
+  backdrop: HTMLDivElement;
+  btnConfirm: HTMLButtonElement | null;
+  btnCancel: HTMLButtonElement | null;
+}
+
+type MarketplaceSelectionFinish = (selected: string | null) => void;
+type MarketplaceSelectionCleanup = () => void;
+
 const MAX_IMPORT_FILE_SIZE = 10 * 1024 * 1024;
 const LARGE_IMPORT_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -151,6 +160,102 @@ export function getReviewSignature(review: CustomerReview): string {
   return `${date}_${author}_${headline.substring(0, 20)}`.trim();
 }
 
+function cloneImportedProduct(product: ScrapedProduct): ScrapedProduct {
+  return JSON.parse(JSON.stringify(product)) as ScrapedProduct;
+}
+
+function ensureProductMetadata(product: ScrapedProduct): void {
+  if (!product.metadata) {
+    product.metadata = {};
+  }
+}
+
+function getMasterProductVersion(
+  versions: ImportedProductWithSource[],
+  targetMarketplace: string
+): ImportedProductWithSource | undefined {
+  return versions.find(version => version._source_site === targetMarketplace);
+}
+
+function getBaseProductVersion(
+  versions: ImportedProductWithSource[],
+  masterVersion: ImportedProductWithSource | undefined,
+  existingVersion: ScrapedProduct | undefined
+): ScrapedProduct | undefined {
+  return masterVersion || existingVersion || versions[0];
+}
+
+function collectReviewSources(
+  versions: ImportedProductWithSource[],
+  masterVersion: ImportedProductWithSource | undefined,
+  existingVersion: ScrapedProduct | undefined
+): Array<ScrapedProduct & { _source_site?: string }> {
+  if (masterVersion) {
+    return [
+      masterVersion,
+      ...versions.filter(version => version !== masterVersion),
+      ...(existingVersion ? [existingVersion] : []),
+    ];
+  }
+
+  return [...(existingVersion ? [existingVersion] : []), ...versions];
+}
+
+function copyReviewWithOrigin(
+  review: CustomerReview,
+  sourceSite: string | undefined
+): CustomerReview {
+  const reviewWithOrigin = { ...review } as CustomerReview & { _origin_site?: string };
+  if (sourceSite && sourceSite !== 'Unknown') {
+    reviewWithOrigin._origin_site = sourceSite;
+  }
+  return reviewWithOrigin;
+}
+
+function collectUniqueReviews(
+  reviewSources: Array<ScrapedProduct & { _source_site?: string }>
+): CustomerReview[] {
+  const uniqueReviewsMap = new Map<string, CustomerReview>();
+
+  reviewSources.forEach(source => {
+    if (!Array.isArray(source.customer_reviews)) return;
+
+    source.customer_reviews.forEach((review: CustomerReview) => {
+      const signature = getReviewSignature(review);
+      if (!uniqueReviewsMap.has(signature)) {
+        uniqueReviewsMap.set(signature, copyReviewWithOrigin(review, source._source_site));
+      }
+    });
+  });
+
+  return Array.from(uniqueReviewsMap.values());
+}
+
+function removeImportSourceFields(product: ScrapedProduct): ProductData {
+  const cleanProduct = { ...product };
+  delete (cleanProduct as ImportedProductWithSource)._source_site;
+  delete (cleanProduct as ImportedProductWithSource)._filename;
+  return cleanProduct;
+}
+
+function mergeProductVersions(
+  versions: ImportedProductWithSource[],
+  targetMarketplace: string,
+  existingVersion: ScrapedProduct | undefined
+): ProductData | null {
+  const masterVersion = getMasterProductVersion(versions, targetMarketplace);
+  const baseProduct = getBaseProductVersion(versions, masterVersion, existingVersion);
+  if (!baseProduct) return null;
+
+  const mergedProduct = cloneImportedProduct(baseProduct);
+  ensureProductMetadata(mergedProduct);
+  mergedProduct.customer_reviews = collectUniqueReviews(
+    collectReviewSources(versions, masterVersion, existingVersion)
+  );
+
+  return removeImportSourceFields(mergedProduct);
+}
+
 /**
  * 合并多站点产品数据
  */
@@ -162,52 +267,14 @@ export function mergeProducts(
   const finalProducts: ProductData[] = [];
 
   for (const [asin, versions] of productPool.entries()) {
-    const masterVersion = versions.find(v => v._source_site === targetMarketplace);
-    const existingVersion = currentProductsMap.get(asin);
-    const baseProduct = masterVersion || existingVersion || versions[0];
-
-    if (!baseProduct) continue;
-
-    const mergedProduct: ScrapedProduct = JSON.parse(JSON.stringify(baseProduct));
-    if (!mergedProduct.metadata) mergedProduct.metadata = {};
-
-    const allReviewSources: Array<ScrapedProduct & { _source_site?: string }> = [];
-    if (masterVersion) {
-      allReviewSources.push(masterVersion);
-      allReviewSources.push(...versions.filter(version => version !== masterVersion));
-      if (existingVersion) allReviewSources.push(existingVersion);
-    } else {
-      if (existingVersion) allReviewSources.push(existingVersion);
-      allReviewSources.push(...versions);
+    const mergedProduct = mergeProductVersions(
+      versions,
+      targetMarketplace,
+      currentProductsMap.get(asin)
+    );
+    if (mergedProduct) {
+      finalProducts.push(mergedProduct);
     }
-
-    const uniqueReviewsMap = new Map<string, CustomerReview>();
-
-    allReviewSources.forEach(ver => {
-      if (Array.isArray(ver.customer_reviews)) {
-        ver.customer_reviews.forEach((r: CustomerReview) => {
-          const sig = getReviewSignature(r);
-          if (!uniqueReviewsMap.has(sig)) {
-            const reviewWithOrigin = { ...r } as CustomerReview & { _origin_site?: string };
-            if (ver._source_site && ver._source_site !== 'Unknown') {
-              reviewWithOrigin._origin_site = ver._source_site;
-            }
-            uniqueReviewsMap.set(sig, reviewWithOrigin);
-          }
-        });
-      }
-    });
-
-    mergedProduct.customer_reviews = Array.from(uniqueReviewsMap.values());
-
-    // 清理临时字段
-    const cleanProduct = { ...mergedProduct };
-    delete (cleanProduct as ScrapedProduct & { _source_site?: string; _filename?: string })
-      ._source_site;
-    delete (cleanProduct as ScrapedProduct & { _source_site?: string; _filename?: string })
-      ._filename;
-
-    finalProducts.push(cleanProduct);
   }
 
   return finalProducts;
@@ -272,94 +339,144 @@ function createMarketplaceSelectionContent(sites: string[], modalId: string): st
         `;
 }
 
+function createMarketplaceBackdrop(modalId: string): HTMLDivElement {
+  const backdrop = document.createElement('div');
+  backdrop.id = modalId;
+  backdrop.className =
+    'fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in';
+  return backdrop;
+}
+
+function renderMarketplaceSelectionElements(
+  sites: string[],
+  modalId: string
+): MarketplaceSelectionElements {
+  const backdrop = createMarketplaceBackdrop(modalId);
+  const content = createMarketplaceSelectionContent(sites, modalId);
+  const renderer = SafeRenderer.getInstance();
+
+  renderer.renderTemplate(backdrop, content);
+  document.body.appendChild(backdrop);
+
+  return {
+    backdrop,
+    btnConfirm: document.getElementById(`btn-confirm-${modalId}`) as HTMLButtonElement | null,
+    btnCancel: document.getElementById(`btn-cancel-${modalId}`) as HTMLButtonElement | null,
+  };
+}
+
+function removeMarketplaceBackdrop(backdrop: HTMLElement): void {
+  try {
+    if (document.body.contains(backdrop)) {
+      document.body.removeChild(backdrop);
+    }
+  } catch (error) {
+    console.error('[Scraper] 清理弹窗失败:', error);
+  }
+}
+
+function getSelectedMarketplace(backdrop: HTMLElement): string | null {
+  const selectedInput = backdrop.querySelector(
+    'input[name="site_choice"]:checked'
+  ) as HTMLInputElement | null;
+  return selectedInput ? selectedInput.value : null;
+}
+
+function hasRequiredMarketplaceControls(elements: MarketplaceSelectionElements): boolean {
+  return Boolean(elements.btnConfirm && elements.btnCancel);
+}
+
+function createMarketplaceSelectionResolver(
+  resolve: (selected: string | null) => void,
+  cleanupRef: { current: MarketplaceSelectionCleanup }
+): MarketplaceSelectionFinish {
+  let resolved = false;
+
+  return (selected: string | null) => {
+    if (resolved) return;
+    resolved = true;
+    cleanupRef.current();
+    resolve(selected);
+  };
+}
+
+function createMarketplaceSelectionCleanup(
+  elements: MarketplaceSelectionElements,
+  handlers: {
+    confirm: (e: Event) => void;
+    cancel: (e: Event) => void;
+    backdropClick: (e: MouseEvent) => void;
+    escape: (e: KeyboardEvent) => void;
+  }
+): MarketplaceSelectionCleanup {
+  return () => {
+    elements.btnConfirm?.removeEventListener('click', handlers.confirm);
+    elements.btnCancel?.removeEventListener('click', handlers.cancel);
+    elements.backdrop.removeEventListener('click', handlers.backdropClick);
+    document.removeEventListener('keydown', handlers.escape);
+    removeMarketplaceBackdrop(elements.backdrop);
+  };
+}
+
+function bindMarketplaceSelectionEvents(
+  elements: MarketplaceSelectionElements,
+  finish: MarketplaceSelectionFinish
+): MarketplaceSelectionCleanup {
+  const handlers = {
+    confirm: (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      finish(getSelectedMarketplace(elements.backdrop));
+    },
+    cancel: (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      finish(null);
+    },
+    backdropClick: (e: MouseEvent) => {
+      if (e.target === elements.backdrop) {
+        finish(null);
+      }
+    },
+    escape: (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        finish(null);
+      }
+    },
+  };
+
+  elements.btnConfirm?.addEventListener('click', handlers.confirm, { once: true });
+  elements.btnCancel?.addEventListener('click', handlers.cancel, { once: true });
+  elements.backdrop.addEventListener('click', handlers.backdropClick);
+  document.addEventListener('keydown', handlers.escape);
+
+  return createMarketplaceSelectionCleanup(elements, handlers);
+}
+
+function openMarketplaceSelectionModal(
+  sites: string[],
+  resolve: (selected: string | null) => void
+): void {
+  const modalId = 'site-select-modal-' + Date.now();
+  const elements = renderMarketplaceSelectionElements(sites, modalId);
+  const cleanupRef = { current: () => removeMarketplaceBackdrop(elements.backdrop) };
+  const finish = createMarketplaceSelectionResolver(resolve, cleanupRef);
+
+  if (!hasRequiredMarketplaceControls(elements)) {
+    console.error('[Scraper] 站点选择弹窗渲染不完整，已自动关闭');
+    finish(null);
+    return;
+  }
+
+  cleanupRef.current = bindMarketplaceSelectionEvents(elements, finish);
+}
+
 /**
  * 显示站点选择弹窗
  */
 export function showMarketplaceSelectionModal(sites: string[]): Promise<string | null> {
   return new Promise(resolve => {
-    const modalId = 'site-select-modal-' + Date.now();
-    const backdrop = document.createElement('div');
-    backdrop.id = modalId;
-    backdrop.className =
-      'fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in';
-    const content = createMarketplaceSelectionContent(sites, modalId);
-
-    const renderer = SafeRenderer.getInstance();
-    renderer.renderTemplate(backdrop, content);
-    document.body.appendChild(backdrop);
-
-    const btnConfirm = document.getElementById(
-      `btn-confirm-${modalId}`
-    ) as HTMLButtonElement | null;
-    const btnCancel = document.getElementById(`btn-cancel-${modalId}`) as HTMLButtonElement | null;
-
-    let resolved = false;
-
-    const cleanup = () => {
-      if (btnConfirm) btnConfirm.removeEventListener('click', handleConfirm);
-      if (btnCancel) btnCancel.removeEventListener('click', handleCancel);
-      backdrop.removeEventListener('click', handleBackdropClick);
-      document.removeEventListener('keydown', handleEscape);
-
-      try {
-        if (backdrop && document.body.contains(backdrop)) {
-          document.body.removeChild(backdrop);
-        }
-      } catch (error) {
-        console.error('[Scraper] 清理弹窗失败:', error);
-      }
-    };
-
-    const finish = (selected: string | null) => {
-      if (resolved) return;
-      resolved = true;
-      cleanup();
-      resolve(selected);
-    };
-
-    const handleConfirm = (e: Event) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (resolved) return;
-
-      const selectedInput = backdrop.querySelector(
-        'input[name="site_choice"]:checked'
-      ) as HTMLInputElement;
-      const selected = selectedInput ? selectedInput.value : null;
-
-      finish(selected);
-    };
-
-    const handleCancel = (e: Event) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      finish(null);
-    };
-
-    const handleBackdropClick = (e: MouseEvent) => {
-      if (e.target === backdrop) {
-        finish(null);
-      }
-    };
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        finish(null);
-      }
-    };
-
-    if (!btnConfirm || !btnCancel) {
-      console.error('[Scraper] 站点选择弹窗渲染不完整，已自动关闭');
-      finish(null);
-      return;
-    }
-
-    btnConfirm.addEventListener('click', handleConfirm, { once: true });
-    btnCancel.addEventListener('click', handleCancel, { once: true });
-    backdrop.addEventListener('click', handleBackdropClick);
-    document.addEventListener('keydown', handleEscape);
+    openMarketplaceSelectionModal(sites, resolve);
   });
 }
 
