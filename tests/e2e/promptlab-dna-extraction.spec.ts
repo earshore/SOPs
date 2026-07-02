@@ -9,7 +9,6 @@ import { PromptlabPage } from './pages/PromptlabPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 import { setupAPIConfig, waitForAppReady } from '../helpers/test-setup';
 
-test.describe('Promptlab DNA 自动提取功能测试', () => {
   let promptlab: PromptlabPage;
 
   test.beforeEach(async ({ page }) => {
@@ -411,4 +410,3 @@ test.describe('Promptlab DNA 自动提取功能测试', () => {
       console.log('✅ DNA 提取性能良好');
     });
   });
-});
