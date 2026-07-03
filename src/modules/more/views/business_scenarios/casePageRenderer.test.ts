@@ -17,8 +17,18 @@ describe('renderBusinessScenarioPage', () => {
 
     expect(html).toContain('<div class="module-container py-6">');
     expect(html.match(/class="zn-hero"/g)).toHaveLength(1);
+    expect(html).toContain('<h1>差评 24 小时闪电响应');
     expect(html).not.toContain('wb-container');
     expect(html).not.toContain('Legacy banner');
+  });
+
+  it('renders the usage notice title as the page h1', () => {
+    const html = renderBusinessScenarioPage(
+      '<div class="module-container py-6"><section>Legacy body</section></div>',
+      'usage_notice'
+    );
+
+    expect(html).toContain('<h1>使用 OpenClaw 前必读 · 两条关键须知</h1>');
   });
 
   it('keeps the module container when loadTemplate has wrapped the template', () => {

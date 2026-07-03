@@ -56,6 +56,7 @@ function registerConvertedRoutes(router: NavigoAdapter, conversionResult: Conver
   for (const [alias, target] of Object.entries(conversionResult.aliases)) {
     router.registerAlias(alias, routeIdToPath(target.replace(/^\//, '')));
   }
+  router.registerAlias('/ppc_search_terms', routeIdToPath('ppc_search_terms'));
   router.registerAlias('/app-center/playground', routeIdToPath('playground'));
 }
 
@@ -99,9 +100,11 @@ function setupPopstateNavigation(): void {
     if (hash && routerInstance) {
       const normalizedHash = normalizeRoutePath(hash);
       const isLegacyPlaygroundPath = normalizedHash === '/app-center/playground';
+      const isLegacyPpcPath = normalizedHash === '/ppc_search_terms';
+      const shouldReplaceLegacyPath = isLegacyPlaygroundPath || isLegacyPpcPath;
       routerInstance.navigate(normalizedHash, {
-        updateHistory: isLegacyPlaygroundPath ? true : false,
-        replace: isLegacyPlaygroundPath,
+        updateHistory: shouldReplaceLegacyPath ? true : false,
+        replace: shouldReplaceLegacyPath,
         skipMiddleware: false,
       });
     }
@@ -208,7 +211,7 @@ export function triggerInitialNavigation(): void {
     });
   } else {
     const normalizedHash = normalizeRoutePath(currentHash);
-    if (normalizedHash === '/app-center/playground') {
+    if (normalizedHash === '/app-center/playground' || normalizedHash === '/ppc_search_terms') {
       void routerInstance.navigate(normalizedHash, {
         replace: true,
         skipMiddleware: false,

@@ -11,8 +11,6 @@
   height: 100%;
   position: relative;
   overflow: hidden;
-  cursor: none;
-  /* 隐藏默认光标 */
 }
 
 /* ----------------------------------------
@@ -263,24 +261,4 @@
 
 .delay-1 {
   animation-delay: -4s;
-}
-
-/* ----------------------------------------
-   5. 光标 (深色)
-   ---------------------------------------- */
-#cursor-follower {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--color-slate-900);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 999;
-  transition: transform 0.1s linear;
-  /* 略微延迟 */
-  background: rgba(15, 23, 42, 0.05);
-  backdrop-filter: blur(2px);
 }

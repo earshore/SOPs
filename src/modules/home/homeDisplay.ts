@@ -233,12 +233,7 @@ class HomeModule extends BaseModule {
     this.mouse.x = e.clientX;
     this.mouse.y = e.clientY;
 
-    const cursorFollower = document.getElementById('cursor-follower');
     const heroContent = document.getElementById('hero-content');
-
-    if (cursorFollower) {
-      cursorFollower.style.transform = `translate(${this.mouse.x}px, ${this.mouse.y}px) translate(-50%, -50%)`;
-    }
 
     if (heroContent) {
       const moveX = (window.innerWidth / 2 - this.mouse.x) * 0.01;

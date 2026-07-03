@@ -311,15 +311,68 @@
 }
 
 .npi-lifecycle-table input[type='number'],
-.npi-lifecycle-table select {
+.npi-lifecycle-table select,
+.npi-lifecycle-table button {
   min-height: 2rem;
+  line-height: 1.2;
+}
+
+.npi-lifecycle-table input[type='number'],
+.npi-lifecycle-table select {
   border-color: var(--color-slate-300);
   background: var(--surface-card, #ffffff);
+}
+
+body .npi-lifecycle-table select[data-action='update-field'] {
+  min-height: 2rem;
+  height: 2rem;
+}
+
+.npi-lifecycle-table select,
+.npi-lifecycle-table button,
+.npi-lifecycle-table .npi-checkbox-hit {
+  cursor: pointer;
+}
+
+.npi-lifecycle-table button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .npi-lifecycle-table input[type='checkbox'] {
   width: 1.125rem;
   height: 1.125rem;
+}
+
+body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='update-field'] {
+  width: 1.125rem;
+  min-height: 1.125rem;
+  height: 1.125rem;
+  padding: 0;
+}
+
+.npi-lifecycle-table .npi-checkbox-hit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  margin-block: -0.4375rem;
+  border-radius: var(--rounded-md, 6px);
+}
+
+.npi-lifecycle-table button[data-action='open-next-step-editor'] {
+  min-width: 2rem;
+  padding-inline: 0;
+}
+
+@media screen and (min-width: 1024px) {
+  .npi-tracker-page select,
+  .npi-tracker-page button,
+  #next-step-modal button {
+    min-height: 2rem;
+  }
 }
 
 /* ==================== 步骤圆圈样式 ==================== */

@@ -28,7 +28,7 @@
 | 已完成 | Playground Prompt 删除一致性          | Prompt 删除先确认历史快照引用删除成功，再更新 Playground Prompt 列表；缺少快照引用按幂等成功处理，保存失败保留 UI 记录。                                                                              |
 | 已完成 | Playground Deep Chat 构建分包         | `deep-chat` 第三方 bundle 改为按需静态资产脚本加载，Playground 路由 chunk 从约 420 kB 降到约 42 kB，Vite 大 chunk warning 清零。                                                                      |
 | 已完成 | 构建性能 warning 收敛                 | 确认 Node `DEP0190` 在 Node 24.11.1 + Vite 8.0.16 下不可复现；Rolldown `pluginTimings` 是内置 asset/CSS 插件耗时占比诊断，已用 `checks.pluginTimings=false` 只关闭该诊断，其他构建 warning 保持开启。 |
-| 已完成 | PPC 搜索词拆分收口                    | 清理 `ppc_search_terms/index.ts` 拆分后残留的重复分析/筛选/设置实现，保留 `analysisEngine.ts`、`filters.ts`、`settings.ts` 等单一来源，恢复 type-check、lint 和 Vite 构建。                           |
+| 已完成 | PPC 搜索词拆分收口                    | 清理 `ppc_tools/ppc_search_terms/index.ts` 拆分后残留的重复分析/筛选/设置实现，保留 `analysisEngine.ts`、`filters.ts`、`settings.ts` 等单一来源，恢复 type-check、lint 和 Vite 构建。                           |
 | 已完成 | 测试 lint 非空断言清理                | `dnaExtractor.test.ts` 和 `universalDNAExtractor.test.ts` 改为显式断言收窄，`lint:tests` 从 99 条 `no-non-null-assertion` warning 收敛到 0。                                                          |
 | 已完成 | 原生日志全局兜底                      | 为 `nativeLoggerConsole` 增加入口/测试 bootstrap 和全局类型声明，修复替换裸 `console` 后的类型与运行时兜底缺口。                                                                                      |
 | 已完成 | PPC Agent/报表控件拆分收口            | 将分析流程、Agent 复核合并逻辑和报表控件渲染从 `index.ts` 拆到 `analysisFlow.ts`、`agentReview.ts`、`reportControls.ts`，清理拆分中间态的重复定义和漏导入。                                           |
@@ -139,7 +139,7 @@
 ### 第 2 批：格式化基线
 
 - [x] 确认 Prettier 配置，不直接用默认配置重排全仓；`format`/`format:check` 已显式指定 `config/.prettierrc.json` 和 `config/.prettierignore`。
-- [x] 完成 `src/modules/app_center/views/ppc_search_terms/**/*.{ts,html,css}` 格式化，并通过 PPC 专项测试、`type-check` 和 `lint:warning-gate`。
+- [x] 完成 `src/modules/app_center/views/ppc_tools/ppc_search_terms/**/*.{ts,html,css}` 格式化，并通过 PPC 专项测试、`type-check` 和 `lint:warning-gate`。
 - [x] 完成 `src/common/errors/**/*.{ts,js,css,md,json}` 格式化，并通过公共错误处理专项测试、`type-check` 和 `lint:warning-gate`。
 - [x] 完成 `src/common/infrastructure/**/*.{ts,js,css,md,json}` 格式化，并通过安全渲染专项测试、`type-check` 和 `lint:warning-gate`。
 - [x] 完成 `src/common/**/*.{ts,js,css,md,json}` 格式化，并通过公共模块专项测试、`type-check` 和 `lint:warning-gate`。

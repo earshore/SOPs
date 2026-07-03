@@ -322,8 +322,8 @@
 }
 
 .playground-thread-delete {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -1211,8 +1211,8 @@
   }
 
   .playground-thread-delete {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     font-size: 10px;
   }
 

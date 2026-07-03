@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mount, unmount } from '@/modules/app_center/views/ppc_search_terms/index';
+import { mount, unmount } from '@/modules/app_center/views/ppc_tools/ppc_search_terms/index';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { showToast } from '@/common/ui/notifications';
 
@@ -114,7 +114,7 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
-vi.mock('@/modules/app_center/views/ppc_search_terms/services/llmAnalysisService', () => ({
+vi.mock('@/modules/app_center/views/ppc_tools/ppc_search_terms/services/llmAnalysisService', () => ({
   analyzePpcSearchTermsWithAgent: mocks.analyzeWithAgent,
 }));
 
@@ -211,7 +211,7 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     container.querySelector<HTMLButtonElement>('#ppc-export-current')?.click();
 
     expect(loadTemplate).toHaveBeenCalledWith(
-      'src/modules/app_center/views/ppc_search_terms/template.html'
+      'src/modules/app_center/views/ppc_tools/ppc_search_terms/template.html'
     );
     expect(mocks.analyzeWithAgent).toHaveBeenCalled();
     expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');

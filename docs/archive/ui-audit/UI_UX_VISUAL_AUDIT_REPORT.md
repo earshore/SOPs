@@ -86,7 +86,7 @@
 
 - 全局基础：`src/css/foundation/variables.css`、`src/common/config/design-tokens.ts`
 - App Center：`src/modules/app_center/app_center_style.css`
-- PPC：`src/modules/app_center/views/ppc_search_terms/style.css`
+- PPC：`src/modules/app_center/views/ppc_tools/style.css`
 - Welcome Banner：`src/css/components/welcome-banner.css`
 
 项目已经有全局 token，但局部模块又定义 `--app-*`、`--ppc-*`、`--wb-*` 等变量，且包含独立阴影、圆角、渐变和主色。短期这会让页面显得丰富，长期会让暗色模式、对比度、组件状态和截图回归难以统一。

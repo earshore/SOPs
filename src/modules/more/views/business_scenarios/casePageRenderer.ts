@@ -115,7 +115,7 @@ function renderHero(caseData: ScenarioCase): string {
                 ${renderBadge('v2.0 · 教会 → 沉淀 → 定时')}
                 ${renderBadge(caseData.market)}
             </div>
-            <h2>${escapeHtml(caseData.title)}</h2>
+            <h1>${escapeHtml(caseData.title)}</h1>
             <p>${escapeHtml(caseData.subtitle)} 同时请记住：OpenClaw 的实际表现高度依赖你接入的大模型，参考页展示的是较强模型配合分步教学后的样例。</p>
             <div class="zn-hero-meta">
                 ${caseData.metrics
@@ -299,7 +299,7 @@ function renderUsageNotice(): string {
   return `
     <div class="ziniao-case-shell ziniao-notice-shell" style="--color-accent:#dc2626;--color-secondary:#f59e0b;">
         <section class="zn-notice-title">
-            <h2>使用 OpenClaw 前必读 · 两条关键须知</h2>
+            <h1>使用 OpenClaw 前必读 · 两条关键须知</h1>
             <p>在跑任何自动化流程前，请先阅读以下两段说明。当前页面保留参考页信息顺序，并按项目宽版内容区重新排版。</p>
         </section>
 

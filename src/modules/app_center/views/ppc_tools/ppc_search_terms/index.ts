@@ -34,7 +34,7 @@ import {
 import { createActionListState } from './actions/actionListState';
 import type { AnalyzedRow, ReportType } from './types';
 
-import './style.css';
+import '../style.css';
 
 export type { ActionType, AnalyzedRow, Thresholds } from './types';
 export { analyzeReport, analyzeSearchTermReport } from './analysis/analysisEngine';
@@ -88,7 +88,7 @@ const exportControllerState: ExportControllerState = {
 
 const mountInternal = async (container: HTMLElement): Promise<void> => {
   resetAnalyzerState();
-  const html = await loadTemplate('src/modules/app_center/views/ppc_search_terms/template.html');
+  const html = await loadTemplate('src/modules/app_center/views/ppc_tools/ppc_search_terms/template.html');
   const renderer = SafeRenderer.getInstance();
   renderer.renderTemplate(container, html);
   renderThresholdFields(container);

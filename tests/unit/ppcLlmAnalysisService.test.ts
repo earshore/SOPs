@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { analyzePpcSearchTermsWithLLM } from '@/modules/app_center/views/ppc_search_terms/services/llmAnalysisService';
-import type { AnalyzedRow, Thresholds } from '@/modules/app_center/views/ppc_search_terms/types';
+import { analyzePpcSearchTermsWithLLM } from '@/modules/app_center/views/ppc_tools/ppc_search_terms/services/llmAnalysisService';
+import type { AnalyzedRow, Thresholds } from '@/modules/app_center/views/ppc_tools/ppc_search_terms/types';
 
 const mocks = vi.hoisted(() => ({
   callLLM: vi.fn(),

@@ -74,7 +74,7 @@
 
 优先页面：
 
-- `src/modules/app_center/views/ppc_search_terms/`
+- `src/modules/app_center/views/ppc_tools/ppc_search_terms/`
 - `src/modules/sops/views/growth/ppc_advertising/`
 - `src/modules/more/views/business_scenarios/ad_acos_diagnosis/`
 

@@ -167,6 +167,8 @@ const checkMark = (value: boolean): string => (value ? '✓' : '');
 const safeText = (value: unknown): string => escapeHtml(String(value ?? ''));
 const rowFieldLabel = (row: NPIProductRecord, field: keyof typeof FIELD_LABELS): string =>
   safeText(`${row.sku} ${FIELD_LABELS[field]}`);
+const rowActionLabel = (row: NPIProductRecord, action: string): string =>
+  safeText(`${row.sku} ${action}`);
 
 function renderComplianceStatus(compliance: ComplianceStatus): string {
   return compliance.isComplete
@@ -270,19 +272,29 @@ function renderComplianceCells(row: NPIProductRecord, compliance: ComplianceStat
   return `
             <!-- SOP合规 (6列: 泛欧 + 4项检查 + 状态) -->
             <td class="px-3 py-3 text-center border-l">
-                <input type="checkbox" ${checkedAttr(row.is_pan_eu)} class="w-4 h-4 rounded" data-action="update-field" data-field="is_pan_eu" aria-label="${rowFieldLabel(row, 'is_pan_eu')}">
+                <label class="npi-checkbox-hit" title="${rowFieldLabel(row, 'is_pan_eu')}">
+                    <input type="checkbox" ${checkedAttr(row.is_pan_eu)} class="w-4 h-4 rounded" data-action="update-field" data-field="is_pan_eu" aria-label="${rowFieldLabel(row, 'is_pan_eu')}">
+                </label>
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${checkedAttr(row.check_content)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_content" aria-label="${rowFieldLabel(row, 'check_content')}">
+                <label class="npi-checkbox-hit" title="${rowFieldLabel(row, 'check_content')}">
+                    <input type="checkbox" ${checkedAttr(row.check_content)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_content" aria-label="${rowFieldLabel(row, 'check_content')}">
+                </label>
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${checkedAttr(row.check_sensitive)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_sensitive" aria-label="${rowFieldLabel(row, 'check_sensitive')}">
+                <label class="npi-checkbox-hit" title="${rowFieldLabel(row, 'check_sensitive')}">
+                    <input type="checkbox" ${checkedAttr(row.check_sensitive)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_sensitive" aria-label="${rowFieldLabel(row, 'check_sensitive')}">
+                </label>
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${checkedAttr(row.check_creative)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_creative" aria-label="${rowFieldLabel(row, 'check_creative')}">
+                <label class="npi-checkbox-hit" title="${rowFieldLabel(row, 'check_creative')}">
+                    <input type="checkbox" ${checkedAttr(row.check_creative)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_creative" aria-label="${rowFieldLabel(row, 'check_creative')}">
+                </label>
             </td>
             <td class="px-3 py-3 text-center">
-                <input type="checkbox" ${checkedAttr(row.check_ebc)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_ebc" aria-label="${rowFieldLabel(row, 'check_ebc')}">
+                <label class="npi-checkbox-hit" title="${rowFieldLabel(row, 'check_ebc')}">
+                    <input type="checkbox" ${checkedAttr(row.check_ebc)} class="w-4 h-4 rounded text-emerald-600" data-action="update-field" data-field="check_ebc" aria-label="${rowFieldLabel(row, 'check_ebc')}">
+                </label>
             </td>
             <td class="px-3 py-3 text-center">
                 ${renderComplianceStatus(compliance)}
@@ -331,7 +343,7 @@ function renderDecisionCells(row: NPIProductRecord, context: TableRowRenderConte
             <td class="px-3 py-3">
                 <div class="flex flex-wrap gap-1">
                     ${renderNextStepTags(row.next_step)}
-                    <button data-action="open-next-step-editor" class="px-2 py-0.5 border border-dashed border-slate-300 rounded text-xs text-slate-400 hover:border-blue-400 hover:text-blue-500">
+                    <button type="button" data-action="open-next-step-editor" class="px-2 py-0.5 border border-dashed border-slate-300 rounded text-xs text-slate-400 hover:border-blue-400 hover:text-blue-500" aria-label="${rowActionLabel(row, '添加 Next Step')}" title="${rowActionLabel(row, '添加 Next Step')}">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>

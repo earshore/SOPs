@@ -36,7 +36,9 @@ const mocks = vi.hoisted(() => ({
   updateUIForRoute: vi.fn(),
   eventBusOn: vi.fn(),
   normalizeRoutePath: vi.fn((path: string) => (path.startsWith('/') ? path : `/${path}`)),
-  routeIdToPath: vi.fn((routeId: string) => `/${routeId}`),
+  routeIdToPath: vi.fn((routeId: string) =>
+    routeId === 'ppc_search_terms' ? '/app-center/ppc-search-terms' : `/${routeId}`
+  ),
 }));
 
 vi.mock('./navigo', () => ({
@@ -139,6 +141,10 @@ describe('initRouter setup', () => {
     });
     expect(mocks.router.registerAlias).toHaveBeenCalledWith('/legacy-keyword', '/keyword_hunter');
     expect(mocks.router.registerAlias).toHaveBeenCalledWith(
+      '/ppc_search_terms',
+      '/app-center/ppc-search-terms'
+    );
+    expect(mocks.router.registerAlias).toHaveBeenCalledWith(
       '/app-center/playground',
       '/playground'
     );
@@ -185,6 +191,14 @@ describe('initRouter navigation and teardown', () => {
       skipMiddleware: false,
     });
 
+    window.location.hash = '#/ppc_search_terms';
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    expect(mocks.router.navigate).toHaveBeenCalledWith('/ppc_search_terms', {
+      updateHistory: true,
+      replace: true,
+      skipMiddleware: false,
+    });
+
     window.location.hash = '#reports';
     window.dispatchEvent(new PopStateEvent('popstate'));
     expect(mocks.router.navigate).toHaveBeenCalledWith('/reports', {
@@ -203,6 +217,13 @@ describe('initRouter navigation and teardown', () => {
     window.location.hash = '#/app-center/playground';
     triggerInitialNavigation();
     expect(mocks.router.navigate).toHaveBeenCalledWith('/app-center/playground', {
+      replace: true,
+      skipMiddleware: false,
+    });
+
+    window.location.hash = '#/ppc_search_terms';
+    triggerInitialNavigation();
+    expect(mocks.router.navigate).toHaveBeenCalledWith('/ppc_search_terms', {
       replace: true,
       skipMiddleware: false,
     });

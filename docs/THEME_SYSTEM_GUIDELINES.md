@@ -244,7 +244,7 @@ npm run generate:tokens
 
 1. `src/css/components/welcome-banner.css`
 2. `src/modules/app_center/app_center_style.css`
-3. `src/modules/app_center/views/ppc_search_terms/style.css`
+3. `src/modules/app_center/views/ppc_tools/style.css`
 4. `src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css`
 5. `src/modules/app_center/views/master_analysis/scraper/scraper_style.css`
 6. `src/modules/app_center/views/playground/styles.css`
@@ -309,4 +309,3 @@ npm run build
 1. 本文的主题系统分层和验收规则。
 2. `VISUAL_DESIGN_GUIDELINES.md` 的页面和 banner 细则。
 3. `src/css/README.md` 与 `QUICK-REFERENCE.md` 的实现速查。
-

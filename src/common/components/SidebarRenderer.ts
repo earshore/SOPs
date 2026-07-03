@@ -499,7 +499,7 @@ export class SidebarRenderer {
             <div class="sidebar-module-icon w-7 h-7 rounded-lg flex items-center justify-center shadow-md">
               <i class="${icon} text-white text-[10px]"></i>
             </div>
-            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest">${title}</h2>
+            <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">${title}</div>
           </div>
 
           ${this.enableSearch ? this._buildSearchBox() : ''}

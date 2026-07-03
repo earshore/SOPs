@@ -8,8 +8,8 @@ import {
   parseReport,
   type Thresholds,
   xlsxArrayBufferToDelimitedText,
-} from '@/modules/app_center/views/ppc_search_terms/index';
-import { selectPpcAgentModelRows } from '@/modules/app_center/views/ppc_search_terms/services/llmAnalysisService';
+} from '@/modules/app_center/views/ppc_tools/ppc_search_terms/index';
+import { selectPpcAgentModelRows } from '@/modules/app_center/views/ppc_tools/ppc_search_terms/services/llmAnalysisService';
 
 const thresholds: Thresholds = {
   targetAcos: 35,

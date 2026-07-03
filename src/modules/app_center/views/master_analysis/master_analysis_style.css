@@ -252,65 +252,115 @@
     display: none !important;
   }
 
+  [x-data='promptlabPanel'] :where(#card-analysis, #card-product-dna, #card-strategy) {
+    border-color: var(--color-slate-300, #cbd5e1) !important;
+    box-shadow: 0 14px 30px -24px rgb(15 23 42 / 0.45) !important;
+  }
+
+  [x-data='promptlabPanel']
+    :where(#card-analysis, #card-product-dna, #card-strategy)
+    > div:first-child {
+    background: var(--color-white, #ffffff);
+    border-bottom-color: var(--color-slate-200, #e2e8f0) !important;
+  }
+
   #console-card-inner > div:first-child > div {
-    background-image: linear-gradient(to bottom right, #0f172a, #1e293b, #1e3a8a) !important;
-    border-radius: 16px !important;
-    box-shadow:
-      0 20px 25px -5px rgb(30 58 138 / 0.3),
-      0 8px 10px -6px rgb(30 58 138 / 0.3) !important;
+    background: var(--color-slate-50, #f8fafc) !important;
+    border: 1px solid var(--color-slate-200, #e2e8f0) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
+    color: var(--color-slate-700, #334155) !important;
   }
 
   #console-card-inner > div:last-child > div {
-    background-image: linear-gradient(to bottom right, #0f172a, #1e293b, #831843) !important;
-    border-radius: 16px !important;
-    box-shadow:
-      0 20px 25px -5px rgb(131 24 67 / 0.3),
-      0 8px 10px -6px rgb(131 24 67 / 0.3) !important;
+    background: var(--color-slate-50, #f8fafc) !important;
+    border: 1px solid var(--color-slate-200, #e2e8f0) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
+    color: var(--color-slate-700, #334155) !important;
   }
 
   #console-card-inner :where(.absolute[class*='blur-'][class*='rounded-full'], .absolute.inset-0),
   #console-card-inner :where(#btn-generate-prompt, #btn-generate-visual) > .absolute {
-    display: block !important;
+    display: none !important;
   }
 
-  #console-card-inner > div:first-child > div > .absolute.inset-0 {
-    background-image: radial-gradient(circle, #3b82f6 1px, transparent 1px) !important;
-    background-size: 20px 20px;
+  #console-card-inner > div > div > .pr-28 h3 {
+    color: var(--color-slate-700, #334155) !important;
+    font-size: 0.875rem !important;
   }
 
-  #console-card-inner > div:last-child > div > .absolute.inset-0 {
-    background-image: radial-gradient(circle, #ec4899 1px, transparent 1px) !important;
-    background-size: 20px 20px;
+  #console-card-inner > div > div > .pr-28 :where(span, p) {
+    color: var(--color-slate-500, #64748b) !important;
   }
 
-  #console-card-inner #btn-generate-prompt > .absolute,
-  #console-card-inner #btn-generate-visual > .absolute {
-    background-image: linear-gradient(
-      to right,
-      transparent,
-      rgb(255 255 255 / 0.1),
-      transparent
-    ) !important;
+  #embed-toggle-container {
+    background: var(--color-slate-200, #e2e8f0) !important;
+    border-color: var(--color-slate-200, #e2e8f0) !important;
+  }
+
+  #mode-toggle-glider {
+    background: var(--color-white, #ffffff) !important;
+  }
+
+  #console-card-inner > div:first-child > div > .pr-28 .w-8 {
+    background: var(--color-blue-50, #eff6ff) !important;
+  }
+
+  #console-card-inner > div:last-child > div > .pr-28 .w-8 {
+    background: var(--color-rose-50, #fff1f2) !important;
+  }
+
+  #console-card-inner > div:first-child > div > .pr-28 i {
+    color: var(--color-blue-600, #2563eb) !important;
+  }
+
+  #console-card-inner > div:last-child > div > .pr-28 i {
+    color: var(--color-rose-600, #e11d48) !important;
   }
 
   #console-card-inner #btn-generate-prompt:not(:disabled) {
-    background-image: linear-gradient(to right, #3b82f6, #4f46e5) !important;
-    border-radius: 12px !important;
-    box-shadow:
-      0 10px 15px -3px rgb(59 130 246 / 0.3),
-      0 4px 6px -4px rgb(59 130 246 / 0.3) !important;
+    background: var(--color-blue-600, #2563eb) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
   }
 
   #console-card-inner #btn-generate-visual:not(:disabled) {
-    background-image: linear-gradient(to right, #db2777, #e11d48) !important;
-    border-radius: 12px !important;
-    box-shadow:
-      0 10px 15px -3px rgb(190 24 93 / 0.4),
-      0 4px 6px -4px rgb(190 24 93 / 0.4) !important;
+    background: var(--color-rose-600, #e11d48) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
   }
 
   #console-card-inner :where(#btn-generate-prompt, #btn-generate-visual):disabled {
     background: var(--color-slate-300, #cbd5e1) !important;
     box-shadow: none !important;
+  }
+
+  #prompt-output-card {
+    background: var(--color-slate-50, #f8fafc) !important;
+    border-color: var(--color-slate-200, #e2e8f0) !important;
+    box-shadow: none !important;
+  }
+
+  #prompt-output-card > div:first-child {
+    background: var(--color-slate-50, #f8fafc) !important;
+    border-bottom-color: var(--color-slate-200, #e2e8f0) !important;
+  }
+
+  #prompt-output-card #output-preview-title {
+    color: var(--color-slate-500, #64748b) !important;
+    font-weight: 600 !important;
+  }
+
+  #prompt-output-card #final-prompt-output {
+    color: var(--color-slate-600, #475569) !important;
+  }
+
+  [x-data='promptlabPanel'] button[title='复制 AI 分析报告与产品 DNA 补充中的 SEO 搜索关键词'] {
+    background: var(--color-slate-50, #f8fafc) !important;
+    border-color: var(--color-slate-200, #e2e8f0) !important;
+    color: var(--color-slate-600, #475569) !important;
+    box-shadow: none !important;
+    font-weight: 700 !important;
   }
 }

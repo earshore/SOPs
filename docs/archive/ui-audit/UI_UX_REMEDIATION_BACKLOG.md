@@ -26,7 +26,7 @@
 | UI-P1-01 | 首页首屏工作台化 | 首页 | `src/modules/home/*` | 首屏显示最近工具、关键 SOP、近期状态或待办；品牌 hero 不再占满首屏。 |
 | UI-P1-02 | 移除自定义 cursor | 首页 | `src/modules/home/homeDisplay.css`、首页模板 | 删除 `cursor: none` 和 follower 依赖，恢复系统指针。 |
 | UI-P1-03 | 路由级 loading / skeleton | 动态路由 | 路由加载与模块挂载代码 | 页面等待超过 300ms 时主区域有稳定 loading，不出现长时间空白。 |
-| UI-P1-04 | App Center / PPC / Welcome Banner token 对照 | 高扩散样式源 | `app_center_style.css`、`ppc_search_terms/style.css`、`welcome-banner.css` | 主要 `--app-*`、`--ppc-*`、`--wb-*` 映射到全局 token；新增局部 token 需登记。 |
+| UI-P1-04 | App Center / PPC / Welcome Banner token 对照 | 高扩散样式源 | `app_center_style.css`、`ppc_tools/style.css`、`welcome-banner.css` | 主要 `--app-*`、`--ppc-*`、`--wb-*` 映射到全局 token；新增局部 token 需登记。 |
 | UI-P1-05 | 横幅和装饰降噪 | 首页、App Center、SOPS、AMZ Hub、More | `welcome-banner.css`、相关模板 | 工具页默认无 orb / particle；普通面板不使用大渐变和大阴影。 |
 | UI-P1-06 | 共享卡片 / 按钮 / badge 统一 | SOPS、AMZ Hub、App Center、More | `src/css/components/cards.css`、`badges.css`、模块 CSS | 同类入口卡、状态 badge、按钮尺寸和 hover / focus 状态一致。 |
 | UI-P1-07 | 总览页和侧边栏语义治理 | Overview、Sidebar、Mega Menu | `OverviewRenderer.ts`、`SidebarRenderer.ts`、`megaMenu.ts` | 搜索有 label；筛选按钮同步 `aria-pressed`；展开项维护 `aria-expanded`。 |
