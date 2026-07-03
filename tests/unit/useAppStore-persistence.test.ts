@@ -128,6 +128,11 @@ import { it, expect, beforeEach, afterEach, vi } from 'vitest';
         state: {
           promptlab: {
             currentPrompt: 'Persisted Listing Prompt',
+            userProductProfile: {
+              targetMarket: 'English',
+              keywordsTier1: 'stale keyword',
+              keywordsTier2: 'stale longtail'
+            },
             history: [
               {
                 id: 'listing-1',
@@ -155,8 +160,38 @@ import { it, expect, beforeEach, afterEach, vi } from 'vitest';
     const state = appStore.getState();
 
     expect(state.promptlab.currentPrompt).toBe('Persisted Listing Prompt');
+    expect(state.promptlab.userProductProfile).toBeUndefined();
     expect(state.promptlab.history?.[0]?.promptType).toBe('listing');
     expect(state.promptlab.history?.[0]?.historyId).toBe('hist-001');
+
+    const persisted = JSON.parse(localStorage.getItem('app-storage') || '{}');
+    expect(persisted.state.promptlab.userProductProfile).toBeUndefined();
+  });
+
+  it('保存 PromptLab 状态时不持久化产品 DNA 草稿', async () => {
+    const { appStore } = await import('@/stores/useAppStore');
+
+    appStore.getState().setUserProductProfile({
+      targetMarket: 'English',
+      keywordsTier1: 'draft keyword',
+      keywordsTier2: 'draft longtail',
+      audience: 'draft audience',
+      usps: '',
+      specs: '',
+      socialHook: '',
+      negative: '',
+      tone: 'professional',
+      customStrategy: '',
+      useCosmo: true,
+      useRufus: true,
+      useEmoji: true,
+      selectedReportSections: [],
+      charLimit: 5000
+    });
+
+    const persisted = JSON.parse(localStorage.getItem('app-storage') || '{}');
+    expect(appStore.getState().promptlab.userProductProfile?.keywordsTier1).toBe('draft keyword');
+    expect(persisted.state.promptlab.userProductProfile).toBeUndefined();
   });
 
   it('恢复旧 app-storage 时限制 PromptLab 生成历史数量', async () => {

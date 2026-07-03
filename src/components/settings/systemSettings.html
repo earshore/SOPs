@@ -224,17 +224,16 @@
                                         x-text="activeContextText"></span>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 sm:justify-end" :title="activeFeaturesText"
-                                aria-label="模型特性">
+                            <div class="flex items-center gap-2 sm:justify-end" aria-label="模型特性">
                                 <span class="text-[10px] font-medium uppercase tracking-wider text-slate-400">特性</span>
                                 <div class="flex flex-wrap items-center gap-1.5 sm:justify-end">
                                     <template x-for="feature in activeFeatureBadges" :key="feature.key">
                                         <span tabindex="0" role="img"
                                             :aria-label="feature.label"
-                                            :title="feature.label"
-                                            class="model-feature-icon relative flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1">
+                                            class="model-feature-icon group relative flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1">
                                             <i class="fas text-[10px]" :class="feature.icon"></i>
-                                            <span class="model-feature-tooltip pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-medium text-white shadow-lg"
+                                            <span aria-hidden="true"
+                                                class="model-feature-tooltip pointer-events-none invisible absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus:visible group-focus:translate-y-0 group-focus:opacity-100 group-focus-visible:visible group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
                                                 x-text="feature.label"></span>
                                         </span>
                                     </template>

@@ -32,6 +32,7 @@
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(220px, 240px) minmax(0, 1fr) minmax(240px, 280px);
+  grid-template-areas: 'thread main prompt';
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), var(--color-slate-50, #f8fafc));
   color: var(--color-slate-900, #0f172a);
   border: 1px solid var(--color-slate-200, #e2e8f0);
@@ -52,6 +53,7 @@
 }
 
 .playground-thread-rail {
+  grid-area: thread;
   min-width: 0;
   padding: var(--spacing-5, 1.25rem) var(--spacing-4, 1rem);
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(241, 245, 249, 0.82));
@@ -69,6 +71,7 @@
 }
 
 .playground-prompt-rail {
+  grid-area: prompt;
   min-width: 0;
   padding: var(--spacing-5, 1.25rem) var(--spacing-4, 1rem);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
@@ -612,6 +615,7 @@
 }
 
 .playground-main {
+  grid-area: main;
   min-width: 0;
   min-height: 0;
   position: relative;
@@ -993,10 +997,17 @@
 @media (max-width: 1180px) and (min-width: 901px) {
   .playground-page {
     grid-template-columns: minmax(216px, 232px) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'thread main'
+      'thread prompt';
   }
 
   .playground-page.is-rail-collapsed {
-    grid-template-columns: 0 minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'main'
+      'prompt';
   }
 
   .playground-thread-rail {
@@ -1004,17 +1015,38 @@
   }
 
   .playground-prompt-rail {
-    display: none;
+    max-height: 188px;
+    padding: var(--spacing-3, 0.75rem);
+    border-top: 1px solid var(--playground-border);
+    border-left: 0;
+  }
+
+  .playground-prompt-list {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-right: 0;
+    padding-bottom: 2px;
+  }
+
+  .playground-prompt-item {
+    flex: 0 0 min(320px, 72vw);
+  }
+
+  .playground-prompt-list-wrap {
+    gap: var(--spacing-1-5, 0.375rem);
   }
 }
 
 @media (max-width: 900px) {
   .playground-page {
     grid-template-columns: 1fr;
+    grid-template-areas: 'main';
   }
 
   .playground-page.is-rail-collapsed {
     grid-template-columns: 1fr;
+    grid-template-areas: 'main';
   }
 
   .playground-thread-rail {

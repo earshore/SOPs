@@ -1668,7 +1668,12 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
     await emitDeepChatResponse(signals, { text: finalText });
   }
 
-  return (finalText || streamedText).trim();
+  const assistantText = (finalText || streamedText).trim();
+  if (!assistantText) {
+    throw new Error('模型没有返回任何内容，请稍后重试或检查模型/上下文配置。');
+  }
+
+  return assistantText;
 }
 
 function preserveStoppedResponse(threadId: string | null): void {

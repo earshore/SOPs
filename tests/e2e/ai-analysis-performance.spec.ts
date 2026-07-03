@@ -73,24 +73,15 @@ const PERFORMANCE_BASELINE = {
       await aiAnalysis.navigate();
       
       // 测量模块初始化时间
-      const initTime = await page.evaluate(() => {
-        return new Promise<number>((resolve) => {
-          const startTime = performance.now();
-          
-          // 等待 Alpine 组件初始化
-          const checkInit = () => {
-            const element = document.querySelector('[x-data="aiAnalysisPanel"]') as any;
-            if (element && element.__x && element.__x.$data) {
-              const endTime = performance.now();
-              resolve(endTime - startTime);
-            } else {
-              setTimeout(checkInit, 10);
-            }
-          };
-          
-          checkInit();
-        });
-      });
+      const initStart = await page.evaluate(() => performance.now());
+      await page.waitForFunction(() => {
+        const element = document.querySelector('[x-data="aiAnalysisPanel"]');
+        const alpine = (window as Window & {
+          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+        }).Alpine;
+        return !!(element && alpine?.$data?.(element));
+      }, undefined, { timeout: PERFORMANCE_BASELINE.moduleInitTime });
+      const initTime = await page.evaluate(startTime => performance.now() - startTime, initStart);
       
       console.log(`📊 模块初始化时间: ${initTime.toFixed(2)}ms`);
       console.log(`   基线: ${PERFORMANCE_BASELINE.moduleInitTime}ms`);
@@ -114,7 +105,11 @@ const PERFORMANCE_BASELINE = {
       await page.waitForSelector('h2:has-text("AI 智能分析")', { state: 'visible' });
       await page.waitForSelector('[data-selection-panel-toggle]', { state: 'visible' });
       
-      const renderTime = performance.now() - startTime;
+      const renderTime = await page.evaluate(fallbackStartTime => {
+        const firstContentfulPaint = performance.getEntriesByName('first-contentful-paint')[0];
+        const firstPaint = performance.getEntriesByName('first-paint')[0];
+        return firstContentfulPaint?.startTime ?? firstPaint?.startTime ?? performance.now() - fallbackStartTime;
+      }, startTime);
       
       console.log(`📊 首次渲染时间: ${renderTime.toFixed(2)}ms`);
       console.log(`   基线: ${PERFORMANCE_BASELINE.firstRenderTime}ms`);
@@ -602,22 +597,29 @@ const PERFORMANCE_BASELINE = {
       await aiAnalysis.navigate();
       await page.waitForLoadState('networkidle');
       const loadTime = performance.now() - startTime;
+      const firstRenderTime = await page.evaluate(fallbackStartTime => {
+        const firstContentfulPaint = performance.getEntriesByName('first-contentful-paint')[0];
+        const firstPaint = performance.getEntriesByName('first-paint')[0];
+        return firstContentfulPaint?.startTime ?? firstPaint?.startTime ?? performance.now() - fallbackStartTime;
+      }, startTime);
       
       // 收集所有性能指标
       const metrics = {
         pageLoad: loadTime,
+        firstRender: firstRenderTime,
         baseline: PERFORMANCE_BASELINE.pageLoadTime,
         deviation: ((loadTime - PERFORMANCE_BASELINE.pageLoadTime) / PERFORMANCE_BASELINE.pageLoadTime) * 100
       };
       
       console.log('\n📊 性能指标对比:');
       console.log(`   页面加载时间: ${metrics.pageLoad.toFixed(2)}ms`);
+      console.log(`   首屏渲染时间: ${metrics.firstRender.toFixed(2)}ms`);
       console.log(`   基线: ${metrics.baseline}ms`);
       console.log(`   偏差: ${metrics.deviation > 0 ? '+' : ''}${metrics.deviation.toFixed(2)}%`);
       
       console.log('\n✅ 性能要求验证:');
       console.log(`   ✓ 模块加载时间 < 5% 退化: ${metrics.deviation < 5 ? '通过' : '失败'}`);
-      console.log(`   ✓ 首屏渲染时间 < 2s: ${metrics.pageLoad < 2000 ? '通过' : '失败'}`);
+      console.log(`   ✓ 首屏渲染时间 < 2s: ${metrics.firstRender < 2000 ? '通过' : '失败'}`);
       console.log(`   ✓ 页面加载时间 < 3s: ${metrics.pageLoad < 3000 ? '通过' : '失败'}`);
       
       console.log('\n📈 性能趋势:');

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ChatMessage } from '@/services/llmService';
 import {
+  DEFAULT_PLAYGROUND_REQUEST_BUDGET,
   buildBudgetedPlaygroundMessages,
   getPlaygroundMessageBudgetError,
   getPlaygroundSystemPromptBudgetError,
@@ -15,6 +16,11 @@ const smallBudget: PlaygroundRequestBudget = {
 };
 
 describe('Playground request budget', () => {
+  it('uses the raised default request budget for playground chat', () => {
+    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxMessageChars).toBe(24000);
+    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxContextChars).toBe(64000);
+  });
+
   it('rejects messages and system prompts that exceed configured limits', () => {
     const messages: ChatMessage[] = [{ role: 'user', content: 'this message is too long' }];
 

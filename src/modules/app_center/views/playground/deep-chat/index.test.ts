@@ -476,4 +476,35 @@ describe('deep-chat playground request errors', () => {
 
     unmount();
   });
+
+  it('persists a visible assistant error when the LLM response is empty', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      callLLM: async () => '',
+    });
+
+    await mount(container);
+    const onResponse = vi.fn();
+    const onClose = vi.fn();
+
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Trigger an empty response' }] },
+      { onResponse, onClose }
+    );
+
+    await vi.waitFor(() => {
+      expect(onResponse).toHaveBeenCalledWith({
+        text: '请求失败：模型没有返回任何内容，请稍后重试或检查模型/上下文配置。',
+      });
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    expectStoredAssistantMessage(
+      mocks.localDataStore.set,
+      '请求失败：模型没有返回任何内容，请稍后重试或检查模型/上下文配置。'
+    );
+
+    unmount();
+  });
 });

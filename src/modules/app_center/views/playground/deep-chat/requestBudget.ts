@@ -13,9 +13,9 @@ export interface BudgetedPlaygroundMessages {
 }
 
 export const DEFAULT_PLAYGROUND_REQUEST_BUDGET: PlaygroundRequestBudget = {
-  maxMessageChars: 12000,
+  maxMessageChars: 24000,
   maxSystemPromptChars: 4000,
-  maxContextChars: 48000,
+  maxContextChars: 64000,
   maxOutputTokens: 2000,
 };
 

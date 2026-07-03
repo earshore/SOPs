@@ -232,6 +232,7 @@ function createPersistedPromptLabState(promptlab?: Partial<PromptLabState>): Pro
     ...initialPromptLabState,
     ...(promptlab || {}),
     history,
+    userProductProfile: undefined,
   };
 }
 
