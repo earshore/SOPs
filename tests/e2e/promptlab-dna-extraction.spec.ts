@@ -8,6 +8,46 @@ import { test, expect } from '@playwright/test';
 import { PromptlabPage } from './pages/PromptlabPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 import { setupAPIConfig, waitForAppReady } from '../helpers/test-setup';
+import { SAMPLE_ANALYSIS_REPORT } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/analysisReportData';
+
+const PROMPTLAB_E2E_REPORT = {
+  ...SAMPLE_ANALYSIS_REPORT,
+  _metadata: {
+    ...SAMPLE_ANALYSIS_REPORT._metadata,
+    language: 'en',
+    targetMarket: 'English (US)',
+    confidence: {
+      'title-keywords': 0.92,
+      'selling-points': 0.9,
+      'buyer-profile': 0.88,
+      'vocab-gap': 0.82,
+    },
+    overallConfidence: 0.88,
+  },
+};
+
+type AppStoreWindow = Window & {
+  appStore?: { getState?: () => { setAnalysisReport?: (report: unknown) => void } };
+};
+
+async function setAnalysisReport(page: import('@playwright/test').Page, report: unknown): Promise<void> {
+  await page.waitForFunction(() => {
+    const appWindow = window as AppStoreWindow;
+    return typeof appWindow.appStore?.getState?.().setAnalysisReport === 'function';
+  });
+
+  await page.evaluate(reportValue => {
+    const appWindow = window as AppStoreWindow;
+    appWindow.appStore?.getState?.().setAnalysisReport?.(reportValue);
+  }, report);
+}
+
+async function clearAnalysisReport(page: import('@playwright/test').Page): Promise<void> {
+  await setAnalysisReport(page, null);
+  await page.locator('#lab-analysis-status').getByText(/未检测到分析报告/).waitFor({
+    timeout: 5000,
+  });
+}
 
   let promptlab: PromptlabPage;
 
@@ -18,6 +58,8 @@ import { setupAPIConfig, waitForAppReady } from '../helpers/test-setup';
     // 等待应用初始化
     await waitForAppReady(page);
 
+    await setAnalysisReport(page, PROMPTLAB_E2E_REPORT);
+
     // 导航到 Promptlab 页面
     promptlab = new PromptlabPage(page);
     await promptlab.navigate();
@@ -25,6 +67,8 @@ import { setupAPIConfig, waitForAppReady } from '../helpers/test-setup';
 
   test.describe('按钮状态测试', () => {
     test('应该在没有分析报告时禁用"从报告加载"按钮', async () => {
+      await clearAnalysisReport(promptlab.page);
+
       // 检查是否有分析报告
       const hasReport = await promptlab.hasAnalysisReport();
 
@@ -361,6 +405,8 @@ import { setupAPIConfig, waitForAppReady } from '../helpers/test-setup';
 
   test.describe('错误处理测试', () => {
     test('应该在没有报告时显示警告', async ({ page }) => {
+      await clearAnalysisReport(page);
+
       // 检查是否有分析报告
       const hasReport = await promptlab.hasAnalysisReport();
 

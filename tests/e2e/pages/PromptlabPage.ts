@@ -128,8 +128,8 @@ export class PromptlabPage extends BasePage {
    * 等待页面就绪
    */
   async waitForPageReady(): Promise<void> {
-    await this.waitForElement(this.selectors.productDnaCard);
-    await this.waitForElement(this.selectors.generatePromptButton);
+    await this.waitForElement(this.selectors.productDnaCard, { timeout: 10000 });
+    await this.waitForElement(this.selectors.generatePromptButton, { timeout: 10000 });
     await this.waitForLoadingToFinish();
   }
 
@@ -142,7 +142,7 @@ export class PromptlabPage extends BasePage {
    */
   async fillProductDNA(data: ProductDNA): Promise<void> {
     if (data.targetMarket) {
-      await this.select(this.selectors.targetMarket, data.targetMarket);
+      await this.selectTargetMarket(data.targetMarket);
     }
 
     if (data.keywordsTier1) {
@@ -180,7 +180,25 @@ export class PromptlabPage extends BasePage {
    * @param market - 市场名称
    */
   async selectTargetMarket(market: string): Promise<void> {
-    await this.select(this.selectors.targetMarket, market);
+    const optionValue = await this.resolveTargetMarketOption(market);
+    await this.select(this.selectors.targetMarket, optionValue);
+  }
+
+  private async resolveTargetMarketOption(market: string): Promise<string> {
+    const options = this.page.locator(`${this.selectors.targetMarket} option`);
+    const count = await options.count();
+    const fallbackMarket = market === 'English' ? 'English (US)' : market;
+
+    for (let index = 0; index < count; index++) {
+      const option = options.nth(index);
+      const value = (await option.getAttribute('value')) || '';
+      const label = (await option.textContent()) || '';
+      if (value === market || value === fallbackMarket || label.includes(market)) {
+        return value;
+      }
+    }
+
+    return market;
   }
 
   /**
@@ -275,8 +293,8 @@ export class PromptlabPage extends BasePage {
    * 检查是否有分析报告
    */
   async hasAnalysisReport(): Promise<boolean> {
-    const text = await this.getText(this.selectors.reportSectionsContainer);
-    return !text.includes('暂无报告数据');
+    const status = await this.getAnalysisStatus();
+    return status.includes('已就绪');
   }
 
   /**
