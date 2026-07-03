@@ -52,13 +52,57 @@ function loadMetrics() {
  * 生成HTML仪表板
  */
 function generateDashboard(metrics) {
-  const html = `<!DOCTYPE html>
+  const generatedAt = new Date(metrics.timestamp).toLocaleString('zh-CN');
+  const footerGeneratedAt = new Date().toLocaleString('zh-CN');
+
+  return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>质量仪表板 - 系统稳定性优化</title>
   <style>
+${generateDashboardStyles()}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>📊 质量仪表板</h1>
+      <div class="subtitle">系统稳定性优化 - 质量基线报告</div>
+      <div class="timestamp">生成时间: ${generatedAt}</div>
+    </div>
+
+    ${generateOverviewSection(metrics)}
+    ${generateQualitySection(metrics.quality)}
+    ${generateCoverageSection(metrics.coverage)}
+    ${generatePerformanceSection(metrics.lighthouse)}
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>© 2025 系统稳定性优化项目 | 自动生成于 ${footerGeneratedAt}</p>
+    </div>
+  </div>
+
+  <script>
+${generateDashboardScript()}
+  </script>
+</body>
+</html>`;
+}
+
+function generateDashboardStyles() {
+  return [
+    generateBaseDashboardStyles(),
+    generateCardDashboardStyles(),
+    generateMetricDashboardStyles(),
+    generateTableDashboardStyles()
+  ].join('\n');
+}
+
+function generateBaseDashboardStyles() {
+  return `
     * {
       margin: 0;
       padding: 0;
@@ -108,7 +152,11 @@ function generateDashboard(metrics) {
       gap: 20px;
       margin-bottom: 20px;
     }
+  `;
+}
 
+function generateCardDashboardStyles() {
+  return `
     .card {
       background: white;
       border-radius: 12px;
@@ -139,6 +187,64 @@ function generateDashboard(metrics) {
       color: #2d3748;
     }
 
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .stat-item {
+      padding: 15px;
+      background: #f7fafc;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .footer {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      color: #718096;
+      font-size: 14px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #a0aec0;
+      font-size: 16px;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      .card {
+        break-inside: avoid;
+      }
+    }
+  `;
+}
+
+function generateMetricDashboardStyles() {
+  return `
     .metric {
       margin-bottom: 15px;
     }
@@ -178,34 +284,11 @@ function generateDashboard(metrics) {
     .bar-good { background: linear-gradient(90deg, #4299e1, #3182ce); }
     .bar-warning { background: linear-gradient(90deg, #ed8936, #dd6b20); }
     .bar-poor { background: linear-gradient(90deg, #f56565, #e53e3e); }
+  `;
+}
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-    }
-
-    .stat-item {
-      padding: 15px;
-      background: #f7fafc;
-      border-radius: 8px;
-      border-left: 4px solid #667eea;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: #718096;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 5px;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: #2d3748;
-    }
-
+function generateTableDashboardStyles() {
+  return `
     .table-container {
       overflow-x: auto;
       margin-top: 15px;
@@ -256,56 +339,11 @@ function generateDashboard(metrics) {
       background: #fed7d7;
       color: #742a2a;
     }
+  `;
+}
 
-    .footer {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      color: #718096;
-      font-size: 14px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .no-data {
-      text-align: center;
-      padding: 40px;
-      color: #a0aec0;
-      font-size: 16px;
-    }
-
-    @media print {
-      body {
-        background: white;
-        padding: 0;
-      }
-      .card {
-        break-inside: avoid;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <h1>📊 质量仪表板</h1>
-      <div class="subtitle">系统稳定性优化 - 质量基线报告</div>
-      <div class="timestamp">生成时间: ${new Date(metrics.timestamp).toLocaleString('zh-CN')}</div>
-    </div>
-
-    ${generateOverviewSection(metrics)}
-    ${generateQualitySection(metrics.quality)}
-    ${generateCoverageSection(metrics.coverage)}
-    ${generatePerformanceSection(metrics.lighthouse)}
-
-    <!-- Footer -->
-    <div class="footer">
-      <p>© 2025 系统稳定性优化项目 | 自动生成于 ${new Date().toLocaleString('zh-CN')}</p>
-    </div>
-  </div>
-
-  <script>
+function generateDashboardScript() {
+  return `
     // 动画效果
     document.addEventListener('DOMContentLoaded', () => {
       const bars = document.querySelectorAll('.metric-bar-fill');
@@ -317,11 +355,7 @@ function generateDashboard(metrics) {
         }, 100);
       });
     });
-  </script>
-</body>
-</html>`;
-
-  return html;
+  `;
 }
 
 /**
@@ -382,139 +416,117 @@ function generateQualitySection(quality) {
     return '<div class="card"><div class="no-data">代码质量数据未找到</div></div>';
   }
 
-  const eslintScore = calculateESLintScore(quality.eslint);
-  const tsScore = calculateTSScore(quality.typescript);
-  const complexityScore = calculateComplexityScore(quality.complexity);
-
   return `
     <div class="grid">
-      <!-- ESLint -->
+      ${generateEslintQualityCard(quality.eslint)}
+      ${generateTypeScriptQualityCard(quality.typescript)}
+      ${generateCodeStatsCard(quality.codeStats)}
+      ${generateComplexityQualityCard(quality.complexity)}
+    </div>
+  `;
+}
+
+function generateEslintQualityCard(eslint) {
+  const score = calculateESLintScore(eslint);
+
+  return `
       <div class="card">
         <div class="card-header">
           <div class="card-icon">📋</div>
           <div class="card-title">ESLint 检查</div>
         </div>
-        <div class="metric">
-          <div class="metric-label">质量评分</div>
-          <div class="metric-value status-${getScoreStatus(eslintScore)}">${eslintScore}分</div>
-          <div class="metric-bar">
-            <div class="metric-bar-fill bar-${getScoreStatus(eslintScore)}" style="width: ${eslintScore}%"></div>
-          </div>
-        </div>
+        ${generateScoreMetric('质量评分', score)}
         <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-label">检查文件</div>
-            <div class="stat-value">${quality.eslint.totalFiles}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">错误数</div>
-            <div class="stat-value status-${quality.eslint.totalErrors > 0 ? 'poor' : 'excellent'}">${quality.eslint.totalErrors}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">警告数</div>
-            <div class="stat-value status-${quality.eslint.totalWarnings > 10 ? 'warning' : 'good'}">${quality.eslint.totalWarnings}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">规则数</div>
-            <div class="stat-value">${Object.keys(quality.eslint.errorsByRule).length}</div>
-          </div>
+          ${generateStatItem('检查文件', eslint.totalFiles)}
+          ${generateStatItem('错误数', eslint.totalErrors, eslint.totalErrors > 0 ? 'poor' : 'excellent')}
+          ${generateStatItem('警告数', eslint.totalWarnings, eslint.totalWarnings > 10 ? 'warning' : 'good')}
+          ${generateStatItem('规则数', Object.keys(eslint.errorsByRule).length)}
         </div>
-        ${generateTopIssuesTable(quality.eslint.errorsByRule, 'ESLint 规则')}
+        ${generateTopIssuesTable(eslint.errorsByRule, 'ESLint 规则')}
       </div>
+  `;
+}
 
-      <!-- TypeScript -->
+function generateTypeScriptQualityCard(typescript) {
+  const score = calculateTSScore(typescript);
+
+  return `
       <div class="card">
         <div class="card-header">
           <div class="card-icon">🔷</div>
           <div class="card-title">TypeScript 类型检查</div>
         </div>
-        <div class="metric">
-          <div class="metric-label">类型安全评分</div>
-          <div class="metric-value status-${getScoreStatus(tsScore)}">${tsScore}分</div>
-          <div class="metric-bar">
-            <div class="metric-bar-fill bar-${getScoreStatus(tsScore)}" style="width: ${tsScore}%"></div>
-          </div>
-        </div>
+        ${generateScoreMetric('类型安全评分', score)}
         <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-label">检查文件</div>
-            <div class="stat-value">${quality.typescript.totalFiles || 0}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">类型错误</div>
-            <div class="stat-value status-${quality.typescript.totalErrors > 0 ? 'poor' : 'excellent'}">${quality.typescript.totalErrors}</div>
-          </div>
+          ${generateStatItem('检查文件', typescript.totalFiles || 0)}
+          ${generateStatItem('类型错误', typescript.totalErrors, typescript.totalErrors > 0 ? 'poor' : 'excellent')}
         </div>
-        ${generateTopIssuesTable(quality.typescript.errorsByCategory, '错误类型')}
+        ${generateTopIssuesTable(typescript.errorsByCategory, '错误类型')}
       </div>
+  `;
+}
 
-      <!-- 代码统计 -->
+function generateCodeStatsCard(codeStats) {
+  return `
       <div class="card">
         <div class="card-header">
           <div class="card-icon">📊</div>
           <div class="card-title">代码统计</div>
         </div>
         <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-label">总文件数</div>
-            <div class="stat-value">${quality.codeStats.totalFiles}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">总行数</div>
-            <div class="stat-value">${quality.codeStats.totalLines.toLocaleString()}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">代码行数</div>
-            <div class="stat-value">${quality.codeStats.totalCodeLines.toLocaleString()}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">注释行数</div>
-            <div class="stat-value">${quality.codeStats.totalCommentLines.toLocaleString()}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">空行数</div>
-            <div class="stat-value">${quality.codeStats.totalBlankLines.toLocaleString()}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">平均每文件</div>
-            <div class="stat-value">${quality.codeStats.avgLinesPerFile} 行</div>
-          </div>
+          ${generateStatItem('总文件数', codeStats.totalFiles)}
+          ${generateStatItem('总行数', codeStats.totalLines.toLocaleString())}
+          ${generateStatItem('代码行数', codeStats.totalCodeLines.toLocaleString())}
+          ${generateStatItem('注释行数', codeStats.totalCommentLines.toLocaleString())}
+          ${generateStatItem('空行数', codeStats.totalBlankLines.toLocaleString())}
+          ${generateStatItem('平均每文件', `${codeStats.avgLinesPerFile} 行`)}
         </div>
       </div>
+  `;
+}
 
-      <!-- 代码复杂度 -->
+function generateComplexityQualityCard(complexity) {
+  const score = calculateComplexityScore(complexity);
+
+  return `
       <div class="card">
         <div class="card-header">
           <div class="card-icon">📈</div>
           <div class="card-title">代码复杂度</div>
         </div>
-        <div class="metric">
-          <div class="metric-label">复杂度评分</div>
-          <div class="metric-value status-${getScoreStatus(complexityScore)}">${complexityScore}分</div>
-          <div class="metric-bar">
-            <div class="metric-bar-fill bar-${getScoreStatus(complexityScore)}" style="width: ${complexityScore}%"></div>
-          </div>
-        </div>
+        ${generateScoreMetric('复杂度评分', score)}
         <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-label">平均复杂度</div>
-            <div class="stat-value">${quality.complexity.avgComplexity}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">最大复杂度</div>
-            <div class="stat-value status-${quality.complexity.maxComplexity > 15 ? 'poor' : 'good'}">${quality.complexity.maxComplexity}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">超阈值文件</div>
-            <div class="stat-value status-${quality.complexity.filesOverThreshold > 5 ? 'warning' : 'excellent'}">${quality.complexity.filesOverThreshold}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">阈值标准</div>
-            <div class="stat-value">10</div>
-          </div>
+          ${generateStatItem('平均复杂度', complexity.avgComplexity)}
+          ${generateStatItem('最大复杂度', complexity.maxComplexity, complexity.maxComplexity > 15 ? 'poor' : 'good')}
+          ${generateStatItem('超阈值文件', complexity.filesOverThreshold, complexity.filesOverThreshold > 5 ? 'warning' : 'excellent')}
+          ${generateStatItem('阈值标准', 10)}
         </div>
       </div>
-    </div>
+  `;
+}
+
+function generateScoreMetric(label, score) {
+  const status = getScoreStatus(score);
+
+  return `
+        <div class="metric">
+          <div class="metric-label">${label}</div>
+          <div class="metric-value status-${status}">${score}分</div>
+          <div class="metric-bar">
+            <div class="metric-bar-fill bar-${status}" style="width: ${score}%"></div>
+          </div>
+        </div>
+  `;
+}
+
+function generateStatItem(label, value, status) {
+  const statusClass = status ? ` status-${status}` : '';
+
+  return `
+          <div class="stat-item">
+            <div class="stat-label">${label}</div>
+            <div class="stat-value${statusClass}">${value}</div>
+          </div>
   `;
 }
 

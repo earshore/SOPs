@@ -80,6 +80,35 @@ import {
     expect(container.querySelector('img')).toBeInstanceOf(HTMLImageElement);
   });
 
+  it('creates safe fragments when SVG href properties are not strings', () => {
+    const descriptor = Object.getOwnPropertyDescriptor(SVGElement.prototype, 'href');
+    Object.defineProperty(SVGElement.prototype, 'href', {
+      configurable: true,
+      get: () => ({ baseVal: '#decorGrad' }),
+    });
+
+    try {
+      const fragment = createSafeFragment(`
+        <svg viewBox="0 0 10 10">
+          <defs>
+            <linearGradient id="decorGrad"></linearGradient>
+          </defs>
+          <circle cx="5" cy="5" r="4" stroke="url(#decorGrad)" />
+        </svg>
+      `);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      expect(container.querySelector('svg')).not.toBeNull();
+    } finally {
+      if (descriptor) {
+        Object.defineProperty(SVGElement.prototype, 'href', descriptor);
+      } else {
+        delete (SVGElement.prototype as { href?: unknown }).href;
+      }
+    }
+  });
+
   it('replaces existing content with sanitized HTML', () => {
     const element = document.createElement('div');
     element.innerHTML = '<span>old</span>';

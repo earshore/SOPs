@@ -5,6 +5,7 @@ import { loadTemplate } from '@/common/utils/viewLoader';
 import { safeMount } from '@/common/utils/safeMount';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { setSafeHtml } from '@/common/utils/security';
+import { randomBase36 } from '@/common/utils/random';
 import { showToast } from '@/common/ui/notifications';
 import { callLLM, type ChatMessage } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
@@ -1485,8 +1486,10 @@ async function handlePlaygroundRequest(
       return;
     }
     const message = error instanceof Error ? error.message : '模型调用失败';
+    const responseText = formatPlaygroundErrorResponse(message);
     console.error('[Deep Chat] LLM 调用失败:', error);
-    await emitDeepChatResponse(signals, { error: message });
+    saveFailedPlaygroundResponse(pendingThreadId, responseText);
+    await emitDeepChatResponse(signals, { text: responseText });
   } finally {
     if (pendingThreadId) {
       pendingRequests.delete(pendingThreadId);
@@ -1536,7 +1539,33 @@ async function preparePlaygroundRequest(
 }
 
 async function rejectPlaygroundRequest(signals: DeepChatSignals, error: string): Promise<void> {
-  await emitDeepChatResponse(signals, { error });
+  await emitDeepChatResponse(signals, { text: formatPlaygroundErrorResponse(error) });
+}
+
+function formatPlaygroundErrorResponse(error: string): string {
+  return `请求失败：${error}`;
+}
+
+function saveFailedPlaygroundResponse(threadId: string | null, responseText: string): void {
+  if (!threadId || !threadExists(threadId)) {
+    return;
+  }
+
+  const pendingRequest = pendingRequests.get(threadId);
+  if (!pendingRequest) {
+    return;
+  }
+
+  const partialResponse = pendingRequest.assistantText.trim();
+  const assistantText = partialResponse ? `${partialResponse}\n\n${responseText}` : responseText;
+  saveThreadMessages(
+    getMountedRenderContainer(),
+    pendingRequest.conversationMessages,
+    assistantText,
+    {
+      threadId,
+    }
+  );
 }
 
 async function getPlaygroundRequestModelConfig(): Promise<PlaygroundRequestModelConfig> {
@@ -2650,7 +2679,7 @@ function createThreadId(): string {
     return crypto.randomUUID();
   }
 
-  return `thread-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `thread-${Date.now()}-${randomBase36(12)}`;
 }
 
 function escapeHTML(value: string): string {

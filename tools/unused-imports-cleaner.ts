@@ -37,6 +37,73 @@ class UnusedImportsCleaner {
     /\.d\.ts$/,
   ];
 
+  private readonly htmlStyles = `
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 { color: #333; margin-bottom: 10px; }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .summary-card h3 { color: #666; font-size: 14px; margin-bottom: 10px; }
+    .summary-card .value { font-size: 32px; font-weight: bold; color: #e74c3c; }
+    .section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .section h2 { color: #333; margin-bottom: 15px; font-size: 18px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #666;
+    }
+    tr:hover { background: #f8f9fa; }
+    .type-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .type-named { background: #e3f2fd; color: #1976d2; }
+    .type-default { background: #f3e5f5; color: #7b1fa2; }
+    .type-namespace { background: #fff3e0; color: #f57c00; }
+    .file-path { font-family: 'Courier New', monospace; font-size: 13px; color: #666; }
+    .import-name { font-family: 'Courier New', monospace; font-weight: 600; color: #e74c3c; }
+`;
+
   /**
    * 扫描目录中的所有 TypeScript 文件
    */
@@ -255,88 +322,8 @@ class UnusedImportsCleaner {
   /**
    * 生成 HTML 报告
    */
-  generateHTMLReport(result: ScanResult, outputPath: string): void {
-    const html = `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>未使用导入扫描报告</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-    }
-    .container { max-width: 1200px; margin: 0 auto; }
-    .header {
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    h1 { color: #333; margin-bottom: 10px; }
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    .summary-card {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .summary-card h3 { color: #666; font-size: 14px; margin-bottom: 10px; }
-    .summary-card .value { font-size: 32px; font-weight: bold; color: #e74c3c; }
-    .section {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .section h2 { color: #333; margin-bottom: 15px; font-size: 18px; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-    }
-    th {
-      background: #f8f9fa;
-      font-weight: 600;
-      color: #666;
-    }
-    tr:hover { background: #f8f9fa; }
-    .type-badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .type-named { background: #e3f2fd; color: #1976d2; }
-    .type-default { background: #f3e5f5; color: #7b1fa2; }
-    .type-namespace { background: #fff3e0; color: #f57c00; }
-    .file-path { font-family: 'Courier New', monospace; font-size: 13px; color: #666; }
-    .import-name { font-family: 'Courier New', monospace; font-weight: 600; color: #e74c3c; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🔍 未使用导入扫描报告</h1>
-      <p>生成时间: ${new Date().toLocaleString('zh-CN')}</p>
-    </div>
-
+  private renderSummaryCards(result: ScanResult): string {
+    return `
     <div class="summary">
       <div class="summary-card">
         <h3>扫描文件数</h3>
@@ -351,7 +338,11 @@ class UnusedImportsCleaner {
         <div class="value">${result.unusedImports.length}</div>
       </div>
     </div>
+`;
+  }
 
+  private renderTypeSummary(result: ScanResult): string {
+    return `
     <div class="section">
       <h2>📊 按类型统计</h2>
       <table>
@@ -377,7 +368,23 @@ class UnusedImportsCleaner {
         </tbody>
       </table>
     </div>
+`;
+  }
 
+  private renderDirectoryRows(result: ScanResult): string {
+    return Object.entries(result.summary.byDirectory)
+      .sort((a, b) => b[1] - a[1])
+      .map(([dir, count]) => `
+              <tr>
+                <td class="file-path">${dir}</td>
+                <td>${count}</td>
+              </tr>
+            `)
+      .join('');
+  }
+
+  private renderDirectorySummary(result: ScanResult): string {
+    return `
     <div class="section">
       <h2>📁 按目录统计</h2>
       <table>
@@ -388,18 +395,27 @@ class UnusedImportsCleaner {
           </tr>
         </thead>
         <tbody>
-          ${Object.entries(result.summary.byDirectory)
-            .sort((a, b) => b[1] - a[1])
-            .map(([dir, count]) => `
-              <tr>
-                <td class="file-path">${dir}</td>
-                <td>${count}</td>
-              </tr>
-            `).join('')}
+          ${this.renderDirectoryRows(result)}
         </tbody>
       </table>
     </div>
+`;
+  }
 
+  private renderUnusedImportRows(result: ScanResult): string {
+    return result.unusedImports.map(imp => `
+            <tr>
+              <td class="file-path">${imp.file}</td>
+              <td>${imp.line}</td>
+              <td class="import-name">${imp.importName}</td>
+              <td class="file-path">${imp.importPath}</td>
+              <td><span class="type-badge type-${imp.type}">${imp.type}</span></td>
+            </tr>
+          `).join('');
+  }
+
+  private renderUnusedImportDetails(result: ScanResult): string {
+    return `
     <div class="section">
       <h2>📝 详细列表</h2>
       <table>
@@ -413,18 +429,34 @@ class UnusedImportsCleaner {
           </tr>
         </thead>
         <tbody>
-          ${result.unusedImports.map(imp => `
-            <tr>
-              <td class="file-path">${imp.file}</td>
-              <td>${imp.line}</td>
-              <td class="import-name">${imp.importName}</td>
-              <td class="file-path">${imp.importPath}</td>
-              <td><span class="type-badge type-${imp.type}">${imp.type}</span></td>
-            </tr>
-          `).join('')}
+          ${this.renderUnusedImportRows(result)}
         </tbody>
       </table>
     </div>
+`;
+  }
+
+  generateHTMLReport(result: ScanResult, outputPath: string): void {
+    const html = `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>未使用导入扫描报告</title>
+  <style>${this.htmlStyles}  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 未使用导入扫描报告</h1>
+      <p>生成时间: ${new Date().toLocaleString('zh-CN')}</p>
+    </div>
+
+${this.renderSummaryCards(result)}
+${this.renderTypeSummary(result)}
+${this.renderDirectorySummary(result)}
+${this.renderUnusedImportDetails(result)}
   </div>
 </body>
 </html>

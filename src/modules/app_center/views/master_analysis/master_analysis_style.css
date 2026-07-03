@@ -113,23 +113,6 @@
   }
 }
 
-/* === Analysis Widget Card === */
-.analysis-widget-card {
-  background: white;
-  border-radius: var(--rounded-xl);
-  border: 1px solid var(--color-slate-200);
-  box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
-  transition: all var(--duration-normal) ease;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.analysis-widget-card:hover {
-  border-color: var(--color-slate-300);
-  box-shadow: 0 4px 12px -2px var(--color-black-alpha-10);
-}
-
 /* === Widget 容器 === */
 .widget-card-container {
   height: 100%;
@@ -164,19 +147,6 @@
 .edit-row:hover {
   border-color: var(--color-slate-300);
   box-shadow: 0 2px 8px -2px var(--color-black-alpha-5);
-}
-
-/* === Glass Card === */
-.glass-card {
-  background: white;
-  border-radius: var(--rounded-xl);
-  border: 1px solid var(--color-slate-200);
-  box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
-  transition: all var(--duration-normal) ease;
-}
-
-.glass-card:hover {
-  box-shadow: 0 4px 12px -2px var(--color-black-alpha-10);
 }
 
 /* === GridStack 调整模式 === */

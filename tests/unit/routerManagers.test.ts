@@ -83,7 +83,6 @@ afterEach(() => {
   }
 });
 
-describe('GuardManager', () => {
   it('registers global and route guards in priority order', async () => {
     const calls: string[] = [];
     const manager = createGuardManager();
@@ -223,7 +222,6 @@ describe('GuardManager', () => {
       totalRoutes: 0,
     });
   });
-});
 
 describe('MiddlewareManager', () => {
   it('runs before middlewares as an ordered next() chain', async () => {
@@ -307,7 +305,6 @@ describe('MiddlewareManager', () => {
   });
 });
 
-describe('PreloadManager', () => {
   it('preloads route data, caches it, and records cache hits', async () => {
     const preload = vi.fn().mockResolvedValue(undefined);
     const manager = createPreloadManager();
@@ -453,4 +450,3 @@ describe('PreloadManager', () => {
       preloadingCount: 0,
     });
   });
-});

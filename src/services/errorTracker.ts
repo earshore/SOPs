@@ -5,6 +5,7 @@
 // ================================================================
 
 import type { AppError } from '@/common/errors/AppError';
+import { randomFloat } from '@/common/utils/random';
 import type { ILoggerService } from '../types/services';
 
 const nativeLoggerConsole = globalThis.console;
@@ -229,7 +230,7 @@ export class ErrorTracker {
     if (!this.config.enabled) return;
 
     // 采样
-    if (Math.random() > this.config.sampleRate) return;
+    if (randomFloat() > this.config.sampleRate) return;
 
     // 忽略模式
     if (this.shouldIgnore(error.message)) return;

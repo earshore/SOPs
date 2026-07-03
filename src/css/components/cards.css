@@ -69,6 +69,150 @@
   border-color: var(--card-border);
 }
 
+/* SOP/Hub/More 概览旧类名基础卡片 */
+.sop-card {
+  background: var(--sop-card-bg, var(--surface-card, #ffffff));
+  border-radius: var(--sop-card-radius, var(--radius-card, 8px));
+  border: 1px solid var(--sop-card-border, var(--border-subtle, var(--color-slate-200)));
+  padding: var(--sop-card-padding, var(--spacing-lg));
+  box-shadow: var(--sop-card-shadow, var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)));
+  transition:
+    background-color var(--duration-fast, 200ms) var(--ease-smooth),
+    border-color var(--duration-fast, 200ms) var(--ease-smooth),
+    box-shadow var(--duration-fast, 200ms) var(--ease-smooth);
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: var(--sop-card-min-height, 180px);
+  overflow: var(--sop-card-overflow, visible);
+}
+
+.sop-card:hover {
+  border-color: var(--sop-card-hover-border, rgba(37, 99, 235, 0.42));
+  background: var(--sop-card-hover-bg, var(--surface-card-hover, var(--color-slate-50)));
+  box-shadow: var(
+    --sop-card-shadow-hover,
+    var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36))
+  );
+}
+
+/* Amazon Hub 旧流光卡片效果 */
+.amz_card-hover {
+  position: relative;
+  background: white;
+  transition: all var(--duration-slow) var(--ease-spring);
+  border-radius: var(--rounded-lg);
+  overflow: hidden;
+}
+
+.amz_card-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-blue-500),
+    var(--color-rose-500),
+    var(--color-orange-500)
+  );
+  opacity: 0;
+  transition: opacity var(--duration-normal) ease;
+}
+
+.amz_card-hover:hover {
+  transform: translateY(-4px) scale(1.005);
+  box-shadow:
+    0 20px 25px -5px var(--color-primary-light),
+    0 8px 10px -6px var(--color-primary-light);
+}
+
+.amz_card-hover:hover::before,
+.asin-card.selected::before {
+  opacity: 1;
+}
+
+/* 旧模块卡片壳层：保留类名，集中基础结构 */
+.zn-notice-card {
+  margin: 0 0 18px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.analysis-widget-card {
+  background: white;
+  border-radius: var(--rounded-xl);
+  border: 1px solid var(--color-slate-200);
+  box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
+  transition: all var(--duration-normal) ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.analysis-widget-card:hover {
+  border-color: var(--color-slate-300);
+  box-shadow: 0 4px 12px -2px var(--color-black-alpha-10);
+}
+
+.manual-option-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--scraper-border);
+  border-radius: var(--scraper-radius);
+  box-shadow: none;
+  min-width: 0;
+}
+
+.kt-input-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-card, white);
+  border-radius: var(--radius-card, var(--rounded-md));
+  border: 1px solid var(--border-muted, var(--color-slate-200));
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
+.kt-input-card:hover {
+  border-color: var(--color-border-default, rgba(148, 163, 184, 0.32));
+  box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+}
+
+.kt-surface-card {
+  background: var(--surface-card, white);
+  border-color: var(--border-muted, var(--color-slate-200));
+  border-radius: var(--radius-card, var(--rounded-md));
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
+.prompt-source-card {
+  display: block;
+  min-height: 11rem;
+  padding: 1.25rem;
+  color: var(--color-slate-600);
+  background: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--rounded-lg);
+  transition:
+    border-color var(--duration-fast),
+    box-shadow var(--duration-fast),
+    transform var(--duration-fast);
+}
+
+.prompt-source-card:hover {
+  color: var(--color-slate-700);
+  border-color: var(--color-teal-200);
+  box-shadow: 0 10px 22px -18px rgba(15, 118, 110, 0.42);
+  transform: translateY(-1px);
+}
+
 /* ========================================
    2. 卡片内容区域
    ======================================== */

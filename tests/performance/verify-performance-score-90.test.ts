@@ -184,8 +184,6 @@ function printPerformanceSummary(results: any[]) {
 // 测试套件
 // ================================================================
 
-test.describe('任务 4.5.10: 验证性能评分 > 90', () => {
-  
   const performanceResults: any[] = [];
   
   test.beforeAll(() => {
@@ -310,5 +308,3 @@ test.describe('任务 4.5.10: 验证性能评分 > 90', () => {
     console.log(`   - 最高评分: ${Math.max(...performanceResults.map(r => r.score))}`);
     console.log(`\n📁 详细报告: ${REPORTS_DIR}\n`);
   });
-  
-});

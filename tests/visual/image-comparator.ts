@@ -105,6 +105,9 @@ export interface ImageCompareResult {
   error?: string;
 }
 
+type ResolvedImageCompareOptions = Required<Omit<ImageCompareOptions, 'diffOutputPath'>> &
+  Pick<ImageCompareOptions, 'diffOutputPath'>;
+
 /**
  * 图像对比器类
  */
@@ -134,59 +137,31 @@ export class ImageComparator {
   ): Promise<ImageCompareResult> {
     try {
       // 合并选项
-      const opts = { ...this.defaultOptions, ...options };
+      const opts: ResolvedImageCompareOptions = { ...this.defaultOptions, ...options };
 
       // 读取图像
       const baseline = await this.loadImage(baselinePath);
       const current = await this.loadImage(currentPath);
 
       // 检查尺寸是否一致
-      if (baseline.width !== current.width || baseline.height !== current.height) {
-        return {
-          match: false,
-          diffPixels: 0,
-          diffPercentage: 100,
-          totalPixels: baseline.width * baseline.height,
-          dimensions: {
-            width: baseline.width,
-            height: baseline.height
-          },
-          error: `图像尺寸不匹配: 基准图 ${baseline.width}x${baseline.height}, 当前图 ${current.width}x${current.height}`
-        };
+      if (this.hasDimensionMismatch(baseline, current)) {
+        return this.createDimensionMismatchResult(baseline, current);
       }
 
       const { width, height } = baseline;
       const totalPixels = width * height;
 
       // 创建差异图缓冲区
-      const diff = opts.generateDiffImage ? new PNG({ width, height }) : null;
+      const diff = this.createDiffImage(width, height, opts);
 
       // 执行像素对比
-      const diffPixels = pixelmatch(
-        baseline.data,
-        current.data,
-        diff?.data || null,
-        width,
-        height,
-        {
-          threshold: opts.threshold,
-          includeAA: opts.includeAA,
-          alpha: opts.alpha,
-          aaColor: [opts.aaThreshold * 255, opts.aaThreshold * 255, opts.aaThreshold * 255] as [number, number, number],
-          diffColor: opts.diffColor,
-          diffColorAlt: opts.diffColorAlt
-        }
-      );
+      const diffPixels = this.comparePixels(baseline, current, diff, opts);
 
       // 计算差异百分比
       const diffPercentage = (diffPixels / totalPixels) * 100;
 
       // 生成差异图
-      let diffImagePath: string | undefined;
-      if (diff && opts.generateDiffImage && diffPixels > 0) {
-        diffImagePath = opts.diffOutputPath || this.generateDiffPath(currentPath);
-        await this.saveImage(diff, diffImagePath);
-      }
+      const diffImagePath = await this.saveDiffImageIfNeeded(diff, opts, diffPixels, currentPath);
 
       // 判断是否匹配（差异在阈值内）
       const match = diffPercentage <= opts.threshold * 100;
@@ -200,15 +175,83 @@ export class ImageComparator {
         diffImagePath
       };
     } catch (error) {
-      return {
-        match: false,
-        diffPixels: 0,
-        diffPercentage: 100,
-        totalPixels: 0,
-        dimensions: { width: 0, height: 0 },
-        error: error instanceof Error ? error.message : String(error)
-      };
+      return this.createErrorResult(error);
     }
+  }
+
+  private hasDimensionMismatch(baseline: PNG, current: PNG): boolean {
+    return baseline.width !== current.width || baseline.height !== current.height;
+  }
+
+  private createDimensionMismatchResult(baseline: PNG, current: PNG): ImageCompareResult {
+    return {
+      match: false,
+      diffPixels: 0,
+      diffPercentage: 100,
+      totalPixels: baseline.width * baseline.height,
+      dimensions: {
+        width: baseline.width,
+        height: baseline.height
+      },
+      error: `图像尺寸不匹配: 基准图 ${baseline.width}x${baseline.height}, 当前图 ${current.width}x${current.height}`
+    };
+  }
+
+  private createDiffImage(
+    width: number,
+    height: number,
+    opts: ResolvedImageCompareOptions
+  ): PNG | null {
+    return opts.generateDiffImage ? new PNG({ width, height }) : null;
+  }
+
+  private comparePixels(
+    baseline: PNG,
+    current: PNG,
+    diff: PNG | null,
+    opts: ResolvedImageCompareOptions
+  ): number {
+    return pixelmatch(
+      baseline.data,
+      current.data,
+      diff?.data || null,
+      baseline.width,
+      baseline.height,
+      {
+        threshold: opts.threshold,
+        includeAA: opts.includeAA,
+        alpha: opts.alpha,
+        aaColor: [opts.aaThreshold * 255, opts.aaThreshold * 255, opts.aaThreshold * 255] as [number, number, number],
+        diffColor: opts.diffColor,
+        diffColorAlt: opts.diffColorAlt
+      }
+    );
+  }
+
+  private async saveDiffImageIfNeeded(
+    diff: PNG | null,
+    opts: ResolvedImageCompareOptions,
+    diffPixels: number,
+    currentPath: string
+  ): Promise<string | undefined> {
+    if (!diff || !opts.generateDiffImage || diffPixels === 0) {
+      return undefined;
+    }
+
+    const diffImagePath = opts.diffOutputPath || this.generateDiffPath(currentPath);
+    await this.saveImage(diff, diffImagePath);
+    return diffImagePath;
+  }
+
+  private createErrorResult(error: unknown): ImageCompareResult {
+    return {
+      match: false,
+      diffPixels: 0,
+      diffPercentage: 100,
+      totalPixels: 0,
+      dimensions: { width: 0, height: 0 },
+      error: error instanceof Error ? error.message : String(error)
+    };
   }
 
   /**

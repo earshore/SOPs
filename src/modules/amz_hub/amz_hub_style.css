@@ -12,62 +12,6 @@
   overflow: visible !important;
 }
 
-/* ----------------------------------------
-   1. 灵动卡片 (Lively Cards)
-   ---------------------------------------- */
-/* 基础磨砂玻璃 */
-.glass-card {
-  background: var(--color-white);
-  backdrop-filter: blur(16px);
-  /* 更深度的模糊 */
-  border: 1px solid var(--color-white);
-  /* 模拟玻璃边缘 */
-  box-shadow: 0 4px 6px -1px var(--color-black-alpha-5);
-}
-
-/* 悬浮流光卡片 - 你的核心视觉资产 */
-.amz_card-hover {
-  position: relative;
-  background: white;
-  transition: all var(--duration-slow) var(--ease-spring);
-  /* 调用 Core 中的 Q弹变量 */
-  border-radius: var(--rounded-lg);
-  overflow: hidden;
-  /* 防止光晕溢出 */
-}
-
-/* 伪元素光晕：隐藏在卡片下的彩色渐变 */
-.amz_card-hover::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  /* 顶部光条 */
-  background: linear-gradient(
-    90deg,
-    var(--color-blue-500),
-    var(--color-rose-500),
-    var(--color-orange-500)
-  );
-  opacity: 0;
-  transition: opacity var(--duration-normal) ease;
-}
-
-.amz_card-hover:hover {
-  transform: translateY(-4px) scale(1.005);
-  box-shadow:
-    0 20px 25px -5px var(--color-primary-light),
-    0 8px 10px -6px var(--color-primary-light);
-}
-
-.amz_card-hover:hover::before,
-.asin-card.selected::before {
-  opacity: 1;
-  /* 激活顶部光条 */
-}
-
 /* 选中状态的 ASIN 卡片 */
 .asin-card.selected {
   background: var(--color-slate-50);
@@ -378,14 +322,9 @@
   --sop-icon-color: var(--color-accent);
   --sop-icon-shadow: none;
   --sop-icon-transition: background-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
-
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 11.75rem;
-  padding: 1.25rem;
-  cursor: pointer;
-  overflow: hidden;
+  --sop-card-min-height: 11.75rem;
+  --sop-card-padding: 1.25rem;
+  --sop-card-overflow: hidden;
 }
 
 .amz-hub-overview section[data-category='knowledge'] .sop-card:nth-child(1) {

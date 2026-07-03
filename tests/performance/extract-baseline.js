@@ -21,15 +21,8 @@ function ensureOutputDir() {
   }
 }
 
-function extractScores() {
-  console.log('📊 提取 Lighthouse 性能分数...\n');
-  
-  if (!fs.existsSync(CONFIG.lhciDir)) {
-    console.error('❌ 未找到 .lighthouseci 目录');
-    return null;
-  }
-  
-  const files = fs.readdirSync(CONFIG.lhciDir)
+function findLighthouseResultFiles() {
+  return fs.readdirSync(CONFIG.lhciDir)
     .filter(f => f.startsWith('lhr-') && f.endsWith('.json'))
     .map(f => ({
       name: f,
@@ -37,13 +30,10 @@ function extractScores() {
       time: fs.statSync(path.join(CONFIG.lhciDir, f)).mtime.getTime()
     }))
     .sort((a, b) => b.time - a.time);
-  
-  if (files.length === 0) {
-    console.error('❌ 未找到 Lighthouse 结果文件');
-    return null;
-  }
-  
-  const scores = {
+}
+
+function createEmptyScores() {
+  return {
     timestamp: new Date().toISOString(),
     urls: {},
     summary: {
@@ -54,59 +44,62 @@ function extractScores() {
       pwa: []
     }
   };
-  
-  files.forEach(file => {
-    const data = JSON.parse(fs.readFileSync(file.path, 'utf-8'));
-    const url = data.finalUrl || data.requestedUrl;
-    const categories = data.categories;
-    
-    if (!scores.urls[url]) {
-      scores.urls[url] = {
-        runs: [],
-        average: {},
-        audits: {}
-      };
-    }
-    
-    const runScores = {
-      performance: Math.round((categories.performance?.score || 0) * 100),
-      accessibility: Math.round((categories.accessibility?.score || 0) * 100),
-      bestPractices: Math.round((categories['best-practices']?.score || 0) * 100),
-      seo: Math.round((categories.seo?.score || 0) * 100),
-      pwa: Math.round((categories.pwa?.score || 0) * 100)
+}
+
+function ensureUrlScoreBucket(scores, url) {
+  if (!scores.urls[url]) {
+    scores.urls[url] = {
+      runs: [],
+      average: {},
+      audits: {}
     };
-    
-    scores.urls[url].runs.push(runScores);
-    
-    scores.summary.performance.push(runScores.performance);
-    scores.summary.accessibility.push(runScores.accessibility);
-    scores.summary.bestPractices.push(runScores.bestPractices);
-    scores.summary.seo.push(runScores.seo);
-    scores.summary.pwa.push(runScores.pwa);
-    
-    // 提取关键审计指标
-    if (data.audits) {
-      const audits = {
-        fcp: data.audits['first-contentful-paint']?.numericValue,
-        lcp: data.audits['largest-contentful-paint']?.numericValue,
-        cls: data.audits['cumulative-layout-shift']?.numericValue,
-        tbt: data.audits['total-blocking-time']?.numericValue,
-        si: data.audits['speed-index']?.numericValue
-      };
-      
-      if (!scores.urls[url].audits.fcp) {
-        scores.urls[url].audits = { fcp: [], lcp: [], cls: [], tbt: [], si: [] };
-      }
-      
-      scores.urls[url].audits.fcp.push(audits.fcp);
-      scores.urls[url].audits.lcp.push(audits.lcp);
-      scores.urls[url].audits.cls.push(audits.cls);
-      scores.urls[url].audits.tbt.push(audits.tbt);
-      scores.urls[url].audits.si.push(audits.si);
-    }
-  });
-  
-  // 计算每个URL的平均分
+  }
+}
+
+function extractCategoryScores(categories) {
+  return {
+    performance: Math.round((categories.performance?.score || 0) * 100),
+    accessibility: Math.round((categories.accessibility?.score || 0) * 100),
+    bestPractices: Math.round((categories['best-practices']?.score || 0) * 100),
+    seo: Math.round((categories.seo?.score || 0) * 100),
+    pwa: Math.round((categories.pwa?.score || 0) * 100)
+  };
+}
+
+function appendRunScores(scores, url, runScores) {
+  scores.urls[url].runs.push(runScores);
+  scores.summary.performance.push(runScores.performance);
+  scores.summary.accessibility.push(runScores.accessibility);
+  scores.summary.bestPractices.push(runScores.bestPractices);
+  scores.summary.seo.push(runScores.seo);
+  scores.summary.pwa.push(runScores.pwa);
+}
+
+function appendAuditScores(urlScores, audits) {
+  if (!urlScores.audits.fcp) {
+    urlScores.audits = { fcp: [], lcp: [], cls: [], tbt: [], si: [] };
+  }
+
+  urlScores.audits.fcp.push(audits['first-contentful-paint']?.numericValue);
+  urlScores.audits.lcp.push(audits['largest-contentful-paint']?.numericValue);
+  urlScores.audits.cls.push(audits['cumulative-layout-shift']?.numericValue);
+  urlScores.audits.tbt.push(audits['total-blocking-time']?.numericValue);
+  urlScores.audits.si.push(audits['speed-index']?.numericValue);
+}
+
+function appendLighthouseResult(scores, file) {
+  const data = JSON.parse(fs.readFileSync(file.path, 'utf-8'));
+  const url = data.finalUrl || data.requestedUrl;
+
+  ensureUrlScoreBucket(scores, url);
+  appendRunScores(scores, url, extractCategoryScores(data.categories));
+
+  if (data.audits) {
+    appendAuditScores(scores.urls[url], data.audits);
+  }
+}
+
+function calculateUrlAverages(scores) {
   Object.keys(scores.urls).forEach(url => {
     const runs = scores.urls[url].runs;
     scores.urls[url].average = {
@@ -127,8 +120,9 @@ function extractScores() {
       si: average(audits.si)
     };
   });
-  
-  // 计算总体平均分
+}
+
+function calculateOverallAverage(scores) {
   scores.overallAverage = {
     performance: average(scores.summary.performance),
     accessibility: average(scores.summary.accessibility),
@@ -136,6 +130,26 @@ function extractScores() {
     seo: average(scores.summary.seo),
     pwa: average(scores.summary.pwa)
   };
+}
+
+function extractScores() {
+  console.log('📊 提取 Lighthouse 性能分数...\n');
+
+  if (!fs.existsSync(CONFIG.lhciDir)) {
+    console.error('❌ 未找到 .lighthouseci 目录');
+    return null;
+  }
+
+  const files = findLighthouseResultFiles();
+  if (files.length === 0) {
+    console.error('❌ 未找到 Lighthouse 结果文件');
+    return null;
+  }
+
+  const scores = createEmptyScores();
+  files.forEach(file => appendLighthouseResult(scores, file));
+  calculateUrlAverages(scores);
+  calculateOverallAverage(scores);
   
   return scores;
 }

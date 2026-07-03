@@ -19,10 +19,6 @@
   transform: translateY(-2px);
 }
 
-.sop-card {
-  /* 保持原有样式，因为有特殊的 ::before 装饰 */
-}
-
 /* ==================== 按钮兼容 ==================== */
 .app-center-btn {
   /* 映射到 .btn 样式 */

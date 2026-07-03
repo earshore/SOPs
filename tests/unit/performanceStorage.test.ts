@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { PerformanceStorage, createPerformanceStorage } from '@/services/performanceStorage';
 import { SystemError } from '@/common/errors/AppError';
 import type { ILoggerService } from '@/types/services';
@@ -201,7 +201,6 @@ const createLogger = (): ILoggerService => ({
   download: vi.fn(),
 });
 
-describe('PerformanceStorage', () => {
   let originalIndexedDB: IDBFactory | undefined;
   let originalWindowIndexedDB: IDBFactory | undefined;
   let originalIDBKeyRange: typeof IDBKeyRange | undefined;
@@ -385,4 +384,3 @@ describe('PerformanceStorage', () => {
     expect(remaining).toHaveLength(1);
     expect(remaining[0].data).toEqual({ fresh: true });
   });
-});

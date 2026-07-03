@@ -128,7 +128,6 @@ B012345678`;
     });
   });
 
-  describe('validateProduct - 产品数据验证', () => {
     it('应该接受有效的产品数据', () => {
       const validProduct = {
         asin: 'B08N5WRWNW',
@@ -261,9 +260,7 @@ B012345678`;
 
       expect(result.valid).toBe(true);
     });
-  });
 
-  describe('validateScrapedData - 数据结构验证', () => {
     it('应该接受标准格式（包含 products 字段）', () => {
       const data = {
         metadata: { marketplace: 'DE' },
@@ -401,4 +398,3 @@ B012345678`;
       expect(result.valid).toBe(true);
       expect(result.products).toHaveLength(2);
     });
-  });

@@ -126,6 +126,19 @@ describe('dataLoaders - checkAndLoadScraperData', () => {
     expect(mockContext.selectedAsins).toBe(originalAsins);
     expect(mockAppStoreState.setSelectedAsins).not.toHaveBeenCalled();
   });
+});
+
+describe('dataLoaders - checkAndLoadScraperData empty states', () => {
+  let mockContext: AlpineContext;
+
+  beforeEach(() => {
+    mockContext = createContext();
+    mockAppStoreState.scraper = undefined;
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('应该在没有 Scraper 数据时不做任何操作', () => {
     mockAppStoreState.scraper = undefined;
@@ -230,6 +243,20 @@ describe('dataLoaders - checkLoadedReport', () => {
     expect(mockContext.analysisReport).toEqual(innerReport);
     expect(mockContext.hasReport).toBe(true);
     expect(mockAppStoreState.setAnalysisReport).toHaveBeenCalledWith(innerReport);
+  });
+});
+
+describe('dataLoaders - checkLoadedReport invalid reports', () => {
+  let mockContext: AlpineContext;
+
+  beforeEach(() => {
+    mockContext = createContext();
+    mockAppStoreState.analysis = {};
+    mockAppStoreState.scraper = undefined;
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
   it('应该在当前产品数据为空时不加载历史报告', () => {

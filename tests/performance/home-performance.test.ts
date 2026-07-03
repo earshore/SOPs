@@ -137,8 +137,6 @@ function printPerformanceSummary(report: any) {
 // 测试套件
 // ================================================================
 
-test.describe('首页性能测试', () => {
-  
   let lighthouseReport: any;
   
   test.beforeAll(async ({ baseURL }) => {
@@ -246,5 +244,3 @@ test.describe('首页性能测试', () => {
     console.log('\n✅ 首页性能测试完成');
     console.log(`📁 报告保存在: ${REPORTS_DIR}\n`);
   });
-  
-});

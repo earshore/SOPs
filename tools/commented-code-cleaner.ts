@@ -198,16 +198,7 @@ class CommentedCodeCleaner {
     return report;
   }
 
-  generateHtmlReport(result: ScanResult): string {
-    const timestamp = new Date().toISOString();
-    
-    let html = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>注释代码清理报告</title>
-  <style>
+  private readonly htmlStyles = `
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       line-height: 1.6;
@@ -312,13 +303,10 @@ class CommentedCodeCleaner {
       text-align: center;
       font-size: 18px;
     }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>📝 注释代码清理报告</h1>
-    <p>生成时间: ${timestamp}</p>
-  </div>
+`;
+
+  private renderHtmlStats(result: ScanResult): string {
+    return `
 
   <div class="stats">
     <div class="stat-card">
@@ -339,31 +327,37 @@ class CommentedCodeCleaner {
     </div>
   </div>
 `;
+  }
 
-    if (result.issues.length === 0) {
-      html += `<div class="success">✅ 未发现注释掉的代码</div>`;
-    } else {
-      // 按文件分组
-      const byFile = new Map<string, CommentedCodeIssue[]>();
-      for (const issue of result.issues) {
-        if (!byFile.has(issue.file)) {
-          byFile.set(issue.file, []);
-        }
-        byFile.get(issue.file)!.push(issue);
+  private groupIssuesByFile(
+    issues: CommentedCodeIssue[]
+  ): Map<string, CommentedCodeIssue[]> {
+    const byFile = new Map<string, CommentedCodeIssue[]>();
+
+    for (const issue of issues) {
+      if (!byFile.has(issue.file)) {
+        byFile.set(issue.file, []);
       }
+      byFile.get(issue.file)!.push(issue);
+    }
 
-      for (const [file, issues] of byFile) {
-        html += `
+    return byFile;
+  }
+
+  private renderFileSection(file: string, issues: CommentedCodeIssue[]): string {
+    return `
   <div class="file-section">
     <div class="file-header">${file}</div>
     <p>发现 ${issues.length} 处注释代码</p>
+${issues.map(issue => this.renderIssue(issue)).join('')}  </div>
 `;
-        
-        for (const issue of issues) {
-          const preview = issue.content.substring(0, 200);
-          const truncated = issue.content.length > 200;
-          
-          html += `
+  }
+
+  private renderIssue(issue: CommentedCodeIssue): string {
+    const preview = issue.content.substring(0, 200);
+    const truncated = issue.content.length > 200;
+
+    return `
     <div class="issue">
       <div class="issue-header">
         行 ${issue.line}
@@ -373,12 +367,16 @@ class CommentedCodeCleaner {
       <pre>${this.escapeHtml(preview)}${truncated ? '\n... (已截断)' : ''}</pre>
     </div>
 `;
-        }
-        
-        html += `  </div>\n`;
-      }
+  }
 
-      html += `
+  private renderFileSections(result: ScanResult): string {
+    return Array.from(this.groupIssuesByFile(result.issues).entries())
+      .map(([file, issues]) => this.renderFileSection(file, issues))
+      .join('');
+  }
+
+  private renderRecommendations(): string {
+    return `
   <div class="recommendations">
     <h3>💡 建议</h3>
     <ul>
@@ -389,13 +387,31 @@ class CommentedCodeCleaner {
     </ul>
   </div>
 `;
-    }
+  }
 
-    html += `
+  generateHtmlReport(result: ScanResult): string {
+    const timestamp = new Date().toISOString();
+    const content = result.issues.length === 0
+      ? `<div class="success">✅ 未发现注释掉的代码</div>`
+      : `${this.renderFileSections(result)}${this.renderRecommendations()}`;
+
+    return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注释代码清理报告</title>
+  <style>${this.htmlStyles}  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📝 注释代码清理报告</h1>
+    <p>生成时间: ${timestamp}</p>
+  </div>
+
+${this.renderHtmlStats(result)}${content}
 </body>
 </html>`;
-
-    return html;
   }
 
   private escapeHtml(text: string): string {

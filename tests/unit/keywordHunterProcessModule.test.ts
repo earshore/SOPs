@@ -225,7 +225,6 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-describe('Keyword Hunter process module', () => {
   it('mounts template content, renders highlighted copy, stats, and floating keywords', async () => {
     const container = await mountProcess();
 
@@ -466,4 +465,3 @@ describe('Keyword Hunter process module', () => {
     expect(document.querySelector('#kt-keywords-floating')).toBeNull();
     expect(document.querySelector('#kt-keywords-minimized')).toBeNull();
   });
-});

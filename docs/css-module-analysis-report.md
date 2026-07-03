@@ -1,45 +1,25 @@
 # CSS 模块分析报告
 
-> 生成时间: 2026/7/3 02:02:06
+> 生成时间: 2026/7/3 02:39:03
 
 ## 📊 统计信息
 
 - 分析文件数: 10
-- 总代码行数: 7353
-- 识别模式数: 8
+- 总代码行数: 7198
+- 识别模式数: 6
 
 ## 🔍 发现的重复模式
 
 ### Cards 相关
 
-- **cards-pattern-1**: 出现 9 次
-  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/more/more_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css, src/modules/more/views/explore/prompts/prompts_style.css
+- **cards-pattern-3**: 出现 2 次
+  - 文件: src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css
   - 示例:
     ```css
-    .sop-card { background: var(--surface-card, #ffffff); border-radius: var(--radius-card, 8px);...
+    .manual-input-card { background: rgba(255, 255, 255, 0.92); border: 1px solid var(--scraper-border);...
     ```
     ```css
-    .amz_card-hover { position: relative; background: white; transition: all var(--duration-slow) var(--...
-    ```
-
-- **cards-pattern-3**: 出现 9 次
-  - 文件: src/modules/sops/sops_style.css, src/modules/amz_hub/amz_hub_style.css, src/modules/more/more_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/master_analysis/master_analysis_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
-  - 示例:
-    ```css
-    .sop-card { background: var(--surface-card, #ffffff); border-radius: var(--radius-card, 8px); border...
-    ```
-    ```css
-    .glass-card { background: var(--color-white); backdrop-filter: blur(16px); /* 更深度的模糊 */ border: 1px ...
-    ```
-
-- **cards-pattern-2**: 出现 3 次
-  - 文件: src/modules/amz_hub/amz_hub_style.css, src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/more/views/explore/prompts/prompts_style.css
-  - 示例:
-    ```css
-    .amz_card-hover:hover { transform: translateY(-4px)...
-    ```
-    ```css
-    .card-hover:hover { transform: translateY(-4px)...
+    .widget-card-container { box-shadow: 0 0 0 2px var(--color-blue-500), 0 8px 24px -4px var(--color-pr...
     ```
 
 ### Buttons 相关
@@ -54,26 +34,12 @@
     .amz_nav-btn { padding: 8px 20px; border-radius: 99px;...
     ```
 
-### Animations 相关
-
-- **animations-pattern-2**: 出现 17 次
-  - 文件: src/modules/home/homeDisplay.css, src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css, src/modules/app_center/views/master_analysis/scraper/scraper_style.css, src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css
-  - 示例:
-    ```css
-    animation: fadeUp 1s...
-    ```
-    ```css
-    animation: fadeUp 1s...
-    ```
-
 ### Icons 相关
 
 ### Badges 相关
 
 ## 💡 优化建议
 
-1. 发现 3 个重复的卡片样式模式，建议提取到 src/css/components/cards.css
-2. 发现 1 个重复的动画定义，建议移动到 src/css/animations/keyframes.css
 
 ## 📝 下一步行动
 

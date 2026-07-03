@@ -56,6 +56,7 @@ type ImportOptions = {
   config?: Record<string, unknown> | null;
   storedThreadStore?: Record<string, unknown> | null;
   promptHistory?: PromptHistoryState['promptlab']['history'];
+  callLLM?: (...args: unknown[]) => Promise<string>;
 };
 
 class TestDeepChatElement extends HTMLElement {
@@ -165,14 +166,17 @@ async function importDeepChat(options: ImportOptions = {}) {
     remove: vi.fn(),
   };
   const toast = vi.fn();
-  const callLLM = vi.fn(async (...args: unknown[]) => {
-    const callOptions = args[5] as
-      | { onStreamUpdate?: (update: { delta: string }) => void }
-      | undefined;
-    callOptions?.onStreamUpdate?.({ delta: 'Streamed ' });
-    callOptions?.onStreamUpdate?.({ delta: 'answer' });
-    return 'Streamed answer';
-  });
+  const callLLM = vi.fn(
+    options.callLLM ||
+      (async (...args: unknown[]) => {
+        const callOptions = args[5] as
+          | { onStreamUpdate?: (update: { delta: string }) => void }
+          | undefined;
+        callOptions?.onStreamUpdate?.({ delta: 'Streamed ' });
+        callOptions?.onStreamUpdate?.({ delta: 'answer' });
+        return 'Streamed answer';
+      })
+  );
   const state: PromptHistoryState = {
     promptlab: {
       history: [...(options.promptHistory ?? promptHistory)],
@@ -244,6 +248,26 @@ function queryRequired<T extends Element>(container: ParentNode, selector: strin
     throw new Error(`Element not found: ${selector}`);
   }
   return element;
+}
+
+function expectStoredAssistantMessage(
+  setMock: ReturnType<typeof vi.fn>,
+  text: string,
+  threadShape: Record<string, unknown> = {}
+): void {
+  expect(setMock).toHaveBeenCalledWith(
+    'user:playground_deep_chat_threads_v1',
+    expect.objectContaining({
+      activeThreadId: 'thread-1',
+      threads: expect.arrayContaining([
+        expect.objectContaining({
+          ...threadShape,
+          messages: expect.arrayContaining([expect.objectContaining({ role: 'ai', text })]),
+        }),
+      ]),
+    }),
+    'user-data'
+  );
 }
 
 beforeAll(() => {
@@ -358,7 +382,7 @@ describe('deep-chat playground module', () => {
   });
 });
 
-describe('deep-chat playground requests', () => {
+describe('deep-chat playground successful requests', () => {
   it('handles a streamed LLM request and persists the assistant response', async () => {
     const container = document.createElement('main');
     document.body.append(container);
@@ -376,7 +400,10 @@ describe('deep-chat playground requests', () => {
       stopClicked: { listener: vi.fn() },
     };
 
-    chat.connect?.handler({ text: 'What should we do next?' }, signals);
+    chat.connect?.handler(
+      { messages: [{ role: 'user', text: 'What should we do next?' }] },
+      signals
+    );
 
     await vi.waitFor(() => {
       expect(mocks.callLLM).toHaveBeenCalled();
@@ -386,25 +413,15 @@ describe('deep-chat playground requests', () => {
     expect(onOpen).toHaveBeenCalled();
     expect(onResponse).toHaveBeenCalledWith({ text: 'Streamed ' });
     expect(onResponse).toHaveBeenCalledWith({ text: 'answer' });
-    expect(mocks.localDataStore.set).toHaveBeenCalledWith(
-      'user:playground_deep_chat_threads_v1',
-      expect.objectContaining({
-        activeThreadId: 'thread-1',
-        threads: expect.arrayContaining([
-          expect.objectContaining({
-            title: 'Saved question',
-            messages: expect.arrayContaining([
-              expect.objectContaining({ role: 'ai', text: 'Streamed answer' }),
-            ]),
-          }),
-        ]),
-      }),
-      'user-data'
-    );
+    expectStoredAssistantMessage(mocks.localDataStore.set, 'Streamed answer', {
+      title: 'Saved question',
+    });
 
     unmount();
   });
+});
 
+describe('deep-chat playground request errors', () => {
   it('rejects requests when no usable model config is available', async () => {
     const container = document.createElement('main');
     document.body.append(container);
@@ -417,13 +434,45 @@ describe('deep-chat playground requests', () => {
     getChat(container).connect?.handler({ text: 'Hello' }, { onResponse, onClose });
 
     await vi.waitFor(() => {
-      expect(onResponse).toHaveBeenCalledWith({ error: '请先在系统设置中配置可用的 LLM 模型。' });
+      expect(onResponse).toHaveBeenCalledWith({
+        text: '请求失败：请先在系统设置中配置可用的 LLM 模型。',
+      });
       expect(onClose).toHaveBeenCalled();
     });
     expect(mocks.callLLM).not.toHaveBeenCalled();
     expect(container.querySelector('#playground-provider-status')?.textContent).toContain(
       '未配置模型'
     );
+
+    unmount();
+  });
+
+  it('persists a visible assistant error when the LLM request fails after send', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      callLLM: async () => {
+        throw new Error('上游 API 返回格式异常');
+      },
+    });
+
+    await mount(container);
+    const onResponse = vi.fn();
+    const onClose = vi.fn();
+
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Trigger a failed request' }] },
+      { onResponse, onClose }
+    );
+
+    await vi.waitFor(() => {
+      expect(onResponse).toHaveBeenCalledWith({
+        text: '请求失败：上游 API 返回格式异常',
+      });
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    expectStoredAssistantMessage(mocks.localDataStore.set, '请求失败：上游 API 返回格式异常');
 
     unmount();
   });

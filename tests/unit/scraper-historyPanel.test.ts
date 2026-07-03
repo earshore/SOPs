@@ -296,7 +296,6 @@ vi.mock('@/common/constants/eventConstants', () => ({
     });
   });
 
-  describe('loadHistoryItem - 加载历史快照', () => {
     it('应该加载历史快照到全局状态', () => {
       const item = mockHistory[0];
       const result = historyPanel.loadHistoryItem(item, false);
@@ -430,7 +429,6 @@ vi.mock('@/common/constants/eventConstants', () => ({
 
       expect(mockState.scraper.scrapedData?.metadata?.marketplace).toBe('DE');
     });
-  });
 
   describe('loadAnalysisReport - 加载分析报告', () => {
     it('应该加载分析报告并跳转', async () => {

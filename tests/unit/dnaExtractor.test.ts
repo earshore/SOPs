@@ -49,7 +49,6 @@ import type { FullAnalysisReport } from '../../src/modules/app_center/views/mast
     });
   });
 
-  describe('extractProductDNA', () => {
     it('应该在报告为 null 时返回 null', () => {
       expect(extractProductDNA(null)).toBeNull();
     });
@@ -357,7 +356,6 @@ import type { FullAnalysisReport } from '../../src/modules/app_center/views/mast
         expect(dna.audience).toBeDefined();
       }
     });
-  });
 
   describe('边界情况测试', () => {
     it('应该处理空对象', () => {

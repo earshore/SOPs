@@ -6,8 +6,8 @@ import { showProgress, showToast } from '@/common/ui';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { KeywordHunterSnapshotService } from '@/modules/app_center/views/keyword_hunter/services/snapshotService';
 
-const inputMocks = vi.hoisted(() => {
-  const template = `
+function createKeywordHunterTemplate(): string {
+  return `
     <section>
       <textarea id="kt-keywords-input"></textarea>
       <div id="kt-keyword-highlight-layer"></div>
@@ -32,120 +32,130 @@ const inputMocks = vi.hoisted(() => {
       <div id="kt-input-snapshot-list"></div>
     </section>
   `;
+}
 
-  const state = {
-    keywordTracker: {
-      keywordsInputText: '',
-      copyInputText: '',
-      keywords: [] as string[],
-      processedCopy: '',
-      matchedKeywords: [] as Array<{ keyword: string; count: number }>,
-      unmatchedKeywords: [] as string[],
-      wordFrequency: [] as Array<[string, number]>,
-      paragraphs: [],
-      translationMode: false,
-      settings: {
-        matchPlural: true,
-        matchStem: true,
-        matchCase: false,
-        matchPartial: false,
+function createKeywordTrackerState() {
+  return {
+    keywordsInputText: '',
+    copyInputText: '',
+    keywords: [] as string[],
+    processedCopy: '',
+    matchedKeywords: [] as Array<{ keyword: string; count: number }>,
+    unmatchedKeywords: [] as string[],
+    wordFrequency: [] as Array<[string, number]>,
+    paragraphs: [],
+    translationMode: false,
+    settings: {
+      matchPlural: true,
+      matchStem: true,
+      matchCase: false,
+      matchPartial: false,
+    },
+    currentSnapshotId: null as string | null,
+    snapshotSource: {
+      type: 'manual' as const,
+    },
+  };
+}
+
+function createSnapshotFixtures(): Array<Record<string, any>> {
+  return [
+    {
+      id: 'kh-coffee',
+      schemaVersion: 1,
+      title: 'Coffee Snapshot',
+      status: 'matched',
+      createdAt: '2026-06-12T08:00:00.000Z',
+      updatedAt: '2026-06-12T09:00:00.000Z',
+      source: { type: 'manual' },
+      input: {
+        keywordsInputText: 'coffee grinder\nespresso',
+        copyInputText: 'Manual coffee grinder copy',
+        settings: {
+          matchPlural: true,
+          matchStem: true,
+          matchCase: false,
+          matchPartial: false,
+        },
       },
-      currentSnapshotId: null as string | null,
-      snapshotSource: {
-        type: 'manual' as const,
+      result: {
+        keywords: ['coffee grinder', 'espresso'],
+        processedCopy: 'Manual coffee grinder copy',
+        matchedKeywords: [{ keyword: 'coffee grinder', count: 2 }],
+        unmatchedKeywords: ['espresso'],
+        wordFrequency: [['coffee', 2]],
+        paragraphs: [],
+        llmAnalysisResult: '',
+        showTranslation: false,
+        translationMode: false,
+        coverageRate: 50,
+      },
+      derived: {
+        keywordCount: 2,
+        matchedCount: 1,
+        unmatchedCount: 1,
+        copyHash: 'copy',
+        snapshotFingerprint: 'fp',
       },
     },
-    updateKeywordTracker: vi.fn((patch: Record<string, unknown>) => {
+    {
+      id: 'kh-manual',
+      schemaVersion: 1,
+      title: 'Manual Draft Snapshot',
+      status: 'draft',
+      createdAt: '2026-06-11T08:00:00.000Z',
+      updatedAt: '2026-06-11T09:00:00.000Z',
+      source: { type: 'manual' },
+      input: {
+        keywordsInputText: 'manual',
+        copyInputText: 'manual copy',
+        settings: {
+          matchPlural: true,
+          matchStem: true,
+          matchCase: false,
+          matchPartial: false,
+        },
+      },
+      result: {
+        keywords: ['manual'],
+        processedCopy: 'manual copy',
+        matchedKeywords: [],
+        unmatchedKeywords: ['manual'],
+        wordFrequency: [],
+        paragraphs: [],
+        llmAnalysisResult: '',
+        showTranslation: false,
+        translationMode: false,
+        coverageRate: 0,
+      },
+      derived: {
+        keywordCount: 1,
+        matchedCount: 0,
+        unmatchedCount: 1,
+        copyHash: 'manual',
+        snapshotFingerprint: 'manual',
+      },
+    },
+  ];
+}
+
+function createInputMocks(mockApi: typeof vi) {
+  const template = createKeywordHunterTemplate();
+  const state = {
+    keywordTracker: createKeywordTrackerState(),
+    updateKeywordTracker: mockApi.fn((patch: Record<string, unknown>) => {
       Object.assign(state.keywordTracker, patch);
     }),
   };
 
-  const snapshots: Array<Record<string, any>> = [];
+  const snapshots = createSnapshotFixtures();
   const resetSnapshots = () => {
-    snapshots.splice(0, snapshots.length,
-      {
-        id: 'kh-coffee',
-        schemaVersion: 1,
-        title: 'Coffee Snapshot',
-        status: 'matched',
-        createdAt: '2026-06-12T08:00:00.000Z',
-        updatedAt: '2026-06-12T09:00:00.000Z',
-        source: { type: 'manual' },
-        input: {
-          keywordsInputText: 'coffee grinder\nespresso',
-          copyInputText: 'Manual coffee grinder copy',
-          settings: {
-            matchPlural: true,
-            matchStem: true,
-            matchCase: false,
-            matchPartial: false,
-          },
-        },
-        result: {
-          keywords: ['coffee grinder', 'espresso'],
-          processedCopy: 'Manual coffee grinder copy',
-          matchedKeywords: [{ keyword: 'coffee grinder', count: 2 }],
-          unmatchedKeywords: ['espresso'],
-          wordFrequency: [['coffee', 2]],
-          paragraphs: [],
-          llmAnalysisResult: '',
-          showTranslation: false,
-          translationMode: false,
-          coverageRate: 50,
-        },
-        derived: {
-          keywordCount: 2,
-          matchedCount: 1,
-          unmatchedCount: 1,
-          copyHash: 'copy',
-          snapshotFingerprint: 'fp',
-        },
-      },
-      {
-        id: 'kh-manual',
-        schemaVersion: 1,
-        title: 'Manual Draft Snapshot',
-        status: 'draft',
-        createdAt: '2026-06-11T08:00:00.000Z',
-        updatedAt: '2026-06-11T09:00:00.000Z',
-        source: { type: 'manual' },
-        input: {
-          keywordsInputText: 'manual',
-          copyInputText: 'manual copy',
-          settings: {
-            matchPlural: true,
-            matchStem: true,
-            matchCase: false,
-            matchPartial: false,
-          },
-        },
-        result: {
-          keywords: ['manual'],
-          processedCopy: 'manual copy',
-          matchedKeywords: [],
-          unmatchedKeywords: ['manual'],
-          wordFrequency: [],
-          paragraphs: [],
-          llmAnalysisResult: '',
-          showTranslation: false,
-          translationMode: false,
-          coverageRate: 0,
-        },
-        derived: {
-          keywordCount: 1,
-          matchedCount: 0,
-          unmatchedCount: 1,
-          copyHash: 'manual',
-          snapshotFingerprint: 'manual',
-        },
-      },
-    );
+    snapshots.splice(0, snapshots.length, ...createSnapshotFixtures());
   };
-  resetSnapshots();
 
   return {
     actions: {} as Record<string, (...args: unknown[]) => unknown>,
-    deleteByIdAsync: vi.fn(async (id: string) => {
+    deleteByIdAsync: mockApi.fn(async (id: string) => {
       const index = snapshots.findIndex((snapshot) => snapshot.id === id);
       if (index >= 0) snapshots.splice(index, 1);
       const tracker = state.keywordTracker as Record<string, any>;
@@ -154,16 +164,16 @@ const inputMocks = vi.hoisted(() => {
       }
       return index >= 0;
     }),
-    confirm: vi.fn(() => true),
-    getAllAsync: vi.fn(async () => snapshots),
-    loadTemplate: vi.fn(async () => template),
-    navigateTo: vi.fn(async () => undefined),
-    readText: vi.fn(async () => 'clipboard copy'),
-    renderTemplate: vi.fn((container: HTMLElement, html: string) => {
+    confirm: mockApi.fn(() => true),
+    getAllAsync: mockApi.fn(async () => snapshots),
+    loadTemplate: mockApi.fn(async () => template),
+    navigateTo: mockApi.fn(async () => undefined),
+    readText: mockApi.fn(async () => 'clipboard copy'),
+    renderTemplate: mockApi.fn((container: HTMLElement, html: string) => {
       container.innerHTML = html;
     }),
     resetSnapshots,
-    restore: vi.fn((snapshot: Record<string, any>) => {
+    restore: mockApi.fn((snapshot: Record<string, any>) => {
       Object.assign(state.keywordTracker, {
         keywordsInputText: snapshot.input.keywordsInputText,
         copyInputText: snapshot.input.copyInputText,
@@ -171,16 +181,18 @@ const inputMocks = vi.hoisted(() => {
       });
       return snapshot;
     }),
-    saveCurrentAsync: vi.fn(async () => ({
+    saveCurrentAsync: mockApi.fn(async () => ({
       id: 'kh-test',
     })),
-    showProgress: vi.fn(),
-    showToast: vi.fn(),
+    showProgress: mockApi.fn(),
+    showToast: mockApi.fn(),
     snapshots,
     state,
-    unregisterActions: vi.fn(),
+    unregisterActions: mockApi.fn(),
   };
-});
+}
+
+const inputMocks = vi.hoisted(() => createInputMocks(vi));
 
 vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
   SafeModuleLoader: {

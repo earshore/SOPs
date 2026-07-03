@@ -57,7 +57,6 @@ import { setupAPIConfig, waitForAppReady } from '../helpers/test-setup';
     });
   });
 
-  test.describe('DNA 提取功能测试', () => {
     test('应该能够从分析报告自动提取产品 DNA', async ({ page }) => {
       // 设置控制台错误监听
       const consoleListener = setupConsoleErrorListener(page);
@@ -187,7 +186,6 @@ import { setupAPIConfig, waitForAppReady } from '../helpers/test-setup';
 
       console.log('✅ 覆盖现有内容功能正常');
     });
-  });
 
   test.describe('提取数据质量测试', () => {
     test('提取的目标受众应该包含有效信息', async () => {

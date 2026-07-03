@@ -5,6 +5,7 @@
 // ==========================================
 
 import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
+import { randomFloat } from '../../../../../common/utils/random';
 import { parseProductPage, parseReviews } from './parserService';
 import { sleep, getErrorSummary } from '../../../../../common/ui';
 import { HistoryService } from './historyService';
@@ -202,7 +203,7 @@ async function waitBeforeProxyAttempt(attempt: number, delay: number): Promise<v
     return;
   }
 
-  const jitter = Math.random() * 300;
+  const jitter = randomFloat() * 300;
   await sleep(delay * (attempt + 1) + jitter);
 }
 
@@ -218,7 +219,7 @@ async function assertProxyResponseOk(res: Response, context: ProxyFetchContext):
   }
 
   if (res.status === 429) {
-    await sleep(2000 + Math.random() * 1000);
+    await sleep(2000 + randomFloat() * 1000);
     throw new ApiError('请求过于频繁 (429)', 'SCRAPER_SVC_004', 429, undefined, {
       module: 'ScraperService',
       action: 'fetchWithProxy',
@@ -526,7 +527,7 @@ export async function scrapeAsin(
     return createFailedScrapedProduct(asin, errorMsg);
   }
 
-  const proxyConfig = StorageService.getProxyConfig();
+  const proxyConfig = await StorageService.getProxyConfigWithCredential();
   const lang = getLanguageHeader(site);
   const baseUrl = `https://www.${lang.domain}/dp/${asin}`;
   const context: ScrapeContext = {
@@ -580,7 +581,7 @@ export async function scrapeMultipleAsins(
 
     // 批次间延迟，避免触发反爬
     if (i + BATCH_SIZE < asins.length) {
-      await sleep(BATCH_DELAY + Math.random() * 500);
+      await sleep(BATCH_DELAY + randomFloat() * 500);
     }
   }
 

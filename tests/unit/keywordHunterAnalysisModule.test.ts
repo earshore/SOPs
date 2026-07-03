@@ -174,7 +174,6 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-describe('Keyword Hunter analysis module', () => {
   it('mounts the template and disables analysis when no processed copy exists', async () => {
     const container = await mountAnalysis();
     const button = container.querySelector<HTMLButtonElement>('#kt-analyze-btn');
@@ -377,4 +376,3 @@ describe('Keyword Hunter analysis module', () => {
     });
     expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
   });
-});

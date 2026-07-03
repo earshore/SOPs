@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import type { AnalysisReport, GeneratedPromptRecord, HistoryItem, ScrapedData } from '@/types/modules-business';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 import { StorageService } from '@/services/storageService';
@@ -156,7 +156,6 @@ function createUserProductProfile(overrides: Partial<UserProductProfile> = {}): 
   };
 }
 
-describe('HistoryService snapshot storage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.history = [];
@@ -426,4 +425,3 @@ describe('HistoryService snapshot storage', () => {
 
     expect(deleted).toBe(false);
   });
-});

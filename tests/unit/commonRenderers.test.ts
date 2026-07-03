@@ -61,7 +61,6 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-describe('OverviewRenderer', () => {
   it('rejects unknown module ids with a structured error', () => {
     const container = document.createElement('main');
 
@@ -175,9 +174,7 @@ describe('OverviewRenderer', () => {
     expect(section?.classList.contains('overview-module-highlight')).toBe(false);
     expect(() => renderer.unmount()).not.toThrow();
   });
-});
 
-describe('SidebarRenderer', () => {
   it('renders categorized navigation with active state and search controls', () => {
     const sidebar = document.createElement('aside');
     const activeRoute = firstRouteInCategory('sops');
@@ -322,4 +319,3 @@ describe('SidebarRenderer', () => {
     expect(sidebar.textContent).toContain('总览');
     expect(sidebar.textContent).toContain('0 项');
   });
-});

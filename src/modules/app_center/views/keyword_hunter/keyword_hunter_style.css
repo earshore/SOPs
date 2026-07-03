@@ -17,23 +17,6 @@
   min-height: 500px;
 }
 
-.kt-input-card {
-  display: flex;
-  flex-direction: column;
-  background: var(--surface-card, white);
-  border-radius: var(--radius-card, var(--rounded-md));
-  border: 1px solid var(--border-muted, var(--color-slate-200));
-  transition:
-    border-color var(--duration-fast) ease,
-    box-shadow var(--duration-fast) ease;
-  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
-}
-
-.kt-input-card:hover {
-  border-color: var(--color-border-default, rgba(148, 163, 184, 0.32));
-  box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
-}
-
 .kt-input-workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
@@ -524,13 +507,6 @@
   color: var(--color-red-600, #dc2626);
 }
 
-.kt-surface-card {
-  background: var(--surface-card, white);
-  border-color: var(--border-muted, var(--color-slate-200));
-  border-radius: var(--radius-card, var(--rounded-md));
-  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
-}
-
 .kt-editor-shell {
   border-width: 1px;
   border-radius: var(--radius-card, var(--rounded-md));
@@ -973,7 +949,7 @@
     0 0 0 3px var(--color-amber-300),
     0 6px 12px -4px var(--color-amber-200) !important;
   transform: none !important;
-  animation: keyword-root-pulse 0.7s var(--ease-in-out) !important;
+  animation: keyword-root-pulse var(--duration-slowest, 700ms) var(--ease-in-out) !important;
   position: relative;
   z-index: 10;
 }

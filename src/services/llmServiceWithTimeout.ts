@@ -7,6 +7,7 @@
 import { callLLM, type ChatMessage, type LLMOptions, type LLMConfig } from './llmService';
 import { workingStateManager } from '../common/utils/WorkingStateManager';
 import { showToast } from '../common/ui/notifications';
+import { createRandomId } from '../common/utils/random';
 
 const nativeLoggerConsole = globalThis.console;
 
@@ -69,7 +70,7 @@ export async function callLLMWithTimeout(
   options: LLMWithTimeoutOptions = {}
 ): Promise<string> {
   const {
-    taskId = `llm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    taskId = createRandomId('llm'),
     timeout = 30000,
     maxRetries = 3,
     description = 'LLM调用',

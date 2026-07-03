@@ -105,6 +105,72 @@ function cleanupBrowserEnvironment() {
   delete (global as any).navigator;
 }
 
+type AnimationFeatureSupport = {
+  transform: boolean;
+  opacity: boolean;
+  intersectionObserver: boolean;
+  requestAnimationFrame: boolean;
+};
+
+function supportsCss(property: string, value: string): boolean {
+  try {
+    return Boolean(window.CSS && window.CSS.supports && window.CSS.supports(property, value));
+  } catch {
+    return false;
+  }
+}
+
+function supportsTransform(): boolean {
+  return supportsCss('transform', 'scale(1)');
+}
+
+function supportsOpacity(): boolean {
+  return supportsCss('opacity', '1');
+}
+
+function supportsIntersectionObserver(): boolean {
+  return typeof window.IntersectionObserver !== 'undefined';
+}
+
+function supportsRequestAnimationFrame(): boolean {
+  return typeof window.requestAnimationFrame !== 'undefined';
+}
+
+function getAnimationFeatures(): AnimationFeatureSupport {
+  return {
+    transform: supportsTransform(),
+    opacity: supportsOpacity(),
+    intersectionObserver: supportsIntersectionObserver(),
+    requestAnimationFrame: supportsRequestAnimationFrame(),
+  };
+}
+
+function checkAnimationSupport() {
+  const features = getAnimationFeatures();
+
+  return {
+    fullSupport: Object.values(features).every(Boolean),
+    partialSupport: Object.values(features).some(Boolean),
+    features,
+  };
+}
+
+function getListAnimationStrategy(): 'intersection-observer' | 'immediate' {
+  return supportsIntersectionObserver() ? 'intersection-observer' : 'immediate';
+}
+
+function getAnimationFrameMethod(): (callback: FrameRequestCallback) => number {
+  return window.requestAnimationFrame || ((callback: FrameRequestCallback) => window.setTimeout(callback, 16));
+}
+
+function getAnimationStrategy(): 'full-animations' | 'basic-animations' | 'no-animations' {
+  const features = getAnimationFeatures();
+  if (Object.values(features).every(Boolean)) {
+    return 'full-animations';
+  }
+  return features.transform && features.opacity ? 'basic-animations' : 'no-animations';
+}
+
   afterEach(() => {
     cleanupBrowserEnvironment();
     vi.restoreAllMocks();
@@ -263,7 +329,6 @@ function cleanupBrowserEnvironment() {
     });
   });
 
-  describe('不支持浏览器的降级 (Requirement 12.5)', () => {
     describe('不支持transform的浏览器', () => {
       beforeEach(() => {
         setupBrowserEnvironment(
@@ -400,53 +465,28 @@ function cleanupBrowserEnvironment() {
         expect(shouldDisableAnimations).toBe(true);
       });
     });
-  });
 
   describe('特性检测工具函数', () => {
     it('应该能够检测CSS transform支持', () => {
       setupBrowserEnvironment('Chrome/90.0', { transform: true });
-      
-      const supportsTransform = () => {
-        try {
-          return window.CSS && window.CSS.supports && window.CSS.supports('transform', 'scale(1)');
-        } catch {
-          return false;
-        }
-      };
 
       expect(supportsTransform()).toBe(true);
     });
 
     it('应该能够检测CSS opacity支持', () => {
       setupBrowserEnvironment('Chrome/90.0', { opacity: true });
-      
-      const supportsOpacity = () => {
-        try {
-          return window.CSS && window.CSS.supports && window.CSS.supports('opacity', '1');
-        } catch {
-          return false;
-        }
-      };
 
       expect(supportsOpacity()).toBe(true);
     });
 
     it('应该能够检测IntersectionObserver支持', () => {
       setupBrowserEnvironment('Chrome/90.0', { intersectionObserver: true });
-      
-      const supportsIntersectionObserver = () => {
-        return typeof window.IntersectionObserver !== 'undefined';
-      };
 
       expect(supportsIntersectionObserver()).toBe(true);
     });
 
     it('应该能够检测requestAnimationFrame支持', () => {
       setupBrowserEnvironment('Chrome/90.0', { requestAnimationFrame: true });
-      
-      const supportsRequestAnimationFrame = () => {
-        return typeof window.requestAnimationFrame !== 'undefined';
-      };
 
       expect(supportsRequestAnimationFrame()).toBe(true);
     });
@@ -458,21 +498,6 @@ function cleanupBrowserEnvironment() {
         intersectionObserver: true,
         requestAnimationFrame: true,
       });
-      
-      const checkAnimationSupport = () => {
-        const features = {
-          transform: window.CSS && window.CSS.supports && window.CSS.supports('transform', 'scale(1)'),
-          opacity: window.CSS && window.CSS.supports && window.CSS.supports('opacity', '1'),
-          intersectionObserver: typeof window.IntersectionObserver !== 'undefined',
-          requestAnimationFrame: typeof window.requestAnimationFrame !== 'undefined',
-        };
-
-        return {
-          fullSupport: Object.values(features).every(Boolean),
-          partialSupport: Object.values(features).some(Boolean),
-          features,
-        };
-      };
 
       const support = checkAnimationSupport();
       expect(support.fullSupport).toBe(true);
@@ -487,36 +512,18 @@ function cleanupBrowserEnvironment() {
   describe('降级策略测试', () => {
     it('应该在不支持transform时禁用动画', () => {
       setupBrowserEnvironment('IE 9', { transform: false });
-      
-      const shouldEnableAnimations = () => {
-        return window.CSS && window.CSS.supports && window.CSS.supports('transform', 'scale(1)');
-      };
 
-      expect(shouldEnableAnimations()).toBe(false);
+      expect(supportsTransform()).toBe(false);
     });
 
     it('应该在不支持IntersectionObserver时使用降级方案', () => {
       setupBrowserEnvironment('IE 11', { intersectionObserver: false });
-      
-      const getListAnimationStrategy = () => {
-        if (typeof window.IntersectionObserver !== 'undefined') {
-          return 'intersection-observer';
-        }
-        return 'immediate';
-      };
 
       expect(getListAnimationStrategy()).toBe('immediate');
     });
 
     it('应该在不支持requestAnimationFrame时使用setTimeout', () => {
       setupBrowserEnvironment('IE 9', { requestAnimationFrame: false });
-      
-      const getAnimationFrameMethod = () => {
-        if (typeof window.requestAnimationFrame !== 'undefined') {
-          return window.requestAnimationFrame;
-        }
-        return (callback: FrameRequestCallback) => setTimeout(callback, 16);
-      };
 
       const method = getAnimationFrameMethod();
       expect(typeof method).toBe('function');
@@ -529,21 +536,6 @@ function cleanupBrowserEnvironment() {
         intersectionObserver: true,
         requestAnimationFrame: true,
       });
-      
-      const getAnimationStrategy = () => {
-        const hasTransform = window.CSS && window.CSS.supports && window.CSS.supports('transform', 'scale(1)');
-        const hasOpacity = window.CSS && window.CSS.supports && window.CSS.supports('opacity', '1');
-        const hasIO = typeof window.IntersectionObserver !== 'undefined';
-        const hasRAF = typeof window.requestAnimationFrame !== 'undefined';
-
-        if (hasTransform && hasOpacity && hasIO && hasRAF) {
-          return 'full-animations';
-        } else if (hasTransform && hasOpacity) {
-          return 'basic-animations';
-        } else {
-          return 'no-animations';
-        }
-      };
 
       expect(getAnimationStrategy()).toBe('full-animations');
     });

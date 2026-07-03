@@ -36,11 +36,13 @@
 }
 
 .animate-float {
-  animation: subtleFloat 4s var(--ease-in-out) infinite;
+  animation: subtleFloat calc(var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms))
+    var(--ease-in-out) infinite;
 }
 
 .animate-pulse-glow {
-  animation: pulseGlow 3s var(--ease-in-out) infinite;
+  animation: pulseGlow calc(var(--duration-2s, 2000ms) + var(--duration-1s, 1000ms))
+    var(--ease-in-out) infinite;
 }
 
 .animate-card-enter {
@@ -55,20 +57,34 @@
   pointer-events: none;
 }
 .particle--1 {
-  animation: particleDrift1 6s var(--ease-in-out) infinite;
+  animation: particleDrift1
+    calc(var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms))
+    var(--ease-in-out) infinite;
 }
 .particle--2 {
-  animation: particleDrift2 8s var(--ease-in-out) infinite;
+  animation: particleDrift2
+    calc(
+      var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms) +
+        var(--duration-2s, 2000ms)
+    )
+    var(--ease-in-out) infinite;
 }
 .particle--3 {
-  animation: particleDrift3 7s var(--ease-in-out) infinite;
+  animation: particleDrift3
+    calc(
+      var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms) +
+        var(--duration-1s, 1000ms)
+    )
+    var(--ease-in-out) infinite;
 }
 
 /* ---- Dot Grid Background ---- */
 .dot-grid-bg {
   background-image: radial-gradient(circle, var(--color-sky-500) 1px, transparent 1px);
   background-size: 24px 24px;
-  animation: dotGridPulse 6s var(--ease-in-out) infinite;
+  animation: dotGridPulse
+    calc(var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms))
+    var(--ease-in-out) infinite;
 }
 
 /* ---- Banner Gradient Animation ---- */
@@ -81,15 +97,12 @@
     rgba(236, 254, 255, 0.4) 100%
   );
   background-size: 200% 200%;
-  animation: gradientShift 8s var(--ease-in-out) infinite;
-}
-
-/* ---- Glass Morphism Card ---- */
-.glass-card {
-  background: var(--color-white);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: gradientShift
+    calc(
+      var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms) + var(--duration-2s, 2000ms) +
+        var(--duration-2s, 2000ms)
+    )
+    var(--ease-in-out) infinite;
 }
 
 /* ---- Enhanced Card Styles ---- */
@@ -298,7 +311,7 @@
     transparent 100%
   );
   background-size: 40px 100%;
-  animation: progressStripes 1s linear infinite;
+  animation: progressStripes var(--duration-1s, 1000ms) linear infinite;
 }
 
 /* ---- History Cards ---- */
@@ -725,8 +738,7 @@
 }
 
 [x-data='scraperPanel'] .manual-config-section,
-[x-data='scraperPanel'] .manual-input-card,
-[x-data='scraperPanel'] .manual-option-card {
+[x-data='scraperPanel'] .manual-input-card {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--scraper-border);
   border-radius: var(--scraper-radius);

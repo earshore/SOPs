@@ -69,6 +69,122 @@ interface ScanConfig {
   rules: ScanRule[];
 }
 
+interface FunctionInfo {
+  name: string;
+  type: string;
+  lines: number;
+  signature: string;
+}
+
+const CONTROL_FLOW_NAMES = new Map<ts.SyntaxKind, string>([
+  [ts.SyntaxKind.IfStatement, 'if 语句'],
+  [ts.SyntaxKind.ForStatement, 'for 循环'],
+  [ts.SyntaxKind.WhileStatement, 'while 循环'],
+  [ts.SyntaxKind.DoStatement, 'do-while 循环'],
+  [ts.SyntaxKind.SwitchStatement, 'switch 语句'],
+  [ts.SyntaxKind.TryStatement, 'try-catch 语句']
+]);
+
+const ANY_TYPE_NODE_READERS: Array<(node: ts.Node) => ts.TypeNode | undefined> = [
+  node => (ts.isVariableDeclaration(node) ? node.type : undefined),
+  node => (ts.isParameter(node) ? node.type : undefined),
+  node => (ts.isFunctionDeclaration(node) ? node.type : undefined),
+  node => (ts.isMethodDeclaration(node) ? node.type : undefined),
+  node => (ts.isArrowFunction(node) ? node.type : undefined),
+  node => (ts.isFunctionExpression(node) ? node.type : undefined),
+  node => (ts.isPropertyDeclaration(node) ? node.type : undefined),
+  node => (ts.isTypeAliasDeclaration(node) ? node.type : undefined),
+  node => (ts.isPropertySignature(node) ? node.type : undefined),
+  node => (ts.isMethodSignature(node) ? node.type : undefined),
+  node => (ts.isAsExpression(node) ? node.type : undefined)
+];
+
+function getCandidateAnyTypeNode(node: ts.Node): ts.TypeNode | undefined {
+  for (const readType of ANY_TYPE_NODE_READERS) {
+    const typeNode = readType(node);
+    if (typeNode) {
+      return typeNode;
+    }
+  }
+  return undefined;
+}
+
+function isAnyTypeUsage(node: ts.Node, sourceFile: ts.SourceFile): boolean {
+  if (node.kind === ts.SyntaxKind.AnyKeyword) {
+    return true;
+  }
+
+  const typeNode = getCandidateAnyTypeNode(node);
+  if (!typeNode) {
+    return false;
+  }
+
+  const typeText = typeNode.getText(sourceFile);
+  return typeText === 'any' || (ts.isTypeAliasDeclaration(node) && typeText.includes('any'));
+}
+
+function getFunctionBodyBlock(node: ts.Node): ts.Block | null {
+  if (ts.isFunctionDeclaration(node) || ts.isMethodDeclaration(node) || ts.isFunctionExpression(node)) {
+    return node.body || null;
+  }
+  if (ts.isArrowFunction(node) && ts.isBlock(node.body)) {
+    return node.body;
+  }
+  return null;
+}
+
+function countNonEmptyLines(text: string): number {
+  return text.split('\n').filter(line => line.trim().length > 0).length;
+}
+
+function isLongFunctionBody(node: ts.Node, sourceFile: ts.SourceFile): boolean {
+  const body = getFunctionBodyBlock(node);
+  if (!body) {
+    return false;
+  }
+
+  const bodyText = sourceFile.text.substring(body.getStart(sourceFile), body.getEnd());
+  return countNonEmptyLines(bodyText) > 100;
+}
+
+function isControlFlowStatement(node: ts.Node): boolean {
+  return CONTROL_FLOW_NAMES.has(node.kind);
+}
+
+function isFunctionBoundary(node: ts.Node): boolean {
+  return (
+    ts.isFunctionDeclaration(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isArrowFunction(node) ||
+    ts.isFunctionExpression(node)
+  );
+}
+
+function getControlFlowDepth(node: ts.Node): number {
+  let depth = 1;
+  let current: ts.Node | undefined = node.parent;
+
+  while (current) {
+    if (isControlFlowStatement(current)) {
+      depth++;
+    }
+    if (isFunctionBoundary(current)) {
+      break;
+    }
+    current = current.parent;
+  }
+
+  return depth;
+}
+
+function isDeeplyNestedStatement(node: ts.Node): boolean {
+  return isControlFlowStatement(node) && getControlFlowDepth(node) > 4;
+}
+
+function getControlFlowName(node: ts.Node): string {
+  return CONTROL_FLOW_NAMES.get(node.kind) || '';
+}
+
 // ============================================================================
 // 扫描规则配置
 // ============================================================================
@@ -127,163 +243,21 @@ const SCAN_RULES: ScanRule[] = [
     id: 'any-type',
     name: 'any 类型',
     severity: 'medium',
-    astChecker: (node: ts.Node, sourceFile: ts.SourceFile): boolean => {
-      // 1. 检查变量声明 (let x: any)
-      if (ts.isVariableDeclaration(node) && node.type) {
-        const typeText = node.type.getText(sourceFile);
-        if (typeText === 'any') return true;
-      }
-
-      // 2. 检查参数声明 (function foo(x: any))
-      if (ts.isParameter(node) && node.type) {
-        const typeText = node.type.getText(sourceFile);
-        if (typeText === 'any') return true;
-      }
-
-      // 3. 检查函数返回类型 (function foo(): any)
-      if (
-        (ts.isFunctionDeclaration(node) || 
-         ts.isMethodDeclaration(node) || 
-         ts.isArrowFunction(node) ||
-         ts.isFunctionExpression(node)) &&
-        node.type
-      ) {
-        const typeText = node.type.getText(sourceFile);
-        if (typeText === 'any') return true;
-      }
-
-      // 4. 检查属性声明 (class Foo { x: any })
-      if (ts.isPropertyDeclaration(node) && node.type) {
-        const typeText = node.type.getText(sourceFile);
-        if (typeText === 'any') return true;
-      }
-
-      // 5. 检查类型别名 (type Foo = any)
-      if (ts.isTypeAliasDeclaration(node)) {
-        const typeText = node.type.getText(sourceFile);
-        if (typeText === 'any' || typeText.includes('any')) return true;
-      }
-
-      // 6. 检查接口属性 (interface Foo { x: any })
-      if (ts.isPropertySignature(node) && node.type) {
-        const typeText = node.type.getText(sourceFile);
-        if (typeText === 'any') return true;
-      }
-
-      // 7. 检查接口方法签名 (interface Foo { method(): any })
-      if (ts.isMethodSignature(node)) {
-        // 检查返回类型
-        if (node.type) {
-          const typeText = node.type.getText(sourceFile);
-          if (typeText === 'any') return true;
-        }
-        // 参数会被单独的 isParameter 检查捕获
-      }
-
-      // 8. 检查类型断言 (x as any)
-      if (ts.isAsExpression(node)) {
-        const typeText = node.type.getText(sourceFile);
-        if (typeText === 'any') return true;
-      }
-
-      // 9. 检查 any 关键字节点本身
-      if (node.kind === ts.SyntaxKind.AnyKeyword) {
-        return true;
-      }
-
-      return false;
-    },
+    astChecker: isAnyTypeUsage,
     message: '使用了 any 类型'
   },
   {
     id: 'long-function',
     name: '过长函数',
     severity: 'medium',
-    astChecker: (node: ts.Node, sourceFile: ts.SourceFile): boolean => {
-      if (
-        ts.isFunctionDeclaration(node) ||
-        ts.isMethodDeclaration(node) ||
-        ts.isArrowFunction(node) ||
-        ts.isFunctionExpression(node)
-      ) {
-        // 获取函数体的起始和结束位置
-        const body = ts.isFunctionDeclaration(node) || ts.isMethodDeclaration(node) || ts.isFunctionExpression(node)
-          ? node.body
-          : ts.isArrowFunction(node) && ts.isBlock(node.body)
-          ? node.body
-          : null;
-
-        if (!body) {
-          // 箭头函数可能没有块体（如 () => expr）
-          return false;
-        }
-
-        // 计算函数体的实际行数（不包括前导空白）
-        const startPos = body.getStart(sourceFile);
-        const endPos = body.getEnd();
-        const bodyText = sourceFile.text.substring(startPos, endPos);
-        
-        // 计算非空行数
-        const lines = bodyText.split('\n');
-        const nonEmptyLines = lines.filter(line => line.trim().length > 0).length;
-        
-        return nonEmptyLines > 100;
-      }
-      return false;
-    },
+    astChecker: isLongFunctionBody,
     message: '函数超过 100 行'
   },
   {
     id: 'deep-nesting',
     name: '过深嵌套',
     severity: 'medium',
-    astChecker: (node: ts.Node, sourceFile: ts.SourceFile): boolean => {
-      // 只检查控制流语句节点本身
-      if (
-        !ts.isIfStatement(node) &&
-        !ts.isForStatement(node) &&
-        !ts.isWhileStatement(node) &&
-        !ts.isDoStatement(node) &&
-        !ts.isSwitchStatement(node) &&
-        !ts.isTryStatement(node)
-      ) {
-        return false;
-      }
-
-      // 计算当前节点的嵌套深度
-      // 向上遍历父节点，统计控制流语句的数量
-      let depth = 0;
-      let current: ts.Node | undefined = node.parent;
-      
-      while (current) {
-        // 检查父节点是否是控制流语句
-        if (
-          ts.isIfStatement(current) ||
-          ts.isForStatement(current) ||
-          ts.isWhileStatement(current) ||
-          ts.isDoStatement(current) ||
-          ts.isSwitchStatement(current) ||
-          ts.isTryStatement(current)
-        ) {
-          depth++;
-        }
-        
-        // 如果到达函数边界，停止计数
-        if (
-          ts.isFunctionDeclaration(current) ||
-          ts.isMethodDeclaration(current) ||
-          ts.isArrowFunction(current) ||
-          ts.isFunctionExpression(current)
-        ) {
-          break;
-        }
-        
-        current = current.parent;
-      }
-      
-      // 当前节点本身也算一层，所以总深度是 depth + 1
-      return (depth + 1) > 4;
-    },
+    astChecker: isDeeplyNestedStatement,
     message: '嵌套深度超过 4 层'
   },
   {
@@ -316,6 +290,90 @@ class TechDebtScanner {
   private totalFiles = 0;
   private totalLines = 0;
   private fileIssueCount: Map<string, number> = new Map();
+  private readonly severityColors: Record<Severity, string> = {
+    critical: '#dc2626',
+    high: '#ea580c',
+    medium: '#f59e0b',
+    low: '#10b981'
+  };
+  private readonly severityIcons: Record<Severity, string> = {
+    critical: '🔴',
+    high: '🟠',
+    medium: '🟡',
+    low: '🟢'
+  };
+  private readonly htmlStyles = `
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f4f6;
+      padding: 2rem;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    h1 { color: #111827; margin-bottom: 0.5rem; }
+    .meta { color: #6b7280; font-size: 0.875rem; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-label { color: #6b7280; font-size: 0.875rem; margin-bottom: 0.5rem; }
+    .stat-value { font-size: 2rem; font-weight: bold; color: #111827; }
+    .severity-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+    }
+    .issues {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .issues-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .issue {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .issue:last-child { border-bottom: none; }
+    .issue-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .issue-message { font-weight: 500; color: #111827; }
+    .issue-location { color: #6b7280; font-size: 0.875rem; }
+    .issue-code {
+      background: #f9fafb;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      overflow-x: auto;
+    }
+`;
 
   /**
    * 扫描目录
@@ -479,91 +537,102 @@ class TechDebtScanner {
   /**
    * 获取函数信息（名称、类型、行数）
    */
-  private getFunctionInfo(node: ts.Node, sourceFile: ts.SourceFile): {
-    name: string;
-    type: string;
-    lines: number;
-    signature: string;
-  } {
-    let name = '';
-    let type = '';
-    let lines = 0;
-    let signature = '';
-
+  private getFunctionInfo(node: ts.Node, sourceFile: ts.SourceFile): FunctionInfo {
+    let info: FunctionInfo = { name: '', type: '', lines: 0, signature: '' };
     if (ts.isFunctionDeclaration(node)) {
-      type = '函数';
-      name = node.name?.getText(sourceFile) || '<匿名>';
-      
-      // 获取函数签名（不包括函数体）
-      const bodyStart = node.body?.getStart(sourceFile) || node.getEnd();
-      signature = sourceFile.text.substring(node.getStart(sourceFile), bodyStart).trim();
-      
-      // 计算函数体行数
-      if (node.body) {
-        const bodyText = node.body.getText(sourceFile);
-        lines = bodyText.split('\n').filter(line => line.trim().length > 0).length;
-      }
+      info = this.getFunctionDeclarationInfo(node, sourceFile);
     } else if (ts.isMethodDeclaration(node)) {
-      type = '方法';
-      name = node.name.getText(sourceFile);
-      
-      // 获取方法签名
-      const bodyStart = node.body?.getStart(sourceFile) || node.getEnd();
-      signature = sourceFile.text.substring(node.getStart(sourceFile), bodyStart).trim();
-      
-      // 计算方法体行数
-      if (node.body) {
-        const bodyText = node.body.getText(sourceFile);
-        lines = bodyText.split('\n').filter(line => line.trim().length > 0).length;
-      }
+      info = this.getMethodDeclarationInfo(node, sourceFile);
     } else if (ts.isArrowFunction(node)) {
-      type = '箭头函数';
-      
-      // 尝试获取变量名
-      if (node.parent && ts.isVariableDeclaration(node.parent)) {
-        name = node.parent.name.getText(sourceFile);
-      } else if (node.parent && ts.isPropertyDeclaration(node.parent)) {
-        name = node.parent.name.getText(sourceFile);
-      }
-      
-      // 获取箭头函数签名
-      if (ts.isBlock(node.body)) {
-        const bodyStart = node.body.getStart(sourceFile);
-        signature = sourceFile.text.substring(node.getStart(sourceFile), bodyStart).trim() + ' => {';
-        
-        // 计算函数体行数
-        const bodyText = node.body.getText(sourceFile);
-        lines = bodyText.split('\n').filter(line => line.trim().length > 0).length;
-      } else {
-        signature = node.getText(sourceFile).split('\n')[0].trim();
-        lines = 1;
-      }
+      info = this.getArrowFunctionInfo(node, sourceFile);
     } else if (ts.isFunctionExpression(node)) {
-      type = '函数表达式';
-      name = node.name?.getText(sourceFile) || '';
-      
-      // 尝试从父节点获取名称
-      if (!name && node.parent && ts.isVariableDeclaration(node.parent)) {
-        name = node.parent.name.getText(sourceFile);
-      }
-      
-      // 获取函数签名
-      const bodyStart = node.body?.getStart(sourceFile) || node.getEnd();
-      signature = sourceFile.text.substring(node.getStart(sourceFile), bodyStart).trim();
-      
-      // 计算函数体行数
-      if (node.body) {
-        const bodyText = node.body.getText(sourceFile);
-        lines = bodyText.split('\n').filter(line => line.trim().length > 0).length;
-      }
+      info = this.getFunctionExpressionInfo(node, sourceFile);
     }
 
-    // 限制签名长度
-    if (signature.length > 120) {
-      signature = signature.substring(0, 120) + '...';
-    }
+    return {
+      ...info,
+      signature: this.truncateSignature(info.signature)
+    };
+  }
 
-    return { name, type, lines, signature };
+  private getFunctionDeclarationInfo(
+    node: ts.FunctionDeclaration,
+    sourceFile: ts.SourceFile
+  ): FunctionInfo {
+    return {
+      name: node.name?.getText(sourceFile) || '<匿名>',
+      type: '函数',
+      lines: this.countBlockLines(node.body, sourceFile),
+      signature: this.getSignatureBeforeBody(node, node.body, sourceFile)
+    };
+  }
+
+  private getMethodDeclarationInfo(
+    node: ts.MethodDeclaration,
+    sourceFile: ts.SourceFile
+  ): FunctionInfo {
+    return {
+      name: node.name.getText(sourceFile),
+      type: '方法',
+      lines: this.countBlockLines(node.body, sourceFile),
+      signature: this.getSignatureBeforeBody(node, node.body, sourceFile)
+    };
+  }
+
+  private getArrowFunctionInfo(node: ts.ArrowFunction, sourceFile: ts.SourceFile): FunctionInfo {
+    const signature = ts.isBlock(node.body)
+      ? `${this.getSignatureBeforeBody(node, node.body, sourceFile)} => {`
+      : node.getText(sourceFile).split('\n')[0].trim();
+
+    return {
+      name: this.getParentBoundName(node, sourceFile),
+      type: '箭头函数',
+      lines: ts.isBlock(node.body) ? this.countBlockLines(node.body, sourceFile) : 1,
+      signature
+    };
+  }
+
+  private getFunctionExpressionInfo(
+    node: ts.FunctionExpression,
+    sourceFile: ts.SourceFile
+  ): FunctionInfo {
+    return {
+      name: node.name?.getText(sourceFile) || this.getParentBoundName(node, sourceFile),
+      type: '函数表达式',
+      lines: this.countBlockLines(node.body, sourceFile),
+      signature: this.getSignatureBeforeBody(node, node.body, sourceFile)
+    };
+  }
+
+  private getParentBoundName(node: ts.Node, sourceFile: ts.SourceFile): string {
+    if (node.parent && ts.isVariableDeclaration(node.parent)) {
+      return node.parent.name.getText(sourceFile);
+    }
+    if (node.parent && ts.isPropertyDeclaration(node.parent)) {
+      return node.parent.name.getText(sourceFile);
+    }
+    return '';
+  }
+
+  private getSignatureBeforeBody(
+    node: ts.Node,
+    body: ts.Node | undefined,
+    sourceFile: ts.SourceFile
+  ): string {
+    const bodyStart = body?.getStart(sourceFile) || node.getEnd();
+    return sourceFile.text.substring(node.getStart(sourceFile), bodyStart).trim();
+  }
+
+  private countBlockLines(body: ts.Block | undefined, sourceFile: ts.SourceFile): number {
+    return body ? this.countNonEmptyLines(body.getText(sourceFile)) : 0;
+  }
+
+  private countNonEmptyLines(text: string): number {
+    return text.split('\n').filter(line => line.trim().length > 0).length;
+  }
+
+  private truncateSignature(signature: string): string {
+    return signature.length > 120 ? `${signature.substring(0, 120)}...` : signature;
   }
 
   /**
@@ -574,62 +643,14 @@ class TechDebtScanner {
     depth: number;
     preview: string;
   } {
-    // 确定语句类型
-    let statementType = '';
-    if (ts.isIfStatement(node)) {
-      statementType = 'if 语句';
-    } else if (ts.isForStatement(node)) {
-      statementType = 'for 循环';
-    } else if (ts.isWhileStatement(node)) {
-      statementType = 'while 循环';
-    } else if (ts.isDoStatement(node)) {
-      statementType = 'do-while 循环';
-    } else if (ts.isSwitchStatement(node)) {
-      statementType = 'switch 语句';
-    } else if (ts.isTryStatement(node)) {
-      statementType = 'try-catch 语句';
-    }
-
-    // 计算嵌套深度
-    let depth = 1; // 当前节点本身算一层
-    let current: ts.Node | undefined = node.parent;
-    
-    while (current) {
-      if (
-        ts.isIfStatement(current) ||
-        ts.isForStatement(current) ||
-        ts.isWhileStatement(current) ||
-        ts.isDoStatement(current) ||
-        ts.isSwitchStatement(current) ||
-        ts.isTryStatement(current)
-      ) {
-        depth++;
-      }
-      
-      // 如果到达函数边界，停止计数
-      if (
-        ts.isFunctionDeclaration(current) ||
-        ts.isMethodDeclaration(current) ||
-        ts.isArrowFunction(current) ||
-        ts.isFunctionExpression(current)
-      ) {
-        break;
-      }
-      
-      current = current.parent;
-    }
-
-    // 获取代码预览（第一行）
     const fullText = node.getText(sourceFile);
     const firstLine = fullText.split('\n')[0].trim();
-    let preview = firstLine;
-    
-    // 限制预览长度
-    if (preview.length > 100) {
-      preview = preview.substring(0, 100) + '...';
-    }
 
-    return { statementType, depth, preview };
+    return {
+      statementType: getControlFlowName(node),
+      depth: getControlFlowDepth(node),
+      preview: firstLine.length > 100 ? `${firstLine.substring(0, 100)}...` : firstLine
+    };
   }
 
   /**
@@ -809,107 +830,8 @@ class TechDebtScanner {
   /**
    * 生成 HTML 报告
    */
-  private generateHTML(report: TechDebtReport): string {
-    const severityColors: Record<Severity, string> = {
-      critical: '#dc2626',
-      high: '#ea580c',
-      medium: '#f59e0b',
-      low: '#10b981'
-    };
-
-    const severityIcons: Record<Severity, string> = {
-      critical: '🔴',
-      high: '🟠',
-      medium: '🟡',
-      low: '🟢'
-    };
-
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>技术债务扫描报告</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f3f4f6;
-      padding: 2rem;
-    }
-    .container { max-width: 1400px; margin: 0 auto; }
-    .header {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      margin-bottom: 2rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    h1 { color: #111827; margin-bottom: 0.5rem; }
-    .meta { color: #6b7280; font-size: 0.875rem; }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .stat-card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .stat-label { color: #6b7280; font-size: 0.875rem; margin-bottom: 0.5rem; }
-    .stat-value { font-size: 2rem; font-weight: bold; color: #111827; }
-    .severity-badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: white;
-    }
-    .issues {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-    .issues-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .issue {
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .issue:last-child { border-bottom: none; }
-    .issue-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
-    }
-    .issue-message { font-weight: 500; color: #111827; }
-    .issue-location { color: #6b7280; font-size: 0.875rem; }
-    .issue-code {
-      background: #f9fafb;
-      padding: 0.75rem;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
-      overflow-x: auto;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>📊 技术债务扫描报告</h1>
-      <div class="meta">生成时间: ${new Date(report.generatedAt).toLocaleString('zh-CN')}</div>
-    </div>
-
+  private renderOverviewStats(report: TechDebtReport): string {
+    return `
     <div class="stats">
       <div class="stat-card">
         <div class="stat-label">总问题数</div>
@@ -928,35 +850,38 @@ class TechDebtScanner {
         <div class="stat-value">${(report.metrics.debtRatio * 100).toFixed(2)}%</div>
       </div>
     </div>
+`;
+  }
 
+  private renderSeverityStats(report: TechDebtReport): string {
+    return `
     <div class="stats">
       <div class="stat-card">
         <div class="stat-label">🔴 严重</div>
-        <div class="stat-value" style="color: ${severityColors.critical}">${report.summary.bySeverity.critical}</div>
+        <div class="stat-value" style="color: ${this.severityColors.critical}">${report.summary.bySeverity.critical}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">🟠 高</div>
-        <div class="stat-value" style="color: ${severityColors.high}">${report.summary.bySeverity.high}</div>
+        <div class="stat-value" style="color: ${this.severityColors.high}">${report.summary.bySeverity.high}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">🟡 中</div>
-        <div class="stat-value" style="color: ${severityColors.medium}">${report.summary.bySeverity.medium}</div>
+        <div class="stat-value" style="color: ${this.severityColors.medium}">${report.summary.bySeverity.medium}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">🟢 低</div>
-        <div class="stat-value" style="color: ${severityColors.low}">${report.summary.bySeverity.low}</div>
+        <div class="stat-value" style="color: ${this.severityColors.low}">${report.summary.bySeverity.low}</div>
       </div>
     </div>
+`;
+  }
 
-    <div class="issues">
-      <div class="issues-header">
-        <h2>问题详情</h2>
-      </div>
-      ${report.issues.map(issue => `
+  private renderIssue(issue: TechDebtIssue): string {
+    return `
         <div class="issue">
           <div class="issue-header">
-            <span class="severity-badge" style="background: ${severityColors[issue.severity]}">
-              ${severityIcons[issue.severity]} ${issue.severity.toUpperCase()}
+            <span class="severity-badge" style="background: ${this.severityColors[issue.severity]}">
+              ${this.severityIcons[issue.severity]} ${issue.severity.toUpperCase()}
             </span>
             <span class="issue-message">${issue.message}</span>
           </div>
@@ -965,8 +890,39 @@ class TechDebtScanner {
           </div>
           ${issue.code ? `<div class="issue-code">${this.escapeHtml(issue.code)}</div>` : ''}
         </div>
-      `).join('')}
+      `;
+  }
+
+  private renderIssueDetails(report: TechDebtReport): string {
+    return `
+    <div class="issues">
+      <div class="issues-header">
+        <h2>问题详情</h2>
+      </div>
+      ${report.issues.map(issue => this.renderIssue(issue)).join('')}
     </div>
+`;
+  }
+
+  private generateHTML(report: TechDebtReport): string {
+    return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>技术债务扫描报告</title>
+  <style>${this.htmlStyles}  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 技术债务扫描报告</h1>
+      <div class="meta">生成时间: ${new Date(report.generatedAt).toLocaleString('zh-CN')}</div>
+    </div>
+
+${this.renderOverviewStats(report)}
+${this.renderSeverityStats(report)}
+${this.renderIssueDetails(report)}
   </div>
 </body>
 </html>`;

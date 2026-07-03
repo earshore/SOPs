@@ -109,7 +109,6 @@ import { APP_EVENTS } from '@/common/constants/eventConstants';
     });
   });
 
-  describe('超时处理', () => {
     it('应该在超时后触发重试', async () => {
       const onTimeout = vi.fn().mockResolvedValue(undefined);
 
@@ -215,9 +214,7 @@ import { APP_EVENTS } from '@/common/constants/eventConstants';
 
       expect(onTimeout).toHaveBeenCalledTimes(2);
     });
-  });
 
-  describe('事件通知', () => {
     it('应该触发开始事件', () => {
       const listener = vi.fn();
       eventBus.on(APP_EVENTS.WORKING_STATE_START, listener);
@@ -332,7 +329,6 @@ import { APP_EVENTS } from '@/common/constants/eventConstants';
 
       eventBus.off(APP_EVENTS.WORKING_STATE_RETRY, listener);
     });
-  });
 
   describe('统计信息', () => {
     it('应该正确统计活跃任务数', () => {

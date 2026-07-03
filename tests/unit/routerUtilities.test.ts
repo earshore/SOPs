@@ -46,7 +46,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('navigo guard utilities', () => {
   it('validates route ids, paths, and plain objects', () => {
     expect(guardUtils.isValidRouteId('orders')).toBe(true);
     expect(guardUtils.isValidRouteId('bad route')).toBe(false);
@@ -162,7 +161,6 @@ describe('navigo guard utilities', () => {
       ValidationError
     );
   });
-});
 
 describe('ParamParser', () => {
   it('parses typed path params, defaults, and validation errors', () => {

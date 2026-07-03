@@ -6,6 +6,7 @@
  */
 
 import { appStore } from '@/stores/useAppStore';
+import { randomBase36 } from '@/common/utils/random';
 import { promptlabService } from '../../services/promptlabService';
 import { HistoryService } from '../../services/historyService';
 import { emitHistoryUpdated } from '../../services/historyEvents';
@@ -66,7 +67,7 @@ function cloneProfileSnapshot(ctx: PromptlabAlpineContext): GeneratedPromptProfi
 }
 
 function createPromptId(type: GeneratedPromptType): string {
-  return `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return `${type}-${Date.now()}-${randomBase36(6)}`;
 }
 
 function getReportMarketplace(report: AnalysisReport | null): string | undefined {

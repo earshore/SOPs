@@ -425,6 +425,53 @@ describe('actions - 复制操作', () => {
       expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     });
   });
+});
+
+describe('actions - Markdown 复制操作', () => {
+  let mockContext: AlpineContext;
+
+  beforeEach(() => {
+    mockContext = {
+      selectedAsins: ['B001'],
+      selectedTargets: ['target1', 'target2'],
+      isAnalyzing: false,
+      progress: 0,
+      currentStep: '',
+      results: [
+        {
+          targetId: 'target1',
+          title: 'Test Result',
+          source: 'Listings',
+          icon: 'icon',
+          color: 'blue',
+          stats: [],
+          highlights: [],
+          details: []
+        }
+      ],
+      analysisReport: { data: 'test' },
+      expandedPromptIndex: null,
+      showPromptPanel: false,
+      showJsonViewer: false,
+      dataSource: 'scraper',
+      availableAsins: [],
+      hasData: false,
+      canAnalyze: false,
+      syncFromModuleState: vi.fn(),
+      syncToModuleState: vi.fn(),
+      $nextTick: vi.fn((cb) => cb())
+    } as AlpineContext;
+
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: vi.fn().mockResolvedValue(undefined)
+      }
+    });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
   
   describe('copyMarkdown', () => {
     it('应该复制 Markdown 报告', async () => {
@@ -442,6 +489,43 @@ describe('actions - 复制操作', () => {
       
       expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('actions - 下载操作', () => {
+  let mockContext: AlpineContext;
+
+  beforeEach(() => {
+    mockContext = {
+      selectedAsins: ['B001'],
+      selectedTargets: ['target1', 'target2'],
+      isAnalyzing: false,
+      progress: 0,
+      currentStep: '',
+      results: [
+        {
+          targetId: 'target1',
+          title: 'Test Result',
+          source: 'Listings',
+          icon: 'icon',
+          color: 'blue',
+          stats: [],
+          highlights: [],
+          details: []
+        }
+      ],
+      analysisReport: { data: 'test' },
+      expandedPromptIndex: null,
+      showPromptPanel: false,
+      showJsonViewer: false,
+      dataSource: 'scraper',
+      availableAsins: [],
+      hasData: false,
+      canAnalyze: false,
+      syncFromModuleState: vi.fn(),
+      syncToModuleState: vi.fn(),
+      $nextTick: vi.fn((cb) => cb())
+    } as AlpineContext;
   });
   
   describe('downloadJson', () => {
@@ -492,74 +576,76 @@ describe('actions - 复制操作', () => {
   });
 });
 
-describe('actions - 执行分析', () => {
-  let mockContext: AlpineContext;
-  let mockProducts: Product[];
+function createRunAnalysisActionTestState(): { mockContext: AlpineContext; mockProducts: Product[] } {
+  const mockContext = {
+    selectedAsins: ['B001'],
+    selectedTargets: ['selling-points'],
+    isAnalyzing: false,
+    progress: 0,
+    currentStep: '',
+    analysisReport: null,
+    hasReport: false,
+    reportResults: [],
+    reportListingsResults: [],
+    reportReviewsResults: [],
+    reportTotalHighlights: 0,
+    reportTotalDetails: 0,
+    reportFullData: null,
+    reportRenderVersion: 0,
+    expandedPromptIndex: null,
+    showPromptPanel: false,
+    showJsonViewer: false,
+    dataSource: 'scraper',
+    availableAsins: ['B001'],
+    hasData: true,
+    canAnalyze: true,
+    $nextTick: vi.fn((cb) => cb()),
+    _unsubscribes: []
+  } as AlpineContext;
 
-  beforeEach(() => {
-    mockContext = {
-      selectedAsins: ['B001'],
-      selectedTargets: ['selling-points'],
-      isAnalyzing: false,
-      progress: 0,
-      currentStep: '',
-      analysisReport: null,
-      hasReport: false,
-      reportResults: [],
-      reportListingsResults: [],
-      reportReviewsResults: [],
-      reportTotalHighlights: 0,
-      reportTotalDetails: 0,
-      reportFullData: null,
-      reportRenderVersion: 0,
-      expandedPromptIndex: null,
-      showPromptPanel: false,
-      showJsonViewer: false,
-      dataSource: 'scraper',
-      availableAsins: ['B001'],
-      hasData: true,
-      canAnalyze: true,
-      $nextTick: vi.fn((cb) => cb()),
-      _unsubscribes: []
-    } as AlpineContext;
+  const mockProducts = [
+    {
+      asin: 'B001',
+      title: 'Test Product',
+      bulletPoints: ['Feature 1'],
+      reviews: []
+    }
+  ];
 
-    mockProducts = [
-      {
-        asin: 'B001',
-        title: 'Test Product',
-        bulletPoints: ['Feature 1'],
-        reviews: []
-      }
-    ];
-
-    mockAppStoreState.scraper = {
-      scrapedData: { products: mockProducts },
-      currentHistoryId: null
-    };
-    mockGetCachedAnalysisResults.mockResolvedValue({
-      'selling-points': { details: [] }
-    });
-    mockResolveAnalysisSchedulePlan.mockReturnValue({
-      taskOrder: ['selling-points'],
-      maxConcurrency: 1,
-      failureStrategy: 'abort',
-      retryBudget: 2,
-      failureMode: 'complete_required',
-      streamMode: 'final_only'
-    });
-    mockRunParallelAIAnalysis.mockImplementation(async (_targets, _product, onProgress, _language, options) => {
-      const partialReport = { 'selling-points': { details: [] } };
-      onProgress(45, '正在分析: selling-points...');
-      options.onTaskComplete?.({ report: partialReport });
-      return partialReport;
-    });
+  mockAppStoreState.scraper = {
+    scrapedData: { products: mockProducts },
+    currentHistoryId: null
+  };
+  mockGetCachedAnalysisResults.mockResolvedValue({
+    'selling-points': { details: [] }
   });
+  mockResolveAnalysisSchedulePlan.mockReturnValue({
+    taskOrder: ['selling-points'],
+    maxConcurrency: 1,
+    failureStrategy: 'abort',
+    retryBudget: 2,
+    failureMode: 'complete_required',
+    streamMode: 'final_only'
+  });
+  mockRunParallelAIAnalysis.mockImplementation(async (_targets, _product, onProgress, _language, options) => {
+    const partialReport = { 'selling-points': { details: [] } };
+    onProgress(45, '正在分析: selling-points...');
+    options.onTaskComplete?.({ report: partialReport });
+    return partialReport;
+  });
+
+  return { mockContext, mockProducts };
+}
+
+describe('actions - 执行分析', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
   it('应该把分析进度和当前步骤同步到应用 store', async () => {
+    const { mockContext, mockProducts } = createRunAnalysisActionTestState();
+
     await runAnalysisAction(mockContext, mockProducts);
 
     expect(mockAppStoreState.updateAnalysis).toHaveBeenCalledWith({
@@ -580,6 +666,8 @@ describe('actions - 执行分析', () => {
   });
 
   it('应该使用调度计划执行分析', async () => {
+    const { mockContext, mockProducts } = createRunAnalysisActionTestState();
+
     await runAnalysisAction(mockContext, mockProducts);
 
     expect(mockGetCachedAnalysisResults).toHaveBeenCalledWith(

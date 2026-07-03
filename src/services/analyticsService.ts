@@ -5,6 +5,7 @@
 // ================================================================
 
 import type { ILoggerService, IStorageService } from '../types/services';
+import { createRandomId, randomFloat } from '../common/utils/random';
 
 /**
  * 事件类型
@@ -235,14 +236,14 @@ export class AnalyticsService {
    * 生成会话ID
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    return createRandomId('session');
   }
 
   /**
    * 生成事件ID
    */
   private generateEventId(): string {
-    return `event_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    return createRandomId('event');
   }
 
   /**
@@ -495,7 +496,7 @@ export class AnalyticsService {
    * 判断是否应该采样
    */
   private shouldSample(): boolean {
-    return Math.random() <= this.config.sampleRate;
+    return randomFloat() <= this.config.sampleRate;
   }
 
   /**

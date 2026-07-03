@@ -23,6 +23,7 @@ import { configCenter } from '../../common/config/ConfigCenter';
 import { APP_EVENTS } from '../../common/constants/eventConstants';
 import { SECURE_STORAGE_SECURITY_BOUNDARY } from '../../common/utils/secureStorage';
 import type { LLMProviderConfig } from '../../types/state';
+import type { ProxyConfig } from '../../types/modules-business';
 import { appStore } from '../../stores/useAppStore';
 import eventBus from '@common/EventBus';
 import { ApiError } from '@common/errors/AppError';
@@ -100,8 +101,8 @@ interface SettingsPanelData {
   fetchModels(): Promise<void>;
   testConnection(): Promise<void>;
   saveProviderConfig(): Promise<void>;
-  loadProxyConfig(): void;
-  saveProxyConfig(): void;
+  loadProxyConfig(): Promise<void>;
+  saveProxyConfig(): Promise<void>;
   setLlmProvider(event: Event): void;
   setLlmEndpoint(event: Event): void;
   setLlmApiKey(event: Event): void;
@@ -752,7 +753,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   // Lifecycle
   init() {
-    this.loadProxyConfig();
+    void this.loadProxyConfig();
     this.loadProviderConfig(this.llm.provider);
     void this.refreshLocalDataUsage();
 
@@ -774,7 +775,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   open() {
     this.isOpen = true;
     this.loadProviderConfig(this.llm.provider);
-    this.loadProxyConfig();
+    void this.loadProxyConfig();
     void this.refreshLocalDataUsage();
   },
 
@@ -919,14 +920,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   // --- Proxy Logic ---
 
-  loadProxyConfig(): void {
-    const savedConfig = (StorageService.get(STORAGE_KEYS.PROXY_CONFIG, null) ||
-      StorageService.get(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, {})) as {
+  async loadProxyConfig(): Promise<void> {
+    const savedConfig = StorageService.getProxyConfig() as {
       type?: string;
       customUrl?: string;
     } | null;
-    this.proxy.savedKeyMap =
-      (StorageService.get(STORAGE_KEYS.PROXY_KEY_MAP, {}) as Record<string, string>) || {};
+    this.proxy.savedKeyMap = await StorageService.getProxyKeyMap();
 
     this.proxy.type = savedConfig?.type || 'scraperapi';
     // If the saved active type matches current type, use its URL, otherwise fallback to cache
@@ -937,15 +936,17 @@ const settingsPanelBehavior: SettingsPanelPart = {
     }
   },
 
-  saveProxyConfig(): void {
+  async saveProxyConfig(): Promise<void> {
     // Update cache map
     this.proxy.savedKeyMap[this.proxy.type] = this.proxy.customUrl;
-    StorageService.set(STORAGE_KEYS.PROXY_KEY_MAP, this.proxy.savedKeyMap);
+    await StorageService.setProxyKeyMap(this.proxy.savedKeyMap);
 
     // Save active config
-    const config = { type: this.proxy.type, customUrl: this.proxy.customUrl };
-    StorageService.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, config);
-    StorageService.set(STORAGE_KEYS.PROXY_CONFIG, config);
+    const config: ProxyConfig = {
+      type: this.proxy.type as ProxyConfig['type'],
+      customUrl: this.proxy.customUrl,
+    };
+    await StorageService.setProxyConfigWithCredential(config);
 
     showToast('网络配置已更新', { type: 'success' });
   },

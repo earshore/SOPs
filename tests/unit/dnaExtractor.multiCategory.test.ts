@@ -8,7 +8,6 @@ import { describe, it, expect } from 'vitest';
 import { extractProductDNA } from '../../src/modules/app_center/views/master_analysis/services/dnaExtractor';
 import type { FullAnalysisReport } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/analysisReportData';
 
-  describe('假发产品', () => {
     it('应该正确提取假发产品的技术参数', () => {
       const wigReport: any = {
         'buyer-profile': {
@@ -115,9 +114,7 @@ import type { FullAnalysisReport } from '../../src/modules/app_center/views/mast
       expect(dna!.specs).toMatch(/13x4/); // 范围模式（x分隔符）
       expect(dna!.specs).toMatch(/150g/); // 数字+单位模式
     });
-  });
 
-  describe('电子产品', () => {
     it('应该正确提取电子产品的技术参数', () => {
       const electronicsReport: any = {
         'buyer-profile': {
@@ -235,9 +232,7 @@ import type { FullAnalysisReport } from '../../src/modules/app_center/views/mast
       expect(dna!.specs).toMatch(/100-240V/); // 范围模式
       expect(dna!.specs).toMatch(/5V\/2A/); // 技术符号
     });
-  });
 
-  describe('美妆产品', () => {
     it('应该正确提取美妆产品的技术参数', () => {
       const beautyReport: any = {
         'buyer-profile': {
@@ -349,7 +344,6 @@ import type { FullAnalysisReport } from '../../src/modules/app_center/views/mast
       expect(dna!.specs).toMatch(/30ml/); // 数字+单位模式
       expect(dna!.specs).toMatch(/Shade\s*3/); // 字母+数字模式
     });
-  });
 
   describe('香水产品（基准测试）', () => {
     it('应该正确提取香水产品的技术参数', () => {
@@ -422,7 +416,6 @@ import type { FullAnalysisReport } from '../../src/modules/app_center/views/mast
     });
   });
 
-  describe('跨品类一致性测试', () => {
     it('所有品类应该使用一致的输出格式', () => {
       const categories = [
         {
@@ -543,7 +536,6 @@ import type { FullAnalysisReport } from '../../src/modules/app_center/views/mast
         }
       });
     });
-  });
 
   describe('未知品类支持', () => {
     it('应该支持完全未知的产品品类', () => {

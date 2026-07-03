@@ -9,7 +9,7 @@ import { APP_VERSION } from '../constants/constants';
 import { StorageService, CACHE_PREFIXES } from '../../services/storageService';
 import { getViewPathByRoute } from '../config/menuConfig';
 import { SystemError } from '@/common/errors/AppError';
-import { escapeHtml } from '@/common/utils/security';
+import { createSafeFragment, escapeHtml } from '@/common/utils/security';
 import { wrapWithPageEnterAnimation } from '@/common/utils/pageEnterAnimation';
 
 const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
@@ -246,7 +246,7 @@ function renderErrorPlaceholder(container: HTMLElement, key: string, error: Erro
         </div>
     `;
   // ✅ 安全: errorHtml仅包含静态模板和已转义的key/error.message
-  container.insertAdjacentHTML('beforeend', errorHtml);
+  container.appendChild(createSafeFragment(errorHtml));
 
   // 绑定事件处理器
   const reloadBtn = container.querySelector('[data-action="reload-page-viewloader"]');
@@ -301,7 +301,7 @@ async function loadHtml(key: string): Promise<HTMLElement | null> {
     }
 
     // ✅ 安全: html来自Vite raw导入的本地静态模板，不包含用户输入
-    container.insertAdjacentHTML('beforeend', html);
+    container.appendChild(createSafeFragment(html));
     config.isLoaded = true;
     return container;
   } catch (e) {

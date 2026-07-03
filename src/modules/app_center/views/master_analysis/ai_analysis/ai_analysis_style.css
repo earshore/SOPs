@@ -12,7 +12,8 @@
 }
 
 .animate-float {
-  animation: aiAnalysisFloat 3s var(--ease-in-out) infinite;
+  animation: aiAnalysisFloat calc(var(--duration-2s, 2000ms) + var(--duration-1s, 1000ms))
+    var(--ease-in-out) infinite;
 }
 
 /* ========== Shimmer 效果 ========== */
@@ -71,16 +72,6 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-/* ========== 卡片悬停效果 ========== */
-.card-hover {
-  transition: all var(--duration-normal) var(--ease-in-out);
-}
-
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -12px var(--color-black-alpha-20);
 }
 
 /* ========== 按钮效果 ========== */

@@ -174,7 +174,6 @@ beforeEach(() => {
     });
   });
 
-  describe('handleScrapeComplete - 处理采集完成', () => {
     it('应该创建有效的 ScrapedData 结构', () => {
       const products: ScrapedProduct[] = [
         {
@@ -413,7 +412,6 @@ beforeEach(() => {
       expect(product.scrape_status).toBe('failed');
       expect(product.error).toBe('Unknown Error');
     });
-  });
 
   describe('采集流程集成测试', () => {
     it('应该正确处理完整的采集流程', () => {

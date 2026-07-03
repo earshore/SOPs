@@ -149,87 +149,89 @@ class TodoCleaner {
 
   generateReport(result: ScanResult): string {
     const timestamp = new Date().toISOString();
-    
-    let report = `# TODO 清理报告\n\n`;
-    report += `生成时间: ${timestamp}\n\n`;
-    report += `## 概览\n\n`;
-    report += `- 扫描文件总数: ${result.totalFiles}\n`;
-    report += `- TODO 总数: ${result.totalTodos}\n`;
-    report += `- 过时 TODO (> 6个月): ${result.outdatedTodos}\n\n`;
+    let report = this.generateMarkdownHeader(result, timestamp);
 
     if (result.totalTodos === 0) {
       report += `✅ 未发现 TODO 注释\n`;
       return report;
     }
 
-    // 按类型统计
-    const byType = new Map<string, TodoIssue[]>();
-    for (const issue of result.issues) {
-      if (!byType.has(issue.type)) {
-        byType.set(issue.type, []);
-      }
-      byType.get(issue.type)!.push(issue);
+    return [
+      report,
+      this.generateMarkdownTypeStats(result.issues),
+      this.generateMarkdownOutdatedTodos(result.issues.filter(issue => this.isOutdated(issue))),
+      this.generateMarkdownTodoList(result.issues),
+      this.generateMarkdownRecommendations()
+    ].join('');
+  }
+
+  private generateMarkdownHeader(result: ScanResult, timestamp: string): string {
+    return `# TODO 清理报告\n\n` +
+      `生成时间: ${timestamp}\n\n` +
+      `## 概览\n\n` +
+      `- 扫描文件总数: ${result.totalFiles}\n` +
+      `- TODO 总数: ${result.totalTodos}\n` +
+      `- 过时 TODO (> 6个月): ${result.outdatedTodos}\n\n`;
+  }
+
+  private generateMarkdownTypeStats(issues: TodoIssue[]): string {
+    const rows = Array.from(this.groupIssuesBy(issues, issue => issue.type))
+      .map(([type, typeIssues]) => `- ${type}: ${typeIssues.length}\n`)
+      .join('');
+
+    return `## 按类型统计\n\n${rows}\n`;
+  }
+
+  private generateMarkdownOutdatedTodos(outdated: TodoIssue[]): string {
+    if (outdated.length === 0) {
+      return '';
     }
 
-    report += `## 按类型统计\n\n`;
-    for (const [type, issues] of byType) {
-      report += `- ${type}: ${issues.length}\n`;
-    }
-    report += `\n`;
+    return `## ⚠️ 过时的 TODO (> 6个月)\n\n` +
+      outdated.map(issue => this.generateMarkdownOutdatedTodo(issue)).join('');
+  }
 
-    // 过时的 TODO
-    const outdated = result.issues.filter(
-      i => i.age && i.age > this.outdatedThresholdDays
-    );
+  private generateMarkdownOutdatedTodo(issue: TodoIssue): string {
+    const author = issue.author ? `- 作者: ${issue.author}\n` : '';
+    const lastModified = issue.lastModified
+      ? `- 最后修改: ${issue.lastModified.toISOString().split('T')[0]}\n`
+      : '';
 
-    if (outdated.length > 0) {
-      report += `## ⚠️ 过时的 TODO (> 6个月)\n\n`;
-      
-      for (const issue of outdated) {
-        report += `### ${issue.file}:${issue.line}\n\n`;
-        report += `- 类型: ${issue.type}\n`;
-        report += `- 内容: ${issue.content}\n`;
-        report += `- 年龄: ${issue.age} 天\n`;
-        if (issue.author) {
-          report += `- 作者: ${issue.author}\n`;
-        }
-        if (issue.lastModified) {
-          report += `- 最后修改: ${issue.lastModified.toISOString().split('T')[0]}\n`;
-        }
-        report += `\n`;
-      }
-    }
+    return `### ${issue.file}:${issue.line}\n\n` +
+      `- 类型: ${issue.type}\n` +
+      `- 内容: ${issue.content}\n` +
+      `- 年龄: ${issue.age} 天\n` +
+      author +
+      lastModified +
+      `\n`;
+  }
 
-    // 所有 TODO 列表
-    report += `## 所有 TODO 列表\n\n`;
-    
-    const byFile = new Map<string, TodoIssue[]>();
-    for (const issue of result.issues) {
-      if (!byFile.has(issue.file)) {
-        byFile.set(issue.file, []);
-      }
-      byFile.get(issue.file)!.push(issue);
-    }
+  private generateMarkdownTodoList(issues: TodoIssue[]): string {
+    const sections = Array.from(this.groupIssuesBy(issues, issue => issue.file))
+      .map(([file, fileIssues]) => this.generateMarkdownFileTodos(file, fileIssues))
+      .join('');
 
-    for (const [file, issues] of byFile) {
-      report += `### ${file}\n\n`;
-      
-      for (const issue of issues) {
+    return `## 所有 TODO 列表\n\n${sections}`;
+  }
+
+  private generateMarkdownFileTodos(file: string, issues: TodoIssue[]): string {
+    const rows = issues
+      .map(issue => {
         const ageStr = issue.age ? ` (${issue.age}天)` : '';
-        report += `- **行 ${issue.line}** [${issue.type}]${ageStr}: ${issue.content}\n`;
-      }
-      
-      report += `\n`;
-    }
+        return `- **行 ${issue.line}** [${issue.type}]${ageStr}: ${issue.content}\n`;
+      })
+      .join('');
 
-    report += `## 建议\n\n`;
-    report += `1. 优先处理过时的 TODO (> 6个月)\n`;
-    report += `2. 将已完成的 TODO 删除\n`;
-    report += `3. 将长期 TODO 转换为 Issue 或任务\n`;
-    report += `4. 为 TODO 添加负责人和截止日期\n`;
-    report += `5. 定期审查和清理 TODO 列表\n`;
+    return `### ${file}\n\n${rows}\n`;
+  }
 
-    return report;
+  private generateMarkdownRecommendations(): string {
+    return `## 建议\n\n` +
+      `1. 优先处理过时的 TODO (> 6个月)\n` +
+      `2. 将已完成的 TODO 删除\n` +
+      `3. 将长期 TODO 转换为 Issue 或任务\n` +
+      `4. 为 TODO 添加负责人和截止日期\n` +
+      `5. 定期审查和清理 TODO 列表\n`;
   }
 
   generateHtmlReport(result: ScanResult): string {

@@ -133,8 +133,8 @@ export function createSafeFragment(html: string): DocumentFragment {
   doc.querySelectorAll('*').forEach(el => {
     dangerousAttrs.forEach(attr => el.removeAttribute(attr));
     // 移除 javascript: 伪协议
-    const anchor = el as HTMLAnchorElement;
-    if (anchor.href && anchor.href.startsWith('javascript:')) {
+    const href = el.getAttribute('href');
+    if (href && href.trim().toLowerCase().startsWith('javascript:')) {
       el.removeAttribute('href');
     }
   });

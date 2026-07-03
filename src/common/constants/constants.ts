@@ -5,6 +5,7 @@
  */
 
 import { SystemError } from '@/common/errors/AppError';
+import { randomInt } from '@/common/utils/random';
 
 // ========================
 // CONFIGURATION CONSTANTS
@@ -28,7 +29,7 @@ export const USER_AGENTS: readonly string[] = [
 
 /** 随机获取 User-Agent */
 export const getRandomUserAgent = (): string => {
-  const index = Math.floor(Math.random() * USER_AGENTS.length);
+  const index = randomInt(USER_AGENTS.length);
   const agent = USER_AGENTS[index];
   if (!agent) {
     throw new SystemError('USER_AGENTS array is empty', 'USER_AGENTS_EMPTY', {

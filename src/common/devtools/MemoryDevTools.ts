@@ -6,6 +6,7 @@
 
 import { memoryLeakDetector } from '../utils/MemoryLeakDetector';
 import eventBus from '../EventBus';
+import { setSafeHtml } from '../utils/security';
 
 /**
  * 内存开发工具
@@ -59,7 +60,9 @@ export class MemoryDevTools {
     panel.style.cssText = 'font-family: monospace; font-size: 12px; max-height: 600px;';
 
     // ✅ 安全: 静态HTML模板，无用户输入
-    panel.innerHTML = `
+    setSafeHtml(
+      panel,
+      `
       <div style="display: flex; flex-direction: column; height: 100%;">
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 6px 6px 0 0;">
@@ -126,7 +129,8 @@ export class MemoryDevTools {
           </button>
         </div>
       </div>
-    `;
+    `
+    );
 
     // 绑定事件
     panel.querySelector('#memory-devtools-close')?.addEventListener('click', () => this.toggle());
@@ -211,32 +215,37 @@ export class MemoryDevTools {
    * 更新快照列表
    */
   private _updateSnapshots(): void {
-    const snapshotsEl = this.panel?.querySelector('#memory-snapshots');
+    const snapshotsEl = this.panel?.querySelector<HTMLElement>('#memory-snapshots');
     if (!snapshotsEl) return;
 
     const snapshots = memoryLeakDetector.getSnapshots();
 
     if (snapshots.length === 0) {
       // ✅ 安全: 静态HTML模板
-      snapshotsEl.innerHTML =
-        '<div style="color: #9ca3af; text-align: center; padding: 20px;">暂无快照</div>';
+      setSafeHtml(
+        snapshotsEl,
+        '<div style="color: #9ca3af; text-align: center; padding: 20px;">暂无快照</div>'
+      );
       return;
     }
 
     // ✅ 安全: snapshot数据来自内部memoryLeakDetector，timestamp和heapUsed是数值类型
-    snapshotsEl.innerHTML = snapshots
-      .slice()
-      .reverse()
-      .map((snapshot, index) => {
-        const time = new Date(snapshot.timestamp).toLocaleTimeString('zh-CN');
-        return `
+    setSafeHtml(
+      snapshotsEl,
+      snapshots
+        .slice()
+        .reverse()
+        .map((snapshot, index) => {
+          const time = new Date(snapshot.timestamp).toLocaleTimeString('zh-CN');
+          return `
           <div style="padding: 6px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; ${index === 0 ? 'background: #fef3c7;' : ''}">
             <span style="color: #6b7280;">${time}</span>
             <span style="color: #667eea; font-weight: 600;">${snapshot.heapUsed.toFixed(1)} MB</span>
           </div>
         `;
-      })
-      .join('');
+        })
+        .join('')
+    );
   }
 
   /**
@@ -244,7 +253,7 @@ export class MemoryDevTools {
    */
   private _updateLeakWarnings(): void {
     const warningsEl = this.panel?.querySelector('#leak-warnings');
-    const leakListEl = this.panel?.querySelector('#leak-list');
+    const leakListEl = this.panel?.querySelector<HTMLElement>('#leak-list');
     if (!warningsEl || !leakListEl) return;
 
     const leaks = eventBus.detectLeaks();
@@ -256,17 +265,20 @@ export class MemoryDevTools {
 
     (warningsEl as HTMLElement).style.display = 'block';
     // ✅ 安全: leak数据来自eventBus.detectLeaks()内部方法，leak.event/message/severity都是内部生成的字符串
-    leakListEl.innerHTML = leaks
-      .map(leak => {
-        const color = leak.severity === 'critical' ? '#ef4444' : '#f59e0b';
-        return `
+    setSafeHtml(
+      leakListEl,
+      leaks
+        .map(leak => {
+          const color = leak.severity === 'critical' ? '#ef4444' : '#f59e0b';
+          return `
           <div style="padding: 6px; border-left: 3px solid ${color}; background: #fef2f2; margin-bottom: 6px; border-radius: 4px;">
             <div style="font-weight: 600; color: ${color};">${leak.event}</div>
             <div style="color: #6b7280; font-size: 10px;">${leak.message}</div>
           </div>
         `;
-      })
-      .join('');
+        })
+        .join('')
+    );
   }
 
   /**

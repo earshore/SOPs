@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 安全审计工具
- * 
+ *
  * 功能：
  * - 扫描所有 innerHTML 使用
  * - 扫描 eval 和 Function 构造器
@@ -71,9 +71,130 @@ interface AuditConfig {
   rules: SecurityRule[];
 }
 
+interface SecurityCategoryMatcher {
+  category: string;
+  ruleIds: string[];
+}
+
 // ============================================================================
 // 安全扫描规则配置
 // ============================================================================
+
+function isJavascriptProtocolLiteral(node: ts.Node, sourceFile: ts.SourceFile): boolean {
+  if (!ts.isStringLiteral(node) && !ts.isNoSubstitutionTemplateLiteral(node)) {
+    return false;
+  }
+
+  const value = node.getText(sourceFile).slice(1, -1).toLowerCase();
+  return value.includes('javascript:');
+}
+
+function isSecurityProtocolListLiteral(node: ts.Node, sourceFile: ts.SourceFile): boolean {
+  const parent = node.parent;
+  if (!parent || !ts.isArrayLiteralExpression(parent)) {
+    return false;
+  }
+
+  const grandParent = parent.parent;
+  if (!grandParent || !ts.isVariableDeclaration(grandParent)) {
+    return false;
+  }
+
+  const varName = grandParent.name.getText(sourceFile).toLowerCase();
+  return ['dangerous', 'protocol', 'blocked'].some(keyword => varName.includes(keyword));
+}
+
+function isProtocolGuardCall(node: ts.Node): boolean {
+  const parent = node.parent;
+  if (!parent || !ts.isCallExpression(parent)) {
+    return false;
+  }
+
+  const expression = parent.expression;
+  if (!ts.isPropertyAccessExpression(expression)) {
+    return false;
+  }
+
+  return ['startsWith', 'includes', 'test'].includes(expression.name.text);
+}
+
+function isCommentOnlyProtocolLiteral(node: ts.Node, sourceFile: ts.SourceFile): boolean {
+  const fullText = sourceFile.getFullText();
+  const pos = node.getStart(sourceFile);
+  const lineStart = fullText.lastIndexOf('\n', pos) + 1;
+  const lineText = fullText.substring(lineStart, pos);
+
+  return lineText.includes('//') || lineText.trim().startsWith('*');
+}
+
+function isDangerousProtocolContext(node: ts.Node, sourceFile: ts.SourceFile): boolean {
+  const fullText = sourceFile.getFullText();
+  const nodeText = fullText.substring(
+    Math.max(0, node.getStart(sourceFile) - 50),
+    Math.min(fullText.length, node.getEnd() + 50)
+  );
+
+  return ['href=', 'onclick=', 'src=', 'action='].some(token => nodeText.includes(token));
+}
+
+function hasUnsafeJavascriptProtocolUsage(node: ts.Node, sourceFile: ts.SourceFile): boolean {
+  if (!isJavascriptProtocolLiteral(node, sourceFile)) {
+    return false;
+  }
+
+  if (
+    isSecurityProtocolListLiteral(node, sourceFile) ||
+    isProtocolGuardCall(node) ||
+    isCommentOnlyProtocolLiteral(node, sourceFile)
+  ) {
+    return false;
+  }
+
+  return isDangerousProtocolContext(node, sourceFile);
+}
+
+const SENSITIVE_STORAGE_TOKEN_PATTERN =
+  /(?:api[_-]?key|llm[_-]?key|proxy[_-]?key|access[_-]?key|private[_-]?key|password|token|secret|credential)/i;
+
+function isLocalStorageSetItemCall(
+  node: ts.Node,
+  sourceFile: ts.SourceFile
+): node is ts.CallExpression {
+  if (!ts.isCallExpression(node)) {
+    return false;
+  }
+
+  const expression = node.expression;
+  if (!ts.isPropertyAccessExpression(expression)) {
+    return false;
+  }
+
+  return expression.getText(sourceFile) === 'localStorage.setItem';
+}
+
+function isApprovedSensitiveStorageBoundary(sourceFile: ts.SourceFile): boolean {
+  const normalized = sourceFile.fileName.replace(/\\/g, '/');
+  return (
+    normalized.endsWith('src/common/utils/secureStorage.ts') ||
+    normalized.endsWith('src/services/storageService.ts')
+  );
+}
+
+function hasUnsafeSensitiveLocalStorageWrite(node: ts.Node, sourceFile: ts.SourceFile): boolean {
+  if (!isLocalStorageSetItemCall(node, sourceFile)) {
+    return false;
+  }
+
+  if (isApprovedSensitiveStorageBoundary(sourceFile)) {
+    return false;
+  }
+
+  return SENSITIVE_STORAGE_TOKEN_PATTERN.test(node.getText(sourceFile));
+}
+
+function isStaticInternalHashAssignment(line: string): boolean {
+  return /^\s*(?:window\.)?location\.hash\s*=\s*['"]#\/[A-Za-z0-9/_-]+['"]\s*;?\s*$/.test(line);
+}
 
 const SECURITY_RULES: SecurityRule[] = [
   {
@@ -82,7 +203,7 @@ const SECURITY_RULES: SecurityRule[] = [
     severity: 'high',
     pattern: /\.innerHTML\s*=/,
     message: '使用 innerHTML 可能导致 XSS 攻击',
-    recommendation: '使用 SafeRenderer.renderDynamic() 或 textContent 替代'
+    recommendation: '使用 SafeRenderer.renderDynamic() 或 textContent 替代',
   },
   {
     id: 'outerHTML-usage',
@@ -90,7 +211,7 @@ const SECURITY_RULES: SecurityRule[] = [
     severity: 'high',
     pattern: /\.outerHTML\s*=/,
     message: '使用 outerHTML 可能导致 XSS 攻击',
-    recommendation: '使用 SafeRenderer 或 DOM API 替代'
+    recommendation: '使用 SafeRenderer 或 DOM API 替代',
   },
   {
     id: 'insertAdjacentHTML-usage',
@@ -98,7 +219,7 @@ const SECURITY_RULES: SecurityRule[] = [
     severity: 'high',
     pattern: /\.insertAdjacentHTML\(/,
     message: '使用 insertAdjacentHTML 可能导致 XSS 攻击',
-    recommendation: '使用 SafeRenderer 或 insertAdjacentElement 替代'
+    recommendation: '使用 SafeRenderer 或 insertAdjacentElement 替代',
   },
   {
     id: 'eval-usage',
@@ -106,7 +227,7 @@ const SECURITY_RULES: SecurityRule[] = [
     severity: 'critical',
     pattern: /\beval\s*\(/,
     message: '使用 eval 存在严重安全风险',
-    recommendation: '避免使用 eval，使用 JSON.parse 或其他安全方法'
+    recommendation: '避免使用 eval，使用 JSON.parse 或其他安全方法',
   },
   {
     id: 'function-constructor',
@@ -114,7 +235,7 @@ const SECURITY_RULES: SecurityRule[] = [
     severity: 'critical',
     pattern: /new\s+Function\s*\(/,
     message: '使用 Function 构造器存在严重安全风险',
-    recommendation: '避免动态创建函数，使用普通函数定义'
+    recommendation: '避免动态创建函数，使用普通函数定义',
   },
   {
     id: 'document-write',
@@ -122,72 +243,15 @@ const SECURITY_RULES: SecurityRule[] = [
     severity: 'high',
     pattern: /document\.write\(/,
     message: '使用 document.write 可能导致 XSS 攻击',
-    recommendation: '使用 DOM API 或 SafeRenderer 替代'
+    recommendation: '使用 DOM API 或 SafeRenderer 替代',
   },
   {
     id: 'javascript-protocol',
     name: 'javascript: 协议',
     severity: 'critical',
-    astChecker: (node: ts.Node, sourceFile: ts.SourceFile) => {
-      // 检测 href="javascript:" 或类似的危险用法
-      if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
-        const text = node.getText(sourceFile);
-        const value = text.slice(1, -1).toLowerCase(); // 移除引号
-        
-        // 如果包含 javascript: 协议
-        if (value.includes('javascript:')) {
-          // 检查是否在安全检查的上下文中
-          const parent = node.parent;
-          
-          // 排除：数组字面量中的协议列表（安全检查）
-          if (parent && ts.isArrayLiteralExpression(parent)) {
-            const grandParent = parent.parent;
-            if (grandParent && ts.isVariableDeclaration(grandParent)) {
-              const varName = grandParent.name.getText(sourceFile).toLowerCase();
-              if (varName.includes('dangerous') || varName.includes('protocol') || varName.includes('blocked')) {
-                return false; // 这是安全检查代码
-              }
-            }
-          }
-          
-          // 排除：条件判断中的检查（如 startsWith('javascript:')）
-          if (parent && ts.isCallExpression(parent)) {
-            const expression = parent.expression;
-            if (ts.isPropertyAccessExpression(expression)) {
-              const methodName = expression.name.text;
-              if (methodName === 'startsWith' || methodName === 'includes' || methodName === 'test') {
-                return false; // 这是安全检查代码
-              }
-            }
-          }
-          
-          // 排除：注释中的说明
-          const fullText = sourceFile.getFullText();
-          const pos = node.getStart(sourceFile);
-          const lineStart = fullText.lastIndexOf('\n', pos) + 1;
-          const lineText = fullText.substring(lineStart, pos);
-          if (lineText.includes('//') || lineText.trim().startsWith('*')) {
-            return false; // 这是注释
-          }
-          
-          // 检测真正的危险用法：href="javascript:" 或 onclick 中的使用
-          const nodeText = sourceFile.getFullText().substring(
-            Math.max(0, node.getStart(sourceFile) - 50),
-            Math.min(sourceFile.getFullText().length, node.getEnd() + 50)
-          );
-          
-          if (nodeText.includes('href=') || nodeText.includes('onclick=') || 
-              nodeText.includes('src=') || nodeText.includes('action=')) {
-            return true; // 这是真正的漏洞
-          }
-          
-          return false;
-        }
-      }
-      return false;
-    },
+    astChecker: hasUnsafeJavascriptProtocolUsage,
     message: '使用 javascript: 协议存在 XSS 风险',
-    recommendation: '使用事件监听器替代内联 JavaScript'
+    recommendation: '使用事件监听器替代内联 JavaScript',
   },
   {
     id: 'data-uri-script',
@@ -195,31 +259,34 @@ const SECURITY_RULES: SecurityRule[] = [
     severity: 'high',
     pattern: /data:text\/html|data:application\/javascript/i,
     message: '使用 data: URI 加载脚本存在安全风险',
-    recommendation: '使用正常的脚本加载方式'
+    recommendation: '使用正常的脚本加载方式',
   },
   {
     id: 'unsafe-url-assignment',
     name: '不安全的 URL 赋值',
-    pattern: /(?:location|window\.location|document\.location)(?:\.href)?\s*=\s*(?!['"](?:https?:\/\/|\/)[^'"]*['"])[^;]+/,
+    pattern:
+      /(?:location|window\.location|document\.location)(?:\.href)?\s*=\s*(?!['"](?:https?:\/\/|\/)[^'"]*['"])[^;]+/,
     severity: 'high',
     message: '直接赋值动态 URL 可能导致开放重定向漏洞',
-    recommendation: '验证 URL 来源，使用白名单机制或 URL 验证函数'
+    recommendation: '验证 URL 来源，使用白名单机制或 URL 验证函数',
   },
   {
     id: 'unsafe-url-search-params',
     name: '不安全的 URL 参数使用',
-    pattern: /(?:location\.search|window\.location\.search|URLSearchParams|new\s+URL\([^)]*\)).*(?:redirect|return|url|goto|next)/i,
+    pattern:
+      /(?:location\.search|window\.location\.search|URLSearchParams|new\s+URL\([^)]*\)).*(?:redirect|return|url|goto|next)/i,
     severity: 'medium',
     message: 'URL 参数中的重定向目标未经验证可能导致开放重定向',
-    recommendation: '验证重定向目标 URL，使用白名单或相对路径'
+    recommendation: '验证重定向目标 URL，使用白名单或相对路径',
   },
   {
     id: 'unsafe-url-hash',
     name: '不安全的 URL hash 使用',
-    pattern: /(?:location\.hash|window\.location\.hash)\s*=\s*[^;]+/,
+    pattern:
+      /(?:window\.location\.hash|(?<!\.)location\.hash)\s*=\s*(?!['"]#\/[A-Za-z0-9/_-]+['"])[^;]+/,
     severity: 'low',
     message: '动态设置 URL hash 可能导致 DOM XSS',
-    recommendation: '验证和转义 hash 值'
+    recommendation: '验证和转义 hash 值',
   },
   {
     id: 'unsafe-window-open',
@@ -227,7 +294,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /window\.open\([^)]*\+[^)]*\)/,
     severity: 'medium',
     message: '动态构造 window.open URL 可能导致开放重定向',
-    recommendation: '验证 URL 参数，使用白名单机制'
+    recommendation: '验证 URL 参数，使用白名单机制',
   },
   {
     id: 'unsafe-iframe-src',
@@ -235,7 +302,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /\.src\s*=\s*[^;'"]*\+[^;]*/,
     severity: 'high',
     message: '动态设置 iframe src 可能导致安全风险',
-    recommendation: '验证 URL 来源，使用 CSP 和 sandbox 属性'
+    recommendation: '验证 URL 来源，使用 CSP 和 sandbox 属性',
   },
   {
     id: 'unsafe-fetch-url',
@@ -243,7 +310,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /fetch\([^)]*\+[^)]*\)/,
     severity: 'medium',
     message: '动态构造 fetch URL 可能导致 SSRF 攻击',
-    recommendation: '验证 URL 参数，使用白名单或 URL 解析验证'
+    recommendation: '验证 URL 参数，使用白名单或 URL 解析验证',
   },
   {
     id: 'unsafe-xhr-url',
@@ -251,7 +318,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /\.open\([^,]*,\s*[^)]*\+[^)]*\)/,
     severity: 'medium',
     message: '动态构造 XMLHttpRequest URL 可能导致 SSRF 攻击',
-    recommendation: '验证 URL 参数，使用白名单机制'
+    recommendation: '验证 URL 参数，使用白名单机制',
   },
   {
     id: 'unsafe-anchor-href',
@@ -259,7 +326,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /\.href\s*=\s*[^;'"]*\+[^;]*/,
     severity: 'medium',
     message: '动态设置 anchor href 可能导致开放重定向',
-    recommendation: '验证 URL，使用相对路径或白名单'
+    recommendation: '验证 URL，使用相对路径或白名单',
   },
   {
     id: 'unsafe-postmessage',
@@ -267,7 +334,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /\.postMessage\([^,]+,\s*['"]?\*['"]?\)/,
     severity: 'high',
     message: 'postMessage 使用通配符 * 存在安全风险',
-    recommendation: '指定明确的目标源（origin）'
+    recommendation: '指定明确的目标源（origin）',
   },
   {
     id: 'unsafe-cors',
@@ -275,7 +342,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /Access-Control-Allow-Origin:\s*\*/,
     severity: 'medium',
     message: 'CORS 配置使用通配符存在安全风险',
-    recommendation: '指定明确的允许源'
+    recommendation: '指定明确的允许源',
   },
   {
     id: 'unsafe-regex',
@@ -283,15 +350,15 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /new\s+RegExp\([^)]*\+[^)]*\)/,
     severity: 'medium',
     message: '动态构造正则表达式可能导致 ReDoS 攻击',
-    recommendation: '使用静态正则表达式或验证输入'
+    recommendation: '使用静态正则表达式或验证输入',
   },
   {
     id: 'localstorage-sensitive',
     name: 'localStorage 存储敏感数据',
-    pattern: /localStorage\.setItem\([^)]*(?:password|token|secret|key|credential)[^)]*\)/i,
+    astChecker: hasUnsafeSensitiveLocalStorageWrite,
     severity: 'high',
     message: 'localStorage 存储敏感数据存在安全风险',
-    recommendation: '使用加密存储或 sessionStorage'
+    recommendation: '使用加密存储或 sessionStorage',
   },
   {
     id: 'unsafe-event-handler',
@@ -299,7 +366,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /on(?:click|load|error|mouseover)\s*=\s*['"][^'"]*['"]/i,
     severity: 'medium',
     message: '内联事件处理器可能导致 XSS 攻击',
-    recommendation: '使用 addEventListener 替代内联事件处理器'
+    recommendation: '使用 addEventListener 替代内联事件处理器',
   },
   {
     id: 'unsafe-srcdoc',
@@ -307,7 +374,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /<iframe[^>]*srcdoc\s*=/i,
     severity: 'high',
     message: 'iframe srcdoc 可能导致 XSS 攻击',
-    recommendation: '验证和转义 srcdoc 内容'
+    recommendation: '验证和转义 srcdoc 内容',
   },
   {
     id: 'unsafe-dangerouslySetInnerHTML',
@@ -315,7 +382,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /dangerouslySetInnerHTML/,
     severity: 'critical',
     message: '使用 dangerouslySetInnerHTML 存在 XSS 风险',
-    recommendation: '使用安全的渲染方法或严格验证内容'
+    recommendation: '使用安全的渲染方法或严格验证内容',
   },
   {
     id: 'sql-injection-risk',
@@ -323,7 +390,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /(?:SELECT|INSERT|UPDATE|DELETE|DROP)\s+.*\+.*(?:FROM|INTO|SET|TABLE)/i,
     severity: 'critical',
     message: '字符串拼接 SQL 语句可能导致 SQL 注入',
-    recommendation: '使用参数化查询或 ORM'
+    recommendation: '使用参数化查询或 ORM',
   },
   {
     id: 'command-injection-risk',
@@ -331,7 +398,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /(?:exec|spawn|execSync|spawnSync)\([^)]*\+[^)]*\)/,
     severity: 'critical',
     message: '动态构造命令可能导致命令注入',
-    recommendation: '验证输入，使用参数数组而非字符串拼接'
+    recommendation: '验证输入，使用参数数组而非字符串拼接',
   },
   {
     id: 'path-traversal-risk',
@@ -339,7 +406,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /(?:readFile|writeFile|unlink|rmdir)\([^)]*\+[^)]*\)/,
     severity: 'high',
     message: '动态构造文件路径可能导致路径遍历攻击',
-    recommendation: '验证和规范化文件路径，使用白名单'
+    recommendation: '验证和规范化文件路径，使用白名单',
   },
   {
     id: 'unsafe-random',
@@ -347,7 +414,7 @@ const SECURITY_RULES: SecurityRule[] = [
     pattern: /Math\.random\(\)/,
     severity: 'low',
     message: 'Math.random() 不适合安全相关场景',
-    recommendation: '使用 crypto.randomBytes() 或 crypto.getRandomValues()'
+    recommendation: '使用 crypto.randomBytes() 或 crypto.getRandomValues()',
   },
   {
     id: 'unsafe-url-constructor',
@@ -362,7 +429,10 @@ const SECURITY_RULES: SecurityRule[] = [
           if (args && args.length > 0) {
             const firstArg = args[0];
             // 检查是否是二元表达式（字符串拼接）
-            if (ts.isBinaryExpression(firstArg) && firstArg.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+            if (
+              ts.isBinaryExpression(firstArg) &&
+              firstArg.operatorToken.kind === ts.SyntaxKind.PlusToken
+            ) {
               return true;
             }
             // 检查是否是模板字符串
@@ -375,7 +445,7 @@ const SECURITY_RULES: SecurityRule[] = [
       return false;
     },
     message: '使用未验证的输入构造 URL 可能导致安全风险',
-    recommendation: '验证 URL 参数，使用 URL 解析和白名单验证'
+    recommendation: '验证 URL 参数，使用 URL 解析和白名单验证',
   },
   {
     id: 'unsafe-location-replace',
@@ -406,7 +476,7 @@ const SECURITY_RULES: SecurityRule[] = [
       return false;
     },
     message: '使用未验证的输入调用 location.replace/assign 可能导致开放重定向',
-    recommendation: '验证重定向目标，使用白名单或相对路径'
+    recommendation: '验证重定向目标，使用白名单或相对路径',
   },
   {
     id: 'unsafe-url-protocol',
@@ -416,7 +486,11 @@ const SECURITY_RULES: SecurityRule[] = [
       // 检测动态设置 URL 协议
       if (ts.isPropertyAccessExpression(node)) {
         const parent = node.parent;
-        if (parent && ts.isBinaryExpression(parent) && parent.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+        if (
+          parent &&
+          ts.isBinaryExpression(parent) &&
+          parent.operatorToken.kind === ts.SyntaxKind.EqualsToken
+        ) {
           const name = node.name.text;
           if (name === 'protocol') {
             const object = node.expression;
@@ -430,8 +504,8 @@ const SECURITY_RULES: SecurityRule[] = [
       return false;
     },
     message: '动态设置 URL 协议可能导致协议混淆攻击',
-    recommendation: '避免动态设置协议，使用固定的 https:// 或 http://'
-  }
+    recommendation: '避免动态设置协议，使用固定的 https:// 或 http://',
+  },
 ];
 
 // ============================================================================
@@ -443,8 +517,47 @@ const CONFIG: AuditConfig = {
   excludeDirs: ['node_modules', 'dist', 'build', '.git', 'coverage'],
   excludeFiles: ['.d.ts', '.test.ts', '.spec.ts'],
   outputDir: path.join(__dirname, '../tests/quality'),
-  rules: SECURITY_RULES
+  rules: SECURITY_RULES,
 };
+
+const SECURITY_CATEGORY_MATCHERS: SecurityCategoryMatcher[] = [
+  {
+    category: 'XSS - DOM 操作',
+    ruleIds: ['innerHTML', 'outerHTML', 'insertAdjacentHTML'],
+  },
+  {
+    category: '代码注入',
+    ruleIds: ['eval', 'function-constructor'],
+  },
+  {
+    category: 'SQL 注入',
+    ruleIds: ['sql'],
+  },
+  {
+    category: '命令注入',
+    ruleIds: ['command'],
+  },
+  {
+    category: '路径遍历',
+    ruleIds: ['path'],
+  },
+  {
+    category: 'URL 安全与开放重定向',
+    ruleIds: ['url', 'redirect', 'location', 'window-open', 'iframe', 'anchor', 'fetch', 'xhr'],
+  },
+  {
+    category: '跨域安全',
+    ruleIds: ['postmessage', 'cors'],
+  },
+  {
+    category: '数据存储',
+    ruleIds: ['localstorage'],
+  },
+  {
+    category: '密码学',
+    ruleIds: ['random'],
+  },
+];
 
 // ============================================================================
 // 安全审计器类
@@ -456,6 +569,135 @@ class SecurityAuditor {
   private totalLines = 0;
   private fileIssueCount: Map<string, number> = new Map();
   private categoryCount: Map<string, number> = new Map();
+  private readonly severityColors: Record<SecuritySeverity, string> = {
+    critical: '#dc2626',
+    high: '#ea580c',
+    medium: '#f59e0b',
+    low: '#10b981',
+  };
+  private readonly severityIcons: Record<SecuritySeverity, string> = {
+    critical: '🔴',
+    high: '🟠',
+    medium: '🟡',
+    low: '🟢',
+  };
+  private readonly htmlStyles = `
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f4f6;
+      padding: 2rem;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    h1 { color: #111827; margin-bottom: 0.5rem; }
+    .meta { color: #6b7280; font-size: 0.875rem; }
+    .risk-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .risk-score {
+      font-size: 4rem;
+      font-weight: bold;
+    }
+    .risk-label { color: #6b7280; margin-top: 0.5rem; }
+    .risk-level {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      margin-top: 1rem;
+      color: white;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-label { color: #6b7280; font-size: 0.875rem; margin-bottom: 0.5rem; }
+    .stat-value { font-size: 2rem; font-weight: bold; color: #111827; }
+    .severity-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+    }
+    .category-section {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .category-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+    .issues {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .issues-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .issue {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .issue:last-child { border-bottom: none; }
+    .issue-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .issue-message { font-weight: 500; color: #111827; }
+    .issue-location { color: #6b7280; font-size: 0.875rem; margin-top: 0.25rem; }
+    .issue-code {
+      background: #f9fafb;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      overflow-x: auto;
+    }
+    .issue-recommendation {
+      background: #dbeafe;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      color: #1e40af;
+    }
+    .recommendation-label {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+`;
 
   /**
    * 扫描目录
@@ -537,10 +779,18 @@ class SecurityAuditor {
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        
+
         // 跳过注释行
         const trimmedLine = line.trim();
-        if (trimmedLine.startsWith('//') || trimmedLine.startsWith('*') || trimmedLine.startsWith('/*')) {
+        if (
+          trimmedLine.startsWith('//') ||
+          trimmedLine.startsWith('*') ||
+          trimmedLine.startsWith('/*')
+        ) {
+          continue;
+        }
+
+        if (rule.id === 'unsafe-url-hash' && isStaticInternalHashAssignment(line)) {
           continue;
         }
 
@@ -555,7 +805,7 @@ class SecurityAuditor {
             line: i + 1,
             column: match.index + 1,
             code: line.trim(),
-            recommendation: rule.recommendation
+            recommendation: rule.recommendation,
           });
         }
 
@@ -569,12 +819,7 @@ class SecurityAuditor {
    */
   private scanWithAST(content: string, filePath: string): void {
     try {
-      const sourceFile = ts.createSourceFile(
-        filePath,
-        content,
-        ts.ScriptTarget.Latest,
-        true
-      );
+      const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
 
       const visit = (node: ts.Node): void => {
         for (const rule of CONFIG.rules) {
@@ -593,7 +838,7 @@ class SecurityAuditor {
               line: line + 1,
               column: character + 1,
               code: codePreview.length > 100 ? codePreview.substring(0, 100) + '...' : codePreview,
-              recommendation: rule.recommendation
+              recommendation: rule.recommendation,
             });
           }
         }
@@ -627,36 +872,10 @@ class SecurityAuditor {
    * 从规则 ID 获取分类
    */
   private getCategoryFromRuleId(ruleId: string): string {
-    if (ruleId.includes('innerHTML') || ruleId.includes('outerHTML') || ruleId.includes('insertAdjacentHTML')) {
-      return 'XSS - DOM 操作';
-    }
-    if (ruleId.includes('eval') || ruleId.includes('function-constructor')) {
-      return '代码注入';
-    }
-    if (ruleId.includes('sql')) {
-      return 'SQL 注入';
-    }
-    if (ruleId.includes('command')) {
-      return '命令注入';
-    }
-    if (ruleId.includes('path')) {
-      return '路径遍历';
-    }
-    if (ruleId.includes('url') || ruleId.includes('redirect') || ruleId.includes('location') || 
-        ruleId.includes('window-open') || ruleId.includes('iframe') || ruleId.includes('anchor') ||
-        ruleId.includes('fetch') || ruleId.includes('xhr')) {
-      return 'URL 安全与开放重定向';
-    }
-    if (ruleId.includes('postmessage') || ruleId.includes('cors')) {
-      return '跨域安全';
-    }
-    if (ruleId.includes('localstorage')) {
-      return '数据存储';
-    }
-    if (ruleId.includes('random')) {
-      return '密码学';
-    }
-    return '其他';
+    const match = SECURITY_CATEGORY_MATCHERS.find(({ ruleIds }) =>
+      ruleIds.some(rulePart => ruleId.includes(rulePart))
+    );
+    return match?.category ?? '其他';
   }
 
   /**
@@ -667,7 +886,7 @@ class SecurityAuditor {
       critical: 0,
       high: 0,
       medium: 0,
-      low: 0
+      low: 0,
     };
 
     for (const issue of this.issues) {
@@ -692,15 +911,15 @@ class SecurityAuditor {
         totalIssues: this.issues.length,
         bySeverity,
         byFile,
-        byCategory
+        byCategory,
       },
       issues: this.issues,
       metrics: {
         totalFiles: this.totalFiles,
         totalLines: this.totalLines,
-        riskScore
+        riskScore,
       },
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     };
   }
 
@@ -712,10 +931,10 @@ class SecurityAuditor {
       critical: 10,
       high: 5,
       medium: 2,
-      low: 1
+      low: 1,
     };
 
-    const totalWeight = 
+    const totalWeight =
       bySeverity.critical * weights.critical +
       bySeverity.high * weights.high +
       bySeverity.medium * weights.medium +
@@ -749,165 +968,29 @@ class SecurityAuditor {
   /**
    * 生成 HTML 报告
    */
-  private generateHTML(report: SecurityReport): string {
-    const severityColors: Record<SecuritySeverity, string> = {
-      critical: '#dc2626',
-      high: '#ea580c',
-      medium: '#f59e0b',
-      low: '#10b981'
-    };
+  private getRiskLevel(riskScore: number): string {
+    return riskScore >= 70 ? '高风险' : riskScore >= 40 ? '中风险' : '低风险';
+  }
 
-    const severityIcons: Record<SecuritySeverity, string> = {
-      critical: '🔴',
-      high: '🟠',
-      medium: '🟡',
-      low: '🟢'
-    };
+  private getRiskColor(riskScore: number): string {
+    return riskScore >= 70 ? '#dc2626' : riskScore >= 40 ? '#f59e0b' : '#10b981';
+  }
 
-    const riskLevel = report.metrics.riskScore >= 70 ? '高风险' :
-                      report.metrics.riskScore >= 40 ? '中风险' : '低风险';
-    const riskColor = report.metrics.riskScore >= 70 ? '#dc2626' :
-                      report.metrics.riskScore >= 40 ? '#f59e0b' : '#10b981';
+  private renderRiskCard(report: SecurityReport): string {
+    const riskLevel = this.getRiskLevel(report.metrics.riskScore);
+    const riskColor = this.getRiskColor(report.metrics.riskScore);
 
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>安全审计报告</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f3f4f6;
-      padding: 2rem;
-    }
-    .container { max-width: 1400px; margin: 0 auto; }
-    .header {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      margin-bottom: 2rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    h1 { color: #111827; margin-bottom: 0.5rem; }
-    .meta { color: #6b7280; font-size: 0.875rem; }
-    .risk-card {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      margin-bottom: 2rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .risk-score {
-      font-size: 4rem;
-      font-weight: bold;
-      color: ${riskColor};
-    }
-    .risk-label { color: #6b7280; margin-top: 0.5rem; }
-    .risk-level {
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      border-radius: 9999px;
-      font-weight: 600;
-      margin-top: 1rem;
-      background: ${riskColor};
-      color: white;
-    }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .stat-card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .stat-label { color: #6b7280; font-size: 0.875rem; margin-bottom: 0.5rem; }
-    .stat-value { font-size: 2rem; font-weight: bold; color: #111827; }
-    .severity-badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: white;
-    }
-    .category-section {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      margin-bottom: 2rem;
-      overflow: hidden;
-    }
-    .category-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
-      background: #f9fafb;
-    }
-    .issues {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-    .issues-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .issue {
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .issue:last-child { border-bottom: none; }
-    .issue-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
-    }
-    .issue-message { font-weight: 500; color: #111827; }
-    .issue-location { color: #6b7280; font-size: 0.875rem; margin-top: 0.25rem; }
-    .issue-code {
-      background: #f9fafb;
-      padding: 0.75rem;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
-      overflow-x: auto;
-    }
-    .issue-recommendation {
-      background: #dbeafe;
-      padding: 0.75rem;
-      border-radius: 4px;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
-      color: #1e40af;
-    }
-    .recommendation-label {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🔒 安全审计报告</h1>
-      <div class="meta">生成时间: ${new Date(report.generatedAt).toLocaleString('zh-CN')}</div>
-    </div>
-
+    return `
     <div class="risk-card">
-      <div class="risk-score">${report.metrics.riskScore}</div>
+      <div class="risk-score" style="color: ${riskColor}">${report.metrics.riskScore}</div>
       <div class="risk-label">风险分数</div>
-      <span class="risk-level">${riskLevel}</span>
+      <span class="risk-level" style="background: ${riskColor}">${riskLevel}</span>
     </div>
+`;
+  }
 
+  private renderOverviewStats(report: SecurityReport): string {
+    return `
     <div class="stats">
       <div class="stat-card">
         <div class="stat-label">总问题数</div>
@@ -922,49 +1005,64 @@ class SecurityAuditor {
         <div class="stat-value">${report.metrics.totalLines.toLocaleString()}</div>
       </div>
     </div>
+`;
+  }
 
+  private renderSeverityStats(report: SecurityReport): string {
+    return `
     <div class="stats">
       <div class="stat-card">
         <div class="stat-label">🔴 严重</div>
-        <div class="stat-value" style="color: ${severityColors.critical}">${report.summary.bySeverity.critical}</div>
+        <div class="stat-value" style="color: ${this.severityColors.critical}">${report.summary.bySeverity.critical}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">🟠 高</div>
-        <div class="stat-value" style="color: ${severityColors.high}">${report.summary.bySeverity.high}</div>
+        <div class="stat-value" style="color: ${this.severityColors.high}">${report.summary.bySeverity.high}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">🟡 中</div>
-        <div class="stat-value" style="color: ${severityColors.medium}">${report.summary.bySeverity.medium}</div>
+        <div class="stat-value" style="color: ${this.severityColors.medium}">${report.summary.bySeverity.medium}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">🟢 低</div>
-        <div class="stat-value" style="color: ${severityColors.low}">${report.summary.bySeverity.low}</div>
+        <div class="stat-value" style="color: ${this.severityColors.low}">${report.summary.bySeverity.low}</div>
       </div>
     </div>
+`;
+  }
 
+  private renderCategoryRows(report: SecurityReport): string {
+    return Object.entries(report.summary.byCategory)
+      .map(
+        ([category, count]) => `
+          <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+            <span>${category}</span>
+            <span style="font-weight: 600;">${count}</span>
+          </div>
+        `
+      )
+      .join('');
+  }
+
+  private renderCategoryStats(report: SecurityReport): string {
+    return `
     <div class="category-section">
       <div class="category-header">
         <h2>问题分类统计</h2>
       </div>
       <div style="padding: 1.5rem;">
-        ${Object.entries(report.summary.byCategory).map(([category, count]) => `
-          <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
-            <span>${category}</span>
-            <span style="font-weight: 600;">${count}</span>
-          </div>
-        `).join('')}
+        ${this.renderCategoryRows(report)}
       </div>
     </div>
+`;
+  }
 
-    <div class="issues">
-      <div class="issues-header">
-        <h2>问题详情</h2>
-      </div>
-      ${report.issues.map(issue => `
+  private renderIssue(issue: SecurityIssue): string {
+    return `
         <div class="issue">
           <div class="issue-header">
-            <span class="severity-badge" style="background: ${severityColors[issue.severity]}">
-              ${severityIcons[issue.severity]} ${issue.severity.toUpperCase()}
+            <span class="severity-badge" style="background: ${this.severityColors[issue.severity]}">
+              ${this.severityIcons[issue.severity]} ${issue.severity.toUpperCase()}
             </span>
             <span class="issue-message">${issue.message}</span>
           </div>
@@ -977,8 +1075,41 @@ class SecurityAuditor {
             ${issue.recommendation}
           </div>
         </div>
-      `).join('')}
+      `;
+  }
+
+  private renderIssues(report: SecurityReport): string {
+    return `
+    <div class="issues">
+      <div class="issues-header">
+        <h2>问题详情</h2>
+      </div>
+      ${report.issues.map(issue => this.renderIssue(issue)).join('')}
     </div>
+`;
+  }
+
+  private generateHTML(report: SecurityReport): string {
+    return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>安全审计报告</title>
+  <style>${this.htmlStyles}  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔒 安全审计报告</h1>
+      <div class="meta">生成时间: ${new Date(report.generatedAt).toLocaleString('zh-CN')}</div>
+    </div>
+
+${this.renderRiskCard(report)}
+${this.renderOverviewStats(report)}
+${this.renderSeverityStats(report)}
+${this.renderCategoryStats(report)}
+${this.renderIssues(report)}
   </div>
 </body>
 </html>`;
@@ -993,7 +1124,7 @@ class SecurityAuditor {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      "'": '&#039;'
+      "'": '&#039;',
     };
     return text.replace(/[&<>"']/g, char => map[char]);
   }
@@ -1081,10 +1212,10 @@ function main(): void {
 // 运行主函数
 const isMainModule = () => {
   if (typeof process.argv[1] === 'undefined') return false;
-  
+
   const scriptPath = fileURLToPath(import.meta.url);
   const argPath = path.resolve(process.argv[1]);
-  
+
   return scriptPath === argPath;
 };
 

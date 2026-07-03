@@ -7,6 +7,7 @@
 import { createErrorTracker } from '@/services/errorTracker';
 import { AppError, NetworkError, SystemError } from '@/common/errors/AppError';
 import { setSafeHtml } from '@/common/utils/security';
+import { randomBetween } from '@/common/utils/random';
 
 /**
  * 模块加载选项
@@ -513,7 +514,7 @@ export class SafeModuleLoader {
           const baseDelay = Math.pow(2, attempt - 1) * 100;
 
           // 添加 ±20% 的随机抖动，防止惊群效应
-          const jitter = baseDelay * 0.2 * (Math.random() * 2 - 1);
+          const jitter = baseDelay * 0.2 * randomBetween(-1, 1);
           const delay = Math.round(baseDelay + jitter);
 
           await this.sleep(delay);
@@ -1240,7 +1241,7 @@ export class SafeModuleLoader {
         break;
       case 'home':
         // 返回首页
-        window.location.href = '/';
+        window.location.assign('/');
         break;
       default:
         break;

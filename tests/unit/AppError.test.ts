@@ -22,7 +22,6 @@ import {
   // AppError基类
   // ================================================================
 
-  describe('AppError基类', () => {
     it('应该创建基本错误实例', () => {
       const error = new AppError(
         '测试错误',
@@ -127,7 +126,6 @@ import {
       expect(error instanceof AppError).toBe(true);
       expect(error instanceof Error).toBe(true);
     });
-  });
 
   // ================================================================
   // toJSON方法

@@ -4,6 +4,8 @@
 // 监控核心Web性能指标(CLS/FID/LCP/FCP/TTFB)
 // ================================================================
 
+import { createRandomId } from '../common/utils/random';
+
 /**
  * Web Vitals指标类型
  */
@@ -129,7 +131,7 @@ class WebVitalsService {
         value: fcpEntry.startTime,
         rating: getRating('FCP', fcpEntry.startTime),
         delta: fcpEntry.startTime,
-        id: `v1-${Date.now()}-${Math.random()}`,
+        id: createRandomId('v1', '-'),
         navigationType: 'navigate',
       });
     }
@@ -153,7 +155,7 @@ class WebVitalsService {
           value,
           rating: getRating('LCP', value),
           delta: value,
-          id: `v1-${Date.now()}-${Math.random()}`,
+          id: createRandomId('v1', '-'),
           navigationType: 'navigate',
         });
       }
@@ -181,7 +183,7 @@ class WebVitalsService {
         value,
         rating: getRating('TTFB', value),
         delta: value,
-        id: `v1-${Date.now()}-${Math.random()}`,
+        id: createRandomId('v1', '-'),
         navigationType: 'navigate',
       });
     }
@@ -211,7 +213,7 @@ class WebVitalsService {
           value: clsValue,
           rating: getRating('CLS', clsValue),
           delta: clsValue,
-          id: `v1-${Date.now()}-${Math.random()}`,
+          id: createRandomId('v1', '-'),
           navigationType: 'navigate',
         });
         lastLoggedValue = clsValue;

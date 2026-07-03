@@ -5,6 +5,7 @@
 // ================================================================
 
 import { escapeHtml, setSafeHtml } from '../common/utils/security';
+import { randomBase36 } from '../common/utils/random';
 
 /**
  * 错误边界配置
@@ -41,7 +42,7 @@ export function renderErrorBoundary(
     onRetry = null,
   } = config;
 
-  const errorId = `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const errorId = `error-${Date.now()}-${randomBase36(9)}`;
 
   const reloadButton = showReload
     ? `

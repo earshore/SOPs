@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>失败截图索引</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f5f5f5;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .stats {
+        color: #666;
+        margin-bottom: 30px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 4px;
+      }
+
+      .stats span {
+        margin-right: 20px;
+      }
+
+      .filters {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .filters input,
+      .filters select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .screenshot-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+      }
+
+      .screenshot-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .screenshot-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .screenshot-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: #f0f0f0;
+        cursor: pointer;
+      }
+
+      .screenshot-info {
+        padding: 15px;
+      }
+
+      .screenshot-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .screenshot-meta {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .screenshot-meta div {
+        margin-bottom: 4px;
+      }
+
+      .browser-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-weight: 500;
+        margin-right: 5px;
+      }
+
+      .browser-chromium {
+        background: #4285f4;
+        color: white;
+      }
+      .browser-firefox {
+        background: #ff7139;
+        color: white;
+      }
+      .browser-webkit {
+        background: #147efb;
+        color: white;
+      }
+
+      .error-message {
+        margin-top: 8px;
+        padding: 8px;
+        background: #fff3cd;
+        border-left: 3px solid #ffc107;
+        font-size: 12px;
+        color: #856404;
+        border-radius: 3px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        max-width: 90%;
+        max-height: 90%;
+        position: relative;
+      }
+
+      .modal-image {
+        max-width: 100%;
+        max-height: 90vh;
+        object-fit: contain;
+      }
+
+      .modal-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        color: white;
+        font-size: 30px;
+        cursor: pointer;
+        background: none;
+        border: none;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+      }
+
+      .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📸 失败截图索引</h1>
+      <div class="stats">
+        <span><strong>总数:</strong> __SCREENSHOT_COUNT__</span>
+        <span><strong>最后更新:</strong> __LAST_UPDATED__</span>
+      </div>
+
+      <div class="filters">
+        <input type="text" id="searchInput" placeholder="搜索测试名称..." />
+        <select id="browserFilter">
+          <option value="">所有浏览器</option>
+          <option value="chromium">Chromium</option>
+          <option value="firefox">Firefox</option>
+          <option value="webkit">WebKit</option>
+        </select>
+        <select id="sortBy">
+          <option value="newest">最新优先</option>
+          <option value="oldest">最旧优先</option>
+          <option value="name">名称排序</option>
+        </select>
+      </div>
+
+      <div class="screenshot-grid" id="screenshotGrid">__INITIAL_GRID__</div>
+    </div>
+
+    <div class="modal" id="modal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <img class="modal-image" id="modalImage" src="" alt="截图预览" />
+      </div>
+    </div>
+
+    <script>
+      const screenshots = __SCREENSHOTS_JSON__;
+
+      function renderScreenshots(filtered) {
+        const grid = document.getElementById('screenshotGrid');
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `__EMPTY_STATE__`;
+          return;
+        }
+
+        grid.innerHTML = filtered
+          .map(
+            entry => `
+        <div class="screenshot-card">
+          <img
+            class="screenshot-image"
+            src="${entry.path.replace(/\\/g, '/')}"
+            alt="${entry.metadata.testName}"
+            onclick="openModal('${entry.path.replace(/\\/g, '/')}')"
+            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'%3E%3Crect fill=\\'%23f0f0f0\\' width=\\'100\\' height=\\'100\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' text-anchor=\\'middle\\' dy=\\'.3em\\' fill=\\'%23999\\'%3E无法加载%3C/text%3E%3C/svg%3E'"
+          />
+          <div class="screenshot-info">
+            <div class="screenshot-title">${entry.metadata.testName}</div>
+            <div class="screenshot-meta">
+              <div>
+                <span class="browser-badge browser-${entry.metadata.browser}">${entry.metadata.browser}</span>
+                <span>${new Date(entry.createdAt).toLocaleString('zh-CN')}</span>
+              </div>
+              <div><strong>文件:</strong> ${entry.metadata.testFile}</div>
+              <div><strong>URL:</strong> ${entry.metadata.url || 'N/A'}</div>
+              <div><strong>大小:</strong> ${(entry.size / 1024).toFixed(2)} KB</div>
+              ${entry.metadata.error ? `<div class="error-message">${entry.metadata.error}</div>` : ''}
+            </div>
+          </div>
+        </div>
+      `
+          )
+          .join('');
+      }
+
+      function filterAndSort() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const browserFilter = document.getElementById('browserFilter').value;
+        const sortBy = document.getElementById('sortBy').value;
+
+        let filtered = screenshots.filter(entry => {
+          const matchesSearch =
+            entry.metadata.testName.toLowerCase().includes(searchTerm) ||
+            entry.metadata.testFile.toLowerCase().includes(searchTerm);
+          const matchesBrowser = !browserFilter || entry.metadata.browser === browserFilter;
+          return matchesSearch && matchesBrowser;
+        });
+
+        filtered.sort((a, b) => {
+          if (sortBy === 'newest') {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          } else if (sortBy === 'oldest') {
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          } else {
+            return a.metadata.testName.localeCompare(b.metadata.testName);
+          }
+        });
+
+        renderScreenshots(filtered);
+      }
+
+      function openModal(imagePath) {
+        document.getElementById('modalImage').src = imagePath;
+        document.getElementById('modal').classList.add('active');
+      }
+
+      function closeModal() {
+        document.getElementById('modal').classList.remove('active');
+      }
+
+      document.getElementById('searchInput').addEventListener('input', filterAndSort);
+      document.getElementById('browserFilter').addEventListener('change', filterAndSort);
+      document.getElementById('sortBy').addEventListener('change', filterAndSort);
+      document.getElementById('modal').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+      });
+
+      // 初始渲染
+      renderScreenshots(screenshots);
+    </script>
+  </body>
+</html>

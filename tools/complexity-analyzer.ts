@@ -234,6 +234,7 @@ class ComplexityAnalyzer {
       name: string;
       startLine: number;
       braceCount: number;
+      hasBodyStarted: boolean;
     } | null = null;
 
     for (let i = 0; i < lines.length; i++) {
@@ -248,6 +249,7 @@ class ComplexityAnalyzer {
             name,
             startLine: i,
             braceCount: 0,
+            hasBodyStarted: false,
           };
         }
       }
@@ -256,10 +258,13 @@ class ComplexityAnalyzer {
         // 计算大括号
         const openBraces = (line.match(/{/g) || []).length;
         const closeBraces = (line.match(/}/g) || []).length;
+        if (openBraces > 0) {
+          currentFunction.hasBodyStarted = true;
+        }
         currentFunction.braceCount += openBraces - closeBraces;
 
         // 函数结束
-        if (currentFunction.braceCount === 0 && openBraces > 0) {
+        if (currentFunction.hasBodyStarted && currentFunction.braceCount === 0) {
           const linesCount = i - currentFunction.startLine + 1;
           
           if (linesCount > this.maxLines) {
@@ -283,67 +288,64 @@ class ComplexityAnalyzer {
 
   generateReport(result: ScanResult): string {
     const timestamp = new Date().toISOString();
-    
-    let report = `# 代码复杂度分析报告\n\n`;
-    report += `生成时间: ${timestamp}\n\n`;
-    report += `## 概览\n\n`;
-    report += `- 扫描文件总数: ${result.totalFiles}\n`;
-    report += `- 函数总数: ${result.totalFunctions}\n`;
-    report += `- 过长函数 (> ${this.maxLines} 行): ${result.longFunctions}\n`;
-    report += `- 高复杂度函数 (圈复杂度 > ${this.maxComplexity}): ${result.complexFunctions}\n`;
-    report += `- 问题函数总数: ${result.issues.length}\n\n`;
+    let report = this.generateMarkdownHeader(result, timestamp);
 
     if (result.issues.length === 0) {
       report += `✅ 未发现复杂度问题\n`;
       return report;
     }
 
-    // 按严重程度排序
-    const sorted = [...result.issues].sort((a, b) => {
-      if (a.issueType === 'both' && b.issueType !== 'both') return -1;
-      if (a.issueType !== 'both' && b.issueType === 'both') return 1;
-      return b.linesCount - a.linesCount;
-    });
+    return report +
+      this.generateMarkdownIssueList(result.issues) +
+      this.generateMarkdownRecommendations();
+  }
 
-    report += `## 问题列表（按严重程度排序）\n\n`;
+  private generateMarkdownHeader(result: ScanResult, timestamp: string): string {
+    return `# 代码复杂度分析报告\n\n` +
+      `生成时间: ${timestamp}\n\n` +
+      `## 概览\n\n` +
+      `- 扫描文件总数: ${result.totalFiles}\n` +
+      `- 函数总数: ${result.totalFunctions}\n` +
+      `- 过长函数 (> ${this.maxLines} 行): ${result.longFunctions}\n` +
+      `- 高复杂度函数 (圈复杂度 > ${this.maxComplexity}): ${result.complexFunctions}\n` +
+      `- 问题函数总数: ${result.issues.length}\n\n`;
+  }
 
-    for (const issue of sorted) {
-      const severity = issue.issueType === 'both' ? '🔴 严重' : '🟡 中等';
-      
-      report += `### ${severity} ${issue.file}\n\n`;
-      report += `**函数**: \`${issue.functionName}\`\n\n`;
-      report += `- 位置: 行 ${issue.line}\n`;
-      report += `- 行数: ${issue.linesCount}\n`;
-      
-      if (issue.cyclomaticComplexity > 0) {
-        report += `- 圈复杂度: ${issue.cyclomaticComplexity}\n`;
-      }
-      
-      report += `- 问题类型: `;
-      if (issue.issueType === 'both') {
-        report += `过长且复杂\n`;
-      } else if (issue.issueType === 'long-function') {
-        report += `函数过长\n`;
-      } else {
-        report += `复杂度过高\n`;
-      }
-      
-      report += `\n`;
-    }
+  private generateMarkdownIssueList(issues: ComplexityIssue[]): string {
+    return `## 问题列表（按严重程度排序）\n\n` +
+      this.sortIssuesBySeverity(issues)
+        .map(issue => this.generateMarkdownIssue(issue))
+        .join('');
+  }
 
-    report += `## 建议\n\n`;
-    report += `### 重构过长函数\n`;
-    report += `1. 提取独立的功能到单独的函数\n`;
-    report += `2. 使用策略模式替代长 if-else\n`;
-    report += `3. 将复杂逻辑拆分为多个小函数\n\n`;
-    
-    report += `### 降低圈复杂度\n`;
-    report += `1. 使用提前返回（Early Return）减少嵌套\n`;
-    report += `2. 使用查找表替代多个 if-else\n`;
-    report += `3. 提取条件判断到独立函数\n`;
-    report += `4. 使用多态替代条件判断\n`;
+  private generateMarkdownIssue(issue: ComplexityIssue): string {
+    const severity = issue.issueType === 'both' ? '🔴 严重' : '🟡 中等';
 
-    return report;
+    return `### ${severity} ${issue.file}\n\n` +
+      `**函数**: \`${issue.functionName}\`\n\n` +
+      `- 位置: 行 ${issue.line}\n` +
+      `- 行数: ${issue.linesCount}\n` +
+      this.generateMarkdownComplexityLine(issue) +
+      `- 问题类型: ${this.formatIssueType(issue.issueType)}\n\n`;
+  }
+
+  private generateMarkdownComplexityLine(issue: ComplexityIssue): string {
+    return issue.cyclomaticComplexity > 0
+      ? `- 圈复杂度: ${issue.cyclomaticComplexity}\n`
+      : '';
+  }
+
+  private generateMarkdownRecommendations(): string {
+    return `## 建议\n\n` +
+      `### 重构过长函数\n` +
+      `1. 提取独立的功能到单独的函数\n` +
+      `2. 使用策略模式替代长 if-else\n` +
+      `3. 将复杂逻辑拆分为多个小函数\n\n` +
+      `### 降低圈复杂度\n` +
+      `1. 使用提前返回（Early Return）减少嵌套\n` +
+      `2. 使用查找表替代多个 if-else\n` +
+      `3. 提取条件判断到独立函数\n` +
+      `4. 使用多态替代条件判断\n`;
   }
 
   generateHtmlReport(result: ScanResult): string {

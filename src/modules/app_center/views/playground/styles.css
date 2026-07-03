@@ -718,6 +718,16 @@
   background: var(--color-slate-50, #f8fafc);
 }
 
+.playground-provider-status {
+  max-width: 220px;
+  color: var(--color-slate-500, #64748b);
+  font-size: var(--text-sm, 0.8125rem);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .playground-tuning-panel {
   position: relative;
 }

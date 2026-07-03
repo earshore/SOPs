@@ -58,7 +58,6 @@ vi.mock('@/common/EventBus', () => ({
   /**
    * UI交互测试
    */
-  describe('UI交互测试', () => {
     it('应该能够点击"导入JSON"按钮', () => {
       // 创建导入按钮
       const importButton = createTestElement('button', {
@@ -240,7 +239,6 @@ vi.mock('@/common/EventBus', () => ({
 
       expect(deleteClicked).toBe(true);
     });
-  });
 
   /**
    * 响应式布局测试
@@ -386,7 +384,6 @@ vi.mock('@/common/EventBus', () => ({
   /**
    * 错误场景测试
    */
-  describe('错误场景测试', () => {
     it('应该正确处理无效的ASIN格式', () => {
       const invalidAsins = ['invalid', '123', 'ASIN123', 'B0', 'B0TOOLONG123456'];
 
@@ -488,7 +485,6 @@ vi.mock('@/common/EventBus', () => ({
       expect(deleteError).toBeDefined();
       expect(mockState.scraper.scrapedData.products).toHaveLength(2);
     });
-  });
 
   /**
    * 数据完整性测试

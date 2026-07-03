@@ -41,11 +41,50 @@ interface DuplicationMetrics {
   files: number;
 }
 
+interface JscpdReportTotals {
+  percentage?: number;
+  lines?: number;
+  tokens?: number;
+  sources?: number;
+  files?: number;
+}
+
+interface JscpdReport {
+  statistics?: {
+    total?: JscpdReportTotals;
+  };
+  total?: JscpdReportTotals;
+}
+
 interface CoverageMetrics {
   statements: number;
   branches: number;
   functions: number;
   lines: number;
+}
+
+interface CoverageSummaryPart {
+  pct?: number;
+  covered?: number;
+  total?: number;
+}
+
+interface CoverageSummaryTotal {
+  statements?: CoverageSummaryPart;
+  branches?: CoverageSummaryPart;
+  functions?: CoverageSummaryPart;
+  lines?: CoverageSummaryPart;
+}
+
+interface CompleteCoverageSummaryTotal {
+  statements: CoverageSummaryPart;
+  branches: CoverageSummaryPart;
+  functions: CoverageSummaryPart;
+  lines: CoverageSummaryPart;
+}
+
+interface CoverageSummaryReport {
+  total?: CoverageSummaryTotal;
 }
 
 interface TypeCoverageMetrics {
@@ -62,6 +101,32 @@ interface TypeUsageAnalysis {
   explicitAny: number;
   implicitAny: number;
 }
+
+interface TypeUsageCounters {
+  totalSymbols: number;
+  anyCount: number;
+  explicitAny: number;
+  implicitAny: number;
+}
+
+function asIdentifier(name: ts.Node | undefined): ts.Identifier | undefined {
+  return name && ts.isIdentifier(name) ? name : undefined;
+}
+
+const TYPE_USAGE_IDENTIFIER_READERS: Array<(node: ts.Node) => ts.Identifier | undefined> = [
+  node => (ts.isVariableDeclaration(node) ? asIdentifier(node.name) : undefined),
+  node => (ts.isParameter(node) ? asIdentifier(node.name) : undefined),
+  node => (ts.isPropertyDeclaration(node) ? asIdentifier(node.name) : undefined),
+  node => (ts.isPropertySignature(node) ? asIdentifier(node.name) : undefined),
+  node => (ts.isFunctionDeclaration(node) ? asIdentifier(node.name) : undefined),
+  node => (ts.isMethodDeclaration(node) ? asIdentifier(node.name) : undefined),
+  node => (ts.isFunctionExpression(node) ? asIdentifier(node.name) : undefined),
+  node => (ts.isArrowFunction(node) ? asIdentifier(node.name) : undefined),
+  node => (ts.isTypeAliasDeclaration(node) ? node.name : undefined),
+  node => (ts.isInterfaceDeclaration(node) ? node.name : undefined),
+  node => (ts.isClassDeclaration(node) ? asIdentifier(node.name) : undefined),
+  node => (ts.isEnumDeclaration(node) ? node.name : undefined)
+];
 
 interface ESLintMessage {
   ruleId?: string | null;
@@ -322,86 +387,81 @@ class QualityMonitor {
     console.log('🔄 检查代码重复...');
 
     try {
-      // 确保输出目录存在
-      if (!fs.existsSync(this.config.outputDir)) {
-        fs.mkdirSync(this.config.outputDir, { recursive: true });
-      }
-
-      // 检查 jscpd 是否安装
-      try {
-        execSync('npx jscpd --version', { stdio: 'ignore' });
-      } catch {
-        console.warn('  ⚠ jscpd 未安装，跳过重复代码检测');
-        console.warn('  💡 安装命令: npm install --save-dev jscpd\n');
+      this.ensureOutputDir();
+      if (!this.isJscpdAvailable()) {
         return;
       }
 
-      // 使用配置文件运行 jscpd
-      const configFile = path.join(__dirname, '../.jscpd.json');
-      const outputFile = path.join(this.config.outputDir, 'jscpd-report.json');
-      
-      let cmd: string;
-      if (fs.existsSync(configFile)) {
-        // 使用配置文件
-        cmd = `npx jscpd ${this.config.srcDir} --config ${configFile}`;
-      } else {
-        // 使用命令行参数
-        cmd = `npx jscpd ${this.config.srcDir} --reporters json,console --format typescript,javascript --min-lines 10 --min-tokens 50 --output ${this.config.outputDir}`;
-      }
-
-      execSync(cmd, {
+      execSync(this.buildJscpdCommand(), {
         encoding: 'utf-8',
         stdio: 'pipe',
         maxBuffer: 10 * 1024 * 1024
       });
 
-      // 读取报告
-      if (fs.existsSync(outputFile)) {
-        const report = JSON.parse(fs.readFileSync(outputFile, 'utf-8'));
-        
-        // jscpd 报告结构可能因版本而异，需要兼容处理
-        const statistics = report.statistics?.total || report.total || {};
-        
-        this.metrics.duplication = {
-          percentage: statistics.percentage || 0,
-          lines: statistics.lines || 0,
-          tokens: statistics.tokens || 0,
-          files: statistics.sources || statistics.files || 0
-        };
-
-        console.log(`  ✓ 重复率: ${this.metrics.duplication.percentage.toFixed(2)}%`);
-        console.log(`  ✓ 重复行数: ${this.metrics.duplication.lines}`);
-        console.log(`  ✓ 重复 tokens: ${this.metrics.duplication.tokens}`);
-        console.log(`  ✓ 涉及文件: ${this.metrics.duplication.files}\n`);
-      } else {
-        console.warn('  ⚠ jscpd 报告文件未生成\n');
-      }
+      this.loadDuplicationReport('  ⚠ jscpd 报告文件未生成\n');
     } catch (error: any) {
       // 即使 jscpd 返回非零退出码，也尝试读取报告
-      const outputFile = path.join(this.config.outputDir, 'jscpd-report.json');
-      if (fs.existsSync(outputFile)) {
-        try {
-          const report = JSON.parse(fs.readFileSync(outputFile, 'utf-8'));
-          const statistics = report.statistics?.total || report.total || {};
-          
-          this.metrics.duplication = {
-            percentage: statistics.percentage || 0,
-            lines: statistics.lines || 0,
-            tokens: statistics.tokens || 0,
-            files: statistics.sources || statistics.files || 0
-          };
-
-          console.log(`  ✓ 重复率: ${this.metrics.duplication.percentage.toFixed(2)}%`);
-          console.log(`  ✓ 重复行数: ${this.metrics.duplication.lines}`);
-          console.log(`  ✓ 重复 tokens: ${this.metrics.duplication.tokens}`);
-          console.log(`  ✓ 涉及文件: ${this.metrics.duplication.files}\n`);
-        } catch {
-          console.warn('  ⚠ 代码重复检测失败\n');
-        }
-      } else {
-        console.warn('  ⚠ 代码重复检测失败\n');
-      }
+      this.loadDuplicationReport('  ⚠ 代码重复检测失败\n');
     }
+  }
+
+  private ensureOutputDir(): void {
+    if (!fs.existsSync(this.config.outputDir)) {
+      fs.mkdirSync(this.config.outputDir, { recursive: true });
+    }
+  }
+
+  private isJscpdAvailable(): boolean {
+    try {
+      execSync('npx jscpd --version', { stdio: 'ignore' });
+      return true;
+    } catch {
+      console.warn('  ⚠ jscpd 未安装，跳过重复代码检测');
+      console.warn('  💡 安装命令: npm install --save-dev jscpd\n');
+      return false;
+    }
+  }
+
+  private buildJscpdCommand(): string {
+    const configFile = path.join(__dirname, '../.jscpd.json');
+    if (fs.existsSync(configFile)) {
+      return `npx jscpd ${this.config.srcDir} --config ${configFile}`;
+    }
+    return `npx jscpd ${this.config.srcDir} --reporters json,console --format typescript,javascript --min-lines 10 --min-tokens 50 --output ${this.config.outputDir}`;
+  }
+
+  private loadDuplicationReport(missingMessage: string): void {
+    const outputFile = path.join(this.config.outputDir, 'jscpd-report.json');
+    if (!fs.existsSync(outputFile)) {
+      console.warn(missingMessage);
+      return;
+    }
+
+    try {
+      this.metrics.duplication = this.readDuplicationMetrics(outputFile);
+      this.logDuplicationMetrics();
+    } catch {
+      console.warn('  ⚠ 代码重复检测失败\n');
+    }
+  }
+
+  private readDuplicationMetrics(outputFile: string): DuplicationMetrics {
+    const report = JSON.parse(fs.readFileSync(outputFile, 'utf-8')) as JscpdReport;
+    const statistics = report.statistics?.total || report.total || {};
+
+    return {
+      percentage: statistics.percentage || 0,
+      lines: statistics.lines || 0,
+      tokens: statistics.tokens || 0,
+      files: statistics.sources || statistics.files || 0
+    };
+  }
+
+  private logDuplicationMetrics(): void {
+    console.log(`  ✓ 重复率: ${this.metrics.duplication.percentage.toFixed(2)}%`);
+    console.log(`  ✓ 重复行数: ${this.metrics.duplication.lines}`);
+    console.log(`  ✓ 重复 tokens: ${this.metrics.duplication.tokens}`);
+    console.log(`  ✓ 涉及文件: ${this.metrics.duplication.files}\n`);
   }
 
   /**
@@ -416,81 +476,22 @@ class QualityMonitor {
     }
 
     try {
-      // 使用项目根目录作为基准路径
       const projectRoot = path.join(__dirname, '..');
       const coverageFile = path.join(projectRoot, 'coverage', 'coverage-summary.json');
 
       console.log(`  📂 覆盖率文件路径: ${coverageFile}`);
 
-      // 如果覆盖率文件不存在，尝试运行测试
-      if (!fs.existsSync(coverageFile)) {
-        console.log('  ⚠ 覆盖率文件不存在，尝试运行测试生成覆盖率报告...');
-        try {
-          console.log('  ⏳ 运行命令: npm run test:coverage');
-          console.log('  ⏱ 超时设置: 120秒');
-          
-          execSync('npm run test:coverage', {
-            stdio: 'pipe',
-            timeout: 120000, // 增加到120秒
-            cwd: projectRoot,
-            encoding: 'utf-8'
-          });
-          
-          console.log('  ✓ 测试运行完成');
-        } catch (error: any) {
-          console.warn('  ⚠ 测试运行失败:');
-          if (error.stdout) {
-            console.warn('  输出:', error.stdout.toString().slice(0, 500));
-          }
-          if (error.stderr) {
-            console.warn('  错误:', error.stderr.toString().slice(0, 500));
-          }
-          console.warn('  ⚠ 跳过覆盖率检查\n');
-          return;
-        }
-      }
-
-      // 再次检查文件是否存在
-      if (!fs.existsSync(coverageFile)) {
-        console.warn('  ⚠ 覆盖率文件仍然不存在，可能测试未生成覆盖率报告\n');
+      if (!this.ensureCoverageReport(projectRoot, coverageFile)) {
         return;
       }
 
-      // 读取并解析覆盖率数据
-      console.log('  📖 读取覆盖率数据...');
-      const coverageData = fs.readFileSync(coverageFile, 'utf-8');
-      const coverage = JSON.parse(coverageData);
-
-      if (!coverage.total) {
-        console.warn('  ⚠ 覆盖率数据格式不正确，缺少 total 字段\n');
+      const total = this.readCoverageSummary(coverageFile);
+      if (!total) {
         return;
       }
 
-      const total = coverage.total;
-
-      // 验证数据完整性
-      if (!total.statements || !total.branches || !total.functions || !total.lines) {
-        console.warn('  ⚠ 覆盖率数据不完整\n');
-        return;
-      }
-
-      this.metrics.coverage = {
-        statements: total.statements.pct || 0,
-        branches: total.branches.pct || 0,
-        functions: total.functions.pct || 0,
-        lines: total.lines.pct || 0
-      };
-
-      console.log(`  ✓ 语句覆盖率: ${this.metrics.coverage.statements.toFixed(2)}%`);
-      console.log(`  ✓ 分支覆盖率: ${this.metrics.coverage.branches.toFixed(2)}%`);
-      console.log(`  ✓ 函数覆盖率: ${this.metrics.coverage.functions.toFixed(2)}%`);
-      console.log(`  ✓ 行覆盖率: ${this.metrics.coverage.lines.toFixed(2)}%`);
-      
-      // 显示统计信息
-      console.log(`  📊 已测试: ${total.statements.covered}/${total.statements.total} 语句`);
-      console.log(`  📊 已测试: ${total.branches.covered}/${total.branches.total} 分支`);
-      console.log(`  📊 已测试: ${total.functions.covered}/${total.functions.total} 函数`);
-      console.log(`  📊 已测试: ${total.lines.covered}/${total.lines.total} 行\n`);
+      this.metrics.coverage = this.toCoverageMetrics(total);
+      this.logCoverageMetrics(total);
     } catch (error: any) {
       console.warn('  ⚠ 测试覆盖率检查失败:');
       console.warn(`  错误信息: ${error.message}`);
@@ -499,6 +500,95 @@ class QualityMonitor {
       }
       console.warn('');
     }
+  }
+
+  private ensureCoverageReport(projectRoot: string, coverageFile: string): boolean {
+    if (fs.existsSync(coverageFile)) {
+      return true;
+    }
+
+    console.log('  ⚠ 覆盖率文件不存在，尝试运行测试生成覆盖率报告...');
+    if (!this.runCoverageCommand(projectRoot)) {
+      return false;
+    }
+
+    if (!fs.existsSync(coverageFile)) {
+      console.warn('  ⚠ 覆盖率文件仍然不存在，可能测试未生成覆盖率报告\n');
+      return false;
+    }
+
+    return true;
+  }
+
+  private runCoverageCommand(projectRoot: string): boolean {
+    try {
+      console.log('  ⏳ 运行命令: npm run test:coverage');
+      console.log('  ⏱ 超时设置: 120秒');
+
+      execSync('npm run test:coverage', {
+        stdio: 'pipe',
+        timeout: 120000,
+        cwd: projectRoot,
+        encoding: 'utf-8'
+      });
+
+      console.log('  ✓ 测试运行完成');
+      return true;
+    } catch (error: any) {
+      console.warn('  ⚠ 测试运行失败:');
+      if (error.stdout) {
+        console.warn('  输出:', error.stdout.toString().slice(0, 500));
+      }
+      if (error.stderr) {
+        console.warn('  错误:', error.stderr.toString().slice(0, 500));
+      }
+      console.warn('  ⚠ 跳过覆盖率检查\n');
+      return false;
+    }
+  }
+
+  private readCoverageSummary(coverageFile: string): CompleteCoverageSummaryTotal | null {
+    console.log('  📖 读取覆盖率数据...');
+    const coverageData = fs.readFileSync(coverageFile, 'utf-8');
+    const coverage = JSON.parse(coverageData) as CoverageSummaryReport;
+
+    if (!coverage.total) {
+      console.warn('  ⚠ 覆盖率数据格式不正确，缺少 total 字段\n');
+      return null;
+    }
+
+    if (!this.hasCompleteCoverageSummary(coverage.total)) {
+      console.warn('  ⚠ 覆盖率数据不完整\n');
+      return null;
+    }
+
+    return coverage.total;
+  }
+
+  private hasCompleteCoverageSummary(
+    total: CoverageSummaryTotal
+  ): total is CompleteCoverageSummaryTotal {
+    return Boolean(total.statements && total.branches && total.functions && total.lines);
+  }
+
+  private toCoverageMetrics(total: CompleteCoverageSummaryTotal): CoverageMetrics {
+    return {
+      statements: total.statements.pct || 0,
+      branches: total.branches.pct || 0,
+      functions: total.functions.pct || 0,
+      lines: total.lines.pct || 0
+    };
+  }
+
+  private logCoverageMetrics(total: CompleteCoverageSummaryTotal): void {
+    console.log(`  ✓ 语句覆盖率: ${this.metrics.coverage.statements.toFixed(2)}%`);
+    console.log(`  ✓ 分支覆盖率: ${this.metrics.coverage.branches.toFixed(2)}%`);
+    console.log(`  ✓ 函数覆盖率: ${this.metrics.coverage.functions.toFixed(2)}%`);
+    console.log(`  ✓ 行覆盖率: ${this.metrics.coverage.lines.toFixed(2)}%`);
+    console.log(`  📊 已测试: ${total.statements.covered}/${total.statements.total} 语句`);
+    console.log(`  📊 已测试: ${total.branches.covered}/${total.branches.total} 分支`);
+    console.log(`  📊 已测试: ${total.functions.covered}/${total.functions.total} 函数`);
+    console.log(`  📊 已测试: ${total.lines.covered}/${total.lines.total} 行\n`);
   }
 
   /**
@@ -600,68 +690,61 @@ class QualityMonitor {
      * 这里使用 TypeChecker 的实际推断结果，避免把正常类型推断误判为隐式 any。
      */
     private analyzeTypeUsage(sourceFile: ts.SourceFile, checker: ts.TypeChecker): TypeUsageAnalysis {
-      let totalSymbols = 0;
-      let anyCount = 0;
-      let explicitAny = 0;
-      let implicitAny = 0;
-
-      const countNode = (name: ts.Identifier | undefined, node: ts.Node): void => {
-        if (!name) {
-          return;
-        }
-
-        totalSymbols++;
-        const type = checker.getTypeAtLocation(name);
-        if (!this.isAnyType(type)) {
-          return;
-        }
-
-        anyCount++;
-        if (this.hasExplicitAnyType(node)) {
-          explicitAny++;
-        } else {
-          implicitAny++;
-        }
+      const counters: TypeUsageCounters = {
+        totalSymbols: 0,
+        anyCount: 0,
+        explicitAny: 0,
+        implicitAny: 0
       };
 
       const visit = (node: ts.Node): void => {
-        if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
-          countNode(node.name, node);
-        } else if (ts.isParameter(node) && ts.isIdentifier(node.name)) {
-          countNode(node.name, node);
-        } else if (
-          (ts.isPropertyDeclaration(node) || ts.isPropertySignature(node)) &&
-          ts.isIdentifier(node.name)
-        ) {
-          countNode(node.name, node);
-        } else if (
-          ts.isFunctionDeclaration(node) ||
-          ts.isMethodDeclaration(node) ||
-          ts.isFunctionExpression(node) ||
-          ts.isArrowFunction(node)
-        ) {
-          countNode(node.name && ts.isIdentifier(node.name) ? node.name : undefined, node);
-        } else if (
-          ts.isTypeAliasDeclaration(node) ||
-          ts.isInterfaceDeclaration(node) ||
-          ts.isClassDeclaration(node) ||
-          ts.isEnumDeclaration(node)
-        ) {
-          countNode(node.name, node);
-        }
-
+        this.countTypeUsageNode(node, checker, counters);
         ts.forEachChild(node, visit);
       };
 
       visit(sourceFile);
 
       return {
-        total: totalSymbols,
-        typed: totalSymbols - anyCount,
-        anyCount,
-        explicitAny,
-        implicitAny
+        total: counters.totalSymbols,
+        typed: counters.totalSymbols - counters.anyCount,
+        anyCount: counters.anyCount,
+        explicitAny: counters.explicitAny,
+        implicitAny: counters.implicitAny
       };
+    }
+
+    private countTypeUsageNode(
+      node: ts.Node,
+      checker: ts.TypeChecker,
+      counters: TypeUsageCounters
+    ): void {
+      const name = this.getTypeUsageIdentifier(node);
+      if (!name) {
+        return;
+      }
+
+      counters.totalSymbols++;
+      const type = checker.getTypeAtLocation(name);
+      if (!this.isAnyType(type)) {
+        return;
+      }
+
+      counters.anyCount++;
+      if (this.hasExplicitAnyType(node)) {
+        counters.explicitAny++;
+      } else {
+        counters.implicitAny++;
+      }
+    }
+
+    private getTypeUsageIdentifier(node: ts.Node): ts.Identifier | undefined {
+      for (const readIdentifier of TYPE_USAGE_IDENTIFIER_READERS) {
+        const identifier = readIdentifier(node);
+        if (identifier) {
+          return identifier;
+        }
+      }
+      return undefined;
     }
 
     private isAnyType(type: ts.Type): boolean {
@@ -1190,17 +1273,12 @@ class QualityMonitor {
   /**
    * 生成 HTML 报告
    */
-  private generateHTML(report: QualityReport): string {
-    const scoreColor = report.score >= 90 ? '#10b981' : 
-                       report.score >= 70 ? '#f59e0b' : '#ef4444';
+  private getScoreColor(score: number): string {
+    return score >= 90 ? '#10b981' : score >= 70 ? '#f59e0b' : '#ef4444';
+  }
 
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>代码质量监控报告</title>
-  <style>
+  private renderQualityReportStyles(scoreColor: string): string {
+    return `
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -1277,15 +1355,11 @@ class QualityMonitor {
     .violation-content { flex: 1; }
     .violation-message { font-weight: 500; color: #111827; }
     .violation-detail { color: #6b7280; font-size: 0.875rem; margin-top: 0.25rem; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>📊 代码质量监控报告</h1>
-      <div class="meta">生成时间: ${new Date(report.metrics.timestamp).toLocaleString('zh-CN')}</div>
-    </div>
+`;
+  }
 
+  private renderScoreCard(report: QualityReport): string {
+    return `
     <div class="score-card">
       <div class="score-value">${report.score}</div>
       <div class="score-label">质量分数</div>
@@ -1293,7 +1367,11 @@ class QualityMonitor {
         ${report.passed ? '✓ 通过' : '✗ 未通过'}
       </span>
     </div>
+`;
+  }
 
+  private renderMetricCards(report: QualityReport): string {
+    return `
     <div class="metrics">
       <div class="metric-card">
         <div class="metric-label">代码复杂度</div>
@@ -1321,25 +1399,59 @@ class QualityMonitor {
         <div class="metric-detail">${report.metrics.lintWarnings} 个警告</div>
       </div>
     </div>
+`;
+  }
 
-    ${report.violations.length > 0 ? `
+  private renderViolation(violation: QualityViolation): string {
+    return `
+        <div class="violation">
+          <div class="violation-icon">${violation.severity === 'error' ? '🔴' : '🟡'}</div>
+          <div class="violation-content">
+            <div class="violation-message">${violation.message}</div>
+            <div class="violation-detail">
+              实际值: ${violation.actual.toFixed(2)} | 期望值: ${violation.expected.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      `;
+  }
+
+  private renderViolations(report: QualityReport): string {
+    if (report.violations.length === 0) {
+      return '<div class="violations"><div class="violations-header"><h2>✅ 无质量违规</h2></div></div>';
+    }
+
+    return `
     <div class="violations">
       <div class="violations-header">
         <h2>质量违规 (${report.violations.length})</h2>
       </div>
-      ${report.violations.map(v => `
-        <div class="violation">
-          <div class="violation-icon">${v.severity === 'error' ? '🔴' : '🟡'}</div>
-          <div class="violation-content">
-            <div class="violation-message">${v.message}</div>
-            <div class="violation-detail">
-              实际值: ${v.actual.toFixed(2)} | 期望值: ${v.expected.toFixed(2)}
-            </div>
-          </div>
-        </div>
-      `).join('')}
+      ${report.violations.map(v => this.renderViolation(v)).join('')}
     </div>
-    ` : '<div class="violations"><div class="violations-header"><h2>✅ 无质量违规</h2></div></div>'}
+`;
+  }
+
+  private generateHTML(report: QualityReport): string {
+    const scoreColor = this.getScoreColor(report.score);
+
+    return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>代码质量监控报告</title>
+  <style>${this.renderQualityReportStyles(scoreColor)}  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 代码质量监控报告</h1>
+      <div class="meta">生成时间: ${new Date(report.metrics.timestamp).toLocaleString('zh-CN')}</div>
+    </div>
+
+${this.renderScoreCard(report)}
+${this.renderMetricCards(report)}
+${this.renderViolations(report)}
   </div>
 </body>
 </html>`;
@@ -1375,21 +1487,18 @@ class QualityMonitor {
   /**
    * 生成趋势图表 HTML
    */
-  private generateTrendHTML(history: TrendData[]): string {
-    const dates = history.map(h => h.date);
-    const complexityData = history.map(h => h.metrics.complexity.average);
-    const duplicationData = history.map(h => h.metrics.duplication.percentage);
-    const coverageData = history.map(h => h.metrics.coverage.lines);
-    const typeCoverageData = history.map(h => h.metrics.typeCoverage.percentage);
+  private getTrendChartData(history: TrendData[]) {
+    return {
+      dates: history.map(h => h.date),
+      complexityData: history.map(h => h.metrics.complexity.average),
+      duplicationData: history.map(h => h.metrics.duplication.percentage),
+      coverageData: history.map(h => h.metrics.coverage.lines),
+      typeCoverageData: history.map(h => h.metrics.typeCoverage.percentage)
+    };
+  }
 
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>代码质量趋势</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
+  private renderTrendStyles(): string {
+    return `
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -1413,14 +1522,11 @@ class QualityMonitor {
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     canvas { max-height: 400px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>📈 代码质量趋势</h1>
-    </div>
+`;
+  }
 
+  private renderTrendChartContainers(): string {
+    return `
     <div class="chart-container">
       <h2>代码复杂度趋势</h2>
       <canvas id="complexityChart"></canvas>
@@ -1440,111 +1546,116 @@ class QualityMonitor {
       <h2>类型覆盖率趋势</h2>
       <canvas id="typeCoverageChart"></canvas>
     </div>
-  </div>
+`;
+  }
 
+  private renderChartOptions(includePercentScale: boolean): string {
+    return `{
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: true }
+        }${includePercentScale ? `,
+        scales: {
+          y: {
+            min: 0,
+            max: 100
+          }
+        }` : ''}
+      }`;
+  }
+
+  private renderLineChartScript(
+    comment: string,
+    chartId: string,
+    label: string,
+    data: number[],
+    borderColor: string,
+    backgroundColor: string,
+    includePercentScale = false
+  ): string {
+    return `
+    // ${comment}
+    new Chart(document.getElementById('${chartId}'), {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: '${label}',
+          data: ${JSON.stringify(data)},
+          borderColor: '${borderColor}',
+          backgroundColor: '${backgroundColor}',
+          tension: 0.4
+        }]
+      },
+      options: ${this.renderChartOptions(includePercentScale)}
+    });
+`;
+  }
+
+  private renderTrendScript(history: TrendData[]): string {
+    const data = this.getTrendChartData(history);
+
+    return `
   <script>
-    const dates = ${JSON.stringify(dates)};
-    
-    // 复杂度图表
-    new Chart(document.getElementById('complexityChart'), {
-      type: 'line',
-      data: {
-        labels: dates,
-        datasets: [{
-          label: '平均复杂度',
-          data: ${JSON.stringify(complexityData)},
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          tension: 0.4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: { display: true }
-        }
-      }
-    });
-
-    // 重复率图表
-    new Chart(document.getElementById('duplicationChart'), {
-      type: 'line',
-      data: {
-        labels: dates,
-        datasets: [{
-          label: '重复率 (%)',
-          data: ${JSON.stringify(duplicationData)},
-          borderColor: '#f59e0b',
-          backgroundColor: 'rgba(245, 158, 11, 0.1)',
-          tension: 0.4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: { display: true }
-        }
-      }
-    });
-
-    // 测试覆盖率图表
-    new Chart(document.getElementById('coverageChart'), {
-      type: 'line',
-      data: {
-        labels: dates,
-        datasets: [{
-          label: '覆盖率 (%)',
-          data: ${JSON.stringify(coverageData)},
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          tension: 0.4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: { display: true }
-        },
-        scales: {
-          y: {
-            min: 0,
-            max: 100
-          }
-        }
-      }
-    });
-
-    // 类型覆盖率图表
-    new Chart(document.getElementById('typeCoverageChart'), {
-      type: 'line',
-      data: {
-        labels: dates,
-        datasets: [{
-          label: '类型覆盖率 (%)',
-          data: ${JSON.stringify(typeCoverageData)},
-          borderColor: '#8b5cf6',
-          backgroundColor: 'rgba(139, 92, 246, 0.1)',
-          tension: 0.4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: { display: true }
-        },
-        scales: {
-          y: {
-            min: 0,
-            max: 100
-          }
-        }
-      }
-    });
+    const dates = ${JSON.stringify(data.dates)};
+    ${this.renderLineChartScript(
+      '复杂度图表',
+      'complexityChart',
+      '平均复杂度',
+      data.complexityData,
+      '#3b82f6',
+      'rgba(59, 130, 246, 0.1)'
+    )}
+    ${this.renderLineChartScript(
+      '重复率图表',
+      'duplicationChart',
+      '重复率 (%)',
+      data.duplicationData,
+      '#f59e0b',
+      'rgba(245, 158, 11, 0.1)'
+    )}
+    ${this.renderLineChartScript(
+      '测试覆盖率图表',
+      'coverageChart',
+      '覆盖率 (%)',
+      data.coverageData,
+      '#10b981',
+      'rgba(16, 185, 129, 0.1)',
+      true
+    )}
+    ${this.renderLineChartScript(
+      '类型覆盖率图表',
+      'typeCoverageChart',
+      '类型覆盖率 (%)',
+      data.typeCoverageData,
+      '#8b5cf6',
+      'rgba(139, 92, 246, 0.1)',
+      true
+    )}
   </script>
+`;
+  }
+
+  private generateTrendHTML(history: TrendData[]): string {
+    return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>代码质量趋势</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>${this.renderTrendStyles()}  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📈 代码质量趋势</h1>
+    </div>
+
+${this.renderTrendChartContainers()}  </div>
+
+${this.renderTrendScript(history)}
 </body>
 </html>`;
   }

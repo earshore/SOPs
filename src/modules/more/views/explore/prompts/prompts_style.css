@@ -145,28 +145,6 @@
   cursor: not-allowed;
 }
 
-/* 资料源卡片 */
-.prompt-source-card {
-  display: block;
-  min-height: 11rem;
-  padding: 1.25rem;
-  color: var(--color-slate-600);
-  background: white;
-  border: 1px solid var(--color-slate-200);
-  border-radius: var(--rounded-lg);
-  transition:
-    border-color var(--duration-fast),
-    box-shadow var(--duration-fast),
-    transform var(--duration-fast);
-}
-
-.prompt-source-card:hover {
-  color: var(--color-slate-700);
-  border-color: var(--color-teal-200);
-  box-shadow: 0 10px 22px -18px rgba(15, 118, 110, 0.42);
-  transform: translateY(-1px);
-}
-
 .prompt-source-card__label {
   display: inline-flex;
   align-items: center;

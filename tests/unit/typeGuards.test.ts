@@ -93,7 +93,6 @@ describe('基础类型守卫', () => {
   });
 });
 
-describe('State 类型守卫', () => {
   describe('isUserProductProfile', () => {
     it('应该接受有效的 UserProductProfile', () => {
       const valid = {
@@ -219,9 +218,7 @@ describe('State 类型守卫', () => {
       expect(isUIState(valid)).toBe(true);
     });
   });
-});
 
-describe('API 类型守卫', () => {
   describe('isApiError', () => {
     it('应该接受有效的 ApiError', () => {
       const valid = {
@@ -375,7 +372,6 @@ describe('API 类型守卫', () => {
       expect(isAnalysisReport(valid)).toBe(true);
     });
   });
-});
 
 describe('Event 类型守卫', () => {
   describe('isModuleLoadedEventPayload', () => {

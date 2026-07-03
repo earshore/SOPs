@@ -334,15 +334,8 @@ class UnusedCodeScanner {
     };
   }
 
-  generateHTMLReport(result: ScanResult, outputPath: string): void {
-    const html = `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>未使用代码扫描报告</title>
-  <style>
+  private renderReportStyles(): string {
+    return `
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; }
     .container { max-width: 1400px; margin: 0 auto; }
@@ -375,15 +368,11 @@ class UnusedCodeScanner {
     .filter-btn.active { background: #007bff; color: white; border-color: #007bff; }
     .filter-btn:hover { background: #f8f9fa; }
     .filter-btn.active:hover { background: #0056b3; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🔍 未使用代码扫描报告</h1>
-      <p>生成时间: ${new Date().toLocaleString('zh-CN')}</p>
-      
-      <div class="summary">
+`;
+  }
+
+  private renderSummaryStats(result: ScanResult): string {
+    return `
         <div class="stat">
           <div class="stat-label">扫描文件数</div>
           <div class="stat-value">${result.totalFiles}</div>
@@ -401,14 +390,11 @@ class UnusedCodeScanner {
         </div>
         `
           )
-          .join('')}
-      </div>
-    </div>
+          .join('')}`;
+  }
 
-    <div class="section">
-      <h2>未使用代码详情</h2>
-      
-      <div class="filter-bar">
+  private renderFilterButtons(result: ScanResult): string {
+    return `
         <button class="filter-btn active" onclick="filterByType('all')">全部</button>
         ${Object.keys(result.byType)
           .map(
@@ -416,23 +402,13 @@ class UnusedCodeScanner {
         <button class="filter-btn" onclick="filterByType('${type}')">${this.getTypeLabel(type)} (${result.byType[type]})</button>
         `
           )
-          .join('')}
-      </div>
+          .join('')}`;
+  }
 
-      <table id="issuesTable">
-        <thead>
-          <tr>
-            <th>类型</th>
-            <th>名称</th>
-            <th>文件</th>
-            <th>位置</th>
-            <th>严重程度</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${result.items
-            .map(
-              (item) => `
+  private renderIssueRows(result: ScanResult): string {
+    return result.items
+      .map(
+        (item) => `
           <tr data-type="${item.type}">
             <td><span class="type-badge type-${item.type}">${this.getTypeLabel(item.type)}</span></td>
             <td><code>${item.name}</code></td>
@@ -441,14 +417,12 @@ class UnusedCodeScanner {
             <td class="severity-${item.severity}">${item.severity === 'warning' ? '⚠️ 警告' : '❌ 错误'}</td>
           </tr>
           `
-            )
-            .join('')}
-        </tbody>
-      </table>
-    </div>
-  </div>
+      )
+      .join('');
+  }
 
-  <script>
+  private renderFilterScript(): string {
+    return `
     function filterByType(type) {
       const rows = document.querySelectorAll('#issuesTable tbody tr');
       const buttons = document.querySelectorAll('.filter-btn');
@@ -464,6 +438,58 @@ class UnusedCodeScanner {
         }
       });
     }
+`;
+  }
+
+  generateHTMLReport(result: ScanResult, outputPath: string): void {
+    const html = `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>未使用代码扫描报告</title>
+  <style>
+${this.renderReportStyles()}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 未使用代码扫描报告</h1>
+      <p>生成时间: ${new Date().toLocaleString('zh-CN')}</p>
+
+      <div class="summary">
+${this.renderSummaryStats(result)}
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>未使用代码详情</h2>
+
+      <div class="filter-bar">
+${this.renderFilterButtons(result)}
+      </div>
+
+      <table id="issuesTable">
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th>名称</th>
+            <th>文件</th>
+            <th>位置</th>
+            <th>严重程度</th>
+          </tr>
+        </thead>
+        <tbody>
+${this.renderIssueRows(result)}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+${this.renderFilterScript()}
   </script>
 </body>
 </html>

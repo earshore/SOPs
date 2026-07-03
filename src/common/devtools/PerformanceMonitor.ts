@@ -8,7 +8,7 @@ import { webVitalsService, type Metric } from '../../services/webVitalsService';
 import { errorTracker } from '../../services/errorTracker';
 import { analyticsService } from '../../services/analyticsService';
 import { alertService } from '../../services/alertService';
-import { escapeHtml } from '../utils/security';
+import { escapeHtml, setSafeHtml } from '../utils/security';
 
 type TabType = 'overview' | 'performance' | 'errors' | 'analytics' | 'alerts';
 
@@ -77,7 +77,9 @@ export class PerformanceMonitor {
     `;
 
     // ✅ 安全: 静态HTML模板，无用户输入
-    this.container.innerHTML = `
+    setSafeHtml(
+      this.container,
+      `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #444;">
         <strong style="font-size: 14px;">⚡ Performance Monitor</strong>
         <button id="perf-close" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px; padding: 0;">×</button>
@@ -87,7 +89,8 @@ export class PerformanceMonitor {
       <div style="padding: 8px 12px; border-top: 1px solid #444; font-size: 10px; color: #888; text-align: center;">
         Ctrl+Shift+P to toggle
       </div>
-    `;
+    `
+    );
 
     document.body.appendChild(this.container);
 
@@ -102,7 +105,7 @@ export class PerformanceMonitor {
    * 渲染标签页
    */
   private renderTabs(): void {
-    const tabsDiv = this.container?.querySelector('#perf-tabs');
+    const tabsDiv = this.container?.querySelector<HTMLElement>('#perf-tabs');
     if (!tabsDiv) return;
 
     const tabs: Array<{ id: TabType; label: string; icon: string }> = [
@@ -114,9 +117,11 @@ export class PerformanceMonitor {
     ];
 
     // ✅ 安全: tab.id/icon/label来自本地常量数组，this.currentTab是内部状态
-    tabsDiv.innerHTML = tabs
-      .map(
-        tab => `
+    setSafeHtml(
+      tabsDiv,
+      tabs
+        .map(
+          tab => `
       <button
         data-tab="${tab.id}"
         style="
@@ -133,8 +138,9 @@ export class PerformanceMonitor {
         ${tab.icon} ${tab.label}
       </button>
     `
-      )
-      .join('');
+        )
+        .join('')
+    );
 
     tabsDiv.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -149,30 +155,30 @@ export class PerformanceMonitor {
    * 渲染当前标签页内容
    */
   private renderCurrentTab(): void {
-    const contentDiv = this.container?.querySelector('#perf-content');
+    const contentDiv = this.container?.querySelector<HTMLElement>('#perf-content');
     if (!contentDiv) return;
 
     // ✅ 安全: renderXXX方法返回的HTML使用内部数据和统计信息，无用户输入
     switch (this.currentTab) {
       case 'overview':
         // ✅ 安全: renderOverview仅使用内部数值统计和静态HTML
-        contentDiv.innerHTML = this.renderOverview();
+        setSafeHtml(contentDiv, this.renderOverview());
         break;
       case 'performance':
         // ✅ 安全: renderPerformance会转义动态文本，其他内容为内部指标
-        contentDiv.innerHTML = this.renderPerformance();
+        setSafeHtml(contentDiv, this.renderPerformance());
         break;
       case 'errors':
         // ✅ 安全: renderErrors会转义错误类型和错误消息
-        contentDiv.innerHTML = this.renderErrors();
+        setSafeHtml(contentDiv, this.renderErrors());
         break;
       case 'analytics':
         // ✅ 安全: renderAnalytics会转义页面路径，其他内容为内部统计
-        contentDiv.innerHTML = this.renderAnalytics();
+        setSafeHtml(contentDiv, this.renderAnalytics());
         break;
       case 'alerts':
         // ✅ 安全: renderAlerts会转义告警标题、等级和消息
-        contentDiv.innerHTML = this.renderAlerts();
+        setSafeHtml(contentDiv, this.renderAlerts());
         break;
     }
   }

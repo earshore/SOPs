@@ -199,7 +199,6 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
     });
   });
 
-  test.describe('采集功能', () => {
     test('应该在未输入 ASIN 时禁用开始按钮', async () => {
       const canStart = await scraper.canStartScrape();
       expect(canStart, '未输入 ASIN 时按钮应该禁用').toBe(false);
@@ -299,7 +298,6 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       console.log('✅ 采集进度显示正常');
     });
-  });
 
   test.describe('数据预览功能', () => {
     test('应该显示采集的数据', async () => {

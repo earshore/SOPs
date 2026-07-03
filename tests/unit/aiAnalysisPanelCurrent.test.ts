@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
 import { createAiAnalysisPanel } from '@/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanel';
 import * as actions from '@/modules/app_center/views/master_analysis/ai_analysis/components/actions';
 import { parseAnalysisReport } from '@/modules/app_center/views/master_analysis/ai_analysis/services/analysisService';
@@ -23,9 +23,7 @@ const panelMocks = vi.hoisted(() => {
       source: 'Listings',
       color: 'blue',
       icon: 'fa-solid fa-bolt',
-      stats: [],
-      highlights: [{ type: 'success' }, { type: 'warning' }],
-      details: [{ label: 'detail' }],
+      stats: [], highlights: [{ type: 'success' }, { type: 'warning' }], details: [{ label: 'detail' }],
     },
     {
       targetId: 'review-insights',
@@ -33,9 +31,7 @@ const panelMocks = vi.hoisted(() => {
       source: 'Reviews',
       color: 'amber',
       icon: 'fa-solid fa-star',
-      stats: [],
-      highlights: [{ type: 'danger' }],
-      details: [{ label: 'review' }, { label: 'review2' }],
+      stats: [], highlights: [{ type: 'danger' }], details: [{ label: 'review' }, { label: 'review2' }],
     },
   ];
 
@@ -52,11 +48,7 @@ const panelMocks = vi.hoisted(() => {
       }),
     ),
     createPerformanceSettingsPanel: vi.fn(() => ({
-      settings: {
-        maxConcurrency: 3,
-        enableCache: true,
-        failureStrategy: 'continue',
-      },
+      settings: { maxConcurrency: 3, enableCache: true, failureStrategy: 'continue' },
       open: vi.fn(),
     })),
     formatHistoryDate: vi.fn((timestamp: string) => `formatted:${timestamp}`),
@@ -199,7 +191,6 @@ beforeEach(() => {
   window.location.hash = '';
 });
 
-describe('AiAnalysisPanel current factory', () => {
   it('initializes synced state, default targets, loaders, and cleanup hooks', () => {
     const addSpy = vi.spyOn(window, 'addEventListener');
     const removeSpy = vi.spyOn(window, 'removeEventListener');
@@ -505,4 +496,3 @@ describe('AiAnalysisPanel current factory', () => {
     expect(panel.analysisReport).toEqual({ ok: true });
     expect(panel.formatHistoryDate('2026')).toBe('formatted:2026');
   });
-});

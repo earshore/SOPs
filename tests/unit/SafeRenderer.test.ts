@@ -57,7 +57,6 @@ import { SafeRenderer } from '../../src/common/infrastructure/SafeRenderer';
     });
   });
 
-  describe('sanitizeHtml', () => {
     describe('基本功能', () => {
       it('应该移除不在白名单中的标签', () => {
         const input = '<script>alert("xss")</script><p>Safe content</p>';
@@ -325,7 +324,6 @@ import { SafeRenderer } from '../../src/common/infrastructure/SafeRenderer';
         expect(result).toContain('href="https://safe.com"');
       });
     });
-  });
 
   describe('renderTemplate', () => {
     it('应该渲染静态模板', () => {

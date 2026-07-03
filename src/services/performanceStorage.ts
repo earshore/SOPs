@@ -6,6 +6,7 @@
 
 import type { ILoggerService } from '../types/services';
 import { SystemError } from '../common/errors/AppError';
+import { createRandomId } from '../common/utils/random';
 
 /**
  * 性能数据记录
@@ -479,7 +480,7 @@ export class PerformanceStorage {
    * 生成ID
    */
   private generateId(): string {
-    return `perf_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    return createRandomId('perf');
   }
 
   /**

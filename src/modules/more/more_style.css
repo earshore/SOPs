@@ -183,8 +183,7 @@
 
 .zn-card,
 .zn-chat-card,
-.zn-notice-title,
-.zn-notice-card {
+.zn-notice-title {
   margin: 0 0 18px;
   background: #fff;
   border: 1px solid #e5e7eb;

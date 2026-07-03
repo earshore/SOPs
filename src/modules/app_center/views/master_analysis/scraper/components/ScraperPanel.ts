@@ -359,7 +359,8 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
       custom_proxy: 'HTTP 代理',
     };
     const name = map[config.type] || '自动';
-    const ready = !!config.customUrl;
+    const ready =
+      !!config.customUrl || StorageService.hasProxyCredential(config.type || 'scraperapi');
     return { name, ready, type: config.type };
   },
 

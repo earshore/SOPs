@@ -62,6 +62,8 @@ const TEST_PAGES = [
   }
 ];
 
+type LighthouseTestPage = typeof TEST_PAGES[number];
+
 /**
  * Lighthouse 配置
  */
@@ -181,6 +183,109 @@ function printPerformanceSummary(pageName: string, audits: any) {
   console.log('='.repeat(60));
 }
 
+async function runLighthouseAudit(
+  playwrightPage: any,
+  baseURL: string | undefined,
+  pageConfig: LighthouseTestPage,
+  timeout?: number
+) {
+  const fullUrl = `${baseURL}${pageConfig.url}`;
+  await playwrightPage.goto(fullUrl, timeout
+    ? { waitUntil: 'networkidle', timeout }
+    : { waitUntil: 'networkidle' });
+  await playwrightPage.waitForTimeout(2000);
+
+  return playAudit({
+    page: playwrightPage,
+    config: LIGHTHOUSE_CONFIG,
+    port: 9222
+  });
+}
+
+function expectCategoryScore(
+  pageName: string,
+  label: string,
+  actual: number,
+  threshold: number
+): void {
+  expect(
+    actual,
+    `${pageName} ${label}评分应该 > ${threshold}，实际: ${actual}`
+  ).toBeGreaterThanOrEqual(threshold);
+}
+
+function expectMetricBelow(
+  label: string,
+  actual: number,
+  threshold: number,
+  formattedActual: string
+): void {
+  expect(
+    actual,
+    `${label} 应该 < ${threshold}${label === 'CLS' ? '' : 'ms'}，实际: ${formattedActual}`
+  ).toBeLessThan(threshold);
+}
+
+function registerCoreMetricTest(
+  pageConfig: LighthouseTestPage,
+  title: string,
+  auditKey: string,
+  label: string,
+  threshold: number,
+  formatActual: (value: number) => string,
+  logLabel = label
+): void {
+  test(title, async ({ page: playwrightPage, baseURL }) => {
+    const audits = await runLighthouseAudit(playwrightPage, baseURL, pageConfig);
+    const value = audits.audits[auditKey]?.numericValue || 0;
+
+    console.log(`   📊 ${pageConfig.name} ${logLabel}: ${formatActual(value)}`);
+
+    expectMetricBelow(label, value, threshold, formatActual(value));
+  });
+}
+
+function registerPagePerformanceTests(pageConfig: LighthouseTestPage): void {
+  test.describe(`${pageConfig.name} 性能测试`, () => {
+    test(`应该满足性能阈值要求`, async ({ page: playwrightPage, baseURL }) => {
+      console.log(`\n🔍 测试页面: ${pageConfig.name}`);
+      console.log(`   URL: ${pageConfig.url}`);
+      console.log(`   描述: ${pageConfig.description}`);
+      console.log('   ⏳ 运行 Lighthouse 审计...');
+
+      const audits = await runLighthouseAudit(playwrightPage, baseURL, pageConfig, 30000);
+      printPerformanceSummary(pageConfig.name, audits);
+      saveLighthouseReport(pageConfig.name, audits, 'json');
+
+      const performanceScore = audits.categories.performance.score * 100;
+      const accessibilityScore = audits.categories.accessibility.score * 100;
+      const bestPracticesScore = audits.categories['best-practices'].score * 100;
+      const seoScore = audits.categories.seo.score * 100;
+
+      expectCategoryScore(pageConfig.name, '性能', performanceScore, PERFORMANCE_THRESHOLDS.performance);
+      expectCategoryScore(pageConfig.name, '可访问性', accessibilityScore, PERFORMANCE_THRESHOLDS.accessibility);
+      expectCategoryScore(pageConfig.name, '最佳实践', bestPracticesScore, PERFORMANCE_THRESHOLDS.bestPractices);
+      expectCategoryScore(pageConfig.name, 'SEO ', seoScore, PERFORMANCE_THRESHOLDS.seo);
+
+      const fcp = audits.audits['first-contentful-paint']?.numericValue || 0;
+      const lcp = audits.audits['largest-contentful-paint']?.numericValue || 0;
+      const cls = audits.audits['cumulative-layout-shift']?.numericValue || 0;
+      const tbt = audits.audits['total-blocking-time']?.numericValue || 0;
+
+      expectMetricBelow(`${pageConfig.name} FCP`, fcp, PERFORMANCE_THRESHOLDS.fcp, `${Math.round(fcp)}ms`);
+      expectMetricBelow(`${pageConfig.name} LCP`, lcp, PERFORMANCE_THRESHOLDS.lcp, `${Math.round(lcp)}ms`);
+      expectMetricBelow(`${pageConfig.name} CLS`, cls, PERFORMANCE_THRESHOLDS.cls, cls.toFixed(3));
+      expectMetricBelow(`${pageConfig.name} TBT`, tbt, PERFORMANCE_THRESHOLDS.tbt, `${Math.round(tbt)}ms`);
+
+      console.log(`\n✅ ${pageConfig.name} 性能测试通过\n`);
+    });
+
+    registerCoreMetricTest(pageConfig, `应该验证 LCP < 2.5s`, 'largest-contentful-paint', 'LCP', 2500, formatMetric);
+    registerCoreMetricTest(pageConfig, `应该验证 FID < 100ms (通过 TBT 估算)`, 'total-blocking-time', 'TBT', 300, formatMetric, 'TBT (FID 估算)');
+    registerCoreMetricTest(pageConfig, `应该验证 CLS < 0.1`, 'cumulative-layout-shift', 'CLS', 0.1, value => value.toFixed(3));
+  });
+}
+
 // ================================================================
 // 测试套件
 // ================================================================
@@ -193,167 +298,7 @@ function printPerformanceSummary(pageName: string, audits: any) {
   });
 
   // 为每个页面创建测试用例
-  TEST_PAGES.forEach((page) => {
-    test.describe(`${page.name} 性能测试`, () => {
-      
-      test(`应该满足性能阈值要求`, async ({ page: playwrightPage, baseURL }) => {
-        console.log(`\n🔍 测试页面: ${page.name}`);
-        console.log(`   URL: ${page.url}`);
-        console.log(`   描述: ${page.description}`);
-        
-        // 导航到目标页面
-        const fullUrl = `${baseURL}${page.url}`;
-        await playwrightPage.goto(fullUrl, {
-          waitUntil: 'networkidle',
-          timeout: 30000
-        });
-        
-        // 等待页面完全加载
-        await playwrightPage.waitForTimeout(2000);
-        
-        // 运行 Lighthouse 审计
-        console.log('   ⏳ 运行 Lighthouse 审计...');
-        
-        const audits = await playAudit({
-          page: playwrightPage,
-          config: LIGHTHOUSE_CONFIG,
-          port: 9222
-        });
-        
-        // 打印性能摘要
-        printPerformanceSummary(page.name, audits);
-        
-        // 保存报告
-        saveLighthouseReport(page.name, audits, 'json');
-        
-        // ============================================================
-        // 验证：分类评分
-        // ============================================================
-        
-        const performanceScore = audits.categories.performance.score * 100;
-        const accessibilityScore = audits.categories.accessibility.score * 100;
-        const bestPracticesScore = audits.categories['best-practices'].score * 100;
-        const seoScore = audits.categories.seo.score * 100;
-        
-        expect(
-          performanceScore,
-          `${page.name} 性能评分应该 > ${PERFORMANCE_THRESHOLDS.performance}，实际: ${performanceScore}`
-        ).toBeGreaterThanOrEqual(PERFORMANCE_THRESHOLDS.performance);
-        
-        expect(
-          accessibilityScore,
-          `${page.name} 可访问性评分应该 > ${PERFORMANCE_THRESHOLDS.accessibility}，实际: ${accessibilityScore}`
-        ).toBeGreaterThanOrEqual(PERFORMANCE_THRESHOLDS.accessibility);
-        
-        expect(
-          bestPracticesScore,
-          `${page.name} 最佳实践评分应该 > ${PERFORMANCE_THRESHOLDS.bestPractices}，实际: ${bestPracticesScore}`
-        ).toBeGreaterThanOrEqual(PERFORMANCE_THRESHOLDS.bestPractices);
-        
-        expect(
-          seoScore,
-          `${page.name} SEO 评分应该 > ${PERFORMANCE_THRESHOLDS.seo}，实际: ${seoScore}`
-        ).toBeGreaterThanOrEqual(PERFORMANCE_THRESHOLDS.seo);
-        
-        // ============================================================
-        // 验证：Core Web Vitals
-        // ============================================================
-        
-        const fcp = audits.audits['first-contentful-paint']?.numericValue || 0;
-        const lcp = audits.audits['largest-contentful-paint']?.numericValue || 0;
-        const cls = audits.audits['cumulative-layout-shift']?.numericValue || 0;
-        const tbt = audits.audits['total-blocking-time']?.numericValue || 0;
-        
-        expect(
-          fcp,
-          `${page.name} FCP 应该 < ${PERFORMANCE_THRESHOLDS.fcp}ms，实际: ${Math.round(fcp)}ms`
-        ).toBeLessThan(PERFORMANCE_THRESHOLDS.fcp);
-        
-        expect(
-          lcp,
-          `${page.name} LCP 应该 < ${PERFORMANCE_THRESHOLDS.lcp}ms，实际: ${Math.round(lcp)}ms`
-        ).toBeLessThan(PERFORMANCE_THRESHOLDS.lcp);
-        
-        expect(
-          cls,
-          `${page.name} CLS 应该 < ${PERFORMANCE_THRESHOLDS.cls}，实际: ${cls.toFixed(3)}`
-        ).toBeLessThan(PERFORMANCE_THRESHOLDS.cls);
-        
-        expect(
-          tbt,
-          `${page.name} TBT 应该 < ${PERFORMANCE_THRESHOLDS.tbt}ms，实际: ${Math.round(tbt)}ms`
-        ).toBeLessThan(PERFORMANCE_THRESHOLDS.tbt);
-        
-        console.log(`\n✅ ${page.name} 性能测试通过\n`);
-      });
-      
-      test(`应该验证 LCP < 2.5s`, async ({ page: playwrightPage, baseURL }) => {
-        const fullUrl = `${baseURL}${page.url}`;
-        await playwrightPage.goto(fullUrl, { waitUntil: 'networkidle' });
-        await playwrightPage.waitForTimeout(2000);
-        
-        const audits = await playAudit({
-          page: playwrightPage,
-          config: LIGHTHOUSE_CONFIG,
-          port: 9222
-        });
-        
-        const lcp = audits.audits['largest-contentful-paint']?.numericValue || 0;
-        
-        console.log(`   📊 ${page.name} LCP: ${formatMetric(lcp)}`);
-        
-        expect(
-          lcp,
-          `LCP 应该 < 2500ms，实际: ${Math.round(lcp)}ms`
-        ).toBeLessThan(2500);
-      });
-      
-      test(`应该验证 FID < 100ms (通过 TBT 估算)`, async ({ page: playwrightPage, baseURL }) => {
-        const fullUrl = `${baseURL}${page.url}`;
-        await playwrightPage.goto(fullUrl, { waitUntil: 'networkidle' });
-        await playwrightPage.waitForTimeout(2000);
-        
-        const audits = await playAudit({
-          page: playwrightPage,
-          config: LIGHTHOUSE_CONFIG,
-          port: 9222
-        });
-        
-        // FID 无法在实验室环境中直接测量，使用 TBT 作为替代指标
-        const tbt = audits.audits['total-blocking-time']?.numericValue || 0;
-        
-        console.log(`   📊 ${page.name} TBT (FID 估算): ${formatMetric(tbt)}`);
-        
-        // TBT < 300ms 通常意味着 FID < 100ms
-        expect(
-          tbt,
-          `TBT 应该 < 300ms (估算 FID < 100ms)，实际: ${Math.round(tbt)}ms`
-        ).toBeLessThan(300);
-      });
-      
-      test(`应该验证 CLS < 0.1`, async ({ page: playwrightPage, baseURL }) => {
-        const fullUrl = `${baseURL}${page.url}`;
-        await playwrightPage.goto(fullUrl, { waitUntil: 'networkidle' });
-        await playwrightPage.waitForTimeout(2000);
-        
-        const audits = await playAudit({
-          page: playwrightPage,
-          config: LIGHTHOUSE_CONFIG,
-          port: 9222
-        });
-        
-        const cls = audits.audits['cumulative-layout-shift']?.numericValue || 0;
-        
-        console.log(`   📊 ${page.name} CLS: ${cls.toFixed(3)}`);
-        
-        expect(
-          cls,
-          `CLS 应该 < 0.1，实际: ${cls.toFixed(3)}`
-        ).toBeLessThan(0.1);
-      });
-      
-    });
-  });
+  TEST_PAGES.forEach(registerPagePerformanceTests);
   
   test.describe('性能对比测试', () => {
     

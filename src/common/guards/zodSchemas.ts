@@ -152,9 +152,19 @@ export const LLMProviderConfigSchema = z.object({
  * ProxyConfig Schema
  */
 export const ProxyConfigSchema = z.object({
-  enabled: z.boolean(),
+  type: z
+    .enum(['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy', 'custom'])
+    .optional(),
+  customUrl: z.string().optional(),
+  enabled: z.boolean().optional(),
   host: z.string().optional(),
   port: z.number().optional(),
+  auth: z
+    .object({
+      username: z.string(),
+      password: z.string(),
+    })
+    .optional(),
 });
 
 // ==================== API Schemas ====================

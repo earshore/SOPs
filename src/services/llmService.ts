@@ -12,6 +12,7 @@ import { configCenter } from '../common/config/ConfigCenter';
 import { EnvConfig } from '../common/config/envConfig';
 import { ApiError, NetworkError, SystemError } from '../common/errors';
 import { isDangerousEndpoint, getDangerousEndpoints } from '../common/config/apiEndpoints';
+import { randomFloat } from '../common/utils/random';
 // 导入统一的 API 响应类型
 import type { LLMChatCompletionResponse, LLMErrorResponse } from '../types/api';
 // 导入类型守卫
@@ -467,7 +468,7 @@ async function waitBeforeLLMRetry(attempt: number, options: ResolvedLLMOptions):
     return;
   }
 
-  const delay = options.retryDelay * Math.pow(2, attempt - 1) * (1 + Math.random() * 0.2);
+  const delay = options.retryDelay * Math.pow(2, attempt - 1) * (1 + randomFloat() * 0.2);
   await sleep(delay);
 }
 

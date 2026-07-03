@@ -285,92 +285,123 @@ function generateRecommendations(pages: ComparisonResult[]): string[] {
   return recommendations;
 }
 
+function generateMarkdownHeader(report: PerformanceReport): string {
+  const { summary } = report;
+
+  return `# 性能测试报告\n\n` +
+    `**生成时间:** ${new Date(report.timestamp).toLocaleString('zh-CN')}\n` +
+    `**测试页面数:** ${summary.totalPages}\n` +
+    `**通过页面数:** ${summary.passedPages}/${summary.totalPages}\n\n` +
+    `---\n\n`;
+}
+
+function generateMarkdownSummaryScores(summary: PerformanceReport['summary']): string {
+  return `## 📊 总体平均评分\n\n` +
+    `| 指标 | 分数 | 状态 |\n` +
+    `|------|------|------|\n` +
+    `| 性能 (Performance) | ${summary.avgScores.performance} | ${getStatus(summary.avgScores.performance)} |\n` +
+    `| 可访问性 (Accessibility) | ${summary.avgScores.accessibility} | ${getStatus(summary.avgScores.accessibility)} |\n` +
+    `| 最佳实践 (Best Practices) | ${summary.avgScores.bestPractices} | ${getStatus(summary.avgScores.bestPractices)} |\n` +
+    `| SEO | ${summary.avgScores.seo} | ${getStatus(summary.avgScores.seo)} |\n` +
+    `| PWA | ${summary.avgScores.pwa} | ${getStatus(summary.avgScores.pwa)} |\n\n`;
+}
+
+function generateMarkdownSummaryVitals(summary: PerformanceReport['summary']): string {
+  return `## 🎯 Core Web Vitals 平均值\n\n` +
+    `| 指标 | 值 | 目标 | 状态 |\n` +
+    `|------|-----|------|------|\n` +
+    `| FCP (First Contentful Paint) | ${formatMs(summary.avgAudits.fcp)} | < 1500ms | ${getStatusIcon(summary.avgAudits.fcp < 1500)} |\n` +
+    `| LCP (Largest Contentful Paint) | ${formatMs(summary.avgAudits.lcp)} | < 2500ms | ${getStatusIcon(summary.avgAudits.lcp < 2500)} |\n` +
+    `| CLS (Cumulative Layout Shift) | ${summary.avgAudits.cls.toFixed(3)} | < 0.1 | ${getStatusIcon(summary.avgAudits.cls < 0.1)} |\n` +
+    `| TBT (Total Blocking Time) | ${formatMs(summary.avgAudits.tbt)} | < 300ms | ${getStatusIcon(summary.avgAudits.tbt < 300)} |\n` +
+    `| SI (Speed Index) | ${formatMs(summary.avgAudits.si)} | < 3500ms | ${getStatusIcon(summary.avgAudits.si < 3500)} |\n\n` +
+    `---\n\n`;
+}
+
+function generateMarkdownScoreRow(
+  label: string,
+  key: keyof PerformanceScore,
+  page: ComparisonResult
+): string {
+  const current = page.current.scores[key];
+  const baseline = page.baseline?.scores[key];
+  const diff = page.diff?.scores[key];
+
+  return `| ${label} | ${current} | ${baseline || 'N/A'} | ${diff ? calculateDiff(current, baseline!) : 'N/A'} | ${getStatus(current)} |\n`;
+}
+
+function formatAuditMetric(key: keyof AuditMetrics, value: number): string {
+  return key === 'cls' ? value.toFixed(3) : formatMs(value);
+}
+
+function generateMarkdownAuditRow(
+  label: string,
+  key: keyof AuditMetrics,
+  page: ComparisonResult,
+  threshold: number
+): string {
+  const current = page.current.audits[key] || 0;
+  const baseline = page.baseline?.audits[key];
+  const diff = page.diff?.audits[key];
+  const baselineText = baseline !== undefined ? formatAuditMetric(key, baseline) : 'N/A';
+  const diffText = diff ? formatAuditMetric(key, diff) : 'N/A';
+
+  return `| ${label} | ${formatAuditMetric(key, current)} | ${baselineText} | ${diffText} | ${getStatusIcon(current < threshold)} |\n`;
+}
+
+function generateMarkdownPageSection(page: ComparisonResult): string {
+  return `### ${page.current.name}\n\n` +
+    `**URL:** ${page.current.url}\n` +
+    `**测试时间:** ${new Date(page.current.timestamp).toLocaleString('zh-CN')}\n\n` +
+    `**分类评分:**\n\n` +
+    `| 指标 | 当前 | 基线 | 变化 | 状态 |\n` +
+    `|------|------|------|------|------|\n` +
+    generateMarkdownScoreRow('性能', 'performance', page) +
+    generateMarkdownScoreRow('可访问性', 'accessibility', page) +
+    generateMarkdownScoreRow('最佳实践', 'bestPractices', page) +
+    generateMarkdownScoreRow('SEO', 'seo', page) +
+    `\n` +
+    `**Core Web Vitals:**\n\n` +
+    `| 指标 | 当前 | 基线 | 变化 | 状态 |\n` +
+    `|------|------|------|------|------|\n` +
+    generateMarkdownAuditRow('FCP', 'fcp', page, 1500) +
+    generateMarkdownAuditRow('LCP', 'lcp', page, 2500) +
+    generateMarkdownAuditRow('CLS', 'cls', page, 0.1) +
+    generateMarkdownAuditRow('TBT', 'tbt', page, 300) +
+    generateMarkdownAuditRow('SI', 'si', page, 3500) +
+    `\n`;
+}
+
+function generateMarkdownPageSections(pages: ComparisonResult[]): string {
+  return `## 📄 各页面详细报告\n\n` +
+    pages.map(generateMarkdownPageSection).join('');
+}
+
+function generateMarkdownRecommendationsSection(recommendations: string[]): string {
+  return `---\n\n` +
+    `## 💡 改进建议\n\n` +
+    recommendations.map((rec, index) => `${index + 1}. ${rec}\n`).join('') +
+    `\n---\n\n`;
+}
+
+function generateMarkdownNotesSection(): string {
+  return `## 📌 说明\n\n` +
+    `- 🟢 优秀: 90-100 分\n` +
+    `- 🟡 需要改进: 50-89 分\n` +
+    `- 🔴 差: 0-49 分\n` +
+    `- ✅ 通过: 指标达到目标值\n` +
+    `- ❌ 未通过: 指标未达到目标值\n\n`;
+}
+
 function generateMarkdownReport(report: PerformanceReport): string {
-  const { summary, pages, recommendations } = report;
-  
-  let md = `# 性能测试报告\n\n`;
-  md += `**生成时间:** ${new Date(report.timestamp).toLocaleString('zh-CN')}\n`;
-  md += `**测试页面数:** ${summary.totalPages}\n`;
-  md += `**通过页面数:** ${summary.passedPages}/${summary.totalPages}\n\n`;
-  md += `---\n\n`;
-  
-  // 总体评分
-  md += `## 📊 总体平均评分\n\n`;
-  md += `| 指标 | 分数 | 状态 |\n`;
-  md += `|------|------|------|\n`;
-  md += `| 性能 (Performance) | ${summary.avgScores.performance} | ${getStatus(summary.avgScores.performance)} |\n`;
-  md += `| 可访问性 (Accessibility) | ${summary.avgScores.accessibility} | ${getStatus(summary.avgScores.accessibility)} |\n`;
-  md += `| 最佳实践 (Best Practices) | ${summary.avgScores.bestPractices} | ${getStatus(summary.avgScores.bestPractices)} |\n`;
-  md += `| SEO | ${summary.avgScores.seo} | ${getStatus(summary.avgScores.seo)} |\n`;
-  md += `| PWA | ${summary.avgScores.pwa} | ${getStatus(summary.avgScores.pwa)} |\n\n`;
-  
-  // Core Web Vitals
-  md += `## 🎯 Core Web Vitals 平均值\n\n`;
-  md += `| 指标 | 值 | 目标 | 状态 |\n`;
-  md += `|------|-----|------|------|\n`;
-  md += `| FCP (First Contentful Paint) | ${formatMs(summary.avgAudits.fcp)} | < 1500ms | ${getStatusIcon(summary.avgAudits.fcp < 1500)} |\n`;
-  md += `| LCP (Largest Contentful Paint) | ${formatMs(summary.avgAudits.lcp)} | < 2500ms | ${getStatusIcon(summary.avgAudits.lcp < 2500)} |\n`;
-  md += `| CLS (Cumulative Layout Shift) | ${summary.avgAudits.cls.toFixed(3)} | < 0.1 | ${getStatusIcon(summary.avgAudits.cls < 0.1)} |\n`;
-  md += `| TBT (Total Blocking Time) | ${formatMs(summary.avgAudits.tbt)} | < 300ms | ${getStatusIcon(summary.avgAudits.tbt < 300)} |\n`;
-  md += `| SI (Speed Index) | ${formatMs(summary.avgAudits.si)} | < 3500ms | ${getStatusIcon(summary.avgAudits.si < 3500)} |\n\n`;
-  
-  md += `---\n\n`;
-  
-  // 各页面详情
-  md += `## 📄 各页面详细报告\n\n`;
-  
-  pages.forEach(page => {
-    md += `### ${page.current.name}\n\n`;
-    md += `**URL:** ${page.current.url}\n`;
-    md += `**测试时间:** ${new Date(page.current.timestamp).toLocaleString('zh-CN')}\n\n`;
-    
-    // 分类评分
-    md += `**分类评分:**\n\n`;
-    md += `| 指标 | 当前 | 基线 | 变化 | 状态 |\n`;
-    md += `|------|------|------|------|------|\n`;
-    
-    const scores = page.current.scores;
-    const baseline = page.baseline?.scores;
-    const diff = page.diff?.scores;
-    
-    md += `| 性能 | ${scores.performance} | ${baseline?.performance || 'N/A'} | ${diff?.performance ? calculateDiff(scores.performance, baseline!.performance) : 'N/A'} | ${getStatus(scores.performance)} |\n`;
-    md += `| 可访问性 | ${scores.accessibility} | ${baseline?.accessibility || 'N/A'} | ${diff?.accessibility ? calculateDiff(scores.accessibility, baseline!.accessibility) : 'N/A'} | ${getStatus(scores.accessibility)} |\n`;
-    md += `| 最佳实践 | ${scores.bestPractices} | ${baseline?.bestPractices || 'N/A'} | ${diff?.bestPractices ? calculateDiff(scores.bestPractices, baseline!.bestPractices) : 'N/A'} | ${getStatus(scores.bestPractices)} |\n`;
-    md += `| SEO | ${scores.seo} | ${baseline?.seo || 'N/A'} | ${diff?.seo ? calculateDiff(scores.seo, baseline!.seo) : 'N/A'} | ${getStatus(scores.seo)} |\n\n`;
-    
-    // Core Web Vitals
-    md += `**Core Web Vitals:**\n\n`;
-    md += `| 指标 | 当前 | 基线 | 变化 | 状态 |\n`;
-    md += `|------|------|------|------|------|\n`;
-    
-    const audits = page.current.audits;
-    const baselineAudits = page.baseline?.audits;
-    const auditsDiff = page.diff?.audits;
-    
-    md += `| FCP | ${formatMs(audits.fcp)} | ${baselineAudits ? formatMs(baselineAudits.fcp) : 'N/A'} | ${auditsDiff?.fcp ? formatMs(auditsDiff.fcp) : 'N/A'} | ${getStatusIcon(audits.fcp < 1500)} |\n`;
-    md += `| LCP | ${formatMs(audits.lcp)} | ${baselineAudits ? formatMs(baselineAudits.lcp) : 'N/A'} | ${auditsDiff?.lcp ? formatMs(auditsDiff.lcp) : 'N/A'} | ${getStatusIcon(audits.lcp < 2500)} |\n`;
-    md += `| CLS | ${audits.cls.toFixed(3)} | ${baselineAudits ? baselineAudits.cls.toFixed(3) : 'N/A'} | ${auditsDiff?.cls ? auditsDiff.cls.toFixed(3) : 'N/A'} | ${getStatusIcon(audits.cls < 0.1)} |\n`;
-    md += `| TBT | ${formatMs(audits.tbt)} | ${baselineAudits ? formatMs(baselineAudits.tbt) : 'N/A'} | ${auditsDiff?.tbt ? formatMs(auditsDiff.tbt) : 'N/A'} | ${getStatusIcon(audits.tbt < 300)} |\n`;
-    md += `| SI | ${formatMs(audits.si)} | ${baselineAudits ? formatMs(baselineAudits.si) : 'N/A'} | ${auditsDiff?.si ? formatMs(auditsDiff.si) : 'N/A'} | ${getStatusIcon(audits.si < 3500)} |\n\n`;
-  });
-  
-  md += `---\n\n`;
-  
-  // 改进建议
-  md += `## 💡 改进建议\n\n`;
-  recommendations.forEach((rec, index) => {
-    md += `${index + 1}. ${rec}\n`;
-  });
-  
-  md += `\n---\n\n`;
-  md += `## 📌 说明\n\n`;
-  md += `- 🟢 优秀: 90-100 分\n`;
-  md += `- 🟡 需要改进: 50-89 分\n`;
-  md += `- 🔴 差: 0-49 分\n`;
-  md += `- ✅ 通过: 指标达到目标值\n`;
-  md += `- ❌ 未通过: 指标未达到目标值\n\n`;
-  
-  return md;
+  return [
+    generateMarkdownHeader(report),
+    generateMarkdownSummaryScores(report.summary),
+    generateMarkdownSummaryVitals(report.summary),
+    generateMarkdownPageSections(report.pages),
+    generateMarkdownRecommendationsSection(report.recommendations),
+    generateMarkdownNotesSection()
+  ].join('');
 }
 
 function getStatusClass(score: number): string {
@@ -731,6 +762,77 @@ function generateHTMLReport(report: PerformanceReport): string {
   ].join('');
 }
 
+function calculateReportSummary(currentResults: PageResult[]): PerformanceReport['summary'] {
+  const allScores = currentResults.map(r => r.scores);
+  const allAudits = currentResults.map(r => r.audits);
+  const passedPages = currentResults.filter(r =>
+    r.scores.performance >= 90 &&
+    r.audits.lcp < 2500 &&
+    r.audits.cls < 0.1 &&
+    r.audits.tbt < 300
+  ).length;
+
+  return {
+    totalPages: currentResults.length,
+    avgScores: {
+      performance: average(allScores.map(s => s.performance)),
+      accessibility: average(allScores.map(s => s.accessibility)),
+      bestPractices: average(allScores.map(s => s.bestPractices)),
+      seo: average(allScores.map(s => s.seo)),
+      pwa: average(allScores.map(s => s.pwa))
+    },
+    avgAudits: {
+      fcp: average(allAudits.map(a => a.fcp)),
+      lcp: average(allAudits.map(a => a.lcp)),
+      cls: allAudits.reduce((sum, a) => sum + a.cls, 0) / allAudits.length,
+      tbt: average(allAudits.map(a => a.tbt)),
+      si: average(allAudits.map(a => a.si))
+    },
+    passedPages,
+    failedPages: currentResults.length - passedPages
+  };
+}
+
+function writeReportFiles(report: PerformanceReport): void {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+
+  const mdReport = generateMarkdownReport(report);
+  const mdPath = path.join(CONFIG.outputDir, `performance-report-${timestamp}.md`);
+  fs.writeFileSync(mdPath, mdReport, 'utf-8');
+  console.log(`   ✅ Markdown 报告: ${mdPath}`);
+
+  const htmlReport = generateHTMLReport(report);
+  const htmlPath = path.join(CONFIG.outputDir, `performance-report-${timestamp}.html`);
+  fs.writeFileSync(htmlPath, htmlReport, 'utf-8');
+  console.log(`   ✅ HTML 报告: ${htmlPath}`);
+
+  const jsonPath = path.join(CONFIG.outputDir, `performance-report-${timestamp}.json`);
+  fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf-8');
+  console.log(`   ✅ JSON 报告: ${jsonPath}`);
+}
+
+function printReportSummary(report: PerformanceReport): void {
+  const { summary } = report;
+
+  console.log('\n' + '='.repeat(60));
+  console.log('📊 性能报告摘要');
+  console.log('='.repeat(60));
+  console.log(`\n测试时间: ${new Date(report.timestamp).toLocaleString('zh-CN')}`);
+  console.log(`测试页面数: ${summary.totalPages}`);
+  console.log(`通过页面数: ${summary.passedPages}/${summary.totalPages}`);
+  console.log(`\n总体平均评分:`);
+  console.log(`  性能:       ${summary.avgScores.performance} ${getStatus(summary.avgScores.performance)}`);
+  console.log(`  可访问性:   ${summary.avgScores.accessibility} ${getStatus(summary.avgScores.accessibility)}`);
+  console.log(`  最佳实践:   ${summary.avgScores.bestPractices} ${getStatus(summary.avgScores.bestPractices)}`);
+  console.log(`  SEO:        ${summary.avgScores.seo} ${getStatus(summary.avgScores.seo)}`);
+  console.log(`\nCore Web Vitals 平均值:`);
+  console.log(`  FCP: ${formatMs(summary.avgAudits.fcp)} ${getStatusIcon(summary.avgAudits.fcp < 1500)}`);
+  console.log(`  LCP: ${formatMs(summary.avgAudits.lcp)} ${getStatusIcon(summary.avgAudits.lcp < 2500)}`);
+  console.log(`  CLS: ${summary.avgAudits.cls.toFixed(3)} ${getStatusIcon(summary.avgAudits.cls < 0.1)}`);
+  console.log(`  TBT: ${formatMs(summary.avgAudits.tbt)} ${getStatusIcon(summary.avgAudits.tbt < 300)}`);
+  console.log('\n' + '='.repeat(60));
+}
+
 // ================================================================
 // 主函数
 // ================================================================
@@ -768,36 +870,7 @@ async function generateReport(): Promise<void> {
   
   // 3. 计算汇总数据
   console.log('\n🔢 步骤 3: 计算汇总数据');
-  
-  const allScores = currentResults.map(r => r.scores);
-  const allAudits = currentResults.map(r => r.audits);
-  
-  const summary = {
-    totalPages: currentResults.length,
-    avgScores: {
-      performance: average(allScores.map(s => s.performance)),
-      accessibility: average(allScores.map(s => s.accessibility)),
-      bestPractices: average(allScores.map(s => s.bestPractices)),
-      seo: average(allScores.map(s => s.seo)),
-      pwa: average(allScores.map(s => s.pwa))
-    },
-    avgAudits: {
-      fcp: average(allAudits.map(a => a.fcp)),
-      lcp: average(allAudits.map(a => a.lcp)),
-      cls: allAudits.reduce((sum, a) => sum + a.cls, 0) / allAudits.length,
-      tbt: average(allAudits.map(a => a.tbt)),
-      si: average(allAudits.map(a => a.si))
-    },
-    passedPages: currentResults.filter(r => 
-      r.scores.performance >= 90 &&
-      r.audits.lcp < 2500 &&
-      r.audits.cls < 0.1 &&
-      r.audits.tbt < 300
-    ).length,
-    failedPages: 0
-  };
-  
-  summary.failedPages = summary.totalPages - summary.passedPages;
+  const summary = calculateReportSummary(currentResults);
   
   console.log(`   ✅ 平均性能评分: ${summary.avgScores.performance}`);
   console.log(`   ✅ 通过页面数: ${summary.passedPages}/${summary.totalPages}`);
@@ -817,44 +890,10 @@ async function generateReport(): Promise<void> {
   
   // 6. 生成报告文件
   console.log('\n📝 步骤 5: 生成报告文件');
-  
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
-  
-  // Markdown 报告
-  const mdReport = generateMarkdownReport(report);
-  const mdPath = path.join(CONFIG.outputDir, `performance-report-${timestamp}.md`);
-  fs.writeFileSync(mdPath, mdReport, 'utf-8');
-  console.log(`   ✅ Markdown 报告: ${mdPath}`);
-  
-  // HTML 报告
-  const htmlReport = generateHTMLReport(report);
-  const htmlPath = path.join(CONFIG.outputDir, `performance-report-${timestamp}.html`);
-  fs.writeFileSync(htmlPath, htmlReport, 'utf-8');
-  console.log(`   ✅ HTML 报告: ${htmlPath}`);
-  
-  // JSON 报告
-  const jsonPath = path.join(CONFIG.outputDir, `performance-report-${timestamp}.json`);
-  fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf-8');
-  console.log(`   ✅ JSON 报告: ${jsonPath}`);
+  writeReportFiles(report);
   
   // 7. 显示摘要
-  console.log('\n' + '='.repeat(60));
-  console.log('📊 性能报告摘要');
-  console.log('='.repeat(60));
-  console.log(`\n测试时间: ${new Date(report.timestamp).toLocaleString('zh-CN')}`);
-  console.log(`测试页面数: ${summary.totalPages}`);
-  console.log(`通过页面数: ${summary.passedPages}/${summary.totalPages}`);
-  console.log(`\n总体平均评分:`);
-  console.log(`  性能:       ${summary.avgScores.performance} ${getStatus(summary.avgScores.performance)}`);
-  console.log(`  可访问性:   ${summary.avgScores.accessibility} ${getStatus(summary.avgScores.accessibility)}`);
-  console.log(`  最佳实践:   ${summary.avgScores.bestPractices} ${getStatus(summary.avgScores.bestPractices)}`);
-  console.log(`  SEO:        ${summary.avgScores.seo} ${getStatus(summary.avgScores.seo)}`);
-  console.log(`\nCore Web Vitals 平均值:`);
-  console.log(`  FCP: ${formatMs(summary.avgAudits.fcp)} ${getStatusIcon(summary.avgAudits.fcp < 1500)}`);
-  console.log(`  LCP: ${formatMs(summary.avgAudits.lcp)} ${getStatusIcon(summary.avgAudits.lcp < 2500)}`);
-  console.log(`  CLS: ${summary.avgAudits.cls.toFixed(3)} ${getStatusIcon(summary.avgAudits.cls < 0.1)}`);
-  console.log(`  TBT: ${formatMs(summary.avgAudits.tbt)} ${getStatusIcon(summary.avgAudits.tbt < 300)}`);
-  console.log('\n' + '='.repeat(60));
+  printReportSummary(report);
   
   console.log('\n✅ 性能报告生成完成！');
   console.log(`\n📁 报告保存在: ${CONFIG.outputDir}`);

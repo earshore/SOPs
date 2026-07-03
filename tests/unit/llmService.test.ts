@@ -72,7 +72,6 @@ vi.mock('../../src/common/config/envConfig', () => ({
     vi.clearAllMocks();
   });
 
-  describe('基础LLM调用', () => {
     it('应该成功调用LLM API', async () => {
       const mockResponse = createChatCompletion('Test response from LLM');
 
@@ -213,7 +212,6 @@ vi.mock('../../src/common/config/envConfig', () => ({
 
       expect(global.fetch).not.toHaveBeenCalled();
     });
-  });
 
   describe('模型列表同步', () => {
     it('应该保留 API 返回模型的上下文和特性信息', async () => {
@@ -256,7 +254,6 @@ vi.mock('../../src/common/config/envConfig', () => ({
     });
   });
 
-  describe('错误处理', () => {
     it('应该处理401认证错误', async () => {
       (global.fetch as any).mockResolvedValueOnce({
         ok: false,
@@ -372,7 +369,6 @@ vi.mock('../../src/common/config/envConfig', () => ({
         )
       ).rejects.toThrow('API 返回格式异常');
     });
-  });
 
   describe('重试机制', () => {
     it('应该在达到最大重试次数后停止', async () => {

@@ -56,6 +56,60 @@ const CACHE_KEY_PREFIXES = [
   'ai_analysis_',
 ];
 
+const PROXY_CREDENTIAL_TYPES = [
+  'scraperapi',
+  'zenrows',
+  'brightdata',
+  'custom_api',
+  'custom_proxy',
+  'custom',
+] as const;
+
+const PROXY_CREDENTIAL_PREFIX = 'proxy_key_';
+const SENSITIVE_PLAIN_STORAGE_KEY_PATTERN =
+  /(?:api[_-]?key|access[_-]?key|private[_-]?key|password|token|secret|credential)/i;
+const SENSITIVE_PLAIN_VALUE_KEYS = new Set([
+  'apiKey',
+  'accessToken',
+  'refreshToken',
+  'password',
+  'token',
+  'secret',
+  'credential',
+]);
+
+function getProxyCredentialKey(type: string): string {
+  return `${PROXY_CREDENTIAL_PREFIX}${type || 'scraperapi'}`;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isStringMap(value: unknown): value is Record<string, string> {
+  return isRecord(value) && Object.values(value).every(item => typeof item === 'string');
+}
+
+function stripProxySecret(config: ProxyConfig): ProxyConfig {
+  const { customUrl: _customUrl, ...safeConfig } = config;
+  return safeConfig;
+}
+
+function stripLLMSecret(config: LLMProviderConfig): LLMProviderConfig {
+  return { ...config, apiKey: '' };
+}
+
+function hasSensitivePlainValue(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return Object.entries(value).some(
+    ([key, item]) =>
+      SENSITIVE_PLAIN_VALUE_KEYS.has(key) && typeof item === 'string' && item.trim().length > 0
+  );
+}
+
 /**
  * LRU缓存配置
  */
@@ -155,7 +209,12 @@ class StorageServiceClass implements IStorageService {
     let serialized = '';
 
     try {
-      serialized = JSON.stringify(value);
+      const valueForStorage = this._sanitizePlainStorageValue(key, value);
+      if (!this._canWritePlainStorage('set', key, valueForStorage)) {
+        return false;
+      }
+
+      serialized = JSON.stringify(valueForStorage);
 
       this._checkCacheSize(serialized.length * 2);
 
@@ -209,6 +268,10 @@ class StorageServiceClass implements IStorageService {
    */
   setRaw(key: string, value: string): boolean {
     try {
+      if (!this._canWritePlainStorage('setRaw', key, value)) {
+        return false;
+      }
+
       this._checkCacheSize(value.length * 2);
 
       localStorage.setItem(key, value);
@@ -262,6 +325,52 @@ class StorageServiceClass implements IStorageService {
 
     this._reportStorageError(action, key, error, false);
     return false;
+  }
+
+  private _sanitizePlainStorageValue(key: string, value: unknown): unknown {
+    if (
+      (key === STORAGE_KEYS.PROXY_CONFIG || key === STORAGE_KEYS.SCRAPER_PROXY_CONFIG) &&
+      isRecord(value)
+    ) {
+      return stripProxySecret(value as ProxyConfig);
+    }
+
+    if (
+      key.startsWith(STORAGE_KEYS.LLM_CONFIG_PREFIX) &&
+      key !== STORAGE_KEYS.LLM_ACTIVE_PROVIDER &&
+      isRecord(value) &&
+      'apiKey' in value
+    ) {
+      return stripLLMSecret(value as unknown as LLMProviderConfig);
+    }
+
+    return value;
+  }
+
+  private _canWritePlainStorage(action: 'set' | 'setRaw', key: string, value: unknown): boolean {
+    if (this._isSensitivePlainStorageKey(key) || hasSensitivePlainValue(value)) {
+      handleSystemError(
+        'SYS_STORAGE_ERROR',
+        {
+          module: 'StorageService',
+          action,
+          key,
+          reason: 'sensitive-plain-storage',
+        },
+        new Error('Sensitive data must use SecureStorage'),
+        {
+          log: true,
+          notify: false,
+        }
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  private _isSensitivePlainStorageKey(key: string): boolean {
+    return key === STORAGE_KEYS.PROXY_KEY_MAP || SENSITIVE_PLAIN_STORAGE_KEY_PATTERN.test(key);
   }
 
   private _reportStorageError(
@@ -326,6 +435,10 @@ class StorageServiceClass implements IStorageService {
    * 更新访问时间
    */
   private _updateAccessTime(key: string): void {
+    if (this._isSensitivePlainStorageKey(key)) {
+      return;
+    }
+
     try {
       const accessKey = `_lru_access_${key}`;
       localStorage.setItem(accessKey, Date.now().toString());
@@ -563,7 +676,7 @@ class StorageServiceClass implements IStorageService {
    * 保存 LLM 配置
    */
   setLLMConfig(provider: string, config: LLMProviderConfig): void {
-    this.set(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, config);
+    this.set(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, stripLLMSecret(config));
     this.set(STORAGE_KEYS.LLM_ACTIVE_PROVIDER, provider);
   }
 
@@ -582,21 +695,95 @@ class StorageServiceClass implements IStorageService {
       return { type: 'scraperapi', enabled: true };
     }
 
-    return config;
+    return stripProxySecret(config);
   }
 
   /**
    * 保存代理配置
    * 🎯 P0-4.1.8: 在数据边界使用类型守卫
    */
-  setProxyConfig(config: ProxyConfig): void {
+  setProxyConfig(config: ProxyConfig): boolean {
     // 🎯 数据边界验证：保存前验证
     if (!isProxyConfig(config)) {
-      return;
+      return false;
     }
 
-    this.set(STORAGE_KEYS.PROXY_CONFIG, config);
-    this.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, config);
+    const safeConfig = stripProxySecret(config);
+    return (
+      this.set(STORAGE_KEYS.PROXY_CONFIG, safeConfig) &&
+      this.set(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, safeConfig)
+    );
+  }
+
+  async getProxyKeyMap(): Promise<Record<string, string>> {
+    const keyMap: Record<string, string> = {};
+
+    for (const type of PROXY_CREDENTIAL_TYPES) {
+      const credential = await this.getSecure<string>(getProxyCredentialKey(type), '');
+      if (credential) {
+        keyMap[type] = credential;
+      }
+    }
+
+    const legacyKeyMap = this.get<Record<string, string>>(STORAGE_KEYS.PROXY_KEY_MAP, {});
+    if (isStringMap(legacyKeyMap)) {
+      Object.assign(keyMap, legacyKeyMap);
+      this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
+    }
+
+    const legacyConfig =
+      this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null) ||
+      this.get<ProxyConfig>(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, null);
+    const legacyType = legacyConfig?.type || 'scraperapi';
+    if (legacyConfig?.customUrl) {
+      keyMap[legacyType] = legacyConfig.customUrl;
+      this.setProxyConfig(legacyConfig);
+    }
+
+    await this.setProxyKeyMap(keyMap);
+    return keyMap;
+  }
+
+  async setProxyKeyMap(keyMap: Record<string, string>): Promise<boolean> {
+    let saved = true;
+
+    for (const [type, credential] of Object.entries(keyMap)) {
+      if (!credential) {
+        this.removeSecure(getProxyCredentialKey(type));
+        continue;
+      }
+
+      saved = (await this.setSecure(getProxyCredentialKey(type), credential)) && saved;
+    }
+
+    this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
+    return saved;
+  }
+
+  hasProxyCredential(type: string): boolean {
+    return this.has(`secure_${getProxyCredentialKey(type)}`);
+  }
+
+  async getProxyConfigWithCredential(): Promise<ProxyConfig> {
+    const config = this.getProxyConfig();
+    const type = config.type || 'scraperapi';
+    const keyMap = await this.getProxyKeyMap();
+    const customUrl = keyMap[type];
+
+    return customUrl ? { ...config, customUrl } : config;
+  }
+
+  async setProxyConfigWithCredential(config: ProxyConfig): Promise<boolean> {
+    const type = config.type || 'scraperapi';
+    const savedConfig = this.setProxyConfig(config);
+
+    if (!config.customUrl) {
+      this.removeSecure(getProxyCredentialKey(type));
+      return savedConfig;
+    }
+
+    const savedCredential = await this.setSecure(getProxyCredentialKey(type), config.customUrl);
+    return savedConfig && savedCredential;
   }
 
   /**

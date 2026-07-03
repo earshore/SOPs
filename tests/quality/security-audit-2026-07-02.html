@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>技术债务扫描报告</title>
+  <title>安全审计报告</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -21,6 +21,27 @@
     }
     h1 { color: #111827; margin-bottom: 0.5rem; }
     .meta { color: #6b7280; font-size: 0.875rem; }
+    .risk-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .risk-score {
+      font-size: 4rem;
+      font-weight: bold;
+    }
+    .risk-label { color: #6b7280; margin-top: 0.5rem; }
+    .risk-level {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      margin-top: 1rem;
+      color: white;
+    }
     .stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -42,6 +63,18 @@
       font-size: 0.75rem;
       font-weight: 600;
       color: white;
+    }
+    .category-section {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .category-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
     }
     .issues {
       background: white;
@@ -65,7 +98,7 @@
       margin-bottom: 0.5rem;
     }
     .issue-message { font-weight: 500; color: #111827; }
-    .issue-location { color: #6b7280; font-size: 0.875rem; }
+    .issue-location { color: #6b7280; font-size: 0.875rem; margin-top: 0.25rem; }
     .issue-code {
       background: #f9fafb;
       padding: 0.75rem;
@@ -75,13 +108,32 @@
       margin-top: 0.5rem;
       overflow-x: auto;
     }
+    .issue-recommendation {
+      background: #dbeafe;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      color: #1e40af;
+    }
+    .recommendation-label {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>📊 技术债务扫描报告</h1>
+      <h1>🔒 安全审计报告</h1>
       <div class="meta">生成时间: 2026/7/3 03:59:30</div>
+    </div>
+
+
+    <div class="risk-card">
+      <div class="risk-score" style="color: #10b981">0</div>
+      <div class="risk-label">风险分数</div>
+      <span class="risk-level" style="background: #10b981">低风险</span>
     </div>
 
 
@@ -92,15 +144,11 @@
       </div>
       <div class="stat-card">
         <div class="stat-label">扫描文件数</div>
-        <div class="stat-value">398</div>
+        <div class="stat-value">410</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">总代码行数</div>
-        <div class="stat-value">99,535</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">债务比率</div>
-        <div class="stat-value">0.00%</div>
+        <div class="stat-value">121,702</div>
       </div>
     </div>
 
@@ -125,11 +173,21 @@
     </div>
 
 
+    <div class="category-section">
+      <div class="category-header">
+        <h2>问题分类统计</h2>
+      </div>
+      <div style="padding: 1.5rem;">
+
+      </div>
+    </div>
+
+
     <div class="issues">
       <div class="issues-header">
         <h2>问题详情</h2>
       </div>
-      
+
     </div>
 
   </div>

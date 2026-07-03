@@ -164,7 +164,6 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
   /**
    * E2E测试：完整的数据导入流程
    */
-  describe('完整的数据导入流程', () => {
     it('应该完成从选择文件到显示数据的完整流程', async () => {
       // 步骤1: 准备JSON文件数据
       const jsonData = {
@@ -297,37 +296,35 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
       expect(mockShowToast).toHaveBeenCalledWith('文件格式错误', 'error');
       expect(mockState.scraper.scrapedData).toBeNull();
     });
-  });
+
+  function setupEditableScraperData() {
+    mockState.scraper.scrapedData = {
+      metadata: {
+        marketplace: 'US',
+        total_asins: 2
+      },
+      products: [
+        {
+          asin: 'B0EDIT001',
+          productTitle: 'Product to Edit',
+          customer_reviews: [
+            { id: 'R1', rating: 5, text: 'Review 1' },
+            { id: 'R2', rating: 4, text: 'Review 2' }
+          ]
+        },
+        {
+          asin: 'B0EDIT002',
+          productTitle: 'Another Product'
+        }
+      ]
+    };
+  }
 
   /**
    * E2E测试：数据编辑和删除流程
    */
-  describe('数据编辑和删除流程', () => {
-    beforeEach(() => {
-      // 准备测试数据
-      mockState.scraper.scrapedData = {
-        metadata: {
-          marketplace: 'US',
-          total_asins: 2
-        },
-        products: [
-          {
-            asin: 'B0EDIT001',
-            productTitle: 'Product to Edit',
-            customer_reviews: [
-              { id: 'R1', rating: 5, text: 'Review 1' },
-              { id: 'R2', rating: 4, text: 'Review 2' }
-            ]
-          },
-          {
-            asin: 'B0EDIT002',
-            productTitle: 'Another Product'
-          }
-        ]
-      };
-    });
-
     it('应该完成删除产品的完整流程', async () => {
+      setupEditableScraperData();
       const asinToDelete = 'B0EDIT001';
 
       // 步骤1: 用户点击删除按钮
@@ -362,6 +359,7 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
     });
 
     it('应该完成删除评论的完整流程', async () => {
+      setupEditableScraperData();
       const asin = 'B0EDIT001';
       const reviewIndex = 0;
 
@@ -392,6 +390,7 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
     });
 
     it('应该处理用户取消删除', async () => {
+      setupEditableScraperData();
       const asinToDelete = 'B0EDIT001';
       const originalProducts = JSON.parse(JSON.stringify(mockState.scraper.scrapedData.products));
 
@@ -409,7 +408,6 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
       expect(mockState.scraper.scrapedData.products).toEqual(originalProducts);
       expect(mockEventBus.emit).not.toHaveBeenCalled();
     });
-  });
 
   /**
    * E2E测试：与其他模块的集成

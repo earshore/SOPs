@@ -4,7 +4,7 @@ import type { ScrapedProduct, ScraperSite } from '@/types/modules-business';
 const mocks = vi.hoisted(() => ({
   parseProductPage: vi.fn(),
   parseReviews: vi.fn(),
-  getProxyConfig: vi.fn(),
+  getProxyConfigWithCredential: vi.fn(),
   getByAsinAsync: vi.fn(),
   sleep: vi.fn(async (_ms: number) => undefined),
   getErrorSummary: vi.fn((message: string) => `summary:${message}`),
@@ -35,7 +35,7 @@ vi.mock('./historyService', () => ({
 
 vi.mock('../../../../../services/storageService', () => ({
   StorageService: {
-    getProxyConfig: mocks.getProxyConfig,
+    getProxyConfigWithCredential: mocks.getProxyConfigWithCredential,
   },
 }));
 
@@ -58,7 +58,7 @@ function createResponse(body = '<html>product</html>', status = 200): Response {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.getProxyConfig.mockReturnValue({
+  mocks.getProxyConfigWithCredential.mockResolvedValue({
     type: 'custom_api',
     customUrl: 'https://proxy.example/?url=',
   });
@@ -87,7 +87,7 @@ describe('scrapeAsin validation and cache', () => {
       error: '无效的站点参数: INVALID',
     });
     expect(status).toHaveBeenCalledWith('B001', 'failed', '无效的站点参数: INVALID');
-    expect(mocks.getProxyConfig).not.toHaveBeenCalled();
+    expect(mocks.getProxyConfigWithCredential).not.toHaveBeenCalled();
   });
 
   it('returns fresh cached products before making proxy requests', async () => {
@@ -175,7 +175,7 @@ describe('scrapeAsin network scraping', () => {
   it('marks the scrape as failed when proxy configuration is incomplete', async () => {
     const status = vi.fn();
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    mocks.getProxyConfig.mockReturnValue({ type: 'custom_api' });
+    mocks.getProxyConfigWithCredential.mockResolvedValue({ type: 'custom_api' });
     vi.stubGlobal('fetch', vi.fn());
 
     const result = await scrapeAsin('B003', 'US', false, status);

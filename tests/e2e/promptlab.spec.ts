@@ -221,7 +221,6 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
     });
   });
 
-  test.describe('Prompt 生成', () => {
     test('应该能够生成 Listing Prompt', async ({ page }) => {
       // 设置控制台错误监听
       const consoleListener = setupConsoleErrorListener(page);
@@ -367,7 +366,6 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       console.log('✅ Prompt 复制功能正常');
     });
-  });
 
   test.describe('完整流程测试', () => {
     test('应该完成完整的 Prompt 生成流程', async ({ page }) => {
