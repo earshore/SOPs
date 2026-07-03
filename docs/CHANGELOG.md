@@ -26,6 +26,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.16] - 2026-07-03
+
+### Added
+- 新增延迟路由/模块加载骨架，提升页面切换反馈。
+- 新增路由审计脚本，覆盖 manifest 路径与导航配置。
+
+### Changed
+- 路由系统迁移到 routeId 优先 API，并支持 manifest route paths 与 redirects。
+- PPC Search Terms 迁移到 PPC Tools 目录结构。
+- Deep Chat 拆分为 controller、配置、样式、预览和渲染模块。
+- 归档历史文档与本地工具产物，减少仓库噪声。
+- 同步应用内版本显示到 `3.0.3-rc.16`。
+
+### Removed
+- 移除 LegacyAdapter、全局 legacy 路由 API 和旧 routeEvents 入口。
+
 ## [3.0.3-rc.15] - 2026-07-03
 
 ### Added
