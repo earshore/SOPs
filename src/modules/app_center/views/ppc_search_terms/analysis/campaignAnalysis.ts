@@ -1,4 +1,4 @@
-import { classifyCampaignMetrics } from './campaignRules';
+import { classifyCampaignMetrics } from '../rules/campaignRules';
 import { mapColumns, type ColumnMapping } from '../columns/columns';
 import { readCampaignPerformanceMetrics, readField } from './analysisMetrics';
 import type { ParsedReport, RawRecord } from '../import/delimitedReport';

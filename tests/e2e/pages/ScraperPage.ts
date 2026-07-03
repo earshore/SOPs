@@ -98,7 +98,7 @@ export class ScraperPage extends BasePage {
     startButtonText: 'button.btn-start span',
     
     // 任务状态面板
-    taskStatusPanel: '.rounded-2xl:has(h3:text("采集状态"))',
+    taskStatusPanel: 'h3:has-text("采集状态")',
     taskProgressBar: '.progress-bar-fill',
     taskCard: '.task-card',
     taskIcon: '.task-icon',

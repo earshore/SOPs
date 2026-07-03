@@ -22,6 +22,7 @@ function createSseResponse(lines: string[]): Response {
 
 describe('callLLM streaming', () => {
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
@@ -58,5 +59,60 @@ describe('callLLM streaming', () => {
     expect(firstResponse).toHaveBeenCalledTimes(1);
     expect(streamUpdate).toHaveBeenCalledTimes(1);
     expect(response).toBe('{"ok":true}');
+  });
+
+  it('does not time out a long stream while chunks keep arriving', async () => {
+    vi.useFakeTimers();
+    const encoder = new TextEncoder();
+    const streamUpdate = vi.fn();
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(
+              encoder.encode('data: {"choices":[{"delta":{"content":"First "}}]}\n\n')
+            );
+            setTimeout(() => {
+              controller.enqueue(
+                encoder.encode('data: {"choices":[{"delta":{"content":"second"}}]}\n\n')
+              );
+            }, 40);
+            setTimeout(() => {
+              controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+              controller.close();
+            }, 80);
+          },
+        });
+
+        return new Response(stream, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/event-stream',
+          },
+        });
+      })
+    );
+
+    const responsePromise = callLLM(
+      [{ role: 'user', content: 'Return a slow stream.' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'test-model',
+      {
+        stream: true,
+        retries: 0,
+        timeout: 50,
+        onStreamUpdate: streamUpdate,
+      }
+    );
+
+    await vi.advanceTimersByTimeAsync(45);
+    await vi.advanceTimersByTimeAsync(45);
+
+    await expect(responsePromise).resolves.toBe('First second');
+    expect(streamUpdate).toHaveBeenCalledTimes(2);
   });
 });

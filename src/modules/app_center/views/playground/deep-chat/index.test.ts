@@ -593,6 +593,50 @@ describe('deep-chat playground request errors', () => {
     unmount();
   });
 
+  it('preserves streamed partial text without appending timeout errors', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const timeoutError = Object.assign(new Error('模型响应超时(90秒)'), {
+      code: 'LLM_TIMEOUT',
+    });
+    const { mount, unmount, mocks } = await importDeepChat({
+      callLLM: async (...args: unknown[]) => {
+        const callOptions = args[5] as
+          | { onStreamUpdate?: (update: { delta: string }) => void }
+          | undefined;
+        callOptions?.onStreamUpdate?.({ delta: '已生成的' });
+        callOptions?.onStreamUpdate?.({ delta: '回复内容' });
+        throw timeoutError;
+      },
+    });
+
+    await mount(container);
+    const onResponse = vi.fn();
+    const onClose = vi.fn();
+
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Generate a long response' }] },
+      { onResponse, onClose }
+    );
+
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    expect(onResponse).toHaveBeenCalledWith({ text: '已生成的' });
+    expect(onResponse).toHaveBeenCalledWith({ text: '回复内容' });
+    expect(onResponse).not.toHaveBeenCalledWith({ text: '请求失败：模型响应超时(90秒)' });
+    expectStoredAssistantMessage(mocks.localDataStore.set, '已生成的回复内容');
+    expect(JSON.stringify(mocks.localDataStore.set.mock.calls)).not.toContain(
+      '请求失败：模型响应超时(90秒)'
+    );
+    expect(mocks.toast).toHaveBeenCalledWith('模型响应超时，已保留已生成内容', {
+      type: 'warning',
+    });
+
+    unmount();
+  });
+
   it('persists a visible assistant error when the LLM response is empty', async () => {
     const container = document.createElement('main');
     document.body.append(container);

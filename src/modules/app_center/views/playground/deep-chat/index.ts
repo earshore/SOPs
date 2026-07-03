@@ -1706,6 +1706,9 @@ async function handlePlaygroundRequest(
     if (requestController?.signal.aborted) {
       return;
     }
+    if (preserveTimedOutPartialResponse(pendingThreadId, error)) {
+      return;
+    }
     const message = error instanceof Error ? error.message : '模型调用失败';
     const responseText = formatPlaygroundErrorResponse(message);
     console.error('[Deep Chat] LLM 调用失败:', error);
@@ -1783,6 +1786,41 @@ async function rejectPlaygroundRequest(signals: DeepChatSignals, error: string):
 
 function formatPlaygroundErrorResponse(error: string): string {
   return `请求失败：${error}`;
+}
+
+function preserveTimedOutPartialResponse(threadId: string | null, error: unknown): boolean {
+  if (!isLLMTimeoutError(error) || !threadId || !threadExists(threadId)) {
+    return false;
+  }
+
+  const pendingRequest = pendingRequests.get(threadId);
+  const partialResponse = pendingRequest?.assistantText.trim();
+  if (!pendingRequest || !partialResponse) {
+    return false;
+  }
+
+  saveThreadMessages(
+    getMountedRenderContainer(),
+    pendingRequest.conversationMessages,
+    partialResponse,
+    {
+      threadId,
+      assistantCreatedAt: pendingRequest.startedAt,
+    }
+  );
+  showToast('模型响应超时，已保留已生成内容', { type: 'warning' });
+  return true;
+}
+
+function isLLMTimeoutError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  return (
+    (error as Error & { code?: string }).code === 'LLM_TIMEOUT' ||
+    error.message.includes('模型响应超时')
+  );
 }
 
 function saveFailedPlaygroundResponse(threadId: string | null, responseText: string): void {

@@ -172,7 +172,9 @@ function getLLMErrorMessage(errorText: string, fallback: string): string {
   }
 }
 
-type OpenAIStreamOptions = Pick<LLMOptions, 'onFirstResponse' | 'onStreamUpdate'>;
+type OpenAIStreamOptions = Pick<LLMOptions, 'onFirstResponse' | 'onStreamUpdate'> & {
+  onStreamActivity?: () => void;
+};
 
 interface OpenAIStreamState {
   content: string;
@@ -324,6 +326,7 @@ async function readOpenAIStreamBody(
       break;
     }
 
+    context.options.onStreamActivity?.();
     const decoded = decoder.decode(value, { stream: true });
     rawText += decoded;
     buffer = processStreamText(decoded, buffer, context);
@@ -379,6 +382,7 @@ interface ResolvedLLMOptions {
   signal: AbortSignal | undefined;
   stream: boolean;
   onFirstResponse: LLMOptions['onFirstResponse'];
+  onStreamActivity: OpenAIStreamOptions['onStreamActivity'];
   onStreamUpdate: LLMOptions['onStreamUpdate'];
 }
 
@@ -417,6 +421,7 @@ function resolveLLMOptions(options: LLMOptions): ResolvedLLMOptions {
     signal: options.signal,
     stream: options.stream ?? true,
     onFirstResponse: options.onFirstResponse,
+    onStreamActivity: undefined,
     onStreamUpdate: options.onStreamUpdate,
   };
 }
@@ -474,12 +479,18 @@ async function waitBeforeLLMRetry(attempt: number, options: ResolvedLLMOptions):
 
 function createLLMAbortResources(options: ResolvedLLMOptions): {
   controller: AbortController;
-  timeoutId: ReturnType<typeof setTimeout>;
+  clearRequestTimeout: () => void;
+  resetRequestTimeout: () => void;
 } {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), options.timeout);
+  let timeoutId = setTimeout(() => controller.abort(), options.timeout);
+  const clearRequestTimeout = (): void => clearTimeout(timeoutId);
+  const resetRequestTimeout = (): void => {
+    clearRequestTimeout();
+    timeoutId = setTimeout(() => controller.abort(), options.timeout);
+  };
   options.signal?.addEventListener('abort', () => controller.abort(), { once: true });
-  return { controller, timeoutId };
+  return { controller, clearRequestTimeout, resetRequestTimeout };
 }
 
 async function fetchLLMResponse(
@@ -555,6 +566,7 @@ async function readLLMResponsePayload(
 
   const streamResult = await readOpenAIStream(response, requestStartedAt, {
     onFirstResponse: context.options.onFirstResponse,
+    onStreamActivity: context.options.onStreamActivity,
     onStreamUpdate: context.options.onStreamUpdate,
   });
 
@@ -623,21 +635,32 @@ function getLLMResponseContent(payload: LLMResponsePayload): string {
 async function executeLLMAttempt(context: LLMCallContext, attempt: number): Promise<string> {
   await waitBeforeLLMRetry(attempt, context.options);
 
-  const { controller, timeoutId } = createLLMAbortResources(context.options);
+  const { clearRequestTimeout, controller, resetRequestTimeout } = createLLMAbortResources(
+    context.options
+  );
+  const attemptContext: LLMCallContext = context.options.stream
+    ? {
+        ...context,
+        options: {
+          ...context.options,
+          onStreamActivity: resetRequestTimeout,
+        },
+      }
+    : context;
   const requestStartedAt = Date.now();
 
   try {
-    const response = await fetchLLMResponse(context, controller);
+    const response = await fetchLLMResponse(attemptContext, controller);
 
     if (!response.ok) {
-      throw await createLLMResponseError(response, context, attempt);
+      throw await createLLMResponseError(response, attemptContext, attempt);
     }
 
-    const payload = await readLLMResponsePayload(response, context, requestStartedAt);
-    assertValidLLMResponse(payload, response, context);
+    const payload = await readLLMResponsePayload(response, attemptContext, requestStartedAt);
+    assertValidLLMResponse(payload, response, attemptContext);
     return getLLMResponseContent(payload);
   } finally {
-    clearTimeout(timeoutId);
+    clearRequestTimeout();
   }
 }
 
