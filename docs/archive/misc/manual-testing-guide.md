@@ -28,7 +28,6 @@ window.appStore.getState().scraper
 window.appStore.getState().analysis
 window.appStore.getState().promptlab
 window.appStore.getState().keywordTracker
-window.appStore.getState().qalab
 ```
 
 ### 2. UI 状态测试 ✅
@@ -122,44 +121,9 @@ window.appStore.getState().setAnalysisReport(mockReport)
 window.appStore.getState().analysis.analysisReport
 ```
 
-### 5. QALab 模块测试 ✅
+### 5. 状态订阅测试 ✅
 
-#### 5.1 设置语言和类别
-```javascript
-// 设置语言
-window.appStore.getState().setQALabLang('en')
-
-// 设置类别
-window.appStore.getState().setQALabCategory('technical')
-
-// 验证
-window.appStore.getState().qalab.currentLang
-window.appStore.getState().qalab.currentCategory
-```
-
-#### 5.2 添加 Rufus 消息
-```javascript
-// 添加用户消息
-window.appStore.getState().addRufusMessage({
-  role: 'user',
-  content: 'Hello Rufus!',
-  timestamp: Date.now()
-})
-
-// 添加助手消息
-window.appStore.getState().addRufusMessage({
-  role: 'assistant',
-  content: 'Hello! How can I help you?',
-  timestamp: Date.now()
-})
-
-// 验证
-window.appStore.getState().qalab.rufusMessages
-```
-
-### 6. 状态订阅测试 ✅
-
-#### 6.1 订阅状态变化
+#### 5.1 订阅状态变化
 ```javascript
 // 订阅整个 store
 const unsubscribe = window.appStore.subscribe((state) => {
@@ -174,16 +138,16 @@ window.appStore.getState().setCurrentTab('scraper')
 unsubscribe()
 ```
 
-### 7. 持久化测试 ✅
+### 6. 持久化测试 ✅
 
-#### 7.1 检查 localStorage
+#### 6.1 检查 localStorage
 ```javascript
 // 查看持久化的状态
 localStorage.getItem('app-storage')
 // 应该返回 JSON 字符串
 ```
 
-#### 7.2 测试持久化
+#### 6.2 测试持久化
 ```javascript
 // 修改状态
 window.appStore.getState().setCurrentTab('analysis')
@@ -197,22 +161,22 @@ window.appStore.getState().ui.currentTab
 window.appStore.getState().ui.theme
 ```
 
-### 8. DevTools 测试 ✅
+### 7. DevTools 测试 ✅
 
-#### 8.1 打开 Redux DevTools
+#### 7.1 打开 Redux DevTools
 1. 安装 Redux DevTools 扩展（如果未安装）
 2. 打开浏览器开发者工具
 3. 切换到 "Redux" 标签
 4. 查看状态树
 
-#### 8.2 时间旅行调试
+#### 7.2 时间旅行调试
 1. 在 Redux DevTools 中触发一些状态变化
 2. 使用左侧的时间轴回退到之前的状态
 3. 验证页面状态同步更新
 
-### 9. 兼容层测试 ⚠️
+### 8. 兼容层测试 ⚠️
 
-#### 9.1 测试旧的 state 访问（应该有警告）
+#### 8.1 测试旧的 state 访问（应该有警告）
 ```javascript
 // 这应该仍然工作，但会在控制台显示弃用警告
 window.state.ui.currentTab
@@ -220,14 +184,14 @@ window.state.ui.currentTab
 // 检查控制台是否有弃用警告
 ```
 
-### 10. 错误检查 ✅
+### 9. 错误检查 ✅
 
-#### 10.1 检查控制台错误
+#### 9.1 检查控制台错误
 - 打开浏览器控制台
 - 查看是否有红色错误信息
 - 特别注意状态相关的错误
 
-#### 10.2 检查网络请求
+#### 9.2 检查网络请求
 - 打开 Network 标签
 - 刷新页面
 - 检查是否有失败的请求
@@ -239,7 +203,6 @@ window.state.ui.currentTab
 - [ ] UI 状态更新
 - [ ] Scraper 模块功能
 - [ ] Analysis 模块功能
-- [ ] QALab 模块功能
 - [ ] 状态订阅
 - [ ] 持久化功能
 - [ ] DevTools 集成

@@ -26,6 +26,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.13] - 2026-07-03
+
+### Added
+- Deep Chat 增加发送流程端到端测试、停止遮罩和请求生命周期覆盖。
+- 新增主题系统文档、CSS 性能/调试工具测试和质量报告沉淀。
+
+### Changed
+- 持久化分析运行记录，处理空 LLM 响应并提升请求预算控制。
+- 拆分 AI Analysis、PPC Search Terms、Scraper import、Prompt Library 与 Keyword Highlight 热点模块。
+- 整合 CSS token、共享 keyframes、badge/icon 样式和质量工具。
+- 强化 Promptlab 页面选择器、DNA 提取流程和 E2E helper。
+- 同步应用内版本显示到 `3.0.3-rc.13`。
+
+### Fixed
+- 修复 Deep Chat 停止竞态并稳定 Promptlab 端到端测试。
+- 更新 Deep Chat stop button 选择器和断言，降低 Playwright 超时与并发抖动。
+
 ## [3.0.3-rc.12] - 2026-07-02
 
 ### Added

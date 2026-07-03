@@ -243,7 +243,6 @@ function getPageName(url: string): string {
   if (url.includes('promptlab')) return 'Promptlab 页面';
   if (url.includes('ai-analysis')) return 'AI 分析页面';
   if (url.includes('scraper')) return 'Scraper 页面';
-  if (url.includes('qa-lab')) return 'QA Lab 页面';
   if (url.includes('keyword-hunter')) return 'Keyword Hunter 页面';
   return '首页';
 }

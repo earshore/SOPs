@@ -57,7 +57,6 @@ run_test "应用中心概览" "tests/e2e/app-center-overview.spec.ts"
 run_test "Scraper 模块" "tests/e2e/scraper.spec.ts"
 run_test "AI Analysis 模块" "tests/e2e/ai-analysis.spec.ts"
 run_test "Promptlab 模块" "tests/e2e/promptlab.spec.ts"
-run_test "QALab 模块" "tests/e2e/qalab.spec.ts"
 
 # ============================================================
 # 第二阶段: Keyword Hunter 测试

@@ -1,7 +1,7 @@
 /**
  * notifications.ts - Toast 通知和进度条
  * 提供用户反馈的 UI 组件
- * 基于 Q&A Lab 视觉设计，支持标题+描述的双行显示
+ * 统一通知提示，支持标题+描述的双行显示
  */
 
 import { getEl } from './utils';

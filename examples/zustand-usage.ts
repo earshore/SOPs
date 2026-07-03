@@ -145,37 +145,10 @@ function example7_ResetState() {
   console.log('重置后:', appStore.getState().scraper);
 }
 
-// ==================== 示例 8: QALab 状态管理 ====================
+// ==================== 示例 8: 持久化状态 ====================
 
-function example8_QALabState() {
-  console.log('=== 示例 8: QALab 状态管理 ===');
-  
-  // 设置语言和类别
-  appStore.getState().setQALabLang('en');
-  appStore.getState().setQALabCategory('technical');
-  
-  // 添加 Rufus 消息
-  appStore.getState().addRufusMessage({
-    role: 'user',
-    content: 'Hello Rufus!',
-    timestamp: Date.now()
-  });
-  
-  appStore.getState().addRufusMessage({
-    role: 'assistant',
-    content: 'Hello! How can I help you?',
-    timestamp: Date.now()
-  });
-  
-  // 读取状态
-  const messages = appStore.getState().qalab.rufusMessages;
-  console.log('Rufus 消息:', messages);
-}
-
-// ==================== 示例 9: 持久化状态 ====================
-
-function example9_Persistence() {
-  console.log('=== 示例 9: 持久化状态 ===');
+function example8_Persistence() {
+  console.log('=== 示例 8: 持久化状态 ===');
   
   // Zustand 的 persist 中间件会自动保存以下状态到 localStorage:
   // - ui.currentTab
@@ -195,10 +168,10 @@ function example9_Persistence() {
   // 刷新页面后，状态会自动恢复
 }
 
-// ==================== 示例 10: DevTools 集成 ====================
+// ==================== 示例 9: DevTools 集成 ====================
 
-function example10_DevTools() {
-  console.log('=== 示例 10: DevTools 集成 ===');
+function example9_DevTools() {
+  console.log('=== 示例 9: DevTools 集成 ===');
   
   // 在开发环境中，Zustand DevTools 会自动启用
   // 可以在浏览器的 Redux DevTools 扩展中查看状态变化
@@ -223,9 +196,8 @@ export function runAllExamples() {
   example5_ScraperState();
   example6_AnalysisState();
   example7_ResetState();
-  example8_QALabState();
-  example9_Persistence();
-  example10_DevTools();
+  example8_Persistence();
+  example9_DevTools();
 }
 
 // 如果直接运行此文件

@@ -204,9 +204,9 @@ export async function navigationExamples(router: NavigoAdapter) {
   await router.navigate('/home');
   console.log(`   当前路由: ${router.getCurrentRoute()?.path}\n`);
 
-  // 带参数导航
-  console.log('2. 带参数导航');
-  await router.navigate('/qalab/123?mode=edit&tags=important');
+  // 带查询参数导航
+  console.log('2. 带查询参数导航');
+  await router.navigate('/app_center/overview?mode=edit&tags=important');
   const current = router.getCurrentRoute();
   console.log(`   当前路由: ${current?.path}`);
   console.log(`   路径参数:`, current?.params);

@@ -31,7 +31,7 @@ This review keeps the application layout intact and only documents the current s
 
 ## Cleanup Applied
 
-- Archived `QALAB_REMOVAL_PLAN.md` under `docs/archive/misc/`.
+- Removed obsolete archived removal plan and stale references for a retired module.
 - Moved `deploy-env.sh` into `scripts/`.
 - Removed tracked `__pycache__` output and added Python cache patterns to `.gitignore`.
 - Removed the obsolete edge LLM proxy; the app now calls the self-hosted new-api gateway directly from the browser.

@@ -54,7 +54,6 @@ interface AppStore {
   analysis: AnalysisState;
   promptlab: PromptLabState;
   keywordTracker: KeywordTrackerState;
-  qalab: QALabState;
   
   // Actions (更新方法)
   setCurrentTab: (tab: string) => void;
@@ -234,32 +233,6 @@ appStore.getState().updateAnalysis({
 
 // 重置
 appStore.getState().resetAnalysis();
-```
-
-### QALab 模块
-
-```typescript
-// 读取
-const currentLang = appStore.getState().qalab.currentLang;
-const rufusMessages = appStore.getState().qalab.rufusMessages;
-
-// 更新
-appStore.getState().setQALabLang('en');
-appStore.getState().setQALabCategory('technical');
-appStore.getState().addRufusMessage({
-  role: 'user',
-  content: 'Hello!',
-  timestamp: Date.now()
-});
-
-// 批量更新
-appStore.getState().updateQALab({
-  currentLang: 'de',
-  allExpanded: true
-});
-
-// 重置
-appStore.getState().resetQALab();
 ```
 
 ## 高级用法

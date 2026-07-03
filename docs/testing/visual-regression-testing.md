@@ -104,7 +104,6 @@ npm run test:e2e:report
 - Promptlab 页面
 - AI 分析页面
 - Scraper 页面
-- QA Lab 页面
 - Keyword Hunter 页面
 - NPI Tracker 页面
 - Restricted Words 页面

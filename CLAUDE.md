@@ -100,7 +100,7 @@ Never hardcode colors, spacing, or other design values. Always use design tokens
 
 Modules are organized by business domain under `src/modules/`:
 
-- **app_center**: AI analysis, scraper, promptlab, keyword hunter, QALab
+- **app_center**: AI analysis, scraper, promptlab, keyword hunter
 - **sops**: Standard operating procedures (backend, growth, safety, service)
 - **amz_hub**: Amazon knowledge hub
 - **more**: Additional tools and workflows

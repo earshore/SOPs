@@ -55,11 +55,11 @@ function example2_RouteParams() {
   const router = createRouter({ enableLogging: true });
 
   // 定义带参数的路由
-  const qaLabParams: RouteParams = {
+  const productParams: RouteParams = {
     id: {
       type: 'number',
       required: true,
-      description: 'QA Lab ID'
+      description: '产品 ID'
     },
     mode: {
       type: 'string',
@@ -70,16 +70,16 @@ function example2_RouteParams() {
     }
   };
 
-  router.register('/qalab/:id', {
-    moduleId: 'master_analysis',
-    label: 'Q&A 预研',
-    icon: 'fas fa-comments',
+  router.register('/products/:id', {
+    moduleId: 'app_center',
+    label: '产品详情',
+    icon: 'fas fa-box',
     panelId: 'panel-app_center',
-    params: qaLabParams
+    params: productParams
   });
 
   // 导航到带参数的路由
-  router.navigate('/qalab/123?mode=edit&tags=important');
+  router.navigate('/products/123?mode=edit&tags=important');
 
   // 获取参数
   const route = router.getCurrentRoute();
@@ -325,7 +325,7 @@ async function example8_CompleteApp() {
 
   // 7. 导航示例
   await router.navigate('/sops/overview');
-  await router.navigate('/app_center/qalab');
+  await router.navigate('/app_center/overview');
   await router.navigate('/amz_hub/overview');
 
   // 8. 查看统计

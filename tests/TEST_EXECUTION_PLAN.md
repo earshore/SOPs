@@ -22,7 +22,6 @@
 - [x] Scraper - 数据采集
 - [x] AI Analysis - AI 智能分析
 - [x] Promptlab - 提示词实验室
-- [x] QALab - QA 实验室
 
 ### Keyword Hunter 模块组
 - [x] Input - 关键词输入
@@ -72,7 +71,6 @@ npm run test:e2e tests/e2e/ai-analysis.spec.ts
 
 # 阶段 2: 扩展功能
 npm run test:e2e tests/e2e/promptlab.spec.ts
-npm run test:e2e tests/e2e/qalab.spec.ts
 npm run test:e2e tests/e2e/keyword-hunter-*.spec.ts
 
 # 阶段 3: 集成测试

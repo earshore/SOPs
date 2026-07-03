@@ -74,7 +74,6 @@ MODULE_CATEGORY_MAP: Dict[str, str] = {
     'app_center/views/master_analysis/ai_analysis': 'ai_tech',
     'app_center/views/master_analysis/scraper': 'ai_tech',
     'app_center/views/master_analysis/promptlab': 'ai_tech',
-    'app_center/views/master_analysis/qalab': 'ai_tech',
     'app_center/views/overview': 'ai_tech',
 
     # 分析类

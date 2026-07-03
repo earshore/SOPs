@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 LLM 网关；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按最新远端 tag `v3.0.3-rc.12`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按最新远端 tag `v3.0.3-rc.13`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,7 +10,7 @@ sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团�
 
 ## 最新发布
 
-当前最新 tag 是 `v3.0.3-rc.12`（2026-07-02，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.12` 聚焦 Keyword Hunter 快照沉淀、Scraper 初始数据渲染和相关同步测试，`v3.0.3` 系列累计带来以下面向运营的变化：
+当前最新 tag 是 `v3.0.3-rc.13`（2026-07-03，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.13` 聚焦 Deep Chat 停止体验、Promptlab/E2E 稳定性、主题与质量工具沉淀，`v3.0.3` 系列累计带来以下面向运营的变化：
 
 - 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
 - 新增工作流导向条和统一确认弹窗，减少高风险数据操作误触。
@@ -29,7 +29,12 @@ sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团�
 - Keyword Hunter 输入页新增历史快照面板与快照服务，支持保存、恢复和删除分析状态。
 - Keyword Hunter 分析结果支持自动归档，减少跨步骤状态丢失。
 - Scraper 页面挂载时渲染当前采集数据，并补充当前数据与历史快照回归测试。
-- 同步应用内版本显示到 `3.0.3-rc.12`。
+- Deep Chat 增加发送回归覆盖、停止遮罩和停止竞态修复。
+- Promptlab 页面选择器、DNA 提取流程和端到端测试进一步稳定。
+- 持久化分析运行记录，处理空 LLM 响应并提升请求预算控制。
+- 拆分 AI Analysis、PPC Search Terms、Scraper import、Prompt Library 与 Keyword Highlight 热点模块。
+- 新增主题系统文档，整合 CSS token、共享 keyframes、badge/icon 样式和质量工具。
+- 同步应用内版本显示到 `3.0.3-rc.13`。
 
 ## 快速开始
 

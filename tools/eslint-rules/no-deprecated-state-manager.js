@@ -62,7 +62,7 @@ module.exports = {
           node.property.type === 'Identifier'
         ) {
           const module = node.property.name;
-          const validModules = ['ui', 'scraper', 'analysis', 'promptlab', 'keywordTracker', 'qalab'];
+          const validModules = ['ui', 'scraper', 'analysis', 'promptlab', 'keywordTracker'];
           
           if (validModules.includes(module)) {
             // 允许在测试文件中使用
