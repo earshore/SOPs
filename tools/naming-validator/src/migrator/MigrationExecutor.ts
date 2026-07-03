@@ -2,6 +2,7 @@
  * 迁移执行器 - 执行迁移计划
  */
 
+import { writeFileSync } from 'fs';
 import { MigrationPlan, MigrationResult, MigrationChange } from '../types/index.js';
 import { HTMLParser } from '../parsers/HTMLParser.js';
 import { CSSParser } from '../parsers/CSSParser.js';
@@ -111,48 +112,57 @@ export class MigrationExecutor {
    * 应用单个变更
    */
   private async applyChange(change: MigrationChange): Promise<void> {
-    const { type, filePath, oldValue, newValue } = change;
-
-    if (filePath.endsWith('.html')) {
-      const elements = await this.htmlParser.parse(filePath);
-      
-      for (const element of elements) {
-        if (type === 'html-id' && element.id === oldValue) {
-          await this.htmlParser.updateId(element, newValue);
-        } else if (type === 'css-class' && element.classes.includes(oldValue)) {
-          // updateClass需要oldClass和newClass参数
-          await this.htmlParser.updateClass(element, oldValue, newValue);
-        } else if (type === 'data-attr' && element.dataAttributes.has(oldValue)) {
-          const value = element.dataAttributes.get(oldValue);
-          // updateDataAttr需要attrName和newValue参数
-          await this.htmlParser.updateDataAttr(element, newValue, value || '');
-        }
-      }
-
-      // serialize不需要参数
-      const serialized = await this.htmlParser.serialize();
-      // 需要写回文件
-      const { writeFileSync } = await import('fs');
-      writeFileSync(filePath, serialized, 'utf-8');
-    } else if (filePath.endsWith('.css')) {
-      const rules = await this.cssParser.parse(filePath);
-      
-      for (const rule of rules) {
-        if (type === 'css-class' && rule.classes.includes(oldValue)) {
-          const newSelector = rule.selector.replace(
-            new RegExp(`\\.${oldValue}\\b`, 'g'),
-            `.${newValue}`
-          );
-          await this.cssParser.updateSelector(rule, newSelector);
-        }
-      }
-
-      // serialize不需要参数
-      const serialized = await this.cssParser.serialize();
-      // 需要写回文件
-      const { writeFileSync } = await import('fs');
-      writeFileSync(filePath, serialized, 'utf-8');
+    if (change.filePath.endsWith('.html')) {
+      await this.applyHtmlChange(change);
+      return;
     }
+
+    if (change.filePath.endsWith('.css')) {
+      await this.applyCssChange(change);
+    }
+  }
+
+  private async applyHtmlChange(change: MigrationChange): Promise<void> {
+    const elements = await this.htmlParser.parse(change.filePath);
+    
+    for (const element of elements) {
+      await this.applyHtmlElementChange(change, element);
+    }
+
+    writeFileSync(change.filePath, await this.htmlParser.serialize(), 'utf-8');
+  }
+
+  private async applyHtmlElementChange(
+    change: MigrationChange,
+    element: Awaited<ReturnType<HTMLParser['parse']>>[number]
+  ): Promise<void> {
+    if (change.type === 'html-id' && element.id === change.oldValue) {
+      await this.htmlParser.updateId(element, change.newValue);
+    } else if (change.type === 'css-class' && element.classes.includes(change.oldValue)) {
+      await this.htmlParser.updateClass(element, change.oldValue, change.newValue);
+    } else if (change.type === 'data-attr' && element.dataAttributes.has(change.oldValue)) {
+      const value = element.dataAttributes.get(change.oldValue);
+      await this.htmlParser.updateDataAttr(element, change.newValue, value || '');
+    }
+  }
+
+  private async applyCssChange(change: MigrationChange): Promise<void> {
+    const rules = await this.cssParser.parse(change.filePath);
+    
+    for (const rule of rules) {
+      if (change.type === 'css-class' && rule.classes.includes(change.oldValue)) {
+        await this.cssParser.updateSelector(rule, this.createRenamedSelector(rule.selector, change));
+      }
+    }
+
+    writeFileSync(change.filePath, await this.cssParser.serialize(), 'utf-8');
+  }
+
+  private createRenamedSelector(selector: string, change: MigrationChange): string {
+    return selector.replace(
+      new RegExp(`\\.${change.oldValue}\\b`, 'g'),
+      `.${change.newValue}`
+    );
   }
 
   /**

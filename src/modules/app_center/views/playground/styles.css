@@ -992,16 +992,19 @@
 
 @media (max-width: 1180px) and (min-width: 901px) {
   .playground-page {
-    grid-template-columns: minmax(216px, 232px) minmax(0, 1fr) minmax(232px, 260px);
+    grid-template-columns: minmax(216px, 232px) minmax(0, 1fr);
   }
 
   .playground-page.is-rail-collapsed {
-    grid-template-columns: 0 minmax(0, 1fr) minmax(232px, 260px);
+    grid-template-columns: 0 minmax(0, 1fr);
   }
 
-  .playground-thread-rail,
-  .playground-prompt-rail {
+  .playground-thread-rail {
     padding-inline: var(--spacing-3, 0.75rem);
+  }
+
+  .playground-prompt-rail {
+    display: none;
   }
 }
 

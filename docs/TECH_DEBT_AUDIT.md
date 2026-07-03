@@ -72,7 +72,8 @@
 | 已完成 | AlpineRegistry 测试复杂度收敛         | 抽取共享 registry setup/cleanup，并按 register、init、依赖解析等职责拆分大块 `describe`；`AlpineRegistry.test.ts` 不再出现在最新复杂度报告。                                                         |
 | 已完成 | Security Auditor 工具复杂度收敛       | 拆分 `tools/security-auditor.ts` 的 HTML report builder、分类匹配和 `javascript:` AST 检测 helper；该文件不再出现在最新复杂度报告。                                                                   |
 | 已完成 | 安全审计 findings 清零                | Devtools、viewLoader 和 SafeModuleLoader 高风险渲染/URL findings 已收敛；LLM/代理凭据禁止写入普通 localStorage，代理旧明文配置会迁移到 SecureStorage；剩余 `Math.random`/静态 hash low findings 已收敛，`security:audit` 当前 0 issue。 |
-| 已完成 | 审计报告产物                          | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-07-02.json`、`tests/quality/tech-debt-2026-07-02.html`、`tests/quality/security-audit-2026-07-02.*` 和最新复杂度报告 `complexity-report-2026-07-02T20-00-01.*`。 |
+| 已完成 | 测试/工具复杂度噪声清零               | 继续拆分 `quality-monitor`、`complexity-analyzer`、命名校验器、注释代码扫描器、视觉阈值校验、性能报告、bundle 分析和 Keyword Hunter fixture；`code:analyze:complexity` 当前 0 issue。                 |
+| 已完成 | 审计报告产物                          | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-07-03.json`、`tests/quality/tech-debt-2026-07-03.html`、`tests/quality/security-audit-2026-07-02.*` 和最新复杂度报告 `complexity-report-2026-07-03T01-11-44.*`。 |
 
 ## 验证快照
 
@@ -100,7 +101,7 @@
 | CSS 变量审计             | `npm run css:audit`                                                                                                                                                                                                                                                                                                                                                                                                   | 75 个 CSS 文件，4505 次变量使用，4505 次符合规范，0 次不符合规范，0 deprecated                                                       |
 | CSS 模块分析             | `npm run css:analyze`                                                                                                                                                                                                                                                                                                                                                                                                 | 10 个模块 CSS 文件，7198 行；卡片 2 类/3 次、按钮 2 类/5 次、图标 1 类/1 次、徽章 1 类/1 次；0 条优化建议                            |
 | 质量基线                 | `npm run quality:check`                                                                                                                                                                                                                                                                                                                                                                                               | ESLint 检查 412 个文件，0 error、0 warning；TypeScript 0 error；统计 412 个文件，平均复杂度 19.4，最大复杂度 261，175 个文件超过阈值 |
-| 复杂度分析               | `npm run code:analyze:complexity`                                                                                                                                                                                                                                                                                                                                                                                     | 691 个文件，13,227 个函数，1 个过长函数、30 个高复杂度函数、31 个问题函数；剩余热点集中在 `tests/*` 和 `tools/*`                     |
+| 复杂度分析               | `npm run code:analyze:complexity`                                                                                                                                                                                                                                                                                                                                                                                     | 692 个文件，13,353 个函数，0 个过长函数、0 个高复杂度函数、0 个问题函数                                                             |
 | 技术债扫描               | `npm run tech-debt:scan`                                                                                                                                                                                                                                                                                                                                                                                              | 398 个文件，99,535 行，0 issue，债务比率 0.00%                                                                                       |
 | 安全审计                 | `npm run security:audit`                                                                                                                                                                                                                                                                                                                                                                                              | 工具可运行并生成 `security-audit-2026-07-02.*`；当前 0 issue，风险分 0/100，退出 0                                                   |
 
@@ -110,13 +111,11 @@
 | ----- | ------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | TD-08 | P3     | 全量浏览器类验证未纳入本轮    | 已补跑 Playground Deep Chat 专项 e2e 和 Chromium 视觉回归；仍未执行全量 `test:e2e`、`test:performance`、`lighthouse`。                                   | 依赖升级、CSS 抽取或路由加载改动后补跑对应浏览器类验证，并归档失败截图/报告。                             |
 | TD-09 | P1     | Playground 权限边界与发布开关 | Deep Chat 请求生命周期和请求预算已收紧；Playground 路由已声明产品级无认证放行策略，但仍缺少真实身份/权限或 feature flag 执行源。                         | 接入用户身份/权限服务或 feature flag 源后，路由守卫能执行 Playground 声明；补充拒绝访问和放行路径测试。   |
-| TD-10 | P3     | 测试/工具复杂度噪声           | `code:analyze:complexity` 当前仍有 31 个问题函数，顶部为 `scraperPanelCurrent.test.ts`、`scraper-performance.spec.ts`、`quality-monitor.ts` 和 `tech-debt-scanner.ts`；运行时代码 high 热点仍未回流。 | 拆分长 `describe`/fixture/report builder，保持测试语义不变；复杂度报告能更快暴露运行时代码问题。          |
 
 ## 修复执行顺序
 
 1. **先处理 TD-09 Playground 权限边界**：如果已有真实身份/权限服务或 feature flag 源，接入路由守卫执行路径并补齐拒绝访问/放行测试；如果仍没有执行源，不做假的权限实现，只保留当前产品级放行声明和测试锁定。
-2. **清理 TD-10 测试/工具噪声**：在运行时代码热点已清空的基础上，拆 e2e/performance/startup 长测试和报告生成器，避免为“报告好看”优先改动低业务风险文件。
-3. **补齐 TD-08 浏览器验证**：对权限、路由加载、分包相关改动执行 `test:e2e`、`test:visual`、`test:performance`、`lighthouse` 中对应项目，并归档失败截图或报告。
+2. **补齐 TD-08 浏览器验证**：对权限、路由加载、分包相关改动执行 `test:e2e`、`test:visual`、`test:performance`、`lighthouse` 中对应项目，并归档失败截图或报告。
 
 ## 消除计划清单
 
@@ -234,7 +233,7 @@
 - [x] 拆分 `tests/unit/AlpineRegistry.test.ts` 大块 `describe` 并抽取共享 setup，复杂度问题函数从 50 降到 45。
 - [x] 拆分 `tools/security-auditor.ts` 的 HTML report builder、分类匹配和 `javascript:` AST 检测，复杂度问题函数从 45 降到 39。
 - [x] 继续压降测试/工具复杂度噪声，最新复杂度问题函数降到 31；顶部剩余为 `scraperPanelCurrent.test.ts`、`scraper-performance.spec.ts`、`quality-monitor.ts` 和 `tech-debt-scanner.ts`。
-- [ ] 继续拆分剩余长测试、performance fixture 和质量工具函数，目标是让复杂度报告优先暴露真实运行时代码风险。
+- [x] 拆分剩余长测试、performance fixture 和质量工具函数；`code:analyze:complexity` 当前 0 个过长函数、0 个高复杂度函数、0 个问题函数。
 
 ### 第 9 批：安全审计发现项
 

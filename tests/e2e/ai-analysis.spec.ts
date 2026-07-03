@@ -37,27 +37,25 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
     });
 
     test('应该正确初始化 Alpine 组件', async ({ page }) => {
-      // 验证：Alpine 组件已初始化
-      const alpineInitialized = await page.evaluate(() => {
+      const componentState = await page.evaluate(() => {
         const element = document.querySelector('[x-data="aiAnalysisPanel"]');
-        return element && (element as any).__x !== undefined;
+        const alpine = (window as Window & {
+          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+        }).Alpine;
+        const data = element && alpine?.$data ? alpine.$data(element) : null;
+
+        return {
+          initialized: !!data,
+          hasComponentData:
+            !!data &&
+            Array.isArray(data.selectedAsins) &&
+            Array.isArray(data.selectedTargets) &&
+            typeof data.runAnalysis === 'function',
+        };
       });
 
-      expect(alpineInitialized, 'Alpine 组件应该已初始化').toBe(true);
-
-      // 验证：组件状态可访问
-      const hasComponentData = await page.evaluate(() => {
-        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as any;
-        if (!element || !element.__x) return false;
-        
-        const data = element.__x.$data;
-        return data && 
-               typeof data.selectedAsins !== 'undefined' &&
-               typeof data.selectedTargets !== 'undefined' &&
-               typeof data.runAnalysis === 'function';
-      });
-
-      expect(hasComponentData, '组件数据应该可访问').toBe(true);
+      expect(componentState.initialized, 'Alpine 组件应该已初始化').toBe(true);
+      expect(componentState.hasComponentData, '组件数据应该可访问').toBe(true);
 
       console.log('✅ Alpine 组件初始化正确');
     });
@@ -160,10 +158,10 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       await aiAnalysis.expandSelectionPanelIfNeeded();
 
       // 验证：Listings 分析标签存在
-      await expect(page.locator('div:has-text("Listings 分析")')).toBeVisible();
+      await expect(page.locator('.ai-analysis-wrapper').getByText('Listings 分析', { exact: true }).first()).toBeVisible();
 
       // 验证：Reviews 分析标签存在
-      await expect(page.locator('div:has-text("Reviews 分析")')).toBeVisible();
+      await expect(page.locator('.ai-analysis-wrapper').getByText('Reviews 分析', { exact: true }).first()).toBeVisible();
 
       console.log('✅ 分析目标分类显示正确');
     });
@@ -525,8 +523,8 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       }
 
       // 验证：应该显示无数据提示
-      await expect(page.locator('div:has-text("暂无产品数据")')).toBeVisible();
-      await expect(page.locator('a:has-text("前往数据采集")')).toBeVisible();
+      await expect(page.getByRole('heading', { name: '暂无产品数据' })).toBeVisible();
+      await expect(page.getByRole('link', { name: /前往数据采集/ })).toBeVisible();
 
       console.log('✅ 无数据提示显示正确');
     });
@@ -537,11 +535,11 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       await aiAnalysis.clearAllTargets();
 
       // 悬停在按钮上
-      await aiAnalysis.hover('button:has-text("开始分析")');
+      await page.locator('button:has-text("开始分析")').hover({ force: true });
       await aiAnalysis.wait(500);
 
       // 验证：应该显示禁用原因提示
-      const hasTooltip = await page.locator('div:has-text("请先选择")').isVisible();
+      const hasTooltip = await page.locator('div:has-text("请先选择")').first().isVisible();
       
       if (hasTooltip) {
         console.log('✅ 禁用原因提示显示正确');
