@@ -43,6 +43,14 @@ const mocks = vi.hoisted(() => ({
     };
     return paths[routeId] || `/${routeId}`;
   }),
+  routeIdToPathStrict: vi.fn((routeId: string) => {
+    const paths: Record<string, string> = {
+      keyword_hunter: '/keyword_hunter',
+      ppc_search_terms: '/app-center/ppc-search-terms',
+      playground: '/app-center/playground/deep-chat',
+    };
+    return paths[routeId] || null;
+  }),
 }));
 
 vi.mock('./navigo', () => ({
@@ -66,6 +74,7 @@ vi.mock('../ui/navigation', () => ({
 vi.mock('./routePaths', () => ({
   normalizeRoutePath: mocks.normalizeRoutePath,
   routeIdToPath: mocks.routeIdToPath,
+  routeIdToPathStrict: mocks.routeIdToPathStrict,
 }));
 
 vi.mock('../EventBus', () => ({
@@ -120,6 +129,7 @@ beforeEach(() => {
   mocks.eventBusOn.mockReset();
   mocks.normalizeRoutePath.mockClear();
   mocks.routeIdToPath.mockClear();
+  mocks.routeIdToPathStrict.mockClear();
   window.location.hash = '';
 });
 
@@ -186,6 +196,15 @@ describe('initRouter navigation and teardown', () => {
     const routeChangeHandler = mocks.eventBusOn.mock.calls[0]?.[1];
     routeChangeHandler?.({ routeId: 'keyword_hunter' });
     expect(mocks.router.navigate).toHaveBeenCalledWith('/keyword_hunter');
+
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    mocks.router.navigate.mockClear();
+    routeChangeHandler?.({ routeId: '__missing__' });
+    expect(consoleWarn).toHaveBeenCalledWith(
+      '[initRouter] Ignored route-change for unknown routeId:',
+      '__missing__'
+    );
+    expect(mocks.router.navigate).not.toHaveBeenCalled();
 
     window.location.hash = '#/app-center/playground';
     window.dispatchEvent(new PopStateEvent('popstate'));

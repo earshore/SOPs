@@ -11,8 +11,6 @@ import {
   type ModuleConfig,
   type RouteConfig,
 } from '@/common/config/menuConfig';
-import { APP_EVENTS } from '@/common/constants/eventConstants';
-import eventBus from '@/common/EventBus';
 import { appStore } from '@/stores/useAppStore';
 import { SystemError } from '@/common/errors/AppError';
 
@@ -55,7 +53,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
-  eventBus.removeAllListeners(APP_EVENTS.ROUTE_CHANGE);
   HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
   window.matchMedia = originalMatchMedia;
   document.body.innerHTML = '';
@@ -68,11 +65,9 @@ afterEach(() => {
     expect(() => new OverviewRenderer(container, '__missing__')).toThrow('模块配置未找到');
   });
 
-  it('renders categorized overview content and emits route change events', async () => {
+  it('renders categorized overview content with delegated route actions', async () => {
     const container = document.createElement('main');
     const route = firstRouteInCategory('sops');
-    const listener = vi.fn();
-    eventBus.on(APP_EVENTS.ROUTE_CHANGE, listener);
 
     const renderer = new OverviewRenderer(container, 'sops', {
       categoryKey: 'sopCategories',
@@ -89,8 +84,9 @@ afterEach(() => {
     expect(container.querySelector(`[data-tab="${route.id}"]`)).not.toBeNull();
     expect(container.textContent).toContain('功能模块');
 
-    container.querySelector<HTMLElement>(`[data-tab="${route.id}"]`)?.click();
-    expect(listener).toHaveBeenCalledWith({ routeId: route.id });
+    expect(
+      container.querySelector<HTMLElement>(`[data-tab="${route.id}"]`)?.dataset.action
+    ).toBe('switch-tab');
   });
 
   it('supports custom guides, alternate layouts, and disabled chrome sections', async () => {

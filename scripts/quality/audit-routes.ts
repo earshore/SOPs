@@ -11,6 +11,7 @@ import {
   sopsManifest,
 } from '@/common/config/routeManifests';
 import { convertMenuConfig } from '@/common/router/navigo/RouteConfigConverter';
+import { LEGACY_ROUTE_ALIASES } from '@/common/router/legacyRouteAliases';
 import { routeIdToPath } from '@/common/router/routePaths';
 import { MODULE_MAP as AMZ_HUB_MODULE_MAP } from '@/modules/amz_hub/module.loaders';
 import { MODULE_MAP as APP_CENTER_MODULE_MAP } from '@/modules/app_center/module.loaders';
@@ -30,6 +31,16 @@ interface AuditIssue {
 
 interface StaticTabReference {
   routeId: string;
+  file: string;
+  line: number;
+}
+
+interface StaticSwitchTabAction {
+  file: string;
+  line: number;
+}
+
+interface LegacyRouteChangeEmit {
   file: string;
   line: number;
 }
@@ -143,9 +154,11 @@ function auditAliases(issues: AuditIssue[], registeredPaths: Set<string>): void 
   const conversion = convertMenuConfig(MENU_CONFIG, { validate: true });
   const aliases: Record<string, string> = {
     ...conversion.aliases,
-    '/ppc_search_terms': '/ppc_search_terms',
-    '/app-center/playground': '/playground',
   };
+
+  for (const legacyAlias of LEGACY_ROUTE_ALIASES) {
+    aliases[legacyAlias.alias] = legacyAlias.routeId;
+  }
 
   for (const [alias, target] of Object.entries(aliases)) {
     const aliasPath = normalizePath(alias);
@@ -228,6 +241,61 @@ function collectStaticTabReferences(): StaticTabReference[] {
   return references;
 }
 
+function collectStaticSwitchTabActions(): StaticSwitchTabAction[] {
+  const files = [join(projectRoot, 'index.html'), ...collectSourceFiles(join(projectRoot, 'src'))];
+  const references: StaticSwitchTabAction[] = [];
+  const switchTabTagPattern = /<[^>]*\bdata-action\s*=\s*(["'])switch-tab\1[^>]*>/gis;
+  const dataTabPattern = /\bdata-tab\s*=\s*(["'])(.*?)\1/i;
+
+  for (const file of files) {
+    const content = readFileSync(file, 'utf-8');
+    let match: RegExpExecArray | null;
+
+    switchTabTagPattern.lastIndex = 0;
+    while ((match = switchTabTagPattern.exec(content)) !== null) {
+      const tag = match[0];
+      if (tag.includes('${') || dataTabPattern.test(tag)) {
+        continue;
+      }
+
+      references.push({
+        file: relative(projectRoot, file),
+        line: content.slice(0, match.index).split('\n').length,
+      });
+    }
+  }
+
+  return references;
+}
+
+function collectLegacyRouteChangeEmits(): LegacyRouteChangeEmit[] {
+  const files = collectSourceFiles(join(projectRoot, 'src'));
+  const references: LegacyRouteChangeEmit[] = [];
+  const legacyRouteChangeEmitPattern =
+    /\.emit\s*\(\s*(?:APP_EVENTS\.ROUTE_CHANGE|['"]route-change['"])/g;
+  const allowedEmitterFile = join('src', 'common', 'router', 'routeEvents.ts');
+
+  for (const file of files) {
+    const relativeFile = relative(projectRoot, file);
+    if (relativeFile === allowedEmitterFile) {
+      continue;
+    }
+
+    const content = readFileSync(file, 'utf-8');
+    let match: RegExpExecArray | null;
+
+    legacyRouteChangeEmitPattern.lastIndex = 0;
+    while ((match = legacyRouteChangeEmitPattern.exec(content)) !== null) {
+      references.push({
+        file: relativeFile,
+        line: content.slice(0, match.index).split('\n').length,
+      });
+    }
+  }
+
+  return references;
+}
+
 function auditStaticTabReferences(issues: AuditIssue[], routeIdSet: Set<string>): void {
   for (const reference of collectStaticTabReferences()) {
     if (!routeIdSet.has(reference.routeId)) {
@@ -239,6 +307,30 @@ function auditStaticTabReferences(issues: AuditIssue[], routeIdSet: Set<string>)
         `${reference.file}:${reference.line}`
       );
     }
+  }
+}
+
+function auditSwitchTabActions(issues: AuditIssue[]): void {
+  for (const reference of collectStaticSwitchTabActions()) {
+    addIssue(
+      issues,
+      'error',
+      'static-switch-tab',
+      'Static data-action="switch-tab" is missing a data-tab route id',
+      `${reference.file}:${reference.line}`
+    );
+  }
+}
+
+function auditLegacyRouteChangeEmits(issues: AuditIssue[]): void {
+  for (const reference of collectLegacyRouteChangeEmits()) {
+    addIssue(
+      issues,
+      'error',
+      'legacy-route-change-emit',
+      'Direct legacy route-change emits must go through emitRouteChange()',
+      `${reference.file}:${reference.line}`
+    );
   }
 }
 
@@ -328,6 +420,8 @@ function main(): void {
   auditManifestPathDeclarations(issues);
   const registeredPaths = auditRoutePaths(issues, routeIds);
   auditAliases(issues, registeredPaths);
+  auditSwitchTabActions(issues);
+  auditLegacyRouteChangeEmits(issues);
   auditStaticTabReferences(issues, routeIdSet);
   auditModuleMaps(issues);
   auditMenuConfig(issues, routeIdSet);

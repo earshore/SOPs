@@ -117,18 +117,22 @@ import {
   scrollToHubModule,
   scrollToMoreModule,
 } from './navigation';
-import { routeIdToPath } from '../router/routePaths';
+import { routeIdToPathStrict } from '../router/routePaths';
 
 registerActions({
   // 路由导航（通过 data-action="switch-tab" data-tab="xxx" 触发）
   'switch-tab': async (params: Record<string, unknown>, event: Event) => {
     event.preventDefault();
-    const tab = (params.tab as string) || '';
+    const tab = typeof params.tab === 'string' ? params.tab.trim() : '';
     if (!tab) {
       return;
     }
 
-    const path = routeIdToPath(tab);
+    const path = routeIdToPathStrict(tab);
+    if (!path) {
+      console.warn('[ActionRegistry] switch-tab ignored unknown routeId:', tab);
+      return;
+    }
 
     closeMegaMenus({ blurActive: true });
     await navigateTo(path);

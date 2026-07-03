@@ -15,7 +15,8 @@ import {
 import { MENU_CONFIG } from '../config/menuConfig';
 import { updateUIForRoute } from '../ui/navigation';
 import { SystemError } from '@/common/errors/AppError';
-import { normalizeRoutePath, routeIdToPath } from './routePaths';
+import { normalizeRoutePath, routeIdToPath, routeIdToPathStrict } from './routePaths';
+import { LEGACY_ROUTE_ALIASES, shouldReplaceLegacyRoute } from './legacyRouteAliases';
 
 // 全局路由实例
 let routerInstance: NavigoAdapter | null = null;
@@ -56,8 +57,10 @@ function registerConvertedRoutes(router: NavigoAdapter, conversionResult: Conver
   for (const [alias, target] of Object.entries(conversionResult.aliases)) {
     router.registerAlias(alias, routeIdToPath(target.replace(/^\//, '')));
   }
-  router.registerAlias('/ppc_search_terms', routeIdToPath('ppc_search_terms'));
-  router.registerAlias('/app-center/playground', routeIdToPath('playground'));
+
+  for (const legacyAlias of LEGACY_ROUTE_ALIASES) {
+    router.registerAlias(legacyAlias.alias, routeIdToPath(legacyAlias.routeId));
+  }
 }
 
 function createAndAttachStoreSync(router: NavigoAdapter): RouterStoreSyncInstance {
@@ -99,9 +102,7 @@ function setupPopstateNavigation(): void {
     const hash = window.location.hash.replace('#', '');
     if (hash && routerInstance) {
       const normalizedHash = normalizeRoutePath(hash);
-      const isLegacyPlaygroundPath = normalizedHash === '/app-center/playground';
-      const isLegacyPpcPath = normalizedHash === '/ppc_search_terms';
-      const shouldReplaceLegacyPath = isLegacyPlaygroundPath || isLegacyPpcPath;
+      const shouldReplaceLegacyPath = shouldReplaceLegacyRoute(normalizedHash);
       routerInstance.navigate(normalizedHash, {
         updateHistory: shouldReplaceLegacyPath ? true : false,
         replace: shouldReplaceLegacyPath,
@@ -116,7 +117,12 @@ function setupRouteChangeListener(): void {
     eventBus.on('route-change', (data: unknown) => {
       const payload = data as { routeId: string } | undefined;
       if (payload && payload.routeId && routerInstance) {
-        const path = routeIdToPath(payload.routeId);
+        const path = routeIdToPathStrict(payload.routeId);
+        if (!path) {
+          console.warn('[initRouter] Ignored route-change for unknown routeId:', payload.routeId);
+          return;
+        }
+
         routerInstance.navigate(path);
       }
     });
@@ -211,7 +217,7 @@ export function triggerInitialNavigation(): void {
     });
   } else {
     const normalizedHash = normalizeRoutePath(currentHash);
-    if (normalizedHash === '/app-center/playground' || normalizedHash === '/ppc_search_terms') {
+    if (shouldReplaceLegacyRoute(normalizedHash)) {
       void routerInstance.navigate(normalizedHash, {
         replace: true,
         skipMiddleware: false,

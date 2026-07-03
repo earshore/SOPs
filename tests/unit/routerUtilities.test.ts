@@ -15,7 +15,18 @@ import {
   assertValidRouteId,
   isValidRouteId,
 } from '@/common/router/navigo/route-ids';
-import { normalizeRoutePath, routeIdToPath } from '@/common/router/routePaths';
+import {
+  getLegacyRouteAlias,
+  shouldReplaceLegacyRoute,
+} from '@/common/router/legacyRouteAliases';
+import {
+  normalizeRoutePath,
+  routeIdToPath,
+  routeIdToPathStrict,
+} from '@/common/router/routePaths';
+import { emitRouteChange } from '@/common/router/routeEvents';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
 import {
   RouterError,
   RouterErrorCode,
@@ -45,6 +56,7 @@ function route(path = '/orders', config: Partial<RouteConfig> = {}): Route {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  eventBus.removeAllListeners(APP_EVENTS.ROUTE_CHANGE);
 });
 
   it('validates route ids, paths, and plain objects', () => {
@@ -65,6 +77,36 @@ afterEach(() => {
     expect(routeIdToPath('sops_overview')).toBe('/sops_overview');
     expect(routeIdToPath('#/app-center/scraper/')).toBe('/app-center/scraper');
     expect(normalizeRoutePath('///known/')).toBe('/known');
+    expect(routeIdToPathStrict('ppc_search_terms')).toBe('/app-center/ppc-search-terms');
+    expect(routeIdToPathStrict('/app-center/scraper')).toBeNull();
+    expect(routeIdToPathStrict('__missing__')).toBeNull();
+  });
+
+  it('emits legacy route-change events only for known route ids', () => {
+    const listener = vi.fn();
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    eventBus.on(APP_EVENTS.ROUTE_CHANGE, listener);
+
+    expect(emitRouteChange(' ppc_search_terms ')).toBe(true);
+    expect(listener).toHaveBeenCalledWith({ routeId: 'ppc_search_terms' });
+
+    expect(emitRouteChange('__missing__')).toBe(false);
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(consoleWarn).toHaveBeenCalledWith(
+      '[routeEvents] Ignored route-change for unknown routeId:',
+      '__missing__'
+    );
+  });
+
+  it('centralizes legacy route alias lookup and replacement policy', () => {
+    expect(getLegacyRouteAlias('#/ppc_search_terms/')).toMatchObject({
+      alias: '/ppc_search_terms',
+      routeId: 'ppc_search_terms',
+      replace: true,
+    });
+    expect(getLegacyRouteAlias('/missing')).toBeNull();
+    expect(shouldReplaceLegacyRoute('/app-center/playground')).toBe(true);
+    expect(shouldReplaceLegacyRoute('/app-center/playground/deep-chat')).toBe(false);
   });
 
   it('validates route configs, metadata, and param definitions', () => {

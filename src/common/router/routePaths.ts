@@ -1,4 +1,5 @@
 import { buildRoutePathMap } from '../config/moduleManifest';
+import { isValidRouteId } from '../constants/routes';
 import { ROUTE_MANIFESTS } from '../config/routeManifests';
 
 const ROUTE_PATHS = buildRoutePathMap(ROUTE_MANIFESTS);
@@ -27,4 +28,17 @@ export function routeIdToPath(routeId: string): string {
   }
 
   return normalizeRoutePath(ROUTE_PATHS[cleanRouteId] || cleanRouteId);
+}
+
+export function routeIdToPathStrict(routeId: unknown): string | null {
+  if (typeof routeId !== 'string') {
+    return null;
+  }
+
+  const cleanRouteId = routeId.trim();
+  if (!isValidRouteId(cleanRouteId)) {
+    return null;
+  }
+
+  return routeIdToPath(cleanRouteId);
 }

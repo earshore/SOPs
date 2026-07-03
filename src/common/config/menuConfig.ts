@@ -5,6 +5,7 @@
 
 import { buildMenuRoutes } from './moduleManifest';
 import { ROUTE_MANIFESTS } from './routeManifests';
+import { validateModuleConfig, validateRouteConfig } from '../utils/typeGuards';
 import type { RouteMeta } from '@/common/router/navigo/types';
 // ==================== 类型定义 ====================
 
@@ -411,10 +412,7 @@ export function getRouteFullConfig(routeId: string): RouteFullConfig | null {
  * });
  */
 export function registerRoute(routeId: string, config: RouteConfig): boolean {
-  // 运行时类型校验
   try {
-    // 动态导入避免循环依赖
-    const { validateRouteConfig } = require('../utils/typeGuards');
     validateRouteConfig(config);
   } catch (error) {
     console.error(`[MenuConfig] 路由注册失败 "${routeId}":`, (error as Error).message);
@@ -436,10 +434,7 @@ export function registerRoute(routeId: string, config: RouteConfig): boolean {
  * @returns 是否注册成功
  */
 export function registerModule(moduleId: string, config: Omit<ModuleConfig, 'id'>): boolean {
-  // 运行时类型校验
   try {
-    // 动态导入避免循环依赖
-    const { validateModuleConfig } = require('../utils/typeGuards');
     validateModuleConfig({
       id: moduleId,
       ...config,

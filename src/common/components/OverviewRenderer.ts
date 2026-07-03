@@ -19,10 +19,8 @@ import {
   type RouteConfig,
   type ModuleConfig,
 } from '../config/menuConfig';
-import { APP_EVENTS } from '../constants/eventConstants';
 import type { CategoryConfig } from './SidebarRenderer';
 import { SystemError } from '@/common/errors/AppError';
-import eventBus from '@common/EventBus';
 import { setSafeHtml } from '../utils/security';
 /**
  * 布局类型
@@ -522,17 +520,6 @@ export class OverviewRenderer {
    * 初始化事件监听
    */
   private _initEvents(): void {
-    // 路由切换事件
-    const cards = this.container.querySelectorAll('[data-action="switch-tab"]');
-    cards.forEach(card => {
-      card.addEventListener('click', () => {
-        const targetTab = (card as HTMLElement).dataset.tab;
-        if (targetTab) {
-          eventBus.emit(APP_EVENTS.ROUTE_CHANGE, { routeId: targetTab });
-        }
-      });
-    });
-
     // 搜索功能
     if (this.options.showSearch) {
       const searchInput = this.container.querySelector(

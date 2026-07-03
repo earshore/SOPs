@@ -5,9 +5,8 @@
 
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { safeMount } from '@/common/utils/safeMount';
-import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { setSafeHtml } from '@/common/utils/security';
-import eventBus from '@/common/EventBus';
+import { emitRouteChange } from '@/common/router/routeEvents';
 
 interface OverviewFilterState {
   category: string;
@@ -82,7 +81,7 @@ function initOverviewEvents(container: HTMLElement): void {
       event.stopPropagation();
       const targetTab = link.dataset.childTab;
       if (targetTab) {
-        eventBus.emit(APP_EVENTS.ROUTE_CHANGE, { routeId: targetTab });
+        emitRouteChange(targetTab);
       }
     });
   });
@@ -90,18 +89,10 @@ function initOverviewEvents(container: HTMLElement): void {
   // 应用卡片点击事件
   const appCards = container.querySelectorAll<HTMLElement>('[data-action="switch-tab"]');
   appCards.forEach(card => {
-    const switchToTab = () => {
-      const targetTab = card.dataset.tab;
-      if (targetTab) {
-        eventBus.emit(APP_EVENTS.ROUTE_CHANGE, { routeId: targetTab });
-      }
-    };
-
-    card.addEventListener('click', switchToTab);
     card.addEventListener('keydown', event => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        switchToTab();
+        card.click();
       }
     });
   });

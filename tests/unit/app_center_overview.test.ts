@@ -61,7 +61,7 @@ describe('App Center Overview', () => {
     expect(container.querySelector('.app-overview-container')).not.toBeNull();
   });
 
-  it('emits route changes from child links and app cards', async () => {
+  it('emits route changes from child links and leaves app cards delegated', async () => {
     const container = document.createElement('div');
 
     await overviewModule.mount(container);
@@ -70,10 +70,11 @@ describe('App Center Overview', () => {
     expect(eventBus.emit).toHaveBeenCalledTimes(1);
     expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.ROUTE_CHANGE, { routeId: 'ai_analysis' });
 
-    vi.mocked(eventBus.emit).mockClear();
-    container.querySelector<HTMLElement>('[data-tab="scraper"]')?.click();
+    const appCard = container.querySelector<HTMLElement>('[data-tab="scraper"]');
+    appCard?.click();
 
-    expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.ROUTE_CHANGE, { routeId: 'scraper' });
+    expect(appCard?.dataset.action).toBe('switch-tab');
+    expect(eventBus.emit).toHaveBeenCalledTimes(1);
   });
 
   it('filters cards by category and updates the visible count', async () => {
