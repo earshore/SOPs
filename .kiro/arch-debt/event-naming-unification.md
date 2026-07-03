@@ -37,13 +37,6 @@ REGISTER_ACTIONS: 'registerActions'             // ❌ 应改为 kebab-case
 UNREGISTER_ACTIONS: 'unregisterActions'         // ❌ 应改为 kebab-case
 ```
 
-#### 模式4: 模块级事件（保持不变）
-```typescript
-QALAB_DATA_IMPORTED: 'qalab:data-imported'      // ✅ 模块级事件，保持不变
-```
-
----
-
 ## 🎯 修复目标
 
 将所有应用级事件统一为 `app:` 前缀 + kebab-case 格式，保持与已修复的 `ANIMATION_SETTINGS_CHANGED` 一致。
@@ -161,15 +154,6 @@ UNREGISTER_ACTIONS: 'app:unregister-actions'
 
 ---
 
-### 9. QALAB_DATA_IMPORTED ✅ 保持不变
-```typescript
-// 保持不变（模块级事件）
-QALAB_DATA_IMPORTED: 'qalab:data-imported'
-```
-**说明**: 这是模块级事件，使用 `qalab:` 前缀是合理的，不需要修改
-
----
-
 ## 📊 影响范围统计
 
 ### 按使用频率排序
@@ -246,9 +230,6 @@ export const APP_EVENTS = {
   NAVIGATE_TO_AI_ANALYSIS: 'app:navigate-to-ai-analysis',
   REGISTER_ACTIONS: 'app:register-actions',
   UNREGISTER_ACTIONS: 'app:unregister-actions',
-  
-  // 保持不变
-  QALAB_DATA_IMPORTED: 'qalab:data-imported',
 } as const;
 ```
 

@@ -9,30 +9,30 @@
 
 | 债务类型 | 文件数量 | 已完成 | 剩余 | 完成率 |
 |---------|---------|--------|------|--------|
-| **错误处理** | 12个文件 | 12个 | 0个 | 100% ✅ |
+| **错误处理** | 10个文件 | 10个 | 0个 | 100% ✅ |
 | **存储访问** | 2个文件 | 1个 | 1个 | 50% |
-| **事件机制** | 18个文件 | 10个 | 8个 | 56% |
+| **事件机制** | 17个文件 | 9个 | 8个 | 53% |
 | **日志记录** | 3个文件 | 0个 | 3个 | 0% |
 | **代码规范** | 1个任务 | 0个 | 1个 | 0% |
 | **内存泄漏** | 3个文件 | 3个 | 0个 | 100% ✅ |
 
-**总计**: 38个文件 + 1个任务，已完成 30个，剩余 8个，整体完成率 **79%**
+**总计**: 35个文件 + 1个任务，已完成 27个，剩余 8个，整体完成率 **77%**
 
 ---
 
-## 🔴 错误处理债务 (12个文件)
+## 🔴 错误处理债务 (10个文件)
 
 ### P0 - 核心服务 (3个文件)
 - [x] `src/services/llmService.ts` - **高风险** ✅ 第四批已完成
   - 问题: 5处使用 `throw new Error()`
-  - 影响: LLM调用核心服务，影响AI分析、Keyword Hunter、QALab等多个模块
+  - 影响: LLM调用核心服务，影响AI分析、Keyword Hunter等多个模块
   - 修复内容:
     - 第127-137行：生产环境安全检查 → `SystemError` (LLM_DANGEROUS_ENDPOINT)
     - 第357-359行：生产环境安全检查 → `SystemError` (LLM_DANGEROUS_ENDPOINT)
     - 第408行：模型列表为空 → `ApiError` (API_EMPTY_MODEL_LIST)
     - 第336行：兜底错误 → `SystemError` (LLM_UNKNOWN_FAILURE)
 
-### P1 - 业务模块 (6个文件)
+### P1 - 业务模块 (4个文件)
 - [x] `src/modules/app_center/views/master_analysis/services/analysisService.ts` - **中风险** ✅ 第一批已完成
   - 问题: 1处使用 `throw new Error()`
   - 影响: AI分析服务
@@ -40,14 +40,6 @@
 - [x] `src/modules/app_center/views/keyword_hunter/services/trackerService.ts` - **中风险** ✅ 第一批已完成
   - 问题: 4处使用 `throw new Error()`
   - 影响: Keyword Hunter追踪服务
-  
-- [x] `src/modules/app_center/views/master_analysis/qalab/services/rufusSimulator.ts` - **中风险** ✅ 第一批已完成
-  - 问题: 2处使用 `throw new Error()`
-  - 影响: QALab Rufus模拟器
-  
-- [x] `src/modules/app_center/views/master_analysis/qalab/services/importHandler.ts` - **中风险** ✅ 第二批已完成
-  - 问题: 7处使用 `throw new Error()`
-  - 影响: QALab数据导入
   
 - [x] `src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts` - **中风险** ✅ 已完成
   - 问题: 14处使用 `throw new Error()` + 2处触发 `HISTORY_UPDATED` 事件
@@ -74,7 +66,7 @@
 
 ---
 
-## 🟡 事件机制债务 (18个文件)
+## 🟡 事件机制债务 (17个文件)
 
 ### P0 - 核心基础设施 (4个文件)
 - [ ] `src/common/constants/eventConstants.ts` - **高风险** ⚠️ 保留
@@ -110,7 +102,7 @@
   - 问题: 触发 `theme-changed` 事件
   - 影响: 主题切换
 
-### P1 - 业务模块 (8个文件)
+### P1 - 业务模块 (7个文件)
 - [x] `src/modules/app_center/views/overview/index.ts` - **中风险** ✅ 第二批已完成
   - 问题: 2处触发路由变化事件
   - 影响: Overview页面导航
@@ -118,10 +110,6 @@
 - [x] `src/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel.ts` - **中风险** ✅ 第二批已完成
   - 问题: 监听 `HISTORY_UPDATED` 事件
   - 影响: Promptlab历史更新
-  
-- [x] `src/modules/app_center/views/master_analysis/qalab/index.ts` - **中风险** ✅ 第二批已完成
-  - 问题: 监听自定义 `qalab:data-imported` 事件
-  - 影响: QALab数据导入
   
 - [x] `src/modules/app_center/views/master_analysis/ai_analysis/components/actions.ts` - **中风险** ✅ 第二批已完成
   - 问题: 触发 `history-updated` 事件
@@ -276,22 +264,19 @@
 
 ## 🎯 修复优先级建议
 
-### 第一批（5-6个文件，低风险）
+### 第一批（5个文件，低风险）
 重点：独立的业务模块，影响范围可控
 1. `src/modules/app_center/views/master_analysis/services/analysisService.ts`
 2. `src/modules/app_center/views/keyword_hunter/services/trackerService.ts`
-3. `src/modules/app_center/views/master_analysis/qalab/services/rufusSimulator.ts`
-4. `src/common/router/navigo/PreloadManager.ts`
-5. `src/common/utils/WorkingStateManager.ts`
-6. `src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService.ts`
+3. `src/common/router/navigo/PreloadManager.ts`
+4. `src/common/utils/WorkingStateManager.ts`
+5. `src/modules/app_center/views/master_analysis/ai_analysis/services/parallelAnalysisService.ts`
 
-### 第二批（5-6个文件，中风险）
-重点：QALab和Scraper模块
-1. `src/modules/app_center/views/master_analysis/qalab/services/importHandler.ts`
-2. `src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts`
-3. `src/modules/app_center/views/master_analysis/qalab/index.ts`
-4. `src/modules/app_center/views/master_analysis/ai_analysis/components/actions.ts`
-5. `src/modules/app_center/views/overview/index.ts`
+### 第二批（3个文件，中风险）
+重点：Scraper、AI Analysis、Overview模块
+1. `src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts`
+2. `src/modules/app_center/views/master_analysis/ai_analysis/components/actions.ts`
+3. `src/modules/app_center/views/overview/index.ts`
 
 ### 第三批（4-5个文件，高风险）
 重点：核心服务和事件系统

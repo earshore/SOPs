@@ -187,7 +187,7 @@ npm run type-check
 
 ### 预期行为
 修复后，组件在以下场景会正确清理资源：
-1. **路由切换**: 从 Scraper → AI Analysis → Promptlab → QALab
+1. **路由切换**: 从 Scraper → AI Analysis → Promptlab
 2. **组件卸载**: Alpine.js 自动调用 `destroy()` 方法
 3. **内存泄漏防止**: 所有事件监听器和订阅被正确清理
 

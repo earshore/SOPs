@@ -22,7 +22,7 @@
 ## 配色方案
 
 ### AI & 技术类 (蓝色系)
-**适用模块**: AI Analysis, Scraper, PromptLab, QA Lab
+**适用模块**: AI Analysis, Scraper, PromptLab
 
 ```css
 /* 方案 A: 天空蓝 */

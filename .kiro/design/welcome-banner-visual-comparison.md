@@ -30,7 +30,6 @@
 - AI Analysis
 - Scraper
 - PromptLab
-- QA Lab
 - App Center Overview
 
 ---

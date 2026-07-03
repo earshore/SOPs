@@ -14,7 +14,10 @@ export interface ProductDNA {
   targetMarket?: string;
   keywordsTier1?: string;
   keywordsTier2?: string;
+  tier1Keywords?: string;
+  tier2Keywords?: string;
   negative?: string;
+  negativeKeywords?: string;
   audience?: string;
   usps?: string;
   specs?: string;
@@ -188,20 +191,24 @@ export class PromptlabPage extends BasePage {
    * @param data - 产品 DNA 数据
    */
   async fillProductDNA(data: ProductDNA): Promise<void> {
+    const keywordsTier1 = data.keywordsTier1 ?? data.tier1Keywords;
+    const keywordsTier2 = data.keywordsTier2 ?? data.tier2Keywords;
+    const negative = data.negative ?? data.negativeKeywords;
+
     if (data.targetMarket) {
       await this.selectTargetMarket(data.targetMarket);
     }
 
-    if (data.keywordsTier1) {
-      await this.fillTier1Keywords(data.keywordsTier1);
+    if (keywordsTier1) {
+      await this.fillTier1Keywords(keywordsTier1);
     }
 
-    if (data.keywordsTier2) {
-      await this.fillTier2Keywords(data.keywordsTier2);
+    if (keywordsTier2) {
+      await this.fillTier2Keywords(keywordsTier2);
     }
 
-    if (data.negative) {
-      await this.fillNegativeKeywords(data.negative);
+    if (negative) {
+      await this.fillNegativeKeywords(negative);
     }
 
     if (data.audience) {
@@ -426,6 +433,16 @@ export class PromptlabPage extends BasePage {
     await this.clickFirstVisible(`${this.selectors.reportSectionsContainer} button:has-text("清空")`);
   }
 
+  async clearReportSelections(): Promise<void> {
+    await this.clearReportSections();
+  }
+
+  async getReportSectionsCount(): Promise<number> {
+    return await this.page
+      .locator(`${this.selectors.reportSectionsContainer} input[type="checkbox"]`)
+      .count();
+  }
+
   private async clickFirstVisible(selector: string): Promise<void> {
     const buttons = this.page.locator(selector);
     const count = await buttons.count();
@@ -575,6 +592,10 @@ export class PromptlabPage extends BasePage {
     await this.wait(500); // 等待翻转动画
   }
 
+  async switchToVisualMode(): Promise<void> {
+    await this.switchConsoleMode('visual');
+  }
+
   /**
    * 生成 Listing Prompt
    */
@@ -633,6 +654,10 @@ export class PromptlabPage extends BasePage {
     return await this.getValue(this.selectors.promptOutput);
   }
 
+  async hasGeneratedPrompt(): Promise<boolean> {
+    return (await this.getGeneratedPrompt()).trim().length > 0;
+  }
+
   /**
    * 复制 Prompt 到剪贴板
    */
@@ -646,6 +671,12 @@ export class PromptlabPage extends BasePage {
    */
   async clearAllInputs(): Promise<void> {
     await this.click(this.selectors.clearButton);
+    const modal = this.page.getByRole('dialog', { name: /清空 PromptLab 输入/ });
+    await modal.waitFor({ state: 'visible', timeout: 3000 });
+    await modal.getByRole('button', { name: '清空输入' }).click();
+    await this.waitForProfileField('targetMarket', '');
+    await this.waitForProfileField('keywordsTier1', '');
+    await this.waitForProfileField('keywordsTier2', '');
   }
 
   /**

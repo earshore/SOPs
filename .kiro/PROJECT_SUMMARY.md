@@ -137,8 +137,7 @@ npm run dev
 3. 导航: App Center → Scraper
 4. 切换到 AI Analysis
 5. 切换到 Promptlab
-6. 切换到 QALab
-7. 重复切换 5-10 次
+6. 重复切换 5-10 次
 
 **预期结果**:
 - ✅ 控制台无 `this.$cleanup is not a function` 错误

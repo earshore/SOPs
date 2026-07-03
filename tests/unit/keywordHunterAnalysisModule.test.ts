@@ -211,7 +211,7 @@ it('restores saved markdown, renders score badges, and avoids double saving HTML
   expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
 });
 
-it('restores the latest reported snapshot when analysis state is empty', async () => {
+it('does not restore a historical report when the current analysis state is empty', async () => {
   const snapshot = {
     id: 'kh-reported',
     status: 'reported',
@@ -241,24 +241,39 @@ it('restores the latest reported snapshot when analysis state is empty', async (
     },
   };
   analysisMocks.getAllSnapshotsAsync.mockResolvedValueOnce([snapshot]);
-  analysisMocks.restoreSnapshot.mockImplementationOnce(() => {
-    Object.assign(analysisMocks.state.keywordTracker, {
-      processedCopy: validListing,
-      keywords: ['wireless earbuds'],
-      matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
-      unmatchedKeywords: [],
-      llmAnalysisResult: scoredMarkdown,
-    });
-    return snapshot;
-  });
+  analysisMocks.state.keywordTracker.processedCopy = validListing;
 
   const container = await mountAnalysis();
 
-  expect(KeywordHunterSnapshotService.restore).toHaveBeenCalledWith(snapshot);
-  expect(container.querySelector('h2')?.textContent).toContain('88/100');
+  expect(KeywordHunterSnapshotService.getAllAsync).not.toHaveBeenCalled();
+  expect(KeywordHunterSnapshotService.restore).not.toHaveBeenCalled();
+  expect(container.querySelector('#kt-llm-analysis-result')?.textContent).not.toContain('88/100');
   expect(container.querySelector('#kt-analyze-btn')?.classList.contains('cursor-pointer')).toBe(
     true
   );
+});
+
+it('does not write a stale cached report back after the current input clears analysis', async () => {
+  analysisMocks.state.keywordTracker.llmAnalysisResult = scoredMarkdown;
+  const firstContainer = await mountAnalysis();
+  expect(firstContainer.querySelector('#kt-llm-analysis-result')?.textContent).toContain('88/100');
+
+  unmount();
+  firstContainer.remove();
+
+  Object.assign(analysisMocks.state.keywordTracker, {
+    processedCopy: `${validListing} Updated.`,
+    llmAnalysisResult: '',
+  });
+
+  const secondContainer = await mountAnalysis();
+  expect(secondContainer.querySelector('#kt-llm-analysis-result')?.textContent).not.toContain(
+    '88/100'
+  );
+
+  unmount();
+
+  expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe('');
 });
 
 it('shows loading phases, renders successful analysis, and stores raw markdown', async () => {
@@ -361,6 +376,48 @@ it('keeps the pending analysis state visible after leaving and returning', async
   expect(secondContainer.querySelector('#kt-analyze-btn-text')?.textContent).toBe('报告已生成');
   expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
   expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
+});
+
+it('ignores a pending analysis run after the processed copy changes', async () => {
+  vi.useFakeTimers();
+  analysisMocks.state.keywordTracker.processedCopy = validListing;
+  analysisMocks.state.keywordTracker.keywords = ['wireless earbuds'];
+  let resolveAnalysis: (value: string) => void = () => undefined;
+  mockedCallLLM.mockImplementationOnce(
+    () =>
+      new Promise<string>(resolve => {
+        resolveAnalysis = resolve;
+      })
+  );
+
+  const firstContainer = await mountAnalysis();
+  click(firstContainer.querySelector('#kt-analyze-btn'));
+  await Promise.resolve();
+  await Promise.resolve();
+
+  expect(firstContainer.querySelector('#kt-loading-state')?.textContent).toContain(
+    '正在读取文案与关键词数据'
+  );
+
+  unmount();
+  firstContainer.remove();
+
+  Object.assign(analysisMocks.state.keywordTracker, {
+    processedCopy: `${validListing} Updated.`,
+    llmAnalysisResult: '',
+  });
+
+  const secondContainer = await mountAnalysis();
+  expect(secondContainer.querySelector('#kt-loading-state')).toBeNull();
+
+  resolveAnalysis(scoredMarkdown);
+  await vi.advanceTimersByTimeAsync(0);
+  await vi.advanceTimersByTimeAsync(16);
+
+  expect(secondContainer.querySelector('#kt-llm-analysis-result')?.textContent).not.toContain(
+    '88/100'
+  );
+  expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe('');
 });
 
 it('warns when the generated report cannot be archived automatically', async () => {

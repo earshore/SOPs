@@ -89,11 +89,10 @@
 
 ## 更新的模块列表
 
-### AI & 技术类 (5 个)
+### AI & 技术类 (4 个)
 - ✅ app_center/views/master_analysis/ai_analysis
 - ✅ app_center/views/master_analysis/scraper
 - ✅ app_center/views/master_analysis/promptlab
-- ✅ app_center/views/master_analysis/qalab
 - ✅ app_center/views/overview
 
 ### 分析类 (3 个)

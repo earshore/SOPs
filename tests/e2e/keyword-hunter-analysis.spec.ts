@@ -18,6 +18,17 @@ const GENERATED_REPORT = [
   '| SEO覆盖 | 31/35 | 核心关键词已覆盖 |',
 ].join('\n');
 
+const SEEDED_REPORT = [
+  '## 80/100 — 良好',
+  '',
+  '### 评分',
+  '',
+  '| 维度 | 得分 | 评审结论 |',
+  '|:--|:--|:--|',
+  '| SEO覆盖 | 28/35 | 核心关键词已覆盖 |',
+  '| 违规 | +0 | 未发现风险 |',
+].join('\n');
+
 async function configureMockLLMProvider(page: Page): Promise<void> {
   await page.evaluate(
     ({ endpoint, model, provider }) => {
@@ -89,28 +100,40 @@ async function holdMockAnalysisRequest(page: Page): Promise<{
   };
 }
 
+async function restoreSeededSnapshotFromInput(page: Page): Promise<void> {
+  await page.goto(KEYWORD_HUNTER_ROUTES.input);
+  await page.waitForSelector('#kt-module-input', { timeout: 15000 });
+  await page.locator('button[title="恢复到输入页"]').first().click();
+}
+
 test.describe('Keyword Hunter 分析页', () => {
-  test.beforeEach(async ({ page }) => {
+  test('不会直接显示未应用的历史报告', async ({ page }) => {
     await seedKeywordHunterStorage(
       page,
       createKeywordHunterState({
-        llmAnalysisResult: [
-          '## 80/100 — 良好',
-          '',
-          '### 评分',
-          '',
-          '| 维度 | 得分 | 评审结论 |',
-          '|:--|:--|:--|',
-          '| SEO覆盖 | 28/35 | 核心关键词已覆盖 |',
-          '| 违规 | +0 | 未发现风险 |',
-        ].join('\n'),
+        llmAnalysisResult: SEEDED_REPORT,
       })
     );
+
     await page.goto(KEYWORD_HUNTER_ROUTES.analysis);
     await page.waitForSelector('#kt-llm-analysis-result', { timeout: 15000 });
+
+    await expect(page.locator('#kt-llm-analysis-result')).not.toContainText('80/100');
+    await expect(page.locator('#kt-analyze-btn')).toBeDisabled();
   });
 
-  test('恢复已生成的 Markdown 报告并启用分析按钮', async ({ page }) => {
+  test('应用快照后恢复当前 Markdown 报告并启用分析按钮', async ({ page }) => {
+    await seedKeywordHunterStorage(
+      page,
+      createKeywordHunterState({
+        llmAnalysisResult: SEEDED_REPORT,
+      })
+    );
+    await restoreSeededSnapshotFromInput(page);
+
+    await page.goto(KEYWORD_HUNTER_ROUTES.analysis);
+    await page.waitForSelector('#kt-llm-analysis-result', { timeout: 15000 });
+
     await expect(page.locator('#kt-llm-analysis-result')).toContainText('80/100');
     await expect(page.locator('#kt-llm-analysis-result')).toContainText('核心关键词已覆盖');
     await expect(page.locator('#kt-analyze-btn')).toBeEnabled();
@@ -119,6 +142,7 @@ test.describe('Keyword Hunter 分析页', () => {
   test('生成报告期间切换页面后仍显示进行中状态', async ({ page }) => {
     await seedKeywordHunterStorage(page, createKeywordHunterState());
     const heldRequest = await holdMockAnalysisRequest(page);
+    await restoreSeededSnapshotFromInput(page);
 
     await page.goto(KEYWORD_HUNTER_ROUTES.analysis);
     await page.waitForSelector('#kt-llm-analysis-result', { timeout: 15000 });

@@ -44,7 +44,6 @@
 - App Center Overview
 - Master Analysis (Scraper, AI Analysis)
 - PromptLab
-- QA Lab
 
 **配色方案**:
 ```css

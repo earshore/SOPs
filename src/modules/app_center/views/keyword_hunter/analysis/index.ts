@@ -18,7 +18,6 @@ import { appStore } from '@/stores/useAppStore';
 import { ErrorService } from '../../../../../services/errorService';
 import { createSafeFragment, setSafeHtml } from '../../../../../common/utils/security';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
-import type { KeywordHunterSnapshot } from '../../../../../types/modules-business';
 import '../keyword_hunter_style.css';
 
 // ==========================================
@@ -188,6 +187,10 @@ function getError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
+function isAnalysisRunForCurrentCopy(run: ActiveAnalysisRun): boolean {
+  return getProcessedCopy() === run.processedCopy;
+}
+
 function finalizeAnalysisSuccess(run: ActiveAnalysisRun, response: string): string {
   if (!response || !response.trim()) {
     throw new Error('AI 返回内容为空，请重试');
@@ -195,6 +198,10 @@ function finalizeAnalysisSuccess(run: ActiveAnalysisRun, response: string): stri
 
   run.status = 'success';
   run.response = response;
+  if (!isAnalysisRunForCurrentCopy(run)) {
+    return response;
+  }
+
   rawMarkdownCache = response;
   saveAnalysisStateToState();
   void saveAnalysisSnapshot(false);
@@ -239,6 +246,10 @@ function getCurrentAnalysisElements(): {
 }
 
 function attachAnalysisRunToPage(run: ActiveAnalysisRun): void {
+  if (!isAnalysisRunForCurrentCopy(run)) {
+    return;
+  }
+
   const viewVersion = analysisViewVersion;
   const { btn, resultDiv } = getCurrentAnalysisElements();
   if (btn) setBtnState(btn, 'loading', '分析中…');
@@ -247,7 +258,7 @@ function attachAnalysisRunToPage(run: ActiveAnalysisRun): void {
   run.promise
     .then(response => {
       cancelLoading?.();
-      if (viewVersion !== analysisViewVersion) return;
+      if (viewVersion !== analysisViewVersion || !isAnalysisRunForCurrentCopy(run)) return;
 
       const current = getCurrentAnalysisElements();
       renderAnalysisSuccess(response, current.resultDiv, current.btn);
@@ -258,39 +269,11 @@ function attachAnalysisRunToPage(run: ActiveAnalysisRun): void {
     })
     .catch(error => {
       cancelLoading?.();
-      if (viewVersion !== analysisViewVersion) return;
+      if (viewVersion !== analysisViewVersion || !isAnalysisRunForCurrentCopy(run)) return;
 
       const current = getCurrentAnalysisElements();
       handleAnalysisFailure(getError(error), current.resultDiv, current.btn);
     });
-}
-
-function getLatestReportedSnapshot(
-  snapshots: KeywordHunterSnapshot[]
-): KeywordHunterSnapshot | undefined {
-  return snapshots.find(
-    snapshot => snapshot.status === 'reported' && !!snapshot.result.llmAnalysisResult?.trim()
-  );
-}
-
-async function restoreLatestAnalysisSnapshotIfNeeded(): Promise<void> {
-  const tracker = appStore.getState().keywordTracker;
-  if (tracker?.llmAnalysisResult?.trim()) {
-    return;
-  }
-
-  try {
-    const snapshot = getLatestReportedSnapshot(await KeywordHunterSnapshotService.getAllAsync());
-    if (snapshot) {
-      KeywordHunterSnapshotService.restore(snapshot);
-    }
-  } catch (error) {
-    ErrorService.handle(error as Error, {
-      action: 'restoreLatestAnalysisSnapshot',
-      module: 'keywordAnalysis',
-      notify: false,
-    });
-  }
 }
 
 async function saveAnalysisSnapshot(showSuccessToast = true): Promise<boolean> {
@@ -324,10 +307,10 @@ async function saveAnalysisSnapshot(showSuccessToast = true): Promise<boolean> {
 async function restoreAnalysisStateFromState(): Promise<void> {
   if (activeAnalysisRun?.status === 'pending') {
     attachAnalysisRunToPage(activeAnalysisRun);
-    return;
+    if (isAnalysisRunForCurrentCopy(activeAnalysisRun)) {
+      return;
+    }
   }
-
-  await restoreLatestAnalysisSnapshotIfNeeded();
 
   const currentState = appStore.getState();
   const savedMarkdown = currentState.keywordTracker?.llmAnalysisResult;
@@ -352,6 +335,8 @@ async function restoreAnalysisStateFromState(): Promise<void> {
       rawMarkdownCache = savedMarkdown;
       renderReport(resultDiv, savedMarkdown);
     }
+  } else {
+    rawMarkdownCache = '';
   }
 
   renderAnalysisModule();
@@ -785,7 +770,9 @@ async function runLLMAnalysis(): Promise<void> {
 
   if (activeAnalysisRun?.status === 'pending') {
     attachAnalysisRunToPage(activeAnalysisRun);
-    return;
+    if (isAnalysisRunForCurrentCopy(activeAnalysisRun)) {
+      return;
+    }
   }
 
   attachAnalysisRunToPage(startAnalysisRun(processedCopy));

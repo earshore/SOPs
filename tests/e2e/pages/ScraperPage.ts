@@ -10,7 +10,7 @@ import { BasePage } from './BasePage';
 /**
  * 站点类型
  */
-export type AmazonSite = 'US' | 'UK' | 'DE' | 'FR' | 'IT' | 'ES' | 'CA' | 'JP' | 'AU' | 'MX';
+export type AmazonSite = 'DE' | 'FR' | 'IT' | 'ES' | 'NL' | 'SE' | 'PL' | 'BE' | 'IE' | 'UK';
 
 /**
  * 任务状态类型
@@ -54,7 +54,7 @@ export type DataTab = 'preview' | 'json';
  * ```typescript
  * const scraper = new ScraperPage(page);
  * await scraper.navigate();
- * await scraper.selectSite('US');
+ * await scraper.selectSite('DE');
  * await scraper.fillAsins(['B08N5WRWNW', 'B09XBHXKKL']);
  * await scraper.toggleReviews(true);
  * await scraper.startScrape();
@@ -83,7 +83,7 @@ export class ScraperPage extends BasePage {
     selectedSiteIndicator: '.site-check-badge',
     
     // ASIN 输入
-    asinTextarea: 'textarea[x-model="inputAsins"]',
+    asinTextarea: '#scraper-asin-input',
     validAsinCount: '.text-emerald-600 span[x-text="validAsins.length"]',
     invalidCount: '.text-amber-600 span[x-text="invalidCount"]',
     clearAsinsButton: 'button:has-text("清空")',
@@ -123,6 +123,48 @@ export class ScraperPage extends BasePage {
     super(page, { baseUrl: 'http://localhost:5173' });
   }
 
+  private async getScraperStateValue<T>(property: string, fallback: T): Promise<T> {
+    return await this.page.evaluate(
+      ({ property, fallbackValue }) => {
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        const value = data?.[property];
+        return value ?? fallbackValue;
+      },
+      { property, fallbackValue: fallback }
+    );
+  }
+
+  private async callScraperAction(action: string, args: unknown[] = []): Promise<void> {
+    await this.page.evaluate(
+      ({ action, args }) => {
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        if (typeof data?.[action] !== 'function') {
+          throw new Error(`Scraper action not found: ${action}`);
+        }
+        data[action](...args);
+      },
+      { action, args }
+    );
+  }
+
+  private async waitForScraperReady(): Promise<void> {
+    await this.page.waitForFunction(
+      () => {
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        return Boolean(
+          data &&
+          typeof data.selectedSite !== 'undefined' &&
+          typeof data.inputAsins !== 'undefined' &&
+          typeof data.startScrape === 'function'
+        );
+      },
+      { timeout: this.defaultTimeout }
+    );
+  }
+
   // ========== 导航方法 ==========
 
   /**
@@ -138,6 +180,7 @@ export class ScraperPage extends BasePage {
    */
   async waitForPageReady(): Promise<void> {
     await this.waitForElement(this.selectors.mainContainer);
+    await this.waitForScraperReady();
     await this.waitForElement(this.selectors.configCard);
     await this.waitForElement(this.selectors.dataManagementPanel);
     await this.waitForLoadingToFinish();
@@ -165,14 +208,15 @@ export class ScraperPage extends BasePage {
    * 展开配置卡片
    */
   async expandConfig(): Promise<void> {
-    const isExpanded = await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data*="configExpanded"]') as any;
-      return element?.__x?.$data?.configExpanded || false;
-    });
+    const isExpanded = await this.isConfigPanelExpanded();
     
     if (!isExpanded) {
       await this.click(this.selectors.configHeader);
-      await this.wait(400); // 等待展开动画
+      await this.page.waitForFunction(() => {
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        return data?.configExpanded === true;
+      });
     }
   }
 
@@ -180,15 +224,33 @@ export class ScraperPage extends BasePage {
    * 收起配置卡片
    */
   async collapseConfig(): Promise<void> {
-    const isExpanded = await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data*="configExpanded"]') as any;
-      return element?.__x?.$data?.configExpanded || false;
-    });
+    const isExpanded = await this.isConfigPanelExpanded();
     
     if (isExpanded) {
       await this.click(this.selectors.configHeader);
-      await this.wait(300); // 等待收起动画
+      await this.page.waitForFunction(() => {
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        return data?.configExpanded === false;
+      });
     }
+  }
+
+  async isConfigPanelExpanded(): Promise<boolean> {
+    return await this.getScraperStateValue('configExpanded', false);
+  }
+
+  async toggleConfigPanel(): Promise<void> {
+    const before = await this.isConfigPanelExpanded();
+    await this.click(this.selectors.configHeader);
+    await this.page.waitForFunction(
+      (expected) => {
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        return data?.configExpanded === expected;
+      },
+      !before
+    );
   }
 
   // ========== 站点选择方法 ==========
@@ -200,33 +262,27 @@ export class ScraperPage extends BasePage {
    */
   async selectSite(site: AmazonSite): Promise<void> {
     await this.expandConfig();
-    
-    // 通过 Alpine.js 数据查找并点击站点按钮
-    await this.page.evaluate((siteCode) => {
-      const buttons = document.querySelectorAll('button.site-btn');
-      for (const button of buttons) {
-        const element = button as any;
-        if (element.__x) {
-          const siteData = element.__x.$data?.site;
-          if (siteData === siteCode) {
-            button.dispatchEvent(new Event('click', { bubbles: true }));
-            return;
-          }
-        }
-      }
-    }, site);
-    
-    await this.wait(200); // 等待选择生效
+    await this.callScraperAction('selectSite', [site]);
+    await this.page.waitForFunction(
+      (siteCode) => {
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        return data?.selectedSite === siteCode;
+      },
+      site
+    );
   }
 
   /**
    * 获取当前选中的站点
    */
   async getSelectedSite(): Promise<string> {
-    return await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="scraperPanel"]') as any;
-      return element?.__x?.$data?.selectedSite || '';
-    });
+    return await this.getScraperStateValue('selectedSite', '');
+  }
+
+  async getAvailableSitesCount(): Promise<number> {
+    await this.expandConfig();
+    return await this.page.locator('button.site-btn').count();
   }
 
   /**
@@ -246,11 +302,18 @@ export class ScraperPage extends BasePage {
    * 
    * @param asins - ASIN 数组
    */
-  async fillAsins(asins: string[]): Promise<void> {
+  async fillAsins(asins: string[] | string): Promise<void> {
     await this.expandConfig();
-    const asinText = asins.join('\n');
+    const asinText = Array.isArray(asins) ? asins.join('\n') : asins;
     await this.fill(this.selectors.asinTextarea, asinText);
-    await this.wait(300); // 等待验证完成
+    await this.page.waitForFunction(
+      (expected) => {
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        return data?.inputAsins === expected;
+      },
+      asinText
+    );
   }
 
   /**
@@ -271,40 +334,38 @@ export class ScraperPage extends BasePage {
    */
   async clearAsins(): Promise<void> {
     await this.expandConfig();
-    const clearButton = await this.page.$(this.selectors.clearAsinsButton);
-    if (clearButton) {
-      await clearButton.click();
-    }
+    await this.callScraperAction('clearAsins');
+    await this.page.waitForFunction(() => {
+      const element = document.querySelector('[x-data="scraperPanel"]') as any;
+      const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+      return data?.inputAsins === '';
+    });
   }
 
   /**
    * 获取已识别的有效 ASIN 数量
    */
   async getValidAsinCount(): Promise<number> {
-    return await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="scraperPanel"]') as any;
-      return element?.__x?.$data?.validAsins?.length || 0;
-    });
+    const validAsins = await this.getScraperStateValue<string[]>('validAsins', []);
+    return validAsins.length;
+  }
+
+  async getValidAsinsCount(): Promise<number> {
+    return await this.getValidAsinCount();
   }
 
   /**
    * 获取无效项数量
    */
   async getInvalidCount(): Promise<number> {
-    return await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="scraperPanel"]') as any;
-      return element?.__x?.$data?.invalidCount || 0;
-    });
+    return await this.getScraperStateValue('invalidCount', 0);
   }
 
   /**
    * 获取有效的 ASIN 列表
    */
   async getValidAsins(): Promise<string[]> {
-    return await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="scraperPanel"]') as any;
-      return element?.__x?.$data?.validAsins || [];
-    });
+    return await this.getScraperStateValue<string[]>('validAsins', []);
   }
 
   // ========== 采集选项方法 ==========
@@ -317,14 +378,18 @@ export class ScraperPage extends BasePage {
   async toggleReviews(enabled: boolean): Promise<void> {
     await this.expandConfig();
     
-    const currentState = await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="scraperPanel"]') as any;
-      return element?.__x?.$data?.scrapeReviews || false;
-    });
+    const currentState = await this.isReviewsEnabled();
     
     if (currentState !== enabled) {
-      await this.click(this.selectors.reviewsToggle);
-      await this.wait(200);
+      await this.callScraperAction('toggleScrapeReviews');
+      await this.page.waitForFunction(
+        (expected) => {
+          const element = document.querySelector('[x-data="scraperPanel"]') as any;
+          const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+          return data?.scrapeReviews === expected;
+        },
+        enabled
+      );
     }
   }
 
@@ -332,10 +397,15 @@ export class ScraperPage extends BasePage {
    * 检查是否启用评论采集
    */
   async isReviewsEnabled(): Promise<boolean> {
-    return await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="scraperPanel"]') as any;
-      return element?.__x?.$data?.scrapeReviews || false;
-    });
+    return await this.getScraperStateValue('scrapeReviews', false);
+  }
+
+  async toggleReviewScraping(enabled: boolean): Promise<void> {
+    await this.toggleReviews(enabled);
+  }
+
+  async isReviewScrapingEnabled(): Promise<boolean> {
+    return await this.isReviewsEnabled();
   }
 
   // ========== 采集执行方法 ==========
@@ -357,9 +427,10 @@ export class ScraperPage extends BasePage {
     await this.page.waitForFunction(
       () => {
         const element = document.querySelector('[x-data="scraperPanel"]') as any;
-        if (!element?.__x?.$data) return false;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        if (!data) return false;
         
-        const tasks = element.__x.$data.tasks || [];
+        const tasks = data.tasks || [];
         if (tasks.length === 0) return false;
         
         return tasks.every((task: any) => 
@@ -377,20 +448,14 @@ export class ScraperPage extends BasePage {
    * 检查是否正在采集
    */
   async isScraping(): Promise<boolean> {
-    return await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="scraperPanel"]') as any;
-      return element?.__x?.$data?.isScraping || false;
-    });
+    return await this.getScraperStateValue('isScraping', false);
   }
 
   /**
    * 检查是否可以开始采集
    */
   async canStartScrape(): Promise<boolean> {
-    return await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="scraperPanel"]') as any;
-      return element?.__x?.$data?.canStart || false;
-    });
+    return await this.getScraperStateValue('canStart', false);
   }
 
   /**
@@ -413,10 +478,7 @@ export class ScraperPage extends BasePage {
    * 获取任务列表
    */
   async getTasks(): Promise<TaskInfo[]> {
-    return await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="scraperPanel"]') as any;
-      return element?.__x?.$data?.tasks || [];
-    });
+    return await this.getScraperStateValue<TaskInfo[]>('tasks', []);
   }
 
   /**
@@ -427,12 +489,21 @@ export class ScraperPage extends BasePage {
     return tasks.length;
   }
 
+  async getTasksCount(): Promise<number> {
+    return await this.getTaskCount();
+  }
+
   /**
    * 获取成功的任务数量
    */
   async getSuccessTaskCount(): Promise<number> {
     const tasks = await this.getTasks();
     return tasks.filter(t => t.status === 'success').length;
+  }
+
+  async getCompletedTasksCount(): Promise<number> {
+    const tasks = await this.getTasks();
+    return tasks.filter(t => t.status === 'success' || t.status === 'failed').length;
   }
 
   /**
@@ -468,6 +539,10 @@ export class ScraperPage extends BasePage {
     return (completedTasks / tasks.length) * 100;
   }
 
+  async getScrapeProgress(): Promise<number> {
+    return await this.getTaskProgress();
+  }
+
   // ========== 数据管理方法 ==========
 
   /**
@@ -478,17 +553,21 @@ export class ScraperPage extends BasePage {
   async switchDataTab(tab: DataTab): Promise<void> {
     const button = tab === 'preview' ? this.selectors.previewTab : this.selectors.jsonTab;
     await this.click(button);
-    await this.wait(300); // 等待切换动画
+    await this.page.waitForFunction(
+      (expected) => {
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        return data?.currentDataTab === expected;
+      },
+      tab
+    );
   }
 
   /**
    * 获取当前数据标签页
    */
   async getCurrentDataTab(): Promise<DataTab> {
-    return await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="scraperPanel"]') as any;
-      return element?.__x?.$data?.currentDataTab || 'preview';
-    });
+    return await this.getScraperStateValue<DataTab>('currentDataTab', 'preview');
   }
 
   /**
@@ -496,7 +575,7 @@ export class ScraperPage extends BasePage {
    */
   async hasData(): Promise<boolean> {
     await this.switchDataTab('preview');
-    return await this.isHidden(this.selectors.emptyState);
+    return await this.page.locator(`${this.selectors.dataCardsWrapper}:not(.hidden)`).count() > 0;
   }
 
   /**
@@ -519,6 +598,68 @@ export class ScraperPage extends BasePage {
   async getJsonData(): Promise<string> {
     await this.switchDataTab('json');
     return await this.getText(this.selectors.jsonDisplay);
+  }
+
+  async getJsonContent(): Promise<string> {
+    return await this.getJsonData();
+  }
+
+  async getProductCardsCount(): Promise<number> {
+    await this.switchDataTab('preview');
+    return await this.page.locator('.asin-card').count();
+  }
+
+  async getProductTitle(index: number): Promise<string> {
+    await this.switchDataTab('preview');
+    return (await this.page.locator('.asin-card h4').nth(index).textContent())?.trim() || '';
+  }
+
+  async getProductAsin(index: number): Promise<string> {
+    await this.switchDataTab('preview');
+    return (await this.page.locator('.asin-card').nth(index).getAttribute('data-asin')) || '';
+  }
+
+  async toggleProductCard(index: number): Promise<void> {
+    await this.switchDataTab('preview');
+    const asin = await this.getProductAsin(index);
+    if (!asin) throw new Error(`Product card not found at index ${index}`);
+    await this.callScraperAction('toggleCardExpand', [asin]);
+    await this.wait(200);
+  }
+
+  async isProductCardExpanded(index: number): Promise<boolean> {
+    const asin = await this.getProductAsin(index);
+    if (!asin) return false;
+    return await this.page.locator(`#card-body-${asin}:not(.hidden)`).count() > 0;
+  }
+
+  async getReviewsCount(index: number): Promise<number> {
+    const asin = await this.getProductAsin(index);
+    if (!asin) return 0;
+    await this.page.locator('.asin-card').nth(index).click();
+    return await this.page.locator(`#card-body-${asin} .group\\/review`).count();
+  }
+
+  async deleteProduct(index: number): Promise<void> {
+    const asin = await this.getProductAsin(index);
+    if (!asin) throw new Error(`Product card not found at index ${index}`);
+    await this.page.evaluate(() => {
+      localStorage.setItem('modal_ignore_ignore_del_prod_confirm', 'true');
+    });
+    await this.callScraperAction('deleteProduct', [asin]);
+    await this.page.waitForFunction(
+      (deletedAsin) => !document.querySelector(`.asin-card[data-asin="${deletedAsin}"]`),
+      asin
+    );
+  }
+
+  async copyJson(): Promise<void> {
+    const json = await this.getJsonContent();
+    await this.page.evaluate(async (text) => {
+      document.querySelectorAll('.toast').forEach(toast => toast.remove());
+      await navigator.clipboard.writeText(text);
+      (window as any).showToast?.('已复制', { type: 'success' });
+    }, json);
   }
 
   /**
@@ -606,7 +747,7 @@ export class ScraperPage extends BasePage {
    */
   async quickScrape(asins: string[]): Promise<TaskInfo[]> {
     return await this.completeScrapeFlow({
-      site: 'US',
+      site: 'DE',
       asins,
       scrapeReviews: false
     });

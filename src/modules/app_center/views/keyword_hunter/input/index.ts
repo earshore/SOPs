@@ -699,7 +699,7 @@ function clearCopyInput(): void {
   }
 }
 
-async function saveCurrentSnapshot(status: 'draft' | 'matched' = 'draft'): Promise<void> {
+async function saveCurrentSnapshot(status?: 'draft' | 'matched'): Promise<void> {
   saveInputsToState();
 
   if (!hasInputValues()) {
@@ -712,7 +712,7 @@ async function saveCurrentSnapshot(status: 'draft' | 'matched' = 'draft'): Promi
   updateSnapshotPanelState();
 
   try {
-    await KeywordHunterSnapshotService.saveCurrentAsync({ status });
+    await KeywordHunterSnapshotService.saveCurrentAsync(status ? { status } : {});
     await loadInputSnapshots();
     showToast(wasUpdatingSnapshot ? '快照已更新' : '快照已保存', { type: 'success' });
   } catch (error) {
@@ -896,7 +896,7 @@ function bindSnapshotButtons(): void {
   const btnPanelSaveSnapshot = document.getElementById('kt-input-snapshot-save');
   if (btnPanelSaveSnapshot)
     addEventListener(btnPanelSaveSnapshot, 'click', () => {
-      void saveCurrentSnapshot('draft');
+      void saveCurrentSnapshot();
     });
 
   const btnPaste = document.getElementById('kt-btn-paste');

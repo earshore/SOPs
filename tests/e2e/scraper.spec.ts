@@ -4,17 +4,68 @@
 // 测试 Scraper 完整流程：输入 ASIN、抓取数据、查看历史记录、导入/导出数据
 // ================================================================
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { ScraperPage } from './pages/ScraperPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
+
+const DEFAULT_TEST_SITE = 'DE';
+
+function createScraperFixtureHtml(asin: string): string {
+  return `<!doctype html>
+<html>
+  <body>
+    <span id="productTitle">E2E Fixture Product ${asin}</span>
+    <div id="feature-bullets">
+      <ul>
+        <li><span class="a-list-item">Durable fixture bullet for ${asin}</span></li>
+        <li><span class="a-list-item">Compact design for browser validation</span></li>
+      </ul>
+    </div>
+    <div data-hook="review">
+      <a data-hook="review-title"><span>5.0 out of 5 stars</span><span>Reliable test review</span></a>
+      <i data-hook="review-star-rating" class="a-icon-star">5.0 out of 5 stars</i>
+      <span data-hook="review-body"><span>This deterministic review is long enough for parser extraction.</span></span>
+      <span>Verified Purchase</span>
+    </div>
+  </body>
+</html>`;
+}
+
+async function setupScraperNetworkFixture(page: Page): Promise<void> {
+  await page.route('**/e2e-scraper-proxy?url=*', async route => {
+    const requestUrl = new URL(route.request().url());
+    const targetUrl = requestUrl.searchParams.get('url') || '';
+    const asin = targetUrl.match(/(?:dp|product-reviews)\/([A-Z0-9]{10})/)?.[1] || 'B000000000';
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'text/html; charset=utf-8',
+      body: createScraperFixtureHtml(asin),
+    });
+  });
+}
+
+async function seedScraperProxyConfig(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    localStorage.setItem('proxy_config', JSON.stringify({ type: 'custom_api', enabled: true }));
+    localStorage.setItem('scraper_proxy_config', JSON.stringify({ type: 'custom_api', enabled: true }));
+    const secureStorage = (window as any).SecureStorage;
+    if (!secureStorage?.setSecure) {
+      throw new Error('SecureStorage is required for scraper E2E proxy setup');
+    }
+    await secureStorage.setSecure('proxy_key_custom_api', 'http://localhost:5173/e2e-scraper-proxy?url=');
+  });
+}
 
   let scraper: ScraperPage;
 
   test.beforeEach(async ({ page }) => {
+    await setupScraperNetworkFixture(page);
     scraper = new ScraperPage(page);
     
     // 导航到 Scraper 页面
     await scraper.navigate();
+    await seedScraperProxyConfig(page);
   });
 
   test.describe('页面加载与初始化', () => {
@@ -39,8 +90,9 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
     test('应该正确初始化 Alpine 组件', async ({ page }) => {
       // 验证：Alpine 组件已初始化
       const alpineInitialized = await page.evaluate(() => {
-        const element = document.querySelector('[x-data="scraperPanel"]');
-        return element && (element as any).__x !== undefined;
+        const element = document.querySelector('[x-data="scraperPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        return Boolean(data);
       });
 
       expect(alpineInitialized, 'Alpine 组件应该已初始化').toBe(true);
@@ -48,9 +100,9 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       // 验证：组件状态可访问
       const hasComponentData = await page.evaluate(() => {
         const element = document.querySelector('[x-data="scraperPanel"]') as any;
-        if (!element || !element.__x) return false;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        if (!data) return false;
         
-        const data = element.__x.$data;
         return data && 
                typeof data.selectedSite !== 'undefined' &&
                typeof data.inputAsins !== 'undefined' &&
@@ -81,20 +133,20 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
   test.describe('站点选择功能', () => {
     test('应该能够选择不同的站点', async () => {
-      // 选择美国站
-      await scraper.selectSite('US');
-      let selected = await scraper.getSelectedSite();
-      expect(selected, '应该选中美国站').toContain('US');
-
       // 选择德国站
       await scraper.selectSite('DE');
-      selected = await scraper.getSelectedSite();
+      let selected = await scraper.getSelectedSite();
       expect(selected, '应该选中德国站').toContain('DE');
 
-      // 选择日本站
-      await scraper.selectSite('JP');
+      // 选择法国站
+      await scraper.selectSite('FR');
       selected = await scraper.getSelectedSite();
-      expect(selected, '应该选中日本站').toContain('JP');
+      expect(selected, '应该选中法国站').toContain('FR');
+
+      // 选择英国站
+      await scraper.selectSite('UK');
+      selected = await scraper.getSelectedSite();
+      expect(selected, '应该选中英国站').toContain('UK');
 
       console.log('✅ 站点选择功能正常');
     });
@@ -207,7 +259,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
     });
 
     test('应该在输入 ASIN 后启用开始按钮', async () => {
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
       
       const canStart = await scraper.canStartScrape();
@@ -221,7 +273,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       const consoleListener = setupConsoleErrorListener(page);
 
       // 配置采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
       await scraper.toggleReviewScraping(true);
 
@@ -250,7 +302,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
     test('应该显示采集任务状态', async () => {
       // 配置并开始采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW\nB09XBHXKKL');
       await scraper.startScrape();
 
@@ -275,7 +327,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
     test('应该显示采集进度百分比', async () => {
       // 配置并开始采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
       await scraper.startScrape();
 
@@ -302,7 +354,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
   test.describe('数据预览功能', () => {
     test('应该显示采集的数据', async () => {
       // 执行采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
       await scraper.startScrape();
       await scraper.waitForScrapeComplete();
@@ -320,7 +372,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
     test('应该显示产品详细信息', async () => {
       // 执行采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
       await scraper.startScrape();
       await scraper.waitForScrapeComplete();
@@ -339,7 +391,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
     test('应该能够展开/收起产品卡片', async () => {
       // 执行采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
       await scraper.startScrape();
       await scraper.waitForScrapeComplete();
@@ -359,7 +411,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
     test('应该显示评论数量', async () => {
       // 执行采集（包含评论）
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
       await scraper.toggleReviewScraping(true);
       await scraper.startScrape();
@@ -382,7 +434,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
   test.describe('数据标签页切换', () => {
     test('应该能够切换到 JSON 视图', async () => {
       // 执行采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
       await scraper.startScrape();
       await scraper.waitForScrapeComplete();
@@ -403,7 +455,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
     test('应该能够在预览和 JSON 视图之间切换', async () => {
       // 执行采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
       await scraper.startScrape();
       await scraper.waitForScrapeComplete();
@@ -427,7 +479,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
   test.describe('数据操作功能', () => {
     test('应该能够删除产品', async ({ page }) => {
       // 执行采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW\nB09XBHXKKL');
       await scraper.startScrape();
       await scraper.waitForScrapeComplete();
@@ -451,7 +503,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 
       // 执行采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
       await scraper.startScrape();
       await scraper.waitForScrapeComplete();
@@ -503,7 +555,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       // 步骤 1: 选择站点
       console.log('  1️⃣ 选择目标站点...');
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       const selectedSite = await scraper.getSelectedSite();
       console.log(`     ✅ 已选择站点: ${selectedSite}`);
 
@@ -591,7 +643,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
     test('数据采集时间应该合理', async () => {
       // 配置采集
-      await scraper.selectSite('US');
+      await scraper.selectSite(DEFAULT_TEST_SITE);
       await scraper.fillAsins('B08N5WRWNW');
 
       // 测量采集时间
@@ -614,6 +666,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       // 重新加载页面
       await scraper.navigate();
+      await scraper.expandConfig();
 
       // 验证：主要元素仍然可见
       await expect(page.locator('h2:has-text("产品数据采集与管理")')).toBeVisible();
@@ -628,10 +681,11 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       // 重新加载页面
       await scraper.navigate();
+      await scraper.expandConfig();
 
       // 验证：主要元素仍然可见
       await expect(page.locator('h2:has-text("手动采集配置")')).toBeVisible();
-      await expect(page.locator('textarea[x-model="inputAsins"]')).toBeVisible();
+      await expect(page.locator('#scraper-asin-input')).toBeVisible();
 
       console.log('✅ 平板端显示正常');
     });

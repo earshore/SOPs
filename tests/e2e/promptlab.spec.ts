@@ -4,9 +4,50 @@
 // 测试 Promptlab 完整流程：填写产品 DNA、选择分析报告、生成 Prompt
 // ================================================================
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { PromptlabPage } from './pages/PromptlabPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
+import { SAMPLE_ANALYSIS_REPORT } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/analysisReportData';
+
+const PROMPTLAB_E2E_REPORT = {
+  ...SAMPLE_ANALYSIS_REPORT,
+  _metadata: {
+    ...SAMPLE_ANALYSIS_REPORT._metadata,
+    language: 'en',
+    targetMarket: 'English (US)',
+    overallConfidence: 0.88,
+  },
+};
+
+type AppStoreWindow = Window & {
+  appStore?: { getState?: () => { setAnalysisReport?: (report: unknown) => void } };
+};
+
+async function setAnalysisReport(page: Page, report: unknown): Promise<void> {
+  await page.waitForFunction(() => {
+    const appWindow = window as AppStoreWindow;
+    return typeof appWindow.appStore?.getState?.().setAnalysisReport === 'function';
+  });
+
+  await page.evaluate(reportValue => {
+    const appWindow = window as AppStoreWindow;
+    appWindow.appStore?.getState?.().setAnalysisReport?.(reportValue);
+  }, report);
+}
+
+async function seedPromptlabReport(page: Page): Promise<void> {
+  await setAnalysisReport(page, PROMPTLAB_E2E_REPORT);
+  await page.locator('#lab-analysis-status').getByText(/分析报告已就绪/).waitFor({
+    timeout: 5000,
+  });
+}
+
+async function clearAnalysisReport(page: Page): Promise<void> {
+  await setAnalysisReport(page, null);
+  await page.locator('#lab-analysis-status').getByText(/未检测到分析报告/).waitFor({
+    timeout: 5000,
+  });
+}
 
   let promptlab: PromptlabPage;
 
@@ -15,6 +56,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
     
     // 导航到 Promptlab 页面
     await promptlab.navigate();
+    await seedPromptlabReport(page);
   });
 
   test.describe('页面加载与初始化', () => {
@@ -40,8 +82,9 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
     test('应该正确初始化 Alpine 组件', async ({ page }) => {
       // 验证：Alpine 组件已初始化
       const alpineInitialized = await page.evaluate(() => {
-        const element = document.querySelector('[x-data="promptlabPanel"]');
-        return element && (element as any).__x !== undefined;
+        const element = document.querySelector('[x-data="promptlabPanel"]') as any;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        return Boolean(data);
       });
 
       expect(alpineInitialized, 'Alpine 组件应该已初始化').toBe(true);
@@ -49,9 +92,9 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       // 验证：组件状态可访问
       const hasComponentData = await page.evaluate(() => {
         const element = document.querySelector('[x-data="promptlabPanel"]') as any;
-        if (!element || !element.__x) return false;
+        const data = (window as any).Alpine?.$data?.(element) ?? element?.__x?.$data;
+        if (!data) return false;
         
-        const data = element.__x.$data;
         return data && 
                typeof data.profile !== 'undefined' &&
                typeof data.generateListingPrompt === 'function';
@@ -82,7 +125,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
   test.describe('产品 DNA 填写', () => {
     test('应该能够填写所有产品 DNA 字段', async () => {
       const productData = {
-        targetMarket: 'English',
+        targetMarket: 'English (US)',
         tier1Keywords: 'wireless earbuds, bluetooth headphones',
         tier2Keywords: 'noise cancelling, waterproof, long battery life',
         audience: 'Tech enthusiasts, fitness lovers',
@@ -110,7 +153,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
     test('应该验证必填字段', async () => {
       // 只填写部分字段
-      await promptlab.selectTargetMarket('English');
+      await promptlab.selectTargetMarket('English (US)');
       await promptlab.fillTier1Keywords('wireless earbuds');
 
       // 验证：缺少 Tier 2 关键词时，按钮应该禁用
@@ -132,7 +175,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
     test('应该能够清空所有输入', async () => {
       // 先填写一些数据
       await promptlab.fillProductDNA({
-        targetMarket: 'English',
+        targetMarket: 'English (US)',
         tier1Keywords: 'test product',
         tier2Keywords: 'test keywords'
       });
@@ -227,7 +270,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       // 填写必填字段
       await promptlab.fillProductDNA({
-        targetMarket: 'English',
+        targetMarket: 'English (US)',
         tier1Keywords: 'wireless earbuds',
         tier2Keywords: 'bluetooth 5.0, noise cancelling, waterproof'
       });
@@ -282,7 +325,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       // 填写必填字段
       await promptlab.fillProductDNA({
-        targetMarket: 'English',
+        targetMarket: 'English (US)',
         tier1Keywords: 'wireless earbuds',
         tier2Keywords: 'bluetooth 5.0, noise cancelling'
       });
@@ -331,7 +374,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       // 填写必填字段
       await promptlab.fillProductDNA({
-        targetMarket: 'English',
+        targetMarket: 'English (US)',
         tier1Keywords: 'test product',
         tier2Keywords: 'test keywords'
       });
@@ -377,7 +420,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       // 步骤 1: 填写产品 DNA
       console.log('  1️⃣ 填写产品 DNA...');
       await promptlab.fillProductDNA({
-        targetMarket: 'English',
+        targetMarket: 'English (US)',
         tier1Keywords: 'wireless earbuds, bluetooth headphones',
         tier2Keywords: 'noise cancelling, waterproof, long battery life',
         audience: 'Tech enthusiasts, fitness lovers',
@@ -454,22 +497,18 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
   test.describe('错误处理', () => {
     test('应该在缺少必填字段时显示警告', async () => {
-      // 不填写任何字段，直接尝试生成
-      await promptlab.generateListingPrompt();
-
-      // 等待警告提示
-      await promptlab.wait(500);
-
-      // 验证：应该显示警告（通过 Toast 或其他方式）
-      // 注意：具体的验证方式取决于应用的实现
+      const isEnabled = await promptlab.isGenerateButtonEnabled();
+      expect(isEnabled, '缺少必填字段时生成按钮应该禁用').toBe(false);
 
       console.log('✅ 缺少必填字段时正确显示警告');
     });
 
-    test('应该在没有分析报告时显示提示', async () => {
+    test('应该在没有分析报告时显示提示', async ({ page }) => {
+      await clearAnalysisReport(page);
+
       // 填写必填字段
       await promptlab.fillProductDNA({
-        targetMarket: 'English',
+        targetMarket: 'English (US)',
         tier1Keywords: 'test product',
         tier2Keywords: 'test keywords'
       });
@@ -509,7 +548,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
     test('Prompt 生成时间应该合理', async () => {
       // 填写必填字段
       await promptlab.fillProductDNA({
-        targetMarket: 'English',
+        targetMarket: 'English (US)',
         tier1Keywords: 'test product',
         tier2Keywords: 'test keywords'
       });

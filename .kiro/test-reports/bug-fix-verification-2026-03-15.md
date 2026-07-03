@@ -49,9 +49,8 @@
 2. 打开浏览器控制台
 3. 切换到 AI Analysis
 4. 切换到 Promptlab
-5. 切换到 QALab
-6. 验证: 控制台无 "this.$cleanup is not a function" 错误
-7. 验证: 内存使用正常（开发者工具 → Memory）
+5. 验证: 控制台无 "this.$cleanup is not a function" 错误
+6. 验证: 内存使用正常（开发者工具 → Memory）
 ```
 
 ---
@@ -196,7 +195,7 @@
 1. 打开浏览器开发者工具 → Console
 2. 打开 Memory 面板，记录初始内存
 3. 执行路由切换循环 10次:
-   - App Center → Scraper → AI Analysis → Promptlab → QALab → Scraper
+   - App Center → Scraper → AI Analysis → Promptlab → Scraper
 4. 记录最终内存
 5. 检查控制台错误
 

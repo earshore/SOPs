@@ -161,7 +161,6 @@
 - [ ] 迁移 Promptlab 模块（高风险，用户输入多）
 - [ ] 迁移 AI 分析模块
 - [ ] 迁移 Scraper 模块
-- [ ] 迁移 QA Lab 模块
 - [ ] 迁移 Keyword Hunter 模块
 - [ ] 迁移 NPI Tracker 模块
 - [ ] 迁移 Restricted Words 模块
@@ -214,7 +213,6 @@
 - [ ] 迁移 analysis 状态（analysisReport、selectedAsins）
 - [ ] 迁移 scraper 状态（scrapedData、history）
 - [ ] 迁移 promptlab 状态（userProductProfile）
-- [ ] 迁移 qalab 状态
 - [ ] 迁移 keywordHunter 状态
 - [ ] 所有状态访问通过 StateManager
 - [ ] 删除冗余的状态存储

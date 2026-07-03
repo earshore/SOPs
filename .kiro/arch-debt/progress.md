@@ -91,14 +91,7 @@
 - **状态**: 已完成
 - **验证**: ✅ 构建通过
 
-#### 3. ✅ rufusSimulator.ts
-- **路径**: `src/modules/app_center/views/master_analysis/qalab/services/rufusSimulator.ts`
-- **债务类型**: 错误处理
-- **修复内容**: 2处 `throw new Error()` → `ValidationError`
-- **状态**: 已完成
-- **验证**: ✅ 构建通过
-
-#### 4. ✅ PreloadManager.ts
+#### 3. ✅ PreloadManager.ts
 - **路径**: `src/common/router/navigo/PreloadManager.ts`
 - **债务类型**: 错误处理
 - **修复内容**: 1处超时错误 → `SystemError`
@@ -151,25 +144,14 @@
 
 ### 基本信息
 - **批次编号**: Batch #2
-- **计划文件数**: 6个
+- **计划文件数**: 4个
 - **风险等级**: 中风险
 - **优先级**: P1
-- **预计影响**: QALab、Scraper、AI Analysis、Overview模块
+- **预计影响**: Scraper、AI Analysis、Overview模块
 
 ### 修复清单
 
-#### 1. importHandler.ts (QALab)
-- **路径**: `src/modules/app_center/views/master_analysis/qalab/services/importHandler.ts`
-- **债务类型**: 错误处理
-- **问题**: 7处使用 `throw new Error()`
-- **修复方案**: 
-  - 文件格式错误 → `ValidationError`
-  - 数据解析错误 → `ApiError`
-  - 业务逻辑错误 → `BusinessError`
-- **风险评估**: 中风险 - 数据导入核心逻辑
-- **依赖关系**: 被 QALab 主模块调用
-
-#### 2. dataOperations.ts (Scraper)
+#### 1. dataOperations.ts (Scraper)
 - **路径**: `src/modules/app_center/views/master_analysis/scraper/handlers/dataOperations.ts`
 - **债务类型**: 错误处理 + 事件机制
 - **问题**: 
@@ -181,24 +163,7 @@
 - **风险评估**: 中风险 - Scraper核心数据操作
 - **依赖关系**: 被 ScraperPanel 和 importHandler 调用
 
-#### 3. qalab/index.ts
-- **路径**: `src/modules/app_center/views/master_analysis/qalab/index.ts`
-- **债务类型**: 事件机制
-- **问题**: 监听自定义 `qalab:data-imported` 事件
-- **修复方案**: 
-  ```typescript
-  // 修改前
-  window.addEventListener('qalab:data-imported', handler);
-  
-  // 修改后
-  import eventBus from '@common/EventBus';
-  import { APP_EVENTS } from '@common/constants/eventConstants';
-  const unsubscribe = eventBus.on(APP_EVENTS.QALAB_DATA_IMPORTED, handler);
-  ```
-- **风险评估**: 中风险 - 需要同步修改事件触发方
-- **依赖关系**: 与 importHandler 配合使用
-
-#### 4. actions.ts (AI Analysis)
+#### 2. actions.ts (AI Analysis)
 - **路径**: `src/modules/app_center/views/master_analysis/ai_analysis/components/actions.ts`
 - **债务类型**: 事件机制
 - **问题**: 触发 `history-updated` 事件
@@ -230,21 +195,19 @@
 
 ### 修复策略
 
-#### 阶段1: 错误处理（2个文件）
-1. `importHandler.ts` - QALab数据导入
-2. `dataOperations.ts` - Scraper数据操作（仅错误处理部分）
+#### 阶段1: 错误处理（1个文件）
+1. `dataOperations.ts` - Scraper数据操作（仅错误处理部分）
 
 **验证点**:
 - 数据导入功能正常
 - 错误信息准确
 - 构建通过
 
-#### 阶段2: 事件机制（5个文件）
+#### 阶段2: 事件机制（4个文件）
 1. `dataOperations.ts` - 完成事件机制部分
-2. `qalab/index.ts` - QALab事件监听
-3. `actions.ts` - AI Analysis事件触发
-4. `overview/index.ts` - Overview导航事件
-5. `AlpinePanel.ts` - AI Analysis导航监听（可选）
+2. `actions.ts` - AI Analysis事件触发
+3. `overview/index.ts` - Overview导航事件
+4. `AlpinePanel.ts` - AI Analysis导航监听（可选）
 
 **验证点**:
 - 事件触发和监听正常
@@ -257,7 +220,7 @@
 #### 高风险点
 1. **事件名称不匹配**: 需要确保事件常量已在 `eventConstants.ts` 中定义
 2. **事件监听清理**: 需要在组件销毁时调用 `unsubscribe()`
-3. **数据导入逻辑**: importHandler 和 dataOperations 是核心业务逻辑
+3. **数据操作逻辑**: dataOperations 是核心业务逻辑
 
 #### 降低风险措施
 1. **分阶段修复**: 先完成错误处理，再处理事件机制
@@ -277,59 +240,43 @@
 ### 基本信息
 - **批次编号**: Batch #2
 - **修复时间**: 2026年
-- **文件数量**: 7个（1个错误处理 + 6个事件机制）
+- **文件数量**: 5个（事件机制）
 - **风险等级**: 中风险
 - **成功率**: 100%
 
 ### 修复清单
 
-#### 错误处理修复（1个文件）
+#### 事件机制修复（5个文件）
 
-##### 1. ✅ importHandler.ts (QALab)
-- **路径**: `src/modules/app_center/views/master_analysis/qalab/services/importHandler.ts`
-- **债务类型**: 错误处理
-- **修复内容**: 7处 `throw new Error()` → `ValidationError`, `ApiError`, `BusinessError`
-- **状态**: 已完成
-- **验证**: ✅ 构建通过
-
-#### 事件机制修复（6个文件）
-
-##### 2. ✅ overview/index.ts
+##### 1. ✅ overview/index.ts
 - **路径**: `src/modules/app_center/views/overview/index.ts`
 - **债务类型**: 事件机制
 - **修复内容**: 2处路由导航事件 → EventBus
 - **状态**: 已完成
 - **验证**: ✅ 构建通过
 
-##### 3. ✅ PromptlabPanel.ts
+##### 2. ✅ PromptlabPanel.ts
 - **路径**: `src/modules/app_center/views/master_analysis/promptlab/components/PromptlabPanel.ts`
 - **债务类型**: 事件机制
 - **修复内容**: 监听 `HISTORY_UPDATED` 事件 → EventBus
 - **状态**: 已完成
 - **验证**: ✅ 构建通过
 
-##### 4. ✅ qalab/index.ts
-- **路径**: `src/modules/app_center/views/master_analysis/qalab/index.ts`
-- **债务类型**: 事件机制
-- **修复内容**: 监听 `qalab:data-imported` 事件 → EventBus
-- **状态**: 已完成
-- **验证**: ✅ 构建通过
-
-##### 5. ✅ actions.ts (AI Analysis)
+##### 3. ✅ actions.ts (AI Analysis)
 - **路径**: `src/modules/app_center/views/master_analysis/ai_analysis/components/actions.ts`
 - **债务类型**: 事件机制
 - **修复内容**: 触发 `history-updated` 事件 → EventBus
 - **状态**: 已完成
 - **验证**: ✅ 构建通过
 
-##### 6. ✅ AlpinePanel.ts
+##### 4. ✅ AlpinePanel.ts
 - **路径**: `src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanel.ts`
 - **债务类型**: 事件机制
 - **修复内容**: 监听 `navigate-to-scraper` 事件 → EventBus
 - **状态**: 已完成
 - **验证**: ✅ 构建通过
 
-##### 7. ✅ ScraperPanel.ts
+##### 5. ✅ ScraperPanel.ts
 - **路径**: `src/modules/app_center/views/master_analysis/scraper/components/ScraperPanel.ts`
 - **债务类型**: 事件机制
 - **修复内容**: 2处监听历史更新事件 → EventBus
@@ -348,7 +295,6 @@
 1. **配对修复**: 事件触发和监听同时修复，避免事件失效
 2. **EventBus迁移**: 从 `window.dispatchEvent` 迁移到 `eventBus.emit/on` 顺利
 3. **生命周期管理**: 正确处理事件监听器的清理（`unsubscribe()`）
-4. **模块级事件**: 成功处理 `qalab:data-imported` 等模块级事件
 
 #### 📝 注意事项
 1. **事件常量**: 确保使用 `APP_EVENTS` 中定义的常量

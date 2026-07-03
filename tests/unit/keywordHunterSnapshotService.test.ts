@@ -12,7 +12,10 @@ const mocks = vi.hoisted(() => {
       formattedCopy: '',
       matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
       unmatchedKeywords: ['waterproof'],
-      wordFrequency: [['wireless', 1], ['earbuds', 1]] as Array<[string, number]>,
+      wordFrequency: [
+        ['wireless', 1],
+        ['earbuds', 1],
+      ] as Array<[string, number]>,
       paragraphs: [],
       translationMode: false,
       keywordLocationIndex: {},
@@ -99,7 +102,10 @@ function resetTracker(): void {
     formattedCopy: '',
     matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
     unmatchedKeywords: ['waterproof'],
-    wordFrequency: [['wireless', 1], ['earbuds', 1]],
+    wordFrequency: [
+      ['wireless', 1],
+      ['earbuds', 1],
+    ],
     paragraphs: [],
     translationMode: false,
     keywordLocationIndex: {},
@@ -121,136 +127,210 @@ function resetTracker(): void {
   };
 }
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    resetTracker();
+beforeEach(() => {
+  vi.clearAllMocks();
+  resetTracker();
+});
+
+it('saves the current Keyword Hunter state as a snapshot', () => {
+  mocks.state.keywordTracker.snapshotSource = {
+    type: 'legacy-external',
+    externalId: 'legacy-001',
+  } as never;
+
+  const snapshot = KeywordHunterSnapshotService.saveCurrent({
+    title: 'Travel earbuds coverage',
   });
 
-  it('saves the current Keyword Hunter state as a snapshot', () => {
-    mocks.state.keywordTracker.snapshotSource = {
+  expect(snapshot.title).toBe('Travel earbuds coverage');
+  expect(snapshot.status).toBe('matched');
+  expect(snapshot.source).toEqual({ type: 'manual' });
+  expect(snapshot.result.coverageRate).toBe(50);
+  expect(snapshot.derived.keywordCount).toBe(2);
+  expect(mocks.snapshots).toEqual([snapshot]);
+  expect(mocks.state.keywordTracker.currentSnapshotId).toBe(snapshot.id);
+  expect(mocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
+});
+
+it('updates the loaded snapshot instead of creating duplicates', () => {
+  const first = KeywordHunterSnapshotService.saveCurrent({ title: 'Initial' });
+  mocks.state.keywordTracker.llmAnalysisResult = '# Report';
+
+  const updated = KeywordHunterSnapshotService.saveCurrent();
+
+  expect(updated.id).toBe(first.id);
+  expect(updated.createdAt).toBe(first.createdAt);
+  expect(updated.status).toBe('reported');
+  expect(mocks.snapshots).toHaveLength(1);
+});
+
+it('restores a saved snapshot into Keyword Hunter state', () => {
+  const snapshot = KeywordHunterSnapshotService.saveCurrent();
+
+  mocks.state.keywordTracker.keywords = [];
+  mocks.state.keywordTracker.matchedKeywords = [];
+  mocks.state.keywordTracker.currentSnapshotId = null;
+
+  const restored = KeywordHunterSnapshotService.restore(snapshot.id);
+
+  expect(restored?.id).toBe(snapshot.id);
+  expect(mocks.state.keywordTracker.keywords).toEqual(['wireless earbuds', 'waterproof']);
+  expect(mocks.state.keywordTracker.matchedKeywords).toEqual([
+    { keyword: 'wireless earbuds', count: 1 },
+  ]);
+  expect(mocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
+});
+
+it('saves and restores input, process, and analysis state in one snapshot', () => {
+  Object.assign(mocks.state.keywordTracker, {
+    keywordsInputText: 'wireless earbuds\ncharging case',
+    copyInputText: 'Wireless earbuds copy',
+    keywords: ['wireless earbuds', 'charging case'],
+    processedCopy: 'Wireless earbuds processed copy',
+    matchedKeywords: [{ keyword: 'wireless earbuds', count: 2 }],
+    unmatchedKeywords: ['charging case'],
+    wordFrequency: [['wireless', 2]],
+    paragraphs: [
+      {
+        original: 'Wireless earbuds processed copy',
+        translation: '无线耳机处理后文案',
+      },
+    ],
+    translationMode: true,
+    showTranslation: true,
+    llmAnalysisResult: '## 88/100',
+  });
+
+  const snapshot = KeywordHunterSnapshotService.saveCurrent();
+
+  expect(snapshot.status).toBe('reported');
+  expect(snapshot.input).toMatchObject({
+    keywordsInputText: 'wireless earbuds\ncharging case',
+    copyInputText: 'Wireless earbuds copy',
+  });
+  expect(snapshot.result).toMatchObject({
+    processedCopy: 'Wireless earbuds processed copy',
+    matchedKeywords: [{ keyword: 'wireless earbuds', count: 2 }],
+    unmatchedKeywords: ['charging case'],
+    wordFrequency: [['wireless', 2]],
+    llmAnalysisResult: '## 88/100',
+    showTranslation: true,
+    translationMode: true,
+  });
+  expect(snapshot.result.paragraphs).toEqual([
+    {
+      original: 'Wireless earbuds processed copy',
+      translation: '无线耳机处理后文案',
+    },
+  ]);
+
+  Object.assign(mocks.state.keywordTracker, {
+    keywordsInputText: '',
+    copyInputText: '',
+    keywords: [],
+    processedCopy: '',
+    matchedKeywords: [],
+    unmatchedKeywords: [],
+    wordFrequency: [],
+    paragraphs: [],
+    translationMode: false,
+    showTranslation: false,
+    llmAnalysisResult: '',
+  });
+
+  KeywordHunterSnapshotService.restore(snapshot.id);
+
+  expect(mocks.state.keywordTracker.keywordsInputText).toBe('wireless earbuds\ncharging case');
+  expect(mocks.state.keywordTracker.copyInputText).toBe('Wireless earbuds copy');
+  expect(mocks.state.keywordTracker.processedCopy).toBe('Wireless earbuds processed copy');
+  expect(mocks.state.keywordTracker.matchedKeywords).toEqual([
+    { keyword: 'wireless earbuds', count: 2 },
+  ]);
+  expect(mocks.state.keywordTracker.paragraphs).toEqual([
+    {
+      original: 'Wireless earbuds processed copy',
+      translation: '无线耳机处理后文案',
+    },
+  ]);
+  expect(mocks.state.keywordTracker.llmAnalysisResult).toBe('## 88/100');
+});
+
+it('normalizes legacy external source metadata to manual input', () => {
+  const snapshot = KeywordHunterSnapshotService.saveCurrent({ title: 'Legacy' });
+  mocks.snapshots[0] = {
+    ...snapshot,
+    source: {
       type: 'legacy-external',
       externalId: 'legacy-001',
-    } as never;
+    } as never,
+  };
 
-    const snapshot = KeywordHunterSnapshotService.saveCurrent({
-      title: 'Travel earbuds coverage',
-    });
+  const restored = KeywordHunterSnapshotService.restore(snapshot.id);
 
-    expect(snapshot.title).toBe('Travel earbuds coverage');
-    expect(snapshot.status).toBe('matched');
-    expect(snapshot.source).toEqual({ type: 'manual' });
-    expect(snapshot.result.coverageRate).toBe(50);
-    expect(snapshot.derived.keywordCount).toBe(2);
-    expect(mocks.snapshots).toEqual([snapshot]);
-    expect(mocks.state.keywordTracker.currentSnapshotId).toBe(snapshot.id);
-    expect(mocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
+  expect(KeywordHunterSnapshotService.getAll()[0]?.source).toEqual({ type: 'manual' });
+  expect(restored?.source).toEqual({ type: 'manual' });
+  expect(mocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
+});
+
+it('deletes a snapshot and clears the current snapshot pointer when needed', () => {
+  const snapshot = KeywordHunterSnapshotService.saveCurrent();
+
+  const deleted = KeywordHunterSnapshotService.deleteById(snapshot.id);
+
+  expect(deleted).toBe(true);
+  expect(mocks.snapshots).toEqual([]);
+  expect(mocks.state.keywordTracker.currentSnapshotId).toBeNull();
+});
+
+it('compares keyword coverage between two snapshots', () => {
+  const before = KeywordHunterSnapshotService.saveCurrent({
+    title: 'Before',
+    updateCurrent: false,
   });
 
-  it('updates the loaded snapshot instead of creating duplicates', () => {
-    const first = KeywordHunterSnapshotService.saveCurrent({ title: 'Initial' });
-    mocks.state.keywordTracker.llmAnalysisResult = '# Report';
+  mocks.state.keywordTracker.keywords = ['wireless earbuds', 'waterproof', 'charging case'];
+  mocks.state.keywordTracker.matchedKeywords = [
+    { keyword: 'wireless earbuds', count: 2 },
+    { keyword: 'waterproof', count: 1 },
+  ];
+  mocks.state.keywordTracker.unmatchedKeywords = ['charging case'];
 
-    const updated = KeywordHunterSnapshotService.saveCurrent();
-
-    expect(updated.id).toBe(first.id);
-    expect(updated.createdAt).toBe(first.createdAt);
-    expect(updated.status).toBe('reported');
-    expect(mocks.snapshots).toHaveLength(1);
+  const after = KeywordHunterSnapshotService.saveCurrent({
+    title: 'After',
+    updateCurrent: false,
   });
 
-  it('restores a saved snapshot into Keyword Hunter state', () => {
-    const snapshot = KeywordHunterSnapshotService.saveCurrent();
+  const diff = KeywordHunterSnapshotService.compare(before, after);
 
-    mocks.state.keywordTracker.keywords = [];
-    mocks.state.keywordTracker.matchedKeywords = [];
-    mocks.state.keywordTracker.currentSnapshotId = null;
+  expect(diff.addedKeywords).toEqual(['charging case']);
+  expect(diff.newlyMatchedKeywords).toEqual(['waterproof']);
+  expect(diff.improvedKeywords).toContainEqual({
+    keyword: 'wireless earbuds',
+    before: 1,
+    after: 2,
+  });
+  expect(diff.coverageDelta).toBe(17);
+});
 
-    const restored = KeywordHunterSnapshotService.restore(snapshot.id);
-
-    expect(restored?.id).toBe(snapshot.id);
-    expect(mocks.state.keywordTracker.keywords).toEqual(['wireless earbuds', 'waterproof']);
-    expect(mocks.state.keywordTracker.matchedKeywords).toEqual([
-      { keyword: 'wireless earbuds', count: 1 },
-    ]);
-    expect(mocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
+it('saves async snapshots in IndexedDB and removes the localStorage mirror', async () => {
+  const snapshot = await KeywordHunterSnapshotService.saveCurrentAsync({
+    title: 'Indexed snapshot',
   });
 
-  it('normalizes legacy external source metadata to manual input', () => {
-    const snapshot = KeywordHunterSnapshotService.saveCurrent({ title: 'Legacy' });
-    mocks.snapshots[0] = {
-      ...snapshot,
-      source: {
-        type: 'legacy-external',
-        externalId: 'legacy-001',
-      } as never,
-    };
+  expect(mocks.indexedSnapshots).toEqual([snapshot]);
+  expect(mocks.removeStorage).toHaveBeenCalledWith('keyword_hunter_snapshots');
+  expect(mocks.state.keywordTracker.currentSnapshotId).toBe(snapshot.id);
+});
 
-    const restored = KeywordHunterSnapshotService.restore(snapshot.id);
-
-    expect(KeywordHunterSnapshotService.getAll()[0]?.source).toEqual({ type: 'manual' });
-    expect(restored?.source).toEqual({ type: 'manual' });
-    expect(mocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
+it('removes legacy localStorage snapshots after a successful migration', async () => {
+  const snapshot = KeywordHunterSnapshotService.saveCurrent({
+    title: 'Legacy snapshot',
+    updateCurrent: false,
   });
+  mocks.removeStorage.mockClear();
+  mockedLocalDataStore.migrateLocalStorageKey.mockResolvedValueOnce([snapshot]);
 
-  it('deletes a snapshot and clears the current snapshot pointer when needed', () => {
-    const snapshot = KeywordHunterSnapshotService.saveCurrent();
+  await expect(KeywordHunterSnapshotService.getAllAsync()).resolves.toEqual([snapshot]);
 
-    const deleted = KeywordHunterSnapshotService.deleteById(snapshot.id);
-
-    expect(deleted).toBe(true);
-    expect(mocks.snapshots).toEqual([]);
-    expect(mocks.state.keywordTracker.currentSnapshotId).toBeNull();
-  });
-
-  it('compares keyword coverage between two snapshots', () => {
-    const before = KeywordHunterSnapshotService.saveCurrent({
-      title: 'Before',
-      updateCurrent: false,
-    });
-
-    mocks.state.keywordTracker.keywords = ['wireless earbuds', 'waterproof', 'charging case'];
-    mocks.state.keywordTracker.matchedKeywords = [
-      { keyword: 'wireless earbuds', count: 2 },
-      { keyword: 'waterproof', count: 1 },
-    ];
-    mocks.state.keywordTracker.unmatchedKeywords = ['charging case'];
-
-    const after = KeywordHunterSnapshotService.saveCurrent({
-      title: 'After',
-      updateCurrent: false,
-    });
-
-    const diff = KeywordHunterSnapshotService.compare(before, after);
-
-    expect(diff.addedKeywords).toEqual(['charging case']);
-    expect(diff.newlyMatchedKeywords).toEqual(['waterproof']);
-    expect(diff.improvedKeywords).toContainEqual({
-      keyword: 'wireless earbuds',
-      before: 1,
-      after: 2,
-    });
-    expect(diff.coverageDelta).toBe(17);
-  });
-
-  it('saves async snapshots in IndexedDB and removes the localStorage mirror', async () => {
-    const snapshot = await KeywordHunterSnapshotService.saveCurrentAsync({
-      title: 'Indexed snapshot',
-    });
-
-    expect(mocks.indexedSnapshots).toEqual([snapshot]);
-    expect(mocks.removeStorage).toHaveBeenCalledWith('keyword_hunter_snapshots');
-    expect(mocks.state.keywordTracker.currentSnapshotId).toBe(snapshot.id);
-  });
-
-  it('removes legacy localStorage snapshots after a successful migration', async () => {
-    const snapshot = KeywordHunterSnapshotService.saveCurrent({
-      title: 'Legacy snapshot',
-      updateCurrent: false,
-    });
-    mocks.removeStorage.mockClear();
-    mockedLocalDataStore.migrateLocalStorageKey.mockResolvedValueOnce([snapshot]);
-
-    await expect(KeywordHunterSnapshotService.getAllAsync()).resolves.toEqual([snapshot]);
-
-    expect(mocks.removeStorage).toHaveBeenCalledWith('keyword_hunter_snapshots');
-  });
+  expect(mocks.removeStorage).toHaveBeenCalledWith('keyword_hunter_snapshots');
+});
