@@ -183,6 +183,54 @@ export class PromptlabPage extends BasePage {
     );
   }
 
+  private async getPromptlabStateValue<T>(property: string, fallback: T): Promise<T> {
+    return await this.page.evaluate(
+      ({ property, fallbackValue }) => {
+        const root = document.querySelector('[x-data="promptlabPanel"]');
+        const alpine = (window as Window & { Alpine?: { $data?: (element: Element) => unknown } })
+          .Alpine;
+        const data = root && typeof alpine?.$data === 'function'
+          ? (alpine.$data(root) as Record<string, unknown>)
+          : undefined;
+        return (data?.[property] as T | undefined) ?? fallbackValue;
+      },
+      { property, fallbackValue: fallback }
+    );
+  }
+
+  private async callPromptlabAction(action: string): Promise<void> {
+    await this.page.evaluate(actionName => {
+      const root = document.querySelector('[x-data="promptlabPanel"]');
+      const alpine = (window as Window & { Alpine?: { $data?: (element: Element) => unknown } })
+        .Alpine;
+      const data = root && typeof alpine?.$data === 'function'
+        ? (alpine.$data(root) as Record<string, unknown>)
+        : undefined;
+
+      if (typeof data?.[actionName] !== 'function') {
+        throw new Error(`Promptlab action not found: ${actionName}`);
+      }
+
+      (data[actionName] as () => void)();
+    }, action);
+  }
+
+  private async waitForSelectedReportSectionsCount(expected: number, timeout = 5000): Promise<void> {
+    await this.page.waitForFunction(
+      expectedCount => {
+        const root = document.querySelector('[x-data="promptlabPanel"]');
+        const alpine = (window as Window & { Alpine?: { $data?: (element: Element) => unknown } })
+          .Alpine;
+        const data = root && typeof alpine?.$data === 'function'
+          ? (alpine.$data(root) as { profile?: { selectedReportSections?: unknown[] } })
+          : undefined;
+        return (data?.profile?.selectedReportSections?.length ?? 0) === expectedCount;
+      },
+      expected,
+      { timeout }
+    );
+  }
+
   // ========== 产品 DNA 填写方法 ==========
 
   /**
@@ -423,14 +471,17 @@ export class PromptlabPage extends BasePage {
    * 全选分析报告维度
    */
   async selectAllReportSections(): Promise<void> {
-    await this.clickFirstVisible(`${this.selectors.reportSectionsContainer} button:has-text("全选")`);
+    await this.callPromptlabAction('selectAllReportSections');
+    const sectionsCount = await this.getReportSectionsCount();
+    await this.waitForSelectedReportSectionsCount(sectionsCount);
   }
 
   /**
    * 清空分析报告选择
    */
   async clearReportSections(): Promise<void> {
-    await this.clickFirstVisible(`${this.selectors.reportSectionsContainer} button:has-text("清空")`);
+    await this.callPromptlabAction('clearReportSections');
+    await this.waitForSelectedReportSectionsCount(0);
   }
 
   async clearReportSelections(): Promise<void> {
@@ -439,7 +490,7 @@ export class PromptlabPage extends BasePage {
 
   async getReportSectionsCount(): Promise<number> {
     return await this.page
-      .locator(`${this.selectors.reportSectionsContainer} input[type="checkbox"]`)
+      .locator(`${this.selectors.reportSectionsContainer} input.dimension-checkbox, ${this.selectors.reportSectionsContainer} input[name="report-section"]`)
       .count();
   }
 
@@ -480,8 +531,8 @@ export class PromptlabPage extends BasePage {
    * 获取已选择的报告维度数量
    */
   async getSelectedReportSectionsCount(): Promise<number> {
-    const checkboxes = this.page.locator(`${this.selectors.reportSectionsContainer} input[type="checkbox"]:checked`);
-    return await checkboxes.count();
+    const profile = await this.getPromptlabStateValue<{ selectedReportSections?: unknown[] }>('profile', {});
+    return profile.selectedReportSections?.length ?? 0;
   }
 
   // ========== 策略配置方法 ==========
@@ -589,7 +640,18 @@ export class PromptlabPage extends BasePage {
       : this.selectors.visualModeButton;
     
     await this.click(button);
-    await this.wait(500); // 等待翻转动画
+    await this.page.waitForFunction(
+      expectedMode => {
+        const root = document.querySelector('[x-data="promptlabPanel"]');
+        const alpine = (window as Window & { Alpine?: { $data?: (element: Element) => unknown } })
+          .Alpine;
+        const data = root && typeof alpine?.$data === 'function'
+          ? (alpine.$data(root) as { currentConsoleMode?: string })
+          : undefined;
+        return data?.currentConsoleMode === expectedMode;
+      },
+      mode
+    );
   }
 
   async switchToVisualMode(): Promise<void> {
@@ -601,6 +663,7 @@ export class PromptlabPage extends BasePage {
    */
   async generateListingPrompt(options?: PromptGenerationWaitOptions): Promise<void> {
     await this.switchConsoleMode('listing');
+    await this.waitForListingReady();
     await this.click(this.selectors.generatePromptButton);
     await this.waitForPromptGeneration(options);
   }
@@ -610,8 +673,26 @@ export class PromptlabPage extends BasePage {
    */
   async generateVisualPrompt(): Promise<void> {
     await this.switchConsoleMode('visual');
+    await this.waitForVisualReady();
     await this.click(this.selectors.generateVisualButton);
     await this.waitForPromptGeneration();
+  }
+
+  async waitForVisualReady(timeout = 10000): Promise<void> {
+    await this.page.waitForFunction(
+      buttonSelector => {
+        const root = document.querySelector('[x-data="promptlabPanel"]');
+        const alpine = (window as Window & { Alpine?: { $data?: (element: Element) => unknown } })
+          .Alpine;
+        const data = root && typeof alpine?.$data === 'function'
+          ? (alpine.$data(root) as { isVisualReady?: boolean })
+          : undefined;
+        const button = document.querySelector(buttonSelector) as HTMLButtonElement | null;
+        return data?.isVisualReady === true && !!button && !button.disabled;
+      },
+      this.selectors.generateVisualButton,
+      { timeout }
+    );
   }
 
   /**
@@ -662,8 +743,15 @@ export class PromptlabPage extends BasePage {
    * 复制 Prompt 到剪贴板
    */
   async copyPrompt(): Promise<void> {
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.toast').forEach(toast => toast.remove());
+    });
     await this.click(this.selectors.copyButton);
-    await this.wait(500); // 等待复制完成
+    await this.page.waitForFunction(() => {
+      return Array.from(document.querySelectorAll('.toast')).some(toast =>
+        toast.textContent?.includes('已复制')
+      );
+    });
   }
 
   /**
@@ -683,15 +771,7 @@ export class PromptlabPage extends BasePage {
    * 获取字符数
    */
   async getCharCount(): Promise<number> {
-    const text = (await this.getText(this.selectors.charCount)).trim();
-    const match = text.match(/^(\d+(?:\.\d+)?)(k)?$/i);
-
-    if (!match) {
-      return 0;
-    }
-
-    const value = Number.parseFloat(match[1] || '0');
-    return match[2] ? Math.round(value * 1000) : value;
+    return (await this.getGeneratedPrompt()).length;
   }
 
   /**

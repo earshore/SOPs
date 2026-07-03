@@ -34,7 +34,6 @@ import {
   computeHasReport,
   computeIsListingReady,
   computeIsReady,
-  computeIsVisualReady,
   computeCurrentPrompt,
   computeTokenCount,
   computeFormattedTokenCount,
@@ -323,6 +322,16 @@ function attachPromptlabPanelBehavior(
   return panel;
 }
 
+function isVisualReadyForUi(ctx: PromptlabPanelThis): boolean {
+  void ctx.reportRevision;
+  return (
+    computeHasReport() &&
+    ctx.profile.targetMarket !== '' &&
+    ctx.profile.keywordsTier1.trim().length > 0 &&
+    ctx.profile.keywordsTier2.trim().length > 0
+  );
+}
+
 /**
  * Promptlab Alpine 组件行为。
  * 通过 descriptor 挂载，保留 getter 语义。
@@ -344,7 +353,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   },
 
   get isVisualReady(): boolean {
-    return computeIsVisualReady(this as unknown as PromptlabAlpineContext);
+    return isVisualReadyForUi(this);
   },
 
   get currentPrompt(): string {
@@ -397,7 +406,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   },
 
   get visualGenerateButtonDisabled(): boolean {
-    return !this.isVisualReady;
+    return !isVisualReadyForUi(this);
   },
 
   get autoPopulateButtonClass(): string {
@@ -431,7 +440,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   },
 
   get visualGenerateButtonClass(): string {
-    return this.isVisualReady
+    return isVisualReadyForUi(this)
       ? 'bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-lg shadow-pink-700/40 hover:shadow-xl hover:shadow-pink-600/50 cursor-pointer'
       : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none opacity-50';
   },

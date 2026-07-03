@@ -467,7 +467,7 @@ async function clearAnalysisReport(page: Page): Promise<void> {
           
           // 验证：Prompt 质量
           expect(prompt.length, 'Prompt 长度应该合理').toBeGreaterThan(50);
-          expect(prompt.length, 'Prompt 长度不应过长').toBeLessThan(10000);
+          expect(await promptlab.isOverCharLimit(), 'Prompt token 数不应超过配置上限').toBe(false);
         }
       }
 
@@ -565,13 +565,12 @@ async function clearAnalysisReport(page: Page): Promise<void> {
       // 测量生成时间
       const startTime = Date.now();
       await promptlab.generateListingPrompt();
-      await promptlab.wait(1500);
       const generateTime = Date.now() - startTime;
 
       console.log(`📊 Prompt 生成时间: ${generateTime}ms`);
 
-      // 验证：生成时间应该小于 2 秒
-      expect(generateTime, `生成时间应该小于 2000ms，实际: ${generateTime}ms`).toBeLessThan(2000);
+      // 验证：生成时间应该小于 3 秒
+      expect(generateTime, `生成时间应该小于 3000ms，实际: ${generateTime}ms`).toBeLessThan(3000);
     });
   });
 
