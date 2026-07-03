@@ -68,6 +68,15 @@ describe('viewLoader', () => {
     await expect(ensureViewLoaded('unknown-route')).resolves.toBeUndefined();
   });
 
+  it('does not leave route loading skeleton after a shell view loads', async () => {
+    const { ensureViewLoaded } = await importViewLoader();
+
+    await ensureViewLoaded('app_center_overview');
+
+    expect(document.querySelector('#route-loading-skeleton')).toBeNull();
+    expect(document.querySelector('main')?.innerHTML.length).toBeGreaterThan(100);
+  });
+
   it('clears legacy cache keys and reports remaining cache stats', async () => {
     const { clearOldCache, getCacheStats } = await importViewLoader();
     localStorage.setItem('view_cache_0.9.0_/legacy.html', '<div>old</div>');

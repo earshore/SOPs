@@ -83,6 +83,100 @@
 }
 
 /* ========================================
+   路由级主内容骨架屏
+   ======================================== */
+.route-loading-skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px;
+  background: rgba(248, 250, 252, 0.88);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.route-loading-skeleton__card {
+  width: min(100%, 1120px);
+  padding: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+
+.route-loading-skeleton__header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.route-loading-skeleton__icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+}
+
+.route-loading-skeleton__heading {
+  flex: 1 1 auto;
+}
+
+.route-loading-skeleton__line {
+  height: 12px;
+  margin-bottom: 10px;
+}
+
+.route-loading-skeleton__line--title {
+  width: 240px;
+  height: 18px;
+}
+
+.route-loading-skeleton__line--subtitle {
+  width: 360px;
+}
+
+.route-loading-skeleton__line--wide {
+  width: 70%;
+}
+
+.route-loading-skeleton__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.route-loading-skeleton__block {
+  height: 92px;
+}
+
+.route-loading-skeleton__table {
+  padding: 18px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 10px;
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.route-loading-skeleton__table .route-loading-skeleton__line {
+  width: 100%;
+}
+
+.dark .route-loading-skeleton,
+[data-theme='dark'] .route-loading-skeleton {
+  background: rgba(15, 23, 42, 0.86);
+}
+
+.dark .route-loading-skeleton__card,
+[data-theme='dark'] .route-loading-skeleton__card {
+  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+/* ========================================
    内联加载状态
    ======================================== */
 .loading-inline {

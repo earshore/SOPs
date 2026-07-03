@@ -16,6 +16,8 @@ const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
 const LEGACY_CACHE_PREFIX = 'view_cache_';
 const VIEW_CACHE_SCHEMA_VERSION = 'view-v2';
 const VIEW_CACHE_VERSION = `${APP_VERSION}:${VIEW_CACHE_SCHEMA_VERSION}`;
+const ROUTE_LOADING_DELAY_MS = 300;
+const ROUTE_LOADING_ID = 'route-loading-skeleton';
 let hasCleanedOldViewCache = false;
 
 /**
@@ -222,6 +224,80 @@ const VIEW_REGISTRY: ViewRegistry = {
   app_center: { path: '/src/modules/app_center/app_center.html', target: 'main', isLoaded: false },
 };
 
+function getMainContentContainer(): HTMLElement | null {
+  return document.getElementById('main-content') ?? document.querySelector<HTMLElement>('main');
+}
+
+function createRouteLoadingSkeleton(routeId: string): HTMLElement {
+  const wrapper = document.createElement('div');
+  wrapper.id = ROUTE_LOADING_ID;
+  wrapper.className = 'route-loading-skeleton';
+  wrapper.setAttribute('role', 'status');
+  wrapper.setAttribute('aria-live', 'polite');
+  wrapper.setAttribute('aria-label', '页面加载中');
+  wrapper.dataset.routeId = routeId;
+
+  wrapper.appendChild(
+    createSafeFragment(`
+      <div class="route-loading-skeleton__card">
+        <div class="route-loading-skeleton__header">
+          <div class="loading-skeleton route-loading-skeleton__icon" aria-hidden="true"></div>
+          <div class="route-loading-skeleton__heading">
+            <div class="loading-skeleton route-loading-skeleton__line route-loading-skeleton__line--title"></div>
+            <div class="loading-skeleton route-loading-skeleton__line route-loading-skeleton__line--subtitle"></div>
+          </div>
+        </div>
+        <div class="route-loading-skeleton__grid">
+          <div class="loading-skeleton route-loading-skeleton__block"></div>
+          <div class="loading-skeleton route-loading-skeleton__block"></div>
+          <div class="loading-skeleton route-loading-skeleton__block"></div>
+          <div class="loading-skeleton route-loading-skeleton__block"></div>
+        </div>
+        <div class="route-loading-skeleton__table">
+          <div class="loading-skeleton route-loading-skeleton__line route-loading-skeleton__line--wide"></div>
+          <div class="loading-skeleton route-loading-skeleton__line"></div>
+          <div class="loading-skeleton route-loading-skeleton__line"></div>
+          <div class="loading-skeleton route-loading-skeleton__line"></div>
+        </div>
+        <span class="sr-only">页面加载中</span>
+      </div>
+    `)
+  );
+  return wrapper;
+}
+
+function showRouteLoading(routeId: string): void {
+  if (document.getElementById(ROUTE_LOADING_ID)) {
+    return;
+  }
+
+  const container = getMainContentContainer();
+  if (!container) {
+    return;
+  }
+
+  container.appendChild(createRouteLoadingSkeleton(routeId));
+}
+
+function hideRouteLoading(): void {
+  document.getElementById(ROUTE_LOADING_ID)?.remove();
+}
+
+function scheduleRouteLoading(routeId: string): () => void {
+  let timer: number | null = window.setTimeout(() => {
+    timer = null;
+    showRouteLoading(routeId);
+  }, ROUTE_LOADING_DELAY_MS);
+
+  return () => {
+    if (timer) {
+      window.clearTimeout(timer);
+      timer = null;
+    }
+    hideRouteLoading();
+  };
+}
+
 /**
  * 渲染错误占位视图
  */
@@ -357,7 +433,12 @@ export async function ensureViewLoaded(routeId: string): Promise<void> {
 
   if (moduleKey && VIEW_REGISTRY[moduleKey]) {
     if (!VIEW_REGISTRY[moduleKey].isLoaded) {
-      await loadHtml(moduleKey);
+      const cancelRouteLoading = scheduleRouteLoading(routeId);
+      try {
+        await loadHtml(moduleKey);
+      } finally {
+        cancelRouteLoading();
+      }
     }
   }
 }

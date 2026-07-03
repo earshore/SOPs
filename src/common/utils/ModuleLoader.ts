@@ -22,6 +22,7 @@ import {
 } from './pageEnterAnimation';
 
 const LEGACY_CONTENT_ENTER_ANIMATION_CLASS = 'fade-in';
+const MODULE_LOADING_DELAY_MS = 300;
 
 // ==================== 类型定义 ====================
 
@@ -83,6 +84,8 @@ export class ModuleLoader {
   private pendingRouteId: string | null;
   private loadSequence: number;
   private contentEnterAnimation: boolean;
+  private loadingTimer: number | null;
+  private loadingTimerLoadId: number | null;
 
   constructor(config: ModuleLoaderConfig) {
     this.containerId = config.containerId;
@@ -97,6 +100,8 @@ export class ModuleLoader {
     this.pendingRouteId = null;
     this.loadSequence = 0;
     this.contentEnterAnimation = config.contentEnterAnimation || false;
+    this.loadingTimer = null;
+    this.loadingTimerLoadId = null;
 
     // 🎯 DI容器注入（预留用于未来的模块工厂函数）
     // const diContainer = config.container || globalContainer;
@@ -181,6 +186,7 @@ export class ModuleLoader {
    * @private
    */
   private _unmountCurrentModule(): void {
+    this._clearDelayedLoading();
     if (this.currentModule && this.currentModule.unmount) {
       try {
         this.currentModule.unmount();
@@ -202,7 +208,33 @@ export class ModuleLoader {
    * @private
    */
   private _renderLoading(container: HTMLElement): void {
-    renderLoading(container, this.loaderColor, 'Loading module...');
+    renderLoading(container, this.loaderColor, '正在加载页面...');
+  }
+
+  private _scheduleDelayedLoading(container: HTMLElement, loadId: number): void {
+    this._clearDelayedLoading();
+    this.loadingTimerLoadId = loadId;
+    this.loadingTimer = window.setTimeout(() => {
+      this.loadingTimer = null;
+      this.loadingTimerLoadId = null;
+      if (this._isStaleLoad(loadId) || !this.isLoading) {
+        return;
+      }
+
+      this._renderLoading(container);
+    }, MODULE_LOADING_DELAY_MS);
+  }
+
+  private _clearDelayedLoading(loadId?: number): void {
+    if (loadId !== undefined && this.loadingTimerLoadId !== loadId) {
+      return;
+    }
+
+    if (this.loadingTimer) {
+      window.clearTimeout(this.loadingTimer);
+      this.loadingTimer = null;
+      this.loadingTimerLoadId = null;
+    }
   }
 
   /**
@@ -256,6 +288,7 @@ export class ModuleLoader {
   }
 
   private _clearLoading(loadId: number): void {
+    this._clearDelayedLoading(loadId);
     if (this._isStaleLoad(loadId)) {
       return;
     }
@@ -286,7 +319,7 @@ export class ModuleLoader {
 
     this.currentContainer = container;
     this._clearContentEnterAnimation(container);
-    this._renderLoading(container);
+    this._scheduleDelayedLoading(container, loadId);
     return container;
   }
 
@@ -296,6 +329,7 @@ export class ModuleLoader {
   ): (() => Promise<IModule>) | null {
     const loader = this.moduleMap[routeId];
     if (!loader) {
+      this._clearDelayedLoading();
       this._renderNotRegistered(container, routeId);
       return null;
     }
@@ -304,6 +338,7 @@ export class ModuleLoader {
   }
 
   private _prepareContainerForMount(container: HTMLElement): void {
+    this._clearDelayedLoading();
     this._clearContentEnterAnimation(container);
     container.replaceChildren();
     this._prepareContentEnterAnimation(container);
@@ -388,6 +423,7 @@ export class ModuleLoader {
     }
 
     if (container) {
+      this._clearDelayedLoading(loadId);
       this._clearContentEnterAnimation(container);
       this._renderRetryLoading(container);
     }
@@ -421,6 +457,7 @@ export class ModuleLoader {
       return;
     }
     if (container) {
+      this._clearDelayedLoading(loadId);
       this._clearContentEnterAnimation(container);
       this._renderErrorBoundary(container, routeId, err as Error);
     }
@@ -530,6 +567,7 @@ export class ModuleLoader {
    * 销毁加载器（清理资源）
    */
   destroy(): void {
+    this._clearDelayedLoading();
     this._unmountCurrentModule();
   }
 }

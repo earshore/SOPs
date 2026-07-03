@@ -42,6 +42,12 @@ function waitForRouteEvent(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+async function flushAsyncWork(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
   beforeEach(() => {
     setupContainers();
     vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -75,6 +81,68 @@ function waitForRouteEvent(): Promise<void> {
     await Promise.all([firstLoad, secondLoad]);
 
     expect(module.mount).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show module loading for routes that finish before 300ms', async () => {
+    vi.useFakeTimers();
+    const content = document.getElementById('content') as HTMLElement;
+    const module = createModule('Fast');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        fast_route: vi.fn(() => Promise.resolve(module))
+      },
+      moduleName: 'TestLoader'
+    });
+
+    try {
+      const load = loader.loadModule('fast_route');
+      await flushAsyncWork();
+      await load;
+      await vi.advanceTimersByTimeAsync(300);
+
+      expect(content.textContent).toBe('Fast');
+      expect(content.textContent).not.toContain('正在加载页面');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('shows module loading after a route waits longer than 300ms', async () => {
+    vi.useFakeTimers();
+    const content = document.getElementById('content') as HTMLElement;
+    const pending = deferred<IModule>();
+    const module = createModule('Slow');
+    const loaderFn = vi.fn(() => pending.promise);
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        slow_route: loaderFn
+      },
+      moduleName: 'TestLoader'
+    });
+
+    try {
+      const load = loader.loadModule('slow_route');
+      await vi.advanceTimersByTimeAsync(0);
+      await flushAsyncWork();
+      expect(loaderFn).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(299);
+      expect(content.textContent).toBe('');
+
+      await vi.advanceTimersByTimeAsync(1);
+      expect(content.textContent).toContain('正在加载页面');
+
+      pending.resolve(module);
+      await load;
+
+      expect(content.textContent).toBe('Slow');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('ignores stale module imports when a newer route finishes first', async () => {
