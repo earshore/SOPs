@@ -26,6 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.15] - 2026-07-03
+
+### Added
+- 新增功能开关服务及路由守卫集成。
+- 新增 AI Analysis 端到端 fixture，覆盖沉浸式翻译运行恢复。
+
+### Changed
+- 拆分 PPC Search Terms 动作、Agent、分析、导入导出、规则、设置和 UI 模块。
+- 持久化沉浸式翻译运行记录。
+- 放宽 Promptlab/Scraper 性能端到端阈值并强化等待逻辑。
+- 同步应用内版本显示到 `3.0.3-rc.15`。
+
+### Fixed
+- 强化 LLM streaming 响应解析与空响应处理。
+
 ## [3.0.3-rc.14] - 2026-07-03
 
 ### Changed
