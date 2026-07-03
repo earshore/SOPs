@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   actions: {} as Record<string, ActionHandler>,
   closeMegaMenus: vi.fn(),
   navigateTo: vi.fn().mockResolvedValue(true),
+  navigateToRouteId: vi.fn().mockResolvedValue(true),
 }));
 
 vi.mock('@/common/utils/actionRegistry', () => ({
@@ -15,6 +16,7 @@ vi.mock('@/common/utils/actionRegistry', () => ({
 
 vi.mock('@/common/router/initRouter', () => ({
   navigateTo: mocks.navigateTo,
+  navigateToRouteId: mocks.navigateToRouteId,
   getRouter: vi.fn(),
   getCurrentRoute: vi.fn(),
   hasRoute: vi.fn(),
@@ -63,6 +65,7 @@ beforeEach(async () => {
   mocks.actions = {};
   mocks.closeMegaMenus.mockReset();
   mocks.navigateTo.mockReset().mockResolvedValue(true);
+  mocks.navigateToRouteId.mockReset().mockResolvedValue(true);
   await import('@/common/ui/index');
 });
 
@@ -70,20 +73,15 @@ describe('UI route actions', () => {
   it('navigates switch-tab only for valid route ids', async () => {
     await mocks.actions['switch-tab']?.({ tab: 'ppc_search_terms' }, event());
 
+    expect(mocks.navigateToRouteId).toHaveBeenCalledWith('ppc_search_terms');
     expect(mocks.closeMegaMenus).toHaveBeenCalledWith({ blurActive: true });
-    expect(mocks.navigateTo).toHaveBeenCalledWith('/app-center/ppc-search-terms');
 
-    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     mocks.closeMegaMenus.mockClear();
-    mocks.navigateTo.mockClear();
+    mocks.navigateToRouteId.mockResolvedValueOnce(false);
 
     await mocks.actions['switch-tab']?.({ tab: '__missing__' }, event());
 
-    expect(consoleWarn).toHaveBeenCalledWith(
-      '[ActionRegistry] switch-tab ignored unknown routeId:',
-      '__missing__'
-    );
+    expect(mocks.navigateToRouteId).toHaveBeenCalledWith('__missing__');
     expect(mocks.closeMegaMenus).not.toHaveBeenCalled();
-    expect(mocks.navigateTo).not.toHaveBeenCalled();
   });
 });

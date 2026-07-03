@@ -11,6 +11,7 @@
 import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { showToast, showProgress } from '../../../../../common/ui';
+import { navigateToRouteId } from '../../../../../common/router/initRouter';
 import * as KeywordService from '../services/trackerService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { appStore } from '../../../../../stores/useAppStore';
@@ -832,7 +833,7 @@ async function startAnalysis(): Promise<void> {
     showToast('分析完成', { type: 'success' });
 
     // 切换到 process 模块
-    await window.navigateTo('/app-center/keyword-hunter/process');
+    await navigateToRouteId('kw_process');
   } catch (error) {
     showProgress(false);
     showToast('分析失败: ' + (error as Error).message, { type: 'error' });

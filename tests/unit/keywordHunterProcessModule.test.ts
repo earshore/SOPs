@@ -67,7 +67,7 @@ const processMocks = vi.hoisted(() => {
   return {
     handleError: vi.fn(),
     loadTemplate: vi.fn(async () => template),
-    navigateTo: vi.fn(async () => undefined),
+    navigateToRouteId: vi.fn(async () => true),
     renderTemplate: vi.fn((container: HTMLElement, html: string) => {
       container.innerHTML = html;
     }),
@@ -97,6 +97,10 @@ vi.mock('@/common/infrastructure/SafeRenderer', () => ({
 
 vi.mock('@/common/ui', () => ({
   showToast: processMocks.showToast,
+}));
+
+vi.mock('@/common/router/initRouter', () => ({
+  navigateToRouteId: processMocks.navigateToRouteId,
 }));
 
 vi.mock('@/services/errorService', () => ({
@@ -195,10 +199,6 @@ beforeEach(() => {
   } as never);
   mockedCallLLM.mockResolvedValue('【1】 无线耳机翻译');
 
-  Object.defineProperty(window, 'navigateTo', {
-    configurable: true,
-    value: processMocks.navigateTo,
-  });
   Object.defineProperty(window, 'requestAnimationFrame', {
     configurable: true,
     writable: true,
@@ -485,12 +485,12 @@ it('syncs original translation text back to input and toggles floating window st
 
   click(document.querySelector('#kt-sync-to-input-btn'));
   await vi.waitFor(() => {
-    expect(processMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/input');
+    expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('kw_input');
   });
 
   expect(processMocks.state.keywordTracker.processedCopy).toBe('Original one\nOriginal two');
   expect(processMocks.state.keywordTracker.copyInputText).toBe('Original one\nOriginal two');
-  expect(processMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/input');
+  expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('kw_input');
   expect(showToast).toHaveBeenCalledWith('已同步原文到输入模块');
 
   click(document.querySelector('#kt-minimize-keywords-btn'));
@@ -510,7 +510,7 @@ it('navigates from process to analysis with the current copy', async () => {
   click(document.querySelector('#kt-go-analysis-btn'));
 
   await vi.waitFor(() => {
-    expect(processMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/analysis');
+    expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('kw_analysis');
   });
   expect(processMocks.state.keywordTracker.processedCopy).toContain('Wireless earbuds');
 });
@@ -579,7 +579,7 @@ it('recomputes keyword coverage from edited process copy before analysis', async
   click(document.querySelector('#kt-go-analysis-btn'));
 
   await vi.waitFor(() => {
-    expect(processMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/analysis');
+    expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('kw_analysis');
   });
   expect(processMocks.state.keywordTracker.processedCopy).toBe(
     'Wireless earbuds now include a waterproof shell.'

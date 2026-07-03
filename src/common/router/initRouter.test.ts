@@ -34,7 +34,6 @@ const mocks = vi.hoisted(() => ({
   createRouterStoreSync: vi.fn(),
   createLegacyAdapter: vi.fn(),
   updateUIForRoute: vi.fn(),
-  eventBusOn: vi.fn(),
   normalizeRoutePath: vi.fn((path: string) => (path.startsWith('/') ? path : `/${path}`)),
   routeIdToPath: vi.fn((routeId: string) => {
     const paths: Record<string, string> = {
@@ -45,7 +44,6 @@ const mocks = vi.hoisted(() => ({
   }),
   routeIdToPathStrict: vi.fn((routeId: string) => {
     const paths: Record<string, string> = {
-      keyword_hunter: '/keyword_hunter',
       ppc_search_terms: '/app-center/ppc-search-terms',
       playground: '/app-center/playground/deep-chat',
     };
@@ -75,12 +73,6 @@ vi.mock('./routePaths', () => ({
   normalizeRoutePath: mocks.normalizeRoutePath,
   routeIdToPath: mocks.routeIdToPath,
   routeIdToPathStrict: mocks.routeIdToPathStrict,
-}));
-
-vi.mock('../EventBus', () => ({
-  default: {
-    on: mocks.eventBusOn,
-  },
 }));
 
 async function loadInitRouter() {
@@ -126,7 +118,6 @@ beforeEach(() => {
   mocks.createRouterStoreSync.mockReset().mockReturnValue(mocks.storeSync);
   mocks.createLegacyAdapter.mockReset().mockReturnValue(mocks.legacy);
   mocks.updateUIForRoute.mockReset().mockResolvedValue(undefined);
-  mocks.eventBusOn.mockReset();
   mocks.normalizeRoutePath.mockClear();
   mocks.routeIdToPath.mockClear();
   mocks.routeIdToPathStrict.mockClear();
@@ -187,24 +178,16 @@ describe('initRouter setup', () => {
 });
 
 describe('initRouter navigation and teardown', () => {
-  it('bridges popstate, event bus route changes, and initial navigation branches', async () => {
-    const { initRouter, triggerInitialNavigation, navigateTo, hasRoute, getCurrentRoute } =
-      await loadInitRouter();
+  it('handles popstate, route-id navigation, and initial navigation branches', async () => {
+    const {
+      initRouter,
+      triggerInitialNavigation,
+      navigateTo,
+      navigateToRouteId,
+      hasRoute,
+      getCurrentRoute,
+    } = await loadInitRouter();
     initRouter();
-
-    await new Promise(resolve => setTimeout(resolve, 0));
-    const routeChangeHandler = mocks.eventBusOn.mock.calls[0]?.[1];
-    routeChangeHandler?.({ routeId: 'keyword_hunter' });
-    expect(mocks.router.navigate).toHaveBeenCalledWith('/keyword_hunter');
-
-    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    mocks.router.navigate.mockClear();
-    routeChangeHandler?.({ routeId: '__missing__' });
-    expect(consoleWarn).toHaveBeenCalledWith(
-      '[initRouter] Ignored route-change for unknown routeId:',
-      '__missing__'
-    );
-    expect(mocks.router.navigate).not.toHaveBeenCalled();
 
     window.location.hash = '#/app-center/playground';
     window.dispatchEvent(new PopStateEvent('popstate'));
@@ -259,6 +242,19 @@ describe('initRouter navigation and teardown', () => {
     });
 
     await expect(navigateTo('/home', { replace: true })).resolves.toBe(true);
+    expect(mocks.router.navigate).toHaveBeenCalledWith('/home', { replace: true });
+
+    await expect(navigateToRouteId('ppc_search_terms', { replace: true })).resolves.toBe(true);
+    expect(mocks.router.navigate).toHaveBeenCalledWith('/app-center/ppc-search-terms', {
+      replace: true,
+    });
+
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await expect(navigateToRouteId('__missing__')).resolves.toBe(false);
+    expect(consoleWarn).toHaveBeenCalledWith(
+      '[initRouter] Ignored navigation for unknown routeId:',
+      '__missing__'
+    );
     expect(hasRoute('/home')).toBe(true);
     expect(getCurrentRoute()).toEqual({ id: 'home' });
   });

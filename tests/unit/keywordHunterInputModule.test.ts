@@ -167,7 +167,7 @@ function createInputMocks(mockApi: typeof vi) {
     confirm: mockApi.fn(() => true),
     getAllAsync: mockApi.fn(async () => snapshots),
     loadTemplate: mockApi.fn(async () => template),
-    navigateTo: mockApi.fn(async () => undefined),
+    navigateToRouteId: mockApi.fn(async () => true),
     readText: mockApi.fn(async () => 'clipboard copy'),
     renderTemplate: mockApi.fn((container: HTMLElement, html: string) => {
       container.innerHTML = html;
@@ -213,6 +213,10 @@ vi.mock('@/common/infrastructure/SafeRenderer', () => ({
 vi.mock('@/common/ui', () => ({
   showProgress: inputMocks.showProgress,
   showToast: inputMocks.showToast,
+}));
+
+vi.mock('@/common/router/initRouter', () => ({
+  navigateToRouteId: inputMocks.navigateToRouteId,
 }));
 
 vi.mock('@/common/utils/actionRegistry', () => ({
@@ -282,10 +286,6 @@ beforeEach(() => {
   inputMocks.actions = {};
   resetTrackerState();
   inputMocks.resetSnapshots();
-  Object.defineProperty(window, 'navigateTo', {
-    configurable: true,
-    value: inputMocks.navigateTo,
-  });
   Object.defineProperty(window, 'confirm', {
     configurable: true,
     value: inputMocks.confirm,
@@ -372,7 +372,7 @@ it('renders the embedded history snapshot panel on the input page', async () => 
   expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain(
     'Manual Draft Snapshot'
   );
-  expect(inputMocks.navigateTo).not.toHaveBeenCalled();
+  expect(inputMocks.navigateToRouteId).not.toHaveBeenCalled();
 
   click(container.querySelector('#kt-input-snapshot-save'));
   await vi.waitFor(() => {
@@ -520,7 +520,7 @@ it('validates required inputs and stores analysis results before navigation', as
   await inputMocks.actions.kt_startAnalysis({}, new Event('click'));
 
   expect(showToast).toHaveBeenCalledWith('请先输入关键词和文案', { type: 'warning' });
-  expect(inputMocks.navigateTo).not.toHaveBeenCalled();
+  expect(inputMocks.navigateToRouteId).not.toHaveBeenCalled();
 
   container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')!.value =
     'wireless earbuds\nwaterproof\nWireless Earbuds';
@@ -537,7 +537,7 @@ it('validates required inputs and stores analysis results before navigation', as
   ]);
   expect(inputMocks.state.keywordTracker.unmatchedKeywords).toEqual(['waterproof']);
   expect(inputMocks.state.keywordTracker.wordFrequency[0]).toEqual(['wireless', 2]);
-  expect(inputMocks.navigateTo).toHaveBeenCalledWith('/app-center/keyword-hunter/process');
+  expect(inputMocks.navigateToRouteId).toHaveBeenCalledWith('kw_process');
 });
 
 it('saves current input values and unregisters actions on unmount', async () => {

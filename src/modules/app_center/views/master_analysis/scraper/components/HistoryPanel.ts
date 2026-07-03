@@ -7,6 +7,7 @@ import { HistoryService } from '../../services/historyService';
 import { emitHistoryUpdated } from '../../services/historyEvents';
 import { getScrapedDataFingerprint } from '../../services/reportIdentity';
 import { showToast } from '../../../../../../common/ui';
+import { navigateToRouteId } from '../../../../../../common/router/initRouter';
 import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
 import { appStore } from '@/stores/useAppStore';
 import eventBus from '../../../../../../common/EventBus';
@@ -236,7 +237,7 @@ export class HistoryPanel {
       }
 
       // 3. 跳转到 AI智能分析页面查看报告
-      await window.navigateTo('/app-center/ai-analysis');
+      await navigateToRouteId('ai_analysis');
 
       showToast('已跳转到 AI智能分析查看报告', { type: 'success' });
     } catch (error) {

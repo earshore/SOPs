@@ -78,6 +78,16 @@ export function updateUIForRoute(routeId: string): Promise<void>;
 export function navigateTo(path: string, options?: { replace?: boolean }): Promise<boolean>;
 
 /**
+ * 通过路由 ID 导航
+ * @param routeId - 路由 ID（如 'home', 'ppc_search_terms'）
+ * @param options - 导航选项
+ */
+export function navigateToRouteId(
+  routeId: string,
+  options?: { replace?: boolean }
+): Promise<boolean>;
+
+/**
  * 显示 Toast 提示消息
  * @param message - 消息内容
  * @param type - 消息类型

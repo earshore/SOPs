@@ -1,17 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { loadTemplate } from '@/common/utils/viewLoader';
-import eventBus from '@/common/EventBus';
 import * as overviewModule from '@/modules/app_center/views/overview/index';
 
 vi.mock('@/common/utils/viewLoader', () => ({
   loadTemplate: vi.fn()
-}));
-
-vi.mock('@/common/EventBus', () => ({
-  default: {
-    emit: vi.fn()
-  }
 }));
 
 const overviewTemplate = `
@@ -25,7 +17,7 @@ const overviewTemplate = `
     <section id="app-module-apps">
       <div class="app-center-card-grid">
         <article data-category="master_analysis" data-search="master analysis 数据采集" data-action="switch-tab" data-tab="scraper">
-          <button class="app-child-link" data-child-tab="ai_analysis"></button>
+          <button class="app-child-link" data-action="switch-tab" data-tab="ai_analysis"></button>
         </article>
         <article data-category="ppc_tools" data-search="ppc search term 广告" data-action="switch-tab" data-tab="ppc_search_terms"></article>
       </div>
@@ -37,7 +29,6 @@ const overviewTemplate = `
 describe('App Center Overview', () => {
   beforeEach(() => {
     vi.mocked(loadTemplate).mockResolvedValue(overviewTemplate);
-    vi.mocked(eventBus.emit).mockClear();
     vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
@@ -61,20 +52,18 @@ describe('App Center Overview', () => {
     expect(container.querySelector('.app-overview-container')).not.toBeNull();
   });
 
-  it('emits route changes from child links and leaves app cards delegated', async () => {
+  it('leaves child links and app cards on delegated switch-tab routing', async () => {
     const container = document.createElement('div');
 
     await overviewModule.mount(container);
-    container.querySelector<HTMLElement>('.app-child-link[data-child-tab="ai_analysis"]')?.click();
-
-    expect(eventBus.emit).toHaveBeenCalledTimes(1);
-    expect(eventBus.emit).toHaveBeenCalledWith(APP_EVENTS.ROUTE_CHANGE, { routeId: 'ai_analysis' });
 
     const appCard = container.querySelector<HTMLElement>('[data-tab="scraper"]');
-    appCard?.click();
+    const childLink = container.querySelector<HTMLElement>('.app-child-link[data-tab="ai_analysis"]');
 
     expect(appCard?.dataset.action).toBe('switch-tab');
-    expect(eventBus.emit).toHaveBeenCalledTimes(1);
+    expect(childLink?.dataset.action).toBe('switch-tab');
+    expect(childLink?.dataset.tab).toBe('ai_analysis');
+    expect(childLink?.dataset.childTab).toBeUndefined();
   });
 
   it('filters cards by category and updates the visible count', async () => {

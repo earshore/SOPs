@@ -12,6 +12,7 @@
 import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { showToast } from '../../../../../common/ui';
+import { navigateToRouteId } from '../../../../../common/router/initRouter';
 import * as KeywordService from '../services/trackerService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { appStore } from '../../../../../stores/useAppStore';
@@ -1039,7 +1040,7 @@ async function syncToInput(): Promise<void> {
   showToast('已同步原文到输入模块');
 
   // 切换到输入模块
-  await window.navigateTo('/app-center/keyword-hunter/input');
+  await navigateToRouteId('kw_input');
 }
 
 async function goToAnalysis(): Promise<void> {
@@ -1051,7 +1052,7 @@ async function goToAnalysis(): Promise<void> {
     return;
   }
 
-  await window.navigateTo('/app-center/keyword-hunter/analysis');
+  await navigateToRouteId('kw_analysis');
 }
 
 function getError(error: unknown): Error {

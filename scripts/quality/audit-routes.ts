@@ -45,6 +45,16 @@ interface LegacyRouteChangeEmit {
   line: number;
 }
 
+interface LegacyChildTabAttribute {
+  file: string;
+  line: number;
+}
+
+interface LegacyWindowNavigationCall {
+  file: string;
+  line: number;
+}
+
 interface LoaderScope {
   name: string;
   manifest: ModuleManifest;
@@ -273,14 +283,9 @@ function collectLegacyRouteChangeEmits(): LegacyRouteChangeEmit[] {
   const references: LegacyRouteChangeEmit[] = [];
   const legacyRouteChangeEmitPattern =
     /\.emit\s*\(\s*(?:APP_EVENTS\.ROUTE_CHANGE|['"]route-change['"])/g;
-  const allowedEmitterFile = join('src', 'common', 'router', 'routeEvents.ts');
 
   for (const file of files) {
     const relativeFile = relative(projectRoot, file);
-    if (relativeFile === allowedEmitterFile) {
-      continue;
-    }
-
     const content = readFileSync(file, 'utf-8');
     let match: RegExpExecArray | null;
 
@@ -288,6 +293,48 @@ function collectLegacyRouteChangeEmits(): LegacyRouteChangeEmit[] {
     while ((match = legacyRouteChangeEmitPattern.exec(content)) !== null) {
       references.push({
         file: relativeFile,
+        line: content.slice(0, match.index).split('\n').length,
+      });
+    }
+  }
+
+  return references;
+}
+
+function collectLegacyChildTabAttributes(): LegacyChildTabAttribute[] {
+  const files = [join(projectRoot, 'index.html'), ...collectSourceFiles(join(projectRoot, 'src'))];
+  const references: LegacyChildTabAttribute[] = [];
+  const childTabPattern = /\bdata-child-tab\s*=/g;
+
+  for (const file of files) {
+    const content = readFileSync(file, 'utf-8');
+    let match: RegExpExecArray | null;
+
+    childTabPattern.lastIndex = 0;
+    while ((match = childTabPattern.exec(content)) !== null) {
+      references.push({
+        file: relative(projectRoot, file),
+        line: content.slice(0, match.index).split('\n').length,
+      });
+    }
+  }
+
+  return references;
+}
+
+function collectLegacyWindowNavigationCalls(): LegacyWindowNavigationCall[] {
+  const files = collectSourceFiles(join(projectRoot, 'src'));
+  const references: LegacyWindowNavigationCall[] = [];
+  const windowNavigatePattern = /\bwindow\.navigateTo\s*\(/g;
+
+  for (const file of files) {
+    const content = readFileSync(file, 'utf-8');
+    let match: RegExpExecArray | null;
+
+    windowNavigatePattern.lastIndex = 0;
+    while ((match = windowNavigatePattern.exec(content)) !== null) {
+      references.push({
+        file: relative(projectRoot, file),
         line: content.slice(0, match.index).split('\n').length,
       });
     }
@@ -328,7 +375,31 @@ function auditLegacyRouteChangeEmits(issues: AuditIssue[]): void {
       issues,
       'error',
       'legacy-route-change-emit',
-      'Direct legacy route-change emits must go through emitRouteChange()',
+      'Direct legacy route-change emits are not allowed; use data-action="switch-tab" or navigateToRouteId()',
+      `${reference.file}:${reference.line}`
+    );
+  }
+}
+
+function auditLegacyChildTabAttributes(issues: AuditIssue[]): void {
+  for (const reference of collectLegacyChildTabAttributes()) {
+    addIssue(
+      issues,
+      'error',
+      'legacy-child-tab',
+      'data-child-tab is a legacy route trigger; use data-action="switch-tab" data-tab instead',
+      `${reference.file}:${reference.line}`
+    );
+  }
+}
+
+function auditLegacyWindowNavigationCalls(issues: AuditIssue[]): void {
+  for (const reference of collectLegacyWindowNavigationCalls()) {
+    addIssue(
+      issues,
+      'error',
+      'legacy-window-navigate',
+      'window.navigateTo() bypasses route-id validation; use navigateToRouteId() or data-action="switch-tab"',
       `${reference.file}:${reference.line}`
     );
   }
@@ -422,6 +493,8 @@ function main(): void {
   auditAliases(issues, registeredPaths);
   auditSwitchTabActions(issues);
   auditLegacyRouteChangeEmits(issues);
+  auditLegacyChildTabAttributes(issues);
+  auditLegacyWindowNavigationCalls(issues);
   auditStaticTabReferences(issues, routeIdSet);
   auditModuleMaps(issues);
   auditMenuConfig(issues, routeIdSet);

@@ -112,23 +112,6 @@ function setupPopstateNavigation(): void {
   });
 }
 
-function setupRouteChangeListener(): void {
-  import('../EventBus').then(({ default: eventBus }) => {
-    eventBus.on('route-change', (data: unknown) => {
-      const payload = data as { routeId: string } | undefined;
-      if (payload && payload.routeId && routerInstance) {
-        const path = routeIdToPathStrict(payload.routeId);
-        if (!path) {
-          console.warn('[initRouter] Ignored route-change for unknown routeId:', payload.routeId);
-          return;
-        }
-
-        routerInstance.navigate(path);
-      }
-    });
-  });
-}
-
 /**
  * 初始化路由系统（幂等操作）
  */
@@ -145,7 +128,6 @@ export function initRouter(): NavigoAdapter {
   installLegacyCompatibility(routerInstance);
   subscribeLegacyEvents(storeSync);
   setupPopstateNavigation();
-  setupRouteChangeListener();
 
   return routerInstance;
 }
@@ -243,6 +225,25 @@ export async function navigateTo(
 ): Promise<boolean> {
   const router = getRouter();
   return router.navigate(path, options);
+}
+
+/**
+ * 通过路由 ID 导航（业务代码优先使用）
+ */
+export async function navigateToRouteId(
+  routeId: unknown,
+  options?: {
+    replace?: boolean;
+    state?: Record<string, unknown>;
+  }
+): Promise<boolean> {
+  const path = routeIdToPathStrict(routeId);
+  if (!path) {
+    console.warn('[initRouter] Ignored navigation for unknown routeId:', routeId);
+    return false;
+  }
+
+  return navigateTo(path, options);
 }
 
 /**

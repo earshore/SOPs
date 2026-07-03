@@ -40,7 +40,13 @@ export {
 } from './search';
 
 // 新路由系统（推荐使用）
-export { navigateTo, getRouter, getCurrentRoute, hasRoute } from '../router/initRouter';
+export {
+  navigateTo,
+  navigateToRouteId,
+  getRouter,
+  getCurrentRoute,
+  hasRoute,
+} from '../router/initRouter';
 
 // 向后兼容：注册到 window
 // ========================
@@ -62,7 +68,7 @@ import {
   searchSidebar,
   clearSidebarSearch,
 } from './search';
-import { navigateTo } from '../router/initRouter';
+import { navigateTo, navigateToRouteId } from '../router/initRouter';
 
 // 挂载到 window 供 legacy 代码使用
 declare global {
@@ -117,7 +123,6 @@ import {
   scrollToHubModule,
   scrollToMoreModule,
 } from './navigation';
-import { routeIdToPathStrict } from '../router/routePaths';
 
 registerActions({
   // 路由导航（通过 data-action="switch-tab" data-tab="xxx" 触发）
@@ -128,14 +133,10 @@ registerActions({
       return;
     }
 
-    const path = routeIdToPathStrict(tab);
-    if (!path) {
-      console.warn('[ActionRegistry] switch-tab ignored unknown routeId:', tab);
-      return;
+    const didNavigate = await navigateToRouteId(tab);
+    if (didNavigate) {
+      closeMegaMenus({ blurActive: true });
     }
-
-    closeMegaMenus({ blurActive: true });
-    await navigateTo(path);
   },
   'toggle-sop-group': (params: Record<string, unknown>) =>
     toggleSOPGroup({ category: (params.group as string) || (params.category as string) }),

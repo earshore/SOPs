@@ -6,7 +6,6 @@
 import { loadTemplate } from '@/common/utils/viewLoader';
 import { safeMount } from '@/common/utils/safeMount';
 import { setSafeHtml } from '@/common/utils/security';
-import { emitRouteChange } from '@/common/router/routeEvents';
 
 interface OverviewFilterState {
   category: string;
@@ -73,17 +72,6 @@ function initOverviewEvents(container: HTMLElement): void {
     if (searchInput) searchInput.value = '';
     clearSearchBtn.classList.add('hidden');
     applyOverviewFilters(container, state);
-  });
-
-  const childLinks = container.querySelectorAll<HTMLElement>('.app-child-link[data-child-tab]');
-  childLinks.forEach(link => {
-    link.addEventListener('click', event => {
-      event.stopPropagation();
-      const targetTab = link.dataset.childTab;
-      if (targetTab) {
-        emitRouteChange(targetTab);
-      }
-    });
   });
 
   // 应用卡片点击事件

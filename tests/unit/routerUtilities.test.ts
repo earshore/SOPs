@@ -24,9 +24,6 @@ import {
   routeIdToPath,
   routeIdToPathStrict,
 } from '@/common/router/routePaths';
-import { emitRouteChange } from '@/common/router/routeEvents';
-import { APP_EVENTS } from '@/common/constants/eventConstants';
-import eventBus from '@/common/EventBus';
 import {
   RouterError,
   RouterErrorCode,
@@ -56,7 +53,6 @@ function route(path = '/orders', config: Partial<RouteConfig> = {}): Route {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  eventBus.removeAllListeners(APP_EVENTS.ROUTE_CHANGE);
 });
 
   it('validates route ids, paths, and plain objects', () => {
@@ -80,22 +76,6 @@ afterEach(() => {
     expect(routeIdToPathStrict('ppc_search_terms')).toBe('/app-center/ppc-search-terms');
     expect(routeIdToPathStrict('/app-center/scraper')).toBeNull();
     expect(routeIdToPathStrict('__missing__')).toBeNull();
-  });
-
-  it('emits legacy route-change events only for known route ids', () => {
-    const listener = vi.fn();
-    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    eventBus.on(APP_EVENTS.ROUTE_CHANGE, listener);
-
-    expect(emitRouteChange(' ppc_search_terms ')).toBe(true);
-    expect(listener).toHaveBeenCalledWith({ routeId: 'ppc_search_terms' });
-
-    expect(emitRouteChange('__missing__')).toBe(false);
-    expect(listener).toHaveBeenCalledTimes(1);
-    expect(consoleWarn).toHaveBeenCalledWith(
-      '[routeEvents] Ignored route-change for unknown routeId:',
-      '__missing__'
-    );
   });
 
   it('centralizes legacy route alias lookup and replacement policy', () => {

@@ -26,6 +26,7 @@ const mocks = vi.hoisted(() => {
     emitHistoryUpdated: vi.fn(),
     getScrapedDataFingerprint: vi.fn(() => 'fingerprint'),
     showToast: vi.fn(),
+    navigateToRouteId: vi.fn(),
     eventBusEmit: vi.fn(),
     confirmWithModal: vi.fn(),
   };
@@ -51,6 +52,10 @@ vi.mock('../../services/reportIdentity', () => ({
 
 vi.mock('../../../../../../common/ui', () => ({
   showToast: mocks.showToast,
+}));
+
+vi.mock('../../../../../../common/router/initRouter', () => ({
+  navigateToRouteId: mocks.navigateToRouteId,
 }));
 
 vi.mock('../../../../../../common/constants/constants', () => ({
@@ -112,6 +117,7 @@ function createHistoryItem(overrides: Partial<HistoryItem> = {}): HistoryItem {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.navigateToRouteId.mockResolvedValue(true);
   mocks.state.analysis.analysisReport = null;
   mocks.getAll.mockReturnValue([createHistoryItem()]);
   mocks.getAllAsync.mockResolvedValue([]);
@@ -247,8 +253,6 @@ describe('HistoryPanel snapshot loading', () => {
 describe('HistoryPanel analysis reports', () => {
   it('loads analysis reports and navigates to the AI analysis route', async () => {
     const panel = new HistoryPanel();
-    const navigateTo = vi.fn(async (_path: string) => true);
-    window.navigateTo = navigateTo as typeof window.navigateTo;
     const report = { summary: 'analysis report' };
     const item = createHistoryItem({
       dataFingerprint: 'fingerprint',
@@ -261,7 +265,7 @@ describe('HistoryPanel analysis reports', () => {
 
     await panel.loadAnalysisReport(item);
 
-    expect(navigateTo).toHaveBeenCalledWith('/app-center/ai-analysis');
+    expect(mocks.navigateToRouteId).toHaveBeenCalledWith('ai_analysis');
     expect(mocks.showToast).toHaveBeenCalledWith('已跳转到 AI智能分析查看报告', {
       type: 'success',
     });
@@ -275,9 +279,7 @@ describe('HistoryPanel analysis reports', () => {
 
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const navigationError = new Error('route failed');
-    window.navigateTo = vi.fn(async (_path: string) => {
-      throw navigationError;
-    }) as typeof window.navigateTo;
+    mocks.navigateToRouteId.mockRejectedValueOnce(navigationError);
 
     await panel.loadAnalysisReport(
       createHistoryItem({

@@ -14,7 +14,6 @@ import type { RouteConfig } from '@/types/config';
 export const APP_EVENTS = {
   // 路由事件
   ROUTE_CHANGED: 'app:route-changed',
-  ROUTE_CHANGE: 'route-change', // Legacy: 用于向后兼容
   ROUTE_BEFORE_CHANGE: 'app:route-before-change',
   ROUTE_ERROR: 'app:route-error',
   ROUTE_REDIRECT: 'route-redirect', // 路由重定向
