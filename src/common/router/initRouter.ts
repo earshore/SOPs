@@ -217,7 +217,10 @@ export function triggerInitialNavigation(): void {
         skipMiddleware: false,
       });
     } else {
-      routerInstance.resolve();
+      void routerInstance.navigate(normalizedHash, {
+        updateHistory: false,
+        skipMiddleware: false,
+      });
     }
   }
 }

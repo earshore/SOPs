@@ -36,9 +36,13 @@ const mocks = vi.hoisted(() => ({
   updateUIForRoute: vi.fn(),
   eventBusOn: vi.fn(),
   normalizeRoutePath: vi.fn((path: string) => (path.startsWith('/') ? path : `/${path}`)),
-  routeIdToPath: vi.fn((routeId: string) =>
-    routeId === 'ppc_search_terms' ? '/app-center/ppc-search-terms' : `/${routeId}`
-  ),
+  routeIdToPath: vi.fn((routeId: string) => {
+    const paths: Record<string, string> = {
+      ppc_search_terms: '/app-center/ppc-search-terms',
+      playground: '/app-center/playground/deep-chat',
+    };
+    return paths[routeId] || `/${routeId}`;
+  }),
 }));
 
 vi.mock('./navigo', () => ({
@@ -146,7 +150,7 @@ describe('initRouter setup', () => {
     );
     expect(mocks.router.registerAlias).toHaveBeenCalledWith(
       '/app-center/playground',
-      '/playground'
+      '/app-center/playground/deep-chat'
     );
     expect(mocks.router.setStoreSync).toHaveBeenCalledWith(mocks.storeSync);
     expect(mocks.legacy.installGlobalAPI).toHaveBeenCalledTimes(1);
@@ -230,7 +234,10 @@ describe('initRouter navigation and teardown', () => {
 
     window.location.hash = '#/known';
     triggerInitialNavigation();
-    expect(mocks.router.resolve).toHaveBeenCalledTimes(1);
+    expect(mocks.router.navigate).toHaveBeenCalledWith('/known', {
+      updateHistory: false,
+      skipMiddleware: false,
+    });
 
     await expect(navigateTo('/home', { replace: true })).resolves.toBe(true);
     expect(hasRoute('/home')).toBe(true);

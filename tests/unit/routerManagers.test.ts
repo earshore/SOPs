@@ -241,24 +241,33 @@ describe('MiddlewareManager', () => {
     manager.addBefore(first);
     manager.addBefore(second);
 
-    await expect(manager.runBefore(route('/orders'), route('/home'))).resolves.toBe(true);
+    await expect(manager.runBefore(route('/orders'), route('/home'))).resolves.toEqual({
+      allowed: true,
+    });
     expect(calls).toEqual(['first:start', 'second:start', 'second:end', 'first:end']);
   });
 
   it('returns false when before middleware aborts, redirects, or throws', async () => {
     const aborted = createMiddlewareManager();
     aborted.addBefore(context => context.abort());
-    await expect(aborted.runBefore(route('/orders'), null)).resolves.toBe(false);
+    await expect(aborted.runBefore(route('/orders'), null)).resolves.toEqual({
+      allowed: false,
+    });
 
     const redirected = createMiddlewareManager();
     redirected.addBefore(context => context.redirect('/login'));
-    await expect(redirected.runBefore(route('/orders'), null)).resolves.toBe(false);
+    await expect(redirected.runBefore(route('/orders'), null)).resolves.toEqual({
+      allowed: false,
+      redirect: '/login',
+    });
 
     const throwing = createMiddlewareManager();
     throwing.addBefore(() => {
       throw new Error('middleware failed');
     });
-    await expect(throwing.runBefore(route('/orders'), null)).resolves.toBe(false);
+    await expect(throwing.runBefore(route('/orders'), null)).resolves.toEqual({
+      allowed: false,
+    });
   });
 
   it('runs after middlewares and ignores abort and redirect requests', async () => {

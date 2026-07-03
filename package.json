@@ -84,6 +84,7 @@
         "generate:tailwind": "tsx scripts/build/generate-tailwind-config.ts",
         "generate:types": "tsx scripts/build/generate-design-token-types.ts",
         "ui:audit": "npm run card-ui:audit && npm run callout-ui:audit && npm run workbench-ui:audit",
+        "routes:audit": "tsx scripts/quality/audit-routes.ts",
         "card-ui:audit": "tsx scripts/quality/audit-card-ui.ts",
         "callout-ui:audit": "tsx scripts/quality/audit-callout-ui.ts",
         "workbench-ui:audit": "tsx scripts/quality/audit-workbench-ui.ts",

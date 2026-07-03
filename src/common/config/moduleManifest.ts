@@ -4,6 +4,7 @@ import type { RouteMeta } from '@/common/router/navigo/types';
 export interface ModuleManifestRoute {
   key: string;
   routeId: string;
+  path?: string;
   moduleId?: string;
   label: string;
   icon: string;
@@ -52,6 +53,20 @@ export function collectRouteIds<const T extends readonly ModuleManifest[]>(
   return manifests.flatMap(manifest =>
     manifest.routes.map(route => route.routeId)
   ) as readonly T[number]['routes'][number]['routeId'][];
+}
+
+export function buildRoutePathMap(manifests: readonly ModuleManifest[]): Record<string, string> {
+  const paths: Record<string, string> = {};
+
+  for (const manifest of manifests) {
+    for (const route of manifest.routes) {
+      if (route.path) {
+        paths[route.routeId] = route.path;
+      }
+    }
+  }
+
+  return paths;
 }
 
 export function buildMenuRoutes(

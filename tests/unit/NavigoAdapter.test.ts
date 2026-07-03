@@ -179,6 +179,63 @@ afterEach(() => {
     expect(instance.navigate).not.toHaveBeenCalled();
   });
 
+  it('redirects after guard rejection without being blocked by active navigation', async () => {
+    const adapter = createRouter();
+    const instance = latestNavigo();
+
+    adapter.register('/orders', routeConfig());
+    adapter.register('/home', routeConfig({ label: 'Home', panelId: 'panel-home' }));
+    adapter.addRouteGuard('/orders', {
+      name: 'orders-redirect',
+      priority: 0,
+      check: () => ({ allow: false, redirect: '/home' }),
+    });
+
+    await expect(adapter.navigate('/orders')).resolves.toBe(true);
+
+    expect(adapter.getCurrentRoute()?.path).toBe('/home');
+    expect(instance.navigate).toHaveBeenCalledWith('/home', {
+      historyAPIMethod: 'replaceState',
+    });
+  });
+
+  it('redirects after before middleware requests a redirect', async () => {
+    const adapter = createRouter();
+    const instance = latestNavigo();
+
+    adapter.register('/orders', routeConfig());
+    adapter.register('/home', routeConfig({ label: 'Home', panelId: 'panel-home' }));
+    adapter.use(context => {
+      if (context.to.path === '/orders') {
+        context.redirect('/home');
+      }
+    });
+
+    await expect(adapter.navigate('/orders')).resolves.toBe(true);
+
+    expect(adapter.getCurrentRoute()?.path).toBe('/home');
+    expect(instance.navigate).toHaveBeenCalledWith('/home', {
+      historyAPIMethod: 'replaceState',
+    });
+  });
+
+  it('falls back from missing routes to the configured default route when no 404 route exists', async () => {
+    const adapter = createRouter({
+      defaultRoute: '/home',
+      notFoundRoute: '/404',
+    });
+    const instance = latestNavigo();
+
+    adapter.register('/home', routeConfig({ label: 'Home', panelId: 'panel-home' }));
+
+    await expect(adapter.navigate('/missing')).resolves.toBe(true);
+
+    expect(adapter.getCurrentRoute()?.path).toBe('/home');
+    expect(instance.navigate).toHaveBeenCalledWith('/home', {
+      historyAPIMethod: 'replaceState',
+    });
+  });
+
   it('returns false for missing routes, blocked middleware, blocked guards, and re-entrant navigation', async () => {
     const missing = createRouter();
     await expect(missing.navigate('/missing')).resolves.toBe(false);
@@ -196,6 +253,16 @@ afterEach(() => {
       check: () => ({ allow: false, reason: 'blocked' }),
     });
     await expect(blockedByGuard.navigate('/orders')).resolves.toBe(false);
+
+    const selfRedirect = createRouter();
+    selfRedirect.register('/orders', routeConfig());
+    selfRedirect.addRouteGuard('/orders', {
+      name: 'self-redirect',
+      priority: 0,
+      check: () => ({ allow: false, redirect: '/orders' }),
+    });
+    await expect(selfRedirect.navigate('/orders')).resolves.toBe(false);
+    expect(selfRedirect.getCurrentRoute()).toBeNull();
 
     const reentrant = createRouter();
     const nestedNavigation = vi.fn();

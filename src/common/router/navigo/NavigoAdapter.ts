@@ -38,6 +38,11 @@ type NavigationGuardOutcome = {
   redirect?: string;
 };
 
+type NavigationRedirect = {
+  path: string;
+  options: NavigateOptions;
+};
+
 /**
  * Navigo 路由适配器
  *
@@ -255,29 +260,43 @@ export class NavigoAdapter {
 
     if (!this._startNavigation()) return false;
 
+    let result = false;
+    let redirect: NavigationRedirect | null = null;
+
     try {
       const target = this._createNavigationTarget(path, options);
-      if (!target) return false;
+      if (!target) {
+        redirect = this._createNotFoundRedirect(path);
+      } else {
+        const { to, from, normalizedPath } = target;
+        const beforeOutcome = await this._runBeforeNavigation(to, from, options);
 
-      const { to, from, normalizedPath } = target;
-      if (!(await this._runBeforeNavigation(to, from, options))) return false;
+        if (!beforeOutcome.allowed) {
+          redirect = this._createRedirect(beforeOutcome.redirect, options, normalizedPath);
+        } else {
+          const guardOutcome = await this._runNavigationGuards(to, from, options);
 
-      const guardOutcome = await this._runNavigationGuards(to, from, options);
-      if (!guardOutcome.allowed) {
-        return guardOutcome.redirect
-          ? this.navigate(guardOutcome.redirect, { ...options, skipGuards: false })
-          : false;
+          if (!guardOutcome.allowed) {
+            redirect = this._createRedirect(guardOutcome.redirect, options, normalizedPath);
+          } else {
+            this._commitNavigation(to, normalizedPath, options);
+            await this._runAfterNavigation(to, from, options);
+            this._logNavigationComplete(from, normalizedPath);
+            result = true;
+          }
+        }
       }
-
-      this._commitNavigation(to, normalizedPath, options);
-      await this._runAfterNavigation(to, from, options);
-      this._logNavigationComplete(from, normalizedPath);
-      return true;
     } catch (error) {
-      return this._handleNavigationError(error);
+      result = this._handleNavigationError(error);
     } finally {
       this._finishNavigation();
     }
+
+    if (redirect) {
+      return this.navigate(redirect.path, redirect.options);
+    }
+
+    return result;
   }
 
   private _logNavigationRequest(path: string, options: NavigateOptions): void {
@@ -306,10 +325,7 @@ export class NavigoAdapter {
   }
 
   private _createNavigationTarget(path: string, options: NavigateOptions): NavigationTarget | null {
-    const resolvedPath = this._resolveAlias(path);
-    this._log(`Resolved path: ${resolvedPath}`);
-
-    const normalizedPath = this._normalizePath(resolvedPath);
+    const normalizedPath = this._resolveNavigationPath(path);
     this._log(`Normalized path: ${normalizedPath}`);
 
     const config = this.routes.get(normalizedPath);
@@ -347,18 +363,18 @@ export class NavigoAdapter {
     to: Route,
     from: Route | null,
     options: NavigateOptions
-  ): Promise<boolean> {
-    if (options.skipMiddleware) return true;
+  ): Promise<NavigationGuardOutcome> {
+    if (options.skipMiddleware) return { allowed: true };
     this._log('Running before middleware...');
 
     const middlewareResult = await this.middlewareManager.runBefore(to, from);
-    if (!middlewareResult) {
+    if (!middlewareResult.allowed) {
       this._log('Navigation blocked by middleware', undefined, 'warn');
-      return false;
+      return { allowed: false, redirect: middlewareResult.redirect };
     }
 
     this._log('Before middleware passed');
-    return true;
+    return { allowed: true };
   }
 
   private async _runNavigationGuards(
@@ -449,6 +465,62 @@ export class NavigoAdapter {
     }
   }
 
+  private _createRedirect(
+    path: string | undefined,
+    options: NavigateOptions,
+    blockedPath?: string
+  ): NavigationRedirect | null {
+    if (!path) {
+      return null;
+    }
+
+    const redirectPath = this._resolveNavigationPath(path);
+    if (blockedPath && redirectPath === this._resolveNavigationPath(blockedPath)) {
+      this._log(`Redirect loop blocked for path: ${redirectPath}`, undefined, 'warn');
+      return null;
+    }
+
+    return {
+      path: redirectPath,
+      options: {
+        ...options,
+        replace: true,
+        updateHistory: true,
+        skipGuards: false,
+        skipMiddleware: false,
+      },
+    };
+  }
+
+  private _createNotFoundRedirect(path: string): NavigationRedirect | null {
+    const normalizedPath = this._resolveNavigationPath(path);
+    const recoveryPath = this.errorHandler.handle404(normalizedPath, this.currentRoute);
+    const fallbackPath = this._getExistingRecoveryPath(recoveryPath, normalizedPath);
+
+    return this._createRedirect(fallbackPath || undefined, {
+      replace: true,
+      updateHistory: true,
+      skipGuards: false,
+      skipMiddleware: false,
+    });
+  }
+
+  private _getExistingRecoveryPath(recoveryPath: string | null, failedPath: string): string | null {
+    if (recoveryPath && this._hasRouteForNavigation(recoveryPath) && recoveryPath !== failedPath) {
+      return recoveryPath;
+    }
+
+    if (
+      this.config.defaultRoute &&
+      this._hasRouteForNavigation(this.config.defaultRoute) &&
+      this._normalizePath(this.config.defaultRoute) !== failedPath
+    ) {
+      return this.config.defaultRoute;
+    }
+
+    return null;
+  }
+
   /**
    * 后退
    */
@@ -503,7 +575,7 @@ export class NavigoAdapter {
    * @param guard - 路由守卫
    */
   addRouteGuard(path: string, guard: RouteGuard): void {
-    const normalizedPath = this._normalizePath(path);
+    const normalizedPath = this._resolveNavigationPath(path);
     this.guardManager.addRouteGuard(normalizedPath, guard);
   }
 
@@ -590,7 +662,7 @@ export class NavigoAdapter {
    * @returns Promise<boolean> - 是否成功
    */
   async preloadRoute(path: string, options?: PreloadOptions): Promise<boolean> {
-    const normalizedPath = this._normalizePath(path);
+    const normalizedPath = this._resolveNavigationPath(path);
     const config = this.routes.get(normalizedPath);
 
     if (!config) {
@@ -636,7 +708,7 @@ export class NavigoAdapter {
    * @returns 路由配置，如果不存在则返回 null
    */
   getRouteConfig(path: string): RouteConfig | null {
-    const normalizedPath = this._normalizePath(path);
+    const normalizedPath = this._resolveNavigationPath(path);
     return this.routes.get(normalizedPath) || null;
   }
 
@@ -647,7 +719,7 @@ export class NavigoAdapter {
    * @returns 路由是否存在
    */
   hasRoute(path: string): boolean {
-    const normalizedPath = this._normalizePath(path);
+    const normalizedPath = this._resolveNavigationPath(path);
     return this.routes.has(normalizedPath);
   }
 
@@ -737,6 +809,16 @@ export class NavigoAdapter {
   private _resolveAlias(path: string): string {
     const normalizedPath = this._normalizePath(path);
     return this.aliases.get(normalizedPath) || normalizedPath;
+  }
+
+  private _resolveNavigationPath(path: string): string {
+    const resolvedPath = this._resolveAlias(path);
+    this._log(`Resolved path: ${resolvedPath}`);
+    return this._normalizePath(resolvedPath);
+  }
+
+  private _hasRouteForNavigation(path: string): boolean {
+    return this.routes.has(this._resolveNavigationPath(path));
   }
 
   /**

@@ -9,6 +9,11 @@ import type { Route, RouteMiddleware, RouteContext } from './types';
 import { isRouteMiddleware } from './guards';
 import { ValidationError } from '@/common/errors/AppError';
 
+export interface BeforeMiddlewareResult {
+  allowed: boolean;
+  redirect?: string;
+}
+
 /**
  * 中间件管理器
  *
@@ -99,9 +104,9 @@ export class MiddlewareManager {
    * @param from - 来源路由
    * @returns 是否继续导航
    */
-  async runBefore(to: Route, from: Route | null): Promise<boolean> {
+  async runBefore(to: Route, from: Route | null): Promise<BeforeMiddlewareResult> {
     if (this.beforeMiddlewares.length === 0) {
-      return true;
+      return { allowed: true };
     }
 
     this._log(`Running ${this.beforeMiddlewares.length} before middlewares`);
@@ -125,19 +130,18 @@ export class MiddlewareManager {
 
       if (aborted) {
         this._log('Navigation aborted by middleware', 'warn');
-        return false;
+        return { allowed: false };
       }
 
       if (redirectPath) {
         this._log(`Middleware requested redirect to: ${redirectPath}`);
-        // 重定向将由 NavigoAdapter 处理
-        return false;
+        return { allowed: false, redirect: redirectPath };
       }
 
-      return true;
+      return { allowed: true };
     } catch (error) {
       this._log(`Before middleware error: ${(error as Error).message}`, 'error');
-      return false;
+      return { allowed: false };
     }
   }
 

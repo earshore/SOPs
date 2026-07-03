@@ -15,6 +15,7 @@ import {
   assertValidRouteId,
   isValidRouteId,
 } from '@/common/router/navigo/route-ids';
+import { normalizeRoutePath, routeIdToPath } from '@/common/router/routePaths';
 import {
   RouterError,
   RouterErrorCode,
@@ -55,6 +56,15 @@ afterEach(() => {
     expect(guardUtils.isObject({})).toBe(true);
     expect(guardUtils.isObject([])).toBe(false);
     expect(guardUtils.isObject(null)).toBe(false);
+  });
+
+  it('maps route ids to manifest-declared paths with route-id fallback compatibility', () => {
+    expect(routeIdToPath('app_center_overview')).toBe('/app-center');
+    expect(routeIdToPath('ppc_search_terms')).toBe('/app-center/ppc-search-terms');
+    expect(routeIdToPath('playground')).toBe('/app-center/playground/deep-chat');
+    expect(routeIdToPath('sops_overview')).toBe('/sops_overview');
+    expect(routeIdToPath('#/app-center/scraper/')).toBe('/app-center/scraper');
+    expect(normalizeRoutePath('///known/')).toBe('/known');
   });
 
   it('validates route configs, metadata, and param definitions', () => {

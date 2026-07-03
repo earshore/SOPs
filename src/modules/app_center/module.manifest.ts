@@ -7,12 +7,14 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'OVERVIEW',
       routeId: 'app_center_overview',
+      path: '/app-center',
       label: '应用总览',
       icon: 'fas fa-th-large',
     },
     {
       key: 'SCRAPER',
       routeId: 'scraper',
+      path: '/app-center/scraper',
       moduleId: 'master_analysis',
       label: '数据采集',
       icon: 'fas fa-spider',
@@ -21,6 +23,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'AI_ANALYSIS',
       routeId: 'ai_analysis',
+      path: '/app-center/ai-analysis',
       moduleId: 'master_analysis',
       label: 'AI智能分析',
       icon: 'fas fa-brain',
@@ -29,6 +32,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'PROMPTLAB',
       routeId: 'promptlab',
+      path: '/app-center/promptlab',
       moduleId: 'master_analysis',
       label: 'Prompt 生成',
       icon: 'fas fa-wand-magic-sparkles',
@@ -37,6 +41,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'PLAYGROUND',
       routeId: 'playground',
+      path: '/app-center/playground/deep-chat',
       moduleId: 'playground',
       label: 'Deep Chat',
       icon: 'fa-regular fa-comments',
@@ -51,6 +56,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'KW_INPUT',
       routeId: 'kw_input',
+      path: '/app-center/keyword-hunter/input',
       moduleId: 'keyword_tracker',
       label: '输入模块',
       icon: 'fas fa-keyboard',
@@ -59,6 +65,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'KW_PROCESS',
       routeId: 'kw_process',
+      path: '/app-center/keyword-hunter/process',
       moduleId: 'keyword_tracker',
       label: '处理模块',
       icon: 'fas fa-cogs',
@@ -67,6 +74,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'KW_ANALYSIS',
       routeId: 'kw_analysis',
+      path: '/app-center/keyword-hunter/analysis',
       moduleId: 'keyword_tracker',
       label: '分析统计',
       icon: 'fas fa-chart-pie',
@@ -75,6 +83,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'PPC_SEARCH_TERMS',
       routeId: 'ppc_search_terms',
+      path: '/app-center/ppc-search-terms',
       moduleId: 'ppc_tools',
       label: 'PPC 搜索词分析器',
       icon: 'fas fa-magnifying-glass-dollar',
