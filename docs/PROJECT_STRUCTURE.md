@@ -1,6 +1,6 @@
 # Project Structure Review
 
-Date: 2026-05-01
+Date: 2026-07-03
 
 ## Scope
 
@@ -37,9 +37,12 @@ This review keeps the application layout intact and only documents the current s
 - Removed the obsolete edge LLM proxy; the app now calls the self-hosted new-api gateway directly from the browser.
 - Updated XSS script paths from `tools/` to `tools/security/` in package scripts, docs, and tool internals.
 - Removed empty local directories that were not part of git tracking: `guides/`, `testing/`, and `docs/verification/`.
+- Moved one-off root reports and completed content/UI review documents into `docs/archive/knowledge-review/`, `docs/archive/ui-audit/`, and `docs/archive/quality/`.
+- Kept active references in the root and `docs/` top level: README, changelog, deployment, current quality/security reports, product roadmap, and active design/architecture guidelines.
+- Removed local AI tool state, generated quality reports, exported sample data, and local plugin bundles from Git tracking through `.gitignore` plus index cleanup.
 
 ## Remaining Review Items
 
-- `npm run type-check` currently fails on existing TypeScript/test fixture drift, especially under `src/modules/app_center/views/master_analysis/**`.
-- Several `package.json` scripts point to missing files or directories, including `tests/build/*`, `scripts/dev/batch-replace-any.ts`, release/monitoring tools, and CSS migration scripts.
-- Large historical quality reports live under `tests/quality/`; consider moving static reports to `docs/archive/quality/` if they are no longer inputs to tests.
+- Keep generated reports out of Git unless they are explicitly promoted into a maintained document such as `TECH_DEBT_AUDIT.md` or `XSS_SCAN_REPORT.md`.
+- Treat `.kiro/` project planning documents as historical references; avoid adding local `.kiro/hooks/` or `.kiro/settings/` state back to version control.
+- Continue pruning root-level one-off reports after each audit cycle so the root remains limited to application entry points and repository-level documentation.

@@ -70,7 +70,9 @@ docs/
 ├── archive/                    # 历史文档归档（过期/阶段性，不作为开发依据）
 │   ├── ai-analysis/            #   AI分析加速方案（4篇）
 │   ├── bug-fix-reports/        #   单次 Bug 修复记录（2篇）
-│   ├── quality/                #   质量门禁、构建修复、技术债报告（3篇）
+│   ├── knowledge-review/       #   知识库内容评审和整改记录
+│   ├── quality/                #   质量门禁、构建修复、技术债和安全修复报告
+│   ├── ui-audit/               #   视觉审计、welcome banner 修复和 UX backlog
 │   ├── verification/           #   阶段性验收报告（4篇）
 │   └── misc/                   #   其他过期文档（5篇）
 ├── development/                # 开发规范、最佳实践、AI辅助上下文
@@ -85,4 +87,4 @@ docs/
 
 ---
 
-**最后更新**: 2026-06-07
+**最后更新**: 2026-07-03

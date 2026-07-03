@@ -166,7 +166,7 @@
 
 ## 5. 精简整改清单
 
-详细拆分见 `docs/UI_UX_REMEDIATION_BACKLOG.md`。本报告只保留汇总。
+详细拆分见 `UI_UX_REMEDIATION_BACKLOG.md`。本报告只保留汇总。
 
 ### P0：先修阻断
 

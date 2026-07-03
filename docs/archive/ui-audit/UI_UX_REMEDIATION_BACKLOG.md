@@ -1,6 +1,6 @@
 # sops 视觉与 UX 整改 backlog（精简版）
 
-本 backlog 基于 `docs/UI_UX_VISUAL_AUDIT_REPORT.md`。目标是修真实可见问题，不把视觉审计扩展成产品平台重建。
+本 backlog 基于 `UI_UX_VISUAL_AUDIT_REPORT.md`。目标是修真实可见问题，不把视觉审计扩展成产品平台重建。
 
 ## 执行原则
 

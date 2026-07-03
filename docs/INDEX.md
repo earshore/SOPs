@@ -9,8 +9,9 @@
 ### 入门指南
 - [README.md](../README.md) - 项目概览和快速开始
 - [运营作业系统落地计划](./OPERATING_SYSTEM_ROADMAP.md) - 产品收敛、作业闭环和阶段落地计划
+- [项目结构审查](./PROJECT_STRUCTURE.md) - 当前目录职责、清理规则和归档边界
 - [CLAUDE.md](../CLAUDE.md) - Claude Code 开发指南
-- [CHANGELOG.md](../CHANGELOG.md) - 项目变更日志
+- [CHANGELOG.md](./CHANGELOG.md) - 项目变更日志
 - [CONTRIBUTING.md](../.kiro/CONTRIBUTING.md) - 贡献指南
 
 ### 开发文档
@@ -169,7 +170,7 @@
 - [完成报告](../.kiro/design/COMPLETION-REPORT.md) - 完成报告
 - [视觉优化计划](../.kiro/design/welcome-visual-optimization-plan.md)
 - [视觉优化总结](../.kiro/design/welcome-visual-optimization-summary.md)
-- [视觉对比](../.kiro/design/welcome-visual-comparison.md)
+- [视觉对比](../.kiro/design/welcome-banner-visual-comparison.md)
 - [配色方案](../.kiro/design/welcome-banner-color-scheme.md)
 - [项目总结](../.kiro/design/welcome-banner-project-summary.md)
 - [快速参考](../.kiro/design/welcome-banner-quick-reference.md)
@@ -199,6 +200,8 @@
 
 ### 归档报告
 - [质量与技术债归档](./archive/quality/README.md) - 已完成的构建修复与 P0 技术债报告
+- [知识库评审归档](./archive/knowledge-review/README.md) - 已完成的知识内容评审与整改报告
+- [视觉审计归档](./archive/ui-audit/README.md) - 已完成的视觉审计、welcome banner 修复和历史 UX backlog
 
 ### 修复报告
 - [Alpine 清理修复](../.kiro/fix-reports/alpine-cleanup-fix-2026-03-15.md) - Alpine.js 修复报告
@@ -249,5 +252,5 @@
 
 ---
 
-**最后更新**: 2026-06-07  
+**最后更新**: 2026-07-03
 **维护者**: sops 开发团队
