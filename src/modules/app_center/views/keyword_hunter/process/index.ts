@@ -47,6 +47,13 @@ interface TranslateButtonState {
   hasTranslationData: boolean;
 }
 
+interface ActiveTranslationRun {
+  processedCopy: string;
+  promise: ReturnType<typeof KeywordService.fetchImmersionTranslation>;
+  status: 'pending' | 'success' | 'failure';
+  error?: Error;
+}
+
 interface AnalysisStats {
   total: number;
   matched: number;
@@ -75,6 +82,8 @@ let floatWinState: FloatWinState = {
   offsetX: 0,
   offsetY: 0,
 };
+let activeTranslationRun: ActiveTranslationRun | null = null;
+let processViewVersion = 0;
 
 // ==========================================
 // Helper Functions
@@ -301,6 +310,9 @@ async function restoreProcessStateFromState(): Promise<void> {
 
   // 渲染处理模块
   renderProcessModule();
+  if (activeTranslationRun?.status === 'pending') {
+    attachTranslationRunToPage(activeTranslationRun);
+  }
 }
 
 // ==========================================
@@ -537,6 +549,10 @@ function hasProcessedCopy(): boolean {
   return !!processedCopy && processedCopy.trim().length > 0;
 }
 
+function getProcessedCopy(): string {
+  return appStore.getState().keywordTracker.processedCopy || '';
+}
+
 function hasTranslationParagraphs(): boolean {
   return appStore.getState().keywordTracker.paragraphs.length > 0;
 }
@@ -558,6 +574,59 @@ function updateTranslateActionButton(
   transBtnText.textContent = state.hasTranslationData ? '翻译已完成' : 'AI 沉浸式翻译';
   transBtn.classList.add('kt-btn-disabled');
   transBtn.classList.remove('kt-btn-active');
+}
+
+function getTranslationElements(): {
+  btn: HTMLButtonElement | null;
+  progress: HTMLElement | null;
+  text: HTMLElement | null;
+} {
+  return {
+    btn: document.getElementById('kt-translate-btn') as HTMLButtonElement | null,
+    progress: document.getElementById('kt-translate-progress'),
+    text: document.getElementById('kt-translate-btn-text'),
+  };
+}
+
+function renderTranslationPendingState(): void {
+  const { btn, progress, text } = getTranslationElements();
+
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add('kt-btn-disabled');
+    btn.classList.remove('kt-btn-active');
+  }
+  if (progress) {
+    progress.classList.remove('hidden');
+    progress.style.width = '30%';
+  }
+  if (text) {
+    text.textContent = '正在翻译...';
+  }
+}
+
+function renderTranslationCompletedState(): void {
+  const { progress } = getTranslationElements();
+  if (progress) {
+    progress.style.width = '100%';
+    addTimeout(() => progress.classList.add('hidden'), 500);
+  }
+}
+
+function renderTranslationFailureState(): void {
+  const { btn, progress, text } = getTranslationElements();
+
+  if (progress) {
+    progress.classList.add('hidden');
+  }
+  if (text) {
+    text.textContent = 'AI 沉浸式翻译';
+  }
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove('kt-btn-disabled');
+    btn.classList.add('kt-btn-active');
+  }
 }
 
 function updateTranslationCheckbox(
@@ -981,46 +1050,96 @@ async function goToAnalysis(): Promise<void> {
   await window.navigateTo('/app-center/keyword-hunter/analysis');
 }
 
+function getError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+function isTranslationRunForCurrentCopy(run: ActiveTranslationRun): boolean {
+  return getProcessedCopy() === run.processedCopy;
+}
+
+function finalizeTranslationSuccess(
+  run: ActiveTranslationRun,
+  pairs: Awaited<ReturnType<typeof KeywordService.fetchImmersionTranslation>>
+): Awaited<ReturnType<typeof KeywordService.fetchImmersionTranslation>> {
+  run.status = 'success';
+  if (!isTranslationRunForCurrentCopy(run)) {
+    return pairs;
+  }
+
+  appStore.getState().updateKeywordTracker({
+    paragraphs: pairs,
+    translationMode: true,
+  });
+  return pairs;
+}
+
+function finalizeTranslationFailure(run: ActiveTranslationRun, error: unknown): never {
+  const normalizedError = getError(error);
+  run.status = 'failure';
+  run.error = normalizedError;
+  throw normalizedError;
+}
+
+function startTranslationRun(processedCopy: string): ActiveTranslationRun {
+  const run: ActiveTranslationRun = {
+    processedCopy,
+    promise: Promise.resolve([]),
+    status: 'pending',
+  };
+
+  run.promise = KeywordService.fetchImmersionTranslation(processedCopy)
+    .then(pairs => finalizeTranslationSuccess(run, pairs))
+    .catch(error => finalizeTranslationFailure(run, error))
+    .finally(() => {
+      if (activeTranslationRun === run) {
+        activeTranslationRun = null;
+      }
+    });
+
+  activeTranslationRun = run;
+  return run;
+}
+
+function attachTranslationRunToPage(run: ActiveTranslationRun): boolean {
+  if (!isTranslationRunForCurrentCopy(run)) {
+    return false;
+  }
+
+  const viewVersion = processViewVersion;
+  renderTranslationPendingState();
+
+  run.promise
+    .then(() => {
+      if (viewVersion !== processViewVersion || !isTranslationRunForCurrentCopy(run)) return;
+      renderProcessModule();
+      renderTranslationCompletedState();
+    })
+    .catch(error => {
+      if (viewVersion !== processViewVersion || !isTranslationRunForCurrentCopy(run)) return;
+      ErrorService.handle(getError(error), {
+        action: 'translateCopyImmersive',
+        module: 'keywordTracker',
+      });
+      renderTranslationFailureState();
+    });
+
+  return true;
+}
+
 /**
  * AI 沉浸式翻译
  */
 async function translateCopyImmersive(): Promise<void> {
-  const btn = document.getElementById('kt-translate-btn') as HTMLButtonElement | null;
-  const progress = document.getElementById('kt-translate-progress') as HTMLElement | null;
-  const btnText = document.getElementById('kt-translate-btn-text');
+  const processedCopy = getProcessedCopy();
 
-  if (btn) btn.disabled = true;
-  if (progress) {
-    progress.classList.remove('hidden');
-    progress.style.width = '30%';
+  if (activeTranslationRun?.status === 'pending') {
+    if (attachTranslationRunToPage(activeTranslationRun)) {
+      return;
+    }
   }
-  if (btnText) btnText.textContent = '正在翻译...';
 
-  try {
-    // fetchImmersionTranslation 现在直接返回 ParagraphData[]
-    // 内部已完成：段落拆分 → 编号发送 → LLM 翻译 → 编号解析 → 1:1 对齐
-    const pairs = await KeywordService.fetchImmersionTranslation(
-      appStore.getState().keywordTracker.processedCopy
-    );
-
-    appStore.getState().updateKeywordTracker({
-      paragraphs: pairs,
-      translationMode: true,
-    });
-
-    renderProcessModule();
-
-    if (progress) progress.style.width = '100%';
-    addTimeout(() => progress?.classList.add('hidden'), 500);
-  } catch (e) {
-    ErrorService.handle(e as Error, {
-      action: 'translateCopyImmersive',
-      module: 'keywordTracker',
-    });
-    if (progress) progress.classList.add('hidden');
-    if (btnText) btnText.textContent = 'AI 沉浸式翻译';
-    if (btn) btn.disabled = false;
-  }
+  attachTranslationRunToPage(startTranslationRun(processedCopy));
 }
 
 /**
@@ -1411,6 +1530,7 @@ function setupEventListeners(container: HTMLElement): void {
  */
 export async function mount(container: HTMLElement): Promise<void> {
   try {
+    processViewVersion += 1;
     // 1. 使用 SafeModuleLoader 加载模板
     const loader = SafeModuleLoader.getInstance();
     const renderer = SafeRenderer.getInstance();
@@ -1472,6 +1592,7 @@ export async function mount(container: HTMLElement): Promise<void> {
  */
 export function unmount(): void {
   try {
+    processViewVersion += 1;
     // 1. 保存状态到 state
     saveProcessStateToState();
 

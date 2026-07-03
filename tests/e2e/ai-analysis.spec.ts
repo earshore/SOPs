@@ -11,7 +11,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
   let aiAnalysis: AIAnalysisPage;
 
   test.beforeEach(async ({ page }) => {
-    aiAnalysis = new AIAnalysisPage(page);
+    aiAnalysis = new AIAnalysisPage(page).useE2EFixture();
     
     // 导航到 AI 分析页面
     await aiAnalysis.navigate();
@@ -352,13 +352,13 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       }
 
       // 验证：结果卡片包含统计数据
-      await expect(page.locator('div:has-text("数据概览")')).toBeVisible();
+      await expect(page.getByText('数据概览', { exact: true }).first()).toBeVisible();
 
       // 验证：结果卡片包含核心发现
-      await expect(page.locator('div:has-text("核心发现")')).toBeVisible();
+      await expect(page.getByText('核心发现', { exact: true }).first()).toBeVisible();
 
       // 验证：结果卡片包含详细分析
-      await expect(page.locator('div:has-text("详细分析")')).toBeVisible();
+      await expect(page.getByText('详细分析', { exact: true }).first()).toBeVisible();
 
       console.log('✅ 结果卡片详细信息显示完整');
     });
@@ -514,6 +514,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
   test.describe('错误处理', () => {
     test('应该在没有数据时显示提示', async ({ page }) => {
+      await aiAnalysis.clearScraperFixture();
       const hasData = await aiAnalysis.hasAvailableData();
       
       if (hasData) {

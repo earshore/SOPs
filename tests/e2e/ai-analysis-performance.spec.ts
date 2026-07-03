@@ -34,7 +34,7 @@ const PERFORMANCE_BASELINE = {
   let aiAnalysis: AIAnalysisPage;
 
   test.beforeEach(async ({ page }) => {
-    aiAnalysis = new AIAnalysisPage(page);
+    aiAnalysis = new AIAnalysisPage(page).useE2EFixture();
   });
 
   test.describe('页面加载性能', () => {
@@ -138,7 +138,9 @@ const PERFORMANCE_BASELINE = {
       // 测量 ASIN 选择响应时间
       const selectDelay = await page.evaluate(() => {
         return new Promise<number>((resolve) => {
-          const checkbox = document.querySelector('input[type="checkbox"][name="asin"]') as HTMLInputElement;
+          const checkbox = document.querySelector(
+            '[data-selection-panel-content] input[type="checkbox"]'
+          ) as HTMLInputElement;
           if (!checkbox) {
             resolve(-1);
             return;
@@ -179,8 +181,10 @@ const PERFORMANCE_BASELINE = {
       // 测量分析目标选择响应时间
       const selectDelay = await page.evaluate(() => {
         return new Promise<number>((resolve) => {
-          const checkbox = document.querySelector('input[type="checkbox"][name="target"]') as HTMLInputElement;
-          if (!checkbox) {
+          const targetButton = Array.from(document.querySelectorAll('button')).find(item =>
+            (item.textContent || '').includes('标题核心词根')
+          ) as HTMLButtonElement | undefined;
+          if (!targetButton) {
             resolve(-1);
             return;
           }
@@ -188,7 +192,7 @@ const PERFORMANCE_BASELINE = {
           const startTime = performance.now();
           
           // 模拟用户点击
-          checkbox.click();
+          targetButton.click();
           
           // 等待下一帧
           requestAnimationFrame(() => {
@@ -231,7 +235,9 @@ const PERFORMANCE_BASELINE = {
       // 测量按钮点击响应时间
       const clickDelay = await page.evaluate(() => {
         return new Promise<number>((resolve) => {
-          const button = document.querySelector('button:has-text("开始分析")') as HTMLButtonElement;
+          const button = Array.from(document.querySelectorAll('button')).find(item =>
+            /开始分析|重新分析/.test(item.textContent || '')
+          ) as HTMLButtonElement | undefined;
           if (!button) {
             resolve(-1);
             return;
@@ -279,7 +285,9 @@ const PERFORMANCE_BASELINE = {
       // 测量全选操作响应时间
       const selectAllDelay = await page.evaluate(() => {
         return new Promise<number>((resolve) => {
-          const button = document.querySelector('button:has-text("全选")') as HTMLButtonElement;
+          const button = Array.from(document.querySelectorAll('button')).find(item =>
+            (item.textContent || '').includes('全选')
+          ) as HTMLButtonElement | undefined;
           if (!button) {
             resolve(-1);
             return;

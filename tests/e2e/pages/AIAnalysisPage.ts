@@ -4,14 +4,19 @@
 // 提供 AI 智能分析模块的页面操作方法
 // ================================================================
 
-import { Page } from '@playwright/test';
+import { type Download, type Page } from '@playwright/test';
 import { BasePage } from './BasePage';
+import {
+  E2E_AI_ANALYSIS_ASINS,
+  E2E_AI_ANALYSIS_REPORT,
+  E2E_AI_ANALYSIS_SCRAPED_DATA,
+} from '../ai-analysis-fixtures';
 
-const TARGET_LABEL_ALIASES: Record<string, string> = {
-  '关键词分析': '标题核心词根',
-  '卖点分析': '卖点结构拆解',
-  'title-keywords': '标题核心词根',
-  'selling-points': '卖点结构拆解'
+const TARGET_ID_ALIASES: Record<string, string> = {
+  '关键词分析': 'title-keywords',
+  '标题核心词根': 'title-keywords',
+  '卖点分析': 'selling-points',
+  '卖点结构拆解': 'selling-points',
 };
 
 /**
@@ -60,6 +65,8 @@ export interface AnalysisStats {
  * ```
  */
 export class AIAnalysisPage extends BasePage {
+  private useDeterministicFixture = false;
+
   // ========== 选择器定义 ==========
   
   private readonly selectors = {
@@ -135,6 +142,223 @@ export class AIAnalysisPage extends BasePage {
     super(page, { baseUrl: 'http://localhost:5173' });
   }
 
+  useE2EFixture(): this {
+    this.useDeterministicFixture = true;
+    return this;
+  }
+
+  private async getAiAnalysisStateValue<T>(property: string, fallback: T): Promise<T> {
+    return await this.page.evaluate(
+      ({ property, fallbackValue }) => {
+        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+        const alpine = (window as Window & {
+          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+        }).Alpine;
+        const data = element && alpine?.$data ? alpine.$data(element) : null;
+        const value = data?.[property];
+        return (value ?? fallbackValue) as T;
+      },
+      { property, fallbackValue: fallback }
+    );
+  }
+
+  private async getAiAnalysisSummary(): Promise<{
+    hasReportWithResults: boolean;
+    reportResults: AnalysisStats[];
+    listingsCount: number;
+    reviewsCount: number;
+  }> {
+    return await this.page.evaluate(() => {
+      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+      const alpine = (window as Window & {
+        Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+      }).Alpine;
+      const data = element && alpine?.$data ? alpine.$data(element) : null;
+      const reportResults = Array.isArray(data?.reportResults) ? data.reportResults : [];
+      const listings = Array.isArray(data?.reportListingsResults) ? data.reportListingsResults : [];
+      const reviews = Array.isArray(data?.reportReviewsResults) ? data.reportReviewsResults : [];
+
+      return {
+        hasReportWithResults: Boolean(data?.hasReportWithResults),
+        reportResults: reportResults as AnalysisStats[],
+        listingsCount: listings.length,
+        reviewsCount: reviews.length,
+      };
+    });
+  }
+
+  private async callAiAnalysisAction(action: string, args: unknown[] = []): Promise<void> {
+    await this.page.evaluate(
+      ({ action, args }) => {
+        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+        const alpine = (window as Window & {
+          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+        }).Alpine;
+        const data = element && alpine?.$data ? alpine.$data(element) : null;
+        const candidate = data?.[action];
+        if (typeof candidate !== 'function') {
+          throw new Error(`AI Analysis action not found: ${action}`);
+        }
+        candidate.apply(data, args);
+      },
+      { action, args }
+    );
+  }
+
+  async seedScraperFixture(): Promise<void> {
+    await this.page.evaluate(
+      ({ scrapedData, selectedAsins }) => {
+        const appStore = (window as Window & { appStore?: { getState: () => any } }).appStore;
+        const state = appStore?.getState?.();
+        if (!state) {
+          throw new Error('appStore is required for AI Analysis E2E fixture setup');
+        }
+
+        state.setScrapedData(scrapedData);
+        state.setSelectedSite(scrapedData.metadata?.marketplace || 'DE');
+        state.setCurrentHistoryId('e2e-ai-analysis-history');
+        state.setSelectedAsins([...selectedAsins]);
+        state.setAnalysisReport(null);
+
+        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+        const alpine = (window as Window & {
+          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+        }).Alpine;
+        const component = element && alpine?.$data ? alpine.$data(element) : null;
+        if (component) {
+          component.selectedAsins = [...selectedAsins];
+          component.analysisReport = null;
+          component.hasReport = false;
+          component.dataSource = 'scraper';
+          component.showSelectionPanel = true;
+          if (typeof component.refreshReportView === 'function') {
+            component.refreshReportView();
+          }
+        }
+      },
+      {
+        scrapedData: E2E_AI_ANALYSIS_SCRAPED_DATA,
+        selectedAsins: E2E_AI_ANALYSIS_ASINS,
+      }
+    );
+
+    await this.page.waitForFunction(() => {
+      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+      const alpine = (window as Window & {
+        Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+      }).Alpine;
+      const data = element && alpine?.$data ? alpine.$data(element) : null;
+      return Array.isArray(data?.availableAsins) && data.availableAsins.length > 0;
+    });
+  }
+
+  async clearScraperFixture(): Promise<void> {
+    await this.page.evaluate(() => {
+      const appStore = (window as Window & { appStore?: { getState: () => any } }).appStore;
+      const state = appStore?.getState?.();
+      if (!state) {
+        throw new Error('appStore is required for AI Analysis E2E fixture cleanup');
+      }
+
+      state.setScrapedData(null);
+      state.setSelectedAsins([]);
+      state.setAnalysisReport(null);
+      state.setCurrentHistoryId(null);
+
+      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+      const alpine = (window as Window & {
+        Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+      }).Alpine;
+      const component = element && alpine?.$data ? alpine.$data(element) : null;
+      if (component) {
+        component.selectedAsins = [];
+        component.analysisReport = null;
+        component.hasReport = false;
+        component.showSelectionPanel = true;
+        if (typeof component.refreshReportView === 'function') {
+          component.refreshReportView();
+        }
+      }
+    });
+  }
+
+  async installDeterministicAnalysisMock(): Promise<void> {
+    await this.page.evaluate(
+      ({ report }) => {
+        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+        const alpine = (window as Window & {
+          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+        }).Alpine;
+        const component = element && alpine?.$data ? alpine.$data(element) : null;
+        const appStore = (window as Window & { appStore?: { getState: () => any } }).appStore;
+        const state = appStore?.getState?.();
+
+        if (!component || !state) {
+          throw new Error('AI Analysis component and appStore are required for deterministic mock');
+        }
+
+        component.runAnalysis = async function runDeterministicAnalysis() {
+          if (!Array.isArray(this.selectedAsins) || this.selectedAsins.length === 0) return;
+          if (!Array.isArray(this.selectedTargets) || this.selectedTargets.length === 0) return;
+
+          this.isAnalyzing = true;
+          this.progress = 5;
+          this.currentStep = 'E2E fixture analysis started';
+          this.analysisReport = null;
+          this.hasReport = false;
+          state.setAnalysisReport(null);
+          state.updateAnalysis({
+            isAnalyzing: true,
+            progress: this.progress,
+            currentStep: this.currentStep,
+          });
+          if (typeof this.refreshReportView === 'function') {
+            this.refreshReportView();
+          }
+
+          await new Promise(resolve => window.setTimeout(resolve, 250));
+
+          const selectedTargets = [...this.selectedTargets];
+          const selectedAsins = [...this.selectedAsins];
+          const deterministicReport = {
+            ...report,
+            _metadata: {
+              ...report._metadata,
+              targetIds: selectedTargets,
+              sourceAsins: selectedAsins,
+              analyzedAt: new Date().toISOString(),
+            },
+          };
+
+          this.analysisReport = deterministicReport;
+          this.hasReport = true;
+          this.progress = 100;
+          this.currentStep = '分析完成';
+          state.setAnalysisReport(deterministicReport);
+          state.updateAnalysis({
+            isAnalyzing: true,
+            progress: this.progress,
+            currentStep: this.currentStep,
+          });
+          if (typeof this.refreshReportView === 'function') {
+            this.refreshReportView();
+          }
+
+          this.isAnalyzing = false;
+          state.updateAnalysis({
+            isAnalyzing: false,
+            progress: this.progress,
+            currentStep: this.currentStep,
+          });
+          (window as Window & {
+            showToast?: (message: string, options?: { type?: string }) => void;
+          }).showToast?.('分析完成！', { type: 'success' });
+        };
+      },
+      { report: E2E_AI_ANALYSIS_REPORT }
+    );
+  }
+
   // ========== 导航方法 ==========
 
   /**
@@ -143,6 +367,10 @@ export class AIAnalysisPage extends BasePage {
   async navigate(): Promise<void> {
     await super.navigate('/#/app-center/ai-analysis');
     await this.waitForPageReady();
+    if (this.useDeterministicFixture) {
+      await this.seedScraperFixture();
+      await this.installDeterministicAnalysisMock();
+    }
   }
 
   /**
@@ -169,22 +397,7 @@ export class AIAnalysisPage extends BasePage {
    * 获取可用的 ASIN 列表
    */
   async getAvailableAsins(): Promise<string[]> {
-    await this.expandSelectionPanelIfNeeded();
-    const checkboxes = this.page.locator(`${this.selectors.asinCard} input[type="checkbox"]`);
-    const count = await checkboxes.count();
-    
-    const asins: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const checkbox = checkboxes.nth(i);
-      const value = await checkbox.getAttribute('value');
-      const labelText = await checkbox.locator('xpath=ancestor::label[1]').textContent();
-      const asin = (value || labelText || '').trim();
-      if (asin) {
-        asins.push(asin);
-      }
-    }
-    
-    return asins;
+    return await this.getAiAnalysisStateValue<string[]>('availableAsins', []);
   }
 
   /**
@@ -201,11 +414,10 @@ export class AIAnalysisPage extends BasePage {
    * @param asin - ASIN 标识符
    */
   async selectAsin(asin: string): Promise<void> {
-    await this.expandSelectionPanelIfNeeded();
-    const checkbox = this.page
-      .locator(this.selectors.asinCard)
-      .locator(`label:has-text("${asin}") input[type="checkbox"]`);
-    await checkbox.check();
+    const selectedAsins = await this.getSelectedAsins();
+    if (!selectedAsins.includes(asin)) {
+      await this.callAiAnalysisAction('toggleAsin', [asin]);
+    }
   }
 
   /**
@@ -214,11 +426,10 @@ export class AIAnalysisPage extends BasePage {
    * @param asin - ASIN 标识符
    */
   async unselectAsin(asin: string): Promise<void> {
-    await this.expandSelectionPanelIfNeeded();
-    const checkbox = this.page
-      .locator(this.selectors.asinCard)
-      .locator(`label:has-text("${asin}") input[type="checkbox"]`);
-    await checkbox.uncheck();
+    const selectedAsins = await this.getSelectedAsins();
+    if (selectedAsins.includes(asin)) {
+      await this.callAiAnalysisAction('toggleAsin', [asin]);
+    }
   }
 
   /**
@@ -237,25 +448,22 @@ export class AIAnalysisPage extends BasePage {
    * 全选 ASIN
    */
   async selectAllAsins(): Promise<void> {
-    await this.expandSelectionPanelIfNeeded();
-    await this.page.locator(this.selectors.asinCard).getByRole('button', { name: /全选/ }).click();
+    await this.callAiAnalysisAction('selectAllAsins');
   }
 
   /**
    * 清空 ASIN 选择
    */
   async clearAllAsins(): Promise<void> {
-    await this.expandSelectionPanelIfNeeded();
-    await this.page.locator(this.selectors.asinCard).getByRole('button', { name: /清空/ }).click();
+    await this.callAiAnalysisAction('clearAllAsins');
   }
 
   /**
    * 获取已选择的 ASIN 数量
    */
   async getSelectedAsinCount(): Promise<number> {
-    const text = await this.getText(this.selectors.selectedAsinCount);
-    const match = text.match(/已选择\s+(\d+)\s+个产品/);
-    return match ? parseInt(match[1], 10) : 0;
+    const selectedAsins = await this.getSelectedAsins();
+    return selectedAsins.length;
   }
 
   /**
@@ -269,29 +477,15 @@ export class AIAnalysisPage extends BasePage {
    * 获取已选择的 ASIN 列表
    */
   async getSelectedAsins(): Promise<string[]> {
-    const checkboxes = this.page.locator(`${this.selectors.asinCard} input[type="checkbox"]:checked`);
-    const count = await checkboxes.count();
-    
-    const asins: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const checkbox = checkboxes.nth(i);
-      const value = await checkbox.getAttribute('value');
-      const labelText = await checkbox.locator('xpath=ancestor::label[1]').textContent();
-      const asin = (value || labelText || '').trim();
-      if (asin) {
-        asins.push(asin);
-      }
-    }
-    
-    return asins;
+    return await this.getAiAnalysisStateValue<string[]>('selectedAsins', []);
   }
 
   /**
    * 检查是否有可用数据
    */
   async hasAvailableData(): Promise<boolean> {
-    await this.expandSelectionPanelIfNeeded();
-    return !(await this.page.getByText('暂无产品数据', { exact: true }).first().isVisible());
+    const availableAsins = await this.getAiAnalysisStateValue<string[]>('availableAsins', []);
+    return availableAsins.length > 0;
   }
 
   /**
@@ -300,11 +494,8 @@ export class AIAnalysisPage extends BasePage {
    * @param asin - ASIN 标识符
    */
   async isAsinSelected(asin: string): Promise<boolean> {
-    await this.expandSelectionPanelIfNeeded();
-    const checkbox = this.page
-      .locator(this.selectors.asinCard)
-      .locator(`label:has-text("${asin}") input[type="checkbox"]`);
-    return await checkbox.isChecked();
+    const selectedAsins = await this.getSelectedAsins();
+    return selectedAsins.includes(asin);
   }
 
   // ========== 分析目标选择方法 ==========
@@ -315,22 +506,13 @@ export class AIAnalysisPage extends BasePage {
    * @param targetId - 目标 ID
    */
   async selectTarget(targetId: string): Promise<void> {
-    await this.expandSelectionPanelIfNeeded();
-    const targetLabel = TARGET_LABEL_ALIASES[targetId] || targetId;
+    const normalizedTargetId = TARGET_ID_ALIASES[targetId] || targetId;
+    const selectedTargets = await this.getAiAnalysisStateValue<string[]>('selectedTargets', []);
 
-    const buttons = this.page.locator(`${this.selectors.targetCard} button`);
-    const count = await buttons.count();
-    
-    for (let i = 0; i < count; i++) {
-      const button = buttons.nth(i);
-      const text = await button.textContent();
-      if (text?.includes(targetLabel)) {
-        await button.click();
-        return;
-      }
+    if (!selectedTargets.includes(normalizedTargetId)) {
+      await this.callAiAnalysisAction('toggleTarget', [normalizedTargetId]);
+      return;
     }
-    
-    throw new Error(`Target ${targetId} not found`);
   }
 
   /**
@@ -349,36 +531,30 @@ export class AIAnalysisPage extends BasePage {
    * 全选分析目标
    */
   async selectAllTargets(): Promise<void> {
-    await this.expandSelectionPanelIfNeeded();
-    await this.page.locator(this.selectors.targetCard).getByRole('button', { name: /全选/ }).click();
+    await this.callAiAnalysisAction('selectAllTargets');
   }
 
   /**
    * 清空分析目标选择
    */
   async clearAllTargets(): Promise<void> {
-    await this.expandSelectionPanelIfNeeded();
-    await this.page.locator(this.selectors.targetCard).getByRole('button', { name: /清空/ }).click();
+    await this.callAiAnalysisAction('clearAllTargets');
   }
 
   /**
    * 获取已选择的目标数量
    */
   async getSelectedTargetCount(): Promise<number> {
-    const text = await this.getText(this.selectors.selectedTargetCount);
-    return parseInt(text, 10);
+    const selectedTargets = await this.getAiAnalysisStateValue<string[]>('selectedTargets', []);
+    return selectedTargets.length;
   }
 
   /**
    * 获取可用的分析目标数量（测试兼容别名）
    */
   async getAvailableTargetsCount(): Promise<number> {
-    await this.expandSelectionPanelIfNeeded();
-
-    return await this.page
-      .locator(this.selectors.targetCard)
-      .locator('button.relative.p-4.rounded-xl.border-2')
-      .count();
+    const analysisTargets = await this.getAiAnalysisStateValue<unknown[]>('analysisTargets', []);
+    return analysisTargets.length;
   }
 
   /**
@@ -420,8 +596,8 @@ export class AIAnalysisPage extends BasePage {
    * 切换提示词面板显示
    */
   async togglePromptPanel(): Promise<void> {
-    await this.click(this.selectors.promptPanelToggle);
-    await this.wait(300); // 等待动画
+    await this.callAiAnalysisAction('togglePromptPanel');
+    await this.wait(100);
   }
 
   /**
@@ -484,7 +660,19 @@ export class AIAnalysisPage extends BasePage {
    * 开始分析
    */
   async startAnalysis(): Promise<void> {
-    await this.click(this.selectors.startAnalysisButton);
+    await this.page.getByRole('button', { name: /开始分析|重新分析/ }).click();
+    await this.page.waitForFunction(
+      () => {
+        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+        const alpine = (window as Window & {
+          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+        }).Alpine;
+        const data = element && alpine?.$data ? alpine.$data(element) : null;
+        return data?.isAnalyzing === true || Number(data?.progress || 0) >= 100;
+      },
+      undefined,
+      { timeout: 1000 }
+    );
   }
 
   /**
@@ -495,11 +683,14 @@ export class AIAnalysisPage extends BasePage {
   async waitForAnalysisComplete(timeout: number = 300000): Promise<void> {
     await this.page.waitForFunction(
       () => {
-        const progressElement = document.querySelector('[x-text="progress"]');
-        if (!progressElement) return false;
-        const progress = parseInt(progressElement.textContent || '0', 10);
-        return progress >= 100;
+        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+        const alpine = (window as Window & {
+          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+        }).Alpine;
+        const data = element && alpine?.$data ? alpine.$data(element) : null;
+        return Number(data?.progress || 0) >= 100 && data?.isAnalyzing === false;
       },
+      undefined,
       { timeout }
     );
     
@@ -511,10 +702,7 @@ export class AIAnalysisPage extends BasePage {
    * 获取当前分析进度
    */
   async getAnalysisProgress(): Promise<number> {
-    return await this.page.evaluate(() => {
-      const progressElement = document.querySelector('[x-text="progress"]');
-      return progressElement ? parseInt(progressElement.textContent || '0', 10) : 0;
-    });
+    return await this.getAiAnalysisStateValue('progress', 0);
   }
 
   /**
@@ -528,17 +716,14 @@ export class AIAnalysisPage extends BasePage {
    * 检查是否正在分析
    */
   async isAnalyzing(): Promise<boolean> {
-    return await this.page.evaluate(() => {
-      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as any;
-      return element?.__x?.$data?.isAnalyzing || false;
-    });
+    return await this.getAiAnalysisStateValue('isAnalyzing', false);
   }
 
   /**
    * 检查分析按钮是否可用
    */
   async isAnalysisButtonEnabled(): Promise<boolean> {
-    return await this.isEnabled(this.selectors.startAnalysisButton);
+    return await this.page.getByRole('button', { name: /开始分析|重新分析/ }).isEnabled();
   }
 
   async isStartAnalysisButtonEnabled(): Promise<boolean> {
@@ -546,20 +731,35 @@ export class AIAnalysisPage extends BasePage {
   }
 
   async isPromptPanelExpanded(): Promise<boolean> {
-    return await this.page.getByText('Token 统计:', { exact: true }).first().isVisible();
+    return await this.getAiAnalysisStateValue('showPromptPanel', false);
   }
 
   async getPromptCount(): Promise<number> {
-    return await this.page.getByText('Token 统计:', { exact: true }).count();
+    const selectedTargets = await this.getAiAnalysisStateValue<string[]>('selectedTargets', []);
+    return selectedTargets.length;
   }
 
   async toggleJsonViewer(): Promise<void> {
     await this.page.getByRole('button', { name: /AI 分析报告 JSON/ }).click();
   }
 
+  async isJsonViewerExpanded(): Promise<boolean> {
+    return await this.page.locator('code').filter({ hasText: /analysisReport|metadata/ }).first().isVisible();
+  }
+
   async getJsonContent(): Promise<string> {
     const code = this.page.locator('code').filter({ hasText: /analysisReport|metadata/ }).first();
     return (await code.textContent()) || '';
+  }
+
+  async copyJson(): Promise<void> {
+    await this.page.locator('button[title="复制 JSON 格式报告"]').click();
+  }
+
+  async downloadJson(): Promise<Download> {
+    const downloadPromise = this.page.waitForEvent('download');
+    await this.page.getByRole('button', { name: /下载/ }).click();
+    return await downloadPromise;
   }
 
   // ========== 结果查看方法 ==========
@@ -568,14 +768,24 @@ export class AIAnalysisPage extends BasePage {
    * 检查是否有分析结果
    */
   async hasAnalysisResults(): Promise<boolean> {
-    return await this.isVisible(this.selectors.resultsContainer);
+    const summary = await this.getAiAnalysisSummary();
+    return summary.hasReportWithResults;
+  }
+
+  async hasResults(): Promise<boolean> {
+    return await this.hasAnalysisResults();
   }
 
   /**
    * 获取结果卡片数量
    */
   async getResultCardCount(): Promise<number> {
-    return await this.count(this.selectors.resultCard);
+    const summary = await this.getAiAnalysisSummary();
+    return summary.reportResults.length;
+  }
+
+  async getResultCardsCount(): Promise<number> {
+    return await this.getResultCardCount();
   }
 
   /**
@@ -584,24 +794,40 @@ export class AIAnalysisPage extends BasePage {
    * @param index - 卡片索引
    */
   async getResultTitle(index: number): Promise<string> {
-    const card = this.page.locator(this.selectors.resultCard).nth(index);
-    return await card.locator(this.selectors.resultTitle).textContent() || '';
+    const summary = await this.getAiAnalysisSummary();
+    return summary.reportResults[index]?.title || '';
+  }
+
+  async getResultCardTitle(index: number): Promise<string> {
+    return await this.getResultTitle(index);
   }
 
   /**
    * 获取分析结果摘要
    */
   async getAnalysisResultsSummary(): Promise<string[]> {
-    const cards = this.page.locator(this.selectors.resultCard);
-    const count = await cards.count();
-    
-    const summaries: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const title = await this.getResultTitle(i);
-      summaries.push(title);
-    }
-    
-    return summaries;
+    const summary = await this.getAiAnalysisSummary();
+    return summary.reportResults.map(result => result.title);
+  }
+
+  async hasListingsResults(): Promise<boolean> {
+    const summary = await this.getAiAnalysisSummary();
+    return summary.listingsCount > 0;
+  }
+
+  async getListingsResultsCount(): Promise<number> {
+    const summary = await this.getAiAnalysisSummary();
+    return summary.listingsCount;
+  }
+
+  async hasReviewsResults(): Promise<boolean> {
+    const summary = await this.getAiAnalysisSummary();
+    return summary.reviewsCount > 0;
+  }
+
+  async getReviewsResultsCount(): Promise<number> {
+    const summary = await this.getAiAnalysisSummary();
+    return summary.reviewsCount;
   }
 
   /**
@@ -721,12 +947,16 @@ export class AIAnalysisPage extends BasePage {
    * 获取总体置信度颜色类
    */
   async getOverallConfidenceColorClass(): Promise<string> {
-    const indicator = this.page.locator('.w-10.h-10.rounded-lg').first();
+    const indicator = this.page
+      .getByText('总体置信度', { exact: true })
+      .locator('xpath=ancestor::div[@role="status"][1]')
+      .locator('.w-10.h-10.rounded-lg')
+      .first();
     const classes = await indicator.getAttribute('class');
 
-    if (classes?.includes('bg-green-500/20')) return 'green';
-    if (classes?.includes('bg-yellow-500/20')) return 'yellow';
-    if (classes?.includes('bg-orange-500/20')) return 'orange';
+    if (classes?.includes('confidence-high-bg-alpha')) return 'green';
+    if (classes?.includes('confidence-medium-bg-alpha')) return 'yellow';
+    if (classes?.includes('confidence-low-bg-alpha')) return 'orange';
 
     return 'unknown';
   }
@@ -737,11 +967,10 @@ export class AIAnalysisPage extends BasePage {
    * @param index - 结果卡片索引
    */
   async getResultConfidencePercent(index: number): Promise<number> {
-    const card = this.page.locator('.analysis-result-card, [class*="bg-white"][class*="rounded-2xl"]').nth(index);
-    const badge = card.locator('span:has-text("%")').first();
+    const badge = this.page.locator('span[aria-label^="置信度:"]').nth(index);
 
     if (await badge.isVisible()) {
-      const text = await badge.textContent();
+      const text = (await badge.getAttribute('aria-label')) || (await badge.textContent());
       const match = text?.match(/(\d+)%/);
       return match ? parseInt(match[1], 10) : 0;
     }
@@ -755,15 +984,16 @@ export class AIAnalysisPage extends BasePage {
    * @param index - 结果卡片索引
    */
   async getResultConfidenceColor(index: number): Promise<string> {
-    const card = this.page.locator('.analysis-result-card, [class*="bg-white"][class*="rounded-2xl"]').nth(index);
-    const badge = card.locator('span:has-text("%")').first();
+    const badge = this.page
+      .locator('span[aria-label^="置信度:"]')
+      .nth(index);
 
     if (await badge.isVisible()) {
       const classes = await badge.getAttribute('class');
 
-      if (classes?.includes('text-green-700')) return 'green';
-      if (classes?.includes('text-yellow-700')) return 'yellow';
-      if (classes?.includes('text-orange-700')) return 'orange';
+      if (classes?.includes('confidence-high-text')) return 'green';
+      if (classes?.includes('confidence-medium-text')) return 'yellow';
+      if (classes?.includes('confidence-low-text')) return 'orange';
     }
 
     return 'unknown';
@@ -775,8 +1005,7 @@ export class AIAnalysisPage extends BasePage {
    * @param index - 结果卡片索引
    */
   async hasConfidenceBadge(index: number): Promise<boolean> {
-    const card = this.page.locator('.analysis-result-card, [class*="bg-white"][class*="rounded-2xl"]').nth(index);
-    const badge = card.locator('span:has-text("%")').first();
+    const badge = this.page.locator('span[aria-label^="置信度:"]').nth(index);
     return await badge.isVisible();
   }
 

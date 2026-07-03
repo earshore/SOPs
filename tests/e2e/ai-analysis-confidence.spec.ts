@@ -11,7 +11,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
   let aiAnalysis: AIAnalysisPage;
 
   test.beforeEach(async ({ page }) => {
-    aiAnalysis = new AIAnalysisPage(page);
+    aiAnalysis = new AIAnalysisPage(page).useE2EFixture();
     await aiAnalysis.navigate();
   });
 
