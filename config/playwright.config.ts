@@ -8,7 +8,7 @@
 // -------------------
 // 1. workers: 控制并行执行的 worker 数量
 //    - CI 环境：1（串行执行，更稳定）
-//    - 本地环境：CPU 核心数的 50%（平衡性能和稳定性）
+//    - 本地环境：2（避免 E2E、性能和 Lighthouse 并发时资源争用）
 //    - 自定义：设置 WORKERS 环境变量
 //
 // 2. fullyParallel: false
@@ -63,8 +63,8 @@ export default defineConfig({
 
   // 并行执行的 worker 数量
   // CI 环境：1 个 worker（串行执行，更稳定）
-  // 本地环境：使用 CPU 核心数的 50%（避免资源耗尽）
-  workers: process.env.CI ? 1 : process.env.WORKERS ? parseInt(process.env.WORKERS) : '50%',
+  // 本地环境：默认 2 个 worker（避免资源争用；需要更快可显式设置 WORKERS）
+  workers: process.env.CI ? 1 : process.env.WORKERS ? parseInt(process.env.WORKERS) : 2,
 
   // 失败时重试次数
   retries: process.env.CI ? 2 : 0,
