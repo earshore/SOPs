@@ -37,6 +37,14 @@ interface AnalysisResult {
 const DIST_DIR = 'dist/assets/js';
 const TARGET_SIZE_KB = 10; // 目标：< 10KB gzipped
 
+const ROUTER_BUNDLE_MARKERS = [
+  'NavigoAdapter',
+  'RouteGuard',
+  'RouteMiddleware',
+  'PreloadManager',
+  'navigo'
+];
+
 /**
  * 获取文件大小（字节）
  */
@@ -173,39 +181,42 @@ function estimateRouterCodeInBundle(bundlePath: string): number {
  * 扫描并分析所有路由相关的 bundle
  */
 function analyzeBundles(): AnalysisResult {
-  const files = readdirSync(DIST_DIR);
-  const routerBundles: BundleInfo[] = [];
   const routerModules = estimateRouterSourceSize();
+  const routerBundles = getJavaScriptBundleFiles()
+    .map(analyzeRouterBundle)
+    .filter((bundle): bundle is BundleInfo => Boolean(bundle));
   
-  for (const file of files) {
-    if (!file.endsWith('.js')) continue;
-    if (file.endsWith('.map')) continue;
-    
-    const filePath = join(DIST_DIR, file);
-    
-    // 检查文件内容是否包含路由相关代码
-    const content = readFileSync(filePath, 'utf-8');
-    const hasRouterCode = 
-      content.includes('NavigoAdapter') ||
-      content.includes('RouteGuard') ||
-      content.includes('RouteMiddleware') ||
-      content.includes('PreloadManager') ||
-      content.includes('navigo') ||
-      isRouterRelated(file);
-    
-    if (hasRouterCode) {
-      const bundleInfo = analyzeBundle(filePath);
-      
-      // 估算路由代码在此 bundle 中的大小
-      const routerCodeSize = estimateRouterCodeInBundle(filePath);
-      bundleInfo.routerCodeSize = routerCodeSize;
-      bundleInfo.routerCodePercentage = (routerCodeSize / bundleInfo.size) * 100;
-      
-      routerBundles.push(bundleInfo);
-    }
+  return createAnalysisResult(routerBundles, routerModules);
+}
+
+function getJavaScriptBundleFiles(): string[] {
+  return readdirSync(DIST_DIR)
+    .filter(file => file.endsWith('.js') && !file.endsWith('.map'));
+}
+
+function analyzeRouterBundle(file: string): BundleInfo | null {
+  const filePath = join(DIST_DIR, file);
+  const content = readFileSync(filePath, 'utf-8');
+
+  if (!hasRouterCode(content, file)) {
+    return null;
   }
-  
-  // 计算总大小
+
+  const bundleInfo = analyzeBundle(filePath);
+  const routerCodeSize = estimateRouterCodeInBundle(filePath);
+  bundleInfo.routerCodeSize = routerCodeSize;
+  bundleInfo.routerCodePercentage = (routerCodeSize / bundleInfo.size) * 100;
+  return bundleInfo;
+}
+
+function hasRouterCode(content: string, file: string): boolean {
+  return ROUTER_BUNDLE_MARKERS.some(marker => content.includes(marker)) || isRouterRelated(file);
+}
+
+function createAnalysisResult(
+  routerBundles: BundleInfo[],
+  routerModules: RouterModuleInfo[]
+): AnalysisResult {
   const totalSize = routerBundles.reduce((sum, b) => sum + b.size, 0);
   const totalGzipSize = routerBundles.reduce((sum, b) => sum + b.gzipSize, 0);
   const totalBrotliSize = routerBundles.reduce((sum, b) => sum + b.brotliSize, 0);

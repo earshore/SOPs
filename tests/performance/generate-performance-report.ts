@@ -79,6 +79,14 @@ interface PerformanceReport {
   recommendations: string[];
 }
 
+interface LighthouseResultFile {
+  name: string;
+  path: string;
+  time: number;
+}
+
+type AuditMetricKey = keyof AuditMetrics;
+
 // ================================================================
 // 工具函数
 // ================================================================
@@ -145,55 +153,90 @@ function loadLatestLighthouseResults(): PageResult[] {
     return [];
   }
   
-  const files = fs.readdirSync(CONFIG.lhciDir)
-    .filter(f => f.startsWith('lhr-') && f.endsWith('.json'))
-    .map(f => ({
-      name: f,
-      path: path.join(CONFIG.lhciDir, f),
-      time: fs.statSync(path.join(CONFIG.lhciDir, f)).mtime.getTime()
-    }))
-    .sort((a, b) => b.time - a.time);
-  
   const results: PageResult[] = [];
   const processedUrls = new Set<string>();
   
-  for (const file of files) {
-    try {
-      const data = JSON.parse(fs.readFileSync(file.path, 'utf-8'));
-      const url = data.finalUrl || data.requestedUrl;
-      
-      if (processedUrls.has(url)) continue;
-      processedUrls.add(url);
-      
-      const categories = data.categories;
-      const audits = data.audits;
-      
-      results.push({
-        url,
-        name: getPageName(url),
-        scores: {
-          performance: Math.round((categories.performance?.score || 0) * 100),
-          accessibility: Math.round((categories.accessibility?.score || 0) * 100),
-          bestPractices: Math.round((categories['best-practices']?.score || 0) * 100),
-          seo: Math.round((categories.seo?.score || 0) * 100),
-          pwa: Math.round((categories.pwa?.score || 0) * 100)
-        },
-        audits: {
-          fcp: audits['first-contentful-paint']?.numericValue || 0,
-          lcp: audits['largest-contentful-paint']?.numericValue || 0,
-          cls: audits['cumulative-layout-shift']?.numericValue || 0,
-          tbt: audits['total-blocking-time']?.numericValue || 0,
-          si: audits['speed-index']?.numericValue || 0,
-          tti: audits['interactive']?.numericValue
-        },
-        timestamp: new Date(file.time).toISOString()
-      });
-    } catch (error) {
-      console.error(`❌ 读取文件失败: ${file.name}`, error);
+  for (const file of getLighthouseResultFiles()) {
+    const result = parseLighthouseResultFile(file, processedUrls);
+    if (result) {
+      results.push(result);
     }
   }
   
   return results;
+}
+
+function getLighthouseResultFiles(): LighthouseResultFile[] {
+  return fs.readdirSync(CONFIG.lhciDir)
+    .filter(f => f.startsWith('lhr-') && f.endsWith('.json'))
+    .map(name => {
+      const filePath = path.join(CONFIG.lhciDir, name);
+      return {
+        name,
+        path: filePath,
+        time: fs.statSync(filePath).mtime.getTime()
+      };
+    })
+    .sort((a, b) => b.time - a.time);
+}
+
+function parseLighthouseResultFile(
+  file: LighthouseResultFile,
+  processedUrls: Set<string>
+): PageResult | null {
+  try {
+    const data = JSON.parse(fs.readFileSync(file.path, 'utf-8'));
+    const url = data.finalUrl || data.requestedUrl;
+    
+    if (!url || processedUrls.has(url)) {
+      return null;
+    }
+
+    processedUrls.add(url);
+    return createPageResult(url, data, file.time);
+  } catch (error) {
+    console.error(`❌ 读取文件失败: ${file.name}`, error);
+    return null;
+  }
+}
+
+function createPageResult(url: string, data: any, timestamp: number): PageResult {
+  return {
+    url,
+    name: getPageName(url),
+    scores: createPerformanceScores(data.categories),
+    audits: createAuditMetrics(data.audits),
+    timestamp: new Date(timestamp).toISOString()
+  };
+}
+
+function createPerformanceScores(categories: any): PerformanceScore {
+  return {
+    performance: getCategoryScore(categories, 'performance'),
+    accessibility: getCategoryScore(categories, 'accessibility'),
+    bestPractices: getCategoryScore(categories, 'best-practices'),
+    seo: getCategoryScore(categories, 'seo'),
+    pwa: getCategoryScore(categories, 'pwa')
+  };
+}
+
+function getCategoryScore(categories: any, category: string): number {
+  return Math.round((categories[category]?.score || 0) * 100);
+}
+
+function createAuditMetrics(audits: any): AuditMetrics {
+  return {
+    fcp: getAuditMetric(audits, 'first-contentful-paint'),
+    lcp: getAuditMetric(audits, 'largest-contentful-paint'),
+    cls: getAuditMetric(audits, 'cumulative-layout-shift'),
+    tbt: getAuditMetric(audits, 'total-blocking-time'),
+    si: getAuditMetric(audits, 'speed-index'),
+    tti: audits['interactive']?.numericValue
+  };
+}
+
+function getAuditMetric(audits: any, auditName: string): number {
+  return audits[auditName]?.numericValue || 0;
 }
 
 function getPageName(url: string): string {
@@ -640,41 +683,40 @@ function generatePageScoreRows(page: ComparisonResult): string {
 
 function generatePageVitalsRows(page: ComparisonResult): string {
   const audits = page.current.audits;
+  const rows = [
+    createVitalsRowConfig('FCP', 'fcp', audits.fcp < 1500, formatMs),
+    createVitalsRowConfig('LCP', 'lcp', audits.lcp < 2500, formatMs),
+    createVitalsRowConfig('CLS', 'cls', audits.cls < 0.1, value => value.toFixed(3)),
+    createVitalsRowConfig('TBT', 'tbt', audits.tbt < 300, formatMs),
+    createVitalsRowConfig('SI', 'si', audits.si < 3500, formatMs),
+  ];
+
+  return rows.map(row => generatePageVitalsRow(page, row)).join('');
+}
+
+function createVitalsRowConfig(
+  label: string,
+  key: AuditMetricKey,
+  passed: boolean,
+  formatter: (value: number) => string
+) {
+  return { label, key, passed, formatter };
+}
+
+function generatePageVitalsRow(
+  page: ComparisonResult,
+  row: ReturnType<typeof createVitalsRowConfig>
+): string {
+  const currentValue = page.current.audits[row.key];
+  const baselineValue = page.baseline?.audits[row.key];
+  const diffValue = page.diff?.audits[row.key];
 
   return `          <tr>
-            <td>FCP</td>
-            <td>${formatMs(audits.fcp)}</td>
-            <td>${page.baseline ? formatMs(page.baseline.audits.fcp) : 'N/A'}</td>
-            <td>${page.diff?.audits.fcp ? formatMs(page.diff.audits.fcp) : 'N/A'}</td>
-            <td class="${getPassClass(audits.fcp < 1500)}">${getStatusIcon(audits.fcp < 1500)}</td>
-          </tr>
-          <tr>
-            <td>LCP</td>
-            <td>${formatMs(audits.lcp)}</td>
-            <td>${page.baseline ? formatMs(page.baseline.audits.lcp) : 'N/A'}</td>
-            <td>${page.diff?.audits.lcp ? formatMs(page.diff.audits.lcp) : 'N/A'}</td>
-            <td class="${getPassClass(audits.lcp < 2500)}">${getStatusIcon(audits.lcp < 2500)}</td>
-          </tr>
-          <tr>
-            <td>CLS</td>
-            <td>${audits.cls.toFixed(3)}</td>
-            <td>${page.baseline ? page.baseline.audits.cls.toFixed(3) : 'N/A'}</td>
-            <td>${page.diff?.audits.cls ? page.diff.audits.cls.toFixed(3) : 'N/A'}</td>
-            <td class="${getPassClass(audits.cls < 0.1)}">${getStatusIcon(audits.cls < 0.1)}</td>
-          </tr>
-          <tr>
-            <td>TBT</td>
-            <td>${formatMs(audits.tbt)}</td>
-            <td>${page.baseline ? formatMs(page.baseline.audits.tbt) : 'N/A'}</td>
-            <td>${page.diff?.audits.tbt ? formatMs(page.diff.audits.tbt) : 'N/A'}</td>
-            <td class="${getPassClass(audits.tbt < 300)}">${getStatusIcon(audits.tbt < 300)}</td>
-          </tr>
-          <tr>
-            <td>SI</td>
-            <td>${formatMs(audits.si)}</td>
-            <td>${page.baseline ? formatMs(page.baseline.audits.si) : 'N/A'}</td>
-            <td>${page.diff?.audits.si ? formatMs(page.diff.audits.si) : 'N/A'}</td>
-            <td class="${getPassClass(audits.si < 3500)}">${getStatusIcon(audits.si < 3500)}</td>
+            <td>${row.label}</td>
+            <td>${row.formatter(currentValue || 0)}</td>
+            <td>${baselineValue !== undefined ? row.formatter(baselineValue) : 'N/A'}</td>
+            <td>${diffValue ? row.formatter(diffValue) : 'N/A'}</td>
+            <td class="${getPassClass(row.passed)}">${getStatusIcon(row.passed)}</td>
           </tr>`;
 }
 

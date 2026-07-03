@@ -398,56 +398,83 @@ export class ThresholdValidator {
     const warnings: string[] = [];
     const errors: string[] = [];
     
-    // 检查阈值范围
-    if (config.threshold !== undefined) {
-      if (config.threshold < 0 || config.threshold > 1) {
-        errors.push(`threshold 必须在 0-1 之间，当前值: ${config.threshold}`);
-      } else if (config.threshold < 0.001) {
-        warnings.push(`threshold 过于严格 (${config.threshold})，可能导致大量误报`);
-      } else if (config.threshold > 0.3) {
-        warnings.push(`threshold 过于宽松 (${config.threshold})，可能遗漏真实问题`);
-      }
-    }
-    
-    // 检查最大差异像素数
-    if (config.maxDiffPixels !== undefined) {
-      if (config.maxDiffPixels < 0) {
-        errors.push(`maxDiffPixels 不能为负数，当前值: ${config.maxDiffPixels}`);
-      } else if (config.maxDiffPixels < 10) {
-        warnings.push(`maxDiffPixels 过小 (${config.maxDiffPixels})，可能导致误报`);
-      } else if (config.maxDiffPixels > 5000) {
-        warnings.push(`maxDiffPixels 过大 (${config.maxDiffPixels})，可能遗漏问题`);
-      }
-    }
-    
-    // 检查透明度阈值
-    if (config.alpha !== undefined && (config.alpha < 0 || config.alpha > 1)) {
-      errors.push(`alpha 必须在 0-1 之间，当前值: ${config.alpha}`);
-    }
-    
-    // 检查抗锯齿阈值
-    if (config.aaThreshold !== undefined && (config.aaThreshold < 0 || config.aaThreshold > 1)) {
-      errors.push(`aaThreshold 必须在 0-1 之间，当前值: ${config.aaThreshold}`);
-    }
-    
-    // 检查差异颜色
-    if (config.diffColor) {
-      if (config.diffColor.length !== 3) {
-        errors.push(`diffColor 必须是 [R, G, B] 格式`);
-      } else {
-        for (let i = 0; i < 3; i++) {
-          if (config.diffColor[i] < 0 || config.diffColor[i] > 255) {
-            errors.push(`diffColor[${i}] 必须在 0-255 之间，当前值: ${config.diffColor[i]}`);
-          }
-        }
-      }
-    }
+    this.validateThreshold(config.threshold, warnings, errors);
+    this.validateMaxDiffPixels(config.maxDiffPixels, warnings, errors);
+    this.validateUnitRange('alpha', config.alpha, errors);
+    this.validateUnitRange('aaThreshold', config.aaThreshold, errors);
+    this.validateDiffColor(config.diffColor, errors);
     
     return {
       valid: errors.length === 0,
       warnings,
       errors
     };
+  }
+
+  private static validateThreshold(
+    threshold: number | undefined,
+    warnings: string[],
+    errors: string[]
+  ): void {
+    if (threshold === undefined) {
+      return;
+    }
+
+    if (threshold < 0 || threshold > 1) {
+      errors.push(`threshold 必须在 0-1 之间，当前值: ${threshold}`);
+    } else if (threshold < 0.001) {
+      warnings.push(`threshold 过于严格 (${threshold})，可能导致大量误报`);
+    } else if (threshold > 0.3) {
+      warnings.push(`threshold 过于宽松 (${threshold})，可能遗漏真实问题`);
+    }
+  }
+
+  private static validateMaxDiffPixels(
+    maxDiffPixels: number | undefined,
+    warnings: string[],
+    errors: string[]
+  ): void {
+    if (maxDiffPixels === undefined) {
+      return;
+    }
+
+    if (maxDiffPixels < 0) {
+      errors.push(`maxDiffPixels 不能为负数，当前值: ${maxDiffPixels}`);
+    } else if (maxDiffPixels < 10) {
+      warnings.push(`maxDiffPixels 过小 (${maxDiffPixels})，可能导致误报`);
+    } else if (maxDiffPixels > 5000) {
+      warnings.push(`maxDiffPixels 过大 (${maxDiffPixels})，可能遗漏问题`);
+    }
+  }
+
+  private static validateUnitRange(
+    field: 'alpha' | 'aaThreshold',
+    value: number | undefined,
+    errors: string[]
+  ): void {
+    if (value !== undefined && (value < 0 || value > 1)) {
+      errors.push(`${field} 必须在 0-1 之间，当前值: ${value}`);
+    }
+  }
+
+  private static validateDiffColor(
+    diffColor: ImageCompareOptions['diffColor'],
+    errors: string[]
+  ): void {
+    if (!diffColor) {
+      return;
+    }
+
+    if (diffColor.length !== 3) {
+      errors.push(`diffColor 必须是 [R, G, B] 格式`);
+      return;
+    }
+
+    diffColor.forEach((value, index) => {
+      if (value < 0 || value > 255) {
+        errors.push(`diffColor[${index}] 必须在 0-255 之间，当前值: ${value}`);
+      }
+    });
   }
   
   /**

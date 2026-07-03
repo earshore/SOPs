@@ -94,10 +94,16 @@ async function readPreviewMetrics(page: Page, pointer: Point | null = null): Pro
     }
 
     const rect = preview.getBoundingClientRect();
+    const viewportBounds = [
+      rect.left >= 0,
+      rect.top >= 0,
+      rect.right <= window.innerWidth,
+      rect.bottom <= window.innerHeight,
+    ];
     const nearestDistance = pointer
       ? {
-          x: Math.round(pointer.x < rect.left ? rect.left - pointer.x : pointer.x > rect.right ? pointer.x - rect.right : 0),
-          y: Math.round(pointer.y < rect.top ? rect.top - pointer.y : pointer.y > rect.bottom ? pointer.y - rect.bottom : 0),
+          x: Math.round(Math.max(rect.left - pointer.x, 0, pointer.x - rect.right)),
+          y: Math.round(Math.max(rect.top - pointer.y, 0, pointer.y - rect.bottom)),
         }
       : null;
 
@@ -116,7 +122,7 @@ async function readPreviewMetrics(page: Page, pointer: Point | null = null): Pro
         height: Math.round(rect.height),
       },
       visible: preview.classList.contains('is-visible'),
-      withinViewport: rect.left >= 0 && rect.top >= 0 && rect.right <= window.innerWidth && rect.bottom <= window.innerHeight,
+      withinViewport: viewportBounds.every(Boolean),
     };
   }, { pointer, previewSelector: PREVIEW_SELECTOR, promptSelector: PROMPT_SELECTOR });
 }

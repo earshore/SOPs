@@ -203,6 +203,89 @@ async function handleMigrateCommand(targetPath: string, options: any): Promise<v
   }
 }
 
+function applyValidateOptionOverrides(config: ValidatorConfig, options: any): ValidatorConfig {
+  if (options.htmlId === false) {
+    config.rules['html-id'] = false;
+  }
+  if (options.cssClass === false) {
+    config.rules['css-class'] = false;
+  }
+  if (options.dataAttr === false) {
+    config.rules['data-attr'] = false;
+  }
+
+  return config;
+}
+
+async function runValidation(validator: Validator, absolutePath: string): Promise<any> {
+  const stats = fs.statSync(absolutePath);
+  
+  if (stats.isDirectory()) {
+    console.log(chalk.gray(`扫描目录: ${absolutePath}\n`));
+    return validator.scanDirectory(absolutePath);
+  }
+
+  if (stats.isFile()) {
+    console.log(chalk.gray(`验证文件: ${absolutePath}\n`));
+    return validator.validateFile(absolutePath);
+  }
+
+  console.error(chalk.red('错误: 不支持的路径类型'));
+  process.exit(1);
+}
+
+function writeValidationReport(validator: Validator, report: any, options: any): void {
+  const reportFormat = options.format === 'json' ? 'json' : 'markdown';
+  const reportContent = validator.generateReport(report, reportFormat);
+
+  if (options.output) {
+    const outputPath = path.resolve(process.cwd(), options.output);
+    fs.writeFileSync(outputPath, reportContent, 'utf-8');
+    console.log(chalk.green(`✅ 报告已保存到: ${outputPath}`));
+    return;
+  }
+
+  console.log(reportContent);
+}
+
+function printValidationSummary(report: any): void {
+  console.log('\n' + chalk.bold('验证摘要:'));
+  console.log(chalk.gray(`  扫描文件: ${report.totalFiles}`));
+  console.log(chalk.gray(`  发现问题: ${report.totalIssues}`));
+  
+  if (report.summary.errors > 0) {
+    console.log(chalk.red(`  错误: ${report.summary.errors}`));
+  }
+  if (report.summary.warnings > 0) {
+    console.log(chalk.yellow(`  警告: ${report.summary.warnings}`));
+  }
+}
+
+function exitOnValidationErrors(report: any): void {
+  if (report.summary.errors > 0) {
+    process.exit(1);
+  }
+}
+
+async function handleValidateCommand(targetPath: string, options: any): Promise<void> {
+  console.log(chalk.blue('🔍 开始验证命名规范...\n'));
+
+  try {
+    const config = applyValidateOptionOverrides(loadConfig(options.config), options);
+    const validator = new Validator(config);
+    const absolutePath = resolveExistingPath(targetPath);
+    const report = await runValidation(validator, absolutePath);
+
+    writeValidationReport(validator, report, options);
+    printValidationSummary(report);
+    exitOnValidationErrors(report);
+  } catch (error) {
+    console.error(chalk.red('验证过程中发生错误:'));
+    console.error(error);
+    process.exit(1);
+  }
+}
+
 /**
  * validate命令：验证命名规范
  */
@@ -216,87 +299,7 @@ program
   .option('--no-html-id', '禁用HTML ID规则检查')
   .option('--no-css-class', '禁用CSS类规则检查')
   .option('--no-data-attr', '禁用data属性规则检查')
-  .action(async (targetPath: string, options: any) => {
-    console.log(chalk.blue('🔍 开始验证命名规范...\n'));
-
-    try {
-      // 加载配置
-      let config = loadConfig(options.config);
-
-      // 命令行参数覆盖配置
-      if (options.htmlId === false) {
-        config.rules['html-id'] = false;
-      }
-      if (options.cssClass === false) {
-        config.rules['css-class'] = false;
-      }
-      if (options.dataAttr === false) {
-        config.rules['data-attr'] = false;
-      }
-
-      // 创建验证器
-      const validator = new Validator(config);
-
-      // 获取绝对路径
-      const absolutePath = path.resolve(process.cwd(), targetPath);
-
-      // 检查路径是否存在
-      if (!fs.existsSync(absolutePath)) {
-        console.error(chalk.red(`错误: 路径不存在: ${absolutePath}`));
-        process.exit(1);
-      }
-
-      // 执行验证
-      let report;
-      const stats = fs.statSync(absolutePath);
-      
-      if (stats.isDirectory()) {
-        console.log(chalk.gray(`扫描目录: ${absolutePath}\n`));
-        report = await validator.scanDirectory(absolutePath);
-      } else if (stats.isFile()) {
-        console.log(chalk.gray(`验证文件: ${absolutePath}\n`));
-        report = await validator.validateFile(absolutePath);
-      } else {
-        console.error(chalk.red('错误: 不支持的路径类型'));
-        process.exit(1);
-      }
-
-      // 生成报告
-      const reportFormat = options.format === 'json' ? 'json' : 'markdown';
-      const reportContent = validator.generateReport(report, reportFormat);
-
-      // 输出报告
-      if (options.output) {
-        const outputPath = path.resolve(process.cwd(), options.output);
-        fs.writeFileSync(outputPath, reportContent, 'utf-8');
-        console.log(chalk.green(`✅ 报告已保存到: ${outputPath}`));
-      } else {
-        console.log(reportContent);
-      }
-
-      // 显示摘要
-      console.log('\n' + chalk.bold('验证摘要:'));
-      console.log(chalk.gray(`  扫描文件: ${report.totalFiles}`));
-      console.log(chalk.gray(`  发现问题: ${report.totalIssues}`));
-      
-      if (report.summary.errors > 0) {
-        console.log(chalk.red(`  错误: ${report.summary.errors}`));
-      }
-      if (report.summary.warnings > 0) {
-        console.log(chalk.yellow(`  警告: ${report.summary.warnings}`));
-      }
-
-      // 如果有错误，退出码为1
-      if (report.summary.errors > 0) {
-        process.exit(1);
-      }
-
-    } catch (error) {
-      console.error(chalk.red('验证过程中发生错误:'));
-      console.error(error);
-      process.exit(1);
-    }
-  });
+  .action(handleValidateCommand);
 
 /**
  * migrate命令：自动迁移命名

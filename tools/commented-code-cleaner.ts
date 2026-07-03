@@ -87,64 +87,96 @@ class CommentedCodeCleaner {
   private async scanFile(filePath: string): Promise<CommentedCodeIssue[]> {
     const content = fs.readFileSync(filePath, 'utf-8');
     const lines = content.split('\n');
-    const issues: CommentedCodeIssue[] = [];
+    return [
+      ...this.scanSingleLineComments(filePath, lines),
+      ...this.scanMultiLineComments(filePath, content),
+    ];
+  }
 
-    // 扫描单行注释
+  private scanSingleLineComments(filePath: string, lines: string[]): CommentedCodeIssue[] {
+    const issues: CommentedCodeIssue[] = [];
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const trimmed = line.trim();
 
-      // 跳过 JSDoc 注释
-      if (trimmed.startsWith('/**') || trimmed.startsWith('*')) {
+      if (this.shouldSkipSingleLineComment(trimmed)) {
         continue;
       }
 
-      // 检查是否是注释掉的代码
-      if (trimmed.startsWith('//')) {
-        const isCode = this.patterns.codePatterns.some(pattern => 
-          pattern.test(trimmed)
-        );
-
-        if (isCode) {
-          // 检查是否是连续的注释代码块
-          let endLine = i;
-          while (endLine + 1 < lines.length && 
-                 lines[endLine + 1].trim().startsWith('//')) {
-            endLine++;
-          }
-
-          issues.push({
-            file: filePath,
-            line: i + 1,
-            content: lines.slice(i, endLine + 1).join('\n'),
-            type: 'single-line',
-            linesCount: endLine - i + 1,
-          });
-
-          i = endLine; // 跳过已处理的行
-        }
-      }
-    }
-
-    // 扫描多行注释中的代码
-    const multiLineMatches = content.matchAll(this.patterns.multiLineCode);
-    for (const match of multiLineMatches) {
-      const beforeMatch = content.substring(0, match.index);
-      const lineNumber = beforeMatch.split('\n').length;
-
-      // 排除 JSDoc 注释
-      if (!match[0].includes('/**') && !match[0].includes('@param')) {
-        issues.push({
-          file: filePath,
-          line: lineNumber,
-          content: match[0],
-          type: 'multi-line',
-          linesCount: match[0].split('\n').length,
-        });
+      if (this.isCommentedCodeLine(trimmed)) {
+        const endLine = this.findSingleLineCommentBlockEnd(lines, i);
+        issues.push(this.createSingleLineIssue(filePath, lines, i, endLine));
+        i = endLine; // 跳过已处理的行
       }
     }
 
     return issues;
+  }
+
+  private shouldSkipSingleLineComment(trimmed: string): boolean {
+    return trimmed.startsWith('/**') || trimmed.startsWith('*');
+  }
+
+  private isCommentedCodeLine(trimmed: string): boolean {
+    return trimmed.startsWith('//') &&
+      this.patterns.codePatterns.some(pattern => pattern.test(trimmed));
+  }
+
+  private findSingleLineCommentBlockEnd(lines: string[], startLine: number): number {
+    let endLine = startLine;
+    while (endLine + 1 < lines.length && lines[endLine + 1].trim().startsWith('//')) {
+      endLine++;
+    }
+    return endLine;
+  }
+
+  private createSingleLineIssue(
+    filePath: string,
+    lines: string[],
+    startLine: number,
+    endLine: number
+  ): CommentedCodeIssue {
+    return {
+      file: filePath,
+      line: startLine + 1,
+      content: lines.slice(startLine, endLine + 1).join('\n'),
+      type: 'single-line',
+      linesCount: endLine - startLine + 1,
+    };
+  }
+
+  private scanMultiLineComments(filePath: string, content: string): CommentedCodeIssue[] {
+    const issues: CommentedCodeIssue[] = [];
+    const multiLineMatches = content.matchAll(this.patterns.multiLineCode);
+    for (const match of multiLineMatches) {
+      if (this.isDocumentationComment(match[0])) {
+        continue;
+      }
+
+      issues.push(this.createMultiLineIssue(filePath, content, match));
+    }
+
+    return issues;
+  }
+
+  private isDocumentationComment(comment: string): boolean {
+    return comment.includes('/**') || comment.includes('@param');
+  }
+
+  private createMultiLineIssue(
+    filePath: string,
+    content: string,
+    match: RegExpMatchArray
+  ): CommentedCodeIssue {
+    const beforeMatch = content.substring(0, match.index ?? 0);
+
+    return {
+      file: filePath,
+      line: beforeMatch.split('\n').length,
+      content: match[0],
+      type: 'multi-line',
+      linesCount: match[0].split('\n').length,
+    };
   }
 
   generateReport(result: ScanResult): string {

@@ -28,6 +28,30 @@ interface ScanResult {
   issues: ComplexityIssue[];
 }
 
+interface JavaScriptFunctionState {
+  name: string;
+  startLine: number;
+  braceCount: number;
+  hasBodyStarted: boolean;
+}
+
+const COMPLEXITY_NODE_KINDS = new Set<ts.SyntaxKind>([
+  ts.SyntaxKind.IfStatement,
+  ts.SyntaxKind.ConditionalExpression,
+  ts.SyntaxKind.ForStatement,
+  ts.SyntaxKind.ForInStatement,
+  ts.SyntaxKind.ForOfStatement,
+  ts.SyntaxKind.WhileStatement,
+  ts.SyntaxKind.DoStatement,
+  ts.SyntaxKind.CaseClause,
+  ts.SyntaxKind.CatchClause,
+]);
+
+const LOGICAL_OPERATOR_KINDS = new Set<ts.SyntaxKind>([
+  ts.SyntaxKind.AmpersandAmpersandToken,
+  ts.SyntaxKind.BarBarToken,
+]);
+
 class ComplexityAnalyzer {
   private readonly maxLines = 100;
   private readonly maxComplexity = 10;
@@ -163,60 +187,49 @@ class ComplexityAnalyzer {
   }
 
   private getFunctionName(node: ts.FunctionLikeDeclaration): string {
+    if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
+      return this.getAssignedFunctionName(node);
+    }
     if (ts.isFunctionDeclaration(node) && node.name) {
       return node.name.text;
     }
     if (ts.isMethodDeclaration(node) && node.name) {
       return ts.isIdentifier(node.name) ? node.name.text : '<computed>';
     }
-    if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
-      // 尝试从父节点获取名称
-      const parent = node.parent;
-      if (ts.isVariableDeclaration(parent) && ts.isIdentifier(parent.name)) {
-        return parent.name.text;
-      }
-      if (ts.isPropertyAssignment(parent) && ts.isIdentifier(parent.name)) {
-        return parent.name.text;
-      }
-      return '<anonymous>';
-    }
     return '<unknown>';
+  }
+
+  private getAssignedFunctionName(node: ts.ArrowFunction | ts.FunctionExpression): string {
+    const parent = node.parent;
+    if (ts.isVariableDeclaration(parent) && ts.isIdentifier(parent.name)) {
+      return parent.name.text;
+    }
+    if (ts.isPropertyAssignment(parent) && ts.isIdentifier(parent.name)) {
+      return parent.name.text;
+    }
+    return '<anonymous>';
   }
 
   private calculateComplexity(node: ts.Node): number {
     let complexity = 1; // 基础复杂度
 
     const visit = (n: ts.Node) => {
-      // 增加复杂度的语句
-      if (
-        ts.isIfStatement(n) ||
-        ts.isConditionalExpression(n) ||
-        ts.isForStatement(n) ||
-        ts.isForInStatement(n) ||
-        ts.isForOfStatement(n) ||
-        ts.isWhileStatement(n) ||
-        ts.isDoStatement(n) ||
-        ts.isCaseClause(n) ||
-        ts.isCatchClause(n)
-      ) {
+      if (this.addsCyclomaticComplexity(n)) {
         complexity++;
       }
-
-      // 逻辑运算符
-      if (ts.isBinaryExpression(n)) {
-        if (
-          n.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken ||
-          n.operatorToken.kind === ts.SyntaxKind.BarBarToken
-        ) {
-          complexity++;
-        }
-      }
-
       ts.forEachChild(n, visit);
     };
 
     visit(node);
     return complexity;
+  }
+
+  private addsCyclomaticComplexity(node: ts.Node): boolean {
+    return COMPLEXITY_NODE_KINDS.has(node.kind) || this.isLogicalBinaryExpression(node);
+  }
+
+  private isLogicalBinaryExpression(node: ts.Node): boolean {
+    return ts.isBinaryExpression(node) && LOGICAL_OPERATOR_KINDS.has(node.operatorToken.kind);
   }
 
   private analyzeJavaScriptFile(
@@ -229,61 +242,84 @@ class ComplexityAnalyzer {
 
     // 简单的函数检测
     const functionPattern = /^\s*(function\s+(\w+)|const\s+(\w+)\s*=\s*(?:async\s+)?\(|(\w+)\s*:\s*(?:async\s+)?function)/;
-    
-    let currentFunction: {
-      name: string;
-      startLine: number;
-      braceCount: number;
-      hasBodyStarted: boolean;
-    } | null = null;
+    let currentFunction: JavaScriptFunctionState | null = null;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
       if (!currentFunction) {
-        const match = functionPattern.exec(line);
-        if (match) {
+        currentFunction = this.detectJavaScriptFunctionStart(line, i, functionPattern);
+        if (currentFunction) {
           totalFunctions++;
-          const name = match[2] || match[3] || match[4] || '<anonymous>';
-          currentFunction = {
-            name,
-            startLine: i,
-            braceCount: 0,
-            hasBodyStarted: false,
-          };
         }
       }
 
-      if (currentFunction) {
-        // 计算大括号
-        const openBraces = (line.match(/{/g) || []).length;
-        const closeBraces = (line.match(/}/g) || []).length;
-        if (openBraces > 0) {
-          currentFunction.hasBodyStarted = true;
-        }
-        currentFunction.braceCount += openBraces - closeBraces;
-
-        // 函数结束
-        if (currentFunction.hasBodyStarted && currentFunction.braceCount === 0) {
-          const linesCount = i - currentFunction.startLine + 1;
-          
-          if (linesCount > this.maxLines) {
-            issues.push({
-              file: filePath,
-              functionName: currentFunction.name,
-              line: currentFunction.startLine + 1,
-              linesCount,
-              cyclomaticComplexity: 0, // JS 文件不计算复杂度
-              issueType: 'long-function',
-            });
-          }
-
-          currentFunction = null;
-        }
+      if (!currentFunction) {
+        continue;
       }
+
+      this.updateJavaScriptFunctionState(currentFunction, line);
+      if (!this.isJavaScriptFunctionComplete(currentFunction)) {
+        continue;
+      }
+
+      const issue = this.createLongJavaScriptFunctionIssue(currentFunction, i, filePath);
+      if (issue) {
+        issues.push(issue);
+      }
+      currentFunction = null;
     }
 
     return { issues, totalFunctions };
+  }
+
+  private detectJavaScriptFunctionStart(
+    line: string,
+    lineIndex: number,
+    functionPattern: RegExp
+  ): JavaScriptFunctionState | null {
+    const match = functionPattern.exec(line);
+    if (!match) {
+      return null;
+    }
+
+    return {
+      name: match[2] || match[3] || match[4] || '<anonymous>',
+      startLine: lineIndex,
+      braceCount: 0,
+      hasBodyStarted: false,
+    };
+  }
+
+  private updateJavaScriptFunctionState(state: JavaScriptFunctionState, line: string): void {
+    const openBraces = (line.match(/{/g) || []).length;
+    const closeBraces = (line.match(/}/g) || []).length;
+    state.hasBodyStarted ||= openBraces > 0;
+    state.braceCount += openBraces - closeBraces;
+  }
+
+  private isJavaScriptFunctionComplete(state: JavaScriptFunctionState): boolean {
+    return state.hasBodyStarted && state.braceCount === 0;
+  }
+
+  private createLongJavaScriptFunctionIssue(
+    state: JavaScriptFunctionState,
+    endLine: number,
+    filePath: string
+  ): ComplexityIssue | null {
+    const linesCount = endLine - state.startLine + 1;
+    if (linesCount <= this.maxLines) {
+      return null;
+    }
+
+    return {
+      file: filePath,
+      functionName: state.name,
+      line: state.startLine + 1,
+      linesCount,
+      cyclomaticComplexity: 0,
+      issueType: 'long-function',
+    };
   }
 
   generateReport(result: ScanResult): string {

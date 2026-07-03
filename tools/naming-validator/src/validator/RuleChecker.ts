@@ -4,10 +4,11 @@
  */
 
 import type { 
+  HTMLElement as ParsedHTMLElement,
   ValidationIssue, 
+  ValidationResult,
   ValidatorConfig, 
-  NamingCategory,
-  Severity 
+  NamingCategory
 } from '../types/index.js';
 import { NamingRuleEngine } from '../naming-rules/NamingRuleEngine.js';
 import { HTMLParser } from '../parsers/HTMLParser.js';
@@ -38,74 +39,81 @@ export class RuleChecker {
       const elements = await parser.parse(filePath);
 
       for (const element of elements) {
-        // 检查ID
-        if (element.id && this.config.rules['html-id']) {
-          const result = this.ruleEngine.validate(element.id, 'html-id');
-          if (!result.isValid) {
-            issues.push({
-              type: 'html-id',
-              severity: this.config.severity['html-id'],
-              filePath,
-              line: element.location.line,
-              column: element.location.column,
-              currentValue: element.id,
-              suggestedValue: result.suggestion || '',
-              ruleName: result.ruleName,
-              message: result.message,
-            });
-          }
-        }
-
-        // 检查CSS类
-        if (this.config.rules['css-class']) {
-          for (const className of element.classes) {
-            // 跳过Tailwind CSS工具类（通常包含特殊字符或数字）
-            if (this.isTailwindClass(className)) {
-              continue;
-            }
-
-            const result = this.ruleEngine.validate(className, 'css-class');
-            if (!result.isValid) {
-              issues.push({
-                type: 'css-class',
-                severity: this.config.severity['css-class'],
-                filePath,
-                line: element.location.line,
-                column: element.location.column,
-                currentValue: className,
-                suggestedValue: result.suggestion || '',
-                ruleName: result.ruleName,
-                message: result.message,
-              });
-            }
-          }
-        }
-
-        // 检查data属性
-        if (this.config.rules['data-attr']) {
-          for (const [attrName, attrValue] of element.dataAttributes) {
-            const result = this.ruleEngine.validate(attrName, 'data-attr');
-            if (!result.isValid) {
-              issues.push({
-                type: 'data-attr',
-                severity: this.config.severity['data-attr'],
-                filePath,
-                line: element.location.line,
-                column: element.location.column,
-                currentValue: attrName,
-                suggestedValue: result.suggestion || '',
-                ruleName: result.ruleName,
-                message: result.message,
-              });
-            }
-          }
-        }
+        issues.push(...this.checkHtmlElement(element, filePath));
       }
     } catch (error) {
       console.error(`解析HTML文件失败: ${filePath}`, error);
     }
 
     return issues;
+  }
+
+  private checkHtmlElement(element: ParsedHTMLElement, filePath: string): ValidationIssue[] {
+    return [
+      ...this.checkHtmlId(element, filePath),
+      ...this.checkHtmlClasses(element, filePath),
+      ...this.checkHtmlDataAttributes(element, filePath),
+    ];
+  }
+
+  private checkHtmlId(element: ParsedHTMLElement, filePath: string): ValidationIssue[] {
+    if (!element.id || !this.config.rules['html-id']) {
+      return [];
+    }
+
+    return this.validateHtmlValue(element.id, 'html-id', element, filePath);
+  }
+
+  private checkHtmlClasses(element: ParsedHTMLElement, filePath: string): ValidationIssue[] {
+    if (!this.config.rules['css-class']) {
+      return [];
+    }
+
+    return element.classes
+      .filter(className => !this.isTailwindClass(className))
+      .flatMap(className => this.validateHtmlValue(className, 'css-class', element, filePath));
+  }
+
+  private checkHtmlDataAttributes(
+    element: ParsedHTMLElement,
+    filePath: string
+  ): ValidationIssue[] {
+    if (!this.config.rules['data-attr']) {
+      return [];
+    }
+
+    return Array.from(element.dataAttributes.keys())
+      .flatMap(attrName => this.validateHtmlValue(attrName, 'data-attr', element, filePath));
+  }
+
+  private validateHtmlValue(
+    value: string,
+    type: NamingCategory,
+    element: ParsedHTMLElement,
+    filePath: string
+  ): ValidationIssue[] {
+    const result = this.ruleEngine.validate(value, type);
+    return result.isValid ? [] : [this.createIssue(type, filePath, element, value, result)];
+  }
+
+  private createIssue(
+    type: NamingCategory,
+    filePath: string,
+    element: ParsedHTMLElement,
+    currentValue: string,
+    result: ValidationResult
+  ): ValidationIssue {
+    return {
+      type,
+      severity: this.config.severity[type],
+      filePath,
+      line: element.location.line,
+      column: element.location.column,
+      currentValue,
+      suggestedValue: result.suggestion || '',
+      ruleName: result.ruleName,
+      message: result.message,
+    };
   }
 
   /**

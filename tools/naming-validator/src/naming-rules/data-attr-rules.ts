@@ -41,6 +41,21 @@ export const DATA_ATTR_PREFIXES = {
   id: 'data-id',
 } as const;
 
+const DATA_ATTR_KEYWORD_PREFIXES = [
+  {
+    prefix: 'data-action-',
+    keywords: ['submit', 'click', 'toggle', 'open', 'close', 'load', 'save', 'delete', 'update', 'create'],
+  },
+  {
+    prefix: 'data-state-',
+    keywords: ['active', 'loading', 'expanded', 'collapsed', 'selected', 'disabled', 'visible', 'hidden'],
+  },
+  {
+    prefix: 'data-config-',
+    keywords: ['theme', 'max', 'min', 'timeout', 'interval', 'url', 'endpoint', 'api'],
+  },
+] as const;
+
 /**
  * data属性命名规则集合
  * 
@@ -283,62 +298,66 @@ export function generateDataAttrSuggestion(value: string): string {
     return value;
   }
 
-  // 基础转换：转为小写并替换非法字符
-  let suggestion = value
+  let suggestion = ensureDataAttrPrefix(normalizeDataAttrSuggestion(value));
+  suggestion = suggestion.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+
+  const name = suggestion.replace(/^data-/, '');
+  suggestion = applyKeywordDataAttrPrefixes(suggestion, name);
+
+  return applyIdDataAttrSuggestion(suggestion, name);
+}
+
+function normalizeDataAttrSuggestion(value: string): string {
+  return value
     .toLowerCase()
     .replace(/[^a-z0-9-_]/g, '-')
     .replace(/_{1,}/g, '-')
     .replace(/-{2,}/g, '-')
     .replace(/^[-]+|[-]+$/g, '');
+}
 
-  // 如果不以data-开头，添加data-前缀
-  if (!suggestion.startsWith('data-')) {
-    suggestion = `data-${suggestion}`;
-  }
+function ensureDataAttrPrefix(value: string): string {
+  return value.startsWith('data-') ? value : `data-${value}`;
+}
 
-  // 如果包含驼峰命名，转换为kebab-case
-  suggestion = suggestion.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+function applyKeywordDataAttrPrefixes(suggestion: string, name: string): string {
+  return DATA_ATTR_KEYWORD_PREFIXES.reduce(
+    (currentSuggestion, { prefix, keywords }) =>
+      shouldUseDataAttrPrefix(currentSuggestion, name, prefix, keywords)
+        ? `${prefix}${name}`
+        : currentSuggestion,
+    suggestion
+  );
+}
 
-  // 尝试识别属性类型并添加适当的前缀
-  const name = suggestion.replace(/^data-/, '');
-  
-  // 检查是否应该是action属性
-  const actionKeywords = ['submit', 'click', 'toggle', 'open', 'close', 'load', 'save', 'delete', 'update', 'create'];
-  if (actionKeywords.some(keyword => name.includes(keyword))) {
-    if (!suggestion.startsWith('data-action-')) {
-      suggestion = `data-action-${name}`;
-    }
-  }
-  
-  // 检查是否应该是state属性
-  const stateKeywords = ['active', 'loading', 'expanded', 'collapsed', 'selected', 'disabled', 'visible', 'hidden'];
-  if (stateKeywords.some(keyword => name.includes(keyword))) {
-    if (!suggestion.startsWith('data-state-')) {
-      suggestion = `data-state-${name}`;
-    }
-  }
-  
-  // 检查是否应该是config属性
-  const configKeywords = ['theme', 'max', 'min', 'timeout', 'interval', 'url', 'endpoint', 'api'];
-  if (configKeywords.some(keyword => name.includes(keyword))) {
-    if (!suggestion.startsWith('data-config-')) {
-      suggestion = `data-config-${name}`;
-    }
-  }
-  
-  // 检查是否应该是id属性
-  if (name.endsWith('id') || name === 'id') {
-    if (!suggestion.match(/^data-([a-z]+(-[a-z]+)*-)?id$/)) {
-      if (name === 'id') {
-        suggestion = 'data-id';
-      } else {
-        const entityName = name.replace(/-?id$/, '');
-        suggestion = entityName ? `data-${entityName}-id` : 'data-id';
-      }
-    }
+function shouldUseDataAttrPrefix(
+  suggestion: string,
+  name: string,
+  prefix: string,
+  keywords: readonly string[]
+): boolean {
+  return !suggestion.startsWith(prefix) && keywords.some(keyword => name.includes(keyword));
+}
+
+function applyIdDataAttrSuggestion(suggestion: string, name: string): string {
+  if (!isIdLikeDataAttrName(name) || isValidIdDataAttrSuggestion(suggestion)) {
+    return suggestion;
   }
 
-  return suggestion;
+  if (name === 'id') {
+    return 'data-id';
+  }
+
+  const entityName = name.replace(/-?id$/, '');
+  return entityName ? `data-${entityName}-id` : 'data-id';
+}
+
+function isIdLikeDataAttrName(name: string): boolean {
+  return name.endsWith('id') || name === 'id';
+}
+
+function isValidIdDataAttrSuggestion(suggestion: string): boolean {
+  return /^data-([a-z]+(-[a-z]+)*-)?id$/.test(suggestion);
 }
 
 /**
