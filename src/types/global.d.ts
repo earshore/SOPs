@@ -232,6 +232,8 @@ export interface RouteMeta {
   title?: string;
   requiresAuth?: boolean;
   permissions?: string[];
+  featureFlag?: string;
+  featureFlagDefault?: boolean;
   [key: string]: unknown;
 }
 

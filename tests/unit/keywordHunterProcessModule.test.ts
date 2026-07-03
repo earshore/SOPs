@@ -605,3 +605,40 @@ it('saves display state and removes floating DOM on unmount', async () => {
   expect(document.querySelector('#kt-keywords-floating')).toBeNull();
   expect(document.querySelector('#kt-keywords-minimized')).toBeNull();
 });
+
+it('keeps a translated snapshot selected after visiting the process page', async () => {
+  const translatedParagraphs = [
+    {
+      original: 'Wireless earbuds are travel earbuds.',
+      translation: '无线耳机是旅行耳机。',
+    },
+    {
+      original: 'Waterproof shell keeps them safe.',
+      translation: '防水外壳提供保护。',
+    },
+  ];
+  Object.assign(processMocks.state.keywordTracker, {
+    processedCopy: 'Wireless earbuds are travel earbuds.\n\nWaterproof shell keeps them safe.',
+    copyInputText: 'Wireless earbuds are travel earbuds.\n\nWaterproof shell keeps them safe.',
+    matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
+    unmatchedKeywords: ['waterproof shell'],
+    paragraphs: translatedParagraphs,
+    translationMode: true,
+    showTranslation: true,
+    currentSnapshotId: 'kh-translated',
+  });
+
+  await mountProcess();
+  expect(document.querySelector('#kt-copy-display .sentence-translation')?.textContent).toBe(
+    '无线耳机是旅行耳机。'
+  );
+
+  unmount();
+
+  expect(processMocks.state.keywordTracker.currentSnapshotId).toBe('kh-translated');
+  expect(processMocks.state.keywordTracker.translationMode).toBe(true);
+  expect(processMocks.state.keywordTracker.paragraphs).toEqual(translatedParagraphs);
+  expect(processMocks.state.keywordTracker.processedCopy).toBe(
+    'Wireless earbuds are travel earbuds.\n\nWaterproof shell keeps them safe.'
+  );
+});

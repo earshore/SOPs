@@ -7,6 +7,7 @@
 import type { Route, RouteGuard, GuardResult } from './types';
 
 import { container } from '@/common/di/Container';
+import { featureFlagService } from '@/services/featureFlagService';
 
 function denyGuard(reason: string): GuardResult {
   return {
@@ -30,6 +31,15 @@ function denyAuthAccess(message: string, reason: string): GuardResult {
     allow: false,
     redirect: '/home',
     reason,
+  };
+}
+
+function denyFeatureAccess(flagName: string): GuardResult {
+  showGuardToast('功能暂未开放');
+  return {
+    allow: false,
+    redirect: '/home',
+    reason: `feature_disabled:${flagName}`,
   };
 }
 
@@ -124,6 +134,14 @@ export const authGuard: RouteGuard = {
   priority: 3,
 
   async check(to: Route, _from: Route | null): Promise<GuardResult> {
+    const featureFlag = to.config?.meta?.featureFlag;
+    if (typeof featureFlag === 'string' && featureFlag.length > 0) {
+      const defaultEnabled = to.config.meta?.featureFlagDefault === true;
+      if (!featureFlagService.isEnabled(featureFlag, defaultEnabled)) {
+        return denyFeatureAccess(featureFlag);
+      }
+    }
+
     // 如果路由不需要认证，直接通过
     if (!to.config?.meta?.requiresAuth) {
       return true;

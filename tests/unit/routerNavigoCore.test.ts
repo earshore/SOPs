@@ -46,6 +46,9 @@ const mocks = vi.hoisted(() => ({
   container: {
     has: vi.fn(),
   },
+  featureFlagService: {
+    isEnabled: vi.fn(),
+  },
 }));
 
 vi.mock('@/services/analyticsService', () => ({
@@ -58,6 +61,10 @@ vi.mock('@/common/utils/LoadingManager', () => ({
 
 vi.mock('@/common/di/Container', () => ({
   container: mocks.container,
+}));
+
+vi.mock('@/services/featureFlagService', () => ({
+  featureFlagService: mocks.featureFlagService,
 }));
 
 function route(path = '/orders', config: Partial<Route['config']> = {}): Route {
@@ -130,6 +137,18 @@ function menuConfig(overrides: Partial<MenuConfig> = {}): MenuConfig {
   };
 }
 
+function setupGuardTest(): void {
+  vi.clearAllMocks();
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  (window as Window & { showToast?: unknown }).showToast = vi.fn();
+  mocks.featureFlagService.isEnabled.mockReturnValue(true);
+}
+
+function cleanupGuardTest(): void {
+  delete (window as Window & { showToast?: unknown }).showToast;
+  vi.restoreAllMocks();
+}
+
 describe('RouterStore', () => {
   it('tracks current, previous, navigation, errors, and bounded history', () => {
     const store = createRouterStore(false, 2);
@@ -151,7 +170,7 @@ describe('RouterStore', () => {
       isNavigating: true,
       error,
     });
-    expect(store.getState().history.map((item) => item.path)).toEqual(['/second', '/third']);
+    expect(store.getState().history.map(item => item.path)).toEqual(['/second', '/third']);
 
     store.getState().clearHistory();
     expect(store.getState().history).toEqual([]);
@@ -209,16 +228,18 @@ describe('RouteConfigConverter', () => {
   });
 
   it('reports conversion errors for routes pointing at missing modules', () => {
-    const result = convertMenuConfig(menuConfig({
-      routes: {
-        broken: {
-          moduleId: 'missing',
-          label: 'Broken',
-          icon: 'x',
-          panelId: 'panel-broken',
+    const result = convertMenuConfig(
+      menuConfig({
+        routes: {
+          broken: {
+            moduleId: 'missing',
+            label: 'Broken',
+            icon: 'x',
+            panelId: 'panel-broken',
+          },
         },
-      },
-    }));
+      })
+    );
 
     expect(result.stats).toMatchObject({ total: 1, success: 0, failed: 1 });
     expect(result.errors[0]).toMatchObject({
@@ -228,21 +249,23 @@ describe('RouteConfigConverter', () => {
   });
 
   it('preserves declared route meta while applying defaults', () => {
-    const result = convertMenuConfig(menuConfig({
-      routes: {
-        playground: {
-          moduleId: 'app_center',
-          label: 'Deep Chat',
-          icon: 'comments',
-          panelId: 'panel-app',
-          meta: {
-            requiresAuth: true,
-            permissions: ['app_center.playground'],
-            accessPolicy: 'permission_required',
+    const result = convertMenuConfig(
+      menuConfig({
+        routes: {
+          playground: {
+            moduleId: 'app_center',
+            label: 'Deep Chat',
+            icon: 'comments',
+            panelId: 'panel-app',
+            meta: {
+              requiresAuth: true,
+              permissions: ['app_center.playground'],
+              accessPolicy: 'permission_required',
+            },
           },
         },
-      },
-    }));
+      })
+    );
 
     expect(result.routes.playground?.meta).toEqual({
       requiresAuth: true,
@@ -252,25 +275,29 @@ describe('RouteConfigConverter', () => {
       keepAlive: false,
     });
   });
+});
 
+describe('RouteConfigConverter validation', () => {
   it('validates converted route configs and exposes factory helpers', () => {
     const converter = createConverter({ enableLogging: true });
     const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-    expect(converter.validate({
-      valid: {
-        moduleId: 'app',
-        label: 'Valid',
-        icon: 'ok',
-        panelId: 'panel',
-      },
-      invalid: {
-        moduleId: '',
-        label: '',
-        icon: '',
-        panelId: '',
-      },
-    })).toEqual({
+    expect(
+      converter.validate({
+        valid: {
+          moduleId: 'app',
+          label: 'Valid',
+          icon: 'ok',
+          panelId: 'panel',
+        },
+        invalid: {
+          moduleId: '',
+          label: '',
+          icon: '',
+          panelId: '',
+        },
+      })
+    ).toEqual({
       valid: false,
       errors: [
         'invalid: missing moduleId',
@@ -282,7 +309,10 @@ describe('RouteConfigConverter', () => {
 
     converter.convert(menuConfig());
 
-    expect(consoleLog).toHaveBeenCalledWith('[RouteConfigConverter]', expect.stringContaining('Converted route'));
+    expect(consoleLog).toHaveBeenCalledWith(
+      '[RouteConfigConverter]',
+      expect.stringContaining('Converted route')
+    );
   });
 });
 
@@ -309,7 +339,10 @@ describe('builtin middlewares', () => {
     await createLoggingMiddleware(true)(context(), next);
     await createAnalyticsMiddleware()(context(route('/orders')), next);
     await createLoadingMiddleware()(context(route('/orders')), next);
-    await createTitleMiddleware('SOPS')(context(route('/orders', { meta: { title: 'Orders' } })), next);
+    await createTitleMiddleware('SOPS')(
+      context(route('/orders', { meta: { title: 'Orders' } })),
+      next
+    );
 
     expect(next).toHaveBeenCalledTimes(4);
     expect(analyticsService.trackPageView).toHaveBeenCalledWith('/orders', 'Orders');
@@ -356,21 +389,15 @@ describe('builtin middlewares', () => {
   });
 });
 
-describe('builtin guards', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-    (window as Window & { showToast?: unknown }).showToast = vi.fn();
-  });
-
-  afterEach(() => {
-    delete (window as Window & { showToast?: unknown }).showToast;
-    vi.restoreAllMocks();
-  });
+describe('builtin guards metadata and dependencies', () => {
+  beforeEach(setupGuardTest);
+  afterEach(cleanupGuardTest);
 
   it('validates route metadata completeness', async () => {
     await expect(metaValidationGuard.check(route('/valid'), null)).resolves.toBe(true);
-    await expect(metaValidationGuard.check(route('/missing', { panelId: '' }), null)).resolves.toEqual({
+    await expect(
+      metaValidationGuard.check(route('/missing', { panelId: '' }), null)
+    ).resolves.toEqual({
       allow: false,
       reason: 'incomplete_route_config',
     });
@@ -379,43 +406,126 @@ describe('builtin guards', () => {
   it('checks declared dependencies through the container', async () => {
     vi.mocked(container.has).mockImplementation((name: string) => name === 'logger');
 
-    await expect(dependencyGuard.check(route('/ok', {
-      meta: { dependencies: ['logger'] },
-    }), null)).resolves.toBe(true);
-    await expect(dependencyGuard.check(route('/missing', {
-      meta: { dependencies: ['logger', 'analytics'] },
-    }), null)).resolves.toEqual({
+    await expect(
+      dependencyGuard.check(
+        route('/ok', {
+          meta: { dependencies: ['logger'] },
+        }),
+        null
+      )
+    ).resolves.toBe(true);
+    await expect(
+      dependencyGuard.check(
+        route('/missing', {
+          meta: { dependencies: ['logger', 'analytics'] },
+        }),
+        null
+      )
+    ).resolves.toEqual({
       allow: false,
       redirect: '/home',
       reason: 'missing_dependencies: analytics',
     });
   });
+});
+
+describe('builtin guards auth and feature flags', () => {
+  beforeEach(setupGuardTest);
+  afterEach(cleanupGuardTest);
 
   it('allows authenticated routes in the current no-auth implementation', async () => {
-    await expect(authGuard.check(route('/secure', {
-      meta: { requiresAuth: true, permissions: ['admin'] },
-    }), null)).resolves.toBe(true);
+    await expect(
+      authGuard.check(
+        route('/secure', {
+          meta: { requiresAuth: true, permissions: ['admin'] },
+        }),
+        null
+      )
+    ).resolves.toBe(true);
   });
+
+  it('checks feature flags before applying the current no-auth policy', async () => {
+    await expect(
+      authGuard.check(
+        route('/playground', {
+          meta: {
+            requiresAuth: false,
+            featureFlag: 'playground.deepChat',
+            featureFlagDefault: true,
+          },
+        }),
+        null
+      )
+    ).resolves.toBe(true);
+
+    expect(mocks.featureFlagService.isEnabled).toHaveBeenCalledWith('playground.deepChat', true);
+  });
+
+  it('rejects routes when the declared feature flag is disabled', async () => {
+    mocks.featureFlagService.isEnabled.mockReturnValue(false);
+
+    await expect(
+      authGuard.check(
+        route('/playground', {
+          meta: {
+            requiresAuth: false,
+            featureFlag: 'playground.deepChat',
+            featureFlagDefault: true,
+          },
+        }),
+        null
+      )
+    ).resolves.toEqual({
+      allow: false,
+      redirect: '/home',
+      reason: 'feature_disabled:playground.deepChat',
+    });
+    expect(
+      (window as Window & { showToast: ReturnType<typeof vi.fn> }).showToast
+    ).toHaveBeenCalledWith('功能暂未开放', { type: 'warning' });
+  });
+});
+
+describe('builtin guards data preload', () => {
+  beforeEach(setupGuardTest);
+  afterEach(cleanupGuardTest);
 
   it('handles route data preload success, optional failure, and required failure', async () => {
     await expect(dataPreloadGuard.check(route('/none'), null)).resolves.toBe(true);
-    await expect(dataPreloadGuard.check(route('/ok', {
-      meta: { preload: vi.fn().mockResolvedValue(undefined) },
-    }), null)).resolves.toBe(true);
-    await expect(dataPreloadGuard.check(route('/optional', {
-      meta: { preload: vi.fn().mockRejectedValue(new Error('skip')), preloadRequired: false },
-    }), null)).resolves.toBe(true);
-    await expect(dataPreloadGuard.check(route('/required', {
-      meta: { preload: vi.fn().mockRejectedValue(new Error('stop')) },
-    }), null)).resolves.toEqual({
+    await expect(
+      dataPreloadGuard.check(
+        route('/ok', {
+          meta: { preload: vi.fn().mockResolvedValue(undefined) },
+        }),
+        null
+      )
+    ).resolves.toBe(true);
+    await expect(
+      dataPreloadGuard.check(
+        route('/optional', {
+          meta: { preload: vi.fn().mockRejectedValue(new Error('skip')), preloadRequired: false },
+        }),
+        null
+      )
+    ).resolves.toBe(true);
+    await expect(
+      dataPreloadGuard.check(
+        route('/required', {
+          meta: { preload: vi.fn().mockRejectedValue(new Error('stop')) },
+        }),
+        null
+      )
+    ).resolves.toEqual({
       allow: false,
       redirect: '/home',
       reason: 'preload_failed',
     });
   });
+});
 
+describe('builtin guards exports', () => {
   it('exports guards in priority order', () => {
-    expect(builtinGuardList.map((guard) => guard.name)).toEqual([
+    expect(builtinGuardList.map(guard => guard.name)).toEqual([
       'metaValidation',
       'dependency',
       'auth',
@@ -426,7 +536,9 @@ describe('builtin guards', () => {
 
 describe('router type guards and errors', () => {
   it('identifies route ids, route configs, guard results, and router errors', () => {
-    const error = new RouterError(RouterErrorCode.ROUTE_NOT_FOUND, 'missing route', { path: '/missing' });
+    const error = new RouterError(RouterErrorCode.ROUTE_NOT_FOUND, 'missing route', {
+      path: '/missing',
+    });
 
     expect(isValidRouteId('home')).toBe(true);
     expect(isValidRouteId('')).toBe(false);

@@ -222,16 +222,20 @@ async function restoreLatestProcessSnapshotIfNeeded(): Promise<void> {
 function getProcessCopyTextFromDisplay(): string {
   const tracker = ensureKeywordTrackerState();
   if (tracker.translationMode && tracker.paragraphs.length > 0) {
-    return tracker.paragraphs
-      .map(paragraph =>
-        typeof paragraph === 'object' && 'original' in paragraph ? paragraph.original : paragraph
-      )
-      .filter(text => text && text.trim())
-      .join('\n');
+    return tracker.processedCopy || getOriginalTextFromTranslationParagraphs(tracker);
   }
 
   const displayEl = document.getElementById('kt-copy-display');
   return displayEl ? displayEl.innerText : '';
+}
+
+function getOriginalTextFromTranslationParagraphs(tracker: KeywordTrackerStoreState): string {
+  return tracker.paragraphs
+    .map(paragraph =>
+      typeof paragraph === 'object' && 'original' in paragraph ? paragraph.original : paragraph
+    )
+    .filter(text => text && text.trim())
+    .join('\n');
 }
 
 function saveProcessCopyText(copyText: string): void {

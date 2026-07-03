@@ -99,6 +99,8 @@ const ROUTE_META_FIELD_VALIDATORS: readonly FieldValidator<Partial<RouteMeta>>[]
   ['title', value => isOptionalType(value, 'string')],
   ['requiresAuth', value => isOptionalType(value, 'boolean')],
   ['permissions', isOptionalStringArray],
+  ['featureFlag', value => isOptionalType(value, 'string')],
+  ['featureFlagDefault', value => isOptionalType(value, 'boolean')],
   ['preload', value => isOptionalType(value, 'function')],
   ['preloadRequired', value => isOptionalType(value, 'boolean')],
   ['dependencies', isOptionalStringArray],

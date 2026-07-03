@@ -346,12 +346,25 @@ const PERFORMANCE_BASELINE = {
         return;
       }
       
+      const siteButton = page.locator('button.site-btn').filter({ hasText: 'DE' }).first();
+      const asinTextarea = page.locator('#scraper-asin-input');
+      const clearInputButton = page.locator('.manual-input-card .clear-btn').filter({ hasText: '清空' }).first();
+
+      if (!(await siteButton.isVisible())) {
+        await page.locator('.config-header').click();
+      }
+
+      await expect(siteButton).toBeVisible();
+      await expect(asinTextarea).toBeVisible();
+
       // 执行多次操作
       for (let i = 0; i < 10; i++) {
-        await scraper.selectSite('DE');
-        await scraper.fillAsins('B08N5WRWNW\nB09XBHXKKL');
-        await scraper.clearAsins();
-        await scraper.selectSite('DE');
+        await siteButton.click();
+        await asinTextarea.fill('B08N5WRWNW\nB09XBHXKKL');
+        await expect(asinTextarea).toHaveValue('B08N5WRWNW\nB09XBHXKKL');
+        await clearInputButton.click();
+        await expect(asinTextarea).toHaveValue('');
+        await siteButton.click();
       }
       
       // 第二次测量

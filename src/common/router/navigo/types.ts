@@ -39,6 +39,10 @@ export interface RouteMeta {
   requiresAuth?: boolean;
   /** 所需权限列表 */
   permissions?: string[];
+  /** 功能开关名称 */
+  featureFlag?: string;
+  /** 未配置功能开关时的默认状态 */
+  featureFlagDefault?: boolean;
   /** 数据预加载函数 */
   preload?: () => Promise<void>;
   /** 预加载是否必需（失败时是否阻止导航） */

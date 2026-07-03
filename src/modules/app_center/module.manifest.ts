@@ -44,6 +44,8 @@ export const appCenterManifest = defineModuleManifest({
       meta: {
         requiresAuth: false,
         accessPolicy: 'product_allowed_without_auth',
+        featureFlag: 'playground.deepChat',
+        featureFlagDefault: true,
       },
     },
     {
