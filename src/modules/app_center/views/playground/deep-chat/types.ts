@@ -89,6 +89,7 @@ export interface PlaygroundLLMCallContext {
   config: LLMProviderConfig;
   model: string;
   signals: DeepChatSignals;
+  sourceChat: DeepChatElement | null;
   controller: AbortController;
   pendingRequest: PendingPlaygroundRequest;
 }

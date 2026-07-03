@@ -79,8 +79,14 @@ afterEach(() => {
       'sops'
     );
     expect(container.textContent).toContain(MENU_CONFIG.modules.sops.title);
-    expect(container.querySelector('#overview-search-input')).not.toBeNull();
-    expect(container.querySelector('.category-filter-btn[data-category="all"]')).not.toBeNull();
+    expect(container.querySelector('#overview-search-input')?.getAttribute('aria-label')).toBe(
+      '搜索功能模块'
+    );
+    expect(
+      container
+        .querySelector('.category-filter-btn[data-category="all"]')
+        ?.getAttribute('aria-pressed')
+    ).toBe('true');
     expect(container.querySelector(`[data-tab="${route.id}"]`)).not.toBeNull();
     expect(container.textContent).toContain('功能模块');
 
@@ -128,9 +134,14 @@ afterEach(() => {
     const secondFilter = container.querySelector<HTMLButtonElement>(
       `.category-filter-btn[data-category="${second.category}"]`
     );
+    const allFilter = container.querySelector<HTMLButtonElement>(
+      '.category-filter-btn[data-category="all"]'
+    );
 
     expect(firstCard).not.toBeNull();
     expect(secondCard).not.toBeNull();
+    expect(allFilter?.getAttribute('aria-pressed')).toBe('true');
+    expect(secondFilter?.getAttribute('aria-pressed')).toBe('false');
 
     search!.value = first.label;
     search!.dispatchEvent(new Event('input', { bubbles: true }));
@@ -139,10 +150,14 @@ afterEach(() => {
 
     secondFilter!.click();
     expect(secondFilter!.classList.contains('active')).toBe(true);
+    expect(secondFilter!.getAttribute('aria-pressed')).toBe('true');
+    expect(allFilter!.getAttribute('aria-pressed')).toBe('false');
     expect(firstCard!.style.display).toBe('none');
     expect(secondCard!.style.display).toBe('');
 
-    container.querySelector<HTMLButtonElement>('.category-filter-btn[data-category="all"]')!.click();
+    allFilter!.click();
+    expect(allFilter!.getAttribute('aria-pressed')).toBe('true');
+    expect(secondFilter!.getAttribute('aria-pressed')).toBe('false');
     expect(firstCard!.style.display).toBe('');
     expect(secondCard!.style.display).toBe('');
   });

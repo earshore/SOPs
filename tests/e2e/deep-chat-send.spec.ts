@@ -1,3 +1,4 @@
+import { createServer, type ServerResponse } from 'node:http';
 import { expect, test, type Page } from '@playwright/test';
 
 const DEEP_CHAT_ROUTE = '/#/app-center/playground/deep-chat';
@@ -10,6 +11,16 @@ const GENERATED_PROMPT_ID = 'deep-chat-generated-prompt-send-test';
 const GENERATED_PROMPT_MARKER = 'PLAYWRIGHT_GENERATED_PROMPT_LONG_DRAFT';
 const GENERATED_PROMPT_REPLY = 'Prompt 生成链路发送正常';
 const GENERATED_PROMPT = createLongGeneratedPrompt();
+
+type ControlledLLMStream = {
+  endpoint: string;
+  firstChunk: string;
+  firstChunkWritten: Promise<void>;
+  release: () => void;
+  reply: string;
+  secondChunk: string;
+  close: () => Promise<void>;
+};
 
 function createLongGeneratedPrompt(): string {
   const intro = [
@@ -35,7 +46,11 @@ function createLongGeneratedPrompt(): string {
   return prompt;
 }
 
-async function seedMockProviderStorage(page: Page, promptDraft?: string): Promise<void> {
+async function seedMockProviderStorage(
+  page: Page,
+  promptDraft?: string,
+  endpoint = MOCK_ENDPOINT
+): Promise<void> {
   await page.addInitScript(
     ({ endpoint, model, promptDraft, provider }) => {
       window.localStorage.clear();
@@ -77,8 +92,105 @@ async function seedMockProviderStorage(page: Page, promptDraft?: string): Promis
         );
       }
     },
-    { endpoint: MOCK_ENDPOINT, model: MOCK_MODEL, promptDraft, provider: MOCK_PROVIDER }
+    { endpoint, model: MOCK_MODEL, promptDraft, provider: MOCK_PROVIDER }
   );
+}
+
+function createLongStreamChunk(): string {
+  return Array.from({ length: 80 }, (_, index) => `segment-${index.toString().padStart(2, '0')} `)
+    .join('')
+    .trimEnd();
+}
+
+function writeOpenAIStreamChunk(response: ServerResponse, chunk: string): void {
+  response.write(`data: ${JSON.stringify({ choices: [{ delta: { content: chunk } }] })}\n\n`);
+}
+
+async function startControlledLLMStream(): Promise<ControlledLLMStream> {
+  const firstChunk = 'First ';
+  const secondChunk = createLongStreamChunk();
+  const reply = `${firstChunk}${secondChunk}`;
+  let markFirstChunkWritten = (): void => {};
+  const firstChunkWritten = new Promise<void>(resolve => {
+    markFirstChunkWritten = resolve;
+  });
+  let releaseSecondChunk = (): void => {};
+  const releasePromise = new Promise<void>(resolve => {
+    releaseSecondChunk = resolve;
+  });
+  let released = false;
+  const release = (): void => {
+    if (released) {
+      return;
+    }
+    released = true;
+    releaseSecondChunk();
+  };
+  const corsHeaders = {
+    'Access-Control-Allow-Headers': 'authorization, content-type',
+    'Access-Control-Allow-Methods': 'OPTIONS, POST',
+    'Access-Control-Allow-Origin': '*',
+  };
+  const server = createServer(async (request, response) => {
+    if (request.method === 'OPTIONS') {
+      response.writeHead(204, corsHeaders);
+      response.end();
+      return;
+    }
+
+    if (request.method !== 'POST' || request.url !== '/chat/completions') {
+      response.writeHead(404, corsHeaders);
+      response.end();
+      return;
+    }
+
+    response.writeHead(200, {
+      ...corsHeaders,
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'Content-Type': 'text/event-stream; charset=utf-8',
+    });
+    writeOpenAIStreamChunk(response, firstChunk);
+    markFirstChunkWritten();
+    await releasePromise;
+    writeOpenAIStreamChunk(response, secondChunk);
+    response.write('data: [DONE]\n\n');
+    response.end();
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      server.off('error', reject);
+      resolve();
+    });
+  });
+
+  const address = server.address();
+  if (!address || typeof address === 'string') {
+    throw new Error('Controlled LLM stream server did not expose a TCP port');
+  }
+
+  return {
+    endpoint: `http://127.0.0.1:${address.port}`,
+    firstChunk,
+    firstChunkWritten,
+    release,
+    reply,
+    secondChunk,
+    close: async () => {
+      release();
+      await new Promise<void>((resolve, reject) => {
+        server.close(error => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve();
+        });
+      });
+    },
+  };
 }
 
 async function mockLLMStream(page: Page, chunks: string[]): Promise<void> {
@@ -86,9 +198,13 @@ async function mockLLMStream(page: Page, chunks: string[]): Promise<void> {
     await route.fulfill({
       status: 200,
       headers: { 'content-type': 'text/event-stream; charset=utf-8' },
-      body: [...chunks.map(chunk => `data: ${JSON.stringify({ choices: [{ delta: { content: chunk } }] })}`), 'data: [DONE]', ''].join(
-        '\n\n'
-      ),
+      body: [
+        ...chunks.map(
+          chunk => `data: ${JSON.stringify({ choices: [{ delta: { content: chunk } }] })}`
+        ),
+        'data: [DONE]',
+        '',
+      ].join('\n\n'),
     });
   });
 }
@@ -121,9 +237,11 @@ async function openDeepChatAndRefreshMockConfig(page: Page): Promise<void> {
     Boolean((window as Window & { SecureStorage?: unknown }).SecureStorage)
   );
   await page.evaluate(async provider => {
-    const secureStorage = (window as Window & {
-      SecureStorage?: { setSecure: (key: string, value: unknown) => Promise<boolean> };
-    }).SecureStorage;
+    const secureStorage = (
+      window as Window & {
+        SecureStorage?: { setSecure: (key: string, value: unknown) => Promise<boolean> };
+      }
+    ).SecureStorage;
     if (!secureStorage) {
       throw new Error('SecureStorage is not available');
     }
@@ -161,6 +279,50 @@ test('Deep Chat sends a message and renders the assistant response', async ({ pa
   await expect(page.locator('#playground-chat')).toContainText(ASSISTANT_REPLY, {
     timeout: 10000,
   });
+});
+
+test('continues typewriter output after switching away and back during a stream', async ({
+  page,
+}) => {
+  const stream = await startControlledLLMStream();
+  await seedMockProviderStorage(page, undefined, stream.endpoint);
+
+  try {
+    await openDeepChatAndRefreshMockConfig(page);
+
+    const chatInput = page.locator('#playground-chat #text-input');
+    await expect(chatInput).toBeVisible();
+    await chatInput.fill('Keep typing while I switch pages');
+    await chatInput.press('Enter');
+    await stream.firstChunkWritten;
+
+    const chat = page.locator('#playground-chat');
+    await expect(chat).toContainText('First', { timeout: 10000 });
+
+    await page.evaluate(() => {
+      window.location.hash = '#/app-center';
+    });
+    await expect(page.locator('#playground-chat')).toHaveCount(0);
+
+    await page.evaluate(() => {
+      window.location.hash = '#/app-center/playground/deep-chat';
+    });
+    const remountedChat = page.locator('#playground-chat');
+    await expect(remountedChat).toBeVisible();
+    await expect(remountedChat).toContainText('First', { timeout: 10000 });
+    await expect(remountedChat).not.toContainText(stream.reply);
+
+    stream.release();
+
+    await expect(remountedChat).toContainText(
+      `${stream.firstChunk}${stream.secondChunk.slice(0, 24)}`,
+      { timeout: 10000 }
+    );
+    await expect(remountedChat).not.toContainText(stream.reply, { timeout: 100 });
+    await expect(remountedChat).toContainText(stream.reply, { timeout: 10000 });
+  } finally {
+    await stream.close();
+  }
 });
 
 test('uses a generated Prompt draft and sends it with the raised budget', async ({ page }) => {
@@ -214,7 +376,9 @@ test('renders a visible error when the model stream returns no content', async (
   );
 });
 
-test('turns the send button into a stop button and aborts the active response', async ({ page }) => {
+test('turns the send button into a stop button and aborts the active response', async ({
+  page,
+}) => {
   await seedMockProviderStorage(page);
   const { releaseHeldRequest, requestStarted } = await holdLLMRequest(page);
   await openDeepChatAndRefreshMockConfig(page);

@@ -93,6 +93,11 @@ describe('current UI notifications and utilities', () => {
     const container = getEl('toast-container');
     const toast = container?.querySelector('.toast');
     expect(toast).not.toBeNull();
+    expect(container?.getAttribute('role')).toBe('status');
+    expect(container?.getAttribute('aria-live')).toBe('polite');
+    expect(toast?.getAttribute('role')).toBe('status');
+    expect(toast?.getAttribute('aria-live')).toBe('polite');
+    expect(toast?.getAttribute('aria-atomic')).toBe('true');
     expect(toast?.className).toContain('toast-success');
     expect(toast?.querySelector('i')?.className).toContain('fa-circle-check');
     expect(toast?.textContent).toContain('Saved');
@@ -114,13 +119,19 @@ describe('current UI notifications and utilities', () => {
 
     showProgress(true, 120);
     expect(getEl('global-progress')?.classList.contains('hidden')).toBe(false);
+    expect(getEl('global-progress')?.getAttribute('role')).toBe('progressbar');
+    expect(getEl('global-progress')?.getAttribute('aria-valuenow')).toBe('100');
+    expect(getEl('global-progress')?.getAttribute('aria-hidden')).toBe('false');
     expect((getEl('progress-fill') as HTMLElement).style.width).toBe('100%');
 
     showProgress(true, -10);
+    expect(getEl('global-progress')?.getAttribute('aria-valuenow')).toBe('0');
     expect((getEl('progress-fill') as HTMLElement).style.width).toBe('0%');
 
     showProgress(false);
     expect(getEl('global-progress')?.classList.contains('hidden')).toBe(true);
+    expect(getEl('global-progress')?.getAttribute('aria-hidden')).toBe('true');
+    expect(getEl('global-progress')?.getAttribute('aria-valuenow')).toBe('0');
     expect((getEl('progress-fill') as HTMLElement).style.width).toBe('0%');
   });
 

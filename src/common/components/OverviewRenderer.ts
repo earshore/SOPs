@@ -250,6 +250,8 @@ export class OverviewRenderer {
         <button 
           class="category-filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
           data-category="all"
+          type="button"
+          aria-pressed="true"
         >
           <i class="fas fa-th mr-2"></i>全部
         </button>
@@ -259,6 +261,8 @@ export class OverviewRenderer {
           <button 
             class="category-filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
             data-category="${cat.id}"
+            type="button"
+            aria-pressed="false"
           >
             <i class="${cat.icon} mr-2"></i>${cat.label}
           </button>
@@ -537,8 +541,12 @@ export class OverviewRenderer {
       const filterBtns = this.container.querySelectorAll('.category-filter-btn');
       filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          filterBtns.forEach(b => b.classList.remove('active'));
+          filterBtns.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-pressed', 'false');
+          });
           btn.classList.add('active');
+          btn.setAttribute('aria-pressed', 'true');
           this._handleFilter((btn as HTMLElement).dataset.category || 'all');
         });
       });

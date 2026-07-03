@@ -244,8 +244,9 @@
         </div>
 
         <!-- Global Progress Bar -->
-        <div id="global-progress" class="progress-bar hidden">
-            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+        <div id="global-progress" class="progress-bar hidden" role="progressbar" aria-label="页面加载进度"
+            aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-hidden="true">
+            <div id="progress-fill" class="progress-fill" style="width: 0%" aria-hidden="true"></div>
         </div>
     </header>
 
@@ -269,7 +270,7 @@
     </div>
 
     <!-- ========== Toast Container ========== -->
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container" role="status" aria-live="polite" aria-atomic="false"></div>
 
     <!-- ========== Modal Container ========== -->
     <div id="modal-container"></div>
@@ -277,7 +278,8 @@
     <!-- ========== User Guide Container ========== -->
 
     <!-- ========== Global Loading Overlay ========== -->
-    <div id="global-loading" class="global-loading hidden">
+    <div id="global-loading" class="global-loading hidden" role="status" aria-live="polite" aria-atomic="true"
+        aria-busy="false" aria-hidden="true">
         <div class="loading-card">
             <!-- Spinner -->
             <div class="loading-spinner">

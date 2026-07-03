@@ -150,6 +150,11 @@ export class LoadingManager {
    */
   setGlobalLoadingElement(element: HTMLElement): void {
     this.globalLoadingElement = element;
+    element.setAttribute('role', 'status');
+    element.setAttribute('aria-live', 'polite');
+    element.setAttribute('aria-atomic', 'true');
+    element.setAttribute('aria-busy', this.isLoading ? 'true' : 'false');
+    element.setAttribute('aria-hidden', this.isLoading ? 'false' : 'true');
   }
 
   /**
@@ -163,6 +168,8 @@ export class LoadingManager {
       // 显示Loading
       this.globalLoadingElement.classList.remove('hidden');
       this.globalLoadingElement.classList.add('flex');
+      this.globalLoadingElement.setAttribute('aria-busy', 'true');
+      this.globalLoadingElement.setAttribute('aria-hidden', 'false');
 
       // 更新消息
       const messageEl = this.globalLoadingElement.querySelector('[data-loading-message]');
@@ -173,6 +180,8 @@ export class LoadingManager {
       // 隐藏Loading
       this.globalLoadingElement.classList.add('hidden');
       this.globalLoadingElement.classList.remove('flex');
+      this.globalLoadingElement.setAttribute('aria-busy', 'false');
+      this.globalLoadingElement.setAttribute('aria-hidden', 'true');
     }
   }
 

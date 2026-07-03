@@ -34,8 +34,15 @@ export function showToast(title: string, options: ToastOptions = {}): void {
   const container = getEl('toast-container');
   if (!container) return;
 
+  container.setAttribute('role', 'status');
+  container.setAttribute('aria-live', 'polite');
+  container.setAttribute('aria-atomic', 'false');
+
   const toast = document.createElement('div');
   toast.className = `toast toast-${type} toast-slide-in`;
+  toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+  toast.setAttribute('aria-atomic', 'true');
 
   const iconMap: Record<ToastType, string> = {
     success: 'fa-circle-check',
@@ -83,11 +90,21 @@ export function showProgress(show: boolean, percent: number = 0): void {
 
   if (!bar || !fill) return;
 
+  const clampedPercent = Math.min(100, Math.max(0, percent));
+  bar.setAttribute('role', 'progressbar');
+  bar.setAttribute('aria-label', bar.getAttribute('aria-label') || '页面加载进度');
+  bar.setAttribute('aria-valuemin', '0');
+  bar.setAttribute('aria-valuemax', '100');
+
   if (show) {
     bar.classList.remove('hidden');
-    (fill as HTMLElement).style.width = `${Math.min(100, Math.max(0, percent))}%`;
+    bar.setAttribute('aria-hidden', 'false');
+    bar.setAttribute('aria-valuenow', String(clampedPercent));
+    (fill as HTMLElement).style.width = `${clampedPercent}%`;
   } else {
     bar.classList.add('hidden');
+    bar.setAttribute('aria-hidden', 'true');
+    bar.setAttribute('aria-valuenow', '0');
     (fill as HTMLElement).style.width = '0%';
   }
 }

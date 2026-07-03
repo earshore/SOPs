@@ -6,13 +6,27 @@ type TestModalElement = HTMLElement & {
   close: () => void;
 };
 
-function createModal(): TestModalElement {
+function createModal(title?: string): TestModalElement {
   if (!customElements.get('app-modal')) {
     customElements.define('app-modal', AppModal);
   }
 
   const modal = document.createElement('app-modal') as TestModalElement;
   modal.setAttribute('no-header', '');
+  if (title) {
+    modal.setAttribute('title', title);
+  }
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function createHeaderModal(title = '设置'): TestModalElement {
+  if (!customElements.get('app-modal')) {
+    customElements.define('app-modal', AppModal);
+  }
+
+  const modal = document.createElement('app-modal') as TestModalElement;
+  modal.setAttribute('title', title);
   document.body.appendChild(modal);
   return modal;
 }
@@ -33,6 +47,12 @@ function getCloseButton(modal: TestModalElement): HTMLButtonElement {
   const button = modal.shadowRoot?.querySelector('.btn-close');
   expect(button).toBeInstanceOf(HTMLButtonElement);
   return button as HTMLButtonElement;
+}
+
+function getModalPanel(modal: TestModalElement): HTMLElement {
+  const panel = modal.shadowRoot?.querySelector('.modal-panel');
+  expect(panel).toBeInstanceOf(HTMLElement);
+  return panel as HTMLElement;
 }
 
 describe('AppModal regression', () => {
@@ -126,5 +146,43 @@ describe('AppModal regression', () => {
 
     expect(container.classList.contains('hidden')).toBe(true);
     expect(container.hasAttribute('hidden')).toBe(true);
+  });
+
+  it('labels header and no-header dialogs for assistive technologies', () => {
+    const headerModal = createHeaderModal('系统设置');
+    const headerPanel = getModalPanel(headerModal);
+    const title = headerModal.shadowRoot?.querySelector('.modal-title');
+
+    expect(headerPanel.getAttribute('role')).toBe('dialog');
+    expect(headerPanel.getAttribute('aria-modal')).toBe('true');
+    expect(headerPanel.getAttribute('tabindex')).toBe('-1');
+    expect(title?.id).toBe('app-modal-title');
+    expect(headerPanel.getAttribute('aria-labelledby')).toBe('app-modal-title');
+
+    const noHeaderModal = createModal('快速预览');
+    const noHeaderPanel = getModalPanel(noHeaderModal);
+
+    expect(noHeaderPanel.getAttribute('role')).toBe('dialog');
+    expect(noHeaderPanel.getAttribute('aria-modal')).toBe('true');
+    expect(noHeaderPanel.getAttribute('aria-label')).toBe('快速预览');
+  });
+
+  it('moves focus into the modal and restores the opener focus after close', () => {
+    vi.useFakeTimers();
+    const opener = document.createElement('button');
+    opener.textContent = 'Open';
+    document.body.appendChild(opener);
+    opener.focus();
+
+    const modal = createHeaderModal('焦点测试');
+    const closeButton = getCloseButton(modal);
+
+    modal.open();
+    expect(modal.shadowRoot?.activeElement).toBe(closeButton);
+
+    modal.close();
+    vi.advanceTimersByTime(350);
+
+    expect(document.activeElement).toBe(opener);
   });
 });

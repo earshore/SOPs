@@ -733,6 +733,7 @@ async function handlePlaygroundRequest(
       config,
       model,
       signals,
+      sourceChat: getChat(container),
       controller: requestController,
       pendingRequest,
     });
@@ -991,7 +992,7 @@ function abortAllPendingRequests(reason: PlaygroundPendingAbortReason): void {
 }
 
 async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<string> {
-  const { messages, config, model, signals, controller, pendingRequest } = context;
+  const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
   let streamedText = '';
   const finalText = await callLLM(
     messages,
@@ -1012,7 +1013,7 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
         streamedText += update.delta;
         if (update.delta) {
           appendPendingAssistantText(pendingRequest, update.delta);
-          void emitPendingAssistantDelta(signals, pendingRequest, update.delta);
+          void emitPendingAssistantDelta(signals, pendingRequest, sourceChat, update.delta);
         }
       },
     }
@@ -1024,7 +1025,7 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
 
   if (!streamedText && finalText) {
     appendPendingAssistantText(pendingRequest, finalText);
-    await emitPendingAssistantDelta(signals, pendingRequest, finalText);
+    await emitPendingAssistantDelta(signals, pendingRequest, sourceChat, finalText);
   }
 
   const assistantText = (finalText || streamedText).trim();
@@ -1676,16 +1677,27 @@ function getPendingStatusText(pendingRequest: PendingPlaygroundRequest): string 
 async function emitPendingAssistantDelta(
   signals: DeepChatSignals,
   pendingRequest: PendingPlaygroundRequest,
+  sourceChat: DeepChatElement | null,
   delta: string
 ): Promise<void> {
   const previousDisplayedLength = pendingRequest.assistantText.length - delta.length;
   const delivered = await emitDeepChatResponse(signals, { text: delta });
-  if (delivered && pendingRequest.displayedAssistantText.length === previousDisplayedLength) {
+  const deliveredToMountedChat =
+    delivered && isCurrentResponseTarget(pendingRequest.threadId, sourceChat);
+  if (
+    deliveredToMountedChat &&
+    pendingRequest.displayedAssistantText.length === previousDisplayedLength
+  ) {
     markPendingPlaygroundAssistantTextDisplayed(pendingRequest, pendingRequest.assistantText);
     return;
   }
 
   schedulePendingAssistantDisplay(pendingRequest.threadId);
+}
+
+function isCurrentResponseTarget(threadId: string, sourceChat: DeepChatElement | null): boolean {
+  const container = getRenderContainerForThread(threadId);
+  return Boolean(container && sourceChat && getChat(container) === sourceChat);
 }
 
 async function emitDeepChatResponse(

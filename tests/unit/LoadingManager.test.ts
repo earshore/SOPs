@@ -235,6 +235,12 @@ import { LoadingManager } from '@/common/utils/LoadingManager';
       const element = document.createElement('div');
       manager.setGlobalLoadingElement(element);
 
+      expect(element.getAttribute('role')).toBe('status');
+      expect(element.getAttribute('aria-live')).toBe('polite');
+      expect(element.getAttribute('aria-atomic')).toBe('true');
+      expect(element.getAttribute('aria-busy')).toBe('false');
+      expect(element.getAttribute('aria-hidden')).toBe('true');
+
       // 不应该抛出错误
       expect(() => {
         manager.start('task1');
@@ -250,6 +256,8 @@ import { LoadingManager } from '@/common/utils/LoadingManager';
 
       expect(element.classList.contains('hidden')).toBe(false);
       expect(element.classList.contains('flex')).toBe(true);
+      expect(element.getAttribute('aria-busy')).toBe('true');
+      expect(element.getAttribute('aria-hidden')).toBe('false');
     });
 
     it('应该在停止任务时隐藏Loading', () => {
@@ -261,6 +269,8 @@ import { LoadingManager } from '@/common/utils/LoadingManager';
 
       expect(element.classList.contains('hidden')).toBe(true);
       expect(element.classList.contains('flex')).toBe(false);
+      expect(element.getAttribute('aria-busy')).toBe('false');
+      expect(element.getAttribute('aria-hidden')).toBe('true');
     });
 
     it('应该更新Loading消息', () => {
