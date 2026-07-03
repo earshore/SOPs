@@ -234,8 +234,8 @@ test('turns the send button into a stop button and aborts the active response', 
     );
   });
 
-  const stopButton = page.locator('#playground-chat .input-button.inside-end');
-  await expect(stopButton).toHaveAttribute('aria-label', '停止生成');
+  const stopButton = page.locator('#playground-stop-generation');
+  await expect(stopButton).toHaveAttribute('data-thread-id', /.+/);
   await expect(stopButton).toBeVisible();
   await stopButton.click();
   releaseHeldRequest();
@@ -244,4 +244,7 @@ test('turns the send button into a stop button and aborts the active response', 
     timeout: 10000,
   });
   await expect(page.locator('#playground-pending-status')).toBeHidden();
+  await expect(page.locator('#playground-thread-list .playground-thread-meta')).not.toContainText(
+    '生成中 ·'
+  );
 });
