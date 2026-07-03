@@ -94,7 +94,7 @@ export abstract class BasePage {
    */
   async navigate(path: string = '', options?: { waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' }): Promise<void> {
     const url = path.startsWith('http') ? path : `${this.baseUrl}${path}`;
-    await this.page.goto(url, options);
+    await this.page.goto(url, { waitUntil: 'domcontentloaded', ...options });
     await this.waitForPageLoad();
   }
 

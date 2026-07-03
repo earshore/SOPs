@@ -1,5 +1,5 @@
-@import './style.hero.css';
-@import './style.layout.css';
-@import './style.import.css';
-@import './style.settings.css';
-@import './style.results.css';
+@import './styles/style.hero.css';
+@import './styles/style.layout.css';
+@import './styles/style.import.css';
+@import './styles/style.settings.css';
+@import './styles/style.results.css';

@@ -2,20 +2,20 @@ import { configCenter } from '@/common/config/ConfigCenter';
 import { ValidationError } from '@common/errors/AppError';
 import { callLLM } from '@/services/llmService';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
-import { buildPpcAgentMessages } from '../agentPrompt';
-import { ensureCompleteDecisions, parsePpcLlmDecisions } from '../agentResponse';
+import { buildPpcAgentMessages } from '../agents/agentPrompt';
+import { ensureCompleteDecisions, parsePpcLlmDecisions } from '../agents/agentResponse';
 import {
   countPpcAgentModelCandidateRows,
   PPC_AGENT_MODEL_ROW_LIMIT,
   selectPpcAgentModelRows,
-} from '../agentSelection';
+} from '../agents/agentSelection';
 import type { AnalyzedRow } from '../types';
 import type {
   PpcAgentAnalysisResult,
   PpcAgentToolCall,
   PpcLlmAnalysisInput,
   PpcLlmDecision,
-} from '../agentTypes';
+} from '../agents/agentTypes';
 
 export type {
   PpcAgentAnalysisResult,
@@ -24,8 +24,8 @@ export type {
   PpcLlmAnalysisInput,
   PpcLlmAnalysisProgress,
   PpcLlmDecision,
-} from '../agentTypes';
-export { selectPpcAgentModelRows } from '../agentSelection';
+} from '../agents/agentTypes';
+export { selectPpcAgentModelRows } from '../agents/agentSelection';
 
 interface LLMConfig {
   provider: string;

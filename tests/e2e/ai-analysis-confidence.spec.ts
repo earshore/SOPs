@@ -65,7 +65,10 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       await aiAnalysis.waitForAnalysisComplete();
 
       // 验证：置信度图标存在
-      const icon = page.locator('.w-10.h-10.rounded-lg svg');
+      const icon = page
+        .getByText('总体置信度', { exact: true })
+        .locator('xpath=ancestor::div[@role="status"][1]')
+        .locator('i.fa-chart-line');
       await expect(icon.first()).toBeVisible();
 
       console.log('✅ 置信度图标显示正常');
@@ -164,9 +167,9 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       await aiAnalysis.waitForAnalysisComplete();
 
       // 验证：至少有一个颜色指示器存在
-      const greenIndicator = page.locator('.bg-green-500\\/20');
-      const yellowIndicator = page.locator('.bg-yellow-500\\/20');
-      const orangeIndicator = page.locator('.bg-orange-500\\/20');
+      const greenIndicator = page.locator('.confidence-high-bg-alpha');
+      const yellowIndicator = page.locator('.confidence-medium-bg-alpha');
+      const orangeIndicator = page.locator('.confidence-low-bg-alpha');
 
       const hasIndicator =
         (await greenIndicator.count()) > 0 ||

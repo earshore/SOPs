@@ -271,6 +271,33 @@ function expectStoredAssistantMessage(
   );
 }
 
+async function mountAndStartStoppableRequest(callLLM: NonNullable<ImportOptions['callLLM']>) {
+  const container = document.createElement('main');
+  document.body.append(container);
+  const { mount, unmount, mocks } = await importDeepChat({ callLLM });
+
+  await mount(container);
+  const onClose = vi.fn();
+  const signals = {
+    onResponse: vi.fn(),
+    onClose,
+    stopClicked: { listener: vi.fn() },
+  };
+  const originalStopListener = signals.stopClicked.listener;
+
+  getChat(container).connect?.handler(
+    { messages: [{ role: 'user', text: 'Stop this request' }] },
+    signals
+  );
+
+  await vi.waitFor(() => {
+    expect(mocks.callLLM).toHaveBeenCalled();
+    expect(signals.stopClicked.listener).not.toBe(originalStopListener);
+  });
+
+  return { container, mocks, onClose, signals, unmount };
+}
+
 beforeAll(() => {
   if (!customElements.get('deep-chat')) {
     customElements.define('deep-chat', TestDeepChatElement);
@@ -428,10 +455,8 @@ describe('deep-chat playground successful requests', () => {
 
 describe('deep-chat playground request stopping', () => {
   it('binds the stop button to abort the active request and persist a stopped response', async () => {
-    const container = document.createElement('main');
-    document.body.append(container);
-    const { mount, unmount, mocks } = await importDeepChat({
-      callLLM: async (...args: unknown[]) => {
+    const { container, mocks, onClose, unmount } = await mountAndStartStoppableRequest(
+      async (...args: unknown[]) => {
         const callOptions = args[5] as { signal?: AbortSignal } | undefined;
         return new Promise<string>((_resolve, reject) => {
           callOptions?.signal?.addEventListener(
@@ -440,27 +465,8 @@ describe('deep-chat playground request stopping', () => {
             { once: true }
           );
         });
-      },
-    });
-
-    await mount(container);
-    const onClose = vi.fn();
-    const signals = {
-      onResponse: vi.fn(),
-      onClose,
-      stopClicked: { listener: vi.fn() },
-    };
-    const originalStopListener = signals.stopClicked.listener;
-
-    getChat(container).connect?.handler(
-      { messages: [{ role: 'user', text: 'Stop this request' }] },
-      signals
+      }
     );
-
-    await vi.waitFor(() => {
-      expect(mocks.callLLM).toHaveBeenCalled();
-      expect(signals.stopClicked.listener).not.toBe(originalStopListener);
-    });
 
     const stopButton = queryRequired<HTMLButtonElement>(container, '#playground-stop-generation');
     expect(stopButton.hidden).toBe(false);
@@ -491,37 +497,20 @@ describe('deep-chat playground request stopping', () => {
 
     unmount();
   });
+});
 
+describe('deep-chat playground request stopping after settled aborts', () => {
   it('persists a stopped response when an aborted request settles without throwing', async () => {
-    const container = document.createElement('main');
-    document.body.append(container);
-    const { mount, unmount, mocks } = await importDeepChat({
-      callLLM: async (...args: unknown[]) => {
+    const { mocks, onClose, signals, unmount } = await mountAndStartStoppableRequest(
+      async (...args: unknown[]) => {
         const callOptions = args[5] as { signal?: AbortSignal } | undefined;
         return new Promise<string>(resolve => {
           callOptions?.signal?.addEventListener('abort', () => resolve('Late response'), {
             once: true,
           });
         });
-      },
-    });
-
-    await mount(container);
-    const onClose = vi.fn();
-    const signals = {
-      onResponse: vi.fn(),
-      onClose,
-      stopClicked: { listener: vi.fn() },
-    };
-
-    getChat(container).connect?.handler(
-      { messages: [{ role: 'user', text: 'Stop this request' }] },
-      signals
+      }
     );
-
-    await vi.waitFor(() => {
-      expect(mocks.callLLM).toHaveBeenCalled();
-    });
 
     signals.stopClicked.listener();
 

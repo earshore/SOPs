@@ -125,14 +125,55 @@ function createSnapshotFingerprint(tracker: KeywordTrackerState): string {
   );
 }
 
+function createWorkflowFingerprintFromTracker(tracker: KeywordTrackerState): string {
+  return hashText(
+    JSON.stringify({
+      keywordsInputText: tracker.keywordsInputText || tracker.keywords.join('\n'),
+      copyInputText: getSnapshotCopyText(tracker),
+      processedCopy: tracker.processedCopy || tracker.copyInputText || '',
+      keywords: tracker.keywords,
+      settings: tracker.settings,
+    })
+  );
+}
+
+function createWorkflowFingerprintFromSnapshot(snapshot: KeywordHunterSnapshot): string {
+  return hashText(
+    JSON.stringify({
+      keywordsInputText: snapshot.input.keywordsInputText,
+      copyInputText: snapshot.input.copyInputText,
+      processedCopy: snapshot.result.processedCopy || snapshot.input.copyInputText || '',
+      keywords: snapshot.result.keywords,
+      settings: snapshot.input.settings,
+    })
+  );
+}
+
+function getMatchingWorkflowSnapshot(
+  tracker: KeywordTrackerState,
+  existing: KeywordHunterSnapshot[],
+  options: SaveSnapshotOptions
+): KeywordHunterSnapshot | undefined {
+  if (options.updateCurrent === false || options.title?.trim()) return undefined;
+
+  const trackerFingerprint = createWorkflowFingerprintFromTracker(tracker);
+  return existing.find(
+    snapshot => createWorkflowFingerprintFromSnapshot(snapshot) === trackerFingerprint
+  );
+}
+
 function getCurrentSnapshot(
   tracker: KeywordTrackerState,
   existing: KeywordHunterSnapshot[],
   options: SaveSnapshotOptions
 ): KeywordHunterSnapshot | undefined {
   if (options.updateCurrent === false) return undefined;
-  if (!tracker.currentSnapshotId) return undefined;
-  return existing.find(snapshot => snapshot.id === tracker.currentSnapshotId);
+  if (tracker.currentSnapshotId) {
+    const currentSnapshot = existing.find(snapshot => snapshot.id === tracker.currentSnapshotId);
+    if (currentSnapshot) return currentSnapshot;
+  }
+
+  return getMatchingWorkflowSnapshot(tracker, existing, options);
 }
 
 function getSnapshotTitle(

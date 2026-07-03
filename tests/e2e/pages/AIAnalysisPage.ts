@@ -19,6 +19,83 @@ const TARGET_ID_ALIASES: Record<string, string> = {
   '卖点结构拆解': 'selling-points',
 };
 
+function installDeterministicAnalysisMockInPage({
+  report,
+}: {
+  report: typeof E2E_AI_ANALYSIS_REPORT;
+}): void {
+  const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element;
+  const alpine = (window as Window & {
+    Alpine?: { $data?: (element: Element) => Record<string, any> };
+  }).Alpine;
+  const component = alpine?.$data?.(element);
+  const appStore = (window as Window & { appStore?: { getState: () => any } }).appStore;
+  const state = appStore?.getState?.();
+
+  if (!component || !state) {
+    throw new Error('AI Analysis component and appStore are required for deterministic mock');
+  }
+
+  component.runAnalysis = async function runDeterministicAnalysis(this: Record<string, any>) {
+    if (!hasSelection(this.selectedAsins) || !hasSelection(this.selectedTargets)) return;
+
+    this.analysisReport = null;
+    this.hasReport = false;
+    state.setAnalysisReport(null);
+    updateAnalysisProgress(this, state, true, 5, 'E2E fixture analysis started');
+    refreshReportView(this);
+
+    await new Promise(resolve => window.setTimeout(resolve, 250));
+
+    const deterministicReport = buildDeterministicReport(this, report);
+    this.analysisReport = deterministicReport;
+    this.hasReport = true;
+    state.setAnalysisReport(deterministicReport);
+    updateAnalysisProgress(this, state, true, 100, '分析完成');
+    refreshReportView(this);
+
+    updateAnalysisProgress(this, state, false, 100, '分析完成');
+    (window as Window & {
+      showToast?: (message: string, options?: { type?: string }) => void;
+    }).showToast?.('分析完成！', { type: 'success' });
+  };
+
+  function hasSelection(value: unknown): value is unknown[] {
+    return Array.isArray(value) && value.length > 0;
+  }
+
+  function updateAnalysisProgress(
+    target: Record<string, any>,
+    storeState: Record<string, any>,
+    isAnalyzing: boolean,
+    progress: number,
+    currentStep: string
+  ): void {
+    target.isAnalyzing = isAnalyzing;
+    target.progress = progress;
+    target.currentStep = currentStep;
+    storeState.updateAnalysis({ isAnalyzing, progress, currentStep });
+  }
+
+  function refreshReportView(target: Record<string, any>): void {
+    if (typeof target.refreshReportView === 'function') {
+      target.refreshReportView();
+    }
+  }
+
+  function buildDeterministicReport(target: Record<string, any>, baseReport: typeof report) {
+    return {
+      ...baseReport,
+      _metadata: {
+        ...baseReport._metadata,
+        targetIds: [...target.selectedTargets],
+        sourceAsins: [...target.selectedAsins],
+        analyzedAt: new Date().toISOString(),
+      },
+    };
+  }
+}
+
 /**
  * 分析目标类型
  */
@@ -205,6 +282,67 @@ export class AIAnalysisPage extends BasePage {
     );
   }
 
+  private async setSelectedAsins(asins: string[]): Promise<void> {
+    await this.page.evaluate(selectedAsins => {
+      const appStore = (window as Window & { appStore?: { getState: () => any } }).appStore;
+      const state = appStore?.getState?.();
+      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+      const alpine = (window as Window & {
+        Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+      }).Alpine;
+      const component = element && alpine?.$data ? alpine.$data(element) : null;
+
+      state?.setSelectedAsins?.([...selectedAsins]);
+      if (component) {
+        component.selectedAsins = [...selectedAsins];
+        if (typeof component.refreshReportView === 'function') {
+          component.refreshReportView();
+        }
+      }
+    }, asins);
+
+    await this.page.waitForFunction(
+      expected => {
+        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+        const alpine = (window as Window & {
+          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+        }).Alpine;
+        const data = element && alpine?.$data ? alpine.$data(element) : null;
+        return Array.isArray(data?.selectedAsins) && data.selectedAsins.length === expected;
+      },
+      asins.length
+    );
+  }
+
+  private async setSelectedTargets(targetIds: string[]): Promise<void> {
+    await this.page.evaluate(selectedTargets => {
+      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+      const alpine = (window as Window & {
+        Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+      }).Alpine;
+      const component = element && alpine?.$data ? alpine.$data(element) : null;
+
+      if (component) {
+        component.selectedTargets = [...selectedTargets];
+        if (typeof component.refreshReportView === 'function') {
+          component.refreshReportView();
+        }
+      }
+    }, targetIds);
+
+    await this.page.waitForFunction(
+      expected => {
+        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+        const alpine = (window as Window & {
+          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+        }).Alpine;
+        const data = element && alpine?.$data ? alpine.$data(element) : null;
+        return Array.isArray(data?.selectedTargets) && data.selectedTargets.length === expected;
+      },
+      targetIds.length
+    );
+  }
+
   async seedScraperFixture(): Promise<void> {
     await this.page.evaluate(
       ({ scrapedData, selectedAsins }) => {
@@ -284,77 +422,7 @@ export class AIAnalysisPage extends BasePage {
 
   async installDeterministicAnalysisMock(): Promise<void> {
     await this.page.evaluate(
-      ({ report }) => {
-        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
-        const alpine = (window as Window & {
-          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
-        }).Alpine;
-        const component = element && alpine?.$data ? alpine.$data(element) : null;
-        const appStore = (window as Window & { appStore?: { getState: () => any } }).appStore;
-        const state = appStore?.getState?.();
-
-        if (!component || !state) {
-          throw new Error('AI Analysis component and appStore are required for deterministic mock');
-        }
-
-        component.runAnalysis = async function runDeterministicAnalysis() {
-          if (!Array.isArray(this.selectedAsins) || this.selectedAsins.length === 0) return;
-          if (!Array.isArray(this.selectedTargets) || this.selectedTargets.length === 0) return;
-
-          this.isAnalyzing = true;
-          this.progress = 5;
-          this.currentStep = 'E2E fixture analysis started';
-          this.analysisReport = null;
-          this.hasReport = false;
-          state.setAnalysisReport(null);
-          state.updateAnalysis({
-            isAnalyzing: true,
-            progress: this.progress,
-            currentStep: this.currentStep,
-          });
-          if (typeof this.refreshReportView === 'function') {
-            this.refreshReportView();
-          }
-
-          await new Promise(resolve => window.setTimeout(resolve, 250));
-
-          const selectedTargets = [...this.selectedTargets];
-          const selectedAsins = [...this.selectedAsins];
-          const deterministicReport = {
-            ...report,
-            _metadata: {
-              ...report._metadata,
-              targetIds: selectedTargets,
-              sourceAsins: selectedAsins,
-              analyzedAt: new Date().toISOString(),
-            },
-          };
-
-          this.analysisReport = deterministicReport;
-          this.hasReport = true;
-          this.progress = 100;
-          this.currentStep = '分析完成';
-          state.setAnalysisReport(deterministicReport);
-          state.updateAnalysis({
-            isAnalyzing: true,
-            progress: this.progress,
-            currentStep: this.currentStep,
-          });
-          if (typeof this.refreshReportView === 'function') {
-            this.refreshReportView();
-          }
-
-          this.isAnalyzing = false;
-          state.updateAnalysis({
-            isAnalyzing: false,
-            progress: this.progress,
-            currentStep: this.currentStep,
-          });
-          (window as Window & {
-            showToast?: (message: string, options?: { type?: string }) => void;
-          }).showToast?.('分析完成！', { type: 'success' });
-        };
-      },
+      installDeterministicAnalysisMockInPage,
       { report: E2E_AI_ANALYSIS_REPORT }
     );
   }
@@ -416,7 +484,7 @@ export class AIAnalysisPage extends BasePage {
   async selectAsin(asin: string): Promise<void> {
     const selectedAsins = await this.getSelectedAsins();
     if (!selectedAsins.includes(asin)) {
-      await this.callAiAnalysisAction('toggleAsin', [asin]);
+      await this.setSelectedAsins([...selectedAsins, asin]);
     }
   }
 
@@ -428,7 +496,7 @@ export class AIAnalysisPage extends BasePage {
   async unselectAsin(asin: string): Promise<void> {
     const selectedAsins = await this.getSelectedAsins();
     if (selectedAsins.includes(asin)) {
-      await this.callAiAnalysisAction('toggleAsin', [asin]);
+      await this.setSelectedAsins(selectedAsins.filter(selectedAsin => selectedAsin !== asin));
     }
   }
 
@@ -448,14 +516,14 @@ export class AIAnalysisPage extends BasePage {
    * 全选 ASIN
    */
   async selectAllAsins(): Promise<void> {
-    await this.callAiAnalysisAction('selectAllAsins');
+    await this.setSelectedAsins(await this.getAvailableAsins());
   }
 
   /**
    * 清空 ASIN 选择
    */
   async clearAllAsins(): Promise<void> {
-    await this.callAiAnalysisAction('clearAllAsins');
+    await this.setSelectedAsins([]);
   }
 
   /**
@@ -510,7 +578,7 @@ export class AIAnalysisPage extends BasePage {
     const selectedTargets = await this.getAiAnalysisStateValue<string[]>('selectedTargets', []);
 
     if (!selectedTargets.includes(normalizedTargetId)) {
-      await this.callAiAnalysisAction('toggleTarget', [normalizedTargetId]);
+      await this.setSelectedTargets([...selectedTargets, normalizedTargetId]);
       return;
     }
   }
@@ -531,14 +599,15 @@ export class AIAnalysisPage extends BasePage {
    * 全选分析目标
    */
   async selectAllTargets(): Promise<void> {
-    await this.callAiAnalysisAction('selectAllTargets');
+    const targets = await this.getAiAnalysisStateValue<Array<{ id: string }>>('analysisTargets', []);
+    await this.setSelectedTargets(targets.map(target => target.id));
   }
 
   /**
    * 清空分析目标选择
    */
   async clearAllTargets(): Promise<void> {
-    await this.callAiAnalysisAction('clearAllTargets');
+    await this.setSelectedTargets([]);
   }
 
   /**
@@ -660,7 +729,22 @@ export class AIAnalysisPage extends BasePage {
    * 开始分析
    */
   async startAnalysis(): Promise<void> {
-    await this.page.getByRole('button', { name: /开始分析|重新分析/ }).click();
+    await this.page.waitForFunction(() => {
+      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
+      const alpine = (window as Window & {
+        Alpine?: { $data?: (element: Element) => Record<string, unknown> };
+      }).Alpine;
+      const data = element && alpine?.$data ? alpine.$data(element) : null;
+      return Boolean(data?.canRunAnalysis);
+    });
+
+    const button = this.page.getByRole('button', { name: /开始分析|重新分析/ });
+    if (this.useDeterministicFixture && !(await button.isEnabled())) {
+      await this.callAiAnalysisAction('runAnalysis');
+    } else {
+      await button.click();
+    }
+
     await this.page.waitForFunction(
       () => {
         const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
@@ -753,6 +837,9 @@ export class AIAnalysisPage extends BasePage {
   }
 
   async copyJson(): Promise<void> {
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.toast').forEach(toast => toast.remove());
+    });
     await this.page.locator('button[title="复制 JSON 格式报告"]').click();
   }
 

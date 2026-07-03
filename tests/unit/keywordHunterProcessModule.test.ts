@@ -74,6 +74,7 @@ const processMocks = vi.hoisted(() => {
     showToast: vi.fn(),
     getAllSnapshotsAsync: vi.fn(async () => []),
     restoreSnapshot: vi.fn(),
+    saveCurrentSnapshotAsync: vi.fn(async () => undefined),
     state,
   };
 });
@@ -123,6 +124,7 @@ vi.mock('@/modules/app_center/views/keyword_hunter/services/snapshotService', ()
   KeywordHunterSnapshotService: {
     getAllAsync: processMocks.getAllSnapshotsAsync,
     restore: processMocks.restoreSnapshot,
+    saveCurrentAsync: processMocks.saveCurrentSnapshotAsync,
   },
 }));
 
@@ -184,6 +186,7 @@ beforeEach(() => {
   resetTrackerState();
   processMocks.getAllSnapshotsAsync.mockResolvedValue([]);
   processMocks.restoreSnapshot.mockReturnValue(null);
+  processMocks.saveCurrentSnapshotAsync.mockResolvedValue(undefined);
   mockedStorage.get.mockReturnValue('openai');
   mockedStorage.getLLMConfigWithKey.mockResolvedValue({
     apiKey: 'test-key',
@@ -319,6 +322,8 @@ it('translates copy, renders translation mode, and hides progress after completi
       translation: '无线耳机翻译',
     },
   ]);
+  expect(processMocks.state.keywordTracker.showTranslation).toBe(true);
+  expect(processMocks.saveCurrentSnapshotAsync).toHaveBeenCalledWith();
   expect(document.querySelector<HTMLInputElement>('#kt-show-translation')?.checked).toBe(true);
   expect(document.querySelector('#kt-copy-display .sentence-translation')?.textContent).toBe(
     '无线耳机翻译'
@@ -371,6 +376,7 @@ it('keeps the pending translation state visible after leaving and returning', as
   expect(document.querySelector('#kt-copy-display .sentence-translation')?.textContent).toBe(
     '无线耳机翻译'
   );
+  expect(processMocks.saveCurrentSnapshotAsync).toHaveBeenCalledWith();
   expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('翻译已完成');
   expect(document.querySelector<HTMLElement>('#kt-translate-progress')?.style.width).toBe('100%');
 
@@ -418,6 +424,7 @@ it('ignores a pending translation run after the processed copy changes', async (
   expect(processMocks.state.keywordTracker.translationMode).toBe(false);
   expect(processMocks.state.keywordTracker.paragraphs).toEqual([]);
   expect(document.querySelector('#kt-copy-display')?.textContent).not.toContain('旧译文');
+  expect(processMocks.saveCurrentSnapshotAsync).not.toHaveBeenCalled();
 });
 
 it('handles translation failures without losing the enabled button state', async () => {
@@ -436,6 +443,35 @@ it('handles translation failures without losing the enabled button state', async
   expect(document.querySelector<HTMLButtonElement>('#kt-translate-btn')?.disabled).toBe(false);
   expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('AI 沉浸式翻译');
   expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(true);
+});
+
+it('keeps translated text visible when snapshot persistence fails', async () => {
+  processMocks.saveCurrentSnapshotAsync.mockRejectedValueOnce(new Error('IndexedDB 不可写'));
+  await mountProcess();
+
+  click(document.querySelector('#kt-translate-btn'));
+  await vi.waitFor(() => {
+    expect(document.querySelector('#kt-copy-display .sentence-translation')?.textContent).toBe(
+      '无线耳机翻译'
+    );
+  });
+
+  await vi.waitFor(() => {
+    expect(showToast).toHaveBeenCalledWith('译文已生成，但历史快照自动保存失败：IndexedDB 不可写', {
+      type: 'warning',
+    });
+  });
+  expect(processMocks.state.keywordTracker.paragraphs).toEqual([
+    {
+      original: 'Wireless earbuds are travel earbuds with long battery life.',
+      translation: '无线耳机翻译',
+    },
+  ]);
+  expect(ErrorService.handle).toHaveBeenCalledWith(expect.any(Error), {
+    action: 'saveTranslationSnapshot',
+    module: 'keywordTracker',
+    notify: false,
+  });
 });
 
 it('syncs original translation text back to input and toggles floating window state', async () => {

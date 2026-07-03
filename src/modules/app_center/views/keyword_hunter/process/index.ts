@@ -1070,8 +1070,26 @@ function finalizeTranslationSuccess(
   appStore.getState().updateKeywordTracker({
     paragraphs: pairs,
     translationMode: true,
+    showTranslation: true,
   });
+  void persistTranslationSnapshot();
   return pairs;
+}
+
+async function persistTranslationSnapshot(): Promise<void> {
+  try {
+    await KeywordHunterSnapshotService.saveCurrentAsync();
+  } catch (error) {
+    ErrorService.handle(getError(error), {
+      action: 'saveTranslationSnapshot',
+      module: 'keywordTracker',
+      notify: false,
+    });
+    const message = error instanceof Error ? error.message : '保存快照失败';
+    showToast(`译文已生成，但历史快照自动保存失败：${message}`, {
+      type: 'warning',
+    });
+  }
 }
 
 function finalizeTranslationFailure(run: ActiveTranslationRun, error: unknown): never {

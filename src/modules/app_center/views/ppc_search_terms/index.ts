@@ -5,19 +5,19 @@ import {
   analyzeReportText,
   cancelActiveAnalysis,
   type AnalysisFlowCallbacks,
-} from './analysisFlow';
-import { toggleAnalysisSettings, updateContextFieldsVisibility } from './analysisSettingsPanel';
-import { handleReportFileImport, loadSampleReport, type ReportImportCallbacks } from './fileImport';
+} from './analysis/analysisFlow';
+import { toggleAnalysisSettings, updateContextFieldsVisibility } from './settings/analysisSettingsPanel';
+import { handleReportFileImport, loadSampleReport, type ReportImportCallbacks } from './import/fileImport';
 import {
   copyActionSummary,
   exportActionRows,
   type ExportControllerState,
-} from './exportController';
-import { getGrowthExportFilter, getWasteExportFilter } from './filters';
-import { getInput, getTextarea, setAnalyzeButtonState, setText } from './dom';
-import { bindPpcEvents } from './eventBindings';
-import { inferReportTypeFromText } from './reportTypeInference';
-import { createListenerRegistry } from './listenerRegistry';
+} from './export/exportController';
+import { getGrowthExportFilter, getWasteExportFilter } from './utils/filters';
+import { getInput, getTextarea, setAnalyzeButtonState, setText } from './ui/dom';
+import { bindPpcEvents } from './ui/eventBindings';
+import { inferReportTypeFromText } from './analysis/reportTypeInference';
+import { createListenerRegistry } from './ui/listenerRegistry';
 import {
   readAnalysisSettings,
   readReportSelection,
@@ -30,18 +30,18 @@ import {
   saveAnalysisSettings,
   saveReportSelection,
   saveThresholds,
-} from './settings';
-import { createActionListState } from './actionListState';
+} from './settings/settings';
+import { createActionListState } from './actions/actionListState';
 import type { AnalyzedRow, ReportType } from './types';
 
 import './style.css';
 
 export type { ActionType, AnalyzedRow, Thresholds } from './types';
-export { analyzeReport, analyzeSearchTermReport } from './analysisEngine';
-export type { AnalysisResult } from './analysisEngine';
-export { parseReport } from './delimitedReport';
-export { buildActionCsv, buildSummaryText } from './exporters';
-export { xlsxArrayBufferToDelimitedText } from './xlsx';
+export { analyzeReport, analyzeSearchTermReport } from './analysis/analysisEngine';
+export type { AnalysisResult } from './analysis/analysisEngine';
+export { parseReport } from './import/delimitedReport';
+export { buildActionCsv, buildSummaryText } from './export/exporters';
+export { xlsxArrayBufferToDelimitedText } from './import/xlsx';
 
 let analyzedRows: AnalyzedRow[] = [];
 let sourceText = '';

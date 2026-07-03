@@ -164,6 +164,25 @@ it('updates the loaded snapshot instead of creating duplicates', () => {
   expect(mocks.snapshots).toHaveLength(1);
 });
 
+it('upgrades the matching draft snapshot when the current snapshot pointer is missing', async () => {
+  const draft = await KeywordHunterSnapshotService.saveCurrentAsync({
+    title: 'Draft before report',
+  });
+
+  mocks.state.keywordTracker.currentSnapshotId = null;
+  mocks.state.keywordTracker.llmAnalysisResult = '# Report';
+
+  const reported = await KeywordHunterSnapshotService.saveCurrentAsync({ status: 'reported' });
+
+  expect(reported.id).toBe(draft.id);
+  expect(reported.createdAt).toBe(draft.createdAt);
+  expect(reported.title).toBe('Draft before report');
+  expect(reported.status).toBe('reported');
+  expect(reported.result.llmAnalysisResult).toBe('# Report');
+  expect(mocks.indexedSnapshots).toHaveLength(1);
+  expect(mocks.state.keywordTracker.currentSnapshotId).toBe(draft.id);
+});
+
 it('restores a saved snapshot into Keyword Hunter state', () => {
   const snapshot = KeywordHunterSnapshotService.saveCurrent();
 
