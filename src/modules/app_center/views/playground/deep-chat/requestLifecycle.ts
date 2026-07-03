@@ -6,10 +6,12 @@ export interface PendingPlaygroundRequest {
   threadId: string;
   conversationMessages: ChatMessage[];
   assistantText: string;
+  displayedAssistantText: string;
   startedAt: number;
   updatedAt: number;
   controller: AbortController;
   abortReason?: PlaygroundPendingAbortReason;
+  isSettled?: boolean;
 }
 
 interface CreatePendingPlaygroundRequestOptions {
@@ -28,6 +30,7 @@ export function createPendingPlaygroundRequest(
     threadId,
     conversationMessages: [...conversationMessages],
     assistantText: '',
+    displayedAssistantText: '',
     startedAt: now,
     updatedAt: now,
     controller: options.controller || new AbortController(),
@@ -41,6 +44,32 @@ export function appendPendingPlaygroundAssistantText(
 ): void {
   pendingRequest.assistantText += delta;
   pendingRequest.updatedAt = now;
+}
+
+export function markPendingPlaygroundAssistantTextDisplayed(
+  pendingRequest: PendingPlaygroundRequest,
+  displayedText: string,
+  now = Date.now()
+): void {
+  pendingRequest.displayedAssistantText = displayedText.slice(
+    0,
+    pendingRequest.assistantText.length
+  );
+  pendingRequest.updatedAt = now;
+}
+
+export function markPendingPlaygroundRequestSettled(
+  pendingRequest: PendingPlaygroundRequest,
+  now = Date.now()
+): void {
+  pendingRequest.isSettled = true;
+  pendingRequest.updatedAt = now;
+}
+
+export function isPendingPlaygroundDisplayComplete(
+  pendingRequest: PendingPlaygroundRequest
+): boolean {
+  return pendingRequest.displayedAssistantText.length >= pendingRequest.assistantText.length;
 }
 
 export function abortPendingPlaygroundRequest(

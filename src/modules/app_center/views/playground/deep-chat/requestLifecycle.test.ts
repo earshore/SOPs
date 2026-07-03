@@ -4,6 +4,9 @@ import {
   abortPendingPlaygroundRequest,
   appendPendingPlaygroundAssistantText,
   createPendingPlaygroundRequest,
+  isPendingPlaygroundDisplayComplete,
+  markPendingPlaygroundAssistantTextDisplayed,
+  markPendingPlaygroundRequestSettled,
   shouldPreserveStoppedResponse,
 } from './requestLifecycle';
 
@@ -21,6 +24,7 @@ describe('Playground request lifecycle', () => {
       threadId: 'thread-1',
       conversationMessages,
       assistantText: '',
+      displayedAssistantText: '',
       startedAt: 1000,
       updatedAt: 1000,
       controller,
@@ -64,5 +68,31 @@ describe('Playground request lifecycle', () => {
 
     expect(pendingRequest.abortReason).toBe('deleted');
     expect(shouldPreserveStoppedResponse(pendingRequest)).toBe(false);
+  });
+
+  it('tracks displayed assistant text separately from received stream text', () => {
+    const pendingRequest = createPendingPlaygroundRequest('thread-1', conversationMessages, {
+      now: 1000,
+    });
+
+    appendPendingPlaygroundAssistantText(pendingRequest, 'streamed answer', 1100);
+    markPendingPlaygroundAssistantTextDisplayed(pendingRequest, 'streamed', 1200);
+
+    expect(pendingRequest.assistantText).toBe('streamed answer');
+    expect(pendingRequest.displayedAssistantText).toBe('streamed');
+    expect(pendingRequest.updatedAt).toBe(1200);
+    expect(isPendingPlaygroundDisplayComplete(pendingRequest)).toBe(false);
+
+    markPendingPlaygroundAssistantTextDisplayed(
+      pendingRequest,
+      'streamed answer and overflow',
+      1300
+    );
+    markPendingPlaygroundRequestSettled(pendingRequest, 1400);
+
+    expect(pendingRequest.displayedAssistantText).toBe('streamed answer');
+    expect(pendingRequest.isSettled).toBe(true);
+    expect(pendingRequest.updatedAt).toBe(1400);
+    expect(isPendingPlaygroundDisplayComplete(pendingRequest)).toBe(true);
   });
 });

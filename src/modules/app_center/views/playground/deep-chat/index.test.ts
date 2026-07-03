@@ -60,8 +60,16 @@ type ImportOptions = {
   callLLM?: (...args: unknown[]) => Promise<string>;
 };
 
+type TestChatMessage = {
+  role?: string;
+  text?: string;
+  html?: string;
+  error?: string;
+  overwrite?: boolean;
+};
+
 class TestDeepChatElement extends HTMLElement {
-  history?: unknown[];
+  history?: TestChatMessage[];
   defaultInput?: { text?: string };
   auxiliaryStyle?: string;
   connect?: {
@@ -79,6 +87,31 @@ class TestDeepChatElement extends HTMLElement {
   displayLoadingBubble?: boolean;
   errorMessages?: Record<string, unknown>;
   onInput?: (body: { content: { text?: string; files?: File[] }; isUser: boolean }) => void;
+  addMessage = vi.fn((message: TestChatMessage) => {
+    const nextMessage = { ...message };
+    delete nextMessage.overwrite;
+    this.history ||= [];
+
+    if (message.overwrite) {
+      const role = message.role || 'ai';
+      let existingIndex = -1;
+      for (let index = this.history.length - 1; index >= 0; index -= 1) {
+        if ((this.history[index]?.role || 'ai') === role) {
+          existingIndex = index;
+          break;
+        }
+      }
+      if (existingIndex >= 0) {
+        this.history[existingIndex] = {
+          ...this.history[existingIndex],
+          ...nextMessage,
+        };
+        return;
+      }
+    }
+
+    this.history.push(nextMessage);
+  });
   clearMessages = vi.fn(() => {
     this.history = [];
   });
@@ -448,6 +481,88 @@ describe('deep-chat playground successful requests', () => {
     expectStoredAssistantMessage(mocks.localDataStore.set, 'Streamed answer', {
       title: 'Saved question',
     });
+
+    unmount();
+  });
+});
+
+describe('deep-chat playground remount streaming', () => {
+  it('continues pending typewriter output after remounting during a stream', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    let releaseStream = (): void => {};
+    const streamGate = new Promise<void>(resolve => {
+      releaseStream = resolve;
+    });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { mount, unmount, mocks } = await importDeepChat({
+      callLLM: async (...args: unknown[]) => {
+        const callOptions = args[5] as
+          | { onStreamUpdate?: (update: { delta: string }) => void }
+          | undefined;
+        callOptions?.onStreamUpdate?.({ delta: 'First ' });
+        await streamGate;
+        callOptions?.onStreamUpdate?.({ delta: 'Second' });
+        return 'First Second';
+      },
+    });
+
+    await mount(container);
+    let originalChatMounted = true;
+    const onResponse = vi.fn(async () => {
+      if (!originalChatMounted) {
+        throw new Error('old Deep Chat instance is unmounted');
+      }
+    });
+    const onClose = vi.fn();
+
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Keep typing across remount' }] },
+      { onResponse, onClose, stopClicked: { listener: vi.fn() } }
+    );
+
+    await vi.waitFor(() => {
+      expect(onResponse).toHaveBeenCalledWith({ text: 'First ' });
+    });
+
+    originalChatMounted = false;
+    unmount();
+    await mount(container);
+
+    expect(getChat(container).history).toEqual(
+      expect.arrayContaining([expect.objectContaining({ role: 'ai', text: 'First' })])
+    );
+    expect(getChat(container).history).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ role: 'ai', text: 'First Second' })])
+    );
+
+    releaseStream();
+
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(getChat(container).history).toEqual(
+      expect.arrayContaining([expect.objectContaining({ role: 'ai', text: 'First Second' })])
+    );
+    expect(mocks.localDataStore.set).toHaveBeenCalledWith(
+      'user:playground_deep_chat_threads_v1',
+      expect.objectContaining({
+        threads: expect.arrayContaining([
+          expect.objectContaining({
+            messages: expect.arrayContaining([
+              expect.objectContaining({ role: 'ai', text: 'First Second' }),
+            ]),
+          }),
+        ]),
+      }),
+      'user-data'
+    );
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[Deep Chat] 忽略已卸载会话的响应更新:',
+      expect.any(Error)
+    );
 
     unmount();
   });

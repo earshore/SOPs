@@ -25,7 +25,7 @@ export function renderThreadList(
         const pendingRequest = pendingRequests.get(thread.id);
         const hasDraft = !!thread.draftText?.trim();
         const meta = pendingRequest
-          ? `生成中 · ${formatThreadTime(pendingRequest.updatedAt)}`
+          ? `${pendingRequest.isSettled ? '输出中' : '生成中'} · ${formatThreadTime(pendingRequest.updatedAt)}`
           : hasDraft
             ? `草稿 · ${formatThreadTime(thread.updatedAt)}`
             : messageCount > 0

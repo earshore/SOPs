@@ -38,6 +38,11 @@ export interface DeepChatElement extends HTMLElement {
   displayLoadingBubble?: boolean;
   errorMessages?: Record<string, unknown>;
   submitUserMessage?: (content: { text: string }) => void;
+  addMessage?: (
+    message: DeepChatMessage & { error?: string; overwrite?: boolean },
+    isUpdate?: boolean
+  ) => void;
+  updateMessage?: (message: Pick<DeepChatMessage, 'text' | 'html'>, index: number) => void;
   clearMessages?: (isReset?: boolean) => void;
   getMessages?: () => DeepChatMessage[];
   onRender?: () => void;

@@ -17,6 +17,9 @@ import {
   abortPendingPlaygroundRequest,
   appendPendingPlaygroundAssistantText,
   createPendingPlaygroundRequest,
+  isPendingPlaygroundDisplayComplete,
+  markPendingPlaygroundAssistantTextDisplayed,
+  markPendingPlaygroundRequestSettled,
   shouldPreserveStoppedResponse,
   type PendingPlaygroundRequest,
   type PlaygroundPendingAbortReason,
@@ -74,6 +77,9 @@ import {
 } from './utils';
 
 const nativeLoggerConsole = globalThis.console;
+const PENDING_ASSISTANT_PLACEHOLDER_TEXT = '正在生成回复...';
+const PENDING_DISPLAY_INTERVAL_MS = 32;
+const PENDING_DISPLAY_CHARS_PER_TICK = 6;
 
 let cleanupCallbacks: Array<() => void> = [];
 let currentConfig: LLMProviderConfig | null = null;
@@ -83,6 +89,7 @@ let sessionTemperature = 0.3;
 let threadStore: PlaygroundThreadStore = createDefaultThreadStore();
 let mountedContainer: HTMLElement | null = null;
 const pendingRequests = new Map<string, PendingPlaygroundRequest>();
+const pendingDisplayTimers = new Map<string, number>();
 let draftInputResizeObserver: ResizeObserver | null = null;
 let draftInputResizeRetryTimer: number | null = null;
 let cleanupDraftInputHeightListener: (() => void) | null = null;
@@ -132,6 +139,7 @@ export function unmount(): void {
 export async function clearPlaygroundThreadStore(): Promise<void> {
   abortAllPendingRequests('cleared');
   pendingRequests.clear();
+  clearAllPendingDisplayTimers();
   draftPersistController.cancel();
   threadStore = createDefaultThreadStore();
 
@@ -211,6 +219,7 @@ function initDeepChat(container: HTMLElement): void {
   syncPendingStatus(container);
   setupDraftInputHeightSync(container, chat);
   setupSubmitStopButtonSync(container, chat);
+  schedulePendingAssistantDisplay(activeThread.id);
 }
 
 function setupDraftInputHeightSync(
@@ -733,6 +742,8 @@ async function handlePlaygroundRequest(
     saveThreadMessages(getMountedRenderContainer(), conversationMessages, assistantText, {
       threadId: activeThread.id,
     });
+    markPendingPlaygroundRequestSettled(pendingRequest);
+    schedulePendingAssistantDisplay(activeThread.id);
   } catch (error) {
     if (requestController?.signal.aborted) {
       return;
@@ -767,6 +778,14 @@ function cleanupLifecyclePendingRequest(
   if (pendingRequest.abortReason === 'stopped') {
     preserveStoppedResponse(threadId);
   }
+  if (pendingRequest.isSettled && !isPendingPlaygroundDisplayComplete(pendingRequest)) {
+    renderMountedThreadList();
+    syncPendingRequestView(threadId);
+    schedulePendingAssistantDisplay(threadId);
+    return;
+  }
+
+  clearPendingDisplayTimer(threadId);
   pendingRequests.delete(threadId);
   renderMountedThreadList();
   syncPendingRequestView(threadId, { replaceChat: true });
@@ -839,6 +858,8 @@ function preserveTimedOutPartialResponse(threadId: string | null, error: unknown
       assistantCreatedAt: pendingRequest.startedAt,
     }
   );
+  markPendingPlaygroundRequestSettled(pendingRequest);
+  schedulePendingAssistantDisplay(threadId);
   showToast('模型响应超时，已保留已生成内容', { type: 'warning' });
   return true;
 }
@@ -937,6 +958,7 @@ function abortPendingRequest(threadId: string, reason: PlaygroundPendingAbortRea
   }
 
   abortPendingPlaygroundRequest(pendingRequest, reason);
+  clearPendingDisplayTimer(threadId);
   return true;
 }
 
@@ -946,7 +968,15 @@ function stopPendingRequest(threadId: string, options: { replaceChat?: boolean }
     return false;
   }
 
+  if (pendingRequest.isSettled) {
+    markPendingPlaygroundAssistantTextDisplayed(pendingRequest, pendingRequest.assistantText);
+    renderPendingAssistantDisplayIfActive(threadId, pendingRequest);
+    completeSettledPendingDisplay(threadId, pendingRequest);
+    return true;
+  }
+
   abortPendingPlaygroundRequest(pendingRequest, 'stopped');
+  clearPendingDisplayTimer(threadId);
   preserveStoppedResponse(threadId);
   pendingRequests.delete(threadId);
   renderMountedThreadList();
@@ -982,7 +1012,7 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
         streamedText += update.delta;
         if (update.delta) {
           appendPendingAssistantText(pendingRequest, update.delta);
-          void emitDeepChatResponse(signals, { text: update.delta });
+          void emitPendingAssistantDelta(signals, pendingRequest, update.delta);
         }
       },
     }
@@ -994,7 +1024,7 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
 
   if (!streamedText && finalText) {
     appendPendingAssistantText(pendingRequest, finalText);
-    await emitDeepChatResponse(signals, { text: finalText });
+    await emitPendingAssistantDelta(signals, pendingRequest, finalText);
   }
 
   const assistantText = (finalText || streamedText).trim();
@@ -1388,11 +1418,25 @@ function getThreadDisplayMessages(thread: PlaygroundThread): DeepChatMessage[] {
     return thread.messages;
   }
 
+  const displayMessages = buildStoredThreadMessages(
+    thread.messages,
+    pendingRequest.conversationMessages,
+    pendingRequest.displayedAssistantText,
+    {
+      now: pendingRequest.startedAt,
+      assistantCreatedAt: pendingRequest.startedAt,
+    }
+  );
+
+  if (pendingRequest.displayedAssistantText.trim()) {
+    return displayMessages;
+  }
+
   return [
-    ...thread.messages,
+    ...displayMessages,
     {
       role: 'ai',
-      text: pendingRequest.assistantText.trim() || '正在生成回复...',
+      text: PENDING_ASSISTANT_PLACEHOLDER_TEXT,
       createdAt: pendingRequest.startedAt,
     },
   ];
@@ -1409,6 +1453,123 @@ function createPendingRequest(
 function appendPendingAssistantText(pendingRequest: PendingPlaygroundRequest, delta: string): void {
   appendPendingPlaygroundAssistantText(pendingRequest, delta);
   syncPendingRequestView(pendingRequest.threadId);
+}
+
+function schedulePendingAssistantDisplay(threadId: string): void {
+  const pendingRequest = pendingRequests.get(threadId);
+  if (!pendingRequest) {
+    return;
+  }
+
+  if (isPendingPlaygroundDisplayComplete(pendingRequest)) {
+    completeSettledPendingDisplay(threadId, pendingRequest);
+    return;
+  }
+
+  if (pendingDisplayTimers.has(threadId) || !getRenderContainerForThread(threadId)) {
+    return;
+  }
+
+  const timer = window.setTimeout(() => {
+    drainPendingAssistantDisplay(threadId);
+  }, PENDING_DISPLAY_INTERVAL_MS);
+  pendingDisplayTimers.set(threadId, timer);
+}
+
+function drainPendingAssistantDisplay(threadId: string): void {
+  pendingDisplayTimers.delete(threadId);
+  const pendingRequest = pendingRequests.get(threadId);
+  const container = getRenderContainerForThread(threadId);
+  if (!pendingRequest || !container) {
+    return;
+  }
+
+  const nextDisplayText = getNextPendingAssistantDisplayText(pendingRequest);
+  markPendingPlaygroundAssistantTextDisplayed(pendingRequest, nextDisplayText);
+  renderPendingAssistantDisplay(container, pendingRequest);
+  syncPendingStatus(container);
+  renderMountedThreadList();
+
+  if (isPendingPlaygroundDisplayComplete(pendingRequest)) {
+    completeSettledPendingDisplay(threadId, pendingRequest);
+    return;
+  }
+
+  schedulePendingAssistantDisplay(threadId);
+}
+
+function getNextPendingAssistantDisplayText(pendingRequest: PendingPlaygroundRequest): string {
+  const currentLength = pendingRequest.displayedAssistantText.length;
+  const remainingLength = pendingRequest.assistantText.length - currentLength;
+  const step = Math.min(
+    48,
+    Math.max(PENDING_DISPLAY_CHARS_PER_TICK, Math.ceil(remainingLength / 40))
+  );
+
+  return pendingRequest.assistantText.slice(0, currentLength + step);
+}
+
+function renderPendingAssistantDisplay(
+  container: HTMLElement,
+  pendingRequest: PendingPlaygroundRequest
+): void {
+  const chat = getChat(container);
+  if (!chat) {
+    return;
+  }
+
+  const text = pendingRequest.displayedAssistantText || PENDING_ASSISTANT_PLACEHOLDER_TEXT;
+  if (typeof chat.addMessage === 'function') {
+    chat.addMessage({ role: 'ai', text, overwrite: true }, true);
+    return;
+  }
+
+  replaceChat(container);
+}
+
+function renderPendingAssistantDisplayIfActive(
+  threadId: string,
+  pendingRequest: PendingPlaygroundRequest
+): void {
+  const container = getRenderContainerForThread(threadId);
+  if (container) {
+    renderPendingAssistantDisplay(container, pendingRequest);
+  }
+}
+
+function completeSettledPendingDisplay(
+  threadId: string,
+  pendingRequest: PendingPlaygroundRequest
+): void {
+  if (!pendingRequest.isSettled || pendingRequests.get(threadId) !== pendingRequest) {
+    return;
+  }
+
+  clearPendingDisplayTimer(threadId);
+  pendingRequests.delete(threadId);
+  renderMountedThreadList();
+
+  const container = getRenderContainerForThread(threadId);
+  if (container) {
+    syncPendingStatus(container);
+  }
+}
+
+function clearPendingDisplayTimer(threadId: string): void {
+  const timer = pendingDisplayTimers.get(threadId);
+  if (timer === undefined) {
+    return;
+  }
+
+  window.clearTimeout(timer);
+  pendingDisplayTimers.delete(threadId);
+}
+
+function clearAllPendingDisplayTimers(): void {
+  pendingDisplayTimers.forEach(timer => {
+    window.clearTimeout(timer);
+  });
+  pendingDisplayTimers.clear();
 }
 
 function applyPendingRequestsToThreadStore(store: PlaygroundThreadStore): PlaygroundThreadStore {
@@ -1504,21 +1665,39 @@ function syncPendingStatus(container: HTMLElement): void {
 
 function getPendingStatusText(pendingRequest: PendingPlaygroundRequest): string {
   const charCount = pendingRequest.assistantText.trim().length;
+  const prefix = pendingRequest.isSettled ? '正在显示回复...' : PENDING_ASSISTANT_PLACEHOLDER_TEXT;
   if (charCount === 0) {
-    return '正在生成回复...';
+    return prefix;
   }
 
-  return `正在生成回复...已收到 ${charCount.toLocaleString('zh-CN')} 字`;
+  return `${prefix}已收到 ${charCount.toLocaleString('zh-CN')} 字`;
+}
+
+async function emitPendingAssistantDelta(
+  signals: DeepChatSignals,
+  pendingRequest: PendingPlaygroundRequest,
+  delta: string
+): Promise<void> {
+  const previousDisplayedLength = pendingRequest.assistantText.length - delta.length;
+  const delivered = await emitDeepChatResponse(signals, { text: delta });
+  if (delivered && pendingRequest.displayedAssistantText.length === previousDisplayedLength) {
+    markPendingPlaygroundAssistantTextDisplayed(pendingRequest, pendingRequest.assistantText);
+    return;
+  }
+
+  schedulePendingAssistantDisplay(pendingRequest.threadId);
 }
 
 async function emitDeepChatResponse(
   signals: DeepChatSignals,
   response: { text?: string; error?: string }
-): Promise<void> {
+): Promise<boolean> {
   try {
     await signals.onResponse?.(response);
+    return true;
   } catch (error) {
     nativeLoggerConsole.warn('[Deep Chat] 忽略已卸载会话的响应更新:', error);
+    return false;
   }
 }
 
