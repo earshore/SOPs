@@ -43,6 +43,8 @@ type ScraperPanelState = {
   isScraping: boolean;
   currentDataTab: DataTab;
   configExpanded: boolean;
+  importStatus: string;
+  importStatusTone: 'status' | 'error';
   tasks: Task[];
   dataPreview: DataPreview | null;
   historyPanel: HistoryPanel | null;
@@ -87,6 +89,8 @@ function createScraperPanelState(): ScraperPanelState {
     isScraping: false,
     currentDataTab: 'preview' as DataTab,
     configExpanded: false,
+    importStatus: '',
+    importStatusTone: 'status',
     tasks: [] as Task[],
     dataPreview: null,
     historyPanel: null,
@@ -225,6 +229,18 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
   get scrapeReviewsToggleClass(): string {
     return this.scrapeReviews ? 'active' : '';
+  },
+
+  get importStatusRole(): string {
+    return this.importStatusTone === 'error' ? 'alert' : 'status';
+  },
+
+  get importStatusLive(): string {
+    return this.importStatusTone === 'error' ? 'assertive' : 'polite';
+  },
+
+  get importStatusClass(): string {
+    return this.importStatusTone === 'error' ? 'text-rose-600' : 'text-slate-500';
   },
 
   get configExpandedState(): boolean {
@@ -701,6 +717,10 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
     const files = Array.from(target.files || []);
     if (files.length === 0) return;
 
+    this.importStatus = `正在导入 ${files.length} 个 JSON 文件...`;
+    this.importStatusTone = 'status';
+    target.removeAttribute('aria-invalid');
+
     try {
       const result: ImportResult = await handleImportFilesCore(
         files,
@@ -725,7 +745,27 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
         // 重新加载历史记录
         this.loadHistory();
+        this.importStatus = `导入完成：${result.data.products?.length || 0} 个 ASIN 已更新。`;
+        this.importStatusTone = 'status';
+        target.removeAttribute('aria-invalid');
+        return;
       }
+
+      if (result.error) {
+        this.importStatus = `导入失败：${result.error}`;
+        this.importStatusTone = 'error';
+        target.setAttribute('aria-invalid', 'true');
+        return;
+      }
+
+      this.importStatus = '导入已取消。';
+      this.importStatusTone = 'status';
+      target.removeAttribute('aria-invalid');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.importStatus = `导入失败：${message}`;
+      this.importStatusTone = 'error';
+      target.setAttribute('aria-invalid', 'true');
     } finally {
       target.value = '';
     }

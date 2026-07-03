@@ -57,8 +57,10 @@ const mocks = vi.hoisted(() => ({
         <option value="erp_search_term">ERP 广告搜索词报表</option>
         <option value="erp_campaign">ERP 广告活动报表</option>
       </select>
-      <textarea id="ppc-paste-input" aria-describedby="ppc-paste-help ppc-mapping-status"></textarea>
+      <label for="ppc-paste-input" class="ppc-field-label">粘贴广告报表内容</label>
+      <textarea id="ppc-paste-input" aria-describedby="ppc-paste-help ppc-paste-error ppc-mapping-status"></textarea>
       <p id="ppc-paste-help">首行必须包含列名；文件导入和粘贴内容二选一即可。</p>
+      <p id="ppc-paste-error" class="ppc-field-error hidden" role="alert"></p>
       <input id="ppc-file-input" type="file" aria-describedby="ppc-file-name ppc-mapping-status" />
       <div id="ppc-threshold-grid"></div>
       <input id="ppc-action-owner" value="广告负责人" aria-describedby="ppc-action-owner-help" />
@@ -278,6 +280,12 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     expect(container.querySelector('#ppc-mapping-status')?.getAttribute('aria-live')).toBe(
       'polite'
     );
+    expect(container.querySelector('.ppc-field-label')?.textContent).toContain('粘贴广告报表内容');
+    expect(container.querySelector('#ppc-paste-error')?.getAttribute('role')).toBe('alert');
+    expect(container.querySelector('#ppc-paste-error')?.classList.contains('hidden')).toBe(true);
+    expect(container.querySelector('#ppc-paste-input')?.getAttribute('aria-describedby')).toContain(
+      'ppc-paste-error'
+    );
     expect(container.querySelector('#ppc-paste-input')?.getAttribute('aria-describedby')).toContain(
       'ppc-mapping-status'
     );
@@ -378,6 +386,31 @@ describe('PPC 搜索词分析器 UI - 筛选和复制', () => {
 });
 
 describe('PPC 搜索词分析器 UI - 导入流程', () => {
+  it('空数据分析时显示字段级错误，并在加载样例后恢复状态语义', async () => {
+    container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
+    await flushAnalysis();
+
+    const textarea = container.querySelector<HTMLTextAreaElement>('#ppc-paste-input');
+    const fieldError = container.querySelector('#ppc-paste-error');
+    const status = container.querySelector('#ppc-mapping-status');
+
+    expect(textarea?.getAttribute('aria-invalid')).toBe('true');
+    expect(fieldError?.textContent).toContain('请先粘贴报表内容或选择报表文件');
+    expect(fieldError?.classList.contains('hidden')).toBe(false);
+    expect(status?.getAttribute('role')).toBe('alert');
+    expect(status?.getAttribute('aria-live')).toBe('assertive');
+    expect(status?.textContent).toContain('没有可分析的数据');
+
+    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+
+    expect(textarea?.hasAttribute('aria-invalid')).toBe(false);
+    expect(fieldError?.textContent).toBe('');
+    expect(fieldError?.classList.contains('hidden')).toBe(true);
+    expect(status?.getAttribute('role')).toBe('status');
+    expect(status?.getAttribute('aria-live')).toBe('polite');
+    expect(status?.textContent).toContain('样例数据已加载');
+  });
+
   it('导入或加载数据后等待用户主动点击分析', async () => {
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
     await flushAnalysis();
@@ -425,6 +458,29 @@ describe('PPC 搜索词分析器 UI - 导入流程', () => {
 
     expect(mocks.analyzeWithAgent).toHaveBeenCalled();
     expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('1');
+  });
+
+  it('报表文件读取失败时标记上传控件并切换为错误状态', async () => {
+    const file = new File(['broken'], 'broken.csv', { type: 'text/csv' });
+    Object.defineProperty(file, 'text', {
+      configurable: true,
+      value: () => Promise.reject(new Error('disk read failed')),
+    });
+    const input = container.querySelector<HTMLInputElement>('#ppc-file-input');
+    Object.defineProperty(input, 'files', { configurable: true, value: [file] });
+
+    input?.dispatchEvent(new Event('change', { bubbles: true }));
+    await flushAnalysis();
+
+    const status = container.querySelector('#ppc-mapping-status');
+    expect(input?.getAttribute('aria-invalid')).toBe('true');
+    expect(status?.getAttribute('role')).toBe('alert');
+    expect(status?.getAttribute('aria-live')).toBe('assertive');
+    expect(status?.textContent).toContain('文件读取失败');
+    expect(showToast).toHaveBeenCalledWith('文件读取失败', {
+      type: 'error',
+      description: 'disk read failed',
+    });
   });
 });
 

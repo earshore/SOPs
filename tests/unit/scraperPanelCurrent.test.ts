@@ -232,6 +232,9 @@ it('computes input, task, site, and history branch states', () => {
   expect(panel.startCountText).toBe('2 项');
   expect(panel.scrapingIconClass).toBe('fa-rocket');
   expect(panel.scrapingButtonText).toBe('开始采集');
+  expect(panel.importStatusRole).toBe('status');
+  expect(panel.importStatusLive).toBe('polite');
+  expect(panel.importStatusClass).toBe('text-slate-500');
   expect(panel.successfulTaskCount).toBe(1);
   expect(panel.completedTaskCount).toBe(2);
   expect(panel.taskProgressStyle).toBe('width: 50%');
@@ -429,7 +432,28 @@ it('imports files, deletes data, and handles delete results', async () => {
   expect(scraperMocks.appState.setScrapedData).toHaveBeenCalledWith(importedData);
   expect(scraperMocks.appState.setAnalysisReport).toHaveBeenCalledWith(null);
   expect(scraperMocks.appState.setSelectedSite).toHaveBeenCalledWith('UK');
+  expect(panel.importStatus).toBe('导入完成：1 个 ASIN 已更新。');
+  expect(panel.importStatusRole).toBe('status');
+  expect(input.hasAttribute('aria-invalid')).toBe(false);
   expect(input.value).toBe('');
+
+  scraperMocks.handleImportFilesCore.mockResolvedValueOnce({
+    success: false,
+    error: 'JSON 格式错误',
+  });
+  const failedInput = document.createElement('input');
+  Object.defineProperty(failedInput, 'files', {
+    configurable: true,
+    value: [file],
+  });
+
+  await panel.handleImportFiles({ target: failedInput } as unknown as Event);
+
+  expect(panel.importStatus).toBe('导入失败：JSON 格式错误');
+  expect(panel.importStatusRole).toBe('alert');
+  expect(panel.importStatusLive).toBe('assertive');
+  expect(panel.importStatusClass).toBe('text-rose-600');
+  expect(failedInput.getAttribute('aria-invalid')).toBe('true');
 
   await panel.deleteProduct('B08N5WRWNW');
   await panel.deleteReview('B08N5WRWNW', 0);
