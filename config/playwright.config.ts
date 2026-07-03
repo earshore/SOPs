@@ -11,9 +11,9 @@
 //    - 本地环境：CPU 核心数的 50%（平衡性能和稳定性）
 //    - 自定义：设置 WORKERS 环境变量
 //
-// 2. fullyParallel: true
-//    - 允许同一文件内的测试并行执行
-//    - 提升测试速度，但需要确保测试隔离性
+// 2. fullyParallel: false
+//    - 不允许同一文件内的测试并行执行
+//    - 多个 E2E spec 使用文件级 page object 状态，开启同文件并发会造成状态污染
 //
 // 3. 浏览器项目控制：
 //    - BROWSER_ONLY: 只运行指定浏览器（chromium/firefox/webkit）
@@ -72,8 +72,11 @@ export default defineConfig({
   // 测试超时（30秒）
   timeout: 30000,
 
-  // 全局超时（5分钟）
-  globalTimeout: 5 * 60 * 1000,
+  // 全局超时
+  // Chromium 全量 E2E 包含数百条用例，默认 5 分钟会在本地稳定截断。
+  globalTimeout: process.env.PLAYWRIGHT_GLOBAL_TIMEOUT
+    ? parseInt(process.env.PLAYWRIGHT_GLOBAL_TIMEOUT)
+    : 15 * 60 * 1000,
 
   // 全局设置脚本
   globalSetup: './tests/playwright-setup.ts',
@@ -86,9 +89,8 @@ export default defineConfig({
     timeout: 5000
   },
 
-  // 完全并行执行测试
-  // 允许同一文件内的测试并行执行
-  fullyParallel: true,
+  // 不在同一 spec 文件内并发执行测试；文件之间仍由 workers 并行。
+  fullyParallel: false,
 
   // 在所有 worker 之间共享浏览器实例（提升性能）
   // 注意：这可能导致测试间的状态污染，需要确保测试隔离性

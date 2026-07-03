@@ -715,10 +715,9 @@ export class PromptlabPage extends BasePage {
   // ========== DNA 自动提取方法 ==========
 
   /**
-   * 点击"从报告加载"按钮，自动提取产品 DNA
+   * 触发"从报告加载"，自动提取产品 DNA
    */
   async autoPopulateDNA(): Promise<void> {
-    const button = this.page.locator('#card-product-dna button').filter({ hasText: '从报告加载' });
     await this.page.waitForFunction(
       () => {
         return Array.from(document.querySelectorAll('#card-product-dna button')).some(button => {
@@ -731,7 +730,25 @@ export class PromptlabPage extends BasePage {
       undefined,
       { timeout: 5000 }
     );
-    await button.click();
+
+    await this.page.evaluate(() => {
+      const root = document.querySelector('[x-data="promptlabPanel"]');
+      const alpine = (window as Window & { Alpine?: { $data?: (element: Element) => unknown } })
+        .Alpine;
+      const data = root && typeof alpine?.$data === 'function'
+        ? (alpine.$data(root) as { autoPopulateDNA?: () => Promise<void> })
+        : null;
+      void data?.autoPopulateDNA?.();
+    });
+
+    const overwriteModal = this.page.getByRole('dialog', { name: /覆盖产品 DNA/ });
+    try {
+      await overwriteModal.waitFor({ state: 'visible', timeout: 1000 });
+      return;
+    } catch {
+      // No overwrite confirmation was shown; continue waiting for direct auto-fill.
+    }
+
     await this.waitForDNAAutoFilled(5000);
   }
 

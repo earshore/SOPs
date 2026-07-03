@@ -370,17 +370,15 @@ function getPromptKeywordTerms(dna: { keywordsTier1?: string; keywordsTier2?: st
         return;
       }
 
-      // 步骤 1: 填写基础信息
-      console.log('  1️⃣ 填写基础信息...');
+      // 步骤 1: 选择目标站点
+      console.log('  1️⃣ 选择目标站点...');
       await promptlab.selectTargetMarket('English');
-      await promptlab.fillTier1Keywords('wireless earbuds');
-      await promptlab.fillTier2Keywords('bluetooth 5.0, noise cancelling');
 
       // 步骤 2: 自动提取 DNA
       console.log('  2️⃣ 自动提取产品 DNA...');
       await promptlab.autoPopulateDNA();
       await confirmOverwriteIfVisible(page);
-      await promptlab.wait(1500);
+      await promptlab.waitForDNAAutoFilled(5000);
 
       // 验证：DNA 已填充
       const isDNAFilled = await promptlab.isDNAAutoFilled();
@@ -388,14 +386,19 @@ function getPromptKeywordTerms(dna: { keywordsTier1?: string; keywordsTier2?: st
 
       console.log(`     ✅ DNA 提取完成`);
 
-      // 步骤 3: 配置策略
-      console.log('  3️⃣ 配置生成策略...');
+      // 步骤 3: 补充手动 SEO 信息
+      console.log('  3️⃣ 补充手动 SEO 信息...');
+      await promptlab.fillTier1Keywords('wireless earbuds');
+      await promptlab.fillTier2Keywords('bluetooth 5.0, noise cancelling');
+
+      // 步骤 4: 配置策略
+      console.log('  4️⃣ 配置生成策略...');
       await promptlab.selectTone('exciting');
       await promptlab.toggleCosmo(true);
       await promptlab.toggleRufus(true);
 
-      // 步骤 4: 选择报告模块
-      console.log('  4️⃣ 选择分析报告模块...');
+      // 步骤 5: 选择报告模块
+      console.log('  5️⃣ 选择分析报告模块...');
       const sectionsCount = await promptlab.page.locator('#report-sections-container input[type="checkbox"]').count();
       if (sectionsCount > 0) {
         await promptlab.selectAllReportSections();
@@ -411,8 +414,8 @@ function getPromptKeywordTerms(dna: { keywordsTier1?: string; keywordsTier2?: st
       const expectedPromptTerms = getPromptKeywordTerms(currentProductDna);
       expect(expectedPromptTerms.length, '生成 Prompt 前应该有当前表单关键词').toBeGreaterThan(0);
 
-      // 步骤 5: 生成 Listing Prompt
-      console.log('  5️⃣ 生成 Listing Prompt...');
+      // 步骤 6: 生成 Listing Prompt
+      console.log('  6️⃣ 生成 Listing Prompt...');
       await promptlab.generateListingPrompt({ expectedTerms: expectedPromptTerms });
       await promptlab.wait(1500);
 

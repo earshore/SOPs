@@ -24,6 +24,7 @@ const deepChatTemplate = `
         </div>
         <div class="playground-chat-wrap">
           <deep-chat id="playground-chat" class="playground-chat"></deep-chat>
+          <button id="playground-stop-generation" type="button" hidden>Stop</button>
         </div>
       </section>
       <aside id="playground-prompt-rail">
@@ -461,12 +462,17 @@ describe('deep-chat playground request stopping', () => {
       expect(signals.stopClicked.listener).not.toBe(originalStopListener);
     });
 
-    signals.stopClicked.listener();
+    const stopButton = queryRequired<HTMLButtonElement>(container, '#playground-stop-generation');
+    expect(stopButton.hidden).toBe(false);
+    expect(stopButton.dataset.threadId).toBe('thread-1');
+
+    stopButton.click();
 
     await vi.waitFor(() => {
       expect(onClose).toHaveBeenCalled();
     });
 
+    expect(container.querySelector('#playground-thread-list')?.textContent).not.toContain('生成中');
     expectStoredAssistantMessage(mocks.localDataStore.set, '已停止生成。');
     expect(mocks.localDataStore.set).toHaveBeenCalledWith(
       'user:playground_deep_chat_threads_v1',

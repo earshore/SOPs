@@ -1036,22 +1036,9 @@ function setupSubmitStopButtonSync(
   attempts = 10
 ): void {
   clearSubmitStopButtonSync();
-  const root = chat.shadowRoot;
-  if (!root) {
-    if (attempts > 0) {
-      submitStopButtonSyncRetryTimer = window.setTimeout(
-        () => setupSubmitStopButtonSync(container, chat, attempts - 1),
-        80
-      );
-    }
-    syncSubmitStopButtonState(container);
-    return;
-  }
-
   const onSubmitButtonStopIntent = (event: Event): void => {
-    const target = event.target instanceof Element ? event.target : null;
-    const button = target?.closest('.input-button.inside-end');
-    const threadId = threadStore.activeThreadId;
+    const button = getSubmitButtonFromEventPath(event, chat);
+    const threadId = button?.getAttribute('data-playground-stop-thread-id') || threadStore.activeThreadId;
     if (!button || !pendingRequests.has(threadId)) {
       return;
     }
@@ -1065,13 +1052,70 @@ function setupSubmitStopButtonSync(
     }
   };
 
-  root.addEventListener('pointerdown', onSubmitButtonStopIntent, true);
-  root.addEventListener('click', onSubmitButtonStopIntent, true);
+  document.addEventListener('pointerdown', onSubmitButtonStopIntent, true);
+  document.addEventListener('click', onSubmitButtonStopIntent, true);
+  const root = chat.shadowRoot;
+  if (root) {
+    root.addEventListener('pointerdown', onSubmitButtonStopIntent, true);
+    root.addEventListener('click', onSubmitButtonStopIntent, true);
+  } else if (attempts > 0) {
+    submitStopButtonSyncRetryTimer = window.setTimeout(
+      () => setupSubmitStopButtonSync(container, chat, attempts - 1),
+      80
+    );
+  }
+
   cleanupSubmitStopButtonListener = () => {
-    root.removeEventListener('pointerdown', onSubmitButtonStopIntent, true);
-    root.removeEventListener('click', onSubmitButtonStopIntent, true);
+    document.removeEventListener('pointerdown', onSubmitButtonStopIntent, true);
+    document.removeEventListener('click', onSubmitButtonStopIntent, true);
+    root?.removeEventListener('pointerdown', onSubmitButtonStopIntent, true);
+    root?.removeEventListener('click', onSubmitButtonStopIntent, true);
   };
   syncSubmitStopButtonState(container);
+}
+
+function getSubmitButtonFromEventPath(event: Event, chat: DeepChatElement): Element | null {
+  const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+  if (path.length > 0 && !path.includes(chat)) {
+    return null;
+  }
+
+  const pathButton = path.find(
+    (target): target is Element =>
+      target instanceof Element &&
+      target.classList.contains('input-button') &&
+      target.classList.contains('inside-end')
+  );
+  if (pathButton) {
+    return pathButton;
+  }
+
+  const coordinateButton = getSubmitButtonFromPointerEvent(event, chat);
+  if (coordinateButton) {
+    return coordinateButton;
+  }
+
+  const target = event.target instanceof Element ? event.target : null;
+  return target?.closest('.input-button.inside-end') || null;
+}
+
+function getSubmitButtonFromPointerEvent(event: Event, chat: DeepChatElement): Element | null {
+  if (!(event instanceof MouseEvent)) {
+    return null;
+  }
+
+  const button = chat.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+  if (!button) {
+    return null;
+  }
+
+  const rect = button.getBoundingClientRect();
+  const isInsideButton =
+    event.clientX >= rect.left &&
+    event.clientX <= rect.right &&
+    event.clientY >= rect.top &&
+    event.clientY <= rect.bottom;
+  return isInsideButton ? button : null;
 }
 
 function clearSubmitStopButtonSync(): void {
@@ -1084,6 +1128,9 @@ function clearSubmitStopButtonSync(): void {
 }
 
 function syncSubmitStopButtonState(container: HTMLElement): void {
+  const isPending = pendingRequests.has(threadStore.activeThreadId);
+  syncStopOverlayState(container, isPending);
+
   const button = getChat(container)?.shadowRoot?.querySelector<HTMLElement>(
     '.input-button.inside-end'
   );
@@ -1091,11 +1138,30 @@ function syncSubmitStopButtonState(container: HTMLElement): void {
     return;
   }
 
-  const isPending = pendingRequests.has(threadStore.activeThreadId);
   const label = isPending ? '停止生成' : '发送消息';
   button.toggleAttribute('data-playground-stop-active', isPending);
+  if (isPending) {
+    button.setAttribute('data-playground-stop-thread-id', threadStore.activeThreadId);
+  } else {
+    button.removeAttribute('data-playground-stop-thread-id');
+  }
   button.setAttribute('aria-label', label);
   button.title = label;
+}
+
+function syncStopOverlayState(container: HTMLElement, isPending: boolean): void {
+  const stopButton = container.querySelector<HTMLButtonElement>('#playground-stop-generation');
+  if (!stopButton) {
+    return;
+  }
+
+  stopButton.hidden = !isPending;
+  stopButton.disabled = !isPending;
+  if (isPending) {
+    stopButton.dataset.threadId = threadStore.activeThreadId;
+  } else {
+    delete stopButton.dataset.threadId;
+  }
 }
 
 function bindControls(container: HTMLElement): void {
@@ -1103,6 +1169,7 @@ function bindControls(container: HTMLElement): void {
   const refreshButton = container.querySelector<HTMLButtonElement>('#playground-refresh-config');
   const clearButton = container.querySelector<HTMLButtonElement>('#playground-clear-chat');
   const railToggleButton = container.querySelector<HTMLButtonElement>('#playground-toggle-rail');
+  const stopButton = container.querySelector<HTMLButtonElement>('#playground-stop-generation');
   const systemPromptInput = container.querySelector<HTMLTextAreaElement>(
     '#playground-system-prompt'
   );
@@ -1116,6 +1183,7 @@ function bindControls(container: HTMLElement): void {
   const promptList = container.querySelector<HTMLElement>('#playground-prompt-list');
 
   bindModelControls(container, modelSelect, refreshButton, clearButton, railToggleButton);
+  bindStopOverlayControl(container, stopButton);
   bindThreadControls(container, threadList, promptList);
   bindTuningControls({
     systemPromptInput,
@@ -1124,6 +1192,21 @@ function bindControls(container: HTMLElement): void {
     resetTuningButton,
     tuningPanel,
   });
+}
+
+function bindStopOverlayControl(
+  container: HTMLElement,
+  stopButton: HTMLButtonElement | null
+): void {
+  const onStop = (event: MouseEvent): void => {
+    event.preventDefault();
+    const threadId = stopButton?.dataset.threadId || threadStore.activeThreadId;
+    stopPendingRequest(threadId);
+  };
+
+  stopButton?.addEventListener('click', onStop);
+  cleanupCallbacks.push(() => stopButton?.removeEventListener('click', onStop));
+  syncStopOverlayState(container, pendingRequests.has(threadStore.activeThreadId));
 }
 
 function bindModelControls(
@@ -1629,18 +1712,30 @@ async function handlePlaygroundRequest(
     saveFailedPlaygroundResponse(pendingThreadId, responseText);
     await emitDeepChatResponse(signals, { text: responseText });
   } finally {
-    if (pendingThreadId && lifecyclePendingRequest) {
-      const pendingRequest = pendingRequests.get(pendingThreadId);
-      if (pendingRequest === lifecyclePendingRequest) {
-        if (pendingRequest.abortReason === 'stopped') {
-          preserveStoppedResponse(pendingThreadId);
-        }
-        pendingRequests.delete(pendingThreadId);
-        syncPendingRequestView(pendingThreadId, { replaceChat: true });
-      }
-    }
+    cleanupLifecyclePendingRequest(pendingThreadId, lifecyclePendingRequest);
     signals.onClose?.();
   }
+}
+
+function cleanupLifecyclePendingRequest(
+  threadId: string | null,
+  lifecyclePendingRequest: PendingPlaygroundRequest | null
+): void {
+  if (!threadId || !lifecyclePendingRequest) {
+    return;
+  }
+
+  const pendingRequest = pendingRequests.get(threadId);
+  if (pendingRequest !== lifecyclePendingRequest) {
+    return;
+  }
+
+  if (pendingRequest.abortReason === 'stopped') {
+    preserveStoppedResponse(threadId);
+  }
+  pendingRequests.delete(threadId);
+  renderMountedThreadList();
+  syncPendingRequestView(threadId, { replaceChat: true });
 }
 
 async function preparePlaygroundRequest(
@@ -1788,6 +1883,7 @@ function stopPendingRequest(
   abortPendingPlaygroundRequest(pendingRequest, 'stopped');
   preserveStoppedResponse(threadId);
   pendingRequests.delete(threadId);
+  renderMountedThreadList();
   syncPendingRequestView(threadId, { replaceChat: options.replaceChat ?? true });
   return true;
 }
@@ -2387,6 +2483,13 @@ function renderThreadList(container: HTMLElement): void {
       })
       .join('')
   );
+}
+
+function renderMountedThreadList(): void {
+  const container = getMountedRenderContainer();
+  if (container) {
+    renderThreadList(container);
+  }
 }
 
 function renderPromptDraftList(container: HTMLElement): void {
