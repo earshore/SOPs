@@ -97,16 +97,22 @@
                         <button
                             class="kt-btn-disabled relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all duration-300"
                             id="kt-translate-btn"
+                            aria-describedby="kt-translate-status"
                             disabled>
                             <!-- Progress Bar -->
                             <div class="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-20 hidden transition-all duration-300"
-                                id="kt-translate-progress" style="width:0%"></div>
+                                id="kt-translate-progress" style="width:0%" role="progressbar"
+                                aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+                                aria-label="AI 翻译进度"></div>
                             <i class="fas fa-language relative z-10 text-sm"></i>
-                            <span class="relative z-10 text-xs" id="kt-translate-btn-text">AI 沉浸式翻译</span>
+                            <span class="relative z-10 text-xs" id="kt-translate-btn-text" aria-live="polite"
+                                aria-atomic="true">AI 沉浸式翻译</span>
                             <span
                                 class="hidden relative z-10 text-[10px] font-bold bg-white/20 px-1.5 py-0.5 rounded-full"
                                 id="translate-btn-percent">0%</span>
                         </button>
+                        <span id="kt-translate-status" class="sr-only" role="status" aria-live="polite"
+                            aria-atomic="true">AI 翻译未开始</span>
                     </div>
                 </div>
             </div>

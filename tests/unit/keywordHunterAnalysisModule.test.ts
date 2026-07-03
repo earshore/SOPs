@@ -296,6 +296,8 @@ it('shows loading phases, renders successful analysis, and stores raw markdown',
   await Promise.resolve();
 
   expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('分析中…');
+  expect(container.querySelector('#kt-loading-state')?.getAttribute('role')).toBe('status');
+  expect(container.querySelector('#kt-loading-state')?.getAttribute('aria-live')).toBe('polite');
   expect(container.querySelector('#kt-loading-state')?.textContent).toContain(
     '正在读取文案与关键词数据'
   );
@@ -460,6 +462,9 @@ it('warns on empty copy and renders validation errors without reporting to Error
   });
 
   expect(ErrorService.handle).not.toHaveBeenCalled();
+  expect(container.querySelector('#kt-llm-analysis-result [role="alert"]')?.textContent).toContain(
+    '无法进行分析'
+  );
   expect(container.querySelector('#kt-llm-analysis-result')?.textContent).toContain(
     '输入内容过短或不具备 Amazon Listing 特征'
   );
@@ -478,6 +483,9 @@ it('reports non-validation failures and supports retrying from the rendered erro
   });
   expect(container.querySelector('#kt-llm-analysis-result')?.textContent).toContain(
     '服务暂时不可用 (503)'
+  );
+  expect(container.querySelector('#kt-llm-analysis-result [role="alert"]')?.textContent).toContain(
+    '分析失败'
   );
 
   mockedCallLLM.mockResolvedValueOnce(scoredMarkdown);

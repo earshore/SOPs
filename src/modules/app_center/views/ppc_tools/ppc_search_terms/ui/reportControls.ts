@@ -1,6 +1,6 @@
 import { REPORT_LABELS } from '../actions/actionMetadata';
 import type { ColumnMapping } from '../columns/columns';
-import { getTextarea, setButtonContent, setText } from './dom';
+import { getElement, getTextarea, setButtonContent, setText } from './dom';
 import type { FilterType } from '../utils/filters';
 import { renderFilterButtons } from '../results/resultsRenderer';
 import type { ReportType } from '../types';
@@ -43,11 +43,25 @@ export function renderMappingStatus(
 ): void {
   const fields = Object.values(mapping.found).filter(Boolean);
   const statusText = status ? ` ${status}` : '';
-  setText(
+  setPpcStatus(
     container,
-    'ppc-mapping-status',
     `已识别为${REPORT_LABELS[mapping.reportType]}，匹配 ${fields.length} 个字段，原始 ${totalRows} 行，有效 ${validRows} 行。${statusText}`
   );
+}
+
+export function setPpcStatus(
+  container: HTMLElement,
+  message: string,
+  tone: 'status' | 'error' = 'status'
+): void {
+  const element = getElement(container, 'ppc-mapping-status');
+  if (!element) return;
+
+  element.textContent = message;
+  element.setAttribute('role', tone === 'error' ? 'alert' : 'status');
+  element.setAttribute('aria-live', tone === 'error' ? 'assertive' : 'polite');
+  element.setAttribute('aria-atomic', 'true');
+  element.classList.toggle('ppc-status-line--error', tone === 'error');
 }
 
 function getReportPlaceholder(reportType: ReportType): string {

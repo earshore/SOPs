@@ -197,6 +197,14 @@ describe('initRouter navigation and teardown', () => {
       skipMiddleware: false,
     });
 
+    window.location.hash = '#/home';
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    expect(mocks.router.navigate).toHaveBeenCalledWith('/home', {
+      updateHistory: false,
+      replace: false,
+      skipMiddleware: false,
+    });
+
     window.location.hash = '';
     triggerInitialNavigation();
     expect(mocks.router.navigate).toHaveBeenCalledWith('/home', {
@@ -258,6 +266,7 @@ describe('initRouter navigation and teardown', () => {
 
     expect(consoleError).toHaveBeenCalledWith('[initRouter] Conversion errors:', ['bad route']);
     expect(removeEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
+    expect(removeEventListener).toHaveBeenCalledWith('hashchange', expect.any(Function));
     expect(mocks.router.destroy).toHaveBeenCalledTimes(1);
     expect(mocks.storeState.reset).toHaveBeenCalledTimes(1);
     expect(() => getRouter()).toThrow('Router not initialized');

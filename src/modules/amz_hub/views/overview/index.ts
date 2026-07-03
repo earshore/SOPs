@@ -16,14 +16,12 @@ function initOverviewEvents(container: HTMLElement): void {
     btn.addEventListener('click', () => {
       // 移除所有按钮的 active 状态
       filterBtns.forEach(b => {
-        b.classList.remove('active', 'bg-blue-500', 'text-white', 'hover:bg-blue-600');
-        b.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
+        b.classList.remove('active');
         b.setAttribute('aria-pressed', 'false');
       });
 
       // 添加当前按钮的 active 状态
       btn.classList.add('active');
-      btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
       btn.setAttribute('aria-pressed', 'true');
 
       // 执行筛选

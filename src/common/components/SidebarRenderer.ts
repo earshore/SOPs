@@ -701,6 +701,7 @@ export class SidebarRenderer {
         <!-- Input -->
         <input type="text" id="sidebar-search-input"
           aria-label="${this.searchPlaceholder}"
+          aria-controls="sidebar-search-results sidebar-nav-container"
           placeholder="${this.searchPlaceholder}"
           class="sidebar-search-input w-full pl-10 pr-8 py-2 text-[12px] border border-slate-200 rounded-xl
             bg-white/80 backdrop-blur-sm
@@ -720,6 +721,10 @@ export class SidebarRenderer {
 
         <!-- Search Results Dropdown -->
         <div id="sidebar-search-results"
+          role="region"
+          aria-label="侧边栏搜索结果"
+          aria-live="polite"
+          aria-hidden="true"
           class="hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-sm
             border border-slate-200 shadow-xl shadow-slate-200/50
             rounded-xl mt-1.5 max-h-60 overflow-y-auto z-50 p-1"

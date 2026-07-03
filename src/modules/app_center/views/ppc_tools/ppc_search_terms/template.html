@@ -95,16 +95,22 @@
             id="ppc-file-input"
             type="file"
             class="sr-only"
+            aria-describedby="ppc-file-name ppc-mapping-status"
             accept=".csv,.tsv,.txt,.xlsx,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           />
         </label>
         <div class="ppc-paste-column">
-          <label for="ppc-paste-input" class="sr-only">粘贴广告报表内容</label>
+          <label for="ppc-paste-input" class="ppc-field-label">粘贴广告报表内容</label>
           <textarea
             id="ppc-paste-input"
             class="ppc-textarea w-full min-h-[150px] rounded-lg border border-slate-300 p-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             placeholder="也可以直接粘贴 Search Term 报表内容，首行需要包含列名。"
+            aria-describedby="ppc-paste-help ppc-paste-error ppc-mapping-status"
           ></textarea>
+          <p id="ppc-paste-help" class="ppc-field-helper">
+            首行必须包含列名；文件导入和粘贴内容二选一即可。
+          </p>
+          <p id="ppc-paste-error" class="ppc-field-error hidden" role="alert"></p>
           <div class="flex flex-wrap gap-2 mt-3">
             <button id="ppc-btn-parse" type="button" class="ppc-primary-action">
               <i class="fas fa-chart-line"></i>分析当前数据
@@ -115,7 +121,13 @@
           </div>
         </div>
       </div>
-      <div id="ppc-mapping-status" class="ppc-status-line"></div>
+      <div
+        id="ppc-mapping-status"
+        class="ppc-status-line"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      ></div>
     </div>
 
     <div class="ppc-panel ppc-settings-panel">
@@ -131,8 +143,11 @@
           value="广告负责人"
           class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           placeholder="例如：广告负责人 / 运营同学"
+          aria-describedby="ppc-action-owner-help"
         />
-        <span class="block text-slate-500 mt-1">用于动作清单 Owner 和周复盘的下次动作负责人。</span>
+        <span id="ppc-action-owner-help" class="block text-slate-500 mt-1"
+          >用于动作清单 Owner 和周复盘的下次动作负责人。</span
+        >
       </label>
       <div class="ppc-delivery-note">
         <div class="font-bold text-emerald-800 text-sm mb-1">交付口径</div>
@@ -241,6 +256,7 @@
           type="search"
           autocomplete="off"
           placeholder="搜索词 / 活动 / 店铺 / 原因"
+          aria-describedby="ppc-result-count"
         />
       </label>
       <button id="ppc-action-search-clear" type="button" class="ppc-search-clear-btn" disabled>

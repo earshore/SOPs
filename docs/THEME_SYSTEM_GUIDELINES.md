@@ -72,7 +72,7 @@ npm run generate:tokens
 
 | 区域 | 当前主题来源 | 页面主视觉 |
 | --- | --- | --- |
-| 首页 | `themeColor: slate` | 中性工作台，不使用品牌大 hero |
+| 首页 | `themeColor: slate` | 保留全屏 splash / 粒子 hero；工作台只作为极简浮动入口 |
 | SOPs 总览 | `themeColor: blue` | blue / indigo，仅用于总览入口 |
 | SOPs 运营与推广 | `category.color: emerald` | `wb-theme-growth` |
 | SOPs 供应链与物流 | `category.color: amber` | `wb-theme-supply` |
@@ -143,7 +143,7 @@ npm run generate:tokens
 
 - 普通工具页使用紧凑 banner 或隐藏 banner。
 - Banner 只放页面名称、一句话说明、必要能力标签。
-- 工具页默认不显示 orb / particle。
+- 工具页默认不显示 orb / particle；只有显式叠加 `.wb-container--decorative` 的总览 hero 可保留轻装饰。
 - 背景必须低饱和、低透明，文本对比度优先。
 - 主题变量由 `wb-theme-*` 提供，模块样式不得大面积覆盖 `--wb-*`。
 
@@ -163,17 +163,18 @@ npm run generate:tokens
 - 首页或工具页自定义 cursor。
 - 工具页全屏品牌 hero。
 - 大面积高饱和渐变背景。
-- 持续漂浮 orb、particle、bokeh、复杂光效。
+- 工具页或普通面板持续漂浮 orb、particle、bokeh、复杂光效。
 - hover 上浮导致面板位置变化。
 - 用 emoji 承担导航、按钮或状态语义。
 
 允许：
 
+- 首页保留旧版全屏 splash / 粒子 hero，但不得把首屏主体改成工作台面板；工作台入口应以右下角等低干扰浮层出现。
 - Loading skeleton。
 - Toast / modal / drawer 的进入退出动效。
 - 按钮 pressed feedback。
 - 数据加载或任务进度的明确动效。
-- 模块总览入口的轻微装饰，但首屏必须露出实际入口或工作内容。
+- 模块总览入口的轻微装饰，但首屏必须露出实际入口或工作内容；首页例外为完整品牌 splash 加极简浮动入口。
 
 所有动效必须满足：
 
@@ -220,13 +221,14 @@ npm run generate:tokens
 | App Center overview | `--app-overview-accent*` | 映射到 `--color-cyan-*`，仅表达应用中心总览主色。 |
 | App Center overview | `--app-overview-surface*`、`--app-overview-border*`、`--app-overview-shadow` | 映射到 `--surface-*`、`--border-*`、`--shadow-panel`。 |
 | App Center overview | `--app-overview-text-*`、`--app-overview-radius`、`--app-overview-pill-radius`、`--app-overview-focus-ring` | 映射到 `--color-text-*`、`--rounded-*`、`--focus-ring-soft` 派生值。 |
+| Shared buttons | `--button-filter-*` | 筛选按钮组件 token，默认映射到全局 surface / border / text / focus token，模块仅覆写主题色。 |
 | PPC tools | `--ppc-surface*`、`--ppc-border*`、`--ppc-text-*` | 映射到 `--surface-*`、`--border-*`、`--color-text-*`。 |
 | PPC tools | `--ppc-primary*`、`--ppc-accent*`、`--ppc-*-soft/text` | 映射到全局主色、emerald 业务强调色和状态色阶；边框通过 `color-mix()` 从全局色派生。 |
 | PPC tools | `--ppc-radius*`、`--ppc-shadow*`、`--ppc-focus-ring`、`--ppc-motion-*` | 映射到 `--rounded-*`、`--shadow-*`、`--focus-ring-soft`、全局 motion token。 |
 | Welcome Banner | `--wb-theme-*`、`--wb-text-*`、`--wb-border-color` | 映射到全局色阶、`--color-text-*`、`--border-subtle`。 |
 | Welcome Banner | `--wb-card-*`、`--wb-tag-*`、`--wb-badge-*` | 映射到 `--surface-*`、`--shadow-panel`、`--rounded-full`、字号和状态色派生值。 |
 | Welcome Banner | `--wb-icon-*`、`--wb-icon-badge-*` | 颜色映射到全局色阶；尺寸和偏移是组件几何规格，保留在 `wb` 命名空间并由 `VISUAL_DESIGN_GUIDELINES.md` 约束。 |
-| Welcome Banner | `--wb-gradient-*`、`--wb-orb-*`、`--wb-particle-color` | 仅用于 legacy banner 装饰层，必须从 `--wb-theme-*` 或全局色阶派生；工具页默认不应新增。 |
+| Welcome Banner | `--wb-gradient-*`、`--wb-orb-*`、`--wb-particle-color` | 仅用于 `.wb-container--decorative` 或 legacy banner 装饰层，必须从 `--wb-theme-*` 或全局色阶派生；工具页默认不应新增。 |
 
 不允许：
 

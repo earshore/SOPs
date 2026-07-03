@@ -230,52 +230,19 @@
 }
 
 .amz-hub-filter-panel {
+  --button-filter-accent: var(--color-orange-600, #ea580c);
+  --button-filter-hover-bg: var(--color-orange-50, #fff7ed);
+  --button-filter-hover-border: rgba(220, 38, 38, 0.24);
+  --button-filter-hover-color: var(--color-orange-700, #c2410c);
+  --button-filter-focus-color: var(--color-orange-500, #f97316);
+  --button-filter-focus-ring: rgba(249, 115, 22, 0.14);
+
   padding: 0.75rem;
   border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24)) !important;
   border-radius: var(--radius-panel, 8px);
   background: var(--surface-panel, #ffffff);
   box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
   scrollbar-width: thin;
-}
-
-.amz-hub-filter-panel .category-filter-btn {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.5rem;
-  border: 1px solid rgba(203, 213, 225, 0.82) !important;
-  border-radius: var(--radius-card, 8px) !important;
-  background: rgba(255, 255, 255, 0.9) !important;
-  color: #334155 !important;
-  transition:
-    background-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    border-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
-    box-shadow 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
-}
-
-.amz-hub-filter-panel .category-filter-btn.active {
-  border-color: transparent !important;
-  background: linear-gradient(135deg, var(--color-orange-500), var(--color-red-600)) !important;
-  color: #fff !important;
-  box-shadow: 0 8px 18px -16px rgba(249, 115, 22, 0.75);
-}
-
-.amz-hub-filter-panel .category-filter-btn.category-filter-btn.active,
-.amz-hub-filter-panel .category-filter-btn.category-filter-btn.active i,
-.amz-hub-filter-panel .category-filter-btn.category-filter-btn.active span {
-  color: #ffffff !important;
-}
-
-.amz-hub-filter-panel .category-filter-btn:not(.active):hover {
-  border-color: rgba(220, 38, 38, 0.24) !important;
-  background: var(--color-orange-50) !important;
-  color: #c2410c !important;
-}
-
-.amz-hub-filter-panel .category-filter-btn:focus-visible {
-  outline: 2px solid var(--color-orange-500);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.14);
 }
 
 .amz-hub-overview .sop-card:focus-visible {
@@ -391,14 +358,7 @@
 }
 
 .amz-hub-overview .sop-card {
-  --sop-status-display: inline-flex;
-  --sop-status-min-height: 1.375rem;
-  --sop-status-padding: 0.125rem 0.5rem;
   --sop-status-border: 1px solid rgba(22, 163, 74, 0.16);
-  --sop-status-radius: 999px;
-  --sop-status-font-size: 0.6875rem;
-  --sop-status-font-weight: 700;
-  --sop-status-line-height: 1;
   --sop-status-active-bg: rgba(220, 252, 231, 0.78);
   --sop-status-active-color: #15803d;
   --sop-status-active-border-color: rgba(22, 163, 74, 0.16);

@@ -141,3 +141,107 @@
 .qa-action-btn i {
   font-size: var(--text-xs);
 }
+
+/* ===== Overview 筛选按钮 ===== */
+.category-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid
+    var(--button-filter-border, var(--border-muted, rgba(203, 213, 225, 0.82))) !important;
+  border-radius: var(--radius-card, 8px) !important;
+  background: var(--button-filter-bg, var(--surface-card, #ffffff)) !important;
+  color: var(
+    --button-filter-color,
+    var(--color-text-secondary, var(--color-slate-700, #334155))
+  ) !important;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  transition:
+    background-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.category-filter-btn:not(.active):not([aria-pressed='true']):hover {
+  border-color: var(
+    --button-filter-hover-border,
+    var(--border-strong, rgba(148, 163, 184, 0.42))
+  ) !important;
+  background: var(
+    --button-filter-hover-bg,
+    var(--surface-card-hover, var(--color-slate-50, #f8fafc))
+  ) !important;
+  color: var(
+    --button-filter-hover-color,
+    var(--button-filter-color, var(--color-text-secondary, var(--color-slate-700, #334155)))
+  ) !important;
+}
+
+.category-filter-btn.active,
+.category-filter-btn[aria-pressed='true'] {
+  border-color: var(
+    --button-filter-active-border,
+    var(--button-filter-accent, var(--color-primary, var(--color-blue-600, #2563eb)))
+  ) !important;
+  background: var(
+    --button-filter-active-bg,
+    var(--button-filter-accent, var(--color-primary, var(--color-blue-600, #2563eb)))
+  ) !important;
+  color: var(--button-filter-active-color, #ffffff) !important;
+  box-shadow: var(--button-filter-active-shadow, none);
+}
+
+.category-filter-btn.active i,
+.category-filter-btn.active span,
+.category-filter-btn[aria-pressed='true'] i,
+.category-filter-btn[aria-pressed='true'] span {
+  color: inherit !important;
+}
+
+.category-filter-btn:focus-visible {
+  outline: 2px solid
+    var(
+      --button-filter-focus-color,
+      var(--button-filter-accent, var(--color-primary, var(--color-blue-600, #2563eb)))
+    );
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px
+    var(
+      --button-filter-focus-ring,
+      color-mix(
+        in srgb,
+        var(--button-filter-accent, var(--color-primary, var(--color-blue-600, #2563eb))) 16%,
+        transparent
+      )
+    );
+}
+
+.category-filter-btn em {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.375rem;
+  border-radius: var(--rounded-full, 9999px);
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  color: inherit;
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.category-filter-btn.active em,
+.category-filter-btn[aria-pressed='true'] em {
+  background: color-mix(in srgb, var(--button-filter-active-color, #ffffff) 18%, transparent);
+}

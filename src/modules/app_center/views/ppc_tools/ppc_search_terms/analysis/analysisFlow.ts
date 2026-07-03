@@ -13,7 +13,7 @@ import {
   saveReportSelection,
   saveThresholds,
 } from '../settings/settings';
-import { renderMappingStatus } from '../ui/reportControls';
+import { renderMappingStatus, setPpcStatus } from '../ui/reportControls';
 import type { AnalysisFlowCallbacks } from './analysisFlowTypes';
 
 export type { AnalysisFlowCallbacks } from './analysisFlowTypes';
@@ -29,6 +29,7 @@ export async function analyzeReportText(
   let localResult: AnalysisResult | null = null;
   const { runId, controller } = startAnalysisRun();
   setAnalyzeButtonState(container, true);
+  setPpcStatus(container, '正在分析报表数据，请稍候。');
 
   try {
     const thresholds = readThresholds(container);

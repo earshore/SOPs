@@ -783,6 +783,8 @@ describe('UI Rendering', () => {
     const reportContainer = document.getElementById('report-sections-container');
 
     expect(statusDiv?.textContent).toContain('未检测到分析报告');
+    expect(statusDiv?.getAttribute('role')).toBe('status');
+    expect(statusDiv?.getAttribute('aria-live')).toBe('polite');
     expect(reportContainer?.textContent).toContain('暂无可用数据');
   });
 
@@ -795,6 +797,8 @@ describe('UI Rendering', () => {
 
     const statusDiv = document.getElementById('lab-analysis-status');
     expect(statusDiv?.textContent).toContain('分析报告已就绪');
+    expect(statusDiv?.getAttribute('role')).toBe('status');
+    expect(statusDiv?.getAttribute('aria-atomic')).toBe('true');
   });
 
   it('should generate language options', () => {

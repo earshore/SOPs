@@ -585,52 +585,77 @@ function getTranslationElements(): {
   btn: HTMLButtonElement | null;
   progress: HTMLElement | null;
   text: HTMLElement | null;
+  status: HTMLElement | null;
 } {
   return {
     btn: document.getElementById('kt-translate-btn') as HTMLButtonElement | null,
     progress: document.getElementById('kt-translate-progress'),
     text: document.getElementById('kt-translate-btn-text'),
+    status: document.getElementById('kt-translate-status'),
   };
 }
 
 function renderTranslationPendingState(): void {
-  const { btn, progress, text } = getTranslationElements();
+  const { btn, progress, text, status } = getTranslationElements();
 
   if (btn) {
     btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
     btn.classList.add('kt-btn-disabled');
     btn.classList.remove('kt-btn-active');
   }
   if (progress) {
     progress.classList.remove('hidden');
     progress.style.width = '30%';
+    progress.setAttribute('aria-valuenow', '30');
   }
   if (text) {
     text.textContent = '正在翻译...';
   }
+  if (status) {
+    status.textContent = 'AI 正在翻译文案，请稍候';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+  }
 }
 
 function renderTranslationCompletedState(): void {
-  const { progress } = getTranslationElements();
+  const { btn, progress, status } = getTranslationElements();
+  if (btn) {
+    btn.removeAttribute('aria-busy');
+  }
   if (progress) {
     progress.style.width = '100%';
+    progress.setAttribute('aria-valuenow', '100');
     addTimeout(() => progress.classList.add('hidden'), 500);
+  }
+  if (status) {
+    status.textContent = 'AI 翻译已完成';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
   }
 }
 
 function renderTranslationFailureState(): void {
-  const { btn, progress, text } = getTranslationElements();
+  const { btn, progress, text, status } = getTranslationElements();
 
   if (progress) {
     progress.classList.add('hidden');
+    progress.setAttribute('aria-valuenow', '0');
   }
   if (text) {
-    text.textContent = 'AI 沉浸式翻译';
+    text.textContent = '翻译失败，请重试';
   }
   if (btn) {
     btn.disabled = false;
+    btn.removeAttribute('aria-busy');
     btn.classList.remove('kt-btn-disabled');
     btn.classList.add('kt-btn-active');
+  }
+  if (status) {
+    status.textContent = 'AI 翻译失败，请重试';
+    status.setAttribute('role', 'alert');
+    status.setAttribute('aria-live', 'assertive');
   }
 }
 

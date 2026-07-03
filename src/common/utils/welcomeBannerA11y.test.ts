@@ -33,7 +33,7 @@ it('adds landmark semantics and prunes repeated simple-banner decorations', () =
   expect(banner?.querySelector('.wb-icon')?.getAttribute('aria-hidden')).toBe('true');
 });
 
-it('keeps card-banner decorations while hiding them from assistive tech', () => {
+it('prunes default card-banner decorations', () => {
   const container = document.createElement('div');
 
   setSafeHtml(
@@ -53,11 +53,40 @@ it('keeps card-banner decorations while hiding them from assistive tech', () => 
   );
 
   const banner = container.querySelector<HTMLElement>('.wb-container');
+
+  expect(banner?.querySelector('.wb-bg-gradient')).toBeNull();
+  expect(banner?.querySelector('.wb-orb')).toBeNull();
+  expect(banner?.querySelector('.wb-particle')).toBeNull();
+});
+
+it('keeps explicitly decorative card-banner backgrounds while hiding them from assistive tech', () => {
+  const container = document.createElement('div');
+
+  setSafeHtml(
+    container,
+    `
+        <div class="wb-container wb-container--card wb-container--decorative">
+          <div class="wb-card">
+            <div class="wb-bg-gradient"></div>
+            <div class="wb-orb wb-orb-1"></div>
+            <div class="wb-particle wb-particle-1"></div>
+            <div class="wb-content">
+              <h2 class="wb-title">Overview Banner</h2>
+            </div>
+          </div>
+        </div>
+      `
+  );
+
+  const banner = container.querySelector<HTMLElement>('.wb-container');
+  const gradient = banner?.querySelector('.wb-bg-gradient');
   const orb = banner?.querySelector('.wb-orb');
   const particle = banner?.querySelector('.wb-particle');
 
+  expect(gradient).not.toBeNull();
   expect(orb).not.toBeNull();
   expect(particle).not.toBeNull();
+  expect(gradient?.getAttribute('aria-hidden')).toBe('true');
   expect(orb?.getAttribute('aria-hidden')).toBe('true');
   expect(particle?.getAttribute('role')).toBe('presentation');
 });

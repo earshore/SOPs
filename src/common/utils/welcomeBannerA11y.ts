@@ -14,8 +14,7 @@ const DECORATIVE_SELECTOR = [
   '.ppc-tag-dot',
   '.ppc-stat-label i',
 ].join(', ');
-const SIMPLE_BANNER_STATIC_DECORATION_SELECTOR =
-  '.wb-orb, .wb-particle, .wb-grid-pattern, .wb-bg-gradient';
+const STATIC_DECORATION_SELECTOR = '.wb-orb, .wb-particle, .wb-grid-pattern, .wb-bg-gradient';
 
 let generatedTitleId = 0;
 
@@ -41,6 +40,13 @@ function collectBanners(root: HTMLElement): HTMLElement[] {
   return banners;
 }
 
+function shouldKeepStaticDecoration(banner: HTMLElement): boolean {
+  return (
+    banner.classList.contains('wb-container--decorative') &&
+    !banner.classList.contains('wb-container--hidden')
+  );
+}
+
 export function normalizeWelcomeBanners(root: HTMLElement): void {
   collectBanners(root).forEach(banner => {
     if (!banner.hasAttribute('role') && banner.tagName !== 'SECTION') {
@@ -59,9 +65,9 @@ export function normalizeWelcomeBanners(root: HTMLElement): void {
       decorativeElement.setAttribute('role', 'presentation');
     });
 
-    if (banner.classList.contains('wb-container--simple')) {
+    if (!shouldKeepStaticDecoration(banner)) {
       banner
-        .querySelectorAll<HTMLElement>(SIMPLE_BANNER_STATIC_DECORATION_SELECTOR)
+        .querySelectorAll<HTMLElement>(STATIC_DECORATION_SELECTOR)
         .forEach(decorativeElement => {
           decorativeElement.remove();
         });

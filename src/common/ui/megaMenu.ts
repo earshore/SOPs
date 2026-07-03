@@ -596,6 +596,23 @@ export function renderMoreMenu(): void {
 
 let megaMenuAccessibilityInitialized = false;
 
+function ensureMegaMenuRelationships(group: HTMLElement, index: number): void {
+  const trigger = group.querySelector<HTMLButtonElement>('.nav-trigger');
+  const menu = group.querySelector<HTMLElement>('.mega-menu');
+  if (!trigger || !menu) return;
+
+  if (!trigger.id) {
+    trigger.id = `nav-trigger-${index + 1}`;
+  }
+
+  if (!menu.id) {
+    menu.id = `${trigger.id}-menu`;
+  }
+
+  trigger.setAttribute('aria-controls', menu.id);
+  menu.setAttribute('aria-labelledby', trigger.id);
+}
+
 function setMegaMenuExpanded(group: HTMLElement, expanded: boolean): void {
   const trigger = group.querySelector<HTMLButtonElement>('.nav-trigger');
   const menu = group.querySelector<HTMLElement>('.mega-menu');
@@ -621,13 +638,14 @@ export function closeMegaMenus(options: { except?: HTMLElement; blurActive?: boo
 }
 
 export function initMegaMenuAccessibility(): void {
-  if (megaMenuAccessibilityInitialized) return;
-  megaMenuAccessibilityInitialized = true;
-
   const groups = document.querySelectorAll<HTMLElement>('.nav-group');
-  groups.forEach(group => {
+  groups.forEach((group, index) => {
+    ensureMegaMenuRelationships(group, index);
+
     const trigger = group.querySelector<HTMLButtonElement>('.nav-trigger');
     if (!trigger) return;
+    if (group.dataset.megaMenuA11yInitialized === 'true') return;
+    group.dataset.megaMenuA11yInitialized = 'true';
 
     const setExpanded = (expanded: boolean): void => setMegaMenuExpanded(group, expanded);
     let openedByHover = false;
@@ -675,10 +693,13 @@ export function initMegaMenuAccessibility(): void {
     });
   });
 
-  document.addEventListener('click', event => {
-    const target = event.target as HTMLElement | null;
-    if (!target?.closest('.nav-group')) {
-      closeMegaMenus();
-    }
-  });
+  if (!megaMenuAccessibilityInitialized) {
+    megaMenuAccessibilityInitialized = true;
+    document.addEventListener('click', event => {
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest('.nav-group')) {
+        closeMegaMenus();
+      }
+    });
+  }
 }

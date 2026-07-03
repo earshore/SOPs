@@ -12,8 +12,9 @@ const processMocks = vi.hoisted(() => {
     <section>
       <button id="kt-sync-to-input-btn"></button>
       <button id="kt-go-analysis-btn"></button>
-      <button id="kt-translate-btn"><span id="kt-translate-btn-text"></span></button>
-      <div id="kt-translate-progress" class="hidden"></div>
+      <button id="kt-translate-btn" aria-describedby="kt-translate-status"><span id="kt-translate-btn-text"></span></button>
+      <div id="kt-translate-progress" class="hidden" role="progressbar" aria-valuenow="0"></div>
+      <span id="kt-translate-status" role="status" aria-live="polite" aria-atomic="true"></span>
       <input id="kt-show-translation" type="checkbox" />
       <div id="kt-copy-display"></div>
       <span id="kt-coverage-rate"></span>
@@ -441,7 +442,10 @@ it('handles translation failures without losing the enabled button state', async
     module: 'keywordTracker',
   });
   expect(document.querySelector<HTMLButtonElement>('#kt-translate-btn')?.disabled).toBe(false);
-  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('AI 沉浸式翻译');
+  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('翻译失败，请重试');
+  expect(document.querySelector('#kt-translate-status')?.textContent).toBe('AI 翻译失败，请重试');
+  expect(document.querySelector('#kt-translate-status')?.getAttribute('role')).toBe('alert');
+  expect(document.querySelector('#kt-translate-btn')?.hasAttribute('aria-busy')).toBe(false);
   expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(true);
 });
 

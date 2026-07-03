@@ -20,7 +20,7 @@ import { LEGACY_ROUTE_ALIASES, shouldReplaceLegacyRoute } from './legacyRouteAli
 // 全局路由实例
 let routerInstance: NavigoAdapter | null = null;
 let storeInstance: ReturnType<typeof createRouterStore> | null = null;
-let popstateNavigationHandler: (() => void) | null = null;
+let browserNavigationHandler: (() => void) | null = null;
 
 type ConversionResult = ReturnType<typeof convertMenuConfig>;
 type RouterStoreSyncInstance = ReturnType<typeof createRouterStoreSync>;
@@ -83,12 +83,18 @@ function configureRouteMiddlewares(router: NavigoAdapter): void {
   });
 }
 
-function setupPopstateNavigation(): void {
-  popstateNavigationHandler = () => {
+function setupBrowserNavigation(): void {
+  browserNavigationHandler = () => {
     const hash = window.location.hash.replace('#', '');
     if (hash && routerInstance) {
       const normalizedHash = normalizeRoutePath(hash);
       const shouldReplaceLegacyPath = shouldReplaceLegacyRoute(normalizedHash);
+      const currentRoute = routerInstance.getCurrentRoute();
+
+      if (!shouldReplaceLegacyPath && currentRoute?.path === normalizedHash) {
+        return;
+      }
+
       routerInstance.navigate(normalizedHash, {
         updateHistory: shouldReplaceLegacyPath ? true : false,
         replace: shouldReplaceLegacyPath,
@@ -97,7 +103,8 @@ function setupPopstateNavigation(): void {
     }
   };
 
-  window.addEventListener('popstate', popstateNavigationHandler);
+  window.addEventListener('popstate', browserNavigationHandler);
+  window.addEventListener('hashchange', browserNavigationHandler);
 }
 
 /**
@@ -113,7 +120,7 @@ export function initRouter(): NavigoAdapter {
   registerConvertedRoutes(routerInstance, conversionResult);
   createAndAttachStoreSync(routerInstance);
   configureRouteMiddlewares(routerInstance);
-  setupPopstateNavigation();
+  setupBrowserNavigation();
 
   return routerInstance;
 }
@@ -150,9 +157,10 @@ export function getRouterStore(): ReturnType<typeof createRouterStore> {
  * 销毁路由系统
  */
 export function destroyRouter(): void {
-  if (popstateNavigationHandler) {
-    window.removeEventListener('popstate', popstateNavigationHandler);
-    popstateNavigationHandler = null;
+  if (browserNavigationHandler) {
+    window.removeEventListener('popstate', browserNavigationHandler);
+    window.removeEventListener('hashchange', browserNavigationHandler);
+    browserNavigationHandler = null;
   }
 
   if (routerInstance) {

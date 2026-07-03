@@ -9,12 +9,18 @@ import { KeywordHunterSnapshotService } from '@/modules/app_center/views/keyword
 function createKeywordHunterTemplate(): string {
   return `
     <section>
-      <textarea id="kt-keywords-input"></textarea>
+      <h2 id="kt-keywords-input-label">关键词列表</h2>
+      <textarea id="kt-keywords-input" aria-labelledby="kt-keywords-input-label"
+        aria-describedby="kt-keywords-input-helper kt-keyword-count-label kt-duplicate-badge"></textarea>
+      <p id="kt-keywords-input-helper">每行一个关键词，支持多语种；清理格式会自动去重。</p>
       <div id="kt-keyword-highlight-layer"></div>
-      <span id="kt-keyword-count"></span>
+      <span id="kt-keyword-count-label"><span id="kt-keyword-count"></span></span>
       <span id="kt-duplicate-badge" class="hidden"><span id="kt-duplicate-count"></span></span>
-      <textarea id="kt-copy-input"></textarea>
-      <span id="copy-char-count"></span>
+      <h2><span id="kt-copy-input-label">目标 Listing 文案</span></h2>
+      <textarea id="kt-copy-input" aria-labelledby="kt-copy-input-label"
+        aria-describedby="kt-copy-input-helper copy-char-count-label"></textarea>
+      <span id="kt-copy-input-helper">Tip: 包含完整 Listing 内容可提升分析精度</span>
+      <span id="copy-char-count-label"><span id="copy-char-count"></span></span>
       <button id="kt-btn-clean-kw"></button>
       <button id="kt-btn-undo-kw-clean"></button>
       <button id="kt-btn-clean-copy"></button>
@@ -23,7 +29,7 @@ function createKeywordHunterTemplate(): string {
       <button id="kt-btn-start-analysis"></button>
       <button id="kt-input-snapshot-save"></button>
       <span id="kt-input-snapshot-count"></span>
-      <span id="kt-input-draft-status">
+      <span id="kt-input-draft-status" role="status" aria-live="polite" aria-atomic="true">
         <span id="kt-input-draft-label"></span>
         <span id="kt-input-draft-detail"></span>
       </span>
@@ -313,10 +319,23 @@ it('mounts the template, restores inputs, updates counters, and registers action
     'alpha\nbeta\nalpha'
   );
   expect(container.querySelector('#kt-keyword-count')?.textContent).toBe('3');
+  expect(container.querySelector('#kt-keywords-input')?.getAttribute('aria-labelledby')).toBe(
+    'kt-keywords-input-label'
+  );
+  expect(container.querySelector('#kt-keywords-input')?.getAttribute('aria-describedby')).toContain(
+    'kt-keywords-input-helper'
+  );
   expect(container.querySelector('#kt-duplicate-badge')?.classList.contains('hidden')).toBe(false);
   expect(container.querySelector('#kt-duplicate-count')?.textContent).toBe('1');
   expect(container.querySelector('#copy-char-count')?.textContent).toBe('10');
+  expect(container.querySelector('#kt-copy-input')?.getAttribute('aria-labelledby')).toBe(
+    'kt-copy-input-label'
+  );
+  expect(container.querySelector('#kt-copy-input')?.getAttribute('aria-describedby')).toContain(
+    'kt-copy-input-helper'
+  );
   expect(container.querySelector('#kt-input-draft-status')?.textContent).toContain('本机草稿');
+  expect(container.querySelector('#kt-input-draft-status')?.getAttribute('role')).toBe('status');
   expect(container.querySelector<HTMLButtonElement>('#kt-btn-undo-kw-clean')?.disabled).toBe(true);
   expect(registerActionsWithLegacy).toHaveBeenCalledWith(
     expect.objectContaining({

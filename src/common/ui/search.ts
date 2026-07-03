@@ -56,7 +56,9 @@ function resetSearchView(
   clearBtn: HTMLElement | null
 ): void {
   resultsContainer?.classList.add('hidden');
+  resultsContainer?.setAttribute('aria-hidden', 'true');
   navContainer?.classList.remove('hidden');
+  navContainer?.setAttribute('aria-hidden', 'false');
   clearBtn?.classList.add('hidden');
 }
 
@@ -145,7 +147,9 @@ function searchMenuRoutes(query: string, config: MenuSearchConfig): void {
   }
 
   resultsContainer.classList.remove('hidden');
+  resultsContainer.setAttribute('aria-hidden', 'false');
   navContainer?.classList.add('hidden');
+  navContainer?.setAttribute('aria-hidden', 'true');
 }
 
 /**
@@ -221,7 +225,9 @@ export function searchSidebar(query: string): void {
 
   if (!query.trim()) {
     resultsContainer.classList.add('hidden');
+    resultsContainer.setAttribute('aria-hidden', 'true');
     navContainer.classList.remove('hidden');
+    navContainer.setAttribute('aria-hidden', 'false');
     return;
   }
 
@@ -250,12 +256,16 @@ export function searchSidebar(query: string): void {
   if (matches.length === 0) {
     appendEmptyResult(resultsContainer, '未找到匹配项', true);
     resultsContainer.classList.remove('hidden');
+    resultsContainer.setAttribute('aria-hidden', 'false');
     navContainer.classList.add('hidden');
+    navContainer.setAttribute('aria-hidden', 'true');
   } else {
     appendSearchMatches(resultsContainer, matches, 'sidebar');
 
     resultsContainer.classList.remove('hidden');
+    resultsContainer.setAttribute('aria-hidden', 'false');
     navContainer.classList.add('hidden');
+    navContainer.setAttribute('aria-hidden', 'true');
   }
 }
 
@@ -270,6 +280,8 @@ export function clearSidebarSearch(): void {
 
   if (searchInput) searchInput.value = '';
   resultsContainer?.classList.add('hidden');
+  resultsContainer?.setAttribute('aria-hidden', 'true');
   navContainer?.classList.remove('hidden');
+  navContainer?.setAttribute('aria-hidden', 'false');
   clearBtn?.classList.add('hidden');
 }

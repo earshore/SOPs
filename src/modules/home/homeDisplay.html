@@ -33,11 +33,13 @@
         </main>
 
         <aside class="floating-workbench" aria-label="浮动工作台">
-            <div class="floating-workbench__trigger" aria-hidden="true">
+            <button type="button" class="floating-workbench__trigger" aria-expanded="false"
+                aria-controls="home-floating-workbench-actions" aria-label="展开浮动工作台">
                 <i class="fas fa-layer-group"></i>
                 <span>工作台</span>
-            </div>
-            <div class="floating-workbench__actions" aria-label="高频工作入口">
+            </button>
+            <div id="home-floating-workbench-actions" class="floating-workbench__actions" aria-label="高频工作入口"
+                aria-hidden="true" inert>
                 <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="ppc_search_terms"
                     aria-label="打开 PPC 搜索词" title="PPC 搜索词">
                     <i class="fas fa-magnifying-glass-dollar" aria-hidden="true"></i>

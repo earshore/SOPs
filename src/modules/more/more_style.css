@@ -41,6 +41,14 @@
   box-shadow: 0 14px 28px -20px rgba(34, 197, 94, 0.56) !important;
 }
 
+.more-overview {
+  --button-filter-accent: var(--color-green-600, #16a34a);
+  --button-filter-hover-bg: var(--color-green-50, #f0fdf4);
+  --button-filter-hover-border: rgba(5, 150, 105, 0.24);
+  --button-filter-hover-color: var(--color-green-700, #15803d);
+  --button-filter-focus-ring: rgba(22, 163, 74, 0.16);
+}
+
 .more-overview .wb-badge {
   border-color: rgba(5, 150, 105, 0.2) !important;
   background: linear-gradient(
@@ -48,31 +56,6 @@
     rgba(240, 253, 244, 0.92),
     rgba(236, 253, 245, 0.86)
   ) !important;
-  color: #15803d !important;
-}
-
-.more-overview .category-filter-btn {
-  border-color: rgba(203, 213, 225, 0.82) !important;
-  background: rgba(255, 255, 255, 0.92) !important;
-  color: #334155 !important;
-}
-
-.more-overview .category-filter-btn.active {
-  border-color: transparent !important;
-  background: linear-gradient(135deg, var(--color-green-500), var(--color-emerald-600)) !important;
-  color: #ffffff !important;
-  box-shadow: 0 12px 22px -18px rgba(34, 197, 94, 0.75);
-}
-
-.more-overview .category-filter-btn.category-filter-btn.active,
-.more-overview .category-filter-btn.category-filter-btn.active i,
-.more-overview .category-filter-btn.category-filter-btn.active span {
-  color: #ffffff !important;
-}
-
-.more-overview .category-filter-btn:not(.active):hover {
-  border-color: rgba(5, 150, 105, 0.24) !important;
-  background: var(--color-green-50) !important;
   color: #15803d !important;
 }
 
@@ -722,8 +705,4 @@
     border-radius: 8px !important;
   }
 
-  .more-overview > * + * .category-filter-btn.active {
-    background: var(--color-green-600, #16a34a) !important;
-    box-shadow: none;
-  }
 }

@@ -100,6 +100,9 @@ export function renderReportAnalysis(ctx: PromptlabAlpineContext): void {
     if (statusDiv) {
       statusDiv.className =
         'px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs flex items-center gap-1';
+      statusDiv.setAttribute('role', 'status');
+      statusDiv.setAttribute('aria-live', 'polite');
+      statusDiv.setAttribute('aria-atomic', 'true');
       renderer.renderTemplate(
         statusDiv,
         '<i class="fas fa-exclamation-circle"></i> 未检测到分析报告'
@@ -116,6 +119,9 @@ export function renderReportAnalysis(ctx: PromptlabAlpineContext): void {
   if (statusDiv) {
     statusDiv.className =
       'px-2 py-1 bg-green-100 text-green-700 rounded text-xs flex items-center gap-1';
+    statusDiv.setAttribute('role', 'status');
+    statusDiv.setAttribute('aria-live', 'polite');
+    statusDiv.setAttribute('aria-atomic', 'true');
     renderer.renderTemplate(statusDiv, '<i class="fas fa-check-circle"></i> 分析报告已就绪');
   }
 

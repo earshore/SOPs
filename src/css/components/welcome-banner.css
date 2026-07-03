@@ -27,6 +27,9 @@
  *   </div>
  * </div>
  *
+ * Decorative overview:
+ * <div class="wb-container wb-container--simple wb-container--decorative">
+ *
  * Card:
  * <div class="wb-container wb-container--card">
  *   <div class="wb-card">
@@ -81,6 +84,7 @@
  * 
  * 6. Variant:
  *    必须在 .wb-container 上显式声明 .wb-container--simple 或 .wb-container--card。
+ *    只有总览 hero 等少量入口可叠加 .wb-container--decorative 显示 orb / particle。
  *    需要保留语义但隐藏视觉横幅时，可叠加 .wb-container--hidden。
  * 
  * ----------------------------------------------------------------------------
@@ -112,7 +116,7 @@
  * ----------------------------------------------------------------------------
  * 
  * 桌面 (>768px):
- * - 完整布局,所有装饰元素可见
+ * - 完整布局,装饰元素仅在 .wb-container--decorative 中可见
  * - 水平排列图标和文本内容
  * 
  * 平板/移动端 (≤768px):
@@ -280,6 +284,7 @@
 }
 
 .wb-card::before {
+  display: none;
   z-index: 1;
   background:
     radial-gradient(
@@ -301,6 +306,7 @@
 }
 
 .wb-card::after {
+  display: none;
   z-index: 2;
   background:
     radial-gradient(
@@ -339,6 +345,7 @@
 /* ===== 背景装饰层 ===== */
 .wb-bg-gradient {
   position: absolute;
+  display: none;
   inset: 0;
   z-index: 0;
   background: linear-gradient(
@@ -355,7 +362,7 @@
 
 .wb-orb {
   position: absolute;
-  display: block;
+  display: none;
   border-radius: 50%;
   filter: blur(36px);
   animation: floatSlow 12s ease-in-out infinite;
@@ -407,6 +414,7 @@
 
 .wb-grid-pattern {
   position: absolute;
+  display: none;
   inset: 0;
   z-index: 1;
   opacity: 0.035;
@@ -418,7 +426,7 @@
 
 .wb-particle {
   position: absolute;
-  display: block;
+  display: none;
   border-radius: 50%;
   pointer-events: none;
   contain: layout style paint;
@@ -1071,12 +1079,7 @@
   border-radius: var(--rounded-lg, 12px);
   border: 1px solid var(--wb-border-color, rgba(148, 163, 184, 0.24));
   overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    var(--wb-gradient-1, rgba(59, 130, 246, 0.08)) 0%,
-    rgba(255, 255, 255, 0.94) 48%,
-    var(--wb-gradient-2, rgba(34, 197, 94, 0.08)) 100%
-  );
+  background: var(--wb-simple-bg, color-mix(in srgb, var(--surface-panel, #ffffff) 94%, transparent));
   box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.48);
   margin-bottom: var(--spacing-xl, 2rem);
   padding: var(--spacing-lg, 1.5rem);
@@ -1098,6 +1101,7 @@
 .wb-container--simple::after {
   content: '';
   position: absolute;
+  display: none;
   inset: 0;
   z-index: 0;
   pointer-events: none;
@@ -1157,6 +1161,29 @@
       transparent 3px
     );
   opacity: 0.46;
+}
+
+.wb-container--decorative .wb-card::before,
+.wb-container--decorative .wb-card::after,
+.wb-container--decorative.wb-container--simple::before,
+.wb-container--decorative.wb-container--simple::after {
+  display: block;
+}
+
+.wb-container--decorative .wb-bg-gradient,
+.wb-container--decorative .wb-grid-pattern,
+.wb-container--decorative .wb-orb,
+.wb-container--decorative .wb-particle {
+  display: block;
+}
+
+.wb-container--decorative.wb-container--simple {
+  background: linear-gradient(
+    135deg,
+    var(--wb-gradient-1, rgba(59, 130, 246, 0.08)) 0%,
+    rgba(255, 255, 255, 0.94) 48%,
+    var(--wb-gradient-2, rgba(34, 197, 94, 0.08)) 100%
+  );
 }
 
 .wb-container--simple:hover {
@@ -1612,13 +1639,17 @@
 
 @media (prefers-color-scheme: dark) {
   .wb-container--simple {
+    background: var(--wb-simple-bg, var(--surface-panel, rgba(15, 23, 42, 0.96)));
+    border-color: var(--wb-border-color);
+  }
+
+  .wb-container--decorative.wb-container--simple {
     background: linear-gradient(
       135deg,
       rgba(15, 23, 42, 0.96) 0%,
       rgba(30, 41, 59, 0.94) 50%,
       rgba(15, 23, 42, 0.96) 100%
     );
-    border-color: var(--wb-border-color);
   }
 
   .wb-container--simple .wb-meta > span {

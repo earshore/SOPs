@@ -128,6 +128,7 @@ class HomeModule extends BaseModule {
   async init(): Promise<void> {
     this.updateTime();
     this.setInterval(() => this.updateTime(), 1000);
+    this.initFloatingWorkbench();
 
     const canvas = document.getElementById('particles-canvas') as HTMLCanvasElement | null;
     if (!canvas) return;
@@ -186,6 +187,74 @@ class HomeModule extends BaseModule {
       const moveY = (window.innerHeight / 2 - this.mouse.y) * 0.01;
       heroContent.style.transform = `translate(${moveX}px, ${moveY}px)`;
     }
+  }
+
+  private initFloatingWorkbench(): void {
+    const workbench =
+      this.container?.querySelector<HTMLElement>('.floating-workbench') ??
+      document.querySelector<HTMLElement>('.floating-workbench');
+    const trigger = workbench?.querySelector<HTMLButtonElement>('.floating-workbench__trigger');
+    const actions = workbench?.querySelector<HTMLElement>('.floating-workbench__actions');
+
+    if (!workbench || !trigger || !actions) return;
+
+    let pinnedExpanded = false;
+    let hoverExpanded = false;
+    let currentExpanded = false;
+
+    const setExpanded = (expanded: boolean): void => {
+      currentExpanded = expanded;
+      workbench.classList.toggle('is-expanded', expanded);
+      trigger.setAttribute('aria-expanded', String(expanded));
+      trigger.setAttribute('aria-label', expanded ? '收起浮动工作台' : '展开浮动工作台');
+      actions.setAttribute('aria-hidden', String(!expanded));
+      actions.toggleAttribute('inert', !expanded);
+    };
+
+    const syncExpandedState = (): void => {
+      setExpanded(pinnedExpanded || hoverExpanded);
+    };
+
+    setExpanded(false);
+
+    this.addEventListener(workbench, 'mouseenter', () => {
+      hoverExpanded = true;
+      syncExpandedState();
+    });
+
+    this.addEventListener(workbench, 'mouseleave', () => {
+      hoverExpanded = false;
+      syncExpandedState();
+    });
+
+    this.addEventListener(trigger, 'click', event => {
+      event.stopPropagation();
+      pinnedExpanded = !pinnedExpanded;
+      if (!pinnedExpanded) {
+        hoverExpanded = false;
+      }
+      syncExpandedState();
+    });
+
+    this.addEventListener(document, 'click', event => {
+      const target = event.target;
+      if (target instanceof Node && workbench.contains(target)) return;
+
+      pinnedExpanded = false;
+      hoverExpanded = false;
+      syncExpandedState();
+    });
+
+    this.addEventListener(document, 'keydown', event => {
+      const keyboardEvent = event as KeyboardEvent;
+      if (keyboardEvent.key !== 'Escape') return;
+      if (!currentExpanded) return;
+
+      pinnedExpanded = false;
+      hoverExpanded = false;
+      syncExpandedState();
+      trigger.focus();
+    });
   }
 
   private updateTime(): void {

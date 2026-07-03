@@ -6,6 +6,7 @@ import {
   cancelActiveAnalysis,
   type AnalysisFlowCallbacks,
 } from './analysis/analysisFlow';
+import { setPasteInputError } from './analysis/analysisInput';
 import { toggleAnalysisSettings, updateContextFieldsVisibility } from './settings/analysisSettingsPanel';
 import { handleReportFileImport, loadSampleReport, type ReportImportCallbacks } from './import/fileImport';
 import {
@@ -16,6 +17,7 @@ import {
 import { getGrowthExportFilter, getWasteExportFilter } from './utils/filters';
 import { getInput, getTextarea, setAnalyzeButtonState, setText } from './ui/dom';
 import { bindPpcEvents } from './ui/eventBindings';
+import { setPpcStatus } from './ui/reportControls';
 import { inferReportTypeFromText } from './analysis/reportTypeInference';
 import { createListenerRegistry } from './ui/listenerRegistry';
 import {
@@ -164,11 +166,15 @@ function clearAnalyzer(container: HTMLElement): void {
   const textarea = getTextarea(container, 'ppc-paste-input');
   if (textarea) textarea.value = '';
   const fileInput = getInput(container, 'ppc-file-input');
-  if (fileInput) fileInput.value = '';
+  if (fileInput) {
+    fileInput.value = '';
+    fileInput.removeAttribute('aria-invalid');
+  }
+  setPasteInputError(container, '');
   resetAnalyzerState();
   actionListState.resetControls(container);
   setText(container, 'ppc-file-name', '支持 CSV、TSV、XLSX 或直接粘贴表格内容。');
-  setText(container, 'ppc-mapping-status', '');
+  setPpcStatus(container, '');
   actionListState.render(container, []);
 }
 
@@ -176,7 +182,7 @@ function handleThresholdChange(container: HTMLElement): void {
   const thresholds = readThresholds(container);
   saveThresholds(thresholds);
   if (sourceText) {
-    setText(container, 'ppc-mapping-status', '阈值已更新，请点击“分析当前数据”重新分析。');
+    setPpcStatus(container, '阈值已更新，请点击“分析当前数据”重新分析。');
   }
 }
 
@@ -189,7 +195,7 @@ function handleReportSelectionChange(container: HTMLElement): void {
   actionListState.render(container, []);
 
   if (sourceText) {
-    setText(container, 'ppc-mapping-status', '报表类型已更新，请点击“分析当前数据”重新分析。');
+    setPpcStatus(container, '报表类型已更新，请点击“分析当前数据”重新分析。');
   }
 }
 

@@ -51,10 +51,36 @@
   outline: none;
 }
 
+.ppc-field-label {
+  margin-bottom: 8px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .ppc-status-line {
   min-height: 22px;
   margin-top: 14px;
   color: #475569;
   font-size: 12px;
   font-weight: 600;
+}
+
+.ppc-status-line--error {
+  color: #b91c1c;
+}
+
+.ppc-field-helper {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ppc-field-error {
+  margin-top: 6px;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
 }

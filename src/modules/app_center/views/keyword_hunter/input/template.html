@@ -66,7 +66,7 @@
                 <!-- Card Header -->
                 <div class="px-5 pt-5 pb-4 border-b border-slate-100">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
+                        <h2 id="kt-keywords-input-label" class="text-base font-bold text-slate-800 flex items-center gap-2.5">
                             <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -98,12 +98,18 @@
                             <textarea id="kt-keywords-input"
                                 class="keyword-input-textarea w-full p-4 border-0 focus:ring-0 text-sm scrollbar-thin bg-slate-50/50 focus:bg-white transition-colors placeholder:text-slate-300 leading-relaxed"
                                 aria-label="关键词列表"
+                                aria-labelledby="kt-keywords-input-label"
+                                aria-describedby="kt-keywords-input-helper kt-keyword-count-label kt-duplicate-badge"
                                 placeholder="请输入关键词列表，每行一个&#10;&#10;支持全语种 (DE/FR/IT/ES/NL 等)&#10;&#10;示例：&#10;wireless earbuds&#10;bluetooth headphones&#10;noise cancelling earphones"></textarea>
                         </div>
+                        <p id="kt-keywords-input-helper" class="mt-2 text-[11px] text-slate-400">
+                            每行一个关键词，支持多语种；清理格式会自动去重。
+                        </p>
 
                         <!-- Stats Bar -->
                         <div class="kt-editor-meta kt-editor-meta--right">
                             <span
+                                id="kt-keyword-count-label"
                                 class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full font-semibold text-[11px] border border-blue-100">
                                 <i class="fas fa-hashtag text-[8px] text-blue-400"></i>
                                 <span id="kt-keyword-count">0</span>
@@ -130,7 +136,7 @@
                             <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
                                 <i class="fas fa-file-alt text-emerald-500 text-sm"></i>
                             </div>
-                            目标 Listing 文案
+                            <span id="kt-copy-input-label">目标 Listing 文案</span>
                         </h2>
 
                         <!-- Action Buttons -->
@@ -167,17 +173,20 @@
                             <textarea id="kt-copy-input"
                                 class="w-full p-4 border-0 focus:ring-0 text-sm scrollbar-thin bg-slate-50/50 focus:bg-white transition-colors placeholder:text-slate-300 leading-relaxed"
                                 aria-label="Amazon 产品文案"
+                                aria-labelledby="kt-copy-input-label"
+                                aria-describedby="kt-copy-input-helper copy-char-count-label"
                                 placeholder="请粘贴您的 Amazon 产品文案&#10;包括标题、五点描述、产品描述等&#10;&#10;示例：&#10;【Premium Wireless Earbuds】Experience crystal-clear sound&#10;with our Bluetooth headphones featuring advanced noise&#10;cancelling technology..."></textarea>
                         </div>
 
                         <!-- Stats Bar -->
                         <div class="kt-editor-meta kt-editor-meta--right">
                             <!-- Quick tip -->
-                            <span class="kt-editor-tip text-[10px] text-slate-300 font-medium hidden sm:flex items-center gap-1">
+                            <span id="kt-copy-input-helper" class="kt-editor-tip text-[10px] text-slate-300 font-medium hidden sm:flex items-center gap-1">
                                 <i class="fas fa-lightbulb text-[9px]"></i>
                                 Tip: 包含完整 Listing 内容可提升分析精度
                             </span>
                             <span
+                                id="copy-char-count-label"
                                 class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full font-semibold text-[11px] border border-emerald-100">
                                 <i class="fas fa-font text-[8px] text-emerald-400"></i>
                                 <span id="copy-char-count">0</span>
@@ -201,7 +210,7 @@
                                 <h3>历史快照</h3>
                                 <p id="kt-input-snapshot-count" class="kh-input-snapshot-count">0 个快照</p>
                             </div>
-                            <div id="kt-input-draft-status" class="kh-input-draft-status idle" aria-live="polite">
+                            <div id="kt-input-draft-status" class="kh-input-draft-status idle" role="status" aria-live="polite" aria-atomic="true">
                                 <span class="kh-input-draft-dot" aria-hidden="true"></span>
                                 <span id="kt-input-draft-label" class="kh-input-draft-label">空白</span>
                                 <span id="kt-input-draft-detail" class="kh-input-draft-detail">本机草稿为空</span>

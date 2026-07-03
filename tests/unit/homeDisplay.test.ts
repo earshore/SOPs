@@ -9,11 +9,15 @@ const homeTemplate = `
       <div class="slogan-line outline">无限可能</div>
     </div>
     <aside class="floating-workbench" aria-label="浮动工作台">
-      <div class="floating-workbench__trigger">工作台</div>
-      <button data-action="switch-tab" data-tab="ppc_search_terms" aria-label="打开 PPC 搜索词">PPC 搜索词</button>
-      <button data-action="switch-tab" data-tab="sops_npi_tracker" aria-label="打开新品跟踪">新品跟踪</button>
-      <button data-action="switch-tab" data-tab="sops_listing_seo" aria-label="打开 Listing SEO">Listing SEO</button>
-      <button data-action="switch-tab" data-tab="playground" aria-label="打开 Deep Chat">Deep Chat</button>
+      <button type="button" class="floating-workbench__trigger" aria-expanded="false"
+        aria-controls="home-floating-workbench-actions" aria-label="展开浮动工作台">工作台</button>
+      <div id="home-floating-workbench-actions" class="floating-workbench__actions" aria-label="高频工作入口"
+        aria-hidden="true" inert>
+        <button data-action="switch-tab" data-tab="ppc_search_terms" aria-label="打开 PPC 搜索词">PPC 搜索词</button>
+        <button data-action="switch-tab" data-tab="sops_npi_tracker" aria-label="打开新品跟踪">新品跟踪</button>
+        <button data-action="switch-tab" data-tab="sops_listing_seo" aria-label="打开 Listing SEO">Listing SEO</button>
+        <button data-action="switch-tab" data-tab="playground" aria-label="打开 Deep Chat">Deep Chat</button>
+      </div>
     </aside>
   </div>
 `;
@@ -111,6 +115,14 @@ it('mounts the full home splash with particles, hero copy, floating workbench, a
   expect(container.textContent).toContain('无限可能');
   expect(container.querySelector('.floating-workbench')).not.toBeNull();
   expect(container.querySelector('.floating-workbench__trigger')?.textContent).toContain('工作台');
+  expect(container.querySelector('.floating-workbench__trigger')).toBeInstanceOf(HTMLButtonElement);
+  expect(container.querySelector('.floating-workbench__trigger')?.getAttribute('aria-expanded')).toBe(
+    'false'
+  );
+  expect(container.querySelector('.floating-workbench__actions')?.getAttribute('aria-hidden')).toBe(
+    'true'
+  );
+  expect(container.querySelector('.floating-workbench__actions')?.hasAttribute('inert')).toBe(true);
   expect(container.querySelector('#cursor-follower')).toBeNull();
   expect(document.getElementById('time-display')?.textContent).toContain('|');
   expect(frameCallbacks).toHaveLength(1);
@@ -127,6 +139,29 @@ it('mounts the full home splash with particles, hero copy, floating workbench, a
       'playground',
     ])
   );
+
+  const workbench = container.querySelector<HTMLElement>('.floating-workbench');
+  const trigger = container.querySelector<HTMLButtonElement>('.floating-workbench__trigger');
+  const actions = container.querySelector<HTMLElement>('.floating-workbench__actions');
+
+  workbench?.dispatchEvent(new MouseEvent('mouseenter'));
+  expect(workbench?.classList.contains('is-expanded')).toBe(true);
+  expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+  expect(actions?.getAttribute('aria-hidden')).toBe('false');
+  expect(actions?.hasAttribute('inert')).toBe(false);
+
+  workbench?.dispatchEvent(new MouseEvent('mouseleave'));
+  expect(workbench?.classList.contains('is-expanded')).toBe(false);
+
+  trigger?.click();
+  expect(workbench?.classList.contains('is-expanded')).toBe(true);
+
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+  expect(workbench?.classList.contains('is-expanded')).toBe(false);
+
+  trigger?.click();
+  document.body.click();
+  expect(workbench?.classList.contains('is-expanded')).toBe(false);
 
   const queuedFrameCount = frameCallbacks.length;
   resizeCallback?.([

@@ -50,17 +50,19 @@ const mocks = vi.hoisted(() => ({
       <div id="ppc-stat-acos"></div>
       <div id="ppc-stat-actions"></div>
       <p id="ppc-file-name"></p>
-      <p id="ppc-mapping-status"></p>
+      <p id="ppc-mapping-status" role="status" aria-live="polite" aria-atomic="true"></p>
       <select id="ppc-report-type">
         <option value="auto">自动识别</option>
         <option value="search_term">店铺搜索广告报告</option>
         <option value="erp_search_term">ERP 广告搜索词报表</option>
         <option value="erp_campaign">ERP 广告活动报表</option>
       </select>
-      <textarea id="ppc-paste-input"></textarea>
-      <input id="ppc-file-input" type="file" />
+      <textarea id="ppc-paste-input" aria-describedby="ppc-paste-help ppc-mapping-status"></textarea>
+      <p id="ppc-paste-help">首行必须包含列名；文件导入和粘贴内容二选一即可。</p>
+      <input id="ppc-file-input" type="file" aria-describedby="ppc-file-name ppc-mapping-status" />
       <div id="ppc-threshold-grid"></div>
-      <input id="ppc-action-owner" value="广告负责人" />
+      <input id="ppc-action-owner" value="广告负责人" aria-describedby="ppc-action-owner-help" />
+      <span id="ppc-action-owner-help">用于动作清单 Owner 和周复盘的下次动作负责人。</span>
       <input id="ppc-use-agent" type="checkbox" />
       <input id="ppc-allow-local-fallback" type="checkbox" />
       <input id="ppc-use-context" type="checkbox" />
@@ -79,7 +81,7 @@ const mocks = vi.hoisted(() => ({
       <button id="ppc-export-negative" type="button"></button>
       <button id="ppc-export-harvest" type="button"></button>
       <button id="ppc-copy-summary" type="button"></button>
-      <input id="ppc-action-search" type="search" />
+      <input id="ppc-action-search" type="search" aria-describedby="ppc-result-count" />
       <button id="ppc-action-search-clear" type="button"></button>
       <div id="ppc-filter-buttons"></div>
       <p id="ppc-result-count"></p>
@@ -246,8 +248,13 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     await mount(container);
 
     expect(container.querySelectorAll('#ppc-threshold-grid input')).toHaveLength(6);
+    expect(container.querySelectorAll('.ppc-threshold-helper')).toHaveLength(6);
     expect(container.querySelector<HTMLInputElement>('#ppc-target-acos')?.value).toBe('42');
     expect(container.querySelector<HTMLInputElement>('#ppc-min-ctr')?.value).toBe('0.5');
+    expect(
+      container.querySelector<HTMLInputElement>('#ppc-target-acos')?.getAttribute('aria-describedby')
+    ).toBe('ppc-target-acos-help');
+    expect(container.querySelector('#ppc-target-acos-help')?.textContent).toContain('控价');
 
     const targetAcos = container.querySelector<HTMLInputElement>('#ppc-target-acos');
     if (targetAcos) {
@@ -267,6 +274,20 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
   });
 
   it('默认仅使用本地规则，不调用 Agent 语义复核', async () => {
+    expect(container.querySelector('#ppc-mapping-status')?.getAttribute('role')).toBe('status');
+    expect(container.querySelector('#ppc-mapping-status')?.getAttribute('aria-live')).toBe(
+      'polite'
+    );
+    expect(container.querySelector('#ppc-paste-input')?.getAttribute('aria-describedby')).toContain(
+      'ppc-mapping-status'
+    );
+    expect(container.querySelector('#ppc-file-input')?.getAttribute('aria-describedby')).toContain(
+      'ppc-file-name'
+    );
+    expect(container.querySelector('#ppc-action-search')?.getAttribute('aria-describedby')).toBe(
+      'ppc-result-count'
+    );
+
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
     container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
     await flushAnalysis();

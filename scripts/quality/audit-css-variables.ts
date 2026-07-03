@@ -121,6 +121,7 @@ const NAMING_PATTERNS = {
   componentCard:
     /^--card-(bg|border|radius|padding|shadow|shadow-hover|translate-hover|body-max-height|left-accent|left-accent-bg)$/,
   componentCardAccent: /^--card-(accent-from|accent-to|left-rail-width)$/,
+  componentButton: /^--button-[\w-]+$/,
   componentOverviewCard:
     /^--overview-card-(accent|accent-bg|bg|border|radius|rail-width|transition-duration)$/,
   componentCallout: /^--callout-(accent|bg|border|rail-width)$/,

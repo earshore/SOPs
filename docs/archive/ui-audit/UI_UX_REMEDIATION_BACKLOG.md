@@ -23,7 +23,7 @@
 
 | ID | 整改项 | 影响范围 | 主要文件 | 验收标准 |
 | --- | --- | --- | --- | --- |
-| UI-P1-01 | 首页首屏工作台化 | 首页 | `src/modules/home/*` | 首屏显示最近工具、关键 SOP、近期状态或待办；品牌 hero 不再占满首屏。 |
+| UI-P1-01 | 首页 splash 保留 + 极简浮动工作台入口 | 首页 | `src/modules/home/*` | 保留旧版全屏 splash / 粒子 hero 和完整 Home；工作台只作为低干扰浮动入口，不把首屏主体改成工作台面板。 |
 | UI-P1-02 | 移除自定义 cursor | 首页 | `src/modules/home/homeDisplay.css`、首页模板 | 删除 `cursor: none` 和 follower 依赖，恢复系统指针。 |
 | UI-P1-03 | 路由级 loading / skeleton | 动态路由 | 路由加载与模块挂载代码 | 页面等待超过 300ms 时主区域有稳定 loading，不出现长时间空白。 |
 | UI-P1-04 | App Center / PPC / Welcome Banner token 对照 | 高扩散样式源 | `app_center_style.css`、`ppc_tools/style.css`、`welcome-banner.css` | 主要 `--app-*`、`--ppc-*`、`--wb-*` 映射到全局 token；新增局部 token 需登记。 |
@@ -56,7 +56,7 @@
 | 里程碑 | 范围 | 完成定义 |
 | --- | --- | --- |
 | M1 | UI-P0-01 到 UI-P0-04 | 移动端核心路由可用，截图回归稳定。 |
-| M2 | UI-P1-01 到 UI-P1-05 | 首页和高扩散装饰源完成降噪。 |
+| M2 | UI-P1-01 到 UI-P1-05 | 首页保留完整 splash 且工作台入口浮动化，高扩散装饰源完成降噪。 |
 | M3 | UI-P1-06 到 UI-P1-12 | 共享样式、语义、表格、主题和视觉回归进入稳定基线。 |
 | M4 | UI-P2-01 到 UI-P2-10 | 逐页质量问题进入持续清理，不再扩大设计债。 |
 

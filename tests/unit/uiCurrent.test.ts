@@ -169,7 +169,9 @@ describe('current UI search helpers', () => {
     expect(result).not.toBeNull();
     expect(result?.dataset.clearSearch).toBe('sop');
     expect(getEl('sop-search-results')?.classList.contains('hidden')).toBe(false);
+    expect(getEl('sop-search-results')?.getAttribute('aria-hidden')).toBe('false');
     expect(getEl('sop-nav-container')?.classList.contains('hidden')).toBe(true);
+    expect(getEl('sop-nav-container')?.getAttribute('aria-hidden')).toBe('true');
 
     result?.click();
     expect(clearSpy).toHaveBeenCalled();
@@ -177,7 +179,9 @@ describe('current UI search helpers', () => {
     clearSOPSearch();
     expect((getEl('sop-search-input') as HTMLInputElement).value).toBe('');
     expect(getEl('sop-search-results')?.classList.contains('hidden')).toBe(true);
+    expect(getEl('sop-search-results')?.getAttribute('aria-hidden')).toBe('true');
     expect(getEl('sop-nav-container')?.classList.contains('hidden')).toBe(false);
+    expect(getEl('sop-nav-container')?.getAttribute('aria-hidden')).toBe('false');
     expect(getEl('sop-search-clear')?.classList.contains('hidden')).toBe(true);
   });
 
@@ -187,11 +191,15 @@ describe('current UI search helpers', () => {
     searchHub('__no_match__');
     expect(getEl('hub-search-results')?.textContent).toContain('未找到匹配的内容');
     expect(getEl('hub-search-results')?.classList.contains('hidden')).toBe(false);
+    expect(getEl('hub-search-results')?.getAttribute('aria-hidden')).toBe('false');
+    expect(getEl('hub-nav-container')?.getAttribute('aria-hidden')).toBe('true');
 
     clearHubSearch();
     expect((getEl('hub-search-input') as HTMLInputElement).value).toBe('');
     expect(getEl('hub-search-results')?.classList.contains('hidden')).toBe(true);
+    expect(getEl('hub-search-results')?.getAttribute('aria-hidden')).toBe('true');
     expect(getEl('hub-nav-container')?.classList.contains('hidden')).toBe(false);
+    expect(getEl('hub-nav-container')?.getAttribute('aria-hidden')).toBe('false');
   });
 
   it('searches the current sidebar module and clears sidebar search', () => {
@@ -209,6 +217,8 @@ describe('current UI search helpers', () => {
     expect(result).not.toBeNull();
     expect(result?.dataset.clearSearch).toBe('sidebar');
     expect(getEl('sidebar-search-clear')?.classList.contains('hidden')).toBe(false);
+    expect(getEl('sidebar-search-results')?.getAttribute('aria-hidden')).toBe('false');
+    expect(getEl('sidebar-nav-container')?.getAttribute('aria-hidden')).toBe('true');
 
     result?.click();
     expect(clearSpy).toHaveBeenCalled();
@@ -216,14 +226,18 @@ describe('current UI search helpers', () => {
     clearSidebarSearch();
     expect((getEl('sidebar-search-input') as HTMLInputElement).value).toBe('');
     expect(getEl('sidebar-search-results')?.classList.contains('hidden')).toBe(true);
+    expect(getEl('sidebar-search-results')?.getAttribute('aria-hidden')).toBe('true');
     expect(getEl('sidebar-nav-container')?.classList.contains('hidden')).toBe(false);
+    expect(getEl('sidebar-nav-container')?.getAttribute('aria-hidden')).toBe('false');
   });
 
   it('handles blank or incomplete sidebar search DOM without throwing', () => {
     setupSearchDom();
     searchSidebar('');
     expect(getEl('sidebar-search-results')?.classList.contains('hidden')).toBe(true);
+    expect(getEl('sidebar-search-results')?.getAttribute('aria-hidden')).toBe('true');
     expect(getEl('sidebar-nav-container')?.classList.contains('hidden')).toBe(false);
+    expect(getEl('sidebar-nav-container')?.getAttribute('aria-hidden')).toBe('false');
 
     document.body.innerHTML = '';
     expect(() => searchSidebar('anything')).not.toThrow();
@@ -273,6 +287,10 @@ describe('current UI mega menu helpers', () => {
     action?.addEventListener('click', actionClick);
 
     initMegaMenuAccessibility();
+    expect(trigger?.id).toBe('nav-trigger-1');
+    expect(menu?.id).toBe('nav-trigger-1-menu');
+    expect(trigger?.getAttribute('aria-controls')).toBe('nav-trigger-1-menu');
+    expect(menu?.getAttribute('aria-labelledby')).toBe('nav-trigger-1');
     expect(trigger?.getAttribute('aria-expanded')).toBe('false');
     expect(menu?.getAttribute('aria-hidden')).toBe('true');
     expect(menu?.hasAttribute('inert')).toBe(true);
@@ -310,6 +328,50 @@ describe('current UI mega menu helpers', () => {
     group?.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
     closeMegaMenus({ blurActive: true });
     expect(group?.classList.contains('is-open')).toBe(false);
+  });
+
+  it('keeps only one mega menu expanded across sibling nav groups', () => {
+    document.body.innerHTML = `
+      <div class="nav-group" id="group-a">
+        <button class="nav-trigger" type="button">Apps</button>
+        <div class="mega-menu">
+          <a href="#page-a" data-action="switch-tab" data-tab="page-a">Page A</a>
+        </div>
+      </div>
+      <div class="nav-group" id="group-b">
+        <button class="nav-trigger" type="button">SOPs</button>
+        <div class="mega-menu">
+          <a href="#page-b" data-action="switch-tab" data-tab="page-b">Page B</a>
+        </div>
+      </div>
+    `;
+
+    const groupA = getEl('group-a') as HTMLElement;
+    const groupB = getEl('group-b') as HTMLElement;
+    const triggerA = groupA.querySelector<HTMLButtonElement>('.nav-trigger');
+    const triggerB = groupB.querySelector<HTMLButtonElement>('.nav-trigger');
+    const menuA = groupA.querySelector<HTMLElement>('.mega-menu');
+    const menuB = groupB.querySelector<HTMLElement>('.mega-menu');
+
+    initMegaMenuAccessibility();
+
+    expect(triggerA?.getAttribute('aria-controls')).toBe(menuA?.id);
+    expect(menuA?.getAttribute('aria-labelledby')).toBe(triggerA?.id);
+    expect(triggerB?.getAttribute('aria-controls')).toBe(menuB?.id);
+    expect(menuB?.getAttribute('aria-labelledby')).toBe(triggerB?.id);
+
+    triggerA?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(triggerA?.getAttribute('aria-expanded')).toBe('true');
+    expect(menuA?.getAttribute('aria-hidden')).toBe('false');
+    expect(menuA?.hasAttribute('inert')).toBe(false);
+
+    triggerB?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(triggerA?.getAttribute('aria-expanded')).toBe('false');
+    expect(menuA?.getAttribute('aria-hidden')).toBe('true');
+    expect(menuA?.hasAttribute('inert')).toBe(true);
+    expect(triggerB?.getAttribute('aria-expanded')).toBe('true');
+    expect(menuB?.getAttribute('aria-hidden')).toBe('false');
+    expect(menuB?.hasAttribute('inert')).toBe(false);
   });
 
   it('keeps mega menu visibility controlled by is-open instead of CSS hover', () => {

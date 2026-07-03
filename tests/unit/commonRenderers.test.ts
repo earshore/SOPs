@@ -128,8 +128,10 @@ afterEach(() => {
       categoryKey: 'sopCategories',
     }).render();
 
-    const firstCard = container.querySelector<HTMLElement>(`[data-tab="${first.id}"]`);
-    const secondCard = container.querySelector<HTMLElement>(`[data-tab="${second.id}"]`);
+    const firstCard = container.querySelector<HTMLElement>(`.overview-card[data-tab="${first.id}"]`);
+    const secondCard = container.querySelector<HTMLElement>(
+      `.overview-card[data-tab="${second.id}"]`
+    );
     const search = container.querySelector<HTMLInputElement>('#overview-search-input');
     const secondFilter = container.querySelector<HTMLButtonElement>(
       `.category-filter-btn[data-category="${second.category}"]`
@@ -147,17 +149,23 @@ afterEach(() => {
     search!.dispatchEvent(new Event('input', { bubbles: true }));
     expect(firstCard!.style.display).toBe('');
     expect(secondCard!.style.display).toBe('none');
+    expect(allFilter!.style.display).toBe('');
+    expect(secondFilter!.style.display).toBe('');
 
     secondFilter!.click();
     expect(secondFilter!.classList.contains('active')).toBe(true);
     expect(secondFilter!.getAttribute('aria-pressed')).toBe('true');
     expect(allFilter!.getAttribute('aria-pressed')).toBe('false');
+    expect(container.querySelectorAll('.category-filter-btn[aria-pressed="true"]')).toHaveLength(1);
     expect(firstCard!.style.display).toBe('none');
     expect(secondCard!.style.display).toBe('');
+    expect(allFilter!.style.display).toBe('');
+    expect(secondFilter!.style.display).toBe('');
 
     allFilter!.click();
     expect(allFilter!.getAttribute('aria-pressed')).toBe('true');
     expect(secondFilter!.getAttribute('aria-pressed')).toBe('false');
+    expect(container.querySelectorAll('.category-filter-btn[aria-pressed="true"]')).toHaveLength(1);
     expect(firstCard!.style.display).toBe('');
     expect(secondCard!.style.display).toBe('');
   });
@@ -208,8 +216,28 @@ afterEach(() => {
     expect(sidebar.querySelector('#sidebar-search-input')?.getAttribute('placeholder')).toBe(
       '搜索 SOP'
     );
+    expect(sidebar.querySelector('#sidebar-search-input')?.getAttribute('aria-label')).toBe(
+      '搜索 SOP'
+    );
+    expect(sidebar.querySelector('#sidebar-search-input')?.getAttribute('aria-controls')).toBe(
+      'sidebar-search-results sidebar-nav-container'
+    );
+    expect(sidebar.querySelector('#sidebar-search-results')?.getAttribute('role')).toBe('region');
+    expect(sidebar.querySelector('#sidebar-search-results')?.getAttribute('aria-live')).toBe(
+      'polite'
+    );
+    expect(sidebar.querySelector('#sidebar-search-results')?.getAttribute('aria-hidden')).toBe(
+      'true'
+    );
     expect(sidebar.querySelector(`#sidebar-btn-${activeRoute.id}`)?.getAttribute('aria-current')).toBe(
       'page'
+    );
+    const categoryButton = sidebar.querySelector<HTMLButtonElement>(
+      `[data-action="toggle-category"][data-category="${activeRoute.category}"]`
+    );
+    expect(categoryButton?.getAttribute('aria-expanded')).toBe('true');
+    expect(categoryButton?.getAttribute('aria-controls')).toBe(
+      `sidebar-category-children-${activeRoute.category}`
     );
     expect(
       sidebar.querySelector<HTMLElement>(
@@ -251,6 +279,11 @@ afterEach(() => {
     expect(sidebar.querySelector(`#sidebar-btn-${second.id}`)?.getAttribute('aria-current')).toBe(
       'page'
     );
+    expect(
+      sidebar
+        .querySelector(`[data-action="toggle-category"][data-category="${second.category}"]`)
+        ?.getAttribute('aria-expanded')
+    ).toBe('true');
     expect(sidebar.querySelector('#sidebar-search-input')).toBeNull();
   });
 

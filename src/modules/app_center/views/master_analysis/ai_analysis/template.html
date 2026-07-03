@@ -551,7 +551,8 @@
         </div>
         <div :class="analysisHeroBodyClass" class="relative transition-all duration-300">
           <div class="flex items-center justify-between gap-8">
-            <div :class="analysisHeroTextClass" class="flex items-center gap-5 transition-colors duration-300">
+            <div :class="analysisHeroTextClass" class="flex items-center gap-5 transition-colors duration-300"
+              role="status" aria-live="polite" aria-atomic="true">
               <div class="relative">
                 <template x-if="isAnalyzing">
                   <div class="absolute inset-0 bg-white/20 rounded-2xl animate-ping" style="animation-duration: 1.5s;">
@@ -669,11 +670,13 @@
               <div class="flex items-center justify-between text-white/80 text-sm mb-3">
                 <span class="flex items-center gap-2 font-medium">
                   <i class="fa-solid fa-spinner animate-spin"></i>
-                  分析进度
+                  <span id="ai-analysis-progress-label">分析进度</span>
                 </span>
-                <span class="font-mono font-bold text-lg" x-text="progressText"></span>
+                <span id="ai-analysis-progress-value" class="font-mono font-bold text-lg" x-text="progressText"></span>
               </div>
-              <div class="h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm shadow-inner">
+              <div class="h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm shadow-inner"
+                role="progressbar" :aria-valuenow="Math.round(progress)" aria-valuemin="0" aria-valuemax="100"
+                aria-labelledby="ai-analysis-progress-label" :aria-valuetext="progressText">
                 <div :style="progressStyle"
                   class="h-full bg-gradient-to-r from-white via-indigo-200 to-white rounded-full transition-all duration-500 ease-out relative">
                   <div class="absolute inset-0 shimmer"></div>
@@ -726,8 +729,8 @@
             <section class="space-y-3">
               <div class="flex items-center justify-between gap-3">
                 <div>
-                  <div class="text-sm font-semibold text-slate-900">调度偏好</div>
-                  <p class="mt-0.5 text-xs text-slate-500">系统会自动控制并发与失败处理。</p>
+                  <div id="ai-analysis-scheduling-title" class="text-sm font-semibold text-slate-900">调度偏好</div>
+                  <p id="ai-analysis-scheduling-helper" class="mt-0.5 text-xs text-slate-500">系统会自动控制并发与失败处理。</p>
                 </div>
                 <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold"
                   :class="perfSettings.scheduleTierBadgeClass">
@@ -736,7 +739,8 @@
                 </span>
               </div>
 
-              <div class="grid gap-2 md:grid-cols-3">
+              <div class="grid gap-2 md:grid-cols-3" role="radiogroup" aria-labelledby="ai-analysis-scheduling-title"
+                aria-describedby="ai-analysis-scheduling-helper">
                 <label class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
                   :class="perfSettings.getSchedulePreferenceClass('recommended')">
                   <input type="radio" name="schedulingPreference" value="recommended"
@@ -795,10 +799,11 @@
               <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <label class="flex min-h-11 cursor-pointer items-start gap-3">
                   <input type="checkbox" :checked="perfSettings.settings.enableCache" @change="perfSettings.setEnableCache($event)"
+                    aria-describedby="ai-analysis-cache-helper"
                     class="mt-1 w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                   <div>
                     <div class="text-sm font-semibold text-slate-900">智能缓存</div>
-                    <div class="mt-1 text-xs text-slate-500">
+                    <div id="ai-analysis-cache-helper" class="mt-1 text-xs text-slate-500">
                       已缓存
                       <span class="font-semibold text-slate-900" x-text="perfSettings.cacheStats.count"></span>
                       项 ·

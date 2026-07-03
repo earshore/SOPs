@@ -248,7 +248,7 @@ export class OverviewRenderer {
     return `
       <div class="mb-6 flex items-center gap-3 overflow-x-auto pb-2">
         <button 
-          class="category-filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
+          class="category-filter-btn active"
           data-category="all"
           type="button"
           aria-pressed="true"
@@ -259,7 +259,7 @@ export class OverviewRenderer {
           .map(
             cat => `
           <button 
-            class="category-filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
+            class="category-filter-btn"
             data-category="${cat.id}"
             type="button"
             aria-pressed="false"
@@ -571,7 +571,7 @@ export class OverviewRenderer {
     });
 
     // 隐藏空分类
-    const sections = this.container.querySelectorAll('[data-category]');
+    const sections = this.container.querySelectorAll('section[data-category]');
     sections.forEach(section => {
       const visibleCards = section.querySelectorAll('.overview-card:not([style*="display: none"])');
       (section as HTMLElement).style.display = visibleCards.length > 0 ? '' : 'none';
@@ -583,7 +583,7 @@ export class OverviewRenderer {
    */
   private _handleFilter(category: string): void {
     const cards = this.container.querySelectorAll('.overview-card, [data-action="switch-tab"]');
-    const sections = this.container.querySelectorAll('[data-category]');
+    const sections = this.container.querySelectorAll('section[data-category]');
 
     if (category === 'all') {
       cards.forEach(card => {

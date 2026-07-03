@@ -391,7 +391,8 @@ function showLoadingState(container: HTMLElement): () => void {
   let phaseIndex = 0;
 
   const buildHtml = (phase: (typeof phases)[number]) => `
-        <div class="flex flex-col items-center justify-center py-16 text-center" id="kt-loading-state">
+        <div class="flex flex-col items-center justify-center py-16 text-center" id="kt-loading-state"
+             role="status" aria-live="polite" aria-atomic="true">
             <div class="relative mb-6">
                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50
                             flex items-center justify-center border border-purple-100 shadow-inner">
@@ -511,6 +512,8 @@ function renderAnalysisError(resultDiv: HTMLElement, userMsg: string, isValidati
 
   const errorDiv = document.createElement('div');
   errorDiv.className = `p-5 bg-${colorScheme}-50 border border-${colorScheme}-200 rounded-xl`;
+  errorDiv.setAttribute('role', 'alert');
+  errorDiv.setAttribute('aria-live', 'assertive');
 
   const headerDiv = document.createElement('div');
   headerDiv.className = `flex items-center gap-2 text-${colorScheme}-700 font-bold mb-2`;
