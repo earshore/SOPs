@@ -136,12 +136,18 @@ async function checkPageLoad() {
     });
     console.log(`  ${hasStore ? '✅' : '❌'} Zustand Store: ${hasStore ? '已加载' : '未加载'}`);
     
-    // 检查是否有 Router
+    // 检查声明式路由入口
     console.log('\n🔍 检查 Router...\n');
-    const hasRouter = await page.evaluate(() => {
-      return typeof window.router !== 'undefined' || typeof window.Router !== 'undefined';
+    const routeState = await page.evaluate(() => {
+      const activeRoute = document.querySelector('[aria-current="page"]');
+      return {
+        hasRouteTrigger: document.querySelector('[data-action="switch-tab"][data-tab]') !== null,
+        activeRoute: activeRoute?.getAttribute('data-tab') || activeRoute?.id || null,
+        hash: window.location.hash
+      };
     });
-    console.log(`  ${hasRouter ? '✅' : '❌'} Router: ${hasRouter ? '已加载' : '未加载'}`);
+    console.log(`  ${routeState.hasRouteTrigger ? '✅' : '❌'} Router: ${routeState.hasRouteTrigger ? '声明式入口已加载' : '声明式入口未找到'}`);
+    console.log(`  当前路由: ${routeState.activeRoute || routeState.hash || 'home'}`);
     
     // 截图
     console.log('\n📸 保存截图...\n');

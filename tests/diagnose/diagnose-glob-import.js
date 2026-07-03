@@ -27,12 +27,12 @@ async function diagnoseGlobImport() {
 
     // 2. 点击App Center按钮
     console.log('\n📍 步骤2: 点击 App Center 按钮');
-    await page.click('[data-action="switchTab"][data-tab="app_center"]');
+    await page.click('[data-action="switch-tab"][data-tab="app_center"]');
     await page.waitForTimeout(1000);
 
     // 3. 点击Promptlab按钮
     console.log('\n📍 步骤3: 点击 Promptlab 按钮');
-    await page.click('[data-action="switchTab"][data-tab="promptlab"]');
+    await page.click('[data-action="switch-tab"][data-tab="promptlab"]');
     await page.waitForTimeout(2000);
 
     // 4. 检查容器内容

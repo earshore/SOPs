@@ -55,6 +55,12 @@ interface LegacyWindowNavigationCall {
   line: number;
 }
 
+interface LegacyGlobalRouteApiReference {
+  file: string;
+  line: number;
+  kind: string;
+}
+
 interface LoaderScope {
   name: string;
   manifest: ModuleManifest;
@@ -343,6 +349,33 @@ function collectLegacyWindowNavigationCalls(): LegacyWindowNavigationCall[] {
   return references;
 }
 
+function collectLegacyGlobalRouteApiReferences(): LegacyGlobalRouteApiReference[] {
+  const files = collectSourceFiles(join(projectRoot, 'src'));
+  const references: LegacyGlobalRouteApiReference[] = [];
+  const patterns: Array<{ kind: string; pattern: RegExp }> = [
+    { kind: 'window.navigateTo assignment', pattern: /\bwindow\.navigateTo\s*=/g },
+    { kind: 'legacy global router install', pattern: /\.installGlobalAPI\s*\(/g },
+  ];
+
+  for (const file of files) {
+    const content = readFileSync(file, 'utf-8');
+
+    for (const { kind, pattern } of patterns) {
+      let match: RegExpExecArray | null;
+      pattern.lastIndex = 0;
+      while ((match = pattern.exec(content)) !== null) {
+        references.push({
+          file: relative(projectRoot, file),
+          line: content.slice(0, match.index).split('\n').length,
+          kind,
+        });
+      }
+    }
+  }
+
+  return references;
+}
+
 function auditStaticTabReferences(issues: AuditIssue[], routeIdSet: Set<string>): void {
   for (const reference of collectStaticTabReferences()) {
     if (!routeIdSet.has(reference.routeId)) {
@@ -400,6 +433,18 @@ function auditLegacyWindowNavigationCalls(issues: AuditIssue[]): void {
       'error',
       'legacy-window-navigate',
       'window.navigateTo() bypasses route-id validation; use navigateToRouteId() or data-action="switch-tab"',
+      `${reference.file}:${reference.line}`
+    );
+  }
+}
+
+function auditLegacyGlobalRouteApis(issues: AuditIssue[]): void {
+  for (const reference of collectLegacyGlobalRouteApiReferences()) {
+    addIssue(
+      issues,
+      'error',
+      'legacy-global-route-api',
+      `${reference.kind} reintroduces a global path/legacy route entrypoint`,
       `${reference.file}:${reference.line}`
     );
   }
@@ -495,6 +540,7 @@ function main(): void {
   auditLegacyRouteChangeEmits(issues);
   auditLegacyChildTabAttributes(issues);
   auditLegacyWindowNavigationCalls(issues);
+  auditLegacyGlobalRouteApis(issues);
   auditStaticTabReferences(issues, routeIdSet);
   auditModuleMaps(issues);
   auditMenuConfig(issues, routeIdSet);

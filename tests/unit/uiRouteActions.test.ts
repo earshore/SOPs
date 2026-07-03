@@ -4,7 +4,6 @@ import type { ActionHandler } from '@/common/utils/actionRegistry';
 const mocks = vi.hoisted(() => ({
   actions: {} as Record<string, ActionHandler>,
   closeMegaMenus: vi.fn(),
-  navigateTo: vi.fn().mockResolvedValue(true),
   navigateToRouteId: vi.fn().mockResolvedValue(true),
 }));
 
@@ -15,7 +14,6 @@ vi.mock('@/common/utils/actionRegistry', () => ({
 }));
 
 vi.mock('@/common/router/initRouter', () => ({
-  navigateTo: mocks.navigateTo,
   navigateToRouteId: mocks.navigateToRouteId,
   getRouter: vi.fn(),
   getCurrentRoute: vi.fn(),
@@ -64,7 +62,6 @@ beforeEach(async () => {
   vi.resetModules();
   mocks.actions = {};
   mocks.closeMegaMenus.mockReset();
-  mocks.navigateTo.mockReset().mockResolvedValue(true);
   mocks.navigateToRouteId.mockReset().mockResolvedValue(true);
   await import('@/common/ui/index');
 });

@@ -40,13 +40,7 @@ export {
 } from './search';
 
 // 新路由系统（推荐使用）
-export {
-  navigateTo,
-  navigateToRouteId,
-  getRouter,
-  getCurrentRoute,
-  hasRoute,
-} from '../router/initRouter';
+export { navigateToRouteId, getRouter, getCurrentRoute, hasRoute } from '../router/initRouter';
 
 // 向后兼容：注册到 window
 // ========================
@@ -68,12 +62,11 @@ import {
   searchSidebar,
   clearSidebarSearch,
 } from './search';
-import { navigateTo, navigateToRouteId } from '../router/initRouter';
+import { navigateToRouteId } from '../router/initRouter';
 
 // 挂载到 window 供 legacy 代码使用
 declare global {
   interface Window {
-    navigateTo: typeof navigateTo;
     renderMegaMenu: typeof renderMegaMenu;
     renderSopsMegaMenu: typeof renderSopsMegaMenu;
     renderHubMegaMenu: typeof renderHubMegaMenu;
@@ -90,7 +83,6 @@ declare global {
   }
 }
 
-window.navigateTo = navigateTo;
 window.renderMegaMenu = renderMegaMenu;
 window.renderSopsMegaMenu = renderSopsMegaMenu;
 window.renderHubMegaMenu = renderHubMegaMenu;

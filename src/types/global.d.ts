@@ -37,12 +37,8 @@ declare global {
     // 全局状态
     state: Record<string, unknown>;
 
-    // 路由
-    router: import('../common/router/navigo/NavigoAdapter').NavigoAdapter;
-
     // 工具函数
     showToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void;
-    navigateTo: (path: string, options?: { replace?: boolean }) => Promise<boolean>;
     renderMegaMenu: () => void;
     renderSopsMegaMenu: () => void;
     renderHubMegaMenu: () => void;

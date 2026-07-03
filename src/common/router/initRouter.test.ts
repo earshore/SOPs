@@ -23,16 +23,10 @@ const mocks = vi.hoisted(() => ({
   storeSync: {
     subscribe: vi.fn(),
   },
-  legacy: {
-    installGlobalAPI: vi.fn(),
-    uninstallGlobalAPI: vi.fn(),
-    emitLegacyEvents: vi.fn(),
-  },
   createRouter: vi.fn(),
   convertMenuConfig: vi.fn(),
   createRouterStore: vi.fn(),
   createRouterStoreSync: vi.fn(),
-  createLegacyAdapter: vi.fn(),
   updateUIForRoute: vi.fn(),
   normalizeRoutePath: vi.fn((path: string) => (path.startsWith('/') ? path : `/${path}`)),
   routeIdToPath: vi.fn((routeId: string) => {
@@ -56,7 +50,6 @@ vi.mock('./navigo', () => ({
   convertMenuConfig: mocks.convertMenuConfig,
   createRouterStore: mocks.createRouterStore,
   createRouterStoreSync: mocks.createRouterStoreSync,
-  createLegacyAdapter: mocks.createLegacyAdapter,
 }));
 
 vi.mock('../config/menuConfig', () => ({
@@ -100,9 +93,6 @@ beforeEach(() => {
       return vi.fn();
     }
   );
-  mocks.legacy.installGlobalAPI.mockReset();
-  mocks.legacy.uninstallGlobalAPI.mockReset();
-  mocks.legacy.emitLegacyEvents.mockReset();
   mocks.createRouter.mockReset().mockReturnValue(mocks.router);
   mocks.convertMenuConfig.mockReset().mockReturnValue({
     routes: {
@@ -116,7 +106,6 @@ beforeEach(() => {
   });
   mocks.createRouterStore.mockReset().mockReturnValue(mocks.store);
   mocks.createRouterStoreSync.mockReset().mockReturnValue(mocks.storeSync);
-  mocks.createLegacyAdapter.mockReset().mockReturnValue(mocks.legacy);
   mocks.updateUIForRoute.mockReset().mockResolvedValue(undefined);
   mocks.normalizeRoutePath.mockClear();
   mocks.routeIdToPath.mockClear();
@@ -132,7 +121,7 @@ describe('initRouter setup', () => {
     expect(() => getRouterStore()).toThrow('Router store not initialized');
   });
 
-  it('initializes routes, aliases, store sync, middleware, and legacy events once', async () => {
+  it('initializes routes, aliases, store sync, and middleware once', async () => {
     const { initRouter, getRouter, getRouterStore } = await loadInitRouter();
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
@@ -154,11 +143,6 @@ describe('initRouter setup', () => {
       '/app-center/playground/deep-chat'
     );
     expect(mocks.router.setStoreSync).toHaveBeenCalledWith(mocks.storeSync);
-    expect(mocks.legacy.installGlobalAPI).toHaveBeenCalledTimes(1);
-    expect(mocks.legacy.emitLegacyEvents).toHaveBeenCalledWith(
-      mocks.storeState.currentRoute,
-      mocks.storeState.previousRoute
-    );
     expect(getRouter()).toBe(mocks.router);
     expect(getRouterStore()).toBe(mocks.store);
 
@@ -262,6 +246,7 @@ describe('initRouter navigation and teardown', () => {
   it('logs conversion errors and destroys installed router state', async () => {
     const { initRouter, destroyRouter, getRouter } = await loadInitRouter();
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const removeEventListener = vi.spyOn(window, 'removeEventListener');
     mocks.convertMenuConfig.mockReturnValueOnce({
       routes: {},
       aliases: {},
@@ -272,7 +257,7 @@ describe('initRouter navigation and teardown', () => {
     destroyRouter();
 
     expect(consoleError).toHaveBeenCalledWith('[initRouter] Conversion errors:', ['bad route']);
-    expect(mocks.legacy.uninstallGlobalAPI).toHaveBeenCalledTimes(1);
+    expect(removeEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
     expect(mocks.router.destroy).toHaveBeenCalledTimes(1);
     expect(mocks.storeState.reset).toHaveBeenCalledTimes(1);
     expect(() => getRouter()).toThrow('Router not initialized');

@@ -11,7 +11,6 @@ export * from './navigo';
 export {
   initRouter,
   getRouter,
-  navigateTo,
   navigateToRouteId,
   getCurrentRoute,
   hasRoute,

@@ -30,9 +30,6 @@ export { PreloadManager, createPreloadManager } from './PreloadManager';
 export { ErrorHandler, createErrorHandler, createRouterError } from './ErrorHandler';
 export type { ErrorHandlerConfig, ErrorContext } from './ErrorHandler';
 
-// 向后兼容适配器
-export { LegacyAdapter, createLegacyAdapter } from './LegacyAdapter';
-
 // 状态管理集成
 export { createRouterStore, createRouterStoreSync, RouterStoreSync } from './RouterStore';
 export type { RouterState, RouterActions, RouterStore } from './RouterStore';

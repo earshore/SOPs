@@ -128,7 +128,6 @@ export default defineConfig({
             'tests/unit/RouteErrorHandler.test.ts',
             'tests/unit/RouteMiddleware.test.ts',
             'tests/unit/design-tokens.test.ts',
-            'tests/unit/scraper-historyPanel.test.ts',
             'tests/unit/scraper-panel.test.ts'
         ],
         setupFiles: ['./tests/setup.ts'],

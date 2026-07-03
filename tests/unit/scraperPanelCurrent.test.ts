@@ -188,7 +188,6 @@ function resetAppState(): void {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  window.navigateTo = vi.fn(async () => undefined);
   resetAppState();
   scraperMocks.storageGet.mockReturnValue({ type: 'scraperapi', customUrl: '' });
   scraperMocks.handleScrapeComplete.mockReturnValue({

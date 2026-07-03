@@ -9,7 +9,6 @@ import {
   convertMenuConfig,
   createRouterStore,
   createRouterStoreSync,
-  createLegacyAdapter,
   type NavigoAdapter,
 } from './navigo';
 import { MENU_CONFIG } from '../config/menuConfig';
@@ -21,7 +20,7 @@ import { LEGACY_ROUTE_ALIASES, shouldReplaceLegacyRoute } from './legacyRouteAli
 // 全局路由实例
 let routerInstance: NavigoAdapter | null = null;
 let storeInstance: ReturnType<typeof createRouterStore> | null = null;
-let legacyInstance: ReturnType<typeof createLegacyAdapter> | null = null;
+let popstateNavigationHandler: (() => void) | null = null;
 
 type ConversionResult = ReturnType<typeof convertMenuConfig>;
 type RouterStoreSyncInstance = ReturnType<typeof createRouterStoreSync>;
@@ -84,21 +83,8 @@ function configureRouteMiddlewares(router: NavigoAdapter): void {
   });
 }
 
-function installLegacyCompatibility(router: NavigoAdapter): void {
-  legacyInstance = createLegacyAdapter(router, false);
-  legacyInstance.installGlobalAPI();
-}
-
-function subscribeLegacyEvents(storeSync: RouterStoreSyncInstance): void {
-  storeSync.subscribe(state => {
-    if (state.currentRoute && legacyInstance) {
-      legacyInstance.emitLegacyEvents(state.currentRoute, state.previousRoute);
-    }
-  });
-}
-
 function setupPopstateNavigation(): void {
-  window.addEventListener('popstate', () => {
+  popstateNavigationHandler = () => {
     const hash = window.location.hash.replace('#', '');
     if (hash && routerInstance) {
       const normalizedHash = normalizeRoutePath(hash);
@@ -109,7 +95,9 @@ function setupPopstateNavigation(): void {
         skipMiddleware: false,
       });
     }
-  });
+  };
+
+  window.addEventListener('popstate', popstateNavigationHandler);
 }
 
 /**
@@ -123,10 +111,8 @@ export function initRouter(): NavigoAdapter {
   routerInstance = createConfiguredRouter();
   const conversionResult = convertRoutes();
   registerConvertedRoutes(routerInstance, conversionResult);
-  const storeSync = createAndAttachStoreSync(routerInstance);
+  createAndAttachStoreSync(routerInstance);
   configureRouteMiddlewares(routerInstance);
-  installLegacyCompatibility(routerInstance);
-  subscribeLegacyEvents(storeSync);
   setupPopstateNavigation();
 
   return routerInstance;
@@ -164,9 +150,9 @@ export function getRouterStore(): ReturnType<typeof createRouterStore> {
  * 销毁路由系统
  */
 export function destroyRouter(): void {
-  if (legacyInstance) {
-    legacyInstance.uninstallGlobalAPI();
-    legacyInstance = null;
+  if (popstateNavigationHandler) {
+    window.removeEventListener('popstate', popstateNavigationHandler);
+    popstateNavigationHandler = null;
   }
 
   if (routerInstance) {
@@ -214,7 +200,9 @@ export function triggerInitialNavigation(): void {
 }
 
 /**
- * 导航到指定路由（便捷函数）
+ * 导航到指定路径。
+ *
+ * @internal 业务代码应使用 navigateToRouteId()，避免绕过 routeId 校验。
  */
 export async function navigateTo(
   path: string,

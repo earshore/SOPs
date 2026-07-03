@@ -71,13 +71,6 @@ export function initMegaMenuAccessibility(): void;
 export function updateUIForRoute(routeId: string): Promise<void>;
 
 /**
- * 导航到指定路由
- * @param path - 路由路径（如 '/home', '/scraper'）
- * @param options - 导航选项
- */
-export function navigateTo(path: string, options?: { replace?: boolean }): Promise<boolean>;
-
-/**
  * 通过路由 ID 导航
  * @param routeId - 路由 ID（如 'home', 'ppc_search_terms'）
  * @param options - 导航选项

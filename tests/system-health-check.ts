@@ -54,7 +54,6 @@ const technicalDebt = {
     '主包大小超过 300KB 阈值'
   ],
   low: [
-    'LegacyAdapter 计划在 2026-09 移除',
     '部分模块使用 @deprecated 标记但未清理',
     '临时 DOM 元素创建用于 HTML 清理'
   ]

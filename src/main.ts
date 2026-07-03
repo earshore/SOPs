@@ -541,7 +541,7 @@ type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 registerActionsWithLegacy({
   // === Navigation 导航 ===
-  // switchTab 已废弃，使用 navigateTo 代替
+  // 页面导航统一通过 data-action="switch-tab" 或 navigateToRouteId() 发起
 
   // switchDataTab, // Owned by DataModule
   renderMegaMenu,

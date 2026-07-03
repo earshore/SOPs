@@ -160,7 +160,6 @@ function estimateRouterCodeInBundle(bundlePath: string): number {
     'ParamParser',
     'ErrorHandler',
     'RouterStore',
-    'LegacyAdapter',
     'navigo'
   ];
   
