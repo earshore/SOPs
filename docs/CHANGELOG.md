@@ -26,6 +26,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.14] - 2026-07-03
+
+### Changed
+- 刷新 Keyword Hunter 分析、输入页和快照服务测试覆盖。
+- 清理历史复杂度/技术债务报告，更新架构债务与 Kiro 状态文档。
+- 强化 Promptlab 视觉 readiness 状态与 E2E helper。
+- 同步应用内版本显示到 `3.0.3-rc.14`。
+
+### Fixed
+- 稳定 Keyword Hunter、Promptlab 和 Scraper 端到端页面对象与等待逻辑。
+
 ## [3.0.3-rc.13] - 2026-07-03
 
 ### Added
