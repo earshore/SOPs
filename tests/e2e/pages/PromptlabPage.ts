@@ -37,6 +37,11 @@ export interface StrategyConfig {
  */
 export type ConsoleMode = 'listing' | 'visual';
 
+interface PromptGenerationWaitOptions {
+  expectedTerms?: string[];
+  timeout?: number;
+}
+
 /**
  * Promptlab 页面对象
  * 
@@ -463,10 +468,10 @@ export class PromptlabPage extends BasePage {
   /**
    * 生成 Listing Prompt
    */
-  async generateListingPrompt(): Promise<void> {
+  async generateListingPrompt(options?: PromptGenerationWaitOptions): Promise<void> {
     await this.switchConsoleMode('listing');
     await this.click(this.selectors.generatePromptButton);
-    await this.waitForPromptGeneration();
+    await this.waitForPromptGeneration(options);
   }
 
   /**
@@ -481,15 +486,24 @@ export class PromptlabPage extends BasePage {
   /**
    * 等待 Prompt 生成完成
    */
-  async waitForPromptGeneration(): Promise<void> {
+  async waitForPromptGeneration(options: PromptGenerationWaitOptions = {}): Promise<void> {
     // 等待输出框有内容
     await this.page.waitForFunction(
-      (selector) => {
+      ({ selector, expectedTerms }: { selector: string; expectedTerms: string[] }) => {
         const textarea = document.querySelector(selector) as HTMLTextAreaElement;
-        return textarea && textarea.value.length > 0;
+        if (!textarea || textarea.value.trim().length === 0) return false;
+
+        const normalizedPrompt = textarea.value.toLowerCase();
+        return (
+          expectedTerms.length === 0 ||
+          expectedTerms.some(term => normalizedPrompt.includes(term.toLowerCase()))
+        );
       },
-      this.selectors.promptOutput,
-      { timeout: 30000 }
+      {
+        selector: this.selectors.promptOutput,
+        expectedTerms: options.expectedTerms?.filter(Boolean) || [],
+      },
+      { timeout: options.timeout || 30000 }
     );
   }
 
@@ -528,8 +542,15 @@ export class PromptlabPage extends BasePage {
    * 获取字符数
    */
   async getCharCount(): Promise<number> {
-    const text = await this.getText(this.selectors.charCount);
-    return parseInt(text, 10);
+    const text = (await this.getText(this.selectors.charCount)).trim();
+    const match = text.match(/^(\d+(?:\.\d+)?)(k)?$/i);
+
+    if (!match) {
+      return 0;
+    }
+
+    const value = Number.parseFloat(match[1] || '0');
+    return match[2] ? Math.round(value * 1000) : value;
   }
 
   /**

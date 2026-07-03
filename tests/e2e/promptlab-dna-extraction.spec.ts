@@ -88,6 +88,13 @@ async function confirmOverwriteIfVisible(page: import('@playwright/test').Page):
   }
 }
 
+function getPromptKeywordTerms(dna: { keywordsTier1?: string; keywordsTier2?: string }): string[] {
+  return [dna.keywordsTier1, dna.keywordsTier2]
+    .flatMap(value => (value || '').split(/[,;，；\n]/))
+    .map(term => term.trim())
+    .filter(Boolean);
+}
+
   let promptlab: PromptlabPage;
 
   test.beforeEach(async ({ page }) => {
@@ -379,8 +386,10 @@ async function confirmOverwriteIfVisible(page: import('@playwright/test').Page):
       const isDNAFilled = await promptlab.isDNAAutoFilled();
       expect(isDNAFilled, 'DNA 应该已填充').toBe(true);
 
-      const dna = await promptlab.getAutoFilledDNA();
       console.log(`     ✅ DNA 提取完成`);
+      const currentProductDna = await promptlab.getProductDNA();
+      const expectedPromptTerms = getPromptKeywordTerms(currentProductDna);
+      expect(expectedPromptTerms.length, '生成 Prompt 前应该有当前表单关键词').toBeGreaterThan(0);
 
       // 步骤 3: 配置策略
       console.log('  3️⃣ 配置生成策略...');
@@ -398,7 +407,7 @@ async function confirmOverwriteIfVisible(page: import('@playwright/test').Page):
 
       // 步骤 5: 生成 Listing Prompt
       console.log('  5️⃣ 生成 Listing Prompt...');
-      await promptlab.generateListingPrompt();
+      await promptlab.generateListingPrompt({ expectedTerms: expectedPromptTerms });
       await promptlab.wait(1500);
 
       // 验证：Prompt 已生成
@@ -408,12 +417,17 @@ async function confirmOverwriteIfVisible(page: import('@playwright/test').Page):
         const prompt = await promptlab.getGeneratedPrompt();
         const charCount = await promptlab.getCharCount();
 
-        console.log(`     ✅ Prompt 生成成功 (${charCount} 字符)`);
+        console.log(`     ✅ Prompt 生成成功 (${charCount} tokens)`);
 
-        // 验证：Prompt 应该包含提取的 DNA 信息
-        const containsDNA = prompt.toLowerCase().includes('wireless') ||
-                           prompt.toLowerCase().includes('earbuds');
-        expect(containsDNA, 'Prompt 应该包含产品信息').toBe(true);
+        // 验证：Prompt 应该包含当前表单中的产品关键词
+        const normalizedPrompt = prompt.toLowerCase();
+        const containsDNA = expectedPromptTerms.some(term =>
+          normalizedPrompt.includes(term.toLowerCase())
+        );
+        expect(
+          containsDNA,
+          `Prompt 应该包含当前产品关键词之一: ${expectedPromptTerms.slice(0, 3).join(', ')}`
+        ).toBe(true);
       }
 
       // 验证：整个流程无错误

@@ -174,248 +174,260 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-  it('mounts the template and disables analysis when no processed copy exists', async () => {
-    const container = await mountAnalysis();
-    const button = container.querySelector<HTMLButtonElement>('#kt-analyze-btn');
+it('mounts the template and disables analysis when no processed copy exists', async () => {
+  const container = await mountAnalysis();
+  const button = container.querySelector<HTMLButtonElement>('#kt-analyze-btn');
 
-    expect(SafeModuleLoader.getInstance).toHaveBeenCalled();
-    expect(SafeRenderer.getInstance).toHaveBeenCalled();
-    expect(analysisMocks.loadTemplate).toHaveBeenCalledWith(
-      'src/modules/app_center/views/keyword_hunter/analysis/template.html',
-      expect.any(Object),
-    );
-    expect(container.classList.contains('fade-in')).toBe(true);
-    expect(button?.disabled).toBe(true);
-    expect(button?.classList.contains('cursor-not-allowed')).toBe(true);
-  });
+  expect(SafeModuleLoader.getInstance).toHaveBeenCalled();
+  expect(SafeRenderer.getInstance).toHaveBeenCalled();
+  expect(analysisMocks.loadTemplate).toHaveBeenCalledWith(
+    'src/modules/app_center/views/keyword_hunter/analysis/template.html',
+    expect.any(Object)
+  );
+  expect(container.classList.contains('fade-in')).toBe(true);
+  expect(button?.disabled).toBe(true);
+  expect(button?.classList.contains('cursor-not-allowed')).toBe(true);
+});
 
-  it('restores saved markdown, renders score badges, and avoids double saving HTML', async () => {
-    analysisMocks.state.keywordTracker.llmAnalysisResult = scoredMarkdown;
+it('restores saved markdown, renders score badges, and avoids double saving HTML', async () => {
+  analysisMocks.state.keywordTracker.llmAnalysisResult = scoredMarkdown;
 
-    const container = await mountAnalysis();
+  const container = await mountAnalysis();
 
-    expect(container.querySelector('h2')?.textContent).toContain('88/100');
-    expect(container.querySelector('h2')?.classList.contains('kh-report-score-title')).toBe(true);
-    expect(container.querySelector('h2')?.classList.contains('kh-report-score-title--excellent')).toBe(true);
-    expect(container.querySelector('.score-progress-bar')).not.toBeNull();
-    expect(container.querySelector('.score-progress-fill')).not.toBeNull();
-    expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
-    expect(container.querySelector('#kt-llm-analysis-result')?.textContent).not.toContain('✅');
-    expect(container.querySelector('.row-risk')).not.toBeNull();
-    expect(container.querySelector('.row-low')).not.toBeNull();
+  expect(container.querySelector('h2')?.textContent).toContain('88/100');
+  expect(container.querySelector('h2')?.classList.contains('kh-report-score-title')).toBe(true);
+  expect(
+    container.querySelector('h2')?.classList.contains('kh-report-score-title--excellent')
+  ).toBe(true);
+  expect(container.querySelector('.score-progress-bar')).not.toBeNull();
+  expect(container.querySelector('.score-progress-fill')).not.toBeNull();
+  expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
+  expect(container.querySelector('#kt-llm-analysis-result')?.textContent).not.toContain('✅');
+  expect(container.querySelector('.row-risk')).not.toBeNull();
+  expect(container.querySelector('.row-low')).not.toBeNull();
 
-    unmount();
+  unmount();
 
-    expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
-  });
+  expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
+});
 
-  it('restores the latest reported snapshot when analysis state is empty', async () => {
-    const snapshot = {
-      id: 'kh-reported',
-      status: 'reported',
-      input: {
-        keywordsInputText: 'wireless earbuds',
-        copyInputText: validListing,
-        settings: {
-          matchPlural: true,
-          matchStem: true,
-          matchCase: false,
-          matchPartial: false,
-        },
+it('restores the latest reported snapshot when analysis state is empty', async () => {
+  const snapshot = {
+    id: 'kh-reported',
+    status: 'reported',
+    input: {
+      keywordsInputText: 'wireless earbuds',
+      copyInputText: validListing,
+      settings: {
+        matchPlural: true,
+        matchStem: true,
+        matchCase: false,
+        matchPartial: false,
       },
-      result: {
-        keywords: ['wireless earbuds'],
-        processedCopy: validListing,
-        matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
-        unmatchedKeywords: [],
-        wordFrequency: [['wireless', 1]],
-        paragraphs: [],
-        llmAnalysisResult: scoredMarkdown,
-        coverageRate: 100,
-      },
-      derived: {
-        matchedCount: 1,
-        unmatchedCount: 0,
-      },
-    };
-    analysisMocks.getAllSnapshotsAsync.mockResolvedValueOnce([snapshot]);
-    analysisMocks.restoreSnapshot.mockImplementationOnce(() => {
-      Object.assign(analysisMocks.state.keywordTracker, {
-        processedCopy: validListing,
-        keywords: ['wireless earbuds'],
-        matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
-        unmatchedKeywords: [],
-        llmAnalysisResult: scoredMarkdown,
-      });
-      return snapshot;
+    },
+    result: {
+      keywords: ['wireless earbuds'],
+      processedCopy: validListing,
+      matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
+      unmatchedKeywords: [],
+      wordFrequency: [['wireless', 1]],
+      paragraphs: [],
+      llmAnalysisResult: scoredMarkdown,
+      coverageRate: 100,
+    },
+    derived: {
+      matchedCount: 1,
+      unmatchedCount: 0,
+    },
+  };
+  analysisMocks.getAllSnapshotsAsync.mockResolvedValueOnce([snapshot]);
+  analysisMocks.restoreSnapshot.mockImplementationOnce(() => {
+    Object.assign(analysisMocks.state.keywordTracker, {
+      processedCopy: validListing,
+      keywords: ['wireless earbuds'],
+      matchedKeywords: [{ keyword: 'wireless earbuds', count: 1 }],
+      unmatchedKeywords: [],
+      llmAnalysisResult: scoredMarkdown,
     });
-
-    const container = await mountAnalysis();
-
-    expect(KeywordHunterSnapshotService.restore).toHaveBeenCalledWith(snapshot);
-    expect(container.querySelector('h2')?.textContent).toContain('88/100');
-    expect(container.querySelector('#kt-analyze-btn')?.classList.contains('cursor-pointer')).toBe(true);
+    return snapshot;
   });
 
-  it('shows loading phases, renders successful analysis, and stores raw markdown', async () => {
-    vi.useFakeTimers();
-    analysisMocks.state.keywordTracker.processedCopy = validListing;
-    analysisMocks.state.keywordTracker.keywords = ['wireless earbuds'];
-    analysisMocks.state.keywordTracker.matchedKeywords = [{ keyword: 'wireless earbuds', count: 1 }];
-    analysisMocks.state.keywordTracker.unmatchedKeywords = ['waterproof'];
-    let resolveAnalysis: (value: string) => void = () => undefined;
-    mockedCallLLM.mockImplementationOnce(
-      () => new Promise<string>((resolve) => {
+  const container = await mountAnalysis();
+
+  expect(KeywordHunterSnapshotService.restore).toHaveBeenCalledWith(snapshot);
+  expect(container.querySelector('h2')?.textContent).toContain('88/100');
+  expect(container.querySelector('#kt-analyze-btn')?.classList.contains('cursor-pointer')).toBe(
+    true
+  );
+});
+
+it('shows loading phases, renders successful analysis, and stores raw markdown', async () => {
+  vi.useFakeTimers();
+  analysisMocks.state.keywordTracker.processedCopy = validListing;
+  analysisMocks.state.keywordTracker.keywords = ['wireless earbuds'];
+  analysisMocks.state.keywordTracker.matchedKeywords = [{ keyword: 'wireless earbuds', count: 1 }];
+  analysisMocks.state.keywordTracker.unmatchedKeywords = ['waterproof'];
+  let resolveAnalysis: (value: string) => void = () => undefined;
+  mockedCallLLM.mockImplementationOnce(
+    () =>
+      new Promise<string>(resolve => {
         resolveAnalysis = resolve;
-      }),
-    );
-    const container = await mountAnalysis();
+      })
+  );
+  const container = await mountAnalysis();
 
-    click(container.querySelector('#kt-analyze-btn'));
-    await Promise.resolve();
-    await Promise.resolve();
+  click(container.querySelector('#kt-analyze-btn'));
+  await Promise.resolve();
+  await Promise.resolve();
 
-    expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('分析中…');
-    expect(container.querySelector('#kt-loading-state')?.textContent).toContain('正在读取文案与关键词数据');
-    await vi.waitFor(() => {
-      expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+  expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('分析中…');
+  expect(container.querySelector('#kt-loading-state')?.textContent).toContain(
+    '正在读取文案与关键词数据'
+  );
+  await vi.waitFor(() => {
+    expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+  });
+
+  vi.advanceTimersByTime(3500);
+  expect(container.querySelector('#kt-loading-state')?.textContent).toContain(
+    'AI 正在深度分析 Listing'
+  );
+
+  vi.advanceTimersByTime(6500);
+  expect(container.querySelector('#kt-loading-state')?.textContent).toContain('正在生成评审报告');
+
+  resolveAnalysis(scoredMarkdown);
+  await vi.advanceTimersByTimeAsync(0);
+  await vi.advanceTimersByTimeAsync(16);
+
+  expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('报告已生成');
+
+  expect(mockedCallLLM).toHaveBeenCalledWith(
+    expect.any(Array),
+    'openai',
+    'https://api.example.test',
+    'test-key',
+    'gpt-test',
+    { temperature: 0.1, jsonMode: false }
+  );
+  expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
+  expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
+  await vi.waitFor(() => {
+    expect(KeywordHunterSnapshotService.saveCurrentAsync).toHaveBeenCalledWith({
+      status: 'reported',
     });
+  });
+  expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
+});
 
-    vi.advanceTimersByTime(3500);
-    expect(container.querySelector('#kt-loading-state')?.textContent).toContain('AI 正在深度分析 Listing');
+it('keeps the pending analysis state visible after leaving and returning', async () => {
+  vi.useFakeTimers();
+  analysisMocks.state.keywordTracker.processedCopy = validListing;
+  analysisMocks.state.keywordTracker.keywords = ['wireless earbuds'];
+  analysisMocks.state.keywordTracker.matchedKeywords = [{ keyword: 'wireless earbuds', count: 1 }];
+  let resolveAnalysis: (value: string) => void = () => undefined;
+  mockedCallLLM.mockImplementationOnce(
+    () =>
+      new Promise<string>(resolve => {
+        resolveAnalysis = resolve;
+      })
+  );
 
-    vi.advanceTimersByTime(6500);
-    expect(container.querySelector('#kt-loading-state')?.textContent).toContain('正在生成评审报告');
+  const firstContainer = await mountAnalysis();
+  click(firstContainer.querySelector('#kt-analyze-btn'));
+  await Promise.resolve();
+  await Promise.resolve();
 
-    resolveAnalysis(scoredMarkdown);
-    await vi.advanceTimersByTimeAsync(0);
-    await vi.advanceTimersByTimeAsync(16);
+  expect(firstContainer.querySelector('#kt-loading-state')?.textContent).toContain(
+    '正在读取文案与关键词数据'
+  );
+  expect(mockedCallLLM).toHaveBeenCalledTimes(1);
 
+  unmount();
+  firstContainer.remove();
+
+  const secondContainer = await mountAnalysis();
+  expect(secondContainer.querySelector('#kt-loading-state')?.textContent).toContain(
+    '正在读取文案与关键词数据'
+  );
+  expect(secondContainer.querySelector('#kt-analyze-btn-text')?.textContent).toBe('分析中…');
+  expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+
+  resolveAnalysis(scoredMarkdown);
+  await vi.advanceTimersByTimeAsync(0);
+  await vi.advanceTimersByTimeAsync(16);
+
+  expect(secondContainer.querySelector('#kt-llm-analysis-result')?.textContent).toContain('88/100');
+  expect(secondContainer.querySelector('#kt-analyze-btn-text')?.textContent).toBe('报告已生成');
+  expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
+  expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
+});
+
+it('warns when the generated report cannot be archived automatically', async () => {
+  analysisMocks.state.keywordTracker.processedCopy = validListing;
+  analysisMocks.saveCurrentAsync.mockRejectedValueOnce(new Error('IndexedDB 不可写'));
+  const container = await mountAnalysis();
+
+  click(container.querySelector('#kt-analyze-btn'));
+
+  await vi.waitFor(() => {
     expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('报告已生成');
-
-    expect(mockedCallLLM).toHaveBeenCalledWith(
-      expect.any(Array),
-      'openai',
-      'https://api.example.test',
-      'test-key',
-      'gpt-test',
-      { temperature: 0.1, jsonMode: false },
-    );
-    expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
-    expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
-    await vi.waitFor(() => {
-      expect(KeywordHunterSnapshotService.saveCurrentAsync).toHaveBeenCalledWith({ status: 'reported' });
-    });
-    expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
   });
-
-  it('keeps the pending analysis state visible after leaving and returning', async () => {
-    vi.useFakeTimers();
-    analysisMocks.state.keywordTracker.processedCopy = validListing;
-    analysisMocks.state.keywordTracker.keywords = ['wireless earbuds'];
-    analysisMocks.state.keywordTracker.matchedKeywords = [{ keyword: 'wireless earbuds', count: 1 }];
-    let resolveAnalysis: (value: string) => void = () => undefined;
-    mockedCallLLM.mockImplementationOnce(
-      () =>
-        new Promise<string>(resolve => {
-          resolveAnalysis = resolve;
-        })
-    );
-
-    const firstContainer = await mountAnalysis();
-    click(firstContainer.querySelector('#kt-analyze-btn'));
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(firstContainer.querySelector('#kt-loading-state')?.textContent).toContain(
-      '正在读取文案与关键词数据'
-    );
-    expect(mockedCallLLM).toHaveBeenCalledTimes(1);
-
-    unmount();
-    firstContainer.remove();
-
-    const secondContainer = await mountAnalysis();
-    expect(secondContainer.querySelector('#kt-loading-state')?.textContent).toContain(
-      '正在读取文案与关键词数据'
-    );
-    expect(secondContainer.querySelector('#kt-analyze-btn-text')?.textContent).toBe('分析中…');
-    expect(mockedCallLLM).toHaveBeenCalledTimes(1);
-
-    resolveAnalysis(scoredMarkdown);
-    await vi.advanceTimersByTimeAsync(0);
-    await vi.advanceTimersByTimeAsync(16);
-
-    expect(secondContainer.querySelector('#kt-llm-analysis-result')?.textContent).toContain('88/100');
-    expect(secondContainer.querySelector('#kt-analyze-btn-text')?.textContent).toBe('报告已生成');
-    expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
-    expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
-  });
-
-  it('warns when the generated report cannot be archived automatically', async () => {
-    analysisMocks.state.keywordTracker.processedCopy = validListing;
-    analysisMocks.saveCurrentAsync.mockRejectedValueOnce(new Error('IndexedDB 不可写'));
-    const container = await mountAnalysis();
-
-    click(container.querySelector('#kt-analyze-btn'));
-
-    await vi.waitFor(() => {
-      expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('报告已生成');
-    });
-    expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
-    expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
-    await vi.waitFor(() => {
-      expect(showToast).toHaveBeenCalledWith(
-        '报告已生成，但历史快照自动保存失败：IndexedDB 不可写',
-        { type: 'warning' },
-      );
-    });
-  });
-
-  it('warns on empty copy and renders validation errors without reporting to ErrorService', async () => {
-    const container = await mountAnalysis();
-
-    click(container.querySelector('#kt-analyze-btn'));
-
-    expect(showToast).toHaveBeenCalledWith('文案内容为空，无法进行 AI 分析', {
+  expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
+  expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
+  await vi.waitFor(() => {
+    expect(showToast).toHaveBeenCalledWith('报告已生成，但历史快照自动保存失败：IndexedDB 不可写', {
       type: 'warning',
     });
-    expect(mockedCallLLM).not.toHaveBeenCalled();
+  });
+});
 
-    analysisMocks.state.keywordTracker.processedCopy = 'too short';
-    await mount(container);
-    click(container.querySelector('#kt-analyze-btn'));
+it('warns on empty copy and renders validation errors without reporting to ErrorService', async () => {
+  const container = await mountAnalysis();
 
-    await vi.waitFor(() => {
-      expect(container.querySelector('#kt-llm-analysis-result')?.textContent).toContain('无法进行分析');
-    });
+  click(container.querySelector('#kt-analyze-btn'));
 
-    expect(ErrorService.handle).not.toHaveBeenCalled();
+  expect(showToast).toHaveBeenCalledWith('文案内容为空，无法进行 AI 分析', {
+    type: 'warning',
+  });
+  expect(mockedCallLLM).not.toHaveBeenCalled();
+
+  analysisMocks.state.keywordTracker.processedCopy = 'too short';
+  await mount(container);
+  click(container.querySelector('#kt-analyze-btn'));
+
+  await vi.waitFor(() => {
     expect(container.querySelector('#kt-llm-analysis-result')?.textContent).toContain(
-      '输入内容过短或不具备 Amazon Listing 特征',
+      '无法进行分析'
     );
-    expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('生成报告');
   });
 
-  it('reports non-validation failures and supports retrying from the rendered error state', async () => {
-    analysisMocks.state.keywordTracker.processedCopy = validListing;
-    mockedCallLLM.mockRejectedValueOnce(new Error('503 upstream unavailable'));
-    const container = await mountAnalysis();
+  expect(ErrorService.handle).not.toHaveBeenCalled();
+  expect(container.querySelector('#kt-llm-analysis-result')?.textContent).toContain(
+    '输入内容过短或不具备 Amazon Listing 特征'
+  );
+  expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('生成报告');
+});
 
-    click(container.querySelector('#kt-analyze-btn'));
+it('reports non-validation failures and supports retrying from the rendered error state', async () => {
+  analysisMocks.state.keywordTracker.processedCopy = validListing;
+  mockedCallLLM.mockRejectedValueOnce(new Error('503 upstream unavailable'));
+  const container = await mountAnalysis();
 
-    await vi.waitFor(() => {
-      expect(ErrorService.handle).toHaveBeenCalled();
-    });
-    expect(container.querySelector('#kt-llm-analysis-result')?.textContent).toContain(
-      '服务暂时不可用 (503)',
-    );
+  click(container.querySelector('#kt-analyze-btn'));
 
-    mockedCallLLM.mockResolvedValueOnce(scoredMarkdown);
-    click(container.querySelector('#kt-llm-analysis-result button'));
-
-    await vi.waitFor(() => {
-      expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('报告已生成');
-    });
-    expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
+  await vi.waitFor(() => {
+    expect(ErrorService.handle).toHaveBeenCalled();
   });
+  expect(container.querySelector('#kt-llm-analysis-result')?.textContent).toContain(
+    '服务暂时不可用 (503)'
+  );
+
+  mockedCallLLM.mockResolvedValueOnce(scoredMarkdown);
+  click(container.querySelector('#kt-llm-analysis-result button'));
+
+  await vi.waitFor(() => {
+    expect(container.querySelector('#kt-analyze-btn-text')?.textContent).toBe('报告已生成');
+  });
+  expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
+});
