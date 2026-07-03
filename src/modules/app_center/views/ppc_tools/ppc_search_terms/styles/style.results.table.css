@@ -1,14 +1,14 @@
 .ppc-empty-state {
   padding: 32px;
-  border: 1px dashed color-mix(in srgb, var(--color-slate-400, #94a3b8) 54%, transparent);
-  border-radius: var(--ppc-radius, var(--rounded-md, 8px));
-  background: var(--ppc-surface-muted, var(--surface-card-hover, var(--color-slate-50)));
+  border: 1px dashed rgba(148, 163, 184, 0.54);
+  border-radius: 8px;
+  background: var(--surface-card-hover, var(--color-slate-50));
   text-align: center;
 }
 
 .ppc-table-wrapper {
-  border: 1px solid var(--ppc-border-muted, var(--color-slate-200, #e2e8f0));
-  border-radius: var(--ppc-radius, var(--rounded-md, 8px));
+  border: 1px solid rgb(226, 232, 240);
+  border-radius: 8px;
 }
 
 .ppc-results-table thead tr {
@@ -27,67 +27,67 @@
 }
 
 .ppc-action-negative_exact {
-  background: var(--ppc-danger-soft, var(--color-red-100, #fee2e2));
-  color: var(--ppc-danger-text, var(--color-red-800, #991b1b));
+  background: rgb(254, 226, 226);
+  color: rgb(153, 27, 27);
 }
 
 .ppc-action-harvest_exact,
 .ppc-action-scale_budget {
-  background: var(--ppc-success-soft, var(--color-green-100, #dcfce7));
-  color: var(--ppc-success-text, var(--color-green-800, #166534));
+  background: rgb(220, 252, 231);
+  color: rgb(22, 101, 52);
 }
 
 .ppc-action-bid_down {
-  background: var(--ppc-warning-soft, var(--color-amber-100, #fef3c7));
-  color: var(--ppc-warning-text, var(--color-amber-800, #92400e));
+  background: rgb(254, 243, 199);
+  color: rgb(146, 64, 14);
 }
 
 .ppc-action-listing_term {
-  background: var(--color-violet-100, #ede9fe);
-  color: var(--color-violet-800, #5b21b6);
+  background: rgb(237, 233, 254);
+  color: rgb(91, 33, 182);
 }
 
 .ppc-action-campaign_fix_status {
-  background: var(--ppc-danger-soft, var(--color-red-100, #fee2e2));
-  color: var(--ppc-danger-text, var(--color-red-800, #991b1b));
+  background: rgb(254, 226, 226);
+  color: rgb(153, 27, 27);
 }
 
 .ppc-action-campaign_pause,
 .ppc-action-campaign_bid_down {
-  background: var(--ppc-warning-soft, var(--color-amber-100, #fef3c7));
-  color: var(--ppc-warning-text, var(--color-amber-800, #92400e));
+  background: rgb(254, 243, 199);
+  color: rgb(146, 64, 14);
 }
 
 .ppc-action-campaign_scale {
-  background: var(--ppc-success-soft, var(--color-green-100, #dcfce7));
-  color: var(--ppc-success-text, var(--color-green-800, #166534));
+  background: rgb(220, 252, 231);
+  color: rgb(22, 101, 52);
 }
 
 .ppc-action-campaign_structure {
-  background: var(--color-sky-100, #e0f2fe);
-  color: var(--color-sky-800, #075985);
+  background: rgb(224, 242, 254);
+  color: rgb(7, 89, 133);
 }
 
 .ppc-action-observe {
-  background: var(--color-slate-200, #e2e8f0);
-  color: var(--ppc-text-secondary, var(--color-slate-700, #334155));
+  background: rgb(226, 232, 240);
+  color: rgb(51, 65, 85);
 }
 
 .ppc-results-row {
-  border-bottom: 1px solid var(--ppc-border-muted, var(--color-slate-200, #e2e8f0));
+  border-bottom: 1px solid rgb(226, 232, 240);
 }
 
 .ppc-results-row-reviewed {
-  background: color-mix(in srgb, var(--color-teal-50, #f0fdfa) 96%, transparent);
-  box-shadow: inset 3px 0 0 var(--color-teal-500, #14b8a6);
+  background: rgba(240, 253, 250, 0.96);
+  box-shadow: inset 3px 0 0 rgb(20, 184, 166);
 }
 
 .ppc-results-row:hover {
-  background: var(--color-sky-50, #f0f9ff);
+  background: rgb(240, 249, 255);
 }
 
 .ppc-results-row-reviewed:hover {
-  background: color-mix(in srgb, var(--color-teal-100, #ccfbf1) 72%, transparent);
+  background: rgba(204, 251, 241, 0.72);
 }
 
 .ppc-results-row td {
@@ -102,10 +102,10 @@
   min-height: 22px;
   margin-top: 6px;
   padding: 0 8px;
-  border: 1px solid color-mix(in srgb, var(--color-teal-600, #0d9488) 28%, transparent);
-  border-radius: var(--rounded-full, 999px);
-  background: var(--color-teal-50, #f0fdfa);
-  color: var(--color-teal-700, #0f766e);
+  border: 1px solid rgba(13, 148, 136, 0.28);
+  border-radius: 999px;
+  background: rgb(240, 253, 250);
+  color: rgb(15, 118, 110);
   font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
@@ -114,25 +114,25 @@
 .ppc-review-chip::before {
   width: 6px;
   height: 6px;
-  border-radius: var(--rounded-full, 999px);
-  background: var(--color-teal-500, #14b8a6);
+  border-radius: 999px;
+  background: rgb(20, 184, 166);
   content: '';
 }
 
 .ppc-review-reason {
   padding: 8px 10px;
-  border: 1px solid color-mix(in srgb, var(--color-teal-500, #14b8a6) 28%, transparent);
-  border-radius: var(--ppc-radius, var(--rounded-md, 8px));
-  background: color-mix(in srgb, var(--color-teal-50, #f0fdfa) 90%, transparent);
+  border: 1px solid rgba(20, 184, 166, 0.28);
+  border-radius: 8px;
+  background: rgba(240, 253, 250, 0.9);
 }
 
 .ppc-review-reason-label {
   margin-bottom: 4px;
-  color: var(--color-teal-700, #0f766e);
+  color: rgb(15, 118, 110);
   font-size: 11px;
   font-weight: 900;
 }
 
 .ppc-review-reason-text {
-  color: var(--color-cyan-900, #164e63);
+  color: rgb(22, 78, 99);
 }

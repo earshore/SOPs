@@ -1,5 +1,5 @@
-﻿/* src/modules/home/homeDisplay.css */
-/* 🚀 P1-7: 移除Google Fonts,使用系统字体栈 */
+/* src/modules/home/homeDisplay.css */
+/* Home 保留全屏 splash / 粒子 hero，工作台仅作为轻量浮动入口。 */
 
 #home-splash-container {
   font-family:
@@ -22,7 +22,6 @@
   left: 0;
   width: 100%;
   height: 100%;
-  /* 极其淡雅的网格背景 */
   background-image:
     linear-gradient(rgba(15, 23, 42, 0) 1px, transparent 1px),
     linear-gradient(90deg, rgba(15, 23, 42, 0) 1px, transparent 1px);
@@ -39,7 +38,6 @@
   height: 100%;
   z-index: 2;
   pointer-events: none;
-  /* 粒子在网格之上 */
 }
 
 /* ----------------------------------------
@@ -55,7 +53,6 @@
   justify-content: space-between;
   align-items: center;
   z-index: 20;
-  /* 保持原样即可，因为 justify-content: space-between 会负责左右两边的元素位置 */
 }
 
 .time-display {
@@ -67,15 +64,9 @@
 
 .logo-section {
   position: absolute;
-  /* 1. 开启绝对定位 */
   left: 50%;
-  /* 2. 移动到父容器宽度的 50% 处 */
   transform: translateX(-50%);
-  /* 3. 向左回退自身宽度的 50%，实现完美居中 */
   text-align: center;
-  /* 文字内部居中 */
-
-  /*以此保证不管左边的时间多长，它都永远在屏幕正中间*/
 }
 
 .logo-text {
@@ -94,7 +85,7 @@
 }
 
 /* ----------------------------------------
-   3. 主视觉 (Hero) - 干净、锐利
+   3. 主视觉 (Hero)
    ---------------------------------------- */
 .splash-content-wrapper {
   position: relative;
@@ -119,7 +110,6 @@
   position: relative;
 }
 
-/* 实体字：蓝青渐变 - 使用全局fadeUp动画 */
 .slogan-line.highlight {
   background: linear-gradient(120deg, var(--color-blue-600), var(--color-cyan-500));
   -webkit-background-clip: text;
@@ -129,7 +119,6 @@
   animation: fadeUp var(--duration-1s, 1000ms) cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-/* 描边字：深色空心 - 使用全局fadeUp动画 */
 .slogan-line.outline {
   color: transparent;
   -webkit-text-stroke: 1.5px var(--color-slate-900);
@@ -138,7 +127,6 @@
   position: relative;
 }
 
-/* 错位效果 - 灰色 */
 .slogan-line.outline::before {
   content: attr(data-text);
   position: absolute;
@@ -164,17 +152,15 @@
   font-weight: 700;
 }
 
-/* 状态胶囊 - 极简风格 - 使用全局fadeIn动画 */
 .ai-status {
   display: inline-flex;
   align-items: center;
   gap: 12px;
   padding: 10px 24px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 100px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  /* 柔和阴影 */
+  background: var(--surface-panel, #ffffff);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.1));
+  border-radius: var(--rounded-full, 100px);
+  box-shadow: var(--shadow-card, 0 4px 20px rgba(0, 0, 0, 0.05));
   opacity: 0;
   animation: fadeIn var(--duration-1s, 1000ms) ease 0.9s forwards;
 }
@@ -187,7 +173,6 @@
   position: relative;
 }
 
-/* 使用全局pulseRing动画 */
 .status-dot-inner::after {
   content: '';
   position: absolute;
@@ -208,7 +193,95 @@
 }
 
 /* ----------------------------------------
-   4. 底部 & 装饰 - 使用全局fadeIn和breathe动画
+   4. 浮动极简工作台
+   ---------------------------------------- */
+.floating-workbench {
+  position: absolute;
+  right: 34px;
+  bottom: 88px;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: calc(100% - 68px);
+  padding: 7px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: var(--rounded-full, 999px);
+  background: color-mix(in srgb, var(--surface-panel, #ffffff) 78%, transparent);
+  box-shadow: 0 16px 38px -30px rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.floating-workbench__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px 0 10px;
+  border-right: 1px solid rgba(148, 163, 184, 0.24);
+  color: var(--color-slate-700);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.floating-workbench__trigger i {
+  color: var(--color-blue-600);
+  font-size: 13px;
+}
+
+.floating-workbench__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.floating-workbench__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border: 1px solid rgba(203, 213, 225, 0.66);
+  border-radius: var(--rounded-full, 999px);
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--color-slate-700);
+  cursor: pointer;
+  transition:
+    background-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.floating-workbench__item:hover {
+  border-color: rgba(37, 99, 235, 0.22);
+  background: var(--surface-panel, #ffffff);
+  color: var(--color-blue-700);
+  box-shadow: 0 10px 24px -20px rgba(15, 23, 42, 0.42);
+}
+
+.floating-workbench__item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring-soft, rgba(37, 99, 235, 0.16));
+}
+
+.floating-workbench__item i {
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  color: var(--color-blue-600);
+  font-size: 14px;
+}
+
+/* ----------------------------------------
+   5. 底部 & 装饰
    ---------------------------------------- */
 .brand-footer {
   position: absolute;
@@ -233,7 +306,7 @@
 .brand-line {
   width: 30px;
   height: 1px;
-  background: #cbd5e1;
+  background: var(--color-slate-300, #cbd5e1);
 }
 
 .geometric-decor {
@@ -248,7 +321,6 @@
   opacity: 0.6;
 }
 
-/* 使用全局breathe动画 */
 .pulse-ring {
   transform-origin: center;
   animation: breathe
@@ -261,4 +333,11 @@
 
 .delay-1 {
   animation-delay: -4s;
+}
+
+@media (max-width: 1100px) {
+  .floating-workbench {
+    right: 24px;
+    bottom: 78px;
+  }
 }

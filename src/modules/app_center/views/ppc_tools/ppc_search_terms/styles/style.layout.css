@@ -1,8 +1,8 @@
 .ppc-panel {
-  border: 1px solid var(--ppc-border, var(--border-subtle, rgba(148, 163, 184, 0.24)));
-  border-radius: var(--ppc-radius, var(--rounded-panel, 8px));
-  background: var(--ppc-surface, var(--surface-panel, #ffffff));
-  box-shadow: var(--ppc-shadow, var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)));
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
+  border-radius: var(--radius-panel, 8px);
+  background: var(--surface-panel, #ffffff);
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
 }
 
 .ppc-import-panel,
@@ -19,15 +19,15 @@
 .ppc-import-panel {
   display: flex;
   flex-direction: column;
-  background: var(--ppc-surface, var(--surface-panel, #ffffff));
+  background: var(--surface-panel, #ffffff);
 }
 
 .ppc-settings-panel {
-  background: var(--ppc-surface, var(--surface-panel, #ffffff));
+  background: var(--surface-panel, #ffffff);
 }
 
 .ppc-results-panel {
-  background: var(--ppc-surface, var(--surface-panel, #ffffff));
+  background: var(--surface-panel, #ffffff);
 }
 
 .ppc-secondary-action,
@@ -54,21 +54,21 @@
   font-size: 14px;
   font-weight: 800;
   transition:
-    transform var(--ppc-motion-duration, 170ms) var(--ppc-motion-ease, var(--ease-smooth)),
-    background-color var(--ppc-motion-duration, 170ms) var(--ppc-motion-ease, var(--ease-smooth)),
-    border-color var(--ppc-motion-duration, 170ms) var(--ppc-motion-ease, var(--ease-smooth)),
-    box-shadow var(--ppc-motion-duration, 170ms) var(--ppc-motion-ease, var(--ease-smooth));
+    transform 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .ppc-secondary-action {
-  border: 1px solid var(--ppc-info-border, rgba(37, 99, 235, 0.18));
-  background: var(--ppc-primary-soft, var(--color-blue-50, #eff6ff));
-  color: var(--ppc-info-text, var(--color-blue-700, #1d4ed8));
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: rgb(239, 246, 255);
+  color: rgb(29, 78, 216);
 }
 
 .ppc-secondary-action:hover {
-  border-color: color-mix(in srgb, var(--ppc-primary) 34%, transparent);
-  background: var(--color-blue-100, #dbeafe);
+  border-color: rgba(37, 99, 235, 0.34);
+  background: rgb(219, 234, 254);
 }
 
 .ppc-import-actions {
@@ -81,13 +81,13 @@
 
 .ppc-primary-action {
   border: 1px solid transparent;
-  background: var(--ppc-primary, var(--color-primary, var(--color-blue-600)));
-  color: var(--color-primary-contrast, #ffffff);
+  background: var(--color-primary, var(--color-blue-600));
+  color: rgb(255, 255, 255);
   box-shadow: none;
 }
 
 .ppc-primary-action:hover {
-  background: var(--ppc-primary-hover, var(--color-primary-dark, var(--color-blue-700)));
+  background: var(--color-primary-dark, var(--color-blue-700));
   box-shadow: none;
 }
 
@@ -99,14 +99,14 @@
 }
 
 .ppc-ghost-action {
-  border: 1px solid var(--ppc-border-muted, var(--color-slate-300, #cbd5e1));
-  background: var(--ppc-surface, var(--surface-panel, #ffffff));
-  color: var(--ppc-text-secondary, var(--color-slate-700, #334155));
+  border: 1px solid rgb(203, 213, 225);
+  background: rgb(255, 255, 255);
+  color: rgb(51, 65, 85);
 }
 
 .ppc-ghost-action:hover {
-  border-color: var(--ppc-text-muted, var(--color-slate-400, #94a3b8));
-  background: var(--ppc-surface-muted, var(--color-slate-50, #f8fafc));
+  border-color: rgb(148, 163, 184);
+  background: rgb(248, 250, 252);
 }
 
 .ppc-secondary-action:focus-visible,
@@ -118,5 +118,5 @@
 .ppc-filter-btn:focus-visible,
 .ppc-dropzone:focus-within {
   outline: none;
-  box-shadow: 0 0 0 3px var(--ppc-focus-ring, var(--focus-ring-soft, rgba(37, 99, 235, 0.16)));
+  box-shadow: 0 0 0 3px var(--focus-ring-soft, rgba(37, 99, 235, 0.16));
 }

@@ -211,6 +211,23 @@ npm run generate:tokens
 }
 ```
 
+### 6.1 高扩散局部 token 登记
+
+以下登记覆盖当前 UI 整改范围内的高扩散来源。新增或调整这些前缀时，必须同步更新本节或在对应 CSS 定义旁写明原因。
+
+| 来源 | 局部 token | 全局来源 / 记录原因 |
+| --- | --- | --- |
+| App Center overview | `--app-overview-accent*` | 映射到 `--color-cyan-*`，仅表达应用中心总览主色。 |
+| App Center overview | `--app-overview-surface*`、`--app-overview-border*`、`--app-overview-shadow` | 映射到 `--surface-*`、`--border-*`、`--shadow-panel`。 |
+| App Center overview | `--app-overview-text-*`、`--app-overview-radius`、`--app-overview-pill-radius`、`--app-overview-focus-ring` | 映射到 `--color-text-*`、`--rounded-*`、`--focus-ring-soft` 派生值。 |
+| PPC tools | `--ppc-surface*`、`--ppc-border*`、`--ppc-text-*` | 映射到 `--surface-*`、`--border-*`、`--color-text-*`。 |
+| PPC tools | `--ppc-primary*`、`--ppc-accent*`、`--ppc-*-soft/text` | 映射到全局主色、emerald 业务强调色和状态色阶；边框通过 `color-mix()` 从全局色派生。 |
+| PPC tools | `--ppc-radius*`、`--ppc-shadow*`、`--ppc-focus-ring`、`--ppc-motion-*` | 映射到 `--rounded-*`、`--shadow-*`、`--focus-ring-soft`、全局 motion token。 |
+| Welcome Banner | `--wb-theme-*`、`--wb-text-*`、`--wb-border-color` | 映射到全局色阶、`--color-text-*`、`--border-subtle`。 |
+| Welcome Banner | `--wb-card-*`、`--wb-tag-*`、`--wb-badge-*` | 映射到 `--surface-*`、`--shadow-panel`、`--rounded-full`、字号和状态色派生值。 |
+| Welcome Banner | `--wb-icon-*`、`--wb-icon-badge-*` | 颜色映射到全局色阶；尺寸和偏移是组件几何规格，保留在 `wb` 命名空间并由 `VISUAL_DESIGN_GUIDELINES.md` 约束。 |
+| Welcome Banner | `--wb-gradient-*`、`--wb-orb-*`、`--wb-particle-color` | 仅用于 legacy banner 装饰层，必须从 `--wb-theme-*` 或全局色阶派生；工具页默认不应新增。 |
+
 不允许：
 
 ```css

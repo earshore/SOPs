@@ -85,6 +85,10 @@
 /* ========================================
    路由级主内容骨架屏
    ======================================== */
+.route-loading-skeleton-host {
+  position: relative;
+}
+
 .route-loading-skeleton {
   position: absolute;
   inset: 0;

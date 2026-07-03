@@ -360,11 +360,4 @@
     color: var(--color-slate-600, #475569) !important;
   }
 
-  [x-data='promptlabPanel'] button[title='复制 AI 分析报告与产品 DNA 补充中的 SEO 搜索关键词'] {
-    background: var(--color-slate-50, #f8fafc) !important;
-    border-color: var(--color-slate-200, #e2e8f0) !important;
-    color: var(--color-slate-600, #475569) !important;
-    box-shadow: none !important;
-    font-weight: 700 !important;
-  }
 }

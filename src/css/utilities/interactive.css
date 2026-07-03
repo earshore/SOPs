@@ -830,9 +830,6 @@
 .cursor-not-allowed {
   cursor: not-allowed;
 }
-.cursor-none {
-  cursor: none;
-}
 .cursor-zoom-in {
   cursor: zoom-in;
 }

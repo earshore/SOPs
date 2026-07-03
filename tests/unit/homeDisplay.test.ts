@@ -4,8 +4,17 @@ const homeTemplate = `
   <div id="home-splash-container">
     <canvas id="particles-canvas"></canvas>
     <div id="time-display"></div>
-    <div id="cursor-follower"></div>
-    <div id="hero-content"></div>
+    <div id="hero-content">
+      <div class="slogan-line highlight">规范流程</div>
+      <div class="slogan-line outline">无限可能</div>
+    </div>
+    <aside class="floating-workbench" aria-label="浮动工作台">
+      <div class="floating-workbench__trigger">工作台</div>
+      <button data-action="switch-tab" data-tab="ppc_search_terms" aria-label="打开 PPC 搜索词">PPC 搜索词</button>
+      <button data-action="switch-tab" data-tab="sops_npi_tracker" aria-label="打开新品跟踪">新品跟踪</button>
+      <button data-action="switch-tab" data-tab="sops_listing_seo" aria-label="打开 Listing SEO">Listing SEO</button>
+      <button data-action="switch-tab" data-tab="playground" aria-label="打开 Deep Chat">Deep Chat</button>
+    </aside>
   </div>
 `;
 
@@ -16,15 +25,15 @@ let disconnectResizeObserver: ReturnType<typeof vi.fn>;
 let frameCallbacks: FrameRequestCallback[];
 
 function flushPromises(): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     queueMicrotask(resolve);
   });
 }
 
-async function importHomeDisplay() {
+async function importHomeDisplay(template = homeTemplate) {
   vi.resetModules();
   vi.doMock('@/common/utils/viewLoader', () => ({
-    loadTemplate: vi.fn(async () => homeTemplate),
+    loadTemplate: vi.fn(async () => template),
   }));
 
   const module = await import('@/modules/home/homeDisplay');
@@ -51,114 +60,135 @@ function createCanvasContext(): CanvasRenderingContext2D {
   } as unknown as CanvasRenderingContext2D;
 }
 
-  beforeEach(() => {
-    document.body.innerHTML = '';
-    resizeCallback = null;
-    disconnectResizeObserver = vi.fn();
-    frameCallbacks = [];
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-07-02T08:09:00Z'));
-    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(createCanvasContext());
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
-      frameCallbacks.push(callback);
-      return frameCallbacks.length;
-    });
-    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
-    global.ResizeObserver = class TestResizeObserver {
-      constructor(callback: ResizeObserverCallback) {
-        resizeCallback = callback;
-      }
-
-      observe(): void {}
-
-      disconnect(): void {
-        disconnectResizeObserver();
-      }
-
-      unobserve(): void {}
-    } as unknown as typeof ResizeObserver;
+beforeEach(() => {
+  document.body.innerHTML = '';
+  resizeCallback = null;
+  disconnectResizeObserver = vi.fn();
+  frameCallbacks = [];
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-07-02T08:09:00Z'));
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(createCanvasContext());
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => {
+    frameCallbacks.push(callback);
+    return frameCallbacks.length;
   });
+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
+  global.ResizeObserver = class TestResizeObserver {
+    constructor(callback: ResizeObserverCallback) {
+      resizeCallback = callback;
+    }
 
-  afterEach(() => {
-    vi.doUnmock('@/common/utils/viewLoader');
-    vi.useRealTimers();
-    vi.restoreAllMocks();
-  });
+    observe(): void {}
 
-  it('mounts the home splash, initializes time, resize handling, and mouse effects', async () => {
-    const container = document.createElement('main');
-    document.body.append(container);
-    const { mount, unmount, loadTemplate } = await importHomeDisplay();
+    disconnect(): void {
+      disconnectResizeObserver();
+    }
 
-    mount(container);
-    await flushPromises();
-    await flushPromises();
+    unobserve(): void {}
+  } as unknown as typeof ResizeObserver;
+});
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/home/homeDisplay.html');
-    expect(container.querySelector('#home-splash-container')).not.toBeNull();
-    expect(document.getElementById('time-display')?.textContent).toContain('|');
-    expect(frameCallbacks).toHaveLength(1);
+afterEach(() => {
+  vi.doUnmock('@/common/utils/viewLoader');
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
 
-    const queuedFrameCount = frameCallbacks.length;
-    resizeCallback?.([
-      { contentRect: { width: 160, height: 120 } as DOMRectReadOnly },
-    ] as ResizeObserverEntry[], {} as ResizeObserver);
-    frameCallbacks[queuedFrameCount]?.(0);
+it('mounts the full home splash with particles, hero copy, floating workbench, and time', async () => {
+  const container = document.createElement('main');
+  document.body.append(container);
+  const { mount, unmount, loadTemplate } = await importHomeDisplay();
 
-    const canvas = document.getElementById('particles-canvas') as HTMLCanvasElement;
-    expect(canvas.width).toBe(160);
-    expect(canvas.height).toBe(120);
+  mount(container);
+  await flushPromises();
+  await flushPromises();
 
-    frameCallbacks[0]?.(20);
+  expect(loadTemplate).toHaveBeenCalledWith('src/modules/home/homeDisplay.html');
+  expect(container.querySelector('#home-splash-container')).not.toBeNull();
+  expect(container.querySelector('#particles-canvas')).not.toBeNull();
+  expect(container.querySelector('#hero-content')).not.toBeNull();
+  expect(container.textContent).toContain('规范流程');
+  expect(container.textContent).toContain('无限可能');
+  expect(container.querySelector('.floating-workbench')).not.toBeNull();
+  expect(container.querySelector('.floating-workbench__trigger')?.textContent).toContain('工作台');
+  expect(container.querySelector('#cursor-follower')).toBeNull();
+  expect(document.getElementById('time-display')?.textContent).toContain('|');
+  expect(frameCallbacks).toHaveLength(1);
 
-    document.dispatchEvent(new MouseEvent('mousemove', {
+  const routeIds = Array.from(container.querySelectorAll<HTMLElement>('[data-action="switch-tab"]'))
+    .map(element => element.dataset.tab)
+    .filter(Boolean);
+
+  expect(routeIds).toEqual(
+    expect.arrayContaining([
+      'ppc_search_terms',
+      'sops_npi_tracker',
+      'sops_listing_seo',
+      'playground',
+    ])
+  );
+
+  const queuedFrameCount = frameCallbacks.length;
+  resizeCallback?.([
+    { contentRect: { width: 160, height: 120 } as DOMRectReadOnly },
+  ] as ResizeObserverEntry[], {} as ResizeObserver);
+  frameCallbacks[queuedFrameCount]?.(0);
+
+  const canvas = document.getElementById('particles-canvas') as HTMLCanvasElement;
+  expect(canvas.width).toBe(160);
+  expect(canvas.height).toBe(120);
+
+  frameCallbacks[0]?.(20);
+
+  document.dispatchEvent(
+    new MouseEvent('mousemove', {
       clientX: 80,
       clientY: 40,
-    }));
+    })
+  );
 
-    expect(document.getElementById('cursor-follower')?.style.transform).toContain('translate(80px, 40px)');
-    expect(document.getElementById('hero-content')?.style.transform).toContain('translate');
+  expect(document.getElementById('hero-content')?.style.transform).toContain('translate');
 
-    vi.advanceTimersByTime(1000);
-    expect(document.getElementById('time-display')?.textContent).toContain('|');
+  vi.advanceTimersByTime(1000);
+  expect(document.getElementById('time-display')?.textContent).toContain('|');
 
-    unmount();
+  unmount();
 
-    expect(window.cancelAnimationFrame).toHaveBeenCalled();
-    expect(disconnectResizeObserver).toHaveBeenCalled();
-  });
+  expect(window.cancelAnimationFrame).toHaveBeenCalled();
+  expect(disconnectResizeObserver).toHaveBeenCalled();
+});
 
-  it('keeps pre-rendered containers intact and supports the legacy initHomeSplash entrypoint', async () => {
-    const parent = document.createElement('main');
-    const splash = document.createElement('section');
-    splash.id = 'home-splash-container';
-    parent.append(splash);
-    document.body.append(parent);
-    const { initHomeSplash, unmount, loadTemplate } = await importHomeDisplay();
+it('keeps pre-rendered containers intact and supports the legacy initHomeSplash entrypoint', async () => {
+  const parent = document.createElement('main');
+  const splash = document.createElement('section');
+  splash.id = 'home-splash-container';
+  parent.append(splash);
+  document.body.append(parent);
+  const { initHomeSplash, unmount, loadTemplate } = await importHomeDisplay();
 
-    initHomeSplash();
-    await flushPromises();
-    await flushPromises();
+  initHomeSplash();
+  await flushPromises();
+  await flushPromises();
 
-    expect(loadTemplate).not.toHaveBeenCalled();
-    expect(parent.firstElementChild).toBe(splash);
+  expect(loadTemplate).not.toHaveBeenCalled();
+  expect(parent.firstElementChild).toBe(splash);
 
-    unmount();
-  });
+  unmount();
+});
 
-  it('does not start the canvas animation when the template has no canvas', async () => {
-    vi.resetModules();
-    vi.doMock('@/common/utils/viewLoader', () => ({
-      loadTemplate: vi.fn(async () => '<div id="home-splash-container"><div id="time-display"></div></div>'),
-    }));
-    const { mount, unmount } = await import('@/modules/home/homeDisplay');
-    const container = document.createElement('main');
+it('keeps the clock working when the template has no animation canvas', async () => {
+  const container = document.createElement('main');
+  document.body.append(container);
+  const { mount, unmount } = await importHomeDisplay(
+    '<div id="home-splash-container"><div id="time-display"></div></div>'
+  );
 
-    mount(container);
-    await flushPromises();
-    await flushPromises();
+  mount(container);
+  await flushPromises();
+  await flushPromises();
 
-    expect(window.requestAnimationFrame).not.toHaveBeenCalled();
+  expect(document.getElementById('time-display')?.textContent).toContain('|');
+  expect(window.requestAnimationFrame).not.toHaveBeenCalled();
 
-    unmount();
-  });
+  unmount();
+});

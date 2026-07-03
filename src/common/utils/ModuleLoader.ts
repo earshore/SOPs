@@ -9,11 +9,11 @@
 import { APP_EVENTS } from '../constants/eventConstants';
 import {
   renderErrorBoundary,
-  renderLoading,
   renderNotRegistered,
   renderTimeout,
 } from '../../components/ErrorBoundary';
 import { ValidationError } from '@/common/errors/AppError';
+import { createSafeFragment } from '@/common/utils/security';
 import type { DIContainer } from '../di/Container';
 import {
   applyPageEnterAnimation,
@@ -23,6 +23,7 @@ import {
 
 const LEGACY_CONTENT_ENTER_ANIMATION_CLASS = 'fade-in';
 const MODULE_LOADING_DELAY_MS = 300;
+const MODULE_LOADING_HOST_CLASS = 'route-loading-skeleton-host';
 
 // ==================== 类型定义 ====================
 
@@ -195,6 +196,7 @@ export class ModuleLoader {
       }
     }
     if (this.currentContainer) {
+      this.currentContainer.classList.remove(MODULE_LOADING_HOST_CLASS);
       this.currentContainer.replaceChildren();
     }
     this.currentModule = null;
@@ -207,11 +209,46 @@ export class ModuleLoader {
    * @param container - 容器元素
    * @private
    */
-  private _renderLoading(container: HTMLElement): void {
-    renderLoading(container, this.loaderColor, '正在加载页面...');
+  private _renderLoading(container: HTMLElement, routeId: string): void {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'route-loading-skeleton';
+    wrapper.setAttribute('role', 'status');
+    wrapper.setAttribute('aria-live', 'polite');
+    wrapper.setAttribute('aria-label', '页面加载中');
+    wrapper.dataset.routeId = routeId;
+
+    wrapper.appendChild(
+      createSafeFragment(`
+        <div class="route-loading-skeleton__card">
+          <div class="route-loading-skeleton__header">
+            <div class="loading-skeleton route-loading-skeleton__icon" aria-hidden="true"></div>
+            <div class="route-loading-skeleton__heading">
+              <div class="loading-skeleton route-loading-skeleton__line route-loading-skeleton__line--title"></div>
+              <div class="loading-skeleton route-loading-skeleton__line route-loading-skeleton__line--subtitle"></div>
+            </div>
+          </div>
+          <div class="route-loading-skeleton__grid">
+            <div class="loading-skeleton route-loading-skeleton__block"></div>
+            <div class="loading-skeleton route-loading-skeleton__block"></div>
+            <div class="loading-skeleton route-loading-skeleton__block"></div>
+            <div class="loading-skeleton route-loading-skeleton__block"></div>
+          </div>
+          <div class="route-loading-skeleton__table">
+            <div class="loading-skeleton route-loading-skeleton__line route-loading-skeleton__line--wide"></div>
+            <div class="loading-skeleton route-loading-skeleton__line"></div>
+            <div class="loading-skeleton route-loading-skeleton__line"></div>
+            <div class="loading-skeleton route-loading-skeleton__line"></div>
+          </div>
+          <span class="sr-only">页面加载中</span>
+        </div>
+      `)
+    );
+
+    container.classList.add(MODULE_LOADING_HOST_CLASS);
+    container.replaceChildren(wrapper);
   }
 
-  private _scheduleDelayedLoading(container: HTMLElement, loadId: number): void {
+  private _scheduleDelayedLoading(container: HTMLElement, loadId: number, routeId: string): void {
     this._clearDelayedLoading();
     this.loadingTimerLoadId = loadId;
     this.loadingTimer = window.setTimeout(() => {
@@ -221,7 +258,7 @@ export class ModuleLoader {
         return;
       }
 
-      this._renderLoading(container);
+      this._renderLoading(container, routeId);
     }, MODULE_LOADING_DELAY_MS);
   }
 
@@ -244,6 +281,7 @@ export class ModuleLoader {
    * @private
    */
   private _renderNotRegistered(container: HTMLElement, routeId: string): void {
+    container.classList.remove(MODULE_LOADING_HOST_CLASS);
     renderNotRegistered(container, routeId);
   }
 
@@ -255,6 +293,7 @@ export class ModuleLoader {
    * @private
    */
   private _renderErrorBoundary(container: HTMLElement, routeId: string, error: Error): void {
+    container.classList.remove(MODULE_LOADING_HOST_CLASS);
     renderErrorBoundary(container, error, {
       title: '模块加载失败',
       color: this.loaderColor,
@@ -319,7 +358,7 @@ export class ModuleLoader {
 
     this.currentContainer = container;
     this._clearContentEnterAnimation(container);
-    this._scheduleDelayedLoading(container, loadId);
+    this._scheduleDelayedLoading(container, loadId, routeId);
     return container;
   }
 
@@ -340,6 +379,7 @@ export class ModuleLoader {
   private _prepareContainerForMount(container: HTMLElement): void {
     this._clearDelayedLoading();
     this._clearContentEnterAnimation(container);
+    container.classList.remove(MODULE_LOADING_HOST_CLASS);
     container.replaceChildren();
     this._prepareContentEnterAnimation(container);
     void container.offsetHeight;
@@ -372,6 +412,7 @@ export class ModuleLoader {
   }
 
   private _renderRetryLoading(container: HTMLElement): void {
+    container.classList.remove(MODULE_LOADING_HOST_CLASS);
     const wrapper = document.createElement('div');
     wrapper.className = 'p-10 text-center';
 

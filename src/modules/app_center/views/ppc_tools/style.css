@@ -5,6 +5,7 @@
 @import './ppc_search_terms/styles/style.results.css';
 
 :where(.ppc-search-app) {
+  /* UI-P1-04: PPC 局部 token 只表达工具业务语义；全局映射登记见 docs/THEME_SYSTEM_GUIDELINES.md §6.1。 */
   --ppc-surface: var(--surface-panel, var(--color-bg-elevated, #ffffff));
   --ppc-surface-muted: var(--surface-card-hover, var(--color-slate-50, #f8fafc));
   --ppc-border: var(--border-subtle, rgba(148, 163, 184, 0.24));

@@ -103,13 +103,13 @@ async function flushAsyncWork(): Promise<void> {
       await vi.advanceTimersByTimeAsync(300);
 
       expect(content.textContent).toBe('Fast');
-      expect(content.textContent).not.toContain('正在加载页面');
+      expect(content.querySelector('.route-loading-skeleton')).toBeNull();
     } finally {
       vi.useRealTimers();
     }
   });
 
-  it('shows module loading after a route waits longer than 300ms', async () => {
+  it('shows a module loading skeleton after a route waits longer than 300ms', async () => {
     vi.useFakeTimers();
     const content = document.getElementById('content') as HTMLElement;
     const pending = deferred<IModule>();
@@ -134,12 +134,20 @@ async function flushAsyncWork(): Promise<void> {
       expect(content.textContent).toBe('');
 
       await vi.advanceTimersByTimeAsync(1);
-      expect(content.textContent).toContain('正在加载页面');
+      const skeleton = content.querySelector('.route-loading-skeleton') as HTMLElement;
+      expect(skeleton).not.toBeNull();
+      expect(content.classList.contains('route-loading-skeleton-host')).toBe(true);
+      expect(skeleton.dataset.routeId).toBe('slow_route');
+      expect(skeleton.getAttribute('role')).toBe('status');
+      expect(skeleton.getAttribute('aria-live')).toBe('polite');
+      expect(skeleton.getAttribute('aria-label')).toBe('页面加载中');
 
       pending.resolve(module);
       await load;
 
       expect(content.textContent).toBe('Slow');
+      expect(content.querySelector('.route-loading-skeleton')).toBeNull();
+      expect(content.classList.contains('route-loading-skeleton-host')).toBe(false);
     } finally {
       vi.useRealTimers();
     }

@@ -242,8 +242,11 @@
   border-radius: var(--rounded-lg, 12px);
   border: 1px solid var(--wb-border-color, rgba(148, 163, 184, 0.24));
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.48);
+  background: var(--wb-card-bg, color-mix(in srgb, var(--surface-panel, #ffffff) 94%, transparent));
+  box-shadow: var(
+    --wb-card-shadow,
+    var(--shadow-panel, 0 10px 28px -24px rgba(15, 23, 42, 0.48))
+  );
   transition:
     border-color var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     box-shadow var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
@@ -257,8 +260,14 @@
 }
 
 .wb-card:hover {
-  border-color: rgba(37, 99, 235, 0.22);
-  box-shadow: 0 14px 32px -26px rgba(15, 23, 42, 0.55);
+  border-color: var(
+    --wb-card-hover-border,
+    color-mix(in srgb, var(--wb-theme-accent) 22%, transparent)
+  );
+  box-shadow: var(
+    --wb-card-hover-shadow,
+    var(--shadow-card-hover, 0 14px 32px -26px rgba(15, 23, 42, 0.55))
+  );
 }
 
 .wb-card::before,
@@ -651,9 +660,9 @@
 
 /* 7.4 可点击徽章的键盘导航支持 */
 .wb-badge:focus-visible {
-  outline: 2px solid var(--color-primary, #3b82f6);
+  outline: 2px solid var(--wb-theme-accent, var(--color-primary, #3b82f6));
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 3px var(--wb-focus-ring, color-mix(in srgb, var(--wb-theme-accent) 30%, transparent));
 }
 
 /* 7.4 移除鼠标点击时的焦点样式 */
@@ -664,51 +673,51 @@
 
 /* 徽章主题变体 */
 .wb-badge-ai {
-  --wb-badge-bg: rgba(239, 246, 255, 0.86);
-  --wb-badge-color: #1d4ed8;
-  --wb-badge-border: rgba(37, 99, 235, 0.2);
+  --wb-badge-bg: color-mix(in srgb, var(--color-blue-50, #eff6ff) 86%, transparent);
+  --wb-badge-color: var(--color-blue-700, #1d4ed8);
+  --wb-badge-border: color-mix(in srgb, var(--color-blue-600, #2563eb) 20%, transparent);
 }
 
 .wb-badge-growth {
-  --wb-badge-bg: rgba(236, 253, 245, 0.88);
-  --wb-badge-color: #047857;
-  --wb-badge-border: rgba(5, 150, 105, 0.22);
+  --wb-badge-bg: color-mix(in srgb, var(--color-emerald-50, #ecfdf5) 88%, transparent);
+  --wb-badge-color: var(--color-emerald-700, #047857);
+  --wb-badge-border: color-mix(in srgb, var(--color-emerald-600, #059669) 22%, transparent);
 }
 
 .wb-badge-safety {
-  --wb-badge-bg: rgba(254, 242, 242, 0.9);
-  --wb-badge-color: #b91c1c;
-  --wb-badge-border: rgba(220, 38, 38, 0.24);
+  --wb-badge-bg: color-mix(in srgb, var(--color-red-50, #fef2f2) 90%, transparent);
+  --wb-badge-color: var(--color-red-700, #b91c1c);
+  --wb-badge-border: color-mix(in srgb, var(--color-red-600, #dc2626) 24%, transparent);
 }
 
 .wb-badge-service {
-  --wb-badge-bg: rgba(240, 253, 250, 0.88);
-  --wb-badge-color: #0f766e;
-  --wb-badge-border: rgba(20, 184, 166, 0.22);
+  --wb-badge-bg: color-mix(in srgb, var(--color-teal-50, #f0fdfa) 88%, transparent);
+  --wb-badge-color: var(--color-teal-700, #0f766e);
+  --wb-badge-border: color-mix(in srgb, var(--color-teal-500, #14b8a6) 22%, transparent);
 }
 
 .wb-badge-supply {
-  --wb-badge-bg: rgba(255, 251, 235, 0.9);
-  --wb-badge-color: #b45309;
-  --wb-badge-border: rgba(217, 119, 6, 0.22);
+  --wb-badge-bg: color-mix(in srgb, var(--color-amber-50, #fffbeb) 90%, transparent);
+  --wb-badge-color: var(--color-amber-700, #b45309);
+  --wb-badge-border: color-mix(in srgb, var(--color-amber-600, #d97706) 22%, transparent);
 }
 
 .wb-badge-analytics {
-  --wb-badge-bg: rgba(236, 254, 255, 0.9);
-  --wb-badge-color: #0e7490;
-  --wb-badge-border: rgba(8, 145, 178, 0.22);
+  --wb-badge-bg: color-mix(in srgb, var(--color-cyan-50, #ecfeff) 90%, transparent);
+  --wb-badge-color: var(--color-cyan-700, #0e7490);
+  --wb-badge-border: color-mix(in srgb, var(--color-cyan-600, #0891b2) 22%, transparent);
 }
 
 .wb-badge-pro {
-  --wb-badge-bg: rgba(255, 251, 235, 0.9);
-  --wb-badge-color: #b45309;
-  --wb-badge-border: rgba(217, 119, 6, 0.22);
+  --wb-badge-bg: color-mix(in srgb, var(--color-amber-50, #fffbeb) 90%, transparent);
+  --wb-badge-color: var(--color-amber-700, #b45309);
+  --wb-badge-border: color-mix(in srgb, var(--color-amber-600, #d97706) 22%, transparent);
 }
 
 .wb-badge-hub {
-  --wb-badge-bg: rgba(248, 250, 252, 0.9);
-  --wb-badge-color: #475569;
-  --wb-badge-border: rgba(100, 116, 139, 0.22);
+  --wb-badge-bg: color-mix(in srgb, var(--color-slate-50, #f8fafc) 90%, transparent);
+  --wb-badge-color: var(--color-slate-600, #475569);
+  --wb-badge-border: color-mix(in srgb, var(--color-slate-500, #64748b) 22%, transparent);
 }
 
 .wb-container[class*='wb-theme-'] .wb-badge {
@@ -757,7 +766,7 @@
   gap: var(--spacing-xs, 0.5rem);
   padding: var(--wb-tag-padding, 5px 10px);
   border-radius: var(--wb-tag-radius, var(--rounded-full, 9999px));
-  background: var(--wb-tag-bg, rgba(255, 255, 255, 0.7));
+  background: var(--wb-tag-bg, color-mix(in srgb, var(--surface-panel, #ffffff) 70%, transparent));
   border: 1px solid var(--wb-tag-border, var(--color-border-default, rgba(0, 0, 0, 0.1)));
   backdrop-filter: none;
   font-size: var(--wb-tag-text-size, var(--text-xs, 0.75rem));
@@ -774,7 +783,7 @@
 
 .wb-tag:hover,
 .wb-meta > span:hover {
-  background: var(--wb-tag-hover-bg, white);
+  background: var(--wb-tag-hover-bg, var(--surface-panel, #ffffff));
   border-color: var(
     --wb-tag-hover-border,
     var(--wb-theme-tag-hover-border, var(--color-primary-light, rgba(59, 130, 246, 0.1)))
@@ -783,9 +792,9 @@
 
 /* 7.4 标签的键盘导航支持 */
 .wb-tag:focus-visible {
-  outline: 2px solid var(--color-primary, #3b82f6);
+  outline: 2px solid var(--wb-theme-accent, var(--color-primary, #3b82f6));
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 3px var(--wb-focus-ring, color-mix(in srgb, var(--wb-theme-accent) 30%, transparent));
 }
 
 /* 7.4 移除鼠标点击时的焦点样式 */
@@ -799,7 +808,7 @@
   border-radius: 50%;
   flex-shrink: 0;
   background: var(--wb-tag-dot-color, var(--wb-tag-dot-1, var(--color-green-500, #22c55e)));
-  border: 1px solid rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--wb-tag-dot-border, color-mix(in srgb, var(--surface-panel, #ffffff) 78%, transparent));
   box-shadow: none;
   filter: saturate(0.82);
   opacity: 0.9;
@@ -991,14 +1000,21 @@
 /* ===== 暗色模式适配 ===== */
 /* 统一在 :root 定义暗色模式变量 */
 :root {
+  /* UI-P1-04: wb 局部 token 的全局映射登记见 docs/THEME_SYSTEM_GUIDELINES.md §6.1。 */
   /* 浅色模式默认值 */
   --wb-text-primary: var(--color-text-primary, #0f172a);
   --wb-text-secondary: var(--color-text-secondary, var(--color-slate-600, #475569));
   --wb-border-color: var(--border-subtle, rgba(148, 163, 184, 0.24));
+  --wb-card-bg: color-mix(in srgb, var(--surface-panel, #ffffff) 94%, transparent);
+  --wb-card-shadow: var(--shadow-panel, 0 10px 28px -24px rgba(15, 23, 42, 0.48));
+  --wb-card-hover-border: color-mix(in srgb, var(--wb-theme-accent, var(--color-blue-600, #2563eb)) 22%, transparent);
+  --wb-card-hover-shadow: var(--shadow-card-hover, 0 14px 32px -26px rgba(15, 23, 42, 0.55));
+  --wb-focus-ring: color-mix(in srgb, var(--wb-theme-accent, var(--color-blue-600, #2563eb)) 30%, transparent);
   --wb-tag-bg: color-mix(in srgb, var(--surface-panel, #ffffff) 78%, transparent);
   --wb-tag-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 22%, transparent);
   --wb-tag-hover-bg: var(--surface-panel, #ffffff);
   --wb-tag-hover-border: color-mix(in srgb, var(--color-blue-600, #2563eb) 18%, transparent);
+  --wb-tag-dot-border: color-mix(in srgb, var(--surface-panel, #ffffff) 78%, transparent);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1007,10 +1023,12 @@
     --wb-text-primary: var(--color-text-primary, var(--color-slate-50, #f8fafc));
     --wb-text-secondary: var(--color-text-secondary, var(--color-slate-300, #cbd5e1));
     --wb-border-color: var(--border-muted, rgba(148, 163, 184, 0.22));
+    --wb-card-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 94%, transparent);
     --wb-tag-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 78%, transparent);
     --wb-tag-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 18%, transparent);
     --wb-tag-hover-bg: color-mix(in srgb, var(--surface-panel, #1e293b) 92%, transparent);
     --wb-tag-hover-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 30%, transparent);
+    --wb-tag-dot-border: color-mix(in srgb, var(--surface-panel, #1e293b) 78%, transparent);
   }
 
   /* 5.1 背景适配 */
