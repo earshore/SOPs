@@ -485,6 +485,61 @@ describe('deep-chat playground request stopping', () => {
 
     unmount();
   });
+
+  it('persists a stopped response when an aborted request settles without throwing', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      callLLM: async (...args: unknown[]) => {
+        const callOptions = args[5] as { signal?: AbortSignal } | undefined;
+        return new Promise<string>(resolve => {
+          callOptions?.signal?.addEventListener('abort', () => resolve('Late response'), {
+            once: true,
+          });
+        });
+      },
+    });
+
+    await mount(container);
+    const onClose = vi.fn();
+    const signals = {
+      onResponse: vi.fn(),
+      onClose,
+      stopClicked: { listener: vi.fn() },
+    };
+
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Stop this request' }] },
+      signals
+    );
+
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+    });
+
+    signals.stopClicked.listener();
+
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    expectStoredAssistantMessage(mocks.localDataStore.set, '已停止生成。');
+    expect(mocks.localDataStore.set).not.toHaveBeenCalledWith(
+      'user:playground_deep_chat_threads_v1',
+      expect.objectContaining({
+        threads: expect.arrayContaining([
+          expect.objectContaining({
+            messages: expect.arrayContaining([
+              expect.objectContaining({ role: 'ai', text: 'Late response' }),
+            ]),
+          }),
+        ]),
+      }),
+      'user-data'
+    );
+
+    unmount();
+  });
 });
 
 describe('deep-chat playground request errors', () => {

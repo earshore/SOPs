@@ -140,7 +140,44 @@ export class PromptlabPage extends BasePage {
   async waitForPageReady(): Promise<void> {
     await this.waitForElement(this.selectors.productDnaCard, { timeout: 10000 });
     await this.waitForElement(this.selectors.generatePromptButton, { timeout: 10000 });
+    await this.waitForPromptlabAlpineReady();
     await this.waitForLoadingToFinish();
+  }
+
+  private async waitForPromptlabAlpineReady(timeout = 10000): Promise<void> {
+    await this.page.waitForFunction(
+      () => {
+        const root = document.querySelector('[x-data="promptlabPanel"]');
+        const alpine = (window as Window & { Alpine?: { $data?: (element: Element) => unknown } })
+          .Alpine;
+        if (!root || typeof alpine?.$data !== 'function') return false;
+
+        const data = alpine.$data(root) as { profile?: unknown; renderReportAnalysis?: unknown };
+        return !!data?.profile && typeof data.renderReportAnalysis === 'function';
+      },
+      undefined,
+      { timeout }
+    );
+  }
+
+  private async waitForProfileField(
+    field: string,
+    value: string | boolean,
+    timeout = 5000
+  ): Promise<void> {
+    await this.page.waitForFunction(
+      ({ fieldName, expectedValue }) => {
+        const root = document.querySelector('[x-data="promptlabPanel"]');
+        const alpine = (window as Window & { Alpine?: { $data?: (element: Element) => unknown } })
+          .Alpine;
+        if (!root || typeof alpine?.$data !== 'function') return false;
+
+        const data = alpine.$data(root) as { profile?: Record<string, unknown> };
+        return data.profile?.[fieldName] === expectedValue;
+      },
+      { fieldName: field, expectedValue: value },
+      { timeout }
+    );
   }
 
   // ========== 产品 DNA 填写方法 ==========
@@ -156,31 +193,31 @@ export class PromptlabPage extends BasePage {
     }
 
     if (data.keywordsTier1) {
-      await this.fill(this.selectors.keywordsTier1, data.keywordsTier1);
+      await this.fillTier1Keywords(data.keywordsTier1);
     }
 
     if (data.keywordsTier2) {
-      await this.fill(this.selectors.keywordsTier2, data.keywordsTier2);
+      await this.fillTier2Keywords(data.keywordsTier2);
     }
 
     if (data.negative) {
-      await this.fill(this.selectors.negativeKeywords, data.negative);
+      await this.fillNegativeKeywords(data.negative);
     }
 
     if (data.audience) {
-      await this.fill(this.selectors.audience, data.audience);
+      await this.fillAudience(data.audience);
     }
 
     if (data.usps) {
-      await this.fill(this.selectors.usps, data.usps);
+      await this.fillUSPs(data.usps);
     }
 
     if (data.specs) {
-      await this.fill(this.selectors.specs, data.specs);
+      await this.fillSpecs(data.specs);
     }
 
     if (data.socialHook) {
-      await this.fill(this.selectors.socialHook, data.socialHook);
+      await this.fillSocialHook(data.socialHook);
     }
   }
 
@@ -192,23 +229,30 @@ export class PromptlabPage extends BasePage {
   async selectTargetMarket(market: string): Promise<void> {
     const optionValue = await this.resolveTargetMarketOption(market);
     await this.select(this.selectors.targetMarket, optionValue);
+    await this.waitForProfileField('targetMarket', optionValue);
   }
 
   private async resolveTargetMarketOption(market: string): Promise<string> {
     const options = this.page.locator(`${this.selectors.targetMarket} option`);
     const count = await options.count();
     const fallbackMarket = market === 'English' ? 'English (US)' : market;
+    const optionData: Array<{ value: string; label: string }> = [];
 
     for (let index = 0; index < count; index++) {
       const option = options.nth(index);
       const value = (await option.getAttribute('value')) || '';
       const label = (await option.textContent()) || '';
-      if (value === market || value === fallbackMarket || label.includes(market)) {
-        return value;
-      }
+      optionData.push({ value, label });
     }
 
-    return market;
+    return (
+      optionData.find(option => option.value === market || option.label === market)?.value ||
+      optionData.find(
+        option => option.value === fallbackMarket || option.label.startsWith(`${fallbackMarket} `)
+      )?.value ||
+      optionData.find(option => option.label.includes(market))?.value ||
+      market
+    );
   }
 
   /**
@@ -218,6 +262,7 @@ export class PromptlabPage extends BasePage {
    */
   async fillTier1Keywords(keywords: string): Promise<void> {
     await this.fill(this.selectors.keywordsTier1, keywords);
+    await this.waitForProfileField('keywordsTier1', keywords);
   }
 
   /**
@@ -227,6 +272,7 @@ export class PromptlabPage extends BasePage {
    */
   async fillTier2Keywords(keywords: string): Promise<void> {
     await this.fill(this.selectors.keywordsTier2, keywords);
+    await this.waitForProfileField('keywordsTier2', keywords);
   }
 
   /**
@@ -236,6 +282,7 @@ export class PromptlabPage extends BasePage {
    */
   async fillNegativeKeywords(keywords: string): Promise<void> {
     await this.fill(this.selectors.negativeKeywords, keywords);
+    await this.waitForProfileField('negative', keywords);
   }
 
   /**
@@ -245,6 +292,7 @@ export class PromptlabPage extends BasePage {
    */
   async fillAudience(audience: string): Promise<void> {
     await this.fill(this.selectors.audience, audience);
+    await this.waitForProfileField('audience', audience);
   }
 
   /**
@@ -254,6 +302,7 @@ export class PromptlabPage extends BasePage {
    */
   async fillUSPs(usps: string): Promise<void> {
     await this.fill(this.selectors.usps, usps);
+    await this.waitForProfileField('usps', usps);
   }
 
   /**
@@ -263,6 +312,7 @@ export class PromptlabPage extends BasePage {
    */
   async fillSpecs(specs: string): Promise<void> {
     await this.fill(this.selectors.specs, specs);
+    await this.waitForProfileField('specs', specs);
   }
 
   /**
@@ -272,6 +322,7 @@ export class PromptlabPage extends BasePage {
    */
   async fillSocialHook(hook: string): Promise<void> {
     await this.fill(this.selectors.socialHook, hook);
+    await this.waitForProfileField('socialHook', hook);
   }
 
   /**
@@ -288,6 +339,60 @@ export class PromptlabPage extends BasePage {
       specs: await this.getValue(this.selectors.specs),
       socialHook: await this.getValue(this.selectors.socialHook)
     };
+  }
+
+  async waitForListingReady(timeout = 10000): Promise<void> {
+    await this.page.waitForFunction(
+      ({
+        targetMarketSelector,
+        tier1Selector,
+        tier2Selector,
+        buttonSelector,
+      }: {
+        targetMarketSelector: string;
+        tier1Selector: string;
+        tier2Selector: string;
+        buttonSelector: string;
+      }) => {
+        const getValue = (selector: string) =>
+          (document.querySelector(selector) as HTMLInputElement | HTMLSelectElement | null)?.value.trim() || '';
+        const button = document.querySelector(buttonSelector) as HTMLButtonElement | null;
+        return (
+          getValue(targetMarketSelector).length > 0 &&
+          getValue(tier1Selector).length > 0 &&
+          getValue(tier2Selector).length > 0 &&
+          !!button &&
+          !button.disabled
+        );
+      },
+      {
+        targetMarketSelector: this.selectors.targetMarket,
+        tier1Selector: this.selectors.keywordsTier1,
+        tier2Selector: this.selectors.keywordsTier2,
+        buttonSelector: this.selectors.generatePromptButton,
+      },
+      { timeout }
+    );
+  }
+
+  async ensureListingRequiredFields(
+    fallback: Pick<ProductDNA, 'targetMarket' | 'keywordsTier1' | 'keywordsTier2'>
+  ): Promise<void> {
+    const current = await this.getProductDNA();
+
+    if (!current.targetMarket && fallback.targetMarket) {
+      await this.selectTargetMarket(fallback.targetMarket);
+    }
+
+    if (!current.keywordsTier1?.trim() && fallback.keywordsTier1) {
+      await this.fillTier1Keywords(fallback.keywordsTier1);
+    }
+
+    if (!current.keywordsTier2?.trim() && fallback.keywordsTier2) {
+      await this.fillTier2Keywords(fallback.keywordsTier2);
+    }
+
+    await this.waitForListingReady();
   }
 
   // ========== 分析报告方法 ==========
@@ -371,23 +476,23 @@ export class PromptlabPage extends BasePage {
    */
   async configureStrategy(config: StrategyConfig): Promise<void> {
     if (config.tone) {
-      await this.select(this.selectors.tone, config.tone);
+      await this.selectTone(config.tone);
     }
 
     if (config.customStrategy !== undefined) {
-      await this.fill(this.selectors.customStrategy, config.customStrategy);
+      await this.fillCustomStrategy(config.customStrategy);
     }
 
     if (config.useCosmo !== undefined) {
-      await this.setChecked(this.selectors.cosmoCheckbox, config.useCosmo);
+      await this.toggleCosmo(config.useCosmo);
     }
 
     if (config.useRufus !== undefined) {
-      await this.setChecked(this.selectors.rufusCheckbox, config.useRufus);
+      await this.toggleRufus(config.useRufus);
     }
 
     if (config.useEmoji !== undefined) {
-      await this.setChecked(this.selectors.emojiCheckbox, config.useEmoji);
+      await this.toggleEmoji(config.useEmoji);
     }
   }
 
@@ -398,6 +503,7 @@ export class PromptlabPage extends BasePage {
    */
   async selectTone(tone: 'professional' | 'exciting' | 'emotional' | 'minimalist'): Promise<void> {
     await this.select(this.selectors.tone, tone);
+    await this.waitForProfileField('tone', tone);
   }
 
   /**
@@ -407,6 +513,7 @@ export class PromptlabPage extends BasePage {
    */
   async fillCustomStrategy(strategy: string): Promise<void> {
     await this.fill(this.selectors.customStrategy, strategy);
+    await this.waitForProfileField('customStrategy', strategy);
   }
 
   /**
@@ -416,6 +523,7 @@ export class PromptlabPage extends BasePage {
    */
   async toggleCosmo(enabled: boolean): Promise<void> {
     await this.setChecked(this.selectors.cosmoCheckbox, enabled);
+    await this.waitForProfileField('useCosmo', enabled);
   }
 
   /**
@@ -425,6 +533,7 @@ export class PromptlabPage extends BasePage {
    */
   async toggleRufus(enabled: boolean): Promise<void> {
     await this.setChecked(this.selectors.rufusCheckbox, enabled);
+    await this.waitForProfileField('useRufus', enabled);
   }
 
   /**
@@ -434,6 +543,7 @@ export class PromptlabPage extends BasePage {
    */
   async toggleEmoji(enabled: boolean): Promise<void> {
     await this.setChecked(this.selectors.emojiCheckbox, enabled);
+    await this.waitForProfileField('useEmoji', enabled);
   }
 
   /**
@@ -608,13 +718,25 @@ export class PromptlabPage extends BasePage {
    * 点击"从报告加载"按钮，自动提取产品 DNA
    */
   async autoPopulateDNA(): Promise<void> {
-    const button = this.page.locator('button:has-text("从报告加载")');
+    const button = this.page.locator('#card-product-dna button').filter({ hasText: '从报告加载' });
+    await this.page.waitForFunction(
+      () => {
+        return Array.from(document.querySelectorAll('#card-product-dna button')).some(button => {
+          return (
+            button.textContent?.includes('从报告加载') &&
+            !(button as HTMLButtonElement).disabled
+          );
+        });
+      },
+      undefined,
+      { timeout: 5000 }
+    );
     await button.click();
-    await this.wait(1000); // 等待填充完成
+    await this.waitForDNAAutoFilled(5000);
   }
 
   async clickAutoPopulateDNA(): Promise<void> {
-    const button = this.page.locator('button:has-text("从报告加载")');
+    const button = this.page.locator('#card-product-dna button').filter({ hasText: '从报告加载' });
     await button.click();
   }
 
@@ -634,7 +756,7 @@ export class PromptlabPage extends BasePage {
    * 检查"从报告加载"按钮是否可用
    */
   async isAutoPopulateButtonEnabled(): Promise<boolean> {
-    const button = this.page.locator('button:has-text("从报告加载")');
+    const button = this.page.locator('#card-product-dna button').filter({ hasText: '从报告加载' });
     return await button.isEnabled();
   }
 

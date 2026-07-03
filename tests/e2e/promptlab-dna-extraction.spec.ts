@@ -387,9 +387,6 @@ function getPromptKeywordTerms(dna: { keywordsTier1?: string; keywordsTier2?: st
       expect(isDNAFilled, 'DNA 应该已填充').toBe(true);
 
       console.log(`     ✅ DNA 提取完成`);
-      const currentProductDna = await promptlab.getProductDNA();
-      const expectedPromptTerms = getPromptKeywordTerms(currentProductDna);
-      expect(expectedPromptTerms.length, '生成 Prompt 前应该有当前表单关键词').toBeGreaterThan(0);
 
       // 步骤 3: 配置策略
       console.log('  3️⃣ 配置生成策略...');
@@ -404,6 +401,15 @@ function getPromptKeywordTerms(dna: { keywordsTier1?: string; keywordsTier2?: st
         await promptlab.selectAllReportSections();
         console.log(`     ✅ 已选择 ${sectionsCount} 个报告模块`);
       }
+
+      await promptlab.ensureListingRequiredFields({
+        targetMarket: 'English',
+        keywordsTier1: 'wireless earbuds',
+        keywordsTier2: 'bluetooth 5.0, noise cancelling',
+      });
+      const currentProductDna = await promptlab.getProductDNA();
+      const expectedPromptTerms = getPromptKeywordTerms(currentProductDna);
+      expect(expectedPromptTerms.length, '生成 Prompt 前应该有当前表单关键词').toBeGreaterThan(0);
 
       // 步骤 5: 生成 Listing Prompt
       console.log('  5️⃣ 生成 Listing Prompt...');

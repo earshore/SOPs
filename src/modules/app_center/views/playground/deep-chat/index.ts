@@ -569,6 +569,7 @@ let draftInputResizeObserver: ResizeObserver | null = null;
 let draftInputResizeRetryTimer: number | null = null;
 let cleanupDraftInputHeightListener: (() => void) | null = null;
 let cleanupSubmitStopButtonListener: (() => void) | null = null;
+let submitStopButtonSyncRetryTimer: number | null = null;
 const draftPersistController = createDraftPersistController(
   persistThreadStore,
   DRAFT_PERSIST_DEBOUNCE_MS
@@ -770,6 +771,13 @@ function configureDeepChatBase(chat: DeepChatElement, activeThread: PlaygroundTh
 }
 
 function configureDeepChatStyles(chat: DeepChatElement): void {
+  configureDeepChatLayoutStyles(chat);
+  configureDeepChatTextInputStyles(chat);
+  configureDeepChatSubmitButtonStyles(chat);
+  configureDeepChatMessageStyles(chat);
+}
+
+function configureDeepChatLayoutStyles(chat: DeepChatElement): void {
   chat.chatStyle = {
     width: '100%',
     height: '100%',
@@ -785,6 +793,9 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
     padding: '0',
     alignItems: 'flex-end',
   };
+}
+
+function configureDeepChatTextInputStyles(chat: DeepChatElement): void {
   chat.textInput = {
     placeholder: {
       text: '有问题，尽管问',
@@ -809,6 +820,9 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
       },
     },
   };
+}
+
+function configureDeepChatSubmitButtonStyles(chat: DeepChatElement): void {
   chat.submitButtonStyles = {
     position: 'inside-end',
     submit: {
@@ -846,6 +860,9 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
       },
     },
   };
+}
+
+function configureDeepChatMessageStyles(chat: DeepChatElement): void {
   chat.messageStyles = {
     default: {
       shared: {
@@ -1013,30 +1030,46 @@ function clearDraftInputHeightSync(): void {
   }
 }
 
-function setupSubmitStopButtonSync(container: HTMLElement, chat: DeepChatElement): void {
+function setupSubmitStopButtonSync(
+  container: HTMLElement,
+  chat: DeepChatElement,
+  attempts = 10
+): void {
   clearSubmitStopButtonSync();
   const root = chat.shadowRoot;
   if (!root) {
+    if (attempts > 0) {
+      submitStopButtonSyncRetryTimer = window.setTimeout(
+        () => setupSubmitStopButtonSync(container, chat, attempts - 1),
+        80
+      );
+    }
     syncSubmitStopButtonState(container);
     return;
   }
 
-  const onSubmitButtonClick = (event: Event): void => {
+  const onSubmitButtonStopIntent = (event: Event): void => {
     const target = event.target instanceof Element ? event.target : null;
     const button = target?.closest('.input-button.inside-end');
-    if (!button || !pendingRequests.has(threadStore.activeThreadId)) {
+    const threadId = threadStore.activeThreadId;
+    if (!button || !pendingRequests.has(threadId)) {
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
-    abortPendingRequest(threadStore.activeThreadId, 'stopped');
-    syncSubmitStopButtonState(container);
+    event.stopImmediatePropagation();
+    const replaceChat = event.type !== 'pointerdown';
+    if (stopPendingRequest(threadId, { replaceChat }) && !replaceChat) {
+      window.setTimeout(() => syncPendingRequestView(threadId, { replaceChat: true }), 0);
+    }
   };
 
-  root.addEventListener('click', onSubmitButtonClick, true);
+  root.addEventListener('pointerdown', onSubmitButtonStopIntent, true);
+  root.addEventListener('click', onSubmitButtonStopIntent, true);
   cleanupSubmitStopButtonListener = () => {
-    root.removeEventListener('click', onSubmitButtonClick, true);
+    root.removeEventListener('pointerdown', onSubmitButtonStopIntent, true);
+    root.removeEventListener('click', onSubmitButtonStopIntent, true);
   };
   syncSubmitStopButtonState(container);
 }
@@ -1044,6 +1077,10 @@ function setupSubmitStopButtonSync(container: HTMLElement, chat: DeepChatElement
 function clearSubmitStopButtonSync(): void {
   cleanupSubmitStopButtonListener?.();
   cleanupSubmitStopButtonListener = null;
+  if (submitStopButtonSyncRetryTimer !== null) {
+    window.clearTimeout(submitStopButtonSyncRetryTimer);
+    submitStopButtonSyncRetryTimer = null;
+  }
 }
 
 function syncSubmitStopButtonState(container: HTMLElement): void {
@@ -1542,6 +1579,7 @@ async function handlePlaygroundRequest(
 ): Promise<void> {
   let requestController: AbortController | null = null;
   let pendingThreadId: string | null = null;
+  let lifecyclePendingRequest: PendingPlaygroundRequest | null = null;
 
   try {
     const preparedRequest = await preparePlaygroundRequest(body, signals);
@@ -1560,6 +1598,7 @@ async function handlePlaygroundRequest(
       conversationMessages,
       requestController
     );
+    lifecyclePendingRequest = pendingRequest;
     bindStopSignal(signals, pendingRequest);
     pendingRequests.set(activeThread.id, pendingRequest);
     saveThreadMessages(container, conversationMessages, '', { threadId: activeThread.id });
@@ -1581,11 +1620,7 @@ async function handlePlaygroundRequest(
       threadId: activeThread.id,
     });
   } catch (error) {
-    const pendingRequest = pendingThreadId ? pendingRequests.get(pendingThreadId) : null;
     if (requestController?.signal.aborted) {
-      if (pendingRequest?.abortReason === 'stopped') {
-        preserveStoppedResponse(pendingThreadId);
-      }
       return;
     }
     const message = error instanceof Error ? error.message : '模型调用失败';
@@ -1594,9 +1629,15 @@ async function handlePlaygroundRequest(
     saveFailedPlaygroundResponse(pendingThreadId, responseText);
     await emitDeepChatResponse(signals, { text: responseText });
   } finally {
-    if (pendingThreadId) {
-      pendingRequests.delete(pendingThreadId);
-      syncPendingRequestView(pendingThreadId, { replaceChat: true });
+    if (pendingThreadId && lifecyclePendingRequest) {
+      const pendingRequest = pendingRequests.get(pendingThreadId);
+      if (pendingRequest === lifecyclePendingRequest) {
+        if (pendingRequest.abortReason === 'stopped') {
+          preserveStoppedResponse(pendingThreadId);
+        }
+        pendingRequests.delete(pendingThreadId);
+        syncPendingRequestView(pendingThreadId, { replaceChat: true });
+      }
     }
     signals.onClose?.();
   }
@@ -1721,7 +1762,7 @@ function createRequestController(): AbortController {
 
 function bindStopSignal(signals: DeepChatSignals, pendingRequest: PendingPlaygroundRequest): void {
   if (signals.stopClicked) {
-    signals.stopClicked.listener = () => abortPendingRequest(pendingRequest.threadId, 'stopped');
+    signals.stopClicked.listener = () => stopPendingRequest(pendingRequest.threadId);
   }
 }
 
@@ -1732,6 +1773,22 @@ function abortPendingRequest(threadId: string, reason: PlaygroundPendingAbortRea
   }
 
   abortPendingPlaygroundRequest(pendingRequest, reason);
+  return true;
+}
+
+function stopPendingRequest(
+  threadId: string,
+  options: { replaceChat?: boolean } = {}
+): boolean {
+  const pendingRequest = pendingRequests.get(threadId);
+  if (!pendingRequest) {
+    return false;
+  }
+
+  abortPendingPlaygroundRequest(pendingRequest, 'stopped');
+  preserveStoppedResponse(threadId);
+  pendingRequests.delete(threadId);
+  syncPendingRequestView(threadId, { replaceChat: options.replaceChat ?? true });
   return true;
 }
 
@@ -1757,6 +1814,9 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
       signal: controller.signal,
       stream: true,
       onStreamUpdate: update => {
+        if (pendingRequest.abortReason) {
+          return;
+        }
         streamedText += update.delta;
         if (update.delta) {
           appendPendingAssistantText(pendingRequest, update.delta);
@@ -1765,6 +1825,10 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
       },
     }
   );
+
+  if (pendingRequest.abortReason) {
+    return pendingRequest.assistantText.trim();
+  }
 
   if (!streamedText && finalText) {
     appendPendingAssistantText(pendingRequest, finalText);
