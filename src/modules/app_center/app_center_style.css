@@ -90,38 +90,54 @@
 
 /* ==================== 应用总览样式 ==================== */
 .app-overview-container {
-  color: var(--color-slate-900);
-  --color-primary: var(--color-cyan-700);
-  --color-primary-light: var(--color-cyan-100);
-  --color-primary-dark: var(--color-cyan-800);
-  --focus-ring-soft: rgba(8, 145, 178, 0.16);
+  color: var(--app-overview-text-primary);
+  --app-overview-accent: var(--color-cyan-700);
+  --app-overview-accent-strong: var(--color-cyan-800);
+  --app-overview-accent-soft: var(--color-cyan-100);
+  --app-overview-accent-surface: var(--color-cyan-50);
+  --app-overview-border: var(--border-subtle, rgba(148, 163, 184, 0.24));
+  --app-overview-surface: var(--surface-panel, var(--color-bg-elevated, #ffffff));
+  --app-overview-text-primary: var(--color-text-primary, var(--color-slate-900, #0f172a));
+  --app-overview-text-secondary: var(--color-text-secondary, var(--color-slate-600, #475569));
+  --app-overview-text-muted: var(--color-text-tertiary, var(--color-slate-400, #94a3b8));
+  --app-overview-radius: var(--rounded-xl, 16px);
+  --app-overview-shadow: var(--shadow-panel, 0 12px 30px -28px rgba(15, 23, 42, 0.45));
+  --app-overview-focus-ring: color-mix(in srgb, var(--app-overview-accent) 16%, transparent);
+  --color-primary: var(--app-overview-accent);
+  --color-primary-light: var(--app-overview-accent-soft);
+  --color-primary-dark: var(--app-overview-accent-strong);
+  --focus-ring-soft: var(--app-overview-focus-ring);
 }
 
 .app-overview-hero {
   position: relative;
   margin-bottom: 2rem !important;
   padding: 0 !important;
-  border: 1px solid rgba(148, 163, 184, 0.24) !important;
-  border-radius: var(--rounded-xl, 16px) !important;
+  border: 1px solid var(--app-overview-border) !important;
+  border-radius: var(--app-overview-radius) !important;
   background:
-    radial-gradient(circle at 82% 18%, rgba(8, 145, 178, 0.1), transparent 32%),
+    radial-gradient(
+      circle at 82% 18%,
+      color-mix(in srgb, var(--app-overview-accent) 10%, transparent),
+      transparent 32%
+    ),
     linear-gradient(
       135deg,
-      rgba(236, 254, 255, 0.98),
-      rgba(255, 255, 255, 0.94) 52%,
-      rgba(224, 242, 254, 0.86)
+      color-mix(in srgb, var(--app-overview-accent-surface) 98%, transparent),
+      color-mix(in srgb, var(--app-overview-surface) 94%, transparent) 52%,
+      color-mix(in srgb, var(--color-sky-100, #e0f2fe) 86%, transparent)
     ) !important;
-  box-shadow: 0 18px 40px -32px rgba(15, 23, 42, 0.42) !important;
+  box-shadow: var(--app-overview-shadow) !important;
   overflow: hidden;
-  --wb-orb-1-color: rgba(6, 182, 212, 0.13);
-  --wb-orb-2-color: rgba(14, 165, 233, 0.1);
-  --wb-orb-3-color: rgba(2, 132, 199, 0.08);
-  --wb-particle-color: rgba(8, 145, 178, 0.42);
-  --wb-text-primary: var(--color-slate-900) !important;
-  --wb-text-secondary: var(--color-slate-600) !important;
-  --wb-border-color: rgba(148, 163, 184, 0.24) !important;
-  --wb-tag-bg: rgba(255, 255, 255, 0.78) !important;
-  --wb-tag-border: rgba(148, 163, 184, 0.22) !important;
+  --wb-orb-1-color: color-mix(in srgb, var(--color-cyan-500, #06b6d4) 13%, transparent);
+  --wb-orb-2-color: color-mix(in srgb, var(--color-sky-500, #0ea5e9) 10%, transparent);
+  --wb-orb-3-color: color-mix(in srgb, var(--color-sky-600, #0284c7) 8%, transparent);
+  --wb-particle-color: color-mix(in srgb, var(--app-overview-accent) 42%, transparent);
+  --wb-text-primary: var(--app-overview-text-primary) !important;
+  --wb-text-secondary: var(--app-overview-text-secondary) !important;
+  --wb-border-color: var(--app-overview-border) !important;
+  --wb-tag-bg: color-mix(in srgb, var(--app-overview-surface) 78%, transparent) !important;
+  --wb-tag-border: color-mix(in srgb, var(--color-slate-400, #94a3b8) 22%, transparent) !important;
   --wb-title-size: 1.375rem !important;
   --wb-title-weight: var(--font-extrabold, 800) !important;
   --wb-title-line-height: 1.3 !important;
@@ -131,8 +147,8 @@
   --wb-tag-text-weight: var(--font-medium, 500) !important;
   --wb-badge-text-size: var(--text-xs, 0.75rem) !important;
   --wb-badge-text-weight: var(--font-extrabold, 800) !important;
-  --wb-icon-shadow: 0 12px 24px -18px rgba(8, 145, 178, 0.62);
-  --wb-icon-shadow-hover: 0 14px 28px -20px rgba(8, 145, 178, 0.62);
+  --wb-icon-shadow: 0 12px 24px -18px color-mix(in srgb, var(--app-overview-accent) 62%, transparent);
+  --wb-icon-shadow-hover: 0 14px 28px -20px color-mix(in srgb, var(--app-overview-accent) 62%, transparent);
 }
 
 .app-overview-hero .wb-content {
@@ -163,8 +179,8 @@
   justify-content: center;
   border-radius: var(--rounded-md, 8px) !important;
   background: linear-gradient(135deg, var(--color-cyan-600), var(--color-blue-700)) !important;
-  color: #ffffff;
-  box-shadow: 0 12px 24px -18px rgba(8, 145, 178, 0.62) !important;
+  color: var(--color-primary-contrast, #ffffff);
+  box-shadow: var(--wb-icon-shadow) !important;
 }
 
 .app-overview-hero .wb-title-row {
@@ -180,10 +196,10 @@
 .app-overview-hero .wb-badge {
   min-height: 1.625rem;
   padding: 0.25rem 0.625rem;
-  border: 1px solid rgba(8, 145, 178, 0.2);
+  border: 1px solid color-mix(in srgb, var(--app-overview-accent) 20%, transparent);
   border-radius: 999px;
-  background: var(--color-cyan-50) !important;
-  color: var(--color-cyan-700) !important;
+  background: var(--app-overview-accent-surface) !important;
+  color: var(--app-overview-accent) !important;
 }
 
 .app-overview-hero .wb-badge i,
@@ -195,7 +211,7 @@
 .app-overview-hero .wb-description {
   max-width: 760px;
   margin: 0;
-  color: var(--color-slate-600) !important;
+  color: var(--app-overview-text-secondary) !important;
 }
 
 .app-overview-hero .wb-tags {
@@ -208,10 +224,10 @@
 .app-overview-hero .wb-tag {
   min-height: 1.75rem;
   padding: 0.25rem 0.625rem;
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid color-mix(in srgb, var(--color-slate-400, #94a3b8) 22%, transparent);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
-  color: var(--color-slate-600) !important;
+  background: color-mix(in srgb, var(--app-overview-surface) 78%, transparent);
+  color: var(--app-overview-text-secondary) !important;
 }
 
 .app-overview-hero .wb-tag-dot,

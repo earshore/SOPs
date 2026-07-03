@@ -138,6 +138,8 @@ const NAMING_PATTERNS = {
   animationRuntime: /^--stagger-index$/,
   tailwindRuntime: /^--tw-(gradient-stops|shadow)$/,
   hitArea: /^--hit-area-expand$/,
+  moduleAppCenter: /^--app-[\w-]+$/,
+  modulePpcTools: /^--ppc-[\w-]+$/,
   moduleKeywordHunter: /^--(kh|keyword)-[\w-]+$/,
   moduleScraper: /^--scraper-(border|radius|surface)$/,
   modulePlayground: /^--playground-[\w-]+$/,
