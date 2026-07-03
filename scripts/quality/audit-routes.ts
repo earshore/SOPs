@@ -61,6 +61,12 @@ interface LegacyGlobalRouteApiReference {
   kind: string;
 }
 
+interface LegacyUrlRouteReference {
+  file: string;
+  line: number;
+  kind: string;
+}
+
 interface LoaderScope {
   name: string;
   manifest: ModuleManifest;
@@ -220,6 +226,10 @@ function collectSourceFiles(dir: string, files: string[] = []): string[] {
   return files;
 }
 
+function isTestFile(file: string): boolean {
+  return /\.(test|spec)\.[jt]sx?$/.test(file);
+}
+
 function collectStaticTabReferences(): StaticTabReference[] {
   const files = [join(projectRoot, 'index.html'), ...collectSourceFiles(join(projectRoot, 'src'))];
   const references: StaticTabReference[] = [];
@@ -376,6 +386,35 @@ function collectLegacyGlobalRouteApiReferences(): LegacyGlobalRouteApiReference[
   return references;
 }
 
+function collectLegacyUrlRouteReferences(): LegacyUrlRouteReference[] {
+  const files = [join(projectRoot, 'index.html'), ...collectSourceFiles(join(projectRoot, 'src'))].filter(
+    file => !isTestFile(file)
+  );
+  const references: LegacyUrlRouteReference[] = [];
+  const patterns: Array<{ kind: string; pattern: RegExp }> = [
+    { kind: 'hash href route', pattern: /\bhref\s*=\s*(["'])#\/[^"']*\1/g },
+    { kind: 'location.hash assignment', pattern: /\b(?:window\.)?location\.hash\s*=/g },
+  ];
+
+  for (const file of files) {
+    const content = readFileSync(file, 'utf-8');
+
+    for (const { kind, pattern } of patterns) {
+      let match: RegExpExecArray | null;
+      pattern.lastIndex = 0;
+      while ((match = pattern.exec(content)) !== null) {
+        references.push({
+          file: relative(projectRoot, file),
+          line: content.slice(0, match.index).split('\n').length,
+          kind,
+        });
+      }
+    }
+  }
+
+  return references;
+}
+
 function auditStaticTabReferences(issues: AuditIssue[], routeIdSet: Set<string>): void {
   for (const reference of collectStaticTabReferences()) {
     if (!routeIdSet.has(reference.routeId)) {
@@ -445,6 +484,18 @@ function auditLegacyGlobalRouteApis(issues: AuditIssue[]): void {
       'error',
       'legacy-global-route-api',
       `${reference.kind} reintroduces a global path/legacy route entrypoint`,
+      `${reference.file}:${reference.line}`
+    );
+  }
+}
+
+function auditLegacyUrlRoutes(issues: AuditIssue[]): void {
+  for (const reference of collectLegacyUrlRouteReferences()) {
+    addIssue(
+      issues,
+      'error',
+      'legacy-url-route',
+      `${reference.kind} bypasses routeId navigation; use data-action="switch-tab" or navigateToRouteId()`,
       `${reference.file}:${reference.line}`
     );
   }
@@ -541,6 +592,7 @@ function main(): void {
   auditLegacyChildTabAttributes(issues);
   auditLegacyWindowNavigationCalls(issues);
   auditLegacyGlobalRouteApis(issues);
+  auditLegacyUrlRoutes(issues);
   auditStaticTabReferences(issues, routeIdSet);
   auditModuleMaps(issues);
   auditMenuConfig(issues, routeIdSet);

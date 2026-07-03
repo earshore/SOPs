@@ -41,6 +41,10 @@
     border-radius: var(--radius-card, var(--rounded-md));
     color: var(--color-slate-600);
     background: var(--surface-card-hover, var(--color-slate-50));
+    appearance: none;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
     text-decoration: none;
     transition:
       border-color var(--duration-fast) ease,

@@ -158,10 +158,7 @@ const storage = this.getService('storage');
 import eventBus from '@common/EventBus';
 import { APP_EVENTS } from '@common/constants/eventConstants';
 
-// 触发事件
-eventBus.emit(APP_EVENTS.ROUTE_CHANGED, { routeId: 'home' });
-
-// 监听事件
+// 监听路由系统发出的变更事件
 const unsubscribe = eventBus.on(APP_EVENTS.ROUTE_CHANGED, (data) => {
   console.log('Route changed:', data);
 });

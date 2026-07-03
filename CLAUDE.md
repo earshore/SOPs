@@ -46,18 +46,21 @@ export function cleanup() {
 
 ### 3. Router System
 
-Modern Navigo-based router with legacy compatibility layer:
+Navigo-based router with a routeId-first navigation contract:
 
 - **Core**: `src/common/router/navigo/` - New router implementation
-- **Legacy Adapter**: `src/common/router/navigo/LegacyAdapter.ts` - Backward compatibility
 - **Initialization**: `src/common/router/initRouter.ts` - Setup and configuration
+- **URL Mapping**: `src/common/router/routePaths.ts` - Strict routeId to URL path conversion
 
 **Route Registration**: Routes are converted from `MENU_CONFIG` and registered with path prefixes:
 - App Center routes: `/app-center/*`
 - Keyword Hunter: `/app-center/keyword-hunter/*`
 - Other modules: `/{module-id}`
 
-**Navigation**: Use `router.navigate(path)` or emit `APP_EVENTS.ROUTE_CHANGE` event.
+**Navigation**:
+- UI markup uses `data-action="switch-tab" data-tab="<routeId>"`
+- TypeScript business code uses `navigateToRouteId('<routeId>')`
+- Do not assign `window.location.hash`, use `href="#/..."`, or expose global router navigation APIs
 
 ### 4. Error Handling System
 

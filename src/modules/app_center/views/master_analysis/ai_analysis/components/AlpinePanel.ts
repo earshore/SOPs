@@ -15,6 +15,7 @@ import { createComputedProperties, ComputedProperties } from './computedProperti
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import { createMultipleStateSyncs, cleanupSubscriptions } from '@common/utils/stateSync';
 import { createPerformanceSettingsPanel } from './PerformanceSettings';
+import { navigateToRouteId } from '@/common/router/initRouter';
 
 type AlpineWatchContext = {
   $watch: (property: string, callback: (newValue: unknown) => void) => void;
@@ -816,11 +817,8 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     await actions.runAnalysisAction(ctx, ctx.currentProducts);
   },
 
-  navigateToScraper() {
-    // 使用正确的路由路径
-    if (window.location.hash !== '#/app-center/scraper') {
-      window.location.hash = '#/app-center/scraper';
-    }
+  async navigateToScraper() {
+    await navigateToRouteId('scraper');
   },
 
   refreshReportView() {

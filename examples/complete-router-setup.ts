@@ -9,10 +9,10 @@ import {
   convertMenuConfig,
   createRouterStore,
   createRouterStoreSync,
-  createLegacyAdapter,
   type NavigoAdapter
 } from '../src/common/router/navigo';
 import { MENU_CONFIG } from '../src/common/config/menuConfig';
+import { routeIdToPathStrict } from '../src/common/router/routePaths';
 
 /**
  * 初始化路由系统
@@ -20,7 +20,6 @@ import { MENU_CONFIG } from '../src/common/config/menuConfig';
 export function initializeRouter(): {
   router: NavigoAdapter;
   store: ReturnType<typeof createRouterStore>;
-  legacy: ReturnType<typeof createLegacyAdapter>;
 } {
   console.log('🚀 初始化路由系统...\n');
 
@@ -154,23 +153,12 @@ export function initializeRouter(): {
 
   console.log(`✓ 已配置 ${highFrequencyRoutes.length} 个路由的预加载\n`);
 
-  // ==================== 7. 配置向后兼容 ====================
-  console.log('🔧 配置向后兼容层...');
-
-  const legacy = createLegacyAdapter(router, true);
-  legacy.installGlobalAPI();
-
-  console.log('✓ 向后兼容 API 已安装\n');
-
-  // ==================== 8. 监听路由变化 ====================
+  // ==================== 7. 监听路由变化 ====================
   console.log('👂 设置路由监听器...');
 
   storeSync.subscribe((state) => {
     if (state.currentRoute) {
       console.log(`[Store] 当前路由: ${state.currentRoute.path}`);
-      
-      // 触发兼容事件
-      legacy.emitLegacyEvents(state.currentRoute, state.previousRoute);
     }
 
     if (state.error) {
@@ -180,16 +168,15 @@ export function initializeRouter(): {
 
   console.log('✓ 监听器设置完成\n');
 
-  // ==================== 9. 启动路由系统 ====================
+  // ==================== 8. 启动路由系统 ====================
   console.log('🎯 启动路由系统...');
   router.resolve();
   console.log('✓ 路由系统已启动\n');
 
-  // ==================== 10. 返回实例 ====================
+  // ==================== 9. 返回实例 ====================
   return {
     router,
-    store,
-    legacy
+    store
   };
 }
 
@@ -292,25 +279,17 @@ export async function errorHandlingExamples(router: NavigoAdapter) {
   console.log('');
 }
 
-/**
- * 向后兼容示例
- */
-export function legacyCompatibilityExamples() {
-  console.log('\n🔧 向后兼容示例:\n');
+export async function routeIdNavigationExample(router: NavigoAdapter) {
+  console.log('\n🔗 RouteId 导航示例:\n');
 
-  // 使用旧的 switchTab 函数
-  console.log('1. 使用 switchTab (已弃用)');
-  if (typeof (window as any).switchTab === 'function') {
-    (window as any).switchTab('home');
-    console.log('   switchTab 调用成功\n');
+  const path = routeIdToPathStrict('scraper');
+  if (!path) {
+    console.warn('   未找到 routeId: scraper');
+    return;
   }
 
-  // 使用旧的 window.router
-  console.log('2. 使用 window.router (已弃用)');
-  if ((window as any).router) {
-    const current = (window as any).router.getCurrentRoute();
-    console.log(`   当前路由: ${current?.path}\n`);
-  }
+  await router.navigate(path);
+  console.log(`   scraper -> ${path}\n`);
 }
 
 /**
@@ -322,7 +301,7 @@ export async function runCompleteExample() {
   console.log('═══════════════════════════════════════════════════════\n');
 
   // 初始化
-  const { router, store, legacy } = initializeRouter();
+  const { router, store } = initializeRouter();
 
   // 等待一下让初始化完成
   await new Promise(resolve => setTimeout(resolve, 100));
@@ -336,15 +315,15 @@ export async function runCompleteExample() {
   // 错误处理示例
   await errorHandlingExamples(router);
 
-  // 向后兼容示例
-  legacyCompatibilityExamples();
+  // RouteId 导航示例
+  await routeIdNavigationExample(router);
 
   console.log('\n═══════════════════════════════════════════════════════');
   console.log('   示例运行完成');
   console.log('═══════════════════════════════════════════════════════\n');
 
   // 返回实例供进一步使用
-  return { router, store, legacy };
+  return { router, store };
 }
 
 // 如果直接运行此文件

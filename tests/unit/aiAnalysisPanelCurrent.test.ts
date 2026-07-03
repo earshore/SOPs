@@ -98,6 +98,7 @@ const panelMocks = vi.hoisted(() => {
     copyJson: vi.fn(),
     copyMarkdown: vi.fn(),
     downloadJson: vi.fn(),
+    navigateToRouteId: vi.fn(async () => true),
     runAnalysisAction: vi.fn(async () => undefined),
   };
 });
@@ -159,6 +160,10 @@ vi.mock('@/modules/app_center/views/master_analysis/ai_analysis/components/Perfo
   createPerformanceSettingsPanel: panelMocks.createPerformanceSettingsPanel,
 }));
 
+vi.mock('@/common/router/initRouter', () => ({
+  navigateToRouteId: panelMocks.navigateToRouteId,
+}));
+
 vi.mock('@/modules/app_center/views/master_analysis/ai_analysis/components/computedProperties', () => ({
   createComputedProperties: vi.fn(() => ({
     availableAsins: ['B001', 'B002'],
@@ -208,7 +213,7 @@ beforeEach(() => {
     expect(addSpy).toHaveBeenCalledWith('navigate-to-scraper', expect.any(Function));
 
     window.dispatchEvent(new Event('navigate-to-scraper'));
-    expect(window.location.hash).toBe('#/app-center/scraper');
+    expect(panelMocks.navigateToRouteId).toHaveBeenCalledWith('scraper');
 
     panel.destroy();
 
