@@ -254,7 +254,9 @@ type PromptlabPanelState = Pick<
   | 'expandedSubItems'
   | '_unsubscribers'
   | '_appStoreUnsubscribe'
->;
+> & {
+  reportRevision: number;
+};
 
 type PromptlabPanelThis = PromptlabAlpineContext & {
   $nextTick?: (callback: () => void) => void;
@@ -263,6 +265,7 @@ type PromptlabPanelThis = PromptlabAlpineContext & {
   isListingReady: boolean;
   isVisualReady: boolean;
   isOverLimit: boolean;
+  reportRevision: number;
   hasReport: boolean;
   canExtractDNA: boolean;
   reportActionDisabled: boolean;
@@ -307,6 +310,7 @@ function createPromptlabPanelState(): PromptlabPanelState {
     hasRenderedReportOnce: false,
     expandedDimensions: new Set<string>(),
     expandedSubItems: new Set<string>(),
+    reportRevision: 0,
     _unsubscribers: [] as Array<() => void>,
     _appStoreUnsubscribe: null,
   };
@@ -327,6 +331,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   // ========== Computed Getters ==========
 
   get hasReport(): boolean {
+    void this.reportRevision;
     return computeHasReport();
   },
 
@@ -375,6 +380,7 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
   },
 
   get canExtractDNA(): boolean {
+    void this.reportRevision;
     return canExtractDNA();
   },
 
@@ -553,6 +559,8 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
         if (currentReportFingerprint === previousReportFingerprint) {
           return;
         }
+
+        this.reportRevision += 1;
 
         const hasUsableReport = computeHasReport();
         if (!hasUsableReport) {

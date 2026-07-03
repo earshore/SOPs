@@ -121,7 +121,12 @@ export class PromptlabPage extends BasePage {
    */
   async navigate(): Promise<void> {
     await super.navigate('/#/app-center/promptlab');
-    await this.waitForPageReady();
+    try {
+      await this.waitForPageReady();
+    } catch {
+      await super.navigate('/#/app-center/promptlab');
+      await this.waitForPageReady();
+    }
   }
 
   /**
@@ -301,14 +306,27 @@ export class PromptlabPage extends BasePage {
    * 全选分析报告维度
    */
   async selectAllReportSections(): Promise<void> {
-    await this.click(this.selectors.selectAllButton);
+    await this.clickFirstVisible(`${this.selectors.reportSectionsContainer} button:has-text("全选")`);
   }
 
   /**
    * 清空分析报告选择
    */
   async clearReportSections(): Promise<void> {
-    await this.click(this.selectors.clearAllButton);
+    await this.clickFirstVisible(`${this.selectors.reportSectionsContainer} button:has-text("清空")`);
+  }
+
+  private async clickFirstVisible(selector: string): Promise<void> {
+    const buttons = this.page.locator(selector);
+    const count = await buttons.count();
+
+    for (let index = 0; index < count; index++) {
+      const button = buttons.nth(index);
+      if (await button.isVisible()) {
+        await button.click();
+        return;
+      }
+    }
   }
 
   /**
@@ -572,6 +590,23 @@ export class PromptlabPage extends BasePage {
     const button = this.page.locator('button:has-text("从报告加载")');
     await button.click();
     await this.wait(1000); // 等待填充完成
+  }
+
+  async clickAutoPopulateDNA(): Promise<void> {
+    const button = this.page.locator('button:has-text("从报告加载")');
+    await button.click();
+  }
+
+  async waitForDNAAutoFilled(timeout: number = 3000): Promise<void> {
+    await this.page.waitForFunction(
+      () => {
+        const getValue = (selector: string) =>
+          (document.querySelector(selector) as HTMLTextAreaElement | null)?.value.trim() || '';
+        return ['#lab-audience', '#lab-usps', '#lab-specs'].some(selector => getValue(selector).length > 0);
+      },
+      undefined,
+      { timeout }
+    );
   }
 
   /**

@@ -309,6 +309,49 @@ afterEach(() => {
     expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
   });
 
+  it('keeps the pending analysis state visible after leaving and returning', async () => {
+    vi.useFakeTimers();
+    analysisMocks.state.keywordTracker.processedCopy = validListing;
+    analysisMocks.state.keywordTracker.keywords = ['wireless earbuds'];
+    analysisMocks.state.keywordTracker.matchedKeywords = [{ keyword: 'wireless earbuds', count: 1 }];
+    let resolveAnalysis: (value: string) => void = () => undefined;
+    mockedCallLLM.mockImplementationOnce(
+      () =>
+        new Promise<string>(resolve => {
+          resolveAnalysis = resolve;
+        })
+    );
+
+    const firstContainer = await mountAnalysis();
+    click(firstContainer.querySelector('#kt-analyze-btn'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(firstContainer.querySelector('#kt-loading-state')?.textContent).toContain(
+      '正在读取文案与关键词数据'
+    );
+    expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+
+    unmount();
+    firstContainer.remove();
+
+    const secondContainer = await mountAnalysis();
+    expect(secondContainer.querySelector('#kt-loading-state')?.textContent).toContain(
+      '正在读取文案与关键词数据'
+    );
+    expect(secondContainer.querySelector('#kt-analyze-btn-text')?.textContent).toBe('分析中…');
+    expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+
+    resolveAnalysis(scoredMarkdown);
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(16);
+
+    expect(secondContainer.querySelector('#kt-llm-analysis-result')?.textContent).toContain('88/100');
+    expect(secondContainer.querySelector('#kt-analyze-btn-text')?.textContent).toBe('报告已生成');
+    expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
+    expect(showToast).toHaveBeenCalledWith('报告生成成功', { type: 'success' });
+  });
+
   it('warns when the generated report cannot be archived automatically', async () => {
     analysisMocks.state.keywordTracker.processedCopy = validListing;
     analysisMocks.saveCurrentAsync.mockRejectedValueOnce(new Error('IndexedDB 不可写'));

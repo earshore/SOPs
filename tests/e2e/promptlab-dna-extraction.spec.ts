@@ -49,6 +49,45 @@ async function clearAnalysisReport(page: import('@playwright/test').Page): Promi
   });
 }
 
+async function seedPromptlabReport(page: import('@playwright/test').Page): Promise<void> {
+  await setAnalysisReport(page, PROMPTLAB_E2E_REPORT);
+  await page.locator('#lab-analysis-status').getByText(/分析报告已就绪/).waitFor({
+    timeout: 5000,
+  });
+  await expect(page.locator('button:has-text("从报告加载")')).toBeEnabled({
+    timeout: 5000,
+  });
+}
+
+async function findOverwriteModal(page: import('@playwright/test').Page, timeout = 1000) {
+  const modal = page.getByRole('dialog', { name: /覆盖产品 DNA/ });
+  try {
+    await modal.waitFor({ state: 'visible', timeout });
+    return modal;
+  } catch {
+    return null;
+  }
+}
+
+async function cancelOverwriteModal(page: import('@playwright/test').Page): Promise<void> {
+  const modal = await findOverwriteModal(page, 3000);
+  expect(modal, '应该显示确认对话框').not.toBeNull();
+  await modal?.getByRole('button', { name: '取消' }).click();
+}
+
+async function confirmOverwriteModal(page: import('@playwright/test').Page): Promise<void> {
+  const modal = await findOverwriteModal(page, 3000);
+  expect(modal, '应该显示确认对话框').not.toBeNull();
+  await modal?.getByRole('button', { name: '覆盖字段' }).click();
+}
+
+async function confirmOverwriteIfVisible(page: import('@playwright/test').Page): Promise<void> {
+  const modal = await findOverwriteModal(page);
+  if (modal) {
+    await modal.getByRole('button', { name: '覆盖字段' }).click();
+  }
+}
+
   let promptlab: PromptlabPage;
 
   test.beforeEach(async ({ page }) => {
@@ -58,11 +97,10 @@ async function clearAnalysisReport(page: import('@playwright/test').Page): Promi
     // 等待应用初始化
     await waitForAppReady(page);
 
-    await setAnalysisReport(page, PROMPTLAB_E2E_REPORT);
-
     // 导航到 Promptlab 页面
     promptlab = new PromptlabPage(page);
     await promptlab.navigate();
+    await seedPromptlabReport(page);
   });
 
   test.describe('按钮状态测试', () => {
@@ -169,22 +207,9 @@ async function clearAnalysisReport(page: import('@playwright/test').Page): Promi
       await promptlab.fillUSPs('现有卖点内容');
       await promptlab.fillSpecs('现有参数内容');
 
-      // 步骤 2: 监听确认对话框
-      let dialogShown = false;
-      page.on('dialog', async dialog => {
-        dialogShown = true;
-        console.log(`  ⚠️ 确认对话框: ${dialog.message()}`);
-
-        // 取消操作
-        await dialog.dismiss();
-      });
-
-      // 步骤 3: 点击"从报告加载"按钮
+      // 步骤 2: 点击"从报告加载"按钮并取消覆盖
       await promptlab.autoPopulateDNA();
-      await promptlab.wait(1000);
-
-      // 验证：应该显示确认对话框
-      expect(dialogShown, '应该显示确认对话框').toBe(true);
+      await cancelOverwriteModal(page);
 
       // 验证：内容应该保持不变（因为取消了）
       const dna = await promptlab.getAutoFilledDNA();
@@ -210,14 +235,9 @@ async function clearAnalysisReport(page: import('@playwright/test').Page): Promi
       await promptlab.fillUSPs('旧的卖点内容');
       await promptlab.fillSpecs('旧的参数内容');
 
-      // 步骤 2: 监听确认对话框并接受
-      page.on('dialog', async dialog => {
-        console.log(`  ✅ 确认覆盖: ${dialog.message()}`);
-        await dialog.accept();
-      });
-
-      // 步骤 3: 点击"从报告加载"按钮
+      // 步骤 2: 点击"从报告加载"按钮并确认覆盖
       await promptlab.autoPopulateDNA();
+      await confirmOverwriteModal(page);
       await promptlab.wait(1500);
 
       // 验证：内容应该已更新
@@ -352,6 +372,7 @@ async function clearAnalysisReport(page: import('@playwright/test').Page): Promi
       // 步骤 2: 自动提取 DNA
       console.log('  2️⃣ 自动提取产品 DNA...');
       await promptlab.autoPopulateDNA();
+      await confirmOverwriteIfVisible(page);
       await promptlab.wait(1500);
 
       // 验证：DNA 已填充
@@ -442,8 +463,8 @@ async function clearAnalysisReport(page: import('@playwright/test').Page): Promi
 
       // 测量提取时间
       const startTime = Date.now();
-      await promptlab.autoPopulateDNA();
-      await promptlab.wait(1000);
+      await promptlab.clickAutoPopulateDNA();
+      await promptlab.waitForDNAAutoFilled();
       const extractTime = Date.now() - startTime;
 
       console.log(`📊 DNA 提取时间: ${extractTime}ms`);

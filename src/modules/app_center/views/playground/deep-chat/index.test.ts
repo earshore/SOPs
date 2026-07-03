@@ -319,6 +319,10 @@ describe('deep-chat playground module', () => {
     const chat = getChat(container);
     expect(chat.history).toHaveLength(2);
     expect(chat.defaultInput).toEqual({ text: 'Saved draft' });
+    expect(chat.submitButtonStyles).toMatchObject({
+      loading: { container: { backgroundColor: '#dc2626' } },
+      stop: { container: { backgroundColor: '#dc2626' } },
+    });
     expect(container.querySelector('#playground-provider-status')?.textContent).toBe(
       'openai / gpt-4.1'
     );
@@ -416,6 +420,68 @@ describe('deep-chat playground successful requests', () => {
     expectStoredAssistantMessage(mocks.localDataStore.set, 'Streamed answer', {
       title: 'Saved question',
     });
+
+    unmount();
+  });
+});
+
+describe('deep-chat playground request stopping', () => {
+  it('binds the stop button to abort the active request and persist a stopped response', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      callLLM: async (...args: unknown[]) => {
+        const callOptions = args[5] as { signal?: AbortSignal } | undefined;
+        return new Promise<string>((_resolve, reject) => {
+          callOptions?.signal?.addEventListener(
+            'abort',
+            () => reject(new DOMException('Aborted', 'AbortError')),
+            { once: true }
+          );
+        });
+      },
+    });
+
+    await mount(container);
+    const onClose = vi.fn();
+    const signals = {
+      onResponse: vi.fn(),
+      onClose,
+      stopClicked: { listener: vi.fn() },
+    };
+    const originalStopListener = signals.stopClicked.listener;
+
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Stop this request' }] },
+      signals
+    );
+
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+      expect(signals.stopClicked.listener).not.toBe(originalStopListener);
+    });
+
+    signals.stopClicked.listener();
+
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    expectStoredAssistantMessage(mocks.localDataStore.set, '已停止生成。');
+    expect(mocks.localDataStore.set).toHaveBeenCalledWith(
+      'user:playground_deep_chat_threads_v1',
+      expect.objectContaining({
+        threads: expect.arrayContaining([
+          expect.objectContaining({
+            messages: expect.arrayContaining([
+              expect.objectContaining({ role: 'ai', text: '已停止生成。', status: 'stopped' }),
+            ]),
+          }),
+        ]),
+      }),
+      'user-data'
+    );
+    expect(mocks.toast).toHaveBeenCalledWith('已停止生成', { type: 'warning' });
 
     unmount();
   });

@@ -146,6 +146,7 @@ const EMPTY_CHAT_WRAP_HEIGHT = 168;
 const MESSAGE_TOOLBAR_CLASS = 'playground-message-toolbar';
 const THREAD_RAIL_COLLAPSED_CLASS = 'is-rail-collapsed';
 const DEEP_CHAT_SCRIPT_MARKER = 'playground-deep-chat-element';
+const STOPPED_RESPONSE_TEXT = '已停止生成。';
 const DEEP_CHAT_AUXILIARY_STYLE = `
   :host {
     overflow: visible !important;
@@ -297,11 +298,35 @@ const DEEP_CHAT_AUXILIARY_STYLE = `
     box-shadow: none !important;
   }
 
+  .input-button.inside-end.loading-button,
+  .input-button.inside-end[data-playground-stop-active="true"] {
+    background: #dc2626 !important;
+    cursor: pointer !important;
+  }
+
+  .input-button.inside-end[data-playground-stop-active="true"] #submit-icon,
+  .input-button.inside-end[data-playground-stop-active="true"] .loading-submit-button {
+    display: none !important;
+  }
+
+  .input-button.inside-end[data-playground-stop-active="true"]::before {
+    content: '' !important;
+    width: 12px !important;
+    height: 12px !important;
+    display: block !important;
+    border-radius: 3px !important;
+    background: #ffffff !important;
+  }
+
   #submit-icon,
   #submit-icon * {
     color: #ffffff !important;
     fill: #ffffff !important;
     stroke: #ffffff !important;
+  }
+
+  #stop-icon {
+    background-color: #ffffff !important;
   }
 
   .${MESSAGE_TOOLBAR_CLASS} {
@@ -543,6 +568,7 @@ let isPromptPreviewHovered = false;
 let draftInputResizeObserver: ResizeObserver | null = null;
 let draftInputResizeRetryTimer: number | null = null;
 let cleanupDraftInputHeightListener: (() => void) | null = null;
+let cleanupSubmitStopButtonListener: (() => void) | null = null;
 const draftPersistController = createDraftPersistController(
   persistThreadStore,
   DRAFT_PERSIST_DEBOUNCE_MS
@@ -639,6 +665,7 @@ export function unmount(): void {
   clearPromptPreviewHideTimer();
   isPromptPreviewHovered = false;
   clearDraftInputHeightSync();
+  clearSubmitStopButtonSync();
   cleanupMessageToolbars();
 }
 
@@ -723,6 +750,7 @@ function initDeepChat(container: HTMLElement): void {
   );
   syncPendingStatus(container);
   setupDraftInputHeightSync(container, chat);
+  setupSubmitStopButtonSync(container, chat);
 }
 
 function configureDeepChatBase(chat: DeepChatElement, activeThread: PlaygroundThread): void {
@@ -782,10 +810,37 @@ function configureDeepChatStyles(chat: DeepChatElement): void {
     },
   };
   chat.submitButtonStyles = {
+    position: 'inside-end',
     submit: {
       container: {
         borderRadius: '999px',
         backgroundColor: 'var(--playground-accent, #334155)',
+        width: '34px',
+        height: '34px',
+      },
+    },
+    loading: {
+      container: {
+        borderRadius: '999px',
+        backgroundColor: '#dc2626',
+        width: '34px',
+        height: '34px',
+        cursor: 'pointer',
+      },
+    },
+    stop: {
+      container: {
+        borderRadius: '999px',
+        backgroundColor: '#dc2626',
+        width: '34px',
+        height: '34px',
+        cursor: 'pointer',
+      },
+    },
+    disabled: {
+      container: {
+        borderRadius: '999px',
+        backgroundColor: '#94a3b8',
         width: '34px',
         height: '34px',
       },
@@ -956,6 +1011,54 @@ function clearDraftInputHeightSync(): void {
     window.clearTimeout(draftInputResizeRetryTimer);
     draftInputResizeRetryTimer = null;
   }
+}
+
+function setupSubmitStopButtonSync(container: HTMLElement, chat: DeepChatElement): void {
+  clearSubmitStopButtonSync();
+  const root = chat.shadowRoot;
+  if (!root) {
+    syncSubmitStopButtonState(container);
+    return;
+  }
+
+  const onSubmitButtonClick = (event: Event): void => {
+    const target = event.target instanceof Element ? event.target : null;
+    const button = target?.closest('.input-button.inside-end');
+    if (!button || !pendingRequests.has(threadStore.activeThreadId)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    abortPendingRequest(threadStore.activeThreadId, 'stopped');
+    syncSubmitStopButtonState(container);
+  };
+
+  root.addEventListener('click', onSubmitButtonClick, true);
+  cleanupSubmitStopButtonListener = () => {
+    root.removeEventListener('click', onSubmitButtonClick, true);
+  };
+  syncSubmitStopButtonState(container);
+}
+
+function clearSubmitStopButtonSync(): void {
+  cleanupSubmitStopButtonListener?.();
+  cleanupSubmitStopButtonListener = null;
+}
+
+function syncSubmitStopButtonState(container: HTMLElement): void {
+  const button = getChat(container)?.shadowRoot?.querySelector<HTMLElement>(
+    '.input-button.inside-end'
+  );
+  if (!button) {
+    return;
+  }
+
+  const isPending = pendingRequests.has(threadStore.activeThreadId);
+  const label = isPending ? '停止生成' : '发送消息';
+  button.toggleAttribute('data-playground-stop-active', isPending);
+  button.setAttribute('aria-label', label);
+  button.title = label;
 }
 
 function bindControls(container: HTMLElement): void {
@@ -1691,6 +1794,16 @@ function preserveStoppedResponse(threadId: string | null): void {
   }
 
   if (!shouldPreserveStoppedResponse(pendingRequest)) {
+    saveThreadMessages(
+      getMountedRenderContainer(),
+      pendingRequest.conversationMessages,
+      STOPPED_RESPONSE_TEXT,
+      {
+        threadId,
+        assistantCreatedAt: pendingRequest.startedAt,
+        assistantStatus: 'stopped',
+      }
+    );
     showToast('已停止生成', { type: 'warning' });
     return;
   }
@@ -2593,6 +2706,7 @@ function syncPendingStatus(container: HTMLElement): void {
   const status = container.querySelector<HTMLElement>('#playground-pending-status');
   const statusText = container.querySelector<HTMLElement>('#playground-pending-status-text');
   if (!status || !statusText) {
+    syncSubmitStopButtonState(container);
     return;
   }
 
@@ -2600,11 +2714,13 @@ function syncPendingStatus(container: HTMLElement): void {
   if (!pendingRequest) {
     status.hidden = true;
     statusText.textContent = '';
+    syncSubmitStopButtonState(container);
     return;
   }
 
   statusText.textContent = getPendingStatusText(pendingRequest);
   status.hidden = false;
+  syncSubmitStopButtonState(container);
 }
 
 function getPendingStatusText(pendingRequest: PendingPlaygroundRequest): string {

@@ -40,11 +40,22 @@ interface EventListenerRecord {
   handler: EventListenerOrEventListenerObject;
 }
 
+interface ActiveAnalysisRun {
+  processedCopy: string;
+  promise: Promise<string>;
+  status: 'pending' | 'success' | 'failure';
+  response?: string;
+  error?: Error;
+  successToastShown?: boolean;
+}
+
 /** 存放当次分析的原始 Markdown 文本（未渲染 HTML） */
 let rawMarkdownCache = '';
 
 let eventListeners: EventListenerRecord[] = [];
 let timeouts: number[] = [];
+let activeAnalysisRun: ActiveAnalysisRun | null = null;
+let analysisViewVersion = 0;
 
 // ==========================================
 // Helper Functions
@@ -142,6 +153,20 @@ function renderReport(container: HTMLElement, markdown: string): void {
   });
 }
 
+function renderAnalysisSuccess(
+  response: string,
+  resultDiv: HTMLElement | null,
+  btn: HTMLButtonElement | null
+): void {
+  if (resultDiv) {
+    renderReport(resultDiv, response);
+  }
+
+  if (btn) {
+    setBtnState(btn, 'success', '报告已生成');
+  }
+}
+
 // ==========================================
 // State Management
 // ==========================================
@@ -157,6 +182,87 @@ function saveAnalysisStateToState(): void {
       llmAnalysisResult: rawMarkdownCache,
     });
   }
+}
+
+function getError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+function finalizeAnalysisSuccess(run: ActiveAnalysisRun, response: string): string {
+  if (!response || !response.trim()) {
+    throw new Error('AI 返回内容为空，请重试');
+  }
+
+  run.status = 'success';
+  run.response = response;
+  rawMarkdownCache = response;
+  saveAnalysisStateToState();
+  void saveAnalysisSnapshot(false);
+  return response;
+}
+
+function finalizeAnalysisFailure(run: ActiveAnalysisRun, error: unknown): never {
+  const normalizedError = getError(error);
+  run.status = 'failure';
+  run.error = normalizedError;
+  throw normalizedError;
+}
+
+function startAnalysisRun(processedCopy: string): ActiveAnalysisRun {
+  const run: ActiveAnalysisRun = {
+    processedCopy,
+    promise: Promise.resolve(''),
+    status: 'pending',
+  };
+
+  run.promise = fetchListingAnalysis(processedCopy)
+    .then(response => finalizeAnalysisSuccess(run, response))
+    .catch(error => finalizeAnalysisFailure(run, error))
+    .finally(() => {
+      if (activeAnalysisRun === run) {
+        activeAnalysisRun = null;
+      }
+    });
+
+  activeAnalysisRun = run;
+  return run;
+}
+
+function getCurrentAnalysisElements(): {
+  btn: HTMLButtonElement | null;
+  resultDiv: HTMLElement | null;
+} {
+  return {
+    btn: document.getElementById('kt-analyze-btn') as HTMLButtonElement | null,
+    resultDiv: document.getElementById('kt-llm-analysis-result'),
+  };
+}
+
+function attachAnalysisRunToPage(run: ActiveAnalysisRun): void {
+  const viewVersion = analysisViewVersion;
+  const { btn, resultDiv } = getCurrentAnalysisElements();
+  if (btn) setBtnState(btn, 'loading', '分析中…');
+  const cancelLoading = resultDiv ? showLoadingState(resultDiv) : null;
+
+  run.promise
+    .then(response => {
+      cancelLoading?.();
+      if (viewVersion !== analysisViewVersion) return;
+
+      const current = getCurrentAnalysisElements();
+      renderAnalysisSuccess(response, current.resultDiv, current.btn);
+      if (!run.successToastShown) {
+        showToast('报告生成成功', { type: 'success' });
+        run.successToastShown = true;
+      }
+    })
+    .catch(error => {
+      cancelLoading?.();
+      if (viewVersion !== analysisViewVersion) return;
+
+      const current = getCurrentAnalysisElements();
+      handleAnalysisFailure(getError(error), current.resultDiv, current.btn);
+    });
 }
 
 function getLatestReportedSnapshot(
@@ -216,6 +322,11 @@ async function saveAnalysisSnapshot(showSuccessToast = true): Promise<boolean> {
  * 读取原始 Markdown 文本重新渲染，而非直接注入保存的 HTML。
  */
 async function restoreAnalysisStateFromState(): Promise<void> {
+  if (activeAnalysisRun?.status === 'pending') {
+    attachAnalysisRunToPage(activeAnalysisRun);
+    return;
+  }
+
   await restoreLatestAnalysisSnapshotIfNeeded();
 
   const currentState = appStore.getState();
@@ -371,33 +482,6 @@ async function fetchListingAnalysis(processedCopy: string): Promise<string> {
     keywordTracker?.matchedKeywords ?? [],
     keywordTracker?.unmatchedKeywords ?? []
   );
-}
-
-function handleAnalysisSuccess(
-  response: string,
-  resultDiv: HTMLElement | null,
-  btn: HTMLButtonElement | null
-): void {
-  if (!response || !response.trim()) {
-    throw new Error('AI 返回内容为空，请重试');
-  }
-
-  // 缓存原始 Markdown
-  rawMarkdownCache = response;
-
-  // 渲染到报告区域
-  if (resultDiv) {
-    renderReport(resultDiv, response);
-  }
-
-  // 更新按钮为"已完成"
-  if (btn) setBtnState(btn, 'success', '报告已生成');
-
-  // 保存原始 Markdown 到 state
-  saveAnalysisStateToState();
-  void saveAnalysisSnapshot(false);
-
-  showToast('报告生成成功', { type: 'success' });
 }
 
 function isValidationAnalysisError(error: Error): boolean {
@@ -692,9 +776,6 @@ function highlightScores(container: HTMLElement): void {
  * 运行 LLM 分析
  */
 async function runLLMAnalysis(): Promise<void> {
-  const btn = document.getElementById('kt-analyze-btn') as HTMLButtonElement | null;
-  const resultDiv = document.getElementById('kt-llm-analysis-result');
-
   // 内容为空时快速失败
   const processedCopy = getProcessedCopy();
   if (!processedCopy.trim()) {
@@ -702,29 +783,12 @@ async function runLLMAnalysis(): Promise<void> {
     return;
   }
 
-  // ——— 进入加载状态 ———
-  if (btn) setBtnState(btn, 'loading', '分析中…');
-
-  let cancelLoading: (() => void) | null = null;
-  if (resultDiv) {
-    cancelLoading = showLoadingState(resultDiv);
+  if (activeAnalysisRun?.status === 'pending') {
+    attachAnalysisRunToPage(activeAnalysisRun);
+    return;
   }
 
-  try {
-    const response = await fetchListingAnalysis(processedCopy);
-
-    // 停止加载动画
-    cancelLoading?.();
-    cancelLoading = null;
-
-    handleAnalysisSuccess(response, resultDiv, btn);
-  } catch (e) {
-    // 停止加载动画（异常路径）
-    cancelLoading?.();
-    cancelLoading = null;
-
-    handleAnalysisFailure(e as Error, resultDiv, btn);
-  }
+  attachAnalysisRunToPage(startAnalysisRun(processedCopy));
 }
 
 // ==========================================
@@ -753,6 +817,7 @@ function setupEventListeners(container: HTMLElement): void {
  */
 export async function mount(container: HTMLElement): Promise<void> {
   try {
+    analysisViewVersion += 1;
     const loader = SafeModuleLoader.getInstance();
     const renderer = SafeRenderer.getInstance();
 
@@ -791,6 +856,7 @@ export async function mount(container: HTMLElement): Promise<void> {
  */
 export function unmount(): void {
   try {
+    analysisViewVersion += 1;
     saveAnalysisStateToState();
     cleanup();
   } catch (error) {

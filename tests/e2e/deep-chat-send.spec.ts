@@ -93,6 +93,28 @@ async function mockLLMStream(page: Page, chunks: string[]): Promise<void> {
   });
 }
 
+async function holdLLMRequest(page: Page): Promise<{
+  releaseHeldRequest: () => void;
+  requestStarted: Promise<void>;
+}> {
+  let releaseHeldRequest = (): void => {};
+  const releasePromise = new Promise<void>(resolve => {
+    releaseHeldRequest = resolve;
+  });
+  let markRequestStarted = (): void => {};
+  const requestStarted = new Promise<void>(resolve => {
+    markRequestStarted = resolve;
+  });
+
+  await page.route('**/mock-llm/chat/completions', async route => {
+    markRequestStarted();
+    await releasePromise;
+    await route.abort('aborted').catch(() => {});
+  });
+
+  return { releaseHeldRequest, requestStarted };
+}
+
 async function openDeepChatAndRefreshMockConfig(page: Page): Promise<void> {
   await page.goto(DEEP_CHAT_ROUTE, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() =>
@@ -190,4 +212,36 @@ test('renders a visible error when the model stream returns no content', async (
     '请求失败：模型没有返回任何内容，请稍后重试或检查模型/上下文配置。',
     { timeout: 10000 }
   );
+});
+
+test('turns the send button into a stop button and aborts the active response', async ({ page }) => {
+  await seedMockProviderStorage(page);
+  const { releaseHeldRequest, requestStarted } = await holdLLMRequest(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  const chatInput = page.locator('#playground-chat #text-input');
+  await expect(chatInput).toBeVisible();
+  await chatInput.fill('请保持生成中，等待停止按钮测试');
+  await chatInput.press('Enter');
+  await requestStarted;
+
+  await page.waitForFunction(() => {
+    const root = document.querySelector('#playground-chat')?.shadowRoot;
+    const submitButton = root?.querySelector('.input-button.inside-end');
+    return (
+      submitButton?.getAttribute('data-playground-stop-active') === '' &&
+      submitButton.getAttribute('aria-label') === '停止生成'
+    );
+  });
+
+  const stopButton = page.locator('#playground-chat .input-button.inside-end');
+  await expect(stopButton).toHaveAttribute('aria-label', '停止生成');
+  await expect(stopButton).toBeVisible();
+  await stopButton.click();
+  releaseHeldRequest();
+
+  await expect(page.locator('#playground-chat')).toContainText('已停止生成。', {
+    timeout: 10000,
+  });
+  await expect(page.locator('#playground-pending-status')).toBeHidden();
 });
