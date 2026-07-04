@@ -26,6 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.19] - 2026-07-04
+
+### Added
+- 新增 LLM provider 与 Scraper proxy 配置。
+- SOPS 工具页新增统一剪贴板辅助能力。
+
+### Changed
+- App Center 切换到 DeepSeek 蓝主题，并更新主题色、图标和 mega-menu 语义类名。
+- 重构 Master Analysis、Promptlab、Scraper 和 App Center 概览模板与样式。
+- 规范引号并压缩 CSS 格式。
+- 同步应用内版本显示到 `3.0.3-rc.19`。
+
+### Fixed
+- 修复 NPI Tracker mock data 类型与 App Center 相关模板测试覆盖。
+
 ## [3.0.3-rc.18] - 2026-07-04
 
 ### Added

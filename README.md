@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 LLM 网关；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按最新远端 tag `v3.0.3-rc.18`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按最新远端 tag `v3.0.3-rc.19`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,7 +10,7 @@ sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团�
 
 ## 最新发布
 
-当前最新 tag 是 `v3.0.3-rc.18`（2026-07-04，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.18` 聚焦 CSP 与 LLM secret 处理、认证路由守卫、App Center 命名统一和安全质量门禁，`v3.0.3` 系列累计带来以下面向运营的变化：
+当前最新 tag 是 `v3.0.3-rc.19`（2026-07-04，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.19` 聚焦 App Center DeepSeek 蓝主题、Master Analysis 模板重构、LLM/Scraper 代理配置和剪贴板体验，`v3.0.3` 系列累计带来以下面向运营的变化：
 
 - 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
 - 新增工作流导向条和统一确认弹窗，减少高风险数据操作误触。
@@ -56,7 +56,12 @@ sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团�
 - 增加认证路由守卫和相关测试覆盖。
 - 将 Floating Workbench 命名统一回 App Center。
 - 补充安全审计报告和 CI 质量门禁文档。
-- 同步应用内版本显示到 `3.0.3-rc.18`。
+- App Center 切换到 DeepSeek 蓝主题并更新主题色、图标和 mega-menu 语义类名。
+- 重构 Master Analysis、Promptlab、Scraper 和 App Center 概览模板与样式。
+- 新增 LLM provider 与 Scraper proxy 配置，补充系统设置入口。
+- SOPS 工具页增加统一剪贴板辅助能力。
+- 规范引号和压缩 CSS 格式，减少样式噪声。
+- 同步应用内版本显示到 `3.0.3-rc.19`。
 
 ## 快速开始
 
