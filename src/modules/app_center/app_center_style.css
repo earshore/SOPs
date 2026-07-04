@@ -92,15 +92,18 @@
 .app-overview-container {
   /* UI-P1-04: app overview 局部 token 必须映射到全局 token，登记见 docs/THEME_SYSTEM_GUIDELINES.md §6.1。 */
   color: var(--app-overview-text-primary);
-  --app-overview-deepseek-blue: #4d6bfe;
-  --app-overview-deepseek-blue-mid: #3982ff;
-  --app-overview-deepseek-blue-light: #2498ff;
-  --app-overview-deepseek-blue-strong: #3151e8;
-  --app-overview-deepseek-blue-dark: #2746d3;
-  --app-overview-accent: var(--app-overview-deepseek-blue-strong);
-  --app-overview-accent-strong: var(--app-overview-deepseek-blue-dark);
-  --app-overview-accent-soft: #dfe7ff;
-  --app-overview-accent-surface: #f3f6ff;
+  --app-overview-minimax-ink: #18151a;
+  --app-overview-minimax-charcoal: #2b252c;
+  --app-overview-minimax-red: #c83a52;
+  --app-overview-minimax-red-strong: #a91f3a;
+  --app-overview-minimax-coral: #ff6b7a;
+  --app-overview-minimax-coral-soft: #fff4f1;
+  --app-overview-minimax-fire: #c73630;
+  --app-overview-minimax-neutral-soft: #f5f2f4;
+  --app-overview-accent: var(--app-overview-minimax-red);
+  --app-overview-accent-strong: var(--app-overview-minimax-red-strong);
+  --app-overview-accent-soft: #ffe5ea;
+  --app-overview-accent-surface: #fff5f7;
   --app-overview-accent-border: color-mix(in srgb, var(--app-overview-accent) 18%, transparent);
   --app-overview-border: var(--border-subtle, rgba(148, 163, 184, 0.24));
   --app-overview-border-strong: var(--border-muted, rgba(203, 213, 225, 0.72));
@@ -112,7 +115,7 @@
   --app-overview-text-inverse: var(--color-primary-contrast, #ffffff);
   --app-overview-radius: var(--rounded-xl, 16px);
   --app-overview-pill-radius: var(--rounded-full, 999px);
-  --app-overview-shadow: var(--shadow-panel, 0 12px 30px -28px rgba(15, 23, 42, 0.45));
+  --app-overview-shadow: 0 12px 30px -28px rgba(136, 19, 55, 0.4);
   --app-overview-focus-ring: color-mix(in srgb, var(--app-overview-accent) 16%, transparent);
   --color-primary: var(--app-overview-accent);
   --color-primary-light: var(--app-overview-accent-soft);
@@ -136,13 +139,13 @@
       135deg,
       color-mix(in srgb, var(--app-overview-accent-surface) 98%, transparent),
       color-mix(in srgb, var(--app-overview-surface) 94%, transparent) 52%,
-      color-mix(in srgb, var(--app-overview-deepseek-blue-light) 12%, var(--app-overview-surface))
+      color-mix(in srgb, var(--app-overview-minimax-coral) 10%, var(--app-overview-surface))
     ) !important;
   box-shadow: var(--app-overview-shadow) !important;
   overflow: hidden;
-  --wb-orb-1-color: color-mix(in srgb, var(--app-overview-deepseek-blue) 13%, transparent);
-  --wb-orb-2-color: color-mix(in srgb, var(--app-overview-deepseek-blue-mid) 10%, transparent);
-  --wb-orb-3-color: color-mix(in srgb, var(--app-overview-deepseek-blue-light) 8%, transparent);
+  --wb-orb-1-color: color-mix(in srgb, var(--app-overview-accent) 14%, transparent);
+  --wb-orb-2-color: color-mix(in srgb, var(--app-overview-minimax-coral) 11%, transparent);
+  --wb-orb-3-color: color-mix(in srgb, var(--app-overview-minimax-ink) 7%, transparent);
   --wb-particle-color: color-mix(in srgb, var(--app-overview-accent) 42%, transparent);
   --wb-text-primary: var(--app-overview-text-primary) !important;
   --wb-text-secondary: var(--app-overview-text-secondary) !important;
@@ -159,9 +162,9 @@
   --wb-badge-text-size: var(--text-xs, 0.75rem) !important;
   --wb-badge-text-weight: var(--font-extrabold, 800) !important;
   --wb-icon-shadow: 0 12px 24px -18px
-    color-mix(in srgb, var(--app-overview-accent) 62%, transparent);
+    color-mix(in srgb, var(--app-overview-accent) 62%, transparent) !important;
   --wb-icon-shadow-hover: 0 14px 28px -20px
-    color-mix(in srgb, var(--app-overview-accent) 62%, transparent);
+    color-mix(in srgb, var(--app-overview-accent) 62%, transparent) !important;
 }
 
 .app-overview-hero .wb-content {
@@ -193,9 +196,9 @@
   border-radius: var(--rounded-md, 8px) !important;
   background: linear-gradient(
     135deg,
-    var(--app-overview-deepseek-blue-strong),
-    var(--app-overview-deepseek-blue),
-    var(--app-overview-deepseek-blue-mid)
+    var(--app-overview-minimax-ink),
+    var(--app-overview-accent) 58%,
+    var(--app-overview-minimax-coral)
   ) !important;
   color: var(--color-primary-contrast, #ffffff);
   box-shadow: var(--wb-icon-shadow) !important;
@@ -214,7 +217,7 @@
 .app-overview-hero .wb-badge {
   min-height: 1.625rem;
   padding: 0.25rem 0.625rem;
-  border: 1px solid var(--app-overview-accent-border);
+  border: 1px solid var(--app-overview-accent-border) !important;
   border-radius: var(--app-overview-pill-radius);
   background: var(--app-overview-accent-surface) !important;
   color: var(--app-overview-accent) !important;
@@ -255,8 +258,8 @@
   border-radius: var(--app-overview-pill-radius);
   background: linear-gradient(
     135deg,
-    var(--app-overview-deepseek-blue),
-    var(--app-overview-deepseek-blue-light)
+    var(--app-overview-accent),
+    var(--app-overview-minimax-coral)
   );
 }
 
@@ -313,6 +316,21 @@
   height: 1.25rem;
   border-radius: var(--app-overview-pill-radius);
   background: var(--app-overview-accent);
+}
+
+.app-overview-flow .app-overview-section-title::before {
+  display: none;
+}
+
+.app-overview-filter-panel .app-overview-section-title::before {
+  display: none;
+}
+
+.app-overview-section-icon {
+  flex: 0 0 auto;
+  color: var(--app-overview-accent);
+  font-size: 1.05rem;
+  line-height: 1;
 }
 
 .app-overview-section-heading {
@@ -433,27 +451,27 @@
 }
 
 .app-flow-step.app-child-link:nth-child(1) {
-  --card-left-accent-bg: var(--color-blue-50);
-  --overview-card-accent-bg: var(--color-blue-50);
-  color: var(--color-blue-600);
+  --card-left-accent-bg: var(--app-overview-accent-surface);
+  --overview-card-accent-bg: var(--app-overview-accent-surface);
+  color: var(--app-overview-accent);
 }
 
 .app-flow-step.app-child-link:nth-child(2) {
-  --card-left-accent-bg: var(--color-emerald-50);
-  --overview-card-accent-bg: var(--color-emerald-50);
-  color: var(--color-emerald-600);
+  --card-left-accent-bg: var(--app-overview-minimax-coral-soft);
+  --overview-card-accent-bg: var(--app-overview-minimax-coral-soft);
+  color: var(--app-overview-minimax-fire);
 }
 
 .app-flow-step.app-child-link:nth-child(3) {
-  --card-left-accent-bg: var(--color-amber-50);
-  --overview-card-accent-bg: var(--color-amber-50);
-  color: var(--color-amber-600);
+  --card-left-accent-bg: var(--app-overview-minimax-neutral-soft);
+  --overview-card-accent-bg: var(--app-overview-minimax-neutral-soft);
+  color: var(--app-overview-minimax-charcoal);
 }
 
 .app-flow-step.app-child-link:nth-child(4) {
-  --card-left-accent-bg: var(--color-emerald-50);
-  --overview-card-accent-bg: var(--color-emerald-50);
-  color: var(--color-emerald-600);
+  --card-left-accent-bg: var(--app-overview-accent-surface);
+  --overview-card-accent-bg: var(--app-overview-accent-surface);
+  color: var(--app-overview-accent);
 }
 
 .app-flow-index {
@@ -480,27 +498,27 @@
 }
 
 .app-flow-step.app-child-link:nth-child(1) .app-flow-icon {
-  border-color: var(--color-blue-100);
-  background: var(--color-blue-50);
-  color: var(--color-blue-600);
+  border-color: var(--app-overview-accent-border);
+  background: var(--app-overview-accent-surface);
+  color: var(--app-overview-accent);
 }
 
 .app-flow-step.app-child-link:nth-child(2) .app-flow-icon {
-  border-color: var(--color-emerald-100);
-  background: var(--color-emerald-50);
-  color: var(--color-emerald-600);
+  border-color: color-mix(in srgb, var(--app-overview-minimax-fire) 18%, transparent);
+  background: var(--app-overview-minimax-coral-soft);
+  color: var(--app-overview-minimax-fire);
 }
 
 .app-flow-step.app-child-link:nth-child(3) .app-flow-icon {
-  border-color: var(--color-amber-100);
-  background: var(--color-amber-50);
-  color: var(--color-amber-600);
+  border-color: color-mix(in srgb, var(--app-overview-minimax-charcoal) 16%, transparent);
+  background: var(--app-overview-minimax-neutral-soft);
+  color: var(--app-overview-minimax-charcoal);
 }
 
 .app-flow-step.app-child-link:nth-child(4) .app-flow-icon {
-  border-color: var(--color-emerald-100);
-  background: var(--color-emerald-50);
-  color: var(--color-emerald-600);
+  border-color: var(--app-overview-accent-border);
+  background: var(--app-overview-accent-surface);
+  color: var(--app-overview-accent);
 }
 
 .app-flow-copy {

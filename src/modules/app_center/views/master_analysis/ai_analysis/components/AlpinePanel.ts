@@ -165,7 +165,7 @@ function createAiAnalysisPanelState(): AiAnalysisPanelState {
     reportFullData: null as FullReportData | null,
     reportRenderVersion: 0,
     expandedPromptIndex: null as number | null,
-    showPromptPanel: false,
+    showPromptPanel: true,
     showJsonViewer: false,
     dataSource: 'scraper' as const,
     productSummaryTooltipVisible: false,

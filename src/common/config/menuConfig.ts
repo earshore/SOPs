@@ -125,7 +125,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0',
       icon: 'fas fa-clipboard-list',
       description: '集成所有亚马逊运营标准化流程指引,确保团队执行一致性。',
-      themeColor: 'blue', // ✅ 蓝色 - 清新明亮的流程管理主题
+      themeColor: 'indigo', // ✅ 通义千问感紫蓝系 - 流程管理主题
     },
 
     // [应用中心] App Center 容器模块
@@ -136,7 +136,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0',
       icon: 'fas fa-cubes',
       description: '集成多个专业工具的应用中心，提供数据采集、分析与优化功能。',
-      themeColor: 'blue', // ✅ DeepSeek 蓝 - 应用中心容器主题
+      themeColor: 'rose', // ✅ MiniMax 感玫红系 - 应用中心容器主题
     },
 
     // [应用 A] Master Analysis

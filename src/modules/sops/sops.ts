@@ -8,7 +8,7 @@ const moduleLoader: ModuleLoader = createModuleLoader({
   containerId: 'sops_content_area',
   shellId: 'panel-sops',
   moduleMap: MODULE_MAP,
-  loaderColor: 'blue',
+  loaderColor: 'indigo',
   moduleName: 'SOPs',
   contentEnterAnimation: true,
 });

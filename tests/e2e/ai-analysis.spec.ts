@@ -181,8 +181,8 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       await aiAnalysis.selectAllAsins();
       await aiAnalysis.selectTarget('关键词分析');
 
-      // 切换提示词面板
-      await aiAnalysis.togglePromptPanel();
+      // 确保提示词面板展开
+      await aiAnalysis.showPromptPanel();
       
       const isExpanded = await aiAnalysis.isPromptPanelExpanded();
       expect(isExpanded, '提示词面板应该展开').toBe(true);
@@ -477,7 +477,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       // 步骤 3: 查看提示词预览
       console.log('  3️⃣ 查看提示词预览...');
-      await aiAnalysis.togglePromptPanel();
+      await aiAnalysis.showPromptPanel();
       const promptCount = await aiAnalysis.getPromptCount();
       console.log(`     ✅ 已生成 ${promptCount} 个提示词`);
 

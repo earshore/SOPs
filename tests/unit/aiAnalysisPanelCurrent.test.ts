@@ -357,6 +357,8 @@ beforeEach(() => {
     const panel = createPanel();
 
     expect(panel.showSelectionSummary).toBe(false);
+    expect(panel.promptPanelChevronClass).toContain('up');
+    panel.showPromptPanel = false;
     expect(panel.promptPanelChevronClass).toContain('down');
     panel.showPromptPanel = true;
     expect(panel.promptPanelChevronClass).toContain('up');

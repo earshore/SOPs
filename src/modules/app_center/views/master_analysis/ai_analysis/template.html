@@ -1467,135 +1467,6 @@
                 </div>
               </div>
             </div>
-            <!-- AI 分析报告 JSON - 集成到分析报告卡片内 -->
-            <template x-if="reportFullData">
-              <div class="mt-5 pt-5 border-t border-slate-200">
-                <div
-                  class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800"
-                >
-                  <div
-                    class="flex items-center justify-between p-4 bg-slate-900"
-                  >
-                    <button
-                      type="button"
-                      @click="toggleJsonViewer()"
-                      class="flex min-h-11 items-center gap-3 hover:opacity-80 transition-opacity"
-                    >
-                      <div
-                        class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg"
-                      >
-                        <i class="fa-solid fa-database text-white"></i>
-                      </div>
-                      <div class="text-left">
-                        <h4
-                          class="text-sm font-bold text-white flex items-center gap-2"
-                        >
-                          AI 分析报告 JSON
-                          <span
-                            class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full"
-                            >ANALYSIS REPORT</span
-                          >
-                        </h4>
-                        <p class="text-xs text-slate-400">
-                          <span x-text="selectedTargets.length"></span>
-                          个分析维度 ·
-                          <span x-text="getReportJsonKbText()"></span> KB
-                        </p>
-                      </div>
-                    </button>
-                    <div class="flex items-center gap-2">
-                      <!-- 导出按钮组 - 极简三段式设计 -->
-                      <div
-                        class="inline-flex rounded-lg overflow-hidden border border-slate-600/50 bg-slate-800/50"
-                      >
-                        <button
-                          type="button"
-                          @click="copyMarkdown()"
-                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all border-r border-slate-600/50"
-                          title="复制 Markdown 格式报告"
-                        >
-                          <i class="fa-brands fa-markdown text-base"></i>
-                          <span>MD</span>
-                        </button>
-                        <button
-                          type="button"
-                          @click="copyJson()"
-                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all border-r border-slate-600/50"
-                          title="复制 JSON 格式报告"
-                        >
-                          <i class="fa-solid fa-copy text-base"></i>
-                          <span>JSON</span>
-                        </button>
-                        <button
-                          type="button"
-                          @click="downloadJson()"
-                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all"
-                          title="下载 JSON 格式报告"
-                        >
-                          <i class="fa-solid fa-download text-base"></i>
-                          <span>下载</span>
-                        </button>
-                      </div>
-                      <div class="w-px h-6 bg-slate-600/50"></div>
-                      <button
-                        type="button"
-                        @click="toggleJsonViewer()"
-                        class="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all"
-                      >
-                        <i :class="jsonViewerChevronClass"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <template x-if="showJsonViewer">
-                    <div class="animate-fade-in">
-                      <div
-                        class="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-t border-slate-700/30"
-                      >
-                        <div
-                          class="flex items-center gap-2 text-xs text-slate-400"
-                        >
-                          <i class="fa-solid fa-file-code"></i>
-                          <span>analysis_report.json</span>
-                        </div>
-                        <div
-                          class="flex items-center gap-4 text-xs text-slate-500"
-                        >
-                          <span
-                            >tokens:
-                            <span x-text="getReportJsonTokenText()"></span
-                          ></span>
-                          <span
-                            >字符: <span x-text="getReportJsonCharText()"></span
-                          ></span>
-                        </div>
-                      </div>
-                      <div class="overflow-auto p-4 max-h-96">
-                        <pre
-                          class="text-xs font-mono leading-relaxed"
-                        ><code class="text-slate-300" x-text="getReportJsonText()"></code></pre>
-                      </div>
-                    </div>
-                  </template>
-                  <template x-if="jsonViewerCollapsed">
-                    <div
-                      class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30"
-                    >
-                      <div
-                        class="flex items-center gap-2 text-xs text-slate-500"
-                      >
-                        <i class="fa-solid fa-code"></i>
-                        <span class="font-mono truncate"
-                          >{ "metadata": { "asins": [<span
-                            x-text="selectedAsinsJsonText"
-                          ></span
-                          >], ... }, "analysisReport": {...} }</span
-                        >
-                      </div>
-                    </div>
-                  </template>
-                </div>
-              </div>
-            </template>
             <div class="mt-8 space-y-8">
               <!-- Listings 结果 -->
               <template x-if="hasReportListingsResults">
@@ -1960,6 +1831,135 @@
           </div>
               </template>
             </div>
+            <!-- AI 分析报告 JSON - 集成到分析报告卡片内 -->
+            <template x-if="reportFullData">
+              <div class="mt-5 pt-5 border-t border-slate-200">
+                <div
+                  class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800"
+                >
+                  <div
+                    class="flex items-center justify-between p-4 bg-slate-900"
+                  >
+                    <button
+                      type="button"
+                      @click="toggleJsonViewer()"
+                      class="flex min-h-11 items-center gap-3 hover:opacity-80 transition-opacity"
+                    >
+                      <div
+                        class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg"
+                      >
+                        <i class="fa-solid fa-database text-white"></i>
+                      </div>
+                      <div class="text-left">
+                        <h4
+                          class="text-sm font-bold text-white flex items-center gap-2"
+                        >
+                          AI 分析报告 JSON
+                          <span
+                            class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full"
+                            >ANALYSIS REPORT</span
+                          >
+                        </h4>
+                        <p class="text-xs text-slate-400">
+                          <span x-text="selectedTargets.length"></span>
+                          个分析维度 ·
+                          <span x-text="getReportJsonKbText()"></span> KB
+                        </p>
+                      </div>
+                    </button>
+                    <div class="flex items-center gap-2">
+                      <!-- 导出按钮组 - 极简三段式设计 -->
+                      <div
+                        class="inline-flex rounded-lg overflow-hidden border border-slate-600/50 bg-slate-800/50"
+                      >
+                        <button
+                          type="button"
+                          @click="copyMarkdown()"
+                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all border-r border-slate-600/50"
+                          title="复制 Markdown 格式报告"
+                        >
+                          <i class="fa-brands fa-markdown text-base"></i>
+                          <span>MD</span>
+                        </button>
+                        <button
+                          type="button"
+                          @click="copyJson()"
+                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all border-r border-slate-600/50"
+                          title="复制 JSON 格式报告"
+                        >
+                          <i class="fa-solid fa-copy text-base"></i>
+                          <span>JSON</span>
+                        </button>
+                        <button
+                          type="button"
+                          @click="downloadJson()"
+                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all"
+                          title="下载 JSON 格式报告"
+                        >
+                          <i class="fa-solid fa-download text-base"></i>
+                          <span>下载</span>
+                        </button>
+                      </div>
+                      <div class="w-px h-6 bg-slate-600/50"></div>
+                      <button
+                        type="button"
+                        @click="toggleJsonViewer()"
+                        class="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all"
+                      >
+                        <i :class="jsonViewerChevronClass"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <template x-if="showJsonViewer">
+                    <div class="animate-fade-in">
+                      <div
+                        class="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-t border-slate-700/30"
+                      >
+                        <div
+                          class="flex items-center gap-2 text-xs text-slate-400"
+                        >
+                          <i class="fa-solid fa-file-code"></i>
+                          <span>analysis_report.json</span>
+                        </div>
+                        <div
+                          class="flex items-center gap-4 text-xs text-slate-500"
+                        >
+                          <span
+                            >tokens:
+                            <span x-text="getReportJsonTokenText()"></span
+                          ></span>
+                          <span
+                            >字符: <span x-text="getReportJsonCharText()"></span
+                          ></span>
+                        </div>
+                      </div>
+                      <div class="overflow-auto p-4 max-h-96">
+                        <pre
+                          class="text-xs font-mono leading-relaxed"
+                        ><code class="text-slate-300" x-text="getReportJsonText()"></code></pre>
+                      </div>
+                    </div>
+                  </template>
+                  <template x-if="jsonViewerCollapsed">
+                    <div
+                      class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30"
+                    >
+                      <div
+                        class="flex items-center gap-2 text-xs text-slate-500"
+                      >
+                        <i class="fa-solid fa-code"></i>
+                        <span class="font-mono truncate"
+                          >{ "metadata": { "asins": [<span
+                            x-text="selectedAsinsJsonText"
+                          ></span
+                          >], ... }, "analysisReport": {...} }</span
+                        >
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
       </div>

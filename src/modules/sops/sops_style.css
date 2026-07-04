@@ -8,53 +8,101 @@
  * - 容器样式使用 .module-container 工具类
  */
 
+.sops-overview {
+  --sops-qwen-blue: #3b6ff6;
+  --sops-qwen-blue-strong: #2454df;
+  --sops-qwen-violet: #6257f5;
+  --sops-qwen-violet-strong: #4f46e5;
+  --sops-qwen-cyan: #06b6d4;
+  --sops-qwen-soft: #f5f3ff;
+  --sops-qwen-surface: #f7f8ff;
+  --sops-qwen-border: color-mix(in srgb, var(--sops-qwen-violet) 20%, transparent);
+  --sops-qwen-focus: color-mix(in srgb, var(--sops-qwen-violet) 18%, transparent);
+  --color-primary: var(--sops-qwen-violet);
+  --color-primary-light: var(--sops-qwen-soft);
+  --color-primary-dark: var(--sops-qwen-violet-strong);
+  --focus-ring-soft: var(--sops-qwen-focus);
+  --button-filter-accent: var(--sops-qwen-violet-strong);
+  --button-filter-hover-bg: var(--sops-qwen-soft);
+  --button-filter-hover-border: var(--sops-qwen-border);
+  --button-filter-hover-color: var(--sops-qwen-violet-strong);
+  --button-filter-active-bg: linear-gradient(
+    135deg,
+    var(--sops-qwen-violet-strong),
+    var(--sops-qwen-blue)
+  );
+  --button-filter-active-border: color-mix(in srgb, var(--sops-qwen-violet) 70%, transparent);
+  --button-filter-focus-color: var(--sops-qwen-violet);
+  --button-filter-focus-ring: var(--sops-qwen-focus);
+  --wb-tag-dot-1: var(--sops-qwen-violet);
+  --wb-tag-dot-2: var(--sops-qwen-blue);
+  --wb-tag-dot-3: var(--sops-qwen-cyan);
+  --wb-tag-dot-4: #8b5cf6;
+}
+
 .sops-overview .wb-container--simple {
-  border: 1px solid rgba(148, 163, 184, 0.24) !important;
+  border: 1px solid var(--sops-qwen-border) !important;
   background:
-    radial-gradient(circle at 82% 18%, rgba(79, 70, 229, 0.08), transparent 32%),
-    linear-gradient(
-      135deg,
-      rgba(239, 246, 255, 0.98),
-      rgba(255, 255, 255, 0.94) 54%,
-      rgba(238, 242, 255, 0.88)
-    ) !important;
-  box-shadow: 0 18px 40px -32px rgba(15, 23, 42, 0.42) !important;
-  --wb-orb-1-color: rgba(59, 130, 246, 0.14) !important;
-  --wb-orb-2-color: rgba(99, 102, 241, 0.12) !important;
-  --wb-orb-3-color: rgba(79, 70, 229, 0.08) !important;
-  --wb-particle-color: rgba(59, 130, 246, 0.45) !important;
+    radial-gradient(circle at 82% 18%, rgba(98, 87, 245, 0.14), transparent 32%),
+    radial-gradient(circle at 18% 8%, rgba(6, 182, 212, 0.08), transparent 28%),
+    linear-gradient(135deg, #f5f3ff, rgba(255, 255, 255, 0.95) 54%, #eef6ff) !important;
+  box-shadow: 0 18px 40px -32px rgba(49, 46, 129, 0.42) !important;
+  --wb-orb-1-color: rgba(98, 87, 245, 0.16) !important;
+  --wb-orb-2-color: rgba(59, 111, 246, 0.12) !important;
+  --wb-orb-3-color: rgba(6, 182, 212, 0.09) !important;
+  --wb-particle-color: rgba(98, 87, 245, 0.5) !important;
   --wb-tag-bg: rgba(255, 255, 255, 0.78) !important;
-  --wb-tag-border: rgba(79, 70, 229, 0.14) !important;
-  --wb-tag-hover-border: rgba(79, 70, 229, 0.24) !important;
-  --wb-icon-shadow: 0 12px 24px -18px rgba(59, 130, 246, 0.58);
-  --wb-icon-shadow-hover: 0 14px 28px -20px rgba(59, 130, 246, 0.58);
+  --wb-tag-border: color-mix(in srgb, var(--sops-qwen-violet) 16%, transparent) !important;
+  --wb-tag-hover-border: color-mix(in srgb, var(--sops-qwen-violet) 26%, transparent) !important;
+  --wb-icon-shadow: 0 12px 24px -18px rgba(79, 70, 229, 0.58);
+  --wb-icon-shadow-hover: 0 14px 28px -20px rgba(79, 70, 229, 0.58);
 }
 
 .sops-overview .wb-container--simple .wb-icon {
-  background: linear-gradient(135deg, var(--color-blue-500), var(--color-indigo-600)) !important;
-  box-shadow: 0 12px 24px -18px rgba(59, 130, 246, 0.58) !important;
+  background: linear-gradient(
+    135deg,
+    var(--sops-qwen-violet-strong),
+    var(--sops-qwen-violet) 56%,
+    var(--sops-qwen-cyan)
+  ) !important;
+  box-shadow: var(--wb-icon-shadow) !important;
 }
 
 .sops-overview .wb-container--simple:hover .wb-icon {
-  box-shadow: 0 14px 28px -20px rgba(59, 130, 246, 0.58) !important;
-}
-
-.sops-overview {
-  --button-filter-accent: var(--color-blue-600, #2563eb);
-  --button-filter-hover-bg: var(--color-blue-50, #eff6ff);
-  --button-filter-hover-border: rgba(79, 70, 229, 0.24);
-  --button-filter-hover-color: var(--color-blue-700, #1d4ed8);
-  --button-filter-focus-ring: rgba(37, 99, 235, 0.16);
+  box-shadow: var(--wb-icon-shadow-hover) !important;
 }
 
 .sops-overview .wb-badge {
-  border-color: rgba(79, 70, 229, 0.2) !important;
+  border-color: var(--sops-qwen-border) !important;
   background: linear-gradient(
     135deg,
-    rgba(239, 246, 255, 0.92),
-    rgba(238, 242, 255, 0.86)
+    color-mix(in srgb, var(--sops-qwen-soft) 94%, transparent),
+    color-mix(in srgb, #eef6ff 88%, transparent)
   ) !important;
-  color: #1d4ed8 !important;
+  color: var(--sops-qwen-violet-strong) !important;
+}
+
+.sops-overview-scope-note {
+  border-color: var(--sops-qwen-border) !important;
+  background: linear-gradient(135deg, #f5f3ff, #eef6ff) !important;
+}
+
+.sops-overview-scope-note i {
+  color: var(--sops-qwen-violet-strong) !important;
+}
+
+.sops-overview-scope-note h3 {
+  color: #312e81 !important;
+}
+
+.sops-overview-scope-note p {
+  color: #3730a3 !important;
+}
+
+.sops-overview-topic-badge {
+  border-color: var(--sops-qwen-border) !important;
+  background: color-mix(in srgb, var(--sops-qwen-soft) 88%, transparent) !important;
+  color: var(--sops-qwen-violet-strong) !important;
 }
 
 /* ==================== SOP 总览折叠区域 ==================== */
@@ -85,7 +133,7 @@
 }
 
 .sops-collapsible-summary:focus-visible {
-  outline: 2px solid var(--color-blue-500, #3b82f6);
+  outline: 2px solid var(--color-primary, var(--color-blue-500, #3b82f6));
   outline-offset: 3px;
 }
 
@@ -226,7 +274,7 @@
 }
 
 .npi-lifecycle-table-scroll:focus-visible {
-  outline: 2px solid var(--color-blue-500);
+  outline: 2px solid var(--color-primary, var(--color-blue-500));
   outline-offset: -2px;
 }
 

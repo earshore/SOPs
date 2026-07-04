@@ -13,7 +13,7 @@ const moduleLoader: ModuleLoader = createModuleLoader({
   containerId: 'app_center_content_area',
   shellId: 'panel-app_center',
   moduleMap: MODULE_MAP,
-  loaderColor: 'blue',
+  loaderColor: 'rose',
   moduleName: 'AppCenter',
   contentEnterAnimation: true,
 });
