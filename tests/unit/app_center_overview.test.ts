@@ -164,4 +164,21 @@ describe('App Center Overview', () => {
     expect(taskPathSection).not.toBeNull();
     expect(taskPathSection?.hasAttribute('open')).toBe(false);
   });
+
+  it('uses the current Keyword Hunter entry labels', () => {
+    const html = readFileSync(realOverviewTemplatePath, 'utf8');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+
+    const inputEntry = wrapper.querySelector('[data-tab="kw_input"]');
+    const processEntry = wrapper.querySelector('[data-tab="kw_process"]');
+    const analysisEntry = wrapper.querySelector('[data-tab="kw_analysis"]');
+
+    expect(inputEntry?.textContent).toContain('输入格式化');
+    expect(processEntry?.textContent).toContain('SEO 处理');
+    expect(analysisEntry?.textContent).toContain('Listing 评审');
+    expect(inputEntry?.textContent).not.toContain('输入模块');
+    expect(processEntry?.textContent).not.toContain('处理模块');
+    expect(analysisEntry?.textContent).not.toContain('分析统计');
+  });
 });

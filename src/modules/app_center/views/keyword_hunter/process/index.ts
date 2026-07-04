@@ -1062,7 +1062,7 @@ async function syncToInput(): Promise<void> {
     return;
   }
 
-  showToast('已同步原文到输入模块');
+  showToast('已同步原文到输入格式化');
 
   // 切换到输入模块
   await navigateToRouteId('kw_input');

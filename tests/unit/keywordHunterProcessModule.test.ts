@@ -495,7 +495,7 @@ it('syncs original translation text back to input and toggles floating window st
   expect(processMocks.state.keywordTracker.processedCopy).toBe('Original one\nOriginal two');
   expect(processMocks.state.keywordTracker.copyInputText).toBe('Original one\nOriginal two');
   expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('kw_input');
-  expect(showToast).toHaveBeenCalledWith('已同步原文到输入模块');
+  expect(showToast).toHaveBeenCalledWith('已同步原文到输入格式化');
 
   click(document.querySelector('#kt-minimize-keywords-btn'));
   vi.advanceTimersByTime(200);
