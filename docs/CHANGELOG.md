@@ -26,6 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.18] - 2026-07-04
+
+### Added
+- 新增认证路由守卫与 API endpoint 安全测试。
+- 新增 2026-07-04 安全审计报告与 CI 质量门禁说明。
+
+### Changed
+- 强化 CSP、SafeRenderer 和安全工具处理，减少渲染与内联脚本风险。
+- 收紧 LLM secret 处理并移除旧 timeout wrapper。
+- 将 Floating Workbench 命名统一回 App Center。
+- 同步应用内版本显示到 `3.0.3-rc.18`。
+
+### Fixed
+- 修复本地存储、安全渲染、PPC 导入和路由守卫相关回归覆盖。
+
 ## [3.0.3-rc.17] - 2026-07-04
 
 ### Added
