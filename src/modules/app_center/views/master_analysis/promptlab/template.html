@@ -1,669 +1,1063 @@
 <div class="module-container" x-data="promptlabPanel">
-    <!-- ========== Welcome Banner ========== -->
-    <div class="wb-container wb-container--card wb-theme-indigo mb-8">
-        <div class="wb-card">
-            <div class="wb-bg-gradient"></div>
-            <div class="wb-grid-pattern"></div>
-            <div class="wb-content">
-                <div class="wb-header">
-                    <div class="wb-icon-wrapper">
-                        <div class="wb-icon-main">
-                            <i class="fas fa-wand-magic-sparkles"></i>
-                        </div>
-                        <div class="wb-icon-badge">
-                            <i class="fas fa-fire"></i>
-                        </div>
-                    </div>
-                    <div class="wb-text">
-                        <div class="wb-title-row">
-                            <h1 class="wb-title">Listing 炼金术工场</h1>
-                            <span aria-label="分析功能" class="wb-badge wb-badge-analytics">
-                                <i aria-hidden="true" class="fas fa-flask"></i>Master Prompt
-                            </span>
-                        </div>
-                        <p class="wb-description">
-                            融合竞品洞察、产品 DNA 与 SEO 关键词，以及 A10、COSMO 与 Rufus AI 逻辑，打造高转化率的 Master Prompt。
-                        </p>
-                        <div class="wb-tags">
-                            <div class="wb-tag">
-                                <div class="wb-tag-dot wb-tag-dot--purple" aria-hidden="true"></div>
-                                <span>AI 分析报告</span>
-                            </div>
-                            <div class="wb-tag">
-                                <div class="wb-tag-dot" aria-hidden="true"></div>
-                                <span>产品 DNA</span>
-                            </div>
-                            <div class="wb-tag">
-                                <div class="wb-tag-dot wb-tag-dot--pink" aria-hidden="true"></div>
-                                <span>Master Prompt / 视觉剧本</span>
-                            </div>
-                            <div class="wb-tag">
-                                <div class="wb-tag-dot wb-tag-dot--amber" aria-hidden="true"></div>
-                                <span>SEO 优化</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <!-- ========== Welcome Banner ========== -->
+  <div class="wb-container wb-container--card wb-theme-cyan mb-8">
+    <div class="wb-card">
+      <div class="wb-bg-gradient"></div>
+      <div class="wb-grid-pattern"></div>
+      <div class="wb-content">
+        <div class="wb-header">
+          <div class="wb-icon-wrapper">
+            <div class="wb-icon-main">
+              <i class="fas fa-wand-magic-sparkles"></i>
             </div>
+            <div class="wb-icon-badge">
+              <i class="fas fa-fire"></i>
+            </div>
+          </div>
+          <div class="wb-text">
+            <div class="wb-title-row">
+              <h1 class="wb-title">Listing 炼金术工场</h1>
+              <span aria-label="分析功能" class="wb-badge wb-badge-analytics">
+                <i aria-hidden="true" class="fas fa-flask"></i>Master Prompt
+              </span>
+            </div>
+            <p class="wb-description">
+              融合竞品洞察、产品 DNA 与 SEO 关键词，以及 A10、COSMO 与 Rufus AI
+              逻辑，打造高转化率的 Master Prompt。
+            </p>
+            <div class="wb-tags">
+              <div class="wb-tag">
+                <div
+                  class="wb-tag-dot wb-tag-dot--purple"
+                  aria-hidden="true"
+                ></div>
+                <span>AI 分析报告</span>
+              </div>
+              <div class="wb-tag">
+                <div class="wb-tag-dot" aria-hidden="true"></div>
+                <span>产品 DNA</span>
+              </div>
+              <div class="wb-tag">
+                <div
+                  class="wb-tag-dot wb-tag-dot--pink"
+                  aria-hidden="true"
+                ></div>
+                <span>Master Prompt / 视觉剧本</span>
+              </div>
+              <div class="wb-tag">
+                <div
+                  class="wb-tag-dot wb-tag-dot--amber"
+                  aria-hidden="true"
+                ></div>
+                <span>SEO 优化</span>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
-    <nav class="ma-workflow-strip" aria-label="Master Analysis 工作流">
-        <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="scraper">
-            <span class="ma-workflow-index">1</span>
-            <span class="ma-workflow-copy">
-                <span class="ma-workflow-label">数据采集</span>
-                <span class="ma-workflow-meta">ASIN / JSON / Review</span>
-            </span>
-        </button>
-        <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="ai_analysis">
-            <span class="ma-workflow-index">2</span>
-            <span class="ma-workflow-copy">
-                <span class="ma-workflow-label">AI 智能分析</span>
-                <span class="ma-workflow-meta">维度选择 / 报告生成</span>
-            </span>
-        </button>
-        <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="promptlab" aria-current="step">
-            <span class="ma-workflow-index">3</span>
-            <span class="ma-workflow-copy">
-                <span class="ma-workflow-label">Prompt 生成</span>
-                <span class="ma-workflow-meta">AI 报告 / 产品 DNA</span>
-            </span>
-        </button>
-    </nav>
-    <!-- ========== Main Layout ========== -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative pb-10">
-        <!-- ===== Left Column: Config Cards ===== -->
-        <div class="lg:col-span-8 space-y-6">
-            <!-- Card 1: Analysis Report -->
-            <div class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden"
-                id="card-analysis">
-                <!-- Card Header -->
-                <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-                            <div
-                                class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm shadow-blue-500/20">
-                                <span class="text-xs font-bold text-white">1</span>
-                            </div>
-                            AI 分析报告
-                            <span class="text-[11px] text-slate-500 font-normal ml-1">Insights Injection</span>
-                        </h3>
-                        <div class="flex items-center gap-3">
-                            <!-- 分析报告状态 -->
-                            <div class="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 font-semibold bg-slate-100 text-slate-500 border border-slate-200"
-                                id="lab-analysis-status" role="status" aria-live="polite" aria-atomic="true">
-                                <i class="fas fa-circle-notch fa-spin text-[10px]"></i> 检测中...
-                            </div>
-                            <!-- 展开/折叠所有维度按钮 -->
-                            <button @click="toggleAllDimensions()"
-                                    x-show="hasReport"
-                                    class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all flex items-center justify-center"
-                                    :title="toggleAllDimensionsTitle">
-                                <i class="fas text-sm" :class="toggleAllDimensionsIconClass"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <!-- Card Body -->
-                <div class="p-6">
-                    <div x-show="reportActionDisabled" class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                            <div>
-                                <h4 class="font-bold text-amber-900 flex items-center gap-2 text-sm">
-                                    <i class="fas fa-circle-info text-amber-600"></i>
-                                    未检测到 AI 分析报告
-                                </h4>
-                                <p class="text-xs text-amber-800/80 mt-1">
-                                    可以先去 AI 分析生成报告，也可以直接手动填写下方产品 DNA 字段。
-                                </p>
-                            </div>
-                            <button type="button" data-action="switch-tab" data-tab="ai_analysis"
-                                class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition-colors">
-                                <i class="fas fa-brain mr-1"></i>去 AI 分析
-                            </button>
-                        </div>
-                    </div>
-                    <div class="rounded-xl overflow-hidden bg-slate-50/50">
-                        <!-- Report Sections -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar p-4"
-                            id="report-sections-container">
-                            <!-- Empty State -->
-                            <div class="col-span-2 flex flex-col items-center justify-center py-8">
-                                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
-                                    <i class="fas fa-file-circle-xmark text-slate-300 text-sm"></i>
-                                </div>
-                                <p class="text-xs text-slate-400 font-medium">暂无报告数据</p>
-                                <p class="text-[10px] text-slate-500 mt-1">请先在 AI 分析页面生成报告</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  </div>
+  <nav class="ma-workflow-strip" aria-label="Master Analysis 工作流">
+    <button
+      type="button"
+      class="ma-workflow-step"
+      data-action="switch-tab"
+      data-tab="scraper"
+    >
+      <span class="ma-workflow-index">1</span>
+      <span class="ma-workflow-copy">
+        <span class="ma-workflow-label">数据采集</span>
+        <span class="ma-workflow-meta">ASIN / JSON / Review</span>
+      </span>
+    </button>
+    <button
+      type="button"
+      class="ma-workflow-step"
+      data-action="switch-tab"
+      data-tab="ai_analysis"
+    >
+      <span class="ma-workflow-index">2</span>
+      <span class="ma-workflow-copy">
+        <span class="ma-workflow-label">AI 智能分析</span>
+        <span class="ma-workflow-meta">维度选择 / 报告生成</span>
+      </span>
+    </button>
+    <button
+      type="button"
+      class="ma-workflow-step"
+      data-action="switch-tab"
+      data-tab="promptlab"
+      aria-current="step"
+    >
+      <span class="ma-workflow-index">3</span>
+      <span class="ma-workflow-copy">
+        <span class="ma-workflow-label">Prompt 生成</span>
+        <span class="ma-workflow-meta">AI 报告 / 产品 DNA</span>
+      </span>
+    </button>
+  </nav>
+  <!-- ========== Main Layout ========== -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative pb-10">
+    <!-- ===== Left Column: Config Cards ===== -->
+    <div class="lg:col-span-8 space-y-6">
+      <!-- Card 1: Analysis Report -->
+      <div
+        class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden"
+        id="card-analysis"
+      >
+        <!-- Card Header -->
+        <div class="px-6 pt-5 pb-4 border-b border-slate-100">
+          <div class="flex items-center justify-between">
+            <h3
+              class="text-base font-bold text-slate-800 flex items-center gap-2.5"
+            >
+              <div
+                class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm shadow-blue-500/20"
+              >
+                <span class="text-xs font-bold text-white">1</span>
+              </div>
+              AI 分析报告
+              <span class="text-[11px] text-slate-500 font-normal ml-1"
+                >Insights Injection</span
+              >
+            </h3>
+            <div class="flex items-center gap-3">
+              <!-- 分析报告状态 -->
+              <div
+                class="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 font-semibold bg-slate-100 text-slate-500 border border-slate-200"
+                id="lab-analysis-status"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                <i class="fas fa-circle-notch fa-spin text-[10px]"></i>
+                检测中...
+              </div>
+              <!-- 展开/折叠所有维度按钮 -->
+              <button
+                @click="toggleAllDimensions()"
+                x-show="hasReport"
+                class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all flex items-center justify-center"
+                :title="toggleAllDimensionsTitle"
+              >
+                <i
+                  class="fas text-sm"
+                  :class="toggleAllDimensionsIconClass"
+                ></i>
+              </button>
             </div>
-            <!-- Card 2: Product DNA Supplement -->
-            <div class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden"
-                id="card-product-dna">
-                <!-- Card Header -->
-                <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-                            <div
-                                class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm shadow-indigo-500/20">
-                                <span class="text-xs font-bold text-white">2</span>
-                            </div>
-                            产品 DNA 补充
-                            <span class="text-[11px] text-slate-500 font-normal ml-1">Product DNA Supplement</span>
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <!-- 从报告加载按钮 -->
-                            <button @click="autoPopulateDNA" :disabled="dnaActionDisabled"
-                                :class="autoPopulateButtonClass"
-                                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
-                                title="从AI分析报告自动提取产品DNA（仅自动填充置信度≥70%的字段）">
-                                <i class="fas fa-magic text-[10px]"></i>
-                                <span>从报告加载</span>
-                            </button>
-                            <label class="flex items-center text-xs font-bold text-slate-700 gap-1.5"
-                                for="lab-target-market">
-                                <span class="w-1 h-3.5 bg-indigo-400 rounded-full"></span>
-                                目标语言/站点
-                            </label>
-                            <select @change="setProfileField('targetMarket', $event)"
-                                class="text-xs border-2 border-slate-200 rounded-xl p-2 w-48 bg-slate-50 text-slate-700 font-semibold transition-all hover:border-slate-300 cursor-pointer appearance-none"
-                                id="lab-target-market" :value="profile.targetMarket">
-                                <option selected="" value=""></option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div x-show="hasReport && dnaActionDisabled" class="mx-6 mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
-                        <i class="fas fa-circle-info text-slate-400"></i>
-                        <span>当前报告暂不支持自动提取产品 DNA，可手动填写下方字段。</span>
-                    </div>
-                </div>
-                <div x-show="showDnaExtractionSummary()" class="mx-6 mt-4 rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                        <div class="flex items-center gap-2 text-xs font-semibold text-blue-800">
-                            <i class="fas fa-chart-simple text-blue-500 text-[10px]"></i>
-                            <span x-text="getDnaExtractionSummaryHeadline()"></span>
-                        </div>
-                        <div class="flex items-center gap-2 text-[10px] text-blue-700/80">
-                            <span x-show="getDnaLowConfidenceText().length > 0" x-text="getDnaLowConfidenceText()"></span>
-                            <span x-show="dnaExtractionSummary" class="px-2 py-0.5 rounded-full bg-white/70 border border-blue-100"
-                                x-text="getDnaReportTypeText()"></span>
-                        </div>
-                    </div>
-                </div>
-                <!-- Card Body -->
-                <div class="p-6">
-                    <div class="space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Tier 1 Keywords -->
-                            <div class="group">
-                                <label class="flex items-center text-xs font-bold text-slate-700 mb-2 gap-1.5">
-                                    <span class="w-1 h-3.5 bg-red-400 rounded-full"></span>
-                                    <span id="lab-keywords-tier1-label">Tier 1 核心词（高权重） <span class="text-slate-400 font-normal">- 1-2个</span></span>
-
-                                    <!-- 置信度徽章 -->
-                                    <span x-show="showDnaConfidence('keywordsTier1')"
-                                        :class="getDnaConfidenceBadgeClass('keywordsTier1')"
-                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                                        <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="getDnaConfidenceText('keywordsTier1')"></span>
-                                    </span>
-
-                                    <button type="button" @click="extractSingleField('keywordsTier1')" :disabled="dnaActionDisabled"
-                                        :class="extractButtonClass"
-                                        class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                                        title="仅重新提取此字段" aria-label="重新提取 Tier 1 核心词">
-                                        <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
-                                    </button>
-                                </label>
-                                <input @input="setProfileField('keywordsTier1', $event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400 font-mono"
-                                    id="lab-keywords-tier1" placeholder="humidifiers for bedroom, cool mist humidifier"
-                                    type="text" aria-label="Tier 1 核心词" aria-labelledby="lab-keywords-tier1-label"
-                                    aria-describedby="lab-keywords-tier1-source" :value="profile.keywordsTier1" />
-                                <p id="lab-keywords-tier1-source" x-show="showDnaSource('keywordsTier1')" class="mt-1 text-[11px] text-slate-400 truncate"
-                                    :title="getDnaFieldSourceText('keywordsTier1')" x-text="getDnaFieldSourceText('keywordsTier1')"></p>
-                            </div>
-                            <!-- Negative Keywords -->
-                            <div class="group">
-                                <label class="flex items-center text-xs font-bold text-slate-700 mb-2 gap-1.5">
-                                    <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
-                                    <i class="fa-solid fa-ban text-slate-400 text-[10px]"></i>
-                                    <span id="negative-keywords-label">限制词 <span class="text-slate-400 font-normal">- 不希望出现</span></span>
-
-                                    <span x-show="showDnaConfidence('negative')"
-                                        :class="getDnaConfidenceBadgeClass('negative')"
-                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                                        <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="getDnaConfidenceText('negative')"></span>
-                                    </span>
-
-                                    <button type="button" @click="extractSingleField('negative')" :disabled="dnaActionDisabled"
-                                        :class="extractButtonClass"
-                                        class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                                        title="仅重新提取此字段" aria-label="重新提取限制词">
-                                        <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
-                                    </button>
-                                </label>
-                                <input @input="setProfileField('negative', $event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400"
-                                    id="negative-keywords" placeholder="例如: bestseller / cure" type="text"
-                                    aria-label="限制词" aria-labelledby="negative-keywords-label"
-                                    aria-describedby="negative-keywords-source" :value="profile.negative" />
-                                <p id="negative-keywords-source" x-show="showDnaSource('negative')" class="mt-1 text-[11px] text-slate-400 truncate"
-                                    :title="getDnaFieldSourceText('negative')" x-text="getDnaFieldSourceText('negative')"></p>
-                            </div>
-                            <!-- Tier 2 Keywords -->
-                            <div class="group">
-                                <label class="flex items-center text-xs font-bold text-slate-700 mb-2 gap-1.5">
-                                    <span class="w-1 h-3.5 bg-red-400 rounded-full"></span>
-                                    <span id="lab-keywords-tier2-label">Tier 2 功能词 <span class="text-slate-400 font-normal">- 2-5个</span></span>
-
-                                    <!-- 置信度徽章 -->
-                                    <span x-show="showDnaConfidence('keywordsTier2')"
-                                        :class="getDnaConfidenceBadgeClass('keywordsTier2')"
-                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                                        <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="getDnaConfidenceText('keywordsTier2')"></span>
-                                    </span>
-
-                                    <button type="button" @click="extractSingleField('keywordsTier2')" :disabled="dnaActionDisabled"
-                                        :class="extractButtonClass"
-                                        class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                                        title="仅重新提取此字段" aria-label="重新提取 Tier 2 功能词">
-                                        <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
-                                    </button>
-                                </label>
-                                <textarea @input="setProfileField('keywordsTier2', $event)" @focus="expandInput($event)"
-                                    @blur="restoreInput($event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400 font-mono"
-                                    id="lab-keywords-tier2"
-                                    placeholder="baby humidifier, easy to clean, quiet operation" rows="1"
-                                    aria-label="Tier 2 功能词" aria-labelledby="lab-keywords-tier2-label"
-                                    aria-describedby="lab-keywords-tier2-source" :value="profile.keywordsTier2"></textarea>
-                                <p id="lab-keywords-tier2-source" x-show="showDnaSource('keywordsTier2')" class="mt-1 text-[11px] text-slate-400 truncate"
-                                    :title="getDnaFieldSourceText('keywordsTier2')" x-text="getDnaFieldSourceText('keywordsTier2')"></p>
-                            </div>
-                            <!-- Target Audience -->
-                            <div class="group">
-                                <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5">
-                                    <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
-                                    <i class="fa-solid fa-users text-slate-400 text-[10px]"></i>
-                                    <span id="lab-audience-label">目标受众 <span class="text-slate-400 font-normal">- 客户特征</span></span>
-
-                                    <!-- 置信度徽章 -->
-                                    <span x-show="showDnaConfidence('audience')"
-                                        :class="getDnaConfidenceBadgeClass('audience')"
-                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                                        <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="getDnaConfidenceText('audience')"></span>
-                                    </span>
-
-                                    <!-- 单字段提取按钮 -->
-                                    <button type="button" @click="extractSingleField('audience')" :disabled="dnaActionDisabled"
-                                        :class="extractButtonClass"
-                                        class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                                        title="仅重新提取此字段" aria-label="重新提取目标受众">
-                                        <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
-                                    </button>
-                                </label>
-                                <input @input="setProfileField('audience', $event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400"
-                                    id="lab-audience" placeholder="e.g. Busy moms, Tech enthusiasts" type="text"
-                                    aria-label="目标受众" aria-labelledby="lab-audience-label"
-                                    aria-describedby="lab-audience-source" :value="profile.audience" />
-                                <p id="lab-audience-source" x-show="showDnaSource('audience')" class="mt-1 text-[11px] text-slate-400 truncate"
-                                    :title="getDnaFieldSourceText('audience')" x-text="getDnaFieldSourceText('audience')"></p>
-                            </div>
-                            <!-- USPs -->
-                            <div class="group">
-                                <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5">
-                                    <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
-                                    <i class="fa-solid fa-list-check text-slate-400 text-[10px]"></i>
-                                    <span id="lab-usps-label">核心卖点 (USPs) <span class="text-slate-400 font-normal">- 可补充</span></span>
-
-                                    <!-- 置信度徽章 -->
-                                    <span x-show="showDnaConfidence('usps')"
-                                        :class="getDnaConfidenceBadgeClass('usps')"
-                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                                        <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="getDnaConfidenceText('usps')"></span>
-                                    </span>
-
-                                    <!-- 单字段提取按钮 -->
-                                    <button type="button" @click="extractSingleField('usps')" :disabled="dnaActionDisabled"
-                                        :class="extractButtonClass"
-                                        class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                                        title="仅重新提取此字段" aria-label="重新提取核心卖点">
-                                        <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
-                                    </button>
-                                </label>
-                                <textarea @input="setProfileField('usps', $event)" @focus="expandInput($event)"
-                                    @blur="restoreInput($event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400"
-                                    id="lab-usps" placeholder="- 专利静音技术 (&lt;28dB)
-- 360度旋转喷嘴" rows="2" aria-label="核心卖点" aria-labelledby="lab-usps-label"
-                                    aria-describedby="lab-usps-source" :value="profile.usps"></textarea>
-                                <p id="lab-usps-source" x-show="showDnaSource('usps')" class="mt-1 text-[11px] text-slate-400 truncate"
-                                    :title="getDnaFieldSourceText('usps')" x-text="getDnaFieldSourceText('usps')"></p>
-                            </div>
-                            <!-- Specs -->
-                            <div class="group">
-                                <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5">
-                                    <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
-                                    <i class="fa-solid fa-circle-info text-slate-400 text-[10px]"></i>
-                                    <span id="lab-specs-label">详细参数 (Specs) <span class="text-slate-400 font-normal">- 产品特征</span></span>
-
-                                    <!-- 置信度徽章 -->
-                                    <span x-show="showDnaConfidence('specs')"
-                                        :class="getDnaConfidenceBadgeClass('specs')"
-                                        class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                                        <i class="fas fa-chart-line text-[8px]"></i>
-                                        <span x-text="getDnaConfidenceText('specs')"></span>
-                                    </span>
-
-                                    <!-- 单字段提取按钮 -->
-                                    <button type="button" @click="extractSingleField('specs')" :disabled="dnaActionDisabled"
-                                        :class="extractButtonClass"
-                                        class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                                        title="仅重新提取此字段" aria-label="重新提取详细参数">
-                                        <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
-                                    </button>
-                                </label>
-                                <textarea @input="setProfileField('specs', $event)" @focus="expandInput($event)"
-                                    @blur="restoreInput($event)"
-                                    class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400 font-mono"
-                                    id="lab-specs" placeholder="材质: ABS + PP
-尺寸: 20x20x30cm" rows="2" aria-label="详细参数" aria-labelledby="lab-specs-label"
-                                    aria-describedby="lab-specs-source" :value="profile.specs"></textarea>
-                                <p id="lab-specs-source" x-show="showDnaSource('specs')" class="mt-1 text-[11px] text-slate-400 truncate"
-                                    :title="getDnaFieldSourceText('specs')" x-text="getDnaFieldSourceText('specs')"></p>
-                            </div>
-                        </div>
-                        <!-- Social Hooks -->
-                        <div class="group">
-                            <label class="flex items-center text-xs font-bold text-purple-600 mb-2 gap-1.5" for="lab-social-hook">
-                                <span class="w-1 h-3.5 bg-purple-400 rounded-full"></span>
-                                <i class="fab fa-instagram text-purple-400 text-[10px]"></i>
-                                植入社媒 Hook / 节日词 <span class="text-purple-400 font-normal">- 可补充</span>
-                            </label>
-                            <input @input="setProfileField('socialHook', $event)"
-                                class="w-full text-sm border-2 border-purple-200 rounded-xl p-3 bg-purple-50/30 text-purple-700 transition-all placeholder:text-purple-300"
-                                id="lab-social-hook" placeholder="例如: 限时半价 / 圣诞特供 / #SummerVibes" type="text"
-                                :value="profile.socialHook" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Card 3: Strategy Config -->
-            <div class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden mb-10"
-                id="card-strategy">
-                <!-- Card Header -->
-                <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-                        <div
-                            class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-sm shadow-orange-500/20">
-                            <span class="text-xs font-bold text-white">3</span>
-                        </div>
-                        生成策略配置
-                        <span class="text-[11px] text-slate-500 font-normal ml-1">Strategy</span>
-                    </h3>
-                </div>
-                <!-- Card Body -->
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-                        <!-- Tone -->
-                        <div>
-                            <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5" for="lab-tone">
-                                <span class="w-1 h-3.5 bg-orange-400 rounded-full"></span>
-                                文案语气 Tone
-                            </label>
-                            <select @change="setProfileField('tone', $event)"
-                                class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all hover:border-slate-300 cursor-pointer font-medium text-slate-700"
-                                id="lab-tone" :value="profile.tone">
-                                <option value="professional">Professional (专业)</option>
-                                <option value="exciting">Exciting (激动人心)</option>
-                                <option value="emotional">Emotional (情感共鸣)</option>
-                                <option value="minimalist">Minimalist (极简)</option>
-                            </select>
-                        </div>
-                        <!-- Custom Rules -->
-                        <div>
-                            <label class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5" for="lab-custom-strategy">
-                                <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
-                                自定义规则 <span class="text-slate-400 font-normal">- 有就填</span>
-                            </label>
-                            <textarea @input="setProfileField('customStrategy', $event)" @focus="expandInput($event)" @blur="restoreInput($event)"
-                                class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400"
-                                id="lab-custom-strategy" placeholder="例如: 禁止使用'Best Seller'词汇..." rows="1"
-                                :value="profile.customStrategy"></textarea>
-                        </div>
-                    </div>
-                    <!-- AI Optimization Toggles -->
-                    <div class="pt-5 border-t border-slate-100">
-                        <label class="flex items-center text-xs font-bold text-slate-600 mb-3 gap-1.5">
-                            <span class="w-1 h-3.5 bg-orange-400 rounded-full"></span>
-                            AI 优化策略
-                        </label>
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <!-- COSMO -->
-                            <label
-                                class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white">
-                                <input @change="setProfileBoolean('useCosmo', $event)" :checked="profile.useCosmo"
-                                    class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4" id="opt-cosmo"
-                                    type="checkbox" />
-                                <div class="flex flex-col">
-                                    <span
-                                        class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors">COSMO
-                                        意图匹配</span>
-                                    <span class="text-[10px] text-slate-400">构建场景化语义</span>
-                                </div>
-                            </label>
-                            <!-- Rufus -->
-                            <label
-                                class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white">
-                                <input @change="setProfileBoolean('useRufus', $event)" :checked="profile.useRufus"
-                                    class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4" id="opt-rufus"
-                                    type="checkbox" />
-                                <div class="flex flex-col">
-                                    <span
-                                        class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors">Rufus
-                                        优化</span>
-                                    <span class="text-[10px] text-slate-400">问答预判策略</span>
-                                </div>
-                            </label>
-                            <!-- Emoji -->
-                            <label
-                                class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white">
-                                <input @change="setProfileBoolean('useEmoji', $event)" :checked="profile.useEmoji"
-                                    class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4" id="opt-emoji"
-                                    type="checkbox" />
-                                <div class="flex flex-col">
-                                    <span
-                                        class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors">Emoji
-                                        点缀</span>
-                                    <span class="text-[10px] text-slate-400">增强视觉吸引</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-        <!-- ===== Right Column: Console & Output ===== -->
-        <div class="lg:col-span-4">
-            <div class="sticky top-6 space-y-5">
-                <!-- Flip Console Card -->
-                <div class="relative w-full group [perspective:1000px]">
-                    <!-- Mode Toggle -->
-                    <div class="absolute top-4 right-4 z-[60] bg-white/15 backdrop-blur-xl p-1 rounded-xl flex items-center shadow-lg border border-white/10 transition-all duration-500"
-                        id="embed-toggle-container">
-                        <div class="absolute top-1 left-1 w-[calc(50%-4px)] h-[calc(100%-8px)] bg-white shadow-md rounded-lg transition-all duration-300 ease-out z-0"
-                            id="mode-toggle-glider">
-                        </div>
-                        <button @click="toggleConsoleMode('listing')"
-                            class="relative z-10 px-4 py-2 text-[11px] font-bold rounded-lg transition-colors duration-300 text-blue-600 uppercase tracking-wider cursor-pointer"
-                            id="btn-mode-listing">
-                            Listing
-                        </button>
-                        <button @click="toggleConsoleMode('visual')"
-                            class="relative z-10 px-4 py-2 text-[11px] font-bold rounded-lg transition-colors duration-300 text-slate-500 hover:text-pink-500 uppercase tracking-wider cursor-pointer"
-                            id="btn-mode-visual">
-                            Visual
-                        </button>
-                    </div>
-                    <div class="relative transition-all duration-700 [transform-style:preserve-3d] grid grid-cols-1 grid-rows-1"
-                        id="console-card-inner">
-                        <!-- Front: Listing Mode -->
-                        <div class="col-start-1 row-start-1 w-full [backface-visibility:hidden] [pointer-events:auto]">
-                            <div
-                                class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 rounded-2xl shadow-xl shadow-blue-900/30 p-6 text-white h-full flex flex-col gap-5 border border-blue-500/20 overflow-hidden">
-                                <!-- 背景光效 -->
-                                <div class="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
-                                <div class="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl">
-                                </div>
-                                <div class="absolute inset-0 opacity-[0.03]"
-                                    style="background-image: radial-gradient(circle, #3b82f6 1px, transparent 1px); background-size: 20px 20px;">
-                                </div>
-                                <div class="pr-28 relative z-10">
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                                            <i class="fas fa-pen-nib text-blue-400 text-sm"></i>
-                                        </div>
-                                        <div>
-                                            <h3 class="font-bold text-base leading-none">Listing</h3>
-                                            <span class="text-blue-300/50 font-normal text-[10px]">Text
-                                                Generation</span>
-                                        </div>
-                                    </div>
-                                    <p class="text-slate-400 text-xs mt-1 leading-relaxed">
-                                        基于 A10 算法逻辑生成高转化 Listing 文本
-                                    </p>
-                                </div>
-                                <div class="relative z-10">
-                                    <button
-                                        :class="listingGenerateButtonClass"
-                                        :disabled="generateButtonDisabled" @click="generateListingPrompt"
-                                        class="relative w-full py-3.5 font-bold rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-center gap-2.5 group overflow-hidden"
-                                        id="btn-generate-prompt">
-                                        <div
-                                            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700">
-                                        </div>
-                                        <i class="fas fa-microchip relative z-10 group-hover:animate-pulse"></i>
-                                        <span class="relative z-10">生成 Master Prompt</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back: Visual Mode -->
-                        <div
-                            class="col-start-1 row-start-1 w-full [backface-visibility:hidden] [transform:rotateY(180deg)] [pointer-events:auto]">
-                            <div
-                                class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-pink-900 rounded-2xl shadow-xl shadow-pink-900/30 p-6 text-white h-full flex flex-col gap-5 border border-pink-500/20 overflow-hidden">
-                                <!-- 背景光效 -->
-                                <div class="absolute top-0 right-0 w-48 h-48 bg-pink-500/5 rounded-full blur-3xl"></div>
-                                <div class="absolute bottom-0 left-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl">
-                                </div>
-                                <div class="absolute inset-0 opacity-[0.03]"
-                                    style="background-image: radial-gradient(circle, #ec4899 1px, transparent 1px); background-size: 20px 20px;">
-                                </div>
-                                <div class="pr-28 relative z-10">
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <div class="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center">
-                                            <i class="fas fa-palette text-pink-400 text-sm"></i>
-                                        </div>
-                                        <div>
-                                            <h3 class="font-bold text-base leading-none text-white">Visual</h3>
-                                            <span class="text-pink-300/50 font-normal text-[10px]">Art Director</span>
-                                        </div>
-                                    </div>
-                                    <p class="text-pink-200/60 text-xs mt-1 leading-relaxed">
-                                        将痛点转化为视觉防御策略
-                                    </p>
-                                </div>
-                                <div class="relative z-10">
-                                    <button
-                                        :class="visualGenerateButtonClass"
-                                        :disabled="visualGenerateButtonDisabled" @click="generateVisualPrompt"
-                                        class="relative w-full py-3.5 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-center gap-2.5 group border border-pink-400/20 overflow-hidden"
-                                        id="btn-generate-visual">
-                                        <div
-                                            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700">
-                                        </div>
-                                        <i class="fas fa-magic relative z-10"></i>
-                                        <span class="relative z-10">生成视觉剧本 (A+/EBC)</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Card Body -->
+        <div class="p-6">
+          <div
+            x-show="reportActionDisabled"
+            class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4"
+          >
+            <div
+              class="flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+            >
+              <div>
+                <h4
+                  class="font-bold text-amber-900 flex items-center gap-2 text-sm"
+                >
+                  <i class="fas fa-circle-info text-amber-600"></i>
+                  未检测到 AI 分析报告
+                </h4>
+                <p class="text-xs text-amber-800/80 mt-1">
+                  可以先去 AI 分析生成报告，也可以直接手动填写下方产品 DNA
+                  字段。
+                </p>
+              </div>
+              <button
+                type="button"
+                data-action="switch-tab"
+                data-tab="ai_analysis"
+                class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition-colors"
+              >
+                <i class="fas fa-brain mr-1"></i>去 AI 分析
+              </button>
+            </div>
+          </div>
+          <div class="rounded-xl overflow-hidden bg-slate-50/50">
+            <!-- Report Sections -->
+            <div
+              class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar p-4"
+              id="report-sections-container"
+            >
+              <!-- Empty State -->
+              <div
+                class="col-span-2 flex flex-col items-center justify-center py-8"
+              >
+                <div
+                  class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-3"
+                >
+                  <i
+                    class="fas fa-file-circle-xmark text-slate-300 text-sm"
+                  ></i>
                 </div>
-                <!-- Output Card -->
-                <div class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white flex flex-col h-[500px] overflow-hidden"
-                    id="prompt-output-card">
-                    <!-- Output Header -->
+                <p class="text-xs text-slate-400 font-medium">暂无报告数据</p>
+                <p class="text-[10px] text-slate-500 mt-1">
+                  请先在 AI 分析页面生成报告
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2: Product DNA Supplement -->
+      <div
+        class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden"
+        id="card-product-dna"
+      >
+        <!-- Card Header -->
+        <div class="px-6 pt-5 pb-4 border-b border-slate-100">
+          <div class="flex items-center justify-between">
+            <h3
+              class="text-base font-bold text-slate-800 flex items-center gap-2.5"
+            >
+              <div
+                class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm shadow-indigo-500/20"
+              >
+                <span class="text-xs font-bold text-white">2</span>
+              </div>
+              产品 DNA 补充
+              <span class="text-[11px] text-slate-500 font-normal ml-1"
+                >Product DNA Supplement</span
+              >
+            </h3>
+            <div class="flex items-center gap-2">
+              <!-- 从报告加载按钮 -->
+              <button
+                @click="autoPopulateDNA"
+                :disabled="dnaActionDisabled"
+                :class="autoPopulateButtonClass"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+                title="从AI分析报告自动提取产品DNA（仅自动填充置信度≥70%的字段）"
+              >
+                <i class="fas fa-magic text-[10px]"></i>
+                <span>从报告加载</span>
+              </button>
+              <label
+                class="flex items-center text-xs font-bold text-slate-700 gap-1.5"
+                for="lab-target-market"
+              >
+                <span class="w-1 h-3.5 bg-indigo-400 rounded-full"></span>
+                目标语言/站点
+              </label>
+              <select
+                @change="setProfileField('targetMarket', $event)"
+                class="text-xs border-2 border-slate-200 rounded-xl p-2 w-48 bg-slate-50 text-slate-700 font-semibold transition-all hover:border-slate-300 cursor-pointer appearance-none"
+                id="lab-target-market"
+                :value="profile.targetMarket"
+              >
+                <option selected="" value=""></option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div
+          x-show="hasReport && dnaActionDisabled"
+          class="mx-6 mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4"
+        >
+          <div
+            class="flex items-center gap-2 text-xs font-semibold text-slate-600"
+          >
+            <i class="fas fa-circle-info text-slate-400"></i>
+            <span>当前报告暂不支持自动提取产品 DNA，可手动填写下方字段。</span>
+          </div>
+        </div>
+        <div
+          x-show="showDnaExtractionSummary()"
+          class="mx-6 mt-4 rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3"
+        >
+          <div
+            class="flex flex-col md:flex-row md:items-center md:justify-between gap-2"
+          >
+            <div
+              class="flex items-center gap-2 text-xs font-semibold text-blue-800"
+            >
+              <i class="fas fa-chart-simple text-blue-500 text-[10px]"></i>
+              <span x-text="getDnaExtractionSummaryHeadline()"></span>
+            </div>
+            <div class="flex items-center gap-2 text-[10px] text-blue-700/80">
+              <span
+                x-show="getDnaLowConfidenceText().length > 0"
+                x-text="getDnaLowConfidenceText()"
+              ></span>
+              <span
+                x-show="dnaExtractionSummary"
+                class="px-2 py-0.5 rounded-full bg-white/70 border border-blue-100"
+                x-text="getDnaReportTypeText()"
+              ></span>
+            </div>
+          </div>
+        </div>
+        <!-- Card Body -->
+        <div class="p-6">
+          <div class="space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Tier 1 Keywords -->
+              <div class="group">
+                <label
+                  class="flex items-center text-xs font-bold text-slate-700 mb-2 gap-1.5"
+                >
+                  <span class="w-1 h-3.5 bg-red-400 rounded-full"></span>
+                  <span id="lab-keywords-tier1-label"
+                    >Tier 1 核心词（高权重）
+                    <span class="text-slate-400 font-normal"
+                      >- 1-2个</span
+                    ></span
+                  >
+
+                  <!-- 置信度徽章 -->
+                  <span
+                    x-show="showDnaConfidence('keywordsTier1')"
+                    :class="getDnaConfidenceBadgeClass('keywordsTier1')"
+                    class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                  >
+                    <i class="fas fa-chart-line text-[8px]"></i>
+                    <span x-text="getDnaConfidenceText('keywordsTier1')"></span>
+                  </span>
+
+                  <button
+                    type="button"
+                    @click="extractSingleField('keywordsTier1')"
+                    :disabled="dnaActionDisabled"
+                    :class="extractButtonClass"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                    title="仅重新提取此字段"
+                    aria-label="重新提取 Tier 1 核心词"
+                  >
+                    <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
+                  </button>
+                </label>
+                <input
+                  @input="setProfileField('keywordsTier1', $event)"
+                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400 font-mono"
+                  id="lab-keywords-tier1"
+                  placeholder="humidifiers for bedroom, cool mist humidifier"
+                  type="text"
+                  aria-label="Tier 1 核心词"
+                  aria-labelledby="lab-keywords-tier1-label"
+                  aria-describedby="lab-keywords-tier1-source"
+                  :value="profile.keywordsTier1"
+                />
+                <p
+                  id="lab-keywords-tier1-source"
+                  x-show="showDnaSource('keywordsTier1')"
+                  class="mt-1 text-[11px] text-slate-400 truncate"
+                  :title="getDnaFieldSourceText('keywordsTier1')"
+                  x-text="getDnaFieldSourceText('keywordsTier1')"
+                ></p>
+              </div>
+              <!-- Negative Keywords -->
+              <div class="group">
+                <label
+                  class="flex items-center text-xs font-bold text-slate-700 mb-2 gap-1.5"
+                >
+                  <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
+                  <i class="fa-solid fa-ban text-slate-400 text-[10px]"></i>
+                  <span id="negative-keywords-label"
+                    >限制词
+                    <span class="text-slate-400 font-normal"
+                      >- 不希望出现</span
+                    ></span
+                  >
+
+                  <span
+                    x-show="showDnaConfidence('negative')"
+                    :class="getDnaConfidenceBadgeClass('negative')"
+                    class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                  >
+                    <i class="fas fa-chart-line text-[8px]"></i>
+                    <span x-text="getDnaConfidenceText('negative')"></span>
+                  </span>
+
+                  <button
+                    type="button"
+                    @click="extractSingleField('negative')"
+                    :disabled="dnaActionDisabled"
+                    :class="extractButtonClass"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                    title="仅重新提取此字段"
+                    aria-label="重新提取限制词"
+                  >
+                    <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
+                  </button>
+                </label>
+                <input
+                  @input="setProfileField('negative', $event)"
+                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400"
+                  id="negative-keywords"
+                  placeholder="例如: bestseller / cure"
+                  type="text"
+                  aria-label="限制词"
+                  aria-labelledby="negative-keywords-label"
+                  aria-describedby="negative-keywords-source"
+                  :value="profile.negative"
+                />
+                <p
+                  id="negative-keywords-source"
+                  x-show="showDnaSource('negative')"
+                  class="mt-1 text-[11px] text-slate-400 truncate"
+                  :title="getDnaFieldSourceText('negative')"
+                  x-text="getDnaFieldSourceText('negative')"
+                ></p>
+              </div>
+              <!-- Tier 2 Keywords -->
+              <div class="group">
+                <label
+                  class="flex items-center text-xs font-bold text-slate-700 mb-2 gap-1.5"
+                >
+                  <span class="w-1 h-3.5 bg-red-400 rounded-full"></span>
+                  <span id="lab-keywords-tier2-label"
+                    >Tier 2 功能词
+                    <span class="text-slate-400 font-normal"
+                      >- 2-5个</span
+                    ></span
+                  >
+
+                  <!-- 置信度徽章 -->
+                  <span
+                    x-show="showDnaConfidence('keywordsTier2')"
+                    :class="getDnaConfidenceBadgeClass('keywordsTier2')"
+                    class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                  >
+                    <i class="fas fa-chart-line text-[8px]"></i>
+                    <span x-text="getDnaConfidenceText('keywordsTier2')"></span>
+                  </span>
+
+                  <button
+                    type="button"
+                    @click="extractSingleField('keywordsTier2')"
+                    :disabled="dnaActionDisabled"
+                    :class="extractButtonClass"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                    title="仅重新提取此字段"
+                    aria-label="重新提取 Tier 2 功能词"
+                  >
+                    <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
+                  </button>
+                </label>
+                <textarea
+                  @input="setProfileField('keywordsTier2', $event)"
+                  @focus="expandInput($event)"
+                  @blur="restoreInput($event)"
+                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400 font-mono"
+                  id="lab-keywords-tier2"
+                  placeholder="baby humidifier, easy to clean, quiet operation"
+                  rows="1"
+                  aria-label="Tier 2 功能词"
+                  aria-labelledby="lab-keywords-tier2-label"
+                  aria-describedby="lab-keywords-tier2-source"
+                  :value="profile.keywordsTier2"
+                ></textarea>
+                <p
+                  id="lab-keywords-tier2-source"
+                  x-show="showDnaSource('keywordsTier2')"
+                  class="mt-1 text-[11px] text-slate-400 truncate"
+                  :title="getDnaFieldSourceText('keywordsTier2')"
+                  x-text="getDnaFieldSourceText('keywordsTier2')"
+                ></p>
+              </div>
+              <!-- Target Audience -->
+              <div class="group">
+                <label
+                  class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5"
+                >
+                  <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
+                  <i class="fa-solid fa-users text-slate-400 text-[10px]"></i>
+                  <span id="lab-audience-label"
+                    >目标受众
+                    <span class="text-slate-400 font-normal"
+                      >- 客户特征</span
+                    ></span
+                  >
+
+                  <!-- 置信度徽章 -->
+                  <span
+                    x-show="showDnaConfidence('audience')"
+                    :class="getDnaConfidenceBadgeClass('audience')"
+                    class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                  >
+                    <i class="fas fa-chart-line text-[8px]"></i>
+                    <span x-text="getDnaConfidenceText('audience')"></span>
+                  </span>
+
+                  <!-- 单字段提取按钮 -->
+                  <button
+                    type="button"
+                    @click="extractSingleField('audience')"
+                    :disabled="dnaActionDisabled"
+                    :class="extractButtonClass"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                    title="仅重新提取此字段"
+                    aria-label="重新提取目标受众"
+                  >
+                    <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
+                  </button>
+                </label>
+                <input
+                  @input="setProfileField('audience', $event)"
+                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all placeholder:text-slate-400"
+                  id="lab-audience"
+                  placeholder="e.g. Busy moms, Tech enthusiasts"
+                  type="text"
+                  aria-label="目标受众"
+                  aria-labelledby="lab-audience-label"
+                  aria-describedby="lab-audience-source"
+                  :value="profile.audience"
+                />
+                <p
+                  id="lab-audience-source"
+                  x-show="showDnaSource('audience')"
+                  class="mt-1 text-[11px] text-slate-400 truncate"
+                  :title="getDnaFieldSourceText('audience')"
+                  x-text="getDnaFieldSourceText('audience')"
+                ></p>
+              </div>
+              <!-- USPs -->
+              <div class="group">
+                <label
+                  class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5"
+                >
+                  <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
+                  <i
+                    class="fa-solid fa-list-check text-slate-400 text-[10px]"
+                  ></i>
+                  <span id="lab-usps-label"
+                    >核心卖点 (USPs)
+                    <span class="text-slate-400 font-normal"
+                      >- 可补充</span
+                    ></span
+                  >
+
+                  <!-- 置信度徽章 -->
+                  <span
+                    x-show="showDnaConfidence('usps')"
+                    :class="getDnaConfidenceBadgeClass('usps')"
+                    class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                  >
+                    <i class="fas fa-chart-line text-[8px]"></i>
+                    <span x-text="getDnaConfidenceText('usps')"></span>
+                  </span>
+
+                  <!-- 单字段提取按钮 -->
+                  <button
+                    type="button"
+                    @click="extractSingleField('usps')"
+                    :disabled="dnaActionDisabled"
+                    :class="extractButtonClass"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                    title="仅重新提取此字段"
+                    aria-label="重新提取核心卖点"
+                  >
+                    <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
+                  </button>
+                </label>
+                <textarea
+                  @input="setProfileField('usps', $event)"
+                  @focus="expandInput($event)"
+                  @blur="restoreInput($event)"
+                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400"
+                  id="lab-usps"
+                  placeholder="- 专利静音技术 (&lt;28dB)
+- 360度旋转喷嘴"
+                  rows="2"
+                  aria-label="核心卖点"
+                  aria-labelledby="lab-usps-label"
+                  aria-describedby="lab-usps-source"
+                  :value="profile.usps"
+                ></textarea>
+                <p
+                  id="lab-usps-source"
+                  x-show="showDnaSource('usps')"
+                  class="mt-1 text-[11px] text-slate-400 truncate"
+                  :title="getDnaFieldSourceText('usps')"
+                  x-text="getDnaFieldSourceText('usps')"
+                ></p>
+              </div>
+              <!-- Specs -->
+              <div class="group">
+                <label
+                  class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5"
+                >
+                  <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
+                  <i
+                    class="fa-solid fa-circle-info text-slate-400 text-[10px]"
+                  ></i>
+                  <span id="lab-specs-label"
+                    >详细参数 (Specs)
+                    <span class="text-slate-400 font-normal"
+                      >- 产品特征</span
+                    ></span
+                  >
+
+                  <!-- 置信度徽章 -->
+                  <span
+                    x-show="showDnaConfidence('specs')"
+                    :class="getDnaConfidenceBadgeClass('specs')"
+                    class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                  >
+                    <i class="fas fa-chart-line text-[8px]"></i>
+                    <span x-text="getDnaConfidenceText('specs')"></span>
+                  </span>
+
+                  <!-- 单字段提取按钮 -->
+                  <button
+                    type="button"
+                    @click="extractSingleField('specs')"
+                    :disabled="dnaActionDisabled"
+                    :class="extractButtonClass"
+                    class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                    title="仅重新提取此字段"
+                    aria-label="重新提取详细参数"
+                  >
+                    <i class="fas fa-rotate text-[10px]" aria-hidden="true"></i>
+                  </button>
+                </label>
+                <textarea
+                  @input="setProfileField('specs', $event)"
+                  @focus="expandInput($event)"
+                  @blur="restoreInput($event)"
+                  class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400 font-mono"
+                  id="lab-specs"
+                  placeholder="材质: ABS + PP
+尺寸: 20x20x30cm"
+                  rows="2"
+                  aria-label="详细参数"
+                  aria-labelledby="lab-specs-label"
+                  aria-describedby="lab-specs-source"
+                  :value="profile.specs"
+                ></textarea>
+                <p
+                  id="lab-specs-source"
+                  x-show="showDnaSource('specs')"
+                  class="mt-1 text-[11px] text-slate-400 truncate"
+                  :title="getDnaFieldSourceText('specs')"
+                  x-text="getDnaFieldSourceText('specs')"
+                ></p>
+              </div>
+            </div>
+            <!-- Social Hooks -->
+            <div class="group">
+              <label
+                class="flex items-center text-xs font-bold text-purple-600 mb-2 gap-1.5"
+                for="lab-social-hook"
+              >
+                <span class="w-1 h-3.5 bg-purple-400 rounded-full"></span>
+                <i class="fab fa-instagram text-purple-400 text-[10px]"></i>
+                植入社媒 Hook / 节日词
+                <span class="text-purple-400 font-normal">- 可补充</span>
+              </label>
+              <input
+                @input="setProfileField('socialHook', $event)"
+                class="w-full text-sm border-2 border-purple-200 rounded-xl p-3 bg-purple-50/30 text-purple-700 transition-all placeholder:text-purple-300"
+                id="lab-social-hook"
+                placeholder="例如: 限时半价 / 圣诞特供 / #SummerVibes"
+                type="text"
+                :value="profile.socialHook"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3: Strategy Config -->
+      <div
+        class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden mb-10"
+        id="card-strategy"
+      >
+        <!-- Card Header -->
+        <div class="px-6 pt-5 pb-4 border-b border-slate-100">
+          <h3
+            class="text-base font-bold text-slate-800 flex items-center gap-2.5"
+          >
+            <div
+              class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-sm shadow-orange-500/20"
+            >
+              <span class="text-xs font-bold text-white">3</span>
+            </div>
+            生成策略配置
+            <span class="text-[11px] text-slate-500 font-normal ml-1"
+              >Strategy</span
+            >
+          </h3>
+        </div>
+        <!-- Card Body -->
+        <div class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+            <!-- Tone -->
+            <div>
+              <label
+                class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5"
+                for="lab-tone"
+              >
+                <span class="w-1 h-3.5 bg-orange-400 rounded-full"></span>
+                文案语气 Tone
+              </label>
+              <select
+                @change="setProfileField('tone', $event)"
+                class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all hover:border-slate-300 cursor-pointer font-medium text-slate-700"
+                id="lab-tone"
+                :value="profile.tone"
+              >
+                <option value="professional">Professional (专业)</option>
+                <option value="exciting">Exciting (激动人心)</option>
+                <option value="emotional">Emotional (情感共鸣)</option>
+                <option value="minimalist">Minimalist (极简)</option>
+              </select>
+            </div>
+            <!-- Custom Rules -->
+            <div>
+              <label
+                class="flex items-center text-xs font-bold text-slate-600 mb-2 gap-1.5"
+                for="lab-custom-strategy"
+              >
+                <span class="w-1 h-3.5 bg-slate-300 rounded-full"></span>
+                自定义规则
+                <span class="text-slate-400 font-normal">- 有就填</span>
+              </label>
+              <textarea
+                @input="setProfileField('customStrategy', $event)"
+                @focus="expandInput($event)"
+                @blur="restoreInput($event)"
+                class="w-full text-sm border-2 border-slate-200 rounded-xl p-3 bg-slate-50/50 transition-all resize-none placeholder:text-slate-400"
+                id="lab-custom-strategy"
+                placeholder="例如: 禁止使用'Best Seller'词汇..."
+                rows="1"
+                :value="profile.customStrategy"
+              ></textarea>
+            </div>
+          </div>
+          <!-- AI Optimization Toggles -->
+          <div class="pt-5 border-t border-slate-100">
+            <label
+              class="flex items-center text-xs font-bold text-slate-600 mb-3 gap-1.5"
+            >
+              <span class="w-1 h-3.5 bg-orange-400 rounded-full"></span>
+              AI 优化策略
+            </label>
+            <div class="flex items-center gap-3 flex-wrap">
+              <!-- COSMO -->
+              <label
+                class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white"
+              >
+                <input
+                  @change="setProfileBoolean('useCosmo', $event)"
+                  :checked="profile.useCosmo"
+                  class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4"
+                  id="opt-cosmo"
+                  type="checkbox"
+                />
+                <div class="flex flex-col">
+                  <span
+                    class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors"
+                    >COSMO 意图匹配</span
+                  >
+                  <span class="text-[10px] text-slate-400">构建场景化语义</span>
+                </div>
+              </label>
+              <!-- Rufus -->
+              <label
+                class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white"
+              >
+                <input
+                  @change="setProfileBoolean('useRufus', $event)"
+                  :checked="profile.useRufus"
+                  class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4"
+                  id="opt-rufus"
+                  type="checkbox"
+                />
+                <div class="flex flex-col">
+                  <span
+                    class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors"
+                    >Rufus 优化</span
+                  >
+                  <span class="text-[10px] text-slate-400">问答预判策略</span>
+                </div>
+              </label>
+              <!-- Emoji -->
+              <label
+                class="flex items-center gap-2.5 text-sm cursor-pointer group px-4 py-2.5 rounded-xl border-2 transition-all duration-200 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-200 has-[:checked]:shadow-sm border-slate-150 hover:border-orange-200 bg-white"
+              >
+                <input
+                  @change="setProfileBoolean('useEmoji', $event)"
+                  :checked="profile.useEmoji"
+                  class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4"
+                  id="opt-emoji"
+                  type="checkbox"
+                />
+                <div class="flex flex-col">
+                  <span
+                    class="text-xs font-semibold text-slate-700 group-hover:text-orange-600 transition-colors"
+                    >Emoji 点缀</span
+                  >
+                  <span class="text-[10px] text-slate-400">增强视觉吸引</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== Right Column: Console & Output ===== -->
+    <div class="lg:col-span-4">
+      <div class="sticky top-6 space-y-5">
+        <!-- Flip Console Card -->
+        <div class="relative w-full group [perspective:1000px]">
+          <!-- Mode Toggle -->
+          <div
+            class="absolute top-4 right-4 z-[60] bg-white/15 backdrop-blur-xl p-1 rounded-xl flex items-center shadow-lg border border-white/10 transition-all duration-500"
+            id="embed-toggle-container"
+          >
+            <div
+              class="absolute top-1 left-1 w-[calc(50%-4px)] h-[calc(100%-8px)] bg-white shadow-md rounded-lg transition-all duration-300 ease-out z-0"
+              id="mode-toggle-glider"
+            ></div>
+            <button
+              @click="toggleConsoleMode('listing')"
+              class="relative z-10 px-4 py-2 text-[11px] font-bold rounded-lg transition-colors duration-300 text-blue-600 uppercase tracking-wider cursor-pointer"
+              id="btn-mode-listing"
+            >
+              Listing
+            </button>
+            <button
+              @click="toggleConsoleMode('visual')"
+              class="relative z-10 px-4 py-2 text-[11px] font-bold rounded-lg transition-colors duration-300 text-slate-500 hover:text-pink-500 uppercase tracking-wider cursor-pointer"
+              id="btn-mode-visual"
+            >
+              Visual
+            </button>
+          </div>
+          <div
+            class="relative transition-all duration-700 [transform-style:preserve-3d] grid grid-cols-1 grid-rows-1"
+            id="console-card-inner"
+          >
+            <!-- Front: Listing Mode -->
+            <div
+              class="col-start-1 row-start-1 w-full [backface-visibility:hidden] [pointer-events:auto]"
+            >
+              <div
+                class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 rounded-2xl shadow-xl shadow-blue-900/30 p-6 text-white h-full flex flex-col gap-5 border border-blue-500/20 overflow-hidden"
+              >
+                <!-- 背景光效 -->
+                <div
+                  class="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"
+                ></div>
+                <div
+                  class="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl"
+                ></div>
+                <div
+                  class="absolute inset-0 opacity-[0.03]"
+                  style="
+                    background-image: radial-gradient(
+                      circle,
+                      #3b82f6 1px,
+                      transparent 1px
+                    );
+                    background-size: 20px 20px;
+                  "
+                ></div>
+                <div class="pr-28 relative z-10">
+                  <div class="flex items-center gap-2 mb-2">
                     <div
-                        class="px-5 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-md bg-indigo-50 flex items-center justify-center">
-                                <i class="fas fa-terminal text-indigo-400 text-[10px]"></i>
-                            </div>
-                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider"
-                                id="output-preview-title">Listing Prompt</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <button @click="copyPrompt"
-                                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-all cursor-pointer border border-transparent hover:border-blue-100"
-                                title="复制">
-                                <i class="fas fa-copy text-xs"></i>
-                            </button>
-                            <button @click="clearInputs"
-                                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-all cursor-pointer border border-transparent hover:border-rose-100"
-                                title="清空">
-                                <i class="fas fa-trash-alt text-xs"></i>
-                            </button>
-                        </div>
-                        <input @input="setProfileNumber('charLimit', $event)" class="hidden" id="lab-char-limit" type="number"
-                            :value="profile.charLimit" />
+                      class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center"
+                    >
+                      <i class="fas fa-pen-nib text-blue-400 text-sm"></i>
                     </div>
-                    <!-- Output Body -->
-                    <div class="relative flex-1 bg-white overflow-hidden">
-                            <textarea
-                                class="w-full h-full px-5 py-4 pb-10 text-xs font-mono text-slate-600 bg-transparent resize-none focus:outline-none border-0 transition-colors duration-500 leading-relaxed"
-                                id="final-prompt-output" placeholder="// 1. 检查 AI 分析报告各维度内容
+                    <div>
+                      <h3 class="font-bold text-base leading-none">Listing</h3>
+                      <span class="text-blue-300/50 font-normal text-[10px]"
+                        >Text Generation</span
+                      >
+                    </div>
+                  </div>
+                  <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                    基于 A10 算法逻辑生成高转化 Listing 文本
+                  </p>
+                </div>
+                <div class="relative z-10">
+                  <button
+                    :class="listingGenerateButtonClass"
+                    :disabled="generateButtonDisabled"
+                    @click="generateListingPrompt"
+                    class="relative w-full py-3.5 font-bold rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-center gap-2.5 group overflow-hidden"
+                    id="btn-generate-prompt"
+                  >
+                    <div
+                      class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                    ></div>
+                    <i
+                      class="fas fa-microchip relative z-10 group-hover:animate-pulse"
+                    ></i>
+                    <span class="relative z-10">生成 Master Prompt</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Back: Visual Mode -->
+            <div
+              class="col-start-1 row-start-1 w-full [backface-visibility:hidden] [transform:rotateY(180deg)] [pointer-events:auto]"
+            >
+              <div
+                class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-pink-900 rounded-2xl shadow-xl shadow-pink-900/30 p-6 text-white h-full flex flex-col gap-5 border border-pink-500/20 overflow-hidden"
+              >
+                <!-- 背景光效 -->
+                <div
+                  class="absolute top-0 right-0 w-48 h-48 bg-pink-500/5 rounded-full blur-3xl"
+                ></div>
+                <div
+                  class="absolute bottom-0 left-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl"
+                ></div>
+                <div
+                  class="absolute inset-0 opacity-[0.03]"
+                  style="
+                    background-image: radial-gradient(
+                      circle,
+                      #ec4899 1px,
+                      transparent 1px
+                    );
+                    background-size: 20px 20px;
+                  "
+                ></div>
+                <div class="pr-28 relative z-10">
+                  <div class="flex items-center gap-2 mb-2">
+                    <div
+                      class="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center"
+                    >
+                      <i class="fas fa-palette text-pink-400 text-sm"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-base leading-none text-white">
+                        Visual
+                      </h3>
+                      <span class="text-pink-300/50 font-normal text-[10px]"
+                        >Art Director</span
+                      >
+                    </div>
+                  </div>
+                  <p class="text-pink-200/60 text-xs mt-1 leading-relaxed">
+                    将痛点转化为视觉防御策略
+                  </p>
+                </div>
+                <div class="relative z-10">
+                  <button
+                    :class="visualGenerateButtonClass"
+                    :disabled="visualGenerateButtonDisabled"
+                    @click="generateVisualPrompt"
+                    class="relative w-full py-3.5 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-center gap-2.5 group border border-pink-400/20 overflow-hidden"
+                    id="btn-generate-visual"
+                  >
+                    <div
+                      class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                    ></div>
+                    <i class="fas fa-magic relative z-10"></i>
+                    <span class="relative z-10">生成视觉剧本 (A+/EBC)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Output Card -->
+        <div
+          class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white flex flex-col h-[500px] overflow-hidden"
+          id="prompt-output-card"
+        >
+          <!-- Output Header -->
+          <div
+            class="px-5 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white flex items-center justify-between"
+          >
+            <div class="flex items-center gap-2">
+              <div
+                class="w-6 h-6 rounded-md bg-indigo-50 flex items-center justify-center"
+              >
+                <i class="fas fa-terminal text-indigo-400 text-[10px]"></i>
+              </div>
+              <span
+                class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                id="output-preview-title"
+                >Listing Prompt</span
+              >
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button
+                @click="copyPrompt"
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-all cursor-pointer border border-transparent hover:border-blue-100"
+                title="复制"
+              >
+                <i class="fas fa-copy text-xs"></i>
+              </button>
+              <button
+                @click="clearInputs"
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-all cursor-pointer border border-transparent hover:border-rose-100"
+                title="清空"
+              >
+                <i class="fas fa-trash-alt text-xs"></i>
+              </button>
+            </div>
+            <input
+              @input="setProfileNumber('charLimit', $event)"
+              class="hidden"
+              id="lab-char-limit"
+              type="number"
+              :value="profile.charLimit"
+            />
+          </div>
+          <!-- Output Body -->
+          <div class="relative flex-1 bg-white overflow-hidden">
+            <textarea
+              class="w-full h-full px-5 py-4 pb-10 text-xs font-mono text-slate-600 bg-transparent resize-none focus:outline-none border-0 transition-colors duration-500 leading-relaxed"
+              id="final-prompt-output"
+              placeholder="// 1. 检查 AI 分析报告各维度内容
 // 2. 补充产品 DNA 信息
 // 3. 点击上方生成按钮
 // 4. 复制 Prompt 并发送给 AI 大模型
 
-// 提示: 先确认报告洞察，再补充产品 DNA，生成效果更稳定" aria-label="最终 Prompt 输出" readonly="" style="pointer-events: auto !important; overflow-y: auto !important;"
-                            :value="currentPrompt"></textarea>
-                        <!-- Footer Status Bar -->
-                        <div
-                            class="absolute bottom-0 left-0 right-0 px-5 py-2 bg-gradient-to-t from-white via-white to-transparent flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <div class="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
-                                <span class="text-[10px] text-slate-400 font-medium">Ready</span>
-                            </div>
-                            <div
-                                class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">
-                                <span
-                                    :class="promptTokenCountClass"
-                                    id="prompt-word-count" x-text="formattedTokenCount">0</span>
-                                <span class="text-[10px]">tokens</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button type="button" @click="copySeoKeywords"
-                    class="w-full h-11 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition-all flex items-center justify-center gap-2 text-xs font-bold shadow-sm shadow-emerald-100/60"
-                    title="复制 AI 分析报告与产品 DNA 补充中的 SEO 搜索关键词">
-                    <i class="fas fa-key text-[11px]"></i>
-                    <span>复制 SEO 关键词</span>
-                </button>
+// 提示: 先确认报告洞察，再补充产品 DNA，生成效果更稳定"
+              aria-label="最终 Prompt 输出"
+              readonly=""
+              style="
+                pointer-events: auto !important;
+                overflow-y: auto !important;
+              "
+              :value="currentPrompt"
+            ></textarea>
+            <!-- Footer Status Bar -->
+            <div
+              class="absolute bottom-0 left-0 right-0 px-5 py-2 bg-gradient-to-t from-white via-white to-transparent flex items-center justify-between"
+            >
+              <div class="flex items-center gap-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+                <span class="text-[10px] text-slate-400 font-medium"
+                  >Ready</span
+                >
+              </div>
+              <div
+                class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100"
+              >
+                <span
+                  :class="promptTokenCountClass"
+                  id="prompt-word-count"
+                  x-text="formattedTokenCount"
+                  >0</span
+                >
+                <span class="text-[10px]">tokens</span>
+              </div>
             </div>
+          </div>
         </div>
+        <button
+          type="button"
+          @click="copySeoKeywords"
+          class="w-full h-11 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition-all flex items-center justify-center gap-2 text-xs font-bold shadow-sm shadow-emerald-100/60"
+          title="复制 AI 分析报告与产品 DNA 补充中的 SEO 搜索关键词"
+        >
+          <i class="fas fa-key text-[11px]"></i>
+          <span>复制 SEO 关键词</span>
+        </button>
+      </div>
     </div>
+  </div>
 </div>

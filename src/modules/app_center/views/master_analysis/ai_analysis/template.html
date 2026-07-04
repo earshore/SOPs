@@ -1,6 +1,6 @@
 <div class="module-container ai-analysis-wrapper" x-data="aiAnalysisPanel">
   <!-- Welcome Banner -->
-  <div class="wb-container wb-container--card wb-theme-indigo mb-8">
+  <div class="wb-container wb-container--card wb-theme-cyan mb-8">
     <div class="wb-card">
       <div class="wb-bg-gradient"></div>
       <div class="wb-grid-pattern"></div>
@@ -18,7 +18,9 @@
             <div class="wb-title-row">
               <h1 class="wb-title">
                 <span
-                  class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">AI</span>
+                  class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400"
+                  >AI</span
+                >
                 智能分析
               </h1>
               <span aria-label="人工智能功能" class="wb-badge wb-badge-ai">
@@ -26,7 +28,8 @@
               </span>
             </div>
             <p class="wb-description">
-              基于大语言模型的 Listings &amp; Reviews 深度洞察，从标题关键词到用户评论，全方位解构产品竞争力。
+              基于大语言模型的 Listings &amp; Reviews
+              深度洞察，从标题关键词到用户评论，全方位解构产品竞争力。
             </p>
             <div class="wb-tags">
               <div class="wb-tag">
@@ -34,11 +37,17 @@
                 <span>支持 Listings &amp; Reviews 分析维度</span>
               </div>
               <div class="wb-tag">
-                <div class="wb-tag-dot wb-tag-dot--purple" aria-hidden="true"></div>
+                <div
+                  class="wb-tag-dot wb-tag-dot--purple"
+                  aria-hidden="true"
+                ></div>
                 <span>AI 大模型驱动</span>
               </div>
               <div class="wb-tag">
-                <div class="wb-tag-dot wb-tag-dot--green" aria-hidden="true"></div>
+                <div
+                  class="wb-tag-dot wb-tag-dot--green"
+                  aria-hidden="true"
+                ></div>
                 <span>一键导出报告</span>
               </div>
             </div>
@@ -48,21 +57,37 @@
     </div>
   </div>
   <nav class="ma-workflow-strip" aria-label="Master Analysis 工作流">
-    <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="scraper">
+    <button
+      type="button"
+      class="ma-workflow-step"
+      data-action="switch-tab"
+      data-tab="scraper"
+    >
       <span class="ma-workflow-index">1</span>
       <span class="ma-workflow-copy">
         <span class="ma-workflow-label">数据采集</span>
         <span class="ma-workflow-meta">ASIN / JSON / Review</span>
       </span>
     </button>
-    <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="ai_analysis" aria-current="step">
+    <button
+      type="button"
+      class="ma-workflow-step"
+      data-action="switch-tab"
+      data-tab="ai_analysis"
+      aria-current="step"
+    >
       <span class="ma-workflow-index">2</span>
       <span class="ma-workflow-copy">
         <span class="ma-workflow-label">AI 智能分析</span>
         <span class="ma-workflow-meta">维度选择 / 报告生成</span>
       </span>
     </button>
-    <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="promptlab">
+    <button
+      type="button"
+      class="ma-workflow-step"
+      data-action="switch-tab"
+      data-tab="promptlab"
+    >
       <span class="ma-workflow-index">3</span>
       <span class="ma-workflow-copy">
         <span class="ma-workflow-label">Prompt 生成</span>
@@ -74,79 +99,119 @@
   <div>
     <!-- ASIN 选择和分析目标 -->
     <div class="mb-8">
-      <div class="bg-white/90 border border-slate-200/70 rounded-2xl shadow-sm overflow-hidden">
-        <button type="button" data-selection-panel-toggle @click="toggleSelectionPanel()"
+      <div
+        class="bg-white/90 border border-slate-200/70 rounded-2xl shadow-sm overflow-hidden"
+      >
+        <button
+          type="button"
+          data-selection-panel-toggle
+          @click="toggleSelectionPanel()"
           class="w-full flex items-center justify-between px-6 py-5 transition-colors hover:bg-slate-50/80"
-          :class="selectionPanelButtonClass">
+          :class="selectionPanelButtonClass"
+        >
           <div class="flex items-center gap-4">
             <div
-              class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200">
+              class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200"
+            >
               <i class="fa-solid fa-sliders text-white"></i>
             </div>
             <div class="text-left">
-              <h3 class="text-lg font-semibold text-slate-800">选择 ASIN 与分析目标</h3>
-              <p class="text-sm text-slate-500 mt-0.5">展开后可一站式完成产品与分析维度配置</p>
+              <h3 class="text-lg font-semibold text-slate-800">
+                选择 ASIN 与分析目标
+              </h3>
+              <p class="text-sm text-slate-500 mt-0.5">
+                展开后可一站式完成产品与分析维度配置
+              </p>
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <span x-show="showSelectionSummary"
-              class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-xs px-3 py-1.5 rounded-full font-medium border border-emerald-100 inline-flex">
+            <span
+              x-show="showSelectionSummary"
+              class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-xs px-3 py-1.5 rounded-full font-medium border border-emerald-100 inline-flex"
+            >
               <i class="fa-solid fa-circle-check"></i>
               已选择 <span x-text="selectedAsins.length"></span> 个产品
             </span>
-            <span x-show="showSelectionSummary"
-              class="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs px-3 py-1.5 rounded-full font-medium border border-indigo-100 inline-flex">
+            <span
+              x-show="showSelectionSummary"
+              class="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs px-3 py-1.5 rounded-full font-medium border border-indigo-100 inline-flex"
+            >
               <i class="fa-solid fa-circle-check"></i>
-              已选择 <span x-text="selectedTargets.length"></span> / <span x-text="analysisTargets.length"></span> 个分析目标
+              已选择 <span x-text="selectedTargets.length"></span> /
+              <span x-text="analysisTargets.length"></span> 个分析目标
             </span>
             <i :class="selectionPanelChevronClass"></i>
           </div>
         </button>
 
-        <template x-if="showMissingRealDataNotice &amp;&amp; !showSelectionPanel">
-          <div class="mx-6 mt-4 mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <template
+          x-if="showMissingRealDataNotice &amp;&amp; !showSelectionPanel"
+        >
+          <div
+            class="mx-6 mt-4 mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4"
+          >
+            <div
+              class="flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+            >
               <div>
-                <h3 class="font-bold text-amber-900 flex items-center gap-2 text-sm">
+                <h3
+                  class="font-bold text-amber-900 flex items-center gap-2 text-sm"
+                >
                   <i class="fa-solid fa-circle-info text-amber-600"></i>
                   还没有可分析的产品数据
                 </h3>
                 <p class="text-xs text-amber-800/80 mt-1">
-                  可以先去数据采集页导入 JSON 或采集 ASIN，再回到这里选择产品和分析目标。
+                  可以先去数据采集页导入 JSON 或采集
+                  ASIN，再回到这里选择产品和分析目标。
                 </p>
               </div>
-              <button type="button" data-action="switch-tab" data-tab="scraper"
-                class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition-colors">
+              <button
+                type="button"
+                data-action="switch-tab"
+                data-tab="scraper"
+                class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition-colors"
+              >
                 <i class="fa-solid fa-spider mr-1"></i>去数据采集
               </button>
             </div>
           </div>
         </template>
 
-        <div x-show="showSelectionPanel" x-transition:enter="transition ease-out duration-200"
+        <div
+          x-show="showSelectionPanel"
+          x-transition:enter="transition ease-out duration-200"
           x-transition:enter-start="opacity-0 transform -translate-y-2"
           x-transition:enter-end="opacity-100 transform translate-y-0"
           x-transition:leave="transition ease-in duration-150"
           x-transition:leave-start="opacity-100 transform translate-y-0"
           x-transition:leave-end="opacity-0 transform -translate-y-2"
-          class="px-6 pb-6 pt-5 bg-gradient-to-b from-slate-50/80 via-white to-white" data-selection-panel-content>
+          class="px-6 pb-6 pt-5 bg-gradient-to-b from-slate-50/80 via-white to-white"
+          data-selection-panel-content
+        >
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- ASIN 输入区 -->
             <div class="lg:col-span-4">
-              <div class="bg-white/95 rounded-2xl shadow-sm border border-slate-200/80 p-6 h-full ring-1 ring-white/70">
+              <div
+                class="bg-white/95 rounded-2xl shadow-sm border border-slate-200/80 p-6 h-full ring-1 ring-white/70"
+              >
                 <div class="flex items-start justify-between gap-4 mb-5">
                   <div class="flex items-center gap-4">
                     <div
-                      class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-100/60">
+                      class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-100/60"
+                    >
                       <i class="fa-solid fa-barcode text-indigo-600"></i>
                     </div>
                     <div>
-                      <h2 class="text-lg font-semibold text-slate-800"> 选择 ASIN</h2>
+                      <h2 class="text-lg font-semibold text-slate-800">
+                        选择 ASIN
+                      </h2>
                       <p class="text-sm text-slate-500">选择或输入产品标识符</p>
                     </div>
                   </div>
-                  <span data-asin-selected-count
-                    class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-xs px-3 py-1.5 rounded-full font-medium border border-emerald-100 inline-flex mt-1">
+                  <span
+                    data-asin-selected-count
+                    class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-xs px-3 py-1.5 rounded-full font-medium border border-emerald-100 inline-flex mt-1"
+                  >
                     <i class="fa-solid fa-circle-check"></i>
                     已选择 <span x-text="selectedAsins.length"></span> 个产品
                   </span>
@@ -157,13 +222,21 @@
                     <div class="flex items-center justify-end mb-3">
                       <!-- <label class="text-sm font-semibold text-slate-700">选择产品 ASIN</label> -->
                       <div class="flex items-center gap-2">
-                        <button type="button" :disabled="isAnalyzing" @click="selectAllAsins()"
-                          class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50">
+                        <button
+                          type="button"
+                          :disabled="isAnalyzing"
+                          @click="selectAllAsins()"
+                          class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                        >
                           <i class="fa-solid fa-check-double"></i>
                           全选
                         </button>
-                        <button type="button" :disabled="isAnalyzing" @click="clearAllAsins()"
-                          class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50">
+                        <button
+                          type="button"
+                          :disabled="isAnalyzing"
+                          @click="clearAllAsins()"
+                          class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                        >
                           <i class="fa-solid fa-xmark"></i>
                           清空
                         </button>
@@ -175,18 +248,30 @@
                         <!-- <p class="text-xs text-slate-500 mb-3 font-medium">已加载的产品（<span x-text="availableAsins.length"></span> 个）：
                 </p> -->
                         <div class="space-y-2 max-h-48 overflow-y-auto">
-                          <template :key="asinItem" x-for="asinItem in availableAsins">
+                          <template
+                            :key="asinItem"
+                            x-for="asinItem in availableAsins"
+                          >
                             <label
                               :class="getAsinOptionClass(asinItem)"
-                              class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-indigo-50">
-                              <input :checked="selectedAsins.includes(asinItem)" :disabled="isAnalyzing"
+                              class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-indigo-50"
+                            >
+                              <input
+                                :checked="selectedAsins.includes(asinItem)"
+                                :disabled="isAnalyzing"
                                 @change="toggleAsin(asinItem)"
                                 class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-                                type="checkbox" />
-                              <span :class="getAsinTextClass(asinItem)"
-                                class="flex-1 font-mono text-sm font-semibold" x-text="asinItem"></span>
-                              <i class="fa-solid fa-check text-indigo-600"
-                                x-show="selectedAsins.includes(asinItem)"></i>
+                                type="checkbox"
+                              />
+                              <span
+                                :class="getAsinTextClass(asinItem)"
+                                class="flex-1 font-mono text-sm font-semibold"
+                                x-text="asinItem"
+                              ></span>
+                              <i
+                                class="fa-solid fa-check text-indigo-600"
+                                x-show="selectedAsins.includes(asinItem)"
+                              ></i>
                             </label>
                           </template>
                         </div>
@@ -196,60 +281,78 @@
                   <!-- 产品信息摘要 -->
                   <template x-if="hasCurrentProducts">
                     <div
-                      class="mt-4 p-4 bg-gradient-to-r from-slate-50 to-indigo-50/50 rounded-xl border border-slate-100">
+                      class="mt-4 p-4 bg-gradient-to-r from-slate-50 to-indigo-50/50 rounded-xl border border-slate-100"
+                    >
                       <h4
-                        class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5"
+                      >
                         <i class="fa-solid fa-box-open"></i>
                         已加载产品信息
                       </h4>
                       <div class="space-y-2">
-                        <template :key="product.asin" x-for="product in currentProducts.slice(0, 2)">
+                        <template
+                          :key="product.asin"
+                          x-for="product in currentProducts.slice(0, 2)"
+                        >
                           <div class="text-xs">
-                            <span class="font-mono text-indigo-600 font-semibold" x-text="product.asin"></span>
-                            <p class="text-slate-600 line-clamp-1 mt-0.5" x-text="product.productTitle"></p>
+                            <span
+                              class="font-mono text-indigo-600 font-semibold"
+                              x-text="product.asin"
+                            ></span>
+                            <p
+                              class="text-slate-600 line-clamp-1 mt-0.5"
+                              x-text="product.productTitle"
+                            ></p>
                           </div>
                         </template>
                         <template x-if="hasMoreCurrentProducts">
                           <p class="text-xs text-slate-500 italic">
-                            还有 <span x-text="currentProducts.length - 2"></span> 个产品...
+                            还有
+                            <span x-text="currentProducts.length - 2"></span>
+                            个产品...
                           </p>
                         </template>
                       </div>
-                      <div class="flex items-center gap-4 mt-3 text-xs text-slate-500 pt-2 border-t border-slate-200">
+                      <div
+                        class="flex items-center gap-4 mt-3 text-xs text-slate-500 pt-2 border-t border-slate-200"
+                      >
                         <span class="flex items-center gap-1">
                           <i class="fa-solid fa-list text-blue-500"></i>
-                          <span
-                            x-text="totalFeatureBulletCount"></span>
+                          <span x-text="totalFeatureBulletCount"></span>
                           个卖点
                         </span>
                         <span class="flex items-center gap-1">
                           <i class="fa-solid fa-comments text-amber-500"></i>
-                          <span
-                            x-text="totalCustomerReviewCount"></span>
+                          <span x-text="totalCustomerReviewCount"></span>
                           条评论
                         </span>
                         <div class="relative ml-auto">
-                          <i @mouseenter="showProductSummaryTooltip()" @mouseleave="hideProductSummaryTooltip()"
-                            class="fa-solid fa-circle-exclamation text-indigo-500 cursor-help"></i>
-                          <div x-show="productSummaryTooltipVisible" x-transition:enter="transition ease-out duration-200"
+                          <i
+                            @mouseenter="showProductSummaryTooltip()"
+                            @mouseleave="hideProductSummaryTooltip()"
+                            class="fa-solid fa-circle-exclamation text-indigo-500 cursor-help"
+                          ></i>
+                          <div
+                            x-show="productSummaryTooltipVisible"
+                            x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0 transform scale-95"
                             x-transition:enter-end="opacity-100 transform scale-100"
                             x-transition:leave="transition ease-in duration-150"
                             x-transition:leave-start="opacity-100 transform scale-100"
                             x-transition:leave-end="opacity-0 transform scale-95"
                             class="absolute left-0 bottom-full mb-2 w-72 p-3 bg-slate-800 text-white rounded-lg shadow-xl z-50"
-                            style="display: none;">
+                            style="display: none"
+                          >
                             <div class="text-xs space-y-2">
                               <template x-if="hasScraperData">
                                 <div>
                                   <p class="font-semibold mb-1">数据源已加载</p>
+                                  <p x-text="productSummaryText"></p>
                                   <p
-                                    x-text="productSummaryText">
-                                  </p>
-                                  <p class="text-slate-300 mt-1.5 flex items-center gap-1">
+                                    class="text-slate-300 mt-1.5 flex items-center gap-1"
+                                  >
                                     <i class="fa-solid fa-globe"></i>
-                                    <span
-                                      x-text="dataSourceMetaText"></span>
+                                    <span x-text="dataSourceMetaText"></span>
                                   </p>
                                 </div>
                               </template>
@@ -257,15 +360,18 @@
                                 <div>
                                   <p class="font-semibold mb-1">数据源已加载</p>
                                   <p>包含产品数据和评论</p>
-                                  <p class="text-slate-300 mt-1.5 flex items-center gap-1">
+                                  <p
+                                    class="text-slate-300 mt-1.5 flex items-center gap-1"
+                                  >
                                     <i class="fa-solid fa-globe"></i>
                                     可从"数据采集"模块获取真实产品数据
                                   </p>
                                 </div>
                               </template>
                             </div>
-                            <div class="ai-analysis-tooltip-arrow absolute left-4 top-full">
-                            </div>
+                            <div
+                              class="ai-analysis-tooltip-arrow absolute left-4 top-full"
+                            ></div>
                           </div>
                         </div>
                       </div>
@@ -275,20 +381,32 @@
                 <!-- 无数据提示 -->
                 <template x-if="hasNoAvailableAsins">
                   <div class="mt-4 pt-4 border-t border-slate-100">
-                    <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
+                    <div
+                      class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4"
+                    >
                       <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <i class="fa-solid fa-exclamation-triangle text-amber-600"></i>
+                        <div
+                          class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0"
+                        >
+                          <i
+                            class="fa-solid fa-exclamation-triangle text-amber-600"
+                          ></i>
                         </div>
                         <div class="flex-1">
-                          <h4 class="text-sm font-bold text-amber-800 mb-1">暂无产品数据</h4>
-                          <p class="text-xs text-amber-700 leading-relaxed mb-3">
+                          <h4 class="text-sm font-bold text-amber-800 mb-1">
+                            暂无产品数据
+                          </h4>
+                          <p
+                            class="text-xs text-amber-700 leading-relaxed mb-3"
+                          >
                             请先从"数据采集"模块抓取产品数据，或从"数据管理"导入历史数据。
                           </p>
                           <div class="flex items-center gap-2">
-                            <a @click.prevent="$dispatch('navigate-to-scraper')"
+                            <a
+                              @click.prevent="$dispatch('navigate-to-scraper')"
                               class="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-amber-700 hover:text-amber-800 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-lg transition-colors"
-                              href="#">
+                              href="#"
+                            >
                               <i class="fa-solid fa-arrow-right"></i>
                               前往数据采集
                             </a>
@@ -302,42 +420,68 @@
             </div>
             <!-- 分析目标选择区 -->
             <div class="lg:col-span-8">
-              <div class="bg-white/95 rounded-2xl shadow-sm border border-slate-200/80 p-6 h-full ring-1 ring-white/70">
+              <div
+                class="bg-white/95 rounded-2xl shadow-sm border border-slate-200/80 p-6 h-full ring-1 ring-white/70"
+              >
                 <div class="flex items-start justify-between gap-4 mb-6">
                   <div class="flex items-center gap-4 flex-1">
                     <div
-                      class="w-12 h-12 bg-violet-50 border border-violet-100 rounded-xl flex items-center justify-center shadow-sm shadow-violet-100/60">
+                      class="w-12 h-12 bg-violet-50 border border-violet-100 rounded-xl flex items-center justify-center shadow-sm shadow-violet-100/60"
+                    >
                       <!-- <i class="fa-solid fa-check-double text-violet-600"></i> -->
-                      <i class="fa-solid fa-users-viewfinder text-violet-600"></i>
+                      <i
+                        class="fa-solid fa-users-viewfinder text-violet-600"
+                      ></i>
                     </div>
                     <div class="flex items-start justify-between gap-4 w-full">
                       <div>
-                        <h2 class="text-lg font-semibold text-slate-800">选择分析目标</h2>
-                        <p class="text-sm text-slate-500">选择需要执行的 AI 分析维度</p>
+                        <h2 class="text-lg font-semibold text-slate-800">
+                          选择分析目标
+                        </h2>
+                        <p class="text-sm text-slate-500">
+                          选择需要执行的 AI 分析维度
+                        </p>
                       </div>
                       <span
-                        class="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs px-3 py-1.5 rounded-full font-medium border border-indigo-100 inline-flex mt-1">
+                        class="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs px-3 py-1.5 rounded-full font-medium border border-indigo-100 inline-flex mt-1"
+                      >
                         <i class="fa-solid fa-circle-check"></i>
-                        已选择 <span data-targets-selected-count class="font-bold text-indigo-600"
-                          x-text="selectedTargets.length"></span> / <span x-text="analysisTargets.length"></span> 个分析目标
+                        已选择
+                        <span
+                          data-targets-selected-count
+                          class="font-bold text-indigo-600"
+                          x-text="selectedTargets.length"
+                        ></span>
+                        /
+                        <span x-text="analysisTargets.length"></span> 个分析目标
                       </span>
                     </div>
                   </div>
                 </div>
                 <div>
-                  <div x-show="hasNoAvailableAsins"
-                    class="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  <div
+                    x-show="hasNoAvailableAsins"
+                    class="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+                  >
                     <i class="fa-solid fa-circle-info mr-2 text-amber-600"></i>
                     当前还没有产品数据。分析目标可以先预选，执行前需要先完成数据采集。
                   </div>
                   <div class="flex items-center justify-end gap-3 mb-6">
-                    <button type="button" :disabled="isAnalyzing" @click="selectAllTargets()"
-                      class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50">
+                    <button
+                      type="button"
+                      :disabled="isAnalyzing"
+                      @click="selectAllTargets()"
+                      class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    >
                       <i class="fa-solid fa-check-double"></i>
                       全选
                     </button>
-                    <button type="button" :disabled="isAnalyzing" @click="clearAllTargets()"
-                      class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50">
+                    <button
+                      type="button"
+                      :disabled="isAnalyzing"
+                      @click="clearAllTargets()"
+                      class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    >
                       <i class="fa-solid fa-xmark"></i>
                       清空
                     </button>
@@ -346,35 +490,53 @@
                   <div class="mb-6">
                     <div class="flex items-center gap-2 mb-4">
                       <div
-                        class="flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-blue-100">
+                        class="flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-blue-100"
+                      >
                         <i class="fa-solid fa-box-open"></i>
                         Listings 分析
                       </div>
-                      <span class="text-xs text-slate-400">基于标题与五点描述</span>
+                      <span class="text-xs text-slate-400"
+                        >基于标题与五点描述</span
+                      >
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <template :key="target.id" x-for="target in listingAnalysisTargets">
+                      <template
+                        :key="target.id"
+                        x-for="target in listingAnalysisTargets"
+                      >
                         <button
                           :class="getListingTargetCardClass(target.id)"
-                          :disabled="isAnalyzing" @click="toggleTarget(target.id)"
-                          class="relative p-4 rounded-xl border-2 text-left transition-all duration-200 group hover:shadow-md">
+                          :disabled="isAnalyzing"
+                          @click="toggleTarget(target.id)"
+                          class="relative p-4 rounded-xl border-2 text-left transition-all duration-200 group hover:shadow-md"
+                        >
                           <div class="flex items-start gap-3">
                             <div
                               :class="getListingTargetIconWrapClass(target.id)"
-                              class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-all">
-                              <i :class="getListingTargetIconClass(target.id)"></i>
+                              class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-all"
+                            >
+                              <i
+                                :class="getListingTargetIconClass(target.id)"
+                              ></i>
                             </div>
                             <div class="flex-1 min-w-0">
-                              <h4 class="font-semibold text-sm text-slate-800" x-text="target.name"></h4>
-                              <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed"
-                                x-text="target.description">
-                              </p>
+                              <h4
+                                class="font-semibold text-sm text-slate-800"
+                                x-text="target.name"
+                              ></h4>
+                              <p
+                                class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed"
+                                x-text="target.description"
+                              ></p>
                             </div>
                             <div
                               :class="getTargetCheckClass(target.id)"
-                              class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all mt-0.5">
-                              <i class="fa-solid fa-check text-white text-[10px]"
-                                x-show="selectedTargets.includes(target.id)"></i>
+                              class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all mt-0.5"
+                            >
+                              <i
+                                class="fa-solid fa-check text-white text-[10px]"
+                                x-show="selectedTargets.includes(target.id)"
+                              ></i>
                             </div>
                           </div>
                         </button>
@@ -385,35 +547,55 @@
                   <div>
                     <div class="flex items-center gap-2 mb-4">
                       <div
-                        class="flex items-center gap-2 bg-amber-50 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-amber-100">
+                        class="flex items-center gap-2 bg-amber-50 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-amber-100"
+                      >
                         <i class="fa-solid fa-star"></i>
                         Reviews 分析
                       </div>
-                      <span class="text-xs text-slate-400">基于用户评论数据</span>
+                      <span class="text-xs text-slate-400"
+                        >基于用户评论数据</span
+                      >
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      <template :key="target.id" x-for="target in reviewAnalysisTargets">
+                    <div
+                      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+                    >
+                      <template
+                        :key="target.id"
+                        x-for="target in reviewAnalysisTargets"
+                      >
                         <button
                           :class="getReviewTargetCardClass(target.id)"
-                          :disabled="isAnalyzing" @click="toggleTarget(target.id)"
-                          class="relative p-4 rounded-xl border-2 text-left transition-all duration-200 group hover:shadow-md">
+                          :disabled="isAnalyzing"
+                          @click="toggleTarget(target.id)"
+                          class="relative p-4 rounded-xl border-2 text-left transition-all duration-200 group hover:shadow-md"
+                        >
                           <div class="flex items-start gap-3">
                             <div
                               :class="getReviewTargetIconWrapClass(target.id)"
-                              class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-all">
-                              <i :class="getReviewTargetIconClass(target.id)"></i>
+                              class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-all"
+                            >
+                              <i
+                                :class="getReviewTargetIconClass(target.id)"
+                              ></i>
                             </div>
                             <div class="flex-1 min-w-0">
-                              <h4 class="font-semibold text-sm text-slate-800" x-text="target.name"></h4>
-                              <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed"
-                                x-text="target.description">
-                              </p>
+                              <h4
+                                class="font-semibold text-sm text-slate-800"
+                                x-text="target.name"
+                              ></h4>
+                              <p
+                                class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed"
+                                x-text="target.description"
+                              ></p>
                             </div>
                             <div
                               :class="getTargetCheckClass(target.id)"
-                              class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all mt-0.5">
-                              <i class="fa-solid fa-check text-white text-[10px]"
-                                x-show="selectedTargets.includes(target.id)"></i>
+                              class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all mt-0.5"
+                            >
+                              <i
+                                class="fa-solid fa-check text-white text-[10px]"
+                                x-show="selectedTargets.includes(target.id)"
+                              ></i>
                             </div>
                           </div>
                         </button>
@@ -427,95 +609,160 @@
             <template x-if="hasSelectedAnalysisInput">
               <div class="lg:col-span-12">
                 <div
-                  class="rounded-2xl border border-slate-200/80 bg-gradient-to-b from-white via-slate-50/30 to-white p-5 shadow-sm ring-1 ring-white/70">
-                  <button @click="togglePromptPanel()"
-                    class="w-full flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4 text-sm text-slate-600 transition-all hover:border-indigo-200 hover:bg-white hover:text-indigo-600">
+                  class="rounded-2xl border border-slate-200/80 bg-gradient-to-b from-white via-slate-50/30 to-white p-5 shadow-sm ring-1 ring-white/70"
+                >
+                  <button
+                    @click="togglePromptPanel()"
+                    class="w-full flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4 text-sm text-slate-600 transition-all hover:border-indigo-200 hover:bg-white hover:text-indigo-600"
+                  >
                     <div class="flex items-center gap-3 min-w-0">
                       <div
-                        class="w-10 h-10 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-100/60 flex-shrink-0">
+                        class="w-10 h-10 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-100/60 flex-shrink-0"
+                      >
                         <i class="fa-solid fa-code text-indigo-600"></i>
                       </div>
                       <div class="text-left min-w-0">
-                        <h3 class="text-sm font-semibold text-slate-800">任务预览</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">在执行分析前预览各任务 Prompt 内容</p>
+                        <h3 class="text-sm font-semibold text-slate-800">
+                          任务预览
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                          在执行分析前预览各任务 Prompt 内容
+                        </p>
                       </div>
                     </div>
                     <div class="flex items-center gap-3 flex-wrap justify-end">
-                      <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full font-semibold"
-                        x-text="selectedTaskCountText"></span>
+                      <span
+                        class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full font-semibold"
+                        x-text="selectedTaskCountText"
+                      ></span>
                       <template x-if="hasTotalTokenCount">
                         <span
-                          class="flex items-center gap-1.5 text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full font-semibold border border-emerald-200">
+                          class="flex items-center gap-1.5 text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full font-semibold border border-emerald-200"
+                        >
                           <i class="fa-solid fa-calculator"></i>
                           <span x-text="formattedTotalTokenCount"></span>
                           <span class="text-emerald-600">tokens</span>
                         </span>
                       </template>
-                      <span class="font-medium" x-text="promptPanelToggleText"></span>
+                      <span
+                        class="font-medium"
+                        x-text="promptPanelToggleText"
+                      ></span>
                       <i :class="promptPanelChevronClass"></i>
                     </div>
                   </button>
                   <template x-if="showPromptPanel">
-                    <div class="mt-4 space-y-3 border-t border-slate-200/70 pt-4">
-                      <template :key="targetId" x-for="(targetId, index) in selectedTargets">
-                        <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700">
-                          <button @click="togglePromptItem(index)"
-                            class="w-full flex items-center justify-between p-4 hover:bg-slate-800/50 transition-colors">
+                    <div
+                      class="mt-4 space-y-3 border-t border-slate-200/70 pt-4"
+                    >
+                      <template
+                        :key="targetId"
+                        x-for="(targetId, index) in selectedTargets"
+                      >
+                        <div
+                          class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700"
+                        >
+                          <button
+                            @click="togglePromptItem(index)"
+                            class="w-full flex items-center justify-between p-4 hover:bg-slate-800/50 transition-colors"
+                          >
                             <div class="flex items-center gap-3">
-                              <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                              <div
+                                class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center"
+                              >
                                 <!-- <i class="fa-solid fa-terminal text-emerald-400"></i> -->
-                                <span class="text-xs font-mono font-semibold text-emerald-400" x-text="getPromptNumber(index)">TASK</span>
+                                <span
+                                  class="text-xs font-mono font-semibold text-emerald-400"
+                                  x-text="getPromptNumber(index)"
+                                  >TASK</span
+                                >
                               </div>
                               <div class="text-left">
                                 <!-- <h4 class="text-sm font-semibold text-white">AI 分析提示词</h4> -->
-                                <h4 class="text-sm font-semibold text-white" x-text="getTargetName(targetId)"></h4>
-                                <p class="text-xs text-slate-400" x-text="getTargetDescription(targetId)">
-                                </p>
+                                <h4
+                                  class="text-sm font-semibold text-white"
+                                  x-text="getTargetName(targetId)"
+                                ></h4>
+                                <p
+                                  class="text-xs text-slate-400"
+                                  x-text="getTargetDescription(targetId)"
+                                ></p>
                               </div>
                             </div>
                             <div class="flex items-center gap-3">
-                              <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg border border-slate-600">
-                                <i class="fa-solid fa-calculator text-emerald-400 text-xs"></i>
-                                <span class="text-xs font-mono font-semibold text-emerald-400"
-                                  x-text="getFormattedTokenCount(targetId)"></span>
-                                <span class="text-xs text-slate-500">tokens</span>
+                              <div
+                                class="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg border border-slate-600"
+                              >
+                                <i
+                                  class="fa-solid fa-calculator text-emerald-400 text-xs"
+                                ></i>
+                                <span
+                                  class="text-xs font-mono font-semibold text-emerald-400"
+                                  x-text="getFormattedTokenCount(targetId)"
+                                ></span>
+                                <span class="text-xs text-slate-500"
+                                  >tokens</span
+                                >
                               </div>
-                              <i
-                                :class="getPromptItemChevronClass(index)"></i>
+                              <i :class="getPromptItemChevronClass(index)"></i>
                             </div>
                           </button>
                           <template x-if="isPromptExpanded(index)">
                             <div class="border-t border-slate-700">
-                              <div class="flex items-center justify-between px-4 py-2 bg-slate-800/50">
-                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                              <div
+                                class="flex items-center justify-between px-4 py-2 bg-slate-800/50"
+                              >
+                                <div
+                                  class="flex items-center gap-2 text-xs text-slate-400"
+                                >
                                   <i class="fa-solid fa-file-code"></i>
                                   <span>Prompt Template</span>
                                 </div>
-                                <button @click.stop="copyPrompt(index)"
-                                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-all">
+                                <button
+                                  @click.stop="copyPrompt(index)"
+                                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-all"
+                                >
                                   <i class="fa-solid fa-copy"></i>
                                   复制
                                 </button>
                               </div>
                               <div class="p-4 max-h-96 overflow-auto">
-                                <pre class="text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed"
-                                  x-text="getPromptText(targetId)"></pre>
+                                <pre
+                                  class="text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed"
+                                  x-text="getPromptText(targetId)"
+                                ></pre>
                               </div>
-                              <div class="border-t border-slate-700 px-4 py-3 bg-slate-800/30">
+                              <div
+                                class="border-t border-slate-700 px-4 py-3 bg-slate-800/30"
+                              >
                                 <div class="flex items-center justify-between">
                                   <div class="flex items-center gap-4">
                                     <div class="flex items-center gap-2">
-                                      <i class="fa-solid fa-calculator text-emerald-400 text-xs"></i>
-                                      <span class="text-xs text-slate-400">Token 统计:</span>
-                                      <span class="text-sm font-mono font-bold text-emerald-400"
-                                        x-text="getPromptTokenCountText(targetId)"></span>
-                                      <span class="text-xs text-slate-500">tokens</span>
+                                      <i
+                                        class="fa-solid fa-calculator text-emerald-400 text-xs"
+                                      ></i>
+                                      <span class="text-xs text-slate-400"
+                                        >Token 统计:</span
+                                      >
+                                      <span
+                                        class="text-sm font-mono font-bold text-emerald-400"
+                                        x-text="getPromptTokenCountText(targetId)"
+                                      ></span>
+                                      <span class="text-xs text-slate-500"
+                                        >tokens</span
+                                      >
                                     </div>
                                     <div class="flex items-center gap-2">
-                                      <i class="fa-solid fa-align-left text-blue-400 text-xs"></i>
-                                      <span class="text-xs text-slate-400">字符数:</span>
-                                      <span class="text-sm font-mono font-semibold text-blue-400"
-                                        x-text="getPromptCharCountText(targetId)"></span>
+                                      <i
+                                        class="fa-solid fa-align-left text-blue-400 text-xs"
+                                      ></i>
+                                      <span class="text-xs text-slate-400"
+                                        >字符数:</span
+                                      >
+                                      <span
+                                        class="text-sm font-mono font-semibold text-blue-400"
+                                        x-text="getPromptCharCountText(targetId)"
+                                      ></span>
                                     </div>
                                   </div>
                                   <div class="text-xs text-slate-500">
@@ -539,33 +786,70 @@
     </div>
     <!-- 分析按钮 -->
     <div class="mb-10">
-      <div :class="analysisHeroCardClass" class="relative overflow-hidden rounded-2xl transition-all duration-300">
-        <div :class="analysisHeroBackdropClass" class="absolute inset-0 transition-colors duration-300"></div>
-        <div :class="analysisHeroAmbientClass" class="absolute inset-0 overflow-hidden transition-opacity duration-300">
-          <div class="absolute top-0 left-1/4 w-80 h-80 bg-white/20 rounded-full filter blur-[80px] animate-pulse">
-          </div>
-          <div class="absolute bottom-0 right-1/4 w-64 h-64 bg-pink-300/20 rounded-full filter blur-[60px]"></div>
+      <div
+        :class="analysisHeroCardClass"
+        class="relative overflow-hidden rounded-2xl transition-all duration-300"
+      >
+        <div
+          :class="analysisHeroBackdropClass"
+          class="absolute inset-0 transition-colors duration-300"
+        ></div>
+        <div
+          :class="analysisHeroAmbientClass"
+          class="absolute inset-0 overflow-hidden transition-opacity duration-300"
+        >
+          <div
+            class="absolute top-0 left-1/4 w-80 h-80 bg-white/20 rounded-full filter blur-[80px] animate-pulse"
+          ></div>
+          <div
+            class="absolute bottom-0 right-1/4 w-64 h-64 bg-pink-300/20 rounded-full filter blur-[60px]"
+          ></div>
         </div>
-        <div :class="analysisHeroPatternClass" class="absolute inset-0 transition-opacity duration-300"
-          style="background-image: linear-gradient(rgba(255,255,255,.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px); background-size: 30px 30px;">
-        </div>
-        <div :class="analysisHeroBodyClass" class="relative transition-all duration-300">
+        <div
+          :class="analysisHeroPatternClass"
+          class="absolute inset-0 transition-opacity duration-300"
+          style="
+            background-image:
+              linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+              linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.2) 1px,
+                transparent 1px
+              );
+            background-size: 30px 30px;
+          "
+        ></div>
+        <div
+          :class="analysisHeroBodyClass"
+          class="relative transition-all duration-300"
+        >
           <div class="flex items-center justify-between gap-8">
-            <div :class="analysisHeroTextClass" class="flex items-center gap-5 transition-colors duration-300"
-              role="status" aria-live="polite" aria-atomic="true">
+            <div
+              :class="analysisHeroTextClass"
+              class="flex items-center gap-5 transition-colors duration-300"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               <div class="relative">
                 <template x-if="isAnalyzing">
-                  <div class="absolute inset-0 bg-white/20 rounded-2xl animate-ping" style="animation-duration: 1.5s;">
-                  </div>
+                  <div
+                    class="absolute inset-0 bg-white/20 rounded-2xl animate-ping"
+                    style="animation-duration: 1.5s"
+                  ></div>
                 </template>
-                <div :class="analysisHeroIconWrapClass"
-                  class="flex items-center justify-center transition-all">
-                  <i :class="analysisHeroIconClass"
-                    class="text-2xl"></i>
+                <div
+                  :class="analysisHeroIconWrapClass"
+                  class="flex items-center justify-center transition-all"
+                >
+                  <i :class="analysisHeroIconClass" class="text-2xl"></i>
                 </div>
               </div>
               <div>
-                <h3 :class="analysisHeroTitleClass" class="font-extrabold flex items-center gap-3 tracking-tight">
+                <h3
+                  :class="analysisHeroTitleClass"
+                  class="font-extrabold flex items-center gap-3 tracking-tight"
+                >
                   <span x-show="isAnalysisComplete">分析完成</span>
                   <span x-show="isAnalysisRunning">AI 正在分析中</span>
                   <span x-show="isAnalysisIdle">执行 AI 分析</span>
@@ -573,25 +857,36 @@
                     <i class="fa-solid fa-cog animate-spin opacity-60"></i>
                   </template>
                 </h3>
-                <p :class="analysisHeroSubtextClass" class="text-sm mt-1.5 flex items-center gap-2 transition-colors duration-300">
+                <p
+                  :class="analysisHeroSubtextClass"
+                  class="text-sm mt-1.5 flex items-center gap-2 transition-colors duration-300"
+                >
                   <template x-if="isAnalyzing">
                     <span class="flex items-center gap-2">
                       <span class="relative flex h-2 w-2">
                         <span
-                          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"
+                        ></span>
+                        <span
+                          class="relative inline-flex rounded-full h-2 w-2 bg-white"
+                        ></span>
                       </span>
                       <span x-text="currentStep"></span>
                     </span>
                   </template>
-                  <template
-                    x-if="hasAnalysisSelection">
+                  <template x-if="hasAnalysisSelection">
                     <span>
-                      <span :class="analysisHeroMetricPillClass" class="px-2 py-0.5 rounded-full text-xs font-semibold"
-                        x-text="selectedAsins.length"></span>
+                      <span
+                        :class="analysisHeroMetricPillClass"
+                        class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                        x-text="selectedAsins.length"
+                      ></span>
                       个产品 ×
-                      <span :class="analysisHeroMetricPillClass" class="px-2 py-0.5 rounded-full text-xs font-semibold"
-                        x-text="selectedTargets.length"></span>
+                      <span
+                        :class="analysisHeroMetricPillClass"
+                        class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                        x-text="selectedTargets.length"
+                      ></span>
                       个维度 = 综合洞察分析
                     </span>
                   </template>
@@ -603,23 +898,31 @@
             </div>
             <div class="relative flex items-center gap-3">
               <!-- 性能设置按钮 -->
-              <button type="button" @click="perfSettings.toggleSettings()"
+              <button
+                type="button"
+                @click="perfSettings.toggleSettings()"
                 :class="analysisPerfButtonClass"
                 class="min-h-11 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 flex flex-col items-start gap-0.5"
-                title="性能设置">
+                title="性能设置"
+              >
                 <span class="flex items-center gap-2">
                   <i class="fa-solid fa-sliders"></i>
                   分析设置
                 </span>
-                <span class="text-[11px] font-normal opacity-75" x-text="performanceSummaryText"></span>
+                <span
+                  class="text-[11px] font-normal opacity-75"
+                  x-text="performanceSummaryText"
+                ></span>
               </button>
 
               <!-- 开始分析按钮 -->
-              <button type="button"
+              <button
+                type="button"
                 :class="runAnalysisButtonClass"
                 :disabled="runAnalysisDisabled"
                 @click="runAnalysis()"
-                class="relative min-h-11 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 flex items-center gap-3 min-w-[180px] justify-center group">
+                class="relative min-h-11 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 flex items-center gap-3 min-w-[180px] justify-center group"
+              >
                 <template x-if="isAnalyzing">
                   <span class="flex items-center gap-3">
                     <i class="fa-solid fa-spinner animate-spin"></i>
@@ -633,32 +936,39 @@
                   </span>
                 </template>
                 <!-- 禁用原因提示 - Hover显示 -->
-                <template
-                  x-if="showRunDisabledHint">
+                <template x-if="showRunDisabledHint">
                   <div
-                    class="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 bg-slate-800 text-white rounded-lg shadow-2xl border border-slate-700 p-3 text-xs z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none">
+                    class="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 bg-slate-800 text-white rounded-lg shadow-2xl border border-slate-700 p-3 text-xs z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
+                  >
                     <div class="flex items-start gap-2">
-                      <i class="fa-solid fa-info-circle text-indigo-400 mt-0.5"></i>
+                      <i
+                        class="fa-solid fa-info-circle text-indigo-400 mt-0.5"
+                      ></i>
                       <div>
                         <template x-if="isMissingAsinAndTarget">
-                          <span class="font-medium">请先选择 ASIN 和分析目标</span>
+                          <span class="font-medium"
+                            >请先选择 ASIN 和分析目标</span
+                          >
                         </template>
                         <template x-if="isMissingTargetOnly">
-                          <span class="font-medium">请选择至少一个分析目标</span>
+                          <span class="font-medium"
+                            >请选择至少一个分析目标</span
+                          >
                         </template>
                         <template x-if="isMissingAsinOnly">
                           <span class="font-medium">请选择至少一个 ASIN</span>
                         </template>
-                        <template
-                          x-if="isMissingLoadedData">
-                          <span class="font-medium">无法加载产品数据，请检查数据源</span>
+                        <template x-if="isMissingLoadedData">
+                          <span class="font-medium"
+                            >无法加载产品数据，请检查数据源</span
+                          >
                         </template>
                       </div>
                     </div>
                     <!-- 小三角箭头 -->
                     <div
-                      class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 border-l border-t border-slate-700 rotate-45">
-                    </div>
+                      class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 border-l border-t border-slate-700 rotate-45"
+                    ></div>
                   </div>
                 </template>
               </button>
@@ -667,22 +977,36 @@
           <!-- 进度条 -->
           <template x-if="isAnalyzing">
             <div class="mt-8">
-              <div class="flex items-center justify-between text-white/80 text-sm mb-3">
+              <div
+                class="flex items-center justify-between text-white/80 text-sm mb-3"
+              >
                 <span class="flex items-center gap-2 font-medium">
                   <i class="fa-solid fa-spinner animate-spin"></i>
                   <span id="ai-analysis-progress-label">分析进度</span>
                 </span>
-                <span id="ai-analysis-progress-value" class="font-mono font-bold text-lg" x-text="progressText"></span>
+                <span
+                  id="ai-analysis-progress-value"
+                  class="font-mono font-bold text-lg"
+                  x-text="progressText"
+                ></span>
               </div>
-              <div class="h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm shadow-inner"
-                role="progressbar" :aria-valuenow="progressAriaValue" aria-valuemin="0" aria-valuemax="100"
-                aria-labelledby="ai-analysis-progress-label" :aria-valuetext="progressText">
-                <div :style="progressStyle"
-                  class="h-full bg-gradient-to-r from-white via-indigo-200 to-white rounded-full transition-all duration-500 ease-out relative">
+              <div
+                class="h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm shadow-inner"
+                role="progressbar"
+                :aria-valuenow="progressAriaValue"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-labelledby="ai-analysis-progress-label"
+                :aria-valuetext="progressText"
+              >
+                <div
+                  :style="progressStyle"
+                  class="h-full bg-gradient-to-r from-white via-indigo-200 to-white rounded-full transition-all duration-500 ease-out relative"
+                >
                   <div class="absolute inset-0 shimmer"></div>
                   <div
-                    class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg shadow-white/50">
-                  </div>
+                    class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg shadow-white/50"
+                  ></div>
                 </div>
               </div>
               <div class="flex justify-between mt-3 text-xs text-white/50">
@@ -699,25 +1023,43 @@
 
     <!-- 性能设置模态框 -->
     <template x-teleport="#modal-container">
-      <div x-show="perfSettings.showSettings" x-cloak
+      <div
+        x-show="perfSettings.showSettings"
+        x-cloak
         class="fixed inset-0 z-[1000] flex items-center justify-center overflow-y-auto p-4 bg-black/40"
-        style="display: none;"
-        @click.self="perfSettings.toggleSettings()">
-        <div class="flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl sm:max-h-[88vh]"
-          role="dialog" aria-modal="true" aria-labelledby="performance-settings-title" @click.stop>
+        style="display: none"
+        @click.self="perfSettings.toggleSettings()"
+      >
+        <div
+          class="flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl sm:max-h-[88vh]"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="performance-settings-title"
+          @click.stop
+        >
           <!-- Header -->
           <div class="shrink-0 px-5 py-4 border-b border-slate-200">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <i class="fa-solid fa-sliders text-slate-500"></i>
                 <div>
-                  <h2 id="performance-settings-title" class="text-lg font-semibold text-slate-900">性能设置</h2>
-                  <p class="mt-0.5 text-sm text-slate-500">选择调度偏好和缓存。</p>
+                  <h2
+                    id="performance-settings-title"
+                    class="text-lg font-semibold text-slate-900"
+                  >
+                    性能设置
+                  </h2>
+                  <p class="mt-0.5 text-sm text-slate-500">
+                    选择调度偏好和缓存。
+                  </p>
                 </div>
               </div>
-              <button type="button" @click="perfSettings.toggleSettings()"
+              <button
+                type="button"
+                @click="perfSettings.toggleSettings()"
                 class="w-11 h-11 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
-                aria-label="关闭性能设置">
+                aria-label="关闭性能设置"
+              >
                 <i class="fa-solid fa-times"></i>
               </button>
             </div>
@@ -729,66 +1071,126 @@
             <section class="space-y-3">
               <div class="flex items-center justify-between gap-3">
                 <div>
-                  <div id="ai-analysis-scheduling-title" class="text-sm font-semibold text-slate-900">调度偏好</div>
-                  <p id="ai-analysis-scheduling-helper" class="mt-0.5 text-xs text-slate-500">系统会自动控制并发与失败处理。</p>
+                  <div
+                    id="ai-analysis-scheduling-title"
+                    class="text-sm font-semibold text-slate-900"
+                  >
+                    调度偏好
+                  </div>
+                  <p
+                    id="ai-analysis-scheduling-helper"
+                    class="mt-0.5 text-xs text-slate-500"
+                  >
+                    系统会自动控制并发与失败处理。
+                  </p>
                 </div>
-                <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold"
-                  :class="perfSettings.scheduleTierBadgeClass">
+                <span
+                  class="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold"
+                  :class="perfSettings.scheduleTierBadgeClass"
+                >
                   <i :class="perfSettings.scheduleIconClass"></i>
                   <span x-text="perfSettings.scheduleTierLabel"></span>
                 </span>
               </div>
 
-              <div class="grid gap-2 md:grid-cols-3" role="radiogroup" aria-labelledby="ai-analysis-scheduling-title"
-                aria-describedby="ai-analysis-scheduling-helper">
-                <label class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
-                  :class="perfSettings.getSchedulePreferenceClass('recommended')">
-                  <input type="radio" name="schedulingPreference" value="recommended"
+              <div
+                class="grid gap-2 md:grid-cols-3"
+                role="radiogroup"
+                aria-labelledby="ai-analysis-scheduling-title"
+                aria-describedby="ai-analysis-scheduling-helper"
+              >
+                <label
+                  class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
+                  :class="perfSettings.getSchedulePreferenceClass('recommended')"
+                >
+                  <input
+                    type="radio"
+                    name="schedulingPreference"
+                    value="recommended"
                     :checked="perfSettings.settings.schedulingPreference === 'recommended'"
-                    @change="perfSettings.setSchedulingPreference($event)" class="sr-only">
+                    @change="perfSettings.setSchedulingPreference($event)"
+                    class="sr-only"
+                  />
                   <div class="flex items-center gap-2 text-sm font-semibold">
                     <i class="fa-solid fa-gauge-high"></i>
                     推荐档
                   </div>
-                  <p class="mt-1.5 text-xs leading-snug opacity-75">平衡速度和稳定性</p>
+                  <p class="mt-1.5 text-xs leading-snug opacity-75">
+                    平衡速度和稳定性
+                  </p>
                 </label>
-                <label class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
-                  :class="perfSettings.getSchedulePreferenceClass('reliability')">
-                  <input type="radio" name="schedulingPreference" value="reliability"
+                <label
+                  class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
+                  :class="perfSettings.getSchedulePreferenceClass('reliability')"
+                >
+                  <input
+                    type="radio"
+                    name="schedulingPreference"
+                    value="reliability"
                     :checked="perfSettings.settings.schedulingPreference === 'reliability'"
-                    @change="perfSettings.setSchedulingPreference($event)" class="sr-only">
+                    @change="perfSettings.setSchedulingPreference($event)"
+                    class="sr-only"
+                  />
                   <div class="flex items-center gap-2 text-sm font-semibold">
                     <i class="fa-solid fa-shield-halved"></i>
                     可靠性优先
                   </div>
-                  <p class="mt-1.5 text-xs leading-snug opacity-75">优先完整结果</p>
+                  <p class="mt-1.5 text-xs leading-snug opacity-75">
+                    优先完整结果
+                  </p>
                 </label>
-                <label class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
-                  :class="perfSettings.getSchedulePreferenceClass('speed')">
-                  <input type="radio" name="schedulingPreference" value="speed"
+                <label
+                  class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
+                  :class="perfSettings.getSchedulePreferenceClass('speed')"
+                >
+                  <input
+                    type="radio"
+                    name="schedulingPreference"
+                    value="speed"
                     :checked="perfSettings.settings.schedulingPreference === 'speed'"
-                    @change="perfSettings.setSchedulingPreference($event)" class="sr-only">
+                    @change="perfSettings.setSchedulingPreference($event)"
+                    class="sr-only"
+                  />
                   <div class="flex items-center gap-2 text-sm font-semibold">
                     <i class="fa-solid fa-bolt"></i>
                     速度优先
                   </div>
-                  <p class="mt-1.5 text-xs leading-snug opacity-75">优先快速完成</p>
+                  <p class="mt-1.5 text-xs leading-snug opacity-75">
+                    优先快速完成
+                  </p>
                 </label>
               </div>
 
-              <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <div
+                class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3"
+              >
                 <div class="grid grid-cols-3 gap-3">
                   <div>
-                    <div class="text-[11px] font-medium text-slate-500">当前策略</div>
-                    <div class="mt-0.5 text-sm font-semibold text-slate-900" x-text="perfSettings.schedulePreferenceLabel"></div>
+                    <div class="text-[11px] font-medium text-slate-500">
+                      当前策略
+                    </div>
+                    <div
+                      class="mt-0.5 text-sm font-semibold text-slate-900"
+                      x-text="perfSettings.schedulePreferenceLabel"
+                    ></div>
                   </div>
                   <div>
-                    <div class="text-[11px] font-medium text-slate-500">调度方式</div>
-                    <div class="mt-0.5 text-sm font-semibold text-slate-900" x-text="perfSettings.scheduleRuntimeText"></div>
+                    <div class="text-[11px] font-medium text-slate-500">
+                      调度方式
+                    </div>
+                    <div
+                      class="mt-0.5 text-sm font-semibold text-slate-900"
+                      x-text="perfSettings.scheduleRuntimeText"
+                    ></div>
                   </div>
                   <div>
-                    <div class="text-[11px] font-medium text-slate-500">失败处理</div>
-                    <div class="mt-0.5 text-sm font-semibold text-slate-900" x-text="perfSettings.scheduleFailureHandlingText"></div>
+                    <div class="text-[11px] font-medium text-slate-500">
+                      失败处理
+                    </div>
+                    <div
+                      class="mt-0.5 text-sm font-semibold text-slate-900"
+                      x-text="perfSettings.scheduleFailureHandlingText"
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -796,46 +1198,75 @@
 
             <!-- 缓存设置 -->
             <section class="rounded-lg border border-slate-200 bg-white p-3">
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+              >
                 <label class="flex min-h-11 cursor-pointer items-start gap-3">
-                  <input type="checkbox" :checked="perfSettings.settings.enableCache" @change="perfSettings.setEnableCache($event)"
+                  <input
+                    type="checkbox"
+                    :checked="perfSettings.settings.enableCache"
+                    @change="perfSettings.setEnableCache($event)"
                     aria-describedby="ai-analysis-cache-helper"
-                    class="mt-1 w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                    class="mt-1 w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  />
                   <div>
-                    <div class="text-sm font-semibold text-slate-900">智能缓存</div>
-                    <div id="ai-analysis-cache-helper" class="mt-1 text-xs text-slate-500">
+                    <div class="text-sm font-semibold text-slate-900">
+                      智能缓存
+                    </div>
+                    <div
+                      id="ai-analysis-cache-helper"
+                      class="mt-1 text-xs text-slate-500"
+                    >
                       已缓存
-                      <span class="font-semibold text-slate-900" x-text="perfSettings.cacheStats.count"></span>
+                      <span
+                        class="font-semibold text-slate-900"
+                        x-text="perfSettings.cacheStats.count"
+                      ></span>
                       项 ·
-                      <span class="font-semibold text-slate-900"
-                        x-text="perfSettings.formatSize(perfSettings.cacheStats.totalSize)"></span>
+                      <span
+                        class="font-semibold text-slate-900"
+                        x-text="perfSettings.formatSize(perfSettings.cacheStats.totalSize)"
+                      ></span>
                     </div>
                   </div>
                 </label>
-                <button type="button" @click="perfSettings.clearCache()"
-                  class="min-h-10 px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-600 text-sm font-medium transition-colors">
+                <button
+                  type="button"
+                  @click="perfSettings.clearCache()"
+                  class="min-h-10 px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-600 text-sm font-medium transition-colors"
+                >
                   <i class="fa-solid fa-trash mr-2"></i>
                   清除缓存
                 </button>
               </div>
             </section>
-
           </div>
 
           <!-- Footer -->
-          <div class="shrink-0 bg-slate-50 px-5 py-3 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-200">
-            <button type="button" @click="perfSettings.resetSettings()"
-              class="min-h-11 px-3 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors">
+          <div
+            class="shrink-0 bg-slate-50 px-5 py-3 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-200"
+          >
+            <button
+              type="button"
+              @click="perfSettings.resetSettings()"
+              class="min-h-11 px-3 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors"
+            >
               <i class="fa-solid fa-rotate-left mr-2"></i>
               恢复默认
             </button>
             <div class="flex gap-3 justify-end">
-              <button type="button" @click="perfSettings.toggleSettings()"
-                class="min-h-11 px-5 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 font-medium transition-colors">
+              <button
+                type="button"
+                @click="perfSettings.toggleSettings()"
+                class="min-h-11 px-5 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 font-medium transition-colors"
+              >
                 取消
               </button>
-              <button type="button" @click="perfSettings.saveSettings()"
-                class="min-h-11 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
+              <button
+                type="button"
+                @click="perfSettings.saveSettings()"
+                class="min-h-11 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+              >
                 <i class="fa-solid fa-check mr-2"></i>
                 保存设置
               </button>
@@ -850,31 +1281,45 @@
     <template x-if="hasReportWithResults">
       <div class="space-y-10">
         <!-- 结果 Header -->
-        <div class="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div class="absolute inset-0 bg-gradient-to-r from-white via-slate-50 to-white"></div>
+        <div
+          class="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+        >
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-white via-slate-50 to-white"
+          ></div>
           <div class="relative p-6">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-5">
                 <div class="relative">
                   <div
-                    class="relative w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-200 shadow-sm">
-                    <i class="fa-solid fa-file-lines text-indigo-600 text-xl"></i>
+                    class="relative w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-200 shadow-sm"
+                  >
+                    <i
+                      class="fa-solid fa-file-lines text-indigo-600 text-xl"
+                    ></i>
                   </div>
                 </div>
                 <div>
-                  <h2 class="text-xl font-extrabold text-slate-900 tracking-tight"
-                    x-text="reportStatusText"></h2>
-                  <p class="text-slate-500 text-sm mt-1 flex items-center gap-2 flex-wrap">
-                    <span class="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700"
-                      x-text="selectedAsins.join(', ')"></span>
+                  <h2
+                    class="text-xl font-extrabold text-slate-900 tracking-tight"
+                    x-text="reportStatusText"
+                  ></h2>
+                  <p
+                    class="text-slate-500 text-sm mt-1 flex items-center gap-2 flex-wrap"
+                  >
+                    <span
+                      class="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700"
+                      x-text="selectedAsins.join(', ')"
+                    ></span>
                     <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
                     <span x-show="isAnalyzing">
-                      已输出 <span x-text="reportResults.length"></span> / <span x-text="selectedTargets.length"></span> 个维度，结果会持续追加
+                      已输出 <span x-text="reportResults.length"></span> /
+                      <span x-text="selectedTargets.length"></span>
+                      个维度，结果会持续追加
                     </span>
                     <span x-show="analysisNotRunning">
                       分析完成于
-                      <span
-                        x-text="reportCompletedAtText"></span>
+                      <span x-text="reportCompletedAtText"></span>
                     </span>
                   </p>
                 </div>
@@ -882,84 +1327,142 @@
               <div class="flex items-center gap-8">
                 <div class="flex items-center gap-6">
                   <div class="text-center">
-                    <div class="text-3xl font-extrabold text-slate-900" x-text="reportResults.length"></div>
-                    <div class="text-slate-500 text-xs uppercase tracking-wider mt-1">分析维度</div>
+                    <div
+                      class="text-3xl font-extrabold text-slate-900"
+                      x-text="reportResults.length"
+                    ></div>
+                    <div
+                      class="text-slate-500 text-xs uppercase tracking-wider mt-1"
+                    >
+                      分析维度
+                    </div>
                   </div>
                   <div class="w-px h-12 bg-slate-200"></div>
                   <div class="text-center">
                     <div
                       :class="reportStatusBadgeClass"
-                      class="inline-flex items-center gap-2 px-4 py-2 rounded-full border">
+                      class="inline-flex items-center gap-2 px-4 py-2 rounded-full border"
+                    >
                       <i :class="reportStatusIconClass"></i>
-                      <span class="text-sm font-bold" x-text="reportStatusBadgeText"></span>
+                      <span
+                        class="text-sm font-bold"
+                        x-text="reportStatusBadgeText"
+                      ></span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <!-- 统计概览栏 -->
-            <div class="mt-5 pt-5 border-t border-slate-200 grid grid-cols-5 gap-4">
+            <div
+              class="mt-5 pt-5 border-t border-slate-200 grid grid-cols-5 gap-4"
+            >
               <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <div
+                    class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"
+                  >
                     <i class="fa-solid fa-box-open text-blue-600"></i>
                   </div>
                   <div>
-                    <div class="text-xl font-bold text-slate-900" x-text="reportListingsResults.length"></div>
+                    <div
+                      class="text-xl font-bold text-slate-900"
+                      x-text="reportListingsResults.length"
+                    ></div>
                     <div class="text-xs text-slate-500">Listings 维度</div>
                   </div>
                 </div>
               </div>
               <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <div
+                    class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"
+                  >
                     <i class="fa-solid fa-star text-amber-600"></i>
                   </div>
                   <div>
-                    <div class="text-xl font-bold text-slate-900" x-text="reportReviewsResults.length"></div>
+                    <div
+                      class="text-xl font-bold text-slate-900"
+                      x-text="reportReviewsResults.length"
+                    ></div>
                     <div class="text-xs text-slate-500">Reviews 维度</div>
                   </div>
                 </div>
               </div>
               <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <div
+                    class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center"
+                  >
                     <i class="fa-solid fa-chart-pie text-purple-600"></i>
                   </div>
                   <div>
-                    <div class="text-xl font-bold text-slate-900" x-text="reportTotalHighlights"></div>
+                    <div
+                      class="text-xl font-bold text-slate-900"
+                      x-text="reportTotalHighlights"
+                    ></div>
                     <div class="text-xs text-slate-500">核心发现</div>
                   </div>
                 </div>
               </div>
               <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <div
+                    class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center"
+                  >
                     <i class="fa-solid fa-circle-check text-emerald-600"></i>
                   </div>
                   <div>
-                    <div class="text-xl font-bold text-slate-900" x-text="reportTotalDetails"></div>
+                    <div
+                      class="text-xl font-bold text-slate-900"
+                      x-text="reportTotalDetails"
+                    ></div>
                     <div class="text-xs text-slate-500">分析细项</div>
                   </div>
                 </div>
               </div>
               <!-- 置信度卡片 -->
-              <div class="bg-slate-50 rounded-xl p-4 border border-slate-200" x-show="hasConfidenceData"
-                role="status" aria-live="polite" aria-label="分析置信度">
-                <div class="flex items-center gap-3" role="progressbar" :aria-valuenow="overallConfidencePercent"
-                  aria-valuemin="0" aria-valuemax="100" :aria-label="overallConfidenceAriaLabel">
-                  <div class="w-10 h-10 rounded-lg flex items-center justify-center"
-                    :class="getConfidenceBgAlphaClass(overallConfidencePercent)">
-                    <i class="fa-solid fa-chart-line" aria-hidden="true"
-                      :class="getConfidenceTextLightClass(overallConfidencePercent)"></i>
+              <div
+                class="bg-slate-50 rounded-xl p-4 border border-slate-200"
+                x-show="hasConfidenceData"
+                role="status"
+                aria-live="polite"
+                aria-label="分析置信度"
+              >
+                <div
+                  class="flex items-center gap-3"
+                  role="progressbar"
+                  :aria-valuenow="overallConfidencePercent"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  :aria-label="overallConfidenceAriaLabel"
+                >
+                  <div
+                    class="w-10 h-10 rounded-lg flex items-center justify-center"
+                    :class="getConfidenceBgAlphaClass(overallConfidencePercent)"
+                  >
+                    <i
+                      class="fa-solid fa-chart-line"
+                      aria-hidden="true"
+                      :class="getConfidenceTextLightClass(overallConfidencePercent)"
+                    ></i>
                   </div>
                   <div>
-                    <div class="text-xl font-bold" :class="getConfidenceTextLightClass(overallConfidencePercent)">
+                    <div
+                      class="text-xl font-bold"
+                      :class="getConfidenceTextLightClass(overallConfidencePercent)"
+                    >
                       <span x-text="overallConfidencePercent"></span>%
-                      <span class="text-xs ml-2" x-text="getConfidenceLevel(overallConfidencePercent)"></span>
+                      <span
+                        class="text-xs ml-2"
+                        x-text="getConfidenceLevel(overallConfidencePercent)"
+                      ></span>
                     </div>
                     <div class="text-xs text-slate-500">总体置信度</div>
-                    <span class="sr-only" x-text="overallConfidenceLevelText"></span>
+                    <span
+                      class="sr-only"
+                      x-text="overallConfidenceLevelText"
+                    ></span>
                   </div>
                 </div>
               </div>
@@ -967,51 +1470,78 @@
             <!-- AI 分析报告 JSON - 集成到分析报告卡片内 -->
             <template x-if="reportFullData">
               <div class="mt-5 pt-5 border-t border-slate-200">
-                <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800">
-                  <div class="flex items-center justify-between p-4 bg-slate-900">
-                    <button type="button" @click="toggleJsonViewer()"
-                      class="flex min-h-11 items-center gap-3 hover:opacity-80 transition-opacity">
+                <div
+                  class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800"
+                >
+                  <div
+                    class="flex items-center justify-between p-4 bg-slate-900"
+                  >
+                    <button
+                      type="button"
+                      @click="toggleJsonViewer()"
+                      class="flex min-h-11 items-center gap-3 hover:opacity-80 transition-opacity"
+                    >
                       <div
-                        class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                        class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg"
+                      >
                         <i class="fa-solid fa-database text-white"></i>
                       </div>
                       <div class="text-left">
-                        <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                        <h4
+                          class="text-sm font-bold text-white flex items-center gap-2"
+                        >
                           AI 分析报告 JSON
-                          <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">ANALYSIS
-                            REPORT</span>
+                          <span
+                            class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full"
+                            >ANALYSIS REPORT</span
+                          >
                         </h4>
                         <p class="text-xs text-slate-400">
-                          <span x-text="selectedTargets.length"></span> 个分析维度 ·
+                          <span x-text="selectedTargets.length"></span>
+                          个分析维度 ·
                           <span x-text="getReportJsonKbText()"></span> KB
                         </p>
                       </div>
                     </button>
                     <div class="flex items-center gap-2">
                       <!-- 导出按钮组 - 极简三段式设计 -->
-                      <div class="inline-flex rounded-lg overflow-hidden border border-slate-600/50 bg-slate-800/50">
-                        <button type="button" @click="copyMarkdown()"
+                      <div
+                        class="inline-flex rounded-lg overflow-hidden border border-slate-600/50 bg-slate-800/50"
+                      >
+                        <button
+                          type="button"
+                          @click="copyMarkdown()"
                           class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all border-r border-slate-600/50"
-                          title="复制 Markdown 格式报告">
+                          title="复制 Markdown 格式报告"
+                        >
                           <i class="fa-brands fa-markdown text-base"></i>
                           <span>MD</span>
                         </button>
-                        <button type="button" @click="copyJson()"
+                        <button
+                          type="button"
+                          @click="copyJson()"
                           class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all border-r border-slate-600/50"
-                          title="复制 JSON 格式报告">
+                          title="复制 JSON 格式报告"
+                        >
                           <i class="fa-solid fa-copy text-base"></i>
                           <span>JSON</span>
                         </button>
-                        <button type="button" @click="downloadJson()"
+                        <button
+                          type="button"
+                          @click="downloadJson()"
                           class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all"
-                          title="下载 JSON 格式报告">
+                          title="下载 JSON 格式报告"
+                        >
                           <i class="fa-solid fa-download text-base"></i>
                           <span>下载</span>
                         </button>
                       </div>
                       <div class="w-px h-6 bg-slate-600/50"></div>
-                      <button type="button" @click="toggleJsonViewer()"
-                        class="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all">
+                      <button
+                        type="button"
+                        @click="toggleJsonViewer()"
+                        class="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all"
+                      >
                         <i :class="jsonViewerChevronClass"></i>
                       </button>
                     </div>
@@ -1019,30 +1549,47 @@
                   <template x-if="showJsonViewer">
                     <div class="animate-fade-in">
                       <div
-                        class="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-t border-slate-700/30">
-                        <div class="flex items-center gap-2 text-xs text-slate-400">
+                        class="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-t border-slate-700/30"
+                      >
+                        <div
+                          class="flex items-center gap-2 text-xs text-slate-400"
+                        >
                           <i class="fa-solid fa-file-code"></i>
                           <span>analysis_report.json</span>
                         </div>
-                        <div class="flex items-center gap-4 text-xs text-slate-500">
-                          <span>tokens: <span
-                              x-text="getReportJsonTokenText()"></span></span>
-                          <span>字符: <span x-text="getReportJsonCharText()"></span></span>
+                        <div
+                          class="flex items-center gap-4 text-xs text-slate-500"
+                        >
+                          <span
+                            >tokens:
+                            <span x-text="getReportJsonTokenText()"></span
+                          ></span>
+                          <span
+                            >字符: <span x-text="getReportJsonCharText()"></span
+                          ></span>
                         </div>
                       </div>
                       <div class="overflow-auto p-4 max-h-96">
                         <pre
-                          class="text-xs font-mono leading-relaxed"><code class="text-slate-300" x-text="getReportJsonText()"></code></pre>
+                          class="text-xs font-mono leading-relaxed"
+                        ><code class="text-slate-300" x-text="getReportJsonText()"></code></pre>
                       </div>
                     </div>
                   </template>
                   <template x-if="jsonViewerCollapsed">
-                    <div class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30">
-                      <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <div
+                      class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30"
+                    >
+                      <div
+                        class="flex items-center gap-2 text-xs text-slate-500"
+                      >
                         <i class="fa-solid fa-code"></i>
-                        <span class="font-mono truncate">{ "metadata": { "asins": [<span
-                            x-text="selectedAsinsJsonText"></span>], ... },
-                          "analysisReport": {...} }</span>
+                        <span class="font-mono truncate"
+                          >{ "metadata": { "asins": [<span
+                            x-text="selectedAsinsJsonText"
+                          ></span
+                          >], ... }, "analysisReport": {...} }</span
+                        >
                       </div>
                     </div>
                   </template>
@@ -1056,42 +1603,67 @@
           <div>
             <div class="flex items-center gap-4 mb-6">
               <div
-                class="flex items-center gap-2.5 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold border border-blue-100">
+                class="flex items-center gap-2.5 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold border border-blue-100"
+              >
                 <i class="fa-solid fa-box-open"></i>
                 Listings 分析结果
               </div>
               <div class="flex-1 h-px bg-slate-200"></div>
-              <span class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-lg"
-                x-text="getListingsResultCountText()"></span>
+              <span
+                class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-lg"
+                x-text="getListingsResultCountText()"
+              ></span>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <template :key="result.targetId" x-for="(result, index) in reportListingsResults">
+              <template
+                :key="result.targetId"
+                x-for="(result, index) in reportListingsResults"
+              >
                 <div
-                  class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition-all duration-200">
+                  class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition-all duration-200"
+                >
                   <!-- Header -->
                   <div
                     :class="getListingResultHeaderClass(result.targetId)"
-                    class="relative overflow-hidden p-5 text-slate-900">
+                    class="relative overflow-hidden p-5 text-slate-900"
+                  >
                     <div class="relative flex items-center gap-4">
-                      <div :class="getResultIconWrapClass(result.targetId)"
-                        class="w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm flex-shrink-0">
-                        <i :class="getResultIconDisplayClass(result.targetId)"></i>
+                      <div
+                        :class="getResultIconWrapClass(result.targetId)"
+                        class="w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm flex-shrink-0"
+                      >
+                        <i
+                          :class="getResultIconDisplayClass(result.targetId)"
+                        ></i>
                       </div>
                       <div class="flex-1">
-                        <h3 class="font-bold text-lg tracking-tight text-slate-900" x-text="result.title"></h3>
+                        <h3
+                          class="font-bold text-lg tracking-tight text-slate-900"
+                          x-text="result.title"
+                        ></h3>
                         <div class="flex items-center gap-2 mt-1">
                           <span
                             class="text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 font-medium text-slate-600"
-                            x-text="result.source"></span>
+                            x-text="result.source"
+                          ></span>
                           <!-- 置信度徽章 -->
-                          <span x-show="showTargetConfidence(result.targetId)"
+                          <span
+                            x-show="showTargetConfidence(result.targetId)"
                             class="text-xs px-2.5 py-1 rounded-full bg-white border font-semibold flex items-center gap-1"
                             :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
-                            :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))">
-                            <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
-                            <span x-text="getTargetConfidenceText(result.targetId)"></span>
-                            <span class="text-[10px] ml-0.5"
-                              x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"></span>
+                            :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))"
+                          >
+                            <i
+                              class="fa-solid fa-chart-line text-[10px]"
+                              aria-hidden="true"
+                            ></i>
+                            <span
+                              x-text="getTargetConfidenceText(result.targetId)"
+                            ></span>
+                            <span
+                              class="text-[10px] ml-0.5"
+                              x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"
+                            ></span>
                           </span>
                         </div>
                       </div>
@@ -1100,19 +1672,29 @@
                   <!-- 统计数据 -->
                   <div class="p-5 bg-slate-50/70 border-b border-slate-100">
                     <div class="flex items-center gap-2 mb-4">
-                      <div class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <div
+                        class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center"
+                      >
                         <i class="fa-solid fa-chart-bar text-indigo-600"></i>
                       </div>
-                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">数据概览</span>
+                      <span
+                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                        >数据概览</span
+                      >
                     </div>
                     <div class="grid grid-cols-3 gap-3">
                       <template :key="stat.label" x-for="stat in result.stats">
                         <div
-                          class="relative bg-white rounded-lg p-4 text-center border border-slate-200">
+                          class="relative bg-white rounded-lg p-4 text-center border border-slate-200"
+                        >
                           <div
                             class="text-xl font-extrabold text-slate-900"
-                            x-text="stat.value"></div>
-                          <div class="text-xs text-slate-500 mt-1 font-medium" x-text="stat.label"></div>
+                            x-text="stat.value"
+                          ></div>
+                          <div
+                            class="text-xs text-slate-500 mt-1 font-medium"
+                            x-text="stat.label"
+                          ></div>
                         </div>
                       </template>
                     </div>
@@ -1120,17 +1702,33 @@
                   <!-- 核心发现 -->
                   <div class="p-5 border-b border-slate-100">
                     <div class="flex items-center gap-2 mb-4">
-                      <div class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <div
+                        class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center"
+                      >
                         <i class="fa-solid fa-lightbulb text-amber-600"></i>
                       </div>
-                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">核心发现</span>
+                      <span
+                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                        >核心发现</span
+                      >
                     </div>
                     <div class="space-y-2.5">
-                      <template :key="highlight.text" x-for="highlight in result.highlights">
-                        <div :class="getHighlightClass(highlight.type)"
-                          class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition-all hover:shadow-sm">
-                          <i :class="getHighlightIconClass(highlight.type)" class="fa-solid mt-0.5 flex-shrink-0"></i>
-                          <span class="leading-relaxed" x-text="highlight.text"></span>
+                      <template
+                        :key="highlight.text"
+                        x-for="highlight in result.highlights"
+                      >
+                        <div
+                          :class="getHighlightClass(highlight.type)"
+                          class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition-all hover:shadow-sm"
+                        >
+                          <i
+                            :class="getHighlightIconClass(highlight.type)"
+                            class="fa-solid mt-0.5 flex-shrink-0"
+                          ></i>
+                          <span
+                            class="leading-relaxed"
+                            x-text="highlight.text"
+                          ></span>
                         </div>
                       </template>
                     </div>
@@ -1138,24 +1736,38 @@
                   <!-- 详细分析 -->
                   <div class="p-5">
                     <div class="flex items-center gap-2 mb-4">
-                      <div class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center">
+                      <div
+                        class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center"
+                      >
                         <i class="fa-solid fa-list text-slate-600"></i>
                       </div>
-                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">详细分析</span>
+                      <span
+                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                        >详细分析</span
+                      >
                     </div>
                     <div class="space-y-5">
-                      <template :key="detail.category" x-for="detail in result.details">
+                      <template
+                        :key="detail.category"
+                        x-for="detail in result.details"
+                      >
                         <div>
-                          <span :class="getResultCategoryClass(result.targetId)"
-                            class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
+                          <span
+                            :class="getResultCategoryClass(result.targetId)"
+                            class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
+                          >
                             <i class="fa-solid fa-quote-left opacity-60"></i>
                             <span x-text="detail.category"></span>
                           </span>
                           <div class="flex flex-wrap gap-2">
-                            <template :key="index" x-for="(item, index) in detail.items">
+                            <template
+                              :key="index"
+                              x-for="(item, index) in detail.items"
+                            >
                               <span
                                 class="inline-block px-3 py-2 bg-slate-50 text-slate-700 text-xs rounded-lg cursor-default border border-slate-200 font-medium"
-                                x-text="item"></span>
+                                x-text="item"
+                              ></span>
                             </template>
                           </div>
                         </div>
@@ -1172,42 +1784,67 @@
           <div>
             <div class="flex items-center gap-4 mb-6">
               <div
-                class="flex items-center gap-2.5 bg-amber-50 text-amber-700 px-4 py-2 rounded-lg text-sm font-bold border border-amber-100">
+                class="flex items-center gap-2.5 bg-amber-50 text-amber-700 px-4 py-2 rounded-lg text-sm font-bold border border-amber-100"
+              >
                 <i class="fa-solid fa-star"></i>
                 Reviews 分析结果
               </div>
               <div class="flex-1 h-px bg-slate-200"></div>
-              <span class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-lg"
-                x-text="getReviewsResultCountText()"></span>
+              <span
+                class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-lg"
+                x-text="getReviewsResultCountText()"
+              ></span>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              <template :key="result.targetId" x-for="(result, index) in reportReviewsResults">
+              <template
+                :key="result.targetId"
+                x-for="(result, index) in reportReviewsResults"
+              >
                 <div
-                  class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition-all duration-200">
+                  class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition-all duration-200"
+                >
                   <!-- Header -->
                   <div
                     :class="getReviewResultHeaderClass(result.targetId)"
-                    class="relative overflow-hidden p-5 text-slate-900">
+                    class="relative overflow-hidden p-5 text-slate-900"
+                  >
                     <div class="relative flex items-center gap-4">
-                      <div :class="getResultIconWrapClass(result.targetId)"
-                        class="w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm flex-shrink-0">
-                        <i :class="getResultIconDisplayClass(result.targetId)"></i>
+                      <div
+                        :class="getResultIconWrapClass(result.targetId)"
+                        class="w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm flex-shrink-0"
+                      >
+                        <i
+                          :class="getResultIconDisplayClass(result.targetId)"
+                        ></i>
                       </div>
                       <div class="flex-1">
-                        <h3 class="font-bold text-lg tracking-tight text-slate-900" x-text="result.title"></h3>
+                        <h3
+                          class="font-bold text-lg tracking-tight text-slate-900"
+                          x-text="result.title"
+                        ></h3>
                         <div class="flex items-center gap-2 mt-1">
                           <span
                             class="text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 font-medium text-slate-600"
-                            x-text="result.source"></span>
+                            x-text="result.source"
+                          ></span>
                           <!-- 置信度徽章 -->
-                          <span x-show="showTargetConfidence(result.targetId)"
+                          <span
+                            x-show="showTargetConfidence(result.targetId)"
                             class="text-xs px-2.5 py-1 rounded-full bg-white border font-semibold flex items-center gap-1"
                             :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
-                            :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))">
-                            <i class="fa-solid fa-chart-line text-[10px]" aria-hidden="true"></i>
-                            <span x-text="getTargetConfidenceText(result.targetId)"></span>
-                            <span class="text-[10px] ml-0.5"
-                              x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"></span>
+                            :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))"
+                          >
+                            <i
+                              class="fa-solid fa-chart-line text-[10px]"
+                              aria-hidden="true"
+                            ></i>
+                            <span
+                              x-text="getTargetConfidenceText(result.targetId)"
+                            ></span>
+                            <span
+                              class="text-[10px] ml-0.5"
+                              x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"
+                            ></span>
                           </span>
                         </div>
                       </div>
@@ -1216,19 +1853,29 @@
                   <!-- 统计数据 -->
                   <div class="p-5 bg-slate-50/70 border-b border-slate-100">
                     <div class="flex items-center gap-2 mb-4">
-                      <div class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <div
+                        class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center"
+                      >
                         <i class="fa-solid fa-chart-bar text-indigo-600"></i>
                       </div>
-                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">数据概览</span>
+                      <span
+                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                        >数据概览</span
+                      >
                     </div>
                     <div class="grid grid-cols-3 gap-3">
                       <template :key="stat.label" x-for="stat in result.stats">
                         <div
-                          class="relative bg-white rounded-lg p-4 text-center border border-slate-200">
+                          class="relative bg-white rounded-lg p-4 text-center border border-slate-200"
+                        >
                           <div
                             class="text-xl font-extrabold text-slate-900"
-                            x-text="stat.value"></div>
-                          <div class="text-xs text-slate-500 mt-1 font-medium" x-text="stat.label"></div>
+                            x-text="stat.value"
+                          ></div>
+                          <div
+                            class="text-xs text-slate-500 mt-1 font-medium"
+                            x-text="stat.label"
+                          ></div>
                         </div>
                       </template>
                     </div>
@@ -1236,17 +1883,33 @@
                   <!-- 核心发现 -->
                   <div class="p-5 border-b border-slate-100">
                     <div class="flex items-center gap-2 mb-4">
-                      <div class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <div
+                        class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center"
+                      >
                         <i class="fa-solid fa-lightbulb text-amber-600"></i>
                       </div>
-                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">核心发现</span>
+                      <span
+                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                        >核心发现</span
+                      >
                     </div>
                     <div class="space-y-2.5">
-                      <template :key="highlight.text" x-for="highlight in result.highlights">
-                        <div :class="getHighlightClass(highlight.type)"
-                          class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition-all hover:shadow-sm">
-                          <i :class="getHighlightIconClass(highlight.type)" class="fa-solid mt-0.5 flex-shrink-0"></i>
-                          <span class="leading-relaxed" x-text="highlight.text"></span>
+                      <template
+                        :key="highlight.text"
+                        x-for="highlight in result.highlights"
+                      >
+                        <div
+                          :class="getHighlightClass(highlight.type)"
+                          class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition-all hover:shadow-sm"
+                        >
+                          <i
+                            :class="getHighlightIconClass(highlight.type)"
+                            class="fa-solid mt-0.5 flex-shrink-0"
+                          ></i>
+                          <span
+                            class="leading-relaxed"
+                            x-text="highlight.text"
+                          ></span>
                         </div>
                       </template>
                     </div>
@@ -1254,24 +1917,38 @@
                   <!-- 详细分析 -->
                   <div class="p-5">
                     <div class="flex items-center gap-2 mb-4">
-                      <div class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center">
+                      <div
+                        class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center"
+                      >
                         <i class="fa-solid fa-list text-slate-600"></i>
                       </div>
-                      <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">详细分析</span>
+                      <span
+                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                        >详细分析</span
+                      >
                     </div>
                     <div class="space-y-5">
-                      <template :key="detail.category" x-for="detail in result.details">
+                      <template
+                        :key="detail.category"
+                        x-for="detail in result.details"
+                      >
                         <div>
-                          <span :class="getResultCategoryClass(result.targetId)"
-                            class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
+                          <span
+                            :class="getResultCategoryClass(result.targetId)"
+                            class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
+                          >
                             <i class="fa-solid fa-quote-left opacity-60"></i>
                             <span x-text="detail.category"></span>
                           </span>
                           <div class="flex flex-wrap gap-2">
-                            <template :key="index" x-for="(item, index) in detail.items">
+                            <template
+                              :key="index"
+                              x-for="(item, index) in detail.items"
+                            >
                               <span
                                 class="inline-block px-3 py-2 bg-slate-50 text-slate-700 text-xs rounded-lg cursor-default border border-slate-200 font-medium"
-                                x-text="item"></span>
+                                x-text="item"
+                              ></span>
                             </template>
                           </div>
                         </div>
@@ -1289,28 +1966,47 @@
     <template x-if="hasNoReportIdle">
       <div class="text-center py-20">
         <div
-          class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl mb-8 shadow-inner">
+          class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl mb-8 shadow-inner"
+        >
           <i class="fa-solid fa-lightbulb text-slate-400 text-4xl"></i>
         </div>
-        <h3 class="text-2xl font-bold text-slate-700 mb-3"
-          x-text="hasNoAnalysisData ? '请先准备产品数据' : '准备开始智能分析'"></h3>
-        <p x-show="!hasNoAnalysisData" class="text-slate-500 max-w-lg mx-auto leading-relaxed">
+        <h3
+          class="text-2xl font-bold text-slate-700 mb-3"
+          x-text="hasNoAnalysisData ? '请先准备产品数据' : '准备开始智能分析'"
+        ></h3>
+        <p
+          x-show="!hasNoAnalysisData"
+          class="text-slate-500 max-w-lg mx-auto leading-relaxed"
+        >
           选择分析目标并确认 ASIN，点击"开始分析"按钮，<br />
           AI 将自动提取 Listings 和 Reviews 中的关键洞察
         </p>
-        <p x-show="hasNoAnalysisData" class="text-slate-500 max-w-lg mx-auto leading-relaxed">
-          当前没有可分析的产品数据。请先完成数据采集或导入，再回到这里生成 Listings 与 Reviews 洞察。
+        <p
+          x-show="hasNoAnalysisData"
+          class="text-slate-500 max-w-lg mx-auto leading-relaxed"
+        >
+          当前没有可分析的产品数据。请先完成数据采集或导入，再回到这里生成
+          Listings 与 Reviews 洞察。
         </p>
         <div x-show="hasNoAnalysisData" class="mt-8">
-          <button type="button" data-action="switch-tab" data-tab="scraper"
-            class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700">
+          <button
+            type="button"
+            data-action="switch-tab"
+            data-tab="scraper"
+            class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+          >
             <i class="fa-solid fa-spider"></i>
             去数据采集
           </button>
         </div>
-        <div x-show="!hasNoAnalysisData" class="mt-10 flex items-center justify-center gap-8">
+        <div
+          x-show="!hasNoAnalysisData"
+          class="mt-10 flex items-center justify-center gap-8"
+        >
           <div class="flex items-center gap-3 text-slate-500">
-            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center border border-blue-200">
+            <div
+              class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center border border-blue-200"
+            >
               <i class="fa-solid fa-box-open text-blue-600"></i>
             </div>
             <div class="text-left">
@@ -1320,7 +2016,9 @@
           </div>
           <div class="w-px h-10 bg-slate-200"></div>
           <div class="flex items-center gap-3 text-slate-500">
-            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center border border-amber-200">
+            <div
+              class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center border border-amber-200"
+            >
               <i class="fa-solid fa-star text-amber-600"></i>
             </div>
             <div class="text-left">

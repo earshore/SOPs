@@ -12,13 +12,19 @@
 }
 
 .animate-float {
-  animation: aiAnalysisFloat calc(var(--duration-2s, 2000ms) + var(--duration-1s, 1000ms))
+  animation: aiAnalysisFloat
+    calc(var(--duration-2s, 2000ms) + var(--duration-1s, 1000ms))
     var(--ease-in-out) infinite;
 }
 
 /* ========== Shimmer 效果 ========== */
 .shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
   background-size: 200% 100%;
   animation: skeletonShimmer var(--duration-2s) infinite;
 }
@@ -65,9 +71,9 @@
 .gradient-text {
   background: linear-gradient(
     135deg,
-    var(--color-indigo-500),
-    var(--color-purple-500),
-    var(--color-pink-500)
+    var(--ma-accent, #2563eb),
+    var(--ma-accent-light, #06b6d4),
+    var(--ma-accent-hover, #1d4ed8)
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -93,16 +99,16 @@
 }
 
 .gradient-border::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   padding: 2px;
   background: linear-gradient(
     135deg,
-    var(--color-indigo-500),
-    var(--color-purple-500),
-    var(--color-pink-500)
+    var(--ma-accent, #2563eb),
+    var(--ma-accent-light, #06b6d4),
+    var(--ma-accent-hover, #1d4ed8)
   );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
@@ -124,13 +130,13 @@ pre code {
 
 /* ========== 选择样式 ========== */
 .ai-analysis-wrapper ::selection {
-  background: rgba(99, 102, 241, 0.2);
-  color: var(--color-indigo-600);
+  background: rgba(var(--ma-accent-rgb, 37, 99, 235), 0.18);
+  color: var(--ma-accent-hover, #1d4ed8);
 }
 
 /* ========== Focus 样式 ========== */
 .ai-analysis-wrapper :focus-visible {
-  outline: 2px solid var(--color-indigo-500);
+  outline: 2px solid var(--ma-accent, #2563eb);
   outline-offset: 2px;
 }
 
@@ -276,9 +282,9 @@ pre code {
 }
 
 @media (min-width: 1024px) {
-  [x-data='aiAnalysisPanel']
+  [x-data="aiAnalysisPanel"]
     :where(
-      [class*='bg-gradient-to-br'][class*='from-slate-100'][class*='to-slate-200'][class*='shadow-inner']
+      [class*="bg-gradient-to-br"][class*="from-slate-100"][class*="to-slate-200"][class*="shadow-inner"]
     ) {
     background-color: var(--color-slate-100);
     background-image: none !important;

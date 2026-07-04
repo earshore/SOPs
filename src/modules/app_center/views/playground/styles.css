@@ -2,29 +2,39 @@
   --playground-accent-rgb: 168, 95, 63;
   --playground-accent: #a85f3f;
   --playground-accent-hover: #8f4f33;
-  --playground-accent-active: #5f2f1d;
+  --playground-accent-active: #6f3925;
   --playground-accent-light: #d08968;
   --playground-accent-muted: #ead6c8;
   --playground-accent-soft: #faf3ee;
   --playground-accent-border: rgba(var(--playground-accent-rgb), 0.24);
   --playground-accent-border-hover: rgba(var(--playground-accent-rgb), 0.36);
   --playground-accent-shadow: rgba(var(--playground-accent-rgb), 0.14);
-  --playground-border: var(--border-muted, rgba(214, 190, 174, 0.72));
+  --playground-border: var(--border-muted, rgba(234, 214, 200, 0.72));
   --playground-focus-ring: rgba(var(--playground-accent-rgb), 0.18);
-  --playground-surface-hover: var(--surface-card-hover, #fff7f0);
+  --playground-surface-hover: var(--surface-card-hover, #faf3ee);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-5, 1.25rem);
   height: 100%;
   min-height: 0;
   font-family:
-    'DM Sans',
+    "DM Sans",
     system-ui,
     -apple-system,
     sans-serif;
 }
 
 .playground-welcome {
+  --wb-theme-accent: var(--playground-accent);
+  --wb-theme-accent-strong: var(--playground-accent-hover);
+  --wb-theme-accent-soft: var(--playground-accent-soft);
+  --wb-theme-accent-border: var(--playground-accent-border);
+  --wb-theme-tag-dot-color: var(--playground-accent);
+  --wb-theme-tag-icon-color: var(--playground-accent-hover);
+  --wb-theme-tag-hover-border: var(--playground-accent-border-hover);
+  --wb-theme-badge-bg: var(--playground-accent-soft);
+  --wb-theme-badge-color: var(--playground-accent-hover);
+  --wb-theme-badge-border: var(--playground-accent-border);
   margin-bottom: 0;
 }
 
@@ -32,9 +42,12 @@
   height: 100%;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(220px, 240px) minmax(0, 1fr) minmax(240px, 280px);
-  grid-template-areas: 'thread main prompt';
-  background: linear-gradient(180deg, #fffaf5, var(--playground-accent-soft));
+  grid-template-columns: minmax(220px, 240px) minmax(0, 1fr) minmax(
+      240px,
+      280px
+    );
+  grid-template-areas: "thread main prompt";
+  background: linear-gradient(180deg, #fffaf7, var(--playground-accent-soft));
   color: var(--color-slate-900, #0f172a);
   border: 1px solid var(--color-slate-200, #e2e8f0);
   border-radius: var(--rounded-xl, 0.75rem);
@@ -57,7 +70,11 @@
   grid-area: thread;
   min-width: 0;
   padding: var(--spacing-5, 1.25rem) var(--spacing-4, 1rem);
-  background: linear-gradient(180deg, rgba(250, 243, 238, 0.96), rgba(255, 247, 240, 0.82));
+  background: linear-gradient(
+    180deg,
+    rgba(250, 243, 238, 0.96),
+    rgba(255, 250, 247, 0.82)
+  );
   border-right: 1px solid var(--color-slate-200, #e2e8f0);
   display: flex;
   flex-direction: column;
@@ -75,7 +92,11 @@
   grid-area: prompt;
   min-width: 0;
   padding: var(--spacing-5, 1.25rem) var(--spacing-4, 1rem);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(250, 243, 238, 0.94));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98),
+    rgba(250, 243, 238, 0.94)
+  );
   border-left: 1px solid var(--color-slate-200, #e2e8f0);
   display: flex;
   flex-direction: column;
@@ -110,7 +131,11 @@
   justify-content: center;
   flex: 0 0 32px;
   border-radius: var(--rounded-lg, 0.5rem);
-  background: linear-gradient(135deg, var(--playground-accent), var(--playground-accent-light));
+  background: linear-gradient(
+    135deg,
+    var(--playground-accent),
+    var(--playground-accent-light)
+  );
   color: #ffffff;
   font-size: 13px;
   box-shadow: 0 8px 18px -14px rgba(var(--playground-accent-rgb), 0.64);
@@ -192,7 +217,7 @@
 }
 
 .playground-panel-title::before {
-  content: '';
+  content: "";
   width: 0.25rem;
   height: 1rem;
   border-radius: 999px;
@@ -200,10 +225,14 @@
 }
 
 .playground-panel-title::after {
-  content: '';
+  content: "";
   height: 1px;
   flex: 1 1 auto;
-  background: linear-gradient(90deg, rgba(148, 163, 184, 0.32), rgba(148, 163, 184, 0));
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.32),
+    rgba(148, 163, 184, 0)
+  );
 }
 
 .playground-panel-title--prompt::before {
@@ -548,7 +577,7 @@
 }
 
 .playground-prompt-preview-popover::before {
-  content: '';
+  content: "";
   position: absolute;
   top: var(--playground-prompt-preview-arrow-top);
   left: -7px;
@@ -595,10 +624,13 @@
 }
 
 .playground-prompt-preview-body {
-  max-height: var(--playground-prompt-preview-body-max-height, min(472px, calc(100vh - 208px)));
+  max-height: var(
+    --playground-prompt-preview-body-max-height,
+    min(472px, calc(100vh - 208px))
+  );
   overflow-y: auto;
   padding-right: var(--spacing-1, 0.25rem);
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: "JetBrains Mono", "Courier New", monospace;
   font-size: 11px;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -622,7 +654,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #ffffff, #fffaf5);
+  background: linear-gradient(180deg, #ffffff, #fffaf7);
 }
 
 .playground-topbar {
@@ -687,7 +719,7 @@
   box-shadow: 0 0 0 3px var(--playground-focus-ring);
 }
 
-.playground-top-icon[aria-expanded='false'] {
+.playground-top-icon[aria-expanded="false"] {
   border-color: var(--playground-accent-border);
   background: var(--playground-accent-soft);
   color: var(--playground-accent-hover);
@@ -703,7 +735,7 @@
   background: #ffffff;
   color: var(--color-slate-900, #0f172a);
   font-size: var(--text-base, 0.875rem);
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: "JetBrains Mono", "Courier New", monospace;
   line-height: 1;
   outline: none;
   box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
@@ -793,7 +825,7 @@
   background: #ffffff;
   color: var(--color-slate-900, #0f172a);
   font-size: 13px;
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: "DM Sans", system-ui, sans-serif;
   line-height: 1.5;
 }
 
@@ -821,7 +853,8 @@
   background: linear-gradient(
     90deg,
     var(--playground-accent) 0 var(--playground-temperature-percent, 30%),
-    var(--playground-accent-muted) var(--playground-temperature-percent, 30%) 100%
+    var(--playground-accent-muted) var(--playground-temperature-percent, 30%)
+      100%
   );
 }
 
@@ -859,7 +892,7 @@
 .playground-field-temperature output {
   color: var(--playground-accent-hover);
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
 }
 
 .playground-reset-tuning {
@@ -873,7 +906,7 @@
   color: var(--color-slate-700, #334155);
   font-size: 13px;
   font-weight: 600;
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: "DM Sans", system-ui, sans-serif;
   cursor: pointer;
   box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
   transition:
@@ -1028,15 +1061,15 @@
     grid-template-columns: minmax(216px, 232px) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr) auto;
     grid-template-areas:
-      'thread main'
-      'thread prompt';
+      "thread main"
+      "thread prompt";
   }
 
   .playground-page.is-rail-collapsed {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      'main'
-      'prompt';
+      "main"
+      "prompt";
   }
 
   .playground-thread-rail {
@@ -1070,12 +1103,12 @@
 @media (max-width: 900px) {
   .playground-page {
     grid-template-columns: 1fr;
-    grid-template-areas: 'main';
+    grid-template-areas: "main";
   }
 
   .playground-page.is-rail-collapsed {
     grid-template-columns: 1fr;
-    grid-template-areas: 'main';
+    grid-template-areas: "main";
   }
 
   .playground-thread-rail {
@@ -1271,7 +1304,10 @@
   .playground-prompt-item:hover,
   .playground-prompt-item:focus-within,
   .playground-reset-tuning:hover {
-    box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+    box-shadow: var(
+      --shadow-card-hover,
+      0 8px 22px -20px rgba(15, 23, 42, 0.36)
+    );
   }
 
   .playground-new-thread:active,
@@ -1302,7 +1338,10 @@
 
   .playground-prompt-preview-popover,
   .playground-tuning {
-    box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
+    box-shadow: var(
+      --shadow-card-hover,
+      0 8px 22px -20px rgba(15, 23, 42, 0.36)
+    );
   }
 
   .playground-topbar {

@@ -1,5 +1,9 @@
 <div class="playground-shell">
-  <div class="wb-container wb-container--card wb-container--hidden wb-theme-amber playground-welcome" aria-labelledby="playground-welcome-title" aria-hidden="true">
+  <div
+    class="wb-container wb-container--card wb-container--hidden wb-theme-supply playground-welcome"
+    aria-labelledby="playground-welcome-title"
+    aria-hidden="true"
+  >
     <div class="wb-card">
       <div class="wb-bg-gradient"></div>
       <div class="wb-content">
@@ -14,13 +18,16 @@
           </div>
           <div class="wb-text">
             <div class="wb-title-row">
-              <h2 id="playground-welcome-title" class="wb-title">Deep Chat 助手</h2>
+              <h2 id="playground-welcome-title" class="wb-title">
+                Deep Chat 助手
+              </h2>
               <span class="wb-badge wb-badge-ai" aria-label="AI 对话功能">
                 <i class="fas fa-bolt" aria-hidden="true"></i>Playground
               </span>
             </div>
             <p class="wb-description">
-              面向运营任务的多模型对话工作台，用于快速生成 SOP 草稿、Listing 改写方向和分析提示词。
+              面向运营任务的多模型对话工作台，用于快速生成 SOP 草稿、Listing
+              改写方向和分析提示词。
             </p>
             <ul class="wb-tags" role="list">
               <li class="wb-tag" role="listitem">
@@ -28,15 +35,24 @@
                 <span>多模型对话</span>
               </li>
               <li class="wb-tag" role="listitem">
-                <span class="wb-tag-dot wb-tag-dot--blue" aria-hidden="true"></span>
+                <span
+                  class="wb-tag-dot wb-tag-dot--blue"
+                  aria-hidden="true"
+                ></span>
                 <span>SOP 草稿</span>
               </li>
               <li class="wb-tag" role="listitem">
-                <span class="wb-tag-dot wb-tag-dot--green" aria-hidden="true"></span>
+                <span
+                  class="wb-tag-dot wb-tag-dot--green"
+                  aria-hidden="true"
+                ></span>
                 <span>Listing 改写</span>
               </li>
               <li class="wb-tag" role="listitem">
-                <span class="wb-tag-dot wb-tag-dot--amber" aria-hidden="true"></span>
+                <span
+                  class="wb-tag-dot wb-tag-dot--amber"
+                  aria-hidden="true"
+                ></span>
                 <span>Prompt 实验</span>
               </li>
             </ul>
@@ -47,9 +63,15 @@
   </div>
 
   <div class="playground-page">
-    <aside id="playground-thread-rail" class="playground-thread-rail" aria-label="Deep Chat 会话">
+    <aside
+      id="playground-thread-rail"
+      class="playground-thread-rail"
+      aria-label="Deep Chat 会话"
+    >
       <div class="playground-rail-brand">
-        <h1 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
+        <h1
+          class="text-base font-bold text-slate-800 flex items-center gap-2.5"
+        >
           <div class="playground-rail-icon">
             <i class="far fa-comments" aria-hidden="true"></i>
           </div>
@@ -57,32 +79,62 @@
         </h1>
       </div>
 
-      <button id="playground-clear-chat" class="playground-new-thread" type="button">
+      <button
+        id="playground-clear-chat"
+        class="playground-new-thread"
+        type="button"
+      >
         <i class="fas fa-plus" aria-hidden="true"></i>
         <span>新建会话</span>
       </button>
 
       <div class="playground-thread-list-wrap">
         <h3 class="playground-panel-title">历史会话</h3>
-        <div id="playground-thread-list" class="playground-thread-list" aria-label="历史会话"></div>
+        <div
+          id="playground-thread-list"
+          class="playground-thread-list"
+          aria-label="历史会话"
+        ></div>
       </div>
     </aside>
 
     <section class="playground-main" aria-label="Deep Chat">
       <header class="playground-topbar">
         <div class="playground-model-area">
-          <button id="playground-toggle-rail" class="playground-top-icon" type="button" title="收起历史会话"
-            aria-label="收起历史会话" aria-controls="playground-thread-rail" aria-expanded="true">
+          <button
+            id="playground-toggle-rail"
+            class="playground-top-icon"
+            type="button"
+            title="收起历史会话"
+            aria-label="收起历史会话"
+            aria-controls="playground-thread-rail"
+            aria-expanded="true"
+          >
             <i class="far fa-window-maximize" aria-hidden="true"></i>
           </button>
-          <select id="playground-model-select" class="playground-select" aria-label="模型选择" disabled>
+          <select
+            id="playground-model-select"
+            class="playground-select"
+            aria-label="模型选择"
+            disabled
+          >
             <option value="">默认</option>
           </select>
-          <span id="playground-provider-status" class="playground-provider-status" aria-live="polite"></span>
+          <span
+            id="playground-provider-status"
+            class="playground-provider-status"
+            aria-live="polite"
+          ></span>
         </div>
 
         <div class="playground-top-actions">
-          <button id="playground-refresh-config" class="playground-top-icon" type="button" title="刷新模型配置" aria-label="刷新模型配置">
+          <button
+            id="playground-refresh-config"
+            class="playground-top-icon"
+            type="button"
+            title="刷新模型配置"
+            aria-label="刷新模型配置"
+          >
             <i class="fas fa-rotate" aria-hidden="true"></i>
           </button>
           <details class="playground-tuning-panel">
@@ -90,16 +142,39 @@
               <i class="fas fa-sliders" aria-hidden="true"></i>
             </summary>
             <div class="playground-tuning">
-              <label class="playground-field playground-field-system" for="playground-system-prompt">
+              <label
+                class="playground-field playground-field-system"
+                for="playground-system-prompt"
+              >
                 <span>系统提示词</span>
-                <textarea id="playground-system-prompt" rows="3"
-                  placeholder="可选：仅用于当前 Deep Chat 会话"></textarea>
+                <textarea
+                  id="playground-system-prompt"
+                  rows="3"
+                  placeholder="可选：仅用于当前 Deep Chat 会话"
+                ></textarea>
               </label>
-              <label class="playground-field playground-field-temperature" for="playground-temperature">
-                <span>随机性 <output id="playground-temperature-value">0.3</output></span>
-                <input id="playground-temperature" type="range" min="0" max="1" step="0.1" value="0.3">
+              <label
+                class="playground-field playground-field-temperature"
+                for="playground-temperature"
+              >
+                <span
+                  >随机性
+                  <output id="playground-temperature-value">0.3</output></span
+                >
+                <input
+                  id="playground-temperature"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value="0.3"
+                />
               </label>
-              <button id="playground-reset-tuning" class="playground-reset-tuning" type="button">
+              <button
+                id="playground-reset-tuning"
+                class="playground-reset-tuning"
+                type="button"
+              >
                 重置参数
               </button>
             </div>
@@ -108,27 +183,53 @@
       </header>
 
       <div class="playground-stage">
-        <div id="playground-pending-status" class="playground-pending-status" aria-live="polite" hidden>
+        <div
+          id="playground-pending-status"
+          class="playground-pending-status"
+          aria-live="polite"
+          hidden
+        >
           <span class="playground-pending-dot" aria-hidden="true"></span>
           <span id="playground-pending-status-text">正在生成回复...</span>
         </div>
         <div class="playground-chat-wrap">
           <deep-chat id="playground-chat" class="playground-chat"></deep-chat>
-          <button id="playground-stop-generation" class="playground-stop-generation" type="button"
-            aria-label="停止生成" title="停止生成" hidden>
+          <button
+            id="playground-stop-generation"
+            class="playground-stop-generation"
+            type="button"
+            aria-label="停止生成"
+            title="停止生成"
+            hidden
+          >
             <i class="fas fa-stop" aria-hidden="true"></i>
           </button>
         </div>
       </div>
     </section>
 
-    <aside id="playground-prompt-rail" class="playground-prompt-rail" aria-label="Prompt 生成记录">
+    <aside
+      id="playground-prompt-rail"
+      class="playground-prompt-rail"
+      aria-label="Prompt 生成记录"
+    >
       <div class="playground-prompt-list-wrap">
-        <h3 class="playground-panel-title playground-panel-title--prompt">生成的 Prompt</h3>
-        <div id="playground-prompt-list" class="playground-prompt-list" aria-label="Prompt 生成记录"></div>
+        <h3 class="playground-panel-title playground-panel-title--prompt">
+          生成的 Prompt
+        </h3>
+        <div
+          id="playground-prompt-list"
+          class="playground-prompt-list"
+          aria-label="Prompt 生成记录"
+        ></div>
       </div>
 
-      <div id="playground-prompt-preview-popover" class="playground-prompt-preview-popover" role="tooltip" aria-hidden="true">
+      <div
+        id="playground-prompt-preview-popover"
+        class="playground-prompt-preview-popover"
+        role="tooltip"
+        aria-hidden="true"
+      >
         <div class="playground-prompt-preview-title"></div>
         <div class="playground-prompt-preview-body"></div>
       </div>
