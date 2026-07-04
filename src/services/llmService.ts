@@ -12,6 +12,7 @@ import { configCenter } from '../common/config/ConfigCenter';
 import { EnvConfig } from '../common/config/envConfig';
 import { ApiError, NetworkError, SystemError } from '../common/errors';
 import { isDangerousEndpoint, getDangerousEndpoints } from '../common/config/apiEndpoints';
+import { DEFAULT_LLM_PROVIDER_ID, DEFAULT_NEW_API_ENDPOINT } from '../common/config/llmProviders';
 import { randomFloat } from '../common/utils/random';
 // 导入统一的 API 响应类型
 import type { LLMChatCompletionResponse, LLMErrorResponse } from '../types/api';
@@ -121,13 +122,11 @@ export interface ModelInfo {
  */
 const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
-const DEFAULT_NEW_API_ENDPOINT = 'https://new.hongecb.store/v1';
-
 function resolveProviderEndpoint(provider: string, endpoint: string): string {
   const trimmedEndpoint = (endpoint || '').trim();
 
   if (
-    provider === 'new_api' &&
+    provider === DEFAULT_LLM_PROVIDER_ID &&
     (!trimmedEndpoint || trimmedEndpoint === '/v1' || trimmedEndpoint === '/v1/')
   ) {
     return DEFAULT_NEW_API_ENDPOINT;

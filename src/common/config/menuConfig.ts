@@ -148,7 +148,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: "v2.1 Pro",
       icon: "fas fa-cubes-stacked",
       description: "集成数据采集、管理、AI分析与提示词工程的一站式解决方案。",
-      themeColor: "cyan", // ✅ 通义千问感蓝青系
+      themeColor: "indigo", // ✅ 通义千问感紫蓝系
     },
 
     // Playground 模块配置
@@ -320,7 +320,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: "master_analysis",
       label: "Master Analysis",
       icon: "fas fa-cubes-stacked",
-      color: "cyan", // ✅ 与模块主题色一致
+      color: "indigo", // ✅ 与模块主题色一致
       order: 1,
       version: "v2.1 Pro",
       description: "集成数据采集、管理、AI分析与提示词工程的一站式解决方案。",

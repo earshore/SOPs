@@ -20,6 +20,11 @@ import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
 import { extractValidAsins } from '../utils/validators';
 import { getFlag, getSiteName, getSiteUrl, formatDate } from '../utils/formatters';
 import {
+  DEFAULT_SCRAPER_PROXY_TYPE,
+  getScraperProxyDisplayName,
+  getScraperProxyProvider,
+} from '../../../../../../common/config/scraperProxies';
+import {
   startScrape,
   handleScrapeComplete,
   saveScrapeSnapshot,
@@ -414,19 +419,12 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
   get proxyConfigStatus(): ProxyConfigStatus {
     const config = (StorageService.get(STORAGE_KEYS.PROXY_CONFIG) as ProxyConfig | null) || {
-      type: 'scraperapi' as const,
+      type: DEFAULT_SCRAPER_PROXY_TYPE,
     };
-    const map: Record<string, string> = {
-      scraperapi: 'ScraperAPI',
-      zenrows: 'ZenRows',
-      brightdata: 'Bright Data',
-      custom_api: 'Custom API',
-      custom_proxy: 'HTTP 代理',
-    };
-    const name = map[config.type] || '自动';
-    const ready =
-      !!config.customUrl || StorageService.hasProxyCredential(config.type || 'scraperapi');
-    return { name, ready, type: config.type };
+    const type = config.type || DEFAULT_SCRAPER_PROXY_TYPE;
+    const name = getScraperProxyProvider(type) ? getScraperProxyDisplayName(type) : '自动';
+    const ready = !!config.customUrl || StorageService.hasProxyCredential(type);
+    return { name, ready, type };
   },
 
   // 数据预览相关计算属性

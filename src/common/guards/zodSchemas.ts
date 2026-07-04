@@ -5,6 +5,7 @@
 // ================================================================
 
 import { z } from 'zod';
+import { SCRAPER_PROXY_TYPE_VALUES } from '@/common/config/scraperProxies';
 
 // ==================== State Schemas ====================
 
@@ -152,9 +153,7 @@ export const LLMProviderConfigSchema = z.object({
  * ProxyConfig Schema
  */
 export const ProxyConfigSchema = z.object({
-  type: z
-    .enum(['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy', 'custom'])
-    .optional(),
+  type: z.enum(SCRAPER_PROXY_TYPE_VALUES).optional(),
   customUrl: z.string().optional(),
   enabled: z.boolean().optional(),
   host: z.string().optional(),

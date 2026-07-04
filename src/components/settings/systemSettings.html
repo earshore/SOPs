@@ -141,7 +141,9 @@
                         <div class="relative">
                             <select id="llm-provider" name="llm-provider" :value="llm.provider" @change="setLlmProvider($event)"
                                 class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm transition-all duration-200 shadow-sm hover:border-slate-300 cursor-pointer">
-                                <option value="new_api">✨ NEW API</option>
+                                <template x-for="option in llmProviderOptions" :key="option.id">
+                                    <option :value="option.id" x-text="option.label"></option>
+                                </template>
                             </select>
                             <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center">
                                 <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
@@ -158,7 +160,7 @@
                             </div>
                             <input type="text" id="llm-endpoint" name="llm-endpoint" :value="llm.endpoint" @input="setLlmEndpoint($event)"
                                 class="settings-leading-icon-input w-full pl-12 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
-                                placeholder="https://new.hongecb.store/v1" />
+                                :placeholder="defaultLlmEndpoint" />
                         </div>
                     </div>
 
@@ -282,13 +284,14 @@
                             <select id="proxy-type" name="proxy-type" :value="proxy.type" @change="setProxyType($event)"
                                 class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition-all duration-200 hover:border-slate-300 cursor-pointer">
                                 <optgroup label="商业 API (高成功率)">
-                                    <option value="scraperapi">ScraperAPI</option>
-                                    <option value="zenrows">ZenRows</option>
-                                    <option value="brightdata">Bright Data</option>
-                                    <option value="custom_api">自定义 API</option>
+                                    <template x-for="option in commercialProxyOptions" :key="option.type">
+                                        <option :value="option.type" x-text="option.displayName"></option>
+                                    </template>
                                 </optgroup>
                                 <optgroup label="直连">
-                                    <option value="custom_proxy">自定义 HTTP 代理</option>
+                                    <template x-for="option in directProxyOptions" :key="option.type">
+                                        <option :value="option.type" x-text="option.displayName"></option>
+                                    </template>
                                 </optgroup>
                             </select>
                             <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center">

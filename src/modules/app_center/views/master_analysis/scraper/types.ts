@@ -12,6 +12,7 @@ import type {
   CustomerReview,
   ScraperSite,
 } from '@/types/modules-business';
+import type { ScraperProxyType } from '@/common/config/scraperProxies';
 
 // ==================== 重新导出全局类型 ====================
 
@@ -58,13 +59,7 @@ export type TaskStatusCallback = (asin: string, status: TaskStatus, message: str
 /**
  * 代理类型
  */
-export type ProxyType =
-  | 'scraperapi' // ScraperAPI
-  | 'zenrows' // ZenRows
-  | 'brightdata' // Bright Data
-  | 'custom_api' // 自定义API
-  | 'custom_proxy' // HTTP代理
-  | 'custom'; // 自定义
+export type ProxyType = ScraperProxyType;
 
 /**
  * 代理配置

@@ -579,9 +579,9 @@
 }
 
 .app-card-qwen {
-  --color-accent: #2563eb;
-  --color-bg-selected: #eff6ff;
-  --color-border-light: #bae6fd;
+  --color-accent: #6257f5;
+  --color-bg-selected: #f5f3ff;
+  --color-border-light: #ddd6fe;
 }
 
 .app-card-rose {
@@ -609,9 +609,9 @@
 }
 
 .app-overview-card[data-category="master_analysis"] {
-  --color-accent: #2563eb;
-  --color-bg-selected: #eff6ff;
-  --color-border-light: #bae6fd;
+  --color-accent: #6257f5;
+  --color-bg-selected: #f5f3ff;
+  --color-border-light: #ddd6fe;
 }
 
 .app-overview-card[data-category="playground"] {

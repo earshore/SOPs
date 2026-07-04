@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/utils/actionRegistry';
 import { escapeHtml } from '../../../../../common/utils/security';
 import { StorageService } from '../../../../../services/storageService';
+import { copyTextToClipboard } from '../../../utils/clipboard';
 import type {
   NPIProductRecord,
   StageConfig,
@@ -25,10 +26,15 @@ import type {
   SiteDomainsMap,
   ComplianceStatus,
 } from '@/types/modules-business';
-import { MOCK_PRODUCTS, STAGE_CONFIG, SITE_FLAGS, SITE_DOMAINS } from './data/mockData';
+import {
+  MOCK_PRODUCTS as NPI_DEMO_PRODUCTS,
+  STAGE_CONFIG,
+  SITE_FLAGS,
+  SITE_DOMAINS,
+} from './data/mockData';
 
-// 示例数据
-const SAMPLE_DATA = MOCK_PRODUCTS as NPIProductRecord[];
+// Demo seed data used until a real NPI data source is wired in.
+const SAMPLE_DATA = NPI_DEMO_PRODUCTS as NPIProductRecord[];
 
 // 类型断言常量
 const stageConfigMap = STAGE_CONFIG as StageConfigMap;
@@ -725,31 +731,13 @@ function exportToExcel(): void {
   );
 }
 
-function fallbackCopyText(text: string): boolean {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', 'true');
-  textarea.style.position = 'fixed';
-  textarea.style.left = '-9999px';
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  try {
-    return document.execCommand('copy');
-  } finally {
-    textarea.remove();
-  }
-}
-
 async function copyNpiReviewTemplate(): Promise<void> {
   const owner = readReviewOwner();
   saveReviewOwner(owner);
   const reviewTemplate = buildNpiReviewTemplate(tableData, owner);
 
   try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(reviewTemplate);
-    } else if (!fallbackCopyText(reviewTemplate)) {
+    if (!(await copyTextToClipboard(reviewTemplate))) {
       throw new Error('clipboard unavailable');
     }
 

@@ -5,6 +5,7 @@ import {
   unregisterActions,
 } from '../../../../../common/utils/actionRegistry';
 import { StorageService } from '../../../../../services/storageService';
+import { copyTextToClipboard } from '../../../utils/clipboard';
 
 const RELEASE_OWNER_STORAGE_KEY = 'fba_shipping_owner_v1';
 const DEFAULT_RELEASE_OWNER = '物流/供应链负责人';
@@ -30,22 +31,6 @@ function readReleaseOwner(): string {
 
 function saveReleaseOwner(owner: string): void {
   StorageService.set(RELEASE_OWNER_STORAGE_KEY, normalizeReleaseOwner(owner));
-}
-
-function fallbackCopyText(text: string): boolean {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', 'true');
-  textarea.style.position = 'fixed';
-  textarea.style.left = '-9999px';
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  try {
-    return document.execCommand('copy');
-  } finally {
-    textarea.remove();
-  }
 }
 
 export function buildFbaShippingTemplate(owner = DEFAULT_RELEASE_OWNER): string {
@@ -113,9 +98,7 @@ async function copyFbaShippingTemplate(): Promise<void> {
   const releaseTemplate = buildFbaShippingTemplate(owner);
 
   try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(releaseTemplate);
-    } else if (!fallbackCopyText(releaseTemplate)) {
+    if (!(await copyTextToClipboard(releaseTemplate))) {
       throw new Error('clipboard unavailable');
     }
 

@@ -5,6 +5,7 @@ import {
   unregisterActions,
 } from '../../../../../common/utils/actionRegistry';
 import { StorageService } from '../../../../../services/storageService';
+import { copyTextToClipboard } from '../../../utils/clipboard';
 
 const REPORT_OWNER_STORAGE_KEY = 'inventory_replenishment_owner_v1';
 const DEFAULT_REPORT_OWNER = '供应链/运营负责人';
@@ -30,22 +31,6 @@ function readReportOwner(): string {
 
 function saveReportOwner(owner: string): void {
   StorageService.set(REPORT_OWNER_STORAGE_KEY, normalizeReportOwner(owner));
-}
-
-function fallbackCopyText(text: string): boolean {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', 'true');
-  textarea.style.position = 'fixed';
-  textarea.style.left = '-9999px';
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  try {
-    return document.execCommand('copy');
-  } finally {
-    textarea.remove();
-  }
 }
 
 export function buildInventoryReplenishmentTemplate(owner = DEFAULT_REPORT_OWNER): string {
@@ -110,9 +95,7 @@ async function copyInventoryReplenishmentTemplate(): Promise<void> {
   const reportTemplate = buildInventoryReplenishmentTemplate(owner);
 
   try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(reportTemplate);
-    } else if (!fallbackCopyText(reportTemplate)) {
+    if (!(await copyTextToClipboard(reportTemplate))) {
       throw new Error('clipboard unavailable');
     }
 

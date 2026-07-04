@@ -41,75 +41,13 @@ export const getRandomUserAgent = (): string => {
   return agent;
 };
 
-// ========================
-// LLM PROVIDERS
-// ========================
-
-/** 模型特性 */
-export type ModelFeature =
-  | 'chat'
-  | 'vision'
-  | 'audio'
-  | 'video'
-  | 'function'
-  | 'structured'
-  | 'streaming'
-  | 'reasoning'
-  | 'code'
-  | 'long-context';
-
-/** 模型配置 */
-export interface ModelConfig {
-  id: string;
-  context: number;
-  features: ModelFeature[];
-}
-
-/** 提供商配置 */
-export interface ProviderConfig {
-  name: string;
-  endpoint: string;
-  models: ModelConfig[];
-}
-
-/** LLM提供商映射 (收敛为自定义网关，通过 Cloudflare 统一路由) */
-export const PROVIDERS: Record<string, ProviderConfig> = {
-  new_api: {
-    name: 'NEW API',
-    endpoint: 'https://new.hongecb.store/v1',
-    models: [
-      {
-        id: 'gpt-5.5',
-        context: 1050000,
-        features: [
-          'chat',
-          'vision',
-          'function',
-          'structured',
-          'streaming',
-          'reasoning',
-          'code',
-          'long-context',
-        ],
-      },
-      {
-        id: 'gemini-3.5-flash',
-        context: 1000000,
-        features: [
-          'chat',
-          'vision',
-          'audio',
-          'video',
-          'function',
-          'structured',
-          'reasoning',
-          'code',
-          'long-context',
-        ],
-      },
-    ],
-  },
-};
+export {
+  PROVIDERS,
+  DEFAULT_LLM_PROVIDER_ID,
+  DEFAULT_NEW_API_ENDPOINT,
+  DEFAULT_NEW_API_DOMAIN,
+} from '@/common/config/llmProviders';
+export type { ModelFeature, ModelConfig, ProviderConfig } from '@/common/config/llmProviders';
 
 // ========================
 // SITE CONFIGURATIONS

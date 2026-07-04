@@ -4,6 +4,9 @@
 // 统一管理所有API端点，支持环境差异化配置
 // ================================================================
 
+import { DEFAULT_NEW_API_DOMAIN } from './llmProviders';
+import { getScraperProxyEndpointConfigs } from './scraperProxies';
+
 /**
  * API端点配置
  */
@@ -17,6 +20,22 @@ export interface ApiEndpointConfig {
   /** 是否为危险端点（生产环境禁止直连） */
   isDangerous?: boolean;
 }
+
+function createScraperProxyEndpointMap(): Record<string, ApiEndpointConfig> {
+  const endpoints: Record<string, ApiEndpointConfig> = {};
+
+  for (const config of getScraperProxyEndpointConfigs()) {
+    endpoints[config.type] = {
+      domain: config.domain,
+      requiresProxy: false,
+      displayName: config.displayName,
+    };
+  }
+
+  return endpoints;
+}
+
+const SCRAPER_PROXY_ENDPOINTS = createScraperProxyEndpointMap();
 
 /**
  * API端点配置表
@@ -46,24 +65,10 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     displayName: 'Google AI',
     isDangerous: true,
   },
-  scraperapi: {
-    domain: 'api.scraperapi.com',
-    requiresProxy: false,
-    displayName: 'ScraperAPI',
-  },
-  zenrows: {
-    domain: 'api.zenrows.com',
-    requiresProxy: false,
-    displayName: 'ZenRows',
-  },
-  brightdata: {
-    domain: 'api.brightdata.com',
-    requiresProxy: false,
-    displayName: 'Bright Data',
-  },
+  ...SCRAPER_PROXY_ENDPOINTS,
   // 自部署 OpenAI 兼容网关，浏览器直连。
   new_api: {
-    domain: 'new.hongecb.store',
+    domain: DEFAULT_NEW_API_DOMAIN,
     requiresProxy: false,
     displayName: 'NEW API',
     isDangerous: false,

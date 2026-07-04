@@ -12,6 +12,10 @@ import type { LLMProviderConfig } from '../types/state';
 import type { HistoryItem, ProxyConfig } from '../types/modules-business';
 import { handleSystemError } from '../common/errors';
 import { isLLMProviderConfig, isProxyConfig } from '../common/guards/typeGuards';
+import {
+  DEFAULT_SCRAPER_PROXY_TYPE,
+  SCRAPER_PROXY_CREDENTIAL_TYPES,
+} from '../common/config/scraperProxies';
 import { LocalDataStore } from './localDataStore';
 
 /**
@@ -56,15 +60,6 @@ const CACHE_KEY_PREFIXES = [
   'ai_analysis_',
 ];
 
-const PROXY_CREDENTIAL_TYPES = [
-  'scraperapi',
-  'zenrows',
-  'brightdata',
-  'custom_api',
-  'custom_proxy',
-  'custom',
-] as const;
-
 const LLM_CREDENTIAL_PREFIX = 'llm_key_';
 const PROXY_CREDENTIAL_PREFIX = 'proxy_key_';
 const SENSITIVE_PLAIN_STORAGE_KEY_PATTERN =
@@ -80,7 +75,7 @@ const SENSITIVE_PLAIN_VALUE_KEYS = new Set([
 ]);
 
 function getProxyCredentialKey(type: string): string {
-  return `${PROXY_CREDENTIAL_PREFIX}${type || 'scraperapi'}`;
+  return `${PROXY_CREDENTIAL_PREFIX}${type || DEFAULT_SCRAPER_PROXY_TYPE}`;
 }
 
 function getLLMCredentialKey(provider: string): string {
@@ -735,7 +730,7 @@ class StorageServiceClass implements IStorageService {
     // 🎯 数据边界验证：已在 get() 方法中验证
     // 如果验证失败，返回默认配置
     if (!config) {
-      return { type: 'scraperapi', enabled: true };
+      return { type: DEFAULT_SCRAPER_PROXY_TYPE, enabled: true };
     }
 
     return stripProxySecret(config);
@@ -761,7 +756,7 @@ class StorageServiceClass implements IStorageService {
   async getProxyKeyMap(): Promise<Record<string, string>> {
     const keyMap: Record<string, string> = {};
 
-    for (const type of PROXY_CREDENTIAL_TYPES) {
+    for (const type of SCRAPER_PROXY_CREDENTIAL_TYPES) {
       const credential = await this.getSecure<string>(getProxyCredentialKey(type), '');
       if (credential) {
         keyMap[type] = credential;
@@ -777,7 +772,7 @@ class StorageServiceClass implements IStorageService {
     const legacyConfig =
       this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null) ||
       this.get<ProxyConfig>(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, null);
-    const legacyType = legacyConfig?.type || 'scraperapi';
+    const legacyType = legacyConfig?.type || DEFAULT_SCRAPER_PROXY_TYPE;
     if (legacyConfig?.customUrl) {
       keyMap[legacyType] = legacyConfig.customUrl;
       this.setProxyConfig(legacyConfig);
@@ -809,7 +804,7 @@ class StorageServiceClass implements IStorageService {
 
   async getProxyConfigWithCredential(): Promise<ProxyConfig> {
     const config = this.getProxyConfig();
-    const type = config.type || 'scraperapi';
+    const type = config.type || DEFAULT_SCRAPER_PROXY_TYPE;
     const keyMap = await this.getProxyKeyMap();
     const customUrl = keyMap[type];
 
@@ -817,7 +812,7 @@ class StorageServiceClass implements IStorageService {
   }
 
   async setProxyConfigWithCredential(config: ProxyConfig): Promise<boolean> {
-    const type = config.type || 'scraperapi';
+    const type = config.type || DEFAULT_SCRAPER_PROXY_TYPE;
     const savedConfig = this.setProxyConfig(config);
 
     if (!config.customUrl) {

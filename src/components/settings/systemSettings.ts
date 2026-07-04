@@ -5,10 +5,26 @@
 
 import { escapeHtml, setSafeHtml } from '../../common/utils/security';
 import {
+  DEFAULT_LLM_PROVIDER_ID,
+  DEFAULT_NEW_API_ENDPOINT,
+  OLD_PRESET_MODEL_IDS,
+  OBSOLETE_PRESET_MODEL_IDS,
   PROVIDERS,
+  getLlmProviderConfig,
   type ModelFeature,
   type ProviderConfig,
-} from '../../common/constants/constants';
+} from '../../common/config/llmProviders';
+import {
+  DEFAULT_SCRAPER_PROXY_TYPE,
+  SCRAPER_COMMERCIAL_PROXY_OPTIONS,
+  SCRAPER_DIRECT_PROXY_OPTIONS,
+  getScraperProxyDisplayName,
+  getScraperProxyHintText,
+  getScraperProxyInputLabel,
+  getScraperProxyInputPlaceholder,
+  scraperProxyNeedsInput,
+  type ScraperProxyProviderConfig,
+} from '../../common/config/scraperProxies';
 import { fetchModelsFromApi, callLLM } from '../../services/llmService';
 import { showToast } from '../../common/ui';
 import { StorageService, STORAGE_KEYS } from '../../services/storageService';
@@ -57,6 +73,10 @@ interface SettingsPanelData {
   llm: LLMState;
   proxy: ProxyState;
   currentProviderConfig: ProviderConfig | Record<string, never>;
+  llmProviderOptions: LLMProviderOption[];
+  defaultLlmEndpoint: string;
+  commercialProxyOptions: readonly ScraperProxyProviderConfig[];
+  directProxyOptions: readonly ScraperProxyProviderConfig[];
   activeModelInfo: ModelMetadata | null;
   isProduction: boolean;
   localData: {
@@ -138,6 +158,12 @@ type ModelMetadata = {
 type ModelOption = string | ModelMetadata;
 type SavedLLMConfig = Partial<LLMProviderConfig> | null;
 
+interface LLMProviderOption {
+  id: string;
+  name: string;
+  label: string;
+}
+
 interface ModelFeatureBadge {
   key: string;
   label: string;
@@ -190,10 +216,6 @@ const MODEL_FEATURE_ICONS: Record<ModelFeature, string> = {
   code: 'fa-code',
   'long-context': 'fa-expand-alt',
 };
-
-const OBSOLETE_PRESET_MODEL_IDS = new Set(['gpt-5.4-mini', 'gpt-5.4-mini-ca', 'gpt-5.5-ca']);
-
-const OLD_PRESET_MODEL_IDS = new Set([...OBSOLETE_PRESET_MODEL_IDS, 'gpt-5.5']);
 
 const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
   config: {
@@ -387,21 +409,13 @@ function dedupeModels(models: ModelOption[]): ModelOption[] {
   });
 }
 
-function getProviderConfig(provider: string): ProviderConfig | null {
-  if (!provider) return null;
-  if (!(provider in PROVIDERS)) {
-    return null;
-  }
-  return PROVIDERS[provider as keyof typeof PROVIDERS] || null;
-}
-
 function resolveProviderEndpoint(
   provider: string,
   config: ProviderConfig,
   savedEndpoint: string
 ): string {
   const shouldUseNewApiDefault =
-    provider === 'new_api' &&
+    provider === DEFAULT_LLM_PROVIDER_ID &&
     (!savedEndpoint || savedEndpoint === '/v1' || savedEndpoint === '/v1/');
   return shouldUseNewApiDefault ? config.endpoint : savedEndpoint || config.endpoint || '';
 }
@@ -433,7 +447,7 @@ function getInitialModel(savedModel: string | undefined, models: ModelOption[]):
 }
 
 function findPresetModelInfo(provider: string, modelId: string): ModelMetadata | null {
-  const config = getProviderConfig(provider);
+  const config = getLlmProviderConfig(provider);
   if (!config) return null;
   return config.models.find(model => model.id === modelId) || null;
 }
@@ -544,8 +558,8 @@ function createSettingsState(): Pick<
 
     // LLM Config State
     llm: {
-      provider: 'new_api',
-      endpoint: 'https://new.hongecb.store/v1',
+      provider: DEFAULT_LLM_PROVIDER_ID,
+      endpoint: DEFAULT_NEW_API_ENDPOINT,
       apiKey: '',
       model: '',
       models: [],
@@ -556,7 +570,7 @@ function createSettingsState(): Pick<
 
     // Proxy Config State
     proxy: {
-      type: 'scraperapi',
+      type: DEFAULT_SCRAPER_PROXY_TYPE,
       customUrl: '',
       showKey: false,
       savedKeyMap: {},
@@ -574,7 +588,27 @@ function createSettingsState(): Pick<
 const settingsPanelBehavior: SettingsPanelPart = {
   // Computed / Helpers
   get currentProviderConfig(): ProviderConfig | Record<string, never> {
-    return PROVIDERS[this.llm.provider] || {};
+    return getLlmProviderConfig(this.llm.provider) || {};
+  },
+
+  get llmProviderOptions(): LLMProviderOption[] {
+    return Object.entries(PROVIDERS).map(([id, config]) => ({
+      id,
+      name: config.name,
+      label: `✨ ${config.name}`,
+    }));
+  },
+
+  get defaultLlmEndpoint(): string {
+    return getLlmProviderConfig(this.llm.provider)?.endpoint || DEFAULT_NEW_API_ENDPOINT;
+  },
+
+  get commercialProxyOptions(): readonly ScraperProxyProviderConfig[] {
+    return SCRAPER_COMMERCIAL_PROXY_OPTIONS;
+  },
+
+  get directProxyOptions(): readonly ScraperProxyProviderConfig[] {
+    return SCRAPER_DIRECT_PROXY_OPTIONS;
   },
 
   get activeModelInfo(): ModelMetadata | null {
@@ -606,21 +640,15 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   get proxyNeedsInput(): boolean {
-    return ['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy'].includes(
-      this.proxy.type
-    );
+    return scraperProxyNeedsInput(this.proxy.type);
   },
 
   get proxyInputLabel(): string {
-    if (this.proxy.type === 'custom_proxy') return 'HTTP 代理地址';
-    if (this.proxy.type === 'custom_api') return '完整端点 (URL)';
-    return 'API Key (密钥)';
+    return getScraperProxyInputLabel(this.proxy.type);
   },
 
   get proxyInputPlaceholder(): string {
-    if (this.proxy.type === 'custom_proxy') return 'http://user:pass@ip:port';
-    if (this.proxy.type === 'custom_api') return 'https://api.example.com/?url=';
-    return `粘贴 ${this.getProxyDisplayName(this.proxy.type)} Key`;
+    return getScraperProxyInputPlaceholder(this.proxy.type);
   },
 
   get llmApiKeyInputType(): string {
@@ -686,9 +714,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   get proxyHintText(): string {
-    return this.proxy.type === 'custom_api'
-      ? '请确保 URL 包含 url= 参数'
-      : '请填写对应商业 API Key 或自定义代理地址';
+    return getScraperProxyHintText(this.proxy.type);
   },
 
   get localSecretBoundaryText(): string {
@@ -817,7 +843,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   // --- LLM Logic ---
 
   async loadProviderConfig(provider: string): Promise<void> {
-    const config = getProviderConfig(provider);
+    const config = getLlmProviderConfig(provider);
     if (!config) return;
 
     const savedConfig = StorageService.getLLMConfig(provider);
@@ -927,7 +953,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     } | null;
     this.proxy.savedKeyMap = await StorageService.getProxyKeyMap();
 
-    this.proxy.type = savedConfig?.type || 'scraperapi';
+    this.proxy.type = savedConfig?.type || DEFAULT_SCRAPER_PROXY_TYPE;
     // If the saved active type matches current type, use its URL, otherwise fallback to cache
     if (savedConfig?.type === this.proxy.type) {
       this.proxy.customUrl = savedConfig?.customUrl || '';
@@ -1119,14 +1145,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   getProxyDisplayName(type: string): string {
-    const names: Record<string, string> = {
-      scraperapi: 'ScraperAPI',
-      zenrows: 'ZenRows',
-      brightdata: 'Bright Data',
-      custom_api: '自定义 API',
-      custom_proxy: 'HTTP 代理',
-    };
-    return names[type] || '默认';
+    return getScraperProxyDisplayName(type);
   },
 };
 

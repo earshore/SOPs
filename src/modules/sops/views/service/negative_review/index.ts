@@ -5,6 +5,7 @@ import {
   unregisterActions,
 } from '../../../../../common/utils/actionRegistry';
 import { StorageService } from '../../../../../services/storageService';
+import { copyTextToClipboard } from '../../../utils/clipboard';
 
 const REVIEW_OWNER_STORAGE_KEY = 'negative_review_owner_v1';
 const DEFAULT_REVIEW_OWNER = '客服负责人';
@@ -30,22 +31,6 @@ function readReviewOwner(): string {
 
 function saveReviewOwner(owner: string): void {
   StorageService.set(REVIEW_OWNER_STORAGE_KEY, normalizeReviewOwner(owner));
-}
-
-function fallbackCopyText(text: string): boolean {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', 'true');
-  textarea.style.position = 'fixed';
-  textarea.style.left = '-9999px';
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  try {
-    return document.execCommand('copy');
-  } finally {
-    textarea.remove();
-  }
 }
 
 export function buildNegativeReviewTemplate(owner = DEFAULT_REVIEW_OWNER): string {
@@ -103,9 +88,7 @@ async function copyNegativeReviewTemplate(): Promise<void> {
   const reviewTemplate = buildNegativeReviewTemplate(owner);
 
   try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(reviewTemplate);
-    } else if (!fallbackCopyText(reviewTemplate)) {
+    if (!(await copyTextToClipboard(reviewTemplate))) {
       throw new Error('clipboard unavailable');
     }
 

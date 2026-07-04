@@ -6,6 +6,7 @@ interface ConfirmModalRequest {
   content: string;
   ignoreKey: string;
   confirmLabel: string;
+  isDestructive: boolean;
   resolve: (result: boolean) => void;
 }
 
@@ -36,7 +37,7 @@ function createBackdrop(modalId: string): HTMLDivElement {
   const backdrop = document.createElement('div');
   backdrop.id = modalId;
   backdrop.className =
-    'fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in';
+    'ma-confirm-modal-backdrop fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center fade-in';
   return backdrop;
 }
 
@@ -45,7 +46,7 @@ function buildDontAskMarkup(modalId: string, ignoreKey: string): string {
 
   return `
         <label class="flex items-center gap-2 text-xs text-slate-500 mb-4 cursor-pointer">
-            <input type="checkbox" id="dont-ask-again-${modalId}" class="rounded border-slate-300">
+            <input type="checkbox" id="dont-ask-again-${modalId}" class="ma-confirm-modal-checkbox rounded border-slate-300">
             <span>不再提示</span>
         </label>
     `;
@@ -58,16 +59,22 @@ function buildModalContent(
 ): string {
   const titleId = `${modalId}-title`;
   const descriptionId = `${modalId}-description`;
+  const variantClass = request.isDestructive
+    ? 'ma-confirm-modal--danger'
+    : 'ma-confirm-modal--theme';
+  const iconClass = request.isDestructive
+    ? 'fas fa-exclamation-triangle'
+    : 'fas fa-circle-question';
 
   return `
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all"
+        <div class="ma-confirm-modal ${variantClass} bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all"
             role="dialog"
             aria-modal="true"
             aria-labelledby="${titleId}"
             aria-describedby="${descriptionId}">
-            <div class="bg-gradient-to-r from-red-600 to-orange-600 p-5 text-white">
+            <div class="ma-confirm-modal-header p-5 text-white">
                 <h3 id="${titleId}" class="text-lg font-bold flex items-center gap-2">
-                    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                    <i class="${iconClass}" aria-hidden="true"></i>
                     ${renderer.escapeHtml(request.title)}
                 </h3>
             </div>
@@ -80,7 +87,7 @@ function buildModalContent(
                     <button type="button" id="btn-cancel-${modalId}" class="min-h-10 px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
                         取消
                     </button>
-                    <button type="button" id="btn-confirm-${modalId}" class="min-h-10 px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2">
+                    <button type="button" id="btn-confirm-${modalId}" class="ma-confirm-modal-confirm min-h-10 px-5 py-2 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
                         ${renderer.escapeHtml(request.confirmLabel)}
                     </button>
                 </div>
@@ -186,6 +193,10 @@ function mountConfirmModal(request: ConfirmModalRequest): void {
   requestAnimationFrame(() => elements.btnCancel?.focus());
 }
 
+function isDestructiveConfirmation(title: string, content: string, confirmLabel: string): boolean {
+  return /删除|清空|移除|无法撤销|无法从/.test(`${title} ${content} ${confirmLabel}`);
+}
+
 export function confirmWithModal(
   title: string,
   content: string,
@@ -199,6 +210,13 @@ export function confirmWithModal(
   }
 
   return new Promise(resolve => {
-    mountConfirmModal({ title, content, ignoreKey, confirmLabel, resolve });
+    mountConfirmModal({
+      title,
+      content,
+      ignoreKey,
+      confirmLabel,
+      isDestructive: isDestructiveConfirmation(title, content, confirmLabel),
+      resolve,
+    });
   });
 }

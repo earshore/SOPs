@@ -71,9 +71,9 @@
 .gradient-text {
   background: linear-gradient(
     135deg,
-    var(--ma-accent, #2563eb),
-    var(--ma-accent-light, #06b6d4),
-    var(--ma-accent-hover, #1d4ed8)
+    var(--ma-accent, #6257f5),
+    var(--ma-accent-light, #8b5cf6),
+    var(--ma-accent-hover, #4f46e5)
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -106,9 +106,9 @@
   padding: 2px;
   background: linear-gradient(
     135deg,
-    var(--ma-accent, #2563eb),
-    var(--ma-accent-light, #06b6d4),
-    var(--ma-accent-hover, #1d4ed8)
+    var(--ma-accent, #6257f5),
+    var(--ma-accent-light, #8b5cf6),
+    var(--ma-accent-hover, #4f46e5)
   );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
@@ -130,13 +130,13 @@ pre code {
 
 /* ========== 选择样式 ========== */
 .ai-analysis-wrapper ::selection {
-  background: rgba(var(--ma-accent-rgb, 37, 99, 235), 0.18);
-  color: var(--ma-accent-hover, #1d4ed8);
+  background: rgba(var(--ma-accent-rgb, 98, 87, 245), 0.18);
+  color: var(--ma-accent-hover, #4f46e5);
 }
 
 /* ========== Focus 样式 ========== */
 .ai-analysis-wrapper :focus-visible {
-  outline: 2px solid var(--ma-accent, #2563eb);
+  outline: 2px solid var(--ma-accent, #6257f5);
   outline-offset: 2px;
 }
 

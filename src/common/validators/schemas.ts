@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { SCRAPER_PROXY_TYPE_VALUES } from '@/common/config/scraperProxies';
 
 // ==================== 路由相关 Schema ====================
 
@@ -114,7 +115,7 @@ export const LLMRequestOptionsSchema = z.object({
  * 代理配置 Schema
  */
 export const ProxyConfigSchema = z.object({
-  type: z.enum(['scraperapi', 'zenrows', 'brightdata', 'custom_api', 'custom_proxy']),
+  type: z.enum(SCRAPER_PROXY_TYPE_VALUES),
   customUrl: z.string().optional(),
 });
 

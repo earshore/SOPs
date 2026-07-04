@@ -11,6 +11,12 @@ import { sleep, getErrorSummary } from '../../../../../common/ui';
 import { HistoryService } from './historyService';
 import { StorageService } from '../../../../../services/storageService';
 import { configCenter } from '../../../../../common/config/ConfigCenter';
+import {
+  DEFAULT_SCRAPER_PROXY_TYPE,
+  buildScraperProxyUrl,
+  getScraperProxyProvider,
+  isCommercialScraperProxyType,
+} from '../../../../../common/config/scraperProxies';
 import { ValidationError, ApiError, SystemError } from '@common/errors/AppError';
 import type {
   ProxyConfig,
@@ -102,45 +108,29 @@ interface ScrapedContent {
   reviews: ScrapedProduct['customer_reviews'];
 }
 
-// ----------------------------------------
-// URL 策略
-// ----------------------------------------
-
-type URLStrategy = (targetUrl: string, key: string) => string;
-
-const URL_STRATEGIES: Record<string, URLStrategy> = {
-  scraperapi: (targetUrl, key) =>
-    `https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(targetUrl)}`,
-  zenrows: (targetUrl, key) =>
-    `https://api.zenrows.com/v1/?apikey=${key}&url=${encodeURIComponent(targetUrl)}&js_render=true`,
-  brightdata: (targetUrl, key) =>
-    `https://api.brightdata.com/request?customer=${key}&url=${encodeURIComponent(targetUrl)}`,
-  custom_api: (targetUrl, baseUrl) => {
-    const separator = baseUrl.includes('?') ? (baseUrl.endsWith('=') ? '' : '&url=') : '?url=';
-    const finalBase =
-      baseUrl.endsWith('url=') || baseUrl.endsWith('url') ? baseUrl : `${baseUrl}${separator}`;
-    return `${finalBase}${encodeURIComponent(targetUrl)}`;
-  },
-  custom_proxy: (targetUrl, proxyUrl) => `${proxyUrl}${encodeURIComponent(targetUrl)}`,
-  custom: (targetUrl, proxyUrl) => `${proxyUrl}${encodeURIComponent(targetUrl)}`,
-};
-
 function constructFetchUrl(targetUrl: string, proxyConfig: ProxyConfig): string {
-  const { type = 'custom_api', customUrl } = proxyConfig;
-  const strategy = URL_STRATEGIES[type];
+  const type = proxyConfig.type || DEFAULT_SCRAPER_PROXY_TYPE;
+  const { customUrl } = proxyConfig;
 
-  if (strategy) {
-    if (!customUrl) {
-      throw new ValidationError(
-        `未配置 API Key 或 URL`,
-        'SCRAPER_SVC_001',
-        'customUrl',
-        undefined,
-        { module: 'ScraperService', action: 'constructFetchUrl', proxyType: type }
-      );
-    }
-    return strategy(targetUrl, customUrl);
+  if (!getScraperProxyProvider(type)) {
+    throw new ValidationError(`未支持的采集代理类型`, 'SCRAPER_SVC_001', 'type', type, {
+      module: 'ScraperService',
+      action: 'constructFetchUrl',
+      proxyType: type,
+    });
   }
+
+  if (!customUrl) {
+    throw new ValidationError(`未配置 API Key 或 URL`, 'SCRAPER_SVC_001', 'customUrl', undefined, {
+      module: 'ScraperService',
+      action: 'constructFetchUrl',
+      proxyType: type,
+    });
+  }
+
+  const fetchUrl = buildScraperProxyUrl(type, targetUrl, customUrl);
+  if (fetchUrl) return fetchUrl;
+
   throw new ValidationError(`未支持的采集代理类型`, 'SCRAPER_SVC_001', 'type', type, {
     module: 'ScraperService',
     action: 'constructFetchUrl',
@@ -181,7 +171,7 @@ function addLanguageParameter(url: string, locale: string): string {
 }
 
 function isCommercialProxy(proxyConfig: ProxyConfig): boolean {
-  return ['scraperapi', 'zenrows', 'brightdata', 'custom_api'].includes(proxyConfig.type || '');
+  return isCommercialScraperProxyType(proxyConfig.type);
 }
 
 function createProxyRequestOptions(headers: LanguageHeader, proxyConfig: ProxyConfig): RequestInit {

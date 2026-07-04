@@ -1,5 +1,6 @@
 // src/types/modules-business.d.ts
 import type { UserProductProfile } from './prompt-profile';
+import type { ScraperProxyType } from '../common/config/scraperProxies';
 // ================================================================
 // 业务模块类型定义
 // 为各业务模块提供完整的类型约束
@@ -97,7 +98,7 @@ export interface ScrapedProduct {
  * 代理配置
  */
 export interface ProxyConfig {
-  type?: 'scraperapi' | 'zenrows' | 'brightdata' | 'custom_api' | 'custom_proxy' | 'custom';
+  type?: ScraperProxyType;
   customUrl?: string;
   enabled?: boolean;
 }

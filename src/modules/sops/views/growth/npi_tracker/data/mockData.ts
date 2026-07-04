@@ -1,7 +1,7 @@
 // src/modules/sops/views/growth/npi_tracker/data/mockData.ts
 // ================================================================
-// 🎯 NPI Tracker 模拟数据
-// 用于演示和测试,生产环境应从API加载
+// NPI Tracker demo seed data.
+// Production data should come from an API or persisted workspace source.
 // ================================================================
 
 /**

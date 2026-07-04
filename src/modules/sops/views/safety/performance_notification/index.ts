@@ -5,6 +5,7 @@ import {
   unregisterActions,
 } from '../../../../../common/utils/actionRegistry';
 import { StorageService } from '../../../../../services/storageService';
+import { copyTextToClipboard } from '../../../utils/clipboard';
 
 const REPORT_OWNER_STORAGE_KEY = 'performance_notification_owner_v1';
 const DEFAULT_REPORT_OWNER = '账号安全负责人';
@@ -34,22 +35,6 @@ function readReportOwner(): string {
 
 function saveReportOwner(owner: string): void {
   StorageService.set(REPORT_OWNER_STORAGE_KEY, normalizeReportOwner(owner));
-}
-
-function fallbackCopyText(text: string): boolean {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', 'true');
-  textarea.style.position = 'fixed';
-  textarea.style.left = '-9999px';
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  try {
-    return document.execCommand('copy');
-  } finally {
-    textarea.remove();
-  }
 }
 
 export function buildPerformanceNotificationTemplate(owner = DEFAULT_REPORT_OWNER): string {
@@ -103,9 +88,7 @@ async function copyPerformanceNotificationTemplate(): Promise<void> {
   const reportTemplate = buildPerformanceNotificationTemplate(owner);
 
   try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(reportTemplate);
-    } else if (!fallbackCopyText(reportTemplate)) {
+    if (!(await copyTextToClipboard(reportTemplate))) {
       throw new Error('clipboard unavailable');
     }
 
