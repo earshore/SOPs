@@ -26,6 +26,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.17] - 2026-07-04
+
+### Added
+- Deep Chat 增加 pending assistant 文案和打字机反馈。
+- Home 页面新增 Workbench 入口。
+- Scraper 导入面板增加导入状态与可访问性回归覆盖。
+
+### Changed
+- 规范化 App Center 路由命名为 kebab-case，并补充历史路由别名。
+- 使用设计 token 调整 welcome 与 app_center 样式。
+- 强化卡片、弹窗、导航、模板控件和 decorative controls 的 ARIA/focus/accessibility 支持。
+- 同步应用内版本显示到 `3.0.3-rc.17`。
+
+### Fixed
+- 稳定 Deep Chat 请求生命周期、Scraper 模板可访问性和导航页面入场动画测试。
+
 ## [3.0.3-rc.16] - 2026-07-03
 
 ### Added

@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 LLM 网关；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按最新远端 tag `v3.0.3-rc.16`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按最新远端 tag `v3.0.3-rc.17`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,7 +10,7 @@ sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团�
 
 ## 最新发布
 
-当前最新 tag 是 `v3.0.3-rc.16`（2026-07-03，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.16` 聚焦 routeId 优先导航、Legacy 路由 API 清理、延迟加载骨架和 App Center 模块整理，`v3.0.3` 系列累计带来以下面向运营的变化：
+当前最新 tag 是 `v3.0.3-rc.17`（2026-07-04，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.17` 聚焦路由命名规范化、UI 可访问性、Deep Chat 待响应反馈、Scraper 导入状态和 Home Workbench 体验，`v3.0.3` 系列累计带来以下面向运营的变化：
 
 - 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
 - 新增工作流导向条和统一确认弹窗，减少高风险数据操作误触。
@@ -46,7 +46,12 @@ sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团�
 - 增加延迟路由/模块加载骨架，减少页面切换空白感。
 - 将 PPC Search Terms 迁移到 PPC Tools，并拆分 Deep Chat 模块文件。
 - 新增路由审计脚本并整理历史本地工具/报告归档。
-- 同步应用内版本显示到 `3.0.3-rc.16`。
+- 规范化 App Center 路由命名，并补充历史路由别名。
+- 提升欢迎页、卡片、弹窗、导航与模板控件的 ARIA/focus/accessibility 支持。
+- Deep Chat 增加 pending assistant 文案和打字机反馈，稳定请求生命周期测试。
+- Scraper 导入面板补充导入状态、可访问性文案和回归覆盖。
+- Home 页面增加 Workbench 入口并统一 welcome/app_center 设计 token。
+- 同步应用内版本显示到 `3.0.3-rc.17`。
 
 ## 快速开始
 
