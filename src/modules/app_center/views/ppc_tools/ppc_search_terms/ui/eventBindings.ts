@@ -17,7 +17,7 @@ export interface PpcEventHandlers {
   analyzeTextarea(): Promise<void>;
   loadSample(): void;
   clearAnalyzer(): void;
-  toggleAnalysisSettings(): void;
+  toggleThresholdPanel(): void;
   handleReportSelectionChange(): void;
   exportAll(): void;
   exportCurrent(): void;
@@ -44,9 +44,9 @@ export function bindPpcEvents(
   addListener(getElement(container, 'ppc-btn-sample'), 'click', handlers.loadSample);
   addListener(getElement(container, 'ppc-btn-clear'), 'click', handlers.clearAnalyzer);
   addListener(
-    getElement(container, 'ppc-analysis-settings-toggle'),
+    getElement(container, 'ppc-threshold-toggle'),
     'click',
-    handlers.toggleAnalysisSettings
+    handlers.toggleThresholdPanel
   );
   addListener(
     getElement(container, 'ppc-report-type'),

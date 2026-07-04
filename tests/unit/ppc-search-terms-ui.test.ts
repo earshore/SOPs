@@ -50,7 +50,13 @@ const mocks = vi.hoisted(() => ({
       <div id="ppc-stat-acos"></div>
       <div id="ppc-stat-actions"></div>
       <p id="ppc-file-name"></p>
-      <p id="ppc-mapping-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <div
+        id="ppc-mapping-status"
+        class="ppc-status-line ppc-status-line--empty"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      ></div>
       <select id="ppc-report-type">
         <option value="auto">自动识别</option>
         <option value="search_term">店铺搜索广告报告</option>
@@ -62,14 +68,23 @@ const mocks = vi.hoisted(() => ({
       <p id="ppc-paste-help">首行必须包含列名；文件导入和粘贴内容二选一即可。</p>
       <p id="ppc-paste-error" class="ppc-field-error hidden" role="alert"></p>
       <input id="ppc-file-input" type="file" aria-describedby="ppc-file-name ppc-mapping-status" />
-      <div id="ppc-threshold-grid"></div>
+      <button
+        id="ppc-threshold-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="ppc-threshold-body"
+      >
+        <span id="ppc-threshold-toggle-label">展开</span>
+      </button>
+      <div id="ppc-threshold-body" class="hidden">
+        <div id="ppc-threshold-grid"></div>
+      </div>
       <input id="ppc-action-owner" value="广告负责人" aria-describedby="ppc-action-owner-help" />
       <span id="ppc-action-owner-help">用于动作清单 Owner 和周复盘的下次动作负责人。</span>
       <input id="ppc-use-agent" type="checkbox" />
       <input id="ppc-allow-local-fallback" type="checkbox" />
       <input id="ppc-use-context" type="checkbox" />
-      <button id="ppc-analysis-settings-toggle" type="button" aria-expanded="false"></button>
-      <div id="ppc-analysis-settings-body" class="hidden"></div>
+      <div id="ppc-analysis-settings-body"></div>
       <div id="ppc-context-fields" class="hidden">
         <input id="ppc-context-asin" />
         <input id="ppc-context-category" />
@@ -145,9 +160,12 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
-vi.mock('@/modules/app_center/views/ppc_tools/ppc_search_terms/services/llmAnalysisService', () => ({
-  analyzePpcSearchTermsWithAgent: mocks.analyzeWithAgent,
-}));
+vi.mock(
+  '@/modules/app_center/views/ppc_tools/ppc_search_terms/services/llmAnalysisService',
+  () => ({
+    analyzePpcSearchTermsWithAgent: mocks.analyzeWithAgent,
+  })
+);
 
 async function flushAnalysis(): Promise<void> {
   await Promise.resolve();
@@ -281,7 +299,9 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     expect(container.querySelector<HTMLInputElement>('#ppc-target-acos')?.value).toBe('42');
     expect(container.querySelector<HTMLInputElement>('#ppc-min-ctr')?.value).toBe('0.5');
     expect(
-      container.querySelector<HTMLInputElement>('#ppc-target-acos')?.getAttribute('aria-describedby')
+      container
+        .querySelector<HTMLInputElement>('#ppc-target-acos')
+        ?.getAttribute('aria-describedby')
     ).toBe('ppc-target-acos-help');
     expect(container.querySelector('#ppc-target-acos-help')?.textContent).toContain('控价');
 
@@ -302,6 +322,25 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     });
   });
 
+  it('分析阈值默认收起，并可展开/收起', async () => {
+    const toggle = container.querySelector<HTMLButtonElement>('#ppc-threshold-toggle');
+    const body = container.querySelector<HTMLElement>('#ppc-threshold-body');
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(body?.classList.contains('hidden')).toBe(true);
+
+    toggle?.click();
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(container.querySelector('#ppc-threshold-toggle-label')?.textContent).toBe('收起');
+    expect(body?.classList.contains('hidden')).toBe(false);
+
+    toggle?.click();
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(container.querySelector('#ppc-threshold-toggle-label')?.textContent).toBe('展开');
+    expect(body?.classList.contains('hidden')).toBe(true);
+  });
 });
 
 describe('PPC 搜索词分析器 UI - 默认本地分析', () => {

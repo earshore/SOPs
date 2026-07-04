@@ -11,6 +11,17 @@
   border-radius: 8px;
 }
 
+.ppc-delivery-note {
+  padding: 12px;
+  border: 1px solid var(--color-emerald-100, #d1fae5);
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--color-emerald-50, #ecfdf5), #ffffff);
+}
+
+.ppc-results-panel .ppc-delivery-note {
+  margin-top: 16px;
+}
+
 .ppc-table-help {
   margin: 0;
   padding: 10px 12px;

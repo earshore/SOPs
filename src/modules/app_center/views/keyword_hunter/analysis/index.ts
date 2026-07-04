@@ -327,9 +327,12 @@ async function restoreAnalysisStateFromState(): Promise<void> {
     }
 
     if (isLikelyHtml) {
-      // 旧版本兼容：直接注入 HTML，但不运行 highlightScores（已处理过）
+      // 旧版本兼容：直接注入 HTML，再运行幂等增强以同步新版报告封面。
       const renderer = SafeRenderer.getInstance();
       renderer.renderTemplate(resultDiv, savedMarkdown);
+      requestAnimationFrame(() => {
+        highlightScores(resultDiv);
+      });
     } else {
       // 新版本：原始 Markdown，重新完整渲染
       rawMarkdownCache = savedMarkdown;
@@ -679,6 +682,15 @@ function highlightScoreRow(tr: Element): void {
 
 type TotalScoreTone = 'excellent' | 'good' | 'warning' | 'critical';
 
+function parseTotalScore(rawText: string): number | null {
+  const totalMatch = rawText.match(/(\d{1,3})\s*\/\s*100/);
+  const totalText = totalMatch?.[1];
+  if (!totalText) return null;
+
+  const total = parseInt(totalText, 10);
+  return Number.isNaN(total) ? null : total;
+}
+
 function getTotalScoreTone(total: number): TotalScoreTone {
   if (total >= 85) {
     return 'excellent';
@@ -695,36 +707,106 @@ function getTotalScoreTone(total: number): TotalScoreTone {
   return 'critical';
 }
 
-function appendTotalScoreProgressBar(h2: HTMLHeadingElement, total: number): void {
+function getTotalScoreVerdict(total: number): string {
+  if (total >= 85) return '优秀';
+  if (total >= 75) return '良好';
+  if (total >= 70) return '待优化';
+  return '高风险';
+}
+
+function getScoreTitleLabel(rawTitle: string): string {
+  const withoutScore = rawTitle
+    .replace(/\d{1,3}\s*\/\s*100/g, '')
+    .replace(/[—-]\s*.*/, '')
+    .trim();
+
+  return withoutScore || 'Listing 评审';
+}
+
+function getScoreVerdict(rawTitle: string, total: number): string {
+  const explicitVerdict = rawTitle.match(/[—-]\s*([^|]+)/)?.[1]?.trim();
+  return explicitVerdict || getTotalScoreVerdict(total);
+}
+
+function getPlainText(element: Element | null): string {
+  return (element?.textContent ?? '').replace(/\s+/g, ' ').trim();
+}
+
+function getExecutiveSummaryQuote(scoreTitle: Element): HTMLElement | null {
+  const firstQuote = scoreTitle.nextElementSibling;
+  return firstQuote?.tagName === 'BLOCKQUOTE' ? (firstQuote as HTMLElement) : null;
+}
+
+function appendCoverSummary(h2: HTMLHeadingElement, summaryText: string): void {
+  h2.classList.toggle('kh-report-cover--with-summary', Boolean(summaryText));
+  if (!summaryText || h2.querySelector('.kh-report-cover-summary')) return;
+
+  const summary = document.createElement('span');
+  summary.className = 'kh-report-cover-summary';
+
+  const body = document.createElement('span');
+  body.className = 'kh-report-cover-summary-text';
+  body.textContent = summaryText;
+
+  const label = document.createElement('span');
+  label.className = 'kh-report-cover-summary-label';
+  label.textContent = '执行摘要';
+
+  summary.append(body, label);
+  h2.appendChild(summary);
+}
+
+function enhanceScoreCover(
+  h2: HTMLHeadingElement,
+  total: number,
+  summaryText: string
+): void {
+  h2.classList.add('kh-report-cover');
+  h2.querySelector('.kh-report-cover-eyebrow')?.remove();
+  if (h2.querySelector('.kh-report-cover-main')) {
+    appendCoverSummary(h2, summaryText);
+    return;
+  }
+
+  const rawTitle = h2.textContent?.trim() ?? '';
+  const titleLabel = getScoreTitleLabel(rawTitle);
+  const verdict = getScoreVerdict(rawTitle, total);
+  h2.setAttribute('aria-label', rawTitle);
+  h2.textContent = '';
+
+  const main = document.createElement('span');
+  main.className = 'kh-report-cover-main';
+
+  const title = document.createElement('span');
+  title.className = 'kh-report-cover-title';
+  title.textContent = titleLabel;
+
+  const meta = document.createElement('span');
+  meta.className = 'kh-report-cover-meta';
+  meta.textContent = `综合评级：${verdict}`;
+
+  main.append(title, meta);
+
+  const score = document.createElement('span');
+  score.className = 'kh-report-cover-score';
+  score.textContent = `${total}/100`;
+
+  h2.append(main, score);
+  appendCoverSummary(h2, summaryText);
+}
+
+function removeTotalScoreProgressBar(h2: HTMLHeadingElement): void {
   // 移除旧进度条（防止重复追加）
   h2.querySelector('.score-progress-bar')?.remove();
-
-  const bar = document.createElement('div');
-  bar.className = 'score-progress-bar';
-
-  const fill = document.createElement('div');
-  fill.className = 'score-progress-fill';
-
-  bar.appendChild(fill);
-  h2.appendChild(bar);
-
-  // 双帧延迟触发 CSS transition
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      fill.style.width = `${total}%`;
-    });
-  });
 }
 
 function highlightTotalScoreTitle(container: HTMLElement): void {
   const h2 = container.querySelector('h2');
   if (!h2) return;
 
-  const totalMatch = (h2.textContent ?? '').match(/(\d+)\s*\/\s*100/);
-  const totalText = totalMatch?.[1];
-  if (!totalText) return;
+  const total = parseTotalScore(h2.textContent ?? '');
+  if (total === null) return;
 
-  const total = parseInt(totalText, 10);
   h2.style.removeProperty('background');
   h2.style.removeProperty('color');
   h2.classList.remove(
@@ -734,7 +816,153 @@ function highlightTotalScoreTitle(container: HTMLElement): void {
     'kh-report-score-title--critical'
   );
   h2.classList.add('kh-report-score-title', `kh-report-score-title--${getTotalScoreTone(total)}`);
-  appendTotalScoreProgressBar(h2, total);
+  removeTotalScoreProgressBar(h2);
+}
+
+function isReportSectionHeading(element: Element): element is HTMLHeadingElement {
+  return ['H2', 'H3'].includes(element.tagName);
+}
+
+function isRecommendationHeading(element: Element): boolean {
+  return /Top\s*-?\s*3|改写建议|优化建议|行动建议/i.test(element.textContent ?? '');
+}
+
+function getNextElementUntilHeading(element: Element | null): Element | null {
+  if (!element || isReportSectionHeading(element)) return null;
+  return element;
+}
+
+function wrapElement(element: Element, className: string): HTMLElement {
+  const parent = element.parentElement;
+  if (parent?.classList.contains(className)) return parent;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = className;
+  element.before(wrapper);
+  wrapper.appendChild(element);
+  return wrapper;
+}
+
+function classifyReportSections(container: HTMLElement): void {
+  const headings = Array.from(container.querySelectorAll('h2, h3'));
+  headings.slice(1).forEach(heading => {
+    const text = heading.textContent ?? '';
+    heading.classList.add('kh-report-section-heading');
+
+    if (/评分|score/i.test(text)) {
+      heading.classList.add('kh-report-section-heading--score');
+      return;
+    }
+
+    if (/致命|风险|问题|risk/i.test(text)) {
+      heading.classList.add('kh-report-section-heading--risk');
+      return;
+    }
+
+    if (isRecommendationHeading(heading)) {
+      heading.classList.add('kh-report-section-heading--recommendations');
+    }
+  });
+}
+
+function enhanceReportSummary(container: HTMLElement): void {
+  const scoreTitle = container.querySelector('h2');
+  if (!scoreTitle) return;
+
+  const firstQuote = getExecutiveSummaryQuote(scoreTitle);
+  if (firstQuote) {
+    firstQuote.classList.add('kh-report-executive-summary');
+    if (scoreTitle.querySelector('.kh-report-cover-summary')) {
+      firstQuote.classList.add('kh-report-executive-summary--merged');
+    }
+  }
+}
+
+function enhanceScoreTable(container: HTMLElement): void {
+  const table = container.querySelector('table');
+  if (!table) return;
+
+  table.classList.add('kh-report-score-table');
+  table.setAttribute('aria-label', '评分矩阵');
+  wrapElement(table, 'kh-report-table-shell');
+}
+
+function enhanceRiskSummary(container: HTMLElement): void {
+  const riskHeading = Array.from(container.querySelectorAll('h2, h3')).find(heading =>
+    /致命|风险|问题|risk/i.test(heading.textContent ?? '')
+  );
+  const riskQuote = getNextElementUntilHeading(riskHeading?.nextElementSibling ?? null);
+  if (riskQuote?.tagName === 'BLOCKQUOTE') {
+    riskQuote.classList.add('kh-report-risk-summary');
+  }
+}
+
+function isRecommendationTitle(element: Element): element is HTMLParagraphElement {
+  return element.tagName === 'P' && element.querySelector(':scope > strong:first-child') !== null;
+}
+
+function classifyRecommendationList(card: HTMLElement): void {
+  card.querySelectorAll('li').forEach(item => {
+    const text = item.textContent ?? '';
+    if (/原句|当前|问题|缺陷/.test(text)) {
+      item.classList.add('kh-report-recommendation-item--current');
+      return;
+    }
+
+    if (/改写|建议|优化|替换/.test(text)) {
+      item.classList.add('kh-report-recommendation-item--proposal');
+      return;
+    }
+
+    if (/位置|原因|收益|目的|影响/.test(text)) {
+      item.classList.add('kh-report-recommendation-item--context');
+    }
+  });
+}
+
+function enhanceRecommendationCards(container: HTMLElement): void {
+  const recommendationHeading = Array.from(container.querySelectorAll('h2, h3')).find(heading =>
+    isRecommendationHeading(heading)
+  );
+  if (!recommendationHeading) return;
+
+  let current = recommendationHeading.nextElementSibling;
+  while (current && !isReportSectionHeading(current)) {
+    if (!isRecommendationTitle(current)) {
+      current = current.nextElementSibling;
+      continue;
+    }
+
+    const card = wrapElement(current, 'kh-report-recommendation-card');
+    card.setAttribute('aria-label', current.textContent?.trim() || '改写建议');
+
+    let next = card.nextElementSibling;
+    while (next && !isReportSectionHeading(next) && !isRecommendationTitle(next)) {
+      const movable = next;
+      next = next.nextElementSibling;
+      card.appendChild(movable);
+    }
+
+    classifyRecommendationList(card);
+    current = next;
+  }
+}
+
+function enhanceReportStructure(container: HTMLElement): void {
+  const scoreTitle = container.querySelector('h2');
+  if (!(scoreTitle instanceof HTMLHeadingElement)) return;
+
+  const total = parseTotalScore(scoreTitle.textContent ?? '');
+  if (total === null) return;
+
+  container.classList.add('kh-report-rendered');
+  const summaryText = getPlainText(getExecutiveSummaryQuote(scoreTitle));
+  enhanceScoreCover(scoreTitle, total, summaryText);
+  classifyReportSections(container);
+  enhanceReportSummary(container);
+  enhanceScoreTable(container);
+  enhanceRiskSummary(container);
+  enhanceRecommendationCards(container);
 }
 
 /**
@@ -752,7 +980,10 @@ function highlightScores(container: HTMLElement): void {
   const rows = container.querySelectorAll('tbody tr');
   rows.forEach(tr => highlightScoreRow(tr));
 
-  // ——— 2. 处理总分 H2 标题 ———
+  // ——— 2. 报告结构增强：只在真实评分报告上启用 ———
+  enhanceReportStructure(container);
+
+  // ——— 3. 处理总分 H2 标题 ———
   highlightTotalScoreTitle(container);
 }
 

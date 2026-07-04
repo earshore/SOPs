@@ -7,10 +7,7 @@ import {
   type AnalysisFlowCallbacks,
 } from './analysis/analysisFlow';
 import { setPasteInputError } from './analysis/analysisInput';
-import {
-  toggleAnalysisSettings,
-  updateContextFieldsVisibility,
-} from './settings/analysisSettingsPanel';
+import { updateContextFieldsVisibility } from './settings/analysisSettingsPanel';
 import {
   handleReportFileImport,
   loadSampleReport,
@@ -27,6 +24,7 @@ import { bindPpcEvents } from './ui/eventBindings';
 import { setPpcStatus } from './ui/reportControls';
 import { inferReportTypeFromText } from './analysis/reportTypeInference';
 import { createListenerRegistry } from './ui/listenerRegistry';
+import { initializeThresholdPanel, toggleThresholdPanel } from './settings/thresholdPanel';
 import {
   readAnalysisSettings,
   readReportSelection,
@@ -104,6 +102,7 @@ const mountInternal = async (container: HTMLElement): Promise<void> => {
   renderer.renderTemplate(container, html);
   renderThresholdFields(container);
   restoreThresholds(container);
+  initializeThresholdPanel(container);
   const restoredSelection = restoreReportSelection(container);
   activeReportType = restoredSelection === 'auto' ? 'search_term' : restoredSelection;
   restoreAnalysisSettings(container);
@@ -127,7 +126,7 @@ function bindEvents(container: HTMLElement): void {
     analyzeTextarea: () => analyzeTextarea(container),
     loadSample: () => loadSampleReport(container, reportImportCallbacks),
     clearAnalyzer: () => clearAnalyzer(container),
-    toggleAnalysisSettings: () => toggleAnalysisSettings(container),
+    toggleThresholdPanel: () => toggleThresholdPanel(container),
     handleReportSelectionChange: () => handleReportSelectionChange(container),
     exportAll: () => exportActionRows(container, 'all', false, exportControllerState),
     exportCurrent: () =>

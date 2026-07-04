@@ -57,11 +57,42 @@ export function setPpcStatus(
   const element = getElement(container, 'ppc-mapping-status');
   if (!element) return;
 
-  element.textContent = message;
+  const normalizedMessage = message.trim();
   element.setAttribute('role', tone === 'error' ? 'alert' : 'status');
   element.setAttribute('aria-live', tone === 'error' ? 'assertive' : 'polite');
   element.setAttribute('aria-atomic', 'true');
+  element.classList.toggle('ppc-status-line--empty', !normalizedMessage);
   element.classList.toggle('ppc-status-line--error', tone === 'error');
+
+  if (!normalizedMessage) {
+    element.removeAttribute('aria-label');
+    element.replaceChildren();
+    return;
+  }
+
+  const titleText = tone === 'error' ? '处理失败' : '数据状态提示';
+  element.setAttribute('aria-label', `${titleText}：${normalizedMessage}`);
+
+  const iconWrapper = document.createElement('span');
+  iconWrapper.className = 'ppc-status-line-icon';
+  const icon = document.createElement('i');
+  icon.className = tone === 'error' ? 'fas fa-triangle-exclamation' : 'fas fa-circle-info';
+  icon.setAttribute('aria-hidden', 'true');
+  iconWrapper.append(icon);
+
+  const copy = document.createElement('span');
+  copy.className = 'ppc-status-line-copy';
+
+  const title = document.createElement('span');
+  title.className = 'ppc-status-line-title';
+  title.textContent = titleText;
+
+  const body = document.createElement('span');
+  body.className = 'ppc-status-line-message';
+  body.textContent = normalizedMessage;
+
+  copy.append(title, body);
+  element.replaceChildren(iconWrapper, copy);
 }
 
 function getReportPlaceholder(reportType: ReportType): string {

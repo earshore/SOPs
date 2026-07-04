@@ -119,6 +119,46 @@ const scoredMarkdown = `
 | 低分项 | 4/10 |
 `;
 
+const structuredReportMarkdown = `
+## 88/100 — 良好
+
+> 核心卖点清晰，但关键词覆盖和风险表达仍需优化。
+
+### 评分
+
+| 项目 | 分数 |
+| --- | --- |
+| 核心卖点 | 8/10 |
+| 关键词覆盖 | 6/10 |
+
+### 致命问题
+
+> 标题存在弱相关词堆叠，可能降低点击转化。
+
+### Top-3 改写建议
+
+**① 强化开头卖点**
+- 原句：Premium wireless earbuds
+- 改写：Wireless earbuds with active noise cancelling
+- 位置：标题前半段
+`;
+
+const legacyRenderedReportHtml = `
+<h2 aria-label="77/100 — 良好" class="kh-report-score-title kh-report-score-title--good">
+  <span class="kh-report-cover-main">
+    <span class="kh-report-cover-eyebrow">AI 评审报告</span>
+    <span class="kh-report-cover-title">Listing 评审</span>
+    <span class="kh-report-cover-meta">综合评级：良好</span>
+  </span>
+  <span class="kh-report-cover-score">77/100</span>
+  <div class="score-progress-bar"><div class="score-progress-fill" style="width: 77%;"></div></div>
+</h2>
+<blockquote><p>执行摘要说明关键词覆盖稳定，但标题表达仍可强化。</p></blockquote>
+<table>
+  <tbody><tr><td>核心卖点</td><td>7/10</td></tr></tbody>
+</table>
+`;
+
 function resetTrackerState(): void {
   analysisMocks.state.keywordTracker = {
     processedCopy: '',
@@ -187,6 +227,11 @@ it('mounts the template and disables analysis when no processed copy exists', as
   expect(container.classList.contains('fade-in')).toBe(true);
   expect(button?.disabled).toBe(true);
   expect(button?.classList.contains('cursor-not-allowed')).toBe(true);
+  expect(
+    container
+      .querySelector('#kt-llm-analysis-result')
+      ?.classList.contains('kh-report-rendered')
+  ).toBe(false);
 });
 
 it('restores saved markdown, renders score badges, and avoids double saving HTML', async () => {
@@ -196,11 +241,12 @@ it('restores saved markdown, renders score badges, and avoids double saving HTML
 
   expect(container.querySelector('h2')?.textContent).toContain('88/100');
   expect(container.querySelector('h2')?.classList.contains('kh-report-score-title')).toBe(true);
+  expect(container.querySelector('h2')?.classList.contains('kh-report-cover')).toBe(true);
   expect(
     container.querySelector('h2')?.classList.contains('kh-report-score-title--excellent')
   ).toBe(true);
-  expect(container.querySelector('.score-progress-bar')).not.toBeNull();
-  expect(container.querySelector('.score-progress-fill')).not.toBeNull();
+  expect(container.querySelector('.score-progress-bar')).toBeNull();
+  expect(container.querySelector('.score-progress-fill')).toBeNull();
   expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
   expect(container.querySelector('#kt-llm-analysis-result')?.textContent).not.toContain('✅');
   expect(container.querySelector('.row-risk')).not.toBeNull();
@@ -209,6 +255,53 @@ it('restores saved markdown, renders score badges, and avoids double saving HTML
   unmount();
 
   expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
+});
+
+it('enhances only rendered reports with commercial report structure', async () => {
+  analysisMocks.state.keywordTracker.llmAnalysisResult = structuredReportMarkdown;
+
+  const container = await mountAnalysis();
+
+  expect(
+    container
+      .querySelector('#kt-llm-analysis-result')
+      ?.classList.contains('kh-report-rendered')
+  ).toBe(true);
+  expect(container.querySelector('.kh-report-cover-main')).not.toBeNull();
+  expect(container.querySelector('h2')?.textContent).not.toContain('AI 评审报告');
+  expect(container.querySelector('.kh-report-cover-summary-text')?.textContent).toContain(
+    '核心卖点清晰'
+  );
+  expect(container.querySelector('.kh-report-cover-summary-label')?.textContent).toBe('执行摘要');
+  expect(container.querySelector('.kh-report-table-shell')).not.toBeNull();
+  expect(
+    container
+      .querySelector('.kh-report-executive-summary')
+      ?.classList.contains('kh-report-executive-summary--merged')
+  ).toBe(true);
+  expect(container.querySelector('.kh-report-risk-summary')).not.toBeNull();
+  expect(container.querySelectorAll('.kh-report-recommendation-card')).toHaveLength(1);
+  expect(container.querySelector('.kh-report-recommendation-item--proposal')).not.toBeNull();
+});
+
+it('normalizes legacy rendered report chrome when restoring old HTML', async () => {
+  analysisMocks.state.keywordTracker.llmAnalysisResult = legacyRenderedReportHtml;
+
+  const container = await mountAnalysis();
+
+  expect(
+    container
+      .querySelector('#kt-llm-analysis-result')
+      ?.classList.contains('kh-report-rendered')
+  ).toBe(true);
+  expect(container.querySelector('h2')?.textContent).not.toContain('AI 评审报告');
+  expect(container.querySelector('.kh-report-cover-eyebrow')).toBeNull();
+  expect(container.querySelector('.score-progress-bar')).toBeNull();
+  expect(container.querySelector('.score-progress-fill')).toBeNull();
+  expect(container.querySelector('.kh-report-cover-summary-text')?.textContent).toContain(
+    '执行摘要说明'
+  );
+  expect(container.querySelector('.kh-report-cover-summary-label')?.textContent).toBe('执行摘要');
 });
 
 it('does not restore a historical report when the current analysis state is empty', async () => {

@@ -1,6 +1,6 @@
 .ppc-report-type-control {
   display: inline-grid;
-  grid-template-columns: max-content 230px;
+  grid-template-columns: max-content minmax(180px, 230px);
   align-items: center;
   gap: 10px;
   min-height: 40px;
@@ -16,6 +16,7 @@
 
 .ppc-report-type-control select {
   width: 100%;
+  min-width: 0;
   min-height: 30px;
   padding: 0 28px 0 12px;
   border: 0;
@@ -35,7 +36,23 @@
 }
 
 .ppc-report-type-control:focus-within {
-  border-color: rgba(37, 99, 235, 0.42);
+  border-color: rgba(5, 150, 105, 0.34);
   background: #ffffff;
-  box-shadow: 0 0 0 3px var(--focus-ring-soft, rgba(37, 99, 235, 0.16));
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
+}
+
+@media (max-width: 640px) {
+  .ppc-report-type-control {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  .ppc-report-type-control select {
+    min-height: 34px;
+    padding-left: 0;
+    border-top: 1px solid rgba(148, 163, 184, 0.24);
+    border-left: 0;
+  }
 }
