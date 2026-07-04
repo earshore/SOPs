@@ -52,20 +52,20 @@
 }
 
 .category-btn:hover {
-  border-color: var(--color-teal-300);
-  background-color: var(--color-teal-50);
-  color: var(--color-teal-600);
+  border-color: var(--color-violet-300);
+  background-color: var(--color-violet-50);
+  color: var(--color-violet-600);
 }
 
 .category-btn.active {
-  background-color: var(--color-teal-600);
+  background-color: var(--color-violet-600);
   color: white;
-  border-color: var(--color-teal-600);
+  border-color: var(--color-violet-600);
 }
 
 .category-btn.active:hover {
-  background-color: var(--color-teal-700);
-  border-color: var(--color-teal-700);
+  background-color: var(--color-violet-700);
+  border-color: var(--color-violet-700);
 }
 
 /* 提示词卡片样式 */
@@ -80,7 +80,7 @@
 
 .prompt-card:hover {
   box-shadow: 0 10px 15px -3px var(--color-black-alpha-10);
-  border-color: var(--color-teal-300);
+  border-color: var(--color-violet-300);
 }
 
 .prompt-title {
@@ -92,7 +92,7 @@
 }
 
 .prompt-card:hover .prompt-title {
-  color: var(--color-teal-600);
+  color: var(--color-violet-600);
 }
 
 .prompt-description {
@@ -118,8 +118,8 @@
 }
 
 .btn-icon:hover {
-  color: var(--color-teal-600);
-  background-color: var(--color-teal-50);
+  color: var(--color-violet-600);
+  background-color: var(--color-violet-50);
 }
 
 /* 语言切换按钮样式 */
@@ -135,7 +135,7 @@
 
 .lang-btn.active {
   background-color: white;
-  color: var(--color-teal-600);
+  color: var(--color-violet-600);
   font-weight: 600;
   box-shadow: 0 1px 2px 0 var(--color-black-alpha-5);
 }
@@ -151,11 +151,11 @@
   min-height: 1.5rem;
   margin-bottom: 0.75rem;
   padding: 0.125rem 0.5rem;
-  color: var(--color-teal-700);
+  color: var(--color-violet-700);
   font-size: 0.75rem;
   font-weight: 700;
-  background-color: var(--color-teal-50);
-  border: 1px solid var(--color-teal-100);
+  background-color: var(--color-violet-50);
+  border: 1px solid var(--color-violet-100);
   border-radius: var(--rounded-md);
 }
 
@@ -176,14 +176,14 @@
 .prompt-business-rule {
   margin-top: 1rem;
   padding: 0.75rem;
-  background-color: var(--color-teal-50);
-  border: 1px solid var(--color-teal-100);
+  background-color: var(--color-violet-50);
+  border: 1px solid var(--color-violet-100);
   border-radius: var(--rounded-md);
 }
 
 .prompt-business-rule span {
   display: block;
-  color: var(--color-teal-700);
+  color: var(--color-violet-700);
   font-size: 0.75rem;
   font-weight: 700;
   line-height: 1.5;
@@ -191,7 +191,7 @@
 
 .prompt-business-rule p {
   margin-top: 0.25rem;
-  color: var(--color-teal-900);
+  color: var(--color-violet-900);
   font-size: 0.8125rem;
   line-height: 1.6;
 }

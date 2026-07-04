@@ -14,7 +14,7 @@ import { wrapWithPageEnterAnimation } from '@/common/utils/pageEnterAnimation';
 
 const CACHE_PREFIX = CACHE_PREFIXES.VIEW;
 const LEGACY_CACHE_PREFIX = 'view_cache_';
-const VIEW_CACHE_SCHEMA_VERSION = 'view-v2';
+const VIEW_CACHE_SCHEMA_VERSION = 'view-v3';
 const VIEW_CACHE_VERSION = `${APP_VERSION}:${VIEW_CACHE_SCHEMA_VERSION}`;
 const ROUTE_LOADING_DELAY_MS = 300;
 const ROUTE_LOADING_ID = 'route-loading-skeleton';

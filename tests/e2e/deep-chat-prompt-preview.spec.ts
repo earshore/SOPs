@@ -47,7 +47,9 @@ function createPromptStoragePayload() {
               '',
               '# REQUIREMENTS',
               'Keep enough content here to render the same preview surface used by generated prompts.',
-            ].join('\n').repeat(8),
+            ]
+              .join('\n')
+              .repeat(8),
             response: '',
             timestamp: now,
             generatedAt: new Date(now).toISOString(),
@@ -63,7 +65,7 @@ function createPromptStoragePayload() {
 }
 
 async function loadDeepChatWithPrompt(page: Page): Promise<void> {
-  await page.addInitScript((payload) => {
+  await page.addInitScript(payload => {
     window.localStorage.setItem('app-storage', JSON.stringify(payload));
   }, createPromptStoragePayload());
 
@@ -85,46 +87,54 @@ async function getPromptHoverPoint(page: Page): Promise<Point> {
   };
 }
 
-async function readPreviewMetrics(page: Page, pointer: Point | null = null): Promise<PreviewMetrics> {
-  return page.evaluate(({ pointer, previewSelector, promptSelector }) => {
-    const preview = document.querySelector(previewSelector);
-    const prompt = document.querySelector(promptSelector);
-    if (!preview) {
-      throw new Error('Prompt preview popover is missing');
-    }
+async function readPreviewMetrics(
+  page: Page,
+  pointer: Point | null = null
+): Promise<PreviewMetrics> {
+  return page.evaluate(
+    ({ pointer, previewSelector, promptSelector }) => {
+      const preview = document.querySelector(previewSelector);
+      const prompt = document.querySelector(promptSelector);
+      if (!preview) {
+        throw new Error('Prompt preview popover is missing');
+      }
 
-    const rect = preview.getBoundingClientRect();
-    const viewportBounds = [
-      rect.left >= 0,
-      rect.top >= 0,
-      rect.right <= window.innerWidth,
-      rect.bottom <= window.innerHeight,
-    ];
-    const nearestDistance = pointer
-      ? {
-          x: Math.round(Math.max(rect.left - pointer.x, 0, pointer.x - rect.right)),
-          y: Math.round(Math.max(rect.top - pointer.y, 0, pointer.y - rect.bottom)),
-        }
-      : null;
+      const rect = preview.getBoundingClientRect();
+      const viewportBounds = [
+        rect.left >= 0,
+        rect.top >= 0,
+        rect.right <= window.innerWidth,
+        rect.bottom <= window.innerHeight,
+      ];
+      const nearestDistance = pointer
+        ? {
+            x: Math.round(Math.max(rect.left - pointer.x, 0, pointer.x - rect.right)),
+            y: Math.round(Math.max(rect.top - pointer.y, 0, pointer.y - rect.bottom)),
+          }
+        : null;
 
-    return {
-      ariaHidden: preview.getAttribute('aria-hidden'),
-      arrowTop: getComputedStyle(preview).getPropertyValue('--playground-prompt-preview-arrow-top').trim(),
-      describedBy: prompt?.getAttribute('aria-describedby') || null,
-      nearestDistance,
-      parentIsBody: preview.parentElement === document.body,
-      rect: {
-        left: Math.round(rect.left),
-        top: Math.round(rect.top),
-        right: Math.round(rect.right),
-        bottom: Math.round(rect.bottom),
-        width: Math.round(rect.width),
-        height: Math.round(rect.height),
-      },
-      visible: preview.classList.contains('is-visible'),
-      withinViewport: viewportBounds.every(Boolean),
-    };
-  }, { pointer, previewSelector: PREVIEW_SELECTOR, promptSelector: PROMPT_SELECTOR });
+      return {
+        ariaHidden: preview.getAttribute('aria-hidden'),
+        arrowTop: getComputedStyle(preview)
+          .getPropertyValue('--playground-prompt-preview-arrow-top')
+          .trim(),
+        describedBy: prompt?.getAttribute('aria-describedby') || null,
+        nearestDistance,
+        parentIsBody: preview.parentElement === document.body,
+        rect: {
+          left: Math.round(rect.left),
+          top: Math.round(rect.top),
+          right: Math.round(rect.right),
+          bottom: Math.round(rect.bottom),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+        },
+        visible: preview.classList.contains('is-visible'),
+        withinViewport: viewportBounds.every(Boolean),
+      };
+    },
+    { pointer, previewSelector: PREVIEW_SELECTOR, promptSelector: PROMPT_SELECTOR }
+  );
 }
 
 test.describe('Deep Chat generated prompt preview', () => {
@@ -168,7 +178,9 @@ test.describe('Deep Chat generated prompt preview', () => {
     expect(metrics.arrowTop).toBe('28px');
   });
 
-  test('clamps the hover preview to the viewport when horizontal space is limited', async ({ page }) => {
+  test('clamps the hover preview to the viewport when horizontal space is limited', async ({
+    page,
+  }) => {
     const viewport = { width: 904, height: 600 };
     await page.setViewportSize(viewport);
     await loadDeepChatWithPrompt(page);

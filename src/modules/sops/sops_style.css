@@ -57,6 +57,99 @@
   color: #1d4ed8 !important;
 }
 
+/* ==================== SOP 总览折叠区域 ==================== */
+.sops-overview-collapsible {
+  border: 1px solid var(--border-subtle, var(--color-slate-200));
+  border-radius: var(--rounded-lg, 0.5rem);
+  background: var(--surface-card, #ffffff);
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
+.sops-collapsible {
+  border-radius: inherit;
+}
+
+.sops-collapsible-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4rem;
+  padding: 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.sops-collapsible-summary::-webkit-details-marker {
+  display: none;
+}
+
+.sops-collapsible-summary:focus-visible {
+  outline: 2px solid var(--color-blue-500, #3b82f6);
+  outline-offset: 3px;
+}
+
+.sops-collapsible-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+
+.sops-collapsible-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border-subtle, var(--color-slate-200));
+  border-radius: var(--rounded-md, 0.375rem);
+  background: var(--color-slate-50, #f8fafc);
+  color: var(--color-slate-700, #334155);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sops-collapsible-action-text::before {
+  content: '展开';
+}
+
+.sops-collapsible[open] .sops-collapsible-action-text::before {
+  content: '收起';
+}
+
+.sops-collapsible-action i {
+  transition: transform 180ms ease;
+}
+
+.sops-collapsible[open] .sops-collapsible-action i {
+  transform: rotate(180deg);
+}
+
+.sops-collapsible-body {
+  padding: 0 1rem 1rem;
+}
+
+@media (max-width: 640px) {
+  .sops-collapsible-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sops-collapsible-controls {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sops-collapsible-action i {
+    transition: none;
+  }
+}
+
 /* ==================== SOP 卡片网格 ==================== */
 .sop-card-grid {
   display: grid;

@@ -303,10 +303,12 @@ test('continues typewriter output after switching away and back during a stream'
       window.location.hash = '#/app-center';
     });
     await expect(page.locator('#playground-chat')).toHaveCount(0);
+    await expect(page.locator('#sidebar-btn-app_center_overview')).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
 
-    await page.evaluate(() => {
-      window.location.hash = '#/app-center/playground/deep-chat';
-    });
+    await page.locator('#sidebar-btn-playground').click();
     const remountedChat = page.locator('#playground-chat');
     await expect(remountedChat).toBeVisible();
     await expect(remountedChat).toContainText('First', { timeout: 10000 });

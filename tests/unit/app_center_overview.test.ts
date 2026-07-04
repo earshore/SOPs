@@ -1,10 +1,15 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { cwd } from 'node:process';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { loadTemplate } from '@/common/utils/viewLoader';
 import * as overviewModule from '@/modules/app_center/views/overview/index';
 
 vi.mock('@/common/utils/viewLoader', () => ({
-  loadTemplate: vi.fn()
+  loadTemplate: vi.fn(),
 }));
+
+const realOverviewTemplatePath = join(cwd(), 'src/modules/app_center/views/overview/template.html');
 
 const overviewTemplate = `
   <div class="app-overview-container">
@@ -47,7 +52,10 @@ describe('App Center Overview', () => {
 
     await overviewModule.mount(container);
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/app_center/views/overview/template.html', { useCache: false });
+    expect(loadTemplate).toHaveBeenCalledWith(
+      'src/modules/app_center/views/overview/template.html',
+      { useCache: false }
+    );
     expect(container.classList.contains('fade-in')).toBe(true);
     expect(container.querySelector('.app-overview-container')).not.toBeNull();
   });
@@ -58,7 +66,9 @@ describe('App Center Overview', () => {
     await overviewModule.mount(container);
 
     const appCard = container.querySelector<HTMLElement>('[data-tab="scraper"]');
-    const childLink = container.querySelector<HTMLElement>('.app-child-link[data-tab="ai_analysis"]');
+    const childLink = container.querySelector<HTMLElement>(
+      '.app-child-link[data-tab="ai_analysis"]'
+    );
 
     expect(appCard?.dataset.action).toBe('switch-tab');
     expect(childLink?.dataset.action).toBe('switch-tab');
@@ -72,10 +82,20 @@ describe('App Center Overview', () => {
     await overviewModule.mount(container);
     container.querySelector<HTMLElement>('[data-category="ppc_tools"]')?.click();
 
-    expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe('none');
-    expect(container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display).toBe('');
-    expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe('显示 1 个应用');
-    expect(container.querySelector<HTMLElement>('[data-category="ppc_tools"]')?.classList.contains('active')).toBe(true);
+    expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe(
+      'none'
+    );
+    expect(
+      container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display
+    ).toBe('');
+    expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
+      '显示 1 个应用'
+    );
+    expect(
+      container
+        .querySelector<HTMLElement>('[data-category="ppc_tools"]')
+        ?.classList.contains('active')
+    ).toBe(true);
   });
 
   it('filters cards by search text and clears the query', async () => {
@@ -92,16 +112,24 @@ describe('App Center Overview', () => {
     searchInput.value = 'ppc';
     searchInput.dispatchEvent(new Event('input'));
 
-    expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe('none');
-    expect(container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display).toBe('');
+    expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe(
+      'none'
+    );
+    expect(
+      container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display
+    ).toBe('');
     expect(clearSearchBtn.classList.contains('hidden')).toBe(false);
-    expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe('显示 1 个应用');
+    expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
+      '显示 1 个应用'
+    );
 
     clearSearchBtn.click();
 
     expect(searchInput.value).toBe('');
     expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe('');
-    expect(container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display).toBe('');
+    expect(
+      container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display
+    ).toBe('');
     expect(clearSearchBtn.classList.contains('hidden')).toBe(true);
   });
 
@@ -118,7 +146,22 @@ describe('App Center Overview', () => {
     searchInput.value = 'not-found';
     searchInput.dispatchEvent(new Event('input'));
 
-    expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe('显示 0 个应用');
-    expect(container.querySelector<HTMLElement>('#app-overview-empty')?.classList.contains('hidden')).toBe(false);
+    expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
+      '显示 0 个应用'
+    );
+    expect(
+      container.querySelector<HTMLElement>('#app-overview-empty')?.classList.contains('hidden')
+    ).toBe(false);
+  });
+
+  it('keeps the task path section collapsed by default', () => {
+    const html = readFileSync(realOverviewTemplatePath, 'utf8');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+
+    const taskPathSection = wrapper.querySelector('.app-overview-flow .app-overview-collapsible');
+
+    expect(taskPathSection).not.toBeNull();
+    expect(taskPathSection?.hasAttribute('open')).toBe(false);
   });
 });

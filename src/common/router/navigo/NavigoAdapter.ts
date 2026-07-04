@@ -43,6 +43,12 @@ type NavigationRedirect = {
   options: NavigateOptions;
 };
 
+type PendingNavigation = {
+  path: string;
+  options: NavigateOptions;
+  resolve: (result: boolean) => void;
+};
+
 /**
  * Navigo 路由适配器
  *
@@ -87,6 +93,12 @@ export class NavigoAdapter {
 
   /** 是否正在导航 */
   private isNavigating: boolean;
+
+  /** 当前导航目标 */
+  private activeNavigationPath: string | null;
+
+  /** 导航中收到的最后一个待执行目标 */
+  private pendingNavigation: PendingNavigation | null;
 
   /** 路由系统配置 */
   private config: RouterConfig;
@@ -146,6 +158,8 @@ export class NavigoAdapter {
     this.history = [];
     this.maxHistorySize = this.config.maxHistorySize || 50;
     this.isNavigating = false;
+    this.activeNavigationPath = null;
+    this.pendingNavigation = null;
 
     this._log('NavigoAdapter initialized', this.config);
   }
@@ -258,15 +272,27 @@ export class NavigoAdapter {
     this._logNavigationRequest(path, options);
     this._assertNavigateOptions(options);
 
-    if (!this._startNavigation()) return false;
+    const normalizedPath = this._resolveNavigationPath(path);
+    if (this.isNavigating) {
+      return this._queueNavigation(normalizedPath, options);
+    }
+
+    return this._navigateResolved(normalizedPath, options);
+  }
+
+  private async _navigateResolved(
+    normalizedPath: string,
+    options: NavigateOptions
+  ): Promise<boolean> {
+    if (!this._startNavigation(normalizedPath)) return false;
 
     let result = false;
     let redirect: NavigationRedirect | null = null;
 
     try {
-      const target = this._createNavigationTarget(path, options);
+      const target = this._createNavigationTarget(normalizedPath, options);
       if (!target) {
-        redirect = this._createNotFoundRedirect(path);
+        redirect = this._createNotFoundRedirect(normalizedPath);
       } else {
         const { to, from, normalizedPath } = target;
         const beforeOutcome = await this._runBeforeNavigation(to, from, options);
@@ -293,8 +319,10 @@ export class NavigoAdapter {
     }
 
     if (redirect) {
-      return this.navigate(redirect.path, redirect.options);
+      result = await this.navigate(redirect.path, redirect.options);
     }
+
+    await this._runPendingNavigation();
 
     return result;
   }
@@ -313,15 +341,39 @@ export class NavigoAdapter {
     );
   }
 
-  private _startNavigation(): boolean {
+  private _startNavigation(normalizedPath: string): boolean {
     if (this.isNavigating) {
       this._log('Navigation in progress, skipping');
       return false;
     }
 
     this.isNavigating = true;
+    this.activeNavigationPath = normalizedPath;
     this._log('isNavigating set to true');
     return true;
+  }
+
+  private _queueNavigation(normalizedPath: string, options: NavigateOptions): Promise<boolean> {
+    if (
+      normalizedPath === this.activeNavigationPath ||
+      normalizedPath === this.pendingNavigation?.path
+    ) {
+      this._log(`Navigation in progress, duplicate target skipped: ${normalizedPath}`);
+      return Promise.resolve(false);
+    }
+
+    if (this.pendingNavigation) {
+      this.pendingNavigation.resolve(false);
+    }
+
+    this._log(`Navigation in progress, queued latest target: ${normalizedPath}`);
+    return new Promise(resolve => {
+      this.pendingNavigation = {
+        path: normalizedPath,
+        options: { ...options },
+        resolve,
+      };
+    });
   }
 
   private _createNavigationTarget(path: string, options: NavigateOptions): NavigationTarget | null {
@@ -459,10 +511,22 @@ export class NavigoAdapter {
   private _finishNavigation(): void {
     this._log('isNavigating set to false');
     this.isNavigating = false;
+    this.activeNavigationPath = null;
 
     if (this.storeSync) {
       this.storeSync.syncNavigating(false);
     }
+  }
+
+  private async _runPendingNavigation(): Promise<void> {
+    const pendingNavigation = this.pendingNavigation;
+    if (!pendingNavigation) {
+      return;
+    }
+
+    this.pendingNavigation = null;
+    const result = await this.navigate(pendingNavigation.path, pendingNavigation.options);
+    pendingNavigation.resolve(result);
   }
 
   private _createRedirect(

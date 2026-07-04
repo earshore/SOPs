@@ -47,8 +47,12 @@ describe('SOPs Overview', () => {
     await mount(container);
     container.querySelector<HTMLButtonElement>('[data-category="growth"]')?.click();
 
-    expect((container.querySelector('section[data-category="growth"]') as HTMLElement).style.display).toBe('');
-    expect((container.querySelector('section[data-category="backend"]') as HTMLElement).style.display).toBe('none');
+    expect(
+      (container.querySelector('section[data-category="growth"]') as HTMLElement).style.display
+    ).toBe('');
+    expect(
+      (container.querySelector('section[data-category="backend"]') as HTMLElement).style.display
+    ).toBe('none');
   });
 
   it('does not include local pilot usage metrics on the real overview page', () => {
@@ -57,5 +61,20 @@ describe('SOPs Overview', () => {
     expect(html).not.toContain('本地试运行计数');
     expect(html).not.toContain('data-ops-metric-count');
     expect(html).not.toContain('data-ops-metric-last');
+  });
+
+  it('keeps the task guidance sections collapsed by default', () => {
+    const html = readFileSync(realOverviewTemplatePath, 'utf8');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+
+    const collapsibleSections = wrapper.querySelectorAll(
+      '.sops-overview-collapsible .sops-collapsible'
+    );
+
+    expect(collapsibleSections).toHaveLength(2);
+    collapsibleSections.forEach(section => {
+      expect(section.hasAttribute('open')).toBe(false);
+    });
   });
 });

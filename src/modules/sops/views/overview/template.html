@@ -45,16 +45,24 @@
                 </div>
         </div>
         <!-- 三条运营作业主线 -->
-        <section class="mb-8" aria-label="三条运营作业主线">
-                <div class="flex items-center justify-between gap-3 mb-4">
-                        <div>
-                                <h2 class="text-xl font-bold text-slate-800">三条运营作业主线</h2>
-                                <p class="text-sm text-slate-500">从任务出发串联 SOP、工具、动作和复盘，避免只停留在阅读文档。</p>
-                        </div>
-                        <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-100">
-                                <i class="fas fa-diagram-project"></i>作业闭环
-                        </span>
-                </div>
+        <section class="mb-8 sops-overview-collapsible" aria-label="三条运营作业主线">
+                <details class="sops-collapsible">
+                        <summary class="sops-collapsible-summary">
+                                <div>
+                                        <h2 class="text-xl font-bold text-slate-800">三条运营作业主线</h2>
+                                        <p class="text-sm text-slate-500">从任务出发串联 SOP、工具、动作和复盘，避免只停留在阅读文档。</p>
+                                </div>
+                                <span class="sops-collapsible-controls">
+                                        <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-100">
+                                                <i class="fas fa-diagram-project"></i>作业闭环
+                                        </span>
+                                        <span class="sops-collapsible-action" aria-hidden="true">
+                                                <span class="sops-collapsible-action-text"></span>
+                                                <i class="fas fa-chevron-down"></i>
+                                        </span>
+                                </span>
+                        </summary>
+                        <div class="sops-collapsible-body">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <div class="sop-card overview-accent-card overview-accent-emerald" data-action="switch-tab"
                                 data-tab="sops_npi_tracker">
@@ -99,18 +107,28 @@
                                 </div>
                         </div>
                 </div>
+                        </div>
+                </details>
         </section>
         <!-- 新人常用任务 -->
-        <section class="mb-8" aria-label="新人常用任务">
-                <div class="flex items-center justify-between gap-3 mb-4">
-                        <div>
-                                <h2 class="text-xl font-bold text-slate-800">新人常用任务</h2>
-                                <p class="text-sm text-slate-500">先从这些高频动作开始，不用理解完整系统结构。</p>
-                        </div>
-                        <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100">
-                                <i class="fas fa-route"></i>入门路径
-                        </span>
-                </div>
+        <section class="mb-8 sops-overview-collapsible" aria-label="新人常用任务">
+                <details class="sops-collapsible">
+                        <summary class="sops-collapsible-summary">
+                                <div>
+                                        <h2 class="text-xl font-bold text-slate-800">新人常用任务</h2>
+                                        <p class="text-sm text-slate-500">先从这些高频动作开始，不用理解完整系统结构。</p>
+                                </div>
+                                <span class="sops-collapsible-controls">
+                                        <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100">
+                                                <i class="fas fa-route"></i>入门路径
+                                        </span>
+                                        <span class="sops-collapsible-action" aria-hidden="true">
+                                                <span class="sops-collapsible-action-text"></span>
+                                                <i class="fas fa-chevron-down"></i>
+                                        </span>
+                                </span>
+                        </summary>
+                        <div class="sops-collapsible-body">
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
                         <div class="sop-card overview-accent-card overview-accent-emerald" data-action="switch-tab"
                                 data-tab="sops_listing_seo">
@@ -173,6 +191,8 @@
                                 <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入差评 SOP</div>
                         </div>
                 </div>
+                        </div>
+                </details>
         </section>
         <!-- 分类筛选器 -->
         <div class="mb-6 flex items-center gap-3 overflow-x-auto pb-2">

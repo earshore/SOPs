@@ -293,7 +293,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'explore',
       label: '大模型探索',
       icon: 'fas fa-compass',
-      color: 'teal',
+      color: 'violet',
       order: 1,
       version: 'v1.0',
       description: '智能体、提示词、工作流等实用功能。',

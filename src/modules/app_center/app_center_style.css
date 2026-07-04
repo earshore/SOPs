@@ -323,6 +323,73 @@
   margin-bottom: 1rem;
 }
 
+.app-overview-collapsible {
+  border: 1px solid var(--app-overview-border);
+  border-radius: var(--radius-panel, 8px);
+  background: var(--app-overview-surface);
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
+.app-overview-collapsible-summary {
+  min-height: 4rem;
+  padding: 1rem;
+  margin-bottom: 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.app-overview-collapsible-summary::-webkit-details-marker {
+  display: none;
+}
+
+.app-overview-collapsible-summary:focus-visible {
+  outline: 2px solid var(--color-primary, var(--color-blue-500));
+  outline-offset: 3px;
+}
+
+.app-overview-collapsible-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+
+.app-overview-collapsible-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--app-overview-border-strong);
+  border-radius: var(--rounded-md, 0.375rem);
+  background: var(--app-overview-surface-muted);
+  color: var(--app-overview-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.app-overview-collapsible-action-text::before {
+  content: '展开';
+}
+
+.app-overview-collapsible[open] .app-overview-collapsible-action-text::before {
+  content: '收起';
+}
+
+.app-overview-collapsible-action i {
+  transition: transform 180ms ease;
+}
+
+.app-overview-collapsible[open] .app-overview-collapsible-action i {
+  transform: rotate(180deg);
+}
+
+.app-overview-collapsible-body {
+  padding: 0 1rem 1rem;
+}
+
 .app-overview-mini-badge,
 .app-overview-count {
   display: inline-flex;
@@ -756,6 +823,11 @@
     gap: 0.625rem;
   }
 
+  .app-overview-collapsible-controls {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
   .app-overview-count,
   .app-overview-mini-badge {
     align-self: flex-start;
@@ -785,6 +857,7 @@
   .app-card-icon,
   .app-card-arrow,
   .app-child-link,
+  .app-overview-collapsible-action i,
   .app-overview-filter-panel .category-filter-btn {
     transition: none;
   }

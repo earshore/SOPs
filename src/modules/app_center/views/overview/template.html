@@ -54,59 +54,69 @@
     </div>
   </div>
 
-  <section class="app-overview-flow" aria-label="核心工作流">
-    <div class="app-overview-section-heading">
-      <div>
-        <h2 class="app-overview-section-title">任务路径</h2>
-        <p class="app-overview-eyebrow">
-          按新人、广告和 Listing 三类高频任务进入工具，最终输出动作或复盘材料。
-        </p>
+  <section class="app-overview-flow" aria-label="任务路径">
+    <details class="app-overview-collapsible">
+      <summary class="app-overview-section-heading app-overview-collapsible-summary">
+        <div>
+          <h2 class="app-overview-section-title">任务路径</h2>
+          <p class="app-overview-eyebrow">
+            按新人、广告和 Listing 三类高频任务进入工具，最终输出动作或复盘材料。
+          </p>
+        </div>
+        <span class="app-overview-collapsible-controls">
+          <span class="app-overview-mini-badge">作业系统</span>
+          <span class="app-overview-collapsible-action" aria-hidden="true">
+            <span class="app-overview-collapsible-action-text"></span>
+            <i class="fas fa-chevron-down"></i>
+          </span>
+        </span>
+      </summary>
+      <div class="app-overview-collapsible-body">
+        <div class="app-overview-flow-grid app-overview-flow-grid--tasks">
+          <button
+            class="app-flow-step app-child-link"
+            type="button"
+            data-action="switch-tab"
+            data-tab="sops_npi_tracker"
+          >
+            <span class="app-flow-index">01</span>
+            <span class="app-flow-icon"><i class="fas fa-seedling"></i></span>
+            <span class="app-flow-copy">
+              <strong>新品作业流</strong>
+              <small>建档、定价、合规和周复盘</small>
+            </span>
+          </button>
+          <button
+            class="app-flow-step app-child-link"
+            type="button"
+            data-action="switch-tab"
+            data-tab="ppc_search_terms"
+          >
+            <span class="app-flow-index">02</span>
+            <span class="app-flow-icon"
+              ><i class="fas fa-magnifying-glass-dollar"></i
+            ></span>
+            <span class="app-flow-copy">
+              <strong>广告作业流</strong>
+              <small>报表导入、动作清单和周报摘要</small>
+            </span>
+          </button>
+          <button
+            class="app-flow-step app-child-link"
+            type="button"
+            data-action="switch-tab"
+            data-tab="scraper"
+          >
+            <span class="app-flow-index">03</span>
+            <span class="app-flow-icon"><i class="fas fa-cubes-stacked"></i></span>
+            <span class="app-flow-copy">
+              <strong>竞品与 Listing 作业流</strong>
+              <small>采集、分析、Prompt 和补词</small>
+            </span>
+          </button>
+        </div>
       </div>
-      <span class="app-overview-mini-badge">作业系统</span>
-    </div>
-    <div class="app-overview-flow-grid app-overview-flow-grid--tasks">
-      <button
-        class="app-flow-step app-child-link"
-        type="button"
-        data-action="switch-tab"
-        data-tab="sops_npi_tracker"
-      >
-        <span class="app-flow-index">01</span>
-        <span class="app-flow-icon"><i class="fas fa-seedling"></i></span>
-        <span class="app-flow-copy">
-          <strong>新品作业流</strong>
-          <small>建档、定价、合规和周复盘</small>
-        </span>
-      </button>
-      <button
-        class="app-flow-step app-child-link"
-        type="button"
-        data-action="switch-tab"
-        data-tab="ppc_search_terms"
-      >
-        <span class="app-flow-index">02</span>
-        <span class="app-flow-icon"
-          ><i class="fas fa-magnifying-glass-dollar"></i
-        ></span>
-        <span class="app-flow-copy">
-          <strong>广告作业流</strong>
-          <small>报表导入、动作清单和周报摘要</small>
-        </span>
-      </button>
-      <button
-        class="app-flow-step app-child-link"
-        type="button"
-        data-action="switch-tab"
-        data-tab="scraper"
-      >
-        <span class="app-flow-index">03</span>
-        <span class="app-flow-icon"><i class="fas fa-cubes-stacked"></i></span>
-        <span class="app-flow-copy">
-          <strong>竞品与 Listing 作业流</strong>
-          <small>采集、分析、Prompt 和补词</small>
-        </span>
-      </button>
-    </div>
+    </details>
   </section>
 
   <section class="app-overview-filter-panel" aria-label="分类筛选">
