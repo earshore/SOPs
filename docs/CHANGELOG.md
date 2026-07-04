@@ -26,6 +26,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.20] - 2026-07-05
+
+### Added
+- 新增导航队列处理与可折叠概览交互。
+- PPC Search Terms 新增阈值设置面板。
+- Deep Chat 启用 prompt panel。
+
+### Changed
+- 重命名 Keyword Hunter 标签并格式化相关样式与 TypeScript。
+- 刷新 App Center 与 SOPS 主题体验。
+- 优化报告 UI、PPC 导入流程和结果布局。
+- 同步应用内版本显示到 `3.0.3-rc.20`。
+
+### Fixed
+- 修复报告区块模板嵌套问题。
+
 ## [3.0.3-rc.19] - 2026-07-04
 
 ### Added
