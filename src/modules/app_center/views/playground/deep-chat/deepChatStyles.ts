@@ -152,17 +152,25 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .input-button.inside-end.loading-button,
-  .input-button.inside-end[data-playground-stop-active="true"] {
+  .input-button.inside-end[data-playground-stop-active] {
     background: #dc2626 !important;
     cursor: pointer !important;
   }
 
-  .input-button.inside-end[data-playground-stop-active="true"] #submit-icon,
-  .input-button.inside-end[data-playground-stop-active="true"] .loading-submit-button {
+  .input-button.inside-end.loading-button:hover,
+  .input-button.inside-end.loading-button:focus-visible,
+  .input-button.inside-end[data-playground-stop-active]:hover,
+  .input-button.inside-end[data-playground-stop-active]:focus-visible {
+    background: #b91c1c !important;
+  }
+
+  .input-button.inside-end[data-playground-stop-active] #submit-icon,
+  .input-button.inside-end[data-playground-stop-active] .loading-submit-button,
+  .input-button.inside-end[data-playground-stop-active] #stop-icon {
     display: none !important;
   }
 
-  .input-button.inside-end[data-playground-stop-active="true"]::before {
+  .input-button.inside-end[data-playground-stop-active]::before {
     content: '' !important;
     width: 12px !important;
     height: 12px !important;
@@ -363,6 +371,13 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border-radius: 50% !important;
     background: var(--playground-accent, #334155) !important;
     pointer-events: none !important;
+  }
+
+  .inside-end.loading-button #stop-icon,
+  .inside-end[data-playground-stop-active] #stop-icon {
+    width: 100% !important;
+    height: 100% !important;
+    background: #dc2626 !important;
   }
 
   .inside-end #stop-icon::after {

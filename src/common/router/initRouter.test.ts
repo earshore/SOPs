@@ -31,20 +31,20 @@ const mocks = vi.hoisted(() => ({
   normalizeRoutePath: vi.fn((path: string) => (path.startsWith('/') ? path : `/${path}`)),
   routeIdToPath: vi.fn((routeId: string) => {
     const paths: Record<string, string> = {
-      scraper: '/app-center/master_analysis/scraper',
-      ai_analysis: '/app-center/master_analysis/ai-analysis',
-      promptlab: '/app-center/master_analysis/promptlab',
-      ppc_search_terms: '/app-center/ppc_tools/ppc-search-terms',
+      scraper: '/app-center/master-analysis/scraper',
+      ai_analysis: '/app-center/master-analysis/ai-analysis',
+      promptlab: '/app-center/master-analysis/promptlab',
+      ppc_search_terms: '/app-center/ppc-tools/ppc-search-terms',
       playground: '/app-center/playground/deep-chat',
     };
     return paths[routeId] || `/${routeId}`;
   }),
   routeIdToPathStrict: vi.fn((routeId: string) => {
     const paths: Record<string, string> = {
-      scraper: '/app-center/master_analysis/scraper',
-      ai_analysis: '/app-center/master_analysis/ai-analysis',
-      promptlab: '/app-center/master_analysis/promptlab',
-      ppc_search_terms: '/app-center/ppc_tools/ppc-search-terms',
+      scraper: '/app-center/master-analysis/scraper',
+      ai_analysis: '/app-center/master-analysis/ai-analysis',
+      promptlab: '/app-center/master-analysis/promptlab',
+      ppc_search_terms: '/app-center/ppc-tools/ppc-search-terms',
       playground: '/app-center/playground/deep-chat',
     };
     return paths[routeId] || null;
@@ -142,23 +142,39 @@ describe('initRouter setup', () => {
     expect(mocks.router.registerAlias).toHaveBeenCalledWith('/legacy-keyword', '/keyword_hunter');
     expect(mocks.router.registerAlias).toHaveBeenCalledWith(
       '/app-center/scraper',
-      '/app-center/master_analysis/scraper'
+      '/app-center/master-analysis/scraper'
+    );
+    expect(mocks.router.registerAlias).toHaveBeenCalledWith(
+      '/app-center/master_analysis/scraper',
+      '/app-center/master-analysis/scraper'
     );
     expect(mocks.router.registerAlias).toHaveBeenCalledWith(
       '/app-center/ai-analysis',
-      '/app-center/master_analysis/ai-analysis'
+      '/app-center/master-analysis/ai-analysis'
+    );
+    expect(mocks.router.registerAlias).toHaveBeenCalledWith(
+      '/app-center/master_analysis/ai-analysis',
+      '/app-center/master-analysis/ai-analysis'
     );
     expect(mocks.router.registerAlias).toHaveBeenCalledWith(
       '/app-center/promptlab',
-      '/app-center/master_analysis/promptlab'
+      '/app-center/master-analysis/promptlab'
+    );
+    expect(mocks.router.registerAlias).toHaveBeenCalledWith(
+      '/app-center/master_analysis/promptlab',
+      '/app-center/master-analysis/promptlab'
     );
     expect(mocks.router.registerAlias).toHaveBeenCalledWith(
       '/ppc_search_terms',
-      '/app-center/ppc_tools/ppc-search-terms'
+      '/app-center/ppc-tools/ppc-search-terms'
+    );
+    expect(mocks.router.registerAlias).toHaveBeenCalledWith(
+      '/app-center/ppc_tools/ppc-search-terms',
+      '/app-center/ppc-tools/ppc-search-terms'
     );
     expect(mocks.router.registerAlias).toHaveBeenCalledWith(
       '/app-center/ppc-search-terms',
-      '/app-center/ppc_tools/ppc-search-terms'
+      '/app-center/ppc-tools/ppc-search-terms'
     );
     expect(mocks.router.registerAlias).toHaveBeenCalledWith(
       '/app-center/playground',
@@ -267,7 +283,7 @@ describe('initRouter navigation and teardown', () => {
     expect(mocks.router.navigate).toHaveBeenCalledWith('/home', { replace: true });
 
     await expect(navigateToRouteId('ppc_search_terms', { replace: true })).resolves.toBe(true);
-    expect(mocks.router.navigate).toHaveBeenCalledWith('/app-center/ppc_tools/ppc-search-terms', {
+    expect(mocks.router.navigate).toHaveBeenCalledWith('/app-center/ppc-tools/ppc-search-terms', {
       replace: true,
     });
 

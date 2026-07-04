@@ -111,7 +111,17 @@ export const LEGACY_ROUTE_ALIASES = [
     replace: true,
   },
   {
+    alias: '/app-center/master_analysis/scraper',
+    routeId: 'scraper',
+    replace: true,
+  },
+  {
     alias: '/app-center/ai-analysis',
+    routeId: 'ai_analysis',
+    replace: true,
+  },
+  {
+    alias: '/app-center/master_analysis/ai-analysis',
     routeId: 'ai_analysis',
     replace: true,
   },
@@ -121,7 +131,17 @@ export const LEGACY_ROUTE_ALIASES = [
     replace: true,
   },
   {
+    alias: '/app-center/master_analysis/promptlab',
+    routeId: 'promptlab',
+    replace: true,
+  },
+  {
     alias: '/ppc_search_terms',
+    routeId: 'ppc_search_terms',
+    replace: true,
+  },
+  {
+    alias: '/app-center/ppc_tools/ppc-search-terms',
     routeId: 'ppc_search_terms',
     replace: true,
   },

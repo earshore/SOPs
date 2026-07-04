@@ -106,7 +106,7 @@ createModuleLoader({
 - `git diff --check`
 - `npm run type-check`
 - 相关单元测试，例如 `tests/unit/pageEnterAnimation.test.ts`、`tests/unit/ModuleLoader.test.ts`
-- 浏览器抽查 `#/home`、`#/sops`、`#/app-center/ppc_tools/ppc-search-terms`、`#/amz-hub`、`#/more`
+- 浏览器抽查 `#/home`、`#/sops`、`#/app-center/ppc-tools/ppc-search-terms`、`#/amz-hub`、`#/more`
 
 浏览器验收标准：
 

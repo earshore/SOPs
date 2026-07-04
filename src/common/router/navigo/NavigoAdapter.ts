@@ -251,7 +251,7 @@ export class NavigoAdapter {
    * @example
    * ```typescript
    * await adapter.navigate('/home');
-   * await adapter.navigate('/app-center/master_analysis/scraper', { replace: true });
+   * await adapter.navigate('/app-center/master-analysis/scraper', { replace: true });
    * ```
    */
   async navigate(path: string, options: NavigateOptions = {}): Promise<boolean> {

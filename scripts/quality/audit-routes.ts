@@ -174,6 +174,15 @@ function auditManifestPathDeclarations(issues: AuditIssue[]): void {
           `Route "${route.routeId}" declares non-normalized path "${route.path}"; expected "${normalizedPath}"`
         );
       }
+
+      if (normalizedPath.includes('_')) {
+        addIssue(
+          issues,
+          'error',
+          'manifest-path',
+          `Route "${route.routeId}" canonical path "${route.path}" must use kebab-case URL segments`
+        );
+      }
     }
   }
 }

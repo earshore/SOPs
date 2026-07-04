@@ -53,6 +53,7 @@ type AiAnalysisPanelState = Pick<
 > & {
   productSummaryTooltipVisible: boolean;
   showSelectionPanel: boolean;
+  Math: AlpineSafeMath;
   _navigationHandler: EventListener | null;
   perfSettings: ReturnType<typeof createPerformanceSettingsPanel>;
 };
@@ -125,6 +126,24 @@ const DEFAULT_REVIEW_RESULT_HEADER_CLASS = 'bg-amber-50 border-b border-amber-10
 const DEFAULT_RESULT_ICON_WRAP_CLASS = 'bg-blue-100 text-blue-700 border-blue-200';
 const DEFAULT_RESULT_CATEGORY_CLASS = 'bg-blue-50 text-blue-700 border border-blue-100';
 
+type AlpineSafeMath = {
+  abs: (value: number) => number;
+  ceil: (value: number) => number;
+  floor: (value: number) => number;
+  max: (...values: number[]) => number;
+  min: (...values: number[]) => number;
+  round: (value: number) => number;
+};
+
+const ALPINE_SAFE_MATH: AlpineSafeMath = Object.freeze({
+  abs: (value: number) => Math.abs(value),
+  ceil: (value: number) => Math.ceil(value),
+  floor: (value: number) => Math.floor(value),
+  max: (...values: number[]) => Math.max(...values),
+  min: (...values: number[]) => Math.min(...values),
+  round: (value: number) => Math.round(value),
+});
+
 function getResultToneClass(map: Record<string, string>, color: string, fallback: string): string {
   return map[color] || fallback;
 }
@@ -151,6 +170,7 @@ function createAiAnalysisPanelState(): AiAnalysisPanelState {
     dataSource: 'scraper' as const,
     productSummaryTooltipVisible: false,
     showSelectionPanel: false,
+    Math: ALPINE_SAFE_MATH,
     _unsubscribes: [] as Array<() => void>,
     _navigationHandler: null,
     perfSettings: createPerformanceSettingsPanel(),

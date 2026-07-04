@@ -62,14 +62,14 @@ const runtimeTargets: RuntimeTarget[] = [
     expectedMinVisible: 3,
     maxRadiusPx: 8,
     name: 'Scraper elevated workbench panels',
-    path: '/app-center/master_analysis/scraper',
+    path: '/app-center/master-analysis/scraper',
     selector: '.card-elevated',
   },
   {
     expectedMinVisible: 2,
     maxRadiusPx: 8,
     name: 'Scraper strategy workbench panels',
-    path: '/app-center/master_analysis/scraper',
+    path: '/app-center/master-analysis/scraper',
     selector: '.strategy-card',
   },
 ];

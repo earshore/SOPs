@@ -397,6 +397,35 @@ test('turns the send button into a stop button and aborts the active response', 
       submitButton.getAttribute('aria-label') === '停止生成'
     );
   });
+  const stopButtonVisualState = await page.evaluate(() => {
+    const root = document.querySelector('#playground-chat')?.shadowRoot;
+    const submitButton = root?.querySelector<HTMLElement>('.input-button.inside-end');
+    if (!submitButton) {
+      throw new Error('Deep Chat submit button is missing');
+    }
+
+    const rect = submitButton.getBoundingClientRect();
+    const style = getComputedStyle(submitButton);
+    const stopIcon = root?.querySelector<HTMLElement>('#stop-icon');
+    const loadingIcon = root?.querySelector<HTMLElement>('.loading-submit-button');
+
+    return {
+      backgroundColor: style.backgroundColor,
+      borderRadius: style.borderRadius,
+      height: Math.round(rect.height),
+      loadingDisplay: loadingIcon ? getComputedStyle(loadingIcon).display : null,
+      stopIconDisplay: stopIcon ? getComputedStyle(stopIcon).display : null,
+      width: Math.round(rect.width),
+    };
+  });
+  expect(stopButtonVisualState).toMatchObject({
+    backgroundColor: 'rgb(220, 38, 38)',
+    borderRadius: '50%',
+    height: 36,
+    width: 36,
+  });
+  expect([null, 'none']).toContain(stopButtonVisualState.loadingDisplay);
+  expect([null, 'none']).toContain(stopButtonVisualState.stopIconDisplay);
 
   const stopButton = page.locator('#playground-stop-generation');
   await expect(stopButton).toHaveAttribute('data-thread-id', /.+/);

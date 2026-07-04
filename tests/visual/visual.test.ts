@@ -36,10 +36,10 @@ import {
 const APP_ROUTES = {
   home: '/',
   appCenterOverview: '/#/app-center',
-  promptlab: '/#/app-center/master_analysis/promptlab',
-  aiAnalysis: '/#/app-center/master_analysis/ai-analysis',
-  scraper: '/#/app-center/master_analysis/scraper',
-  ppcSearchTerms: '/#/app-center/ppc_tools/ppc-search-terms',
+  promptlab: '/#/app-center/master-analysis/promptlab',
+  aiAnalysis: '/#/app-center/master-analysis/ai-analysis',
+  scraper: '/#/app-center/master-analysis/scraper',
+  ppcSearchTerms: '/#/app-center/ppc-tools/ppc-search-terms',
   keywordHunterInput: '/#/app-center/keyword-hunter/input',
   npiTracker: '/#/sops/growth/npi-tracker',
   restrictedWords: '/#/sops/growth/restricted-words',
@@ -315,7 +315,7 @@ test.describe('Desktop Views', () => {
     await page.waitForSelector('.ppc-search-app', { timeout: 15000 });
 
     await expect(page.locator('#ppc-page-title')).toHaveText('PPC 搜索词分析器');
-    await expect(page).toHaveURL(/#\/app-center\/ppc-search-terms$/);
+    await expect(page).toHaveURL(/#\/app-center\/ppc-tools\/ppc-search-terms$/);
   });
 
   for (const pageConfig of DESKTOP_PAGES) {

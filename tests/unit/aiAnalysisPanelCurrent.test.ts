@@ -342,6 +342,17 @@ beforeEach(() => {
     expect(panel.isMissingTargetOnly).toBe(true);
   });
 
+  it('exposes CSP-safe Math helpers for Alpine expressions', () => {
+    const panel = createPanel();
+
+    expect(panel.Math).not.toBe(Math);
+    expect(panel.Math.round(72.4)).toBe(72);
+    expect(panel.Math.ceil(72.1)).toBe(73);
+    expect(panel.Math.floor(72.9)).toBe(72);
+    expect(panel.Math.min(72, 73)).toBe(72);
+    expect(panel.Math.max(72, 73)).toBe(73);
+  });
+
   it('computes idle, disabled, fallback, and confidence edge branches', () => {
     const panel = createPanel();
 

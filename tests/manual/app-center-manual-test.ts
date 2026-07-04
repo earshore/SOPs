@@ -25,9 +25,9 @@ const EXAMPLE_JSON_PATH = path.resolve(process.cwd(), 'examples/Amz_B01KYRUBT8_2
 // 测试模块列表
 const TEST_MODULES = [
   { name: '应用中心概览', path: '/#/app-center' },
-  { name: 'Scraper - 数据采集', path: '/#/app-center/master_analysis/scraper' },
-  { name: 'AI Analysis - 智能分析', path: '/#/app-center/master_analysis/ai-analysis' },
-  { name: 'Promptlab - 提示词实验室', path: '/#/app-center/master_analysis/promptlab' },
+  { name: 'Scraper - 数据采集', path: '/#/app-center/master-analysis/scraper' },
+  { name: 'AI Analysis - 智能分析', path: '/#/app-center/master-analysis/ai-analysis' },
+  { name: 'Promptlab - 提示词实验室', path: '/#/app-center/master-analysis/promptlab' },
   { name: 'Playground - Deep Chat', path: '/#/app-center/playground/deep-chat' },
   { name: 'Keyword Hunter - 输入', path: '/#/app-center/keyword-hunter/input' },
   { name: 'Keyword Hunter - 处理', path: '/#/app-center/keyword-hunter/process' },
