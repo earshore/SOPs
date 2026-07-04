@@ -106,7 +106,7 @@ function configureDeepChatSubmitButtonStyles(chat: DeepChatElement): void {
     submit: {
       container: {
         borderRadius: '999px',
-        backgroundColor: 'var(--playground-accent, #334155)',
+        backgroundColor: 'var(--playground-accent, #a85f3f)',
         width: '34px',
         height: '34px',
       },
@@ -155,7 +155,7 @@ function configureDeepChatMessageStyles(chat: DeepChatElement): void {
       },
       user: {
         bubble: {
-          backgroundColor: 'var(--playground-accent-soft, #f8fafc)',
+          backgroundColor: 'var(--playground-accent-soft, #faf3ee)',
           color: '#0f172a',
           border: '0',
           borderRadius: '18px',

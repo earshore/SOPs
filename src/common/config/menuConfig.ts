@@ -160,7 +160,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0',
       icon: 'fas fa-paper-plane',
       description: '轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。',
-      themeColor: 'slate',
+      themeColor: 'orange',
     },
 
     // Keyword Tracker 模块配置
@@ -172,7 +172,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0 Pro',
       icon: 'fas fa-search',
       description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。',
-      themeColor: 'fuchsia', // ✅ 紫红色 - 鲜艳醒目的搜索主题
+      themeColor: 'rose', // ✅ 玫红色 - 鲜艳醒目的搜索主题
     },
 
     // PPC Tools 模块配置
@@ -182,7 +182,7 @@ export const MENU_CONFIG: MenuConfig = {
       parentModuleId: 'app_center',
       title: 'PPC Tools',
       version: 'v1.0',
-      icon: 'fas fa-magnifying-glass-dollar',
+      icon: 'fas fa-bullhorn',
       description: '广告搜索词报表分析、否词与加词建议工具。',
       themeColor: 'emerald',
     },
@@ -317,7 +317,7 @@ export const MENU_CONFIG: MenuConfig = {
     master_analysis: {
       id: 'master_analysis',
       label: 'Master Analysis',
-      icon: 'fas fa-robot',
+      icon: 'fas fa-cubes-stacked',
       color: 'indigo', // ✅ 靛蓝色，与模块主题色一致
       order: 1,
       version: 'v2.1 Pro',
@@ -327,7 +327,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'playground',
       label: 'Playground',
       icon: 'fas fa-paper-plane',
-      color: 'slate',
+      color: 'orange',
       order: 2,
       version: 'v1.0',
       description: '轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。',
@@ -336,7 +336,7 @@ export const MENU_CONFIG: MenuConfig = {
       id: 'keyword_tracker',
       label: 'Keyword Hunter',
       icon: 'fas fa-search',
-      color: 'fuchsia', // ✅ 紫红色，与模块主题色一致
+      color: 'rose', // 与应用总览的 Keyword Hunter 玫红主视觉保持一致
       order: 3,
       version: 'v1.0 Pro',
       description: 'ASIN 关键词覆盖情况查询，手动补充与 SEO 合规性审查工具。',
@@ -344,7 +344,7 @@ export const MENU_CONFIG: MenuConfig = {
     ppc_tools: {
       id: 'ppc_tools',
       label: 'PPC Tools',
-      icon: 'fas fa-magnifying-glass-dollar',
+      icon: 'fas fa-bullhorn',
       color: 'emerald',
       order: 4,
       version: 'v1.0',

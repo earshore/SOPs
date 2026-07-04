@@ -505,10 +505,10 @@
   --color-border-light: var(--color-indigo-100);
 }
 
-.app-card-violet {
-  --color-accent: var(--color-purple-500);
-  --color-bg-selected: var(--color-fuchsia-50);
-  --color-border-light: var(--color-pink-100);
+.app-card-rose {
+  --color-accent: var(--color-rose-600);
+  --color-bg-selected: var(--color-rose-50);
+  --color-border-light: var(--color-rose-100);
 }
 
 .app-card-emerald {
@@ -523,10 +523,10 @@
   --color-border-light: var(--color-cyan-100);
 }
 
-.app-card-slate {
-  --color-accent: var(--color-slate-700);
-  --color-bg-selected: var(--color-slate-100);
-  --color-border-light: var(--color-slate-200);
+.app-card-claude {
+  --color-accent: #a85f3f;
+  --color-bg-selected: #faf3ee;
+  --color-border-light: #ead6c8;
 }
 
 .app-card-head,

@@ -54,7 +54,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     padding: 10px 14px !important;
     border: 0 !important;
     border-radius: 18px !important;
-    background: var(--playground-accent-soft, #f8fafc) !important;
+    background: var(--playground-accent-soft, #faf3ee) !important;
     color: #0f172a !important;
     box-shadow: none !important;
   }
@@ -141,7 +141,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .input-button.inside-end {
-    background: var(--playground-accent, #334155) !important;
+    background: var(--playground-accent, #a85f3f) !important;
     box-shadow: none !important;
   }
 
@@ -342,7 +342,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     align-items: center !important;
     justify-content: center !important;
     border-radius: 50% !important;
-    background: var(--playground-accent, #334155) !important;
+    background: var(--playground-accent, #a85f3f) !important;
     box-shadow: none !important;
   }
 
@@ -354,7 +354,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .inside-end.loading-button:focus-visible,
   .inside-end.disabled-button:hover,
   .inside-end.disabled-button:focus-visible {
-    background: var(--playground-accent-hover, #1e293b) !important;
+    background: var(--playground-accent-hover, #8f4f33) !important;
   }
 
   .inside-end #submit-icon {
@@ -369,7 +369,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     width: 36px !important;
     height: 36px !important;
     border-radius: 50% !important;
-    background: var(--playground-accent, #334155) !important;
+    background: var(--playground-accent, #a85f3f) !important;
     pointer-events: none !important;
   }
 

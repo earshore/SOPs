@@ -18,6 +18,22 @@ describe('UI-P1-08 template semantics', () => {
     expect(html).toContain('aria-describedby="ai-analysis-cache-helper"');
   });
 
+  it('keeps AI Analysis missing-data notice visually aligned with PromptLab report notice', () => {
+    const html = readTemplate(
+      'src/modules/app_center/views/master_analysis/ai_analysis/template.html'
+    );
+
+    expect(html).toContain('还没有可分析的产品数据');
+    expect(html).toContain(
+      '可以先去数据采集页导入 JSON 或采集 ASIN，再回到这里选择产品和分析目标。'
+    );
+    expect(html).toContain('rounded-xl border border-amber-200 bg-amber-50 p-4');
+    expect(html).toContain('font-bold text-amber-900 flex items-center gap-2 text-sm');
+    expect(html).toContain('text-xs text-amber-800/80 mt-1');
+    expect(html).toContain('px-4 py-2 rounded-xl bg-amber-600');
+    expect(html).toContain('fa-solid fa-spider mr-1');
+  });
+
   it('connects PromptLab Product DNA fields to visible labels and helper sources', () => {
     const html = readTemplate(
       'src/modules/app_center/views/master_analysis/promptlab/template.html'

@@ -424,7 +424,7 @@ export const SOP_COLORS = {
  */
 export const APP_COLORS = {
   masterPrompt: 'blue' as ColorSchemeName,
-  keywordHunter: 'purple' as ColorSchemeName,
+  keywordHunter: 'rose' as ColorSchemeName,
   dataAnalysis: 'emerald' as ColorSchemeName,
 } as const;
 

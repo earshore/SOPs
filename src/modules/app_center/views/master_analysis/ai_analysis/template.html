@@ -104,20 +104,20 @@
         </button>
 
         <template x-if="showMissingRealDataNotice &amp;&amp; !showSelectionPanel">
-          <div class="mx-6 mt-4 mb-4 rounded-xl border border-amber-200 bg-amber-50 p-5">
+          <div class="mx-6 mt-4 mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div>
-                <h3 class="font-bold text-amber-900 flex items-center gap-2 text-base">
+                <h3 class="font-bold text-amber-900 flex items-center gap-2 text-sm">
                   <i class="fa-solid fa-circle-info text-amber-600"></i>
                   还没有可分析的产品数据
                 </h3>
-                <p class="text-sm text-amber-800/80 mt-1">
-                  先去数据采集页导入 JSON 或采集 ASIN，再回到这里选择产品和分析目标。
+                <p class="text-xs text-amber-800/80 mt-1">
+                  可以先去数据采集页导入 JSON 或采集 ASIN，再回到这里选择产品和分析目标。
                 </p>
               </div>
               <button type="button" data-action="switch-tab" data-tab="scraper"
-                class="inline-flex min-h-11 items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold transition-colors">
-                <i class="fa-solid fa-spider"></i>去数据采集
+                class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition-colors">
+                <i class="fa-solid fa-spider mr-1"></i>去数据采集
               </button>
             </div>
           </div>

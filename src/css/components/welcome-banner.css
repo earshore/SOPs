@@ -850,6 +850,10 @@
   --wb-tag-dot-color: var(--color-fuchsia-500, #d946ef);
 }
 
+.wb-tag-dot--rose {
+  --wb-tag-dot-color: var(--color-rose-500, #f43f5e);
+}
+
 .wb-tag-dot--green {
   --wb-tag-dot-color: var(--color-emerald-500, #10b981);
 }
