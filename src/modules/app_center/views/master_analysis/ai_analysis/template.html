@@ -1596,10 +1596,9 @@
                 </div>
               </div>
             </template>
-          </div>
-        </div>
-        <!-- Listings 结果 -->
-        <template x-if="hasReportListingsResults">
+            <div class="mt-8 space-y-8">
+              <!-- Listings 结果 -->
+              <template x-if="hasReportListingsResults">
           <div>
             <div class="flex items-center gap-4 mb-6">
               <div
@@ -1778,9 +1777,9 @@
               </template>
             </div>
           </div>
-        </template>
-        <!-- Reviews 结果 -->
-        <template x-if="hasReportReviewsResults">
+              </template>
+              <!-- Reviews 结果 -->
+              <template x-if="hasReportReviewsResults">
           <div>
             <div class="flex items-center gap-4 mb-6">
               <div
@@ -1959,7 +1958,10 @@
               </template>
             </div>
           </div>
-        </template>
+              </template>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
     <!-- 空状态 -->
