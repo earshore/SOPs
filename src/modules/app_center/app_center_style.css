@@ -92,10 +92,15 @@
 .app-overview-container {
   /* UI-P1-04: app overview 局部 token 必须映射到全局 token，登记见 docs/THEME_SYSTEM_GUIDELINES.md §6.1。 */
   color: var(--app-overview-text-primary);
-  --app-overview-accent: var(--color-cyan-700);
-  --app-overview-accent-strong: var(--color-cyan-800);
-  --app-overview-accent-soft: var(--color-cyan-100);
-  --app-overview-accent-surface: var(--color-cyan-50);
+  --app-overview-deepseek-blue: #4d6bfe;
+  --app-overview-deepseek-blue-mid: #3982ff;
+  --app-overview-deepseek-blue-light: #2498ff;
+  --app-overview-deepseek-blue-strong: #3151e8;
+  --app-overview-deepseek-blue-dark: #2746d3;
+  --app-overview-accent: var(--app-overview-deepseek-blue-strong);
+  --app-overview-accent-strong: var(--app-overview-deepseek-blue-dark);
+  --app-overview-accent-soft: #dfe7ff;
+  --app-overview-accent-surface: #f3f6ff;
   --app-overview-accent-border: color-mix(in srgb, var(--app-overview-accent) 18%, transparent);
   --app-overview-border: var(--border-subtle, rgba(148, 163, 184, 0.24));
   --app-overview-border-strong: var(--border-muted, rgba(203, 213, 225, 0.72));
@@ -131,13 +136,13 @@
       135deg,
       color-mix(in srgb, var(--app-overview-accent-surface) 98%, transparent),
       color-mix(in srgb, var(--app-overview-surface) 94%, transparent) 52%,
-      color-mix(in srgb, var(--color-sky-100, #e0f2fe) 86%, transparent)
+      color-mix(in srgb, var(--app-overview-deepseek-blue-light) 12%, var(--app-overview-surface))
     ) !important;
   box-shadow: var(--app-overview-shadow) !important;
   overflow: hidden;
-  --wb-orb-1-color: color-mix(in srgb, var(--color-cyan-500, #06b6d4) 13%, transparent);
-  --wb-orb-2-color: color-mix(in srgb, var(--color-sky-500, #0ea5e9) 10%, transparent);
-  --wb-orb-3-color: color-mix(in srgb, var(--color-sky-600, #0284c7) 8%, transparent);
+  --wb-orb-1-color: color-mix(in srgb, var(--app-overview-deepseek-blue) 13%, transparent);
+  --wb-orb-2-color: color-mix(in srgb, var(--app-overview-deepseek-blue-mid) 10%, transparent);
+  --wb-orb-3-color: color-mix(in srgb, var(--app-overview-deepseek-blue-light) 8%, transparent);
   --wb-particle-color: color-mix(in srgb, var(--app-overview-accent) 42%, transparent);
   --wb-text-primary: var(--app-overview-text-primary) !important;
   --wb-text-secondary: var(--app-overview-text-secondary) !important;
@@ -186,7 +191,12 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--rounded-md, 8px) !important;
-  background: linear-gradient(135deg, var(--color-cyan-600), var(--color-blue-700)) !important;
+  background: linear-gradient(
+    135deg,
+    var(--app-overview-deepseek-blue-strong),
+    var(--app-overview-deepseek-blue),
+    var(--app-overview-deepseek-blue-mid)
+  ) !important;
   color: var(--color-primary-contrast, #ffffff);
   box-shadow: var(--wb-icon-shadow) !important;
 }
@@ -243,7 +253,11 @@
   width: 0.45rem;
   height: 0.45rem;
   border-radius: var(--app-overview-pill-radius);
-  background: linear-gradient(135deg, var(--color-cyan-600), var(--color-blue-700));
+  background: linear-gradient(
+    135deg,
+    var(--app-overview-deepseek-blue),
+    var(--app-overview-deepseek-blue-light)
+  );
 }
 
 .app-overview-flow,
@@ -337,9 +351,9 @@
 
 .app-flow-step.app-child-link {
   --card-left-accent: currentColor;
-  --card-left-accent-bg: var(--color-cyan-50);
+  --card-left-accent-bg: var(--app-overview-accent-surface);
   --overview-card-accent: currentColor;
-  --overview-card-accent-bg: var(--color-cyan-50);
+  --overview-card-accent-bg: var(--app-overview-accent-surface);
   --overview-card-border: var(--app-overview-border-strong);
   --overview-card-transition-duration: 180ms;
 
@@ -347,7 +361,7 @@
   justify-content: flex-start;
   min-height: 7rem;
   padding: 1rem;
-  color: var(--color-cyan-600);
+  color: var(--app-overview-accent);
   text-align: left;
 }
 
@@ -393,9 +407,9 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--rounded-lg, 12px);
-  border: 1px solid var(--color-cyan-100);
-  background: var(--color-cyan-50);
-  color: var(--color-cyan-600);
+  border: 1px solid var(--app-overview-accent-border);
+  background: var(--app-overview-accent-surface);
+  color: var(--app-overview-accent);
 }
 
 .app-flow-step.app-child-link:nth-child(1) .app-flow-icon {
@@ -481,9 +495,9 @@
 }
 
 .app-overview-card {
-  --color-accent: var(--color-cyan-600);
-  --color-bg-selected: var(--color-cyan-50);
-  --color-border-light: var(--color-cyan-100);
+  --color-accent: var(--app-overview-accent);
+  --color-bg-selected: var(--app-overview-accent-surface);
+  --color-border-light: var(--app-overview-accent-border);
   --card-left-accent: var(--color-accent);
   --card-left-accent-bg: var(--color-bg-selected);
   --overview-card-accent: var(--color-accent);

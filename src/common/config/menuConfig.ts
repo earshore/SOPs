@@ -136,7 +136,7 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0',
       icon: 'fas fa-cubes',
       description: '集成多个专业工具的应用中心，提供数据采集、分析与优化功能。',
-      themeColor: 'cyan', // ✅ 青色 - 应用中心容器主题，避开 Keyword Hunter 紫红色
+      themeColor: 'blue', // ✅ DeepSeek 蓝 - 应用中心容器主题
     },
 
     // [应用 A] Master Analysis
