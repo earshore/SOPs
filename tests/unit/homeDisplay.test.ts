@@ -8,18 +8,18 @@ const homeTemplate = `
       <div class="slogan-line highlight">规范流程</div>
       <div class="slogan-line outline">无限可能</div>
     </div>
-    <aside class="floating-workbench" aria-label="浮动工作台">
+    <aside class="floating-workbench" aria-label="应用中心快捷入口">
       <button type="button" class="floating-workbench__trigger" aria-expanded="false"
-        aria-controls="home-floating-workbench-actions" aria-label="展开浮动工作台" title="工作台">
-        <i class="fas fa-layer-group" aria-hidden="true"></i>
-        <span class="sr-only">工作台</span>
+        aria-controls="home-floating-workbench-actions" aria-label="展开应用中心快捷入口" title="应用中心">
+        <i class="fas fa-cubes" aria-hidden="true"></i>
+        <span class="sr-only">应用中心</span>
       </button>
-      <div id="home-floating-workbench-actions" class="floating-workbench__actions" aria-label="高频工作入口"
+      <div id="home-floating-workbench-actions" class="floating-workbench__actions" aria-label="应用中心应用快捷入口"
         aria-hidden="true" inert>
-        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="ppc_search_terms" aria-label="打开 PPC 搜索词">PPC 搜索词</button>
-        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="sops_npi_tracker" aria-label="打开新品跟踪">新品跟踪</button>
-        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="sops_listing_seo" aria-label="打开 Listing SEO">Listing SEO</button>
-        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="playground" aria-label="打开 Deep Chat">Deep Chat</button>
+        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="scraper" aria-label="打开 Master Analysis">Master Analysis</button>
+        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="playground" aria-label="打开 Playground">Playground</button>
+        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="kw_input" aria-label="打开 Keyword Hunter">Keyword Hunter</button>
+        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="ppc_search_terms" aria-label="打开 PPC Tools">PPC Tools</button>
       </div>
     </aside>
   </div>
@@ -101,7 +101,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-it('mounts the full home splash with particles, hero copy, floating workbench, and time', async () => {
+it('mounts the full home splash with particles, hero copy, app center shortcuts, and time', async () => {
   const container = document.createElement('main');
   document.body.append(container);
   const { mount, unmount, loadTemplate } = await importHomeDisplay();
@@ -117,11 +117,13 @@ it('mounts the full home splash with particles, hero copy, floating workbench, a
   expect(container.textContent).toContain('规范流程');
   expect(container.textContent).toContain('无限可能');
   expect(container.querySelector('.floating-workbench')).not.toBeNull();
-  expect(container.querySelector('.floating-workbench__trigger')?.textContent).toContain('工作台');
-  expect(container.querySelector('.floating-workbench__trigger')).toBeInstanceOf(HTMLButtonElement);
-  expect(container.querySelector('.floating-workbench__trigger')?.getAttribute('aria-expanded')).toBe(
-    'false'
+  expect(container.querySelector('.floating-workbench__trigger')?.textContent).toContain(
+    '应用中心'
   );
+  expect(container.querySelector('.floating-workbench__trigger')).toBeInstanceOf(HTMLButtonElement);
+  expect(
+    container.querySelector('.floating-workbench__trigger')?.getAttribute('aria-expanded')
+  ).toBe('false');
   expect(container.querySelector('.floating-workbench__actions')?.getAttribute('aria-hidden')).toBe(
     'true'
   );
@@ -134,14 +136,7 @@ it('mounts the full home splash with particles, hero copy, floating workbench, a
     .map(element => element.dataset.tab)
     .filter(Boolean);
 
-  expect(routeIds).toEqual(
-    expect.arrayContaining([
-      'ppc_search_terms',
-      'sops_npi_tracker',
-      'sops_listing_seo',
-      'playground',
-    ])
-  );
+  expect(routeIds).toEqual(['scraper', 'playground', 'kw_input', 'ppc_search_terms']);
 
   const workbench = container.querySelector<HTMLElement>('.floating-workbench');
   const trigger = container.querySelector<HTMLButtonElement>('.floating-workbench__trigger');

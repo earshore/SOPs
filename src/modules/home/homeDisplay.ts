@@ -233,7 +233,10 @@ class HomeModule extends BaseModule {
     state.currentExpanded = expanded;
     elements.workbench.classList.toggle('is-expanded', expanded);
     elements.trigger.setAttribute('aria-expanded', String(expanded));
-    elements.trigger.setAttribute('aria-label', expanded ? '收起浮动工作台' : '展开浮动工作台');
+    elements.trigger.setAttribute(
+      'aria-label',
+      expanded ? '收起应用中心快捷入口' : '展开应用中心快捷入口'
+    );
     elements.actions.setAttribute('aria-hidden', String(!expanded));
     elements.actions.toggleAttribute('inert', !expanded);
   }
