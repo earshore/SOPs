@@ -330,24 +330,24 @@
   font-size: 11px;
 }
 
-.mega-menu-icon--sky {
-  background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-  color: #0284c7;
+.mega-menu-icon--sops {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #1d4ed8;
 }
 
-.mega-menu-icon--purple {
-  background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
-  color: #9333ea;
+.mega-menu-icon--apps {
+  background: linear-gradient(135deg, #edf2ff, #dfe7ff);
+  color: #3151e8;
 }
 
-.mega-menu-icon--orange {
+.mega-menu-icon--hub {
   background: linear-gradient(135deg, #fff7ed, #fed7aa);
-  color: #ea580c;
+  color: #9a3412;
 }
 
-.mega-menu-icon--lime {
+.mega-menu-icon--more {
   background: linear-gradient(135deg, #f0fdf4, #bbf7d0);
-  color: #16a34a;
+  color: #166534;
 }
 
 .mega-menu-title {
