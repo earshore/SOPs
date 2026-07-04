@@ -7,12 +7,14 @@ export const moreManifest = defineModuleManifest({
     {
       key: 'OVERVIEW',
       routeId: 'more_overview',
+      path: '/more',
       label: '更多总览',
       icon: 'fas fa-th-large',
     },
     {
       key: 'AGENTS',
       routeId: 'more_agents',
+      path: '/more/explore/agents',
       label: '智能体',
       icon: 'fas fa-robot',
       category: 'explore',
@@ -20,6 +22,7 @@ export const moreManifest = defineModuleManifest({
     {
       key: 'PROMPTS',
       routeId: 'more_prompts',
+      path: '/more/explore/prompts',
       label: '提示词',
       icon: 'fas fa-message',
       category: 'explore',
@@ -27,6 +30,7 @@ export const moreManifest = defineModuleManifest({
     {
       key: 'WORKFLOWS',
       routeId: 'more_workflows',
+      path: '/more/explore/workflows',
       label: '工作流',
       icon: 'fas fa-diagram-project',
       category: 'explore',
@@ -34,6 +38,7 @@ export const moreManifest = defineModuleManifest({
     {
       key: 'ZINIAO_USAGE_NOTICE',
       routeId: 'more_ziniao_usage_notice',
+      path: '/more/business-scenarios/usage-notice',
       label: '使用须知',
       icon: 'fas fa-circle-info',
       category: 'business_scenarios',
@@ -41,6 +46,7 @@ export const moreManifest = defineModuleManifest({
     {
       key: 'BAD_REVIEW_RESPONSE',
       routeId: 'more_bad_review_response',
+      path: '/more/business-scenarios/bad-review-response',
       label: '差评响应',
       icon: 'fas fa-bolt',
       category: 'business_scenarios',
@@ -48,6 +54,7 @@ export const moreManifest = defineModuleManifest({
     {
       key: 'AD_ACOS_DIAGNOSIS',
       routeId: 'more_ad_acos_diagnosis',
+      path: '/more/business-scenarios/ad-acos-diagnosis',
       label: '广告诊断',
       icon: 'fas fa-bullseye',
       category: 'business_scenarios',
@@ -55,6 +62,7 @@ export const moreManifest = defineModuleManifest({
     {
       key: 'REVIEW_MONITOR',
       routeId: 'more_review_monitor',
+      path: '/more/business-scenarios/review-monitor',
       label: '评论监控',
       icon: 'fas fa-comments',
       category: 'business_scenarios',
@@ -62,6 +70,7 @@ export const moreManifest = defineModuleManifest({
     {
       key: 'AMAZON_DAILY_REPORT',
       routeId: 'more_amazon_daily_report',
+      path: '/more/business-scenarios/amazon-daily-report',
       label: '一键日报',
       icon: 'fas fa-chart-line',
       category: 'business_scenarios',

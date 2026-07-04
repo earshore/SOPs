@@ -292,6 +292,7 @@ beforeEach(() => {
     expect(panel.runAnalysisNotRunningIconClass).toContain('rotate-right');
     expect(panel.showRunDisabledHint).toBe(false);
     expect(panel.progressText).toBe('72%');
+    expect(panel.progressAriaValue).toBe(72);
     expect(panel.progressStyle).toBe('width: 72%');
     expect(panel.progressInsightStepClass).toBe('text-white/80');
     expect(panel.reportStatusText).toBe('分析结果');

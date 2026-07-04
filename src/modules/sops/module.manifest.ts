@@ -7,6 +7,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'OVERVIEW',
       routeId: 'sops_overview',
+      path: '/sops',
       label: 'SOP 总览',
       icon: 'fas fa-th-large',
       viewPath: '/src/modules/sops/sops.html',
@@ -14,6 +15,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'NPI_TRACKER',
       routeId: 'sops_npi_tracker',
+      path: '/sops/growth/npi-tracker',
       label: '新品生命周期跟踪',
       icon: 'fas fa-seedling',
       category: 'growth',
@@ -21,6 +23,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'LISTING_SEO',
       routeId: 'sops_listing_seo',
+      path: '/sops/growth/listing-seo',
       label: 'Listing 极致优化 (SEO)',
       icon: 'fas fa-magnifying-glass-chart',
       category: 'growth',
@@ -28,6 +31,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'PPC_ADVERTISING',
       routeId: 'sops_ppc_advertising',
+      path: '/sops/growth/ppc-advertising',
       label: 'PPC 广告投放与优化',
       icon: 'fas fa-chart-line',
       category: 'growth',
@@ -35,6 +39,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'RESTRICTED_WORDS',
       routeId: 'sops_restricted_words',
+      path: '/sops/growth/restricted-words',
       label: '欧洲本土化高危词库',
       icon: 'fas fa-book-dead',
       category: 'growth',
@@ -42,6 +47,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'PROMOTION_SUBMISSION',
       routeId: 'sops_promotion_submission',
+      path: '/sops/growth/promotion-submission',
       label: '促销活动提报',
       icon: 'fas fa-tags',
       category: 'growth',
@@ -49,6 +55,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'COMPETITOR_MONITORING',
       routeId: 'sops_competitor_monitoring',
+      path: '/sops/growth/competitor-monitoring',
       label: '竞品监控与分析',
       icon: 'fas fa-binoculars',
       category: 'growth',
@@ -56,6 +63,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'FBA_SHIPPING',
       routeId: 'sops_fba_shipping',
+      path: '/sops/backend/fba-shipping',
       label: 'FBA 发货标准操作',
       icon: 'fas fa-truck-fast',
       category: 'backend',
@@ -63,6 +71,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'PROCUREMENT_QC',
       routeId: 'sops_procurement_qc',
+      path: '/sops/backend/procurement-qc',
       label: '采购与质检 (QC)',
       icon: 'fas fa-clipboard-check',
       category: 'backend',
@@ -70,6 +79,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'INVENTORY_REPLENISHMENT',
       routeId: 'sops_inventory_replenishment',
+      path: '/sops/backend/inventory-replenishment',
       label: '库存预警与补货',
       icon: 'fas fa-cubes',
       category: 'backend',
@@ -77,6 +87,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'ACCOUNT_SECURITY',
       routeId: 'sops_account_security',
+      path: '/sops/safety/account-security',
       label: '账号登录与环境安全',
       icon: 'fas fa-shield-halved',
       category: 'safety',
@@ -84,6 +95,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'PERMISSION_MANAGEMENT',
       routeId: 'sops_permission_management',
+      path: '/sops/safety/permission-management',
       label: '后台权限管理',
       icon: 'fas fa-user-lock',
       category: 'safety',
@@ -91,6 +103,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'BRAND_INFRINGEMENT',
       routeId: 'sops_brand_infringement',
+      path: '/sops/safety/brand-infringement',
       label: '品牌与侵权审核',
       icon: 'fas fa-trademark',
       category: 'safety',
@@ -98,6 +111,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'PERFORMANCE_NOTIFICATION',
       routeId: 'sops_performance_notification',
+      path: '/sops/safety/performance-notification',
       label: '绩效通知处理',
       icon: 'fas fa-bell',
       category: 'safety',
@@ -105,6 +119,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'PRODUCT_COMPLIANCE',
       routeId: 'sops_product_compliance',
+      path: '/sops/safety/product-compliance',
       label: '敏感产品合规销售',
       icon: 'fas fa-file-shield',
       category: 'safety',
@@ -112,6 +127,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'EU_GPSR_COMPLIANCE',
       routeId: 'sops_eu_gpsr_compliance',
+      path: '/sops/safety/eu-gpsr-compliance',
       label: '欧洲GPSR合规',
       icon: 'fa-solid fa-shield-dog',
       category: 'safety',
@@ -119,6 +135,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'EMAIL_TEMPLATES',
       routeId: 'sops_email_templates',
+      path: '/sops/service/email-templates',
       label: '邮件回复模板',
       icon: 'fas fa-envelope-open-text',
       category: 'service',
@@ -126,6 +143,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'NEGATIVE_REVIEW',
       routeId: 'sops_negative_review',
+      path: '/sops/service/negative-review',
       label: '差评处理与分析',
       icon: 'fas fa-comment-dots',
       category: 'service',
@@ -133,6 +151,7 @@ export const sopsManifest = defineModuleManifest({
     {
       key: 'QA_MAINTENANCE',
       routeId: 'sops_qa_maintenance',
+      path: '/sops/service/qa-maintenance',
       label: 'QA 问答维护',
       icon: 'fas fa-comments',
       category: 'service',

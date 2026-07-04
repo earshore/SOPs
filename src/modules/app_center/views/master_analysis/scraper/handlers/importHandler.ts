@@ -29,6 +29,7 @@ interface ImportCollectionContext {
 
 interface MarketplaceSelectionElements {
   backdrop: HTMLDivElement;
+  dialogPanel: HTMLElement | null;
   btnConfirm: HTMLButtonElement | null;
   btnCancel: HTMLButtonElement | null;
 }
@@ -293,18 +294,30 @@ const MARKETPLACE_SITE_NAME_MAP: Record<string, string> = {
   UK: '英国',
 };
 
+function getPreviousActiveElement(): HTMLElement | null {
+  return document.activeElement instanceof HTMLElement ? document.activeElement : null;
+}
+
 function createMarketplaceSelectionContent(sites: string[], modalId: string): string {
+  const titleId = `${modalId}-title`;
+  const descriptionId = `${modalId}-description`;
+
   return `
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="${titleId}"
+                aria-describedby="${descriptionId}"
+                tabindex="-1">
                 <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-5 text-white">
-                    <h3 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-globe"></i> 检测到多站点数据
+                    <h3 id="${titleId}" class="text-lg font-bold flex items-center gap-2">
+                        <i class="fas fa-globe" aria-hidden="true"></i> 检测到多站点数据
                     </h3>
                     <p class="text-blue-100 text-xs mt-1">您导入的文件包含多个市场的数据 (${sites.join(', ')})</p>
                 </div>
                 
                 <div class="p-6">
-                    <p class="text-slate-600 text-sm mb-4 font-medium">
+                    <p id="${descriptionId}" class="text-slate-600 text-sm mb-4 font-medium">
                         请选择一个<span class="text-blue-600 font-bold">主站点</span>：
                         <br/><span class="text-xs text-slate-400 font-normal">我们将保留主站点的标题、五点描述、Review，并自动合并其他站点的Review。</span>
                     </p>
@@ -327,10 +340,10 @@ function createMarketplaceSelectionContent(sites: string[], modalId: string): st
                     </div>
 
                     <div class="flex justify-end gap-3">
-                        <button id="btn-cancel-${modalId}" class="px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors">
+                        <button type="button" id="btn-cancel-${modalId}" class="px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors">
                             取消导入
                         </button>
-                        <button id="btn-confirm-${modalId}" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:scale-95">
+                        <button type="button" id="btn-confirm-${modalId}" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:scale-95">
                             确认合并
                         </button>
                     </div>
@@ -360,6 +373,7 @@ function renderMarketplaceSelectionElements(
 
   return {
     backdrop,
+    dialogPanel: backdrop.querySelector('[role="dialog"]') as HTMLElement | null,
     btnConfirm: document.getElementById(`btn-confirm-${modalId}`) as HTMLButtonElement | null,
     btnCancel: document.getElementById(`btn-cancel-${modalId}`) as HTMLButtonElement | null,
   };
@@ -383,7 +397,7 @@ function getSelectedMarketplace(backdrop: HTMLElement): string | null {
 }
 
 function hasRequiredMarketplaceControls(elements: MarketplaceSelectionElements): boolean {
-  return Boolean(elements.btnConfirm && elements.btnCancel);
+  return Boolean(elements.dialogPanel && elements.btnConfirm && elements.btnCancel);
 }
 
 function createMarketplaceSelectionResolver(
@@ -407,7 +421,8 @@ function createMarketplaceSelectionCleanup(
     cancel: (e: Event) => void;
     backdropClick: (e: MouseEvent) => void;
     escape: (e: KeyboardEvent) => void;
-  }
+  },
+  previousActiveElement: HTMLElement | null
 ): MarketplaceSelectionCleanup {
   return () => {
     elements.btnConfirm?.removeEventListener('click', handlers.confirm);
@@ -415,12 +430,17 @@ function createMarketplaceSelectionCleanup(
     elements.backdrop.removeEventListener('click', handlers.backdropClick);
     document.removeEventListener('keydown', handlers.escape);
     removeMarketplaceBackdrop(elements.backdrop);
+
+    if (previousActiveElement?.isConnected) {
+      previousActiveElement.focus();
+    }
   };
 }
 
 function bindMarketplaceSelectionEvents(
   elements: MarketplaceSelectionElements,
-  finish: MarketplaceSelectionFinish
+  finish: MarketplaceSelectionFinish,
+  previousActiveElement: HTMLElement | null
 ): MarketplaceSelectionCleanup {
   const handlers = {
     confirm: (e: Event) => {
@@ -450,7 +470,7 @@ function bindMarketplaceSelectionEvents(
   elements.backdrop.addEventListener('click', handlers.backdropClick);
   document.addEventListener('keydown', handlers.escape);
 
-  return createMarketplaceSelectionCleanup(elements, handlers);
+  return createMarketplaceSelectionCleanup(elements, handlers, previousActiveElement);
 }
 
 function openMarketplaceSelectionModal(
@@ -458,8 +478,16 @@ function openMarketplaceSelectionModal(
   resolve: (selected: string | null) => void
 ): void {
   const modalId = 'site-select-modal-' + Date.now();
+  const previousActiveElement = getPreviousActiveElement();
   const elements = renderMarketplaceSelectionElements(sites, modalId);
-  const cleanupRef = { current: () => removeMarketplaceBackdrop(elements.backdrop) };
+  const cleanupRef = {
+    current: () => {
+      removeMarketplaceBackdrop(elements.backdrop);
+      if (previousActiveElement?.isConnected) {
+        previousActiveElement.focus();
+      }
+    },
+  };
   const finish = createMarketplaceSelectionResolver(resolve, cleanupRef);
 
   if (!hasRequiredMarketplaceControls(elements)) {
@@ -468,7 +496,8 @@ function openMarketplaceSelectionModal(
     return;
   }
 
-  cleanupRef.current = bindMarketplaceSelectionEvents(elements, finish);
+  cleanupRef.current = bindMarketplaceSelectionEvents(elements, finish, previousActiveElement);
+  requestAnimationFrame(() => elements.btnCancel?.focus());
 }
 
 /**

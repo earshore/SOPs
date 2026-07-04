@@ -199,7 +199,6 @@ class HomeModule extends BaseModule {
     if (!workbench || !trigger || !actions) return;
 
     let pinnedExpanded = false;
-    let hoverExpanded = false;
     let currentExpanded = false;
 
     const setExpanded = (expanded: boolean): void => {
@@ -211,29 +210,21 @@ class HomeModule extends BaseModule {
       actions.toggleAttribute('inert', !expanded);
     };
 
-    const syncExpandedState = (): void => {
-      setExpanded(pinnedExpanded || hoverExpanded);
-    };
-
     setExpanded(false);
-
-    this.addEventListener(workbench, 'mouseenter', () => {
-      hoverExpanded = true;
-      syncExpandedState();
-    });
-
-    this.addEventListener(workbench, 'mouseleave', () => {
-      hoverExpanded = false;
-      syncExpandedState();
-    });
 
     this.addEventListener(trigger, 'click', event => {
       event.stopPropagation();
       pinnedExpanded = !pinnedExpanded;
-      if (!pinnedExpanded) {
-        hoverExpanded = false;
-      }
-      syncExpandedState();
+      setExpanded(pinnedExpanded);
+    });
+
+    this.addEventListener(actions, 'click', event => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (!target.closest('.floating-workbench__item, [data-action="switch-tab"]')) return;
+
+      pinnedExpanded = false;
+      setExpanded(false);
     });
 
     this.addEventListener(document, 'click', event => {
@@ -241,8 +232,7 @@ class HomeModule extends BaseModule {
       if (target instanceof Node && workbench.contains(target)) return;
 
       pinnedExpanded = false;
-      hoverExpanded = false;
-      syncExpandedState();
+      setExpanded(false);
     });
 
     this.addEventListener(document, 'keydown', event => {
@@ -251,8 +241,7 @@ class HomeModule extends BaseModule {
       if (!currentExpanded) return;
 
       pinnedExpanded = false;
-      hoverExpanded = false;
-      syncExpandedState();
+      setExpanded(false);
       trigger.focus();
     });
   }

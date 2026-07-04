@@ -83,12 +83,39 @@ const mocks = vi.hoisted(() => ({
       <button id="ppc-export-negative" type="button"></button>
       <button id="ppc-export-harvest" type="button"></button>
       <button id="ppc-copy-summary" type="button"></button>
-      <input id="ppc-action-search" type="search" aria-describedby="ppc-result-count" />
+      <input id="ppc-action-search" type="search" aria-describedby="ppc-result-count ppc-table-help" />
       <button id="ppc-action-search-clear" type="button"></button>
       <div id="ppc-filter-buttons"></div>
+      <h2 id="ppc-results-title">动作清单</h2>
       <p id="ppc-result-count"></p>
       <div id="ppc-empty-state"><div id="ppc-empty-title"></div><p id="ppc-empty-description"></p></div>
-      <div id="ppc-table-wrapper" class="hidden"><table><thead><tr><th id="ppc-object-header"></th></tr></thead><tbody id="ppc-results-body"></tbody></table></div>
+      <div
+        id="ppc-table-wrapper"
+        class="hidden"
+        role="region"
+        aria-labelledby="ppc-results-title"
+        aria-describedby="ppc-result-count ppc-table-help"
+        tabindex="0"
+      >
+        <p id="ppc-table-help">表格支持横向滚动；按搜索词、动作和核心广告指标查看建议。</p>
+        <table aria-labelledby="ppc-results-title" aria-describedby="ppc-result-count ppc-table-help">
+          <caption class="sr-only">PPC 搜索词动作清单</caption>
+          <thead>
+            <tr>
+              <th id="ppc-object-header" scope="col">搜索词</th>
+              <th scope="col">动作</th>
+              <th scope="col">花费</th>
+              <th scope="col">销售额</th>
+              <th scope="col">订单</th>
+              <th scope="col">ACOS</th>
+              <th scope="col">CTR</th>
+              <th scope="col">CVR</th>
+              <th scope="col">原因</th>
+            </tr>
+          </thead>
+          <tbody id="ppc-results-body"></tbody>
+        </table>
+      </div>
     </div>
   `,
 }));
@@ -292,9 +319,26 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     expect(container.querySelector('#ppc-file-input')?.getAttribute('aria-describedby')).toContain(
       'ppc-file-name'
     );
-    expect(container.querySelector('#ppc-action-search')?.getAttribute('aria-describedby')).toBe(
-      'ppc-result-count'
-    );
+    const actionSearchDescription = container
+      .querySelector('#ppc-action-search')
+      ?.getAttribute('aria-describedby');
+    expect(actionSearchDescription).toContain('ppc-result-count');
+    expect(actionSearchDescription).toContain('ppc-table-help');
+    const tableWrapper = container.querySelector<HTMLElement>('#ppc-table-wrapper');
+    const table = container.querySelector<HTMLTableElement>('.ppc-results-table, table');
+    expect(tableWrapper?.getAttribute('role')).toBe('region');
+    expect(tableWrapper?.getAttribute('aria-labelledby')).toBe('ppc-results-title');
+    expect(tableWrapper?.getAttribute('aria-describedby')).toBe('ppc-result-count ppc-table-help');
+    expect(tableWrapper?.tabIndex).toBe(0);
+    expect(container.querySelector('#ppc-table-help')?.textContent).toContain('横向滚动');
+    expect(table?.getAttribute('aria-labelledby')).toBe('ppc-results-title');
+    expect(table?.getAttribute('aria-describedby')).toBe('ppc-result-count ppc-table-help');
+    expect(table?.querySelector('caption')?.textContent).toContain('PPC 搜索词动作清单');
+    expect(
+      Array.from(container.querySelectorAll('#ppc-table-wrapper th')).every(
+        header => header.getAttribute('scope') === 'col'
+      )
+    ).toBe(true);
 
     container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
     container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();

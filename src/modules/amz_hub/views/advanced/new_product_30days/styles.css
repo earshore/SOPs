@@ -67,3 +67,9 @@
     box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36)) !important;
   }
 }
+
+.np30_prompt_block {
+  overflow-x: auto;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}

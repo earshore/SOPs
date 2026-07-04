@@ -137,9 +137,9 @@ export function initializeRouter(): {
 
   // 预加载高频路由
   const highFrequencyRoutes = [
-    '/sops/overview',
-    '/app_center/overview',
-    '/amz_hub/overview'
+    '/sops',
+    '/app-center',
+    '/amz-hub'
   ];
 
   // 空闲时预加载

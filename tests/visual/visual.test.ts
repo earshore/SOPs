@@ -36,16 +36,16 @@ import {
 const APP_ROUTES = {
   home: '/',
   appCenterOverview: '/#/app-center',
-  promptlab: '/#/app-center/promptlab',
-  aiAnalysis: '/#/app-center/ai-analysis',
-  scraper: '/#/app-center/scraper',
-  ppcSearchTerms: '/#/app-center/ppc-search-terms',
+  promptlab: '/#/app-center/master_analysis/promptlab',
+  aiAnalysis: '/#/app-center/master_analysis/ai-analysis',
+  scraper: '/#/app-center/master_analysis/scraper',
+  ppcSearchTerms: '/#/app-center/ppc_tools/ppc-search-terms',
   keywordHunterInput: '/#/app-center/keyword-hunter/input',
-  npiTracker: '/#/sops_npi_tracker',
-  restrictedWords: '/#/sops_restricted_words',
-  hubOverview: '/#/amz_hub_overview',
-  moreOverview: '/#/more_overview',
-  marketingCalendar: '/#/amz_marketing_calendar',
+  npiTracker: '/#/sops/growth/npi-tracker',
+  restrictedWords: '/#/sops/growth/restricted-words',
+  hubOverview: '/#/amz-hub',
+  moreOverview: '/#/more',
+  marketingCalendar: '/#/amz-hub/practice/marketing-calendar',
 } as const;
 
 /**

@@ -11,6 +11,16 @@
   border-radius: 8px;
 }
 
+.ppc-table-help {
+  margin: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgb(226, 232, 240);
+  background: rgba(248, 250, 252, 0.72);
+  color: var(--ppc-text-secondary, #475569);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .ppc-results-table thead tr {
   background: var(--color-slate-50);
 }

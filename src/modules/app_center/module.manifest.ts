@@ -14,7 +14,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'SCRAPER',
       routeId: 'scraper',
-      path: '/app-center/scraper',
+      path: '/app-center/master_analysis/scraper',
       moduleId: 'master_analysis',
       label: '数据采集',
       icon: 'fas fa-spider',
@@ -23,7 +23,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'AI_ANALYSIS',
       routeId: 'ai_analysis',
-      path: '/app-center/ai-analysis',
+      path: '/app-center/master_analysis/ai-analysis',
       moduleId: 'master_analysis',
       label: 'AI智能分析',
       icon: 'fas fa-brain',
@@ -32,7 +32,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'PROMPTLAB',
       routeId: 'promptlab',
-      path: '/app-center/promptlab',
+      path: '/app-center/master_analysis/promptlab',
       moduleId: 'master_analysis',
       label: 'Prompt 生成',
       icon: 'fas fa-wand-magic-sparkles',
@@ -83,7 +83,7 @@ export const appCenterManifest = defineModuleManifest({
     {
       key: 'PPC_SEARCH_TERMS',
       routeId: 'ppc_search_terms',
-      path: '/app-center/ppc-search-terms',
+      path: '/app-center/ppc_tools/ppc-search-terms',
       moduleId: 'ppc_tools',
       label: 'PPC 搜索词分析器',
       icon: 'fas fa-magnifying-glass-dollar',

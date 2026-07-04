@@ -194,29 +194,37 @@
         </div>
         <!-- ========== ACOS/TACoS 阶段目标 ========== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="ppc-stage-goals-table-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-chart-area text-emerald-500"></i>分阶段目标：ACOS / TACoS / 自然单占比
                 </h2>
-                <div class="overflow-x-auto">
-                        <table class="w-full text-sm border-collapse">
+                <p id="ppc-stage-goals-table-help" class="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 mb-3">
+                        表格支持横向滚动；按投放阶段查看时间、ACOS/TACoS 目标、自然单占比和核心任务。
+                </p>
+                <div id="ppc-stage-goals-table-wrapper" class="overflow-x-auto" tabindex="0" role="region"
+                        aria-labelledby="ppc-stage-goals-table-title"
+                        aria-describedby="ppc-stage-goals-table-help">
+                        <table id="ppc-stage-goals-table" class="w-full text-sm border-collapse"
+                                aria-labelledby="ppc-stage-goals-table-title"
+                                aria-describedby="ppc-stage-goals-table-help">
+                                <caption class="sr-only">PPC 分阶段目标表</caption>
                                 <thead>
                                         <tr class="bg-emerald-100">
-                                                <th class="border border-emerald-200 px-3 py-2 text-left">阶段</th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-center">时间</th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-center">ACOS 目标</th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-center">TACoS 目标
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-left">阶段</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-center">时间</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-center">ACOS 目标</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-center">TACoS 目标
                                                 </th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-center">自然单占比</th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-left">核心任务</th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-left">心态</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-center">自然单占比</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-left">核心任务</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-left">心态</th>
                                         </tr>
                                 </thead>
                                 <tbody>
                                         <tr class="bg-blue-50">
-                                                <td class="border border-slate-200 px-3 py-2 font-bold">
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">
                                                         <span
                                                                 class="px-2 py-0.5 bg-blue-500 text-white rounded text-xs">冲刺期</span>
-                                                </td>
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">Week 1-2</td>
                                                 <td
                                                         class="border border-slate-200 px-3 py-2 text-center font-bold text-blue-600">
@@ -231,10 +239,10 @@
                                                         花钱买数据</td>
                                         </tr>
                                         <tr class="bg-emerald-50">
-                                                <td class="border border-slate-200 px-3 py-2 font-bold">
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">
                                                         <span
                                                                 class="px-2 py-0.5 bg-emerald-500 text-white rounded text-xs">推广期</span>
-                                                </td>
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">Week 3-12</td>
                                                 <td
                                                         class="border border-slate-200 px-3 py-2 text-center font-bold text-emerald-600">
@@ -249,10 +257,10 @@
                                                         花钱买排名</td>
                                         </tr>
                                         <tr class="bg-amber-50">
-                                                <td class="border border-slate-200 px-3 py-2 font-bold">
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">
                                                         <span
                                                                 class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs">成长期</span>
-                                                </td>
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">Month 3-6</td>
                                                 <td
                                                         class="border border-slate-200 px-3 py-2 text-center font-bold text-amber-600">
@@ -266,10 +274,10 @@
                                                         开始算账</td>
                                         </tr>
                                         <tr class="bg-purple-50">
-                                                <td class="border border-slate-200 px-3 py-2 font-bold">
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">
                                                         <span
                                                                 class="px-2 py-0.5 bg-purple-500 text-white rounded text-xs">成熟期</span>
-                                                </td>
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">Month 6+</td>
                                                 <td
                                                         class="border border-slate-200 px-3 py-2 text-center font-bold text-purple-600">
@@ -803,26 +811,34 @@
         </div>
         <!-- ========== 出价管理规则 ========== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="ppc-bid-rules-table-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-sliders-h text-teal-500"></i>出价调整规则 — 量化决策，不凭感觉
                 </h2>
                 <p class="text-xs text-slate-500 mb-4">所有出价调整<strong>基于至少 7 天 + 至少 20 次点击</strong>的数据。数据不够的先不动。</p>
-                <div class="overflow-x-auto">
-                        <table class="w-full text-xs border-collapse">
+                <p id="ppc-bid-rules-table-help" class="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 mb-3">
+                        表格支持横向滚动；按数据表现、目标偏差、动作和调整幅度查看出价规则。
+                </p>
+                <div id="ppc-bid-rules-table-wrapper" class="overflow-x-auto" tabindex="0" role="region"
+                        aria-labelledby="ppc-bid-rules-table-title"
+                        aria-describedby="ppc-bid-rules-table-help">
+                        <table id="ppc-bid-rules-table" class="w-full text-xs border-collapse"
+                                aria-labelledby="ppc-bid-rules-table-title"
+                                aria-describedby="ppc-bid-rules-table-help">
+                                <caption class="sr-only">PPC 出价调整规则表</caption>
                                 <thead>
                                         <tr class="bg-teal-100">
-                                                <th class="border border-teal-200 px-3 py-2 text-left">数据表现</th>
-                                                <th class="border border-teal-200 px-3 py-2 text-center">ACOS vs 目标</th>
-                                                <th class="border border-teal-200 px-3 py-2 text-center">动作</th>
-                                                <th class="border border-teal-200 px-3 py-2 text-center">调整幅度</th>
-                                                <th class="border border-teal-200 px-3 py-2 text-left">逻辑</th>
+                                                <th scope="col" class="border border-teal-200 px-3 py-2 text-left">数据表现</th>
+                                                <th scope="col" class="border border-teal-200 px-3 py-2 text-center">ACOS vs 目标</th>
+                                                <th scope="col" class="border border-teal-200 px-3 py-2 text-center">动作</th>
+                                                <th scope="col" class="border border-teal-200 px-3 py-2 text-center">调整幅度</th>
+                                                <th scope="col" class="border border-teal-200 px-3 py-2 text-left">逻辑</th>
                                         </tr>
                                 </thead>
                                 <tbody>
                                         <tr class="bg-emerald-50">
-                                                <td
+                                                <th scope="row"
                                                         class="border border-slate-200 px-3 py-2 font-semibold text-emerald-700">
-                                                        高转化 + 低ACOS</td>
+                                                        高转化 + 低ACOS</th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">ACOS &lt; 目标 ×
                                                         0.7</td>
                                                 <td
@@ -832,9 +848,9 @@
                                                 <td class="border border-slate-200 px-3 py-2">利润空间充足，加价抢更多曝光和单量</td>
                                         </tr>
                                         <tr>
-                                                <td
+                                                <th scope="row"
                                                         class="border border-slate-200 px-3 py-2 font-semibold text-blue-700">
-                                                        正常出单</td>
+                                                        正常出单</th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">目标×0.7 ≤ ACOS
                                                         ≤ 目标×1.3</td>
                                                 <td
@@ -844,9 +860,9 @@
                                                 <td class="border border-slate-200 px-3 py-2">在合理范围内，保持稳定</td>
                                         </tr>
                                         <tr class="bg-amber-50">
-                                                <td
+                                                <th scope="row"
                                                         class="border border-slate-200 px-3 py-2 font-semibold text-amber-700">
-                                                        ACOS偏高但有单</td>
+                                                        ACOS偏高但有单</th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">目标×1.3 &lt;
                                                         ACOS &lt; 目标×2</td>
                                                 <td
@@ -856,9 +872,9 @@
                                                 <td class="border border-slate-200 px-3 py-2">小幅降价，观察 7 天后再决定</td>
                                         </tr>
                                         <tr class="bg-red-50">
-                                                <td
+                                                <th scope="row"
                                                         class="border border-slate-200 px-3 py-2 font-semibold text-red-700">
-                                                        ACOS远超目标</td>
+                                                        ACOS远超目标</th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">ACOS &gt; 目标 ×
                                                         2</td>
                                                 <td
@@ -868,9 +884,9 @@
                                                 <td class="border border-slate-200 px-3 py-2">先降价，14天无改善→暂停该词</td>
                                         </tr>
                                         <tr class="bg-slate-50">
-                                                <td
+                                                <th scope="row"
                                                         class="border border-slate-200 px-3 py-2 font-semibold text-slate-600">
-                                                        有曝光无点击</td>
+                                                        有曝光无点击</th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">Impressions
                                                         高，CTR &lt; 0.2%</td>
                                                 <td
@@ -880,9 +896,9 @@
                                                 <td class="border border-slate-200 px-3 py-2">不是出价问题，是主图/价格/标题问题</td>
                                         </tr>
                                         <tr>
-                                                <td
+                                                <th scope="row"
                                                         class="border border-slate-200 px-3 py-2 font-semibold text-indigo-700">
-                                                        无曝光</td>
+                                                        无曝光</th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">Impressions
                                                         &lt; 100/周</td>
                                                 <td
@@ -1272,88 +1288,96 @@
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
-                                <h3 class="font-bold text-slate-700 text-sm mb-3">📊 每周记录字段</h3>
-                                <div class="overflow-x-auto">
-                                        <table class="w-full text-xs border-collapse">
+                                <h3 id="ppc-weekly-fields-table-title" class="font-bold text-slate-700 text-sm mb-3">📊 每周记录字段</h3>
+                                <p id="ppc-weekly-fields-table-help" class="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 mb-3">
+                                        表格支持横向滚动；按字段查看每周 PPC 数据追踪口径。
+                                </p>
+                                <div id="ppc-weekly-fields-table-wrapper" class="overflow-x-auto" tabindex="0"
+                                        role="region" aria-labelledby="ppc-weekly-fields-table-title"
+                                        aria-describedby="ppc-weekly-fields-table-help">
+                                        <table id="ppc-weekly-fields-table" class="w-full text-xs border-collapse"
+                                                aria-labelledby="ppc-weekly-fields-table-title"
+                                                aria-describedby="ppc-weekly-fields-table-help">
+                                                <caption class="sr-only">PPC 周度数据追踪字段表</caption>
                                                 <thead>
                                                         <tr class="bg-teal-100">
-                                                                <th
+                                                                <th scope="col"
                                                                         class="border border-teal-200 px-2 py-1.5 text-left">
                                                                         字段</th>
-                                                                <th
+                                                                <th scope="col"
                                                                         class="border border-teal-200 px-2 py-1.5 text-left">
                                                                         说明</th>
                                                         </tr>
                                                 </thead>
                                                 <tbody>
                                                         <tr>
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        周次</td>
+                                                                        周次</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">W1, W2,
                                                                         W3...</td>
                                                         </tr>
                                                         <tr class="bg-slate-50">
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        广告花费</td>
+                                                                        广告花费</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">本周总广告支出
                                                                 </td>
                                                         </tr>
                                                         <tr>
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        广告销售额</td>
+                                                                        广告销售额</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">广告带来的销售
                                                                 </td>
                                                         </tr>
                                                         <tr class="bg-slate-50">
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        总销售额</td>
+                                                                        总销售额</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">广告+自然合计
                                                                 </td>
                                                         </tr>
                                                         <tr>
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        ACOS</td>
+                                                                        ACOS</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">
                                                                         广告花费/广告销售额</td>
                                                         </tr>
                                                         <tr class="bg-slate-50">
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold bg-emerald-50 text-emerald-800">
-                                                                        TACoS ⭐</td>
+                                                                        TACoS ⭐</th>
                                                                 <td
                                                                         class="border border-slate-200 px-2 py-1.5 bg-emerald-50">
                                                                         广告花费/总销售额</td>
                                                         </tr>
                                                         <tr>
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        自然单占比</td>
+                                                                        自然单占比</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">自然销售/总销售
                                                                 </td>
                                                         </tr>
                                                         <tr class="bg-slate-50">
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        核心词自然排名</td>
+                                                                        核心词自然排名</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">TOP 3
                                                                         关键词位置</td>
                                                         </tr>
                                                         <tr>
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        CTR / CVR</td>
+                                                                        CTR / CVR</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">点击率 /
                                                                         转化率</td>
                                                         </tr>
                                                         <tr class="bg-slate-50">
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        本周动作备注</td>
+                                                                        本周动作备注</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">
                                                                         否了什么词/加了什么词/调了什么价</td>
                                                         </tr>

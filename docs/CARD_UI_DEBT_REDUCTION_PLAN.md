@@ -2,7 +2,7 @@
 
 Status: active
 Scope: PC card visual design and implementation
-Baseline page: Amazon Hub overview (`#/amz_hub_overview`)
+Baseline page: Amazon Hub overview (`#/amz-hub`)
 
 ## Goal
 

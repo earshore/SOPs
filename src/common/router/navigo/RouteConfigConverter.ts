@@ -163,9 +163,9 @@ export class RouteConfigConverter {
   /**
    * 生成路由别名
    *
-   * 为总览页面创建别名，例如：
-   * - /sops -> /sops/overview
-   * - /app_center -> /app_center/overview
+   * 为旧模块入口创建别名，例如：
+   * - /app_center -> /app-center
+   * - /amz_hub -> /amz-hub
    *
    * @param menuConfig - 菜单配置
    * @param aliases - 别名映射对象（会被修改）
@@ -173,7 +173,6 @@ export class RouteConfigConverter {
   private _generateAliases(menuConfig: MenuConfig, aliases: Record<string, string>): void {
     // 定义需要创建别名的模块
     const moduleAliases: Record<string, string> = {
-      sops: 'sops_overview',
       app_center: 'app_center_overview',
       amz_hub: 'amz_hub_overview',
       more_core: 'more_overview',

@@ -69,6 +69,7 @@ type AiAnalysisPanelThis = AiAnalysisPanelContext &
     analysisHeroIsStrong: boolean;
     analysisHeroIsCompact: boolean;
     hasAnalysisSelection: boolean;
+    progressAriaValue: number;
     reportConfidence: Record<string, number> | null;
     overallConfidence: number;
     overallConfidencePercent: number;
@@ -617,6 +618,10 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
   get progressText(): string {
     return `${Math.round(this.progress)}%`;
+  },
+
+  get progressAriaValue(): number {
+    return Math.round(this.progress);
   },
 
   get progressStyle(): string {

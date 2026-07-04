@@ -266,44 +266,48 @@
 
             <!-- 广告预算再分配 -->
             <div>
-                <h3 class="font-bold text-slate-800 mb-3 text-sm">成熟期广告预算再分配</h3>
-                <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                    <table class="w-full text-xs">
+                <h3 id="mature-ad-budget-table-title" class="font-bold text-slate-800 mb-3 text-sm">成熟期广告预算再分配</h3>
+                <div id="mature-ad-budget-table-wrapper" class="bg-slate-50 rounded-lg p-4 border border-slate-200 overflow-x-auto"
+                    role="region" aria-labelledby="mature-ad-budget-table-title"
+                    aria-describedby="mature-ad-budget-table-help" tabindex="0">
+                    <p id="mature-ad-budget-table-help" class="sr-only">表格支持横向滚动，用于查看广告类型、成长期占比、成熟期占比和调整逻辑。</p>
+                    <table id="mature-ad-budget-table" class="w-full min-w-[720px] text-xs">
+                        <caption class="sr-only">成熟期广告预算再分配表</caption>
                         <thead>
                             <tr class="border-b border-slate-300">
-                                <th class="text-left py-2 text-slate-700 font-bold">广告类型</th>
-                                <th class="text-center py-2 text-slate-700 font-bold">成长期占比</th>
-                                <th class="text-center py-2 text-slate-700 font-bold">成熟期占比</th>
-                                <th class="text-left py-2 text-slate-700 font-bold">调整逻辑</th>
+                                <th scope="col" class="text-left py-2 text-slate-700 font-bold">广告类型</th>
+                                <th scope="col" class="text-center py-2 text-slate-700 font-bold">成长期占比</th>
+                                <th scope="col" class="text-center py-2 text-slate-700 font-bold">成熟期占比</th>
+                                <th scope="col" class="text-left py-2 text-slate-700 font-bold">调整逻辑</th>
                             </tr>
                         </thead>
                         <tbody class="text-slate-600">
                             <tr class="border-b border-slate-200">
-                                <td class="py-2 font-medium">SP-Exact</td>
+                                <th scope="row" class="py-2 font-medium text-left">SP-Exact</th>
                                 <td class="text-center">30%</td>
                                 <td class="text-center font-bold text-emerald-600">50%</td>
                                 <td class="pl-2">主力转化，精准收割</td>
                             </tr>
                             <tr class="border-b border-slate-200">
-                                <td class="py-2 font-medium">SP-Auto</td>
+                                <th scope="row" class="py-2 font-medium text-left">SP-Auto</th>
                                 <td class="text-center">40%</td>
                                 <td class="text-center font-bold text-red-500">15%</td>
                                 <td class="pl-2">数据已饱和，降至发现用</td>
                             </tr>
                             <tr class="border-b border-slate-200">
-                                <td class="py-2 font-medium">SP-Broad</td>
+                                <th scope="row" class="py-2 font-medium text-left">SP-Broad</th>
                                 <td class="text-center">20%</td>
                                 <td class="text-center font-bold text-amber-500">10%</td>
                                 <td class="pl-2">仅保留长尾拓词</td>
                             </tr>
                             <tr class="border-b border-slate-200">
-                                <td class="py-2 font-medium">SB-Brand</td>
+                                <th scope="row" class="py-2 font-medium text-left">SB-Brand</th>
                                 <td class="text-center">5%</td>
                                 <td class="text-center font-bold text-blue-600">15%</td>
                                 <td class="pl-2">品牌防御，护城河</td>
                             </tr>
                             <tr>
-                                <td class="py-2 font-medium">SD-Competitor</td>
+                                <th scope="row" class="py-2 font-medium text-left">SD-Competitor</th>
                                 <td class="text-center">5%</td>
                                 <td class="text-center font-bold text-rose-600">10%</td>
                                 <td class="pl-2">抢竞品流量，单独考核ACOS</td>

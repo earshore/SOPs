@@ -128,11 +128,11 @@ export class PromptlabPage extends BasePage {
    * 导航到 Promptlab 页面
    */
   async navigate(): Promise<void> {
-    await super.navigate('/#/app-center/promptlab');
+    await super.navigate('/#/app-center/master_analysis/promptlab');
     try {
       await this.waitForPageReady();
     } catch {
-      await super.navigate('/#/app-center/promptlab');
+      await super.navigate('/#/app-center/master_analysis/promptlab');
       await this.waitForPageReady();
     }
   }

@@ -156,6 +156,12 @@ function auditManifestPathDeclarations(issues: AuditIssue[]): void {
   for (const manifest of ROUTE_MANIFESTS) {
     for (const route of manifest.routes) {
       if (!route.path) {
+        addIssue(
+          issues,
+          'error',
+          'manifest-path',
+          `Route "${route.routeId}" must declare an explicit canonical path`
+        );
         continue;
       }
 

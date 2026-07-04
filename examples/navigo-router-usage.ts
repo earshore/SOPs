@@ -324,9 +324,9 @@ async function example8_CompleteApp() {
   router.resolve();
 
   // 7. 导航示例
-  await router.navigate('/sops/overview');
-  await router.navigate('/app_center/overview');
-  await router.navigate('/amz_hub/overview');
+  await router.navigate('/sops');
+  await router.navigate('/app-center');
+  await router.navigate('/amz-hub');
 
   // 8. 查看统计
   console.log('\n路由统计:');

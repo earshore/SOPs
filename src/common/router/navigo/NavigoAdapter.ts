@@ -227,7 +227,7 @@ export class NavigoAdapter {
    *
    * @example
    * ```typescript
-   * adapter.registerAlias('/amz_hub', '/amz_hub/overview');
+   * adapter.registerAlias('/amz_hub', '/amz-hub');
    * ```
    */
   registerAlias(alias: string, target: string): void {
@@ -251,7 +251,7 @@ export class NavigoAdapter {
    * @example
    * ```typescript
    * await adapter.navigate('/home');
-   * await adapter.navigate('/app-center/scraper', { replace: true });
+   * await adapter.navigate('/app-center/master_analysis/scraper', { replace: true });
    * ```
    */
   async navigate(path: string, options: NavigateOptions = {}): Promise<boolean> {

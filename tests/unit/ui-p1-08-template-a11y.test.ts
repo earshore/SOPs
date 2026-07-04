@@ -12,7 +12,7 @@ describe('UI-P1-08 template semantics', () => {
 
     expect(html).toContain('role="status" aria-live="polite" aria-atomic="true"');
     expect(html).toContain('role="progressbar"');
-    expect(html).toContain(':aria-valuenow="Math.round(progress)"');
+    expect(html).toContain(':aria-valuenow="progressAriaValue"');
     expect(html).toContain('role="radiogroup"');
     expect(html).toContain('aria-labelledby="ai-analysis-scheduling-title"');
     expect(html).toContain('aria-describedby="ai-analysis-cache-helper"');

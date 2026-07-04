@@ -66,15 +66,25 @@ afterEach(() => {
     expect(guardUtils.isObject(null)).toBe(false);
   });
 
-  it('maps route ids to manifest-declared paths with route-id fallback compatibility', () => {
+  it('maps route ids to explicit manifest-declared paths', () => {
     expect(routeIdToPath('app_center_overview')).toBe('/app-center');
-    expect(routeIdToPath('ppc_search_terms')).toBe('/app-center/ppc-search-terms');
+    expect(routeIdToPath('scraper')).toBe('/app-center/master_analysis/scraper');
+    expect(routeIdToPath('ai_analysis')).toBe('/app-center/master_analysis/ai-analysis');
+    expect(routeIdToPath('promptlab')).toBe('/app-center/master_analysis/promptlab');
+    expect(routeIdToPath('ppc_search_terms')).toBe('/app-center/ppc_tools/ppc-search-terms');
     expect(routeIdToPath('playground')).toBe('/app-center/playground/deep-chat');
-    expect(routeIdToPath('sops_overview')).toBe('/sops_overview');
-    expect(routeIdToPath('#/app-center/scraper/')).toBe('/app-center/scraper');
+    expect(routeIdToPath('sops_overview')).toBe('/sops');
+    expect(routeIdToPath('sops_npi_tracker')).toBe('/sops/growth/npi-tracker');
+    expect(routeIdToPath('amz_hub_overview')).toBe('/amz-hub');
+    expect(routeIdToPath('more_overview')).toBe('/more');
+    expect(routeIdToPath('#/app-center/master_analysis/scraper/')).toBe(
+      '/app-center/master_analysis/scraper'
+    );
     expect(normalizeRoutePath('///known/')).toBe('/known');
-    expect(routeIdToPathStrict('ppc_search_terms')).toBe('/app-center/ppc-search-terms');
-    expect(routeIdToPathStrict('/app-center/scraper')).toBeNull();
+    expect(routeIdToPathStrict('ppc_search_terms')).toBe(
+      '/app-center/ppc_tools/ppc-search-terms'
+    );
+    expect(routeIdToPathStrict('/app-center/master_analysis/scraper')).toBeNull();
     expect(routeIdToPathStrict('__missing__')).toBeNull();
   });
 
@@ -84,7 +94,30 @@ afterEach(() => {
       routeId: 'ppc_search_terms',
       replace: true,
     });
+    expect(getLegacyRouteAlias('/sops_npi_tracker')).toMatchObject({
+      alias: '/sops_npi_tracker',
+      routeId: 'sops_npi_tracker',
+      replace: true,
+    });
+    expect(getLegacyRouteAlias('/app-center/scraper')).toMatchObject({
+      alias: '/app-center/scraper',
+      routeId: 'scraper',
+      replace: true,
+    });
+    expect(getLegacyRouteAlias('/app-center/ai-analysis')).toMatchObject({
+      alias: '/app-center/ai-analysis',
+      routeId: 'ai_analysis',
+      replace: true,
+    });
+    expect(getLegacyRouteAlias('/app-center/promptlab')).toMatchObject({
+      alias: '/app-center/promptlab',
+      routeId: 'promptlab',
+      replace: true,
+    });
     expect(getLegacyRouteAlias('/missing')).toBeNull();
+    expect(shouldReplaceLegacyRoute('/app-center/scraper')).toBe(true);
+    expect(shouldReplaceLegacyRoute('/app-center/master_analysis/scraper')).toBe(false);
+    expect(shouldReplaceLegacyRoute('/app-center/ppc-search-terms')).toBe(true);
     expect(shouldReplaceLegacyRoute('/app-center/playground')).toBe(true);
     expect(shouldReplaceLegacyRoute('/app-center/playground/deep-chat')).toBe(false);
   });

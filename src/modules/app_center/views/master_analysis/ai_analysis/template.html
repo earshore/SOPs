@@ -675,7 +675,7 @@
                 <span id="ai-analysis-progress-value" class="font-mono font-bold text-lg" x-text="progressText"></span>
               </div>
               <div class="h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm shadow-inner"
-                role="progressbar" :aria-valuenow="Math.round(progress)" aria-valuemin="0" aria-valuemax="100"
+                role="progressbar" :aria-valuenow="progressAriaValue" aria-valuemin="0" aria-valuemax="100"
                 aria-labelledby="ai-analysis-progress-label" :aria-valuetext="progressText">
                 <div :style="progressStyle"
                   class="h-full bg-gradient-to-r from-white via-indigo-200 to-white rounded-full transition-all duration-500 ease-out relative">

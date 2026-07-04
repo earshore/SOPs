@@ -46,17 +46,17 @@ interface CardSample {
 const targets: Target[] = [
   {
     name: 'Amazon Hub overview card',
-    path: '/amz_hub_overview',
+    path: '/amz-hub',
     selector: '.amz-hub-overview .sop-card.overview-accent-card',
   },
   {
     name: 'SOP overview card',
-    path: '/sops_overview',
+    path: '/sops',
     selector: '.sops-overview .sop-card.overview-accent-card',
   },
   {
     name: 'More overview card',
-    path: '/more_overview',
+    path: '/more',
     selector: '.more-overview .sop-card.overview-accent-card',
   },
   {

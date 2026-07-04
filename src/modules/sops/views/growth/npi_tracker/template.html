@@ -825,8 +825,17 @@
         </div>
         <!-- Data Table -->
         <div class="npi-lifecycle-table-card bg-white rounded-xl border border-slate-200 overflow-hidden mb-6 shadow-sm">
-                <div class="npi-lifecycle-table-scroll custom-scrollbar" tabindex="0" aria-label="新品生命周期跟踪明细表">
-                        <table class="npi-lifecycle-table w-full text-left">
+                <h2 id="npi-lifecycle-table-title" class="sr-only">新品生命周期跟踪明细表</h2>
+                <p id="npi-lifecycle-table-help" class="npi-lifecycle-table-help">
+                        表格支持横向滚动；左侧阶段和 SKU 固定，按基础档案、合规、财务、流量和决策查看新品生命周期。
+                </p>
+                <div class="npi-lifecycle-table-scroll custom-scrollbar" tabindex="0" role="region"
+                        aria-labelledby="npi-lifecycle-table-title"
+                        aria-describedby="npi-lifecycle-table-help">
+                        <table id="npi-lifecycle-table" class="npi-lifecycle-table w-full text-left"
+                                aria-labelledby="npi-lifecycle-table-title"
+                                aria-describedby="npi-lifecycle-table-help">
+                                <caption class="sr-only">新品生命周期跟踪明细表</caption>
                                 <colgroup>
                                         <col class="npi-col-stage">
                                         <col class="npi-col-sku">
@@ -861,60 +870,60 @@
                                 <thead>
                                         <tr class="bg-slate-50 border-b border-slate-200">
                                                 <th class="px-2 py-1.5 text-xs font-bold text-blue-700 text-center border-r border-slate-100 bg-blue-50/50"
-                                                        colspan="8">
+                                                        colspan="8" scope="colgroup">
                                                         <i class="fas fa-folder mr-1 opacity-70"></i>基础档案
                                                 </th>
                                                 <th class="px-2 py-1.5 text-xs font-bold text-purple-700 text-center border-r border-slate-100 bg-purple-50/50"
-                                                        colspan="6">
+                                                        colspan="6" scope="colgroup">
                                                         <i
                                                                 class="fas fa-clipboard-check mr-1 opacity-70"></i>合规Checklist
                                                 </th>
                                                 <th class="px-2 py-1.5 text-xs font-bold text-emerald-700 text-center border-r border-slate-100 bg-emerald-50/50"
-                                                        colspan="6">
+                                                        colspan="6" scope="colgroup">
                                                         <i class="fas fa-euro-sign mr-1 opacity-70"></i>财务模型
                                                 </th>
                                                 <th class="px-2 py-1.5 text-xs font-bold text-amber-700 text-center border-r border-slate-100 bg-amber-50/50"
-                                                        colspan="5">
+                                                        colspan="5" scope="colgroup">
                                                         <i class="fas fa-chart-line mr-1 opacity-70"></i>流量转化
                                                 </th>
                                                 <th class="px-2 py-1.5 text-xs font-bold text-red-700 text-center bg-red-50/50"
-                                                        colspan="4">
+                                                        colspan="4" scope="colgroup">
                                                         <i class="fas fa-gavel mr-1 opacity-70"></i>决策
                                                 </th>
                                         </tr>
                                         <tr
                                                 class="bg-white text-[11px] text-slate-500 border-b border-slate-200 font-medium">
-                                                <th
+                                                <th scope="col"
                                                         class="px-2 py-2 sticky left-0 bg-white z-10 border-r border-slate-100">
                                                         阶段</th>
-                                                <th class="px-2 py-2">SKU</th>
-                                                <th class="px-2 py-2">中文名</th>
-                                                <th class="px-2 py-2">店铺</th>
-                                                <th class="px-2 py-2">ASIN</th>
-                                                <th class="px-2 py-2 text-center">站点</th>
-                                                <th class="px-2 py-2 text-center">发货量</th>
-                                                <th class="px-2 py-2 text-center border-r border-slate-100">库存天数</th>
-                                                <th class="px-2 py-2 text-center" title="泛欧计划">泛欧</th>
-                                                <th class="px-2 py-2 text-center" title="五点Rufus+标题">Rufus</th>
-                                                <th class="px-2 py-2 text-center" title="敏感词规避">敏感词</th>
-                                                <th class="px-2 py-2 text-center" title="图片+QA">图片QA</th>
-                                                <th class="px-2 py-2 text-center" title="A+页面">A+</th>
-                                                <th class="px-2 py-2 text-center border-r border-slate-100">状态</th>
-                                                <th class="px-2 py-2 text-center">配送费</th>
-                                                <th class="px-2 py-2 text-center">配送占比</th>
-                                                <th class="px-2 py-2 text-center text-red-600">35%红线</th>
-                                                <th class="px-2 py-2 text-center text-amber-600">30%复核</th>
-                                                <th class="px-2 py-2 text-center text-emerald-600">25%参考</th>
-                                                <th class="px-2 py-2 text-center border-r border-slate-100">盈亏点</th>
-                                                <th class="px-2 py-2 text-center">流量</th>
-                                                <th class="px-2 py-2 text-center">CTR</th>
-                                                <th class="px-2 py-2 text-center">CVR</th>
-                                                <th class="px-2 py-2 text-center">ACOAS</th>
-                                                <th class="px-2 py-2 text-center border-r border-slate-100">自然占比</th>
-                                                <th class="px-2 py-2 text-center">Vine进度</th>
-                                                <th class="px-2 py-2 text-center">广告</th>
-                                                <th class="px-2 py-2 text-center">保留</th>
-                                                <th class="px-2 py-2">Next Step</th>
+                                                <th scope="col" class="px-2 py-2">SKU</th>
+                                                <th scope="col" class="px-2 py-2">中文名</th>
+                                                <th scope="col" class="px-2 py-2">店铺</th>
+                                                <th scope="col" class="px-2 py-2">ASIN</th>
+                                                <th scope="col" class="px-2 py-2 text-center">站点</th>
+                                                <th scope="col" class="px-2 py-2 text-center">发货量</th>
+                                                <th scope="col" class="px-2 py-2 text-center border-r border-slate-100">库存天数</th>
+                                                <th scope="col" class="px-2 py-2 text-center" title="泛欧计划">泛欧</th>
+                                                <th scope="col" class="px-2 py-2 text-center" title="五点Rufus+标题">Rufus</th>
+                                                <th scope="col" class="px-2 py-2 text-center" title="敏感词规避">敏感词</th>
+                                                <th scope="col" class="px-2 py-2 text-center" title="图片+QA">图片QA</th>
+                                                <th scope="col" class="px-2 py-2 text-center" title="A+页面">A+</th>
+                                                <th scope="col" class="px-2 py-2 text-center border-r border-slate-100">状态</th>
+                                                <th scope="col" class="px-2 py-2 text-center">配送费</th>
+                                                <th scope="col" class="px-2 py-2 text-center">配送占比</th>
+                                                <th scope="col" class="px-2 py-2 text-center text-red-600">35%红线</th>
+                                                <th scope="col" class="px-2 py-2 text-center text-amber-600">30%复核</th>
+                                                <th scope="col" class="px-2 py-2 text-center text-emerald-600">25%参考</th>
+                                                <th scope="col" class="px-2 py-2 text-center border-r border-slate-100">盈亏点</th>
+                                                <th scope="col" class="px-2 py-2 text-center">流量</th>
+                                                <th scope="col" class="px-2 py-2 text-center">CTR</th>
+                                                <th scope="col" class="px-2 py-2 text-center">CVR</th>
+                                                <th scope="col" class="px-2 py-2 text-center">ACOAS</th>
+                                                <th scope="col" class="px-2 py-2 text-center border-r border-slate-100">自然占比</th>
+                                                <th scope="col" class="px-2 py-2 text-center">Vine进度</th>
+                                                <th scope="col" class="px-2 py-2 text-center">广告</th>
+                                                <th scope="col" class="px-2 py-2 text-center">保留</th>
+                                                <th scope="col" class="px-2 py-2">Next Step</th>
                                         </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100" id="npi-table-body">
@@ -942,23 +951,31 @@
         </div>
         <!-- ==================== 新增：阶段升降级规则速查表 ==================== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="npi-stage-rules-table-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-exchange-alt text-indigo-500"></i>阶段升降级规则速查表
                 </h2>
-                <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-xs border-collapse">
+                <p id="npi-stage-rules-table-help" class="npi-lifecycle-table-help">
+                        表格支持横向滚动；按当前阶段查看升级条件、降级/清仓条件和操作动作。
+                </p>
+                <div id="npi-stage-rules-table-wrapper" class="overflow-x-auto custom-scrollbar" tabindex="0"
+                        role="region" aria-labelledby="npi-stage-rules-table-title"
+                        aria-describedby="npi-stage-rules-table-help">
+                        <table id="npi-stage-rules-table" class="w-full text-xs border-collapse"
+                                aria-labelledby="npi-stage-rules-table-title"
+                                aria-describedby="npi-stage-rules-table-help">
+                                <caption class="sr-only">新品阶段升降级规则速查表</caption>
                                 <thead>
                                         <tr class="bg-slate-50">
-                                                <th
+                                                <th scope="col"
                                                         class="px-3 py-2 text-left border border-slate-200 font-bold text-slate-700">
                                                         当前阶段</th>
-                                                <th
+                                                <th scope="col"
                                                         class="px-3 py-2 text-left border border-slate-200 font-bold text-emerald-700">
                                                         升级条件 ↑</th>
-                                                <th
+                                                <th scope="col"
                                                         class="px-3 py-2 text-left border border-slate-200 font-bold text-red-700">
                                                         降级/清仓条件 ↓</th>
-                                                <th
+                                                <th scope="col"
                                                         class="px-3 py-2 text-left border border-slate-200 font-bold text-blue-700">
                                                         操作动作</th>
                                         </tr>
@@ -1189,20 +1206,28 @@
         </div>
         <!-- ==================== 新增：历史归档与复盘模板 ==================== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="npi-review-archive-table-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-archive text-slate-500"></i>SKU 复盘归档模板（每个清仓SKU必填）
                 </h2>
-                <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-xs border-collapse">
+                <p id="npi-review-archive-table-help" class="npi-lifecycle-table-help">
+                        表格支持横向滚动；按复盘维度记录归档内容和示例。
+                </p>
+                <div id="npi-review-archive-table-wrapper" class="overflow-x-auto custom-scrollbar" tabindex="0"
+                        role="region" aria-labelledby="npi-review-archive-table-title"
+                        aria-describedby="npi-review-archive-table-help">
+                        <table id="npi-review-archive-table" class="w-full text-xs border-collapse"
+                                aria-labelledby="npi-review-archive-table-title"
+                                aria-describedby="npi-review-archive-table-help">
+                                <caption class="sr-only">SKU 复盘归档模板</caption>
                                 <thead>
                                         <tr class="bg-slate-100">
-                                                <th
+                                                <th scope="col"
                                                         class="px-3 py-2 text-left border border-slate-200 font-bold text-slate-700">
                                                         复盘维度</th>
-                                                <th
+                                                <th scope="col"
                                                         class="px-3 py-2 text-left border border-slate-200 font-bold text-slate-700">
                                                         记录内容</th>
-                                                <th
+                                                <th scope="col"
                                                         class="px-3 py-2 text-left border border-slate-200 font-bold text-slate-700">
                                                         示例</th>
                                         </tr>

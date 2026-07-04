@@ -95,6 +95,7 @@ describe('current UI notifications and utilities', () => {
     expect(toast).not.toBeNull();
     expect(container?.getAttribute('role')).toBe('status');
     expect(container?.getAttribute('aria-live')).toBe('polite');
+    expect(container?.getAttribute('aria-atomic')).toBe('false');
     expect(toast?.getAttribute('role')).toBe('status');
     expect(toast?.getAttribute('aria-live')).toBe('polite');
     expect(toast?.getAttribute('aria-atomic')).toBe('true');
@@ -107,6 +108,30 @@ describe('current UI notifications and utilities', () => {
     expect(toast?.classList.contains('toast-slide-out')).toBe(true);
     await vi.advanceTimersByTimeAsync(400);
     expect(container?.children).toHaveLength(0);
+  });
+
+  it('announces error toasts assertively without changing the container contract', () => {
+    document.body.innerHTML = '<div id="toast-container"></div>';
+
+    showToast('Failed', {
+      type: 'error',
+      description: 'Please retry',
+      duration: 1000,
+    });
+
+    const container = getEl('toast-container');
+    const toast = container?.querySelector('.toast');
+
+    expect(container?.getAttribute('role')).toBe('status');
+    expect(container?.getAttribute('aria-live')).toBe('polite');
+    expect(container?.getAttribute('aria-atomic')).toBe('false');
+    expect(toast?.getAttribute('role')).toBe('alert');
+    expect(toast?.getAttribute('aria-live')).toBe('assertive');
+    expect(toast?.getAttribute('aria-atomic')).toBe('true');
+    expect(toast?.className).toContain('toast-error');
+    expect(toast?.querySelector('i')?.className).toContain('fa-circle-xmark');
+    expect(toast?.textContent).toContain('Failed');
+    expect(toast?.textContent).toContain('Please retry');
   });
 
   it('handles missing toast container and clamps progress percentages', () => {
@@ -386,6 +411,13 @@ describe('current UI mega menu helpers', () => {
       expect(css).toMatch(/\.nav-group\.is-open\s+\.mega-menu/);
       expect(css).toMatch(/\.nav-group:not\(\.is-open\)\s+\.mega-menu \*/);
     });
+  });
+
+  it('keeps AMZ Hub module-container overflow scoped to its own panel', () => {
+    const css = readFileSync('src/modules/amz_hub/amz_hub_style.css', 'utf8');
+
+    expect(css).toContain('#amz_hub_content_area .module-container');
+    expect(css).not.toMatch(/(^|\n)\.module-container\s*\{\s*overflow:\s*visible\s*!important;/);
   });
 });
 

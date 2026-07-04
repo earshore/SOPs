@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AppModal } from './AppModal';
 
@@ -165,6 +166,22 @@ describe('AppModal regression', () => {
     expect(noHeaderPanel.getAttribute('role')).toBe('dialog');
     expect(noHeaderPanel.getAttribute('aria-modal')).toBe('true');
     expect(noHeaderPanel.getAttribute('aria-label')).toBe('快速预览');
+  });
+
+  it('keeps shared no-header modals explicitly named', () => {
+    const template = readFileSync('src/components/modal/sharedModals.html', 'utf8');
+    const noHeaderModals = template.match(/<app-modal\b[^>]*\bno-header\b[^>]*>/g) ?? [];
+
+    expect(template).toContain(
+      '<app-modal id="import-conflict-modal" size="lg" title="数据冲突确认" no-header>'
+    );
+    expect(template).toContain(
+      '<app-modal id="delete-confirm-modal" size="sm" title="确认删除" no-header>'
+    );
+    expect(noHeaderModals.length).toBeGreaterThan(0);
+    noHeaderModals.forEach(modalTag => {
+      expect(modalTag).toMatch(/\btitle="[^"]+"/);
+    });
   });
 
   it('moves focus into the modal and restores the opener focus after close', () => {

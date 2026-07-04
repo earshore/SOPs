@@ -143,29 +143,34 @@
         </div>
         <!-- ========== 消息分级响应矩阵 ========== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="email-priority-matrix-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-layer-group text-indigo-500"></i>
                         消息分级响应矩阵 — 一人团队优先级分配
                 </h2>
-                <p class="text-xs text-slate-500 mb-4">每天固定时段打开后台，按此矩阵顺序处理。不要看到就回，要先分级再批量处理。</p>
-                <div class="overflow-x-auto">
-                        <table class="w-full text-sm border-collapse">
+                <p id="email-priority-matrix-description" class="text-xs text-slate-500 mb-4">每天固定时段打开后台，按此矩阵顺序处理。不要看到就回，要先分级再批量处理。</p>
+                <div id="email-priority-matrix-wrapper" class="overflow-x-auto" tabindex="0" role="region"
+                        aria-labelledby="email-priority-matrix-title"
+                        aria-describedby="email-priority-matrix-description">
+                        <table id="email-priority-matrix-table" class="w-full text-sm border-collapse"
+                                aria-labelledby="email-priority-matrix-title"
+                                aria-describedby="email-priority-matrix-description">
+                                <caption class="sr-only">消息分级响应矩阵</caption>
                                 <thead>
                                         <tr class="bg-slate-100">
-                                                <th class="border border-slate-200 px-3 py-2 text-left">优先级</th>
-                                                <th class="border border-slate-200 px-3 py-2 text-left">场景类型</th>
-                                                <th class="border border-slate-200 px-3 py-2 text-left">响应时效</th>
-                                                <th class="border border-slate-200 px-3 py-2 text-left">处理策略</th>
-                                                <th class="border border-slate-200 px-3 py-2 text-left">使用模板</th>
+                                                <th scope="col" class="border border-slate-200 px-3 py-2 text-left">优先级</th>
+                                                <th scope="col" class="border border-slate-200 px-3 py-2 text-left">场景类型</th>
+                                                <th scope="col" class="border border-slate-200 px-3 py-2 text-left">响应时效</th>
+                                                <th scope="col" class="border border-slate-200 px-3 py-2 text-left">处理策略</th>
+                                                <th scope="col" class="border border-slate-200 px-3 py-2 text-left">使用模板</th>
                                         </tr>
                                 </thead>
                                 <tbody>
                                         <tr class="bg-red-50">
-                                                <td class="border border-slate-200 px-3 py-2">
+                                                <th scope="row" class="border border-slate-200 px-3 py-2">
                                                         <span
                                                                 class="px-2 py-0.5 bg-red-600 text-white rounded text-xs font-bold">P0
                                                                 紧急</span>
-                                                </td>
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2">
                                                         A-to-Z Claim 通知<br />
                                                         <span class="text-xs text-red-600">安全投诉 / 法律威胁 /
@@ -180,11 +185,11 @@
                                                 </td>
                                         </tr>
                                         <tr class="bg-amber-50">
-                                                <td class="border border-slate-200 px-3 py-2">
+                                                <th scope="row" class="border border-slate-200 px-3 py-2">
                                                         <span
                                                                 class="px-2 py-0.5 bg-amber-500 text-white rounded text-xs font-bold">P1
                                                                 高</span>
-                                                </td>
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2">
                                                         产品损坏/缺陷到货<br />
                                                         <span class="text-xs text-amber-600">收到错误产品 / 缺件 / 退款争议</span>
@@ -198,11 +203,11 @@
                                                 </td>
                                         </tr>
                                         <tr class="bg-blue-50">
-                                                <td class="border border-slate-200 px-3 py-2">
+                                                <th scope="row" class="border border-slate-200 px-3 py-2">
                                                         <span
                                                                 class="px-2 py-0.5 bg-blue-500 text-white rounded text-xs font-bold">P2
                                                                 中</span>
-                                                </td>
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2">
                                                         物流查询 / 退货流程<br />
                                                         <span class="text-xs text-blue-600">使用咨询 / 产品尺寸询问</span>
@@ -216,11 +221,11 @@
                                                 </td>
                                         </tr>
                                         <tr class="bg-slate-50">
-                                                <td class="border border-slate-200 px-3 py-2">
+                                                <th scope="row" class="border border-slate-200 px-3 py-2">
                                                         <span
                                                                 class="px-2 py-0.5 bg-slate-400 text-white rounded text-xs font-bold">P3
                                                                 低</span>
-                                                </td>
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2">
                                                         发票/VAT收据请求<br />
                                                         <span class="text-xs text-slate-500">GDPR数据请求 / 一般感谢</span>
@@ -1085,31 +1090,36 @@
         </div>
         <!-- ========== 多语言速查表 ========== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="email-phrase-table-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-language text-indigo-500"></i>五语高频短语速查表 — 复制即用
                 </h2>
-                <p class="text-xs text-slate-500 mb-4">日常邮件中最常用的开头/结尾/关键短语。不需要学语法，直接复制替换即可。</p>
-                <div class="overflow-x-auto">
-                        <table class="w-full text-xs border-collapse">
+                <p id="email-phrase-table-description" class="text-xs text-slate-500 mb-4">日常邮件中最常用的开头/结尾/关键短语。不需要学语法，直接复制替换即可。</p>
+                <div id="email-phrase-table-wrapper" class="overflow-x-auto" tabindex="0" role="region"
+                        aria-labelledby="email-phrase-table-title"
+                        aria-describedby="email-phrase-table-description">
+                        <table id="email-phrase-table" class="w-full text-xs border-collapse"
+                                aria-labelledby="email-phrase-table-title"
+                                aria-describedby="email-phrase-table-description">
+                                <caption class="sr-only">五语高频短语速查表</caption>
                                 <thead>
                                         <tr class="bg-indigo-100">
-                                                <th class="border border-indigo-200 px-3 py-2 text-left w-20">用途</th>
-                                                <th class="border border-indigo-200 px-3 py-2 text-left">🇬🇧 English
+                                                <th scope="col" class="border border-indigo-200 px-3 py-2 text-left w-20">用途</th>
+                                                <th scope="col" class="border border-indigo-200 px-3 py-2 text-left">🇬🇧 English
                                                 </th>
-                                                <th class="border border-indigo-200 px-3 py-2 text-left">🇩🇪 Deutsch
+                                                <th scope="col" class="border border-indigo-200 px-3 py-2 text-left">🇩🇪 Deutsch
                                                 </th>
-                                                <th class="border border-indigo-200 px-3 py-2 text-left">🇫🇷 Français
+                                                <th scope="col" class="border border-indigo-200 px-3 py-2 text-left">🇫🇷 Français
                                                 </th>
-                                                <th class="border border-indigo-200 px-3 py-2 text-left">🇮🇹 Italiano
+                                                <th scope="col" class="border border-indigo-200 px-3 py-2 text-left">🇮🇹 Italiano
                                                 </th>
-                                                <th class="border border-indigo-200 px-3 py-2 text-left">🇪🇸 Español
+                                                <th scope="col" class="border border-indigo-200 px-3 py-2 text-left">🇪🇸 Español
                                                 </th>
                                         </tr>
                                 </thead>
                                 <tbody>
                                         <tr>
-                                                <td class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">称呼
-                                                </td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">称呼
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2">Dear Customer,</td>
                                                 <td class="border border-slate-200 px-3 py-2">Sehr geehrte/r
                                                         Kunde/Kundin,</td>
@@ -1118,7 +1128,7 @@
                                                 <td class="border border-slate-200 px-3 py-2">Estimado/a cliente,</td>
                                         </tr>
                                         <tr class="bg-slate-50">
-                                                <td class="border border-slate-200 px-3 py-2 font-bold">感谢联系</td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">感谢联系</th>
                                                 <td class="border border-slate-200 px-3 py-2">Thank you for contacting
                                                         us.</td>
                                                 <td class="border border-slate-200 px-3 py-2">Vielen Dank für Ihre
@@ -1131,8 +1141,8 @@
                                                 </td>
                                         </tr>
                                         <tr>
-                                                <td class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">表示歉意
-                                                </td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">表示歉意
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2">We sincerely apologize for
                                                         the inconvenience.</td>
                                                 <td class="border border-slate-200 px-3 py-2">Wir entschuldigen uns
@@ -1145,7 +1155,7 @@
                                                         disculpas por las molestias.</td>
                                         </tr>
                                         <tr class="bg-slate-50">
-                                                <td class="border border-slate-200 px-3 py-2 font-bold">提供退款</td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">提供退款</th>
                                                 <td class="border border-slate-200 px-3 py-2">We have issued a full
                                                         refund.</td>
                                                 <td class="border border-slate-200 px-3 py-2">Wir haben eine
@@ -1158,8 +1168,8 @@
                                                         completo.</td>
                                         </tr>
                                         <tr>
-                                                <td class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">补发承诺
-                                                </td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">补发承诺
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2">We will send a replacement
                                                         right away.</td>
                                                 <td class="border border-slate-200 px-3 py-2">Wir senden Ihnen umgehend
@@ -1172,7 +1182,7 @@
                                                         de inmediato.</td>
                                         </tr>
                                         <tr class="bg-slate-50">
-                                                <td class="border border-slate-200 px-3 py-2 font-bold">无需退货</td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">无需退货</th>
                                                 <td class="border border-slate-200 px-3 py-2">No need to return the
                                                         item.</td>
                                                 <td class="border border-slate-200 px-3 py-2">Sie brauchen den Artikel
@@ -1185,8 +1195,8 @@
                                                         el artículo.</td>
                                         </tr>
                                         <tr>
-                                                <td class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">退货引导
-                                                </td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">退货引导
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2">Please go to "Your Orders"
                                                         → "Return"</td>
                                                 <td class="border border-slate-200 px-3 py-2">Bitte gehen Sie zu "Meine
@@ -1199,7 +1209,7 @@
                                                         "Devolver"</td>
                                         </tr>
                                         <tr class="bg-slate-50">
-                                                <td class="border border-slate-200 px-3 py-2 font-bold">请求照片</td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold">请求照片</th>
                                                 <td class="border border-slate-200 px-3 py-2">Could you share a photo of
                                                         the issue?</td>
                                                 <td class="border border-slate-200 px-3 py-2">Könnten Sie uns ein Foto
@@ -1212,8 +1222,8 @@
                                                         del problema?</td>
                                         </tr>
                                         <tr>
-                                                <td class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">结尾祝好
-                                                </td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-bold bg-slate-50">结尾祝好
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2">Best regards, / Warm
                                                         regards,</td>
                                                 <td class="border border-slate-200 px-3 py-2">Mit freundlichen Grüßen,
@@ -1573,27 +1583,32 @@
         </div>
         <!-- ========== 退款决策矩阵 ========== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="email-refund-matrix-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-calculator text-teal-500"></i>退款决策速查矩阵 — 秒级判断
                 </h2>
-                <p class="text-xs text-slate-500 mb-4">不需要每次都纠结"要不要退""退多少"。按此矩阵直接决策，省时间也保护利润。</p>
-                <div class="overflow-x-auto">
-                        <table class="w-full text-xs border-collapse">
+                <p id="email-refund-matrix-description" class="text-xs text-slate-500 mb-4">不需要每次都纠结"要不要退""退多少"。按此矩阵直接决策，省时间也保护利润。</p>
+                <div id="email-refund-matrix-wrapper" class="overflow-x-auto" tabindex="0" role="region"
+                        aria-labelledby="email-refund-matrix-title"
+                        aria-describedby="email-refund-matrix-description">
+                        <table id="email-refund-matrix-table" class="w-full text-xs border-collapse"
+                                aria-labelledby="email-refund-matrix-title"
+                                aria-describedby="email-refund-matrix-description">
+                                <caption class="sr-only">退款决策速查矩阵</caption>
                                 <thead>
                                         <tr class="bg-teal-100">
-                                                <th class="border border-teal-200 px-3 py-2 text-left">场景</th>
-                                                <th class="border border-teal-200 px-3 py-2 text-center">产品价格 &lt;€15
+                                                <th scope="col" class="border border-teal-200 px-3 py-2 text-left">场景</th>
+                                                <th scope="col" class="border border-teal-200 px-3 py-2 text-center">产品价格 &lt;€15
                                                 </th>
-                                                <th class="border border-teal-200 px-3 py-2 text-center">产品价格 €15-50
+                                                <th scope="col" class="border border-teal-200 px-3 py-2 text-center">产品价格 €15-50
                                                 </th>
-                                                <th class="border border-teal-200 px-3 py-2 text-center">产品价格 &gt;€50
+                                                <th scope="col" class="border border-teal-200 px-3 py-2 text-center">产品价格 &gt;€50
                                                 </th>
                                         </tr>
                                 </thead>
                                 <tbody>
                                         <tr>
-                                                <td class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
-                                                        到货损坏/缺陷</td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
+                                                        到货损坏/缺陷</th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center bg-emerald-50">
                                                         <span class="font-bold text-emerald-700">全额退款</span><br />
                                                         <span class="text-slate-500">不退货</span>
@@ -1608,8 +1623,8 @@
                                                 </td>
                                         </tr>
                                         <tr>
-                                                <td class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
-                                                        不喜欢/不合适</td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
+                                                        不喜欢/不合适</th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center bg-emerald-50">
                                                         <span class="font-bold text-emerald-700">全额退款</span><br />
                                                         <span class="text-slate-500">不退货</span>
@@ -1624,8 +1639,8 @@
                                                 </td>
                                         </tr>
                                         <tr>
-                                                <td class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
-                                                        配件缺失</td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
+                                                        配件缺失</th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center bg-emerald-50">
                                                         <span class="font-bold text-emerald-700">全额退款</span><br />
                                                         <span class="text-slate-500">不退货</span>
@@ -1640,8 +1655,8 @@
                                                 </td>
                                         </tr>
                                         <tr>
-                                                <td class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
-                                                        使用一段时间后坏了</td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold bg-slate-50">
+                                                        使用一段时间后坏了</th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center bg-emerald-50">
                                                         <span class="font-bold text-emerald-700">全额退款</span><br />
                                                         <span class="text-slate-500">不退货</span>

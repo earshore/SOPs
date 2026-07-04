@@ -10,13 +10,16 @@ const homeTemplate = `
     </div>
     <aside class="floating-workbench" aria-label="浮动工作台">
       <button type="button" class="floating-workbench__trigger" aria-expanded="false"
-        aria-controls="home-floating-workbench-actions" aria-label="展开浮动工作台">工作台</button>
+        aria-controls="home-floating-workbench-actions" aria-label="展开浮动工作台" title="工作台">
+        <i class="fas fa-layer-group" aria-hidden="true"></i>
+        <span class="sr-only">工作台</span>
+      </button>
       <div id="home-floating-workbench-actions" class="floating-workbench__actions" aria-label="高频工作入口"
         aria-hidden="true" inert>
-        <button data-action="switch-tab" data-tab="ppc_search_terms" aria-label="打开 PPC 搜索词">PPC 搜索词</button>
-        <button data-action="switch-tab" data-tab="sops_npi_tracker" aria-label="打开新品跟踪">新品跟踪</button>
-        <button data-action="switch-tab" data-tab="sops_listing_seo" aria-label="打开 Listing SEO">Listing SEO</button>
-        <button data-action="switch-tab" data-tab="playground" aria-label="打开 Deep Chat">Deep Chat</button>
+        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="ppc_search_terms" aria-label="打开 PPC 搜索词">PPC 搜索词</button>
+        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="sops_npi_tracker" aria-label="打开新品跟踪">新品跟踪</button>
+        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="sops_listing_seo" aria-label="打开 Listing SEO">Listing SEO</button>
+        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="playground" aria-label="打开 Deep Chat">Deep Chat</button>
       </div>
     </aside>
   </div>
@@ -145,13 +148,18 @@ it('mounts the full home splash with particles, hero copy, floating workbench, a
   const actions = container.querySelector<HTMLElement>('.floating-workbench__actions');
 
   workbench?.dispatchEvent(new MouseEvent('mouseenter'));
+  expect(workbench?.classList.contains('is-expanded')).toBe(false);
+
+  trigger?.click();
   expect(workbench?.classList.contains('is-expanded')).toBe(true);
   expect(trigger?.getAttribute('aria-expanded')).toBe('true');
   expect(actions?.getAttribute('aria-hidden')).toBe('false');
   expect(actions?.hasAttribute('inert')).toBe(false);
 
-  workbench?.dispatchEvent(new MouseEvent('mouseleave'));
+  container.querySelector<HTMLButtonElement>('[data-tab="ppc_search_terms"]')?.click();
   expect(workbench?.classList.contains('is-expanded')).toBe(false);
+  expect(actions?.getAttribute('aria-hidden')).toBe('true');
+  expect(actions?.hasAttribute('inert')).toBe(true);
 
   trigger?.click();
   expect(workbench?.classList.contains('is-expanded')).toBe(true);

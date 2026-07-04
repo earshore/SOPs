@@ -758,22 +758,26 @@
         </div>
         <!-- ========== 多语言高危词速查 ========== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="rw-multilingual-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-language text-indigo-500"></i>多语言高危词对照表 — 翻译后更容易忽略
                 </h2>
-                <p class="text-xs text-slate-500 mb-4">
+                <p id="rw-multilingual-description" class="text-xs text-slate-500 mb-4">
                         很多卖家英语版 Listing 检查过了，但翻译成德语/法语后忘了检查——同一个词在其他语言中照样违规。以下是最常出问题的词在各语言中的写法。
                 </p>
-                <div class="overflow-x-auto">
-                        <table class="w-full text-xs border-collapse">
+                <div class="overflow-x-auto" role="region" tabindex="0"
+                        aria-labelledby="rw-multilingual-title"
+                        aria-describedby="rw-multilingual-description">
+                        <table class="w-full text-xs border-collapse" aria-labelledby="rw-multilingual-title"
+                                aria-describedby="rw-multilingual-description">
+                                <caption class="sr-only">多语言高危词对照表</caption>
                                 <thead>
                                         <tr class="bg-red-100">
-                                                <th class="border border-red-200 px-3 py-2 text-left">高危词 (EN)</th>
-                                                <th class="border border-red-200 px-3 py-2 text-left">🇩🇪 Deutsch</th>
-                                                <th class="border border-red-200 px-3 py-2 text-left">🇫🇷 Français</th>
-                                                <th class="border border-red-200 px-3 py-2 text-left">🇮🇹 Italiano</th>
-                                                <th class="border border-red-200 px-3 py-2 text-left">🇪🇸 Español</th>
-                                                <th class="border border-red-200 px-3 py-2 text-center">等级</th>
+                                                <th scope="col" class="border border-red-200 px-3 py-2 text-left">高危词 (EN)</th>
+                                                <th scope="col" class="border border-red-200 px-3 py-2 text-left">🇩🇪 Deutsch</th>
+                                                <th scope="col" class="border border-red-200 px-3 py-2 text-left">🇫🇷 Français</th>
+                                                <th scope="col" class="border border-red-200 px-3 py-2 text-left">🇮🇹 Italiano</th>
+                                                <th scope="col" class="border border-red-200 px-3 py-2 text-left">🇪🇸 Español</th>
+                                                <th scope="col" class="border border-red-200 px-3 py-2 text-center">等级</th>
                                         </tr>
                                 </thead>
                                 <tbody>
@@ -977,10 +981,10 @@
                 <div
                         class="p-6 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <h2 id="rw-results-title" class="text-lg font-bold text-slate-800 flex items-center gap-2">
                                         <i class="fas fa-database text-blue-500"></i>完整词条检索库
                                 </h2>
-                                <p class="text-xs text-slate-500 mt-1">输入任何关键词快速检索，支持英语及各欧洲语言。</p>
+                                <p id="rw-results-description" class="text-xs text-slate-500 mt-1">输入任何关键词快速检索，支持英语及各欧洲语言。</p>
                         </div>
                         <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
                                 <span class="text-xs font-bold text-slate-600 px-2"><i
@@ -1016,6 +1020,7 @@
                                         <input class="w-full pl-9 pr-4 py-2 border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                                                 id="rw-search-input"
                                                 aria-label="高危词检索关键词"
+                                                aria-describedby="rw-results-description rw-results-table-help"
                                                 placeholder="输入关键词检索 (如 Bamboo, Antibacterial, CE, Bio, Leder...)"
                                                 type="text" />
                                 </div>
@@ -1025,18 +1030,27 @@
                                         id="rw-clear-btn" title="重置"><i class="fas fa-rotate-left"></i></button>
                         </div>
                 </div>
-                <div class="overflow-x-auto min-h-[400px]">
-                        <table class="w-full text-sm text-left">
+                <p id="rw-results-table-help"
+                        class="px-4 pt-3 pb-2 text-xs font-semibold text-slate-600 bg-slate-50 border-b border-slate-200">
+                        表格支持横向滚动；按关键词、分类、风险等级和受影响站点查看高危词条。
+                </p>
+                <div id="rw-results-table-wrapper" class="overflow-x-auto min-h-[400px]" role="region"
+                        tabindex="0" aria-labelledby="rw-results-title"
+                        aria-describedby="rw-results-description rw-results-table-help rw-stats-display">
+                        <table id="rw-results-table" class="w-full text-sm text-left"
+                                aria-labelledby="rw-results-title"
+                                aria-describedby="rw-results-description rw-results-table-help rw-stats-display">
+                                <caption class="sr-only">完整高危词条检索结果表</caption>
                                 <thead
                                         class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 sticky top-0 shadow-sm z-10">
                                         <tr>
-                                                <th class="px-4 py-3 w-1/4">
+                                                <th scope="col" class="px-4 py-3 w-1/4">
                                                         关键词
                                                         <span
                                                                 class="block text-[10px] font-normal text-slate-500 mt-0.5">Keywords
                                                                 &amp; Variants</span>
                                                 </th>
-                                                <th class="px-4 py-3 w-1/6">
+                                                <th scope="col" class="px-4 py-3 w-1/6">
                                                         <div class="flex flex-col gap-1">
                                                                 <span>分类</span>
                                                                 <select class="text-xs font-normal border border-slate-300 rounded px-1 py-0.5 bg-white focus:ring-1 focus:ring-blue-500 outline-none max-w-[120px]"
@@ -1046,7 +1060,7 @@
                                                                 </select>
                                                         </div>
                                                 </th>
-                                                <th class="px-4 py-3 w-1/8 text-center">
+                                                <th scope="col" class="px-4 py-3 w-1/8 text-center">
                                                         <div class="flex flex-col gap-1 items-center">
                                                                 <span>风险等级</span>
                                                                 <select class="text-xs font-normal border border-slate-300 rounded px-1 py-0.5 bg-white focus:ring-1 focus:ring-blue-500 outline-none w-20"
@@ -1056,19 +1070,19 @@
                                                                 </select>
                                                         </div>
                                                 </th>
-                                                <th class="px-4 py-3 w-1/6">
+                                                <th scope="col" class="px-4 py-3 w-1/6">
                                                         受影响站点
                                                         <span
                                                                 class="block text-[10px] font-normal text-slate-500 mt-0.5">Affected
                                                                 Marketplaces</span>
                                                 </th>
-                                                <th class="px-4 py-3 w-1/5">
+                                                <th scope="col" class="px-4 py-3 w-1/5">
                                                         常见触雷产品
                                                         <span
                                                                 class="block text-[10px] font-normal text-slate-500 mt-0.5">Common
                                                                 Products</span>
                                                 </th>
-                                                <th class="px-4 py-3 w-1/8 text-center">操作</th>
+                                                <th scope="col" class="px-4 py-3 w-1/8 text-center">操作</th>
                                         </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100" id="rw-results-tbody">
@@ -1083,19 +1097,23 @@
         </div>
         <!-- ========== 安全替代词速查 ========== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="rw-alternatives-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-exchange-alt text-emerald-500"></i>高危词 → 安全替代词 速查表
                 </h2>
-                <p class="text-xs text-slate-500 mb-4">遇到高危词不是简单删掉，而是用合规的方式表达同样的卖点。以下是最常用的替换方案。</p>
-                <div class="overflow-x-auto">
-                        <table class="w-full text-xs border-collapse">
+                <p id="rw-alternatives-description" class="text-xs text-slate-500 mb-4">遇到高危词不是简单删掉，而是用合规的方式表达同样的卖点。以下是最常用的替换方案。</p>
+                <div class="overflow-x-auto" role="region" tabindex="0"
+                        aria-labelledby="rw-alternatives-title"
+                        aria-describedby="rw-alternatives-description">
+                        <table class="w-full text-xs border-collapse" aria-labelledby="rw-alternatives-title"
+                                aria-describedby="rw-alternatives-description">
+                                <caption class="sr-only">高危词安全替代词速查表</caption>
                                 <thead>
                                         <tr class="bg-emerald-100">
-                                                <th class="border border-emerald-200 px-3 py-2 text-left w-1/5">❌ 禁用 /
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-left w-1/5">❌ 禁用 /
                                                         高危词</th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-left w-2/5">✅ 安全替代方案
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-left w-2/5">✅ 安全替代方案
                                                 </th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-left w-2/5">💡 说明
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-left w-2/5">💡 说明
                                                 </th>
                                         </tr>
                                 </thead>

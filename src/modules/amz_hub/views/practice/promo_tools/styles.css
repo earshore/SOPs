@@ -567,8 +567,27 @@
   border-radius: 18px;
 }
 
+.amzpt_table_wrapper:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring-soft, rgba(37, 99, 235, 0.16));
+}
+
+.amzpt_table_caption,
+.amzpt_table_desc {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .amzpt_table {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
   font-size: 0.92rem;
   background: #ffffff;
@@ -585,6 +604,7 @@
   text-align: left;
   vertical-align: top;
   line-height: 1.65;
+  overflow-wrap: anywhere;
 }
 
 .amzpt_table tbody tr:nth-child(even) {
@@ -595,9 +615,10 @@
   border-top: 1px solid #e2e8f0;
 }
 
-.amzpt_table td:first-child {
+.amzpt_table tbody th[scope='row'] {
   font-weight: 700;
   color: var(--color-slate-900);
+  text-align: left;
 }
 
 .amzpt_tip_list,

@@ -43,6 +43,12 @@ interface PromoSection {
   content: ContentBlock[];
 }
 
+interface ContentBlockRenderContext {
+  blockIndex: number;
+  sectionId: string;
+  sectionTitle: string;
+}
+
 const promoData: PromoSection[] = [
   {
     id: 'overview',
@@ -671,13 +677,19 @@ function renderStatsBlock(block: ContentBlock): string {
   `;
 }
 
-function renderComparisonTableBlock(block: ContentBlock): string {
+function renderComparisonTableBlock(block: ContentBlock, context: ContentBlockRenderContext): string {
+  const tableId = `amzpt-table-${context.sectionId}-${context.blockIndex}`;
+  const descriptionId = `${tableId}-desc`;
+  const caption = `${context.sectionTitle}对比表`;
+
   return `
-    <div class="amzpt_table_wrapper">
+    <div class="amzpt_table_wrapper" role="region" aria-label="${caption}" aria-describedby="${descriptionId}" tabindex="0">
+      <p id="${descriptionId}" class="amzpt_table_desc">横向滚动查看${caption}的全部列。</p>
       <table class="amzpt_table">
+        <caption class="amzpt_table_caption">${caption}</caption>
         <thead>
           <tr>
-            ${(block.headers ?? []).map(header => `<th>${header}</th>`).join('')}
+            ${(block.headers ?? []).map(header => `<th scope="col">${header}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
@@ -685,7 +697,11 @@ function renderComparisonTableBlock(block: ContentBlock): string {
             .map(
               row => `
                 <tr>
-                  ${row.map(cell => `<td>${cell}</td>`).join('')}
+                  ${row
+                    .map((cell, cellIndex) =>
+                      cellIndex === 0 ? `<th scope="row">${cell}</th>` : `<td>${cell}</td>`
+                    )
+                    .join('')}
                 </tr>
               `
             )
@@ -753,7 +769,10 @@ function renderChecklistBlock(block: ContentBlock): string {
   `;
 }
 
-const contentBlockRenderers: Record<ContentBlock['type'], (block: ContentBlock) => string> = {
+const contentBlockRenderers: Record<
+  ContentBlock['type'],
+  (block: ContentBlock, context: ContentBlockRenderContext) => string
+> = {
   text: renderTextBlock,
   section_header: renderSectionHeaderBlock,
   callout: renderCalloutBlock,
@@ -765,8 +784,8 @@ const contentBlockRenderers: Record<ContentBlock['type'], (block: ContentBlock) 
   checklist: renderChecklistBlock,
 };
 
-function renderContentBlock(block: ContentBlock): string {
-  return contentBlockRenderers[block.type](block);
+function renderContentBlock(block: ContentBlock, context: ContentBlockRenderContext): string {
+  return contentBlockRenderers[block.type](block, context);
 }
 
 class PromotionsModule extends BaseModule {
@@ -846,7 +865,7 @@ class PromotionsModule extends BaseModule {
               <i class="fas ${section.icon} amzpt_card_icon"></i>
               <h2 class="amzpt_card_title">${section.title}</h2>
             </div>
-            ${this.renderSectionBody(section.content)}
+            ${this.renderSectionBody(section)}
           </section>
         `
         )
@@ -854,8 +873,16 @@ class PromotionsModule extends BaseModule {
     );
   }
 
-  private renderSectionBody(contentArray: ContentBlock[]): string {
-    return contentArray.map(block => renderContentBlock(block)).join('');
+  private renderSectionBody(section: PromoSection): string {
+    return section.content
+      .map((block, blockIndex) =>
+        renderContentBlock(block, {
+          blockIndex,
+          sectionId: section.id,
+          sectionTitle: section.title,
+        })
+      )
+      .join('');
   }
 }
 

@@ -977,32 +977,40 @@
         </div>
         <!-- ========== QA 管理表 ========== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="qa-tracking-table-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-table text-teal-500"></i>QA 管理追踪表（Google Sheet）
                 </h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
-                                <h3 class="font-bold text-slate-700 text-sm mb-3">📊 字段设计</h3>
-                                <div class="overflow-x-auto">
-                                        <table class="w-full text-xs border-collapse">
+                                <h3 id="qa-tracking-fields-title" class="font-bold text-slate-700 text-sm mb-3">📊 字段设计</h3>
+                                <p id="qa-tracking-fields-description" class="text-xs text-slate-500 mb-3">
+                                        表格支持横向滚动；按字段查看 QA 追踪表的记录口径和示例。
+                                </p>
+                                <div id="qa-tracking-fields-wrapper" class="overflow-x-auto" tabindex="0"
+                                        role="region" aria-labelledby="qa-tracking-fields-title"
+                                        aria-describedby="qa-tracking-fields-description">
+                                        <table id="qa-tracking-fields-table" class="w-full text-xs border-collapse"
+                                                aria-labelledby="qa-tracking-fields-title"
+                                                aria-describedby="qa-tracking-fields-description">
+                                                <caption class="sr-only">QA 管理追踪字段表</caption>
                                                 <thead>
                                                         <tr class="bg-teal-100">
-                                                                <th
+                                                                <th scope="col"
                                                                         class="border border-teal-200 px-2 py-1.5 text-left">
                                                                         字段</th>
-                                                                <th
+                                                                <th scope="col"
                                                                         class="border border-teal-200 px-2 py-1.5 text-left">
                                                                         说明</th>
-                                                                <th
+                                                                <th scope="col"
                                                                         class="border border-teal-200 px-2 py-1.5 text-left">
                                                                         示例</th>
                                                         </tr>
                                                 </thead>
                                                 <tbody>
                                                         <tr>
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        日期</td>
+                                                                        日期</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">发现日期
                                                                 </td>
                                                                 <td
@@ -1010,27 +1018,27 @@
                                                                         2025-06-10</td>
                                                         </tr>
                                                         <tr class="bg-slate-50">
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        站点</td>
+                                                                        站点</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">哪个站</td>
                                                                 <td
                                                                         class="border border-slate-200 px-2 py-1.5 text-slate-500">
                                                                         DE</td>
                                                         </tr>
                                                         <tr>
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        ASIN</td>
+                                                                        ASIN</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">产品</td>
                                                                 <td
                                                                         class="border border-slate-200 px-2 py-1.5 text-slate-500">
                                                                         B0XXXXXXXX</td>
                                                         </tr>
                                                         <tr class="bg-slate-50">
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        问题原文</td>
+                                                                        问题原文</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">买家提问
                                                                 </td>
                                                                 <td
@@ -1038,9 +1046,9 @@
                                                                         Ist das wasserdicht?</td>
                                                         </tr>
                                                         <tr>
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        问题分类</td>
+                                                                        问题分类</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">A-F类
                                                                 </td>
                                                                 <td
@@ -1048,9 +1056,9 @@
                                                                         A-产品参数</td>
                                                         </tr>
                                                         <tr class="bg-slate-50">
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        投票数</td>
+                                                                        投票数</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">有多少人关心
                                                                 </td>
                                                                 <td
@@ -1058,9 +1066,9 @@
                                                                         12</td>
                                                         </tr>
                                                         <tr>
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        是否已回复</td>
+                                                                        是否已回复</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">官方回复状态
                                                                 </td>
                                                                 <td
@@ -1068,9 +1076,9 @@
                                                                         ✅ 已回复</td>
                                                         </tr>
                                                         <tr class="bg-slate-50">
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        植入关键词</td>
+                                                                        植入关键词</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">回答中的SEO词
                                                                 </td>
                                                                 <td
@@ -1078,9 +1086,9 @@
                                                                         waterproof IP65</td>
                                                         </tr>
                                                         <tr>
-                                                                <td
+                                                                <th scope="row"
                                                                         class="border border-slate-200 px-2 py-1.5 font-semibold">
-                                                                        Listing反哺</td>
+                                                                        Listing反哺</th>
                                                                 <td class="border border-slate-200 px-2 py-1.5">
                                                                         是否需更新Listing</td>
                                                                 <td
@@ -1138,25 +1146,30 @@
         </div>
         <!-- ========== QA 数量建设目标 ========== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h2 id="qa-baseline-table-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-chart-line text-emerald-500"></i>QA 数量建设基准线
                 </h2>
-                <p class="text-xs text-slate-500 mb-4">QA 数量反映产品的信息丰富度。越多高质量 QA = 越少客服邮件 + 越高转化率。</p>
-                <div class="overflow-x-auto">
-                        <table class="w-full text-sm border-collapse">
+                <p id="qa-baseline-table-description" class="text-xs text-slate-500 mb-4">QA 数量反映产品的信息丰富度。越多高质量 QA = 越少客服邮件 + 越高转化率。</p>
+                <div id="qa-baseline-table-wrapper" class="overflow-x-auto" tabindex="0" role="region"
+                        aria-labelledby="qa-baseline-table-title"
+                        aria-describedby="qa-baseline-table-description">
+                        <table id="qa-baseline-table" class="w-full text-sm border-collapse"
+                                aria-labelledby="qa-baseline-table-title"
+                                aria-describedby="qa-baseline-table-description">
+                                <caption class="sr-only">QA 数量建设基准线表</caption>
                                 <thead>
                                         <tr class="bg-emerald-100">
-                                                <th class="border border-emerald-200 px-3 py-2 text-left">ASIN 类型</th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-center">当前 QA 数</th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-center">目标 QA 数</th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-center">官方回复覆盖</th>
-                                                <th class="border border-emerald-200 px-3 py-2 text-left">行动</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-left">ASIN 类型</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-center">当前 QA 数</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-center">目标 QA 数</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-center">官方回复覆盖</th>
+                                                <th scope="col" class="border border-emerald-200 px-3 py-2 text-left">行动</th>
                                         </tr>
                                 </thead>
                                 <tbody>
                                         <tr class="bg-red-50">
-                                                <td class="border border-slate-200 px-3 py-2 font-semibold">核心利润 ASIN
-                                                </td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold">核心利润 ASIN
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">&lt;10</td>
                                                 <td
                                                         class="border border-slate-200 px-3 py-2 text-center font-bold text-emerald-600">
@@ -1166,8 +1179,8 @@
                                                         确保每条都有官方回答</td>
                                         </tr>
                                         <tr>
-                                                <td class="border border-slate-200 px-3 py-2 font-semibold">次核心 ASIN
-                                                </td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold">次核心 ASIN
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">&lt;5</td>
                                                 <td
                                                         class="border border-slate-200 px-3 py-2 text-center font-bold text-blue-600">
@@ -1176,8 +1189,8 @@
                                                 <td class="border border-slate-200 px-3 py-2 text-xs">自然积累 + 及时回复</td>
                                         </tr>
                                         <tr class="bg-slate-50">
-                                                <td class="border border-slate-200 px-3 py-2 font-semibold">长尾/新品 ASIN
-                                                </td>
+                                                <th scope="row" class="border border-slate-200 px-3 py-2 font-semibold">长尾/新品 ASIN
+                                                </th>
                                                 <td class="border border-slate-200 px-3 py-2 text-center">0-3</td>
                                                 <td
                                                         class="border border-slate-200 px-3 py-2 text-center font-bold text-slate-500">

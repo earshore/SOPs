@@ -7,6 +7,7 @@ export const homeManifest = defineModuleManifest({
     {
       key: 'HOME',
       routeId: 'home',
+      path: '/home',
       label: '首页',
       icon: 'fas fa-home',
       viewPath: '/src/modules/home/homeDisplay.html',

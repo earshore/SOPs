@@ -213,7 +213,7 @@ describe('RouteConfigConverter', () => {
       total: 2,
       success: 2,
       failed: 0,
-      aliases: 2,
+      aliases: 1,
     });
     expect(result.routes.app_center_overview).toMatchObject({
       routeId: 'app_center_overview',
@@ -223,7 +223,6 @@ describe('RouteConfigConverter', () => {
     });
     expect(result.aliases).toMatchObject({
       '/app_center': '/app_center_overview',
-      '/sops': '/sops_overview',
     });
   });
 

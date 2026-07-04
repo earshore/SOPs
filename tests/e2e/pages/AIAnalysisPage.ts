@@ -433,7 +433,7 @@ export class AIAnalysisPage extends BasePage {
    * 导航到 AI 分析页面
    */
   async navigate(): Promise<void> {
-    await super.navigate('/#/app-center/ai-analysis');
+    await super.navigate('/#/app-center/master_analysis/ai-analysis');
     await this.waitForPageReady();
     if (this.useDeterministicFixture) {
       await this.seedScraperFixture();

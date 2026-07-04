@@ -8,7 +8,7 @@
 }
 
 /* 确保模块容器允许下拉框溢出 */
-.module-container {
+#amz_hub_content_area .module-container {
   overflow: visible !important;
 }
 

@@ -17,9 +17,9 @@ export default {
       // 测试的 URL 列表
       url: [
         'http://localhost:4173/',
-        'http://localhost:4173/#/app-center/promptlab',
-        'http://localhost:4173/#/app-center/ai-analysis',
-        'http://localhost:4173/#/app-center/scraper',
+        'http://localhost:4173/#/app-center/master_analysis/promptlab',
+        'http://localhost:4173/#/app-center/master_analysis/ai-analysis',
+        'http://localhost:4173/#/app-center/master_analysis/scraper',
       ],
 
       // 每个 URL 运行的次数（用于获取稳定的平均值）

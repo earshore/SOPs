@@ -119,6 +119,55 @@ function clearDerivedAnalysisStateAfterDataChange(data: ScrapedData): void {
   state.setCurrentPrompt?.('');
 }
 
+function setImportStatus(
+  panel: ScraperPanelThis,
+  target: HTMLInputElement,
+  message: string,
+  tone: ScraperPanelState['importStatusTone']
+): void {
+  panel.importStatus = message;
+  panel.importStatusTone = tone;
+
+  if (tone === 'error') {
+    target.setAttribute('aria-invalid', 'true');
+    return;
+  }
+
+  target.removeAttribute('aria-invalid');
+}
+
+function applyImportedData(panel: ScraperPanelThis, data: ScrapedData): void {
+  appStore.getState().setScrapedData(data);
+  clearDerivedAnalysisStateAfterDataChange(data);
+
+  const marketplace = data.metadata?.marketplace || 'DE';
+  appStore.getState().setSelectedSite(marketplace as ScraperSite);
+  panel.selectedSite = marketplace as ScraperSite;
+
+  if (panel.dataPreview) {
+    panel.updateDataPreview(data);
+  }
+
+  panel.loadHistory();
+}
+
+function getImportResultStatus(result: ImportResult): {
+  message: string;
+  tone: ScraperPanelState['importStatusTone'];
+} {
+  if (result.error) {
+    return {
+      message: `导入失败：${result.error}`,
+      tone: 'error',
+    };
+  }
+
+  return {
+    message: '导入已取消。',
+    tone: 'status',
+  };
+}
+
 function attachScraperPanelBehavior(
   panel: ScraperPanelState
 ): ScraperPanelState & Record<string, unknown> {
@@ -717,9 +766,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
     const files = Array.from(target.files || []);
     if (files.length === 0) return;
 
-    this.importStatus = `正在导入 ${files.length} 个 JSON 文件...`;
-    this.importStatusTone = 'status';
-    target.removeAttribute('aria-invalid');
+    setImportStatus(this, target, `正在导入 ${files.length} 个 JSON 文件...`, 'status');
 
     try {
       const result: ImportResult = await handleImportFilesCore(
@@ -729,43 +776,21 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
       );
 
       if (result.success && result.data) {
-        // 更新全局状态
-        appStore.getState().setScrapedData(result.data);
-        clearDerivedAnalysisStateAfterDataChange(result.data);
-
-        // 根据新导入的数据更新选中的站点
-        const marketplace = result.data.metadata?.marketplace || 'DE';
-        appStore.getState().setSelectedSite(marketplace as ScraperSite);
-        this.selectedSite = marketplace as ScraperSite;
-
-        // 更新数据预览
-        if (this.dataPreview) {
-          this.updateDataPreview(result.data);
-        }
-
-        // 重新加载历史记录
-        this.loadHistory();
-        this.importStatus = `导入完成：${result.data.products?.length || 0} 个 ASIN 已更新。`;
-        this.importStatusTone = 'status';
-        target.removeAttribute('aria-invalid');
+        applyImportedData(this, result.data);
+        setImportStatus(
+          this,
+          target,
+          `导入完成：${result.data.products?.length || 0} 个 ASIN 已更新。`,
+          'status'
+        );
         return;
       }
 
-      if (result.error) {
-        this.importStatus = `导入失败：${result.error}`;
-        this.importStatusTone = 'error';
-        target.setAttribute('aria-invalid', 'true');
-        return;
-      }
-
-      this.importStatus = '导入已取消。';
-      this.importStatusTone = 'status';
-      target.removeAttribute('aria-invalid');
+      const status = getImportResultStatus(result);
+      setImportStatus(this, target, status.message, status.tone);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.importStatus = `导入失败：${message}`;
-      this.importStatusTone = 'error';
-      target.setAttribute('aria-invalid', 'true');
+      setImportStatus(this, target, `导入失败：${message}`, 'error');
     } finally {
       target.value = '';
     }
