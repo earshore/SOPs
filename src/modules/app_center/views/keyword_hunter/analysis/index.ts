@@ -756,11 +756,7 @@ function appendCoverSummary(h2: HTMLHeadingElement, summaryText: string): void {
   h2.appendChild(summary);
 }
 
-function enhanceScoreCover(
-  h2: HTMLHeadingElement,
-  total: number,
-  summaryText: string
-): void {
+function enhanceScoreCover(h2: HTMLHeadingElement, total: number, summaryText: string): void {
   h2.classList.add('kh-report-cover');
   h2.querySelector('.kh-report-cover-eyebrow')?.remove();
   if (h2.querySelector('.kh-report-cover-main')) {
