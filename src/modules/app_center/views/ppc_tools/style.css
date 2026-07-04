@@ -34,7 +34,8 @@
   --ppc-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
   --ppc-shadow-panel: var(--shadow-panel, 0 12px 30px -28px rgba(15, 23, 42, 0.45));
   --ppc-shadow-accent: 0 8px 18px -14px color-mix(in srgb, var(--ppc-accent) 72%, transparent);
-  --ppc-shadow-accent-hover: 0 10px 22px -16px color-mix(in srgb, var(--color-teal-500, #14b8a6) 72%, transparent);
+  --ppc-shadow-accent-hover: 0 10px 22px -16px
+    color-mix(in srgb, var(--color-teal-500, #14b8a6) 72%, transparent);
   --ppc-focus-ring: var(--focus-ring-soft, rgba(37, 99, 235, 0.16));
   --ppc-motion-duration: var(--micro-duration-quick, 150ms);
   --ppc-motion-ease: var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));

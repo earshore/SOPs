@@ -432,15 +432,26 @@ describe('builtin guards auth and feature flags', () => {
   beforeEach(setupGuardTest);
   afterEach(cleanupGuardTest);
 
-  it('allows authenticated routes in the current no-auth implementation', async () => {
+  it('rejects authenticated routes until a real auth service is wired', async () => {
     await expect(
       authGuard.check(
         route('/secure', {
-          meta: { requiresAuth: true, permissions: ['admin'] },
+          meta: {
+            requiresAuth: true,
+            permissions: ['admin'],
+            accessPolicy: 'permission_required',
+          },
         }),
         null
       )
-    ).resolves.toBe(true);
+    ).resolves.toEqual({
+      allow: false,
+      redirect: '/home',
+      reason: 'auth_service_unavailable',
+    });
+    expect(
+      (window as Window & { showToast: ReturnType<typeof vi.fn> }).showToast
+    ).toHaveBeenCalledWith('当前版本未启用登录/权限服务', { type: 'warning' });
   });
 
   it('checks feature flags before applying the current no-auth policy', async () => {

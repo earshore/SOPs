@@ -355,6 +355,9 @@ describe('current UI mega menu helpers', () => {
     expect(group?.classList.contains('is-open')).toBe(false);
   });
 
+});
+
+describe('current UI mega menu sibling and CSS safeguards', () => {
   it('keeps only one mega menu expanded across sibling nav groups', () => {
     document.body.innerHTML = `
       <div class="nav-group" id="group-a">

@@ -43,6 +43,50 @@ function denyFeatureAccess(flagName: string): GuardResult {
   };
 }
 
+function hasRuntimeAuthService(): boolean {
+  // 当前静态前端未接入真实身份/权限服务。不要用本地状态伪造认证边界。
+  return false;
+}
+
+function checkFeatureFlagAccess(to: Route): GuardResult {
+  const featureFlag = to.config?.meta?.featureFlag;
+  if (typeof featureFlag !== 'string' || featureFlag.length === 0) {
+    return true;
+  }
+
+  const defaultEnabled = to.config.meta?.featureFlagDefault === true;
+  if (!featureFlagService.isEnabled(featureFlag, defaultEnabled)) {
+    return denyFeatureAccess(featureFlag);
+  }
+
+  return true;
+}
+
+async function checkAuthenticatedAccess(to: Route): Promise<GuardResult> {
+  if (!hasRuntimeAuthService()) {
+    return denyAuthAccess('当前版本未启用登录/权限服务', 'auth_service_unavailable');
+  }
+
+  // 检查认证状态
+  const isAuthenticated = await checkAuthentication();
+
+  if (!isAuthenticated) {
+    return denyAuthAccess('请先登录', 'unauthorized');
+  }
+
+  // 检查权限
+  const permissions = to.config.meta?.permissions;
+  if (permissions && permissions.length > 0) {
+    const hasPermission = await checkPermissions(permissions);
+
+    if (!hasPermission) {
+      return denyAuthAccess('权限不足', 'insufficient_permissions');
+    }
+  }
+
+  return true;
+}
+
 // ==================== 元信息验证守卫 ====================
 
 /**
@@ -134,12 +178,9 @@ export const authGuard: RouteGuard = {
   priority: 3,
 
   async check(to: Route, _from: Route | null): Promise<GuardResult> {
-    const featureFlag = to.config?.meta?.featureFlag;
-    if (typeof featureFlag === 'string' && featureFlag.length > 0) {
-      const defaultEnabled = to.config.meta?.featureFlagDefault === true;
-      if (!featureFlagService.isEnabled(featureFlag, defaultEnabled)) {
-        return denyFeatureAccess(featureFlag);
-      }
+    const featureAccess = checkFeatureFlagAccess(to);
+    if (featureAccess !== true) {
+      return featureAccess;
     }
 
     // 如果路由不需要认证，直接通过
@@ -148,23 +189,7 @@ export const authGuard: RouteGuard = {
     }
 
     try {
-      // 检查认证状态
-      const isAuthenticated = await checkAuthentication();
-
-      if (!isAuthenticated) {
-        return denyAuthAccess('请先登录', 'unauthorized');
-      }
-
-      // 检查权限
-      if (to.config.meta.permissions && to.config.meta.permissions.length > 0) {
-        const hasPermission = await checkPermissions(to.config.meta.permissions);
-
-        if (!hasPermission) {
-          return denyAuthAccess('权限不足', 'insufficient_permissions');
-        }
-      }
-
-      return true;
+      return await checkAuthenticatedAccess(to);
     } catch (error) {
       console.error('[authGuard] Authentication check failed:', error);
       return denyGuard('auth_check_failed');
@@ -220,8 +245,8 @@ export const dataPreloadGuard: RouteGuard = {
  * @returns 是否已认证
  */
 async function checkAuthentication(): Promise<boolean> {
-  // 当前产品未启用认证服务，路由认证守卫保持放行。
-  return true;
+  // 接入真实认证服务后在这里读取服务端可信会话。
+  return false;
 }
 
 /**
@@ -231,8 +256,8 @@ async function checkAuthentication(): Promise<boolean> {
  * @returns 是否有权限
  */
 async function checkPermissions(_permissions: string[]): Promise<boolean> {
-  // 当前产品未启用权限服务，路由权限守卫保持放行。
-  return true;
+  // 接入真实权限服务后在这里读取服务端授权结果。
+  return false;
 }
 
 // ==================== 导出所有内置守卫 ====================

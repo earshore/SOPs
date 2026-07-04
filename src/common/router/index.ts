@@ -8,13 +8,7 @@
 export * from './navigo';
 
 // 导出路由初始化函数
-export {
-  initRouter,
-  getRouter,
-  navigateToRouteId,
-  getCurrentRoute,
-  hasRoute,
-} from './initRouter';
+export { initRouter, getRouter, navigateToRouteId, getCurrentRoute, hasRoute } from './initRouter';
 
 /**
  * 路由系统初始化选项

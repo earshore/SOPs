@@ -7,7 +7,7 @@
  */
 
 import { ValidationError } from '@/common/errors/AppError';
-import { setSafeHtml } from '@/common/utils/security';
+import { isSafeHtmlAttribute, setSafeHtml } from '@/common/utils/security';
 
 /**
  * 渲染选项接口
@@ -478,12 +478,7 @@ export class SafeRenderer {
   }
 
   private isSafeAttribute(attr: Attr): boolean {
-    if (attr.name !== 'href' && attr.name !== 'src') {
-      return true;
-    }
-
-    const value = attr.value.trim().toLowerCase();
-    return !value.startsWith('javascript:') && !value.startsWith('data:');
+    return isSafeHtmlAttribute(attr.name, attr.value);
   }
 
   /**

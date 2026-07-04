@@ -677,7 +677,9 @@ describe('deep-chat playground request errors', () => {
 
     unmount();
   });
+});
 
+describe('deep-chat playground failed responses', () => {
   it('persists a visible assistant error when the LLM request fails after send', async () => {
     const container = document.createElement('main');
     document.body.append(container);
@@ -707,7 +709,9 @@ describe('deep-chat playground request errors', () => {
 
     unmount();
   });
+});
 
+describe('deep-chat playground timeout responses', () => {
   it('preserves streamed partial text without appending timeout errors', async () => {
     const container = document.createElement('main');
     document.body.append(container);
@@ -751,7 +755,9 @@ describe('deep-chat playground request errors', () => {
 
     unmount();
   });
+});
 
+describe('deep-chat playground empty responses', () => {
   it('persists a visible assistant error when the LLM response is empty', async () => {
     const container = document.createElement('main');
     document.body.append(container);

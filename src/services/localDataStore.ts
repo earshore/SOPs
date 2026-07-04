@@ -94,6 +94,7 @@ const CONFIG_KEYS = new Set([
 ]);
 const CONFIG_PREFIXES = ['llm_', 'feature_', 'layout_config_', 'modal_ignore_', 'ignore_', 'ppc_'];
 const CONFIG_SUFFIXES = ['_owner_v1'];
+const LEGACY_LLM_SECRET_PREFIX = 'llm_key_';
 const SECRET_KEYS = new Set(['proxy_config', 'proxy_key_map', 'scraper_proxy_config']);
 const WORKSPACE_STATE_KEYS = new Set(['app-storage']);
 const SCRAPE_HISTORY_KEYS = new Set([
@@ -130,7 +131,12 @@ function isCacheBucketKey(key: string, storageClass?: StorageClass): boolean {
 }
 
 function isSecretBucketKey(key: string, storageClass?: StorageClass): boolean {
-  return storageClass === 'secret' || key.startsWith('secure_') || SECRET_KEYS.has(key);
+  return (
+    storageClass === 'secret' ||
+    key.startsWith('secure_') ||
+    key.startsWith(LEGACY_LLM_SECRET_PREFIX) ||
+    SECRET_KEYS.has(key)
+  );
 }
 
 function isConfigBucketKey(key: string, storageClass?: StorageClass): boolean {

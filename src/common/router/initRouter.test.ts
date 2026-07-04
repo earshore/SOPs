@@ -200,15 +200,8 @@ describe('initRouter setup', () => {
 });
 
 describe('initRouter navigation and teardown', () => {
-  it('handles popstate, route-id navigation, and initial navigation branches', async () => {
-    const {
-      initRouter,
-      triggerInitialNavigation,
-      navigateTo,
-      navigateToRouteId,
-      hasRoute,
-      getCurrentRoute,
-    } = await loadInitRouter();
+  it('handles popstate and hashchange navigation branches', async () => {
+    const { initRouter } = await loadInitRouter();
     initRouter();
 
     window.location.hash = '#/app-center/playground';
@@ -250,6 +243,11 @@ describe('initRouter navigation and teardown', () => {
       replace: false,
       skipMiddleware: false,
     });
+  });
+
+  it('handles initial navigation branches', async () => {
+    const { initRouter, triggerInitialNavigation } = await loadInitRouter();
+    initRouter();
 
     window.location.hash = '';
     triggerInitialNavigation();
@@ -278,6 +276,14 @@ describe('initRouter navigation and teardown', () => {
       updateHistory: false,
       skipMiddleware: false,
     });
+  });
+});
+
+describe('initRouter route helper APIs', () => {
+  it('exposes route-id navigation and current route helpers', async () => {
+    const { initRouter, navigateTo, navigateToRouteId, hasRoute, getCurrentRoute } =
+      await loadInitRouter();
+    initRouter();
 
     await expect(navigateTo('/home', { replace: true })).resolves.toBe(true);
     expect(mocks.router.navigate).toHaveBeenCalledWith('/home', { replace: true });
@@ -287,16 +293,13 @@ describe('initRouter navigation and teardown', () => {
       replace: true,
     });
 
-    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     await expect(navigateToRouteId('__missing__')).resolves.toBe(false);
-    expect(consoleWarn).toHaveBeenCalledWith(
-      '[initRouter] Ignored navigation for unknown routeId:',
-      '__missing__'
-    );
     expect(hasRoute('/home')).toBe(true);
     expect(getCurrentRoute()).toEqual({ id: 'home' });
   });
+});
 
+describe('initRouter teardown and error handling', () => {
   it('logs conversion errors and destroys installed router state', async () => {
     const { initRouter, destroyRouter, getRouter } = await loadInitRouter();
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);

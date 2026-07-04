@@ -65,6 +65,7 @@ const PROXY_CREDENTIAL_TYPES = [
   'custom',
 ] as const;
 
+const LLM_CREDENTIAL_PREFIX = 'llm_key_';
 const PROXY_CREDENTIAL_PREFIX = 'proxy_key_';
 const SENSITIVE_PLAIN_STORAGE_KEY_PATTERN =
   /(?:api[_-]?key|access[_-]?key|private[_-]?key|password|token|secret|credential)/i;
@@ -80,6 +81,10 @@ const SENSITIVE_PLAIN_VALUE_KEYS = new Set([
 
 function getProxyCredentialKey(type: string): string {
   return `${PROXY_CREDENTIAL_PREFIX}${type || 'scraperapi'}`;
+}
+
+function getLLMCredentialKey(provider: string): string {
+  return `${LLM_CREDENTIAL_PREFIX}${provider}`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -108,6 +113,21 @@ function hasSensitivePlainValue(value: unknown): boolean {
     ([key, item]) =>
       SENSITIVE_PLAIN_VALUE_KEYS.has(key) && typeof item === 'string' && item.trim().length > 0
   );
+}
+
+function parseLegacyPlainSecret(raw: string): string {
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (typeof parsed === 'string') {
+      return parsed;
+    }
+    if (isRecord(parsed) && typeof parsed.apiKey === 'string') {
+      return parsed.apiKey;
+    }
+    return '';
+  } catch {
+    return raw;
+  }
 }
 
 /**
@@ -370,7 +390,11 @@ class StorageServiceClass implements IStorageService {
   }
 
   private _isSensitivePlainStorageKey(key: string): boolean {
-    return key === STORAGE_KEYS.PROXY_KEY_MAP || SENSITIVE_PLAIN_STORAGE_KEY_PATTERN.test(key);
+    return (
+      key === STORAGE_KEYS.PROXY_KEY_MAP ||
+      key.startsWith(LLM_CREDENTIAL_PREFIX) ||
+      SENSITIVE_PLAIN_STORAGE_KEY_PATTERN.test(key)
+    );
   }
 
   private _reportStorageError(
@@ -620,7 +644,9 @@ class StorageServiceClass implements IStorageService {
     if (!config) return null;
 
     try {
-      const apiKey = await this.getSecure(`llm_key_${activeProvider}`, '');
+      const apiKey =
+        (await this.getSecure<string>(getLLMCredentialKey(activeProvider), '')) ||
+        (await this._migrateLegacyPlainLLMKey(activeProvider));
       const fullConfig = { ...config, apiKey: apiKey || '' } as LLMProviderConfig;
 
       // 🎯 数据边界验证：验证完整配置
@@ -635,7 +661,7 @@ class StorageServiceClass implements IStorageService {
         {
           module: 'StorageService',
           action: 'getLLMConfigWithKey',
-          key: `llm_key_${activeProvider}`,
+          key: getLLMCredentialKey(activeProvider),
         },
         error as Error,
         {
@@ -678,6 +704,23 @@ class StorageServiceClass implements IStorageService {
   setLLMConfig(provider: string, config: LLMProviderConfig): void {
     this.set(`${STORAGE_KEYS.LLM_CONFIG_PREFIX}${provider}`, stripLLMSecret(config));
     this.set(STORAGE_KEYS.LLM_ACTIVE_PROVIDER, provider);
+  }
+
+  private async _migrateLegacyPlainLLMKey(provider: string): Promise<string> {
+    const legacyKey = getLLMCredentialKey(provider);
+    const raw = localStorage.getItem(legacyKey);
+    if (raw === null) {
+      return '';
+    }
+
+    const apiKey = parseLegacyPlainSecret(raw);
+    if (apiKey) {
+      await this.setSecure(legacyKey, apiKey);
+    }
+
+    localStorage.removeItem(legacyKey);
+    this._removeAccessTime(legacyKey);
+    return apiKey;
   }
 
   /**

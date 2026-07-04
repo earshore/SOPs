@@ -229,6 +229,28 @@ describe('LLM配置管理', () => {
       'secret-key'
     );
   });
+
+  it('应该迁移旧版明文LLM密钥到安全存储', async () => {
+    const provider = 'new_api';
+    const legacyKey = `llm_key_${provider}`;
+    const config = {
+      provider,
+      model: 'gpt-5',
+      apiKey: '',
+      endpoint: 'https://new.hongecb.store/v1',
+      models: ['gpt-5'],
+      enabled: true,
+    };
+
+    StorageService.setLLMConfig(provider, config);
+    localStorage.setItem(legacyKey, JSON.stringify('legacy-key'));
+
+    const result = await StorageService.getLLMConfigWithKey(provider);
+
+    expect(result?.apiKey).toBe('legacy-key');
+    expect(localStorage.getItem(legacyKey)).toBeNull();
+    await expect(StorageService.getSecure(legacyKey)).resolves.toBe('legacy-key');
+  });
 });
 
 // ================================================================
@@ -423,6 +445,11 @@ describe('敏感明文存储防护', () => {
   it('应该拒绝直接写入包含敏感字段的普通对象', () => {
     expect(StorageService.set('plain-config', { apiKey: 'secret' })).toBe(false);
     expect(StorageService.getRaw('plain-config')).toBeNull();
+  });
+
+  it('应该拒绝写入旧版明文LLM密钥键', () => {
+    expect(StorageService.setRaw('llm_key_new_api', 'secret')).toBe(false);
+    expect(StorageService.getRaw('llm_key_new_api')).toBeNull();
   });
 });
 

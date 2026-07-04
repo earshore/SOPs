@@ -38,10 +38,7 @@ export async function handleReportFileImport(
     setPasteInputError(container, '');
     callbacks.prepareReport(container, text);
     setText(container, 'ppc-file-name', `已选择：${file.name}`);
-    setPpcStatus(
-      container,
-      '报表已导入，请确认报表类型和阈值后点击“分析当前数据”。'
-    );
+    setPpcStatus(container, '报表已导入，请确认报表类型和阈值后点击“分析当前数据”。');
   } catch (error) {
     const message = error instanceof Error ? error.message : '文件读取失败';
     input.setAttribute('aria-invalid', 'true');

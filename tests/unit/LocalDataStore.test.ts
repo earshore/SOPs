@@ -106,6 +106,26 @@ import { LocalDataStore } from '@/services/localDataStore';
     expect(localStorage.getItem('llm_active_provider')).toBe(JSON.stringify('new_api'));
   });
 
+  it('treats legacy plaintext LLM keys as secrets', async () => {
+    localStorage.setItem('llm_key_new_api', 'legacy-key');
+    localStorage.setItem('llm_active_provider', JSON.stringify('new_api'));
+
+    const usage = await LocalDataStore.getUsage();
+    const buckets = Object.fromEntries(usage.buckets.map(bucket => [bucket.id, bucket]));
+
+    expect(buckets.secrets.localStorage.keys).toBe(1);
+    expect(buckets.config.localStorage.keys).toBe(1);
+
+    const exported = await LocalDataStore.exportAll();
+    expect(exported.localStorage).toHaveProperty('llm_key_new_api', 'legacy-key');
+
+    const removed = await LocalDataStore.clearBucket('secrets');
+
+    expect(removed).toBe(1);
+    expect(localStorage.getItem('llm_key_new_api')).toBeNull();
+    expect(localStorage.getItem('llm_active_provider')).toBe(JSON.stringify('new_api'));
+  });
+
   it('clears only the selected data bucket', async () => {
     localStorage.setItem('scrape_history', JSON.stringify([{ id: 'legacy' }]));
     localStorage.setItem('playground_deep_chat_threads_v1', JSON.stringify({ threads: [] }));

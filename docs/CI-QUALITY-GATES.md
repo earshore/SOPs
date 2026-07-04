@@ -31,6 +31,9 @@ npm run prebuild
    - TypeScript类型检查
    - ESLint代码规范检查
    - ESLint warning baseline gate
+   - 测试 TypeScript 类型检查
+   - 测试 ESLint 检查
+   - Prettier 格式检查
 
 3. **构建验证** (`npm run build`)
    - Vite构建成功
@@ -100,6 +103,8 @@ $ npm run circular:check
 
 **命令**: `npm run type-check`
 
+**测试类型命令**: `npm run type-check:tests`
+
 **工具**: TypeScript Compiler (tsc)
 
 **检查内容**:
@@ -123,6 +128,8 @@ $ npm run type-check
 ### 2. ESLint代码规范检查
 
 **命令**: `npm run lint`
+
+**测试 lint 命令**: `npm run lint:tests`
 
 **工具**: ESLint 8.x
 
@@ -169,6 +176,7 @@ $ npm run type-check
 - 0个错误 (error)
 - 已有警告允许保留在 `config/eslint-warning-baseline.json` 基线内
 - 新增或超过基线的 warning 由 `npm run lint:warning-gate` 阻断
+- 测试 lint 为 0 error、0 warning
 
 **配置文件**: `config/eslint.config.js`
 
@@ -185,7 +193,20 @@ $ npm run type-check
 
 **通过标准**:
 - 当前 warning 数量不超过基线
-- 当前结果: `342/342 warning(s)`
+- 当前结果: `0/0 warning(s)`
+
+### 4. Prettier 格式检查
+
+**命令**: `npm run format:check`
+
+**工具**: Prettier 3.x，显式使用 `config/.prettierrc.json` 和 `config/.prettierignore`
+
+**检查内容**:
+- `src/**/*.{js,ts,jsx,tsx,json,css,md}` 是否符合项目格式
+- 防止格式漂移绕过代码评审和后续机械改动
+
+**通过标准**:
+- 所有匹配文件符合 Prettier 格式
 
 ---
 
@@ -223,7 +244,10 @@ npm run circular:check      # 循环依赖
 npm run xss:gate           # XSS安全门
 npm run xss:scan           # XSS完整报告
 npm run type-check         # 类型检查
+npm run type-check:tests   # 测试类型检查
 npm run lint               # 代码规范
+npm run lint:tests         # 测试代码规范
+npm run format:check       # 格式检查
 npm run build              # 构建验证
 ```
 
@@ -241,7 +265,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
           
       - name: Install dependencies
         run: npm ci
@@ -320,7 +344,7 @@ jobs:
 | XSS中危风险 | 0个 | 0个 | ✅ 达标 |
 | TypeScript错误 | 0个 | 0个 | ✅ 达标 |
 | ESLint错误 | 0个 | 0个 | ✅ 达标 |
-| ESLint警告 | 342/342基线内 | <300个 | 🟡 P1/P2待处理 |
+| ESLint警告 | 0/0基线内 | 0个 | ✅ 达标 |
 | 技术债扫描 | 1185项，0 critical / 0 high，297 medium / 888 low | 0 high | 🟡 P1/P2待处理 |
 | 测试类型检查 | 通过 | 通过 | ✅ 达标 |
 | 全量 Vitest | 通过 | 通过 | ✅ 达标 |
@@ -337,10 +361,11 @@ jobs:
 **阶段2 (进行中)**:
 - ✅ 清零所有中危XSS风险
 - ✅ 复核测试基础设施：`type-check:tests` 和全量 Vitest 通过
+- ✅ 将 `type-check:tests`、`lint:tests` 和 `format:check` 纳入 `ci:quality` 与 GitHub Actions
 - 🔄 治理构建警告: Vite 动态/静态 import 混用、chunk 体积偏大
 
 **阶段3 (计划中)**:
-- ⏳ 降低 ESLint 警告到 300 以下
+- ⏳ 持续保持 ESLint warning 基线为 0
 - ⏳ 分批处理技术债扫描中的 medium 项：重复代码、长函数、深嵌套
 - ⏳ 完善安全编码培训
 

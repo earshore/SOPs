@@ -163,6 +163,26 @@ import { SafeRenderer } from '../../src/common/infrastructure/SafeRenderer';
         
         expect(result).not.toContain('style');
       });
+
+      it('应该对自定义允许属性复用统一安全策略', () => {
+        const input = `
+          <a href="java
+script:alert('xss')">Bad link</a>
+          <img srcset="https://safe.example/a.png 1x, javascript:alert(1) 2x">
+          <div style="color: red" onanimationstart="bad()">Safe style</div>
+          <section style="background:url(javascript:alert(1))">Bad style</section>
+        `;
+        const result = renderer.sanitizeHtml(input, {
+          allowedTags: ['a', 'img', 'div', 'section'],
+          allowedAttrs: ['href', 'srcset', 'style', 'onanimationstart']
+        });
+        
+        expect(result).not.toContain('javascript:');
+        expect(result).not.toContain('srcset');
+        expect(result).not.toContain('onanimationstart');
+        expect(result).toContain('style="color: red"');
+        expect(result).toContain('<section>Bad style</section>');
+      });
     });
 
     describe('嵌套结构', () => {
@@ -356,6 +376,25 @@ import { SafeRenderer } from '../../src/common/infrastructure/SafeRenderer';
       expect(container.innerHTML).toContain('Dynamic');
       expect(container.innerHTML).not.toContain('<script>');
       expect(container.innerHTML).not.toContain('onclick');
+    });
+
+    it('应该移除运行时 HTML 中的扩展 XSS 属性向量', () => {
+      renderer.renderSanitizedHtml(
+        container,
+        `
+          <p style="color: red" onanimationstart="bad()">Dynamic</p>
+          <img src="javascript:alert(1)" srcset="https://safe.example/a.png 1x, javascript:alert(1) 2x">
+          <button formaction="javascript:alert(1)">submit</button>
+          <section style="background:url(javascript:alert(1))">Bad style</section>
+        `,
+      );
+
+      expect(container.querySelector('p')?.getAttribute('style')).toContain('color: red');
+      expect(container.querySelector('[onanimationstart]')).toBeNull();
+      expect(container.querySelector('img')?.hasAttribute('src')).toBe(false);
+      expect(container.querySelector('img')?.hasAttribute('srcset')).toBe(false);
+      expect(container.querySelector('button')?.hasAttribute('formaction')).toBe(false);
+      expect(container.querySelector('section')?.hasAttribute('style')).toBe(false);
     });
 
     it('应该抛出错误（HTML 不是字符串）', () => {

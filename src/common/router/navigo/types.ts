@@ -39,6 +39,8 @@ export interface RouteMeta {
   requiresAuth?: boolean;
   /** 所需权限列表 */
   permissions?: string[];
+  /** 当前产品访问边界声明 */
+  accessPolicy?: 'product_allowed_without_auth' | 'permission_required';
   /** 功能开关名称 */
   featureFlag?: string;
   /** 未配置功能开关时的默认状态 */

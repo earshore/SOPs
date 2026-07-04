@@ -118,12 +118,21 @@ export function getDangerousEndpoints(): string[] {
 }
 
 /**
+ * 获取允许浏览器在生产环境直连的端点域名列表
+ */
+export function getBrowserDirectEndpoints(): string[] {
+  return Object.values(API_ENDPOINTS)
+    .filter(config => !config.requiresProxy && !config.isDangerous)
+    .map(config => config.domain);
+}
+
+/**
  * 生成CSP connect-src指令
  */
 export function generateCSPConnectSrc(): string {
   const domains = [
     "'self'",
-    ...Object.values(API_ENDPOINTS).map(config => `https://${config.domain}`),
+    ...getBrowserDirectEndpoints().map(domain => `https://${domain}`),
     ...AMAZON_DOMAINS.map(domain => `https://*.${domain}`),
   ];
   return domains.join(' ');

@@ -56,12 +56,12 @@ function getModalPanel(modal: TestModalElement): HTMLElement {
   return panel as HTMLElement;
 }
 
-describe('AppModal regression', () => {
-  afterEach(() => {
-    vi.useRealTimers();
-    document.body.replaceChildren();
-  });
+afterEach(() => {
+  vi.useRealTimers();
+  document.body.replaceChildren();
+});
 
+describe('AppModal regression visibility', () => {
   it('preserves shadow styles when rendering a closed no-header modal', () => {
     const modal = createModal();
 
@@ -148,7 +148,9 @@ describe('AppModal regression', () => {
     expect(container.classList.contains('hidden')).toBe(true);
     expect(container.hasAttribute('hidden')).toBe(true);
   });
+});
 
+describe('AppModal regression accessibility', () => {
   it('labels header and no-header dialogs for assistive technologies', () => {
     const headerModal = createHeaderModal('系统设置');
     const headerPanel = getModalPanel(headerModal);

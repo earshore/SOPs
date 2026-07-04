@@ -677,7 +677,10 @@ function renderStatsBlock(block: ContentBlock): string {
   `;
 }
 
-function renderComparisonTableBlock(block: ContentBlock, context: ContentBlockRenderContext): string {
+function renderComparisonTableBlock(
+  block: ContentBlock,
+  context: ContentBlockRenderContext
+): string {
   const tableId = `amzpt-table-${context.sectionId}-${context.blockIndex}`;
   const descriptionId = `${tableId}-desc`;
   const caption = `${context.sectionTitle}对比表`;

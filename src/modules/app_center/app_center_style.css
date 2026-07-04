@@ -153,8 +153,10 @@
   --wb-tag-text-weight: var(--font-medium, 500) !important;
   --wb-badge-text-size: var(--text-xs, 0.75rem) !important;
   --wb-badge-text-weight: var(--font-extrabold, 800) !important;
-  --wb-icon-shadow: 0 12px 24px -18px color-mix(in srgb, var(--app-overview-accent) 62%, transparent);
-  --wb-icon-shadow-hover: 0 14px 28px -20px color-mix(in srgb, var(--app-overview-accent) 62%, transparent);
+  --wb-icon-shadow: 0 12px 24px -18px
+    color-mix(in srgb, var(--app-overview-accent) 62%, transparent);
+  --wb-icon-shadow-hover: 0 14px 28px -20px
+    color-mix(in srgb, var(--app-overview-accent) 62%, transparent);
 }
 
 .app-overview-hero .wb-content {

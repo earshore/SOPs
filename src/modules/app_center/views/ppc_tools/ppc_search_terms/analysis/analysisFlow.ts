@@ -4,7 +4,10 @@ import { getAnalyzableReportText } from './analysisInput';
 import { clearActiveAnalysisRun, isCurrentAnalysisRun, startAnalysisRun } from './analysisRun';
 import { applyAgentAnalysis } from '../agents/agentAnalysisFlow';
 import { setAnalyzeButtonState } from '../ui/dom';
-import { finishLocalAnalysisIfNeeded, getLocalAnalysisStatus } from '../utils/localAnalysisFeedback';
+import {
+  finishLocalAnalysisIfNeeded,
+  getLocalAnalysisStatus,
+} from '../utils/localAnalysisFeedback';
 import {
   readAnalysisSettings,
   readReportSelection,

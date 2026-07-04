@@ -51,17 +51,24 @@ describe('promo tools module', () => {
 
     tables.forEach(table => {
       expect(table.querySelector('caption')?.textContent).toContain('对比表');
-      expect(Array.from(table.querySelectorAll('thead th')).every(th => th.scope === 'col')).toBe(
-        true
-      );
-      expect(Array.from(table.querySelectorAll('tbody tr')).every(row => row.querySelector('th[scope="row"]'))).toBe(
-        true
-      );
+      expect(
+        Array.from(table.querySelectorAll<HTMLTableCellElement>('thead th')).every(
+          th => th.scope === 'col'
+        )
+      ).toBe(true);
+      expect(
+        Array.from(table.querySelectorAll('tbody tr')).every(row =>
+          row.querySelector('th[scope="row"]')
+        )
+      ).toBe(true);
     });
   });
 
   it('keeps comparison tables wide enough and resilient to long terms', () => {
-    const css = readFileSync(resolve(process.cwd(), 'src/modules/amz_hub/views/practice/promo_tools/styles.css'), 'utf8');
+    const css = readFileSync(
+      resolve(process.cwd(), 'src/modules/amz_hub/views/practice/promo_tools/styles.css'),
+      'utf8'
+    );
 
     expect(css).toContain('min-width: 900px');
     expect(css).toContain('overflow-wrap: anywhere');

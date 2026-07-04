@@ -80,6 +80,28 @@ import {
     expect(container.querySelector('img')).toBeInstanceOf(HTMLImageElement);
   });
 
+  it('removes broad XSS attributes while preserving benign inline styles', () => {
+    const fragment = createSafeFragment(`
+      <div id="safe-style" onanimationstart="bad()" ONPointerEnter="bad()" style="color: red; min-width: 1rem">Safe style</div>
+      <img src="javascript:alert(1)" srcset="https://safe.example/a.png 1x, javascript:alert(1) 2x">
+      <svg><a xlink:href="javascript:alert(1)"><text>svg link</text></a></svg>
+      <button formaction="javascript:alert(1)">submit</button>
+      <section id="unsafe-style" style="background-image: url(javascript:alert(1))">Bad style</section>
+    `);
+    const container = document.createElement('div');
+    container.appendChild(fragment);
+
+    const safeStyle = container.querySelector('#safe-style');
+    expect(safeStyle?.getAttribute('style')).toContain('color: red');
+    expect(container.querySelector('[onanimationstart]')).toBeNull();
+    expect(container.querySelector('[onpointerenter]')).toBeNull();
+    expect(container.querySelector('img')?.hasAttribute('src')).toBe(false);
+    expect(container.querySelector('img')?.hasAttribute('srcset')).toBe(false);
+    expect(container.querySelector('svg a')?.hasAttribute('xlink:href')).toBe(false);
+    expect(container.querySelector('button')?.hasAttribute('formaction')).toBe(false);
+    expect(container.querySelector('#unsafe-style')?.hasAttribute('style')).toBe(false);
+  });
+
   it('creates safe fragments when SVG href properties are not strings', () => {
     const descriptor = Object.getOwnPropertyDescriptor(SVGElement.prototype, 'href');
     Object.defineProperty(SVGElement.prototype, 'href', {
@@ -125,6 +147,7 @@ import {
     expect(isSafeUrl('https://example.com')).toBe(true);
     expect(isSafeUrl('/relative/path')).toBe(true);
     expect(isSafeUrl('  javascript:alert(1)')).toBe(false);
+    expect(isSafeUrl('java\nscript:alert(1)')).toBe(false);
     expect(isSafeUrl('data:text/html,<script>bad()</script>')).toBe(false);
     expect(isSafeUrl('vbscript:msgbox("x")')).toBe(false);
     expect(isSafeUrl(undefined)).toBe(false);
@@ -138,11 +161,12 @@ import {
   });
 
   it('renders markdown through a provided parser and sanitizes parser output', () => {
-    const parser = () => '<h1 onclick="bad()">Title</h1><script>bad()</script>';
+    const parser = () =>
+      '<h1 onclick="bad()">Title</h1><img src="javascript:alert(1)"><span style="background:url(javascript:alert(1))">x</span><script>bad()</script>';
 
     const html = safeMarkdown('# title', parser);
 
-    expect(html).toBe('<h1>Title</h1>');
+    expect(html).toBe('<h1>Title</h1><img><span>x</span>');
   });
 
   it('escapes markdown when no parser is provided', () => {

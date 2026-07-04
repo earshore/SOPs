@@ -1,9 +1,9 @@
 # 技术债务审计与消除计划
 
 **审计日期**: 2026-06-08
-**最新更新**: 2026-07-03
+**最新更新**: 2026-07-04
 **审计范围**: 当前 CI 门禁、依赖审计、`src/` 代码质量、CSS 变量与模块样式、技术债扫描、单元/集成测试。
-**结论**: 当前没有仍阻塞 `ci:all` 的 P0 债务；本轮已消除循环依赖门禁、生产依赖漏洞、开发依赖漏洞、`ConfigCenter` 构建导入 warning、构建性能 warning、ESLint warning 基线、格式化基线、技术债扫描基线、安全审计 findings、Vitest 输出噪声、质量脚本失效问题、`src/` 非测试运行时代码复杂度热点、测试/工具复杂度噪声、CSS 变量命名基线和 CSS 模块重复建议。剩余债务按优先级集中在 Playground 权限边界执行源和浏览器类验证补齐。
+**结论**: 当前没有仍阻塞 `ci:all` 的 P0 债务；本轮已消除循环依赖门禁、生产依赖漏洞、开发依赖漏洞、`ConfigCenter` 构建导入 warning、构建性能 warning、ESLint warning 基线、格式化基线、技术债扫描基线、安全审计 findings、Vitest 输出噪声、质量脚本失效问题、`src/` 非测试运行时代码复杂度热点、测试/工具复杂度噪声、CSS 变量命名基线和 CSS 模块重复建议。当前技术债扫描、复杂度分析和安全审计均为 0 issue；剩余事项为发布验证和未来真实身份服务接入条件，不作为当前代码债务。
 
 ---
 
@@ -56,11 +56,12 @@
 | 已完成 | 技术债扫描基线清零                    | 抽取重复测试 fixture、导航开关状态、并行分析进度更新、历史 Prompt 指纹匹配和 LLM 响应错误构造；`tech-debt:scan` 当前 0 issue。                                                                        |
 | 已完成 | ESLint warning baseline 清零          | `config/eslint-warning-baseline.json` 从 342 收敛到 0，`lint:warning-gate` 当前为 0/0 warning。                                                                                                       |
 | 已完成 | 质量脚本可运行性                      | 修复 CSS 审计根目录、CSS 模块分析失效路径、注释代码清理器 `glob` 导入、质量检查 ESLint 输出缓冲和失败处理。                                                                                           |
+| 已完成 | LLM timeout 边界单一化                | 删除未被生产路径引用的 `llmServiceWithTimeout` 包装器和自证测试；LLM 请求超时与重试继续由 `llmService` 的 `AbortController` 边界负责，避免双层重试、取消无效和悬挂 Promise 语义。                    |
 | 已完成 | Marketing Calendar 搜索复杂度收敛     | 拆分搜索框 focus/dismiss/input/keyboard/clear/resize/scroll 事件绑定，`bindSearchEvents` 不再出现在最新复杂度报告。                                                                                   |
 | 已完成 | Restricted Words 搜索复杂度收敛       | 拆分搜索条件读取、站点上下文过滤、关键词匹配和属性过滤，`executeSearch` 不再出现在最新复杂度报告。                                                                                                    |
 | 已完成 | Master Analysis 报告生成复杂度收敛    | 拆分 legacy `generateReport` 的产品数据 section、Prompt 构造、LLM 调用和响应解析，`analysisService.ts` 不再出现在最新复杂度报告。                                                                      |
 | 已完成 | SafeRenderer sanitizer 复杂度收敛     | 拆分 `sanitizeHtml` 的子节点遍历、元素清理、属性复制和 URL 属性检查，`SafeRenderer.ts` 不再出现在最新复杂度报告。                                                                                     |
-| 已完成 | `src/` 运行时代码复杂度热点清空       | 继续拆分 `ImageLazyLoader.loadImage`、`parseReviews`、`parseBuyerProfile`、`buildContextSection`、`extractUSPs`、`calculateTitleKeywordsConfidence`、`renderMegaMenu` 和 `getPreviewText`；最新复杂度报告中剩余 `src/` 项均为测试文件。 |
+| 已完成 | `src/` 运行时代码复杂度热点清空       | 继续拆分 `ImageLazyLoader.loadImage`、`parseReviews`、`parseBuyerProfile`、`buildContextSection`、`extractUSPs`、`calculateTitleKeywordsConfidence`、`renderMegaMenu` 和 `getPreviewText`；最新复杂度报告中 0 个过长函数、0 个高复杂度函数。 |
 | 已完成 | CSS 变量命名基线清零                  | 冻结全局语义 token、组件 token 和模块命名空间 token 规则；将卡片渐变变量迁入 `--card-*` 命名空间，`css:audit` 当前 0 个不合规变量。                                                                  |
 | 已完成 | CSS 动画重复小批收敛                  | 将 Home、Scraper、Keyword Hunter 和 AI Analysis 的模块 keyframes 收敛到全局动画库，并将模块动画时长收敛为 duration token；模块 CSS 动画重复次数从 45 降到 0。                                       |
 | 已完成 | CSS 状态徽章和图标重复收敛            | 将跨 SOPs、AMZ Hub 和 More 复用的 `sop-status-*`、模块徽章、旧图标容器兼容层沉到全局组件 CSS；模块徽章和图标重复均只剩 1 次非建议项。                                                                |
@@ -71,17 +72,17 @@
 | 已完成 | 质量仪表板生成复杂度收敛              | 拆分 `tests/quality/generate-dashboard.js` 的页面框架、样式、脚本和质量卡片模板；`generateDashboard`、`generateQualitySection` 不再出现在最新复杂度报告。                                             |
 | 已完成 | AlpineRegistry 测试复杂度收敛         | 抽取共享 registry setup/cleanup，并按 register、init、依赖解析等职责拆分大块 `describe`；`AlpineRegistry.test.ts` 不再出现在最新复杂度报告。                                                         |
 | 已完成 | Security Auditor 工具复杂度收敛       | 拆分 `tools/security-auditor.ts` 的 HTML report builder、分类匹配和 `javascript:` AST 检测 helper；该文件不再出现在最新复杂度报告。                                                                   |
-| 已完成 | 安全审计 findings 清零                | Devtools、viewLoader 和 SafeModuleLoader 高风险渲染/URL findings 已收敛；LLM/代理凭据禁止写入普通 localStorage，代理旧明文配置会迁移到 SecureStorage；剩余 `Math.random`/静态 hash low findings 已收敛，`security:audit` 当前 0 issue。 |
+| 已完成 | 安全审计 findings 清零                | Devtools、viewLoader 和 SafeModuleLoader 高风险渲染/URL findings 已收敛；LLM/代理凭据禁止写入普通 localStorage，旧明文 LLM key 和代理旧明文配置会迁移或按 secrets 清理；剩余 `Math.random`/静态 hash low findings 已收敛，`security:audit` 当前 0 issue。 |
 | 已完成 | 测试/工具复杂度噪声清零               | 继续拆分 `quality-monitor`、`complexity-analyzer`、命名校验器、注释代码扫描器、视觉阈值校验、性能报告、bundle 分析和 Keyword Hunter fixture；`code:analyze:complexity` 当前 0 issue。                 |
-| 已完成 | 审计报告产物                          | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-07-03.json`、`tests/quality/tech-debt-2026-07-03.html`、`tests/quality/security-audit-2026-07-02.*` 和最新复杂度报告 `complexity-report-2026-07-03T06-11-58.*`。 |
+| 已完成 | 审计报告产物                          | 生成 `docs/css-module-analysis-report.md`、`tests/quality/tech-debt-2026-07-04.json`、`tests/quality/tech-debt-2026-07-04.html`、`tests/quality/security-audit-2026-07-04.*` 和最新复杂度报告 `complexity-report-2026-07-04T03-37-15.*`。 |
 
 ## 验证快照
 
 | 验证项                   | 命令                                                                                                                                                                                                                                                                                                                                                                                                                  | 当前结果                                                                                                                             |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 完整 CI 门禁             | `npm run ci:all`                                                                                                                                                                                                                                                                                                                                                                                                      | 通过；包含 XSS、循环依赖、应用类型检查、生产 ESLint、warning gate 和构建                                                             |
-| XSS 高危门禁             | `npm run xss:gate`                                                                                                                                                                                                                                                                                                                                                                                                    | 468 个源文件，0 风险点；清空 DOM 跳过 6 处                                                                                           |
-| 循环依赖                 | `npm run circular:check`                                                                                                                                                                                                                                                                                                                                                                                              | 486 个文件，0 循环依赖，madge 输出 3 个解析 warning                                                                                  |
+| 完整 CI 门禁             | `npm run ci:all`                                                                                                                                                                                                                                                                                                                                                                                                      | 通过；包含 XSS、循环依赖、应用类型检查、生产 ESLint、warning gate、测试类型检查、测试 ESLint、格式检查和构建                         |
+| XSS 高危门禁             | `npm run xss:gate`                                                                                                                                                                                                                                                                                                                                                                                                    | 480 个源文件，0 风险点；清空 DOM 跳过 6 处                                                                                           |
+| 循环依赖                 | `npm run circular:check`                                                                                                                                                                                                                                                                                                                                                                                              | 498 个文件，0 循环依赖，madge 输出 3 个解析 warning                                                                                  |
 | 应用类型检查             | `npm run type-check`                                                                                                                                                                                                                                                                                                                                                                                                  | 通过                                                                                                                                 |
 | 测试类型检查             | `npm run type-check:tests`                                                                                                                                                                                                                                                                                                                                                                                            | 通过                                                                                                                                 |
 | 生产 ESLint              | `npm run lint`                                                                                                                                                                                                                                                                                                                                                                                                        | 通过                                                                                                                                 |
@@ -101,21 +102,21 @@
 | CSS 变量审计             | `npm run css:audit`                                                                                                                                                                                                                                                                                                                                                                                                   | 75 个 CSS 文件，4505 次变量使用，4505 次符合规范，0 次不符合规范，0 deprecated                                                       |
 | CSS 模块分析             | `npm run css:analyze`                                                                                                                                                                                                                                                                                                                                                                                                 | 10 个模块 CSS 文件，7198 行；卡片 2 类/3 次、按钮 2 类/5 次、图标 1 类/1 次、徽章 1 类/1 次；0 条优化建议                            |
 | 质量基线                 | `npm run quality:check`                                                                                                                                                                                                                                                                                                                                                                                               | ESLint 检查 412 个文件，0 error、0 warning；TypeScript 0 error；统计 412 个文件，平均复杂度 19.4，最大复杂度 261，175 个文件超过阈值 |
-| 复杂度分析               | `npm run code:analyze:complexity`                                                                                                                                                                                                                                                                                                                                                                                     | 691 个文件，13,527 个函数，0 个过长函数、0 个高复杂度函数、0 个问题函数                                                             |
-| 技术债扫描               | `npm run tech-debt:scan`                                                                                                                                                                                                                                                                                                                                                                                              | 398 个文件，100,209 行，0 issue，债务比率 0.00%                                                                                      |
-| 安全审计                 | `npm run security:audit`                                                                                                                                                                                                                                                                                                                                                                                              | 工具可运行并生成 `security-audit-2026-07-02.*`；当前 0 issue，风险分 0/100，退出 0                                                   |
+| 复杂度分析               | `npm run code:analyze:complexity`                                                                                                                                                                                                                                                                                                                                                                                     | 705 个文件，13,701 个函数，0 个过长函数、0 个高复杂度函数、0 个问题函数                                                             |
+| 技术债扫描               | `npm run tech-debt:scan`                                                                                                                                                                                                                                                                                                                                                                                              | 410 个文件，101,928 行，0 issue，债务比率 0.00%                                                                                      |
+| 安全审计                 | `npm run security:audit`                                                                                                                                                                                                                                                                                                                                                                                              | 421 个文件，123,737 行，0 issue，风险分 0/100，生成 `security-audit-2026-07-04.*`                                                     |
 
-## 剩余技术债务
+## 非阻塞跟进项
 
-| ID    | 优先级 | 债务                          | 当前证据                                                                                                                                                 | 验收条件                                                                                                  |
-| ----- | ------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| TD-08 | P3     | 全量浏览器类验证未纳入本轮    | 已补跑 Playground Deep Chat 7 条专项 Chromium e2e 和 Chromium 视觉回归；仍未执行全量 `test:e2e`、`test:performance`、`lighthouse`。                        | 依赖升级、CSS 抽取或路由加载改动后补跑对应浏览器类验证，并归档失败截图/报告。                             |
-| TD-09 | P1     | Playground 权限边界与发布开关 | Deep Chat 请求生命周期和请求预算已收紧；Playground 路由已声明产品级无认证放行策略，但仍缺少真实身份/权限或 feature flag 执行源。                         | 接入用户身份/权限服务或 feature flag 源后，路由守卫能执行 Playground 声明；补充拒绝访问和放行路径测试。   |
+| ID    | 类型             | 当前证据                                                                                                                                                 | 后续触发条件                                                                                              |
+| ----- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| FU-08 | 发布验证         | 已补跑 Playground Deep Chat 7 条专项 Chromium e2e 和 Chromium 视觉回归；本轮代码门禁、技术债扫描、复杂度分析和安全审计均已清零。                        | 发布前或依赖升级、CSS 抽取、路由加载改动后，补跑 `test:e2e`、`test:performance`、`lighthouse` 并归档报告。 |
+| FU-09 | 未来身份服务接入 | Deep Chat 请求生命周期和请求预算已收紧；Playground 路由已声明产品级无认证放行策略，feature flag 已执行；`requiresAuth` 路由在未接入真实认证服务前会拒绝访问，避免假权限放行。 | 接入用户身份/权限服务后，补充真实认证通过、未登录拒绝和权限不足路径测试。                                  |
 
 ## 修复执行顺序
 
-1. **先处理 TD-09 Playground 权限边界**：如果已有真实身份/权限服务或 feature flag 源，接入路由守卫执行路径并补齐拒绝访问/放行测试；如果仍没有执行源，不做假的权限实现，只保留当前产品级放行声明和测试锁定。
-2. **补齐 TD-08 浏览器验证**：对权限、路由加载、分包相关改动执行 `test:e2e`、`test:visual`、`test:performance`、`lighthouse` 中对应项目，并归档失败截图或报告。
+1. **发布前补齐 FU-08 浏览器验证**：对权限、路由加载、分包相关改动执行 `test:e2e`、`test:visual`、`test:performance`、`lighthouse` 中对应项目，并归档失败截图或报告。
+2. **真实身份服务接入时处理 FU-09**：当前版本未接入真实身份服务时拒绝 `requiresAuth` 路由；接入后再打开受保护路由并补齐认证通过、未登录拒绝和权限不足测试。
 
 ## 消除计划清单
 
@@ -220,9 +221,10 @@
 - [x] 增加 Playground 请求预算：用户消息、系统提示词、上下文和输出 token 上限。
 - [x] 为 Playground route manifest 增加访问策略元数据，并让 route converter 保留该 meta。
 - [x] 记录当前产品层无认证放行策略并用测试锁定行为。
+- [x] 在未接入真实认证服务时拒绝 `requiresAuth` 路由，避免假权限放行。
 - [x] Deep Chat 草稿输入改为 debounce 持久化，卸载/清空边界分别 flush/cancel。
 - [x] Prompt 删除改为等待历史快照引用删除结果，避免持久层失败时 UI 先显示已删除。
-- [ ] 接入真实身份/权限服务或 feature flag 源后，补充拒绝访问和放行路径守卫测试。
+- [ ] 接入真实身份/权限服务后，补充真实认证通过、未登录拒绝和权限不足路径守卫测试。
 
 ### 第 8 批：测试/工具复杂度噪声
 
@@ -237,7 +239,7 @@
 
 ### 第 9 批：安全审计发现项
 
-- [x] 修复 `security:audit` high findings：devtools/viewLoader/SafeModuleLoader 安全渲染与 URL 赋值收敛，LLM/代理凭据禁止普通 localStorage 明文写入，SecureStorage/StorageService 作为受控边界由 AST 规则识别。
+- [x] 修复 `security:audit` high findings：devtools/viewLoader/SafeModuleLoader 安全渲染与 URL 赋值收敛，LLM/代理凭据禁止普通 localStorage 明文写入，旧明文 LLM key 和代理旧明文配置会迁移或按 secrets 清理，SecureStorage/StorageService 作为受控边界由 AST 规则识别。
 - [x] 复核并清理 20 个 low findings：19 个 `Math.random` 场景改走 Web Crypto 随机 helper，1 个静态 URL hash 赋值场景加入明确的内部路由白名单。
 
 ## 本轮不建议直接执行

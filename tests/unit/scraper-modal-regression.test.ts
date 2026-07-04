@@ -37,13 +37,13 @@ function waitForAnimationFrame(): Promise<void> {
   });
 }
 
-describe('scraper runtime modal regression', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-    document.body.replaceChildren();
-    localStorage.clear();
-  });
+afterEach(() => {
+  vi.restoreAllMocks();
+  document.body.replaceChildren();
+  localStorage.clear();
+});
 
+describe('scraper runtime modal cancellation', () => {
   it('cancels delete confirmation when clicking the backdrop', async () => {
     const result = confirmWithModal('确认删除', '确认删除测试内容', 'delete-backdrop-regression');
     const backdrop = getRuntimeModal('confirm-modal-');
@@ -87,7 +87,9 @@ describe('scraper runtime modal regression', () => {
     expect(document.body.contains(backdrop)).toBe(false);
     expect(document.activeElement).toBe(opener);
   });
+});
 
+describe('scraper runtime modal focus handling', () => {
   it('labels marketplace selection dialog and moves focus inside it', async () => {
     const opener = createFocusedOpener();
     const result = showMarketplaceSelectionModal(['DE', 'FR']);
@@ -157,7 +159,9 @@ describe('scraper runtime modal regression', () => {
     expect(document.body.contains(confirmBackdrop)).toBe(false);
     expect(document.activeElement).toBe(opener);
   });
+});
 
+describe('scraper runtime modal missing-control fallback', () => {
   it('removes delete confirmation backdrop if required controls are missing', async () => {
     vi.spyOn(SafeRenderer.getInstance(), 'renderTemplate').mockImplementation((container) => {
       container.textContent = 'stripped modal content';

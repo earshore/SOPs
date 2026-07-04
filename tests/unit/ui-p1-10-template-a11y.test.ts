@@ -8,11 +8,10 @@ import {
 
 const readTemplate = (path: string): string => readFileSync(resolve(process.cwd(), path), 'utf8');
 
-describe('UI-P1-10 table and long content semantics', () => {
-  afterEach(() => {
-    unmountPromoTools();
-    document.body.replaceChildren();
-  });
+afterEach(() => {
+  unmountPromoTools();
+  document.body.replaceChildren();
+});
 
   it('keeps the PPC action table named, described, and column-scoped', () => {
     const html = readTemplate(
@@ -306,4 +305,3 @@ describe('UI-P1-10 table and long content semantics', () => {
       ).toBe(true);
     });
   });
-});

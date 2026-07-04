@@ -21,25 +21,26 @@ export async function setupAPIConfig(
   // 导航到首页
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-  // 在 localStorage 中设置 API 配置
-  await page.evaluate(({ apiKey, provider }) => {
+  // 在 localStorage / SecureStorage 中设置 API 配置
+  await page.evaluate(async ({ apiKey, provider }) => {
     // 设置活跃的 LLM 提供商
-    localStorage.setItem('llm_active_provider', provider);
+    localStorage.setItem('llm_active_provider', JSON.stringify(provider));
 
     // 设置 LLM 配置
     const llmConfig = {
       provider: provider,
       endpoint: 'https://new.hongecb.store/v1',
       model: 'gpt-4o-mini',
-      apiKey: apiKey
+      apiKey: '',
+      enabled: true,
     };
-    localStorage.setItem(`llm_config_${provider}`, JSON.stringify(llmConfig));
+    localStorage.setItem(`llm_${provider}`, JSON.stringify(llmConfig));
 
-    // 设置加密的 API 密钥（简化版，实际应用中会加密）
-    localStorage.setItem(`llm_key_${provider}`, apiKey);
+    const { SecureStorage } = await import('/src/common/utils/secureStorage.ts');
+    await SecureStorage.setSecure(`llm_key_${provider}`, apiKey);
 
     // 设置应用初始化标志
-    localStorage.setItem('app_initialized', 'true');
+    localStorage.setItem('app_initialized', JSON.stringify(true));
   }, { apiKey, provider });
 
   console.log(`✅ API 配置已设置: provider=${provider}, apiKey=${apiKey.substring(0, 4)}***`);

@@ -34,6 +34,9 @@ jobs:
       - name: Type check
         run: npm run type-check
 
+      - name: Test type check
+        run: npm run type-check:tests
+
   lint-warning-gate:
     name: lint warning gate
     runs-on: windows-latest
@@ -55,8 +58,14 @@ jobs:
       - name: ESLint
         run: npm run lint
 
+      - name: Test ESLint
+        run: npm run lint:tests
+
       - name: ESLint warning baseline gate
         run: npm run lint:warning-gate
+
+      - name: Format check
+        run: npm run format:check
 
   unit:
     name: unit

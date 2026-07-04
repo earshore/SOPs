@@ -21,6 +21,17 @@ interface MousePosition {
   y: number;
 }
 
+interface FloatingWorkbenchElements {
+  workbench: HTMLElement;
+  trigger: HTMLButtonElement;
+  actions: HTMLElement;
+}
+
+interface FloatingWorkbenchState {
+  pinnedExpanded: boolean;
+  currentExpanded: boolean;
+}
+
 class Particle {
   private static idCounter = 0;
 
@@ -190,60 +201,98 @@ class HomeModule extends BaseModule {
   }
 
   private initFloatingWorkbench(): void {
+    const elements = this.getFloatingWorkbenchElements();
+    if (!elements) return;
+
+    const state: FloatingWorkbenchState = {
+      pinnedExpanded: false,
+      currentExpanded: false,
+    };
+
+    this.setFloatingWorkbenchExpanded(elements, state, false);
+    this.bindFloatingWorkbenchEvents(elements, state);
+  }
+
+  private getFloatingWorkbenchElements(): FloatingWorkbenchElements | null {
     const workbench =
       this.container?.querySelector<HTMLElement>('.floating-workbench') ??
       document.querySelector<HTMLElement>('.floating-workbench');
     const trigger = workbench?.querySelector<HTMLButtonElement>('.floating-workbench__trigger');
     const actions = workbench?.querySelector<HTMLElement>('.floating-workbench__actions');
 
-    if (!workbench || !trigger || !actions) return;
+    if (!workbench || !trigger || !actions) return null;
 
-    let pinnedExpanded = false;
-    let currentExpanded = false;
+    return { workbench, trigger, actions };
+  }
 
-    const setExpanded = (expanded: boolean): void => {
-      currentExpanded = expanded;
-      workbench.classList.toggle('is-expanded', expanded);
-      trigger.setAttribute('aria-expanded', String(expanded));
-      trigger.setAttribute('aria-label', expanded ? '收起浮动工作台' : '展开浮动工作台');
-      actions.setAttribute('aria-hidden', String(!expanded));
-      actions.toggleAttribute('inert', !expanded);
-    };
+  private setFloatingWorkbenchExpanded(
+    elements: FloatingWorkbenchElements,
+    state: FloatingWorkbenchState,
+    expanded: boolean
+  ): void {
+    state.currentExpanded = expanded;
+    elements.workbench.classList.toggle('is-expanded', expanded);
+    elements.trigger.setAttribute('aria-expanded', String(expanded));
+    elements.trigger.setAttribute('aria-label', expanded ? '收起浮动工作台' : '展开浮动工作台');
+    elements.actions.setAttribute('aria-hidden', String(!expanded));
+    elements.actions.toggleAttribute('inert', !expanded);
+  }
 
-    setExpanded(false);
+  private collapseFloatingWorkbench(
+    elements: FloatingWorkbenchElements,
+    state: FloatingWorkbenchState
+  ): void {
+    state.pinnedExpanded = false;
+    this.setFloatingWorkbenchExpanded(elements, state, false);
+  }
 
-    this.addEventListener(trigger, 'click', event => {
+  private toggleFloatingWorkbench(
+    elements: FloatingWorkbenchElements,
+    state: FloatingWorkbenchState
+  ): void {
+    state.pinnedExpanded = !state.pinnedExpanded;
+    this.setFloatingWorkbenchExpanded(elements, state, state.pinnedExpanded);
+  }
+
+  private bindFloatingWorkbenchEvents(
+    elements: FloatingWorkbenchElements,
+    state: FloatingWorkbenchState
+  ): void {
+    this.addEventListener(elements.trigger, 'click', event => {
       event.stopPropagation();
-      pinnedExpanded = !pinnedExpanded;
-      setExpanded(pinnedExpanded);
+      this.toggleFloatingWorkbench(elements, state);
     });
 
-    this.addEventListener(actions, 'click', event => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-      if (!target.closest('.floating-workbench__item, [data-action="switch-tab"]')) return;
-
-      pinnedExpanded = false;
-      setExpanded(false);
+    this.addEventListener(elements.actions, 'click', event => {
+      if (!this.isFloatingWorkbenchActionTarget(event.target)) return;
+      this.collapseFloatingWorkbench(elements, state);
     });
 
     this.addEventListener(document, 'click', event => {
-      const target = event.target;
-      if (target instanceof Node && workbench.contains(target)) return;
-
-      pinnedExpanded = false;
-      setExpanded(false);
+      if (this.isInsideFloatingWorkbench(event.target, elements.workbench)) return;
+      this.collapseFloatingWorkbench(elements, state);
     });
 
     this.addEventListener(document, 'keydown', event => {
-      const keyboardEvent = event as KeyboardEvent;
-      if (keyboardEvent.key !== 'Escape') return;
-      if (!currentExpanded) return;
-
-      pinnedExpanded = false;
-      setExpanded(false);
-      trigger.focus();
+      if (!this.shouldCloseFloatingWorkbenchOnEscape(event, state.currentExpanded)) return;
+      this.collapseFloatingWorkbench(elements, state);
+      elements.trigger.focus();
     });
+  }
+
+  private isFloatingWorkbenchActionTarget(target: EventTarget | null): boolean {
+    return (
+      target instanceof Element &&
+      target.closest('.floating-workbench__item, [data-action="switch-tab"]') !== null
+    );
+  }
+
+  private isInsideFloatingWorkbench(target: EventTarget | null, workbench: HTMLElement): boolean {
+    return target instanceof Node && workbench.contains(target);
+  }
+
+  private shouldCloseFloatingWorkbenchOnEscape(event: Event, currentExpanded: boolean): boolean {
+    return event instanceof KeyboardEvent && event.key === 'Escape' && currentExpanded;
   }
 
   private updateTime(): void {

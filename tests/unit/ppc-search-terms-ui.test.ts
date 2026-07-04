@@ -302,6 +302,9 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     });
   });
 
+});
+
+describe('PPC 搜索词分析器 UI - 默认本地分析', () => {
   it('默认仅使用本地规则，不调用 Agent 语义复核', async () => {
     expect(container.querySelector('#ppc-mapping-status')?.getAttribute('role')).toBe('status');
     expect(container.querySelector('#ppc-mapping-status')?.getAttribute('aria-live')).toBe(

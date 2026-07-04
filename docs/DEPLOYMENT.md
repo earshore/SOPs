@@ -7,6 +7,7 @@
 - 静态站点：Cloudflare Pages，构建输出目录为 `dist/`。
 - 模型网关：自部署 new-api，OpenAI 兼容接口，地址为 `https://new.hongecb.store/v1`。
 - 权限与治理：API key 白名单、额度、过期时间、限流、日志监控均由 new-api 管理。
+- 浏览器本地密钥：仅用于减少明文暴露，不是服务端密钥托管，也不是权限边界；同源脚本、浏览器扩展或本机访问仍属于风险面。
 - 已移除：边缘 API 代理、旧路由头、Pages 环境变量网关注册流程。
 
 ## 本地准备
@@ -25,6 +26,7 @@ npm run build
 ```
 
 构建完成后确认 `dist/` 存在，且 `dist/_headers` 的 CSP `connect-src` 包含 `https://new.hongecb.store`。
+生产环境不应在 `connect-src` 中放行 OpenAI、Gemini、腾讯混元等模型直连域；LLM 统一通过 new-api 网关治理。
 
 ## 部署到 Cloudflare Pages
 
@@ -49,7 +51,7 @@ curl -I https://sops.hongecb.store
 
 - 页面返回 `200` 或 Cloudflare 正常缓存状态。
 - `Content-Security-Policy` 中允许 `https://new.hongecb.store`。
-- 不再出现旧网关域名。
+- 不再出现旧网关域名或外部模型直连域名。
 
 可选：使用本地 `.env` 中的 key 直接验证 new-api。
 
@@ -82,10 +84,12 @@ curl.exe https://new.hongecb.store/v1/models `
 ### CSP 阻止请求
 
 检查 `public/_headers`，确保 `connect-src` 保留 `https://new.hongecb.store`。修改后重新构建并部署。
+如果新增可浏览器直连服务，先更新 `src/common/config/apiEndpoints.ts` 中的端点策略，再同步响应头；不要直接手改 CSP 放行模型供应商 API。
 
 ## 维护规则
 
 - 不要重新引入边缘函数作为 LLM 代理，除非有新的安全或合规要求。
 - 不要在 Pages 项目中保存 LLM API key；生产调用凭据由用户配置并由 new-api 侧治理。
+- 不要把浏览器 `SecureStorage` 当作认证/授权系统；需要权限隔离时，应先接入真实身份服务，再启用路由 `requiresAuth`。
 - Cloudflare Pages production secrets 应保持为空；用 `npx wrangler pages secret list --project-name sops` 复查。
 - 新增模型或调整模型权限，应在 new-api 后台完成，不需要修改前端部署链路。

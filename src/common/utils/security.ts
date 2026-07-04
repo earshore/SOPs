@@ -7,6 +7,20 @@
 import { normalizeWelcomeBanners } from './welcomeBannerA11y';
 
 const nativeLoggerConsole = globalThis.console;
+const DANGEROUS_TAGS = ['script', 'iframe', 'object', 'embed', 'form', 'base', 'meta'];
+const URL_ATTRS = new Set([
+  'href',
+  'src',
+  'xlink:href',
+  'formaction',
+  'action',
+  'poster',
+  'background',
+]);
+const BLOCKED_ATTRS = new Set(['srcdoc']);
+const CSS_COMMENT_PATTERN = /\/\*[\s\S]*?\*\//g;
+const UNSAFE_STYLE_PATTERN =
+  /(?:url\s*\(|expression\s*\(|javascript\s*:|data\s*:|vbscript\s*:|\\)/i;
 
 // ==================== 类型定义 ====================
 
@@ -123,20 +137,17 @@ export function createSafeFragment(html: string): DocumentFragment {
   const doc = parser.parseFromString(html, 'text/html');
 
   // 移除危险元素
-  const dangerousTags = ['script', 'iframe', 'object', 'embed', 'form'];
-  dangerousTags.forEach(tag => {
+  DANGEROUS_TAGS.forEach(tag => {
     doc.querySelectorAll(tag).forEach(el => el.remove());
   });
 
   // 移除危险属性
-  const dangerousAttrs = ['onclick', 'onerror', 'onload', 'onmouseover', 'onfocus', 'onblur'];
   doc.querySelectorAll('*').forEach(el => {
-    dangerousAttrs.forEach(attr => el.removeAttribute(attr));
-    // 移除 javascript: 伪协议
-    const href = el.getAttribute('href');
-    if (href && href.trim().toLowerCase().startsWith('javascript:')) {
-      el.removeAttribute('href');
-    }
+    Array.from(el.attributes).forEach(attr => {
+      if (!isSafeHtmlAttribute(attr.name, attr.value)) {
+        el.removeAttribute(attr.name);
+      }
+    });
   });
 
   const fragment = document.createDocumentFragment();
@@ -188,6 +199,49 @@ export function safeMarkdown(markdown: string, markdownParser?: MarkdownParser):
   return temp.innerHTML;
 }
 
+/**
+ * HTML 属性安全检查
+ * 阻止事件处理器、危险 URL 属性、srcdoc 和危险内联样式。
+ */
+export function isSafeHtmlAttribute(name: string, value: string): boolean {
+  const normalizedName = name.trim().toLowerCase();
+
+  if (!normalizedName || BLOCKED_ATTRS.has(normalizedName) || normalizedName.startsWith('on')) {
+    return false;
+  }
+
+  if (normalizedName === 'style') {
+    return isSafeStyleValue(value);
+  }
+
+  if (normalizedName === 'srcset') {
+    return isSafeSrcset(value);
+  }
+
+  if (URL_ATTRS.has(normalizedName)) {
+    return isSafeUrl(value);
+  }
+
+  return true;
+}
+
+/**
+ * 内联样式安全检查
+ * 保留普通布局样式，剥离可触发脚本、外链加载或 CSS escape 混淆的样式值。
+ */
+export function isSafeStyleValue(value: string | null | undefined): boolean {
+  if (typeof value !== 'string') return false;
+
+  return !UNSAFE_STYLE_PATTERN.test(value.replace(CSS_COMMENT_PATTERN, ''));
+}
+
+function isSafeSrcset(value: string): boolean {
+  return value
+    .split(',')
+    .map(candidate => candidate.trim().split(/\s+/)[0])
+    .every(url => isSafeUrl(url));
+}
+
 // ==================== URL安全检查 ====================
 
 /**
@@ -200,7 +254,10 @@ export function safeMarkdown(markdown: string, markdownParser?: MarkdownParser):
 export function isSafeUrl(url: string | null | undefined): boolean {
   if (!url || typeof url !== 'string') return false;
 
-  const normalized = url.trim().toLowerCase();
+  const normalized = url
+    .trim()
+    .replace(/[\u0000-\u001F\u007F\s]+/g, '')
+    .toLowerCase();
   const dangerousProtocols = ['javascript:', 'data:', 'vbscript:'];
 
   return !dangerousProtocols.some(protocol => normalized.startsWith(protocol));
@@ -233,6 +290,8 @@ export const SecurityUtils = {
   createSafeFragment,
   setSafeHtml,
   safeMarkdown,
+  isSafeHtmlAttribute,
+  isSafeStyleValue,
   isSafeUrl,
   safeLink,
 };

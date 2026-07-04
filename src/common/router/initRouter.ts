@@ -235,7 +235,6 @@ export async function navigateToRouteId(
 ): Promise<boolean> {
   const path = routeIdToPathStrict(routeId);
   if (!path) {
-    console.warn('[initRouter] Ignored navigation for unknown routeId:', routeId);
     return false;
   }
 

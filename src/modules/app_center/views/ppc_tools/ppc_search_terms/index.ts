@@ -7,8 +7,15 @@ import {
   type AnalysisFlowCallbacks,
 } from './analysis/analysisFlow';
 import { setPasteInputError } from './analysis/analysisInput';
-import { toggleAnalysisSettings, updateContextFieldsVisibility } from './settings/analysisSettingsPanel';
-import { handleReportFileImport, loadSampleReport, type ReportImportCallbacks } from './import/fileImport';
+import {
+  toggleAnalysisSettings,
+  updateContextFieldsVisibility,
+} from './settings/analysisSettingsPanel';
+import {
+  handleReportFileImport,
+  loadSampleReport,
+  type ReportImportCallbacks,
+} from './import/fileImport';
 import {
   copyActionSummary,
   exportActionRows,
@@ -90,7 +97,9 @@ const exportControllerState: ExportControllerState = {
 
 const mountInternal = async (container: HTMLElement): Promise<void> => {
   resetAnalyzerState();
-  const html = await loadTemplate('src/modules/app_center/views/ppc_tools/ppc_search_terms/template.html');
+  const html = await loadTemplate(
+    'src/modules/app_center/views/ppc_tools/ppc_search_terms/template.html'
+  );
   const renderer = SafeRenderer.getInstance();
   renderer.renderTemplate(container, html);
   renderThresholdFields(container);
