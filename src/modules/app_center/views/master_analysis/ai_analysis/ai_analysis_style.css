@@ -12,19 +12,13 @@
 }
 
 .animate-float {
-  animation: aiAnalysisFloat
-    calc(var(--duration-2s, 2000ms) + var(--duration-1s, 1000ms))
+  animation: aiAnalysisFloat calc(var(--duration-2s, 2000ms) + var(--duration-1s, 1000ms))
     var(--ease-in-out) infinite;
 }
 
 /* ========== Shimmer 效果 ========== */
 .shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   background-size: 200% 100%;
   animation: skeletonShimmer var(--duration-2s) infinite;
 }
@@ -99,7 +93,7 @@
 }
 
 .gradient-border::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -282,9 +276,9 @@ pre code {
 }
 
 @media (min-width: 1024px) {
-  [x-data="aiAnalysisPanel"]
+  [x-data='aiAnalysisPanel']
     :where(
-      [class*="bg-gradient-to-br"][class*="from-slate-100"][class*="to-slate-200"][class*="shadow-inner"]
+      [class*='bg-gradient-to-br'][class*='from-slate-100'][class*='to-slate-200'][class*='shadow-inner']
     ) {
     background-color: var(--color-slate-100);
     background-image: none !important;
