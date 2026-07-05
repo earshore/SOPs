@@ -26,6 +26,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.22] - 2026-07-06
+
+### Added
+- 新增安全审计报告、release smoke E2E 覆盖和持久化清洗测试。
+- 新增 AppModal 独立样式文件与 Restricted Words 样式入口。
+
+### Changed
+- 收紧 LLM 网关、CSP/headers、系统设置和 new_api 直连配置。
+- 使用系统字体并调整 Deep Chat、Restricted Words 与代码高亮样式。
+- 同步应用内版本显示到 `3.0.3-rc.22`。
+
+### Fixed
+- 修复 HttpService Abort/timeout/retry 行为和性能包装重复执行风险。
+- 修复 EventBus 错误记录上限、可选服务监控清理和事件解绑元数据。
+- 修复持久化中间件对异常 payload 的清洗与恢复。
+
 ## [3.0.3-rc.21] - 2026-07-05
 
 ### Added

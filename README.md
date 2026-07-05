@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 `https://new.hongecb.store/v1` 中转站；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按当前待发布版本 `v3.0.3-rc.21`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按当前待发布版本 `v3.0.3-rc.22`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,7 +10,7 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-当前待发布版本是 `v3.0.3-rc.21`（2026-07-05，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.21` 聚焦 SafeTemplateLoader、async DI、页面架构审计、PC UI/动效收敛、空状态可访问性和模块错误/存储安全，`v3.0.3` 系列累计带来以下面向运营的变化：
+当前待发布版本是 `v3.0.3-rc.22`（2026-07-06，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.22` 聚焦 LLM 网关与 CSP 收敛、AppModal 样式拆分、系统字体、Abort/timeout 处理、持久化清洗和事件订阅清理，`v3.0.3` 系列累计带来以下面向运营的变化：
 
 - 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
 - 新增工作流导向条和统一确认弹窗，减少高风险数据操作误触。
@@ -71,7 +71,11 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 - 收敛 PC 端模块、模板、设计 token、动效 CSS 与概览列表视图。
 - 空状态改为任务导向并补充按钮类型、ARIA 与可访问性测试。
 - 强化模块错误、卸载流程、Loader 和 StorageService 安全性。
-- 同步应用内版本显示到 `3.0.3-rc.21`。
+- 收紧 LLM 网关配置、CSP/headers 和直连 new_api 访问。
+- 拆分 AppModal 样式并补充安全审计与发布 smoke 覆盖。
+- 使用系统字体并调整 Deep Chat、Restricted Words 与代码高亮样式。
+- 强化 HttpService Abort/timeout/retry 行为、EventBus 错误记录和持久化状态清洗。
+- 同步应用内版本显示到 `3.0.3-rc.22`。
 
 ## 快速开始
 
