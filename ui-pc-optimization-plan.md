@@ -196,6 +196,33 @@
    - 优化方案：Keyword Hunter 历史快照、词频和关键词监控空态补齐原因与推荐动作；Scraper 导入区说明导入 JSON / 输入 ASIN 两条路径，历史区说明快照产生条件；AI Analysis 产品数据缺失状态说明 ASIN 列表为空并强化前往数据采集动作，相关按钮补齐键盘焦点环。
    - 验收：Keyword Hunter、Scraper、AI Analysis 相关测试通过；深层 PC 动效扫描仍无 `transition-all`、缩放或旋转反馈回退；`git diff --check` 通过。
 
+### Batch 19：动态按钮可读名称补齐（已执行）
+
+1. 补齐 Alpine 动态按钮的可读名称、状态语义和显式按钮类型。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/master_analysis/ai_analysis/template.html`、`src/modules/app_center/views/master_analysis/scraper/template.html`、`src/components/settings/systemSettings.html`、`tests/unit/ui-p1-08-template-a11y.test.ts`、`tests/unit/scraper-template-a11y.test.ts`、`tests/unit/systemSettingsCurrent.test.ts`。
+   - PC 端影响：AI Analysis 目标选择卡、JSON 展开按钮、Scraper 手动采集按钮和系统设置拉取 / 测试按钮都在桌面高频流程中；如果动态按钮只依赖视觉文案或图标状态，键盘和屏幕阅读器用户难以判断当前动作、选择状态或展开状态。
+   - 优化方案：AI Analysis 目标选择按钮增加目标名 + 已选择 / 未选择的动态 `aria-label`，并用 `aria-pressed` 暴露选择状态；JSON 报告按钮增加展开 / 收起动态名称和 `aria-expanded`；Scraper 手动采集与设置面板异步按钮增加显式 `type="button"` 和运行时可读名称。
+   - 验收：相关聚焦单测通过；真实 UI 模板扫描未发现未命名的图标按钮或空文本按钮；`git diff --check` 通过。
+
+### Batch 20：Scraper 导入入口原生按钮化（已执行）
+
+1. 将导入 JSON 的模拟按钮替换为原生按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/master_analysis/scraper/template.html`、`tests/unit/scraper-template-a11y.test.ts`。
+   - PC 端影响：空数据导入区和重新导入入口是 Scraper 数据采集流程的关键入口；继续使用 `div role="button" tabindex="0"` 需要手写键盘事件，焦点语义也不如原生按钮稳定。
+   - 优化方案：将两处导入触发区改为 `button type="button"`，保留原点击行为和视觉结构；补齐导入 / 重新导入的 `aria-label`，并增加统一 `focus-visible` 焦点环。
+   - 验收：Scraper 静态语义测试通过；真实 UI 模板扫描已无 `div/span/article/li/section/a role="button"` 模拟按钮残留。
+
+### Batch 21：Scraper 按钮类型显式化（已执行）
+
+1. 收敛 Scraper 页面和动态渲染卡片中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/master_analysis/scraper/template.html`、`src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts`、`tests/unit/scraper-template-a11y.test.ts`。
+   - PC 端影响：Scraper 的 Tab、站点选择、历史快照操作、插件下载、产品删除和评论删除都是桌面端高频按钮；未显式声明 `type` 时，未来若被移动到表单上下文中会产生隐式提交风险。
+   - 优化方案：为 Scraper 模板和渲染器中的全部业务按钮补齐 `type="button"`；新增静态测试扫描 Scraper UI 源，要求所有 `<button>` 开始标签都声明按钮类型。
+   - 验收：Scraper 聚焦测试通过；Scraper 模板 / 渲染器扫描无隐式类型按钮残留。
+
 ## 0. PC 端优化目标
 
 本轮优化不追求“大改风格”，而是让现有界面在 PC 工作台场景下更高效、更稳定、更一致：

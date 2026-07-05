@@ -505,6 +505,9 @@
                         x-for="target in listingAnalysisTargets"
                       >
                         <button
+                          type="button"
+                          :aria-label="target.name + (selectedTargets.includes(target.id) ? '，已选择' : '，未选择')"
+                          :aria-pressed="selectedTargets.includes(target.id).toString()"
                           :class="getListingTargetCardClass(target.id)"
                           :disabled="isAnalyzing"
                           @click="toggleTarget(target.id)"
@@ -564,6 +567,9 @@
                         x-for="target in reviewAnalysisTargets"
                       >
                         <button
+                          type="button"
+                          :aria-label="target.name + (selectedTargets.includes(target.id) ? '，已选择' : '，未选择')"
+                          :aria-pressed="selectedTargets.includes(target.id).toString()"
                           :class="getReviewTargetCardClass(target.id)"
                           :disabled="isAnalyzing"
                           @click="toggleTarget(target.id)"
@@ -1905,6 +1911,8 @@
                       <div class="w-px h-6 bg-slate-600/50"></div>
                       <button
                         type="button"
+                        :aria-label="showJsonViewer ? '收起 JSON 格式报告' : '展开 JSON 格式报告'"
+                        :aria-expanded="showJsonViewer.toString()"
                         @click="toggleJsonViewer()"
                         class="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-800"
                       >

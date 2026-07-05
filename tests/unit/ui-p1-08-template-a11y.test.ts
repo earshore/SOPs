@@ -60,6 +60,19 @@ describe('UI-P1-08 template semantics', () => {
     requireElement(root, '[aria-describedby="ai-analysis-cache-helper"]');
   });
 
+  it('keeps AI Analysis dynamic selection and JSON buttons named', () => {
+    const html = readTemplate(
+      'src/modules/app_center/views/master_analysis/ai_analysis/template.html'
+    );
+
+    expect(html).toContain('type="button"\n                          :aria-label="target.name');
+    expect(html).toContain(':aria-pressed="selectedTargets.includes(target.id).toString()"');
+    expect(html).toContain(':class="getListingTargetCardClass(target.id)"');
+    expect(html).toContain(':class="getReviewTargetCardClass(target.id)"');
+    expect(html).toContain(':aria-label="showJsonViewer ? \'收起 JSON 格式报告\' : \'展开 JSON 格式报告\'"');
+    expect(html).toContain(':aria-expanded="showJsonViewer.toString()"');
+  });
+
   it('keeps AI Analysis missing-data notice visually aligned with PromptLab report notice', () => {
     const path = 'src/modules/app_center/views/master_analysis/ai_analysis/template.html';
     const html = readTemplate(path);

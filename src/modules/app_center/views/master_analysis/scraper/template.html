@@ -123,6 +123,7 @@
           <div class="flex items-center gap-1">
             <!-- Preview Tab -->
             <button
+              type="button"
               :class="getDataTabButtonClass('preview')"
               @click="switchDataTab('preview')"
               class="tab-btn relative px-5 py-3.5 text-sm font-medium flex items-center gap-2 -mb-[1px]"
@@ -140,6 +141,7 @@
             </button>
             <!-- JSON Tab -->
             <button
+              type="button"
               :class="getDataTabButtonClass('json')"
               @click="switchDataTab('json')"
               class="tab-btn relative px-5 py-3.5 text-sm font-medium flex items-center gap-2 -mb-[1px]"
@@ -166,14 +168,12 @@
           x-transition:enter-start="opacity-0"
         >
           <!-- Empty State - Clickable Upload Area -->
-          <div
+          <button
+            type="button"
             @click="triggerImport()"
-            @keydown.enter.prevent="triggerImport()"
-            @keydown.space.prevent="triggerImport()"
-            class="upload-area empty-state text-center py-16 cursor-pointer rounded-2xl border-2 border-dashed border-slate-200 bg-gradient-to-b from-slate-50/30 to-white group"
+            class="upload-area empty-state w-full appearance-none text-center py-16 cursor-pointer rounded-2xl border-2 border-dashed border-slate-200 bg-gradient-to-b from-slate-50/30 to-white group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             id="no-data-msg"
-            role="button"
-            tabindex="0"
+            aria-label="导入 JSON 产品数据文件"
             aria-describedby="scraper-import-help scraper-import-status"
           >
             <div class="flex flex-col items-center pointer-events-none">
@@ -212,17 +212,15 @@
                 <span>支持点击任意位置选择文件；采集成功后会自动生成历史快照</span>
               </div>
             </div>
-          </div>
+          </button>
           <!-- Data Cards Container with Click-to-Import Overlay -->
           <div class="hidden" id="data-cards-wrapper">
             <!-- Floating Import Trigger -->
-            <div
+            <button
+              type="button"
               @click="triggerImport()"
-              @keydown.enter.prevent="triggerImport()"
-              @keydown.space.prevent="triggerImport()"
-              class="import-trigger mb-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-r from-slate-50/50 to-white hover:border-blue-300 hover:bg-blue-50/30 cursor-pointer group flex items-center justify-center gap-3"
-              role="button"
-              tabindex="0"
+              class="import-trigger mb-4 w-full appearance-none p-4 rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-r from-slate-50/50 to-white hover:border-blue-300 hover:bg-blue-50/30 cursor-pointer group flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              aria-label="重新导入 JSON 产品数据文件"
               aria-describedby="scraper-reimport-help scraper-import-status"
             >
               <div
@@ -243,7 +241,7 @@
                   >点击选择 JSON 文件</span
                 >
               </div>
-            </div>
+            </button>
             <div class="space-y-4" id="data-cards"></div>
           </div>
           <p
@@ -372,6 +370,7 @@
               <div class="manual-site-grid" aria-label="目标站点列表">
                 <template :key="site" x-for="(site, index) in sites">
                   <button
+                    type="button"
                     :class="getSiteButtonClass(site)"
                     :style="getAnimationDelayStyle(index, 24)"
                     @click="selectSite(site)"
@@ -504,6 +503,7 @@ B0EXAMPLE1"
                   </div>
                   <div class="manual-input-actions">
                     <button
+                      type="button"
                       @click="clearAsins()"
                       class="manual-clear-button clear-btn text-xs font-semibold flex items-center justify-center gap-1"
                       x-show="hasInputAsins"
@@ -512,6 +512,8 @@ B0EXAMPLE1"
                       <i class="fas fa-eraser text-[10px]"></i> 清空
                     </button>
                     <button
+                      type="button"
+                      :aria-label="scrapingButtonText"
                       :disabled="startDisabled"
                       @click="startScrape()"
                       class="manual-start-button btn-start relative text-white font-bold flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed overflow-hidden"
@@ -711,6 +713,7 @@ B0EXAMPLE1"
             历史快照
           </span>
           <button
+            type="button"
             @click="clearAllHistory()"
             class="clear-btn text-xs text-slate-400 hover:text-rose-500 transition duration-200 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-rose-50 border border-transparent hover:border-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-1"
             x-show="showHistoryClear"
@@ -778,6 +781,7 @@ B0EXAMPLE1"
                   </div>
                 </div>
                 <button
+                  type="button"
                   @click.stop="deleteHistoryItem(item.id)"
                   class="delete-btn w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 sm:focus:opacity-100 sm:focus-visible:opacity-100 border border-transparent hover:border-rose-100"
                   style="
@@ -841,6 +845,7 @@ B0EXAMPLE1"
                 </div>
                 <div class="flex items-center gap-2">
                   <button
+                    type="button"
                     @click="loadHistoryItem(item)"
                     class="load-btn w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 text-slate-300 hover:bg-indigo-600 hover:text-white transition duration-200 border border-slate-100 hover:border-indigo-600 hover:shadow-md hover:shadow-indigo-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
                     title="加载快照"
@@ -910,6 +915,7 @@ B0EXAMPLE1"
               </div>
             </div>
             <button
+              type="button"
               @click="downloadPlugin()"
               class="download-btn w-8 h-8 flex items-center justify-center rounded-lg bg-white border-2 border-slate-200 text-slate-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-200 transition duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
               title="前往 GitHub 下载"
