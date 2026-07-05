@@ -76,6 +76,19 @@ describe('UI-P1-08 template semantics', () => {
     expect(html).toContain('fa-solid fa-spider mr-1');
   });
 
+  it('keeps AI Analysis product-data empty states task-oriented', () => {
+    const path = 'src/modules/app_center/views/master_analysis/ai_analysis/template.html';
+    const html = readTemplate(path);
+    const root = readTemplateFragment(path);
+
+    expect(normalizeText(root)).toContain('还没有产品数据');
+    expect(html).toContain('推荐操作：先从"数据采集"模块抓取产品数据');
+    expect(html).toContain("hasNoAnalysisData ? '还没有产品数据' : '准备开始智能分析'");
+    expect(html).toContain('推荐操作：先完成数据采集或导入');
+    expect(html).toContain('数据准备完成后，这里会展示可导出的 AI 分析报告。');
+    expect(html).toContain('focus-visible:ring-amber-500');
+  });
+
   it('connects PromptLab Product DNA fields to visible labels and helper sources', () => {
     const root = readTemplateFragment(
       'src/modules/app_center/views/master_analysis/promptlab/template.html'
@@ -142,5 +155,18 @@ describe('UI-P1-08 template semantics', () => {
       inputRoot,
       '#kt-input-draft-status[role="status"][aria-live="polite"][aria-atomic="true"]'
     );
+    const snapshotEmpty = requireElement(
+      inputRoot,
+      '#kt-input-snapshot-empty[role="status"][aria-live="polite"]'
+    );
+    expect(normalizeText(snapshotEmpty)).toContain('还没有历史快照');
+    expect(normalizeText(snapshotEmpty)).toContain('推荐操作：');
+
+    const wordFrequencyEmpty = requireElement(
+      processRoot,
+      '#kt-word-frequency-list [role="status"][aria-live="polite"]'
+    );
+    expect(normalizeText(wordFrequencyEmpty)).toContain('还没有词频数据');
+    expect(normalizeText(wordFrequencyEmpty)).toContain('推荐操作：');
   });
 });

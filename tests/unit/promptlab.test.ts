@@ -784,7 +784,9 @@ describe('UI Rendering', () => {
     expect(statusDiv?.textContent).toContain('未检测到分析报告');
     expect(statusDiv?.getAttribute('role')).toBe('status');
     expect(statusDiv?.getAttribute('aria-live')).toBe('polite');
-    expect(reportContainer?.textContent).toContain('暂无可用数据');
+    expect(reportContainer?.textContent).toContain('还没有报告维度');
+    expect(reportContainer?.textContent).toContain('推荐操作：');
+    expect(reportContainer?.querySelector('[role="status"]')).not.toBeNull();
   });
 
   it('should render report ready state', () => {

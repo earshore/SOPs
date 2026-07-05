@@ -197,19 +197,19 @@
               <p
                 class="text-base font-semibold text-slate-500 mb-2 group-hover:text-blue-600 transition-colors duration-300"
               >
-                点击导入 JSON 数据
+                还没有产品数据
               </p>
               <p
                 id="scraper-import-help"
                 class="text-sm text-slate-400 mb-3 max-w-sm leading-relaxed group-hover:text-blue-500 transition-colors duration-300"
               >
-                或输入 ASIN 开始采集产品数据
+                当前预览区为空，无法进入 AI 分析。推荐操作：点击导入 JSON 文件，或在下方输入 ASIN 开始采集。
               </p>
               <div
                 class="flex items-center gap-2 text-xs text-slate-400 group-hover:text-blue-500 transition-colors duration-300"
               >
                 <i class="fas fa-mouse-pointer text-[10px]"></i>
-                <span>点击任意位置选择文件</span>
+                <span>支持点击任意位置选择文件；采集成功后会自动生成历史快照</span>
               </div>
             </div>
           </div>
@@ -865,8 +865,11 @@ B0EXAMPLE1"
             >
               <i class="far fa-folder-open text-2xl text-slate-200"></i>
             </div>
-            <p class="text-sm font-semibold text-slate-400">暂无历史数据</p>
-            <p class="text-[11px] text-slate-300 mt-1">完成采集后将自动记录</p>
+            <p class="text-sm font-semibold text-slate-500">还没有历史快照</p>
+            <p class="text-xs text-slate-400 mt-2 max-w-xs text-center leading-relaxed">
+              当前还没有可恢复的采集快照。推荐操作：导入 JSON 或完成一次 ASIN 采集后再回来查看。
+            </p>
+            <p class="text-[11px] text-slate-300 mt-2">快照会记录站点、ASIN 数量和最近采集时间。</p>
           </div>
         </div>
       </div>

@@ -382,8 +382,43 @@ function renderWordFrequencyStats(tracker: KeywordTrackerStoreState): void {
   const unmatchedKeywordRoots = collectUnmatchedKeywordRoots(tracker);
 
   freqList.replaceChildren();
+  if (tracker.wordFrequency.length === 0 && unmatchedKeywordRoots.size === 0) {
+    freqList.appendChild(createEmptyWordFrequencyElement());
+    return;
+  }
+
   renderWordCloud(freqList, tracker.wordFrequency, matchedKeywordRoots);
   renderUnmatchedRootSection(freqList, unmatchedKeywordRoots);
+}
+
+function createEmptyWordFrequencyElement(): HTMLElement {
+  const emptyDiv = document.createElement('div');
+  emptyDiv.className = 'flex flex-col items-center justify-center py-16 px-4 text-center';
+  emptyDiv.setAttribute('role', 'status');
+  emptyDiv.setAttribute('aria-live', 'polite');
+
+  const iconWrap = document.createElement('div');
+  iconWrap.className =
+    'w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4 border border-indigo-100';
+  const icon = document.createElement('i');
+  icon.className = 'fas fa-cloud text-indigo-200 text-xl';
+  icon.setAttribute('aria-hidden', 'true');
+  iconWrap.appendChild(icon);
+
+  const title = document.createElement('p');
+  title.className = 'text-sm font-semibold text-slate-600';
+  title.textContent = '还没有词频数据';
+
+  const reason = document.createElement('p');
+  reason.className = 'text-xs text-slate-500 mt-2 max-w-sm leading-relaxed';
+  reason.textContent = '当前没有可统计的 Listing 文案和关键词匹配结果。';
+
+  const action = document.createElement('p');
+  action.className = 'text-xs text-slate-500 mt-2 max-w-sm leading-relaxed';
+  action.textContent = '推荐操作：返回输入页粘贴关键词和文案，点击开始分析后这里会生成词云。';
+
+  emptyDiv.append(iconWrap, title, reason, action);
+  return emptyDiv;
 }
 
 function collectMatchedKeywordRoots(matchedKeywords: readonly MatchedKeywordEntry[]): Set<string> {
@@ -988,14 +1023,22 @@ function createUnmatchedKeywordElement(item: KeywordItem): HTMLElement {
 
 function createEmptyKeywordsElement(): HTMLElement {
   const emptyDiv = document.createElement('div');
-  emptyDiv.className = 'text-center text-slate-400 py-8';
+  emptyDiv.className = 'text-center text-slate-500 py-8 px-4';
+  emptyDiv.setAttribute('role', 'status');
+  emptyDiv.setAttribute('aria-live', 'polite');
   const icon = document.createElement('i');
-  icon.className = 'fas fa-inbox text-3xl mb-2';
-  const text = document.createElement('p');
-  text.className = 'text-sm';
-  text.textContent = '暂无关键词数据';
-  emptyDiv.appendChild(icon);
-  emptyDiv.appendChild(text);
+  icon.className = 'fas fa-inbox text-3xl mb-3 text-slate-300';
+  icon.setAttribute('aria-hidden', 'true');
+  const title = document.createElement('p');
+  title.className = 'text-sm font-semibold text-slate-600';
+  title.textContent = '还没有关键词数据';
+  const reason = document.createElement('p');
+  reason.className = 'mt-2 text-xs text-slate-500';
+  reason.textContent = '当前没有可监控的已匹配或未匹配关键词。';
+  const action = document.createElement('p');
+  action.className = 'mt-2 text-xs text-slate-500';
+  action.textContent = '推荐操作：返回输入页粘贴关键词和文案，重新开始分析。';
+  emptyDiv.append(icon, title, reason, action);
   return emptyDiv;
 }
 

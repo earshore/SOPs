@@ -179,13 +179,19 @@
                     <div class="max-h-96 overflow-y-auto scrollbar-thin leading-relaxed pr-1"
                         id="kt-word-frequency-list">
                         <!-- Empty State -->
-                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                        <div class="flex flex-col items-center justify-center py-16 px-4 text-center" role="status" aria-live="polite">
                             <div
                                 class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4 border border-indigo-100">
                                 <i class="fas fa-cloud text-indigo-200 text-xl"></i>
                             </div>
-                            <p class="text-sm font-semibold text-slate-400">暂无词频数据</p>
-                            <p class="text-[11px] text-slate-300 mt-1">完成分析后将自动生成词云</p>
+                            <p class="text-sm font-semibold text-slate-600">还没有词频数据</p>
+                            <p class="text-xs text-slate-500 mt-2 max-w-sm leading-relaxed">
+                                当前没有可统计的 Listing 文案和关键词匹配结果。
+                            </p>
+                            <p class="text-xs text-slate-500 mt-2 max-w-sm leading-relaxed">
+                                <span class="font-semibold text-slate-600">推荐操作：</span>
+                                返回输入页粘贴关键词和文案，点击开始分析后这里会生成词云。
+                            </p>
                         </div>
                     </div>
                 </div>

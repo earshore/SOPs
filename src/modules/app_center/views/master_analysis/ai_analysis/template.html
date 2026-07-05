@@ -394,17 +394,17 @@
                         </div>
                         <div class="flex-1">
                           <h4 class="text-sm font-bold text-amber-800 mb-1">
-                            暂无产品数据
+                            还没有产品数据
                           </h4>
                           <p
                             class="text-xs text-amber-700 leading-relaxed mb-3"
                           >
-                            请先从"数据采集"模块抓取产品数据，或从"数据管理"导入历史数据。
+                            当前 ASIN 列表为空，无法执行 Listings 或 Reviews 分析。推荐操作：先从"数据采集"模块抓取产品数据，或从"数据管理"导入历史数据。
                           </p>
                           <div class="flex items-center gap-2">
                             <a
                               @click.prevent="$dispatch('navigate-to-scraper')"
-                              class="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-amber-700 hover:text-amber-800 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-lg transition-colors"
+                              class="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-amber-700 hover:text-amber-800 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
                               href="#"
                             >
                               <i class="fa-solid fa-arrow-right"></i>
@@ -1976,7 +1976,7 @@
         </div>
         <h3
           class="text-2xl font-bold text-slate-700 mb-3"
-          x-text="hasNoAnalysisData ? '请先准备产品数据' : '准备开始智能分析'"
+          x-text="hasNoAnalysisData ? '还没有产品数据' : '准备开始智能分析'"
         ></h3>
         <p
           x-show="!hasNoAnalysisData"
@@ -1989,15 +1989,18 @@
           x-show="hasNoAnalysisData"
           class="text-slate-500 max-w-lg mx-auto leading-relaxed"
         >
-          当前没有可分析的产品数据。请先完成数据采集或导入，再回到这里生成
+          当前没有可分析的产品数据。推荐操作：先完成数据采集或导入，再回到这里生成
           Listings 与 Reviews 洞察。
+          <span class="block mt-2 text-sm text-slate-400">
+            数据准备完成后，这里会展示可导出的 AI 分析报告。
+          </span>
         </p>
         <div x-show="hasNoAnalysisData" class="mt-8">
           <button
             type="button"
             data-action="switch-tab"
             data-tab="scraper"
-            class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+            class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
           >
             <i class="fa-solid fa-spider"></i>
             去数据采集

@@ -110,7 +110,14 @@ export function renderReportAnalysis(ctx: PromptlabAlpineContext): void {
     }
     renderer.renderTemplate(
       container,
-      '<p class="text-xs text-slate-400 italic p-2">暂无可用数据...</p>'
+      `
+        <div class="px-4 py-5 text-center" role="status" aria-live="polite">
+          <p class="text-sm font-semibold text-slate-600">还没有报告维度</p>
+          <p class="mt-2 text-xs text-slate-500 leading-relaxed">当前未检测到 AI 分析报告，暂时无法自动拆解关键词、卖点和受众维度。</p>
+          <p class="mt-2 text-xs text-slate-500 leading-relaxed"><span class="font-semibold text-slate-600">推荐操作：</span>先去 AI 分析生成报告；如果赶时间，可以继续手动填写下方产品 DNA。</p>
+          <p class="mt-2 text-[11px] text-slate-400">生成报告后，这里会显示可一键导入的维度。</p>
+        </div>
+      `
     );
     container.className = 'mt-3';
     return;

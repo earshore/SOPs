@@ -178,6 +178,24 @@
    - 优化方案：ASIN 选择项、Listing / Reviews 分析目标卡、任务预览、Prompt 复制、Hero 卡片、性能设置、结果卡、发现条目和导出按钮统一改为 `transition duration-200` 并补齐重点按钮焦点环；主分析按钮按压反馈改为 `active:translate-y-px`；禁用原因提示只过渡 opacity；分析进度条保留宽度语义但改为 `transition-[width]`；动态主按钮类移除 `hover:scale-105`。
    - 验收：AI Analysis 模板与动态类文件扫描无 `transition-all`、`hover/active/group-hover:scale`、`hover:rotate`；深层 PC 动效合同已锁定本批文件。
 
+### Batch 17：报告 / 搜索结果空状态任务导向（已执行）
+
+1. 将报告占位和搜索无结果从“说明为空”调整为“原因 + 推荐操作 + 次级帮助”。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/master_analysis/promptlab/template.html`、`src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts`、`src/modules/app_center/views/keyword_hunter/analysis/template.html`、`src/modules/more/views/explore/prompts/index.ts`、`src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts`、`tests/unit/promptlab.test.ts`、`tests/unit/promptsModule.test.ts`、`tests/unit/restrictedWordsHandler.test.ts`、`tests/unit/ui-p1-08-template-a11y.test.ts`。
+   - PC 端影响：这些区域位于 Prompt Lab、Keyword Hunter、提示词库和禁限词结果表的关键工作流中；旧文案只告诉用户“暂无/未找到”，不能帮助桌面用户快速判断是缺报告、筛选过窄还是需要回到上游步骤。
+   - 优化方案：Prompt Lab 静态模板与运行时报告占位统一说明缺少 AI 分析报告、推荐先生成报告或手填产品 DNA；Keyword Hunter 评审报告空态说明需先完成 STEP 1 / STEP 2；提示词库和禁限词搜索空态说明筛选无命中，并给出清空、切换分类/模式和缩短关键词等操作。
+   - 验收：相关单元测试锁定空态文案、`role="status"` / `aria-live` 语义和推荐操作；聚焦测试通过。
+
+### Batch 18：数据准备 / 历史空状态任务导向（已执行）
+
+1. 收敛数据导入、历史快照和产品数据缺失状态。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/keyword_hunter/input/template.html`、`src/modules/app_center/views/keyword_hunter/process/template.html`、`src/modules/app_center/views/keyword_hunter/process/index.ts`、`src/modules/app_center/views/master_analysis/scraper/template.html`、`src/modules/app_center/views/master_analysis/ai_analysis/template.html`、`tests/unit/keywordHunterProcessModule.test.ts`、`tests/unit/scraper-template-a11y.test.ts`、`tests/unit/ui-p1-08-template-a11y.test.ts`。
+   - PC 端影响：数据准备类空态是工作流入口卡点；如果只显示“暂无数据”，用户不知道该导入 JSON、输入 ASIN、保存快照，还是返回输入页重新分析。
+   - 优化方案：Keyword Hunter 历史快照、词频和关键词监控空态补齐原因与推荐动作；Scraper 导入区说明导入 JSON / 输入 ASIN 两条路径，历史区说明快照产生条件；AI Analysis 产品数据缺失状态说明 ASIN 列表为空并强化前往数据采集动作，相关按钮补齐键盘焦点环。
+   - 验收：Keyword Hunter、Scraper、AI Analysis 相关测试通过；深层 PC 动效扫描仍无 `transition-all`、缩放或旋转反馈回退；`git diff --check` 通过。
+
 ## 0. PC 端优化目标
 
 本轮优化不追求“大改风格”，而是让现有界面在 PC 工作台场景下更高效、更稳定、更一致：
@@ -413,7 +431,8 @@
 
 - **当前状态**
   - 全局 `ErrorBoundary`、通用空状态、未注册模块和超时 fallback 已完成首批任务导向改造。
-  - 业务页内私有空状态仍需按页面继续处理，例如 Prompt Lab 报告空状态、Scraper 历史/导入空状态、Keyword Hunter 结果空状态。
+  - 业务页内私有空状态已完成首批页面级收敛：Prompt Lab 报告静态 / 运行时占位、Keyword Hunter 报告 / 历史快照 / 词频 / 关键词监控空态、Scraper 导入 / 历史空态、AI Analysis 产品数据缺失状态、提示词库搜索无结果、禁限词搜索无结果。
+  - 当前复扫剩余命中主要是 SOP 正文说明、常量文案、操作 toast 或服务异常信息；不再属于本轮页面级空状态首批范围。
 - **当前问题**
   - 错误和空状态目前偏通用，如“功能开发中”“加载超时”等。
 - **PC 端影响**

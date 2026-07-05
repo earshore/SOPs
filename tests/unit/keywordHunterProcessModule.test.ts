@@ -285,6 +285,31 @@ it('keeps the floating keyword monitor visible when all keywords are unmatched',
   ).toHaveLength(1);
 });
 
+it('renders task-oriented empty states when no keyword data exists', async () => {
+  Object.assign(processMocks.state.keywordTracker, {
+    keywords: [],
+    processedCopy: '',
+    matchedKeywords: [],
+    unmatchedKeywords: [],
+    wordFrequency: [],
+  });
+
+  await mountProcess();
+
+  expect(document.querySelector('#kt-word-frequency-list')?.textContent).toContain(
+    '还没有词频数据'
+  );
+  expect(document.querySelector('#kt-word-frequency-list')?.textContent).toContain(
+    '推荐操作：返回输入页粘贴关键词和文案'
+  );
+  expect(document.querySelector('#kt-all-keywords')?.textContent).toContain('还没有关键词数据');
+  expect(document.querySelector('#kt-all-keywords')?.textContent).toContain(
+    '推荐操作：返回输入页粘贴关键词和文案'
+  );
+  expect(document.querySelector('#kt-word-frequency-list [role="status"]')).not.toBeNull();
+  expect(document.querySelector('#kt-all-keywords [role="status"]')).not.toBeNull();
+});
+
 it('locates matched keywords and unmatched roots from rendered controls', async () => {
   vi.useFakeTimers();
   await mountProcess();
