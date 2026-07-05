@@ -11,6 +11,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.restoreAllMocks();
   localStorage.clear();
 });
 
@@ -48,14 +49,26 @@ describe('基础存储操作', () => {
     expect(StorageService.get('key')).toBeNull();
   });
 
-  it('应该能够清空所有数据', () => {
+  it('应该只清空本应用管理的数据', () => {
     StorageService.set('key1', 'value1');
     StorageService.set('key2', 'value2');
+    localStorage.setItem('external-app-key', 'keep');
 
     StorageService.clear();
 
     expect(StorageService.get('key1')).toBeNull();
     expect(StorageService.get('key2')).toBeNull();
+    expect(localStorage.getItem('external-app-key')).toBe('keep');
+  });
+
+  it('应该提供显式命名的全量清空危险方法', () => {
+    StorageService.set('key1', 'value1');
+    localStorage.setItem('external-app-key', 'remove');
+
+    StorageService.dangerouslyClearAllLocalStorage();
+
+    expect(localStorage.getItem('key1')).toBeNull();
+    expect(localStorage.getItem('external-app-key')).toBeNull();
   });
 
   it('应该能够检查键是否存在', () => {
@@ -68,11 +81,13 @@ describe('基础存储操作', () => {
   it('应该能够获取所有键', () => {
     StorageService.set('key1', 'value1');
     StorageService.set('key2', 'value2');
+    localStorage.setItem('external-app-key', 'keep');
 
     const keys = StorageService.keys();
 
     expect(keys).toContain('key1');
     expect(keys).toContain('key2');
+    expect(keys).not.toContain('external-app-key');
     expect(keys.length).toBeGreaterThanOrEqual(2);
   });
 });
@@ -407,6 +422,8 @@ describe('存储使用情况', () => {
   it('应该返回存储使用情况', () => {
     StorageService.set('key1', 'value1');
     StorageService.set('key2', 'value2');
+    const usageBeforeExternalKey = StorageService.getUsage();
+    localStorage.setItem('external-app-key', 'external-value');
 
     const usage = StorageService.getUsage();
 
@@ -414,6 +431,7 @@ describe('存储使用情况', () => {
     expect(usage).toHaveProperty('total');
     expect(usage).toHaveProperty('percent');
     expect(usage.used).toBeGreaterThan(0);
+    expect(usage.used).toBe(usageBeforeExternalKey.used);
     expect(usage.total).toBe(5 * 1024 * 1024); // 5MB
   });
 });
@@ -468,8 +486,7 @@ describe('错误处理', () => {
 
   it('set应该在存储失败时返回false', () => {
     // Mock localStorage.setItem抛出错误
-    const originalSetItem = Storage.prototype.setItem;
-    Storage.prototype.setItem = vi.fn(() => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       const error = new Error('QuotaExceededError');
       error.name = 'QuotaExceededError';
       throw error;
@@ -477,17 +494,13 @@ describe('错误处理', () => {
 
     const result = StorageService.set('key', 'value');
 
-    // 恢复原始方法
-    Storage.prototype.setItem = originalSetItem;
-
     // 应该返回false或true(取决于重试是否成功)
     expect(typeof result).toBe('boolean');
   });
 
   it('setRaw应该在存储失败时返回false', () => {
     // Mock localStorage.setItem抛出错误
-    const originalSetItem = Storage.prototype.setItem;
-    Storage.prototype.setItem = vi.fn(() => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       const error = new Error('QuotaExceededError');
       error.name = 'QuotaExceededError';
       throw error;
@@ -495,10 +508,51 @@ describe('错误处理', () => {
 
     const result = StorageService.setRaw('key', 'value');
 
-    // 恢复原始方法
-    Storage.prototype.setItem = originalSetItem;
-
     expect(typeof result).toBe('boolean');
+  });
+
+  it('remove应该在localStorage失败时安全返回', () => {
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+      throw new Error('remove failed');
+    });
+
+    expect(() => StorageService.remove('key')).not.toThrow();
+  });
+
+  it('clear应该在localStorage失败时安全返回', () => {
+    vi.spyOn(Storage.prototype, 'key').mockImplementation(() => {
+      throw new Error('key failed');
+    });
+
+    expect(() => StorageService.clear()).not.toThrow();
+  });
+
+  it('has应该在localStorage失败时返回false', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('get failed');
+    });
+
+    expect(StorageService.has('key')).toBe(false);
+  });
+
+  it('keys应该在localStorage失败时返回空数组', () => {
+    vi.spyOn(Storage.prototype, 'key').mockImplementation(() => {
+      throw new Error('key failed');
+    });
+
+    expect(StorageService.keys()).toEqual([]);
+  });
+
+  it('getUsage应该在localStorage失败时返回安全默认值', () => {
+    vi.spyOn(Storage.prototype, 'key').mockImplementation(() => {
+      throw new Error('key failed');
+    });
+
+    expect(StorageService.getUsage()).toEqual({
+      used: 0,
+      total: 5 * 1024 * 1024,
+      percent: 0,
+    });
   });
 });
 

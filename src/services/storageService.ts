@@ -16,7 +16,7 @@ import {
   DEFAULT_SCRAPER_PROXY_TYPE,
   SCRAPER_PROXY_CREDENTIAL_TYPES,
 } from '../common/config/scraperProxies';
-import { LocalDataStore } from './localDataStore';
+import { isSopsManagedLocalStorageKey, LocalDataStore } from './localDataStore';
 
 /**
  * 存储键名常量
@@ -414,40 +414,95 @@ class StorageServiceClass implements IStorageService {
     );
   }
 
+  private _reportStorageReadError(action: string, key: string, error: Error): void {
+    handleSystemError(
+      'SYS_STORAGE_ERROR',
+      {
+        module: 'StorageService',
+        action,
+        key,
+      },
+      error,
+      {
+        log: true,
+        notify: false,
+      }
+    );
+  }
+
   /**
    * 删除存储值
    */
   remove(key: string): void {
-    localStorage.removeItem(key);
-    this._removeAccessTime(key);
+    try {
+      localStorage.removeItem(key);
+      this._removeAccessTime(key);
+    } catch (e) {
+      this._reportStorageReadError('remove', key, e as Error);
+    }
   }
 
   /**
-   * 清空所有存储
+   * 清空本应用管理的 localStorage 键，避免误删同 origin 下的外部数据。
    */
-  clear(): void {
-    localStorage.clear();
+  clear(namespace?: string): void {
+    try {
+      if (!namespace) {
+        LocalDataStore.clearAppLocalStorageKeys();
+        return;
+      }
+
+      this.keys(namespace).forEach(key => this.remove(key));
+    } catch (e) {
+      this._reportStorageReadError('clear', namespace || '*', e as Error);
+    }
+  }
+
+  /**
+   * 危险操作：清空整个 origin 的 localStorage。只允许明确知道影响范围时调用。
+   */
+  dangerouslyClearAllLocalStorage(): void {
+    try {
+      localStorage.clear();
+    } catch (e) {
+      this._reportStorageReadError('dangerouslyClearAllLocalStorage', '*', e as Error);
+    }
   }
 
   /**
    * 检查键是否存在
    */
   has(key: string): boolean {
-    return localStorage.getItem(key) !== null;
+    try {
+      return localStorage.getItem(key) !== null;
+    } catch (e) {
+      this._reportStorageReadError('has', key, e as Error);
+      return false;
+    }
   }
 
   /**
    * 获取所有键
    */
-  keys(): string[] {
-    const keys: string[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && !key.startsWith('_lru_access_')) {
-        keys.push(key);
+  keys(namespace?: string): string[] {
+    try {
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (
+          key &&
+          !key.startsWith('_lru_access_') &&
+          isSopsManagedLocalStorageKey(key) &&
+          (!namespace || key.startsWith(namespace))
+        ) {
+          keys.push(key);
+        }
       }
+      return keys;
+    } catch (e) {
+      this._reportStorageReadError('keys', namespace || '*', e as Error);
+      return [];
     }
-    return keys;
   }
 
   /**
@@ -597,18 +652,28 @@ class StorageServiceClass implements IStorageService {
    * 获取存储使用情况
    */
   getUsage(): StorageUsage {
-    let used = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key) continue;
-      used += (localStorage.getItem(key) || '').length * 2;
+    try {
+      let used = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !isSopsManagedLocalStorageKey(key)) continue;
+        used += (localStorage.getItem(key) || '').length * 2;
+      }
+      const total = 5 * 1024 * 1024; // 5MB
+      return {
+        used,
+        total,
+        percent: Math.round((used / total) * 100),
+      };
+    } catch (e) {
+      this._reportStorageReadError('getUsage', '*', e as Error);
+      const total = 5 * 1024 * 1024;
+      return {
+        used: 0,
+        total,
+        percent: 0,
+      };
     }
-    const total = 5 * 1024 * 1024; // 5MB
-    return {
-      used,
-      total,
-      percent: Math.round((used / total) * 100),
-    };
   }
 
   /**

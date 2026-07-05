@@ -87,6 +87,11 @@ export class ModuleLoader {
   private contentEnterAnimation: boolean;
   private loadingTimer: number | null;
   private loadingTimerLoadId: number | null;
+  private retryTimer: number | null;
+  private retryTimerLoadId: number | null;
+  private routeChangeHandler: ((event: Event) => void) | null;
+  private moduleUnloadHandler: ((event: Event) => void) | null;
+  private isDestroyed: boolean;
 
   constructor(config: ModuleLoaderConfig) {
     this.containerId = config.containerId;
@@ -103,6 +108,11 @@ export class ModuleLoader {
     this.contentEnterAnimation = config.contentEnterAnimation || false;
     this.loadingTimer = null;
     this.loadingTimerLoadId = null;
+    this.retryTimer = null;
+    this.retryTimerLoadId = null;
+    this.routeChangeHandler = null;
+    this.moduleUnloadHandler = null;
+    this.isDestroyed = false;
 
     // 🎯 DI容器注入（预留用于未来的模块工厂函数）
     // const diContainer = config.container || globalContainer;
@@ -188,6 +198,7 @@ export class ModuleLoader {
    */
   private _unmountCurrentModule(): void {
     this._clearDelayedLoading();
+    this._clearRetry();
     if (this.currentModule && this.currentModule.unmount) {
       try {
         this.currentModule.unmount();
@@ -274,6 +285,18 @@ export class ModuleLoader {
     }
   }
 
+  private _clearRetry(loadId?: number): void {
+    if (loadId !== undefined && this.retryTimerLoadId !== loadId) {
+      return;
+    }
+
+    if (this.retryTimer) {
+      window.clearTimeout(this.retryTimer);
+      this.retryTimer = null;
+      this.retryTimerLoadId = null;
+    }
+  }
+
   /**
    * 渲染未注册模块提示
    * @param container - 容器元素
@@ -320,6 +343,7 @@ export class ModuleLoader {
   }
 
   private _startLoad(routeId: string): number {
+    this._clearRetry();
     const loadId = ++this.loadSequence;
     this.isLoading = true;
     this.pendingRouteId = routeId;
@@ -469,8 +493,11 @@ export class ModuleLoader {
       this._renderRetryLoading(container);
     }
 
-    setTimeout(() => {
-      if (!this._isStaleLoad(loadId)) {
+    this.retryTimerLoadId = loadId;
+    this.retryTimer = window.setTimeout(() => {
+      this.retryTimer = null;
+      this.retryTimerLoadId = null;
+      if (!this.isDestroyed && !this._isStaleLoad(loadId)) {
         this.loadModule(routeId, retryCount + 1);
       }
     }, 1000);
@@ -510,6 +537,10 @@ export class ModuleLoader {
    * @param retryCount - 重试次数
    */
   async loadModule(routeId: string, retryCount: number = 0): Promise<void> {
+    if (this.isDestroyed) {
+      return;
+    }
+
     if (this._shouldSkipLoad(routeId)) {
       return;
     }
@@ -569,7 +600,7 @@ export class ModuleLoader {
    */
   private _initRouteListener(): void {
     // 监听路由变化事件
-    window.addEventListener(APP_EVENTS.ROUTE_CHANGED, async (e: Event) => {
+    this.routeChangeHandler = (e: Event) => {
       const customEvent = e as CustomEvent;
       const { routeId } = customEvent.detail;
 
@@ -588,12 +619,13 @@ export class ModuleLoader {
         }
 
         // 加载子模块
-        await this.loadModule(routeId);
+        void this.loadModule(routeId);
       }
-    });
+    };
+    window.addEventListener(APP_EVENTS.ROUTE_CHANGED, this.routeChangeHandler);
 
     // 监听主模块卸载事件
-    window.addEventListener(APP_EVENTS.MODULE_UNLOAD, (e: Event) => {
+    this.moduleUnloadHandler = (e: Event) => {
       const customEvent = e as CustomEvent;
       const { panelId } = customEvent.detail;
 
@@ -601,15 +633,29 @@ export class ModuleLoader {
       if (panelId === this.shellId) {
         this._unmountCurrentModule();
       }
-    });
+    };
+    window.addEventListener(APP_EVENTS.MODULE_UNLOAD, this.moduleUnloadHandler);
   }
 
   /**
    * 销毁加载器（清理资源）
    */
   destroy(): void {
+    this.isDestroyed = true;
+    this.loadSequence += 1;
+    this.isLoading = false;
+    this.pendingRouteId = null;
     this._clearDelayedLoading();
+    this._clearRetry();
     this._unmountCurrentModule();
+    if (this.routeChangeHandler) {
+      window.removeEventListener(APP_EVENTS.ROUTE_CHANGED, this.routeChangeHandler);
+      this.routeChangeHandler = null;
+    }
+    if (this.moduleUnloadHandler) {
+      window.removeEventListener(APP_EVENTS.MODULE_UNLOAD, this.moduleUnloadHandler);
+      this.moduleUnloadHandler = null;
+    }
   }
 }
 

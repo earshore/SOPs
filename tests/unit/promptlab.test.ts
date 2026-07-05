@@ -162,7 +162,7 @@ describe('Module Lifecycle', () => {
       throw mockError;
     });
 
-    await expect(mount(container)).resolves.toBeUndefined();
+    await expect(mount(container)).rejects.toThrow('Render failed');
     expect(container.textContent).toContain('模块加载失败 (promptlab)');
     expect(container.textContent).toContain('Render failed');
   });

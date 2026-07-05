@@ -127,16 +127,36 @@ function createContainer() {
 
   it('renders sanitized fallback UI when render fails and supports retry', async () => {
     const module = new FailingModule('failing-module');
+    const emit = vi.spyOn(eventBus, 'emit');
 
-    await module.mount(host);
+    await expect(module.mount(host)).rejects.toThrow('<script>render failed</script>');
 
     expect(host.querySelector('script')).toBeNull();
     expect(host.textContent).toContain('模块加载失败 (failing-module)');
     expect(host.textContent).toContain('<script>render failed</script>');
+    expect(emit).toHaveBeenCalledWith(APP_EVENTS.MODULE_ERROR, {
+      moduleId: 'failing-module',
+      phase: 'mount',
+      error: expect.any(Error),
+      message: '<script>render failed</script>',
+    });
 
-    host.querySelector<HTMLButtonElement>('#retry-btn-failing-module')?.click();
+    host.querySelector<HTMLButtonElement>('button[data-module-retry]')?.click();
 
     expect(host.querySelector('.fa-spinner')).toBeInstanceOf(HTMLElement);
+  });
+
+  it('removes retry listeners when an error state is unmounted', async () => {
+    const module = new FailingModule('failing-module');
+
+    await expect(module.mount(host)).rejects.toThrow('render failed');
+    const retryButton = host.querySelector<HTMLButtonElement>('button[data-module-retry]');
+    expect(retryButton).toBeInstanceOf(HTMLButtonElement);
+
+    module.unmount();
+    retryButton?.click();
+
+    expect(host.querySelector('.fa-spinner')).toBeNull();
   });
 
   it('exposes DI service helpers through subclasses', () => {

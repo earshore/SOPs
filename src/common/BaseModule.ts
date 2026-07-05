@@ -159,7 +159,10 @@ export default class BaseModule {
       await this.render();
       await this.init();
     } catch (error) {
-      this.handleError(error as Error);
+      const moduleError = error as Error;
+      this.handleError(moduleError);
+      this.emitModuleError(moduleError, 'mount');
+      throw moduleError;
     }
   }
 
@@ -377,7 +380,7 @@ export default class BaseModule {
                     </div>
                     <h3 class="text-lg font-bold text-slate-800 mb-2">模块加载失败 (${escapeHtml(this.moduleId)})</h3>
                     <p class="text-sm text-slate-500 mb-6 max-w-md break-words">${escapeHtml(error.message)}</p>
-                    <button id="retry-btn-${escapeHtml(this.moduleId)}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
+                    <button type="button" data-module-retry="true" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
                         <i class="fas fa-redo mr-2"></i>重试
                     </button>
                 </div>
@@ -385,9 +388,9 @@ export default class BaseModule {
       );
 
       // 绑定重试逻辑
-      const btn = this.container.querySelector(`#retry-btn-${this.moduleId}`) as HTMLButtonElement;
+      const btn = this.container.querySelector<HTMLButtonElement>('button[data-module-retry]');
       if (btn) {
-        btn.addEventListener('click', () => {
+        this.addEventListener(btn, 'click', () => {
           const container = this.container;
           if (!container) return;
 
@@ -398,11 +401,21 @@ export default class BaseModule {
           );
           // 重新挂载
           this.mount(container).catch(e => {
-            this.handleError(e as Error); // 递归处理再次失败的情况
+            // mount 已经渲染错误状态并发出 MODULE_ERROR，这里只消费 rejection。
+            void e;
           });
         });
       }
     }
+  }
+
+  private emitModuleError(error: Error, phase: string): void {
+    eventBus.emit(APP_EVENTS.MODULE_ERROR, {
+      moduleId: this.moduleId,
+      phase,
+      error,
+      message: error.message,
+    });
   }
 
   /**

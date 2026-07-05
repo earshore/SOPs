@@ -229,6 +229,55 @@ async function flushAsyncWork(): Promise<void> {
     expect(content.textContent).toBe('');
   });
 
+  it('removes route listeners when destroyed', async () => {
+    const routeModule = createModule('Route');
+    const loaderFn = vi.fn(() => Promise.resolve(routeModule));
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        listener_route: loaderFn
+      },
+      moduleName: 'TestLoader'
+    });
+
+    loader.destroy();
+    window.dispatchEvent(new CustomEvent(APP_EVENTS.ROUTE_CHANGED, {
+      detail: {
+        routeId: 'listener_route',
+        config: { module: { id: 'listener' } }
+      }
+    }));
+    await waitForRouteEvent();
+
+    expect(loaderFn).not.toHaveBeenCalled();
+  });
+
+  it('clears scheduled retry timers when destroyed', async () => {
+    vi.useFakeTimers();
+    const loaderFn = vi.fn(() => Promise.reject(new Error('load failed')));
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        retry_route: loaderFn
+      },
+      moduleName: 'TestLoader'
+    });
+
+    try {
+      await loader.loadModule('retry_route');
+      const callsBeforeDestroy = loaderFn.mock.calls.length;
+
+      loader.destroy();
+      await vi.advanceTimersByTimeAsync(1000);
+
+      expect(loaderFn).toHaveBeenCalledTimes(callsBeforeDestroy);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('applies content enter animation when enabled', async () => {
     const content = document.getElementById('content') as HTMLElement;
     content.classList.add('fade-in');

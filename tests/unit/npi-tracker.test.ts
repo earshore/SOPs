@@ -177,7 +177,7 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
             
             vi.spyOn(SafeModuleLoader.getInstance(), 'loadTemplate').mockRejectedValue(mockError);
 
-            await expect(mount(container)).resolves.toBeUndefined();
+            await expect(mount(container)).rejects.toThrow('Template load failed');
             expect(container.textContent).toContain('模块加载失败 (sops_npi_tracker)');
             expect(container.textContent).toContain('Template load failed');
         });

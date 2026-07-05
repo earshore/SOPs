@@ -177,6 +177,14 @@ function classifyLocalStorageKey(key: string): LocalDataBucketId | null {
     : null;
 }
 
+export function isSopsManagedLocalStorageKey(key: string): boolean {
+  if (classifyLocalStorageKey(key) !== null || isLruAccessKey(key)) {
+    return true;
+  }
+
+  return getBrowserLocalStorage().getItem(`_lru_access_${key}`) !== null;
+}
+
 function normalizeStorageClass(storageClass: unknown): StorageClass {
   return storageClass === 'config' ||
     storageClass === 'secret' ||
@@ -662,10 +670,10 @@ class LocalDataStoreClass {
     return existed;
   }
 
-  private clearAppLocalStorageKeys(): number {
+  clearAppLocalStorageKeys(): number {
     let removed = 0;
     for (const key of this.getLocalStorageKeys()) {
-      if (classifyLocalStorageKey(key) !== null && this.removeLocalStorageKey(key)) {
+      if (isSopsManagedLocalStorageKey(key) && this.removeLocalStorageKey(key)) {
         removed += 1;
       }
     }
