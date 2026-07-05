@@ -44,6 +44,9 @@ describe('事件订阅和发布', () => {
     const callback = vi.fn();
     const unsubscribe = eventBus.on('test-event', callback);
 
+    expect(unsubscribe.subscribed).toBe(true);
+    expect(unsubscribe.reason).toBeUndefined();
+
     unsubscribe();
     eventBus.emit('test-event', { data: 'test' });
 
@@ -80,6 +83,24 @@ describe('内存泄漏检测', () => {
     expect(stats.eventCounts['test-event']).toBe(50);
     expect(stats.events[0]?.isError).toBe(true);
     expect(warnSpy).toHaveBeenCalledWith('[EventBus] 事件 "test-event" 的监听器数量已达上限 (50)');
+  });
+
+  it('应该在达到最大监听器数量时返回订阅失败状态', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    for (let i = 0; i < 50; i++) {
+      eventBus.on('test-event', () => {});
+    }
+
+    const callback = vi.fn();
+    const unsubscribe = eventBus.on('test-event', callback);
+
+    expect(unsubscribe.subscribed).toBe(false);
+    expect(unsubscribe.reason).toBe('listener-limit');
+
+    eventBus.emit('test-event', {});
+
+    expect(callback).not.toHaveBeenCalled();
   });
 });
 

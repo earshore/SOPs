@@ -237,6 +237,78 @@ import { persist, clearPersistedState } from '@/stores/middleware/persist';
       expect(parsed.state.tokenCount).toBe(20);
       expect(parsed.state.nested).toEqual({ keep: 'safe-value' });
     });
+
+    it('应该在恢复旧持久化状态时丢弃敏感字段', () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          state: {
+            publicSetting: 'restored',
+            apiKey: 'legacy-secret-key',
+            tokenCount: 12,
+            nested: {
+              accessToken: 'legacy-access-token',
+              keep: 'safe-value',
+              child: {
+                password: 'legacy-password',
+                label: 'safe-label'
+              }
+            }
+          },
+          version: 0
+        })
+      );
+
+      interface TestState {
+        publicSetting: string;
+        apiKey: string;
+        tokenCount: number;
+        nested: {
+          accessToken?: string;
+          keep: string;
+          child: {
+            password?: string;
+            label: string;
+          };
+        };
+      }
+
+      const store = createStore<TestState>()(
+        persist(
+          () => ({
+            publicSetting: 'initial',
+            apiKey: 'initial-key',
+            tokenCount: 0,
+            nested: {
+              accessToken: 'initial-access-token',
+              keep: 'initial-keep',
+              child: {
+                password: 'initial-password',
+                label: 'initial-label'
+              }
+            }
+          }),
+          { name: STORAGE_KEY }
+        )
+      );
+
+      expect(store.getState()).toEqual({
+        publicSetting: 'restored',
+        apiKey: 'initial-key',
+        tokenCount: 12,
+        nested: {
+          keep: 'safe-value',
+          child: {
+            label: 'safe-label'
+          }
+        }
+      });
+
+      const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      expect(persisted.state.apiKey).toBeUndefined();
+      expect(persisted.state.nested.accessToken).toBeUndefined();
+      expect(persisted.state.nested.child.password).toBeUndefined();
+    });
   });
 
   // ================================================================
@@ -334,6 +406,43 @@ import { persist, clearPersistedState } from '@/stores/middleware/persist';
       const parsed = JSON.parse(saved!);
       
       expect(parsed.version).toBe(2);
+    });
+
+    it('应该在迁移后丢弃迁移结果中的敏感字段', () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          state: { oldField: 'public-value' },
+          version: 0
+        })
+      );
+
+      interface TestState {
+        publicSetting: string;
+        apiKey: string;
+      }
+
+      const store = createStore<TestState>()(
+        persist(
+          () => ({
+            publicSetting: 'initial',
+            apiKey: 'initial-key'
+          }),
+          {
+            name: STORAGE_KEY,
+            version: 1,
+            migrate: () => ({
+              publicSetting: 'migrated',
+              apiKey: 'migrated-secret-key'
+            })
+          }
+        )
+      );
+
+      expect(store.getState()).toEqual({
+        publicSetting: 'migrated',
+        apiKey: 'initial-key'
+      });
     });
   });
 

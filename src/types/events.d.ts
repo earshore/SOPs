@@ -865,7 +865,17 @@ export interface EventSubscribeOptions {
 /**
  * 取消订阅函数
  */
-export type EventUnsubscribe = () => void;
+export type EventUnsubscribe = (() => void) & {
+  /**
+   * 是否成功完成订阅。达到监听器上限时为 false。
+   */
+  subscribed?: boolean;
+
+  /**
+   * 订阅被拒绝时的原因。
+   */
+  reason?: 'listener-limit';
+};
 
 // ==================== EventBus接口 ====================
 

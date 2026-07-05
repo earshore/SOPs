@@ -67,6 +67,25 @@ function omitSensitivePersistFields(field: string, value: unknown): unknown {
   return isPersistSensitiveField(field) ? undefined : value;
 }
 
+function sanitizePersistedValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(item => sanitizePersistedValue(item));
+  }
+
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+
+  const sanitized: Record<string, unknown> = {};
+  Object.entries(value as Record<string, unknown>).forEach(([key, entryValue]) => {
+    if (!isPersistSensitiveField(key)) {
+      sanitized[key] = sanitizePersistedValue(entryValue);
+    }
+  });
+
+  return sanitized;
+}
+
 /**
  * 持久化配置
  */
@@ -153,6 +172,7 @@ export const persist = <T extends object>(
         if (migrate && parsed.version !== version) {
           persistedState = migrate(persistedState, parsed.version);
         }
+        persistedState = sanitizePersistedValue(persistedState);
 
         // 🎯 数据边界验证：如果提供了验证函数，验证持久化状态
         if (validate && !validate(persistedState)) {

@@ -247,9 +247,16 @@ class HttpServiceClass implements IHttpService {
     signal: AbortSignal | null | undefined,
     controller: AbortController
   ): void {
-    if (signal) {
-      signal.addEventListener('abort', () => controller.abort(), { once: true });
+    if (!signal) {
+      return;
     }
+
+    if (signal.aborted) {
+      controller.abort();
+      return;
+    }
+
+    signal.addEventListener('abort', () => controller.abort(), { once: true });
   }
 
   private _createFetchOptions(
@@ -277,6 +284,22 @@ class HttpServiceClass implements IHttpService {
       'name' in error &&
       (error as { name?: unknown }).name === 'AbortError'
     );
+  }
+
+  private _createAbortError(): Error {
+    if (typeof DOMException !== 'undefined') {
+      return new DOMException('Aborted', 'AbortError') as Error;
+    }
+
+    const error = new Error('Aborted');
+    error.name = 'AbortError';
+    return error;
+  }
+
+  private _throwIfAborted(...signals: Array<AbortSignal | null | undefined>): void {
+    if (signals.some(signal => signal?.aborted)) {
+      throw this._createAbortError();
+    }
   }
 
   private _shouldRetry(error: Error): boolean {
@@ -314,6 +337,8 @@ class HttpServiceClass implements IHttpService {
     options: HttpRequestExecutionOptions,
     abortSignal?: AbortSignal
   ): Promise<T> {
+    this._throwIfAborted(options.signal, abortSignal);
+
     const controller = new AbortController();
     let didTimeout = false;
     const timeoutId = setTimeout(() => {
@@ -354,7 +379,7 @@ class HttpServiceClass implements IHttpService {
           throw error;
         }
 
-        await this._delay(options.retryDelay * (attempt + 1));
+        await this._delay(options.retryDelay * (attempt + 1), options.signal, abortSignal);
         this._log('debug', 'Retry request', {
           attempt: attempt + 1,
           retries: options.retries,
@@ -595,8 +620,30 @@ class HttpServiceClass implements IHttpService {
   /**
    * 延迟函数
    */
-  private _delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  private _delay(ms: number, ...signals: Array<AbortSignal | null | undefined>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        this._throwIfAborted(...signals);
+      } catch (error) {
+        reject(error);
+        return;
+      }
+
+      const timeoutId = setTimeout(() => {
+        cleanup();
+        resolve();
+      }, ms);
+      const onAbort = () => {
+        clearTimeout(timeoutId);
+        cleanup();
+        reject(this._createAbortError());
+      };
+      const cleanup = () => {
+        signals.forEach(signal => signal?.removeEventListener('abort', onAbort));
+      };
+
+      signals.forEach(signal => signal?.addEventListener('abort', onAbort, { once: true }));
+    });
   }
 
   /**

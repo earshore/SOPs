@@ -520,6 +520,42 @@ describe('AbortSignal支持', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
+
+  it('请求开始前已经取消时不应该调用fetch', async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      HttpService.get('https://api.example.com/test', {
+        signal: controller.signal,
+        retries: 2,
+        retryDelay: 10,
+      })
+    ).rejects.toMatchObject({ name: 'AbortError' });
+
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('重试等待期间取消时不应该继续下一次fetch', async () => {
+    const controller = new AbortController();
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: async () => 'Server Error',
+    });
+
+    const request = HttpService.get('https://api.example.com/test', {
+      signal: controller.signal,
+      retries: 1,
+      retryDelay: 100,
+    });
+
+    await vi.waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
+    controller.abort();
+
+    await expect(request).rejects.toMatchObject({ name: 'AbortError' });
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
 });
 
 // ================================================================

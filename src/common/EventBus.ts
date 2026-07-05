@@ -70,6 +70,18 @@ interface EventBusDebugInfo {
 
 type EventListener = (...args: never[]) => unknown;
 
+function createUnsubscribe(
+  callback: () => void,
+  status: { subscribed: boolean; reason?: EventUnsubscribe['reason'] }
+): EventUnsubscribe {
+  const unsubscribe = callback as EventUnsubscribe;
+  unsubscribe.subscribed = status.subscribed;
+  if (status.reason) {
+    unsubscribe.reason = status.reason;
+  }
+  return unsubscribe;
+}
+
 /**
  * 事件总线类
  * 提供模块间通信的发布/订阅机制
@@ -137,7 +149,7 @@ class EventBus {
       console.warn(
         `[EventBus] 事件 "${event}" 的监听器数量已达上限 (${this._config.maxListenersPerEvent})`
       );
-      return () => {}; // 返回空函数，防止添加更多监听器
+      return createUnsubscribe(() => {}, { subscribed: false, reason: 'listener-limit' });
     }
 
     this.events[event].push(callback);
@@ -147,7 +159,9 @@ class EventBus {
     }
     this._stats.eventCounts[event]++;
 
-    return () => this.off(event, callback as GenericEventHandler);
+    return createUnsubscribe(() => this.off(event, callback as GenericEventHandler), {
+      subscribed: true,
+    });
   }
 
   /**
