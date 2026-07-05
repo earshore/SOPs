@@ -67,12 +67,13 @@ describe('apiEndpoints CSP policy', () => {
     const connectSrc = generateCSPConnectSrc();
 
     expect(getBrowserDirectEndpoints()).toEqual([
+      'new.hongecb.store',
       'api.scraperapi.com',
       'api.zenrows.com',
       'api.brightdata.com',
     ]);
     expect(connectSrc).toContain("'self'");
-    expect(connectSrc).not.toContain('https://new.hongecb.store');
+    expect(connectSrc).toContain('https://new.hongecb.store');
 
     getDangerousEndpoints().forEach(domain => {
       expect(connectSrc).not.toContain(domain);
@@ -103,6 +104,16 @@ describe('apiEndpoints CSP policy', () => {
     for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
       expect(extractCspDirective(csp, 'style-src')).not.toContain('cdn.bootcdn.net');
       expect(extractCspDirective(csp, 'font-src')).not.toContain('cdn.bootcdn.net');
+    }
+  });
+
+  it('uses system font stacks instead of loading Google Fonts', () => {
+    expect(readIndexHtml()).not.toContain('fonts.googleapis.com');
+    expect(readIndexHtml()).not.toContain('fonts.gstatic.com');
+
+    for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
+      expect(extractCspDirective(csp, 'style-src')).not.toContain('fonts.googleapis.com');
+      expect(extractCspDirective(csp, 'font-src')).not.toContain('fonts.gstatic.com');
     }
   });
 

@@ -32,15 +32,7 @@
    ======================================== */
 :root {
   /* ---- 代码块容器 ---- */
-  --code-font: var(
-    --font-mono,
-    'Fira Code',
-    'Cascadia Code',
-    'JetBrains Mono',
-    'SF Mono',
-    Consolas,
-    monospace
-  );
+  --code-font: var(--font-mono, 'Fira Code', 'Cascadia Code', 'SF Mono', Consolas, monospace);
   --code-font-size: 0.8125rem; /* 13px */
   --code-line-height: 1.7;
   --code-tab-size: 2;

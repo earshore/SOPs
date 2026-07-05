@@ -12,10 +12,7 @@ import { configCenter } from '../common/config/ConfigCenter';
 import { EnvConfig } from '../common/config/envConfig';
 import { ApiError, NetworkError, SystemError } from '../common/errors';
 import { isDangerousEndpoint, getDangerousEndpoints } from '../common/config/apiEndpoints';
-import {
-  isServerManagedLlmEndpoint,
-  resolveRuntimeLlmEndpoint,
-} from '../common/config/llmProviders';
+import { DEFAULT_LLM_PROVIDER_ID, DEFAULT_NEW_API_ENDPOINT } from '../common/config/llmProviders';
 import { randomFloat } from '../common/utils/random';
 // 导入统一的 API 响应类型
 import type { LLMChatCompletionResponse, LLMErrorResponse } from '../types/api';
@@ -127,8 +124,15 @@ const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(r
 
 function resolveProviderEndpoint(provider: string, endpoint: string): string {
   const trimmedEndpoint = (endpoint || '').trim();
-  const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(trimmedEndpoint);
-  return resolveRuntimeLlmEndpoint(provider, normalizedEndpoint, configCenter.isProduction());
+
+  if (
+    provider === DEFAULT_LLM_PROVIDER_ID &&
+    (!trimmedEndpoint || trimmedEndpoint === '/v1' || trimmedEndpoint === '/v1/')
+  ) {
+    return DEFAULT_NEW_API_ENDPOINT;
+  }
+
+  return EnvConfig.api.normalizeEndpoint(trimmedEndpoint);
 }
 
 function getStreamDelta(payload: Record<string, unknown>): string {
@@ -497,14 +501,7 @@ async function fetchLLMResponse(
     'Content-Type': 'application/json',
   };
 
-  if (
-    context.apiKey &&
-    !isServerManagedLlmEndpoint(
-      context.provider,
-      context.normalizedEndpoint,
-      configCenter.isProduction()
-    )
-  ) {
+  if (context.apiKey) {
     headers.Authorization = `Bearer ${context.apiKey}`;
   }
 
@@ -835,14 +832,7 @@ async function fetchModelsRawText(context: FetchModelsContext): Promise<string> 
   const timeoutId = setTimeout(() => controller.abort(), 10000);
   const headers: Record<string, string> = {};
 
-  if (
-    context.apiKey &&
-    !isServerManagedLlmEndpoint(
-      context.provider,
-      context.normalizedEndpoint,
-      configCenter.isProduction()
-    )
-  ) {
+  if (context.apiKey) {
     headers.Authorization = `Bearer ${context.apiKey}`;
   }
 

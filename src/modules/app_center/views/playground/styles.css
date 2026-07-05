@@ -18,9 +18,11 @@
   height: 100%;
   min-height: 0;
   font-family:
-    'DM Sans',
+    ui-sans-serif,
     system-ui,
     -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
     sans-serif;
 }
 
@@ -608,7 +610,7 @@
   max-height: var(--playground-prompt-preview-body-max-height, min(472px, calc(100vh - 208px)));
   overflow-y: auto;
   padding-right: var(--spacing-1, 0.25rem);
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: var(--font-mono, ui-monospace, 'SFMono-Regular', Consolas, 'Courier New', monospace);
   font-size: 11px;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -713,7 +715,7 @@
   background: #ffffff;
   color: var(--color-slate-900, #0f172a);
   font-size: var(--text-base, 0.875rem);
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: var(--font-mono, ui-monospace, 'SFMono-Regular', Consolas, 'Courier New', monospace);
   line-height: 1;
   outline: none;
   box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
@@ -803,7 +805,14 @@
   background: #ffffff;
   color: var(--color-slate-900, #0f172a);
   font-size: 13px;
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: var(
+    --font-sans,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif
+  );
   line-height: 1.5;
 }
 
@@ -869,7 +878,7 @@
 .playground-field-temperature output {
   color: var(--playground-accent-hover);
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono, ui-monospace, 'SFMono-Regular', Consolas, monospace);
 }
 
 .playground-reset-tuning {
@@ -883,7 +892,14 @@
   color: var(--color-slate-700, #334155);
   font-size: 13px;
   font-weight: 600;
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: var(
+    --font-sans,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif
+  );
   cursor: pointer;
   box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
   transition:

@@ -65,12 +65,12 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
     displayName: 'Google AI',
     isDangerous: true,
   },
-  // 默认 NEW API 上游只能由服务端代理访问。
+  // 自部署 OpenAI 兼容中转站，允许浏览器直连。
   new_api: {
     domain: DEFAULT_NEW_API_DOMAIN,
-    requiresProxy: true,
+    requiresProxy: false,
     displayName: 'NEW API',
-    isDangerous: true,
+    isDangerous: false,
   },
   ...SCRAPER_PROXY_ENDPOINTS,
 };

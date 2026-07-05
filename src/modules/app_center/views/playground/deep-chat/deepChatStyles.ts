@@ -121,7 +121,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border-radius: 8px !important;
     background: #f8fafc !important;
     color: #334155 !important;
-    font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace !important;
+    font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
     font-size: 12px !important;
     line-height: 1.65 !important;
   }
@@ -130,7 +130,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border-radius: 4px !important;
     background: #f1f5f9 !important;
     color: #334155 !important;
-    font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace !important;
+    font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
     font-size: 0.92em !important;
     padding: 1px 4px !important;
   }

@@ -16,12 +16,6 @@ import {
   DEFAULT_SCRAPER_PROXY_TYPE,
   SCRAPER_PROXY_CREDENTIAL_TYPES,
 } from '../common/config/scraperProxies';
-import { configCenter } from '../common/config/ConfigCenter';
-import {
-  isServerManagedLlmEndpoint,
-  resolveRuntimeLlmEndpoint,
-  SERVER_MANAGED_LLM_API_KEY,
-} from '../common/config/llmProviders';
 import { isSopsManagedLocalStorageKey, LocalDataStore } from './localDataStore';
 
 /**
@@ -710,19 +704,11 @@ class StorageServiceClass implements IStorageService {
     if (!config) return null;
 
     try {
-      const endpoint = resolveRuntimeLlmEndpoint(
-        activeProvider,
-        config.endpoint || '',
-        configCenter.isProduction()
-      );
-      const apiKey = isServerManagedLlmEndpoint(
-        activeProvider,
-        endpoint,
-        configCenter.isProduction()
-      )
-        ? SERVER_MANAGED_LLM_API_KEY
-        : (await this.getSecure<string>(getLLMCredentialKey(activeProvider), '')) ||
-          (await this._migrateLegacyPlainLLMKey(activeProvider));
+      const endpoint = config.endpoint || '';
+      const storedApiKey =
+        (await this.getSecure<string>(getLLMCredentialKey(activeProvider), '')) ||
+        (await this._migrateLegacyPlainLLMKey(activeProvider));
+      const apiKey = storedApiKey;
       const fullConfig = { ...config, endpoint, apiKey } as LLMProviderConfig;
 
       // 🎯 数据边界验证：验证完整配置

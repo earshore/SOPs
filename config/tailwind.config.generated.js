@@ -330,10 +330,10 @@ export default {
 
       // 字体系统
       fontFamily: {
-        sans: ['DM Sans', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
         serif: ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'Cascadia Code', 'monospace'],
-        display: ['Syne', 'DM Sans', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Cascadia Code', 'Consolas', 'Liberation Mono', 'monospace'],
+        display: ['ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
 
       fontSize: {

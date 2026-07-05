@@ -164,7 +164,7 @@ body {
 
 .logo-subtitle {
   margin-top: 4px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family: var(--font-mono, ui-monospace, 'SFMono-Regular', Consolas, monospace);
   font-size: 10px;
   font-weight: 700;
   line-height: 1;

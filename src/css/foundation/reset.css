@@ -667,15 +667,7 @@ hr {
 code,
 kbd,
 samp {
-  font-family: var(
-    --font-mono,
-    'Fira Code',
-    'Cascadia Code',
-    'JetBrains Mono',
-    'SF Mono',
-    Consolas,
-    monospace
-  );
+  font-family: var(--font-mono, 'Fira Code', 'Cascadia Code', 'SF Mono', Consolas, monospace);
   font-size: 0.875em;
 }
 

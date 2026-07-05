@@ -12,8 +12,6 @@ import {
   OBSOLETE_PRESET_MODEL_IDS,
   PROVIDERS,
   getLlmProviderConfig,
-  isServerManagedLlmEndpoint,
-  resolveRuntimeLlmEndpoint,
   type ModelFeature,
   type ProviderConfig,
 } from '../../common/config/llmProviders';
@@ -419,22 +417,13 @@ function resolveProviderEndpoint(
   config: ProviderConfig,
   savedEndpoint: string
 ): string {
-  return resolveRuntimeLlmEndpoint(
-    provider,
-    savedEndpoint || config.endpoint || '',
-    configCenter.isProduction()
-  );
+  const shouldUseNewApiDefault =
+    provider === DEFAULT_LLM_PROVIDER_ID &&
+    (!savedEndpoint || savedEndpoint === '/v1' || savedEndpoint === '/v1/');
+  return shouldUseNewApiDefault ? config.endpoint : savedEndpoint || config.endpoint || '';
 }
 
-async function loadProviderApiKey(
-  provider: string,
-  endpoint: string,
-  savedConfig: SavedLLMConfig
-): Promise<string> {
-  if (isServerManagedLlmEndpoint(provider, endpoint, configCenter.isProduction())) {
-    return '';
-  }
-
+async function loadProviderApiKey(provider: string, savedConfig: SavedLLMConfig): Promise<string> {
   try {
     const key = await StorageService.getSecure(`llm_key_${provider}`, '');
     return key || '';
@@ -522,10 +511,7 @@ function validateModelFetchInput(llm: LLMState): string | null {
 }
 
 function isLLMApiKeyRequired(llm: LLMState): boolean {
-  return (
-    Boolean(llm.endpoint) &&
-    !isServerManagedLlmEndpoint(llm.provider, llm.endpoint, configCenter.isProduction())
-  );
+  return Boolean(llm.endpoint);
 }
 
 function assertFetchedModels(models: ModelOption[], provider: string): void {
@@ -877,7 +863,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
     const savedConfig = StorageService.getLLMConfig(provider);
     this.llm.endpoint = resolveProviderEndpoint(provider, config, savedConfig?.endpoint || '');
-    this.llm.apiKey = await loadProviderApiKey(provider, this.llm.endpoint, savedConfig);
+    this.llm.apiKey = await loadProviderApiKey(provider, savedConfig);
     this.llm.models = dedupeModels(getRawProviderModels(savedConfig, config));
     this.llm.model = getInitialModel(savedConfig?.model, this.llm.models);
   },
