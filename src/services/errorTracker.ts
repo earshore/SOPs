@@ -493,7 +493,7 @@ export class ErrorTracker {
 }
 
 // 创建全局实例（向后兼容）
-/** @deprecated 请使用 container.resolve('errorTracker') 获取ErrorTracker实例 */
+/** @deprecated 请使用 container.resolveAsync('errorTracker') 获取ErrorTracker实例 */
 export const errorTracker = ErrorTracker.getInstance();
 
 // 默认导出

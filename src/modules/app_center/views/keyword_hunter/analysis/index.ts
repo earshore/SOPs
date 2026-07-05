@@ -10,7 +10,7 @@
  */
 
 import { marked } from 'marked';
-import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { showToast } from '../../../../../common/ui';
 import * as KeywordService from '../services/trackerService';
@@ -1035,7 +1035,7 @@ function setupEventListeners(container: HTMLElement): void {
 export async function mount(container: HTMLElement): Promise<void> {
   try {
     analysisViewVersion += 1;
-    const loader = SafeModuleLoader.getInstance();
+    const loader = SafeTemplateLoader.getInstance();
     const renderer = SafeRenderer.getInstance();
 
     const html = await loader.loadTemplate(

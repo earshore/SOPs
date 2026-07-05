@@ -14,7 +14,7 @@ export type ServiceLifetime = 'transient' | 'singleton';
 /**
  * 服务工厂函数类型
  */
-export type ServiceFactory<T = unknown> = (container: DIContainer) => T;
+export type ServiceFactory<T = unknown> = (container: DIContainer) => T | Promise<T>;
 
 /**
  * 服务注册选项
@@ -28,6 +28,10 @@ export interface RegisterOptions {
    * 服务依赖列表
    */
   dependencies?: string[];
+  /**
+   * 服务是否必须异步解析
+   */
+  async?: boolean;
 }
 
 /**
@@ -37,6 +41,7 @@ export interface ServiceMetadata {
   name: string;
   lifetime: ServiceLifetime;
   dependencies: string[];
+  async: boolean;
   registered: number;
   resolved: number;
 }
@@ -52,8 +57,14 @@ export class DIContainer {
   /** 单例实例缓存 */
   private singletons: Map<string, unknown>;
 
+  /** 正在解析的异步单例 */
+  private pendingSingletons: Map<string, Promise<unknown>>;
+
   /** 服务生命周期 */
   private lifetimes: Map<string, ServiceLifetime>;
+
+  /** 必须异步解析的服务 */
+  private asyncServices: Set<string>;
 
   /** 服务依赖关系 */
   private dependencies: Map<string, string[]>;
@@ -64,7 +75,9 @@ export class DIContainer {
   constructor() {
     this.factories = new Map();
     this.singletons = new Map();
+    this.pendingSingletons = new Map();
     this.lifetimes = new Map();
+    this.asyncServices = new Set();
     this.dependencies = new Map();
     this.metadata = new Map();
   }
@@ -90,14 +103,22 @@ export class DIContainer {
 
     const lifetime = options.lifetime || 'singleton';
     const deps = options.dependencies || [];
+    const isAsync = options.async || false;
 
     this.factories.set(name, factory);
     this.lifetimes.set(name, lifetime);
     this.dependencies.set(name, deps);
+    if (isAsync) {
+      this.asyncServices.add(name);
+    } else {
+      this.asyncServices.delete(name);
+    }
+    this.clearCache(name);
     this.metadata.set(name, {
       name,
       lifetime,
       dependencies: deps,
+      async: isAsync,
       registered: Date.now(),
       resolved: 0,
     });
@@ -110,24 +131,22 @@ export class DIContainer {
    * @throws 服务未注册时抛出错误
    */
   resolve<T = unknown>(name: string): T {
-    // 1. 检查服务是否已注册
-    if (!this.factories.has(name)) {
-      throw new SystemError(`服务未注册: ${name}`, 'DI_SERVICE_NOT_FOUND', {
-        module: 'DIContainer',
-        action: 'resolve',
-        serviceName: name,
-      });
+    this.assertRegistered(name, 'resolve');
+
+    if (this.asyncServices.has(name)) {
+      throw new SystemError(
+        `服务 "${name}" 是异步服务，请使用 resolveAsync()`,
+        'DI_ASYNC_SERVICE_SYNC_RESOLVE',
+        {
+          module: 'DIContainer',
+          action: 'resolve',
+          serviceName: name,
+        }
+      );
     }
 
     const lifetime = this.lifetimes.get(name);
-    const factory = this.factories.get(name);
-    if (!factory) {
-      throw new SystemError(`服务未注册: ${name}`, 'DI_SERVICE_NOT_FOUND', {
-        module: 'DIContainer',
-        action: 'resolve',
-        serviceName: name,
-      });
-    }
+    const factory = this.getFactory(name, 'resolve');
 
     // 2. 单例模式：返回缓存的实例
     if (lifetime === 'singleton') {
@@ -137,19 +156,61 @@ export class DIContainer {
 
       // 创建新实例并缓存
       const instance = factory(this);
+      this.assertSyncInstance(name, instance, 'resolve');
       this.singletons.set(name, instance);
 
       // 更新元信息
-      const meta = this.metadata.get(name);
-      if (meta) {
-        meta.resolved = Date.now();
-      }
+      this.markResolved(name);
 
       return instance as T;
     }
 
     // 3. 瞬态模式：每次创建新实例
-    return factory(this) as T;
+    const instance = factory(this);
+    this.assertSyncInstance(name, instance, 'resolve');
+    this.markResolved(name);
+    return instance as T;
+  }
+
+  /**
+   * 异步解析服务
+   * @param name - 服务名称
+   * @returns 服务实例
+   */
+  async resolveAsync<T = unknown>(name: string): Promise<T> {
+    this.assertRegistered(name, 'resolveAsync');
+
+    const lifetime = this.lifetimes.get(name);
+    const factory = this.getFactory(name, 'resolveAsync');
+
+    if (lifetime === 'singleton') {
+      if (this.singletons.has(name)) {
+        return this.singletons.get(name) as T;
+      }
+
+      const pending = this.pendingSingletons.get(name);
+      if (pending) {
+        return (await pending) as T;
+      }
+
+      const loadPromise = Promise.resolve()
+        .then(() => factory(this))
+        .then(instance => {
+          this.singletons.set(name, instance);
+          this.markResolved(name);
+          return instance;
+        })
+        .finally(() => {
+          this.pendingSingletons.delete(name);
+        });
+
+      this.pendingSingletons.set(name, loadPromise);
+      return (await loadPromise) as T;
+    }
+
+    const instance = await factory(this);
+    this.markResolved(name);
+    return instance as T;
   }
 
   /**
@@ -167,8 +228,10 @@ export class DIContainer {
   clearCache(name?: string): void {
     if (name) {
       this.singletons.delete(name);
+      this.pendingSingletons.delete(name);
     } else {
       this.singletons.clear();
+      this.pendingSingletons.clear();
     }
   }
 
@@ -192,6 +255,61 @@ export class DIContainer {
    */
   getAllMetadata(): ServiceMetadata[] {
     return Array.from(this.metadata.values());
+  }
+
+  private assertRegistered(name: string, action: string): void {
+    if (!this.factories.has(name)) {
+      throw new SystemError(`服务未注册: ${name}`, 'DI_SERVICE_NOT_FOUND', {
+        module: 'DIContainer',
+        action,
+        serviceName: name,
+      });
+    }
+  }
+
+  private getFactory(name: string, action: string): ServiceFactory {
+    const factory = this.factories.get(name);
+    if (!factory) {
+      throw new SystemError(`服务未注册: ${name}`, 'DI_SERVICE_NOT_FOUND', {
+        module: 'DIContainer',
+        action,
+        serviceName: name,
+      });
+    }
+
+    return factory;
+  }
+
+  private assertSyncInstance(name: string, instance: unknown, action: string): void {
+    if (this.isPromiseLike(instance)) {
+      void Promise.resolve(instance).catch(() => {
+        // The caller gets a sync contract error below; suppress later async rejection noise.
+      });
+      throw new SystemError(
+        `服务 "${name}" 返回了 Promise，请使用 resolveAsync() 并将服务标记为 async`,
+        'DI_ASYNC_SERVICE_SYNC_RESOLVE',
+        {
+          module: 'DIContainer',
+          action,
+          serviceName: name,
+        }
+      );
+    }
+  }
+
+  private isPromiseLike(value: unknown): value is PromiseLike<unknown> {
+    return (
+      value !== null &&
+      (typeof value === 'object' || typeof value === 'function') &&
+      typeof (value as { then?: unknown }).then === 'function'
+    );
+  }
+
+  private markResolved(name: string): void {
+    const meta = this.metadata.get(name);
+    if (meta) {
+      meta.resolved = Date.now();
+    }
   }
 
   /**
@@ -255,7 +373,9 @@ export class DIContainer {
   reset(): void {
     this.factories.clear();
     this.singletons.clear();
+    this.pendingSingletons.clear();
     this.lifetimes.clear();
+    this.asyncServices.clear();
     this.dependencies.clear();
     this.metadata.clear();
   }

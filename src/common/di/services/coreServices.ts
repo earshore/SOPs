@@ -19,7 +19,7 @@ import { initRouter } from '@/common/router/initRouter';
 function registerBaseServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.CONFIG,
-    factory: async () => ConfigCenter.getInstance(),
+    factory: () => ConfigCenter.getInstance(),
     lifetime: 'singleton',
     dependencies: [],
   });
@@ -27,7 +27,7 @@ function registerBaseServices(registry: ServiceRegistry): void {
   // StorageService - 存储服务
   registry.register({
     name: SERVICE_NAMES.STORAGE,
-    factory: async () => {
+    factory: () => {
       return createStorageService();
     },
     lifetime: 'singleton',
@@ -37,7 +37,7 @@ function registerBaseServices(registry: ServiceRegistry): void {
   // EventBus - 事件总线
   registry.register({
     name: SERVICE_NAMES.EVENT_BUS,
-    factory: async () => {
+    factory: () => {
       return eventBus;
     },
     lifetime: 'singleton',
@@ -56,6 +56,7 @@ function registerRuntimeServices(registry: ServiceRegistry): void {
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.STORAGE, SERVICE_NAMES.CONFIG],
+    async: true,
   });
 
   // WorkingStateManager - 工作状态管理器
@@ -67,12 +68,13 @@ function registerRuntimeServices(registry: ServiceRegistry): void {
     },
     lifetime: 'singleton',
     dependencies: [],
+    async: true,
   });
 
   // GlobalErrorHandler - 全局错误处理器
   registry.register({
     name: SERVICE_NAMES.GLOBAL_ERROR_HANDLER,
-    factory: async () => {
+    factory: () => {
       return globalErrorHandler;
     },
     lifetime: 'singleton',
@@ -85,18 +87,19 @@ function registerApplicationServices(registry: ServiceRegistry): void {
     name: SERVICE_NAMES.HTTP,
     factory: async c => {
       const { createHttpService } = await import('@/services/httpService');
-      const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
+      const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
       const config = c.resolve<IConfigService>(SERVICE_NAMES.CONFIG);
       return createHttpService(logger, config);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER, SERVICE_NAMES.CONFIG],
+    async: true,
   });
 
   // ActionRegistry - 动作注册中心
   registry.register({
     name: SERVICE_NAMES.ACTION_REGISTRY,
-    factory: async () => {
+    factory: () => {
       return actionRegistry;
     },
     lifetime: 'singleton',
@@ -106,7 +109,7 @@ function registerApplicationServices(registry: ServiceRegistry): void {
   // Router - 路由器（Navigo 适配器）
   registry.register({
     name: SERVICE_NAMES.ROUTER,
-    factory: async () => {
+    factory: () => {
       return initRouter();
     },
     lifetime: 'singleton',
@@ -116,7 +119,7 @@ function registerApplicationServices(registry: ServiceRegistry): void {
   // LoadingManager - 加载管理器
   registry.register({
     name: SERVICE_NAMES.LOADING_MANAGER,
-    factory: async () => {
+    factory: () => {
       return loadingManager;
     },
     lifetime: 'singleton',

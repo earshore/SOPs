@@ -9,7 +9,7 @@
  * - 使用 AlpineRegistry 统一管理组件注册
  */
 
-import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
 import { createScraperPanel } from './components/ScraperPanel';
@@ -27,8 +27,8 @@ import './scraper_style.css';
  */
 export async function mount(container: HTMLElement): Promise<void> {
   try {
-    // 1. 使用 SafeModuleLoader 加载模板
-    const loader = SafeModuleLoader.getInstance();
+    // 1. 使用 SafeTemplateLoader 加载模板
+    const loader = SafeTemplateLoader.getInstance();
     const renderer = SafeRenderer.getInstance();
 
     const html = await loader.loadTemplate(

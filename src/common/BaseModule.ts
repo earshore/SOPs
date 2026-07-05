@@ -85,6 +85,15 @@ export default class BaseModule {
   }
 
   /**
+   * 异步获取服务实例（类型安全）
+   * @param name - 服务名称
+   * @returns 服务实例
+   */
+  protected getServiceAsync<T = unknown>(name: ServiceName): Promise<T> {
+    return this.diContainer.resolveAsync<T>(name);
+  }
+
+  /**
    * 检查服务是否存在
    * @param name - 服务名称
    * @returns 是否存在
@@ -95,9 +104,17 @@ export default class BaseModule {
 
   /**
    * 获取Logger服务（便捷属性）
+   * @deprecated logger 是异步服务。新代码请使用 await this.getLogger()。
    */
   protected get logger(): ILoggerService {
     return this.getService<ILoggerService>(SERVICE_NAMES.LOGGER);
+  }
+
+  /**
+   * 获取Logger服务
+   */
+  protected getLogger(): Promise<ILoggerService> {
+    return this.getServiceAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
   }
 
   /**
@@ -109,9 +126,17 @@ export default class BaseModule {
 
   /**
    * 获取Http服务（便捷属性）
+   * @deprecated http 是异步服务。新代码请使用 await this.getHttp()。
    */
   protected get http(): IHttpService {
     return this.getService<IHttpService>(SERVICE_NAMES.HTTP);
+  }
+
+  /**
+   * 获取Http服务
+   */
+  protected getHttp(): Promise<IHttpService> {
+    return this.getServiceAsync<IHttpService>(SERVICE_NAMES.HTTP);
   }
 
   // ================= 生命周期方法 =================

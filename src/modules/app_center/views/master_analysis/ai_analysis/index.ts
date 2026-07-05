@@ -3,7 +3,7 @@
  * 集成到 Master Analysis 的子页面
  */
 
-import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { createAiAnalysisPanel } from './components/AlpinePanel';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
@@ -17,8 +17,8 @@ import './ai_analysis_style.css';
  */
 export async function mount(container: HTMLElement): Promise<void> {
   try {
-    // 1. 使用 SafeModuleLoader 加载模板
-    const loader = SafeModuleLoader.getInstance();
+    // 1. 使用 SafeTemplateLoader 加载模板
+    const loader = SafeTemplateLoader.getInstance();
     const html = await loader.loadTemplate(
       'src/modules/app_center/views/master_analysis/ai_analysis/template.html',
       {

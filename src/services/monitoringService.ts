@@ -401,7 +401,7 @@ export class MonitoringService {
 
 /**
  * 监控服务单例（向后兼容）
- * @deprecated 请使用 container.resolve('monitoring') 获取MonitoringService实例
+ * @deprecated 请使用 container.resolveAsync('monitoring') 获取MonitoringService实例
  */
 export const monitoringService = new MonitoringService();
 

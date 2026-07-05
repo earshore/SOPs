@@ -177,7 +177,7 @@ export class ServiceBootstrap {
       // 设置超时
       const timeout = config.timeout || 5000;
       const result = await Promise.race([
-        this.container.resolve(name),
+        this.container.resolveAsync(name),
         this._timeout(timeout, name),
       ]);
 

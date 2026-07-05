@@ -294,7 +294,7 @@ Use path aliases defined in `tsconfig.json`:
 
 ### Lazy Loading
 - Chart.js and GridStack are lazy-loaded via `src/common/utils/lazyLibs.js`
-- Module CSS is loaded on-demand via `moduleCssLoader`
+- Module CSS is imported by each route/module entry and split by Vite
 - Images use lazy loading with `ImageLazyLoader`
 
 ### Code Splitting

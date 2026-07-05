@@ -11,11 +11,30 @@ import { generateAnalysisPrompt, getReviewSamplingMetadata } from '../prompts/an
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse, validateAnalysisResult } from './analysisResultParser';
 import { ValidationError, AppError, ErrorLevel, ErrorCategory } from '@common/errors/AppError';
-import { container } from '@common/di/Container';
-import type { ILoggerService } from '@/types/services';
 
-// 获取 logger 实例
-const logger = container.resolve<ILoggerService>('logger');
+const logger = {
+  debug(message: string, data?: unknown, module = 'AIAnalysisService'): void {
+    if (data === undefined) {
+      console.debug(`[${module}] ${message}`);
+      return;
+    }
+    console.debug(`[${module}] ${message}`, data);
+  },
+  warn(message: string, data?: unknown, module = 'AIAnalysisService'): void {
+    if (data === undefined) {
+      console.warn(`[${module}] ${message}`);
+      return;
+    }
+    console.warn(`[${module}] ${message}`, data);
+  },
+  error(message: string, error?: unknown, module = 'AIAnalysisService'): void {
+    if (error === undefined) {
+      console.error(`[${module}] ${message}`);
+      return;
+    }
+    console.error(`[${module}] ${message}`, error);
+  },
+};
 
 // 目标ID到报告字段的映射
 const TARGET_TO_FIELD: Record<string, keyof FullAnalysisReport> = {

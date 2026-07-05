@@ -25,18 +25,19 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
     name: SERVICE_NAMES.PERFORMANCE,
     factory: async c => {
       const { createPerformanceService } = await import('@/services/performanceService');
-      const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
+      const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createPerformanceService(logger);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
+    async: true,
     optional: true,
   });
 
   // AnalyticsService - 用户行为分析服务
   registry.register({
     name: SERVICE_NAMES.ANALYTICS,
-    factory: async () => {
+    factory: () => {
       return analyticsService;
     },
     lifetime: 'singleton',
@@ -48,11 +49,12 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.ERROR_TRACKER,
     factory: async c => {
-      const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
+      const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createErrorTracker(logger);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
+    async: true,
     optional: true,
   });
 
@@ -61,11 +63,12 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
     name: SERVICE_NAMES.MONITORING,
     factory: async c => {
       const { createMonitoringService } = await import('@/services/monitoringService');
-      const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
+      const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createMonitoringService(logger);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
+    async: true,
     optional: true,
   });
 
@@ -78,6 +81,7 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
     },
     lifetime: 'singleton',
     dependencies: [],
+    async: true,
     optional: true,
   });
 
@@ -85,11 +89,12 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.ALERT,
     factory: async c => {
-      const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
+      const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createAlertService(logger);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
+    async: true,
     optional: true,
   });
 
@@ -97,11 +102,12 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.PERFORMANCE_STORAGE,
     factory: async c => {
-      const logger = c.resolve<ILoggerService>(SERVICE_NAMES.LOGGER);
+      const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
       return createPerformanceStorage(logger);
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
+    async: true,
     optional: true,
   });
 }

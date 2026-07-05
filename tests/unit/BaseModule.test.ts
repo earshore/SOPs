@@ -64,6 +64,10 @@ class TestModule extends BaseModule {
     return this.getService<T>(name as never);
   }
 
+  serviceAsync<T = unknown>(name: string): Promise<T> {
+    return this.getServiceAsync<T>(name as never);
+  }
+
   has(name: string): boolean {
     return this.hasService(name as never);
   }
@@ -84,6 +88,7 @@ function createContainer() {
       }
       return { name };
     }),
+    resolveAsync: vi.fn(async (name: string) => ({ name, async: true })),
     has: vi.fn((name: string) => name === 'logger'),
   } as unknown as DIContainer;
 
@@ -141,6 +146,14 @@ function createContainer() {
     expect(module.service<{ name: string }>('logger')).toEqual({ name: 'logger' });
     expect(module.has('logger')).toBe(true);
     expect(module.has('missing')).toBe(false);
+  });
+
+  it('exposes async DI service helpers through subclasses', async () => {
+    const { container } = createContainer();
+    const module = new TestModule('di-async-module', container);
+
+    await expect(module.serviceAsync('logger')).resolves.toEqual({ name: 'logger', async: true });
+    expect(container.resolveAsync).toHaveBeenCalledWith('logger');
   });
 
   it('cleans event listeners, timers, intervals, and disposables on unmount', async () => {

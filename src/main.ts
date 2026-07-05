@@ -368,10 +368,6 @@ function initializeAnimationSystem(): void {
 function initializeLazyEnhancements(): void {
   loadDeferredStyles();
 
-  import('./common/utils/moduleCssLoader').then(({ moduleCssLoader }) => {
-    moduleCssLoader.preloadHighPriorityModules();
-  });
-
   import('./common/utils/ImageLazyLoader').then(({ imageLazyLoader }) => {
     imageLazyLoader.initialize({
       rootMargin: '50px',

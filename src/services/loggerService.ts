@@ -517,7 +517,7 @@ export class LoggerService implements ILoggerService {
 }
 
 // 创建单例（向后兼容）
-/** @deprecated 请使用 container.resolve('logger') 获取LoggerService实例 */
+/** @deprecated 请使用 container.resolveAsync('logger') 获取LoggerService实例 */
 export const Logger = new LoggerService();
 
 // 默认导出

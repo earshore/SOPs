@@ -324,7 +324,7 @@ class WebVitalsService {
 
 /**
  * 全局实例（向后兼容）
- * @deprecated 请使用 container.resolve('webVitals') 获取WebVitalsService实例
+ * @deprecated 请使用 container.resolveAsync('webVitals') 获取WebVitalsService实例
  */
 export const webVitalsService = new WebVitalsService();
 

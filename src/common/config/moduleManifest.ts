@@ -11,6 +11,7 @@ export interface ModuleManifestRoute {
   category?: string;
   panelId?: string;
   viewPath?: string;
+  loaderPath?: string;
   meta?: RouteMeta;
   loader?: ModuleLoaderFn;
 }
@@ -109,6 +110,30 @@ export function buildModuleMap(manifest: ModuleManifest): ModuleMap {
     if (route.loader) {
       moduleMap[route.routeId] = route.loader;
     }
+  }
+
+  return moduleMap;
+}
+
+export function buildModuleMapFromLoaderPaths(
+  manifest: ModuleManifest,
+  loaders: Record<string, ModuleLoaderFn>
+): ModuleMap {
+  const moduleMap: ModuleMap = {};
+
+  for (const route of manifest.routes) {
+    if (!route.loaderPath) {
+      continue;
+    }
+
+    const loader = loaders[route.loaderPath];
+    if (!loader) {
+      throw new Error(
+        `Manifest route "${route.routeId}" declares loaderPath "${route.loaderPath}" but no loader was generated`
+      );
+    }
+
+    moduleMap[route.routeId] = loader;
   }
 
   return moduleMap;

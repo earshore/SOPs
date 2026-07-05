@@ -1,7 +1,7 @@
 // src/common/infrastructure/SafeModuleLoader.ts
 // ================================================================
-// 🎯 P0: 系统稳定性优化 - 安全模块加载器
-// 提供统一的模块加载机制，支持错误恢复和降级策略
+// 🎯 P0: 系统稳定性优化 - 安全模板加载器
+// 当前生产链路主要使用模板加载能力；子模块加载由 ModuleLoader 负责。
 // ================================================================
 
 import { createErrorTracker } from '@/services/errorTracker';
@@ -142,8 +142,10 @@ const ELEMENT_NOT_FOUND_STACK_KEYWORDS = [
 ] as const;
 
 /**
- * 安全模块加载器
- * 提供统一的模块加载、错误处理和降级机制
+ * 安全模板加载器
+ * 提供模板加载、错误处理和降级机制。
+ *
+ * @deprecated 旧名保留用于兼容。新代码请使用 SafeTemplateLoader/safeTemplateLoader。
  */
 export class SafeModuleLoader {
   private static instance: SafeModuleLoader;
@@ -304,6 +306,7 @@ export class SafeModuleLoader {
    * @param modulePath - 模块路径
    * @param options - 加载选项
    * @returns 加载结果
+   * @deprecated 该方法未接入主路由模块加载链。生产子模块加载请使用 ModuleLoader。
    */
   async loadModule(
     container: HTMLElement,
@@ -1367,8 +1370,16 @@ export class SafeModuleLoader {
   }
 }
 
+// 新命名反映当前生产职责：安全模板加载。
+export const SafeTemplateLoader = SafeModuleLoader;
+
 // 创建并导出单例实例
-export const safeModuleLoader = SafeModuleLoader.getInstance();
+export const safeTemplateLoader = SafeModuleLoader.getInstance();
+
+/**
+ * @deprecated 旧名保留用于兼容。新代码请使用 safeTemplateLoader。
+ */
+export const safeModuleLoader = safeTemplateLoader;
 
 // 默认导出
-export default safeModuleLoader;
+export default safeTemplateLoader;

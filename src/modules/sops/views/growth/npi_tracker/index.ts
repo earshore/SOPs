@@ -3,13 +3,13 @@
  * Amazon New Product Introduction Tracker (EU Focus)
  *
  * 架构说明：
- * - 使用 SafeModuleLoader 加载模板
+ * - 使用 SafeTemplateLoader 加载模板
  * - 使用 SafeRenderer 进行安全渲染
  * - 使用 registerActionsWithLegacy 注册全局操作
  * - 已迁移到新架构（系统稳定性优化）
  */
 
-import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import {
   registerActionsWithLegacy,
@@ -839,8 +839,8 @@ declare global {
  */
 export async function mount(container: HTMLElement): Promise<void> {
   try {
-    // 1. 使用 SafeModuleLoader 加载模板
-    const loader = SafeModuleLoader.getInstance();
+    // 1. 使用 SafeTemplateLoader 加载模板
+    const loader = SafeTemplateLoader.getInstance();
     const renderer = SafeRenderer.getInstance();
 
     const html = await loader.loadTemplate(

@@ -1,7 +1,7 @@
 /**
  * 高危词库搜索、筛选、渲染逻辑
  * Restricted Words Search, Filter, and Rendering Logic
- * Phase 5: 迁移到新架构 (SafeModuleLoader, AlpineRegistry, SafeRenderer)
+ * Phase 5: 迁移到新架构 (SafeTemplateLoader, AlpineRegistry, SafeRenderer)
  */
 
 import {

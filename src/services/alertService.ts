@@ -517,7 +517,7 @@ export class AlertService {
 }
 
 // 创建全局实例（向后兼容）
-/** @deprecated 请使用 container.resolve('alert') 获取AlertService实例 */
+/** @deprecated 请使用 container.resolveAsync('alert') 获取AlertService实例 */
 export const alertService = AlertService.getInstance();
 
 // 默认导出

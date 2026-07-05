@@ -585,7 +585,7 @@ class HttpServiceClass implements IHttpService {
 }
 
 // 创建单例（向后兼容）
-/** @deprecated 请使用 container.resolve('http') 获取HttpService实例 */
+/** @deprecated 请使用 container.resolveAsync('http') 获取HttpService实例 */
 export const HttpService = new HttpServiceClass();
 
 // 默认导出

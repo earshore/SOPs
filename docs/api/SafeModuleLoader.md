@@ -2,11 +2,13 @@
 
 ## 概述
 
-`SafeModuleLoader` 是一个安全的模块加载器，提供统一的模块加载、错误处理和降级机制。它确保模块加载失败时不会导致整个应用崩溃，而是显示友好的错误提示并提供恢复选项。
+`SafeModuleLoader` 是历史名称。当前生产职责已收窄为安全模板加载，推荐新代码使用 `SafeTemplateLoader` / `safeTemplateLoader`。主路由模块加载链由 `ModuleLoader` 执行，`SafeModuleLoader.loadModule()` 不在主路由模块加载链上，仅作为兼容 API 保留。
+
+本页保留历史 API 说明，阅读时请优先遵守上述职责边界。
 
 ## 特性
 
-- ✅ **统一加载接口**：提供一致的模块和模板加载 API
+- ✅ **模板加载接口**：提供安全模板加载 API，模块加载 API 仅兼容旧调用
 - ✅ **自动重试机制**：支持指数退避的智能重试策略
 - ✅ **超时控制**：防止加载操作无限等待
 - ✅ **错误分类**：自动识别网络、解析、渲染等不同类型的错误
@@ -19,11 +21,11 @@
 
 ```typescript
 // 导入单例实例（推荐）
-import { safeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { safeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 
 // 或导入类
-import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
-const loader = SafeModuleLoader.getInstance();
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+const loader = SafeTemplateLoader.getInstance();
 ```
 
 ## 核心 API

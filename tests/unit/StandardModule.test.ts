@@ -69,6 +69,10 @@ class TestModule extends StandardModule {
     return this.getService<T>(name);
   }
 
+  resolveServiceAsync<T>(name: ServiceName): Promise<T> {
+    return this.getServiceAsync<T>(name);
+  }
+
   hasRegisteredService(name: ServiceName): boolean {
     return this.hasService(name);
   }
@@ -148,6 +152,7 @@ describe('StandardModule', () => {
     const service = { info: vi.fn() };
     const container = {
       resolve: vi.fn(() => service),
+      resolveAsync: vi.fn(async () => service),
       has: vi.fn(() => true),
     };
     const module = new TestModule(container as ConstructorParameters<typeof StandardModule>[0]['container']);
@@ -160,5 +165,18 @@ describe('StandardModule', () => {
 
     module.resetError();
     expect(module.getState().error).toBeNull();
+  });
+
+  it('exposes async DI service helpers to subclasses', async () => {
+    const service = { info: vi.fn() };
+    const container = {
+      resolve: vi.fn(() => service),
+      resolveAsync: vi.fn(async () => service),
+      has: vi.fn(() => true),
+    };
+    const module = new TestModule(container as ConstructorParameters<typeof StandardModule>[0]['container']);
+
+    await expect(module.resolveServiceAsync('logger')).resolves.toBe(service);
+    expect(container.resolveAsync).toHaveBeenCalledWith('logger');
   });
 });

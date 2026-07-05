@@ -80,13 +80,18 @@ const processMocks = vi.hoisted(() => {
   };
 });
 
-vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
-  SafeModuleLoader: {
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => {
+  const loader = {
     getInstance: vi.fn(() => ({
       loadTemplate: processMocks.loadTemplate,
     })),
-  },
-}));
+  };
+
+  return {
+    SafeModuleLoader: loader,
+    SafeTemplateLoader: loader,
+  };
+});
 
 vi.mock('@/common/infrastructure/SafeRenderer', () => ({
   SafeRenderer: {

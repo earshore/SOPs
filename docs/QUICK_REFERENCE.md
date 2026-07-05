@@ -149,8 +149,9 @@ export default class MyModule extends BaseModule {
 
 ### 服务使用
 ```typescript
-const logger = this.getService('logger');
+const logger = await this.getLogger();
 const storage = this.getService('storage');
+const http = await this.getHttp();
 ```
 
 ### 事件系统

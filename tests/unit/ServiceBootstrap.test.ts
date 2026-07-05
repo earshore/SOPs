@@ -70,6 +70,7 @@ function container(options: {
       };
     }),
     resolve: vi.fn((name: string) => options.resolve?.(name) ?? { name }),
+    resolveAsync: vi.fn(async (name: string) => options.resolve?.(name) ?? { name }),
   } as unknown as DIContainer;
 }
 

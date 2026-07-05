@@ -55,6 +55,8 @@ export interface ServiceConfig<T = unknown> {
   lifetime: ServiceLifetime;
   /** 依赖的服务名称列表 */
   dependencies: ServiceName[];
+  /** 是否必须异步解析 */
+  async?: boolean;
   /** 是否为可选服务 */
   optional?: boolean;
   /** 初始化超时时间（毫秒） */
@@ -104,6 +106,7 @@ export class ServiceRegistry {
       container.register(config.name, config.factory, {
         lifetime: config.lifetime,
         dependencies: config.dependencies,
+        async: config.async,
       });
     }
   }

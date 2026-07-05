@@ -10,6 +10,7 @@ export const amzHubManifest = defineModuleManifest({
       path: '/amz-hub',
       label: '智库总览',
       icon: 'fas fa-th-large',
+      loaderPath: './views/overview/index.ts',
     },
     {
       key: 'EU_INSIGHTS',
@@ -18,6 +19,7 @@ export const amzHubManifest = defineModuleManifest({
       label: '市场洞察',
       icon: 'fas fa-globe-europe',
       category: 'knowledge',
+      loaderPath: './views/knowledge/eu_insights/index.ts',
     },
     {
       key: 'SEO_STRATEGY',
@@ -26,6 +28,7 @@ export const amzHubManifest = defineModuleManifest({
       label: 'SEO 策略',
       icon: 'fas fa-magnifying-glass-chart',
       category: 'knowledge',
+      loaderPath: './views/knowledge/seo_strategy/index.ts',
     },
     {
       key: 'ECOSYSTEM',
@@ -34,6 +37,7 @@ export const amzHubManifest = defineModuleManifest({
       label: 'A10 & COSMO',
       icon: 'fas fa-network-wired',
       category: 'knowledge',
+      loaderPath: './views/knowledge/ecosystem/index.ts',
     },
     {
       key: 'QUALITY_LISTING',
@@ -42,6 +46,7 @@ export const amzHubManifest = defineModuleManifest({
       label: '教你打造优质Listing',
       icon: 'fas fa-star',
       category: 'practice',
+      loaderPath: './views/practice/quality_listing/index.ts',
     },
     {
       key: 'MARKETING_CALENDAR',
@@ -50,6 +55,7 @@ export const amzHubManifest = defineModuleManifest({
       label: 'EU营销日历',
       icon: 'fas fa-calendar-alt',
       category: 'practice',
+      loaderPath: './views/practice/marketing_calendar/index.ts',
     },
     {
       key: 'PROMO_ACTIVITIES',
@@ -58,6 +64,7 @@ export const amzHubManifest = defineModuleManifest({
       label: '促销活动',
       icon: 'fa-solid fa-gift',
       category: 'practice',
+      loaderPath: './views/practice/promo_activities/index.ts',
     },
     {
       key: 'PROMO_TOOLS',
@@ -66,6 +73,7 @@ export const amzHubManifest = defineModuleManifest({
       label: '促销工具',
       icon: 'fas fa-tools',
       category: 'practice',
+      loaderPath: './views/practice/promo_tools/index.ts',
     },
     {
       key: 'NEW_PRODUCT_30DAYS',
@@ -74,6 +82,7 @@ export const amzHubManifest = defineModuleManifest({
       label: '新品30天极速突围',
       icon: 'fas fa-rocket',
       category: 'advanced',
+      loaderPath: './views/advanced/new_product_30days/index.ts',
     },
     {
       key: 'CONVERSION_OPTIMIZATION',
@@ -82,6 +91,7 @@ export const amzHubManifest = defineModuleManifest({
       label: '链接转化率低自查优化',
       icon: 'fas fa-chart-line',
       category: 'advanced',
+      loaderPath: './views/advanced/conversion_optimization/index.ts',
     },
     {
       key: 'MATURE_PHASE',
@@ -90,6 +100,7 @@ export const amzHubManifest = defineModuleManifest({
       label: '成熟期运营策略',
       icon: 'fas fa-trophy',
       category: 'advanced',
+      loaderPath: './views/advanced/mature_phase/index.ts',
     },
   ],
 } as const);

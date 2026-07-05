@@ -45,13 +45,18 @@ const analysisMocks = vi.hoisted(() => {
   };
 });
 
-vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
-  SafeModuleLoader: {
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => {
+  const loader = {
     getInstance: vi.fn(() => ({
       loadTemplate: analysisMocks.loadTemplate,
     })),
-  },
-}));
+  };
+
+  return {
+    SafeModuleLoader: loader,
+    SafeTemplateLoader: loader,
+  };
+});
 
 vi.mock('@/common/infrastructure/SafeRenderer', () => ({
   SafeRenderer: {

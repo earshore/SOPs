@@ -54,6 +54,80 @@ import { DIContainer } from '@/common/di/Container';
         container.resolve('nonExistentService');
       }).toThrow('服务未注册');
     });
+
+    it('应该禁止同步解析显式异步服务', () => {
+      container.register('asyncService', async () => ({ ready: true }), {
+        async: true,
+      });
+
+      expect(() => container.resolve('asyncService')).toThrow('resolveAsync');
+    });
+
+    it('应该通过resolveAsync缓存异步单例的最终实例', async () => {
+      const factory = vi.fn(async () => ({ ready: true }));
+      container.register('asyncService', factory, {
+        lifetime: 'singleton',
+        async: true,
+      });
+
+      const instance1 = await container.resolveAsync('asyncService');
+      const instance2 = await container.resolveAsync('asyncService');
+
+      expect(instance1).toEqual({ ready: true });
+      expect(instance1).toBe(instance2);
+      expect(factory).toHaveBeenCalledTimes(1);
+    });
+
+    it('应该合并并发的异步单例解析', async () => {
+      const factory = vi.fn(
+        () => new Promise(resolve => setTimeout(() => resolve({ ready: true }), 1))
+      );
+      container.register('asyncService', factory, {
+        lifetime: 'singleton',
+        async: true,
+      });
+
+      const [instance1, instance2] = await Promise.all([
+        container.resolveAsync('asyncService'),
+        container.resolveAsync('asyncService'),
+      ]);
+
+      expect(instance1).toBe(instance2);
+      expect(factory).toHaveBeenCalledTimes(1);
+    });
+
+    it('应该让异步依赖工厂拿到已解析的依赖实例', async () => {
+      container.register('base', async () => ({ ready: true }), {
+        lifetime: 'singleton',
+        async: true,
+      });
+      container.register(
+        'dependent',
+        async c => {
+          const base = await c.resolveAsync<{ ready: boolean }>('base');
+          return {
+            depIsPromise: base instanceof Promise,
+            base,
+          };
+        },
+        {
+          lifetime: 'singleton',
+          dependencies: ['base'],
+          async: true,
+        }
+      );
+
+      await expect(container.resolveAsync('dependent')).resolves.toEqual({
+        depIsPromise: false,
+        base: { ready: true },
+      });
+    });
+
+    it('应该拒绝同步解析未显式标记但返回Promise的服务', () => {
+      container.register('implicitAsyncService', async () => ({ ready: true }));
+
+      expect(() => container.resolve('implicitAsyncService')).toThrow('resolveAsync');
+    });
   });
 
   describe('依赖注入', () => {

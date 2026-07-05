@@ -8,7 +8,7 @@
  * - 使用 registerActionsWithLegacy 注册全局操作
  */
 
-import { SafeModuleLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { showToast, showProgress } from '../../../../../common/ui';
 import { navigateToRouteId } from '../../../../../common/router/initRouter';
@@ -930,8 +930,8 @@ function setupEventListeners(container: HTMLElement): void {
  */
 export async function mount(container: HTMLElement): Promise<void> {
   try {
-    // 1. 使用 SafeModuleLoader 加载模板
-    const loader = SafeModuleLoader.getInstance();
+    // 1. 使用 SafeTemplateLoader 加载模板
+    const loader = SafeTemplateLoader.getInstance();
     const renderer = SafeRenderer.getInstance();
 
     const html = await loader.loadTemplate(

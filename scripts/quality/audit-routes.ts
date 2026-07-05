@@ -13,12 +13,7 @@ import {
 import { convertMenuConfig } from '@/common/router/navigo/RouteConfigConverter';
 import { LEGACY_ROUTE_ALIASES } from '@/common/router/legacyRouteAliases';
 import { routeIdToPath } from '@/common/router/routePaths';
-import { MODULE_MAP as AMZ_HUB_MODULE_MAP } from '@/modules/amz_hub/module.loaders';
-import { MODULE_MAP as APP_CENTER_MODULE_MAP } from '@/modules/app_center/module.loaders';
-import { MODULE_MAP as MORE_MODULE_MAP } from '@/modules/more/module.loaders';
-import { MODULE_MAP as SOPS_MODULE_MAP } from '@/modules/sops/module.loaders';
 import type { ModuleManifest } from '@/common/config/moduleManifest';
-import type { ModuleMap } from '@/types/modules-business';
 
 type IssueSeverity = 'error' | 'warn';
 
@@ -69,8 +64,8 @@ interface LegacyUrlRouteReference {
 
 interface LoaderScope {
   name: string;
+  moduleDir: string;
   manifest: ModuleManifest;
-  moduleMap: ModuleMap;
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -78,10 +73,10 @@ const __dirname = dirname(__filename);
 const projectRoot = join(__dirname, '..', '..');
 
 const loaderScopes: LoaderScope[] = [
-  { name: 'sops', manifest: sopsManifest, moduleMap: SOPS_MODULE_MAP },
-  { name: 'app_center', manifest: appCenterManifest, moduleMap: APP_CENTER_MODULE_MAP },
-  { name: 'amz_hub', manifest: amzHubManifest, moduleMap: AMZ_HUB_MODULE_MAP },
-  { name: 'more', manifest: moreManifest, moduleMap: MORE_MODULE_MAP },
+  { name: 'sops', moduleDir: 'sops', manifest: sopsManifest },
+  { name: 'app_center', moduleDir: 'app_center', manifest: appCenterManifest },
+  { name: 'amz_hub', moduleDir: 'amz_hub', manifest: amzHubManifest },
+  { name: 'more', moduleDir: 'more', manifest: moreManifest },
 ];
 
 function normalizePath(path: string): string {
@@ -150,6 +145,66 @@ function auditRoutePaths(issues: AuditIssue[], routeIds: string[]): Set<string> 
   }
 
   return new Set(pathOwners.keys());
+}
+
+function getCloudflareRedirectSources(): Set<string> {
+  const redirectsPath = join(projectRoot, 'public', '_redirects');
+  const redirects = readFileSync(redirectsPath, 'utf-8');
+  const sources = new Set<string>();
+
+  for (const line of redirects.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) {
+      continue;
+    }
+
+    const [source] = trimmed.split(/\s+/);
+    if (source) {
+      sources.add(source);
+    }
+  }
+
+  return sources;
+}
+
+function auditCloudflareRedirects(issues: AuditIssue[], registeredPaths: Set<string>): void {
+  const redirects = getCloudflareRedirectSources();
+  const prefixes = new Map<string, { exact: boolean; wildcard: boolean }>();
+
+  for (const path of registeredPaths) {
+    const [, prefix, ...rest] = path.split('/');
+    if (!prefix) {
+      continue;
+    }
+
+    const current = prefixes.get(prefix) ?? { exact: false, wildcard: false };
+    if (rest.length === 0) {
+      current.exact = true;
+    } else {
+      current.wildcard = true;
+    }
+    prefixes.set(prefix, current);
+  }
+
+  for (const [prefix, required] of prefixes) {
+    if (required.exact && !redirects.has(`/${prefix}`)) {
+      addIssue(
+        issues,
+        'error',
+        'cloudflare-redirects',
+        `public/_redirects must include SPA fallback for "/${prefix}"`
+      );
+    }
+
+    if (required.wildcard && !redirects.has(`/${prefix}/*`)) {
+      addIssue(
+        issues,
+        'error',
+        'cloudflare-redirects',
+        `public/_redirects must include SPA fallback for "/${prefix}/*"`
+      );
+    }
+  }
 }
 
 function auditManifestPathDeclarations(issues: AuditIssue[]): void {
@@ -516,29 +571,60 @@ function auditLegacyUrlRoutes(issues: AuditIssue[]): void {
   }
 }
 
-function auditModuleMaps(issues: AuditIssue[]): void {
+function auditManifestLoaders(issues: AuditIssue[]): void {
   for (const scope of loaderScopes) {
-    const manifestRouteIds = new Set(scope.manifest.routes.map(route => route.routeId));
-    const moduleMapRouteIds = new Set(Object.keys(scope.moduleMap));
-
-    for (const routeId of manifestRouteIds) {
-      if (!moduleMapRouteIds.has(routeId)) {
+    for (const route of scope.manifest.routes) {
+      if (!route.loaderPath) {
         addIssue(
           issues,
           'error',
-          'module-map',
-          `Manifest route "${routeId}" has no MODULE_MAP loader in ${scope.name}`
+          'manifest-loader',
+          `Business manifest route "${route.routeId}" must declare loaderPath in ${scope.name}`
+        );
+        continue;
+      }
+
+      if (route.loader) {
+        addIssue(
+          issues,
+          'error',
+          'manifest-loader',
+          `Business manifest route "${route.routeId}" must not declare a direct loader; use loaderPath`
         );
       }
-    }
 
-    for (const routeId of moduleMapRouteIds) {
-      if (!manifestRouteIds.has(routeId)) {
+      if (!route.loaderPath.startsWith('./views/') || !route.loaderPath.endsWith('/index.ts')) {
         addIssue(
           issues,
           'error',
-          'module-map',
-          `MODULE_MAP loader "${routeId}" is not declared in ${scope.name} manifest`
+          'manifest-loader',
+          `Manifest route "${route.routeId}" loaderPath "${route.loaderPath}" must match ./views/**/index.ts`
+        );
+      }
+
+      const loaderFile = join(
+        projectRoot,
+        'src',
+        'modules',
+        scope.moduleDir,
+        route.loaderPath.replace(/^\.\//, '')
+      );
+
+      try {
+        if (!statSync(loaderFile).isFile()) {
+          addIssue(
+            issues,
+            'error',
+            'manifest-loader',
+            `Manifest route "${route.routeId}" loaderPath "${route.loaderPath}" is not a file`
+          );
+        }
+      } catch {
+        addIssue(
+          issues,
+          'error',
+          'manifest-loader',
+          `Manifest route "${route.routeId}" loaderPath "${route.loaderPath}" does not exist`
         );
       }
     }
@@ -601,6 +687,7 @@ function main(): void {
   auditUniqueRouteIds(issues, routeIds);
   auditManifestPathDeclarations(issues);
   const registeredPaths = auditRoutePaths(issues, routeIds);
+  auditCloudflareRedirects(issues, registeredPaths);
   auditAliases(issues, registeredPaths);
   auditSwitchTabActions(issues);
   auditLegacyRouteChangeEmits(issues);
@@ -609,7 +696,7 @@ function main(): void {
   auditLegacyGlobalRouteApis(issues);
   auditLegacyUrlRoutes(issues);
   auditStaticTabReferences(issues, routeIdSet);
-  auditModuleMaps(issues);
+  auditManifestLoaders(issues);
   auditMenuConfig(issues, routeIdSet);
 
   printReport(issues, routeIds.length);

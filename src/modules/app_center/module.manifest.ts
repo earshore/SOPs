@@ -10,6 +10,7 @@ export const appCenterManifest = defineModuleManifest({
       path: '/app-center',
       label: '应用总览',
       icon: 'fas fa-th-large',
+      loaderPath: './views/overview/index.ts',
     },
     {
       key: 'SCRAPER',
@@ -19,6 +20,7 @@ export const appCenterManifest = defineModuleManifest({
       label: '数据采集',
       icon: 'fas fa-spider',
       category: 'master_analysis',
+      loaderPath: './views/master_analysis/scraper/index.ts',
     },
     {
       key: 'AI_ANALYSIS',
@@ -28,6 +30,7 @@ export const appCenterManifest = defineModuleManifest({
       label: 'AI智能分析',
       icon: 'fas fa-brain',
       category: 'master_analysis',
+      loaderPath: './views/master_analysis/ai_analysis/index.ts',
     },
     {
       key: 'PROMPTLAB',
@@ -37,6 +40,7 @@ export const appCenterManifest = defineModuleManifest({
       label: 'Prompt 生成',
       icon: 'fas fa-wand-magic-sparkles',
       category: 'master_analysis',
+      loaderPath: './views/master_analysis/promptlab/index.ts',
     },
     {
       key: 'PLAYGROUND',
@@ -52,6 +56,7 @@ export const appCenterManifest = defineModuleManifest({
         featureFlag: 'playground.deepChat',
         featureFlagDefault: true,
       },
+      loaderPath: './views/playground/deep-chat/index.ts',
     },
     {
       key: 'KW_INPUT',
@@ -61,6 +66,7 @@ export const appCenterManifest = defineModuleManifest({
       label: '输入格式化',
       icon: 'fas fa-keyboard',
       category: 'keyword_tracker',
+      loaderPath: './views/keyword_hunter/input/index.ts',
     },
     {
       key: 'KW_PROCESS',
@@ -70,6 +76,7 @@ export const appCenterManifest = defineModuleManifest({
       label: 'SEO 处理',
       icon: 'fas fa-cogs',
       category: 'keyword_tracker',
+      loaderPath: './views/keyword_hunter/process/index.ts',
     },
     {
       key: 'KW_ANALYSIS',
@@ -79,6 +86,7 @@ export const appCenterManifest = defineModuleManifest({
       label: 'Listing 评审',
       icon: 'fas fa-chart-pie',
       category: 'keyword_tracker',
+      loaderPath: './views/keyword_hunter/analysis/index.ts',
     },
     {
       key: 'PPC_SEARCH_TERMS',
@@ -88,6 +96,7 @@ export const appCenterManifest = defineModuleManifest({
       label: 'PPC 搜索词分析器',
       icon: 'fas fa-magnifying-glass-dollar',
       category: 'ppc_tools',
+      loaderPath: './views/ppc_tools/ppc_search_terms/index.ts',
     },
   ],
 } as const);

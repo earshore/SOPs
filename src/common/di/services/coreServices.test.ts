@@ -65,7 +65,11 @@ type RegisteredConfig = {
   name: string;
   dependencies: string[];
   lifetime: string;
-  factory: (container: { resolve: <T>(name: string) => T }) => Promise<unknown>;
+  async?: boolean;
+  factory: (container: {
+    resolve: <T>(name: string) => T;
+    resolveAsync: <T>(name: string) => Promise<T>;
+  }) => unknown | Promise<unknown>;
 };
 
 function createRegistry(): {
@@ -121,8 +125,15 @@ describe('registerCoreServices', () => {
     const resolve = vi.fn((name: string) => resolved.get(name)) as unknown as <T>(
       name: string
     ) => T;
-    const container: { resolve: <T>(name: string) => T } = {
+    const resolveAsync = vi.fn(async (name: string) => resolved.get(name)) as unknown as <T>(
+      name: string
+    ) => Promise<T>;
+    const container: {
+      resolve: <T>(name: string) => T;
+      resolveAsync: <T>(name: string) => Promise<T>;
+    } = {
       resolve,
+      resolveAsync,
     };
     mocks.createStorageService.mockReturnValue(mocks.storageService);
     mocks.createLoggerService.mockReturnValue(mocks.loggerService);
@@ -131,16 +142,16 @@ describe('registerCoreServices', () => {
 
     registerCoreServices(registry);
 
-    await expect(configs[0]?.factory(container)).resolves.toBe(mocks.configCenter);
-    await expect(configs[1]?.factory(container)).resolves.toBe(mocks.storageService);
-    await expect(configs[2]?.factory(container)).resolves.toBe(mocks.eventBus);
+    expect(configs[0]?.factory(container)).toBe(mocks.configCenter);
+    expect(configs[1]?.factory(container)).toBe(mocks.storageService);
+    expect(configs[2]?.factory(container)).toBe(mocks.eventBus);
     await expect(configs[3]?.factory(container)).resolves.toBe(mocks.loggerService);
     await expect(configs[4]?.factory(container)).resolves.toBe(mocks.workingStateManager);
-    await expect(configs[5]?.factory(container)).resolves.toBe(mocks.globalErrorHandler);
+    expect(configs[5]?.factory(container)).toBe(mocks.globalErrorHandler);
     await expect(configs[6]?.factory(container)).resolves.toBe(mocks.httpService);
-    await expect(configs[7]?.factory(container)).resolves.toBe(mocks.actionRegistry);
-    await expect(configs[8]?.factory(container)).resolves.toBe(mocks.router);
-    await expect(configs[9]?.factory(container)).resolves.toBe(mocks.loadingManager);
+    expect(configs[7]?.factory(container)).toBe(mocks.actionRegistry);
+    expect(configs[8]?.factory(container)).toBe(mocks.router);
+    expect(configs[9]?.factory(container)).toBe(mocks.loadingManager);
 
     expect(mocks.createLoggerService).toHaveBeenCalledWith(
       mocks.storageService,

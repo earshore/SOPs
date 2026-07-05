@@ -353,17 +353,10 @@ document.documentElement.className = `theme-${themeName}`;
    src/modules/my_module/my_module_style.css
    ```
 
-2. 注册到模块 CSS 注册表：
+2. 在模块入口静态导入模块样式：
    ```typescript
-   // src/common/config/moduleCssRegistry.ts
-   export const MODULE_CSS_REGISTRY: Record<string, ModuleCssConfig> = {
-     my_module: {
-       moduleId: 'my_module',
-       cssImporter: () => import('../../modules/my_module/my_module_style.css'),
-       priority: 'normal',
-       preload: false
-     }
-   };
+   // src/modules/my_module/index.ts
+   import './my_module_style.css';
    ```
 
 3. 编写模块样式：

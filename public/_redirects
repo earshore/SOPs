@@ -4,6 +4,12 @@
 /home  /index.html  200
 /app-center  /index.html  200
 /app-center/*  /index.html  200
+/sops  /index.html  200
+/sops/*  /index.html  200
+/amz-hub  /index.html  200
+/amz-hub/*  /index.html  200
+/more  /index.html  200
+/more/*  /index.html  200
 /sops_*  /index.html  200
 /amz_*  /index.html  200
 /more_*  /index.html  200

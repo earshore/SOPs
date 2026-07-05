@@ -114,7 +114,7 @@ npm run quality:dashboard        # 生成质量仪表板
 **使用模式**:
 ```typescript
 // 在模块中获取服务
-const logger = this.getService('logger');
+const logger = await this.getLogger();
 const storage = this.getService('storage');
 ```
 

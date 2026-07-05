@@ -200,13 +200,18 @@ function createInputMocks(mockApi: typeof vi) {
 
 const inputMocks = vi.hoisted(() => createInputMocks(vi));
 
-vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
-  SafeModuleLoader: {
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => {
+  const loader = {
     getInstance: vi.fn(() => ({
       loadTemplate: inputMocks.loadTemplate,
     })),
-  },
-}));
+  };
+
+  return {
+    SafeModuleLoader: loader,
+    SafeTemplateLoader: loader,
+  };
+});
 
 vi.mock('@/common/infrastructure/SafeRenderer', () => ({
   SafeRenderer: {

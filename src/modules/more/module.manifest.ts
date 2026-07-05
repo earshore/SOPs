@@ -10,6 +10,7 @@ export const moreManifest = defineModuleManifest({
       path: '/more',
       label: '更多总览',
       icon: 'fas fa-th-large',
+      loaderPath: './views/overview/index.ts',
     },
     {
       key: 'AGENTS',
@@ -18,6 +19,7 @@ export const moreManifest = defineModuleManifest({
       label: '智能体',
       icon: 'fas fa-robot',
       category: 'explore',
+      loaderPath: './views/explore/agents/index.ts',
     },
     {
       key: 'PROMPTS',
@@ -26,6 +28,7 @@ export const moreManifest = defineModuleManifest({
       label: '提示词',
       icon: 'fas fa-message',
       category: 'explore',
+      loaderPath: './views/explore/prompts/index.ts',
     },
     {
       key: 'WORKFLOWS',
@@ -34,6 +37,7 @@ export const moreManifest = defineModuleManifest({
       label: '工作流',
       icon: 'fas fa-diagram-project',
       category: 'explore',
+      loaderPath: './views/explore/workflows/index.ts',
     },
     {
       key: 'ZINIAO_USAGE_NOTICE',
@@ -42,6 +46,7 @@ export const moreManifest = defineModuleManifest({
       label: '使用须知',
       icon: 'fas fa-circle-info',
       category: 'business_scenarios',
+      loaderPath: './views/business_scenarios/usage_notice/index.ts',
     },
     {
       key: 'BAD_REVIEW_RESPONSE',
@@ -50,6 +55,7 @@ export const moreManifest = defineModuleManifest({
       label: '差评响应',
       icon: 'fas fa-bolt',
       category: 'business_scenarios',
+      loaderPath: './views/business_scenarios/bad_review_response/index.ts',
     },
     {
       key: 'AD_ACOS_DIAGNOSIS',
@@ -58,6 +64,7 @@ export const moreManifest = defineModuleManifest({
       label: '广告诊断',
       icon: 'fas fa-bullseye',
       category: 'business_scenarios',
+      loaderPath: './views/business_scenarios/ad_acos_diagnosis/index.ts',
     },
     {
       key: 'REVIEW_MONITOR',
@@ -66,6 +73,7 @@ export const moreManifest = defineModuleManifest({
       label: '评论监控',
       icon: 'fas fa-comments',
       category: 'business_scenarios',
+      loaderPath: './views/business_scenarios/review_monitor/index.ts',
     },
     {
       key: 'AMAZON_DAILY_REPORT',
@@ -74,6 +82,7 @@ export const moreManifest = defineModuleManifest({
       label: '一键日报',
       icon: 'fas fa-chart-line',
       category: 'business_scenarios',
+      loaderPath: './views/business_scenarios/amazon_daily_report/index.ts',
     },
   ],
 } as const);

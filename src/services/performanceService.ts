@@ -511,7 +511,7 @@ export class PerformanceService {
 
 /**
  * 性能监控服务单例（向后兼容）
- * @deprecated 请使用 container.resolve('performance') 获取PerformanceService实例
+ * @deprecated 请使用 container.resolveAsync('performance') 获取PerformanceService实例
  */
 export const performanceService = new PerformanceService();
 

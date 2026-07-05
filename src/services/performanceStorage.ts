@@ -509,7 +509,7 @@ export class PerformanceStorage {
 }
 
 // 创建全局实例（向后兼容）
-/** @deprecated 请使用 container.resolve('performanceStorage') 获取PerformanceStorage实例 */
+/** @deprecated 请使用 container.resolveAsync('performanceStorage') 获取PerformanceStorage实例 */
 export const performanceStorage = PerformanceStorage.getInstance();
 
 // 默认导出

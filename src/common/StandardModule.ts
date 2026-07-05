@@ -1,7 +1,7 @@
 // src/common/StandardModule.ts
 // ================================================================
-// 🎯 标准化模块基类
-// 提供统一的模块接口和生命周期管理
+// 🎯 历史标准化模块基类
+// 保留用于兼容旧测试和实验代码；业务模块统一使用 BaseModule。
 // 🎯 增强: 支持DI容器注入和服务获取
 // ================================================================
 
@@ -35,6 +35,8 @@ export interface StandardModuleConfig {
  * - 完整的生命周期钩子
  * - 状态管理
  * - 错误处理
+ *
+ * @deprecated 业务模块请统一继承 BaseModule。该类仅保留兼容，不再作为新模块基类。
  *
  * @example
  * ```typescript
@@ -223,6 +225,15 @@ export abstract class StandardModule implements IModule {
   }
 
   /**
+   * 异步获取服务实例（类型安全）
+   * @param name - 服务名称
+   * @returns 服务实例
+   */
+  protected getServiceAsync<T = unknown>(name: ServiceName): Promise<T> {
+    return this.diContainer.resolveAsync<T>(name);
+  }
+
+  /**
    * 检查服务是否存在
    * @param name - 服务名称
    * @returns 是否存在
@@ -233,9 +244,17 @@ export abstract class StandardModule implements IModule {
 
   /**
    * 获取Logger服务（便捷属性）
+   * @deprecated logger 是异步服务。新代码请使用 await this.getLogger()。
    */
   protected get logger(): ILoggerService {
     return this.getService<ILoggerService>(SERVICE_NAMES.LOGGER);
+  }
+
+  /**
+   * 获取Logger服务
+   */
+  protected getLogger(): Promise<ILoggerService> {
+    return this.getServiceAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
   }
 
   /**
@@ -247,9 +266,17 @@ export abstract class StandardModule implements IModule {
 
   /**
    * 获取Http服务（便捷属性）
+   * @deprecated http 是异步服务。新代码请使用 await this.getHttp()。
    */
   protected get http(): IHttpService {
     return this.getService<IHttpService>(SERVICE_NAMES.HTTP);
+  }
+
+  /**
+   * 获取Http服务
+   */
+  protected getHttp(): Promise<IHttpService> {
+    return this.getServiceAsync<IHttpService>(SERVICE_NAMES.HTTP);
   }
 
   // ================================================================

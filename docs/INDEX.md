@@ -17,6 +17,7 @@
 ### 开发文档
 - [最佳实践](./development/best-practices.md) - 开发最佳实践
 - [开发指南](./development/CLAUDE.md) - 详细的开发指南
+- [页面实现模板规范](./guides/modules/page-implementation-templates.md) - 按页面分类约束模块入口、加载、DI 和 CSS 策略
 
 ---
 
@@ -37,7 +38,7 @@
 
 ### 核心 API
 - [AlpineRegistry](./api/AlpineRegistry.md) - Alpine.js 组件注册系统
-- [SafeModuleLoader](./api/SafeModuleLoader.md) - 安全模块加载器
+- [SafeModuleLoader](./api/SafeModuleLoader.md) - 安全模板加载器（历史名）
 - [SafeRenderer](./api/SafeRenderer.md) - 安全渲染器
 
 ---
@@ -252,5 +253,5 @@
 
 ---
 
-**最后更新**: 2026-07-03
+**最后更新**: 2026-07-05
 **维护者**: sops 开发团队
