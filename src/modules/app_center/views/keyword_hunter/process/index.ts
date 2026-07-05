@@ -1406,7 +1406,7 @@ function restoreKeywordsWindow(): void {
     floatWinEl.classList.add('opacity-0', 'scale-95');
     requestAnimationFrame(() => {
       floatWinEl.classList.remove('opacity-0', 'scale-95');
-      floatWinEl.classList.add('transition-all', 'duration-200');
+      floatWinEl.classList.add('transition', 'duration-200');
     });
   }
 

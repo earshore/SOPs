@@ -159,7 +159,7 @@ function renderDefaultSidebar(
                 return `
                 <button type="button" data-action="switch-tab" data-tab="${route.id}" id="sidebar-btn-${route.id}"
                   ${isActive ? 'aria-current="page"' : ''}
-                  class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${activeClasses} transition-all duration-200">
+                  class="sidebar-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${activeClasses} transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                   <i class="${route.icon} w-5 text-center"></i> 
                   ${route.label}
                 </button>

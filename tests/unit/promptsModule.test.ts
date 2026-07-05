@@ -89,6 +89,10 @@ beforeEach(() => {
 
     expect(container.querySelectorAll('.prompt-card')).toHaveLength(0);
     expect(container.querySelector('#prompt-list')?.textContent).toContain('未找到匹配的提示词');
+    expect(container.querySelector('#prompt-list')?.textContent).toContain(
+      '推荐操作：清空搜索、切回“全部”分类，或使用更短关键词重试。'
+    );
+    expect(container.querySelector('#prompt-list [role="status"]')).not.toBeNull();
 
     search!.value = 'listing';
     search!.dispatchEvent(new Event('input', { bubbles: true }));

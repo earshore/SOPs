@@ -550,7 +550,7 @@
 
 .app-overview-toolbar {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.875rem;
   padding: 0.75rem;
@@ -569,7 +569,53 @@
   scrollbar-width: thin;
 }
 
+.app-overview-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  justify-self: end;
+  padding: 0.25rem;
+  border: 1px solid var(--app-overview-border);
+  border-radius: var(--rounded-lg, 12px);
+  background: var(--app-overview-surface-muted);
+}
+
+.app-overview-view-btn {
+  display: inline-flex;
+  min-height: var(--pc-data-row-height-compact, 36px);
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0 0.75rem;
+  border: 1px solid transparent;
+  border-radius: var(--rounded-md, 8px);
+  background: transparent;
+  color: var(--app-overview-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.app-overview-view-btn:hover {
+  color: var(--app-overview-accent);
+}
+
+.app-overview-view-btn.active {
+  border-color: var(--app-overview-accent-border);
+  background: var(--app-overview-surface);
+  color: var(--app-overview-accent-strong);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
 .app-overview-filter-panel .category-filter-btn:focus-visible,
+.app-overview-view-btn:focus-visible,
 .app-card-primary-link:focus-visible,
 .app-child-link:focus-visible {
   outline: 2px solid var(--module-accent, var(--color-blue-500));
@@ -801,6 +847,152 @@
   text-align: center;
 }
 
+.app-overview-list {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.app-overview-list-row {
+  --color-accent: var(--app-overview-accent);
+  --color-bg-selected: var(--app-overview-accent-surface);
+  --color-border-light: var(--app-overview-accent-border);
+
+  display: grid;
+  min-height: 4.75rem;
+  grid-template-columns: minmax(14rem, 0.9fr) minmax(16rem, 1.15fr) auto minmax(18rem, auto);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--app-overview-border-strong);
+  border-radius: var(--rounded-lg, 12px);
+  background: var(--app-overview-surface);
+  color: var(--app-overview-text-primary);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition:
+    background-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 180ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.app-overview-list-row:hover {
+  border-color: var(--color-border-light);
+  background: color-mix(in srgb, var(--color-bg-selected) 32%, var(--app-overview-surface));
+  box-shadow: 0 10px 22px -20px color-mix(in srgb, var(--color-accent) 42%, transparent);
+}
+
+.app-overview-list-main {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-overview-list-icon {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--rounded-md, 8px);
+  background: var(--color-bg-selected);
+  color: var(--color-accent);
+  font-size: 1rem;
+}
+
+.app-overview-list-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.1875rem;
+}
+
+.app-overview-list-copy h3 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--app-overview-text-primary);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-overview-list-copy p,
+.app-overview-list-value {
+  margin: 0;
+  color: var(--app-overview-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.app-overview-list-copy p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-overview-list-value {
+  min-width: 0;
+}
+
+.app-overview-list-meta {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.app-overview-list-badge,
+.app-overview-list-tag {
+  display: inline-flex;
+  min-height: 1.5rem;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--app-overview-pill-radius);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.app-overview-list-badge {
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-selected);
+  color: var(--color-accent);
+}
+
+.app-overview-list-tag {
+  border: 1px solid var(--app-overview-border);
+  background: var(--app-overview-surface-muted);
+  color: var(--app-overview-text-secondary);
+}
+
+.app-overview-list-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.app-overview-list-secondary {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.375rem;
+}
+
+.app-overview-list-actions .app-card-primary-link {
+  min-height: var(--pc-data-row-height-compact, 36px);
+}
+
+.app-overview-list-actions .app-child-link {
+  min-height: 1.75rem;
+}
+
 .app-overview-empty {
   margin-top: 1rem;
   padding: 2rem 1rem;
@@ -834,6 +1026,24 @@
   .app-overview-hero .wb-content,
   .app-overview-toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .app-overview-view-toggle {
+    justify-self: stretch;
+    width: fit-content;
+  }
+
+  .app-overview-list-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .app-overview-list-actions {
+    justify-content: flex-start;
+  }
+
+  .app-overview-list-secondary {
+    justify-content: flex-start;
   }
 }
 
@@ -902,7 +1112,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .app-overview-card,
+  .app-overview-list-row,
   .app-card-icon,
+  .app-overview-view-btn,
   .app-card-primary-link,
   .app-card-primary-link i,
   .app-child-link,
@@ -927,7 +1139,7 @@
     border-radius: 8px !important;
   }
 
-  #app_center_content_area :where(.app-flow-step.app-child-link, .app-overview-card) {
+  #app_center_content_area :where(.app-flow-step.app-child-link, .app-overview-card, .app-overview-list-row) {
     border-radius: var(--rounded-xl, 16px) !important;
   }
 }

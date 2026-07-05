@@ -10,6 +10,7 @@ import { setSafeHtml } from '@/common/utils/security';
 interface OverviewFilterState {
   category: string;
   query: string;
+  viewMode: 'grid' | 'list';
 }
 
 class AppCenterOverviewModule extends BaseModule {
@@ -53,9 +54,12 @@ function initOverviewEvents(container: HTMLElement): void {
   const state: OverviewFilterState = {
     category: 'all',
     query: '',
+    viewMode: 'grid',
   };
 
   const filterBtns = container.querySelectorAll<HTMLElement>('.category-filter-btn');
+  const viewModeBtns =
+    container.querySelectorAll<HTMLButtonElement>('.app-overview-view-btn[data-view-mode]');
 
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -64,6 +68,17 @@ function initOverviewEvents(container: HTMLElement): void {
         state.category = category;
         setActiveCategory(filterBtns, btn);
         applyOverviewFilters(container, state);
+      }
+    });
+  });
+
+  viewModeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const viewMode = btn.dataset.viewMode;
+      if (viewMode === 'grid' || viewMode === 'list') {
+        state.viewMode = viewMode;
+        setActiveViewMode(viewModeBtns, viewMode);
+        syncOverviewViewMode(container, state.viewMode);
       }
     });
   });
@@ -99,17 +114,44 @@ function setActiveCategory(filterBtns: NodeListOf<HTMLElement>, activeBtn: HTMLE
 }
 
 /**
+ * 更新应用矩阵显示模式
+ */
+function setActiveViewMode(
+  viewModeBtns: NodeListOf<HTMLButtonElement>,
+  activeViewMode: OverviewFilterState['viewMode']
+): void {
+  viewModeBtns.forEach(btn => {
+    const isActive = btn.dataset.viewMode === activeViewMode;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', String(isActive));
+  });
+}
+
+function syncOverviewViewMode(
+  container: HTMLElement,
+  viewMode: OverviewFilterState['viewMode']
+): void {
+  const grid = container.querySelector<HTMLElement>('.app-overview-grid');
+  const list = container.querySelector<HTMLElement>('.app-overview-list');
+  const showGrid = viewMode === 'grid';
+
+  grid?.classList.toggle('hidden', !showGrid);
+  grid?.setAttribute('aria-hidden', String(!showGrid));
+  list?.classList.toggle('hidden', showGrid);
+  list?.setAttribute('aria-hidden', String(showGrid));
+}
+
+/**
  * 按分类筛选应用卡片
  */
 function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState): void {
-  const cards = container.querySelectorAll<HTMLElement>('.app-center-card-grid > [data-category]');
+  const cards = container.querySelectorAll<HTMLElement>('.app-overview-grid > [data-category]');
+  const listRows = container.querySelectorAll<HTMLElement>('.app-overview-list > [data-category]');
   let visibleCount = 0;
+  let visibleListCount = 0;
 
   cards.forEach(card => {
-    const categoryMatches = state.category === 'all' || card.dataset.category === state.category;
-    const searchableText = `${card.dataset.search || ''} ${card.textContent || ''}`.toLowerCase();
-    const queryMatches = !state.query || searchableText.includes(state.query);
-    const isVisible = categoryMatches && queryMatches;
+    const isVisible = overviewItemMatches(card, state);
 
     card.style.display = isVisible ? '' : 'none';
     if (isVisible) {
@@ -117,6 +159,20 @@ function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState
       card.classList.add('fade-in');
     }
   });
+
+  listRows.forEach(row => {
+    const isVisible = overviewItemMatches(row, state);
+
+    row.style.display = isVisible ? '' : 'none';
+    if (isVisible) {
+      visibleListCount += 1;
+      row.classList.add('fade-in');
+    }
+  });
+
+  if (cards.length === 0) {
+    visibleCount = visibleListCount;
+  }
 
   const visibleCountText = container.querySelector<HTMLElement>('#app-overview-visible-count');
   if (visibleCountText) {
@@ -127,4 +183,14 @@ function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState
   if (emptyState) {
     emptyState.classList.toggle('hidden', visibleCount > 0);
   }
+
+  syncOverviewViewMode(container, state.viewMode);
+}
+
+function overviewItemMatches(item: HTMLElement, state: OverviewFilterState): boolean {
+  const categoryMatches = state.category === 'all' || item.dataset.category === state.category;
+  const searchableText = `${item.dataset.search || ''} ${item.textContent || ''}`.toLowerCase();
+  const queryMatches = !state.query || searchableText.includes(state.query);
+
+  return categoryMatches && queryMatches;
 }

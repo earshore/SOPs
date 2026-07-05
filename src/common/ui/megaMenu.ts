@@ -296,7 +296,7 @@ function renderCard(opts: CardOptions): string {
       class="cursor-pointer group/card relative rounded-lg overflow-hidden
         h-full flex flex-col
         text-left no-underline
-        transition-all duration-300 ease-out
+        transition duration-300 ease-out
         hover:-translate-y-0.5
         focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40
         active:translate-y-0">
@@ -309,7 +309,7 @@ function renderCard(opts: CardOptions): string {
         rounded-lg
         shadow-sm shadow-slate-200/50
         group-hover/card:shadow-md group-hover/card:shadow-slate-200/60
-        transition-all duration-300"></div>
+        transition duration-300"></div>
 
       <!-- Layer 2: Top color glow -->
       <div class="absolute -top-6 -left-6 w-32 h-20
@@ -346,7 +346,7 @@ function renderCard(opts: CardOptions): string {
             <i class="fas fa-arrow-right text-[9px] text-slate-300
               opacity-0 -translate-x-1.5
               group-hover/card:opacity-100 group-hover/card:translate-x-0
-              transition-all duration-300 ease-out"></i>
+              transition duration-300 ease-out"></i>
           </h4>
           <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">
             ${description}

@@ -99,8 +99,9 @@ function createProductCardViewModel(options: ProductCardOptions): ProductCardVie
 function renderDeleteProductButton({ product, onDelete }: ProductCardViewModel): string {
   return `
             <button data-action="delete" data-asin="${product.asin}" @click.stop="${onDelete}" 
-                class="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center bg-white text-slate-400 border border-slate-200 rounded-full shadow-sm opacity-0 group-hover:opacity-100 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all z-30"
-                title="彻底删除该 ASIN">
+                class="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center bg-white text-slate-400 border border-slate-200 rounded-full shadow-sm opacity-0 group-hover:opacity-100 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition duration-200 z-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
+                title="彻底删除该 ASIN"
+                aria-label="彻底删除该 ASIN">
                 <i class="fas fa-times text-xs"></i>
             </button>`;
 }
@@ -128,7 +129,7 @@ function renderProductCardHeader(viewModel: ProductCardViewModel): string {
                         <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-list-ul text-blue-500"></i> ${(product.feature_bullets || []).length}</span>
                         <span class="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-100 shadow-sm"><i class="fas fa-comments text-purple-500"></i> ${(product.customer_reviews || []).length}</span>
                     </div>
-                    <span class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-500 transition-all">
+                    <span class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-500 transition duration-200">
                         <i id="card-icon-${product.asin}" class="fas fa-chevron-down transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}"></i>
                     </span>
                 </div>
@@ -185,9 +186,10 @@ function renderReviewCard(review: unknown, index: number, viewModel: ProductCard
     : '';
 
   return `
-                                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group/review relative hover:border-purple-200 hover:shadow-md transition-all">
+                                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group/review relative hover:border-purple-200 hover:shadow-md transition duration-200">
                                     <button data-action="delete-review" data-asin="${product.asin}" data-index="${index}" @click.stop="${onDeleteReview.replace('INDEX', String(index))}"
-                                        class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover/review:opacity-100 z-10">
+                                        class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition duration-200 opacity-0 group-hover/review:opacity-100 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
+                                        aria-label="删除评论">
                                         <i class="fas fa-trash-alt text-xs"></i>
                                     </button>
                                     <div class="flex flex-wrap justify-between items-start gap-2 mb-2 pr-8">
@@ -246,7 +248,7 @@ export function renderProductCard(options: ProductCardOptions): string {
   return `
         <div id="card-${viewModel.product.asin}" 
              data-asin="${viewModel.product.asin}"
-             class="asin-card group relative p-5 border rounded-2xl transition-all cursor-pointer hover:shadow-md 
+             class="asin-card group relative p-5 border rounded-2xl transition duration-200 cursor-pointer hover:shadow-md
             ${expandedClass}">
             ${renderDeleteProductButton(viewModel)}
             ${renderProductCardHeader(viewModel)}

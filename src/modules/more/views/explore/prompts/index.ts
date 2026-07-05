@@ -281,13 +281,30 @@ function renderPromptList(): void {
 
   if (promptsToRender.length === 0) {
     const empty = document.createElement('div');
-    empty.className = 'col-span-full text-center py-12';
+    empty.className = 'col-span-full text-center py-12 px-6';
+    empty.setAttribute('role', 'status');
+    empty.setAttribute('aria-live', 'polite');
     appendIcon(empty, 'fas fa-search text-4xl text-slate-300 mb-4');
 
-    const text = document.createElement('p');
-    text.className = 'text-slate-500';
-    text.textContent = '未找到匹配的提示词';
-    empty.appendChild(text);
+    const title = document.createElement('p');
+    title.className = 'text-sm font-semibold text-slate-600';
+    title.textContent = '未找到匹配的提示词';
+    empty.appendChild(title);
+
+    const reason = document.createElement('p');
+    reason.className = 'mt-2 text-sm text-slate-500';
+    reason.textContent = '当前搜索词或分类筛选没有命中已有模板。';
+    empty.appendChild(reason);
+
+    const action = document.createElement('p');
+    action.className = 'mt-2 text-xs text-slate-500';
+    action.textContent = '推荐操作：清空搜索、切回“全部”分类，或使用更短关键词重试。';
+    empty.appendChild(action);
+
+    const help = document.createElement('p');
+    help.className = 'mt-1 text-xs text-slate-400';
+    help.textContent = '示例关键词：Listing、Review、PPC、合规。';
+    empty.appendChild(help);
 
     container.appendChild(empty);
     return;

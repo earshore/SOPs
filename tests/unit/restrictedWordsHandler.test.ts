@@ -104,6 +104,10 @@ beforeEach(() => {
 
     setSearch('[', 'regex');
     expect(document.getElementById('rw-results-tbody')?.textContent).toContain('没有找到相关高危词条');
+    expect(document.getElementById('rw-results-tbody')?.textContent).toContain(
+      '推荐操作：清除部分筛选条件，或切换到模糊搜索后重试。'
+    );
+    expect(document.querySelector('#rw-results-tbody [role="status"]')).not.toBeNull();
   });
 
   it('filters by category, risk, and site, then resets filters', () => {

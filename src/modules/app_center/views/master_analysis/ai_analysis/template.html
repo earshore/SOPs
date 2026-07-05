@@ -254,7 +254,7 @@
                           >
                             <label
                               :class="getAsinOptionClass(asinItem)"
-                              class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-indigo-50"
+                              class="flex items-center gap-3 p-3 rounded-lg border-2 transition duration-200 cursor-pointer hover:bg-indigo-50"
                             >
                               <input
                                 :checked="selectedAsins.includes(asinItem)"
@@ -508,12 +508,12 @@
                           :class="getListingTargetCardClass(target.id)"
                           :disabled="isAnalyzing"
                           @click="toggleTarget(target.id)"
-                          class="relative p-4 rounded-xl border-2 text-left transition-all duration-200 group hover:shadow-md"
+                          class="relative p-4 rounded-xl border-2 text-left transition duration-200 group hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
                         >
                           <div class="flex items-start gap-3">
                             <div
                               :class="getListingTargetIconWrapClass(target.id)"
-                              class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-all"
+                              class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition duration-200"
                             >
                               <i
                                 :class="getListingTargetIconClass(target.id)"
@@ -531,7 +531,7 @@
                             </div>
                             <div
                               :class="getTargetCheckClass(target.id)"
-                              class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all mt-0.5"
+                              class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition duration-200 mt-0.5"
                             >
                               <i
                                 class="fa-solid fa-check text-white text-[10px]"
@@ -567,12 +567,12 @@
                           :class="getReviewTargetCardClass(target.id)"
                           :disabled="isAnalyzing"
                           @click="toggleTarget(target.id)"
-                          class="relative p-4 rounded-xl border-2 text-left transition-all duration-200 group hover:shadow-md"
+                          class="relative p-4 rounded-xl border-2 text-left transition duration-200 group hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
                         >
                           <div class="flex items-start gap-3">
                             <div
                               :class="getReviewTargetIconWrapClass(target.id)"
-                              class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-all"
+                              class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition duration-200"
                             >
                               <i
                                 :class="getReviewTargetIconClass(target.id)"
@@ -590,7 +590,7 @@
                             </div>
                             <div
                               :class="getTargetCheckClass(target.id)"
-                              class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all mt-0.5"
+                              class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition duration-200 mt-0.5"
                             >
                               <i
                                 class="fa-solid fa-check text-white text-[10px]"
@@ -613,7 +613,7 @@
                 >
                   <button
                     @click="togglePromptPanel()"
-                    class="w-full flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4 text-sm text-slate-600 transition-all hover:border-indigo-200 hover:bg-white hover:text-indigo-600"
+                    class="w-full flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4 text-sm text-slate-600 transition duration-200 hover:border-indigo-200 hover:bg-white hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
                   >
                     <div class="flex items-center gap-3 min-w-0">
                       <div
@@ -722,7 +722,7 @@
                                 </div>
                                 <button
                                   @click.stop="copyPrompt(index)"
-                                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-all"
+                                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-800"
                                 >
                                   <i class="fa-solid fa-copy"></i>
                                   复制
@@ -790,7 +790,7 @@
     <div class="mb-10">
       <div
         :class="analysisHeroCardClass"
-        class="relative overflow-hidden rounded-2xl transition-all duration-300"
+        class="relative overflow-hidden rounded-2xl transition duration-200"
       >
         <div
           :class="analysisHeroBackdropClass"
@@ -823,7 +823,7 @@
         ></div>
         <div
           :class="analysisHeroBodyClass"
-          class="relative transition-all duration-300"
+          class="relative transition duration-200"
         >
           <div class="flex items-center justify-between gap-8">
             <div
@@ -842,7 +842,7 @@
                 </template>
                 <div
                   :class="analysisHeroIconWrapClass"
-                  class="flex items-center justify-center transition-all"
+                  class="flex items-center justify-center transition duration-200"
                 >
                   <i :class="analysisHeroIconClass" class="text-2xl"></i>
                 </div>
@@ -904,7 +904,7 @@
                 type="button"
                 @click="perfSettings.toggleSettings()"
                 :class="analysisPerfButtonClass"
-                class="min-h-11 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 flex flex-col items-start gap-0.5"
+                class="min-h-11 px-4 py-3 rounded-xl font-medium text-sm transition duration-200 flex flex-col items-start gap-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-700"
                 title="性能设置"
               >
                 <span class="flex items-center gap-2">
@@ -923,7 +923,7 @@
                 :class="runAnalysisButtonClass"
                 :disabled="runAnalysisDisabled"
                 @click="runAnalysis()"
-                class="relative min-h-11 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 flex items-center gap-3 min-w-[180px] justify-center group"
+                class="relative min-h-11 px-8 py-4 rounded-xl font-bold text-base transition duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-700 flex items-center gap-3 min-w-[180px] justify-center group"
               >
                 <template x-if="isAnalyzing">
                   <span class="flex items-center gap-3">
@@ -940,7 +940,7 @@
                 <!-- 禁用原因提示 - Hover显示 -->
                 <template x-if="showRunDisabledHint">
                   <div
-                    class="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 bg-slate-800 text-white rounded-lg shadow-2xl border border-slate-700 p-3 text-xs z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
+                    class="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 bg-slate-800 text-white rounded-lg shadow-2xl border border-slate-700 p-3 text-xs z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none"
                   >
                     <div class="flex items-start gap-2">
                       <i
@@ -1003,7 +1003,7 @@
               >
                 <div
                   :style="progressStyle"
-                  class="h-full bg-gradient-to-r from-white via-indigo-200 to-white rounded-full transition-all duration-500 ease-out relative"
+                  class="h-full bg-gradient-to-r from-white via-indigo-200 to-white rounded-full transition-[width] duration-500 ease-out relative"
                 >
                   <div class="absolute inset-0 shimmer"></div>
                   <div
@@ -1492,7 +1492,7 @@
                 x-for="(result, index) in reportListingsResults"
               >
                 <div
-                  class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition-all duration-200"
+                  class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition duration-200"
                 >
                   <!-- Header -->
                   <div
@@ -1591,7 +1591,7 @@
                       >
                         <div
                           :class="getHighlightClass(highlight.type)"
-                          class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition-all hover:shadow-sm"
+                          class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition duration-200 hover:shadow-sm"
                         >
                           <i
                             :class="getHighlightIconClass(highlight.type)"
@@ -1673,7 +1673,7 @@
                 x-for="(result, index) in reportReviewsResults"
               >
                 <div
-                  class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition-all duration-200"
+                  class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition duration-200"
                 >
                   <!-- Header -->
                   <div
@@ -1772,7 +1772,7 @@
                       >
                         <div
                           :class="getHighlightClass(highlight.type)"
-                          class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition-all hover:shadow-sm"
+                          class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition duration-200 hover:shadow-sm"
                         >
                           <i
                             :class="getHighlightIconClass(highlight.type)"
@@ -1877,7 +1877,7 @@
                         <button
                           type="button"
                           @click="copyMarkdown()"
-                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all border-r border-slate-600/50"
+                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition duration-200 border-r border-slate-600/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-800"
                           title="复制 Markdown 格式报告"
                         >
                           <i class="fa-brands fa-markdown text-base"></i>
@@ -1886,7 +1886,7 @@
                         <button
                           type="button"
                           @click="copyJson()"
-                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all border-r border-slate-600/50"
+                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition duration-200 border-r border-slate-600/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-800"
                           title="复制 JSON 格式报告"
                         >
                           <i class="fa-solid fa-copy text-base"></i>
@@ -1895,7 +1895,7 @@
                         <button
                           type="button"
                           @click="downloadJson()"
-                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all"
+                          class="flex min-h-11 items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-800"
                           title="下载 JSON 格式报告"
                         >
                           <i class="fa-solid fa-download text-base"></i>
@@ -1906,7 +1906,7 @@
                       <button
                         type="button"
                         @click="toggleJsonViewer()"
-                        class="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition-all"
+                        class="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-800"
                       >
                         <i :class="jsonViewerChevronClass"></i>
                       </button>

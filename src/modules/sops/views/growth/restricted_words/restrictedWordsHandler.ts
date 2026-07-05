@@ -378,11 +378,13 @@ function renderEmptyResults(tbody: HTMLElement): void {
     tbody,
     `
         <tr>
-            <td colspan="6" class="text-center py-12 text-slate-400">
-                <div class="flex flex-col items-center">
-                    <i class="fas fa-search text-4xl mb-3 opacity-50"></i>
-                    <p>没有找到相关高危词条</p>
-                    <p class="text-xs mt-1">尝试切换搜索模式或清除筛选条件</p>
+            <td colspan="6" class="text-center py-12 px-6 text-slate-500">
+                <div class="flex flex-col items-center" role="status" aria-live="polite">
+                    <i class="fas fa-search text-4xl mb-3 text-slate-300"></i>
+                    <p class="text-sm font-semibold text-slate-600">没有找到相关高危词条</p>
+                    <p class="mt-2 text-sm text-slate-500">当前关键词、风险等级、站点或搜索模式组合没有命中词库。</p>
+                    <p class="mt-2 text-xs text-slate-500">推荐操作：清除部分筛选条件，或切换到模糊搜索后重试。</p>
+                    <p class="mt-1 text-xs text-slate-400">使用正则搜索时，请先确认表达式完整且可解析。</p>
                 </div>
             </td>
         </tr>
@@ -495,8 +497,9 @@ function createActionCell(word: RestrictedWord): HTMLTableCellElement {
   const actionTd = document.createElement('td');
   actionTd.className = 'px-4 py-3 align-top text-center';
   const detailBtn = document.createElement('button');
+  detailBtn.type = 'button';
   detailBtn.className =
-    'px-3 py-1.5 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 rounded-md text-xs font-medium transition-all shadow-sm';
+    'px-3 py-1.5 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 rounded-md text-xs font-medium transition duration-200 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1';
   detailBtn.textContent = '详情';
   detailBtn.addEventListener('click', () => showWordDetail(word.id));
   actionTd.appendChild(detailBtn);

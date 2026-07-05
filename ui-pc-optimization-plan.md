@@ -88,6 +88,96 @@
    - 优化方案：错误边界增加原因说明、错误详情、重试加载、刷新页面和辅助排查说明；空状态改为标题、下一步说明和辅助提示；未注册模块说明可从顶部导航选择其他模块或确认路由；超时状态说明刷新会重新初始化应用状态；关键按钮补齐 `focus-visible` ring。
    - 验收：新增单元测试锁定错误、空状态、未注册和超时四种 fallback 的任务导向文案、ARIA 状态和焦点态。
 
+### Batch 7：PC 顶部导航当前位置与默认侧边栏稳定性（已执行）
+
+1. 锁定顶部导航当前位置语义，并收敛默认侧边栏生成模板的动效。
+   - 状态：已完成首批。
+   - 范围：`src/common/ui/navigation.ts`、`tests/unit/navigationPageEnterAnimation.test.ts`、`tests/unit/pc-motion-css.test.ts`。
+   - PC 端影响：桌面用户跨 SOP、应用中心、AMZ Hub、更多模块切换时，需要明确知道当前所处一级模块；默认侧边栏若继续生成 `transition-all`，会绕过前面 CSS 层的动效合同。
+   - 优化方案：保留顶部导航由 `aria-current="page"` 驱动的当前位置高亮，并通过路由 UI 测试锁定当前项 / 非当前项状态；默认侧边栏按钮从 `transition-all` 改为显式 `transition`，并补齐 `focus-visible` ring；动效合同扫描加入 `navigation.ts`。
+   - 验收：路由到 `sops_overview` 时 `nav-sops` 获得 `aria-current="page"`、蓝色文字和蓝色边框，其他一级导航清除当前位置；高频模板/生成模板扫描无 `transition-all`、缩放和旋转反馈，且保留 `focus-visible:ring-2`。
+
+### Batch 8：应用中心 PC 紧凑列表视图（已执行）
+
+1. 为应用矩阵增加卡片 / 列表模式切换。
+   - 状态：已完成首批。
+   - 范围：`src/modules/app_center/views/overview/template.html`、`src/modules/app_center/views/overview/index.ts`、`src/modules/app_center/app_center_style.css`、`tests/unit/app_center_overview.test.ts`。
+   - PC 端影响：桌面用户在应用数量增加后，需要用更高密度的行式信息快速比较应用名、价值、标签和入口；只保留装饰性卡片会降低扫读效率。
+   - 优化方案：在应用矩阵工具栏增加分段式“卡片 / 列表”切换；新增 4 条非交互列表行，行内保留显式主入口和子入口按钮；分类与既有搜索筛选同时作用于卡片和列表行，计数只按应用数量统计一次；列表行 Hover 只调整边框、背景和阴影，不改变布局尺寸。
+   - 验收：默认展示卡片，切换列表时卡片容器 `aria-hidden="true"`、列表容器 `aria-hidden="false"`；真实模板提供 4 条 `app-overview-list-row` 且行本身不承担 `role="button"` / `tabindex`；筛选分类和搜索时列表行与卡片同步显隐，显示数量不重复计数。
+
+### Batch 9：全局顶部菜单与搜索交互稳定性（已执行）
+
+1. 收敛 Mega Menu 与搜索结果按钮的动效和焦点态。
+   - 状态：已完成首批。
+   - 范围：`src/common/ui/megaMenu.ts`、`src/common/ui/search.ts`、`tests/unit/pc-motion-css.test.ts`、`tests/unit/uiCurrent.test.ts`。
+   - PC 端影响：顶部 Mega Menu、SOP / 智库 / 侧边栏搜索是桌面端跨模块导航的高频入口；若仍使用 `transition-all`，会让 hover、聚焦、阴影、背景和位移都被默认动画化，增加长时间鼠标扫视时的反馈噪声。
+   - 优化方案：Mega Menu 卡片、玻璃背景层和箭头只使用 Tailwind `transition` 的限定属性集合；搜索结果按钮改为 `transition duration-200` 并补齐 `focus-visible` ring；动效合同扫描加入 `megaMenu.ts` 与 `search.ts`。
+   - 验收：全局高频生成模板扫描无 `transition-all`、`hover/active/group-hover:scale`、`hover:rotate`，且保留 `focus-visible:ring-2`；现有 UI helper 测试确认 Mega Menu 渲染、展开收起、搜索结果点击和清空行为不变。
+
+### Batch 10：Master Analysis 私有弹层交互状态收敛（已执行）
+
+1. 清理确认弹层与多站点导入弹层的 `transition-all` 和缩放按压反馈。
+   - 状态：已完成首批。
+   - 范围：`src/modules/app_center/views/master_analysis/utils/confirmModal.ts`、`src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts`、`tests/unit/pc-motion-css.test.ts`。
+   - PC 端影响：删除确认、忽略提示确认和多站点导入选择都是桌面工作台中的风险操作；按钮按压缩放和默认动画所有属性会让弹层反馈与系统设置、共享确认弹层不一致。
+   - 优化方案：弹层面板容器从 `transition-all` 改为 `transition`；多站点选项从 `transition-all` 改为 `transition duration-200`；确认按钮按压从 `active:scale-95` 改为 `active:translate-y-px`；导入弹层取消 / 确认按钮补齐 `focus-visible` ring；动效合同扫描加入两个私有弹层实现。
+   - 验收：两个私有弹层实现扫描无 `transition-all`、`hover/active/group-hover:scale`、`hover:rotate`，且保留 `focus-visible:ring-2`；弹层事件、选择和清理逻辑未改动。
+
+### Batch 11：SOPS 安全合规模板静态卡动效收敛（已执行）
+
+1. 收敛 Product Compliance 流程卡与 EU GPSR 官方资源卡的 Hover 动效。
+   - 状态：已完成首批。
+   - 范围：`src/modules/sops/views/safety/product_compliance/template.html`、`src/modules/sops/views/safety/eu_gpsr_compliance/template.html`、`tests/unit/pc-motion-css.test.ts`。
+   - PC 端影响：安全合规页面包含长表格、流程卡和外部资源入口；静态说明卡使用 `transition-all`、外链图标使用放大反馈，会在 PC 长页面扫视时产生不必要的视觉噪声。
+   - 优化方案：Product Compliance 8 张 SOP 流程卡从 `transition-all` 改为 `transition duration-200`；EU GPSR 3 个官方资源外链从 `transition-all` 改为显式 `transition duration-200`，移除图标 `group-hover:scale-110`，并补齐外链卡 `focus-visible` ring；新增深层模板静态合同，只锁定无广义动画和缩放/旋转反馈。
+   - 验收：两个安全合规模板扫描无 `transition-all`、`hover/active/group-hover:scale`、`hover:rotate`；Product Compliance 与 GPSR 现有单元测试通过。
+
+### Batch 12：Keyword Hunter 输入 / 处理页动效收敛（已执行）
+
+1. 收敛 Keyword Hunter 工作流中编辑器、处理按钮、统计卡和浮动入口的 Hover / Focus / Active 反馈。
+   - 状态：已完成首批。
+   - 范围：`src/modules/app_center/views/keyword_hunter/input/template.html`、`src/modules/app_center/views/keyword_hunter/process/template.html`、`src/modules/app_center/views/keyword_hunter/process/index.ts`、`tests/unit/pc-motion-css.test.ts`。
+   - PC 端影响：Keyword Hunter 是桌面端长时间编辑、对照和监控关键词覆盖率的工作流；编辑器焦点容器、处理按钮、统计卡和浮动关键词入口若使用 `transition-all` 或 hover 缩放，会让鼠标扫视和浮窗恢复时的反馈不够稳定。
+   - 优化方案：输入页两个编辑器容器改为显式 `transition duration-200`；处理页开关滑块只过渡 transform，按钮按压从 `active:scale-95` 改为 `active:translate-y-px` 并补齐键盘焦点环；AI 翻译和覆盖率进度条保留进度语义但改为 `transition-[width]`；统计卡和最小化浮动按钮只过渡颜色、边框、阴影和 transform；运行时恢复浮窗不再注入 `transition-all`。
+   - 验收：Keyword Hunter 输入 / 处理页及浮窗恢复逻辑扫描无 `transition-all`、`hover/active/group-hover:scale`、`hover:rotate`；深层模板动效合同已锁定本批文件。
+
+### Batch 13：提示词语言切换与禁限词详情按钮收敛（已执行）
+
+1. 清理两个低风险独立控件的广义过渡，并补齐键盘焦点态。
+   - 状态：已完成。
+   - 范围：`src/modules/more/views/explore/prompts/template.html`、`src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts`、`tests/unit/pc-motion-css.test.ts`。
+   - PC 端影响：提示词详情弹层的中英文切换和禁限词结果表的详情按钮都是桌面端表格/弹层中的小控件；继续使用 `transition-all` 会让按钮状态反馈与前面已收敛的弹层、导航和列表控件不一致。
+   - 优化方案：提示词语言切换按钮改为 `transition duration-200` 并补齐 violet 焦点环；禁限词详情按钮改为 `transition duration-200`，补齐 blue 焦点环，并显式设置 `type="button"`，避免未来嵌入表单时出现隐式提交。
+   - 验收：两个文件扫描无 `transition-all`、`hover/active/group-hover:scale`、`hover:rotate`；深层 PC 动效合同已锁定本批文件。
+
+### Batch 14：Prompt Lab 表单与输出区动效收敛（已执行）
+
+1. 收敛 Prompt Lab 中产品 DNA 表单、策略开关、翻转控制台、输出操作和报告维度卡的动效。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/master_analysis/promptlab/template.html`、`src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts`、`tests/unit/pc-motion-css.test.ts`。
+   - PC 端影响：Prompt Lab 是桌面端长表单和右侧生成控制台并列的工作流；表单控件、报告维度卡和生成按钮如果继续使用 `transition-all`、hover 放大和上浮，会让大屏密集操作时的视觉反馈过重，也增加键盘焦点不一致的问题。
+   - 优化方案：产品 DNA 表单输入、单字段提取按钮、目标市场 / Tone 选择器和 AI 策略开关统一改为 `transition duration-200`；Listing / Visual 翻转卡保留 3D transform 语义但改为 `transition-transform`；模式滑块只过渡 transform；生成按钮从 hover 放大 / 上浮改为 `active:translate-y-px` 并补齐焦点环；复制 / 清空 / 复制 SEO 关键词按钮补齐焦点环和图标按钮可读名称；报告维度卡从 `transition-all` 改为限定过渡。
+   - 验收：Prompt Lab 模板与报告渲染器扫描无 `transition-all`、`hover/active/group-hover:scale`、`hover:rotate`；深层 PC 动效合同已锁定本批文件。
+
+### Batch 15：Scraper 导入 / 历史 / 产品卡动效收敛（已执行）
+
+1. 收敛 Scraper 空状态、导入入口、手动配置、历史快照、插件入口和产品 / 评论卡片的动效。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/master_analysis/scraper/template.html`、`src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts`、`tests/unit/pc-motion-css.test.ts`。
+   - PC 端影响：Scraper 页面包含导入、采集配置、历史快照和多 ASIN 产品卡；广义过渡和站点徽章 hover 放大会让长页面扫视时的状态反馈过重，图标按钮缺少焦点态也会降低键盘操作清晰度。
+   - 优化方案：空状态图标、导入卡、手动采集选项、历史 ASIN 标签、加载按钮、插件下载入口和产品 / 评论卡统一改为 `transition duration-200`；历史站点徽章移除 `hover:scale-105`；产品删除与评论删除按钮补齐 `focus-visible` ring 和 `aria-label`；展开箭头继续使用已有 `transition-transform`。
+   - 验收：Scraper 模板与产品卡渲染器扫描无 `transition-all`、`hover/active/group-hover:scale`、`hover:rotate`；深层 PC 动效合同已锁定本批文件。
+
+### Batch 16：AI Analysis 选择 / 结果 / 操作区动效收敛（已执行）
+
+1. 收敛 AI Analysis 中 ASIN 选择、分析目标卡、任务预览、Hero 操作区、结果卡和报告导出栏的动效。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/master_analysis/ai_analysis/template.html`、`src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanel.ts`、`tests/unit/pc-motion-css.test.ts`。
+   - PC 端影响：AI Analysis 是桌面端高密度配置和结果阅读页面；目标卡、Hero 主按钮、结果卡和导出操作栏如果继续使用 `transition-all` 或 hover 放大，会让状态反馈不稳定，也让键盘焦点与前面已收敛的工作流不一致。
+   - 优化方案：ASIN 选择项、Listing / Reviews 分析目标卡、任务预览、Prompt 复制、Hero 卡片、性能设置、结果卡、发现条目和导出按钮统一改为 `transition duration-200` 并补齐重点按钮焦点环；主分析按钮按压反馈改为 `active:translate-y-px`；禁用原因提示只过渡 opacity；分析进度条保留宽度语义但改为 `transition-[width]`；动态主按钮类移除 `hover:scale-105`。
+   - 验收：AI Analysis 模板与动态类文件扫描无 `transition-all`、`hover/active/group-hover:scale`、`hover:rotate`；深层 PC 动效合同已锁定本批文件。
+
 ## 0. PC 端优化目标
 
 本轮优化不追求“大改风格”，而是让现有界面在 PC 工作台场景下更高效、更稳定、更一致：
@@ -239,6 +329,11 @@
 
 ### P2-01 PC 端导航与顶部栏需要强化当前位置感
 
+- **当前状态**
+  - 顶部主导航已由 `aria-current="page"` 驱动当前位置高亮，并有路由测试覆盖。
+  - 默认侧边栏生成模板已去掉 `transition-all` 并补齐键盘焦点环，避免和 PC 动效合同分叉。
+  - Mega Menu 与 SOP / 智库 / 侧边栏搜索结果按钮已加入高频模板动效合同，键盘焦点态已补齐。
+  - 后续仍可继续增强面包屑或页面级模块标签，但不在本批一次性展开。
 - **当前问题**
   - 顶部导航有基础样式，但大屏下当前位置、模块分组和用户当前任务关系还不够强。
 - **PC 端影响**
@@ -251,6 +346,10 @@
 
 ### P2-02 应用中心 PC 卡片矩阵可提升扫描效率
 
+- **当前状态**
+  - 已完成首批：应用矩阵支持卡片 / 列表模式切换；列表模式以更高信息密度展示应用名、一句话价值、标签、主入口和子入口。
+  - 列表行保持信息容器语义，操作仍由明确按钮承担；分类与既有搜索筛选已同步到列表行。
+  - 后续若应用数量继续增加，可继续补真实搜索框、标签折叠 `+N` 与用户偏好记忆。
 - **当前问题**
   - 卡片视觉较丰富，但 PC 大屏上同类信息重复较多。
 - **PC 端影响**
@@ -277,7 +376,14 @@
 
 - **当前状态**
   - 已完成首批高频弹层收敛：系统设置、导入冲突确认、删除确认。
-  - 仍需后续逐页处理 Prompt Lab、Scraper、Keyword Hunter 等更深业务模板，避免一次性大改带来回归风险。
+  - 已完成全局导航入口首批收敛：默认侧边栏、Mega Menu、搜索结果按钮均锁定显式过渡属性与 `focus-visible` ring。
+  - 已完成 Master Analysis 私有确认 / 多站点导入弹层首批收敛：确认按钮使用 `active:translate-y-px`，导入弹层按钮补齐键盘焦点态。
+  - 已完成 SOPS 安全合规模板首批收敛：静态流程卡不再使用 `transition-all`，EU GPSR 外链卡不再使用图标放大反馈并补齐键盘焦点态。
+  - 已完成 Keyword Hunter 输入 / 处理页首批收敛：处理按钮使用 `active:translate-y-px`，浮动入口移除 hover 放大并补齐键盘焦点态。
+  - 已完成提示词语言切换与禁限词详情按钮收敛：小型按钮改为限定过渡并补齐 `focus-visible` ring。
+  - 已完成 Prompt Lab 表单与输出区首批收敛：生成按钮不再 hover 放大 / 上浮，翻转控制台只保留 transform 过渡。
+  - 已完成 Scraper 导入 / 历史 / 产品卡首批收敛：历史站点徽章移除 hover 放大，产品 / 评论删除按钮补齐焦点态。
+  - 已完成 AI Analysis 选择 / 结果 / 操作区首批收敛：主分析按钮移除 hover 放大，进度条改为显式宽度过渡。
 - **当前问题**
   - 不同组件的 Hover 有的变色、有的升起、有的放大、有的旋转。
 - **PC 端影响**
@@ -292,8 +398,8 @@
 ### P2-05 减少 `transition: all`，提升 PC 长页面稳定性
 
 - **当前状态**
-  - 公共 CSS、业务模块私有 CSS、设置面板与共享确认弹层模板已完成收敛。
-  - 深层业务 HTML 模板仍保留少量 Tailwind `transition-all`，后续按页面继续消债。
+  - 公共 CSS、业务模块私有 CSS、设置面板、共享确认弹层、默认侧边栏、Mega Menu、搜索结果生成模板、Master Analysis 私有弹层、SOPS 安全合规模板首批静态卡、Keyword Hunter 输入 / 处理页、两个低风险独立控件、Prompt Lab 表单 / 输出区、Scraper 导入 / 历史 / 产品卡和 AI Analysis 选择 / 结果 / 操作区已完成收敛。
+  - 当前本轮扫描范围内的深层业务模板已无 `transition-all`、hover/active 缩放或 hover 旋转残留；后续新增页面继续通过 PC 动效合同防回退。
 - **当前问题**
   - 项目中存在 `transition: all` 工具类和局部布局属性动画。
 - **PC 端影响**

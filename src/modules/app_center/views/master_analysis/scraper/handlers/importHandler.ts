@@ -303,7 +303,7 @@ function createMarketplaceSelectionContent(sites: string[], modalId: string): st
   const descriptionId = `${modalId}-description`;
 
   return `
-            <div class="ma-marketplace-modal bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all"
+            <div class="ma-marketplace-modal bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="${titleId}"
@@ -326,7 +326,7 @@ function createMarketplaceSelectionContent(sites: string[], modalId: string): st
                         ${sites
                           .map(
                             (site, index) => `
-                            <label class="ma-marketplace-option flex items-center p-3 border border-slate-200 rounded-xl cursor-pointer transition-all group">
+                            <label class="ma-marketplace-option flex items-center p-3 border border-slate-200 rounded-xl cursor-pointer transition duration-200 group">
                                 <input type="radio" name="site_choice" value="${site}" ${index === 0 ? 'checked' : ''} 
                                     class="ma-marketplace-option-input w-4 h-4 border-gray-300">
                                 <span class="ma-marketplace-option-label ml-3 font-bold text-slate-700"> ${MARKETPLACE_SITE_NAME_MAP[site] || site} - ${site} </span>
@@ -340,10 +340,10 @@ function createMarketplaceSelectionContent(sites: string[], modalId: string): st
                     </div>
 
                     <div class="flex justify-end gap-3">
-                        <button type="button" id="btn-cancel-${modalId}" class="px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors">
+                        <button type="button" id="btn-cancel-${modalId}" class="px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
                             取消导入
                         </button>
-                        <button type="button" id="btn-confirm-${modalId}" class="ma-marketplace-modal-confirm px-5 py-2 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:scale-95">
+                        <button type="button" id="btn-confirm-${modalId}" class="ma-marketplace-modal-confirm px-5 py-2 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
                             确认合并
                         </button>
                     </div>

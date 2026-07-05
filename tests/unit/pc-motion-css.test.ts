@@ -40,6 +40,38 @@ const explicitMotionModulePaths = [
 const explicitMotionTemplatePaths = [
   resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
   resolve(process.cwd(), 'src/components/modal/sharedModals.html'),
+  resolve(process.cwd(), 'src/common/ui/navigation.ts'),
+  resolve(process.cwd(), 'src/common/ui/megaMenu.ts'),
+  resolve(process.cwd(), 'src/common/ui/search.ts'),
+  resolve(process.cwd(), 'src/modules/app_center/views/master_analysis/utils/confirmModal.ts'),
+  resolve(
+    process.cwd(),
+    'src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts'
+  ),
+];
+const convergedDeepTemplatePaths = [
+  resolve(process.cwd(), 'src/modules/app_center/views/keyword_hunter/input/template.html'),
+  resolve(process.cwd(), 'src/modules/app_center/views/keyword_hunter/process/template.html'),
+  resolve(process.cwd(), 'src/modules/app_center/views/keyword_hunter/process/index.ts'),
+  resolve(process.cwd(), 'src/modules/app_center/views/master_analysis/ai_analysis/template.html'),
+  resolve(
+    process.cwd(),
+    'src/modules/app_center/views/master_analysis/ai_analysis/components/AlpinePanel.ts'
+  ),
+  resolve(process.cwd(), 'src/modules/app_center/views/master_analysis/promptlab/template.html'),
+  resolve(
+    process.cwd(),
+    'src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts'
+  ),
+  resolve(process.cwd(), 'src/modules/app_center/views/master_analysis/scraper/template.html'),
+  resolve(
+    process.cwd(),
+    'src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts'
+  ),
+  resolve(process.cwd(), 'src/modules/more/views/explore/prompts/template.html'),
+  resolve(process.cwd(), 'src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts'),
+  resolve(process.cwd(), 'src/modules/sops/views/safety/product_compliance/template.html'),
+  resolve(process.cwd(), 'src/modules/sops/views/safety/eu_gpsr_compliance/template.html'),
 ];
 
 describe('PC motion CSS contract', () => {
@@ -77,7 +109,7 @@ describe('PC motion CSS contract', () => {
     });
   });
 
-  it('keeps high-frequency PC modal templates on stable interaction feedback', () => {
+  it('keeps high-frequency PC templates on stable interaction feedback', () => {
     explicitMotionTemplatePaths.forEach(templatePath => {
       const template = readFileSync(templatePath, 'utf8');
 
@@ -85,6 +117,16 @@ describe('PC motion CSS contract', () => {
       expect(template).not.toMatch(/\b(?:hover|active|group-hover):scale/);
       expect(template).not.toMatch(/\bhover:rotate/);
       expect(template).toContain('focus-visible:ring-2');
+    });
+  });
+
+  it('keeps converged deep PC templates from using broad or scaling hover feedback', () => {
+    convergedDeepTemplatePaths.forEach(templatePath => {
+      const template = readFileSync(templatePath, 'utf8');
+
+      expect(template).not.toContain('transition-all');
+      expect(template).not.toMatch(/\b(?:hover|active|group-hover):scale/);
+      expect(template).not.toMatch(/\bhover:rotate/);
     });
   });
 });

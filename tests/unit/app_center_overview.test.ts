@@ -26,8 +26,10 @@ const overviewTemplate = `
     <button class="category-filter-btn active bg-blue-600 text-white" data-category="all"></button>
     <button class="category-filter-btn bg-white text-slate-700 border border-slate-300" data-category="master_analysis"></button>
     <button class="category-filter-btn bg-white text-slate-700 border border-slate-300" data-category="ppc_tools"></button>
+    <button class="app-overview-view-btn active" data-view-mode="grid" aria-pressed="true"></button>
+    <button class="app-overview-view-btn" data-view-mode="list" aria-pressed="false"></button>
     <section id="app-module-apps">
-      <div class="app-center-card-grid">
+      <div class="app-center-card-grid app-overview-grid">
         <article data-category="master_analysis" data-search="master analysis 数据采集">
           <button class="app-card-primary-link" data-action="switch-tab" data-tab="scraper"></button>
           <button class="app-child-link" data-action="switch-tab" data-tab="ai_analysis"></button>
@@ -35,6 +37,14 @@ const overviewTemplate = `
         <article data-category="ppc_tools" data-search="ppc search term 广告">
           <button class="app-card-primary-link" data-action="switch-tab" data-tab="ppc_search_terms"></button>
         </article>
+      </div>
+      <div class="app-overview-list hidden">
+        <div class="app-overview-list-row" data-category="master_analysis" data-search="master analysis 数据采集">
+          <button class="app-card-primary-link" data-action="switch-tab" data-tab="scraper"></button>
+        </div>
+        <div class="app-overview-list-row" data-category="ppc_tools" data-search="ppc search term 广告">
+          <button class="app-card-primary-link" data-action="switch-tab" data-tab="ppc_search_terms"></button>
+        </div>
       </div>
       <div id="app-overview-empty" class="hidden"></div>
     </section>
@@ -107,6 +117,14 @@ describe('App Center Overview', () => {
     expect(
       container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.style.display
     ).toBe('');
+    expect(
+      container.querySelector<HTMLElement>('.app-overview-list-row[data-category="master_analysis"]')
+        ?.style.display
+    ).toBe('none');
+    expect(
+      container.querySelector<HTMLElement>('.app-overview-list-row[data-category="ppc_tools"]')
+        ?.style.display
+    ).toBe('');
     expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
       '显示 1 个应用'
     );
@@ -138,6 +156,14 @@ describe('App Center Overview', () => {
     expect(
       container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.style.display
     ).toBe('');
+    expect(
+      container.querySelector<HTMLElement>('.app-overview-list-row[data-category="master_analysis"]')
+        ?.style.display
+    ).toBe('none');
+    expect(
+      container.querySelector<HTMLElement>('.app-overview-list-row[data-category="ppc_tools"]')
+        ?.style.display
+    ).toBe('');
     expect(clearSearchBtn.classList.contains('hidden')).toBe(false);
     expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
       '显示 1 个应用'
@@ -153,7 +179,43 @@ describe('App Center Overview', () => {
     expect(
       container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.style.display
     ).toBe('');
+    expect(
+      container.querySelector<HTMLElement>('.app-overview-list-row[data-category="master_analysis"]')
+        ?.style.display
+    ).toBe('');
+    expect(
+      container.querySelector<HTMLElement>('.app-overview-list-row[data-category="ppc_tools"]')
+        ?.style.display
+    ).toBe('');
     expect(clearSearchBtn.classList.contains('hidden')).toBe(true);
+  });
+
+  it('switches between card and compact list view without changing the visible count', async () => {
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+
+    const grid = container.querySelector<HTMLElement>('.app-overview-grid');
+    const list = container.querySelector<HTMLElement>('.app-overview-list');
+    const gridBtn = container.querySelector<HTMLButtonElement>('[data-view-mode="grid"]');
+    const listBtn = container.querySelector<HTMLButtonElement>('[data-view-mode="list"]');
+
+    expect(grid?.classList.contains('hidden')).toBe(false);
+    expect(grid?.getAttribute('aria-hidden')).toBe('false');
+    expect(list?.classList.contains('hidden')).toBe(true);
+    expect(list?.getAttribute('aria-hidden')).toBe('true');
+
+    listBtn?.click();
+
+    expect(grid?.classList.contains('hidden')).toBe(true);
+    expect(grid?.getAttribute('aria-hidden')).toBe('true');
+    expect(list?.classList.contains('hidden')).toBe(false);
+    expect(list?.getAttribute('aria-hidden')).toBe('false');
+    expect(gridBtn?.getAttribute('aria-pressed')).toBe('false');
+    expect(listBtn?.getAttribute('aria-pressed')).toBe('true');
+    expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
+      '显示 2 个应用'
+    );
   });
 
   it('shows an empty state when no app matches the search', async () => {
@@ -196,7 +258,28 @@ describe('App Center Overview', () => {
     expect(wrapper.querySelector('.app-overview-card[role="button"]')).toBeNull();
     expect(wrapper.querySelector('.app-overview-card[tabindex]')).toBeNull();
     expect(
-      wrapper.querySelectorAll('.app-card-primary-link[data-action="switch-tab"]')
+      wrapper.querySelectorAll('.app-overview-card .app-card-primary-link[data-action="switch-tab"]')
+    ).toHaveLength(4);
+  });
+
+  it('exposes the PC compact list view as non-interactive rows with explicit buttons', () => {
+    const html = readFileSync(realOverviewTemplatePath, 'utf8');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+
+    const viewModeButtons = wrapper.querySelectorAll('.app-overview-view-btn[data-view-mode]');
+    const list = wrapper.querySelector('.app-overview-list');
+    const rows = wrapper.querySelectorAll('.app-overview-list-row[data-category]');
+
+    expect(viewModeButtons).toHaveLength(2);
+    expect(list?.classList.contains('hidden')).toBe(true);
+    expect(rows).toHaveLength(4);
+    expect(wrapper.querySelector('.app-overview-list-row[role="button"]')).toBeNull();
+    expect(wrapper.querySelector('.app-overview-list-row[tabindex]')).toBeNull();
+    expect(
+      wrapper.querySelectorAll(
+        '.app-overview-list-row .app-card-primary-link[data-action="switch-tab"]'
+      )
     ).toHaveLength(4);
   });
 

@@ -588,7 +588,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
       return 'bg-indigo-600 text-white hover:bg-indigo-700 border border-indigo-600 shadow-sm';
     }
     return this.canRunAnalysis
-      ? 'bg-white text-indigo-600 hover:bg-indigo-50 hover:scale-105 border border-white/50 shadow-2xl'
+      ? 'bg-white text-indigo-600 hover:bg-indigo-50 border border-white/50 shadow-2xl'
       : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none';
   },
 

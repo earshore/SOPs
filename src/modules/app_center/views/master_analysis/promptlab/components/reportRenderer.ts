@@ -735,7 +735,7 @@ export function renderLegacyFormatModules(
 
     const div = document.createElement('div');
     div.className =
-      'relative flex items-start p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition-all';
+      'relative flex items-start p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition duration-200';
 
     const template = `
       <div class="flex h-5 items-center">

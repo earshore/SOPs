@@ -31,6 +31,9 @@ class ScraperModule extends BaseModule {
     const container = this.container;
     if (!container) return;
 
+    const registry = AlpineRegistry.getInstance();
+    registry.register('scraperPanel', createScraperPanel);
+
     // 1. 使用 SafeTemplateLoader 加载模板
     const loader = SafeTemplateLoader.getInstance();
     const renderer = SafeRenderer.getInstance();
@@ -48,12 +51,6 @@ class ScraperModule extends BaseModule {
     // 添加淡入动画（在渲染前添加）
     container.classList.add('fade-in');
     renderer.renderTemplate(container, html);
-  }
-
-  protected async init(): Promise<void> {
-    // 3. 使用 AlpineRegistry 注册组件
-    const registry = AlpineRegistry.getInstance();
-    registry.register('scraperPanel', createScraperPanel);
   }
 
   protected onUnmount(): void {

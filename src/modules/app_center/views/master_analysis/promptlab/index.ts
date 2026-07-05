@@ -26,6 +26,9 @@ class PromptlabModule extends BaseModule {
     const container = this.container;
     if (!container) return;
 
+    const registry = AlpineRegistry.getInstance();
+    registry.register('promptlabPanel', createPromptlabPanel);
+
     // 运行时检查: 确保没有 CSP meta 标签
     const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
     if (cspMeta) {
@@ -41,11 +44,6 @@ class PromptlabModule extends BaseModule {
     const renderer = SafeRenderer.getInstance();
     container.classList.add('fade-in');
     renderer.renderTemplate(container, html);
-  }
-
-  protected async init(): Promise<void> {
-    const registry = AlpineRegistry.getInstance();
-    registry.register('promptlabPanel', createPromptlabPanel);
   }
 
   protected onUnmount(): void {

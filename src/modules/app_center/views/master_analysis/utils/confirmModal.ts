@@ -67,7 +67,7 @@ function buildModalContent(
     : 'fas fa-circle-question';
 
   return `
-        <div class="ma-confirm-modal ${variantClass} bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all"
+        <div class="ma-confirm-modal ${variantClass} bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition"
             role="dialog"
             aria-modal="true"
             aria-labelledby="${titleId}"
@@ -87,7 +87,7 @@ function buildModalContent(
                     <button type="button" id="btn-cancel-${modalId}" class="min-h-10 px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
                         取消
                     </button>
-                    <button type="button" id="btn-confirm-${modalId}" class="ma-confirm-modal-confirm min-h-10 px-5 py-2 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+                    <button type="button" id="btn-confirm-${modalId}" class="ma-confirm-modal-confirm min-h-10 px-5 py-2 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
                         ${renderer.escapeHtml(request.confirmLabel)}
                     </button>
                 </div>

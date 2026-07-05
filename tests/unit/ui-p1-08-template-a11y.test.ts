@@ -101,6 +101,26 @@ describe('UI-P1-08 template semantics', () => {
     expect(status.getAttribute('aria-atomic')).toBe('true');
   });
 
+  it('keeps report empty states task-oriented on PC workflows', () => {
+    const promptlabRoot = readTemplateFragment(
+      'src/modules/app_center/views/master_analysis/promptlab/template.html'
+    );
+    const keywordAnalysisRoot = readTemplateFragment(
+      'src/modules/app_center/views/keyword_hunter/analysis/template.html'
+    );
+
+    const reportSections = requireElement(promptlabRoot, '#report-sections-container');
+    const promptlabEmpty = requireElement(reportSections, '[role="status"][aria-live="polite"]');
+    expect(normalizeText(promptlabEmpty)).toContain('还没有报告维度');
+    expect(normalizeText(promptlabEmpty)).toContain('推荐操作：');
+    expect(normalizeText(promptlabEmpty)).toContain('一键导入的维度');
+
+    const keywordEmpty = requireElement(keywordAnalysisRoot, '#kt-analysis-empty-state');
+    expect(normalizeText(keywordEmpty)).toContain('还没有评审报告');
+    expect(normalizeText(keywordEmpty)).toContain('推荐操作：');
+    expect(normalizeText(keywordEmpty)).toContain('Top 3 改写建议');
+  });
+
   it('keeps Keyword Hunter translation progress and input fields programmatically described', () => {
     const processRoot = readTemplateFragment(
       'src/modules/app_center/views/keyword_hunter/process/template.html'

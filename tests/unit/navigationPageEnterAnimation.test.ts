@@ -15,6 +15,8 @@ describe('navigation page enter animation', () => {
     document.body.className = '';
     document.body.innerHTML = `
       <div id="dynamic-sidebar"></div>
+      <button id="nav-sops" class="nav-trigger text-slate-600 border-transparent"></button>
+      <button id="nav-app_center" class="nav-trigger text-slate-600 border-transparent"></button>
       <main id="main-content" class="p-8 bg-gradient-to-b"></main>
       <div id="panel-home" class="panel hidden"></div>
       <div id="panel-sops" class="panel hidden"></div>
@@ -44,5 +46,18 @@ describe('navigation page enter animation', () => {
 
     expect(document.getElementById('panel-sops')?.classList.contains('hidden')).toBe(false);
     expect(document.body.classList.contains('home-shell-active')).toBe(false);
+  });
+
+  it('marks the active top-level PC navigation item for orientation', async () => {
+    const sopsNav = document.getElementById('nav-sops') as HTMLElement;
+    const appCenterNav = document.getElementById('nav-app_center') as HTMLElement;
+
+    await updateUIForRoute('sops_overview');
+
+    expect(sopsNav.getAttribute('aria-current')).toBe('page');
+    expect(sopsNav.classList.contains('text-blue-600')).toBe(true);
+    expect(sopsNav.classList.contains('border-blue-600')).toBe(true);
+    expect(appCenterNav.hasAttribute('aria-current')).toBe(false);
+    expect(appCenterNav.classList.contains('border-transparent')).toBe(true);
   });
 });
