@@ -50,24 +50,7 @@ interface SentryInitConfig {
   release?: string;
   tracesSampleRate?: number;
   beforeSend?: (event: SentryEvent, hint: SentryEventHint) => SentryEvent | null;
-  integrations?: SentryIntegration[];
   ignoreErrors?: string[];
-}
-
-/**
- * Sentry集成接口
- */
-interface SentryIntegration {
-  name: string;
-  [key: string]: unknown;
-}
-
-/**
- * Sentry浏览器追踪配置
- */
-interface BrowserTracingConfig {
-  tracingOrigins?: (string | RegExp)[];
-  [key: string]: unknown;
 }
 
 /**
@@ -91,7 +74,6 @@ interface SentrySDK {
   setContext: (name: string, context: Record<string, unknown>) => void;
   addBreadcrumb: (breadcrumb: Record<string, unknown>) => void;
   startTransaction: (config: { name: string }) => SentryTransaction;
-  BrowserTracing: new (config?: BrowserTracingConfig) => SentryIntegration;
 }
 
 /**
@@ -205,13 +187,6 @@ export class MonitoringService {
         tracesSampleRate: this.config.tracesSampleRate,
         beforeSend: this.config.beforeSend,
 
-        // 集成配置
-        integrations: [
-          new Sentry.BrowserTracing({
-            tracingOrigins: ['localhost', /^\//],
-          }),
-        ],
-
         // 忽略特定错误
         ignoreErrors: [
           // 浏览器扩展错误
@@ -230,6 +205,7 @@ export class MonitoringService {
       this._log('info', '监控服务初始化成功', { dsn: this.config.dsn });
     } catch (error) {
       this._log('error', '监控服务初始化失败', { error: (error as Error).message });
+      throw error;
     }
   }
 
@@ -237,21 +213,21 @@ export class MonitoringService {
    * 加载Sentry SDK
    */
   private async _loadSentry(): Promise<SentrySDK> {
-    return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://browser.sentry-cdn.com/7.x/bundle.min.js';
-      script.crossOrigin = 'anonymous';
-      script.onload = () => {
-        const w = window as Window & { Sentry?: SentrySDK };
-        if (w.Sentry) {
-          resolve(w.Sentry);
-        } else {
-          reject(new Error('Sentry SDK加载失败'));
-        }
-      };
-      script.onerror = () => reject(new Error('Sentry SDK加载失败'));
-      document.head.appendChild(script);
-    });
+    const [browserSdk, coreSdk] = await Promise.all([
+      import('@sentry/browser/esm/sdk.js'),
+      import('@sentry/core'),
+    ]);
+
+    return {
+      init: browserSdk.init,
+      captureException: coreSdk.captureException,
+      captureMessage: coreSdk.captureMessage,
+      setUser: coreSdk.setUser,
+      setTag: coreSdk.setTag,
+      setContext: coreSdk.setContext,
+      addBreadcrumb: coreSdk.addBreadcrumb,
+      startTransaction: coreSdk.startTransaction,
+    } as unknown as SentrySDK;
   }
 
   /**

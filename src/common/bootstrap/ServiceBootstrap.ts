@@ -12,6 +12,8 @@ import { analyticsService } from '@/services/analyticsService';
 import { performanceStorage } from '@/services/performanceStorage';
 import { alertService, AlertType } from '@/services/alertService';
 import { SystemError } from '@/common/errors/AppError';
+import { EnvConfig } from '@/common/config/envConfig';
+import { APP_VERSION } from '@/common/constants/constants';
 
 /**
  * 失败的服务信息
@@ -294,33 +296,42 @@ export class ServiceBootstrap {
    * @private
    */
   private async _initMonitoringServices(): Promise<void> {
-    // 1. 错误追踪
+    const { monitoringService } = await import('@/services/monitoringService');
+
+    // 1. 外部错误监控（无 DSN 时会保持禁用）
+    await monitoringService.init({
+      dsn: EnvConfig.monitoring.sentryDsn || undefined,
+      environment: EnvConfig.environment,
+      release: APP_VERSION,
+    });
+
+    // 2. 错误追踪
     errorTracker.init({
       enabled: true,
       sampleRate: 1.0,
     });
 
-    // 2. 用户行为分析
+    // 3. 用户行为分析
     analyticsService.init({
       enabled: true,
       trackPageViews: true,
       trackUserActions: true,
     });
 
-    // 3. 性能数据存储
+    // 4. 性能数据存储
     await performanceStorage.init({
       retentionDays: 7,
       maxRecords: 10000,
     });
 
-    // 4. 告警服务
+    // 5. 告警服务
     alertService.init({
       enabled: true,
       showToast: true,
       showBrowserNotification: false,
     });
 
-    // 5. 连接数据流: webVitals -> storage
+    // 6. 连接数据流: webVitals -> storage
     await this._connectMonitoringDataFlow();
   }
 

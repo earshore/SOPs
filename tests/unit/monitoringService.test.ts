@@ -84,7 +84,6 @@ function createSentryMock() {
       release: '2.0.0',
       tracesSampleRate: 0.1,
       beforeSend: expect.any(Function),
-      integrations: [{ name: 'BrowserTracing' }],
     }));
 
     const beforeSend = Sentry.init.mock.calls[0][0].beforeSend;
@@ -106,6 +105,21 @@ function createSentryMock() {
       version: '2.0.0',
       environment: 'production',
     });
+  });
+
+  it('rejects when the local Sentry SDK cannot initialize', async () => {
+    const service = new MonitoringService(logger);
+    vi.spyOn(service as unknown as { _loadSentry: () => Promise<unknown> }, '_loadSentry')
+      .mockRejectedValue(new Error('chunk load failed'));
+
+    await expect(service.init({ dsn: 'https://dsn.example', forceEnable: true })).rejects.toThrow(
+      'chunk load failed'
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      '监控服务初始化失败',
+      { error: 'chunk load failed' },
+      'Monitoring'
+    );
   });
 
   it('captures exceptions, messages, context, breadcrumbs, and transactions after initialization', async () => {

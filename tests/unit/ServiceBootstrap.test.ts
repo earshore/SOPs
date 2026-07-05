@@ -20,6 +20,9 @@ const mocks = vi.hoisted(() => ({
     init: vi.fn(),
     check: vi.fn(),
   },
+  monitoringService: {
+    init: vi.fn(() => Promise.resolve()),
+  },
   webVitalsService: {
     onMetric: vi.fn(),
   },
@@ -44,6 +47,10 @@ vi.mock('@/services/alertService', () => ({
     MEMORY_LEAK: 'MEMORY_LEAK',
     PERFORMANCE: 'PERFORMANCE',
   },
+}));
+
+vi.mock('@/services/monitoringService', () => ({
+  monitoringService: mocks.monitoringService,
 }));
 
 vi.mock('@/services/webVitalsService', () => ({
@@ -123,6 +130,11 @@ it('initializes services by dependency level and starts monitoring services', as
   expect(calls.indexOf('logger')).toBeLessThan(calls.indexOf('analytics'));
   expect(calls.indexOf('storage')).toBeLessThan(calls.indexOf('feature'));
   expect(calls.indexOf('analytics')).toBeLessThan(calls.indexOf('feature'));
+  expect(mocks.monitoringService.init).toHaveBeenCalledWith({
+    dsn: undefined,
+    environment: 'test',
+    release: expect.any(String),
+  });
   expect(mocks.errorTracker.init).toHaveBeenCalledWith({
     enabled: true,
     sampleRate: 1,
@@ -258,6 +270,28 @@ it('records monitoring initialization failures without failing required services
     ],
   });
   expect(console.warn).toHaveBeenCalledWith('⚠️ [Bootstrap] monitoring: IndexedDB unavailable');
+});
+
+it('records Sentry monitoring failures without failing required services', async () => {
+  mocks.monitoringService.init.mockRejectedValueOnce(new Error('Sentry unavailable'));
+  const bootstrap = new ServiceBootstrap(
+    container(),
+    registry([{ name: 'core', dependencies: [] }])
+  );
+
+  const result = await bootstrap.initialize();
+  await bootstrap.whenMonitoringReady();
+
+  expect(result.success).toBe(true);
+  expect(bootstrap.getMonitoringStatus()).toEqual({
+    state: 'failed',
+    warnings: [
+      expect.objectContaining({
+        scope: 'monitoring',
+        message: 'Sentry unavailable',
+      }),
+    ],
+  });
 });
 
 it('clears monitoring intervals on destroy', async () => {
