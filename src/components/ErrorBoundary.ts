@@ -58,7 +58,7 @@ export function renderErrorBoundary(
 
   const reloadButton = showReload
     ? `
-        <button data-action="reload-page-error" 
+        <button type="button" data-action="reload-page-error"
             class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
             <i class="fas fa-redo mr-2"></i>${escapeHtml(reloadLabel)}
         </button>
@@ -67,7 +67,7 @@ export function renderErrorBoundary(
 
   const retryButton = showRetry
     ? `
-        <button id="btn-retry-${errorId}"
+        <button type="button" id="btn-retry-${errorId}"
             class="px-4 py-2 bg-${color}-600 hover:bg-${color}-700 text-white rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-${color}-500 focus-visible:ring-offset-2">
             ${escapeHtml(retryLabel)}
         </button>
@@ -205,7 +205,7 @@ export function renderTimeout(container: HTMLElement): void {
             <h3 class="text-lg font-bold text-slate-800 mb-2">加载超时</h3>
             <p class="text-sm text-slate-500 mb-2">内容容器没有在预期时间内就绪。</p>
             <p class="text-xs text-slate-400 mb-4">刷新页面会重新初始化应用状态，适合网络波动或路由切换后卡住的情况。</p>
-            <button data-action="reload-page-timeout"
+            <button type="button" data-action="reload-page-timeout"
                 class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2">
                 <i class="fas fa-redo mr-2"></i>刷新页面
             </button>

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount, unmount } from '@/modules/app_center/views/keyword_hunter/process';
 import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
@@ -232,6 +233,20 @@ afterEach(() => {
   vi.useRealTimers();
   unmount();
   document.body.innerHTML = '';
+});
+
+it('keeps process template buttons explicit about non-submit behavior', () => {
+  const template = readFileSync(
+    'src/modules/app_center/views/keyword_hunter/process/template.html',
+    'utf8'
+  );
+  const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
+  const implicitButtons = buttonOpenings.filter(
+    (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+  );
+
+  expect(buttonOpenings).toHaveLength(5);
+  expect(implicitButtons).toEqual([]);
 });
 
 it('mounts template content, renders highlighted copy, stats, and floating keywords', async () => {

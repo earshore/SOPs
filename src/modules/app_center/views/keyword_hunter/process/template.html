@@ -84,17 +84,20 @@
                         </span>
                         <!-- Sync Back -->
                         <button
+                            type="button"
                             class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-semibold transition duration-200 border border-emerald-200 hover:border-emerald-300 hover:shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
                             id="kt-sync-to-input-btn">
                             <i class="fas fa-reply text-[10px]"></i> 同步回输入
                         </button>
                         <button
+                            type="button"
                             class="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-semibold transition duration-200 border border-rose-200 hover:border-rose-300 hover:shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
                             id="kt-go-analysis-btn">
                             <i class="fas fa-chart-line text-[10px]"></i> 进入分析
                         </button>
                         <!-- AI Translate -->
                         <button
+                            type="button"
                             class="kt-btn-disabled relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition duration-300"
                             id="kt-translate-btn"
                             aria-describedby="kt-translate-status"
@@ -298,7 +301,8 @@
             关键词监控
         </h3>
         <div class="flex items-center gap-1.5">
-            <button class="w-7 h-7 flex items-center justify-center hover:bg-white/20 rounded-lg transition-colors"
+            <button type="button"
+                class="w-7 h-7 flex items-center justify-center hover:bg-white/20 rounded-lg transition-colors"
                 id="kt-minimize-keywords-btn" title="最小化">
                 <i class="fas fa-minus text-xs"></i>
             </button>
@@ -327,6 +331,7 @@
 </div>
 <!-- ========== Minimized Keywords Button ========== -->
 <button
+    type="button"
     class="kt-minimized-btn fixed bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-2xl shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 transition duration-200 items-center gap-2.5 border border-blue-400/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
     id="kt-keywords-minimized">
     <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">

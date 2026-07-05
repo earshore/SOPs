@@ -28,6 +28,10 @@ describe('task-oriented fallback UI', () => {
     expect(host.textContent).toContain('重试加载');
     expect(host.textContent).toContain('刷新页面');
     expect(host.innerHTML).toContain('focus-visible:ring-2');
+    expect(host.querySelector<HTMLButtonElement>('[data-action="reload-page-error"]')?.type).toBe(
+      'button'
+    );
+    expect(host.querySelector<HTMLButtonElement>('[id^="btn-retry-"]')?.type).toBe('button');
 
     await new Promise(resolve => window.setTimeout(resolve, 0));
     host.querySelector<HTMLButtonElement>('[id^="btn-retry-"]')?.click();
@@ -64,5 +68,8 @@ describe('task-oriented fallback UI', () => {
     expect(host.textContent).toContain('重新初始化应用状态');
     expect(host.querySelector('[data-action="reload-page-timeout"]')).toBeTruthy();
     expect(host.innerHTML).toContain('focus-visible:ring-2');
+    expect(host.querySelector<HTMLButtonElement>('[data-action="reload-page-timeout"]')?.type).toBe(
+      'button'
+    );
   });
 });

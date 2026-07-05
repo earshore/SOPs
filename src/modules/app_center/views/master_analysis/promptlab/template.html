@@ -135,6 +135,7 @@
               </div>
               <!-- 展开/折叠所有维度按钮 -->
               <button
+                type="button"
                 @click="toggleAllDimensions()"
                 x-show="hasReport"
                 class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
@@ -238,6 +239,7 @@
             <div class="flex items-center gap-2">
               <!-- 从报告加载按钮 -->
               <button
+                type="button"
                 @click="autoPopulateDNA"
                 :disabled="dnaActionDisabled"
                 :class="autoPopulateButtonClass"
@@ -825,6 +827,7 @@
               id="mode-toggle-glider"
             ></div>
             <button
+              type="button"
               @click="toggleConsoleMode('listing')"
               class="relative z-10 px-4 py-2 text-[11px] font-bold rounded-lg transition-colors duration-300 text-blue-600 uppercase tracking-wider cursor-pointer"
               id="btn-mode-listing"
@@ -832,6 +835,7 @@
               Listing
             </button>
             <button
+              type="button"
               @click="toggleConsoleMode('visual')"
               class="relative z-10 px-4 py-2 text-[11px] font-bold rounded-lg transition-colors duration-300 text-slate-500 hover:text-pink-500 uppercase tracking-wider cursor-pointer"
               id="btn-mode-visual"
@@ -888,6 +892,7 @@
                 </div>
                 <div class="relative z-10">
                   <button
+                    type="button"
                     :class="listingGenerateButtonClass"
                     :disabled="generateButtonDisabled"
                     @click="generateListingPrompt"
@@ -952,6 +957,7 @@
                 </div>
                 <div class="relative z-10">
                   <button
+                    type="button"
                     :class="visualGenerateButtonClass"
                     :disabled="visualGenerateButtonDisabled"
                     @click="generateVisualPrompt"
@@ -992,6 +998,7 @@
             </div>
             <div class="flex items-center gap-1.5">
               <button
+                type="button"
                 @click="copyPrompt"
                 class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition duration-200 cursor-pointer border border-transparent hover:border-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                 title="复制"
@@ -1000,6 +1007,7 @@
                 <i class="fas fa-copy text-xs"></i>
               </button>
               <button
+                type="button"
                 @click="clearInputs"
                 class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition duration-200 cursor-pointer border border-transparent hover:border-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-1"
                 title="清空"

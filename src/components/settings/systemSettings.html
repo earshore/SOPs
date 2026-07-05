@@ -42,6 +42,7 @@
         </div>
       </div>
       <button
+        type="button"
         @click="close()"
         aria-label="关闭系统设置"
         title="关闭系统设置"
@@ -203,6 +204,7 @@
                       placeholder="sk-..."
                     />
                     <button
+                      type="button"
                       @click="toggleLlmKeyVisibility()"
                       :aria-label="llmApiKeyVisibilityLabel"
                       :title="llmApiKeyVisibilityLabel"
@@ -322,6 +324,7 @@
                     <span x-text="testConnectionText"></span>
                   </button>
                   <button
+                    type="button"
                     @click="saveProviderConfig()"
                     class="flex-[2] py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                   >
@@ -419,6 +422,7 @@
                       :placeholder="proxyInputPlaceholder"
                     />
                     <button
+                      type="button"
                       @click="toggleProxyKeyVisibility()"
                       :aria-label="proxyKeyVisibilityLabel"
                       :title="proxyKeyVisibilityLabel"
@@ -428,6 +432,7 @@
                     </button>
                   </div>
                   <button
+                    type="button"
                     @click="saveProxyConfig()"
                     class="px-5 py-2.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white rounded-xl transition duration-200 text-sm font-semibold shadow-lg shadow-slate-500/15 whitespace-nowrap active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
                   >
@@ -516,6 +521,7 @@
 
               <div class="flex flex-wrap gap-2">
                 <button
+                  type="button"
                   @click="exportLocalData()"
                   :disabled="localData.isBusy"
                   class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
@@ -523,6 +529,7 @@
                   <i class="fas fa-file-export text-blue-500"></i> 导出全部
                 </button>
                 <button
+                  type="button"
                   @click="importLocalData()"
                   :disabled="localData.isBusy"
                   class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
@@ -530,6 +537,7 @@
                   <i class="fas fa-file-import text-emerald-500"></i> 导入恢复
                 </button>
                 <button
+                  type="button"
                   @click="clearAllLocalData()"
                   :disabled="localData.isBusy"
                   class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-red-50 border border-red-100 hover:bg-red-100 text-red-700 font-medium rounded-xl transition duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
@@ -540,6 +548,7 @@
 
               <div class="space-y-2.5">
                 <button
+                  type="button"
                   @click="toggleLocalDataCleanupItems()"
                   :aria-expanded="localData.cleanupItemsExpanded"
                   class="flex min-h-[44px] w-full items-center gap-3 rounded-xl border border-white/80 bg-white/85 p-3 text-left shadow-sm transition duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
@@ -621,6 +630,7 @@
                               ></div>
                             </div>
                             <button
+                              type="button"
                               @click="clearLocalDataBucket(bucket.id)"
                               :disabled="localData.isBusy || bucket.isEmpty"
                               class="min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
@@ -669,6 +679,7 @@
             <div class="settings-section-frame settings-section-frame--performance space-y-4">
               <!-- Monitor Panel Button -->
               <button
+                type="button"
                 @click="openPerformanceMonitor()"
                 class="w-full p-4 bg-gradient-to-br from-emerald-50 to-teal-50/30 hover:from-emerald-100 hover:to-teal-100/50 border border-emerald-200/60 hover:border-emerald-300 rounded-2xl transition duration-200 shadow-sm hover:shadow-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
               >

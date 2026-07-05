@@ -36,6 +36,13 @@ function normalizeText(node: Node): string {
   return (node.textContent ?? '').replace(/\s+/g, ' ').trim();
 }
 
+function findImplicitButtons(html: string): string[] {
+  const buttonOpenings = html.match(/<button\b[^>]*>/g) ?? [];
+  return buttonOpenings.filter(
+    (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+  );
+}
+
 describe('UI-P1-08 template semantics', () => {
   it('keeps AI Analysis progress and settings controls announced', () => {
     const root = readTemplateFragment(
@@ -71,6 +78,19 @@ describe('UI-P1-08 template semantics', () => {
     expect(html).toContain(':class="getReviewTargetCardClass(target.id)"');
     expect(html).toContain(':aria-label="showJsonViewer ? \'收起 JSON 格式报告\' : \'展开 JSON 格式报告\'"');
     expect(html).toContain(':aria-expanded="showJsonViewer.toString()"');
+  });
+
+  it('keeps AI Analysis buttons explicit about non-submit behavior', () => {
+    const html = readTemplate(
+      'src/modules/app_center/views/master_analysis/ai_analysis/template.html'
+    );
+    const buttonOpenings = html.match(/<button\b[^>]*>/g) ?? [];
+    const implicitButtons = buttonOpenings.filter(
+      (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+    );
+
+    expect(buttonOpenings).toHaveLength(27);
+    expect(implicitButtons).toEqual([]);
   });
 
   it('keeps AI Analysis missing-data notice visually aligned with PromptLab report notice', () => {
@@ -145,6 +165,14 @@ describe('UI-P1-08 template semantics', () => {
     expect(normalizeText(keywordEmpty)).toContain('还没有评审报告');
     expect(normalizeText(keywordEmpty)).toContain('推荐操作：');
     expect(normalizeText(keywordEmpty)).toContain('Top 3 改写建议');
+  });
+
+  it('keeps Keyword Hunter analysis buttons explicit about non-submit behavior', () => {
+    const html = readTemplate('src/modules/app_center/views/keyword_hunter/analysis/template.html');
+    const buttons = html.match(/<button\b[^>]*>/g) ?? [];
+
+    expect(buttons).toHaveLength(1);
+    expect(findImplicitButtons(html)).toEqual([]);
   });
 
   it('keeps Keyword Hunter translation progress and input fields programmatically described', () => {

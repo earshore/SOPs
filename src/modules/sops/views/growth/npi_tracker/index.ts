@@ -343,7 +343,7 @@ function renderDecisionCells(row: NPIProductRecord, context: TableRowRenderConte
                 </select>
             </td>
             <td class="px-3 py-3 text-center">
-                <button data-action="toggle-decision" class="px-2 py-1 rounded text-xs font-medium ${context.decisionClass}">
+                <button type="button" data-action="toggle-decision" class="px-2 py-1 rounded text-xs font-medium ${context.decisionClass}">
                     ${row.decision === 'keep' ? '保留' : '放弃'}
                 </button>
             </td>

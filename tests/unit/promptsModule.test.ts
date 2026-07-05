@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { mount, unmount } from '@/modules/more/views/explore/prompts';
 import { showToast } from '@/common/ui';
@@ -64,6 +65,17 @@ beforeEach(() => {
   });
   unmount();
 });
+
+  it('keeps prompt detail template buttons explicit about non-submit behavior', () => {
+    const template = readFileSync('src/modules/more/views/explore/prompts/template.html', 'utf8');
+    const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
+    const implicitButtons = buttonOpenings.filter(
+      (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+    );
+
+    expect(buttonOpenings).toHaveLength(5);
+    expect(implicitButtons).toEqual([]);
+  });
 
   it('mounts template content, renders categories, and lists prompt cards', async () => {
     const container = await mountPrompts();

@@ -98,7 +98,7 @@ function createProductCardViewModel(options: ProductCardOptions): ProductCardVie
 
 function renderDeleteProductButton({ product, onDelete }: ProductCardViewModel): string {
   return `
-            <button type="button" data-action="delete" data-asin="${product.asin}" @click.stop="${onDelete}" 
+            <button type="button" data-action="delete" data-asin="${product.asin}" @click.stop="${onDelete}"
                 class="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center bg-white text-slate-400 border border-slate-200 rounded-full shadow-sm opacity-0 group-hover:opacity-100 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition duration-200 z-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
                 title="彻底删除该 ASIN"
                 aria-label="彻底删除该 ASIN">

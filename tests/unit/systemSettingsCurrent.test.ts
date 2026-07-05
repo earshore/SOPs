@@ -680,6 +680,13 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('id="settings-section-performance"');
   expect(template).toContain(':aria-label="fetchModelsText"');
   expect(template).toContain(':aria-label="testConnectionText"');
+
+  const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
+  const implicitButtons = buttonOpenings.filter(
+    (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+  );
+  expect(implicitButtons).toEqual([]);
+
   expect(styles).toContain('@media (min-width: 1024px)');
   expect(styles).toContain('grid-template-columns: 172px minmax(0, 1fr)');
   expect(styles).toContain('flex-direction: column');

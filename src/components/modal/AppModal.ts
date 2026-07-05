@@ -309,8 +309,8 @@ const MODAL_STYLES = `
  * <app-modal id="my-modal" title="Modal Title" size="sm|md|lg|xl">
  *   <div slot="body">Modal Content</div>
  *   <div slot="footer">
- *     <button data-action="close">Cancel</button>
- *     <button data-action="confirm">Confirm</button>
+ *     <button type="button" data-action="close">Cancel</button>
+ *     <button type="button" data-action="confirm">Confirm</button>
  *   </div>
  * </app-modal>
  *
@@ -503,7 +503,7 @@ export class AppModal extends HTMLElement {
         ? `aria-labelledby="${titleId}"`
         : `aria-label="${safeTitle || '对话框'}"`;
     const renderCloseButton = (className = 'btn-close') => `
-            <button class="${className}" aria-label="关闭">
+            <button type="button" class="${className}" aria-label="关闭">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>

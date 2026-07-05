@@ -8,6 +8,13 @@ import {
 
 const readTemplate = (path: string): string => readFileSync(resolve(process.cwd(), path), 'utf8');
 
+function findImplicitButtons(html: string): string[] {
+  const buttonOpenings = html.match(/<button\b[^>]*>/g) ?? [];
+  return buttonOpenings.filter(
+    (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+  );
+}
+
 afterEach(() => {
   unmountPromoTools();
   document.body.replaceChildren();
@@ -86,6 +93,13 @@ afterEach(() => {
     expect(archiveTableHtml.match(/<th\b[^>]*\bscope="col"/g) ?? []).toHaveLength(3);
   });
 
+  it('keeps NPI template buttons explicit about non-submit behavior', () => {
+    const html = readTemplate('src/modules/sops/views/growth/npi_tracker/template.html');
+
+    expect(html.match(/<button\b[^>]*>/g) ?? []).toHaveLength(4);
+    expect(findImplicitButtons(html)).toEqual([]);
+  });
+
   it('keeps Restricted Words lookup tables named and column-scoped', () => {
     const html = readTemplate('src/modules/sops/views/growth/restricted_words/template.html');
 
@@ -121,6 +135,14 @@ afterEach(() => {
     expect(multilingualHtml.match(/<th\b[^>]*\bscope="col"/g) ?? []).toHaveLength(6);
     expect(resultsHtml.match(/<th\b[^>]*\bscope="col"/g) ?? []).toHaveLength(6);
     expect(alternativesHtml.match(/<th\b[^>]*\bscope="col"/g) ?? []).toHaveLength(3);
+  });
+
+  it('keeps Restricted Words buttons explicit about non-submit behavior', () => {
+    const html = readTemplate('src/modules/sops/views/growth/restricted_words/template.html');
+    const buttonOpenings = html.match(/<button\b[^>]*>/g) ?? [];
+
+    expect(buttonOpenings).toHaveLength(4);
+    expect(findImplicitButtons(html)).toEqual([]);
   });
 
   it('keeps PPC Advertising long-page tables named, described, and column-scoped', () => {

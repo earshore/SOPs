@@ -223,6 +223,105 @@
    - 优化方案：为 Scraper 模板和渲染器中的全部业务按钮补齐 `type="button"`；新增静态测试扫描 Scraper UI 源，要求所有 `<button>` 开始标签都声明按钮类型。
    - 验收：Scraper 聚焦测试通过；Scraper 模板 / 渲染器扫描无隐式类型按钮残留。
 
+### Batch 22：系统设置按钮类型显式化（已执行）
+
+1. 收敛系统设置面板中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/components/settings/systemSettings.html`、`tests/unit/systemSettingsCurrent.test.ts`。
+   - PC 端影响：系统设置面板包含关闭、密钥显隐、保存配置、导入导出、清理数据和打开性能监控等桌面高频操作；未显式声明 `type` 时，未来若被嵌入表单上下文中会产生意外提交风险。
+   - 优化方案：为设置面板内所有业务按钮补齐 `type="button"`，保留现有视觉、禁用态、焦点态和 Alpine 事件不变；在真实模板测试中加入静态扫描，要求所有 `<button>` 开始标签都声明按钮类型。
+   - 验收：系统设置聚焦测试通过；设置模板扫描无隐式类型按钮残留。
+
+### Batch 23：Workflows 入口按钮类型显式化（已执行）
+
+1. 收敛工作流入口页中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/more/views/explore/workflows/template.html`、`tests/unit/workflows-template-a11y.test.ts`。
+   - PC 端影响：Workflows 页承载跨模块跳转入口，桌面用户会从这里进入 Listing、PPC、数据采集、VOC、合规和日报等流程；入口按钮未声明类型时，未来若页面被嵌入表单或复用到配置面板中，会产生意外提交风险。
+   - 优化方案：为 30 个 `data-action="switch-tab"` 工作流入口按钮补齐 `type="button"`，保留现有路由属性、视觉样式和按钮文案不变；新增静态测试锁定入口数量和显式按钮类型。
+   - 验收：Workflows 聚焦测试通过；Workflows 模板扫描无隐式类型按钮残留。
+
+### Batch 24：PromptLab 按钮类型显式化（已执行）
+
+1. 收敛 PromptLab 页面中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/master_analysis/promptlab/template.html`、`tests/unit/promptlab-template-a11y.test.ts`。
+   - PC 端影响：PromptLab 的维度展开、产品 DNA 自动填充、Listing / Visual 模式切换、生成、复制和清空操作都是桌面端长表单旁的高频按钮；未显式声明 `type` 时，未来若被嵌入表单上下文中会产生意外提交风险。
+   - 优化方案：为 8 个 PromptLab 普通操作按钮补齐 `type="button"`，保留现有 Alpine 事件、禁用态、标题、可读名称和视觉样式不变；新增静态测试扫描模板内所有 `<button>` 开始标签。
+   - 验收：PromptLab 模板扫描 19 个按钮、隐式类型 0 个；全局扫描仍无 `role="button"` 模拟按钮和未命名图标按钮残留。
+
+### Batch 25：Keyword Hunter Process 按钮类型显式化（已执行）
+
+1. 收敛 Keyword Hunter 处理页中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/keyword_hunter/process/template.html`、`tests/unit/keywordHunterProcessModule.test.ts`。
+   - PC 端影响：SEO 处理中心顶部操作栏、AI 翻译按钮和关键词监控浮窗控制是桌面端文案处理流程的高频入口；未显式声明 `type` 时，未来若嵌入表单容器会产生意外提交风险。
+   - 优化方案：为 5 个处理页业务按钮补齐 `type="button"`，保留现有 ID、点击绑定、禁用态、进度语义、标题和视觉样式不变；在已有模块测试中加入真实模板静态扫描。
+   - 验收：Keyword Hunter Process 模板扫描 5 个按钮、隐式类型 0 个；全局扫描仍无 `role="button"` 模拟按钮和未命名图标按钮残留。
+
+### Batch 26：Prompts 详情弹层按钮类型显式化（已执行）
+
+1. 收敛提示词库详情弹层中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/more/views/explore/prompts/template.html`、`tests/unit/promptsModule.test.ts`。
+   - PC 端影响：提示词详情弹层的关闭、语言切换和复制按钮是桌面端模板浏览、对照和复用的高频操作；未显式声明 `type` 时，未来若弹层内容嵌入表单容器会产生意外提交风险。
+   - 优化方案：为 5 个详情弹层按钮补齐 `type="button"`，保留现有数据属性、键盘关闭、复制逻辑、语言切换状态和视觉样式不变；在 Prompts 模块测试中加入真实模板静态扫描。
+   - 验收：Prompts 模板扫描 5 个按钮、隐式类型 0 个；全局扫描仍无 `role="button"` 模拟按钮和未命名图标按钮残留。
+
+### Batch 27：共享弹层按钮类型显式化（已执行）
+
+1. 收敛共享导入冲突 / 删除确认弹层中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/components/modal/sharedModals.html`、`src/components/modal/AppModal.regression.test.ts`。
+   - PC 端影响：导入冲突确认和删除确认是跨流程复用的桌面高风险操作；按钮未声明类型时，未来若弹层内容进入表单上下文，会把选择、取消或删除误解释为提交。
+   - 优化方案：为 5 个共享弹层操作按钮补齐 `type="button"`，保留现有 ID、点击绑定、危险操作视觉层级、键盘焦点态和弹层标题语义不变；扩展 AppModal 回归测试扫描共享模板内所有按钮类型。
+   - 验收：共享弹层模板扫描 5 个按钮、隐式类型 0 个；AppModal 与 Scraper 弹层回归测试通过；全局扫描仍无 `role="button"` 模拟按钮和未命名图标按钮残留。
+
+### Batch 28：PromptLab 报告渲染器按钮类型显式化（已执行）
+
+1. 收敛 PromptLab 动态报告维度卡中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts`、`tests/unit/promptlab-template-a11y.test.ts`。
+   - PC 端影响：报告维度卡的子项和具体内容“全选 / 取消全选”是桌面端整理报告素材时的批量操作；未显式声明 `type` 时，未来若报告区域进入表单上下文会产生意外提交风险。
+   - 优化方案：为动态渲染器中的 4 个批量选择按钮补齐 `type="button"`，保留 Alpine 点击阻止冒泡、文案、选择逻辑和视觉样式不变；扩展 PromptLab 静态测试覆盖模板和动态渲染器两类 HTML 来源。
+   - 验收：PromptLab 模板扫描 19 个按钮、渲染器扫描 4 个按钮，隐式类型均为 0；PromptLab 聚焦测试通过；全局扫描仍无 `role="button"` 模拟按钮和未命名图标按钮残留。
+
+### Batch 29：Usage Notice 场景入口按钮类型显式化（已执行）
+
+1. 收敛使用须知页底部业务场景入口中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/more/views/business_scenarios/usage_notice/template.html`、`tests/unit/business-scenarios-template-a11y.test.ts`。
+   - PC 端影响：使用须知页底部入口负责把桌面用户引导到差评响应、广告诊断、评论监控和日报场景；入口按钮未声明类型时，未来若说明页嵌入表单式配置容器会产生意外提交风险。
+   - 优化方案：为 4 个 `data-action="switch-tab"` 场景入口按钮补齐 `type="button"`，保留路由属性、文案和视觉样式不变；新增业务场景模板静态语义测试。
+   - 验收：Usage Notice 模板扫描 4 个按钮、隐式类型 0 个；业务场景聚焦测试通过；全局扫描仍无 `role="button"` 模拟按钮和未命名图标按钮残留。
+
+### Batch 30：AI Analysis Prompt 面板按钮类型显式化（已执行）
+
+1. 收敛 AI Analysis Prompt 面板中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/master_analysis/ai_analysis/template.html`、`tests/unit/ui-p1-08-template-a11y.test.ts`。
+   - PC 端影响：Prompt 面板展开、Prompt 条目展开和复制 Prompt 是桌面端查看分析指令与复用内容的高频辅助操作；未显式声明 `type` 时，未来若面板进入表单上下文会产生意外提交风险。
+   - 优化方案：为 3 个 Prompt 面板按钮补齐 `type="button"`，保留 Alpine 点击、阻止冒泡、展开状态、复制逻辑和视觉样式不变；扩展 AI Analysis 模板语义测试扫描所有按钮类型。
+   - 验收：AI Analysis 模板扫描 27 个按钮、隐式类型 0 个；UI-P1-08 聚焦测试通过；全局扫描仍无 `role="button"` 模拟按钮和未命名图标按钮残留。
+
+### Batch 31：Restricted Words 操作按钮类型显式化（已执行）
+
+1. 收敛禁限词工作台中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/sops/views/growth/restricted_words/template.html`、`tests/unit/ui-p1-10-template-a11y.test.ts`。
+   - PC 端影响：高危词搜索、重置和详情弹层关闭是桌面端合规检查流程中的高频操作；未显式声明 `type` 时，未来若工具区或弹层进入表单上下文会产生意外提交风险。
+   - 优化方案：为 3 个操作按钮补齐 `type="button"`，保留现有 ID、标题、详情关闭动作和视觉样式不变；扩展 P1-10 静态测试扫描禁限词模板所有按钮类型。
+   - 验收：Restricted Words 模板扫描 4 个按钮、隐式类型 0 个；禁限词聚焦测试通过；全局扫描仍无 `role="button"` 模拟按钮和未命名图标按钮残留。
+
+### Batch 32：共享 fallback / modal 按钮类型显式化（已执行）
+
+1. 收敛 ErrorBoundary 和 AppModal 生成模板中的隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/components/ErrorBoundary.ts`、`src/components/modal/AppModal.ts`、`tests/unit/errorBoundary-ui.test.ts`、`src/components/modal/AppModal.regression.test.ts`。
+   - PC 端影响：错误重试、刷新页面和弹层关闭是全局兜底交互；这些基础组件未声明按钮类型时，会把隐式 submit 风险扩散到所有模块 fallback 和弹层容器。
+   - 优化方案：为 ErrorBoundary 的重试 / 刷新按钮、超时刷新按钮和 AppModal 关闭按钮补齐 `type="button"`；同步修正 AppModal 注释示例中的按钮类型；扩展回归测试检查运行时按钮类型和源码模板扫描。
+   - 验收：ErrorBoundary 扫描 3 个按钮、AppModal 扫描 3 个按钮，隐式类型均为 0；ErrorBoundary / AppModal 聚焦测试通过；全局扫描仍无 `role="button"` 模拟按钮和未命名图标按钮残留。
+
 ## 0. PC 端优化目标
 
 本轮优化不追求“大改风格”，而是让现有界面在 PC 工作台场景下更高效、更稳定、更一致：

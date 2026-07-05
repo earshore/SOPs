@@ -618,6 +618,7 @@
                   class="rounded-2xl border border-slate-200/80 bg-gradient-to-b from-white via-slate-50/30 to-white p-5 shadow-sm ring-1 ring-white/70"
                 >
                   <button
+                    type="button"
                     @click="togglePromptPanel()"
                     class="w-full flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4 text-sm text-slate-600 transition duration-200 hover:border-indigo-200 hover:bg-white hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
                   >
@@ -671,6 +672,7 @@
                           class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700"
                         >
                           <button
+                            type="button"
                             @click="togglePromptItem(index)"
                             class="w-full flex items-center justify-between p-4 hover:bg-slate-800/50 transition-colors"
                           >
@@ -727,6 +729,7 @@
                                   <span>Prompt Template</span>
                                 </div>
                                 <button
+                                  type="button"
                                   @click.stop="copyPrompt(index)"
                                   class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-800"
                                 >

@@ -433,11 +433,13 @@ function renderModuleSubItems(
       <div class="sub-items-header flex justify-between px-4 py-2 bg-slate-50 border-t border-slate-200">
         <span class="text-xs text-slate-600 font-medium">子项选择</span>
         <div class="flex gap-3">
-          <button @click.stop="selectAllSubItems('${safeTargetId}')"
+          <button type="button"
+                  @click.stop="selectAllSubItems('${safeTargetId}')"
                   class="text-xs text-blue-600 hover:underline font-medium">
             全选
           </button>
-          <button @click.stop="deselectAllSubItems('${safeTargetId}')"
+          <button type="button"
+                  @click.stop="deselectAllSubItems('${safeTargetId}')"
                   class="text-xs text-slate-600 hover:underline">
             取消全选
           </button>
@@ -515,11 +517,13 @@ function renderSubItemContent(options: SubItemContentRenderOptions): string {
       <div class="content-items-header flex justify-between py-1 mb-1">
         <span class="text-xs text-slate-500">具体内容</span>
         <div class="flex gap-2">
-          <button @click.stop="selectAllContentItems('${safeTargetId}', '${safeKey}')"
+          <button type="button"
+                  @click.stop="selectAllContentItems('${safeTargetId}', '${safeKey}')"
                   class="text-xs text-blue-600 hover:underline">
             全选
           </button>
-          <button @click.stop="deselectAllContentItems('${safeTargetId}', '${safeKey}')"
+          <button type="button"
+                  @click.stop="deselectAllContentItems('${safeTargetId}', '${safeKey}')"
                   class="text-xs text-slate-500 hover:underline">
             取消全选
           </button>

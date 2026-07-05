@@ -151,6 +151,7 @@ describe('AppModal regression visibility', () => {
     const container = getModalContainer(modal);
     const closeButton = getCloseButton(modal);
 
+    expect(closeButton.type).toBe('button');
     expect(closeButton.classList.contains('btn-close-floating')).toBe(true);
 
     modal.open();
@@ -196,6 +197,28 @@ describe('AppModal regression accessibility', () => {
     noHeaderModals.forEach(modalTag => {
       expect(modalTag).toMatch(/\btitle="[^"]+"/);
     });
+  });
+
+  it('keeps shared modal action buttons explicit about non-submit behavior', () => {
+    const template = readFileSync('src/components/modal/sharedModals.html', 'utf8');
+    const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
+    const implicitButtons = buttonOpenings.filter(
+      (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+    );
+
+    expect(buttonOpenings).toHaveLength(5);
+    expect(implicitButtons).toEqual([]);
+  });
+
+  it('keeps AppModal generated and documented buttons explicit about non-submit behavior', () => {
+    const source = readFileSync('src/components/modal/AppModal.ts', 'utf8');
+    const buttonOpenings = source.match(/<button\b[^>]*>/g) ?? [];
+    const implicitButtons = buttonOpenings.filter(
+      (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+    );
+
+    expect(buttonOpenings).toHaveLength(3);
+    expect(implicitButtons).toEqual([]);
   });
 
   it('moves focus into the modal and restores the opener focus after close', () => {
