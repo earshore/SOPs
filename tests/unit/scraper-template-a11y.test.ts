@@ -30,6 +30,7 @@ describe('Scraper template accessibility semantics', () => {
   });
 
   it('names Alpine-driven manual scrape controls', () => {
+    expect(template).toContain(':aria-label="\'选择目标站点 \' + getSiteUrl(site)"');
     expect(template).toContain('type="button"\n                      @click="clearAsins()"');
     expect(template).toContain('type="button"\n                      :aria-label="scrapingButtonText"');
     expect(template).toContain(':disabled="startDisabled"');
@@ -66,8 +67,10 @@ describe('Scraper template accessibility semantics', () => {
   });
 
   it('keeps import and history empty states task-oriented', () => {
+    const normalizedTemplate = template.replace(/\s+/g, ' ');
+
     expect(template).toContain('还没有产品数据');
-    expect(template).toContain('推荐操作：点击导入 JSON 文件，或在下方输入 ASIN 开始采集。');
+    expect(normalizedTemplate).toContain('推荐操作：点击导入 JSON 文件，或在下方输入 ASIN 开始采集。');
     expect(template).toContain('还没有历史快照');
     expect(template).toContain('当前还没有可恢复的采集快照');
     expect(template).toContain('快照会记录站点、ASIN 数量和最近采集时间。');

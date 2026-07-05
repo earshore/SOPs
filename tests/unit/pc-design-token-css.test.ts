@@ -96,4 +96,11 @@ describe('PC design token CSS contract', () => {
     expect(sopsCss).not.toMatch(localPrimaryDefinition);
     expect(sopsCss).not.toMatch(localPrimaryReference);
   });
+
+  it('keeps NPI long-form helper copy within a readable desktop measure', () => {
+    const sopsCss = readFileSync(sopsCssPath, 'utf8');
+
+    expect(sopsCss).toContain('.npi-tracker-page p');
+    expect(sopsCss).toContain('max-width: min(100%, 64rem)');
+  });
 });

@@ -203,7 +203,7 @@ describe('AppModal regression accessibility', () => {
     const template = readFileSync('src/components/modal/sharedModals.html', 'utf8');
     const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
     const implicitButtons = buttonOpenings.filter(
-      (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+      button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
     );
 
     expect(buttonOpenings).toHaveLength(5);
@@ -214,7 +214,7 @@ describe('AppModal regression accessibility', () => {
     const source = readFileSync('src/components/modal/AppModal.ts', 'utf8');
     const buttonOpenings = source.match(/<button\b[^>]*>/g) ?? [];
     const implicitButtons = buttonOpenings.filter(
-      (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+      button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
     );
 
     expect(buttonOpenings).toHaveLength(3);

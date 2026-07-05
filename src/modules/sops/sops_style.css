@@ -251,6 +251,10 @@
 }
 
 /* ==================== NPI 生命周期主表 ==================== */
+.npi-tracker-page p {
+  max-width: min(100%, 64rem);
+}
+
 .npi-lifecycle-table-card {
   background: var(--surface-card, #ffffff);
 }

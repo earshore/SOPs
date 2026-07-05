@@ -242,6 +242,14 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
             expect(rows![0]?.querySelectorAll('td').length).toBe(29);
         });
 
+        it('should render table action buttons as non-submit controls', () => {
+            const tbody = document.getElementById('npi-table-body');
+            const buttons = Array.from(tbody?.querySelectorAll('button') ?? []);
+
+            expect(buttons.length).toBeGreaterThan(0);
+            expect(buttons.every(button => button.type === 'button')).toBe(true);
+        });
+
         it('should display product basic information', () => {
             const tbody = document.getElementById('npi-table-body');
             const firstRow = tbody?.querySelector('tr');

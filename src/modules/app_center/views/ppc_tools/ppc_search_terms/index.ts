@@ -133,7 +133,8 @@ class PpcSearchTermsModule extends BaseModule {
 
 const ppcSearchTermsModule = new PpcSearchTermsModule();
 
-export const mount = (container: HTMLElement): Promise<void> => ppcSearchTermsModule.mount(container);
+export const mount = (container: HTMLElement): Promise<void> =>
+  ppcSearchTermsModule.mount(container);
 export const unmount = (): void => {
   ppcSearchTermsModule.unmount();
 };

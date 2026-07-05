@@ -16,6 +16,7 @@ interface RuntimeTarget {
   maxRadiusPx: number;
   name: string;
   path: string;
+  readyText: string;
   selector: string;
 }
 
@@ -42,6 +43,7 @@ const runtimeTargets: RuntimeTarget[] = [
     maxRadiusPx: 8,
     name: 'Keyword Hunter input workbench panels',
     path: '/app-center/keyword-hunter/input',
+    readyText: '关键词与 Listing 文案输入',
     selector: '.kt-input-card',
   },
   {
@@ -49,6 +51,7 @@ const runtimeTargets: RuntimeTarget[] = [
     maxRadiusPx: 8,
     name: 'Keyword Hunter process workbench panels',
     path: '/app-center/keyword-hunter/process',
+    readyText: 'SEO 处理中心',
     selector: '.kt-surface-card',
   },
   {
@@ -56,6 +59,7 @@ const runtimeTargets: RuntimeTarget[] = [
     maxRadiusPx: 8,
     name: 'Keyword Hunter analysis workbench panels',
     path: '/app-center/keyword-hunter/analysis',
+    readyText: 'AI 评审报告',
     selector: '.kt-surface-card',
   },
   {
@@ -63,6 +67,7 @@ const runtimeTargets: RuntimeTarget[] = [
     maxRadiusPx: 8,
     name: 'Scraper elevated workbench panels',
     path: '/app-center/master-analysis/scraper',
+    readyText: '数据采集',
     selector: '.card-elevated',
   },
   {
@@ -70,6 +75,7 @@ const runtimeTargets: RuntimeTarget[] = [
     maxRadiusPx: 8,
     name: 'Scraper strategy workbench panels',
     path: '/app-center/master-analysis/scraper',
+    readyText: '数据采集',
     selector: '.strategy-card',
   },
 ];
@@ -149,7 +155,11 @@ async function auditRuntimeTarget(page: Page, target: RuntimeTarget): Promise<st
 
   await page.goto(`${hashBase}${target.path}`, { waitUntil: 'commit', timeout: 30000 });
   await page.waitForFunction(
-    (selector) => {
+    ({ readyText, selector }) => {
+      if (!document.body.textContent?.includes(readyText)) {
+        return false;
+      }
+
       return Array.from(document.querySelectorAll<HTMLElement>(selector)).some((element) => {
         const rect = element.getBoundingClientRect();
         const styles = getComputedStyle(element);
@@ -162,7 +172,7 @@ async function auditRuntimeTarget(page: Page, target: RuntimeTarget): Promise<st
         );
       });
     },
-    target.selector,
+    { readyText: target.readyText, selector: target.selector },
     { timeout: 20000 },
   );
 

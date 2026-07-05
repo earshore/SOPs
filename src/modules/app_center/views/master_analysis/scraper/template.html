@@ -22,8 +22,7 @@
               </span>
             </div>
             <p class="wb-description">
-              连接亚马逊全球 10+ 站点，深度抓取 ASIN 标题、Listing 详情与
-              Review；支持 JSON
+              连接亚马逊全球 10+ 站点，深度抓取 ASIN 标题、Listing 详情与 Review；支持 JSON
               批量导入产品数据，合并Reviews，保留主站点Listings，统一管理。
             </p>
             <div class="wb-tags">
@@ -32,24 +31,15 @@
                 <span>支持 10+ 站点</span>
               </div>
               <div class="wb-tag">
-                <div
-                  class="wb-tag-dot wb-tag-dot--cyan"
-                  aria-hidden="true"
-                ></div>
+                <div class="wb-tag-dot wb-tag-dot--cyan" aria-hidden="true"></div>
                 <span>批量采集 &amp; 导入</span>
               </div>
               <div class="wb-tag">
-                <div
-                  class="wb-tag-dot wb-tag-dot--blue"
-                  aria-hidden="true"
-                ></div>
+                <div class="wb-tag-dot wb-tag-dot--blue" aria-hidden="true"></div>
                 <span>产品导入管理</span>
               </div>
               <div class="wb-tag">
-                <div
-                  class="wb-tag-dot wb-tag-dot--violet"
-                  aria-hidden="true"
-                ></div>
+                <div class="wb-tag-dot wb-tag-dot--violet" aria-hidden="true"></div>
                 <span>历史快照</span>
               </div>
             </div>
@@ -72,24 +62,14 @@
         <span class="ma-workflow-meta">ASIN / JSON / Review</span>
       </span>
     </button>
-    <button
-      type="button"
-      class="ma-workflow-step"
-      data-action="switch-tab"
-      data-tab="ai_analysis"
-    >
+    <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="ai_analysis">
       <span class="ma-workflow-index">2</span>
       <span class="ma-workflow-copy">
         <span class="ma-workflow-label">AI 智能分析</span>
         <span class="ma-workflow-meta">维度选择 / 报告生成</span>
       </span>
     </button>
-    <button
-      type="button"
-      class="ma-workflow-step"
-      data-action="switch-tab"
-      data-tab="promptlab"
-    >
+    <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="promptlab">
       <span class="ma-workflow-index">3</span>
       <span class="ma-workflow-copy">
         <span class="ma-workflow-label">Prompt 生成</span>
@@ -105,9 +85,7 @@
         class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden card-elevated"
       >
         <!-- Header with Title and Tabs -->
-        <div
-          class="flex items-center justify-between px-6 pt-5 pb-0 border-b border-slate-100"
-        >
+        <div class="flex items-center justify-between px-6 pt-5 pb-0 border-b border-slate-100">
           <!-- Left: Title -->
           <h2
             class="text-base font-bold text-slate-800 flex items-center gap-2.5 pb-4 section-header"
@@ -132,10 +110,7 @@
                 :class="getDataTabIconWrapClass('preview')"
                 class="tab-icon w-6 h-6 rounded-md flex items-center justify-center transition-colors duration-200"
               >
-                <i
-                  :class="getDataTabIconClass('preview')"
-                  class="fas fa-table text-[11px]"
-                ></i>
+                <i :class="getDataTabIconClass('preview')" class="fas fa-table text-[11px]"></i>
               </div>
               数据预览
             </button>
@@ -150,10 +125,7 @@
                 :class="getDataTabIconWrapClass('json')"
                 class="tab-icon w-6 h-6 rounded-md flex items-center justify-center transition-colors duration-200"
               >
-                <i
-                  :class="getDataTabIconClass('json')"
-                  class="fas fa-code text-[11px]"
-                ></i>
+                <i :class="getDataTabIconClass('json')" class="fas fa-code text-[11px]"></i>
               </div>
               JSON数据
             </button>
@@ -203,7 +175,8 @@
                 id="scraper-import-help"
                 class="text-sm text-slate-400 mb-3 max-w-sm leading-relaxed group-hover:text-blue-500 transition-colors duration-300"
               >
-                当前预览区为空，无法进入 AI 分析。推荐操作：点击导入 JSON 文件，或在下方输入 ASIN 开始采集。
+                当前预览区为空，无法进入 AI 分析。推荐操作：点击导入 JSON 文件，或在下方输入 ASIN
+                开始采集。
               </p>
               <div
                 class="flex items-center gap-2 text-xs text-slate-400 group-hover:text-blue-500 transition-colors duration-300"
@@ -274,36 +247,21 @@
               <div class="flex items-center gap-2">
                 <!-- macOS-style dots -->
                 <div class="flex items-center gap-1.5">
-                  <div
-                    class="mac-dot w-3 h-3 rounded-full bg-rose-500/80"
-                  ></div>
-                  <div
-                    class="mac-dot w-3 h-3 rounded-full bg-amber-500/80"
-                  ></div>
-                  <div
-                    class="mac-dot w-3 h-3 rounded-full bg-emerald-500/80"
-                  ></div>
+                  <div class="mac-dot w-3 h-3 rounded-full bg-rose-500/80"></div>
+                  <div class="mac-dot w-3 h-3 rounded-full bg-amber-500/80"></div>
+                  <div class="mac-dot w-3 h-3 rounded-full bg-emerald-500/80"></div>
                 </div>
-                <span class="text-xs text-slate-400 font-mono ml-2"
-                  >scraped_data.json</span
-                >
+                <span class="text-xs text-slate-400 font-mono ml-2">scraped_data.json</span>
               </div>
               <div class="flex items-center gap-2">
-                <span
-                  class="text-[10px] text-slate-500 bg-slate-700 px-2 py-0.5 rounded font-mono"
+                <span class="text-[10px] text-slate-500 bg-slate-700 px-2 py-0.5 rounded font-mono"
                   >JSON</span
                 >
               </div>
             </div>
             <!-- JSON Content -->
-            <div
-              class="bg-slate-900 p-5 overflow-auto custom-scrollbar"
-              style="height: 280px"
-            >
-              <pre
-                class="text-xs font-mono text-slate-300 leading-relaxed"
-                id="json-display"
-              ></pre>
+            <div class="bg-slate-900 p-5 overflow-auto custom-scrollbar" style="height: 280px">
+              <pre class="text-xs font-mono text-slate-300 leading-relaxed" id="json-display"></pre>
             </div>
           </div>
         </div>
@@ -318,9 +276,7 @@
           class="config-header px-6 pt-6 pb-4 border-b border-slate-100 cursor-pointer"
         >
           <div class="flex items-center justify-between">
-            <h2
-              class="text-base font-bold text-slate-800 flex items-center gap-2.5 section-header"
-            >
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5 section-header">
               <div
                 class="header-icon w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center transition-colors duration-200"
               >
@@ -332,8 +288,7 @@
               <span
                 class="text-[10px] text-slate-400 font-medium bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100"
               >
-                <i class="fas fa-info-circle mr-1"></i>选择目标站点 -&gt;
-                输入ASIN -&gt; 开始采集
+                <i class="fas fa-info-circle mr-1"></i>选择目标站点 -&gt; 输入ASIN -&gt; 开始采集
               </span>
               <!-- Chevron -->
               <div
@@ -371,6 +326,7 @@
                 <template :key="site" x-for="(site, index) in sites">
                   <button
                     type="button"
+                    :aria-label="'选择目标站点 ' + getSiteUrl(site)"
                     :class="getSiteButtonClass(site)"
                     :style="getAnimationDelayStyle(index, 24)"
                     @click="selectSite(site)"
@@ -408,13 +364,9 @@
                     class="manual-config-label flex items-center text-sm font-bold text-slate-700"
                     for="scraper-asin-input"
                   >
-                    <span
-                      class="w-1 h-4 bg-violet-500 rounded-full mr-2"
-                    ></span>
+                    <span class="w-1 h-4 bg-violet-500 rounded-full mr-2"></span>
                     ASIN列表
-                    <span class="text-slate-400 font-normal ml-1.5 text-xs"
-                      >(逗号或换行分隔)</span
-                    >
+                    <span class="text-slate-400 font-normal ml-1.5 text-xs">(逗号或换行分隔)</span>
                   </label>
                 </div>
                 <div class="manual-textarea-wrapper textarea-wrapper">
@@ -430,17 +382,11 @@ B0EXAMPLE1"
                     @input="setInputAsins($event)"
                   ></textarea>
                 </div>
-                <p
-                  id="scraper-asin-helper"
-                  class="mt-2 text-xs leading-relaxed text-slate-400"
-                >
-                  每行一个
-                  ASIN，或使用逗号、空格分隔；无效项会在采集前自动过滤。
+                <p id="scraper-asin-helper" class="mt-2 text-xs leading-relaxed text-slate-400">
+                  每行一个 ASIN，或使用逗号、空格分隔；无效项会在采集前自动过滤。
                 </p>
                 <!-- Input Footer -->
-                <div
-                  class="manual-input-footer flex items-end justify-between mt-3 px-0.5"
-                >
+                <div class="manual-input-footer flex items-end justify-between mt-3 px-0.5">
                   <div
                     id="scraper-asin-status"
                     class="manual-input-meta"
@@ -448,10 +394,7 @@ B0EXAMPLE1"
                     aria-live="polite"
                     aria-atomic="true"
                   >
-                    <span
-                      :class="validAsinStatusClass"
-                      class="text-xs flex items-center gap-1.5"
-                    >
+                    <span :class="validAsinStatusClass" class="text-xs flex items-center gap-1.5">
                       <template x-if="hasValidAsins">
                         <span
                           class="flex items-center gap-1"
@@ -462,9 +405,7 @@ B0EXAMPLE1"
                           <span
                             class="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center"
                           >
-                            <i
-                              class="fas fa-check text-[8px] text-emerald-600"
-                            ></i>
+                            <i class="fas fa-check text-[8px] text-emerald-600"></i>
                           </span>
                           <span class="font-semibold"
                             >已识别
@@ -477,9 +418,7 @@ B0EXAMPLE1"
                         </span>
                       </template>
                       <template x-if="hasNoValidAsins">
-                        <span
-                          class="text-slate-400 italic flex items-center gap-1"
-                        >
+                        <span class="text-slate-400 italic flex items-center gap-1">
                           <span
                             class="inline-block w-1 h-3 bg-slate-300 rounded-full"
                             style="animation: cursorBlink 1s infinite"
@@ -518,14 +457,8 @@ B0EXAMPLE1"
                       @click="startScrape()"
                       class="manual-start-button btn-start relative text-white font-bold flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed overflow-hidden"
                     >
-                      <i
-                        :class="scrapingIconClass"
-                        class="fas relative z-10 text-sm"
-                      ></i>
-                      <span
-                        class="relative z-10 text-xs"
-                        x-text="scrapingButtonText"
-                      ></span>
+                      <i :class="scrapingIconClass" class="fas relative z-10 text-sm"></i>
+                      <span class="relative z-10 text-xs" x-text="scrapingButtonText"></span>
                       <template x-if="showStartCount">
                         <span
                           class="relative z-10 bg-white/20 text-white/90 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
@@ -566,9 +499,7 @@ B0EXAMPLE1"
                         class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition-colors duration-200"
                         >采集评论</span
                       >
-                      <span
-                        id="scraper-reviews-toggle-help"
-                        class="text-[10px] text-slate-400"
+                      <span id="scraper-reviews-toggle-help" class="text-[10px] text-slate-400"
                         >抓取商品 Review 数据</span
                       >
                     </div>
@@ -594,9 +525,7 @@ B0EXAMPLE1"
           >
             <!-- Header with Progress -->
             <div class="px-4 pt-3 pb-2.5 border-b border-slate-100">
-              <div
-                class="flex flex-wrap items-center justify-between gap-2 mb-2"
-              >
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <h3
                   id="scraper-task-status-title"
                   class="text-sm font-bold text-slate-800 flex items-center gap-2 whitespace-nowrap section-header"
@@ -617,9 +546,7 @@ B0EXAMPLE1"
                       x-transition:enter-start="opacity-0 scale-75"
                     >
                       <i class="fas fa-check mr-1"></i>
-                      <span x-text="successfulTaskCount"></span>/<span
-                        x-text="tasks.length"
-                      ></span>
+                      <span x-text="successfulTaskCount"></span>/<span x-text="tasks.length"></span>
                     </span>
                   </template>
                 </div>
@@ -653,10 +580,7 @@ B0EXAMPLE1"
                       :class="getTaskIconWrapperClass(task)"
                       class="task-icon w-5 h-5 rounded-md flex items-center justify-center"
                     >
-                      <i
-                        :class="getTaskIconClass(task)"
-                        class="fas text-[10px]"
-                      ></i>
+                      <i :class="getTaskIconClass(task)" class="fas text-[10px]"></i>
                     </div>
                     <!-- ASIN and Status -->
                     <div class="min-w-0 flex-1">
@@ -672,16 +596,10 @@ B0EXAMPLE1"
                         class="text-[11px] leading-4 flex items-center w-full"
                       >
                         <template x-if="isTaskSuccess(task)">
-                          <div
-                            class="font-medium truncate"
-                            x-text="task.message"
-                          ></div>
+                          <div class="font-medium truncate" x-text="task.message"></div>
                         </template>
                         <template x-if="isTaskNotSuccess(task)">
-                          <span
-                            class="truncate font-medium"
-                            x-text="task.message"
-                          ></span>
+                          <span class="truncate font-medium" x-text="task.message"></span>
                         </template>
                       </div>
                     </div>
@@ -702,9 +620,7 @@ B0EXAMPLE1"
         <div
           class="flex items-center justify-between w-full px-6 pt-5 pb-4 border-b border-slate-100"
         >
-          <span
-            class="flex items-center gap-2.5 text-slate-800 font-bold text-base section-header"
-          >
+          <span class="flex items-center gap-2.5 text-slate-800 font-bold text-base section-header">
             <div
               class="header-icon w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center"
             >
@@ -721,9 +637,7 @@ B0EXAMPLE1"
             <i class="fas fa-trash-alt text-[10px]"></i> 清空
           </button>
         </div>
-        <div
-          class="p-4 space-y-2 max-h-[301px] overflow-y-auto custom-scrollbar"
-        >
+        <div class="p-4 space-y-2 max-h-[301px] overflow-y-auto custom-scrollbar">
           <div
             class="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700"
             x-show="historyLoadError"
@@ -759,10 +673,7 @@ B0EXAMPLE1"
               </template>
               <!-- Header -->
               <div class="flex items-start justify-between mb-2">
-                <div
-                  @click="loadHistoryItem(item)"
-                  class="flex items-center gap-2 cursor-pointer"
-                >
+                <div @click="loadHistoryItem(item)" class="flex items-center gap-2 cursor-pointer">
                   <span
                     class="flex h-8 min-w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-2 font-mono text-[11px] font-bold text-slate-600 shadow-sm transition duration-200"
                     x-text="getFlag(item.site)"
@@ -823,23 +734,16 @@ B0EXAMPLE1"
                   <i class="fas fa-clock text-[9px] text-emerald-500"></i>
                   <span class="text-[10px] text-emerald-600 font-medium">
                     分析于
-                    <span
-                      x-text="formatDate(item.analysisStatus.analyzedAt)"
-                    ></span>
+                    <span x-text="formatDate(item.analysisStatus.analyzedAt)"></span>
                   </span>
                 </div>
               </template>
               <!-- Footer -->
-              <div
-                class="flex items-center justify-between pt-2 border-t border-slate-100"
-              >
+              <div class="flex items-center justify-between pt-2 border-t border-slate-100">
                 <div class="flex items-center gap-1.5">
                   <i class="fas fa-box-open text-[10px] text-slate-300"></i>
                   <span class="text-[11px] text-slate-500">
-                    <span
-                      class="font-bold text-slate-700"
-                      x-text="item.asins.length"
-                    ></span>
+                    <span class="font-bold text-slate-700" x-text="item.asins.length"></span>
                     个ASIN
                   </span>
                 </div>
@@ -883,9 +787,7 @@ B0EXAMPLE1"
         class="rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden card-elevated"
       >
         <div class="px-5 py-3 border-b border-slate-100">
-          <h3
-            class="text-sm font-bold text-slate-800 flex items-center gap-2 section-header"
-          >
+          <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 section-header">
             <div
               class="header-icon w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center"
             >
@@ -941,9 +843,7 @@ B0EXAMPLE1"
               >
                 <i class="fas fa-lightbulb text-[13px] text-white"></i>
               </div>
-              <h3 class="text-sm font-bold text-slate-700">
-                数据结构化提取策略
-              </h3>
+              <h3 class="text-sm font-bold text-slate-700">数据结构化提取策略</h3>
               <span
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm"
               >
@@ -964,8 +864,8 @@ B0EXAMPLE1"
         >
           <!-- 策略说明 -->
           <p class="text-slate-500 text-xs leading-relaxed mb-5 max-w-3xl">
-            不要把所有信息都丢给 AI。垃圾进，垃圾出。你需要提取那些能喂饱
-            Project COSMO（知识图谱）和 Rufus（问答助手）的高价值信息。
+            不要把所有信息都丢给 AI。垃圾进，垃圾出。你需要提取那些能喂饱 Project
+            COSMO（知识图谱）和 Rufus（问答助手）的高价值信息。
           </p>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <!-- ✅ Must Extract Card -->
@@ -976,12 +876,8 @@ B0EXAMPLE1"
                 class="bg-gradient-to-r from-emerald-50 to-green-50/50 px-5 py-4 border-b border-emerald-100"
               >
                 <div class="flex items-center justify-between">
-                  <h4
-                    class="font-bold text-emerald-800 text-sm flex items-center gap-2.5"
-                  >
-                    <div
-                      class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center"
-                    >
+                  <h4 class="font-bold text-emerald-800 text-sm flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
                       <i class="fas fa-check text-emerald-600 text-xs"></i>
                     </div>
                     必须提取 (高价值信号)
@@ -1003,12 +899,9 @@ B0EXAMPLE1"
                     >
                   </div>
                   <div class="min-w-0">
-                    <h5 class="font-bold text-slate-700 text-xs mb-1">
-                      具体使用场景 (Context)
-                    </h5>
+                    <h5 class="font-bold text-slate-700 text-xs mb-1">具体使用场景 (Context)</h5>
                     <p class="text-[11px] text-slate-500 leading-relaxed">
-                      例如：Review中提到的 "<span
-                        class="text-emerald-600 font-medium"
+                      例如：Review中提到的 "<span class="text-emerald-600 font-medium"
                         >Taking it on a ski trip</span
                       >" 而非单纯的 "Winter coat"。COSMO 依赖场景构建图谱。
                     </p>
@@ -1028,8 +921,7 @@ B0EXAMPLE1"
                       具体痛点与解决方案 (QA Pairs)
                     </h5>
                     <p class="text-[11px] text-slate-500 leading-relaxed">
-                      提取负面 Review 中的具体失效点（如"<span
-                        class="text-blue-600 font-medium"
+                      提取负面 Review 中的具体失效点（如"<span class="text-blue-600 font-medium"
                         >拉链在零下度数卡住</span
                       >"），转化为 Listing 中的 QA 或属性描述。
                     </p>
@@ -1045,12 +937,9 @@ B0EXAMPLE1"
                     >
                   </div>
                   <div class="min-w-0">
-                    <h5 class="font-bold text-slate-700 text-xs mb-1">
-                      情感形容词与原生表达
-                    </h5>
+                    <h5 class="font-bold text-slate-700 text-xs mb-1">情感形容词与原生表达</h5>
                     <p class="text-[11px] text-slate-500 leading-relaxed">
-                      用户用来形容产品的非官方词汇（如 "<span
-                        class="text-violet-600 font-medium"
+                      用户用来形容产品的非官方词汇（如 "<span class="text-violet-600 font-medium"
                         >Game changer for arthritis</span
                       >"）。这是长尾流量的来源。
                     </p>
@@ -1066,32 +955,22 @@ B0EXAMPLE1"
                     >
                   </div>
                   <div class="min-w-0">
-                    <h5 class="font-bold text-slate-700 text-xs mb-1">
-                      变体偏好分布
-                    </h5>
+                    <h5 class="font-bold text-slate-700 text-xs mb-1">变体偏好分布</h5>
                     <p class="text-[11px] text-slate-500 leading-relaxed">
-                      分析 Top
-                      竞品哪个颜色/尺寸评论最多，直接决定备货，避免库存积压影响
-                      IPI。
+                      分析 Top 竞品哪个颜色/尺寸评论最多，直接决定备货，避免库存积压影响 IPI。
                     </p>
                   </div>
                 </div>
               </div>
             </div>
             <!-- ❌ Must Filter Card -->
-            <div
-              class="bg-white rounded-xl border-2 border-rose-100 overflow-hidden strategy-card"
-            >
+            <div class="bg-white rounded-xl border-2 border-rose-100 overflow-hidden strategy-card">
               <div
                 class="bg-gradient-to-r from-rose-50 to-red-50/50 px-5 py-4 border-b border-rose-100"
               >
                 <div class="flex items-center justify-between">
-                  <h4
-                    class="font-bold text-rose-800 text-sm flex items-center gap-2.5"
-                  >
-                    <div
-                      class="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center"
-                    >
+                  <h4 class="font-bold text-rose-800 text-sm flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center">
                       <i class="fas fa-times text-rose-500 text-xs"></i>
                     </div>
                     必须过滤 (噪音)
@@ -1107,9 +986,7 @@ B0EXAMPLE1"
                   class="strategy-item rose p-3 rounded-xl hover:bg-rose-50/40 transition-colors"
                 >
                   <div class="flex items-center gap-2 mb-1.5">
-                    <div
-                      class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80"
-                    >
+                    <div class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80">
                       <i class="fas fa-ban text-[9px] text-rose-400"></i>
                     </div>
                     <h5
@@ -1119,9 +996,10 @@ B0EXAMPLE1"
                     </h5>
                   </div>
                   <p class="text-[11px] text-slate-500 leading-relaxed pl-7">
-                    "<span class="text-rose-400 italic">Great product</span>",
-                    "<span class="text-rose-400 italic">Fast shipping</span>",
-                    "<span class="text-rose-400 italic">Love it</span>".
+                    "<span class="text-rose-400 italic">Great product</span>", "<span
+                      class="text-rose-400 italic"
+                      >Fast shipping</span
+                    >", "<span class="text-rose-400 italic">Love it</span>".
                     这些对构建语义图谱毫无价值，会稀释 AI 的注意力。
                   </p>
                 </div>
@@ -1129,9 +1007,7 @@ B0EXAMPLE1"
                   class="strategy-item rose p-3 rounded-xl hover:bg-rose-50/40 transition-colors"
                 >
                   <div class="flex items-center gap-2 mb-1.5">
-                    <div
-                      class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80"
-                    >
+                    <div class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80">
                       <i class="fas fa-ban text-[9px] text-rose-400"></i>
                     </div>
                     <h5
@@ -1141,8 +1017,7 @@ B0EXAMPLE1"
                     </h5>
                   </div>
                   <p class="text-[11px] text-slate-500 leading-relaxed pl-7">
-                    除非你是自发货，否则 FBA
-                    的物流问题不属于产品本身的属性缺陷，会误导 Rufus
+                    除非你是自发货，否则 FBA 的物流问题不属于产品本身的属性缺陷，会误导 Rufus
                     对产品质量的判断。
                   </p>
                 </div>
@@ -1150,9 +1025,7 @@ B0EXAMPLE1"
                   class="strategy-item rose p-3 rounded-xl hover:bg-rose-50/40 transition-colors"
                 >
                   <div class="flex items-center gap-2 mb-1.5">
-                    <div
-                      class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80"
-                    >
+                    <div class="w-5 h-5 rounded flex items-center justify-center bg-rose-100/80">
                       <i class="fas fa-ban text-[9px] text-rose-400"></i>
                     </div>
                     <h5
@@ -1162,22 +1035,16 @@ B0EXAMPLE1"
                     </h5>
                   </div>
                   <p class="text-[11px] text-slate-500 leading-relaxed pl-7">
-                    虽然可以做 PPC 竞品词，但在 Listing
-                    埋词中应避免，以免造成侵权或相关性降低。
+                    虽然可以做 PPC 竞品词，但在 Listing 埋词中应避免，以免造成侵权或相关性降低。
                   </p>
                 </div>
                 <div
                   class="mt-3 mx-3 p-3 bg-amber-50/80 rounded-lg border border-amber-100 warning-banner"
                 >
                   <div class="flex items-start gap-2">
-                    <i
-                      class="fas fa-exclamation-triangle text-amber-500 text-[11px] mt-0.5"
-                    ></i>
-                    <p
-                      class="text-[10px] text-amber-700 leading-relaxed font-medium"
-                    >
-                      过滤噪音数据可显著提升 AI
-                      分析质量，建议在采集后先清洗再送入分析流程。
+                    <i class="fas fa-exclamation-triangle text-amber-500 text-[11px] mt-0.5"></i>
+                    <p class="text-[10px] text-amber-700 leading-relaxed font-medium">
+                      过滤噪音数据可显著提升 AI 分析质量，建议在采集后先清洗再送入分析流程。
                     </p>
                   </div>
                 </div>

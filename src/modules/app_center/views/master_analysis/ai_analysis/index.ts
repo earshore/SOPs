@@ -13,6 +13,11 @@ import { destroyAlpineComponent } from '../utils/alpineLifecycle';
 import '../master_analysis_style.css';
 import './ai_analysis_style.css';
 
+function cleanupAiAnalysisPanel(): void {
+  destroyAlpineComponent('[x-data="aiAnalysisPanel"]');
+  AlpineRegistry.getInstance().unregister('aiAnalysisPanel');
+}
+
 class AiAnalysisModule extends BaseModule {
   constructor() {
     super('ai_analysis');
@@ -46,8 +51,7 @@ class AiAnalysisModule extends BaseModule {
 
   protected onUnmount(): void {
     try {
-      destroyAlpineComponent('[x-data="aiAnalysisPanel"]');
-      AlpineRegistry.getInstance().unregister('aiAnalysisPanel');
+      cleanupAiAnalysisPanel();
     } catch (error) {
       console.error('[AI智能分析] ❌ 模块卸载失败:', error);
     }
@@ -58,5 +62,14 @@ const aiAnalysisModule = new AiAnalysisModule();
 
 export const mount = (container: HTMLElement): Promise<void> => aiAnalysisModule.mount(container);
 export const unmount = (): void => {
-  aiAnalysisModule.unmount();
+  if (aiAnalysisModule.isMounted) {
+    aiAnalysisModule.unmount();
+    return;
+  }
+
+  try {
+    cleanupAiAnalysisPanel();
+  } catch (error) {
+    console.error('[AI智能分析] ❌ 模块卸载失败:', error);
+  }
 };

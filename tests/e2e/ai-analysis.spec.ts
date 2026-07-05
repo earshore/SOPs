@@ -524,7 +524,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       }
 
       // 验证：应该显示无数据提示
-      await expect(page.getByRole('heading', { name: '暂无产品数据' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: '还没有产品数据' }).first()).toBeVisible();
       await expect(page.getByRole('link', { name: /前往数据采集/ })).toBeVisible();
 
       console.log('✅ 无数据提示显示正确');

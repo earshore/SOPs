@@ -199,6 +199,14 @@ async function auditTarget(page: Page, target: Target): Promise<string[]> {
   const failures: string[] = [];
 
   await page.goto(`${hashBase}${target.path}`, { waitUntil: 'commit', timeout: 30000 });
+  if (target.selector.includes('app-flow-step')) {
+    await page
+      .locator('.app-overview-collapsible')
+      .evaluate((details: HTMLDetailsElement) => {
+        details.open = true;
+      })
+      .catch(() => undefined);
+  }
   await page
     .waitForFunction(
       (selector) => {

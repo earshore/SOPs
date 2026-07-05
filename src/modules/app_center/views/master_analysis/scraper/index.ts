@@ -18,6 +18,14 @@ import { destroyAlpineComponent, getAlpineData } from '../utils/alpineLifecycle'
 import '../master_analysis_style.css';
 import './scraper_style.css';
 
+function cleanupScraperPanel(): void {
+  destroyAlpineComponent('[x-data="scraperPanel"]');
+
+  // 使用 AlpineRegistry 卸载组件
+  const registry = AlpineRegistry.getInstance();
+  registry.unregister('scraperPanel');
+}
+
 // ==========================================
 // Module Exports (统一架构接口)
 // ==========================================
@@ -55,11 +63,7 @@ class ScraperModule extends BaseModule {
 
   protected onUnmount(): void {
     try {
-      destroyAlpineComponent('[x-data="scraperPanel"]');
-
-      // 使用 AlpineRegistry 卸载组件
-      const registry = AlpineRegistry.getInstance();
-      registry.unregister('scraperPanel');
+      cleanupScraperPanel();
     } catch (error) {
       console.error('[Scraper] ❌ 子模块卸载失败:', error);
     }
@@ -70,7 +74,16 @@ const scraperModule = new ScraperModule();
 
 export const mount = (container: HTMLElement): Promise<void> => scraperModule.mount(container);
 export const unmount = (): void => {
-  scraperModule.unmount();
+  if (scraperModule.isMounted) {
+    scraperModule.unmount();
+    return;
+  }
+
+  try {
+    cleanupScraperPanel();
+  } catch (error) {
+    console.error('[Scraper] ❌ 子模块卸载失败:', error);
+  }
 };
 
 // ==========================================

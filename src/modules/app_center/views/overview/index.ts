@@ -58,8 +58,9 @@ function initOverviewEvents(container: HTMLElement): void {
   };
 
   const filterBtns = container.querySelectorAll<HTMLElement>('.category-filter-btn');
-  const viewModeBtns =
-    container.querySelectorAll<HTMLButtonElement>('.app-overview-view-btn[data-view-mode]');
+  const viewModeBtns = container.querySelectorAll<HTMLButtonElement>(
+    '.app-overview-view-btn[data-view-mode]'
+  );
 
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {

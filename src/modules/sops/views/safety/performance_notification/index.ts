@@ -136,9 +136,7 @@ class PerformanceNotificationModule extends BaseModule {
   }
 }
 
-const performanceNotificationModule = new PerformanceNotificationModule(
-  'performance_notification'
-);
+const performanceNotificationModule = new PerformanceNotificationModule('performance_notification');
 
 export const mount = (container: HTMLElement): Promise<void> =>
   performanceNotificationModule.mount(container);

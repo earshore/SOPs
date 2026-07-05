@@ -143,9 +143,7 @@ class InventoryReplenishmentModule extends BaseModule {
   }
 }
 
-const inventoryReplenishmentModule = new InventoryReplenishmentModule(
-  'inventory_replenishment'
-);
+const inventoryReplenishmentModule = new InventoryReplenishmentModule('inventory_replenishment');
 
 export const mount = (container: HTMLElement): Promise<void> =>
   inventoryReplenishmentModule.mount(container);

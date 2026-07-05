@@ -126,9 +126,7 @@ class AccountSecurityModule extends BaseModule {
     restoreReviewOwner();
 
     this.registeredActions = registerActionsWithLegacy({
-      sops_copyAccountSecurityTemplate: copyAccountSecurityTemplate as (
-        ...args: unknown[]
-      ) => void,
+      sops_copyAccountSecurityTemplate: copyAccountSecurityTemplate as (...args: unknown[]) => void,
     });
   }
 

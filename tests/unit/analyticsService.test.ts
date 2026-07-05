@@ -7,6 +7,12 @@ import {
 } from '@/services/analyticsService';
 import type { ILoggerService } from '@/types/services';
 
+let cryptoRandomUint32 = 0;
+
+function setCryptoRandomFloat(value: number): void {
+  cryptoRandomUint32 = Math.floor(value * 0x100000000);
+}
+
 function logger(): ILoggerService {
   return {
     debug: vi.fn(),
@@ -17,6 +23,20 @@ function logger(): ILoggerService {
 }
 
 beforeEach(() => {
+  setCryptoRandomFloat(0);
+  vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation(
+    ((array: ArrayBufferView | null): ArrayBufferView | null => {
+      if (!array) return array;
+
+      if (array instanceof Uint32Array) {
+        array.fill(cryptoRandomUint32);
+        return array;
+      }
+
+      new Uint8Array(array.buffer, array.byteOffset, array.byteLength).fill(0);
+      return array;
+    }) as Crypto['getRandomValues']
+  );
   vi.spyOn(Math, 'random').mockReturnValue(0);
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 204 }));
   Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
@@ -82,10 +102,10 @@ afterEach(() => {
 
     const sampledOut = createAnalyticsService(logger());
     sampledOut.init({ sampleRate: 0.5, trackUserActions: false });
-    vi.mocked(Math.random).mockReturnValue(0.9);
+    setCryptoRandomFloat(0.9);
     sampledOut.trackEvent('sampled-out');
     expect(sampledOut.getAllEvents()).toEqual([]);
-    vi.mocked(Math.random).mockReturnValue(0);
+    setCryptoRandomFloat(0);
 
     const noPageViews = createAnalyticsService(logger());
     noPageViews.init({ trackPageViews: false, trackUserActions: false });

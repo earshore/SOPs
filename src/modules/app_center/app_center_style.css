@@ -1139,7 +1139,8 @@
     border-radius: 8px !important;
   }
 
-  #app_center_content_area :where(.app-flow-step.app-child-link, .app-overview-card, .app-overview-list-row) {
+  #app_center_content_area
+    :where(.app-flow-step.app-child-link, .app-overview-card, .app-overview-list-row) {
     border-radius: var(--rounded-xl, 16px) !important;
   }
 }

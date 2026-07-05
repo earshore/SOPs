@@ -135,9 +135,7 @@ class EuGpsrComplianceModule extends BaseModule {
     restoreReviewOwner();
 
     this.registeredActions = registerActionsWithLegacy({
-      sops_copyGpsrComplianceTemplate: copyGpsrComplianceTemplate as (
-        ...args: unknown[]
-      ) => void,
+      sops_copyGpsrComplianceTemplate: copyGpsrComplianceTemplate as (...args: unknown[]) => void,
     });
   }
 

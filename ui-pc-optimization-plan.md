@@ -322,6 +322,24 @@
    - 优化方案：为 ErrorBoundary 的重试 / 刷新按钮、超时刷新按钮和 AppModal 关闭按钮补齐 `type="button"`；同步修正 AppModal 注释示例中的按钮类型；扩展回归测试检查运行时按钮类型和源码模板扫描。
    - 验收：ErrorBoundary 扫描 3 个按钮、AppModal 扫描 3 个按钮，隐式类型均为 0；ErrorBoundary / AppModal 聚焦测试通过；全局扫描仍无 `role="button"` 模拟按钮和未命名图标按钮残留。
 
+### Batch 33：剩余高频模板按钮类型显式化（已执行）
+
+1. 清零 PC 高频模板和动态表格中的剩余隐式 submit 按钮。
+   - 状态：已完成。
+   - 范围：`src/modules/app_center/views/keyword_hunter/analysis/template.html`、`src/modules/sops/views/growth/npi_tracker/template.html`、`src/modules/sops/views/growth/npi_tracker/index.ts`、`src/modules/more/views/business_scenarios/*/template.html`、`tests/unit/ui-p1-08-template-a11y.test.ts`、`tests/unit/ui-p1-10-template-a11y.test.ts`、`tests/unit/business-scenarios-template-a11y.test.ts`、`tests/unit/npi-tracker.test.ts`。
+   - PC 端影响：Keyword Hunter 生成报告、NPI 复盘 / 导出 / 表格决策和业务场景切换都是桌面端高频点击入口；补齐按钮类型后，即使未来这些区域被放入筛选表单、工具栏表单或弹层表单，也不会触发意外提交。
+   - 优化方案：仅为剩余按钮补齐 `type="button"`，保留现有 `data-action`、禁用态、样式类和文案不变；扩展静态模板测试与 NPI 动态渲染测试，锁定按钮非提交语义。
+   - 验收：全局扫描结果为 `roleButtons 0`、`unnamedButtons 0`、`implicitTotal 0`；本批聚焦 Vitest 通过；`git diff --check`、`npm run type-check`、`npm run build:app` 均通过。
+
+### Batch 34：PC 验收清单审计与收尾修复（已执行）
+
+1. 逐项审计 PC 验收清单并补齐剩余证据链。
+   - 状态：已完成。
+   - 范围：`src/modules/sops/sops_style.css`、`src/common/components/OverviewRenderer.ts`、`src/modules/app_center/views/master_analysis/scraper/template.html`、`scripts/quality/audit-card-ui.ts`、`scripts/quality/audit-workbench-ui.ts`、`tests/unit/pc-design-token-css.test.ts`、`tests/unit/scraper-template-a11y.test.ts`、`ui-pc-optimization-plan.md`。
+   - PC 端影响：最终验收发现 NPI 长说明在 1920px 下会拉到 1384px，影响大屏阅读行长；同时严格扫描发现生成器按钮缺少显式类型、Scraper 站点按钮缺少稳定可读名称，UI audit 对折叠区和同类选择器路由切换存在时序误判。
+   - 优化方案：NPI 页面段落增加 `max-width: min(100%, 64rem)`，将 1920px 下最长说明收敛到 1024px；OverviewRenderer 快速入口按钮补齐 `type="button"`；Scraper 站点按钮补动态 `aria-label`；Card audit 检查 App Center 任务路径前先展开折叠区；Workbench audit 等待目标页面就绪文本后再采样同类面板。
+   - 验收：Playwright 桌面采样覆盖 1366 / 1440 / 1536 / 1920，首页、应用中心、SOPS、NPI 横向溢出均为 0；NPI 最长段落收敛到 1024px；`npm run ui:audit` 三段通过；按钮语义扫描为 `roleButtons 0`、`implicitButtons 0`、`iconOnlyWithoutName 0`；相关 Vitest、类型检查和构建通过。
+
 ## 0. PC 端优化目标
 
 本轮优化不追求“大改风格”，而是让现有界面在 PC 工作台场景下更高效、更稳定、更一致：
@@ -609,16 +627,26 @@
 
 ## 5. PC 端验收清单
 
-- [ ] 1366px 下页面无横向滚动，主内容不被导航或浮层遮挡。
-- [ ] 1440px 下首屏能看到页面标题、主操作和核心内容区。
-- [ ] 1536px / 1920px 下内容不会无限拉宽，阅读行长保持合理。
-- [ ] 首页、应用中心、设置面板、模态框的圆角、阴影、边框、标题层级一致。
-- [ ] 应用中心卡片不存在嵌套交互区域。
-- [ ] 设置面板可在 3 秒内定位到模型、网络、数据、性能分类。
-- [ ] 所有图标按钮有可读名称或明确可见文本。
-- [ ] 键盘可完成导航、打开应用、筛选、关闭弹层等关键操作。
-- [ ] 弹层在浅色 / 暗色模式下无白色孤岛或低对比文本。
-- [ ] Hover、Focus、Active 状态在按钮、卡片、菜单、表单控件间保持一致。
+- [x] 1366px 下页面无横向滚动，主内容不被导航或浮层遮挡。
+  - 证据：Playwright 采样首页、应用中心、SOPS、NPI，在 1366px 下 `horizontalOverflow = 0`，目标模块 heading 与首屏内容可见。
+- [x] 1440px 下首屏能看到页面标题、主操作和核心内容区。
+  - 证据：Playwright 采样 1440px，应用中心首屏包含“应用中心 / 任务路径”和入口按钮，SOPS 首屏包含“标准作业程序 (SOPs)”和筛选按钮，NPI 首屏包含“新品生命周期跟踪 SOP”和作业元信息。
+- [x] 1536px / 1920px 下内容不会无限拉宽，阅读行长保持合理。
+  - 证据：Playwright 采样 1536 / 1920px 横向溢出均为 0；主要内容最大宽度受 PC 容器约束；NPI 长说明由 1384px 收敛到 1024px。
+- [x] 首页、应用中心、设置面板、模态框的圆角、阴影、边框、标题层级一致。
+  - 证据：`npm run ui:audit` 的 card / callout / workbench 三段通过；`pc-design-token-css.test.ts` 锁定布局、组件令牌和模块 Accent；AppModal 回归测试锁定弹层令牌。
+- [x] 应用中心卡片不存在嵌套交互区域。
+  - 证据：`app_center_overview.test.ts` 覆盖真实卡片非交互容器、主入口/子入口为显式按钮，列表视图行也不承担交互。
+- [x] 设置面板可在 3 秒内定位到模型、网络、数据、性能分类。
+  - 证据：`systemSettingsCurrent.test.ts` 锁定真实模板的 PC 分类导航；运行时 DOM 具备“模型配置 / 采集网络 / 本地数据 / 性能监控”四个导航链接。
+- [x] 所有图标按钮有可读名称或明确可见文本。
+  - 证据：严格按钮扫描结果为 `iconOnlyWithoutName 0`；Scraper 站点按钮补齐动态 `aria-label`；系统设置、Scraper、AppModal、ErrorBoundary 等聚焦测试覆盖可读名称。
+- [x] 键盘可完成导航、打开应用、筛选、关闭弹层等关键操作。
+  - 证据：导航、Mega Menu、应用中心筛选/视图切换、系统设置、AppModal、Scraper 导入入口均有单测覆盖；关键交互保留原生按钮 / 链接语义和 `focus-visible` ring。
+- [x] 弹层在浅色 / 暗色模式下无白色孤岛或低对比文本。
+  - 证据：AppModal Shadow DOM 令牌化，设置面板和共享弹层接入主题/焦点令牌；相关回归测试和 PC token 合同通过。
+- [x] Hover、Focus、Active 状态在按钮、卡片、菜单、表单控件间保持一致。
+  - 证据：`npm run ui:audit` 通过；`pc-motion-css.test.ts` 锁定无 `transition-all`、无 hover/active 缩放和旋转残留，并保留焦点环。
 
 ## 6. 一句话落地建议
 

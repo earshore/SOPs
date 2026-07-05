@@ -247,6 +247,21 @@ async function openDeepChatAndRefreshMockConfig(page: Page): Promise<void> {
     }
     await secureStorage.setSecure(`llm_key_${provider}`, 'playwright-test-key');
   }, MOCK_PROVIDER);
+  await page.waitForFunction(
+    async provider => {
+      const secureStorage = (
+        window as Window & {
+          SecureStorage?: { getSecure: (key: string, defaultValue?: string) => Promise<string> };
+        }
+      ).SecureStorage;
+      if (!secureStorage) {
+        return false;
+      }
+      return (await secureStorage.getSecure(`llm_key_${provider}`, '')) === 'playwright-test-key';
+    },
+    MOCK_PROVIDER,
+    { timeout: 5000 }
+  );
 
   await page.locator('#playground-refresh-config').click();
   await expect(page.locator('#playground-provider-status')).toContainText(
@@ -308,9 +323,11 @@ test('continues typewriter output after switching away and back during a stream'
       'page'
     );
 
+    await expect(page.locator('#sidebar-btn-playground')).toBeVisible();
     await page.locator('#sidebar-btn-playground').click();
+    await expect(page).toHaveURL(/#\/app-center\/playground\/deep-chat$/, { timeout: 10000 });
     const remountedChat = page.locator('#playground-chat');
-    await expect(remountedChat).toBeVisible();
+    await expect(remountedChat).toBeVisible({ timeout: 10000 });
     await expect(remountedChat).toContainText('First', { timeout: 10000 });
     await expect(remountedChat).not.toContainText(stream.reply);
 

@@ -17,6 +17,14 @@ import { createPromptlabPanel } from './components/PromptlabPanel';
 import { destroyAlpineComponent } from '../utils/alpineLifecycle';
 import '../master_analysis_style.css';
 
+function cleanupPromptlabPanel(): void {
+  destroyAlpineComponent('[x-data="promptlabPanel"]');
+
+  // 使用 AlpineRegistry 卸载组件
+  const registry = AlpineRegistry.getInstance();
+  registry.unregister('promptlabPanel');
+}
+
 class PromptlabModule extends BaseModule {
   constructor() {
     super('promptlab');
@@ -48,11 +56,7 @@ class PromptlabModule extends BaseModule {
 
   protected onUnmount(): void {
     try {
-      destroyAlpineComponent('[x-data="promptlabPanel"]');
-
-      // 使用 AlpineRegistry 卸载组件
-      const registry = AlpineRegistry.getInstance();
-      registry.unregister('promptlabPanel');
+      cleanupPromptlabPanel();
     } catch (error) {
       console.error('[Promptlab] ❌ 子模块卸载失败:', error);
     }
@@ -63,5 +67,14 @@ const promptlabModule = new PromptlabModule();
 
 export const mount = (container: HTMLElement): Promise<void> => promptlabModule.mount(container);
 export const unmount = (): void => {
-  promptlabModule.unmount();
+  if (promptlabModule.isMounted) {
+    promptlabModule.unmount();
+    return;
+  }
+
+  try {
+    cleanupPromptlabPanel();
+  } catch (error) {
+    console.error('[Promptlab] ❌ 子模块卸载失败:', error);
+  }
 };

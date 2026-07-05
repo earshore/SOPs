@@ -93,14 +93,11 @@ async function gotoStartupPage(page: Page): Promise<void> {
 const STARTUP_DEV_LCP_BUDGET_MS = 9000;
 const STARTUP_DEV_MIN_PERFORMANCE_SCORE = 40;
 
-const CONSOLE_ERROR_PATTERNS: Record<
-  Exclude<ConsoleErrorCategory, 'other'>,
-  readonly string[]
-> = {
+const CONSOLE_ERROR_PATTERNS: Record<Exclude<ConsoleErrorCategory, 'other'>, readonly string[]> = {
   deprecations: ['deprecated', 'deprecation'],
   warnings: ['warning', 'warn'],
   network: ['failed to load', 'network', 'fetch', '404', '500'],
-  critical: ['error', 'exception', 'uncaught', 'cannot read', 'undefined is not', 'null is not']
+  critical: ['error', 'exception', 'uncaught', 'cannot read', 'undefined is not', 'null is not'],
 };
 
 function hasAnyPattern(value: string, patterns: readonly string[]): boolean {
@@ -123,7 +120,7 @@ function categorizeConsoleErrors(errors: string[]): ConsoleErrorCategories {
     warnings: [],
     deprecations: [],
     network: [],
-    other: []
+    other: [],
   };
 
   errors.forEach(error => {
@@ -198,14 +195,14 @@ async function collectStartupErrorSignals(page: Page): Promise<StartupErrorSigna
     resourceErrors,
     runtimeErrors,
     alpineErrors,
-    routerErrors
+    routerErrors,
   ] = await Promise.all([
     readWindowErrorArray(page, '__pageErrors'),
     readWindowErrorArray(page, '__unhandledRejections'),
     readResourceErrors(page),
     readWindowErrorArray(page, '__runtimeErrors') as Promise<string[]>,
     readObjectErrorArray(page, 'Alpine'),
-    readObjectErrorArray(page, 'router')
+    readObjectErrorArray(page, 'router'),
   ]);
 
   return {
@@ -214,7 +211,7 @@ async function collectStartupErrorSignals(page: Page): Promise<StartupErrorSigna
     resourceErrors,
     runtimeErrors,
     alpineErrors,
-    routerErrors
+    routerErrors,
   };
 }
 
@@ -226,7 +223,12 @@ function logStartupErrorDetails(
   logNumberedItems('\n⚠️ 网络错误:', categories.network, message => console.warn(message));
   logNumberedItems('\n⚠️ 警告:', categories.warnings, message => console.warn(message));
   logNumberedItems('\n⚠️ 弃用警告:', categories.deprecations, message => console.warn(message));
-  logNumberedItems('\n❌ 页面错误事件:', signals.pageErrors, message => console.error(message), 'message');
+  logNumberedItems(
+    '\n❌ 页面错误事件:',
+    signals.pageErrors,
+    message => console.error(message),
+    'message'
+  );
   logNumberedItems(
     '\n❌ 未捕获的 Promise rejection:',
     signals.unhandledRejections,
@@ -234,7 +236,9 @@ function logStartupErrorDetails(
     'reason'
   );
   logNumberedItems('\n❌ 资源加载错误:', signals.resourceErrors, message => console.error(message));
-  logNumberedItems('\n❌ JavaScript 运行时错误:', signals.runtimeErrors, message => console.error(message));
+  logNumberedItems('\n❌ JavaScript 运行时错误:', signals.runtimeErrors, message =>
+    console.error(message)
+  );
   logNumberedItems('\n❌ Alpine.js 错误:', signals.alpineErrors, message => console.error(message));
   logNumberedItems('\n❌ 路由错误:', signals.routerErrors, message => console.error(message));
 }
@@ -255,7 +259,7 @@ function buildStartupErrorReport(
     resourceErrors: signals.resourceErrors.length,
     runtimeErrors: signals.runtimeErrors.length,
     alpineErrors: signals.alpineErrors.length,
-    routerErrors: signals.routerErrors.length
+    routerErrors: signals.routerErrors.length,
   };
 }
 
@@ -293,7 +297,7 @@ function buildStartupErrorSuggestions(report: StartupErrorReport): string[] {
     [report.routerErrors, '存在路由错误，检查路由配置和导航逻辑'],
     [report.networkErrors, '存在网络错误，检查资源路径和服务器配置'],
     [report.warnings, '存在警告信息，建议修复以提升代码质量'],
-    [report.deprecations, '存在弃用警告，建议更新到新的 API']
+    [report.deprecations, '存在弃用警告，建议更新到新的 API'],
   ];
 
   return checks.filter(([count]) => count > 0).map(([, suggestion]) => suggestion);
@@ -316,13 +320,19 @@ function assertNoStartupErrors(report: StartupErrorReport, errorScore: number): 
     report.totalErrors,
     `应用启动时不应有任何 console.error 输出，但检测到 ${report.totalErrors} 个错误`
   ).toBe(0);
-  expect(report.criticalErrors, `不应有关键错误，但检测到 ${report.criticalErrors} 个关键错误`).toBe(0);
+  expect(
+    report.criticalErrors,
+    `不应有关键错误，但检测到 ${report.criticalErrors} 个关键错误`
+  ).toBe(0);
   expect(report.pageErrors, `不应有页面错误事件，但检测到 ${report.pageErrors} 个页面错误`).toBe(0);
   expect(
     report.unhandledRejections,
     `不应有未捕获的 Promise rejection，但检测到 ${report.unhandledRejections} 个`
   ).toBe(0);
-  expect(report.runtimeErrors, `不应有 JavaScript 运行时错误，但检测到 ${report.runtimeErrors} 个`).toBe(0);
+  expect(
+    report.runtimeErrors,
+    `不应有 JavaScript 运行时错误，但检测到 ${report.runtimeErrors} 个`
+  ).toBe(0);
   expect(report.alpineErrors, `不应有 Alpine.js 错误，但检测到 ${report.alpineErrors} 个`).toBe(0);
   expect(report.routerErrors, `不应有路由错误，但检测到 ${report.routerErrors} 个`).toBe(0);
   expect(errorScore, `错误评分应该至少为 90 分，当前: ${errorScore} 分`).toBeGreaterThanOrEqual(90);
@@ -343,7 +353,7 @@ async function readBrowserMemory(page: Page): Promise<BrowserMemorySnapshot | nu
       return {
         usedJSHeapSize: memory.usedJSHeapSize,
         totalJSHeapSize: memory.totalJSHeapSize,
-        jsHeapSizeLimit: memory.jsHeapSizeLimit
+        jsHeapSizeLimit: memory.jsHeapSizeLimit,
       };
     }
 
@@ -353,7 +363,9 @@ async function readBrowserMemory(page: Page): Promise<BrowserMemorySnapshot | nu
 
 function skipWhenMemoryApiUnavailable(): void {
   console.warn('⚠️ 浏览器不支持 performance.memory API，跳过内存测试');
-  console.log('💡 提示: 使用 Chrome 浏览器并启用 --enable-precise-memory-info 标志可以获取精确的内存信息');
+  console.log(
+    '💡 提示: 使用 Chrome 浏览器并启用 --enable-precise-memory-info 标志可以获取精确的内存信息'
+  );
   test.skip();
 }
 
@@ -388,7 +400,7 @@ async function simulateCommonMemoryOperations(page: Page): Promise<void> {
       id: i,
       name: `Item ${i}`,
       description: `Description for item ${i}`,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }));
   });
   await page.waitForTimeout(500);
@@ -424,7 +436,7 @@ async function readDomStats(page: Page): Promise<DomStats> {
   return page.evaluate(() => ({
     totalNodes: document.querySelectorAll('*').length,
     eventListeners: 0,
-    detachedNodes: 0
+    detachedNodes: 0,
   }));
 }
 
@@ -439,12 +451,14 @@ async function readGlobalObjectStats(page: Page): Promise<GlobalObjectStats> {
     return {
       total: globalKeys.length,
       customKeys: globalKeys.filter(key => {
-        return !key.startsWith('webkit') &&
-               !key.startsWith('chrome') &&
-               !key.startsWith('moz') &&
-               key !== 'constructor' &&
-               key !== 'prototype';
-      }).length
+        return (
+          !key.startsWith('webkit') &&
+          !key.startsWith('chrome') &&
+          !key.startsWith('moz') &&
+          key !== 'constructor' &&
+          key !== 'prototype'
+        );
+      }).length,
     };
   });
 }
@@ -507,7 +521,7 @@ function calculateMemoryScore(
     memoryUsageRate > 80 ? 10 : 0,
     totalNodes > 3000 ? 5 : 0,
     totalNodes > 5000 ? 10 : 0,
-    leakIndicatorCount * 10
+    leakIndicatorCount * 10,
   ];
 
   return penalties.reduce((score, penalty) => score - penalty, 100);
@@ -532,7 +546,10 @@ function buildMemoryOptimizationSuggestions(
     [memoryUsageRate > 70, '内存使用率较高，考虑实现内存回收机制'],
     [domStats.totalNodes > 3000, 'DOM 节点数量较多，考虑使用虚拟滚动或懒加载'],
     [globalObjectsCount.customKeys > 50, '全局对象属性较多，考虑使用模块化或命名空间'],
-    [memoryLeakIndicators.length > 0, '检测到潜在内存泄漏，建议使用 Chrome DevTools Memory Profiler 进行详细分析']
+    [
+      memoryLeakIndicators.length > 0,
+      '检测到潜在内存泄漏，建议使用 Chrome DevTools Memory Profiler 进行详细分析',
+    ],
   ];
 
   return checks.filter(([shouldSuggest]) => shouldSuggest).map(([, suggestion]) => suggestion);
@@ -556,10 +573,18 @@ function assertMemoryHealth(
   totalNodes: number,
   memoryScore: number
 ): void {
-  expect(usedMemoryMB, `应用内存占用应该小于 100MB，实际: ${usedMemoryMB.toFixed(2)} MB`).toBeLessThan(100);
-  expect(memoryUsageRate, `内存使用率不应超过 85%，实际: ${memoryUsageRate.toFixed(2)}%`).toBeLessThan(85);
+  expect(
+    usedMemoryMB,
+    `应用内存占用应该小于 100MB，实际: ${usedMemoryMB.toFixed(2)} MB`
+  ).toBeLessThan(100);
+  expect(
+    memoryUsageRate,
+    `内存使用率不应超过 85%，实际: ${memoryUsageRate.toFixed(2)}%`
+  ).toBeLessThan(85);
   expect(totalNodes, `DOM 节点数不应超过 5000，实际: ${totalNodes}`).toBeLessThan(5000);
-  expect(memoryScore, `内存评分应该至少为 60 分，当前: ${memoryScore} 分`).toBeGreaterThanOrEqual(60);
+  expect(memoryScore, `内存评分应该至少为 60 分，当前: ${memoryScore} 分`).toBeGreaterThanOrEqual(
+    60
+  );
 }
 
 async function readPerformanceMetrics(page: Page): Promise<Record<string, number>> {
@@ -681,7 +706,7 @@ async function readBlockingResources(page: Page): Promise<BlockingResource[]> {
         name: resource.name,
         type: resource.initiatorType,
         duration: resource.duration,
-        size: resource.transferSize
+        size: resource.transferSize,
       }));
   });
 }
@@ -695,7 +720,9 @@ function logBlockingResources(blockingResources: BlockingResource[]): void {
   console.log('\n⚠️ 检测到可能阻塞渲染的资源:');
   blockingResources.forEach((resource, index) => {
     console.log(`  ${index + 1}. ${resource.type}: ${resource.name}`);
-    console.log(`     耗时: ${resource.duration.toFixed(2)}ms, 大小: ${(resource.size / 1024).toFixed(2)}KB`);
+    console.log(
+      `     耗时: ${resource.duration.toFixed(2)}ms, 大小: ${(resource.size / 1024).toFixed(2)}KB`
+    );
   });
 }
 
@@ -709,7 +736,7 @@ async function readResourceStats(page: Page): Promise<ResourceStats> {
       图片数: 0,
       字体数: 0,
       总传输大小: 0,
-      平均加载时间: 0
+      平均加载时间: 0,
     };
     let totalDuration = 0;
 
@@ -718,7 +745,10 @@ async function readResourceStats(page: Page): Promise<ResourceStats> {
         stats.CSS文件数++;
       } else if (resource.initiatorType === 'script' || resource.name.endsWith('.js')) {
         stats.JS文件数++;
-      } else if (resource.initiatorType === 'img' || /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(resource.name)) {
+      } else if (
+        resource.initiatorType === 'img' ||
+        /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(resource.name)
+      ) {
         stats.图片数++;
       } else if (/\.(woff|woff2|ttf|otf|eot)$/i.test(resource.name)) {
         stats.字体数++;
@@ -763,8 +793,14 @@ function calculatePerformanceScore(
   resourceStats: ResourceStats
 ): number {
   const penalty =
-    sumThresholdPenalties(renderTime, [[1500, 10], [1800, 10]]) +
-    sumThresholdPenalties(performanceMetrics['TTFB'], [[300, 5], [400, 5]]) +
+    sumThresholdPenalties(renderTime, [
+      [1500, 10],
+      [1800, 10],
+    ]) +
+    sumThresholdPenalties(performanceMetrics['TTFB'], [
+      [300, 5],
+      [400, 5],
+    ]) +
     sumThresholdPenalties(performanceMetrics['First Contentful Paint'], [[1200, 10]]) +
     sumThresholdPenalties(lcpMetric, [[2000, 10]]) +
     sumThresholdPenalties(blockingResources.length, [[5, 10]]) +
@@ -790,11 +826,11 @@ function buildPerformanceSuggestions(
     [renderTime > 1500, '首屏渲染时间偏长，考虑优化关键渲染路径'],
     [
       Boolean(performanceMetrics['TTFB'] && performanceMetrics['TTFB'] > 300),
-      'TTFB 偏高，考虑优化服务器响应时间或使用 CDN'
+      'TTFB 偏高，考虑优化服务器响应时间或使用 CDN',
     ],
     [blockingResources.length > 5, '存在较多阻塞渲染的资源，考虑异步加载或延迟加载'],
     [resourceStats.总传输大小 > 1024 * 1024, '资源总大小较大，考虑压缩、代码分割或使用更小的库'],
-    [resourceStats.图片数 > 10, '图片数量较多，考虑使用懒加载或图片优化']
+    [resourceStats.图片数 > 10, '图片数量较多，考虑使用懒加载或图片优化'],
   ];
 
   return checks.filter(([shouldSuggest]) => shouldSuggest).map(([, suggestion]) => suggestion);
@@ -822,10 +858,10 @@ function assertPerformanceScore(performanceScore: number): void {
 async function readStorePresenceStatus(page: Page): Promise<StoreStatus> {
   return page.evaluate(() => {
     const results: Record<string, any> = {};
-    results['useAppStore存在'] = typeof (window as any).useAppStore !== 'undefined' &&
-                                  (window as any).useAppStore !== null;
-    results['appStore别名存在'] = typeof (window as any).appStore !== 'undefined' &&
-                                  (window as any).appStore !== null;
+    results['useAppStore存在'] =
+      typeof (window as any).useAppStore !== 'undefined' && (window as any).useAppStore !== null;
+    results['appStore别名存在'] =
+      typeof (window as any).appStore !== 'undefined' && (window as any).appStore !== null;
 
     const store = (window as any).useAppStore;
     if (!store) return results;
@@ -847,11 +883,12 @@ async function readStoreModuleStatus(page: Page): Promise<StoreStatus> {
         Scraper状态存在: state?.scraper !== undefined && state?.scraper !== null,
         Analysis状态存在: state?.analysis !== undefined && state?.analysis !== null,
         PromptLab状态存在: state?.promptlab !== undefined && state?.promptlab !== null,
-        KeywordTracker状态存在: state?.keywordTracker !== undefined && state?.keywordTracker !== null
+        KeywordTracker状态存在:
+          state?.keywordTracker !== undefined && state?.keywordTracker !== null,
       };
     } catch (error) {
       return {
-        状态获取错误: error instanceof Error ? error.message : String(error)
+        状态获取错误: error instanceof Error ? error.message : String(error),
       };
     }
   });
@@ -865,7 +902,7 @@ async function readStoreUiStatus(page: Page): Promise<StoreStatus> {
     return {
       'UI.currentTab': state.ui.currentTab || '未设置',
       'UI.theme': state.ui.theme || '未设置',
-      'UI.loading': state.ui.loading !== undefined ? state.ui.loading : '未设置'
+      'UI.loading': state.ui.loading !== undefined ? state.ui.loading : '未设置',
     };
   });
 }
@@ -879,7 +916,7 @@ async function readStoreActionStatus(page: Page): Promise<StoreStatus> {
       setCurrentTab方法存在: typeof state.setCurrentTab === 'function',
       setTheme方法存在: typeof state.setTheme === 'function',
       setLoading方法存在: typeof state.setLoading === 'function',
-      updateUI方法存在: typeof state.updateUI === 'function'
+      updateUI方法存在: typeof state.updateUI === 'function',
     };
   });
 }
@@ -889,21 +926,24 @@ async function readStoreStatus(page: Page): Promise<StoreStatus> {
     readStorePresenceStatus(page),
     readStoreModuleStatus(page),
     readStoreUiStatus(page),
-    readStoreActionStatus(page)
+    readStoreActionStatus(page),
   ]);
 
   return {
     ...presence,
     ...modules,
     ...ui,
-    ...actions
+    ...actions,
   };
 }
 
 function logStoreStatus(storeStatus: StoreStatus): void {
   console.log('📊 Zustand Store 初始化状态:');
   for (const [key, value] of Object.entries(storeStatus)) {
-    const icon = value === true || (typeof value === 'string' && !key.includes('错误') && value !== '未设置') ? '✅' : '❌';
+    const icon =
+      value === true || (typeof value === 'string' && !key.includes('错误') && value !== '未设置')
+        ? '✅'
+        : '❌';
     console.log(`  ${icon} ${key}: ${value}`);
   }
 }
@@ -923,7 +963,7 @@ function assertRequiredStoreStatus(storeStatus: StoreStatus): void {
     ['setCurrentTab方法存在', 'setCurrentTab() 方法应该存在'],
     ['setTheme方法存在', 'setTheme() 方法应该存在'],
     ['setLoading方法存在', 'setLoading() 方法应该存在'],
-    ['updateUI方法存在', 'updateUI() 方法应该存在']
+    ['updateUI方法存在', 'updateUI() 方法应该存在'],
   ];
 
   requiredChecks.forEach(([key, message]) => {
@@ -941,17 +981,19 @@ async function checkStoreReactivity(page: Page): Promise<boolean> {
           return;
         }
 
-        const initialTab = store.getState().ui.currentTab;
+        const initialLoading = Boolean(store.getState().ui.loading);
+        const targetLoading = !initialLoading;
         let changeDetected = false;
         const unsubscribe = store.subscribe((state: any) => {
-          if (state.ui.currentTab !== initialTab) changeDetected = true;
+          if (state.ui.loading === targetLoading) changeDetected = true;
         });
 
-        store.getState().setCurrentTab('test-tab');
+        store.getState().setLoading(targetLoading);
         setTimeout(() => {
-          const newTab = store.getState().ui.currentTab;
+          const newLoading = Boolean(store.getState().ui.loading);
+          store.getState().setLoading(initialLoading);
           unsubscribe();
-          resolve(newTab === 'test-tab' && changeDetected);
+          resolve(newLoading === targetLoading && changeDetected);
         }, 100);
       } catch (error) {
         console.error('Store 响应式测试失败:', error);
@@ -981,7 +1023,9 @@ function filterStoreErrors(errors: string[]): string[] {
 
 function assertNoStoreErrors(storeErrors: string[]): void {
   logNumberedItems('❌ 检测到 Store 相关错误:', storeErrors, message => console.error(message));
-  expect(storeErrors.length, `不应有 Store 相关错误，但检测到 ${storeErrors.length} 个错误`).toBe(0);
+  expect(storeErrors.length, `不应有 Store 相关错误，但检测到 ${storeErrors.length} 个错误`).toBe(
+    0
+  );
 }
 
 async function checkStoreActions(page: Page): Promise<boolean> {
@@ -1003,8 +1047,8 @@ async function checkStoreActions(page: Page): Promise<boolean> {
           const newState = store.getState();
           resolve(
             newState.ui.theme === 'dark' &&
-            newState.ui.loading === true &&
-            newState.ui.sidebarCollapsed === true
+              newState.ui.loading === true &&
+              newState.ui.sidebarCollapsed === true
           );
         }, 100);
       } catch (error) {
@@ -1036,7 +1080,7 @@ function countStoreFunctionality(
     storeStatus['setLoading方法存在'],
     storeStatus['updateUI方法存在'],
     storeReactivityWorks,
-    actionsWork
+    actionsWork,
   ];
 
   return checks.filter(status => status === true).length;
@@ -1045,8 +1089,8 @@ function countStoreFunctionality(
 async function readRouterStatus(page: Page): Promise<RouterStatus> {
   return page.evaluate(() => {
     const results: Record<string, any> = {};
-    results['Router对象存在'] = typeof (window as any).router !== 'undefined' &&
-                                (window as any).router !== null;
+    results['Router对象存在'] =
+      typeof (window as any).router !== 'undefined' && (window as any).router !== null;
     results['Router类存在'] = typeof (window as any).Router !== 'undefined';
 
     const router = (window as any).router;
@@ -1090,7 +1134,7 @@ function assertRequiredRouterStatus(routerStatus: RouterStatus): void {
     ['getCurrentRoute方法存在', 'getCurrentRoute() 方法应该存在'],
     ['getHistory方法存在', 'getHistory() 方法应该存在'],
     ['register方法存在', 'register() 方法应该存在'],
-    ['registerRoutes方法存在', 'registerRoutes() 方法应该存在']
+    ['registerRoutes方法存在', 'registerRoutes() 方法应该存在'],
   ];
 
   requiredChecks.forEach(([key, message]) => {
@@ -1103,10 +1147,10 @@ async function checkRouterEventListeners(page: Page): Promise<boolean> {
     return new Promise<boolean>(resolve => {
       const testPopstate = () => {
         const event = new PopStateEvent('popstate', {
-          state: { routeId: 'home' }
+          state: { routeId: 'home' },
         });
         const originalPushState = window.history.pushState;
-        window.history.pushState = function(...args) {
+        window.history.pushState = function (...args) {
           return originalPushState.apply(this, args);
         };
 
@@ -1204,12 +1248,15 @@ function assertNoRouterErrors(routerErrors: string[]): void {
 
 async function readRouteSupportStatus(page: Page): Promise<Record<string, boolean>> {
   return page.evaluate(() => ({
-    RouteGuard存在: typeof (window as any).routeGuard !== 'undefined' ||
-                    typeof (window as any).RouteGuardManager !== 'undefined',
-    RouteMiddleware存在: typeof (window as any).routeMiddleware !== 'undefined' ||
-                         typeof (window as any).RouteMiddlewareManager !== 'undefined',
-    RouteErrorHandler存在: typeof (window as any).routeErrorHandler !== 'undefined' ||
-                           typeof (window as any).RouteErrorHandlerManager !== 'undefined'
+    RouteGuard存在:
+      typeof (window as any).routeGuard !== 'undefined' ||
+      typeof (window as any).RouteGuardManager !== 'undefined',
+    RouteMiddleware存在:
+      typeof (window as any).routeMiddleware !== 'undefined' ||
+      typeof (window as any).RouteMiddlewareManager !== 'undefined',
+    RouteErrorHandler存在:
+      typeof (window as any).routeErrorHandler !== 'undefined' ||
+      typeof (window as any).RouteErrorHandlerManager !== 'undefined',
   }));
 }
 
@@ -1238,7 +1285,7 @@ function countRouterFunctionality(
     routerStatus['registerRoutes方法存在'],
     eventListenersRegistered,
     navigationWorks,
-    historyWorks
+    historyWorks,
   ];
 
   return checks.filter(status => status === true).length;
@@ -1255,10 +1302,10 @@ function assertRouterFunctionality(functionalityCount: number): void {
 async function readAlpineStatus(page: Page): Promise<AlpineStatus> {
   return page.evaluate(() => {
     const results: Record<string, any> = {};
-    results['Alpine对象存在'] = typeof (window as any).Alpine !== 'undefined' &&
-                                (window as any).Alpine !== null;
-    results['Alpine已启动'] = (window as any).Alpine &&
-                              typeof (window as any).Alpine.version !== 'undefined';
+    results['Alpine对象存在'] =
+      typeof (window as any).Alpine !== 'undefined' && (window as any).Alpine !== null;
+    results['Alpine已启动'] =
+      (window as any).Alpine && typeof (window as any).Alpine.version !== 'undefined';
 
     const alpine = (window as any).Alpine;
     if (alpine) {
@@ -1286,7 +1333,7 @@ function assertRequiredAlpineStatus(alpineStatus: AlpineStatus): void {
     ['Alpine已启动', 'Alpine.js 应该已启动'],
     ['data方法存在', 'Alpine.data() 方法应该存在'],
     ['store方法存在', 'Alpine.store() 方法应该存在'],
-    ['start方法存在', 'Alpine.start() 方法应该存在']
+    ['start方法存在', 'Alpine.start() 方法应该存在'],
   ];
 
   requiredChecks.forEach(([key, message]) => {
@@ -1349,7 +1396,10 @@ function filterAlpineErrors(errors: string[]): string[] {
 
 function assertNoAlpineErrors(alpineErrors: string[]): void {
   logNumberedItems('❌ 检测到 Alpine 相关错误:', alpineErrors, message => console.error(message));
-  expect(alpineErrors.length, `不应有 Alpine 相关错误，但检测到 ${alpineErrors.length} 个错误`).toBe(0);
+  expect(
+    alpineErrors.length,
+    `不应有 Alpine 相关错误，但检测到 ${alpineErrors.length} 个错误`
+  ).toBe(0);
 }
 
 async function checkAlpineComponentRegistration(page: Page): Promise<boolean> {
@@ -1366,7 +1416,7 @@ async function checkAlpineComponentRegistration(page: Page): Promise<boolean> {
           message: 'test',
           getMessage() {
             return this.message;
-          }
+          },
         }));
         resolve(true);
       } catch (error) {
@@ -1389,7 +1439,7 @@ function countAlpineFunctionality(
     alpineStatus['store方法存在'],
     alpineStatus['start方法存在'],
     alpineReactivityWorks,
-    componentInitWorks
+    componentInitWorks,
   ];
 
   return checks.filter(status => status === true).length;
@@ -1397,24 +1447,29 @@ function countAlpineFunctionality(
 
 async function hasAppContainer(page: Page): Promise<boolean> {
   return page.evaluate(() => {
-    return window.hasOwnProperty('__container__') || typeof (window as any).container !== 'undefined';
+    return (
+      window.hasOwnProperty('__container__') || typeof (window as any).container !== 'undefined'
+    );
   });
 }
 
 async function readServicesStatus(page: Page): Promise<ServicesStatus> {
   return page.evaluate(() => ({
-    'Alpine.js': typeof (window as any).Alpine !== 'undefined' &&
-                 (window as any).Alpine !== null,
-    EventBus: typeof (window as any).eventBus !== 'undefined' ||
-              typeof (window as any).EventBus !== 'undefined',
-    Router: typeof (window as any).router !== 'undefined' ||
-            typeof (window as any).Router !== 'undefined',
-    LoadingManager: typeof (window as any).loadingManager !== 'undefined' ||
-                    typeof (window as any).LoadingManager !== 'undefined',
-    ActionRegistry: typeof (window as any).actionRegistry !== 'undefined' ||
-                    typeof (window as any).ActionRegistry !== 'undefined',
+    'Alpine.js': typeof (window as any).Alpine !== 'undefined' && (window as any).Alpine !== null,
+    EventBus:
+      typeof (window as any).eventBus !== 'undefined' ||
+      typeof (window as any).EventBus !== 'undefined',
+    Router:
+      typeof (window as any).router !== 'undefined' ||
+      typeof (window as any).Router !== 'undefined',
+    LoadingManager:
+      typeof (window as any).loadingManager !== 'undefined' ||
+      typeof (window as any).LoadingManager !== 'undefined',
+    ActionRegistry:
+      typeof (window as any).actionRegistry !== 'undefined' ||
+      typeof (window as any).ActionRegistry !== 'undefined',
     State: typeof (window as any).state !== 'undefined',
-    AppStore: typeof (window as any).useAppStore !== 'undefined'
+    AppStore: typeof (window as any).useAppStore !== 'undefined',
   }));
 }
 
@@ -1472,8 +1527,10 @@ async function checkAppInitialized(page: Page): Promise<boolean> {
 
 async function checkRouterWorks(page: Page): Promise<boolean> {
   return page.evaluate(() => {
-    return typeof (window as any).router !== 'undefined' &&
-           typeof (window as any).router.navigate === 'function';
+    return (
+      typeof (window as any).router !== 'undefined' &&
+      typeof (window as any).router.navigate === 'function'
+    );
   });
 }
 
@@ -1489,386 +1546,410 @@ function assertServiceInitializationRate(servicesStatus: ServicesStatus): void {
   ).toBeGreaterThanOrEqual(0.8);
 }
 
-  test('1.5.3 应用成功启动（无 JS 错误）', async ({ page }) => {
-    // 设置控制台错误监听器
-    const consoleListener = setupConsoleErrorListener(page);
+test('1.5.3 应用成功启动（无 JS 错误）', async ({ page }) => {
+  // 设置控制台错误监听器
+  const consoleListener = setupConsoleErrorListener(page);
 
-    // 导航到应用首页
-    await gotoStartupPage(page);
+  // 导航到应用首页
+  await gotoStartupPage(page);
 
-    // 等待主内容区域加载
-    await page.waitForSelector('#main-content', {
-      state: 'visible',
-      timeout: 10000
+  // 等待主内容区域加载
+  await page.waitForSelector('#main-content', {
+    state: 'visible',
+    timeout: 10000,
+  });
+
+  // 验证：无控制台错误
+  const errors = consoleListener.getErrors();
+
+  // 如果有错误，输出详细信息以便调试
+  if (errors.length > 0) {
+    console.error('❌ 检测到控制台错误:');
+    errors.forEach((error, index) => {
+      console.error(`  ${index + 1}. ${error}`);
     });
+  }
 
-    // 验证：无控制台错误
-    const errors = consoleListener.getErrors();
-    
-    // 如果有错误，输出详细信息以便调试
-    if (errors.length > 0) {
-      console.error('❌ 检测到控制台错误:');
-      errors.forEach((error, index) => {
-        console.error(`  ${index + 1}. ${error}`);
-      });
-    }
+  // 断言：应该没有 JavaScript 错误
+  expect(errors.length, `应用启动时不应有 JavaScript 错误，但检测到 ${errors.length} 个错误`).toBe(
+    0
+  );
 
-    // 断言：应该没有 JavaScript 错误
-    expect(errors.length, `应用启动时不应有 JavaScript 错误，但检测到 ${errors.length} 个错误`).toBe(0);
+  // 验证：页面标题正确
+  const title = await page.title();
+  expect(title).toBe('Amazing Amazon Architect');
 
-    // 验证：页面标题正确
-    const title = await page.title();
-    expect(title).toBe('Amazing Amazon Architect');
+  // 验证：主要 DOM 元素存在
+  await expect(page.locator('body')).toBeVisible();
+  await expect(page.locator('.header')).toBeVisible();
+  await expect(page.locator('#main-content')).toBeVisible();
 
-    // 验证：主要 DOM 元素存在
-    await expect(page.locator('body')).toBeVisible();
-    await expect(page.locator('.header')).toBeVisible();
-    await expect(page.locator('#main-content')).toBeVisible();
+  // 验证：无页面错误（pageerror 事件）
+  // 这已经被 setupConsoleErrorListener 捕获了
+  expect(consoleListener.hasErrors()).toBe(false);
 
-    // 验证：无页面错误（pageerror 事件）
-    // 这已经被 setupConsoleErrorListener 捕获了
-    expect(consoleListener.hasErrors()).toBe(false);
+  console.log('✅ 应用启动测试通过：无 JavaScript 错误');
+});
 
-    console.log('✅ 应用启动测试通过：无 JavaScript 错误');
+test('1.5.4 测试所有服务初始化成功', async ({ page }) => {
+  // 设置控制台错误监听器
+  const consoleListener = setupConsoleErrorListener(page);
+
+  // 导航到应用首页
+  await gotoStartupPage(page);
+
+  // 等待应用初始化完成事件
+  await page.waitForFunction(
+    () => {
+      return window.hasOwnProperty('Alpine') && (window as any).Alpine !== undefined;
+    },
+    { timeout: 10000 }
+  );
+
+  // 等待一段时间确保所有服务初始化完成
+  await page.waitForTimeout(2000);
+
+  console.log(`📊 DI 容器: ${(await hasAppContainer(page)) ? '✅ 已初始化' : '⚠️ 未暴露'}`);
+  const servicesStatus = await readServicesStatus(page);
+  logServicesStatus(servicesStatus);
+  assertCoreServicesInitialized(
+    servicesStatus,
+    filterCriticalInitializationErrors(consoleListener.getErrors())
+  );
+
+  const appInitialized = await checkAppInitialized(page);
+  expect(appInitialized, '应用应该触发初始化完成事件').toBe(true);
+
+  if (await checkRouterWorks(page)) console.log('✅ 路由系统已正常初始化');
+  assertServiceInitializationRate(servicesStatus);
+
+  console.log('✅ 所有服务初始化测试通过');
+});
+
+test('1.5.5 测试 Alpine.js 正确加载', async ({ page }) => {
+  // 设置控制台错误监听器
+  const consoleListener = setupConsoleErrorListener(page);
+
+  // 导航到应用首页
+  await gotoStartupPage(page);
+
+  // 等待 Alpine.js 加载完成
+  await page.waitForFunction(
+    () => {
+      return (
+        window.hasOwnProperty('Alpine') &&
+        (window as any).Alpine !== undefined &&
+        (window as any).Alpine !== null
+      );
+    },
+    { timeout: 10000 }
+  );
+
+  console.log('📊 开始检测 Alpine.js 加载状态...');
+
+  const alpineStatus = await readAlpineStatus(page);
+  logAlpineStatus(alpineStatus);
+  assertRequiredAlpineStatus(alpineStatus);
+  logRegisteredAlpineComponents(await readRegisteredAlpineComponents(page));
+
+  const alpineReactivityWorks = await checkAlpineReactivity(page);
+  console.log(`📊 Alpine 响应式功能: ${alpineReactivityWorks ? '✅ 正常工作' : '❌ 未正常工作'}`);
+  expect(alpineReactivityWorks, 'Alpine.js 响应式功能应该正常工作').toBe(true);
+
+  assertNoAlpineErrors(filterAlpineErrors(consoleListener.getErrors()));
+
+  const componentInitWorks = await checkAlpineComponentRegistration(page);
+  console.log(`📊 Alpine 组件注册功能: ${componentInitWorks ? '✅ 正常工作' : '❌ 未正常工作'}`);
+  expect(componentInitWorks, 'Alpine.js 组件注册功能应该正常工作').toBe(true);
+
+  const functionalityCount = countAlpineFunctionality(
+    alpineStatus,
+    alpineReactivityWorks,
+    componentInitWorks
+  );
+  console.log(`\n📊 Alpine.js 功能统计: ${functionalityCount}/7 项功能正常`);
+  expect(functionalityCount, 'Alpine.js 所有核心功能都应该正常工作').toBe(7);
+
+  console.log('✅ Alpine.js 加载测试通过');
+});
+
+test('1.5.7 测试路由系统初始化', async ({ page }) => {
+  // 设置控制台错误监听器
+  const consoleListener = setupConsoleErrorListener(page);
+
+  // 导航到应用首页
+  await gotoStartupPage(page);
+
+  // 等待应用初始化完成
+  await page.waitForFunction(
+    () => {
+      return window.hasOwnProperty('Alpine') && (window as any).Alpine !== undefined;
+    },
+    { timeout: 10000 }
+  );
+
+  // 等待路由系统初始化
+  await page.waitForTimeout(2000);
+
+  console.log('📊 开始检测路由系统初始化状态...');
+
+  const routerStatus = await readRouterStatus(page);
+  logRouterStatus(routerStatus);
+  assertRequiredRouterStatus(routerStatus);
+
+  const eventListenersRegistered = await checkRouterEventListeners(page);
+  console.log(`📊 路由事件监听器: ${eventListenersRegistered ? '✅ 已注册' : '❌ 未注册'}`);
+  expect(eventListenersRegistered, '路由事件监听器应该已注册').toBe(true);
+
+  const navigationWorks = await checkRouterNavigation(page);
+  console.log(`📊 路由导航功能: ${navigationWorks ? '✅ 正常工作' : '❌ 未正常工作'}`);
+  expect(navigationWorks, '路由导航功能应该正常工作').toBe(true);
+
+  const currentRoute = routerStatus['当前路由'];
+  const hasCurrentRoute = currentRoute !== null && currentRoute !== undefined;
+  console.log(`📊 当前路由状态: ${hasCurrentRoute ? '✅ 已设置' : '⚠️ 未设置'}`);
+
+  const historyWorks = await checkRouterHistory(page);
+  console.log(`📊 路由历史记录功能: ${historyWorks ? '✅ 正常工作' : '❌ 未正常工作'}`);
+  expect(historyWorks, '路由历史记录功能应该正常工作').toBe(true);
+
+  assertNoRouterErrors(filterRouterErrors(consoleListener.getErrors()));
+  logRouteSupportStatus(await readRouteSupportStatus(page));
+
+  const functionalityCount = countRouterFunctionality(
+    routerStatus,
+    eventListenersRegistered,
+    navigationWorks,
+    historyWorks
+  );
+  console.log(`\n📊 路由系统功能统计: ${functionalityCount}/12 项功能正常`);
+  assertRouterFunctionality(functionalityCount);
+
+  console.log('✅ 路由系统初始化测试通过');
+});
+
+test('1.5.8 采集首屏性能并验证 dev server 启动未失控', async ({ page }) => {
+  console.log('📊 开始测试首屏渲染时间...');
+
+  // 记录导航开始时间
+  const navigationStartTime = Date.now();
+
+  // 导航到应用首页
+  await page.goto('/', {
+    waitUntil: 'domcontentloaded',
+    timeout: 30000,
   });
 
-  test('1.5.4 测试所有服务初始化成功', async ({ page }) => {
-    // 设置控制台错误监听器
-    const consoleListener = setupConsoleErrorListener(page);
-
-    // 导航到应用首页
-    await gotoStartupPage(page);
-
-    // 等待应用初始化完成事件
-    await page.waitForFunction(() => {
-      return window.hasOwnProperty('Alpine') && 
-             (window as any).Alpine !== undefined;
-    }, { timeout: 10000 });
-
-    // 等待一段时间确保所有服务初始化完成
-    await page.waitForTimeout(2000);
-
-    console.log(`📊 DI 容器: ${(await hasAppContainer(page)) ? '✅ 已初始化' : '⚠️ 未暴露'}`);
-    const servicesStatus = await readServicesStatus(page);
-    logServicesStatus(servicesStatus);
-    assertCoreServicesInitialized(
-      servicesStatus,
-      filterCriticalInitializationErrors(consoleListener.getErrors())
-    );
-
-    const appInitialized = await checkAppInitialized(page);
-    expect(appInitialized, '应用应该触发初始化完成事件').toBe(true);
-
-    if (await checkRouterWorks(page)) console.log('✅ 路由系统已正常初始化');
-    assertServiceInitializationRate(servicesStatus);
-
-    console.log('✅ 所有服务初始化测试通过');
+  // 等待主内容区域可见
+  await page.waitForSelector('#main-content', {
+    state: 'visible',
+    timeout: 10000,
   });
 
-  test('1.5.5 测试 Alpine.js 正确加载', async ({ page }) => {
-    // 设置控制台错误监听器
-    const consoleListener = setupConsoleErrorListener(page);
+  // 记录首屏渲染完成时间
+  const firstRenderTime = Date.now();
 
-    // 导航到应用首页
-    await gotoStartupPage(page);
+  // 计算首屏渲染时间
+  const renderTime = firstRenderTime - navigationStartTime;
 
-    // 等待 Alpine.js 加载完成
-    await page.waitForFunction(() => {
-      return window.hasOwnProperty('Alpine') && 
-             (window as any).Alpine !== undefined &&
-             (window as any).Alpine !== null;
-    }, { timeout: 10000 });
+  console.log(`📊 首屏渲染时间: ${renderTime}ms`);
 
-    console.log('📊 开始检测 Alpine.js 加载状态...');
+  const performanceMetrics = await readPerformanceMetrics(page);
+  logPerformanceMetrics(performanceMetrics);
+  const lcpMetric = await readLargestContentfulPaint(page);
+  recordLargestContentfulPaint(performanceMetrics, lcpMetric);
 
-    const alpineStatus = await readAlpineStatus(page);
-    logAlpineStatus(alpineStatus);
-    assertRequiredAlpineStatus(alpineStatus);
-    logRegisteredAlpineComponents(await readRegisteredAlpineComponents(page));
+  const criticalRenderingPath = performanceMetrics['DOMContentLoaded'] || renderTime;
+  console.log(`\n📊 关键渲染路径时间: ${criticalRenderingPath.toFixed(2)}ms`);
+  assertCorePerformanceMetrics(renderTime, performanceMetrics, lcpMetric);
 
-    const alpineReactivityWorks = await checkAlpineReactivity(page);
-    console.log(`📊 Alpine 响应式功能: ${alpineReactivityWorks ? '✅ 正常工作' : '❌ 未正常工作'}`);
-    expect(alpineReactivityWorks, 'Alpine.js 响应式功能应该正常工作').toBe(true);
+  const blockingResources = await readBlockingResources(page);
+  logBlockingResources(blockingResources);
+  const resourceStats = await readResourceStats(page);
+  logResourceStats(resourceStats);
 
-    assertNoAlpineErrors(filterAlpineErrors(consoleListener.getErrors()));
+  const performanceScore = calculatePerformanceScore(
+    renderTime,
+    performanceMetrics,
+    lcpMetric,
+    blockingResources,
+    resourceStats
+  );
+  console.log(`\n📊 性能评分: ${performanceScore}/100`);
+  console.log(`📊 性能评级: ${getPerformanceRating(performanceScore)}`);
+  logPerformanceSuggestions(
+    buildPerformanceSuggestions(renderTime, performanceMetrics, blockingResources, resourceStats)
+  );
+  assertPerformanceScore(performanceScore);
 
-    const componentInitWorks = await checkAlpineComponentRegistration(page);
-    console.log(`📊 Alpine 组件注册功能: ${componentInitWorks ? '✅ 正常工作' : '❌ 未正常工作'}`);
-    expect(componentInitWorks, 'Alpine.js 组件注册功能应该正常工作').toBe(true);
+  console.log('\n✅ 首屏渲染时间测试通过');
+});
 
-    const functionalityCount = countAlpineFunctionality(
-      alpineStatus,
-      alpineReactivityWorks,
-      componentInitWorks
-    );
-    console.log(`\n📊 Alpine.js 功能统计: ${functionalityCount}/7 项功能正常`);
-    expect(functionalityCount, 'Alpine.js 所有核心功能都应该正常工作').toBe(7);
+test('1.5.9 测试内存占用 < 100MB', async ({ page }) => {
+  console.log('📊 开始测试内存占用...');
 
-    console.log('✅ Alpine.js 加载测试通过');
-  });
+  // 导航到应用首页
+  await gotoStartupPage(page);
 
-  test('1.5.7 测试路由系统初始化', async ({ page }) => {
-    // 设置控制台错误监听器
-    const consoleListener = setupConsoleErrorListener(page);
+  // 等待应用完全初始化
+  await page.waitForFunction(
+    () => {
+      return window.hasOwnProperty('Alpine') && (window as any).Alpine !== undefined;
+    },
+    { timeout: 10000 }
+  );
 
-    // 导航到应用首页
-    await gotoStartupPage(page);
+  // 等待所有异步操作完成
+  await page.waitForTimeout(3000);
 
-    // 等待应用初始化完成
-    await page.waitForFunction(() => {
-      return window.hasOwnProperty('Alpine') && 
-             (window as any).Alpine !== undefined;
-    }, { timeout: 10000 });
+  const initialMemory = await readBrowserMemory(page);
+  if (!initialMemory) {
+    skipWhenMemoryApiUnavailable();
+    return;
+  }
 
-    // 等待路由系统初始化
-    await page.waitForTimeout(2000);
+  logMemorySnapshot('📊 初始内存使用情况:', initialMemory);
 
-    console.log('📊 开始检测路由系统初始化状态...');
+  console.log('\n📊 执行常见操作以模拟实际使用...');
+  await simulateCommonMemoryOperations(page);
 
-    const routerStatus = await readRouterStatus(page);
-    logRouterStatus(routerStatus);
-    assertRequiredRouterStatus(routerStatus);
+  const afterOperationsMemory = await readBrowserMemory(page);
+  logMemoryGrowth(initialMemory, afterOperationsMemory);
+  await triggerBrowserGarbageCollection(page);
 
-    const eventListenersRegistered = await checkRouterEventListeners(page);
-    console.log(`📊 路由事件监听器: ${eventListenersRegistered ? '✅ 已注册' : '❌ 未注册'}`);
-    expect(eventListenersRegistered, '路由事件监听器应该已注册').toBe(true);
+  const finalMemory = await readBrowserMemory(page);
+  if (!finalMemory) {
+    console.error('❌ 无法获取最终内存使用情况');
+    return;
+  }
 
-    const navigationWorks = await checkRouterNavigation(page);
-    console.log(`📊 路由导航功能: ${navigationWorks ? '✅ 正常工作' : '❌ 未正常工作'}`);
-    expect(navigationWorks, '路由导航功能应该正常工作').toBe(true);
+  logMemorySnapshot('\n📊 最终内存使用情况:', finalMemory);
 
-    const currentRoute = routerStatus['当前路由'];
-    const hasCurrentRoute = currentRoute !== null && currentRoute !== undefined;
-    console.log(`📊 当前路由状态: ${hasCurrentRoute ? '✅ 已设置' : '⚠️ 未设置'}`);
+  const memoryUsageRate = (finalMemory.usedJSHeapSize / finalMemory.jsHeapSizeLimit) * 100;
+  const usedMemoryMB = toMegabytes(finalMemory.usedJSHeapSize);
+  const totalMemoryMB = toMegabytes(finalMemory.totalJSHeapSize);
+  console.log(`\n📊 内存占用: ${usedMemoryMB.toFixed(2)} MB / ${totalMemoryMB.toFixed(2)} MB`);
+  console.log(`📊 内存使用率: ${memoryUsageRate.toFixed(2)}%`);
 
-    const historyWorks = await checkRouterHistory(page);
-    console.log(`📊 路由历史记录功能: ${historyWorks ? '✅ 正常工作' : '❌ 未正常工作'}`);
-    expect(historyWorks, '路由历史记录功能应该正常工作').toBe(true);
+  const domStats = await readDomStats(page);
+  logDomStats(domStats);
+  const globalObjectsCount = await readGlobalObjectStats(page);
+  logGlobalObjectStats(globalObjectsCount);
 
-    assertNoRouterErrors(filterRouterErrors(consoleListener.getErrors()));
-    logRouteSupportStatus(await readRouteSupportStatus(page));
-
-    const functionalityCount = countRouterFunctionality(
-      routerStatus,
-      eventListenersRegistered,
-      navigationWorks,
-      historyWorks
-    );
-    console.log(`\n📊 路由系统功能统计: ${functionalityCount}/12 项功能正常`);
-    assertRouterFunctionality(functionalityCount);
-
-    console.log('✅ 路由系统初始化测试通过');
-  });
-
-  test('1.5.8 采集首屏性能并验证 dev server 启动未失控', async ({ page }) => {
-    console.log('📊 开始测试首屏渲染时间...');
-
-    // 记录导航开始时间
-    const navigationStartTime = Date.now();
-
-    // 导航到应用首页
-    await page.goto('/', {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000
-    });
-
-    // 等待主内容区域可见
-    await page.waitForSelector('#main-content', {
-      state: 'visible',
-      timeout: 10000
-    });
-
-    // 记录首屏渲染完成时间
-    const firstRenderTime = Date.now();
-
-    // 计算首屏渲染时间
-    const renderTime = firstRenderTime - navigationStartTime;
-
-    console.log(`📊 首屏渲染时间: ${renderTime}ms`);
-
-    const performanceMetrics = await readPerformanceMetrics(page);
-    logPerformanceMetrics(performanceMetrics);
-    const lcpMetric = await readLargestContentfulPaint(page);
-    recordLargestContentfulPaint(performanceMetrics, lcpMetric);
-
-    const criticalRenderingPath = performanceMetrics['DOMContentLoaded'] || renderTime;
-    console.log(`\n📊 关键渲染路径时间: ${criticalRenderingPath.toFixed(2)}ms`);
-    assertCorePerformanceMetrics(renderTime, performanceMetrics, lcpMetric);
-
-    const blockingResources = await readBlockingResources(page);
-    logBlockingResources(blockingResources);
-    const resourceStats = await readResourceStats(page);
-    logResourceStats(resourceStats);
-
-    const performanceScore = calculatePerformanceScore(
-      renderTime,
-      performanceMetrics,
-      lcpMetric,
-      blockingResources,
-      resourceStats
-    );
-    console.log(`\n📊 性能评分: ${performanceScore}/100`);
-    console.log(`📊 性能评级: ${getPerformanceRating(performanceScore)}`);
-    logPerformanceSuggestions(
-      buildPerformanceSuggestions(renderTime, performanceMetrics, blockingResources, resourceStats)
-    );
-    assertPerformanceScore(performanceScore);
-
-    console.log('\n✅ 首屏渲染时间测试通过');
-  });
-
-  test('1.5.9 测试内存占用 < 100MB', async ({ page }) => {
-    console.log('📊 开始测试内存占用...');
-
-    // 导航到应用首页
-    await gotoStartupPage(page);
-
-    // 等待应用完全初始化
-    await page.waitForFunction(() => {
-      return window.hasOwnProperty('Alpine') && 
-             (window as any).Alpine !== undefined;
-    }, { timeout: 10000 });
-
-    // 等待所有异步操作完成
-    await page.waitForTimeout(3000);
-
-    const initialMemory = await readBrowserMemory(page);
-    if (!initialMemory) {
-      skipWhenMemoryApiUnavailable();
-      return;
-    }
-
-    logMemorySnapshot('📊 初始内存使用情况:', initialMemory);
-
-    console.log('\n📊 执行常见操作以模拟实际使用...');
-    await simulateCommonMemoryOperations(page);
-
-    const afterOperationsMemory = await readBrowserMemory(page);
-    logMemoryGrowth(initialMemory, afterOperationsMemory);
-    await triggerBrowserGarbageCollection(page);
-
-    const finalMemory = await readBrowserMemory(page);
-    if (!finalMemory) {
-      console.error('❌ 无法获取最终内存使用情况');
-      return;
-    }
-
-    logMemorySnapshot('\n📊 最终内存使用情况:', finalMemory);
-
-    const memoryUsageRate = (finalMemory.usedJSHeapSize / finalMemory.jsHeapSizeLimit) * 100;
-    const usedMemoryMB = toMegabytes(finalMemory.usedJSHeapSize);
-    const totalMemoryMB = toMegabytes(finalMemory.totalJSHeapSize);
-    console.log(`\n📊 内存占用: ${usedMemoryMB.toFixed(2)} MB / ${totalMemoryMB.toFixed(2)} MB`);
-    console.log(`📊 内存使用率: ${memoryUsageRate.toFixed(2)}%`);
-
-    const domStats = await readDomStats(page);
-    logDomStats(domStats);
-    const globalObjectsCount = await readGlobalObjectStats(page);
-    logGlobalObjectStats(globalObjectsCount);
-
-    const memoryLeakIndicators = collectMemoryLeakIndicators(
-      initialMemory,
-      afterOperationsMemory,
-      memoryUsageRate,
-      domStats,
-      globalObjectsCount
-    );
-    logMemoryLeakIndicators(memoryLeakIndicators);
-    const memoryScore = calculateMemoryScore(
+  const memoryLeakIndicators = collectMemoryLeakIndicators(
+    initialMemory,
+    afterOperationsMemory,
+    memoryUsageRate,
+    domStats,
+    globalObjectsCount
+  );
+  logMemoryLeakIndicators(memoryLeakIndicators);
+  const memoryScore = calculateMemoryScore(
+    usedMemoryMB,
+    memoryUsageRate,
+    domStats.totalNodes,
+    memoryLeakIndicators.length
+  );
+  console.log(`\n📊 内存评分: ${memoryScore}/100`);
+  console.log(`📊 内存评级: ${getMemoryRating(memoryScore)}`);
+  logMemoryOptimizationSuggestions(
+    buildMemoryOptimizationSuggestions(
       usedMemoryMB,
       memoryUsageRate,
-      domStats.totalNodes,
-      memoryLeakIndicators.length
-    );
-    console.log(`\n📊 内存评分: ${memoryScore}/100`);
-    console.log(`📊 内存评级: ${getMemoryRating(memoryScore)}`);
-    logMemoryOptimizationSuggestions(
-      buildMemoryOptimizationSuggestions(
-        usedMemoryMB,
-        memoryUsageRate,
-        domStats,
-        globalObjectsCount,
-        memoryLeakIndicators
-      )
-    );
-    assertMemoryHealth(usedMemoryMB, memoryUsageRate, domStats.totalNodes, memoryScore);
+      domStats,
+      globalObjectsCount,
+      memoryLeakIndicators
+    )
+  );
+  assertMemoryHealth(usedMemoryMB, memoryUsageRate, domStats.totalNodes, memoryScore);
 
-    console.log('\n✅ 内存占用测试通过');
-  });
+  console.log('\n✅ 内存占用测试通过');
+});
 
-  test('1.5.10 测试无 console.error 输出', async ({ page }) => {
-    console.log('📊 开始测试控制台错误输出...');
+test('1.5.10 测试无 console.error 输出', async ({ page }) => {
+  console.log('📊 开始测试控制台错误输出...');
 
-    // 设置控制台错误监听器
-    const consoleListener = setupConsoleErrorListener(page);
+  // 设置控制台错误监听器
+  const consoleListener = setupConsoleErrorListener(page);
 
-    // 导航到应用首页
-    await gotoStartupPage(page);
+  // 导航到应用首页
+  await gotoStartupPage(page);
 
-    // 等待应用完全初始化
-    await page.waitForFunction(() => {
-      return window.hasOwnProperty('Alpine') && 
-             (window as any).Alpine !== undefined;
-    }, { timeout: 10000 });
+  // 等待应用完全初始化
+  await page.waitForFunction(
+    () => {
+      return window.hasOwnProperty('Alpine') && (window as any).Alpine !== undefined;
+    },
+    { timeout: 10000 }
+  );
 
-    // 等待所有异步操作完成
-    await page.waitForTimeout(3000);
+  // 等待所有异步操作完成
+  await page.waitForTimeout(3000);
 
-    console.log('📊 检查控制台错误输出...');
+  console.log('📊 检查控制台错误输出...');
 
-    const errors = consoleListener.getErrors();
-    const errorCategories = categorizeConsoleErrors(errors);
-    const errorSignals = await collectStartupErrorSignals(page);
-    const errorReport = buildStartupErrorReport(errors, errorCategories, errorSignals);
-    const errorScore = calculateStartupErrorScore(errorReport);
+  const errors = consoleListener.getErrors();
+  const errorCategories = categorizeConsoleErrors(errors);
+  const errorSignals = await collectStartupErrorSignals(page);
+  const errorReport = buildStartupErrorReport(errors, errorCategories, errorSignals);
+  const errorScore = calculateStartupErrorScore(errorReport);
 
-    logConsoleErrorSummary(errors.length, errorCategories);
-    logStartupErrorDetails(errorCategories, errorSignals);
-    console.log(`\n📊 错误严重程度评分: ${errorScore}/100`);
-    console.log(`📊 错误评级: ${getStartupErrorRating(errorScore)}`);
-    logStartupErrorSuggestions(buildStartupErrorSuggestions(errorReport));
-    assertNoStartupErrors(errorReport, errorScore);
+  logConsoleErrorSummary(errors.length, errorCategories);
+  logStartupErrorDetails(errorCategories, errorSignals);
+  console.log(`\n📊 错误严重程度评分: ${errorScore}/100`);
+  console.log(`📊 错误评级: ${getStartupErrorRating(errorScore)}`);
+  logStartupErrorSuggestions(buildStartupErrorSuggestions(errorReport));
+  assertNoStartupErrors(errorReport, errorScore);
 
-    console.log('\n✅ 控制台错误输出测试通过');
-  });
+  console.log('\n✅ 控制台错误输出测试通过');
+});
 
-  test('1.5.6 测试 Zustand store 初始化', async ({ page }) => {
-    // 设置控制台错误监听器
-    const consoleListener = setupConsoleErrorListener(page);
+test('1.5.6 测试 Zustand store 初始化', async ({ page }) => {
+  // 设置控制台错误监听器
+  const consoleListener = setupConsoleErrorListener(page);
 
-    // 导航到应用首页
-    await gotoStartupPage(page);
+  // 导航到应用首页
+  await gotoStartupPage(page);
 
-    // 等待 Zustand store 加载完成
-    await page.waitForFunction(() => {
-      return window.hasOwnProperty('useAppStore') && 
-             (window as any).useAppStore !== undefined &&
-             (window as any).useAppStore !== null;
-    }, { timeout: 10000 });
+  // 等待 Zustand store 加载完成
+  await page.waitForFunction(
+    () => {
+      return (
+        window.hasOwnProperty('useAppStore') &&
+        (window as any).useAppStore !== undefined &&
+        (window as any).useAppStore !== null
+      );
+    },
+    { timeout: 10000 }
+  );
 
-    console.log('📊 开始检测 Zustand Store 初始化状态...');
+  console.log('📊 开始检测 Zustand Store 初始化状态...');
 
-    const storeStatus = await readStoreStatus(page);
-    logStoreStatus(storeStatus);
-    assertRequiredStoreStatus(storeStatus);
+  const storeStatus = await readStoreStatus(page);
+  logStoreStatus(storeStatus);
+  assertRequiredStoreStatus(storeStatus);
 
-    const storeReactivityWorks = await checkStoreReactivity(page);
-    console.log(`📊 Store 响应式功能: ${storeReactivityWorks ? '✅ 正常工作' : '❌ 未正常工作'}`);
-    expect(storeReactivityWorks, 'Zustand store 响应式功能应该正常工作').toBe(true);
+  const storeReactivityWorks = await checkStoreReactivity(page);
+  console.log(`📊 Store 响应式功能: ${storeReactivityWorks ? '✅ 正常工作' : '❌ 未正常工作'}`);
+  expect(storeReactivityWorks, 'Zustand store 响应式功能应该正常工作').toBe(true);
 
-    const storePersistenceWorks = await checkStorePersistence(page);
-    console.log(`📊 Store 持久化功能: ${storePersistenceWorks ? '✅ 已启用' : '⚠️ 未检测到'}`);
+  const storePersistenceWorks = await checkStorePersistence(page);
+  console.log(`📊 Store 持久化功能: ${storePersistenceWorks ? '✅ 已启用' : '⚠️ 未检测到'}`);
 
-    const storeErrors = filterStoreErrors(consoleListener.getErrors());
-    assertNoStoreErrors(storeErrors);
+  const storeErrors = filterStoreErrors(consoleListener.getErrors());
+  assertNoStoreErrors(storeErrors);
 
-    const actionsWork = await checkStoreActions(page);
-    console.log(`📊 Store Actions 功能: ${actionsWork ? '✅ 正常工作' : '❌ 未正常工作'}`);
-    expect(actionsWork, 'Zustand store Actions 应该正常工作').toBe(true);
+  const actionsWork = await checkStoreActions(page);
+  console.log(`📊 Store Actions 功能: ${actionsWork ? '✅ 正常工作' : '❌ 未正常工作'}`);
+  expect(actionsWork, 'Zustand store Actions 应该正常工作').toBe(true);
 
-    const functionalityCount = countStoreFunctionality(storeStatus, storeReactivityWorks, actionsWork);
-    console.log(`\n📊 Zustand Store 功能统计: ${functionalityCount}/16 项功能正常`);
-    expect(functionalityCount, 'Zustand Store 所有核心功能都应该正常工作').toBeGreaterThanOrEqual(15);
+  const functionalityCount = countStoreFunctionality(
+    storeStatus,
+    storeReactivityWorks,
+    actionsWork
+  );
+  console.log(`\n📊 Zustand Store 功能统计: ${functionalityCount}/16 项功能正常`);
+  expect(functionalityCount, 'Zustand Store 所有核心功能都应该正常工作').toBeGreaterThanOrEqual(15);
 
-    console.log('✅ Zustand Store 初始化测试通过');
-  });
+  console.log('✅ Zustand Store 初始化测试通过');
+});

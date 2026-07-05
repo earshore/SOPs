@@ -136,7 +136,8 @@ class NegativeReviewModule extends BaseModule {
 
 const negativeReviewModule = new NegativeReviewModule('negative_review');
 
-export const mount = (container: HTMLElement): Promise<void> => negativeReviewModule.mount(container);
+export const mount = (container: HTMLElement): Promise<void> =>
+  negativeReviewModule.mount(container);
 export const unmount = (): void => {
   negativeReviewModule.unmount();
 };
