@@ -51,6 +51,13 @@ function readMarketingCalendarTemplate(): string {
   );
 }
 
+function readMarketingCalendarEntry(): string {
+  return readFileSync(
+    join(process.cwd(), 'src/modules/amz_hub/views/practice/marketing_calendar/index.ts'),
+    'utf8'
+  );
+}
+
 function readAppModalSource(): string {
   return readFileSync(join(process.cwd(), 'src/components/modal/AppModal.ts'), 'utf8');
 }
@@ -121,8 +128,8 @@ describe('apiEndpoints CSP policy', () => {
       const styleSrcElem = extractCspDirective(csp, 'style-src-elem');
       const styleSrcAttr = extractCspDirective(csp, 'style-src-attr');
 
-      expect(styleSrc).toBe("'self' https://cdn.jsdelivr.net");
-      expect(styleSrcElem).toBe("'self' https://cdn.jsdelivr.net");
+      expect(styleSrc).toBe("'self'");
+      expect(styleSrcElem).toBe("'self'");
       expect(styleSrcAttr).toBe("'unsafe-inline'");
       expect(styleSrc).not.toContain("'unsafe-inline'");
       expect(styleSrcElem).not.toContain("'unsafe-inline'");
@@ -155,13 +162,17 @@ describe('apiEndpoints CSP policy', () => {
     }
   });
 
-  it('uses SRI for the remaining fixed-version stylesheet CDN', () => {
+  it('bundles flag icons locally instead of loading them from the stylesheet CDN', () => {
     const template = readMarketingCalendarTemplate();
+    const entry = readMarketingCalendarEntry();
 
-    expect(template).toContain('https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2');
-    expect(template).toContain(
-      'integrity="sha384-mEneSLan5jEffu+TOnGhf+aAynm+K7RzMB0ADBpwxjXcj8txXEQ4+6PqBePn5CoW"'
-    );
-    expect(template).toContain('crossorigin="anonymous"');
+    expect(template).not.toContain('cdn.jsdelivr.net');
+    expect(entry).not.toContain('flag-icons/css/flag-icons.min.css');
+    expect(entry).toContain("import './flag-icons.local.css';");
+
+    for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
+      expect(extractCspDirective(csp, 'style-src')).not.toContain('cdn.jsdelivr.net');
+      expect(extractCspDirective(csp, 'style-src-elem')).not.toContain('cdn.jsdelivr.net');
+    }
   });
 });

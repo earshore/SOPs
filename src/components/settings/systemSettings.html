@@ -63,22 +63,42 @@
       <div class="settings-panel-body">
         <nav class="settings-panel-nav" aria-label="系统设置分类">
           <div class="settings-panel-nav-title">分类</div>
-          <a class="settings-panel-nav-link" href="#settings-section-llm">
+          <button
+            type="button"
+            class="settings-panel-nav-link"
+            aria-controls="settings-section-llm"
+            @click="scrollToSection('settings-section-llm')"
+          >
             <i class="fas fa-robot" aria-hidden="true"></i>
             <span>模型配置</span>
-          </a>
-          <a class="settings-panel-nav-link" href="#settings-section-network">
+          </button>
+          <button
+            type="button"
+            class="settings-panel-nav-link"
+            aria-controls="settings-section-network"
+            @click="scrollToSection('settings-section-network')"
+          >
             <i class="fas fa-network-wired" aria-hidden="true"></i>
             <span>采集网络</span>
-          </a>
-          <a class="settings-panel-nav-link" href="#settings-section-data">
+          </button>
+          <button
+            type="button"
+            class="settings-panel-nav-link"
+            aria-controls="settings-section-data"
+            @click="scrollToSection('settings-section-data')"
+          >
             <i class="fas fa-database" aria-hidden="true"></i>
             <span>本地数据</span>
-          </a>
-          <a class="settings-panel-nav-link" href="#settings-section-performance">
+          </button>
+          <button
+            type="button"
+            class="settings-panel-nav-link"
+            aria-controls="settings-section-performance"
+            @click="scrollToSection('settings-section-performance')"
+          >
             <i class="fas fa-chart-line" aria-hidden="true"></i>
             <span>性能监控</span>
-          </a>
+          </button>
         </nav>
         <div class="settings-panel-sections space-y-7">
           <!-- Section 1: LLM Config -->

@@ -722,6 +722,23 @@ it('emits settings bridge events through EventBus', () => {
   unsubscribeClose();
 });
 
+it('scrolls settings sections without changing the URL hash', () => {
+  const panel = createPanel();
+  const section = document.createElement('section');
+  const scrollIntoView = vi.fn();
+
+  window.location.hash = '#/more';
+  section.id = 'settings-section-network';
+  section.scrollIntoView = scrollIntoView;
+  document.body.append(section);
+
+  panel.scrollToSection('settings-section-network');
+
+  expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+  expect(window.location.hash).toBe('#/more');
+  window.location.hash = '';
+});
+
 it('keeps the real settings template optimized for PC category scanning', () => {
   const template = readFileSync(
     resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
@@ -734,10 +751,11 @@ it('keeps the real settings template optimized for PC category scanning', () => 
 
   expect(template).toContain('max-w-[min(860px,calc(100vw-48px))]');
   expect(template).toContain('aria-label="系统设置分类"');
-  expect(template).toContain('href="#settings-section-llm"');
-  expect(template).toContain('href="#settings-section-network"');
-  expect(template).toContain('href="#settings-section-data"');
-  expect(template).toContain('href="#settings-section-performance"');
+  expect(template).not.toContain('href="#settings-section-');
+  expect(template).toContain('@click="scrollToSection(\'settings-section-llm\')"');
+  expect(template).toContain('@click="scrollToSection(\'settings-section-network\')"');
+  expect(template).toContain('@click="scrollToSection(\'settings-section-data\')"');
+  expect(template).toContain('@click="scrollToSection(\'settings-section-performance\')"');
   expect(template).toContain('id="settings-section-llm"');
   expect(template).toContain('id="settings-section-network"');
   expect(template).toContain('id="settings-section-data"');

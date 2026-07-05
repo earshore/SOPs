@@ -2,6 +2,9 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
+const DEFAULT_LLM_ENDPOINT = 'https://new.hongecb.store/v1';
+const DEFAULT_LLM_MODELS_URL = `${DEFAULT_LLM_ENDPOINT}/models`;
+
 const CORE_ROUTES = [
   { label: 'Home', path: '/home' },
   { label: 'SOPs', path: '/sops' },
@@ -68,6 +71,15 @@ async function openRoute(page: Page, path: string): Promise<void> {
   await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => undefined);
 }
 
+async function waitForSettingsPanel(page: Page): Promise<void> {
+  await page.waitForFunction(() => {
+    const root = document.querySelector('[x-data="settingsPanel"]') as
+      | (HTMLElement & { _x_dataStack?: unknown[] })
+      | null;
+    return Array.isArray(root?._x_dataStack);
+  });
+}
+
 test.describe('release candidate smoke', () => {
   for (const route of CORE_ROUTES) {
     test(`${route.label} renders without console or route errors`, async ({ page }) => {
@@ -99,5 +111,96 @@ test.describe('release candidate smoke', () => {
         `${route.label} should not overflow the mobile viewport`
       ).toBeLessThanOrEqual(24);
     }
+  });
+
+  test('marketing calendar renders local flag icons without stylesheet CDN requests', async ({
+    page,
+  }) => {
+    const consoleListener = setupConsoleErrorListener(page);
+    const stylesheetCdnRequests: string[] = [];
+
+    page.on('request', request => {
+      const url = request.url();
+      if (url.includes('cdn.jsdelivr.net')) {
+        stylesheetCdnRequests.push(url);
+      }
+    });
+
+    await openRoute(page, '/amz-hub/practice/marketing-calendar');
+    await expectNoRouteErrorText(page);
+
+    const germanFlag = page.locator('.fi-de').first();
+    await expect(germanFlag).toBeVisible();
+    await expect
+      .poll(
+        () =>
+          germanFlag.evaluate(element => window.getComputedStyle(element).backgroundImage),
+        { message: 'marketing calendar should render bundled flag icon backgrounds' }
+      )
+      .not.toBe('none');
+
+    expect(stylesheetCdnRequests, 'marketing calendar should not load flag icons from a CDN').toEqual(
+      []
+    );
+    expect(
+      consoleListener.getErrors(),
+      'marketing calendar smoke should not emit console/page errors'
+    ).toEqual([]);
+  });
+
+  test('settings LLM config defaults to the direct new-api endpoint and blocks empty key model sync', async ({
+    page,
+  }) => {
+    const consoleListener = setupConsoleErrorListener(page);
+    const interceptedModelRequests: string[] = [];
+
+    await page.addInitScript(() => {
+      window.localStorage.removeItem('llm_active_provider');
+      window.localStorage.removeItem('llm_new_api');
+      window.localStorage.removeItem('secure_llm_key_new_api');
+    });
+
+    await page.route(`${DEFAULT_LLM_MODELS_URL}**`, async route => {
+      interceptedModelRequests.push(route.request().url());
+      await route.abort('blockedbyclient');
+    });
+
+    await openRoute(page, '/home');
+    await expectNoRouteErrorText(page);
+    await waitForSettingsPanel(page);
+
+    await page.locator('#nav-more').click();
+    await page.getByRole('button', { name: '全局设置' }).click();
+
+    await expect(page.getByRole('heading', { name: '系统设置' })).toBeVisible();
+
+    const llmSection = page.locator('#settings-section-llm');
+    await expect(llmSection.getByRole('heading', { name: 'LLM 模型配置' })).toBeVisible();
+    await expect(llmSection.locator('#llm-endpoint')).toHaveValue(DEFAULT_LLM_ENDPOINT);
+    await expect(llmSection.locator('#llm-api-key')).toHaveValue('');
+
+    const modelRequest = page
+      .waitForRequest(request => request.url().startsWith(DEFAULT_LLM_MODELS_URL), {
+        timeout: 1000,
+      })
+      .then(() => true)
+      .catch(() => false);
+
+    await llmSection.getByRole('button', { name: '获取模型列表' }).click();
+
+    await expect(
+      page.locator('#toast-container .toast.toast-warning .toast-content strong').last()
+    ).toHaveText('请先输入 API Key');
+    expect(await modelRequest, 'empty API key should not issue any direct /models request').toBe(
+      false
+    );
+    expect(
+      interceptedModelRequests,
+      'empty API key should stop model sync before any direct /models request'
+    ).toEqual([]);
+    expect(
+      consoleListener.getErrors(),
+      'settings LLM smoke should not emit console/page errors'
+    ).toEqual([]);
   });
 });

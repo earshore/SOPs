@@ -143,6 +143,7 @@ interface SettingsPanelData {
   clearLocalCache(): Promise<void>;
   clearLocalDataBucket(bucketId: LocalDataBucketId): Promise<void>;
   clearAllLocalData(): Promise<void>;
+  scrollToSection(sectionId: string): void;
   formatBytes(bytes: number): string;
   getProxyDisplayName(type: string): string;
   isDangerousEndpoint(endpoint: string): boolean;
@@ -828,6 +829,15 @@ const settingsPanelBehavior: SettingsPanelPart = {
     // 清理 EventBus 订阅
     this._unsubscribers?.forEach(unsub => unsub());
     this._unsubscribers = [];
+  },
+
+  scrollToSection(sectionId: string): void {
+    const section = document.getElementById(sectionId);
+    if (typeof section?.scrollIntoView !== 'function') {
+      return;
+    }
+
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
   },
 
   // 打开性能监控面板

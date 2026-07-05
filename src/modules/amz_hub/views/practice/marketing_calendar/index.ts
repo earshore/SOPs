@@ -12,6 +12,7 @@ import type { IStorageService } from '@/types/services';
 import { amzf_countries, amzf_months, amzf_events } from '../../../constants/amz_hub_constants';
 import { configCenter } from '../../../../../common/config/ConfigCenter';
 import type { MarketingEvent, CountryInfo } from '@/types/modules-business';
+import './flag-icons.local.css';
 import './styles.css';
 
 const AMZF_HISTORY_KEY = 'amzf_search_history';
