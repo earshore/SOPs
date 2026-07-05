@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildCompetitorReviewTemplate, mount, unmount } from '@/modules/sops/views/growth/competitor_monitoring/index';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
+  loadTemplate: vi.fn(),
   template: `
     <section>
       <input id="competitor-review-owner" value="运营负责人" />
@@ -14,8 +14,12 @@ const mocks = vi.hoisted(() => ({
   `,
 }));
 
-vi.mock('@/common/utils/viewLoader', () => ({
-  loadTemplate: vi.fn(() => Promise.resolve(mocks.template)),
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
+  SafeTemplateLoader: {
+    getInstance: () => ({
+      loadTemplate: mocks.loadTemplate,
+    }),
+  },
 }));
 
 vi.mock('@/services/storageService', () => ({
@@ -36,6 +40,8 @@ describe('Competitor monitoring review workflow', () => {
       return fallback;
     });
     mocks.storageSet.mockClear();
+    mocks.loadTemplate.mockResolvedValue(mocks.template);
+    mocks.loadTemplate.mockClear();
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
@@ -68,7 +74,9 @@ describe('Competitor monitoring review workflow', () => {
 
     await window.sops_copyCompetitorReviewTemplate?.();
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/growth/competitor_monitoring/template.html');
+    expect(mocks.loadTemplate).toHaveBeenCalledWith(
+      'src/modules/sops/views/growth/competitor_monitoring/template.html'
+    );
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：运营小李'));
     expect(StorageService.set).toHaveBeenCalledWith('competitor_review_owner_v1', '运营小李');
     expect(global.alert).toHaveBeenCalledWith('已复制竞品周复盘模板，可粘贴到周报或归档文档。');

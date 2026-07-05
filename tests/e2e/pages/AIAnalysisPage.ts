@@ -182,8 +182,8 @@ export class AIAnalysisPage extends BasePage {
     
     // 提示词预览面板
     promptPanelToggle: 'button:has-text("AI 提示词模板")',
-    promptPanel: '.space-y-3.animate-fade-in-up',
-    promptItem: (index: number) => `.space-y-3 > div:nth-child(${index + 1})`,
+    promptPanel: '[data-testid="ai-analysis-prompt-panel"]',
+    promptItem: '[data-testid="ai-analysis-prompt-item"]',
     promptCopyButton: 'button:has-text("复制")',
     totalTokenCount: '.text-emerald-700:has-text("tokens")',
     
@@ -673,8 +673,8 @@ export class AIAnalysisPage extends BasePage {
    * 显示提示词面板
    */
   async showPromptPanel(): Promise<void> {
-    const isVisible = await this.isVisible(this.selectors.promptPanel);
-    if (!isVisible) {
+    const isExpanded = await this.isPromptPanelExpanded();
+    if (!isExpanded) {
       await this.togglePromptPanel();
     }
   }
@@ -683,8 +683,8 @@ export class AIAnalysisPage extends BasePage {
    * 隐藏提示词面板
    */
   async hidePromptPanel(): Promise<void> {
-    const isVisible = await this.isVisible(this.selectors.promptPanel);
-    if (isVisible) {
+    const isExpanded = await this.isPromptPanelExpanded();
+    if (isExpanded) {
       await this.togglePromptPanel();
     }
   }
@@ -695,7 +695,7 @@ export class AIAnalysisPage extends BasePage {
    * @param index - 提示词项索引
    */
   async expandPromptItem(index: number): Promise<void> {
-    const item = this.page.locator(this.selectors.promptItem(index));
+    const item = this.page.locator(this.selectors.promptItem).nth(index);
     const button = item.locator('button').first();
     await button.click();
     await this.wait(300); // 等待展开动画
@@ -708,7 +708,7 @@ export class AIAnalysisPage extends BasePage {
    */
   async copyPrompt(index: number): Promise<void> {
     await this.expandPromptItem(index);
-    const item = this.page.locator(this.selectors.promptItem(index));
+    const item = this.page.locator(this.selectors.promptItem).nth(index);
     const copyButton = item.locator(this.selectors.promptCopyButton);
     await copyButton.click();
     await this.wait(500); // 等待复制完成

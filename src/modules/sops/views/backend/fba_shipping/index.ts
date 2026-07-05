@@ -1,4 +1,5 @@
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import BaseModule from '../../../../../common/BaseModule';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '../../../../../common/utils/security';
 import {
   registerActionsWithLegacy,
@@ -9,8 +10,6 @@ import { copyTextToClipboard } from '../../../utils/clipboard';
 
 const RELEASE_OWNER_STORAGE_KEY = 'fba_shipping_owner_v1';
 const DEFAULT_RELEASE_OWNER = '物流/供应链负责人';
-
-let registeredActions: string[] = [];
 
 function normalizeReleaseOwner(owner: unknown): string {
   return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_RELEASE_OWNER;
@@ -115,21 +114,39 @@ declare global {
 }
 
 // FBA发货与物流跟踪 SOP
-export async function mount(container: HTMLElement): Promise<void> {
-  const html = await loadTemplate('src/modules/sops/views/backend/fba_shipping/template.html');
-  // ✅ 安全: 静态HTML模板，无用户输入
-  setSafeHtml(container, html);
-  container.classList.add('fade-in');
-  restoreReleaseOwner();
+class FbaShippingModule extends BaseModule {
+  private registeredActions: string[] = [];
 
-  registeredActions = registerActionsWithLegacy({
-    sops_copyFbaShippingTemplate: copyFbaShippingTemplate as (...args: unknown[]) => void,
-  });
-}
+  protected async render(): Promise<void> {
+    if (!this.container) return;
 
-export function unmount(): void {
-  if (registeredActions.length > 0) {
-    unregisterActions(registeredActions);
-    registeredActions = [];
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/sops/views/backend/fba_shipping/template.html'
+    );
+    // ✅ 安全: 静态HTML模板，无用户输入
+    setSafeHtml(this.container, html);
+    this.container.classList.add('fade-in');
+  }
+
+  protected async init(): Promise<void> {
+    restoreReleaseOwner();
+
+    this.registeredActions = registerActionsWithLegacy({
+      sops_copyFbaShippingTemplate: copyFbaShippingTemplate as (...args: unknown[]) => void,
+    });
+  }
+
+  protected onUnmount(): void {
+    if (this.registeredActions.length > 0) {
+      unregisterActions(this.registeredActions);
+      this.registeredActions = [];
+    }
   }
 }
+
+const fbaShippingModule = new FbaShippingModule('fba_shipping');
+
+export const mount = (container: HTMLElement): Promise<void> => fbaShippingModule.mount(container);
+export const unmount = (): void => {
+  fbaShippingModule.unmount();
+};

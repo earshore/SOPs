@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildRestrictedWordsTemplate, mount, unmount } from '@/modules/sops/views/growth/restricted_words/index';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
+  loadTemplate: vi.fn(),
   initPanel: vi.fn(),
   cleanupPanel: vi.fn(),
   template: `
@@ -16,8 +16,12 @@ const mocks = vi.hoisted(() => ({
   `,
 }));
 
-vi.mock('@/common/utils/viewLoader', () => ({
-  loadTemplate: vi.fn(() => Promise.resolve(mocks.template)),
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
+  SafeTemplateLoader: {
+    getInstance: () => ({
+      loadTemplate: mocks.loadTemplate,
+    }),
+  },
 }));
 
 vi.mock('@/services/storageService', () => ({
@@ -43,6 +47,8 @@ describe('Restricted words review workflow', () => {
       return fallback;
     });
     mocks.storageSet.mockClear();
+    mocks.loadTemplate.mockResolvedValue(mocks.template);
+    mocks.loadTemplate.mockClear();
     mocks.initPanel.mockClear();
     mocks.cleanupPanel.mockClear();
     Object.defineProperty(navigator, 'clipboard', {
@@ -77,7 +83,9 @@ describe('Restricted words review workflow', () => {
 
     await window.sops_copyRestrictedWordsTemplate?.();
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/growth/restricted_words/template.html');
+    expect(mocks.loadTemplate).toHaveBeenCalledWith(
+      'src/modules/sops/views/growth/restricted_words/template.html'
+    );
     expect(mocks.initPanel).toHaveBeenCalled();
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：合规小周'));
     expect(StorageService.set).toHaveBeenCalledWith('restricted_words_owner_v1', '合规小周');

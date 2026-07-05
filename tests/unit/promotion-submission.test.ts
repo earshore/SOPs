@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildPromotionSubmissionTemplate, mount, unmount } from '@/modules/sops/views/growth/promotion_submission/index';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
+  loadTemplate: vi.fn(),
   template: `
     <section>
       <input id="promotion-submission-owner" value="运营负责人" />
@@ -14,8 +14,12 @@ const mocks = vi.hoisted(() => ({
   `,
 }));
 
-vi.mock('@/common/utils/viewLoader', () => ({
-  loadTemplate: vi.fn(() => Promise.resolve(mocks.template)),
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
+  SafeTemplateLoader: {
+    getInstance: () => ({
+      loadTemplate: mocks.loadTemplate,
+    }),
+  },
 }));
 
 vi.mock('@/services/storageService', () => ({
@@ -36,6 +40,8 @@ describe('Promotion submission archive workflow', () => {
       return fallback;
     });
     mocks.storageSet.mockClear();
+    mocks.loadTemplate.mockResolvedValue(mocks.template);
+    mocks.loadTemplate.mockClear();
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
@@ -69,7 +75,9 @@ describe('Promotion submission archive workflow', () => {
 
     await window.sops_copyPromotionSubmissionTemplate?.();
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/growth/promotion_submission/template.html');
+    expect(mocks.loadTemplate).toHaveBeenCalledWith(
+      'src/modules/sops/views/growth/promotion_submission/template.html'
+    );
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：运营小周'));
     expect(StorageService.set).toHaveBeenCalledWith('promotion_submission_owner_v1', '运营小周');
     expect(global.alert).toHaveBeenCalledWith('已复制促销提报/复盘模板，可粘贴到周报或归档文档。');

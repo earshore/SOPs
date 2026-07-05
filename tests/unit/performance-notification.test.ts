@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildPerformanceNotificationTemplate, mount, unmount } from '@/modules/sops/views/safety/performance_notification/index';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
+  loadTemplate: vi.fn(),
   template: `
     <section>
       <input id="performance-notification-owner" value="账号安全负责人" />
@@ -14,8 +14,12 @@ const mocks = vi.hoisted(() => ({
   `,
 }));
 
-vi.mock('@/common/utils/viewLoader', () => ({
-  loadTemplate: vi.fn(() => Promise.resolve(mocks.template)),
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
+  SafeTemplateLoader: {
+    getInstance: () => ({
+      loadTemplate: mocks.loadTemplate,
+    }),
+  },
 }));
 
 vi.mock('@/services/storageService', () => ({
@@ -36,6 +40,8 @@ describe('Performance notification report workflow', () => {
       return fallback;
     });
     mocks.storageSet.mockClear();
+    mocks.loadTemplate.mockResolvedValue(mocks.template);
+    mocks.loadTemplate.mockClear();
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
@@ -68,7 +74,9 @@ describe('Performance notification report workflow', () => {
 
     await window.sops_copyPerformanceNotificationTemplate?.();
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/safety/performance_notification/template.html');
+    expect(mocks.loadTemplate).toHaveBeenCalledWith(
+      'src/modules/sops/views/safety/performance_notification/template.html'
+    );
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('上报负责人：主管小周'));
     expect(StorageService.set).toHaveBeenCalledWith('performance_notification_owner_v1', '主管小周');
     expect(global.alert).toHaveBeenCalledWith('已复制绩效通知上报复盘模板，可粘贴到工作群或归档文档。');

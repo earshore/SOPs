@@ -4,8 +4,8 @@
  */
 
 import BaseModule from '../../../../../common/BaseModule';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '../../../../../common/utils/security';
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
 import {
   registerActionsWithLegacy,
   unregisterActions,
@@ -336,7 +336,7 @@ class PromotionSubmissionModule extends BaseModule {
    * 挂载模块
    */
   async mount(container: HTMLElement): Promise<void> {
-    const html = await loadTemplate(
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
       'src/modules/sops/views/growth/promotion_submission/template.html'
     );
     // ✅ 安全: 静态HTML模板，无用户输入

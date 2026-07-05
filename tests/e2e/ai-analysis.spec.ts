@@ -26,7 +26,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       await expect(page).toHaveTitle(/Amazing Amazon Architect/);
 
       // 验证：主要元素可见
-      await expect(page.locator('h2:has-text("AI 智能分析")')).toBeVisible();
+      await expect(page.getByRole('heading', { name: /AI\s*智能分析/ })).toBeVisible();
       await expect(page.locator('[data-selection-panel-toggle]')).toBeVisible();
 
       // 验证：无 JavaScript 错误
@@ -600,7 +600,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       await aiAnalysis.navigate();
 
       // 验证：主要元素仍然可见
-      await expect(page.locator('h2:has-text("AI 智能分析")')).toBeVisible();
+      await expect(page.getByRole('heading', { name: /AI\s*智能分析/ })).toBeVisible();
       await expect(page.locator('[data-selection-panel-toggle]')).toBeVisible();
       await expect(page.locator('button:has-text("开始分析")')).toBeVisible();
 
@@ -615,7 +615,7 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
       await aiAnalysis.navigate();
 
       // 验证：主要元素仍然可见
-      await expect(page.locator('h2:has-text("AI 智能分析")')).toBeVisible();
+      await expect(page.getByRole('heading', { name: /AI\s*智能分析/ })).toBeVisible();
       await expect(page.locator('[data-selection-panel-toggle]')).toBeVisible();
 
       console.log('✅ 平板端显示正常');

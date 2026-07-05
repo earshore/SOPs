@@ -1,4 +1,5 @@
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import BaseModule from '../../../../../common/BaseModule';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '../../../../../common/utils/security';
 import {
   registerActionsWithLegacy,
@@ -9,8 +10,6 @@ import { copyTextToClipboard } from '../../../utils/clipboard';
 
 const REVIEW_OWNER_STORAGE_KEY = 'product_compliance_owner_v1';
 const DEFAULT_REVIEW_OWNER = '合规负责人';
-
-let registeredActions: string[] = [];
 
 function normalizeReviewOwner(owner: unknown): string {
   return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_REVIEW_OWNER;
@@ -106,23 +105,42 @@ declare global {
 }
 
 // 产品Listing合规性 SOP
-export async function mount(container: HTMLElement): Promise<void> {
-  const html = await loadTemplate('src/modules/sops/views/safety/product_compliance/template.html');
-  // ✅ 安全: 静态HTML模板，无用户输入
-  setSafeHtml(container, html);
-  container.classList.add('fade-in');
-  restoreReviewOwner();
+class ProductComplianceModule extends BaseModule {
+  private registeredActions: string[] = [];
 
-  registeredActions = registerActionsWithLegacy({
-    sops_copyProductComplianceTemplate: copyProductComplianceTemplate as (
-      ...args: unknown[]
-    ) => void,
-  });
-}
+  protected async render(): Promise<void> {
+    if (!this.container) return;
 
-export function unmount(): void {
-  if (registeredActions.length > 0) {
-    unregisterActions(registeredActions);
-    registeredActions = [];
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/sops/views/safety/product_compliance/template.html'
+    );
+    // ✅ 安全: 静态HTML模板，无用户输入
+    setSafeHtml(this.container, html);
+    this.container.classList.add('fade-in');
+  }
+
+  protected async init(): Promise<void> {
+    restoreReviewOwner();
+
+    this.registeredActions = registerActionsWithLegacy({
+      sops_copyProductComplianceTemplate: copyProductComplianceTemplate as (
+        ...args: unknown[]
+      ) => void,
+    });
+  }
+
+  protected onUnmount(): void {
+    if (this.registeredActions.length > 0) {
+      unregisterActions(this.registeredActions);
+      this.registeredActions = [];
+    }
   }
 }
+
+const productComplianceModule = new ProductComplianceModule('product_compliance');
+
+export const mount = (container: HTMLElement): Promise<void> =>
+  productComplianceModule.mount(container);
+export const unmount = (): void => {
+  productComplianceModule.unmount();
+};

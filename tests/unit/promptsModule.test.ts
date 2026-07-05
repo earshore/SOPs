@@ -65,7 +65,10 @@ beforeEach(() => {
   it('mounts template content, renders categories, and lists prompt cards', async () => {
     const container = await mountPrompts();
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/more/views/explore/prompts/template.html');
+    expect(loadTemplate).toHaveBeenCalledWith(
+      '/src/modules/more/views/explore/prompts/template.html',
+      { disableFadeIn: true }
+    );
     expect(container.classList.contains('fade-in')).toBe(true);
     expect(container.querySelector('#category-container')?.textContent).toContain('全部');
     expect(container.querySelectorAll('.category-btn').length).toBeGreaterThan(1);

@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildBrandInfringementTemplate, mount, unmount } from '@/modules/sops/views/safety/brand_infringement/index';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
+  loadTemplate: vi.fn(),
   template: `
     <section>
       <input id="brand-infringement-owner" value="品牌/合规负责人" />
@@ -14,8 +14,12 @@ const mocks = vi.hoisted(() => ({
   `,
 }));
 
-vi.mock('@/common/utils/viewLoader', () => ({
-  loadTemplate: vi.fn(() => Promise.resolve(mocks.template)),
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
+  SafeTemplateLoader: {
+    getInstance: () => ({
+      loadTemplate: mocks.loadTemplate,
+    }),
+  },
 }));
 
 vi.mock('@/services/storageService', () => ({
@@ -36,6 +40,8 @@ describe('Brand infringement review workflow', () => {
       return fallback;
     });
     mocks.storageSet.mockClear();
+    mocks.loadTemplate.mockResolvedValue(mocks.template);
+    mocks.loadTemplate.mockClear();
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
@@ -68,7 +74,9 @@ describe('Brand infringement review workflow', () => {
 
     await window.sops_copyBrandInfringementTemplate?.();
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/safety/brand_infringement/template.html');
+    expect(mocks.loadTemplate).toHaveBeenCalledWith(
+      'src/modules/sops/views/safety/brand_infringement/template.html'
+    );
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：合规小周'));
     expect(StorageService.set).toHaveBeenCalledWith('brand_infringement_owner_v1', '合规小周');
     expect(global.alert).toHaveBeenCalledWith('已复制品牌/侵权审核复盘模板，可粘贴到周报或归档文档。');

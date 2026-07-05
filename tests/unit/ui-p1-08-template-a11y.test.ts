@@ -4,30 +4,72 @@ import { describe, expect, it } from 'vitest';
 
 const readTemplate = (path: string): string => readFileSync(resolve(process.cwd(), path), 'utf8');
 
+function readTemplateFragment(path: string): DocumentFragment {
+  const template = document.createElement('template');
+  template.innerHTML = readTemplate(path);
+  return template.content;
+}
+
+function querySelectorDeep(root: ParentNode, selector: string): Element | null {
+  const element = root.querySelector(selector);
+  if (element) {
+    return element;
+  }
+
+  for (const template of Array.from(root.querySelectorAll('template'))) {
+    const nested = querySelectorDeep(template.content, selector);
+    if (nested) {
+      return nested;
+    }
+  }
+
+  return null;
+}
+
+function requireElement(root: ParentNode, selector: string): Element {
+  const element = querySelectorDeep(root, selector);
+  expect(element, selector).not.toBeNull();
+  return element as Element;
+}
+
+function normalizeText(node: Node): string {
+  return (node.textContent ?? '').replace(/\s+/g, ' ').trim();
+}
+
 describe('UI-P1-08 template semantics', () => {
   it('keeps AI Analysis progress and settings controls announced', () => {
-    const html = readTemplate(
+    const root = readTemplateFragment(
       'src/modules/app_center/views/master_analysis/ai_analysis/template.html'
     );
 
-    expect(html).toContain('role="status" aria-live="polite" aria-atomic="true"');
-    expect(html).toContain('role="progressbar"');
-    expect(html).toContain(':aria-valuenow="progressAriaValue"');
-    expect(html).toContain('role="radiogroup"');
-    expect(html).toContain('aria-labelledby="ai-analysis-scheduling-title"');
-    expect(html).toContain('aria-describedby="ai-analysis-cache-helper"');
+    requireElement(root, '[role="status"][aria-live="polite"][aria-atomic="true"]');
+
+    const progressbar = requireElement(
+      root,
+      '[role="progressbar"][aria-labelledby="ai-analysis-progress-label"]'
+    );
+    expect(progressbar.getAttribute(':aria-valuenow')).toBe('progressAriaValue');
+
+    const schedulingGroup = requireElement(
+      root,
+      '[role="radiogroup"][aria-labelledby="ai-analysis-scheduling-title"]'
+    );
+    expect(schedulingGroup.getAttribute('aria-describedby')).toBe(
+      'ai-analysis-scheduling-helper'
+    );
+    requireElement(root, '[aria-describedby="ai-analysis-cache-helper"]');
   });
 
   it('keeps AI Analysis missing-data notice visually aligned with PromptLab report notice', () => {
-    const html = readTemplate(
-      'src/modules/app_center/views/master_analysis/ai_analysis/template.html'
-    );
+    const path = 'src/modules/app_center/views/master_analysis/ai_analysis/template.html';
+    const html = readTemplate(path);
+    const root = readTemplateFragment(path);
+    const notice = requireElement(root, '.rounded-xl.border.border-amber-200.bg-amber-50.p-4');
 
-    expect(html).toContain('还没有可分析的产品数据');
-    expect(html).toContain(
+    expect(normalizeText(notice)).toContain('还没有可分析的产品数据');
+    expect(normalizeText(notice)).toContain(
       '可以先去数据采集页导入 JSON 或采集 ASIN，再回到这里选择产品和分析目标。'
     );
-    expect(html).toContain('rounded-xl border border-amber-200 bg-amber-50 p-4');
     expect(html).toContain('font-bold text-amber-900 flex items-center gap-2 text-sm');
     expect(html).toContain('text-xs text-amber-800/80 mt-1');
     expect(html).toContain('px-4 py-2 rounded-xl bg-amber-600');
@@ -35,7 +77,7 @@ describe('UI-P1-08 template semantics', () => {
   });
 
   it('connects PromptLab Product DNA fields to visible labels and helper sources', () => {
-    const html = readTemplate(
+    const root = readTemplateFragment(
       'src/modules/app_center/views/master_analysis/promptlab/template.html'
     );
 
@@ -47,31 +89,38 @@ describe('UI-P1-08 template semantics', () => {
       'lab-usps',
       'lab-specs',
     ].forEach(id => {
-      expect(html).toContain(`id="${id}-label"`);
-      expect(html).toContain(`aria-labelledby="${id}-label"`);
-      expect(html).toContain(`aria-describedby="${id}-source"`);
-      expect(html).toContain(`id="${id}-source"`);
+      requireElement(root, `#${id}-label`);
+      const control = requireElement(root, `[aria-labelledby="${id}-label"]`);
+      expect(control.getAttribute('aria-describedby')).toBe(`${id}-source`);
+      requireElement(root, `#${id}-source`);
     });
 
-    expect(html).toContain(
-      'id="lab-analysis-status" role="status" aria-live="polite" aria-atomic="true"'
-    );
+    const status = requireElement(root, '#lab-analysis-status');
+    expect(status.getAttribute('role')).toBe('status');
+    expect(status.getAttribute('aria-live')).toBe('polite');
+    expect(status.getAttribute('aria-atomic')).toBe('true');
   });
 
   it('keeps Keyword Hunter translation progress and input fields programmatically described', () => {
-    const processHtml = readTemplate(
+    const processRoot = readTemplateFragment(
       'src/modules/app_center/views/keyword_hunter/process/template.html'
     );
-    const inputHtml = readTemplate('src/modules/app_center/views/keyword_hunter/input/template.html');
+    const inputRoot = readTemplateFragment(
+      'src/modules/app_center/views/keyword_hunter/input/template.html'
+    );
 
-    expect(processHtml).toContain('id="kt-translate-progress"');
-    expect(processHtml).toContain('role="progressbar"');
-    expect(processHtml).toContain('id="kt-translate-status"');
-    expect(processHtml).toContain('aria-describedby="kt-translate-status"');
+    const progress = requireElement(processRoot, '#kt-translate-progress');
+    expect(progress.getAttribute('role')).toBe('progressbar');
+    requireElement(processRoot, '#kt-translate-status[role="status"][aria-live="polite"]');
+    requireElement(processRoot, '[aria-describedby="kt-translate-status"]');
 
-    expect(inputHtml).toContain('aria-labelledby="kt-keywords-input-label"');
-    expect(inputHtml).toContain('aria-describedby="kt-keywords-input-helper');
-    expect(inputHtml).toContain('aria-labelledby="kt-copy-input-label"');
-    expect(inputHtml).toContain('role="status" aria-live="polite" aria-atomic="true"');
+    requireElement(inputRoot, '[aria-labelledby="kt-keywords-input-label"]');
+    const keywordsInput = requireElement(inputRoot, '[aria-labelledby="kt-keywords-input-label"]');
+    expect(keywordsInput.getAttribute('aria-describedby')).toContain('kt-keywords-input-helper');
+    requireElement(inputRoot, '[aria-labelledby="kt-copy-input-label"]');
+    requireElement(
+      inputRoot,
+      '#kt-input-draft-status[role="status"][aria-live="polite"][aria-atomic="true"]'
+    );
   });
 });

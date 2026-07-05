@@ -2,11 +2,18 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import * as overviewModule from '@/modules/app_center/views/overview/index';
 
-vi.mock('@/common/utils/viewLoader', () => ({
+const safeTemplateLoaderMocks = vi.hoisted(() => ({
   loadTemplate: vi.fn(),
+}));
+
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
+  SafeTemplateLoader: {
+    getInstance: () => ({
+      loadTemplate: safeTemplateLoaderMocks.loadTemplate,
+    }),
+  },
 }));
 
 const realOverviewTemplatePath = join(cwd(), 'src/modules/app_center/views/overview/template.html');
@@ -33,7 +40,8 @@ const overviewTemplate = `
 
 describe('App Center Overview', () => {
   beforeEach(() => {
-    vi.mocked(loadTemplate).mockResolvedValue(overviewTemplate);
+    safeTemplateLoaderMocks.loadTemplate.mockReset();
+    safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(overviewTemplate);
     vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
@@ -52,9 +60,8 @@ describe('App Center Overview', () => {
 
     await overviewModule.mount(container);
 
-    expect(loadTemplate).toHaveBeenCalledWith(
-      'src/modules/app_center/views/overview/template.html',
-      { useCache: false }
+    expect(safeTemplateLoaderMocks.loadTemplate).toHaveBeenCalledWith(
+      'src/modules/app_center/views/overview/template.html'
     );
     expect(container.classList.contains('fade-in')).toBe(true);
     expect(container.querySelector('.app-overview-container')).not.toBeNull();

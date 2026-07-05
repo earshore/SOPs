@@ -1,13 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Product } from '../../config/sampleData';
 
 const mocks = vi.hoisted(() => ({
-  logger: {
-    debug: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    info: vi.fn(),
-  },
   callLLM: vi.fn(),
   storageGet: vi.fn(),
   getLLMConfigWithKey: vi.fn(),
@@ -27,12 +21,6 @@ const mocks = vi.hoisted(() => ({
     'selling-points': 0.7,
   })),
   calculateOverallConfidence: vi.fn(() => 0.75),
-}));
-
-vi.mock('@common/di/Container', () => ({
-  container: {
-    resolve: vi.fn(() => mocks.logger),
-  },
 }));
 
 vi.mock('@/services/llmService', () => ({
@@ -67,6 +55,8 @@ vi.mock('../confidenceCalculator', () => ({
 
 import { runAIAnalysis, validateAnalysisResult } from '../aiAnalysisService';
 
+const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
 const product = {
   asin: 'B001',
   productTitle: 'Desk organizer',
@@ -93,6 +83,10 @@ function resetAiAnalysisMocks(): void {
 }
 
 beforeEach(resetAiAnalysisMocks);
+
+afterAll(() => {
+  consoleErrorSpy.mockRestore();
+});
 
 describe('validateAnalysisResult', () => {
   it('rejects non-object analysis results', () => {
@@ -215,10 +209,9 @@ describe('runAIAnalysis results', () => {
       overall_strategy: {},
       function_scene_matrix: {},
     });
-    expect(mocks.logger.error).toHaveBeenCalledWith(
-      '[AI分析] 失败:',
-      expect.any(Error),
-      'AIAnalysisService'
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '[AIAnalysisService] [AI分析] 失败:',
+      expect.any(Error)
     );
     expect(onProgress).toHaveBeenCalledWith(50, '正在分析: selling-points...');
     expect(onProgress).toHaveBeenCalledWith(100, '分析完成!');

@@ -104,7 +104,7 @@ const PERFORMANCE_BASELINE = {
       await aiAnalysis.navigate();
       
       // 等待关键元素渲染
-      await page.waitForSelector('h2:has-text("AI 智能分析")', { state: 'visible' });
+      await page.getByRole('heading', { name: /AI\s*智能分析/ }).waitFor({ state: 'visible' });
       await page.waitForSelector('[data-selection-panel-toggle]', { state: 'visible' });
       
       const renderTime = await page.evaluate(fallbackStartTime => {

@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildInventoryReplenishmentTemplate, mount, unmount } from '@/modules/sops/views/backend/inventory_replenishment/index';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
+  loadTemplate: vi.fn(),
   template: `
     <section>
       <input id="inventory-replenishment-owner" value="供应链/运营负责人" />
@@ -14,8 +14,12 @@ const mocks = vi.hoisted(() => ({
   `,
 }));
 
-vi.mock('@/common/utils/viewLoader', () => ({
-  loadTemplate: vi.fn(() => Promise.resolve(mocks.template)),
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
+  SafeTemplateLoader: {
+    getInstance: () => ({
+      loadTemplate: mocks.loadTemplate,
+    }),
+  },
 }));
 
 vi.mock('@/services/storageService', () => ({
@@ -36,6 +40,8 @@ describe('Inventory replenishment report workflow', () => {
       return fallback;
     });
     mocks.storageSet.mockClear();
+    mocks.loadTemplate.mockResolvedValue(mocks.template);
+    mocks.loadTemplate.mockClear();
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
@@ -68,7 +74,9 @@ describe('Inventory replenishment report workflow', () => {
 
     await window.sops_copyInventoryReplenishmentTemplate?.();
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/backend/inventory_replenishment/template.html');
+    expect(mocks.loadTemplate).toHaveBeenCalledWith(
+      'src/modules/sops/views/backend/inventory_replenishment/template.html'
+    );
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：供应链小周'));
     expect(StorageService.set).toHaveBeenCalledWith('inventory_replenishment_owner_v1', '供应链小周');
     expect(global.alert).toHaveBeenCalledWith('已复制库存补货周报复盘模板，可粘贴到周报或归档文档。');

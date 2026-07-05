@@ -1,10 +1,12 @@
-import { loadTemplate } from '../../../../common/utils/viewLoader';
+import { SafeTemplateLoader } from '../../../../common/infrastructure/SafeModuleLoader';
 import { safeMount } from '../../../../common/utils/safeMount';
 import { setSafeHtml } from '../../../../common/utils/security';
 
 // SOPs Overview - 总览页面
 const mountInternal = async (container: HTMLElement): Promise<void> => {
-  const html = await loadTemplate('src/modules/sops/views/overview/template.html');
+  const html = await SafeTemplateLoader.getInstance().loadTemplate(
+    'src/modules/sops/views/overview/template.html'
+  );
   // ✅ 安全: 静态HTML模板，无用户输入
   setSafeHtml(container, html);
   container.classList.add('fade-in');

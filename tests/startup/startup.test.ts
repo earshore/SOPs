@@ -78,6 +78,18 @@ const STARTUP_DEV_RENDER_BUDGET_MS = 8000;
 const STARTUP_DEV_DOM_CONTENT_LOADED_BUDGET_MS = 8000;
 const STARTUP_DEV_FCP_BUDGET_MS = 8000;
 const STARTUP_DEV_TTFB_BUDGET_MS = 1500;
+
+async function gotoStartupPage(page: Page): Promise<void> {
+  await page.goto('/', {
+    waitUntil: 'domcontentloaded',
+    timeout: 30000,
+  });
+
+  await page.waitForSelector('#main-content', {
+    state: 'attached',
+    timeout: 10000,
+  });
+}
 const STARTUP_DEV_LCP_BUDGET_MS = 9000;
 const STARTUP_DEV_MIN_PERFORMANCE_SCORE = 40;
 
@@ -1109,22 +1121,59 @@ async function checkRouterEventListeners(page: Page): Promise<boolean> {
 }
 
 async function checkRouterNavigation(page: Page): Promise<boolean> {
-  return page.evaluate(() => {
-    return new Promise<boolean>(resolve => {
-      const router = (window as any).router;
-      if (!router || typeof router.navigate !== 'function') {
-        resolve(false);
-        return;
+  return page.evaluate(async () => {
+    const router = (window as any).router as {
+      isNavigating?: boolean;
+      getAllRoutes?: () => string[];
+      getCurrentRoute?: () => { path?: string } | null;
+      navigate?: (path: string, options?: Record<string, unknown>) => Promise<boolean>;
+    };
+    if (!router || typeof router.navigate !== 'function') {
+      return false;
+    }
+
+    const waitForRouterIdle = async (): Promise<boolean> => {
+      const startedAt = Date.now();
+      while (router.isNavigating === true) {
+        if (Date.now() - startedAt > 5000) {
+          return false;
+        }
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      return true;
+    };
+
+    const currentPath = router.getCurrentRoute?.()?.path || '/home';
+    const routes = router.getAllRoutes?.() || [];
+    const targetPath =
+      routes.find(path => path !== currentPath && path === '/app-center') ||
+      routes.find(path => path !== currentPath && path === '/more') ||
+      routes.find(path => path !== currentPath);
+
+    if (!targetPath || !(await waitForRouterIdle())) {
+      return false;
+    }
+
+    try {
+      const targetResult = await router.navigate(targetPath, {
+        replace: true,
+        updateHistory: false,
+      });
+      const targetRoute = router.getCurrentRoute?.();
+      const targetReached = targetResult === true && targetRoute?.path === targetPath;
+
+      if (currentPath !== targetPath && (await waitForRouterIdle())) {
+        await router.navigate(currentPath, {
+          replace: true,
+          updateHistory: false,
+        });
       }
 
-      router
-        .navigate('home', { updateHistory: false })
-        .then((result: boolean) => resolve(result === true))
-        .catch((error: unknown) => {
-          console.error('导航测试失败:', error);
-          resolve(false);
-        });
-    });
+      return targetReached;
+    } catch (error) {
+      console.error('导航测试失败:', error);
+      return false;
+    }
   });
 }
 
@@ -1445,10 +1494,7 @@ function assertServiceInitializationRate(servicesStatus: ServicesStatus): void {
     const consoleListener = setupConsoleErrorListener(page);
 
     // 导航到应用首页
-    await page.goto('/', {
-      waitUntil: 'networkidle',
-      timeout: 30000
-    });
+    await gotoStartupPage(page);
 
     // 等待主内容区域加载
     await page.waitForSelector('#main-content', {
@@ -1491,10 +1537,7 @@ function assertServiceInitializationRate(servicesStatus: ServicesStatus): void {
     const consoleListener = setupConsoleErrorListener(page);
 
     // 导航到应用首页
-    await page.goto('/', {
-      waitUntil: 'networkidle',
-      timeout: 30000
-    });
+    await gotoStartupPage(page);
 
     // 等待应用初始化完成事件
     await page.waitForFunction(() => {
@@ -1527,10 +1570,7 @@ function assertServiceInitializationRate(servicesStatus: ServicesStatus): void {
     const consoleListener = setupConsoleErrorListener(page);
 
     // 导航到应用首页
-    await page.goto('/', {
-      waitUntil: 'networkidle',
-      timeout: 30000
-    });
+    await gotoStartupPage(page);
 
     // 等待 Alpine.js 加载完成
     await page.waitForFunction(() => {
@@ -1572,10 +1612,7 @@ function assertServiceInitializationRate(servicesStatus: ServicesStatus): void {
     const consoleListener = setupConsoleErrorListener(page);
 
     // 导航到应用首页
-    await page.goto('/', {
-      waitUntil: 'networkidle',
-      timeout: 30000
-    });
+    await gotoStartupPage(page);
 
     // 等待应用初始化完成
     await page.waitForFunction(() => {
@@ -1684,10 +1721,7 @@ function assertServiceInitializationRate(servicesStatus: ServicesStatus): void {
     console.log('📊 开始测试内存占用...');
 
     // 导航到应用首页
-    await page.goto('/', {
-      waitUntil: 'networkidle',
-      timeout: 30000
-    });
+    await gotoStartupPage(page);
 
     // 等待应用完全初始化
     await page.waitForFunction(() => {
@@ -1769,10 +1803,7 @@ function assertServiceInitializationRate(servicesStatus: ServicesStatus): void {
     const consoleListener = setupConsoleErrorListener(page);
 
     // 导航到应用首页
-    await page.goto('/', {
-      waitUntil: 'networkidle',
-      timeout: 30000
-    });
+    await gotoStartupPage(page);
 
     // 等待应用完全初始化
     await page.waitForFunction(() => {
@@ -1806,10 +1837,7 @@ function assertServiceInitializationRate(servicesStatus: ServicesStatus): void {
     const consoleListener = setupConsoleErrorListener(page);
 
     // 导航到应用首页
-    await page.goto('/', {
-      waitUntil: 'networkidle',
-      timeout: 30000
-    });
+    await gotoStartupPage(page);
 
     // 等待 Zustand store 加载完成
     await page.waitForFunction(() => {

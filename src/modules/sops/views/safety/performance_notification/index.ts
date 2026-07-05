@@ -1,4 +1,5 @@
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
+import BaseModule from '../../../../../common/BaseModule';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '../../../../../common/utils/security';
 import {
   registerActionsWithLegacy,
@@ -9,8 +10,6 @@ import { copyTextToClipboard } from '../../../utils/clipboard';
 
 const REPORT_OWNER_STORAGE_KEY = 'performance_notification_owner_v1';
 const DEFAULT_REPORT_OWNER = '账号安全负责人';
-
-let registeredActions: string[] = [];
 
 function normalizeReportOwner(owner: unknown): string {
   return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_REPORT_OWNER;
@@ -105,25 +104,44 @@ declare global {
 }
 
 // 绩效通知处理 SOP
-export async function mount(container: HTMLElement): Promise<void> {
-  const html = await loadTemplate(
-    'src/modules/sops/views/safety/performance_notification/template.html'
-  );
-  // ✅ 安全: 静态HTML模板，无用户输入
-  setSafeHtml(container, html);
-  container.classList.add('fade-in');
-  restoreReportOwner();
+class PerformanceNotificationModule extends BaseModule {
+  private registeredActions: string[] = [];
 
-  registeredActions = registerActionsWithLegacy({
-    sops_copyPerformanceNotificationTemplate: copyPerformanceNotificationTemplate as (
-      ...args: unknown[]
-    ) => void,
-  });
-}
+  protected async render(): Promise<void> {
+    if (!this.container) return;
 
-export function unmount(): void {
-  if (registeredActions.length > 0) {
-    unregisterActions(registeredActions);
-    registeredActions = [];
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/sops/views/safety/performance_notification/template.html'
+    );
+    // ✅ 安全: 静态HTML模板，无用户输入
+    setSafeHtml(this.container, html);
+    this.container.classList.add('fade-in');
+  }
+
+  protected async init(): Promise<void> {
+    restoreReportOwner();
+
+    this.registeredActions = registerActionsWithLegacy({
+      sops_copyPerformanceNotificationTemplate: copyPerformanceNotificationTemplate as (
+        ...args: unknown[]
+      ) => void,
+    });
+  }
+
+  protected onUnmount(): void {
+    if (this.registeredActions.length > 0) {
+      unregisterActions(this.registeredActions);
+      this.registeredActions = [];
+    }
   }
 }
+
+const performanceNotificationModule = new PerformanceNotificationModule(
+  'performance_notification'
+);
+
+export const mount = (container: HTMLElement): Promise<void> =>
+  performanceNotificationModule.mount(container);
+export const unmount = (): void => {
+  performanceNotificationModule.unmount();
+};

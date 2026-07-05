@@ -403,7 +403,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
       {
         label: '演示节奏',
         value: '6 步教 · 1 步沉淀 · 1 步定时',
-        detail: '先跑通，再标准化，最后自动执行。',
+        detail: '先跑通，再标准化，最后生成提醒，执行仍需人工确认。',
       },
       {
         label: '数据源',

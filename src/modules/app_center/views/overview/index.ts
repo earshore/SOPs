@@ -3,7 +3,7 @@
 // App Center Overview - 总览页面 (TypeScript版本)
 // ================================================================
 
-import { loadTemplate } from '@/common/utils/viewLoader';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { safeMount } from '@/common/utils/safeMount';
 import { setSafeHtml } from '@/common/utils/security';
 
@@ -16,9 +16,9 @@ interface OverviewFilterState {
  * 挂载 App Center 总览模块
  */
 const mountInternal = async (container: HTMLElement): Promise<void> => {
-  const html = await loadTemplate('src/modules/app_center/views/overview/template.html', {
-    useCache: false,
-  });
+  const html = await SafeTemplateLoader.getInstance().loadTemplate(
+    'src/modules/app_center/views/overview/template.html'
+  );
   // ✅ 安全: 静态HTML模板，无用户输入
   // 为overview页面添加淡入动画（在渲染前添加）
   container.classList.add('fade-in');

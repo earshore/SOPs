@@ -101,8 +101,8 @@ const PERFORMANCE_BASELINE = {
       await scraper.navigate();
       
       // 等待关键元素渲染
-      await page.waitForSelector('h2:has-text("产品数据采集与管理")', { state: 'visible' });
-      await page.waitForSelector('h2:has-text("手动采集配置")', { state: 'visible' });
+      await page.getByRole('heading', { name: '产品数据采集与管理' }).waitFor({ state: 'visible' });
+      await page.getByRole('heading', { name: '手动采集配置' }).waitFor({ state: 'visible' });
       await page.locator('button.site-btn').first().waitFor({ state: 'attached' });
       
       const renderTime = performance.now() - startTime;

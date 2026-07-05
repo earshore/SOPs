@@ -85,6 +85,8 @@
         "generate:types": "tsx scripts/build/generate-design-token-types.ts",
         "ui:audit": "npm run card-ui:audit && npm run callout-ui:audit && npm run workbench-ui:audit",
         "routes:audit": "tsx scripts/quality/audit-routes.ts",
+        "page:architecture:audit": "tsx scripts/quality/audit-page-architecture.ts",
+        "architecture:audit": "npm run routes:audit && npm run page:architecture:audit",
         "card-ui:audit": "tsx scripts/quality/audit-card-ui.ts",
         "callout-ui:audit": "tsx scripts/quality/audit-callout-ui.ts",
         "workbench-ui:audit": "tsx scripts/quality/audit-workbench-ui.ts",

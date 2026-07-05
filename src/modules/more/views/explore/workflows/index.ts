@@ -4,8 +4,8 @@
  */
 
 import BaseModule from '../../../../../common/BaseModule';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '../../../../../common/utils/security';
-import { loadTemplate } from '../../../../../common/utils/viewLoader';
 
 // Module class
 class WorkflowsModule extends BaseModule {
@@ -13,7 +13,9 @@ class WorkflowsModule extends BaseModule {
    * 挂载模块
    */
   async mount(container: HTMLElement): Promise<void> {
-    const html = await loadTemplate('src/modules/more/views/explore/workflows/template.html');
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/more/views/explore/workflows/template.html'
+    );
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, html);
     container.classList.add('fade-in');

@@ -4,8 +4,8 @@
  */
 
 import BaseModule from '../../../../common/BaseModule';
+import { SafeTemplateLoader } from '../../../../common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '../../../../common/utils/security';
-import { loadTemplate } from '../../../../common/utils/viewLoader';
 
 /**
  * 初始化事件监听
@@ -88,7 +88,9 @@ class MoreOverviewModule extends BaseModule {
   async mount(container: HTMLElement): Promise<void> {
     try {
       // 加载HTML模板
-      const html = await loadTemplate('src/modules/more/views/overview/template.html');
+      const html = await SafeTemplateLoader.getInstance().loadTemplate(
+        'src/modules/more/views/overview/template.html'
+      );
       // ✅ 安全: 静态HTML模板，无用户输入
       setSafeHtml(container, html);
       container.classList.add('fade-in');
