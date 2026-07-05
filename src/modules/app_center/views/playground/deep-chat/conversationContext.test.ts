@@ -106,6 +106,16 @@ describe('buildStoredThreadMessages', () => {
     expect(stored[0]?.text).toContain('abc');
     expect(stored[0]?.text).toContain('内容已截断');
   });
+
+  it('preserves oversized stored messages when no explicit char limit is configured', () => {
+    const longContent = 'x'.repeat(30000);
+    const stored = buildStoredThreadMessages([], [{ role: 'user', content: longContent }], '', {
+      now: 1000,
+    });
+
+    expect(stored).toEqual([{ role: 'user', text: longContent, createdAt: 1000 }]);
+    expect(stored[0]?.text).not.toContain('内容已截断');
+  });
 });
 
 describe('normalizeStoredThreadMessages', () => {

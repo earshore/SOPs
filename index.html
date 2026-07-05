@@ -1,272 +1,348 @@
-﻿<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="zh-CN">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Amazing Amazon Architect</title>
 
     <!-- CSP已移至HTTP响应头 (public/_headers) 以避免DOM操作导致的问题 -->
 
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234285F4'/%3E%3Cstop offset='50%25' style='stop-color:%239B72F2'/%3E%3Cstop offset='100%25' style='stop-color:%23D96570'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='12' cy='12' r='1' stroke='url(%23g)'/%3E%3Cpath stroke='url(%23g)' d='M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z'/%3E%3Cpath stroke='url(%23g)' d='M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z'/%3E%3C/svg%3E">
-
-    <link rel="preconnect" href="https://cdn.bootcdn.net" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.bootcdn.net">
-
-
-    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2"
-        as="font" type="font/woff2" crossorigin>
-    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234285F4'/%3E%3Cstop offset='50%25' style='stop-color:%239B72F2'/%3E%3Cstop offset='100%25' style='stop-color:%23D96570'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='12' cy='12' r='1' stroke='url(%23g)'/%3E%3Cpath stroke='url(%23g)' d='M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z'/%3E%3Cpath stroke='url(%23g)' d='M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z'/%3E%3C/svg%3E"
+    />
 
     <!-- Google Fonts: 独特字体组合 - 异步加载 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <noscript>
-        <link
-            href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-            rel="stylesheet">
+      <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+      />
     </noscript>
 
     <!-- 首屏关键样式：必须在 JS 启动前加载，避免导航骨架首帧闪现 -->
-    <link rel="stylesheet" href="/src/css/critical.css">
+    <link rel="stylesheet" href="/src/css/critical.css" />
 
     <!-- 外部样式由 Vite 通过 /src/main.ts 统一注入 -->
-</head>
+  </head>
 
-<body>
-
+  <body>
     <!-- ========== Header ========== -->
     <header class="header">
-        <div class="header-inner">
+      <div class="header-inner">
+        <!-- ===== Logo ===== -->
+        <button type="button" data-action="switch-tab" data-tab="home" class="logo-button">
+          <div class="logo-icon-wrapper">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color: #6366f1; stop-opacity: 1" />
+                  <stop offset="50%" style="stop-color: #a855f7; stop-opacity: 1" />
+                  <stop offset="100%" style="stop-color: #ec4899; stop-opacity: 1" />
+                </linearGradient>
+              </defs>
+              <circle cx="12" cy="12" r="1" stroke="url(#gemini-gradient)"></circle>
+              <path
+                stroke="url(#gemini-gradient)"
+                d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"
+              ></path>
+              <path
+                stroke="url(#gemini-gradient)"
+                d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"
+              ></path>
+            </svg>
+          </div>
 
-            <!-- ===== Logo ===== -->
-            <button type="button" data-action="switch-tab" data-tab="home" class="logo-button">
-                <div class="logo-icon-wrapper">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <defs>
-                            <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
-                                <stop offset="50%" style="stop-color:#a855f7;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
-                            </linearGradient>
-                        </defs>
-                        <circle cx="12" cy="12" r="1" stroke="url(#gemini-gradient)"></circle>
-                        <path stroke="url(#gemini-gradient)"
-                            d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z">
-                        </path>
-                        <path stroke="url(#gemini-gradient)"
-                            d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z">
-                        </path>
-                    </svg>
-                </div>
+          <div class="logo-text-wrapper">
+            <span class="logo-text-main">
+              Amazing Amazon
+              <span class="logo-text-gradient">Architect</span>
+            </span>
+            <span class="logo-subtitle">Prompt by Prompt</span>
+          </div>
+        </button>
 
-                <div class="logo-text-wrapper">
-                    <span class="logo-text-main">
-                        Amazing Amazon
-                        <span class="logo-text-gradient">Architect</span>
-                    </span>
-                    <span class="logo-subtitle">Prompt by Prompt</span>
-                </div>
+        <!-- ===== Navigation ===== -->
+        <nav class="nav-wrapper" aria-label="主导航">
+          <!-- SOPs 流程中心 -->
+          <div class="nav-group">
+            <button
+              id="nav-sops"
+              class="nav-trigger"
+              type="button"
+              aria-expanded="false"
+              aria-controls="sops-mega-menu"
+            >
+              <i class="fas fa-project-diagram nav-icon"></i>
+              SOPs 流程中心
+              <i class="fas fa-chevron-down nav-chevron"></i>
             </button>
 
-            <!-- ===== Navigation ===== -->
-            <nav class="nav-wrapper" aria-label="主导航">
-
-                <!-- SOPs 流程中心 -->
-                <div class="nav-group">
-                    <button id="nav-sops" class="nav-trigger" type="button"
-                        aria-expanded="false" aria-controls="sops-mega-menu">
-                        <i class="fas fa-project-diagram nav-icon"></i>
-                        SOPs 流程中心
-                        <i class="fas fa-chevron-down nav-chevron"></i>
-                    </button>
-
-                    <div id="sops-mega-menu" class="mega-menu" aria-labelledby="nav-sops" aria-hidden="true">
-                        <div class="mega-menu-inner">
-                            <div class="mega-menu-header">
-                                <div class="mega-menu-icon mega-menu-icon--sops">
-                                    <i class="fas fa-layer-group"></i>
-                                </div>
-                                <h3 id="sops-mega-menu-title" class="mega-menu-title">核心 SOP 体系</h3>
-                            </div>
-                            <div id="sops-mega-menu-content" class="mega-menu-grid mega-menu-grid--5"
-                                aria-labelledby="sops-mega-menu-title">
-                                <div class="skeleton" style="height:96px;"></div>
-                                <div class="skeleton" style="height:96px;animation-delay:0.1s;"></div>
-                                <div class="skeleton" style="height:96px;animation-delay:0.2s;"></div>
-                                <div class="skeleton" style="height:96px;animation-delay:0.3s;"></div>
-                                <div class="skeleton" style="height:96px;animation-delay:0.4s;"></div>
-                            </div>
-                        </div>
-                    </div>
+            <div
+              id="sops-mega-menu"
+              class="mega-menu"
+              aria-labelledby="nav-sops"
+              aria-hidden="true"
+            >
+              <div class="mega-menu-inner">
+                <div class="mega-menu-header">
+                  <div class="mega-menu-icon mega-menu-icon--sops">
+                    <i class="fas fa-layer-group"></i>
+                  </div>
+                  <h3 id="sops-mega-menu-title" class="mega-menu-title">核心 SOP 体系</h3>
                 </div>
-
-                <!-- 应用中心 -->
-                <div class="nav-group">
-                    <button id="nav-apps" class="nav-trigger" type="button"
-                        aria-expanded="false" aria-controls="apps-mega-menu">
-                        <i class="fas fa-th-large nav-icon"></i>
-                        应用中心
-                        <i class="fas fa-chevron-down nav-chevron"></i>
-                    </button>
-
-                    <div id="apps-mega-menu" class="mega-menu" aria-labelledby="nav-apps" aria-hidden="true">
-                        <div class="mega-menu-inner">
-                            <div class="mega-menu-header">
-                                <div class="mega-menu-icon mega-menu-icon--apps">
-                                    <i class="fas fa-rocket"></i>
-                                </div>
-                                <h3 id="apps-mega-menu-title" class="mega-menu-title">核心应用模块</h3>
-                            </div>
-                            <div id="mega-menu-content" class="mega-menu-grid mega-menu-grid--5"
-                                aria-labelledby="apps-mega-menu-title">
-                                <div class="skeleton" style="height:128px;"></div>
-                                <div class="skeleton" style="height:128px;animation-delay:0.1s;"></div>
-                                <div class="skeleton" style="height:128px;animation-delay:0.2s;"></div>
-                            </div>
-                        </div>
-                    </div>
+                <div
+                  id="sops-mega-menu-content"
+                  class="mega-menu-grid mega-menu-grid--5"
+                  aria-labelledby="sops-mega-menu-title"
+                >
+                  <div class="skeleton" style="height: 96px"></div>
+                  <div class="skeleton" style="height: 96px; animation-delay: 0.1s"></div>
+                  <div class="skeleton" style="height: 96px; animation-delay: 0.2s"></div>
+                  <div class="skeleton" style="height: 96px; animation-delay: 0.3s"></div>
+                  <div class="skeleton" style="height: 96px; animation-delay: 0.4s"></div>
                 </div>
-
-                <!-- Amazon 智库 -->
-                <div class="nav-group">
-                    <button id="nav-hub" class="nav-trigger" type="button"
-                        aria-expanded="false" aria-controls="hub-mega-menu">
-                        <i class="fas fa-book-open nav-icon"></i>
-                        Amazon 智库
-                        <i class="fas fa-chevron-down nav-chevron"></i>
-                    </button>
-
-                    <div id="hub-mega-menu" class="mega-menu" aria-labelledby="nav-hub" aria-hidden="true">
-                        <div class="mega-menu-inner">
-                            <div class="mega-menu-header">
-                                <div class="mega-menu-icon mega-menu-icon--hub">
-                                    <i class="fas fa-lightbulb"></i>
-                                </div>
-                                <h3 id="hub-mega-menu-title" class="mega-menu-title">Amazon 智库体系</h3>
-                            </div>
-                            <div id="hub-mega-menu-content" class="mega-menu-grid mega-menu-grid--4"
-                                aria-labelledby="hub-mega-menu-title">
-                                <div class="skeleton" style="height:96px;"></div>
-                                <div class="skeleton" style="height:96px;animation-delay:0.1s;"></div>
-                                <div class="skeleton" style="height:96px;animation-delay:0.2s;"></div>
-                                <div class="skeleton" style="height:96px;animation-delay:0.3s;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 更多 -->
-                <div class="nav-group">
-                    <button id="nav-more" class="nav-trigger" type="button"
-                        aria-expanded="false" aria-controls="more-mega-menu">
-                        <i class="fas fa-ellipsis-h nav-icon"></i>
-                        更多
-                        <i class="fas fa-chevron-down nav-chevron"></i>
-                    </button>
-
-                    <div id="more-mega-menu" class="mega-menu" aria-labelledby="nav-more" aria-hidden="true">
-                        <div class="mega-menu-inner">
-                            <div class="more-menu-layout">
-                                <!-- Main Content -->
-                                <div>
-                                    <div class="mega-menu-header">
-                                        <div class="mega-menu-icon mega-menu-icon--more">
-                                            <i class="fas fa-compass"></i>
-                                        </div>
-                                        <h3 id="more-mega-menu-title" class="mega-menu-title">探索模块</h3>
-                                    </div>
-                                    <div id="more-menu-content" class="mega-menu-grid mega-menu-grid--3"
-                                        aria-labelledby="more-mega-menu-title">
-                                        <div class="skeleton" style="height:128px;"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Quick Access Sidebar -->
-                                <div class="more-menu-sidebar">
-                                    <div>
-                                        <h3 class="quick-access-title">
-                                            <i class="fas fa-bolt"></i>
-                                            快速访问
-                                        </h3>
-                                        <ul class="quick-access-list">
-                                            <li>
-                                                <button type="button" data-action="openSettings" class="quick-access-item">
-                                                    <div class="quick-access-icon">
-                                                        <i class="fas fa-cog"></i>
-                                                    </div>
-                                                    <span>全局设置</span>
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </div>
-
-                                    <!-- Version Card -->
-                                    <div class="tip-card version-card" aria-label="当前版本">
-                                        <div class="tip-card-icon">
-                                            <i class="fas fa-code-branch"></i>
-                                        </div>
-                                        <div class="version-card-copy">
-                                            <span class="version-card-label">当前版本</span>
-                                            <span id="app-version-more" class="version-card-value">V --</span>
-                                        </div>
-                                        <a class="version-card-release-link"
-                                            href="https://github.com/earshore/SOPs/releases"
-                                            target="_blank" rel="noopener noreferrer"
-                                            aria-label="打开 GitHub Releases" title="打开 GitHub Releases">
-                                            <i class="fab fa-github" aria-hidden="true"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <!-- ===== Right Actions ===== -->
-            <div class="header-actions">
-                <!-- Model Status -->
-                <div id="model-status" class="model-status">
-                    <span class="status-dot status-pending pulse-dot"></span>
-                    <span>未配置模型</span>
-                </div>
+              </div>
             </div>
-        </div>
+          </div>
 
-        <!-- Global Progress Bar -->
-        <div id="global-progress" class="progress-bar hidden" role="progressbar" aria-label="页面加载进度"
-            aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-hidden="true">
-            <div id="progress-fill" class="progress-fill" style="width: 0%" aria-hidden="true"></div>
+          <!-- 应用中心 -->
+          <div class="nav-group">
+            <button
+              id="nav-apps"
+              class="nav-trigger"
+              type="button"
+              aria-expanded="false"
+              aria-controls="apps-mega-menu"
+            >
+              <i class="fas fa-th-large nav-icon"></i>
+              应用中心
+              <i class="fas fa-chevron-down nav-chevron"></i>
+            </button>
+
+            <div
+              id="apps-mega-menu"
+              class="mega-menu"
+              aria-labelledby="nav-apps"
+              aria-hidden="true"
+            >
+              <div class="mega-menu-inner">
+                <div class="mega-menu-header">
+                  <div class="mega-menu-icon mega-menu-icon--apps">
+                    <i class="fas fa-rocket"></i>
+                  </div>
+                  <h3 id="apps-mega-menu-title" class="mega-menu-title">核心应用模块</h3>
+                </div>
+                <div
+                  id="mega-menu-content"
+                  class="mega-menu-grid mega-menu-grid--5"
+                  aria-labelledby="apps-mega-menu-title"
+                >
+                  <div class="skeleton" style="height: 128px"></div>
+                  <div class="skeleton" style="height: 128px; animation-delay: 0.1s"></div>
+                  <div class="skeleton" style="height: 128px; animation-delay: 0.2s"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Amazon 智库 -->
+          <div class="nav-group">
+            <button
+              id="nav-hub"
+              class="nav-trigger"
+              type="button"
+              aria-expanded="false"
+              aria-controls="hub-mega-menu"
+            >
+              <i class="fas fa-book-open nav-icon"></i>
+              Amazon 智库
+              <i class="fas fa-chevron-down nav-chevron"></i>
+            </button>
+
+            <div id="hub-mega-menu" class="mega-menu" aria-labelledby="nav-hub" aria-hidden="true">
+              <div class="mega-menu-inner">
+                <div class="mega-menu-header">
+                  <div class="mega-menu-icon mega-menu-icon--hub">
+                    <i class="fas fa-lightbulb"></i>
+                  </div>
+                  <h3 id="hub-mega-menu-title" class="mega-menu-title">Amazon 智库体系</h3>
+                </div>
+                <div
+                  id="hub-mega-menu-content"
+                  class="mega-menu-grid mega-menu-grid--4"
+                  aria-labelledby="hub-mega-menu-title"
+                >
+                  <div class="skeleton" style="height: 96px"></div>
+                  <div class="skeleton" style="height: 96px; animation-delay: 0.1s"></div>
+                  <div class="skeleton" style="height: 96px; animation-delay: 0.2s"></div>
+                  <div class="skeleton" style="height: 96px; animation-delay: 0.3s"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 更多 -->
+          <div class="nav-group">
+            <button
+              id="nav-more"
+              class="nav-trigger"
+              type="button"
+              aria-expanded="false"
+              aria-controls="more-mega-menu"
+            >
+              <i class="fas fa-ellipsis-h nav-icon"></i>
+              更多
+              <i class="fas fa-chevron-down nav-chevron"></i>
+            </button>
+
+            <div
+              id="more-mega-menu"
+              class="mega-menu"
+              aria-labelledby="nav-more"
+              aria-hidden="true"
+            >
+              <div class="mega-menu-inner">
+                <div class="more-menu-layout">
+                  <!-- Main Content -->
+                  <div>
+                    <div class="mega-menu-header">
+                      <div class="mega-menu-icon mega-menu-icon--more">
+                        <i class="fas fa-compass"></i>
+                      </div>
+                      <h3 id="more-mega-menu-title" class="mega-menu-title">探索模块</h3>
+                    </div>
+                    <div
+                      id="more-menu-content"
+                      class="mega-menu-grid mega-menu-grid--3"
+                      aria-labelledby="more-mega-menu-title"
+                    >
+                      <div class="skeleton" style="height: 128px"></div>
+                    </div>
+                  </div>
+
+                  <!-- Quick Access Sidebar -->
+                  <div class="more-menu-sidebar">
+                    <div>
+                      <h3 class="quick-access-title">
+                        <i class="fas fa-bolt"></i>
+                        快速访问
+                      </h3>
+                      <ul class="quick-access-list">
+                        <li>
+                          <button
+                            type="button"
+                            data-action="openSettings"
+                            class="quick-access-item"
+                          >
+                            <div class="quick-access-icon">
+                              <i class="fas fa-cog"></i>
+                            </div>
+                            <span>全局设置</span>
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <!-- Version Card -->
+                    <div class="tip-card version-card" aria-label="当前版本">
+                      <div class="tip-card-icon">
+                        <i class="fas fa-code-branch"></i>
+                      </div>
+                      <div class="version-card-copy">
+                        <span class="version-card-label">当前版本</span>
+                        <span id="app-version-more" class="version-card-value">V --</span>
+                      </div>
+                      <a
+                        class="version-card-release-link"
+                        href="https://github.com/earshore/SOPs/releases"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="打开 GitHub Releases"
+                        title="打开 GitHub Releases"
+                      >
+                        <i class="fab fa-github" aria-hidden="true"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <!-- ===== Right Actions ===== -->
+        <div class="header-actions">
+          <!-- Model Status -->
+          <div id="model-status" class="model-status">
+            <span class="status-dot status-pending pulse-dot"></span>
+            <span>未配置模型</span>
+          </div>
         </div>
+      </div>
+
+      <!-- Global Progress Bar -->
+      <div
+        id="global-progress"
+        class="progress-bar hidden"
+        role="progressbar"
+        aria-label="页面加载进度"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+        aria-hidden="true"
+      >
+        <div id="progress-fill" class="progress-fill" style="width: 0%" aria-hidden="true"></div>
+      </div>
     </header>
 
     <!-- ========== Main Layout ========== -->
     <div class="flex flex-1 overflow-hidden relative">
-        <!-- 装饰性背景 Blobs -->
-        <div class="bg-blob bg-blob--1"></div>
-        <div class="bg-blob bg-blob--2"></div>
-        <div class="bg-blob bg-blob--3"></div>
+      <!-- 装饰性背景 Blobs -->
+      <div class="bg-blob bg-blob--1"></div>
+      <div class="bg-blob bg-blob--2"></div>
+      <div class="bg-blob bg-blob--3"></div>
 
-        <!-- Dynamic Sidebar -->
-        <aside id="dynamic-sidebar"
-            class="w-64 bg-white border-r border-slate-200/80 flex flex-col transition-all duration-300 -ml-64 hidden">
-        </aside>
+      <!-- Dynamic Sidebar -->
+      <aside
+        id="dynamic-sidebar"
+        class="w-64 bg-white border-r border-slate-200/80 flex flex-col transition-all duration-300 -ml-64 hidden"
+      ></aside>
 
-        <!-- Main Content -->
-        <main id="main-content"
-            class="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-slate-50/80 to-slate-100/30 p-8 relative scroll-smooth">
-            <!-- main content -->
-        </main>
+      <!-- Main Content -->
+      <main
+        id="main-content"
+        class="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-slate-50/80 to-slate-100/30 p-8 relative scroll-smooth"
+      >
+        <!-- main content -->
+      </main>
     </div>
 
     <!-- ========== Toast Container ========== -->
-    <div id="toast-container" class="toast-container" role="status" aria-live="polite" aria-atomic="false"></div>
+    <div
+      id="toast-container"
+      class="toast-container"
+      role="status"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
 
     <!-- ========== Modal Container ========== -->
     <div id="modal-container"></div>
@@ -274,27 +350,32 @@
     <!-- ========== User Guide Container ========== -->
 
     <!-- ========== Global Loading Overlay ========== -->
-    <div id="global-loading" class="global-loading hidden" role="status" aria-live="polite" aria-atomic="true"
-        aria-busy="false" aria-hidden="true">
-        <div class="loading-card">
-            <!-- Spinner -->
-            <div class="loading-spinner">
-                <div class="loading-spinner-track"></div>
-                <div class="loading-spinner-fill"></div>
-                <div class="loading-spinner-dot"></div>
-            </div>
-            <div class="loading-text">
-                <p data-loading-message class="loading-text-main">加载中</p>
-                <div class="loading-text-sub">
-                    <span>请稍候</span>
-                    <span class="loading-dots"></span>
-                </div>
-            </div>
+    <div
+      id="global-loading"
+      class="global-loading hidden"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-busy="false"
+      aria-hidden="true"
+    >
+      <div class="loading-card">
+        <!-- Spinner -->
+        <div class="loading-spinner">
+          <div class="loading-spinner-track"></div>
+          <div class="loading-spinner-fill"></div>
+          <div class="loading-spinner-dot"></div>
         </div>
+        <div class="loading-text">
+          <p data-loading-message class="loading-text-main">加载中</p>
+          <div class="loading-text-sub">
+            <span>请稍候</span>
+            <span class="loading-dots"></span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="/src/main.ts"></script>
-
-</body>
-
+  </body>
 </html>

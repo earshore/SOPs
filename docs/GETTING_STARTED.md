@@ -1,6 +1,6 @@
 # 快速开始
 
-本项目当前按静态前端部署：Cloudflare Pages 托管页面，浏览器直接调用 `https://new.hongecb.store/v1`。
+本项目当前按 Cloudflare Pages 静态部署：静态页面由 Pages 托管，生产 LLM 请求由浏览器直接调用自部署 new-api 中转站 `https://new.hongecb.store/v1`。
 
 ## 本地运行
 
@@ -39,6 +39,6 @@ npx wrangler login
 curl -I https://sops.hongecb.store
 ```
 
-确认 CSP `connect-src` 允许 `https://new.hongecb.store`。模型白名单、额度、过期时间、限流和日志都在 new-api 后台管理。
+确认 CSP `connect-src` 允许 `https://new.hongecb.store`。模型白名单、额度、过期时间、限流和日志仍在 new-api 后台管理。
 
 更多细节见 [部署指南](./DEPLOYMENT.md)。

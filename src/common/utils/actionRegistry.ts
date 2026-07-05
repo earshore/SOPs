@@ -39,6 +39,7 @@ interface NamingConventions {
  * 动作注册表
  */
 const ActionRegistry: ActionRegistryMap = {};
+let delegatedClickHandler: ((event: MouseEvent) => void) | null = null;
 
 /**
  * 动作命名规范
@@ -215,10 +216,14 @@ export function getRegisteredActions(): string[] {
  * 初始化全局事件委托
  */
 export function initGlobalEventDelegation(): void {
-  document.addEventListener('click', event => {
+  if (delegatedClickHandler) {
+    return;
+  }
+
+  delegatedClickHandler = event => {
     // 从点击目标向上查找带有 data-action 的元素
-    const target = event.target as HTMLElement;
-    const actionElement = target.closest('[data-action]') as HTMLElement;
+    if (!(event.target instanceof Element)) return;
+    const actionElement = event.target.closest<HTMLElement>('[data-action]');
     if (!actionElement) return;
 
     const actionName = actionElement.dataset.action;
@@ -230,7 +235,21 @@ export function initGlobalEventDelegation(): void {
 
     // 执行动作
     executeAction(actionName, params, event);
-  });
+  };
+
+  document.addEventListener('click', delegatedClickHandler);
+}
+
+/**
+ * 销毁全局事件委托（测试/热重载清理）
+ */
+export function destroyGlobalEventDelegation(): void {
+  if (!delegatedClickHandler) {
+    return;
+  }
+
+  document.removeEventListener('click', delegatedClickHandler);
+  delegatedClickHandler = null;
 }
 
 // ================================================================
@@ -305,20 +324,54 @@ export function getLegacyCallStats(): string[] {
   return Array.from(warnedFunctions);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isActionMap(value: unknown): value is ActionMap {
+  return isRecord(value) && Object.values(value).every(handler => typeof handler === 'function');
+}
+
+function isRegisterActionsPayload(payload: unknown): payload is {
+  moduleId?: string;
+  actions: ActionMap;
+} {
+  return isRecord(payload) && isActionMap(payload.actions);
+}
+
+function isUnregisterActionsPayload(payload: unknown): payload is {
+  moduleId?: string;
+  actionNames: string[];
+} {
+  return (
+    isRecord(payload) &&
+    Array.isArray(payload.actionNames) &&
+    payload.actionNames.every(actionName => typeof actionName === 'string')
+  );
+}
+
 // ================================================================
 // 🔧 监听事件总线,实现解耦
 // ================================================================
 
 // 监听注册事件
 eventBus.on(APP_EVENTS.REGISTER_ACTIONS, (payload: unknown) => {
-  const { actions } = payload as { moduleId: string; actions: ActionMap };
-  registerActionsWithLegacy(actions);
+  if (!isRegisterActionsPayload(payload)) {
+    nativeLoggerConsole.warn('[ActionRegistry] 忽略无效 REGISTER_ACTIONS payload');
+    return;
+  }
+
+  registerActionsWithLegacy(payload.actions);
 });
 
 // 监听清理事件
-eventBus.on('unregisterActions', (payload: unknown) => {
-  const { actionNames } = payload as { moduleId: string; actionNames: string[] };
-  unregisterActions(actionNames);
+eventBus.on(APP_EVENTS.UNREGISTER_ACTIONS, (payload: unknown) => {
+  if (!isUnregisterActionsPayload(payload)) {
+    nativeLoggerConsole.warn('[ActionRegistry] 忽略无效 UNREGISTER_ACTIONS payload');
+    return;
+  }
+
+  unregisterActions(payload.actionNames);
 });
 
 export default ActionRegistry;

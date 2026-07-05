@@ -16,12 +16,17 @@ const smallBudget: PlaygroundRequestBudget = {
 };
 
 describe('Playground request budget', () => {
-  it('uses the raised default request budget for playground chat', () => {
-    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxMessageChars).toBe(24000);
-    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxContextChars).toBe(64000);
+  it('does not hard-block message or system prompt length by default', () => {
+    const longMessages: ChatMessage[] = [{ role: 'user', content: 'x'.repeat(80000) }];
+
+    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxMessageChars).toBeUndefined();
+    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxSystemPromptChars).toBeUndefined();
+    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxContextChars).toBe(200000);
+    expect(getPlaygroundMessageBudgetError(longMessages)).toBeNull();
+    expect(getPlaygroundSystemPromptBudgetError('system'.repeat(10000))).toBeNull();
   });
 
-  it('rejects messages and system prompts that exceed configured limits', () => {
+  it('rejects messages and system prompts when an explicit budget limit is configured', () => {
     const messages: ChatMessage[] = [{ role: 'user', content: 'this message is too long' }];
 
     expect(getPlaygroundMessageBudgetError(messages, smallBudget)).toContain('12');

@@ -18,6 +18,8 @@ interface EventBusConfig {
   maxListenersPerEvent: number;
   /** 警告阈值 */
   warningThreshold: number;
+  /** 监听器错误保留上限 */
+  maxListenerErrors: number;
   /** 启用内存泄漏检测 */
   enableLeakDetection: boolean;
 }
@@ -91,6 +93,7 @@ class EventBus {
     this._config = {
       maxListenersPerEvent: 50,
       warningThreshold: 30,
+      maxListenerErrors: 100,
       enableLeakDetection: true,
     };
 
@@ -131,6 +134,9 @@ class EventBus {
     const currentCount = this.events[event].length;
 
     if (currentCount >= this._config.maxListenersPerEvent) {
+      console.warn(
+        `[EventBus] 事件 "${event}" 的监听器数量已达上限 (${this._config.maxListenersPerEvent})`
+      );
       return () => {}; // 返回空函数，防止添加更多监听器
     }
 
@@ -201,13 +207,23 @@ class EventBus {
       try {
         (callback as GenericEventHandler)(data);
       } catch (error) {
-        this._listenerErrors.push({
-          event,
-          error,
-          timestamp: Date.now(),
-        });
+        this._recordListenerError(event, error);
       }
     });
+  }
+
+  private _recordListenerError(event: string, error: unknown): void {
+    console.error(`[EventBus] 事件 "${event}" 的监听器执行失败`, error);
+
+    this._listenerErrors.push({
+      event,
+      error,
+      timestamp: Date.now(),
+    });
+
+    if (this._listenerErrors.length > this._config.maxListenerErrors) {
+      this._listenerErrors.splice(0, this._listenerErrors.length - this._config.maxListenerErrors);
+    }
   }
 
   /**

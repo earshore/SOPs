@@ -18,7 +18,11 @@ interface VercelConfig {
 }
 
 function extractConnectSrc(csp: string): string {
-  return csp.match(/(?:^|;\s*)connect-src\s+([^;]+)/)?.[1]?.trim() ?? '';
+  return extractCspDirective(csp, 'connect-src');
+}
+
+function extractCspDirective(csp: string, directive: string): string {
+  return csp.match(new RegExp(`(?:^|;\\s*)${directive}\\s+([^;]+)`))?.[1]?.trim() ?? '';
 }
 
 function readPublicHeadersCsp(): string {
@@ -29,6 +33,21 @@ function readPublicHeadersCsp(): string {
       .find(line => line.includes('Content-Security-Policy:'))
       ?.split('Content-Security-Policy:')[1]
       ?.trim() ?? ''
+  );
+}
+
+function readIndexHtml(): string {
+  return readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+}
+
+function readMainEntry(): string {
+  return readFileSync(join(process.cwd(), 'src/main.ts'), 'utf8');
+}
+
+function readMarketingCalendarTemplate(): string {
+  return readFileSync(
+    join(process.cwd(), 'src/modules/amz_hub/views/practice/marketing_calendar/template.html'),
+    'utf8'
   );
 }
 
@@ -51,10 +70,9 @@ describe('apiEndpoints CSP policy', () => {
       'api.scraperapi.com',
       'api.zenrows.com',
       'api.brightdata.com',
-      'new.hongecb.store',
     ]);
     expect(connectSrc).toContain("'self'");
-    expect(connectSrc).toContain('https://new.hongecb.store');
+    expect(connectSrc).not.toContain('https://new.hongecb.store');
 
     getDangerousEndpoints().forEach(domain => {
       expect(connectSrc).not.toContain(domain);
@@ -66,5 +84,35 @@ describe('apiEndpoints CSP policy', () => {
 
     expect(extractConnectSrc(readPublicHeadersCsp())).toBe(expectedConnectSrc);
     expect(extractConnectSrc(readVercelCsp())).toBe(expectedConnectSrc);
+  });
+
+  it('keeps script-src strict in deployed CSP headers', () => {
+    for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
+      const scriptSrc = extractCspDirective(csp, 'script-src');
+
+      expect(scriptSrc).toBe("'self'");
+      expect(scriptSrc).not.toContain("'unsafe-inline'");
+      expect(scriptSrc).not.toContain('https://cdn.bootcdn.net');
+    }
+  });
+
+  it('bundles Font Awesome locally instead of loading it from bootcdn', () => {
+    expect(readIndexHtml()).not.toContain('cdn.bootcdn.net');
+    expect(readMainEntry()).toContain('@fortawesome/fontawesome-free/css/all.min.css');
+
+    for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
+      expect(extractCspDirective(csp, 'style-src')).not.toContain('cdn.bootcdn.net');
+      expect(extractCspDirective(csp, 'font-src')).not.toContain('cdn.bootcdn.net');
+    }
+  });
+
+  it('uses SRI for the remaining fixed-version stylesheet CDN', () => {
+    const template = readMarketingCalendarTemplate();
+
+    expect(template).toContain('https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2');
+    expect(template).toContain(
+      'integrity="sha384-mEneSLan5jEffu+TOnGhf+aAynm+K7RzMB0ADBpwxjXcj8txXEQ4+6PqBePn5CoW"'
+    );
+    expect(template).toContain('crossorigin="anonymous"');
   });
 });

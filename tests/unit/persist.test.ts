@@ -159,6 +159,86 @@ import { persist, clearPersistedState } from '@/stores/middleware/persist';
     });
   });
 
+  describe('敏感字段拒写', () => {
+    it('应该拒绝持久化partialize返回的敏感字段', () => {
+      interface TestState {
+        publicSetting: string;
+        apiKey: string;
+        maxTokens: number;
+        tokenCount: number;
+        nested: {
+          accessToken: string;
+          keep: string;
+          userProductProfile: {
+            keywordsTier1: string;
+          };
+        };
+        update: () => void;
+      }
+
+      const store = createStore<TestState>()(
+        persist(
+          (set) => ({
+            publicSetting: 'initial',
+            apiKey: 'initial-secret',
+            maxTokens: 1000,
+            tokenCount: 10,
+            nested: {
+              accessToken: 'initial-token',
+              keep: 'initial-keep',
+              userProductProfile: {
+                keywordsTier1: 'initial-keyword'
+              }
+            },
+            update: () =>
+              set({
+                publicSetting: 'saved',
+                apiKey: 'secret-key',
+                maxTokens: 2000,
+                tokenCount: 20,
+                nested: {
+                  accessToken: 'secret-token',
+                  keep: 'safe-value',
+                  userProductProfile: {
+                    keywordsTier1: 'draft keyword'
+                  }
+                }
+              })
+          }),
+          {
+            name: STORAGE_KEY,
+            partialize: (state) => ({
+              publicSetting: state.publicSetting,
+              apiKey: state.apiKey,
+              maxTokens: state.maxTokens,
+              tokenCount: state.tokenCount,
+              nested: state.nested
+            })
+          }
+        )
+      );
+
+      store.getState().update();
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const parsed = JSON.parse(saved!) as {
+        state: {
+          publicSetting?: string;
+          apiKey?: string;
+          maxTokens?: number;
+          tokenCount?: number;
+          nested?: Record<string, unknown>;
+        };
+      };
+
+      expect(parsed.state.publicSetting).toBe('saved');
+      expect(parsed.state.apiKey).toBeUndefined();
+      expect(parsed.state.maxTokens).toBe(2000);
+      expect(parsed.state.tokenCount).toBe(20);
+      expect(parsed.state.nested).toEqual({ keep: 'safe-value' });
+    });
+  });
+
   // ================================================================
   // 版本迁移
   // ================================================================

@@ -86,6 +86,9 @@ vi.mock('@/services/storageService', () => {
       setSecure: vi.fn(async (key: string, value: string) => {
         deps.secureValues.set(key, value);
       }),
+      removeSecure: vi.fn((key: string) => {
+        deps.secureValues.delete(key);
+      }),
       getProxyConfig: vi.fn(
         () =>
           deps.values.get(keys.PROXY_CONFIG) ??
@@ -175,6 +178,7 @@ vi.mock('@/common/config/envConfig', () => ({
 vi.mock('@/common/config/ConfigCenter', () => ({
   configCenter: {
     get: deps.configGet,
+    isProduction: vi.fn(() => deps.env.isProduction),
   },
 }));
 
@@ -344,7 +348,7 @@ it('fetches models and handles validation or API failures', async () => {
   panel.llm.apiKey = '';
 
   await panel.fetchModels();
-  expect(showToast).toHaveBeenCalledWith('请先输入 API Key', { type: 'warning' });
+  expect(showToast).toHaveBeenCalledWith('请先输入API端点地址', { type: 'warning' });
 
   panel.llm.apiKey = 'key';
   await panel.fetchModels();
@@ -379,9 +383,69 @@ it('fetches models and handles validation or API failures', async () => {
   expect(panel.llm.isFetching).toBe(false);
 });
 
+it('uses production new_api direct gateway with a browser API key', async () => {
+  deps.env.isProduction = true;
+  deps.llmConfigs.set('new_api', {
+    endpoint: 'https://new.hongecb.store/v1',
+    model: 'gpt-5.5',
+    models: ['gpt-5.5'],
+  });
+  deps.secureValues.set('llm_key_new_api', 'browser-key');
+  const panel = createPanel();
+
+  await panel.loadProviderConfig('new_api');
+
+  expect(panel.llm.endpoint).toBe('https://new.hongecb.store/v1');
+  expect(panel.llm.apiKey).toBe('browser-key');
+
+  deps.fetchModelsFromApi.mockResolvedValueOnce([{ id: 'gpt-5.5', context: 1000, features: [] }]);
+  await panel.fetchModels();
+
+  expect(fetchModelsFromApi).toHaveBeenCalledWith(
+    'new_api',
+    'https://new.hongecb.store/v1',
+    'browser-key'
+  );
+  expect(showToast).toHaveBeenCalledWith('成功同步 1 个模型', { type: 'success' });
+
+  deps.callLLM.mockResolvedValueOnce('OK');
+  await panel.testConnection();
+
+  expect(callLLM).toHaveBeenCalledWith(
+    [{ role: 'user', content: "Hello! Reply 'OK'." }],
+    'new_api',
+    'https://new.hongecb.store/v1',
+    'browser-key',
+    'gpt-5.5',
+    { temperature: 0.1, jsonMode: false, timeout: 15000 }
+  );
+
+  vi.mocked(StorageService.setSecure).mockClear();
+  vi.mocked(StorageService.removeSecure).mockClear();
+  vi.mocked(StorageService.setLLMConfig).mockClear();
+  await panel.saveProviderConfig();
+
+  expect(StorageService.setSecure).toHaveBeenCalledWith('llm_key_new_api', 'browser-key');
+  expect(StorageService.removeSecure).not.toHaveBeenCalledWith('llm_key_new_api');
+  expect(StorageService.setLLMConfig).toHaveBeenCalledWith(
+    'new_api',
+    expect.objectContaining({
+      endpoint: 'https://new.hongecb.store/v1',
+      model: 'gpt-5.5',
+      apiKey: '',
+      enabled: true,
+    })
+  );
+});
+
 it('tests LLM connectivity with configured timeout', async () => {
   const panel = createPanel();
 
+  await panel.testConnection();
+  expect(showToast).toHaveBeenCalledWith('请先完善配置 (端点 + 模型)', { type: 'warning' });
+
+  panel.llm.endpoint = 'https://gateway.example/v1';
+  panel.llm.model = 'model-a';
   await panel.testConnection();
   expect(showToast).toHaveBeenCalledWith('请先完善配置 (Key + 模型)', { type: 'warning' });
 
@@ -683,7 +747,7 @@ it('keeps the real settings template optimized for PC category scanning', () => 
 
   const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
   const implicitButtons = buttonOpenings.filter(
-    (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+    button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
   );
   expect(implicitButtons).toEqual([]);
 

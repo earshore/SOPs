@@ -16,6 +16,8 @@ import { updateUIForRoute } from '../ui/navigation';
 import { SystemError } from '@/common/errors/AppError';
 import { normalizeRoutePath, routeIdToPath, routeIdToPathStrict } from './routePaths';
 import { LEGACY_ROUTE_ALIASES, shouldReplaceLegacyRoute } from './legacyRouteAliases';
+import eventBus from '../EventBus';
+import { APP_EVENTS } from '../constants/eventConstants';
 
 // 全局路由实例
 let routerInstance: NavigoAdapter | null = null;
@@ -24,6 +26,35 @@ let browserNavigationHandler: (() => void) | null = null;
 
 type ConversionResult = ReturnType<typeof convertMenuConfig>;
 type RouterStoreSyncInstance = ReturnType<typeof createRouterStoreSync>;
+
+function isRouteConversionFatal(): boolean {
+  const isCi = typeof process !== 'undefined' && process.env.CI === 'true';
+  return import.meta.env.PROD || isCi;
+}
+
+function createRouteConversionError(errors: ConversionResult['errors']): SystemError {
+  const errorSummary = errors.map(error => `${error.routeId}: ${error.error}`).join('; ');
+
+  return new SystemError(`Route conversion failed: ${errorSummary}`, 'ROUTE_CONVERSION_FAILED', {
+    module: 'initRouter',
+    action: 'convertRoutes',
+    errors,
+  });
+}
+
+function recordRouteConversionErrors(errors: ConversionResult['errors']): SystemError {
+  const error = createRouteConversionError(errors);
+
+  console.error('[initRouter] Conversion errors:', errors);
+  eventBus.emit(APP_EVENTS.ROUTE_ERROR, {
+    routeId: 'route-conversion',
+    error,
+    errors,
+    timestamp: Date.now(),
+  });
+
+  return error;
+}
 
 function createConfiguredRouter(): NavigoAdapter {
   return createRouter({
@@ -42,7 +73,10 @@ function convertRoutes(): ConversionResult {
   });
 
   if (conversionResult.errors.length > 0) {
-    console.error('[initRouter] Conversion errors:', conversionResult.errors);
+    const error = recordRouteConversionErrors(conversionResult.errors);
+    if (isRouteConversionFatal()) {
+      throw error;
+    }
   }
 
   return conversionResult;
@@ -115,8 +149,8 @@ export function initRouter(): NavigoAdapter {
     return routerInstance;
   }
 
-  routerInstance = createConfiguredRouter();
   const conversionResult = convertRoutes();
+  routerInstance = createConfiguredRouter();
   registerConvertedRoutes(routerInstance, conversionResult);
   createAndAttachStoreSync(routerInstance);
   configureRouteMiddlewares(routerInstance);

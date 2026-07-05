@@ -12,7 +12,10 @@ import { configCenter } from '../common/config/ConfigCenter';
 import { EnvConfig } from '../common/config/envConfig';
 import { ApiError, NetworkError, SystemError } from '../common/errors';
 import { isDangerousEndpoint, getDangerousEndpoints } from '../common/config/apiEndpoints';
-import { DEFAULT_LLM_PROVIDER_ID, DEFAULT_NEW_API_ENDPOINT } from '../common/config/llmProviders';
+import {
+  isServerManagedLlmEndpoint,
+  resolveRuntimeLlmEndpoint,
+} from '../common/config/llmProviders';
 import { randomFloat } from '../common/utils/random';
 // 导入统一的 API 响应类型
 import type { LLMChatCompletionResponse, LLMErrorResponse } from '../types/api';
@@ -124,15 +127,8 @@ const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(r
 
 function resolveProviderEndpoint(provider: string, endpoint: string): string {
   const trimmedEndpoint = (endpoint || '').trim();
-
-  if (
-    provider === DEFAULT_LLM_PROVIDER_ID &&
-    (!trimmedEndpoint || trimmedEndpoint === '/v1' || trimmedEndpoint === '/v1/')
-  ) {
-    return DEFAULT_NEW_API_ENDPOINT;
-  }
-
-  return EnvConfig.api.normalizeEndpoint(trimmedEndpoint);
+  const normalizedEndpoint = EnvConfig.api.normalizeEndpoint(trimmedEndpoint);
+  return resolveRuntimeLlmEndpoint(provider, normalizedEndpoint, configCenter.isProduction());
 }
 
 function getStreamDelta(payload: Record<string, unknown>): string {
@@ -386,6 +382,7 @@ interface ResolvedLLMOptions {
 }
 
 interface LLMCallContext {
+  provider: string;
   endpoint: string;
   normalizedEndpoint: string;
   apiKey: string;
@@ -438,7 +435,7 @@ function assertSafeLLMEndpoint(endpoint: string): void {
       '2. API端点配置错误\n\n' +
       '解决方案:\n' +
       '- 请在设置中配置企业代理\n' +
-      '- 或联系管理员配置 Cloudflare Workers 代理\n\n' +
+      '- 或联系管理员配置企业服务端网关\n\n' +
       `检测到的危险端点: ${dangerousEndpoints.join(', ')}\n` +
       '这是为了保护您的API密钥安全。',
     'LLM_DANGEROUS_ENDPOINT',
@@ -496,12 +493,24 @@ async function fetchLLMResponse(
   context: LLMCallContext,
   controller: AbortController
 ): Promise<Response> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (
+    context.apiKey &&
+    !isServerManagedLlmEndpoint(
+      context.provider,
+      context.normalizedEndpoint,
+      configCenter.isProduction()
+    )
+  ) {
+    headers.Authorization = `Bearer ${context.apiKey}`;
+  }
+
   return fetch(`${context.normalizedEndpoint}/chat/completions`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${context.apiKey}`,
-    },
+    headers,
     body: JSON.stringify(context.requestBody),
     signal: controller.signal,
   });
@@ -764,6 +773,7 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
   assertSafeLLMEndpoint(normalizedEndpoint);
 
   const context: LLMCallContext = {
+    provider: request.provider,
     endpoint: request.endpoint,
     normalizedEndpoint,
     apiKey: request.apiKey,
@@ -823,11 +833,21 @@ function assertSafeModelsEndpoint(endpoint: string): void {
 async function fetchModelsRawText(context: FetchModelsContext): Promise<string> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
+  const headers: Record<string, string> = {};
+
+  if (
+    context.apiKey &&
+    !isServerManagedLlmEndpoint(
+      context.provider,
+      context.normalizedEndpoint,
+      configCenter.isProduction()
+    )
+  ) {
+    headers.Authorization = `Bearer ${context.apiKey}`;
+  }
 
   const response = await fetch(`${context.normalizedEndpoint}/models`, {
-    headers: {
-      Authorization: `Bearer ${context.apiKey}`,
-    },
+    headers,
     signal: controller.signal,
   }).finally(() => clearTimeout(timeoutId));
 

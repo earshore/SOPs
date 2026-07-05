@@ -27,7 +27,6 @@ export interface NormalizeStoredThreadMessagesOptions {
 }
 
 export const DEFAULT_MAX_THREAD_MESSAGE_COUNT = 80;
-export const DEFAULT_MAX_STORED_MESSAGE_CHARS = 24000;
 
 export function mergeThreadHistoryWithRequest(
   threadMessages: DeepChatMessage[],
@@ -186,16 +185,21 @@ function fromChatRole(role: ChatMessage['role']): DeepChatMessage['role'] {
   return role === 'user' ? 'user' : 'ai';
 }
 
-function truncateStoredMessage(
-  value: string,
-  maxMessageChars = DEFAULT_MAX_STORED_MESSAGE_CHARS
-): string {
+function truncateStoredMessage(value: string, maxMessageChars?: number): string {
   const normalizedValue = value.trim();
+  if (!hasFiniteMessageLimit(maxMessageChars)) {
+    return normalizedValue;
+  }
+
   if (normalizedValue.length <= maxMessageChars) {
     return normalizedValue;
   }
 
   return `${normalizedValue.slice(0, maxMessageChars).trimEnd()}\n\n[内容已截断，仅保留前 ${maxMessageChars.toLocaleString('zh-CN')} 字]`;
+}
+
+function hasFiniteMessageLimit(value: number | undefined): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
 }
 
 function limitStoredMessages(

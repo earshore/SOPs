@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-
 ## Essential Commands
 
 ### Development
+
 ```bash
 npm run dev              # 启动开发服务器 (端口 5173)
 npm run build            # 构建生产版本
@@ -15,6 +15,7 @@ npm run preview          # 预览生产构建
 ```
 
 ### Code Quality
+
 ```bash
 npm run type-check       # TypeScript 类型检查
 npm run lint             # ESLint 检查
@@ -23,6 +24,7 @@ npm run format           # Prettier 格式化代码
 ```
 
 ### Testing
+
 ```bash
 npm run test             # 运行 Vitest 单元测试
 npm run test:coverage    # 生成测试覆盖率报告
@@ -31,6 +33,7 @@ npm run test:e2e:ui      # E2E 测试 UI 界面
 ```
 
 ### Design Token System
+
 ```bash
 npm run generate:tokens  # 生成所有设计令牌配置（CSS 变量、Tailwind 配置、TypeScript 类型）
 npm run css:audit        # 审查 CSS 变量命名规范
@@ -39,6 +42,7 @@ npm run css:migrate:dry  # 预览迁移（不修改文件）
 ```
 
 ### Code Cleanup & Technical Debt
+
 ```bash
 # 技术债务扫描
 npm run tech-debt:scan           # 扫描技术债务（未使用代码、复杂度、代码异味等）
@@ -68,6 +72,7 @@ npm run css:cleanup              # 清理未使用的 CSS
 ```
 
 ### Release Management
+
 ```bash
 # 发布前检查
 npm run release:check            # 运行所有发布前检查（类型、测试、构建、安全）
@@ -97,6 +102,7 @@ npm run quality:dashboard        # 生成质量仪表板
    - `src/common/types/design-tokens.generated.ts` - TypeScript 类型定义
 
 **工作流程**:
+
 - 修改 `design-tokens.ts` 后必须运行 `npm run generate:tokens`
 - 使用设计令牌而非硬编码值（如 `var(--color-blue-500)` 而非 `#3b82f6`）
 - 生成的文件不应手动编辑
@@ -112,6 +118,7 @@ npm run quality:dashboard        # 生成质量仪表板
   - `src/common/di/services/businessServices.ts` - 业务服务
 
 **使用模式**:
+
 ```typescript
 // 在模块中获取服务
 const logger = await this.getLogger();
@@ -132,6 +139,7 @@ const storage = this.getService('storage');
   - `sops/` - SOP 管理
 
 **模块开发模式**:
+
 ```typescript
 export default class MyModule extends BaseModule {
   constructor() {
@@ -232,6 +240,6 @@ Vite 配置了手动分包策略（`vite.config.js`）：
 ## Notes
 
 - Node.js 版本要求: >=18.0.0
-- LLM 请求由浏览器直接调用 `https://new.hongecb.store/v1`，开发服务器不再配置 `/v1` 代理。
+- LLM 请求由浏览器直接调用 `https://new.hongecb.store/v1`，开发服务器不再配置 LLM 代理。
 - TypeScript 检查由 `npm run type-check` 和 CI gate 独立执行，Vite 配置不再内置 checker 插件。
 - 生产构建会移除所有 console 语句

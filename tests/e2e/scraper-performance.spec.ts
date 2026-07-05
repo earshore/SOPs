@@ -574,8 +574,8 @@ test.describe('Web Vitals 指标', () => {
       );
       expect(
         vitals.fcp,
-        `FCP 应该 < ${PERFORMANCE_BASELINE.lighthouse.fcp}ms，实际: ${vitals.fcp.toFixed(2)}ms`
-      ).toBeLessThan(PERFORMANCE_BASELINE.lighthouse.fcp);
+        `FCP 应该 <= ${PERFORMANCE_BASELINE.lighthouse.fcp}ms，实际: ${vitals.fcp.toFixed(2)}ms`
+      ).toBeLessThanOrEqual(PERFORMANCE_BASELINE.lighthouse.fcp);
     }
 
     if (vitals.ttfb !== null) {

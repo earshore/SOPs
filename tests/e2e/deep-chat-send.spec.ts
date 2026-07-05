@@ -39,7 +39,7 @@ function createLongGeneratedPrompt(): string {
   ].join('\n');
   let prompt = intro;
 
-  while (prompt.length <= 13000) {
+  while (prompt.length <= 30000) {
     prompt += section;
   }
 
@@ -371,12 +371,35 @@ test('uses a generated Prompt draft and sends it with the raised budget', async 
   expect(payload.stream).toBe(true);
   expect(latestMessage?.role).toBe('user');
   expect(latestMessage?.content).toContain(GENERATED_PROMPT_MARKER);
-  expect(latestMessage?.content?.length).toBeGreaterThan(12000);
-  expect(latestMessage?.content?.length).toBeLessThanOrEqual(24000);
+  expect(latestMessage?.content?.length).toBeGreaterThan(24000);
+  expect(latestMessage?.content).toBe(GENERATED_PROMPT);
 
   await expect(page.locator('#playground-chat')).toContainText(GENERATED_PROMPT_REPLY, {
     timeout: 10000,
   });
+
+  const followUpPrompt = 'Continue from the full generated Prompt context';
+  await chatInput.scrollIntoViewIfNeeded();
+  await chatInput.evaluate((element, value) => {
+    element.textContent = value;
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+  }, followUpPrompt);
+  await expect(chatInput).toContainText(followUpPrompt, { timeout: 5000 });
+
+  const followUpRequestPromise = page.waitForRequest('**/mock-llm/chat/completions');
+  await chatInput.press('Enter');
+
+  const followUpRequest = await followUpRequestPromise;
+  const followUpPayload = followUpRequest.postDataJSON() as {
+    messages?: Array<{ role?: string; content?: string }>;
+  };
+  const preservedPromptMessage = followUpPayload.messages?.find(message =>
+    message.content?.includes(GENERATED_PROMPT_MARKER)
+  );
+  expect(preservedPromptMessage?.content).toBe(GENERATED_PROMPT);
+  expect(followUpPayload.messages?.some(message => message.content?.includes('内容已截断'))).toBe(
+    false
+  );
 });
 
 test('renders a visible error when the model stream returns no content', async ({ page }) => {

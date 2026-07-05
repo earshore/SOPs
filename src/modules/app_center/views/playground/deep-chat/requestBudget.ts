@@ -1,8 +1,8 @@
 import type { ChatMessage } from '@/services/llmService';
 
 export interface PlaygroundRequestBudget {
-  maxMessageChars: number;
-  maxSystemPromptChars: number;
+  maxMessageChars?: number;
+  maxSystemPromptChars?: number;
   maxContextChars: number;
   maxOutputTokens: number;
 }
@@ -13,9 +13,7 @@ export interface BudgetedPlaygroundMessages {
 }
 
 export const DEFAULT_PLAYGROUND_REQUEST_BUDGET: PlaygroundRequestBudget = {
-  maxMessageChars: 24000,
-  maxSystemPromptChars: 4000,
-  maxContextChars: 64000,
+  maxContextChars: 200000,
   maxOutputTokens: 2000,
 };
 
@@ -23,25 +21,33 @@ export function getPlaygroundMessageBudgetError(
   messages: ChatMessage[],
   budget: PlaygroundRequestBudget = DEFAULT_PLAYGROUND_REQUEST_BUDGET
 ): string | null {
-  const oversizedMessage = messages.find(
-    message => message.content.length > budget.maxMessageChars
-  );
+  const maxMessageChars = budget.maxMessageChars;
+  if (!hasFiniteBudgetLimit(maxMessageChars)) {
+    return null;
+  }
+
+  const oversizedMessage = messages.find(message => message.content.length > maxMessageChars);
   if (!oversizedMessage) {
     return null;
   }
 
-  return `单条消息不能超过 ${formatBudgetNumber(budget.maxMessageChars)} 字，请缩短后再发送。`;
+  return `单条消息不能超过 ${formatBudgetNumber(maxMessageChars)} 字，请缩短后再发送。`;
 }
 
 export function getPlaygroundSystemPromptBudgetError(
   systemPrompt: string,
   budget: PlaygroundRequestBudget = DEFAULT_PLAYGROUND_REQUEST_BUDGET
 ): string | null {
-  if (systemPrompt.trim().length <= budget.maxSystemPromptChars) {
+  const maxSystemPromptChars = budget.maxSystemPromptChars;
+  if (!hasFiniteBudgetLimit(maxSystemPromptChars)) {
     return null;
   }
 
-  return `系统提示词不能超过 ${formatBudgetNumber(budget.maxSystemPromptChars)} 字，请缩短后再发送。`;
+  if (systemPrompt.trim().length <= maxSystemPromptChars) {
+    return null;
+  }
+
+  return `系统提示词不能超过 ${formatBudgetNumber(maxSystemPromptChars)} 字，请缩短后再发送。`;
 }
 
 export function buildBudgetedPlaygroundMessages(
@@ -116,6 +122,10 @@ function takeNewestMessagesWithinBudget(messages: ChatMessage[], maxChars: numbe
 
 function getMessageCharCount(message: ChatMessage | null): number {
   return message ? message.content.length : 0;
+}
+
+function hasFiniteBudgetLimit(value: number | undefined): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
 }
 
 function formatBudgetNumber(value: number): string {

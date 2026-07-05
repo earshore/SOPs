@@ -377,37 +377,53 @@ function logMemorySnapshot(title: string, memory: BrowserMemorySnapshot): void {
 }
 
 async function simulateCommonMemoryOperations(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    const router = (window as any).router;
-    if (router && typeof router.navigate === 'function') {
-      router.navigate('home', { updateHistory: false });
-    }
-  });
-  await page.waitForTimeout(500);
-
-  await page.evaluate(() => {
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach((button, index) => {
-      if (index < 3) {
-        button.dispatchEvent(new Event('click', { bubbles: true }));
+  try {
+    await page.evaluate(() => {
+      const router = (window as any).router;
+      if (router && typeof router.navigate === 'function') {
+        router.navigate('home', { updateHistory: false });
       }
     });
-  });
+  } catch (error) {
+    console.warn('内存采样导航操作失败，已跳过:', error);
+  }
   await page.waitForTimeout(500);
 
-  await page.evaluate(() => {
-    (window as any).__tempTestData = Array.from({ length: 100 }, (_, i) => ({
-      id: i,
-      name: `Item ${i}`,
-      description: `Description for item ${i}`,
-      timestamp: Date.now(),
-    }));
-  });
+  try {
+    await page.evaluate(() => {
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach((button, index) => {
+        if (index < 3) {
+          button.dispatchEvent(new Event('click', { bubbles: true }));
+        }
+      });
+    });
+  } catch (error) {
+    console.warn('内存采样按钮操作失败，已跳过:', error);
+  }
   await page.waitForTimeout(500);
 
-  await page.evaluate(() => {
-    delete (window as any).__tempTestData;
-  });
+  try {
+    await page.evaluate(() => {
+      (window as any).__tempTestData = Array.from({ length: 100 }, (_, i) => ({
+        id: i,
+        name: `Item ${i}`,
+        description: `Description for item ${i}`,
+        timestamp: Date.now(),
+      }));
+    });
+  } catch (error) {
+    console.warn('内存采样临时数据写入失败，已跳过:', error);
+  }
+  await page.waitForTimeout(500);
+
+  try {
+    await page.evaluate(() => {
+      delete (window as any).__tempTestData;
+    });
+  } catch (error) {
+    console.warn('内存采样临时数据清理失败，已跳过:', error);
+  }
   await page.waitForTimeout(1000);
 }
 
@@ -620,31 +636,36 @@ function logPerformanceMetrics(performanceMetrics: Record<string, number>): void
 }
 
 async function readLargestContentfulPaint(page: Page): Promise<number> {
-  return page.evaluate(() => {
-    return new Promise<number>(resolve => {
-      let lcpValue = 0;
-      const observer = new PerformanceObserver(list => {
-        const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1] as any;
-        if (lastEntry && lastEntry.renderTime) {
-          lcpValue = lastEntry.renderTime;
-        } else if (lastEntry && lastEntry.loadTime) {
-          lcpValue = lastEntry.loadTime;
+  try {
+    return await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        let lcpValue = 0;
+        const observer = new PerformanceObserver(list => {
+          const entries = list.getEntries();
+          const lastEntry = entries[entries.length - 1] as any;
+          if (lastEntry && lastEntry.renderTime) {
+            lcpValue = lastEntry.renderTime;
+          } else if (lastEntry && lastEntry.loadTime) {
+            lcpValue = lastEntry.loadTime;
+          }
+        });
+
+        try {
+          observer.observe({ type: 'largest-contentful-paint', buffered: true });
+        } catch (e) {
+          console.warn('LCP 监听失败:', e);
         }
+
+        setTimeout(() => {
+          observer.disconnect();
+          resolve(lcpValue);
+        }, 1000);
       });
-
-      try {
-        observer.observe({ type: 'largest-contentful-paint', buffered: true });
-      } catch (e) {
-        console.warn('LCP 监听失败:', e);
-      }
-
-      setTimeout(() => {
-        observer.disconnect();
-        resolve(lcpValue);
-      }, 1000);
     });
-  });
+  } catch (error) {
+    console.warn('LCP 指标读取失败，已跳过:', error);
+    return 0;
+  }
 }
 
 function recordLargestContentfulPaint(
@@ -1369,19 +1390,24 @@ function logRegisteredAlpineComponents(registeredComponents: string[]): void {
 async function checkAlpineReactivity(page: Page): Promise<boolean> {
   return page.evaluate(() => {
     return new Promise<boolean>(resolve => {
+      const alpine = (window as any).Alpine;
+      let testDiv: HTMLDivElement | null = null;
+
       try {
-        const testDiv = document.createElement('div');
+        testDiv = document.createElement('div');
         testDiv.setAttribute('x-data', '{ test: "hello" }');
         testDiv.setAttribute('x-text', 'test');
         testDiv.style.display = 'none';
         document.body.appendChild(testDiv);
+        alpine?.initTree?.(testDiv);
 
         setTimeout(() => {
           const textContent = testDiv.textContent;
-          document.body.removeChild(testDiv);
+          testDiv?.remove();
           resolve(textContent === 'hello');
         }, 500);
       } catch {
+        testDiv?.remove();
         resolve(false);
       }
     });

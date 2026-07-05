@@ -12,6 +12,8 @@ import {
   OBSOLETE_PRESET_MODEL_IDS,
   PROVIDERS,
   getLlmProviderConfig,
+  isServerManagedLlmEndpoint,
+  resolveRuntimeLlmEndpoint,
   type ModelFeature,
   type ProviderConfig,
 } from '../../common/config/llmProviders';
@@ -417,13 +419,22 @@ function resolveProviderEndpoint(
   config: ProviderConfig,
   savedEndpoint: string
 ): string {
-  const shouldUseNewApiDefault =
-    provider === DEFAULT_LLM_PROVIDER_ID &&
-    (!savedEndpoint || savedEndpoint === '/v1' || savedEndpoint === '/v1/');
-  return shouldUseNewApiDefault ? config.endpoint : savedEndpoint || config.endpoint || '';
+  return resolveRuntimeLlmEndpoint(
+    provider,
+    savedEndpoint || config.endpoint || '',
+    configCenter.isProduction()
+  );
 }
 
-async function loadProviderApiKey(provider: string, savedConfig: SavedLLMConfig): Promise<string> {
+async function loadProviderApiKey(
+  provider: string,
+  endpoint: string,
+  savedConfig: SavedLLMConfig
+): Promise<string> {
+  if (isServerManagedLlmEndpoint(provider, endpoint, configCenter.isProduction())) {
+    return '';
+  }
+
   try {
     const key = await StorageService.getSecure(`llm_key_${provider}`, '');
     return key || '';
@@ -505,9 +516,16 @@ function getModelFeatureBadges(features: unknown): ModelFeatureBadge[] {
 }
 
 function validateModelFetchInput(llm: LLMState): string | null {
-  if (!llm.apiKey) return '请先输入 API Key';
   if (!llm.endpoint) return '请先输入API端点地址';
+  if (isLLMApiKeyRequired(llm) && !llm.apiKey) return '请先输入 API Key';
   return null;
+}
+
+function isLLMApiKeyRequired(llm: LLMState): boolean {
+  return (
+    Boolean(llm.endpoint) &&
+    !isServerManagedLlmEndpoint(llm.provider, llm.endpoint, configCenter.isProduction())
+  );
 }
 
 function assertFetchedModels(models: ModelOption[], provider: string): void {
@@ -859,7 +877,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
     const savedConfig = StorageService.getLLMConfig(provider);
     this.llm.endpoint = resolveProviderEndpoint(provider, config, savedConfig?.endpoint || '');
-    this.llm.apiKey = await loadProviderApiKey(provider, savedConfig);
+    this.llm.apiKey = await loadProviderApiKey(provider, this.llm.endpoint, savedConfig);
     this.llm.models = dedupeModels(getRawProviderModels(savedConfig, config));
     this.llm.model = getInitialModel(savedConfig?.model, this.llm.models);
   },
@@ -891,7 +909,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   async testConnection(): Promise<void> {
-    if (!this.llm.apiKey || !this.llm.model) {
+    if (!this.llm.endpoint || !this.llm.model) {
+      showToast('请先完善配置 (端点 + 模型)', { type: 'warning' });
+      return;
+    }
+
+    if (isLLMApiKeyRequired(this.llm) && !this.llm.apiKey) {
       showToast('请先完善配置 (Key + 模型)', { type: 'warning' });
       return;
     }
@@ -923,7 +946,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   async saveProviderConfig(): Promise<void> {
-    if (!this.llm.apiKey) {
+    if (isLLMApiKeyRequired(this.llm) && !this.llm.apiKey) {
       showToast('请填写 API Key', { type: 'warning' });
       return;
     }
@@ -939,8 +962,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
         apiKey: '', // 占位符,实际存储在安全存储中
       };
 
-      // API Key 单独加密存储
-      await StorageService.setSecure(`llm_key_${this.llm.provider}`, this.llm.apiKey);
+      if (this.llm.apiKey) {
+        // API Key 单独加密存储
+        await StorageService.setSecure(`llm_key_${this.llm.provider}`, this.llm.apiKey);
+      } else {
+        StorageService.removeSecure(`llm_key_${this.llm.provider}`);
+      }
 
       // 其他配置正常存储
       StorageService.setLLMConfig(this.llm.provider, newConfig);

@@ -12,6 +12,61 @@ const nativeLoggerConsole = globalThis.console;
 type StateUpdater<T> = T | Partial<T> | ((state: T) => T | Partial<T>);
 type StateReplacer<T> = T | ((state: T) => T);
 
+export const PERSIST_SENSITIVE_FIELD_DENYLIST = [
+  'apiKey',
+  'accessKey',
+  'accessToken',
+  'authHeader',
+  'authorization',
+  'bearerToken',
+  'clientSecret',
+  'credential',
+  'credentials',
+  'customUrl',
+  'idToken',
+  'password',
+  'privateKey',
+  'proxyKey',
+  'refreshToken',
+  'secret',
+  'token',
+  'userProductProfile',
+] as const;
+
+const SENSITIVE_FIELD_TOKENS = [
+  'apikey',
+  'authorization',
+  'credential',
+  'password',
+  'privatekey',
+  'secret',
+] as const;
+
+const NORMALIZED_SENSITIVE_FIELD_DENYLIST = new Set(
+  PERSIST_SENSITIVE_FIELD_DENYLIST.map(field => normalizePersistField(field))
+);
+
+function normalizePersistField(field: string): string {
+  return field.replace(/[\s_-]/g, '').toLowerCase();
+}
+
+export function isPersistSensitiveField(field: string): boolean {
+  if (!field) {
+    return false;
+  }
+
+  const normalizedField = normalizePersistField(field);
+  return (
+    NORMALIZED_SENSITIVE_FIELD_DENYLIST.has(normalizedField) ||
+    normalizedField.endsWith('token') ||
+    SENSITIVE_FIELD_TOKENS.some(token => normalizedField.includes(token))
+  );
+}
+
+function omitSensitivePersistFields(field: string, value: unknown): unknown {
+  return isPersistSensitiveField(field) ? undefined : value;
+}
+
 /**
  * 持久化配置
  */
@@ -71,10 +126,13 @@ export const persist = <T extends object>(
       try {
         const state = get();
         const stateToPersist = partialize(state);
-        const item = JSON.stringify({
-          state: stateToPersist,
-          version,
-        });
+        const item = JSON.stringify(
+          {
+            state: stateToPersist,
+            version,
+          },
+          omitSensitivePersistFields
+        );
         storage.setItem(name, item);
       } catch (error) {
         console.error('[Persist] 保存状态失败:', error);

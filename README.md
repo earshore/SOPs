@@ -1,6 +1,6 @@
 # sops - 亚马逊运营管理平台
 
-sops 是一个 Vite + TypeScript 静态前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 LLM 网关；仓库和 Pages 项目不应保存生产 API key。
+sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 `https://new.hongecb.store/v1` 中转站；仓库和 Pages 项目不应保存生产 API key。
 
 > 本 README 已按当前待发布版本 `v3.0.3-rc.21`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
@@ -125,27 +125,27 @@ npm run build
 npx wrangler pages deploy dist --project-name sops --branch main
 ```
 
-当前生产链路由 Cloudflare Pages 托管静态文件，LLM 请求由浏览器直连自部署 new-api 网关。部署细节与排查步骤见 [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)。
+当前生产链路由 Cloudflare Pages 托管静态文件，LLM 请求由浏览器直连自部署 new-api 中转站 `https://new.hongecb.store/v1`。部署细节与排查步骤见 [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)。
 
 ## 当前功能入口
 
-| 区域 | 主要功能 | 代码入口 |
-| --- | --- | --- |
-| SOPs 流程中心 | 运营推广、供应链物流、账号安全、客服体验相关 SOP 页面 | `src/modules/sops/` |
-| 应用中心 | Master Analysis、PPC Tools、Keyword Hunter、Deep Chat Playground | `src/modules/app_center/` |
-| Amazon 智库 | 市场洞察、SEO 策略、运营实践和进阶攻略 | `src/modules/amz_hub/` |
-| 更多 | Agent Center、提示词、工作流探索页 | `src/modules/more/` |
+| 区域          | 主要功能                                                         | 代码入口                  |
+| ------------- | ---------------------------------------------------------------- | ------------------------- |
+| SOPs 流程中心 | 运营推广、供应链物流、账号安全、客服体验相关 SOP 页面            | `src/modules/sops/`       |
+| 应用中心      | Master Analysis、PPC Tools、Keyword Hunter、Deep Chat Playground | `src/modules/app_center/` |
+| Amazon 智库   | 市场洞察、SEO 策略、运营实践和进阶攻略                           | `src/modules/amz_hub/`    |
+| 更多          | Agent Center、提示词、工作流探索页                               | `src/modules/more/`       |
 
 业务页面的路由和菜单元数据统一声明在各模块的 `module.manifest.ts`。`src/common/constants/routes.ts` 和 `src/common/config/menuConfig.ts` 会从这些 manifest 派生；子页面的动态导入入口仍需要同步维护对应模块的 `module.loaders.ts`。
 
 ### 应用中心入口
 
-| 应用 | 路由 | 说明 |
-| --- | --- | --- |
-| Master Analysis | `/app-center/scraper`、`/app-center/ai-analysis`、`/app-center/promptlab` | 竞品数据采集、AI 分析和 Prompt 生成 |
-| PPC Tools | `/app-center/ppc-search-terms` | 导入广告搜索词或活动报表，生成 PPC 动作清单和周报摘要 |
-| Keyword Hunter | `/app-center/keyword-hunter/input`、`/app-center/keyword-hunter/process`、`/app-center/keyword-hunter/analysis` | 关键词输入、处理与分析统计 |
-| Deep Chat | `/app-center/playground/deep-chat` | LLM 对话与提示词实验 |
+| 应用            | 路由                                                                                                            | 说明                                                  |
+| --------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Master Analysis | `/app-center/scraper`、`/app-center/ai-analysis`、`/app-center/promptlab`                                       | 竞品数据采集、AI 分析和 Prompt 生成                   |
+| PPC Tools       | `/app-center/ppc-search-terms`                                                                                  | 导入广告搜索词或活动报表，生成 PPC 动作清单和周报摘要 |
+| Keyword Hunter  | `/app-center/keyword-hunter/input`、`/app-center/keyword-hunter/process`、`/app-center/keyword-hunter/analysis` | 关键词输入、处理与分析统计                            |
+| Deep Chat       | `/app-center/playground/deep-chat`                                                                              | LLM 对话与提示词实验                                  |
 
 PPC 搜索词分析器只输出运营建议，最终否词、加词、改价、预算调整仍在 ERP 或广告后台执行。
 

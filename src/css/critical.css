@@ -365,14 +365,50 @@ body {
 @media (max-width: 768px) {
   .header-inner {
     padding: 0 16px;
+    gap: 8px;
   }
 
   .nav-wrapper {
     display: none;
   }
 
+  .logo-button,
+  .logo-text-wrapper {
+    min-width: 0;
+  }
+
+  .logo-text-main,
+  .logo-subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .header-actions {
     min-width: 0;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-inner {
+    padding: 0 12px;
+  }
+
+  .logo-button {
+    flex: 1 1 auto;
+    gap: 8px;
+    padding: 0 4px;
+  }
+
+  .model-status {
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .model-status span:not(.status-dot) {
+    display: none;
   }
 }
 

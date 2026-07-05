@@ -262,12 +262,33 @@ class HttpServiceClass implements IHttpService {
       signal: controller.signal,
     };
 
-    if (options.body) {
+    if (options.body !== null && options.body !== undefined) {
       fetchOptions.body =
         typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
     }
 
     return fetchOptions;
+  }
+
+  private _isAbortError(error: unknown): boolean {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'name' in error &&
+      (error as { name?: unknown }).name === 'AbortError'
+    );
+  }
+
+  private _shouldRetry(error: Error): boolean {
+    if (this._isAbortError(error)) {
+      return false;
+    }
+
+    if (error instanceof HttpError) {
+      return error.status === 408 || error.status === 429 || error.status >= 500;
+    }
+
+    return true;
   }
 
   private async _parseResponse<T>(response: Response, json: boolean): Promise<T> {
@@ -294,7 +315,11 @@ class HttpServiceClass implements IHttpService {
     abortSignal?: AbortSignal
   ): Promise<T> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), options.timeout);
+    let didTimeout = false;
+    const timeoutId = setTimeout(() => {
+      didTimeout = true;
+      controller.abort();
+    }, options.timeout);
 
     this._attachAbortSignal(options.signal, controller);
     this._attachAbortSignal(abortSignal, controller);
@@ -305,6 +330,9 @@ class HttpServiceClass implements IHttpService {
       return await this._parseResponse<T>(response, options.json);
     } catch (error) {
       clearTimeout(timeoutId);
+      if (didTimeout && this._isAbortError(error)) {
+        throw new HttpError(408, `Request timed out after ${options.timeout}ms`);
+      }
       throw error;
     }
   }
@@ -322,7 +350,7 @@ class HttpServiceClass implements IHttpService {
       } catch (error) {
         lastError = error as Error;
 
-        if (attempt === options.retries) {
+        if (attempt === options.retries || !this._shouldRetry(lastError)) {
           throw error;
         }
 
@@ -458,18 +486,27 @@ class HttpServiceClass implements IHttpService {
     priority: RequestPriority,
     fn: () => Promise<T>
   ): Promise<T> {
+    let requestStarted = false;
+
     try {
       const { performanceService } = await import('./performanceService');
       const apiName = this._extractApiName(url);
+      const measuredRun = () => {
+        requestStarted = true;
+        return fn();
+      };
 
       if (usePool) {
         return await performanceService.measureApiCall(apiName, () =>
-          priorityRequestPool.add(fn, priority, { url, method })
+          priorityRequestPool.add(measuredRun, priority, { url, method })
         );
       }
 
-      return await performanceService.measureApiCall(apiName, fn);
+      return await performanceService.measureApiCall(apiName, measuredRun);
     } catch (e) {
+      if (requestStarted) {
+        throw e;
+      }
       this._log('debug', '性能监控不可用，直接执行请求', {});
       return await fn();
     }

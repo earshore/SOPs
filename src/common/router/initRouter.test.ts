@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
+  eventBusEmit: vi.fn(),
   router: {
     register: vi.fn(),
     registerAlias: vi.fn(),
@@ -51,6 +52,20 @@ const mocks = vi.hoisted(() => ({
   }),
 }));
 
+const originalCi = process.env.CI;
+
+vi.mock('../EventBus', () => ({
+  default: {
+    emit: mocks.eventBusEmit,
+  },
+}));
+
+vi.mock('../constants/eventConstants', () => ({
+  APP_EVENTS: {
+    ROUTE_ERROR: 'app:route-error',
+  },
+}));
+
 vi.mock('./navigo', () => ({
   createRouter: mocks.createRouter,
   convertMenuConfig: mocks.convertMenuConfig,
@@ -81,6 +96,8 @@ async function loadInitRouter() {
 
 beforeEach(() => {
   vi.restoreAllMocks();
+  delete process.env.CI;
+  mocks.eventBusEmit.mockReset();
   mocks.router.register.mockReset();
   mocks.router.registerAlias.mockReset();
   mocks.router.setStoreSync.mockReset();
@@ -117,6 +134,14 @@ beforeEach(() => {
   mocks.routeIdToPath.mockClear();
   mocks.routeIdToPathStrict.mockClear();
   window.location.hash = '';
+});
+
+afterEach(() => {
+  if (originalCi === undefined) {
+    delete process.env.CI;
+  } else {
+    process.env.CI = originalCi;
+  }
 });
 
 describe('initRouter setup', () => {
@@ -300,24 +325,58 @@ describe('initRouter route helper APIs', () => {
 });
 
 describe('initRouter teardown and error handling', () => {
-  it('logs conversion errors and destroys installed router state', async () => {
+  it('logs conversion errors, emits route error, and destroys installed router state', async () => {
     const { initRouter, destroyRouter, getRouter } = await loadInitRouter();
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const removeEventListener = vi.spyOn(window, 'removeEventListener');
+    const routeErrors = [{ routeId: 'bad', error: 'bad route' }];
     mocks.convertMenuConfig.mockReturnValueOnce({
       routes: {},
       aliases: {},
-      errors: ['bad route'],
+      errors: routeErrors,
     });
 
     initRouter();
     destroyRouter();
 
-    expect(consoleError).toHaveBeenCalledWith('[initRouter] Conversion errors:', ['bad route']);
+    expect(consoleError).toHaveBeenCalledWith('[initRouter] Conversion errors:', routeErrors);
+    expect(mocks.eventBusEmit).toHaveBeenCalledWith(
+      'app:route-error',
+      expect.objectContaining({
+        routeId: 'route-conversion',
+        error: expect.any(Error),
+        errors: routeErrors,
+      })
+    );
     expect(removeEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
     expect(removeEventListener).toHaveBeenCalledWith('hashchange', expect.any(Function));
     expect(mocks.router.destroy).toHaveBeenCalledTimes(1);
     expect(mocks.storeState.reset).toHaveBeenCalledTimes(1);
+    expect(() => getRouter()).toThrow('Router not initialized');
+  });
+
+  it('fails fast on conversion errors in CI without installing router state', async () => {
+    const { initRouter, getRouter } = await loadInitRouter();
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const routeErrors = [{ routeId: 'bad', error: 'bad route' }];
+    process.env.CI = 'true';
+    mocks.convertMenuConfig.mockReturnValueOnce({
+      routes: {},
+      aliases: {},
+      errors: routeErrors,
+    });
+
+    expect(() => initRouter()).toThrow('Route conversion failed: bad: bad route');
+    expect(consoleError).toHaveBeenCalledWith('[initRouter] Conversion errors:', routeErrors);
+    expect(mocks.eventBusEmit).toHaveBeenCalledWith(
+      'app:route-error',
+      expect.objectContaining({
+        routeId: 'route-conversion',
+        error: expect.any(Error),
+        errors: routeErrors,
+      })
+    );
+    expect(mocks.createRouter).not.toHaveBeenCalled();
     expect(() => getRouter()).toThrow('Router not initialized');
   });
 

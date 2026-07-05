@@ -22,13 +22,26 @@ interface FailedService {
   duration: number;
 }
 
+export interface BootstrapWarning {
+  scope: string;
+  message: string;
+  serviceName?: string;
+}
+
+export interface MonitoringStatus {
+  state: 'idle' | 'starting' | 'ready' | 'failed';
+  warnings: BootstrapWarning[];
+}
+
 /**
  * 初始化结果
  */
 export interface InitializeResult {
   success: boolean;
   failed: FailedService[];
+  optionalFailed: FailedService[];
   initialized: string[];
+  warnings: BootstrapWarning[];
 }
 
 /**
@@ -37,7 +50,13 @@ export interface InitializeResult {
  */
 export class ServiceBootstrap {
   private failedServices: FailedService[] = [];
+  private optionalFailedServices: FailedService[] = [];
   private initializedServices: Set<string> = new Set();
+  private warnings: BootstrapWarning[] = [];
+  private monitoringStatus: MonitoringStatus = { state: 'idle', warnings: [] };
+  private monitoringReady: Promise<void> | null = null;
+  private monitoringRunId = 0;
+  private monitoringIntervalIds: ReturnType<typeof setInterval>[] = [];
 
   /**
    * 构造函数
@@ -56,7 +75,7 @@ export class ServiceBootstrap {
   async initialize(): Promise<InitializeResult> {
     try {
       // 0. 初始化监控服务(优先,所有环境) - 异步不阻塞
-      void this._initMonitoringServices();
+      this._startMonitoringServices();
 
       // 1. 验证依赖关系
       const validation = this.container.validateDependencies();
@@ -76,7 +95,9 @@ export class ServiceBootstrap {
       return {
         success: this.failedServices.length === 0,
         failed: this.failedServices,
+        optionalFailed: this.optionalFailedServices,
         initialized: Array.from(this.initializedServices),
+        warnings: [...this.warnings],
       };
     } catch (error) {
       console.error('❌ [Bootstrap] 初始化流程失败:', error);
@@ -190,6 +211,16 @@ export class ServiceBootstrap {
 
       // 如果是可选服务，记录但不抛出错误
       if (config.optional) {
+        this.optionalFailedServices.push({
+          name,
+          error: errorMessage,
+          duration,
+        });
+        this._recordWarning({
+          scope: 'optional-service',
+          serviceName: name,
+          message: errorMessage,
+        });
         return null;
       }
 
@@ -226,43 +257,71 @@ export class ServiceBootstrap {
     });
   }
 
+  private _recordWarning(warning: BootstrapWarning): void {
+    this.warnings.push(warning);
+    console.warn(`⚠️ [Bootstrap] ${warning.scope}: ${warning.message}`);
+  }
+
+  private _startMonitoringServices(): void {
+    if (this.monitoringStatus.state === 'starting' || this.monitoringStatus.state === 'ready') {
+      return;
+    }
+
+    const runId = ++this.monitoringRunId;
+    this.monitoringStatus = { state: 'starting', warnings: [] };
+    this.monitoringReady = this._initMonitoringServices()
+      .then(() => {
+        if (runId !== this.monitoringRunId) return;
+        this.monitoringStatus = { ...this.monitoringStatus, state: 'ready' };
+      })
+      .catch(error => {
+        if (runId !== this.monitoringRunId) return;
+        const message = error instanceof Error ? error.message : String(error);
+        const warning = {
+          scope: 'monitoring',
+          message,
+        };
+        this.monitoringStatus = {
+          state: 'failed',
+          warnings: [...this.monitoringStatus.warnings, warning],
+        };
+        this._recordWarning(warning);
+      });
+  }
+
   /**
    * 初始化监控服务
    * @private
    */
   private async _initMonitoringServices(): Promise<void> {
-    try {
-      // 1. 错误追踪
-      errorTracker.init({
-        enabled: true,
-        sampleRate: 1.0,
-      });
+    // 1. 错误追踪
+    errorTracker.init({
+      enabled: true,
+      sampleRate: 1.0,
+    });
 
-      // 2. 用户行为分析
-      analyticsService.init({
-        enabled: true,
-        trackPageViews: true,
-        trackUserActions: true,
-      });
+    // 2. 用户行为分析
+    analyticsService.init({
+      enabled: true,
+      trackPageViews: true,
+      trackUserActions: true,
+    });
 
-      // 3. 性能数据存储
-      await performanceStorage.init({
-        retentionDays: 7,
-        maxRecords: 10000,
-      });
+    // 3. 性能数据存储
+    await performanceStorage.init({
+      retentionDays: 7,
+      maxRecords: 10000,
+    });
 
-      // 4. 告警服务
-      alertService.init({
-        enabled: true,
-        showToast: true,
-        showBrowserNotification: false,
-      });
+    // 4. 告警服务
+    alertService.init({
+      enabled: true,
+      showToast: true,
+      showBrowserNotification: false,
+    });
 
-      // 5. 连接数据流: webVitals -> storage
-      this._connectMonitoringDataFlow();
-    } catch {
-      // 监控服务失败不影响主流程
-    }
+    // 5. 连接数据流: webVitals -> storage
+    await this._connectMonitoringDataFlow();
   }
 
   /**
@@ -302,7 +361,7 @@ export class ServiceBootstrap {
     });
 
     // 定期检查错误率(每分钟)
-    setInterval(() => {
+    this._setMonitoringInterval(() => {
       const stats = errorTracker.getStats();
       const total = stats.total;
 
@@ -325,7 +384,7 @@ export class ServiceBootstrap {
     if (perfWithMemory.memory) {
       let lastMemory = perfWithMemory.memory.usedJSHeapSize;
 
-      setInterval(() => {
+      this._setMonitoringInterval(() => {
         if (perfWithMemory.memory) {
           const currentMemory = perfWithMemory.memory.usedJSHeapSize;
           const memoryGrowth = currentMemory - lastMemory;
@@ -335,6 +394,26 @@ export class ServiceBootstrap {
         }
       }, 300000);
     }
+  }
+
+  private _setMonitoringInterval(handler: () => void, timeout: number): void {
+    this.monitoringIntervalIds.push(setInterval(handler, timeout));
+  }
+
+  private _clearMonitoringIntervals(): void {
+    this.monitoringIntervalIds.forEach(intervalId => clearInterval(intervalId));
+    this.monitoringIntervalIds = [];
+  }
+
+  getMonitoringStatus(): MonitoringStatus {
+    return {
+      state: this.monitoringStatus.state,
+      warnings: [...this.monitoringStatus.warnings],
+    };
+  }
+
+  whenMonitoringReady(): Promise<void> {
+    return this.monitoringReady || Promise.resolve();
   }
 
   /**
@@ -358,8 +437,24 @@ export class ServiceBootstrap {
    * 重置初始化状态（用于测试）
    */
   reset(): void {
+    this.monitoringRunId += 1;
+    this._clearMonitoringIntervals();
     this.failedServices = [];
+    this.optionalFailedServices = [];
     this.initializedServices.clear();
+    this.warnings = [];
+    this.monitoringStatus = { state: 'idle', warnings: [] };
+    this.monitoringReady = null;
+  }
+
+  /**
+   * 销毁启动器持有的后台资源
+   */
+  destroy(): void {
+    this.monitoringRunId += 1;
+    this._clearMonitoringIntervals();
+    this.monitoringStatus = { state: 'idle', warnings: [] };
+    this.monitoringReady = null;
   }
 }
 

@@ -266,6 +266,24 @@ describe('LLM配置管理', () => {
     expect(localStorage.getItem(legacyKey)).toBeNull();
     await expect(StorageService.getSecure(legacyKey)).resolves.toBe('legacy-key');
   });
+
+  it('生产默认new_api应该读取为浏览器直连中转站配置', async () => {
+    const provider = 'new_api';
+    StorageService.setLLMConfig(provider, {
+      provider,
+      model: 'gpt-5.5',
+      apiKey: 'browser-key',
+      endpoint: 'https://new.hongecb.store/v1',
+      models: ['gpt-5.5'],
+      enabled: true,
+    });
+    await StorageService.setSecure('llm_key_new_api', 'browser-key');
+
+    const result = await StorageService.getLLMConfigWithKey(provider);
+
+    expect(result?.endpoint).toBe('https://new.hongecb.store/v1');
+    expect(result?.apiKey).toBe('browser-key');
+  });
 });
 
 // ================================================================
