@@ -3,9 +3,9 @@
  */
 
 import BaseModule from '../../../../../common/BaseModule';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '../../../../../common/utils/security';
 import './styles.css';
-import templateHTML from './template.html?raw';
 
 class QualityListingModule extends BaseModule {
   constructor() {
@@ -17,7 +17,10 @@ class QualityListingModule extends BaseModule {
     if (!container) return;
 
     // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(container, templateHTML);
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/amz_hub/views/practice/quality_listing/template.html'
+    );
+    setSafeHtml(container, html);
     container.classList.add('fade-in');
   }
 }

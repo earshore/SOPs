@@ -10,6 +10,7 @@
 
 import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import BaseModule from '../../../../../common/BaseModule';
 import { showToast, showProgress } from '../../../../../common/ui';
 import { navigateToRouteId } from '../../../../../common/router/initRouter';
 import * as KeywordService from '../services/trackerService';
@@ -924,70 +925,90 @@ function setupEventListeners(container: HTMLElement): void {
 // Module Exports (统一架构接口)
 // ==========================================
 
-/**
- * 挂载子模块
- * @param {HTMLElement} container - 容器元素
- */
-export async function mount(container: HTMLElement): Promise<void> {
-  try {
-    // 1. 使用 SafeTemplateLoader 加载模板
-    const loader = SafeTemplateLoader.getInstance();
-    const renderer = SafeRenderer.getInstance();
+class KeywordHunterInputModule extends BaseModule {
+  constructor() {
+    super('keyword_hunter_input');
+  }
 
-    const html = await loader.loadTemplate(
-      'src/modules/app_center/views/keyword_hunter/input/template.html',
-      {
-        retryCount: 3,
-        timeout: 5000,
-        onError: error => {
-          console.error('[Input] 模板加载失败:', error);
-        },
-      }
-    );
+  protected async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
 
-    // 使用 SafeRenderer 渲染模板
-    // 添加淡入动画（在渲染前添加）
-    container.classList.add('fade-in');
-    renderer.renderTemplate(container, html);
+    try {
+      // 1. 使用 SafeTemplateLoader 加载模板
+      const loader = SafeTemplateLoader.getInstance();
+      const renderer = SafeRenderer.getInstance();
 
-    // 2. 注册全局操作（用于旧模板兼容）
-    const actionNames = registerActionsWithLegacy({
-      kt_cleanKeywords: () => cleanKeywordsUI(),
-      kt_removeDuplicates: () => removeDuplicatesUI(),
-      kt_undoKeywordClean: () => undoKeywordClean(),
-      kt_cleanCopyFormat: () => cleanCopyFormat(),
-      kt_pasteFromClipboard: () => pasteFromClipboard(),
-      kt_clearCopyInput: () => clearCopyInput(),
-      kt_startAnalysis: () => startAnalysis(),
-    });
+      const html = await loader.loadTemplate(
+        'src/modules/app_center/views/keyword_hunter/input/template.html',
+        {
+          retryCount: 3,
+          timeout: 5000,
+          onError: error => {
+            console.error('[Input] 模板加载失败:', error);
+          },
+        }
+      );
 
-    // 保存已注册的动作名称，用于卸载时清理
-    registeredActions = actionNames;
+      // 使用 SafeRenderer 渲染模板
+      // 添加淡入动画（在渲染前添加）
+      container.classList.add('fade-in');
+      renderer.renderTemplate(container, html);
+    } catch (error) {
+      console.error('[Input] ❌ 子模块挂载失败:', error);
+      throw error;
+    }
+  }
 
-    // 3. 设置事件监听器
-    setupEventListeners(container);
+  protected async init(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
 
-    // 4. 从 state 恢复状态
-    restoreInputsFromState();
-    updateUndoKeywordButtonState();
-    await loadInputSnapshots();
-  } catch (error) {
-    console.error('[Input] ❌ 子模块挂载失败:', error);
-    throw error;
+    try {
+      // 2. 注册全局操作（用于旧模板兼容）
+      const actionNames = registerActionsWithLegacy({
+        kt_cleanKeywords: () => cleanKeywordsUI(),
+        kt_removeDuplicates: () => removeDuplicatesUI(),
+        kt_undoKeywordClean: () => undoKeywordClean(),
+        kt_cleanCopyFormat: () => cleanCopyFormat(),
+        kt_pasteFromClipboard: () => pasteFromClipboard(),
+        kt_clearCopyInput: () => clearCopyInput(),
+        kt_startAnalysis: () => startAnalysis(),
+      });
+
+      // 保存已注册的动作名称，用于卸载时清理
+      registeredActions = actionNames;
+
+      // 3. 设置事件监听器
+      setupEventListeners(container);
+
+      // 4. 从 state 恢复状态
+      restoreInputsFromState();
+      updateUndoKeywordButtonState();
+      await loadInputSnapshots();
+    } catch (error) {
+      console.error('[Input] ❌ 子模块挂载失败:', error);
+      throw error;
+    }
+  }
+
+  protected onUnmount(): void {
+    try {
+      // 1. 保存状态到 state
+      saveInputsToState();
+
+      // 2. 清理事件监听器和定时器
+      cleanup();
+    } catch (error) {
+      console.error('[Input] ❌ 子模块卸载失败:', error);
+    }
   }
 }
 
-/**
- * 卸载子模块
- */
-export function unmount(): void {
-  try {
-    // 1. 保存状态到 state
-    saveInputsToState();
+const keywordHunterInputModule = new KeywordHunterInputModule();
 
-    // 2. 清理事件监听器和定时器
-    cleanup();
-  } catch (error) {
-    console.error('[Input] ❌ 子模块卸载失败:', error);
-  }
-}
+export const mount = (container: HTMLElement): Promise<void> =>
+  keywordHunterInputModule.mount(container);
+export const unmount = (): void => {
+  keywordHunterInputModule.unmount();
+};

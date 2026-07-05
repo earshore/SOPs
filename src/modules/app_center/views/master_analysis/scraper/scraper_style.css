@@ -107,7 +107,11 @@
 
 /* ---- Enhanced Card Styles ---- */
 .card-elevated {
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
 }
 .card-elevated:hover {
   transform: none;
@@ -118,7 +122,12 @@
 
 /* ---- Site Selection Buttons ---- */
 .site-btn {
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
   position: relative;
   overflow: visible;
 }
@@ -152,7 +161,9 @@
 
 /* ---- Selected Check Badge ---- */
 .site-check-badge {
-  transition: all var(--duration-fast) var(--ease-spring);
+  transition:
+    opacity var(--duration-fast) var(--ease-spring),
+    transform var(--duration-fast) var(--ease-spring);
   transform: scale(0);
   z-index: 20;
 }
@@ -202,7 +213,13 @@
 .btn-start {
   position: relative;
   overflow: hidden;
-  transition: all var(--duration-slow) var(--ease-smooth);
+  transition:
+    background-color var(--duration-slow) var(--ease-smooth),
+    color var(--duration-slow) var(--ease-smooth),
+    filter var(--duration-slow) var(--ease-smooth),
+    opacity var(--duration-slow) var(--ease-smooth),
+    box-shadow var(--duration-slow) var(--ease-smooth),
+    transform var(--duration-slow) var(--ease-smooth);
 }
 .btn-start::before {
   content: '';
@@ -266,7 +283,11 @@
   box-shadow: 0 6px 14px -12px rgba(15, 23, 42, 0.35);
 }
 .task-card .task-icon {
-  transition: all var(--duration-normal) ease;
+  transition:
+    background-color var(--duration-normal) ease,
+    color var(--duration-normal) ease,
+    box-shadow var(--duration-normal) ease,
+    transform var(--duration-normal) ease;
   flex: 0 0 auto;
 }
 .task-card:hover .task-icon {
@@ -321,7 +342,11 @@
 
 /* ---- History Cards ---- */
 .history-card {
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
   position: relative;
 }
 .history-card::before {
@@ -366,7 +391,11 @@
 
 /* ---- Upload Area ---- */
 .upload-area {
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
   position: relative;
 }
 .upload-area::before {
@@ -390,12 +419,19 @@
   transition-duration: 0.1s;
 }
 .upload-icon {
-  transition: all var(--duration-slow) var(--ease-smooth);
+  transition:
+    color var(--duration-slow) var(--ease-smooth),
+    box-shadow var(--duration-slow) var(--ease-smooth),
+    transform var(--duration-slow) var(--ease-smooth);
 }
 
 /* ---- Import Button (floating) ---- */
 .import-trigger {
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
 }
 .import-trigger:hover {
   transform: translateY(-1px);
@@ -407,7 +443,11 @@
 
 /* ---- Plugin Download Card ---- */
 .plugin-card {
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
   position: relative;
   overflow: hidden;
 }
@@ -434,7 +474,9 @@
     0 4px 12px -4px rgba(var(--ma-accent-rgb, 98, 87, 245), 0.06);
 }
 .plugin-card .plugin-icon {
-  transition: all var(--duration-slow) var(--ease-smooth);
+  transition:
+    color var(--duration-slow) var(--ease-smooth),
+    transform var(--duration-slow) var(--ease-smooth);
 }
 .plugin-card:hover .plugin-icon {
   transform: rotate(-8deg) scale(1.05);
@@ -442,7 +484,11 @@
 
 /* ---- Download Button ---- */
 .download-btn {
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
   position: relative;
   overflow: hidden;
 }
@@ -455,7 +501,11 @@
 
 /* ---- JSON Display ---- */
 .json-container {
-  transition: all var(--duration-normal);
+  transition:
+    background-color var(--duration-normal),
+    border-color var(--duration-normal),
+    box-shadow var(--duration-normal),
+    transform var(--duration-normal);
 }
 .json-container .json-header {
   transition: background var(--duration-normal);
@@ -483,7 +533,11 @@
   position: relative;
 }
 [x-data='scraperPanel'] .textarea-wrapper textarea {
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth);
 }
 [x-data='scraperPanel'] .textarea-wrapper textarea:focus {
   background: var(--color-white);
@@ -502,7 +556,12 @@
 
 /* ---- ASIN Tag Hover ---- */
 .asin-tag {
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
 }
 .asin-tag:hover {
   transform: translateY(-1px) scale(1.02);
@@ -518,14 +577,23 @@
 
 /* ---- Strategy Cards ---- */
 .strategy-card {
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
 }
 .strategy-card:hover {
   transform: none;
 }
 
 .strategy-item {
-  transition: all var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
   position: relative;
 }
 .strategy-item::before {
@@ -575,7 +643,9 @@
   position: relative;
 }
 .section-header .header-icon {
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    color var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
 }
 .section-header:hover .header-icon {
   transform: rotate(-5deg) scale(1.05);
@@ -584,26 +654,34 @@
 /* ---- Tab Buttons ---- */
 .tab-btn {
   position: relative;
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
 }
 .tab-btn::after {
   content: '';
   position: absolute;
   bottom: -1px;
   left: 50%;
-  width: 0;
+  width: 70%;
   height: 2px;
   background: linear-gradient(90deg, var(--ma-accent, #6257f5), var(--ma-accent-light, #8b5cf6));
   border-radius: var(--rounded-xs) 2px 0 0;
-  transition: all var(--duration-normal) var(--ease-smooth);
-  transform: translateX(-50%);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
 }
 .tab-btn.active::after {
-  width: 70%;
+  transform: translateX(-50%) scaleX(1);
 }
 .tab-btn:hover:not(.active)::after {
-  width: 40%;
   background: var(--color-slate-300);
+  transform: translateX(-50%) scaleX(0.57);
 }
 .tab-btn .tab-icon {
   transition: transform var(--duration-fast) ease;
@@ -631,7 +709,9 @@
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    opacity var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
   z-index: 50;
 }
 .tooltip-wrapper:hover::after {
@@ -650,7 +730,9 @@
 
 /* ---- Empty State ---- */
 .empty-state-icon {
-  transition: all var(--duration-slow) var(--ease-smooth);
+  transition:
+    color var(--duration-slow) var(--ease-smooth),
+    transform var(--duration-slow) var(--ease-smooth);
 }
 .empty-state:hover .empty-state-icon {
   transform: translateY(-4px) rotate(-3deg);
@@ -658,7 +740,11 @@
 
 /* ---- Load History Button ---- */
 .load-btn {
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
 }
 .load-btn:hover {
   transform: translateX(2px);
@@ -666,7 +752,11 @@
 
 /* ---- Delete Button ---- */
 .delete-btn {
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
 }
 .delete-btn:hover {
   transform: rotate(8deg) scale(1.1);
@@ -674,7 +764,11 @@
 
 /* ---- Clear Button ---- */
 .clear-btn {
-  transition: all var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
   position: relative;
 }
 .clear-btn::after {
@@ -699,7 +793,11 @@
   background: rgba(251, 191, 36, 0.04);
 }
 .guide-toggle .toggle-chevron-wrap {
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
 }
 .guide-toggle:hover .toggle-chevron-wrap {
   background: var(--color-slate-800);
@@ -717,7 +815,11 @@
   background: rgba(248, 250, 252, 0.8);
 }
 .config-header .config-chevron-wrap {
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
 }
 .config-header:hover .config-chevron-wrap {
   background: var(--color-slate-800);
@@ -1120,7 +1222,11 @@
 
 /* ---- Warning Banner ---- */
 .warning-banner {
-  transition: all var(--duration-normal);
+  transition:
+    background-color var(--duration-normal),
+    border-color var(--duration-normal),
+    box-shadow var(--duration-normal),
+    transform var(--duration-normal);
   animation: fadeInScale var(--duration-slow) var(--ease-out);
 }
 .warning-banner:hover {

@@ -21,7 +21,13 @@
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    opacity var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
 }
 
 /* ========================================
@@ -487,7 +493,11 @@
   justify-content: center;
   color: currentColor;
   opacity: 0.6;
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    opacity var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
 }
 
 .badge-dismiss-btn:hover {

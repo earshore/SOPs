@@ -709,7 +709,11 @@
   background: white;
   border: 1px solid var(--color-slate-200);
   border-radius: var(--rounded-lg);
-  transition: all var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
 }
 
 .widget-content-area .group\/card:hover {
@@ -722,7 +726,11 @@
   background: white;
   border: 1px solid var(--color-slate-200);
   border-radius: var(--rounded-lg);
-  transition: all var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
 }
 
 .edit-row:hover {

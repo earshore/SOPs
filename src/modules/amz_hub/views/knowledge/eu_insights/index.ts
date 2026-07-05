@@ -5,8 +5,8 @@
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import BaseModule from '../../../../../common/BaseModule';
 import { AMZ_COUNTRY_DATA, type CountryCode } from '../../../constants/amz_hub_constants';
-import templateHTML from './template.html?raw';
 import './styles.css';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { loadChartJs, type ChartJS } from '../../../../../common/utils/lazyLibs';
 
 // Chart.js 实例类型定义
@@ -40,7 +40,10 @@ class EuInsightsModule extends BaseModule {
     if (!container) return;
 
     // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(container, templateHTML);
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/amz_hub/views/knowledge/eu_insights/template.html'
+    );
+    setSafeHtml(container, html);
     container.classList.add('fade-in');
   }
 

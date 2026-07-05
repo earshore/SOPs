@@ -4,8 +4,8 @@
 // ================================================================
 
 import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '@/common/utils/security';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import './homeDisplay.css';
 
 interface ParticleConfig {
@@ -131,7 +131,9 @@ class HomeModule extends BaseModule {
 
   async render(): Promise<void> {
     if (this.container && !this.container.innerHTML.trim()) {
-      const html = await loadTemplate('src/modules/home/homeDisplay.html');
+      const html = await SafeTemplateLoader.getInstance().loadTemplate(
+        'src/modules/home/homeDisplay.html'
+      );
       setSafeHtml(this.container, html);
     }
   }

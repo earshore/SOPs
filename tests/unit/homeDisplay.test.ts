@@ -7,6 +7,10 @@ const homeTemplate = `
     <div id="hero-content">
       <div class="slogan-line highlight">规范流程</div>
       <div class="slogan-line outline">无限可能</div>
+      <div class="home-primary-actions" aria-label="首页主入口">
+        <button type="button" class="home-primary-action" data-action="switch-tab" data-tab="sops_overview">进入 SOP 流程中心</button>
+        <button type="button" class="home-primary-action" data-action="switch-tab" data-tab="app_center_overview">打开应用中心</button>
+      </div>
     </div>
     <aside class="floating-workbench" aria-label="应用中心快捷入口">
       <button type="button" class="floating-workbench__trigger" aria-expanded="false"
@@ -39,16 +43,21 @@ function flushPromises(): Promise<void> {
 
 async function importHomeDisplay(template = homeTemplate) {
   vi.resetModules();
-  vi.doMock('@/common/utils/viewLoader', () => ({
-    loadTemplate: vi.fn(async () => template),
+  const loadTemplate = vi.fn(async () => template);
+
+  vi.doMock('@/common/infrastructure/SafeModuleLoader', () => ({
+    SafeTemplateLoader: {
+      getInstance: () => ({
+        loadTemplate,
+      }),
+    },
   }));
 
   const module = await import('@/modules/home/homeDisplay');
-  const viewLoader = await import('@/common/utils/viewLoader');
 
   return {
     ...module,
-    loadTemplate: viewLoader.loadTemplate as ReturnType<typeof vi.fn>,
+    loadTemplate,
   };
 }
 
@@ -96,7 +105,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.doUnmock('@/common/utils/viewLoader');
+  vi.doUnmock('@/common/infrastructure/SafeModuleLoader');
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
@@ -136,7 +145,14 @@ it('mounts the full home splash with particles, hero copy, app center shortcuts,
     .map(element => element.dataset.tab)
     .filter(Boolean);
 
-  expect(routeIds).toEqual(['scraper', 'playground', 'kw_input', 'ppc_search_terms']);
+  expect(routeIds).toEqual([
+    'sops_overview',
+    'app_center_overview',
+    'scraper',
+    'playground',
+    'kw_input',
+    'ppc_search_terms',
+  ]);
 
   const workbench = container.querySelector<HTMLElement>('.floating-workbench');
   const trigger = container.querySelector<HTMLButtonElement>('.floating-workbench__trigger');
@@ -167,9 +183,10 @@ it('mounts the full home splash with particles, hero copy, app center shortcuts,
   expect(workbench?.classList.contains('is-expanded')).toBe(false);
 
   const queuedFrameCount = frameCallbacks.length;
-  resizeCallback?.([
-    { contentRect: { width: 160, height: 120 } as DOMRectReadOnly },
-  ] as ResizeObserverEntry[], {} as ResizeObserver);
+  resizeCallback?.(
+    [{ contentRect: { width: 160, height: 120 } as DOMRectReadOnly }] as ResizeObserverEntry[],
+    {} as ResizeObserver
+  );
   frameCallbacks[queuedFrameCount]?.(0);
 
   const canvas = document.getElementById('particles-canvas') as HTMLCanvasElement;

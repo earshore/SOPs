@@ -23,7 +23,12 @@
   cursor: pointer;
   user-select: none;
   outline: none;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
 }
 
 .action-btn:hover {
@@ -61,20 +66,20 @@
 
 /* 主要按钮 */
 .action-btn-primary {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
+  background: var(--button-primary-bg, var(--color-primary));
+  color: var(--button-primary-fg, var(--color-primary-contrast, #ffffff));
+  border-color: var(--button-primary-bg, var(--color-primary));
 }
 
 .action-btn-primary:hover {
-  background: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
+  background: var(--button-primary-hover-bg, var(--color-primary-dark));
+  border-color: var(--button-primary-hover-bg, var(--color-primary-dark));
   box-shadow: var(--shadow-primary-sm);
 }
 
 .action-btn-primary:active {
-  background: var(--color-primary-darker);
-  border-color: var(--color-primary-darker);
+  background: var(--button-primary-active-bg, var(--color-primary-darker));
+  border-color: var(--button-primary-active-bg, var(--color-primary-darker));
   box-shadow: none;
 }
 
@@ -116,7 +121,12 @@
   font-weight: var(--font-medium);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
   font-family: inherit;
 }
 

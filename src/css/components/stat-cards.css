@@ -18,7 +18,11 @@
   padding: var(--spacing-lg);
   position: relative;
   overflow: hidden;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
   box-shadow: var(--shadow-xs);
 }
 

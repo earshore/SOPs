@@ -3,6 +3,7 @@
  * 集成到 Master Analysis 的子页面
  */
 
+import BaseModule from '../../../../../common/BaseModule';
 import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { createAiAnalysisPanel } from './components/AlpinePanel';
@@ -12,11 +13,15 @@ import { destroyAlpineComponent } from '../utils/alpineLifecycle';
 import '../master_analysis_style.css';
 import './ai_analysis_style.css';
 
-/**
- * 挂载模块
- */
-export async function mount(container: HTMLElement): Promise<void> {
-  try {
+class AiAnalysisModule extends BaseModule {
+  constructor() {
+    super('ai_analysis');
+  }
+
+  protected async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
     // 1. 使用 SafeTemplateLoader 加载模板
     const loader = SafeTemplateLoader.getInstance();
     const html = await loader.loadTemplate(
@@ -34,27 +39,30 @@ export async function mount(container: HTMLElement): Promise<void> {
     const renderer = SafeRenderer.getInstance();
     container.classList.add('fade-in');
     renderer.renderTemplate(container, html);
+  }
 
+  protected async init(): Promise<void> {
     // 3. 使用 AlpineRegistry 注册组件（直接使用 Zustand 作为数据源）
     const registry = AlpineRegistry.getInstance();
     registry.register('aiAnalysisPanel', createAiAnalysisPanel);
 
     // 初始化注册器（如果尚未初始化）
     registry.init();
-  } catch (error) {
-    console.error('[AI智能分析] ❌ 模块挂载失败:', error);
-    throw error;
+  }
+
+  protected onUnmount(): void {
+    try {
+      destroyAlpineComponent('[x-data="aiAnalysisPanel"]');
+      AlpineRegistry.getInstance().unregister('aiAnalysisPanel');
+    } catch (error) {
+      console.error('[AI智能分析] ❌ 模块卸载失败:', error);
+    }
   }
 }
 
-/**
- * 卸载模块
- */
-export function unmount(): void {
-  try {
-    destroyAlpineComponent('[x-data="aiAnalysisPanel"]');
-    AlpineRegistry.getInstance().unregister('aiAnalysisPanel');
-  } catch (error) {
-    console.error('[AI智能分析] ❌ 模块卸载失败:', error);
-  }
-}
+const aiAnalysisModule = new AiAnalysisModule();
+
+export const mount = (container: HTMLElement): Promise<void> => aiAnalysisModule.mount(container);
+export const unmount = (): void => {
+  aiAnalysisModule.unmount();
+};

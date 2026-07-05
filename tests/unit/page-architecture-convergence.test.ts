@@ -1,40 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { cwd } from 'node:process';
 
 const modulesDir = join(cwd(), 'src/modules');
+const srcDir = join(cwd(), 'src');
 
-const nakedMountAllowlist = [
-  'src/modules/app_center/views/keyword_hunter/analysis/index.ts',
-  'src/modules/app_center/views/keyword_hunter/input/index.ts',
-  'src/modules/app_center/views/keyword_hunter/process/index.ts',
-  'src/modules/app_center/views/master_analysis/ai_analysis/index.ts',
-  'src/modules/app_center/views/master_analysis/promptlab/index.ts',
-  'src/modules/app_center/views/master_analysis/scraper/index.ts',
-  'src/modules/sops/views/growth/npi_tracker/index.ts',
-];
+const nakedMountAllowlist: string[] = [];
 
-const viewLoaderAllowlist = [
-  'src/modules/app_center/views/playground/deep-chat/controller.ts',
-  'src/modules/app_center/views/ppc_tools/ppc_search_terms/index.ts',
-  'src/modules/home/homeDisplay.ts',
-];
+const viewLoaderAllowlist: string[] = [];
 
-const rawTemplateAllowlist = [
-  'src/modules/amz_hub/views/advanced/conversion_optimization/index.ts',
-  'src/modules/amz_hub/views/advanced/mature_phase/index.ts',
-  'src/modules/amz_hub/views/advanced/new_product_30days/index.ts',
-  'src/modules/amz_hub/views/knowledge/ecosystem/index.ts',
-  'src/modules/amz_hub/views/knowledge/eu_insights/index.ts',
-  'src/modules/amz_hub/views/knowledge/seo_strategy/index.ts',
-  'src/modules/amz_hub/views/overview/index.ts',
-  'src/modules/amz_hub/views/practice/marketing_calendar/index.ts',
-  'src/modules/amz_hub/views/practice/promo_activities/index.ts',
-  'src/modules/amz_hub/views/practice/promo_tools/index.ts',
-  'src/modules/amz_hub/views/practice/quality_listing/index.ts',
-  'src/modules/app_center/views/master_analysis/promptlab/index.ts',
-];
+const rawTemplateAllowlist: string[] = [];
 
 function normalizePath(file: string): string {
   return file.replace(/\\/g, '/');
@@ -66,11 +42,71 @@ function findOffenders(pattern: RegExp, extensions: readonly string[] = ['.ts'])
     .sort();
 }
 
+function findSourceOffenders(pattern: RegExp, extensions: readonly string[] = ['.ts']): string[] {
+  return collectFiles(srcDir)
+    .filter(file => extensions.some(extension => file.endsWith(extension)))
+    .filter(file => pattern.test(readFileSync(file, 'utf8')))
+    .map(file => normalizePath(relative(cwd(), file)))
+    .sort();
+}
+
+function resolveRelativeTsFile(baseFile: string, specifier: string): string | null {
+  if (!specifier.startsWith('.')) {
+    return null;
+  }
+
+  const target = join(dirname(baseFile), specifier.endsWith('.ts') ? specifier : `${specifier}.ts`);
+
+  try {
+    return statSync(target).isFile() ? target : null;
+  } catch {
+    return null;
+  }
+}
+
+function collectPageEntries(): string[] {
+  const viewEntries = collectFiles(modulesDir).filter(file =>
+    /\/views\/.+\/index\.ts$/.test(normalizePath(relative(cwd(), file)))
+  );
+  const homeEntry = join(modulesDir, 'home/homeDisplay.ts');
+
+  return [...viewEntries, homeEntry].filter(file => statSync(file).isFile()).sort();
+}
+
+function collectPageImplementationContent(entryFile: string): string {
+  const content = readFileSync(entryFile, 'utf8');
+  const files = [entryFile];
+  const exportFromPattern = /\bexport\s+(?:\{[^}]*\}|\*)\s+from\s+['"]([^'"]+)['"]/g;
+
+  for (const match of content.matchAll(exportFromPattern)) {
+    const target = resolveRelativeTsFile(entryFile, match[1]);
+    if (target) {
+      files.push(target);
+    }
+  }
+
+  return [...new Set(files)].map(file => readFileSync(file, 'utf8')).join('\n');
+}
+
 describe('page architecture convergence', () => {
+  it('keeps every page entry implementation on BaseModule', () => {
+    const offenders = collectPageEntries()
+      .filter(file => !/\bextends\s+BaseModule\b/.test(collectPageImplementationContent(file)))
+      .map(file => normalizePath(relative(cwd(), file)));
+
+    expect(offenders).toEqual([]);
+  });
+
   it('does not add new naked mount page entries', () => {
     const offenders = findOffenders(/\bexport\s+(?:async\s+)?function\s+mount\b/);
 
     expect(offenders).toEqual(nakedMountAllowlist);
+  });
+
+  it('does not add safeMount usage in production modules', () => {
+    const offenders = findOffenders(/\bsafeMount\b|common\/utils\/safeMount/);
+
+    expect(offenders).toEqual([]);
   });
 
   it('does not add new viewLoader usage in production modules', () => {
@@ -83,6 +119,22 @@ describe('page architecture convergence', () => {
     const offenders = findOffenders(/template\.html\?raw|html\?raw|templateHTML/);
 
     expect(offenders).toEqual(rawTemplateAllowlist);
+  });
+
+  it('keeps SafeModuleLoader scoped to template loading in production modules', () => {
+    const offenders = findOffenders(
+      /\bimport\s*\{\s*SafeModuleLoader\b|\bsafeModuleLoader\b|SafeTemplateLoader\.getInstance\(\)\.loadModule|safeTemplateLoader\.loadModule/
+    );
+
+    expect(offenders).toEqual([]);
+  });
+
+  it('does not reintroduce a module CSS registry side path', () => {
+    const offenders = findSourceOffenders(
+      /\bloadModuleCSS\b|\bmoduleCSSRegistry\b|\bcssRegistry\b|\bregisterModuleCSS\b/
+    );
+
+    expect(offenders).toEqual([]);
   });
 
   it('keeps high-risk automation copy behind human-confirmation wording', () => {

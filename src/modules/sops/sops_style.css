@@ -18,9 +18,11 @@
   --sops-qwen-surface: #f7f8ff;
   --sops-qwen-border: color-mix(in srgb, var(--sops-qwen-violet) 20%, transparent);
   --sops-qwen-focus: color-mix(in srgb, var(--sops-qwen-violet) 18%, transparent);
-  --color-primary: var(--sops-qwen-violet);
-  --color-primary-light: var(--sops-qwen-soft);
-  --color-primary-dark: var(--sops-qwen-violet-strong);
+  --module-accent: var(--sops-qwen-violet);
+  --module-accent-soft: var(--sops-qwen-soft);
+  --module-accent-border: var(--sops-qwen-border);
+  --module-accent-text: var(--sops-qwen-violet-strong);
+  --module-accent-focus: var(--sops-qwen-focus);
   --focus-ring-soft: var(--sops-qwen-focus);
   --button-filter-accent: var(--sops-qwen-violet-strong);
   --button-filter-hover-bg: var(--sops-qwen-soft);
@@ -133,7 +135,7 @@
 }
 
 .sops-collapsible-summary:focus-visible {
-  outline: 2px solid var(--color-primary, var(--color-blue-500, #3b82f6));
+  outline: 2px solid var(--module-accent, var(--color-blue-500, #3b82f6));
   outline-offset: 3px;
 }
 
@@ -274,7 +276,7 @@
 }
 
 .npi-lifecycle-table-scroll:focus-visible {
-  outline: 2px solid var(--color-primary, var(--color-blue-500));
+  outline: 2px solid var(--module-accent, var(--color-blue-500));
   outline-offset: -2px;
 }
 
@@ -540,7 +542,12 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   color: var(--color-slate-500);
   background: transparent;
   border: 1px solid transparent;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
   cursor: pointer;
 }
 
@@ -561,12 +568,15 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   border: 1px solid var(--color-slate-200);
   border-radius: var(--rounded-lg);
   padding: 0.75rem 1rem;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth);
 }
 
 .sop-search-box:focus-within {
   border-color: var(--color-blue-500);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
+  box-shadow: 0 0 0 3px var(--module-accent-focus, var(--focus-ring-soft));
 }
 
 .sop-search-box input {
@@ -643,7 +653,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:hover {
-  border-color: var(--color-primary, var(--color-blue-500));
+  border-color: var(--module-accent, var(--color-blue-500));
   background: var(--surface-card-hover, var(--color-slate-50));
   box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
 }
@@ -654,7 +664,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   height: 40px;
   margin: 0 auto var(--spacing-sm, 0.75rem);
   border-radius: 50%;
-  background: var(--color-primary, var(--color-blue-500));
+  background: var(--module-accent, var(--color-blue-500));
   color: white;
   font-size: var(--text-md, 1rem);
   font-weight: var(--font-bold, 700);
@@ -667,7 +677,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:hover .sop-step-number {
-  background: var(--color-primary-dark, var(--color-blue-600));
+  background: var(--module-accent-text, var(--color-blue-600));
 }
 
 /* 步骤内容 */
@@ -689,7 +699,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 }
 
 .sop-process-step:hover .sop-step-title {
-  color: var(--color-primary, var(--color-blue-500));
+  color: var(--module-accent, var(--color-blue-500));
 }
 
 /* 步骤描述 */
@@ -711,8 +721,9 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   justify-content: center;
   color: var(--color-text-tertiary, var(--color-slate-400));
   font-size: var(--text-sm, 0.875rem);
-  transition: all var(--duration-fast, var(--duration-fast))
-    var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition:
+    color var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .sop-process-arrow i {
@@ -723,7 +734,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 /* 当相邻步骤悬停时，箭头也有动画效果 */
 .sop-process-step:hover + .sop-process-arrow,
 .sop-process-arrow:has(+ .sop-process-step:hover) {
-  color: var(--color-primary, var(--color-blue-500));
+  color: var(--module-accent, var(--color-blue-500));
 }
 
 .sop-process-step:hover + .sop-process-arrow i,
@@ -838,7 +849,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   }
 
   .sop-process-step:hover {
-    border-color: var(--color-primary, #818cf8);
+    border-color: var(--module-accent, #818cf8);
   }
 
   .sop-step-title {
@@ -855,7 +866,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 
   .sop-process-step:hover + .sop-process-arrow,
   .sop-process-arrow:has(+ .sop-process-step:hover) {
-    color: var(--color-primary, #818cf8);
+    color: var(--module-accent, #818cf8);
   }
 }
 

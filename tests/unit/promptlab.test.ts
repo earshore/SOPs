@@ -156,17 +156,15 @@ describe('Module Lifecycle', () => {
   });
 
   it('should handle mount errors gracefully', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const mockError = new Error('Render failed');
 
     vi.spyOn(SafeRenderer.getInstance(), 'renderTemplate').mockImplementation(() => {
       throw mockError;
     });
 
-    await expect(mount(container)).rejects.toThrow('Render failed');
-    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('[Promptlab]'), mockError);
-
-    consoleErrorSpy.mockRestore();
+    await expect(mount(container)).resolves.toBeUndefined();
+    expect(container.textContent).toContain('模块加载失败 (promptlab)');
+    expect(container.textContent).toContain('Render failed');
   });
 
   it('should unmount module successfully', () => {
@@ -175,10 +173,11 @@ describe('Module Lifecycle', () => {
     expect(AlpineRegistry.getInstance().unregister).toHaveBeenCalledWith('promptlabPanel');
   });
 
-  it('should handle unmount errors gracefully', () => {
+  it('should handle unmount errors gracefully', async () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const mockError = new Error('Unregister failed');
 
+    await mount(container);
     vi.spyOn(AlpineRegistry.getInstance(), 'unregister').mockImplementation(() => {
       throw mockError;
     });

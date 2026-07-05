@@ -2,8 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import { mount, unmount } from '@/modules/sops/views/overview/index';
+
+const sopsOverviewMocks = vi.hoisted(() => ({
+  loadTemplate: vi.fn(),
+}));
 
 const realOverviewTemplatePath = join(cwd(), 'src/modules/sops/views/overview/template.html');
 
@@ -17,8 +20,12 @@ const overviewTemplate = `
   </div>
 `;
 
-vi.mock('@/common/utils/viewLoader', () => ({
-  loadTemplate: vi.fn(),
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
+  SafeTemplateLoader: {
+    getInstance: () => ({
+      loadTemplate: sopsOverviewMocks.loadTemplate,
+    }),
+  },
 }));
 
 describe('SOPs Overview', () => {
@@ -27,7 +34,7 @@ describe('SOPs Overview', () => {
   beforeEach(() => {
     container = document.createElement('div');
     document.body.appendChild(container);
-    vi.mocked(loadTemplate).mockResolvedValue(overviewTemplate);
+    sopsOverviewMocks.loadTemplate.mockResolvedValue(overviewTemplate);
   });
 
   afterEach(() => {
@@ -39,7 +46,9 @@ describe('SOPs Overview', () => {
   it('renders the overview template on mount', async () => {
     await mount(container);
 
-    expect(loadTemplate).toHaveBeenCalledWith('src/modules/sops/views/overview/template.html');
+    expect(sopsOverviewMocks.loadTemplate).toHaveBeenCalledWith(
+      'src/modules/sops/views/overview/template.html'
+    );
     expect(container.querySelector('.sops-overview')).not.toBeNull();
   });
 

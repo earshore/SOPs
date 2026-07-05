@@ -228,8 +228,12 @@ async function importDeepChat(options: ImportOptions = {}) {
   };
 
   vi.resetModules();
-  vi.doMock('@/common/utils/viewLoader', () => ({
-    loadTemplate: vi.fn(async () => deepChatTemplate),
+  vi.doMock('@/common/infrastructure/SafeModuleLoader', () => ({
+    SafeTemplateLoader: {
+      getInstance: () => ({
+        loadTemplate: vi.fn(async () => deepChatTemplate),
+      }),
+    },
   }));
   vi.doMock('@/common/infrastructure/SafeRenderer', () => ({
     SafeRenderer: {
@@ -357,7 +361,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.doUnmock('@/common/utils/viewLoader');
+  vi.doUnmock('@/common/infrastructure/SafeModuleLoader');
   vi.doUnmock('@/common/infrastructure/SafeRenderer');
   vi.doUnmock('@/services/storageService');
   vi.doUnmock('@/services/localDataStore');

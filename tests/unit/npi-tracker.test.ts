@@ -173,18 +173,13 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
         });
 
         it('should handle mount errors gracefully', async () => {
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
             const mockError = new Error('Template load failed');
             
             vi.spyOn(SafeModuleLoader.getInstance(), 'loadTemplate').mockRejectedValue(mockError);
 
-            await expect(mount(container)).rejects.toThrow('Template load failed');
-            expect(consoleErrorSpy).toHaveBeenCalledWith(
-                expect.stringContaining('[NPITracker]'),
-                mockError
-            );
-
-            consoleErrorSpy.mockRestore();
+            await expect(mount(container)).resolves.toBeUndefined();
+            expect(container.textContent).toContain('模块加载失败 (sops_npi_tracker)');
+            expect(container.textContent).toContain('Template load failed');
         });
 
         it('should register global actions on mount', async () => {

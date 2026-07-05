@@ -18,7 +18,6 @@ import { APP_EVENTS, emitAppEvent } from '../constants/eventConstants';
 import { getEl } from './utils';
 import { showToast } from './notifications';
 import { setSafeHtml } from '../utils/security';
-import { applyPageEnterAnimation } from '../utils/pageEnterAnimation';
 
 // ========================
 // 侧边栏渲染器注册表
@@ -258,14 +257,6 @@ function showRoutePanel(targetPanelId: string): HTMLElement | null {
   return null;
 }
 
-function applyTopLevelPanelEnterAnimation(panel: HTMLElement | null): void {
-  if (panel?.id !== 'panel-home') {
-    return;
-  }
-
-  applyPageEnterAnimation(panel);
-}
-
 /**
  * 内部 UI 更新函数
  * 由新路由系统的中间件调用，负责更新侧边栏、面板显隐等 UI 状态
@@ -293,8 +284,7 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
   emitPanelUnloadIfNeeded(targetPanelId);
   currentActivePanel = targetPanelId;
 
-  const activePanel = showRoutePanel(targetPanelId);
-  applyTopLevelPanelEnterAnimation(activePanel);
+  showRoutePanel(targetPanelId);
 
   // 更新导航高亮
   if (fullConfig) {

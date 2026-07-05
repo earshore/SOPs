@@ -16,8 +16,8 @@
   --ppc-primary: var(--color-primary, var(--color-blue-600, #2563eb));
   --ppc-primary-hover: var(--color-primary-dark, var(--color-blue-700, #1d4ed8));
   --ppc-primary-soft: var(--color-primary-light, var(--color-blue-50, #eff6ff));
-  --ppc-accent: var(--color-emerald-600, var(--color-green-600, #16a34a));
-  --ppc-accent-strong: var(--color-emerald-700, var(--color-green-700, #15803d));
+  --ppc-accent: var(--color-emerald-700, var(--color-green-700, #047857));
+  --ppc-accent-strong: var(--color-emerald-800, var(--color-green-800, #065f46));
   --ppc-accent-soft: var(--color-emerald-50, var(--color-green-50, #f0fdf4));
   --ppc-accent-border: color-mix(in srgb, var(--ppc-accent) 18%, transparent);
   --ppc-info-soft: var(--color-blue-50, #eff6ff);

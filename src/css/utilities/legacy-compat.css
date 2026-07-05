@@ -11,7 +11,9 @@
   border-radius: var(--rounded-xl, 16px);
   padding: var(--spacing-lg, 1.5rem);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all var(--duration-normal, 300ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition-property: box-shadow, transform;
+  transition-duration: var(--duration-normal, 300ms);
+  transition-timing-function: var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .app-center-card:hover {
@@ -29,7 +31,9 @@
   border-radius: var(--rounded-lg, 12px);
   font-size: 0.875rem;
   font-weight: 600;
-  transition: all var(--duration-fast, 200ms) var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: var(--duration-fast, 200ms);
+  transition-timing-function: var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
   cursor: pointer;
   border: none;
 }
@@ -131,7 +135,9 @@
   border: 1px solid var(--color-slate-200);
   border-radius: var(--rounded-lg);
   padding: 0.75rem 1rem;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition-property: background-color, border-color, box-shadow;
+  transition-duration: var(--duration-normal);
+  transition-timing-function: var(--ease-smooth);
 }
 
 .app-center-search-box:focus-within,

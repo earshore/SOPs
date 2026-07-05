@@ -3,6 +3,9 @@
  * 由 JS 入口统一注入，避免在 index.html 中保留内联 <style> 影响构建。
  */
 
+/* 首屏基础令牌 - 与主样式共享自动生成 token，避免关键路径复制色板/字体 */
+@import './foundation/variables.generated.css';
+
 /* 首屏必需组件 - 仅 Loading */
 @import './components/loading.css';
 
@@ -10,22 +13,8 @@
 @tailwind base;
 
 :root {
-  --color-primary: var(--color-indigo-500);
-  --color-slate-50: #f8fafc;
-  --color-slate-700: #334155;
-  --gradient-aurora: linear-gradient(
-    135deg,
-    #6366f1 0%,
-    #ec4899 25%,
-    #f59e0b 50%,
-    #10b981 75%,
-    #06b6d4 100%
-  );
-  --duration-normal: 250ms;
-  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
-  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
-  --font-display: 'Syne', 'DM Sans', sans-serif;
-  --z-header: 40;
+  --duration-normal: var(--duration-300, 300ms);
+  --z-header: var(--z-40, 40);
   --z-mega-menu: 60;
   --z-loading: 300;
 }

@@ -16,36 +16,24 @@
             </span>
           </div>
           <p class="wb-description">
-            面向亚马逊运营的工具工作台，集中承载数据采集、AI
-            分析、关键词处理、PPC 搜索词分析和对话实验。
+            面向亚马逊运营的工具工作台，集中承载数据采集、AI 分析、关键词处理、PPC
+            搜索词分析和对话实验。
           </p>
           <div class="wb-tags" aria-label="应用中心能力标签">
             <div class="wb-tag">
-              <span
-                class="wb-tag-dot app-dot-primary"
-                aria-hidden="true"
-              ></span>
+              <span class="wb-tag-dot app-dot-primary" aria-hidden="true"></span>
               <span>数据采集</span>
             </div>
             <div class="wb-tag">
-              <span
-                class="wb-tag-dot app-dot-primary"
-                aria-hidden="true"
-              ></span>
+              <span class="wb-tag-dot app-dot-primary" aria-hidden="true"></span>
               <span>关键词增长</span>
             </div>
             <div class="wb-tag">
-              <span
-                class="wb-tag-dot app-dot-primary"
-                aria-hidden="true"
-              ></span>
+              <span class="wb-tag-dot app-dot-primary" aria-hidden="true"></span>
               <span>PPC 优化</span>
             </div>
             <div class="wb-tag">
-              <span
-                class="wb-tag-dot app-dot-primary"
-                aria-hidden="true"
-              ></span>
+              <span class="wb-tag-dot app-dot-primary" aria-hidden="true"></span>
               <span>AI 对话</span>
             </div>
           </div>
@@ -93,9 +81,7 @@
             data-tab="ppc_search_terms"
           >
             <span class="app-flow-index">02</span>
-            <span class="app-flow-icon"
-              ><i class="fas fa-magnifying-glass-dollar"></i
-            ></span>
+            <span class="app-flow-icon"><i class="fas fa-magnifying-glass-dollar"></i></span>
             <span class="app-flow-copy">
               <strong>广告作业流</strong>
               <small>报表导入、动作清单和周报摘要</small>
@@ -126,15 +112,9 @@
           <i class="fa-solid fa-table-cells-large app-overview-section-icon" aria-hidden="true"></i>
           应用矩阵
         </h2>
-        <p class="app-overview-eyebrow">
-          按应用类型筛选入口，快速定位工具分组。
-        </p>
+        <p class="app-overview-eyebrow">按应用类型筛选入口，快速定位工具分组。</p>
       </div>
-      <p
-        id="app-overview-visible-count"
-        class="app-overview-count"
-        aria-live="polite"
-      >
+      <p id="app-overview-visible-count" class="app-overview-count" aria-live="polite">
         显示 4 个应用
       </p>
     </div>
@@ -154,8 +134,7 @@
           data-category="master_analysis"
           aria-pressed="false"
         >
-          <i class="fas fa-cubes-stacked"></i><span>Master Analysis</span
-          ><em>3</em>
+          <i class="fas fa-cubes-stacked"></i><span>Master Analysis</span><em>3</em>
         </button>
         <button
           class="category-filter-btn"
@@ -187,14 +166,7 @@
 
   <section id="app-module-apps" class="app-overview-apps" data-category="all">
     <div class="app-center-card-grid app-overview-grid">
-      <article
-        class="app-overview-card app-card-qwen"
-        data-action="switch-tab"
-        data-tab="scraper"
-        data-category="master_analysis"
-        role="button"
-        tabindex="0"
-      >
+      <article class="app-overview-card app-card-qwen" data-category="master_analysis">
         <div class="app-card-head">
           <div class="app-card-icon">
             <i class="fas fa-cubes-stacked"></i>
@@ -206,18 +178,19 @@
             <h3>Master Analysis</h3>
             <p>采集、分析、Prompt 生成</p>
           </div>
-          <i class="fas fa-arrow-right app-card-arrow"></i>
-        </div>
-        <p class="app-card-desc">
-          从竞品数据采集开始，沉淀分析报告，再进入 AI 分析和 Prompt Lab。
-        </p>
-        <div class="app-card-actions">
           <button
-            class="app-child-link"
+            class="app-card-primary-link"
             type="button"
             data-action="switch-tab"
             data-tab="scraper"
+            aria-label="打开 Master Analysis 数据采集"
           >
+            <span>打开</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+        <p class="app-card-desc">从竞品数据采集开始，沉淀分析报告，再进入 AI 分析和 Prompt Lab。</p>
+        <div class="app-card-actions">
+          <button class="app-child-link" type="button" data-action="switch-tab" data-tab="scraper">
             <i class="fas fa-spider"></i><span>数据采集</span>
           </button>
           <button
@@ -239,14 +212,7 @@
         </div>
       </article>
 
-      <article
-        class="app-overview-card app-card-claude"
-        data-action="switch-tab"
-        data-tab="playground"
-        data-category="playground"
-        role="button"
-        tabindex="0"
-      >
+      <article class="app-overview-card app-card-claude" data-category="playground">
         <div class="app-card-head">
           <div class="app-card-icon">
             <i class="fas fa-paper-plane"></i>
@@ -258,11 +224,17 @@
             <h3>Playground</h3>
             <p>Deep Chat 与 Prompt 试验</p>
           </div>
-          <i class="fas fa-arrow-right app-card-arrow"></i>
+          <button
+            class="app-card-primary-link"
+            type="button"
+            data-action="switch-tab"
+            data-tab="playground"
+            aria-label="打开 Playground Deep Chat"
+          >
+            <span>打开</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </button>
         </div>
-        <p class="app-card-desc">
-          复用系统模型配置，进行快速问答、Prompt 验证和日常分析。
-        </p>
+        <p class="app-card-desc">复用系统模型配置，进行快速问答、Prompt 验证和日常分析。</p>
         <div class="app-card-actions app-card-actions-single">
           <button
             class="app-child-link"
@@ -275,14 +247,7 @@
         </div>
       </article>
 
-      <article
-        class="app-overview-card app-card-rose"
-        data-action="switch-tab"
-        data-tab="kw_input"
-        data-category="keyword_tracker"
-        role="button"
-        tabindex="0"
-      >
+      <article class="app-overview-card app-card-rose" data-category="keyword_tracker">
         <div class="app-card-head">
           <div class="app-card-icon">
             <i class="fas fa-search"></i>
@@ -294,18 +259,19 @@
             <h3>Keyword Hunter</h3>
             <p>关键词输入、处理、分析</p>
           </div>
-          <i class="fas fa-arrow-right app-card-arrow"></i>
-        </div>
-        <p class="app-card-desc">
-          检查 ASIN 关键词覆盖，整理手动补充词，并输出 SEO 复核结果。
-        </p>
-        <div class="app-card-actions">
           <button
-            class="app-child-link"
+            class="app-card-primary-link"
             type="button"
             data-action="switch-tab"
             data-tab="kw_input"
+            aria-label="打开 Keyword Hunter 输入格式化"
           >
+            <span>打开</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+        <p class="app-card-desc">检查 ASIN 关键词覆盖，整理手动补充词，并输出 SEO 复核结果。</p>
+        <div class="app-card-actions">
+          <button class="app-child-link" type="button" data-action="switch-tab" data-tab="kw_input">
             <i class="fas fa-keyboard"></i><span>输入格式化</span>
           </button>
           <button
@@ -327,14 +293,7 @@
         </div>
       </article>
 
-      <article
-        class="app-overview-card app-card-emerald"
-        data-action="switch-tab"
-        data-tab="ppc_search_terms"
-        data-category="ppc_tools"
-        role="button"
-        tabindex="0"
-      >
+      <article class="app-overview-card app-card-emerald" data-category="ppc_tools">
         <div class="app-card-head">
           <div class="app-card-icon">
             <i class="fas fa-bullhorn"></i>
@@ -346,7 +305,15 @@
             <h3>PPC Tools</h3>
             <p>广告搜索词动作清单</p>
           </div>
-          <i class="fas fa-arrow-right app-card-arrow"></i>
+          <button
+            class="app-card-primary-link"
+            type="button"
+            data-action="switch-tab"
+            data-tab="ppc_search_terms"
+            aria-label="打开 PPC 搜索词分析器"
+          >
+            <span>打开</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </button>
         </div>
         <p class="app-card-desc">
           导入 Search Term 报表，生成否词、加精准、加预算、降竞价和词池建议。
@@ -358,18 +325,13 @@
             data-action="switch-tab"
             data-tab="ppc_search_terms"
           >
-            <i class="fas fa-magnifying-glass-dollar"></i
-            ><span>PPC 搜索词分析器</span>
+            <i class="fas fa-magnifying-glass-dollar"></i><span>PPC 搜索词分析器</span>
           </button>
         </div>
       </article>
     </div>
 
-    <div
-      id="app-overview-empty"
-      class="app-overview-empty hidden"
-      aria-live="polite"
-    >
+    <div id="app-overview-empty" class="app-overview-empty hidden" aria-live="polite">
       <i class="fas fa-layer-group" aria-hidden="true"></i>
       <div class="app-overview-empty-title">当前分类暂无应用</div>
       <p>切回全部应用查看完整矩阵。</p>

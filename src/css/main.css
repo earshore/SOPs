@@ -35,6 +35,7 @@
 @import './components/progress.css'; /* Phase 4: 进度组件 */
 @import './components/scrollbar.css';
 @import './components/status.css';
+@import './components/data-scan.css';
 @import './components/toast.css';
 
 /* ----------------------------------------

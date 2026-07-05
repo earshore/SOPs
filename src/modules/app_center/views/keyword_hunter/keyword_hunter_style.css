@@ -554,7 +554,11 @@
   padding: 1.25rem;
   border: none;
   border-radius: var(--rounded-lg);
-  transition: all var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
   background: transparent;
 }
 
@@ -609,7 +613,10 @@
   border: 1px solid var(--border-muted, var(--color-slate-200));
   box-shadow: var(--shadow-panel, 0 12px 30px -28px rgba(15, 23, 42, 0.45));
   z-index: 9999;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    opacity var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
   display: none;
   overflow: hidden;
   pointer-events: auto;
@@ -693,7 +700,12 @@
   border-radius: var(--radius-card, var(--rounded-md));
   font-size: 0.875rem;
   font-weight: 600;
-  transition: all var(--duration-normal) var(--ease-in-out);
+  transition:
+    background-color var(--duration-normal) var(--ease-in-out),
+    color var(--duration-normal) var(--ease-in-out),
+    opacity var(--duration-normal) var(--ease-in-out),
+    box-shadow var(--duration-normal) var(--ease-in-out),
+    transform var(--duration-normal) var(--ease-in-out);
   border: none;
   cursor: pointer;
   box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
@@ -853,7 +865,11 @@
   display: inline;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  transition: all var(--duration-fast) ease;
+  transition:
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
 }
 
 .keyword-bold.kw-solo {
@@ -927,7 +943,11 @@
   border-radius: 0 0.5rem 0.5rem 0;
   line-height: 1.65;
   box-shadow: 0 1px 3px var(--color-indigo-100);
-  transition: all var(--duration-fast) ease;
+  transition:
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
 }
 
 .sentence-translation:hover {

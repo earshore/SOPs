@@ -7,10 +7,10 @@
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import BaseModule from '../../../../../common/BaseModule';
 import { SERVICE_NAMES } from '../../../../../common/di/ServiceRegistry';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import type { IStorageService } from '@/types/services';
 import { amzf_countries, amzf_months, amzf_events } from '../../../constants/amz_hub_constants';
 import { configCenter } from '../../../../../common/config/ConfigCenter';
-import templateHTML from './template.html?raw';
 import type { MarketingEvent, CountryInfo } from '@/types/modules-business';
 import './styles.css';
 
@@ -123,7 +123,10 @@ class MarketingCalendarModule extends BaseModule {
     if (!container) return;
 
     // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(container, templateHTML);
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/amz_hub/views/practice/marketing_calendar/template.html'
+    );
+    setSafeHtml(container, html);
     container.classList.add('fade-in');
   }
 

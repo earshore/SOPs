@@ -101,7 +101,11 @@
 .amz_card-hover {
   position: relative;
   background: white;
-  transition: all var(--duration-slow) var(--ease-spring);
+  transition:
+    transform var(--duration-slow) var(--ease-spring),
+    box-shadow var(--duration-slow) var(--ease-spring),
+    background-color var(--duration-slow) var(--ease-spring),
+    border-color var(--duration-slow) var(--ease-spring);
   border-radius: var(--rounded-lg);
   overflow: hidden;
 }
@@ -149,7 +153,10 @@
   border-radius: var(--rounded-xl);
   border: 1px solid var(--color-slate-200);
   box-shadow: 0 1px 3px 0 var(--color-black-alpha-5);
-  transition: all var(--duration-normal) ease;
+  transition:
+    border-color var(--duration-normal) ease,
+    box-shadow var(--duration-normal) ease,
+    background-color var(--duration-normal) ease;
   overflow: hidden;
   display: flex;
   flex-direction: column;

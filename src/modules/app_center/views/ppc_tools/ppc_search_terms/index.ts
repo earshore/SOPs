@@ -1,6 +1,6 @@
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
-import { safeMount } from '@/common/utils/safeMount';
-import { loadTemplate } from '@/common/utils/viewLoader';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import BaseModule from '@/common/BaseModule';
 import {
   analyzeReportText,
   cancelActiveAnalysis,
@@ -93,32 +93,50 @@ const exportControllerState: ExportControllerState = {
   getSearchQuery: () => actionListState.getSearchQuery(),
 };
 
-const mountInternal = async (container: HTMLElement): Promise<void> => {
-  resetAnalyzerState();
-  const html = await loadTemplate(
-    'src/modules/app_center/views/ppc_tools/ppc_search_terms/template.html'
-  );
-  const renderer = SafeRenderer.getInstance();
-  renderer.renderTemplate(container, html);
-  renderThresholdFields(container);
-  restoreThresholds(container);
-  initializeThresholdPanel(container);
-  const restoredSelection = restoreReportSelection(container);
-  activeReportType = restoredSelection === 'auto' ? 'search_term' : restoredSelection;
-  restoreAnalysisSettings(container);
-  updateContextFieldsVisibility(container);
-  restoreActionOwner(container);
-  bindEvents(container);
-  actionListState.syncReportControls(container);
-  actionListState.render(container, []);
-};
+class PpcSearchTermsModule extends BaseModule {
+  constructor() {
+    super('ppc_search_terms');
+  }
 
-export const mount = safeMount(mountInternal, { moduleName: 'PPC 搜索词分析器' });
+  protected async render(): Promise<void> {
+    if (!this.container) return;
 
-export function unmount(): void {
-  cancelActiveAnalysis();
-  listenerRegistry.clear();
+    resetAnalyzerState();
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/app_center/views/ppc_tools/ppc_search_terms/template.html'
+    );
+    const renderer = SafeRenderer.getInstance();
+    renderer.renderTemplate(this.container, html);
+  }
+
+  protected async init(): Promise<void> {
+    if (!this.container) return;
+
+    renderThresholdFields(this.container);
+    restoreThresholds(this.container);
+    initializeThresholdPanel(this.container);
+    const restoredSelection = restoreReportSelection(this.container);
+    activeReportType = restoredSelection === 'auto' ? 'search_term' : restoredSelection;
+    restoreAnalysisSettings(this.container);
+    updateContextFieldsVisibility(this.container);
+    restoreActionOwner(this.container);
+    bindEvents(this.container);
+    actionListState.syncReportControls(this.container);
+    actionListState.render(this.container, []);
+  }
+
+  protected onUnmount(): void {
+    cancelActiveAnalysis();
+    listenerRegistry.clear();
+  }
 }
+
+const ppcSearchTermsModule = new PpcSearchTermsModule();
+
+export const mount = (container: HTMLElement): Promise<void> => ppcSearchTermsModule.mount(container);
+export const unmount = (): void => {
+  ppcSearchTermsModule.unmount();
+};
 
 function bindEvents(container: HTMLElement): void {
   bindPpcEvents(container, listenerRegistry.add, {

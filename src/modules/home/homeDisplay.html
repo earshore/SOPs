@@ -1,85 +1,155 @@
 <div id="panel-home" class="panel w-full h-full absolute top-0 left-0 overflow-hidden hidden z-10">
+  <div id="home-splash-container">
+    <div class="clean-bg"></div>
 
-    <div id="home-splash-container">
-        <div class="clean-bg"></div>
+    <canvas id="particles-canvas"></canvas>
 
-        <canvas id="particles-canvas"></canvas>
+    <header class="top-bar">
+      <div class="time-display" id="time-display"></div>
+      <div class="logo-section">
+        <div class="logo-text">AMAZON WORKFLOW</div>
+        <div class="logo-sub">Standard Operating Procedure</div>
+      </div>
+    </header>
 
-        <header class="top-bar">
-            <div class="time-display" id="time-display"></div>
-            <div class="logo-section">
-                <div class="logo-text">AMAZON WORKFLOW</div>
-                <div class="logo-sub">Standard Operating Procedure</div>
-            </div>
-        </header>
+    <main class="splash-content-wrapper">
+      <div class="hero-container" id="hero-content">
+        <h1 class="slogan-main">
+          <div class="slogan-line highlight" data-text="规范流程">规范流程</div>
+          <div class="slogan-line outline" data-text="无限可能">无限可能</div>
+        </h1>
 
-        <main class="splash-content-wrapper">
-            <div class="hero-container" id="hero-content">
-                <h1 class="slogan-main">
-                    <div class="slogan-line highlight" data-text="规范流程">规范流程</div>
-                    <div class="slogan-line outline" data-text="无限可能">无限可能</div>
-                </h1>
+        <p class="slogan-sub">
+          把<span>混乱</span>变成<span>秩序</span>， 把<span>经验</span>变成<span>指令</span>。
+        </p>
 
-                <p class="slogan-sub">
-                    把<span>混乱</span>变成<span>秩序</span>，
-                    把<span>经验</span>变成<span>指令</span>。
-                </p>
+        <div class="home-primary-actions" aria-label="首页主入口">
+          <button
+            type="button"
+            class="home-primary-action home-primary-action--main"
+            data-action="switch-tab"
+            data-tab="sops_overview"
+          >
+            <i class="fas fa-diagram-project" aria-hidden="true"></i>
+            <span>进入 SOP 流程中心</span>
+          </button>
+          <button
+            type="button"
+            class="home-primary-action"
+            data-action="switch-tab"
+            data-tab="app_center_overview"
+          >
+            <i class="fas fa-cubes" aria-hidden="true"></i>
+            <span>打开应用中心</span>
+          </button>
+        </div>
 
-                <div class="ai-status">
-                    <div class="status-dot-inner"></div>
-                    <span class="status-text">AI SYSTEM ONLINE · READY TO TRANSFORM</span>
-                </div>
-            </div>
-        </main>
+        <div class="ai-status">
+          <div class="status-dot-inner"></div>
+          <span class="status-text">AI SYSTEM ONLINE · READY TO TRANSFORM</span>
+        </div>
+      </div>
+    </main>
 
-        <aside class="floating-workbench" aria-label="应用中心快捷入口">
-            <button type="button" class="floating-workbench__trigger" aria-expanded="false"
-                aria-controls="home-floating-workbench-actions" aria-label="展开应用中心快捷入口" title="应用中心">
-                <i class="fas fa-cubes" aria-hidden="true"></i>
-                <span class="sr-only">应用中心</span>
-            </button>
-            <div id="home-floating-workbench-actions" class="floating-workbench__actions" aria-label="应用中心应用快捷入口"
-                aria-hidden="true" inert>
-                <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="scraper"
-                    aria-label="打开 Master Analysis" title="Master Analysis">
-                    <i class="fas fa-cubes-stacked" aria-hidden="true"></i>
-                    <span class="sr-only">Master Analysis</span>
-                </button>
-                <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="playground"
-                    aria-label="打开 Playground" title="Playground">
-                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                    <span class="sr-only">Playground</span>
-                </button>
-                <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="kw_input"
-                    aria-label="打开 Keyword Hunter" title="Keyword Hunter">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                    <span class="sr-only">Keyword Hunter</span>
-                </button>
-                <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="ppc_search_terms"
-                    aria-label="打开 PPC Tools" title="PPC Tools">
-                    <i class="fas fa-bullhorn" aria-hidden="true"></i>
-                    <span class="sr-only">PPC Tools</span>
-                </button>
-            </div>
-        </aside>
+    <aside class="floating-workbench" aria-label="应用中心快捷入口">
+      <button
+        type="button"
+        class="floating-workbench__trigger"
+        aria-expanded="false"
+        aria-controls="home-floating-workbench-actions"
+        aria-label="展开应用中心快捷入口"
+        title="应用中心"
+      >
+        <i class="fas fa-cubes" aria-hidden="true"></i>
+        <span class="sr-only">应用中心</span>
+      </button>
+      <div
+        id="home-floating-workbench-actions"
+        class="floating-workbench__actions"
+        aria-label="应用中心应用快捷入口"
+        aria-hidden="true"
+        inert
+      >
+        <button
+          type="button"
+          class="floating-workbench__item"
+          data-action="switch-tab"
+          data-tab="scraper"
+          aria-label="打开 Master Analysis"
+          title="Master Analysis"
+        >
+          <i class="fas fa-cubes-stacked" aria-hidden="true"></i>
+          <span class="sr-only">Master Analysis</span>
+        </button>
+        <button
+          type="button"
+          class="floating-workbench__item"
+          data-action="switch-tab"
+          data-tab="playground"
+          aria-label="打开 Playground"
+          title="Playground"
+        >
+          <i class="fas fa-paper-plane" aria-hidden="true"></i>
+          <span class="sr-only">Playground</span>
+        </button>
+        <button
+          type="button"
+          class="floating-workbench__item"
+          data-action="switch-tab"
+          data-tab="kw_input"
+          aria-label="打开 Keyword Hunter"
+          title="Keyword Hunter"
+        >
+          <i class="fas fa-search" aria-hidden="true"></i>
+          <span class="sr-only">Keyword Hunter</span>
+        </button>
+        <button
+          type="button"
+          class="floating-workbench__item"
+          data-action="switch-tab"
+          data-tab="ppc_search_terms"
+          aria-label="打开 PPC Tools"
+          title="PPC Tools"
+        >
+          <i class="fas fa-bullhorn" aria-hidden="true"></i>
+          <span class="sr-only">PPC Tools</span>
+        </button>
+      </div>
+    </aside>
 
-        <footer class="brand-footer">
-            <div class="brand-line"></div>
-            <span class="brand-text">AI DRIVEN | HUMAN CENTERED | PROCESS AS CODE | DECISION AT SPEED</span>
-            <div class="brand-line"></div>
-        </footer>
+    <footer class="brand-footer">
+      <div class="brand-line"></div>
+      <span class="brand-text"
+        >AI DRIVEN | HUMAN CENTERED | PROCESS AS CODE | DECISION AT SPEED</span
+      >
+      <div class="brand-line"></div>
+    </footer>
 
-        <svg class="geometric-decor" viewBox="0 0 800 800" aria-hidden="true">
-            <defs>
-                <linearGradient id="decorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#2563eb; stop-opacity:0.2" />
-                    <stop offset="100%" style="stop-color:#06b6d4; stop-opacity:0.2" />
-                </linearGradient>
-            </defs>
-            <circle cx="400" cy="400" r="300" stroke="url(#decorGrad)" stroke-width="1" fill="none"
-                class="pulse-ring" />
-            <circle cx="400" cy="400" r="250" stroke="url(#decorGrad)" stroke-width="1" fill="none"
-                class="pulse-ring delay-1" />
-        </svg>
-    </div>
+    <svg class="geometric-decor" viewBox="0 0 800 800" aria-hidden="true">
+      <defs>
+        <linearGradient id="decorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color: #2563eb; stop-opacity: 0.2" />
+          <stop offset="100%" style="stop-color: #06b6d4; stop-opacity: 0.2" />
+        </linearGradient>
+      </defs>
+      <circle
+        cx="400"
+        cy="400"
+        r="300"
+        stroke="url(#decorGrad)"
+        stroke-width="1"
+        fill="none"
+        class="pulse-ring"
+      />
+      <circle
+        cx="400"
+        cy="400"
+        r="250"
+        stroke="url(#decorGrad)"
+        stroke-width="1"
+        fill="none"
+        class="pulse-ring delay-1"
+      />
+    </svg>
+  </div>
 </div>

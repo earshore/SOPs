@@ -1,23 +1,37 @@
 import { SafeTemplateLoader } from '../../../../common/infrastructure/SafeModuleLoader';
-import { safeMount } from '../../../../common/utils/safeMount';
+import BaseModule from '../../../../common/BaseModule';
 import { setSafeHtml } from '../../../../common/utils/security';
 
-// SOPs Overview - 总览页面
-const mountInternal = async (container: HTMLElement): Promise<void> => {
-  const html = await SafeTemplateLoader.getInstance().loadTemplate(
-    'src/modules/sops/views/overview/template.html'
-  );
-  // ✅ 安全: 静态HTML模板，无用户输入
-  setSafeHtml(container, html);
-  container.classList.add('fade-in');
+class SopsOverviewModule extends BaseModule {
+  constructor() {
+    super('sops_overview');
+  }
 
-  // 初始化事件监听
-  initOverviewEvents(container);
+  protected async render(): Promise<void> {
+    if (!this.container) return;
+
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/sops/views/overview/template.html'
+    );
+    // ✅ 安全: 静态HTML模板，无用户输入
+    setSafeHtml(this.container, html);
+    this.container.classList.add('fade-in');
+  }
+
+  protected async init(): Promise<void> {
+    if (!this.container) return;
+
+    // 初始化事件监听
+    initOverviewEvents(this.container);
+  }
+}
+
+const sopsOverviewModule = new SopsOverviewModule();
+
+export const mount = (container: HTMLElement): Promise<void> => sopsOverviewModule.mount(container);
+export const unmount = (): void => {
+  sopsOverviewModule.unmount();
 };
-
-export const mount = safeMount(mountInternal, { moduleName: 'SOPs Overview' });
-
-export function unmount(): void {}
 
 /**
  * 滚动到指定的模块区域

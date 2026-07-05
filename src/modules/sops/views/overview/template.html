@@ -1,596 +1,709 @@
 <div class="module-container sops-overview">
-        <!-- Welcome Banner -->
-        <div class="wb-container wb-container--simple wb-container--decorative">
-                <div class="wb-content">
-                        <div class="wb-icon">
-                                <i class="fas fa-clipboard-list"></i>
-                        </div>
-                        <div class="wb-title-row">
-                                <h1 class="wb-title">标准作业程序 (SOPs)</h1>
-                                <span aria-label="中心功能" class="wb-badge wb-badge-hub">
-                                        <i class="fa-solid fa-diagram-project"></i>WORKFLOW
-                                </span>
-                        </div>
-                        <p class="wb-description">系统化的亚马逊运营标准流程体系，确保团队执行一致性，降低风险，提升效率。</p>
-                        <div class="wb-tags">
-                                <div class="wb-tag">
-                                        <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-1, #6257f5);">
-                                        </div>
-                                        <span>运营与推广体系</span>
-                                </div>
-                                <div class="wb-tag">
-                                        <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-2, #3b6ff6);">
-                                        </div>
-                                        <span>供应链与物流体系</span>
-                                </div>
-                                <div class="wb-tag">
-                                        <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-3, #06b6d4);">
-                                        </div>
-                                        <span>账号安全与风控体系</span>
-                                </div>
-                                <div class="wb-tag">
-                                        <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-4, #8b5cf6);">
-                                        </div>
-                                        <span>客服与客户体验体系</span>
-                                </div>
-                        </div>
-                </div>
+  <!-- Welcome Banner -->
+  <div class="wb-container wb-container--simple wb-container--decorative">
+    <div class="wb-content">
+      <div class="wb-icon">
+        <i class="fas fa-clipboard-list"></i>
+      </div>
+      <div class="wb-title-row">
+        <h1 class="wb-title">标准作业程序 (SOPs)</h1>
+        <span aria-label="中心功能" class="wb-badge wb-badge-hub">
+          <i class="fa-solid fa-diagram-project"></i>WORKFLOW
+        </span>
+      </div>
+      <p class="wb-description">
+        系统化的亚马逊运营标准流程体系，确保团队执行一致性，降低风险，提升效率。
+      </p>
+      <div class="wb-tags">
+        <div class="wb-tag">
+          <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-1, #6257f5)"></div>
+          <span>运营与推广体系</span>
         </div>
-        <!-- 平台定位声明 -->
-        <div class="sops-overview-scope-note border rounded-xl p-4 mb-6 flex items-start gap-3">
-                <i class="fas fa-circle-info text-xl mt-0.5"></i>
-                <div>
-                        <h3 class="font-bold text-sm mb-1">适用范围声明</h3>
-                        <p class="text-sm">本流程中心聚焦 <strong>亚马逊欧洲站运营</strong>（DE/FR/IT/ES/NL/SE/PL/BE/GB/IE/TR）。北美、日本及其他平台不属于当前规划范围，不作为知识库重点。</p>
-                </div>
+        <div class="wb-tag">
+          <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-2, #3b6ff6)"></div>
+          <span>供应链与物流体系</span>
         </div>
-        <!-- 三条运营作业主线 -->
-        <section class="mb-8 sops-overview-collapsible" aria-label="三条运营作业主线">
-                <details class="sops-collapsible">
-                        <summary class="sops-collapsible-summary">
-                                <div>
-                                        <h2 class="text-xl font-bold text-slate-800">三条运营作业主线</h2>
-                                        <p class="text-sm text-slate-500">从任务出发串联 SOP、工具、动作和复盘，避免只停留在阅读文档。</p>
-                                </div>
-                                <span class="sops-collapsible-controls">
-                                        <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-100">
-                                                <i class="fas fa-diagram-project"></i>作业闭环
-                                        </span>
-                                        <span class="sops-collapsible-action" aria-hidden="true">
-                                                <span class="sops-collapsible-action-text"></span>
-                                                <i class="fas fa-chevron-down"></i>
-                                        </span>
-                                </span>
-                        </summary>
-                        <div class="sops-collapsible-body">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                        <div class="sop-card overview-accent-card overview-accent-emerald" data-action="switch-tab"
-                                data-tab="sops_npi_tracker">
-                                <div class="flex items-start justify-between mb-3">
-                                        <div class="sop-icon-container bg-emerald-50 text-emerald-600">
-                                                <i class="fas fa-seedling"></i>
-                                        </div>
-                                        <span class="sop-status-badge sop-status-active">新人主线</span>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-2">新品作业流</h3>
-                                <p class="text-sm text-slate-500 mb-3">建档、合规、定价、推广和周复盘，输出继续、观察或清仓结论。</p>
-                                <div class="text-xs text-slate-400">
-                                        <i class="fas fa-arrow-right mr-1"></i>NPI Tracker → Listing SEO → 高危词检查
-                                </div>
-                        </div>
-                        <div class="sop-card overview-accent-card overview-accent-teal" data-action="switch-tab"
-                                data-tab="ppc_search_terms">
-                                <div class="flex items-start justify-between mb-3">
-                                        <div class="sop-icon-container bg-teal-50 text-teal-600">
-                                                <i class="fas fa-magnifying-glass-dollar"></i>
-                                        </div>
-                                        <span class="sop-status-badge sop-status-active">🔗 跳转工具</span>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-2">广告作业流</h3>
-                                <p class="text-sm text-slate-500 mb-3">导入搜索词或活动报表，生成否词、加词、降竞价和复盘建议。</p>
-                                <div class="text-xs text-slate-400">
-                                        <i class="fas fa-arrow-right mr-1"></i>PPC SOP → 搜索词分析器 → 周报摘要
-                                </div>
-                        </div>
-                        <div class="sop-card overview-accent-card overview-accent-indigo" data-action="switch-tab"
-                                data-tab="scraper">
-                                <div class="flex items-start justify-between mb-3">
-                                        <div class="sop-icon-container bg-indigo-50 text-indigo-600">
-                                                <i class="fas fa-cubes-stacked"></i>
-                                        </div>
-                                        <span class="sop-status-badge sop-status-active">🔗 跳转工具</span>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-2">竞品与 Listing 作业流</h3>
-                                <p class="text-sm text-slate-500 mb-3">采集竞品素材，提炼产品洞察，生成 Listing 改写 Prompt 和补词清单。</p>
-                                <div class="text-xs text-slate-400">
-                                        <i class="fas fa-arrow-right mr-1"></i>数据采集 → AI 分析 → Prompt 生成
-                                </div>
-                        </div>
-                </div>
-                        </div>
-                </details>
-        </section>
-        <!-- 新人常用任务 -->
-        <section class="mb-8 sops-overview-collapsible" aria-label="新人常用任务">
-                <details class="sops-collapsible">
-                        <summary class="sops-collapsible-summary">
-                                <div>
-                                        <h2 class="text-xl font-bold text-slate-800">新人常用任务</h2>
-                                        <p class="text-sm text-slate-500">先从这些高频动作开始，不用理解完整系统结构。</p>
-                                </div>
-                                <span class="sops-collapsible-controls">
-                                        <span class="sops-overview-topic-badge hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border">
-                                                <i class="fas fa-route"></i>入门路径
-                                        </span>
-                                        <span class="sops-collapsible-action" aria-hidden="true">
-                                                <span class="sops-collapsible-action-text"></span>
-                                                <i class="fas fa-chevron-down"></i>
-                                        </span>
-                                </span>
-                        </summary>
-                        <div class="sops-collapsible-body">
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
-                        <div class="sop-card overview-accent-card overview-accent-emerald" data-action="switch-tab"
-                                data-tab="sops_listing_seo">
-                                <div class="flex items-start justify-between mb-3">
-                                        <div class="sop-icon-container bg-emerald-50 text-emerald-600">
-                                                <i class="fas fa-magnifying-glass-chart"></i>
-                                        </div>
-                                        <span class="sop-status-badge sop-status-active">先做</span>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-2">优化 Listing</h3>
-                                <p class="text-sm text-slate-500 mb-3">标题、五点、A+ 和移动端检查。</p>
-                                <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入 SEO SOP</div>
-                        </div>
-                        <div class="sop-card overview-accent-card overview-accent-red" data-action="switch-tab"
-                                data-tab="sops_restricted_words">
-                                <div class="flex items-start justify-between mb-3">
-                                        <div class="sop-icon-container bg-red-50 text-red-600">
-                                                <i class="fas fa-triangle-exclamation"></i>
-                                        </div>
-                                        <span class="sop-status-badge sop-status-active">必查</span>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-2">检查高危词</h3>
-                                <p class="text-sm text-slate-500 mb-3">发布前排除欧洲站合规风险。</p>
-                                <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入词库 SOP</div>
-                        </div>
-                        <div class="sop-card overview-accent-card overview-accent-blue" data-action="switch-tab"
-                                data-tab="scraper">
-                                <div class="flex items-start justify-between mb-3">
-                                        <div class="sop-icon-container bg-blue-50 text-blue-600">
-                                                <i class="fas fa-spider"></i>
-                                        </div>
-                                        <span class="sop-status-badge sop-status-active">🔗 跳转工具</span>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-2">分析竞品</h3>
-                                <p class="text-sm text-slate-500 mb-3">采集 ASIN 数据，准备 AI 分析素材。</p>
-                                <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入数据采集</div>
-                        </div>
-                        <div class="sop-card overview-accent-card overview-accent-purple" data-action="switch-tab"
-                                data-tab="promptlab">
-                                <div class="flex items-start justify-between mb-3">
-                                        <div class="sop-icon-container bg-purple-50 text-purple-600">
-                                                <i class="fas fa-wand-magic-sparkles"></i>
-                                        </div>
-                                        <span class="sop-status-badge sop-status-active">🔗 跳转工具</span>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-2">生成 Prompt</h3>
-                                <p class="text-sm text-slate-500 mb-3">把产品 DNA 转成可复制的 Listing 指令。</p>
-                                <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入 Prompt 生成</div>
-                        </div>
-                        <div class="sop-card overview-accent-card overview-accent-blue" data-action="switch-tab"
-                                data-tab="sops_negative_review">
-                                <div class="flex items-start justify-between mb-3">
-                                        <div class="sop-icon-container bg-blue-50 text-blue-600">
-                                                <i class="fas fa-comment-dots"></i>
-                                        </div>
-                                        <span class="sop-status-badge sop-status-active">售后</span>
-                                </div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-2">处理差评</h3>
-                                <p class="text-sm text-slate-500 mb-3">分级响应、登记 VOC、反馈供应链。</p>
-                                <div class="text-xs text-slate-400"><i class="fas fa-arrow-right mr-1"></i>进入差评 SOP</div>
-                        </div>
-                </div>
-                        </div>
-                </details>
-        </section>
-        <!-- 分类筛选器 -->
-        <div class="mb-6 flex items-center gap-3 overflow-x-auto pb-2">
-                <button class="category-filter-btn active"
-                        data-category="all" type="button" aria-pressed="true">
-                        <i class="fas fa-th mr-2"></i><span>全部</span>
-                </button>
-                <button class="category-filter-btn"
-                        data-category="growth" type="button" aria-pressed="false">
-                        <i class="fas fa-rocket mr-2"></i><span>运营与推广体系</span>
-                </button>
-                <button class="category-filter-btn"
-                        data-category="backend" type="button" aria-pressed="false">
-                        <i class="fas fa-warehouse mr-2"></i><span>供应链与物流体系</span>
-                </button>
-                <button class="category-filter-btn"
-                        data-category="safety" type="button" aria-pressed="false">
-                        <i class="fas fa-shield-halved mr-2"></i><span>账号安全与风控体系</span>
-                </button>
-                <button class="category-filter-btn"
-                        data-category="service" type="button" aria-pressed="false">
-                        <i class="fas fa-headset mr-2"></i><span>客服与客户体验体系</span>
-                </button>
+        <div class="wb-tag">
+          <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-3, #06b6d4)"></div>
+          <span>账号安全与风控体系</span>
         </div>
-        <!-- Module 1: Growth Layer -->
-        <section class="mb-10" data-category="growth" id="sop-module-growth">
-                <div class="sop-module-section">
-                        <div class="flex items-center gap-3 mb-4">
-                                <div
-                                        class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600">
-                                        <i class="fas fa-rocket"></i>
-                                </div>
-                                <div>
-                                        <h2 class="text-xl font-bold text-slate-800">第一模块：运营与推广体系</h2>
-                                        <p class="text-sm text-slate-500">The Growth Layer · 将"怎么卖"标准化，减少对个人能力的依赖</p>
-                                </div>
-                        </div>
-                        <div class="sop-card-grid">
-                                <!-- 新品生命周期跟踪 (NPI Tracker) -->
-                                <div class="sop-card overview-accent-card overview-accent-emerald" data-action="switch-tab"
-                                        data-tab="sops_npi_tracker">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-emerald-50 text-emerald-600">
-                                                        <i class="fas fa-seedling"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">新品生命周期跟踪 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">NPI Tracker看板、自动定价计算、SOP合规检查、Excel导出</p>
-                                        <div class="flex items-center gap-2 text-xs">
-                                                <span
-                                                        class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded font-medium">
-                                                        <i class="fas fa-calculator mr-1"></i>配送费→清仓线/动销价/建议价
-                                                </span>
-                                        </div>
-                                </div>
-                                <!-- Listing 极致优化 -->
-                                <div class="sop-card overview-accent-card overview-accent-emerald" data-action="switch-tab"
-                                        data-tab="sops_listing_seo">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-emerald-50 text-emerald-600">
-                                                        <i class="fas fa-magnifying-glass-chart"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">Listing 极致优化 (SEO) SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">标题公式、五点埋词逻辑、A+排版规范、移动端确认</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-robot mr-1"></i>采集竞品 → 分析报告 → AI生成文案
-                                        </div>
-                                </div>
-                                <!-- PPC 广告投放 -->
-                                <div class="sop-card overview-accent-card overview-accent-emerald" data-action="switch-tab"
-                                        data-tab="sops_ppc_advertising">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-emerald-50 text-emerald-600">
-                                                        <i class="fas fa-chart-line"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">PPC 广告投放与优化 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">广告命名规范、否词筛选标准、ACOS目标调价策略</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-tag mr-1"></i>命名：ASIN_开启日期_匹配模式
-                                        </div>
-                                </div>
-                                <!-- 欧洲本土化高危词库 -->
-                                <div class="sop-card overview-accent-card overview-accent-emerald" data-action="switch-tab"
-                                        data-tab="sops_restricted_words">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-emerald-50 text-emerald-600">
-                                                        <i class="fas fa-book-dead"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-2">欧洲本土化高危词库 SOP</h3>
-                                <p class="text-sm text-slate-500 mb-3">138 条合规词条、智能搜索、TIC认证要求</p>
-                                        <div class="flex items-center gap-2 text-xs">
-                                                <span
-                                                        class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded font-medium">
-                                                        <i class="fas fa-shield-halved mr-1"></i>Listing 合规
-                                                </span>
-                                        </div>
-                                </div>
-                                <!-- 促销活动提报 -->
-                                <div class="sop-card overview-accent-card overview-accent-emerald" data-action="switch-tab"
-                                        data-tab="sops_promotion_submission">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-emerald-50 text-emerald-600">
-                                                        <i class="fas fa-tags"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">促销活动提报 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">Coupon/PED/LD/7DD提报门槛、利润核算确保折后不亏</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-calculator mr-1"></i>必须核算折后利润
-                                        </div>
-                                </div>
-                                <!-- 竞品监控与分析 -->
-                                <div class="sop-card overview-accent-card overview-accent-emerald" data-action="switch-tab"
-                                        data-tab="sops_competitor_monitoring">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-emerald-50 text-emerald-600">
-                                                        <i class="fas fa-binoculars"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">竞品监控与分析 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">每日记录竞品价格、BSR排名、Review变化</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-chart-bar mr-1"></i>核心竞品日更跟踪
-                                        </div>
-                                </div>
-                        </div>
-                </div>
-        </section>
-        <!-- Module 2: Backend Layer -->
-        <section class="mb-10" data-category="backend" id="sop-module-backend">
-                <div class="sop-module-section">
-                        <div class="flex items-center gap-3 mb-4">
-                                <div
-                                        class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600">
-                                        <i class="fas fa-warehouse"></i>
-                                </div>
-                                <div>
-                                        <h2 class="text-xl font-bold text-slate-800">第二模块：供应链与物流体系</h2>
-                                        <p class="text-sm text-slate-500">The Backend Layer · 确保不断货、不积压、入库无异常</p>
-                                </div>
-                        </div>
-                        <div class="sop-card-grid">
-                                <!-- FBA发货标准操作 -->
-                                <div class="sop-card overview-accent-card overview-accent-amber" data-action="switch-tab"
-                                        data-tab="sops_fba_shipping">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-amber-50 text-amber-600">
-                                                        <i class="fas fa-truck-fast"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">FBA 发货标准操作 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">货件计划创建、箱标规范、装箱单核对、各站点限重</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-weight-hanging mr-1"></i>EU/GB单箱≤23kg
-                                        </div>
-                                </div>
-                                <!-- 采购与质检 -->
-                                <div class="sop-card overview-accent-card overview-accent-amber" data-action="switch-tab"
-                                        data-tab="sops_procurement_qc">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-amber-50 text-amber-600">
-                                                        <i class="fas fa-clipboard-check"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">采购与质检 (QC) SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">下单模板、AQL抽检标准、跌落测试、入库前贴标</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-check-double mr-1"></i>配件完整性必检
-                                        </div>
-                                </div>
-                                <!-- 库存预警与补货 -->
-                                <div class="sop-card overview-accent-card overview-accent-amber" data-action="switch-tab"
-                                        data-tab="sops_inventory_replenishment">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-amber-50 text-amber-600">
-                                                        <i class="fas fa-cubes"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">库存预警与补货 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">安全库存公式、补货周期计算、周报输出规范</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-calculator mr-1"></i>安全库存 = 日均销量 × 物流天数 × 1.5
-                                        </div>
-                                </div>
-                        </div>
-                </div>
-        </section>
-        <!-- Module 3: Safety Layer -->
-        <section class="mb-10" data-category="safety" id="sop-module-safety">
-                <div class="sop-module-section">
-                        <div class="flex items-center gap-3 mb-4">
-                                <div
-                                        class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
-                                        <i class="fas fa-shield-halved"></i>
-                                </div>
-                                <div>
-                                        <h2 class="text-xl font-bold text-slate-800">第三模块：账号安全与风控体系</h2>
-                                        <p class="text-sm text-slate-500">The Safety Layer · <span
-                                                        class="text-red-600 font-semibold">优先级最高 -
-                                                        保命层</span></p>
-                                </div>
-                        </div>
-                        <div class="sop-card-grid">
-                                <!-- 账号登录与环境安全 -->
-                                <div class="sop-card overview-accent-card overview-accent-red" data-action="switch-tab"
-                                        data-tab="sops_account_security">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-red-50 text-red-600">
-                                                        <i class="fas fa-shield-halved"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">账号登录与环境安全 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">登录设备规范、IP隔离原则、紫鸟浏览器/VPS使用标准</p>
-                                        <div class="flex items-center gap-2 text-xs">
-                                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-medium">
-                                                        <i class="fas fa-skull-crossbones mr-1"></i>红线：违规即清退
-                                                </span>
-                                        </div>
-                                </div>
-                                <!-- 后台权限管理 -->
-                                <div class="sop-card overview-accent-card overview-accent-red" data-action="switch-tab"
-                                        data-tab="sops_permission_management">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-red-50 text-red-600">
-                                                        <i class="fas fa-user-lock"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">后台权限管理 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">子账号授权范围、最小权限原则、核心权限屏蔽</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-key mr-1"></i>Payments/Settings 权限仅限Boss
-                                        </div>
-                                </div>
-                                <!-- 品牌与侵权审核 -->
-                                <div class="sop-card overview-accent-card overview-accent-red" data-action="switch-tab"
-                                        data-tab="sops_brand_infringement">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-red-50 text-red-600">
-                                                        <i class="fas fa-trademark"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">品牌与侵权审核 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">EUIPO/UKIPO/WIPO查重流程、图片版权确认、侵权词库过滤</p>
-                                        <div class="flex items-center gap-2 text-xs">
-                                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-medium">
-                                                        <i class="fas fa-ban mr-1"></i>Listing修改必过词库
-                                                </span>
-                                        </div>
-                                </div>
-                                <!-- 绩效通知处理 -->
-                                <div class="sop-card overview-accent-card overview-accent-red" data-action="switch-tab"
-                                        data-tab="sops_performance_notification">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-red-50 text-red-600">
-                                                        <i class="fas fa-bell"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">绩效通知处理 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">"小红旗"处理流程、标准上报机制、禁止私自回复</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-comments mr-1"></i>工作群反馈 + 登记信息
-                                        </div>
-                                </div>
-                                <!-- 产品Listing合规性 -->
-                                <div class="sop-card overview-accent-card overview-accent-red" data-action="switch-tab"
-                                        data-tab="sops_product_compliance">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-red-50 text-red-600">
-                                                        <i class="fas fa-file-shield"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">敏感产品合规销售 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">欧洲敏感货合规要求：生物杀虫剂、电子3C、儿童玩具、化妆品</p>
-                                        <div class="flex items-center gap-2 text-xs">
-                                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-medium">
-                                                        <i class="fa-solid fa-earth-europe mr-1"></i>欧洲五国全覆盖
-                                                </span>
-                                        </div>
-                                </div>
-                                <!-- 欧洲GPSR合规 -->
-                                <div class="sop-card overview-accent-card overview-accent-red" data-action="switch-tab"
-                                        data-tab="sops_eu_gpsr_compliance">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-red-50 text-red-600">
-                                                        <i class="fa-solid fa-shield-dog"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-2">欧洲GPSR合规 SOP</h3>
-                                <p class="text-sm text-slate-500 mb-3">EU General Product Safety Regulation
-                                        持续合规运营指南（2024-12-13 已全面生效）</p>
-                                <div class="flex items-center gap-2 text-xs">
-                                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-medium">
-                                                <i class="fas fa-circle-check mr-1"></i>已生效 · 持续合规
-                                        </span>
-                                </div>
-                                </div>
-                        </div>
-                </div>
-        </section>
-        <!-- Module 4: Service Layer -->
-        <section class="mb-10" data-category="service" id="sop-module-service">
-                <div class="sop-module-section">
-                        <div class="flex items-center gap-3 mb-4">
-                                <div
-                                        class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
-                                        <i class="fas fa-headset"></i>
-                                </div>
-                                <div>
-                                        <h2 class="text-xl font-bold text-slate-800">第四模块：客服与客户体验体系</h2>
-                                        <p class="text-sm text-slate-500">The Service Layer · 维护Review评分，挖掘产品改进点</p>
-                                </div>
-                        </div>
-                        <div class="sop-card-grid">
-                                <!-- 邮件回复模板 -->
-                                <div class="sop-card overview-accent-card overview-accent-blue" data-action="switch-tab"
-                                        data-tab="sops_email_templates">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-blue-50 text-blue-600">
-                                                        <i class="fas fa-envelope-open-text"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">邮件回复模板 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">物流延误、产品破损、退换货请求、发票索取场景库</p>
-                                        <div class="flex items-center gap-2 text-xs">
-                                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded font-medium">
-                                                        <i class="fas fa-clock mr-1"></i>SLA: 24h内必回复
-                                                </span>
-                                        </div>
-                                </div>
-                                <!-- 差评处理与分析 -->
-                                <div class="sop-card overview-accent-card overview-accent-blue" data-action="switch-tab"
-                                        data-tab="sops_negative_review">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-blue-50 text-blue-600">
-                                                        <i class="fas fa-comment-dots"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">差评处理与分析 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">每日监控、VOC分析表登记、差评归类反馈供应链</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-tags mr-1"></i>质量问题/物流问题/描述不符
-                                        </div>
-                                </div>
-                                <!-- QA 问答维护 -->
-                                <div class="sop-card overview-accent-card overview-accent-blue" data-action="switch-tab"
-                                        data-tab="sops_qa_maintenance">
-                                        <div class="flex items-start justify-between mb-3">
-                                                <div class="sop-icon-container bg-blue-50 text-blue-600">
-                                                        <i class="fas fa-comments"></i>
-                                                </div>
-                                                <span class="sop-status-badge sop-status-active">已发布</span>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-slate-800 mb-2">QA 问答维护 SOP</h3>
-                                        <p class="text-sm text-slate-500 mb-3">定期检查前台QA、未回复问题官方解答</p>
-                                        <div class="text-xs text-slate-400">
-                                                <i class="fas fa-calendar-check mr-1"></i>每周巡检一次
-                                        </div>
-                                </div>
-                        </div>
-                </div>
-        </section>
-        <!-- Quick Stats -->
-        <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
-                        <div class="text-2xl font-bold text-emerald-500">6</div>
-                        <div class="text-xs text-slate-500 mt-1">运营推广 SOP</div>
-                </div>
-                <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
-                        <div class="text-2xl font-bold text-amber-500">3</div>
-                        <div class="text-xs text-slate-500 mt-1">供应链物流 SOP</div>
-                </div>
-                <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
-                        <div class="text-2xl font-bold text-red-600">6</div>
-                        <div class="text-xs text-slate-500 mt-1">安全风控 SOP</div>
-                </div>
-                <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
-                        <div class="text-2xl font-bold text-blue-500">3</div>
-                        <div class="text-xs text-slate-500 mt-1">客服体验 SOP</div>
-                </div>
+        <div class="wb-tag">
+          <div class="wb-tag-dot" style="background-color: var(--wb-tag-dot-4, #8b5cf6)"></div>
+          <span>客服与客户体验体系</span>
         </div>
+      </div>
+    </div>
+  </div>
+  <!-- 平台定位声明 -->
+  <div class="sops-overview-scope-note border rounded-xl p-4 mb-6 flex items-start gap-3">
+    <i class="fas fa-circle-info text-xl mt-0.5"></i>
+    <div>
+      <h3 class="font-bold text-sm mb-1">适用范围声明</h3>
+      <p class="text-sm">
+        本流程中心聚焦
+        <strong>亚马逊欧洲站运营</strong
+        >（DE/FR/IT/ES/NL/SE/PL/BE/GB/IE/TR）。北美、日本及其他平台不属于当前规划范围，不作为知识库重点。
+      </p>
+    </div>
+  </div>
+  <!-- 三条运营作业主线 -->
+  <section class="mb-8 sops-overview-collapsible" aria-label="三条运营作业主线">
+    <details class="sops-collapsible">
+      <summary class="sops-collapsible-summary">
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">三条运营作业主线</h2>
+          <p class="text-sm text-slate-500">
+            从任务出发串联 SOP、工具、动作和复盘，避免只停留在阅读文档。
+          </p>
+        </div>
+        <span class="sops-collapsible-controls">
+          <span
+            class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-100"
+          >
+            <i class="fas fa-diagram-project"></i>作业闭环
+          </span>
+          <span class="sops-collapsible-action" aria-hidden="true">
+            <span class="sops-collapsible-action-text"></span>
+            <i class="fas fa-chevron-down"></i>
+          </span>
+        </span>
+      </summary>
+      <div class="sops-collapsible-body">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div
+            class="sop-card overview-accent-card overview-accent-emerald"
+            data-action="switch-tab"
+            data-tab="sops_npi_tracker"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+                <i class="fas fa-seedling"></i>
+              </div>
+              <span class="sop-status-badge sop-status-active">新人主线</span>
+            </div>
+            <h3 class="font-bold text-lg text-slate-800 mb-2">新品作业流</h3>
+            <p class="text-sm text-slate-500 mb-3">
+              建档、合规、定价、推广和周复盘，输出继续、观察或清仓结论。
+            </p>
+            <div class="text-xs text-slate-500">
+              <i class="fas fa-arrow-right mr-1"></i>NPI Tracker → Listing SEO → 高危词检查
+            </div>
+          </div>
+          <div
+            class="sop-card overview-accent-card overview-accent-teal"
+            data-action="switch-tab"
+            data-tab="ppc_search_terms"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="sop-icon-container bg-teal-50 text-teal-600">
+                <i class="fas fa-magnifying-glass-dollar"></i>
+              </div>
+              <span class="sop-status-badge sop-status-active">🔗 跳转工具</span>
+            </div>
+            <h3 class="font-bold text-lg text-slate-800 mb-2">广告作业流</h3>
+            <p class="text-sm text-slate-500 mb-3">
+              导入搜索词或活动报表，生成否词、加词、降竞价和复盘建议。
+            </p>
+            <div class="text-xs text-slate-500">
+              <i class="fas fa-arrow-right mr-1"></i>PPC SOP → 搜索词分析器 → 周报摘要
+            </div>
+          </div>
+          <div
+            class="sop-card overview-accent-card overview-accent-indigo"
+            data-action="switch-tab"
+            data-tab="scraper"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="sop-icon-container bg-indigo-50 text-indigo-600">
+                <i class="fas fa-cubes-stacked"></i>
+              </div>
+              <span class="sop-status-badge sop-status-active">🔗 跳转工具</span>
+            </div>
+            <h3 class="font-bold text-lg text-slate-800 mb-2">竞品与 Listing 作业流</h3>
+            <p class="text-sm text-slate-500 mb-3">
+              采集竞品素材，提炼产品洞察，生成 Listing 改写 Prompt 和补词清单。
+            </p>
+            <div class="text-xs text-slate-500">
+              <i class="fas fa-arrow-right mr-1"></i>数据采集 → AI 分析 → Prompt 生成
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+  </section>
+  <!-- 新人常用任务 -->
+  <section class="mb-8 sops-overview-collapsible" aria-label="新人常用任务">
+    <details class="sops-collapsible">
+      <summary class="sops-collapsible-summary">
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">新人常用任务</h2>
+          <p class="text-sm text-slate-500">先从这些高频动作开始，不用理解完整系统结构。</p>
+        </div>
+        <span class="sops-collapsible-controls">
+          <span
+            class="sops-overview-topic-badge hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border"
+          >
+            <i class="fas fa-route"></i>入门路径
+          </span>
+          <span class="sops-collapsible-action" aria-hidden="true">
+            <span class="sops-collapsible-action-text"></span>
+            <i class="fas fa-chevron-down"></i>
+          </span>
+        </span>
+      </summary>
+      <div class="sops-collapsible-body">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+          <div
+            class="sop-card overview-accent-card overview-accent-emerald"
+            data-action="switch-tab"
+            data-tab="sops_listing_seo"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+                <i class="fas fa-magnifying-glass-chart"></i>
+              </div>
+              <span class="sop-status-badge sop-status-active">先做</span>
+            </div>
+            <h3 class="font-bold text-lg text-slate-800 mb-2">优化 Listing</h3>
+            <p class="text-sm text-slate-500 mb-3">标题、五点、A+ 和移动端检查。</p>
+            <div class="text-xs text-slate-500">
+              <i class="fas fa-arrow-right mr-1"></i>进入 SEO SOP
+            </div>
+          </div>
+          <div
+            class="sop-card overview-accent-card overview-accent-red"
+            data-action="switch-tab"
+            data-tab="sops_restricted_words"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="sop-icon-container bg-red-50 text-red-600">
+                <i class="fas fa-triangle-exclamation"></i>
+              </div>
+              <span class="sop-status-badge sop-status-active">必查</span>
+            </div>
+            <h3 class="font-bold text-lg text-slate-800 mb-2">检查高危词</h3>
+            <p class="text-sm text-slate-500 mb-3">发布前排除欧洲站合规风险。</p>
+            <div class="text-xs text-slate-500">
+              <i class="fas fa-arrow-right mr-1"></i>进入词库 SOP
+            </div>
+          </div>
+          <div
+            class="sop-card overview-accent-card overview-accent-blue"
+            data-action="switch-tab"
+            data-tab="scraper"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="sop-icon-container bg-blue-50 text-blue-600">
+                <i class="fas fa-spider"></i>
+              </div>
+              <span class="sop-status-badge sop-status-active">🔗 跳转工具</span>
+            </div>
+            <h3 class="font-bold text-lg text-slate-800 mb-2">分析竞品</h3>
+            <p class="text-sm text-slate-500 mb-3">采集 ASIN 数据，准备 AI 分析素材。</p>
+            <div class="text-xs text-slate-500">
+              <i class="fas fa-arrow-right mr-1"></i>进入数据采集
+            </div>
+          </div>
+          <div
+            class="sop-card overview-accent-card overview-accent-purple"
+            data-action="switch-tab"
+            data-tab="promptlab"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="sop-icon-container bg-purple-50 text-purple-600">
+                <i class="fas fa-wand-magic-sparkles"></i>
+              </div>
+              <span class="sop-status-badge sop-status-active">🔗 跳转工具</span>
+            </div>
+            <h3 class="font-bold text-lg text-slate-800 mb-2">生成 Prompt</h3>
+            <p class="text-sm text-slate-500 mb-3">把产品 DNA 转成可复制的 Listing 指令。</p>
+            <div class="text-xs text-slate-500">
+              <i class="fas fa-arrow-right mr-1"></i>进入 Prompt 生成
+            </div>
+          </div>
+          <div
+            class="sop-card overview-accent-card overview-accent-blue"
+            data-action="switch-tab"
+            data-tab="sops_negative_review"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="sop-icon-container bg-blue-50 text-blue-600">
+                <i class="fas fa-comment-dots"></i>
+              </div>
+              <span class="sop-status-badge sop-status-active">售后</span>
+            </div>
+            <h3 class="font-bold text-lg text-slate-800 mb-2">处理差评</h3>
+            <p class="text-sm text-slate-500 mb-3">分级响应、登记 VOC、反馈供应链。</p>
+            <div class="text-xs text-slate-500">
+              <i class="fas fa-arrow-right mr-1"></i>进入差评 SOP
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+  </section>
+  <!-- 分类筛选器 -->
+  <div class="mb-6 flex items-center gap-3 overflow-x-auto pb-2">
+    <button
+      class="category-filter-btn active"
+      data-category="all"
+      type="button"
+      aria-pressed="true"
+    >
+      <i class="fas fa-th mr-2"></i><span>全部</span>
+    </button>
+    <button class="category-filter-btn" data-category="growth" type="button" aria-pressed="false">
+      <i class="fas fa-rocket mr-2"></i><span>运营与推广体系</span>
+    </button>
+    <button class="category-filter-btn" data-category="backend" type="button" aria-pressed="false">
+      <i class="fas fa-warehouse mr-2"></i><span>供应链与物流体系</span>
+    </button>
+    <button class="category-filter-btn" data-category="safety" type="button" aria-pressed="false">
+      <i class="fas fa-shield-halved mr-2"></i><span>账号安全与风控体系</span>
+    </button>
+    <button class="category-filter-btn" data-category="service" type="button" aria-pressed="false">
+      <i class="fas fa-headset mr-2"></i><span>客服与客户体验体系</span>
+    </button>
+  </div>
+  <!-- Module 1: Growth Layer -->
+  <section class="mb-10" data-category="growth" id="sop-module-growth">
+    <div class="sop-module-section">
+      <div class="flex items-center gap-3 mb-4">
+        <div
+          class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600"
+        >
+          <i class="fas fa-rocket"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">第一模块：运营与推广体系</h2>
+          <p class="text-sm text-slate-500">
+            The Growth Layer · 将"怎么卖"标准化，减少对个人能力的依赖
+          </p>
+        </div>
+      </div>
+      <div class="sop-card-grid">
+        <!-- 新品生命周期跟踪 (NPI Tracker) -->
+        <div
+          class="sop-card overview-accent-card overview-accent-emerald"
+          data-action="switch-tab"
+          data-tab="sops_npi_tracker"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+              <i class="fas fa-seedling"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">新品生命周期跟踪 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">
+            NPI Tracker看板、自动定价计算、SOP合规检查、Excel导出
+          </p>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded font-medium">
+              <i class="fas fa-calculator mr-1"></i>配送费→清仓线/动销价/建议价
+            </span>
+          </div>
+        </div>
+        <!-- Listing 极致优化 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-emerald"
+          data-action="switch-tab"
+          data-tab="sops_listing_seo"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+              <i class="fas fa-magnifying-glass-chart"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">Listing 极致优化 (SEO) SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">标题公式、五点埋词逻辑、A+排版规范、移动端确认</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-robot mr-1"></i>采集竞品 → 分析报告 → AI生成文案
+          </div>
+        </div>
+        <!-- PPC 广告投放 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-emerald"
+          data-action="switch-tab"
+          data-tab="sops_ppc_advertising"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">PPC 广告投放与优化 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">广告命名规范、否词筛选标准、ACOS目标调价策略</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-tag mr-1"></i>命名：ASIN_开启日期_匹配模式
+          </div>
+        </div>
+        <!-- 欧洲本土化高危词库 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-emerald"
+          data-action="switch-tab"
+          data-tab="sops_restricted_words"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+              <i class="fas fa-book-dead"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">欧洲本土化高危词库 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">138 条合规词条、智能搜索、TIC认证要求</p>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded font-medium">
+              <i class="fas fa-shield-halved mr-1"></i>Listing 合规
+            </span>
+          </div>
+        </div>
+        <!-- 促销活动提报 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-emerald"
+          data-action="switch-tab"
+          data-tab="sops_promotion_submission"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+              <i class="fas fa-tags"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">促销活动提报 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">Coupon/PED/LD/7DD提报门槛、利润核算确保折后不亏</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-calculator mr-1"></i>必须核算折后利润
+          </div>
+        </div>
+        <!-- 竞品监控与分析 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-emerald"
+          data-action="switch-tab"
+          data-tab="sops_competitor_monitoring"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-emerald-50 text-emerald-600">
+              <i class="fas fa-binoculars"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">竞品监控与分析 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">每日记录竞品价格、BSR排名、Review变化</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-chart-bar mr-1"></i>核心竞品日更跟踪
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Module 2: Backend Layer -->
+  <section class="mb-10" data-category="backend" id="sop-module-backend">
+    <div class="sop-module-section">
+      <div class="flex items-center gap-3 mb-4">
+        <div
+          class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600"
+        >
+          <i class="fas fa-warehouse"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">第二模块：供应链与物流体系</h2>
+          <p class="text-sm text-slate-500">The Backend Layer · 确保不断货、不积压、入库无异常</p>
+        </div>
+      </div>
+      <div class="sop-card-grid">
+        <!-- FBA发货标准操作 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-amber"
+          data-action="switch-tab"
+          data-tab="sops_fba_shipping"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-amber-50 text-amber-600">
+              <i class="fas fa-truck-fast"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">FBA 发货标准操作 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">货件计划创建、箱标规范、装箱单核对、各站点限重</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-weight-hanging mr-1"></i>EU/GB单箱≤23kg
+          </div>
+        </div>
+        <!-- 采购与质检 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-amber"
+          data-action="switch-tab"
+          data-tab="sops_procurement_qc"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-amber-50 text-amber-600">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">采购与质检 (QC) SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">下单模板、AQL抽检标准、跌落测试、入库前贴标</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-check-double mr-1"></i>配件完整性必检
+          </div>
+        </div>
+        <!-- 库存预警与补货 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-amber"
+          data-action="switch-tab"
+          data-tab="sops_inventory_replenishment"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-amber-50 text-amber-600">
+              <i class="fas fa-cubes"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">库存预警与补货 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">安全库存公式、补货周期计算、周报输出规范</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-calculator mr-1"></i>安全库存 = 日均销量 × 物流天数 × 1.5
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Module 3: Safety Layer -->
+  <section class="mb-10" data-category="safety" id="sop-module-safety">
+    <div class="sop-module-section">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+          <i class="fas fa-shield-halved"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">第三模块：账号安全与风控体系</h2>
+          <p class="text-sm text-slate-500">
+            The Safety Layer · <span class="text-red-600 font-semibold">优先级最高 - 保命层</span>
+          </p>
+        </div>
+      </div>
+      <div class="sop-card-grid">
+        <!-- 账号登录与环境安全 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-red"
+          data-action="switch-tab"
+          data-tab="sops_account_security"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-red-50 text-red-600">
+              <i class="fas fa-shield-halved"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">账号登录与环境安全 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">
+            登录设备规范、IP隔离原则、紫鸟浏览器/VPS使用标准
+          </p>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-medium">
+              <i class="fas fa-skull-crossbones mr-1"></i>红线：违规即清退
+            </span>
+          </div>
+        </div>
+        <!-- 后台权限管理 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-red"
+          data-action="switch-tab"
+          data-tab="sops_permission_management"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-red-50 text-red-600">
+              <i class="fas fa-user-lock"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">后台权限管理 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">子账号授权范围、最小权限原则、核心权限屏蔽</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-key mr-1"></i>Payments/Settings 权限仅限Boss
+          </div>
+        </div>
+        <!-- 品牌与侵权审核 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-red"
+          data-action="switch-tab"
+          data-tab="sops_brand_infringement"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-red-50 text-red-600">
+              <i class="fas fa-trademark"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">品牌与侵权审核 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">
+            EUIPO/UKIPO/WIPO查重流程、图片版权确认、侵权词库过滤
+          </p>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-medium">
+              <i class="fas fa-ban mr-1"></i>Listing修改必过词库
+            </span>
+          </div>
+        </div>
+        <!-- 绩效通知处理 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-red"
+          data-action="switch-tab"
+          data-tab="sops_performance_notification"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-red-50 text-red-600">
+              <i class="fas fa-bell"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">绩效通知处理 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">"小红旗"处理流程、标准上报机制、禁止私自回复</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-comments mr-1"></i>工作群反馈 + 登记信息
+          </div>
+        </div>
+        <!-- 产品Listing合规性 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-red"
+          data-action="switch-tab"
+          data-tab="sops_product_compliance"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-red-50 text-red-600">
+              <i class="fas fa-file-shield"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">敏感产品合规销售 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">
+            欧洲敏感货合规要求：生物杀虫剂、电子3C、儿童玩具、化妆品
+          </p>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-medium">
+              <i class="fa-solid fa-earth-europe mr-1"></i>欧洲五国全覆盖
+            </span>
+          </div>
+        </div>
+        <!-- 欧洲GPSR合规 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-red"
+          data-action="switch-tab"
+          data-tab="sops_eu_gpsr_compliance"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-red-50 text-red-600">
+              <i class="fa-solid fa-shield-dog"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">欧洲GPSR合规 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">
+            EU General Product Safety Regulation 持续合规运营指南（2024-12-13 已全面生效）
+          </p>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded font-medium">
+              <i class="fas fa-circle-check mr-1"></i>已生效 · 持续合规
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Module 4: Service Layer -->
+  <section class="mb-10" data-category="service" id="sop-module-service">
+    <div class="sop-module-section">
+      <div class="flex items-center gap-3 mb-4">
+        <div
+          class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600"
+        >
+          <i class="fas fa-headset"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">第四模块：客服与客户体验体系</h2>
+          <p class="text-sm text-slate-500">The Service Layer · 维护Review评分，挖掘产品改进点</p>
+        </div>
+      </div>
+      <div class="sop-card-grid">
+        <!-- 邮件回复模板 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-blue"
+          data-action="switch-tab"
+          data-tab="sops_email_templates"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-blue-50 text-blue-600">
+              <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">邮件回复模板 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">物流延误、产品破损、退换货请求、发票索取场景库</p>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded font-medium">
+              <i class="fas fa-clock mr-1"></i>SLA: 24h内必回复
+            </span>
+          </div>
+        </div>
+        <!-- 差评处理与分析 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-blue"
+          data-action="switch-tab"
+          data-tab="sops_negative_review"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-blue-50 text-blue-600">
+              <i class="fas fa-comment-dots"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">差评处理与分析 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">每日监控、VOC分析表登记、差评归类反馈供应链</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-tags mr-1"></i>质量问题/物流问题/描述不符
+          </div>
+        </div>
+        <!-- QA 问答维护 -->
+        <div
+          class="sop-card overview-accent-card overview-accent-blue"
+          data-action="switch-tab"
+          data-tab="sops_qa_maintenance"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="sop-icon-container bg-blue-50 text-blue-600">
+              <i class="fas fa-comments"></i>
+            </div>
+            <span class="sop-status-badge sop-status-active">已发布</span>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 mb-2">QA 问答维护 SOP</h3>
+          <p class="text-sm text-slate-500 mb-3">定期检查前台QA、未回复问题官方解答</p>
+          <div class="text-xs text-slate-500">
+            <i class="fas fa-calendar-check mr-1"></i>每周巡检一次
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Quick Stats -->
+  <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
+      <div class="text-2xl font-bold text-emerald-500">6</div>
+      <div class="text-xs text-slate-500 mt-1">运营推广 SOP</div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
+      <div class="text-2xl font-bold text-amber-500">3</div>
+      <div class="text-xs text-slate-500 mt-1">供应链物流 SOP</div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
+      <div class="text-2xl font-bold text-red-600">6</div>
+      <div class="text-xs text-slate-500 mt-1">安全风控 SOP</div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-slate-200 text-center">
+      <div class="text-2xl font-bold text-blue-500">3</div>
+      <div class="text-xs text-slate-500 mt-1">客服体验 SOP</div>
+    </div>
+  </div>
 </div>

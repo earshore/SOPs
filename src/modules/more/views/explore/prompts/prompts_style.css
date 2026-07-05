@@ -42,7 +42,12 @@
   border: 1px solid var(--color-slate-200);
   background-color: white;
   color: var(--color-slate-500);
-  transition: all var(--duration-fast);
+  transition:
+    background-color var(--duration-fast),
+    border-color var(--duration-fast),
+    color var(--duration-fast),
+    box-shadow var(--duration-fast),
+    transform var(--duration-fast);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -74,7 +79,11 @@
   border-radius: var(--rounded-lg);
   border: 1px solid var(--color-slate-200);
   padding: 1.25rem;
-  transition: all var(--duration-fast);
+  transition:
+    background-color var(--duration-fast),
+    border-color var(--duration-fast),
+    box-shadow var(--duration-fast),
+    transform var(--duration-fast);
   cursor: pointer;
 }
 
@@ -114,7 +123,11 @@
   justify-content: center;
   border-radius: var(--rounded-md);
   color: var(--color-slate-400);
-  transition: all var(--duration-fast);
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast),
+    box-shadow var(--duration-fast),
+    transform var(--duration-fast);
 }
 
 .btn-icon:hover {

@@ -4,7 +4,7 @@
 // ================================================================
 
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { safeMount } from '@/common/utils/safeMount';
+import BaseModule from '@/common/BaseModule';
 import { setSafeHtml } from '@/common/utils/security';
 
 interface OverviewFilterState {
@@ -12,29 +12,39 @@ interface OverviewFilterState {
   query: string;
 }
 
-/**
- * 挂载 App Center 总览模块
- */
-const mountInternal = async (container: HTMLElement): Promise<void> => {
-  const html = await SafeTemplateLoader.getInstance().loadTemplate(
-    'src/modules/app_center/views/overview/template.html'
-  );
-  // ✅ 安全: 静态HTML模板，无用户输入
-  // 为overview页面添加淡入动画（在渲染前添加）
-  container.classList.add('fade-in');
-  // ✅ 安全: html来自本地静态template.html，无用户输入
-  setSafeHtml(container, html);
+class AppCenterOverviewModule extends BaseModule {
+  constructor() {
+    super('app_center_overview');
+  }
 
-  // 初始化事件监听
-  initOverviewEvents(container);
+  protected async render(): Promise<void> {
+    if (!this.container) return;
+
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/app_center/views/overview/template.html'
+    );
+    // ✅ 安全: 静态HTML模板，无用户输入
+    // 为overview页面添加淡入动画（在渲染前添加）
+    this.container.classList.add('fade-in');
+    // ✅ 安全: html来自本地静态template.html，无用户输入
+    setSafeHtml(this.container, html);
+  }
+
+  protected async init(): Promise<void> {
+    if (!this.container) return;
+
+    // 初始化事件监听
+    initOverviewEvents(this.container);
+  }
+}
+
+const appCenterOverviewModule = new AppCenterOverviewModule();
+
+export const mount = (container: HTMLElement): Promise<void> =>
+  appCenterOverviewModule.mount(container);
+export const unmount = (): void => {
+  appCenterOverviewModule.unmount();
 };
-
-export const mount = safeMount(mountInternal, { moduleName: 'App Center Overview' });
-
-/**
- * 卸载 App Center 总览模块
- */
-export function unmount(): void {}
 
 /**
  * 初始化总览页面事件
@@ -74,17 +84,6 @@ function initOverviewEvents(container: HTMLElement): void {
     applyOverviewFilters(container, state);
   });
 
-  // 应用卡片点击事件
-  const appCards = container.querySelectorAll<HTMLElement>('[data-action="switch-tab"]');
-  appCards.forEach(card => {
-    card.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        card.click();
-      }
-    });
-  });
-
   applyOverviewFilters(container, state);
 }
 
@@ -103,9 +102,7 @@ function setActiveCategory(filterBtns: NodeListOf<HTMLElement>, activeBtn: HTMLE
  * 按分类筛选应用卡片
  */
 function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState): void {
-  const cards = container.querySelectorAll<HTMLElement>(
-    '.app-center-card-grid > [data-action="switch-tab"][data-category]'
-  );
+  const cards = container.querySelectorAll<HTMLElement>('.app-center-card-grid > [data-category]');
   let visibleCount = 0;
 
   cards.forEach(card => {

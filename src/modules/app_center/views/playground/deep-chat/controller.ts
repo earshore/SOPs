@@ -1,5 +1,5 @@
-import { loadTemplate } from '@/common/utils/viewLoader';
-import { safeMount } from '@/common/utils/safeMount';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui/notifications';
 import { callLLM, type ChatMessage } from '@/services/llmService';
@@ -100,40 +100,63 @@ const draftPersistController = createDraftPersistController(
   DRAFT_PERSIST_DEBOUNCE_MS
 );
 
-const mountInternal = async (container: HTMLElement): Promise<void> => {
-  const html = await loadTemplate(DEEP_CHAT_TEMPLATE_PATH, { disableFadeIn: true });
-  const renderer = SafeRenderer.getInstance();
+class DeepChatModule extends BaseModule {
+  constructor() {
+    super('playground');
+  }
 
-  mountedContainer = container;
-  renderer.renderTemplate(container, html);
-  threadStore = applyPendingRequestsToThreadStore(await loadThreadStore());
-  renderThreadList(container, threadStore, pendingRequests);
-  renderPromptDraftList(container);
+  protected async render(): Promise<void> {
+    if (!this.container) {
+      return;
+    }
 
-  await ensureDeepChatElementDefined();
-  initDeepChat(container);
-  await refreshLLMConfig(container);
-  bindControls(container);
-};
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(DEEP_CHAT_TEMPLATE_PATH);
+    const renderer = SafeRenderer.getInstance();
 
-export const mount = safeMount(mountInternal, { moduleName: 'Deep Chat' });
+    mountedContainer = this.container;
+    renderer.renderTemplate(this.container, html);
+  }
+
+  protected async init(): Promise<void> {
+    if (!this.container) {
+      return;
+    }
+
+    threadStore = applyPendingRequestsToThreadStore(await loadThreadStore());
+    renderThreadList(this.container, threadStore, pendingRequests);
+    renderPromptDraftList(this.container);
+
+    await ensureDeepChatElementDefined();
+    initDeepChat(this.container);
+    await refreshLLMConfig(this.container);
+    bindControls(this.container);
+  }
+
+  protected onUnmount(): void {
+    if (mountedContainer && document.body.contains(mountedContainer)) {
+      saveActiveThreadDraft(mountedContainer);
+      draftPersistController.flush();
+    }
+    cleanupCallbacks.forEach(cleanup => cleanup());
+    cleanupCallbacks = [];
+    mountedContainer = null;
+    currentConfig = null;
+    selectedModel = '';
+    sessionSystemPrompt = '';
+    sessionTemperature = 0.3;
+    resetPromptPreviewState();
+    clearDraftInputHeightSync();
+    clearSubmitStopButtonSync();
+    cleanupMessageToolbars();
+  }
+}
+
+const deepChatModule = new DeepChatModule();
+
+export const mount = (container: HTMLElement): Promise<void> => deepChatModule.mount(container);
 
 export function unmount(): void {
-  if (mountedContainer && document.body.contains(mountedContainer)) {
-    saveActiveThreadDraft(mountedContainer);
-    draftPersistController.flush();
-  }
-  cleanupCallbacks.forEach(cleanup => cleanup());
-  cleanupCallbacks = [];
-  mountedContainer = null;
-  currentConfig = null;
-  selectedModel = '';
-  sessionSystemPrompt = '';
-  sessionTemperature = 0.3;
-  resetPromptPreviewState();
-  clearDraftInputHeightSync();
-  clearSubmitStopButtonSync();
-  cleanupMessageToolbars();
+  deepChatModule.unmount();
 }
 
 export async function clearPlaygroundThreadStore(): Promise<void> {

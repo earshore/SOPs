@@ -11,6 +11,7 @@
 
 import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import BaseModule from '../../../../../common/BaseModule';
 import { showToast } from '../../../../../common/ui';
 import { navigateToRouteId } from '../../../../../common/router/initRouter';
 import * as KeywordService from '../services/trackerService';
@@ -1572,95 +1573,119 @@ function setupEventListeners(container: HTMLElement): void {
 // Module Exports (统一架构接口)
 // ==========================================
 
-/**
- * 挂载子模块
- * @param {HTMLElement} container - 容器元素
- */
-export async function mount(container: HTMLElement): Promise<void> {
-  try {
-    processViewVersion += 1;
-    // 1. 使用 SafeTemplateLoader 加载模板
-    const loader = SafeTemplateLoader.getInstance();
-    const renderer = SafeRenderer.getInstance();
+class KeywordHunterProcessModule extends BaseModule {
+  constructor() {
+    super('keyword_hunter_process');
+  }
 
-    const html = await loader.loadTemplate(
-      'src/modules/app_center/views/keyword_hunter/process/template.html',
-      {
-        retryCount: 3,
-        timeout: 5000,
-        onError: error => {
-          ErrorService.handle(error as Error, {
-            action: 'loadProcessTemplate',
-            module: 'keywordTracker',
-            notify: false,
-          });
-        },
+  protected async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
+    try {
+      processViewVersion += 1;
+      // 1. 使用 SafeTemplateLoader 加载模板
+      const loader = SafeTemplateLoader.getInstance();
+      const renderer = SafeRenderer.getInstance();
+
+      const html = await loader.loadTemplate(
+        'src/modules/app_center/views/keyword_hunter/process/template.html',
+        {
+          retryCount: 3,
+          timeout: 5000,
+          onError: error => {
+            ErrorService.handle(error as Error, {
+              action: 'loadProcessTemplate',
+              module: 'keywordTracker',
+              notify: false,
+            });
+          },
+        }
+      );
+
+      // 使用 SafeRenderer 渲染模板
+      // 添加淡入动画（在渲染前添加）
+      container.classList.add('fade-in');
+      renderer.renderTemplate(container, html);
+
+      // 2. 将浮动窗口移到 body 级别(避免被容器限制)
+      const floatWin = document.getElementById('kt-keywords-floating');
+      const minBtn = document.getElementById('kt-keywords-minimized');
+
+      // 如果浮动窗口不在 body 中，则移动到 body
+      if (floatWin && floatWin.parentElement !== document.body) {
+        document.body.appendChild(floatWin);
       }
-    );
-
-    // 使用 SafeRenderer 渲染模板
-    // 添加淡入动画（在渲染前添加）
-    container.classList.add('fade-in');
-    renderer.renderTemplate(container, html);
-
-    // 2. 将浮动窗口移到 body 级别(避免被容器限制)
-    const floatWin = document.getElementById('kt-keywords-floating');
-    const minBtn = document.getElementById('kt-keywords-minimized');
-
-    // 如果浮动窗口不在 body 中，则移动到 body
-    if (floatWin && floatWin.parentElement !== document.body) {
-      document.body.appendChild(floatWin);
+      if (minBtn && minBtn.parentElement !== document.body) {
+        document.body.appendChild(minBtn);
+      }
+    } catch (error) {
+      ErrorService.handle(error as Error, {
+        action: 'mountProcessModule',
+        module: 'keywordTracker',
+        notify: false,
+      });
+      throw error;
     }
-    if (minBtn && minBtn.parentElement !== document.body) {
-      document.body.appendChild(minBtn);
+  }
+
+  protected async init(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
+    try {
+      // 3. 设置事件监听器
+      setupEventListeners(container);
+
+      // 4. 从 state 恢复状态
+      await restoreProcessStateFromState();
+
+      // 5. 管理浮动窗口显示 - 延迟执行确保 DOM 已渲染
+      addTimeout(() => {
+        manageFloatingWindowVisibility();
+      }, 100);
+    } catch (error) {
+      ErrorService.handle(error as Error, {
+        action: 'mountProcessModule',
+        module: 'keywordTracker',
+        notify: false,
+      });
+      throw error;
     }
+  }
 
-    // 3. 设置事件监听器
-    setupEventListeners(container);
+  protected onUnmount(): void {
+    try {
+      processViewVersion += 1;
+      // 1. 保存状态到 state
+      saveProcessStateToState();
 
-    // 4. 从 state 恢复状态
-    await restoreProcessStateFromState();
+      // 2. 移除浮动窗口和最小化按钮（从 DOM 中完全移除）
+      const floatWin = document.getElementById('kt-keywords-floating');
+      const minBtn = document.getElementById('kt-keywords-minimized');
+      if (floatWin) {
+        floatWin.remove();
+      }
+      if (minBtn) {
+        minBtn.remove();
+      }
 
-    // 5. 管理浮动窗口显示 - 延迟执行确保 DOM 已渲染
-    setTimeout(() => {
-      manageFloatingWindowVisibility();
-    }, 100);
-  } catch (error) {
-    ErrorService.handle(error as Error, {
-      action: 'mountProcessModule',
-      module: 'keywordTracker',
-      notify: false,
-    });
-    throw error;
+      // 3. 清理事件监听器和定时器
+      cleanup();
+    } catch (error) {
+      ErrorService.handle(error as Error, {
+        action: 'unmountProcessModule',
+        module: 'keywordTracker',
+        notify: false,
+      });
+    }
   }
 }
 
-/**
- * 卸载子模块
- */
-export function unmount(): void {
-  try {
-    processViewVersion += 1;
-    // 1. 保存状态到 state
-    saveProcessStateToState();
+const keywordHunterProcessModule = new KeywordHunterProcessModule();
 
-    // 2. 移除浮动窗口和最小化按钮（从 DOM 中完全移除）
-    const floatWin = document.getElementById('kt-keywords-floating');
-    const minBtn = document.getElementById('kt-keywords-minimized');
-    if (floatWin) {
-      floatWin.remove();
-    }
-    if (minBtn) {
-      minBtn.remove();
-    }
-
-    // 3. 清理事件监听器和定时器
-    cleanup();
-  } catch (error) {
-    ErrorService.handle(error as Error, {
-      action: 'unmountProcessModule',
-      module: 'keywordTracker',
-      notify: false,
-    });
-  }
-}
+export const mount = (container: HTMLElement): Promise<void> =>
+  keywordHunterProcessModule.mount(container);
+export const unmount = (): void => {
+  keywordHunterProcessModule.unmount();
+};

@@ -91,7 +91,9 @@
   font-size: var(--text-xs);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition-property: var(--transition-interactive-properties);
+  transition-duration: var(--duration-normal);
+  transition-timing-function: var(--ease-smooth);
   display: flex;
   align-items: center;
   gap: var(--spacing-2xs);
@@ -211,7 +213,9 @@
   border: 1.5px solid var(--color-border-default);
   border-radius: var(--rounded-lg);
   padding: var(--spacing-2xs) var(--spacing-2xs) var(--spacing-2xs) var(--spacing-md);
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition-property: background-color, border-color, box-shadow;
+  transition-duration: var(--duration-normal);
+  transition-timing-function: var(--ease-smooth);
 }
 
 .chat-input-wrap:focus-within,
@@ -255,7 +259,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition-property: box-shadow, transform;
+  transition-duration: var(--duration-normal);
+  transition-timing-function: var(--ease-smooth);
   flex-shrink: 0;
   box-shadow: 0 3px 12px var(--color-purple-200);
 }

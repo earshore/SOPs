@@ -9,9 +9,9 @@
 
 /* 标准模块容器 */
 .module-container {
-  max-width: 1450px;
+  max-width: var(--layout-max-width, 1450px);
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem var(--page-gutter, 1rem);
 }
 
 /* 紧凑容器 */
@@ -21,7 +21,7 @@
 
 /* 宽松容器 */
 .module-container--spacious {
-  padding: 3rem 1.5rem;
+  padding: 3rem var(--page-gutter, 1.5rem);
 }
 
 /* 无内边距容器 */
@@ -35,9 +35,9 @@
 
 /* 内容区域 */
 .content-area {
-  max-width: 1450px;
+  max-width: var(--layout-max-width, 1450px);
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 var(--page-gutter, 1rem);
 }
 
 /* 窄内容区域 */
@@ -47,7 +47,7 @@
 
 /* 宽内容区域 */
 .content-area--wide {
-  max-width: 1600px;
+  max-width: var(--layout-wide-width, 1600px);
 }
 
 /* 全宽内容区域 */
@@ -61,9 +61,9 @@
 
 /* 概览容器 (用于模块首页) */
 .overview-container {
-  max-width: 1450px;
+  max-width: var(--layout-max-width, 1450px);
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem var(--page-gutter, 1rem);
 }
 
 /* ----------------------------------------
@@ -72,9 +72,9 @@
 
 /* 章节容器 */
 .section-container {
-  max-width: 1450px;
+  max-width: var(--layout-max-width, 1450px);
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 var(--page-gutter, 1rem);
   margin-bottom: var(--spacing-2xl, 48px);
 }
 
@@ -118,7 +118,7 @@
   .module-container,
   .overview-container,
   .content-area {
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-left: var(--page-gutter, 2rem);
+    padding-right: var(--page-gutter, 2rem);
   }
 }

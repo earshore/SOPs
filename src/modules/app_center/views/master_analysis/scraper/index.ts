@@ -9,6 +9,7 @@
  * - 使用 AlpineRegistry 统一管理组件注册
  */
 
+import BaseModule from '../../../../../common/BaseModule';
 import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
@@ -21,12 +22,15 @@ import './scraper_style.css';
 // Module Exports (统一架构接口)
 // ==========================================
 
-/**
- * 挂载子模块
- * @param container - 容器元素
- */
-export async function mount(container: HTMLElement): Promise<void> {
-  try {
+class ScraperModule extends BaseModule {
+  constructor() {
+    super('scraper');
+  }
+
+  protected async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
     // 1. 使用 SafeTemplateLoader 加载模板
     const loader = SafeTemplateLoader.getInstance();
     const renderer = SafeRenderer.getInstance();
@@ -44,30 +48,33 @@ export async function mount(container: HTMLElement): Promise<void> {
     // 添加淡入动画（在渲染前添加）
     container.classList.add('fade-in');
     renderer.renderTemplate(container, html);
+  }
 
+  protected async init(): Promise<void> {
     // 3. 使用 AlpineRegistry 注册组件
     const registry = AlpineRegistry.getInstance();
     registry.register('scraperPanel', createScraperPanel);
-  } catch (error) {
-    console.error('[Scraper] ❌ 子模块挂载失败:', error);
-    throw error;
+  }
+
+  protected onUnmount(): void {
+    try {
+      destroyAlpineComponent('[x-data="scraperPanel"]');
+
+      // 使用 AlpineRegistry 卸载组件
+      const registry = AlpineRegistry.getInstance();
+      registry.unregister('scraperPanel');
+    } catch (error) {
+      console.error('[Scraper] ❌ 子模块卸载失败:', error);
+    }
   }
 }
 
-/**
- * 卸载子模块
- */
-export function unmount(): void {
-  try {
-    destroyAlpineComponent('[x-data="scraperPanel"]');
+const scraperModule = new ScraperModule();
 
-    // 使用 AlpineRegistry 卸载组件
-    const registry = AlpineRegistry.getInstance();
-    registry.unregister('scraperPanel');
-  } catch (error) {
-    console.error('[Scraper] ❌ 子模块卸载失败:', error);
-  }
-}
+export const mount = (container: HTMLElement): Promise<void> => scraperModule.mount(container);
+export const unmount = (): void => {
+  scraperModule.unmount();
+};
 
 // ==========================================
 // Legacy Bridges (向后兼容)

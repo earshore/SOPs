@@ -12,6 +12,36 @@ const MODAL_STYLES = `
                     display: block;
                     z-index: 1000;
                     position: relative;
+                    --modal-bg: var(--surface-panel, #ffffff);
+                    --modal-bg-muted: var(--color-slate-50, #fafbfc);
+                    --modal-border: var(--color-slate-100, #f1f5f9);
+                    --modal-text-primary: var(--color-slate-800, #1e293b);
+                    --modal-text-muted: var(--color-slate-400, #94a3b8);
+                    --modal-text-secondary: var(--color-slate-600, #475569);
+                    --modal-control-hover-bg: var(--color-slate-100, #f1f5f9);
+                    --modal-control-active-bg: var(--color-slate-200, #e2e8f0);
+                    --modal-accent: var(--color-primary, #3b82f6);
+                    --modal-accent-soft: rgba(59, 130, 246, 0.15);
+                    --modal-title-icon-bg: linear-gradient(
+                        135deg,
+                        var(--color-blue-50, #eff6ff),
+                        var(--color-indigo-100, #e0e7ff)
+                    );
+                    --modal-floating-bg: rgba(255, 255, 255, 0.92);
+                    --modal-scrollbar-thumb: var(--color-slate-300, #cbd5e1);
+                    --modal-scrollbar-thumb-hover: var(--color-slate-400, #94a3b8);
+                    --modal-focus-ring-offset: var(--modal-bg);
+                    --modal-focus-ring: var(--modal-accent);
+                    --modal-backdrop-bg: linear-gradient(
+                        135deg,
+                        rgba(15, 23, 42, 0.45) 0%,
+                        rgba(30, 41, 59, 0.55) 100%
+                    );
+                    --modal-panel-shadow:
+                        0 0 0 1px rgba(0, 0, 0, 0.03),
+                        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+                        0 12px 24px -4px rgba(0, 0, 0, 0.08),
+                        0 32px 64px -8px rgba(0, 0, 0, 0.12);
                 }
 
                 .hidden {
@@ -42,11 +72,7 @@ const MODAL_STYLES = `
                 .modal-backdrop {
                     position: fixed;
                     inset: 0;
-                    background: linear-gradient(
-                        135deg,
-                        rgba(15, 23, 42, 0.45) 0%,
-                        rgba(30, 41, 59, 0.55) 100%
-                    );
+                    background: var(--modal-backdrop-bg);
                     backdrop-filter: blur(8px);
                     -webkit-backdrop-filter: blur(8px);
                     opacity: 0;
@@ -61,18 +87,14 @@ const MODAL_STYLES = `
                 .modal-panel {
                     position: relative;
                     z-index: 10;
-                    background: #ffffff;
+                    background: var(--modal-bg);
                     border-radius: 1.25rem;
                     width: 100%;
                     overflow: hidden;
                     padding: 0;
 
                     /* 精致多层阴影 */
-                    box-shadow:
-                        0 0 0 1px rgba(0, 0, 0, 0.03),
-                        0 4px 6px -1px rgba(0, 0, 0, 0.05),
-                        0 12px 24px -4px rgba(0, 0, 0, 0.08),
-                        0 32px 64px -8px rgba(0, 0, 0, 0.12);
+                    box-shadow: var(--modal-panel-shadow);
 
                     /* 进入动画 */
                     opacity: 0;
@@ -101,8 +123,8 @@ const MODAL_STYLES = `
                     align-items: center;
                     justify-content: space-between;
                     padding: 1.125rem 1.5rem;
-                    background: linear-gradient(to bottom, #ffffff, #fafbfc);
-                    border-bottom: 1px solid #f1f5f9;
+                    background: linear-gradient(to bottom, var(--modal-bg), var(--modal-bg-muted));
+                    border-bottom: 1px solid var(--modal-border);
                     position: relative;
                 }
 
@@ -117,8 +139,8 @@ const MODAL_STYLES = `
                     background: linear-gradient(
                         90deg,
                         transparent,
-                        rgba(59, 130, 246, 0.15) 30%,
-                        rgba(99, 102, 241, 0.15) 70%,
+                        var(--modal-accent-soft) 30%,
+                        var(--modal-accent-soft) 70%,
                         transparent
                     );
                 }
@@ -131,7 +153,7 @@ const MODAL_STYLES = `
                     margin: 0;
                     font-size: 1.0625rem;
                     font-weight: 700;
-                    color: #1e293b;
+                    color: var(--modal-text-primary);
                     letter-spacing: -0.01em;
                     line-height: 1.4;
                 }
@@ -144,15 +166,15 @@ const MODAL_STYLES = `
                     width: 2rem;
                     height: 2rem;
                     border-radius: 0.5rem;
-                    background: linear-gradient(135deg, #eff6ff, #e0e7ff);
+                    background: var(--modal-title-icon-bg);
                     flex-shrink: 0;
                     box-shadow: 0 1px 2px rgba(59, 130, 246, 0.08);
                 }
 
-                .title-icon-wrapper svg {
+                    .title-icon-wrapper svg {
                     width: 1.125rem;
                     height: 1.125rem;
-                    color: #3b82f6;
+                    color: var(--modal-accent);
                     fill: currentColor;
                 }
 
@@ -166,27 +188,30 @@ const MODAL_STYLES = `
                     border-radius: 0.5rem;
                     border: none;
                     background: transparent;
-                    color: #94a3b8;
+                    color: var(--modal-text-muted);
                     cursor: pointer;
-                    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                    transition:
+                        background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                        color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
                     padding: 0;
                     outline: none;
                     flex-shrink: 0;
                 }
 
                 .btn-close:hover {
-                    background: #f1f5f9;
-                    color: #475569;
+                    background: var(--modal-control-hover-bg);
+                    color: var(--modal-text-secondary);
                     transform: rotate(90deg);
                 }
 
                 .btn-close:active {
                     transform: rotate(90deg) scale(0.9);
-                    background: #e2e8f0;
+                    background: var(--modal-control-active-bg);
                 }
 
                 .btn-close:focus-visible {
-                    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #3b82f6;
+                    box-shadow: 0 0 0 2px var(--modal-focus-ring-offset), 0 0 0 4px var(--modal-focus-ring);
                 }
 
                 .btn-close-floating {
@@ -194,12 +219,12 @@ const MODAL_STYLES = `
                     top: 0.75rem;
                     right: 0.75rem;
                     z-index: 20;
-                    background: rgba(255, 255, 255, 0.92);
+                    background: var(--modal-floating-bg);
                     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
                 }
 
                 .btn-close-floating:hover {
-                    background: #ffffff;
+                    background: var(--modal-bg);
                 }
 
                 .btn-close svg {
@@ -233,12 +258,12 @@ const MODAL_STYLES = `
                 }
 
                 .modal-body::-webkit-scrollbar-thumb {
-                    background: #cbd5e1;
+                    background: var(--modal-scrollbar-thumb);
                     border-radius: 3px;
                 }
 
                 .modal-body::-webkit-scrollbar-thumb:hover {
-                    background: #94a3b8;
+                    background: var(--modal-scrollbar-thumb-hover);
                 }
 
                 /* ===== RESPONSIVE ===== */
@@ -270,11 +295,7 @@ const MODAL_STYLES = `
 
                 /* ===== FOCUS TRAP INDICATOR ===== */
                 .modal-panel:focus-within {
-                    box-shadow:
-                        0 0 0 1px rgba(0, 0, 0, 0.03),
-                        0 4px 6px -1px rgba(0, 0, 0, 0.05),
-                        0 12px 24px -4px rgba(0, 0, 0, 0.08),
-                        0 32px 64px -8px rgba(0, 0, 0, 0.12);
+                    box-shadow: var(--modal-panel-shadow);
                 }
 `;
 

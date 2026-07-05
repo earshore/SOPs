@@ -143,7 +143,9 @@
 .toast-slide-out {
   opacity: 0;
   transform: translateX(40px);
-  transition: all 0.4s var(--ease-smooth);
+  transition:
+    opacity 0.4s var(--ease-smooth),
+    transform 0.4s var(--ease-smooth);
 }
 
 /* ========================================

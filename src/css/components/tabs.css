@@ -149,7 +149,12 @@
   font-weight: var(--font-semibold);
   border-radius: var(--rounded-full);
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
   font-family: var(--font-sans);
   display: flex;
   align-items: center;

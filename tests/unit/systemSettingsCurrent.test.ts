@@ -1,4 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   closeSettings,
   fetchModels,
@@ -654,4 +656,29 @@ it('emits settings bridge events through EventBus', () => {
 
   unsubscribeOpen();
   unsubscribeClose();
+});
+
+it('keeps the real settings template optimized for PC category scanning', () => {
+  const template = readFileSync(
+    resolve(process.cwd(), 'src/components/settings/systemSettings.html'),
+    'utf8'
+  );
+  const styles = readFileSync(
+    resolve(process.cwd(), 'src/components/settings/systemSettings.css'),
+    'utf8'
+  );
+
+  expect(template).toContain('max-w-[min(860px,calc(100vw-48px))]');
+  expect(template).toContain('aria-label="系统设置分类"');
+  expect(template).toContain('href="#settings-section-llm"');
+  expect(template).toContain('href="#settings-section-network"');
+  expect(template).toContain('href="#settings-section-data"');
+  expect(template).toContain('href="#settings-section-performance"');
+  expect(template).toContain('id="settings-section-llm"');
+  expect(template).toContain('id="settings-section-network"');
+  expect(template).toContain('id="settings-section-data"');
+  expect(template).toContain('id="settings-section-performance"');
+  expect(styles).toContain('@media (min-width: 1024px)');
+  expect(styles).toContain('grid-template-columns: 172px minmax(0, 1fr)');
+  expect(styles).toContain('flex-direction: column');
 });

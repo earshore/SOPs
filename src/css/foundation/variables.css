@@ -548,6 +548,10 @@
   --micro-duration-smooth: 250ms;
   --micro-duration-gentle: 350ms;
 
+  /* ---- PC 交互过渡属性 ---- */
+  --transition-interactive-properties:
+    color, background-color, border-color, fill, stroke, opacity, box-shadow, transform;
+
   /* ========================================
      13. 模糊 & 滤镜
      ======================================== */
@@ -648,6 +652,50 @@
      ======================================== */
   --animations-enabled: 1;
   --animation-speed-multiplier: 1;
+
+  /* ========================================
+     20. PC 工作台语义别名
+     作为页面与组件引用层，避免业务模块直接绑定基础色板或生成令牌。
+     ======================================== */
+
+  /* ---- PC 页面布局 ---- */
+  --layout-max-width: var(--container-max-width, var(--container-2xl));
+  --layout-wide-width: 1600px;
+  --page-gutter: var(--container-padding-x-lg, 24px);
+  --page-gutter-wide: var(--spacing-xl, 32px);
+  --page-content-max-width: var(--layout-max-width);
+  --page-content-wide-width: var(--layout-wide-width);
+
+  /* ---- 组件视觉 ---- */
+  --radius-card: var(--rounded-card);
+  --radius-panel: var(--rounded-panel);
+  --card-bg: var(--surface-card);
+  --card-border: var(--border-subtle);
+  --card-shadow: var(--shadow-card);
+  --card-radius: var(--radius-card);
+  --panel-bg: var(--surface-panel);
+  --panel-border: var(--border-subtle);
+  --panel-shadow: var(--shadow-panel);
+  --panel-radius: var(--radius-panel);
+
+  /* ---- 操作按钮 ---- */
+  --button-primary-bg: var(--color-primary);
+  --button-primary-hover-bg: var(--color-primary-dark);
+  --button-primary-active-bg: var(--color-primary-darker);
+  --button-primary-fg: var(--color-primary-contrast);
+
+  /* ---- 模块强调色 ---- */
+  --module-accent: var(--color-accent);
+  --module-accent-soft: var(--color-accent-light);
+  --module-accent-border: color-mix(in srgb, var(--module-accent) 24%, transparent);
+  --module-accent-text: var(--color-accent-dark);
+  --module-accent-focus: var(--focus-ring-soft);
+}
+
+@media (min-width: 1536px) {
+  :root {
+    --page-gutter: var(--page-gutter-wide, 32px);
+  }
 }
 
 /* ========================================

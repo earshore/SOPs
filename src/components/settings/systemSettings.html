@@ -1,549 +1,745 @@
 <!-- 系统设置 (Alpine.js Refactored - Visual Enhanced) -->
-<style>
-    .model-feature-tooltip {
-        opacity: 0;
-        visibility: hidden;
-        transform: translate(-50%, 4px);
-        transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
-    }
+<div
+  x-data="settingsPanel"
+  @open-settings.window="open()"
+  @close-settings.window="close()"
+  @keydown.escape.window="close()"
+  x-show="isOpen"
+  x-transition.opacity.duration.300ms
+  class="fixed inset-0 z-50 flex items-center justify-end"
+  style="display: none"
+>
+  <!-- Backdrop with blur -->
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="close()"></div>
 
-    .model-feature-icon:hover .model-feature-tooltip,
-    .model-feature-icon:focus .model-feature-tooltip,
-    .model-feature-icon:focus-visible .model-feature-tooltip {
-        opacity: 1;
-        visibility: visible;
-        transform: translate(-50%, 0);
-    }
+  <!-- Modal Panel -->
+  <div
+    x-show="isOpen"
+    x-transition:enter="transform transition ease-out duration-400"
+    x-transition:enter-start="translate-x-full opacity-90"
+    x-transition:enter-end="translate-x-0 opacity-100"
+    x-transition:leave="transform transition ease-in duration-300"
+    x-transition:leave-start="translate-x-0 opacity-100"
+    x-transition:leave-end="translate-x-full opacity-90"
+    class="relative h-full w-full max-w-[min(860px,calc(100vw-48px))] bg-gradient-to-b from-white to-slate-50/80 shadow-[-8px_0_30px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col"
+  >
+    <!-- Decorative top accent line -->
+    <div
+      class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500"
+    ></div>
 
-    #llm-endpoint.settings-leading-icon-input,
-    #llm-api-key.settings-secret-input,
-    #proxy-custom-url.settings-proxy-secret-input {
-        padding-left: 3rem;
-    }
-
-    #llm-api-key.settings-secret-input,
-    #proxy-custom-url.settings-proxy-secret-input {
-        padding-right: 3rem;
-    }
-
-    .settings-section-frame {
-        border: 1px solid rgba(226, 232, 240, 0.75);
-        border-radius: 1rem;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-        padding: 1rem;
-    }
-
-    .settings-section-frame--llm {
-        background: linear-gradient(135deg, rgba(245, 243, 255, 0.9), rgba(248, 250, 252, 0.62));
-        border-color: rgba(221, 214, 254, 0.78);
-    }
-
-    .settings-section-frame--network {
-        background: linear-gradient(135deg, rgba(236, 254, 255, 0.9), rgba(248, 250, 252, 0.62));
-        border-color: rgba(165, 243, 252, 0.72);
-    }
-
-    .settings-section-frame--data {
-        background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(248, 250, 252, 0.62));
-        border-color: rgba(191, 219, 254, 0.72);
-    }
-
-    .settings-section-frame--performance {
-        background: linear-gradient(135deg, rgba(236, 253, 245, 0.9), rgba(248, 250, 252, 0.62));
-        border-color: rgba(167, 243, 208, 0.72);
-    }
-</style>
-<div x-data="settingsPanel" @open-settings.window="open()" @close-settings.window="close()"
-    @keydown.escape.window="close()" x-show="isOpen" x-transition.opacity.duration.300ms
-    class="fixed inset-0 z-50 flex items-center justify-end" style="display: none;">
-
-    <!-- Backdrop with blur -->
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="close()"></div>
-
-    <!-- Modal Panel -->
-    <div x-show="isOpen"
-        x-transition:enter="transform transition ease-out duration-400"
-        x-transition:enter-start="translate-x-full opacity-90"
-        x-transition:enter-end="translate-x-0 opacity-100"
-        x-transition:leave="transform transition ease-in duration-300"
-        x-transition:leave-start="translate-x-0 opacity-100"
-        x-transition:leave-end="translate-x-full opacity-90"
-        class="relative w-full max-w-lg h-full bg-gradient-to-b from-white to-slate-50/80 shadow-[-8px_0_30px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col">
-
-        <!-- Decorative top accent line -->
-        <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500"></div>
-
-        <!-- Header -->
-        <div class="relative p-5 pb-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                    <i class="fas fa-sliders-h text-white text-sm"></i>
-                </div>
-                <div>
-                    <h2 class="text-[15px] font-bold text-slate-800 tracking-tight">系统设置</h2>
-                    <p class="text-[11px] text-slate-400 mt-0.5">配置模型与网络参数</p>
-                </div>
-            </div>
-            <button @click="close()"
-                class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200 hover:rotate-90">
-                <i class="fas fa-times text-sm"></i>
-            </button>
+    <!-- Header -->
+    <div class="relative p-5 pb-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25"
+        >
+          <i class="fas fa-sliders-h text-white text-sm"></i>
         </div>
-
-        <!-- Subtle separator -->
-        <div class="mx-5 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-
-        <!-- Scrollable Content -->
-        <div class="flex-1 overflow-y-auto px-5 py-6 space-y-7"
-            style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
-
-            <!-- Section 1: LLM Config -->
-            <section class="space-y-4">
-                <div class="flex items-center gap-2.5 mb-1">
-                    <div class="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center">
-                        <i class="fas fa-robot text-violet-500 text-[10px]"></i>
-                    </div>
-                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">LLM 模型配置</h3>
-                </div>
-
-                <div class="settings-section-frame settings-section-frame--llm space-y-4">
-                    <!-- 🔒 Security Warning -->
-                    <div x-show="showDangerousEndpointWarning"
-                         x-transition:enter="transition ease-out duration-300"
-                         x-transition:enter-start="opacity-0 -translate-y-2"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl shadow-sm">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <i class="fas fa-exclamation-triangle text-amber-500 text-xs"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="font-bold text-amber-800 text-sm mb-1.5">安全警告</h4>
-                                <p class="text-xs text-amber-700/80 leading-relaxed mb-2.5">
-                                    为保护您的 API 密钥安全，生产环境已禁用直接调用外部 API。
-                                </p>
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700">
-                                        <i class="fas fa-server"></i> 使用内置代理
-                                    </span>
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700">
-                                        <i class="fas fa-shield-alt"></i> 配置企业网关
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4">
-                        <!-- Provider Select -->
-                        <div class="group">
-                        <label for="llm-provider" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">AI 厂商</label>
-                        <div class="relative">
-                            <select id="llm-provider" name="llm-provider" :value="llm.provider" @change="setLlmProvider($event)"
-                                class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm transition-all duration-200 shadow-sm hover:border-slate-300 cursor-pointer">
-                                <template x-for="option in llmProviderOptions" :key="option.id">
-                                    <option :value="option.id" x-text="option.label"></option>
-                                </template>
-                            </select>
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center">
-                                <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Endpoint -->
-                    <div class="group">
-                        <label for="llm-endpoint" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">API Endpoint</label>
-                        <div class="relative">
-                            <div class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-emerald-100 flex items-center justify-center">
-                                <i class="fas fa-link text-emerald-500 text-[9px]"></i>
-                            </div>
-                            <input type="text" id="llm-endpoint" name="llm-endpoint" :value="llm.endpoint" @input="setLlmEndpoint($event)"
-                                class="settings-leading-icon-input w-full pl-12 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
-                                :placeholder="defaultLlmEndpoint" />
-                        </div>
-                    </div>
-
-                    <!-- API Key -->
-                    <div class="group">
-                        <label for="llm-api-key" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">API Key</label>
-                        <div class="relative">
-                            <div class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center">
-                                <i class="fas fa-key text-amber-500 text-[9px]"></i>
-                            </div>
-                            <input :type="llmApiKeyInputType" id="llm-api-key" name="llm-api-key" :value="llm.apiKey" @input="setLlmApiKey($event)"
-                                class="settings-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
-                                placeholder="sk-..." />
-                            <button @click="toggleLlmKeyVisibility()"
-                                class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200">
-                                <i class="fas text-xs" :class="llmApiKeyIconClass"></i>
-                            </button>
-                        </div>
-                        <p class="mt-1.5 text-[10px] leading-relaxed text-amber-700/75"
-                            x-text="localSecretBoundaryText"></p>
-                    </div>
-
-                    <!-- Model Selection -->
-                    <div class="group">
-                        <label for="llm-model" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">选择模型</label>
-                        <div class="flex gap-2">
-                            <div class="relative flex-1">
-                                <select id="llm-model" name="llm-model" :value="llm.model" @change="setLlmModel($event)"
-                                    class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition-all duration-200 hover:border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer"
-                                    :disabled="modelSelectDisabled">
-                                    <option value="">-- 请选择 --</option>
-                                    <template x-for="(m, index) in llm.models" :key="index">
-                                        <option :value="getModelValue(m)"
-                                            x-text="getModelLabel(m)"></option>
-                                    </template>
-                                </select>
-                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center">
-                                    <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
-                                </div>
-                            </div>
-                            <button @click="fetchModels()" :disabled="llm.isFetching"
-                                class="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 rounded-xl transition-all duration-200 text-sm font-medium flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-[0.97]">
-                                <i class="fas text-xs" :class="fetchModelsIconClass"></i>
-                                <span x-text="fetchModelsText"></span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Model Info Card -->
-                    <div x-show="activeModelInfo"
-                        x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 scale-95"
-                        x-transition:enter-end="opacity-100 scale-100"
-                        class="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5 shadow-sm">
-                        <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-                            <div class="flex min-w-0 items-center gap-2.5">
-                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500 ring-1 ring-blue-100">
-                                    <i class="fas fa-expand-alt text-[11px]"></i>
-                                </span>
-                                <div class="min-w-0">
-                                    <span class="block text-[10px] font-medium uppercase tracking-wider text-slate-400">上下文</span>
-                                    <span class="block truncate text-sm font-bold leading-tight text-slate-800"
-                                        x-text="activeContextText"></span>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 sm:justify-end" aria-label="模型特性">
-                                <span class="text-[10px] font-medium uppercase tracking-wider text-slate-400">特性</span>
-                                <div class="flex flex-wrap items-center gap-1.5 sm:justify-end">
-                                    <template x-for="feature in activeFeatureBadges" :key="feature.key">
-                                        <span tabindex="0" role="img"
-                                            :aria-label="feature.label"
-                                            class="model-feature-icon group relative flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1">
-                                            <i class="fas text-[10px]" :class="feature.icon"></i>
-                                            <span aria-hidden="true"
-                                                class="model-feature-tooltip pointer-events-none invisible absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus:visible group-focus:translate-y-0 group-focus:opacity-100 group-focus-visible:visible group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
-                                                x-text="feature.label"></span>
-                                        </span>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex gap-2.5 pt-1">
-                        <button @click="testConnection()" :disabled="llm.isTesting"
-                            class="flex-1 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-medium rounded-xl transition-all duration-200 text-sm flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 active:scale-[0.97]">
-                            <i class="fas text-xs" :class="testConnectionIconClass"></i>
-                            <span x-text="testConnectionText"></span>
-                        </button>
-                        <button @click="saveProviderConfig()"
-                            class="flex-[2] py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all duration-200 text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 active:scale-[0.97]">
-                            <i class="fas fa-check text-xs"></i> 保存配置
-                        </button>
-                    </div>
-                </div>
-                </div>
-            </section>
-
-            <!-- Decorative Divider -->
-            <div class="flex items-center gap-3 py-1">
-                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-                <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
-                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-            </div>
-
-            <!-- Section 2: Proxy Config -->
-            <section class="space-y-4">
-                <div class="flex items-center gap-2.5 mb-1">
-                    <div class="w-6 h-6 rounded-lg bg-cyan-100 flex items-center justify-center">
-                        <i class="fas fa-network-wired text-cyan-500 text-[10px]"></i>
-                    </div>
-                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">采集网络设置</h3>
-                </div>
-
-                <div class="settings-section-frame settings-section-frame--network space-y-4">
-                    <!-- Connection Type -->
-                    <div class="group">
-                        <label for="proxy-type" class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors">连接方式</label>
-                        <div class="relative">
-                            <select id="proxy-type" name="proxy-type" :value="proxy.type" @change="setProxyType($event)"
-                                class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition-all duration-200 hover:border-slate-300 cursor-pointer">
-                                <optgroup label="商业 API (高成功率)">
-                                    <template x-for="option in commercialProxyOptions" :key="option.type">
-                                        <option :value="option.type" x-text="option.displayName"></option>
-                                    </template>
-                                </optgroup>
-                                <optgroup label="直连">
-                                    <template x-for="option in directProxyOptions" :key="option.type">
-                                        <option :value="option.type" x-text="option.displayName"></option>
-                                    </template>
-                                </optgroup>
-                            </select>
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center">
-                                <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Conditional Input -->
-                    <div x-show="proxyNeedsInput"
-                        x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 -translate-y-2"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        class="space-y-3">
-                        <label for="proxy-custom-url" class="block text-xs font-semibold text-slate-600" x-text="proxyInputLabel"></label>
-                        <div class="flex gap-2">
-                            <div class="relative min-w-0 flex-1">
-                                <div class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-cyan-100 flex items-center justify-center">
-                                    <i class="fas fa-globe text-cyan-500 text-[9px]"></i>
-                                </div>
-                                <input :type="proxyInputType" id="proxy-custom-url" name="proxy-custom-url" :value="proxy.customUrl" @input="setProxyCustomUrl($event)"
-                                    class="settings-proxy-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 placeholder:text-slate-300"
-                                    :placeholder="proxyInputPlaceholder" />
-                                <button @click="toggleProxyKeyVisibility()"
-                                    class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200">
-                                    <i class="fas text-xs" :class="proxyKeyIconClass"></i>
-                                </button>
-                            </div>
-                            <button @click="saveProxyConfig()"
-                                class="px-5 py-2.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white rounded-xl transition-all duration-200 text-sm font-semibold shadow-lg shadow-slate-500/15 whitespace-nowrap active:scale-[0.97]">
-                                更新配置
-                            </button>
-                        </div>
-                        <div class="flex items-center gap-2 px-1">
-                            <div class="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-info text-slate-400 text-[8px]"></i>
-                            </div>
-                            <p class="text-[11px] text-slate-400 leading-relaxed"
-                                x-text="proxyHintText"></p>
-                        </div>
-                    </div>
-
-                    <!-- Tip Card -->
-                    <div class="p-3.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/50 border border-blue-100/60 rounded-2xl flex gap-3">
-                        <div class="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fas fa-lightbulb text-blue-500 text-[10px]"></i>
-                        </div>
-                        <p class="text-[11px] text-slate-500 leading-[1.7]">
-                            商业 API 通常提供更稳定的 IP 池和验证码自动绕过功能，建议在大量采集时使用。
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Decorative Divider -->
-            <div class="flex items-center gap-3 py-1">
-                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-                <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
-                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-            </div>
-
-            <!-- Section 3: Local Data Management -->
-            <section class="space-y-4">
-                <div class="flex items-center gap-2.5 mb-1">
-                    <div class="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center">
-                        <i class="fas fa-database text-blue-500 text-[10px]"></i>
-                    </div>
-                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">本地数据管理</h3>
-                </div>
-
-                <div class="settings-section-frame settings-section-frame--data space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                            <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium">localStorage</span>
-                            <span class="block text-sm font-bold text-slate-700 mt-1"
-                                x-text="localStorageUsedText"></span>
-                            <span class="block text-[10px] text-slate-400 mt-0.5"
-                                x-text="localStorageKeysText"></span>
-                        </div>
-                        <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                            <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium">IndexedDB</span>
-                            <span class="block text-sm font-bold text-slate-700 mt-1"
-                                x-text="indexedDbUsedText"></span>
-                            <span class="block text-[10px] text-slate-400 mt-0.5"
-                                x-text="indexedDbKeysText"></span>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-wrap gap-2">
-                        <button @click="exportLocalData()" :disabled="localData.isBusy"
-                            class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
-                            <i class="fas fa-file-export text-blue-500"></i> 导出全部
-                        </button>
-                        <button @click="importLocalData()" :disabled="localData.isBusy"
-                            class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
-                            <i class="fas fa-file-import text-emerald-500"></i> 导入恢复
-                        </button>
-                        <button @click="clearAllLocalData()" :disabled="localData.isBusy"
-                            class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-red-50 border border-red-100 hover:bg-red-100 text-red-700 font-medium rounded-xl transition-all duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50">
-                            <i class="fas fa-trash-alt"></i> 清空全部
-                        </button>
-                    </div>
-
-                    <div class="space-y-2.5">
-                        <button @click="toggleLocalDataCleanupItems()"
-                            :aria-expanded="localData.cleanupItemsExpanded"
-                            class="flex min-h-[44px] w-full items-center gap-3 rounded-xl border border-white/80 bg-white/85 p-3 text-left shadow-sm transition-all duration-200 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-blue-100">
-                                <i class="fas fa-list-check text-[11px]"></i>
-                            </span>
-                            <span class="min-w-0 flex-1">
-                                <span class="block text-xs font-bold text-slate-700">清理项</span>
-                                <span class="block truncate text-[10px] text-slate-400"
-                                    x-text="localDataCleanupSummaryText"></span>
-                            </span>
-                            <span class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600">
-                                <span x-text="localDataCleanupToggleText"></span>
-                                <i class="fas text-[10px]" :class="localDataCleanupToggleIconClass"></i>
-                            </span>
-                        </button>
-
-                        <div x-show="localData.cleanupItemsExpanded"
-                            x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 -translate-y-1"
-                            x-transition:enter-end="opacity-100 translate-y-0"
-                            x-transition:leave="transition ease-in duration-150"
-                            x-transition:leave-start="opacity-100 translate-y-0"
-                            x-transition:leave-end="opacity-0 -translate-y-1"
-                            class="space-y-2.5">
-                            <template x-for="bucket in localDataBucketItems" :key="bucket.id">
-                                <div class="rounded-xl border border-white/80 bg-white/85 p-3 shadow-sm">
-                                    <div class="flex items-start gap-3">
-                                        <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1"
-                                            :class="bucket.iconClass">
-                                            <i class="fas text-[11px]" :class="bucket.icon"></i>
-                                        </div>
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-start justify-between gap-2">
-                                                <div class="min-w-0">
-                                                    <div class="flex items-center gap-2">
-                                                        <h4 class="truncate text-xs font-bold text-slate-700"
-                                                            x-text="bucket.label"></h4>
-                                                        <span class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500"
-                                                            x-text="bucket.percentText"></span>
-                                                    </div>
-                                                    <p class="mt-0.5 text-[10px] leading-relaxed text-slate-400"
-                                                        x-text="bucket.description"></p>
-                                                </div>
-                                                <div class="shrink-0 text-right">
-                                                    <span class="block text-xs font-bold text-slate-700"
-                                                        x-text="bucket.usedText"></span>
-                                                    <span class="block text-[10px] text-slate-400"
-                                                        x-text="bucket.keysText"></span>
-                                                </div>
-                                            </div>
-                                            <div class="mt-2.5 flex items-center gap-2">
-                                                <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                                                    <div class="h-full rounded-full transition-all duration-300"
-                                                        :class="bucket.barClass"
-                                                        :style="{ width: bucket.percentWidth }"></div>
-                                                </div>
-                                                <button @click="clearLocalDataBucket(bucket.id)"
-                                                    :disabled="localData.isBusy || bucket.isEmpty"
-                                                    class="min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-45"
-                                                    :class="bucket.buttonClass">
-                                                    <span x-show="!bucket.isClearing" x-text="bucket.actionLabel"></span>
-                                                    <span x-show="bucket.isClearing" class="inline-flex items-center gap-1">
-                                                        <i class="fas fa-circle-notch fa-spin"></i> 清理中
-                                                    </span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Decorative Divider -->
-            <div class="flex items-center gap-3 py-1">
-                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-                <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
-                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-            </div>
-
-            <!-- Section 4: Performance Monitor -->
-            <section class="space-y-4">
-                <div class="flex items-center gap-2.5 mb-1">
-                    <div class="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
-                        <i class="fas fa-chart-line text-emerald-500 text-[10px]"></i>
-                    </div>
-                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">性能监控</h3>
-                </div>
-
-                <div class="settings-section-frame settings-section-frame--performance space-y-4">
-                    <!-- Monitor Panel Button -->
-                    <button @click="openPerformanceMonitor()"
-                        class="w-full p-4 bg-gradient-to-br from-emerald-50 to-teal-50/30 hover:from-emerald-100 hover:to-teal-100/50 border border-emerald-200/60 hover:border-emerald-300 rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md group">
-                        <div class="flex items-center gap-3">
-                            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:shadow-emerald-500/40 transition-all duration-200">
-                                <i class="fas fa-tachometer-alt text-white text-base"></i>
-                            </div>
-                            <div class="flex-1 text-left">
-                                <h4 class="text-sm font-bold text-slate-700 mb-0.5">打开监控面板</h4>
-                                <p class="text-[11px] text-slate-500">查看性能指标、错误追踪和用户行为分析</p>
-                            </div>
-                            <div class="w-7 h-7 rounded-lg bg-white/80 flex items-center justify-center group-hover:bg-white transition-all duration-200">
-                                <i class="fas fa-arrow-right text-emerald-500 text-xs group-hover:translate-x-0.5 transition-transform duration-200"></i>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Info Card -->
-                    <div class="p-3.5 bg-gradient-to-r from-slate-50/80 to-emerald-50/30 border border-slate-100/60 rounded-2xl">
-                        <div class="flex gap-3">
-                            <div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <i class="fas fa-info-circle text-slate-400 text-[10px]"></i>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-[11px] text-slate-500 leading-[1.7] mb-2">
-                                    监控面板提供实时性能数据、错误统计和用户行为分析,帮助您了解应用运行状态。
-                                </p>
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-white/80 rounded-md text-[10px] font-medium text-slate-600">
-                                        <i class="fas fa-bolt text-amber-500"></i> Web Vitals
-                                    </span>
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-white/80 rounded-md text-[10px] font-medium text-slate-600">
-                                        <i class="fas fa-bug text-red-500"></i> 错误追踪
-                                    </span>
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-white/80 rounded-md text-[10px] font-medium text-slate-600">
-                                        <i class="fas fa-users text-blue-500"></i> 用户分析
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Bottom spacer for comfortable scrolling -->
-            <div class="h-2"></div>
+        <div>
+          <h2 class="text-[15px] font-bold text-slate-800 tracking-tight">系统设置</h2>
+          <p class="text-[11px] text-slate-500 mt-0.5">配置模型与网络参数</p>
         </div>
-
-        <!-- Footer -->
-        <div class="px-5 py-3.5 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                <span class="text-[11px] text-slate-400 font-medium">系统正常运行</span>
-            </div>
-            <span class="text-[11px] text-slate-300 font-mono">AihangSOP v1.0.0</span>
-        </div>
+      </div>
+      <button
+        @click="close()"
+        aria-label="关闭系统设置"
+        title="关闭系统设置"
+        class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+      >
+        <i class="fas fa-times text-sm"></i>
+      </button>
     </div>
+
+    <!-- Subtle separator -->
+    <div class="mx-5 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+
+    <!-- Scrollable Content -->
+    <div
+      class="flex-1 overflow-y-auto px-5 py-6"
+      style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent"
+    >
+      <div class="settings-panel-body">
+        <nav class="settings-panel-nav" aria-label="系统设置分类">
+          <div class="settings-panel-nav-title">分类</div>
+          <a class="settings-panel-nav-link" href="#settings-section-llm">
+            <i class="fas fa-robot" aria-hidden="true"></i>
+            <span>模型配置</span>
+          </a>
+          <a class="settings-panel-nav-link" href="#settings-section-network">
+            <i class="fas fa-network-wired" aria-hidden="true"></i>
+            <span>采集网络</span>
+          </a>
+          <a class="settings-panel-nav-link" href="#settings-section-data">
+            <i class="fas fa-database" aria-hidden="true"></i>
+            <span>本地数据</span>
+          </a>
+          <a class="settings-panel-nav-link" href="#settings-section-performance">
+            <i class="fas fa-chart-line" aria-hidden="true"></i>
+            <span>性能监控</span>
+          </a>
+        </nav>
+        <div class="settings-panel-sections space-y-7">
+          <!-- Section 1: LLM Config -->
+          <section id="settings-section-llm" class="settings-panel-section space-y-4">
+            <div class="flex items-center gap-2.5 mb-1">
+              <div class="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center">
+                <i class="fas fa-robot text-violet-500 text-[10px]"></i>
+              </div>
+              <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                LLM 模型配置
+              </h3>
+            </div>
+
+            <div class="settings-section-frame settings-section-frame--llm space-y-4">
+              <!-- 🔒 Security Warning -->
+              <div
+                x-show="showDangerousEndpointWarning"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 -translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl shadow-sm"
+              >
+                <div class="flex items-start gap-3">
+                  <div
+                    class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                  >
+                    <i class="fas fa-exclamation-triangle text-amber-500 text-xs"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-amber-800 text-sm mb-1.5">安全警告</h4>
+                    <p class="text-xs text-amber-700/80 leading-relaxed mb-2.5">
+                      为保护您的 API 密钥安全，生产环境已禁用直接调用外部 API。
+                    </p>
+                    <div class="flex flex-wrap gap-1.5">
+                      <span
+                        class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700"
+                      >
+                        <i class="fas fa-server"></i> 使用内置代理
+                      </span>
+                      <span
+                        class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100/80 rounded-md text-[10px] font-medium text-amber-700"
+                      >
+                        <i class="fas fa-shield-alt"></i> 配置企业网关
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <!-- Provider Select -->
+                <div class="group">
+                  <label
+                    for="llm-provider"
+                    class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                    >AI 厂商</label
+                  >
+                  <div class="relative">
+                    <select
+                      id="llm-provider"
+                      name="llm-provider"
+                      :value="llm.provider"
+                      @change="setLlmProvider($event)"
+                      class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm transition duration-200 shadow-sm hover:border-slate-300 cursor-pointer"
+                    >
+                      <template x-for="option in llmProviderOptions" :key="option.id">
+                        <option :value="option.id" x-text="option.label"></option>
+                      </template>
+                    </select>
+                    <div
+                      class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                    >
+                      <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Endpoint -->
+                <div class="group">
+                  <label
+                    for="llm-endpoint"
+                    class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                    >API Endpoint</label
+                  >
+                  <div class="relative">
+                    <div
+                      class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-emerald-100 flex items-center justify-center"
+                    >
+                      <i class="fas fa-link text-emerald-500 text-[9px]"></i>
+                    </div>
+                    <input
+                      type="text"
+                      id="llm-endpoint"
+                      name="llm-endpoint"
+                      :value="llm.endpoint"
+                      @input="setLlmEndpoint($event)"
+                      class="settings-leading-icon-input w-full pl-12 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                      :placeholder="defaultLlmEndpoint"
+                    />
+                  </div>
+                </div>
+
+                <!-- API Key -->
+                <div class="group">
+                  <label
+                    for="llm-api-key"
+                    class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                    >API Key</label
+                  >
+                  <div class="relative">
+                    <div
+                      class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-amber-100 flex items-center justify-center"
+                    >
+                      <i class="fas fa-key text-amber-500 text-[9px]"></i>
+                    </div>
+                    <input
+                      :type="llmApiKeyInputType"
+                      id="llm-api-key"
+                      name="llm-api-key"
+                      :value="llm.apiKey"
+                      @input="setLlmApiKey($event)"
+                      class="settings-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                      placeholder="sk-..."
+                    />
+                    <button
+                      @click="toggleLlmKeyVisibility()"
+                      :aria-label="llmApiKeyVisibilityLabel"
+                      :title="llmApiKeyVisibilityLabel"
+                      class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                    >
+                      <i class="fas text-xs" :class="llmApiKeyIconClass"></i>
+                    </button>
+                  </div>
+                  <p
+                    class="mt-1.5 text-[10px] leading-relaxed text-amber-700/75"
+                    x-text="localSecretBoundaryText"
+                  ></p>
+                </div>
+
+                <!-- Model Selection -->
+                <div class="group">
+                  <label
+                    for="llm-model"
+                    class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                    >选择模型</label
+                  >
+                  <div class="flex gap-2">
+                    <div class="relative flex-1">
+                      <select
+                        id="llm-model"
+                        name="llm-model"
+                        :value="llm.model"
+                        @change="setLlmModel($event)"
+                        class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed cursor-pointer"
+                        :disabled="modelSelectDisabled"
+                      >
+                        <option value="">-- 请选择 --</option>
+                        <template x-for="(m, index) in llm.models" :key="index">
+                          <option :value="getModelValue(m)" x-text="getModelLabel(m)"></option>
+                        </template>
+                      </select>
+                      <div
+                        class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                      >
+                        <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                      </div>
+                    </div>
+                    <button
+                      @click="fetchModels()"
+                      :disabled="llm.isFetching"
+                      class="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 rounded-xl transition duration-200 text-sm font-medium flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    >
+                      <i class="fas text-xs" :class="fetchModelsIconClass"></i>
+                      <span x-text="fetchModelsText"></span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Model Info Card -->
+                <div
+                  x-show="activeModelInfo"
+                  x-transition:enter="transition ease-out duration-300"
+                  x-transition:enter-start="opacity-0 scale-95"
+                  x-transition:enter-end="opacity-100 scale-100"
+                  class="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5 shadow-sm"
+                >
+                  <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex min-w-0 items-center gap-2.5">
+                      <span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500 ring-1 ring-blue-100"
+                      >
+                        <i class="fas fa-expand-alt text-[11px]"></i>
+                      </span>
+                      <div class="min-w-0">
+                        <span
+                          class="block text-[10px] font-medium uppercase tracking-wider text-slate-400"
+                          >上下文</span
+                        >
+                        <span
+                          class="block truncate text-sm font-bold leading-tight text-slate-800"
+                          x-text="activeContextText"
+                        ></span>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2 sm:justify-end" aria-label="模型特性">
+                      <span class="text-[10px] font-medium uppercase tracking-wider text-slate-400"
+                        >特性</span
+                      >
+                      <div class="flex flex-wrap items-center gap-1.5 sm:justify-end">
+                        <template x-for="feature in activeFeatureBadges" :key="feature.key">
+                          <span
+                            tabindex="0"
+                            role="img"
+                            :aria-label="feature.label"
+                            class="model-feature-icon group relative flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 transition duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                          >
+                            <i class="fas text-[10px]" :class="feature.icon"></i>
+                            <span
+                              aria-hidden="true"
+                              class="model-feature-tooltip pointer-events-none invisible absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus:visible group-focus:translate-y-0 group-focus:opacity-100 group-focus-visible:visible group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
+                              x-text="feature.label"
+                            ></span>
+                          </span>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-2.5 pt-1">
+                  <button
+                    @click="testConnection()"
+                    :disabled="llm.isTesting"
+                    class="flex-1 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-medium rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  >
+                    <i class="fas text-xs" :class="testConnectionIconClass"></i>
+                    <span x-text="testConnectionText"></span>
+                  </button>
+                  <button
+                    @click="saveProviderConfig()"
+                    class="flex-[2] py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  >
+                    <i class="fas fa-check text-xs"></i> 保存配置
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Decorative Divider -->
+          <div class="flex items-center gap-3 py-1">
+            <div
+              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
+            ></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
+            <div
+              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
+            ></div>
+          </div>
+
+          <!-- Section 2: Proxy Config -->
+          <section id="settings-section-network" class="settings-panel-section space-y-4">
+            <div class="flex items-center gap-2.5 mb-1">
+              <div class="w-6 h-6 rounded-lg bg-cyan-100 flex items-center justify-center">
+                <i class="fas fa-network-wired text-cyan-500 text-[10px]"></i>
+              </div>
+              <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                采集网络设置
+              </h3>
+            </div>
+
+            <div class="settings-section-frame settings-section-frame--network space-y-4">
+              <!-- Connection Type -->
+              <div class="group">
+                <label
+                  for="proxy-type"
+                  class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                  >连接方式</label
+                >
+                <div class="relative">
+                  <select
+                    id="proxy-type"
+                    name="proxy-type"
+                    :value="proxy.type"
+                    @change="setProxyType($event)"
+                    class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 cursor-pointer"
+                  >
+                    <optgroup label="商业 API (高成功率)">
+                      <template x-for="option in commercialProxyOptions" :key="option.type">
+                        <option :value="option.type" x-text="option.displayName"></option>
+                      </template>
+                    </optgroup>
+                    <optgroup label="直连">
+                      <template x-for="option in directProxyOptions" :key="option.type">
+                        <option :value="option.type" x-text="option.displayName"></option>
+                      </template>
+                    </optgroup>
+                  </select>
+                  <div
+                    class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                  >
+                    <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Conditional Input -->
+              <div
+                x-show="proxyNeedsInput"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 -translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                class="space-y-3"
+              >
+                <label
+                  for="proxy-custom-url"
+                  class="block text-xs font-semibold text-slate-600"
+                  x-text="proxyInputLabel"
+                ></label>
+                <div class="flex gap-2">
+                  <div class="relative min-w-0 flex-1">
+                    <div
+                      class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-cyan-100 flex items-center justify-center"
+                    >
+                      <i class="fas fa-globe text-cyan-500 text-[9px]"></i>
+                    </div>
+                    <input
+                      :type="proxyInputType"
+                      id="proxy-custom-url"
+                      name="proxy-custom-url"
+                      :value="proxy.customUrl"
+                      @input="setProxyCustomUrl($event)"
+                      class="settings-proxy-secret-input w-full pl-12 pr-12 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                      :placeholder="proxyInputPlaceholder"
+                    />
+                    <button
+                      @click="toggleProxyKeyVisibility()"
+                      :aria-label="proxyKeyVisibilityLabel"
+                      :title="proxyKeyVisibilityLabel"
+                      class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                    >
+                      <i class="fas text-xs" :class="proxyKeyIconClass"></i>
+                    </button>
+                  </div>
+                  <button
+                    @click="saveProxyConfig()"
+                    class="px-5 py-2.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white rounded-xl transition duration-200 text-sm font-semibold shadow-lg shadow-slate-500/15 whitespace-nowrap active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
+                  >
+                    更新配置
+                  </button>
+                </div>
+                <div class="flex items-center gap-2 px-1">
+                  <div
+                    class="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0"
+                  >
+                    <i class="fas fa-info text-slate-400 text-[8px]"></i>
+                  </div>
+                  <p class="text-[11px] text-slate-500 leading-relaxed" x-text="proxyHintText"></p>
+                </div>
+              </div>
+
+              <!-- Tip Card -->
+              <div
+                class="p-3.5 bg-gradient-to-r from-blue-50/80 to-indigo-50/50 border border-blue-100/60 rounded-2xl flex gap-3"
+              >
+                <div
+                  class="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                >
+                  <i class="fas fa-lightbulb text-blue-500 text-[10px]"></i>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-[1.7]">
+                  商业 API 通常提供更稳定的 IP 池和验证码自动绕过功能，建议在大量采集时使用。
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Decorative Divider -->
+          <div class="flex items-center gap-3 py-1">
+            <div
+              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
+            ></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
+            <div
+              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
+            ></div>
+          </div>
+
+          <!-- Section 3: Local Data Management -->
+          <section id="settings-section-data" class="settings-panel-section space-y-4">
+            <div class="flex items-center gap-2.5 mb-1">
+              <div class="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center">
+                <i class="fas fa-database text-blue-500 text-[10px]"></i>
+              </div>
+              <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                本地数据管理
+              </h3>
+            </div>
+
+            <div class="settings-section-frame settings-section-frame--data space-y-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
+                  <span
+                    class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium"
+                    >localStorage</span
+                  >
+                  <span
+                    class="block text-sm font-bold text-slate-700 mt-1"
+                    x-text="localStorageUsedText"
+                  ></span>
+                  <span
+                    class="block text-[10px] text-slate-400 mt-0.5"
+                    x-text="localStorageKeysText"
+                  ></span>
+                </div>
+                <div class="p-3 bg-white/80 rounded-xl border border-white shadow-sm">
+                  <span
+                    class="block text-[10px] text-slate-400 uppercase tracking-wider font-medium"
+                    >IndexedDB</span
+                  >
+                  <span
+                    class="block text-sm font-bold text-slate-700 mt-1"
+                    x-text="indexedDbUsedText"
+                  ></span>
+                  <span
+                    class="block text-[10px] text-slate-400 mt-0.5"
+                    x-text="indexedDbKeysText"
+                  ></span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <button
+                  @click="exportLocalData()"
+                  :disabled="localData.isBusy"
+                  class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                >
+                  <i class="fas fa-file-export text-blue-500"></i> 导出全部
+                </button>
+                <button
+                  @click="importLocalData()"
+                  :disabled="localData.isBusy"
+                  class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                >
+                  <i class="fas fa-file-import text-emerald-500"></i> 导入恢复
+                </button>
+                <button
+                  @click="clearAllLocalData()"
+                  :disabled="localData.isBusy"
+                  class="min-h-[40px] flex-1 min-w-[120px] px-3 py-2.5 bg-red-50 border border-red-100 hover:bg-red-100 text-red-700 font-medium rounded-xl transition duration-200 text-xs flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                >
+                  <i class="fas fa-trash-alt"></i> 清空全部
+                </button>
+              </div>
+
+              <div class="space-y-2.5">
+                <button
+                  @click="toggleLocalDataCleanupItems()"
+                  :aria-expanded="localData.cleanupItemsExpanded"
+                  class="flex min-h-[44px] w-full items-center gap-3 rounded-xl border border-white/80 bg-white/85 p-3 text-left shadow-sm transition duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                >
+                  <span
+                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-blue-100"
+                  >
+                    <i class="fas fa-list-check text-[11px]"></i>
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-xs font-bold text-slate-700">清理项</span>
+                    <span
+                      class="block truncate text-[10px] text-slate-400"
+                      x-text="localDataCleanupSummaryText"
+                    ></span>
+                  </span>
+                  <span
+                    class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600"
+                  >
+                    <span x-text="localDataCleanupToggleText"></span>
+                    <i class="fas text-[10px]" :class="localDataCleanupToggleIconClass"></i>
+                  </span>
+                </button>
+
+                <div
+                  x-show="localData.cleanupItemsExpanded"
+                  x-transition:enter="transition ease-out duration-200"
+                  x-transition:enter-start="opacity-0 -translate-y-1"
+                  x-transition:enter-end="opacity-100 translate-y-0"
+                  x-transition:leave="transition ease-in duration-150"
+                  x-transition:leave-start="opacity-100 translate-y-0"
+                  x-transition:leave-end="opacity-0 -translate-y-1"
+                  class="space-y-2.5"
+                >
+                  <template x-for="bucket in localDataBucketItems" :key="bucket.id">
+                    <div class="rounded-xl border border-white/80 bg-white/85 p-3 shadow-sm">
+                      <div class="flex items-start gap-3">
+                        <div
+                          class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1"
+                          :class="bucket.iconClass"
+                        >
+                          <i class="fas text-[11px]" :class="bucket.icon"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                              <div class="flex items-center gap-2">
+                                <h4
+                                  class="truncate text-xs font-bold text-slate-700"
+                                  x-text="bucket.label"
+                                ></h4>
+                                <span
+                                  class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500"
+                                  x-text="bucket.percentText"
+                                ></span>
+                              </div>
+                              <p
+                                class="mt-0.5 text-[10px] leading-relaxed text-slate-400"
+                                x-text="bucket.description"
+                              ></p>
+                            </div>
+                            <div class="shrink-0 text-right">
+                              <span
+                                class="block text-xs font-bold text-slate-700"
+                                x-text="bucket.usedText"
+                              ></span>
+                              <span
+                                class="block text-[10px] text-slate-400"
+                                x-text="bucket.keysText"
+                              ></span>
+                            </div>
+                          </div>
+                          <div class="mt-2.5 flex items-center gap-2">
+                            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                              <div
+                                class="h-full rounded-full transition-[width] duration-300"
+                                :class="bucket.barClass"
+                                :style="{ width: bucket.percentWidth }"
+                              ></div>
+                            </div>
+                            <button
+                              @click="clearLocalDataBucket(bucket.id)"
+                              :disabled="localData.isBusy || bucket.isEmpty"
+                              class="min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                              :class="bucket.buttonClass"
+                            >
+                              <span x-show="!bucket.isClearing" x-text="bucket.actionLabel"></span>
+                              <span
+                                x-show="bucket.isClearing"
+                                class="inline-flex items-center gap-1"
+                              >
+                                <i class="fas fa-circle-notch fa-spin"></i> 清理中
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Decorative Divider -->
+          <div class="flex items-center gap-3 py-1">
+            <div
+              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
+            ></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
+            <div
+              class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
+            ></div>
+          </div>
+
+          <!-- Section 4: Performance Monitor -->
+          <section id="settings-section-performance" class="settings-panel-section space-y-4">
+            <div class="flex items-center gap-2.5 mb-1">
+              <div class="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <i class="fas fa-chart-line text-emerald-500 text-[10px]"></i>
+              </div>
+              <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                性能监控
+              </h3>
+            </div>
+
+            <div class="settings-section-frame settings-section-frame--performance space-y-4">
+              <!-- Monitor Panel Button -->
+              <button
+                @click="openPerformanceMonitor()"
+                class="w-full p-4 bg-gradient-to-br from-emerald-50 to-teal-50/30 hover:from-emerald-100 hover:to-teal-100/50 border border-emerald-200/60 hover:border-emerald-300 rounded-2xl transition duration-200 shadow-sm hover:shadow-md group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:shadow-emerald-500/40 transition-shadow duration-200"
+                  >
+                    <i class="fas fa-tachometer-alt text-white text-base"></i>
+                  </div>
+                  <div class="flex-1 text-left">
+                    <h4 class="text-sm font-bold text-slate-700 mb-0.5">打开监控面板</h4>
+                    <p class="text-[11px] text-slate-500">查看性能指标、错误追踪和用户行为分析</p>
+                  </div>
+                  <div
+                    class="w-7 h-7 rounded-lg bg-white/80 flex items-center justify-center group-hover:bg-white transition-colors duration-200"
+                  >
+                    <i
+                      class="fas fa-arrow-right text-emerald-500 text-xs group-hover:translate-x-0.5 transition-transform duration-200"
+                    ></i>
+                  </div>
+                </div>
+              </button>
+
+              <!-- Info Card -->
+              <div
+                class="p-3.5 bg-gradient-to-r from-slate-50/80 to-emerald-50/30 border border-slate-100/60 rounded-2xl"
+              >
+                <div class="flex gap-3">
+                  <div
+                    class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                  >
+                    <i class="fas fa-info-circle text-slate-400 text-[10px]"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-[11px] text-slate-500 leading-[1.7] mb-2">
+                      监控面板提供实时性能数据、错误统计和用户行为分析,帮助您了解应用运行状态。
+                    </p>
+                    <div class="flex flex-wrap gap-1.5">
+                      <span
+                        class="inline-flex items-center gap-1 px-2 py-1 bg-white/80 rounded-md text-[10px] font-medium text-slate-600"
+                      >
+                        <i class="fas fa-bolt text-amber-500"></i> Web Vitals
+                      </span>
+                      <span
+                        class="inline-flex items-center gap-1 px-2 py-1 bg-white/80 rounded-md text-[10px] font-medium text-slate-600"
+                      >
+                        <i class="fas fa-bug text-red-500"></i> 错误追踪
+                      </span>
+                      <span
+                        class="inline-flex items-center gap-1 px-2 py-1 bg-white/80 rounded-md text-[10px] font-medium text-slate-600"
+                      >
+                        <i class="fas fa-users text-blue-500"></i> 用户分析
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Bottom spacer for comfortable scrolling -->
+          <div class="h-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div
+      class="px-5 py-3.5 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+        <span class="text-[11px] text-slate-400 font-medium">系统正常运行</span>
+      </div>
+      <span class="text-[11px] text-slate-300 font-mono">AihangSOP v1.0.0</span>
+    </div>
+  </div>
 </div>

@@ -247,7 +247,11 @@
     0 4px 24px rgba(102, 126, 234, 0.15),
     0 1px 3px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: text;
 }
 
@@ -315,7 +319,12 @@
   opacity: 0;
   visibility: hidden;
   transform: scale(0.8);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 0.25s;
   flex-shrink: 0;
 }
 
@@ -323,6 +332,7 @@
   opacity: 1;
   visibility: visible;
   transform: scale(1);
+  transition-delay: 0s;
 }
 
 .amzf_search_clear:hover {
@@ -390,7 +400,11 @@
   padding: 4px 10px;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   font-weight: 500;
 }
 
@@ -421,7 +435,10 @@
   border: 0;
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
   position: relative;
 }
 
@@ -460,7 +477,11 @@
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -505,7 +526,11 @@
   border: 0;
   border-radius: 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   font-weight: 500;
 }
 
@@ -625,7 +650,13 @@
   font-weight: 500;
   color: var(--color-slate-500);
   cursor: pointer;
-  transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
+  transition:
+    background-color var(--duration-normal, 300ms)
+      var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
+    color var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
+    box-shadow var(--duration-normal, 300ms)
+      var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
+    transform var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
   display: flex;
   align-items: center;
   gap: 8px;
@@ -656,7 +687,15 @@
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
+  transition:
+    background-color var(--duration-normal, 300ms)
+      var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
+    border-color var(--duration-normal, 300ms)
+      var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
+    color var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
+    box-shadow var(--duration-normal, 300ms)
+      var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
+    transform var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
   display: flex;
   align-items: center;
   gap: 8px;
@@ -783,7 +822,11 @@
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
+  transition:
+    border-color var(--duration-normal, 300ms)
+      var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
+    box-shadow var(--duration-normal, 300ms)
+      var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .amzf_month_section:hover {
@@ -803,7 +846,12 @@
   justify-content: space-between;
   text-align: left;
   user-select: none;
-  transition: all var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
+  transition:
+    background-color var(--duration-normal, 300ms)
+      var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
+    color var(--duration-normal, 300ms) var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)),
+    box-shadow var(--duration-normal, 300ms)
+      var(--ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .amzf_month_header:hover {

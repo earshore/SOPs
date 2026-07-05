@@ -137,7 +137,11 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition:
+    background-color var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
 }
 
 .modal-close:hover {

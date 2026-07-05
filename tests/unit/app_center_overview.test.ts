@@ -28,10 +28,13 @@ const overviewTemplate = `
     <button class="category-filter-btn bg-white text-slate-700 border border-slate-300" data-category="ppc_tools"></button>
     <section id="app-module-apps">
       <div class="app-center-card-grid">
-        <article data-category="master_analysis" data-search="master analysis 数据采集" data-action="switch-tab" data-tab="scraper">
+        <article data-category="master_analysis" data-search="master analysis 数据采集">
+          <button class="app-card-primary-link" data-action="switch-tab" data-tab="scraper"></button>
           <button class="app-child-link" data-action="switch-tab" data-tab="ai_analysis"></button>
         </article>
-        <article data-category="ppc_tools" data-search="ppc search term 广告" data-action="switch-tab" data-tab="ppc_search_terms"></article>
+        <article data-category="ppc_tools" data-search="ppc search term 广告">
+          <button class="app-card-primary-link" data-action="switch-tab" data-tab="ppc_search_terms"></button>
+        </article>
       </div>
       <div id="app-overview-empty" class="hidden"></div>
     </section>
@@ -67,17 +70,25 @@ describe('App Center Overview', () => {
     expect(container.querySelector('.app-overview-container')).not.toBeNull();
   });
 
-  it('leaves child links and app cards on delegated switch-tab routing', async () => {
+  it('keeps cards as containers and leaves entry buttons on delegated switch-tab routing', async () => {
     const container = document.createElement('div');
 
     await overviewModule.mount(container);
 
-    const appCard = container.querySelector<HTMLElement>('[data-tab="scraper"]');
+    const appCard = container.querySelector<HTMLElement>(
+      'article[data-category="master_analysis"]'
+    );
+    const primaryLink = container.querySelector<HTMLElement>(
+      '.app-card-primary-link[data-tab="scraper"]'
+    );
     const childLink = container.querySelector<HTMLElement>(
       '.app-child-link[data-tab="ai_analysis"]'
     );
 
-    expect(appCard?.dataset.action).toBe('switch-tab');
+    expect(appCard?.dataset.action).toBeUndefined();
+    expect(appCard?.getAttribute('role')).toBeNull();
+    expect(appCard?.getAttribute('tabindex')).toBeNull();
+    expect(primaryLink?.dataset.action).toBe('switch-tab');
     expect(childLink?.dataset.action).toBe('switch-tab');
     expect(childLink?.dataset.tab).toBe('ai_analysis');
     expect(childLink?.dataset.childTab).toBeUndefined();
@@ -89,11 +100,12 @@ describe('App Center Overview', () => {
     await overviewModule.mount(container);
     container.querySelector<HTMLElement>('[data-category="ppc_tools"]')?.click();
 
-    expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe(
-      'none'
-    );
     expect(
-      container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display
+      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.style
+        .display
+    ).toBe('none');
+    expect(
+      container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.style.display
     ).toBe('');
     expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
       '显示 1 个应用'
@@ -119,11 +131,12 @@ describe('App Center Overview', () => {
     searchInput.value = 'ppc';
     searchInput.dispatchEvent(new Event('input'));
 
-    expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe(
-      'none'
-    );
     expect(
-      container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display
+      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.style
+        .display
+    ).toBe('none');
+    expect(
+      container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.style.display
     ).toBe('');
     expect(clearSearchBtn.classList.contains('hidden')).toBe(false);
     expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
@@ -133,9 +146,12 @@ describe('App Center Overview', () => {
     clearSearchBtn.click();
 
     expect(searchInput.value).toBe('');
-    expect(container.querySelector<HTMLElement>('[data-tab="scraper"]')?.style.display).toBe('');
     expect(
-      container.querySelector<HTMLElement>('[data-tab="ppc_search_terms"]')?.style.display
+      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.style
+        .display
+    ).toBe('');
+    expect(
+      container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.style.display
     ).toBe('');
     expect(clearSearchBtn.classList.contains('hidden')).toBe(true);
   });
@@ -172,14 +188,26 @@ describe('App Center Overview', () => {
     expect(taskPathSection?.hasAttribute('open')).toBe(false);
   });
 
+  it('keeps real app cards non-interactive and exposes explicit entry buttons', () => {
+    const html = readFileSync(realOverviewTemplatePath, 'utf8');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+
+    expect(wrapper.querySelector('.app-overview-card[role="button"]')).toBeNull();
+    expect(wrapper.querySelector('.app-overview-card[tabindex]')).toBeNull();
+    expect(
+      wrapper.querySelectorAll('.app-card-primary-link[data-action="switch-tab"]')
+    ).toHaveLength(4);
+  });
+
   it('uses the current Keyword Hunter entry labels', () => {
     const html = readFileSync(realOverviewTemplatePath, 'utf8');
     const wrapper = document.createElement('div');
     wrapper.innerHTML = html;
 
-    const inputEntry = wrapper.querySelector('[data-tab="kw_input"]');
-    const processEntry = wrapper.querySelector('[data-tab="kw_process"]');
-    const analysisEntry = wrapper.querySelector('[data-tab="kw_analysis"]');
+    const inputEntry = wrapper.querySelector('.app-child-link[data-tab="kw_input"]');
+    const processEntry = wrapper.querySelector('.app-child-link[data-tab="kw_process"]');
+    const analysisEntry = wrapper.querySelector('.app-child-link[data-tab="kw_analysis"]');
 
     expect(inputEntry?.textContent).toContain('输入格式化');
     expect(processEntry?.textContent).toContain('SEO 处理');

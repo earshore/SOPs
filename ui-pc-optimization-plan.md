@@ -4,6 +4,90 @@
 > 推荐适配宽度：1366px、1440px、1536px、1920px。  
 > 主要场景：亚马逊运营人员在桌面浏览器中进行数据查看、SOP 管理、应用切换、系统配置与高频操作。
 
+## 执行批次与当前状态
+
+> 更新日期：2026-07-05
+
+### Batch 1：低风险 P1 消债（已执行）
+
+1. 应用中心卡片交互语义
+   - 状态：已调整。
+   - 范围：`src/modules/app_center/views/overview/template.html`、`src/modules/app_center/views/overview/index.ts`、`src/modules/app_center/app_center_style.css`。
+   - 验收：卡片不再承担 `role="button"`；主入口与子入口均为明确按钮；过滤逻辑改为基于卡片 `data-category`。
+
+2. 设置面板图标按钮可读名称
+   - 状态：已调整。
+   - 范围：`src/components/settings/systemSettings.html`、`src/components/settings/systemSettings.ts`。
+   - 验收：关闭按钮、LLM API Key 显隐按钮、采集网络 API Key 显隐按钮均有可读名称或动态标题。
+
+3. 低对比小字与禁用态
+   - 状态：已调整首批高频页面。
+   - 范围：`src/modules/sops/views/overview/template.html`、`src/modules/app_center/views/ppc_tools/style.css`、`src/modules/app_center/views/ppc_tools/ppc_search_terms/styles/style.results.toolbar.css`。
+   - 验收：SOPS 总览辅助说明从 `slate-400` 提升到 `slate-500`；PPC 主操作绿色加深；PPC 禁用导出/清除按钮文字加深。
+
+### Batch 2：PC 工作台结构优化（已执行）
+
+1. 首页首屏可见性
+   - 状态：已调整。
+   - 范围：`src/modules/home/homeDisplay.html`、`src/modules/home/homeDisplay.css`、`src/modules/home/homeDisplay.ts`。
+   - 验收：首屏 H1、副标题默认可见；路由挂载时禁用全局淡入包装；新增“SOP 流程中心 / 应用中心”两个明确入口。
+
+2. 设置面板 PC 双栏结构
+   - 状态：已调整。
+   - 范围：`src/components/settings/systemSettings.html`、`src/components/settings/systemSettings.css`、`src/components/settings/systemSettings.ts`。
+   - 验收：PC 面板宽度提升到 860px 上限；设置样式从模板内联 `<style>` 迁移到组件 CSS 并由 Vite 打包；运行时左侧分类导航直达模型、网络、本地数据、性能监控，右侧保留原表单和危险操作区域。
+
+3. 应用中心矩阵扫描效率
+   - 状态：已调整。
+   - 范围：`src/modules/app_center/app_center_style.css`。
+   - 验收：应用卡片等高；描述区高度更稳定；子入口固定在卡片底部工具条，Tab 顺序仍只经过可操作控件。
+
+### Batch 3：设计系统与主题收敛（进行中）
+
+1. 模态框接入组件令牌，减少 Shadow DOM 硬编码颜色。
+   - 状态：已完成首批。
+   - 范围：`src/components/modal/AppModal.ts`、`src/components/modal/AppModal.regression.test.ts`。
+   - 验收：`AppModal` Shadow DOM 定义 `--modal-*` 语义令牌；面板、标题、关闭按钮、滚动条和焦点环引用令牌；关闭按钮不再使用 `transition: all`。
+2. 收敛 `critical.css`、`variables.css`、`variables.generated.css` 的重复令牌。
+   - 状态：已完成首批 alias 层与关键路径去重。
+   - 范围：`src/css/critical.css`、`src/css/foundation/variables.css`、`src/css/components/buttons.css`、`src/css/components/header.css`、`src/css/utilities/containers.css`、`src/modules/app_center/app_center_style.css`、`src/modules/sops/sops_style.css`、`tests/unit/pc-design-token-css.test.ts`。
+   - 验收：`variables.generated.css` 继续先于手工变量层加载；`critical.css` 在首屏入口导入生成 token，不再复制基础色板和字体变量，只保留首屏缺失的轻量别名；手工变量层新增 PC 布局、卡片、面板、主按钮、模块 Accent 语义别名；主按钮读取 `--button-primary-*`；公共容器和 Header 内容宽度读取 `--layout-*` / `--page-gutter`；应用中心与 SOPS 总览不再局部覆盖 `--color-primary*`，改用 `--module-accent*`。
+3. 替换高频 `transition: all` 与布局属性动画。
+   - 状态：已完成本轮组件/工具层收敛。
+   - 范围：`src/css/foundation/variables.css`、`src/css/utilities/transitions.css`、`src/css/utilities/legacy-compat.css`、`src/css/components/buttons.css`、`src/css/components/badges.css`、`src/css/components/cards.css`、`src/css/components/icon-container.css`、`src/css/components/insight-cards.css`、`src/css/components/stat-cards.css`、`src/css/components/language-selector.css`、`src/css/components/timeline.css`、`src/css/components/tabs.css`、`src/css/components/modals.css`、`src/css/components/progress.css`、`src/css/components/toast.css`、`src/css/components/chat.css`、`src/css/components/markdown.css`、`src/css/components/header-main.css`、`tests/unit/pc-motion-css.test.ts`。
+   - 验收：`.smooth-transition`、`.smooth-transition-slow`、`.transition-all` 改为 `--transition-interactive-properties` 属性集合；通用按钮、徽章、公共卡片、图标容器、洞察/统计卡、语言切换、时间线、分类标签、modal close、进度步骤、toast 退出态、聊天输入、Markdown 内容、主 Header 和兼容层只过渡颜色、边框、阴影、透明度和 transform；`src/css/components`、`src/css/utilities` 与 `src/css/critical.css` 扫描无 `transition: all`。
+4. 建立 PC 端表格、列表、状态标签和按钮的统一扫描规格。
+   - 状态：已完成首批。
+   - 范围：`src/css/components/data-scan.css`、`src/css/main.css`、`tests/unit/pc-data-scan-css.test.ts`。
+   - 验收：主 CSS 入口加载 PC 数据扫描组件；标准表格行高 44px、紧凑行高 36px；提供数字列右对齐、列表项、工具栏、语义状态徽章和 PC 操作按钮规格。
+
+### Batch 4：模块级动效债务收敛（已执行）
+
+1. 清理业务模块私有 CSS 中的 `transition: all`。
+   - 状态：已完成。
+   - 范围：`src/modules/sops/sops_style.css`、`src/modules/amz_hub/amz_hub_style.css`、`src/modules/amz_hub/views/practice/promo_tools/styles.css`、`src/modules/amz_hub/views/practice/promo_activities/styles.css`、`src/modules/amz_hub/views/practice/marketing_calendar/styles.css`、`src/modules/more/views/explore/prompts/prompts_style.css`、`src/modules/app_center/views/master_analysis/master_analysis_style.css`、`src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css`、`src/modules/app_center/views/master_analysis/scraper/scraper_style.css`、`src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css`、`tests/unit/pc-motion-css.test.ts`。
+   - PC 端影响：这些页面是高频业务工作台，布局属性被默认动画化会增加 hover/focus 抖动风险，也会让长表格、工具卡、筛选器在大屏快速扫视时显得不稳定。
+   - 优化方案：按模块分批把 `transition: all` 替换为颜色、边框、阴影、透明度和 transform；对确实需要展开/收起高度动画的区域单独保留显式 `height` 或 `max-height`，并配套模块级静态测试。
+   - 验收：`src/modules`、`src/css/components`、`src/css/utilities` 与 `src/css/critical.css` 扫描无 `transition: all`；按钮、卡片、搜索框、可编辑输入、流程箭头、浮动窗、提示气泡和状态 Banner 只过渡颜色、边框、阴影、透明度和 transform；Scraper Tab 下划线由 `width` 动画改为 `transform: scaleX()`；`pc-motion-css.test.ts` 已锁定所有完成文件。
+
+### Batch 5：PC 高频弹层交互状态收敛（已执行）
+
+1. 收敛设置面板与共享确认弹层的 Hover / Focus / Active 反馈。
+   - 状态：已完成首批。
+   - 范围：`src/components/settings/systemSettings.html`、`src/components/modal/sharedModals.html`、`tests/unit/pc-motion-css.test.ts`。
+   - PC 端影响：设置抽屉、导入冲突确认和删除确认是桌面端高频弹层；`transition-all`、悬浮旋转、图标放大和按钮缩放会让鼠标扫过时反馈过重，也会让键盘焦点状态不够统一。
+   - 优化方案：将高频模板内的 `transition-all` 替换为 `transition`、`transition-colors`、`transition-shadow`、`transition-[width]` 等显式属性；关闭、显隐、危险操作、导入冲突选项等控件补齐 `focus-visible` ring；按钮按压反馈从 `active:scale-*` 改为 `active:translate-y-px`；导入冲突选项图标去掉 hover 放大。
+   - 验收：设置面板与共享确认弹层扫描无 `transition-all`、`hover:rotate`、`hover/group-hover/active:scale`；焦点态均保留 `focus-visible:ring-2`；`pc-motion-css.test.ts` 已锁定首批高频模板。
+
+### Batch 6：共享空状态与错误状态任务导向（已执行）
+
+1. 将全局 fallback 从“说明失败”调整为“说明原因 + 给出下一步”。
+   - 状态：已完成首批。
+   - 范围：`src/components/ErrorBoundary.ts`、`tests/unit/errorBoundary-ui.test.ts`。
+   - PC 端影响：模块加载失败、内容空状态、未注册模块和加载超时是桌面工作台的兜底体验；只显示“暂无内容 / 加载失败”会让用户不知道是重试、刷新、切换模块还是检查配置。
+   - 优化方案：错误边界增加原因说明、错误详情、重试加载、刷新页面和辅助排查说明；空状态改为标题、下一步说明和辅助提示；未注册模块说明可从顶部导航选择其他模块或确认路由；超时状态说明刷新会重新初始化应用状态；关键按钮补齐 `focus-visible` ring。
+   - 验收：新增单元测试锁定错误、空状态、未注册和超时四种 fallback 的任务导向文案、ARIA 状态和焦点态。
+
 ## 0. PC 端优化目标
 
 本轮优化不追求“大改风格”，而是让现有界面在 PC 工作台场景下更高效、更稳定、更一致：
@@ -191,6 +275,9 @@
 
 ### P2-04 Hover、Focus、Active 状态强度需要统一
 
+- **当前状态**
+  - 已完成首批高频弹层收敛：系统设置、导入冲突确认、删除确认。
+  - 仍需后续逐页处理 Prompt Lab、Scraper、Keyword Hunter 等更深业务模板，避免一次性大改带来回归风险。
 - **当前问题**
   - 不同组件的 Hover 有的变色、有的升起、有的放大、有的旋转。
 - **PC 端影响**
@@ -204,6 +291,9 @@
 
 ### P2-05 减少 `transition: all`，提升 PC 长页面稳定性
 
+- **当前状态**
+  - 公共 CSS、业务模块私有 CSS、设置面板与共享确认弹层模板已完成收敛。
+  - 深层业务 HTML 模板仍保留少量 Tailwind `transition-all`，后续按页面继续消债。
 - **当前问题**
   - 项目中存在 `transition: all` 工具类和局部布局属性动画。
 - **PC 端影响**
@@ -215,6 +305,9 @@
 
 ### P2-06 PC 端空状态与错误状态需要更任务导向
 
+- **当前状态**
+  - 全局 `ErrorBoundary`、通用空状态、未注册模块和超时 fallback 已完成首批任务导向改造。
+  - 业务页内私有空状态仍需按页面继续处理，例如 Prompt Lab 报告空状态、Scraper 历史/导入空状态、Keyword Hunter 结果空状态。
 - **当前问题**
   - 错误和空状态目前偏通用，如“功能开发中”“加载超时”等。
 - **PC 端影响**

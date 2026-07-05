@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount, unmount } from '@/modules/app_center/views/ppc_tools/ppc_search_terms/index';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import { showToast } from '@/common/ui/notifications';
 
 interface LlmMockRow {
@@ -39,6 +38,7 @@ interface LlmMockAgentResult {
 
 const mocks = vi.hoisted(() => ({
   analyzeWithAgent: vi.fn(),
+  loadTemplate: vi.fn(),
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   showToast: vi.fn(),
@@ -135,8 +135,12 @@ const mocks = vi.hoisted(() => ({
   `,
 }));
 
-vi.mock('@/common/utils/viewLoader', () => ({
-  loadTemplate: vi.fn(() => Promise.resolve(mocks.template)),
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
+  SafeTemplateLoader: {
+    getInstance: () => ({
+      loadTemplate: mocks.loadTemplate,
+    }),
+  },
 }));
 
 vi.mock('@/common/infrastructure/SafeRenderer', () => ({
@@ -208,6 +212,8 @@ beforeEach(async () => {
   mocks.storageGet.mockReturnValue({});
   mocks.storageSet.mockClear();
   mocks.showToast.mockClear();
+  mocks.loadTemplate.mockReset();
+  mocks.loadTemplate.mockResolvedValue(mocks.template);
   mocks.analyzeWithAgent.mockReset();
   mocks.analyzeWithAgent.mockImplementation(async ({ rows, onProgress }: LlmMockInput) => {
     const decisions = rows.map(row => ({
@@ -259,7 +265,7 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     container.querySelector<HTMLButtonElement>('[data-filter="scale_budget"]')?.click();
     container.querySelector<HTMLButtonElement>('#ppc-export-current')?.click();
 
-    expect(loadTemplate).toHaveBeenCalledWith(
+    expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/app_center/views/ppc_tools/ppc_search_terms/template.html'
     );
     expect(mocks.analyzeWithAgent).toHaveBeenCalled();

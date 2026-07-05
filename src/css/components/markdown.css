@@ -107,7 +107,9 @@
   display: flex;
   align-items: center;
   background: none;
-  transition: all 0.2s ease;
+  transition-property: border-color, color, background-color, transform;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
 }
 
 /* H3 类型着色 */
@@ -130,7 +132,7 @@
 }
 
 .markdown-content h3:hover {
-  padding-left: 1rem;
+  transform: translateX(2px);
 }
 
 /* ========================================
@@ -148,7 +150,9 @@
   font-size: 0.925rem;
   line-height: 1.75;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+  transition-property: box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
   position: relative;
 }
 
@@ -281,7 +285,9 @@
   font-size: 0.9rem;
   color: #475569;
   line-height: 1.7;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-property: box-shadow, transform;
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .markdown-content li:hover {

@@ -1,6 +1,6 @@
 import BaseModule from '../../../../../common/BaseModule';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '../../../../../common/utils/security';
-import templateHTML from './template.html?raw';
 import './styles.css';
 
 interface ContentItem {
@@ -800,7 +800,10 @@ class PromotionsModule extends BaseModule {
     const container = this.container;
     if (!container) return;
 
-    setSafeHtml(container, templateHTML);
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/amz_hub/views/practice/promo_tools/template.html'
+    );
+    setSafeHtml(container, html);
     container.classList.add('fade-in');
   }
 

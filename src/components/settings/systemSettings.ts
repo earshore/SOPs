@@ -3,6 +3,7 @@
 // 🎯 Phase 3: Alpine.js Refactor (TypeScript版本)
 // ================================================================
 
+import './systemSettings.css';
 import { escapeHtml, setSafeHtml } from '../../common/utils/security';
 import {
   DEFAULT_LLM_PROVIDER_ID,
@@ -91,6 +92,7 @@ interface SettingsPanelData {
   proxyInputPlaceholder: string;
   llmApiKeyInputType: string;
   llmApiKeyIconClass: string;
+  llmApiKeyVisibilityLabel: string;
   modelSelectDisabled: boolean;
   fetchModelsIconClass: string;
   fetchModelsText: string;
@@ -101,6 +103,7 @@ interface SettingsPanelData {
   testConnectionText: string;
   proxyInputType: string;
   proxyKeyIconClass: string;
+  proxyKeyVisibilityLabel: string;
   proxyHintText: string;
   localSecretBoundaryText: string;
   localStorageUsedText: string;
@@ -659,6 +662,10 @@ const settingsPanelBehavior: SettingsPanelPart = {
     return this.llm.showKey ? 'fa-eye-slash' : 'fa-eye';
   },
 
+  get llmApiKeyVisibilityLabel(): string {
+    return this.llm.showKey ? '隐藏 LLM API Key' : '显示 LLM API Key';
+  },
+
   get modelSelectDisabled(): boolean {
     return this.llm.models.length === 0;
   },
@@ -711,6 +718,10 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   get proxyKeyIconClass(): string {
     return this.proxy.showKey ? 'fa-eye-slash' : 'fa-eye';
+  },
+
+  get proxyKeyVisibilityLabel(): string {
+    return this.proxy.showKey ? '隐藏采集网络 API Key' : '显示采集网络 API Key';
   },
 
   get proxyHintText(): string {

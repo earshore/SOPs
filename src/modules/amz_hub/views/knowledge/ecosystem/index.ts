@@ -4,8 +4,8 @@
 
 import BaseModule from '../../../../../common/BaseModule';
 import { A10_CHART_DATA } from '../../../constants/amz_hub_constants';
-import templateHTML from './template.html?raw';
 import './styles.css';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { loadChartJs, type ChartJS } from '../../../../../common/utils/lazyLibs';
 import { setSafeHtml } from '../../../../../common/utils/security';
 
@@ -30,7 +30,10 @@ class EcosystemModule extends BaseModule {
     if (!container) return;
 
     // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(container, templateHTML);
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/amz_hub/views/knowledge/ecosystem/template.html'
+    );
+    setSafeHtml(container, html);
     container.classList.add('fade-in');
   }
 

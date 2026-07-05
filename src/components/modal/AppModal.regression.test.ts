@@ -81,6 +81,18 @@ describe('AppModal regression visibility', () => {
     expect(container.hasAttribute('hidden')).toBe(true);
   });
 
+  it('uses modal theme tokens instead of hard-coded panel and control styles', () => {
+    const modal = createHeaderModal('令牌检查');
+    const styleText = modal.shadowRoot?.querySelector('style')?.textContent ?? '';
+
+    expect(styleText).toContain('--modal-bg: var(--surface-panel');
+    expect(styleText).toContain('background: var(--modal-bg)');
+    expect(styleText).toContain('color: var(--modal-text-primary)');
+    expect(styleText).toContain('box-shadow: var(--modal-panel-shadow)');
+    expect(styleText).toContain('background-color 0.2s');
+    expect(styleText).not.toContain('transition: all 0.2s');
+  });
+
   it('removes and restores native hidden state across open and close', () => {
     vi.useFakeTimers();
     const modal = createModal();

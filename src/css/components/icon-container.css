@@ -22,7 +22,11 @@
   justify-content: center;
   flex-shrink: 0;
   font-size: 1.25rem;
-  transition: all var(--duration-normal, 300ms) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal, 300ms) var(--ease-smooth),
+    color var(--duration-normal, 300ms) var(--ease-smooth),
+    box-shadow var(--duration-normal, 300ms) var(--ease-smooth),
+    transform var(--duration-normal, 300ms) var(--ease-smooth);
   position: relative;
 }
 

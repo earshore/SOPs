@@ -103,7 +103,11 @@
   background: var(--color-bg-secondary);
   font-size: var(--text-sm);
   color: var(--color-text-tertiary);
-  transition: all 0.4s var(--ease-smooth);
+  transition:
+    background-color 0.4s var(--ease-smooth),
+    color 0.4s var(--ease-smooth),
+    box-shadow 0.4s var(--ease-smooth),
+    transform 0.4s var(--ease-smooth);
 }
 
 .progress-step .step-indicator {

@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { cwd } from 'node:process';
 import { MENU_CONFIG } from '@/common/config/menuConfig';
 import { BUSINESS_ROUTE_MANIFESTS, ROUTE_MANIFESTS } from '@/common/config/routeManifests';
 import { buildModuleMap, buildModuleMapFromLoaderPaths } from '@/common/config/moduleManifest';
@@ -41,6 +44,23 @@ describe('module manifests', () => {
       expect(Object.keys(buildModuleMapFromLoaderPaths(manifest, loaders))).toEqual(
         routesWithLoaders
       );
+    }
+  });
+
+  it('keeps business module loaders generated from manifest loader paths', () => {
+    const loaderFiles = [
+      'src/modules/app_center/module.loaders.ts',
+      'src/modules/sops/module.loaders.ts',
+      'src/modules/amz_hub/module.loaders.ts',
+      'src/modules/more/module.loaders.ts',
+    ];
+
+    for (const file of loaderFiles) {
+      const content = readFileSync(join(cwd(), file), 'utf8');
+
+      expect(content).toContain("import.meta.glob('./views/**/index.ts')");
+      expect(content).toContain('buildModuleMapFromLoaderPaths');
+      expect(content).not.toMatch(/export\s+const\s+MODULE_MAP\s*=\s*\{/);
     }
   });
 

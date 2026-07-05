@@ -71,9 +71,9 @@
 
 .ppc-search-clear-btn:disabled {
   cursor: not-allowed;
-  border-color: #e2e8f0;
+  border-color: #cbd5e1;
   background: #f8fafc;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .ppc-export-btn {
@@ -101,9 +101,9 @@
 
 .ppc-export-btn:disabled {
   cursor: not-allowed;
-  border-color: #e2e8f0;
+  border-color: #cbd5e1;
   background: #f8fafc;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 @media (max-width: 640px) {

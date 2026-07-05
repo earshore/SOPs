@@ -13,12 +13,20 @@ import { randomBase36 } from '../common/utils/random';
 export interface ErrorBoundaryConfig {
   /** 错误标题 */
   title?: string;
+  /** 用户可理解的失败原因与处理方向 */
+  description?: string;
+  /** 辅助说明 */
+  helpText?: string;
   /** 主题颜色 */
   color?: string;
   /** 是否显示刷新按钮 */
   showReload?: boolean;
   /** 是否显示重试按钮 */
   showRetry?: boolean;
+  /** 重试按钮文案 */
+  retryLabel?: string;
+  /** 刷新按钮文案 */
+  reloadLabel?: string;
   /** 重试回调函数 */
   onRetry?: () => void;
 }
@@ -36,9 +44,13 @@ export function renderErrorBoundary(
 ): void {
   const {
     title = '模块加载失败',
+    description = '当前模块没有成功加载。请先重试加载；如果仍失败，刷新页面重新初始化应用状态。',
+    helpText = '若问题持续出现，请记录当前页面和操作路径后交给维护者排查。',
     color = 'red',
     showReload = true,
     showRetry = true,
+    retryLabel = '重试加载',
+    reloadLabel = '刷新页面',
     onRetry = null,
   } = config;
 
@@ -47,8 +59,8 @@ export function renderErrorBoundary(
   const reloadButton = showReload
     ? `
         <button data-action="reload-page-error" 
-            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
-            <i class="fas fa-redo mr-2"></i>刷新页面
+            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
+            <i class="fas fa-redo mr-2"></i>${escapeHtml(reloadLabel)}
         </button>
     `
     : '';
@@ -56,8 +68,8 @@ export function renderErrorBoundary(
   const retryButton = showRetry
     ? `
         <button id="btn-retry-${errorId}"
-            class="px-4 py-2 bg-${color}-600 hover:bg-${color}-700 text-white rounded-lg text-sm font-medium transition-colors">
-            再试一次
+            class="px-4 py-2 bg-${color}-600 hover:bg-${color}-700 text-white rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-${color}-500 focus-visible:ring-offset-2">
+            ${escapeHtml(retryLabel)}
         </button>
     `
     : '';
@@ -66,16 +78,18 @@ export function renderErrorBoundary(
   setSafeHtml(
     container,
     `
-        <div class="error-boundary flex flex-col items-center justify-center p-12 text-center fade-in">
+        <div class="error-boundary flex flex-col items-center justify-center p-12 text-center fade-in" role="alert" aria-live="assertive">
             <div class="w-16 h-16 rounded-full bg-${escapeHtml(color)}-50 flex items-center justify-center mb-4">
                 <i class="fas fa-exclamation-triangle text-2xl text-${escapeHtml(color)}-500"></i>
             </div>
             <h3 class="text-lg font-bold text-slate-800 mb-2">${escapeHtml(title)}</h3>
-            <p class="text-sm text-slate-500 mb-4 max-w-md">${escapeHtml(error.message || '网络连接不稳定或文件缺失')}</p>
+            <p class="text-sm text-slate-600 mb-2 max-w-md">${escapeHtml(description)}</p>
+            <p class="text-xs text-slate-500 mb-4 max-w-md break-words">错误详情：${escapeHtml(error.message || '网络连接不稳定或文件缺失')}</p>
             <div class="flex gap-3">
                 ${reloadButton}
                 ${retryButton}
             </div>
+            <p class="mt-4 max-w-md text-xs leading-relaxed text-slate-400">${escapeHtml(helpText)}</p>
         </div>
     `
   );
@@ -141,11 +155,13 @@ export function renderEmpty(
   setSafeHtml(
     container,
     `
-        <div class="flex flex-col items-center justify-center p-12 text-center">
+        <div class="flex flex-col items-center justify-center p-12 text-center" role="status">
             <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
                 <i class="fas ${escapeHtml(icon)} text-2xl text-slate-400"></i>
             </div>
-            <p class="text-sm text-slate-500">${escapeHtml(message)}</p>
+            <h3 class="text-base font-bold text-slate-800 mb-2">${escapeHtml(message)}</h3>
+            <p class="max-w-md text-sm text-slate-500">完成导入、筛选或配置后，这里会显示对应结果。</p>
+            <p class="mt-2 max-w-md text-xs text-slate-400">如果你刚完成操作，请重新执行当前任务或刷新当前模块。</p>
         </div>
     `
   );
@@ -165,8 +181,9 @@ export function renderNotRegistered(container: HTMLElement, routeId: string): vo
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 mb-4">
                 <i class="fas fa-tools text-2xl text-amber-500"></i>
             </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">功能开发中</h3>
-            <p class="text-sm text-slate-500">模块 [${escapeHtml(routeId)}] 尚未开发或未注册</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">功能暂未开放</h3>
+            <p class="text-sm text-slate-500">模块 [${escapeHtml(routeId)}] 尚未开发或未注册。</p>
+            <p class="mt-2 text-xs text-slate-400">请从顶部导航选择其他可用模块，或联系维护者确认路由配置。</p>
         </div>
     `
   );
@@ -186,9 +203,10 @@ export function renderTimeout(container: HTMLElement): void {
                 <i class="fas fa-clock text-2xl text-orange-500"></i>
             </div>
             <h3 class="text-lg font-bold text-slate-800 mb-2">加载超时</h3>
-            <p class="text-sm text-slate-500 mb-4">内容容器加载超时，请刷新重试</p>
+            <p class="text-sm text-slate-500 mb-2">内容容器没有在预期时间内就绪。</p>
+            <p class="text-xs text-slate-400 mb-4">刷新页面会重新初始化应用状态，适合网络波动或路由切换后卡住的情况。</p>
             <button data-action="reload-page-timeout"
-                class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors">
+                class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2">
                 <i class="fas fa-redo mr-2"></i>刷新页面
             </button>
         </div>

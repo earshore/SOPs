@@ -12,6 +12,7 @@
 import { marked } from 'marked';
 import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import BaseModule from '../../../../../common/BaseModule';
 import { showToast } from '../../../../../common/ui';
 import * as KeywordService from '../services/trackerService';
 import { appStore } from '@/stores/useAppStore';
@@ -1029,58 +1030,83 @@ function setupEventListeners(container: HTMLElement): void {
 // Module Exports (统一架构接口)
 // ==========================================
 
-/**
- * 挂载子模块
- */
-export async function mount(container: HTMLElement): Promise<void> {
-  try {
-    analysisViewVersion += 1;
-    const loader = SafeTemplateLoader.getInstance();
-    const renderer = SafeRenderer.getInstance();
+class KeywordHunterAnalysisModule extends BaseModule {
+  constructor() {
+    super('keyword_hunter_analysis');
+  }
 
-    const html = await loader.loadTemplate(
-      'src/modules/app_center/views/keyword_hunter/analysis/template.html',
-      {
-        retryCount: 3,
-        timeout: 5000,
-        onError: error => {
-          ErrorService.handle(error as Error, {
-            action: 'loadAnalysisTemplate',
-            module: 'keywordAnalysis',
-            notify: false,
-          });
-        },
-      }
-    );
+  protected async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
 
-    container.classList.add('fade-in');
-    renderer.renderTemplate(container, html);
+    try {
+      analysisViewVersion += 1;
+      const loader = SafeTemplateLoader.getInstance();
+      const renderer = SafeRenderer.getInstance();
 
-    setupEventListeners(container);
-    await restoreAnalysisStateFromState();
-  } catch (error) {
-    ErrorService.handle(error as Error, {
-      action: 'mountAnalysisModule',
-      module: 'keywordAnalysis',
-      notify: false,
-    });
-    throw error;
+      const html = await loader.loadTemplate(
+        'src/modules/app_center/views/keyword_hunter/analysis/template.html',
+        {
+          retryCount: 3,
+          timeout: 5000,
+          onError: error => {
+            ErrorService.handle(error as Error, {
+              action: 'loadAnalysisTemplate',
+              module: 'keywordAnalysis',
+              notify: false,
+            });
+          },
+        }
+      );
+
+      container.classList.add('fade-in');
+      renderer.renderTemplate(container, html);
+    } catch (error) {
+      ErrorService.handle(error as Error, {
+        action: 'mountAnalysisModule',
+        module: 'keywordAnalysis',
+        notify: false,
+      });
+      throw error;
+    }
+  }
+
+  protected async init(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
+    try {
+      setupEventListeners(container);
+      await restoreAnalysisStateFromState();
+    } catch (error) {
+      ErrorService.handle(error as Error, {
+        action: 'mountAnalysisModule',
+        module: 'keywordAnalysis',
+        notify: false,
+      });
+      throw error;
+    }
+  }
+
+  protected onUnmount(): void {
+    try {
+      analysisViewVersion += 1;
+      saveAnalysisStateToState();
+      cleanup();
+    } catch (error) {
+      ErrorService.handle(error as Error, {
+        action: 'unmountAnalysisModule',
+        module: 'keywordAnalysis',
+        notify: false,
+      });
+    }
   }
 }
 
-/**
- * 卸载子模块
- */
-export function unmount(): void {
-  try {
-    analysisViewVersion += 1;
-    saveAnalysisStateToState();
-    cleanup();
-  } catch (error) {
-    ErrorService.handle(error as Error, {
-      action: 'unmountAnalysisModule',
-      module: 'keywordAnalysis',
-      notify: false,
-    });
-  }
-}
+const keywordHunterAnalysisModule = new KeywordHunterAnalysisModule();
+
+export const mount = (container: HTMLElement): Promise<void> =>
+  keywordHunterAnalysisModule.mount(container);
+export const unmount = (): void => {
+  keywordHunterAnalysisModule.unmount();
+};

@@ -3,11 +3,11 @@ import { updateUIForRoute } from '@/common/ui/navigation';
 import { ensureViewLoaded } from '@/common/utils/viewLoader';
 
 vi.mock('@/common/utils/viewLoader', () => ({
-  ensureViewLoaded: vi.fn().mockResolvedValue(undefined)
+  ensureViewLoaded: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('@/common/ui/notifications', () => ({
-  showToast: vi.fn()
+  showToast: vi.fn(),
 }));
 
 describe('navigation page enter animation', () => {
@@ -27,15 +27,15 @@ describe('navigation page enter animation', () => {
     vi.clearAllMocks();
   });
 
-  it('applies the page enter animation when the home panel is shown', async () => {
+  it('shows the home panel without delaying first-screen content', async () => {
     const homePanel = document.getElementById('panel-home') as HTMLElement;
 
     await updateUIForRoute('home');
 
     expect(ensureViewLoaded).toHaveBeenCalledWith('home');
     expect(homePanel.classList.contains('hidden')).toBe(false);
-    expect(homePanel.classList.contains('view-fade-in-initial')).toBe(true);
-    expect(homePanel.classList.contains('view-fade-in')).toBe(true);
+    expect(homePanel.classList.contains('view-fade-in-initial')).toBe(false);
+    expect(homePanel.classList.contains('view-fade-in')).toBe(false);
     expect(document.body.classList.contains('home-shell-active')).toBe(false);
   });
 

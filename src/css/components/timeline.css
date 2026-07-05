@@ -47,7 +47,11 @@
   background: var(--color-blue-500, #3b82f6);
   border: 3px solid white;
   box-shadow: 0 0 0 2px var(--color-blue-500, #3b82f6);
-  transition: all var(--duration-normal, 300ms) var(--ease-smooth);
+  transition:
+    background-color var(--duration-normal, 300ms) var(--ease-smooth),
+    border-color var(--duration-normal, 300ms) var(--ease-smooth),
+    box-shadow var(--duration-normal, 300ms) var(--ease-smooth),
+    transform var(--duration-normal, 300ms) var(--ease-smooth);
 }
 
 /* 节点悬停效果 */

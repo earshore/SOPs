@@ -75,7 +75,10 @@
 .amzpt_dual_card--link {
   appearance: none;
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
 }
 
 .amzpt_dual_card--link:hover {
@@ -221,7 +224,10 @@
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
   text-decoration: none;
-  transition: all 0.22s ease;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
   overflow: visible;
 }
 
@@ -288,7 +294,9 @@
   color: #ffffff;
   background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.2);
-  transition: all 0.22s ease;
+  transition:
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
 }
 
 .amzpt_nav_step:nth-child(4n + 2) .amzpt_nav_step_no {
@@ -464,7 +472,10 @@
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--color-slate-200);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
-  transition: all 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   min-height: 100%;
 }
 

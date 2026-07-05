@@ -1,6 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { mount, unmount } from '@/modules/more/views/explore/prompts';
-import { loadTemplate } from '@/common/utils/viewLoader';
 import { showToast } from '@/common/ui';
 
 const promptMocks = vi.hoisted(() => {
@@ -30,8 +29,12 @@ const promptMocks = vi.hoisted(() => {
   };
 });
 
-vi.mock('@/common/utils/viewLoader', () => ({
-  loadTemplate: promptMocks.loadTemplate,
+vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
+  SafeTemplateLoader: {
+    getInstance: () => ({
+      loadTemplate: promptMocks.loadTemplate,
+    }),
+  },
 }));
 
 vi.mock('@/common/ui', () => ({
@@ -65,9 +68,8 @@ beforeEach(() => {
   it('mounts template content, renders categories, and lists prompt cards', async () => {
     const container = await mountPrompts();
 
-    expect(loadTemplate).toHaveBeenCalledWith(
-      '/src/modules/more/views/explore/prompts/template.html',
-      { disableFadeIn: true }
+    expect(promptMocks.loadTemplate).toHaveBeenCalledWith(
+      'src/modules/more/views/explore/prompts/template.html'
     );
     expect(container.classList.contains('fade-in')).toBe(true);
     expect(container.querySelector('#category-container')?.textContent).toContain('全部');

@@ -111,9 +111,9 @@
   align-items: center;
   justify-content: space-between;
   height: var(--header-height);
-  max-width: var(--container-2xl, 1450px);
+  max-width: var(--layout-max-width, var(--container-2xl, 1450px));
   margin: 0 auto;
-  padding: 0 var(--spacing-md, 16px);
+  padding: 0 var(--page-gutter, var(--spacing-md, 16px));
 }
 
 /* 小屏幕高度调整 */

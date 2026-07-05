@@ -99,7 +99,7 @@
         "ci:security": "npm run xss:gate && npm run circular:check",
         "ci:test-quality": "npm run type-check:tests && npm run lint:tests",
         "ci:format": "npm run format:check",
-        "ci:quality": "npm run type-check && npm run lint && npm run lint:warning-gate && npm run ci:test-quality && npm run ci:format",
+        "ci:quality": "npm run architecture:audit && npm run type-check && npm run lint && npm run lint:warning-gate && npm run ci:test-quality && npm run ci:format",
         "ci:all": "npm run ci:security && npm run ci:quality && npm run build:app"
     },
     "devDependencies": {

@@ -9,6 +9,7 @@
  * - 已迁移到新架构（系统稳定性优化）
  */
 
+import BaseModule from '../../../../../common/BaseModule';
 import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import {
@@ -834,11 +835,15 @@ declare global {
   }
 }
 
-/**
- * 挂载模块
- */
-export async function mount(container: HTMLElement): Promise<void> {
-  try {
+class NpiTrackerModule extends BaseModule {
+  constructor() {
+    super('sops_npi_tracker');
+  }
+
+  protected async render(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
     // 1. 使用 SafeTemplateLoader 加载模板
     const loader = SafeTemplateLoader.getInstance();
     const renderer = SafeRenderer.getInstance();
@@ -859,6 +864,11 @@ export async function mount(container: HTMLElement): Promise<void> {
     container.classList.add('fade-in');
     moveNextStepModalToBody(container);
     restoreReviewOwner();
+  }
+
+  protected async init(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
 
     // 3. 注册全局操作
     const npiTrackerActions: Record<string, (...args: unknown[]) => void> = {
@@ -876,30 +886,33 @@ export async function mount(container: HTMLElement): Promise<void> {
     setupFilterEventDelegation(container);
 
     // 4. 初始化表格（延迟渲染，确保 DOM 就绪）
-    setTimeout(() => {
+    this.setTimeout(() => {
       renderTable();
     }, 100);
-  } catch (error) {
-    console.error('[NPITracker] ❌ 模块挂载失败:', error);
-    throw error;
   }
-}
 
-/**
- * 卸载模块
- */
-export function unmount(): void {
-  try {
-    // 1. 清理注册的动作
-    if (registeredActions.length > 0) {
-      unregisterActions(registeredActions);
-      registeredActions = [];
+  protected onUnmount(): void {
+    try {
+      // 1. 清理注册的动作
+      if (registeredActions.length > 0) {
+        unregisterActions(registeredActions);
+        registeredActions = [];
+      }
+
+      removeFilterListener?.();
+
+      // 2. 重置表格数据
+      tableData = [...SAMPLE_DATA];
+      removeNextStepModalFromBody();
+    } catch (error) {
+      console.error('[NPITracker] ❌ 模块卸载失败:', error);
     }
-
-    // 2. 重置表格数据
-    tableData = [...SAMPLE_DATA];
-    removeNextStepModalFromBody();
-  } catch (error) {
-    console.error('[NPITracker] ❌ 模块卸载失败:', error);
   }
 }
+
+const npiTrackerModule = new NpiTrackerModule();
+
+export const mount = (container: HTMLElement): Promise<void> => npiTrackerModule.mount(container);
+export const unmount = (): void => {
+  npiTrackerModule.unmount();
+};

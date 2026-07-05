@@ -3,9 +3,9 @@
  */
 
 import BaseModule from '../../../../../common/BaseModule';
+import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '../../../../../common/utils/security';
 import './styles.css';
-import templateHTML from './template.html?raw';
 
 // Module class
 class NewProduct30DaysModule extends BaseModule {
@@ -17,7 +17,10 @@ class NewProduct30DaysModule extends BaseModule {
     if (!container) return;
 
     // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(container, templateHTML);
+    const html = await SafeTemplateLoader.getInstance().loadTemplate(
+      'src/modules/amz_hub/views/advanced/new_product_30days/template.html'
+    );
+    setSafeHtml(container, html);
     container.classList.add('fade-in');
   }
 }
