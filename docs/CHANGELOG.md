@@ -26,6 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.21] - 2026-07-05
+
+### Added
+- 新增 async DI、`loaderPath` API 与 SafeTemplateLoader。
+- 新增页面架构审计、预发布检查文档和模板实现指南。
+- 新增 PC 端设计 token、动效 CSS 和页面架构收敛测试。
+
+### Changed
+- 收敛 PC 端模块、模板、空状态和概览列表视图。
+- 为模板按钮补充显式类型、ARIA 和可访问性测试覆盖。
+- 同步应用内版本显示到 `3.0.3-rc.21`。
+
+### Fixed
+- 修复模块错误处理、卸载流程、Loader 和 StorageService 安全性。
+
 ## [3.0.3-rc.20] - 2026-07-05
 
 ### Added
