@@ -51,6 +51,24 @@ function readMarketingCalendarTemplate(): string {
   );
 }
 
+function readAppModalSource(): string {
+  return readFileSync(join(process.cwd(), 'src/components/modal/AppModal.ts'), 'utf8');
+}
+
+function readRestrictedWordsTemplate(): string {
+  return readFileSync(
+    join(process.cwd(), 'src/modules/sops/views/growth/restricted_words/template.html'),
+    'utf8'
+  );
+}
+
+function readRestrictedWordsEntry(): string {
+  return readFileSync(
+    join(process.cwd(), 'src/modules/sops/views/growth/restricted_words/index.ts'),
+    'utf8'
+  );
+}
+
 function readVercelCsp(): string {
   const vercelConfig = JSON.parse(
     readFileSync(join(process.cwd(), 'vercel.json'), 'utf8')
@@ -97,12 +115,31 @@ describe('apiEndpoints CSP policy', () => {
     }
   });
 
+  it('keeps style elements strict while isolating inline style attributes', () => {
+    for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
+      const styleSrc = extractCspDirective(csp, 'style-src');
+      const styleSrcElem = extractCspDirective(csp, 'style-src-elem');
+      const styleSrcAttr = extractCspDirective(csp, 'style-src-attr');
+
+      expect(styleSrc).toBe("'self' https://cdn.jsdelivr.net");
+      expect(styleSrcElem).toBe("'self' https://cdn.jsdelivr.net");
+      expect(styleSrcAttr).toBe("'unsafe-inline'");
+      expect(styleSrc).not.toContain("'unsafe-inline'");
+      expect(styleSrcElem).not.toContain("'unsafe-inline'");
+    }
+
+    expect(readAppModalSource()).not.toContain("createElement('style')");
+    expect(readRestrictedWordsTemplate()).not.toContain('<style');
+    expect(readRestrictedWordsEntry()).toContain("import './styles.css';");
+  });
+
   it('bundles Font Awesome locally instead of loading it from bootcdn', () => {
     expect(readIndexHtml()).not.toContain('cdn.bootcdn.net');
     expect(readMainEntry()).toContain('@fortawesome/fontawesome-free/css/all.min.css');
 
     for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
       expect(extractCspDirective(csp, 'style-src')).not.toContain('cdn.bootcdn.net');
+      expect(extractCspDirective(csp, 'style-src-elem')).not.toContain('cdn.bootcdn.net');
       expect(extractCspDirective(csp, 'font-src')).not.toContain('cdn.bootcdn.net');
     }
   });
@@ -113,6 +150,7 @@ describe('apiEndpoints CSP policy', () => {
 
     for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
       expect(extractCspDirective(csp, 'style-src')).not.toContain('fonts.googleapis.com');
+      expect(extractCspDirective(csp, 'style-src-elem')).not.toContain('fonts.googleapis.com');
       expect(extractCspDirective(csp, 'font-src')).not.toContain('fonts.gstatic.com');
     }
   });

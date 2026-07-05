@@ -99,6 +99,11 @@ declare module '*.css' {
   export default content;
 }
 
+declare module '*.css?url' {
+  const url: string;
+  export default url;
+}
+
 // 图片模块
 declare module '*.png' {
   const src: string;

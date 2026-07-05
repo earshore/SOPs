@@ -56,6 +56,10 @@ function getModalPanel(modal: TestModalElement): HTMLElement {
   return panel as HTMLElement;
 }
 
+function readModalStyles(): string {
+  return readFileSync('src/components/modal/AppModal.css', 'utf8');
+}
+
 afterEach(() => {
   vi.useRealTimers();
   document.body.replaceChildren();
@@ -70,20 +74,24 @@ describe('AppModal regression visibility', () => {
     body.textContent = 'This content must stay hidden while the modal is closed';
     modal.appendChild(body);
 
-    const style = modal.shadowRoot?.querySelector('style');
+    const stylesheet = modal.shadowRoot?.querySelector('link[rel="stylesheet"]');
     const container = getModalContainer(modal);
+    const styleText = readModalStyles();
+    const source = readFileSync('src/components/modal/AppModal.ts', 'utf8');
 
-    expect(style).toBeInstanceOf(HTMLStyleElement);
-    expect(style?.textContent).toContain('.hidden');
-    expect(style?.textContent).toContain('.modal-container[hidden]');
-    expect(style?.textContent).toContain('.modal-container.is-open');
+    expect(stylesheet).toBeInstanceOf(HTMLLinkElement);
+    expect(modal.shadowRoot?.querySelector('style')).toBeNull();
+    expect(source).toContain("import modalStylesUrl from './AppModal.css?url';");
+    expect(styleText).toContain('.hidden');
+    expect(styleText).toContain('.modal-container[hidden]');
+    expect(styleText).toContain('.modal-container.is-open');
     expect(container.classList.contains('hidden')).toBe(true);
     expect(container.hasAttribute('hidden')).toBe(true);
   });
 
   it('uses modal theme tokens instead of hard-coded panel and control styles', () => {
-    const modal = createHeaderModal('令牌检查');
-    const styleText = modal.shadowRoot?.querySelector('style')?.textContent ?? '';
+    createHeaderModal('令牌检查');
+    const styleText = readModalStyles();
 
     expect(styleText).toContain('--modal-bg: var(--surface-panel');
     expect(styleText).toContain('background: var(--modal-bg)');

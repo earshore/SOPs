@@ -13,6 +13,7 @@ import {
 import { StorageService } from '../../../../../services/storageService';
 import { copyTextToClipboard } from '../../../utils/clipboard';
 import { cleanupRestrictedWordsPanel, initRestrictedWordsPanel } from './restrictedWordsHandler';
+import './styles.css';
 
 const REVIEW_OWNER_STORAGE_KEY = 'restricted_words_owner_v1';
 const DEFAULT_REVIEW_OWNER = '合规负责人/运营负责人';
