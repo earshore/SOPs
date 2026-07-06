@@ -143,7 +143,7 @@ class DeepChatModule extends BaseModule {
 
     threadStore = applyPendingRequestsToThreadStore(await loadThreadStore());
     renderThreadList(this.container, threadStore, pendingRequests);
-    renderPromptDraftList(this.container);
+    renderPromptDraftsForActiveThread(this.container);
 
     await ensureDeepChatElementDefined();
     initDeepChat(this.container);
@@ -195,6 +195,7 @@ export async function clearPlaygroundThreadStore(): Promise<void> {
   }
 
   renderThreadList(container, threadStore, pendingRequests);
+  renderPromptDraftsForActiveThread(container);
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
   syncPendingStatus(container);
@@ -515,19 +516,15 @@ function syncSubmitStopButtonState(container: HTMLElement): void {
   button.title = label;
 }
 
-function syncStopOverlayState(container: HTMLElement, isPending: boolean): void {
+function syncStopOverlayState(container: HTMLElement, _isPending: boolean): void {
   const stopButton = container.querySelector<HTMLButtonElement>('#playground-stop-generation');
   if (!stopButton) {
     return;
   }
 
-  stopButton.hidden = !isPending;
-  stopButton.disabled = !isPending;
-  if (isPending) {
-    stopButton.dataset.threadId = threadStore.activeThreadId;
-  } else {
-    delete stopButton.dataset.threadId;
-  }
+  stopButton.hidden = true;
+  stopButton.disabled = true;
+  delete stopButton.dataset.threadId;
 }
 
 function bindControls(container: HTMLElement): void {
@@ -690,7 +687,7 @@ function bindThreadControls(
   setupPromptPreview(container, promptList, cleanup => cleanupCallbacks.push(cleanup));
 
   const unsubscribePromptDrafts = appStore.subscribe(() => {
-    renderPromptDraftList(container);
+    renderPromptDraftsForActiveThread(container);
   });
   cleanupCallbacks.push(unsubscribePromptDrafts);
 }
@@ -804,6 +801,7 @@ function openChatSearchModal(container: HTMLElement): void {
   }
 
   saveActiveThreadDraft(container);
+  positionChatSearchModal(container, refs.modal);
   refs.input.value = '';
   renderChatSearchResults(container);
   refs.modal.hidden = false;
@@ -816,6 +814,19 @@ function openChatSearchModal(container: HTMLElement): void {
     refs.input.focus();
     refs.input.select();
   }, 0);
+}
+
+function positionChatSearchModal(container: HTMLElement, modal: HTMLElement): void {
+  const main = container.querySelector<HTMLElement>('.playground-main');
+  const rect = main?.getBoundingClientRect();
+  if (!rect || rect.width <= 0 || rect.height <= 0) {
+    modal.style.removeProperty('--playground-chat-search-left');
+    modal.style.removeProperty('--playground-chat-search-top');
+    return;
+  }
+
+  modal.style.setProperty('--playground-chat-search-left', `${rect.left + rect.width / 2}px`);
+  modal.style.setProperty('--playground-chat-search-top', `${rect.top + rect.height / 2}px`);
 }
 
 function closeChatSearchModal(container: HTMLElement): void {
@@ -1447,13 +1458,17 @@ function getChat(container: HTMLElement): DeepChatElement | null {
 
 function createThread(container: HTMLElement, options: CreateThreadOptions = {}): void {
   saveActiveThreadDraft(container);
-  const nextThread = createEmptyThread();
+  const nextThread: PlaygroundThread = {
+    ...createEmptyThread(),
+    ...(options.promptDraftId ? { promptDraftId: options.promptDraftId } : {}),
+  };
   threadStore = {
     activeThreadId: nextThread.id,
     threads: [nextThread, ...threadStore.threads].slice(0, MAX_THREAD_COUNT),
   };
   persistThreadStoreNow();
   renderThreadList(container, threadStore, pendingRequests);
+  renderPromptDraftsForActiveThread(container);
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
   if (options.toastMessage !== null) {
@@ -1465,18 +1480,18 @@ function createThreadFromPromptDraft(container: HTMLElement, promptId: string): 
   const promptDraft = getPromptDrafts().find(item => item.id === promptId);
   if (!promptDraft) {
     showToast('未找到可用 Prompt，请回到 Prompt 生成页面重新生成', { type: 'warning' });
-    renderPromptDraftList(container);
+    renderPromptDraftsForActiveThread(container);
     return;
   }
 
-  createThread(container, { toastMessage: null });
+  createThread(container, { toastMessage: null, promptDraftId: promptId });
   window.setTimeout(() => fillPromptDraftInput(container, promptDraft.prompt), 80);
 }
 
 async function deletePromptDraft(container: HTMLElement, promptId: string): Promise<void> {
   const promptDraft = getPromptDrafts().find(item => item.id === promptId);
   if (!promptDraft) {
-    renderPromptDraftList(container);
+    renderPromptDraftsForActiveThread(container);
     return;
   }
 
@@ -1498,7 +1513,7 @@ async function deletePromptDraft(container: HTMLElement, promptId: string): Prom
   }
 
   appStore.getState().removePromptHistory(promptId);
-  renderPromptDraftList(container);
+  renderPromptDraftsForActiveThread(container);
   showToast('已删除 Prompt 生成记录', { type: 'success' });
 }
 
@@ -1551,6 +1566,7 @@ function switchThread(container: HTMLElement, threadId: string): void {
   };
   persistThreadStoreNow();
   renderThreadList(container, threadStore, pendingRequests);
+  renderPromptDraftsForActiveThread(container);
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
 }
@@ -1585,6 +1601,9 @@ function deleteThread(container: HTMLElement, threadId: string): void {
   threadStore = nextStore;
   persistThreadStoreNow();
   renderThreadList(container, threadStore, pendingRequests);
+  if (shouldReplaceChat) {
+    renderPromptDraftsForActiveThread(container);
+  }
   refreshChatSearchResultsIfOpen(container);
   if (shouldReplaceChat) {
     replaceChat(container);
@@ -1615,6 +1634,13 @@ function renderMountedThreadList(): void {
     renderThreadList(container, threadStore, pendingRequests);
     refreshChatSearchResultsIfOpen(container);
   }
+}
+
+function renderPromptDraftsForActiveThread(container: HTMLElement): void {
+  const promptDraftId = threadStore.threads.find(
+    thread => thread.id === threadStore.activeThreadId
+  )?.promptDraftId;
+  renderPromptDraftList(container, promptDraftId);
 }
 
 function saveThreadMessages(
@@ -1725,7 +1751,11 @@ function getPersistableThreadStore(): PlaygroundThreadStore {
 }
 
 function isPersistableThread(thread: PlaygroundThread): boolean {
-  return thread.messages.length > 0 || Boolean(thread.draftText?.trim());
+  return (
+    thread.messages.length > 0 ||
+    Boolean(thread.draftText?.trim()) ||
+    Boolean(thread.promptDraftId)
+  );
 }
 
 function createDefaultThreadStore(): PlaygroundThreadStore {
@@ -2087,6 +2117,10 @@ function sanitizeThread(thread: PlaygroundThread): PlaygroundThread | null {
   }
 
   const draftText = typeof thread.draftText === 'string' ? thread.draftText : '';
+  const promptDraftId =
+    typeof thread.promptDraftId === 'string' && thread.promptDraftId
+      ? thread.promptDraftId
+      : undefined;
   const createdAt = Number.isFinite(thread.createdAt) ? thread.createdAt : Date.now();
   const updatedAt = Number.isFinite(thread.updatedAt) ? thread.updatedAt : createdAt;
   const messages = Array.isArray(thread.messages)
@@ -2101,6 +2135,7 @@ function sanitizeThread(thread: PlaygroundThread): PlaygroundThread | null {
         : getThreadTitle(messages),
     messages,
     draftText,
+    ...(promptDraftId ? { promptDraftId } : {}),
     createdAt,
     updatedAt,
   };

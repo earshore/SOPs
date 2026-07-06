@@ -54,6 +54,7 @@ export interface PlaygroundThread {
   title: string;
   messages: DeepChatMessage[];
   draftText?: string;
+  promptDraftId?: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -118,6 +119,7 @@ export interface PromptPreviewLeftOptions {
 
 export interface CreateThreadOptions {
   toastMessage?: string | null;
+  promptDraftId?: string;
 }
 
 export interface SaveThreadMessagesOptions {

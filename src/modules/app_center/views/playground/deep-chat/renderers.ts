@@ -55,7 +55,10 @@ export function renderThreadList(
   );
 }
 
-export function renderPromptDraftList(container: HTMLElement): void {
+export function renderPromptDraftList(
+  container: HTMLElement,
+  selectedPromptDraftId?: string
+): void {
   const list = container.querySelector<HTMLElement>('#playground-prompt-list');
   if (!list) {
     return;
@@ -90,11 +93,16 @@ export function renderPromptDraftList(container: HTMLElement): void {
         const meta = formatPromptDraftMeta(prompt);
         const snippet = truncateText(prompt.prompt.replace(/\s+/g, ' ').trim(), 70);
         const previewAriaLabel = `预览 ${typeLabel} Prompt`;
-        const useAriaLabel = `创建新会话并填入 ${typeLabel} Prompt`;
         const isPreviewActive = prompt.id === activePromptPreviewId;
+        const isSelected = prompt.id === selectedPromptDraftId;
+        const useAriaLabel = isSelected
+          ? `当前会话已使用 ${typeLabel} Prompt`
+          : `创建新会话并填入 ${typeLabel} Prompt`;
+        const useTitle = isSelected ? '当前会话已使用' : '使用 Prompt';
+        const useIconClass = isSelected ? 'fas fa-check' : 'fas fa-arrow-right-to-bracket';
 
         return `
-      <div class="playground-prompt-item playground-prompt-item--${typeLabel.toLowerCase()}${isPreviewActive ? ' is-preview-active' : ''}">
+      <div class="playground-prompt-item playground-prompt-item--${typeLabel.toLowerCase()}${isPreviewActive ? ' is-preview-active' : ''}${isSelected ? ' is-selected' : ''}"${isSelected ? ' aria-current="true"' : ''}>
         <button class="playground-prompt-draft" type="button" data-preview-prompt-id="${escapeHTML(prompt.id)}" aria-label="${escapeHTML(previewAriaLabel)}" aria-describedby="playground-prompt-preview-popover">
           <span class="playground-prompt-icon">
             <i class="${iconClass}" aria-hidden="true"></i>
@@ -107,8 +115,8 @@ export function renderPromptDraftList(container: HTMLElement): void {
             <span class="playground-prompt-snippet">${escapeHTML(snippet)}</span>
           </span>
         </button>
-        <button class="playground-prompt-use" type="button" data-use-prompt-draft-id="${escapeHTML(prompt.id)}" aria-label="${escapeHTML(useAriaLabel)}" title="使用 Prompt">
-          <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
+        <button class="playground-prompt-use${isSelected ? ' is-selected' : ''}" type="button" data-use-prompt-draft-id="${escapeHTML(prompt.id)}" aria-label="${escapeHTML(useAriaLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}" title="${escapeHTML(useTitle)}">
+          <i class="${useIconClass}" aria-hidden="true"></i>
         </button>
         <button class="playground-prompt-delete" type="button" data-delete-prompt-draft-id="${escapeHTML(prompt.id)}" aria-label="删除 ${typeLabel} Prompt" title="删除 Prompt">
           <i class="fas fa-trash" aria-hidden="true"></i>

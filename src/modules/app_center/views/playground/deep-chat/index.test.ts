@@ -157,10 +157,14 @@ class TestDeepChatElement extends HTMLElement {
     textInput.contentEditable = 'true';
     textInputContainer.append(textInput);
 
+    const submitButton = document.createElement('button');
+    submitButton.className = 'input-button inside-end';
+    submitButton.type = 'button';
+
     const messages = document.createElement('div');
     messages.id = 'messages';
 
-    root.append(textInputContainer, messages);
+    root.append(textInputContainer, submitButton, messages);
   }
 }
 
@@ -503,6 +507,25 @@ describe('deep-chat playground module', () => {
     expect(getChat(container).shadowRoot?.querySelector('#text-input')?.textContent).toContain(
       'Rewrite this listing'
     );
+    expect(container.querySelector('.playground-prompt-item.is-selected')?.textContent).toContain(
+      'Rewrite this listing'
+    );
+    const selectedPromptUseButton = queryRequired<HTMLButtonElement>(
+      container,
+      '[data-use-prompt-draft-id="prompt-1"]'
+    );
+    expect(selectedPromptUseButton.getAttribute('aria-pressed')).toBe('true');
+    expect(selectedPromptUseButton.getAttribute('aria-label')).toContain('当前会话已使用');
+    expect(selectedPromptUseButton.querySelector('i')?.className).toContain('fa-check');
+    expect(mocks.localDataStore.set).toHaveBeenCalledWith(
+      'user:playground_deep_chat_threads_v1',
+      expect.objectContaining({
+        threads: expect.arrayContaining([
+          expect.objectContaining({ promptDraftId: 'prompt-1' }),
+        ]),
+      }),
+      'user-data'
+    );
 
     queryRequired<HTMLButtonElement>(container, '#playground-open-promptlab').click();
     await vi.waitFor(() => {
@@ -522,6 +545,95 @@ describe('deep-chat playground module', () => {
 
     unmount();
     expect(window.cancelAnimationFrame).toHaveBeenCalled();
+  });
+
+  it('keeps prompt selection on the active thread and clears it when switching threads', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount } = await importDeepChat();
+
+    await mount(container);
+
+    queryRequired<HTMLButtonElement>(container, '[data-use-prompt-draft-id="prompt-1"]').click();
+
+    expect(container.querySelector('.playground-prompt-item.is-selected')?.textContent).toContain(
+      'Rewrite this listing'
+    );
+    expect(
+      queryRequired<HTMLButtonElement>(
+        container,
+        '[data-use-prompt-draft-id="prompt-1"]'
+      ).getAttribute('aria-pressed')
+    ).toBe('true');
+
+    queryRequired<HTMLButtonElement>(container, '[data-thread-id="thread-1"]').click();
+
+    expect(container.querySelector('.playground-prompt-item.is-selected')).toBeNull();
+    expect(
+      queryRequired<HTMLButtonElement>(
+        container,
+        '[data-use-prompt-draft-id="prompt-1"]'
+      ).getAttribute('aria-pressed')
+    ).toBe('false');
+
+    queryRequired<HTMLButtonElement>(container, '[data-use-prompt-draft-id="prompt-2"]').click();
+
+    expect(container.querySelector('.playground-prompt-item.is-selected')?.textContent).toContain(
+      'Create a visual concept'
+    );
+    expect(
+      queryRequired<HTMLButtonElement>(
+        container,
+        '[data-use-prompt-draft-id="prompt-2"]'
+      ).getAttribute('aria-pressed')
+    ).toBe('true');
+    expect(
+      queryRequired<HTMLButtonElement>(
+        container,
+        '[data-use-prompt-draft-id="prompt-1"]'
+      ).getAttribute('aria-pressed')
+    ).toBe('false');
+
+    unmount();
+  });
+
+  it('restores the selected prompt when the Deep Chat page remounts', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const selectedPromptThreadStore = {
+      activeThreadId: 'thread-1',
+      threads: [
+        {
+          ...storedThreadStore.threads[0],
+          promptDraftId: 'prompt-1',
+        },
+        storedThreadStore.threads[1],
+      ],
+    };
+    const { mount, unmount } = await importDeepChat({
+      storedThreadStore: selectedPromptThreadStore,
+    });
+
+    await mount(container);
+
+    expect(container.querySelector('.playground-prompt-item.is-selected')?.textContent).toContain(
+      'Rewrite this listing'
+    );
+
+    unmount();
+    await mount(container);
+
+    expect(container.querySelector('.playground-prompt-item.is-selected')?.textContent).toContain(
+      'Rewrite this listing'
+    );
+    expect(
+      queryRequired<HTMLButtonElement>(
+        container,
+        '[data-use-prompt-draft-id="prompt-1"]'
+      ).getAttribute('aria-pressed')
+    ).toBe('true');
+
+    unmount();
   });
 
   it('marks the PC prompt rail empty state and links to Prompt generation', async () => {
@@ -557,6 +669,20 @@ describe('deep-chat playground search chats', () => {
     const { mount, unmount } = await importDeepChat();
 
     await mount(container);
+    vi.spyOn(
+      queryRequired<HTMLElement>(container, '.playground-main'),
+      'getBoundingClientRect'
+    ).mockReturnValue({
+      bottom: 780,
+      height: 700,
+      left: 300,
+      right: 1200,
+      top: 80,
+      width: 900,
+      x: 300,
+      y: 80,
+      toJSON: () => ({}),
+    } as DOMRect);
 
     queryRequired<HTMLButtonElement>(container, '#playground-search-chats').click();
     const modal = queryRequired<HTMLElement>(document, '#playground-chat-search-modal');
@@ -565,6 +691,8 @@ describe('deep-chat playground search chats', () => {
 
     expect(modal.hidden).toBe(false);
     expect(modal.parentElement).toBe(document.body);
+    expect(modal.style.getPropertyValue('--playground-chat-search-left')).toBe('750px');
+    expect(modal.style.getPropertyValue('--playground-chat-search-top')).toBe('430px');
     expect(results.textContent).toContain('今天');
     expect(results.textContent).toContain('Existing thread');
     expect(results.textContent).toContain('Other thread');
@@ -769,11 +897,21 @@ describe('deep-chat playground request stopping', () => {
       }
     );
 
-    const stopButton = queryRequired<HTMLButtonElement>(container, '#playground-stop-generation');
-    expect(stopButton.hidden).toBe(false);
-    expect(stopButton.dataset.threadId).toBe('thread-1');
+    const overlayStopButton = queryRequired<HTMLButtonElement>(
+      container,
+      '#playground-stop-generation'
+    );
+    expect(overlayStopButton.hidden).toBe(true);
+    expect(overlayStopButton.dataset.threadId).toBeUndefined();
 
-    stopButton.click();
+    const submitButton = queryRequired<HTMLButtonElement>(
+      getChat(container).shadowRoot || document,
+      '.input-button.inside-end'
+    );
+    expect(submitButton.getAttribute('data-playground-stop-active')).toBe('');
+    expect(submitButton.getAttribute('data-playground-stop-thread-id')).toBe('thread-1');
+
+    submitButton.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
 
     await vi.waitFor(() => {
       expect(onClose).toHaveBeenCalled();
