@@ -103,10 +103,17 @@ describe('PerformanceSettings', () => {
       'src/modules/app_center/views/master_analysis/ai_analysis/template.html',
       'utf8'
     );
+    const styles = readFileSync(
+      'src/modules/app_center/views/master_analysis/master_analysis_style.css',
+      'utf8'
+    );
     const closeButton = template.match(/<button[\s\S]*?aria-label="关闭性能设置"[\s\S]*?>/)?.[0];
 
     expect(closeButton).toContain('inline-flex');
     expect(closeButton).toContain('items-center');
     expect(closeButton).toContain('justify-center');
+    expect(styles).toMatch(
+      /\.ma-performance-modal button\[aria-label='关闭性能设置'\]\s*\{[\s\S]*display:\s*inline-flex;[\s\S]*align-items:\s*center;[\s\S]*justify-content:\s*center;[\s\S]*\}/
+    );
   });
 });

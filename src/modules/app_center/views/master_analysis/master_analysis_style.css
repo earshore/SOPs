@@ -75,6 +75,12 @@
     0 18px 48px -34px rgba(15, 23, 42, 0.5) !important;
 }
 
+.ma-performance-modal button[aria-label='关闭性能设置'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .ma-performance-modal .fa-sliders {
   color: var(--ma-accent) !important;
 }
