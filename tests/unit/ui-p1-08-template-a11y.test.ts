@@ -187,6 +187,16 @@ describe('UI-P1-08 template semantics', () => {
 
     const progress = requireElement(processRoot, '#kt-translate-progress');
     expect(progress.getAttribute('role')).toBe('progressbar');
+    requireElement(processRoot, 'label[for="kt-translation-model-select"]');
+    requireElement(
+      processRoot,
+      '#kt-translation-model-select[aria-describedby="kt-translation-model-status"]'
+    );
+    requireElement(processRoot, '#kt-refresh-models-btn[aria-label="重新获取 AI 翻译可用模型"]');
+    requireElement(
+      processRoot,
+      '#kt-translation-model-status[role="status"][aria-live="polite"][aria-atomic="true"]'
+    );
     requireElement(processRoot, '#kt-translate-status[role="status"][aria-live="polite"]');
     requireElement(processRoot, '[aria-describedby="kt-translate-status"]');
 

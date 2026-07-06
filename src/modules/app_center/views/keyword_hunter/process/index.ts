@@ -16,11 +16,15 @@ import { showToast } from '../../../../../common/ui';
 import { navigateToRouteId } from '../../../../../common/router/initRouter';
 import * as KeywordService from '../services/trackerService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
+import { getLlmProviderConfig } from '../../../../../common/config/llmProviders';
+import { fetchModelsFromApi } from '../../../../../services/llmService';
 import { appStore } from '../../../../../stores/useAppStore';
 import { ErrorService } from '../../../../../services/errorService';
+import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
 import { createSafeFragment } from '../../../../../common/utils/security';
 import { updateRuntimeCssRule } from '../../../../../common/utils/runtimeStyles';
 import type { KeywordHunterSnapshot } from '../../../../../types/modules-business';
+import type { LLMProviderConfig } from '../../../../../types/state';
 import '../keyword_hunter_style.css';
 
 // ==========================================
@@ -58,6 +62,13 @@ interface ActiveTranslationRun {
   llmStatus?: KeywordService.KeywordHunterLlmStatus;
 }
 
+interface TranslationModelRefreshConfig {
+  storedConfig: Partial<LLMProviderConfig> | null;
+  configWithKey: LLMProviderConfig | null;
+  endpoint: string;
+  apiKey: string;
+}
+
 interface AnalysisStats {
   total: number;
   matched: number;
@@ -78,6 +89,7 @@ interface HighlightedTranslationParagraph {
 
 type KeywordTrackerStoreState = ReturnType<typeof appStore.getState>['keywordTracker'];
 type MatchedKeywordEntry = KeywordTrackerStoreState['matchedKeywords'][number] | string;
+type TranslationModelOption = NonNullable<LLMProviderConfig['models']>[number];
 
 let eventListeners: EventListenerRecord[] = []; // 用于清理事件监听器
 let timeouts: number[] = []; // 用于清理定时器
@@ -88,6 +100,7 @@ let floatWinState: FloatWinState = {
 };
 let activeTranslationRun: ActiveTranslationRun | null = null;
 let processViewVersion = 0;
+let isRefreshingTranslationModels = false;
 
 // ==========================================
 // Helper Functions
@@ -157,6 +170,264 @@ function escapeAttr(text: string): string {
     .replace(/'/g, '&#39;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+function getActiveLlmProvider(): string | null {
+  const provider = StorageService.get<string>(STORAGE_KEYS.LLM_ACTIVE_PROVIDER);
+  return typeof provider === 'string' && provider.trim() ? provider : null;
+}
+
+function getTranslationModelId(model: TranslationModelOption): string {
+  return typeof model === 'string' ? model : model.id;
+}
+
+function getTranslationModelLabel(model: TranslationModelOption): string {
+  if (typeof model === 'string') return model;
+  if (model.name && model.name !== model.id) return `${model.name} (${model.id})`;
+  return model.id;
+}
+
+function dedupeTranslationModels(models: TranslationModelOption[]): TranslationModelOption[] {
+  const seen = new Set<string>();
+  return models.filter(model => {
+    const id = getTranslationModelId(model);
+    if (!id || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
+
+function ensureTranslationModelOption(
+  models: TranslationModelOption[],
+  modelId: string | undefined
+): TranslationModelOption[] {
+  if (!modelId) return models;
+  if (models.some(model => getTranslationModelId(model) === modelId)) return models;
+  return [modelId, ...models];
+}
+
+function getTranslationLlmConfig(provider: string): Partial<LLMProviderConfig> | null {
+  return StorageService.getLLMConfig(provider);
+}
+
+function getTranslationModelOptions(
+  provider: string | null,
+  config: Partial<LLMProviderConfig> | null
+): TranslationModelOption[] {
+  const presetModels = provider ? getLlmProviderConfig(provider)?.models || [] : [];
+  const configuredModels = config?.models || [];
+  return dedupeTranslationModels(
+    ensureTranslationModelOption([...configuredModels, ...presetModels], config?.model)
+  );
+}
+
+function getTranslationModelSelection(
+  config: Partial<LLMProviderConfig> | null,
+  models: TranslationModelOption[]
+): string {
+  if (config?.model) return config.model;
+  const firstModel = models[0];
+  return firstModel ? getTranslationModelId(firstModel) : '';
+}
+
+function createTranslationModelOption(
+  model: TranslationModelOption,
+  selectedModel: string
+): HTMLOptionElement {
+  const option = document.createElement('option');
+  const id = getTranslationModelId(model);
+  option.value = id;
+  option.textContent = getTranslationModelLabel(model);
+  option.selected = id === selectedModel;
+  return option;
+}
+
+function setTranslationModelStatus(message: string, role: 'status' | 'alert' = 'status'): void {
+  const status = document.getElementById('kt-translation-model-status');
+  if (!status) return;
+  status.textContent = message;
+  status.setAttribute('role', role);
+  status.setAttribute('aria-live', role === 'alert' ? 'assertive' : 'polite');
+}
+
+function renderTranslationModelRefreshButton(): void {
+  const button = document.getElementById('kt-refresh-models-btn') as HTMLButtonElement | null;
+  const icon = document.getElementById('kt-refresh-models-icon');
+  if (!button) return;
+
+  button.disabled = isRefreshingTranslationModels || !getActiveLlmProvider();
+  if (isRefreshingTranslationModels) {
+    button.setAttribute('aria-busy', 'true');
+  } else {
+    button.removeAttribute('aria-busy');
+  }
+
+  if (icon) {
+    icon.className = isRefreshingTranslationModels
+      ? 'fas fa-sync-alt fa-spin text-[10px]'
+      : 'fas fa-sync-alt text-[10px]';
+  }
+}
+
+function renderTranslationModelSelector(): void {
+  const select = document.getElementById('kt-translation-model-select') as HTMLSelectElement | null;
+  if (!select) return;
+
+  const provider = getActiveLlmProvider();
+  const config = provider ? getTranslationLlmConfig(provider) : null;
+  const models = getTranslationModelOptions(provider, config);
+  const selectedModel = getTranslationModelSelection(config, models);
+
+  select.replaceChildren();
+  if (models.length === 0) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = provider ? '暂无可选模型' : '模型未配置';
+    select.appendChild(option);
+    select.disabled = true;
+  } else {
+    const fragment = document.createDocumentFragment();
+    models.forEach(model => {
+      fragment.appendChild(createTranslationModelOption(model, selectedModel));
+    });
+    select.appendChild(fragment);
+    select.disabled = false;
+    select.value = selectedModel;
+  }
+
+  if (!provider) {
+    setTranslationModelStatus('请先在全局设置中选择 LLM 提供商');
+  } else if (!selectedModel) {
+    setTranslationModelStatus('请先在全局设置中选择模型，或刷新可用模型列表');
+  } else {
+    setTranslationModelStatus(`当前 AI 翻译模型：${selectedModel}`);
+  }
+
+  renderTranslationModelRefreshButton();
+}
+
+function saveTranslationLlmConfig(
+  provider: string,
+  config: Partial<LLMProviderConfig> | null,
+  model: string,
+  models: TranslationModelOption[]
+): void {
+  const presetConfig = getLlmProviderConfig(provider);
+  const nextConfig: LLMProviderConfig = {
+    ...config,
+    provider,
+    endpoint: config?.endpoint || presetConfig?.endpoint || '',
+    apiKey: '',
+    model,
+    models,
+    enabled: config?.enabled ?? true,
+    ...(config?.serviceTier && { serviceTier: config.serviceTier }),
+  };
+
+  StorageService.setLLMConfig(provider, nextConfig);
+}
+
+function selectTranslationModel(event: Event): void {
+  const model = (event.target as HTMLSelectElement).value;
+  if (!model) return;
+
+  const provider = getActiveLlmProvider();
+  if (!provider) {
+    showToast('请先在全局设置中选择 LLM 提供商', { type: 'warning' });
+    renderTranslationModelSelector();
+    return;
+  }
+
+  const config = getTranslationLlmConfig(provider);
+  const models = ensureTranslationModelOption(getTranslationModelOptions(provider, config), model);
+  saveTranslationLlmConfig(provider, config, model, models);
+  setTranslationModelStatus(`当前 AI 翻译模型：${model}`);
+  showToast(`AI 翻译模型已切换为 ${model}`, { type: 'success' });
+}
+
+function getModelFetchErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  return String(error || '未知错误');
+}
+
+function warnTranslationModelRefreshBlocked(message: string): void {
+  showToast(message, { type: 'warning' });
+  setTranslationModelStatus(message, 'alert');
+}
+
+async function resolveTranslationModelRefreshConfig(
+  provider: string
+): Promise<TranslationModelRefreshConfig | null> {
+  const storedConfig = getTranslationLlmConfig(provider);
+  const configWithKey = await StorageService.getLLMConfigWithKey(provider);
+  const presetConfig = getLlmProviderConfig(provider);
+  const endpoint =
+    configWithKey?.endpoint || storedConfig?.endpoint || presetConfig?.endpoint || '';
+  const apiKey = configWithKey?.apiKey || '';
+
+  if (!endpoint) {
+    warnTranslationModelRefreshBlocked('请先在全局设置中配置 API 端点');
+    return null;
+  }
+
+  if (!apiKey) {
+    warnTranslationModelRefreshBlocked('请先在全局设置中配置 API Key');
+    return null;
+  }
+
+  return { storedConfig, configWithKey, endpoint, apiKey };
+}
+
+function getNextTranslationModel(
+  config: Partial<LLMProviderConfig> | null,
+  models: TranslationModelOption[]
+): string {
+  const selectedModel = getTranslationModelSelection(config, models);
+  const modelExists = models.some(model => getTranslationModelId(model) === selectedModel);
+  const fallbackModel = models[0];
+  if (!fallbackModel) {
+    throw new Error('未能获取到有效模型列表');
+  }
+  return modelExists ? selectedModel : getTranslationModelId(fallbackModel);
+}
+
+async function refreshTranslationModels(): Promise<void> {
+  if (isRefreshingTranslationModels) return;
+
+  const provider = getActiveLlmProvider();
+  if (!provider) {
+    warnTranslationModelRefreshBlocked('请先在全局设置中选择 LLM 提供商');
+    renderTranslationModelRefreshButton();
+    return;
+  }
+
+  isRefreshingTranslationModels = true;
+  setTranslationModelStatus('正在获取 AI 翻译可用模型');
+  renderTranslationModelRefreshButton();
+
+  try {
+    const refreshConfig = await resolveTranslationModelRefreshConfig(provider);
+    if (!refreshConfig) return;
+
+    const models = await fetchModelsFromApi(provider, refreshConfig.endpoint, refreshConfig.apiKey);
+    const config = refreshConfig.configWithKey || refreshConfig.storedConfig;
+    const nextModel = getNextTranslationModel(config, models);
+    saveTranslationLlmConfig(provider, config, nextModel, models);
+    renderTranslationModelSelector();
+    showToast(`成功同步 ${models.length} 个模型`, { type: 'success' });
+  } catch (error) {
+    ErrorService.handle(getError(error), {
+      action: 'refreshTranslationModels',
+      module: 'keywordTracker',
+      notify: false,
+    });
+    const message = getModelFetchErrorMessage(error);
+    showToast(`获取模型失败: ${message}`, { type: 'error' });
+    setTranslationModelStatus(`获取模型失败: ${message}`, 'alert');
+  } finally {
+    isRefreshingTranslationModels = false;
+    renderTranslationModelRefreshButton();
+  }
 }
 
 function getKeywordSet(sets: Set<string>[], index: number): Set<string> {
@@ -331,6 +602,7 @@ async function restoreProcessStateFromState(): Promise<void> {
  * 渲染处理模块
  */
 function renderProcessModule(): void {
+  renderTranslationModelSelector();
   updateTranslateButton();
   renderCopyDisplay();
   renderFloatingKeywords();
@@ -1655,6 +1927,18 @@ function setupEventListeners(container: HTMLElement): void {
     addEventListener(checkTrans, 'change', () => {
       saveProcessStateToState();
       renderCopyDisplay();
+    });
+  }
+
+  const translationModelSelect = document.getElementById('kt-translation-model-select');
+  if (translationModelSelect) {
+    addEventListener(translationModelSelect, 'change', selectTranslationModel);
+  }
+
+  const refreshModelsBtn = document.getElementById('kt-refresh-models-btn');
+  if (refreshModelsBtn) {
+    addEventListener(refreshModelsBtn, 'click', () => {
+      void refreshTranslationModels();
     });
   }
 

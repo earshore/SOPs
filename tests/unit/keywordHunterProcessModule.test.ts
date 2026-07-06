@@ -5,7 +5,7 @@ import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui';
 import { ErrorService } from '@/services/errorService';
-import { callLLM } from '@/services/llmService';
+import { callLLM, fetchModelsFromApi } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
 
 const processMocks = vi.hoisted(() => {
@@ -13,6 +13,9 @@ const processMocks = vi.hoisted(() => {
     <section>
       <button id="kt-sync-to-input-btn"></button>
       <button id="kt-go-analysis-btn"></button>
+      <select id="kt-translation-model-select" aria-describedby="kt-translation-model-status"></select>
+      <button id="kt-refresh-models-btn" aria-label="重新获取 AI 翻译可用模型"><i id="kt-refresh-models-icon"></i></button>
+      <span id="kt-translation-model-status" role="status" aria-live="polite" aria-atomic="true"></span>
       <button id="kt-translate-btn" aria-describedby="kt-translate-status"><span id="kt-translate-btn-text"></span></button>
       <div id="kt-translate-progress" class="hidden" role="progressbar" aria-valuenow="0"></div>
       <span id="kt-translate-status" role="status" aria-live="polite" aria-atomic="true"></span>
@@ -78,6 +81,14 @@ const processMocks = vi.hoisted(() => {
     getAllSnapshotsAsync: vi.fn(async () => []),
     restoreSnapshot: vi.fn(),
     saveCurrentSnapshotAsync: vi.fn(async () => undefined),
+    llmConfig: {
+      provider: 'openai',
+      endpoint: 'https://api.example.test',
+      apiKey: '',
+      model: 'gpt-test',
+      models: ['gpt-test', 'gpt-fast'],
+      enabled: true,
+    },
     state,
   };
 });
@@ -119,6 +130,7 @@ vi.mock('@/services/errorService', () => ({
 
 vi.mock('@/services/llmService', () => ({
   callLLM: vi.fn(),
+  fetchModelsFromApi: vi.fn(),
 }));
 
 vi.mock('@/services/storageService', () => ({
@@ -130,6 +142,7 @@ vi.mock('@/services/storageService', () => ({
     get: vi.fn(),
     getLLMConfig: vi.fn(),
     getLLMConfigWithKey: vi.fn(),
+    setLLMConfig: vi.fn(),
   },
 }));
 
@@ -156,6 +169,7 @@ vi.mock('@/stores/useAppStore', () => ({
 }));
 
 const mockedCallLLM = vi.mocked(callLLM);
+const mockedFetchModelsFromApi = vi.mocked(fetchModelsFromApi);
 const mockedStorage = vi.mocked(StorageService);
 
 function resetTrackerState(): void {
@@ -200,6 +214,13 @@ function click(element: Element | null): void {
   element?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 }
 
+function changeSelect(select: HTMLSelectElement | null, value: string): void {
+  expect(select).not.toBeNull();
+  if (!select) return;
+  select.value = value;
+  select.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
 function mouseDown(element: Element | null): void {
   expect(element).not.toBeNull();
   element?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
@@ -214,20 +235,37 @@ beforeEach(() => {
   document.body.innerHTML = '';
   vi.clearAllMocks();
   resetTrackerState();
+  processMocks.llmConfig = {
+    provider: 'openai',
+    endpoint: 'https://api.example.test',
+    apiKey: '',
+    model: 'gpt-test',
+    models: ['gpt-test', 'gpt-fast'],
+    enabled: true,
+  };
   processMocks.getAllSnapshotsAsync.mockResolvedValue([]);
   processMocks.restoreSnapshot.mockReturnValue(null);
   processMocks.saveCurrentSnapshotAsync.mockResolvedValue(undefined);
   mockedStorage.get.mockReturnValue('openai');
-  mockedStorage.getLLMConfig.mockReturnValue({
-    endpoint: 'https://api.example.test',
-    model: 'gpt-test',
-  } as never);
-  mockedStorage.getLLMConfigWithKey.mockResolvedValue({
-    apiKey: 'test-key',
-    endpoint: 'https://api.example.test',
-    model: 'gpt-test',
-  } as never);
+  mockedStorage.getLLMConfig.mockImplementation(() => processMocks.llmConfig as never);
+  mockedStorage.getLLMConfigWithKey.mockImplementation(
+    async () =>
+      ({
+        ...processMocks.llmConfig,
+        apiKey: 'test-key',
+      }) as never
+  );
+  mockedStorage.setLLMConfig.mockImplementation((_provider, config) => {
+    processMocks.llmConfig = {
+      ...(config as typeof processMocks.llmConfig),
+      apiKey: '',
+    };
+  });
   mockedCallLLM.mockResolvedValue('【1】 无线耳机翻译');
+  mockedFetchModelsFromApi.mockResolvedValue([
+    { id: 'gpt-fast', context: 128000, features: [] },
+    { id: 'gpt-quality', context: 128000, features: [] },
+  ]);
 
   Object.defineProperty(window, 'requestAnimationFrame', {
     configurable: true,
@@ -268,7 +306,7 @@ it('keeps process template buttons explicit about non-submit behavior', () => {
     (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
   );
 
-  expect(buttonOpenings).toHaveLength(5);
+  expect(buttonOpenings).toHaveLength(6);
   expect(implicitButtons).toEqual([]);
 });
 
@@ -278,11 +316,16 @@ it('places AI translation next to the original/translation toggle', () => {
     'utf8'
   );
 
+  const modelSelectIndex = template.indexOf('id="kt-translation-model-select"');
+  const refreshButtonIndex = template.indexOf('id="kt-refresh-models-btn"');
   const toggleIndex = template.indexOf('id="kt-show-translation"');
   const translateButtonIndex = template.indexOf('id="kt-translate-btn"');
   const savedStatusIndex = template.indexOf('aria-label="已自动保存"');
   const analysisButtonIndex = template.indexOf('id="kt-go-analysis-btn"');
 
+  expect(modelSelectIndex).toBeGreaterThanOrEqual(0);
+  expect(refreshButtonIndex).toBeGreaterThan(modelSelectIndex);
+  expect(refreshButtonIndex).toBeLessThan(toggleIndex);
   expect(toggleIndex).toBeGreaterThanOrEqual(0);
   expect(translateButtonIndex).toBeGreaterThan(toggleIndex);
   expect(translateButtonIndex).toBeLessThan(savedStatusIndex);
@@ -316,6 +359,58 @@ it('mounts template content, renders highlighted copy, stats, and floating keywo
   expect(document.querySelector('#kt-tab-unmatched-count')?.textContent).toBe('1');
   expect(document.querySelector('#kt-minimized-badge')?.textContent).toBe('2');
   expect(document.querySelector<HTMLButtonElement>('#kt-translate-btn')?.disabled).toBe(false);
+  expect(document.querySelector<HTMLSelectElement>('#kt-translation-model-select')?.value).toBe(
+    'gpt-test'
+  );
+  expect(document.querySelector('#kt-translation-model-status')?.textContent).toBe(
+    '当前 AI 翻译模型：gpt-test'
+  );
+});
+
+it('refreshes available translation models and persists the selected model', async () => {
+  await mountProcess();
+
+  click(document.querySelector('#kt-refresh-models-btn'));
+
+  await vi.waitFor(() => {
+    expect(mockedFetchModelsFromApi).toHaveBeenCalledWith(
+      'openai',
+      'https://api.example.test',
+      'test-key'
+    );
+  });
+
+  expect(mockedStorage.setLLMConfig).toHaveBeenCalledWith(
+    'openai',
+    expect.objectContaining({
+      model: 'gpt-fast',
+      models: [
+        { id: 'gpt-fast', context: 128000, features: [] },
+        { id: 'gpt-quality', context: 128000, features: [] },
+      ],
+    })
+  );
+  expect(document.querySelector<HTMLSelectElement>('#kt-translation-model-select')?.value).toBe(
+    'gpt-fast'
+  );
+  expect(showToast).toHaveBeenCalledWith('成功同步 2 个模型', { type: 'success' });
+});
+
+it('uses the model selected in the SEO process page for immersion translation', async () => {
+  await mountProcess();
+
+  changeSelect(document.querySelector('#kt-translation-model-select'), 'gpt-fast');
+  click(document.querySelector('#kt-translate-btn'));
+
+  await vi.waitFor(() => {
+    expect(mockedCallLLM).toHaveBeenCalled();
+  });
+
+  expect(mockedStorage.setLLMConfig).toHaveBeenCalledWith(
+    'openai',
+    expect.objectContaining({ model: 'gpt-fast' })
+  );
+  expect(mockedCallLLM.mock.calls[0]?.[4]).toBe('gpt-fast');
 });
 
 it('keeps the floating keyword monitor visible when all keywords are unmatched', async () => {
