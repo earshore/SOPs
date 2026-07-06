@@ -1536,10 +1536,16 @@ function setupFloatingWindow(): void {
 
   addEventListener(header, 'mousedown', (e: Event) => {
     const mouseEvent = e as MouseEvent;
-    floatWinState.isDragging = true;
-    floatWinState.offsetX = mouseEvent.clientX - el.getBoundingClientRect().left;
-    floatWinState.offsetY = mouseEvent.clientY - el.getBoundingClientRect().top;
+    if (mouseEvent.button !== 0 || isInteractiveDragTarget(mouseEvent.target)) {
+      return;
+    }
 
+    const rect = el.getBoundingClientRect();
+    floatWinState.isDragging = true;
+    floatWinState.offsetX = mouseEvent.clientX - rect.left;
+    floatWinState.offsetY = mouseEvent.clientY - rect.top;
+
+    updateFloatingWindowPosition(rect.left, rect.top);
     el.classList.add('kt-floating-window--positioned', 'is-dragging');
     mouseEvent.preventDefault();
   });
@@ -1577,6 +1583,13 @@ function setupFloatingWindow(): void {
       updateFloatingWindowPosition(20, rect.top);
     }
   });
+}
+
+function isInteractiveDragTarget(target: EventTarget | null): boolean {
+  return (
+    target instanceof Element &&
+    target.closest('button, a, input, textarea, select, label, [role="button"]') !== null
+  );
 }
 
 function updateFloatingWindowPosition(left: number, top: number): void {

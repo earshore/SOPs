@@ -25,8 +25,9 @@ const processMocks = vi.hoisted(() => {
       <span id="kt-stat-total"></span>
       <div id="kt-word-frequency-list"></div>
       <div id="kt-keywords-floating">
-        <div class="floating-header"></div>
-        <button id="kt-minimize-keywords-btn"></button>
+        <div class="floating-header">
+          <button id="kt-minimize-keywords-btn"></button>
+        </div>
         <span id="kt-tab-matched-count"></span>
         <span id="kt-tab-unmatched-count"></span>
         <div id="kt-all-keywords"></div>
@@ -199,6 +200,11 @@ function click(element: Element | null): void {
   element?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 }
 
+function mouseDown(element: Element | null): void {
+  expect(element).not.toBeNull();
+  element?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
+}
+
 function getProgressValue(selector: string): string | null {
   return document.querySelector(selector)?.getAttribute('aria-valuenow') ?? null;
 }
@@ -266,6 +272,23 @@ it('keeps process template buttons explicit about non-submit behavior', () => {
   expect(implicitButtons).toEqual([]);
 });
 
+it('places AI translation next to the original/translation toggle', () => {
+  const template = readFileSync(
+    'src/modules/app_center/views/keyword_hunter/process/template.html',
+    'utf8'
+  );
+
+  const toggleIndex = template.indexOf('id="kt-show-translation"');
+  const translateButtonIndex = template.indexOf('id="kt-translate-btn"');
+  const savedStatusIndex = template.indexOf('aria-label="已自动保存"');
+  const analysisButtonIndex = template.indexOf('id="kt-go-analysis-btn"');
+
+  expect(toggleIndex).toBeGreaterThanOrEqual(0);
+  expect(translateButtonIndex).toBeGreaterThan(toggleIndex);
+  expect(translateButtonIndex).toBeLessThan(savedStatusIndex);
+  expect(translateButtonIndex).toBeLessThan(analysisButtonIndex);
+});
+
 it('mounts template content, renders highlighted copy, stats, and floating keywords', async () => {
   const container = await mountProcess();
 
@@ -315,6 +338,25 @@ it('keeps the floating keyword monitor visible when all keywords are unmatched',
   expect(
     document.querySelectorAll('#kt-all-keywords .keyword-status-item--unmatched')
   ).toHaveLength(1);
+});
+
+it('does not start floating window drag when clicking the minimize control', async () => {
+  vi.useFakeTimers();
+  await mountProcess();
+
+  const floatingWindow = document.querySelector('#kt-keywords-floating');
+  const minimizeButton = document.querySelector('#kt-minimize-keywords-btn');
+
+  mouseDown(minimizeButton);
+
+  expect(floatingWindow?.classList.contains('kt-floating-window--positioned')).toBe(false);
+  expect(floatingWindow?.classList.contains('is-dragging')).toBe(false);
+
+  click(minimizeButton);
+  vi.advanceTimersByTime(200);
+
+  expect(floatingWindow?.classList.contains('show')).toBe(false);
+  expect(document.querySelector('#kt-keywords-minimized')?.classList.contains('show')).toBe(true);
 });
 
 it('renders task-oriented empty states when no keyword data exists', async () => {

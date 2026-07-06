@@ -198,6 +198,9 @@ describe('UI-P1-08 template semantics', () => {
       inputRoot,
       '#kt-input-draft-status[role="status"][aria-live="polite"][aria-atomic="true"]'
     );
+    const startAnalysisButton = requireElement(inputRoot, '#kt-btn-start-analysis');
+    expect(startAnalysisButton.classList.contains('kt-title-action-btn')).toBe(true);
+    expect(normalizeText(startAnalysisButton)).toContain('开始分析');
     const snapshotEmpty = requireElement(
       inputRoot,
       '#kt-input-snapshot-empty[role="status"][aria-live="polite"]'

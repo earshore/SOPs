@@ -85,6 +85,21 @@
   color: white;
 }
 
+.kt-title-action-btn {
+  width: auto;
+  min-width: 5.75rem;
+  flex: 0 0 auto;
+  gap: 0.45rem;
+  padding: 0 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.kt-title-action-btn i {
+  font-size: 0.75rem;
+}
+
 .kh-input-snapshot-panel {
   position: sticky;
   top: 1rem;
@@ -606,7 +621,7 @@
   position: fixed;
   width: 380px;
   height: 500px;
-  bottom: 80px;
+  bottom: 8px;
   right: 20px;
   background: var(--surface-panel, white);
   border-radius: var(--radius-panel, var(--rounded-md));
