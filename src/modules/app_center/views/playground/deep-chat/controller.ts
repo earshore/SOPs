@@ -1,6 +1,9 @@
 import BaseModule from '@/common/BaseModule';
+import eventBus from '@/common/EventBus';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui/notifications';
 import { setSafeHtml } from '@/common/utils/security';
 import { callLLM, type ChatMessage } from '@/services/llmService';
@@ -213,8 +216,17 @@ async function refreshLLMConfig(container: HTMLElement): Promise<void> {
 
 function renderLLMConfigState(statusEl: HTMLElement | null, modelSelect: HTMLSelectElement): void {
   modelSelect.replaceChildren();
+  const settingsButton = modelSelect
+    .closest('.playground-main')
+    ?.querySelector<HTMLButtonElement>('#playground-open-settings') ??
+    modelSelect.ownerDocument.querySelector<HTMLButtonElement>('#playground-open-settings');
+  const config = currentConfig;
+  const hasUsableConfig = !!config?.apiKey && !!selectedModel;
+  if (settingsButton) {
+    settingsButton.hidden = hasUsableConfig;
+  }
 
-  if (!currentConfig || !currentConfig.apiKey || !selectedModel) {
+  if (!hasUsableConfig) {
     if (statusEl) {
       statusEl.textContent = '未配置模型，请先在系统设置中配置 LLM';
     }
@@ -223,7 +235,7 @@ function renderLLMConfigState(statusEl: HTMLElement | null, modelSelect: HTMLSel
     return;
   }
 
-  const models = normalizeModels(currentConfig);
+  const models = normalizeModels(config);
   const visibleModels = models.length > 0 ? models : [selectedModel];
 
   visibleModels.forEach(model => {
@@ -236,7 +248,7 @@ function renderLLMConfigState(statusEl: HTMLElement | null, modelSelect: HTMLSel
   selectedModel = modelSelect.value;
   modelSelect.disabled = visibleModels.length <= 1;
   if (statusEl) {
-    statusEl.textContent = `${currentConfig.provider} / ${selectedModel}`;
+    statusEl.textContent = `${config.provider} / ${selectedModel}`;
   }
 }
 
@@ -535,8 +547,18 @@ function bindControls(container: HTMLElement): void {
   const tuningPanel = container.querySelector<HTMLDetailsElement>('.playground-tuning-panel');
   const threadList = container.querySelector<HTMLElement>('#playground-thread-list');
   const promptList = container.querySelector<HTMLElement>('#playground-prompt-list');
+  const settingsButton = container.querySelector<HTMLButtonElement>('#playground-open-settings');
+  const promptlabButton = container.querySelector<HTMLButtonElement>('#playground-open-promptlab');
 
-  bindModelControls(container, modelSelect, refreshButton, clearButton, railToggleButton);
+  bindModelControls(
+    container,
+    modelSelect,
+    refreshButton,
+    clearButton,
+    railToggleButton,
+    settingsButton,
+    promptlabButton
+  );
   bindStopOverlayControl(container, stopButton);
   bindThreadControls(container, threadList, promptList);
   bindChatSearchControls(container);
@@ -569,7 +591,9 @@ function bindModelControls(
   modelSelect: HTMLSelectElement | null,
   refreshButton: HTMLButtonElement | null,
   clearButton: HTMLButtonElement | null,
-  railToggleButton: HTMLButtonElement | null
+  railToggleButton: HTMLButtonElement | null,
+  settingsButton: HTMLButtonElement | null,
+  promptlabButton: HTMLButtonElement | null
 ): void {
   const onModelChange = (): void => {
     selectedModel = modelSelect?.value || selectedModel;
@@ -597,6 +621,18 @@ function bindModelControls(
   };
   clearButton?.addEventListener('click', onClear);
   cleanupCallbacks.push(() => clearButton?.removeEventListener('click', onClear));
+
+  const onOpenSettings = (): void => {
+    openModelSettings();
+  };
+  settingsButton?.addEventListener('click', onOpenSettings);
+  cleanupCallbacks.push(() => settingsButton?.removeEventListener('click', onOpenSettings));
+
+  const onOpenPromptlab = (): void => {
+    void openPromptlab();
+  };
+  promptlabButton?.addEventListener('click', onOpenPromptlab);
+  cleanupCallbacks.push(() => promptlabButton?.removeEventListener('click', onOpenPromptlab));
 }
 
 function bindThreadControls(
@@ -624,6 +660,11 @@ function bindThreadControls(
 
   const onPromptListClick = (event: MouseEvent): void => {
     const target = event.target as HTMLElement | null;
+    if (target?.closest('[data-open-promptlab]')) {
+      void openPromptlab();
+      return;
+    }
+
     const deleteButton = target?.closest<HTMLButtonElement>('[data-delete-prompt-draft-id]');
     const deletePromptId = deleteButton?.dataset.deletePromptDraftId;
     if (deletePromptId) {
@@ -652,6 +693,22 @@ function bindThreadControls(
     renderPromptDraftList(container);
   });
   cleanupCallbacks.push(unsubscribePromptDrafts);
+}
+
+function openModelSettings(): void {
+  eventBus.emit(APP_EVENTS.SETTINGS_OPEN);
+}
+
+async function openPromptlab(): Promise<void> {
+  try {
+    const didNavigate = await navigateToRouteId('promptlab');
+    if (!didNavigate) {
+      showToast('无法打开 Prompt 生成页面，请稍后重试', { type: 'error' });
+    }
+  } catch (error) {
+    console.error('[DeepChat] 打开 Prompt 生成页面失败:', error);
+    showToast('无法打开 Prompt 生成页面，请稍后重试', { type: 'error' });
+  }
 }
 
 function bindChatSearchControls(container: HTMLElement): void {
@@ -786,14 +843,14 @@ function renderChatSearchResults(container: HTMLElement): void {
       refs.results,
       `
       <div class="playground-chat-search-empty">
-        No chats found
+        未找到匹配会话
       </div>
     `
     );
     return;
   }
 
-  const groupLabel = query ? 'Search Results' : 'Today';
+  const groupLabel = query ? '搜索结果' : '今天';
 
   setSafeHtml(
     refs.results,
@@ -810,7 +867,7 @@ function renderChatSearchResults(container: HTMLElement): void {
           class="playground-chat-search-result${isActive ? ' is-active' : ''}"
           type="button"
           data-chat-search-thread-id="${escapeHTML(thread.id)}"
-          aria-label="Open chat ${title}"
+          aria-label="打开会话 ${title}"
         >
           <span class="playground-chat-search-result-icon" aria-hidden="true">
             <i class="far fa-message"></i>
@@ -986,7 +1043,7 @@ function syncThreadRailState(container: HTMLElement): void {
   const rail = container.querySelector<HTMLElement>('#playground-thread-rail');
   const toggle = container.querySelector<HTMLButtonElement>('#playground-toggle-rail');
   const isCollapsed = page?.classList.contains(THREAD_RAIL_COLLAPSED_CLASS) || false;
-  const expandedText = isCollapsed ? 'Expand Recents' : 'Collapse Recents';
+  const expandedText = isCollapsed ? '展开最近会话' : '收起最近会话';
 
   if (rail) {
     rail.setAttribute('aria-hidden', String(isCollapsed));

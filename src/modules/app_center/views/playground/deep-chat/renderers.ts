@@ -5,6 +5,8 @@ import { formatPromptDraftMeta, getPromptDrafts } from './promptDrafts';
 import type { PlaygroundThreadStore } from './types';
 import { escapeHTML, formatThreadTime, truncateText } from './utils';
 
+const PROMPT_EMPTY_CLASS = 'is-prompt-empty';
+
 export function renderThreadList(
   container: HTMLElement,
   threadStore: PlaygroundThreadStore,
@@ -60,12 +62,17 @@ export function renderPromptDraftList(container: HTMLElement): void {
   }
 
   const prompts = getPromptDrafts();
+  syncPromptEmptyState(container, prompts.length === 0);
   if (prompts.length === 0) {
     setSafeHtml(
       list,
       `
       <div class="playground-prompt-empty">
-        暂无生成 Prompt
+        <div class="playground-prompt-empty-title">暂无 Prompt</div>
+        <p>从 Prompt 生成页创建后，可在这里一键带入新会话。</p>
+        <button class="playground-prompt-empty-action" type="button" data-open-promptlab>
+          前往 Prompt 生成
+        </button>
       </div>
     `
     );
@@ -120,4 +127,10 @@ export function renderPromptDraftList(container: HTMLElement): void {
   } else if (activePromptPreviewId) {
     hidePromptPreview(container);
   }
+}
+
+function syncPromptEmptyState(container: HTMLElement, isEmpty: boolean): void {
+  container
+    .querySelector<HTMLElement>('.playground-page')
+    ?.classList.toggle(PROMPT_EMPTY_CLASS, isEmpty);
 }

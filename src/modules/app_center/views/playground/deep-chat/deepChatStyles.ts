@@ -195,7 +195,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     align-items: center;
     gap: 10px;
     margin-top: 7px;
-    color: #8a8f98;
+    color: #64748b;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 12px;
     line-height: 1;
@@ -213,7 +213,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .playground-message-time {
-    color: #9aa0a6;
+    color: #64748b;
     font-variant-numeric: tabular-nums;
   }
 
@@ -223,15 +223,15 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .playground-message-tool {
-    width: 22px;
-    height: 22px;
+    width: 30px;
+    height: 30px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border: 0;
     border-radius: 6px;
     background: transparent;
-    color: #8a8f98;
+    color: #64748b;
     cursor: pointer;
     transition: background 140ms ease, color 140ms ease;
   }
@@ -314,7 +314,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   #text-input[contenteditable]:empty:before {
-    color: #9a9a9a !important;
+    color: #64748b !important;
   }
 
   #microphone-button,

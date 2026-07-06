@@ -8,20 +8,22 @@ const deepChatTemplate = `
         <div class="playground-thread-actions">
           <button id="playground-clear-chat" class="playground-new-thread" type="button">
             <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
-            <span>New Chat</span>
+            <span>新建会话</span>
           </button>
           <button id="playground-search-chats" class="playground-search-chats" type="button">
             <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-            <span>Search Chats</span>
+            <span>搜索会话</span>
           </button>
         </div>
-        <h3 class="playground-panel-title">Recents</h3>
+        <h3 class="playground-panel-title">最近会话</h3>
         <div id="playground-thread-list"></div>
       </aside>
-      <section>
-        <button id="playground-toggle-rail" type="button" aria-expanded="true" aria-label="Collapse Recents"></button>
+      <section class="playground-main">
+        <button id="playground-toggle-rail" type="button" aria-expanded="true" aria-label="收起最近会话"></button>
         <select id="playground-model-select"></select>
         <span id="playground-provider-status"></span>
+        <button id="playground-open-settings" type="button" hidden>配置模型</button>
+        <button id="playground-open-promptlab" type="button">生成 Prompt</button>
         <button id="playground-refresh-config" type="button"></button>
         <details class="playground-tuning-panel">
           <summary>Settings</summary>
@@ -39,7 +41,7 @@ const deepChatTemplate = `
         </div>
       </section>
       <aside id="playground-prompt-rail">
-        <h3 class="playground-panel-title playground-panel-title--prompt">Prompts</h3>
+        <h3 class="playground-panel-title playground-panel-title--prompt">Prompt</h3>
         <div id="playground-prompt-list"></div>
         <div id="playground-prompt-preview-popover" aria-hidden="true">
           <div class="playground-prompt-preview-title"></div>
@@ -49,15 +51,15 @@ const deepChatTemplate = `
     </div>
     <div id="playground-chat-search-modal" class="playground-chat-search-modal" aria-hidden="true" hidden>
       <div class="playground-chat-search-backdrop" data-chat-search-close></div>
-      <section class="playground-chat-search-dialog" role="dialog" aria-modal="true" aria-label="Search Chats">
+      <section class="playground-chat-search-dialog" role="dialog" aria-modal="true" aria-label="搜索会话">
         <div class="playground-chat-search-bar">
-          <input id="playground-chat-search-input" type="search" aria-label="Search Chats">
+          <input id="playground-chat-search-input" type="search" aria-label="搜索会话">
           <button id="playground-chat-search-close" type="button" data-chat-search-close>
-            Close
+            关闭搜索会话
           </button>
         </div>
         <button class="playground-chat-search-new" type="button" data-chat-search-new>
-          New Chat
+          新建会话
         </button>
         <div id="playground-chat-search-results" class="playground-chat-search-results" aria-live="polite"></div>
       </section>
@@ -253,6 +255,10 @@ async function importDeepChat(options: ImportOptions = {}) {
   const historyService = {
     deletePromptResultAsync: vi.fn(async () => true),
   };
+  const eventBus = {
+    emit: vi.fn(),
+  };
+  const navigateToRouteId = vi.fn(async () => true);
 
   vi.resetModules();
   vi.doMock('@/common/infrastructure/SafeModuleLoader', () => ({
@@ -279,6 +285,8 @@ async function importDeepChat(options: ImportOptions = {}) {
   vi.doMock('@/services/llmService', () => ({ callLLM }));
   vi.doMock('@/common/ui/notifications', () => ({ showToast: toast }));
   vi.doMock('@/stores/useAppStore', () => ({ appStore }));
+  vi.doMock('@/common/EventBus', () => ({ default: eventBus }));
+  vi.doMock('@/common/router/initRouter', () => ({ navigateToRouteId }));
   vi.doMock('@/modules/app_center/views/master_analysis/services/historyService', () => ({
     HistoryService: historyService,
   }));
@@ -290,8 +298,10 @@ async function importDeepChat(options: ImportOptions = {}) {
     mocks: {
       appStore,
       callLLM,
+      eventBus,
       historyService,
       localDataStore,
+      navigateToRouteId,
       state,
       storageService,
       toast,
@@ -395,30 +405,34 @@ afterEach(() => {
   vi.doUnmock('@/services/llmService');
   vi.doUnmock('@/common/ui/notifications');
   vi.doUnmock('@/stores/useAppStore');
+  vi.doUnmock('@/common/EventBus');
+  vi.doUnmock('@/common/router/initRouter');
   vi.doUnmock('@/modules/app_center/views/master_analysis/services/historyService');
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
 describe('deep-chat playground template copy', () => {
-  it('uses the requested sidebar labels, New Chat icon, and search modal copy', () => {
+  it('uses localized sidebar labels, recovery actions, and search modal copy', () => {
     const template = readFileSync(
       'src/modules/app_center/views/playground/deep-chat/template.html',
       'utf8'
     );
 
     expect(template).toContain('class="fa-regular fa-pen-to-square"');
-    expect(template).toContain('<span>New Chat</span>');
-    expect(template).toContain('<span>Search Chats</span>');
-    expect(template).toContain('>Recents</h3>');
-    expect(template).toContain('>Prompts</h3>');
+    expect(template).toContain('<span>新建会话</span>');
+    expect(template).toContain('<span>搜索会话</span>');
+    expect(template).toContain('>最近会话</h3>');
+    expect(template).toContain('id="playground-open-settings"');
+    expect(template).toContain('id="playground-open-promptlab"');
+    expect(template).toContain('>Prompt</h3>');
     expect(template).toContain('id="playground-chat-search-modal"');
-    expect(template).toContain('aria-label="Search Chats"');
+    expect(template).toContain('aria-label="搜索会话"');
     expect(template).toContain('class="playground-chat-search-bar"');
     expect(template).toContain('data-chat-search-new');
-    expect(template).not.toContain('新建会话');
-    expect(template).not.toContain('历史会话');
-    expect(template).not.toContain('生成的 Prompt');
+    expect(template).not.toContain('<span>New Chat</span>');
+    expect(template).not.toContain('<span>Search Chats</span>');
+    expect(template).not.toContain('>Prompts</h3>');
   });
 });
 
@@ -440,6 +454,9 @@ describe('deep-chat playground module', () => {
     expect(container.querySelector('#playground-provider-status')?.textContent).toBe(
       'openai / gpt-4.1'
     );
+    expect(queryRequired<HTMLButtonElement>(container, '#playground-open-settings').hidden).toBe(
+      true
+    );
     expect([...container.querySelectorAll('option')].map(option => option.value)).toEqual([
       'gpt-4.1',
       'gpt-4.1-mini',
@@ -450,6 +467,9 @@ describe('deep-chat playground module', () => {
     expect(container.querySelector('#playground-prompt-list')?.textContent).toContain(
       'Rewrite this listing'
     );
+    expect(
+      container.querySelector('.playground-page')?.classList.contains('is-prompt-empty')
+    ).toBe(false);
 
     const temperature = queryRequired<HTMLInputElement>(container, '#playground-temperature');
     const temperatureValue = queryRequired<HTMLOutputElement>(
@@ -484,6 +504,11 @@ describe('deep-chat playground module', () => {
       'Rewrite this listing'
     );
 
+    queryRequired<HTMLButtonElement>(container, '#playground-open-promptlab').click();
+    await vi.waitFor(() => {
+      expect(mocks.navigateToRouteId).toHaveBeenCalledWith('promptlab');
+    });
+
     container.querySelector<HTMLButtonElement>('[data-delete-prompt-draft-id="prompt-1"]')?.click();
     await vi.runAllTimersAsync();
     expect(mocks.historyService.deletePromptResultAsync).toHaveBeenCalledWith('prompt-1');
@@ -498,10 +523,35 @@ describe('deep-chat playground module', () => {
     unmount();
     expect(window.cancelAnimationFrame).toHaveBeenCalled();
   });
+
+  it('marks the PC prompt rail empty state and links to Prompt generation', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({ promptHistory: [] });
+
+    await mount(container);
+
+    expect(
+      container.querySelector('.playground-page')?.classList.contains('is-prompt-empty')
+    ).toBe(true);
+    expect(container.querySelector('#playground-prompt-list')?.textContent).toContain(
+      '暂无 Prompt'
+    );
+    expect(container.querySelector('#playground-prompt-list')?.textContent).toContain(
+      '前往 Prompt 生成'
+    );
+
+    queryRequired<HTMLButtonElement>(container, '[data-open-promptlab]').click();
+    await vi.waitFor(() => {
+      expect(mocks.navigateToRouteId).toHaveBeenCalledWith('promptlab');
+    });
+
+    unmount();
+  });
 });
 
 describe('deep-chat playground search chats', () => {
-  it('opens Search Chats, filters live results, and switches to a matching chat', async () => {
+  it('opens chat search, filters live results, and switches to a matching chat', async () => {
     const container = document.createElement('main');
     document.body.append(container);
     const { mount, unmount } = await importDeepChat();
@@ -515,14 +565,14 @@ describe('deep-chat playground search chats', () => {
 
     expect(modal.hidden).toBe(false);
     expect(modal.parentElement).toBe(document.body);
-    expect(results.textContent).toContain('Today');
+    expect(results.textContent).toContain('今天');
     expect(results.textContent).toContain('Existing thread');
     expect(results.textContent).toContain('Other thread');
 
     input.value = 'Other question';
     input.dispatchEvent(new Event('input', { bubbles: true }));
 
-    expect(results.textContent).toContain('Search Results');
+    expect(results.textContent).toContain('搜索结果');
     expect(results.textContent).toContain('Other thread');
     expect(results.textContent).not.toContain('Existing thread');
 
@@ -797,6 +847,11 @@ describe('deep-chat playground request errors', () => {
     await mount(container);
     const onResponse = vi.fn();
     const onClose = vi.fn();
+    const settingsButton = queryRequired<HTMLButtonElement>(container, '#playground-open-settings');
+
+    expect(settingsButton.hidden).toBe(false);
+    settingsButton.click();
+    expect(mocks.eventBus.emit).toHaveBeenCalledWith('open-settings');
 
     getChat(container).connect?.handler({ text: 'Hello' }, { onResponse, onClose });
 
