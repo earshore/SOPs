@@ -52,8 +52,8 @@ import {
 import { ensureDeepChatElementDefined } from './deepChatElementLoader';
 import { cleanupMessageToolbars, setupMessageToolbars } from './messageToolbar';
 import { getPromptDrafts } from './promptDrafts';
-import { resetPromptPreviewState, setupPromptPreview, showPromptPreview } from './promptPreview';
-import { renderPromptDraftList, renderThreadList } from './renderers';
+import { resetPromptPreviewState, setupPromptPreview } from './promptPreview';
+import { renderPromptDraftList, renderThreadList, type ThreadMenuState } from './renderers';
 import type {
   CreateThreadOptions,
   DeepChatElement,
@@ -86,6 +86,8 @@ const nativeLoggerConsole = globalThis.console;
 const PENDING_ASSISTANT_PLACEHOLDER_TEXT = '正在生成回复...';
 const PENDING_DISPLAY_INTERVAL_MS = 32;
 const PENDING_DISPLAY_CHARS_PER_TICK = 6;
+const THREAD_MENU_HEIGHT = 132;
+const THREAD_MENU_GAP = 6;
 const CHAT_SEARCH_FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -114,6 +116,7 @@ let draftInputResizeRetryTimer: number | null = null;
 let cleanupDraftInputHeightListener: (() => void) | null = null;
 let cleanupSubmitStopButtonListener: (() => void) | null = null;
 let submitStopButtonSyncRetryTimer: number | null = null;
+let openThreadMenu: ThreadMenuState | null = null;
 const draftPersistController = createDraftPersistController(
   persistThreadStore,
   DRAFT_PERSIST_DEBOUNCE_MS
@@ -167,6 +170,7 @@ class DeepChatModule extends BaseModule {
     clearDraftInputHeightSync();
     clearSubmitStopButtonSync();
     cleanupMessageToolbars();
+    openThreadMenu = null;
   }
 }
 
@@ -183,6 +187,7 @@ export async function clearPlaygroundThreadStore(): Promise<void> {
   pendingRequests.clear();
   clearAllPendingDisplayTimers();
   draftPersistController.cancel();
+  openThreadMenu = null;
   threadStore = createDefaultThreadStore();
 
   await LocalDataStore.remove(`user:${THREAD_STORAGE_KEY}`);
@@ -217,9 +222,10 @@ async function refreshLLMConfig(container: HTMLElement): Promise<void> {
 
 function renderLLMConfigState(statusEl: HTMLElement | null, modelSelect: HTMLSelectElement): void {
   modelSelect.replaceChildren();
-  const settingsButton = modelSelect
-    .closest('.playground-main')
-    ?.querySelector<HTMLButtonElement>('#playground-open-settings') ??
+  const settingsButton =
+    modelSelect
+      .closest('.playground-main')
+      ?.querySelector<HTMLButtonElement>('#playground-open-settings') ??
     modelSelect.ownerDocument.querySelector<HTMLButtonElement>('#playground-open-settings');
   const config = currentConfig;
   const hasUsableConfig = !!config?.apiKey && !!selectedModel;
@@ -359,9 +365,7 @@ function updateThreadDraft(threadId: string, draftText: string): void {
   const updatedThread = { ...thread, draftText, updatedAt: Date.now() };
   threadStore = {
     ...threadStore,
-    threads: threadStore.threads.map(item =>
-      item.id === threadId ? updatedThread : item
-    ),
+    threads: threadStore.threads.map(item => (item.id === threadId ? updatedThread : item)),
   };
   draftPersistController.schedule();
   if (wasVisibleInHistory !== isThreadVisibleInHistory(updatedThread)) {
@@ -552,15 +556,15 @@ function bindControls(container: HTMLElement): void {
   const settingsButton = container.querySelector<HTMLButtonElement>('#playground-open-settings');
   const promptlabButton = container.querySelector<HTMLButtonElement>('#playground-open-promptlab');
 
-  bindModelControls(
+  bindModelControls({
     container,
     modelSelect,
     refreshButton,
     clearButton,
     railToggleButton,
     settingsButton,
-    promptlabButton
-  );
+    promptlabButton,
+  });
   bindStopOverlayControl(container, stopButton);
   bindThreadControls(container, threadList, promptList);
   bindChatSearchControls(container);
@@ -588,15 +592,27 @@ function bindStopOverlayControl(
   syncStopOverlayState(container, pendingRequests.has(threadStore.activeThreadId));
 }
 
-function bindModelControls(
-  container: HTMLElement,
-  modelSelect: HTMLSelectElement | null,
-  refreshButton: HTMLButtonElement | null,
-  clearButton: HTMLButtonElement | null,
-  railToggleButton: HTMLButtonElement | null,
-  settingsButton: HTMLButtonElement | null,
-  promptlabButton: HTMLButtonElement | null
-): void {
+interface ModelControlRefs {
+  container: HTMLElement;
+  modelSelect: HTMLSelectElement | null;
+  refreshButton: HTMLButtonElement | null;
+  clearButton: HTMLButtonElement | null;
+  railToggleButton: HTMLButtonElement | null;
+  settingsButton: HTMLButtonElement | null;
+  promptlabButton: HTMLButtonElement | null;
+}
+
+function bindModelControls(refs: ModelControlRefs): void {
+  const {
+    clearButton,
+    container,
+    modelSelect,
+    promptlabButton,
+    railToggleButton,
+    refreshButton,
+    settingsButton,
+  } = refs;
+
   const onModelChange = (): void => {
     selectedModel = modelSelect?.value || selectedModel;
     updateStatus(container);
@@ -644,21 +660,53 @@ function bindThreadControls(
 ): void {
   const onThreadListClick = (event: MouseEvent): void => {
     const target = event.target as HTMLElement | null;
-    const deleteButton = target?.closest<HTMLButtonElement>('[data-delete-thread-id]');
-    const deleteThreadId = deleteButton?.dataset.deleteThreadId;
-    if (deleteThreadId) {
-      deleteThread(container, deleteThreadId);
+    const menuActionButton = target?.closest<HTMLButtonElement>('[data-thread-menu-action]');
+    const menuAction = menuActionButton?.dataset.threadMenuAction;
+    const menuActionThreadId = menuActionButton?.dataset.threadMenuThreadId;
+    if (menuAction && menuActionThreadId) {
+      handleThreadMenuAction(container, menuActionThreadId, menuAction);
+      return;
+    }
+
+    const menuButton = target?.closest<HTMLButtonElement>('[data-thread-menu-id]');
+    const menuThreadId = menuButton?.dataset.threadMenuId;
+    if (menuThreadId && menuButton) {
+      toggleThreadMenu(container, menuThreadId, menuButton);
       return;
     }
 
     const switchButton = target?.closest<HTMLButtonElement>('[data-thread-id]');
     const threadId = switchButton?.dataset.threadId;
     if (threadId) {
+      closeThreadMenu(container);
       switchThread(container, threadId);
     }
   };
   threadList?.addEventListener('click', onThreadListClick);
   cleanupCallbacks.push(() => threadList?.removeEventListener('click', onThreadListClick));
+
+  const onDocumentClick = (event: MouseEvent): void => {
+    if (!openThreadMenu) {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('.playground-thread-menu, [data-thread-menu-id]')) {
+      return;
+    }
+
+    closeThreadMenu(container);
+  };
+  document.addEventListener('click', onDocumentClick);
+  cleanupCallbacks.push(() => document.removeEventListener('click', onDocumentClick));
+
+  const onDocumentKeydown = (event: KeyboardEvent): void => {
+    if (event.key === 'Escape' && openThreadMenu) {
+      closeThreadMenu(container);
+    }
+  };
+  document.addEventListener('keydown', onDocumentKeydown);
+  cleanupCallbacks.push(() => document.removeEventListener('keydown', onDocumentKeydown));
 
   const onPromptListClick = (event: MouseEvent): void => {
     const target = event.target as HTMLElement | null;
@@ -679,12 +727,6 @@ function bindThreadControls(
     if (usePromptId) {
       createThreadFromPromptDraft(container, usePromptId);
       return;
-    }
-
-    const promptButton = target?.closest<HTMLButtonElement>('[data-preview-prompt-id]');
-    const promptId = promptButton?.dataset.previewPromptId;
-    if (promptId) {
-      showPromptPreview(container, promptId, promptButton);
     }
   };
   promptList?.addEventListener('click', onPromptListClick);
@@ -1643,7 +1685,7 @@ function renderMountedThreadList(): void {
 }
 
 function renderHistoryThreadList(container: HTMLElement): void {
-  renderThreadList(container, getHistoryThreadStore(), pendingRequests);
+  renderThreadList(container, getHistoryThreadStore(), pendingRequests, openThreadMenu);
 }
 
 function getHistoryThreadStore(): PlaygroundThreadStore {
@@ -1655,6 +1697,117 @@ function getHistoryThreadStore(): PlaygroundThreadStore {
 
 function isThreadVisibleInHistory(thread: PlaygroundThread): boolean {
   return pendingRequests.has(thread.id) || isPersistableThread(thread);
+}
+
+function toggleThreadMenu(
+  container: HTMLElement,
+  threadId: string,
+  button: HTMLButtonElement
+): void {
+  if (openThreadMenu?.threadId === threadId) {
+    closeThreadMenu(container);
+    return;
+  }
+
+  openThreadMenu = {
+    threadId,
+    placement: shouldOpenThreadMenuAbove(button) ? 'above' : 'below',
+  };
+  renderHistoryThreadList(container);
+}
+
+function shouldOpenThreadMenuAbove(button: HTMLButtonElement): boolean {
+  const item = button.closest<HTMLElement>('.playground-thread-item');
+  const list = button.closest<HTMLElement>('.playground-thread-list');
+  if (!item || !list) {
+    return false;
+  }
+
+  const itemRect = item.getBoundingClientRect();
+  const listRect = list.getBoundingClientRect();
+  const requiredSpace = THREAD_MENU_HEIGHT + THREAD_MENU_GAP;
+  const spaceBelow = listRect.bottom - itemRect.bottom;
+  const spaceAbove = itemRect.top - listRect.top;
+
+  return spaceBelow < requiredSpace && spaceAbove >= requiredSpace;
+}
+
+function closeThreadMenu(container: HTMLElement): void {
+  if (!openThreadMenu) {
+    return;
+  }
+
+  openThreadMenu = null;
+  renderHistoryThreadList(container);
+}
+
+function handleThreadMenuAction(container: HTMLElement, threadId: string, action: string): void {
+  closeThreadMenu(container);
+
+  if (action === 'rename') {
+    renameThread(container, threadId);
+    return;
+  }
+
+  if (action === 'pin') {
+    togglePinnedThread(container, threadId);
+    return;
+  }
+
+  if (action === 'delete') {
+    deleteThread(container, threadId);
+  }
+}
+
+function renameThread(container: HTMLElement, threadId: string): void {
+  const thread = threadStore.threads.find(item => item.id === threadId);
+  if (!thread) {
+    return;
+  }
+
+  const title = window.prompt('重命名会话', thread.customTitle || thread.title);
+  if (title === null) {
+    return;
+  }
+
+  const trimmedTitle = title.replace(/\s+/g, ' ').trim();
+  if (!trimmedTitle) {
+    showToast('会话名称不能为空', { type: 'warning' });
+    return;
+  }
+
+  updateThreadMetadata(container, threadId, {
+    title: trimmedTitle,
+    customTitle: trimmedTitle,
+    updatedAt: Date.now(),
+  });
+}
+
+function togglePinnedThread(container: HTMLElement, threadId: string): void {
+  const thread = threadStore.threads.find(item => item.id === threadId);
+  if (!thread) {
+    return;
+  }
+
+  updateThreadMetadata(container, threadId, {
+    pinnedAt: thread.pinnedAt ? undefined : Date.now(),
+  });
+}
+
+function updateThreadMetadata(
+  container: HTMLElement,
+  threadId: string,
+  changes: Partial<PlaygroundThread>
+): void {
+  threadStore = {
+    ...threadStore,
+    threads: threadStore.threads.map(thread =>
+      thread.id === threadId ? { ...thread, ...changes } : thread
+    ),
+  };
+  persistThreadStoreNow();
+  renderHistoryThreadList(container);
+  refreshChatSearchResultsIfOpen(container);
 }
 
 function renderPromptDraftsForActiveThread(container: HTMLElement): void {
@@ -1689,7 +1842,7 @@ function saveThreadMessages(
 
   const nextThread: PlaygroundThread = {
     ...activeThread,
-    title: getThreadTitle(storedMessages),
+    title: activeThread.customTitle || getThreadTitle(storedMessages),
     messages: storedMessages,
     draftText: '',
     updatedAt: now,
@@ -2133,29 +2286,68 @@ function sanitizeThread(thread: PlaygroundThread): PlaygroundThread | null {
     return null;
   }
 
-  const draftText = typeof thread.draftText === 'string' ? thread.draftText : '';
-  const promptDraftId =
-    typeof thread.promptDraftId === 'string' && thread.promptDraftId
-      ? thread.promptDraftId
-      : undefined;
-  const createdAt = Number.isFinite(thread.createdAt) ? thread.createdAt : Date.now();
-  const updatedAt = Number.isFinite(thread.updatedAt) ? thread.updatedAt : createdAt;
-  const messages = Array.isArray(thread.messages)
-    ? normalizeStoredThreadMessages(thread.messages, { fallbackCreatedAt: updatedAt })
-    : [];
+  const draftText = getOptionalString(thread.draftText) || '';
+  const optionalFields = getSanitizedThreadOptionalFields(thread);
+  const createdAt = getFiniteTimestamp(thread.createdAt, Date.now());
+  const updatedAt = getFiniteTimestamp(thread.updatedAt, createdAt);
+  const messages = getSanitizedThreadMessages(thread.messages, updatedAt);
 
   return {
     id: thread.id,
-    title:
-      typeof thread.title === 'string' && thread.title.trim()
-        ? thread.title.trim()
-        : getThreadTitle(messages),
+    title: getSanitizedThreadTitle(thread.title, optionalFields.customTitle, messages),
     messages,
     draftText,
-    ...(promptDraftId ? { promptDraftId } : {}),
+    ...optionalFields,
     createdAt,
     updatedAt,
   };
+}
+
+function getSanitizedThreadOptionalFields(thread: PlaygroundThread): Partial<PlaygroundThread> {
+  const customTitle = getOptionalString(thread.customTitle);
+  const promptDraftId = getOptionalString(thread.promptDraftId);
+  const pinnedAt = getOptionalFiniteTimestamp(thread.pinnedAt);
+
+  return {
+    ...(customTitle ? { customTitle } : {}),
+    ...(promptDraftId ? { promptDraftId } : {}),
+    ...(pinnedAt ? { pinnedAt } : {}),
+  };
+}
+
+function getSanitizedThreadMessages(
+  messages: PlaygroundThread['messages'],
+  fallbackCreatedAt: number
+): DeepChatMessage[] {
+  if (!Array.isArray(messages)) {
+    return [];
+  }
+
+  return normalizeStoredThreadMessages(messages, { fallbackCreatedAt });
+}
+
+function getSanitizedThreadTitle(
+  title: PlaygroundThread['title'],
+  customTitle: string | undefined,
+  messages: DeepChatMessage[]
+): string {
+  return customTitle || getOptionalString(title) || getThreadTitle(messages);
+}
+
+function getOptionalString(value: unknown): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  return value.trim() || undefined;
+}
+
+function getFiniteTimestamp(value: unknown, fallback: number): number {
+  return Number.isFinite(value) ? Number(value) : fallback;
+}
+
+function getOptionalFiniteTimestamp(value: unknown): number | undefined {
+  return Number.isFinite(value) ? Number(value) : undefined;
 }
 
 function isValidThreadStore(value: PlaygroundThreadStore | null): value is PlaygroundThreadStore {

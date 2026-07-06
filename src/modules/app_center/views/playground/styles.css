@@ -156,9 +156,9 @@
   align-items: center;
   gap: var(--spacing-2-5, 0.625rem);
   padding: 0 var(--spacing-3-5, 0.875rem);
-  border: 1px solid var(--playground-border);
+  border: 1px solid transparent;
   border-radius: var(--rounded-lg, 0.5rem);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.62);
   color: var(--color-slate-700, #334155);
   font-size: var(--text-base, 0.875rem);
   font-weight: 500;
@@ -173,20 +173,29 @@
     transform 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-.playground-new-thread i {
-  color: var(--playground-accent);
-}
-
+.playground-new-thread i,
 .playground-search-chats i {
   color: var(--color-slate-500, #64748b);
+  transition: color 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .playground-new-thread:hover,
-.playground-search-chats:hover {
+.playground-search-chats:hover,
+.playground-new-thread:focus-visible,
+.playground-search-chats:focus-visible {
   background: #ffffff;
-  border-color: var(--playground-border);
+  border-color: rgba(var(--playground-accent-rgb), 0.2);
   color: var(--color-slate-900, #0f172a);
-  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  box-shadow:
+    0 4px 6px -1px rgba(var(--playground-accent-rgb), 0.08),
+    0 2px 4px -2px rgba(var(--playground-accent-rgb), 0.08);
+}
+
+.playground-new-thread:hover i,
+.playground-search-chats:hover i,
+.playground-new-thread:focus-visible i,
+.playground-search-chats:focus-visible i {
+  color: var(--playground-accent-hover);
 }
 
 .playground-new-thread:active,
@@ -267,9 +276,8 @@
 .playground-thread-item {
   width: 100%;
   min-width: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-1, 0.25rem);
+  position: relative;
+  display: block;
   padding: var(--spacing-1, 0.25rem);
   border: 1px solid transparent;
   border-radius: var(--rounded-lg, 0.5rem);
@@ -299,13 +307,14 @@
     0 2px 4px -2px rgba(var(--playground-accent-rgb), 0.1);
 }
 
+.playground-thread-item.is-menu-open {
+  z-index: 20;
+}
+
 .playground-thread-select {
+  width: 100%;
   min-width: 0;
-  flex: 1 1 auto;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-2-5, 0.625rem);
-  min-height: 76px;
+  display: block;
   padding: var(--spacing-2, 0.5rem) var(--spacing-1-5, 0.375rem);
   border: 0;
   background: transparent;
@@ -314,23 +323,9 @@
   cursor: pointer;
 }
 
-.playground-thread-icon {
-  width: 26px;
-  height: 26px;
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--rounded-lg, 0.5rem);
-  background: var(--playground-accent-muted);
-  color: var(--playground-accent-hover);
-  font-size: 12px;
-  margin-top: 1px;
-}
-
 .playground-thread-copy {
   min-width: 0;
-  flex: 1 1 auto;
+  display: block;
 }
 
 .playground-thread-name,
@@ -353,16 +348,22 @@
 }
 
 .playground-thread-meta {
-  margin-top: 4px;
+  width: calc(100% - 2.25rem);
+  margin-top: 3px;
   color: var(--color-slate-500, #64748b);
   font-size: 11px;
   line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.playground-thread-delete {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 auto;
+.playground-thread-menu-toggle {
+  position: absolute;
+  right: var(--spacing-1, 0.25rem);
+  bottom: var(--spacing-1-5, 0.375rem);
+  width: 28px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -370,7 +371,7 @@
   border-radius: var(--rounded-lg, 0.5rem);
   background: transparent;
   color: var(--color-slate-400, #94a3b8);
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   opacity: 0;
   transition:
@@ -379,23 +380,95 @@
     color 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-.playground-thread-item:hover .playground-thread-delete,
-.playground-thread-item:focus-within .playground-thread-delete {
+.playground-thread-item:hover .playground-thread-menu-toggle,
+.playground-thread-item:focus-within .playground-thread-menu-toggle,
+.playground-thread-item.is-menu-open .playground-thread-menu-toggle {
   opacity: 1;
 }
 
-.playground-thread-delete:hover,
-.playground-thread-delete:focus-visible {
-  background: var(--color-red-50, #fef2f2);
-  color: var(--color-red-600, #dc2626);
+.playground-thread-menu-toggle:hover,
+.playground-thread-menu-toggle:focus-visible,
+.playground-thread-menu-toggle[aria-expanded='true'] {
+  background: var(--playground-accent-soft);
+  color: var(--playground-accent-hover);
   outline: none;
+}
+
+.playground-thread-menu {
+  position: absolute;
+  right: var(--spacing-1, 0.25rem);
+  z-index: 160;
+  width: 148px;
+  padding: var(--spacing-2, 0.5rem);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow:
+    0 18px 36px -24px rgba(15, 23, 42, 0.35),
+    0 8px 18px -14px rgba(15, 23, 42, 0.24);
+}
+
+.playground-thread-menu--below {
+  top: calc(100% + var(--spacing-1, 0.25rem));
+}
+
+.playground-thread-menu--above {
+  bottom: calc(100% + var(--spacing-1, 0.25rem));
+}
+
+.playground-thread-menu-action {
+  width: 100%;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2, 0.5rem);
+  padding: 0 var(--spacing-2, 0.5rem);
+  border: 0;
+  border-radius: var(--rounded-lg, 0.5rem);
+  background: transparent;
+  color: var(--color-slate-800, #1e293b);
+  font-size: 13px;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+}
+
+.playground-thread-menu-action i {
+  width: 16px;
+  flex: 0 0 16px;
+  color: var(--color-slate-700, #334155);
+  font-size: 13px;
+  text-align: center;
+}
+
+.playground-thread-menu-action:hover,
+.playground-thread-menu-action:focus-visible {
+  background: var(--color-slate-100, #f1f5f9);
+  outline: none;
+}
+
+.playground-thread-menu-action.is-danger {
+  margin-top: var(--spacing-1, 0.25rem);
+  padding-top: var(--spacing-1, 0.25rem);
+  border-top: 1px solid var(--color-slate-200, #e2e8f0);
+  border-radius: 0 0 var(--rounded-lg, 0.5rem) var(--rounded-lg, 0.5rem);
+  color: var(--color-red-600, #dc2626);
+}
+
+.playground-thread-menu-action.is-danger i {
+  color: var(--color-red-600, #dc2626);
+}
+
+.playground-thread-menu-action.is-danger:hover,
+.playground-thread-menu-action.is-danger:focus-visible {
+  background: var(--color-red-50, #fef2f2);
 }
 
 .playground-prompt-item {
   width: 100%;
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 32px 32px;
+  grid-template-columns: minmax(0, 1fr) 32px;
   align-items: start;
   gap: var(--spacing-1, 0.25rem);
   padding: var(--spacing-1, 0.25rem);
@@ -410,7 +483,8 @@
 }
 
 .playground-prompt-item:hover,
-.playground-prompt-item:focus-within {
+.playground-prompt-item:focus-within,
+.playground-prompt-item.is-preview-active {
   background: #ffffff;
   border-color: rgba(var(--playground-accent-rgb), 0.2);
   box-shadow:
@@ -418,7 +492,6 @@
     0 2px 4px -2px rgba(var(--playground-accent-rgb), 0.08);
 }
 
-.playground-prompt-item.is-preview-active,
 .playground-prompt-item.is-selected {
   background: #ffffff;
   border-color: var(--playground-accent-border);
@@ -433,10 +506,10 @@
 }
 
 .playground-prompt-draft {
+  width: 100%;
   min-width: 0;
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-2-5, 0.625rem);
   padding: var(--spacing-1-5, 0.375rem);
   border: 0;
   border-radius: var(--rounded-lg, 0.5rem);
@@ -450,7 +523,6 @@
   outline: none;
 }
 
-.playground-prompt-use,
 .playground-prompt-delete {
   width: 32px;
   height: 32px;
@@ -466,29 +538,6 @@
     opacity 150ms cubic-bezier(0, 0, 0.2, 1),
     background 150ms cubic-bezier(0, 0, 0.2, 1),
     color 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.playground-prompt-use {
-  background: var(--playground-accent-soft);
-  color: var(--playground-accent-hover);
-}
-
-.playground-prompt-use:hover,
-.playground-prompt-use:focus-visible {
-  background: var(--playground-accent-muted);
-  color: var(--playground-accent-active);
-  outline: none;
-}
-
-.playground-prompt-use.is-selected {
-  background: var(--playground-accent);
-  color: #ffffff;
-}
-
-.playground-prompt-use.is-selected:hover,
-.playground-prompt-use.is-selected:focus-visible {
-  background: var(--playground-accent-hover);
-  color: #ffffff;
 }
 
 .playground-prompt-delete {
@@ -508,24 +557,6 @@
   outline: none;
 }
 
-.playground-prompt-icon {
-  width: 26px;
-  height: 26px;
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--rounded-lg, 0.5rem);
-  background: var(--color-slate-100, #f1f5f9);
-  color: var(--color-slate-700, #334155);
-  font-size: 12px;
-}
-
-.playground-prompt-item--visual .playground-prompt-icon {
-  background: var(--color-pink-50, #fdf2f8);
-  color: var(--color-pink-600, #db2777);
-}
-
 .playground-prompt-copy {
   min-width: 0;
   flex: 1 1 auto;
@@ -542,8 +573,8 @@
   flex: 0 0 auto;
   padding: 2px 6px;
   border-radius: 999px;
-  background: var(--color-slate-100, #f1f5f9);
-  color: var(--color-slate-700, #334155);
+  background: var(--playground-accent-soft);
+  color: var(--playground-accent-hover);
   font-size: 10px;
   font-weight: 700;
   line-height: 1.2;
@@ -623,7 +654,11 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--spacing-1-5, 0.375rem);
-  margin-bottom: var(--spacing-2, 0.5rem);
+  margin: calc(var(--spacing-3, 0.75rem) * -1) calc(var(--spacing-3, 0.75rem) * -1)
+    var(--spacing-2, 0.5rem);
+  padding: var(--spacing-2, 0.5rem) var(--spacing-3, 0.75rem);
+  border-bottom: 1px solid rgba(var(--playground-accent-rgb), 0.1);
+  background: rgba(var(--playground-accent-rgb), 0.055);
   color: var(--color-slate-900, #0f172a);
   font-size: 12px;
   font-weight: 700;
@@ -1004,9 +1039,9 @@
 .playground-config-link:focus-visible,
 .playground-promptlab-link:focus-visible,
 .playground-thread-select:focus-visible,
-.playground-thread-delete:focus-visible,
+.playground-thread-menu-toggle:focus-visible,
+.playground-thread-menu-action:focus-visible,
 .playground-prompt-draft:focus-visible,
-.playground-prompt-use:focus-visible,
 .playground-prompt-delete:focus-visible,
 .playground-prompt-empty-action:focus-visible,
 .playground-reset-tuning:focus-visible,
@@ -1679,26 +1714,15 @@
   }
 
   .playground-thread-item {
-    min-height: 80px;
     gap: 2px;
     padding: 2px;
   }
 
   .playground-thread-select {
-    min-height: 76px;
-    gap: var(--spacing-1-5, 0.375rem);
     padding: var(--spacing-2, 0.5rem) var(--spacing-1-5, 0.375rem);
   }
 
-  .playground-thread-icon {
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
-    font-size: 10px;
-  }
-
   .playground-thread-copy {
-    display: block;
     min-width: 0;
   }
 
@@ -1709,15 +1733,15 @@
   }
 
   .playground-thread-meta {
-    max-width: 100%;
-    margin-top: 4px;
+    width: calc(100% - 2rem);
+    margin-top: 3px;
     font-size: 10px;
     line-height: 1.35;
   }
 
-  .playground-thread-delete {
-    width: 32px;
-    height: 32px;
+  .playground-thread-menu-toggle {
+    width: 28px;
+    height: 24px;
     font-size: 10px;
   }
 
@@ -1727,9 +1751,9 @@
   .playground-config-link,
   .playground-promptlab-link,
   .playground-thread-item,
-  .playground-thread-icon,
+  .playground-thread-menu-toggle,
+  .playground-thread-menu-action,
   .playground-prompt-item,
-  .playground-prompt-icon,
   .playground-prompt-badge,
   .playground-prompt-preview-popover,
   .playground-prompt-empty,
@@ -1741,7 +1765,6 @@
   .playground-field textarea,
   .playground-reset-tuning,
   .playground-prompt-draft,
-  .playground-prompt-use,
   .playground-pending-status {
     border-radius: 8px !important;
   }
@@ -1753,17 +1776,13 @@
     white-space: nowrap;
   }
 
-  .playground-rail-icon,
-  .playground-thread-icon,
-  .playground-prompt-icon {
+  .playground-rail-icon {
     border: 1px solid var(--playground-accent-border);
     background: var(--playground-accent-soft);
     box-shadow: none;
     color: var(--playground-accent);
   }
 
-  .playground-new-thread,
-  .playground-search-chats,
   .playground-config-link,
   .playground-promptlab-link {
     background: rgba(255, 255, 255, 0.72);
@@ -1772,10 +1791,33 @@
     color: var(--color-slate-700, #334155);
   }
 
+  .playground-new-thread,
+  .playground-search-chats {
+    background: rgba(255, 255, 255, 0.62);
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--color-slate-700, #334155);
+  }
+
   .playground-new-thread:hover,
   .playground-search-chats:hover,
   .playground-new-thread:focus-visible,
-  .playground-search-chats:focus-visible,
+  .playground-search-chats:focus-visible {
+    background: #ffffff;
+    border-color: rgba(var(--playground-accent-rgb), 0.2);
+    color: var(--color-slate-900, #0f172a);
+    box-shadow:
+      0 4px 6px -1px rgba(var(--playground-accent-rgb), 0.08),
+      0 2px 4px -2px rgba(var(--playground-accent-rgb), 0.08);
+  }
+
+  .playground-new-thread:hover i,
+  .playground-search-chats:hover i,
+  .playground-new-thread:focus-visible i,
+  .playground-search-chats:focus-visible i {
+    color: var(--playground-accent-hover);
+  }
+
   .playground-config-link:hover,
   .playground-promptlab-link:hover,
   .playground-config-link:focus-visible,
@@ -1788,6 +1830,7 @@
   .playground-thread-item:focus-within,
   .playground-prompt-item:hover,
   .playground-prompt-item:focus-within,
+  .playground-prompt-item.is-preview-active,
   .playground-reset-tuning:hover {
     box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
   }
@@ -1802,6 +1845,7 @@
   .playground-thread-item:focus-within,
   .playground-prompt-item:hover,
   .playground-prompt-item:focus-within,
+  .playground-prompt-item.is-preview-active,
   .playground-top-icon:hover,
   .playground-tuning-panel summary:hover,
   .playground-reset-tuning:hover {
@@ -1811,7 +1855,6 @@
   }
 
   .playground-thread-item.is-active,
-  .playground-prompt-item.is-preview-active,
   .playground-prompt-item.is-selected {
     background: var(--surface-card, #ffffff);
     border-color: var(--playground-accent-border);

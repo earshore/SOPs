@@ -55,6 +55,8 @@ export interface PlaygroundThread {
   messages: DeepChatMessage[];
   draftText?: string;
   promptDraftId?: string;
+  customTitle?: string;
+  pinnedAt?: number;
   createdAt: number;
   updatedAt: number;
 }

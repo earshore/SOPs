@@ -1,58 +1,138 @@
 import { setSafeHtml } from '@/common/utils/security';
+import type { PromptHistoryItem } from '@/types/state';
 import type { PendingPlaygroundRequest } from './requestLifecycle';
 import { getActivePromptPreviewId, hidePromptPreview, renderPromptPreview } from './promptPreview';
 import { formatPromptDraftMeta, getPromptDrafts } from './promptDrafts';
-import type { PlaygroundThreadStore } from './types';
+import type { PlaygroundThread, PlaygroundThreadStore } from './types';
 import { escapeHTML, formatThreadTime, truncateText } from './utils';
 
 const PROMPT_EMPTY_CLASS = 'is-prompt-empty';
 
+export interface ThreadMenuState {
+  threadId: string;
+  placement: 'above' | 'below';
+}
+
 export function renderThreadList(
   container: HTMLElement,
   threadStore: PlaygroundThreadStore,
-  pendingRequests: Map<string, PendingPlaygroundRequest>
+  pendingRequests: Map<string, PendingPlaygroundRequest>,
+  threadMenuState: ThreadMenuState | null = null
 ): void {
   const list = container.querySelector<HTMLElement>('#playground-thread-list');
   if (!list) {
     return;
   }
 
-  const sortedThreads = [...threadStore.threads].sort((a, b) => b.updatedAt - a.updatedAt);
+  const sortedThreads = sortThreadsForHistory(threadStore.threads);
   setSafeHtml(
     list,
     sortedThreads
-      .map(thread => {
-        const isActive = thread.id === threadStore.activeThreadId;
-        const messageCount = thread.messages.length;
-        const pendingRequest = pendingRequests.get(thread.id);
-        const hasDraft = !!thread.draftText?.trim();
-        const meta = pendingRequest
-          ? `${pendingRequest.isSettled ? '输出中' : '生成中'} · ${formatThreadTime(pendingRequest.updatedAt)}`
-          : hasDraft
-            ? `草稿 · ${formatThreadTime(thread.updatedAt)}`
-            : messageCount > 0
-              ? `${messageCount} 条 · ${formatThreadTime(thread.updatedAt)}`
-              : `空会话 · ${formatThreadTime(thread.updatedAt)}`;
-
-        return `
-      <div class="playground-thread-item${isActive ? ' is-active' : ''}">
-        <button class="playground-thread-select" type="button" data-thread-id="${thread.id}">
-          <span class="playground-thread-icon">
-            <i class="far fa-message"></i>
-          </span>
-          <span class="playground-thread-copy">
-            <span class="playground-thread-name">${escapeHTML(thread.title)}</span>
-            <span class="playground-thread-meta">${escapeHTML(meta)}</span>
-          </span>
-        </button>
-        <button class="playground-thread-delete" type="button" data-delete-thread-id="${thread.id}" aria-label="删除会话 ${escapeHTML(thread.title)}" title="删除会话">
-          <i class="fas fa-trash"></i>
-        </button>
-      </div>
-    `;
-      })
+      .map(thread =>
+        renderThreadItem(thread, threadStore.activeThreadId, pendingRequests, threadMenuState)
+      )
       .join('')
   );
+}
+
+function sortThreadsForHistory(threads: PlaygroundThread[]): PlaygroundThread[] {
+  return [...threads].sort((a, b) => {
+    const pinnedDelta = (b.pinnedAt || 0) - (a.pinnedAt || 0);
+    return pinnedDelta || b.updatedAt - a.updatedAt;
+  });
+}
+
+function renderThreadItem(
+  thread: PlaygroundThread,
+  activeThreadId: string,
+  pendingRequests: Map<string, PendingPlaygroundRequest>,
+  threadMenuState: ThreadMenuState | null
+): string {
+  const isActive = thread.id === activeThreadId;
+  const isPinned = Boolean(thread.pinnedAt);
+  const isMenuOpen = thread.id === threadMenuState?.threadId;
+  const escapedThreadId = escapeHTML(thread.id);
+  const escapedTitle = escapeHTML(thread.title);
+
+  return `
+      <div class="${getThreadItemClassName(isActive, isPinned, isMenuOpen)}">
+        <button class="playground-thread-select" type="button" data-thread-id="${escapedThreadId}">
+          <span class="playground-thread-copy">
+            <span class="playground-thread-name">${escapedTitle}</span>
+            <span class="playground-thread-meta">${escapeHTML(getThreadMeta(thread, pendingRequests.get(thread.id)))}</span>
+          </span>
+        </button>
+        <button class="playground-thread-menu-toggle" type="button" data-thread-menu-id="${escapedThreadId}" aria-label="打开会话 ${escapedTitle} 的更多操作" aria-haspopup="menu" aria-expanded="${String(isMenuOpen)}" aria-controls="playground-thread-menu-${escapedThreadId}" title="更多操作">
+          <i class="fas fa-ellipsis" aria-hidden="true"></i>
+        </button>
+        ${renderThreadMenu(thread, isPinned, isMenuOpen, threadMenuState)}
+      </div>
+    `;
+}
+
+function getThreadItemClassName(isActive: boolean, isPinned: boolean, isMenuOpen: boolean): string {
+  return [
+    'playground-thread-item',
+    isActive ? 'is-active' : '',
+    isPinned ? 'is-pinned' : '',
+    isMenuOpen ? 'is-menu-open' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
+function getThreadMeta(
+  thread: PlaygroundThread,
+  pendingRequest: PendingPlaygroundRequest | undefined
+): string {
+  if (pendingRequest) {
+    const stateLabel = pendingRequest.isSettled ? '输出中' : '生成中';
+    return `${stateLabel} · ${formatThreadTime(pendingRequest.updatedAt)}`;
+  }
+
+  if (thread.draftText?.trim()) {
+    return `草稿 · ${formatThreadTime(thread.updatedAt)}`;
+  }
+
+  if (thread.messages.length > 0) {
+    return `${thread.messages.length} 条 · ${formatThreadTime(thread.updatedAt)}`;
+  }
+
+  return `空会话 · ${formatThreadTime(thread.updatedAt)}`;
+}
+
+function renderThreadMenu(
+  thread: PlaygroundThread,
+  isPinned: boolean,
+  isMenuOpen: boolean,
+  threadMenuState: ThreadMenuState | null
+): string {
+  if (!isMenuOpen || !threadMenuState) {
+    return '';
+  }
+
+  const escapedThreadId = escapeHTML(thread.id);
+  const pinLabel = isPinned ? '取消置顶' : '置顶聊天';
+  const placementClass =
+    threadMenuState.placement === 'above'
+      ? ' playground-thread-menu--above'
+      : ' playground-thread-menu--below';
+
+  return `
+        <div id="playground-thread-menu-${escapedThreadId}" class="playground-thread-menu${placementClass}" role="menu">
+          <button class="playground-thread-menu-action" type="button" role="menuitem" data-thread-menu-action="rename" data-thread-menu-thread-id="${escapedThreadId}">
+            <i class="fas fa-pen" aria-hidden="true"></i>
+            <span>重命名</span>
+          </button>
+          <button class="playground-thread-menu-action" type="button" role="menuitem" data-thread-menu-action="pin" data-thread-menu-thread-id="${escapedThreadId}">
+            <i class="fas fa-thumbtack" aria-hidden="true"></i>
+            <span>${pinLabel}</span>
+          </button>
+          <button class="playground-thread-menu-action is-danger" type="button" role="menuitem" data-thread-menu-action="delete" data-thread-menu-thread-id="${escapedThreadId}">
+            <i class="fas fa-trash" aria-hidden="true"></i>
+            <span>删除</span>
+          </button>
+        </div>`;
 }
 
 export function renderPromptDraftList(
@@ -87,43 +167,7 @@ export function renderPromptDraftList(
   setSafeHtml(
     list,
     prompts
-      .map(prompt => {
-        const typeLabel = prompt.promptType === 'visual' ? 'Visual' : 'Listing';
-        const iconClass = prompt.promptType === 'visual' ? 'fas fa-palette' : 'fas fa-pen-nib';
-        const meta = formatPromptDraftMeta(prompt);
-        const snippet = truncateText(prompt.prompt.replace(/\s+/g, ' ').trim(), 70);
-        const previewAriaLabel = `预览 ${typeLabel} Prompt`;
-        const isPreviewActive = prompt.id === activePromptPreviewId;
-        const isSelected = prompt.id === selectedPromptDraftId;
-        const useAriaLabel = isSelected
-          ? `当前会话已使用 ${typeLabel} Prompt`
-          : `创建新会话并填入 ${typeLabel} Prompt`;
-        const useTitle = isSelected ? '当前会话已使用' : '使用 Prompt';
-        const useIconClass = isSelected ? 'fas fa-check' : 'fas fa-arrow-right-to-bracket';
-
-        return `
-      <div class="playground-prompt-item playground-prompt-item--${typeLabel.toLowerCase()}${isPreviewActive ? ' is-preview-active' : ''}${isSelected ? ' is-selected' : ''}"${isSelected ? ' aria-current="true"' : ''}>
-        <button class="playground-prompt-draft" type="button" data-preview-prompt-id="${escapeHTML(prompt.id)}" aria-label="${escapeHTML(previewAriaLabel)}" aria-describedby="playground-prompt-preview-popover">
-          <span class="playground-prompt-icon">
-            <i class="${iconClass}" aria-hidden="true"></i>
-          </span>
-          <span class="playground-prompt-copy">
-            <span class="playground-prompt-row">
-              <span class="playground-prompt-badge">${typeLabel}</span>
-              <span class="playground-prompt-meta">${escapeHTML(meta)}</span>
-            </span>
-            <span class="playground-prompt-snippet">${escapeHTML(snippet)}</span>
-          </span>
-        </button>
-        <button class="playground-prompt-use${isSelected ? ' is-selected' : ''}" type="button" data-use-prompt-draft-id="${escapeHTML(prompt.id)}" aria-label="${escapeHTML(useAriaLabel)}" aria-pressed="${isSelected ? 'true' : 'false'}" title="${escapeHTML(useTitle)}">
-          <i class="${useIconClass}" aria-hidden="true"></i>
-        </button>
-        <button class="playground-prompt-delete" type="button" data-delete-prompt-draft-id="${escapeHTML(prompt.id)}" aria-label="删除 ${typeLabel} Prompt" title="删除 Prompt">
-          <i class="fas fa-trash" aria-hidden="true"></i>
-        </button>
-      </div>
-    `;
-      })
+      .map(prompt => renderPromptDraftItem(prompt, activePromptPreviewId, selectedPromptDraftId))
       .join('')
   );
 
@@ -135,6 +179,57 @@ export function renderPromptDraftList(
   } else if (activePromptPreviewId) {
     hidePromptPreview(container);
   }
+}
+
+function renderPromptDraftItem(
+  prompt: PromptHistoryItem,
+  activePromptPreviewId: string | null,
+  selectedPromptDraftId: string | undefined
+): string {
+  const typeLabel = getPromptDraftTypeLabel(prompt);
+  const isPreviewActive = prompt.id === activePromptPreviewId;
+  const isSelected = prompt.id === selectedPromptDraftId;
+  const promptId = escapeHTML(prompt.id);
+  const actionLabel = isSelected
+    ? `当前会话已使用 ${typeLabel} Prompt`
+    : `使用 ${typeLabel} Prompt`;
+  const snippet = truncateText(prompt.prompt.replace(/\s+/g, ' ').trim(), 70);
+
+  return `
+      <div class="${getPromptDraftItemClassName(typeLabel, isPreviewActive, isSelected)}"${isSelected ? ' aria-current="true"' : ''}>
+        <button class="playground-prompt-draft" type="button" data-preview-prompt-id="${promptId}" data-use-prompt-draft-id="${promptId}" aria-label="${escapeHTML(actionLabel)}" aria-pressed="${String(isSelected)}" aria-describedby="playground-prompt-preview-popover">
+          <span class="playground-prompt-copy">
+            <span class="playground-prompt-row">
+              <span class="playground-prompt-badge">${typeLabel}</span>
+              <span class="playground-prompt-meta">${escapeHTML(formatPromptDraftMeta(prompt))}</span>
+            </span>
+            <span class="playground-prompt-snippet">${escapeHTML(snippet)}</span>
+          </span>
+        </button>
+        <button class="playground-prompt-delete" type="button" data-delete-prompt-draft-id="${promptId}" aria-label="删除 ${typeLabel} Prompt" title="删除 Prompt">
+          <i class="fas fa-trash" aria-hidden="true"></i>
+        </button>
+      </div>
+    `;
+}
+
+function getPromptDraftTypeLabel(prompt: PromptHistoryItem): string {
+  return prompt.promptType === 'visual' ? 'Visual' : 'Listing';
+}
+
+function getPromptDraftItemClassName(
+  typeLabel: string,
+  isPreviewActive: boolean,
+  isSelected: boolean
+): string {
+  return [
+    'playground-prompt-item',
+    `playground-prompt-item--${typeLabel.toLowerCase()}`,
+    isPreviewActive ? 'is-preview-active' : '',
+    isSelected ? 'is-selected' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 }
 
 function syncPromptEmptyState(container: HTMLElement, isEmpty: boolean): void {
