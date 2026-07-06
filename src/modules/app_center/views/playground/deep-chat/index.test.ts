@@ -1,14 +1,25 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const deepChatTemplate = `
   <div class="playground-shell">
     <div class="playground-page">
       <aside id="playground-thread-rail" class="playground-thread-rail">
-        <button id="playground-clear-chat" type="button">New</button>
+        <div class="playground-thread-actions">
+          <button id="playground-clear-chat" class="playground-new-thread" type="button">
+            <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+            <span>New Chat</span>
+          </button>
+          <button id="playground-search-chats" class="playground-search-chats" type="button">
+            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+            <span>Search Chats</span>
+          </button>
+        </div>
+        <h3 class="playground-panel-title">Recents</h3>
         <div id="playground-thread-list"></div>
       </aside>
       <section>
-        <button id="playground-toggle-rail" type="button" aria-expanded="true"></button>
+        <button id="playground-toggle-rail" type="button" aria-expanded="true" aria-label="Collapse Recents"></button>
         <select id="playground-model-select"></select>
         <span id="playground-provider-status"></span>
         <button id="playground-refresh-config" type="button"></button>
@@ -28,12 +39,28 @@ const deepChatTemplate = `
         </div>
       </section>
       <aside id="playground-prompt-rail">
+        <h3 class="playground-panel-title playground-panel-title--prompt">Prompts</h3>
         <div id="playground-prompt-list"></div>
         <div id="playground-prompt-preview-popover" aria-hidden="true">
           <div class="playground-prompt-preview-title"></div>
           <div class="playground-prompt-preview-body"></div>
         </div>
       </aside>
+    </div>
+    <div id="playground-chat-search-modal" class="playground-chat-search-modal" aria-hidden="true" hidden>
+      <div class="playground-chat-search-backdrop" data-chat-search-close></div>
+      <section class="playground-chat-search-dialog" role="dialog" aria-modal="true" aria-label="Search Chats">
+        <div class="playground-chat-search-bar">
+          <input id="playground-chat-search-input" type="search" aria-label="Search Chats">
+          <button id="playground-chat-search-close" type="button" data-chat-search-close>
+            Close
+          </button>
+        </div>
+        <button class="playground-chat-search-new" type="button" data-chat-search-new>
+          New Chat
+        </button>
+        <div id="playground-chat-search-results" class="playground-chat-search-results" aria-live="polite"></div>
+      </section>
     </div>
   </div>
 `;
@@ -373,6 +400,28 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe('deep-chat playground template copy', () => {
+  it('uses the requested sidebar labels, New Chat icon, and search modal copy', () => {
+    const template = readFileSync(
+      'src/modules/app_center/views/playground/deep-chat/template.html',
+      'utf8'
+    );
+
+    expect(template).toContain('class="fa-regular fa-pen-to-square"');
+    expect(template).toContain('<span>New Chat</span>');
+    expect(template).toContain('<span>Search Chats</span>');
+    expect(template).toContain('>Recents</h3>');
+    expect(template).toContain('>Prompts</h3>');
+    expect(template).toContain('id="playground-chat-search-modal"');
+    expect(template).toContain('aria-label="Search Chats"');
+    expect(template).toContain('class="playground-chat-search-bar"');
+    expect(template).toContain('data-chat-search-new');
+    expect(template).not.toContain('新建会话');
+    expect(template).not.toContain('历史会话');
+    expect(template).not.toContain('生成的 Prompt');
+  });
+});
+
 describe('deep-chat playground module', () => {
   it('mounts stored threads, model config, prompt history, and tuning controls', async () => {
     const container = document.createElement('main');
@@ -448,6 +497,89 @@ describe('deep-chat playground module', () => {
 
     unmount();
     expect(window.cancelAnimationFrame).toHaveBeenCalled();
+  });
+});
+
+describe('deep-chat playground search chats', () => {
+  it('opens Search Chats, filters live results, and switches to a matching chat', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount } = await importDeepChat();
+
+    await mount(container);
+
+    queryRequired<HTMLButtonElement>(container, '#playground-search-chats').click();
+    const modal = queryRequired<HTMLElement>(document, '#playground-chat-search-modal');
+    const input = queryRequired<HTMLInputElement>(document, '#playground-chat-search-input');
+    const results = queryRequired<HTMLElement>(document, '#playground-chat-search-results');
+
+    expect(modal.hidden).toBe(false);
+    expect(modal.parentElement).toBe(document.body);
+    expect(results.textContent).toContain('Today');
+    expect(results.textContent).toContain('Existing thread');
+    expect(results.textContent).toContain('Other thread');
+
+    input.value = 'Other question';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(results.textContent).toContain('Search Results');
+    expect(results.textContent).toContain('Other thread');
+    expect(results.textContent).not.toContain('Existing thread');
+
+    queryRequired<HTMLButtonElement>(results, '[data-chat-search-thread-id="thread-2"]').click();
+
+    expect(modal.hidden).toBe(true);
+    expect(container.querySelector('.playground-thread-item.is-active')?.textContent).toContain(
+      'Other thread'
+    );
+    expect(getChat(container).history).toEqual([
+      expect.objectContaining({ role: 'user', text: 'Other question' }),
+    ]);
+
+    unmount();
+    expect(document.querySelector('#playground-chat-search-modal')).toBeNull();
+  });
+
+  it('closes Search Chats from blank areas without breaking New Chat or result clicks', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount } = await importDeepChat();
+
+    await mount(container);
+
+    const openButton = queryRequired<HTMLButtonElement>(container, '#playground-search-chats');
+    const modal = queryRequired<HTMLElement>(document, '#playground-chat-search-modal');
+    const input = queryRequired<HTMLInputElement>(document, '#playground-chat-search-input');
+    const results = queryRequired<HTMLElement>(document, '#playground-chat-search-results');
+
+    openButton.click();
+    expect(modal.hidden).toBe(false);
+
+    input.click();
+    expect(modal.hidden).toBe(false);
+
+    results.click();
+    expect(modal.hidden).toBe(true);
+
+    openButton.click();
+    queryRequired<HTMLButtonElement>(document, '[data-chat-search-new]').click();
+    expect(modal.hidden).toBe(true);
+    expect(container.querySelector('.playground-thread-item.is-active')?.textContent).toContain(
+      'New Thread'
+    );
+
+    openButton.click();
+    queryRequired<HTMLElement>(document, '.playground-chat-search-backdrop').click();
+    expect(modal.hidden).toBe(true);
+
+    openButton.click();
+    queryRequired<HTMLButtonElement>(results, '[data-chat-search-thread-id="thread-2"]').click();
+    expect(modal.hidden).toBe(true);
+    expect(container.querySelector('.playground-thread-item.is-active')?.textContent).toContain(
+      'Other thread'
+    );
+
+    unmount();
   });
 });
 

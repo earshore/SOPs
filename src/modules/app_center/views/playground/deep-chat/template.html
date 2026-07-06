@@ -61,14 +61,24 @@
         </h1>
       </div>
 
-      <button id="playground-clear-chat" class="playground-new-thread" type="button">
-        <i class="fas fa-plus" aria-hidden="true"></i>
-        <span>新建会话</span>
-      </button>
+      <div class="playground-thread-actions">
+        <button id="playground-clear-chat" class="playground-new-thread" type="button">
+          <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+          <span>新建会话</span>
+        </button>
+        <button id="playground-search-chats" class="playground-search-chats" type="button">
+          <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+          <span>搜索会话</span>
+        </button>
+      </div>
 
       <div class="playground-thread-list-wrap">
-        <h3 class="playground-panel-title">历史会话</h3>
-        <div id="playground-thread-list" class="playground-thread-list" aria-label="历史会话"></div>
+        <h3 class="playground-panel-title">最近会话</h3>
+        <div
+          id="playground-thread-list"
+          class="playground-thread-list"
+          aria-label="最近会话"
+        ></div>
       </div>
     </aside>
 
@@ -79,8 +89,8 @@
             id="playground-toggle-rail"
             class="playground-top-icon"
             type="button"
-            title="收起历史会话"
-            aria-label="收起历史会话"
+            title="收起最近会话"
+            aria-label="收起最近会话"
             aria-controls="playground-thread-rail"
             aria-expanded="true"
           >
@@ -99,9 +109,21 @@
             class="playground-provider-status"
             aria-live="polite"
           ></span>
+          <button
+            id="playground-open-settings"
+            class="playground-config-link"
+            type="button"
+            hidden
+          >
+            配置模型
+          </button>
         </div>
 
         <div class="playground-top-actions">
+          <button id="playground-open-promptlab" class="playground-promptlab-link" type="button">
+            <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+            <span>生成 Prompt</span>
+          </button>
           <button
             id="playground-refresh-config"
             class="playground-top-icon"
@@ -177,7 +199,7 @@
 
     <aside id="playground-prompt-rail" class="playground-prompt-rail" aria-label="Prompt 生成记录">
       <div class="playground-prompt-list-wrap">
-        <h3 class="playground-panel-title playground-panel-title--prompt">生成的 Prompt</h3>
+        <h3 class="playground-panel-title playground-panel-title--prompt">Prompt</h3>
         <div
           id="playground-prompt-list"
           class="playground-prompt-list"
@@ -188,12 +210,60 @@
       <div
         id="playground-prompt-preview-popover"
         class="playground-prompt-preview-popover"
-        role="tooltip"
+        role="dialog"
+        aria-label="Prompt 预览"
+        aria-modal="false"
         aria-hidden="true"
       >
         <div class="playground-prompt-preview-title"></div>
         <div class="playground-prompt-preview-body"></div>
       </div>
     </aside>
+  </div>
+
+  <div
+    id="playground-chat-search-modal"
+    class="playground-chat-search-modal"
+    aria-hidden="true"
+    hidden
+  >
+    <div class="playground-chat-search-backdrop" data-chat-search-close aria-hidden="true"></div>
+    <section
+      class="playground-chat-search-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-label="搜索会话"
+    >
+      <div class="playground-chat-search-bar">
+        <input
+          id="playground-chat-search-input"
+          class="playground-chat-search-input"
+          type="search"
+          aria-label="搜索会话"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="搜索会话..."
+        />
+        <button
+          id="playground-chat-search-close"
+          class="playground-chat-search-close"
+          type="button"
+          data-chat-search-close
+          aria-label="关闭搜索会话"
+          title="关闭搜索会话"
+        >
+          <i class="fas fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <button class="playground-chat-search-new" type="button" data-chat-search-new>
+        <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+        <span>新建会话</span>
+      </button>
+      <div
+        id="playground-chat-search-results"
+        class="playground-chat-search-results"
+        aria-live="polite"
+      ></div>
+    </section>
   </div>
 </div>

@@ -2,6 +2,7 @@ import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { showToast } from '@/common/ui/notifications';
+import { setSafeHtml } from '@/common/utils/security';
 import { callLLM, type ChatMessage } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
 import { LocalDataStore } from '@/services/localDataStore';
@@ -68,7 +69,9 @@ import type {
 import {
   createTextInputEvent,
   createThreadId,
+  escapeHTML,
   getFirstModel,
+  getMessageText,
   getThreadTitle,
   normalizeChatMessages,
   normalizeModels,
@@ -80,6 +83,19 @@ const nativeLoggerConsole = globalThis.console;
 const PENDING_ASSISTANT_PLACEHOLDER_TEXT = '正在生成回复...';
 const PENDING_DISPLAY_INTERVAL_MS = 32;
 const PENDING_DISPLAY_CHARS_PER_TICK = 6;
+const CHAT_SEARCH_FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+type ChatSearchRefs = {
+  modal: HTMLElement;
+  input: HTMLInputElement;
+  results: HTMLElement;
+  openButton: HTMLButtonElement | null;
+};
+
+type ChatSearchResult = {
+  thread: PlaygroundThread;
+};
 
 let cleanupCallbacks: Array<() => void> = [];
 let currentConfig: LLMProviderConfig | null = null;
@@ -176,6 +192,7 @@ export async function clearPlaygroundThreadStore(): Promise<void> {
   }
 
   renderThreadList(container, threadStore, pendingRequests);
+  refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
   syncPendingStatus(container);
 }
@@ -522,6 +539,7 @@ function bindControls(container: HTMLElement): void {
   bindModelControls(container, modelSelect, refreshButton, clearButton, railToggleButton);
   bindStopOverlayControl(container, stopButton);
   bindThreadControls(container, threadList, promptList);
+  bindChatSearchControls(container);
   bindTuningControls({
     systemPromptInput,
     temperatureInput,
@@ -636,6 +654,267 @@ function bindThreadControls(
   cleanupCallbacks.push(unsubscribePromptDrafts);
 }
 
+function bindChatSearchControls(container: HTMLElement): void {
+  const refs = getChatSearchRefs(container);
+  if (!refs) {
+    return;
+  }
+
+  portalChatSearchModal(refs.modal);
+  const { modal, input, openButton } = refs;
+
+  const onOpen = (): void => {
+    openChatSearchModal(container);
+  };
+  openButton?.addEventListener('click', onOpen);
+  cleanupCallbacks.push(() => openButton?.removeEventListener('click', onOpen));
+
+  const onInput = (): void => {
+    renderChatSearchResults(container);
+  };
+  input.addEventListener('input', onInput);
+  cleanupCallbacks.push(() => input.removeEventListener('input', onInput));
+
+  const onModalClick = (event: MouseEvent): void => {
+    const target = event.target as HTMLElement | null;
+    if (!target?.closest('.playground-chat-search-dialog')) {
+      closeChatSearchModal(container);
+      return;
+    }
+
+    if (target.closest('[data-chat-search-close]')) {
+      closeChatSearchModal(container);
+      return;
+    }
+
+    const newChatButton = target.closest('[data-chat-search-new]');
+    if (newChatButton) {
+      createThread(container);
+      closeChatSearchModal(container);
+      return;
+    }
+
+    const resultButton = target.closest<HTMLButtonElement>('[data-chat-search-thread-id]');
+    const threadId = resultButton?.dataset.chatSearchThreadId;
+    if (threadId) {
+      switchThread(container, threadId);
+      closeChatSearchModal(container);
+      return;
+    }
+
+    if (target.closest('.playground-chat-search-bar')) {
+      return;
+    }
+
+    closeChatSearchModal(container);
+  };
+  modal.addEventListener('click', onModalClick);
+  cleanupCallbacks.push(() => modal.removeEventListener('click', onModalClick));
+
+  const onDocumentKeydown = (event: KeyboardEvent): void => {
+    if (modal.hidden) {
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeChatSearchModal(container);
+      return;
+    }
+    if (event.key === 'Tab') {
+      keepChatSearchFocus(modal, event);
+    }
+  };
+  document.addEventListener('keydown', onDocumentKeydown);
+  cleanupCallbacks.push(() => document.removeEventListener('keydown', onDocumentKeydown));
+
+  renderChatSearchResults(container);
+}
+
+function portalChatSearchModal(modal: HTMLElement): void {
+  const body = modal.ownerDocument.body;
+  if (modal.parentElement === body) {
+    return;
+  }
+
+  body.append(modal);
+  cleanupCallbacks.push(() => modal.remove());
+}
+
+function openChatSearchModal(container: HTMLElement): void {
+  const refs = getChatSearchRefs(container);
+  if (!refs) {
+    return;
+  }
+
+  saveActiveThreadDraft(container);
+  refs.input.value = '';
+  renderChatSearchResults(container);
+  refs.modal.hidden = false;
+  refs.modal.classList.add('is-visible');
+  refs.modal.setAttribute('aria-hidden', 'false');
+  window.setTimeout(() => {
+    if (refs.modal.hidden) {
+      return;
+    }
+    refs.input.focus();
+    refs.input.select();
+  }, 0);
+}
+
+function closeChatSearchModal(container: HTMLElement): void {
+  const refs = getChatSearchRefs(container);
+  if (!refs || refs.modal.hidden) {
+    return;
+  }
+
+  refs.modal.hidden = true;
+  refs.modal.classList.remove('is-visible');
+  refs.modal.setAttribute('aria-hidden', 'true');
+  refs.openButton?.focus();
+}
+
+function renderChatSearchResults(container: HTMLElement): void {
+  const refs = getChatSearchRefs(container);
+  if (!refs) {
+    return;
+  }
+
+  const query = refs.input.value.trim();
+  const results = getChatSearchResults(query);
+  if (results.length === 0) {
+    setSafeHtml(
+      refs.results,
+      `
+      <div class="playground-chat-search-empty">
+        No chats found
+      </div>
+    `
+    );
+    return;
+  }
+
+  const groupLabel = query ? 'Search Results' : 'Today';
+
+  setSafeHtml(
+    refs.results,
+    `
+    <div class="playground-chat-search-group">${escapeHTML(groupLabel)}</div>
+    <div class="playground-chat-search-result-list">
+      ${results
+        .map(({ thread }) => {
+          const isActive = thread.id === threadStore.activeThreadId;
+          const title = escapeHTML(thread.title);
+
+          return `
+        <button
+          class="playground-chat-search-result${isActive ? ' is-active' : ''}"
+          type="button"
+          data-chat-search-thread-id="${escapeHTML(thread.id)}"
+          aria-label="Open chat ${title}"
+        >
+          <span class="playground-chat-search-result-icon" aria-hidden="true">
+            <i class="far fa-message"></i>
+          </span>
+          <span class="playground-chat-search-result-copy">
+            <span class="playground-chat-search-result-title">${title}</span>
+          </span>
+        </button>
+      `;
+        })
+        .join('')}
+    </div>
+  `
+  );
+}
+
+function getChatSearchResults(query: string): ChatSearchResult[] {
+  const normalizedQuery = normalizeChatSearchText(query);
+  return [...threadStore.threads]
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .map((thread): ChatSearchResult | null => {
+      const matchedText = normalizedQuery
+        ? getThreadMatchedSearchText(thread, normalizedQuery)
+        : '';
+      if (normalizedQuery && !matchedText) {
+        return null;
+      }
+
+      return {
+        thread,
+      };
+    })
+    .filter((result): result is ChatSearchResult => result !== null);
+}
+
+function getThreadMatchedSearchText(thread: PlaygroundThread, normalizedQuery: string): string {
+  const searchableValues = [
+    thread.title,
+    thread.draftText || '',
+    ...thread.messages.map(message => getMessageText(message)),
+  ];
+
+  return (
+    searchableValues.find(value => normalizeChatSearchText(value).includes(normalizedQuery)) || ''
+  );
+}
+
+function normalizeChatSearchText(value: string): string {
+  return value.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function keepChatSearchFocus(modal: HTMLElement, event: KeyboardEvent): void {
+  const focusableElements = Array.from(
+    modal.querySelectorAll<HTMLElement>(CHAT_SEARCH_FOCUSABLE_SELECTOR)
+  ).filter(element => {
+    const style = window.getComputedStyle(element);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+  });
+
+  if (focusableElements.length === 0) {
+    return;
+  }
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+  if (event.shiftKey && document.activeElement === firstElement) {
+    event.preventDefault();
+    lastElement?.focus();
+  } else if (!event.shiftKey && document.activeElement === lastElement) {
+    event.preventDefault();
+    firstElement?.focus();
+  }
+}
+
+function refreshChatSearchResultsIfOpen(container: HTMLElement): void {
+  const refs = getChatSearchRefs(container);
+  if (refs && !refs.modal.hidden) {
+    renderChatSearchResults(container);
+  }
+}
+
+function getChatSearchRefs(container: HTMLElement): ChatSearchRefs | null {
+  const root = container.ownerDocument;
+  const modal =
+    container.querySelector<HTMLElement>('#playground-chat-search-modal') ||
+    root.querySelector<HTMLElement>('#playground-chat-search-modal');
+  const input =
+    container.querySelector<HTMLInputElement>('#playground-chat-search-input') ||
+    root.querySelector<HTMLInputElement>('#playground-chat-search-input');
+  const results =
+    container.querySelector<HTMLElement>('#playground-chat-search-results') ||
+    root.querySelector<HTMLElement>('#playground-chat-search-results');
+  if (!modal || !input || !results) {
+    return null;
+  }
+
+  return {
+    modal,
+    input,
+    results,
+    openButton: container.querySelector<HTMLButtonElement>('#playground-search-chats'),
+  };
+}
+
 function bindTuningControls(refs: TuningControlRefs): void {
   const { systemPromptInput, temperatureInput, temperatureValue, resetTuningButton, tuningPanel } =
     refs;
@@ -707,7 +986,7 @@ function syncThreadRailState(container: HTMLElement): void {
   const rail = container.querySelector<HTMLElement>('#playground-thread-rail');
   const toggle = container.querySelector<HTMLButtonElement>('#playground-toggle-rail');
   const isCollapsed = page?.classList.contains(THREAD_RAIL_COLLAPSED_CLASS) || false;
-  const expandedText = isCollapsed ? '展开历史会话' : '收起历史会话';
+  const expandedText = isCollapsed ? 'Expand Recents' : 'Collapse Recents';
 
   if (rail) {
     rail.setAttribute('aria-hidden', String(isCollapsed));
@@ -1118,6 +1397,7 @@ function createThread(container: HTMLElement, options: CreateThreadOptions = {})
   };
   persistThreadStoreNow();
   renderThreadList(container, threadStore, pendingRequests);
+  refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
   if (options.toastMessage !== null) {
     showToast(options.toastMessage || '已创建新的 Deep Chat 会话', { type: 'success' });
@@ -1214,6 +1494,7 @@ function switchThread(container: HTMLElement, threadId: string): void {
   };
   persistThreadStoreNow();
   renderThreadList(container, threadStore, pendingRequests);
+  refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
 }
 
@@ -1247,6 +1528,7 @@ function deleteThread(container: HTMLElement, threadId: string): void {
   threadStore = nextStore;
   persistThreadStoreNow();
   renderThreadList(container, threadStore, pendingRequests);
+  refreshChatSearchResultsIfOpen(container);
   if (shouldReplaceChat) {
     replaceChat(container);
   }
@@ -1274,6 +1556,7 @@ function renderMountedThreadList(): void {
   const container = getMountedRenderContainer();
   if (container) {
     renderThreadList(container, threadStore, pendingRequests);
+    refreshChatSearchResultsIfOpen(container);
   }
 }
 
@@ -1324,6 +1607,7 @@ function saveThreadMessages(
   persistThreadStoreNow();
   if (container) {
     renderThreadList(container, threadStore, pendingRequests);
+    refreshChatSearchResultsIfOpen(container);
     syncPendingStatus(container);
   }
 }
