@@ -2,7 +2,6 @@ import { showToast } from '@/common/ui/notifications';
 import { isSearchTermReportType } from '../columns/columns';
 import type { AnalysisResult } from './analysisEngine';
 import type { AnalysisFlowCallbacks } from './analysisFlowTypes';
-import { renderMappingStatus, setPpcStatus } from '../ui/reportControls';
 import { readAnalysisSettings, type AnalysisSettings } from '../settings/settings';
 import { setPasteInputError } from './analysisInput';
 
@@ -19,7 +18,7 @@ export function handleAnalysisError(
   if (fallbackResult) {
     setPasteInputError(container, '');
     callbacks.setAnalyzedRows(fallbackResult.rows);
-    renderMappingStatus(
+    callbacks.renderMappingStatus(
       container,
       fallbackResult.mapping,
       fallbackResult.totalRows,
@@ -33,7 +32,7 @@ export function handleAnalysisError(
 
   if (hasVisibleSearchTermResult(localResult, callbacks)) {
     setPasteInputError(container, '');
-    renderMappingStatus(
+    callbacks.renderMappingStatus(
       container,
       localResult.mapping,
       localResult.totalRows,
@@ -44,7 +43,7 @@ export function handleAnalysisError(
     callbacks.setAnalyzedRows([]);
     callbacks.renderResults(container, []);
     setPasteInputError(container, message);
-    setPpcStatus(container, `分析失败：${message}`, 'error');
+    callbacks.setStatus(container, `分析失败：${message}`, 'error');
   }
   showToast('分析失败', { type: 'error', description: message });
 }

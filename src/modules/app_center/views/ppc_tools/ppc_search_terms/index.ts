@@ -21,7 +21,7 @@ import {
 import { getGrowthExportFilter, getWasteExportFilter } from './utils/filters';
 import { getInput, getTextarea, setAnalyzeButtonState, setText } from './ui/dom';
 import { bindPpcEvents } from './ui/eventBindings';
-import { setPpcStatus } from './ui/reportControls';
+import { renderMappingStatus, setPpcStatus } from './ui/reportControls';
 import { inferReportTypeFromText } from './analysis/reportTypeInference';
 import { createListenerRegistry } from './ui/listenerRegistry';
 import { initializeThresholdPanel, toggleThresholdPanel } from './settings/thresholdPanel';
@@ -40,6 +40,8 @@ import {
 } from './settings/settings';
 import { createActionListState } from './actions/actionListState';
 import type { AnalyzedRow, ReportType } from './types';
+import type { ColumnMapping } from './columns/columns';
+import type { AnalysisStatusTone } from './analysis/analysisFlowTypes';
 
 import '../style.css';
 
@@ -53,7 +55,25 @@ export { xlsxArrayBufferToDelimitedText } from './import/xlsx';
 let analyzedRows: AnalyzedRow[] = [];
 let sourceText = '';
 let activeReportType: ReportType = 'search_term';
+let isAnalyzing = false;
+let retainAnalyzerState = false;
+let activeContainer: HTMLElement | null = null;
 const listenerRegistry = createListenerRegistry();
+
+interface StatusSnapshot {
+  message: string;
+  tone: AnalysisStatusTone;
+}
+
+interface MappingStatusSnapshot {
+  mapping: ColumnMapping;
+  totalRows: number;
+  validRows: number;
+  status: string;
+}
+
+let statusSnapshot: StatusSnapshot | null = null;
+let mappingStatusSnapshot: MappingStatusSnapshot | null = null;
 
 const actionListState = createActionListState({
   getRows: () => analyzedRows,
@@ -70,11 +90,22 @@ const analysisFlowCallbacks: AnalysisFlowCallbacks = {
   setActiveReportType: reportType => {
     activeReportType = reportType;
   },
+  setAnalyzing: nextIsAnalyzing => {
+    setAnalyzerAnalyzing(nextIsAnalyzing);
+  },
+  setStatus: (container, message, tone = 'status') => {
+    setAnalyzerStatus(container, message, tone);
+  },
+  renderMappingStatus: (container, mapping, totalRows, validRows, status = '') => {
+    setAnalyzerMappingStatus(container, mapping, totalRows, validRows, status);
+  },
   resetResultControls: container => {
-    actionListState.resetControls(container);
+    const target = getRenderContainer(container);
+    if (target) actionListState.resetControls(target);
   },
   renderResults: (container, rows) => {
-    actionListState.render(container, rows);
+    const target = getRenderContainer(container);
+    if (target) actionListState.render(target, rows);
   },
   hasAnalyzedRows: () => analyzedRows.length > 0,
   formatFileSize,
@@ -101,7 +132,10 @@ class PpcSearchTermsModule extends BaseModule {
   protected async render(): Promise<void> {
     if (!this.container) return;
 
-    resetAnalyzerState();
+    activeContainer = this.container;
+    if (!retainAnalyzerState) {
+      resetAnalyzerState();
+    }
     const html = await SafeTemplateLoader.getInstance().loadTemplate(
       'src/modules/app_center/views/ppc_tools/ppc_search_terms/template.html'
     );
@@ -116,17 +150,23 @@ class PpcSearchTermsModule extends BaseModule {
     restoreThresholds(this.container);
     initializeThresholdPanel(this.container);
     const restoredSelection = restoreReportSelection(this.container);
-    activeReportType = restoredSelection === 'auto' ? 'search_term' : restoredSelection;
+    if (!retainAnalyzerState) {
+      activeReportType = restoredSelection === 'auto' ? 'search_term' : restoredSelection;
+    }
     restoreAnalysisSettings(this.container);
     updateContextFieldsVisibility(this.container);
     restoreActionOwner(this.container);
     bindEvents(this.container);
-    actionListState.syncReportControls(this.container);
-    actionListState.render(this.container, []);
+    restoreAnalyzerView(this.container);
   }
 
   protected onUnmount(): void {
-    cancelActiveAnalysis();
+    if (isAnalyzing) {
+      retainAnalyzerState = true;
+    }
+    if (activeContainer === this.container) {
+      activeContainer = null;
+    }
     listenerRegistry.clear();
   }
 }
@@ -183,12 +223,16 @@ function prepareImportedReport(container: HTMLElement, text: string): void {
   sourceText = text.trim();
   analyzedRows = [];
   activeReportType = inferReportTypeFromText(sourceText, readReportSelection(container));
+  statusSnapshot = null;
+  mappingStatusSnapshot = null;
+  retainAnalyzerState = false;
   actionListState.resetControls(container);
   actionListState.render(container, []);
 }
 
 function clearAnalyzer(container: HTMLElement): void {
   cancelActiveAnalysis();
+  resetAnalyzerState();
   setAnalyzeButtonState(container, false);
   const textarea = getTextarea(container, 'ppc-paste-input');
   if (textarea) textarea.value = '';
@@ -198,7 +242,6 @@ function clearAnalyzer(container: HTMLElement): void {
     fileInput.removeAttribute('aria-invalid');
   }
   setPasteInputError(container, '');
-  resetAnalyzerState();
   actionListState.resetControls(container);
   setText(container, 'ppc-file-name', '支持 CSV、TSV、XLSX 或直接粘贴表格内容。');
   setPpcStatus(container, '');
@@ -209,7 +252,7 @@ function handleThresholdChange(container: HTMLElement): void {
   const thresholds = readThresholds(container);
   saveThresholds(thresholds);
   if (sourceText) {
-    setPpcStatus(container, '阈值已更新，请点击“分析当前数据”重新分析。');
+    setAnalyzerStatus(container, '阈值已更新，请点击“分析当前数据”重新分析。');
   }
 }
 
@@ -218,11 +261,12 @@ function handleReportSelectionChange(container: HTMLElement): void {
   saveReportSelection(selection);
   activeReportType = selection === 'auto' ? inferCurrentReportType() : selection;
   analyzedRows = [];
+  mappingStatusSnapshot = null;
   actionListState.resetControls(container);
   actionListState.render(container, []);
 
   if (sourceText) {
-    setPpcStatus(container, '报表类型已更新，请点击“分析当前数据”重新分析。');
+    setAnalyzerStatus(container, '报表类型已更新，请点击“分析当前数据”重新分析。');
   }
 }
 
@@ -239,8 +283,84 @@ function formatFileSize(bytes: number): string {
   return `${Math.round(bytes / 1024 / 1024)}MB`;
 }
 
+function restoreAnalyzerView(container: HTMLElement): void {
+  const textarea = getTextarea(container, 'ppc-paste-input');
+  if (textarea && sourceText) {
+    textarea.value = sourceText;
+    setPasteInputError(container, '');
+  }
+
+  actionListState.syncReportControls(container);
+  if (mappingStatusSnapshot) {
+    renderMappingStatus(
+      container,
+      mappingStatusSnapshot.mapping,
+      mappingStatusSnapshot.totalRows,
+      mappingStatusSnapshot.validRows,
+      mappingStatusSnapshot.status
+    );
+  } else if (statusSnapshot) {
+    setPpcStatus(container, statusSnapshot.message, statusSnapshot.tone);
+  } else {
+    setPpcStatus(container, '');
+  }
+
+  setAnalyzeButtonState(container, isAnalyzing);
+  actionListState.render(container, analyzedRows);
+  if (!isAnalyzing) {
+    retainAnalyzerState = false;
+  }
+}
+
+function getRenderContainer(fallback?: HTMLElement | null): HTMLElement | null {
+  if (activeContainer?.isConnected) {
+    return activeContainer;
+  }
+
+  return fallback?.isConnected ? fallback : null;
+}
+
+function setAnalyzerAnalyzing(nextIsAnalyzing: boolean): void {
+  isAnalyzing = nextIsAnalyzing;
+  const container = getRenderContainer();
+  if (container) {
+    setAnalyzeButtonState(container, nextIsAnalyzing);
+    if (!nextIsAnalyzing) {
+      retainAnalyzerState = false;
+    }
+  }
+}
+
+function setAnalyzerStatus(
+  container: HTMLElement,
+  message: string,
+  tone: AnalysisStatusTone = 'status'
+): void {
+  statusSnapshot = { message, tone };
+  mappingStatusSnapshot = null;
+  const target = getRenderContainer(container);
+  if (target) setPpcStatus(target, message, tone);
+}
+
+function setAnalyzerMappingStatus(
+  container: HTMLElement,
+  mapping: ColumnMapping,
+  totalRows: number,
+  validRows: number,
+  status = ''
+): void {
+  mappingStatusSnapshot = { mapping, totalRows, validRows, status };
+  statusSnapshot = null;
+  const target = getRenderContainer(container);
+  if (target) renderMappingStatus(target, mapping, totalRows, validRows, status);
+}
+
 function resetAnalyzerState(): void {
   sourceText = '';
   analyzedRows = [];
+  isAnalyzing = false;
+  retainAnalyzerState = false;
+  statusSnapshot = null;
+  mappingStatusSnapshot = null;
   actionListState.reset();
 }

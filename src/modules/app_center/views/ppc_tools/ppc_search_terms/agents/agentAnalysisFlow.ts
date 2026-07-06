@@ -7,7 +7,6 @@ import {
   formatAgentToast,
   hasProgressDecisions,
 } from './agentReview';
-import { renderMappingStatus } from '../ui/reportControls';
 import type { AnalysisResult } from '../analysis/analysisEngine';
 import type { AnalysisFlowCallbacks } from '../analysis/analysisFlowTypes';
 import type { AnalysisSettings } from '../settings/settings';
@@ -59,7 +58,7 @@ export async function applyAgentAnalysis({
         callbacks.renderResults(container, rows);
       }
 
-      renderMappingStatus(
+      callbacks.renderMappingStatus(
         container,
         localResult.mapping,
         localResult.totalRows,
@@ -76,7 +75,7 @@ export async function applyAgentAnalysis({
     new Set(agentResult.modelDecisionIds)
   );
   callbacks.setAnalyzedRows(rows);
-  renderMappingStatus(
+  callbacks.renderMappingStatus(
     container,
     localResult.mapping,
     localResult.totalRows,

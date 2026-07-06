@@ -658,7 +658,7 @@
     var(--spacing-2, 0.5rem);
   padding: var(--spacing-2, 0.5rem) var(--spacing-3, 0.75rem);
   border-bottom: 1px solid rgba(var(--playground-accent-rgb), 0.1);
-  background: rgba(var(--playground-accent-rgb), 0.055);
+  background: var(--playground-accent-soft);
   color: var(--color-slate-900, #0f172a);
   font-size: 12px;
   font-weight: 700;

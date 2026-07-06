@@ -674,6 +674,92 @@ describe('PPC 搜索词分析器 UI - Agent 增量', () => {
 
     expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('PPC Agent 完成');
   });
+
+  it('分析中切换页面后恢复进度并继续接收 Agent 更新', async () => {
+    const deferred = createDeferred<LlmMockAgentResult>();
+    let progressHandler: LlmMockInput['onProgress'];
+    let capturedRows: LlmMockRow[] = [];
+    mocks.analyzeWithAgent.mockImplementationOnce(({ rows, onProgress }: LlmMockInput) => {
+      capturedRows = rows;
+      progressHandler = onProgress;
+      return deferred.promise;
+    });
+
+    const useAgent = container.querySelector<HTMLInputElement>('#ppc-use-agent');
+    if (useAgent) {
+      useAgent.checked = true;
+      useAgent.dispatchEvent(new Event('change'));
+    }
+    container.querySelector<HTMLButtonElement>('#ppc-btn-sample')?.click();
+    container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.click();
+
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
+    expect(container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.disabled).toBe(true);
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain(
+      '本地工具已生成初判'
+    );
+
+    unmount();
+    container.replaceChildren();
+    await mount(container);
+
+    expect(container.querySelector<HTMLTextAreaElement>('#ppc-paste-input')?.value).toContain(
+      'winter dog coat'
+    );
+    expect(container.querySelector('#ppc-stat-rows')?.textContent).toBe('10');
+    expect(container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.disabled).toBe(true);
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain(
+      '本地工具已生成初判'
+    );
+
+    progressHandler?.({
+      completedBatches: 1,
+      totalBatches: 2,
+      decisions: [
+        {
+          id: capturedRows[0]?.id || '',
+          action: 'observe',
+          reason: '切页后的模型建议：先观察',
+          priority: 99,
+        },
+      ],
+    });
+
+    expect(container.querySelector('#ppc-results-body')?.textContent).toContain(
+      '切页后的模型建议：先观察'
+    );
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain(
+      'Agent 语义工具复核中 1/2'
+    );
+
+    deferred.resolve({
+      decisions: capturedRows.map(row => ({
+        id: row.id,
+        action: row.action,
+        reason: `模型建议：${row.reason}`,
+        priority: row.priority,
+      })),
+      modelDecisionIds: [capturedRows[0]?.id || ''],
+      toolCalls: [
+        {
+          tool: 'local_metric_rules',
+          inputRows: capturedRows.length,
+          outputRows: capturedRows.length,
+          note: '本地指标规则已完成全量预判',
+        },
+      ],
+      summary: {
+        totalRows: capturedRows.length,
+        localRows: capturedRows.length,
+        modelRows: 0,
+        skippedModelRows: 0,
+      },
+    });
+    await flushAnalysis();
+
+    expect(container.querySelector<HTMLButtonElement>('#ppc-btn-parse')?.disabled).toBe(false);
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('PPC Agent 完成');
+  });
 });
 
 describe('PPC 搜索词分析器 UI - Agent 取消', () => {

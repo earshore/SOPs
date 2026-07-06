@@ -3,7 +3,6 @@ import { handleAnalysisError } from './analysisErrorHandler';
 import { getAnalyzableReportText } from './analysisInput';
 import { clearActiveAnalysisRun, isCurrentAnalysisRun, startAnalysisRun } from './analysisRun';
 import { applyAgentAnalysis } from '../agents/agentAnalysisFlow';
-import { setAnalyzeButtonState } from '../ui/dom';
 import {
   finishLocalAnalysisIfNeeded,
   getLocalAnalysisStatus,
@@ -16,7 +15,6 @@ import {
   saveReportSelection,
   saveThresholds,
 } from '../settings/settings';
-import { renderMappingStatus, setPpcStatus } from '../ui/reportControls';
 import type { AnalysisFlowCallbacks } from './analysisFlowTypes';
 
 export type { AnalysisFlowCallbacks } from './analysisFlowTypes';
@@ -31,8 +29,8 @@ export async function analyzeReportText(
 
   let localResult: AnalysisResult | null = null;
   const { runId, controller } = startAnalysisRun();
-  setAnalyzeButtonState(container, true);
-  setPpcStatus(container, '正在分析报表数据，请稍候。');
+  callbacks.setAnalyzing(true);
+  callbacks.setStatus(container, '正在分析报表数据，请稍候。');
 
   try {
     const thresholds = readThresholds(container);
@@ -47,7 +45,7 @@ export async function analyzeReportText(
     saveThresholds(thresholds);
     saveAnalysisSettings(settings);
     saveReportSelection(reportSelection);
-    renderMappingStatus(
+    callbacks.renderMappingStatus(
       container,
       localResult.mapping,
       localResult.totalRows,
@@ -72,7 +70,7 @@ export async function analyzeReportText(
   } finally {
     if (isCurrentAnalysisRun(runId)) {
       clearActiveAnalysisRun(runId);
-      setAnalyzeButtonState(container, false);
+      callbacks.setAnalyzing(false);
     }
   }
 }
