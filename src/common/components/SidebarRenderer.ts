@@ -337,7 +337,7 @@ export class SidebarRenderer {
       return;
     }
 
-    children.offsetHeight; // force reflow
+    void children.offsetHeight; // force reflow
     children.classList.remove('sidebar-category-children--collapsed');
     this._setChevronExpanded(chevron, true);
     countBadge?.classList.add('opacity-0');

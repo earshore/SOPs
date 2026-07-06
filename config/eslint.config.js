@@ -28,10 +28,13 @@ export default [
             "@typescript-eslint/explicit-function-return-type": "off",
             "@typescript-eslint/no-unused-vars": ["error", { 
                 argsIgnorePattern: "^_",
-                varsIgnorePattern: "^_"
+                varsIgnorePattern: "^_",
+                caughtErrors: "none"
             }],
             "@typescript-eslint/no-non-null-assertion": "warn",
-            "@typescript-eslint/ban-types": "warn",
+            "@typescript-eslint/no-empty-object-type": "warn",
+            "@typescript-eslint/no-unsafe-function-type": "warn",
+            "@typescript-eslint/no-wrapper-object-types": "warn",
             "@typescript-eslint/no-var-requires": "off",  // Allow require() for dynamic imports to avoid circular deps
             // 禁用no-dupe-class-members，因为TypeScript支持方法重载
             "no-dupe-class-members": "off",
