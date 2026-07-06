@@ -503,7 +503,7 @@ describe('deep-chat playground module', () => {
     );
 
     container.querySelector<HTMLButtonElement>('[data-use-prompt-draft-id="prompt-1"]')?.click();
-    await vi.advanceTimersByTimeAsync(200);
+    await vi.advanceTimersByTimeAsync(600);
     expect(getChat(container).shadowRoot?.querySelector('#text-input')?.textContent).toContain(
       'Rewrite this listing'
     );
@@ -545,6 +545,58 @@ describe('deep-chat playground module', () => {
 
     unmount();
     expect(window.cancelAnimationFrame).toHaveBeenCalled();
+  });
+
+  it('keeps a new empty thread out of recent history until it has draft content', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat();
+
+    await mount(container);
+
+    queryRequired<HTMLButtonElement>(container, '#playground-clear-chat').click();
+
+    expect(getChat(container).history).toEqual([]);
+    expect(container.querySelector('#playground-thread-list')?.textContent).not.toContain(
+      'New Thread'
+    );
+    expect(container.querySelector('.playground-thread-item.is-active')).toBeNull();
+    expect(mocks.localDataStore.set).toHaveBeenLastCalledWith(
+      'user:playground_deep_chat_threads_v1',
+      expect.objectContaining({
+        activeThreadId: 'thread-1',
+        threads: expect.not.arrayContaining([
+          expect.objectContaining({ title: 'New Thread' }),
+        ]),
+      }),
+      'user-data'
+    );
+
+    const chat = getChat(container);
+    chat.shadowRoot!.querySelector<HTMLElement>('#text-input')!.textContent = 'Draft only';
+    chat.onInput?.({ content: { text: 'Draft only', files: [] }, isUser: true });
+
+    expect(container.querySelector('#playground-thread-list')?.textContent).toContain(
+      'New Thread'
+    );
+    expect(container.querySelector('#playground-thread-list')?.textContent).toContain('草稿');
+
+    await vi.advanceTimersByTimeAsync(500);
+
+    expect(mocks.localDataStore.set).toHaveBeenLastCalledWith(
+      'user:playground_deep_chat_threads_v1',
+      expect.objectContaining({
+        threads: expect.arrayContaining([
+          expect.objectContaining({
+            title: 'New Thread',
+            draftText: 'Draft only',
+          }),
+        ]),
+      }),
+      'user-data'
+    );
+
+    unmount();
   });
 
   it('keeps prompt selection on the active thread and clears it when switching threads', async () => {
@@ -742,9 +794,10 @@ describe('deep-chat playground search chats', () => {
     openButton.click();
     queryRequired<HTMLButtonElement>(document, '[data-chat-search-new]').click();
     expect(modal.hidden).toBe(true);
-    expect(container.querySelector('.playground-thread-item.is-active')?.textContent).toContain(
+    expect(container.querySelector('#playground-thread-list')?.textContent).not.toContain(
       'New Thread'
     );
+    expect(container.querySelector('.playground-thread-item.is-active')).toBeNull();
 
     openButton.click();
     queryRequired<HTMLElement>(document, '.playground-chat-search-backdrop').click();

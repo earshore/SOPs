@@ -142,7 +142,7 @@ class DeepChatModule extends BaseModule {
     }
 
     threadStore = applyPendingRequestsToThreadStore(await loadThreadStore());
-    renderThreadList(this.container, threadStore, pendingRequests);
+    renderHistoryThreadList(this.container);
     renderPromptDraftsForActiveThread(this.container);
 
     await ensureDeepChatElementDefined();
@@ -194,7 +194,7 @@ export async function clearPlaygroundThreadStore(): Promise<void> {
     return;
   }
 
-  renderThreadList(container, threadStore, pendingRequests);
+  renderHistoryThreadList(container);
   renderPromptDraftsForActiveThread(container);
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
@@ -355,13 +355,18 @@ function updateThreadDraft(threadId: string, draftText: string): void {
     return;
   }
 
+  const wasVisibleInHistory = isThreadVisibleInHistory(thread);
+  const updatedThread = { ...thread, draftText, updatedAt: Date.now() };
   threadStore = {
     ...threadStore,
     threads: threadStore.threads.map(item =>
-      item.id === threadId ? { ...item, draftText, updatedAt: Date.now() } : item
+      item.id === threadId ? updatedThread : item
     ),
   };
   draftPersistController.schedule();
+  if (wasVisibleInHistory !== isThreadVisibleInHistory(updatedThread)) {
+    renderMountedThreadList();
+  }
 }
 
 function restoreActiveThreadDraftInput(container: HTMLElement, attempts = 4): void {
@@ -898,6 +903,7 @@ function renderChatSearchResults(container: HTMLElement): void {
 function getChatSearchResults(query: string): ChatSearchResult[] {
   const normalizedQuery = normalizeChatSearchText(query);
   return [...threadStore.threads]
+    .filter(isThreadVisibleInHistory)
     .sort((a, b) => b.updatedAt - a.updatedAt)
     .map((thread): ChatSearchResult | null => {
       const matchedText = normalizedQuery
@@ -1467,7 +1473,7 @@ function createThread(container: HTMLElement, options: CreateThreadOptions = {})
     threads: [nextThread, ...threadStore.threads].slice(0, MAX_THREAD_COUNT),
   };
   persistThreadStoreNow();
-  renderThreadList(container, threadStore, pendingRequests);
+  renderHistoryThreadList(container);
   renderPromptDraftsForActiveThread(container);
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
@@ -1565,7 +1571,7 @@ function switchThread(container: HTMLElement, threadId: string): void {
     activeThreadId: threadId,
   };
   persistThreadStoreNow();
-  renderThreadList(container, threadStore, pendingRequests);
+  renderHistoryThreadList(container);
   renderPromptDraftsForActiveThread(container);
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
@@ -1600,7 +1606,7 @@ function deleteThread(container: HTMLElement, threadId: string): void {
   const shouldReplaceChat = threadId === threadStore.activeThreadId;
   threadStore = nextStore;
   persistThreadStoreNow();
-  renderThreadList(container, threadStore, pendingRequests);
+  renderHistoryThreadList(container);
   if (shouldReplaceChat) {
     renderPromptDraftsForActiveThread(container);
   }
@@ -1631,9 +1637,24 @@ function replaceChat(container: HTMLElement): void {
 function renderMountedThreadList(): void {
   const container = getMountedRenderContainer();
   if (container) {
-    renderThreadList(container, threadStore, pendingRequests);
+    renderHistoryThreadList(container);
     refreshChatSearchResultsIfOpen(container);
   }
+}
+
+function renderHistoryThreadList(container: HTMLElement): void {
+  renderThreadList(container, getHistoryThreadStore(), pendingRequests);
+}
+
+function getHistoryThreadStore(): PlaygroundThreadStore {
+  return {
+    ...threadStore,
+    threads: threadStore.threads.filter(isThreadVisibleInHistory),
+  };
+}
+
+function isThreadVisibleInHistory(thread: PlaygroundThread): boolean {
+  return pendingRequests.has(thread.id) || isPersistableThread(thread);
 }
 
 function renderPromptDraftsForActiveThread(container: HTMLElement): void {
@@ -1689,7 +1710,7 @@ function saveThreadMessages(
   };
   persistThreadStoreNow();
   if (container) {
-    renderThreadList(container, threadStore, pendingRequests);
+    renderHistoryThreadList(container);
     refreshChatSearchResultsIfOpen(container);
     syncPendingStatus(container);
   }
@@ -1751,11 +1772,7 @@ function getPersistableThreadStore(): PlaygroundThreadStore {
 }
 
 function isPersistableThread(thread: PlaygroundThread): boolean {
-  return (
-    thread.messages.length > 0 ||
-    Boolean(thread.draftText?.trim()) ||
-    Boolean(thread.promptDraftId)
-  );
+  return thread.messages.length > 0 || Boolean(thread.draftText?.trim());
 }
 
 function createDefaultThreadStore(): PlaygroundThreadStore {
