@@ -33,6 +33,8 @@ import {
   DEFAULT_PLAYGROUND_REQUEST_BUDGET,
   getPlaygroundMessageBudgetError,
   getPlaygroundSystemPromptBudgetError,
+  resolvePlaygroundRequestBudget,
+  type PlaygroundRequestBudget,
 } from './requestBudget';
 import { createDraftPersistController } from './draftPersistence';
 import {
@@ -1223,14 +1225,15 @@ async function preparePlaygroundRequest(
     return null;
   }
 
+  const requestBudget = resolvePlaygroundRequestBudget(config, model);
   const { requestMessages, conversationMessages, messages, droppedMessageCount } =
-    createPlaygroundRequestMessages(body);
+    createPlaygroundRequestMessages(body, requestBudget);
   if (requestMessages.length === 0) {
     await rejectPlaygroundRequest(signals, '请输入要发送的内容。');
     return null;
   }
 
-  const budgetError = getPlaygroundRequestBudgetError(requestMessages);
+  const budgetError = getPlaygroundRequestBudgetError(requestMessages, requestBudget);
   if (budgetError) {
     await rejectPlaygroundRequest(signals, budgetError);
     return null;
@@ -1326,7 +1329,8 @@ async function getPlaygroundRequestModelConfig(): Promise<PlaygroundRequestModel
 }
 
 function createPlaygroundRequestMessages(
-  body: DeepChatRequestBody | DeepChatMessage[]
+  body: DeepChatRequestBody | DeepChatMessage[],
+  budget: PlaygroundRequestBudget
 ): PlaygroundRequestMessages {
   const requestMessages = normalizeChatMessages(body);
   const conversationMessages = mergeThreadHistoryWithRequest(
@@ -1335,7 +1339,8 @@ function createPlaygroundRequestMessages(
   );
   const budgetedMessages = buildBudgetedPlaygroundMessages(
     conversationMessages,
-    sessionSystemPrompt
+    sessionSystemPrompt,
+    budget
   );
 
   return {
@@ -1346,10 +1351,13 @@ function createPlaygroundRequestMessages(
   };
 }
 
-function getPlaygroundRequestBudgetError(requestMessages: ChatMessage[]): string | null {
+function getPlaygroundRequestBudgetError(
+  requestMessages: ChatMessage[],
+  budget: PlaygroundRequestBudget
+): string | null {
   return (
-    getPlaygroundMessageBudgetError(requestMessages) ||
-    getPlaygroundSystemPromptBudgetError(sessionSystemPrompt)
+    getPlaygroundMessageBudgetError(requestMessages, budget) ||
+    getPlaygroundSystemPromptBudgetError(sessionSystemPrompt, budget)
   );
 }
 

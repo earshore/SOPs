@@ -5,6 +5,7 @@ import {
   buildBudgetedPlaygroundMessages,
   getPlaygroundMessageBudgetError,
   getPlaygroundSystemPromptBudgetError,
+  resolvePlaygroundRequestBudget,
   type PlaygroundRequestBudget,
 } from './requestBudget';
 
@@ -16,14 +17,43 @@ const smallBudget: PlaygroundRequestBudget = {
 };
 
 describe('Playground request budget', () => {
-  it('does not hard-block message or system prompt length by default', () => {
+  it('keeps long prompt inputs sendable under the default dynamic budget', () => {
     const longMessages: ChatMessage[] = [{ role: 'user', content: 'x'.repeat(80000) }];
 
-    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxMessageChars).toBeUndefined();
-    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxSystemPromptChars).toBeUndefined();
-    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxContextChars).toBe(200000);
+    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxMessageChars).toBe(153600);
+    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxSystemPromptChars).toBe(102400);
+    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxContextChars).toBe(128000);
     expect(getPlaygroundMessageBudgetError(longMessages)).toBeNull();
     expect(getPlaygroundSystemPromptBudgetError('system'.repeat(10000))).toBeNull();
+  });
+
+  it('derives a smaller context budget for small-context models', () => {
+    const smallModelBudget = resolvePlaygroundRequestBudget(
+      {
+        provider: 'new_api',
+        endpoint: 'https://example.com/v1',
+        apiKey: 'test',
+        model: 'small-model',
+        models: [{ id: 'small-model', context: 16000 }],
+        enabled: true,
+      },
+      'small-model'
+    );
+    const largeModelBudget = resolvePlaygroundRequestBudget(
+      {
+        provider: 'new_api',
+        endpoint: 'https://example.com/v1',
+        apiKey: 'test',
+        model: 'large-model',
+        models: [{ id: 'large-model', context: 128000 }],
+        enabled: true,
+      },
+      'large-model'
+    );
+
+    expect(smallModelBudget.maxContextChars).toBe(48000);
+    expect(smallModelBudget.maxMessageChars).toBe(57600);
+    expect(largeModelBudget.maxContextChars).toBe(128000);
   });
 
   it('rejects messages and system prompts when an explicit budget limit is configured', () => {

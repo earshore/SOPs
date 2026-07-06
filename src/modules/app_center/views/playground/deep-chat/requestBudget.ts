@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@/services/llmService';
+import type { LLMProviderConfig } from '@/types/state';
 
 export interface PlaygroundRequestBudget {
   maxMessageChars?: number;
@@ -13,9 +14,44 @@ export interface BudgetedPlaygroundMessages {
 }
 
 export const DEFAULT_PLAYGROUND_REQUEST_BUDGET: PlaygroundRequestBudget = {
-  maxContextChars: 200000,
+  maxMessageChars: 153600,
+  maxSystemPromptChars: 102400,
+  maxContextChars: 128000,
   maxOutputTokens: 2000,
 };
+
+const DEFAULT_CONTEXT_WINDOW_TOKENS = 128000;
+const MIN_INPUT_CONTEXT_TOKENS = 12000;
+const MAX_INPUT_CONTEXT_TOKENS = 32000;
+const CONTEXT_TARGET_RATIO = 0.35;
+const CONTEXT_SAFETY_TOKENS = 1000;
+const APPROX_CHARS_PER_TOKEN = 4;
+const SINGLE_MESSAGE_OVERFLOW_RATIO = 1.2;
+const SYSTEM_PROMPT_CONTEXT_RATIO = 0.8;
+
+export function resolvePlaygroundRequestBudget(
+  config: LLMProviderConfig | null,
+  model: string
+): PlaygroundRequestBudget {
+  const contextTokens = getModelContextTokens(config, model) || DEFAULT_CONTEXT_WINDOW_TOKENS;
+  const availableInputTokens = Math.max(
+    1000,
+    contextTokens - DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxOutputTokens - CONTEXT_SAFETY_TOKENS
+  );
+  const targetInputTokens = Math.min(
+    availableInputTokens,
+    Math.max(MIN_INPUT_CONTEXT_TOKENS, Math.floor(contextTokens * CONTEXT_TARGET_RATIO)),
+    MAX_INPUT_CONTEXT_TOKENS
+  );
+  const maxContextChars = Math.max(4000, targetInputTokens * APPROX_CHARS_PER_TOKEN);
+
+  return {
+    maxContextChars,
+    maxMessageChars: Math.floor(maxContextChars * SINGLE_MESSAGE_OVERFLOW_RATIO),
+    maxSystemPromptChars: Math.floor(maxContextChars * SYSTEM_PROMPT_CONTEXT_RATIO),
+    maxOutputTokens: DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxOutputTokens,
+  };
+}
 
 export function getPlaygroundMessageBudgetError(
   messages: ChatMessage[],
@@ -130,4 +166,18 @@ function hasFiniteBudgetLimit(value: number | undefined): value is number {
 
 function formatBudgetNumber(value: number): string {
   return value.toLocaleString('zh-CN');
+}
+
+function getModelContextTokens(config: LLMProviderConfig | null, model: string): number | null {
+  const modelConfig = config?.models?.find(item => {
+    return typeof item === 'object' && item.id === model;
+  });
+
+  if (!modelConfig || typeof modelConfig === 'string') {
+    return null;
+  }
+
+  return Number.isFinite(modelConfig.context) && modelConfig.context
+    ? Math.max(1, Math.floor(modelConfig.context))
+    : null;
 }

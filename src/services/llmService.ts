@@ -489,12 +489,21 @@ function createLLMAbortResources(options: ResolvedLLMOptions): {
 } {
   const controller = new AbortController();
   let timeoutId = setTimeout(() => controller.abort(), options.timeout);
-  const clearRequestTimeout = (): void => clearTimeout(timeoutId);
+  const abortFromExternalSignal = (): void => controller.abort();
+  const clearTimeoutOnly = (): void => clearTimeout(timeoutId);
+  const clearRequestTimeout = (): void => {
+    clearTimeoutOnly();
+    options.signal?.removeEventListener('abort', abortFromExternalSignal);
+  };
   const resetRequestTimeout = (): void => {
-    clearRequestTimeout();
+    clearTimeoutOnly();
     timeoutId = setTimeout(() => controller.abort(), options.timeout);
   };
-  options.signal?.addEventListener('abort', () => controller.abort(), { once: true });
+  if (options.signal?.aborted) {
+    controller.abort();
+  } else {
+    options.signal?.addEventListener('abort', abortFromExternalSignal, { once: true });
+  }
   return { controller, clearRequestTimeout, resetRequestTimeout };
 }
 

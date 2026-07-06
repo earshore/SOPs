@@ -510,4 +510,34 @@ describe('取消信号支持', () => {
 
     await expect(promise).rejects.toThrow();
   });
+
+  it('passes through an already aborted external signal', async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    (global.fetch as any).mockImplementationOnce((_url: string, init: RequestInit) => {
+      expect(init.signal?.aborted).toBe(true);
+      const error = new Error('Aborted');
+      error.name = 'AbortError';
+      return Promise.reject(error);
+    });
+
+    const { callLLM } = await import('../../src/services/llmService');
+
+    await expect(
+      callLLM(
+        [{ role: 'user' as const, content: 'Test' }],
+        'openai',
+        'https://api.example.com/v1',
+        'test-key',
+        'gpt-4',
+        {
+          signal: controller.signal,
+          retries: 0,
+        }
+      )
+    ).rejects.toThrow();
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
 });
