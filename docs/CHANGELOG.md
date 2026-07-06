@@ -26,6 +26,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.3-rc.23] - 2026-07-06
+
+### Added
+- 新增 Sentry SDK、监控初始化、secret leak scanner 和安全 CI 门禁。
+- 新增本地 flag icons、Deep Chat Search Chats 弹窗和线程菜单 UI。
+- 新增 release smoke 覆盖、PPC 分析器状态测试和安全审计报告。
+
+### Changed
+- Deep Chat 完成界面本地化、历史线程过滤和 prompt 选择持久化。
+- 优化 PromptLab、Settings、Playground 渲染器、Sidebar 和 loading/skeleton 体验。
+- PPC Search Terms 分析器改用回调驱动 UI，并保留分析状态。
+- 同步应用内版本显示到 `3.0.3-rc.23`。
+
+### Fixed
+- 修复 Keyword Hunter 可访问性、拖拽交互、追踪服务和分析流程状态问题。
+- 加固 release 安全门禁、CSP 和 secret 泄露检查。
+- 修复监控、存储、模块加载、图片懒加载和模板可访问性回归。
+
 ## [3.0.3-rc.22] - 2026-07-06
 
 ### Added
