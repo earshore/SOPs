@@ -47,6 +47,7 @@ interface ActiveAnalysisRun {
   response?: string;
   error?: Error;
   successToastShown?: boolean;
+  llmStatus?: KeywordService.KeywordHunterLlmStatus;
 }
 
 /** 存放当次分析的原始 Markdown 文本（未渲染 HTML） */
@@ -223,7 +224,10 @@ function startAnalysisRun(processedCopy: string): ActiveAnalysisRun {
     status: 'pending',
   };
 
-  run.promise = fetchListingAnalysis(processedCopy)
+  run.promise = fetchListingAnalysis(processedCopy, status => {
+    run.llmStatus = status;
+    renderAnalysisLlmStatus(run, status);
+  })
     .then(response => finalizeAnalysisSuccess(run, response))
     .catch(error => finalizeAnalysisFailure(run, error))
     .finally(() => {
@@ -255,6 +259,9 @@ function attachAnalysisRunToPage(run: ActiveAnalysisRun): void {
   const { btn, resultDiv } = getCurrentAnalysisElements();
   if (btn) setBtnState(btn, 'loading', '分析中…');
   const cancelLoading = resultDiv ? showLoadingState(resultDiv) : null;
+  if (run.llmStatus) {
+    renderAnalysisLlmStatus(run, run.llmStatus);
+  }
 
   run.promise
     .then(response => {
@@ -410,9 +417,9 @@ function showLoadingState(container: HTMLElement): () => void {
             <p class="font-semibold ${phase.color} text-sm mb-1">${phase.text}</p>
             <p class="text-xs text-slate-400">这可能需要 10 ~ 30 秒，请耐心等待</p>
             <div class="mt-4 flex gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-rose-300 animate-bounce" style="animation-delay: 0s"></span>
-                <span class="w-1.5 h-1.5 rounded-full bg-rose-300 animate-bounce" style="animation-delay: 0.15s"></span>
-                <span class="w-1.5 h-1.5 rounded-full bg-rose-300 animate-bounce" style="animation-delay: 0.3s"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-300 animate-bounce"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-300 animate-bounce [animation-delay:150ms]"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-300 animate-bounce [animation-delay:300ms]"></span>
             </div>
         </div>
     `;
@@ -448,6 +455,36 @@ function showLoadingState(container: HTMLElement): () => void {
   };
 }
 
+function renderAnalysisLlmStatus(
+  run: ActiveAnalysisRun,
+  status: KeywordService.KeywordHunterLlmStatus
+): void {
+  if (!isAnalysisRunForCurrentCopy(run)) return;
+
+  const loadingEl = document.getElementById('kt-loading-state');
+  if (!loadingEl) return;
+
+  const title = loadingEl.querySelector('p.font-semibold');
+  const hint = loadingEl.querySelector('p.text-xs');
+  if (!title || !hint) return;
+
+  if (status.stage === 'cache-hit') {
+    title.textContent = '已命中缓存，正在渲染报告…';
+    hint.textContent = '无需重新调用模型';
+    return;
+  }
+
+  if (status.stage === 'in-flight') {
+    title.textContent = '正在复用进行中的分析请求…';
+    hint.textContent = '相同 Listing 不会重复调用模型';
+    return;
+  }
+
+  const firstMs = status.metrics.firstChunkMs ?? status.metrics.elapsedMs;
+  title.textContent = `模型已首响 ${(firstMs / 1000).toFixed(1)}s，正在接收报告…`;
+  hint.textContent = '流式响应已开始';
+}
+
 // ==========================================
 // Button State Helpers
 // ==========================================
@@ -463,14 +500,18 @@ function getProcessedCopy(): string {
   return appStore.getState().keywordTracker?.processedCopy ?? '';
 }
 
-async function fetchListingAnalysis(processedCopy: string): Promise<string> {
+async function fetchListingAnalysis(
+  processedCopy: string,
+  onLlmStatus?: (status: KeywordService.KeywordHunterLlmStatus) => void
+): Promise<string> {
   const keywordTracker = appStore.getState().keywordTracker;
 
   return KeywordService.fetchListingAnalysis(
     processedCopy,
     keywordTracker?.keywords ?? [],
     keywordTracker?.matchedKeywords ?? [],
-    keywordTracker?.unmatchedKeywords ?? []
+    keywordTracker?.unmatchedKeywords ?? [],
+    { onLlmStatus }
   );
 }
 
@@ -804,8 +845,7 @@ function highlightTotalScoreTitle(container: HTMLElement): void {
   const total = parseTotalScore(h2.textContent ?? '');
   if (total === null) return;
 
-  h2.style.removeProperty('background');
-  h2.style.removeProperty('color');
+  h2.removeAttribute('style');
   h2.classList.remove(
     'kh-report-score-title--excellent',
     'kh-report-score-title--good',
@@ -1026,6 +1066,15 @@ function setupEventListeners(container: HTMLElement): void {
   }
 }
 
+function handleAnalysisMountError(error: unknown): never {
+  ErrorService.handle(error as Error, {
+    action: 'mountAnalysisModule',
+    module: 'keywordAnalysis',
+    notify: false,
+  });
+  throw error;
+}
+
 // ==========================================
 // Module Exports (统一架构接口)
 // ==========================================
@@ -1062,12 +1111,7 @@ class KeywordHunterAnalysisModule extends BaseModule {
       container.classList.add('fade-in');
       renderer.renderTemplate(container, html);
     } catch (error) {
-      ErrorService.handle(error as Error, {
-        action: 'mountAnalysisModule',
-        module: 'keywordAnalysis',
-        notify: false,
-      });
-      throw error;
+      handleAnalysisMountError(error);
     }
   }
 
@@ -1079,12 +1123,7 @@ class KeywordHunterAnalysisModule extends BaseModule {
       setupEventListeners(container);
       await restoreAnalysisStateFromState();
     } catch (error) {
-      ErrorService.handle(error as Error, {
-        action: 'mountAnalysisModule',
-        module: 'keywordAnalysis',
-        notify: false,
-      });
-      throw error;
+      handleAnalysisMountError(error);
     }
   }
 

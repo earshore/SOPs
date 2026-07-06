@@ -56,16 +56,14 @@ describe('modal animation', () => {
     await controller.open({ skipAnimation: true, onStart, onComplete });
 
     expect(backdrop.classList.contains('show')).toBe(true);
-    expect(modal.style.pointerEvents).toBe('auto');
+    expect(modal.classList.contains('modal-interaction-blocked')).toBe(false);
     expect(onStart).toHaveBeenCalledTimes(1);
     expect(onComplete).toHaveBeenCalledTimes(1);
 
     await controller.close({ skipAnimation: true });
 
     expect(backdrop.classList.contains('show')).toBe(false);
-    expect(backdrop.style.visibility).toBe('hidden');
-    expect(backdrop.style.pointerEvents).toBe('none');
-    expect(modal.style.pointerEvents).toBe('none');
+    expect(modal.classList.contains('modal-interaction-blocked')).toBe(false);
   });
 
   it('runs animated open and close sequences and clears animation classes', async () => {
@@ -85,7 +83,8 @@ describe('modal animation', () => {
 
     expect(controller.isInProgress()).toBe(false);
     expect(backdrop.classList.contains(ANIMATION_CLASSES.modalBackdropEnter)).toBe(false);
-    expect(modal.style.pointerEvents).toBe('auto');
+    expect(backdrop.classList.contains('show')).toBe(true);
+    expect(modal.classList.contains('modal-interaction-blocked')).toBe(false);
 
     const closePromise = controller.close();
     backdrop.dispatchEvent(new Event('animationend'));
@@ -94,7 +93,7 @@ describe('modal animation', () => {
 
     expect(backdrop.classList.contains(ANIMATION_CLASSES.modalBackdropExit)).toBe(false);
     expect(modal.classList.contains(ANIMATION_CLASSES.modalContentExit)).toBe(false);
-    expect(backdrop.style.visibility).toBe('hidden');
+    expect(backdrop.classList.contains('show')).toBe(false);
   });
 
   it('attaches and retrieves controllers for existing modal backdrops', async () => {

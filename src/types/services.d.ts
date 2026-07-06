@@ -149,9 +149,12 @@ export interface LLMOptions {
   temperature?: number;
   jsonMode?: boolean;
   timeout?: number;
+  maxTokens?: number;
+  serviceTier?: 'auto' | 'default' | 'flex' | 'priority';
   retries?: number;
   retryDelay?: number;
   signal?: AbortSignal;
+  stream?: boolean;
 }
 
 /**
@@ -162,6 +165,7 @@ export interface LLMConfig {
   endpoint: string;
   apiKey: string;
   model: string;
+  serviceTier?: 'auto' | 'default' | 'flex' | 'priority';
 }
 
 /**

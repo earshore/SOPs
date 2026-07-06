@@ -1069,7 +1069,7 @@
  * ----------------------------------------------------------------------------
  * 
  * HTML 结构:
- * <div class="wb-container wb-container--simple" style="--wb-gradient-1: #color1; --wb-gradient-2: #color2;">
+ * <div class="wb-container wb-container--simple wb-theme-indigo">
  *   <div class="wb-orb wb-orb-1"></div>
  *   <div class="wb-orb wb-orb-2"></div>
  *   <div class="wb-content">

@@ -139,7 +139,7 @@ describe('current UI notifications and utilities', () => {
 
     document.body.innerHTML = `
       <div id="global-progress" class="hidden"></div>
-      <div id="progress-fill"></div>
+      <progress id="progress-fill" value="0" max="100"></progress>
     `;
 
     showProgress(true, 120);
@@ -147,17 +147,17 @@ describe('current UI notifications and utilities', () => {
     expect(getEl('global-progress')?.getAttribute('role')).toBe('progressbar');
     expect(getEl('global-progress')?.getAttribute('aria-valuenow')).toBe('100');
     expect(getEl('global-progress')?.getAttribute('aria-hidden')).toBe('false');
-    expect((getEl('progress-fill') as HTMLElement).style.width).toBe('100%');
+    expect(getEl('progress-fill')?.getAttribute('value')).toBe('100');
 
     showProgress(true, -10);
     expect(getEl('global-progress')?.getAttribute('aria-valuenow')).toBe('0');
-    expect((getEl('progress-fill') as HTMLElement).style.width).toBe('0%');
+    expect(getEl('progress-fill')?.getAttribute('value')).toBe('0');
 
     showProgress(false);
     expect(getEl('global-progress')?.classList.contains('hidden')).toBe(true);
     expect(getEl('global-progress')?.getAttribute('aria-hidden')).toBe('true');
     expect(getEl('global-progress')?.getAttribute('aria-valuenow')).toBe('0');
-    expect((getEl('progress-fill') as HTMLElement).style.width).toBe('0%');
+    expect(getEl('progress-fill')?.getAttribute('value')).toBe('0');
   });
 
   it('summarizes known and unknown errors and resolves sleep after the delay', async () => {

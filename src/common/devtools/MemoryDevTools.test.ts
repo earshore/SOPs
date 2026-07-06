@@ -83,9 +83,11 @@ it('creates the panel and toggles updates from the keyboard shortcut', async () 
   expect(panel?.classList.contains('hidden')).toBe(false);
   expect(panel?.querySelector('#heap-used')?.textContent).toBe('42.5 MB');
   expect(panel?.querySelector('#heap-percentage')?.textContent).toBe('65.0%');
-  expect((panel?.querySelector('#heap-percentage') as HTMLElement | null)?.style.color).toBe(
-    'rgb(245, 158, 11)'
-  );
+  expect(
+    (panel?.querySelector('#heap-percentage') as HTMLElement | null)?.classList.contains(
+      'text-amber-500'
+    )
+  ).toBe(true);
   expect(panel?.querySelector('#total-listeners')?.textContent).toBe('3');
   expect(panel?.querySelector('#event-count')?.textContent).toBe('2');
 
@@ -125,13 +127,15 @@ it('renders snapshots, leak warnings, and action buttons', async () => {
 
   const panel = document.getElementById('memory-devtools');
 
-  expect((panel?.querySelector('#heap-percentage') as HTMLElement | null)?.style.color).toBe(
-    'rgb(239, 68, 68)'
-  );
+  expect(
+    (panel?.querySelector('#heap-percentage') as HTMLElement | null)?.classList.contains(
+      'text-red-500'
+    )
+  ).toBe(true);
   expect(panel?.querySelector('#memory-snapshots')?.textContent).toContain('48.0 MB');
-  expect((panel?.querySelector('#leak-warnings') as HTMLElement | null)?.style.display).toBe(
-    'block'
-  );
+  expect(
+    (panel?.querySelector('#leak-warnings') as HTMLElement | null)?.classList.contains('hidden')
+  ).toBe(false);
   expect(panel?.querySelector('#leak-list')?.textContent).toContain('listener count exceeded');
 
   panel?.querySelector<HTMLButtonElement>('#memory-force-gc')?.click();

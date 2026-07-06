@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { THEME_PRESETS, ThemeManager, type ThemeConfig } from './themeConfig';
 import { ColorContext } from '../utils/ColorContext';
+import { getRuntimeCssRuleText } from '../utils/runtimeStyles';
 import { StorageService } from '../../services/storageService';
 import eventBus from '../EventBus';
 
@@ -69,8 +70,8 @@ describe('ThemeManager', () => {
 
     expect(ColorContext.setModuleColor).toHaveBeenCalledWith('cyan');
     expect(document.documentElement.dataset.theme).toBe('ocean');
-    expect(document.documentElement.style.getPropertyValue('--color-primary')).toBe(
-      'var(--color-cyan-500)'
+    expect(getRuntimeCssRuleText('theme-manager-vars')).toContain(
+      '--color-primary:var(--color-cyan-500)'
     );
     expect(StorageService.set).toHaveBeenCalledWith('app-theme', 'ocean');
     expect(cssPerf.trackThemeSwitch).toHaveBeenCalledWith('default', 'ocean');
@@ -79,11 +80,13 @@ describe('ThemeManager', () => {
       theme: THEME_PRESETS.ocean,
     });
 
-    expect(document.documentElement.style.getPropertyValue('--theme-transition-duration')).toBe(
-      '200ms'
+    expect(getRuntimeCssRuleText('theme-manager-vars')).toContain(
+      '--theme-transition-duration:200ms'
     );
     vi.advanceTimersByTime(200);
-    expect(document.documentElement.style.getPropertyValue('--theme-transition-duration')).toBe('');
+    expect(getRuntimeCssRuleText('theme-manager-vars')).not.toContain(
+      '--theme-transition-duration'
+    );
     expect(ThemeManager.getCurrentTheme()).toBe('ocean');
   });
 
@@ -105,7 +108,7 @@ describe('ThemeManager', () => {
     ThemeManager.restoreTheme();
 
     expect(document.documentElement.dataset.theme).toBe('ops');
-    expect(document.documentElement.style.getPropertyValue('--surface-critical')).toBe('#f00');
+    expect(getRuntimeCssRuleText('theme-manager-vars')).toContain('--surface-critical:#f00');
 
     mocks.storageSet.mockClear();
     mocks.storageGet.mockReturnValueOnce('missing');

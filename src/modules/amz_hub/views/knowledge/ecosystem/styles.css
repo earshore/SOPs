@@ -48,3 +48,15 @@
     transform: none !important;
   }
 }
+
+.eco-progress-share--traditional {
+  width: 45%;
+}
+
+.eco-progress-share--semantic {
+  width: 35%;
+}
+
+.eco-progress-share--rufus {
+  width: 20%;
+}

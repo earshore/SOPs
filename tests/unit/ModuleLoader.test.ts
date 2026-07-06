@@ -180,6 +180,34 @@ async function flushAsyncWork(): Promise<void> {
     expect(content.textContent).toBe('Fast');
   });
 
+  it('cancels pending route loads when the owning module unloads', async () => {
+    const content = document.getElementById('content') as HTMLElement;
+    const pending = deferred<IModule>();
+    const module = createModule('Late');
+    const loaderFn = vi.fn(() => pending.promise);
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        pending_route: loaderFn
+      },
+      moduleName: 'TestLoader'
+    });
+
+    const load = loader.loadModule('pending_route');
+    await vi.waitFor(() => expect(loaderFn).toHaveBeenCalledTimes(1));
+
+    window.dispatchEvent(new CustomEvent(APP_EVENTS.MODULE_UNLOAD, {
+      detail: { panelId: 'shell' }
+    }));
+
+    pending.resolve(module);
+    await load;
+
+    expect(module.mount).not.toHaveBeenCalled();
+    expect(content.textContent).toBe('');
+  });
+
   it('handles dynamically registered route prefixes from route events', async () => {
     const pluginModule = createModule('Plugin');
     const pluginLoader = vi.fn(() => Promise.resolve(pluginModule));
@@ -273,6 +301,33 @@ async function flushAsyncWork(): Promise<void> {
       await vi.advanceTimersByTimeAsync(1000);
 
       expect(loaderFn).toHaveBeenCalledTimes(callsBeforeDestroy);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('clears scheduled retry timers when the owning module unloads', async () => {
+    vi.useFakeTimers();
+    const loaderFn = vi.fn(() => Promise.reject(new Error('load failed')));
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        retry_route: loaderFn
+      },
+      moduleName: 'TestLoader'
+    });
+
+    try {
+      await loader.loadModule('retry_route');
+      const callsBeforeUnload = loaderFn.mock.calls.length;
+
+      window.dispatchEvent(new CustomEvent(APP_EVENTS.MODULE_UNLOAD, {
+        detail: { panelId: 'shell' }
+      }));
+      await vi.advanceTimersByTimeAsync(1000);
+
+      expect(loaderFn).toHaveBeenCalledTimes(callsBeforeUnload);
     } finally {
       vi.useRealTimers();
     }

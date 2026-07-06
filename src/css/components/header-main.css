@@ -672,6 +672,7 @@
 
 .progress-fill {
   height: 100%;
+  width: var(--progress-width, 0%);
   background: var(
     --gradient-primary,
     linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)
@@ -679,6 +680,40 @@
   border-radius: 0 var(--rounded-full, 9999px) var(--rounded-full, 9999px) 0;
   position: relative;
   transition: width var(--duration-normal, 250ms) ease;
+}
+
+.progress-fill--empty {
+  width: 0%;
+}
+
+.progress-fill--native {
+  display: block;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+}
+
+.progress-fill--native::-webkit-progress-bar {
+  background: transparent;
+}
+
+.progress-fill--native::-webkit-progress-value {
+  background: var(
+    --gradient-primary,
+    linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)
+  );
+  border-radius: 0 var(--rounded-full, 9999px) var(--rounded-full, 9999px) 0;
+  transition: width var(--duration-normal, 250ms) ease;
+}
+
+.progress-fill--native::-moz-progress-bar {
+  background: var(
+    --gradient-primary,
+    linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)
+  );
+  border-radius: 0 var(--rounded-full, 9999px) var(--rounded-full, 9999px) 0;
 }
 
 .progress-fill::after {

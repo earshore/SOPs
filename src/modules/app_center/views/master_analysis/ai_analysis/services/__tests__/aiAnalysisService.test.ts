@@ -66,6 +66,20 @@ const product = {
   metadata: {},
 } as Product;
 
+function createDeferred<T>(): {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (reason?: unknown) => void;
+} {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
 function resetAiAnalysisMocks(): void {
   vi.clearAllMocks();
   mocks.storageGet.mockReturnValue('new_api');
@@ -167,6 +181,8 @@ describe('runAIAnalysis results', () => {
       {
         temperature: 0.3,
         jsonMode: true,
+        maxTokens: 4096,
+        stream: true,
         timeout: 1500,
         retries: 1,
       }
@@ -189,6 +205,45 @@ describe('runAIAnalysis results', () => {
     });
     expect(onProgress).toHaveBeenCalledWith(0, '正在分析: title-keywords...');
     expect(onProgress).toHaveBeenCalledWith(100, '分析完成!');
+  });
+
+  it('starts multiple selected targets without waiting for the first model response', async () => {
+    const firstResponse = createDeferred<string>();
+    const secondResponse = createDeferred<string>();
+    mocks.callLLM
+      .mockReturnValueOnce(firstResponse.promise)
+      .mockReturnValueOnce(secondResponse.promise);
+
+    const reportPromise = runAIAnalysis(['title-keywords', 'selling-points'], product, vi.fn());
+
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalledTimes(2);
+    });
+
+    firstResponse.resolve(
+      JSON.stringify({
+        primary_keywords: [],
+        secondary_keywords: [],
+      })
+    );
+    secondResponse.resolve(
+      JSON.stringify({
+        bullet_analysis: [],
+        overall_strategy: {},
+        function_scene_matrix: {},
+      })
+    );
+
+    const report = await reportPromise;
+    expect(report['title-keywords']).toEqual({
+      primary_keywords: [],
+      secondary_keywords: [],
+    });
+    expect(report['selling-points']).toEqual({
+      bullet_analysis: [],
+      overall_strategy: {},
+      function_scene_matrix: {},
+    });
   });
 
   it('continues with later targets when one target fails', async () => {

@@ -103,6 +103,7 @@ export const LLMConfigSchema = z.object({
 export const LLMRequestOptionsSchema = z.object({
   temperature: z.number().min(0).max(2).optional(),
   maxTokens: z.number().positive().optional(),
+  serviceTier: z.enum(['auto', 'default', 'flex', 'priority']).optional(),
   jsonMode: z.boolean().optional(),
   timeout: z.number().positive().optional(),
   retries: z.number().int().nonnegative().optional(),

@@ -4,14 +4,14 @@
         <!-- 顶部警告横幅 - 增加渐变背景和装饰元素 -->
         <div class="relative bg-gradient-to-r from-amber-50 via-amber-50 to-orange-50 px-6 py-5 border-b border-amber-100/80">
             <!-- 背景装饰纹理 -->
-            <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;20&quot; height=&quot;20&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Ccircle cx=&quot;1&quot; cy=&quot;1&quot; r=&quot;1&quot; fill=&quot;%23f59e0b&quot;/%3E%3C/svg%3E'); background-size: 20px 20px;"></div>
+            <div class="shared-modal-dot-pattern absolute inset-0 opacity-[0.03]"></div>
             <!-- 顶部警告色条 -->
             <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-400"></div>
             
             <div class="relative flex items-center gap-4">
                 <!-- 图标 - 增加双层光晕效果 -->
                 <div class="relative flex-shrink-0">
-                    <div class="absolute inset-0 w-12 h-12 rounded-full bg-amber-200/50 animate-ping" style="animation-duration: 3s;"></div>
+                    <div class="shared-modal-ping-3s absolute inset-0 w-12 h-12 rounded-full bg-amber-200/50 animate-ping"></div>
                     <div class="relative w-12 h-12 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center text-amber-600 shadow-sm shadow-amber-200/50 ring-4 ring-amber-50">
                         <i class="fas fa-exclamation-triangle text-xl drop-shadow-sm"></i>
                     </div>
@@ -121,9 +121,9 @@
             <!-- 图标区域 - 增加多层涟漪效果 -->
             <div class="relative mx-auto w-16 h-16 mb-5">
                 <!-- 外层脉冲 -->
-                <div class="absolute inset-0 rounded-full bg-red-100 animate-ping opacity-20" style="animation-duration: 2s;"></div>
+                <div class="shared-modal-ping-2s absolute inset-0 rounded-full bg-red-100 animate-ping opacity-20"></div>
                 <!-- 中间光环 -->
-                <div class="absolute inset-[-4px] rounded-full border-4 border-red-100/60 border-dashed animate-spin" style="animation-duration: 12s;"></div>
+                <div class="shared-modal-spin-12s absolute inset-[-4px] rounded-full border-4 border-red-100/60 border-dashed animate-spin"></div>
                 <!-- 主图标 -->
                 <div class="relative w-16 h-16 rounded-full bg-gradient-to-br from-red-50 to-rose-100 flex items-center justify-center ring-4 ring-red-50 shadow-lg shadow-red-100/40">
                     <i class="fas fa-trash-alt text-red-500 text-2xl drop-shadow-sm"></i>

@@ -177,10 +177,12 @@ describe('PerformanceMonitor lifecycle and metrics', () => {
 
     monitor.initialize();
     expect(monitor.isInitialized()).toBe(true);
-    expect(document.getElementById('performance-monitor')?.style.display).toBe('none');
+    expect(document.getElementById('performance-monitor')?.classList.contains('hidden')).toBe(true);
 
     monitor.show();
-    expect(document.getElementById('performance-monitor')?.style.display).toBe('block');
+    expect(document.getElementById('performance-monitor')?.classList.contains('hidden')).toBe(
+      false
+    );
     expect(document.querySelector('#perf-content')?.textContent).toContain('性能评分');
     expect(document.querySelector('#perf-content')?.textContent).toContain('32MB / 128MB (25%)');
 
@@ -191,13 +193,15 @@ describe('PerformanceMonitor lifecycle and metrics', () => {
         key: 'P',
       })
     );
-    expect(document.getElementById('performance-monitor')?.style.display).toBe('none');
+    expect(document.getElementById('performance-monitor')?.classList.contains('hidden')).toBe(true);
 
     monitor.toggle();
-    expect(document.getElementById('performance-monitor')?.style.display).toBe('block');
+    expect(document.getElementById('performance-monitor')?.classList.contains('hidden')).toBe(
+      false
+    );
 
     document.querySelector<HTMLButtonElement>('#perf-close')?.click();
-    expect(document.getElementById('performance-monitor')?.style.display).toBe('none');
+    expect(document.getElementById('performance-monitor')?.classList.contains('hidden')).toBe(true);
 
     monitor.destroy();
     expect(mocks.unsubscribe).toHaveBeenCalledTimes(1);

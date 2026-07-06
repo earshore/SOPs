@@ -15,6 +15,8 @@ import { SystemError } from '@/common/errors/AppError';
 import { EnvConfig } from '@/common/config/envConfig';
 import { APP_VERSION } from '@/common/constants/constants';
 
+const nativeLoggerConsole = globalThis.console;
+
 /**
  * 失败的服务信息
  */
@@ -261,7 +263,7 @@ export class ServiceBootstrap {
 
   private _recordWarning(warning: BootstrapWarning): void {
     this.warnings.push(warning);
-    console.warn(`⚠️ [Bootstrap] ${warning.scope}: ${warning.message}`);
+    nativeLoggerConsole.warn(`⚠️ [Bootstrap] ${warning.scope}: ${warning.message}`);
   }
 
   private _startMonitoringServices(): void {

@@ -428,8 +428,7 @@ function renderModuleSubItems(
 ): string {
   return `
     <div class="sub-items"
-         x-show="isExpanded('${safeTargetId}')"
-         x-collapse>
+         :class="isExpanded('${safeTargetId}') ? '' : 'hidden'">
       <div class="sub-items-header flex justify-between px-4 py-2 bg-slate-50 border-t border-slate-200">
         <span class="text-xs text-slate-600 font-medium">子项选择</span>
         <div class="flex gap-3">
@@ -512,8 +511,7 @@ function renderSubItemContent(options: SubItemContentRenderOptions): string {
 
   return `
     <div class="content-items pl-8"
-         x-show="isSubItemExpanded('${safeTargetId}', '${safeKey}')"
-         x-collapse>
+         :class="isSubItemExpanded('${safeTargetId}', '${safeKey}') ? '' : 'hidden'">
       <div class="content-items-header flex justify-between py-1 mb-1">
         <span class="text-xs text-slate-500">具体内容</span>
         <div class="flex gap-2">

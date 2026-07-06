@@ -64,7 +64,6 @@ function configureDeepChatLayoutStyles(chat: DeepChatElement): void {
     borderRadius: '0',
     backgroundColor: 'transparent',
   };
-  Object.assign(chat.style, chat.chatStyle);
   chat.inputAreaStyle = {
     backgroundColor: 'transparent',
     borderTop: '0',

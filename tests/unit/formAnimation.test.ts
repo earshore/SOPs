@@ -107,7 +107,7 @@ function appendInput(name = 'email', value = ''): HTMLInputElement {
 
     clearInputError(input);
     expect(input.classList.contains('error')).toBe(false);
-    expect(error?.style.display).toBe('none');
+    expect(error?.hidden).toBe(true);
   });
 
   it('shows success state, success icon, and reduced-motion fallback', async () => {
@@ -133,7 +133,7 @@ function appendInput(name = 'email', value = ''): HTMLInputElement {
     const reducedIcon = reducedInput.parentElement?.querySelector<HTMLElement>(
       `.${ANIMATION_CLASSES.formInputSuccessIcon}`
     );
-    expect(reducedIcon?.style.animation).toBe('none');
+    expect(reducedIcon?.classList.contains('form-input-success-icon--animated')).toBe(false);
   });
 
   it('validates inputs and handles validator errors', async () => {

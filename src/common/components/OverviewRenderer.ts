@@ -562,20 +562,23 @@ export class OverviewRenderer {
     const lowerKeyword = keyword.toLowerCase();
 
     cards.forEach(card => {
+      const cardElement = card as HTMLElement;
       const text = (card as HTMLElement).textContent?.toLowerCase() || '';
       if (text.includes(lowerKeyword)) {
-        (card as HTMLElement).style.display = '';
+        cardElement.hidden = false;
         card.classList.add('fade-in');
       } else {
-        (card as HTMLElement).style.display = 'none';
+        cardElement.hidden = true;
       }
     });
 
     // 隐藏空分类
     const sections = this.container.querySelectorAll('section[data-category]');
     sections.forEach(section => {
-      const visibleCards = section.querySelectorAll('.overview-card:not([style*="display: none"])');
-      (section as HTMLElement).style.display = visibleCards.length > 0 ? '' : 'none';
+      const visibleCards = Array.from(section.querySelectorAll('.overview-card')).filter(
+        card => !(card as HTMLElement).hidden
+      );
+      (section as HTMLElement).hidden = visibleCards.length === 0;
     });
   }
 
@@ -588,24 +591,24 @@ export class OverviewRenderer {
 
     if (category === 'all') {
       cards.forEach(card => {
-        (card as HTMLElement).style.display = '';
+        (card as HTMLElement).hidden = false;
         card.classList.add('fade-in');
       });
-      sections.forEach(section => ((section as HTMLElement).style.display = ''));
+      sections.forEach(section => ((section as HTMLElement).hidden = false));
     } else {
       cards.forEach(card => {
         const cardCategory = (card as HTMLElement).dataset.category;
         if (cardCategory === category || cardCategory === 'all') {
-          (card as HTMLElement).style.display = '';
+          (card as HTMLElement).hidden = false;
           card.classList.add('fade-in');
         } else {
-          (card as HTMLElement).style.display = 'none';
+          (card as HTMLElement).hidden = true;
         }
       });
 
       sections.forEach(section => {
         const sectionCategory = (section as HTMLElement).dataset.category;
-        (section as HTMLElement).style.display = sectionCategory === category ? '' : 'none';
+        (section as HTMLElement).hidden = sectionCategory !== category;
       });
     }
   }

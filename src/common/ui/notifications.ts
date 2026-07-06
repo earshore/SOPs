@@ -100,11 +100,20 @@ export function showProgress(show: boolean, percent: number = 0): void {
     bar.classList.remove('hidden');
     bar.setAttribute('aria-hidden', 'false');
     bar.setAttribute('aria-valuenow', String(clampedPercent));
-    (fill as HTMLElement).style.width = `${clampedPercent}%`;
+    setProgressFillValue(fill, clampedPercent);
   } else {
     bar.classList.add('hidden');
     bar.setAttribute('aria-hidden', 'true');
     bar.setAttribute('aria-valuenow', '0');
-    (fill as HTMLElement).style.width = '0%';
+    setProgressFillValue(fill, 0);
+  }
+}
+
+function setProgressFillValue(fill: HTMLElement, percent: number): void {
+  const value = String(Math.round(percent));
+
+  fill.setAttribute('value', value);
+  if (fill instanceof HTMLProgressElement) {
+    fill.value = Number(value);
   }
 }

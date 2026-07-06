@@ -11,6 +11,10 @@ import { ApiError, ValidationError } from '@common/errors/AppError';
 import { TRANSLATE_PROMPT_TEMPLATE } from '../constants/prompts';
 import { jsonrepair } from 'jsonrepair';
 import { sanitizePromptInput } from '../ai_analysis/prompts/promptSanitizer';
+import {
+  MASTER_ANALYSIS_FULL_REPORT_MAX_TOKENS,
+  MASTER_ANALYSIS_TRANSLATION_MAX_TOKENS,
+} from './llmOutputBudget';
 import type { ProductData, DataOptions, LLMConfig, AnalysisReport } from '@/types/modules-business';
 
 const nativeLoggerConsole = globalThis.console;
@@ -79,7 +83,13 @@ async function callAnalysisLLM(prompt: string, llmConfig: LLMConfig): Promise<st
     llmConfig.endpoint,
     llmConfig.apiKey,
     llmConfig.model,
-    { jsonMode: true, timeout: configCenter.get<number>('llm.analysisTimeout') || 120000 }
+    {
+      jsonMode: true,
+      maxTokens: MASTER_ANALYSIS_FULL_REPORT_MAX_TOKENS,
+      ...(llmConfig.serviceTier && { serviceTier: llmConfig.serviceTier }),
+      stream: true,
+      timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
+    }
   );
 }
 
@@ -217,7 +227,13 @@ export const AnalysisService = {
       llmConfig.endpoint,
       llmConfig.apiKey,
       llmConfig.model,
-      { jsonMode: true, timeout: configCenter.get<number>('llm.defaultTimeout') || 60000 }
+      {
+        jsonMode: true,
+        maxTokens: MASTER_ANALYSIS_TRANSLATION_MAX_TOKENS,
+        ...(llmConfig.serviceTier && { serviceTier: llmConfig.serviceTier }),
+        stream: true,
+        timeout: configCenter.get<number>('llm.defaultTimeout') || 60000,
+      }
     );
 
     try {

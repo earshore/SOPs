@@ -10,6 +10,9 @@ import type {
   GenericEventHandler,
   EventUnsubscribe,
 } from '../types/events';
+
+const nativeLoggerConsole = globalThis.console;
+
 /**
  * EventBus配置选项
  */
@@ -146,7 +149,7 @@ class EventBus {
     const currentCount = this.events[event].length;
 
     if (currentCount >= this._config.maxListenersPerEvent) {
-      console.warn(
+      nativeLoggerConsole.warn(
         `[EventBus] 事件 "${event}" 的监听器数量已达上限 (${this._config.maxListenersPerEvent})`
       );
       return createUnsubscribe(() => {}, { subscribed: false, reason: 'listener-limit' });

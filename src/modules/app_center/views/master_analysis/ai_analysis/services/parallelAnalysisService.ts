@@ -11,6 +11,7 @@
 import {
   callLLM,
   type ChatMessage,
+  type LLMOptions,
   type LLMStreamMetrics,
 } from '../../../../../../services/llmService';
 import { LocalDataStore } from '../../../../../../services/localDataStore';
@@ -32,6 +33,7 @@ import {
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse } from './analysisResultParser';
 import { estimateTokenCount } from '../utils/tokenCounter';
+import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
 
 const DEFAULT_ANALYSIS_CONCURRENCY = 8;
 const MAX_ANALYSIS_CONCURRENCY = 8;
@@ -52,6 +54,7 @@ interface LLMConfig {
   endpoint: string;
   apiKey: string;
   model: string;
+  serviceTier?: LLMOptions['serviceTier'];
 }
 
 export interface AnalysisCacheIdentity {
@@ -377,12 +380,16 @@ function isCachedAnalysisEntry(value: unknown): value is CachedAnalysisEntry {
   );
 }
 
+function isStaleCachedAnalysisEntry(entry: CachedAnalysisEntry): boolean {
+  return Date.now() - entry.timestamp >= ANALYSIS_CACHE_TTL_MS;
+}
+
 function getFreshCachedData(entry: unknown): unknown | null {
   if (!isCachedAnalysisEntry(entry)) {
     return null;
   }
 
-  if (Date.now() - entry.timestamp >= ANALYSIS_CACHE_TTL_MS) {
+  if (isStaleCachedAnalysisEntry(entry)) {
     return null;
   }
 
@@ -414,7 +421,11 @@ export async function getCachedResult(cacheKey: string): Promise<unknown | null>
     if (!parsedCache) {
       return getLegacyCachedResult(cacheKey);
     }
-    return getFreshCachedData(parsedCache);
+    if (isStaleCachedAnalysisEntry(parsedCache)) {
+      await LocalDataStore.remove(cacheKey);
+      return null;
+    }
+    return parsedCache.data;
   } catch {
     return null;
   }
@@ -547,6 +558,7 @@ async function getLLMConfig(): Promise<LLMConfig> {
     endpoint: config.endpoint,
     apiKey: config.apiKey,
     model: model,
+    serviceTier: config.serviceTier,
   };
 }
 
@@ -618,6 +630,8 @@ async function executeAnalysisTask(
       {
         temperature: 0.3,
         jsonMode: true,
+        maxTokens: getMasterAnalysisTargetMaxTokens(task.targetId),
+        ...(config.serviceTier && { serviceTier: config.serviceTier }),
         stream: true,
         onFirstResponse: metrics => {
           task.firstResponseMs = metrics.elapsedMs;

@@ -48,6 +48,8 @@ export interface LLMOptions {
   timeout?: number;
   /** 最大输出 token 数 */
   maxTokens?: number;
+  /** OpenAI-compatible service tier. Only sent when explicitly configured. */
+  serviceTier?: 'auto' | 'default' | 'flex' | 'priority';
   /** 最大重试次数 */
   retries?: number;
   /** 初始重试延迟 (ms) */
@@ -376,6 +378,7 @@ interface ResolvedLLMOptions {
   jsonMode: boolean;
   timeout: number;
   maxTokens: number | undefined;
+  serviceTier: LLMOptions['serviceTier'];
   retries: number;
   retryDelay: number;
   signal: AbortSignal | undefined;
@@ -416,6 +419,7 @@ function resolveLLMOptions(options: LLMOptions): ResolvedLLMOptions {
     jsonMode: options.jsonMode ?? false,
     timeout: options.timeout ?? 90000,
     maxTokens: options.maxTokens,
+    serviceTier: options.serviceTier,
     retries: options.retries ?? 2,
     retryDelay: options.retryDelay ?? 1000,
     signal: options.signal,
@@ -463,6 +467,7 @@ function createLLMRequestBody(
     messages,
     temperature: options.temperature,
     ...(options.maxTokens !== undefined && { max_tokens: options.maxTokens }),
+    ...(options.serviceTier !== undefined && { service_tier: options.serviceTier }),
     ...(options.stream && { stream: true }),
     ...(options.jsonMode && { response_format: { type: 'json_object' } }),
   };

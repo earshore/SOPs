@@ -260,9 +260,10 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
     return this.tasks.filter(task => task.status === 'success' || task.status === 'failed').length;
   },
 
-  get taskProgressStyle(): string {
+  get taskProgressClass(): string {
     const percent = this.tasks.length > 0 ? (this.completedTaskCount / this.tasks.length) * 100 : 0;
-    return `width: ${percent}%`;
+    const normalizedPercent = Math.max(0, Math.min(100, Math.round(percent / 5) * 5));
+    return `progress-bar-fill--${normalizedPercent}`;
   },
 
   get showHistoryClear(): boolean {
@@ -333,10 +334,6 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
     return this.isSelectedSite(site)
       ? 'text-blue-700'
       : 'text-slate-500 group-hover:text-slate-700';
-  },
-
-  getAnimationDelayStyle(index: number, stepMs: number): string {
-    return `animation-delay: ${index * stepMs}ms`;
   },
 
   getTaskCardClass(task: Task): Record<string, boolean> {

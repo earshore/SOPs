@@ -1,4 +1,5 @@
 import type { ActionType, AnalyzedRow, Thresholds } from '../types';
+import type { LLMStreamMetrics } from '@/services/llmService';
 
 export interface PpcAnalysisContext {
   asin: string;
@@ -17,6 +18,8 @@ export interface PpcLlmAnalysisProgress {
   completedBatches: number;
   totalBatches: number;
   decisions?: PpcLlmDecision[];
+  firstResponse?: LLMStreamMetrics & { batchIndex: number };
+  cachedBatches?: number;
 }
 
 export interface PpcAgentToolCall {
@@ -35,6 +38,8 @@ export interface PpcAgentAnalysisResult {
     localRows: number;
     modelRows: number;
     skippedModelRows: number;
+    cachedBatches?: number;
+    totalBatches?: number;
   };
 }
 

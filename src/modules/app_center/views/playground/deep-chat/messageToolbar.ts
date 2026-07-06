@@ -223,10 +223,7 @@ function copyTextWithSelectionFallback(content: string): void {
   const textarea = document.createElement('textarea');
   textarea.value = content;
   textarea.setAttribute('readonly', 'true');
-  textarea.style.position = 'fixed';
-  textarea.style.top = '0';
-  textarea.style.left = '-9999px';
-  textarea.style.opacity = '0';
+  textarea.className = 'sr-only';
   document.body.appendChild(textarea);
 
   const selection = document.getSelection();

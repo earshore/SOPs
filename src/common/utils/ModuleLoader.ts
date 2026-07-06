@@ -350,6 +350,14 @@ export class ModuleLoader {
     return loadId;
   }
 
+  private _cancelPendingLoad(): void {
+    this.loadSequence += 1;
+    this.isLoading = false;
+    this.pendingRouteId = null;
+    this._clearDelayedLoading();
+    this._clearRetry();
+  }
+
   private _clearLoading(loadId: number): void {
     this._clearDelayedLoading(loadId);
     if (this._isStaleLoad(loadId)) {
@@ -631,6 +639,7 @@ export class ModuleLoader {
 
       // 只处理当前模块的卸载
       if (panelId === this.shellId) {
+        this._cancelPendingLoad();
         this._unmountCurrentModule();
       }
     };
@@ -642,11 +651,7 @@ export class ModuleLoader {
    */
   destroy(): void {
     this.isDestroyed = true;
-    this.loadSequence += 1;
-    this.isLoading = false;
-    this.pendingRouteId = null;
-    this._clearDelayedLoading();
-    this._clearRetry();
+    this._cancelPendingLoad();
     this._unmountCurrentModule();
     if (this.routeChangeHandler) {
       window.removeEventListener(APP_EVENTS.ROUTE_CHANGED, this.routeChangeHandler);

@@ -5,6 +5,8 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+import { LocalDataStore } from '@/services/localDataStore';
+import { SecureStorage } from '@/common/utils/secureStorage';
 
 beforeEach(() => {
   localStorage.clear();
@@ -571,6 +573,72 @@ describe('错误处理', () => {
       total: 5 * 1024 * 1024,
       percent: 0,
     });
+  });
+
+  it('代理密钥读取应该在安全存储失败时返回空对象', async () => {
+    vi.spyOn(StorageService, 'getSecure').mockRejectedValue(new Error('secure read failed'));
+
+    await expect(StorageService.getProxyKeyMap()).resolves.toEqual({});
+  });
+
+  it('代理密钥保存应该在安全存储失败时返回false', async () => {
+    vi.spyOn(StorageService, 'setSecure').mockRejectedValue(new Error('secure write failed'));
+
+    await expect(StorageService.setProxyKeyMap({ scraperapi: 'secret' })).resolves.toBe(false);
+  });
+
+  it('带密钥代理配置读取应该在密钥缓存失败时返回默认配置', async () => {
+    vi.spyOn(StorageService, 'getProxyKeyMap').mockRejectedValue(new Error('key map failed'));
+
+    await expect(StorageService.getProxyConfigWithCredential()).resolves.toEqual({
+      type: 'scraperapi',
+      enabled: true,
+    });
+  });
+
+  it('带密钥代理配置保存应该在安全存储失败时返回false', async () => {
+    vi.spyOn(StorageService, 'setSecure').mockRejectedValue(new Error('secure write failed'));
+
+    await expect(
+      StorageService.setProxyConfigWithCredential({
+        type: 'scraperapi',
+        customUrl: 'secret',
+        enabled: true,
+      })
+    ).resolves.toBe(false);
+  });
+
+  it('异步采集历史读取应该在IndexedDB失败时回退到localStorage历史', async () => {
+    const history = [{ id: '1', url: 'https://example.com', timestamp: Date.now() }];
+    StorageService.setScrapeHistory(history);
+    vi.spyOn(LocalDataStore, 'migrateLocalStorageKey').mockRejectedValue(new Error('idb failed'));
+
+    await expect(StorageService.getScrapeHistoryAsync()).resolves.toEqual(history);
+  });
+
+  it('异步采集历史保存应该在IndexedDB失败时回退到localStorage', async () => {
+    const history = [{ id: '1', url: 'https://example.com', timestamp: Date.now() }];
+    vi.spyOn(LocalDataStore, 'set').mockRejectedValue(new Error('idb failed'));
+
+    await expect(StorageService.setScrapeHistoryAsync(history)).resolves.toBe(true);
+    expect(StorageService.getScrapeHistory()).toEqual(history);
+  });
+
+  it('异步采集历史删除应该在IndexedDB失败时仍清理localStorage历史', async () => {
+    const history = [{ id: '1', url: 'https://example.com', timestamp: Date.now() }];
+    StorageService.setScrapeHistory(history);
+    vi.spyOn(LocalDataStore, 'remove').mockRejectedValue(new Error('idb failed'));
+
+    await expect(StorageService.removeScrapeHistoryAsync()).resolves.toBeUndefined();
+    expect(StorageService.getScrapeHistory()).toEqual([]);
+  });
+
+  it('安全存储快捷方法应该在底层异常时返回安全默认值', async () => {
+    vi.spyOn(SecureStorage, 'setSecure').mockRejectedValue(new Error('crypto failed'));
+    vi.spyOn(SecureStorage, 'getSecure').mockRejectedValue(new Error('crypto failed'));
+
+    await expect(StorageService.setSecure('api-key', 'secret')).resolves.toBe(false);
+    await expect(StorageService.getSecure('api-key', 'fallback')).resolves.toBe('fallback');
   });
 });
 

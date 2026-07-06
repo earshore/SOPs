@@ -5,6 +5,7 @@
 
 import type { ColorSchemeName } from '../constants/colorSchemes';
 import { ColorContext } from '../utils/ColorContext';
+import { updateRuntimeCssRule } from '../utils/runtimeStyles';
 import { StorageService } from '../../services/storageService';
 import eventBus from '../EventBus';
 
@@ -92,29 +93,26 @@ export class ThemeManager {
     const previousTheme = this.currentTheme;
     const root = document.documentElement;
 
-    // 添加过渡动画
-    if (animate) {
-      root.style.setProperty('--theme-transition-duration', '200ms');
-    }
-
     // 应用颜色方案
     ColorContext.setModuleColor(theme.colorScheme);
 
     // 更新CSS变量
-    const colorVars = this.getColorVars(theme.colorScheme);
-    Object.entries(colorVars).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
+    const colorVars: Record<string, string> = this.getColorVars(theme.colorScheme);
 
     // 应用自定义变量
     if (theme.customVars) {
       Object.entries(theme.customVars).forEach(([key, value]) => {
-        root.style.setProperty(key, value);
+        colorVars[key] = value;
       });
     }
 
     // 更新data属性
     root.dataset.theme = themeId;
+    const themeSelector = getThemeSelector(themeId);
+    updateRuntimeCssRule('theme-manager-vars', themeSelector, {
+      ...colorVars,
+      ...(animate ? { '--theme-transition-duration': '200ms' } : {}),
+    });
 
     // 持久化
     StorageService.set('app-theme', themeId);
@@ -123,7 +121,7 @@ export class ThemeManager {
     // 移除过渡
     if (animate) {
       setTimeout(() => {
-        root.style.removeProperty('--theme-transition-duration');
+        updateRuntimeCssRule('theme-manager-vars', themeSelector, colorVars);
       }, 200);
     }
 
@@ -212,6 +210,10 @@ export class ThemeManager {
       info: style.getPropertyValue('--color-info'),
     };
   }
+}
+
+function getThemeSelector(themeId: string): string {
+  return `:root[data-theme="${themeId.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"]`;
 }
 
 // 初始化时恢复主题

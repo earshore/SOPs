@@ -35,6 +35,8 @@ export interface HTTPRequestOptions {
 export interface LLMRequestOptions {
   temperature?: number;
   jsonMode?: boolean;
+  maxTokens?: number;
+  serviceTier?: 'auto' | 'default' | 'flex' | 'priority';
   timeout?: number;
   retries?: number;
   retryDelay?: number;

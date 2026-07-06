@@ -302,6 +302,7 @@ it('loads and saves LLM provider configuration', async () => {
   deps.llmConfigs.set('new_api', {
     endpoint: '/v1',
     model: 'custom-model',
+    serviceTier: 'priority',
     models: [
       { id: 'custom-model', name: 'Custom' },
       { id: 'custom-model', name: 'Duplicate' },
@@ -335,6 +336,7 @@ it('loads and saves LLM provider configuration', async () => {
     expect.objectContaining({
       endpoint: 'https://new.hongecb.store/v1',
       model: 'custom-model',
+      serviceTier: 'priority',
       apiKey: '',
       enabled: true,
     })
@@ -417,7 +419,7 @@ it('uses production new_api direct gateway with a browser API key', async () => 
     'https://new.hongecb.store/v1',
     'browser-key',
     'gpt-5.5',
-    { temperature: 0.1, jsonMode: false, timeout: 15000 }
+    { temperature: 0.1, jsonMode: false, maxTokens: 32, stream: true, timeout: 15000 }
   );
 
   vi.mocked(StorageService.setSecure).mockClear();
@@ -462,7 +464,7 @@ it('tests LLM connectivity with configured timeout', async () => {
     'https://gateway.example/v1',
     'key',
     'model-a',
-    { temperature: 0.1, jsonMode: false, timeout: 15000 }
+    { temperature: 0.1, jsonMode: false, maxTokens: 32, stream: true, timeout: 15000 }
   );
   expect(showToast).toHaveBeenCalledWith('连接成功！', { type: 'success' });
 
@@ -535,13 +537,18 @@ it('updates form state through DOM event setters', () => {
   panel.setLlmEndpoint({ target: { value: 'https://gateway.example/v1' } });
   panel.setLlmApiKey({ target: { value: 'key' } });
   panel.setLlmModel({ target: { value: 'model-a' } });
+  panel.setLlmServiceTier({ target: { value: 'priority' } });
 
   expect(panel.llm).toMatchObject({
     provider: 'new_api',
     endpoint: 'https://gateway.example/v1',
     apiKey: 'key',
     model: 'model-a',
+    serviceTier: 'priority',
   });
+
+  panel.setLlmServiceTier({ target: { value: '' } });
+  expect(panel.llm.serviceTier).toBeUndefined();
 });
 
 it('opens the dev performance monitor from panel and bridge exports', async () => {
@@ -762,6 +769,8 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('id="settings-section-performance"');
   expect(template).toContain(':aria-label="fetchModelsText"');
   expect(template).toContain(':aria-label="testConnectionText"');
+  expect(template).toContain('id="llm-service-tier"');
+  expect(template).toContain('<option value="">不发送 service_tier</option>');
 
   const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
   const implicitButtons = buttonOpenings.filter(

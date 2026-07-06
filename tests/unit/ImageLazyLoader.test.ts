@@ -66,11 +66,12 @@ async function importImageLazyLoader() {
     expect(image.src).toContain('/real.png');
     expect(image.srcset).toContain('/real-2x.png 2x');
     expect(image.classList.contains('lazy-loading')).toBe(true);
+    expect(image.classList.contains('lazy-image--fade')).toBe(true);
 
     image.dispatchEvent(new Event('load'));
 
     expect(image.classList.contains('lazy-loaded')).toBe(true);
-    expect(image.style.opacity).toBe('1');
+    expect(image.style.opacity).toBe('');
     expect(observer.unobserve).toHaveBeenCalledWith(image);
   });
 

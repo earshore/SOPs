@@ -103,10 +103,10 @@
                             aria-describedby="kt-translate-status"
                             disabled>
                             <!-- Progress Bar -->
-                            <div class="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-rose-500 to-pink-500 opacity-20 hidden transition-[width] duration-300"
-                                id="kt-translate-progress" style="width:0%" role="progressbar"
+                            <progress class="kt-inline-progress absolute left-0 top-0 bottom-0 opacity-20 hidden"
+                                id="kt-translate-progress" value="0" max="100" role="progressbar"
                                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-                                aria-label="AI 翻译进度"></div>
+                                aria-label="AI 翻译进度"></progress>
                             <i class="fas fa-language relative z-10 text-sm"></i>
                             <span class="relative z-10 text-xs" id="kt-translate-btn-text" aria-live="polite"
                                 aria-atomic="true">AI 沉浸式翻译</span>
@@ -222,13 +222,12 @@
                                 id="kt-coverage-rate">0%</span>
                         </div>
                         <div class="w-full bg-slate-200/80 rounded-full h-2.5 overflow-hidden">
-                            <div class="bg-gradient-to-r from-blue-500 via-sky-500 to-rose-500 h-2.5 rounded-full transition-[width] duration-700 ease-out relative"
-                                id="kt-coverage-bar" style="width: 0%">
-                                <!-- Shimmer on bar -->
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse">
-                                </div>
-                            </div>
+                            <progress
+                                class="kt-coverage-progress h-2.5 rounded-full"
+                                id="kt-coverage-bar"
+                                value="0"
+                                max="100"
+                                aria-label="关键词覆盖率"></progress>
                         </div>
                     </div>
                     <!-- Stats Cards -->

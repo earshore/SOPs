@@ -16,6 +16,13 @@ interface LlmMockInput {
     completedBatches: number;
     totalBatches: number;
     decisions?: LlmMockRow[];
+    cachedBatches?: number;
+    firstResponse?: {
+      batchIndex: number;
+      elapsedMs: number;
+      firstChunkMs?: number;
+      chunkCount: number;
+    };
   }) => void;
 }
 
@@ -601,10 +608,24 @@ describe('PPC 搜索词分析器 UI - Agent 增量', () => {
       '本地工具已生成初判'
     );
 
+    progressHandler?.({
+      completedBatches: 0,
+      totalBatches: 2,
+      firstResponse: {
+        batchIndex: 1,
+        elapsedMs: 900,
+        firstChunkMs: 900,
+        chunkCount: 1,
+      },
+    });
+
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('首响 0.9s');
+
     const rows = (mocks.analyzeWithAgent.mock.calls[0]?.[0] as LlmMockInput).rows;
     progressHandler?.({
       completedBatches: 1,
       totalBatches: 2,
+      cachedBatches: 1,
       decisions: [
         {
           id: rows[0]?.id || '',
@@ -624,6 +645,7 @@ describe('PPC 搜索词分析器 UI - Agent 增量', () => {
     expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain(
       'Agent 语义工具复核中 1/2'
     );
+    expect(container.querySelector('#ppc-mapping-status')?.textContent).toContain('缓存 1');
 
     deferred.resolve({
       decisions: rows.map(row => ({

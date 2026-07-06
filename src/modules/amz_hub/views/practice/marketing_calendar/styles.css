@@ -345,7 +345,7 @@
 .amzf_search_history {
   position: fixed;
   /* 改为 fixed 避免被父容器裁切 */
-  /* top, left, width, maxHeight 将由JavaScript动态设置 */
+  transform: none;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -1346,6 +1346,50 @@
 .amzf_list_entering .amzf_month_section,
 .amzf_list_entering .amzf_event_comparison {
   animation: amzf_fadeIn 0.4s ease-out forwards;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(2) {
+  animation-delay: 0.03s;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(3) {
+  animation-delay: 0.06s;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(4) {
+  animation-delay: 0.09s;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(5) {
+  animation-delay: 0.12s;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(6) {
+  animation-delay: 0.15s;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(7) {
+  animation-delay: 0.18s;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(8) {
+  animation-delay: 0.21s;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(9) {
+  animation-delay: 0.24s;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(10) {
+  animation-delay: 0.27s;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(11) {
+  animation-delay: 0.3s;
+}
+
+.amzf_list_entering :where(.amzf_month_section, .amzf_event_comparison):nth-child(12) {
+  animation-delay: 0.33s;
 }
 
 /* Responsive */

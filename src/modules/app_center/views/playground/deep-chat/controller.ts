@@ -292,7 +292,7 @@ function syncDraftInputHeight(container: HTMLElement): void {
 
   const page = container.querySelector<HTMLElement>('.playground-page');
   if (page?.classList.contains('is-chatting')) {
-    wrap.style.removeProperty('height');
+    wrap.classList.remove('is-draft-height-md', 'is-draft-height-lg', 'is-draft-height-xl');
     return;
   }
 
@@ -301,7 +301,10 @@ function syncDraftInputHeight(container: HTMLElement): void {
   const inputHeight = Math.ceil(
     inputContainer?.getBoundingClientRect().height || EMPTY_CHAT_WRAP_HEIGHT
   );
-  wrap.style.height = `${Math.max(EMPTY_CHAT_WRAP_HEIGHT, inputHeight)}px`;
+  const draftHeight = Math.max(EMPTY_CHAT_WRAP_HEIGHT, inputHeight);
+  wrap.classList.toggle('is-draft-height-md', draftHeight > EMPTY_CHAT_WRAP_HEIGHT);
+  wrap.classList.toggle('is-draft-height-lg', draftHeight > 240);
+  wrap.classList.toggle('is-draft-height-xl', draftHeight > 340);
 }
 
 function getDraftInput(container: HTMLElement): HTMLElement | null {
@@ -1026,6 +1029,7 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
     {
       temperature: sessionTemperature,
       maxTokens: DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxOutputTokens,
+      ...(config.serviceTier && { serviceTier: config.serviceTier }),
       retries: 0,
       signal: controller.signal,
       stream: true,

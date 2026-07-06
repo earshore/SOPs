@@ -68,6 +68,77 @@
   min-width: 0;
 }
 
+.settings-panel-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.settings-panel-root[data-state='closed'] {
+  display: none;
+}
+
+.settings-panel-root[hidden],
+.settings-panel-root [hidden] {
+  display: none !important;
+}
+
+.settings-local-data-progress {
+  display: block;
+  appearance: none;
+  border: 0;
+  background: #f1f5f9;
+  color: var(--settings-local-data-progress-color, #64748b);
+}
+
+.settings-local-data-progress::-webkit-progress-bar {
+  border-radius: 9999px;
+  background: #f1f5f9;
+}
+
+.settings-local-data-progress::-webkit-progress-value {
+  border-radius: 9999px;
+  background: var(--settings-local-data-progress-color, #64748b);
+  transition: width 300ms ease;
+}
+
+.settings-local-data-progress::-moz-progress-bar {
+  border-radius: 9999px;
+  background: var(--settings-local-data-progress-color, #64748b);
+  transition: width 300ms ease;
+}
+
+.settings-local-data-progress[data-bucket='config'] {
+  --settings-local-data-progress-color: #3b82f6;
+}
+
+.settings-local-data-progress[data-bucket='secrets'] {
+  --settings-local-data-progress-color: #f59e0b;
+}
+
+.settings-local-data-progress[data-bucket='workspace-state'] {
+  --settings-local-data-progress-color: #06b6d4;
+}
+
+.settings-local-data-progress[data-bucket='scrape-history'] {
+  --settings-local-data-progress-color: #10b981;
+}
+
+.settings-local-data-progress[data-bucket='chat-history'] {
+  --settings-local-data-progress-color: #8b5cf6;
+}
+
+.settings-local-data-progress[data-bucket='keyword-history'] {
+  --settings-local-data-progress-color: #14b8a6;
+}
+
+.settings-local-data-progress[data-bucket='cache'] {
+  --settings-local-data-progress-color: #64748b;
+}
+
+.settings-local-data-progress[data-bucket='other'] {
+  --settings-local-data-progress-color: #f43f5e;
+}
+
 .settings-panel-section {
   scroll-margin-top: 1rem;
 }

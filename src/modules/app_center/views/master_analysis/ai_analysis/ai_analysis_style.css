@@ -23,6 +23,39 @@
   animation: skeletonShimmer var(--duration-2s) infinite;
 }
 
+.ai-analysis-progress-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ai-analysis-progress-fill {
+  transition: width var(--duration-500, 500ms) ease-out;
+}
+
+.ai-analysis-progress-shimmer {
+  animation: aiAnalysisProgressShimmer var(--duration-2s, 2000ms) linear infinite;
+}
+
+.ai-analysis-progress-dot {
+  fill: #ffffff;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+  transition:
+    cx var(--duration-500, 500ms) ease-out,
+    r var(--duration-500, 500ms) ease-out,
+    opacity var(--duration-500, 500ms) ease-out;
+}
+
+@keyframes aiAnalysisProgressShimmer {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(160px);
+  }
+}
+
 /* ========== 文本截断 ========== */
 .line-clamp-1 {
   display: -webkit-box;
@@ -227,6 +260,17 @@ pre code {
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
   border-top: 4px solid var(--color-slate-800, #1e293b);
+}
+
+.ai-analysis-hero-pattern-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.ai-analysis-ping-slow {
+  animation-duration: 1.5s;
 }
 
 /* ========== 置信度颜色系统（使用设计令牌） ========== */

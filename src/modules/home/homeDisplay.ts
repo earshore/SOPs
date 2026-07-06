@@ -192,14 +192,6 @@ class HomeModule extends BaseModule {
   private handleMouseMove(e: MouseEvent): void {
     this.mouse.x = e.clientX;
     this.mouse.y = e.clientY;
-
-    const heroContent = document.getElementById('hero-content');
-
-    if (heroContent) {
-      const moveX = (window.innerWidth / 2 - this.mouse.x) * 0.01;
-      const moveY = (window.innerHeight / 2 - this.mouse.y) * 0.01;
-      heroContent.style.transform = `translate(${moveX}px, ${moveY}px)`;
-    }
   }
 
   private initFloatingWorkbench(): void {

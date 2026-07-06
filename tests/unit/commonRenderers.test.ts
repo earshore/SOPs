@@ -147,27 +147,27 @@ afterEach(() => {
 
     search!.value = first.label;
     search!.dispatchEvent(new Event('input', { bubbles: true }));
-    expect(firstCard!.style.display).toBe('');
-    expect(secondCard!.style.display).toBe('none');
-    expect(allFilter!.style.display).toBe('');
-    expect(secondFilter!.style.display).toBe('');
+    expect(firstCard!.hidden).toBe(false);
+    expect(secondCard!.hidden).toBe(true);
+    expect(allFilter!.hidden).toBe(false);
+    expect(secondFilter!.hidden).toBe(false);
 
     secondFilter!.click();
     expect(secondFilter!.classList.contains('active')).toBe(true);
     expect(secondFilter!.getAttribute('aria-pressed')).toBe('true');
     expect(allFilter!.getAttribute('aria-pressed')).toBe('false');
     expect(container.querySelectorAll('.category-filter-btn[aria-pressed="true"]')).toHaveLength(1);
-    expect(firstCard!.style.display).toBe('none');
-    expect(secondCard!.style.display).toBe('');
-    expect(allFilter!.style.display).toBe('');
-    expect(secondFilter!.style.display).toBe('');
+    expect(firstCard!.hidden).toBe(true);
+    expect(secondCard!.hidden).toBe(false);
+    expect(allFilter!.hidden).toBe(false);
+    expect(secondFilter!.hidden).toBe(false);
 
     allFilter!.click();
     expect(allFilter!.getAttribute('aria-pressed')).toBe('true');
     expect(secondFilter!.getAttribute('aria-pressed')).toBe('false');
     expect(container.querySelectorAll('.category-filter-btn[aria-pressed="true"]')).toHaveLength(1);
-    expect(firstCard!.style.display).toBe('');
-    expect(secondCard!.style.display).toBe('');
+    expect(firstCard!.hidden).toBe(false);
+    expect(secondCard!.hidden).toBe(false);
   });
 
   it('scrolls to a category with a temporary highlight', async () => {
@@ -313,7 +313,7 @@ afterEach(() => {
 
     button!.click();
     expect(button!.getAttribute('aria-expanded')).toBe('false');
-    expect(chevron!.style.transform).toBe('rotate(0deg)');
+    expect(chevron!.classList.contains('rotate-0')).toBe(true);
     await vi.advanceTimersByTimeAsync(200);
     expect(children!.classList.contains('hidden')).toBe(true);
 
@@ -326,7 +326,7 @@ afterEach(() => {
     button!.click();
     expect(button!.getAttribute('aria-expanded')).toBe('true');
     expect(children!.classList.contains('hidden')).toBe(false);
-    expect(chevron!.style.transform).toBe('rotate(180deg)');
+    expect(chevron!.classList.contains('rotate-180')).toBe(true);
   });
 
   it('falls back to inferred colors and safe defaults', () => {
@@ -357,8 +357,8 @@ afterEach(() => {
       themeColor: 'not-a-theme',
     } as ModuleConfig, []);
 
-    expect(sidebar.querySelector('.sidebar-shell')?.getAttribute('style')).toContain(
-      '--sidebar-primary'
+    expect(sidebar.querySelector('.sidebar-shell')?.classList.contains('sidebar-theme-blue')).toBe(
+      true
     );
     expect(sidebar.textContent).toContain('总览');
     expect(sidebar.textContent).toContain('0 项');

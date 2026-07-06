@@ -127,7 +127,16 @@ vi.mock('@/services/storageService', () => ({
   },
   StorageService: {
     get: vi.fn(),
+    getLLMConfig: vi.fn(),
     getLLMConfigWithKey: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/localDataStore', () => ({
+  LocalDataStore: {
+    get: vi.fn(async () => null),
+    set: vi.fn(async () => undefined),
+    remove: vi.fn(async () => undefined),
   },
 }));
 
@@ -190,6 +199,10 @@ function click(element: Element | null): void {
   element?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 }
 
+function getProgressValue(selector: string): string | null {
+  return document.querySelector(selector)?.getAttribute('aria-valuenow') ?? null;
+}
+
 beforeEach(() => {
   vi.useRealTimers();
   document.body.innerHTML = '';
@@ -199,6 +212,10 @@ beforeEach(() => {
   processMocks.restoreSnapshot.mockReturnValue(null);
   processMocks.saveCurrentSnapshotAsync.mockResolvedValue(undefined);
   mockedStorage.get.mockReturnValue('openai');
+  mockedStorage.getLLMConfig.mockReturnValue({
+    endpoint: 'https://api.example.test',
+    model: 'gpt-test',
+  } as never);
   mockedStorage.getLLMConfigWithKey.mockResolvedValue({
     apiKey: 'test-key',
     endpoint: 'https://api.example.test',
@@ -263,7 +280,7 @@ it('mounts template content, renders highlighted copy, stats, and floating keywo
   expect(document.body.querySelector('#kt-keywords-minimized')?.parentElement).toBe(document.body);
   expect(document.querySelectorAll('#kt-copy-display .highlightable').length).toBeGreaterThan(0);
   expect(document.querySelector('#kt-coverage-rate')?.textContent).toBe('50%');
-  expect(document.querySelector<HTMLElement>('#kt-coverage-bar')?.style.width).toBe('50%');
+  expect(getProgressValue('#kt-coverage-bar')).toBe('50');
   expect(document.querySelector('#kt-stat-matched')?.textContent).toBe('1');
   expect(document.querySelector('#kt-stat-unmatched')?.textContent).toBe('1');
   expect(document.querySelector('#kt-stat-total')?.textContent).toBe('2');
@@ -374,7 +391,7 @@ it('translates copy, renders translation mode, and hides progress after completi
   expect(document.querySelector('#kt-copy-display .sentence-translation')?.textContent).toBe(
     '无线耳机翻译'
   );
-  expect(document.querySelector<HTMLElement>('#kt-translate-progress')?.style.width).toBe('100%');
+  expect(getProgressValue('#kt-translate-progress')).toBe('100');
 
   vi.advanceTimersByTime(500);
   expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(true);
@@ -402,16 +419,31 @@ it('keeps the pending translation state visible after leaving and returning', as
     false
   );
 
+  const options = mockedCallLLM.mock.calls[0]?.[5] as
+    | {
+        onFirstResponse?: (metrics: {
+          elapsedMs: number;
+          firstChunkMs?: number;
+          chunkCount: number;
+        }) => void;
+      }
+    | undefined;
+  options?.onFirstResponse?.({ elapsedMs: 900, firstChunkMs: 900, chunkCount: 1 });
+  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('正在接收译文...');
+  expect(document.querySelector('#kt-translate-status')?.textContent).toContain('模型已首响 0.9s');
+  expect(getProgressValue('#kt-translate-progress')).toBe('55');
+
   unmount();
   firstContainer.remove();
 
   await mountProcess();
 
-  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('正在翻译...');
+  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('正在接收译文...');
   expect(document.querySelector<HTMLButtonElement>('#kt-translate-btn')?.disabled).toBe(true);
   expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(
     false
   );
+  expect(document.querySelector('#kt-translate-status')?.textContent).toContain('模型已首响 0.9s');
   expect(mockedCallLLM).toHaveBeenCalledTimes(1);
 
   resolveTranslation('【1】 无线耳机翻译');
@@ -424,7 +456,7 @@ it('keeps the pending translation state visible after leaving and returning', as
   );
   expect(processMocks.saveCurrentSnapshotAsync).toHaveBeenCalledWith();
   expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('翻译已完成');
-  expect(document.querySelector<HTMLElement>('#kt-translate-progress')?.style.width).toBe('100%');
+  expect(getProgressValue('#kt-translate-progress')).toBe('100');
 
   vi.advanceTimersByTime(500);
   expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(true);

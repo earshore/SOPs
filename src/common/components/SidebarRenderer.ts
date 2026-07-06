@@ -18,7 +18,6 @@ import {
 } from '../config/menuConfig';
 import { appStore } from '@/stores/useAppStore';
 import { COLOR_SCHEMES, type ColorSchemeName } from '../constants/colorSchemes';
-import { COLOR_PALETTES } from '../config/design-tokens';
 import { ColorContext } from '../utils/ColorContext';
 import { setSafeHtml } from '../utils/security';
 
@@ -42,140 +41,48 @@ export interface SidebarConfig {
   searchPlaceholder?: string;
 }
 
-interface SidebarTheme {
-  primary: string;
-  accent: string;
-  active: string;
-  text: string;
-  activeBgStart: string;
-  activeBgEnd: string;
-  iconSoft: string;
-  iconSoftEnd: string;
-  border: string;
-  focus: string;
-  shadow: string;
-}
-
-type PaletteName = keyof typeof COLOR_PALETTES;
-type PaletteStep = keyof typeof COLOR_PALETTES.blue;
-
-interface SidebarThemeDefinition {
-  primary: PaletteName;
-  accent?: PaletteName;
-  activeEndStep?: PaletteStep;
-  activeStartAlpha?: number;
-  activeEndAlpha?: number;
-  borderAlpha?: number;
-  focusAlpha?: number;
-  shadowAlpha?: number;
-}
-
-const SIDEBAR_THEME_DEFINITIONS: Record<ColorSchemeName, SidebarThemeDefinition> = {
-  blue: { primary: 'blue', accent: 'indigo' },
-  sky: {
-    primary: 'sky',
-    accent: 'blue',
-    activeEndAlpha: 0.72,
-    borderAlpha: 0.34,
-    shadowAlpha: 0.58,
-  },
-  indigo: { primary: 'indigo', accent: 'violet' },
-  violet: { primary: 'violet', accent: 'purple' },
-  purple: {
-    primary: 'purple',
-    accent: 'pink',
-    borderAlpha: 0.42,
-    focusAlpha: 0.18,
-    shadowAlpha: 0.72,
-  },
-  fuchsia: { primary: 'fuchsia', accent: 'pink', activeEndAlpha: 0.72, borderAlpha: 0.38 },
-  emerald: { primary: 'emerald', accent: 'teal', activeEndAlpha: 0.7, shadowAlpha: 0.58 },
-  teal: { primary: 'teal', accent: 'cyan', activeEndAlpha: 0.7, shadowAlpha: 0.58 },
-  green: { primary: 'green', accent: 'emerald', activeEndAlpha: 0.72, shadowAlpha: 0.56 },
-  lime: {
-    primary: 'lime',
-    accent: 'green',
-    activeEndAlpha: 0.72,
-    borderAlpha: 0.34,
-    shadowAlpha: 0.56,
-  },
-  amber: { primary: 'amber', accent: 'orange', shadowAlpha: 0.58 },
-  orange: { primary: 'orange', accent: 'red' },
-  red: { primary: 'red', accent: 'rose' },
-  rose: { primary: 'rose', accent: 'pink', activeEndAlpha: 0.72 },
-  pink: { primary: 'pink', accent: 'rose', activeEndAlpha: 0.72, borderAlpha: 0.34 },
-  cyan: {
-    primary: 'cyan',
-    accent: 'blue',
-    activeEndAlpha: 0.72,
-    borderAlpha: 0.34,
-    shadowAlpha: 0.56,
-  },
-  slate: {
-    primary: 'slate',
-    activeEndStep: 100,
-    activeStartAlpha: 0.96,
-    activeEndAlpha: 0.8,
-    borderAlpha: 0.32,
-    focusAlpha: 0.14,
-    shadowAlpha: 0.48,
-  },
+const SIDEBAR_THEME_CLASSES: Record<ColorSchemeName, string> = {
+  blue: 'sidebar-theme-blue',
+  sky: 'sidebar-theme-sky',
+  indigo: 'sidebar-theme-indigo',
+  violet: 'sidebar-theme-violet',
+  purple: 'sidebar-theme-purple',
+  fuchsia: 'sidebar-theme-fuchsia',
+  emerald: 'sidebar-theme-emerald',
+  teal: 'sidebar-theme-teal',
+  green: 'sidebar-theme-green',
+  lime: 'sidebar-theme-lime',
+  amber: 'sidebar-theme-amber',
+  orange: 'sidebar-theme-orange',
+  red: 'sidebar-theme-red',
+  rose: 'sidebar-theme-rose',
+  pink: 'sidebar-theme-pink',
+  cyan: 'sidebar-theme-cyan',
+  slate: 'sidebar-theme-slate',
 };
 
-function paletteColor(color: PaletteName, step: PaletteStep): string {
-  return COLOR_PALETTES[color][step];
-}
+const SIDEBAR_CATEGORY_LINE_CLASSES: Record<ColorSchemeName, string> = {
+  blue: 'sidebar-category-line-blue',
+  sky: 'sidebar-category-line-sky',
+  indigo: 'sidebar-category-line-indigo',
+  violet: 'sidebar-category-line-violet',
+  purple: 'sidebar-category-line-purple',
+  fuchsia: 'sidebar-category-line-fuchsia',
+  emerald: 'sidebar-category-line-emerald',
+  teal: 'sidebar-category-line-teal',
+  green: 'sidebar-category-line-green',
+  lime: 'sidebar-category-line-lime',
+  amber: 'sidebar-category-line-amber',
+  orange: 'sidebar-category-line-orange',
+  red: 'sidebar-category-line-red',
+  rose: 'sidebar-category-line-rose',
+  pink: 'sidebar-category-line-pink',
+  cyan: 'sidebar-category-line-cyan',
+  slate: 'sidebar-category-line-slate',
+};
 
-function paletteRgba(color: PaletteName, step: PaletteStep, alpha: number): string {
-  const hex = paletteColor(color, step);
-  const red = Number.parseInt(hex.slice(1, 3), 16);
-  const green = Number.parseInt(hex.slice(3, 5), 16);
-  const blue = Number.parseInt(hex.slice(5, 7), 16);
-  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
-}
-
-function resolvePaletteName(color: PaletteName | undefined, fallback: PaletteName): PaletteName {
-  return color ?? fallback;
-}
-
-function resolvePaletteStep(step: PaletteStep | undefined, fallback: PaletteStep): PaletteStep {
-  return step ?? fallback;
-}
-
-function resolveAlpha(alpha: number | undefined, fallback: number): number {
-  return alpha ?? fallback;
-}
-
-function createSidebarTheme(definition: SidebarThemeDefinition): SidebarTheme {
-  const primary = definition.primary;
-  const accent = resolvePaletteName(definition.accent, primary);
-
-  return {
-    primary: paletteColor(primary, 500),
-    accent: paletteColor(accent, 600),
-    active: paletteColor(primary, 600),
-    text: paletteColor(primary, 700),
-    activeBgStart: paletteRgba(primary, 50, resolveAlpha(definition.activeStartAlpha, 0.96)),
-    activeBgEnd: paletteRgba(
-      primary,
-      resolvePaletteStep(definition.activeEndStep, 100),
-      resolveAlpha(definition.activeEndAlpha, 0.8)
-    ),
-    iconSoft: paletteColor(primary, 100),
-    iconSoftEnd: paletteColor(primary, 50),
-    border: paletteRgba(primary, 600, resolveAlpha(definition.borderAlpha, 0.32)),
-    focus: paletteRgba(primary, 600, resolveAlpha(definition.focusAlpha, 0.14)),
-    shadow: paletteRgba(primary, 500, resolveAlpha(definition.shadowAlpha, 0.62)),
-  };
-}
-
-const SIDEBAR_THEMES = Object.entries(SIDEBAR_THEME_DEFINITIONS).reduce(
-  (themes, [name, definition]) => ({
-    ...themes,
-    [name]: createSidebarTheme(definition),
-  }),
-  {} as Record<ColorSchemeName, SidebarTheme>
-);
+const SIDEBAR_THEME_CLASS_NAMES = Object.values(SIDEBAR_THEME_CLASSES);
+const SIDEBAR_CATEGORY_ANIMATION_MS = 200;
 
 // ═══════════════════════════════════════════════════════════
 // Sidebar Renderer
@@ -219,7 +126,7 @@ export class SidebarRenderer {
     const lastModuleId = sidebar.dataset.moduleId;
 
     if (existingNav && lastModuleId === this.moduleId) {
-      this._syncThemeStyle(sidebar);
+      this._syncThemeClass(sidebar);
       this._updateNavigationState(sidebar, currentTab, activeCategory);
       return;
     }
@@ -385,7 +292,7 @@ export class SidebarRenderer {
     const countBadge = btn.querySelector('.category-count') as HTMLElement | null;
     if (!children || !chevron) return;
 
-    const isExpanded = !children.classList.contains('hidden');
+    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
     btn.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
 
     if (isExpanded) {
@@ -402,24 +309,17 @@ export class SidebarRenderer {
     countBadge: HTMLElement | null
   ): void {
     if (this._prefersReducedMotion()) {
-      children.classList.add('hidden');
-      children.style.maxHeight = '';
-      children.style.opacity = '';
-      chevron.style.transform = 'rotate(0deg)';
+      children.classList.add('sidebar-category-children--collapsed', 'hidden');
+      this._setChevronExpanded(chevron, false);
       countBadge?.classList.remove('opacity-0');
       return;
     }
 
-    children.style.maxHeight = children.scrollHeight + 'px';
-    children.offsetHeight; // force reflow
-    children.style.maxHeight = '0px';
-    children.style.opacity = '0';
+    children.classList.add('sidebar-category-children--collapsed');
     setTimeout(() => {
       children.classList.add('hidden');
-      children.style.maxHeight = '';
-      children.style.opacity = '';
-    }, 200);
-    chevron.style.transform = 'rotate(0deg)';
+    }, SIDEBAR_CATEGORY_ANIMATION_MS);
+    this._setChevronExpanded(chevron, false);
     countBadge?.classList.remove('opacity-0');
   }
 
@@ -431,24 +331,15 @@ export class SidebarRenderer {
     children.classList.remove('hidden');
 
     if (this._prefersReducedMotion()) {
-      children.style.maxHeight = '';
-      children.style.opacity = '';
-      chevron.style.transform = 'rotate(180deg)';
+      children.classList.remove('sidebar-category-children--collapsed');
+      this._setChevronExpanded(chevron, true);
       countBadge?.classList.add('opacity-0');
       return;
     }
 
-    const fullHeight = children.scrollHeight;
-    children.style.maxHeight = '0px';
-    children.style.opacity = '0';
     children.offsetHeight; // force reflow
-    children.style.maxHeight = fullHeight + 'px';
-    children.style.opacity = '1';
-    setTimeout(() => {
-      children.style.maxHeight = '';
-      children.style.opacity = '';
-    }, 200);
-    chevron.style.transform = 'rotate(180deg)';
+    children.classList.remove('sidebar-category-children--collapsed');
+    this._setChevronExpanded(chevron, true);
     countBadge?.classList.add('opacity-0');
   }
 
@@ -462,12 +353,10 @@ export class SidebarRenderer {
     const categoryBtn = group.querySelector('[data-action="toggle-category"]') as HTMLElement;
 
     if (children) {
-      children.classList.remove('hidden');
-      children.style.maxHeight = '';
-      children.style.opacity = '';
+      children.classList.remove('sidebar-category-children--collapsed', 'hidden');
     }
     if (chevron) {
-      chevron.style.transform = 'rotate(180deg)';
+      this._setChevronExpanded(chevron, true);
     }
     if (countBadge) {
       countBadge.classList.add('opacity-0');
@@ -488,10 +377,10 @@ export class SidebarRenderer {
     currentTab: string,
     _activeCategory: string | null
   ): string {
-    const themeStyle = this._getThemeStyle();
+    const themeClass = this._getThemeClass();
 
     return `
-      <div class="sidebar-shell flex flex-col h-full bg-gradient-to-b from-white to-slate-50/50" style="${themeStyle}">
+      <div class="sidebar-shell flex flex-col h-full bg-gradient-to-b from-white to-slate-50/50 ${themeClass}">
 
         <!-- ═══ Header ═══ -->
         <div class="p-4 pb-3">
@@ -509,8 +398,7 @@ export class SidebarRenderer {
         <div class="mx-4 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
 
         <!-- ═══ Navigation ═══ -->
-        <nav id="sidebar-nav-container" aria-label="${title} 导航" class="flex-1 overflow-y-auto px-3 py-3 space-y-1"
-          style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
+        <nav id="sidebar-nav-container" aria-label="${title} 导航" class="sidebar-scrollbar-thin flex-1 overflow-y-auto px-3 py-3 space-y-1">
 
           ${this._buildOverviewButton(currentTab)}
 
@@ -597,7 +485,7 @@ export class SidebarRenderer {
   private _buildCategoryGroup(category: CategoryTreeNode, currentTab: string): string {
     const categoryColor = category.color || 'slate'; // 分类装饰色
     const scheme = COLOR_SCHEMES[categoryColor as keyof typeof COLOR_SCHEMES] || COLOR_SCHEMES.blue;
-    const lineColor = this._getCategoryLineColor(categoryColor);
+    const lineColorClass = this._getCategoryLineClass(categoryColor);
     const childCount = category.children.length;
 
     return `
@@ -633,18 +521,17 @@ export class SidebarRenderer {
 
           <!-- Chevron -->
           <i class="fas fa-chevron-down text-[9px] text-slate-400 group-hover:text-slate-600
-            transition-all duration-300 category-chevron" style="transform: rotate(0deg)"></i>
+            transition-all duration-300 category-chevron rotate-0"></i>
         </button>
 
         <!-- Children Container -->
-        <div id="sidebar-category-children-${category.id}" class="sidebar-category-children hidden overflow-hidden transition-all duration-200"
-          style="will-change: max-height, opacity;">
+        <div id="sidebar-category-children-${category.id}" class="sidebar-category-children sidebar-category-children--collapsed hidden overflow-hidden transition-all duration-200">
 
           <!-- Left accent line container -->
-          <div class="relative ml-[18px] pl-4 mt-1 space-y-0.5">
+          <div class="sidebar-category-children-inner relative ml-[18px] pl-4 mt-1 space-y-0.5">
 
             <!-- Vertical accent line - 使用分类自己的颜色 -->
-            <div class="absolute left-0 top-1 bottom-1 w-[2px] rounded-full opacity-30" style="background-color: ${lineColor}"></div>
+            <div class="sidebar-category-line ${lineColorClass} absolute left-0 top-1 bottom-1 w-[2px] rounded-full opacity-30"></div>
 
             ${category.children.map(route => this._buildChildRouteItem(route, currentTab)).join('')}
           </div>
@@ -657,7 +544,7 @@ export class SidebarRenderer {
 
   private _buildChildRouteItem(route: RouteConfig & { id: string }, currentTab: string): string {
     const isActive = currentTab === route.id;
-    const itemThemeStyle = this._getThemeStyleForColor(
+    const itemThemeClass = this._getThemeClassForColor(
       this.categories[route.category || '']?.color
     );
     const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } = this._getRouteItemClasses(
@@ -670,12 +557,10 @@ export class SidebarRenderer {
       <button type="button" data-action="switch-tab" data-tab="${route.id}"
         id="sidebar-btn-${route.id}"
         ${isActive ? 'aria-current="page"' : ''}
-        style="${itemThemeStyle}"
         class="sidebar-btn group w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg
-          ${containerCls} transition-all duration-200">
-        <div class="sidebar-icon-container w-5.5 h-5.5 rounded-md ${iconContainerCls}
-          flex items-center justify-center transition-all duration-200"
-          style="width: 22px; height: 22px;">
+          ${itemThemeClass} ${containerCls} transition-all duration-200">
+        <div class="sidebar-icon-container w-[22px] h-[22px] rounded-md ${iconContainerCls}
+          flex items-center justify-center transition-all duration-200">
           <i class="sidebar-icon ${route.icon} text-[9px] ${iconCls} transition-colors duration-200"></i>
         </div>
         <span class="sidebar-label text-[12px] ${labelCls} transition-colors duration-200 flex-1 text-left truncate">
@@ -725,56 +610,54 @@ export class SidebarRenderer {
           aria-label="侧边栏搜索结果"
           aria-live="polite"
           aria-hidden="true"
-          class="hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-sm
+          class="sidebar-scrollbar-thin hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-sm
             border border-slate-200 shadow-xl shadow-slate-200/50
-            rounded-xl mt-1.5 max-h-60 overflow-y-auto z-50 p-1"
-          style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
+            rounded-xl mt-1.5 max-h-60 overflow-y-auto z-50 p-1">
         </div>
       </div>
     `;
   }
 
-  private _getThemeStyle(): string {
-    return this._getThemeStyleForColor(this.moduleColor);
+  private _getThemeClass(): string {
+    return this._getThemeClassForColor(this.moduleColor);
   }
 
-  private _getThemeStyleForColor(color?: string): string {
+  private _getThemeClassForColor(color?: string): string {
     const resolvedColor = this._resolveThemeColor(color);
-    const theme = SIDEBAR_THEMES[resolvedColor] || SIDEBAR_THEMES.blue;
-    return [
-      `--sidebar-primary:${theme.primary}`,
-      `--sidebar-accent:${theme.accent}`,
-      `--sidebar-active:${theme.active}`,
-      `--sidebar-text:${theme.text}`,
-      `--sidebar-active-bg-start:${theme.activeBgStart}`,
-      `--sidebar-active-bg-end:${theme.activeBgEnd}`,
-      `--sidebar-icon-soft:${theme.iconSoft}`,
-      `--sidebar-icon-soft-end:${theme.iconSoftEnd}`,
-      `--sidebar-border:${theme.border}`,
-      `--sidebar-focus:${theme.focus}`,
-      `--sidebar-shadow:${theme.shadow}`,
-    ].join(';');
+    return SIDEBAR_THEME_CLASSES[resolvedColor];
   }
 
-  private _getCategoryLineColor(categoryColor: string): string {
-    const palette =
-      COLOR_PALETTES[categoryColor as keyof typeof COLOR_PALETTES] || COLOR_PALETTES.blue;
-    return palette[200];
+  private _getCategoryLineClass(categoryColor: string): string {
+    const resolvedColor = this._resolveKnownColor(categoryColor, 'blue');
+    return SIDEBAR_CATEGORY_LINE_CLASSES[resolvedColor];
   }
 
   private _resolveThemeColor(themeColor?: string): ColorSchemeName {
-    if (themeColor && themeColor in SIDEBAR_THEMES) {
-      return themeColor as ColorSchemeName;
-    }
-
-    return ColorContext.inferColorFromModule(this.moduleId);
+    return this._resolveKnownColor(themeColor, ColorContext.inferColorFromModule(this.moduleId));
   }
 
-  private _syncThemeStyle(sidebar: HTMLElement): void {
+  private _resolveKnownColor(
+    color: string | undefined,
+    fallback: ColorSchemeName
+  ): ColorSchemeName {
+    if (color && color in COLOR_SCHEMES) {
+      return color as ColorSchemeName;
+    }
+
+    return fallback;
+  }
+
+  private _syncThemeClass(sidebar: HTMLElement): void {
     const shell = sidebar.querySelector('.sidebar-shell') as HTMLElement | null;
     if (shell) {
-      shell.setAttribute('style', this._getThemeStyle());
+      shell.classList.remove(...SIDEBAR_THEME_CLASS_NAMES);
+      shell.classList.add(this._getThemeClass());
     }
+  }
+
+  private _setChevronExpanded(chevron: HTMLElement, isExpanded: boolean): void {
+    chevron.classList.toggle('rotate-180', isExpanded);
+    chevron.classList.toggle('rotate-0', !isExpanded);
   }
 
   private _prefersReducedMotion(): boolean {

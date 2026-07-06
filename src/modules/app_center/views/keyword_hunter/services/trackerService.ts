@@ -4,7 +4,8 @@
 // 🎯 P0优化: 使用统一类型定义
 // ================================================================
 
-import { callLLM } from '../../../../../services/llmService';
+import { callLLM, type LLMStreamMetrics } from '../../../../../services/llmService';
+import { LocalDataStore } from '../../../../../services/localDataStore';
 import { ValidationError } from '@common/errors/AppError';
 import {
   ANALYSIS_PROMPT_TEMPLATE,
@@ -18,9 +19,59 @@ import type {
   WordFrequency,
   KeywordTrackerSettings,
 } from '@/types/modules-business';
-import type { ParagraphData } from '@/types/state';
+import type { LLMProviderConfig, ParagraphData } from '@/types/state';
 
 const nativeLoggerConsole = globalThis.console;
+const KEYWORD_HUNTER_LLM_CACHE_VERSION = 'v1';
+const KEYWORD_HUNTER_LLM_CACHE_PREFIX = 'cache:keyword-hunter-llm:';
+const KEYWORD_HUNTER_LLM_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const LISTING_ANALYSIS_MAX_TOKENS = 6000;
+const TRANSLATION_MIN_MAX_TOKENS = 2048;
+const TRANSLATION_MAX_TOKENS = 12000;
+const TRANSLATION_OUTPUT_TOKEN_BUFFER = 1000;
+const keywordHunterInFlightLlmRequests = new Map<string, Promise<string>>();
+
+interface CachedKeywordHunterLlmEntry {
+  response: string;
+  timestamp: number;
+}
+
+interface KeywordHunterLlmOptions {
+  temperature?: number;
+  jsonMode?: boolean;
+  maxTokens?: number;
+  serviceTier?: LLMProviderConfig['serviceTier'];
+  onStatus?: (status: KeywordHunterLlmStatus) => void;
+}
+
+export type KeywordHunterLlmStatus =
+  | { stage: 'cache-hit' }
+  | { stage: 'in-flight' }
+  | { stage: 'first-response'; metrics: LLMStreamMetrics };
+
+type KeywordHunterLlmMessage = { role: 'system' | 'user'; content: string };
+type ResolvedKeywordHunterLlmOptions = Required<
+  Pick<KeywordHunterLlmOptions, 'temperature' | 'jsonMode'>
+> &
+  Pick<KeywordHunterLlmOptions, 'maxTokens' | 'serviceTier'>;
+
+interface KeywordHunterLlmCall {
+  messages: KeywordHunterLlmMessage[];
+  provider: string;
+  endpoint: string;
+  apiKey: string;
+  model: string;
+  options: ResolvedKeywordHunterLlmOptions;
+  cacheKey: string;
+  onStatus?: (status: KeywordHunterLlmStatus) => void;
+}
+
+interface KeywordHunterLlmCacheConfig {
+  provider: string;
+  endpoint: string;
+  model: string;
+  serviceTier?: LLMProviderConfig['serviceTier'];
+}
 
 // ==========================================
 // 1. 基础文本处理工具
@@ -333,6 +384,16 @@ export function buildNumberedTranslationInput(paragraphs: string[]): string {
   return paragraphs.map((p, i) => `【${i + 1}】 ${sanitizePromptInput(p)}`).join('\n');
 }
 
+function getTranslationMaxTokens(copyText: string): number {
+  return Math.min(
+    TRANSLATION_MAX_TOKENS,
+    Math.max(
+      TRANSLATION_MIN_MAX_TOKENS,
+      TRANSLATION_OUTPUT_TOKEN_BUFFER + Math.ceil(copyText.length / 2)
+    )
+  );
+}
+
 // ==========================================
 // 3. LLM 服务封装
 // ==========================================
@@ -352,8 +413,9 @@ function createLlmConfigValidationError(
 async function bridgeCallLLM(
   systemPrompt: string,
   userPrompt: string,
-  options: { temperature?: number; jsonMode?: boolean } = {}
+  options: KeywordHunterLlmOptions = {}
 ): Promise<string> {
+  const { onStatus, ...requestOptions } = options;
   // 使用 StorageService 获取 LLM 配置
   const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
 
@@ -367,28 +429,8 @@ async function bridgeCallLLM(
     );
   }
 
-  // 🔐 P0优化: 使用安全存储读取配置
-  const config = await StorageService.getLLMConfigWithKey(activeProvider);
-
-  // 检查 Key
-  if (!config || !config.apiKey) {
-    // 特殊处理：如果是 serverless 模式，允许前端 key 为空或随意值，但为了通过校验建议前端填个占位符
-    // 这里抛出错误提示用户去设置里检查
-    throw createLlmConfigValidationError(
-      '所选提供商未配置 API Key',
-      'ERR_LLM_API_KEY_MISSING',
-      activeProvider
-    );
-  }
-
-  const targetModel =
-    config.model ||
-    (config.models && config.models[0]
-      ? typeof config.models[0] === 'string'
-        ? config.models[0]
-        : config.models[0].id
-      : undefined);
-  if (!targetModel) {
+  const cacheConfig = getKeywordHunterLlmCacheConfig(activeProvider);
+  if (!cacheConfig.model) {
     throw createLlmConfigValidationError(
       '未选择模型，请在设置中同步或选择模型',
       'ERR_LLM_MODEL_NOT_SELECTED',
@@ -401,20 +443,177 @@ async function bridgeCallLLM(
     { role: 'user' as const, content: userPrompt },
   ];
 
-  const finalOptions = {
+  const finalOptions: ResolvedKeywordHunterLlmOptions = {
     temperature: 0.3,
     jsonMode: false,
-    ...options,
+    ...requestOptions,
+    ...(cacheConfig.serviceTier && { serviceTier: cacheConfig.serviceTier }),
   };
 
-  return await callLLM(
+  const cacheKey = generateKeywordHunterLlmCacheKey(
+    activeProvider,
+    cacheConfig.endpoint,
+    cacheConfig.model,
     messages,
-    activeProvider as string,
-    config.endpoint,
-    config.apiKey,
-    targetModel,
     finalOptions
   );
+  const cachedResponse = await getCachedKeywordHunterLlmResponse(cacheKey);
+  if (cachedResponse !== null) {
+    onStatus?.({ stage: 'cache-hit' });
+    return cachedResponse;
+  }
+
+  const inFlightRequest = keywordHunterInFlightLlmRequests.get(cacheKey);
+  if (inFlightRequest) {
+    onStatus?.({ stage: 'in-flight' });
+    return await inFlightRequest;
+  }
+
+  const request = getKeywordHunterLlmApiKey(activeProvider).then(apiKey =>
+    callAndCacheKeywordHunterLlm({
+      messages,
+      provider: activeProvider,
+      endpoint: cacheConfig.endpoint,
+      apiKey,
+      model: cacheConfig.model,
+      options: finalOptions,
+      cacheKey,
+      onStatus,
+    })
+  );
+  keywordHunterInFlightLlmRequests.set(cacheKey, request);
+  try {
+    return await request;
+  } finally {
+    keywordHunterInFlightLlmRequests.delete(cacheKey);
+  }
+}
+
+async function getKeywordHunterLlmApiKey(provider: string): Promise<string> {
+  const config = await StorageService.getLLMConfigWithKey(provider);
+  if (!config || !config.apiKey) {
+    throw createLlmConfigValidationError(
+      '所选提供商未配置 API Key',
+      'ERR_LLM_API_KEY_MISSING',
+      provider
+    );
+  }
+  return config.apiKey;
+}
+
+function getKeywordHunterLlmCacheConfig(provider: string): KeywordHunterLlmCacheConfig {
+  const config = StorageService.getLLMConfig(provider);
+  const model = config ? resolveConfiguredLlmModel(config) : undefined;
+
+  return {
+    provider,
+    endpoint: config?.endpoint || '',
+    model: model || '',
+    serviceTier: config?.serviceTier,
+  };
+}
+
+async function callAndCacheKeywordHunterLlm({
+  messages,
+  provider,
+  endpoint,
+  apiKey,
+  model,
+  options,
+  cacheKey,
+  onStatus,
+}: KeywordHunterLlmCall): Promise<string> {
+  const response = await callLLM(messages, provider, endpoint, apiKey, model, {
+    ...options,
+    stream: true,
+    onFirstResponse: metrics => onStatus?.({ stage: 'first-response', metrics }),
+  });
+  if (response.trim()) {
+    await setCachedKeywordHunterLlmResponse(cacheKey, response);
+  }
+  return response;
+}
+
+function resolveConfiguredLlmModel(
+  config: Partial<Pick<LLMProviderConfig, 'model' | 'models'>>
+): string | undefined {
+  if (config.model) {
+    return config.model;
+  }
+
+  const [firstModel] = config.models || [];
+  if (!firstModel) {
+    return undefined;
+  }
+
+  return typeof firstModel === 'string' ? firstModel : firstModel.id;
+}
+
+function generateKeywordHunterLlmCacheKey(
+  provider: string,
+  endpoint: string,
+  model: string,
+  messages: unknown,
+  options: unknown
+): string {
+  return [
+    KEYWORD_HUNTER_LLM_CACHE_PREFIX,
+    KEYWORD_HUNTER_LLM_CACHE_VERSION,
+    hashString(
+      [provider, endpoint, model, JSON.stringify(options), JSON.stringify(messages)].join('\n')
+    ),
+  ].join(':');
+}
+
+function isCachedKeywordHunterLlmEntry(value: unknown): value is CachedKeywordHunterLlmEntry {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as { response?: unknown }).response === 'string' &&
+    typeof (value as { timestamp?: unknown }).timestamp === 'number'
+  );
+}
+
+async function getCachedKeywordHunterLlmResponse(cacheKey: string): Promise<string | null> {
+  try {
+    const cached = await LocalDataStore.get<CachedKeywordHunterLlmEntry>(cacheKey, null);
+    if (!isCachedKeywordHunterLlmEntry(cached)) {
+      return null;
+    }
+    if (Date.now() - cached.timestamp >= KEYWORD_HUNTER_LLM_CACHE_TTL_MS) {
+      await LocalDataStore.remove(cacheKey);
+      return null;
+    }
+    return cached.response;
+  } catch {
+    return null;
+  }
+}
+
+async function setCachedKeywordHunterLlmResponse(
+  cacheKey: string,
+  response: string
+): Promise<void> {
+  try {
+    await LocalDataStore.set<CachedKeywordHunterLlmEntry>(
+      cacheKey,
+      {
+        response,
+        timestamp: Date.now(),
+      },
+      'cache'
+    );
+  } catch {
+    // Cache failures should not block analysis or translation.
+  }
+}
+
+function hashString(value: string): string {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = ((hash << 5) - hash + value.charCodeAt(index)) | 0;
+  }
+  return Math.abs(hash).toString(36);
 }
 
 /**
@@ -458,7 +657,8 @@ export async function fetchListingAnalysis(
   copyText: string,
   _keywords: string[],
   matchedKeywords: KeywordMatchResult[],
-  unmatchedKeywords: string[]
+  unmatchedKeywords: string[],
+  options: { onLlmStatus?: (status: KeywordHunterLlmStatus) => void } = {}
 ): Promise<string> {
   // 🔥🔥🔥 新增校验：检查文案是否为空 🔥🔥🔥
   if (!copyText || !copyText.trim()) {
@@ -490,7 +690,11 @@ export async function fetchListingAnalysis(
   const userPrompt = buildListingAnalysisUserPrompt(copyText, matchedKeywords, unmatchedKeywords);
 
   // 🔥 调整：temperature 0.5 -> 0.1 提高稳定性
-  return await bridgeCallLLM(systemPrompt, userPrompt, { temperature: 0.1 });
+  return await bridgeCallLLM(systemPrompt, userPrompt, {
+    temperature: 0.1,
+    maxTokens: LISTING_ANALYSIS_MAX_TOKENS,
+    onStatus: options.onLlmStatus,
+  });
 }
 
 /**
@@ -573,7 +777,10 @@ function parseNumberedTranslations(response: string, totalCount: number): Record
  * @param copyText - 待翻译的原始文案（支持任意语言/格式）
  * @returns        - ParagraphData[]，每项含 original + translation
  */
-export async function fetchImmersionTranslation(copyText: string): Promise<ParagraphData[]> {
+export async function fetchImmersionTranslation(
+  copyText: string,
+  options: { onLlmStatus?: (status: KeywordHunterLlmStatus) => void } = {}
+): Promise<ParagraphData[]> {
   if (!copyText || !copyText.trim()) {
     throw new ValidationError(
       '文案内容为空，无法进行翻译',
@@ -607,6 +814,8 @@ export async function fetchImmersionTranslation(copyText: string): Promise<Parag
   const response = await bridgeCallLLM(systemPrompt, userPrompt, {
     jsonMode: false,
     temperature: 0,
+    maxTokens: getTranslationMaxTokens(copyText),
+    onStatus: options.onLlmStatus,
   });
 
   // 4. 解析编号格式响应

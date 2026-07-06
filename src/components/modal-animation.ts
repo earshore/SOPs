@@ -12,6 +12,9 @@ type ModalBackdropElement = HTMLElement & {
   __modalAnimationController?: ModalAnimationController;
 };
 
+const MODAL_SHOW_CLASS = 'show';
+const MODAL_INTERACTION_BLOCKED_CLASS = 'modal-interaction-blocked';
+
 /**
  * 模态框动画选项
  */
@@ -98,22 +101,19 @@ export class ModalAnimationController {
   }
 
   private showInstantly(): void {
-    this.backdrop.classList.add('show');
-    this.modal.style.pointerEvents = 'auto';
+    this.backdrop.classList.add(MODAL_SHOW_CLASS);
+    this.modal.classList.remove(MODAL_INTERACTION_BLOCKED_CLASS);
   }
 
   private hideInstantly(): void {
-    this.backdrop.classList.remove('show');
-    this.backdrop.style.visibility = 'hidden';
-    this.backdrop.style.pointerEvents = 'none';
-    this.modal.style.pointerEvents = 'none';
+    this.backdrop.classList.remove(MODAL_SHOW_CLASS);
+    this.modal.classList.remove(MODAL_INTERACTION_BLOCKED_CLASS);
   }
 
   private async animateOpen(): Promise<void> {
     this.isAnimating = true;
-    this.modal.style.pointerEvents = 'none';
-    this.backdrop.style.visibility = 'visible';
-    this.backdrop.style.pointerEvents = 'auto';
+    this.backdrop.classList.add(MODAL_SHOW_CLASS);
+    this.modal.classList.add(MODAL_INTERACTION_BLOCKED_CLASS);
     this.backdrop.classList.add(ANIMATION_CLASSES.modalBackdropEnter);
     this.modal.classList.add(ANIMATION_CLASSES.modalContentEnter);
 
@@ -124,14 +124,13 @@ export class ModalAnimationController {
 
     this.backdrop.classList.remove(ANIMATION_CLASSES.modalBackdropEnter);
     this.modal.classList.remove(ANIMATION_CLASSES.modalContentEnter);
-    this.modal.style.pointerEvents = 'auto';
+    this.modal.classList.remove(MODAL_INTERACTION_BLOCKED_CLASS);
     this.isAnimating = false;
   }
 
   private async animateClose(): Promise<void> {
     this.isAnimating = true;
-    this.modal.style.pointerEvents = 'none';
-    this.backdrop.style.pointerEvents = 'none';
+    this.modal.classList.add(MODAL_INTERACTION_BLOCKED_CLASS);
     this.backdrop.classList.add(ANIMATION_CLASSES.modalBackdropExit);
     this.modal.classList.add(ANIMATION_CLASSES.modalContentExit);
 
@@ -142,7 +141,8 @@ export class ModalAnimationController {
 
     this.backdrop.classList.remove(ANIMATION_CLASSES.modalBackdropExit);
     this.modal.classList.remove(ANIMATION_CLASSES.modalContentExit);
-    this.backdrop.style.visibility = 'hidden';
+    this.backdrop.classList.remove(MODAL_SHOW_CLASS);
+    this.modal.classList.remove(MODAL_INTERACTION_BLOCKED_CLASS);
     this.isAnimating = false;
   }
 
@@ -209,7 +209,8 @@ export class ModalAnimationController {
     );
     this.modal.classList.remove(
       ANIMATION_CLASSES.modalContentEnter,
-      ANIMATION_CLASSES.modalContentExit
+      ANIMATION_CLASSES.modalContentExit,
+      MODAL_INTERACTION_BLOCKED_CLASS
     );
 
     // 重置状态

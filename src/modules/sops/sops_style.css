@@ -60,6 +60,22 @@
   --wb-icon-shadow-hover: 0 14px 28px -20px rgba(79, 70, 229, 0.58);
 }
 
+.sops-overview .wb-tag-dot--sops-1 {
+  --wb-tag-dot-color: var(--wb-tag-dot-1);
+}
+
+.sops-overview .wb-tag-dot--sops-2 {
+  --wb-tag-dot-color: var(--wb-tag-dot-2);
+}
+
+.sops-overview .wb-tag-dot--sops-3 {
+  --wb-tag-dot-color: var(--wb-tag-dot-3);
+}
+
+.sops-overview .wb-tag-dot--sops-4 {
+  --wb-tag-dot-color: var(--wb-tag-dot-4);
+}
+
 .sops-overview .wb-container--simple .wb-icon {
   background: linear-gradient(
     135deg,
@@ -395,6 +411,18 @@
 .npi-lifecycle-table tbody tr:hover td:first-child,
 .npi-lifecycle-table tbody tr:hover td:nth-child(2) {
   background: var(--color-blue-50);
+}
+
+@media (max-width: 768px) {
+  .npi-lifecycle-table thead tr:nth-child(2) th:first-child,
+  .npi-lifecycle-table thead tr:nth-child(2) th:nth-child(2),
+  .npi-lifecycle-table tbody td:first-child,
+  .npi-lifecycle-table tbody td:nth-child(2) {
+    position: static;
+    left: auto;
+    z-index: auto;
+    box-shadow: none;
+  }
 }
 
 .npi-lifecycle-table :is(th, td):nth-child(9),

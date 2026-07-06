@@ -137,7 +137,7 @@
               <button
                 type="button"
                 @click="toggleAllDimensions()"
-                x-show="hasReport"
+                :class="hasReport ? '' : 'hidden'"
                 class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                 :title="toggleAllDimensionsTitle"
               >
@@ -152,7 +152,7 @@
         <!-- Card Body -->
         <div class="p-6">
           <div
-            x-show="reportActionDisabled"
+            :class="reportActionDisabled ? '' : 'hidden'"
             class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4"
           >
             <div
@@ -268,7 +268,7 @@
           </div>
         </div>
         <div
-          x-show="hasReport && dnaActionDisabled"
+          :class="hasReport && dnaActionDisabled ? '' : 'hidden'"
           class="mx-6 mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4"
         >
           <div
@@ -279,7 +279,7 @@
           </div>
         </div>
         <div
-          x-show="showDnaExtractionSummary()"
+          :class="showDnaExtractionSummary() ? '' : 'hidden'"
           class="mx-6 mt-4 rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3"
         >
           <div
@@ -293,11 +293,11 @@
             </div>
             <div class="flex items-center gap-2 text-[10px] text-blue-700/80">
               <span
-                x-show="getDnaLowConfidenceText().length > 0"
+                :class="getDnaLowConfidenceText().length > 0 ? '' : 'hidden'"
                 x-text="getDnaLowConfidenceText()"
               ></span>
               <span
-                x-show="dnaExtractionSummary"
+                :class="dnaExtractionSummary ? '' : 'hidden'"
                 class="px-2 py-0.5 rounded-full bg-white/70 border border-blue-100"
                 x-text="getDnaReportTypeText()"
               ></span>
@@ -323,8 +323,7 @@
 
                   <!-- 置信度徽章 -->
                   <span
-                    x-show="showDnaConfidence('keywordsTier1')"
-                    :class="getDnaConfidenceBadgeClass('keywordsTier1')"
+                    :class="getDnaConfidenceBadgeClass('keywordsTier1') + (showDnaConfidence('keywordsTier1') ? '' : ' hidden')"
                     class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
                   >
                     <i class="fas fa-chart-line text-[8px]"></i>
@@ -356,7 +355,7 @@
                 />
                 <p
                   id="lab-keywords-tier1-source"
-                  x-show="showDnaSource('keywordsTier1')"
+                  :class="showDnaSource('keywordsTier1') ? '' : 'hidden'"
                   class="mt-1 text-[11px] text-slate-400 truncate"
                   :title="getDnaFieldSourceText('keywordsTier1')"
                   x-text="getDnaFieldSourceText('keywordsTier1')"
@@ -377,8 +376,7 @@
                   >
 
                   <span
-                    x-show="showDnaConfidence('negative')"
-                    :class="getDnaConfidenceBadgeClass('negative')"
+                    :class="getDnaConfidenceBadgeClass('negative') + (showDnaConfidence('negative') ? '' : ' hidden')"
                     class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
                   >
                     <i class="fas fa-chart-line text-[8px]"></i>
@@ -410,7 +408,7 @@
                 />
                 <p
                   id="negative-keywords-source"
-                  x-show="showDnaSource('negative')"
+                  :class="showDnaSource('negative') ? '' : 'hidden'"
                   class="mt-1 text-[11px] text-slate-400 truncate"
                   :title="getDnaFieldSourceText('negative')"
                   x-text="getDnaFieldSourceText('negative')"
@@ -431,8 +429,7 @@
 
                   <!-- 置信度徽章 -->
                   <span
-                    x-show="showDnaConfidence('keywordsTier2')"
-                    :class="getDnaConfidenceBadgeClass('keywordsTier2')"
+                    :class="getDnaConfidenceBadgeClass('keywordsTier2') + (showDnaConfidence('keywordsTier2') ? '' : ' hidden')"
                     class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
                   >
                     <i class="fas fa-chart-line text-[8px]"></i>
@@ -466,7 +463,7 @@
                 ></textarea>
                 <p
                   id="lab-keywords-tier2-source"
-                  x-show="showDnaSource('keywordsTier2')"
+                  :class="showDnaSource('keywordsTier2') ? '' : 'hidden'"
                   class="mt-1 text-[11px] text-slate-400 truncate"
                   :title="getDnaFieldSourceText('keywordsTier2')"
                   x-text="getDnaFieldSourceText('keywordsTier2')"
@@ -488,8 +485,7 @@
 
                   <!-- 置信度徽章 -->
                   <span
-                    x-show="showDnaConfidence('audience')"
-                    :class="getDnaConfidenceBadgeClass('audience')"
+                    :class="getDnaConfidenceBadgeClass('audience') + (showDnaConfidence('audience') ? '' : ' hidden')"
                     class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
                   >
                     <i class="fas fa-chart-line text-[8px]"></i>
@@ -522,7 +518,7 @@
                 />
                 <p
                   id="lab-audience-source"
-                  x-show="showDnaSource('audience')"
+                  :class="showDnaSource('audience') ? '' : 'hidden'"
                   class="mt-1 text-[11px] text-slate-400 truncate"
                   :title="getDnaFieldSourceText('audience')"
                   x-text="getDnaFieldSourceText('audience')"
@@ -546,8 +542,7 @@
 
                   <!-- 置信度徽章 -->
                   <span
-                    x-show="showDnaConfidence('usps')"
-                    :class="getDnaConfidenceBadgeClass('usps')"
+                    :class="getDnaConfidenceBadgeClass('usps') + (showDnaConfidence('usps') ? '' : ' hidden')"
                     class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
                   >
                     <i class="fas fa-chart-line text-[8px]"></i>
@@ -583,7 +578,7 @@
                 ></textarea>
                 <p
                   id="lab-usps-source"
-                  x-show="showDnaSource('usps')"
+                  :class="showDnaSource('usps') ? '' : 'hidden'"
                   class="mt-1 text-[11px] text-slate-400 truncate"
                   :title="getDnaFieldSourceText('usps')"
                   x-text="getDnaFieldSourceText('usps')"
@@ -607,8 +602,7 @@
 
                   <!-- 置信度徽章 -->
                   <span
-                    x-show="showDnaConfidence('specs')"
-                    :class="getDnaConfidenceBadgeClass('specs')"
+                    :class="getDnaConfidenceBadgeClass('specs') + (showDnaConfidence('specs') ? '' : ' hidden')"
                     class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold"
                   >
                     <i class="fas fa-chart-line text-[8px]"></i>
@@ -644,7 +638,7 @@
                 ></textarea>
                 <p
                   id="lab-specs-source"
-                  x-show="showDnaSource('specs')"
+                  :class="showDnaSource('specs') ? '' : 'hidden'"
                   class="mt-1 text-[11px] text-slate-400 truncate"
                   :title="getDnaFieldSourceText('specs')"
                   x-text="getDnaFieldSourceText('specs')"
@@ -825,6 +819,7 @@
             <div
               class="absolute top-1 left-1 w-[calc(50%-4px)] h-[calc(100%-8px)] bg-white shadow-md rounded-lg transition-transform duration-300 ease-out z-0"
               id="mode-toggle-glider"
+              data-console-mode="listing"
             ></div>
             <button
               type="button"
@@ -846,6 +841,7 @@
           <div
             class="relative transition-transform duration-700 [transform-style:preserve-3d] grid grid-cols-1 grid-rows-1"
             id="console-card-inner"
+            data-console-mode="listing"
           >
             <!-- Front: Listing Mode -->
             <div
@@ -862,15 +858,7 @@
                   class="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl"
                 ></div>
                 <div
-                  class="absolute inset-0 opacity-[0.03]"
-                  style="
-                    background-image: radial-gradient(
-                      circle,
-                      #3b82f6 1px,
-                      transparent 1px
-                    );
-                    background-size: 20px 20px;
-                  "
+                  class="promptlab-console-pattern promptlab-console-pattern--listing absolute inset-0 opacity-[0.03]"
                 ></div>
                 <div class="pr-28 relative z-10">
                   <div class="flex items-center gap-2 mb-2">
@@ -925,15 +913,7 @@
                   class="absolute bottom-0 left-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl"
                 ></div>
                 <div
-                  class="absolute inset-0 opacity-[0.03]"
-                  style="
-                    background-image: radial-gradient(
-                      circle,
-                      #ec4899 1px,
-                      transparent 1px
-                    );
-                    background-size: 20px 20px;
-                  "
+                  class="promptlab-console-pattern promptlab-console-pattern--visual absolute inset-0 opacity-[0.03]"
                 ></div>
                 <div class="pr-28 relative z-10">
                   <div class="flex items-center gap-2 mb-2">
@@ -1027,7 +1007,7 @@
           <!-- Output Body -->
           <div class="relative flex-1 bg-white overflow-hidden">
             <textarea
-              class="w-full h-full px-5 py-4 pb-10 text-xs font-mono text-slate-600 bg-transparent resize-none focus:outline-none border-0 transition-colors duration-500 leading-relaxed"
+              class="promptlab-output-textarea w-full h-full px-5 py-4 pb-10 text-xs font-mono text-slate-600 bg-transparent resize-none focus:outline-none border-0 transition-colors duration-500 leading-relaxed"
               id="final-prompt-output"
               placeholder="// 1. 检查 AI 分析报告各维度内容
 // 2. 补充产品 DNA 信息
@@ -1037,10 +1017,6 @@
 // 提示: 先确认报告洞察，再补充产品 DNA，生成效果更稳定"
               aria-label="最终 Prompt 输出"
               readonly=""
-              style="
-                pointer-events: auto !important;
-                overflow-y: auto !important;
-              "
               :value="currentPrompt"
             ></textarea>
             <!-- Footer Status Bar -->

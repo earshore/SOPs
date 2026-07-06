@@ -5,6 +5,7 @@
 // ================================================================
 
 import { StorageService } from '@services/storageService';
+import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
 
 /**
  * 主题颜色配置
@@ -237,16 +238,20 @@ export function applyTheme(themeId: string): void {
   const theme = getThemeOrDefault(themeId);
   const root = document.documentElement;
 
-  // 设置CSS变量
-  root.style.setProperty('--theme-primary', theme.colors.primary);
-  root.style.setProperty('--theme-primary-hover', theme.colors.primaryHover);
-  root.style.setProperty('--theme-primary-active', theme.colors.primaryActive);
-  root.style.setProperty('--theme-light', theme.colors.light);
-  root.style.setProperty('--theme-border', theme.colors.border);
-  root.style.setProperty('--theme-text', theme.colors.text);
-
   // 设置data属性（用于TailwindCSS）
   root.setAttribute('data-theme', themeId);
+  updateRuntimeCssRule('legacy-theme-vars', getThemeSelector(themeId), {
+    '--theme-primary': theme.colors.primary,
+    '--theme-primary-hover': theme.colors.primaryHover,
+    '--theme-primary-active': theme.colors.primaryActive,
+    '--theme-light': theme.colors.light,
+    '--theme-border': theme.colors.border,
+    '--theme-text': theme.colors.text,
+  });
+}
+
+function getThemeSelector(themeId: string): string {
+  return `:root[data-theme="${themeId.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"]`;
 }
 
 /**

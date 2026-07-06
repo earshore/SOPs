@@ -237,7 +237,7 @@ it('computes input, task, site, and history branch states', () => {
   expect(panel.importStatusClass).toBe('text-slate-500');
   expect(panel.successfulTaskCount).toBe(1);
   expect(panel.completedTaskCount).toBe(2);
-  expect(panel.taskProgressStyle).toBe('width: 50%');
+  expect(panel.taskProgressClass).toBe('progress-bar-fill--50');
   expect(panel.getTaskCardClass(panel.tasks[0])['border-slate-200 bg-slate-50/60']).toBe(true);
   expect(
     panel.getTaskCardClass(panel.tasks[1])['border-blue-200 bg-blue-50/60 scraping-shimmer']
@@ -251,7 +251,6 @@ it('computes input, task, site, and history branch states', () => {
   expect(panel.getSiteButtonClass('DE')).toContain('selected');
   expect(panel.getSiteButtonClass('FR')).toContain('hover:border-blue-300');
   expect(panel.getSiteNameClass('DE')).toBe('text-blue-700');
-  expect(panel.getAnimationDelayStyle(3, 40)).toBe('animation-delay: 120ms');
   expect(panel.getDataTabButtonClass('preview')).toContain('active');
   expect(panel.getDataTabButtonClass('json')).toContain('hover:text-slate-600');
   expect(panel.showHistoryClear).toBe(true);
@@ -272,7 +271,7 @@ it('computes input, task, site, and history branch states', () => {
   expect(panel.startDisabled).toBe(true);
   expect(panel.hasTasks).toBe(false);
   expect(panel.hasSuccessfulTasks).toBe(false);
-  expect(panel.taskProgressStyle).toBe('width: 0%');
+  expect(panel.taskProgressClass).toBe('progress-bar-fill--0');
   expect(panel.scrapingIconClass).toBe('fa-circle-notch fa-spin');
   expect(panel.scrapingButtonText).toBe('正在采集中...');
   expect(panel.showStartCount).toBe(false);

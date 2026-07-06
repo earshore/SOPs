@@ -962,8 +962,8 @@ describe('Console Mode Toggle', () => {
     component.toggleConsoleMode('visual');
 
     expect(component.currentConsoleMode).toBe('visual');
-    expect(cardInner.style.transform).toBe('rotateY(180deg)');
-    expect(glider.style.transform).toBe('translateX(100%)');
+    expect(cardInner.dataset.consoleMode).toBe('visual');
+    expect(glider.dataset.consoleMode).toBe('visual');
   });
 
   it('should toggle back to listing mode', () => {
@@ -974,8 +974,8 @@ describe('Console Mode Toggle', () => {
     component.toggleConsoleMode('listing');
 
     expect(component.currentConsoleMode).toBe('listing');
-    expect(cardInner.style.transform).toBe('rotateY(0deg)');
-    expect(glider.style.transform).toBe('translateX(0)');
+    expect(cardInner.dataset.consoleMode).toBe('listing');
+    expect(glider.dataset.consoleMode).toBe('listing');
   });
 
   it('should not toggle if already in target mode', () => {

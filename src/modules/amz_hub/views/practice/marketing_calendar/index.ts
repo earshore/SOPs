@@ -5,6 +5,7 @@
 // ================================================================
 
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
+import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
 import BaseModule from '../../../../../common/BaseModule';
 import { SERVICE_NAMES } from '../../../../../common/di/ServiceRegistry';
 import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
@@ -406,17 +407,20 @@ class MarketingCalendarModule extends BaseModule {
         top = searchRect.top - maxHeight - 8;
       }
 
-      // 应用样式 - 先设置位置和尺寸，再显示
-      container.style.position = 'fixed';
-      container.style.top = `${top}px`;
-      container.style.left = `${left}px`;
-      container.style.width = `${containerWidth}px`;
-      container.style.zIndex = '99999';
-      container.style.transform = 'none'; // 强制重置transform
+      container.classList.add('amzf_search_history--positioned');
+      updateRuntimeCssRule(
+        'amzf-search-history-position',
+        '#amzf_search_history.amzf_search_history--positioned',
+        {
+          top: `${top}px`,
+          left: `${left}px`,
+          width: `${containerWidth}px`,
+          'max-height': `${maxHeight}px`,
+        }
+      );
 
       // 使用requestAnimationFrame确保样式应用后再添加show类
       requestAnimationFrame(() => {
-        container.style.maxHeight = `${maxHeight}px`;
         container.classList.add('amzf_show');
         document.getElementById('amzf_search')?.setAttribute('aria-expanded', 'true');
       });
@@ -822,7 +826,7 @@ class MarketingCalendarModule extends BaseModule {
       const isExpanded = isSearchActive || this.state.expandedSections.has(sectionId);
 
       html += `
-                <div id="${sectionId}" class="amzf_month_section ${isExpanded ? 'amzf_expanded' : ''}" style="animation-delay: ${(m - 1) * 0.03}s">
+                <div id="${sectionId}" class="amzf_month_section ${isExpanded ? 'amzf_expanded' : ''}">
                     <button type="button" class="amzf_month_header" data-amzf-toggle-section="${escapeHtml(sectionId)}" aria-expanded="${isExpanded}" aria-controls="${escapeHtml(sectionId)}_content">
                         <div class="amzf_month_info">
                             <span class="amzf_month_name">${(amzf_months as string[])[m - 1]}</span>
@@ -873,7 +877,7 @@ class MarketingCalendarModule extends BaseModule {
     let html = '<div class="amzf_event_view">';
     const isSearchActive = this.state.searchTerm && this.state.searchTerm.length > 0;
 
-    Object.keys(eventGroups).forEach((key, idx) => {
+    Object.keys(eventGroups).forEach(key => {
       const group = eventGroups[key];
       if (!group) return;
       const safeKey = key.replace(/[^a-zA-Z0-9]/g, '_');
@@ -882,7 +886,7 @@ class MarketingCalendarModule extends BaseModule {
       const displayName = `${escapeHtml(group.name)}(${escapeHtml(group.nameEn)})`;
 
       html += `
-                <div id="${sectionId}" class="amzf_event_comparison ${isExpanded ? 'amzf_expanded' : ''}" style="animation-delay: ${idx * 0.03}s">
+                <div id="${sectionId}" class="amzf_event_comparison ${isExpanded ? 'amzf_expanded' : ''}">
                     <button type="button" class="amzf_comparison_header" data-amzf-toggle-section="${escapeHtml(sectionId)}" aria-expanded="${isExpanded}" aria-controls="${escapeHtml(sectionId)}_content">
                         <div class="amzf_comparison_title">
                             <span>${group.emoji}</span>

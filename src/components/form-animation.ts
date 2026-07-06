@@ -9,6 +9,8 @@ import { animationManager } from '../services/animation-manager';
 import { ANIMATION_CLASSES } from '../config/animation-config';
 import { setSafeHtml } from '../common/utils/security';
 
+const SUCCESS_ICON_ANIMATED_CLASS = 'form-input-success-icon--animated';
+
 /**
  * 初始化表单输入动画
  * 为所有表单输入添加动画效果
@@ -188,7 +190,7 @@ function showErrorMessage(input: HTMLInputElement | HTMLTextAreaElement, message
   }
 
   errorElement.textContent = message;
-  errorElement.style.display = 'flex';
+  errorElement.hidden = false;
 }
 
 /**
@@ -203,7 +205,7 @@ export function clearInputError(input: HTMLInputElement | HTMLTextAreaElement): 
   // 隐藏错误消息
   const errorElement = input.parentElement?.querySelector<HTMLElement>('.form-error');
   if (errorElement) {
-    errorElement.style.display = 'none';
+    errorElement.hidden = true;
   }
 }
 
@@ -264,16 +266,11 @@ function showSuccessIcon(input: HTMLInputElement | HTMLTextAreaElement, animate:
   }
 
   // 如果需要动画，重新触发动画
+  iconElement.classList.remove(SUCCESS_ICON_ANIMATED_CLASS);
   if (animate) {
-    // 移除并重新添加以重新触发动画
-    iconElement.style.animation = 'none';
     // 强制重排
     void iconElement.offsetHeight;
-    iconElement.style.animation = '';
-  } else {
-    // 直接显示，不播放动画
-    iconElement.style.opacity = '1';
-    iconElement.style.animation = 'none';
+    iconElement.classList.add(SUCCESS_ICON_ANIMATED_CLASS);
   }
 }
 

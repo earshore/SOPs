@@ -1,4 +1,5 @@
 import { setSafeHtml } from '@/common/utils/security';
+import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
 import type { PromptHistoryItem } from '@/types/state';
 import { formatPromptDraftPreviewMeta, getPromptDrafts } from './promptDrafts';
 import type { PromptPreviewLeftOptions, PromptPreviewPointer } from './types';
@@ -183,16 +184,20 @@ function positionPromptPreview(
   const anchorX = pointer?.clientX ?? anchorRect?.left ?? promptRailRect?.left;
   const isLeftOfAnchor = Number.isFinite(anchorX) && left + previewWidth <= Number(anchorX) - 2;
 
-  preview.style.left = `${left}px`;
-  preview.style.top = `${top}px`;
-  preview.style.width = `${previewWidth}px`;
-  preview.style.maxHeight = `${previewHeight}px`;
-  preview.classList.toggle('is-left-of-anchor', isLeftOfAnchor);
-  preview.style.setProperty('--playground-prompt-preview-arrow-top', `${arrowTop}px`);
-  preview.style.setProperty(
-    '--playground-prompt-preview-body-max-height',
-    `${Math.max(180, previewHeight - 48)}px`
+  preview.classList.add('playground-prompt-preview-popover--positioned');
+  updateRuntimeCssRule(
+    'playground-prompt-preview-position',
+    '.playground-prompt-preview-popover.playground-prompt-preview-popover--positioned',
+    {
+      left: `${left}px`,
+      top: `${top}px`,
+      width: `${previewWidth}px`,
+      'max-height': `${previewHeight}px`,
+      '--playground-prompt-preview-arrow-top': `${arrowTop}px`,
+      '--playground-prompt-preview-body-max-height': `${Math.max(180, previewHeight - 48)}px`,
+    }
   );
+  preview.classList.toggle('is-left-of-anchor', isLeftOfAnchor);
 }
 
 function resolvePromptPreviewLeft({

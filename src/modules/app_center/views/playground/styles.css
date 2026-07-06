@@ -839,8 +839,96 @@
   border-radius: 999px;
   background: linear-gradient(
     90deg,
-    var(--playground-accent) 0 var(--playground-temperature-percent, 30%),
-    var(--playground-accent-muted) var(--playground-temperature-percent, 30%) 100%
+    var(--playground-accent) 0 30%,
+    var(--playground-accent-muted) 30% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='0']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 0%,
+    var(--playground-accent-muted) 0% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='1']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 10%,
+    var(--playground-accent-muted) 10% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='2']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 20%,
+    var(--playground-accent-muted) 20% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='3']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 30%,
+    var(--playground-accent-muted) 30% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='4']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 40%,
+    var(--playground-accent-muted) 40% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='5']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 50%,
+    var(--playground-accent-muted) 50% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='6']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 60%,
+    var(--playground-accent-muted) 60% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='7']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 70%,
+    var(--playground-accent-muted) 70% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='8']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 80%,
+    var(--playground-accent-muted) 80% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='9']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 90%,
+    var(--playground-accent-muted) 90% 100%
+  );
+}
+
+.playground-field-temperature input[data-temperature-level='10']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--playground-accent) 0 100%,
+    var(--playground-accent-muted) 100% 100%
   );
 }
 
@@ -951,6 +1039,18 @@
     min-height 200ms cubic-bezier(0, 0, 0.2, 1),
     border-radius 200ms cubic-bezier(0, 0, 0.2, 1),
     box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.playground-chat-wrap.is-draft-height-md {
+  height: 240px;
+}
+
+.playground-chat-wrap.is-draft-height-lg {
+  height: 340px;
+}
+
+.playground-chat-wrap.is-draft-height-xl {
+  height: 460px;
 }
 
 .playground-pending-status {

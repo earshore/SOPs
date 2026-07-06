@@ -61,7 +61,7 @@ describe('Scraper template accessibility semantics', () => {
     expect(template).toContain(':aria-checked="scrapeReviews"');
     expect(template).toContain('aria-labelledby="scraper-reviews-toggle-label"');
     expect(template).toContain('aria-describedby="scraper-reviews-toggle-help"');
-    expect(template).toContain('x-show="historyLoadError"');
+    expect(template).toContain(":class=\"historyLoadError ? '' : 'hidden'\"");
     expect(template).toContain('role="alert"');
     expect(template).toContain('aria-live="assertive"');
   });

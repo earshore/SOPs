@@ -41,6 +41,23 @@
   display: none !important;
 }
 
+.shared-modal-dot-pattern {
+  background-image: url('data:image/svg+xml,%3Csvg width="20" height="20" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="1" cy="1" r="1" fill="%23f59e0b"/%3E%3C/svg%3E');
+  background-size: 20px 20px;
+}
+
+.shared-modal-ping-2s {
+  animation-duration: 2s;
+}
+
+.shared-modal-ping-3s {
+  animation-duration: 3s;
+}
+
+.shared-modal-spin-12s {
+  animation-duration: 12s;
+}
+
 /* ===== CONTAINER ===== */
 .modal-container {
   position: fixed;

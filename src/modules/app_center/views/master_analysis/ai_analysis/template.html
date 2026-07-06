@@ -37,17 +37,11 @@
                 <span>支持 Listings &amp; Reviews 分析维度</span>
               </div>
               <div class="wb-tag">
-                <div
-                  class="wb-tag-dot wb-tag-dot--purple"
-                  aria-hidden="true"
-                ></div>
+                <div class="wb-tag-dot wb-tag-dot--purple" aria-hidden="true"></div>
                 <span>AI 大模型驱动</span>
               </div>
               <div class="wb-tag">
-                <div
-                  class="wb-tag-dot wb-tag-dot--green"
-                  aria-hidden="true"
-                ></div>
+                <div class="wb-tag-dot wb-tag-dot--green" aria-hidden="true"></div>
                 <span>一键导出报告</span>
               </div>
             </div>
@@ -57,12 +51,7 @@
     </div>
   </div>
   <nav class="ma-workflow-strip" aria-label="Master Analysis 工作流">
-    <button
-      type="button"
-      class="ma-workflow-step"
-      data-action="switch-tab"
-      data-tab="scraper"
-    >
+    <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="scraper">
       <span class="ma-workflow-index">1</span>
       <span class="ma-workflow-copy">
         <span class="ma-workflow-label">数据采集</span>
@@ -82,12 +71,7 @@
         <span class="ma-workflow-meta">维度选择 / 报告生成</span>
       </span>
     </button>
-    <button
-      type="button"
-      class="ma-workflow-step"
-      data-action="switch-tab"
-      data-tab="promptlab"
-    >
+    <button type="button" class="ma-workflow-step" data-action="switch-tab" data-tab="promptlab">
       <span class="ma-workflow-index">3</span>
       <span class="ma-workflow-copy">
         <span class="ma-workflow-label">Prompt 生成</span>
@@ -99,9 +83,7 @@
   <div>
     <!-- ASIN 选择和分析目标 -->
     <div class="mb-8">
-      <div
-        class="bg-white/90 border border-slate-200/70 rounded-2xl shadow-sm overflow-hidden"
-      >
+      <div class="bg-white/90 border border-slate-200/70 rounded-2xl shadow-sm overflow-hidden">
         <button
           type="button"
           data-selection-panel-toggle
@@ -116,24 +98,20 @@
               <i class="fa-solid fa-sliders text-white"></i>
             </div>
             <div class="text-left">
-              <h3 class="text-lg font-semibold text-slate-800">
-                选择 ASIN 与分析目标
-              </h3>
-              <p class="text-sm text-slate-500 mt-0.5">
-                展开后可一站式完成产品与分析维度配置
-              </p>
+              <h3 class="text-lg font-semibold text-slate-800">选择 ASIN 与分析目标</h3>
+              <p class="text-sm text-slate-500 mt-0.5">展开后可一站式完成产品与分析维度配置</p>
             </div>
           </div>
           <div class="flex items-center gap-3">
             <span
-              x-show="showSelectionSummary"
+              :hidden="!showSelectionSummary"
               class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-xs px-3 py-1.5 rounded-full font-medium border border-emerald-100 inline-flex"
             >
               <i class="fa-solid fa-circle-check"></i>
               已选择 <span x-text="selectedAsins.length"></span> 个产品
             </span>
             <span
-              x-show="showSelectionSummary"
+              :hidden="!showSelectionSummary"
               class="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs px-3 py-1.5 rounded-full font-medium border border-indigo-100 inline-flex"
             >
               <i class="fa-solid fa-circle-check"></i>
@@ -144,25 +122,16 @@
           </div>
         </button>
 
-        <template
-          x-if="showMissingRealDataNotice &amp;&amp; !showSelectionPanel"
-        >
-          <div
-            class="mx-6 mt-4 mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4"
-          >
-            <div
-              class="flex flex-col md:flex-row md:items-center md:justify-between gap-3"
-            >
+        <template x-if="showMissingRealDataNotice &amp;&amp; !showSelectionPanel">
+          <div class="mx-6 mt-4 mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div>
-                <h3
-                  class="font-bold text-amber-900 flex items-center gap-2 text-sm"
-                >
+                <h3 class="font-bold text-amber-900 flex items-center gap-2 text-sm">
                   <i class="fa-solid fa-circle-info text-amber-600"></i>
                   还没有可分析的产品数据
                 </h3>
                 <p class="text-xs text-amber-800/80 mt-1">
-                  可以先去数据采集页导入 JSON 或采集
-                  ASIN，再回到这里选择产品和分析目标。
+                  可以先去数据采集页导入 JSON 或采集 ASIN，再回到这里选择产品和分析目标。
                 </p>
               </div>
               <button
@@ -178,7 +147,7 @@
         </template>
 
         <div
-          x-show="showSelectionPanel"
+          :hidden="!showSelectionPanel"
           x-transition:enter="transition ease-out duration-200"
           x-transition:enter-start="opacity-0 transform -translate-y-2"
           x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -202,9 +171,7 @@
                       <i class="fa-solid fa-barcode text-indigo-600"></i>
                     </div>
                     <div>
-                      <h2 class="text-lg font-semibold text-slate-800">
-                        选择 ASIN
-                      </h2>
+                      <h2 class="text-lg font-semibold text-slate-800">选择 ASIN</h2>
                       <p class="text-sm text-slate-500">选择或输入产品标识符</p>
                     </div>
                   </div>
@@ -248,10 +215,7 @@
                         <!-- <p class="text-xs text-slate-500 mb-3 font-medium">已加载的产品（<span x-text="availableAsins.length"></span> 个）：
                 </p> -->
                         <div class="space-y-2 max-h-48 overflow-y-auto">
-                          <template
-                            :key="asinItem"
-                            x-for="asinItem in availableAsins"
-                          >
+                          <template :key="asinItem" x-for="asinItem in availableAsins">
                             <label
                               :class="getAsinOptionClass(asinItem)"
                               class="flex items-center gap-3 p-3 rounded-lg border-2 transition duration-200 cursor-pointer hover:bg-indigo-50"
@@ -270,7 +234,7 @@
                               ></span>
                               <i
                                 class="fa-solid fa-check text-indigo-600"
-                                x-show="selectedAsins.includes(asinItem)"
+                                :hidden="!selectedAsins.includes(asinItem)"
                               ></i>
                             </label>
                           </template>
@@ -333,7 +297,7 @@
                             class="fa-solid fa-circle-exclamation text-indigo-500 cursor-help"
                           ></i>
                           <div
-                            x-show="productSummaryTooltipVisible"
+                            :hidden="!productSummaryTooltipVisible"
                             x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0 transform scale-95"
                             x-transition:enter-end="opacity-100 transform scale-100"
@@ -341,16 +305,14 @@
                             x-transition:leave-start="opacity-100 transform scale-100"
                             x-transition:leave-end="opacity-0 transform scale-95"
                             class="absolute left-0 bottom-full mb-2 w-72 p-3 bg-slate-800 text-white rounded-lg shadow-xl z-50"
-                            style="display: none"
+                            x-cloak
                           >
                             <div class="text-xs space-y-2">
                               <template x-if="hasScraperData">
                                 <div>
                                   <p class="font-semibold mb-1">数据源已加载</p>
                                   <p x-text="productSummaryText"></p>
-                                  <p
-                                    class="text-slate-300 mt-1.5 flex items-center gap-1"
-                                  >
+                                  <p class="text-slate-300 mt-1.5 flex items-center gap-1">
                                     <i class="fa-solid fa-globe"></i>
                                     <span x-text="dataSourceMetaText"></span>
                                   </p>
@@ -360,18 +322,14 @@
                                 <div>
                                   <p class="font-semibold mb-1">数据源已加载</p>
                                   <p>包含产品数据和评论</p>
-                                  <p
-                                    class="text-slate-300 mt-1.5 flex items-center gap-1"
-                                  >
+                                  <p class="text-slate-300 mt-1.5 flex items-center gap-1">
                                     <i class="fa-solid fa-globe"></i>
                                     可从"数据采集"模块获取真实产品数据
                                   </p>
                                 </div>
                               </template>
                             </div>
-                            <div
-                              class="ai-analysis-tooltip-arrow absolute left-4 top-full"
-                            ></div>
+                            <div class="ai-analysis-tooltip-arrow absolute left-4 top-full"></div>
                           </div>
                         </div>
                       </div>
@@ -381,25 +339,18 @@
                 <!-- 无数据提示 -->
                 <template x-if="hasNoAvailableAsins">
                   <div class="mt-4 pt-4 border-t border-slate-100">
-                    <div
-                      class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4"
-                    >
+                    <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
                       <div class="flex items-start gap-3">
                         <div
                           class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0"
                         >
-                          <i
-                            class="fa-solid fa-exclamation-triangle text-amber-600"
-                          ></i>
+                          <i class="fa-solid fa-exclamation-triangle text-amber-600"></i>
                         </div>
                         <div class="flex-1">
-                          <h4 class="text-sm font-bold text-amber-800 mb-1">
-                            还没有产品数据
-                          </h4>
-                          <p
-                            class="text-xs text-amber-700 leading-relaxed mb-3"
-                          >
-                            当前 ASIN 列表为空，无法执行 Listings 或 Reviews 分析。推荐操作：先从"数据采集"模块抓取产品数据，或从"数据管理"导入历史数据。
+                          <h4 class="text-sm font-bold text-amber-800 mb-1">还没有产品数据</h4>
+                          <p class="text-xs text-amber-700 leading-relaxed mb-3">
+                            当前 ASIN 列表为空，无法执行 Listings 或 Reviews
+                            分析。推荐操作：先从"数据采集"模块抓取产品数据，或从"数据管理"导入历史数据。
                           </p>
                           <div class="flex items-center gap-2">
                             <a
@@ -429,18 +380,12 @@
                       class="w-12 h-12 bg-violet-50 border border-violet-100 rounded-xl flex items-center justify-center shadow-sm shadow-violet-100/60"
                     >
                       <!-- <i class="fa-solid fa-check-double text-violet-600"></i> -->
-                      <i
-                        class="fa-solid fa-users-viewfinder text-violet-600"
-                      ></i>
+                      <i class="fa-solid fa-users-viewfinder text-violet-600"></i>
                     </div>
                     <div class="flex items-start justify-between gap-4 w-full">
                       <div>
-                        <h2 class="text-lg font-semibold text-slate-800">
-                          选择分析目标
-                        </h2>
-                        <p class="text-sm text-slate-500">
-                          选择需要执行的 AI 分析维度
-                        </p>
+                        <h2 class="text-lg font-semibold text-slate-800">选择分析目标</h2>
+                        <p class="text-sm text-slate-500">选择需要执行的 AI 分析维度</p>
                       </div>
                       <span
                         class="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs px-3 py-1.5 rounded-full font-medium border border-indigo-100 inline-flex mt-1"
@@ -460,7 +405,7 @@
                 </div>
                 <div>
                   <div
-                    x-show="hasNoAvailableAsins"
+                    :hidden="!hasNoAvailableAsins"
                     class="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
                   >
                     <i class="fa-solid fa-circle-info mr-2 text-amber-600"></i>
@@ -495,15 +440,10 @@
                         <i class="fa-solid fa-box-open"></i>
                         Listings 分析
                       </div>
-                      <span class="text-xs text-slate-400"
-                        >基于标题与五点描述</span
-                      >
+                      <span class="text-xs text-slate-400">基于标题与五点描述</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <template
-                        :key="target.id"
-                        x-for="target in listingAnalysisTargets"
-                      >
+                      <template :key="target.id" x-for="target in listingAnalysisTargets">
                         <button
                           type="button"
                           :aria-label="target.name + (selectedTargets.includes(target.id) ? '，已选择' : '，未选择')"
@@ -518,9 +458,7 @@
                               :class="getListingTargetIconWrapClass(target.id)"
                               class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition duration-200"
                             >
-                              <i
-                                :class="getListingTargetIconClass(target.id)"
-                              ></i>
+                              <i :class="getListingTargetIconClass(target.id)"></i>
                             </div>
                             <div class="flex-1 min-w-0">
                               <h4
@@ -538,7 +476,7 @@
                             >
                               <i
                                 class="fa-solid fa-check text-white text-[10px]"
-                                x-show="selectedTargets.includes(target.id)"
+                                :hidden="!selectedTargets.includes(target.id)"
                               ></i>
                             </div>
                           </div>
@@ -555,17 +493,10 @@
                         <i class="fa-solid fa-star"></i>
                         Reviews 分析
                       </div>
-                      <span class="text-xs text-slate-400"
-                        >基于用户评论数据</span
-                      >
+                      <span class="text-xs text-slate-400">基于用户评论数据</span>
                     </div>
-                    <div
-                      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
-                    >
-                      <template
-                        :key="target.id"
-                        x-for="target in reviewAnalysisTargets"
-                      >
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      <template :key="target.id" x-for="target in reviewAnalysisTargets">
                         <button
                           type="button"
                           :aria-label="target.name + (selectedTargets.includes(target.id) ? '，已选择' : '，未选择')"
@@ -580,9 +511,7 @@
                               :class="getReviewTargetIconWrapClass(target.id)"
                               class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition duration-200"
                             >
-                              <i
-                                :class="getReviewTargetIconClass(target.id)"
-                              ></i>
+                              <i :class="getReviewTargetIconClass(target.id)"></i>
                             </div>
                             <div class="flex-1 min-w-0">
                               <h4
@@ -600,7 +529,7 @@
                             >
                               <i
                                 class="fa-solid fa-check text-white text-[10px]"
-                                x-show="selectedTargets.includes(target.id)"
+                                :hidden="!selectedTargets.includes(target.id)"
                               ></i>
                             </div>
                           </div>
@@ -629,9 +558,7 @@
                         <i class="fa-solid fa-code text-indigo-600"></i>
                       </div>
                       <div class="text-left min-w-0">
-                        <h3 class="text-sm font-semibold text-slate-800">
-                          任务预览
-                        </h3>
+                        <h3 class="text-sm font-semibold text-slate-800">任务预览</h3>
                         <p class="text-xs text-slate-500 mt-0.5">
                           在执行分析前预览各任务 Prompt 内容
                         </p>
@@ -651,10 +578,7 @@
                           <span class="text-emerald-600">tokens</span>
                         </span>
                       </template>
-                      <span
-                        class="font-medium"
-                        x-text="promptPanelToggleText"
-                      ></span>
+                      <span class="font-medium" x-text="promptPanelToggleText"></span>
                       <i :class="promptPanelChevronClass"></i>
                     </div>
                   </button>
@@ -663,10 +587,7 @@
                       data-testid="ai-analysis-prompt-panel"
                       class="mt-4 space-y-3 border-t border-slate-200/70 pt-4"
                     >
-                      <template
-                        :key="targetId"
-                        x-for="(targetId, index) in selectedTargets"
-                      >
+                      <template :key="targetId" x-for="(targetId, index) in selectedTargets">
                         <div
                           data-testid="ai-analysis-prompt-item"
                           class="bg-slate-900 rounded-xl overflow-hidden border border-slate-700"
@@ -703,16 +624,12 @@
                               <div
                                 class="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg border border-slate-600"
                               >
-                                <i
-                                  class="fa-solid fa-calculator text-emerald-400 text-xs"
-                                ></i>
+                                <i class="fa-solid fa-calculator text-emerald-400 text-xs"></i>
                                 <span
                                   class="text-xs font-mono font-semibold text-emerald-400"
                                   x-text="getFormattedTokenCount(targetId)"
                                 ></span>
-                                <span class="text-xs text-slate-500"
-                                  >tokens</span
-                                >
+                                <span class="text-xs text-slate-500">tokens</span>
                               </div>
                               <i :class="getPromptItemChevronClass(index)"></i>
                             </div>
@@ -722,9 +639,7 @@
                               <div
                                 class="flex items-center justify-between px-4 py-2 bg-slate-800/50"
                               >
-                                <div
-                                  class="flex items-center gap-2 text-xs text-slate-400"
-                                >
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
                                   <i class="fa-solid fa-file-code"></i>
                                   <span>Prompt Template</span>
                                 </div>
@@ -743,33 +658,23 @@
                                   x-text="getPromptText(targetId)"
                                 ></pre>
                               </div>
-                              <div
-                                class="border-t border-slate-700 px-4 py-3 bg-slate-800/30"
-                              >
+                              <div class="border-t border-slate-700 px-4 py-3 bg-slate-800/30">
                                 <div class="flex items-center justify-between">
                                   <div class="flex items-center gap-4">
                                     <div class="flex items-center gap-2">
                                       <i
                                         class="fa-solid fa-calculator text-emerald-400 text-xs"
                                       ></i>
-                                      <span class="text-xs text-slate-400"
-                                        >Token 统计:</span
-                                      >
+                                      <span class="text-xs text-slate-400">Token 统计:</span>
                                       <span
                                         class="text-sm font-mono font-bold text-emerald-400"
                                         x-text="getPromptTokenCountText(targetId)"
                                       ></span>
-                                      <span class="text-xs text-slate-500"
-                                        >tokens</span
-                                      >
+                                      <span class="text-xs text-slate-500">tokens</span>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                      <i
-                                        class="fa-solid fa-align-left text-blue-400 text-xs"
-                                      ></i>
-                                      <span class="text-xs text-slate-400"
-                                        >字符数:</span
-                                      >
+                                      <i class="fa-solid fa-align-left text-blue-400 text-xs"></i>
+                                      <span class="text-xs text-slate-400">字符数:</span>
                                       <span
                                         class="text-sm font-mono font-semibold text-blue-400"
                                         x-text="getPromptCharCountText(targetId)"
@@ -818,22 +723,9 @@
         </div>
         <div
           :class="analysisHeroPatternClass"
-          class="absolute inset-0 transition-opacity duration-300"
-          style="
-            background-image:
-              linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
-              linear-gradient(
-                90deg,
-                rgba(255, 255, 255, 0.2) 1px,
-                transparent 1px
-              );
-            background-size: 30px 30px;
-          "
+          class="ai-analysis-hero-pattern-grid absolute inset-0 transition-opacity duration-300"
         ></div>
-        <div
-          :class="analysisHeroBodyClass"
-          class="relative transition duration-200"
-        >
+        <div :class="analysisHeroBodyClass" class="relative transition duration-200">
           <div class="flex items-center justify-between gap-8">
             <div
               :class="analysisHeroTextClass"
@@ -845,8 +737,7 @@
               <div class="relative">
                 <template x-if="isAnalyzing">
                   <div
-                    class="absolute inset-0 bg-white/20 rounded-2xl animate-ping"
-                    style="animation-duration: 1.5s"
+                    class="ai-analysis-ping-slow absolute inset-0 bg-white/20 rounded-2xl animate-ping"
                   ></div>
                 </template>
                 <div
@@ -861,9 +752,9 @@
                   :class="analysisHeroTitleClass"
                   class="font-extrabold flex items-center gap-3 tracking-tight"
                 >
-                  <span x-show="isAnalysisComplete">分析完成</span>
-                  <span x-show="isAnalysisRunning">AI 正在分析中</span>
-                  <span x-show="isAnalysisIdle">执行 AI 分析</span>
+                  <span :hidden="!isAnalysisComplete">分析完成</span>
+                  <span :hidden="!isAnalysisRunning">AI 正在分析中</span>
+                  <span :hidden="!isAnalysisIdle">执行 AI 分析</span>
                   <template x-if="isAnalysisRunning">
                     <i class="fa-solid fa-cog animate-spin opacity-60"></i>
                   </template>
@@ -878,9 +769,7 @@
                         <span
                           class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"
                         ></span>
-                        <span
-                          class="relative inline-flex rounded-full h-2 w-2 bg-white"
-                        ></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                       </span>
                       <span x-text="currentStep"></span>
                     </span>
@@ -952,27 +841,19 @@
                     class="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 bg-slate-800 text-white rounded-lg shadow-2xl border border-slate-700 p-3 text-xs z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none"
                   >
                     <div class="flex items-start gap-2">
-                      <i
-                        class="fa-solid fa-info-circle text-indigo-400 mt-0.5"
-                      ></i>
+                      <i class="fa-solid fa-info-circle text-indigo-400 mt-0.5"></i>
                       <div>
                         <template x-if="isMissingAsinAndTarget">
-                          <span class="font-medium"
-                            >请先选择 ASIN 和分析目标</span
-                          >
+                          <span class="font-medium">请先选择 ASIN 和分析目标</span>
                         </template>
                         <template x-if="isMissingTargetOnly">
-                          <span class="font-medium"
-                            >请选择至少一个分析目标</span
-                          >
+                          <span class="font-medium">请选择至少一个分析目标</span>
                         </template>
                         <template x-if="isMissingAsinOnly">
                           <span class="font-medium">请选择至少一个 ASIN</span>
                         </template>
                         <template x-if="isMissingLoadedData">
-                          <span class="font-medium"
-                            >无法加载产品数据，请检查数据源</span
-                          >
+                          <span class="font-medium">无法加载产品数据，请检查数据源</span>
                         </template>
                       </div>
                     </div>
@@ -988,9 +869,7 @@
           <!-- 进度条 -->
           <template x-if="isAnalyzing">
             <div class="mt-8">
-              <div
-                class="flex items-center justify-between text-white/80 text-sm mb-3"
-              >
+              <div class="flex items-center justify-between text-white/80 text-sm mb-3">
                 <span class="flex items-center gap-2 font-medium">
                   <i class="fa-solid fa-spinner animate-spin"></i>
                   <span id="ai-analysis-progress-label">分析进度</span>
@@ -1010,15 +889,73 @@
                 aria-labelledby="ai-analysis-progress-label"
                 :aria-valuetext="progressText"
               >
-                <div
-                  :style="progressStyle"
-                  class="h-full bg-gradient-to-r from-white via-indigo-200 to-white rounded-full transition-[width] duration-500 ease-out relative"
+                <svg
+                  class="ai-analysis-progress-svg"
+                  viewBox="0 0 100 12"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                  focusable="false"
                 >
-                  <div class="absolute inset-0 shimmer"></div>
-                  <div
-                    class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg shadow-white/50"
-                  ></div>
-                </div>
+                  <defs>
+                    <linearGradient
+                      id="ai-analysis-progress-fill-gradient"
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="0"
+                    >
+                      <stop offset="0%" stop-color="#ffffff"></stop>
+                      <stop offset="50%" stop-color="#c7d2fe"></stop>
+                      <stop offset="100%" stop-color="#ffffff"></stop>
+                    </linearGradient>
+                    <linearGradient
+                      id="ai-analysis-progress-shimmer-gradient"
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="0"
+                    >
+                      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"></stop>
+                      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.4"></stop>
+                      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"></stop>
+                    </linearGradient>
+                    <clipPath id="ai-analysis-progress-fill-clip">
+                      <rect
+                        x="0"
+                        y="0"
+                        :width="progress"
+                        height="12"
+                        rx="6"
+                      ></rect>
+                    </clipPath>
+                  </defs>
+                  <rect
+                    class="ai-analysis-progress-fill"
+                    fill="url(#ai-analysis-progress-fill-gradient)"
+                    x="0"
+                    y="0"
+                    :width="progress"
+                    height="12"
+                    rx="6"
+                  ></rect>
+                  <g clip-path="url(#ai-analysis-progress-fill-clip)">
+                    <rect
+                      class="ai-analysis-progress-shimmer"
+                      fill="url(#ai-analysis-progress-shimmer-gradient)"
+                      x="-60"
+                      y="0"
+                      width="60"
+                      height="12"
+                    ></rect>
+                  </g>
+                  <circle
+                    class="ai-analysis-progress-dot"
+                    :cx="progress"
+                    cy="6"
+                    :r="progress > 0 ? 5 : 0"
+                    :opacity="progress > 0 ? 1 : 0"
+                  ></circle>
+                </svg>
               </div>
               <div class="flex justify-between mt-3 text-xs text-white/50">
                 <span :class="progressDataStepClass">数据加载</span>
@@ -1035,10 +972,9 @@
     <!-- 性能设置模态框 -->
     <template x-teleport="#modal-container">
       <div
-        x-show="perfSettings.showSettings"
+        :hidden="!perfSettings.showSettings"
         x-cloak
         class="ma-performance-modal fixed inset-0 z-[1000] flex items-center justify-center overflow-y-auto p-4 bg-black/40"
-        style="display: none"
         @click.self="perfSettings.toggleSettings()"
       >
         <div
@@ -1054,15 +990,10 @@
               <div class="flex items-center gap-3">
                 <i class="fa-solid fa-sliders text-slate-500"></i>
                 <div>
-                  <h2
-                    id="performance-settings-title"
-                    class="text-lg font-semibold text-slate-900"
-                  >
+                  <h2 id="performance-settings-title" class="text-lg font-semibold text-slate-900">
                     性能设置
                   </h2>
-                  <p class="mt-0.5 text-sm text-slate-500">
-                    选择调度偏好和缓存。
-                  </p>
+                  <p class="mt-0.5 text-sm text-slate-500">选择调度偏好和缓存。</p>
                 </div>
               </div>
               <button
@@ -1088,10 +1019,7 @@
                   >
                     调度偏好
                   </div>
-                  <p
-                    id="ai-analysis-scheduling-helper"
-                    class="mt-0.5 text-xs text-slate-500"
-                  >
+                  <p id="ai-analysis-scheduling-helper" class="mt-0.5 text-xs text-slate-500">
                     系统会自动控制并发与失败处理。
                   </p>
                 </div>
@@ -1126,9 +1054,7 @@
                     <i class="fa-solid fa-gauge-high"></i>
                     推荐档
                   </div>
-                  <p class="mt-1.5 text-xs leading-snug opacity-75">
-                    平衡速度和稳定性
-                  </p>
+                  <p class="mt-1.5 text-xs leading-snug opacity-75">平衡速度和稳定性</p>
                 </label>
                 <label
                   class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
@@ -1146,9 +1072,7 @@
                     <i class="fa-solid fa-shield-halved"></i>
                     可靠性优先
                   </div>
-                  <p class="mt-1.5 text-xs leading-snug opacity-75">
-                    优先完整结果
-                  </p>
+                  <p class="mt-1.5 text-xs leading-snug opacity-75">优先完整结果</p>
                 </label>
                 <label
                   class="min-h-16 cursor-pointer rounded-lg border p-2.5 transition-colors"
@@ -1166,38 +1090,28 @@
                     <i class="fa-solid fa-bolt"></i>
                     速度优先
                   </div>
-                  <p class="mt-1.5 text-xs leading-snug opacity-75">
-                    优先快速完成
-                  </p>
+                  <p class="mt-1.5 text-xs leading-snug opacity-75">优先快速完成</p>
                 </label>
               </div>
 
-              <div
-                class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3"
-              >
+              <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
                 <div class="grid grid-cols-3 gap-3">
                   <div>
-                    <div class="text-[11px] font-medium text-slate-500">
-                      当前策略
-                    </div>
+                    <div class="text-[11px] font-medium text-slate-500">当前策略</div>
                     <div
                       class="mt-0.5 text-sm font-semibold text-slate-900"
                       x-text="perfSettings.schedulePreferenceLabel"
                     ></div>
                   </div>
                   <div>
-                    <div class="text-[11px] font-medium text-slate-500">
-                      调度方式
-                    </div>
+                    <div class="text-[11px] font-medium text-slate-500">调度方式</div>
                     <div
                       class="mt-0.5 text-sm font-semibold text-slate-900"
                       x-text="perfSettings.scheduleRuntimeText"
                     ></div>
                   </div>
                   <div>
-                    <div class="text-[11px] font-medium text-slate-500">
-                      失败处理
-                    </div>
+                    <div class="text-[11px] font-medium text-slate-500">失败处理</div>
                     <div
                       class="mt-0.5 text-sm font-semibold text-slate-900"
                       x-text="perfSettings.scheduleFailureHandlingText"
@@ -1209,9 +1123,7 @@
 
             <!-- 缓存设置 -->
             <section class="rounded-lg border border-slate-200 bg-white p-3">
-              <div
-                class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-              >
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <label class="flex min-h-11 cursor-pointer items-start gap-3">
                   <input
                     type="checkbox"
@@ -1221,13 +1133,8 @@
                     class="mt-1 w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
                   />
                   <div>
-                    <div class="text-sm font-semibold text-slate-900">
-                      智能缓存
-                    </div>
-                    <div
-                      id="ai-analysis-cache-helper"
-                      class="mt-1 text-xs text-slate-500"
-                    >
+                    <div class="text-sm font-semibold text-slate-900">智能缓存</div>
+                    <div id="ai-analysis-cache-helper" class="mt-1 text-xs text-slate-500">
                       已缓存
                       <span
                         class="font-semibold text-slate-900"
@@ -1292,12 +1199,8 @@
     <template x-if="hasReportWithResults">
       <div class="space-y-10">
         <!-- 结果 Header -->
-        <div
-          class="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
-        >
-          <div
-            class="absolute inset-0 bg-gradient-to-r from-white via-slate-50 to-white"
-          ></div>
+        <div class="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div class="absolute inset-0 bg-gradient-to-r from-white via-slate-50 to-white"></div>
           <div class="relative p-6">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-5">
@@ -1305,9 +1208,7 @@
                   <div
                     class="relative w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-200 shadow-sm"
                   >
-                    <i
-                      class="fa-solid fa-file-lines text-indigo-600 text-xl"
-                    ></i>
+                    <i class="fa-solid fa-file-lines text-indigo-600 text-xl"></i>
                   </div>
                 </div>
                 <div>
@@ -1315,20 +1216,18 @@
                     class="text-xl font-extrabold text-slate-900 tracking-tight"
                     x-text="reportStatusText"
                   ></h2>
-                  <p
-                    class="text-slate-500 text-sm mt-1 flex items-center gap-2 flex-wrap"
-                  >
+                  <p class="text-slate-500 text-sm mt-1 flex items-center gap-2 flex-wrap">
                     <span
                       class="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700"
                       x-text="selectedAsins.join(', ')"
                     ></span>
                     <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
-                    <span x-show="isAnalyzing">
+                    <span :hidden="!isAnalyzing">
                       已输出 <span x-text="reportResults.length"></span> /
                       <span x-text="selectedTargets.length"></span>
                       个维度，结果会持续追加
                     </span>
-                    <span x-show="analysisNotRunning">
+                    <span :hidden="!analysisNotRunning">
                       分析完成于
                       <span x-text="reportCompletedAtText"></span>
                     </span>
@@ -1342,11 +1241,7 @@
                       class="text-3xl font-extrabold text-slate-900"
                       x-text="reportResults.length"
                     ></div>
-                    <div
-                      class="text-slate-500 text-xs uppercase tracking-wider mt-1"
-                    >
-                      分析维度
-                    </div>
+                    <div class="text-slate-500 text-xs uppercase tracking-wider mt-1">分析维度</div>
                   </div>
                   <div class="w-px h-12 bg-slate-200"></div>
                   <div class="text-center">
@@ -1355,24 +1250,17 @@
                       class="inline-flex items-center gap-2 px-4 py-2 rounded-full border"
                     >
                       <i :class="reportStatusIconClass"></i>
-                      <span
-                        class="text-sm font-bold"
-                        x-text="reportStatusBadgeText"
-                      ></span>
+                      <span class="text-sm font-bold" x-text="reportStatusBadgeText"></span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <!-- 统计概览栏 -->
-            <div
-              class="mt-5 pt-5 border-t border-slate-200 grid grid-cols-5 gap-4"
-            >
+            <div class="mt-5 pt-5 border-t border-slate-200 grid grid-cols-5 gap-4">
               <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"
-                  >
+                  <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <i class="fa-solid fa-box-open text-blue-600"></i>
                   </div>
                   <div>
@@ -1386,9 +1274,7 @@
               </div>
               <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"
-                  >
+                  <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
                     <i class="fa-solid fa-star text-amber-600"></i>
                   </div>
                   <div>
@@ -1402,9 +1288,7 @@
               </div>
               <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center"
-                  >
+                  <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                     <i class="fa-solid fa-chart-pie text-purple-600"></i>
                   </div>
                   <div>
@@ -1418,16 +1302,11 @@
               </div>
               <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center"
-                  >
+                  <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                     <i class="fa-solid fa-circle-check text-emerald-600"></i>
                   </div>
                   <div>
-                    <div
-                      class="text-xl font-bold text-slate-900"
-                      x-text="reportTotalDetails"
-                    ></div>
+                    <div class="text-xl font-bold text-slate-900" x-text="reportTotalDetails"></div>
                     <div class="text-xs text-slate-500">分析细项</div>
                   </div>
                 </div>
@@ -1435,7 +1314,7 @@
               <!-- 置信度卡片 -->
               <div
                 class="bg-slate-50 rounded-xl p-4 border border-slate-200"
-                x-show="hasConfidenceData"
+                :hidden="!hasConfidenceData"
                 role="status"
                 aria-live="polite"
                 aria-label="分析置信度"
@@ -1470,10 +1349,7 @@
                       ></span>
                     </div>
                     <div class="text-xs text-slate-500">总体置信度</div>
-                    <span
-                      class="sr-only"
-                      x-text="overallConfidenceLevelText"
-                    ></span>
+                    <span class="sr-only" x-text="overallConfidenceLevelText"></span>
                   </div>
                 </div>
               </div>
@@ -1481,376 +1357,334 @@
             <div class="mt-8 space-y-8">
               <!-- Listings 结果 -->
               <template x-if="hasReportListingsResults">
-          <div>
-            <div class="flex items-center gap-4 mb-6">
-              <div
-                class="flex items-center gap-2.5 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold border border-blue-100"
-              >
-                <i class="fa-solid fa-box-open"></i>
-                Listings 分析结果
-              </div>
-              <div class="flex-1 h-px bg-slate-200"></div>
-              <span
-                class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-lg"
-                x-text="getListingsResultCountText()"
-              ></span>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <template
-                :key="result.targetId"
-                x-for="(result, index) in reportListingsResults"
-              >
-                <div
-                  class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition duration-200"
-                >
-                  <!-- Header -->
-                  <div
-                    :class="getListingResultHeaderClass(result.targetId)"
-                    class="relative overflow-hidden p-5 text-slate-900"
-                  >
-                    <div class="relative flex items-center gap-4">
-                      <div
-                        :class="getResultIconWrapClass(result.targetId)"
-                        class="w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm flex-shrink-0"
-                      >
-                        <i
-                          :class="getResultIconDisplayClass(result.targetId)"
-                        ></i>
-                      </div>
-                      <div class="flex-1">
-                        <h3
-                          class="font-bold text-lg tracking-tight text-slate-900"
-                          x-text="result.title"
-                        ></h3>
-                        <div class="flex items-center gap-2 mt-1">
-                          <span
-                            class="text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 font-medium text-slate-600"
-                            x-text="result.source"
-                          ></span>
-                          <!-- 置信度徽章 -->
-                          <span
-                            x-show="showTargetConfidence(result.targetId)"
-                            class="text-xs px-2.5 py-1 rounded-full bg-white border font-semibold flex items-center gap-1"
-                            :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
-                            :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))"
-                          >
-                            <i
-                              class="fa-solid fa-chart-line text-[10px]"
-                              aria-hidden="true"
-                            ></i>
-                            <span
-                              x-text="getTargetConfidenceText(result.targetId)"
-                            ></span>
-                            <span
-                              class="text-[10px] ml-0.5"
-                              x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"
-                            ></span>
-                          </span>
-                        </div>
-                      </div>
+                <div>
+                  <div class="flex items-center gap-4 mb-6">
+                    <div
+                      class="flex items-center gap-2.5 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold border border-blue-100"
+                    >
+                      <i class="fa-solid fa-box-open"></i>
+                      Listings 分析结果
                     </div>
+                    <div class="flex-1 h-px bg-slate-200"></div>
+                    <span
+                      class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-lg"
+                      x-text="getListingsResultCountText()"
+                    ></span>
                   </div>
-                  <!-- 统计数据 -->
-                  <div class="p-5 bg-slate-50/70 border-b border-slate-100">
-                    <div class="flex items-center gap-2 mb-4">
+                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <template
+                      :key="result.targetId"
+                      x-for="(result, index) in reportListingsResults"
+                    >
                       <div
-                        class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center"
+                        class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition duration-200"
                       >
-                        <i class="fa-solid fa-chart-bar text-indigo-600"></i>
-                      </div>
-                      <span
-                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
-                        >数据概览</span
-                      >
-                    </div>
-                    <div class="grid grid-cols-3 gap-3">
-                      <template :key="stat.label" x-for="stat in result.stats">
+                        <!-- Header -->
                         <div
-                          class="relative bg-white rounded-lg p-4 text-center border border-slate-200"
+                          :class="getListingResultHeaderClass(result.targetId)"
+                          class="relative overflow-hidden p-5 text-slate-900"
                         >
-                          <div
-                            class="text-xl font-extrabold text-slate-900"
-                            x-text="stat.value"
-                          ></div>
-                          <div
-                            class="text-xs text-slate-500 mt-1 font-medium"
-                            x-text="stat.label"
-                          ></div>
-                        </div>
-                      </template>
-                    </div>
-                  </div>
-                  <!-- 核心发现 -->
-                  <div class="p-5 border-b border-slate-100">
-                    <div class="flex items-center gap-2 mb-4">
-                      <div
-                        class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center"
-                      >
-                        <i class="fa-solid fa-lightbulb text-amber-600"></i>
-                      </div>
-                      <span
-                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
-                        >核心发现</span
-                      >
-                    </div>
-                    <div class="space-y-2.5">
-                      <template
-                        :key="highlight.text"
-                        x-for="highlight in result.highlights"
-                      >
-                        <div
-                          :class="getHighlightClass(highlight.type)"
-                          class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition duration-200 hover:shadow-sm"
-                        >
-                          <i
-                            :class="getHighlightIconClass(highlight.type)"
-                            class="fa-solid mt-0.5 flex-shrink-0"
-                          ></i>
-                          <span
-                            class="leading-relaxed"
-                            x-text="highlight.text"
-                          ></span>
-                        </div>
-                      </template>
-                    </div>
-                  </div>
-                  <!-- 详细分析 -->
-                  <div class="p-5">
-                    <div class="flex items-center gap-2 mb-4">
-                      <div
-                        class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center"
-                      >
-                        <i class="fa-solid fa-list text-slate-600"></i>
-                      </div>
-                      <span
-                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
-                        >详细分析</span
-                      >
-                    </div>
-                    <div class="space-y-5">
-                      <template
-                        :key="detail.category"
-                        x-for="detail in result.details"
-                      >
-                        <div>
-                          <span
-                            :class="getResultCategoryClass(result.targetId)"
-                            class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
-                          >
-                            <i class="fa-solid fa-quote-left opacity-60"></i>
-                            <span x-text="detail.category"></span>
-                          </span>
-                          <div class="flex flex-wrap gap-2">
-                            <template
-                              :key="index"
-                              x-for="(item, index) in detail.items"
+                          <div class="relative flex items-center gap-4">
+                            <div
+                              :class="getResultIconWrapClass(result.targetId)"
+                              class="w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm flex-shrink-0"
                             >
-                              <span
-                                class="inline-block px-3 py-2 bg-slate-50 text-slate-700 text-xs rounded-lg cursor-default border border-slate-200 font-medium"
-                                x-text="item"
-                              ></span>
+                              <i :class="getResultIconDisplayClass(result.targetId)"></i>
+                            </div>
+                            <div class="flex-1">
+                              <h3
+                                class="font-bold text-lg tracking-tight text-slate-900"
+                                x-text="result.title"
+                              ></h3>
+                              <div class="flex items-center gap-2 mt-1">
+                                <span
+                                  class="text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 font-medium text-slate-600"
+                                  x-text="result.source"
+                                ></span>
+                                <!-- 置信度徽章 -->
+                                <span
+                                  :hidden="!showTargetConfidence(result.targetId)"
+                                  class="text-xs px-2.5 py-1 rounded-full bg-white border font-semibold flex items-center gap-1"
+                                  :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
+                                  :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))"
+                                >
+                                  <i
+                                    class="fa-solid fa-chart-line text-[10px]"
+                                    aria-hidden="true"
+                                  ></i>
+                                  <span x-text="getTargetConfidenceText(result.targetId)"></span>
+                                  <span
+                                    class="text-[10px] ml-0.5"
+                                    x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"
+                                  ></span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- 统计数据 -->
+                        <div class="p-5 bg-slate-50/70 border-b border-slate-100">
+                          <div class="flex items-center gap-2 mb-4">
+                            <div
+                              class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center"
+                            >
+                              <i class="fa-solid fa-chart-bar text-indigo-600"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                              >数据概览</span
+                            >
+                          </div>
+                          <div class="grid grid-cols-3 gap-3">
+                            <template :key="stat.label" x-for="stat in result.stats">
+                              <div
+                                class="relative bg-white rounded-lg p-4 text-center border border-slate-200"
+                              >
+                                <div
+                                  class="text-xl font-extrabold text-slate-900"
+                                  x-text="stat.value"
+                                ></div>
+                                <div
+                                  class="text-xs text-slate-500 mt-1 font-medium"
+                                  x-text="stat.label"
+                                ></div>
+                              </div>
                             </template>
                           </div>
                         </div>
-                      </template>
-                    </div>
+                        <!-- 核心发现 -->
+                        <div class="p-5 border-b border-slate-100">
+                          <div class="flex items-center gap-2 mb-4">
+                            <div
+                              class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center"
+                            >
+                              <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                              >核心发现</span
+                            >
+                          </div>
+                          <div class="space-y-2.5">
+                            <template :key="highlight.text" x-for="highlight in result.highlights">
+                              <div
+                                :class="getHighlightClass(highlight.type)"
+                                class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition duration-200 hover:shadow-sm"
+                              >
+                                <i
+                                  :class="getHighlightIconClass(highlight.type)"
+                                  class="fa-solid mt-0.5 flex-shrink-0"
+                                ></i>
+                                <span class="leading-relaxed" x-text="highlight.text"></span>
+                              </div>
+                            </template>
+                          </div>
+                        </div>
+                        <!-- 详细分析 -->
+                        <div class="p-5">
+                          <div class="flex items-center gap-2 mb-4">
+                            <div
+                              class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center"
+                            >
+                              <i class="fa-solid fa-list text-slate-600"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                              >详细分析</span
+                            >
+                          </div>
+                          <div class="space-y-5">
+                            <template :key="detail.category" x-for="detail in result.details">
+                              <div>
+                                <span
+                                  :class="getResultCategoryClass(result.targetId)"
+                                  class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
+                                >
+                                  <i class="fa-solid fa-quote-left opacity-60"></i>
+                                  <span x-text="detail.category"></span>
+                                </span>
+                                <div class="flex flex-wrap gap-2">
+                                  <template :key="index" x-for="(item, index) in detail.items">
+                                    <span
+                                      class="inline-block px-3 py-2 bg-slate-50 text-slate-700 text-xs rounded-lg cursor-default border border-slate-200 font-medium"
+                                      x-text="item"
+                                    ></span>
+                                  </template>
+                                </div>
+                              </div>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
                   </div>
                 </div>
-              </template>
-            </div>
-          </div>
               </template>
               <!-- Reviews 结果 -->
               <template x-if="hasReportReviewsResults">
-          <div>
-            <div class="flex items-center gap-4 mb-6">
-              <div
-                class="flex items-center gap-2.5 bg-amber-50 text-amber-700 px-4 py-2 rounded-lg text-sm font-bold border border-amber-100"
-              >
-                <i class="fa-solid fa-star"></i>
-                Reviews 分析结果
-              </div>
-              <div class="flex-1 h-px bg-slate-200"></div>
-              <span
-                class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-lg"
-                x-text="getReviewsResultCountText()"
-              ></span>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              <template
-                :key="result.targetId"
-                x-for="(result, index) in reportReviewsResults"
-              >
-                <div
-                  class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition duration-200"
-                >
-                  <!-- Header -->
-                  <div
-                    :class="getReviewResultHeaderClass(result.targetId)"
-                    class="relative overflow-hidden p-5 text-slate-900"
-                  >
-                    <div class="relative flex items-center gap-4">
-                      <div
-                        :class="getResultIconWrapClass(result.targetId)"
-                        class="w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm flex-shrink-0"
-                      >
-                        <i
-                          :class="getResultIconDisplayClass(result.targetId)"
-                        ></i>
-                      </div>
-                      <div class="flex-1">
-                        <h3
-                          class="font-bold text-lg tracking-tight text-slate-900"
-                          x-text="result.title"
-                        ></h3>
-                        <div class="flex items-center gap-2 mt-1">
-                          <span
-                            class="text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 font-medium text-slate-600"
-                            x-text="result.source"
-                          ></span>
-                          <!-- 置信度徽章 -->
-                          <span
-                            x-show="showTargetConfidence(result.targetId)"
-                            class="text-xs px-2.5 py-1 rounded-full bg-white border font-semibold flex items-center gap-1"
-                            :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
-                            :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))"
-                          >
-                            <i
-                              class="fa-solid fa-chart-line text-[10px]"
-                              aria-hidden="true"
-                            ></i>
-                            <span
-                              x-text="getTargetConfidenceText(result.targetId)"
-                            ></span>
-                            <span
-                              class="text-[10px] ml-0.5"
-                              x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"
-                            ></span>
-                          </span>
-                        </div>
-                      </div>
+                <div>
+                  <div class="flex items-center gap-4 mb-6">
+                    <div
+                      class="flex items-center gap-2.5 bg-amber-50 text-amber-700 px-4 py-2 rounded-lg text-sm font-bold border border-amber-100"
+                    >
+                      <i class="fa-solid fa-star"></i>
+                      Reviews 分析结果
                     </div>
+                    <div class="flex-1 h-px bg-slate-200"></div>
+                    <span
+                      class="text-sm text-slate-500 font-semibold bg-slate-100 px-3 py-1 rounded-lg"
+                      x-text="getReviewsResultCountText()"
+                    ></span>
                   </div>
-                  <!-- 统计数据 -->
-                  <div class="p-5 bg-slate-50/70 border-b border-slate-100">
-                    <div class="flex items-center gap-2 mb-4">
+                  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <template
+                      :key="result.targetId"
+                      x-for="(result, index) in reportReviewsResults"
+                    >
                       <div
-                        class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center"
+                        class="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition duration-200"
                       >
-                        <i class="fa-solid fa-chart-bar text-indigo-600"></i>
-                      </div>
-                      <span
-                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
-                        >数据概览</span
-                      >
-                    </div>
-                    <div class="grid grid-cols-3 gap-3">
-                      <template :key="stat.label" x-for="stat in result.stats">
+                        <!-- Header -->
                         <div
-                          class="relative bg-white rounded-lg p-4 text-center border border-slate-200"
+                          :class="getReviewResultHeaderClass(result.targetId)"
+                          class="relative overflow-hidden p-5 text-slate-900"
                         >
-                          <div
-                            class="text-xl font-extrabold text-slate-900"
-                            x-text="stat.value"
-                          ></div>
-                          <div
-                            class="text-xs text-slate-500 mt-1 font-medium"
-                            x-text="stat.label"
-                          ></div>
-                        </div>
-                      </template>
-                    </div>
-                  </div>
-                  <!-- 核心发现 -->
-                  <div class="p-5 border-b border-slate-100">
-                    <div class="flex items-center gap-2 mb-4">
-                      <div
-                        class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center"
-                      >
-                        <i class="fa-solid fa-lightbulb text-amber-600"></i>
-                      </div>
-                      <span
-                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
-                        >核心发现</span
-                      >
-                    </div>
-                    <div class="space-y-2.5">
-                      <template
-                        :key="highlight.text"
-                        x-for="highlight in result.highlights"
-                      >
-                        <div
-                          :class="getHighlightClass(highlight.type)"
-                          class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition duration-200 hover:shadow-sm"
-                        >
-                          <i
-                            :class="getHighlightIconClass(highlight.type)"
-                            class="fa-solid mt-0.5 flex-shrink-0"
-                          ></i>
-                          <span
-                            class="leading-relaxed"
-                            x-text="highlight.text"
-                          ></span>
-                        </div>
-                      </template>
-                    </div>
-                  </div>
-                  <!-- 详细分析 -->
-                  <div class="p-5">
-                    <div class="flex items-center gap-2 mb-4">
-                      <div
-                        class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center"
-                      >
-                        <i class="fa-solid fa-list text-slate-600"></i>
-                      </div>
-                      <span
-                        class="text-xs font-bold text-slate-600 uppercase tracking-wider"
-                        >详细分析</span
-                      >
-                    </div>
-                    <div class="space-y-5">
-                      <template
-                        :key="detail.category"
-                        x-for="detail in result.details"
-                      >
-                        <div>
-                          <span
-                            :class="getResultCategoryClass(result.targetId)"
-                            class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
-                          >
-                            <i class="fa-solid fa-quote-left opacity-60"></i>
-                            <span x-text="detail.category"></span>
-                          </span>
-                          <div class="flex flex-wrap gap-2">
-                            <template
-                              :key="index"
-                              x-for="(item, index) in detail.items"
+                          <div class="relative flex items-center gap-4">
+                            <div
+                              :class="getResultIconWrapClass(result.targetId)"
+                              class="w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm flex-shrink-0"
                             >
-                              <span
-                                class="inline-block px-3 py-2 bg-slate-50 text-slate-700 text-xs rounded-lg cursor-default border border-slate-200 font-medium"
-                                x-text="item"
-                              ></span>
+                              <i :class="getResultIconDisplayClass(result.targetId)"></i>
+                            </div>
+                            <div class="flex-1">
+                              <h3
+                                class="font-bold text-lg tracking-tight text-slate-900"
+                                x-text="result.title"
+                              ></h3>
+                              <div class="flex items-center gap-2 mt-1">
+                                <span
+                                  class="text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 font-medium text-slate-600"
+                                  x-text="result.source"
+                                ></span>
+                                <!-- 置信度徽章 -->
+                                <span
+                                  :hidden="!showTargetConfidence(result.targetId)"
+                                  class="text-xs px-2.5 py-1 rounded-full bg-white border font-semibold flex items-center gap-1"
+                                  :class="getConfidenceTextBorderClass(getTargetConfidence(result.targetId))"
+                                  :aria-label="getConfidenceAriaLabel(getTargetConfidence(result.targetId))"
+                                >
+                                  <i
+                                    class="fa-solid fa-chart-line text-[10px]"
+                                    aria-hidden="true"
+                                  ></i>
+                                  <span x-text="getTargetConfidenceText(result.targetId)"></span>
+                                  <span
+                                    class="text-[10px] ml-0.5"
+                                    x-text="getConfidenceLevel(getTargetConfidence(result.targetId))"
+                                  ></span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- 统计数据 -->
+                        <div class="p-5 bg-slate-50/70 border-b border-slate-100">
+                          <div class="flex items-center gap-2 mb-4">
+                            <div
+                              class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center"
+                            >
+                              <i class="fa-solid fa-chart-bar text-indigo-600"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                              >数据概览</span
+                            >
+                          </div>
+                          <div class="grid grid-cols-3 gap-3">
+                            <template :key="stat.label" x-for="stat in result.stats">
+                              <div
+                                class="relative bg-white rounded-lg p-4 text-center border border-slate-200"
+                              >
+                                <div
+                                  class="text-xl font-extrabold text-slate-900"
+                                  x-text="stat.value"
+                                ></div>
+                                <div
+                                  class="text-xs text-slate-500 mt-1 font-medium"
+                                  x-text="stat.label"
+                                ></div>
+                              </div>
                             </template>
                           </div>
                         </div>
-                      </template>
-                    </div>
+                        <!-- 核心发现 -->
+                        <div class="p-5 border-b border-slate-100">
+                          <div class="flex items-center gap-2 mb-4">
+                            <div
+                              class="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center"
+                            >
+                              <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                              >核心发现</span
+                            >
+                          </div>
+                          <div class="space-y-2.5">
+                            <template :key="highlight.text" x-for="highlight in result.highlights">
+                              <div
+                                :class="getHighlightClass(highlight.type)"
+                                class="relative flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium border transition duration-200 hover:shadow-sm"
+                              >
+                                <i
+                                  :class="getHighlightIconClass(highlight.type)"
+                                  class="fa-solid mt-0.5 flex-shrink-0"
+                                ></i>
+                                <span class="leading-relaxed" x-text="highlight.text"></span>
+                              </div>
+                            </template>
+                          </div>
+                        </div>
+                        <!-- 详细分析 -->
+                        <div class="p-5">
+                          <div class="flex items-center gap-2 mb-4">
+                            <div
+                              class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center"
+                            >
+                              <i class="fa-solid fa-list text-slate-600"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider"
+                              >详细分析</span
+                            >
+                          </div>
+                          <div class="space-y-5">
+                            <template :key="detail.category" x-for="detail in result.details">
+                              <div>
+                                <span
+                                  :class="getResultCategoryClass(result.targetId)"
+                                  class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-3"
+                                >
+                                  <i class="fa-solid fa-quote-left opacity-60"></i>
+                                  <span x-text="detail.category"></span>
+                                </span>
+                                <div class="flex flex-wrap gap-2">
+                                  <template :key="index" x-for="(item, index) in detail.items">
+                                    <span
+                                      class="inline-block px-3 py-2 bg-slate-50 text-slate-700 text-xs rounded-lg cursor-default border border-slate-200 font-medium"
+                                      x-text="item"
+                                    ></span>
+                                  </template>
+                                </div>
+                              </div>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
                   </div>
                 </div>
-              </template>
-            </div>
-          </div>
               </template>
             </div>
             <!-- AI 分析报告 JSON - 集成到分析报告卡片内 -->
             <template x-if="reportFullData">
               <div class="mt-5 pt-5 border-t border-slate-200">
-                <div
-                  class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800"
-                >
-                  <div
-                    class="flex items-center justify-between p-4 bg-slate-900"
-                  >
+                <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800">
+                  <div class="flex items-center justify-between p-4 bg-slate-900">
                     <button
                       type="button"
                       @click="toggleJsonViewer()"
@@ -1862,9 +1696,7 @@
                         <i class="fa-solid fa-database text-white"></i>
                       </div>
                       <div class="text-left">
-                        <h4
-                          class="text-sm font-bold text-white flex items-center gap-2"
-                        >
+                        <h4 class="text-sm font-bold text-white flex items-center gap-2">
                           AI 分析报告 JSON
                           <span
                             class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full"
@@ -1928,22 +1760,13 @@
                       <div
                         class="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-t border-slate-700/30"
                       >
-                        <div
-                          class="flex items-center gap-2 text-xs text-slate-400"
-                        >
+                        <div class="flex items-center gap-2 text-xs text-slate-400">
                           <i class="fa-solid fa-file-code"></i>
                           <span>analysis_report.json</span>
                         </div>
-                        <div
-                          class="flex items-center gap-4 text-xs text-slate-500"
-                        >
-                          <span
-                            >tokens:
-                            <span x-text="getReportJsonTokenText()"></span
-                          ></span>
-                          <span
-                            >字符: <span x-text="getReportJsonCharText()"></span
-                          ></span>
+                        <div class="flex items-center gap-4 text-xs text-slate-500">
+                          <span>tokens: <span x-text="getReportJsonTokenText()"></span></span>
+                          <span>字符: <span x-text="getReportJsonCharText()"></span></span>
                         </div>
                       </div>
                       <div class="overflow-auto p-4 max-h-96">
@@ -1954,18 +1777,12 @@
                     </div>
                   </template>
                   <template x-if="jsonViewerCollapsed">
-                    <div
-                      class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30"
-                    >
-                      <div
-                        class="flex items-center gap-2 text-xs text-slate-500"
-                      >
+                    <div class="px-4 py-3 bg-slate-800/30 border-t border-slate-700/30">
+                      <div class="flex items-center gap-2 text-xs text-slate-500">
                         <i class="fa-solid fa-code"></i>
                         <span class="font-mono truncate"
-                          >{ "metadata": { "asins": [<span
-                            x-text="selectedAsinsJsonText"
-                          ></span
-                          >], ... }, "analysisReport": {...} }</span
+                          >{ "metadata": { "asins": [<span x-text="selectedAsinsJsonText"></span>],
+                          ... }, "analysisReport": {...} }</span
                         >
                       </div>
                     </div>
@@ -1989,24 +1806,18 @@
           class="text-2xl font-bold text-slate-700 mb-3"
           x-text="hasNoAnalysisData ? '还没有产品数据' : '准备开始智能分析'"
         ></h3>
-        <p
-          x-show="!hasNoAnalysisData"
-          class="text-slate-500 max-w-lg mx-auto leading-relaxed"
-        >
+        <p :hidden="hasNoAnalysisData" class="text-slate-500 max-w-lg mx-auto leading-relaxed">
           选择分析目标并确认 ASIN，点击"开始分析"按钮，<br />
           AI 将自动提取 Listings 和 Reviews 中的关键洞察
         </p>
-        <p
-          x-show="hasNoAnalysisData"
-          class="text-slate-500 max-w-lg mx-auto leading-relaxed"
-        >
-          当前没有可分析的产品数据。推荐操作：先完成数据采集或导入，再回到这里生成
-          Listings 与 Reviews 洞察。
+        <p :hidden="!hasNoAnalysisData" class="text-slate-500 max-w-lg mx-auto leading-relaxed">
+          当前没有可分析的产品数据。推荐操作：先完成数据采集或导入，再回到这里生成 Listings 与
+          Reviews 洞察。
           <span class="block mt-2 text-sm text-slate-400">
             数据准备完成后，这里会展示可导出的 AI 分析报告。
           </span>
         </p>
-        <div x-show="hasNoAnalysisData" class="mt-8">
+        <div :hidden="!hasNoAnalysisData" class="mt-8">
           <button
             type="button"
             data-action="switch-tab"
@@ -2017,10 +1828,7 @@
             去数据采集
           </button>
         </div>
-        <div
-          x-show="!hasNoAnalysisData"
-          class="mt-10 flex items-center justify-center gap-8"
-        >
+        <div :hidden="hasNoAnalysisData" class="mt-10 flex items-center justify-center gap-8">
           <div class="flex items-center gap-3 text-slate-500">
             <div
               class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center border border-blue-200"

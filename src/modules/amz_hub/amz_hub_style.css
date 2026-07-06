@@ -12,6 +12,18 @@
   overflow: visible !important;
 }
 
+.amz-hub-overview .wb-tag-dot--knowledge {
+  --wb-tag-dot-color: var(--wb-tag-dot-2, #6178d3);
+}
+
+.amz-hub-overview .wb-tag-dot--practice {
+  --wb-tag-dot-color: var(--wb-tag-dot-2, #00a000);
+}
+
+.amz-hub-overview .wb-tag-dot--advanced {
+  --wb-tag-dot-color: var(--wb-tag-dot-3, #e11d48);
+}
+
 /* 选中状态的 ASIN 卡片 */
 .asin-card.selected {
   background: var(--color-slate-50);

@@ -61,6 +61,8 @@
 
 /* ==================== 紫鸟业务场景宽版复刻 ==================== */
 .ziniao-case-shell {
+  --color-accent: var(--color-cyan-600);
+  --color-secondary: var(--color-blue-600);
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -68,6 +70,31 @@
   font-size: 15px;
   line-height: 1.7;
   letter-spacing: 0;
+}
+
+.ziniao-case-shell[data-case-theme='bad-review-response'] {
+  --color-accent: #4f46e5;
+  --color-secondary: #7c3aed;
+}
+
+.ziniao-case-shell[data-case-theme='ad-acos-diagnosis'] {
+  --color-accent: #f59e0b;
+  --color-secondary: #2563eb;
+}
+
+.ziniao-case-shell[data-case-theme='review-monitor'] {
+  --color-accent: #0f766e;
+  --color-secondary: #2563eb;
+}
+
+.ziniao-case-shell[data-case-theme='amazon-daily-report'] {
+  --color-accent: #4f46e5;
+  --color-secondary: #14b8a6;
+}
+
+.ziniao-notice-shell {
+  --color-accent: #dc2626;
+  --color-secondary: #f59e0b;
 }
 
 .ziniao-case-shell *,
@@ -315,6 +342,10 @@
   font-size: 12px;
   font-weight: 800;
   border-radius: 999px;
+}
+
+.zn-avatar--assistant {
+  background: var(--color-accent);
 }
 
 .zn-avatar--user {

@@ -186,6 +186,30 @@ it('应该支持最大输出token限制', async () => {
   expect(body.max_tokens).toBe(1200);
 });
 
+it('默认不发送 service_tier，显式配置时才发送', async () => {
+  const mockResponse = createChatCompletion('response');
+
+  (global.fetch as any)
+    .mockResolvedValueOnce(createJsonResponse(mockResponse))
+    .mockResolvedValueOnce(createJsonResponse(mockResponse));
+
+  const { callLLM } = await import('../../src/services/llmService');
+  const messages = [{ role: 'user' as const, content: 'Test' }];
+
+  await callLLM(messages, 'openai', 'https://api.example.com/v1', 'test-api-key', 'gpt-4', {
+    stream: false,
+  });
+  await callLLM(messages, 'openai', 'https://api.example.com/v1', 'test-api-key', 'gpt-4', {
+    serviceTier: 'priority',
+    stream: false,
+  });
+
+  const firstBody = JSON.parse((global.fetch as any).mock.calls[0][1].body);
+  const secondBody = JSON.parse((global.fetch as any).mock.calls[1][1].body);
+  expect(firstBody.service_tier).toBeUndefined();
+  expect(secondBody.service_tier).toBe('priority');
+});
+
 it('应该先规范化端点再执行生产安全检查', async () => {
   const { configCenter } = await import('../../src/common/config/ConfigCenter');
   const { EnvConfig } = await import('../../src/common/config/envConfig');

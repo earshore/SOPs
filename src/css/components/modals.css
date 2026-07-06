@@ -77,6 +77,11 @@
   pointer-events: auto;
 }
 
+.modal.modal-interaction-blocked,
+.modal-backdrop.show .modal.modal-interaction-blocked {
+  pointer-events: none;
+}
+
 /* ========================================
    模态框尺寸
    ======================================== */

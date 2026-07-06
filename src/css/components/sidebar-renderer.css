@@ -1,7 +1,347 @@
 /**
  * Sidebar Renderer
- * 通用模块侧边栏主题。颜色由 SidebarRenderer 注入的 CSS 变量控制。
+ * 通用模块侧边栏主题。颜色由 SidebarRenderer 注入的主题 class 控制。
  */
+
+.sidebar-scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.sidebar-category-children {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows 200ms ease,
+    opacity 200ms ease;
+}
+
+.sidebar-category-children.hidden {
+  display: none;
+}
+
+.sidebar-category-children--collapsed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.sidebar-category-children-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-category-children {
+    transition: none;
+  }
+}
+
+.sidebar-theme-blue {
+  --sidebar-primary: #3b82f6;
+  --sidebar-accent: #4f46e5;
+  --sidebar-active: #2563eb;
+  --sidebar-text: #1d4ed8;
+  --sidebar-active-bg-start: rgba(239, 246, 255, 0.96);
+  --sidebar-active-bg-end: rgba(219, 234, 254, 0.8);
+  --sidebar-icon-soft: #dbeafe;
+  --sidebar-icon-soft-end: #eff6ff;
+  --sidebar-border: rgba(37, 99, 235, 0.32);
+  --sidebar-focus: rgba(37, 99, 235, 0.14);
+  --sidebar-shadow: rgba(59, 130, 246, 0.62);
+}
+
+.sidebar-theme-sky {
+  --sidebar-primary: #0ea5e9;
+  --sidebar-accent: #2563eb;
+  --sidebar-active: #0284c7;
+  --sidebar-text: #0369a1;
+  --sidebar-active-bg-start: rgba(240, 249, 255, 0.96);
+  --sidebar-active-bg-end: rgba(224, 242, 254, 0.72);
+  --sidebar-icon-soft: #e0f2fe;
+  --sidebar-icon-soft-end: #f0f9ff;
+  --sidebar-border: rgba(2, 132, 199, 0.34);
+  --sidebar-focus: rgba(2, 132, 199, 0.14);
+  --sidebar-shadow: rgba(14, 165, 233, 0.58);
+}
+
+.sidebar-theme-indigo {
+  --sidebar-primary: #6366f1;
+  --sidebar-accent: #7c3aed;
+  --sidebar-active: #4f46e5;
+  --sidebar-text: #4338ca;
+  --sidebar-active-bg-start: rgba(238, 242, 255, 0.96);
+  --sidebar-active-bg-end: rgba(224, 231, 255, 0.8);
+  --sidebar-icon-soft: #e0e7ff;
+  --sidebar-icon-soft-end: #eef2ff;
+  --sidebar-border: rgba(79, 70, 229, 0.32);
+  --sidebar-focus: rgba(79, 70, 229, 0.14);
+  --sidebar-shadow: rgba(99, 102, 241, 0.62);
+}
+
+.sidebar-theme-violet {
+  --sidebar-primary: #8b5cf6;
+  --sidebar-accent: #9333ea;
+  --sidebar-active: #7c3aed;
+  --sidebar-text: #6d28d9;
+  --sidebar-active-bg-start: rgba(245, 243, 255, 0.96);
+  --sidebar-active-bg-end: rgba(237, 233, 254, 0.8);
+  --sidebar-icon-soft: #ede9fe;
+  --sidebar-icon-soft-end: #f5f3ff;
+  --sidebar-border: rgba(124, 58, 237, 0.32);
+  --sidebar-focus: rgba(124, 58, 237, 0.14);
+  --sidebar-shadow: rgba(139, 92, 246, 0.62);
+}
+
+.sidebar-theme-purple {
+  --sidebar-primary: #a855f7;
+  --sidebar-accent: #db2777;
+  --sidebar-active: #9333ea;
+  --sidebar-text: #7e22ce;
+  --sidebar-active-bg-start: rgba(250, 245, 255, 0.96);
+  --sidebar-active-bg-end: rgba(243, 232, 255, 0.8);
+  --sidebar-icon-soft: #f3e8ff;
+  --sidebar-icon-soft-end: #faf5ff;
+  --sidebar-border: rgba(147, 51, 234, 0.42);
+  --sidebar-focus: rgba(147, 51, 234, 0.18);
+  --sidebar-shadow: rgba(168, 85, 247, 0.72);
+}
+
+.sidebar-theme-fuchsia {
+  --sidebar-primary: #d946ef;
+  --sidebar-accent: #db2777;
+  --sidebar-active: #c026d3;
+  --sidebar-text: #a21caf;
+  --sidebar-active-bg-start: rgba(253, 244, 255, 0.96);
+  --sidebar-active-bg-end: rgba(250, 232, 255, 0.72);
+  --sidebar-icon-soft: #fae8ff;
+  --sidebar-icon-soft-end: #fdf4ff;
+  --sidebar-border: rgba(192, 38, 211, 0.38);
+  --sidebar-focus: rgba(192, 38, 211, 0.14);
+  --sidebar-shadow: rgba(217, 70, 239, 0.62);
+}
+
+.sidebar-theme-emerald {
+  --sidebar-primary: #10b981;
+  --sidebar-accent: #0d9488;
+  --sidebar-active: #059669;
+  --sidebar-text: #047857;
+  --sidebar-active-bg-start: rgba(236, 253, 245, 0.96);
+  --sidebar-active-bg-end: rgba(209, 250, 229, 0.7);
+  --sidebar-icon-soft: #d1fae5;
+  --sidebar-icon-soft-end: #ecfdf5;
+  --sidebar-border: rgba(5, 150, 105, 0.32);
+  --sidebar-focus: rgba(5, 150, 105, 0.14);
+  --sidebar-shadow: rgba(16, 185, 129, 0.58);
+}
+
+.sidebar-theme-teal {
+  --sidebar-primary: #14b8a6;
+  --sidebar-accent: #0891b2;
+  --sidebar-active: #0d9488;
+  --sidebar-text: #0f766e;
+  --sidebar-active-bg-start: rgba(240, 253, 250, 0.96);
+  --sidebar-active-bg-end: rgba(204, 251, 241, 0.7);
+  --sidebar-icon-soft: #ccfbf1;
+  --sidebar-icon-soft-end: #f0fdfa;
+  --sidebar-border: rgba(13, 148, 136, 0.32);
+  --sidebar-focus: rgba(13, 148, 136, 0.14);
+  --sidebar-shadow: rgba(20, 184, 166, 0.58);
+}
+
+.sidebar-theme-green {
+  --sidebar-primary: #22c55e;
+  --sidebar-accent: #059669;
+  --sidebar-active: #16a34a;
+  --sidebar-text: #15803d;
+  --sidebar-active-bg-start: rgba(240, 253, 244, 0.96);
+  --sidebar-active-bg-end: rgba(220, 252, 231, 0.72);
+  --sidebar-icon-soft: #dcfce7;
+  --sidebar-icon-soft-end: #f0fdf4;
+  --sidebar-border: rgba(22, 163, 74, 0.32);
+  --sidebar-focus: rgba(22, 163, 74, 0.14);
+  --sidebar-shadow: rgba(34, 197, 94, 0.56);
+}
+
+.sidebar-theme-lime {
+  --sidebar-primary: #84cc16;
+  --sidebar-accent: #16a34a;
+  --sidebar-active: #65a30d;
+  --sidebar-text: #4d7c0f;
+  --sidebar-active-bg-start: rgba(247, 254, 231, 0.96);
+  --sidebar-active-bg-end: rgba(236, 252, 203, 0.72);
+  --sidebar-icon-soft: #ecfccb;
+  --sidebar-icon-soft-end: #f7fee7;
+  --sidebar-border: rgba(101, 163, 13, 0.34);
+  --sidebar-focus: rgba(101, 163, 13, 0.14);
+  --sidebar-shadow: rgba(132, 204, 22, 0.56);
+}
+
+.sidebar-theme-amber {
+  --sidebar-primary: #f59e0b;
+  --sidebar-accent: #ea580c;
+  --sidebar-active: #d97706;
+  --sidebar-text: #b45309;
+  --sidebar-active-bg-start: rgba(255, 251, 235, 0.96);
+  --sidebar-active-bg-end: rgba(254, 243, 199, 0.8);
+  --sidebar-icon-soft: #fef3c7;
+  --sidebar-icon-soft-end: #fffbeb;
+  --sidebar-border: rgba(217, 119, 6, 0.32);
+  --sidebar-focus: rgba(217, 119, 6, 0.14);
+  --sidebar-shadow: rgba(245, 158, 11, 0.58);
+}
+
+.sidebar-theme-orange {
+  --sidebar-primary: #f97316;
+  --sidebar-accent: #dc2626;
+  --sidebar-active: #ea580c;
+  --sidebar-text: #c2410c;
+  --sidebar-active-bg-start: rgba(255, 247, 237, 0.96);
+  --sidebar-active-bg-end: rgba(255, 237, 213, 0.8);
+  --sidebar-icon-soft: #ffedd5;
+  --sidebar-icon-soft-end: #fff7ed;
+  --sidebar-border: rgba(234, 88, 12, 0.32);
+  --sidebar-focus: rgba(234, 88, 12, 0.14);
+  --sidebar-shadow: rgba(249, 115, 22, 0.62);
+}
+
+.sidebar-theme-red {
+  --sidebar-primary: #ef4444;
+  --sidebar-accent: #e11d48;
+  --sidebar-active: #dc2626;
+  --sidebar-text: #b91c1c;
+  --sidebar-active-bg-start: rgba(254, 242, 242, 0.96);
+  --sidebar-active-bg-end: rgba(254, 226, 226, 0.8);
+  --sidebar-icon-soft: #fee2e2;
+  --sidebar-icon-soft-end: #fef2f2;
+  --sidebar-border: rgba(220, 38, 38, 0.32);
+  --sidebar-focus: rgba(220, 38, 38, 0.14);
+  --sidebar-shadow: rgba(239, 68, 68, 0.62);
+}
+
+.sidebar-theme-rose {
+  --sidebar-primary: #f43f5e;
+  --sidebar-accent: #db2777;
+  --sidebar-active: #e11d48;
+  --sidebar-text: #be123c;
+  --sidebar-active-bg-start: rgba(255, 241, 242, 0.96);
+  --sidebar-active-bg-end: rgba(255, 228, 230, 0.72);
+  --sidebar-icon-soft: #ffe4e6;
+  --sidebar-icon-soft-end: #fff1f2;
+  --sidebar-border: rgba(225, 29, 72, 0.32);
+  --sidebar-focus: rgba(225, 29, 72, 0.14);
+  --sidebar-shadow: rgba(244, 63, 94, 0.62);
+}
+
+.sidebar-theme-pink {
+  --sidebar-primary: #ec4899;
+  --sidebar-accent: #e11d48;
+  --sidebar-active: #db2777;
+  --sidebar-text: #be185d;
+  --sidebar-active-bg-start: rgba(253, 242, 248, 0.96);
+  --sidebar-active-bg-end: rgba(252, 231, 243, 0.72);
+  --sidebar-icon-soft: #fce7f3;
+  --sidebar-icon-soft-end: #fdf2f8;
+  --sidebar-border: rgba(219, 39, 119, 0.34);
+  --sidebar-focus: rgba(219, 39, 119, 0.14);
+  --sidebar-shadow: rgba(236, 72, 153, 0.62);
+}
+
+.sidebar-theme-cyan {
+  --sidebar-primary: #06b6d4;
+  --sidebar-accent: #2563eb;
+  --sidebar-active: #0891b2;
+  --sidebar-text: #0e7490;
+  --sidebar-active-bg-start: rgba(236, 254, 255, 0.96);
+  --sidebar-active-bg-end: rgba(207, 250, 254, 0.72);
+  --sidebar-icon-soft: #cffafe;
+  --sidebar-icon-soft-end: #ecfeff;
+  --sidebar-border: rgba(8, 145, 178, 0.34);
+  --sidebar-focus: rgba(8, 145, 178, 0.14);
+  --sidebar-shadow: rgba(6, 182, 212, 0.56);
+}
+
+.sidebar-theme-slate {
+  --sidebar-primary: #64748b;
+  --sidebar-accent: #475569;
+  --sidebar-active: #475569;
+  --sidebar-text: #334155;
+  --sidebar-active-bg-start: rgba(248, 250, 252, 0.96);
+  --sidebar-active-bg-end: rgba(241, 245, 249, 0.8);
+  --sidebar-icon-soft: #f1f5f9;
+  --sidebar-icon-soft-end: #f8fafc;
+  --sidebar-border: rgba(71, 85, 105, 0.32);
+  --sidebar-focus: rgba(71, 85, 105, 0.14);
+  --sidebar-shadow: rgba(100, 116, 139, 0.48);
+}
+
+.sidebar-category-line-blue {
+  background-color: #bfdbfe;
+}
+
+.sidebar-category-line-sky {
+  background-color: #bae6fd;
+}
+
+.sidebar-category-line-indigo {
+  background-color: #c7d2fe;
+}
+
+.sidebar-category-line-violet {
+  background-color: #ddd6fe;
+}
+
+.sidebar-category-line-purple {
+  background-color: #e9d5ff;
+}
+
+.sidebar-category-line-fuchsia {
+  background-color: #f5d0fe;
+}
+
+.sidebar-category-line-emerald {
+  background-color: #a7f3d0;
+}
+
+.sidebar-category-line-teal {
+  background-color: #99f6e4;
+}
+
+.sidebar-category-line-green {
+  background-color: #bbf7d0;
+}
+
+.sidebar-category-line-lime {
+  background-color: #d9f99d;
+}
+
+.sidebar-category-line-amber {
+  background-color: #fde68a;
+}
+
+.sidebar-category-line-orange {
+  background-color: #fed7aa;
+}
+
+.sidebar-category-line-red {
+  background-color: #fecaca;
+}
+
+.sidebar-category-line-rose {
+  background-color: #fecdd3;
+}
+
+.sidebar-category-line-pink {
+  background-color: #fbcfe8;
+}
+
+.sidebar-category-line-cyan {
+  background-color: #a5f3fc;
+}
+
+.sidebar-category-line-slate {
+  background-color: #e2e8f0;
+}
 
 .sidebar-shell .sidebar-module-icon {
   background: linear-gradient(135deg, var(--sidebar-primary), var(--sidebar-accent)) !important;

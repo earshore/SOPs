@@ -630,6 +630,7 @@ export interface LLMProviderConfig {
   apiKey: string;
   model: string;
   models?: Array<string | { id: string; name?: string; context?: number; features?: string[] }>;
+  serviceTier?: 'auto' | 'default' | 'flex' | 'priority';
   enabled: boolean;
 }
 

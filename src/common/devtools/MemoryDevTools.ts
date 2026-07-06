@@ -56,75 +56,74 @@ export class MemoryDevTools {
     const panel = document.createElement('div');
     panel.id = 'memory-devtools';
     panel.className =
-      'fixed top-20 right-4 w-96 bg-white border-2 border-purple-500 shadow-2xl z-[10000] rounded-lg hidden';
-    panel.style.cssText = 'font-family: monospace; font-size: 12px; max-height: 600px;';
+      'fixed top-20 right-4 z-[10000] hidden max-h-[600px] w-96 rounded-lg border-2 border-purple-500 bg-white font-mono text-xs shadow-2xl';
 
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(
       panel,
       `
-      <div style="display: flex; flex-direction: column; height: 100%;">
+      <div class="flex h-full flex-col">
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 6px 6px 0 0;">
-          <div style="display: flex; items-center: gap: 8px;">
-            <i class="fas fa-memory" style="font-size: 16px;"></i>
-            <span style="font-weight: bold; font-size: 14px;">内存监控</span>
+        <div class="flex items-center justify-between rounded-t-md bg-gradient-to-br from-[#667eea] to-[#764ba2] p-3 text-white">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-memory text-base"></i>
+            <span class="text-sm font-bold">内存监控</span>
           </div>
-          <button id="memory-devtools-close" style="background: rgba(255,255,255,0.2); border: none; color: white; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 16px;">✕</button>
+          <button id="memory-devtools-close" class="cursor-pointer rounded border-0 bg-white/20 px-2 py-1 text-base text-white">✕</button>
         </div>
 
         <!-- Current Memory -->
-        <div style="padding: 12px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
-          <div style="font-weight: bold; color: #6b7280; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">当前内存使用</div>
-          <div id="memory-current" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <div style="background: white; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb;">
-              <div style="color: #6b7280; font-size: 10px;">已用堆内存</div>
-              <div id="heap-used" style="font-size: 18px; font-weight: bold; color: #667eea;">-</div>
+        <div class="border-b border-gray-200 bg-gray-50 p-3">
+          <div class="mb-2 text-[10px] font-bold uppercase tracking-[0.5px] text-gray-500">当前内存使用</div>
+          <div id="memory-current" class="grid grid-cols-2 gap-2">
+            <div class="rounded-md border border-gray-200 bg-white p-2">
+              <div class="text-[10px] text-gray-500">已用堆内存</div>
+              <div id="heap-used" class="text-[18px] font-bold text-[#667eea]">-</div>
             </div>
-            <div style="background: white; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb;">
-              <div style="color: #6b7280; font-size: 10px;">使用率</div>
-              <div id="heap-percentage" style="font-size: 18px; font-weight: bold; color: #764ba2;">-</div>
+            <div class="rounded-md border border-gray-200 bg-white p-2">
+              <div class="text-[10px] text-gray-500">使用率</div>
+              <div id="heap-percentage" class="text-[18px] font-bold text-[#764ba2]">-</div>
             </div>
           </div>
         </div>
 
         <!-- EventBus Stats -->
-        <div style="padding: 12px; border-bottom: 1px solid #e5e7eb; background: white;">
-          <div style="font-weight: bold; color: #6b7280; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">EventBus 监听器</div>
-          <div id="eventbus-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <div style="background: #f9fafb; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb;">
-              <div style="color: #6b7280; font-size: 10px;">总监听器</div>
-              <div id="total-listeners" style="font-size: 18px; font-weight: bold; color: #10b981;">-</div>
+        <div class="border-b border-gray-200 bg-white p-3">
+          <div class="mb-2 text-[10px] font-bold uppercase tracking-[0.5px] text-gray-500">EventBus 监听器</div>
+          <div id="eventbus-stats" class="grid grid-cols-2 gap-2">
+            <div class="rounded-md border border-gray-200 bg-gray-50 p-2">
+              <div class="text-[10px] text-gray-500">总监听器</div>
+              <div id="total-listeners" class="text-[18px] font-bold text-emerald-500">-</div>
             </div>
-            <div style="background: #f9fafb; padding: 8px; border-radius: 6px; border: 1px solid #e5e7eb;">
-              <div style="color: #6b7280; font-size: 10px;">事件数量</div>
-              <div id="event-count" style="font-size: 18px; font-weight: bold; color: #3b82f6;">-</div>
+            <div class="rounded-md border border-gray-200 bg-gray-50 p-2">
+              <div class="text-[10px] text-gray-500">事件数量</div>
+              <div id="event-count" class="text-[18px] font-bold text-blue-500">-</div>
             </div>
           </div>
         </div>
 
         <!-- Memory Snapshots -->
-        <div style="padding: 12px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
-          <div style="font-weight: bold; color: #6b7280; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">内存快照 (最近10次)</div>
-          <div id="memory-snapshots" style="max-height: 150px; overflow-y: auto; font-size: 10px;">
-            <div style="color: #9ca3af; text-align: center; padding: 20px;">暂无快照</div>
+        <div class="border-b border-gray-200 bg-gray-50 p-3">
+          <div class="mb-2 text-[10px] font-bold uppercase tracking-[0.5px] text-gray-500">内存快照 (最近10次)</div>
+          <div id="memory-snapshots" class="max-h-[150px] overflow-y-auto text-[10px]">
+            <div class="p-5 text-center text-gray-400">暂无快照</div>
           </div>
         </div>
 
         <!-- Leak Warnings -->
-        <div id="leak-warnings" style="padding: 12px; background: white; display: none;">
-          <div style="font-weight: bold; color: #ef4444; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+        <div id="leak-warnings" class="hidden bg-white p-3">
+          <div class="mb-2 text-[10px] font-bold uppercase tracking-[0.5px] text-red-500">
             <i class="fas fa-exclamation-triangle"></i> 内存泄漏警告
           </div>
-          <div id="leak-list" style="max-height: 120px; overflow-y: auto; font-size: 11px;"></div>
+          <div id="leak-list" class="max-h-[120px] overflow-y-auto text-[11px]"></div>
         </div>
 
         <!-- Actions -->
-        <div style="padding: 12px; display: flex; gap: 8px; background: #f9fafb; border-radius: 0 0 6px 6px;">
-          <button id="memory-force-gc" style="flex: 1; padding: 8px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">
+        <div class="flex gap-2 rounded-b-md bg-gray-50 p-3">
+          <button id="memory-force-gc" class="flex-1 cursor-pointer rounded-md border-0 bg-emerald-500 p-2 text-[11px] font-semibold text-white">
             <i class="fas fa-trash"></i> 强制GC
           </button>
-          <button id="memory-clear-snapshots" style="flex: 1; padding: 8px; background: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">
+          <button id="memory-clear-snapshots" class="flex-1 cursor-pointer rounded-md border-0 bg-amber-500 p-2 text-[11px] font-semibold text-white">
             <i class="fas fa-eraser"></i> 清除快照
           </button>
         </div>
@@ -170,7 +169,7 @@ export class MemoryDevTools {
     const memoryUsage = memoryLeakDetector.getMemoryUsage();
     if (memoryUsage) {
       const heapUsedEl = this.panel.querySelector('#heap-used');
-      const heapPercentageEl = this.panel.querySelector('#heap-percentage');
+      const heapPercentageEl = this.panel.querySelector<HTMLElement>('#heap-percentage');
 
       if (heapUsedEl) {
         heapUsedEl.textContent = `${memoryUsage.heapUsed.toFixed(1)} MB`;
@@ -181,12 +180,13 @@ export class MemoryDevTools {
         heapPercentageEl.textContent = `${percentage.toFixed(1)}%`;
 
         // 根据使用率改变颜色
+        heapPercentageEl.classList.remove('text-red-500', 'text-amber-500', 'text-[#764ba2]');
         if (percentage > 80) {
-          (heapPercentageEl as HTMLElement).style.color = '#ef4444';
+          heapPercentageEl.classList.add('text-red-500');
         } else if (percentage > 60) {
-          (heapPercentageEl as HTMLElement).style.color = '#f59e0b';
+          heapPercentageEl.classList.add('text-amber-500');
         } else {
-          (heapPercentageEl as HTMLElement).style.color = '#764ba2';
+          heapPercentageEl.classList.add('text-[#764ba2]');
         }
       }
     }
@@ -222,10 +222,7 @@ export class MemoryDevTools {
 
     if (snapshots.length === 0) {
       // ✅ 安全: 静态HTML模板
-      setSafeHtml(
-        snapshotsEl,
-        '<div style="color: #9ca3af; text-align: center; padding: 20px;">暂无快照</div>'
-      );
+      setSafeHtml(snapshotsEl, '<div class="p-5 text-center text-gray-400">暂无快照</div>');
       return;
     }
 
@@ -238,9 +235,9 @@ export class MemoryDevTools {
         .map((snapshot, index) => {
           const time = new Date(snapshot.timestamp).toLocaleTimeString('zh-CN');
           return `
-          <div style="padding: 6px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; ${index === 0 ? 'background: #fef3c7;' : ''}">
-            <span style="color: #6b7280;">${time}</span>
-            <span style="color: #667eea; font-weight: 600;">${snapshot.heapUsed.toFixed(1)} MB</span>
+          <div class="flex justify-between border-b border-gray-200 p-1.5${index === 0 ? ' bg-amber-100' : ''}">
+            <span class="text-gray-500">${time}</span>
+            <span class="font-semibold text-[#667eea]">${snapshot.heapUsed.toFixed(1)} MB</span>
           </div>
         `;
         })
@@ -252,28 +249,31 @@ export class MemoryDevTools {
    * 更新泄漏警告
    */
   private _updateLeakWarnings(): void {
-    const warningsEl = this.panel?.querySelector('#leak-warnings');
+    const warningsEl = this.panel?.querySelector<HTMLElement>('#leak-warnings');
     const leakListEl = this.panel?.querySelector<HTMLElement>('#leak-list');
     if (!warningsEl || !leakListEl) return;
 
     const leaks = eventBus.detectLeaks();
 
     if (leaks.length === 0) {
-      (warningsEl as HTMLElement).style.display = 'none';
+      warningsEl.classList.add('hidden');
       return;
     }
 
-    (warningsEl as HTMLElement).style.display = 'block';
+    warningsEl.classList.remove('hidden');
     // ✅ 安全: leak数据来自eventBus.detectLeaks()内部方法，leak.event/message/severity都是内部生成的字符串
     setSafeHtml(
       leakListEl,
       leaks
         .map(leak => {
-          const color = leak.severity === 'critical' ? '#ef4444' : '#f59e0b';
+          const severityClass =
+            leak.severity === 'critical'
+              ? 'border-red-500 text-red-500'
+              : 'border-amber-500 text-amber-500';
           return `
-          <div style="padding: 6px; border-left: 3px solid ${color}; background: #fef2f2; margin-bottom: 6px; border-radius: 4px;">
-            <div style="font-weight: 600; color: ${color};">${leak.event}</div>
-            <div style="color: #6b7280; font-size: 10px;">${leak.message}</div>
+          <div class="mb-1.5 rounded border-l-[3px] ${severityClass} bg-red-50 p-1.5">
+            <div class="font-semibold">${leak.event}</div>
+            <div class="text-[10px] text-gray-500">${leak.message}</div>
           </div>
         `;
         })

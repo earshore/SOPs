@@ -14,7 +14,7 @@ describe('SkeletonLoader', () => {
     vi.spyOn(Date, 'now').mockReturnValue(1000);
   });
 
-  it('creates every built-in skeleton type with defaults and custom styles', () => {
+  it('creates every built-in skeleton type with defaults and custom classes', () => {
     const types: SkeletonType[] = ['text', 'title', 'paragraph', 'avatar', 'image', 'card', 'list', 'table', 'custom'];
 
     types.forEach((type) => {
@@ -29,6 +29,7 @@ describe('SkeletonLoader', () => {
       expect(skeleton.className).toBe('skeleton-container');
       expect(skeleton.children).toHaveLength(2);
       expect(skeleton.querySelector('.extra')).not.toBeNull();
+      expect(skeleton.querySelector('[style]')).toBeNull();
     });
   });
 
@@ -43,7 +44,8 @@ describe('SkeletonLoader', () => {
     expect(card.querySelector('.skeleton-image')).not.toBeNull();
     expect(list.querySelectorAll('.skeleton-list-item')).toHaveLength(5);
     expect(table.querySelectorAll('.skeleton-table-row')).toHaveLength(5);
-    expect((avatar.firstElementChild as HTMLElement).style.borderRadius).toBe('50%');
+    expect((avatar.firstElementChild as HTMLElement).classList.contains('skeleton-avatar--sm')).toBe(true);
+    expect(avatar.querySelector('[style]')).toBeNull();
     expect(avatar.querySelector('.skeleton-animated')).toBeNull();
   });
 

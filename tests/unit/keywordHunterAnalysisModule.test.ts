@@ -36,6 +36,9 @@ const analysisMocks = vi.hoisted(() => {
       container.innerHTML = html;
     }),
     showToast: vi.fn(),
+    localDataGet: vi.fn(),
+    localDataSet: vi.fn(),
+    localDataRemove: vi.fn(),
     saveCurrentAsync: vi.fn(async () => ({
       id: 'kh-test',
     })),
@@ -80,6 +83,14 @@ vi.mock('@/services/llmService', () => ({
   callLLM: vi.fn(),
 }));
 
+vi.mock('@/services/localDataStore', () => ({
+  LocalDataStore: {
+    get: analysisMocks.localDataGet,
+    set: analysisMocks.localDataSet,
+    remove: analysisMocks.localDataRemove,
+  },
+}));
+
 vi.mock('@/services/storageService', () => ({
   STORAGE_KEYS: {
     LLM_ACTIVE_PROVIDER: 'llm_active_provider',
@@ -87,6 +98,7 @@ vi.mock('@/services/storageService', () => ({
   },
   StorageService: {
     get: vi.fn(),
+    getLLMConfig: vi.fn(),
     getLLMConfigWithKey: vi.fn(),
   },
 }));
@@ -191,7 +203,14 @@ beforeEach(() => {
   document.body.innerHTML = '';
   vi.clearAllMocks();
   resetTrackerState();
+  analysisMocks.localDataGet.mockResolvedValue(null);
+  analysisMocks.localDataSet.mockResolvedValue(true);
+  analysisMocks.localDataRemove.mockResolvedValue(undefined);
   mockedStorage.get.mockReturnValue('openai');
+  mockedStorage.getLLMConfig.mockReturnValue({
+    endpoint: 'https://api.example.test',
+    model: 'gpt-test',
+  } as never);
   mockedStorage.getLLMConfigWithKey.mockResolvedValue({
     apiKey: 'test-key',
     endpoint: 'https://api.example.test',
@@ -411,6 +430,19 @@ it('shows loading phases, renders successful analysis, and stores raw markdown',
   vi.advanceTimersByTime(6500);
   expect(container.querySelector('#kt-loading-state')?.textContent).toContain('正在生成评审报告');
 
+  const options = mockedCallLLM.mock.calls[0]?.[5] as
+    | {
+        onFirstResponse?: (metrics: {
+          elapsedMs: number;
+          firstChunkMs?: number;
+          chunkCount: number;
+        }) => void;
+      }
+    | undefined;
+  options?.onFirstResponse?.({ elapsedMs: 800, firstChunkMs: 800, chunkCount: 1 });
+  expect(container.querySelector('#kt-loading-state')?.textContent).toContain('模型已首响 0.8s');
+  expect(container.querySelector('#kt-loading-state')?.textContent).toContain('流式响应已开始');
+
   resolveAnalysis(scoredMarkdown);
   await vi.advanceTimersByTimeAsync(0);
   await vi.advanceTimersByTimeAsync(16);
@@ -423,7 +455,13 @@ it('shows loading phases, renders successful analysis, and stores raw markdown',
     'https://api.example.test',
     'test-key',
     'gpt-test',
-    { temperature: 0.1, jsonMode: false }
+    expect.objectContaining({
+      temperature: 0.1,
+      jsonMode: false,
+      maxTokens: 6000,
+      stream: true,
+      onFirstResponse: expect.any(Function),
+    })
   );
   expect(container.querySelectorAll('.score-badge')).toHaveLength(5);
   expect(analysisMocks.state.keywordTracker.llmAnalysisResult).toBe(scoredMarkdown);
@@ -450,13 +488,13 @@ it('keeps the pending analysis state visible after leaving and returning', async
 
   const firstContainer = await mountAnalysis();
   click(firstContainer.querySelector('#kt-analyze-btn'));
-  await Promise.resolve();
-  await Promise.resolve();
 
   expect(firstContainer.querySelector('#kt-loading-state')?.textContent).toContain(
     '正在读取文案与关键词数据'
   );
-  expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+  await vi.waitFor(() => {
+    expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+  });
 
   unmount();
   firstContainer.remove();
@@ -492,12 +530,13 @@ it('ignores a pending analysis run after the processed copy changes', async () =
 
   const firstContainer = await mountAnalysis();
   click(firstContainer.querySelector('#kt-analyze-btn'));
-  await Promise.resolve();
-  await Promise.resolve();
 
   expect(firstContainer.querySelector('#kt-loading-state')?.textContent).toContain(
     '正在读取文案与关键词数据'
   );
+  await vi.waitFor(() => {
+    expect(mockedCallLLM).toHaveBeenCalledTimes(1);
+  });
 
   unmount();
   firstContainer.remove();

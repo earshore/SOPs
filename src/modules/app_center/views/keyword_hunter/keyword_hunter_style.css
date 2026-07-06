@@ -628,6 +628,16 @@
   animation: keywordSlideInUp var(--duration-normal) var(--ease-spring);
 }
 
+.kt-floating-window--positioned {
+  right: auto;
+  bottom: auto;
+}
+
+.kt-floating-window.is-dragging {
+  opacity: 0.9;
+  transition: none;
+}
+
 .floating-header {
   cursor: move;
   user-select: none;
@@ -2220,4 +2230,65 @@
   #app_center_content_area #kt-analysis-empty-state .kt-analysis-empty-visual {
     overflow: visible !important;
   }
+}
+
+#kt-translate-progress,
+#kt-coverage-bar {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+}
+
+#kt-translate-progress {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+#kt-coverage-bar {
+  width: 100%;
+  background: transparent;
+}
+
+#kt-translate-progress::-webkit-progress-bar,
+#kt-coverage-bar::-webkit-progress-bar {
+  background: transparent;
+}
+
+#kt-translate-progress::-webkit-progress-value {
+  background: linear-gradient(
+    to right,
+    var(--color-rose-500, #f43f5e),
+    var(--color-pink-500, #ec4899)
+  );
+  transition: width 300ms ease;
+}
+
+#kt-translate-progress::-moz-progress-bar {
+  background: linear-gradient(
+    to right,
+    var(--color-rose-500, #f43f5e),
+    var(--color-pink-500, #ec4899)
+  );
+}
+
+#kt-coverage-bar::-webkit-progress-value {
+  background: linear-gradient(
+    to right,
+    var(--color-blue-500, #3b82f6),
+    var(--color-sky-500, #0ea5e9),
+    var(--color-rose-500, #f43f5e)
+  );
+  border-radius: 9999px;
+  transition: width 700ms ease-out;
+}
+
+#kt-coverage-bar::-moz-progress-bar {
+  background: linear-gradient(
+    to right,
+    var(--color-blue-500, #3b82f6),
+    var(--color-sky-500, #0ea5e9),
+    var(--color-rose-500, #f43f5e)
+  );
+  border-radius: 9999px;
 }

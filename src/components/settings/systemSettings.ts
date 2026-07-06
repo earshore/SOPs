@@ -57,6 +57,7 @@ interface LLMState {
   apiKey: string;
   model: string;
   models: ModelOption[];
+  serviceTier?: LLMProviderConfig['serviceTier'];
   showKey: boolean;
   isFetching: boolean;
   isTesting: boolean;
@@ -130,6 +131,7 @@ interface SettingsPanelData {
   setLlmEndpoint(event: Event): void;
   setLlmApiKey(event: Event): void;
   setLlmModel(event: Event): void;
+  setLlmServiceTier(event: Event): void;
   setProxyType(event: Event): void;
   setProxyCustomUrl(event: Event): void;
   toggleLlmKeyVisibility(): void;
@@ -179,7 +181,6 @@ interface LocalDataBucketMeta {
   description: string;
   icon: string;
   iconClass: string;
-  barClass: string;
   buttonClass: string;
   actionLabel: string;
   confirmMessage: string | null;
@@ -191,6 +192,7 @@ interface LocalDataBucketView extends LocalDataBucketMeta {
   keysText: string;
   percentText: string;
   percentWidth: string;
+  percentValue: number;
   isEmpty: boolean;
   isClearing: boolean;
 }
@@ -221,13 +223,14 @@ const MODEL_FEATURE_ICONS: Record<ModelFeature, string> = {
   'long-context': 'fa-expand-alt',
 };
 
+const LLM_TEST_CONNECTION_MAX_TOKENS = 32;
+
 const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
   config: {
     label: '配置与偏好',
     description: '模型、网络、布局和功能开关',
     icon: 'fa-sliders-h',
     iconClass: 'bg-blue-50 text-blue-600 ring-blue-100',
-    barClass: 'bg-blue-500',
     buttonClass: 'border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100',
     actionLabel: '清理配置',
     confirmMessage: '这会删除模型、网络、布局和偏好配置，保留历史、聊天与缓存。继续？',
@@ -237,7 +240,6 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     description: '浏览器本地加密保存的 API Key；非服务端密钥隔离',
     icon: 'fa-key',
     iconClass: 'bg-amber-50 text-amber-600 ring-amber-100',
-    barClass: 'bg-amber-500',
     buttonClass: 'border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100',
     actionLabel: '清理密钥',
     confirmMessage: '这会删除本浏览器保存的 API Key，之后需要重新配置。继续？',
@@ -247,7 +249,6 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     description: '页面状态、草稿、PromptLab 与关键词工具工作区',
     icon: 'fa-layer-group',
     iconClass: 'bg-cyan-50 text-cyan-600 ring-cyan-100',
-    barClass: 'bg-cyan-500',
     buttonClass: 'border-cyan-100 bg-cyan-50 text-cyan-700 hover:bg-cyan-100',
     actionLabel: '清理状态',
     confirmMessage:
@@ -258,7 +259,6 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     description: '商品采集结果、导入记录和历史报告',
     icon: 'fa-clock-rotate-left',
     iconClass: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
-    barClass: 'bg-emerald-500',
     buttonClass: 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
     actionLabel: '清理历史',
     confirmMessage: '这会删除本浏览器中的采集历史和历史报告，建议先导出备份。继续？',
@@ -268,7 +268,6 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     description: 'Playground 对话线程和消息上下文',
     icon: 'fa-comments',
     iconClass: 'bg-violet-50 text-violet-600 ring-violet-100',
-    barClass: 'bg-violet-500',
     buttonClass: 'border-violet-100 bg-violet-50 text-violet-700 hover:bg-violet-100',
     actionLabel: '清理聊天',
     confirmMessage: '这会删除 Playground 本地聊天线程，建议先导出备份。继续？',
@@ -278,7 +277,6 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     description: 'Keyword Hunter 快照、对比记录和迁移备份',
     icon: 'fa-magnifying-glass-chart',
     iconClass: 'bg-teal-50 text-teal-600 ring-teal-100',
-    barClass: 'bg-teal-500',
     buttonClass: 'border-teal-100 bg-teal-50 text-teal-700 hover:bg-teal-100',
     actionLabel: '清理关键词',
     confirmMessage: '这会删除 Keyword Hunter 本地快照和历史对比记录，建议先导出备份。继续？',
@@ -288,7 +286,6 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     description: '页面模板、HTTP 响应和 AI 分析缓存',
     icon: 'fa-broom',
     iconClass: 'bg-slate-100 text-slate-600 ring-slate-200',
-    barClass: 'bg-slate-500',
     buttonClass: 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
     actionLabel: '清理缓存',
     confirmMessage: null,
@@ -298,7 +295,6 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     description: '尚未归类的本地业务数据',
     icon: 'fa-box-archive',
     iconClass: 'bg-rose-50 text-rose-600 ring-rose-100',
-    barClass: 'bg-rose-500',
     buttonClass: 'border-rose-100 bg-rose-50 text-rose-700 hover:bg-rose-100',
     actionLabel: '清理其它',
     confirmMessage: '这会删除尚未归类的本地数据，可能影响部分模块状态。建议先导出备份。继续？',
@@ -571,6 +567,7 @@ function createSettingsState(): Pick<
       apiKey: '',
       model: '',
       models: [],
+      serviceTier: undefined,
       showKey: false,
       isFetching: false,
       isTesting: false,
@@ -779,6 +776,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
       const used = bucket?.total || 0;
       const keys = (bucket?.localStorage.keys || 0) + (bucket?.indexedDB.keys || 0);
       const percent = total > 0 ? Math.round((used / total) * 100) : 0;
+      const percentValue = used > 0 ? Math.max(percent, 3) : 0;
 
       return {
         id,
@@ -786,7 +784,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
         usedText: this.formatBytes(used),
         keysText: `${keys} 项`,
         percentText: `${percent}%`,
-        percentWidth: used > 0 ? `${Math.max(percent, 3)}%` : '0%',
+        percentWidth: `${percentValue}%`,
+        percentValue,
         isEmpty: used <= 0 && keys === 0,
         isClearing: this.localData.clearingBucketId === id,
       };
@@ -876,6 +875,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.llm.apiKey = await loadProviderApiKey(provider, savedConfig);
     this.llm.models = dedupeModels(getRawProviderModels(savedConfig, config));
     this.llm.model = getInitialModel(savedConfig?.model, this.llm.models);
+    this.llm.serviceTier = savedConfig?.serviceTier;
   },
 
   async fetchModels(): Promise<void> {
@@ -929,6 +929,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
         {
           temperature: 0.1,
           jsonMode: false,
+          maxTokens: LLM_TEST_CONNECTION_MAX_TOKENS,
+          ...(this.llm.serviceTier && { serviceTier: this.llm.serviceTier }),
+          stream: true,
           timeout: configCenter.get<number>('llm.testConnectionTimeout') || 15000,
         }
       );
@@ -954,6 +957,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
         endpoint: this.llm.endpoint,
         model: this.llm.model,
         models: this.llm.models,
+        ...(this.llm.serviceTier && { serviceTier: this.llm.serviceTier }),
         enabled: true,
         apiKey: '', // 占位符,实际存储在安全存储中
       };
@@ -1025,6 +1029,13 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   setLlmModel(event: Event): void {
     this.llm.model = (event.target as HTMLSelectElement).value;
+  },
+
+  setLlmServiceTier(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.llm.serviceTier = value
+      ? (value as NonNullable<LLMProviderConfig['serviceTier']>)
+      : undefined;
   },
 
   setProxyType(event: Event): void {

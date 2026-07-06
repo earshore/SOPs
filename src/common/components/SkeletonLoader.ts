@@ -26,14 +26,14 @@ export type SkeletonType =
 export interface SkeletonConfig {
   type: SkeletonType;
   count?: number; // 重复次数
-  width?: string; // 宽度
-  height?: string; // 高度
+  width?: string; // 历史配置：严格 CSP 下不再生成内联样式
+  height?: string; // 历史配置：严格 CSP 下不再生成内联样式
   animated?: boolean; // 是否启用动画
   className?: string; // 自定义类名
-  style?: Partial<CSSStyleDeclaration>; // 自定义样式
+  style?: Partial<CSSStyleDeclaration>; // 历史配置：严格 CSP 下不再生成内联样式
 }
 
-type SkeletonBuilder = (element: HTMLElement) => HTMLElement;
+type SkeletonBuilder = (element: HTMLElement, config: SkeletonConfig) => HTMLElement;
 
 /**
  * 骨架屏生成器
@@ -48,7 +48,7 @@ export class SkeletonLoader {
     text: element => SkeletonLoader.createTextSkeleton(element),
     title: element => SkeletonLoader.createTitleSkeleton(element),
     paragraph: element => SkeletonLoader.createParagraphSkeleton(element),
-    avatar: element => SkeletonLoader.createAvatarSkeleton(element),
+    avatar: (element, config) => SkeletonLoader.createAvatarSkeleton(element, config),
     image: element => SkeletonLoader.createImageSkeleton(element),
     card: element => SkeletonLoader.createCardSkeleton(element),
     list: element => SkeletonLoader.createListSkeleton(element),
@@ -87,22 +87,13 @@ export class SkeletonLoader {
       element.classList.add(config.className);
     }
 
-    // 应用样式
-    if (config.width) element.style.width = config.width;
-    if (config.height) element.style.height = config.height;
-    if (config.style) {
-      Object.assign(element.style, config.style);
-    }
-
-    return this.BUILDERS[config.type](element);
+    return this.BUILDERS[config.type](element, config);
   }
 
   /**
    * 创建文本骨架屏
    */
   private static createTextSkeleton(element: HTMLElement): HTMLElement {
-    if (!element.style.height) element.style.height = '16px';
-    if (!element.style.width) element.style.width = '100%';
     return element;
   }
 
@@ -110,9 +101,6 @@ export class SkeletonLoader {
    * 创建标题骨架屏
    */
   private static createTitleSkeleton(element: HTMLElement): HTMLElement {
-    if (!element.style.height) element.style.height = '24px';
-    if (!element.style.width) element.style.width = '60%';
-    element.style.marginBottom = '16px';
     return element;
   }
 
@@ -122,12 +110,9 @@ export class SkeletonLoader {
   private static createParagraphSkeleton(element: HTMLElement): HTMLElement {
     const lines = [100, 95, 90, 60]; // 不同宽度的行
 
-    lines.forEach((width, index) => {
+    lines.forEach(width => {
       const line = document.createElement('div');
-      line.className = 'skeleton skeleton-text skeleton-animated';
-      line.style.height = '16px';
-      line.style.width = `${width}%`;
-      line.style.marginBottom = index < lines.length - 1 ? '8px' : '0';
+      line.className = `skeleton skeleton-text skeleton-animated skeleton-paragraph__line skeleton-paragraph__line--w-${width}`;
       element.appendChild(line);
     });
 
@@ -137,11 +122,11 @@ export class SkeletonLoader {
   /**
    * 创建头像骨架屏
    */
-  private static createAvatarSkeleton(element: HTMLElement): HTMLElement {
-    const size = element.style.width || element.style.height || '48px';
-    element.style.width = size;
-    element.style.height = size;
-    element.style.borderRadius = '50%';
+  private static createAvatarSkeleton(element: HTMLElement, config: SkeletonConfig): HTMLElement {
+    if (config.width === '32px' || config.height === '32px') {
+      element.classList.add('skeleton-avatar--sm');
+    }
+
     return element;
   }
 
@@ -149,9 +134,6 @@ export class SkeletonLoader {
    * 创建图片骨架屏
    */
   private static createImageSkeleton(element: HTMLElement): HTMLElement {
-    if (!element.style.height) element.style.height = '200px';
-    if (!element.style.width) element.style.width = '100%';
-    element.style.borderRadius = '4px';
     return element;
   }
 
@@ -159,33 +141,22 @@ export class SkeletonLoader {
    * 创建卡片骨架屏
    */
   private static createCardSkeleton(element: HTMLElement): HTMLElement {
-    element.style.padding = '16px';
-    element.style.borderRadius = '8px';
-    element.style.border = '1px solid #e0e0e0';
-
     // 图片
     const image = document.createElement('div');
-    image.className = 'skeleton skeleton-image skeleton-animated';
-    image.style.height = '150px';
-    image.style.marginBottom = '12px';
-    image.style.borderRadius = '4px';
+    image.className = 'skeleton skeleton-image skeleton-animated skeleton-card__image';
     element.appendChild(image);
 
     // 标题
     const title = document.createElement('div');
-    title.className = 'skeleton skeleton-title skeleton-animated';
-    title.style.height = '20px';
-    title.style.width = '70%';
-    title.style.marginBottom = '8px';
+    title.className = 'skeleton skeleton-title skeleton-animated skeleton-card__title';
     element.appendChild(title);
 
     // 文本行
     for (let i = 0; i < 2; i++) {
       const text = document.createElement('div');
-      text.className = 'skeleton skeleton-text skeleton-animated';
-      text.style.height = '14px';
-      text.style.width = i === 0 ? '100%' : '80%';
-      text.style.marginBottom = '6px';
+      text.className = `skeleton skeleton-text skeleton-animated skeleton-card__text ${
+        i === 0 ? 'skeleton-card__text--wide' : 'skeleton-card__text--short'
+      }`;
       element.appendChild(text);
     }
 
@@ -199,37 +170,24 @@ export class SkeletonLoader {
     for (let i = 0; i < 5; i++) {
       const item = document.createElement('div');
       item.className = 'skeleton-list-item';
-      item.style.display = 'flex';
-      item.style.alignItems = 'center';
-      item.style.marginBottom = '12px';
 
       // 头像
       const avatar = document.createElement('div');
-      avatar.className = 'skeleton skeleton-avatar skeleton-animated';
-      avatar.style.width = '40px';
-      avatar.style.height = '40px';
-      avatar.style.borderRadius = '50%';
-      avatar.style.marginRight = '12px';
-      avatar.style.flexShrink = '0';
+      avatar.className = 'skeleton skeleton-avatar skeleton-animated skeleton-list-item__avatar';
       item.appendChild(avatar);
 
       // 文本容器
       const textContainer = document.createElement('div');
-      textContainer.style.flex = '1';
+      textContainer.className = 'skeleton-list-item__content';
 
       // 标题
       const title = document.createElement('div');
-      title.className = 'skeleton skeleton-text skeleton-animated';
-      title.style.height = '16px';
-      title.style.width = '60%';
-      title.style.marginBottom = '6px';
+      title.className = 'skeleton skeleton-text skeleton-animated skeleton-list-item__title';
       textContainer.appendChild(title);
 
       // 描述
       const desc = document.createElement('div');
-      desc.className = 'skeleton skeleton-text skeleton-animated';
-      desc.style.height = '14px';
-      desc.style.width = '40%';
+      desc.className = 'skeleton skeleton-text skeleton-animated skeleton-list-item__desc';
       textContainer.appendChild(desc);
 
       item.appendChild(textContainer);
@@ -246,15 +204,10 @@ export class SkeletonLoader {
     // 表头
     const header = document.createElement('div');
     header.className = 'skeleton-table-header';
-    header.style.display = 'flex';
-    header.style.gap = '12px';
-    header.style.marginBottom = '12px';
 
     for (let i = 0; i < 4; i++) {
       const col = document.createElement('div');
-      col.className = 'skeleton skeleton-text skeleton-animated';
-      col.style.height = '18px';
-      col.style.flex = '1';
+      col.className = 'skeleton skeleton-text skeleton-animated skeleton-table-header__cell';
       header.appendChild(col);
     }
     element.appendChild(header);
@@ -263,15 +216,10 @@ export class SkeletonLoader {
     for (let i = 0; i < 5; i++) {
       const row = document.createElement('div');
       row.className = 'skeleton-table-row';
-      row.style.display = 'flex';
-      row.style.gap = '12px';
-      row.style.marginBottom = '8px';
 
       for (let j = 0; j < 4; j++) {
         const col = document.createElement('div');
-        col.className = 'skeleton skeleton-text skeleton-animated';
-        col.style.height = '16px';
-        col.style.flex = '1';
+        col.className = 'skeleton skeleton-text skeleton-animated skeleton-table-row__cell';
         row.appendChild(col);
       }
       element.appendChild(row);

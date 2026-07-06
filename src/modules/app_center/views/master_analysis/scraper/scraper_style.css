@@ -325,6 +325,70 @@
   transition: width var(--duration-slower) var(--ease-smooth);
   position: relative;
   overflow: hidden;
+  width: 0;
+}
+.progress-bar-fill--0 {
+  width: 0%;
+}
+.progress-bar-fill--5 {
+  width: 5%;
+}
+.progress-bar-fill--10 {
+  width: 10%;
+}
+.progress-bar-fill--15 {
+  width: 15%;
+}
+.progress-bar-fill--20 {
+  width: 20%;
+}
+.progress-bar-fill--25 {
+  width: 25%;
+}
+.progress-bar-fill--30 {
+  width: 30%;
+}
+.progress-bar-fill--35 {
+  width: 35%;
+}
+.progress-bar-fill--40 {
+  width: 40%;
+}
+.progress-bar-fill--45 {
+  width: 45%;
+}
+.progress-bar-fill--50 {
+  width: 50%;
+}
+.progress-bar-fill--55 {
+  width: 55%;
+}
+.progress-bar-fill--60 {
+  width: 60%;
+}
+.progress-bar-fill--65 {
+  width: 65%;
+}
+.progress-bar-fill--70 {
+  width: 70%;
+}
+.progress-bar-fill--75 {
+  width: 75%;
+}
+.progress-bar-fill--80 {
+  width: 80%;
+}
+.progress-bar-fill--85 {
+  width: 85%;
+}
+.progress-bar-fill--90 {
+  width: 90%;
+}
+.progress-bar-fill--95 {
+  width: 95%;
+}
+.progress-bar-fill--100 {
+  width: 100%;
 }
 .progress-bar-fill::after {
   content: '';
@@ -490,6 +554,7 @@
     box-shadow var(--duration-fast) var(--ease-smooth),
     transform var(--duration-fast) var(--ease-smooth);
   position: relative;
+  z-index: 100;
   overflow: hidden;
 }
 .download-btn:hover {
@@ -500,6 +565,10 @@
 }
 
 /* ---- JSON Display ---- */
+.scraper-json-content {
+  height: 280px;
+}
+
 .json-container {
   transition:
     background-color var(--duration-normal),
@@ -518,6 +587,10 @@
 }
 .json-container:hover .mac-dot:nth-child(1) {
   transform: scale(1.1);
+}
+
+.scraper-cursor-blink {
+  animation: cursorBlink 1s infinite;
 }
 .json-container:hover .mac-dot:nth-child(2) {
   transform: scale(1.1);
@@ -753,6 +826,7 @@
 /* ---- Delete Button ---- */
 .delete-btn {
   transition:
+    opacity var(--duration-fast) var(--ease-smooth),
     background-color var(--duration-fast) var(--ease-smooth),
     color var(--duration-fast) var(--ease-smooth),
     box-shadow var(--duration-fast) var(--ease-smooth),

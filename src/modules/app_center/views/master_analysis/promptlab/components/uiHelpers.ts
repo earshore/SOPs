@@ -38,8 +38,7 @@ export function initAutoHeightInputs(originalHeights: Map<HTMLElement, number>):
     textareas.forEach(textarea => {
       const el = textarea as HTMLTextAreaElement;
       if (!originalHeights.has(el)) {
-        const h = parseInt(window.getComputedStyle(el).height, 10);
-        originalHeights.set(el, h);
+        originalHeights.set(el, el.rows || 1);
       }
     });
   }, 100);
@@ -52,18 +51,18 @@ export function expandInput(originalHeights: Map<HTMLElement, number>, event: Fo
   const target = event.target as HTMLTextAreaElement;
 
   if (!originalHeights.has(target)) {
-    const h = parseInt(window.getComputedStyle(target).height, 10);
-    originalHeights.set(target, h);
+    originalHeights.set(target, target.rows || 1);
   }
 
-  target.style.height = 'auto';
-  const scrollHeight = target.scrollHeight;
-  const minHeight = originalHeights.get(target) ?? 40;
-  const maxHeight = 300;
-  const newHeight = Math.min(Math.max(scrollHeight + 4, minHeight), maxHeight);
+  const computed = window.getComputedStyle(target);
+  const lineHeight = parseFloat(computed.lineHeight) || parseFloat(computed.fontSize) * 1.45 || 20;
+  const verticalPadding =
+    (parseFloat(computed.paddingTop) || 0) + (parseFloat(computed.paddingBottom) || 0);
+  const minRows = originalHeights.get(target) ?? 1;
+  const contentRows = Math.ceil(Math.max(0, target.scrollHeight - verticalPadding) / lineHeight);
 
-  target.style.height = `${newHeight}px`;
-  target.style.transition = 'height 0.2s ease-out';
+  target.rows = Math.min(Math.max(contentRows, minRows), 10);
+  target.classList.add('promptlab-textarea-expanded');
 }
 
 /**
@@ -71,12 +70,12 @@ export function expandInput(originalHeights: Map<HTMLElement, number>, event: Fo
  */
 export function restoreInput(originalHeights: Map<HTMLElement, number>, event: FocusEvent): void {
   const target = event.target as HTMLTextAreaElement;
-  const originalHeight = originalHeights.get(target);
+  const originalRows = originalHeights.get(target);
 
-  if (originalHeight) {
-    target.style.height = `${originalHeight}px`;
-    target.style.transition = 'height 0.2s ease-in';
+  if (originalRows) {
+    target.rows = originalRows;
   }
+  target.classList.remove('promptlab-textarea-expanded');
 }
 
 // ==========================================
@@ -104,8 +103,8 @@ export function toggleConsoleMode(
   if (!cardInner || !glider) return;
 
   if (mode === 'visual') {
-    cardInner.style.transform = 'rotateY(180deg)';
-    glider.style.transform = 'translateX(100%)';
+    cardInner.dataset.consoleMode = 'visual';
+    glider.dataset.consoleMode = 'visual';
     glider.classList.add('bg-white');
     glider.classList.remove('bg-pink-500');
 
@@ -120,8 +119,8 @@ export function toggleConsoleMode(
 
     if (outputTitle) outputTitle.textContent = 'Visual Prompt';
   } else {
-    cardInner.style.transform = 'rotateY(0deg)';
-    glider.style.transform = 'translateX(0)';
+    cardInner.dataset.consoleMode = 'listing';
+    glider.dataset.consoleMode = 'listing';
     glider.classList.add('bg-white');
     glider.classList.remove('bg-pink-500');
 
@@ -176,8 +175,7 @@ async function writeTextToClipboard(text: string): Promise<void> {
   const textarea = document.createElement('textarea');
   textarea.value = text;
   textarea.setAttribute('readonly', 'true');
-  textarea.style.position = 'fixed';
-  textarea.style.left = '-9999px';
+  textarea.className = 'sr-only';
   document.body.appendChild(textarea);
   textarea.select();
   document.execCommand('copy');

@@ -780,12 +780,45 @@
   pointer-events: none;
 }
 
+#console-card-inner[data-console-mode='listing'] {
+  transform: rotateY(0deg);
+}
+
+#console-card-inner[data-console-mode='visual'] {
+  transform: rotateY(180deg);
+}
+
+#mode-toggle-glider[data-console-mode='listing'] {
+  transform: translateX(0);
+}
+
+#mode-toggle-glider[data-console-mode='visual'] {
+  transform: translateX(100%);
+}
+
+.promptlab-console-pattern {
+  background-size: 20px 20px;
+}
+
+.promptlab-console-pattern--listing {
+  background-image: radial-gradient(circle, #3b82f6 1px, transparent 1px);
+}
+
+.promptlab-console-pattern--visual {
+  background-image: radial-gradient(circle, #ec4899 1px, transparent 1px);
+}
+
+.promptlab-output-textarea {
+  pointer-events: auto !important;
+  overflow-y: auto !important;
+}
+
 /* 翻转后，背面变成正面，恢复点击 */
-#console-card-inner[style*='rotateY(180deg)'] > div:last-child {
+#console-card-inner[data-console-mode='visual'] > div:last-child {
   pointer-events: auto;
 }
 
-#console-card-inner[style*='rotateY(180deg)'] > div:first-child {
+#console-card-inner[data-console-mode='visual'] > div:first-child {
   pointer-events: none;
 }
 
@@ -890,6 +923,10 @@
 
   #mode-toggle-glider {
     background: var(--color-white, #ffffff) !important;
+  }
+
+  [x-data='promptlabPanel'] textarea.promptlab-textarea-expanded {
+    transition: min-height 0.2s ease-out;
   }
 
   #console-card-inner > div:first-child > div > .pr-28 .w-8 {

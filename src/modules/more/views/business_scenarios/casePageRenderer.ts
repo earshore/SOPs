@@ -45,8 +45,7 @@ interface ChatStage {
 }
 
 interface ScenarioCase {
-  accent: string;
-  soft: string;
+  theme: string;
   title: string;
   subtitle: string;
   sourceUrl: string;
@@ -87,13 +86,13 @@ function renderToolTrace(tool: ToolTrace): string {
         </div>`;
 }
 
-function renderMessage(message: ChatMessage, accent: string): string {
+function renderMessage(message: ChatMessage): string {
   const isUser = message.role === 'user';
   const role = isUser ? 'user' : 'assistant';
 
   return `
         <div class="zn-msg zn-msg--${role}">
-            ${isUser ? '' : `<div class="zn-avatar" style="background:${accent};">${escapeHtml(message.actor)}</div>`}
+            ${isUser ? '' : `<div class="zn-avatar zn-avatar--assistant">${escapeHtml(message.actor)}</div>`}
             <div class="zn-msg-stack">
                 <div class="zn-bubble">
                     <div class="zn-msg-meta">${escapeHtml(isUser ? '用户' : 'OpenClaw')} · ${escapeHtml(message.time)}</div>
@@ -207,7 +206,7 @@ function renderStages(caseData: ScenarioCase): string {
                 </div>
             </div>
             <div class="zn-stage-messages">
-                ${stage.messages.map(message => renderMessage(message, caseData.accent)).join('')}
+                ${stage.messages.map(message => renderMessage(message)).join('')}
             </div>
         </section>`
     )
@@ -218,7 +217,7 @@ function renderChat(caseData: ScenarioCase): string {
   return `
         <section class="zn-chat-card">
             <header class="zn-chat-header">
-                <div class="zn-avatar zn-avatar--assistant" style="background:${caseData.accent};">${escapeHtml(caseData.assistantInitial)}</div>
+                <div class="zn-avatar zn-avatar--assistant">${escapeHtml(caseData.assistantInitial)}</div>
                 <div>
                     <h2>OpenClaw · 紫鸟开放平台 AI 助理</h2>
                     <p>${escapeHtml(caseData.assistantLine)}</p>
@@ -261,7 +260,7 @@ function renderCapabilitySummary(caseData: ScenarioCase): string {
 
 function renderScenario(caseData: ScenarioCase): string {
   return `
-    <div class="ziniao-case-shell" style="--color-accent:${caseData.accent};--color-secondary:${caseData.soft};">
+    <div class="ziniao-case-shell" data-case-theme="${escapeHtml(caseData.theme)}">
         ${renderHero(caseData)}
         ${renderOperationalMeta(caseData)}
         ${renderPhases(caseData.phases)}
@@ -297,7 +296,7 @@ function renderUsageNotice(): string {
   ];
 
   return `
-    <div class="ziniao-case-shell ziniao-notice-shell" style="--color-accent:#dc2626;--color-secondary:#f59e0b;">
+    <div class="ziniao-case-shell ziniao-notice-shell">
         <section class="zn-notice-title">
             <h1>使用 OpenClaw 前必读 · 两条关键须知</h1>
             <p>在跑任何自动化流程前，请先阅读以下两段说明。当前页面保留参考页信息顺序，并按项目宽版内容区重新排版。</p>
@@ -387,8 +386,7 @@ const commonPhases: PhaseItem[] = [
 
 const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
   bad_review_response: {
-    accent: '#4f46e5',
-    soft: '#7c3aed',
+    theme: 'bad-review-response',
     title: '差评 24 小时闪电响应 — 先教会 OpenClaw，再让它定时帮你跑',
     subtitle:
       '差评响应不能一句话全自动。参考页按 6 步把店铺打开、Feedback 抓取、Brand / Product Reviews 补充、分类、S/A/B 草稿和 HTML 看板逐步跑通，再沉淀 SOP 与定时任务。',
@@ -655,8 +653,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
       '场景示例 · 差评 24 小时闪电响应 · 本页面对话、订单号和看板数字均为演示数据，非真实执行结果。',
   },
   ad_acos_diagnosis: {
-    accent: '#f59e0b',
-    soft: '#2563eb',
+    theme: 'ad-acos-diagnosis',
     title: '广告 ACOS 日审 — 从一句“先看一眼”到周一/三/五自动跑',
     subtitle:
       '广告优化涉及 Campaign / Ad Group / Targeting / 搜索词多层下钻。参考页强调先审后跑，只输出人工可复核的调价手册和否定词清单，不直接自动改后台。',
@@ -888,8 +885,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
     footer: '场景示例 · 广告 ACOS 日审 · 调价建议仅供人工复核，非自动执行结果。',
   },
   review_monitor: {
-    accent: '#0f766e',
-    soft: '#2563eb',
+    theme: 'review-monitor',
     title: '本店评论健康周报 — 把“挨条翻评论”变成一周一次的自动巡检',
     subtitle:
       '评论监控参考页覆盖 Feedback Manager、Brand Customer Reviews 与 Product Reviews，强调多语种原文保留、分类校验、回复草稿不自动发送，以及周报和每日红线任务拆分。',
@@ -1122,8 +1118,7 @@ const scenarioCases: Record<Exclude<CaseId, 'usage_notice'>, ScenarioCase> = {
     footer: '场景示例 · 评论健康周报 · 回复草稿仅供人工确认，非自动公开回复。',
   },
   amazon_daily_report: {
-    accent: '#4f46e5',
-    soft: '#14b8a6',
+    theme: 'amazon-daily-report',
     title: '亚马逊店铺日报 — 12 个后台模块，一份早 08:30 的运营晨会日报',
     subtitle:
       '店铺日报参考页把 Seller Central、Ads 与 Performance 中的 12 个模块拆成 6 组验证，保留 DE/EN 字段映射、广告 7 日均值对比、重要提醒固定优先级和失败分级兜底。',

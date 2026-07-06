@@ -43,14 +43,14 @@ function filterByCategory(container: HTMLElement, category: string): void {
   sections.forEach(section => {
     const sectionEl = section as HTMLElement;
     if (category === 'all') {
-      sectionEl.style.display = '';
+      sectionEl.hidden = false;
       sectionEl.classList.add('fade-in');
     } else {
       if (sectionEl.dataset.category === category) {
-        sectionEl.style.display = '';
+        sectionEl.hidden = false;
         sectionEl.classList.add('fade-in');
       } else {
-        sectionEl.style.display = 'none';
+        sectionEl.hidden = true;
       }
     }
   });

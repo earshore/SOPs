@@ -19,6 +19,7 @@ import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { appStore } from '../../../../../stores/useAppStore';
 import { ErrorService } from '../../../../../services/errorService';
 import { createSafeFragment } from '../../../../../common/utils/security';
+import { updateRuntimeCssRule } from '../../../../../common/utils/runtimeStyles';
 import type { KeywordHunterSnapshot } from '../../../../../types/modules-business';
 import '../keyword_hunter_style.css';
 
@@ -54,6 +55,7 @@ interface ActiveTranslationRun {
   promise: ReturnType<typeof KeywordService.fetchImmersionTranslation>;
   status: 'pending' | 'success' | 'failure';
   error?: Error;
+  llmStatus?: KeywordService.KeywordHunterLlmStatus;
 }
 
 interface AnalysisStats {
@@ -361,7 +363,7 @@ function renderCoverageStats(stats: AnalysisStats): void {
   if (rateEl) rateEl.textContent = stats.rate + '%';
 
   const barEl = document.getElementById('kt-coverage-bar') as HTMLElement | null;
-  if (barEl) barEl.style.width = stats.rate + '%';
+  if (barEl) setProgressValue(barEl, stats.rate);
 
   // 更新统计数据
   const matchedEl = document.getElementById('kt-stat-matched');
@@ -631,6 +633,17 @@ function getTranslationElements(): {
   };
 }
 
+function setProgressValue(progress: HTMLElement, value: number): void {
+  const normalized = Math.max(0, Math.min(100, Math.round(value)));
+  const valueText = normalized.toString();
+
+  progress.setAttribute('aria-valuenow', valueText);
+  progress.setAttribute('value', valueText);
+  if ('value' in progress) {
+    (progress as HTMLProgressElement).value = normalized;
+  }
+}
+
 function renderTranslationPendingState(): void {
   const { btn, progress, text, status } = getTranslationElements();
 
@@ -642,8 +655,7 @@ function renderTranslationPendingState(): void {
   }
   if (progress) {
     progress.classList.remove('hidden');
-    progress.style.width = '30%';
-    progress.setAttribute('aria-valuenow', '30');
+    setProgressValue(progress, 30);
   }
   if (text) {
     text.textContent = '正在翻译...';
@@ -655,14 +667,57 @@ function renderTranslationPendingState(): void {
   }
 }
 
+function renderTranslationStatusMessage(
+  elements: ReturnType<typeof getTranslationElements>,
+  progressValue: number,
+  buttonText: string,
+  statusText: string
+): void {
+  if (elements.progress) {
+    setProgressValue(elements.progress, progressValue);
+  }
+  if (elements.text) {
+    elements.text.textContent = buttonText;
+  }
+  if (elements.status) {
+    elements.status.textContent = statusText;
+  }
+}
+
+function renderTranslationLlmStatus(status: KeywordService.KeywordHunterLlmStatus): void {
+  const elements = getTranslationElements();
+
+  if (status.stage === 'cache-hit') {
+    renderTranslationStatusMessage(elements, 80, '正在载入缓存译文...', '已命中缓存，正在渲染译文');
+    return;
+  }
+
+  if (status.stage === 'in-flight') {
+    renderTranslationStatusMessage(
+      elements,
+      45,
+      '正在复用翻译任务...',
+      '相同文案正在翻译，不会重复调用模型'
+    );
+    return;
+  }
+
+  const firstMs = status.metrics.firstChunkMs ?? status.metrics.elapsedMs;
+  renderTranslationStatusMessage(
+    elements,
+    55,
+    '正在接收译文...',
+    `模型已首响 ${(firstMs / 1000).toFixed(1)}s，正在接收译文`
+  );
+}
+
 function renderTranslationCompletedState(): void {
   const { btn, progress, status } = getTranslationElements();
   if (btn) {
     btn.removeAttribute('aria-busy');
   }
   if (progress) {
-    progress.style.width = '100%';
-    progress.setAttribute('aria-valuenow', '100');
+    setProgressValue(progress, 100);
     addTimeout(() => progress.classList.add('hidden'), 500);
   }
   if (status) {
@@ -677,7 +732,7 @@ function renderTranslationFailureState(): void {
 
   if (progress) {
     progress.classList.add('hidden');
-    progress.setAttribute('aria-valuenow', '0');
+    setProgressValue(progress, 0);
   }
   if (text) {
     text.textContent = '翻译失败，请重试';
@@ -1180,7 +1235,14 @@ function startTranslationRun(processedCopy: string): ActiveTranslationRun {
     status: 'pending',
   };
 
-  run.promise = KeywordService.fetchImmersionTranslation(processedCopy)
+  run.promise = KeywordService.fetchImmersionTranslation(processedCopy, {
+    onLlmStatus: status => {
+      run.llmStatus = status;
+      if (isTranslationRunForCurrentCopy(run)) {
+        renderTranslationLlmStatus(status);
+      }
+    },
+  })
     .then(pairs => finalizeTranslationSuccess(run, pairs))
     .catch(error => finalizeTranslationFailure(run, error))
     .finally(() => {
@@ -1200,6 +1262,9 @@ function attachTranslationRunToPage(run: ActiveTranslationRun): boolean {
 
   const viewVersion = processViewVersion;
   renderTranslationPendingState();
+  if (run.llmStatus) {
+    renderTranslationLlmStatus(run.llmStatus);
+  }
 
   run.promise
     .then(() => {
@@ -1475,8 +1540,7 @@ function setupFloatingWindow(): void {
     floatWinState.offsetX = mouseEvent.clientX - el.getBoundingClientRect().left;
     floatWinState.offsetY = mouseEvent.clientY - el.getBoundingClientRect().top;
 
-    el.style.opacity = '0.9';
-    el.style.transition = 'none';
+    el.classList.add('kt-floating-window--positioned', 'is-dragging');
     mouseEvent.preventDefault();
   });
 
@@ -1493,17 +1557,14 @@ function setupFloatingWindow(): void {
     newX = Math.max(0, Math.min(newX, maxX));
     newY = Math.max(0, Math.min(newY, maxY));
 
-    el.style.left = newX + 'px';
-    el.style.top = newY + 'px';
-    el.style.right = 'auto';
+    updateFloatingWindowPosition(newX, newY);
   });
 
   addEventListener(document, 'mouseup', () => {
     if (!floatWinState.isDragging) return;
     floatWinState.isDragging = false;
 
-    el.style.opacity = '1';
-    el.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    el.classList.remove('is-dragging');
 
     const rect = el.getBoundingClientRect();
     const screenWidth = window.innerWidth;
@@ -1511,11 +1572,22 @@ function setupFloatingWindow(): void {
 
     // 修改: 优先吸附到右侧，避免遮挡左侧边栏
     if (rect.right > screenWidth - threshold) {
-      el.style.left = screenWidth - rect.width - 20 + 'px';
+      updateFloatingWindowPosition(screenWidth - rect.width - 20, rect.top);
     } else if (rect.left < threshold) {
-      el.style.left = '20px';
+      updateFloatingWindowPosition(20, rect.top);
     }
   });
+}
+
+function updateFloatingWindowPosition(left: number, top: number): void {
+  updateRuntimeCssRule(
+    'keyword-floating-window-position',
+    '#kt-keywords-floating.kt-floating-window--positioned',
+    {
+      left: `${Math.round(left)}px`,
+      top: `${Math.round(top)}px`,
+    }
+  );
 }
 
 /**
@@ -1612,6 +1684,15 @@ function setupEventListeners(container: HTMLElement): void {
   setupFloatingWindow();
 }
 
+function handleProcessMountError(error: unknown): never {
+  ErrorService.handle(error as Error, {
+    action: 'mountProcessModule',
+    module: 'keywordTracker',
+    notify: false,
+  });
+  throw error;
+}
+
 // ==========================================
 // Module Exports (统一架构接口)
 // ==========================================
@@ -1663,12 +1744,7 @@ class KeywordHunterProcessModule extends BaseModule {
         document.body.appendChild(minBtn);
       }
     } catch (error) {
-      ErrorService.handle(error as Error, {
-        action: 'mountProcessModule',
-        module: 'keywordTracker',
-        notify: false,
-      });
-      throw error;
+      handleProcessMountError(error);
     }
   }
 
@@ -1688,12 +1764,7 @@ class KeywordHunterProcessModule extends BaseModule {
         manageFloatingWindowVisibility();
       }, 100);
     } catch (error) {
-      ErrorService.handle(error as Error, {
-        action: 'mountProcessModule',
-        module: 'keywordTracker',
-        notify: false,
-      });
-      throw error;
+      handleProcessMountError(error);
     }
   }
 

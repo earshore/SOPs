@@ -120,8 +120,8 @@ export function updateTemperatureTrack(input: HTMLInputElement | null): void {
     return;
   }
 
-  const percent = normalizeTemperature(input.value) * 100;
-  input.style.setProperty('--playground-temperature-percent', `${percent}%`);
+  const level = Math.round(normalizeTemperature(input.value) * 10);
+  input.dataset.temperatureLevel = String(level);
 }
 
 function toChatRole(role: DeepChatRole | undefined): ChatMessage['role'] {

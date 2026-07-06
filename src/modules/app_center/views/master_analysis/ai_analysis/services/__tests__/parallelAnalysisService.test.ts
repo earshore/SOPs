@@ -211,19 +211,22 @@ describe('缓存读写', () => {
   it('应该在缓存过期后返回 null', async () => {
     const testData = { result: 'test' };
     const cacheKey = 'test_cache_key';
+    const removeSpy = vi.spyOn(LocalDataStore, 'remove');
 
     // 保存一个过期的缓存（25小时前）
     const expiredTimestamp = Date.now() - 25 * 60 * 60 * 1000;
-    localStorageMock.setItem(
+    await LocalDataStore.set(
       cacheKey,
-      JSON.stringify({
+      {
         data: testData,
         timestamp: expiredTimestamp,
-      })
+      },
+      'cache'
     );
 
     const cached = await getCachedResult(cacheKey);
     expect(cached).toBeNull();
+    expect(removeSpy).toHaveBeenCalledWith(cacheKey);
   });
 
   it('应该在缓存有效期内返回数据', async () => {

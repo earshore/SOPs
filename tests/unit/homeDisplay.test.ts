@@ -202,7 +202,7 @@ it('mounts the full home splash with particles, hero copy, app center shortcuts,
     })
   );
 
-  expect(document.getElementById('hero-content')?.style.transform).toContain('translate');
+  expect(document.getElementById('hero-content')?.getAttribute('style')).toBeNull();
 
   vi.advanceTimersByTime(1000);
   expect(document.getElementById('time-display')?.textContent).toContain('|');

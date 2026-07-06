@@ -146,6 +146,20 @@ export const LLMProviderConfigSchema = z.object({
   endpoint: z.string(),
   apiKey: z.string(),
   model: z.string(),
+  models: z
+    .array(
+      z.union([
+        z.string(),
+        z.object({
+          id: z.string(),
+          name: z.string().optional(),
+          context: z.number().optional(),
+          features: z.array(z.string()).optional(),
+        }),
+      ])
+    )
+    .optional(),
+  serviceTier: z.enum(['auto', 'default', 'flex', 'priority']).optional(),
   enabled: z.boolean(),
 });
 

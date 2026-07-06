@@ -112,6 +112,48 @@ body {
   border: 0;
 }
 
+@keyframes skeleton-background-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
+.skeleton {
+  min-width: 0;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%);
+  background-size: 400% 100%;
+  animation: skeleton-background-shimmer 1.8s ease-in-out infinite;
+}
+
+.skeleton--h-96 {
+  height: 96px;
+}
+
+.skeleton--h-128 {
+  height: 128px;
+}
+
+.skeleton--delay-100 {
+  animation-delay: 0.1s;
+}
+
+.skeleton--delay-200 {
+  animation-delay: 0.2s;
+}
+
+.skeleton--delay-300 {
+  animation-delay: 0.3s;
+}
+
+.skeleton--delay-400 {
+  animation-delay: 0.4s;
+}
+
 .header {
   position: sticky;
   top: 0;

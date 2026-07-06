@@ -12,6 +12,7 @@ import type { AnalysisResult } from '../analysis/analysisEngine';
 import type { AnalysisFlowCallbacks } from '../analysis/analysisFlowTypes';
 import type { AnalysisSettings } from '../settings/settings';
 import type { Thresholds } from '../types';
+import type { PpcLlmAnalysisProgress } from './agentTypes';
 import { showToast } from '@/common/ui/notifications';
 
 interface AgentAnalysisContext {
@@ -21,6 +22,19 @@ interface AgentAnalysisContext {
   settings: AnalysisSettings;
   run: ActiveAnalysisRun;
   callbacks: AnalysisFlowCallbacks;
+}
+
+function formatAgentProgressStatus(progress: PpcLlmAnalysisProgress): string {
+  const cacheText = progress.cachedBatches ? `，缓存 ${progress.cachedBatches}` : '';
+  const baseStatus = `Agent 语义工具复核中 ${progress.completedBatches}/${progress.totalBatches}${cacheText}`;
+  const firstChunkMs = progress.firstResponse?.firstChunkMs;
+  if (firstChunkMs === undefined || !progress.firstResponse) {
+    return baseStatus;
+  }
+
+  return `${baseStatus}，批次 ${progress.firstResponse.batchIndex} 首响 ${(
+    firstChunkMs / 1000
+  ).toFixed(1)}s`;
 }
 
 export async function applyAgentAnalysis({
@@ -50,7 +64,7 @@ export async function applyAgentAnalysis({
         localResult.mapping,
         localResult.totalRows,
         localResult.validRows,
-        `Agent 语义工具复核中 ${progress.completedBatches}/${progress.totalBatches}`
+        formatAgentProgressStatus(progress)
       );
     },
   });

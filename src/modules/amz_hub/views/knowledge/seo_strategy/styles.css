@@ -46,3 +46,9 @@
     box-shadow: none !important;
   }
 }
+
+.seo-keyword-chart-panel {
+  position: relative;
+  width: 100%;
+  height: 400px;
+}

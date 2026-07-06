@@ -79,6 +79,13 @@ class FailingModule extends TestModule {
   }
 }
 
+class InitFailingModule extends TestModule {
+  async init(): Promise<void> {
+    this.initCalled += 1;
+    throw new Error('init failed');
+  }
+}
+
 function createContainer() {
   const unregisterAction = vi.fn();
   const container = {
@@ -144,6 +151,24 @@ function createContainer() {
     host.querySelector<HTMLButtonElement>('button[data-module-retry]')?.click();
 
     expect(host.querySelector('.fa-spinner')).toBeInstanceOf(HTMLElement);
+  });
+
+  it('emits and rethrows init failures during mount', async () => {
+    const module = new InitFailingModule('init-failing-module');
+    const emit = vi.spyOn(eventBus, 'emit');
+
+    await expect(module.mount(host)).rejects.toThrow('init failed');
+
+    expect(module.renderCalled).toBe(1);
+    expect(module.initCalled).toBe(1);
+    expect(host.textContent).toContain('模块加载失败 (init-failing-module)');
+    expect(host.textContent).toContain('init failed');
+    expect(emit).toHaveBeenCalledWith(APP_EVENTS.MODULE_ERROR, {
+      moduleId: 'init-failing-module',
+      phase: 'mount',
+      error: expect.any(Error),
+      message: 'init failed',
+    });
   });
 
   it('removes retry listeners when an error state is unmounted', async () => {

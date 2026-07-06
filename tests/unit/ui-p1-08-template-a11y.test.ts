@@ -45,11 +45,13 @@ function findImplicitButtons(html: string): string[] {
 
 describe('UI-P1-08 template semantics', () => {
   it('keeps AI Analysis progress and settings controls announced', () => {
-    const root = readTemplateFragment(
-      'src/modules/app_center/views/master_analysis/ai_analysis/template.html'
-    );
+    const path = 'src/modules/app_center/views/master_analysis/ai_analysis/template.html';
+    const html = readTemplate(path);
+    const root = readTemplateFragment(path);
 
     requireElement(root, '[role="status"][aria-live="polite"][aria-atomic="true"]');
+    expect(html).not.toContain(':style=');
+    expect(html).not.toContain('x-bind:style=');
 
     const progressbar = requireElement(
       root,

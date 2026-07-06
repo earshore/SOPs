@@ -116,8 +116,7 @@ class ImageLazyLoader {
 
   private prepareImageLoading(img: HTMLImageElement): void {
     if (this.config.fadeIn) {
-      img.style.opacity = '0';
-      img.style.transition = `opacity ${this.config.fadeInDuration}ms ease-in-out`;
+      img.classList.add('lazy-image--fade');
     }
 
     img.classList.add('lazy-loading');
@@ -132,10 +131,6 @@ class ImageLazyLoader {
     this.loadedImages.add(img);
     img.classList.add('lazy-loaded');
     img.classList.remove('lazy-loading', 'lazy-error');
-
-    if (this.config.fadeIn) {
-      img.style.opacity = '1';
-    }
 
     this.stopObserving(img);
   }

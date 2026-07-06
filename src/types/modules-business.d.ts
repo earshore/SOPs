@@ -146,6 +146,7 @@ export interface LLMConfig {
   apiKey: string;
   model: string;
   models?: Array<{ id: string; context: number; features?: string[] }>;
+  serviceTier?: 'auto' | 'default' | 'flex' | 'priority';
 }
 
 /**

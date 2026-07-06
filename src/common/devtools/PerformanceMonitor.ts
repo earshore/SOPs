@@ -12,6 +12,51 @@ import { escapeHtml, setSafeHtml } from '../utils/security';
 
 type TabType = 'overview' | 'performance' | 'errors' | 'analytics' | 'alerts';
 
+function getScoreTextClass(score: number): string {
+  if (score >= 80) return 'text-[#0f0]';
+  if (score >= 50) return 'text-[#ff0]';
+  return 'text-[#f00]';
+}
+
+function getRatingTextClass(rating: string): string {
+  if (rating === 'good') return 'text-[#0f0]';
+  if (rating === 'needs-improvement') return 'text-[#ff0]';
+  return 'text-[#f00]';
+}
+
+function getSeverityBorderClass(severity: string): string {
+  if (severity === 'critical') return 'border-l-[#f00]';
+  if (severity === 'high') return 'border-l-[#f80]';
+  if (severity === 'medium') return 'border-l-[#ff0]';
+  return 'border-l-[#0af]';
+}
+
+function getAlertLevelBorderClass(level: string): string {
+  if (level === 'critical') return 'border-l-[#f00]';
+  if (level === 'error') return 'border-l-[#f80]';
+  if (level === 'warning') return 'border-l-[#ff0]';
+  return 'border-l-[#0af]';
+}
+
+function getAlertLevelTextClass(level: string): string {
+  if (level === 'critical') return 'text-[#f00]';
+  if (level === 'error') return 'text-[#f80]';
+  if (level === 'warning') return 'text-[#ff0]';
+  return 'text-[#0af]';
+}
+
+function getMemoryTextClass(percentage: number): string {
+  if (percentage < 70) return 'text-[#0f0]';
+  if (percentage < 90) return 'text-[#ff0]';
+  return 'text-[#f00]';
+}
+
+function getMemoryProgressClass(percentage: number): string {
+  if (percentage < 70) return 'accent-[#0f0]';
+  if (percentage < 90) return 'accent-[#ff0]';
+  return 'accent-[#f00]';
+}
+
 /**
  * 性能监控面板 (增强版)
  */
@@ -58,35 +103,20 @@ export class PerformanceMonitor {
   private createContainer(): void {
     this.container = document.createElement('div');
     this.container.id = 'performance-monitor';
-    this.container.style.cssText = `
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.95);
-      color: #fff;
-      padding: 0;
-      border-radius: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      z-index: 999999;
-      width: 400px;
-      max-height: 600px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-      display: none;
-      overflow: hidden;
-    `;
+    this.container.className =
+      'fixed right-2.5 top-2.5 z-[999999] hidden max-h-[600px] w-[400px] overflow-hidden rounded-lg bg-black/95 p-0 font-mono text-xs text-white shadow-2xl';
 
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(
       this.container,
       `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #444;">
-        <strong style="font-size: 14px;">⚡ Performance Monitor</strong>
-        <button id="perf-close" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px; padding: 0;">×</button>
+      <div class="flex items-center justify-between border-b border-[#444] p-3">
+        <strong class="text-[14px]">⚡ Performance Monitor</strong>
+        <button id="perf-close" class="cursor-pointer border-0 bg-transparent p-0 text-lg text-white">×</button>
       </div>
-      <div id="perf-tabs" style="display: flex; border-bottom: 1px solid #444; background: rgba(255,255,255,0.05);"></div>
-      <div id="perf-content" style="padding: 12px; max-height: 500px; overflow-y: auto;"></div>
-      <div style="padding: 8px 12px; border-top: 1px solid #444; font-size: 10px; color: #888; text-align: center;">
+      <div id="perf-tabs" class="flex border-b border-[#444] bg-[rgba(255,255,255,0.05)]"></div>
+      <div id="perf-content" class="max-h-[500px] overflow-y-auto p-3"></div>
+      <div class="border-t border-[#444] px-3 py-2 text-center text-[10px] text-[#888]">
         Ctrl+Shift+P to toggle
       </div>
     `
@@ -120,25 +150,21 @@ export class PerformanceMonitor {
     setSafeHtml(
       tabsDiv,
       tabs
-        .map(
-          tab => `
+        .map(tab => {
+          const tabClass =
+            this.currentTab === tab.id
+              ? 'flex-1 cursor-pointer border-0 border-b-2 border-b-[#0f0] bg-[rgba(255,255,255,0.1)] p-2 text-[11px] text-white'
+              : 'flex-1 cursor-pointer border-0 border-b-2 border-b-transparent bg-transparent p-2 text-[11px] text-[#aaa]';
+
+          return `
       <button
         data-tab="${tab.id}"
-        style="
-          flex: 1;
-          padding: 8px;
-          background: ${this.currentTab === tab.id ? 'rgba(255,255,255,0.1)' : 'transparent'};
-          border: none;
-          color: ${this.currentTab === tab.id ? '#fff' : '#aaa'};
-          cursor: pointer;
-          font-size: 11px;
-          border-bottom: 2px solid ${this.currentTab === tab.id ? '#0f0' : 'transparent'};
-        "
+        class="${tabClass}"
       >
         ${tab.icon} ${tab.label}
       </button>
-    `
-        )
+    `;
+        })
         .join('')
     );
 
@@ -192,30 +218,32 @@ export class PerformanceMonitor {
     const analyticsStats = analyticsService.getStats();
     const alertStats = alertService.getStats();
 
-    const scoreColor = summary.score >= 80 ? '#0f0' : summary.score >= 50 ? '#ff0' : '#f00';
+    const scoreClass = getScoreTextClass(summary.score);
+    const errorTotalClass = errorStats.total > 0 ? 'text-[#f00]' : 'text-[#0f0]';
+    const alertTotalClass = alertStats.unacknowledged > 0 ? 'text-[#ff0]' : 'text-[#0f0]';
 
     return `
-      <div style="text-align: center; margin-bottom: 16px;">
-        <div style="font-size: 36px; color: ${scoreColor}; font-weight: bold;">${summary.score}</div>
-        <div style="font-size: 11px; color: #888;">性能评分</div>
+      <div class="mb-4 text-center">
+        <div class="text-[36px] font-bold ${scoreClass}">${summary.score}</div>
+        <div class="text-[11px] text-[#888]">性能评分</div>
       </div>
       
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-        <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
-          <div style="font-size: 10px; color: #888;">Web Vitals</div>
-          <div style="font-size: 18px; color: #0f0;">${Object.keys(summary.metrics).length}</div>
+      <div class="mb-3 grid grid-cols-2 gap-2">
+        <div class="rounded bg-[rgba(255,255,255,0.05)] p-2">
+          <div class="text-[10px] text-[#888]">Web Vitals</div>
+          <div class="text-[18px] text-[#0f0]">${Object.keys(summary.metrics).length}</div>
         </div>
-        <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
-          <div style="font-size: 10px; color: #888;">错误总数</div>
-          <div style="font-size: 18px; color: ${errorStats.total > 0 ? '#f00' : '#0f0'};">${errorStats.total}</div>
+        <div class="rounded bg-[rgba(255,255,255,0.05)] p-2">
+          <div class="text-[10px] text-[#888]">错误总数</div>
+          <div class="text-[18px] ${errorTotalClass}">${errorStats.total}</div>
         </div>
-        <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
-          <div style="font-size: 10px; color: #888;">页面浏览</div>
-          <div style="font-size: 18px; color: #0af;">${analyticsStats.totalPageViews}</div>
+        <div class="rounded bg-[rgba(255,255,255,0.05)] p-2">
+          <div class="text-[10px] text-[#888]">页面浏览</div>
+          <div class="text-[18px] text-[#0af]">${analyticsStats.totalPageViews}</div>
         </div>
-        <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
-          <div style="font-size: 10px; color: #888;">未读告警</div>
-          <div style="font-size: 18px; color: ${alertStats.unacknowledged > 0 ? '#ff0' : '#0f0'};">${alertStats.unacknowledged}</div>
+        <div class="rounded bg-[rgba(255,255,255,0.05)] p-2">
+          <div class="text-[10px] text-[#888]">未读告警</div>
+          <div class="text-[18px] ${alertTotalClass}">${alertStats.unacknowledged}</div>
         </div>
       </div>
 
@@ -231,16 +259,15 @@ export class PerformanceMonitor {
 
     const metricsHtml = Object.entries(summary.metrics)
       .map(([name, data]) => {
-        const color =
-          data.rating === 'good' ? '#0f0' : data.rating === 'needs-improvement' ? '#ff0' : '#f00';
+        const ratingClass = getRatingTextClass(data.rating);
 
         return `
-          <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px;">
+          <div class="my-2 flex justify-between rounded bg-[rgba(255,255,255,0.05)] p-2">
             <div>
-              <div style="font-weight: bold;">${name}</div>
-              <div style="font-size: 10px; color: #888;">${data.rating}</div>
+              <div class="font-bold">${name}</div>
+              <div class="text-[10px] text-[#888]">${data.rating}</div>
             </div>
-            <div style="color: ${color}; font-weight: bold; font-size: 16px;">
+            <div class="text-[16px] font-bold ${ratingClass}">
               ${this.formatValue(name, data.value)}
             </div>
           </div>
@@ -249,8 +276,8 @@ export class PerformanceMonitor {
       .join('');
 
     return `
-      <div style="margin-bottom: 12px;">
-        <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">Web Vitals 指标</div>
+      <div class="mb-3">
+        <div class="mb-2 text-[13px] font-bold">Web Vitals 指标</div>
         ${metricsHtml}
       </div>
       ${this.renderMemoryInfo()}
@@ -264,41 +291,34 @@ export class PerformanceMonitor {
     const stats = errorTracker.getStats();
 
     if (stats.total === 0) {
-      return '<div style="text-align: center; color: #888; padding: 20px;">暂无错误记录</div>';
+      return '<div class="p-5 text-center text-[#888]">暂无错误记录</div>';
     }
 
     const errorsHtml = stats.recentErrors
       .slice(0, 10)
       .map(error => {
-        const severityColor =
-          error.severity === 'critical'
-            ? '#f00'
-            : error.severity === 'high'
-              ? '#f80'
-              : error.severity === 'medium'
-                ? '#ff0'
-                : '#0af';
+        const severityBorderClass = getSeverityBorderClass(error.severity);
         const errorType = escapeHtml(error.type);
         const errorMessage = escapeHtml(error.message);
 
         return `
-        <div style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; border-left: 3px solid ${severityColor};">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="font-weight: bold; font-size: 11px;">${errorType}</span>
-            <span style="font-size: 10px; color: #888;">${error.count}次</span>
+        <div class="my-2 rounded border-l-[3px] ${severityBorderClass} bg-[rgba(255,255,255,0.05)] p-2">
+          <div class="mb-1 flex justify-between">
+            <span class="text-[11px] font-bold">${errorType}</span>
+            <span class="text-[10px] text-[#888]">${error.count}次</span>
           </div>
-          <div style="font-size: 11px; color: #ccc; margin-bottom: 4px;">${errorMessage}</div>
-          <div style="font-size: 10px; color: #888;">${new Date(error.lastOccurrence).toLocaleTimeString()}</div>
+          <div class="mb-1 text-[11px] text-[#ccc]">${errorMessage}</div>
+          <div class="text-[10px] text-[#888]">${new Date(error.lastOccurrence).toLocaleTimeString()}</div>
         </div>
       `;
       })
       .join('');
 
     return `
-      <div style="margin-bottom: 12px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span style="font-size: 13px; font-weight: bold;">最近错误</span>
-          <span style="font-size: 11px; color: #888;">总计: ${stats.total}</span>
+      <div class="mb-3">
+        <div class="mb-2 flex justify-between">
+          <span class="text-[13px] font-bold">最近错误</span>
+          <span class="text-[11px] text-[#888]">总计: ${stats.total}</span>
         </div>
         ${errorsHtml}
       </div>
@@ -313,7 +333,7 @@ export class PerformanceMonitor {
     const session = analyticsService.getCurrentSession();
 
     if (!session) {
-      return '<div style="text-align: center; color: #888; padding: 20px;">暂无分析数据</div>';
+      return '<div class="p-5 text-center text-[#888]">暂无分析数据</div>';
     }
 
     const sessionDuration = Math.floor((Date.now() - session.startTime) / 1000);
@@ -326,36 +346,36 @@ export class PerformanceMonitor {
         const path = escapeHtml(page.path);
 
         return `
-        <div style="display: flex; justify-content: space-between; margin: 4px 0; padding: 4px; background: rgba(255,255,255,0.05); border-radius: 2px;">
-          <span style="font-size: 11px;">${path}</span>
-          <span style="color: #0af;">${page.views}</span>
+        <div class="my-1 flex justify-between rounded-sm bg-[rgba(255,255,255,0.05)] p-1">
+          <span class="text-[11px]">${path}</span>
+          <span class="text-[#0af]">${page.views}</span>
         </div>
       `;
       })
       .join('');
 
     return `
-      <div style="margin-bottom: 12px;">
-        <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">会话信息</div>
-        <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
-          <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+      <div class="mb-3">
+        <div class="mb-2 text-[13px] font-bold">会话信息</div>
+        <div class="rounded bg-[rgba(255,255,255,0.05)] p-2">
+          <div class="my-1 flex justify-between">
             <span>会话时长:</span>
-            <span style="color: #0af;">${minutes}分${seconds}秒</span>
+            <span class="text-[#0af]">${minutes}分${seconds}秒</span>
           </div>
-          <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+          <div class="my-1 flex justify-between">
             <span>页面浏览:</span>
-            <span style="color: #0af;">${session.pageViews}</span>
+            <span class="text-[#0af]">${session.pageViews}</span>
           </div>
-          <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+          <div class="my-1 flex justify-between">
             <span>事件数:</span>
-            <span style="color: #0af;">${session.events}</span>
+            <span class="text-[#0af]">${session.events}</span>
           </div>
         </div>
       </div>
 
-      <div style="margin-bottom: 12px;">
-        <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">热门页面</div>
-        ${topPagesHtml || '<div style="color: #888; font-size: 11px;">暂无数据</div>'}
+      <div class="mb-3">
+        <div class="mb-2 text-[13px] font-bold">热门页面</div>
+        ${topPagesHtml || '<div class="text-[11px] text-[#888]">暂无数据</div>'}
       </div>
     `;
   }
@@ -367,44 +387,38 @@ export class PerformanceMonitor {
     const alerts = alertService.getUnacknowledgedAlerts();
 
     if (alerts.length === 0) {
-      return '<div style="text-align: center; color: #888; padding: 20px;">暂无告警</div>';
+      return '<div class="p-5 text-center text-[#888]">暂无告警</div>';
     }
 
     const alertsHtml = alerts
       .slice(0, 10)
       .map(alert => {
-        const levelColor =
-          alert.level === 'critical'
-            ? '#f00'
-            : alert.level === 'error'
-              ? '#f80'
-              : alert.level === 'warning'
-                ? '#ff0'
-                : '#0af';
+        const levelBorderClass = getAlertLevelBorderClass(alert.level);
+        const levelTextClass = getAlertLevelTextClass(alert.level);
         const title = escapeHtml(alert.title);
         const level = escapeHtml(alert.level);
         const message = escapeHtml(alert.message);
 
         return `
-        <div style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; border-left: 3px solid ${levelColor};">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="font-weight: bold; font-size: 11px;">${title}</span>
-            <span style="font-size: 10px; color: ${levelColor};">${level}</span>
+        <div class="my-2 rounded border-l-[3px] ${levelBorderClass} bg-[rgba(255,255,255,0.05)] p-2">
+          <div class="mb-1 flex justify-between">
+            <span class="text-[11px] font-bold">${title}</span>
+            <span class="text-[10px] ${levelTextClass}">${level}</span>
           </div>
-          <div style="font-size: 11px; color: #ccc; margin-bottom: 4px;">${message}</div>
-          <div style="font-size: 10px; color: #888;">${new Date(alert.timestamp).toLocaleTimeString()}</div>
+          <div class="mb-1 text-[11px] text-[#ccc]">${message}</div>
+          <div class="text-[10px] text-[#888]">${new Date(alert.timestamp).toLocaleTimeString()}</div>
         </div>
       `;
       })
       .join('');
 
     const html = `
-      <div style="margin-bottom: 12px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span style="font-size: 13px; font-weight: bold;">未读告警</span>
+      <div class="mb-3">
+        <div class="mb-2 flex justify-between">
+          <span class="text-[13px] font-bold">未读告警</span>
           <button 
             data-action="acknowledge-all-alerts"
-            style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;"
+            class="cursor-pointer rounded border-0 bg-[rgba(255,255,255,0.1)] px-2 py-1 text-[10px] text-white"
           >
             全部确认
           </button>
@@ -435,24 +449,23 @@ export class PerformanceMonitor {
     };
     const memory = performanceWithMemory.memory;
     if (!memory) {
-      return '<div style="color: #888; font-size: 11px; margin-top: 12px;">Memory API不可用</div>';
+      return '<div class="mt-3 text-[11px] text-[#888]">Memory API不可用</div>';
     }
 
     const used = Math.round(memory.usedJSHeapSize / 1048576);
     const limit = Math.round(memory.jsHeapSizeLimit / 1048576);
     const percentage = Math.round((used / limit) * 100);
-    const color = percentage < 70 ? '#0f0' : percentage < 90 ? '#ff0' : '#f00';
+    const memoryTextClass = getMemoryTextClass(percentage);
+    const memoryProgressClass = getMemoryProgressClass(percentage);
 
     return `
-      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #444;">
-        <div style="font-size: 11px; font-weight: bold; margin-bottom: 4px;">内存使用</div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-          <span style="font-size: 11px;">已使用:</span>
-          <span style="color: ${color}; font-size: 11px;">${used}MB / ${limit}MB (${percentage}%)</span>
+      <div class="mt-3 border-t border-[#444] pt-3">
+        <div class="mb-1 text-[11px] font-bold">内存使用</div>
+        <div class="mb-1 flex justify-between">
+          <span class="text-[11px]">已使用:</span>
+          <span class="text-[11px] ${memoryTextClass}">${used}MB / ${limit}MB (${percentage}%)</span>
         </div>
-        <div style="background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; overflow: hidden;">
-          <div style="background: ${color}; height: 100%; width: ${percentage}%;"></div>
-        </div>
+        <progress class="h-1.5 w-full ${memoryProgressClass}" value="${percentage}" max="100"></progress>
       </div>
     `;
   }
@@ -481,7 +494,7 @@ export class PerformanceMonitor {
    */
   show(): void {
     if (this.container) {
-      this.container.style.display = 'block';
+      this.container.classList.remove('hidden');
       this.isVisible = true;
       this.renderCurrentTab();
     }
@@ -492,7 +505,7 @@ export class PerformanceMonitor {
    */
   hide(): void {
     if (this.container) {
-      this.container.style.display = 'none';
+      this.container.classList.add('hidden');
       this.isVisible = false;
     }
   }

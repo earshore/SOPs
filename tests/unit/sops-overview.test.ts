@@ -56,12 +56,12 @@ describe('SOPs Overview', () => {
     await mount(container);
     container.querySelector<HTMLButtonElement>('[data-category="growth"]')?.click();
 
-    expect(
-      (container.querySelector('section[data-category="growth"]') as HTMLElement).style.display
-    ).toBe('');
-    expect(
-      (container.querySelector('section[data-category="backend"]') as HTMLElement).style.display
-    ).toBe('none');
+    expect((container.querySelector('section[data-category="growth"]') as HTMLElement).hidden).toBe(
+      false
+    );
+    expect((container.querySelector('section[data-category="backend"]') as HTMLElement).hidden).toBe(
+      true
+    );
   });
 
   it('does not include local pilot usage metrics on the real overview page', () => {

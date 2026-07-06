@@ -825,48 +825,58 @@ class StorageServiceClass implements IStorageService {
   }
 
   async getProxyKeyMap(): Promise<Record<string, string>> {
-    const keyMap: Record<string, string> = {};
+    try {
+      const keyMap: Record<string, string> = {};
 
-    for (const type of SCRAPER_PROXY_CREDENTIAL_TYPES) {
-      const credential = await this.getSecure<string>(getProxyCredentialKey(type), '');
-      if (credential) {
-        keyMap[type] = credential;
+      for (const type of SCRAPER_PROXY_CREDENTIAL_TYPES) {
+        const credential = await this.getSecure<string>(getProxyCredentialKey(type), '');
+        if (credential) {
+          keyMap[type] = credential;
+        }
       }
-    }
 
-    const legacyKeyMap = this.get<Record<string, string>>(STORAGE_KEYS.PROXY_KEY_MAP, {});
-    if (isStringMap(legacyKeyMap)) {
-      Object.assign(keyMap, legacyKeyMap);
-      this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
-    }
+      const legacyKeyMap = this.get<Record<string, string>>(STORAGE_KEYS.PROXY_KEY_MAP, {});
+      if (isStringMap(legacyKeyMap)) {
+        Object.assign(keyMap, legacyKeyMap);
+        this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
+      }
 
-    const legacyConfig =
-      this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null) ||
-      this.get<ProxyConfig>(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, null);
-    const legacyType = legacyConfig?.type || DEFAULT_SCRAPER_PROXY_TYPE;
-    if (legacyConfig?.customUrl) {
-      keyMap[legacyType] = legacyConfig.customUrl;
-      this.setProxyConfig(legacyConfig);
-    }
+      const legacyConfig =
+        this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null) ||
+        this.get<ProxyConfig>(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, null);
+      const legacyType = legacyConfig?.type || DEFAULT_SCRAPER_PROXY_TYPE;
+      if (legacyConfig?.customUrl) {
+        keyMap[legacyType] = legacyConfig.customUrl;
+        this.setProxyConfig(legacyConfig);
+      }
 
-    await this.setProxyKeyMap(keyMap);
-    return keyMap;
+      await this.setProxyKeyMap(keyMap);
+      return keyMap;
+    } catch (e) {
+      this._reportStorageReadError('getProxyKeyMap', STORAGE_KEYS.PROXY_KEY_MAP, e as Error);
+      return {};
+    }
   }
 
   async setProxyKeyMap(keyMap: Record<string, string>): Promise<boolean> {
-    let saved = true;
+    try {
+      let saved = true;
 
-    for (const [type, credential] of Object.entries(keyMap)) {
-      if (!credential) {
-        this.removeSecure(getProxyCredentialKey(type));
-        continue;
+      for (const [type, credential] of Object.entries(keyMap)) {
+        if (!credential) {
+          this.removeSecure(getProxyCredentialKey(type));
+          continue;
+        }
+
+        saved = (await this.setSecure(getProxyCredentialKey(type), credential)) && saved;
       }
 
-      saved = (await this.setSecure(getProxyCredentialKey(type), credential)) && saved;
+      this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
+      return saved;
+    } catch (e) {
+      this._reportStorageReadError('setProxyKeyMap', STORAGE_KEYS.PROXY_KEY_MAP, e as Error);
+      return false;
     }
-
-    this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
-    return saved;
   }
 
   hasProxyCredential(type: string): boolean {
@@ -874,25 +884,43 @@ class StorageServiceClass implements IStorageService {
   }
 
   async getProxyConfigWithCredential(): Promise<ProxyConfig> {
-    const config = this.getProxyConfig();
-    const type = config.type || DEFAULT_SCRAPER_PROXY_TYPE;
-    const keyMap = await this.getProxyKeyMap();
-    const customUrl = keyMap[type];
+    try {
+      const config = this.getProxyConfig();
+      const type = config.type || DEFAULT_SCRAPER_PROXY_TYPE;
+      const keyMap = await this.getProxyKeyMap();
+      const customUrl = keyMap[type];
 
-    return customUrl ? { ...config, customUrl } : config;
+      return customUrl ? { ...config, customUrl } : config;
+    } catch (e) {
+      this._reportStorageReadError(
+        'getProxyConfigWithCredential',
+        STORAGE_KEYS.PROXY_CONFIG,
+        e as Error
+      );
+      return { type: DEFAULT_SCRAPER_PROXY_TYPE, enabled: true };
+    }
   }
 
   async setProxyConfigWithCredential(config: ProxyConfig): Promise<boolean> {
-    const type = config.type || DEFAULT_SCRAPER_PROXY_TYPE;
-    const savedConfig = this.setProxyConfig(config);
+    try {
+      const type = config.type || DEFAULT_SCRAPER_PROXY_TYPE;
+      const savedConfig = this.setProxyConfig(config);
 
-    if (!config.customUrl) {
-      this.removeSecure(getProxyCredentialKey(type));
-      return savedConfig;
+      if (!config.customUrl) {
+        this.removeSecure(getProxyCredentialKey(type));
+        return savedConfig;
+      }
+
+      const savedCredential = await this.setSecure(getProxyCredentialKey(type), config.customUrl);
+      return savedConfig && savedCredential;
+    } catch (e) {
+      this._reportStorageReadError(
+        'setProxyConfigWithCredential',
+        STORAGE_KEYS.PROXY_CONFIG,
+        e as Error
+      );
+      return false;
     }
-
-    const savedCredential = await this.setSecure(getProxyCredentialKey(type), config.customUrl);
-    return savedConfig && savedCredential;
   }
 
   /**
@@ -916,18 +944,27 @@ class StorageServiceClass implements IStorageService {
    * 兼容迁移旧 localStorage 数据，迁移后会保留旧键作为安全备份。
    */
   async getScrapeHistoryAsync(): Promise<HistoryItem[]> {
-    const indexedKey = `user:${STORAGE_KEYS.SCRAPE_HISTORY}`;
-    const migrated = await LocalDataStore.migrateLocalStorageKey<HistoryItem[]>(
-      STORAGE_KEYS.SCRAPE_HISTORY,
-      indexedKey,
-      'user-data'
-    );
+    try {
+      const indexedKey = `user:${STORAGE_KEYS.SCRAPE_HISTORY}`;
+      const migrated = await LocalDataStore.migrateLocalStorageKey<HistoryItem[]>(
+        STORAGE_KEYS.SCRAPE_HISTORY,
+        indexedKey,
+        'user-data'
+      );
 
-    if (migrated) {
-      return migrated;
+      if (migrated) {
+        return migrated;
+      }
+
+      return (await LocalDataStore.get<HistoryItem[]>(indexedKey, [])) || [];
+    } catch (e) {
+      this._reportStorageReadError(
+        'getScrapeHistoryAsync',
+        STORAGE_KEYS.SCRAPE_HISTORY,
+        e as Error
+      );
+      return this.getScrapeHistory();
     }
-
-    return (await LocalDataStore.get<HistoryItem[]>(indexedKey, [])) || [];
   }
 
   /**
@@ -936,11 +973,30 @@ class StorageServiceClass implements IStorageService {
   async setScrapeHistoryAsync(history: HistoryItem[]): Promise<boolean> {
     const maxItems = 50;
     const trimmed = history.slice(0, maxItems);
-    return await LocalDataStore.set(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`, trimmed, 'user-data');
+
+    try {
+      return await LocalDataStore.set(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`, trimmed, 'user-data');
+    } catch (e) {
+      this._reportStorageReadError(
+        'setScrapeHistoryAsync',
+        STORAGE_KEYS.SCRAPE_HISTORY,
+        e as Error
+      );
+      return this.setScrapeHistory(trimmed);
+    }
   }
 
   async removeScrapeHistoryAsync(): Promise<void> {
-    await LocalDataStore.remove(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`);
+    try {
+      await LocalDataStore.remove(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`);
+    } catch (e) {
+      this._reportStorageReadError(
+        'removeScrapeHistoryAsync',
+        STORAGE_KEYS.SCRAPE_HISTORY,
+        e as Error
+      );
+    }
+
     this.remove(STORAGE_KEYS.SCRAPE_HISTORY);
   }
 
@@ -976,16 +1032,26 @@ class StorageServiceClass implements IStorageService {
    * 安全存储敏感数据
    */
   async setSecure(key: string, value: unknown): Promise<boolean> {
-    const { SecureStorage } = await import('../common/utils/secureStorage');
-    return await SecureStorage.setSecure(key, value);
+    try {
+      const { SecureStorage } = await import('../common/utils/secureStorage');
+      return await SecureStorage.setSecure(key, value);
+    } catch (e) {
+      this._reportStorageReadError('setSecure', key, e as Error);
+      return false;
+    }
   }
 
   /**
    * 读取安全存储的数据
    */
   async getSecure<T = unknown>(key: string, defaultValue: T | null = null): Promise<T | null> {
-    const { SecureStorage } = await import('../common/utils/secureStorage');
-    return await SecureStorage.getSecure(key, defaultValue);
+    try {
+      const { SecureStorage } = await import('../common/utils/secureStorage');
+      return await SecureStorage.getSecure(key, defaultValue);
+    } catch (e) {
+      this._reportStorageReadError('getSecure', key, e as Error);
+      return defaultValue;
+    }
   }
 
   /**

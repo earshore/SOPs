@@ -154,7 +154,7 @@ function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState
   cards.forEach(card => {
     const isVisible = overviewItemMatches(card, state);
 
-    card.style.display = isVisible ? '' : 'none';
+    card.hidden = !isVisible;
     if (isVisible) {
       visibleCount += 1;
       card.classList.add('fade-in');
@@ -164,7 +164,7 @@ function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState
   listRows.forEach(row => {
     const isVisible = overviewItemMatches(row, state);
 
-    row.style.display = isVisible ? '' : 'none';
+    row.hidden = !isVisible;
     if (isVisible) {
       visibleListCount += 1;
       row.classList.add('fade-in');

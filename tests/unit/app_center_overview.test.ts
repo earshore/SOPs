@@ -111,20 +111,19 @@ describe('App Center Overview', () => {
     container.querySelector<HTMLElement>('[data-category="ppc_tools"]')?.click();
 
     expect(
-      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.style
-        .display
-    ).toBe('none');
-    expect(
-      container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.style.display
-    ).toBe('');
+      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.hidden
+    ).toBe(true);
+    expect(container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.hidden).toBe(
+      false
+    );
     expect(
       container.querySelector<HTMLElement>('.app-overview-list-row[data-category="master_analysis"]')
-        ?.style.display
-    ).toBe('none');
+        ?.hidden
+    ).toBe(true);
     expect(
       container.querySelector<HTMLElement>('.app-overview-list-row[data-category="ppc_tools"]')
-        ?.style.display
-    ).toBe('');
+        ?.hidden
+    ).toBe(false);
     expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
       '显示 1 个应用'
     );
@@ -150,20 +149,19 @@ describe('App Center Overview', () => {
     searchInput.dispatchEvent(new Event('input'));
 
     expect(
-      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.style
-        .display
-    ).toBe('none');
-    expect(
-      container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.style.display
-    ).toBe('');
+      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.hidden
+    ).toBe(true);
+    expect(container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.hidden).toBe(
+      false
+    );
     expect(
       container.querySelector<HTMLElement>('.app-overview-list-row[data-category="master_analysis"]')
-        ?.style.display
-    ).toBe('none');
+        ?.hidden
+    ).toBe(true);
     expect(
       container.querySelector<HTMLElement>('.app-overview-list-row[data-category="ppc_tools"]')
-        ?.style.display
-    ).toBe('');
+        ?.hidden
+    ).toBe(false);
     expect(clearSearchBtn.classList.contains('hidden')).toBe(false);
     expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
       '显示 1 个应用'
@@ -173,20 +171,19 @@ describe('App Center Overview', () => {
 
     expect(searchInput.value).toBe('');
     expect(
-      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.style
-        .display
-    ).toBe('');
-    expect(
-      container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.style.display
-    ).toBe('');
+      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.hidden
+    ).toBe(false);
+    expect(container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.hidden).toBe(
+      false
+    );
     expect(
       container.querySelector<HTMLElement>('.app-overview-list-row[data-category="master_analysis"]')
-        ?.style.display
-    ).toBe('');
+        ?.hidden
+    ).toBe(false);
     expect(
       container.querySelector<HTMLElement>('.app-overview-list-row[data-category="ppc_tools"]')
-        ?.style.display
-    ).toBe('');
+        ?.hidden
+    ).toBe(false);
     expect(clearSearchBtn.classList.contains('hidden')).toBe(true);
   });
 

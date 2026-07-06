@@ -8,11 +8,12 @@ describe('SkeletonLoader', () => {
 
     expect(skeleton.className).toBe('skeleton-container');
     expect(items).toHaveLength(2);
-    expect((items[0] as HTMLElement).style.height).toBe('24px');
+    expect((items[0] as HTMLElement).classList.contains('skeleton-title')).toBe(true);
     expect((items[0] as HTMLElement).classList.contains('skeleton-animated')).toBe(true);
+    expect(skeleton.querySelector('[style]')).toBeNull();
   });
 
-  it('renders custom skeletons without type-specific children', () => {
+  it('renders custom skeletons without type-specific children or inline styles', () => {
     const skeleton = SkeletonLoader.create({
       type: 'custom',
       count: 1,
@@ -25,8 +26,7 @@ describe('SkeletonLoader', () => {
     expect(item.classList.contains('skeleton-custom')).toBe(true);
     expect(item.classList.contains('custom-loader')).toBe(true);
     expect(item.children).toHaveLength(0);
-    expect(item.style.width).toBe('12px');
-    expect(item.style.height).toBe('16px');
+    expect(item.getAttribute('style')).toBeNull();
   });
 
   it('removes skeleton containers from a target', () => {

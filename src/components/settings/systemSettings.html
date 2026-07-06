@@ -4,23 +4,17 @@
   @open-settings.window="open()"
   @close-settings.window="close()"
   @keydown.escape.window="close()"
-  x-show="isOpen"
-  x-transition.opacity.duration.300ms
-  class="fixed inset-0 z-50 flex items-center justify-end"
-  style="display: none"
+  :hidden="!isOpen"
+  :aria-hidden="(!isOpen).toString()"
+  data-state="closed"
+  :data-state="isOpen ? 'open' : 'closed'"
+  class="settings-panel-root fixed inset-0 z-50 flex items-center justify-end"
 >
   <!-- Backdrop with blur -->
   <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="close()"></div>
 
   <!-- Modal Panel -->
   <div
-    x-show="isOpen"
-    x-transition:enter="transform transition ease-out duration-400"
-    x-transition:enter-start="translate-x-full opacity-90"
-    x-transition:enter-end="translate-x-0 opacity-100"
-    x-transition:leave="transform transition ease-in duration-300"
-    x-transition:leave-start="translate-x-0 opacity-100"
-    x-transition:leave-end="translate-x-full opacity-90"
     class="relative h-full w-full max-w-[min(860px,calc(100vw-48px))] bg-gradient-to-b from-white to-slate-50/80 shadow-[-8px_0_30px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col"
   >
     <!-- Decorative top accent line -->
@@ -56,10 +50,7 @@
     <div class="mx-5 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
 
     <!-- Scrollable Content -->
-    <div
-      class="flex-1 overflow-y-auto px-5 py-6"
-      style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent"
-    >
+    <div class="settings-panel-scroll flex-1 overflow-y-auto px-5 py-6">
       <div class="settings-panel-body">
         <nav class="settings-panel-nav" aria-label="系统设置分类">
           <div class="settings-panel-nav-title">分类</div>
@@ -115,10 +106,7 @@
             <div class="settings-section-frame settings-section-frame--llm space-y-4">
               <!-- 🔒 Security Warning -->
               <div
-                x-show="showDangerousEndpointWarning"
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 -translate-y-2"
-                x-transition:enter-end="opacity-100 translate-y-0"
+                :hidden="!showDangerousEndpointWarning"
                 class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl shadow-sm"
               >
                 <div class="flex items-start gap-3">
@@ -280,12 +268,41 @@
                   </div>
                 </div>
 
+                <!-- Service Tier -->
+                <div class="group">
+                  <label
+                    for="llm-service-tier"
+                    class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                    >服务层级</label
+                  >
+                  <div class="relative">
+                    <select
+                      id="llm-service-tier"
+                      name="llm-service-tier"
+                      :value="llm.serviceTier || ''"
+                      @change="setLlmServiceTier($event)"
+                      class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 cursor-pointer"
+                    >
+                      <option value="">不发送 service_tier</option>
+                      <option value="auto">auto</option>
+                      <option value="default">default</option>
+                      <option value="flex">flex</option>
+                      <option value="priority">priority</option>
+                    </select>
+                    <div
+                      class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                    >
+                      <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                    </div>
+                  </div>
+                  <p class="mt-1.5 text-[10px] leading-relaxed text-slate-500">
+                    默认不发送；仅在网关明确支持时手动选择。
+                  </p>
+                </div>
+
                 <!-- Model Info Card -->
                 <div
-                  x-show="activeModelInfo"
-                  x-transition:enter="transition ease-out duration-300"
-                  x-transition:enter-start="opacity-0 scale-95"
-                  x-transition:enter-end="opacity-100 scale-100"
+                  :hidden="!activeModelInfo"
                   class="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2.5 shadow-sm"
                 >
                   <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
@@ -414,10 +431,7 @@
 
               <!-- Conditional Input -->
               <div
-                x-show="proxyNeedsInput"
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 -translate-y-2"
-                x-transition:enter-end="opacity-100 translate-y-0"
+                :hidden="!proxyNeedsInput"
                 class="space-y-3"
               >
                 <label
@@ -594,13 +608,7 @@
                 </button>
 
                 <div
-                  x-show="localData.cleanupItemsExpanded"
-                  x-transition:enter="transition ease-out duration-200"
-                  x-transition:enter-start="opacity-0 -translate-y-1"
-                  x-transition:enter-end="opacity-100 translate-y-0"
-                  x-transition:leave="transition ease-in duration-150"
-                  x-transition:leave-start="opacity-100 translate-y-0"
-                  x-transition:leave-end="opacity-0 -translate-y-1"
+                  :hidden="!localData.cleanupItemsExpanded"
                   class="space-y-2.5"
                 >
                   <template x-for="bucket in localDataBucketItems" :key="bucket.id">
@@ -643,11 +651,14 @@
                           </div>
                           <div class="mt-2.5 flex items-center gap-2">
                             <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                              <div
-                                class="h-full rounded-full transition-[width] duration-300"
-                                :class="bucket.barClass"
-                                :style="{ width: bucket.percentWidth }"
-                              ></div>
+                              <progress
+                                class="settings-local-data-progress h-full w-full"
+                                value="0"
+                                max="100"
+                                :value="bucket.percentValue"
+                                :data-bucket="bucket.id"
+                                :aria-label="bucket.label"
+                              ></progress>
                             </div>
                             <button
                               type="button"
@@ -656,9 +667,12 @@
                               class="min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                               :class="bucket.buttonClass"
                             >
-                              <span x-show="!bucket.isClearing" x-text="bucket.actionLabel"></span>
                               <span
-                                x-show="bucket.isClearing"
+                                :hidden="bucket.isClearing"
+                                x-text="bucket.actionLabel"
+                              ></span>
+                              <span
+                                :hidden="!bucket.isClearing"
                                 class="inline-flex items-center gap-1"
                               >
                                 <i class="fas fa-circle-notch fa-spin"></i> 清理中

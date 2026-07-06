@@ -2,7 +2,7 @@
  * AI 分析服务 - 调用大模型进行真实数据分析
  */
 
-import { callLLM, type ChatMessage } from '../../../../../../services/llmService';
+import { callLLM, type ChatMessage, type LLMOptions } from '../../../../../../services/llmService';
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
 import { configCenter } from '../../../../../../common/config/ConfigCenter';
 import type { FullAnalysisReport } from '../config/analysisReportData';
@@ -11,28 +11,31 @@ import { generateAnalysisPrompt, getReviewSamplingMetadata } from '../prompts/an
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse, validateAnalysisResult } from './analysisResultParser';
 import { ValidationError, AppError, ErrorLevel, ErrorCategory } from '@common/errors/AppError';
+import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
+
+const nativeLoggerConsole = globalThis.console;
 
 const logger = {
   debug(message: string, data?: unknown, module = 'AIAnalysisService'): void {
     if (data === undefined) {
-      console.debug(`[${module}] ${message}`);
+      nativeLoggerConsole.debug(`[${module}] ${message}`);
       return;
     }
-    console.debug(`[${module}] ${message}`, data);
+    nativeLoggerConsole.debug(`[${module}] ${message}`, data);
   },
   warn(message: string, data?: unknown, module = 'AIAnalysisService'): void {
     if (data === undefined) {
-      console.warn(`[${module}] ${message}`);
+      nativeLoggerConsole.warn(`[${module}] ${message}`);
       return;
     }
-    console.warn(`[${module}] ${message}`, data);
+    nativeLoggerConsole.warn(`[${module}] ${message}`, data);
   },
   error(message: string, error?: unknown, module = 'AIAnalysisService'): void {
     if (error === undefined) {
-      console.error(`[${module}] ${message}`);
+      nativeLoggerConsole.error(`[${module}] ${message}`);
       return;
     }
-    console.error(`[${module}] ${message}`, error);
+    nativeLoggerConsole.error(`[${module}] ${message}`, error);
   },
 };
 
@@ -56,6 +59,7 @@ interface LLMConfig {
   endpoint: string;
   apiKey: string;
   model: string;
+  serviceTier?: LLMOptions['serviceTier'];
 }
 
 /**
@@ -107,6 +111,7 @@ async function getLLMConfig(): Promise<LLMConfig> {
     endpoint: config.endpoint,
     apiKey: config.apiKey,
     model: model,
+    serviceTier: config.serviceTier,
   };
 }
 
@@ -138,13 +143,10 @@ async function analyzeTarget(
   targetId: string,
   product: Product,
   config: LLMConfig,
-  language: string = 'en',
-  onProgress?: (step: string) => void
+  language: string = 'en'
 ): Promise<unknown> {
   // 使用 analysisPrompts.ts 中的 generateAnalysisPrompt 生成提示词
   const prompt = generateAnalysisPrompt(targetId, product, language);
-
-  onProgress?.(`正在分析: ${targetId}...`);
 
   const messages: ChatMessage[] = [
     {
@@ -168,6 +170,9 @@ async function analyzeTarget(
       {
         temperature: 0.3,
         jsonMode: true,
+        maxTokens: getMasterAnalysisTargetMaxTokens(targetId),
+        ...(config.serviceTier && { serviceTier: config.serviceTier }),
+        stream: true,
         timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
         retries: configCenter.get<number>('llm.maxRetries') || 2,
       }
@@ -227,22 +232,26 @@ async function analyzeTargets(
   const totalTargets = targetIds.length;
   let completedTargets = 0;
 
-  for (const targetId of targetIds) {
-    const progress = Math.round((completedTargets / totalTargets) * 100);
-    try {
+  await Promise.all(
+    targetIds.map(async (targetId, index) => {
+      const progress = totalTargets > 0 ? Math.round((index / totalTargets) * 100) : 0;
       onProgress(progress, `正在分析: ${targetId}...`);
-      const result = await analyzeTarget(targetId, product, config, language, step => {
-        onProgress(progress, step);
-      });
 
-      appendTargetResult(report, targetId, result);
-    } catch (error) {
-      logger.error('[AI分析] 失败:', error, 'AIAnalysisService');
-      // 继续分析其他目标,不中断整个流程
-    } finally {
-      completedTargets++;
-    }
-  }
+      try {
+        const result = await analyzeTarget(targetId, product, config, language);
+
+        appendTargetResult(report, targetId, result);
+      } catch (error) {
+        logger.error('[AI分析] 失败:', error, 'AIAnalysisService');
+        // 继续分析其他目标,不中断整个流程
+      } finally {
+        completedTargets++;
+        const completedProgress =
+          totalTargets > 0 ? Math.round((completedTargets / totalTargets) * 100) : 100;
+        onProgress(completedProgress, `已完成: ${targetId} (${completedTargets}/${totalTargets})`);
+      }
+    })
+  );
 
   return report;
 }

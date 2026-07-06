@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -58,6 +58,24 @@ function readMarketingCalendarEntry(): string {
   );
 }
 
+function readSettingsTemplate(): string {
+  return readFileSync(join(process.cwd(), 'src/components/settings/systemSettings.html'), 'utf8');
+}
+
+function readAiAnalysisTemplate(): string {
+  return readFileSync(
+    join(process.cwd(), 'src/modules/app_center/views/master_analysis/ai_analysis/template.html'),
+    'utf8'
+  );
+}
+
+function readScraperTemplate(): string {
+  return readFileSync(
+    join(process.cwd(), 'src/modules/app_center/views/master_analysis/scraper/template.html'),
+    'utf8'
+  );
+}
+
 function readAppModalSource(): string {
   return readFileSync(join(process.cwd(), 'src/components/modal/AppModal.ts'), 'utf8');
 }
@@ -87,6 +105,33 @@ function readVercelCsp(): string {
   );
 }
 
+function readProjectFile(path: string): string {
+  return readFileSync(join(process.cwd(), path), 'utf8');
+}
+
+function readRuntimeTextFiles(paths: string[]): Array<{ path: string; source: string }> {
+  const files: Array<{ path: string; source: string }> = [];
+  const textFilePattern = /\.(?:css|html|json|md|ts|tsx|js|mjs|cjs)$/;
+
+  for (const path of paths) {
+    const absolutePath = join(process.cwd(), path);
+    const stat = statSync(absolutePath);
+
+    if (stat.isDirectory()) {
+      for (const entry of readdirSync(absolutePath)) {
+        files.push(...readRuntimeTextFiles([`${path}/${entry}`]));
+      }
+      continue;
+    }
+
+    if (textFilePattern.test(path) && !/\.test\.[cm]?[jt]sx?$/.test(path)) {
+      files.push({ path, source: readFileSync(absolutePath, 'utf8') });
+    }
+  }
+
+  return files;
+}
+
 describe('apiEndpoints CSP policy', () => {
   it('only includes browser-direct endpoints in CSP connect-src', () => {
     const connectSrc = generateCSPConnectSrc();
@@ -112,6 +157,19 @@ describe('apiEndpoints CSP policy', () => {
     expect(extractConnectSrc(readVercelCsp())).toBe(expectedConnectSrc);
   });
 
+  it('keeps production LLM browser-direct and prevents old proxy routes from returning', () => {
+    const runtimeFiles = readRuntimeTextFiles(['src', 'public', 'vercel.json']);
+
+    for (const { path, source } of runtimeFiles) {
+      expect(source, path).not.toContain('/api/llm/v1');
+      expect(source, path).not.toContain('_routes.json');
+      expect(source, path).not.toContain('server-managed placeholder');
+    }
+
+    expect(readPublicHeadersCsp()).toContain('https://new.hongecb.store');
+    expect(readVercelCsp()).toContain('https://new.hongecb.store');
+  });
+
   it('keeps script-src strict in deployed CSP headers', () => {
     for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
       const scriptSrc = extractCspDirective(csp, 'script-src');
@@ -122,7 +180,7 @@ describe('apiEndpoints CSP policy', () => {
     }
   });
 
-  it('keeps style elements strict while isolating inline style attributes', () => {
+  it('keeps style sources strict without inline style attributes', () => {
     for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
       const styleSrc = extractCspDirective(csp, 'style-src');
       const styleSrcElem = extractCspDirective(csp, 'style-src-elem');
@@ -130,14 +188,70 @@ describe('apiEndpoints CSP policy', () => {
 
       expect(styleSrc).toBe("'self'");
       expect(styleSrcElem).toBe("'self'");
-      expect(styleSrcAttr).toBe("'unsafe-inline'");
+      expect(styleSrcAttr).toBe('');
       expect(styleSrc).not.toContain("'unsafe-inline'");
       expect(styleSrcElem).not.toContain("'unsafe-inline'");
+      expect(csp).not.toContain("'unsafe-inline'");
     }
 
     expect(readAppModalSource()).not.toContain("createElement('style')");
     expect(readRestrictedWordsTemplate()).not.toContain('<style');
     expect(readRestrictedWordsEntry()).toContain("import './styles.css';");
+  });
+});
+
+describe('apiEndpoints inline style policy', () => {
+  it('keeps the app shell and migrated panels free of inline style bindings', () => {
+    const inlineStyleBinding = /\s(?:x-bind:|:)?style\s*=/;
+
+    expect(readIndexHtml()).not.toMatch(inlineStyleBinding);
+    expect(readSettingsTemplate()).not.toMatch(inlineStyleBinding);
+    expect(readAiAnalysisTemplate()).not.toMatch(inlineStyleBinding);
+    expect(readScraperTemplate()).not.toMatch(inlineStyleBinding);
+    expect(readSettingsTemplate()).toContain('data-state="closed"');
+    expect(readSettingsTemplate()).toContain(":data-state=\"isOpen ? 'open' : 'closed'\"");
+  });
+
+  it('keeps migrated assets free of static style attributes', () => {
+    const migratedStaticStyleFiles = [
+      'src/common/components/SidebarRenderer.ts',
+      'src/common/devtools/PerformanceMonitor.ts',
+      'src/common/devtools/MemoryDevTools.ts',
+      'src/css/components/welcome-banner.css',
+      'src/components/modal/sharedModals.html',
+      'src/modules/amz_hub/constants/amz_hub_constants.ts',
+      'src/modules/amz_hub/views/overview/template.html',
+      'src/modules/amz_hub/views/knowledge/ecosystem/template.html',
+      'src/modules/amz_hub/views/knowledge/eu_insights/template.html',
+      'src/modules/amz_hub/views/knowledge/seo_strategy/template.html',
+      'src/modules/amz_hub/views/practice/marketing_calendar/index.ts',
+      'src/modules/amz_hub/views/practice/marketing_calendar/template.html',
+      'src/modules/amz_hub/views/practice/promo_activities/template.html',
+      'src/modules/app_center/views/keyword_hunter/analysis/index.ts',
+      'src/modules/app_center/views/keyword_hunter/analysis/template.html',
+      'src/modules/app_center/views/keyword_hunter/process/template.html',
+      'src/modules/app_center/views/master_analysis/promptlab/template.html',
+      'src/modules/home/homeDisplay.html',
+      'src/modules/more/views/business_scenarios/casePageRenderer.ts',
+      'src/modules/more/views/explore/agents/template.html',
+      'src/modules/more/views/explore/prompts/template.html',
+      'src/modules/more/views/explore/workflows/template.html',
+      'src/modules/more/views/overview/template.html',
+      'src/modules/sops/views/growth/npi_tracker/template.html',
+      'src/modules/sops/views/overview/template.html',
+    ];
+
+    for (const file of migratedStaticStyleFiles) {
+      expect(readProjectFile(file), file).not.toMatch(/\sstyle=/);
+    }
+  });
+
+  it('keeps the migrated settings panel free of Alpine runtime display styles', () => {
+    const alpineShowDirective = ['x', 'show'].join('-');
+
+    expect(readSettingsTemplate()).not.toContain(`${alpineShowDirective}=`);
+    expect(readSettingsTemplate()).not.toContain('x-transition');
+    expect(readSettingsTemplate()).toContain(':hidden="!isOpen"');
   });
 
   it('bundles Font Awesome locally instead of loading it from bootcdn', () => {

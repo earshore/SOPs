@@ -111,14 +111,14 @@ function filterByCategory(container: HTMLElement, category: string): void {
   sections.forEach(section => {
     const sectionElement = section as HTMLElement;
     if (category === 'all') {
-      sectionElement.style.display = '';
+      sectionElement.hidden = false;
       sectionElement.classList.add('fade-in');
     } else {
       if (sectionElement.dataset.category === category) {
-        sectionElement.style.display = '';
+        sectionElement.hidden = false;
         sectionElement.classList.add('fade-in');
       } else {
-        sectionElement.style.display = 'none';
+        sectionElement.hidden = true;
       }
     }
   });
@@ -129,10 +129,10 @@ function filterSOPs(container: HTMLElement, category: string): void {
   cards.forEach(card => {
     const cardElement = card as HTMLElement;
     if (category === 'all' || cardElement.dataset.category === category) {
-      cardElement.style.display = 'block';
+      cardElement.hidden = false;
       cardElement.classList.add('sop-fade-in');
     } else {
-      cardElement.style.display = 'none';
+      cardElement.hidden = true;
     }
   });
 }
@@ -145,9 +145,9 @@ function searchSOPs(container: HTMLElement, keyword: string): void {
     const title = cardElement.querySelector('h3')?.textContent?.toLowerCase() || '';
     const desc = cardElement.querySelector('p')?.textContent?.toLowerCase() || '';
     if (title.includes(lowerKeyword) || desc.includes(lowerKeyword)) {
-      cardElement.style.display = 'block';
+      cardElement.hidden = false;
     } else {
-      cardElement.style.display = 'none';
+      cardElement.hidden = true;
     }
   });
 }
