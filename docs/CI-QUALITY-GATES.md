@@ -23,8 +23,10 @@ npm run prebuild
 ```
 
 执行顺序：
+
 1. **安全检查** (`npm run ci:security`)
    - XSS安全门
+   - Secret泄漏门
    - 循环依赖检查
 
 2. **代码质量检查** (`npm run ci:quality`)
@@ -50,19 +52,23 @@ npm run prebuild
 **工具**: madge
 
 **检查内容**:
+
 - 扫描 `src/` 目录下所有 `.ts` 文件
 - 检测模块间的循环依赖关系
 
 **通过标准**:
+
 ```
 ✔ No circular dependency found!
 ```
 
 **失败处理**:
+
 - 构建中断
 - 必须修复所有循环依赖后才能继续
 
 **示例**:
+
 ```bash
 $ npm run circular:check
 ✔ No circular dependency found!
@@ -75,12 +81,14 @@ $ npm run circular:check
 **工具**: 自定义XSS扫描器 (`tools/security/xss-scanner.js`)
 
 **检查内容**:
+
 - 扫描不安全的DOM操作 (innerHTML, outerHTML, insertAdjacentHTML)
 - 检测eval/Function构造器
 - 验证用户输入处理
 - 检查动态脚本注入
 
 **风险等级**:
+
 - 🔴 严重 (Critical): 直接XSS漏洞
 - 🟠 高危 (High): 未经清理的用户输入
 - 🟡 中危 (Medium): 需要审查的模式
@@ -88,12 +96,36 @@ $ npm run circular:check
 - ⚪ 信息 (Info): 需要注意的模式
 
 **通过标准**:
+
 - 严重风险: 0个
 - 高危风险: 0个
 
 `npm run xss:scan` 用于生成完整报告；`npm run xss:gate` 才是 CI 阻断命令。
 
 **报告位置**: `docs/XSS_SCAN_REPORT.md`
+
+---
+
+### 3. Secret泄漏门
+
+**命令**: `npm run secret:scan`
+
+**工具**: 高置信度凭据扫描器 (`tools/secret-leak-scanner.ts`)
+
+**检查内容**:
+
+- 扫描 Git 可见文件中的 provider token、私钥块、JWT 和敏感 env 赋值
+- 跳过占位符、示例值和测试假 key
+- 命中时只输出脱敏片段，避免二次传播
+
+**通过标准**:
+
+- 高置信度真实凭据: 0 个
+
+**失败处理**:
+
+- 立即移除并轮换命中的凭据
+- 如凭据已进入历史或共享产物，按凭据泄漏事故流程处理
 
 ---
 
@@ -108,18 +140,21 @@ $ npm run circular:check
 **工具**: TypeScript Compiler (tsc)
 
 **检查内容**:
+
 - 所有TypeScript类型错误
 - 类型推断问题
 - 接口一致性
 - 泛型使用正确性
 
 **通过标准**:
+
 - 0个类型错误
 - 0个编译错误
 
 **配置文件**: `tsconfig.app.json`
 
 **示例**:
+
 ```bash
 $ npm run type-check
 # 无输出表示通过
@@ -134,6 +169,7 @@ $ npm run type-check
 **工具**: ESLint 8.x
 
 **检查内容**:
+
 - 代码风格一致性
 - 安全规则 (XSS防护)
 - 循环依赖防护规则
@@ -143,6 +179,7 @@ $ npm run type-check
 **关键规则**:
 
 #### XSS防护规则
+
 ```javascript
 "no-restricted-syntax": [
   "warn",
@@ -154,6 +191,7 @@ $ npm run type-check
 ```
 
 #### 循环依赖防护
+
 ```javascript
 "no-restricted-imports": [
   "error",
@@ -167,12 +205,14 @@ $ npm run type-check
 ```
 
 #### 复杂度控制
+
 - `complexity`: 圈复杂度 ≤ 10
 - `max-params`: 参数数量 ≤ 5
 - `max-depth`: 嵌套深度 ≤ 4
 - `max-lines-per-function`: 函数行数 ≤ 100
 
 **通过标准**:
+
 - 0个错误 (error)
 - 已有警告允许保留在 `config/eslint-warning-baseline.json` 基线内
 - 新增或超过基线的 warning 由 `npm run lint:warning-gate` 阻断
@@ -187,11 +227,13 @@ $ npm run type-check
 **工具**: `scripts/quality/eslint-warning-gate.ts`
 
 **检查内容**:
+
 - 运行 ESLint JSON 输出
 - 与 `config/eslint-warning-baseline.json` 对比 warning bucket
 - 阻止新增 warning 或已有 bucket 数量回升
 
 **通过标准**:
+
 - 当前 warning 数量不超过基线
 - 当前结果: `0/0 warning(s)`
 
@@ -202,10 +244,12 @@ $ npm run type-check
 **工具**: Prettier 3.x，显式使用 `config/.prettierrc.json` 和 `config/.prettierignore`
 
 **检查内容**:
+
 - `src/**/*.{js,ts,jsx,tsx,json,css,md}` 是否符合项目格式
 - 防止格式漂移绕过代码评审和后续机械改动
 
 **通过标准**:
+
 - 所有匹配文件符合 Prettier 格式
 
 ---
@@ -217,6 +261,7 @@ $ npm run type-check
 **工具**: Vite 5.x
 
 **检查内容**:
+
 - 所有模块成功打包
 - 依赖关系正确解析
 - 代码分割正确执行
@@ -225,6 +270,7 @@ $ npm run type-check
 **输出目录**: `dist/`
 
 **通过标准**:
+
 - 构建成功完成
 - 无构建错误
 - 生成所有预期的chunk和asset文件
@@ -261,21 +307,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Security Check
         run: npm run ci:security
-        
+
       - name: Quality Check
         run: npm run ci:quality
-        
+
       - name: Build
         run: npm run build
 ```
@@ -287,6 +333,7 @@ jobs:
 ### 1. 基础设施层文件
 
 **文件列表**:
+
 - `**/ConfigCenter.ts`
 - `**/config/schemas/**/*.ts`
 - `**/typeGuards.ts`
@@ -294,27 +341,32 @@ jobs:
 - `**/ColorContext.ts`
 
 **豁免规则**:
+
 - 允许使用 `console` (no-console: off)
 - 禁止导入 Logger (避免循环依赖)
 
 ### 2. 存储服务
 
 **文件列表**:
+
 - `**/storageService.ts`
 - `**/secureStorage.ts`
 - `**/persist.ts`
 
 **豁免规则**:
+
 - 允许直接访问 localStorage/sessionStorage
 
 ### 3. 测试文件
 
 **文件模式**:
+
 - `**/*.test.ts`
 - `**/*.spec.ts`
 - `tests/**/*.ts`
 
 **豁免规则**:
+
 - no-console: off
 - no-explicit-any: off
 - no-restricted-globals: off
@@ -322,11 +374,13 @@ jobs:
 ### 4. Logger和开发工具
 
 **文件列表**:
+
 - `**/loggerService.ts`
 - `**/devtools/**/*.ts`
 - `**/DebugInterface.ts`
 
 **豁免规则**:
+
 - no-console: off
 - no-restricted-syntax: off
 
@@ -336,35 +390,38 @@ jobs:
 
 ### 当前基线 (2026-07-06)
 
-| 指标 | 当前值 | 目标值 | 状态 |
-|------|--------|--------|------|
-| 循环依赖 | 0个 | 0个 | ✅ 达标 |
-| XSS严重风险 | 0个 | 0个 | ✅ 达标 |
-| XSS高危风险 | 0个 | 0个 | ✅ 达标 |
-| XSS中危风险 | 0个 | 0个 | ✅ 达标 |
-| TypeScript错误 | 0个 | 0个 | ✅ 达标 |
-| ESLint错误 | 0个 | 0个 | ✅ 达标 |
-| ESLint警告 | 0/0基线内 | 0个 | ✅ 达标 |
-| 技术债扫描 | 0 issue，债务比率 0.00% | 0 high | ✅ 达标 |
-| 测试类型检查 | 通过 | 通过 | ✅ 达标 |
-| 全量 Vitest | 通过 | 通过 | ✅ 达标 |
-| 构建状态 | 成功，无当前发布阻塞 warning | 成功 | ✅ 达标 |
+| 指标           | 当前值                       | 目标值 | 状态    |
+| -------------- | ---------------------------- | ------ | ------- |
+| 循环依赖       | 0个                          | 0个    | ✅ 达标 |
+| XSS严重风险    | 0个                          | 0个    | ✅ 达标 |
+| XSS高危风险    | 0个                          | 0个    | ✅ 达标 |
+| XSS中危风险    | 0个                          | 0个    | ✅ 达标 |
+| TypeScript错误 | 0个                          | 0个    | ✅ 达标 |
+| ESLint错误     | 0个                          | 0个    | ✅ 达标 |
+| ESLint警告     | 0/0基线内                    | 0个    | ✅ 达标 |
+| 技术债扫描     | 0 issue，债务比率 0.00%      | 0 high | ✅ 达标 |
+| 测试类型检查   | 通过                         | 通过   | ✅ 达标 |
+| 全量 Vitest    | 通过                         | 通过   | ✅ 达标 |
+| 构建状态       | 成功，无当前发布阻塞 warning | 成功   | ✅ 达标 |
 
 ### 改进计划
 
 **阶段1 (已完成)**:
+
 - ✅ 消除所有循环依赖
 - ✅ 修复 CRITICAL/HIGH XSS 风险点
 - ✅ 添加ESLint防护规则
 - ✅ 建立 `xss:gate` 阻断门禁
 
 **阶段2 (已完成)**:
+
 - ✅ 清零所有中危XSS风险
 - ✅ 复核测试基础设施：`type-check:tests` 和全量 Vitest 通过
 - ✅ 将 `type-check:tests`、`lint:tests` 和 `format:check` 纳入 `ci:quality` 与 GitHub Actions
 - ✅ 治理构建警告: Vite 动态/静态 import 混用、chunk 体积偏大
 
 **阶段3 (持续保持)**:
+
 - ⏳ 持续保持 ESLint warning 基线为 0
 - ⏳ 持续保持技术债扫描 0 issue；新增重复代码、长函数、深嵌套需在门禁中处理
 - ⏳ 完善安全编码培训
@@ -378,12 +435,14 @@ jobs:
 #### 1. 循环依赖检查失败
 
 **症状**:
+
 ```
 Processed 316 files (3s) (47 warnings)
 ✖ Found 5 circular dependencies!
 ```
 
 **解决方案**:
+
 1. 查看详细报告确定循环依赖链
 2. 采用以下策略之一：
    - 延迟初始化 (dynamic import/require)
@@ -402,6 +461,7 @@ Processed 316 files (3s) (47 warnings)
 
 **解决方案**:
 添加安全注释说明：
+
 ```typescript
 // SAFE: 使用sanitizeHtml清理后的内容
 element.innerHTML = sanitizedContent;
@@ -410,11 +470,13 @@ element.innerHTML = sanitizedContent;
 #### 3. TypeScript类型检查失败
 
 **症状**:
+
 ```
 error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'
 ```
 
 **解决方案**:
+
 1. 修复类型错误，不要使用 `@ts-ignore`
 2. 如果是第三方库问题，添加类型声明文件
 3. 运行 `npm run type-check` 获取详细错误位置
@@ -422,11 +484,13 @@ error TS2345: Argument of type 'string' is not assignable to parameter of type '
 #### 4. ESLint检查失败
 
 **症状**:
+
 ```
 error  Do not use 'innerHTML' directly  no-restricted-syntax
 ```
 
 **解决方案**:
+
 1. 使用推荐的安全替代方案
 2. 如果必须使用，添加 `// eslint-disable-next-line` 并注释原因
 3. 运行 `npm run lint:fix` 自动修复部分问题
@@ -470,4 +534,4 @@ error  Do not use 'innerHTML' directly  no-restricted-syntax
 
 ---
 
-*最后更新: 2026-06-07*
+_最后更新: 2026-06-07_

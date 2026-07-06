@@ -64,6 +64,10 @@
   background: rgba(15, 23, 42, 0.46) !important;
 }
 
+.ma-performance-modal[hidden] {
+  display: none !important;
+}
+
 .ma-performance-modal-panel {
   border-color: var(--ma-accent-border) !important;
   box-shadow:
