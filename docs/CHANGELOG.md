@@ -26,6 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.4] - 2026-07-06
+
+### Added
+- 新增 Keyword Hunter AI 翻译模型选择器和界面刷新。
+- 新增 AI 功能深度优化建议文档。
+
+### Changed
+- Deep Chat/Playground 请求预算改为动态计算，并延续 rc 系列的线程、搜索、本地化和 prompt 持久化体验。
+- 整合 `v3.0.3-rc.7` 至 `v3.0.3-rc.23` 的监控、安全门禁、PPC 分析器、Keyword Hunter、PromptLab、Settings 和 UI 可访问性改进。
+- 同步应用内版本显示到 `3.0.4`。
+
+### Fixed
+- 修复 LLM abort 边界行为和动态请求预算回归。
+- 补充 Keyword Hunter 翻译模型选择与 LLM 行为测试覆盖。
+
 ## [3.0.3-rc.23] - 2026-07-06
 
 ### Added

@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 `https://new.hongecb.store/v1` 中转站；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按当前待发布版本 `v3.0.3-rc.23`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按当前稳定版本 `v3.0.4`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,7 +10,7 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-当前待发布版本是 `v3.0.3-rc.23`（2026-07-06，release candidate）；最新稳定 tag 是 `v3.0.2`。`v3.0.3-rc.23` 聚焦 Sentry 监控、安全门禁、Deep Chat 搜索与线程 UI、本地化、PromptLab/Settings 体验、Keyword Hunter 可访问性和 PPC 分析器状态保留，`v3.0.3` 系列累计带来以下面向运营的变化：
+当前最新稳定版本是 `v3.0.4`（2026-07-06）。`v3.0.4` 聚焦 Sentry 监控、安全门禁、Deep Chat 搜索与线程 UI、本地化、PromptLab/Settings 体验、Keyword Hunter 可访问性、PPC 分析器状态保留、动态请求预算和 AI 翻译模型选择，累计带来以下面向运营的变化：
 
 - 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
 - 新增工作流导向条和统一确认弹窗，减少高风险数据操作误触。
@@ -81,7 +81,9 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 - 持久化 prompt 选择，优化 PromptLab、Settings 和 Playground 渲染体验。
 - 强化 Keyword Hunter 可访问性、拖拽交互、追踪服务和分析流程状态。
 - PPC Search Terms 分析器改用回调驱动 UI，并保留分析状态。
-- 同步应用内版本显示到 `3.0.3-rc.23`。
+- Deep Chat/Playground 请求预算支持动态计算，并修复 LLM abort 边界行为。
+- Keyword Hunter AI 翻译支持模型选择器和界面刷新。
+- 同步应用内版本显示到 `3.0.4`。
 
 ## 快速开始
 
