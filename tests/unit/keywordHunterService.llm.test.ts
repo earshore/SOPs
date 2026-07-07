@@ -2,7 +2,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import {
   fetchImmersionTranslation,
   fetchListingAnalysis,
-} from '@/modules/app_center/views/keyword_hunter/services/trackerService';
+} from '@/modules/app_center/views/keyword_hunter/services/keywordHunterService';
 import { callLLM } from '@/services/llmService';
 import { LocalDataStore } from '@/services/localDataStore';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';

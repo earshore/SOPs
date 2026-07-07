@@ -1,4 +1,4 @@
-.ppc-stat-tile {
+.ppc-search-terms-stat-tile {
   min-height: 86px;
   padding: 12px;
   border: 1px solid rgba(148, 163, 184, 0.22);
@@ -7,7 +7,7 @@
   box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.42);
 }
 
-.ppc-stat-label {
+.ppc-search-terms-stat-label {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -16,7 +16,7 @@
   font-weight: 700;
 }
 
-.ppc-stat-label i {
+.ppc-search-terms-stat-label i {
   width: 18px;
   height: 18px;
   display: inline-flex;
@@ -25,7 +25,7 @@
   border-radius: 6px;
 }
 
-.ppc-stat-number {
+.ppc-search-terms-stat-number {
   margin-top: 10px;
   color: #0f172a;
   font-size: 22px;
@@ -34,22 +34,22 @@
   font-variant-numeric: tabular-nums;
 }
 
-.ppc-stat-tile-blue .ppc-stat-label i {
+.ppc-search-terms-stat-tile-blue .ppc-search-terms-stat-label i {
   background: #dbeafe;
   color: var(--color-blue-600);
 }
 
-.ppc-stat-tile-green .ppc-stat-label i {
+.ppc-search-terms-stat-tile-green .ppc-search-terms-stat-label i {
   background: #d1fae5;
   color: var(--color-emerald-600);
 }
 
-.ppc-stat-tile-orange .ppc-stat-label i {
+.ppc-search-terms-stat-tile-orange .ppc-search-terms-stat-label i {
   background: #ffedd5;
   color: var(--color-orange-600);
 }
 
-.ppc-stat-tile-violet .ppc-stat-label i {
+.ppc-search-terms-stat-tile-violet .ppc-search-terms-stat-label i {
   background: #ede9fe;
   color: var(--color-violet-600);
 }

@@ -1,3 +1,3 @@
-import '../styles.css';
+import './styles.css';
 
-export { clearPlaygroundThreadStore, mount, unmount } from './controller';
+export { clearDeepChatThreadStore, mount, unmount } from './controller';

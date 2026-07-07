@@ -1,8 +1,8 @@
 export function getAnalysisSettingInputs(container: HTMLElement): HTMLInputElement[] {
   return getInputsByIds(container, [
-    'ppc-use-agent',
-    'ppc-allow-local-fallback',
-    'ppc-use-context',
+    'ppc-search-terms-use-agent',
+    'ppc-search-terms-allow-local-fallback',
+    'ppc-search-terms-use-context',
   ]);
 }
 

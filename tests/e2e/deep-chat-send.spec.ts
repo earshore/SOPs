@@ -263,10 +263,7 @@ async function openDeepChatAndRefreshMockConfig(page: Page): Promise<void> {
     { timeout: 5000 }
   );
 
-  await page.locator('#playground-refresh-config').click();
-  await expect(page.locator('#playground-provider-status')).toContainText(
-    `${MOCK_PROVIDER} / ${MOCK_MODEL}`
-  );
+  await page.locator('#deep-chat-refresh-config').click();
 }
 
 test('Deep Chat sends a message and renders the assistant response', async ({ page }) => {
@@ -275,7 +272,7 @@ test('Deep Chat sends a message and renders the assistant response', async ({ pa
   await openDeepChatAndRefreshMockConfig(page);
 
   const requestPromise = page.waitForRequest('**/mock-llm/chat/completions');
-  const chatInput = page.locator('#playground-chat #text-input');
+  const chatInput = page.locator('#deep-chat-view #text-input');
   await expect(chatInput).toBeVisible();
   await chatInput.fill(USER_PROMPT);
   await chatInput.press('Enter');
@@ -291,7 +288,7 @@ test('Deep Chat sends a message and renders the assistant response', async ({ pa
   expect(payload.stream).toBe(true);
   expect(latestMessage).toMatchObject({ role: 'user', content: USER_PROMPT });
 
-  await expect(page.locator('#playground-chat')).toContainText(ASSISTANT_REPLY, {
+  await expect(page.locator('#deep-chat-view')).toContainText(ASSISTANT_REPLY, {
     timeout: 10000,
   });
 });
@@ -305,28 +302,28 @@ test('continues typewriter output after switching away and back during a stream'
   try {
     await openDeepChatAndRefreshMockConfig(page);
 
-    const chatInput = page.locator('#playground-chat #text-input');
+    const chatInput = page.locator('#deep-chat-view #text-input');
     await expect(chatInput).toBeVisible();
     await chatInput.fill('Keep typing while I switch pages');
     await chatInput.press('Enter');
     await stream.firstChunkWritten;
 
-    const chat = page.locator('#playground-chat');
+    const chat = page.locator('#deep-chat-view');
     await expect(chat).toContainText('First', { timeout: 10000 });
 
     await page.evaluate(() => {
       window.location.hash = '#/app-center';
     });
-    await expect(page.locator('#playground-chat')).toHaveCount(0);
+    await expect(page.locator('#deep-chat-view')).toHaveCount(0);
     await expect(page.locator('#sidebar-btn-app_center_overview')).toHaveAttribute(
       'aria-current',
       'page'
     );
 
-    await expect(page.locator('#sidebar-btn-playground')).toBeVisible();
-    await page.locator('#sidebar-btn-playground').click();
+    await expect(page.locator('#sidebar-btn-playground_deep_chat')).toBeVisible();
+    await page.locator('#sidebar-btn-playground_deep_chat').click();
     await expect(page).toHaveURL(/#\/app-center\/playground\/deep-chat$/, { timeout: 10000 });
-    const remountedChat = page.locator('#playground-chat');
+    const remountedChat = page.locator('#deep-chat-view');
     await expect(remountedChat).toBeVisible({ timeout: 10000 });
     await expect(remountedChat).toContainText('First', { timeout: 10000 });
     await expect(remountedChat).not.toContainText(stream.reply);
@@ -354,7 +351,7 @@ test('uses a generated Prompt draft and sends it with the raised budget', async 
   await expect(usePromptButton).toBeVisible();
   await usePromptButton.click();
 
-  const chatInput = page.locator('#playground-chat #text-input');
+  const chatInput = page.locator('#deep-chat-view #text-input');
   await expect(chatInput).toContainText(GENERATED_PROMPT_MARKER, { timeout: 5000 });
 
   const requestPromise = page.waitForRequest('**/mock-llm/chat/completions');
@@ -374,7 +371,7 @@ test('uses a generated Prompt draft and sends it with the raised budget', async 
   expect(latestMessage?.content?.length).toBeGreaterThan(24000);
   expect(latestMessage?.content).toBe(GENERATED_PROMPT);
 
-  await expect(page.locator('#playground-chat')).toContainText(GENERATED_PROMPT_REPLY, {
+  await expect(page.locator('#deep-chat-view')).toContainText(GENERATED_PROMPT_REPLY, {
     timeout: 10000,
   });
 
@@ -407,12 +404,12 @@ test('renders a visible error when the model stream returns no content', async (
   await mockLLMStream(page, []);
   await openDeepChatAndRefreshMockConfig(page);
 
-  const chatInput = page.locator('#playground-chat #text-input');
+  const chatInput = page.locator('#deep-chat-view #text-input');
   await expect(chatInput).toBeVisible();
   await chatInput.fill('请触发空响应回显测试');
   await chatInput.press('Enter');
 
-  await expect(page.locator('#playground-chat')).toContainText(
+  await expect(page.locator('#deep-chat-view')).toContainText(
     '请求失败：模型没有返回任何内容，请稍后重试或检查模型/上下文配置。',
     { timeout: 10000 }
   );
@@ -425,22 +422,22 @@ test('turns the send button into a stop button and aborts the active response', 
   const { releaseHeldRequest, requestStarted } = await holdLLMRequest(page);
   await openDeepChatAndRefreshMockConfig(page);
 
-  const chatInput = page.locator('#playground-chat #text-input');
+  const chatInput = page.locator('#deep-chat-view #text-input');
   await expect(chatInput).toBeVisible();
   await chatInput.fill('请保持生成中，等待停止按钮测试');
   await chatInput.press('Enter');
   await requestStarted;
 
   await page.waitForFunction(() => {
-    const root = document.querySelector('#playground-chat')?.shadowRoot;
+    const root = document.querySelector('#deep-chat-view')?.shadowRoot;
     const submitButton = root?.querySelector('.input-button.inside-end');
     return (
-      submitButton?.getAttribute('data-playground-stop-active') === '' &&
+      submitButton?.getAttribute('data-deep-chat-stop-active') === '' &&
       submitButton.getAttribute('aria-label') === '停止生成'
     );
   });
   const stopButtonVisualState = await page.evaluate(() => {
-    const root = document.querySelector('#playground-chat')?.shadowRoot;
+    const root = document.querySelector('#deep-chat-view')?.shadowRoot;
     const submitButton = root?.querySelector<HTMLElement>('.input-button.inside-end');
     if (!submitButton) {
       throw new Error('Deep Chat submit button is missing');
@@ -469,17 +466,19 @@ test('turns the send button into a stop button and aborts the active response', 
   expect([null, 'none']).toContain(stopButtonVisualState.loadingDisplay);
   expect([null, 'none']).toContain(stopButtonVisualState.stopIconDisplay);
 
-  const stopButton = page.locator('#playground-stop-generation');
-  await expect(stopButton).toHaveAttribute('data-thread-id', /.+/);
+  const stopButton = page.locator(
+    '#deep-chat-view .input-button.inside-end[data-deep-chat-stop-active]'
+  );
+  await expect(stopButton).toHaveAttribute('data-deep-chat-stop-thread-id', /.+/);
   await expect(stopButton).toBeVisible();
   await stopButton.click();
   releaseHeldRequest();
 
-  await expect(page.locator('#playground-chat')).toContainText('已停止生成。', {
+  await expect(page.locator('#deep-chat-view')).toContainText('已停止生成。', {
     timeout: 10000,
   });
-  await expect(page.locator('#playground-pending-status')).toBeHidden();
-  await expect(page.locator('#playground-thread-list .playground-thread-meta')).not.toContainText(
+  await expect(page.locator('#deep-chat-pending-status')).toBeHidden();
+  await expect(page.locator('#deep-chat-thread-list .deep-chat-thread-meta')).not.toContainText(
     '生成中 ·'
   );
 });

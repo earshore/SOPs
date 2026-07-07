@@ -163,9 +163,9 @@ export const MENU_CONFIG: MenuConfig = {
       themeColor: 'orange', // ✅ Claude 感暖色系
     },
 
-    // Keyword Tracker 模块配置
-    keyword_tracker: {
-      id: 'keyword_tracker',
+    // Keyword Hunter 模块配置
+    keyword_hunter: {
+      id: 'keyword_hunter',
       contextId: 'apps',
       parentModuleId: 'app_center',
       title: 'Keyword Hunter',
@@ -332,8 +332,8 @@ export const MENU_CONFIG: MenuConfig = {
       version: 'v1.0',
       description: '轻量级 AI 对话试验台，当前内置 Deep Chat 页面用于快速问答与 Prompt 试验。',
     },
-    keyword_tracker: {
-      id: 'keyword_tracker',
+    keyword_hunter: {
+      id: 'keyword_hunter',
       label: 'Keyword Hunter',
       icon: 'fas fa-search',
       color: 'rose', // 与应用总览的 Keyword Hunter 玫红主视觉保持一致

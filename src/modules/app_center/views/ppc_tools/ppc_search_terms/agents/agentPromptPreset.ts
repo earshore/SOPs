@@ -1,7 +1,7 @@
-import { PPC_LLM_ACTION_TYPES } from './agentTypes';
+import { PPC_SEARCH_TERMS_LLM_ACTION_TYPES } from './agentTypes';
 import type { Thresholds } from '../types';
 
-export const PPC_AGENT_PRESET = {
+export const PPC_SEARCH_TERMS_AGENT_PRESET = {
   name: 'PPC Search Term Optimization Agent',
   skill: 'Amazon PPC 搜索词动作分析：先用指标规则做确定性判断，再用语义模型复核低置信候选。',
   mcp: 'local-first-analysis',
@@ -21,9 +21,9 @@ export const PPC_AGENT_PRESET = {
   ],
 };
 
-export function buildPpcAgentRules(thresholds: Thresholds): Record<string, unknown> {
+export function buildPpcSearchTermsAgentRules(thresholds: Thresholds): Record<string, unknown> {
   return {
-    actionTypes: PPC_LLM_ACTION_TYPES,
+    actionTypes: PPC_SEARCH_TERMS_LLM_ACTION_TYPES,
     definitions: {
       negative_exact: '搜索词浪费预算、无订单或明显不相关，建议否精准。',
       harvest_exact: '搜索词有稳定转化且 ACOS 达标，建议加精准投放。',

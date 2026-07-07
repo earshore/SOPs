@@ -1,10 +1,10 @@
 import { ACTION_LABELS } from '../actions/actionMetadata';
 import type { AnalysisResult } from '../analysis/analysisEngine';
-import type { PpcLlmDecision } from '../services/llmAnalysisService';
+import type { PpcSearchTermsLlmDecision } from '../services/llmAnalysisService';
 import type { AnalyzedRow } from '../types';
 
 export function hasProgressDecisions(
-  decisions: PpcLlmDecision[],
+  decisions: PpcSearchTermsLlmDecision[],
   result: AnalysisResult | null
 ): result is AnalysisResult {
   return decisions.length > 0 && result !== null;
@@ -12,7 +12,7 @@ export function hasProgressDecisions(
 
 export function applyModelDecisions(
   rows: AnalyzedRow[],
-  decisions: PpcLlmDecision[],
+  decisions: PpcSearchTermsLlmDecision[],
   reviewedIds = new Set<string>()
 ): AnalyzedRow[] {
   const byId = new Map(decisions.map(decisionItem => [decisionItem.id, decisionItem]));
@@ -33,7 +33,7 @@ export function applyModelDecisions(
 
 export function applyPartialModelDecisions(
   rows: AnalyzedRow[],
-  decisions: PpcLlmDecision[]
+  decisions: PpcSearchTermsLlmDecision[]
 ): AnalyzedRow[] {
   const byId = new Map(decisions.map(decisionItem => [decisionItem.id, decisionItem]));
 
@@ -48,7 +48,7 @@ export function applyPartialModelDecisions(
 
 function mergeDecisionIntoRow(
   row: AnalyzedRow,
-  modelDecision: PpcLlmDecision,
+  modelDecision: PpcSearchTermsLlmDecision,
   isReviewed: boolean
 ): AnalyzedRow {
   const nextRow: AnalyzedRow = {

@@ -70,7 +70,7 @@ export function createActionListState({
   }
 
   function handleSearch(container: HTMLElement): void {
-    setSearchQuery(container, getInput(container, 'ppc-action-search')?.value || '');
+    setSearchQuery(container, getInput(container, 'ppc-search-terms-action-search')?.value || '');
     render(container);
   }
 
@@ -82,12 +82,12 @@ export function createActionListState({
   function clearSearch(container: HTMLElement): void {
     setSearchQuery(container, '');
     render(container);
-    getInput(container, 'ppc-action-search')?.focus();
+    getInput(container, 'ppc-search-terms-action-search')?.focus();
   }
 
   function setSearchQuery(container: HTMLElement, query: string): void {
     activeSearchQuery = query.trim();
-    const input = getInput(container, 'ppc-action-search');
+    const input = getInput(container, 'ppc-search-terms-action-search');
     if (input && input.value !== activeSearchQuery) input.value = activeSearchQuery;
   }
 

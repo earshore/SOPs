@@ -348,13 +348,13 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     confirmMessage: '这会删除本浏览器中的采集历史和历史报告，建议先导出备份。继续？',
   },
   'chat-history': {
-    label: 'Playground 聊天记录',
-    description: 'Playground 对话线程和消息上下文',
+    label: 'Deep Chat 聊天记录',
+    description: 'Deep Chat 对话线程和消息上下文',
     icon: 'fa-comments',
     iconClass: 'bg-violet-50 text-violet-600 ring-violet-100',
     buttonClass: 'border-violet-100 bg-violet-50 text-violet-700 hover:bg-violet-100',
     actionLabel: '清理聊天',
-    confirmMessage: '这会删除 Playground 本地聊天线程，建议先导出备份。继续？',
+    confirmMessage: '这会删除 Deep Chat 本地聊天线程，建议先导出备份。继续？',
   },
   'keyword-history': {
     label: 'Keyword Hunter 历史',
@@ -483,9 +483,9 @@ async function syncLocalDataRuntimeAfterBucketClear(bucketId: LocalDataBucketId)
   }
 
   if (bucketId === 'chat-history') {
-    const { clearPlaygroundThreadStore } =
+    const { clearDeepChatThreadStore } =
       await import('../../modules/app_center/views/playground/deep-chat');
-    await clearPlaygroundThreadStore();
+    await clearDeepChatThreadStore();
     return;
   }
 

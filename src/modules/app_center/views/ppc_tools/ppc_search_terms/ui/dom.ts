@@ -1,5 +1,5 @@
 export function setAnalyzeButtonState(container: HTMLElement, isAnalyzing: boolean): void {
-  const button = getButton(container, 'ppc-btn-parse');
+  const button = getButton(container, 'ppc-search-terms-btn-parse');
   if (!button) return;
 
   button.disabled = isAnalyzing;

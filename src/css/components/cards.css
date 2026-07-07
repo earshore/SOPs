@@ -175,7 +175,7 @@
   min-width: 0;
 }
 
-.kt-input-card {
+.keyword-hunter-input-card {
   display: flex;
   flex-direction: column;
   background: var(--surface-card, white);
@@ -187,12 +187,12 @@
   box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
 }
 
-.kt-input-card:hover {
+.keyword-hunter-input-card:hover {
   border-color: var(--color-border-default, rgba(148, 163, 184, 0.32));
   box-shadow: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
 }
 
-.kt-surface-card {
+.keyword-hunter-surface-card {
   background: var(--surface-card, white);
   border-color: var(--border-muted, var(--color-slate-200));
   border-radius: var(--radius-card, var(--rounded-md));

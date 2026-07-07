@@ -14,7 +14,7 @@ import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer'
 import BaseModule from '../../../../../common/BaseModule';
 import { showToast } from '../../../../../common/ui';
 import { navigateToRouteId } from '../../../../../common/router/initRouter';
-import * as KeywordService from '../services/trackerService';
+import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { getLlmProviderConfig } from '../../../../../common/config/llmProviders';
 import { fetchModelsFromApi } from '../../../../../services/llmService';
@@ -30,7 +30,7 @@ import { createSafeFragment } from '../../../../../common/utils/security';
 import { updateRuntimeCssRule } from '../../../../../common/utils/runtimeStyles';
 import type { KeywordHunterSnapshot } from '../../../../../types/modules-business';
 import type { LLMProviderConfig } from '../../../../../types/state';
-import '../keyword_hunter_style.css';
+import '../styles.css';
 
 // ==========================================
 // Module State
@@ -61,10 +61,10 @@ interface TranslateButtonState {
 
 interface ActiveTranslationRun {
   processedCopy: string;
-  promise: ReturnType<typeof KeywordService.fetchImmersionTranslation>;
+  promise: ReturnType<typeof KeywordHunterService.fetchImmersionTranslation>;
   status: 'pending' | 'success' | 'failure';
   error?: Error;
-  llmStatus?: KeywordService.KeywordHunterLlmStatus;
+  llmStatus?: KeywordHunterService.KeywordHunterLlmStatus;
 }
 
 interface TranslationModelRefreshConfig {
@@ -92,8 +92,8 @@ interface HighlightedTranslationParagraph {
   translation: string | null;
 }
 
-type KeywordTrackerStoreState = ReturnType<typeof appStore.getState>['keywordTracker'];
-type MatchedKeywordEntry = KeywordTrackerStoreState['matchedKeywords'][number] | string;
+type KeywordHunterStoreState = ReturnType<typeof appStore.getState>['keywordTracker'];
+type MatchedKeywordEntry = KeywordHunterStoreState['matchedKeywords'][number] | string;
 type TranslationModelOption = NonNullable<LLMProviderConfig['models']>[number];
 const SEO_PROCESS_TARGET_ID = 'keyword-hunter-seo-process';
 
@@ -256,7 +256,7 @@ function createTranslationModelOption(
 }
 
 function setTranslationModelStatus(message: string, role: 'status' | 'alert' = 'status'): void {
-  const status = document.getElementById('kt-translation-model-status');
+  const status = document.getElementById('keyword-hunter-translation-model-status');
   if (!status) return;
   status.textContent = message;
   status.setAttribute('role', role);
@@ -264,8 +264,10 @@ function setTranslationModelStatus(message: string, role: 'status' | 'alert' = '
 }
 
 function renderTranslationModelRefreshButton(): void {
-  const button = document.getElementById('kt-refresh-models-btn') as HTMLButtonElement | null;
-  const icon = document.getElementById('kt-refresh-models-icon');
+  const button = document.getElementById(
+    'keyword-hunter-refresh-models-btn'
+  ) as HTMLButtonElement | null;
+  const icon = document.getElementById('keyword-hunter-refresh-models-icon');
   if (!button) return;
 
   button.disabled = isRefreshingTranslationModels || !getActiveLlmProvider();
@@ -283,7 +285,9 @@ function renderTranslationModelRefreshButton(): void {
 }
 
 function renderTranslationModelSelector(): void {
-  const select = document.getElementById('kt-translation-model-select') as HTMLSelectElement | null;
+  const select = document.getElementById(
+    'keyword-hunter-translation-model-select'
+  ) as HTMLSelectElement | null;
   if (!select) return;
 
   const provider = getActiveLlmProvider();
@@ -440,7 +444,7 @@ async function refreshTranslationModels(): Promise<void> {
   } catch (error) {
     ErrorService.handle(getError(error), {
       action: 'refreshTranslationModels',
-      module: 'keywordTracker',
+      module: 'keywordHunter',
       notify: false,
     });
     const message = getModelFetchErrorMessage(error);
@@ -456,7 +460,7 @@ function getKeywordSet(sets: Set<string>[], index: number): Set<string> {
   return sets[index] ?? new Set<string>();
 }
 
-function getDefaultProcessKeywordTrackerState(): KeywordTrackerStoreState {
+function getDefaultProcessKeywordHunterState(): KeywordHunterStoreState {
   const defaultMatchSettings = getRuntimeKeywordHunterSeoOptions();
   return {
     keywords: [],
@@ -478,10 +482,10 @@ function getDefaultProcessKeywordTrackerState(): KeywordTrackerStoreState {
   };
 }
 
-function ensureKeywordTrackerState(): KeywordTrackerStoreState {
+function ensureKeywordHunterState(): KeywordHunterStoreState {
   const currentState = appStore.getState();
   if (!currentState.keywordTracker) {
-    currentState.updateKeywordTracker(getDefaultProcessKeywordTrackerState());
+    currentState.updateKeywordTracker(getDefaultProcessKeywordHunterState());
   }
 
   return appStore.getState().keywordTracker;
@@ -498,7 +502,7 @@ function getLatestSnapshotForProcess(
 }
 
 async function restoreLatestProcessSnapshotIfNeeded(): Promise<void> {
-  const tracker = ensureKeywordTrackerState();
+  const tracker = ensureKeywordHunterState();
   if (tracker.processedCopy?.trim()) {
     return;
   }
@@ -511,23 +515,23 @@ async function restoreLatestProcessSnapshotIfNeeded(): Promise<void> {
   } catch (error) {
     ErrorService.handle(error as Error, {
       action: 'restoreLatestProcessSnapshot',
-      module: 'keywordTracker',
+      module: 'keywordHunter',
       notify: false,
     });
   }
 }
 
 function getProcessCopyTextFromDisplay(): string {
-  const tracker = ensureKeywordTrackerState();
+  const tracker = ensureKeywordHunterState();
   if (tracker.translationMode && tracker.paragraphs.length > 0) {
     return tracker.processedCopy || getOriginalTextFromTranslationParagraphs(tracker);
   }
 
-  const displayEl = document.getElementById('kt-copy-display');
+  const displayEl = document.getElementById('keyword-hunter-copy-display');
   return displayEl ? displayEl.innerText : '';
 }
 
-function getOriginalTextFromTranslationParagraphs(tracker: KeywordTrackerStoreState): string {
+function getOriginalTextFromTranslationParagraphs(tracker: KeywordHunterStoreState): string {
   return tracker.paragraphs
     .map(paragraph =>
       typeof paragraph === 'object' && 'original' in paragraph ? paragraph.original : paragraph
@@ -537,9 +541,9 @@ function getOriginalTextFromTranslationParagraphs(tracker: KeywordTrackerStoreSt
 }
 
 function saveProcessCopyText(copyText: string): void {
-  const tracker = ensureKeywordTrackerState();
+  const tracker = ensureKeywordHunterState();
   const changed = copyText !== tracker.processedCopy;
-  const metrics = KeywordService.computeKeywordTrackerMetrics(
+  const metrics = KeywordHunterService.computeKeywordHunterMetrics(
     copyText,
     tracker.keywords,
     tracker.settings
@@ -571,7 +575,7 @@ function saveProcessCopyText(copyText: string): void {
  * 保存处理状态到 state
  */
 function saveProcessStateToState(): void {
-  ensureKeywordTrackerState();
+  ensureKeywordHunterState();
 
   const copyText = getProcessCopyTextFromDisplay();
   if (copyText.trim()) {
@@ -580,7 +584,7 @@ function saveProcessStateToState(): void {
 
   // 保存翻译显示状态
   const showTransCheckbox = document.getElementById(
-    'kt-show-translation'
+    'keyword-hunter-show-translation'
   ) as HTMLInputElement | null;
   if (showTransCheckbox) {
     appStore.getState().updateKeywordTracker({ showTranslation: showTransCheckbox.checked });
@@ -595,7 +599,7 @@ async function restoreProcessStateFromState(): Promise<void> {
 
   // 恢复翻译显示状态
   const showTransCheckbox = document.getElementById(
-    'kt-show-translation'
+    'keyword-hunter-show-translation'
   ) as HTMLInputElement | null;
   const currentState = appStore.getState();
   if (showTransCheckbox && currentState.keywordTracker) {
@@ -637,13 +641,13 @@ function renderProcessModule(): void {
  * 渲染分析统计数据（从 analysis 模块移动过来）
  */
 function renderAnalysisStats(): void {
-  const tracker = ensureKeywordTrackerState();
+  const tracker = ensureKeywordHunterState();
   const stats = getAnalysisStats(tracker);
   renderCoverageStats(stats);
   renderWordFrequencyStats(tracker);
 }
 
-function getAnalysisStats(tracker: KeywordTrackerStoreState): AnalysisStats {
+function getAnalysisStats(tracker: KeywordHunterStoreState): AnalysisStats {
   const total = tracker.keywords ? tracker.keywords.length : 0;
   const matched = tracker.matchedKeywords ? tracker.matchedKeywords.length : 0;
   const unmatched = tracker.unmatchedKeywords ? tracker.unmatchedKeywords.length : 0;
@@ -654,25 +658,25 @@ function getAnalysisStats(tracker: KeywordTrackerStoreState): AnalysisStats {
 
 function renderCoverageStats(stats: AnalysisStats): void {
   // 更新覆盖率
-  const rateEl = document.getElementById('kt-coverage-rate');
+  const rateEl = document.getElementById('keyword-hunter-coverage-rate');
   if (rateEl) rateEl.textContent = stats.rate + '%';
 
-  const barEl = document.getElementById('kt-coverage-bar') as HTMLElement | null;
+  const barEl = document.getElementById('keyword-hunter-coverage-bar') as HTMLElement | null;
   if (barEl) setProgressValue(barEl, stats.rate);
 
   // 更新统计数据
-  const matchedEl = document.getElementById('kt-stat-matched');
+  const matchedEl = document.getElementById('keyword-hunter-stat-matched');
   if (matchedEl) matchedEl.textContent = stats.matched.toString();
 
-  const unmatchedEl = document.getElementById('kt-stat-unmatched');
+  const unmatchedEl = document.getElementById('keyword-hunter-stat-unmatched');
   if (unmatchedEl) unmatchedEl.textContent = stats.unmatched.toString();
 
-  const totalEl = document.getElementById('kt-stat-total');
+  const totalEl = document.getElementById('keyword-hunter-stat-total');
   if (totalEl) totalEl.textContent = stats.total.toString();
 }
 
-function renderWordFrequencyStats(tracker: KeywordTrackerStoreState): void {
-  const freqList = document.getElementById('kt-word-frequency-list');
+function renderWordFrequencyStats(tracker: KeywordHunterStoreState): void {
+  const freqList = document.getElementById('keyword-hunter-word-frequency-list');
   if (!freqList || !tracker.wordFrequency) return;
 
   const matchedKeywordRoots = collectMatchedKeywordRoots(tracker.matchedKeywords);
@@ -726,7 +730,7 @@ function collectMatchedKeywordRoots(matchedKeywords: readonly MatchedKeywordEntr
   return roots;
 }
 
-function collectUnmatchedKeywordRoots(tracker: KeywordTrackerStoreState): Set<string> {
+function collectUnmatchedKeywordRoots(tracker: KeywordHunterStoreState): Set<string> {
   const roots = new Set<string>();
   const highFreqWordsSet = new Set(tracker.wordFrequency.map(([word]) => word.toLowerCase()));
 
@@ -861,9 +865,13 @@ function createUnmatchedRootTag(root: string): HTMLElement {
  * 更新翻译按钮状态
  */
 function updateTranslateButton(): void {
-  const transBtn = document.getElementById('kt-translate-btn') as HTMLButtonElement | null;
-  const transBtnText = document.getElementById('kt-translate-btn-text');
-  const transCheckbox = document.getElementById('kt-show-translation') as HTMLInputElement | null;
+  const transBtn = document.getElementById(
+    'keyword-hunter-translate-btn'
+  ) as HTMLButtonElement | null;
+  const transBtnText = document.getElementById('keyword-hunter-translate-btn-text');
+  const transCheckbox = document.getElementById(
+    'keyword-hunter-show-translation'
+  ) as HTMLInputElement | null;
 
   const hasContent = hasProcessedCopy();
   const hasTranslationData = hasTranslationParagraphs();
@@ -903,15 +911,15 @@ function updateTranslateActionButton(
   if (state.hasContent && !state.hasTranslationData) {
     transBtn.disabled = false;
     transBtnText.textContent = 'AI 沉浸式翻译';
-    transBtn.classList.remove('kt-btn-disabled');
-    transBtn.classList.add('kt-btn-active');
+    transBtn.classList.remove('keyword-hunter-btn-disabled');
+    transBtn.classList.add('keyword-hunter-btn-active');
     return;
   }
 
   transBtn.disabled = true;
   transBtnText.textContent = state.hasTranslationData ? '翻译已完成' : 'AI 沉浸式翻译';
-  transBtn.classList.add('kt-btn-disabled');
-  transBtn.classList.remove('kt-btn-active');
+  transBtn.classList.add('keyword-hunter-btn-disabled');
+  transBtn.classList.remove('keyword-hunter-btn-active');
 }
 
 function getTranslationElements(): {
@@ -921,10 +929,10 @@ function getTranslationElements(): {
   status: HTMLElement | null;
 } {
   return {
-    btn: document.getElementById('kt-translate-btn') as HTMLButtonElement | null,
-    progress: document.getElementById('kt-translate-progress'),
-    text: document.getElementById('kt-translate-btn-text'),
-    status: document.getElementById('kt-translate-status'),
+    btn: document.getElementById('keyword-hunter-translate-btn') as HTMLButtonElement | null,
+    progress: document.getElementById('keyword-hunter-translate-progress'),
+    text: document.getElementById('keyword-hunter-translate-btn-text'),
+    status: document.getElementById('keyword-hunter-translate-status'),
   };
 }
 
@@ -945,8 +953,8 @@ function renderTranslationPendingState(): void {
   if (btn) {
     btn.disabled = true;
     btn.setAttribute('aria-busy', 'true');
-    btn.classList.add('kt-btn-disabled');
-    btn.classList.remove('kt-btn-active');
+    btn.classList.add('keyword-hunter-btn-disabled');
+    btn.classList.remove('keyword-hunter-btn-active');
   }
   if (progress) {
     progress.classList.remove('hidden');
@@ -979,7 +987,7 @@ function renderTranslationStatusMessage(
   }
 }
 
-function renderTranslationLlmStatus(status: KeywordService.KeywordHunterLlmStatus): void {
+function renderTranslationLlmStatus(status: KeywordHunterService.KeywordHunterLlmStatus): void {
   const elements = getTranslationElements();
 
   if (status.stage === 'cache-hit') {
@@ -1035,8 +1043,8 @@ function renderTranslationFailureState(): void {
   if (btn) {
     btn.disabled = false;
     btn.removeAttribute('aria-busy');
-    btn.classList.remove('kt-btn-disabled');
-    btn.classList.add('kt-btn-active');
+    btn.classList.remove('keyword-hunter-btn-disabled');
+    btn.classList.add('keyword-hunter-btn-active');
   }
   if (status) {
     status.textContent = 'AI 翻译失败，请重试';
@@ -1065,11 +1073,12 @@ function updateTranslationCheckbox(
  * 渲染文案显示区域
  */
 function renderCopyDisplay(): void {
-  const display = document.getElementById('kt-copy-display');
+  const display = document.getElementById('keyword-hunter-copy-display');
   if (!display) return;
 
-  const showTrans = (document.getElementById('kt-show-translation') as HTMLInputElement | null)
-    ?.checked;
+  const showTrans = (
+    document.getElementById('keyword-hunter-show-translation') as HTMLInputElement | null
+  )?.checked;
   const tracker = appStore.getState().keywordTracker;
 
   if (shouldRenderTranslationParagraphs(tracker)) {
@@ -1080,12 +1089,12 @@ function renderCopyDisplay(): void {
   renderProcessedCopy(display, tracker.processedCopy);
 }
 
-function shouldRenderTranslationParagraphs(tracker: KeywordTrackerStoreState): boolean {
+function shouldRenderTranslationParagraphs(tracker: KeywordHunterStoreState): boolean {
   return Boolean(tracker.translationMode && tracker.paragraphs && tracker.paragraphs.length > 0);
 }
 
 function getHighlightedTranslationParagraphs(
-  tracker: KeywordTrackerStoreState,
+  tracker: KeywordHunterStoreState,
   showTranslation: boolean | undefined
 ): HighlightedTranslationParagraph[] {
   return (tracker.paragraphs || [])
@@ -1177,11 +1186,11 @@ function buildEmptyCharacterKeywordMap(length: number): Set<string>[] {
 function addKeywordRanges(
   charKeywords: Set<string>[],
   text: string,
-  tracker: KeywordTrackerStoreState,
+  tracker: KeywordHunterStoreState,
   keyword: string
 ): void {
   const kwLower = keyword.toLowerCase();
-  const ranges = KeywordService.findKeywordMatchRanges(text, keyword, tracker.settings);
+  const ranges = KeywordHunterService.findKeywordMatchRanges(text, keyword, tracker.settings);
 
   ranges.forEach(({ start, end }) => {
     for (let i = start; i < end; i++) {
@@ -1190,7 +1199,7 @@ function addKeywordRanges(
   });
 }
 
-function buildCharacterKeywordMap(text: string, tracker: KeywordTrackerStoreState): Set<string>[] {
+function buildCharacterKeywordMap(text: string, tracker: KeywordHunterStoreState): Set<string>[] {
   const charKeywords = buildEmptyCharacterKeywordMap(text.length);
 
   tracker.matchedKeywords.forEach(item => {
@@ -1286,7 +1295,7 @@ function setsEqual(a: Set<string>, b: Set<string>): boolean {
  * 渲染浮动关键词窗口（统一展示已匹配和未匹配）
  */
 function renderFloatingKeywords(): void {
-  const allContainer = document.getElementById('kt-all-keywords');
+  const allContainer = document.getElementById('keyword-hunter-all-keywords');
 
   if (!allContainer) return;
 
@@ -1393,13 +1402,13 @@ function createEmptyKeywordsElement(): HTMLElement {
 }
 
 function updateFloatingKeywordCounts(): void {
-  const matchedCount = document.getElementById('kt-tab-matched-count');
+  const matchedCount = document.getElementById('keyword-hunter-tab-matched-count');
   const tracker = appStore.getState().keywordTracker;
   if (matchedCount) {
     matchedCount.textContent = tracker.matchedKeywords.length.toString();
   }
 
-  const unmatchedCount = document.getElementById('kt-tab-unmatched-count');
+  const unmatchedCount = document.getElementById('keyword-hunter-tab-unmatched-count');
   if (unmatchedCount) {
     unmatchedCount.textContent = tracker.unmatchedKeywords.length.toString();
   }
@@ -1409,7 +1418,7 @@ function updateFloatingKeywordCounts(): void {
  * 更新最小化徽章
  */
 function updateMinimizedBadge(): void {
-  const badge = document.getElementById('kt-minimized-badge');
+  const badge = document.getElementById('keyword-hunter-minimized-badge');
   if (badge) {
     const tracker = appStore.getState().keywordTracker;
     const totalKeywords =
@@ -1444,7 +1453,7 @@ async function syncToInput(): Promise<void> {
       .join('\n');
   } else {
     // 普通模式：直接获取显示区域的文本
-    const display = document.getElementById('kt-copy-display');
+    const display = document.getElementById('keyword-hunter-copy-display');
     text = display ? display.innerText : '';
   }
 
@@ -1459,7 +1468,7 @@ async function syncToInput(): Promise<void> {
   showToast('已同步原文到输入格式化');
 
   // 切换到输入模块
-  await navigateToRouteId('kw_input');
+  await navigateToRouteId('keyword_hunter_input');
 }
 
 async function goToAnalysis(): Promise<void> {
@@ -1471,7 +1480,7 @@ async function goToAnalysis(): Promise<void> {
     return;
   }
 
-  await navigateToRouteId('kw_analysis');
+  await navigateToRouteId('keyword_hunter_analysis');
 }
 
 function getError(error: unknown): Error {
@@ -1484,8 +1493,8 @@ function isTranslationRunForCurrentCopy(run: ActiveTranslationRun): boolean {
 
 function finalizeTranslationSuccess(
   run: ActiveTranslationRun,
-  pairs: Awaited<ReturnType<typeof KeywordService.fetchImmersionTranslation>>
-): Awaited<ReturnType<typeof KeywordService.fetchImmersionTranslation>> {
+  pairs: Awaited<ReturnType<typeof KeywordHunterService.fetchImmersionTranslation>>
+): Awaited<ReturnType<typeof KeywordHunterService.fetchImmersionTranslation>> {
   run.status = 'success';
   if (!isTranslationRunForCurrentCopy(run)) {
     return pairs;
@@ -1506,7 +1515,7 @@ async function persistTranslationSnapshot(): Promise<void> {
   } catch (error) {
     ErrorService.handle(getError(error), {
       action: 'saveTranslationSnapshot',
-      module: 'keywordTracker',
+      module: 'keywordHunter',
       notify: false,
     });
     const message = error instanceof Error ? error.message : '保存快照失败';
@@ -1530,7 +1539,7 @@ function startTranslationRun(processedCopy: string): ActiveTranslationRun {
     status: 'pending',
   };
 
-  run.promise = KeywordService.fetchImmersionTranslation(processedCopy, {
+  run.promise = KeywordHunterService.fetchImmersionTranslation(processedCopy, {
     onLlmStatus: status => {
       run.llmStatus = status;
       if (isTranslationRunForCurrentCopy(run)) {
@@ -1571,7 +1580,7 @@ function attachTranslationRunToPage(run: ActiveTranslationRun): boolean {
       if (viewVersion !== processViewVersion || !isTranslationRunForCurrentCopy(run)) return;
       ErrorService.handle(getError(error), {
         action: 'translateCopyImmersive',
-        module: 'keywordTracker',
+        module: 'keywordHunter',
       });
       renderTranslationFailureState();
     });
@@ -1598,7 +1607,7 @@ async function translateCopyImmersive(): Promise<void> {
  * 定位关键词在文案中的位置
  */
 function locateKeywordInCopy(keyword: string): void {
-  const container = document.getElementById('kt-copy-display');
+  const container = document.getElementById('keyword-hunter-copy-display');
   if (!container) return;
 
   const targetKw = keyword.toLowerCase();
@@ -1705,8 +1714,8 @@ function updateKeywordLocationIndex(targetKw: string, idx: number, groupCount: n
  * 点击词根后，在浮动窗口中高亮显示所有包含该词根的未匹配关键词
  */
 function locateUnmatchedRootInList(root: string): void {
-  const floatWin = document.getElementById('kt-keywords-floating');
-  const allKeywordsContainer = document.getElementById('kt-all-keywords');
+  const floatWin = document.getElementById('keyword-hunter-keywords-floating');
+  const allKeywordsContainer = document.getElementById('keyword-hunter-all-keywords');
 
   if (!allKeywordsContainer) {
     return;
@@ -1779,8 +1788,8 @@ function highlightRootKeywords(root: string, container: HTMLElement): void {
  * 最小化关键词窗口
  */
 function minimizeKeywordsWindow(): void {
-  const floatWinEl = document.getElementById('kt-keywords-floating');
-  const minBtn = document.getElementById('kt-keywords-minimized');
+  const floatWinEl = document.getElementById('keyword-hunter-keywords-floating');
+  const minBtn = document.getElementById('keyword-hunter-keywords-minimized');
 
   if (floatWinEl) {
     floatWinEl.classList.add('opacity-0', 'scale-95');
@@ -1800,8 +1809,8 @@ function minimizeKeywordsWindow(): void {
  * 恢复关键词窗口
  */
 function restoreKeywordsWindow(): void {
-  const floatWinEl = document.getElementById('kt-keywords-floating');
-  const minBtn = document.getElementById('kt-keywords-minimized');
+  const floatWinEl = document.getElementById('keyword-hunter-keywords-floating');
+  const minBtn = document.getElementById('keyword-hunter-keywords-minimized');
 
   if (minBtn) minBtn.classList.remove('show');
   if (floatWinEl) {
@@ -1824,7 +1833,7 @@ function restoreKeywordsWindow(): void {
  * 设置浮动窗口拖拽功能
  */
 function setupFloatingWindow(): void {
-  const el = document.getElementById('kt-keywords-floating') as HTMLElement | null;
+  const el = document.getElementById('keyword-hunter-keywords-floating') as HTMLElement | null;
   if (!el) return;
   const header = el.querySelector('.floating-header') as HTMLElement | null;
   if (!header) return;
@@ -1841,7 +1850,7 @@ function setupFloatingWindow(): void {
     floatWinState.offsetY = mouseEvent.clientY - rect.top;
 
     updateFloatingWindowPosition(rect.left, rect.top);
-    el.classList.add('kt-floating-window--positioned', 'is-dragging');
+    el.classList.add('keyword-hunter-floating-window--positioned', 'is-dragging');
     mouseEvent.preventDefault();
   });
 
@@ -1890,7 +1899,7 @@ function isInteractiveDragTarget(target: EventTarget | null): boolean {
 function updateFloatingWindowPosition(left: number, top: number): void {
   updateRuntimeCssRule(
     'keyword-floating-window-position',
-    '#kt-keywords-floating.kt-floating-window--positioned',
+    '#keyword-hunter-keywords-floating.keyword-hunter-floating-window--positioned',
     {
       left: `${Math.round(left)}px`,
       top: `${Math.round(top)}px`,
@@ -1902,8 +1911,8 @@ function updateFloatingWindowPosition(left: number, top: number): void {
  * 管理浮动窗口的显示/隐藏
  */
 function manageFloatingWindowVisibility(): void {
-  const floatWin = document.getElementById('kt-keywords-floating');
-  const minBtn = document.getElementById('kt-keywords-minimized');
+  const floatWin = document.getElementById('keyword-hunter-keywords-floating');
+  const minBtn = document.getElementById('keyword-hunter-keywords-minimized');
 
   if (!floatWin || !minBtn) return;
 
@@ -1945,7 +1954,9 @@ function setupEventListeners(container: HTMLElement): void {
   if (!container) return;
 
   // 翻译显示复选框
-  const checkTrans = document.getElementById('kt-show-translation') as HTMLInputElement | null;
+  const checkTrans = document.getElementById(
+    'keyword-hunter-show-translation'
+  ) as HTMLInputElement | null;
   if (checkTrans) {
     addEventListener(checkTrans, 'change', () => {
       saveProcessStateToState();
@@ -1953,47 +1964,47 @@ function setupEventListeners(container: HTMLElement): void {
     });
   }
 
-  const translationModelSelect = document.getElementById('kt-translation-model-select');
+  const translationModelSelect = document.getElementById('keyword-hunter-translation-model-select');
   if (translationModelSelect) {
     addEventListener(translationModelSelect, 'change', selectTranslationModel);
   }
 
-  const refreshModelsBtn = document.getElementById('kt-refresh-models-btn');
+  const refreshModelsBtn = document.getElementById('keyword-hunter-refresh-models-btn');
   if (refreshModelsBtn) {
     addEventListener(refreshModelsBtn, 'click', () => {
       void refreshTranslationModels();
     });
   }
 
-  const syncBtn = document.getElementById('kt-sync-to-input-btn');
+  const syncBtn = document.getElementById('keyword-hunter-sync-to-input-btn');
   if (syncBtn) {
     addEventListener(syncBtn, 'click', () => {
       void syncToInput();
     });
   }
 
-  const goAnalysisBtn = document.getElementById('kt-go-analysis-btn');
+  const goAnalysisBtn = document.getElementById('keyword-hunter-go-analysis-btn');
   if (goAnalysisBtn) {
     addEventListener(goAnalysisBtn, 'click', () => {
       void goToAnalysis();
     });
   }
 
-  const translateBtn = document.getElementById('kt-translate-btn');
+  const translateBtn = document.getElementById('keyword-hunter-translate-btn');
   if (translateBtn) {
     addEventListener(translateBtn, 'click', () => {
       void translateCopyImmersive();
     });
   }
 
-  const minimizeBtn = document.getElementById('kt-minimize-keywords-btn');
+  const minimizeBtn = document.getElementById('keyword-hunter-minimize-keywords-btn');
   if (minimizeBtn) {
     addEventListener(minimizeBtn, 'click', () => {
       minimizeKeywordsWindow();
     });
   }
 
-  const restoreBtn = document.getElementById('kt-keywords-minimized');
+  const restoreBtn = document.getElementById('keyword-hunter-keywords-minimized');
   if (restoreBtn) {
     addEventListener(restoreBtn, 'click', () => {
       restoreKeywordsWindow();
@@ -2007,7 +2018,7 @@ function setupEventListeners(container: HTMLElement): void {
 function handleProcessMountError(error: unknown): never {
   ErrorService.handle(error as Error, {
     action: 'mountProcessModule',
-    module: 'keywordTracker',
+    module: 'keywordHunter',
     notify: false,
   });
   throw error;
@@ -2040,7 +2051,7 @@ class KeywordHunterProcessModule extends BaseModule {
           onError: error => {
             ErrorService.handle(error as Error, {
               action: 'loadProcessTemplate',
-              module: 'keywordTracker',
+              module: 'keywordHunter',
               notify: false,
             });
           },
@@ -2053,8 +2064,8 @@ class KeywordHunterProcessModule extends BaseModule {
       renderer.renderTemplate(container, html);
 
       // 2. 将浮动窗口移到 body 级别(避免被容器限制)
-      const floatWin = document.getElementById('kt-keywords-floating');
-      const minBtn = document.getElementById('kt-keywords-minimized');
+      const floatWin = document.getElementById('keyword-hunter-keywords-floating');
+      const minBtn = document.getElementById('keyword-hunter-keywords-minimized');
 
       // 如果浮动窗口不在 body 中，则移动到 body
       if (floatWin && floatWin.parentElement !== document.body) {
@@ -2095,8 +2106,8 @@ class KeywordHunterProcessModule extends BaseModule {
       saveProcessStateToState();
 
       // 2. 移除浮动窗口和最小化按钮（从 DOM 中完全移除）
-      const floatWin = document.getElementById('kt-keywords-floating');
-      const minBtn = document.getElementById('kt-keywords-minimized');
+      const floatWin = document.getElementById('keyword-hunter-keywords-floating');
+      const minBtn = document.getElementById('keyword-hunter-keywords-minimized');
       if (floatWin) {
         floatWin.remove();
       }
@@ -2109,7 +2120,7 @@ class KeywordHunterProcessModule extends BaseModule {
     } catch (error) {
       ErrorService.handle(error as Error, {
         action: 'unmountProcessModule',
-        module: 'keywordTracker',
+        module: 'keywordHunter',
         notify: false,
       });
     }

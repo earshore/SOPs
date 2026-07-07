@@ -1,4 +1,4 @@
-.ppc-flow-steps {
+.ppc-search-terms-flow-steps {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -8,7 +8,7 @@
   list-style: none;
 }
 
-.ppc-flow-steps li {
+.ppc-search-terms-flow-steps li {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -24,7 +24,7 @@
   white-space: nowrap;
 }
 
-.ppc-flow-steps span {
+.ppc-search-terms-flow-steps span {
   width: 18px;
   height: 18px;
   display: inline-flex;
@@ -40,7 +40,7 @@
 }
 
 @media (max-width: 640px) {
-  .ppc-flow-steps {
+  .ppc-search-terms-flow-steps {
     width: 100%;
   }
 }

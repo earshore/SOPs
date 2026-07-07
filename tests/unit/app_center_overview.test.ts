@@ -117,8 +117,9 @@ describe('App Center Overview', () => {
       false
     );
     expect(
-      container.querySelector<HTMLElement>('.app-overview-list-row[data-category="master_analysis"]')
-        ?.hidden
+      container.querySelector<HTMLElement>(
+        '.app-overview-list-row[data-category="master_analysis"]'
+      )?.hidden
     ).toBe(true);
     expect(
       container.querySelector<HTMLElement>('.app-overview-list-row[data-category="ppc_tools"]')
@@ -155,8 +156,9 @@ describe('App Center Overview', () => {
       false
     );
     expect(
-      container.querySelector<HTMLElement>('.app-overview-list-row[data-category="master_analysis"]')
-        ?.hidden
+      container.querySelector<HTMLElement>(
+        '.app-overview-list-row[data-category="master_analysis"]'
+      )?.hidden
     ).toBe(true);
     expect(
       container.querySelector<HTMLElement>('.app-overview-list-row[data-category="ppc_tools"]')
@@ -177,8 +179,9 @@ describe('App Center Overview', () => {
       false
     );
     expect(
-      container.querySelector<HTMLElement>('.app-overview-list-row[data-category="master_analysis"]')
-        ?.hidden
+      container.querySelector<HTMLElement>(
+        '.app-overview-list-row[data-category="master_analysis"]'
+      )?.hidden
     ).toBe(false);
     expect(
       container.querySelector<HTMLElement>('.app-overview-list-row[data-category="ppc_tools"]')
@@ -255,7 +258,9 @@ describe('App Center Overview', () => {
     expect(wrapper.querySelector('.app-overview-card[role="button"]')).toBeNull();
     expect(wrapper.querySelector('.app-overview-card[tabindex]')).toBeNull();
     expect(
-      wrapper.querySelectorAll('.app-overview-card .app-card-primary-link[data-action="switch-tab"]')
+      wrapper.querySelectorAll(
+        '.app-overview-card .app-card-primary-link[data-action="switch-tab"]'
+      )
     ).toHaveLength(4);
   });
 
@@ -285,9 +290,13 @@ describe('App Center Overview', () => {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = html;
 
-    const inputEntry = wrapper.querySelector('.app-child-link[data-tab="kw_input"]');
-    const processEntry = wrapper.querySelector('.app-child-link[data-tab="kw_process"]');
-    const analysisEntry = wrapper.querySelector('.app-child-link[data-tab="kw_analysis"]');
+    const inputEntry = wrapper.querySelector('.app-child-link[data-tab="keyword_hunter_input"]');
+    const processEntry = wrapper.querySelector(
+      '.app-child-link[data-tab="keyword_hunter_process"]'
+    );
+    const analysisEntry = wrapper.querySelector(
+      '.app-child-link[data-tab="keyword_hunter_analysis"]'
+    );
 
     expect(inputEntry?.textContent).toContain('输入格式化');
     expect(processEntry?.textContent).toContain('SEO 处理');

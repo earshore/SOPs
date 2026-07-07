@@ -1,4 +1,4 @@
-.ppc-action-toolbar {
+.ppc-search-terms-action-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 520px) max-content;
   align-items: center;
@@ -6,7 +6,7 @@
   margin-bottom: 12px;
 }
 
-.ppc-action-search {
+.ppc-search-terms-action-search {
   min-height: 40px;
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr);
@@ -23,13 +23,13 @@
     background-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.ppc-action-search:focus-within {
+.ppc-search-terms-action-search:focus-within {
   border-color: var(--color-blue-600);
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
 }
 
-.ppc-action-search input {
+.ppc-search-terms-action-search input {
   width: 100%;
   min-height: 38px;
   border: 0;
@@ -40,12 +40,12 @@
   outline: none;
 }
 
-.ppc-action-search input::placeholder {
+.ppc-search-terms-action-search input::placeholder {
   color: #94a3b8;
   font-weight: 600;
 }
 
-.ppc-search-clear-btn {
+.ppc-search-terms-search-clear-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -64,19 +64,19 @@
     color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.ppc-search-clear-btn:hover {
+.ppc-search-terms-search-clear-btn:hover {
   border-color: #94a3b8;
   background: #f8fafc;
 }
 
-.ppc-search-clear-btn:disabled {
+.ppc-search-terms-search-clear-btn:disabled {
   cursor: not-allowed;
   border-color: #cbd5e1;
   background: #f8fafc;
   color: #64748b;
 }
 
-.ppc-export-btn {
+.ppc-search-terms-export-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -94,12 +94,12 @@
     color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.ppc-export-btn:hover {
+.ppc-search-terms-export-btn:hover {
   border-color: #94a3b8;
   background: #f8fafc;
 }
 
-.ppc-export-btn:disabled {
+.ppc-search-terms-export-btn:disabled {
   cursor: not-allowed;
   border-color: #cbd5e1;
   background: #f8fafc;
@@ -107,11 +107,11 @@
 }
 
 @media (max-width: 640px) {
-  .ppc-action-toolbar {
+  .ppc-search-terms-action-toolbar {
     grid-template-columns: 1fr;
   }
 
-  .ppc-search-clear-btn {
+  .ppc-search-terms-search-clear-btn {
     width: 100%;
   }
 }

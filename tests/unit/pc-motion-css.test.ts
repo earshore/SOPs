@@ -30,11 +30,14 @@ const explicitMotionModulePaths = [
   resolve(process.cwd(), 'src/modules/amz_hub/amz_hub_style.css'),
   resolve(process.cwd(), 'src/modules/more/views/explore/prompts/prompts_style.css'),
   resolve(process.cwd(), 'src/modules/app_center/views/master_analysis/master_analysis_style.css'),
-  resolve(process.cwd(), 'src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css'),
+  resolve(
+    process.cwd(),
+    'src/modules/app_center/views/master_analysis/ai_analysis/ai_analysis_style.css'
+  ),
   resolve(process.cwd(), 'src/modules/amz_hub/views/practice/promo_tools/styles.css'),
   resolve(process.cwd(), 'src/modules/amz_hub/views/practice/promo_activities/styles.css'),
   resolve(process.cwd(), 'src/modules/amz_hub/views/practice/marketing_calendar/styles.css'),
-  resolve(process.cwd(), 'src/modules/app_center/views/keyword_hunter/keyword_hunter_style.css'),
+  resolve(process.cwd(), 'src/modules/app_center/views/keyword_hunter/styles.css'),
   resolve(process.cwd(), 'src/modules/app_center/views/master_analysis/scraper/scraper_style.css'),
 ];
 const explicitMotionTemplatePaths = [
@@ -64,12 +67,12 @@ const convergedDeepTemplatePaths = [
     'src/modules/app_center/views/master_analysis/promptlab/components/reportRenderer.ts'
   ),
   resolve(process.cwd(), 'src/modules/app_center/views/master_analysis/scraper/template.html'),
+  resolve(process.cwd(), 'src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts'),
+  resolve(process.cwd(), 'src/modules/more/views/explore/prompts/template.html'),
   resolve(
     process.cwd(),
-    'src/modules/app_center/views/master_analysis/scraper/utils/renderers.ts'
+    'src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts'
   ),
-  resolve(process.cwd(), 'src/modules/more/views/explore/prompts/template.html'),
-  resolve(process.cwd(), 'src/modules/sops/views/growth/restricted_words/restrictedWordsHandler.ts'),
   resolve(process.cwd(), 'src/modules/sops/views/safety/product_compliance/template.html'),
   resolve(process.cwd(), 'src/modules/sops/views/safety/eu_gpsr_compliance/template.html'),
 ];

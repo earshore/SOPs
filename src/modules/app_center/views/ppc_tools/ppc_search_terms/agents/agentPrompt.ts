@@ -1,13 +1,13 @@
 import type { ChatMessage } from '@/services/llmService';
 import type { AnalyzedRow, Thresholds } from '../types';
-import { type PpcAnalysisContext } from './agentTypes';
+import { type PpcSearchTermsAnalysisContext } from './agentTypes';
 import { compactContext, toPromptRow } from './agentPromptInput';
-import { buildPpcAgentRules, PPC_AGENT_PRESET } from './agentPromptPreset';
+import { buildPpcSearchTermsAgentRules, PPC_SEARCH_TERMS_AGENT_PRESET } from './agentPromptPreset';
 
-export function buildPpcAgentMessages(
+export function buildPpcSearchTermsAgentMessages(
   rows: AnalyzedRow[],
   thresholds: Thresholds,
-  context?: PpcAnalysisContext
+  context?: PpcSearchTermsAnalysisContext
 ): ChatMessage[] {
   return [
     {
@@ -29,13 +29,13 @@ export function buildPpcAgentMessages(
 function buildPrompt(
   rows: AnalyzedRow[],
   thresholds: Thresholds,
-  context?: PpcAnalysisContext
+  context?: PpcSearchTermsAnalysisContext
 ): string {
   return JSON.stringify(
     {
       task: 'Analyze Amazon PPC search term rows and choose one action for every row.',
-      agentPreset: PPC_AGENT_PRESET,
-      rules: buildPpcAgentRules(thresholds),
+      agentPreset: PPC_SEARCH_TERMS_AGENT_PRESET,
+      rules: buildPpcSearchTermsAgentRules(thresholds),
       optionalContext: compactContext(context),
       rows: rows.map(toPromptRow),
     },

@@ -1,7 +1,7 @@
-<div class="playground-shell">
+<div class="deep-chat-shell">
   <div
-    class="wb-container wb-container--card wb-container--hidden wb-theme-supply playground-welcome"
-    aria-labelledby="playground-welcome-title"
+    class="wb-container wb-container--card wb-container--hidden wb-theme-supply deep-chat-welcome"
+    aria-labelledby="deep-chat-welcome-title"
     aria-hidden="true"
   >
     <div class="wb-card">
@@ -18,7 +18,7 @@
           </div>
           <div class="wb-text">
             <div class="wb-title-row">
-              <h2 id="playground-welcome-title" class="wb-title">Deep Chat 助手</h2>
+              <h2 id="deep-chat-welcome-title" class="wb-title">Deep Chat 助手</h2>
               <span class="wb-badge wb-badge-ai" aria-label="AI 对话功能">
                 <i class="fas fa-bolt" aria-hidden="true"></i>Playground
               </span>
@@ -50,98 +50,95 @@
     </div>
   </div>
 
-  <div class="playground-page">
-    <aside id="playground-thread-rail" class="playground-thread-rail" aria-label="Deep Chat 会话">
-      <div class="playground-rail-brand">
+  <div class="deep-chat-page">
+    <aside id="deep-chat-thread-rail" class="deep-chat-thread-rail" aria-label="Deep Chat 会话">
+      <div class="deep-chat-rail-brand">
         <h1 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-          <div class="playground-rail-icon">
+          <div class="deep-chat-rail-icon">
             <i class="far fa-comments" aria-hidden="true"></i>
           </div>
           Deep Chat
         </h1>
       </div>
 
-      <div class="playground-thread-actions">
-        <button id="playground-clear-chat" class="playground-new-thread" type="button">
+      <div class="deep-chat-thread-actions">
+        <button id="deep-chat-clear-chat" class="deep-chat-new-thread" type="button">
           <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
           <span>新建会话</span>
         </button>
-        <button id="playground-search-chats" class="playground-search-chats" type="button">
+        <button id="deep-chat-search-chats" class="deep-chat-search-chats" type="button">
           <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
           <span>搜索会话</span>
         </button>
       </div>
 
-      <div class="playground-thread-list-wrap">
-        <h3 class="playground-panel-title">最近会话</h3>
-        <div id="playground-thread-list" class="playground-thread-list" aria-label="最近会话"></div>
+      <div class="deep-chat-thread-list-wrap">
+        <h3 class="deep-chat-panel-title">最近会话</h3>
+        <div id="deep-chat-thread-list" class="deep-chat-thread-list" aria-label="最近会话"></div>
       </div>
     </aside>
 
-    <section class="playground-main" aria-label="Deep Chat">
-      <header class="playground-topbar">
-        <div class="playground-model-area">
+    <section class="deep-chat-main" aria-label="Deep Chat">
+      <header class="deep-chat-topbar">
+        <div class="deep-chat-model-area">
           <button
-            id="playground-toggle-rail"
-            class="playground-top-icon"
+            id="deep-chat-toggle-rail"
+            class="deep-chat-top-icon"
             type="button"
             title="收起最近会话"
             aria-label="收起最近会话"
-            aria-controls="playground-thread-rail"
+            aria-controls="deep-chat-thread-rail"
             aria-expanded="true"
           >
             <i class="far fa-window-maximize" aria-hidden="true"></i>
           </button>
           <select
-            id="playground-model-select"
-            class="playground-select"
+            id="deep-chat-model-select"
+            class="deep-chat-select"
             aria-label="模型选择"
             disabled
           >
             <option value="">默认</option>
           </select>
           <button
-            id="playground-refresh-config"
-            class="playground-top-icon"
+            id="deep-chat-refresh-config"
+            class="deep-chat-top-icon"
             type="button"
             title="刷新模型配置"
             aria-label="刷新模型配置"
           >
             <i class="fas fa-rotate" aria-hidden="true"></i>
           </button>
-          <button id="playground-open-settings" class="playground-config-link" type="button" hidden>
+          <button id="deep-chat-open-settings" class="deep-chat-config-link" type="button" hidden>
             配置模型
           </button>
         </div>
 
-        <div class="playground-top-actions">
-          <button id="playground-open-promptlab" class="playground-promptlab-link" type="button">
+        <div class="deep-chat-top-actions">
+          <button id="deep-chat-open-promptlab" class="deep-chat-promptlab-link" type="button">
             <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
             <span>生成 Prompt</span>
           </button>
-          <details class="playground-tuning-panel">
+          <details class="deep-chat-tuning-panel">
             <summary title="调试参数" aria-label="调试参数">
               <i class="fas fa-sliders" aria-hidden="true"></i>
             </summary>
-            <div class="playground-tuning">
-              <label
-                class="playground-field playground-field-system"
-                for="playground-system-prompt"
-              >
+            <div class="deep-chat-tuning">
+              <label class="deep-chat-field deep-chat-field-system" for="deep-chat-system-prompt">
                 <span>系统提示词</span>
                 <textarea
-                  id="playground-system-prompt"
+                  id="deep-chat-system-prompt"
                   rows="3"
                   placeholder="可选：仅用于当前 Deep Chat 会话"
                 ></textarea>
               </label>
               <label
-                class="playground-field playground-field-temperature"
-                for="playground-temperature"
+                class="deep-chat-field deep-chat-field-temperature"
+                for="deep-chat-temperature"
               >
-                <span>随机性 <output id="playground-temperature-value">0.3</output></span>
+                <span>随机性 <output id="deep-chat-temperature-value">0.3</output></span>
                 <input
-                  id="playground-temperature"
+                  id="deep-chat-temperature"
                   type="range"
                   min="0"
                   max="1"
@@ -149,7 +146,7 @@
                   value="0.3"
                 />
               </label>
-              <button id="playground-reset-tuning" class="playground-reset-tuning" type="button">
+              <button id="deep-chat-reset-tuning" class="deep-chat-reset-tuning" type="button">
                 重置参数
               </button>
             </div>
@@ -157,21 +154,21 @@
         </div>
       </header>
 
-      <div class="playground-stage">
+      <div class="deep-chat-stage">
         <div
-          id="playground-pending-status"
-          class="playground-pending-status"
+          id="deep-chat-pending-status"
+          class="deep-chat-pending-status"
           aria-live="polite"
           hidden
         >
-          <span class="playground-pending-dot" aria-hidden="true"></span>
-          <span id="playground-pending-status-text">正在生成回复...</span>
+          <span class="deep-chat-pending-dot" aria-hidden="true"></span>
+          <span id="deep-chat-pending-status-text">正在生成回复...</span>
         </div>
-        <div class="playground-chat-wrap">
-          <deep-chat id="playground-chat" class="playground-chat"></deep-chat>
+        <div class="deep-chat-wrap">
+          <deep-chat id="deep-chat-view" class="deep-chat-view"></deep-chat>
           <button
-            id="playground-stop-generation"
-            class="playground-stop-generation"
+            id="deep-chat-stop-generation"
+            class="deep-chat-stop-generation"
             type="button"
             aria-label="停止生成"
             title="停止生成"
@@ -183,47 +180,37 @@
       </div>
     </section>
 
-    <aside id="playground-prompt-rail" class="playground-prompt-rail" aria-label="Prompt 生成记录">
-      <div class="playground-prompt-list-wrap">
-        <h3 class="playground-panel-title playground-panel-title--prompt">Prompt</h3>
+    <aside id="deep-chat-prompt-rail" class="deep-chat-prompt-rail" aria-label="Prompt 生成记录">
+      <div class="deep-chat-prompt-list-wrap">
+        <h3 class="deep-chat-panel-title deep-chat-panel-title--prompt">Prompt</h3>
         <div
-          id="playground-prompt-list"
-          class="playground-prompt-list"
+          id="deep-chat-prompt-list"
+          class="deep-chat-prompt-list"
           aria-label="Prompt 生成记录"
         ></div>
       </div>
 
       <div
-        id="playground-prompt-preview-popover"
-        class="playground-prompt-preview-popover"
+        id="deep-chat-prompt-preview-popover"
+        class="deep-chat-prompt-preview-popover"
         role="dialog"
         aria-label="Prompt 预览"
         aria-modal="false"
         aria-hidden="true"
       >
-        <div class="playground-prompt-preview-title"></div>
-        <div class="playground-prompt-preview-body"></div>
+        <div class="deep-chat-prompt-preview-title"></div>
+        <div class="deep-chat-prompt-preview-body"></div>
       </div>
     </aside>
   </div>
 
-  <div
-    id="playground-chat-search-modal"
-    class="playground-chat-search-modal"
-    aria-hidden="true"
-    hidden
-  >
-    <div class="playground-chat-search-backdrop" data-chat-search-close aria-hidden="true"></div>
-    <section
-      class="playground-chat-search-dialog"
-      role="dialog"
-      aria-modal="true"
-      aria-label="搜索会话"
-    >
-      <div class="playground-chat-search-bar">
+  <div id="deep-chat-search-modal" class="deep-chat-search-modal" aria-hidden="true" hidden>
+    <div class="deep-chat-search-backdrop" data-chat-search-close aria-hidden="true"></div>
+    <section class="deep-chat-search-dialog" role="dialog" aria-modal="true" aria-label="搜索会话">
+      <div class="deep-chat-search-bar">
         <input
-          id="playground-chat-search-input"
-          class="playground-chat-search-input"
+          id="deep-chat-search-input"
+          class="deep-chat-search-input"
           type="search"
           aria-label="搜索会话"
           autocomplete="off"
@@ -231,8 +218,8 @@
           placeholder="搜索会话..."
         />
         <button
-          id="playground-chat-search-close"
-          class="playground-chat-search-close"
+          id="deep-chat-search-close"
+          class="deep-chat-search-close"
           type="button"
           data-chat-search-close
           aria-label="关闭搜索会话"
@@ -241,15 +228,11 @@
           <i class="fas fa-xmark" aria-hidden="true"></i>
         </button>
       </div>
-      <button class="playground-chat-search-new" type="button" data-chat-search-new>
+      <button class="deep-chat-search-new" type="button" data-chat-search-new>
         <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
         <span>新建会话</span>
       </button>
-      <div
-        id="playground-chat-search-results"
-        class="playground-chat-search-results"
-        aria-live="polite"
-      ></div>
+      <div id="deep-chat-search-results" class="deep-chat-search-results" aria-live="polite"></div>
     </section>
   </div>
 </div>

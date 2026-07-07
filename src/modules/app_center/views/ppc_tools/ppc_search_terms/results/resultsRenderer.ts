@@ -37,10 +37,10 @@ export function renderResults(
 }
 
 function updateStats(container: HTMLElement, summary: AnalysisSummary): void {
-  setText(container, 'ppc-stat-rows', String(summary.rowCount));
-  setText(container, 'ppc-stat-spend', formatCurrency(summary.spend));
-  setText(container, 'ppc-stat-acos', formatSummaryAcos(summary));
-  setText(container, 'ppc-stat-actions', String(summary.actionCount));
+  setText(container, 'ppc-search-terms-stat-rows', String(summary.rowCount));
+  setText(container, 'ppc-search-terms-stat-spend', formatCurrency(summary.spend));
+  setText(container, 'ppc-search-terms-stat-acos', formatSummaryAcos(summary));
+  setText(container, 'ppc-search-terms-stat-actions', String(summary.actionCount));
 }
 
 function updateResultCount(
@@ -51,14 +51,14 @@ function updateResultCount(
   searchQuery: string
 ): void {
   if (rows.length === 0) {
-    setText(container, 'ppc-result-count', '等待导入数据。');
+    setText(container, 'ppc-search-terms-result-count', '等待导入数据。');
     return;
   }
   const extra = visibleRows.length > MAX_RENDER_ROWS ? `，当前展示前 ${MAX_RENDER_ROWS} 行` : '';
   const searchText = searchQuery ? `，匹配 ${searchedRows.length} 行` : '';
   setText(
     container,
-    'ppc-result-count',
+    'ppc-search-terms-result-count',
     `共 ${rows.length} 行${searchText}，当前筛选 ${visibleRows.length} 行${extra}。`
   );
 }
@@ -75,15 +75,15 @@ function updateExportAvailability(
   const hasWasteRows = rows.some(row => row.action === wasteFilter);
   const hasGrowthRows = rows.some(row => row.action === growthFilter);
 
-  setButtonDisabled(container, 'ppc-export-all', !hasRows);
-  setButtonDisabled(container, 'ppc-export-current', visibleRows.length === 0);
-  setButtonDisabled(container, 'ppc-export-negative', !hasWasteRows);
-  setButtonDisabled(container, 'ppc-export-harvest', !hasGrowthRows);
-  setButtonDisabled(container, 'ppc-copy-summary', !hasRows);
+  setButtonDisabled(container, 'ppc-search-terms-export-all', !hasRows);
+  setButtonDisabled(container, 'ppc-search-terms-export-current', visibleRows.length === 0);
+  setButtonDisabled(container, 'ppc-search-terms-export-negative', !hasWasteRows);
+  setButtonDisabled(container, 'ppc-search-terms-export-harvest', !hasGrowthRows);
+  setButtonDisabled(container, 'ppc-search-terms-copy-summary', !hasRows);
 }
 
 function updateSearchControls(container: HTMLElement, searchQuery: string): void {
   const hasQuery = searchQuery.length > 0;
-  setButtonDisabled(container, 'ppc-action-search-clear', !hasQuery);
-  getElement(container, 'ppc-action-search')?.classList.toggle('has-value', hasQuery);
+  setButtonDisabled(container, 'ppc-search-terms-action-search-clear', !hasQuery);
+  getElement(container, 'ppc-search-terms-action-search')?.classList.toggle('has-value', hasQuery);
 }

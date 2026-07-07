@@ -1,9 +1,9 @@
 import { setSafeHtml } from '@/common/utils/security';
 import type { PromptHistoryItem } from '@/types/state';
-import type { PendingPlaygroundRequest } from './requestLifecycle';
+import type { PendingDeepChatRequest } from './requestLifecycle';
 import { getActivePromptPreviewId, hidePromptPreview, renderPromptPreview } from './promptPreview';
 import { formatPromptDraftMeta, getPromptDrafts } from './promptDrafts';
-import type { PlaygroundThread, PlaygroundThreadStore } from './types';
+import type { DeepChatThread, DeepChatThreadStore } from './types';
 import { escapeHTML, formatThreadTime, truncateText } from './utils';
 
 const PROMPT_EMPTY_CLASS = 'is-prompt-empty';
@@ -15,11 +15,11 @@ export interface ThreadMenuState {
 
 export function renderThreadList(
   container: HTMLElement,
-  threadStore: PlaygroundThreadStore,
-  pendingRequests: Map<string, PendingPlaygroundRequest>,
+  threadStore: DeepChatThreadStore,
+  pendingRequests: Map<string, PendingDeepChatRequest>,
   threadMenuState: ThreadMenuState | null = null
 ): void {
-  const list = container.querySelector<HTMLElement>('#playground-thread-list');
+  const list = container.querySelector<HTMLElement>('#deep-chat-thread-list');
   if (!list) {
     return;
   }
@@ -35,7 +35,7 @@ export function renderThreadList(
   );
 }
 
-function sortThreadsForHistory(threads: PlaygroundThread[]): PlaygroundThread[] {
+function sortThreadsForHistory(threads: DeepChatThread[]): DeepChatThread[] {
   return [...threads].sort((a, b) => {
     const pinnedDelta = (b.pinnedAt || 0) - (a.pinnedAt || 0);
     return pinnedDelta || b.updatedAt - a.updatedAt;
@@ -43,9 +43,9 @@ function sortThreadsForHistory(threads: PlaygroundThread[]): PlaygroundThread[] 
 }
 
 function renderThreadItem(
-  thread: PlaygroundThread,
+  thread: DeepChatThread,
   activeThreadId: string,
-  pendingRequests: Map<string, PendingPlaygroundRequest>,
+  pendingRequests: Map<string, PendingDeepChatRequest>,
   threadMenuState: ThreadMenuState | null
 ): string {
   const isActive = thread.id === activeThreadId;
@@ -56,13 +56,13 @@ function renderThreadItem(
 
   return `
       <div class="${getThreadItemClassName(isActive, isPinned, isMenuOpen)}">
-        <button class="playground-thread-select" type="button" data-thread-id="${escapedThreadId}">
-          <span class="playground-thread-copy">
-            <span class="playground-thread-name">${escapedTitle}</span>
-            <span class="playground-thread-meta">${escapeHTML(getThreadMeta(thread, pendingRequests.get(thread.id)))}</span>
+        <button class="deep-chat-thread-select" type="button" data-thread-id="${escapedThreadId}">
+          <span class="deep-chat-thread-copy">
+            <span class="deep-chat-thread-name">${escapedTitle}</span>
+            <span class="deep-chat-thread-meta">${escapeHTML(getThreadMeta(thread, pendingRequests.get(thread.id)))}</span>
           </span>
         </button>
-        <button class="playground-thread-menu-toggle" type="button" data-thread-menu-id="${escapedThreadId}" aria-label="打开会话 ${escapedTitle} 的更多操作" aria-haspopup="menu" aria-expanded="${String(isMenuOpen)}" aria-controls="playground-thread-menu-${escapedThreadId}" title="更多操作">
+        <button class="deep-chat-thread-menu-toggle" type="button" data-thread-menu-id="${escapedThreadId}" aria-label="打开会话 ${escapedTitle} 的更多操作" aria-haspopup="menu" aria-expanded="${String(isMenuOpen)}" aria-controls="deep-chat-thread-menu-${escapedThreadId}" title="更多操作">
           <i class="fas fa-ellipsis" aria-hidden="true"></i>
         </button>
         ${renderThreadMenu(thread, isPinned, isMenuOpen, threadMenuState)}
@@ -72,7 +72,7 @@ function renderThreadItem(
 
 function getThreadItemClassName(isActive: boolean, isPinned: boolean, isMenuOpen: boolean): string {
   return [
-    'playground-thread-item',
+    'deep-chat-thread-item',
     isActive ? 'is-active' : '',
     isPinned ? 'is-pinned' : '',
     isMenuOpen ? 'is-menu-open' : '',
@@ -82,8 +82,8 @@ function getThreadItemClassName(isActive: boolean, isPinned: boolean, isMenuOpen
 }
 
 function getThreadMeta(
-  thread: PlaygroundThread,
-  pendingRequest: PendingPlaygroundRequest | undefined
+  thread: DeepChatThread,
+  pendingRequest: PendingDeepChatRequest | undefined
 ): string {
   if (pendingRequest) {
     const stateLabel = pendingRequest.isSettled ? '输出中' : '生成中';
@@ -102,7 +102,7 @@ function getThreadMeta(
 }
 
 function renderThreadMenu(
-  thread: PlaygroundThread,
+  thread: DeepChatThread,
   isPinned: boolean,
   isMenuOpen: boolean,
   threadMenuState: ThreadMenuState | null
@@ -115,20 +115,20 @@ function renderThreadMenu(
   const pinLabel = isPinned ? '取消置顶' : '置顶聊天';
   const placementClass =
     threadMenuState.placement === 'above'
-      ? ' playground-thread-menu--above'
-      : ' playground-thread-menu--below';
+      ? ' deep-chat-thread-menu--above'
+      : ' deep-chat-thread-menu--below';
 
   return `
-        <div id="playground-thread-menu-${escapedThreadId}" class="playground-thread-menu${placementClass}" role="menu">
-          <button class="playground-thread-menu-action" type="button" role="menuitem" data-thread-menu-action="rename" data-thread-menu-thread-id="${escapedThreadId}">
+        <div id="deep-chat-thread-menu-${escapedThreadId}" class="deep-chat-thread-menu${placementClass}" role="menu">
+          <button class="deep-chat-thread-menu-action" type="button" role="menuitem" data-thread-menu-action="rename" data-thread-menu-thread-id="${escapedThreadId}">
             <i class="fas fa-pen" aria-hidden="true"></i>
             <span>重命名</span>
           </button>
-          <button class="playground-thread-menu-action" type="button" role="menuitem" data-thread-menu-action="pin" data-thread-menu-thread-id="${escapedThreadId}">
+          <button class="deep-chat-thread-menu-action" type="button" role="menuitem" data-thread-menu-action="pin" data-thread-menu-thread-id="${escapedThreadId}">
             <i class="fas fa-thumbtack" aria-hidden="true"></i>
             <span>${pinLabel}</span>
           </button>
-          <button class="playground-thread-menu-action is-danger" type="button" role="menuitem" data-thread-menu-action="delete" data-thread-menu-thread-id="${escapedThreadId}">
+          <button class="deep-chat-thread-menu-action is-danger" type="button" role="menuitem" data-thread-menu-action="delete" data-thread-menu-thread-id="${escapedThreadId}">
             <i class="fas fa-trash" aria-hidden="true"></i>
             <span>删除</span>
           </button>
@@ -139,7 +139,7 @@ export function renderPromptDraftList(
   container: HTMLElement,
   selectedPromptDraftId?: string
 ): void {
-  const list = container.querySelector<HTMLElement>('#playground-prompt-list');
+  const list = container.querySelector<HTMLElement>('#deep-chat-prompt-list');
   if (!list) {
     return;
   }
@@ -150,10 +150,10 @@ export function renderPromptDraftList(
     setSafeHtml(
       list,
       `
-      <div class="playground-prompt-empty">
-        <div class="playground-prompt-empty-title">暂无 Prompt</div>
+      <div class="deep-chat-prompt-empty">
+        <div class="deep-chat-prompt-empty-title">暂无 Prompt</div>
         <p>从 Prompt 生成页创建后，可在这里一键带入新会话。</p>
-        <button class="playground-prompt-empty-action" type="button" data-open-promptlab>
+        <button class="deep-chat-prompt-empty-action" type="button" data-open-promptlab>
           前往 Prompt 生成
         </button>
       </div>
@@ -197,16 +197,16 @@ function renderPromptDraftItem(
 
   return `
       <div class="${getPromptDraftItemClassName(typeLabel, isPreviewActive, isSelected)}"${isSelected ? ' aria-current="true"' : ''}>
-        <button class="playground-prompt-draft" type="button" data-preview-prompt-id="${promptId}" data-use-prompt-draft-id="${promptId}" aria-label="${escapeHTML(actionLabel)}" aria-pressed="${String(isSelected)}" aria-describedby="playground-prompt-preview-popover">
-          <span class="playground-prompt-copy">
-            <span class="playground-prompt-row">
-              <span class="playground-prompt-badge">${typeLabel}</span>
-              <span class="playground-prompt-meta">${escapeHTML(formatPromptDraftMeta(prompt))}</span>
+        <button class="deep-chat-prompt-draft" type="button" data-preview-prompt-id="${promptId}" data-use-prompt-draft-id="${promptId}" aria-label="${escapeHTML(actionLabel)}" aria-pressed="${String(isSelected)}" aria-describedby="deep-chat-prompt-preview-popover">
+          <span class="deep-chat-prompt-copy">
+            <span class="deep-chat-prompt-row">
+              <span class="deep-chat-prompt-badge">${typeLabel}</span>
+              <span class="deep-chat-prompt-meta">${escapeHTML(formatPromptDraftMeta(prompt))}</span>
             </span>
-            <span class="playground-prompt-snippet">${escapeHTML(snippet)}</span>
+            <span class="deep-chat-prompt-snippet">${escapeHTML(snippet)}</span>
           </span>
         </button>
-        <button class="playground-prompt-delete" type="button" data-delete-prompt-draft-id="${promptId}" aria-label="删除 ${typeLabel} Prompt" title="删除 Prompt">
+        <button class="deep-chat-prompt-delete" type="button" data-delete-prompt-draft-id="${promptId}" aria-label="删除 ${typeLabel} Prompt" title="删除 Prompt">
           <i class="fas fa-trash" aria-hidden="true"></i>
         </button>
       </div>
@@ -223,8 +223,8 @@ function getPromptDraftItemClassName(
   isSelected: boolean
 ): string {
   return [
-    'playground-prompt-item',
-    `playground-prompt-item--${typeLabel.toLowerCase()}`,
+    'deep-chat-prompt-item',
+    `deep-chat-prompt-item--${typeLabel.toLowerCase()}`,
     isPreviewActive ? 'is-preview-active' : '',
     isSelected ? 'is-selected' : '',
   ]
@@ -234,6 +234,6 @@ function getPromptDraftItemClassName(
 
 function syncPromptEmptyState(container: HTMLElement, isEmpty: boolean): void {
   container
-    .querySelector<HTMLElement>('.playground-page')
+    .querySelector<HTMLElement>('.deep-chat-page')
     ?.classList.toggle(PROMPT_EMPTY_CLASS, isEmpty);
 }

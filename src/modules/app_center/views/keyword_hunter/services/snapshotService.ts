@@ -125,7 +125,7 @@ function createSnapshotFingerprint(tracker: KeywordTrackerState): string {
   );
 }
 
-function createWorkflowFingerprintFromTracker(tracker: KeywordTrackerState): string {
+function createWorkflowFingerprintFromKeywordHunterState(tracker: KeywordTrackerState): string {
   return hashText(
     JSON.stringify({
       keywordsInputText: tracker.keywordsInputText || tracker.keywords.join('\n'),
@@ -156,7 +156,7 @@ function getMatchingWorkflowSnapshot(
 ): KeywordHunterSnapshot | undefined {
   if (options.updateCurrent === false || options.title?.trim()) return undefined;
 
-  const trackerFingerprint = createWorkflowFingerprintFromTracker(tracker);
+  const trackerFingerprint = createWorkflowFingerprintFromKeywordHunterState(tracker);
   return existing.find(
     snapshot => createWorkflowFingerprintFromSnapshot(snapshot) === trackerFingerprint
   );
@@ -191,7 +191,7 @@ function getSnapshotCopyText(tracker: KeywordTrackerState): string {
   return tracker.copyInputText || tracker.processedCopy || '';
 }
 
-function createSnapshotFromTracker(
+function createSnapshotFromKeywordHunterState(
   tracker: KeywordTrackerState,
   existing: KeywordHunterSnapshot[],
   options: SaveSnapshotOptions = {}
@@ -329,10 +329,14 @@ export const KeywordHunterSnapshotService = {
 
   saveCurrent(options: SaveSnapshotOptions = {}): KeywordHunterSnapshot {
     const snapshots = this.getAll();
-    const snapshot = createSnapshotFromTracker(appStore.getState().keywordTracker, snapshots, {
-      updateCurrent: true,
-      ...options,
-    });
+    const snapshot = createSnapshotFromKeywordHunterState(
+      appStore.getState().keywordTracker,
+      snapshots,
+      {
+        updateCurrent: true,
+        ...options,
+      }
+    );
     const next = upsertSnapshot(snapshots, snapshot);
 
     if (!StorageService.set(SNAPSHOT_STORAGE_KEY, next)) {
@@ -349,10 +353,14 @@ export const KeywordHunterSnapshotService = {
 
   async saveCurrentAsync(options: SaveSnapshotOptions = {}): Promise<KeywordHunterSnapshot> {
     const snapshots = await this.getAllAsync();
-    const snapshot = createSnapshotFromTracker(appStore.getState().keywordTracker, snapshots, {
-      updateCurrent: true,
-      ...options,
-    });
+    const snapshot = createSnapshotFromKeywordHunterState(
+      appStore.getState().keywordTracker,
+      snapshots,
+      {
+        updateCurrent: true,
+        ...options,
+      }
+    );
     const next = upsertSnapshot(snapshots, snapshot);
     const saved = await LocalDataStore.set(INDEXED_SNAPSHOT_STORAGE_KEY, next, 'user-data');
 

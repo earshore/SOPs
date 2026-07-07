@@ -5,7 +5,7 @@ import { THRESHOLD_FIELDS, type ThresholdFieldDefinition } from './thresholdFiel
 const THRESHOLD_INPUT_CLASS = 'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm';
 
 export function renderThresholdFields(container: HTMLElement): void {
-  const grid = getElement(container, 'ppc-threshold-grid');
+  const grid = getElement(container, 'ppc-search-terms-threshold-grid');
   if (!grid) return;
   grid.replaceChildren(...THRESHOLD_FIELDS.map(createThresholdField));
 }
@@ -21,7 +21,7 @@ function createThresholdField(field: ThresholdFieldDefinition): HTMLLabelElement
   const helperId = `${field.id}-help`;
   const helper = document.createElement('span');
   helper.id = helperId;
-  helper.className = 'ppc-threshold-helper';
+  helper.className = 'ppc-search-terms-threshold-helper';
   helper.textContent = field.helper;
 
   label.className = 'text-xs font-semibold text-slate-600';

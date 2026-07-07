@@ -1,4 +1,4 @@
-.ppc-hero-tags {
+.ppc-search-terms-hero-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -8,7 +8,7 @@
   list-style: none;
 }
 
-.ppc-hero-tag {
+.ppc-search-terms-hero-tag {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -22,24 +22,24 @@
   font-weight: 500;
 }
 
-.ppc-tag-dot {
+.ppc-search-terms-tag-dot {
   width: 6px;
   height: 6px;
   border-radius: 999px;
 }
 
-.ppc-tag-dot-blue {
+.ppc-search-terms-tag-dot-blue {
   background: var(--color-blue-600);
 }
 
-.ppc-tag-dot-green {
+.ppc-search-terms-tag-dot-green {
   background: var(--color-emerald-600);
 }
 
-.ppc-tag-dot-violet {
+.ppc-search-terms-tag-dot-violet {
   background: var(--color-violet-600);
 }
 
-.ppc-tag-dot-orange {
+.ppc-search-terms-tag-dot-orange {
   background: var(--color-orange-600);
 }

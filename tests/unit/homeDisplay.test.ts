@@ -21,8 +21,8 @@ const homeTemplate = `
       <div id="home-floating-workbench-actions" class="floating-workbench__actions" aria-label="应用中心应用快捷入口"
         aria-hidden="true" inert>
         <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="scraper" aria-label="打开 Master Analysis">Master Analysis</button>
-        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="playground" aria-label="打开 Playground">Playground</button>
-        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="kw_input" aria-label="打开 Keyword Hunter">Keyword Hunter</button>
+        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="playground_deep_chat" aria-label="打开 Playground">Playground</button>
+        <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="keyword_hunter_input" aria-label="打开 Keyword Hunter">Keyword Hunter</button>
         <button type="button" class="floating-workbench__item" data-action="switch-tab" data-tab="ppc_search_terms" aria-label="打开 PPC Tools">PPC Tools</button>
       </div>
     </aside>
@@ -149,8 +149,8 @@ it('mounts the full home splash with particles, hero copy, app center shortcuts,
     'sops_overview',
     'app_center_overview',
     'scraper',
-    'playground',
-    'kw_input',
+    'playground_deep_chat',
+    'keyword_hunter_input',
     'ppc_search_terms',
   ]);
 

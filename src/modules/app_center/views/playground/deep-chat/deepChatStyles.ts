@@ -54,7 +54,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     padding: 10px 14px !important;
     border: 0 !important;
     border-radius: 18px !important;
-    background: var(--playground-accent-soft, #faf3ee) !important;
+    background: var(--deep-chat-accent-soft, #faf3ee) !important;
     color: #0f172a !important;
     box-shadow: none !important;
   }
@@ -141,7 +141,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .input-button.inside-end {
-    background: var(--playground-accent, #a85f3f) !important;
+    background: var(--deep-chat-accent, #a85f3f) !important;
     box-shadow: none !important;
   }
 
@@ -152,25 +152,25 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .input-button.inside-end.loading-button,
-  .input-button.inside-end[data-playground-stop-active] {
+  .input-button.inside-end[data-deep-chat-stop-active] {
     background: #dc2626 !important;
     cursor: pointer !important;
   }
 
   .input-button.inside-end.loading-button:hover,
   .input-button.inside-end.loading-button:focus-visible,
-  .input-button.inside-end[data-playground-stop-active]:hover,
-  .input-button.inside-end[data-playground-stop-active]:focus-visible {
+  .input-button.inside-end[data-deep-chat-stop-active]:hover,
+  .input-button.inside-end[data-deep-chat-stop-active]:focus-visible {
     background: #b91c1c !important;
   }
 
-  .input-button.inside-end[data-playground-stop-active] #submit-icon,
-  .input-button.inside-end[data-playground-stop-active] .loading-submit-button,
-  .input-button.inside-end[data-playground-stop-active] #stop-icon {
+  .input-button.inside-end[data-deep-chat-stop-active] #submit-icon,
+  .input-button.inside-end[data-deep-chat-stop-active] .loading-submit-button,
+  .input-button.inside-end[data-deep-chat-stop-active] #stop-icon {
     display: none !important;
   }
 
-  .input-button.inside-end[data-playground-stop-active]::before {
+  .input-button.inside-end[data-deep-chat-stop-active]::before {
     content: '' !important;
     width: 12px !important;
     height: 12px !important;
@@ -212,17 +212,17 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     margin-top: 12px;
   }
 
-  .playground-message-time {
+  .deep-chat-message-time {
     color: #64748b;
     font-variant-numeric: tabular-nums;
   }
 
-  .playground-message-status {
+  .deep-chat-message-status {
     color: #b45309;
     font-weight: 600;
   }
 
-  .playground-message-tool {
+  .deep-chat-message-tool {
     width: 30px;
     height: 30px;
     display: inline-flex;
@@ -236,14 +236,14 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     transition: background 140ms ease, color 140ms ease;
   }
 
-  .playground-message-tool:hover,
-  .playground-message-tool:focus-visible {
+  .deep-chat-message-tool:hover,
+  .deep-chat-message-tool:focus-visible {
     background: #f2f3f5;
     color: #4b5563;
     outline: none;
   }
 
-  .playground-message-tool svg {
+  .deep-chat-message-tool svg {
     width: 14px;
     height: 14px;
     stroke: currentColor;
@@ -342,7 +342,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     align-items: center !important;
     justify-content: center !important;
     border-radius: 50% !important;
-    background: var(--playground-accent, #a85f3f) !important;
+    background: var(--deep-chat-accent, #a85f3f) !important;
     box-shadow: none !important;
   }
 
@@ -354,7 +354,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .inside-end.loading-button:focus-visible,
   .inside-end.disabled-button:hover,
   .inside-end.disabled-button:focus-visible {
-    background: var(--playground-accent-hover, #8f4f33) !important;
+    background: var(--deep-chat-accent-hover, #8f4f33) !important;
   }
 
   .inside-end #submit-icon {
@@ -369,12 +369,12 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     width: 36px !important;
     height: 36px !important;
     border-radius: 50% !important;
-    background: var(--playground-accent, #a85f3f) !important;
+    background: var(--deep-chat-accent, #a85f3f) !important;
     pointer-events: none !important;
   }
 
   .inside-end.loading-button #stop-icon,
-  .inside-end[data-playground-stop-active] #stop-icon {
+  .inside-end[data-deep-chat-stop-active] #stop-icon {
     width: 100% !important;
     height: 100% !important;
     background: #dc2626 !important;

@@ -20,23 +20,23 @@ import {
   normalizeStoredThreadMessages,
 } from './conversationContext';
 import {
-  abortPendingPlaygroundRequest,
-  appendPendingPlaygroundAssistantText,
-  createPendingPlaygroundRequest,
-  isPendingPlaygroundDisplayComplete,
-  markPendingPlaygroundAssistantTextDisplayed,
-  markPendingPlaygroundRequestSettled,
+  abortPendingDeepChatRequest,
+  appendPendingDeepChatAssistantText,
+  createPendingDeepChatRequest,
+  isPendingDeepChatDisplayComplete,
+  markPendingDeepChatAssistantTextDisplayed,
+  markPendingDeepChatRequestSettled,
   shouldPreserveStoppedResponse,
-  type PendingPlaygroundRequest,
-  type PlaygroundPendingAbortReason,
+  type PendingDeepChatRequest,
+  type DeepChatPendingAbortReason,
 } from './requestLifecycle';
 import {
-  buildBudgetedPlaygroundMessages,
-  getPlaygroundRequestBudgetDefaults,
-  getPlaygroundMessageBudgetError,
-  getPlaygroundSystemPromptBudgetError,
-  resolvePlaygroundRequestBudget,
-  type PlaygroundRequestBudget,
+  buildBudgetedDeepChatMessages,
+  getDeepChatRequestBudgetDefaults,
+  getDeepChatMessageBudgetError,
+  getDeepChatSystemPromptBudgetError,
+  resolveDeepChatRequestBudget,
+  type DeepChatRequestBudget,
 } from './requestBudget';
 import { createDraftPersistController } from './draftPersistence';
 import {
@@ -64,12 +64,12 @@ import type {
   DeepChatMessage,
   DeepChatRequestBody,
   DeepChatSignals,
-  PlaygroundLLMCallContext,
-  PlaygroundRequestMessages,
-  PlaygroundRequestModelConfig,
-  PlaygroundThread,
-  PlaygroundThreadStore,
-  PreparedPlaygroundRequest,
+  DeepChatLLMCallContext,
+  DeepChatRequestMessages,
+  DeepChatRequestModelConfig,
+  DeepChatThread,
+  DeepChatThreadStore,
+  PreparedDeepChatRequest,
   SaveThreadMessagesOptions,
   TuningControlRefs,
 } from './types';
@@ -103,7 +103,7 @@ type ChatSearchRefs = {
 };
 
 type ChatSearchResult = {
-  thread: PlaygroundThread;
+  thread: DeepChatThread;
 };
 
 let cleanupCallbacks: Array<() => void> = [];
@@ -111,9 +111,9 @@ let currentConfig: LLMProviderConfig | null = null;
 let selectedModel = '';
 let sessionSystemPrompt = '';
 let sessionTemperature = 0.3;
-let threadStore: PlaygroundThreadStore = createDefaultThreadStore();
+let threadStore: DeepChatThreadStore = createDefaultThreadStore();
 let mountedContainer: HTMLElement | null = null;
-const pendingRequests = new Map<string, PendingPlaygroundRequest>();
+const pendingRequests = new Map<string, PendingDeepChatRequest>();
 const pendingDisplayTimers = new Map<string, number>();
 let draftInputResizeObserver: ResizeObserver | null = null;
 let draftInputResizeRetryTimer: number | null = null;
@@ -128,7 +128,7 @@ const draftPersistController = createDraftPersistController(
 
 class DeepChatModule extends BaseModule {
   constructor() {
-    super('playground');
+    super('playground_deep_chat');
   }
 
   protected async render(): Promise<void> {
@@ -186,7 +186,7 @@ export function unmount(): void {
   deepChatModule.unmount();
 }
 
-export async function clearPlaygroundThreadStore(): Promise<void> {
+export async function clearDeepChatThreadStore(): Promise<void> {
   abortAllPendingRequests('cleared');
   pendingRequests.clear();
   clearAllPendingDisplayTimers();
@@ -211,7 +211,7 @@ export async function clearPlaygroundThreadStore(): Promise<void> {
 }
 
 async function refreshLLMConfig(container: HTMLElement): Promise<void> {
-  const modelSelect = container.querySelector<HTMLSelectElement>('#playground-model-select');
+  const modelSelect = container.querySelector<HTMLSelectElement>('#deep-chat-model-select');
 
   currentConfig = await StorageService.getLLMConfigWithKey();
   selectedModel =
@@ -230,9 +230,9 @@ function renderLLMConfigState(modelSelect: HTMLSelectElement): void {
   modelSelect.replaceChildren();
   const settingsButton =
     modelSelect
-      .closest('.playground-main')
-      ?.querySelector<HTMLButtonElement>('#playground-open-settings') ??
-    modelSelect.ownerDocument.querySelector<HTMLButtonElement>('#playground-open-settings');
+      .closest('.deep-chat-main')
+      ?.querySelector<HTMLButtonElement>('#deep-chat-open-settings') ??
+    modelSelect.ownerDocument.querySelector<HTMLButtonElement>('#deep-chat-open-settings');
   const config = currentConfig;
   const hasUsableConfig = !!config?.apiKey && !!selectedModel;
   if (settingsButton) {
@@ -260,7 +260,7 @@ function renderLLMConfigState(modelSelect: HTMLSelectElement): void {
 }
 
 function initDeepChat(container: HTMLElement): void {
-  const chat = container.querySelector<DeepChatElement>('#playground-chat');
+  const chat = container.querySelector<DeepChatElement>('#deep-chat-view');
   if (!chat) {
     return;
   }
@@ -268,7 +268,7 @@ function initDeepChat(container: HTMLElement): void {
   const activeThread = getActiveThread();
   configureDeepChatBase(chat, activeThread, updateThreadDraft, getThreadDisplayMessages);
   configureDeepChatStyles(chat);
-  configureDeepChatConnection(chat, container, handlePlaygroundRequest);
+  configureDeepChatConnection(chat, container, handleDeepChatRequest);
   chat.onRender?.();
   setupMessageToolbars(chat, () => getThreadDisplayMessages(getActiveThread()));
   setConversationActive(
@@ -321,12 +321,12 @@ function setupDraftInputHeightSync(
 }
 
 function syncDraftInputHeight(container: HTMLElement): void {
-  const wrap = container.querySelector<HTMLElement>('.playground-chat-wrap');
+  const wrap = container.querySelector<HTMLElement>('.deep-chat-wrap');
   if (!wrap) {
     return;
   }
 
-  const page = container.querySelector<HTMLElement>('.playground-page');
+  const page = container.querySelector<HTMLElement>('.deep-chat-page');
   if (page?.classList.contains('is-chatting')) {
     wrap.classList.remove('is-draft-height-md', 'is-draft-height-lg', 'is-draft-height-xl');
     return;
@@ -414,7 +414,7 @@ function setupSubmitStopButtonSync(
   const onSubmitButtonStopIntent = (event: Event): void => {
     const button = getSubmitButtonFromEventPath(event, chat);
     const threadId =
-      button?.getAttribute('data-playground-stop-thread-id') || threadStore.activeThreadId;
+      button?.getAttribute('data-deep-chat-stop-thread-id') || threadStore.activeThreadId;
     if (!button || !pendingRequests.has(threadId)) {
       return;
     }
@@ -515,18 +515,18 @@ function syncSubmitStopButtonState(container: HTMLElement): void {
   }
 
   const label = isPending ? '停止生成' : '发送消息';
-  button.toggleAttribute('data-playground-stop-active', isPending);
+  button.toggleAttribute('data-deep-chat-stop-active', isPending);
   if (isPending) {
-    button.setAttribute('data-playground-stop-thread-id', threadStore.activeThreadId);
+    button.setAttribute('data-deep-chat-stop-thread-id', threadStore.activeThreadId);
   } else {
-    button.removeAttribute('data-playground-stop-thread-id');
+    button.removeAttribute('data-deep-chat-stop-thread-id');
   }
   button.setAttribute('aria-label', label);
   button.title = label;
 }
 
 function syncStopOverlayState(container: HTMLElement, _isPending: boolean): void {
-  const stopButton = container.querySelector<HTMLButtonElement>('#playground-stop-generation');
+  const stopButton = container.querySelector<HTMLButtonElement>('#deep-chat-stop-generation');
   if (!stopButton) {
     return;
   }
@@ -537,24 +537,24 @@ function syncStopOverlayState(container: HTMLElement, _isPending: boolean): void
 }
 
 function bindControls(container: HTMLElement): void {
-  const modelSelect = container.querySelector<HTMLSelectElement>('#playground-model-select');
-  const refreshButton = container.querySelector<HTMLButtonElement>('#playground-refresh-config');
-  const clearButton = container.querySelector<HTMLButtonElement>('#playground-clear-chat');
-  const railToggleButton = container.querySelector<HTMLButtonElement>('#playground-toggle-rail');
-  const stopButton = container.querySelector<HTMLButtonElement>('#playground-stop-generation');
+  const modelSelect = container.querySelector<HTMLSelectElement>('#deep-chat-model-select');
+  const refreshButton = container.querySelector<HTMLButtonElement>('#deep-chat-refresh-config');
+  const clearButton = container.querySelector<HTMLButtonElement>('#deep-chat-clear-chat');
+  const railToggleButton = container.querySelector<HTMLButtonElement>('#deep-chat-toggle-rail');
+  const stopButton = container.querySelector<HTMLButtonElement>('#deep-chat-stop-generation');
   const systemPromptInput = container.querySelector<HTMLTextAreaElement>(
-    '#playground-system-prompt'
+    '#deep-chat-system-prompt'
   );
-  const temperatureInput = container.querySelector<HTMLInputElement>('#playground-temperature');
+  const temperatureInput = container.querySelector<HTMLInputElement>('#deep-chat-temperature');
   const temperatureValue = container.querySelector<HTMLOutputElement>(
-    '#playground-temperature-value'
+    '#deep-chat-temperature-value'
   );
-  const resetTuningButton = container.querySelector<HTMLButtonElement>('#playground-reset-tuning');
-  const tuningPanel = container.querySelector<HTMLDetailsElement>('.playground-tuning-panel');
-  const threadList = container.querySelector<HTMLElement>('#playground-thread-list');
-  const promptList = container.querySelector<HTMLElement>('#playground-prompt-list');
-  const settingsButton = container.querySelector<HTMLButtonElement>('#playground-open-settings');
-  const promptlabButton = container.querySelector<HTMLButtonElement>('#playground-open-promptlab');
+  const resetTuningButton = container.querySelector<HTMLButtonElement>('#deep-chat-reset-tuning');
+  const tuningPanel = container.querySelector<HTMLDetailsElement>('.deep-chat-tuning-panel');
+  const threadList = container.querySelector<HTMLElement>('#deep-chat-thread-list');
+  const promptList = container.querySelector<HTMLElement>('#deep-chat-prompt-list');
+  const settingsButton = container.querySelector<HTMLButtonElement>('#deep-chat-open-settings');
+  const promptlabButton = container.querySelector<HTMLButtonElement>('#deep-chat-open-promptlab');
 
   bindModelControls({
     container,
@@ -690,7 +690,7 @@ function bindThreadControls(
     }
 
     const target = event.target as HTMLElement | null;
-    if (target?.closest('.playground-thread-menu, [data-thread-menu-id]')) {
+    if (target?.closest('.deep-chat-thread-menu, [data-thread-menu-id]')) {
       return;
     }
 
@@ -777,7 +777,7 @@ function bindChatSearchControls(container: HTMLElement): void {
 
   const onModalClick = (event: MouseEvent): void => {
     const target = event.target as HTMLElement | null;
-    if (!target?.closest('.playground-chat-search-dialog')) {
+    if (!target?.closest('.deep-chat-search-dialog')) {
       closeChatSearchModal(container);
       return;
     }
@@ -802,7 +802,7 @@ function bindChatSearchControls(container: HTMLElement): void {
       return;
     }
 
-    if (target.closest('.playground-chat-search-bar')) {
+    if (target.closest('.deep-chat-search-bar')) {
       return;
     }
 
@@ -863,16 +863,16 @@ function openChatSearchModal(container: HTMLElement): void {
 }
 
 function positionChatSearchModal(container: HTMLElement, modal: HTMLElement): void {
-  const main = container.querySelector<HTMLElement>('.playground-main');
+  const main = container.querySelector<HTMLElement>('.deep-chat-main');
   const rect = main?.getBoundingClientRect();
   if (!rect || rect.width <= 0 || rect.height <= 0) {
-    modal.style.removeProperty('--playground-chat-search-left');
-    modal.style.removeProperty('--playground-chat-search-top');
+    modal.style.removeProperty('--deep-chat-search-left');
+    modal.style.removeProperty('--deep-chat-search-top');
     return;
   }
 
-  modal.style.setProperty('--playground-chat-search-left', `${rect.left + rect.width / 2}px`);
-  modal.style.setProperty('--playground-chat-search-top', `${rect.top + rect.height / 2}px`);
+  modal.style.setProperty('--deep-chat-search-left', `${rect.left + rect.width / 2}px`);
+  modal.style.setProperty('--deep-chat-search-top', `${rect.top + rect.height / 2}px`);
 }
 
 function closeChatSearchModal(container: HTMLElement): void {
@@ -899,7 +899,7 @@ function renderChatSearchResults(container: HTMLElement): void {
     setSafeHtml(
       refs.results,
       `
-      <div class="playground-chat-search-empty">
+      <div class="deep-chat-search-empty">
         未找到匹配会话
       </div>
     `
@@ -912,8 +912,8 @@ function renderChatSearchResults(container: HTMLElement): void {
   setSafeHtml(
     refs.results,
     `
-    <div class="playground-chat-search-group">${escapeHTML(groupLabel)}</div>
-    <div class="playground-chat-search-result-list">
+    <div class="deep-chat-search-group">${escapeHTML(groupLabel)}</div>
+    <div class="deep-chat-search-result-list">
       ${results
         .map(({ thread }) => {
           const isActive = thread.id === threadStore.activeThreadId;
@@ -921,16 +921,16 @@ function renderChatSearchResults(container: HTMLElement): void {
 
           return `
         <button
-          class="playground-chat-search-result${isActive ? ' is-active' : ''}"
+          class="deep-chat-search-result${isActive ? ' is-active' : ''}"
           type="button"
           data-chat-search-thread-id="${escapeHTML(thread.id)}"
           aria-label="打开会话 ${title}"
         >
-          <span class="playground-chat-search-result-icon" aria-hidden="true">
+          <span class="deep-chat-search-result-icon" aria-hidden="true">
             <i class="far fa-message"></i>
           </span>
-          <span class="playground-chat-search-result-copy">
-            <span class="playground-chat-search-result-title">${title}</span>
+          <span class="deep-chat-search-result-copy">
+            <span class="deep-chat-search-result-title">${title}</span>
           </span>
         </button>
       `;
@@ -961,7 +961,7 @@ function getChatSearchResults(query: string): ChatSearchResult[] {
     .filter((result): result is ChatSearchResult => result !== null);
 }
 
-function getThreadMatchedSearchText(thread: PlaygroundThread, normalizedQuery: string): string {
+function getThreadMatchedSearchText(thread: DeepChatThread, normalizedQuery: string): string {
   const searchableValues = [
     thread.title,
     thread.draftText || '',
@@ -1010,14 +1010,14 @@ function refreshChatSearchResultsIfOpen(container: HTMLElement): void {
 function getChatSearchRefs(container: HTMLElement): ChatSearchRefs | null {
   const root = container.ownerDocument;
   const modal =
-    container.querySelector<HTMLElement>('#playground-chat-search-modal') ||
-    root.querySelector<HTMLElement>('#playground-chat-search-modal');
+    container.querySelector<HTMLElement>('#deep-chat-search-modal') ||
+    root.querySelector<HTMLElement>('#deep-chat-search-modal');
   const input =
-    container.querySelector<HTMLInputElement>('#playground-chat-search-input') ||
-    root.querySelector<HTMLInputElement>('#playground-chat-search-input');
+    container.querySelector<HTMLInputElement>('#deep-chat-search-input') ||
+    root.querySelector<HTMLInputElement>('#deep-chat-search-input');
   const results =
-    container.querySelector<HTMLElement>('#playground-chat-search-results') ||
-    root.querySelector<HTMLElement>('#playground-chat-search-results');
+    container.querySelector<HTMLElement>('#deep-chat-search-results') ||
+    root.querySelector<HTMLElement>('#deep-chat-search-results');
   if (!modal || !input || !results) {
     return null;
   }
@@ -1026,7 +1026,7 @@ function getChatSearchRefs(container: HTMLElement): ChatSearchRefs | null {
     modal,
     input,
     results,
-    openButton: container.querySelector<HTMLButtonElement>('#playground-search-chats'),
+    openButton: container.querySelector<HTMLButtonElement>('#deep-chat-search-chats'),
   };
 }
 
@@ -1086,7 +1086,7 @@ function bindTuningControls(refs: TuningControlRefs): void {
 }
 
 function toggleThreadRail(container: HTMLElement): void {
-  const page = container.querySelector<HTMLElement>('.playground-page');
+  const page = container.querySelector<HTMLElement>('.deep-chat-page');
   if (!page) {
     return;
   }
@@ -1097,9 +1097,9 @@ function toggleThreadRail(container: HTMLElement): void {
 }
 
 function syncThreadRailState(container: HTMLElement): void {
-  const page = container.querySelector<HTMLElement>('.playground-page');
-  const rail = container.querySelector<HTMLElement>('#playground-thread-rail');
-  const toggle = container.querySelector<HTMLButtonElement>('#playground-toggle-rail');
+  const page = container.querySelector<HTMLElement>('.deep-chat-page');
+  const rail = container.querySelector<HTMLElement>('#deep-chat-thread-rail');
+  const toggle = container.querySelector<HTMLButtonElement>('#deep-chat-toggle-rail');
   const isCollapsed = page?.classList.contains(THREAD_RAIL_COLLAPSED_CLASS) || false;
   const expandedText = isCollapsed ? '展开最近会话' : '收起最近会话';
 
@@ -1115,17 +1115,17 @@ function syncThreadRailState(container: HTMLElement): void {
   }
 }
 
-async function handlePlaygroundRequest(
+async function handleDeepChatRequest(
   container: HTMLElement,
   body: DeepChatRequestBody | DeepChatMessage[],
   signals: DeepChatSignals
 ): Promise<void> {
   let requestController: AbortController | null = null;
   let pendingThreadId: string | null = null;
-  let lifecyclePendingRequest: PendingPlaygroundRequest | null = null;
+  let lifecyclePendingRequest: PendingDeepChatRequest | null = null;
 
   try {
-    const preparedRequest = await preparePlaygroundRequest(body, signals);
+    const preparedRequest = await prepareDeepChatRequest(body, signals);
     if (!preparedRequest) return;
 
     const { config, model, activeThread, conversationMessages, messages, droppedMessageCount } =
@@ -1148,7 +1148,7 @@ async function handlePlaygroundRequest(
     syncPendingRequestView(activeThread.id);
     notifyContextBudgetApplied(droppedMessageCount);
 
-    const assistantText = await callPlaygroundLLM({
+    const assistantText = await callDeepChatLLM({
       messages,
       config,
       model,
@@ -1163,7 +1163,7 @@ async function handlePlaygroundRequest(
     saveThreadMessages(getMountedRenderContainer(), conversationMessages, assistantText, {
       threadId: activeThread.id,
     });
-    markPendingPlaygroundRequestSettled(pendingRequest);
+    markPendingDeepChatRequestSettled(pendingRequest);
     schedulePendingAssistantDisplay(activeThread.id);
   } catch (error) {
     if (requestController?.signal.aborted) {
@@ -1173,9 +1173,9 @@ async function handlePlaygroundRequest(
       return;
     }
     const message = error instanceof Error ? error.message : '模型调用失败';
-    const responseText = formatPlaygroundErrorResponse(message);
+    const responseText = formatDeepChatErrorResponse(message);
     console.error('[Deep Chat] LLM 调用失败:', error);
-    saveFailedPlaygroundResponse(pendingThreadId, responseText);
+    saveFailedDeepChatResponse(pendingThreadId, responseText);
     await emitDeepChatResponse(signals, { text: responseText });
   } finally {
     cleanupLifecyclePendingRequest(pendingThreadId, lifecyclePendingRequest);
@@ -1185,7 +1185,7 @@ async function handlePlaygroundRequest(
 
 function cleanupLifecyclePendingRequest(
   threadId: string | null,
-  lifecyclePendingRequest: PendingPlaygroundRequest | null
+  lifecyclePendingRequest: PendingDeepChatRequest | null
 ): void {
   if (!threadId || !lifecyclePendingRequest) {
     return;
@@ -1199,7 +1199,7 @@ function cleanupLifecyclePendingRequest(
   if (pendingRequest.abortReason === 'stopped') {
     preserveStoppedResponse(threadId);
   }
-  if (pendingRequest.isSettled && !isPendingPlaygroundDisplayComplete(pendingRequest)) {
+  if (pendingRequest.isSettled && !isPendingDeepChatDisplayComplete(pendingRequest)) {
     renderMountedThreadList();
     syncPendingRequestView(threadId);
     schedulePendingAssistantDisplay(threadId);
@@ -1212,33 +1212,33 @@ function cleanupLifecyclePendingRequest(
   syncPendingRequestView(threadId, { replaceChat: true });
 }
 
-async function preparePlaygroundRequest(
+async function prepareDeepChatRequest(
   body: DeepChatRequestBody | DeepChatMessage[],
   signals: DeepChatSignals
-): Promise<PreparedPlaygroundRequest | null> {
-  const { config, model } = await getPlaygroundRequestModelConfig();
+): Promise<PreparedDeepChatRequest | null> {
+  const { config, model } = await getDeepChatRequestModelConfig();
   if (!config || !config.apiKey || !model) {
-    await rejectPlaygroundRequest(signals, '请先在系统设置中配置可用的 LLM 模型。');
+    await rejectDeepChatRequest(signals, '请先在系统设置中配置可用的 LLM 模型。');
     return null;
   }
 
-  const requestBudget = resolvePlaygroundRequestBudget(config, model);
+  const requestBudget = resolveDeepChatRequestBudget(config, model);
   const { requestMessages, conversationMessages, messages, droppedMessageCount } =
-    createPlaygroundRequestMessages(body, requestBudget);
+    createDeepChatRequestMessages(body, requestBudget);
   if (requestMessages.length === 0) {
-    await rejectPlaygroundRequest(signals, '请输入要发送的内容。');
+    await rejectDeepChatRequest(signals, '请输入要发送的内容。');
     return null;
   }
 
-  const budgetError = getPlaygroundRequestBudgetError(requestMessages, requestBudget);
+  const budgetError = getDeepChatRequestBudgetError(requestMessages, requestBudget);
   if (budgetError) {
-    await rejectPlaygroundRequest(signals, budgetError);
+    await rejectDeepChatRequest(signals, budgetError);
     return null;
   }
 
   const activeThread = getActiveThread();
   if (pendingRequests.has(activeThread.id)) {
-    await rejectPlaygroundRequest(signals, '当前会话仍在生成回复，请等待完成后再发送。');
+    await rejectDeepChatRequest(signals, '当前会话仍在生成回复，请等待完成后再发送。');
     return null;
   }
 
@@ -1252,11 +1252,11 @@ async function preparePlaygroundRequest(
   };
 }
 
-async function rejectPlaygroundRequest(signals: DeepChatSignals, error: string): Promise<void> {
-  await emitDeepChatResponse(signals, { text: formatPlaygroundErrorResponse(error) });
+async function rejectDeepChatRequest(signals: DeepChatSignals, error: string): Promise<void> {
+  await emitDeepChatResponse(signals, { text: formatDeepChatErrorResponse(error) });
 }
 
-function formatPlaygroundErrorResponse(error: string): string {
+function formatDeepChatErrorResponse(error: string): string {
   return `请求失败：${error}`;
 }
 
@@ -1280,7 +1280,7 @@ function preserveTimedOutPartialResponse(threadId: string | null, error: unknown
       assistantCreatedAt: pendingRequest.startedAt,
     }
   );
-  markPendingPlaygroundRequestSettled(pendingRequest);
+  markPendingDeepChatRequestSettled(pendingRequest);
   schedulePendingAssistantDisplay(threadId);
   showToast('模型响应超时，已保留已生成内容', { type: 'warning' });
   return true;
@@ -1297,7 +1297,7 @@ function isLLMTimeoutError(error: unknown): boolean {
   );
 }
 
-function saveFailedPlaygroundResponse(threadId: string | null, responseText: string): void {
+function saveFailedDeepChatResponse(threadId: string | null, responseText: string): void {
   if (!threadId || !threadExists(threadId)) {
     return;
   }
@@ -1319,22 +1319,22 @@ function saveFailedPlaygroundResponse(threadId: string | null, responseText: str
   );
 }
 
-async function getPlaygroundRequestModelConfig(): Promise<PlaygroundRequestModelConfig> {
+async function getDeepChatRequestModelConfig(): Promise<DeepChatRequestModelConfig> {
   const config = currentConfig || (await StorageService.getLLMConfigWithKey());
   const model = selectedModel || config?.model || getFirstModel(config);
   return { config, model };
 }
 
-function createPlaygroundRequestMessages(
+function createDeepChatRequestMessages(
   body: DeepChatRequestBody | DeepChatMessage[],
-  budget: PlaygroundRequestBudget
-): PlaygroundRequestMessages {
+  budget: DeepChatRequestBudget
+): DeepChatRequestMessages {
   const requestMessages = normalizeChatMessages(body);
   const conversationMessages = mergeThreadHistoryWithRequest(
     getActiveThread().messages,
     requestMessages
   );
-  const budgetedMessages = buildBudgetedPlaygroundMessages(
+  const budgetedMessages = buildBudgetedDeepChatMessages(
     conversationMessages,
     sessionSystemPrompt,
     budget
@@ -1348,13 +1348,13 @@ function createPlaygroundRequestMessages(
   };
 }
 
-function getPlaygroundRequestBudgetError(
+function getDeepChatRequestBudgetError(
   requestMessages: ChatMessage[],
-  budget: PlaygroundRequestBudget
+  budget: DeepChatRequestBudget
 ): string | null {
   return (
-    getPlaygroundMessageBudgetError(requestMessages, budget) ||
-    getPlaygroundSystemPromptBudgetError(sessionSystemPrompt, budget)
+    getDeepChatMessageBudgetError(requestMessages, budget) ||
+    getDeepChatSystemPromptBudgetError(sessionSystemPrompt, budget)
   );
 }
 
@@ -1372,19 +1372,19 @@ function createRequestController(): AbortController {
   return new AbortController();
 }
 
-function bindStopSignal(signals: DeepChatSignals, pendingRequest: PendingPlaygroundRequest): void {
+function bindStopSignal(signals: DeepChatSignals, pendingRequest: PendingDeepChatRequest): void {
   if (signals.stopClicked) {
     signals.stopClicked.listener = () => stopPendingRequest(pendingRequest.threadId);
   }
 }
 
-function abortPendingRequest(threadId: string, reason: PlaygroundPendingAbortReason): boolean {
+function abortPendingRequest(threadId: string, reason: DeepChatPendingAbortReason): boolean {
   const pendingRequest = pendingRequests.get(threadId);
   if (!pendingRequest) {
     return false;
   }
 
-  abortPendingPlaygroundRequest(pendingRequest, reason);
+  abortPendingDeepChatRequest(pendingRequest, reason);
   clearPendingDisplayTimer(threadId);
   return true;
 }
@@ -1396,13 +1396,13 @@ function stopPendingRequest(threadId: string, options: { replaceChat?: boolean }
   }
 
   if (pendingRequest.isSettled) {
-    markPendingPlaygroundAssistantTextDisplayed(pendingRequest, pendingRequest.assistantText);
+    markPendingDeepChatAssistantTextDisplayed(pendingRequest, pendingRequest.assistantText);
     renderPendingAssistantDisplayIfActive(threadId, pendingRequest);
     completeSettledPendingDisplay(threadId, pendingRequest);
     return true;
   }
 
-  abortPendingPlaygroundRequest(pendingRequest, 'stopped');
+  abortPendingDeepChatRequest(pendingRequest, 'stopped');
   clearPendingDisplayTimer(threadId);
   preserveStoppedResponse(threadId);
   pendingRequests.delete(threadId);
@@ -1411,13 +1411,13 @@ function stopPendingRequest(threadId: string, options: { replaceChat?: boolean }
   return true;
 }
 
-function abortAllPendingRequests(reason: PlaygroundPendingAbortReason): void {
+function abortAllPendingRequests(reason: DeepChatPendingAbortReason): void {
   pendingRequests.forEach(pendingRequest => {
-    abortPendingPlaygroundRequest(pendingRequest, reason);
+    abortPendingDeepChatRequest(pendingRequest, reason);
   });
 }
 
-async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<string> {
+async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string> {
   const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
   let streamedText = '';
   const finalText = await callLLM(
@@ -1428,7 +1428,7 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
     model,
     {
       temperature: sessionTemperature,
-      maxTokens: getPlaygroundRequestBudgetDefaults().maxOutputTokens,
+      maxTokens: getDeepChatRequestBudgetDefaults().maxOutputTokens,
       ...(config.serviceTier && { serviceTier: config.serviceTier }),
       retries: 0,
       ...getRuntimeDeepChatOptions(),
@@ -1507,12 +1507,12 @@ function preserveStoppedResponse(threadId: string | null): void {
 }
 
 function getChat(container: HTMLElement): DeepChatElement | null {
-  return container.querySelector<DeepChatElement>('#playground-chat');
+  return container.querySelector<DeepChatElement>('#deep-chat-view');
 }
 
 function createThread(container: HTMLElement, options: CreateThreadOptions = {}): void {
   saveActiveThreadDraft(container);
-  const nextThread: PlaygroundThread = {
+  const nextThread: DeepChatThread = {
     ...createEmptyThread(),
     ...(options.promptDraftId ? { promptDraftId: options.promptDraftId } : {}),
   };
@@ -1676,8 +1676,8 @@ function replaceChat(container: HTMLElement): void {
   }
 
   const nextChat = document.createElement('deep-chat') as DeepChatElement;
-  nextChat.id = 'playground-chat';
-  nextChat.className = 'playground-chat';
+  nextChat.id = 'deep-chat-view';
+  nextChat.className = 'deep-chat-view';
   chat.replaceWith(nextChat);
   initDeepChat(container);
 }
@@ -1694,14 +1694,14 @@ function renderHistoryThreadList(container: HTMLElement): void {
   renderThreadList(container, getHistoryThreadStore(), pendingRequests, openThreadMenu);
 }
 
-function getHistoryThreadStore(): PlaygroundThreadStore {
+function getHistoryThreadStore(): DeepChatThreadStore {
   return {
     ...threadStore,
     threads: threadStore.threads.filter(isThreadVisibleInHistory),
   };
 }
 
-function isThreadVisibleInHistory(thread: PlaygroundThread): boolean {
+function isThreadVisibleInHistory(thread: DeepChatThread): boolean {
   return pendingRequests.has(thread.id) || isPersistableThread(thread);
 }
 
@@ -1723,8 +1723,8 @@ function toggleThreadMenu(
 }
 
 function shouldOpenThreadMenuAbove(button: HTMLButtonElement): boolean {
-  const item = button.closest<HTMLElement>('.playground-thread-item');
-  const list = button.closest<HTMLElement>('.playground-thread-list');
+  const item = button.closest<HTMLElement>('.deep-chat-thread-item');
+  const list = button.closest<HTMLElement>('.deep-chat-thread-list');
   if (!item || !list) {
     return false;
   }
@@ -1803,7 +1803,7 @@ function togglePinnedThread(container: HTMLElement, threadId: string): void {
 function updateThreadMetadata(
   container: HTMLElement,
   threadId: string,
-  changes: Partial<PlaygroundThread>
+  changes: Partial<DeepChatThread>
 ): void {
   threadStore = {
     ...threadStore,
@@ -1846,7 +1846,7 @@ function saveThreadMessages(
     }
   );
 
-  const nextThread: PlaygroundThread = {
+  const nextThread: DeepChatThread = {
     ...activeThread,
     title: activeThread.customTitle || getThreadTitle(storedMessages),
     messages: storedMessages,
@@ -1875,21 +1875,21 @@ function saveThreadMessages(
   }
 }
 
-async function loadThreadStore(): Promise<PlaygroundThreadStore> {
+async function loadThreadStore(): Promise<DeepChatThreadStore> {
   const indexedKey = `user:${THREAD_STORAGE_KEY}`;
   const stored =
-    (await LocalDataStore.migrateLocalStorageKey<PlaygroundThreadStore>(
+    (await LocalDataStore.migrateLocalStorageKey<DeepChatThreadStore>(
       THREAD_STORAGE_KEY,
       indexedKey,
       'user-data'
-    )) || (await LocalDataStore.get<PlaygroundThreadStore>(indexedKey, null));
+    )) || (await LocalDataStore.get<DeepChatThreadStore>(indexedKey, null));
   if (!isValidThreadStore(stored)) {
     return createDefaultThreadStore();
   }
 
   const threads = stored.threads
     .map(sanitizeThread)
-    .filter((thread): thread is PlaygroundThread => thread !== null)
+    .filter((thread): thread is DeepChatThread => thread !== null)
     .sort((a, b) => b.updatedAt - a.updatedAt)
     .slice(0, getMaxThreadCount());
 
@@ -1921,7 +1921,7 @@ function persistThreadStoreNow(): void {
   persistThreadStore();
 }
 
-function getPersistableThreadStore(): PlaygroundThreadStore {
+function getPersistableThreadStore(): DeepChatThreadStore {
   const threads = threadStore.threads.filter(isPersistableThread).slice(0, getMaxThreadCount());
   const activeThreadId = threads.some(thread => thread.id === threadStore.activeThreadId)
     ? threadStore.activeThreadId
@@ -1930,11 +1930,11 @@ function getPersistableThreadStore(): PlaygroundThreadStore {
   return { activeThreadId, threads };
 }
 
-function isPersistableThread(thread: PlaygroundThread): boolean {
+function isPersistableThread(thread: DeepChatThread): boolean {
   return thread.messages.length > 0 || Boolean(thread.draftText?.trim());
 }
 
-function createDefaultThreadStore(): PlaygroundThreadStore {
+function createDefaultThreadStore(): DeepChatThreadStore {
   const thread = createEmptyThread();
   return {
     activeThreadId: thread.id,
@@ -1942,7 +1942,7 @@ function createDefaultThreadStore(): PlaygroundThreadStore {
   };
 }
 
-function createEmptyThread(): PlaygroundThread {
+function createEmptyThread(): DeepChatThread {
   const now = Date.now();
   return {
     id: createThreadId(),
@@ -1954,7 +1954,7 @@ function createEmptyThread(): PlaygroundThread {
   };
 }
 
-function getActiveThread(): PlaygroundThread {
+function getActiveThread(): DeepChatThread {
   const activeThread = threadStore.threads.find(thread => thread.id === threadStore.activeThreadId);
 
   if (activeThread) {
@@ -1970,7 +1970,7 @@ function getActiveThread(): PlaygroundThread {
   return fallbackThread;
 }
 
-function getThreadForSave(threadId?: string): PlaygroundThread | null {
+function getThreadForSave(threadId?: string): DeepChatThread | null {
   if (!threadId) {
     return getActiveThread();
   }
@@ -1987,7 +1987,7 @@ function threadExists(threadId: string): boolean {
   return threadStore.threads.some(thread => thread.id === threadId);
 }
 
-function getThreadDisplayMessages(thread: PlaygroundThread): DeepChatMessage[] {
+function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessage[] {
   const pendingRequest = pendingRequests.get(thread.id);
   if (!pendingRequest) {
     return thread.messages;
@@ -2021,12 +2021,12 @@ function createPendingRequest(
   threadId: string,
   conversationMessages: ChatMessage[],
   controller: AbortController
-): PendingPlaygroundRequest {
-  return createPendingPlaygroundRequest(threadId, conversationMessages, { controller });
+): PendingDeepChatRequest {
+  return createPendingDeepChatRequest(threadId, conversationMessages, { controller });
 }
 
-function appendPendingAssistantText(pendingRequest: PendingPlaygroundRequest, delta: string): void {
-  appendPendingPlaygroundAssistantText(pendingRequest, delta);
+function appendPendingAssistantText(pendingRequest: PendingDeepChatRequest, delta: string): void {
+  appendPendingDeepChatAssistantText(pendingRequest, delta);
   syncPendingRequestView(pendingRequest.threadId);
 }
 
@@ -2036,7 +2036,7 @@ function schedulePendingAssistantDisplay(threadId: string): void {
     return;
   }
 
-  if (isPendingPlaygroundDisplayComplete(pendingRequest)) {
+  if (isPendingDeepChatDisplayComplete(pendingRequest)) {
     completeSettledPendingDisplay(threadId, pendingRequest);
     return;
   }
@@ -2060,12 +2060,12 @@ function drainPendingAssistantDisplay(threadId: string): void {
   }
 
   const nextDisplayText = getNextPendingAssistantDisplayText(pendingRequest);
-  markPendingPlaygroundAssistantTextDisplayed(pendingRequest, nextDisplayText);
+  markPendingDeepChatAssistantTextDisplayed(pendingRequest, nextDisplayText);
   renderPendingAssistantDisplay(container, pendingRequest);
   syncPendingStatus(container);
   renderMountedThreadList();
 
-  if (isPendingPlaygroundDisplayComplete(pendingRequest)) {
+  if (isPendingDeepChatDisplayComplete(pendingRequest)) {
     completeSettledPendingDisplay(threadId, pendingRequest);
     return;
   }
@@ -2073,7 +2073,7 @@ function drainPendingAssistantDisplay(threadId: string): void {
   schedulePendingAssistantDisplay(threadId);
 }
 
-function getNextPendingAssistantDisplayText(pendingRequest: PendingPlaygroundRequest): string {
+function getNextPendingAssistantDisplayText(pendingRequest: PendingDeepChatRequest): string {
   const currentLength = pendingRequest.displayedAssistantText.length;
   const remainingLength = pendingRequest.assistantText.length - currentLength;
   const step = Math.min(
@@ -2086,7 +2086,7 @@ function getNextPendingAssistantDisplayText(pendingRequest: PendingPlaygroundReq
 
 function renderPendingAssistantDisplay(
   container: HTMLElement,
-  pendingRequest: PendingPlaygroundRequest
+  pendingRequest: PendingDeepChatRequest
 ): void {
   const chat = getChat(container);
   if (!chat) {
@@ -2104,7 +2104,7 @@ function renderPendingAssistantDisplay(
 
 function renderPendingAssistantDisplayIfActive(
   threadId: string,
-  pendingRequest: PendingPlaygroundRequest
+  pendingRequest: PendingDeepChatRequest
 ): void {
   const container = getRenderContainerForThread(threadId);
   if (container) {
@@ -2114,7 +2114,7 @@ function renderPendingAssistantDisplayIfActive(
 
 function completeSettledPendingDisplay(
   threadId: string,
-  pendingRequest: PendingPlaygroundRequest
+  pendingRequest: PendingDeepChatRequest
 ): void {
   if (!pendingRequest.isSettled || pendingRequests.get(threadId) !== pendingRequest) {
     return;
@@ -2147,7 +2147,7 @@ function clearAllPendingDisplayTimers(): void {
   pendingDisplayTimers.clear();
 }
 
-function applyPendingRequestsToThreadStore(store: PlaygroundThreadStore): PlaygroundThreadStore {
+function applyPendingRequestsToThreadStore(store: DeepChatThreadStore): DeepChatThreadStore {
   let nextStore = store;
 
   pendingRequests.forEach(pendingRequest => {
@@ -2158,7 +2158,7 @@ function applyPendingRequestsToThreadStore(store: PlaygroundThreadStore): Playgr
       '',
       { now: pendingRequest.startedAt }
     );
-    const nextThread: PlaygroundThread = {
+    const nextThread: DeepChatThread = {
       ...(existingThread || {
         id: pendingRequest.threadId,
         title: 'New Thread',
@@ -2218,8 +2218,8 @@ function syncPendingRequestView(threadId: string, options: { replaceChat?: boole
 }
 
 function syncPendingStatus(container: HTMLElement): void {
-  const status = container.querySelector<HTMLElement>('#playground-pending-status');
-  const statusText = container.querySelector<HTMLElement>('#playground-pending-status-text');
+  const status = container.querySelector<HTMLElement>('#deep-chat-pending-status');
+  const statusText = container.querySelector<HTMLElement>('#deep-chat-pending-status-text');
   if (!status || !statusText) {
     syncSubmitStopButtonState(container);
     return;
@@ -2238,7 +2238,7 @@ function syncPendingStatus(container: HTMLElement): void {
   syncSubmitStopButtonState(container);
 }
 
-function getPendingStatusText(pendingRequest: PendingPlaygroundRequest): string {
+function getPendingStatusText(pendingRequest: PendingDeepChatRequest): string {
   const charCount = pendingRequest.assistantText.trim().length;
   const prefix = pendingRequest.isSettled ? '正在显示回复...' : PENDING_ASSISTANT_PLACEHOLDER_TEXT;
   if (charCount === 0) {
@@ -2250,7 +2250,7 @@ function getPendingStatusText(pendingRequest: PendingPlaygroundRequest): string 
 
 async function emitPendingAssistantDelta(
   signals: DeepChatSignals,
-  pendingRequest: PendingPlaygroundRequest,
+  pendingRequest: PendingDeepChatRequest,
   sourceChat: DeepChatElement | null,
   delta: string
 ): Promise<void> {
@@ -2262,7 +2262,7 @@ async function emitPendingAssistantDelta(
     deliveredToMountedChat &&
     pendingRequest.displayedAssistantText.length === previousDisplayedLength
   ) {
-    markPendingPlaygroundAssistantTextDisplayed(pendingRequest, pendingRequest.assistantText);
+    markPendingDeepChatAssistantTextDisplayed(pendingRequest, pendingRequest.assistantText);
     return;
   }
 
@@ -2287,7 +2287,7 @@ async function emitDeepChatResponse(
   }
 }
 
-function sanitizeThread(thread: PlaygroundThread): PlaygroundThread | null {
+function sanitizeThread(thread: DeepChatThread): DeepChatThread | null {
   if (!thread || typeof thread.id !== 'string') {
     return null;
   }
@@ -2309,7 +2309,7 @@ function sanitizeThread(thread: PlaygroundThread): PlaygroundThread | null {
   };
 }
 
-function getSanitizedThreadOptionalFields(thread: PlaygroundThread): Partial<PlaygroundThread> {
+function getSanitizedThreadOptionalFields(thread: DeepChatThread): Partial<DeepChatThread> {
   const customTitle = getOptionalString(thread.customTitle);
   const promptDraftId = getOptionalString(thread.promptDraftId);
   const pinnedAt = getOptionalFiniteTimestamp(thread.pinnedAt);
@@ -2322,7 +2322,7 @@ function getSanitizedThreadOptionalFields(thread: PlaygroundThread): Partial<Pla
 }
 
 function getSanitizedThreadMessages(
-  messages: PlaygroundThread['messages'],
+  messages: DeepChatThread['messages'],
   fallbackCreatedAt: number
 ): DeepChatMessage[] {
   if (!Array.isArray(messages)) {
@@ -2333,7 +2333,7 @@ function getSanitizedThreadMessages(
 }
 
 function getSanitizedThreadTitle(
-  title: PlaygroundThread['title'],
+  title: DeepChatThread['title'],
   customTitle: string | undefined,
   messages: DeepChatMessage[]
 ): string {
@@ -2356,12 +2356,12 @@ function getOptionalFiniteTimestamp(value: unknown): number | undefined {
   return Number.isFinite(value) ? Number(value) : undefined;
 }
 
-function isValidThreadStore(value: PlaygroundThreadStore | null): value is PlaygroundThreadStore {
+function isValidThreadStore(value: DeepChatThreadStore | null): value is DeepChatThreadStore {
   return Boolean(value && typeof value.activeThreadId === 'string' && Array.isArray(value.threads));
 }
 
 function setConversationActive(container: HTMLElement, isActive: boolean): void {
-  container.querySelector('.playground-page')?.classList.toggle('is-chatting', isActive);
+  container.querySelector('.deep-chat-page')?.classList.toggle('is-chatting', isActive);
   const chat = getChat(container);
   chat?.classList.toggle('is-chatting', isActive);
   chat?.classList.toggle('is-empty', !isActive);

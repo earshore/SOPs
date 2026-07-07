@@ -209,10 +209,10 @@ const PAGES: PageConfig[] = [
     name: 'keyword-hunter',
     path: APP_ROUTES.keywordHunterInput,
     pageType: PageType.FORM,
-    waitForSelector: '#kt-module-input',
-    maskSelectors: ['.timestamp', '#kt-keyword-highlight-layer', '[class*="animate-"]'],
+    waitForSelector: '#keyword-hunter-module-input',
+    maskSelectors: ['.timestamp', '#keyword-hunter-keyword-highlight-layer', '[class*="animate-"]'],
     beforeScreenshot: async (page: Page) => {
-      await page.waitForSelector('#kt-module-input', { timeout: 15000 });
+      await page.waitForSelector('#keyword-hunter-module-input', { timeout: 15000 });
       await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
     },
   },
@@ -257,10 +257,10 @@ const DESKTOP_ONLY_PAGES: PageConfig[] = [
     name: 'ppc-search-terms',
     path: APP_ROUTES.ppcSearchTerms,
     pageType: PageType.FORM,
-    waitForSelector: '.ppc-search-app',
+    waitForSelector: '.ppc-search-terms-app',
     maskSelectors: ['.timestamp', '[class*="animate-"]'],
     beforeScreenshot: async (page: Page) => {
-      await page.waitForSelector('.ppc-search-app', { timeout: 15000 });
+      await page.waitForSelector('.ppc-search-terms-app', { timeout: 15000 });
       await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
     },
   },
@@ -312,9 +312,9 @@ test.describe('Desktop Views', () => {
 
   test('should render PPC search terms from legacy route', async ({ page }) => {
     await page.goto('/#/ppc_search_terms');
-    await page.waitForSelector('.ppc-search-app', { timeout: 15000 });
+    await page.waitForSelector('.ppc-search-terms-app', { timeout: 15000 });
 
-    await expect(page.locator('#ppc-page-title')).toHaveText('PPC 搜索词分析器');
+    await expect(page.locator('#ppc-search-terms-page-title')).toHaveText('PPC 搜索词分析器');
     await expect(page).toHaveURL(/#\/app-center\/ppc-tools\/ppc-search-terms$/);
   });
 

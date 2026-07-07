@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { fetchImmersionTranslation, fetchListingAnalysis } from './trackerService';
+import { fetchImmersionTranslation, fetchListingAnalysis } from './keywordHunterService';
 
 const mocks = vi.hoisted(() => ({
   callLLM: vi.fn(),

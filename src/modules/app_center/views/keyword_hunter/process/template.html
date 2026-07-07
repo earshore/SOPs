@@ -1,363 +1,478 @@
-<section class="flex-1 overflow-y-auto pb-20 w-full" id="kt-module-process">
-    <div class="module-container">
-        <!-- ========== Welcome Banner ========== -->
-        <div class="wb-container wb-container--card wb-theme-rose mb-8">
-            <div class="wb-card">
-                <div class="wb-bg-gradient"></div>
-                <div class="wb-grid-pattern"></div>
-                <div class="wb-content">
-                    <div class="wb-header">
-                        <div class="wb-icon-wrapper">
-                            <div class="wb-icon-main">
-                                <i class="fas fa-tasks"></i>
-                            </div>
-                            <div class="wb-icon-badge">
-                                <i class="fas fa-cogs"></i>
-                            </div>
-                        </div>
-                        <div class="wb-text">
-                            <div class="wb-title-row">
-                                <h1 class="wb-title">SEO 处理中心</h1>
-                                <span aria-label="专业功能" class="wb-badge wb-badge-pro">
-                                    <i aria-hidden="true" class="fas fa-microchip"></i>STEP 2
-                                </span>
-                            </div>
-                            <p class="wb-description">
-                                自动化 SEO 覆盖标注、高频词云分析与快速定位，结合 AI 逐行翻译服务，方便审核、补充和优化，确保最大化 SEO 覆盖率与语义丰富度。
-                            </p>
-                            <div class="wb-tags">
-                                <div class="wb-tag">
-                                    <div class="wb-tag-dot" aria-hidden="true"></div>
-                                    <span>覆盖标注</span>
-                                </div>
-                                <div class="wb-tag">
-                                    <div class="wb-tag-dot wb-tag-dot--teal" aria-hidden="true"></div>
-                                    <span>词云分析</span>
-                                </div>
-                                <div class="wb-tag">
-                                    <div class="wb-tag-dot wb-tag-dot--rose" aria-hidden="true"></div>
-                                    <span>关键词定位</span>
-                                </div>
-                                <div class="wb-tag">
-                                    <div class="wb-tag-dot wb-tag-dot--blue" aria-hidden="true"></div>
-                                    <span>AI 沉浸翻译</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<section class="flex-1 overflow-y-auto pb-20 w-full" id="keyword-hunter-module-process">
+  <div class="module-container">
+    <!-- ========== Welcome Banner ========== -->
+    <div class="wb-container wb-container--card wb-theme-rose mb-8">
+      <div class="wb-card">
+        <div class="wb-bg-gradient"></div>
+        <div class="wb-grid-pattern"></div>
+        <div class="wb-content">
+          <div class="wb-header">
+            <div class="wb-icon-wrapper">
+              <div class="wb-icon-main">
+                <i class="fas fa-tasks"></i>
+              </div>
+              <div class="wb-icon-badge">
+                <i class="fas fa-cogs"></i>
+              </div>
             </div>
+            <div class="wb-text">
+              <div class="wb-title-row">
+                <h1 class="wb-title">SEO 处理中心</h1>
+                <span aria-label="专业功能" class="wb-badge wb-badge-pro">
+                  <i aria-hidden="true" class="fas fa-microchip"></i>STEP 2
+                </span>
+              </div>
+              <p class="wb-description">
+                自动化 SEO 覆盖标注、高频词云分析与快速定位，结合 AI
+                逐行翻译服务，方便审核、补充和优化，确保最大化 SEO 覆盖率与语义丰富度。
+              </p>
+              <div class="wb-tags">
+                <div class="wb-tag">
+                  <div class="wb-tag-dot" aria-hidden="true"></div>
+                  <span>覆盖标注</span>
+                </div>
+                <div class="wb-tag">
+                  <div class="wb-tag-dot wb-tag-dot--teal" aria-hidden="true"></div>
+                  <span>词云分析</span>
+                </div>
+                <div class="wb-tag">
+                  <div class="wb-tag-dot wb-tag-dot--rose" aria-hidden="true"></div>
+                  <span>关键词定位</span>
+                </div>
+                <div class="wb-tag">
+                  <div class="wb-tag-dot wb-tag-dot--blue" aria-hidden="true"></div>
+                  <span>AI 沉浸翻译</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <!-- ========== Main Listing Editor Card ========== -->
-        <div class="kt-surface-card rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
-            <!-- Card Header -->
-            <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-                <div class="flex items-center justify-between flex-wrap gap-3">
-                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                            <i class="fa-solid fa-list-check text-emerald-500 text-sm"></i>
-                        </div>
-                        待处理 Listing 文案
-                    </h2>
-                    <!-- Action Bar -->
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <!-- Translation Model -->
-                        <div class="inline-flex items-center gap-1.5">
-                            <label for="kt-translation-model-select" class="sr-only">AI 翻译模型</label>
-                            <select
-                                id="kt-translation-model-select"
-                                class="min-h-10 w-44 max-w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
-                                aria-describedby="kt-translation-model-status">
-                                <option value="">模型未配置</option>
-                            </select>
-                            <button
-                                type="button"
-                                class="inline-flex min-h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition duration-200 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 active:translate-y-px disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-300 disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
-                                id="kt-refresh-models-btn"
-                                aria-label="重新获取 AI 翻译可用模型"
-                                title="重新获取可用模型">
-                                <i id="kt-refresh-models-icon" class="fas fa-sync-alt text-[10px]" aria-hidden="true"></i>
-                            </button>
-                            <span id="kt-translation-model-status" class="sr-only" role="status" aria-live="polite"
-                                aria-atomic="true">AI 翻译模型未同步</span>
-                        </div>
-                        <!-- Translation Toggle -->
-                        <label
-                            class="inline-flex items-center gap-2.5 cursor-pointer group px-3 py-2 rounded-xl border-2 border-slate-200 hover:border-rose-300 bg-white transition duration-200">
-                            <span
-                                class="text-xs font-semibold text-slate-600 group-hover:text-rose-600 transition-colors whitespace-nowrap">原文</span>
-                            <div class="relative flex-shrink-0">
-                                <input checked="" class="sr-only peer" id="kt-show-translation" type="checkbox" />
-                                <div
-                                    class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:bg-rose-500 transition-colors duration-200 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-transform after:duration-200 after:shadow-sm peer-checked:after:translate-x-4">
-                                </div>
-                            </div>
-                            <span
-                                class="text-xs font-semibold text-slate-600 group-hover:text-rose-600 transition-colors whitespace-nowrap">译文</span>
-                        </label>
-                        <!-- AI Translate -->
-                        <button
-                            type="button"
-                            class="kt-btn-disabled relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition duration-300"
-                            id="kt-translate-btn"
-                            aria-describedby="kt-translate-status"
-                            disabled>
-                            <!-- Progress Bar -->
-                            <progress class="kt-inline-progress absolute left-0 top-0 bottom-0 opacity-20 hidden"
-                                id="kt-translate-progress" value="0" max="100" role="progressbar"
-                                aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-                                aria-label="AI 翻译进度"></progress>
-                            <i class="fas fa-language relative z-10 text-sm"></i>
-                            <span class="relative z-10 text-xs" id="kt-translate-btn-text" aria-live="polite"
-                                aria-atomic="true">AI 沉浸式翻译</span>
-                            <span
-                                class="hidden relative z-10 text-[10px] font-bold bg-white/20 px-1.5 py-0.5 rounded-full"
-                                id="translate-btn-percent">0%</span>
-                        </button>
-                        <div class="w-px h-7 bg-slate-200 mx-0.5"></div>
-                        <span
-                            class="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-50 text-slate-500 rounded-xl text-xs font-semibold border border-slate-200"
-                            aria-label="已自动保存">
-                            <i class="fas fa-check-circle text-[10px] text-emerald-500" aria-hidden="true"></i>
-                            已自动保存
-                        </span>
-                        <!-- Sync Back -->
-                        <button
-                            type="button"
-                            class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-semibold transition duration-200 border border-emerald-200 hover:border-emerald-300 hover:shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
-                            id="kt-sync-to-input-btn">
-                            <i class="fas fa-reply text-[10px]"></i> 同步回输入
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-semibold transition duration-200 border border-rose-200 hover:border-rose-300 hover:shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
-                            id="kt-go-analysis-btn">
-                            <i class="fas fa-chart-line text-[10px]"></i> 进入分析
-                        </button>
-                        <span id="kt-translate-status" class="sr-only" role="status" aria-live="polite"
-                            aria-atomic="true">AI 翻译未开始</span>
-                    </div>
-                </div>
-            </div>
-            <!-- Editor Body -->
-            <div class="p-6">
-                <div
-                    class="kt-editor-shell relative rounded-xl border-2 border-slate-200 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition duration-200 overflow-hidden bg-slate-50/30">
-                    <div class="copy-content p-5 min-h-[420px] text-slate-800 text-sm leading-relaxed focus:outline-none focus:bg-white transition-colors"
-                        contenteditable="true" data-placeholder="请先在 输入格式化 点击 开始分析!" id="kt-copy-display">
-                    </div>
-                    <!-- Editor Status Bar -->
-                    <div
-                        class="absolute bottom-0 left-0 right-0 px-5 py-2.5 bg-gradient-to-t from-white via-white/95 to-transparent flex items-center justify-between pointer-events-none">
-                        <div class="flex items-center gap-2 pointer-events-auto">
-                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                            <span class="text-[10px] text-slate-400 font-medium">可编辑</span>
-                        </div>
-                        <span class="text-[10px] text-slate-300 font-medium hidden sm:flex items-center gap-1">
-                            <i class="fas fa-pencil-alt text-[8px]"></i>
-                            直接编辑文案以补充关键词
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- ========== Statistics + Word Frequency ========== -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start mt-6">
-            <!-- ===== Word Frequency Cloud (2/3) ===== -->
-            <div
-                class="kt-surface-card lg:col-span-2 rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
-                <!-- Card Header -->
-                <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-                                <i class="fas fa-cloud text-indigo-500 text-sm"></i>
-                            </div>
-                            高频词云
-                            <span
-                                class="text-[10px] text-slate-400 font-normal ml-1 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">Top
-                                50</span>
-                        </h3>
-                        <!-- Legend -->
-                        <div class="flex items-center gap-3">
-                            <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
-                                <!-- <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-indigo-400 to-indigo-500"></div> -->
-                                <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-green-400 to-green-500"></div>
-                                已匹配词根
-                            </div>
-                            <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
-                                <!-- <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-indigo-400 to-indigo-500"></div> -->
-                                <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-red-400 to-red-500"></div>
-                                未匹配词根
-                            </div>
-                            <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
-                                <div class="w-4 h-2 rounded-sm bg-slate-200"></div>
-                                其他词根
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Word Cloud Body -->
-                <div class="p-6">
-                    <div class="max-h-96 overflow-y-auto scrollbar-thin leading-relaxed pr-1"
-                        id="kt-word-frequency-list">
-                        <!-- Empty State -->
-                        <div class="flex flex-col items-center justify-center py-16 px-4 text-center" role="status" aria-live="polite">
-                            <div
-                                class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4 border border-indigo-100">
-                                <i class="fas fa-cloud text-indigo-200 text-xl"></i>
-                            </div>
-                            <p class="text-sm font-semibold text-slate-600">还没有词频数据</p>
-                            <p class="text-xs text-slate-500 mt-2 max-w-sm leading-relaxed">
-                                当前没有可统计的 Listing 文案和关键词匹配结果。
-                            </p>
-                            <p class="text-xs text-slate-500 mt-2 max-w-sm leading-relaxed">
-                                <span class="font-semibold text-slate-600">推荐操作：</span>
-                                返回输入页粘贴关键词和文案，点击开始分析后这里会生成词云。
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- ===== Coverage Stats (1/3) ===== -->
-            <div class="kt-surface-card rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden">
-                <!-- Card Header -->
-                <div class="px-5 pt-5 pb-4 border-b border-slate-100">
-                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                            <i class="fas fa-chart-pie text-blue-500 text-sm"></i>
-                        </div>
-                        覆盖率
-                    </h2>
-                </div>
-                <!-- Card Body -->
-                <div class="p-5 space-y-5">
-                    <!-- Progress Ring / Bar -->
-                    <div
-                        class="relative bg-gradient-to-br from-blue-50/80 to-indigo-50/50 rounded-xl p-5 border border-blue-100/60">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Coverage</span>
-                            <span
-                                class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600"
-                                id="kt-coverage-rate">0%</span>
-                        </div>
-                        <div class="w-full bg-slate-200/80 rounded-full h-2.5 overflow-hidden">
-                            <progress
-                                class="kt-coverage-progress h-2.5 rounded-full"
-                                id="kt-coverage-bar"
-                                value="0"
-                                max="100"
-                                aria-label="关键词覆盖率"></progress>
-                        </div>
-                    </div>
-                    <!-- Stats Cards -->
-                    <div class="space-y-2.5">
-                        <!-- Matched -->
-                        <div
-                            class="group flex items-center justify-between p-3.5 rounded-xl border-2 border-emerald-100 bg-gradient-to-r from-emerald-50/80 to-white hover:border-emerald-200 hover:shadow-sm transition duration-200">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-500 transition-colors duration-200">
-                                    <i
-                                        class="fas fa-check text-emerald-600 text-xs group-hover:text-white transition-colors"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span
-                                        class="text-[10px] text-emerald-600 font-semibold uppercase tracking-wide">已匹配</span>
-                                    <span class="text-[10px] text-slate-400">Matched</span>
-                                </div>
-                            </div>
-                            <span class="text-2xl font-black text-emerald-600 tabular-nums"
-                                id="kt-stat-matched">0</span>
-                        </div>
-                        <!-- Unmatched -->
-                        <div
-                            class="group flex items-center justify-between p-3.5 rounded-xl border-2 border-rose-100 bg-gradient-to-r from-rose-50/80 to-white hover:border-rose-200 hover:shadow-sm transition duration-200">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="w-9 h-9 rounded-lg bg-rose-100 flex items-center justify-center group-hover:bg-rose-500 transition-colors duration-200">
-                                    <i
-                                        class="fas fa-times text-rose-500 text-xs group-hover:text-white transition-colors"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span
-                                        class="text-[10px] text-rose-600 font-semibold uppercase tracking-wide">未匹配</span>
-                                    <span class="text-[10px] text-slate-400">Unmatched</span>
-                                </div>
-                            </div>
-                            <span class="text-2xl font-black text-rose-600 tabular-nums" id="kt-stat-unmatched">0</span>
-                        </div>
-                        <!-- Total -->
-                        <div
-                            class="group flex items-center justify-between p-3.5 rounded-xl border-2 border-slate-150 bg-gradient-to-r from-slate-50/80 to-white hover:border-slate-200 hover:shadow-sm transition duration-200">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-slate-600 transition-colors duration-200">
-                                    <i
-                                        class="fas fa-hashtag text-slate-500 text-xs group-hover:text-white transition-colors"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span
-                                        class="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">总词数</span>
-                                    <span class="text-[10px] text-slate-400">Total</span>
-                                </div>
-                            </div>
-                            <span class="text-2xl font-black text-slate-600 tabular-nums" id="kt-stat-total">0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+    <!-- ========== Main Listing Editor Card ========== -->
+    <div
+      class="keyword-hunter-surface-card rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden"
+    >
+      <!-- Card Header -->
+      <div class="px-6 pt-5 pb-4 border-b border-slate-100">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+              <i class="fa-solid fa-list-check text-emerald-500 text-sm"></i>
+            </div>
+            待处理 Listing 文案
+          </h2>
+          <!-- Action Bar -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Translation Model -->
+            <div class="inline-flex items-center gap-1.5">
+              <label for="keyword-hunter-translation-model-select" class="sr-only"
+                >AI 翻译模型</label
+              >
+              <select
+                id="keyword-hunter-translation-model-select"
+                class="min-h-10 w-44 max-w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                aria-describedby="keyword-hunter-translation-model-status"
+              >
+                <option value="">模型未配置</option>
+              </select>
+              <button
+                type="button"
+                class="inline-flex min-h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition duration-200 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 active:translate-y-px disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-300 disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+                id="keyword-hunter-refresh-models-btn"
+                aria-label="重新获取 AI 翻译可用模型"
+                title="重新获取可用模型"
+              >
+                <i
+                  id="keyword-hunter-refresh-models-icon"
+                  class="fas fa-sync-alt text-[10px]"
+                  aria-hidden="true"
+                ></i>
+              </button>
+              <span
+                id="keyword-hunter-translation-model-status"
+                class="sr-only"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                >AI 翻译模型未同步</span
+              >
+            </div>
+            <!-- Translation Toggle -->
+            <label
+              class="inline-flex items-center gap-2.5 cursor-pointer group px-3 py-2 rounded-xl border-2 border-slate-200 hover:border-rose-300 bg-white transition duration-200"
+            >
+              <span
+                class="text-xs font-semibold text-slate-600 group-hover:text-rose-600 transition-colors whitespace-nowrap"
+                >原文</span
+              >
+              <div class="relative flex-shrink-0">
+                <input
+                  checked=""
+                  class="sr-only peer"
+                  id="keyword-hunter-show-translation"
+                  type="checkbox"
+                />
+                <div
+                  class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:bg-rose-500 transition-colors duration-200 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-transform after:duration-200 after:shadow-sm peer-checked:after:translate-x-4"
+                ></div>
+              </div>
+              <span
+                class="text-xs font-semibold text-slate-600 group-hover:text-rose-600 transition-colors whitespace-nowrap"
+                >译文</span
+              >
+            </label>
+            <!-- AI Translate -->
+            <button
+              type="button"
+              class="keyword-hunter-btn-disabled relative overflow-hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition duration-300"
+              id="keyword-hunter-translate-btn"
+              aria-describedby="keyword-hunter-translate-status"
+              disabled
+            >
+              <!-- Progress Bar -->
+              <progress
+                class="keyword-hunter-inline-progress absolute left-0 top-0 bottom-0 opacity-20 hidden"
+                id="keyword-hunter-translate-progress"
+                value="0"
+                max="100"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+                aria-label="AI 翻译进度"
+              ></progress>
+              <i class="fas fa-language relative z-10 text-sm"></i>
+              <span
+                class="relative z-10 text-xs"
+                id="keyword-hunter-translate-btn-text"
+                aria-live="polite"
+                aria-atomic="true"
+                >AI 沉浸式翻译</span
+              >
+              <span
+                class="hidden relative z-10 text-[10px] font-bold bg-white/20 px-1.5 py-0.5 rounded-full"
+                id="translate-btn-percent"
+                >0%</span
+              >
+            </button>
+            <div class="w-px h-7 bg-slate-200 mx-0.5"></div>
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-50 text-slate-500 rounded-xl text-xs font-semibold border border-slate-200"
+              aria-label="已自动保存"
+            >
+              <i class="fas fa-check-circle text-[10px] text-emerald-500" aria-hidden="true"></i>
+              已自动保存
+            </span>
+            <!-- Sync Back -->
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-semibold transition duration-200 border border-emerald-200 hover:border-emerald-300 hover:shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+              id="keyword-hunter-sync-to-input-btn"
+            >
+              <i class="fas fa-reply text-[10px]"></i> 同步回输入
+            </button>
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-semibold transition duration-200 border border-rose-200 hover:border-rose-300 hover:shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+              id="keyword-hunter-go-analysis-btn"
+            >
+              <i class="fas fa-chart-line text-[10px]"></i> 进入分析
+            </button>
+            <span
+              id="keyword-hunter-translate-status"
+              class="sr-only"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              >AI 翻译未开始</span
+            >
+          </div>
+        </div>
+      </div>
+      <!-- Editor Body -->
+      <div class="p-6">
+        <div
+          class="keyword-hunter-editor-shell relative rounded-xl border-2 border-slate-200 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition duration-200 overflow-hidden bg-slate-50/30"
+        >
+          <div
+            class="copy-content p-5 min-h-[420px] text-slate-800 text-sm leading-relaxed focus:outline-none focus:bg-white transition-colors"
+            contenteditable="true"
+            data-placeholder="请先在 输入格式化 点击 开始分析!"
+            id="keyword-hunter-copy-display"
+          ></div>
+          <!-- Editor Status Bar -->
+          <div
+            class="absolute bottom-0 left-0 right-0 px-5 py-2.5 bg-gradient-to-t from-white via-white/95 to-transparent flex items-center justify-between pointer-events-none"
+          >
+            <div class="flex items-center gap-2 pointer-events-auto">
+              <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+              <span class="text-[10px] text-slate-400 font-medium">可编辑</span>
+            </div>
+            <span class="text-[10px] text-slate-300 font-medium hidden sm:flex items-center gap-1">
+              <i class="fas fa-pencil-alt text-[8px]"></i>
+              直接编辑文案以补充关键词
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ========== Statistics + Word Frequency ========== -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start mt-6">
+      <!-- ===== Word Frequency Cloud (2/3) ===== -->
+      <div
+        class="keyword-hunter-surface-card lg:col-span-2 rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden"
+      >
+        <!-- Card Header -->
+        <div class="px-6 pt-5 pb-4 border-b border-slate-100">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                <i class="fas fa-cloud text-indigo-500 text-sm"></i>
+              </div>
+              高频词云
+              <span
+                class="text-[10px] text-slate-400 font-normal ml-1 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100"
+                >Top 50</span
+              >
+            </h3>
+            <!-- Legend -->
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
+                <!-- <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-indigo-400 to-indigo-500"></div> -->
+                <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-green-400 to-green-500"></div>
+                已匹配词根
+              </div>
+              <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
+                <!-- <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-indigo-400 to-indigo-500"></div> -->
+                <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-red-400 to-red-500"></div>
+                未匹配词根
+              </div>
+              <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
+                <div class="w-4 h-2 rounded-sm bg-slate-200"></div>
+                其他词根
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Word Cloud Body -->
+        <div class="p-6">
+          <div
+            class="max-h-96 overflow-y-auto scrollbar-thin leading-relaxed pr-1"
+            id="keyword-hunter-word-frequency-list"
+          >
+            <!-- Empty State -->
+            <div
+              class="flex flex-col items-center justify-center py-16 px-4 text-center"
+              role="status"
+              aria-live="polite"
+            >
+              <div
+                class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4 border border-indigo-100"
+              >
+                <i class="fas fa-cloud text-indigo-200 text-xl"></i>
+              </div>
+              <p class="text-sm font-semibold text-slate-600">还没有词频数据</p>
+              <p class="text-xs text-slate-500 mt-2 max-w-sm leading-relaxed">
+                当前没有可统计的 Listing 文案和关键词匹配结果。
+              </p>
+              <p class="text-xs text-slate-500 mt-2 max-w-sm leading-relaxed">
+                <span class="font-semibold text-slate-600">推荐操作：</span>
+                返回输入页粘贴关键词和文案，点击开始分析后这里会生成词云。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ===== Coverage Stats (1/3) ===== -->
+      <div
+        class="keyword-hunter-surface-card rounded-2xl shadow-sm shadow-slate-200/50 border border-slate-200/80 bg-white overflow-hidden"
+      >
+        <!-- Card Header -->
+        <div class="px-5 pt-5 pb-4 border-b border-slate-100">
+          <h2 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <i class="fas fa-chart-pie text-blue-500 text-sm"></i>
+            </div>
+            覆盖率
+          </h2>
+        </div>
+        <!-- Card Body -->
+        <div class="p-5 space-y-5">
+          <!-- Progress Ring / Bar -->
+          <div
+            class="relative bg-gradient-to-br from-blue-50/80 to-indigo-50/50 rounded-xl p-5 border border-blue-100/60"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                >Coverage</span
+              >
+              <span
+                class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600"
+                id="keyword-hunter-coverage-rate"
+                >0%</span
+              >
+            </div>
+            <div class="w-full bg-slate-200/80 rounded-full h-2.5 overflow-hidden">
+              <progress
+                class="keyword-hunter-coverage-progress h-2.5 rounded-full"
+                id="keyword-hunter-coverage-bar"
+                value="0"
+                max="100"
+                aria-label="关键词覆盖率"
+              ></progress>
+            </div>
+          </div>
+          <!-- Stats Cards -->
+          <div class="space-y-2.5">
+            <!-- Matched -->
+            <div
+              class="group flex items-center justify-between p-3.5 rounded-xl border-2 border-emerald-100 bg-gradient-to-r from-emerald-50/80 to-white hover:border-emerald-200 hover:shadow-sm transition duration-200"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-500 transition-colors duration-200"
+                >
+                  <i
+                    class="fas fa-check text-emerald-600 text-xs group-hover:text-white transition-colors"
+                  ></i>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[10px] text-emerald-600 font-semibold uppercase tracking-wide"
+                    >已匹配</span
+                  >
+                  <span class="text-[10px] text-slate-400">Matched</span>
+                </div>
+              </div>
+              <span
+                class="text-2xl font-black text-emerald-600 tabular-nums"
+                id="keyword-hunter-stat-matched"
+                >0</span
+              >
+            </div>
+            <!-- Unmatched -->
+            <div
+              class="group flex items-center justify-between p-3.5 rounded-xl border-2 border-rose-100 bg-gradient-to-r from-rose-50/80 to-white hover:border-rose-200 hover:shadow-sm transition duration-200"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-9 h-9 rounded-lg bg-rose-100 flex items-center justify-center group-hover:bg-rose-500 transition-colors duration-200"
+                >
+                  <i
+                    class="fas fa-times text-rose-500 text-xs group-hover:text-white transition-colors"
+                  ></i>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[10px] text-rose-600 font-semibold uppercase tracking-wide"
+                    >未匹配</span
+                  >
+                  <span class="text-[10px] text-slate-400">Unmatched</span>
+                </div>
+              </div>
+              <span
+                class="text-2xl font-black text-rose-600 tabular-nums"
+                id="keyword-hunter-stat-unmatched"
+                >0</span
+              >
+            </div>
+            <!-- Total -->
+            <div
+              class="group flex items-center justify-between p-3.5 rounded-xl border-2 border-slate-150 bg-gradient-to-r from-slate-50/80 to-white hover:border-slate-200 hover:shadow-sm transition duration-200"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-slate-600 transition-colors duration-200"
+                >
+                  <i
+                    class="fas fa-hashtag text-slate-500 text-xs group-hover:text-white transition-colors"
+                  ></i>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[10px] text-slate-600 font-semibold uppercase tracking-wide"
+                    >总词数</span
+                  >
+                  <span class="text-[10px] text-slate-400">Total</span>
+                </div>
+              </div>
+              <span
+                class="text-2xl font-black text-slate-600 tabular-nums"
+                id="keyword-hunter-stat-total"
+                >0</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 <!-- ========== Floating Keywords Window ========== -->
-<div class="kt-floating-window" id="kt-keywords-floating">
-    <div class="floating-header bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-xl">
-        <h3 class="font-semibold text-sm flex items-center gap-2.5">
-            <div class="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center">
-                <i class="fas fa-list text-[10px]"></i>
-            </div>
-            关键词监控
-        </h3>
-        <div class="flex items-center gap-1.5">
-            <button type="button"
-                class="w-7 h-7 flex items-center justify-center hover:bg-white/20 rounded-lg transition-colors"
-                id="kt-minimize-keywords-btn" title="最小化">
-                <i class="fas fa-minus text-xs"></i>
-            </button>
-        </div>
+<div class="keyword-hunter-floating-window" id="keyword-hunter-keywords-floating">
+  <div class="floating-header bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-xl">
+    <h3 class="font-semibold text-sm flex items-center gap-2.5">
+      <div class="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center">
+        <i class="fas fa-list text-[10px]"></i>
+      </div>
+      关键词监控
+    </h3>
+    <div class="flex items-center gap-1.5">
+      <button
+        type="button"
+        class="w-7 h-7 flex items-center justify-center hover:bg-white/20 rounded-lg transition-colors"
+        id="keyword-hunter-minimize-keywords-btn"
+        title="最小化"
+      >
+        <i class="fas fa-minus text-xs"></i>
+      </button>
     </div>
-    <div class="kt-floating-content p-4">
-        <!-- Legend -->
-        <div class="flex items-center justify-start gap-5 mb-3.5 pb-3.5 border-b border-slate-100">
-            <div class="flex items-center gap-2 text-xs">
-                <span
-                    class="w-3 h-3 rounded-md bg-gradient-to-br from-emerald-400 to-emerald-500 shadow-sm shadow-emerald-200"></span>
-                <span class="text-slate-600 font-semibold">已匹配 <span class="text-emerald-600 font-bold">(<span
-                            id="kt-tab-matched-count">0</span>)</span></span>
-            </div>
-            <div class="flex items-center gap-2 text-xs">
-                <span
-                    class="w-3 h-3 rounded-md bg-gradient-to-br from-rose-400 to-rose-500 shadow-sm shadow-rose-200"></span>
-                <span class="text-slate-600 font-semibold">未匹配 <span class="text-rose-600 font-bold">(<span
-                            id="kt-tab-unmatched-count">0</span>)</span></span>
-            </div>
-        </div>
-        <div class="kt-keyword-list-wrapper">
-            <div class="kt-keyword-list space-y-1.5 scrollbar-thin" id="kt-all-keywords"></div>
-        </div>
+  </div>
+  <div class="keyword-hunter-floating-content p-4">
+    <!-- Legend -->
+    <div class="flex items-center justify-start gap-5 mb-3.5 pb-3.5 border-b border-slate-100">
+      <div class="flex items-center gap-2 text-xs">
+        <span
+          class="w-3 h-3 rounded-md bg-gradient-to-br from-emerald-400 to-emerald-500 shadow-sm shadow-emerald-200"
+        ></span>
+        <span class="text-slate-600 font-semibold"
+          >已匹配
+          <span class="text-emerald-600 font-bold"
+            >(<span id="keyword-hunter-tab-matched-count">0</span>)</span
+          ></span
+        >
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <span
+          class="w-3 h-3 rounded-md bg-gradient-to-br from-rose-400 to-rose-500 shadow-sm shadow-rose-200"
+        ></span>
+        <span class="text-slate-600 font-semibold"
+          >未匹配
+          <span class="text-rose-600 font-bold"
+            >(<span id="keyword-hunter-tab-unmatched-count">0</span>)</span
+          ></span
+        >
+      </div>
     </div>
+    <div class="keyword-hunter-keyword-list-wrapper">
+      <div
+        class="keyword-hunter-keyword-list space-y-1.5 scrollbar-thin"
+        id="keyword-hunter-all-keywords"
+      ></div>
+    </div>
+  </div>
 </div>
 <!-- ========== Minimized Keywords Button ========== -->
 <button
-    type="button"
-    class="kt-minimized-btn fixed bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-2xl shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 transition duration-200 items-center gap-2.5 border border-blue-400/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-    id="kt-keywords-minimized">
-    <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
-        <i class="fas fa-list text-xs"></i>
-    </div>
-    <span class="text-sm font-bold">关键词</span>
-    <span
-        class="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm min-w-[20px] text-center"
-        id="kt-minimized-badge">0</span>
+  type="button"
+  class="keyword-hunter-minimized-btn fixed bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-2xl shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 transition duration-200 items-center gap-2.5 border border-blue-400/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+  id="keyword-hunter-keywords-minimized"
+>
+  <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+    <i class="fas fa-list text-xs"></i>
+  </div>
+  <span class="text-sm font-bold">关键词</span>
+  <span
+    class="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm min-w-[20px] text-center"
+    id="keyword-hunter-minimized-badge"
+    >0</span
+  >
 </button>

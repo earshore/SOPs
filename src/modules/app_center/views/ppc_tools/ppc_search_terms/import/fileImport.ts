@@ -3,7 +3,7 @@ import { getInput, getTextarea, setText } from '../ui/dom';
 import { MAX_IMPORT_FILE_SIZE_BYTES } from '../analysis/reportLimits';
 import { xlsxArrayBufferToDelimitedText } from './xlsx';
 import { setPasteInputError } from '../analysis/analysisInput';
-import { setPpcStatus } from '../ui/reportControls';
+import { setPpcSearchTermsStatus } from '../ui/reportControls';
 
 export interface ReportImportCallbacks {
   prepareReport(container: HTMLElement, text: string): void;
@@ -26,34 +26,34 @@ export async function handleReportFileImport(
   container: HTMLElement,
   callbacks: ReportImportCallbacks
 ): Promise<void> {
-  const input = getInput(container, 'ppc-file-input');
+  const input = getInput(container, 'ppc-search-terms-file-input');
   const file = input?.files?.[0];
   if (!file) return;
 
   try {
     const text = await readReportFile(file, callbacks);
-    const textarea = getTextarea(container, 'ppc-paste-input');
+    const textarea = getTextarea(container, 'ppc-search-terms-paste-input');
     if (textarea) textarea.value = text;
     input.removeAttribute('aria-invalid');
     setPasteInputError(container, '');
     callbacks.prepareReport(container, text);
-    setText(container, 'ppc-file-name', `已选择：${file.name}`);
-    setPpcStatus(container, '报表已导入，请确认报表类型和阈值后点击“分析当前数据”。');
+    setText(container, 'ppc-search-terms-file-name', `已选择：${file.name}`);
+    setPpcSearchTermsStatus(container, '报表已导入，请确认报表类型和阈值后点击“分析当前数据”。');
   } catch (error) {
     const message = error instanceof Error ? error.message : '文件读取失败';
     input.setAttribute('aria-invalid', 'true');
-    setPpcStatus(container, `文件读取失败：${message}`, 'error');
+    setPpcSearchTermsStatus(container, `文件读取失败：${message}`, 'error');
     showToast('文件读取失败', { type: 'error', description: message });
   }
 }
 
 export function loadSampleReport(container: HTMLElement, callbacks: ReportImportCallbacks): void {
-  const textarea = getTextarea(container, 'ppc-paste-input');
+  const textarea = getTextarea(container, 'ppc-search-terms-paste-input');
   if (textarea) textarea.value = SAMPLE_REPORT;
   setPasteInputError(container, '');
   callbacks.prepareReport(container, SAMPLE_REPORT);
-  setText(container, 'ppc-file-name', '已加载样例数据');
-  setPpcStatus(container, '样例数据已加载，请点击“分析当前数据”开始分析。');
+  setText(container, 'ppc-search-terms-file-name', '已加载样例数据');
+  setPpcSearchTermsStatus(container, '样例数据已加载，请点击“分析当前数据”开始分析。');
 }
 
 async function readReportFile(file: File, callbacks: ReportImportCallbacks): Promise<string> {

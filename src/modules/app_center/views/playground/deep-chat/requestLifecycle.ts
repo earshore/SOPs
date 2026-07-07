@@ -1,8 +1,8 @@
 import type { ChatMessage } from '@/services/llmService';
 
-export type PlaygroundPendingAbortReason = 'stopped' | 'deleted' | 'cleared';
+export type DeepChatPendingAbortReason = 'stopped' | 'deleted' | 'cleared';
 
-export interface PendingPlaygroundRequest {
+export interface PendingDeepChatRequest {
   threadId: string;
   conversationMessages: ChatMessage[];
   assistantText: string;
@@ -10,20 +10,20 @@ export interface PendingPlaygroundRequest {
   startedAt: number;
   updatedAt: number;
   controller: AbortController;
-  abortReason?: PlaygroundPendingAbortReason;
+  abortReason?: DeepChatPendingAbortReason;
   isSettled?: boolean;
 }
 
-interface CreatePendingPlaygroundRequestOptions {
+interface CreatePendingDeepChatRequestOptions {
   now?: number;
   controller?: AbortController;
 }
 
-export function createPendingPlaygroundRequest(
+export function createPendingDeepChatRequest(
   threadId: string,
   conversationMessages: ChatMessage[],
-  options: CreatePendingPlaygroundRequestOptions = {}
-): PendingPlaygroundRequest {
+  options: CreatePendingDeepChatRequestOptions = {}
+): PendingDeepChatRequest {
   const now = options.now ?? Date.now();
 
   return {
@@ -37,8 +37,8 @@ export function createPendingPlaygroundRequest(
   };
 }
 
-export function appendPendingPlaygroundAssistantText(
-  pendingRequest: PendingPlaygroundRequest,
+export function appendPendingDeepChatAssistantText(
+  pendingRequest: PendingDeepChatRequest,
   delta: string,
   now = Date.now()
 ): void {
@@ -46,8 +46,8 @@ export function appendPendingPlaygroundAssistantText(
   pendingRequest.updatedAt = now;
 }
 
-export function markPendingPlaygroundAssistantTextDisplayed(
-  pendingRequest: PendingPlaygroundRequest,
+export function markPendingDeepChatAssistantTextDisplayed(
+  pendingRequest: PendingDeepChatRequest,
   displayedText: string,
   now = Date.now()
 ): void {
@@ -58,23 +58,21 @@ export function markPendingPlaygroundAssistantTextDisplayed(
   pendingRequest.updatedAt = now;
 }
 
-export function markPendingPlaygroundRequestSettled(
-  pendingRequest: PendingPlaygroundRequest,
+export function markPendingDeepChatRequestSettled(
+  pendingRequest: PendingDeepChatRequest,
   now = Date.now()
 ): void {
   pendingRequest.isSettled = true;
   pendingRequest.updatedAt = now;
 }
 
-export function isPendingPlaygroundDisplayComplete(
-  pendingRequest: PendingPlaygroundRequest
-): boolean {
+export function isPendingDeepChatDisplayComplete(pendingRequest: PendingDeepChatRequest): boolean {
   return pendingRequest.displayedAssistantText.length >= pendingRequest.assistantText.length;
 }
 
-export function abortPendingPlaygroundRequest(
-  pendingRequest: PendingPlaygroundRequest,
-  reason: PlaygroundPendingAbortReason
+export function abortPendingDeepChatRequest(
+  pendingRequest: PendingDeepChatRequest,
+  reason: DeepChatPendingAbortReason
 ): void {
   pendingRequest.abortReason ||= reason;
   if (!pendingRequest.controller.signal.aborted) {
@@ -82,6 +80,6 @@ export function abortPendingPlaygroundRequest(
   }
 }
 
-export function shouldPreserveStoppedResponse(pendingRequest: PendingPlaygroundRequest): boolean {
+export function shouldPreserveStoppedResponse(pendingRequest: PendingDeepChatRequest): boolean {
   return pendingRequest.abortReason === 'stopped' && pendingRequest.assistantText.trim().length > 0;
 }

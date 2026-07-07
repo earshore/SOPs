@@ -382,7 +382,7 @@
     ),
   body
     textarea[class]:where(
-      :not(.form-textarea):not(.keyword-input-textarea):not(#kt-copy-input):not(
+      :not(.form-textarea):not(.keyword-input-textarea):not(#keyword-hunter-copy-input):not(
           #final-prompt-output
         ):not(.border-none):not(.bg-transparent)
     ),
@@ -436,7 +436,7 @@
     ):hover,
   body
     textarea[class]:where(
-      :not(.form-textarea):not(.keyword-input-textarea):not(#kt-copy-input):not(
+      :not(.form-textarea):not(.keyword-input-textarea):not(#keyword-hunter-copy-input):not(
           #final-prompt-output
         ):not(.border-none):not(.bg-transparent)
     ):hover,
@@ -460,7 +460,7 @@
     ):focus,
   body
     textarea[class]:where(
-      :not(.form-textarea):not(.keyword-input-textarea):not(#kt-copy-input):not(
+      :not(.form-textarea):not(.keyword-input-textarea):not(#keyword-hunter-copy-input):not(
           #final-prompt-output
         ):not(.border-none):not(.bg-transparent)
     ):focus,

@@ -4,39 +4,48 @@
 @import './ppc_search_terms/styles/style.settings.css';
 @import './ppc_search_terms/styles/style.results.css';
 
-:where(.ppc-search-app) {
+:where(.ppc-search-terms-app) {
   /* UI-P1-04: PPC 局部 token 只表达工具业务语义；全局映射登记见 docs/THEME_SYSTEM_GUIDELINES.md §6.1。 */
-  --ppc-surface: var(--surface-panel, var(--color-bg-elevated, #ffffff));
-  --ppc-surface-muted: var(--surface-card-hover, var(--color-slate-50, #f8fafc));
-  --ppc-border: var(--border-subtle, rgba(148, 163, 184, 0.24));
-  --ppc-border-muted: var(--border-muted, rgba(203, 213, 225, 0.72));
-  --ppc-text-primary: var(--color-text-primary, var(--color-slate-900, #0f172a));
-  --ppc-text-secondary: var(--color-text-secondary, var(--color-slate-600, #475569));
-  --ppc-text-muted: var(--color-text-tertiary, var(--color-slate-400, #94a3b8));
-  --ppc-primary: var(--color-primary, var(--color-blue-600, #2563eb));
-  --ppc-primary-hover: var(--color-primary-dark, var(--color-blue-700, #1d4ed8));
-  --ppc-primary-soft: var(--color-primary-light, var(--color-blue-50, #eff6ff));
-  --ppc-accent: var(--color-emerald-700, var(--color-green-700, #047857));
-  --ppc-accent-strong: var(--color-emerald-800, var(--color-green-800, #065f46));
-  --ppc-accent-soft: var(--color-emerald-50, var(--color-green-50, #f0fdf4));
-  --ppc-accent-border: color-mix(in srgb, var(--ppc-accent) 18%, transparent);
-  --ppc-info-soft: var(--color-blue-50, #eff6ff);
-  --ppc-info-border: color-mix(in srgb, var(--color-blue-600, #2563eb) 22%, transparent);
-  --ppc-info-text: var(--color-blue-700, #1d4ed8);
-  --ppc-danger-soft: var(--color-red-100, #fee2e2);
-  --ppc-danger-text: var(--color-red-800, #991b1b);
-  --ppc-warning-soft: var(--color-amber-100, #fef3c7);
-  --ppc-warning-text: var(--color-amber-800, #92400e);
-  --ppc-success-soft: var(--color-green-100, #dcfce7);
-  --ppc-success-text: var(--color-green-800, #166534);
-  --ppc-radius: var(--rounded-panel, var(--rounded-md, 8px));
-  --ppc-radius-lg: var(--rounded-lg, 12px);
-  --ppc-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
-  --ppc-shadow-panel: var(--shadow-panel, 0 12px 30px -28px rgba(15, 23, 42, 0.45));
-  --ppc-shadow-accent: 0 8px 18px -14px color-mix(in srgb, var(--ppc-accent) 72%, transparent);
-  --ppc-shadow-accent-hover: 0 10px 22px -16px
+  --ppc-search-terms-surface: var(--surface-panel, var(--color-bg-elevated, #ffffff));
+  --ppc-search-terms-surface-muted: var(--surface-card-hover, var(--color-slate-50, #f8fafc));
+  --ppc-search-terms-border: var(--border-subtle, rgba(148, 163, 184, 0.24));
+  --ppc-search-terms-border-muted: var(--border-muted, rgba(203, 213, 225, 0.72));
+  --ppc-search-terms-text-primary: var(--color-text-primary, var(--color-slate-900, #0f172a));
+  --ppc-search-terms-text-secondary: var(--color-text-secondary, var(--color-slate-600, #475569));
+  --ppc-search-terms-text-muted: var(--color-text-tertiary, var(--color-slate-400, #94a3b8));
+  --ppc-search-terms-primary: var(--color-primary, var(--color-blue-600, #2563eb));
+  --ppc-search-terms-primary-hover: var(--color-primary-dark, var(--color-blue-700, #1d4ed8));
+  --ppc-search-terms-primary-soft: var(--color-primary-light, var(--color-blue-50, #eff6ff));
+  --ppc-search-terms-accent: var(--color-emerald-700, var(--color-green-700, #047857));
+  --ppc-search-terms-accent-strong: var(--color-emerald-800, var(--color-green-800, #065f46));
+  --ppc-search-terms-accent-soft: var(--color-emerald-50, var(--color-green-50, #f0fdf4));
+  --ppc-search-terms-accent-border: color-mix(
+    in srgb,
+    var(--ppc-search-terms-accent) 18%,
+    transparent
+  );
+  --ppc-search-terms-info-soft: var(--color-blue-50, #eff6ff);
+  --ppc-search-terms-info-border: color-mix(
+    in srgb,
+    var(--color-blue-600, #2563eb) 22%,
+    transparent
+  );
+  --ppc-search-terms-info-text: var(--color-blue-700, #1d4ed8);
+  --ppc-search-terms-danger-soft: var(--color-red-100, #fee2e2);
+  --ppc-search-terms-danger-text: var(--color-red-800, #991b1b);
+  --ppc-search-terms-warning-soft: var(--color-amber-100, #fef3c7);
+  --ppc-search-terms-warning-text: var(--color-amber-800, #92400e);
+  --ppc-search-terms-success-soft: var(--color-green-100, #dcfce7);
+  --ppc-search-terms-success-text: var(--color-green-800, #166534);
+  --ppc-search-terms-radius: var(--rounded-panel, var(--rounded-md, 8px));
+  --ppc-search-terms-radius-lg: var(--rounded-lg, 12px);
+  --ppc-search-terms-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  --ppc-search-terms-shadow-panel: var(--shadow-panel, 0 12px 30px -28px rgba(15, 23, 42, 0.45));
+  --ppc-search-terms-shadow-accent: 0 8px 18px -14px
+    color-mix(in srgb, var(--ppc-search-terms-accent) 72%, transparent);
+  --ppc-search-terms-shadow-accent-hover: 0 10px 22px -16px
     color-mix(in srgb, var(--color-teal-500, #14b8a6) 72%, transparent);
-  --ppc-focus-ring: var(--focus-ring-soft, rgba(37, 99, 235, 0.16));
-  --ppc-motion-duration: var(--micro-duration-quick, 150ms);
-  --ppc-motion-ease: var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+  --ppc-search-terms-focus-ring: var(--focus-ring-soft, rgba(37, 99, 235, 0.16));
+  --ppc-search-terms-motion-duration: var(--micro-duration-quick, 150ms);
+  --ppc-search-terms-motion-ease: var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }

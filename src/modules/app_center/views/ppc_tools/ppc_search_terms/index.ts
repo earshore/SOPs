@@ -20,8 +20,8 @@ import {
 } from './export/exportController';
 import { getGrowthExportFilter, getWasteExportFilter } from './utils/filters';
 import { getInput, getTextarea, setAnalyzeButtonState, setText } from './ui/dom';
-import { bindPpcEvents } from './ui/eventBindings';
-import { renderMappingStatus, setPpcStatus } from './ui/reportControls';
+import { bindPpcSearchTermsEvents } from './ui/eventBindings';
+import { renderMappingStatus, setPpcSearchTermsStatus } from './ui/reportControls';
 import { inferReportTypeFromText } from './analysis/reportTypeInference';
 import { createListenerRegistry } from './ui/listenerRegistry';
 import { initializeThresholdPanel, toggleThresholdPanel } from './settings/thresholdPanel';
@@ -180,7 +180,7 @@ export const unmount = (): void => {
 };
 
 function bindEvents(container: HTMLElement): void {
-  bindPpcEvents(container, listenerRegistry.add, {
+  bindPpcSearchTermsEvents(container, listenerRegistry.add, {
     importReport: () => handleReportFileImport(container, reportImportCallbacks),
     analyzeTextarea: () => analyzeTextarea(container),
     loadSample: () => loadSampleReport(container, reportImportCallbacks),
@@ -215,7 +215,7 @@ function bindEvents(container: HTMLElement): void {
 }
 
 async function analyzeTextarea(container: HTMLElement): Promise<void> {
-  const text = getTextarea(container, 'ppc-paste-input')?.value || '';
+  const text = getTextarea(container, 'ppc-search-terms-paste-input')?.value || '';
   await analyzeReportText(container, text, analysisFlowCallbacks);
 }
 
@@ -234,17 +234,17 @@ function clearAnalyzer(container: HTMLElement): void {
   cancelActiveAnalysis();
   resetAnalyzerState();
   setAnalyzeButtonState(container, false);
-  const textarea = getTextarea(container, 'ppc-paste-input');
+  const textarea = getTextarea(container, 'ppc-search-terms-paste-input');
   if (textarea) textarea.value = '';
-  const fileInput = getInput(container, 'ppc-file-input');
+  const fileInput = getInput(container, 'ppc-search-terms-file-input');
   if (fileInput) {
     fileInput.value = '';
     fileInput.removeAttribute('aria-invalid');
   }
   setPasteInputError(container, '');
   actionListState.resetControls(container);
-  setText(container, 'ppc-file-name', '支持 CSV、TSV、XLSX 或直接粘贴表格内容。');
-  setPpcStatus(container, '');
+  setText(container, 'ppc-search-terms-file-name', '支持 CSV、TSV、XLSX 或直接粘贴表格内容。');
+  setPpcSearchTermsStatus(container, '');
   actionListState.render(container, []);
 }
 
@@ -284,7 +284,7 @@ function formatFileSize(bytes: number): string {
 }
 
 function restoreAnalyzerView(container: HTMLElement): void {
-  const textarea = getTextarea(container, 'ppc-paste-input');
+  const textarea = getTextarea(container, 'ppc-search-terms-paste-input');
   if (textarea && sourceText) {
     textarea.value = sourceText;
     setPasteInputError(container, '');
@@ -300,9 +300,9 @@ function restoreAnalyzerView(container: HTMLElement): void {
       mappingStatusSnapshot.status
     );
   } else if (statusSnapshot) {
-    setPpcStatus(container, statusSnapshot.message, statusSnapshot.tone);
+    setPpcSearchTermsStatus(container, statusSnapshot.message, statusSnapshot.tone);
   } else {
-    setPpcStatus(container, '');
+    setPpcSearchTermsStatus(container, '');
   }
 
   setAnalyzeButtonState(container, isAnalyzing);
@@ -339,7 +339,7 @@ function setAnalyzerStatus(
   statusSnapshot = { message, tone };
   mappingStatusSnapshot = null;
   const target = getRenderContainer(container);
-  if (target) setPpcStatus(target, message, tone);
+  if (target) setPpcSearchTermsStatus(target, message, tone);
 }
 
 function setAnalyzerMappingStatus(

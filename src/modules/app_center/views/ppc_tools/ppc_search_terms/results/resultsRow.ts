@@ -5,8 +5,8 @@ export function createResultRow(row: AnalyzedRow): HTMLTableRowElement {
   const tr = document.createElement('tr');
   tr.className =
     row.reviewStatus === 'model_reviewed'
-      ? 'ppc-results-row ppc-results-row-reviewed'
-      : 'ppc-results-row';
+      ? 'ppc-search-terms-results-row ppc-search-terms-results-row-reviewed'
+      : 'ppc-search-terms-results-row';
   tr.appendChild(createSearchTermCell(row));
   tr.appendChild(createActionCell(row));
   tr.appendChild(createCell(formatCurrency(row.spend), 'right'));
@@ -46,13 +46,13 @@ function getObjectMeta(row: AnalyzedRow): string {
 function createActionCell(row: AnalyzedRow): HTMLTableCellElement {
   const cell = createCell('', 'left');
   const badge = document.createElement('span');
-  badge.className = `ppc-action-badge ppc-action-${row.action}`;
+  badge.className = `ppc-search-terms-action-badge ppc-search-terms-action-${row.action}`;
   badge.textContent = row.actionLabel;
   cell.appendChild(badge);
 
   if (row.reviewStatus === 'model_reviewed') {
     const reviewBadge = document.createElement('span');
-    reviewBadge.className = 'ppc-review-chip';
+    reviewBadge.className = 'ppc-search-terms-review-chip';
     reviewBadge.textContent = 'Agent 复核';
     cell.appendChild(reviewBadge);
   }
@@ -69,12 +69,12 @@ function createReasonCell(row: AnalyzedRow): HTMLTableCellElement {
   }
 
   const wrapper = document.createElement('div');
-  wrapper.className = 'ppc-review-reason';
+  wrapper.className = 'ppc-search-terms-review-reason';
   const label = document.createElement('div');
-  label.className = 'ppc-review-reason-label';
+  label.className = 'ppc-search-terms-review-reason-label';
   label.textContent = '语义复核结论';
   const text = document.createElement('div');
-  text.className = 'ppc-review-reason-text';
+  text.className = 'ppc-search-terms-review-reason-text';
   text.textContent = row.reason;
   wrapper.append(label, text);
   cell.appendChild(wrapper);

@@ -2,65 +2,65 @@ import { readFileSync } from 'node:fs';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const deepChatTemplate = `
-  <div class="playground-shell">
-    <div class="playground-page">
-      <aside id="playground-thread-rail" class="playground-thread-rail">
-        <div class="playground-thread-actions">
-          <button id="playground-clear-chat" class="playground-new-thread" type="button">
+  <div class="deep-chat-shell">
+    <div class="deep-chat-page">
+      <aside id="deep-chat-thread-rail" class="deep-chat-thread-rail">
+        <div class="deep-chat-thread-actions">
+          <button id="deep-chat-clear-chat" class="deep-chat-new-thread" type="button">
             <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
             <span>新建会话</span>
           </button>
-          <button id="playground-search-chats" class="playground-search-chats" type="button">
+          <button id="deep-chat-search-chats" class="deep-chat-search-chats" type="button">
             <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
             <span>搜索会话</span>
           </button>
         </div>
-        <h3 class="playground-panel-title">最近会话</h3>
-        <div id="playground-thread-list"></div>
+        <h3 class="deep-chat-panel-title">最近会话</h3>
+        <div id="deep-chat-thread-list"></div>
       </aside>
-      <section class="playground-main">
-        <button id="playground-toggle-rail" type="button" aria-expanded="true" aria-label="收起最近会话"></button>
-        <select id="playground-model-select"></select>
-        <button id="playground-refresh-config" type="button"></button>
-        <button id="playground-open-settings" type="button" hidden>配置模型</button>
-        <button id="playground-open-promptlab" type="button">生成 Prompt</button>
-        <details class="playground-tuning-panel">
+      <section class="deep-chat-main">
+        <button id="deep-chat-toggle-rail" type="button" aria-expanded="true" aria-label="收起最近会话"></button>
+        <select id="deep-chat-model-select"></select>
+        <button id="deep-chat-refresh-config" type="button"></button>
+        <button id="deep-chat-open-settings" type="button" hidden>配置模型</button>
+        <button id="deep-chat-open-promptlab" type="button">生成 Prompt</button>
+        <details class="deep-chat-tuning-panel">
           <summary>Settings</summary>
-          <textarea id="playground-system-prompt"></textarea>
-          <output id="playground-temperature-value">0.3</output>
-          <input id="playground-temperature" type="range" value="0.3">
-          <button id="playground-reset-tuning" type="button"></button>
+          <textarea id="deep-chat-system-prompt"></textarea>
+          <output id="deep-chat-temperature-value">0.3</output>
+          <input id="deep-chat-temperature" type="range" value="0.3">
+          <button id="deep-chat-reset-tuning" type="button"></button>
         </details>
-        <div id="playground-pending-status" hidden>
-          <span id="playground-pending-status-text"></span>
+        <div id="deep-chat-pending-status" hidden>
+          <span id="deep-chat-pending-status-text"></span>
         </div>
-        <div class="playground-chat-wrap">
-          <deep-chat id="playground-chat" class="playground-chat"></deep-chat>
-          <button id="playground-stop-generation" type="button" hidden>Stop</button>
+        <div class="deep-chat-wrap">
+          <deep-chat id="deep-chat-view" class="deep-chat-view"></deep-chat>
+          <button id="deep-chat-stop-generation" type="button" hidden>Stop</button>
         </div>
       </section>
-      <aside id="playground-prompt-rail">
-        <h3 class="playground-panel-title playground-panel-title--prompt">Prompt</h3>
-        <div id="playground-prompt-list"></div>
-        <div id="playground-prompt-preview-popover" aria-hidden="true">
-          <div class="playground-prompt-preview-title"></div>
-          <div class="playground-prompt-preview-body"></div>
+      <aside id="deep-chat-prompt-rail">
+        <h3 class="deep-chat-panel-title deep-chat-panel-title--prompt">Prompt</h3>
+        <div id="deep-chat-prompt-list"></div>
+        <div id="deep-chat-prompt-preview-popover" aria-hidden="true">
+          <div class="deep-chat-prompt-preview-title"></div>
+          <div class="deep-chat-prompt-preview-body"></div>
         </div>
       </aside>
     </div>
-    <div id="playground-chat-search-modal" class="playground-chat-search-modal" aria-hidden="true" hidden>
-      <div class="playground-chat-search-backdrop" data-chat-search-close></div>
-      <section class="playground-chat-search-dialog" role="dialog" aria-modal="true" aria-label="搜索会话">
-        <div class="playground-chat-search-bar">
-          <input id="playground-chat-search-input" type="search" aria-label="搜索会话">
-          <button id="playground-chat-search-close" type="button" data-chat-search-close>
+    <div id="deep-chat-search-modal" class="deep-chat-search-modal" aria-hidden="true" hidden>
+      <div class="deep-chat-search-backdrop" data-chat-search-close></div>
+      <section class="deep-chat-search-dialog" role="dialog" aria-modal="true" aria-label="搜索会话">
+        <div class="deep-chat-search-bar">
+          <input id="deep-chat-search-input" type="search" aria-label="搜索会话">
+          <button id="deep-chat-search-close" type="button" data-chat-search-close>
             关闭搜索会话
           </button>
         </div>
-        <button class="playground-chat-search-new" type="button" data-chat-search-new>
+        <button class="deep-chat-search-new" type="button" data-chat-search-new>
           新建会话
         </button>
-        <div id="playground-chat-search-results" class="playground-chat-search-results" aria-live="polite"></div>
+        <div id="deep-chat-search-results" class="deep-chat-search-results" aria-live="polite"></div>
       </section>
     </div>
   </div>
@@ -333,7 +333,7 @@ async function importDeepChat(options: ImportOptions = {}) {
 }
 
 function getChat(container: HTMLElement): TestDeepChatElement {
-  const chat = container.querySelector<TestDeepChatElement>('#playground-chat');
+  const chat = container.querySelector<TestDeepChatElement>('#deep-chat-view');
   if (!chat) {
     throw new Error('Deep Chat element not found');
   }
@@ -446,19 +446,19 @@ describe('deep-chat playground template copy', () => {
     expect(template).toContain('<span>新建会话</span>');
     expect(template).toContain('<span>搜索会话</span>');
     expect(template).toContain('>最近会话</h3>');
-    expect(template).toContain('id="playground-open-settings"');
-    expect(template).toContain('id="playground-open-promptlab"');
-    expect(template).not.toContain('playground-provider-status');
-    expect(template.indexOf('id="playground-model-select"')).toBeLessThan(
-      template.indexOf('id="playground-refresh-config"')
+    expect(template).toContain('id="deep-chat-open-settings"');
+    expect(template).toContain('id="deep-chat-open-promptlab"');
+    expect(template).not.toContain('deep-chat-provider-status');
+    expect(template.indexOf('id="deep-chat-model-select"')).toBeLessThan(
+      template.indexOf('id="deep-chat-refresh-config"')
     );
-    expect(template.indexOf('id="playground-refresh-config"')).toBeLessThan(
-      template.indexOf('class="playground-top-actions"')
+    expect(template.indexOf('id="deep-chat-refresh-config"')).toBeLessThan(
+      template.indexOf('class="deep-chat-top-actions"')
     );
     expect(template).toContain('>Prompt</h3>');
-    expect(template).toContain('id="playground-chat-search-modal"');
+    expect(template).toContain('id="deep-chat-search-modal"');
     expect(template).toContain('aria-label="搜索会话"');
-    expect(template).toContain('class="playground-chat-search-bar"');
+    expect(template).toContain('class="deep-chat-search-bar"');
     expect(template).toContain('data-chat-search-new');
     expect(template).not.toContain('<span>New Chat</span>');
     expect(template).not.toContain('<span>Search Chats</span>');
@@ -470,7 +470,7 @@ describe('deep-chat playground module', () => {
   it('mounts stored threads, model config, prompt history, and tuning controls', async () => {
     const container = document.createElement('main');
     document.body.append(container);
-    const { mount, unmount, clearPlaygroundThreadStore, mocks } = await importDeepChat();
+    const { mount, unmount, clearDeepChatThreadStore, mocks } = await importDeepChat();
 
     await mount(container);
 
@@ -481,53 +481,53 @@ describe('deep-chat playground module', () => {
       loading: { container: { backgroundColor: '#dc2626' } },
       stop: { container: { backgroundColor: '#dc2626' } },
     });
-    expect(queryRequired<HTMLButtonElement>(container, '#playground-open-settings').hidden).toBe(
+    expect(queryRequired<HTMLButtonElement>(container, '#deep-chat-open-settings').hidden).toBe(
       true
     );
     expect([...container.querySelectorAll('option')].map(option => option.value)).toEqual([
       'gpt-4.1',
       'gpt-4.1-mini',
     ]);
-    expect(container.querySelector('#playground-thread-list')?.textContent).toContain(
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
       'Existing thread'
     );
-    expect(container.querySelector('#playground-prompt-list')?.textContent).toContain(
+    expect(container.querySelector('#deep-chat-prompt-list')?.textContent).toContain(
       'Rewrite this listing'
     );
-    expect(container.querySelector('.playground-prompt-icon')).toBeNull();
-    expect(container.querySelector('.playground-page')?.classList.contains('is-prompt-empty')).toBe(
+    expect(container.querySelector('.deep-chat-prompt-icon')).toBeNull();
+    expect(container.querySelector('.deep-chat-page')?.classList.contains('is-prompt-empty')).toBe(
       false
     );
 
-    const temperature = queryRequired<HTMLInputElement>(container, '#playground-temperature');
+    const temperature = queryRequired<HTMLInputElement>(container, '#deep-chat-temperature');
     const temperatureValue = queryRequired<HTMLOutputElement>(
       container,
-      '#playground-temperature-value'
+      '#deep-chat-temperature-value'
     );
-    const systemPrompt = queryRequired<HTMLTextAreaElement>(container, '#playground-system-prompt');
+    const systemPrompt = queryRequired<HTMLTextAreaElement>(container, '#deep-chat-system-prompt');
     systemPrompt.value = 'Act as an SOP assistant';
     systemPrompt.dispatchEvent(new Event('input'));
     temperature.value = '0.8';
     temperature.dispatchEvent(new Event('input'));
     expect(temperatureValue.value).toBe('0.8');
 
-    container.querySelector<HTMLButtonElement>('#playground-reset-tuning')?.click();
+    container.querySelector<HTMLButtonElement>('#deep-chat-reset-tuning')?.click();
     expect(systemPrompt.value).toBe('');
     expect(temperature.value).toBe('0.3');
     expect(mocks.toast).toHaveBeenCalledWith('Deep Chat 调试参数已重置', { type: 'success' });
 
-    container.querySelector<HTMLButtonElement>('#playground-toggle-rail')?.click();
+    container.querySelector<HTMLButtonElement>('#deep-chat-toggle-rail')?.click();
     expect(
-      container.querySelector('.playground-page')?.classList.contains('is-rail-collapsed')
+      container.querySelector('.deep-chat-page')?.classList.contains('is-rail-collapsed')
     ).toBe(true);
 
     const promptRecord = queryRequired<HTMLButtonElement>(
       container,
       '[data-preview-prompt-id="prompt-1"]'
     );
-    expect(container.querySelector('.playground-prompt-use')).toBeNull();
+    expect(container.querySelector('.deep-chat-prompt-use')).toBeNull();
     promptRecord.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-    expect(document.body.querySelector('.playground-prompt-preview-title')?.textContent).toContain(
+    expect(document.body.querySelector('.deep-chat-prompt-preview-title')?.textContent).toContain(
       'Listing Prompt'
     );
 
@@ -536,14 +536,14 @@ describe('deep-chat playground module', () => {
     expect(getChat(container).shadowRoot?.querySelector('#text-input')?.textContent).toContain(
       'Rewrite this listing'
     );
-    expect(container.querySelector('.playground-prompt-item.is-selected')?.textContent).toContain(
+    expect(container.querySelector('.deep-chat-prompt-item.is-selected')?.textContent).toContain(
       'Rewrite this listing'
     );
     const selectedPromptRecord = queryRequired<HTMLButtonElement>(
       container,
       '[data-use-prompt-draft-id="prompt-1"]'
     );
-    expect(selectedPromptRecord.classList.contains('playground-prompt-draft')).toBe(true);
+    expect(selectedPromptRecord.classList.contains('deep-chat-prompt-draft')).toBe(true);
     expect(selectedPromptRecord.getAttribute('aria-pressed')).toBe('true');
     expect(selectedPromptRecord.getAttribute('aria-label')).toContain('当前会话已使用');
     expect(mocks.localDataStore.set).toHaveBeenCalledWith(
@@ -554,7 +554,7 @@ describe('deep-chat playground module', () => {
       'user-data'
     );
 
-    queryRequired<HTMLButtonElement>(container, '#playground-open-promptlab').click();
+    queryRequired<HTMLButtonElement>(container, '#deep-chat-open-promptlab').click();
     await vi.waitFor(() => {
       expect(mocks.navigateToRouteId).toHaveBeenCalledWith('promptlab');
     });
@@ -564,7 +564,7 @@ describe('deep-chat playground module', () => {
     expect(mocks.historyService.deletePromptResultAsync).toHaveBeenCalledWith('prompt-1');
     expect(mocks.state.removePromptHistory).toHaveBeenCalledWith('prompt-1');
 
-    await clearPlaygroundThreadStore();
+    await clearDeepChatThreadStore();
     expect(mocks.localDataStore.remove).toHaveBeenCalledWith(
       'user:playground_deep_chat_threads_v1'
     );
@@ -583,13 +583,13 @@ describe('deep-chat playground thread history', () => {
 
     await mount(container);
 
-    queryRequired<HTMLButtonElement>(container, '#playground-clear-chat').click();
+    queryRequired<HTMLButtonElement>(container, '#deep-chat-clear-chat').click();
 
     expect(getChat(container).history).toEqual([]);
-    expect(container.querySelector('#playground-thread-list')?.textContent).not.toContain(
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).not.toContain(
       'New Thread'
     );
-    expect(container.querySelector('.playground-thread-item.is-active')).toBeNull();
+    expect(container.querySelector('.deep-chat-thread-item.is-active')).toBeNull();
     expect(mocks.localDataStore.set).toHaveBeenLastCalledWith(
       'user:playground_deep_chat_threads_v1',
       expect.objectContaining({
@@ -607,8 +607,8 @@ describe('deep-chat playground thread history', () => {
     queryRequired<HTMLElement>(shadowRoot, '#text-input').textContent = 'Draft only';
     chat.onInput?.({ content: { text: 'Draft only', files: [] }, isUser: true });
 
-    expect(container.querySelector('#playground-thread-list')?.textContent).toContain('New Thread');
-    expect(container.querySelector('#playground-thread-list')?.textContent).toContain('草稿');
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain('New Thread');
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain('草稿');
 
     await vi.advanceTimersByTimeAsync(500);
 
@@ -646,7 +646,7 @@ describe('deep-chat playground thread history', () => {
 
     await mount(container);
 
-    expect(queryRequired<HTMLSelectElement>(container, '#playground-model-select').value).toBe(
+    expect(queryRequired<HTMLSelectElement>(container, '#deep-chat-model-select').value).toBe(
       'gpt-4.1-mini'
     );
 
@@ -684,23 +684,23 @@ describe('deep-chat playground thread menu', () => {
 
     await mount(container);
 
-    expect(container.querySelector('.playground-thread-icon')).toBeNull();
+    expect(container.querySelector('.deep-chat-thread-icon')).toBeNull();
 
     openThreadMenu('thread-2');
 
-    const menu = queryRequired<HTMLElement>(container, '.playground-thread-menu');
+    const menu = queryRequired<HTMLElement>(container, '.deep-chat-thread-menu');
     expect(menu.textContent).toContain('重命名');
     expect(menu.textContent).toContain('置顶聊天');
     expect(menu.textContent).toContain('删除');
-    expect(menu.classList.contains('playground-thread-menu--below')).toBe(true);
+    expect(menu.classList.contains('deep-chat-thread-menu--below')).toBe(true);
     expect(menu.hasAttribute('style')).toBe(false);
-    expect(menu.closest('.playground-thread-item')?.querySelector('[data-thread-menu-id]')).toBe(
+    expect(menu.closest('.deep-chat-thread-item')?.querySelector('[data-thread-menu-id]')).toBe(
       queryRequired<HTMLButtonElement>(container, '[data-thread-menu-id="thread-2"]')
     );
 
     queryRequired<HTMLButtonElement>(container, '[data-thread-menu-action="pin"]').click();
 
-    expect(container.querySelector('.playground-thread-item')?.textContent).toContain(
+    expect(container.querySelector('.deep-chat-thread-item')?.textContent).toContain(
       'Other thread'
     );
     expect(mocks.localDataStore.set).toHaveBeenLastCalledWith(
@@ -720,7 +720,7 @@ describe('deep-chat playground thread menu', () => {
     openThreadMenu('thread-2');
     queryRequired<HTMLButtonElement>(container, '[data-thread-menu-action="rename"]').click();
 
-    expect(container.querySelector('#playground-thread-list')?.textContent).toContain(
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
       'Renamed thread'
     );
     expect(mocks.localDataStore.set).toHaveBeenLastCalledWith(
@@ -740,7 +740,7 @@ describe('deep-chat playground thread menu', () => {
     openThreadMenu('thread-2');
     queryRequired<HTMLButtonElement>(container, '[data-thread-menu-action="delete"]').click();
 
-    expect(container.querySelector('#playground-thread-list')?.textContent).not.toContain(
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).not.toContain(
       'Renamed thread'
     );
 
@@ -758,7 +758,7 @@ describe('deep-chat playground prompt selection', () => {
 
     queryRequired<HTMLButtonElement>(container, '[data-use-prompt-draft-id="prompt-1"]').click();
 
-    expect(container.querySelector('.playground-prompt-item.is-selected')?.textContent).toContain(
+    expect(container.querySelector('.deep-chat-prompt-item.is-selected')?.textContent).toContain(
       'Rewrite this listing'
     );
     expect(
@@ -770,7 +770,7 @@ describe('deep-chat playground prompt selection', () => {
 
     queryRequired<HTMLButtonElement>(container, '[data-thread-id="thread-1"]').click();
 
-    expect(container.querySelector('.playground-prompt-item.is-selected')).toBeNull();
+    expect(container.querySelector('.deep-chat-prompt-item.is-selected')).toBeNull();
     expect(
       queryRequired<HTMLButtonElement>(
         container,
@@ -780,7 +780,7 @@ describe('deep-chat playground prompt selection', () => {
 
     queryRequired<HTMLButtonElement>(container, '[data-use-prompt-draft-id="prompt-2"]').click();
 
-    expect(container.querySelector('.playground-prompt-item.is-selected')?.textContent).toContain(
+    expect(container.querySelector('.deep-chat-prompt-item.is-selected')?.textContent).toContain(
       'Create a visual concept'
     );
     expect(
@@ -818,14 +818,14 @@ describe('deep-chat playground prompt selection', () => {
 
     await mount(container);
 
-    expect(container.querySelector('.playground-prompt-item.is-selected')?.textContent).toContain(
+    expect(container.querySelector('.deep-chat-prompt-item.is-selected')?.textContent).toContain(
       'Rewrite this listing'
     );
 
     unmount();
     await mount(container);
 
-    expect(container.querySelector('.playground-prompt-item.is-selected')?.textContent).toContain(
+    expect(container.querySelector('.deep-chat-prompt-item.is-selected')?.textContent).toContain(
       'Rewrite this listing'
     );
     expect(
@@ -847,13 +847,11 @@ describe('deep-chat playground prompt empty state', () => {
 
     await mount(container);
 
-    expect(container.querySelector('.playground-page')?.classList.contains('is-prompt-empty')).toBe(
+    expect(container.querySelector('.deep-chat-page')?.classList.contains('is-prompt-empty')).toBe(
       true
     );
-    expect(container.querySelector('#playground-prompt-list')?.textContent).toContain(
-      '暂无 Prompt'
-    );
-    expect(container.querySelector('#playground-prompt-list')?.textContent).toContain(
+    expect(container.querySelector('#deep-chat-prompt-list')?.textContent).toContain('暂无 Prompt');
+    expect(container.querySelector('#deep-chat-prompt-list')?.textContent).toContain(
       '前往 Prompt 生成'
     );
 
@@ -874,7 +872,7 @@ describe('deep-chat playground search chats', () => {
 
     await mount(container);
     vi.spyOn(
-      queryRequired<HTMLElement>(container, '.playground-main'),
+      queryRequired<HTMLElement>(container, '.deep-chat-main'),
       'getBoundingClientRect'
     ).mockReturnValue({
       bottom: 780,
@@ -888,15 +886,15 @@ describe('deep-chat playground search chats', () => {
       toJSON: () => ({}),
     } as DOMRect);
 
-    queryRequired<HTMLButtonElement>(container, '#playground-search-chats').click();
-    const modal = queryRequired<HTMLElement>(document, '#playground-chat-search-modal');
-    const input = queryRequired<HTMLInputElement>(document, '#playground-chat-search-input');
-    const results = queryRequired<HTMLElement>(document, '#playground-chat-search-results');
+    queryRequired<HTMLButtonElement>(container, '#deep-chat-search-chats').click();
+    const modal = queryRequired<HTMLElement>(document, '#deep-chat-search-modal');
+    const input = queryRequired<HTMLInputElement>(document, '#deep-chat-search-input');
+    const results = queryRequired<HTMLElement>(document, '#deep-chat-search-results');
 
     expect(modal.hidden).toBe(false);
     expect(modal.parentElement).toBe(document.body);
-    expect(modal.style.getPropertyValue('--playground-chat-search-left')).toBe('750px');
-    expect(modal.style.getPropertyValue('--playground-chat-search-top')).toBe('430px');
+    expect(modal.style.getPropertyValue('--deep-chat-search-left')).toBe('750px');
+    expect(modal.style.getPropertyValue('--deep-chat-search-top')).toBe('430px');
     expect(results.textContent).toContain('今天');
     expect(results.textContent).toContain('Existing thread');
     expect(results.textContent).toContain('Other thread');
@@ -911,7 +909,7 @@ describe('deep-chat playground search chats', () => {
     queryRequired<HTMLButtonElement>(results, '[data-chat-search-thread-id="thread-2"]').click();
 
     expect(modal.hidden).toBe(true);
-    expect(container.querySelector('.playground-thread-item.is-active')?.textContent).toContain(
+    expect(container.querySelector('.deep-chat-thread-item.is-active')?.textContent).toContain(
       'Other thread'
     );
     expect(getChat(container).history).toEqual([
@@ -919,7 +917,7 @@ describe('deep-chat playground search chats', () => {
     ]);
 
     unmount();
-    expect(document.querySelector('#playground-chat-search-modal')).toBeNull();
+    expect(document.querySelector('#deep-chat-search-modal')).toBeNull();
   });
 
   it('closes Search Chats from blank areas without breaking New Chat or result clicks', async () => {
@@ -929,10 +927,10 @@ describe('deep-chat playground search chats', () => {
 
     await mount(container);
 
-    const openButton = queryRequired<HTMLButtonElement>(container, '#playground-search-chats');
-    const modal = queryRequired<HTMLElement>(document, '#playground-chat-search-modal');
-    const input = queryRequired<HTMLInputElement>(document, '#playground-chat-search-input');
-    const results = queryRequired<HTMLElement>(document, '#playground-chat-search-results');
+    const openButton = queryRequired<HTMLButtonElement>(container, '#deep-chat-search-chats');
+    const modal = queryRequired<HTMLElement>(document, '#deep-chat-search-modal');
+    const input = queryRequired<HTMLInputElement>(document, '#deep-chat-search-input');
+    const results = queryRequired<HTMLElement>(document, '#deep-chat-search-results');
 
     openButton.click();
     expect(modal.hidden).toBe(false);
@@ -946,19 +944,19 @@ describe('deep-chat playground search chats', () => {
     openButton.click();
     queryRequired<HTMLButtonElement>(document, '[data-chat-search-new]').click();
     expect(modal.hidden).toBe(true);
-    expect(container.querySelector('#playground-thread-list')?.textContent).not.toContain(
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).not.toContain(
       'New Thread'
     );
-    expect(container.querySelector('.playground-thread-item.is-active')).toBeNull();
+    expect(container.querySelector('.deep-chat-thread-item.is-active')).toBeNull();
 
     openButton.click();
-    queryRequired<HTMLElement>(document, '.playground-chat-search-backdrop').click();
+    queryRequired<HTMLElement>(document, '.deep-chat-search-backdrop').click();
     expect(modal.hidden).toBe(true);
 
     openButton.click();
     queryRequired<HTMLButtonElement>(results, '[data-chat-search-thread-id="thread-2"]').click();
     expect(modal.hidden).toBe(true);
-    expect(container.querySelector('.playground-thread-item.is-active')?.textContent).toContain(
+    expect(container.querySelector('.deep-chat-thread-item.is-active')?.textContent).toContain(
       'Other thread'
     );
 
@@ -1104,7 +1102,7 @@ describe('deep-chat playground request stopping', () => {
 
     const overlayStopButton = queryRequired<HTMLButtonElement>(
       container,
-      '#playground-stop-generation'
+      '#deep-chat-stop-generation'
     );
     expect(overlayStopButton.hidden).toBe(true);
     expect(overlayStopButton.dataset.threadId).toBeUndefined();
@@ -1113,8 +1111,8 @@ describe('deep-chat playground request stopping', () => {
       getChat(container).shadowRoot || document,
       '.input-button.inside-end'
     );
-    expect(submitButton.getAttribute('data-playground-stop-active')).toBe('');
-    expect(submitButton.getAttribute('data-playground-stop-thread-id')).toBe('thread-1');
+    expect(submitButton.getAttribute('data-deep-chat-stop-active')).toBe('');
+    expect(submitButton.getAttribute('data-deep-chat-stop-thread-id')).toBe('thread-1');
 
     submitButton.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
 
@@ -1122,7 +1120,7 @@ describe('deep-chat playground request stopping', () => {
       expect(onClose).toHaveBeenCalled();
     });
 
-    expect(container.querySelector('#playground-thread-list')?.textContent).not.toContain('生成中');
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).not.toContain('生成中');
     expectStoredAssistantMessage(mocks.localDataStore.set, '已停止生成。');
     expect(mocks.localDataStore.set).toHaveBeenCalledWith(
       'user:playground_deep_chat_threads_v1',
@@ -1190,7 +1188,7 @@ describe('deep-chat playground request errors', () => {
     await mount(container);
     const onResponse = vi.fn();
     const onClose = vi.fn();
-    const settingsButton = queryRequired<HTMLButtonElement>(container, '#playground-open-settings');
+    const settingsButton = queryRequired<HTMLButtonElement>(container, '#deep-chat-open-settings');
 
     expect(settingsButton.hidden).toBe(false);
     settingsButton.click();
@@ -1205,7 +1203,7 @@ describe('deep-chat playground request errors', () => {
       expect(onClose).toHaveBeenCalled();
     });
     expect(mocks.callLLM).not.toHaveBeenCalled();
-    expect(queryRequired<HTMLSelectElement>(container, '#playground-model-select').value).toBe('');
+    expect(queryRequired<HTMLSelectElement>(container, '#deep-chat-model-select').value).toBe('');
 
     unmount();
   });

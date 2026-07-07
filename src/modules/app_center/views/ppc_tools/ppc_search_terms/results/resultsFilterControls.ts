@@ -8,7 +8,7 @@ export function renderFilterButtons(
   reportType: ReportType,
   activeFilter: FilterType
 ): FilterType {
-  const wrapper = getElement(container, 'ppc-filter-buttons');
+  const wrapper = getElement(container, 'ppc-search-terms-filter-buttons');
   if (!wrapper) return activeFilter;
 
   const filters: FilterType[] = ['all', ...REPORT_FILTERS[reportType]];
@@ -21,7 +21,7 @@ export function renderFilterButtons(
 }
 
 export function setActiveFilterButton(container: HTMLElement, filter: FilterType): void {
-  container.querySelectorAll<HTMLElement>('.ppc-filter-btn').forEach(item => {
+  container.querySelectorAll<HTMLElement>('.ppc-search-terms-filter-btn').forEach(item => {
     const isActive = item.dataset.filter === filter;
     item.classList.toggle('active', isActive);
     item.setAttribute('aria-pressed', String(isActive));
@@ -36,18 +36,18 @@ export function updateFilterCounts(container: HTMLElement, rows: AnalyzedRow[]):
     counts.set(row.action, (counts.get(row.action) || 0) + 1);
   });
 
-  container.querySelectorAll<HTMLElement>('.ppc-filter-btn').forEach(button => {
+  container.querySelectorAll<HTMLElement>('.ppc-search-terms-filter-btn').forEach(button => {
     const filter = button.dataset.filter;
     if (!isFilterType(filter)) return;
 
-    const count = button.querySelector<HTMLElement>('.ppc-filter-count');
+    const count = button.querySelector<HTMLElement>('.ppc-search-terms-filter-count');
     if (count) count.textContent = String(counts.get(filter) || 0);
   });
 }
 
 function createFilterButton(filter: FilterType, isActive: boolean): HTMLButtonElement {
   const button = document.createElement('button');
-  button.className = `ppc-filter-btn${isActive ? ' active' : ''}`;
+  button.className = `ppc-search-terms-filter-btn${isActive ? ' active' : ''}`;
   button.type = 'button';
   button.dataset.filter = filter;
   button.setAttribute('aria-pressed', String(isActive));
@@ -56,7 +56,7 @@ function createFilterButton(filter: FilterType, isActive: boolean): HTMLButtonEl
   const label = document.createElement('span');
   label.textContent = filter === 'all' ? '全部' : ACTION_LABELS[filter];
   const count = document.createElement('span');
-  count.className = 'ppc-filter-count';
+  count.className = 'ppc-search-terms-filter-count';
   count.textContent = '0';
   button.append(icon, label, count);
   return button;

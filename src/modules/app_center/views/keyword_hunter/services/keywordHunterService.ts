@@ -1,4 +1,4 @@
-// src/modules/app_center/keyword_hunter/services/trackerService.ts
+// src/modules/app_center/keyword_hunter/services/keywordHunterService.ts
 // ================================================================
 // 🎯 Phase 4: 已迁移使用 StorageService
 // 🎯 P0优化: 使用统一类型定义
@@ -350,7 +350,7 @@ export function calculateWordFrequency(text: string): WordFrequency[] {
     .slice(0, 50);
 }
 
-export function computeKeywordTrackerMetrics(
+export function computeKeywordHunterMetrics(
   copyText: string,
   keywords: string[],
   settings: Partial<KeywordTrackerSettings> = {}
@@ -411,7 +411,7 @@ function createLlmConfigValidationError(
   provider: string
 ): ValidationError {
   return new ValidationError(message, code, undefined, undefined, {
-    module: 'TrackerService',
+    module: 'KeywordHunterService',
     action: 'bridgeCallLLM',
     provider,
   });
@@ -433,7 +433,7 @@ async function bridgeCallLLM(
       'ERR_LLM_PROVIDER_NOT_SELECTED',
       undefined,
       undefined,
-      { module: 'TrackerService', action: 'bridgeCallLLM' }
+      { module: 'KeywordHunterService', action: 'bridgeCallLLM' }
     );
   }
 
@@ -690,7 +690,7 @@ export async function fetchListingAnalysis(
       'ERR_EMPTY_LISTING_TEXT',
       undefined,
       undefined,
-      { module: 'TrackerService', action: 'fetchListingAnalysis' }
+      { module: 'KeywordHunterService', action: 'fetchListingAnalysis' }
     );
   }
 
@@ -702,7 +702,7 @@ export async function fetchListingAnalysis(
       undefined,
       undefined,
       {
-        module: 'TrackerService',
+        module: 'KeywordHunterService',
         action: 'fetchListingAnalysis',
         textLength: copyText.length,
       }
@@ -778,7 +778,7 @@ function parseNumberedTranslations(response: string, totalCount: number): Record
   }
 
   // Fallback B：按行分割逐行对应（LLM 未遵守编号格式时）
-  nativeLoggerConsole.warn('[TrackerService] LLM 未遵守编号格式，退回行数对齐模式');
+  nativeLoggerConsole.warn('[KeywordHunterService] LLM 未遵守编号格式，退回行数对齐模式');
   const lines = response.split(/\n+/).filter(t => t.trim());
   lines.forEach((line, i) => {
     if (i + 1 <= totalCount) {
@@ -811,7 +811,7 @@ export async function fetchImmersionTranslation(
       'ERR_EMPTY_TRANSLATION_TEXT',
       undefined,
       undefined,
-      { module: 'TrackerService', action: 'fetchImmersionTranslation' }
+      { module: 'KeywordHunterService', action: 'fetchImmersionTranslation' }
     );
   }
 
@@ -824,7 +824,7 @@ export async function fetchImmersionTranslation(
       'ERR_EMPTY_PARAGRAPHS',
       undefined,
       undefined,
-      { module: 'TrackerService', action: 'fetchImmersionTranslation' }
+      { module: 'KeywordHunterService', action: 'fetchImmersionTranslation' }
     );
   }
 

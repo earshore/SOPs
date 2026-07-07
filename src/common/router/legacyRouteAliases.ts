@@ -152,7 +152,7 @@ export const LEGACY_ROUTE_ALIASES = [
   },
   {
     alias: '/app-center/playground',
-    routeId: 'playground',
+    routeId: 'playground_deep_chat',
     replace: true,
   },
   {

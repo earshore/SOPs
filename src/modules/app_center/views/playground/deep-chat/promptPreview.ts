@@ -14,7 +14,7 @@ export function setupPromptPreview(
   promptList: HTMLElement | null,
   addCleanup: (cleanup: () => void) => void
 ): void {
-  const preview = container.querySelector<HTMLElement>('#playground-prompt-preview-popover');
+  const preview = container.querySelector<HTMLElement>('#deep-chat-prompt-preview-popover');
   if (!promptList || !preview) {
     return;
   }
@@ -99,9 +99,9 @@ export function renderPromptPreview(
   anchor?: HTMLElement,
   pointer?: PromptPreviewPointer
 ): void {
-  const preview = document.getElementById('playground-prompt-preview-popover');
-  const title = preview?.querySelector<HTMLElement>('.playground-prompt-preview-title');
-  const body = preview?.querySelector<HTMLElement>('.playground-prompt-preview-body');
+  const preview = document.getElementById('deep-chat-prompt-preview-popover');
+  const title = preview?.querySelector<HTMLElement>('.deep-chat-prompt-preview-title');
+  const body = preview?.querySelector<HTMLElement>('.deep-chat-prompt-preview-body');
   if (!preview || !title || !body) {
     return;
   }
@@ -111,8 +111,8 @@ export function renderPromptPreview(
   setSafeHtml(
     title,
     `
-    <span class="playground-prompt-preview-title-main">${escapeHTML(typeLabel)}</span>
-    ${previewMeta ? `<span class="playground-prompt-preview-title-meta">${escapeHTML(previewMeta)}</span>` : ''}
+    <span class="deep-chat-prompt-preview-title-main">${escapeHTML(typeLabel)}</span>
+    ${previewMeta ? `<span class="deep-chat-prompt-preview-title-meta">${escapeHTML(previewMeta)}</span>` : ''}
   `
   );
   body.textContent = promptDraft.prompt;
@@ -126,7 +126,7 @@ export function hidePromptPreview(container: HTMLElement): void {
   clearPromptPreviewHideTimer();
   activePromptPreviewId = null;
   syncPromptPreviewHighlight(container);
-  const preview = document.getElementById('playground-prompt-preview-popover');
+  const preview = document.getElementById('deep-chat-prompt-preview-popover');
   if (!preview) {
     return;
   }
@@ -151,7 +151,7 @@ function positionPromptPreview(
   anchor?: HTMLElement,
   pointer?: PromptPreviewPointer
 ): void {
-  const promptRail = container.querySelector<HTMLElement>('#playground-prompt-rail');
+  const promptRail = container.querySelector<HTMLElement>('#deep-chat-prompt-rail');
   const promptRailRect = promptRail?.getBoundingClientRect();
   const anchorRect = anchor?.getBoundingClientRect();
   const viewportPadding = 16;
@@ -184,17 +184,17 @@ function positionPromptPreview(
   const anchorX = pointer?.clientX ?? anchorRect?.left ?? promptRailRect?.left;
   const isLeftOfAnchor = Number.isFinite(anchorX) && left + previewWidth <= Number(anchorX) - 2;
 
-  preview.classList.add('playground-prompt-preview-popover--positioned');
+  preview.classList.add('deep-chat-prompt-preview-popover--positioned');
   updateRuntimeCssRule(
-    'playground-prompt-preview-position',
-    '.playground-prompt-preview-popover.playground-prompt-preview-popover--positioned',
+    'deep-chat-prompt-preview-position',
+    '.deep-chat-prompt-preview-popover.deep-chat-prompt-preview-popover--positioned',
     {
       left: `${left}px`,
       top: `${top}px`,
       width: `${previewWidth}px`,
       'max-height': `${previewHeight}px`,
-      '--playground-prompt-preview-arrow-top': `${arrowTop}px`,
-      '--playground-prompt-preview-body-max-height': `${Math.max(180, previewHeight - 48)}px`,
+      '--deep-chat-prompt-preview-arrow-top': `${arrowTop}px`,
+      '--deep-chat-prompt-preview-body-max-height': `${Math.max(180, previewHeight - 48)}px`,
     }
   );
   preview.classList.toggle('is-left-of-anchor', isLeftOfAnchor);
@@ -269,7 +269,7 @@ function schedulePromptPreviewHide(container: HTMLElement): void {
 }
 
 function syncPromptPreviewHighlight(container: HTMLElement): void {
-  container.querySelectorAll<HTMLElement>('.playground-prompt-item').forEach(item => {
+  container.querySelectorAll<HTMLElement>('.deep-chat-prompt-item').forEach(item => {
     const promptButton = item.querySelector<HTMLButtonElement>('[data-preview-prompt-id]');
     item.classList.toggle(
       'is-preview-active',

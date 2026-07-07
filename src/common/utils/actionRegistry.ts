@@ -108,7 +108,7 @@ const NAMING_CONVENTIONS: NamingConventions = {
   ],
   // 模块前缀映射
   prefixes: {
-    kt_: 'keyword_tracker',
+    keyword_hunter_: 'keyword_hunter',
     mp_: 'master_analysis',
     sops_: 'sops_module',
     amz_: 'amz_hub',
@@ -134,7 +134,7 @@ function _validateActionName(actionName: string): boolean {
   if (!hasPrefix && !actionName.startsWith('_')) {
     nativeLoggerConsole.warn(
       `⚠️ [ActionRegistry] 动作 "${actionName}" 未使用模块前缀。\n` +
-        `   推荐格式: <prefix>_<action>，例如: kt_syncToInput\n` +
+        `   推荐格式: <prefix>_<action>，例如: keyword_hunter_syncToInput\n` +
         `   可用前缀: ${Object.keys(NAMING_CONVENTIONS.prefixes).join(', ')}`
     );
   }

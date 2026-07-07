@@ -1,4 +1,4 @@
-.ppc-filter-btn {
+.ppc-search-terms-filter-btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -16,21 +16,21 @@
     color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.ppc-filter-btn:hover {
+.ppc-search-terms-filter-btn:hover {
   background: #f8fafc;
 }
 
-.ppc-filter-btn.active {
+.ppc-search-terms-filter-btn.active {
   border-color: var(--color-blue-600);
   background: var(--color-blue-50);
   color: #1d4ed8;
 }
 
-.ppc-filter-btn i {
+.ppc-search-terms-filter-btn i {
   font-size: 12px;
 }
 
-.ppc-filter-count {
+.ppc-search-terms-filter-count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -45,7 +45,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.ppc-filter-btn.active .ppc-filter-count {
+.ppc-search-terms-filter-btn.active .ppc-search-terms-filter-count {
   background: #dbeafe;
   color: #1d4ed8;
 }

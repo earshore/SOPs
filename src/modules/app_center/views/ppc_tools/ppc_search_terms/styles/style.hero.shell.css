@@ -1,14 +1,14 @@
-.ppc-hero {
+.ppc-search-terms-hero {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--ppc-accent-border, rgba(5, 150, 105, 0.18));
-  border-radius: var(--ppc-radius-lg, var(--rounded-lg, 12px));
+  border: 1px solid var(--ppc-search-terms-accent-border, rgba(5, 150, 105, 0.18));
+  border-radius: var(--ppc-search-terms-radius-lg, var(--rounded-lg, 12px));
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.32) 1px, transparent 1px),
     linear-gradient(180deg, rgba(255, 255, 255, 0.32) 1px, transparent 1px),
     linear-gradient(
       135deg,
-      var(--ppc-accent-soft, var(--color-emerald-50, #ecfdf5)) 0%,
+      var(--ppc-search-terms-accent-soft, var(--color-emerald-50, #ecfdf5)) 0%,
       var(--color-teal-50, #f0fdfa) 46%,
       var(--color-slate-50, #f8fafc) 100%
     );
@@ -16,10 +16,10 @@
     28px 28px,
     28px 28px,
     auto;
-  box-shadow: var(--ppc-shadow-panel, 0 18px 42px -34px rgba(15, 23, 42, 0.42));
+  box-shadow: var(--ppc-search-terms-shadow-panel, 0 18px 42px -34px rgba(15, 23, 42, 0.42));
 }
 
-.ppc-hero-icon {
+.ppc-search-terms-hero-icon {
   position: relative;
   width: 46px;
   height: 46px;
@@ -27,26 +27,31 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--ppc-radius-lg, var(--rounded-lg, 12px));
-  background: linear-gradient(135deg, var(--ppc-accent), var(--color-teal-500));
+  border-radius: var(--ppc-search-terms-radius-lg, var(--rounded-lg, 12px));
+  background: linear-gradient(135deg, var(--ppc-search-terms-accent), var(--color-teal-500));
   color: var(--color-success-contrast, #ffffff);
-  box-shadow: var(--ppc-shadow-accent, 0 8px 18px -14px rgba(5, 150, 105, 0.72));
+  box-shadow: var(--ppc-search-terms-shadow-accent, 0 8px 18px -14px rgba(5, 150, 105, 0.72));
   transition:
-    box-shadow var(--ppc-motion-duration, 170ms) var(--ppc-motion-ease, var(--ease-smooth)),
-    filter var(--ppc-motion-duration, 170ms) var(--ppc-motion-ease, var(--ease-smooth));
+    box-shadow var(--ppc-search-terms-motion-duration, 170ms)
+      var(--ppc-search-terms-motion-ease, var(--ease-smooth)),
+    filter var(--ppc-search-terms-motion-duration, 170ms)
+      var(--ppc-search-terms-motion-ease, var(--ease-smooth));
 }
 
-.ppc-hero-icon > i {
+.ppc-search-terms-hero-icon > i {
   font-size: 19px;
   line-height: 1;
 }
 
-.ppc-hero-icon:hover {
+.ppc-search-terms-hero-icon:hover {
   filter: brightness(1.03);
-  box-shadow: var(--ppc-shadow-accent-hover, 0 10px 22px -16px rgba(20, 184, 166, 0.72));
+  box-shadow: var(
+    --ppc-search-terms-shadow-accent-hover,
+    0 10px 22px -16px rgba(20, 184, 166, 0.72)
+  );
 }
 
-.ppc-hero-icon-badge {
+.ppc-search-terms-hero-icon-badge {
   position: absolute;
   right: -4px;
   bottom: -4px;
@@ -55,19 +60,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--ppc-surface, #ffffff);
+  border: 2px solid var(--ppc-search-terms-surface, #ffffff);
   border-radius: var(--rounded-full, 999px);
   background: linear-gradient(135deg, var(--color-teal-400), var(--color-teal-600));
   color: var(--color-success-contrast, #ffffff);
   box-shadow: var(--shadow-xs, 0 6px 12px -9px rgba(20, 184, 166, 0.58));
 }
 
-.ppc-hero-icon-badge i {
+.ppc-search-terms-hero-icon-badge i {
   font-size: 7px;
   line-height: 1;
 }
 
-.ppc-hero #ppc-page-title {
+.ppc-search-terms-hero #ppc-search-terms-page-title {
   margin: 0;
   font-size: 1.375rem;
   font-weight: 800;
@@ -75,21 +80,21 @@
   letter-spacing: 0;
 }
 
-.ppc-hero #ppc-page-title + p {
+.ppc-search-terms-hero #ppc-search-terms-page-title + p {
   font-size: 0.875rem;
   line-height: 1.5;
 }
 
-.ppc-hero-eyebrow {
+.ppc-search-terms-hero-eyebrow {
   display: inline-flex;
   align-items: center;
   min-height: 20px;
   margin-bottom: 2px;
   padding: 0 8px;
-  border: 1px solid var(--ppc-accent-border, rgba(5, 150, 105, 0.18));
+  border: 1px solid var(--ppc-search-terms-accent-border, rgba(5, 150, 105, 0.18));
   border-radius: var(--rounded-full, 999px);
   background: rgba(255, 255, 255, 0.68);
-  color: var(--ppc-accent-strong, var(--color-emerald-700, #047857));
+  color: var(--ppc-search-terms-accent-strong, var(--color-emerald-700, #047857));
   font-size: 0.75rem;
   font-weight: 800;
 }

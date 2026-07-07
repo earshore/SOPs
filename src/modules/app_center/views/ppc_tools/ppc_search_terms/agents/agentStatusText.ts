@@ -1,6 +1,6 @@
-import type { PpcAgentAnalysisResult } from '../services/llmAnalysisService';
+import type { PpcSearchTermsAgentAnalysisResult } from '../services/llmAnalysisService';
 
-export function formatAgentStatus(result: PpcAgentAnalysisResult): string {
+export function formatAgentStatus(result: PpcSearchTermsAgentAnalysisResult): string {
   const modelText =
     result.summary.modelRows > 0 ? `模型语义复核 ${result.summary.modelRows} 行` : '无需模型复核';
   const cacheText =
@@ -14,7 +14,7 @@ export function formatAgentStatus(result: PpcAgentAnalysisResult): string {
   return `PPC Agent 完成：本地工具全量处理 ${result.summary.totalRows} 行，${modelText}${cacheText}${skippedText}`;
 }
 
-export function formatAgentToast(result: PpcAgentAnalysisResult): string {
+export function formatAgentToast(result: PpcSearchTermsAgentAnalysisResult): string {
   if (result.summary.modelRows === 0) {
     return `本地工具已完成 ${result.summary.totalRows} 行分析`;
   }

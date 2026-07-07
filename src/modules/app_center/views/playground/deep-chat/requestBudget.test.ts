@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type { ChatMessage } from '@/services/llmService';
 import {
-  DEFAULT_PLAYGROUND_REQUEST_BUDGET,
-  buildBudgetedPlaygroundMessages,
-  getPlaygroundMessageBudgetError,
-  getPlaygroundSystemPromptBudgetError,
-  resolvePlaygroundRequestBudget,
-  type PlaygroundRequestBudget,
+  DEFAULT_DEEP_CHAT_REQUEST_BUDGET,
+  buildBudgetedDeepChatMessages,
+  getDeepChatMessageBudgetError,
+  getDeepChatSystemPromptBudgetError,
+  resolveDeepChatRequestBudget,
+  type DeepChatRequestBudget,
 } from './requestBudget';
 
-const smallBudget: PlaygroundRequestBudget = {
+const smallBudget: DeepChatRequestBudget = {
   maxMessageChars: 12,
   maxSystemPromptChars: 10,
   maxContextChars: 30,
@@ -20,15 +20,15 @@ describe('Playground request budget', () => {
   it('keeps long prompt inputs sendable under the default dynamic budget', () => {
     const longMessages: ChatMessage[] = [{ role: 'user', content: 'x'.repeat(80000) }];
 
-    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxMessageChars).toBe(153600);
-    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxSystemPromptChars).toBe(102400);
-    expect(DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxContextChars).toBe(128000);
-    expect(getPlaygroundMessageBudgetError(longMessages)).toBeNull();
-    expect(getPlaygroundSystemPromptBudgetError('system'.repeat(10000))).toBeNull();
+    expect(DEFAULT_DEEP_CHAT_REQUEST_BUDGET.maxMessageChars).toBe(153600);
+    expect(DEFAULT_DEEP_CHAT_REQUEST_BUDGET.maxSystemPromptChars).toBe(102400);
+    expect(DEFAULT_DEEP_CHAT_REQUEST_BUDGET.maxContextChars).toBe(128000);
+    expect(getDeepChatMessageBudgetError(longMessages)).toBeNull();
+    expect(getDeepChatSystemPromptBudgetError('system'.repeat(10000))).toBeNull();
   });
 
   it('derives a smaller context budget for small-context models', () => {
-    const smallModelBudget = resolvePlaygroundRequestBudget(
+    const smallModelBudget = resolveDeepChatRequestBudget(
       {
         provider: 'new_api',
         endpoint: 'https://example.com/v1',
@@ -39,7 +39,7 @@ describe('Playground request budget', () => {
       },
       'small-model'
     );
-    const largeModelBudget = resolvePlaygroundRequestBudget(
+    const largeModelBudget = resolveDeepChatRequestBudget(
       {
         provider: 'new_api',
         endpoint: 'https://example.com/v1',
@@ -59,8 +59,8 @@ describe('Playground request budget', () => {
   it('rejects messages and system prompts when an explicit budget limit is configured', () => {
     const messages: ChatMessage[] = [{ role: 'user', content: 'this message is too long' }];
 
-    expect(getPlaygroundMessageBudgetError(messages, smallBudget)).toContain('12');
-    expect(getPlaygroundSystemPromptBudgetError('system prompt too long', smallBudget)).toContain(
+    expect(getDeepChatMessageBudgetError(messages, smallBudget)).toContain('12');
+    expect(getDeepChatSystemPromptBudgetError('system prompt too long', smallBudget)).toContain(
       '10'
     );
   });
@@ -71,7 +71,7 @@ describe('Playground request budget', () => {
       { role: 'user', content: 'question' },
     ];
 
-    const result = buildBudgetedPlaygroundMessages(messages, 'new system', {
+    const result = buildBudgetedDeepChatMessages(messages, 'new system', {
       ...smallBudget,
       maxContextChars: 100,
     });
@@ -91,7 +91,7 @@ describe('Playground request budget', () => {
       { role: 'assistant', content: 'latest answer' },
     ];
 
-    const result = buildBudgetedPlaygroundMessages(messages, '', smallBudget);
+    const result = buildBudgetedDeepChatMessages(messages, '', smallBudget);
 
     expect(result.messages).toEqual([
       { role: 'user', content: 'latest question' },
@@ -106,7 +106,7 @@ describe('Playground request budget', () => {
       { role: 'user', content: 'latest question is long' },
     ];
 
-    const result = buildBudgetedPlaygroundMessages(messages, 'system', {
+    const result = buildBudgetedDeepChatMessages(messages, 'system', {
       ...smallBudget,
       maxMessageChars: 100,
       maxContextChars: 8,

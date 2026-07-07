@@ -36,7 +36,7 @@ const mocks = vi.hoisted(() => ({
       ai_analysis: '/app-center/master-analysis/ai-analysis',
       promptlab: '/app-center/master-analysis/promptlab',
       ppc_search_terms: '/app-center/ppc-tools/ppc-search-terms',
-      playground: '/app-center/playground/deep-chat',
+      playground_deep_chat: '/app-center/playground/deep-chat',
     };
     return paths[routeId] || `/${routeId}`;
   }),
@@ -46,7 +46,7 @@ const mocks = vi.hoisted(() => ({
       ai_analysis: '/app-center/master-analysis/ai-analysis',
       promptlab: '/app-center/master-analysis/promptlab',
       ppc_search_terms: '/app-center/ppc-tools/ppc-search-terms',
-      playground: '/app-center/playground/deep-chat',
+      playground_deep_chat: '/app-center/playground/deep-chat',
     };
     return paths[routeId] || null;
   }),

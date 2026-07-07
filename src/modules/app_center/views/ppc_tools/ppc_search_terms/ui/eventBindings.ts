@@ -12,7 +12,7 @@ export type AddListener = (
   handler: EventListenerOrEventListenerObject
 ) => void;
 
-export interface PpcEventHandlers {
+export interface PpcSearchTermsEventHandlers {
   importReport(): void;
   analyzeTextarea(): Promise<void>;
   loadSample(): void;
@@ -32,48 +32,70 @@ export interface PpcEventHandlers {
   handleAnalysisSettingsChange(): void;
 }
 
-export function bindPpcEvents(
+export function bindPpcSearchTermsEvents(
   container: HTMLElement,
   addListener: AddListener,
-  handlers: PpcEventHandlers
+  handlers: PpcSearchTermsEventHandlers
 ): void {
-  addListener(getElement(container, 'ppc-file-input'), 'change', handlers.importReport);
-  addListener(getElement(container, 'ppc-btn-parse'), 'click', () => {
+  addListener(
+    getElement(container, 'ppc-search-terms-file-input'),
+    'change',
+    handlers.importReport
+  );
+  addListener(getElement(container, 'ppc-search-terms-btn-parse'), 'click', () => {
     void handlers.analyzeTextarea();
   });
-  addListener(getElement(container, 'ppc-btn-sample'), 'click', handlers.loadSample);
-  addListener(getElement(container, 'ppc-btn-clear'), 'click', handlers.clearAnalyzer);
+  addListener(getElement(container, 'ppc-search-terms-btn-sample'), 'click', handlers.loadSample);
+  addListener(getElement(container, 'ppc-search-terms-btn-clear'), 'click', handlers.clearAnalyzer);
   addListener(
-    getElement(container, 'ppc-threshold-toggle'),
+    getElement(container, 'ppc-search-terms-threshold-toggle'),
     'click',
     handlers.toggleThresholdPanel
   );
   addListener(
-    getElement(container, 'ppc-report-type'),
+    getElement(container, 'ppc-search-terms-report-type'),
     'change',
     handlers.handleReportSelectionChange
   );
-  addListener(getElement(container, 'ppc-export-all'), 'click', handlers.exportAll);
-  addListener(getElement(container, 'ppc-export-current'), 'click', handlers.exportCurrent);
-  addListener(getElement(container, 'ppc-export-negative'), 'click', handlers.exportWaste);
-  addListener(getElement(container, 'ppc-export-harvest'), 'click', handlers.exportGrowth);
-  addListener(getElement(container, 'ppc-copy-summary'), 'click', () => {
+  addListener(getElement(container, 'ppc-search-terms-export-all'), 'click', handlers.exportAll);
+  addListener(
+    getElement(container, 'ppc-search-terms-export-current'),
+    'click',
+    handlers.exportCurrent
+  );
+  addListener(
+    getElement(container, 'ppc-search-terms-export-negative'),
+    'click',
+    handlers.exportWaste
+  );
+  addListener(
+    getElement(container, 'ppc-search-terms-export-harvest'),
+    'click',
+    handlers.exportGrowth
+  );
+  addListener(getElement(container, 'ppc-search-terms-copy-summary'), 'click', () => {
     void handlers.copySummary();
   });
-  addListener(getInput(container, 'ppc-action-search'), 'input', handlers.handleActionSearch);
   addListener(
-    getInput(container, 'ppc-action-search'),
+    getInput(container, 'ppc-search-terms-action-search'),
+    'input',
+    handlers.handleActionSearch
+  );
+  addListener(
+    getInput(container, 'ppc-search-terms-action-search'),
     'keydown',
     handlers.handleActionSearchKeydown
   );
   addListener(
-    getElement(container, 'ppc-action-search-clear'),
+    getElement(container, 'ppc-search-terms-action-search-clear'),
     'click',
     handlers.clearActionSearch
   );
-  addListener(getElement(container, 'ppc-filter-buttons'), 'click', event => {
+  addListener(getElement(container, 'ppc-search-terms-filter-buttons'), 'click', event => {
     const target =
-      event.target instanceof Element ? event.target.closest<HTMLElement>('.ppc-filter-btn') : null;
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>('.ppc-search-terms-filter-btn')
+        : null;
     if (target) handlers.setFilter(target);
   });
 
@@ -85,7 +107,7 @@ export function bindPpcEvents(
     addListener(input, 'change', handlers.handleAnalysisSettingsChange);
   });
 
-  addListener(getInput(container, 'ppc-action-owner'), 'input', () =>
+  addListener(getInput(container, 'ppc-search-terms-action-owner'), 'input', () =>
     saveActionOwner(readActionOwner(container))
   );
 }

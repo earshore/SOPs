@@ -11,7 +11,7 @@ import type { AnalysisResult } from '../analysis/analysisEngine';
 import type { AnalysisFlowCallbacks } from '../analysis/analysisFlowTypes';
 import type { AnalysisSettings } from '../settings/settings';
 import type { Thresholds } from '../types';
-import type { PpcLlmAnalysisProgress } from './agentTypes';
+import type { PpcSearchTermsLlmAnalysisProgress } from './agentTypes';
 import { showToast } from '@/common/ui/notifications';
 
 interface AgentAnalysisContext {
@@ -23,7 +23,7 @@ interface AgentAnalysisContext {
   callbacks: AnalysisFlowCallbacks;
 }
 
-function formatAgentProgressStatus(progress: PpcLlmAnalysisProgress): string {
+function formatAgentProgressStatus(progress: PpcSearchTermsLlmAnalysisProgress): string {
   const cacheText = progress.cachedBatches ? `，缓存 ${progress.cachedBatches}` : '';
   const baseStatus = `Agent 语义工具复核中 ${progress.completedBatches}/${progress.totalBatches}${cacheText}`;
   const firstChunkMs = progress.firstResponse?.firstChunkMs;

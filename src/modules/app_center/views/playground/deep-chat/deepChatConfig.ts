@@ -3,7 +3,7 @@ import type {
   DeepChatElement,
   DeepChatRequestBody,
   DeepChatSignals,
-  PlaygroundThread,
+  DeepChatThread,
 } from './types';
 import type { DeepChatMessage } from './conversationContext';
 
@@ -16,9 +16,9 @@ type RequestHandler = (
 
 export function configureDeepChatBase(
   chat: DeepChatElement,
-  activeThread: PlaygroundThread,
+  activeThread: DeepChatThread,
   updateThreadDraft: DraftUpdater,
-  getThreadDisplayMessages: (thread: PlaygroundThread) => DeepChatMessage[]
+  getThreadDisplayMessages: (thread: DeepChatThread) => DeepChatMessage[]
 ): void {
   chat.history = getThreadDisplayMessages(activeThread);
   chat.defaultInput = activeThread.draftText ? { text: activeThread.draftText } : undefined;
@@ -105,7 +105,7 @@ function configureDeepChatSubmitButtonStyles(chat: DeepChatElement): void {
     submit: {
       container: {
         borderRadius: '999px',
-        backgroundColor: 'var(--playground-accent, #a85f3f)',
+        backgroundColor: 'var(--deep-chat-accent, #a85f3f)',
         width: '34px',
         height: '34px',
       },
@@ -154,7 +154,7 @@ function configureDeepChatMessageStyles(chat: DeepChatElement): void {
       },
       user: {
         bubble: {
-          backgroundColor: 'var(--playground-accent-soft, #faf3ee)',
+          backgroundColor: 'var(--deep-chat-accent-soft, #faf3ee)',
           color: '#0f172a',
           border: '0',
           borderRadius: '18px',

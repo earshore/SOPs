@@ -10,9 +10,9 @@ export function renderRows(
   hasAnalyzedRows: boolean,
   searchQuery: string
 ): void {
-  const body = getElement(container, 'ppc-results-body');
-  const empty = getElement(container, 'ppc-empty-state');
-  const wrapper = getElement(container, 'ppc-table-wrapper');
+  const body = getElement(container, 'ppc-search-terms-results-body');
+  const empty = getElement(container, 'ppc-search-terms-empty-state');
+  const wrapper = getElement(container, 'ppc-search-terms-table-wrapper');
   if (!body || !empty || !wrapper) return;
 
   body.replaceChildren();
@@ -34,19 +34,19 @@ function updateEmptyState(
   searchQuery: string
 ): void {
   if (!hasAnalyzedRows) {
-    setText(container, 'ppc-empty-title', '还没有分析结果');
+    setText(container, 'ppc-search-terms-empty-title', '还没有分析结果');
     setText(
       container,
-      'ppc-empty-description',
+      'ppc-search-terms-empty-description',
       '导入报表或加载样例数据后，会在这里生成可执行动作。'
     );
     return;
   }
 
-  setText(container, 'ppc-empty-title', '没有匹配的动作');
+  setText(container, 'ppc-search-terms-empty-title', '没有匹配的动作');
   setText(
     container,
-    'ppc-empty-description',
+    'ppc-search-terms-empty-description',
     searchQuery ? '调整搜索词或切换动作筛选。' : '切换动作筛选后再查看。'
   );
 }

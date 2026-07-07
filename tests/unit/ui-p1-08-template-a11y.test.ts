@@ -38,9 +38,7 @@ function normalizeText(node: Node): string {
 
 function findImplicitButtons(html: string): string[] {
   const buttonOpenings = html.match(/<button\b[^>]*>/g) ?? [];
-  return buttonOpenings.filter(
-    (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
-  );
+  return buttonOpenings.filter(button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button));
 }
 
 describe('UI-P1-08 template semantics', () => {
@@ -63,9 +61,7 @@ describe('UI-P1-08 template semantics', () => {
       root,
       '[role="radiogroup"][aria-labelledby="ai-analysis-scheduling-title"]'
     );
-    expect(schedulingGroup.getAttribute('aria-describedby')).toBe(
-      'ai-analysis-scheduling-helper'
-    );
+    expect(schedulingGroup.getAttribute('aria-describedby')).toBe('ai-analysis-scheduling-helper');
     requireElement(root, '[aria-describedby="ai-analysis-cache-helper"]');
   });
 
@@ -78,7 +74,9 @@ describe('UI-P1-08 template semantics', () => {
     expect(html).toContain(':aria-pressed="selectedTargets.includes(target.id).toString()"');
     expect(html).toContain(':class="getListingTargetCardClass(target.id)"');
     expect(html).toContain(':class="getReviewTargetCardClass(target.id)"');
-    expect(html).toContain(':aria-label="showJsonViewer ? \'收起 JSON 格式报告\' : \'展开 JSON 格式报告\'"');
+    expect(html).toContain(
+      ":aria-label=\"showJsonViewer ? '收起 JSON 格式报告' : '展开 JSON 格式报告'\""
+    );
     expect(html).toContain(':aria-expanded="showJsonViewer.toString()"');
   });
 
@@ -88,7 +86,7 @@ describe('UI-P1-08 template semantics', () => {
     );
     const buttonOpenings = html.match(/<button\b[^>]*>/g) ?? [];
     const implicitButtons = buttonOpenings.filter(
-      (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+      button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
     );
 
     expect(buttonOpenings).toHaveLength(27);
@@ -163,7 +161,10 @@ describe('UI-P1-08 template semantics', () => {
     expect(normalizeText(promptlabEmpty)).toContain('推荐操作：');
     expect(normalizeText(promptlabEmpty)).toContain('一键导入的维度');
 
-    const keywordEmpty = requireElement(keywordAnalysisRoot, '#kt-analysis-empty-state');
+    const keywordEmpty = requireElement(
+      keywordAnalysisRoot,
+      '#keyword-hunter-analysis-empty-state'
+    );
     expect(normalizeText(keywordEmpty)).toContain('还没有评审报告');
     expect(normalizeText(keywordEmpty)).toContain('推荐操作：');
     expect(normalizeText(keywordEmpty)).toContain('Top 3 改写建议');
@@ -185,42 +186,53 @@ describe('UI-P1-08 template semantics', () => {
       'src/modules/app_center/views/keyword_hunter/input/template.html'
     );
 
-    const progress = requireElement(processRoot, '#kt-translate-progress');
+    const progress = requireElement(processRoot, '#keyword-hunter-translate-progress');
     expect(progress.getAttribute('role')).toBe('progressbar');
-    requireElement(processRoot, 'label[for="kt-translation-model-select"]');
+    requireElement(processRoot, 'label[for="keyword-hunter-translation-model-select"]');
     requireElement(
       processRoot,
-      '#kt-translation-model-select[aria-describedby="kt-translation-model-status"]'
+      '#keyword-hunter-translation-model-select[aria-describedby="keyword-hunter-translation-model-status"]'
     );
-    requireElement(processRoot, '#kt-refresh-models-btn[aria-label="重新获取 AI 翻译可用模型"]');
     requireElement(
       processRoot,
-      '#kt-translation-model-status[role="status"][aria-live="polite"][aria-atomic="true"]'
+      '#keyword-hunter-refresh-models-btn[aria-label="重新获取 AI 翻译可用模型"]'
     );
-    requireElement(processRoot, '#kt-translate-status[role="status"][aria-live="polite"]');
-    requireElement(processRoot, '[aria-describedby="kt-translate-status"]');
+    requireElement(
+      processRoot,
+      '#keyword-hunter-translation-model-status[role="status"][aria-live="polite"][aria-atomic="true"]'
+    );
+    requireElement(
+      processRoot,
+      '#keyword-hunter-translate-status[role="status"][aria-live="polite"]'
+    );
+    requireElement(processRoot, '[aria-describedby="keyword-hunter-translate-status"]');
 
-    requireElement(inputRoot, '[aria-labelledby="kt-keywords-input-label"]');
-    const keywordsInput = requireElement(inputRoot, '[aria-labelledby="kt-keywords-input-label"]');
-    expect(keywordsInput.getAttribute('aria-describedby')).toContain('kt-keywords-input-helper');
-    requireElement(inputRoot, '[aria-labelledby="kt-copy-input-label"]');
+    requireElement(inputRoot, '[aria-labelledby="keyword-hunter-keywords-input-label"]');
+    const keywordsInput = requireElement(
+      inputRoot,
+      '[aria-labelledby="keyword-hunter-keywords-input-label"]'
+    );
+    expect(keywordsInput.getAttribute('aria-describedby')).toContain(
+      'keyword-hunter-keywords-input-helper'
+    );
+    requireElement(inputRoot, '[aria-labelledby="keyword-hunter-copy-input-label"]');
     requireElement(
       inputRoot,
-      '#kt-input-draft-status[role="status"][aria-live="polite"][aria-atomic="true"]'
+      '#keyword-hunter-input-draft-status[role="status"][aria-live="polite"][aria-atomic="true"]'
     );
-    const startAnalysisButton = requireElement(inputRoot, '#kt-btn-start-analysis');
-    expect(startAnalysisButton.classList.contains('kt-title-action-btn')).toBe(true);
+    const startAnalysisButton = requireElement(inputRoot, '#keyword-hunter-btn-start-analysis');
+    expect(startAnalysisButton.classList.contains('keyword-hunter-title-action-btn')).toBe(true);
     expect(normalizeText(startAnalysisButton)).toContain('开始分析');
     const snapshotEmpty = requireElement(
       inputRoot,
-      '#kt-input-snapshot-empty[role="status"][aria-live="polite"]'
+      '#keyword-hunter-input-snapshot-empty[role="status"][aria-live="polite"]'
     );
     expect(normalizeText(snapshotEmpty)).toContain('还没有历史快照');
     expect(normalizeText(snapshotEmpty)).toContain('推荐操作：');
 
     const wordFrequencyEmpty = requireElement(
       processRoot,
-      '#kt-word-frequency-list [role="status"][aria-live="polite"]'
+      '#keyword-hunter-word-frequency-list [role="status"][aria-live="polite"]'
     );
     expect(normalizeText(wordFrequencyEmpty)).toContain('还没有词频数据');
     expect(normalizeText(wordFrequencyEmpty)).toContain('推荐操作：');

@@ -14,12 +14,12 @@ import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeMod
 import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
 import BaseModule from '../../../../../common/BaseModule';
 import { showToast } from '../../../../../common/ui';
-import * as KeywordService from '../services/trackerService';
+import * as KeywordHunterService from '../services/keywordHunterService';
 import { appStore } from '@/stores/useAppStore';
 import { ErrorService } from '../../../../../services/errorService';
 import { createSafeFragment, setSafeHtml } from '../../../../../common/utils/security';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
-import '../keyword_hunter_style.css';
+import '../styles.css';
 
 // ==========================================
 // marked 配置
@@ -47,7 +47,7 @@ interface ActiveAnalysisRun {
   response?: string;
   error?: Error;
   successToastShown?: boolean;
-  llmStatus?: KeywordService.KeywordHunterLlmStatus;
+  llmStatus?: KeywordHunterService.KeywordHunterLlmStatus;
 }
 
 /** 存放当次分析的原始 Markdown 文本（未渲染 HTML） */
@@ -245,8 +245,8 @@ function getCurrentAnalysisElements(): {
   resultDiv: HTMLElement | null;
 } {
   return {
-    btn: document.getElementById('kt-analyze-btn') as HTMLButtonElement | null,
-    resultDiv: document.getElementById('kt-llm-analysis-result'),
+    btn: document.getElementById('keyword-hunter-analyze-btn') as HTMLButtonElement | null,
+    resultDiv: document.getElementById('keyword-hunter-llm-analysis-result'),
   };
 }
 
@@ -328,7 +328,7 @@ async function restoreAnalysisStateFromState(): Promise<void> {
     // 简单启发式：以 '<' 开头的大概率是 HTML（旧版本兼容）
     const isLikelyHtml = savedMarkdown.trimStart().startsWith('<');
 
-    const resultDiv = document.getElementById('kt-llm-analysis-result');
+    const resultDiv = document.getElementById('keyword-hunter-llm-analysis-result');
     if (!resultDiv) {
       renderAnalysisModule();
       return;
@@ -365,7 +365,7 @@ function renderAnalysisModule(): void {
  * 更新"生成报告"按钮的激活/禁用状态
  */
 function updateAnalyzeButtonState(): void {
-  const btn = document.getElementById('kt-analyze-btn') as HTMLButtonElement | null;
+  const btn = document.getElementById('keyword-hunter-analyze-btn') as HTMLButtonElement | null;
   const hasContent = appStore.getState().keywordTracker?.processedCopy?.trim().length > 0;
 
   if (!btn) return;
@@ -402,7 +402,7 @@ function showLoadingState(container: HTMLElement): () => void {
   let phaseIndex = 0;
 
   const buildHtml = (phase: (typeof phases)[number]) => `
-        <div class="flex flex-col items-center justify-center py-16 text-center" id="kt-loading-state"
+        <div class="flex flex-col items-center justify-center py-16 text-center" id="keyword-hunter-loading-state"
              role="status" aria-live="polite" aria-atomic="true">
             <div class="relative mb-6">
                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50
@@ -432,7 +432,7 @@ function showLoadingState(container: HTMLElement): () => void {
   // 阶段切换计时器
   const advancePhase = () => {
     phaseIndex = Math.min(phaseIndex + 1, phases.length - 1);
-    const loadingEl = document.getElementById('kt-loading-state');
+    const loadingEl = document.getElementById('keyword-hunter-loading-state');
     if (loadingEl) {
       const phase = phases[phaseIndex];
       if (!phase) return;
@@ -457,11 +457,11 @@ function showLoadingState(container: HTMLElement): () => void {
 
 function renderAnalysisLlmStatus(
   run: ActiveAnalysisRun,
-  status: KeywordService.KeywordHunterLlmStatus
+  status: KeywordHunterService.KeywordHunterLlmStatus
 ): void {
   if (!isAnalysisRunForCurrentCopy(run)) return;
 
-  const loadingEl = document.getElementById('kt-loading-state');
+  const loadingEl = document.getElementById('keyword-hunter-loading-state');
   if (!loadingEl) return;
 
   const title = loadingEl.querySelector('p.font-semibold');
@@ -490,10 +490,10 @@ function renderAnalysisLlmStatus(
 // ==========================================
 
 const BTN_CLASSES = {
-  active: ['kh-analysis-action--active', 'cursor-pointer'],
-  disabled: ['kh-analysis-action--disabled', 'cursor-not-allowed'],
-  loading: ['kh-analysis-action--loading', 'cursor-wait'],
-  success: ['kh-analysis-action--success', 'cursor-not-allowed'],
+  active: ['keyword-hunter-analysis-action--active', 'cursor-pointer'],
+  disabled: ['keyword-hunter-analysis-action--disabled', 'cursor-not-allowed'],
+  loading: ['keyword-hunter-analysis-action--loading', 'cursor-wait'],
+  success: ['keyword-hunter-analysis-action--success', 'cursor-not-allowed'],
 } as const;
 
 function getProcessedCopy(): string {
@@ -502,11 +502,11 @@ function getProcessedCopy(): string {
 
 async function fetchListingAnalysis(
   processedCopy: string,
-  onLlmStatus?: (status: KeywordService.KeywordHunterLlmStatus) => void
+  onLlmStatus?: (status: KeywordHunterService.KeywordHunterLlmStatus) => void
 ): Promise<string> {
   const keywordTracker = appStore.getState().keywordTracker;
 
-  return KeywordService.fetchListingAnalysis(
+  return KeywordHunterService.fetchListingAnalysis(
     processedCopy,
     keywordTracker?.keywords ?? [],
     keywordTracker?.matchedKeywords ?? [],
@@ -590,7 +590,7 @@ function handleAnalysisFailure(
   if (!isValidation) {
     ErrorService.handle(error, {
       action: 'runLLMAnalysis',
-      module: 'keywordTracker',
+      module: 'keywordHunter',
       notify: false,
     });
   }
@@ -619,7 +619,7 @@ function setBtnState(
   btn.disabled = state !== 'active';
   btn.classList.add(...BTN_CLASSES[state]);
 
-  const textEl = document.getElementById('kt-analyze-btn-text');
+  const textEl = document.getElementById('keyword-hunter-analyze-btn-text');
   if (textEl && labelText !== undefined) {
     textEl.textContent = labelText;
   }
@@ -780,18 +780,18 @@ function getExecutiveSummaryQuote(scoreTitle: Element): HTMLElement | null {
 }
 
 function appendCoverSummary(h2: HTMLHeadingElement, summaryText: string): void {
-  h2.classList.toggle('kh-report-cover--with-summary', Boolean(summaryText));
-  if (!summaryText || h2.querySelector('.kh-report-cover-summary')) return;
+  h2.classList.toggle('keyword-hunter-report-cover--with-summary', Boolean(summaryText));
+  if (!summaryText || h2.querySelector('.keyword-hunter-report-cover-summary')) return;
 
   const summary = document.createElement('span');
-  summary.className = 'kh-report-cover-summary';
+  summary.className = 'keyword-hunter-report-cover-summary';
 
   const body = document.createElement('span');
-  body.className = 'kh-report-cover-summary-text';
+  body.className = 'keyword-hunter-report-cover-summary-text';
   body.textContent = summaryText;
 
   const label = document.createElement('span');
-  label.className = 'kh-report-cover-summary-label';
+  label.className = 'keyword-hunter-report-cover-summary-label';
   label.textContent = '执行摘要';
 
   summary.append(body, label);
@@ -799,9 +799,9 @@ function appendCoverSummary(h2: HTMLHeadingElement, summaryText: string): void {
 }
 
 function enhanceScoreCover(h2: HTMLHeadingElement, total: number, summaryText: string): void {
-  h2.classList.add('kh-report-cover');
-  h2.querySelector('.kh-report-cover-eyebrow')?.remove();
-  if (h2.querySelector('.kh-report-cover-main')) {
+  h2.classList.add('keyword-hunter-report-cover');
+  h2.querySelector('.keyword-hunter-report-cover-eyebrow')?.remove();
+  if (h2.querySelector('.keyword-hunter-report-cover-main')) {
     appendCoverSummary(h2, summaryText);
     return;
   }
@@ -813,20 +813,20 @@ function enhanceScoreCover(h2: HTMLHeadingElement, total: number, summaryText: s
   h2.textContent = '';
 
   const main = document.createElement('span');
-  main.className = 'kh-report-cover-main';
+  main.className = 'keyword-hunter-report-cover-main';
 
   const title = document.createElement('span');
-  title.className = 'kh-report-cover-title';
+  title.className = 'keyword-hunter-report-cover-title';
   title.textContent = titleLabel;
 
   const meta = document.createElement('span');
-  meta.className = 'kh-report-cover-meta';
+  meta.className = 'keyword-hunter-report-cover-meta';
   meta.textContent = `综合评级：${verdict}`;
 
   main.append(title, meta);
 
   const score = document.createElement('span');
-  score.className = 'kh-report-cover-score';
+  score.className = 'keyword-hunter-report-cover-score';
   score.textContent = `${total}/100`;
 
   h2.append(main, score);
@@ -847,12 +847,15 @@ function highlightTotalScoreTitle(container: HTMLElement): void {
 
   h2.removeAttribute('style');
   h2.classList.remove(
-    'kh-report-score-title--excellent',
-    'kh-report-score-title--good',
-    'kh-report-score-title--warning',
-    'kh-report-score-title--critical'
+    'keyword-hunter-report-score-title--excellent',
+    'keyword-hunter-report-score-title--good',
+    'keyword-hunter-report-score-title--warning',
+    'keyword-hunter-report-score-title--critical'
   );
-  h2.classList.add('kh-report-score-title', `kh-report-score-title--${getTotalScoreTone(total)}`);
+  h2.classList.add(
+    'keyword-hunter-report-score-title',
+    `keyword-hunter-report-score-title--${getTotalScoreTone(total)}`
+  );
   removeTotalScoreProgressBar(h2);
 }
 
@@ -884,20 +887,20 @@ function classifyReportSections(container: HTMLElement): void {
   const headings = Array.from(container.querySelectorAll('h2, h3'));
   headings.slice(1).forEach(heading => {
     const text = heading.textContent ?? '';
-    heading.classList.add('kh-report-section-heading');
+    heading.classList.add('keyword-hunter-report-section-heading');
 
     if (/评分|score/i.test(text)) {
-      heading.classList.add('kh-report-section-heading--score');
+      heading.classList.add('keyword-hunter-report-section-heading--score');
       return;
     }
 
     if (/致命|风险|问题|risk/i.test(text)) {
-      heading.classList.add('kh-report-section-heading--risk');
+      heading.classList.add('keyword-hunter-report-section-heading--risk');
       return;
     }
 
     if (isRecommendationHeading(heading)) {
-      heading.classList.add('kh-report-section-heading--recommendations');
+      heading.classList.add('keyword-hunter-report-section-heading--recommendations');
     }
   });
 }
@@ -908,9 +911,9 @@ function enhanceReportSummary(container: HTMLElement): void {
 
   const firstQuote = getExecutiveSummaryQuote(scoreTitle);
   if (firstQuote) {
-    firstQuote.classList.add('kh-report-executive-summary');
-    if (scoreTitle.querySelector('.kh-report-cover-summary')) {
-      firstQuote.classList.add('kh-report-executive-summary--merged');
+    firstQuote.classList.add('keyword-hunter-report-executive-summary');
+    if (scoreTitle.querySelector('.keyword-hunter-report-cover-summary')) {
+      firstQuote.classList.add('keyword-hunter-report-executive-summary--merged');
     }
   }
 }
@@ -919,9 +922,9 @@ function enhanceScoreTable(container: HTMLElement): void {
   const table = container.querySelector('table');
   if (!table) return;
 
-  table.classList.add('kh-report-score-table');
+  table.classList.add('keyword-hunter-report-score-table');
   table.setAttribute('aria-label', '评分矩阵');
-  wrapElement(table, 'kh-report-table-shell');
+  wrapElement(table, 'keyword-hunter-report-table-shell');
 }
 
 function enhanceRiskSummary(container: HTMLElement): void {
@@ -930,7 +933,7 @@ function enhanceRiskSummary(container: HTMLElement): void {
   );
   const riskQuote = getNextElementUntilHeading(riskHeading?.nextElementSibling ?? null);
   if (riskQuote?.tagName === 'BLOCKQUOTE') {
-    riskQuote.classList.add('kh-report-risk-summary');
+    riskQuote.classList.add('keyword-hunter-report-risk-summary');
   }
 }
 
@@ -942,17 +945,17 @@ function classifyRecommendationList(card: HTMLElement): void {
   card.querySelectorAll('li').forEach(item => {
     const text = item.textContent ?? '';
     if (/原句|当前|问题|缺陷/.test(text)) {
-      item.classList.add('kh-report-recommendation-item--current');
+      item.classList.add('keyword-hunter-report-recommendation-item--current');
       return;
     }
 
     if (/改写|建议|优化|替换/.test(text)) {
-      item.classList.add('kh-report-recommendation-item--proposal');
+      item.classList.add('keyword-hunter-report-recommendation-item--proposal');
       return;
     }
 
     if (/位置|原因|收益|目的|影响/.test(text)) {
-      item.classList.add('kh-report-recommendation-item--context');
+      item.classList.add('keyword-hunter-report-recommendation-item--context');
     }
   });
 }
@@ -970,7 +973,7 @@ function enhanceRecommendationCards(container: HTMLElement): void {
       continue;
     }
 
-    const card = wrapElement(current, 'kh-report-recommendation-card');
+    const card = wrapElement(current, 'keyword-hunter-report-recommendation-card');
     card.setAttribute('aria-label', current.textContent?.trim() || '改写建议');
 
     let next = card.nextElementSibling;
@@ -992,7 +995,7 @@ function enhanceReportStructure(container: HTMLElement): void {
   const total = parseTotalScore(scoreTitle.textContent ?? '');
   if (total === null) return;
 
-  container.classList.add('kh-report-rendered');
+  container.classList.add('keyword-hunter-report-rendered');
   const summaryText = getPlainText(getExecutiveSummaryQuote(scoreTitle));
   enhanceScoreCover(scoreTitle, total, summaryText);
   classifyReportSections(container);
@@ -1056,7 +1059,7 @@ async function runLLMAnalysis(): Promise<void> {
 function setupEventListeners(container: HTMLElement): void {
   if (!container) return;
 
-  const btnAnalyze = document.getElementById('kt-analyze-btn');
+  const btnAnalyze = document.getElementById('keyword-hunter-analyze-btn');
   if (btnAnalyze) {
     addEventListener(
       btnAnalyze as HTMLElement,

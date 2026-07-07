@@ -2,26 +2,26 @@ import type { ChatMessage } from '@/services/llmService';
 import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
 import type { LLMProviderConfig } from '@/types/state';
 
-export interface PlaygroundRequestBudget {
+export interface DeepChatRequestBudget {
   maxMessageChars?: number;
   maxSystemPromptChars?: number;
   maxContextChars: number;
   maxOutputTokens: number;
 }
 
-export interface BudgetedPlaygroundMessages {
+export interface BudgetedDeepChatMessages {
   messages: ChatMessage[];
   droppedMessageCount: number;
 }
 
-export const DEFAULT_PLAYGROUND_REQUEST_BUDGET: PlaygroundRequestBudget = {
+export const DEFAULT_DEEP_CHAT_REQUEST_BUDGET: DeepChatRequestBudget = {
   maxMessageChars: 153600,
   maxSystemPromptChars: 102400,
   maxContextChars: 128000,
   maxOutputTokens: 2000,
 };
 
-export function getPlaygroundRequestBudgetDefaults(): PlaygroundRequestBudget {
+export function getDeepChatRequestBudgetDefaults(): DeepChatRequestBudget {
   const settings = getRuntimeStrategySettings().deepChat;
   return {
     maxMessageChars: settings.maxMessageChars,
@@ -40,11 +40,11 @@ const APPROX_CHARS_PER_TOKEN = 4;
 const SINGLE_MESSAGE_OVERFLOW_RATIO = 1.2;
 const SYSTEM_PROMPT_CONTEXT_RATIO = 0.8;
 
-export function resolvePlaygroundRequestBudget(
+export function resolveDeepChatRequestBudget(
   config: LLMProviderConfig | null,
   model: string
-): PlaygroundRequestBudget {
-  const configuredBudget = getPlaygroundRequestBudgetDefaults();
+): DeepChatRequestBudget {
+  const configuredBudget = getDeepChatRequestBudgetDefaults();
   const contextTokens = getModelContextTokens(config, model) || DEFAULT_CONTEXT_WINDOW_TOKENS;
   const availableInputTokens = Math.max(
     1000,
@@ -74,9 +74,9 @@ export function resolvePlaygroundRequestBudget(
   };
 }
 
-export function getPlaygroundMessageBudgetError(
+export function getDeepChatMessageBudgetError(
   messages: ChatMessage[],
-  budget: PlaygroundRequestBudget = DEFAULT_PLAYGROUND_REQUEST_BUDGET
+  budget: DeepChatRequestBudget = DEFAULT_DEEP_CHAT_REQUEST_BUDGET
 ): string | null {
   const maxMessageChars = budget.maxMessageChars;
   if (!hasFiniteBudgetLimit(maxMessageChars)) {
@@ -91,9 +91,9 @@ export function getPlaygroundMessageBudgetError(
   return `单条消息不能超过 ${formatBudgetNumber(maxMessageChars)} 字，请缩短后再发送。`;
 }
 
-export function getPlaygroundSystemPromptBudgetError(
+export function getDeepChatSystemPromptBudgetError(
   systemPrompt: string,
-  budget: PlaygroundRequestBudget = DEFAULT_PLAYGROUND_REQUEST_BUDGET
+  budget: DeepChatRequestBudget = DEFAULT_DEEP_CHAT_REQUEST_BUDGET
 ): string | null {
   const maxSystemPromptChars = budget.maxSystemPromptChars;
   if (!hasFiniteBudgetLimit(maxSystemPromptChars)) {
@@ -107,11 +107,11 @@ export function getPlaygroundSystemPromptBudgetError(
   return `系统提示词不能超过 ${formatBudgetNumber(maxSystemPromptChars)} 字，请缩短后再发送。`;
 }
 
-export function buildBudgetedPlaygroundMessages(
+export function buildBudgetedDeepChatMessages(
   conversationMessages: ChatMessage[],
   sessionSystemPrompt = '',
-  budget: PlaygroundRequestBudget = DEFAULT_PLAYGROUND_REQUEST_BUDGET
-): BudgetedPlaygroundMessages {
+  budget: DeepChatRequestBudget = DEFAULT_DEEP_CHAT_REQUEST_BUDGET
+): BudgetedDeepChatMessages {
   const messagesWithSystemPrompt = withSessionSystemPrompt(
     conversationMessages,
     sessionSystemPrompt

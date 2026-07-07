@@ -1,5 +1,5 @@
 import { sanitizePromptInput } from '@/modules/app_center/views/master_analysis/ai_analysis/prompts/promptSanitizer';
-import type { PpcAnalysisContext } from './agentTypes';
+import type { PpcSearchTermsAnalysisContext } from './agentTypes';
 import type { AnalyzedRow } from '../types';
 
 export function toPromptRow(row: AnalyzedRow): Record<string, string | number> {
@@ -21,7 +21,9 @@ export function toPromptRow(row: AnalyzedRow): Record<string, string | number> {
   };
 }
 
-export function compactContext(context?: PpcAnalysisContext): Partial<PpcAnalysisContext> | null {
+export function compactContext(
+  context?: PpcSearchTermsAnalysisContext
+): Partial<PpcSearchTermsAnalysisContext> | null {
   if (!context || !hasContext(context)) return null;
 
   return {
@@ -35,7 +37,7 @@ export function compactContext(context?: PpcAnalysisContext): Partial<PpcAnalysi
   };
 }
 
-function hasContext(context: PpcAnalysisContext): boolean {
+function hasContext(context: PpcSearchTermsAnalysisContext): boolean {
   return Boolean(context.asin.trim() || context.category.trim() || context.listing.trim());
 }
 

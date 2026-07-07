@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const DEEP_CHAT_ROUTE = '/#/app-center/playground/deep-chat';
-const PREVIEW_SELECTOR = '#playground-prompt-preview-popover';
+const PREVIEW_SELECTOR = '#deep-chat-prompt-preview-popover';
 const PROMPT_SELECTOR = '[data-preview-prompt-id]';
 
 type Point = {
@@ -116,7 +116,7 @@ async function readPreviewMetrics(
       return {
         ariaHidden: preview.getAttribute('aria-hidden'),
         arrowTop: getComputedStyle(preview)
-          .getPropertyValue('--playground-prompt-preview-arrow-top')
+          .getPropertyValue('--deep-chat-prompt-preview-arrow-top')
           .trim(),
         describedBy: prompt?.getAttribute('aria-describedby') || null,
         nearestDistance,
@@ -172,7 +172,7 @@ test.describe('Deep Chat generated prompt preview', () => {
     const metrics = await readPreviewMetrics(page);
     expect(metrics.visible).toBe(true);
     expect(metrics.ariaHidden).toBe('false');
-    expect(metrics.describedBy).toBe('playground-prompt-preview-popover');
+    expect(metrics.describedBy).toBe('deep-chat-prompt-preview-popover');
     expect(metrics.parentIsBody).toBe(true);
     expect(metrics.withinViewport).toBe(true);
     expect(metrics.arrowTop).toBe('28px');

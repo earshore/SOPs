@@ -1,8 +1,8 @@
 import type { ActionType, AnalyzedRow } from '../types';
-import { PPC_LLM_ACTION_TYPES, type PpcLlmDecision } from './agentTypes';
+import { PPC_SEARCH_TERMS_LLM_ACTION_TYPES, type PpcSearchTermsLlmDecision } from './agentTypes';
 import { parseJsonObject } from './agentResponseJson';
 
-export function parsePpcLlmDecisions(response: string): PpcLlmDecision[] {
+export function parsePpcSearchTermsLlmDecisions(response: string): PpcSearchTermsLlmDecision[] {
   const payload = parseJsonObject(response);
   const decisions = Array.isArray(payload.decisions) ? payload.decisions : [];
 
@@ -13,7 +13,10 @@ export function parsePpcLlmDecisions(response: string): PpcLlmDecision[] {
   return decisions.map(normalizeDecision);
 }
 
-export function ensureCompleteDecisions(rows: AnalyzedRow[], decisions: PpcLlmDecision[]): void {
+export function ensureCompleteDecisions(
+  rows: AnalyzedRow[],
+  decisions: PpcSearchTermsLlmDecision[]
+): void {
   const decisionIds = new Set(decisions.map(decision => decision.id));
   const missingCount = rows.filter(row => !decisionIds.has(row.id)).length;
 
@@ -22,7 +25,7 @@ export function ensureCompleteDecisions(rows: AnalyzedRow[], decisions: PpcLlmDe
   }
 }
 
-function normalizeDecision(value: unknown): PpcLlmDecision {
+function normalizeDecision(value: unknown): PpcSearchTermsLlmDecision {
   if (!value || typeof value !== 'object') {
     throw new Error('模型返回的动作项格式无效');
   }
@@ -61,5 +64,5 @@ function normalizePriority(value: unknown): number {
 }
 
 function isActionType(value: string): value is ActionType {
-  return (PPC_LLM_ACTION_TYPES as string[]).includes(value);
+  return (PPC_SEARCH_TERMS_LLM_ACTION_TYPES as string[]).includes(value);
 }

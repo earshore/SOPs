@@ -1,13 +1,13 @@
 import type { ActionType, AnalyzedRow, Thresholds } from '../types';
 
-export const PPC_AGENT_MODEL_ROW_LIMIT = 160;
+export const PPC_SEARCH_TERMS_AGENT_MODEL_ROW_LIMIT = 160;
 
-const PPC_AGENT_LOW_CONFIDENCE_ACTIONS: ActionType[] = ['listing_term', 'observe'];
+const PPC_SEARCH_TERMS_AGENT_LOW_CONFIDENCE_ACTIONS: ActionType[] = ['listing_term', 'observe'];
 
-export function selectPpcAgentModelRows(
+export function selectPpcSearchTermsAgentModelRows(
   rows: AnalyzedRow[],
   thresholds: Thresholds,
-  limit = PPC_AGENT_MODEL_ROW_LIMIT
+  limit = PPC_SEARCH_TERMS_AGENT_MODEL_ROW_LIMIT
 ): AnalyzedRow[] {
   return rows
     .filter(row => shouldRefineWithModel(row, thresholds))
@@ -15,7 +15,7 @@ export function selectPpcAgentModelRows(
     .slice(0, limit);
 }
 
-export function countPpcAgentModelCandidateRows(
+export function countPpcSearchTermsAgentModelCandidateRows(
   rows: AnalyzedRow[],
   thresholds: Thresholds
 ): number {
@@ -23,7 +23,7 @@ export function countPpcAgentModelCandidateRows(
 }
 
 function shouldRefineWithModel(row: AnalyzedRow, thresholds: Thresholds): boolean {
-  if (!PPC_AGENT_LOW_CONFIDENCE_ACTIONS.includes(row.action)) return false;
+  if (!PPC_SEARCH_TERMS_AGENT_LOW_CONFIDENCE_ACTIONS.includes(row.action)) return false;
   if (row.orders > 0) return true;
   if (row.clicks >= Math.max(3, Math.ceil(thresholds.minClicksNoOrder * 0.35))) return true;
   if (row.spend >= thresholds.minSpendNoOrder * 0.35) return true;

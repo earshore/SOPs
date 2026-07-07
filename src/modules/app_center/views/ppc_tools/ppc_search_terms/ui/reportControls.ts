@@ -11,26 +11,40 @@ export function updateReportControls(
   activeFilter: FilterType
 ): FilterType {
   const nextFilter = renderFilterButtons(container, reportType, activeFilter);
-  setText(container, 'ppc-object-header', reportType === 'erp_campaign' ? '广告活动' : '搜索词');
   setText(
     container,
-    'ppc-stat-rows-label',
+    'ppc-search-terms-object-header',
+    reportType === 'erp_campaign' ? '广告活动' : '搜索词'
+  );
+  setText(
+    container,
+    'ppc-search-terms-stat-rows-label',
     reportType === 'erp_campaign' ? '广告活动' : '搜索词行'
   );
 
-  const textarea = getTextarea(container, 'ppc-paste-input');
+  const textarea = getTextarea(container, 'ppc-search-terms-paste-input');
   if (textarea) {
     textarea.placeholder = getReportPlaceholder(reportType);
   }
 
   if (reportType === 'erp_campaign') {
-    setButtonContent(container, 'ppc-export-negative', 'fas fa-pause', '导出停投/降预算');
-    setButtonContent(container, 'ppc-export-harvest', 'fas fa-arrow-trend-up', '导出加预算');
+    setButtonContent(
+      container,
+      'ppc-search-terms-export-negative',
+      'fas fa-pause',
+      '导出停投/降预算'
+    );
+    setButtonContent(
+      container,
+      'ppc-search-terms-export-harvest',
+      'fas fa-arrow-trend-up',
+      '导出加预算'
+    );
     return nextFilter;
   }
 
-  setButtonContent(container, 'ppc-export-negative', 'fas fa-ban', '导出否词');
-  setButtonContent(container, 'ppc-export-harvest', 'fas fa-bullseye', '导出加词');
+  setButtonContent(container, 'ppc-search-terms-export-negative', 'fas fa-ban', '导出否词');
+  setButtonContent(container, 'ppc-search-terms-export-harvest', 'fas fa-bullseye', '导出加词');
   return nextFilter;
 }
 
@@ -43,26 +57,26 @@ export function renderMappingStatus(
 ): void {
   const fields = Object.values(mapping.found).filter(Boolean);
   const statusText = status ? ` ${status}` : '';
-  setPpcStatus(
+  setPpcSearchTermsStatus(
     container,
     `已识别为${REPORT_LABELS[mapping.reportType]}，匹配 ${fields.length} 个字段，原始 ${totalRows} 行，有效 ${validRows} 行。${statusText}`
   );
 }
 
-export function setPpcStatus(
+export function setPpcSearchTermsStatus(
   container: HTMLElement,
   message: string,
   tone: 'status' | 'error' = 'status'
 ): void {
-  const element = getElement(container, 'ppc-mapping-status');
+  const element = getElement(container, 'ppc-search-terms-mapping-status');
   if (!element) return;
 
   const normalizedMessage = message.trim();
   element.setAttribute('role', tone === 'error' ? 'alert' : 'status');
   element.setAttribute('aria-live', tone === 'error' ? 'assertive' : 'polite');
   element.setAttribute('aria-atomic', 'true');
-  element.classList.toggle('ppc-status-line--empty', !normalizedMessage);
-  element.classList.toggle('ppc-status-line--error', tone === 'error');
+  element.classList.toggle('ppc-search-terms-status-line--empty', !normalizedMessage);
+  element.classList.toggle('ppc-search-terms-status-line--error', tone === 'error');
 
   if (!normalizedMessage) {
     element.removeAttribute('aria-label');
@@ -74,21 +88,21 @@ export function setPpcStatus(
   element.setAttribute('aria-label', `${titleText}：${normalizedMessage}`);
 
   const iconWrapper = document.createElement('span');
-  iconWrapper.className = 'ppc-status-line-icon';
+  iconWrapper.className = 'ppc-search-terms-status-line-icon';
   const icon = document.createElement('i');
   icon.className = tone === 'error' ? 'fas fa-triangle-exclamation' : 'fas fa-circle-info';
   icon.setAttribute('aria-hidden', 'true');
   iconWrapper.append(icon);
 
   const copy = document.createElement('span');
-  copy.className = 'ppc-status-line-copy';
+  copy.className = 'ppc-search-terms-status-line-copy';
 
   const title = document.createElement('span');
-  title.className = 'ppc-status-line-title';
+  title.className = 'ppc-search-terms-status-line-title';
   title.textContent = titleText;
 
   const body = document.createElement('span');
-  body.className = 'ppc-status-line-message';
+  body.className = 'ppc-search-terms-status-line-message';
   body.textContent = normalizedMessage;
 
   copy.append(title, body);

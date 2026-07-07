@@ -9,7 +9,7 @@ import {
   type Thresholds,
   xlsxArrayBufferToDelimitedText,
 } from '@/modules/app_center/views/ppc_tools/ppc_search_terms/index';
-import { selectPpcAgentModelRows } from '@/modules/app_center/views/ppc_tools/ppc_search_terms/services/llmAnalysisService';
+import { selectPpcSearchTermsAgentModelRows } from '@/modules/app_center/views/ppc_tools/ppc_search_terms/services/llmAnalysisService';
 
 const thresholds: Thresholds = {
   targetAcos: 35,
@@ -153,7 +153,7 @@ function escapeXml(value: string): string {
     ].join('\n');
 
     const result = analyzeSearchTermReport(report, thresholds);
-    const modelRows = selectPpcAgentModelRows(result.rows, thresholds);
+    const modelRows = selectPpcSearchTermsAgentModelRows(result.rows, thresholds);
     const modelTerms = modelRows.map((row) => row.searchTerm);
 
     expect(modelTerms).toContain('semantic listing term');

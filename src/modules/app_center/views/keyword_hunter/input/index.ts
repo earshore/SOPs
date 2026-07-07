@@ -13,7 +13,7 @@ import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer'
 import BaseModule from '../../../../../common/BaseModule';
 import { showToast, showProgress } from '../../../../../common/ui';
 import { navigateToRouteId } from '../../../../../common/router/initRouter';
-import * as KeywordService from '../services/trackerService';
+import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import { appStore } from '../../../../../stores/useAppStore';
 import {
@@ -23,7 +23,7 @@ import {
 import type { KeywordHunterSnapshot } from '../../../../../types/modules-business';
 import type { KeywordTrackerState } from '../../../../../types/state';
 
-import '../keyword_hunter_style.css';
+import '../styles.css';
 
 const nativeLoggerConsole = globalThis.console;
 
@@ -127,8 +127,12 @@ function debounce<T extends (...args: unknown[]) => void>(
 }
 
 function getCurrentInputValues(): InputValues {
-  const kwInput = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
-  const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
+  const kwInput = document.getElementById(
+    'keyword-hunter-keywords-input'
+  ) as HTMLTextAreaElement | null;
+  const copyInput = document.getElementById(
+    'keyword-hunter-copy-input'
+  ) as HTMLTextAreaElement | null;
 
   return {
     keywordsInputText: kwInput?.value || '',
@@ -142,7 +146,7 @@ function hasInputValues(values: InputValues = getCurrentInputValues()): boolean 
 
 function parseUniqueKeywords(text: string): string[] {
   const seen = new Set<string>();
-  return KeywordService.parseKeywords(text).filter(keyword => {
+  return KeywordHunterService.parseKeywords(text).filter(keyword => {
     const normalized = keyword.trim().toLowerCase();
     if (!normalized || seen.has(normalized)) return false;
     seen.add(normalized);
@@ -195,10 +199,12 @@ function getSnapshotStatusView(): SnapshotStatusView {
 }
 
 function updateSnapshotPanelState(): void {
-  const status = document.getElementById('kt-input-draft-status');
-  const statusLabel = document.getElementById('kt-input-draft-label');
-  const statusDetail = document.getElementById('kt-input-draft-detail');
-  const saveButton = document.getElementById('kt-input-snapshot-save') as HTMLButtonElement | null;
+  const status = document.getElementById('keyword-hunter-input-draft-status');
+  const statusLabel = document.getElementById('keyword-hunter-input-draft-label');
+  const statusDetail = document.getElementById('keyword-hunter-input-draft-detail');
+  const saveButton = document.getElementById(
+    'keyword-hunter-input-snapshot-save'
+  ) as HTMLButtonElement | null;
   const statusView = getSnapshotStatusView();
   const accessibleText = `${statusView.label}，${statusView.detail}`;
 
@@ -209,7 +215,7 @@ function updateSnapshotPanelState(): void {
     } else {
       status.textContent = `${statusView.label} ${statusView.detail}`;
     }
-    status.className = `kh-input-draft-status ${statusView.className}`;
+    status.className = `keyword-hunter-input-draft-status ${statusView.className}`;
     status.setAttribute('aria-label', accessibleText);
     status.title = statusView.detail;
   }
@@ -268,8 +274,12 @@ function saveInputsToState(): void {
  * 从 state 恢复输入
  */
 function restoreInputsFromState(): void {
-  const kwInput = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
-  const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
+  const kwInput = document.getElementById(
+    'keyword-hunter-keywords-input'
+  ) as HTMLTextAreaElement | null;
+  const copyInput = document.getElementById(
+    'keyword-hunter-copy-input'
+  ) as HTMLTextAreaElement | null;
   const tracker = appStore.getState().keywordTracker;
 
   if (kwInput && tracker.keywordsInputText !== undefined) {
@@ -294,17 +304,19 @@ function restoreInputsFromState(): void {
  * 更新关键词输入统计
  */
 function updateInputStats(): void {
-  const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
+  const inputEl = document.getElementById(
+    'keyword-hunter-keywords-input'
+  ) as HTMLTextAreaElement | null;
   if (!inputEl) return;
 
   const text = inputEl.value;
-  const keywords = KeywordService.parseKeywords(text);
-  const countEl = document.getElementById('kt-keyword-count');
+  const keywords = KeywordHunterService.parseKeywords(text);
+  const countEl = document.getElementById('keyword-hunter-keyword-count');
   if (countEl) countEl.textContent = keywords.length.toString();
 
-  const dups = KeywordService.findDuplicateKeywords(text);
-  const badge = document.getElementById('kt-duplicate-badge');
-  const dupCountEl = document.getElementById('kt-duplicate-count');
+  const dups = KeywordHunterService.findDuplicateKeywords(text);
+  const badge = document.getElementById('keyword-hunter-duplicate-badge');
+  const dupCountEl = document.getElementById('keyword-hunter-duplicate-count');
 
   if (badge && dupCountEl) {
     if (dups.size > 0) {
@@ -320,11 +332,13 @@ function updateInputStats(): void {
  * 高亮显示重复关键词
  */
 function highlightDuplicatesInInput(): void {
-  const input = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
-  const layer = document.getElementById('kt-keyword-highlight-layer');
+  const input = document.getElementById(
+    'keyword-hunter-keywords-input'
+  ) as HTMLTextAreaElement | null;
+  const layer = document.getElementById('keyword-hunter-keyword-highlight-layer');
   if (!input || !layer) return;
 
-  const dups = KeywordService.findDuplicateKeywords(input.value);
+  const dups = KeywordHunterService.findDuplicateKeywords(input.value);
   const lines = input.value.split('\n');
 
   // 清空容器
@@ -352,7 +366,9 @@ function highlightDuplicatesInInput(): void {
  * 更新文案字符计数
  */
 function updateCopyCharCount(): void {
-  const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
+  const copyInput = document.getElementById(
+    'keyword-hunter-copy-input'
+  ) as HTMLTextAreaElement | null;
   const counter = document.getElementById('copy-char-count');
   if (copyInput && counter) {
     counter.textContent = copyInput.value.length.toString();
@@ -360,7 +376,9 @@ function updateCopyCharCount(): void {
 }
 
 function updateUndoKeywordButtonState(): void {
-  const undoBtn = document.getElementById('kt-btn-undo-kw-clean') as HTMLButtonElement | null;
+  const undoBtn = document.getElementById(
+    'keyword-hunter-btn-undo-kw-clean'
+  ) as HTMLButtonElement | null;
   if (undoBtn) {
     undoBtn.disabled = lastKeywordInputSnapshot === null;
   }
@@ -432,7 +450,7 @@ function createSnapshotActionButton(
 }
 
 function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
-  const item = createElement('article', 'kh-input-snapshot-item');
+  const item = createElement('article', 'keyword-hunter-input-snapshot-item');
   const currentSnapshotId = appStore.getState().keywordTracker.currentSnapshotId;
   const isCurrent = snapshot.id === currentSnapshotId;
 
@@ -444,17 +462,17 @@ function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
   item.setAttribute('role', 'button');
   item.setAttribute('aria-label', `${isCurrent ? '当前快照，' : ''}恢复快照 ${snapshot.title}`);
 
-  const header = createElement('div', 'kh-input-snapshot-item-head');
+  const header = createElement('div', 'keyword-hunter-input-snapshot-item-head');
   const title = createElement('h4');
   title.textContent = snapshot.title;
   header.appendChild(title);
 
-  const status = createElement('span', `kh-input-snapshot-status ${snapshot.status}`);
+  const status = createElement('span', `keyword-hunter-input-snapshot-status ${snapshot.status}`);
   status.textContent = getSnapshotStatusLabel(snapshot.status);
   header.appendChild(status);
   item.appendChild(header);
 
-  const meta = createElement('div', 'kh-input-snapshot-meta');
+  const meta = createElement('div', 'keyword-hunter-input-snapshot-meta');
   const source = createElement('span');
   source.textContent = getSnapshotSourceLabel();
   const time = createElement('span');
@@ -463,16 +481,16 @@ function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
   meta.appendChild(time);
   item.appendChild(meta);
 
-  const stats = createElement('div', 'kh-input-snapshot-stats');
+  const stats = createElement('div', 'keyword-hunter-input-snapshot-stats');
   stats.appendChild(createSnapshotStat('覆盖', `${snapshot.result.coverageRate}%`));
   stats.appendChild(createSnapshotStat('命中', String(snapshot.derived.matchedCount)));
   stats.appendChild(createSnapshotStat('未命中', String(snapshot.derived.unmatchedCount)));
   item.appendChild(stats);
 
-  const actions = createElement('div', 'kh-input-snapshot-actions');
+  const actions = createElement('div', 'keyword-hunter-input-snapshot-actions');
   actions.appendChild(
     createSnapshotActionButton(
-      'kh-input-snapshot-action restore',
+      'keyword-hunter-input-snapshot-action restore',
       'fas fa-arrow-rotate-left',
       '恢复到输入页',
       () => {
@@ -482,7 +500,7 @@ function renderInputSnapshotItem(snapshot: KeywordHunterSnapshot): HTMLElement {
   );
   actions.appendChild(
     createSnapshotActionButton(
-      'kh-input-snapshot-action delete',
+      'keyword-hunter-input-snapshot-action delete',
       'fas fa-times',
       '删除快照',
       () => {
@@ -516,10 +534,10 @@ function createSnapshotStat(label: string, value: string): HTMLElement {
 }
 
 function renderInputSnapshots(): void {
-  const list = document.getElementById('kt-input-snapshot-list');
-  const empty = document.getElementById('kt-input-snapshot-empty');
-  const loading = document.getElementById('kt-input-snapshot-loading');
-  const count = document.getElementById('kt-input-snapshot-count');
+  const list = document.getElementById('keyword-hunter-input-snapshot-list');
+  const empty = document.getElementById('keyword-hunter-input-snapshot-empty');
+  const loading = document.getElementById('keyword-hunter-input-snapshot-loading');
+  const count = document.getElementById('keyword-hunter-input-snapshot-count');
   if (!list || !empty || !count) return;
 
   const visible = getVisibleInputSnapshots();
@@ -614,18 +632,20 @@ async function deleteInputSnapshot(id: string): Promise<void> {
  * 清理关键词格式（包含去重）
  */
 function cleanKeywordsUI(): void {
-  const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
+  const inputEl = document.getElementById(
+    'keyword-hunter-keywords-input'
+  ) as HTMLTextAreaElement | null;
   if (!inputEl || !inputEl.value.trim()) {
     showToast('关键词列表为空', { type: 'warning' });
     return;
   }
 
   const originalText = inputEl.value;
-  const originalKeywords = KeywordService.parseKeywords(originalText);
+  const originalKeywords = KeywordHunterService.parseKeywords(originalText);
 
   // 先清理格式，再去重
-  let cleanedText = KeywordService.cleanKeywordsText(originalText);
-  cleanedText = KeywordService.deduplicateKeywordsText(cleanedText);
+  let cleanedText = KeywordHunterService.cleanKeywordsText(originalText);
+  cleanedText = KeywordHunterService.deduplicateKeywordsText(cleanedText);
 
   if (cleanedText !== originalText) {
     lastKeywordInputSnapshot = originalText;
@@ -633,7 +653,7 @@ function cleanKeywordsUI(): void {
 
   restoreKeywordInputValue(inputEl, cleanedText);
 
-  const finalKeywords = KeywordService.parseKeywords(cleanedText);
+  const finalKeywords = KeywordHunterService.parseKeywords(cleanedText);
   const removedCount = originalKeywords.length - finalKeywords.length;
 
   if (removedCount > 0) {
@@ -647,10 +667,12 @@ function cleanKeywordsUI(): void {
  * 去除重复关键词（已合并到 cleanKeywordsUI）
  */
 function removeDuplicatesUI(): void {
-  const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
+  const inputEl = document.getElementById(
+    'keyword-hunter-keywords-input'
+  ) as HTMLTextAreaElement | null;
   if (!inputEl) return;
   const originalText = inputEl.value;
-  const deduplicatedText = KeywordService.deduplicateKeywordsText(originalText);
+  const deduplicatedText = KeywordHunterService.deduplicateKeywordsText(originalText);
   if (deduplicatedText !== originalText) {
     lastKeywordInputSnapshot = originalText;
   }
@@ -659,7 +681,9 @@ function removeDuplicatesUI(): void {
 }
 
 function undoKeywordClean(): void {
-  const inputEl = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
+  const inputEl = document.getElementById(
+    'keyword-hunter-keywords-input'
+  ) as HTMLTextAreaElement | null;
   if (!inputEl || lastKeywordInputSnapshot === null) {
     showToast('没有可撤回的关键词操作', { type: 'info' });
     return;
@@ -677,7 +701,9 @@ function undoKeywordClean(): void {
 async function pasteFromClipboard(): Promise<void> {
   try {
     const text = await navigator.clipboard.readText();
-    const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
+    const copyInput = document.getElementById(
+      'keyword-hunter-copy-input'
+    ) as HTMLTextAreaElement | null;
     if (copyInput) {
       copyInput.value = text;
       updateCopyCharCount();
@@ -693,7 +719,9 @@ async function pasteFromClipboard(): Promise<void> {
  * 清空文案输入
  */
 function clearCopyInput(): void {
-  const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
+  const copyInput = document.getElementById(
+    'keyword-hunter-copy-input'
+  ) as HTMLTextAreaElement | null;
   if (copyInput) {
     copyInput.value = '';
     updateCopyCharCount();
@@ -731,7 +759,9 @@ async function saveCurrentSnapshot(status?: 'draft' | 'matched'): Promise<void> 
  * 去除大模型生成的 Markdown 格式符号，如 *、`、** 等
  */
 function cleanCopyFormat(): void {
-  const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
+  const copyInput = document.getElementById(
+    'keyword-hunter-copy-input'
+  ) as HTMLTextAreaElement | null;
   if (!copyInput || !copyInput.value.trim()) {
     showToast('文案为空，无需清理', { type: 'warning' });
     return;
@@ -786,9 +816,12 @@ function cleanCopyFormat(): void {
  * 开始分析
  */
 async function startAnalysis(): Promise<void> {
-  const kwText = (document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null)
-    ?.value;
-  const copyText = (document.getElementById('kt-copy-input') as HTMLTextAreaElement | null)?.value;
+  const kwText = (
+    document.getElementById('keyword-hunter-keywords-input') as HTMLTextAreaElement | null
+  )?.value;
+  const copyText = (
+    document.getElementById('keyword-hunter-copy-input') as HTMLTextAreaElement | null
+  )?.value;
 
   if (!kwText || !kwText.trim() || !copyText || !copyText.trim()) {
     showToast(`请先输入关键词和文案`, { type: 'warning' });
@@ -812,7 +845,7 @@ async function startAnalysis(): Promise<void> {
   // 注意：Worker 的初始化在核心模块中完成，这里我们使用主线程回退
   try {
     const tracker = appStore.getState().keywordTracker;
-    const analysisResult = KeywordService.analyzeKeywordMatching(
+    const analysisResult = KeywordHunterService.analyzeKeywordMatching(
       tracker.processedCopy,
       tracker.keywords,
       tracker.settings
@@ -820,7 +853,7 @@ async function startAnalysis(): Promise<void> {
     appStore.getState().updateKeywordTracker({
       matchedKeywords: analysisResult.matched,
       unmatchedKeywords: analysisResult.unmatched,
-      wordFrequency: KeywordService.calculateWordFrequency(tracker.processedCopy),
+      wordFrequency: KeywordHunterService.calculateWordFrequency(tracker.processedCopy),
       isWindowMinimized: false,
     });
 
@@ -834,7 +867,7 @@ async function startAnalysis(): Promise<void> {
     showToast('分析完成', { type: 'success' });
 
     // 切换到 process 模块
-    await navigateToRouteId('kw_process');
+    await navigateToRouteId('keyword_hunter_process');
   } catch (error) {
     showProgress(false);
     showToast('分析失败: ' + (error as Error).message, { type: 'error' });
@@ -865,7 +898,7 @@ function bindKeywordInputEvents(kwInput: HTMLTextAreaElement | null): void {
     updateSnapshotPanelState();
   });
   addEventListener(kwInput, 'scroll', () => {
-    const highlight = document.getElementById('kt-keyword-highlight-layer');
+    const highlight = document.getElementById('keyword-hunter-keyword-highlight-layer');
     if (highlight) highlight.scrollTop = kwInput.scrollTop;
   });
 }
@@ -881,30 +914,30 @@ function bindCopyInputEvents(copyInput: HTMLTextAreaElement | null): void {
 }
 
 function bindActionButtons(): void {
-  const btnClean = document.getElementById('kt-btn-clean-kw');
+  const btnClean = document.getElementById('keyword-hunter-btn-clean-kw');
   if (btnClean) addEventListener(btnClean, 'click', () => cleanKeywordsUI());
 
-  const btnUndoClean = document.getElementById('kt-btn-undo-kw-clean');
+  const btnUndoClean = document.getElementById('keyword-hunter-btn-undo-kw-clean');
   if (btnUndoClean) addEventListener(btnUndoClean, 'click', () => undoKeywordClean());
 
-  const btnCleanCopy = document.getElementById('kt-btn-clean-copy');
+  const btnCleanCopy = document.getElementById('keyword-hunter-btn-clean-copy');
   if (btnCleanCopy) addEventListener(btnCleanCopy, 'click', () => cleanCopyFormat());
 
-  const btnClearCopy = document.getElementById('kt-btn-clear-copy');
+  const btnClearCopy = document.getElementById('keyword-hunter-btn-clear-copy');
   if (btnClearCopy) addEventListener(btnClearCopy, 'click', () => clearCopyInput());
 }
 
 function bindSnapshotButtons(): void {
-  const btnPanelSaveSnapshot = document.getElementById('kt-input-snapshot-save');
+  const btnPanelSaveSnapshot = document.getElementById('keyword-hunter-input-snapshot-save');
   if (btnPanelSaveSnapshot)
     addEventListener(btnPanelSaveSnapshot, 'click', () => {
       void saveCurrentSnapshot();
     });
 
-  const btnPaste = document.getElementById('kt-btn-paste');
+  const btnPaste = document.getElementById('keyword-hunter-btn-paste');
   if (btnPaste) addEventListener(btnPaste, 'click', async () => await pasteFromClipboard());
 
-  const btnStartAnalysis = document.getElementById('kt-btn-start-analysis');
+  const btnStartAnalysis = document.getElementById('keyword-hunter-btn-start-analysis');
   if (btnStartAnalysis)
     addEventListener(btnStartAnalysis, 'click', async () => await startAnalysis());
 }
@@ -912,8 +945,12 @@ function bindSnapshotButtons(): void {
 function setupEventListeners(container: HTMLElement): void {
   if (!container) return;
 
-  const kwInput = document.getElementById('kt-keywords-input') as HTMLTextAreaElement | null;
-  const copyInput = document.getElementById('kt-copy-input') as HTMLTextAreaElement | null;
+  const kwInput = document.getElementById(
+    'keyword-hunter-keywords-input'
+  ) as HTMLTextAreaElement | null;
+  const copyInput = document.getElementById(
+    'keyword-hunter-copy-input'
+  ) as HTMLTextAreaElement | null;
 
   bindKeywordInputEvents(kwInput);
   bindCopyInputEvents(copyInput);
@@ -967,13 +1004,13 @@ class KeywordHunterInputModule extends BaseModule {
     try {
       // 2. 注册全局操作（用于旧模板兼容）
       const actionNames = registerActionsWithLegacy({
-        kt_cleanKeywords: () => cleanKeywordsUI(),
-        kt_removeDuplicates: () => removeDuplicatesUI(),
-        kt_undoKeywordClean: () => undoKeywordClean(),
-        kt_cleanCopyFormat: () => cleanCopyFormat(),
-        kt_pasteFromClipboard: () => pasteFromClipboard(),
-        kt_clearCopyInput: () => clearCopyInput(),
-        kt_startAnalysis: () => startAnalysis(),
+        keyword_hunter_cleanKeywords: () => cleanKeywordsUI(),
+        keyword_hunter_removeDuplicates: () => removeDuplicatesUI(),
+        keyword_hunter_undoKeywordClean: () => undoKeywordClean(),
+        keyword_hunter_cleanCopyFormat: () => cleanCopyFormat(),
+        keyword_hunter_pasteFromClipboard: () => pasteFromClipboard(),
+        keyword_hunter_clearCopyInput: () => clearCopyInput(),
+        keyword_hunter_startAnalysis: () => startAnalysis(),
       });
 
       // 保存已注册的动作名称，用于卸载时清理

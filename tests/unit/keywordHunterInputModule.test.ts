@@ -9,38 +9,38 @@ import { KeywordHunterSnapshotService } from '@/modules/app_center/views/keyword
 function createKeywordHunterTemplate(): string {
   return `
     <section>
-      <h2 id="kt-keywords-input-label">关键词列表</h2>
-      <textarea id="kt-keywords-input" aria-labelledby="kt-keywords-input-label"
-        aria-describedby="kt-keywords-input-helper kt-keyword-count-label kt-duplicate-badge"></textarea>
-      <p id="kt-keywords-input-helper">每行一个关键词，支持多语种；清理格式会自动去重。</p>
-      <div id="kt-keyword-highlight-layer"></div>
-      <span id="kt-keyword-count-label"><span id="kt-keyword-count"></span></span>
-      <span id="kt-duplicate-badge" class="hidden"><span id="kt-duplicate-count"></span></span>
-      <h2><span id="kt-copy-input-label">目标 Listing 文案</span></h2>
-      <textarea id="kt-copy-input" aria-labelledby="kt-copy-input-label"
-        aria-describedby="kt-copy-input-helper copy-char-count-label"></textarea>
-      <span id="kt-copy-input-helper">Tip: 包含完整 Listing 内容可提升分析精度</span>
+      <h2 id="keyword-hunter-keywords-input-label">关键词列表</h2>
+      <textarea id="keyword-hunter-keywords-input" aria-labelledby="keyword-hunter-keywords-input-label"
+        aria-describedby="keyword-hunter-keywords-input-helper keyword-hunter-keyword-count-label keyword-hunter-duplicate-badge"></textarea>
+      <p id="keyword-hunter-keywords-input-helper">每行一个关键词，支持多语种；清理格式会自动去重。</p>
+      <div id="keyword-hunter-keyword-highlight-layer"></div>
+      <span id="keyword-hunter-keyword-count-label"><span id="keyword-hunter-keyword-count"></span></span>
+      <span id="keyword-hunter-duplicate-badge" class="hidden"><span id="keyword-hunter-duplicate-count"></span></span>
+      <h2><span id="keyword-hunter-copy-input-label">目标 Listing 文案</span></h2>
+      <textarea id="keyword-hunter-copy-input" aria-labelledby="keyword-hunter-copy-input-label"
+        aria-describedby="keyword-hunter-copy-input-helper copy-char-count-label"></textarea>
+      <span id="keyword-hunter-copy-input-helper">Tip: 包含完整 Listing 内容可提升分析精度</span>
       <span id="copy-char-count-label"><span id="copy-char-count"></span></span>
-      <button id="kt-btn-clean-kw"></button>
-      <button id="kt-btn-undo-kw-clean"></button>
-      <button id="kt-btn-clean-copy"></button>
-      <button id="kt-btn-clear-copy"></button>
-      <button id="kt-btn-paste"></button>
-      <button id="kt-btn-start-analysis"></button>
-      <button id="kt-input-snapshot-save"></button>
-      <span id="kt-input-snapshot-count"></span>
-      <span id="kt-input-draft-status" role="status" aria-live="polite" aria-atomic="true">
-        <span id="kt-input-draft-label"></span>
-        <span id="kt-input-draft-detail"></span>
+      <button id="keyword-hunter-btn-clean-kw"></button>
+      <button id="keyword-hunter-btn-undo-kw-clean"></button>
+      <button id="keyword-hunter-btn-clean-copy"></button>
+      <button id="keyword-hunter-btn-clear-copy"></button>
+      <button id="keyword-hunter-btn-paste"></button>
+      <button id="keyword-hunter-btn-start-analysis"></button>
+      <button id="keyword-hunter-input-snapshot-save"></button>
+      <span id="keyword-hunter-input-snapshot-count"></span>
+      <span id="keyword-hunter-input-draft-status" role="status" aria-live="polite" aria-atomic="true">
+        <span id="keyword-hunter-input-draft-label"></span>
+        <span id="keyword-hunter-input-draft-detail"></span>
       </span>
-      <div id="kt-input-snapshot-loading" class="hidden"></div>
-      <div id="kt-input-snapshot-empty" class="hidden"></div>
-      <div id="kt-input-snapshot-list"></div>
+      <div id="keyword-hunter-input-snapshot-loading" class="hidden"></div>
+      <div id="keyword-hunter-input-snapshot-empty" class="hidden"></div>
+      <div id="keyword-hunter-input-snapshot-list"></div>
     </section>
   `;
 }
 
-function createKeywordTrackerState() {
+function createKeywordHunterState() {
   return {
     keywordsInputText: '',
     copyInputText: '',
@@ -148,7 +148,7 @@ function createSnapshotFixtures(): Array<Record<string, any>> {
 function createInputMocks(mockApi: typeof vi) {
   const template = createKeywordHunterTemplate();
   const state = {
-    keywordTracker: createKeywordTrackerState(),
+    keywordTracker: createKeywordHunterState(),
     updateKeywordTracker: mockApi.fn((patch: Record<string, unknown>) => {
       Object.assign(state.keywordTracker, patch);
     }),
@@ -253,7 +253,7 @@ vi.mock('@/stores/useAppStore', () => ({
   },
 }));
 
-function resetTrackerState(): void {
+function resetKeywordHunterState(): void {
   inputMocks.state.keywordTracker = {
     keywordsInputText: '',
     copyInputText: '',
@@ -295,7 +295,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   inputMocks.confirm.mockReturnValue(true);
   inputMocks.actions = {};
-  resetTrackerState();
+  resetKeywordHunterState();
   inputMocks.resetSnapshots();
   Object.defineProperty(window, 'confirm', {
     configurable: true,
@@ -320,32 +320,40 @@ it('mounts the template, restores inputs, updates counters, and registers action
     expect.any(Object)
   );
   expect(container.classList.contains('fade-in')).toBe(true);
-  expect(container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')?.value).toBe(
-    'alpha\nbeta\nalpha'
-  );
-  expect(container.querySelector('#kt-keyword-count')?.textContent).toBe('3');
-  expect(container.querySelector('#kt-keywords-input')?.getAttribute('aria-labelledby')).toBe(
-    'kt-keywords-input-label'
-  );
-  expect(container.querySelector('#kt-keywords-input')?.getAttribute('aria-describedby')).toContain(
-    'kt-keywords-input-helper'
-  );
-  expect(container.querySelector('#kt-duplicate-badge')?.classList.contains('hidden')).toBe(false);
-  expect(container.querySelector('#kt-duplicate-count')?.textContent).toBe('1');
+  expect(
+    container.querySelector<HTMLTextAreaElement>('#keyword-hunter-keywords-input')?.value
+  ).toBe('alpha\nbeta\nalpha');
+  expect(container.querySelector('#keyword-hunter-keyword-count')?.textContent).toBe('3');
+  expect(
+    container.querySelector('#keyword-hunter-keywords-input')?.getAttribute('aria-labelledby')
+  ).toBe('keyword-hunter-keywords-input-label');
+  expect(
+    container.querySelector('#keyword-hunter-keywords-input')?.getAttribute('aria-describedby')
+  ).toContain('keyword-hunter-keywords-input-helper');
+  expect(
+    container.querySelector('#keyword-hunter-duplicate-badge')?.classList.contains('hidden')
+  ).toBe(false);
+  expect(container.querySelector('#keyword-hunter-duplicate-count')?.textContent).toBe('1');
   expect(container.querySelector('#copy-char-count')?.textContent).toBe('10');
-  expect(container.querySelector('#kt-copy-input')?.getAttribute('aria-labelledby')).toBe(
-    'kt-copy-input-label'
+  expect(
+    container.querySelector('#keyword-hunter-copy-input')?.getAttribute('aria-labelledby')
+  ).toBe('keyword-hunter-copy-input-label');
+  expect(
+    container.querySelector('#keyword-hunter-copy-input')?.getAttribute('aria-describedby')
+  ).toContain('keyword-hunter-copy-input-helper');
+  expect(container.querySelector('#keyword-hunter-input-draft-status')?.textContent).toContain(
+    '本机草稿'
   );
-  expect(container.querySelector('#kt-copy-input')?.getAttribute('aria-describedby')).toContain(
-    'kt-copy-input-helper'
+  expect(container.querySelector('#keyword-hunter-input-draft-status')?.getAttribute('role')).toBe(
+    'status'
   );
-  expect(container.querySelector('#kt-input-draft-status')?.textContent).toContain('本机草稿');
-  expect(container.querySelector('#kt-input-draft-status')?.getAttribute('role')).toBe('status');
-  expect(container.querySelector<HTMLButtonElement>('#kt-btn-undo-kw-clean')?.disabled).toBe(true);
+  expect(
+    container.querySelector<HTMLButtonElement>('#keyword-hunter-btn-undo-kw-clean')?.disabled
+  ).toBe(true);
   expect(registerActionsWithLegacy).toHaveBeenCalledWith(
     expect.objectContaining({
-      kt_cleanKeywords: expect.any(Function),
-      kt_startAnalysis: expect.any(Function),
+      keyword_hunter_cleanKeywords: expect.any(Function),
+      keyword_hunter_startAnalysis: expect.any(Function),
     })
   );
 });
@@ -354,15 +362,17 @@ it('renders the embedded history snapshot panel on the input page', async () => 
   const container = await mountInput();
 
   expect(KeywordHunterSnapshotService.getAllAsync).toHaveBeenCalled();
-  expect(container.querySelector('#kt-input-snapshot-count')?.textContent).toBe('2 个快照');
-  expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain(
+  expect(container.querySelector('#keyword-hunter-input-snapshot-count')?.textContent).toBe(
+    '2 个快照'
+  );
+  expect(container.querySelector('#keyword-hunter-input-snapshot-list')?.textContent).toContain(
     'Coffee Snapshot'
   );
-  expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain(
+  expect(container.querySelector('#keyword-hunter-input-snapshot-list')?.textContent).toContain(
     'Manual Draft Snapshot'
   );
-  expect(container.querySelector('[data-kh-snapshot-filter]')).toBeNull();
-  expect(container.querySelector('#kt-input-snapshot-open-history')).toBeNull();
+  expect(container.querySelector('[data-keyword-hunter-snapshot-filter]')).toBeNull();
+  expect(container.querySelector('#keyword-hunter-input-snapshot-open-history')).toBeNull();
 
   click(container.querySelector('button[title="恢复到输入页"]'));
   await vi.waitFor(() => {
@@ -370,14 +380,16 @@ it('renders the embedded history snapshot panel on the input page', async () => 
       expect.objectContaining({ id: 'kh-coffee' })
     );
   });
-  expect(container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')?.value).toBe(
-    'coffee grinder\nespresso'
-  );
-  expect(container.querySelector<HTMLTextAreaElement>('#kt-copy-input')?.value).toBe(
+  expect(
+    container.querySelector<HTMLTextAreaElement>('#keyword-hunter-keywords-input')?.value
+  ).toBe('coffee grinder\nespresso');
+  expect(container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input')?.value).toBe(
     'Manual coffee grinder copy'
   );
-  expect(container.querySelector('#kt-input-draft-label')?.textContent).toBe('已载入');
-  expect(container.querySelector('#kt-input-draft-detail')?.textContent).toBe('Coffee Snapshot');
+  expect(container.querySelector('#keyword-hunter-input-draft-label')?.textContent).toBe('已载入');
+  expect(container.querySelector('#keyword-hunter-input-draft-detail')?.textContent).toBe(
+    'Coffee Snapshot'
+  );
 
   click(container.querySelector('button[title="删除快照"]'));
   await vi.waitFor(() => {
@@ -389,16 +401,16 @@ it('renders the embedded history snapshot panel on the input page', async () => 
     expect(KeywordHunterSnapshotService.deleteByIdAsync).toHaveBeenCalledWith('kh-coffee');
   });
   await vi.waitFor(() => {
-    expect(container.querySelector('#kt-input-snapshot-list')?.textContent).not.toContain(
-      'Coffee Snapshot'
-    );
+    expect(
+      container.querySelector('#keyword-hunter-input-snapshot-list')?.textContent
+    ).not.toContain('Coffee Snapshot');
   });
-  expect(container.querySelector('#kt-input-snapshot-list')?.textContent).toContain(
+  expect(container.querySelector('#keyword-hunter-input-snapshot-list')?.textContent).toContain(
     'Manual Draft Snapshot'
   );
   expect(inputMocks.navigateToRouteId).not.toHaveBeenCalled();
 
-  click(container.querySelector('#kt-input-snapshot-save'));
+  click(container.querySelector('#keyword-hunter-input-snapshot-save'));
   await vi.waitFor(() => {
     expect(KeywordHunterSnapshotService.saveCurrentAsync).toHaveBeenCalledWith({});
   });
@@ -407,8 +419,10 @@ it('renders the embedded history snapshot panel on the input page', async () => 
 it('asks before restoring a snapshot over the local draft', async () => {
   inputMocks.confirm.mockReturnValueOnce(false);
   const container = await mountInput();
-  container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')!.value = 'unsaved keyword';
-  container.querySelector<HTMLTextAreaElement>('#kt-copy-input')!.value = 'unsaved copy';
+  container.querySelector<HTMLTextAreaElement>('#keyword-hunter-keywords-input')!.value =
+    'unsaved keyword';
+  container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input')!.value =
+    'unsaved copy';
 
   click(container.querySelector('button[title="恢复到输入页"]'));
 
@@ -416,10 +430,10 @@ it('asks before restoring a snapshot over the local draft', async () => {
     expect(inputMocks.confirm).toHaveBeenCalledWith(expect.stringContaining('确定恢复快照吗'));
   });
   expect(KeywordHunterSnapshotService.restore).not.toHaveBeenCalled();
-  expect(container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')?.value).toBe(
-    'unsaved keyword'
-  );
-  expect(container.querySelector<HTMLTextAreaElement>('#kt-copy-input')?.value).toBe(
+  expect(
+    container.querySelector<HTMLTextAreaElement>('#keyword-hunter-keywords-input')?.value
+  ).toBe('unsaved keyword');
+  expect(container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input')?.value).toBe(
     'unsaved copy'
   );
 });
@@ -437,10 +451,11 @@ it('clears stale analysis results before saving edited input as a draft snapshot
   });
 
   const container = await mountInput();
-  container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')!.value = 'fresh keyword';
-  container.querySelector<HTMLTextAreaElement>('#kt-copy-input')!.value = 'fresh copy';
+  container.querySelector<HTMLTextAreaElement>('#keyword-hunter-keywords-input')!.value =
+    'fresh keyword';
+  container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input')!.value = 'fresh copy';
 
-  click(container.querySelector('#kt-input-snapshot-save'));
+  click(container.querySelector('#keyword-hunter-input-snapshot-save'));
 
   await vi.waitFor(() => {
     expect(KeywordHunterSnapshotService.saveCurrentAsync).toHaveBeenCalledWith({});
@@ -477,7 +492,7 @@ it('keeps process and report state when saving an unchanged full Keyword Hunter 
   });
 
   const container = await mountInput();
-  click(container.querySelector('#kt-input-snapshot-save'));
+  click(container.querySelector('#keyword-hunter-input-snapshot-save'));
 
   await vi.waitFor(() => {
     expect(KeywordHunterSnapshotService.saveCurrentAsync).toHaveBeenCalledWith({});
@@ -497,61 +512,63 @@ it('keeps process and report state when saving an unchanged full Keyword Hunter 
 
 it('cleans duplicate keywords and restores the previous value with undo', async () => {
   const container = await mountInput();
-  const input = container.querySelector<HTMLTextAreaElement>('#kt-keywords-input');
+  const input = container.querySelector<HTMLTextAreaElement>('#keyword-hunter-keywords-input');
   expect(input).not.toBeNull();
   input!.value = 'Alpha, beta; Alpha!!';
 
-  inputMocks.actions.kt_cleanKeywords({}, new Event('click'));
+  inputMocks.actions.keyword_hunter_cleanKeywords({}, new Event('click'));
 
   expect(input!.value).toBe('alpha\nbeta');
   expect(showToast).toHaveBeenCalledWith('已清理格式并去重，移除 1 个重复项', {
     type: 'success',
   });
-  expect(container.querySelector<HTMLButtonElement>('#kt-btn-undo-kw-clean')?.disabled).toBe(false);
+  expect(
+    container.querySelector<HTMLButtonElement>('#keyword-hunter-btn-undo-kw-clean')?.disabled
+  ).toBe(false);
 
-  inputMocks.actions.kt_undoKeywordClean({}, new Event('click'));
+  inputMocks.actions.keyword_hunter_undoKeywordClean({}, new Event('click'));
 
   expect(input!.value).toBe('Alpha, beta; Alpha!!');
   expect(showToast).toHaveBeenCalledWith('已撤回上一步', { type: 'success' });
 
-  inputMocks.actions.kt_undoKeywordClean({}, new Event('click'));
+  inputMocks.actions.keyword_hunter_undoKeywordClean({}, new Event('click'));
   expect(showToast).toHaveBeenCalledWith('没有可撤回的关键词操作', { type: 'info' });
 });
 
 it('cleans, clears, and pastes copy text while persisting input state', async () => {
   const container = await mountInput();
-  const copyInput = container.querySelector<HTMLTextAreaElement>('#kt-copy-input');
+  const copyInput = container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input');
   expect(copyInput).not.toBeNull();
   copyInput!.value = '**Bold** and `code`\n\n\nplain';
 
-  inputMocks.actions.kt_cleanCopyFormat({}, new Event('click'));
+  inputMocks.actions.keyword_hunter_cleanCopyFormat({}, new Event('click'));
 
   expect(copyInput!.value).toBe('Bold and code\n\nplain');
   expect(container.querySelector('#copy-char-count')?.textContent).toBe('20');
   expect(inputMocks.state.keywordTracker.copyInputText).toBe('Bold and code\n\nplain');
 
-  inputMocks.actions.kt_clearCopyInput({}, new Event('click'));
+  inputMocks.actions.keyword_hunter_clearCopyInput({}, new Event('click'));
   expect(copyInput!.value).toBe('');
   expect(container.querySelector('#copy-char-count')?.textContent).toBe('0');
 
-  await inputMocks.actions.kt_pasteFromClipboard({}, new Event('click'));
+  await inputMocks.actions.keyword_hunter_pasteFromClipboard({}, new Event('click'));
   expect(copyInput!.value).toBe('clipboard copy');
   expect(inputMocks.state.keywordTracker.copyInputText).toBe('clipboard copy');
 });
 
 it('validates required inputs and stores analysis results before navigation', async () => {
   const container = await mountInput();
-  await inputMocks.actions.kt_startAnalysis({}, new Event('click'));
+  await inputMocks.actions.keyword_hunter_startAnalysis({}, new Event('click'));
 
   expect(showToast).toHaveBeenCalledWith('请先输入关键词和文案', { type: 'warning' });
   expect(inputMocks.navigateToRouteId).not.toHaveBeenCalled();
 
-  container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')!.value =
+  container.querySelector<HTMLTextAreaElement>('#keyword-hunter-keywords-input')!.value =
     'wireless earbuds\nwaterproof\nWireless Earbuds';
-  container.querySelector<HTMLTextAreaElement>('#kt-copy-input')!.value =
+  container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input')!.value =
     'These wireless earbuds are comfortable wireless earbuds for travel.';
 
-  await inputMocks.actions.kt_startAnalysis({}, new Event('click'));
+  await inputMocks.actions.keyword_hunter_startAnalysis({}, new Event('click'));
 
   expect(showProgress).toHaveBeenNthCalledWith(1, true, 50);
   expect(showProgress).toHaveBeenLastCalledWith(false);
@@ -561,25 +578,26 @@ it('validates required inputs and stores analysis results before navigation', as
   ]);
   expect(inputMocks.state.keywordTracker.unmatchedKeywords).toEqual(['waterproof']);
   expect(inputMocks.state.keywordTracker.wordFrequency[0]).toEqual(['wireless', 2]);
-  expect(inputMocks.navigateToRouteId).toHaveBeenCalledWith('kw_process');
+  expect(inputMocks.navigateToRouteId).toHaveBeenCalledWith('keyword_hunter_process');
 });
 
 it('saves current input values and unregisters actions on unmount', async () => {
   const container = await mountInput();
-  container.querySelector<HTMLTextAreaElement>('#kt-keywords-input')!.value = 'saved keyword';
-  container.querySelector<HTMLTextAreaElement>('#kt-copy-input')!.value = 'saved copy';
+  container.querySelector<HTMLTextAreaElement>('#keyword-hunter-keywords-input')!.value =
+    'saved keyword';
+  container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input')!.value = 'saved copy';
 
   unmount();
 
   expect(inputMocks.state.keywordTracker.keywordsInputText).toBe('saved keyword');
   expect(inputMocks.state.keywordTracker.copyInputText).toBe('saved copy');
   expect(unregisterActions).toHaveBeenCalledWith([
-    'kt_cleanKeywords',
-    'kt_removeDuplicates',
-    'kt_undoKeywordClean',
-    'kt_cleanCopyFormat',
-    'kt_pasteFromClipboard',
-    'kt_clearCopyInput',
-    'kt_startAnalysis',
+    'keyword_hunter_cleanKeywords',
+    'keyword_hunter_removeDuplicates',
+    'keyword_hunter_undoKeywordClean',
+    'keyword_hunter_cleanCopyFormat',
+    'keyword_hunter_pasteFromClipboard',
+    'keyword_hunter_clearCopyInput',
+    'keyword_hunter_startAnalysis',
   ]);
 });

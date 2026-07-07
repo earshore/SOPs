@@ -22,7 +22,7 @@ describe('module manifests', () => {
   });
 
   it('preserves route meta from manifests', () => {
-    expect(MENU_CONFIG.routes.playground?.meta).toMatchObject({
+    expect(MENU_CONFIG.routes.playground_deep_chat?.meta).toMatchObject({
       requiresAuth: false,
       accessPolicy: 'product_allowed_without_auth',
       featureFlag: 'playground.deepChat',

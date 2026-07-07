@@ -147,7 +147,7 @@
         <button
           class="category-filter-btn"
           type="button"
-          data-category="keyword_tracker"
+          data-category="keyword_hunter"
           aria-pressed="false"
         >
           <i class="fas fa-search"></i><span>Keyword Hunter</span><em>1</em>
@@ -246,7 +246,7 @@
             class="app-card-primary-link"
             type="button"
             data-action="switch-tab"
-            data-tab="playground"
+            data-tab="playground_deep_chat"
             aria-label="打开 Playground Deep Chat"
           >
             <span>打开</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
@@ -258,14 +258,14 @@
             class="app-child-link"
             type="button"
             data-action="switch-tab"
-            data-tab="playground"
+            data-tab="playground_deep_chat"
           >
             <i class="fa-regular fa-comments"></i><span>Deep Chat</span>
           </button>
         </div>
       </article>
 
-      <article class="app-overview-card app-card-rose" data-category="keyword_tracker">
+      <article class="app-overview-card app-card-rose" data-category="keyword_hunter">
         <div class="app-card-head">
           <div class="app-card-icon">
             <i class="fas fa-search"></i>
@@ -281,7 +281,7 @@
             class="app-card-primary-link"
             type="button"
             data-action="switch-tab"
-            data-tab="kw_input"
+            data-tab="keyword_hunter_input"
             aria-label="打开 Keyword Hunter 输入格式化"
           >
             <span>打开</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
@@ -289,14 +289,19 @@
         </div>
         <p class="app-card-desc">检查 ASIN 关键词覆盖，整理手动补充词，并输出 SEO 复核结果。</p>
         <div class="app-card-actions">
-          <button class="app-child-link" type="button" data-action="switch-tab" data-tab="kw_input">
+          <button
+            class="app-child-link"
+            type="button"
+            data-action="switch-tab"
+            data-tab="keyword_hunter_input"
+          >
             <i class="fas fa-keyboard"></i><span>输入格式化</span>
           </button>
           <button
             class="app-child-link"
             type="button"
             data-action="switch-tab"
-            data-tab="kw_process"
+            data-tab="keyword_hunter_process"
           >
             <i class="fas fa-cogs"></i><span>SEO 处理</span>
           </button>
@@ -304,7 +309,7 @@
             class="app-child-link"
             type="button"
             data-action="switch-tab"
-            data-tab="kw_analysis"
+            data-tab="keyword_hunter_analysis"
           >
             <i class="fas fa-chart-pie"></i><span>Listing 评审</span>
           </button>
@@ -384,7 +389,12 @@
             <span>打开</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
           </button>
           <div class="app-overview-list-secondary">
-            <button class="app-child-link" type="button" data-action="switch-tab" data-tab="scraper">
+            <button
+              class="app-child-link"
+              type="button"
+              data-action="switch-tab"
+              data-tab="scraper"
+            >
               <i class="fas fa-spider"></i><span>数据采集</span>
             </button>
             <button
@@ -434,7 +444,7 @@
             class="app-card-primary-link"
             type="button"
             data-action="switch-tab"
-            data-tab="playground"
+            data-tab="playground_deep_chat"
             aria-label="打开 Playground Deep Chat"
           >
             <span>打开</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
@@ -444,7 +454,7 @@
               class="app-child-link"
               type="button"
               data-action="switch-tab"
-              data-tab="playground"
+              data-tab="playground_deep_chat"
             >
               <i class="fa-regular fa-comments"></i><span>Deep Chat</span>
             </button>
@@ -455,7 +465,7 @@
       <div
         class="app-overview-list-row app-card-rose"
         role="listitem"
-        data-category="keyword_tracker"
+        data-category="keyword_hunter"
         data-search="keyword hunter 关键词 输入格式化 seo 处理 listing 评审"
       >
         <div class="app-overview-list-main">
@@ -480,20 +490,25 @@
             class="app-card-primary-link"
             type="button"
             data-action="switch-tab"
-            data-tab="kw_input"
+            data-tab="keyword_hunter_input"
             aria-label="打开 Keyword Hunter 输入格式化"
           >
             <span>打开</span><i class="fas fa-arrow-right" aria-hidden="true"></i>
           </button>
           <div class="app-overview-list-secondary">
-            <button class="app-child-link" type="button" data-action="switch-tab" data-tab="kw_input">
+            <button
+              class="app-child-link"
+              type="button"
+              data-action="switch-tab"
+              data-tab="keyword_hunter_input"
+            >
               <i class="fas fa-keyboard"></i><span>输入格式化</span>
             </button>
             <button
               class="app-child-link"
               type="button"
               data-action="switch-tab"
-              data-tab="kw_process"
+              data-tab="keyword_hunter_process"
             >
               <i class="fas fa-cogs"></i><span>SEO 处理</span>
             </button>
@@ -501,7 +516,7 @@
               class="app-child-link"
               type="button"
               data-action="switch-tab"
-              data-tab="kw_analysis"
+              data-tab="keyword_hunter_analysis"
             >
               <i class="fas fa-chart-pie"></i><span>Listing 评审</span>
             </button>

@@ -320,9 +320,10 @@ test.describe('release candidate smoke', () => {
     await expect(asinInput).toHaveValue('');
     await expect(asinStatus).toContainText('等待输入');
     await expect(startButton).toBeDisabled();
-    expect(consoleListener.getErrors(), 'scraper invalid input smoke should not emit errors').toEqual(
-      []
-    );
+    expect(
+      consoleListener.getErrors(),
+      'scraper invalid input smoke should not emit errors'
+    ).toEqual([]);
   });
 
   test('AI Analysis empty data state blocks analysis and points back to data collection', async ({
@@ -351,18 +352,18 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
-    await switchTabFromHome(page, 'kw_input');
+    await switchTabFromHome(page, 'keyword_hunter_input');
     await expectNoRouteErrorText(page);
 
-    await expect(page.locator('#kt-module-input')).toBeVisible();
-    await expect(page.locator('#kt-input-draft-label')).toHaveText('空白');
+    await expect(page.locator('#keyword-hunter-module-input')).toBeVisible();
+    await expect(page.locator('#keyword-hunter-input-draft-label')).toHaveText('空白');
     await page.waitForFunction(() => {
       const registry = (window as Window & { ActionRegistry?: Record<string, unknown> })
         .ActionRegistry;
-      return typeof registry?.kt_startAnalysis === 'function';
+      return typeof registry?.keyword_hunter_startAnalysis === 'function';
     });
 
-    const startAnalysisButton = page.locator('#kt-btn-start-analysis');
+    const startAnalysisButton = page.locator('#keyword-hunter-btn-start-analysis');
     const emptyInputToast = page.locator('#toast-container .toast').last();
     await expect(startAnalysisButton).toBeEnabled();
     await page.evaluate(() => {
@@ -374,32 +375,32 @@ test.describe('release candidate smoke', () => {
           >;
         }
       ).ActionRegistry;
-      return registry?.kt_startAnalysis?.({}, new MouseEvent('click'));
+      return registry?.keyword_hunter_startAnalysis?.({}, new MouseEvent('click'));
     });
     await expect(emptyInputToast).toContainText('请先输入关键词和文案');
-    await expect(page.locator('#kt-module-input')).toBeVisible();
-    await expect(page.locator('#kt-module-process')).toHaveCount(0);
+    await expect(page.locator('#keyword-hunter-module-input')).toBeVisible();
+    await expect(page.locator('#keyword-hunter-module-process')).toHaveCount(0);
 
-    await page.locator('#kt-keywords-input').fill(
-      ['wireless earbuds', 'noise cancelling', 'wireless earbuds'].join('\n')
-    );
-    await expect(page.locator('#kt-keyword-count')).toHaveText('3');
-    await expect(page.locator('#kt-duplicate-count')).toHaveText('1');
+    await page
+      .locator('#keyword-hunter-keywords-input')
+      .fill(['wireless earbuds', 'noise cancelling', 'wireless earbuds'].join('\n'));
+    await expect(page.locator('#keyword-hunter-keyword-count')).toHaveText('3');
+    await expect(page.locator('#keyword-hunter-duplicate-count')).toHaveText('1');
 
-    await page.locator('#kt-btn-clean-kw').click();
-    await expect(page.locator('#kt-keyword-count')).toHaveText('2');
-    await expect(page.locator('#kt-keywords-input')).toHaveValue(
+    await page.locator('#keyword-hunter-btn-clean-kw').click();
+    await expect(page.locator('#keyword-hunter-keyword-count')).toHaveText('2');
+    await expect(page.locator('#keyword-hunter-keywords-input')).toHaveValue(
       'wireless earbuds\nnoise cancelling'
     );
 
     await page
-      .locator('#kt-copy-input')
+      .locator('#keyword-hunter-copy-input')
       .fill('Wireless earbuds with active noise cancelling and long battery life.');
-    await page.locator('#kt-btn-start-analysis').click();
+    await page.locator('#keyword-hunter-btn-start-analysis').click();
 
-    await expect(page.locator('#kt-module-process')).toBeVisible();
-    await expect(page.locator('#kt-stat-matched')).toHaveText('2');
-    await expect(page.locator('#kt-stat-unmatched')).toHaveText('0');
+    await expect(page.locator('#keyword-hunter-module-process')).toBeVisible();
+    await expect(page.locator('#keyword-hunter-stat-matched')).toHaveText('2');
+    await expect(page.locator('#keyword-hunter-stat-unmatched')).toHaveText('0');
     expect(
       consoleListener.getErrors(),
       'Keyword Hunter smoke should not emit console/page errors'
@@ -425,9 +426,7 @@ test.describe('release candidate smoke', () => {
 
     await expect(page).toHaveURL(/\/sops\/growth\/listing-seo/);
     await expect(page.locator('.listing-seo-page')).toBeVisible();
-    await expect(
-      page.getByRole('heading', { name: 'Listing 极致优化 (SEO) SOP' })
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Listing 极致优化 (SEO) SOP' })).toBeVisible();
     await expectNoSevereMobileOverflow(page, 'Listing SEO SOP mobile page');
 
     await page
@@ -551,17 +550,15 @@ test.describe('release candidate smoke', () => {
     ).toEqual([]);
   });
 
-  test('PPC Search Terms blocks empty input and analyzes sample data locally', async ({
-    page,
-  }) => {
+  test('PPC Search Terms blocks empty input and analyzes sample data locally', async ({ page }) => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
     await switchTabFromHome(page, 'ppc_search_terms');
     await expectNoRouteErrorText(page);
 
-    const pasteInput = page.locator('#ppc-paste-input');
-    const parseButton = page.locator('#ppc-btn-parse');
+    const pasteInput = page.locator('#ppc-search-terms-paste-input');
+    const parseButton = page.locator('#ppc-search-terms-btn-parse');
     await expect(pasteInput).toBeVisible();
     await expect
       .poll(
@@ -579,32 +576,37 @@ test.describe('release candidate smoke', () => {
         }
       )
       .toBe('true');
-    await expect(page.locator('#ppc-paste-error')).toContainText(
+    await expect(page.locator('#ppc-search-terms-paste-error')).toContainText(
       '请先粘贴报表内容或选择报表文件'
     );
-    await expect(page.locator('#ppc-mapping-status')).toContainText('没有可分析的数据');
+    await expect(page.locator('#ppc-search-terms-mapping-status')).toContainText(
+      '没有可分析的数据'
+    );
 
-    await page.locator('#ppc-btn-sample').click();
-    await expect(page.locator('#ppc-paste-input')).not.toHaveAttribute('aria-invalid', 'true');
-    await expect(page.locator('#ppc-paste-error')).toHaveText('');
-    await expect(page.locator('#ppc-mapping-status')).toContainText('样例数据已加载');
-    await expect(page.locator('#ppc-stat-rows')).toHaveText('0');
+    await page.locator('#ppc-search-terms-btn-sample').click();
+    await expect(page.locator('#ppc-search-terms-paste-input')).not.toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
+    await expect(page.locator('#ppc-search-terms-paste-error')).toHaveText('');
+    await expect(page.locator('#ppc-search-terms-mapping-status')).toContainText('样例数据已加载');
+    await expect(page.locator('#ppc-search-terms-stat-rows')).toHaveText('0');
 
-    const useAgent = page.locator('#ppc-use-agent');
+    const useAgent = page.locator('#ppc-search-terms-use-agent');
     if (await useAgent.isChecked()) {
       await useAgent.uncheck();
     }
     await expect(useAgent).not.toBeChecked();
 
-    await page.locator('#ppc-btn-parse').click();
+    await page.locator('#ppc-search-terms-btn-parse').click();
 
-    await expect(page.locator('#ppc-stat-rows')).toHaveText('10');
-    await expect(page.locator('#ppc-result-count')).toContainText('共 10 行');
-    await expect(page.locator('#ppc-table-wrapper')).toBeVisible();
-    await expect(page.locator('#ppc-results-body tr')).toHaveCount(10);
+    await expect(page.locator('#ppc-search-terms-stat-rows')).toHaveText('10');
+    await expect(page.locator('#ppc-search-terms-result-count')).toContainText('共 10 行');
+    await expect(page.locator('#ppc-search-terms-table-wrapper')).toBeVisible();
+    await expect(page.locator('#ppc-search-terms-results-body tr')).toHaveCount(10);
 
-    await page.locator('#ppc-action-search').fill('wireless');
-    await expect(page.locator('#ppc-result-count')).toContainText('当前筛选');
+    await page.locator('#ppc-search-terms-action-search').fill('wireless');
+    await expect(page.locator('#ppc-search-terms-result-count')).toContainText('当前筛选');
     expect(
       consoleListener.getErrors(),
       'PPC Search Terms smoke should not emit console/page errors'
@@ -633,9 +635,10 @@ test.describe('release candidate smoke', () => {
       const root = document.querySelector('[x-data="promptlabPanel"]');
       const alpine = (window as Window & { Alpine?: { $data?: (element: Element) => unknown } })
         .Alpine;
-      const data = root && typeof alpine?.$data === 'function'
-        ? (alpine.$data(root) as { generateListingPrompt?: unknown; profile?: unknown })
-        : undefined;
+      const data =
+        root && typeof alpine?.$data === 'function'
+          ? (alpine.$data(root) as { generateListingPrompt?: unknown; profile?: unknown })
+          : undefined;
       return !!data?.profile && typeof data.generateListingPrompt === 'function';
     });
 
@@ -648,9 +651,7 @@ test.describe('release candidate smoke', () => {
 
     await page.locator('#lab-target-market').selectOption('English (US)');
     await page.locator('#lab-keywords-tier1').fill('wireless earbuds');
-    await page
-      .locator('#lab-keywords-tier2')
-      .fill('bluetooth 5.0, noise cancelling, waterproof');
+    await page.locator('#lab-keywords-tier2').fill('bluetooth 5.0, noise cancelling, waterproof');
     await page.locator('#lab-audience').fill('Remote workers who need focused calls.');
     await page.locator('#lab-usps').fill('Hybrid ANC, pocket charging case, multipoint pairing.');
     await page.locator('#lab-specs').fill('Bluetooth 5.3, 40 hour battery life, IPX5 resistance.');
@@ -658,8 +659,9 @@ test.describe('release candidate smoke', () => {
     await expect(generateButton).toBeEnabled();
     await generateButton.click();
 
-    await expect(page.locator('#toast-container .toast.toast-success .toast-content strong').last())
-      .toContainText('Listing Prompt 已生成');
+    await expect(
+      page.locator('#toast-container .toast.toast-success .toast-content strong').last()
+    ).toContainText('Listing Prompt 已生成');
     await expect(page.locator('#final-prompt-output')).toHaveValue(/# ROLE/);
     await expect(page.locator('#prompt-word-count')).toHaveText(/^[1-9]/);
 
@@ -671,9 +673,7 @@ test.describe('release candidate smoke', () => {
     expect(prompt).toContain('wireless earbuds');
     expect(prompt).toContain('bluetooth 5.0');
     expect(prompt).toContain('English (US) Amazon marketplace (amazon.com)');
-    expect(llmRequestUrls, 'Promptlab manual generation should not call LLM endpoints').toEqual(
-      []
-    );
+    expect(llmRequestUrls, 'Promptlab manual generation should not call LLM endpoints').toEqual([]);
     expect(
       consoleListener.getErrors(),
       'Promptlab manual generation smoke should not emit console/page errors'
@@ -694,25 +694,26 @@ test.describe('release candidate smoke', () => {
     });
 
     await seedDeepChatPromptDraftBeforeLoad(page);
-    await switchTabFromHome(page, 'playground');
+    await switchTabFromHome(page, 'playground_deep_chat');
     await expectNoRouteErrorText(page);
 
-    await expect(page.locator('#playground-chat')).toBeVisible();
+    await expect(page.locator('#deep-chat-view')).toBeVisible();
     const promptButton = page.locator(`[data-preview-prompt-id="${DEEP_CHAT_PROMPT_ID}"]`);
     await expect(promptButton).toBeVisible();
 
     await promptButton.click();
-    await expect(page.locator('#playground-prompt-preview-popover')).toHaveClass(/is-visible/);
-    await expect(page.locator('#playground-prompt-preview-popover')).toContainText(
+    await expect(page.locator('#deep-chat-prompt-preview-popover')).toHaveClass(/is-visible/);
+    await expect(page.locator('#deep-chat-prompt-preview-popover')).toContainText(
       DEEP_CHAT_PROMPT_MARKER
     );
 
     await page.locator(`[data-use-prompt-draft-id="${DEEP_CHAT_PROMPT_ID}"]`).click();
 
-    const chatInput = page.locator('#playground-chat #text-input');
+    const chatInput = page.locator('#deep-chat-view #text-input');
     await expect(chatInput).toContainText(DEEP_CHAT_PROMPT_MARKER, { timeout: 5000 });
-    await expect(page.locator('#toast-container .toast.toast-success .toast-content strong').last())
-      .toContainText('已创建新会话并填入 Prompt');
+    await expect(
+      page.locator('#toast-container .toast.toast-success .toast-content strong').last()
+    ).toContainText('已创建新会话并填入 Prompt');
     expect(llmRequestUrls, 'using a Deep Chat prompt draft should not call LLM endpoints').toEqual(
       []
     );
@@ -824,7 +825,9 @@ test.describe('release candidate smoke', () => {
     await openGlobalSettings(page);
 
     const llmSection = page.locator('#settings-section-llm');
-    const errorToast = page.locator('#toast-container .toast.toast-error .toast-content strong').last();
+    const errorToast = page
+      .locator('#toast-container .toast.toast-error .toast-content strong')
+      .last();
     await llmSection.locator('#llm-api-key').fill('fake-browser-key');
 
     await llmSection.getByRole('button', { name: '获取模型列表' }).click();

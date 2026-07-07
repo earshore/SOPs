@@ -1,38 +1,38 @@
 import type { ActionType, AnalyzedRow, Thresholds } from '../types';
 import type { LLMStreamMetrics } from '@/services/llmService';
 
-export interface PpcAnalysisContext {
+export interface PpcSearchTermsAnalysisContext {
   asin: string;
   category: string;
   listing: string;
 }
 
-export interface PpcLlmDecision {
+export interface PpcSearchTermsLlmDecision {
   id: string;
   action: ActionType;
   reason: string;
   priority: number;
 }
 
-export interface PpcLlmAnalysisProgress {
+export interface PpcSearchTermsLlmAnalysisProgress {
   completedBatches: number;
   totalBatches: number;
-  decisions?: PpcLlmDecision[];
+  decisions?: PpcSearchTermsLlmDecision[];
   firstResponse?: LLMStreamMetrics & { batchIndex: number };
   cachedBatches?: number;
 }
 
-export interface PpcAgentToolCall {
+export interface PpcSearchTermsAgentToolCall {
   tool: 'local_metric_rules' | 'semantic_llm_refiner';
   inputRows: number;
   outputRows: number;
   note: string;
 }
 
-export interface PpcAgentAnalysisResult {
-  decisions: PpcLlmDecision[];
+export interface PpcSearchTermsAgentAnalysisResult {
+  decisions: PpcSearchTermsLlmDecision[];
   modelDecisionIds: string[];
-  toolCalls: PpcAgentToolCall[];
+  toolCalls: PpcSearchTermsAgentToolCall[];
   summary: {
     totalRows: number;
     localRows: number;
@@ -43,15 +43,15 @@ export interface PpcAgentAnalysisResult {
   };
 }
 
-export interface PpcLlmAnalysisInput {
+export interface PpcSearchTermsLlmAnalysisInput {
   rows: AnalyzedRow[];
   thresholds: Thresholds;
-  context?: PpcAnalysisContext;
+  context?: PpcSearchTermsAnalysisContext;
   signal?: AbortSignal;
-  onProgress?: (progress: PpcLlmAnalysisProgress) => void;
+  onProgress?: (progress: PpcSearchTermsLlmAnalysisProgress) => void;
 }
 
-export const PPC_LLM_ACTION_TYPES: ActionType[] = [
+export const PPC_SEARCH_TERMS_LLM_ACTION_TYPES: ActionType[] = [
   'negative_exact',
   'harvest_exact',
   'scale_budget',

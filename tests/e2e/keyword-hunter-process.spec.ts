@@ -12,7 +12,7 @@ const TRANSLATED_COPY = '带主动降噪和长续航的无线耳机。';
 
 async function restoreSeededSnapshotFromInput(page: Page): Promise<void> {
   await page.goto(KEYWORD_HUNTER_ROUTES.input);
-  await page.waitForSelector('#kt-module-input', { timeout: 15000 });
+  await page.waitForSelector('#keyword-hunter-module-input', { timeout: 15000 });
   await page.locator('button[title="恢复到输入页"]').first().click();
 }
 
@@ -23,7 +23,7 @@ async function openProcessWithState(
   await seedKeywordHunterStorage(page, keywordTracker);
   await restoreSeededSnapshotFromInput(page);
   await page.goto(KEYWORD_HUNTER_ROUTES.process);
-  await page.waitForSelector('#kt-module-process', { timeout: 15000 });
+  await page.waitForSelector('#keyword-hunter-module-process', { timeout: 15000 });
 }
 
 async function configureMockLLMProvider(page: Page): Promise<void> {
@@ -113,15 +113,15 @@ test.describe('Keyword Hunter 处理页', () => {
       })
     );
 
-    await expect(page.locator('#kt-copy-display')).toContainText('Wireless earbuds');
-    await expect(page.locator('#kt-copy-display')).toContainText(TRANSLATED_COPY);
-    await expect(page.locator('#kt-stat-matched')).toHaveText('1');
-    await expect(page.locator('#kt-stat-unmatched')).toHaveText('1');
+    await expect(page.locator('#keyword-hunter-copy-display')).toContainText('Wireless earbuds');
+    await expect(page.locator('#keyword-hunter-copy-display')).toContainText(TRANSLATED_COPY);
+    await expect(page.locator('#keyword-hunter-stat-matched')).toHaveText('1');
+    await expect(page.locator('#keyword-hunter-stat-unmatched')).toHaveText('1');
 
-    await page.locator('#kt-sync-to-input-btn').click();
+    await page.locator('#keyword-hunter-sync-to-input-btn').click();
 
-    await expect(page.locator('#kt-module-input')).toBeVisible();
-    await expect(page.locator('#kt-copy-input')).toHaveValue(
+    await expect(page.locator('#keyword-hunter-module-input')).toBeVisible();
+    await expect(page.locator('#keyword-hunter-copy-input')).toHaveValue(
       'Wireless earbuds with active noise cancelling and long battery life.'
     );
   });
@@ -131,27 +131,27 @@ test.describe('Keyword Hunter 处理页', () => {
     await configureMockLLMProvider(page);
     const heldRequest = await holdMockTranslationRequest(page);
 
-    await expect(page.locator('#kt-translate-btn')).toBeEnabled();
-    await page.locator('#kt-translate-btn').click();
+    await expect(page.locator('#keyword-hunter-translate-btn')).toBeEnabled();
+    await page.locator('#keyword-hunter-translate-btn').click();
     await heldRequest.requestStarted;
-    await expect(page.locator('#kt-translate-btn-text')).toHaveText('正在翻译...');
-    await expect(page.locator('#kt-translate-progress')).not.toHaveClass(/hidden/);
+    await expect(page.locator('#keyword-hunter-translate-btn-text')).toHaveText('正在翻译...');
+    await expect(page.locator('#keyword-hunter-translate-progress')).not.toHaveClass(/hidden/);
 
     await page.goto(KEYWORD_HUNTER_ROUTES.input);
-    await expect(page.locator('#kt-module-input')).toBeVisible();
+    await expect(page.locator('#keyword-hunter-module-input')).toBeVisible();
 
     await page.goto(KEYWORD_HUNTER_ROUTES.process);
-    await expect(page.locator('#kt-module-process')).toBeVisible();
-    await expect(page.locator('#kt-translate-btn-text')).toHaveText('正在翻译...');
-    await expect(page.locator('#kt-translate-progress')).not.toHaveClass(/hidden/);
+    await expect(page.locator('#keyword-hunter-module-process')).toBeVisible();
+    await expect(page.locator('#keyword-hunter-translate-btn-text')).toHaveText('正在翻译...');
+    await expect(page.locator('#keyword-hunter-translate-progress')).not.toHaveClass(/hidden/);
     expect(heldRequest.getRequestCount()).toBe(1);
 
     heldRequest.releaseHeldRequest();
 
-    await expect(page.locator('#kt-copy-display')).toContainText(TRANSLATED_COPY, {
+    await expect(page.locator('#keyword-hunter-copy-display')).toContainText(TRANSLATED_COPY, {
       timeout: 10000,
     });
-    await expect(page.locator('#kt-translate-btn-text')).toHaveText('翻译已完成');
+    await expect(page.locator('#keyword-hunter-translate-btn-text')).toHaveText('翻译已完成');
     expect(heldRequest.getRequestCount()).toBe(1);
   });
 });

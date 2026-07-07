@@ -1,7 +1,7 @@
 import type { ChatMessage } from '@/services/llmService';
 import type { LLMProviderConfig } from '@/types/state';
 import type { DeepChatMessage, DeepChatMessageStatus, DeepChatRole } from './conversationContext';
-import type { PendingPlaygroundRequest } from './requestLifecycle';
+import type { PendingDeepChatRequest } from './requestLifecycle';
 
 export interface DeepChatRequestBody {
   messages?: DeepChatMessage[];
@@ -49,7 +49,7 @@ export interface DeepChatElement extends HTMLElement {
   onInput?: (body: { content: { text?: string; files?: File[] }; isUser: boolean }) => void;
 }
 
-export interface PlaygroundThread {
+export interface DeepChatThread {
   id: string;
   title: string;
   messages: DeepChatMessage[];
@@ -61,40 +61,40 @@ export interface PlaygroundThread {
   updatedAt: number;
 }
 
-export interface PlaygroundThreadStore {
+export interface DeepChatThreadStore {
   activeThreadId: string;
-  threads: PlaygroundThread[];
+  threads: DeepChatThread[];
 }
 
-export interface PlaygroundRequestModelConfig {
+export interface DeepChatRequestModelConfig {
   config: LLMProviderConfig | null;
   model: string;
 }
 
-export interface PlaygroundRequestMessages {
+export interface DeepChatRequestMessages {
   requestMessages: ChatMessage[];
   conversationMessages: ChatMessage[];
   messages: ChatMessage[];
   droppedMessageCount: number;
 }
 
-export interface PreparedPlaygroundRequest {
+export interface PreparedDeepChatRequest {
   config: LLMProviderConfig;
   model: string;
-  activeThread: PlaygroundThread;
+  activeThread: DeepChatThread;
   conversationMessages: ChatMessage[];
   messages: ChatMessage[];
   droppedMessageCount: number;
 }
 
-export interface PlaygroundLLMCallContext {
+export interface DeepChatLLMCallContext {
   messages: ChatMessage[];
   config: LLMProviderConfig;
   model: string;
   signals: DeepChatSignals;
   sourceChat: DeepChatElement | null;
   controller: AbortController;
-  pendingRequest: PendingPlaygroundRequest;
+  pendingRequest: PendingDeepChatRequest;
 }
 
 export interface TuningControlRefs {

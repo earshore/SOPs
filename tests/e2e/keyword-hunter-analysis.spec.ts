@@ -102,7 +102,7 @@ async function holdMockAnalysisRequest(page: Page): Promise<{
 
 async function restoreSeededSnapshotFromInput(page: Page): Promise<void> {
   await page.goto(KEYWORD_HUNTER_ROUTES.input);
-  await page.waitForSelector('#kt-module-input', { timeout: 15000 });
+  await page.waitForSelector('#keyword-hunter-module-input', { timeout: 15000 });
   await page.locator('button[title="恢复到输入页"]').first().click();
 }
 
@@ -116,10 +116,10 @@ test.describe('Keyword Hunter 分析页', () => {
     );
 
     await page.goto(KEYWORD_HUNTER_ROUTES.analysis);
-    await page.waitForSelector('#kt-llm-analysis-result', { timeout: 15000 });
+    await page.waitForSelector('#keyword-hunter-llm-analysis-result', { timeout: 15000 });
 
-    await expect(page.locator('#kt-llm-analysis-result')).not.toContainText('80/100');
-    await expect(page.locator('#kt-analyze-btn')).toBeDisabled();
+    await expect(page.locator('#keyword-hunter-llm-analysis-result')).not.toContainText('80/100');
+    await expect(page.locator('#keyword-hunter-analyze-btn')).toBeDisabled();
   });
 
   test('应用快照后恢复当前 Markdown 报告并启用分析按钮', async ({ page }) => {
@@ -132,11 +132,13 @@ test.describe('Keyword Hunter 分析页', () => {
     await restoreSeededSnapshotFromInput(page);
 
     await page.goto(KEYWORD_HUNTER_ROUTES.analysis);
-    await page.waitForSelector('#kt-llm-analysis-result', { timeout: 15000 });
+    await page.waitForSelector('#keyword-hunter-llm-analysis-result', { timeout: 15000 });
 
-    await expect(page.locator('#kt-llm-analysis-result')).toContainText('80/100');
-    await expect(page.locator('#kt-llm-analysis-result')).toContainText('核心关键词已覆盖');
-    await expect(page.locator('#kt-analyze-btn')).toBeEnabled();
+    await expect(page.locator('#keyword-hunter-llm-analysis-result')).toContainText('80/100');
+    await expect(page.locator('#keyword-hunter-llm-analysis-result')).toContainText(
+      '核心关键词已覆盖'
+    );
+    await expect(page.locator('#keyword-hunter-analyze-btn')).toBeEnabled();
   });
 
   test('生成报告期间切换页面后仍显示进行中状态', async ({ page }) => {
@@ -145,28 +147,32 @@ test.describe('Keyword Hunter 分析页', () => {
     await restoreSeededSnapshotFromInput(page);
 
     await page.goto(KEYWORD_HUNTER_ROUTES.analysis);
-    await page.waitForSelector('#kt-llm-analysis-result', { timeout: 15000 });
+    await page.waitForSelector('#keyword-hunter-llm-analysis-result', { timeout: 15000 });
     await configureMockLLMProvider(page);
 
-    await expect(page.locator('#kt-analyze-btn')).toBeEnabled();
-    await page.locator('#kt-analyze-btn').click();
+    await expect(page.locator('#keyword-hunter-analyze-btn')).toBeEnabled();
+    await page.locator('#keyword-hunter-analyze-btn').click();
     await heldRequest.requestStarted;
-    await expect(page.locator('#kt-loading-state')).toContainText('正在读取文案与关键词数据');
+    await expect(page.locator('#keyword-hunter-loading-state')).toContainText(
+      '正在读取文案与关键词数据'
+    );
 
     await page.goto(KEYWORD_HUNTER_ROUTES.process);
-    await expect(page.locator('#kt-module-process')).toBeVisible();
+    await expect(page.locator('#keyword-hunter-module-process')).toBeVisible();
 
     await page.goto(KEYWORD_HUNTER_ROUTES.analysis);
-    await expect(page.locator('#kt-loading-state')).toContainText('正在读取文案与关键词数据');
-    await expect(page.locator('#kt-analyze-btn-text')).toHaveText('分析中…');
+    await expect(page.locator('#keyword-hunter-loading-state')).toContainText(
+      '正在读取文案与关键词数据'
+    );
+    await expect(page.locator('#keyword-hunter-analyze-btn-text')).toHaveText('分析中…');
     expect(heldRequest.getRequestCount()).toBe(1);
 
     heldRequest.releaseHeldRequest();
 
-    await expect(page.locator('#kt-llm-analysis-result')).toContainText('88/100', {
+    await expect(page.locator('#keyword-hunter-llm-analysis-result')).toContainText('88/100', {
       timeout: 10000,
     });
-    await expect(page.locator('#kt-analyze-btn-text')).toHaveText('报告已生成');
+    await expect(page.locator('#keyword-hunter-analyze-btn-text')).toHaveText('报告已生成');
     expect(heldRequest.getRequestCount()).toBe(1);
   });
 });

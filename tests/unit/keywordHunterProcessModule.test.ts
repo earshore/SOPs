@@ -11,31 +11,31 @@ import { StorageService } from '@/services/storageService';
 const processMocks = vi.hoisted(() => {
   const template = `
     <section>
-      <button id="kt-sync-to-input-btn"></button>
-      <button id="kt-go-analysis-btn"></button>
-      <select id="kt-translation-model-select" aria-describedby="kt-translation-model-status"></select>
-      <button id="kt-refresh-models-btn" aria-label="重新获取 AI 翻译可用模型"><i id="kt-refresh-models-icon"></i></button>
-      <span id="kt-translation-model-status" role="status" aria-live="polite" aria-atomic="true"></span>
-      <button id="kt-translate-btn" aria-describedby="kt-translate-status"><span id="kt-translate-btn-text"></span></button>
-      <div id="kt-translate-progress" class="hidden" role="progressbar" aria-valuenow="0"></div>
-      <span id="kt-translate-status" role="status" aria-live="polite" aria-atomic="true"></span>
-      <input id="kt-show-translation" type="checkbox" />
-      <div id="kt-copy-display"></div>
-      <span id="kt-coverage-rate"></span>
-      <div id="kt-coverage-bar"></div>
-      <span id="kt-stat-matched"></span>
-      <span id="kt-stat-unmatched"></span>
-      <span id="kt-stat-total"></span>
-      <div id="kt-word-frequency-list"></div>
-      <div id="kt-keywords-floating">
+      <button id="keyword-hunter-sync-to-input-btn"></button>
+      <button id="keyword-hunter-go-analysis-btn"></button>
+      <select id="keyword-hunter-translation-model-select" aria-describedby="keyword-hunter-translation-model-status"></select>
+      <button id="keyword-hunter-refresh-models-btn" aria-label="重新获取 AI 翻译可用模型"><i id="keyword-hunter-refresh-models-icon"></i></button>
+      <span id="keyword-hunter-translation-model-status" role="status" aria-live="polite" aria-atomic="true"></span>
+      <button id="keyword-hunter-translate-btn" aria-describedby="keyword-hunter-translate-status"><span id="keyword-hunter-translate-btn-text"></span></button>
+      <div id="keyword-hunter-translate-progress" class="hidden" role="progressbar" aria-valuenow="0"></div>
+      <span id="keyword-hunter-translate-status" role="status" aria-live="polite" aria-atomic="true"></span>
+      <input id="keyword-hunter-show-translation" type="checkbox" />
+      <div id="keyword-hunter-copy-display"></div>
+      <span id="keyword-hunter-coverage-rate"></span>
+      <div id="keyword-hunter-coverage-bar"></div>
+      <span id="keyword-hunter-stat-matched"></span>
+      <span id="keyword-hunter-stat-unmatched"></span>
+      <span id="keyword-hunter-stat-total"></span>
+      <div id="keyword-hunter-word-frequency-list"></div>
+      <div id="keyword-hunter-keywords-floating">
         <div class="floating-header">
-          <button id="kt-minimize-keywords-btn"></button>
+          <button id="keyword-hunter-minimize-keywords-btn"></button>
         </div>
-        <span id="kt-tab-matched-count"></span>
-        <span id="kt-tab-unmatched-count"></span>
-        <div id="kt-all-keywords"></div>
+        <span id="keyword-hunter-tab-matched-count"></span>
+        <span id="keyword-hunter-tab-unmatched-count"></span>
+        <div id="keyword-hunter-all-keywords"></div>
       </div>
-      <button id="kt-keywords-minimized"><span id="kt-minimized-badge"></span></button>
+      <button id="keyword-hunter-keywords-minimized"><span id="keyword-hunter-minimized-badge"></span></button>
     </section>
   `;
 
@@ -178,7 +178,7 @@ const mockedCallLLM = vi.mocked(callLLM);
 const mockedFetchModelsFromApi = vi.mocked(fetchModelsFromApi);
 const mockedStorage = vi.mocked(StorageService);
 
-function resetTrackerState(): void {
+function resetKeywordHunterState(): void {
   processMocks.state.keywordTracker = {
     keywords: ['wireless earbuds', 'waterproof shell'],
     processedCopy: 'Wireless earbuds are travel earbuds with long battery life.',
@@ -240,7 +240,7 @@ beforeEach(() => {
   vi.useRealTimers();
   document.body.innerHTML = '';
   vi.clearAllMocks();
-  resetTrackerState();
+  resetKeywordHunterState();
   processMocks.llmConfig = {
     provider: 'openai',
     endpoint: 'https://api.example.test',
@@ -314,7 +314,7 @@ it('keeps process template buttons explicit about non-submit behavior', () => {
   );
   const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
   const implicitButtons = buttonOpenings.filter(
-    (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+    button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
   );
 
   expect(buttonOpenings).toHaveLength(6);
@@ -327,12 +327,12 @@ it('places AI translation next to the original/translation toggle', () => {
     'utf8'
   );
 
-  const modelSelectIndex = template.indexOf('id="kt-translation-model-select"');
-  const refreshButtonIndex = template.indexOf('id="kt-refresh-models-btn"');
-  const toggleIndex = template.indexOf('id="kt-show-translation"');
-  const translateButtonIndex = template.indexOf('id="kt-translate-btn"');
+  const modelSelectIndex = template.indexOf('id="keyword-hunter-translation-model-select"');
+  const refreshButtonIndex = template.indexOf('id="keyword-hunter-refresh-models-btn"');
+  const toggleIndex = template.indexOf('id="keyword-hunter-show-translation"');
+  const translateButtonIndex = template.indexOf('id="keyword-hunter-translate-btn"');
   const savedStatusIndex = template.indexOf('aria-label="已自动保存"');
-  const analysisButtonIndex = template.indexOf('id="kt-go-analysis-btn"');
+  const analysisButtonIndex = template.indexOf('id="keyword-hunter-go-analysis-btn"');
 
   expect(modelSelectIndex).toBeGreaterThanOrEqual(0);
   expect(refreshButtonIndex).toBeGreaterThan(modelSelectIndex);
@@ -353,27 +353,39 @@ it('mounts template content, renders highlighted copy, stats, and floating keywo
     expect.any(Object)
   );
   expect(container.classList.contains('fade-in')).toBe(true);
-  expect(document.body.querySelector('#kt-keywords-floating')?.parentElement).toBe(document.body);
-  expect(document.body.querySelector('#kt-keywords-minimized')?.parentElement).toBe(document.body);
-  expect(document.querySelectorAll('#kt-copy-display .highlightable').length).toBeGreaterThan(0);
-  expect(document.querySelector('#kt-coverage-rate')?.textContent).toBe('50%');
-  expect(getProgressValue('#kt-coverage-bar')).toBe('50');
-  expect(document.querySelector('#kt-stat-matched')?.textContent).toBe('1');
-  expect(document.querySelector('#kt-stat-unmatched')?.textContent).toBe('1');
-  expect(document.querySelector('#kt-stat-total')?.textContent).toBe('2');
-  expect(document.querySelector('#kt-word-frequency-list')?.textContent).toContain('earbuds');
-  expect(document.querySelector('#kt-word-frequency-list')?.textContent).toContain(
+  expect(document.body.querySelector('#keyword-hunter-keywords-floating')?.parentElement).toBe(
+    document.body
+  );
+  expect(document.body.querySelector('#keyword-hunter-keywords-minimized')?.parentElement).toBe(
+    document.body
+  );
+  expect(
+    document.querySelectorAll('#keyword-hunter-copy-display .highlightable').length
+  ).toBeGreaterThan(0);
+  expect(document.querySelector('#keyword-hunter-coverage-rate')?.textContent).toBe('50%');
+  expect(getProgressValue('#keyword-hunter-coverage-bar')).toBe('50');
+  expect(document.querySelector('#keyword-hunter-stat-matched')?.textContent).toBe('1');
+  expect(document.querySelector('#keyword-hunter-stat-unmatched')?.textContent).toBe('1');
+  expect(document.querySelector('#keyword-hunter-stat-total')?.textContent).toBe('2');
+  expect(document.querySelector('#keyword-hunter-word-frequency-list')?.textContent).toContain(
+    'earbuds'
+  );
+  expect(document.querySelector('#keyword-hunter-word-frequency-list')?.textContent).toContain(
     '未在文案中出现的关键词词根'
   );
-  expect(document.querySelectorAll('#kt-all-keywords .keyword-status-item')).toHaveLength(2);
-  expect(document.querySelector('#kt-tab-matched-count')?.textContent).toBe('1');
-  expect(document.querySelector('#kt-tab-unmatched-count')?.textContent).toBe('1');
-  expect(document.querySelector('#kt-minimized-badge')?.textContent).toBe('2');
-  expect(document.querySelector<HTMLButtonElement>('#kt-translate-btn')?.disabled).toBe(false);
-  expect(document.querySelector<HTMLSelectElement>('#kt-translation-model-select')?.value).toBe(
-    'gpt-test'
+  expect(
+    document.querySelectorAll('#keyword-hunter-all-keywords .keyword-status-item')
+  ).toHaveLength(2);
+  expect(document.querySelector('#keyword-hunter-tab-matched-count')?.textContent).toBe('1');
+  expect(document.querySelector('#keyword-hunter-tab-unmatched-count')?.textContent).toBe('1');
+  expect(document.querySelector('#keyword-hunter-minimized-badge')?.textContent).toBe('2');
+  expect(document.querySelector<HTMLButtonElement>('#keyword-hunter-translate-btn')?.disabled).toBe(
+    false
   );
-  expect(document.querySelector('#kt-translation-model-status')?.textContent).toBe(
+  expect(
+    document.querySelector<HTMLSelectElement>('#keyword-hunter-translation-model-select')?.value
+  ).toBe('gpt-test');
+  expect(document.querySelector('#keyword-hunter-translation-model-status')?.textContent).toBe(
     '当前 AI 翻译模型：gpt-test'
   );
 });
@@ -381,7 +393,7 @@ it('mounts template content, renders highlighted copy, stats, and floating keywo
 it('refreshes available translation models and persists the selected model', async () => {
   await mountProcess();
 
-  click(document.querySelector('#kt-refresh-models-btn'));
+  click(document.querySelector('#keyword-hunter-refresh-models-btn'));
 
   await vi.waitFor(() => {
     expect(mockedFetchModelsFromApi).toHaveBeenCalledWith(
@@ -414,17 +426,17 @@ it('refreshes available translation models and persists the selected model', asy
       }),
     })
   );
-  expect(document.querySelector<HTMLSelectElement>('#kt-translation-model-select')?.value).toBe(
-    'gpt-fast'
-  );
+  expect(
+    document.querySelector<HTMLSelectElement>('#keyword-hunter-translation-model-select')?.value
+  ).toBe('gpt-fast');
   expect(showToast).toHaveBeenCalledWith('成功同步 2 个模型', { type: 'success' });
 });
 
 it('uses the model selected in the SEO process page for immersion translation', async () => {
   await mountProcess();
 
-  changeSelect(document.querySelector('#kt-translation-model-select'), 'gpt-fast');
-  click(document.querySelector('#kt-translate-btn'));
+  changeSelect(document.querySelector('#keyword-hunter-translation-model-select'), 'gpt-fast');
+  click(document.querySelector('#keyword-hunter-translate-btn'));
 
   await vi.waitFor(() => {
     expect(mockedCallLLM).toHaveBeenCalled();
@@ -461,13 +473,17 @@ it('keeps the floating keyword monitor visible when all keywords are unmatched',
   await mountProcess();
   vi.advanceTimersByTime(100);
 
-  expect(document.querySelector('#kt-keywords-floating')?.classList.contains('show')).toBe(true);
-  expect(document.querySelector('#kt-keywords-minimized')?.classList.contains('show')).toBe(false);
-  expect(document.querySelector('#kt-tab-matched-count')?.textContent).toBe('0');
-  expect(document.querySelector('#kt-tab-unmatched-count')?.textContent).toBe('1');
-  expect(document.querySelector('#kt-minimized-badge')?.textContent).toBe('1');
   expect(
-    document.querySelectorAll('#kt-all-keywords .keyword-status-item--unmatched')
+    document.querySelector('#keyword-hunter-keywords-floating')?.classList.contains('show')
+  ).toBe(true);
+  expect(
+    document.querySelector('#keyword-hunter-keywords-minimized')?.classList.contains('show')
+  ).toBe(false);
+  expect(document.querySelector('#keyword-hunter-tab-matched-count')?.textContent).toBe('0');
+  expect(document.querySelector('#keyword-hunter-tab-unmatched-count')?.textContent).toBe('1');
+  expect(document.querySelector('#keyword-hunter-minimized-badge')?.textContent).toBe('1');
+  expect(
+    document.querySelectorAll('#keyword-hunter-all-keywords .keyword-status-item--unmatched')
   ).toHaveLength(1);
 });
 
@@ -475,19 +491,23 @@ it('does not start floating window drag when clicking the minimize control', asy
   vi.useFakeTimers();
   await mountProcess();
 
-  const floatingWindow = document.querySelector('#kt-keywords-floating');
-  const minimizeButton = document.querySelector('#kt-minimize-keywords-btn');
+  const floatingWindow = document.querySelector('#keyword-hunter-keywords-floating');
+  const minimizeButton = document.querySelector('#keyword-hunter-minimize-keywords-btn');
 
   mouseDown(minimizeButton);
 
-  expect(floatingWindow?.classList.contains('kt-floating-window--positioned')).toBe(false);
+  expect(floatingWindow?.classList.contains('keyword-hunter-floating-window--positioned')).toBe(
+    false
+  );
   expect(floatingWindow?.classList.contains('is-dragging')).toBe(false);
 
   click(minimizeButton);
   vi.advanceTimersByTime(200);
 
   expect(floatingWindow?.classList.contains('show')).toBe(false);
-  expect(document.querySelector('#kt-keywords-minimized')?.classList.contains('show')).toBe(true);
+  expect(
+    document.querySelector('#keyword-hunter-keywords-minimized')?.classList.contains('show')
+  ).toBe(true);
 });
 
 it('renders task-oriented empty states when no keyword data exists', async () => {
@@ -501,26 +521,32 @@ it('renders task-oriented empty states when no keyword data exists', async () =>
 
   await mountProcess();
 
-  expect(document.querySelector('#kt-word-frequency-list')?.textContent).toContain(
+  expect(document.querySelector('#keyword-hunter-word-frequency-list')?.textContent).toContain(
     '还没有词频数据'
   );
-  expect(document.querySelector('#kt-word-frequency-list')?.textContent).toContain(
+  expect(document.querySelector('#keyword-hunter-word-frequency-list')?.textContent).toContain(
     '推荐操作：返回输入页粘贴关键词和文案'
   );
-  expect(document.querySelector('#kt-all-keywords')?.textContent).toContain('还没有关键词数据');
-  expect(document.querySelector('#kt-all-keywords')?.textContent).toContain(
+  expect(document.querySelector('#keyword-hunter-all-keywords')?.textContent).toContain(
+    '还没有关键词数据'
+  );
+  expect(document.querySelector('#keyword-hunter-all-keywords')?.textContent).toContain(
     '推荐操作：返回输入页粘贴关键词和文案'
   );
-  expect(document.querySelector('#kt-word-frequency-list [role="status"]')).not.toBeNull();
-  expect(document.querySelector('#kt-all-keywords [role="status"]')).not.toBeNull();
+  expect(
+    document.querySelector('#keyword-hunter-word-frequency-list [role="status"]')
+  ).not.toBeNull();
+  expect(document.querySelector('#keyword-hunter-all-keywords [role="status"]')).not.toBeNull();
 });
 
 it('locates matched keywords and unmatched roots from rendered controls', async () => {
   vi.useFakeTimers();
   await mountProcess();
 
-  click(document.querySelector('#kt-all-keywords .keyword-status-item--matched'));
-  expect(document.querySelectorAll('#kt-copy-display .highlight-focus').length).toBeGreaterThan(0);
+  click(document.querySelector('#keyword-hunter-all-keywords .keyword-status-item--matched'));
+  expect(
+    document.querySelectorAll('#keyword-hunter-copy-display .highlight-focus').length
+  ).toBeGreaterThan(0);
   expect(processMocks.state.keywordTracker.keywordLocationIndex['wireless earbuds']).toBe(0);
   expect(showToast).toHaveBeenCalledWith(expect.stringContaining('定位: wireless earbuds'));
 
@@ -545,7 +571,7 @@ it('translates copy, renders translation mode, and hides progress after completi
   vi.useFakeTimers();
   await mountProcess();
 
-  click(document.querySelector('#kt-translate-btn'));
+  click(document.querySelector('#keyword-hunter-translate-btn'));
   await vi.waitFor(() => {
     expect(processMocks.state.keywordTracker.translationMode).toBe(true);
   });
@@ -560,14 +586,18 @@ it('translates copy, renders translation mode, and hides progress after completi
   ]);
   expect(processMocks.state.keywordTracker.showTranslation).toBe(true);
   expect(processMocks.saveCurrentSnapshotAsync).toHaveBeenCalledWith();
-  expect(document.querySelector<HTMLInputElement>('#kt-show-translation')?.checked).toBe(true);
-  expect(document.querySelector('#kt-copy-display .sentence-translation')?.textContent).toBe(
-    '无线耳机翻译'
-  );
-  expect(getProgressValue('#kt-translate-progress')).toBe('100');
+  expect(
+    document.querySelector<HTMLInputElement>('#keyword-hunter-show-translation')?.checked
+  ).toBe(true);
+  expect(
+    document.querySelector('#keyword-hunter-copy-display .sentence-translation')?.textContent
+  ).toBe('无线耳机翻译');
+  expect(getProgressValue('#keyword-hunter-translate-progress')).toBe('100');
 
   vi.advanceTimersByTime(500);
-  expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(true);
+  expect(
+    document.querySelector('#keyword-hunter-translate-progress')?.classList.contains('hidden')
+  ).toBe(true);
 });
 
 it('keeps the pending translation state visible after leaving and returning', async () => {
@@ -581,16 +611,20 @@ it('keeps the pending translation state visible after leaving and returning', as
   );
 
   const firstContainer = await mountProcess();
-  click(document.querySelector('#kt-translate-btn'));
+  click(document.querySelector('#keyword-hunter-translate-btn'));
 
   await vi.waitFor(() => {
     expect(mockedCallLLM).toHaveBeenCalledTimes(1);
   });
-  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('正在翻译...');
-  expect(document.querySelector<HTMLButtonElement>('#kt-translate-btn')?.disabled).toBe(true);
-  expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(
-    false
+  expect(document.querySelector('#keyword-hunter-translate-btn-text')?.textContent).toBe(
+    '正在翻译...'
   );
+  expect(document.querySelector<HTMLButtonElement>('#keyword-hunter-translate-btn')?.disabled).toBe(
+    true
+  );
+  expect(
+    document.querySelector('#keyword-hunter-translate-progress')?.classList.contains('hidden')
+  ).toBe(false);
 
   const options = mockedCallLLM.mock.calls[0]?.[5] as
     | {
@@ -602,21 +636,31 @@ it('keeps the pending translation state visible after leaving and returning', as
       }
     | undefined;
   options?.onFirstResponse?.({ elapsedMs: 900, firstChunkMs: 900, chunkCount: 1 });
-  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('正在接收译文...');
-  expect(document.querySelector('#kt-translate-status')?.textContent).toContain('模型已首响 0.9s');
-  expect(getProgressValue('#kt-translate-progress')).toBe('55');
+  expect(document.querySelector('#keyword-hunter-translate-btn-text')?.textContent).toBe(
+    '正在接收译文...'
+  );
+  expect(document.querySelector('#keyword-hunter-translate-status')?.textContent).toContain(
+    '模型已首响 0.9s'
+  );
+  expect(getProgressValue('#keyword-hunter-translate-progress')).toBe('55');
 
   unmount();
   firstContainer.remove();
 
   await mountProcess();
 
-  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('正在接收译文...');
-  expect(document.querySelector<HTMLButtonElement>('#kt-translate-btn')?.disabled).toBe(true);
-  expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(
-    false
+  expect(document.querySelector('#keyword-hunter-translate-btn-text')?.textContent).toBe(
+    '正在接收译文...'
   );
-  expect(document.querySelector('#kt-translate-status')?.textContent).toContain('模型已首响 0.9s');
+  expect(document.querySelector<HTMLButtonElement>('#keyword-hunter-translate-btn')?.disabled).toBe(
+    true
+  );
+  expect(
+    document.querySelector('#keyword-hunter-translate-progress')?.classList.contains('hidden')
+  ).toBe(false);
+  expect(document.querySelector('#keyword-hunter-translate-status')?.textContent).toContain(
+    '模型已首响 0.9s'
+  );
   expect(mockedCallLLM).toHaveBeenCalledTimes(1);
 
   resolveTranslation('【1】 无线耳机翻译');
@@ -624,15 +668,19 @@ it('keeps the pending translation state visible after leaving and returning', as
   await vi.waitFor(() => {
     expect(processMocks.state.keywordTracker.translationMode).toBe(true);
   });
-  expect(document.querySelector('#kt-copy-display .sentence-translation')?.textContent).toBe(
-    '无线耳机翻译'
-  );
+  expect(
+    document.querySelector('#keyword-hunter-copy-display .sentence-translation')?.textContent
+  ).toBe('无线耳机翻译');
   expect(processMocks.saveCurrentSnapshotAsync).toHaveBeenCalledWith();
-  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('翻译已完成');
-  expect(getProgressValue('#kt-translate-progress')).toBe('100');
+  expect(document.querySelector('#keyword-hunter-translate-btn-text')?.textContent).toBe(
+    '翻译已完成'
+  );
+  expect(getProgressValue('#keyword-hunter-translate-progress')).toBe('100');
 
   vi.advanceTimersByTime(500);
-  expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(true);
+  expect(
+    document.querySelector('#keyword-hunter-translate-progress')?.classList.contains('hidden')
+  ).toBe(true);
 });
 
 it('ignores a pending translation run after the processed copy changes', async () => {
@@ -646,7 +694,7 @@ it('ignores a pending translation run after the processed copy changes', async (
   );
 
   const firstContainer = await mountProcess();
-  click(document.querySelector('#kt-translate-btn'));
+  click(document.querySelector('#keyword-hunter-translate-btn'));
 
   await vi.waitFor(() => {
     expect(mockedCallLLM).toHaveBeenCalledTimes(1);
@@ -663,9 +711,15 @@ it('ignores a pending translation run after the processed copy changes', async (
 
   await mountProcess();
 
-  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('AI 沉浸式翻译');
-  expect(document.querySelector<HTMLButtonElement>('#kt-translate-btn')?.disabled).toBe(false);
-  expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(true);
+  expect(document.querySelector('#keyword-hunter-translate-btn-text')?.textContent).toBe(
+    'AI 沉浸式翻译'
+  );
+  expect(document.querySelector<HTMLButtonElement>('#keyword-hunter-translate-btn')?.disabled).toBe(
+    false
+  );
+  expect(
+    document.querySelector('#keyword-hunter-translate-progress')?.classList.contains('hidden')
+  ).toBe(true);
 
   resolveTranslation('【1】 旧译文');
 
@@ -674,7 +728,9 @@ it('ignores a pending translation run after the processed copy changes', async (
 
   expect(processMocks.state.keywordTracker.translationMode).toBe(false);
   expect(processMocks.state.keywordTracker.paragraphs).toEqual([]);
-  expect(document.querySelector('#kt-copy-display')?.textContent).not.toContain('旧译文');
+  expect(document.querySelector('#keyword-hunter-copy-display')?.textContent).not.toContain(
+    '旧译文'
+  );
   expect(processMocks.saveCurrentSnapshotAsync).not.toHaveBeenCalled();
 });
 
@@ -682,32 +738,44 @@ it('handles translation failures without losing the enabled button state', async
   mockedCallLLM.mockRejectedValueOnce(new Error('provider down'));
   await mountProcess();
 
-  click(document.querySelector('#kt-translate-btn'));
+  click(document.querySelector('#keyword-hunter-translate-btn'));
   await vi.waitFor(() => {
     expect(ErrorService.handle).toHaveBeenCalled();
   });
 
   expect(ErrorService.handle).toHaveBeenCalledWith(expect.any(Error), {
     action: 'translateCopyImmersive',
-    module: 'keywordTracker',
+    module: 'keywordHunter',
   });
-  expect(document.querySelector<HTMLButtonElement>('#kt-translate-btn')?.disabled).toBe(false);
-  expect(document.querySelector('#kt-translate-btn-text')?.textContent).toBe('翻译失败，请重试');
-  expect(document.querySelector('#kt-translate-status')?.textContent).toBe('AI 翻译失败，请重试');
-  expect(document.querySelector('#kt-translate-status')?.getAttribute('role')).toBe('alert');
-  expect(document.querySelector('#kt-translate-btn')?.hasAttribute('aria-busy')).toBe(false);
-  expect(document.querySelector('#kt-translate-progress')?.classList.contains('hidden')).toBe(true);
+  expect(document.querySelector<HTMLButtonElement>('#keyword-hunter-translate-btn')?.disabled).toBe(
+    false
+  );
+  expect(document.querySelector('#keyword-hunter-translate-btn-text')?.textContent).toBe(
+    '翻译失败，请重试'
+  );
+  expect(document.querySelector('#keyword-hunter-translate-status')?.textContent).toBe(
+    'AI 翻译失败，请重试'
+  );
+  expect(document.querySelector('#keyword-hunter-translate-status')?.getAttribute('role')).toBe(
+    'alert'
+  );
+  expect(document.querySelector('#keyword-hunter-translate-btn')?.hasAttribute('aria-busy')).toBe(
+    false
+  );
+  expect(
+    document.querySelector('#keyword-hunter-translate-progress')?.classList.contains('hidden')
+  ).toBe(true);
 });
 
 it('keeps translated text visible when snapshot persistence fails', async () => {
   processMocks.saveCurrentSnapshotAsync.mockRejectedValueOnce(new Error('IndexedDB 不可写'));
   await mountProcess();
 
-  click(document.querySelector('#kt-translate-btn'));
+  click(document.querySelector('#keyword-hunter-translate-btn'));
   await vi.waitFor(() => {
-    expect(document.querySelector('#kt-copy-display .sentence-translation')?.textContent).toBe(
-      '无线耳机翻译'
-    );
+    expect(
+      document.querySelector('#keyword-hunter-copy-display .sentence-translation')?.textContent
+    ).toBe('无线耳机翻译');
   });
 
   await vi.waitFor(() => {
@@ -723,7 +791,7 @@ it('keeps translated text visible when snapshot persistence fails', async () => 
   ]);
   expect(ErrorService.handle).toHaveBeenCalledWith(expect.any(Error), {
     action: 'saveTranslationSnapshot',
-    module: 'keywordTracker',
+    module: 'keywordHunter',
     notify: false,
   });
 });
@@ -737,34 +805,40 @@ it('syncs original translation text back to input and toggles floating window st
   ];
   await mountProcess();
 
-  click(document.querySelector('#kt-sync-to-input-btn'));
+  click(document.querySelector('#keyword-hunter-sync-to-input-btn'));
   await vi.waitFor(() => {
-    expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('kw_input');
+    expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('keyword_hunter_input');
   });
 
   expect(processMocks.state.keywordTracker.processedCopy).toBe('Original one\nOriginal two');
   expect(processMocks.state.keywordTracker.copyInputText).toBe('Original one\nOriginal two');
-  expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('kw_input');
+  expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('keyword_hunter_input');
   expect(showToast).toHaveBeenCalledWith('已同步原文到输入格式化');
 
-  click(document.querySelector('#kt-minimize-keywords-btn'));
+  click(document.querySelector('#keyword-hunter-minimize-keywords-btn'));
   vi.advanceTimersByTime(200);
-  expect(document.querySelector('#kt-keywords-floating')?.classList.contains('show')).toBe(false);
-  expect(document.querySelector('#kt-keywords-minimized')?.classList.contains('show')).toBe(true);
+  expect(
+    document.querySelector('#keyword-hunter-keywords-floating')?.classList.contains('show')
+  ).toBe(false);
+  expect(
+    document.querySelector('#keyword-hunter-keywords-minimized')?.classList.contains('show')
+  ).toBe(true);
   expect(processMocks.state.keywordTracker.isWindowMinimized).toBe(true);
 
-  click(document.querySelector('#kt-keywords-minimized'));
-  expect(document.querySelector('#kt-keywords-floating')?.classList.contains('show')).toBe(true);
+  click(document.querySelector('#keyword-hunter-keywords-minimized'));
+  expect(
+    document.querySelector('#keyword-hunter-keywords-floating')?.classList.contains('show')
+  ).toBe(true);
   expect(processMocks.state.keywordTracker.isWindowMinimized).toBe(false);
 });
 
 it('navigates from process to analysis with the current copy', async () => {
   await mountProcess();
 
-  click(document.querySelector('#kt-go-analysis-btn'));
+  click(document.querySelector('#keyword-hunter-go-analysis-btn'));
 
   await vi.waitFor(() => {
-    expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('kw_analysis');
+    expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('keyword_hunter_analysis');
   });
   expect(processMocks.state.keywordTracker.processedCopy).toContain('Wireless earbuds');
 });
@@ -816,24 +890,24 @@ it('restores the latest matched snapshot when process state is empty', async () 
   await mountProcess();
 
   expect(processMocks.restoreSnapshot).toHaveBeenCalledWith(snapshot);
-  expect(document.querySelector('#kt-copy-display')?.textContent).toContain(
+  expect(document.querySelector('#keyword-hunter-copy-display')?.textContent).toContain(
     'Wireless earbuds restored copy'
   );
-  expect(document.querySelector('#kt-coverage-rate')?.textContent).toBe('100%');
+  expect(document.querySelector('#keyword-hunter-coverage-rate')?.textContent).toBe('100%');
 });
 
 it('recomputes keyword coverage from edited process copy before analysis', async () => {
   processMocks.state.keywordTracker.llmAnalysisResult = '# Old report';
   await mountProcess();
 
-  const display = document.querySelector<HTMLElement>('#kt-copy-display');
+  const display = document.querySelector<HTMLElement>('#keyword-hunter-copy-display');
   expect(display).not.toBeNull();
   display!.innerText = 'Wireless earbuds now include a waterproof shell.';
 
-  click(document.querySelector('#kt-go-analysis-btn'));
+  click(document.querySelector('#keyword-hunter-go-analysis-btn'));
 
   await vi.waitFor(() => {
-    expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('kw_analysis');
+    expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('keyword_hunter_analysis');
   });
   expect(processMocks.state.keywordTracker.processedCopy).toBe(
     'Wireless earbuds now include a waterproof shell.'
@@ -848,7 +922,7 @@ it('recomputes keyword coverage from edited process copy before analysis', async
 
 it('saves display state and removes floating DOM on unmount', async () => {
   await mountProcess();
-  const checkbox = document.querySelector<HTMLInputElement>('#kt-show-translation');
+  const checkbox = document.querySelector<HTMLInputElement>('#keyword-hunter-show-translation');
   expect(checkbox).not.toBeNull();
   checkbox!.checked = true;
 
@@ -856,8 +930,8 @@ it('saves display state and removes floating DOM on unmount', async () => {
 
   expect(processMocks.state.keywordTracker.processedCopy).toContain('Wireless earbuds');
   expect(processMocks.state.keywordTracker.showTranslation).toBe(true);
-  expect(document.querySelector('#kt-keywords-floating')).toBeNull();
-  expect(document.querySelector('#kt-keywords-minimized')).toBeNull();
+  expect(document.querySelector('#keyword-hunter-keywords-floating')).toBeNull();
+  expect(document.querySelector('#keyword-hunter-keywords-minimized')).toBeNull();
 });
 
 it('keeps a translated snapshot selected after visiting the process page', async () => {
@@ -883,9 +957,9 @@ it('keeps a translated snapshot selected after visiting the process page', async
   });
 
   await mountProcess();
-  expect(document.querySelector('#kt-copy-display .sentence-translation')?.textContent).toBe(
-    '无线耳机是旅行耳机。'
-  );
+  expect(
+    document.querySelector('#keyword-hunter-copy-display .sentence-translation')?.textContent
+  ).toBe('无线耳机是旅行耳机。');
 
   unmount();
 

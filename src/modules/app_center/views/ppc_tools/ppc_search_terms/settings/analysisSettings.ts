@@ -4,14 +4,14 @@ import {
   getRuntimeStrategySettings,
   saveRuntimeStrategySettings,
 } from '@/services/runtimeStrategyService';
-import type { PpcAnalysisContext } from '../services/llmAnalysisService';
+import type { PpcSearchTermsAnalysisContext } from '../services/llmAnalysisService';
 import { getAnalysisSettingInputs, getInput, getTextarea, setChecked } from './settingsFields';
 
 export interface AnalysisSettings {
   useAgent: boolean;
   allowLocalFallback: boolean;
   useContext: boolean;
-  context: PpcAnalysisContext;
+  context: PpcSearchTermsAnalysisContext;
 }
 
 const ANALYSIS_SETTINGS_STORAGE_KEY = 'ppc_search_terms_analysis_settings_v1';
@@ -19,25 +19,26 @@ const ANALYSIS_SETTINGS_STORAGE_KEY = 'ppc_search_terms_analysis_settings_v1';
 export { getAnalysisSettingInputs };
 
 export function readAnalysisSettings(container: HTMLElement): AnalysisSettings {
-  const useContext = getInput(container, 'ppc-use-context')?.checked || false;
+  const useContext = getInput(container, 'ppc-search-terms-use-context')?.checked || false;
 
   return {
-    useAgent: getInput(container, 'ppc-use-agent')?.checked || false,
-    allowLocalFallback: getInput(container, 'ppc-allow-local-fallback')?.checked || false,
+    useAgent: getInput(container, 'ppc-search-terms-use-agent')?.checked || false,
+    allowLocalFallback:
+      getInput(container, 'ppc-search-terms-allow-local-fallback')?.checked || false,
     useContext,
     context: {
-      asin: getInput(container, 'ppc-context-asin')?.value || '',
-      category: getInput(container, 'ppc-context-category')?.value || '',
-      listing: getTextarea(container, 'ppc-context-listing')?.value || '',
+      asin: getInput(container, 'ppc-search-terms-context-asin')?.value || '',
+      category: getInput(container, 'ppc-search-terms-context-category')?.value || '',
+      listing: getTextarea(container, 'ppc-search-terms-context-listing')?.value || '',
     },
   };
 }
 
 export function restoreAnalysisSettings(container: HTMLElement): void {
   const saved = getRuntimePpcSearchTermsOptions();
-  setChecked(container, 'ppc-use-agent', saved.useAgent);
-  setChecked(container, 'ppc-allow-local-fallback', saved.allowLocalFallback);
-  setChecked(container, 'ppc-use-context', saved.useContext);
+  setChecked(container, 'ppc-search-terms-use-agent', saved.useAgent);
+  setChecked(container, 'ppc-search-terms-allow-local-fallback', saved.allowLocalFallback);
+  setChecked(container, 'ppc-search-terms-use-context', saved.useContext);
 }
 
 export function saveAnalysisSettings(settings: AnalysisSettings): void {

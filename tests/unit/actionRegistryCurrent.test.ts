@@ -25,7 +25,7 @@ const GLOBAL_SYSTEM_ACTIONS = [
 describe('ActionRegistry naming conventions', () => {
   afterEach(() => {
     GLOBAL_SYSTEM_ACTIONS.forEach(actionName => unregisterAction(actionName));
-    unregisterAction('kt_delegatedAction');
+    unregisterAction('keyword_hunter_delegatedAction');
     unregisterAction('badAction');
     destroyGlobalEventDelegation();
     vi.restoreAllMocks();
@@ -46,9 +46,9 @@ describe('ActionRegistry naming conventions', () => {
 
   it('binds global click delegation once', () => {
     const handler = vi.fn();
-    registerAction('kt_delegatedAction', handler);
+    registerAction('keyword_hunter_delegatedAction', handler);
     document.body.innerHTML =
-      '<button type="button" data-action="kt_delegatedAction" data-id="42">Run</button>';
+      '<button type="button" data-action="keyword_hunter_delegatedAction" data-id="42">Run</button>';
 
     initGlobalEventDelegation();
     initGlobalEventDelegation();

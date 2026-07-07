@@ -155,12 +155,12 @@ function createMessageToolbar(
   toolbar.dataset.role = role;
 
   const time = document.createElement('span');
-  time.className = 'playground-message-time';
+  time.className = 'deep-chat-message-time';
   time.textContent = formatToolbarTime(storedMessage?.createdAt);
   toolbar.appendChild(time);
   if (storedMessage?.status === 'stopped') {
     const status = document.createElement('span');
-    status.className = 'playground-message-status';
+    status.className = 'deep-chat-message-status';
     status.textContent = '已停止';
     toolbar.appendChild(status);
   }
@@ -180,7 +180,7 @@ function createMessageToolbar(
 function createToolbarButton(label: string, icon: string, onClick: () => void): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'playground-message-tool';
+  button.className = 'deep-chat-message-tool';
   button.title = label;
   button.setAttribute('aria-label', label);
   setSafeHtml(button, icon);

@@ -55,14 +55,14 @@ export function getRouteModule(routeId: RouteId): string {
   if (routeId.startsWith('amz_')) return 'amz_hub';
   if (routeId.startsWith('more_')) return 'more';
   if (
-    routeId.startsWith('kw_') ||
+    routeId.startsWith('keyword_hunter_') ||
     (
       [
         APP_CENTER_ROUTES.SCRAPER,
         APP_CENTER_ROUTES.AI_ANALYSIS,
         APP_CENTER_ROUTES.PROMPTLAB,
         APP_CENTER_ROUTES.PPC_SEARCH_TERMS,
-        APP_CENTER_ROUTES.PLAYGROUND,
+        APP_CENTER_ROUTES.PLAYGROUND_DEEP_CHAT,
         APP_CENTER_ROUTES.OVERVIEW,
       ] as readonly string[]
     ).includes(routeId)

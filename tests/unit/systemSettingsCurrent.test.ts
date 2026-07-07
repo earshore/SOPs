@@ -49,7 +49,7 @@ const deps = vi.hoisted(() => {
       resetKeywordTracker: vi.fn(),
     },
     historyClearAsync: vi.fn(),
-    clearPlaygroundThreadStore: vi.fn(),
+    clearDeepChatThreadStore: vi.fn(),
     keywordHistoryClearAsync: vi.fn(),
     performanceMonitor: {
       isInitialized: vi.fn(),
@@ -164,7 +164,7 @@ vi.mock('@/modules/app_center/views/master_analysis/services/historyService', ()
 }));
 
 vi.mock('@/modules/app_center/views/playground/deep-chat', () => ({
-  clearPlaygroundThreadStore: deps.clearPlaygroundThreadStore,
+  clearDeepChatThreadStore: deps.clearDeepChatThreadStore,
 }));
 
 vi.mock('@/modules/app_center/views/keyword_hunter/services/snapshotService', () => ({
@@ -241,7 +241,7 @@ beforeEach(() => {
   deps.appStoreState.resetPromptLab.mockReset();
   deps.appStoreState.resetKeywordTracker.mockReset();
   deps.historyClearAsync.mockReset().mockResolvedValue(undefined);
-  deps.clearPlaygroundThreadStore.mockReset().mockResolvedValue(undefined);
+  deps.clearDeepChatThreadStore.mockReset().mockResolvedValue(undefined);
   deps.keywordHistoryClearAsync.mockReset().mockResolvedValue(undefined);
   deps.performanceMonitor.isInitialized.mockReset().mockReturnValue(false);
   deps.performanceMonitor.initialize.mockReset();
@@ -741,7 +741,7 @@ it('handles local data clear all confirmation flow', async () => {
   expect(deps.appStoreState.resetPromptLab).toHaveBeenCalledTimes(1);
   expect(deps.appStoreState.resetKeywordTracker).toHaveBeenCalledTimes(1);
   expect(deps.historyClearAsync).toHaveBeenCalledTimes(1);
-  expect(deps.clearPlaygroundThreadStore).toHaveBeenCalledTimes(1);
+  expect(deps.clearDeepChatThreadStore).toHaveBeenCalledTimes(1);
   expect(deps.keywordHistoryClearAsync).toHaveBeenCalledTimes(1);
   expect(LocalDataStore.clearBucket).toHaveBeenCalledWith('workspace-state');
   expect(LocalDataStore.getUsage).toHaveBeenCalledTimes(1);

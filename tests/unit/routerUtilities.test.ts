@@ -72,7 +72,7 @@ afterEach(() => {
     expect(routeIdToPath('ai_analysis')).toBe('/app-center/master-analysis/ai-analysis');
     expect(routeIdToPath('promptlab')).toBe('/app-center/master-analysis/promptlab');
     expect(routeIdToPath('ppc_search_terms')).toBe('/app-center/ppc-tools/ppc-search-terms');
-    expect(routeIdToPath('playground')).toBe('/app-center/playground/deep-chat');
+    expect(routeIdToPath('playground_deep_chat')).toBe('/app-center/playground/deep-chat');
     expect(routeIdToPath('sops_overview')).toBe('/sops');
     expect(routeIdToPath('sops_npi_tracker')).toBe('/sops/growth/npi-tracker');
     expect(routeIdToPath('amz_hub_overview')).toBe('/amz-hub');

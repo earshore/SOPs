@@ -8,30 +8,30 @@ import {
   getRuntimePpcSearchTermsOptions,
   type RuntimeStrategySettings,
 } from '@/services/runtimeStrategyService';
-import { buildPpcAgentMessages } from '../agents/agentPrompt';
-import { ensureCompleteDecisions, parsePpcLlmDecisions } from '../agents/agentResponse';
+import { buildPpcSearchTermsAgentMessages } from '../agents/agentPrompt';
+import { ensureCompleteDecisions, parsePpcSearchTermsLlmDecisions } from '../agents/agentResponse';
 import {
-  countPpcAgentModelCandidateRows,
-  PPC_AGENT_MODEL_ROW_LIMIT,
-  selectPpcAgentModelRows,
+  countPpcSearchTermsAgentModelCandidateRows,
+  PPC_SEARCH_TERMS_AGENT_MODEL_ROW_LIMIT,
+  selectPpcSearchTermsAgentModelRows,
 } from '../agents/agentSelection';
 import type { AnalyzedRow } from '../types';
 import type {
-  PpcAgentAnalysisResult,
-  PpcAgentToolCall,
-  PpcLlmAnalysisInput,
-  PpcLlmDecision,
+  PpcSearchTermsAgentAnalysisResult,
+  PpcSearchTermsAgentToolCall,
+  PpcSearchTermsLlmAnalysisInput,
+  PpcSearchTermsLlmDecision,
 } from '../agents/agentTypes';
 
 export type {
-  PpcAgentAnalysisResult,
-  PpcAgentToolCall,
-  PpcAnalysisContext,
-  PpcLlmAnalysisInput,
-  PpcLlmAnalysisProgress,
-  PpcLlmDecision,
+  PpcSearchTermsAgentAnalysisResult,
+  PpcSearchTermsAgentToolCall,
+  PpcSearchTermsAnalysisContext,
+  PpcSearchTermsLlmAnalysisInput,
+  PpcSearchTermsLlmAnalysisProgress,
+  PpcSearchTermsLlmDecision,
 } from '../agents/agentTypes';
-export { selectPpcAgentModelRows } from '../agents/agentSelection';
+export { selectPpcSearchTermsAgentModelRows } from '../agents/agentSelection';
 
 interface LLMConfig {
   provider: string;
@@ -44,35 +44,35 @@ interface LLMConfig {
 type LLMCacheConfig = Omit<LLMConfig, 'apiKey'>;
 type GetLLMRequestConfig = () => Promise<LLMConfig>;
 
-const PPC_LLM_CACHE_VERSION = 'v1';
-const PPC_LLM_CACHE_PREFIX = 'cache:ppc-llm:';
+const PPC_SEARCH_TERMS_LLM_CACHE_VERSION = 'v1';
+const PPC_SEARCH_TERMS_LLM_CACHE_PREFIX = 'cache:ppc-search-terms-llm:';
 type PpcSearchTermsRuntimeOptions = RuntimeStrategySettings['ppcSearchTerms'];
 
-interface CachedPpcLlmEntry {
-  decisions: PpcLlmDecision[];
+interface CachedPpcSearchTermsLlmEntry {
+  decisions: PpcSearchTermsLlmDecision[];
   timestamp: number;
 }
 
-interface PpcBatchAnalysisResult {
-  decisions: PpcLlmDecision[];
+interface PpcSearchTermsBatchAnalysisResult {
+  decisions: PpcSearchTermsLlmDecision[];
   fromCache: boolean;
 }
 
-interface PpcLlmAnalysisResult {
-  decisions: PpcLlmDecision[];
+interface PpcSearchTermsLlmAnalysisResult {
+  decisions: PpcSearchTermsLlmDecision[];
   cachedBatches: number;
   totalBatches: number;
 }
 
-interface PpcBatchRequestOptions {
+interface PpcSearchTermsBatchRequestOptions {
   temperature: number;
   jsonMode: boolean;
   maxTokens: number;
   serviceTier?: LLMOptions['serviceTier'];
 }
 
-interface AnalyzePpcBatchInput {
-  input: PpcLlmAnalysisInput;
+interface AnalyzePpcSearchTermsBatchInput {
+  input: PpcSearchTermsLlmAnalysisInput;
   config: LLMCacheConfig;
   rows: AnalyzedRow[];
   runtimeOptions: PpcSearchTermsRuntimeOptions;
@@ -80,29 +80,32 @@ interface AnalyzePpcBatchInput {
   getRequestConfig: GetLLMRequestConfig;
 }
 
-interface ExecutePpcBatchRequestInput {
-  input: PpcLlmAnalysisInput;
+interface ExecutePpcSearchTermsBatchRequestInput {
+  input: PpcSearchTermsLlmAnalysisInput;
   rows: AnalyzedRow[];
-  messages: ReturnType<typeof buildPpcAgentMessages>;
-  cacheOptions: PpcBatchRequestOptions;
+  messages: ReturnType<typeof buildPpcSearchTermsAgentMessages>;
+  cacheOptions: PpcSearchTermsBatchRequestOptions;
   cacheKey: string;
   enableCache: boolean;
   onFirstResponse: ((metrics: LLMStreamMetrics) => void) | undefined;
   getRequestConfig: GetLLMRequestConfig;
 }
 
-const ppcInFlightBatchRequests = new Map<string, Promise<PpcBatchAnalysisResult>>();
+const ppcSearchTermsInFlightBatchRequests = new Map<
+  string,
+  Promise<PpcSearchTermsBatchAnalysisResult>
+>();
 
 export async function analyzePpcSearchTermsWithAgent(
-  input: PpcLlmAnalysisInput
-): Promise<PpcAgentAnalysisResult> {
-  const modelRows = selectPpcAgentModelRows(
+  input: PpcSearchTermsLlmAnalysisInput
+): Promise<PpcSearchTermsAgentAnalysisResult> {
+  const modelRows = selectPpcSearchTermsAgentModelRows(
     input.rows,
     input.thresholds,
-    PPC_AGENT_MODEL_ROW_LIMIT
+    PPC_SEARCH_TERMS_AGENT_MODEL_ROW_LIMIT
   );
   const localDecisions = rowsToDecisions(input.rows);
-  const toolCalls: PpcAgentToolCall[] = [
+  const toolCalls: PpcSearchTermsAgentToolCall[] = [
     {
       tool: 'local_metric_rules',
       inputRows: input.rows.length,
@@ -148,7 +151,7 @@ export async function analyzePpcSearchTermsWithAgent(
       modelRows: modelRows.length,
       skippedModelRows: Math.max(
         0,
-        countPpcAgentModelCandidateRows(input.rows, input.thresholds) - modelRows.length
+        countPpcSearchTermsAgentModelCandidateRows(input.rows, input.thresholds) - modelRows.length
       ),
       cachedBatches: modelAnalysis.cachedBatches,
       totalBatches: modelAnalysis.totalBatches,
@@ -157,14 +160,14 @@ export async function analyzePpcSearchTermsWithAgent(
 }
 
 export async function analyzePpcSearchTermsWithLLM(
-  input: PpcLlmAnalysisInput
-): Promise<PpcLlmDecision[]> {
+  input: PpcSearchTermsLlmAnalysisInput
+): Promise<PpcSearchTermsLlmDecision[]> {
   return (await analyzePpcSearchTermsWithLLMResult(input)).decisions;
 }
 
 async function analyzePpcSearchTermsWithLLMResult(
-  input: PpcLlmAnalysisInput
-): Promise<PpcLlmAnalysisResult> {
+  input: PpcSearchTermsLlmAnalysisInput
+): Promise<PpcSearchTermsLlmAnalysisResult> {
   if (input.rows.length === 0) {
     return { decisions: [], cachedBatches: 0, totalBatches: 0 };
   }
@@ -172,19 +175,19 @@ async function analyzePpcSearchTermsWithLLMResult(
   const config = getLLMCacheConfig();
   const runtimeOptions = getRuntimePpcSearchTermsOptions();
   const batches = chunkRows(input.rows, runtimeOptions.batchSize);
-  const result = await analyzePpcBatches(input, config, batches, runtimeOptions);
+  const result = await analyzePpcSearchTermsBatches(input, config, batches, runtimeOptions);
 
   ensureCompleteDecisions(input.rows, result.decisions);
   return result;
 }
 
-async function analyzePpcBatches(
-  input: PpcLlmAnalysisInput,
+async function analyzePpcSearchTermsBatches(
+  input: PpcSearchTermsLlmAnalysisInput,
   config: LLMCacheConfig,
   batches: AnalyzedRow[][],
   runtimeOptions: PpcSearchTermsRuntimeOptions
-): Promise<PpcLlmAnalysisResult> {
-  const batchResults: Array<PpcLlmDecision[] | undefined> = [];
+): Promise<PpcSearchTermsLlmAnalysisResult> {
+  const batchResults: Array<PpcSearchTermsLlmDecision[] | undefined> = [];
   const workerCount = Math.min(runtimeOptions.maxConcurrentBatches, batches.length);
   let nextBatchIndex = 0;
   let completedBatches = 0;
@@ -203,7 +206,7 @@ async function analyzePpcBatches(
       if (batchIndex >= batches.length) return;
 
       try {
-        const batchResult = await analyzePpcBatch({
+        const batchResult = await analyzePpcSearchTermsBatch({
           input,
           config,
           rows: batches[batchIndex] || [],
@@ -256,36 +259,39 @@ async function analyzePpcBatches(
   };
 }
 
-async function analyzePpcBatch({
+async function analyzePpcSearchTermsBatch({
   input,
   config,
   rows,
   runtimeOptions,
   onFirstResponse,
   getRequestConfig,
-}: AnalyzePpcBatchInput): Promise<PpcBatchAnalysisResult> {
-  const messages = buildPpcAgentMessages(rows, input.thresholds, input.context);
+}: AnalyzePpcSearchTermsBatchInput): Promise<PpcSearchTermsBatchAnalysisResult> {
+  const messages = buildPpcSearchTermsAgentMessages(rows, input.thresholds, input.context);
   const cacheOptions = {
     temperature: 0.1,
     jsonMode: true,
-    maxTokens: getPpcLlmMaxTokens(rows.length, runtimeOptions),
+    maxTokens: getPpcSearchTermsLlmMaxTokens(rows.length, runtimeOptions),
     ...(config.serviceTier && { serviceTier: config.serviceTier }),
   };
-  const cacheKey = generatePpcBatchCacheKey(config, messages, cacheOptions);
+  const cacheKey = generatePpcSearchTermsBatchCacheKey(config, messages, cacheOptions);
   if (runtimeOptions.enableLlmCache) {
-    const cachedDecisions = await getCachedPpcBatchDecisions(cacheKey, runtimeOptions.cacheTtlMs);
+    const cachedDecisions = await getCachedPpcSearchTermsBatchDecisions(
+      cacheKey,
+      runtimeOptions.cacheTtlMs
+    );
     if (cachedDecisions) {
       return { decisions: cachedDecisions, fromCache: true };
     }
   }
 
   if (!input.signal) {
-    const inFlightRequest = ppcInFlightBatchRequests.get(cacheKey);
+    const inFlightRequest = ppcSearchTermsInFlightBatchRequests.get(cacheKey);
     if (inFlightRequest) {
       return await inFlightRequest;
     }
 
-    const request = executePpcBatchRequest({
+    const request = executePpcSearchTermsBatchRequest({
       input,
       rows,
       messages,
@@ -295,15 +301,15 @@ async function analyzePpcBatch({
       onFirstResponse,
       getRequestConfig,
     });
-    ppcInFlightBatchRequests.set(cacheKey, request);
+    ppcSearchTermsInFlightBatchRequests.set(cacheKey, request);
     try {
       return await request;
     } finally {
-      ppcInFlightBatchRequests.delete(cacheKey);
+      ppcSearchTermsInFlightBatchRequests.delete(cacheKey);
     }
   }
 
-  return executePpcBatchRequest({
+  return executePpcSearchTermsBatchRequest({
     input,
     rows,
     messages,
@@ -315,7 +321,7 @@ async function analyzePpcBatch({
   });
 }
 
-async function executePpcBatchRequest({
+async function executePpcSearchTermsBatchRequest({
   input,
   rows,
   messages,
@@ -324,7 +330,7 @@ async function executePpcBatchRequest({
   enableCache,
   onFirstResponse,
   getRequestConfig,
-}: ExecutePpcBatchRequestInput): Promise<PpcBatchAnalysisResult> {
+}: ExecutePpcSearchTermsBatchRequestInput): Promise<PpcSearchTermsBatchAnalysisResult> {
   const requestConfig = await getRequestConfig();
   const response = await callLLM(
     messages,
@@ -341,21 +347,21 @@ async function executePpcBatchRequest({
     }
   );
 
-  const decisions = parsePpcLlmDecisions(response);
+  const decisions = parsePpcSearchTermsLlmDecisions(response);
   ensureCompleteDecisions(rows, decisions);
   if (enableCache) {
-    await setCachedPpcBatchDecisions(cacheKey, decisions);
+    await setCachedPpcSearchTermsBatchDecisions(cacheKey, decisions);
   }
   return { decisions, fromCache: false };
 }
 
 function flattenBatchDecisions(
-  batchResults: Array<PpcLlmDecision[] | undefined>
-): PpcLlmDecision[] {
+  batchResults: Array<PpcSearchTermsLlmDecision[] | undefined>
+): PpcSearchTermsLlmDecision[] {
   return batchResults.flatMap(decisions => decisions || []);
 }
 
-function getPpcLlmMaxTokens(
+function getPpcSearchTermsLlmMaxTokens(
   rowCount: number,
   runtimeOptions: PpcSearchTermsRuntimeOptions
 ): number {
@@ -368,14 +374,14 @@ function getPpcLlmMaxTokens(
   );
 }
 
-function generatePpcBatchCacheKey(
+function generatePpcSearchTermsBatchCacheKey(
   config: LLMCacheConfig,
   messages: unknown,
   options: unknown
 ): string {
   return [
-    PPC_LLM_CACHE_PREFIX,
-    PPC_LLM_CACHE_VERSION,
+    PPC_SEARCH_TERMS_LLM_CACHE_PREFIX,
+    PPC_SEARCH_TERMS_LLM_CACHE_VERSION,
     hashString(
       [
         config.provider,
@@ -388,7 +394,7 @@ function generatePpcBatchCacheKey(
   ].join(':');
 }
 
-function isCachedPpcLlmEntry(value: unknown): value is CachedPpcLlmEntry {
+function isCachedPpcSearchTermsLlmEntry(value: unknown): value is CachedPpcSearchTermsLlmEntry {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -397,13 +403,13 @@ function isCachedPpcLlmEntry(value: unknown): value is CachedPpcLlmEntry {
   );
 }
 
-async function getCachedPpcBatchDecisions(
+async function getCachedPpcSearchTermsBatchDecisions(
   cacheKey: string,
   cacheTtlMs: number
-): Promise<PpcLlmDecision[] | null> {
+): Promise<PpcSearchTermsLlmDecision[] | null> {
   try {
-    const cached = await LocalDataStore.get<CachedPpcLlmEntry>(cacheKey, null);
-    if (!isCachedPpcLlmEntry(cached)) {
+    const cached = await LocalDataStore.get<CachedPpcSearchTermsLlmEntry>(cacheKey, null);
+    if (!isCachedPpcSearchTermsLlmEntry(cached)) {
       return null;
     }
     if (Date.now() - cached.timestamp >= cacheTtlMs) {
@@ -416,12 +422,12 @@ async function getCachedPpcBatchDecisions(
   }
 }
 
-async function setCachedPpcBatchDecisions(
+async function setCachedPpcSearchTermsBatchDecisions(
   cacheKey: string,
-  decisions: PpcLlmDecision[]
+  decisions: PpcSearchTermsLlmDecision[]
 ): Promise<void> {
   try {
-    await LocalDataStore.set<CachedPpcLlmEntry>(
+    await LocalDataStore.set<CachedPpcSearchTermsLlmEntry>(
       cacheKey,
       {
         decisions,
@@ -512,7 +518,7 @@ async function getLLMConfig(cacheConfig: LLMCacheConfig): Promise<LLMConfig> {
   };
 }
 
-function rowsToDecisions(rows: AnalyzedRow[]): PpcLlmDecision[] {
+function rowsToDecisions(rows: AnalyzedRow[]): PpcSearchTermsLlmDecision[] {
   return rows.map(row => ({
     id: row.id,
     action: row.action,
@@ -522,9 +528,9 @@ function rowsToDecisions(rows: AnalyzedRow[]): PpcLlmDecision[] {
 }
 
 function mergeAgentDecisions(
-  localDecisions: PpcLlmDecision[],
-  modelDecisions: PpcLlmDecision[]
-): PpcLlmDecision[] {
+  localDecisions: PpcSearchTermsLlmDecision[],
+  modelDecisions: PpcSearchTermsLlmDecision[]
+): PpcSearchTermsLlmDecision[] {
   const byId = new Map(localDecisions.map(decision => [decision.id, decision]));
   modelDecisions.forEach(decision => byId.set(decision.id, decision));
   return localDecisions.map(decision => byId.get(decision.id) || decision);
