@@ -50,6 +50,11 @@ vi.mock('@/services/storageService', () => ({
   STORAGE_KEYS: {
     SCRAPE_HISTORY: 'scrape_history'
   },
+  getRuntimeStorageStrategyOptions: vi.fn(() => ({
+    historyMaxItems: 50,
+    lruWarningThreshold: 0.8,
+    lruCleanupRatio: 0.3,
+  })),
   StorageService: {
     getScrapeHistory: vi.fn(() => mocks.history),
     getScrapeHistoryAsync: vi.fn(async () => mocks.history),

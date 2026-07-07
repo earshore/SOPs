@@ -93,7 +93,7 @@ function createSettingsPanel(): SettingsPanelForTest {
     expect(cache?.label).toBe('缓存');
     expect(cache?.actionLabel).toBe('清理缓存');
     expect(cache?.isEmpty).toBe(false);
-    expect(history?.label).toBe('采集历史');
+    expect(history?.label).toBe('采集与报告历史');
     expect(history?.isEmpty).toBe(false);
   });
 

@@ -86,6 +86,7 @@ type ImportOptions = {
   config?: Record<string, unknown> | null;
   storedThreadStore?: Record<string, unknown> | null;
   promptHistory?: PromptHistoryState['promptlab']['history'];
+  toolStrategySettings?: Record<string, unknown> | null;
   callLLM?: (...args: unknown[]) => Promise<string>;
 };
 
@@ -219,6 +220,27 @@ const promptHistory = [
   },
 ];
 
+const deepChatStorageKeys = {
+  LLM_ACTIVE_PROVIDER: 'llm_active_provider',
+  TOOL_STRATEGY_SETTINGS: 'tool_strategy_settings',
+  RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
+} as const;
+
+function createDeepChatStorageService(options: ImportOptions) {
+  return {
+    get: vi.fn((key: string, fallback?: unknown) => {
+      if (key === deepChatStorageKeys.TOOL_STRATEGY_SETTINGS) {
+        return options.toolStrategySettings ?? null;
+      }
+      return fallback ?? null;
+    }),
+    getLLMConfigWithKey: vi.fn(async () =>
+      options.config === undefined ? defaultConfig : options.config
+    ),
+    remove: vi.fn(),
+  };
+}
+
 async function importDeepChat(options: ImportOptions = {}) {
   const localDataStore = {
     migrateLocalStorageKey: vi.fn(async () => options.storedThreadStore ?? storedThreadStore),
@@ -226,12 +248,7 @@ async function importDeepChat(options: ImportOptions = {}) {
     set: vi.fn(async () => true),
     remove: vi.fn(async () => true),
   };
-  const storageService = {
-    getLLMConfigWithKey: vi.fn(async () =>
-      options.config === undefined ? defaultConfig : options.config
-    ),
-    remove: vi.fn(),
-  };
+  const storageService = createDeepChatStorageService(options);
   const toast = vi.fn();
   const callLLM = vi.fn(
     options.callLLM ||
@@ -284,7 +301,10 @@ async function importDeepChat(options: ImportOptions = {}) {
       }),
     },
   }));
-  vi.doMock('@/services/storageService', () => ({ StorageService: storageService }));
+  vi.doMock('@/services/storageService', () => ({
+    STORAGE_KEYS: deepChatStorageKeys,
+    StorageService: storageService,
+  }));
   vi.doMock('@/services/localDataStore', () => ({ LocalDataStore: localDataStore }));
   vi.doMock('@/services/llmService', () => ({ callLLM }));
   vi.doMock('@/common/ui/notifications', () => ({ showToast: toast }));
@@ -601,6 +621,48 @@ describe('deep-chat playground thread history', () => {
       }),
       'user-data'
     );
+
+    unmount();
+  });
+
+  it('uses the Deep Chat default model from tool strategy for requests', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      toolStrategySettings: {
+        version: 2,
+        targets: {
+          'playground-deep-chat': {
+            defaultModelsByProvider: {
+              openai: 'gpt-4.1-mini',
+            },
+          },
+        },
+      },
+    });
+
+    await mount(container);
+
+    expect(container.querySelector('#playground-provider-status')?.textContent).toBe(
+      'openai / gpt-4.1-mini'
+    );
+    expect(queryRequired<HTMLSelectElement>(container, '#playground-model-select').value).toBe(
+      'gpt-4.1-mini'
+    );
+
+    const onResponse = vi.fn();
+    const onClose = vi.fn();
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Use strategy model' }] },
+      { onResponse, onClose }
+    );
+
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    expect(mocks.callLLM.mock.calls[0]?.[4]).toBe('gpt-4.1-mini');
 
     unmount();
   });

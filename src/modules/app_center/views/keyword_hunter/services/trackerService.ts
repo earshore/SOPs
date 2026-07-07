@@ -12,6 +12,15 @@ import {
   TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2,
 } from '../constants/prompts';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
+import {
+  applyToolTargetModel,
+  type ToolStrategyTargetId,
+} from '../../../../../services/toolStrategyService';
+import {
+  getRuntimeKeywordHunterListingReviewOptions,
+  getRuntimeKeywordHunterSeoOptions,
+  getRuntimeLlmAnalysisOptions,
+} from '../../../../../services/runtimeStrategyService';
 import { sanitizePromptInput } from '../../../../../common/utils/promptSanitizer';
 import type {
   KeywordMatchResult,
@@ -24,11 +33,6 @@ import type { LLMProviderConfig, ParagraphData } from '@/types/state';
 const nativeLoggerConsole = globalThis.console;
 const KEYWORD_HUNTER_LLM_CACHE_VERSION = 'v1';
 const KEYWORD_HUNTER_LLM_CACHE_PREFIX = 'cache:keyword-hunter-llm:';
-const KEYWORD_HUNTER_LLM_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-const LISTING_ANALYSIS_MAX_TOKENS = 6000;
-const TRANSLATION_MIN_MAX_TOKENS = 2048;
-const TRANSLATION_MAX_TOKENS = 12000;
-const TRANSLATION_OUTPUT_TOKEN_BUFFER = 1000;
 const keywordHunterInFlightLlmRequests = new Map<string, Promise<string>>();
 
 interface CachedKeywordHunterLlmEntry {
@@ -41,6 +45,7 @@ interface KeywordHunterLlmOptions {
   jsonMode?: boolean;
   maxTokens?: number;
   serviceTier?: LLMProviderConfig['serviceTier'];
+  strategyTargetId?: ToolStrategyTargetId;
   onStatus?: (status: KeywordHunterLlmStatus) => void;
 }
 
@@ -156,6 +161,7 @@ export interface KeywordMatchRange {
 function getMatchSettings(settings: Partial<KeywordTrackerSettings> = {}): KeywordTrackerSettings {
   return {
     ...DEFAULT_MATCH_SETTINGS,
+    ...getRuntimeKeywordHunterSeoOptions(),
     ...settings,
   };
 }
@@ -385,11 +391,12 @@ export function buildNumberedTranslationInput(paragraphs: string[]): string {
 }
 
 function getTranslationMaxTokens(copyText: string): number {
+  const runtimeOptions = getRuntimeKeywordHunterSeoOptions();
   return Math.min(
-    TRANSLATION_MAX_TOKENS,
+    runtimeOptions.translationMaxTokens,
     Math.max(
-      TRANSLATION_MIN_MAX_TOKENS,
-      TRANSLATION_OUTPUT_TOKEN_BUFFER + Math.ceil(copyText.length / 2)
+      runtimeOptions.translationMinMaxTokens,
+      runtimeOptions.translationOutputTokenBuffer + Math.ceil(copyText.length / 2)
     )
   );
 }
@@ -418,6 +425,7 @@ async function bridgeCallLLM(
   const { onStatus, ...requestOptions } = options;
   // 使用 StorageService 获取 LLM 配置
   const activeProvider = StorageService.get(STORAGE_KEYS.LLM_ACTIVE_PROVIDER) as string | null;
+  const strategyTargetId = requestOptions.strategyTargetId || 'keyword-hunter-seo-process';
 
   if (!activeProvider || typeof activeProvider !== 'string') {
     throw new ValidationError(
@@ -429,7 +437,7 @@ async function bridgeCallLLM(
     );
   }
 
-  const cacheConfig = getKeywordHunterLlmCacheConfig(activeProvider);
+  const cacheConfig = getKeywordHunterLlmCacheConfig(activeProvider, strategyTargetId);
   if (!cacheConfig.model) {
     throw createLlmConfigValidationError(
       '未选择模型，请在设置中同步或选择模型',
@@ -457,10 +465,16 @@ async function bridgeCallLLM(
     messages,
     finalOptions
   );
-  const cachedResponse = await getCachedKeywordHunterLlmResponse(cacheKey);
-  if (cachedResponse !== null) {
-    onStatus?.({ stage: 'cache-hit' });
-    return cachedResponse;
+  const runtimeOptions = getKeywordHunterRuntimeOptions(strategyTargetId);
+  if (runtimeOptions.enableLlmCache) {
+    const cachedResponse = await getCachedKeywordHunterLlmResponse(
+      cacheKey,
+      runtimeOptions.cacheTtlMs
+    );
+    if (cachedResponse !== null) {
+      onStatus?.({ stage: 'cache-hit' });
+      return cachedResponse;
+    }
   }
 
   const inFlightRequest = keywordHunterInFlightLlmRequests.get(cacheKey);
@@ -478,6 +492,7 @@ async function bridgeCallLLM(
       model: cacheConfig.model,
       options: finalOptions,
       cacheKey,
+      enableCache: runtimeOptions.enableLlmCache,
       onStatus,
     })
   );
@@ -501,16 +516,34 @@ async function getKeywordHunterLlmApiKey(provider: string): Promise<string> {
   return config.apiKey;
 }
 
-function getKeywordHunterLlmCacheConfig(provider: string): KeywordHunterLlmCacheConfig {
+function getKeywordHunterLlmCacheConfig(
+  provider: string,
+  strategyTargetId: ToolStrategyTargetId
+): KeywordHunterLlmCacheConfig {
   const config = StorageService.getLLMConfig(provider);
-  const model = config ? resolveConfiguredLlmModel(config) : undefined;
+  const strategyConfig = config
+    ? applyToolTargetModel(strategyTargetId, {
+        ...config,
+        provider,
+      })
+    : null;
 
   return {
     provider,
-    endpoint: config?.endpoint || '',
-    model: model || '',
-    serviceTier: config?.serviceTier,
+    endpoint: strategyConfig?.endpoint || '',
+    model: strategyConfig?.model || '',
+    serviceTier: strategyConfig?.serviceTier,
   };
+}
+
+function getKeywordHunterRuntimeOptions(strategyTargetId: ToolStrategyTargetId): {
+  enableLlmCache: boolean;
+  cacheTtlMs: number;
+} {
+  if (strategyTargetId === 'keyword-hunter-listing-review') {
+    return getRuntimeKeywordHunterListingReviewOptions();
+  }
+  return getRuntimeKeywordHunterSeoOptions();
 }
 
 async function callAndCacheKeywordHunterLlm({
@@ -521,32 +554,19 @@ async function callAndCacheKeywordHunterLlm({
   model,
   options,
   cacheKey,
+  enableCache,
   onStatus,
-}: KeywordHunterLlmCall): Promise<string> {
+}: KeywordHunterLlmCall & { enableCache: boolean }): Promise<string> {
   const response = await callLLM(messages, provider, endpoint, apiKey, model, {
     ...options,
+    ...getRuntimeLlmAnalysisOptions(),
     stream: true,
     onFirstResponse: metrics => onStatus?.({ stage: 'first-response', metrics }),
   });
-  if (response.trim()) {
+  if (enableCache && response.trim()) {
     await setCachedKeywordHunterLlmResponse(cacheKey, response);
   }
   return response;
-}
-
-function resolveConfiguredLlmModel(
-  config: Partial<Pick<LLMProviderConfig, 'model' | 'models'>>
-): string | undefined {
-  if (config.model) {
-    return config.model;
-  }
-
-  const [firstModel] = config.models || [];
-  if (!firstModel) {
-    return undefined;
-  }
-
-  return typeof firstModel === 'string' ? firstModel : firstModel.id;
 }
 
 function generateKeywordHunterLlmCacheKey(
@@ -574,13 +594,16 @@ function isCachedKeywordHunterLlmEntry(value: unknown): value is CachedKeywordHu
   );
 }
 
-async function getCachedKeywordHunterLlmResponse(cacheKey: string): Promise<string | null> {
+async function getCachedKeywordHunterLlmResponse(
+  cacheKey: string,
+  cacheTtlMs: number
+): Promise<string | null> {
   try {
     const cached = await LocalDataStore.get<CachedKeywordHunterLlmEntry>(cacheKey, null);
     if (!isCachedKeywordHunterLlmEntry(cached)) {
       return null;
     }
-    if (Date.now() - cached.timestamp >= KEYWORD_HUNTER_LLM_CACHE_TTL_MS) {
+    if (Date.now() - cached.timestamp >= cacheTtlMs) {
       await LocalDataStore.remove(cacheKey);
       return null;
     }
@@ -692,7 +715,8 @@ export async function fetchListingAnalysis(
   // 🔥 调整：temperature 0.5 -> 0.1 提高稳定性
   return await bridgeCallLLM(systemPrompt, userPrompt, {
     temperature: 0.1,
-    maxTokens: LISTING_ANALYSIS_MAX_TOKENS,
+    maxTokens: getRuntimeKeywordHunterListingReviewOptions().listingAnalysisMaxTokens,
+    strategyTargetId: 'keyword-hunter-listing-review',
     onStatus: options.onLlmStatus,
   });
 }
@@ -815,6 +839,7 @@ export async function fetchImmersionTranslation(
     jsonMode: false,
     temperature: 0,
     maxTokens: getTranslationMaxTokens(copyText),
+    strategyTargetId: 'keyword-hunter-seo-process',
     onStatus: options.onLlmStatus,
   });
 

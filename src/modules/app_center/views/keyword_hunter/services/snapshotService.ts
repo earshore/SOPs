@@ -1,7 +1,10 @@
-import { configCenter } from '../../../../../common/config/ConfigCenter';
 import { appStore } from '../../../../../stores/useAppStore';
 import { LocalDataStore } from '../../../../../services/localDataStore';
-import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
+import {
+  getRuntimeStorageStrategyOptions,
+  StorageService,
+  STORAGE_KEYS,
+} from '../../../../../services/storageService';
 import type {
   KeywordHunterSnapshot,
   KeywordHunterSnapshotDiff,
@@ -12,10 +15,6 @@ import type { KeywordTrackerState } from '../../../../../types/state';
 
 const SNAPSHOT_STORAGE_KEY = STORAGE_KEYS.KEYWORD_HUNTER_SNAPSHOTS;
 const INDEXED_SNAPSHOT_STORAGE_KEY = `user:${SNAPSHOT_STORAGE_KEY}`;
-const MAX_SNAPSHOT_ITEMS =
-  configCenter.get<number>('storage.keywordHunterSnapshotMaxItems') ||
-  configCenter.get<number>('keywordHunter.historyMaxItems') ||
-  50;
 const MANUAL_SOURCE = { type: 'manual' as const };
 
 interface SaveSnapshotOptions {
@@ -34,7 +33,8 @@ function sortSnapshots(snapshots: KeywordHunterSnapshot[]): KeywordHunterSnapsho
 }
 
 function trimSnapshots(snapshots: KeywordHunterSnapshot[]): KeywordHunterSnapshot[] {
-  return sortSnapshots(snapshots).slice(0, MAX_SNAPSHOT_ITEMS);
+  const maxItems = getRuntimeStorageStrategyOptions().historyMaxItems;
+  return sortSnapshots(snapshots).slice(0, maxItems);
 }
 
 function createSnapshotId(existing: KeywordHunterSnapshot[]): string {

@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@/services/llmService';
+import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
 
 export type DeepChatRole = 'user' | 'ai' | 'assistant' | 'system';
 export type DeepChatMessageStatus = 'stopped';
@@ -204,7 +205,7 @@ function hasFiniteMessageLimit(value: number | undefined): value is number {
 
 function limitStoredMessages(
   messages: DeepChatMessage[],
-  maxMessages = DEFAULT_MAX_THREAD_MESSAGE_COUNT
+  maxMessages = getRuntimeStrategySettings().deepChat.maxThreadMessageCount
 ): DeepChatMessage[] {
   return maxMessages > 0 ? messages.slice(-maxMessages) : messages;
 }

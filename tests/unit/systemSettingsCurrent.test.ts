@@ -62,6 +62,8 @@ vi.mock('@/services/storageService', () => {
   const keys = {
     LLM_ACTIVE_PROVIDER: 'llm_active_provider',
     LLM_CONFIG_PREFIX: 'llm_',
+    TOOL_STRATEGY_SETTINGS: 'tool_strategy_settings',
+    RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
     PROXY_CONFIG: 'proxy_config',
     PROXY_KEY_MAP: 'proxy_key_map',
     SCRAPER_PROXY_CONFIG: 'scraper_proxy_config',
@@ -234,7 +236,19 @@ beforeEach(() => {
   deps.performanceMonitor.isInitialized.mockReset().mockReturnValue(false);
   deps.performanceMonitor.initialize.mockReset();
   deps.performanceMonitor.show.mockReset();
-  deps.configGet.mockReset().mockReturnValue(15000);
+  deps.configGet.mockReset().mockImplementation((key: string, fallback?: unknown) => {
+    const values: Record<string, unknown> = {
+      'llm.testConnectionTimeout': 15000,
+      'performance.enableMonitoring': true,
+      'errorTracker.enabled': true,
+      'analytics.enabled': true,
+      'features.enableExperimentalFeatures': false,
+      'features.enableBetaFeatures': false,
+      'features.enableDebugMode': false,
+      'logger.minLevel': 'info',
+    };
+    return key in values ? values[key] : fallback;
+  });
   document.body.innerHTML = '';
   delete (window as unknown as { Alpine?: unknown }).Alpine;
 });
@@ -287,6 +301,13 @@ it('computes field state, display labels, and local data text', () => {
   expect(panel.formatBytes(1536)).toBe('1.5 KB');
   expect(panel.getProxyDisplayName('custom_proxy')).toBe('HTTP 代理');
   expect(panel.getProxyDisplayName('missing')).toBe('默认');
+  expect(panel.diagnosticStatusItems).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ id: 'performance-monitor', value: '已启用' }),
+      expect.objectContaining({ id: 'event-debug', value: '已关闭' }),
+      expect.objectContaining({ id: 'logger', value: 'info' }),
+    ])
+  );
 
   panel.toggleLlmKeyVisibility();
   panel.toggleProxyKeyVisibility();
@@ -342,6 +363,103 @@ it('loads and saves LLM provider configuration', async () => {
     })
   );
   expect(panel.isOpen).toBe(false);
+});
+
+it('saves and reloads tool strategy target default models', async () => {
+  const panel = createPanel();
+  panel.llm.provider = 'new_api';
+  panel.llm.model = 'fast-model';
+  panel.llm.models = ['fast-model', 'quality-model'];
+  panel.loadToolStrategyDefaults();
+
+  expect(
+    panel.toolStrategyTargetItems.find((item: any) => item.id === 'master-analysis-ai-analysis')
+  ).toEqual(
+    expect.objectContaining({
+      label: 'Master Analysis - AI智能分析',
+      model: '',
+      resolvedModel: 'fast-model',
+    })
+  );
+  expect(
+    panel
+      .toolStrategyTargetItemsByIds(['master-analysis-ai-analysis', 'playground-deep-chat'])
+      .map((item: any) => item.label)
+  ).toEqual(['Master Analysis - AI智能分析', 'Playground - Deep Chat']);
+
+  panel.setToolTargetModel('master-analysis-ai-analysis', {
+    target: { value: 'quality-model' },
+  } as any);
+  panel.setToolTargetModel('playground-deep-chat', { target: { value: 'fast-model' } } as any);
+  await panel.saveToolStrategy();
+
+  expect(StorageService.set).toHaveBeenCalledWith(
+    'tool_strategy_settings',
+    expect.objectContaining({
+      version: 2,
+      targets: expect.objectContaining({
+        'master-analysis-ai-analysis': {
+          defaultModelsByProvider: {
+            new_api: 'quality-model',
+          },
+        },
+        'playground-deep-chat': {
+          defaultModelsByProvider: {
+            new_api: 'fast-model',
+          },
+        },
+      }),
+    })
+  );
+  expect(showToast).toHaveBeenCalledWith('工具策略已保存', { type: 'success' });
+
+  panel.toolStrategy.targetModels['master-analysis-ai-analysis'] = '';
+  panel.loadToolStrategyDefaults();
+  expect(panel.toolStrategy.targetModels['master-analysis-ai-analysis']).toBe('quality-model');
+});
+
+it('saves editable runtime strategy settings', async () => {
+  const panel = createPanel();
+
+  panel.setRuntimeNumber('llm.analysisTimeoutMs', { target: { value: '180' } } as any, 1000);
+  panel.setRuntimeNumber('llm.maxRetries', { target: { value: '4' } } as any);
+  panel.setRuntimeNumber('llm.testConnectionTimeoutMs', { target: { value: '20' } } as any, 1000);
+  panel.setRuntimeNumber('deepChat.requestTimeoutMs', { target: { value: '75' } } as any, 1000);
+  panel.setRuntimeNumber('ppcSearchTerms.batchSize', { target: { value: '120' } } as any);
+  panel.setRuntimeNumber('ppcSearchTerms.maxConcurrentBatches', { target: { value: '3' } } as any);
+  panel.setRuntimeBoolean('keywordHunterSeoProcess.enableLlmCache', {
+    target: { checked: false },
+  } as any);
+  panel.setRuntimeBoolean('keywordHunterListingReview.enableLlmCache', {
+    target: { checked: false },
+  } as any);
+  await panel.saveRuntimeStrategy();
+
+  expect(StorageService.set).toHaveBeenCalledWith(
+    'runtime_strategy_settings',
+    expect.objectContaining({
+      version: 2,
+      llm: expect.objectContaining({
+        testConnectionTimeoutMs: 20000,
+        analysisTimeoutMs: 180000,
+        maxRetries: 4,
+      }),
+      deepChat: expect.objectContaining({
+        requestTimeoutMs: 75000,
+      }),
+      ppcSearchTerms: expect.objectContaining({
+        batchSize: 120,
+        maxConcurrentBatches: 3,
+      }),
+      keywordHunterSeoProcess: expect.objectContaining({
+        enableLlmCache: false,
+      }),
+      keywordHunterListingReview: expect.objectContaining({
+        enableLlmCache: false,
+      }),
+    })
+  );
+  expect(showToast).toHaveBeenCalledWith('策略已保存', { type: 'success' });
 });
 
 it('fetches models and handles validation or API failures', async () => {
@@ -454,6 +572,15 @@ it('tests LLM connectivity with configured timeout', async () => {
   panel.llm.apiKey = 'key';
   panel.llm.model = 'model-a';
   panel.llm.endpoint = 'https://gateway.example/v1';
+  deps.values.set(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS, {
+    version: 1,
+    llm: {
+      testConnectionTimeoutMs: 22000,
+      analysisTimeoutMs: 120000,
+      maxRetries: 2,
+    },
+  });
+  panel.loadRuntimeStrategy();
   deps.callLLM.mockResolvedValueOnce('OK');
 
   await panel.testConnection();
@@ -464,7 +591,7 @@ it('tests LLM connectivity with configured timeout', async () => {
     'https://gateway.example/v1',
     'key',
     'model-a',
-    { temperature: 0.1, jsonMode: false, maxTokens: 32, stream: true, timeout: 15000 }
+    { temperature: 0.1, jsonMode: false, maxTokens: 32, stream: true, timeout: 22000 }
   );
   expect(showToast).toHaveBeenCalledWith('连接成功！', { type: 'success' });
 
@@ -760,13 +887,38 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('aria-label="系统设置分类"');
   expect(template).not.toContain('href="#settings-section-');
   expect(template).toContain('@click="scrollToSection(\'settings-section-llm\')"');
+  expect(template).toContain('@click="scrollToSection(\'settings-section-tool-strategy\')"');
   expect(template).toContain('@click="scrollToSection(\'settings-section-network\')"');
   expect(template).toContain('@click="scrollToSection(\'settings-section-data\')"');
   expect(template).toContain('@click="scrollToSection(\'settings-section-performance\')"');
   expect(template).toContain('id="settings-section-llm"');
+  expect(template).toContain('id="settings-section-tool-strategy"');
   expect(template).toContain('id="settings-section-network"');
   expect(template).toContain('id="settings-section-data"');
   expect(template).toContain('id="settings-section-performance"');
+  expect(template).toContain('AI 模型与连接');
+  expect(template).toContain('工具策略');
+  expect(template).toContain('通用 AI 执行策略');
+  expect(template).toContain('应用中心');
+  expect(template).toContain('toolStrategyTargetItemsByIds');
+  expect(template).not.toContain('<template x-for="item in toolStrategyTargetItems"');
+  expect(template).toContain('setToolTargetModel(item.id, $event)');
+  expect(template).toContain("toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])");
+  expect(template).toContain("toolStrategyTargetItemsByIds(['playground-deep-chat'])");
+  expect(template).toContain("toolStrategyTargetItemsByIds(['keyword-hunter-seo-process'])");
+  expect(template).toContain("toolStrategyTargetItemsByIds(['keyword-hunter-listing-review'])");
+  expect(template).toContain("toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])");
+  expect(template.indexOf('通用 AI 执行策略')).toBeLessThan(template.indexOf('应用中心'));
+  expect(template.indexOf('Master Analysis')).toBeLessThan(template.indexOf('Playground'));
+  expect(template.indexOf('Playground')).toBeLessThan(template.indexOf('Keyword Hunter'));
+  expect(template.indexOf('Keyword Hunter')).toBeLessThan(template.indexOf('PPC Tools'));
+  expect(template).toContain('采集代理与网络');
+  expect(template).toContain('采集运行策略');
+  expect(template).toContain('数据与备份');
+  expect(template).toContain('数据保留策略');
+  expect(template).toContain('运行诊断');
+  expect(template).toContain('危险操作');
+  expect(template).toContain('清空全部本地数据');
   expect(template).toContain(':aria-label="fetchModelsText"');
   expect(template).toContain(':aria-label="testConnectionText"');
   expect(template).toContain('id="llm-service-tier"');

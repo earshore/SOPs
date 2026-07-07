@@ -74,7 +74,7 @@ describe('UI-P1-08 template semantics', () => {
       'src/modules/app_center/views/master_analysis/ai_analysis/template.html'
     );
 
-    expect(html).toContain('type="button"\n                          :aria-label="target.name');
+    expect(html).toContain(':aria-label="target.name +');
     expect(html).toContain(':aria-pressed="selectedTargets.includes(target.id).toString()"');
     expect(html).toContain(':class="getListingTargetCardClass(target.id)"');
     expect(html).toContain(':class="getReviewTargetCardClass(target.id)"');

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { showToast } from '@common/ui/index';
-import { StorageService } from '../../../../../../services/storageService';
+import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
 import {
   createPerformanceSettingsPanel,
   getPerformanceSettings,
@@ -9,6 +9,9 @@ import {
 } from './PerformanceSettings';
 
 vi.mock('../../../../../../services/storageService', () => ({
+  STORAGE_KEYS: {
+    RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
+  },
   StorageService: {
     get: vi.fn(),
     set: vi.fn(),
@@ -31,9 +34,10 @@ describe('PerformanceSettings', () => {
 
   it('normalizes persisted settings', () => {
     vi.mocked(StorageService.get).mockReturnValue({
-      maxConcurrency: 1,
-      enableCache: false,
-      failureStrategy: 'abort',
+      masterAnalysis: {
+        schedulingPreference: 'reliability',
+        enableCache: false,
+      },
     });
 
     expect(getPerformanceSettings()).toMatchObject({
@@ -77,11 +81,13 @@ describe('PerformanceSettings', () => {
 
     panel.saveSettings();
     expect(StorageService.set).toHaveBeenCalledWith(
-      'ai_analysis_performance_settings',
+      STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS,
       expect.objectContaining({
-        schedulingPreference: 'speed',
-        maxConcurrency: 8,
-        settingsVersion: 3,
+        version: 2,
+        masterAnalysis: expect.objectContaining({
+          schedulingPreference: 'speed',
+          enableCache: true,
+        }),
       })
     );
     expect(showToast).toHaveBeenCalledWith('分析设置已保存', { type: 'success' });

@@ -30,6 +30,8 @@ vi.mock('@/services/llmService', () => ({
 vi.mock('@/services/storageService', () => ({
   STORAGE_KEYS: {
     LLM_ACTIVE_PROVIDER: 'llm.activeProvider',
+    TOOL_STRATEGY_SETTINGS: 'tool_strategy_settings',
+    RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
   },
   StorageService: {
     get: mocks.storageGet,
@@ -82,7 +84,10 @@ function createDeferred<T>(): {
 
 function resetAiAnalysisMocks(): void {
   vi.clearAllMocks();
-  mocks.storageGet.mockReturnValue('new_api');
+  mocks.storageGet.mockImplementation((key: string, fallback?: unknown) => {
+    if (key === 'llm.activeProvider') return 'new_api';
+    return fallback ?? null;
+  });
   mocks.getLLMConfigWithKey.mockResolvedValue({
     endpoint: 'https://llm.example/v1',
     apiKey: 'test-key',
@@ -162,6 +167,45 @@ describe('runAIAnalysis configuration', () => {
   });
 });
 
+describe('runAIAnalysis tool strategy', () => {
+  it('uses the AI Analysis default model from tool strategy when configured', async () => {
+    mocks.storageGet.mockImplementation((key: string) => {
+      if (key === 'llm.activeProvider') return 'new_api';
+      if (key === 'tool_strategy_settings') {
+        return {
+          version: 2,
+          targets: {
+            'master-analysis-ai-analysis': {
+              defaultModelsByProvider: {
+                new_api: 'quality-model',
+              },
+            },
+          },
+        };
+      }
+      return null;
+    });
+    mocks.getLLMConfigWithKey.mockResolvedValueOnce({
+      provider: 'new_api',
+      endpoint: 'https://llm.example/v1',
+      apiKey: 'test-key',
+      model: 'fast-model',
+      models: ['fast-model', 'quality-model'],
+    });
+
+    await runAIAnalysis(['title-keywords'], product, vi.fn(), 'zh');
+
+    expect(mocks.callLLM).toHaveBeenCalledWith(
+      expect.any(Array),
+      'new_api',
+      'https://llm.example/v1',
+      'test-key',
+      'quality-model',
+      expect.any(Object)
+    );
+  });
+});
+
 describe('runAIAnalysis results', () => {
   it('runs selected targets and attaches confidence metadata', async () => {
     const onProgress = vi.fn();
@@ -183,8 +227,9 @@ describe('runAIAnalysis results', () => {
         jsonMode: true,
         maxTokens: 4096,
         stream: true,
-        timeout: 1500,
-        retries: 1,
+        timeout: 120000,
+        retries: 2,
+        retryDelay: 1000,
       }
     );
     expect(report['title-keywords']).toEqual({
@@ -245,7 +290,9 @@ describe('runAIAnalysis results', () => {
       function_scene_matrix: {},
     });
   });
+});
 
+describe('runAIAnalysis failure handling', () => {
   it('continues with later targets when one target fails', async () => {
     const onProgress = vi.fn();
     mocks.callLLM.mockRejectedValueOnce(new Error('llm down')).mockResolvedValueOnce(

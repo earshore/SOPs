@@ -1,6 +1,6 @@
 import { appStore } from '@/stores/useAppStore';
 import type { PromptHistoryItem } from '@/types/state';
-import { MAX_PROMPT_DRAFT_COUNT } from './constants';
+import { getMaxPromptDraftCount } from './constants';
 import { formatThreadTime } from './utils';
 
 export function getPromptDrafts(): PromptHistoryItem[] {
@@ -13,7 +13,7 @@ export function getPromptDrafts(): PromptHistoryItem[] {
       )
     )
     .sort((a, b) => getPromptDraftTime(b) - getPromptDraftTime(a))
-    .slice(0, MAX_PROMPT_DRAFT_COUNT);
+    .slice(0, getMaxPromptDraftCount());
 }
 
 export function getPromptDraftTime(prompt: PromptHistoryItem): number {

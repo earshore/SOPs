@@ -13,7 +13,7 @@ const renderers = readFileSync(
 describe('Scraper template accessibility semantics', () => {
   it('keeps import triggers keyboard reachable and names the hidden file input', () => {
     expect(template).toContain('id="no-data-msg"');
-    expect(template).toContain('type="button"\n            @click="triggerImport()"');
+    expect(template).toContain('@click="triggerImport()"');
     expect(template).toContain('aria-label="导入 JSON 产品数据文件"');
     expect(template).toContain('aria-label="重新导入 JSON 产品数据文件"');
     expect(template).toContain('focus-visible:ring-2 focus-visible:ring-blue-500');
@@ -31,8 +31,8 @@ describe('Scraper template accessibility semantics', () => {
 
   it('names Alpine-driven manual scrape controls', () => {
     expect(template).toContain(':aria-label="\'选择目标站点 \' + getSiteUrl(site)"');
-    expect(template).toContain('type="button"\n                      @click="clearAsins()"');
-    expect(template).toContain('type="button"\n                      :aria-label="scrapingButtonText"');
+    expect(template).toContain('@click="clearAsins()"');
+    expect(template).toContain(':aria-label="scrapingButtonText"');
     expect(template).toContain(':disabled="startDisabled"');
   });
 

@@ -37,8 +37,22 @@ import {
 import { ErrorService } from '../../services/errorService';
 import { EnvConfig } from '../../common/config/envConfig';
 import { configCenter } from '../../common/config/ConfigCenter';
+import { getDangerousEndpoints } from '../../common/config/apiEndpoints';
 import { APP_EVENTS } from '../../common/constants/eventConstants';
 import { SECURE_STORAGE_SECURITY_BOUNDARY } from '../../common/utils/secureStorage';
+import {
+  TOOL_STRATEGY_TARGETS,
+  getToolTargetDefaultModel,
+  setToolTargetDefaultModel,
+  type ToolStrategyTargetId,
+} from '../../services/toolStrategyService';
+import {
+  DEFAULT_RUNTIME_STRATEGY_SETTINGS,
+  getRuntimeStrategySettings,
+  normalizeRuntimeStrategySettings,
+  saveRuntimeStrategySettings,
+  type RuntimeStrategySettings,
+} from '../../services/runtimeStrategyService';
 import type { LLMProviderConfig } from '../../types/state';
 import type { ProxyConfig } from '../../types/modules-business';
 import { appStore } from '../../stores/useAppStore';
@@ -70,10 +84,22 @@ interface ProxyState {
   savedKeyMap: Record<string, string>;
 }
 
+interface ToolStrategyState {
+  targetModels: Record<ToolStrategyTargetId, string>;
+  isSaving: boolean;
+}
+
+interface RuntimeStrategyState {
+  settings: RuntimeStrategySettings;
+  isSaving: boolean;
+}
+
 interface SettingsPanelData {
   isOpen: boolean;
   llm: LLMState;
   proxy: ProxyState;
+  toolStrategy: ToolStrategyState;
+  runtimeStrategy: RuntimeStrategyState;
   currentProviderConfig: ProviderConfig | Record<string, never>;
   llmProviderOptions: LLMProviderOption[];
   defaultLlmEndpoint: string;
@@ -100,6 +126,20 @@ interface SettingsPanelData {
   activeContextText: string;
   activeFeaturesText: string;
   activeFeatureBadges: ModelFeatureBadge[];
+  toolStrategyProviderLabel: string;
+  toolStrategyModelSelectDisabled: boolean;
+  toolStrategyTargetItems: ToolStrategyTargetView[];
+  toolStrategyTargetItemsByIds(targetIds: ToolStrategyTargetId[]): ToolStrategyTargetView[];
+  toolStrategySaveText: string;
+  toolStrategySaveIconClass: string;
+  runtimeStrategySaveText: string;
+  runtimeStrategySaveIconClass: string;
+  runtimeTestConnectionTimeoutSeconds: number;
+  runtimeAnalysisTimeoutSeconds: number;
+  runtimeDeepChatTimeoutSeconds: number;
+  masterAnalysisBudgetItems: RuntimeNumberFieldView[];
+  ppcThresholdItems: RuntimeNumberFieldView[];
+  diagnosticStatusItems: DiagnosticStatusView[];
   testConnectionIconClass: string;
   testConnectionText: string;
   proxyInputType: string;
@@ -125,6 +165,11 @@ interface SettingsPanelData {
   fetchModels(): Promise<void>;
   testConnection(): Promise<void>;
   saveProviderConfig(): Promise<void>;
+  loadToolStrategyDefaults(): void;
+  saveToolStrategy(): Promise<void>;
+  loadRuntimeStrategy(): void;
+  saveRuntimeStrategy(): Promise<void>;
+  resetRuntimeStrategy(): void;
   loadProxyConfig(): Promise<void>;
   saveProxyConfig(): Promise<void>;
   setLlmProvider(event: Event): void;
@@ -132,6 +177,12 @@ interface SettingsPanelData {
   setLlmApiKey(event: Event): void;
   setLlmModel(event: Event): void;
   setLlmServiceTier(event: Event): void;
+  setToolTargetModel(targetId: ToolStrategyTargetId, event: Event): void;
+  getRuntimeNumber(path: string, divisor?: number): number;
+  getRuntimeBoolean(path: string): boolean;
+  setRuntimeNumber(path: string, event: Event, multiplier?: number): void;
+  setRuntimeBoolean(path: string, event: Event): void;
+  setRuntimeString(path: string, event: Event): void;
   setProxyType(event: Event): void;
   setProxyCustomUrl(event: Event): void;
   toggleLlmKeyVisibility(): void;
@@ -174,6 +225,35 @@ interface ModelFeatureBadge {
   key: string;
   label: string;
   icon: string;
+}
+
+interface ToolStrategyTargetView {
+  id: ToolStrategyTargetId;
+  label: string;
+  description: string;
+  modelHint: string;
+  model: string;
+  resolvedModel: string;
+}
+
+interface RuntimeNumberFieldView {
+  key: string;
+  label: string;
+  path: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  unit?: string;
+}
+
+interface DiagnosticStatusView {
+  id: string;
+  label: string;
+  value: string;
+  description: string;
+  icon: string;
+  toneClass: string;
 }
 
 interface LocalDataBucketMeta {
@@ -227,8 +307,8 @@ const LLM_TEST_CONNECTION_MAX_TOKENS = 32;
 
 const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
   config: {
-    label: '配置与偏好',
-    description: '模型、网络、布局和功能开关',
+    label: '系统配置与偏好',
+    description: 'AI 连接、工具策略、网络、布局和功能开关',
     icon: 'fa-sliders-h',
     iconClass: 'bg-blue-50 text-blue-600 ring-blue-100',
     buttonClass: 'border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100',
@@ -236,8 +316,8 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     confirmMessage: '这会删除模型、网络、布局和偏好配置，保留历史、聊天与缓存。继续？',
   },
   secrets: {
-    label: '密钥',
-    description: '浏览器本地加密保存的 API Key；非服务端密钥隔离',
+    label: '密钥与凭据',
+    description: '浏览器本地加密保存的 API Key 与代理凭据',
     icon: 'fa-key',
     iconClass: 'bg-amber-50 text-amber-600 ring-amber-100',
     buttonClass: 'border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100',
@@ -245,7 +325,7 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     confirmMessage: '这会删除本浏览器保存的 API Key，之后需要重新配置。继续？',
   },
   'workspace-state': {
-    label: '工作台状态',
+    label: '工作台临时状态',
     description: '页面状态、草稿、PromptLab 与关键词工具工作区',
     icon: 'fa-layer-group',
     iconClass: 'bg-cyan-50 text-cyan-600 ring-cyan-100',
@@ -255,7 +335,7 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
       '这会重置本浏览器保存的工作台状态、草稿和工具输入，但保留模型配置、密钥、采集历史、聊天和缓存。继续？',
   },
   'scrape-history': {
-    label: '采集历史',
+    label: '采集与报告历史',
     description: '商品采集结果、导入记录和历史报告',
     icon: 'fa-clock-rotate-left',
     iconClass: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
@@ -264,7 +344,7 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     confirmMessage: '这会删除本浏览器中的采集历史和历史报告，建议先导出备份。继续？',
   },
   'chat-history': {
-    label: '聊天记录',
+    label: 'Playground 聊天记录',
     description: 'Playground 对话线程和消息上下文',
     icon: 'fa-comments',
     iconClass: 'bg-violet-50 text-violet-600 ring-violet-100',
@@ -273,7 +353,7 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     confirmMessage: '这会删除 Playground 本地聊天线程，建议先导出备份。继续？',
   },
   'keyword-history': {
-    label: '关键词历史',
+    label: 'Keyword Hunter 历史',
     description: 'Keyword Hunter 快照、对比记录和迁移备份',
     icon: 'fa-magnifying-glass-chart',
     iconClass: 'bg-teal-50 text-teal-600 ring-teal-100',
@@ -291,15 +371,77 @@ const LOCAL_DATA_BUCKET_META: Record<LocalDataBucketId, LocalDataBucketMeta> = {
     confirmMessage: null,
   },
   other: {
-    label: '其它数据',
-    description: '尚未归类的本地业务数据',
+    label: '未归类数据（谨慎）',
+    description: '尚未归类的本地业务数据，清理前建议先导出备份',
     icon: 'fa-box-archive',
     iconClass: 'bg-rose-50 text-rose-600 ring-rose-100',
     buttonClass: 'border-rose-100 bg-rose-50 text-rose-700 hover:bg-rose-100',
-    actionLabel: '清理其它',
+    actionLabel: '谨慎清理',
     confirmMessage: '这会删除尚未归类的本地数据，可能影响部分模块状态。建议先导出备份。继续？',
   },
 };
+
+const MASTER_ANALYSIS_BUDGET_FIELDS = [
+  { key: 'title-keywords', label: '标题关键词', min: 1024, max: 32000, step: 512 },
+  { key: 'selling-points', label: '卖点提炼', min: 1024, max: 32000, step: 512 },
+  { key: 'fatal-flaws', label: '致命缺陷', min: 1024, max: 32000, step: 512 },
+  { key: 'wow-moments', label: 'Wow Moments', min: 1024, max: 32000, step: 512 },
+  { key: 'hesitation-points', label: '犹豫点', min: 1024, max: 32000, step: 512 },
+  { key: 'buyer-profile', label: '买家画像', min: 1024, max: 32000, step: 512 },
+  { key: 'vocab-gap', label: '词汇差距', min: 1024, max: 32000, step: 512 },
+  { key: 'promise-reality', label: '承诺落差', min: 1024, max: 32000, step: 512 },
+] as const;
+
+const PPC_THRESHOLD_FIELDS = [
+  {
+    key: 'targetAcos',
+    label: '目标 ACOS %',
+    path: 'ppcSearchTerms.thresholds.targetAcos',
+    min: 1,
+    max: 200,
+    step: 1,
+  },
+  {
+    key: 'highAcos',
+    label: '高 ACOS %',
+    path: 'ppcSearchTerms.thresholds.highAcos',
+    min: 1,
+    max: 300,
+    step: 1,
+  },
+  {
+    key: 'minClicksNoOrder',
+    label: '无单点击',
+    path: 'ppcSearchTerms.thresholds.minClicksNoOrder',
+    min: 1,
+    max: 1000,
+    step: 1,
+  },
+  {
+    key: 'minSpendNoOrder',
+    label: '无单花费',
+    path: 'ppcSearchTerms.thresholds.minSpendNoOrder',
+    min: 1,
+    max: 100000,
+    step: 1,
+  },
+  {
+    key: 'minOrdersHarvest',
+    label: '收割订单',
+    path: 'ppcSearchTerms.thresholds.minOrdersHarvest',
+    min: 1,
+    max: 1000,
+    step: 1,
+  },
+  {
+    key: 'minCtr',
+    label: '低 CTR %',
+    path: 'ppcSearchTerms.thresholds.minCtr',
+    min: 0,
+    max: 100,
+    step: 0.05,
+  },
+] as const;
 
 function registerSettingsWatchers(panel: SettingsPanelData & AlpineWatchContext): void {
   panel.$watch('llm.provider', (val: string) => panel.loadProviderConfig(val));
@@ -446,6 +588,62 @@ function getInitialModel(savedModel: string | undefined, models: ModelOption[]):
   return first ? getModelId(first) : '';
 }
 
+function createEmptyToolTargetModels(): Record<ToolStrategyTargetId, string> {
+  return TOOL_STRATEGY_TARGETS.reduce(
+    (acc, target) => {
+      acc[target.id] = '';
+      return acc;
+    },
+    {} as Record<ToolStrategyTargetId, string>
+  );
+}
+
+function millisecondsToSeconds(milliseconds: number): number {
+  return Math.round(milliseconds / 1000);
+}
+
+function getInputNumber(event: Event): number {
+  return Number((event.target as HTMLInputElement).value);
+}
+
+function getRuntimePathValue(settings: RuntimeStrategySettings, path: string): unknown {
+  return path.split('.').reduce<unknown>((value, key) => {
+    if (value && typeof value === 'object') {
+      return (value as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, settings);
+}
+
+function setRuntimePathValue(
+  settings: RuntimeStrategySettings,
+  path: string,
+  value: string | number | boolean
+): void {
+  const keys = path.split('.');
+  const lastKey = keys.pop();
+  if (!lastKey) return;
+
+  let target: Record<string, unknown> = settings as unknown as Record<string, unknown>;
+  keys.forEach(key => {
+    const next = target[key];
+    if (!next || typeof next !== 'object') {
+      target[key] = {};
+    }
+    target = target[key] as Record<string, unknown>;
+  });
+  target[lastKey] = value;
+}
+
+function formatEnabledStatus(enabled: boolean): string {
+  return enabled ? '已启用' : '已关闭';
+}
+
+function isStoredFlagEnabled(key: string): boolean {
+  const value = StorageService.get<unknown>(key, 'false');
+  return value === true || value === 'true' || value === '1';
+}
+
 function findPresetModelInfo(provider: string, modelId: string): ModelMetadata | null {
   const config = getLlmProviderConfig(provider);
   if (!config) return null;
@@ -552,7 +750,7 @@ type SettingsPanelPart = Partial<SettingsPanelData> & ThisType<SettingsPanelData
 
 function createSettingsState(): Pick<
   SettingsPanelData,
-  'isOpen' | '_unsubscribers' | 'llm' | 'proxy' | 'localData'
+  'isOpen' | '_unsubscribers' | 'llm' | 'proxy' | 'toolStrategy' | 'runtimeStrategy' | 'localData'
 > {
   return {
     isOpen: false,
@@ -579,6 +777,16 @@ function createSettingsState(): Pick<
       customUrl: '',
       showKey: false,
       savedKeyMap: {},
+    },
+
+    toolStrategy: {
+      targetModels: createEmptyToolTargetModels(),
+      isSaving: false,
+    },
+
+    runtimeStrategy: {
+      settings: getRuntimeStrategySettings(),
+      isSaving: false,
     },
 
     localData: {
@@ -704,6 +912,154 @@ const settingsPanelBehavior: SettingsPanelPart = {
     return getModelFeatureBadges(features);
   },
 
+  get toolStrategyProviderLabel(): string {
+    const provider = getLlmProviderConfig(this.llm.provider);
+    return provider?.name || this.llm.provider || '未选择厂商';
+  },
+
+  get toolStrategyModelSelectDisabled(): boolean {
+    return this.llm.models.length === 0;
+  },
+
+  get toolStrategyTargetItems(): ToolStrategyTargetView[] {
+    return TOOL_STRATEGY_TARGETS.map(target => {
+      const model = this.toolStrategy.targetModels[target.id] || '';
+      return {
+        ...target,
+        model,
+        resolvedModel: model || this.llm.model || '未选择模型',
+      };
+    });
+  },
+
+  toolStrategyTargetItemsByIds(targetIds: ToolStrategyTargetId[]): ToolStrategyTargetView[] {
+    return targetIds
+      .map(targetId => this.toolStrategyTargetItems.find(item => item.id === targetId))
+      .filter((item): item is ToolStrategyTargetView => Boolean(item));
+  },
+
+  get toolStrategySaveText(): string {
+    return this.toolStrategy.isSaving ? '保存中' : '保存工具策略';
+  },
+
+  get toolStrategySaveIconClass(): string {
+    return this.toolStrategy.isSaving ? 'fa-circle-notch fa-spin' : 'fa-check';
+  },
+
+  get runtimeStrategySaveText(): string {
+    return this.runtimeStrategy.isSaving ? '保存中' : '保存运行策略';
+  },
+
+  get runtimeStrategySaveIconClass(): string {
+    return this.runtimeStrategy.isSaving ? 'fa-circle-notch fa-spin' : 'fa-check';
+  },
+
+  get runtimeTestConnectionTimeoutSeconds(): number {
+    return millisecondsToSeconds(this.runtimeStrategy.settings.llm.testConnectionTimeoutMs);
+  },
+
+  get runtimeAnalysisTimeoutSeconds(): number {
+    return millisecondsToSeconds(this.runtimeStrategy.settings.llm.analysisTimeoutMs);
+  },
+
+  get runtimeDeepChatTimeoutSeconds(): number {
+    return millisecondsToSeconds(this.runtimeStrategy.settings.deepChat.requestTimeoutMs);
+  },
+
+  get masterAnalysisBudgetItems(): RuntimeNumberFieldView[] {
+    const budgets = this.runtimeStrategy.settings.masterAnalysis.tokenBudgetsByTarget;
+    const defaultBudgets = DEFAULT_RUNTIME_STRATEGY_SETTINGS.masterAnalysis.tokenBudgetsByTarget;
+    return MASTER_ANALYSIS_BUDGET_FIELDS.map(field => ({
+      ...field,
+      path: `masterAnalysis.tokenBudgetsByTarget.${field.key}`,
+      value: budgets[field.key] ?? defaultBudgets[field.key] ?? 0,
+      unit: 'tokens',
+    }));
+  },
+
+  get ppcThresholdItems(): RuntimeNumberFieldView[] {
+    return PPC_THRESHOLD_FIELDS.map(field => ({
+      ...field,
+      value: this.getRuntimeNumber(field.path),
+    }));
+  },
+
+  get diagnosticStatusItems(): DiagnosticStatusView[] {
+    const performanceEnabled = configCenter.get<boolean>('performance.enableMonitoring', true);
+    const eventDebugEnabled = isStoredFlagEnabled('debug_events');
+    const errorTrackerEnabled = configCenter.get<boolean>('errorTracker.enabled', true);
+    const analyticsEnabled = configCenter.get<boolean>('analytics.enabled', true);
+    const featureModes = [
+      configCenter.get<boolean>('features.enableExperimentalFeatures', false),
+      configCenter.get<boolean>('features.enableBetaFeatures', false),
+      configCenter.get<boolean>('features.enableDebugMode', false),
+    ];
+    const enabledFeatureModeCount = featureModes.filter(Boolean).length;
+    const logLevel = configCenter.get<string>('logger.minLevel', 'info');
+    const dangerousEndpointCount = getDangerousEndpoints().length;
+
+    return [
+      {
+        id: 'performance-monitor',
+        label: '性能监控',
+        value: formatEnabledStatus(performanceEnabled),
+        description: 'Web Vitals、加载耗时和运行指标面板',
+        icon: 'fa-tachometer-alt',
+        toneClass: performanceEnabled
+          ? 'bg-emerald-50 text-emerald-700 ring-emerald-100'
+          : 'bg-slate-100 text-slate-600 ring-slate-200',
+      },
+      {
+        id: 'event-debug',
+        label: '事件调试',
+        value: formatEnabledStatus(eventDebugEnabled),
+        description: '读取本地 debug_events 开关，仅用于开发排查',
+        icon: 'fa-code-branch',
+        toneClass: eventDebugEnabled
+          ? 'bg-amber-50 text-amber-700 ring-amber-100'
+          : 'bg-slate-100 text-slate-600 ring-slate-200',
+      },
+      {
+        id: 'feature-flags',
+        label: '功能模式',
+        value: `${enabledFeatureModeCount}/3 开启`,
+        description: '实验功能、Beta 功能和 Debug 模式只读状态',
+        icon: 'fa-toggle-on',
+        toneClass:
+          enabledFeatureModeCount > 0
+            ? 'bg-blue-50 text-blue-700 ring-blue-100'
+            : 'bg-slate-100 text-slate-600 ring-slate-200',
+      },
+      {
+        id: 'logger',
+        label: '日志级别',
+        value: logLevel,
+        description: '当前 logger.minLevel 配置',
+        icon: 'fa-list-check',
+        toneClass: 'bg-indigo-50 text-indigo-700 ring-indigo-100',
+      },
+      {
+        id: 'error-analytics',
+        label: '错误追踪 / 行为分析',
+        value: `${formatEnabledStatus(errorTrackerEnabled)} / ${formatEnabledStatus(analyticsEnabled)}`,
+        description: '错误捕获和用户行为分析运行状态',
+        icon: 'fa-bug',
+        toneClass:
+          errorTrackerEnabled || analyticsEnabled
+            ? 'bg-rose-50 text-rose-700 ring-rose-100'
+            : 'bg-slate-100 text-slate-600 ring-slate-200',
+      },
+      {
+        id: 'endpoint-security',
+        label: '端点安全策略',
+        value: `${dangerousEndpointCount} 个危险端点`,
+        description: '生产环境危险端点需通过代理或企业网关访问',
+        icon: 'fa-shield-halved',
+        toneClass: 'bg-amber-50 text-amber-700 ring-amber-100',
+      },
+    ];
+  },
+
   get testConnectionIconClass(): string {
     return this.llm.isTesting
       ? 'fa-circle-notch fa-spin text-blue-500'
@@ -794,6 +1150,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   // Lifecycle
   init() {
+    this.loadRuntimeStrategy();
     void this.loadProxyConfig();
     this.loadProviderConfig(this.llm.provider);
     void this.refreshLocalDataUsage();
@@ -815,6 +1172,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   open() {
     this.isOpen = true;
+    this.loadRuntimeStrategy();
     this.loadProviderConfig(this.llm.provider);
     void this.loadProxyConfig();
     void this.refreshLocalDataUsage();
@@ -876,6 +1234,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.llm.models = dedupeModels(getRawProviderModels(savedConfig, config));
     this.llm.model = getInitialModel(savedConfig?.model, this.llm.models);
     this.llm.serviceTier = savedConfig?.serviceTier;
+    this.loadToolStrategyDefaults();
   },
 
   async fetchModels(): Promise<void> {
@@ -932,7 +1291,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
           maxTokens: LLM_TEST_CONNECTION_MAX_TOKENS,
           ...(this.llm.serviceTier && { serviceTier: this.llm.serviceTier }),
           stream: true,
-          timeout: configCenter.get<number>('llm.testConnectionTimeout') || 15000,
+          timeout: this.runtimeStrategy.settings.llm.testConnectionTimeoutMs,
         }
       );
 
@@ -980,6 +1339,59 @@ const settingsPanelBehavior: SettingsPanelPart = {
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'saveProviderConfig', module: 'settings' });
     }
+  },
+
+  loadToolStrategyDefaults(): void {
+    this.toolStrategy.targetModels = TOOL_STRATEGY_TARGETS.reduce(
+      (acc, target) => {
+        acc[target.id] = getToolTargetDefaultModel(target.id, this.llm.provider);
+        return acc;
+      },
+      {} as Record<ToolStrategyTargetId, string>
+    );
+  },
+
+  async saveToolStrategy(): Promise<void> {
+    try {
+      this.toolStrategy.isSaving = true;
+      TOOL_STRATEGY_TARGETS.forEach(target => {
+        setToolTargetDefaultModel(
+          target.id,
+          this.llm.provider,
+          this.toolStrategy.targetModels[target.id] || ''
+        );
+      });
+      saveRuntimeStrategySettings(this.runtimeStrategy.settings);
+      this.loadRuntimeStrategy();
+      showToast('工具策略已保存', { type: 'success' });
+    } catch (error) {
+      ErrorService.handle(error as Error, { action: 'saveToolStrategy', module: 'settings' });
+    } finally {
+      this.toolStrategy.isSaving = false;
+    }
+  },
+
+  loadRuntimeStrategy(): void {
+    this.runtimeStrategy.settings = getRuntimeStrategySettings();
+  },
+
+  async saveRuntimeStrategy(): Promise<void> {
+    try {
+      this.runtimeStrategy.isSaving = true;
+      saveRuntimeStrategySettings(this.runtimeStrategy.settings);
+      this.loadRuntimeStrategy();
+      showToast('策略已保存', { type: 'success' });
+    } catch (error) {
+      ErrorService.handle(error as Error, { action: 'saveRuntimeStrategy', module: 'settings' });
+    } finally {
+      this.runtimeStrategy.isSaving = false;
+    }
+  },
+
+  resetRuntimeStrategy(): void {
+    this.runtimeStrategy.settings = normalizeRuntimeStrategySettings(
+      DEFAULT_RUNTIME_STRATEGY_SETTINGS
+    );
   },
 
   // --- Proxy Logic ---
@@ -1036,6 +1448,40 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.llm.serviceTier = value
       ? (value as NonNullable<LLMProviderConfig['serviceTier']>)
       : undefined;
+  },
+
+  setToolTargetModel(targetId: ToolStrategyTargetId, event: Event): void {
+    this.toolStrategy.targetModels[targetId] = (event.target as HTMLSelectElement).value;
+  },
+
+  getRuntimeNumber(path: string, divisor = 1): number {
+    const value = Number(getRuntimePathValue(this.runtimeStrategy.settings, path));
+    if (!Number.isFinite(value)) return 0;
+    return divisor === 1 ? value : Number((value / divisor).toFixed(2));
+  },
+
+  getRuntimeBoolean(path: string): boolean {
+    return Boolean(getRuntimePathValue(this.runtimeStrategy.settings, path));
+  },
+
+  setRuntimeNumber(path: string, event: Event, multiplier = 1): void {
+    setRuntimePathValue(this.runtimeStrategy.settings, path, getInputNumber(event) * multiplier);
+  },
+
+  setRuntimeBoolean(path: string, event: Event): void {
+    setRuntimePathValue(
+      this.runtimeStrategy.settings,
+      path,
+      (event.target as HTMLInputElement).checked
+    );
+  },
+
+  setRuntimeString(path: string, event: Event): void {
+    setRuntimePathValue(
+      this.runtimeStrategy.settings,
+      path,
+      (event.target as HTMLSelectElement).value
+    );
   },
 
   setProxyType(event: Event): void {

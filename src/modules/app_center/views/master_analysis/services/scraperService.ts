@@ -10,7 +10,7 @@ import { parseProductPage, parseReviews } from './parserService';
 import { sleep, getErrorSummary } from '../../../../../common/ui';
 import { HistoryService } from './historyService';
 import { StorageService } from '../../../../../services/storageService';
-import { configCenter } from '../../../../../common/config/ConfigCenter';
+import { getRuntimeScraperOptions } from '../../../../../services/runtimeStrategyService';
 import {
   DEFAULT_SCRAPER_PROXY_TYPE,
   buildScraperProxyUrl,
@@ -28,18 +28,14 @@ import type {
 
 const nativeLoggerConsole = globalThis.console;
 
-const CACHE_DURATION_MS = configCenter.get<number>('scraper.cacheDuration') || 24 * 60 * 60 * 1000;
-
 // ----------------------------------------
 // 请求超时控制器
 // ----------------------------------------
 
-const REQUEST_TIMEOUT_MS = configCenter.get<number>('scraper.requestTimeout') || 15000;
-
 function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
-  timeout: number = REQUEST_TIMEOUT_MS
+  timeout: number = getRuntimeScraperOptions().requestTimeoutMs
 ): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -78,7 +74,17 @@ class RequestPool {
   }
 }
 
-const requestPool = new RequestPool(configCenter.get<number>('scraper.maxConcurrent') || 2);
+let requestPool: RequestPool | null = null;
+let requestPoolMaxConcurrent = 0;
+
+function getRequestPool(): RequestPool {
+  const maxConcurrent = getRuntimeScraperOptions().maxConcurrent;
+  if (!requestPool || requestPoolMaxConcurrent !== maxConcurrent) {
+    requestPool = new RequestPool(maxConcurrent);
+    requestPoolMaxConcurrent = maxConcurrent;
+  }
+  return requestPool;
+}
 
 type LanguageHeader = (typeof LANGUAGE_HEADERS)[keyof typeof LANGUAGE_HEADERS];
 
@@ -144,12 +150,12 @@ function getScraperRequestConfig(options: FetchOptions): {
   proxyConfig: ProxyConfig;
   timeout: number;
 } {
+  const runtimeOptions = getRuntimeScraperOptions();
   return {
-    retries: options.retries ?? configCenter.get<number>('scraper.maxRetries') ?? 3,
-    delay: options.delay ?? configCenter.get<number>('scraper.retryDelay') ?? 500,
+    retries: options.retries ?? runtimeOptions.maxRetries,
+    delay: options.delay ?? runtimeOptions.retryDelayMs,
     proxyConfig: options.proxyConfig ?? {},
-    timeout:
-      options.timeout ?? configCenter.get<number>('scraper.requestTimeout') ?? REQUEST_TIMEOUT_MS,
+    timeout: options.timeout ?? runtimeOptions.requestTimeoutMs,
   };
 }
 
@@ -263,7 +269,9 @@ async function fetchProxyAttempt(context: ProxyFetchContext, attempt: number): P
 
   const fetchUrl = constructFetchUrl(context.urlWithLang, context.proxyConfig);
   const reqOptions = createProxyRequestOptions(context.headers, context.proxyConfig);
-  const res = await requestPool.add(() => fetchWithTimeout(fetchUrl, reqOptions, context.timeout));
+  const res = await getRequestPool().add(() =>
+    fetchWithTimeout(fetchUrl, reqOptions, context.timeout)
+  );
 
   await assertProxyResponseOk(res, context);
 
@@ -356,7 +364,7 @@ async function getCachedScrapedProduct(context: ScrapeContext): Promise<ScrapedP
 
     const now = Date.now();
     const cachedTime = new Date(cachedItem.timestamp).getTime();
-    if (now - cachedTime >= CACHE_DURATION_MS) {
+    if (now - cachedTime >= getRuntimeScraperOptions().cacheDurationMs) {
       return null;
     }
 
@@ -370,9 +378,10 @@ async function getCachedScrapedProduct(context: ScrapeContext): Promise<ScrapedP
 }
 
 function createScrapeFetchOptions(proxyConfig: ProxyConfig): FetchOptions {
+  const runtimeOptions = getRuntimeScraperOptions();
   return {
-    retries: configCenter.get<number>('scraper.maxRetries') || 3,
-    delay: configCenter.get<number>('scraper.retryDelay') || 500,
+    retries: runtimeOptions.maxRetries,
+    delay: runtimeOptions.retryDelayMs,
     proxyConfig,
   };
 }
@@ -475,11 +484,11 @@ async function handleScrapeAttemptFailure(
     return;
   }
 
-  await sleep(1000 * attempt);
+  await sleep(getRuntimeScraperOptions().retryDelayMs * attempt);
 }
 
 async function runScrapeAttempts(context: ScrapeContext, result: ScrapedProduct): Promise<void> {
-  const maxRetries = configCenter.get<number>('scraper.maxRetries') || 3;
+  const maxRetries = getRuntimeScraperOptions().maxRetries;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -555,8 +564,9 @@ export async function scrapeMultipleAsins(
   scrapeReviews: boolean,
   updateStatusCallback: StatusCallback
 ): Promise<ScrapedProduct[]> {
-  const BATCH_SIZE = configCenter.get<number>('scraper.batchSize') || 3;
-  const BATCH_DELAY = configCenter.get<number>('scraper.batchDelay') || 1500;
+  const runtimeOptions = getRuntimeScraperOptions();
+  const BATCH_SIZE = runtimeOptions.batchSize;
+  const BATCH_DELAY = runtimeOptions.batchDelayMs;
 
   const results: ScrapedProduct[] = [];
 

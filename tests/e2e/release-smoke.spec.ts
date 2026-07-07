@@ -167,7 +167,7 @@ async function openGlobalSettings(page: Page): Promise<void> {
 
   await expect(page.getByRole('heading', { name: '系统设置' })).toBeVisible();
   await expect(
-    page.locator('#settings-section-llm').getByRole('heading', { name: 'LLM 模型配置' })
+    page.locator('#settings-section-llm').getByRole('heading', { name: 'AI 模型与连接' })
   ).toBeVisible();
 }
 

@@ -89,6 +89,7 @@ const processMocks = vi.hoisted(() => {
       models: ['gpt-test', 'gpt-fast'],
       enabled: true,
     },
+    storageValues: new Map<string, unknown>(),
     state,
   };
 });
@@ -137,9 +138,14 @@ vi.mock('@/services/storageService', () => ({
   STORAGE_KEYS: {
     LLM_ACTIVE_PROVIDER: 'llm_active_provider',
     LLM_CONFIG_PREFIX: 'llm_',
+    TOOL_STRATEGY_SETTINGS: 'tool_strategy_settings',
+    RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
   },
   StorageService: {
     get: vi.fn(),
+    set: vi.fn((key: string, value: unknown) => {
+      processMocks.storageValues.set(key, value);
+    }),
     getLLMConfig: vi.fn(),
     getLLMConfigWithKey: vi.fn(),
     setLLMConfig: vi.fn(),
@@ -243,10 +249,15 @@ beforeEach(() => {
     models: ['gpt-test', 'gpt-fast'],
     enabled: true,
   };
+  processMocks.storageValues.clear();
   processMocks.getAllSnapshotsAsync.mockResolvedValue([]);
   processMocks.restoreSnapshot.mockReturnValue(null);
   processMocks.saveCurrentSnapshotAsync.mockResolvedValue(undefined);
-  mockedStorage.get.mockReturnValue('openai');
+  mockedStorage.get.mockImplementation((key: string, fallback?: unknown) => {
+    if (key === 'llm_active_provider') return 'openai';
+    if (processMocks.storageValues.has(key)) return processMocks.storageValues.get(key) as never;
+    return (fallback ?? null) as never;
+  });
   mockedStorage.getLLMConfig.mockImplementation(() => processMocks.llmConfig as never);
   mockedStorage.getLLMConfigWithKey.mockImplementation(
     async () =>
@@ -383,11 +394,24 @@ it('refreshes available translation models and persists the selected model', asy
   expect(mockedStorage.setLLMConfig).toHaveBeenCalledWith(
     'openai',
     expect.objectContaining({
-      model: 'gpt-fast',
+      model: 'gpt-test',
       models: [
         { id: 'gpt-fast', context: 128000, features: [] },
         { id: 'gpt-quality', context: 128000, features: [] },
       ],
+    })
+  );
+  expect(mockedStorage.set).toHaveBeenCalledWith(
+    'tool_strategy_settings',
+    expect.objectContaining({
+      version: 2,
+      targets: expect.objectContaining({
+        'keyword-hunter-seo-process': {
+          defaultModelsByProvider: {
+            openai: 'gpt-fast',
+          },
+        },
+      }),
     })
   );
   expect(document.querySelector<HTMLSelectElement>('#kt-translation-model-select')?.value).toBe(
@@ -406,9 +430,21 @@ it('uses the model selected in the SEO process page for immersion translation', 
     expect(mockedCallLLM).toHaveBeenCalled();
   });
 
-  expect(mockedStorage.setLLMConfig).toHaveBeenCalledWith(
+  expect(mockedStorage.setLLMConfig).not.toHaveBeenCalledWith(
     'openai',
     expect.objectContaining({ model: 'gpt-fast' })
+  );
+  expect(mockedStorage.set).toHaveBeenCalledWith(
+    'tool_strategy_settings',
+    expect.objectContaining({
+      targets: expect.objectContaining({
+        'keyword-hunter-seo-process': {
+          defaultModelsByProvider: {
+            openai: 'gpt-fast',
+          },
+        },
+      }),
+    })
   );
   expect(mockedCallLLM.mock.calls[0]?.[4]).toBe('gpt-fast');
 });

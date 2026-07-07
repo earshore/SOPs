@@ -1,3 +1,5 @@
+import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
+
 export const THREAD_STORAGE_KEY = 'playground_deep_chat_threads_v1';
 export const MAX_THREAD_COUNT = 30;
 export const MAX_PROMPT_DRAFT_COUNT = 12;
@@ -9,3 +11,11 @@ export const DEEP_CHAT_SCRIPT_MARKER = 'playground-deep-chat-element';
 export const STOPPED_RESPONSE_TEXT = '已停止生成。';
 export const DEEP_CHAT_TEMPLATE_PATH =
   'src/modules/app_center/views/playground/deep-chat/template.html';
+
+export function getMaxThreadCount(): number {
+  return getRuntimeStrategySettings().deepChat.maxThreadCount;
+}
+
+export function getMaxPromptDraftCount(): number {
+  return getRuntimeStrategySettings().deepChat.maxPromptDraftCount;
+}

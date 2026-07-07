@@ -20,9 +20,12 @@ import {
   STORAGE_KEYS,
   CACHE_PREFIXES,
 } from '../../../../../../services/storageService';
+import {
+  applyToolTargetModel,
+  resolveToolTargetModel,
+} from '../../../../../../services/toolStrategyService';
 import { ValidationError, BusinessError } from '@common/errors/AppError';
-import { configCenter } from '../../../../../../common/config/ConfigCenter';
-import type { LLMProviderConfig } from '../../../../../../types/state';
+import { getRuntimeLlmAnalysisOptions } from '../../../../../../services/runtimeStrategyService';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import {
@@ -324,25 +327,6 @@ function getCacheIdentitySignature(identity: AnalysisCacheIdentity): string {
   );
 }
 
-function resolveConfiguredModel(
-  config: Partial<LLMProviderConfig> | LLMConfig | null
-): string | undefined {
-  if (!config) {
-    return undefined;
-  }
-
-  if (config.model) {
-    return config.model;
-  }
-
-  if ('models' in config && Array.isArray(config.models) && config.models[0]) {
-    const firstModel = config.models[0];
-    return typeof firstModel === 'string' ? firstModel : firstModel.id;
-  }
-
-  return undefined;
-}
-
 function getCacheIdentityFromConfig(config: LLMConfig): AnalysisCacheIdentity {
   return {
     provider: config.provider,
@@ -358,7 +342,15 @@ function getConfiguredCacheIdentity(): AnalysisCacheIdentity | null {
   }
 
   const config = StorageService.getLLMConfig(activeProvider);
-  const model = resolveConfiguredModel(config);
+  const model = resolveToolTargetModel(
+    'master-analysis-ai-analysis',
+    config
+      ? {
+          ...config,
+          provider: activeProvider,
+        }
+      : null
+  );
   if (!model) {
     return null;
   }
@@ -541,7 +533,11 @@ async function getLLMConfig(): Promise<LLMConfig> {
     );
   }
 
-  const model = resolveConfiguredModel(config);
+  const strategyConfig = applyToolTargetModel('master-analysis-ai-analysis', {
+    ...config,
+    provider: activeProvider,
+  });
+  const model = strategyConfig?.model;
 
   if (!model) {
     throw new ValidationError(
@@ -555,10 +551,10 @@ async function getLLMConfig(): Promise<LLMConfig> {
 
   return {
     provider: activeProvider,
-    endpoint: config.endpoint,
-    apiKey: config.apiKey,
-    model: model,
-    serviceTier: config.serviceTier,
+    endpoint: strategyConfig.endpoint,
+    apiKey: strategyConfig.apiKey,
+    model,
+    serviceTier: strategyConfig.serviceTier,
   };
 }
 
@@ -641,7 +637,7 @@ async function executeAnalysisTask(
           task.streamChunks = update.chunkCount;
           task.streamedChars = update.content.length;
         },
-        timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
+        timeout: getRuntimeLlmAnalysisOptions().timeout,
         retries: resolveRetryBudget(retryBudget),
       }
     );
@@ -671,8 +667,7 @@ function resolveRetryBudget(retryBudget: number | undefined): number {
     return Math.max(0, Math.floor(retryBudget as number));
   }
 
-  const configuredRetries = configCenter.get<number>('llm.maxRetries');
-  return Number.isFinite(configuredRetries) ? Math.max(0, Math.floor(configuredRetries)) : 2;
+  return getRuntimeLlmAnalysisOptions().retries;
 }
 
 /**

@@ -4,7 +4,8 @@
 
 import { callLLM, type ChatMessage, type LLMOptions } from '../../../../../../services/llmService';
 import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
-import { configCenter } from '../../../../../../common/config/ConfigCenter';
+import { applyToolTargetModel } from '../../../../../../services/toolStrategyService';
+import { getRuntimeLlmAnalysisOptions } from '../../../../../../services/runtimeStrategyService';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt, getReviewSamplingMetadata } from '../prompts/analysisPrompts';
@@ -88,13 +89,11 @@ async function getLLMConfig(): Promise<LLMConfig> {
     });
   }
 
-  const model =
-    config.model ||
-    (config.models && config.models[0]
-      ? typeof config.models[0] === 'string'
-        ? config.models[0]
-        : config.models[0].id
-      : undefined);
+  const strategyConfig = applyToolTargetModel('master-analysis-ai-analysis', {
+    ...config,
+    provider: activeProvider,
+  });
+  const model = strategyConfig?.model;
 
   if (!model) {
     throw new ValidationError(
@@ -108,10 +107,10 @@ async function getLLMConfig(): Promise<LLMConfig> {
 
   return {
     provider: activeProvider,
-    endpoint: config.endpoint,
-    apiKey: config.apiKey,
-    model: model,
-    serviceTier: config.serviceTier,
+    endpoint: strategyConfig.endpoint,
+    apiKey: strategyConfig.apiKey,
+    model,
+    serviceTier: strategyConfig.serviceTier,
   };
 }
 
@@ -173,8 +172,7 @@ async function analyzeTarget(
         maxTokens: getMasterAnalysisTargetMaxTokens(targetId),
         ...(config.serviceTier && { serviceTier: config.serviceTier }),
         stream: true,
-        timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
-        retries: configCenter.get<number>('llm.maxRetries') || 2,
+        ...getRuntimeLlmAnalysisOptions(),
       }
     );
 

@@ -1,4 +1,9 @@
 import { StorageService } from '@/services/storageService';
+import {
+  getRuntimePpcSearchTermsOptions,
+  getRuntimeStrategySettings,
+  saveRuntimeStrategySettings,
+} from '@/services/runtimeStrategyService';
 import type { PpcAnalysisContext } from '../services/llmAnalysisService';
 import { getAnalysisSettingInputs, getInput, getTextarea, setChecked } from './settingsFields';
 
@@ -29,11 +34,10 @@ export function readAnalysisSettings(container: HTMLElement): AnalysisSettings {
 }
 
 export function restoreAnalysisSettings(container: HTMLElement): void {
-  const saved =
-    StorageService.get<Partial<AnalysisSettings>>(ANALYSIS_SETTINGS_STORAGE_KEY, {}) || {};
-  setChecked(container, 'ppc-use-agent', saved.useAgent || false);
-  setChecked(container, 'ppc-allow-local-fallback', saved.allowLocalFallback || false);
-  setChecked(container, 'ppc-use-context', saved.useContext || false);
+  const saved = getRuntimePpcSearchTermsOptions();
+  setChecked(container, 'ppc-use-agent', saved.useAgent);
+  setChecked(container, 'ppc-allow-local-fallback', saved.allowLocalFallback);
+  setChecked(container, 'ppc-use-context', saved.useContext);
 }
 
 export function saveAnalysisSettings(settings: AnalysisSettings): void {
@@ -41,5 +45,15 @@ export function saveAnalysisSettings(settings: AnalysisSettings): void {
     useAgent: settings.useAgent,
     allowLocalFallback: settings.allowLocalFallback,
     useContext: settings.useContext,
+  });
+  const runtimeSettings = getRuntimeStrategySettings();
+  saveRuntimeStrategySettings({
+    ...runtimeSettings,
+    ppcSearchTerms: {
+      ...runtimeSettings.ppcSearchTerms,
+      useAgent: settings.useAgent,
+      allowLocalFallback: settings.allowLocalFallback,
+      useContext: settings.useContext,
+    },
   });
 }

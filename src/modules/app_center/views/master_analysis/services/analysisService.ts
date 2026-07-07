@@ -12,8 +12,8 @@ import { TRANSLATE_PROMPT_TEMPLATE } from '../constants/prompts';
 import { jsonrepair } from 'jsonrepair';
 import { sanitizePromptInput } from '../ai_analysis/prompts/promptSanitizer';
 import {
-  MASTER_ANALYSIS_FULL_REPORT_MAX_TOKENS,
-  MASTER_ANALYSIS_TRANSLATION_MAX_TOKENS,
+  getMasterAnalysisFullReportMaxTokens,
+  getMasterAnalysisTranslationMaxTokens,
 } from './llmOutputBudget';
 import type { ProductData, DataOptions, LLMConfig, AnalysisReport } from '@/types/modules-business';
 
@@ -85,7 +85,7 @@ async function callAnalysisLLM(prompt: string, llmConfig: LLMConfig): Promise<st
     llmConfig.model,
     {
       jsonMode: true,
-      maxTokens: MASTER_ANALYSIS_FULL_REPORT_MAX_TOKENS,
+      maxTokens: getMasterAnalysisFullReportMaxTokens(),
       ...(llmConfig.serviceTier && { serviceTier: llmConfig.serviceTier }),
       stream: true,
       timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
@@ -229,7 +229,7 @@ export const AnalysisService = {
       llmConfig.model,
       {
         jsonMode: true,
-        maxTokens: MASTER_ANALYSIS_TRANSLATION_MAX_TOKENS,
+        maxTokens: getMasterAnalysisTranslationMaxTokens(),
         ...(llmConfig.serviceTier && { serviceTier: llmConfig.serviceTier }),
         stream: true,
         timeout: configCenter.get<number>('llm.defaultTimeout') || 60000,

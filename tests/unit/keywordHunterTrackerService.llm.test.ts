@@ -23,6 +23,7 @@ vi.mock('@/services/storageService', () => ({
   STORAGE_KEYS: {
     LLM_ACTIVE_PROVIDER: 'llm_active_provider',
     LLM_CONFIG_PREFIX: 'llm_',
+    RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
   },
   StorageService: {
     get: vi.fn(),
@@ -34,6 +35,7 @@ vi.mock('@/services/storageService', () => ({
 const mockedCallLLM = vi.mocked(callLLM);
 const mockedLocalDataStore = vi.mocked(LocalDataStore);
 const mockedStorage = vi.mocked(StorageService);
+let activeProvider: string | null = 'openai';
 
 const validListing =
   'Premium wireless earbuds with active noise cancelling, long battery life, ' +
@@ -62,7 +64,12 @@ beforeEach(() => {
   mockedLocalDataStore.get.mockResolvedValue(null);
   mockedLocalDataStore.set.mockResolvedValue(true);
   mockedLocalDataStore.remove.mockResolvedValue(undefined);
-  mockedStorage.get.mockReturnValue('openai');
+  activeProvider = 'openai';
+  mockedStorage.get.mockImplementation((key: string) => {
+    if (key === STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS) return null;
+    if (key === STORAGE_KEYS.LLM_ACTIVE_PROVIDER) return activeProvider;
+    return null;
+  });
   mockedStorage.getLLMConfig.mockReturnValue({
     endpoint: 'https://api.example.test',
     model: 'gpt-test',
@@ -154,13 +161,13 @@ it('removes stale cached Listing analysis and calls the model', async () => {
 });
 
 it('requires an active provider and configured API key/model before calling the LLM', async () => {
-  mockedStorage.get.mockReturnValueOnce(null);
+  activeProvider = null;
 
   await expect(fetchListingAnalysis(validListing, [], [], [])).rejects.toMatchObject({
     code: 'ERR_LLM_PROVIDER_NOT_SELECTED',
   });
 
-  mockedStorage.get.mockReturnValue('openai');
+  activeProvider = 'openai';
   mockedStorage.getLLMConfig.mockReturnValueOnce({
     endpoint: 'https://api.example.test',
     model: 'gpt-test',

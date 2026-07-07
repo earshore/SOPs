@@ -3,8 +3,12 @@
  * 允许用户调整并行分析的性能参数
  */
 
-import { StorageService } from '../../../../../../services/storageService';
 import { getCacheStatsAsync, clearAnalysisCacheAsync } from '../services/parallelAnalysisService';
+import {
+  getRuntimeMasterAnalysisOptions,
+  getRuntimeStrategySettings,
+  saveRuntimeStrategySettings,
+} from '../../../../../../services/runtimeStrategyService';
 import {
   isSchedulingPreference,
   resolveAnalysisSchedule,
@@ -14,7 +18,6 @@ import {
   type ScheduleTier,
 } from '../services/analysisScheduler';
 import { showToast } from '@common/ui/index';
-const SETTINGS_KEY = 'ai_analysis_performance_settings';
 const SETTINGS_VERSION = 3;
 
 export type { AnalysisSchedulePlan, FailureStrategy, SchedulingPreference, ScheduleTier };
@@ -114,15 +117,10 @@ function normalizeSettings(settings: Partial<PerformanceSettings>): PerformanceS
  */
 export function getPerformanceSettings(): PerformanceSettings {
   try {
-    const saved = StorageService.get(SETTINGS_KEY);
-    if (saved && typeof saved === 'object') {
-      const savedSettings = saved as Partial<PerformanceSettings>;
-      return normalizeSettings(savedSettings);
-    }
+    return normalizeSettings(getRuntimeMasterAnalysisOptions());
   } catch {
     return { ...DEFAULT_SETTINGS };
   }
-  return { ...DEFAULT_SETTINGS };
 }
 
 /**
@@ -130,7 +128,16 @@ export function getPerformanceSettings(): PerformanceSettings {
  */
 export function savePerformanceSettings(settings: PerformanceSettings): void {
   try {
-    StorageService.set(SETTINGS_KEY, normalizeSettings(settings));
+    const normalized = normalizeSettings(settings);
+    const runtimeSettings = getRuntimeStrategySettings();
+    saveRuntimeStrategySettings({
+      ...runtimeSettings,
+      masterAnalysis: {
+        ...runtimeSettings.masterAnalysis,
+        schedulingPreference: normalized.schedulingPreference,
+        enableCache: normalized.enableCache,
+      },
+    });
   } catch (error) {
     console.error('[性能设置] 保存失败:', error);
     throw error;

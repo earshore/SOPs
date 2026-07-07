@@ -7,6 +7,7 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import { persist } from './middleware/persist';
 import { devtools } from './middleware/devtools';
+import { getRuntimeKeywordHunterSeoOptions } from '../services/runtimeStrategyService';
 import type {
   UIState,
   ScraperState,
@@ -87,6 +88,7 @@ interface AppStore {
 
 type AppStoreSet = StoreApi<AppStore>['setState'];
 const MAX_PROMPT_HISTORY_ITEMS = 20;
+const initialKeywordHunterMatchSettings = getRuntimeKeywordHunterSeoOptions();
 
 type PersistedAppState = Partial<AppStore> & {
   scraper?: Partial<ScraperState>;
@@ -184,10 +186,10 @@ const initialKeywordTrackerState: KeywordTrackerState = {
   translationMode: false,
   keywordLocationIndex: {},
   settings: {
-    matchPlural: true,
-    matchStem: true,
-    matchCase: false,
-    matchPartial: false,
+    matchPlural: initialKeywordHunterMatchSettings.matchPlural,
+    matchStem: initialKeywordHunterMatchSettings.matchStem,
+    matchCase: initialKeywordHunterMatchSettings.matchCase,
+    matchPartial: initialKeywordHunterMatchSettings.matchPartial,
   },
   isWindowMinimized: false,
   trackingData: null,

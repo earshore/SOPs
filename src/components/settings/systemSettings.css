@@ -44,6 +44,11 @@
   border-color: rgba(165, 243, 252, 0.72);
 }
 
+.settings-section-frame--strategy {
+  background: linear-gradient(135deg, rgba(238, 242, 255, 0.9), rgba(248, 250, 252, 0.62));
+  border-color: rgba(199, 210, 254, 0.72);
+}
+
 .settings-section-frame--data {
   background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(248, 250, 252, 0.62));
   border-color: rgba(191, 219, 254, 0.72);

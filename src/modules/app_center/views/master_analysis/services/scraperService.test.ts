@@ -34,7 +34,25 @@ vi.mock('./historyService', () => ({
 }));
 
 vi.mock('../../../../../services/storageService', () => ({
+  STORAGE_KEYS: {
+    RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
+  },
   StorageService: {
+    get: vi.fn((key: string) =>
+      key === 'runtime_strategy_settings'
+        ? {
+            scraper: {
+              requestTimeoutMs: 100,
+              maxConcurrent: 2,
+              maxRetries: 2,
+              retryDelayMs: 1000,
+              batchSize: 2,
+              batchDelayMs: 1,
+              cacheDurationMs: 24 * 60 * 60 * 1000,
+            },
+          }
+        : null
+    ),
     getProxyConfigWithCredential: mocks.getProxyConfigWithCredential,
   },
 }));

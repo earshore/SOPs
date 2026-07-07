@@ -8,6 +8,8 @@ import { showToast } from '@/common/ui/notifications';
 import { setSafeHtml } from '@/common/utils/security';
 import { callLLM, type ChatMessage } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
+import { resolveToolTargetModel } from '@/services/toolStrategyService';
+import { getRuntimeDeepChatOptions } from '@/services/runtimeStrategyService';
 import { LocalDataStore } from '@/services/localDataStore';
 import { appStore } from '@/stores/useAppStore';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
@@ -30,7 +32,7 @@ import {
 } from './requestLifecycle';
 import {
   buildBudgetedPlaygroundMessages,
-  DEFAULT_PLAYGROUND_REQUEST_BUDGET,
+  getPlaygroundRequestBudgetDefaults,
   getPlaygroundMessageBudgetError,
   getPlaygroundSystemPromptBudgetError,
   resolvePlaygroundRequestBudget,
@@ -41,7 +43,7 @@ import {
   DEEP_CHAT_TEMPLATE_PATH,
   DRAFT_PERSIST_DEBOUNCE_MS,
   EMPTY_CHAT_WRAP_HEIGHT,
-  MAX_THREAD_COUNT,
+  getMaxThreadCount,
   STOPPED_RESPONSE_TEXT,
   THREAD_RAIL_COLLAPSED_CLASS,
   THREAD_STORAGE_KEY,
@@ -213,7 +215,10 @@ async function refreshLLMConfig(container: HTMLElement): Promise<void> {
   const modelSelect = container.querySelector<HTMLSelectElement>('#playground-model-select');
 
   currentConfig = await StorageService.getLLMConfigWithKey();
-  selectedModel = currentConfig?.model || getFirstModel(currentConfig) || '';
+  selectedModel =
+    resolveToolTargetModel('playground-deep-chat', currentConfig) ||
+    getFirstModel(currentConfig) ||
+    '';
 
   if (!modelSelect) {
     return;
@@ -1431,9 +1436,10 @@ async function callPlaygroundLLM(context: PlaygroundLLMCallContext): Promise<str
     model,
     {
       temperature: sessionTemperature,
-      maxTokens: DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxOutputTokens,
+      maxTokens: getPlaygroundRequestBudgetDefaults().maxOutputTokens,
       ...(config.serviceTier && { serviceTier: config.serviceTier }),
       retries: 0,
+      ...getRuntimeDeepChatOptions(),
       signal: controller.signal,
       stream: true,
       onStreamUpdate: update => {
@@ -1520,7 +1526,7 @@ function createThread(container: HTMLElement, options: CreateThreadOptions = {})
   };
   threadStore = {
     activeThreadId: nextThread.id,
-    threads: [nextThread, ...threadStore.threads].slice(0, MAX_THREAD_COUNT),
+    threads: [nextThread, ...threadStore.threads].slice(0, getMaxThreadCount()),
   };
   persistThreadStoreNow();
   renderHistoryThreadList(container);
@@ -1867,7 +1873,7 @@ function saveThreadMessages(
     threads: [
       nextThread,
       ...threadStore.threads.filter(thread => thread.id !== nextThread.id),
-    ].slice(0, MAX_THREAD_COUNT),
+    ].slice(0, getMaxThreadCount()),
   };
   persistThreadStoreNow();
   if (container) {
@@ -1893,7 +1899,7 @@ async function loadThreadStore(): Promise<PlaygroundThreadStore> {
     .map(sanitizeThread)
     .filter((thread): thread is PlaygroundThread => thread !== null)
     .sort((a, b) => b.updatedAt - a.updatedAt)
-    .slice(0, MAX_THREAD_COUNT);
+    .slice(0, getMaxThreadCount());
 
   if (threads.length === 0) {
     return createDefaultThreadStore();
@@ -1924,7 +1930,7 @@ function persistThreadStoreNow(): void {
 }
 
 function getPersistableThreadStore(): PlaygroundThreadStore {
-  const threads = threadStore.threads.filter(isPersistableThread).slice(0, MAX_THREAD_COUNT);
+  const threads = threadStore.threads.filter(isPersistableThread).slice(0, getMaxThreadCount());
   const activeThreadId = threads.some(thread => thread.id === threadStore.activeThreadId)
     ? threadStore.activeThreadId
     : threads[0]?.id || '';
@@ -2183,7 +2189,7 @@ function applyPendingRequestsToThreadStore(store: PlaygroundThreadStore): Playgr
       threads: [
         nextThread,
         ...nextStore.threads.filter(thread => thread.id !== nextThread.id),
-      ].slice(0, MAX_THREAD_COUNT),
+      ].slice(0, getMaxThreadCount()),
     };
   });
 

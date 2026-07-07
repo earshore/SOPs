@@ -4,8 +4,11 @@
 // ================================================================
 
 import { appStore } from '@/stores/useAppStore';
-import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
-import { configCenter } from '../../../../../common/config/ConfigCenter';
+import {
+  getRuntimeStorageStrategyOptions,
+  StorageService,
+  STORAGE_KEYS,
+} from '../../../../../services/storageService';
 import type {
   GeneratedPromptRecord,
   HistoryItem,
@@ -17,10 +20,6 @@ import type {
 import type { UserProductProfile } from '../../../../../types/state';
 import { getReportFingerprint, getScrapedDataFingerprint } from './reportIdentity';
 
-const MAX_HISTORY_ITEMS =
-  configCenter.get<number>('storage.historyMaxItems') ||
-  configCenter.get<number>('history.maxItems') ||
-  50;
 const MAX_PROMPT_RESULT_HISTORY = 20;
 
 let historyCache: HistoryItem[] | null = null;
@@ -369,7 +368,8 @@ function upsertHistoryItem(history: HistoryItem[], draft: HistoryDraft): void {
 }
 
 function trimHistory(history: HistoryItem[]): HistoryItem[] {
-  return history.sort((a, b) => getHistoryTime(b) - getHistoryTime(a)).slice(0, MAX_HISTORY_ITEMS);
+  const maxItems = getRuntimeStorageStrategyOptions().historyMaxItems;
+  return history.sort((a, b) => getHistoryTime(b) - getHistoryTime(a)).slice(0, maxItems);
 }
 
 function removeHistoryItem(history: HistoryItem[], id: HistoryItem['id']): HistoryItem[] | null {

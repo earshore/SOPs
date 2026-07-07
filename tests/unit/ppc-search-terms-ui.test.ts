@@ -165,6 +165,9 @@ vi.mock('@/common/ui/notifications', () => ({
 }));
 
 vi.mock('@/services/storageService', () => ({
+  STORAGE_KEYS: {
+    RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
+  },
   StorageService: {
     get: mocks.storageGet,
     set: mocks.storageSet,
@@ -292,16 +295,22 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     unmount();
     container.replaceChildren();
     mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
-      if (key === 'ppc_search_terms_thresholds_v1') {
+      const thresholds = {
+        targetAcos: 42,
+        highAcos: 63,
+        minClicksNoOrder: 18,
+        minSpendNoOrder: 24,
+        minOrdersHarvest: 4,
+        minCtr: 0.5,
+      };
+      if (key === 'runtime_strategy_settings') {
         return {
-          targetAcos: 42,
-          highAcos: 63,
-          minClicksNoOrder: 18,
-          minSpendNoOrder: 24,
-          minOrdersHarvest: 4,
-          minCtr: 0.5,
+          ppcSearchTerms: {
+            thresholds,
+          },
         };
       }
+      if (key === 'ppc_search_terms_thresholds_v1') return thresholds;
       return fallback;
     });
 

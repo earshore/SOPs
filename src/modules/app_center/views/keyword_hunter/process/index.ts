@@ -21,6 +21,11 @@ import { fetchModelsFromApi } from '../../../../../services/llmService';
 import { appStore } from '../../../../../stores/useAppStore';
 import { ErrorService } from '../../../../../services/errorService';
 import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
+import {
+  getToolTargetDefaultModel,
+  setToolTargetDefaultModel,
+} from '../../../../../services/toolStrategyService';
+import { getRuntimeKeywordHunterSeoOptions } from '../../../../../services/runtimeStrategyService';
 import { createSafeFragment } from '../../../../../common/utils/security';
 import { updateRuntimeCssRule } from '../../../../../common/utils/runtimeStyles';
 import type { KeywordHunterSnapshot } from '../../../../../types/modules-business';
@@ -90,6 +95,7 @@ interface HighlightedTranslationParagraph {
 type KeywordTrackerStoreState = ReturnType<typeof appStore.getState>['keywordTracker'];
 type MatchedKeywordEntry = KeywordTrackerStoreState['matchedKeywords'][number] | string;
 type TranslationModelOption = NonNullable<LLMProviderConfig['models']>[number];
+const SEO_PROCESS_TARGET_ID = 'keyword-hunter-seo-process';
 
 let eventListeners: EventListenerRecord[] = []; // 用于清理事件监听器
 let timeouts: number[] = []; // 用于清理定时器
@@ -216,15 +222,22 @@ function getTranslationModelOptions(
 ): TranslationModelOption[] {
   const presetModels = provider ? getLlmProviderConfig(provider)?.models || [] : [];
   const configuredModels = config?.models || [];
+  const strategyModel = provider ? getToolTargetDefaultModel(SEO_PROCESS_TARGET_ID, provider) : '';
   return dedupeTranslationModels(
-    ensureTranslationModelOption([...configuredModels, ...presetModels], config?.model)
+    ensureTranslationModelOption(
+      ensureTranslationModelOption([...configuredModels, ...presetModels], config?.model),
+      strategyModel
+    )
   );
 }
 
 function getTranslationModelSelection(
+  provider: string | null,
   config: Partial<LLMProviderConfig> | null,
   models: TranslationModelOption[]
 ): string {
+  const strategyModel = provider ? getToolTargetDefaultModel(SEO_PROCESS_TARGET_ID, provider) : '';
+  if (strategyModel) return strategyModel;
   if (config?.model) return config.model;
   const firstModel = models[0];
   return firstModel ? getTranslationModelId(firstModel) : '';
@@ -276,7 +289,7 @@ function renderTranslationModelSelector(): void {
   const provider = getActiveLlmProvider();
   const config = provider ? getTranslationLlmConfig(provider) : null;
   const models = getTranslationModelOptions(provider, config);
-  const selectedModel = getTranslationModelSelection(config, models);
+  const selectedModel = getTranslationModelSelection(provider, config, models);
 
   select.replaceChildren();
   if (models.length === 0) {
@@ -306,25 +319,31 @@ function renderTranslationModelSelector(): void {
   renderTranslationModelRefreshButton();
 }
 
-function saveTranslationLlmConfig(
+function saveTranslationModelCatalog(
   provider: string,
   config: Partial<LLMProviderConfig> | null,
-  model: string,
-  models: TranslationModelOption[]
+  models: TranslationModelOption[],
+  fallbackModel?: string
 ): void {
   const presetConfig = getLlmProviderConfig(provider);
+  const persistedModel =
+    config?.model || fallbackModel || (models[0] ? getTranslationModelId(models[0]) : '');
   const nextConfig: LLMProviderConfig = {
     ...config,
     provider,
     endpoint: config?.endpoint || presetConfig?.endpoint || '',
     apiKey: '',
-    model,
+    model: persistedModel,
     models,
     enabled: config?.enabled ?? true,
     ...(config?.serviceTier && { serviceTier: config.serviceTier }),
   };
 
   StorageService.setLLMConfig(provider, nextConfig);
+}
+
+function saveTranslationStrategyModel(provider: string, model: string): void {
+  setToolTargetDefaultModel(SEO_PROCESS_TARGET_ID, provider, model);
 }
 
 function selectTranslationModel(event: Event): void {
@@ -340,7 +359,8 @@ function selectTranslationModel(event: Event): void {
 
   const config = getTranslationLlmConfig(provider);
   const models = ensureTranslationModelOption(getTranslationModelOptions(provider, config), model);
-  saveTranslationLlmConfig(provider, config, model, models);
+  saveTranslationModelCatalog(provider, config, models, model);
+  saveTranslationStrategyModel(provider, model);
   setTranslationModelStatus(`当前 AI 翻译模型：${model}`);
   showToast(`AI 翻译模型已切换为 ${model}`, { type: 'success' });
 }
@@ -379,10 +399,11 @@ async function resolveTranslationModelRefreshConfig(
 }
 
 function getNextTranslationModel(
+  provider: string,
   config: Partial<LLMProviderConfig> | null,
   models: TranslationModelOption[]
 ): string {
-  const selectedModel = getTranslationModelSelection(config, models);
+  const selectedModel = getTranslationModelSelection(provider, config, models);
   const modelExists = models.some(model => getTranslationModelId(model) === selectedModel);
   const fallbackModel = models[0];
   if (!fallbackModel) {
@@ -411,8 +432,9 @@ async function refreshTranslationModels(): Promise<void> {
 
     const models = await fetchModelsFromApi(provider, refreshConfig.endpoint, refreshConfig.apiKey);
     const config = refreshConfig.configWithKey || refreshConfig.storedConfig;
-    const nextModel = getNextTranslationModel(config, models);
-    saveTranslationLlmConfig(provider, config, nextModel, models);
+    const nextModel = getNextTranslationModel(provider, config, models);
+    saveTranslationModelCatalog(provider, config, models, nextModel);
+    saveTranslationStrategyModel(provider, nextModel);
     renderTranslationModelSelector();
     showToast(`成功同步 ${models.length} 个模型`, { type: 'success' });
   } catch (error) {
@@ -435,6 +457,7 @@ function getKeywordSet(sets: Set<string>[], index: number): Set<string> {
 }
 
 function getDefaultProcessKeywordTrackerState(): KeywordTrackerStoreState {
+  const defaultMatchSettings = getRuntimeKeywordHunterSeoOptions();
   return {
     keywords: [],
     processedCopy: '',
@@ -446,10 +469,10 @@ function getDefaultProcessKeywordTrackerState(): KeywordTrackerStoreState {
     translationMode: false,
     keywordLocationIndex: {},
     settings: {
-      matchPlural: true,
-      matchStem: true,
-      matchCase: false,
-      matchPartial: false,
+      matchPlural: defaultMatchSettings.matchPlural,
+      matchStem: defaultMatchSettings.matchStem,
+      matchCase: defaultMatchSettings.matchCase,
+      matchPartial: defaultMatchSettings.matchPartial,
     },
     isWindowMinimized: false,
   };

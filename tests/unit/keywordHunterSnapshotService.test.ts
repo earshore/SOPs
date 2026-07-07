@@ -69,6 +69,11 @@ vi.mock('@/services/storageService', () => ({
   STORAGE_KEYS: {
     KEYWORD_HUNTER_SNAPSHOTS: 'keyword_hunter_snapshots',
   },
+  getRuntimeStorageStrategyOptions: vi.fn(() => ({
+    historyMaxItems: 50,
+    lruWarningThreshold: 0.8,
+    lruCleanupRatio: 0.3,
+  })),
   StorageService: {
     get: vi.fn(() => mocks.snapshots),
     set: mocks.setSnapshots,

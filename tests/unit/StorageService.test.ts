@@ -404,6 +404,27 @@ describe('采集历史管理', () => {
     expect(result.length).toBe(50);
   });
 
+  it('应该按运行策略限制历史记录数量', () => {
+    localStorage.setItem(
+      STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS,
+      JSON.stringify({
+        storage: {
+          historyMaxItems: 12,
+        },
+      })
+    );
+    const history = Array.from({ length: 20 }, (_, i) => ({
+      id: String(i),
+      url: `https://example.com/${i}`,
+      timestamp: Date.now(),
+    }));
+
+    StorageService.setScrapeHistory(history);
+    const result = StorageService.getScrapeHistory();
+
+    expect(result.length).toBe(12);
+  });
+
   it('应该在没有历史时返回空数组', () => {
     const result = StorageService.getScrapeHistory();
     expect(result).toEqual([]);

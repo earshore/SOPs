@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@/services/llmService';
+import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
 import type { LLMProviderConfig } from '@/types/state';
 
 export interface PlaygroundRequestBudget {
@@ -20,6 +21,16 @@ export const DEFAULT_PLAYGROUND_REQUEST_BUDGET: PlaygroundRequestBudget = {
   maxOutputTokens: 2000,
 };
 
+export function getPlaygroundRequestBudgetDefaults(): PlaygroundRequestBudget {
+  const settings = getRuntimeStrategySettings().deepChat;
+  return {
+    maxMessageChars: settings.maxMessageChars,
+    maxSystemPromptChars: settings.maxSystemPromptChars,
+    maxContextChars: settings.maxContextChars,
+    maxOutputTokens: settings.maxOutputTokens,
+  };
+}
+
 const DEFAULT_CONTEXT_WINDOW_TOKENS = 128000;
 const MIN_INPUT_CONTEXT_TOKENS = 12000;
 const MAX_INPUT_CONTEXT_TOKENS = 32000;
@@ -33,23 +44,33 @@ export function resolvePlaygroundRequestBudget(
   config: LLMProviderConfig | null,
   model: string
 ): PlaygroundRequestBudget {
+  const configuredBudget = getPlaygroundRequestBudgetDefaults();
   const contextTokens = getModelContextTokens(config, model) || DEFAULT_CONTEXT_WINDOW_TOKENS;
   const availableInputTokens = Math.max(
     1000,
-    contextTokens - DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxOutputTokens - CONTEXT_SAFETY_TOKENS
+    contextTokens - configuredBudget.maxOutputTokens - CONTEXT_SAFETY_TOKENS
   );
   const targetInputTokens = Math.min(
     availableInputTokens,
     Math.max(MIN_INPUT_CONTEXT_TOKENS, Math.floor(contextTokens * CONTEXT_TARGET_RATIO)),
     MAX_INPUT_CONTEXT_TOKENS
   );
-  const maxContextChars = Math.max(4000, targetInputTokens * APPROX_CHARS_PER_TOKEN);
+  const maxContextChars = Math.min(
+    configuredBudget.maxContextChars,
+    Math.max(4000, targetInputTokens * APPROX_CHARS_PER_TOKEN)
+  );
 
   return {
     maxContextChars,
-    maxMessageChars: Math.floor(maxContextChars * SINGLE_MESSAGE_OVERFLOW_RATIO),
-    maxSystemPromptChars: Math.floor(maxContextChars * SYSTEM_PROMPT_CONTEXT_RATIO),
-    maxOutputTokens: DEFAULT_PLAYGROUND_REQUEST_BUDGET.maxOutputTokens,
+    maxMessageChars: Math.min(
+      configuredBudget.maxMessageChars || Number.MAX_SAFE_INTEGER,
+      Math.floor(maxContextChars * SINGLE_MESSAGE_OVERFLOW_RATIO)
+    ),
+    maxSystemPromptChars: Math.min(
+      configuredBudget.maxSystemPromptChars || Number.MAX_SAFE_INTEGER,
+      Math.floor(maxContextChars * SYSTEM_PROMPT_CONTEXT_RATIO)
+    ),
+    maxOutputTokens: configuredBudget.maxOutputTokens,
   };
 }
 

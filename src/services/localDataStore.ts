@@ -84,6 +84,8 @@ const LOCAL_DATA_BUCKET_IDS: LocalDataBucketId[] = [
 ];
 const CONFIG_KEYS = new Set([
   'llm_active_provider',
+  'tool_strategy_settings',
+  'runtime_strategy_settings',
   'ai_analysis_performance_settings',
   'app_theme',
   'app-theme',

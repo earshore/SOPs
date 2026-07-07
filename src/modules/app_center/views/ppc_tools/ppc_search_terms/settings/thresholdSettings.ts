@@ -1,4 +1,9 @@
 import { StorageService } from '@/services/storageService';
+import {
+  getRuntimePpcSearchTermsOptions,
+  getRuntimeStrategySettings,
+  saveRuntimeStrategySettings,
+} from '@/services/runtimeStrategyService';
 import { readNumber, setInputValue } from './settingsFields';
 import {
   HIGH_ACOS_FIELD,
@@ -26,7 +31,7 @@ export function readThresholds(container: HTMLElement): Thresholds {
 }
 
 export function restoreThresholds(container: HTMLElement): void {
-  const saved = StorageService.get<Partial<Thresholds>>(STORAGE_KEY, {}) || {};
+  const saved = getRuntimePpcSearchTermsOptions().thresholds;
   THRESHOLD_FIELDS.forEach(field => {
     setInputValue(container, field.id, saved[field.key], field.defaultValue);
   });
@@ -34,6 +39,14 @@ export function restoreThresholds(container: HTMLElement): void {
 
 export function saveThresholds(thresholds: Thresholds): void {
   StorageService.set(STORAGE_KEY, thresholds);
+  const runtimeSettings = getRuntimeStrategySettings();
+  saveRuntimeStrategySettings({
+    ...runtimeSettings,
+    ppcSearchTerms: {
+      ...runtimeSettings.ppcSearchTerms,
+      thresholds,
+    },
+  });
 }
 
 function readThresholdField(container: HTMLElement, field: ThresholdFieldDefinition): number {

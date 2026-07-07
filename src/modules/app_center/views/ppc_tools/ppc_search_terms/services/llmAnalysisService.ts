@@ -1,8 +1,13 @@
-import { configCenter } from '@/common/config/ConfigCenter';
 import { ValidationError } from '@common/errors/AppError';
 import { callLLM, type LLMOptions, type LLMStreamMetrics } from '@/services/llmService';
 import { LocalDataStore } from '@/services/localDataStore';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+import { applyToolTargetModel } from '@/services/toolStrategyService';
+import {
+  getRuntimeLlmAnalysisOptions,
+  getRuntimePpcSearchTermsOptions,
+  type RuntimeStrategySettings,
+} from '@/services/runtimeStrategyService';
 import { buildPpcAgentMessages } from '../agents/agentPrompt';
 import { ensureCompleteDecisions, parsePpcLlmDecisions } from '../agents/agentResponse';
 import {
@@ -39,15 +44,9 @@ interface LLMConfig {
 type LLMCacheConfig = Omit<LLMConfig, 'apiKey'>;
 type GetLLMRequestConfig = () => Promise<LLMConfig>;
 
-const PPC_BATCH_SIZE = 80;
-const PPC_MAX_CONCURRENT_BATCHES = 2;
-const PPC_LLM_OUTPUT_TOKEN_BUFFER = 1000;
-const PPC_LLM_OUTPUT_TOKENS_PER_ROW = 120;
-const PPC_LLM_MIN_OUTPUT_TOKENS = 2048;
-const PPC_LLM_MAX_OUTPUT_TOKENS = 12000;
 const PPC_LLM_CACHE_VERSION = 'v1';
 const PPC_LLM_CACHE_PREFIX = 'cache:ppc-llm:';
-const PPC_LLM_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+type PpcSearchTermsRuntimeOptions = RuntimeStrategySettings['ppcSearchTerms'];
 
 interface CachedPpcLlmEntry {
   decisions: PpcLlmDecision[];
@@ -72,12 +71,22 @@ interface PpcBatchRequestOptions {
   serviceTier?: LLMOptions['serviceTier'];
 }
 
+interface AnalyzePpcBatchInput {
+  input: PpcLlmAnalysisInput;
+  config: LLMCacheConfig;
+  rows: AnalyzedRow[];
+  runtimeOptions: PpcSearchTermsRuntimeOptions;
+  onFirstResponse: ((metrics: LLMStreamMetrics) => void) | undefined;
+  getRequestConfig: GetLLMRequestConfig;
+}
+
 interface ExecutePpcBatchRequestInput {
   input: PpcLlmAnalysisInput;
   rows: AnalyzedRow[];
   messages: ReturnType<typeof buildPpcAgentMessages>;
   cacheOptions: PpcBatchRequestOptions;
   cacheKey: string;
+  enableCache: boolean;
   onFirstResponse: ((metrics: LLMStreamMetrics) => void) | undefined;
   getRequestConfig: GetLLMRequestConfig;
 }
@@ -161,8 +170,9 @@ async function analyzePpcSearchTermsWithLLMResult(
   }
 
   const config = getLLMCacheConfig();
-  const batches = chunkRows(input.rows, PPC_BATCH_SIZE);
-  const result = await analyzePpcBatches(input, config, batches);
+  const runtimeOptions = getRuntimePpcSearchTermsOptions();
+  const batches = chunkRows(input.rows, runtimeOptions.batchSize);
+  const result = await analyzePpcBatches(input, config, batches, runtimeOptions);
 
   ensureCompleteDecisions(input.rows, result.decisions);
   return result;
@@ -171,10 +181,11 @@ async function analyzePpcSearchTermsWithLLMResult(
 async function analyzePpcBatches(
   input: PpcLlmAnalysisInput,
   config: LLMCacheConfig,
-  batches: AnalyzedRow[][]
+  batches: AnalyzedRow[][],
+  runtimeOptions: PpcSearchTermsRuntimeOptions
 ): Promise<PpcLlmAnalysisResult> {
   const batchResults: Array<PpcLlmDecision[] | undefined> = [];
-  const workerCount = Math.min(PPC_MAX_CONCURRENT_BATCHES, batches.length);
+  const workerCount = Math.min(runtimeOptions.maxConcurrentBatches, batches.length);
   let nextBatchIndex = 0;
   let completedBatches = 0;
   let cachedBatches = 0;
@@ -192,11 +203,12 @@ async function analyzePpcBatches(
       if (batchIndex >= batches.length) return;
 
       try {
-        const batchResult = await analyzePpcBatch(
+        const batchResult = await analyzePpcBatch({
           input,
           config,
-          batches[batchIndex] || [],
-          metrics => {
+          rows: batches[batchIndex] || [],
+          runtimeOptions,
+          onFirstResponse: metrics => {
             input.onProgress?.({
               completedBatches,
               totalBatches: batches.length,
@@ -207,8 +219,8 @@ async function analyzePpcBatches(
               },
             });
           },
-          getRequestConfig
-        );
+          getRequestConfig,
+        });
         batchResults[batchIndex] = batchResult.decisions;
         if (batchResult.fromCache) {
           cachedBatches += 1;
@@ -244,24 +256,27 @@ async function analyzePpcBatches(
   };
 }
 
-async function analyzePpcBatch(
-  input: PpcLlmAnalysisInput,
-  config: LLMCacheConfig,
-  rows: AnalyzedRow[],
-  onFirstResponse: ((metrics: LLMStreamMetrics) => void) | undefined,
-  getRequestConfig: GetLLMRequestConfig
-): Promise<PpcBatchAnalysisResult> {
+async function analyzePpcBatch({
+  input,
+  config,
+  rows,
+  runtimeOptions,
+  onFirstResponse,
+  getRequestConfig,
+}: AnalyzePpcBatchInput): Promise<PpcBatchAnalysisResult> {
   const messages = buildPpcAgentMessages(rows, input.thresholds, input.context);
   const cacheOptions = {
     temperature: 0.1,
     jsonMode: true,
-    maxTokens: getPpcLlmMaxTokens(rows.length),
+    maxTokens: getPpcLlmMaxTokens(rows.length, runtimeOptions),
     ...(config.serviceTier && { serviceTier: config.serviceTier }),
   };
   const cacheKey = generatePpcBatchCacheKey(config, messages, cacheOptions);
-  const cachedDecisions = await getCachedPpcBatchDecisions(cacheKey);
-  if (cachedDecisions) {
-    return { decisions: cachedDecisions, fromCache: true };
+  if (runtimeOptions.enableLlmCache) {
+    const cachedDecisions = await getCachedPpcBatchDecisions(cacheKey, runtimeOptions.cacheTtlMs);
+    if (cachedDecisions) {
+      return { decisions: cachedDecisions, fromCache: true };
+    }
   }
 
   if (!input.signal) {
@@ -276,6 +291,7 @@ async function analyzePpcBatch(
       messages,
       cacheOptions,
       cacheKey,
+      enableCache: runtimeOptions.enableLlmCache,
       onFirstResponse,
       getRequestConfig,
     });
@@ -293,6 +309,7 @@ async function analyzePpcBatch(
     messages,
     cacheOptions,
     cacheKey,
+    enableCache: runtimeOptions.enableLlmCache,
     onFirstResponse,
     getRequestConfig,
   });
@@ -304,6 +321,7 @@ async function executePpcBatchRequest({
   messages,
   cacheOptions,
   cacheKey,
+  enableCache,
   onFirstResponse,
   getRequestConfig,
 }: ExecutePpcBatchRequestInput): Promise<PpcBatchAnalysisResult> {
@@ -319,14 +337,15 @@ async function executePpcBatchRequest({
       stream: true,
       signal: input.signal,
       onFirstResponse,
-      timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
-      retries: configCenter.get<number>('llm.maxRetries') || 2,
+      ...getRuntimeLlmAnalysisOptions(),
     }
   );
 
   const decisions = parsePpcLlmDecisions(response);
   ensureCompleteDecisions(rows, decisions);
-  await setCachedPpcBatchDecisions(cacheKey, decisions);
+  if (enableCache) {
+    await setCachedPpcBatchDecisions(cacheKey, decisions);
+  }
   return { decisions, fromCache: false };
 }
 
@@ -336,12 +355,15 @@ function flattenBatchDecisions(
   return batchResults.flatMap(decisions => decisions || []);
 }
 
-function getPpcLlmMaxTokens(rowCount: number): number {
+function getPpcLlmMaxTokens(
+  rowCount: number,
+  runtimeOptions: PpcSearchTermsRuntimeOptions
+): number {
   return Math.min(
-    PPC_LLM_MAX_OUTPUT_TOKENS,
+    runtimeOptions.maxOutputTokens,
     Math.max(
-      PPC_LLM_MIN_OUTPUT_TOKENS,
-      PPC_LLM_OUTPUT_TOKEN_BUFFER + rowCount * PPC_LLM_OUTPUT_TOKENS_PER_ROW
+      runtimeOptions.minOutputTokens,
+      runtimeOptions.outputTokenBuffer + rowCount * runtimeOptions.outputTokensPerRow
     )
   );
 }
@@ -375,13 +397,16 @@ function isCachedPpcLlmEntry(value: unknown): value is CachedPpcLlmEntry {
   );
 }
 
-async function getCachedPpcBatchDecisions(cacheKey: string): Promise<PpcLlmDecision[] | null> {
+async function getCachedPpcBatchDecisions(
+  cacheKey: string,
+  cacheTtlMs: number
+): Promise<PpcLlmDecision[] | null> {
   try {
     const cached = await LocalDataStore.get<CachedPpcLlmEntry>(cacheKey, null);
     if (!isCachedPpcLlmEntry(cached)) {
       return null;
     }
-    if (Date.now() - cached.timestamp >= PPC_LLM_CACHE_TTL_MS) {
+    if (Date.now() - cached.timestamp >= cacheTtlMs) {
       await LocalDataStore.remove(cacheKey);
       return null;
     }
@@ -441,13 +466,11 @@ function getLLMCacheConfig(): LLMCacheConfig {
     );
   }
 
-  const model =
-    config.model ||
-    (config.models?.[0]
-      ? typeof config.models[0] === 'string'
-        ? config.models[0]
-        : config.models[0].id
-      : undefined);
+  const strategyConfig = applyToolTargetModel('ppc-tools-ppc-search-terms', {
+    ...config,
+    provider: activeProvider,
+  });
+  const model = strategyConfig?.model;
   if (!model) {
     throw new ValidationError(
       '未选择模型，请在设置中同步或选择模型',
@@ -460,9 +483,9 @@ function getLLMCacheConfig(): LLMCacheConfig {
 
   return {
     provider: activeProvider,
-    endpoint: config.endpoint || '',
+    endpoint: strategyConfig.endpoint || '',
     model,
-    serviceTier: config.serviceTier,
+    serviceTier: strategyConfig.serviceTier,
   };
 }
 

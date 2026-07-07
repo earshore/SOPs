@@ -25,6 +25,8 @@ export const STORAGE_KEYS = {
   // === LLM 配置 ===
   LLM_ACTIVE_PROVIDER: 'llm_active_provider',
   LLM_CONFIG_PREFIX: 'llm_',
+  TOOL_STRATEGY_SETTINGS: 'tool_strategy_settings',
+  RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
 
   // === 代理配置 ===
   PROXY_CONFIG: 'proxy_config',
@@ -132,6 +134,68 @@ export interface LRUConfig {
   maxSize: number;
   warningThreshold: number;
   cleanupRatio: number;
+}
+
+export interface RuntimeStorageStrategyOptions {
+  historyMaxItems: number;
+  lruWarningThreshold: number;
+  lruCleanupRatio: number;
+}
+
+const DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS: RuntimeStorageStrategyOptions = {
+  historyMaxItems: 50,
+  lruWarningThreshold: 0.8,
+  lruCleanupRatio: 0.3,
+};
+
+function clampRuntimeNumber(value: unknown, fallback: number, min: number, max: number): number {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.max(min, Math.min(Math.round(numeric), max));
+}
+
+function clampRuntimeRatio(value: unknown, fallback: number, min: number, max: number): number {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.max(min, Math.min(numeric, max));
+}
+
+export function getRuntimeStorageStrategyOptions(): RuntimeStorageStrategyOptions {
+  try {
+    if (typeof localStorage === 'undefined') {
+      return { ...DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS };
+    }
+
+    const raw = localStorage.getItem(STORAGE_KEYS.RUNTIME_STRATEGY_SETTINGS);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : null;
+    const storage =
+      isRecord(parsed) && isRecord(parsed.storage)
+        ? parsed.storage
+        : DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS;
+
+    return {
+      historyMaxItems: clampRuntimeNumber(
+        storage.historyMaxItems,
+        DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS.historyMaxItems,
+        10,
+        500
+      ),
+      lruWarningThreshold: clampRuntimeRatio(
+        storage.lruWarningThreshold,
+        DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS.lruWarningThreshold,
+        0.5,
+        0.95
+      ),
+      lruCleanupRatio: clampRuntimeRatio(
+        storage.lruCleanupRatio,
+        DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS.lruCleanupRatio,
+        0.05,
+        0.8
+      ),
+    };
+  } catch {
+    return { ...DEFAULT_RUNTIME_STORAGE_STRATEGY_OPTIONS };
+  }
 }
 
 /**
@@ -580,7 +644,8 @@ class StorageServiceClass implements IStorageService {
   private _checkCacheSize(newItemSize: number): void {
     const usage = this.getUsage();
     const projectedUsage = usage.used + newItemSize;
-    const threshold = this._lruConfig.maxSize * this._lruConfig.warningThreshold;
+    const threshold =
+      this._lruConfig.maxSize * getRuntimeStorageStrategyOptions().lruWarningThreshold;
 
     if (projectedUsage > threshold) {
       this._cleanupLRU();
@@ -594,7 +659,7 @@ class StorageServiceClass implements IStorageService {
     try {
       const items = this._getAccessTimes();
       const usage = this.getUsage();
-      const targetSize = usage.used * (1 - this._lruConfig.cleanupRatio);
+      const targetSize = usage.used * (1 - getRuntimeStorageStrategyOptions().lruCleanupRatio);
 
       let currentSize = usage.used;
 
@@ -683,8 +748,9 @@ class StorageServiceClass implements IStorageService {
     this._cleanupLRU();
 
     const history = this.get<unknown[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
-    if (history && history.length > 10) {
-      this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, 10));
+    const maxItems = getRuntimeStorageStrategyOptions().historyMaxItems;
+    if (history && history.length > maxItems) {
+      this.set(STORAGE_KEYS.SCRAPE_HISTORY, history.slice(0, maxItems));
     }
   }
 
@@ -934,7 +1000,7 @@ class StorageServiceClass implements IStorageService {
    * 保存采集历史
    */
   setScrapeHistory(history: HistoryItem[]): boolean {
-    const maxItems = 50;
+    const maxItems = getRuntimeStorageStrategyOptions().historyMaxItems;
     const trimmed = history.slice(0, maxItems);
     return this.set(STORAGE_KEYS.SCRAPE_HISTORY, trimmed);
   }
@@ -971,7 +1037,7 @@ class StorageServiceClass implements IStorageService {
    * 保存采集历史（IndexedDB，大对象层）
    */
   async setScrapeHistoryAsync(history: HistoryItem[]): Promise<boolean> {
-    const maxItems = 50;
+    const maxItems = getRuntimeStorageStrategyOptions().historyMaxItems;
     const trimmed = history.slice(0, maxItems);
 
     try {
