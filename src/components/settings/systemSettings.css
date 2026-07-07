@@ -49,6 +49,68 @@
   border-color: rgba(199, 210, 254, 0.72);
 }
 
+.settings-tool-app-summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.settings-tool-app-summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-tool-app-summary > span {
+  margin-left: auto;
+}
+
+.settings-tool-app-summary:hover,
+.settings-tool-app-summary:focus-visible {
+  background: rgba(238, 242, 255, 0.54);
+  outline: none;
+}
+
+.settings-tool-app-chevron {
+  transition: transform 160ms ease;
+}
+
+.settings-tool-app[open] .settings-tool-app-chevron {
+  transform: rotate(180deg);
+}
+
+.settings-collapsible-summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.settings-collapsible-summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-collapsible-summary > span {
+  margin-left: auto;
+}
+
+.settings-collapsible-summary:hover,
+.settings-collapsible-summary:focus-visible {
+  background: rgba(248, 250, 252, 0.72);
+  outline: none;
+}
+
+.settings-collapsible-chevron {
+  transition: transform 160ms ease;
+}
+
+.settings-collapsible-card[open] .settings-collapsible-chevron {
+  transform: rotate(180deg);
+}
+
 .settings-section-frame--data {
   background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(248, 250, 252, 0.62));
   border-color: rgba(191, 219, 254, 0.72);
