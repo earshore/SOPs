@@ -5,7 +5,7 @@
  * 支持鼠标悬停预加载、空闲时预加载等策略
  */
 
-import { AppError, ErrorLevel, ErrorCategory } from '@common/errors/AppError';
+import { AppError, ErrorLevel, ErrorCategory } from '@/common/errors/AppError';
 import type { RouteConfig, PreloadOptions, PreloadStats, PreloadStrategy } from './types';
 
 /**
@@ -117,13 +117,13 @@ export class PreloadManager {
   async preload(path: string, config: RouteConfig, options: PreloadOptions = {}): Promise<boolean> {
     // 检查是否已缓存
     if (this.cache.has(path)) {
-      this._log(`Route already cached: ${path}`);
+      this.log(`Route already cached: ${path}`);
       return true;
     }
 
     // 检查是否正在加载
     if (this.loading.has(path)) {
-      this._log(`Route already loading: ${path}`);
+      this.log(`Route already loading: ${path}`);
       return false;
     }
 
@@ -144,10 +144,10 @@ export class PreloadManager {
 
     // 添加到队列
     this.queue.push(task);
-    this._sortQueue();
+    this.sortQueue();
 
     // 执行预加载
-    return this._executePreload(task, options.timeout);
+    return this.executePreload(task, options.timeout);
   }
 
   /**
@@ -158,7 +158,7 @@ export class PreloadManager {
    */
   preloadOnHover(path: string, config: RouteConfig): void {
     // 清除已存在的定时器
-    this._clearHoverTimer(path);
+    this.clearHoverTimer(path);
 
     // 设置延迟预加载
     const timerId = window.setTimeout(() => {
@@ -168,7 +168,7 @@ export class PreloadManager {
 
     this.hoverTimers.set(path, timerId);
 
-    this._log(`Hover preload scheduled: ${path}`);
+    this.log(`Hover preload scheduled: ${path}`);
   }
 
   /**
@@ -177,8 +177,8 @@ export class PreloadManager {
    * @param path - 路由路径
    */
   cancelHoverPreload(path: string): void {
-    this._clearHoverTimer(path);
-    this._log(`Hover preload cancelled: ${path}`);
+    this.clearHoverTimer(path);
+    this.log(`Hover preload cancelled: ${path}`);
   }
 
   /**
@@ -222,7 +222,7 @@ export class PreloadManager {
       { timeout: 2000 }
     );
 
-    this._log(`Idle preload scheduled for ${paths.length} routes`);
+    this.log(`Idle preload scheduled for ${paths.length} routes`);
   }
 
   /**
@@ -237,11 +237,11 @@ export class PreloadManager {
     if (item) {
       item.hitCount++;
       this.stats.totalHits++;
-      this._log(`Cache hit: ${path} (hits: ${item.hitCount})`);
+      this.log(`Cache hit: ${path} (hits: ${item.hitCount})`);
       return item;
     }
 
-    this._log(`Cache miss: ${path}`);
+    this.log(`Cache miss: ${path}`);
     return null;
   }
 
@@ -253,10 +253,10 @@ export class PreloadManager {
   clearCache(path?: string): void {
     if (path) {
       this.cache.delete(path);
-      this._log(`Cache cleared: ${path}`);
+      this.log(`Cache cleared: ${path}`);
     } else {
       this.cache.clear();
-      this._log('All cache cleared');
+      this.log('All cache cleared');
     }
   }
 
@@ -293,16 +293,16 @@ export class PreloadManager {
     this.queue = [];
     this.loading.clear();
 
-    this._log('PreloadManager destroyed');
+    this.log('PreloadManager destroyed');
   }
 
   /**
    * 执行预加载
    */
-  private async _executePreload(task: PreloadTask, timeout?: number): Promise<boolean> {
+  private async executePreload(task: PreloadTask, timeout?: number): Promise<boolean> {
     // 检查并发限制
     if (this.loading.size >= this.maxConcurrent) {
-      this._log(`Concurrent limit reached, queuing: ${task.path}`);
+      this.log(`Concurrent limit reached, queuing: ${task.path}`);
       return false;
     }
 
@@ -318,26 +318,26 @@ export class PreloadManager {
         : null;
 
       // 执行预加载
-      const preloadPromise = this._loadRoute(task.config);
+      const preloadPromise = this.loadRoute(task.config);
 
       const resources = timeoutPromise
         ? await Promise.race([preloadPromise, timeoutPromise])
         : await preloadPromise;
 
       // 缓存结果
-      this._addToCache(task.path, task.config, resources);
+      this.addToCache(task.path, task.config, resources);
 
       task.status = 'loaded';
       this.stats.preloadedCount++;
 
-      this._log(`Preload success: ${task.path}`);
+      this.log(`Preload success: ${task.path}`);
       return true;
     } catch (error) {
       task.status = 'failed';
       task.error = (error as Error).message;
       this.stats.failedCount++;
 
-      this._log(`Preload failed: ${task.path}`, error, 'error');
+      this.log(`Preload failed: ${task.path}`, error, 'error');
 
       // 抛出标准错误以便上层处理
       throw new AppError(
@@ -350,17 +350,17 @@ export class PreloadManager {
       );
     } finally {
       this.loading.delete(task.path);
-      this._removeFromQueue(task.path);
+      this.removeFromQueue(task.path);
 
       // 处理队列中的下一个任务
-      this._processQueue();
+      this.processQueue();
     }
   }
 
   /**
    * 加载路由资源
    */
-  private async _loadRoute(config: RouteConfig): Promise<{
+  private async loadRoute(config: RouteConfig): Promise<{
     module?: unknown;
     data?: unknown;
   }> {
@@ -371,9 +371,9 @@ export class PreloadManager {
       try {
         // 这里可以使用动态 import 预加载模块
         // resources.module = await import(config.viewPath);
-        this._log(`Module preload skipped (not implemented): ${config.viewPath}`);
+        this.log(`Module preload skipped (not implemented): ${config.viewPath}`);
       } catch (error) {
-        this._log(`Module preload failed: ${config.viewPath}`, error, 'warn');
+        this.log(`Module preload failed: ${config.viewPath}`, error, 'warn');
       }
     }
 
@@ -383,7 +383,7 @@ export class PreloadManager {
         await config.meta.preload();
         resources.data = true;
       } catch (error) {
-        this._log(`Data preload failed`, error, 'warn');
+        this.log(`Data preload failed`, error, 'warn');
       }
     }
 
@@ -393,14 +393,14 @@ export class PreloadManager {
   /**
    * 添加到缓存
    */
-  private _addToCache(
+  private addToCache(
     path: string,
     config: RouteConfig,
     resources: { module?: unknown; data?: unknown }
   ): void {
     // 检查缓存大小限制
     if (this.cache.size >= this.maxCacheSize) {
-      this._evictCache();
+      this.evictCache();
     }
 
     this.cache.set(path, {
@@ -414,7 +414,7 @@ export class PreloadManager {
   /**
    * 缓存淘汰（LRU）
    */
-  private _evictCache(): void {
+  private evictCache(): void {
     let lruPath: string | null = null;
     let lruHitCount = Infinity;
     let lruTime = Infinity;
@@ -433,14 +433,14 @@ export class PreloadManager {
 
     if (lruPath) {
       this.cache.delete(lruPath);
-      this._log(`Cache evicted (LRU): ${lruPath}`);
+      this.log(`Cache evicted (LRU): ${lruPath}`);
     }
   }
 
   /**
    * 队列排序（按优先级）
    */
-  private _sortQueue(): void {
+  private sortQueue(): void {
     const priorityMap = { high: 0, medium: 1, low: 2 };
 
     this.queue.sort((a, b) => {
@@ -453,7 +453,7 @@ export class PreloadManager {
   /**
    * 从队列中移除任务
    */
-  private _removeFromQueue(path: string): void {
+  private removeFromQueue(path: string): void {
     const index = this.queue.findIndex(task => task.path === path);
     if (index !== -1) {
       this.queue.splice(index, 1);
@@ -463,21 +463,21 @@ export class PreloadManager {
   /**
    * 处理队列
    */
-  private _processQueue(): void {
+  private processQueue(): void {
     // 找到下一个待处理的任务
     const nextTask = this.queue.find(
       task => task.status === 'pending' && !this.loading.has(task.path)
     );
 
     if (nextTask && this.loading.size < this.maxConcurrent) {
-      this._executePreload(nextTask);
+      this.executePreload(nextTask);
     }
   }
 
   /**
    * 清除悬停定时器
    */
-  private _clearHoverTimer(path: string): void {
+  private clearHoverTimer(path: string): void {
     const timerId = this.hoverTimers.get(path);
     if (timerId !== undefined) {
       window.clearTimeout(timerId);
@@ -488,7 +488,7 @@ export class PreloadManager {
   /**
    * 日志输出
    */
-  private _log(message: string, data?: unknown, level: 'log' | 'error' | 'warn' = 'log'): void {
+  private log(message: string, data?: unknown, level: 'log' | 'error' | 'warn' = 'log'): void {
     if (!this.enableLogging) return;
 
     const prefix = '[PreloadManager]';

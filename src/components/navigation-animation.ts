@@ -5,9 +5,9 @@
  * Requirements: 8.1, 8.2, 8.3, 8.4
  */
 
-import { animationManager } from '../services/animation-manager';
+import { setSafeHtml } from '@/common/utils/security';
+import { animationManager } from '@/services/animation-manager';
 import { ANIMATION_CLASSES } from '../config/animation-config';
-import { setSafeHtml } from '../common/utils/security';
 
 type PageTransitionElement = HTMLElement & {
   __pageTransitionController?: PageTransitionController;

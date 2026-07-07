@@ -29,7 +29,7 @@
 .card {
   --card-bg: var(--surface-card, #ffffff);
   --card-border: var(--border-subtle, var(--color-border-light, rgba(0, 0, 0, 0.06)));
-  --card-radius: var(--radius-card, var(--rounded-md, 8px));
+  --card-radius: var(--rounded-card, var(--rounded-md, 8px));
   --card-padding: var(--spacing-lg, 24px);
   --card-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
   --card-shadow-hover: var(--shadow-card-hover, 0 8px 22px -20px rgba(15, 23, 42, 0.36));
@@ -72,7 +72,7 @@
 /* SOP/Hub/More 概览旧类名基础卡片 */
 .sop-card {
   background: var(--sop-card-bg, var(--surface-card, #ffffff));
-  border-radius: var(--sop-card-radius, var(--radius-card, 8px));
+  border-radius: var(--sop-card-radius, var(--rounded-card, 8px));
   border: 1px solid var(--sop-card-border, var(--border-subtle, var(--color-slate-200)));
   padding: var(--sop-card-padding, var(--spacing-lg));
   box-shadow: var(--sop-card-shadow, var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04)));
@@ -179,7 +179,7 @@
   display: flex;
   flex-direction: column;
   background: var(--surface-card, white);
-  border-radius: var(--radius-card, var(--rounded-md));
+  border-radius: var(--rounded-card, var(--rounded-md));
   border: 1px solid var(--border-muted, var(--color-slate-200));
   transition:
     border-color var(--duration-fast) ease,
@@ -195,7 +195,7 @@
 .keyword-hunter-surface-card {
   background: var(--surface-card, white);
   border-color: var(--border-muted, var(--color-slate-200));
-  border-radius: var(--radius-card, var(--rounded-md));
+  border-radius: var(--rounded-card, var(--rounded-md));
   box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
 }
 
@@ -628,7 +628,7 @@
 
   position: relative;
   border: 1px solid var(--callout-border) !important;
-  border-radius: var(--radius-card, 8px) !important;
+  border-radius: var(--rounded-card, 8px) !important;
   background: var(--callout-bg) !important;
   box-shadow:
     inset var(--callout-rail-width) 0 0 var(--callout-accent),

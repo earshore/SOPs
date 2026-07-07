@@ -3,9 +3,9 @@
  * 管理 Agent 产品应用、能力编排与接入状态
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 
 // Module class
 class AgentsModule extends BaseModule {

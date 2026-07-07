@@ -1,6 +1,6 @@
 @media (min-width: 1024px) {
   .eco-page > :nth-child(n + 2) :where(.rounded-xl, .rounded-lg) {
-    border-radius: var(--radius-card, var(--rounded-md)) !important;
+    border-radius: var(--rounded-card, var(--rounded-md)) !important;
   }
 
   .eco-page > :nth-child(n + 2) :where(.shadow, .shadow-sm, .shadow-md) {

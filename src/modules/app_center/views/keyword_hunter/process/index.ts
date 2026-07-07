@@ -9,27 +9,27 @@
  * - 管理浮动关键词窗口的显示和交互
  */
 
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
-import BaseModule from '../../../../../common/BaseModule';
-import { showToast } from '../../../../../common/ui';
-import { navigateToRouteId } from '../../../../../common/router/initRouter';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import BaseModule from '@/common/BaseModule';
+import { showToast } from '@/common/ui';
+import { navigateToRouteId } from '@/common/router/initRouter';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
-import { getLlmProviderConfig } from '../../../../../common/config/llmProviders';
-import { fetchModelsFromApi } from '../../../../../services/llmService';
-import { appStore } from '../../../../../stores/useAppStore';
-import { ErrorService } from '../../../../../services/errorService';
-import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
+import { getLlmProviderConfig } from '@/common/config/llmProviders';
+import { fetchModelsFromApi } from '@/services/llmService';
+import { appStore } from '@/stores/useAppStore';
+import { ErrorService } from '@/services/errorService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
   getToolTargetDefaultModel,
   setToolTargetDefaultModel,
-} from '../../../../../services/toolStrategyService';
-import { getRuntimeKeywordHunterSeoOptions } from '../../../../../services/runtimeStrategyService';
-import { createSafeFragment } from '../../../../../common/utils/security';
-import { updateRuntimeCssRule } from '../../../../../common/utils/runtimeStyles';
-import type { KeywordHunterSnapshot } from '../../../../../types/modules-business';
-import type { LLMProviderConfig } from '../../../../../types/state';
+} from '@/services/toolStrategyService';
+import { getRuntimeKeywordHunterSeoOptions } from '@/services/runtimeStrategyService';
+import { createSafeFragment } from '@/common/utils/security';
+import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
+import type { KeywordHunterSnapshot } from '@/types/modules-business';
+import type { LLMProviderConfig } from '@/types/state';
 import '../styles.css';
 
 // ==========================================

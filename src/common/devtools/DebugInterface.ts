@@ -4,7 +4,7 @@
 // 仅在开发环境暴露必要的调试接口到window
 // ================================================================
 
-import { StorageService } from '@services/storageService';
+import { StorageService } from '@/services/storageService';
 import { appStore } from '@/stores/useAppStore';
 import { MENU_CONFIG } from '../config/menuConfig';
 import { container } from '../di/Container';

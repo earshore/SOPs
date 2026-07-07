@@ -11,7 +11,7 @@
  */
 
 import { appStore } from '@/stores/useAppStore';
-import { showToast } from '../../../../../../common/ui';
+import { showToast } from '@/common/ui';
 import type { DnaConfidence, PromptlabAlpineContext, ConsoleMode } from './types';
 import type { PromptInputs, UserProductProfile } from '@/types/state';
 import type { AnalysisReport } from '@/types/modules-business';

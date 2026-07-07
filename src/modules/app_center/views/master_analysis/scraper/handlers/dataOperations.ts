@@ -5,10 +5,10 @@
 import type { ScrapedData, DeleteResult, ConfirmModalCallback } from '../types';
 import { HistoryService } from '../../services/historyService';
 import { emitHistoryUpdated } from '../../services/historyEvents';
-import { showToast } from '../../../../../../common/ui';
-import eventBus from '../../../../../../common/EventBus';
-import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
-import { ValidationError, BusinessError, SystemError } from '@common/errors/AppError';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
+import { showToast } from '@/common/ui';
+import { ValidationError, BusinessError, SystemError } from '@/common/errors/AppError';
 import { escapeHtml } from '@/common/utils/security';
 
 const nativeLoggerConsole = globalThis.console;

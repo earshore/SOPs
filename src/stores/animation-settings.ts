@@ -7,12 +7,8 @@
 
 import { createStore } from 'zustand/vanilla';
 import { devtools } from './middleware/devtools';
-import type {
-  AnimationSettings,
-  AnimationSpeed,
-  AnimationCategory,
-} from '../types/animation-types';
-import { animationManager } from '../services/animation-manager';
+import type { AnimationSettings, AnimationSpeed, AnimationCategory } from '@/types/animation-types';
+import { animationManager } from '@/services/animation-manager';
 
 /**
  * 动画设置Store接口

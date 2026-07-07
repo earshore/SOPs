@@ -1,5 +1,5 @@
-import { StorageService } from '../../../../../services/storageService';
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import { StorageService } from '@/services/storageService';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 
 interface ConfirmModalRequest {
   title: string;

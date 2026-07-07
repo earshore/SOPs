@@ -1,17 +1,17 @@
-import { appStore } from '../../../../../stores/useAppStore';
-import { LocalDataStore } from '../../../../../services/localDataStore';
+import { appStore } from '@/stores/useAppStore';
+import { LocalDataStore } from '@/services/localDataStore';
 import {
   getRuntimeStorageStrategyOptions,
   StorageService,
   STORAGE_KEYS,
-} from '../../../../../services/storageService';
+} from '@/services/storageService';
 import type {
   KeywordHunterSnapshot,
   KeywordHunterSnapshotDiff,
   KeywordHunterSnapshotResult,
   KeywordHunterSnapshotStatus,
-} from '../../../../../types/modules-business';
-import type { KeywordTrackerState } from '../../../../../types/state';
+} from '@/types/modules-business';
+import type { KeywordTrackerState } from '@/types/state';
 
 const SNAPSHOT_STORAGE_KEY = STORAGE_KEYS.KEYWORD_HUNTER_SNAPSHOTS;
 const INDEXED_SNAPSHOT_STORAGE_KEY = `user:${SNAPSHOT_STORAGE_KEY}`;

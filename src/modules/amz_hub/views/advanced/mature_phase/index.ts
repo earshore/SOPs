@@ -3,9 +3,9 @@
  * 涵盖品牌防御、类目延展、TACOS控制、库存周转优化
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 import './styles.css';
 
 class MaturePhaseModule extends BaseModule {

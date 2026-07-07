@@ -208,7 +208,7 @@ export default [
                 {
                     patterns: [
                         {
-                            group: ["**/loggerService", "@services/loggerService", "@/services/loggerService", "../services/loggerService", "../../services/loggerService", "../../../services/loggerService", "./loggerService"],
+                            group: ["**/loggerService", "@/services/loggerService", "../services/loggerService", "../../services/loggerService", "../../../services/loggerService", "./loggerService"],
                             message: "基础设施服务不应依赖Logger以避免循环依赖，请直接使用console"
                         }
                     ]

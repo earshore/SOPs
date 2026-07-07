@@ -5,7 +5,7 @@
 // 🎯 增强: 支持DI容器注入和服务获取
 // ================================================================
 
-import type { IModule, ModuleState, ModuleMetadata } from '../types/modules';
+import type { IModule, ModuleState, ModuleMetadata } from '@/types/modules';
 import { container as globalContainer } from './di/Container';
 import type { DIContainer } from './di/Container';
 import type { ServiceName } from './di/ServiceRegistry';

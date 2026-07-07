@@ -17,8 +17,8 @@
  */
 
 import { appStore } from '@/stores/useAppStore';
-import { APP_EVENTS, MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
-import eventBus from '../../../../../../common/EventBus';
+import { APP_EVENTS, MODULE_EVENTS } from '@/common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
 import { HistoryService } from '../../services/historyService';
 import { getReportFingerprint } from '../../services/reportIdentity';
 // ── 子模块导入 ────────────────────────────────────────────────────────────────

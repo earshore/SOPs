@@ -50,15 +50,15 @@ vi.mock('../../services/reportIdentity', () => ({
   getScrapedDataFingerprint: mocks.getScrapedDataFingerprint,
 }));
 
-vi.mock('../../../../../../common/ui', () => ({
+vi.mock('@/common/ui', () => ({
   showToast: mocks.showToast,
 }));
 
-vi.mock('../../../../../../common/router/initRouter', () => ({
+vi.mock('@/common/router/initRouter', () => ({
   navigateToRouteId: mocks.navigateToRouteId,
 }));
 
-vi.mock('../../../../../../common/constants/constants', () => ({
+vi.mock('@/common/constants/constants', () => ({
   LANGUAGE_HEADERS: {
     US: { domain: 'amazon.com', name: 'English (US)' },
     DE: { domain: 'amazon.de', name: 'German' },
@@ -71,13 +71,13 @@ vi.mock('@/stores/useAppStore', () => ({
   },
 }));
 
-vi.mock('../../../../../../common/EventBus', () => ({
+vi.mock('@/common/EventBus', () => ({
   default: {
     emit: mocks.eventBusEmit,
   },
 }));
 
-vi.mock('../../../../../../common/constants/eventConstants', () => ({
+vi.mock('@/common/constants/eventConstants', () => ({
   MODULE_EVENTS: {
     SCRAPER: {
       SCRAPE_SUCCESS: 'scraper:scrape-success',

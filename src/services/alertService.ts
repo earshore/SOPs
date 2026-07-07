@@ -4,7 +4,7 @@
 // 监控性能指标并触发告警
 // ================================================================
 
-import type { ILoggerService } from '../types/services';
+import type { ILoggerService } from '@/types/services';
 import eventBus from '@/common/EventBus';
 
 type WindowWithToast = Window & {

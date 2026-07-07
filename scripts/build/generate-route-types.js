@@ -121,7 +121,7 @@ function generateTypeDefinition(routeIds, routeValues) {
  * 生成脚本: scripts/generate-route-types.js
  * 
  * 使用方法：
- *   import type { RouteId } from '@router/navigo/route-ids';
+ *   import type { RouteId } from '@/common/router/navigo/route-ids';
  *   
  *   function navigate(routeId: RouteId) {
  *     // routeId 会有类型提示和检查

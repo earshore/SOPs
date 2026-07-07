@@ -612,7 +612,7 @@
     padding: 0.75rem;
     background: var(--surface-panel, var(--color-white));
     border: 1px solid var(--border-muted, var(--color-slate-200));
-    border-radius: var(--radius-panel, var(--rounded-md));
+    border-radius: var(--rounded-panel, var(--rounded-md));
     box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
   }
 
@@ -625,7 +625,7 @@
     gap: 0.75rem;
     padding: 0.875rem 1rem;
     border: 1px solid var(--border-muted, var(--color-slate-200));
-    border-radius: var(--radius-card, var(--rounded-md));
+    border-radius: var(--rounded-card, var(--rounded-md));
     color: var(--color-slate-600);
     background: var(--surface-card-hover, var(--color-slate-50));
     appearance: none;

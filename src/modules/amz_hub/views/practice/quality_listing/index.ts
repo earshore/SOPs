@@ -2,9 +2,9 @@
  * 教你打造优质Listing 视图模块
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 import './styles.css';
 
 class QualityListingModule extends BaseModule {

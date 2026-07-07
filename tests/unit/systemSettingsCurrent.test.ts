@@ -10,7 +10,7 @@ import {
   updateModelStatus,
 } from '@/components/settings/systemSettings';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
-import eventBus from '@common/EventBus';
+import eventBus from '@/common/EventBus';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { fetchModelsFromApi, callLLM } from '@/services/llmService';
 import { showToast } from '@/common/ui';
@@ -958,7 +958,7 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('数据与备份');
   expect(template).toContain('数据保留策略');
   expect(template).toContain('开发者诊断');
-  expect(template).toContain('x-show="showDeveloperDiagnostics"');
+  expect(template).toContain(':hidden="!showDeveloperDiagnostics"');
   expect(template).toContain("setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)");
   expect(template).toContain('setDeveloperDiagnosticLogLevel($event)');
   expect(template).toContain('developerDangerousEndpointText');

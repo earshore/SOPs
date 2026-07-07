@@ -1,8 +1,5 @@
 // src/modules/app_center/views/master_analysis/services/parserService.ts
-import {
-  SELECTOR_MAP,
-  VERIFIED_PURCHASE_PATTERNS,
-} from '../../../../../common/constants/constants';
+import { SELECTOR_MAP, VERIFIED_PURCHASE_PATTERNS } from '@/common/constants/constants';
 
 const nativeLoggerConsole = globalThis.console;
 // ----------------------------------------

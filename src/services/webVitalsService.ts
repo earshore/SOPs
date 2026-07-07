@@ -4,7 +4,7 @@
 // 监控核心Web性能指标(CLS/FID/LCP/FCP/TTFB)
 // ================================================================
 
-import { createRandomId } from '../common/utils/random';
+import { createRandomId } from '@/common/utils/random';
 
 /**
  * Web Vitals指标类型

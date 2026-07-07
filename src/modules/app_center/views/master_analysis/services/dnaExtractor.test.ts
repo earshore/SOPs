@@ -39,7 +39,7 @@ function expectDefined<T>(value: T | undefined, label: string): T {
 }
 
 // Mock Logger
-vi.mock('../../../../../services/loggerService', () => ({
+vi.mock('@/services/loggerService', () => ({
   Logger: {
     debug: vi.fn(),
     info: vi.fn(),

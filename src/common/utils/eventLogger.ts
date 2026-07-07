@@ -4,7 +4,7 @@
 // 监控并记录所有 app:* 自定义事件，便于调试事件流
 // ================================================================
 
-import { StorageService } from '../../services/storageService';
+import { StorageService } from '@/services/storageService';
 import { configCenter } from '../config/ConfigCenter';
 
 /**

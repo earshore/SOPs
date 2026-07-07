@@ -4,9 +4,9 @@
 // 使用IndexedDB存储性能数据
 // ================================================================
 
-import type { ILoggerService } from '../types/services';
-import { SystemError } from '../common/errors/AppError';
-import { createRandomId } from '../common/utils/random';
+import { SystemError } from '@/common/errors/AppError';
+import { createRandomId } from '@/common/utils/random';
+import type { ILoggerService } from '@/types/services';
 
 /**
  * 性能数据记录

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import eventBus from '../../../../../../common/EventBus';
-import { APP_EVENTS, MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
-import { showToast } from '../../../../../../common/ui';
+import { APP_EVENTS, MODULE_EVENTS } from '@/common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
+import { showToast } from '@/common/ui';
 import { HistoryService } from '../../services/historyService';
 import { handleImportFiles, mergeProducts } from './importHandler';
 import type { ScrapedData, ScraperSite } from '../types';
@@ -13,11 +13,11 @@ vi.mock('../../services/historyService', () => ({
   },
 }));
 
-vi.mock('../../../../../../common/ui', () => ({
+vi.mock('@/common/ui', () => ({
   showToast: vi.fn(),
 }));
 
-vi.mock('../../../../../../common/EventBus', () => ({
+vi.mock('@/common/EventBus', () => ({
   default: {
     emit: vi.fn(),
   },

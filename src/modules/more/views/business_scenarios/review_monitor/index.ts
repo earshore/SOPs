@@ -2,9 +2,9 @@
  * More 模块 - 评论监控 · 全店铺多语种聚合
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 import { renderBusinessScenarioPage } from '../casePageRenderer';
 
 class ReviewMonitorModule extends BaseModule {

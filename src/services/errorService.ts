@@ -4,7 +4,7 @@
 // 🎯 P0-4: 重构为GlobalErrorHandler的包装器,保持向后兼容
 // ================================================================
 
-import { globalErrorHandler, toAppError, type ErrorHandlerOptions } from '../common/errors';
+import { globalErrorHandler, toAppError, type ErrorHandlerOptions } from '@/common/errors';
 
 /**
  * 错误类型枚举 (向后兼容)

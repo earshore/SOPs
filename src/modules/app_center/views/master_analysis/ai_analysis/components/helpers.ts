@@ -3,7 +3,7 @@
  * 提供各种工具函数和辅助方法
  */
 
-import { LANGUAGE_HEADERS } from '@common/constants/constants';
+import { LANGUAGE_HEADERS } from '@/common/constants/constants';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import type { Product } from '../config/sampleData';
 import { mergeProducts } from '../utils/dataTransformers';

@@ -2,9 +2,9 @@
  * 链接转化率低自查优化的五大方面 视图模块
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 import './styles.css';
 
 // Module class

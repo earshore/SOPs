@@ -11,9 +11,9 @@ import type {
   IConfigService,
   ILoggerService,
   LogEntry as ILogEntry,
-} from '../types/services';
-import { ValidationError } from '../common/errors/AppError';
-import type { LoggerConfig } from '../common/config/ConfigCenter';
+} from '@/types/services';
+import type { LoggerConfig } from '@/common/config/ConfigCenter';
+import { ValidationError } from '@/common/errors/AppError';
 
 const nativeLoggerConsole = globalThis.console;
 /**

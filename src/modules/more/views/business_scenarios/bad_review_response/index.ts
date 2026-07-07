@@ -2,9 +2,9 @@
  * More 模块 - 差评 24 小时闪电响应
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 import { renderBusinessScenarioPage } from '../casePageRenderer';
 
 class BadReviewResponseModule extends BaseModule {

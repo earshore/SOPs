@@ -6,8 +6,8 @@ import type { Task, ScrapedData, TaskStatusCallback } from '../types';
 import type { ScrapedProduct, ScraperSite } from '@/types/modules-business';
 import { scrapeAsin } from '../../services/scraperService';
 import { HistoryService } from '../../services/historyService';
-import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
-import { sleep } from '../../../../../../common/ui';
+import { LANGUAGE_HEADERS } from '@/common/constants/constants';
+import { sleep } from '@/common/ui';
 
 /**
  * 更新任务状态

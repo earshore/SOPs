@@ -21,7 +21,7 @@ import {
   DIFFERENTIATION_CONFIDENCE_WEIGHTS,
   CONFIDENCE_THRESHOLDS,
 } from '../../config/confidenceWeights';
-import { ValidationError } from '../../../../../../common/errors/AppError';
+import { ValidationError } from '@/common/errors/AppError';
 
 const nativeLoggerConsole = globalThis.console;
 

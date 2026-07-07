@@ -23,7 +23,7 @@ const mockAppStoreState = vi.hoisted(() => ({
 }));
 
 // Mock showToast
-vi.mock('@common/ui/index', () => ({
+vi.mock('@/common/ui/index', () => ({
   showToast: vi.fn()
 }));
 

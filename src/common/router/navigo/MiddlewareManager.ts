@@ -39,7 +39,7 @@ export class MiddlewareManager {
     this.afterMiddlewares = [];
     this.enableLogging = enableLogging;
 
-    this._log('MiddlewareManager initialized');
+    this.log('MiddlewareManager initialized');
   }
 
   // ==================== 中间件注册 ====================
@@ -62,7 +62,7 @@ export class MiddlewareManager {
     }
 
     this.beforeMiddlewares.push(middleware);
-    this._log(`Before middleware added (total: ${this.beforeMiddlewares.length})`);
+    this.log(`Before middleware added (total: ${this.beforeMiddlewares.length})`);
   }
 
   /**
@@ -83,7 +83,7 @@ export class MiddlewareManager {
     }
 
     this.afterMiddlewares.push(middleware);
-    this._log(`After middleware added (total: ${this.afterMiddlewares.length})`);
+    this.log(`After middleware added (total: ${this.afterMiddlewares.length})`);
   }
 
   /**
@@ -92,7 +92,7 @@ export class MiddlewareManager {
   clear(): void {
     this.beforeMiddlewares = [];
     this.afterMiddlewares = [];
-    this._log('All middlewares cleared');
+    this.log('All middlewares cleared');
   }
 
   // ==================== 中间件执行 ====================
@@ -109,7 +109,7 @@ export class MiddlewareManager {
       return { allowed: true };
     }
 
-    this._log(`Running ${this.beforeMiddlewares.length} before middlewares`);
+    this.log(`Running ${this.beforeMiddlewares.length} before middlewares`);
 
     let aborted = false;
     let redirectPath: string | null = null;
@@ -126,21 +126,21 @@ export class MiddlewareManager {
     };
 
     try {
-      await this._runMiddlewareChain(this.beforeMiddlewares, context);
+      await this.runMiddlewareChain(this.beforeMiddlewares, context);
 
       if (aborted) {
-        this._log('Navigation aborted by middleware', 'warn');
+        this.log('Navigation aborted by middleware', 'warn');
         return { allowed: false };
       }
 
       if (redirectPath) {
-        this._log(`Middleware requested redirect to: ${redirectPath}`);
+        this.log(`Middleware requested redirect to: ${redirectPath}`);
         return { allowed: false, redirect: redirectPath };
       }
 
       return { allowed: true };
     } catch (error) {
-      this._log(`Before middleware error: ${(error as Error).message}`, 'error');
+      this.log(`Before middleware error: ${(error as Error).message}`, 'error');
       return { allowed: false };
     }
   }
@@ -156,25 +156,25 @@ export class MiddlewareManager {
       return;
     }
 
-    this._log(`Running ${this.afterMiddlewares.length} after middlewares`);
+    this.log(`Running ${this.afterMiddlewares.length} after middlewares`);
 
     const context: RouteContext = {
       to,
       from,
       abort: () => {
         // After 中间件不能中止导航
-        this._log('abort() called in after middleware (ignored)', 'warn');
+        this.log('abort() called in after middleware (ignored)', 'warn');
       },
       redirect: () => {
         // After 中间件不能重定向
-        this._log('redirect() called in after middleware (ignored)', 'warn');
+        this.log('redirect() called in after middleware (ignored)', 'warn');
       },
     };
 
     try {
-      await this._runMiddlewareChain(this.afterMiddlewares, context);
+      await this.runMiddlewareChain(this.afterMiddlewares, context);
     } catch (error) {
-      this._log(`After middleware error: ${(error as Error).message}`, 'error');
+      this.log(`After middleware error: ${(error as Error).message}`, 'error');
     }
   }
 
@@ -184,7 +184,7 @@ export class MiddlewareManager {
    * @param middlewares - 中间件列表
    * @param context - 路由上下文
    */
-  private async _runMiddlewareChain(
+  private async runMiddlewareChain(
     middlewares: RouteMiddleware[],
     context: RouteContext
   ): Promise<void> {
@@ -231,7 +231,7 @@ export class MiddlewareManager {
    * @param message - 日志消息
    * @param level - 日志级别
    */
-  private _log(message: string, level: 'log' | 'warn' | 'error' = 'log'): void {
+  private log(message: string, level: 'log' | 'warn' | 'error' = 'log'): void {
     if (!this.enableLogging) return;
 
     const prefix = '[MiddlewareManager]';

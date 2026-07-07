@@ -1,4 +1,4 @@
-import type { LLMProviderConfig } from '../types/state';
+import type { LLMProviderConfig } from '@/types/state';
 import { StorageService, STORAGE_KEYS } from './storageService';
 
 export const TOOL_STRATEGY_TARGETS = [

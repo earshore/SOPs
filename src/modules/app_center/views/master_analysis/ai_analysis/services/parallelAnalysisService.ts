@@ -13,19 +13,12 @@ import {
   type ChatMessage,
   type LLMOptions,
   type LLMStreamMetrics,
-} from '../../../../../../services/llmService';
-import { LocalDataStore } from '../../../../../../services/localDataStore';
-import {
-  StorageService,
-  STORAGE_KEYS,
-  CACHE_PREFIXES,
-} from '../../../../../../services/storageService';
-import {
-  applyToolTargetModel,
-  resolveToolTargetModel,
-} from '../../../../../../services/toolStrategyService';
-import { ValidationError, BusinessError } from '@common/errors/AppError';
-import { getRuntimeLlmAnalysisOptions } from '../../../../../../services/runtimeStrategyService';
+} from '@/services/llmService';
+import { LocalDataStore } from '@/services/localDataStore';
+import { StorageService, STORAGE_KEYS, CACHE_PREFIXES } from '@/services/storageService';
+import { applyToolTargetModel, resolveToolTargetModel } from '@/services/toolStrategyService';
+import { ValidationError, BusinessError } from '@/common/errors/AppError';
+import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import {

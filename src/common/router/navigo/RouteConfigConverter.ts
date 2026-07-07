@@ -70,13 +70,13 @@ export class RouteConfigConverter {
     // 转换每个路由
     for (const [routeId, menuRoute] of Object.entries(menuConfig.routes)) {
       try {
-        const navigoRoute = this._convertRoute(routeId, menuRoute, menuConfig);
+        const navigoRoute = this.convertRoute(routeId, menuRoute, menuConfig);
 
         if (navigoRoute) {
           routes[routeId] = navigoRoute;
           successCount++;
 
-          this._log(`✓ Converted route: ${routeId}`);
+          this.log(`✓ Converted route: ${routeId}`);
         } else {
           failedCount++;
           errors.push({
@@ -91,12 +91,12 @@ export class RouteConfigConverter {
           error: (error as Error).message,
         });
 
-        this._log(`✗ Failed to convert route: ${routeId}`, error, 'error');
+        this.log(`✗ Failed to convert route: ${routeId}`, error, 'error');
       }
     }
 
     // 生成路由别名
-    this._generateAliases(menuConfig, aliases);
+    this.generateAliases(menuConfig, aliases);
 
     const result: ConversionResult = {
       routes,
@@ -110,7 +110,7 @@ export class RouteConfigConverter {
       errors,
     };
 
-    this._log('Conversion completed', result.stats);
+    this.log('Conversion completed', result.stats);
 
     return result;
   }
@@ -123,7 +123,7 @@ export class RouteConfigConverter {
    * @param menuConfig - 完整菜单配置（用于查找模块信息）
    * @returns Navigo 路由配置
    */
-  private _convertRoute(
+  private convertRoute(
     routeId: string,
     menuRoute: MenuRouteConfig,
     menuConfig: MenuConfig
@@ -170,7 +170,7 @@ export class RouteConfigConverter {
    * @param menuConfig - 菜单配置
    * @param aliases - 别名映射对象（会被修改）
    */
-  private _generateAliases(menuConfig: MenuConfig, aliases: Record<string, string>): void {
+  private generateAliases(menuConfig: MenuConfig, aliases: Record<string, string>): void {
     // 定义需要创建别名的模块
     const moduleAliases: Record<string, string> = {
       app_center: 'app_center_overview',
@@ -186,7 +186,7 @@ export class RouteConfigConverter {
 
         aliases[aliasPath] = targetPath;
 
-        this._log(`Created alias: ${aliasPath} -> ${targetPath}`);
+        this.log(`Created alias: ${aliasPath} -> ${targetPath}`);
       }
     }
   }
@@ -228,7 +228,7 @@ export class RouteConfigConverter {
   /**
    * 日志输出
    */
-  private _log(message: string, data?: unknown, level: 'log' | 'error' | 'warn' = 'log'): void {
+  private log(message: string, data?: unknown, level: 'log' | 'error' | 'warn' = 'log'): void {
     if (!this.options.enableLogging) return;
 
     const prefix = '[RouteConfigConverter]';

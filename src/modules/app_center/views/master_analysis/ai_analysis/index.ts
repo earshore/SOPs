@@ -3,11 +3,11 @@
  * 集成到 Master Analysis 的子页面
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { createAiAnalysisPanel } from './components/AlpinePanel';
-import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
+import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 import { destroyAlpineComponent } from '../utils/alpineLifecycle';
 
 import '../master_analysis_style.css';

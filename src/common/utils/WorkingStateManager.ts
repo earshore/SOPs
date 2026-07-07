@@ -4,7 +4,7 @@
 // 自动检测超时并重试，提升系统鲁棒性
 // ================================================================
 
-import { SystemError } from '@common/errors/AppError';
+import { SystemError } from '@/common/errors/AppError';
 import eventBus from '../EventBus';
 import { APP_EVENTS } from '../constants/eventConstants';
 
@@ -128,7 +128,7 @@ export class WorkingStateManager {
     this.stats.totalCount++;
 
     // 启动超时检查
-    this._startTimeoutCheck(id);
+    this.startTimeoutCheck(id);
 
     // 触发事件
     eventBus.emit(APP_EVENTS.WORKING_STATE_START, { id, timeout });
@@ -222,7 +222,7 @@ export class WorkingStateManager {
    * @param id - 任务ID
    * @private
    */
-  private _startTimeoutCheck(id: string): void {
+  private startTimeoutCheck(id: string): void {
     const state = this.states.get(id);
     if (!state) return;
 
@@ -233,7 +233,7 @@ export class WorkingStateManager {
 
     // 设置新定时器
     state.timerId = window.setTimeout(() => {
-      this._handleTimeout(id);
+      this.handleTimeout(id);
     }, state.timeout);
   }
 
@@ -242,7 +242,7 @@ export class WorkingStateManager {
    * @param id - 任务ID
    * @private
    */
-  private async _handleTimeout(id: string): Promise<void> {
+  private async handleTimeout(id: string): Promise<void> {
     const state = this.states.get(id);
     if (!state) return;
 
@@ -276,7 +276,7 @@ export class WorkingStateManager {
           await currentState.onTimeout();
 
           // 重新启动超时检查
-          this._startTimeoutCheck(id);
+          this.startTimeoutCheck(id);
 
           // 触发重试事件
           eventBus.emit(APP_EVENTS.WORKING_STATE_RETRY, {
@@ -288,7 +288,7 @@ export class WorkingStateManager {
 
           // 如果还有重试次数，继续重试
           if (currentState.retryCount < currentState.maxRetries) {
-            setTimeout(() => this._handleTimeout(id), 1000);
+            setTimeout(() => this.handleTimeout(id), 1000);
           } else {
             // 重试耗尽，标记为失败
             const systemError = new SystemError(

@@ -5,8 +5,8 @@
 import type { ScrapedData, DataTab } from '../types';
 import type { ScrapedProduct } from '@/types/modules-business';
 import { renderProductCard, syntaxHighlight } from '../utils/renderers';
-import { showToast } from '../../../../../../common/ui';
-import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import { showToast } from '@/common/ui';
 
 export interface DataPreviewState {
   expandedAsin: string | null;

@@ -5,9 +5,9 @@
  * Requirements: 6.1, 6.2, 6.3, 6.4
  */
 
-import { animationManager } from '../services/animation-manager';
+import { setSafeHtml } from '@/common/utils/security';
+import { animationManager } from '@/services/animation-manager';
 import { ANIMATION_CLASSES } from '../config/animation-config';
-import { setSafeHtml } from '../common/utils/security';
 
 const SUCCESS_ICON_ANIMATED_CLASS = 'form-input-success-icon--animated';
 

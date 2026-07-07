@@ -1,5 +1,5 @@
 import './sops_style.css';
-import { createModuleLoader, ModuleLoader } from '../../common/utils/ModuleLoader';
+import { createModuleLoader, ModuleLoader } from '@/common/utils/ModuleLoader';
 import type { ModuleLoaderFn } from '@/types/modules-business';
 import { MODULE_MAP } from './module.loaders';
 

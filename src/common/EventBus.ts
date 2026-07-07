@@ -9,7 +9,7 @@ import type {
   TypedEventHandler,
   GenericEventHandler,
   EventUnsubscribe,
-} from '../types/events';
+} from '@/types/events';
 
 const nativeLoggerConsole = globalThis.console;
 

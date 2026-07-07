@@ -6,7 +6,7 @@
 
 import type { AppError } from '@/common/errors/AppError';
 import { randomFloat } from '@/common/utils/random';
-import type { ILoggerService } from '../types/services';
+import type { ILoggerService } from '@/types/services';
 
 const nativeLoggerConsole = globalThis.console;
 

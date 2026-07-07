@@ -161,7 +161,7 @@
   min-height: 2.5rem;
   padding: 0.5rem 1rem;
   border: 1px solid var(--button-filter-border, var(--border-muted, rgba(203, 213, 225, 0.82))) !important;
-  border-radius: var(--radius-card, 8px) !important;
+  border-radius: var(--rounded-card, 8px) !important;
   background: var(--button-filter-bg, var(--surface-card, #ffffff)) !important;
   color: var(
     --button-filter-color,

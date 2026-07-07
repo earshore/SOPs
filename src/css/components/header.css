@@ -283,7 +283,7 @@
 .header-search-input:focus {
   outline: none;
   border-color: var(--color-primary, #3b82f6);
-  box-shadow: 0 0 0 3px var(--input-ring-focus, rgba(59, 130, 246, 0.1));
+  box-shadow: 0 0 0 3px var(--focus-ring-soft, rgba(59, 130, 246, 0.1));
   background: var(--color-bg-primary, #ffffff);
 }
 

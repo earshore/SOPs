@@ -3,9 +3,9 @@
  * 提示词库浏览、搜索和复制功能
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 import {
   PROMPT_CATEGORIES,
   getPromptsByCategory,
@@ -16,7 +16,7 @@ import {
   type PromptCategory,
   type PromptCategoryId,
 } from './constants/promptLibrary';
-import { showToast } from '../../../../../common/ui';
+import { showToast } from '@/common/ui';
 import './prompts_style.css';
 
 // 使用导入的类型别名

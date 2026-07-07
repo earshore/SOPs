@@ -9,9 +9,9 @@ import {
   RISK_LEVELS,
   WORD_CATEGORIES,
 } from './constants/restrictedWordsConstants';
-import * as actionRegistry from '../../../../../common/utils/actionRegistry';
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
-import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
+import * as actionRegistry from '@/common/utils/actionRegistry';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 
 type SearchMode = 'fuzzy' | 'exact' | 'fulltext' | 'regex';
 type SiteContext = string;

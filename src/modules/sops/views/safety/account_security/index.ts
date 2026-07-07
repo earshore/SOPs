@@ -1,40 +1,22 @@
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
-import {
-  registerActionsWithLegacy,
-  unregisterActions,
-} from '../../../../../common/utils/actionRegistry';
-import { StorageService } from '../../../../../services/storageService';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
+import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { copyTextToClipboard } from '../../../utils/clipboard';
+import { createOwnerField } from '../../../utils/ownerField';
 
 const ACCOUNT_SECURITY_OWNER_STORAGE_KEY = 'account_security_owner_v1';
 const DEFAULT_REVIEW_OWNER = '账号安全负责人';
 
-function normalizeReviewOwner(owner: unknown): string {
-  return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_REVIEW_OWNER;
-}
-
-function restoreReviewOwner(): void {
-  const input = document.getElementById('account-security-owner') as HTMLInputElement | null;
-  if (input)
-    input.value = normalizeReviewOwner(
-      StorageService.get<string>(ACCOUNT_SECURITY_OWNER_STORAGE_KEY, DEFAULT_REVIEW_OWNER)
-    );
-}
-
-function readReviewOwner(): string {
-  const input = document.getElementById('account-security-owner') as HTMLInputElement | null;
-  return normalizeReviewOwner(input?.value);
-}
-
-function saveReviewOwner(owner: string): void {
-  StorageService.set(ACCOUNT_SECURITY_OWNER_STORAGE_KEY, normalizeReviewOwner(owner));
-}
+const reviewOwnerField = createOwnerField({
+  storageKey: ACCOUNT_SECURITY_OWNER_STORAGE_KEY,
+  defaultOwner: DEFAULT_REVIEW_OWNER,
+  inputId: 'account-security-owner',
+});
 
 export function buildAccountSecurityTemplate(owner = DEFAULT_REVIEW_OWNER): string {
   const today = new Date().toISOString().split('T')[0];
-  const reviewOwner = normalizeReviewOwner(owner);
+  const reviewOwner = reviewOwnerField.normalize(owner);
 
   return [
     `# 账号登录异常登记复盘 - ${today}`,
@@ -86,8 +68,8 @@ export function buildAccountSecurityTemplate(owner = DEFAULT_REVIEW_OWNER): stri
 }
 
 async function copyAccountSecurityTemplate(): Promise<void> {
-  const owner = readReviewOwner();
-  saveReviewOwner(owner);
+  const owner = reviewOwnerField.read();
+  reviewOwnerField.save(owner);
   const reviewTemplate = buildAccountSecurityTemplate(owner);
 
   try {
@@ -123,7 +105,7 @@ class AccountSecurityModule extends BaseModule {
   }
 
   protected async init(): Promise<void> {
-    restoreReviewOwner();
+    reviewOwnerField.restore();
 
     this.registeredActions = registerActionsWithLegacy({
       sops_copyAccountSecurityTemplate: copyAccountSecurityTemplate as (...args: unknown[]) => void,

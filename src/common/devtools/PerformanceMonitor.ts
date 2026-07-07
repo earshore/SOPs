@@ -4,10 +4,10 @@
 // 实时显示Web Vitals、错误、分析数据和告警
 // ================================================================
 
-import { webVitalsService, type Metric } from '../../services/webVitalsService';
-import { errorTracker } from '../../services/errorTracker';
-import { analyticsService } from '../../services/analyticsService';
-import { alertService } from '../../services/alertService';
+import { alertService } from '@/services/alertService';
+import { analyticsService } from '@/services/analyticsService';
+import { errorTracker } from '@/services/errorTracker';
+import { webVitalsService, type Metric } from '@/services/webVitalsService';
 import { escapeHtml, setSafeHtml } from '../utils/security';
 
 type TabType = 'overview' | 'performance' | 'errors' | 'analytics' | 'alerts';

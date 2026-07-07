@@ -1,40 +1,22 @@
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
-import {
-  registerActionsWithLegacy,
-  unregisterActions,
-} from '../../../../../common/utils/actionRegistry';
-import { StorageService } from '../../../../../services/storageService';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
+import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { copyTextToClipboard } from '../../../utils/clipboard';
+import { createOwnerField } from '../../../utils/ownerField';
 
 const REPORT_OWNER_STORAGE_KEY = 'inventory_replenishment_owner_v1';
 const DEFAULT_REPORT_OWNER = '供应链/运营负责人';
 
-function normalizeReportOwner(owner: unknown): string {
-  return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_REPORT_OWNER;
-}
-
-function restoreReportOwner(): void {
-  const input = document.getElementById('inventory-replenishment-owner') as HTMLInputElement | null;
-  if (input)
-    input.value = normalizeReportOwner(
-      StorageService.get<string>(REPORT_OWNER_STORAGE_KEY, DEFAULT_REPORT_OWNER)
-    );
-}
-
-function readReportOwner(): string {
-  const input = document.getElementById('inventory-replenishment-owner') as HTMLInputElement | null;
-  return normalizeReportOwner(input?.value);
-}
-
-function saveReportOwner(owner: string): void {
-  StorageService.set(REPORT_OWNER_STORAGE_KEY, normalizeReportOwner(owner));
-}
+const reportOwnerField = createOwnerField({
+  storageKey: REPORT_OWNER_STORAGE_KEY,
+  defaultOwner: DEFAULT_REPORT_OWNER,
+  inputId: 'inventory-replenishment-owner',
+});
 
 export function buildInventoryReplenishmentTemplate(owner = DEFAULT_REPORT_OWNER): string {
   const today = new Date().toISOString().split('T')[0];
-  const reportOwner = normalizeReportOwner(owner);
+  const reportOwner = reportOwnerField.normalize(owner);
 
   return [
     `# 库存补货周报复盘 - ${today}`,
@@ -89,8 +71,8 @@ export function buildInventoryReplenishmentTemplate(owner = DEFAULT_REPORT_OWNER
 }
 
 async function copyInventoryReplenishmentTemplate(): Promise<void> {
-  const owner = readReportOwner();
-  saveReportOwner(owner);
+  const owner = reportOwnerField.read();
+  reportOwnerField.save(owner);
   const reportTemplate = buildInventoryReplenishmentTemplate(owner);
 
   try {
@@ -126,7 +108,7 @@ class InventoryReplenishmentModule extends BaseModule {
   }
 
   protected async init(): Promise<void> {
-    restoreReportOwner();
+    reportOwnerField.restore();
 
     this.registeredActions = registerActionsWithLegacy({
       sops_copyInventoryReplenishmentTemplate: copyInventoryReplenishmentTemplate as (

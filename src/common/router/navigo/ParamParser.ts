@@ -65,7 +65,7 @@ export class ParamParser {
 
     // 验证和转换每个参数
     for (const [key, paramConfig] of Object.entries(config)) {
-      const parsed = this._parsePathParam(key, rawParams?.[key], paramConfig);
+      const parsed = this.parsePathParam(key, rawParams?.[key], paramConfig);
       if (parsed.status === 'error') {
         errors.push(parsed.error);
       }
@@ -77,7 +77,7 @@ export class ParamParser {
     return { params, errors };
   }
 
-  private _parsePathParam(
+  private parsePathParam(
     key: string,
     rawValue: string | undefined,
     paramConfig: RouteParamConfig
@@ -94,7 +94,7 @@ export class ParamParser {
       return { status: 'skip' };
     }
 
-    const converted = this._convertType(rawValue, paramConfig.type);
+    const converted = this.convertType(rawValue, paramConfig.type);
     if (converted === null) {
       return {
         status: 'error',
@@ -227,7 +227,7 @@ export class ParamParser {
    * @param type - 目标类型
    * @returns 转换后的值，失败返回 null
    */
-  private _convertType(
+  private convertType(
     value: string,
     type: 'string' | 'number' | 'boolean'
   ): string | number | boolean | null {

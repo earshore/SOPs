@@ -906,7 +906,7 @@
 /* ---- Manual Collection Configuration ---- */
 [x-data='scraperPanel'] .manual-config-panel {
   --scraper-border: var(--border-muted, var(--color-slate-200, #e2e8f0));
-  --scraper-radius: var(--radius-card, var(--rounded-md));
+  --scraper-radius: var(--rounded-card, var(--rounded-md));
   --scraper-surface: var(--surface-card, var(--color-white, #ffffff));
   container-type: inline-size;
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.72), rgba(255, 255, 255, 1) 42%);

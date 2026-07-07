@@ -4,7 +4,7 @@
 // 使用Shadow DOM实现封装
 // ================================================================
 
-import { createSafeFragment, escapeHtml } from '../../common/utils/security';
+import { createSafeFragment, escapeHtml } from '@/common/utils/security';
 import modalStylesUrl from './AppModal.css?url';
 
 /**
@@ -48,7 +48,7 @@ export class AppModal extends HTMLElement {
 
   connectedCallback(): void {
     this.render();
-    this._setupEvents();
+    this.setupEvents();
   }
 
   disconnectedCallback(): void {
@@ -58,10 +58,10 @@ export class AppModal extends HTMLElement {
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
     if (name === 'title') {
-      this._updateTitle(newValue || '');
+      this.updateTitle(newValue || '');
     }
     if (name === 'size') {
-      this._updateSize(newValue || 'md');
+      this.updateSize(newValue || 'md');
     }
   }
 
@@ -84,7 +84,7 @@ export class AppModal extends HTMLElement {
     container.hidden = false;
     container.classList.remove('hidden');
     container.classList.add('is-open');
-    this._focusInitialElement(panel);
+    this.focusInitialElement(panel);
     // Trigger reflow for transition
     requestAnimationFrame(() => {
       backdrop.classList.add('active');
@@ -110,7 +110,7 @@ export class AppModal extends HTMLElement {
       if (!this._isOpen && container) {
         container.hidden = true;
         container.classList.add('hidden');
-        this._restoreFocus();
+        this.restoreFocus();
       }
       this.dispatchEvent(new CustomEvent('close'));
     }, 350);
@@ -120,7 +120,7 @@ export class AppModal extends HTMLElement {
     this.setAttribute('title', title);
   }
 
-  private _updateTitle(title: string): void {
+  private updateTitle(title: string): void {
     const el = this._shadowRoot.querySelector('.modal-title-text');
     if (el) el.textContent = title;
 
@@ -130,16 +130,16 @@ export class AppModal extends HTMLElement {
     }
   }
 
-  private _updateSize(size: string): void {
+  private updateSize(size: string): void {
     const panel = this._shadowRoot.querySelector('.modal-panel');
     if (!panel) return;
 
     // Remove all size classes
-    Object.values(this._sizeMap()).forEach(cls => panel.classList.remove(cls));
-    panel.classList.add(this._sizeMap()[size] || 'size-lg');
+    Object.values(this.getSizeMap()).forEach(cls => panel.classList.remove(cls));
+    panel.classList.add(this.getSizeMap()[size] || 'size-lg');
   }
 
-  private _sizeMap(): Record<string, string> {
+  private getSizeMap(): Record<string, string> {
     return {
       sm: 'size-sm',
       md: 'size-md',
@@ -150,7 +150,7 @@ export class AppModal extends HTMLElement {
     };
   }
 
-  private _focusInitialElement(panel: HTMLElement): void {
+  private focusInitialElement(panel: HTMLElement): void {
     const autofocusTarget =
       this.querySelector<HTMLElement>('[autofocus]') ||
       this._shadowRoot.querySelector<HTMLElement>('[autofocus]');
@@ -160,7 +160,7 @@ export class AppModal extends HTMLElement {
     target.focus({ preventScroll: true });
   }
 
-  private _restoreFocus(): void {
+  private restoreFocus(): void {
     const target = this._previousActiveElement;
     this._previousActiveElement = null;
 
@@ -169,7 +169,7 @@ export class AppModal extends HTMLElement {
     }
   }
 
-  private _setupEvents(): void {
+  private setupEvents(): void {
     const backdrop = this._shadowRoot.querySelector('.modal-backdrop');
     const closeBtn = this._shadowRoot.querySelector('.btn-close');
 
@@ -204,7 +204,7 @@ export class AppModal extends HTMLElement {
     const safeTitle = escapeHtml(title);
     const size = this.getAttribute('size') || 'md';
     const hideHeader = this.hasAttribute('no-header');
-    const sizeClass = this._sizeMap()[size] || 'size-lg';
+    const sizeClass = this.getSizeMap()[size] || 'size-lg';
     const titleId = 'app-modal-title';
     const accessibleNameAttr =
       !hideHeader && safeTitle

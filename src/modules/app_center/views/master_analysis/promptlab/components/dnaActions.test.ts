@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { appStore } from '@/stores/useAppStore';
-import { showToast } from '../../../../../../common/ui';
+import { showToast } from '@/common/ui';
 import {
   autoPopulateDNA,
   canExtractDNA,
@@ -15,7 +15,7 @@ type AnalysisReportStateValue = Parameters<
   ReturnType<typeof appStore.getState>['setAnalysisReport']
 >[0];
 
-vi.mock('../../../../../../common/ui', () => ({
+vi.mock('@/common/ui', () => ({
   showToast: vi.fn(),
 }));
 

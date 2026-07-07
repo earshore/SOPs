@@ -7,7 +7,7 @@ import type { ReportAdapter, ExtractionResult } from './ReportAdapter';
 import type { CompetitorReport } from '../../types/downloadsReportTypes';
 import type { ExtendedDNA } from '../../types/extendedDNA';
 import { isTechnicalSpec } from '../../utils/specUtils';
-import { ValidationError } from '../../../../../../common/errors/AppError';
+import { ValidationError } from '@/common/errors/AppError';
 
 type CompetitorReportInput = Partial<CompetitorReport> & {
   productSummary?: CompetitorReport['product_summary'];

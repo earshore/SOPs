@@ -4,7 +4,7 @@
 // 统一管理所有颜色主题，支持动态切换和用户自定义
 // ================================================================
 
-import { StorageService } from '@services/storageService';
+import { StorageService } from '@/services/storageService';
 import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
 
 /**

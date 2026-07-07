@@ -4,7 +4,7 @@
 // 从 menuConfig.ts 迁移而来，作为配置中心的一部分
 // ================================================================
 
-import type { MenuConfig } from '../../../types/config';
+import type { MenuConfig } from '@/types/config';
 
 /**
  * 默认路由配置

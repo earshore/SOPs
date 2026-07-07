@@ -200,7 +200,7 @@ export interface CountryInfo {
 /**
  * 营销日历 - 国家列表（统一大写 ISO 代码，与 AMZ_COUNTRY_DATA 对齐）
  */
-export const amzf_countries: CountryInfo[] = [
+export const AMZF_COUNTRIES: CountryInfo[] = [
   { code: 'DE', name: '德国', flag: '<span class="fi fi-de"></span>' },
   { code: 'FR', name: '法国', flag: '<span class="fi fi-fr"></span>' },
   { code: 'IT', name: '意大利', flag: '<span class="fi fi-it"></span>' },
@@ -217,7 +217,7 @@ export const amzf_countries: CountryInfo[] = [
 /**
  * 营销日历 - 月份列表
  */
-export const amzf_months: string[] = [
+export const AMZF_MONTHS: string[] = [
   '一月',
   '二月',
   '三月',
@@ -258,7 +258,7 @@ export interface MarketingEvent {
  * 营销日历 - 事件列表
  * 包含全年50个重要营销节点
  */
-export const amzf_events: MarketingEvent[] = [
+export const AMZF_EVENTS: MarketingEvent[] = [
   // ==================== January (一月) ====================
   {
     id: 1,
@@ -992,7 +992,7 @@ export default {
   AMZ_COUNTRY_DATA,
   A10_CHART_DATA,
   SEO_RADAR_DATA,
-  amzf_countries,
-  amzf_months,
-  amzf_events,
+  AMZF_COUNTRIES,
+  AMZF_MONTHS,
+  AMZF_EVENTS,
 };

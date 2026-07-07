@@ -3,43 +3,25 @@
  * Email Reply Templates SOP - Static Version
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
-import {
-  registerActionsWithLegacy,
-  unregisterActions,
-} from '../../../../../common/utils/actionRegistry';
-import { StorageService } from '../../../../../services/storageService';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
+import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { copyTextToClipboard } from '../../../utils/clipboard';
+import { createOwnerField } from '../../../utils/ownerField';
 
 const REVIEW_OWNER_STORAGE_KEY = 'email_templates_owner_v1';
 const DEFAULT_REVIEW_OWNER = '客服负责人';
 
-function normalizeReviewOwner(owner: unknown): string {
-  return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_REVIEW_OWNER;
-}
-
-function restoreReviewOwner(): void {
-  const input = document.getElementById('email-templates-owner') as HTMLInputElement | null;
-  if (input)
-    input.value = normalizeReviewOwner(
-      StorageService.get<string>(REVIEW_OWNER_STORAGE_KEY, DEFAULT_REVIEW_OWNER)
-    );
-}
-
-function readReviewOwner(): string {
-  const input = document.getElementById('email-templates-owner') as HTMLInputElement | null;
-  return normalizeReviewOwner(input?.value);
-}
-
-function saveReviewOwner(owner: string): void {
-  StorageService.set(REVIEW_OWNER_STORAGE_KEY, normalizeReviewOwner(owner));
-}
+const reviewOwnerField = createOwnerField({
+  storageKey: REVIEW_OWNER_STORAGE_KEY,
+  defaultOwner: DEFAULT_REVIEW_OWNER,
+  inputId: 'email-templates-owner',
+});
 
 export function buildEmailTemplatesReviewTemplate(owner = DEFAULT_REVIEW_OWNER): string {
   const today = new Date().toISOString().split('T')[0];
-  const reviewOwner = normalizeReviewOwner(owner);
+  const reviewOwner = reviewOwnerField.normalize(owner);
 
   return [
     `# 客服邮件处理复盘归档 - ${today}`,
@@ -85,8 +67,8 @@ export function buildEmailTemplatesReviewTemplate(owner = DEFAULT_REVIEW_OWNER):
 }
 
 async function copyEmailTemplatesReviewTemplate(): Promise<void> {
-  const owner = readReviewOwner();
-  saveReviewOwner(owner);
+  const owner = reviewOwnerField.read();
+  reviewOwnerField.save(owner);
   const reviewTemplate = buildEmailTemplatesReviewTemplate(owner);
 
   try {
@@ -139,7 +121,7 @@ class EmailTemplatesModule extends BaseModule {
     setSafeHtml(container, html);
     container.classList.add('fade-in');
     this.bindTemplateToggles(container);
-    restoreReviewOwner();
+    reviewOwnerField.restore();
 
     this.registeredActions = registerActionsWithLegacy({
       sops_copyEmailTemplatesReviewTemplate: copyEmailTemplatesReviewTemplate as (

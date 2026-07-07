@@ -1,23 +1,23 @@
-﻿// ==========================================
+// ==========================================
 // 🚀 src/modules/app_center/views/master_analysis/services/scraperService.ts
 // 🎯 Phase 4: 已迁移使用 StorageService
 // 🎯 P0优化: 完整类型定义
 // ==========================================
 
-import { LANGUAGE_HEADERS } from '../../../../../common/constants/constants';
-import { randomFloat } from '../../../../../common/utils/random';
+import { LANGUAGE_HEADERS } from '@/common/constants/constants';
+import { randomFloat } from '@/common/utils/random';
 import { parseProductPage, parseReviews } from './parserService';
-import { sleep, getErrorSummary } from '../../../../../common/ui';
+import { sleep, getErrorSummary } from '@/common/ui';
 import { HistoryService } from './historyService';
-import { StorageService } from '../../../../../services/storageService';
-import { getRuntimeScraperOptions } from '../../../../../services/runtimeStrategyService';
+import { StorageService } from '@/services/storageService';
+import { getRuntimeScraperOptions } from '@/services/runtimeStrategyService';
 import {
   DEFAULT_SCRAPER_PROXY_TYPE,
   buildScraperProxyUrl,
   getScraperProxyProvider,
   isCommercialScraperProxyType,
-} from '../../../../../common/config/scraperProxies';
-import { ValidationError, ApiError, SystemError } from '@common/errors/AppError';
+} from '@/common/config/scraperProxies';
+import { ValidationError, ApiError, SystemError } from '@/common/errors/AppError';
 import type {
   ProxyConfig,
   FetchOptions,

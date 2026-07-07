@@ -1233,7 +1233,7 @@
   }
   to {
     opacity: 1;
-    max-height: var(--expand-height, 500px);
+    max-height: var(--animation-expand-height, 500px);
     transform: scaleY(1);
   }
 }
@@ -1248,7 +1248,7 @@
 @keyframes collapseUp {
   from {
     opacity: 1;
-    max-height: var(--expand-height, 500px);
+    max-height: var(--animation-expand-height, 500px);
     transform: scaleY(1);
   }
   to {

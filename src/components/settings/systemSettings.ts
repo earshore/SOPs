@@ -4,7 +4,9 @@
 // ================================================================
 
 import './systemSettings.css';
-import { escapeHtml, setSafeHtml } from '../../common/utils/security';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import { getDangerousEndpoints } from '@/common/config/apiEndpoints';
+import { EnvConfig } from '@/common/config/envConfig';
 import {
   DEFAULT_LLM_PROVIDER_ID,
   DEFAULT_NEW_API_ENDPOINT,
@@ -14,7 +16,7 @@ import {
   getLlmProviderConfig,
   type ModelFeature,
   type ProviderConfig,
-} from '../../common/config/llmProviders';
+} from '@/common/config/llmProviders';
 import {
   DEFAULT_SCRAPER_PROXY_TYPE,
   SCRAPER_COMMERCIAL_PROXY_OPTIONS,
@@ -25,45 +27,43 @@ import {
   getScraperProxyInputPlaceholder,
   scraperProxyNeedsInput,
   type ScraperProxyProviderConfig,
-} from '../../common/config/scraperProxies';
-import { fetchModelsFromApi, callLLM } from '../../services/llmService';
-import { showToast } from '../../common/ui';
-import { StorageService, STORAGE_KEYS } from '../../services/storageService';
+} from '@/common/config/scraperProxies';
+import { showToast } from '@/common/ui';
+import { initEventLogger } from '@/common/utils/eventLogger';
+import { escapeHtml, setSafeHtml } from '@/common/utils/security';
+import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorage';
+import { fetchModelsFromApi, callLLM } from '@/services/llmService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
   LocalDataStore,
   type LocalDataBucketId,
   type LocalDataUsage,
-} from '../../services/localDataStore';
-import { ErrorService } from '../../services/errorService';
-import { EnvConfig } from '../../common/config/envConfig';
-import { getDangerousEndpoints } from '../../common/config/apiEndpoints';
-import { initEventLogger } from '../../common/utils/eventLogger';
-import { APP_EVENTS } from '../../common/constants/eventConstants';
-import { SECURE_STORAGE_SECURITY_BOUNDARY } from '../../common/utils/secureStorage';
+} from '@/services/localDataStore';
+import { ErrorService } from '@/services/errorService';
 import {
   TOOL_STRATEGY_TARGETS,
   getToolTargetDefaultModel,
   setToolTargetDefaultModel,
   type ToolStrategyTargetId,
-} from '../../services/toolStrategyService';
+} from '@/services/toolStrategyService';
 import {
   DEFAULT_RUNTIME_STRATEGY_SETTINGS,
   getRuntimeStrategySettings,
   normalizeRuntimeStrategySettings,
   saveRuntimeStrategySettings,
   type RuntimeStrategySettings,
-} from '../../services/runtimeStrategyService';
+} from '@/services/runtimeStrategyService';
 import {
   getDeveloperDiagnosticSettings,
   updateDeveloperDiagnosticSetting,
   type DeveloperDiagnosticSettings,
   type DeveloperLogLevel,
-} from '../../services/developerDiagnosticsService';
-import type { LLMProviderConfig } from '../../types/state';
-import type { ProxyConfig } from '../../types/modules-business';
-import { appStore } from '../../stores/useAppStore';
-import eventBus from '@common/EventBus';
-import { ApiError } from '@common/errors/AppError';
+} from '@/services/developerDiagnosticsService';
+import { appStore } from '@/stores/useAppStore';
+import type { ProxyConfig } from '@/types/modules-business';
+import type { LLMProviderConfig } from '@/types/state';
+import eventBus from '@/common/EventBus';
+import { ApiError } from '@/common/errors/AppError';
 
 let alpineRetryCount = 0;
 
@@ -1138,7 +1138,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   // 打开性能监控面板
   async openPerformanceMonitor(): Promise<void> {
     try {
-      const { performanceMonitor } = await import('../../common/devtools/PerformanceMonitor');
+      const { performanceMonitor } = await import('@/common/devtools/PerformanceMonitor');
 
       // 确保面板已初始化
       if (!performanceMonitor.isInitialized()) {
@@ -1655,7 +1655,7 @@ export function closeSettings(): void {
  */
 export async function openPerformanceMonitor(): Promise<void> {
   try {
-    const { performanceMonitor } = await import('../../common/devtools/PerformanceMonitor');
+    const { performanceMonitor } = await import('@/common/devtools/PerformanceMonitor');
     performanceMonitor.show();
     showToast('监控面板已打开', { type: 'success' });
   } catch (error) {

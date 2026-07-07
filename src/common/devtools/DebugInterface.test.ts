@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import debugInterface, { type DebugInterface } from './DebugInterface';
-import { StorageService } from '@services/storageService';
+import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   appState: {
@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   storageClear: vi.fn(),
 }));
 
-vi.mock('@services/storageService', () => ({
+vi.mock('@/services/storageService', () => ({
   StorageService: {
     clear: mocks.storageClear,
   },

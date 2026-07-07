@@ -1,6 +1,6 @@
 @media (min-width: 1024px) {
   .seo-page > :nth-child(n + 2) :where(.rounded-xl, .rounded-lg) {
-    border-radius: var(--radius-card, var(--rounded-md)) !important;
+    border-radius: var(--rounded-card, var(--rounded-md)) !important;
   }
 
   .seo-page > :nth-child(n + 2) :where(.shadow, .shadow-sm, .shadow-md) {
@@ -41,7 +41,7 @@
   }
 
   .seo-page > :nth-child(n + 2) :where(.bg-slate-900, .bg-slate-800) {
-    border-radius: var(--radius-card, var(--rounded-md)) !important;
+    border-radius: var(--rounded-card, var(--rounded-md)) !important;
     background: var(--color-slate-900) !important;
     box-shadow: none !important;
   }

@@ -669,16 +669,14 @@
   --page-content-wide-width: var(--layout-wide-width);
 
   /* ---- 组件视觉 ---- */
-  --radius-card: var(--rounded-card);
-  --radius-panel: var(--rounded-panel);
   --card-bg: var(--surface-card);
   --card-border: var(--border-subtle);
   --card-shadow: var(--shadow-card);
-  --card-radius: var(--radius-card);
+  --card-radius: var(--rounded-card);
   --panel-bg: var(--surface-panel);
   --panel-border: var(--border-subtle);
   --panel-shadow: var(--shadow-panel);
-  --panel-radius: var(--radius-panel);
+  --panel-radius: var(--rounded-panel);
 
   /* ---- 操作按钮 ---- */
   --button-primary-bg: var(--color-primary);

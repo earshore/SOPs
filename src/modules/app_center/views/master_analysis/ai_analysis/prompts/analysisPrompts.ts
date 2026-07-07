@@ -51,7 +51,7 @@
 
 import type { Product } from '../config/sampleData';
 import { sanitizePromptInput } from './promptSanitizer';
-import { ValidationError } from '@common/errors/AppError';
+import { ValidationError } from '@/common/errors/AppError';
 
 const nativeLoggerConsole = globalThis.console;
 // 核心 JSON 规则

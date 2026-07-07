@@ -1,14 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { showToast } from '@common/ui/index';
-import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
+import { showToast } from '@/common/ui/index';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
   createPerformanceSettingsPanel,
   getPerformanceSettings,
   resolveAnalysisSchedule,
 } from './PerformanceSettings';
 
-vi.mock('../../../../../../services/storageService', () => ({
+vi.mock('@/services/storageService', () => ({
   STORAGE_KEYS: {
     RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
   },
@@ -23,7 +23,7 @@ vi.mock('../services/parallelAnalysisService', () => ({
   clearAnalysisCacheAsync: vi.fn(() => Promise.resolve()),
 }));
 
-vi.mock('@common/ui/index', () => ({
+vi.mock('@/common/ui/index', () => ({
   showToast: vi.fn(),
 }));
 

@@ -2,9 +2,9 @@
  * More 模块 - 亚马逊基础报告 · 一键日报
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 import { renderBusinessScenarioPage } from '../casePageRenderer';
 
 class AmazonDailyReportModule extends BaseModule {

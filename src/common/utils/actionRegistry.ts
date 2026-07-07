@@ -4,9 +4,10 @@
 // 替代 window.xxx 全局函数挂载模式
 // ================================================================
 
-import { StorageService } from '../../services/storageService';
+import { StorageService } from '@/services/storageService';
 import eventBus from '../EventBus';
 import { APP_EVENTS } from '../constants/eventConstants';
+import { ACTION_GLOBAL_NAMES, ACTION_PREFIXES, validateRegistryActionName } from './actionNaming';
 
 const nativeLoggerConsole = globalThis.console;
 
@@ -27,117 +28,24 @@ interface ActionRegistryMap {
   [actionName: string]: ActionHandler;
 }
 
-/**
- * 命名规范配置
- */
-interface NamingConventions {
-  global: string[];
-  prefixes: Record<string, string>;
-}
-
-/**
- * 动作注册表
- */
 const ActionRegistry: ActionRegistryMap = {};
 let delegatedClickHandler: ((event: MouseEvent) => void) | null = null;
 
 /**
- * 动作命名规范
- */
-const NAMING_CONVENTIONS: NamingConventions = {
-  // 全局动作（无前缀）- UI 核心功能和系统级操作
-  global: [
-    // 核心导航
-    'switch-tab', // 通过 ActionRegistry 事件委托，内部调用 navigateToRouteId
-    'renderMegaMenu',
-    // 通用 UI
-    'showToast',
-    'close',
-    'clear-sidebar-search',
-    // 设置相关
-    'openSettings',
-    'closeSettings',
-    'saveProviderConfig',
-    'loadProviderConfig',
-    'fetchModels',
-    'toggleApiKeyVisibility',
-    'testConnection',
-    'saveProxyConfig',
-    'openPerformanceMonitor',
-    'showPerformanceReport',
-    'switchTheme',
-    'getAllThemes',
-    'getCurrentTheme',
-    'showLogs',
-    'showErrors',
-    'clearLogs',
-    'downloadLogs',
-    // 全局 UI 交互
-    'toggle-sop-group',
-    'clear-sop-search',
-    'clear-hub-search',
-    'scroll-to-sop-module',
-    'scroll-to-hub-module',
-    'scroll-to-more-module',
-
-    // NPI Tracker 模块专用动作
-    'updateField',
-    'updateDeliveryFee',
-    'toggleDecision',
-    'openNextStepEditor',
-    'saveNextSteps',
-    'closeNextStepModal',
-    'exportToExcel',
-    'copyNpiReviewTemplate',
-    'copyListingReviewTemplate',
-    'filterByStore',
-    'filterByStage',
-
-    // Restricted Words 模块专用动作
-    'showWordDetail',
-    'closeWordDetail',
-
-    // Analysis 模块专用动作
-    'toggleAllModules',
-    'selectAllAsins',
-    'copyPromptText',
-    'translateReport',
-    'copyReportMarkdown',
-    'exportReport',
-    'toggleCardResize',
-  ],
-  // 模块前缀映射
-  prefixes: {
-    keyword_hunter_: 'keyword_hunter',
-    mp_: 'master_analysis',
-    sops_: 'sops_module',
-    amz_: 'amz_hub',
-    amzf_: 'amz_hub_features',
-    more_: 'more_module',
-  },
-};
-
-/**
  * 验证动作命名是否符合规范
  */
-function _validateActionName(actionName: string): boolean {
-  // 全局动作豁免
-  if (NAMING_CONVENTIONS.global.includes(actionName)) {
+function validateActionNameForRegistry(actionName: string): boolean {
+  const validation = validateRegistryActionName(actionName);
+  if (validation.valid) {
     return true;
   }
 
-  // 检查是否有模块前缀
-  const hasPrefix = Object.keys(NAMING_CONVENTIONS.prefixes).some(prefix =>
-    actionName.startsWith(prefix)
+  nativeLoggerConsole.warn(
+    `[ActionRegistry] Action "${actionName}" does not match the naming convention.\n` +
+      `   Expected: known global action or <prefix>_<camelAction>, for example keyword_hunter_syncToInput\n` +
+      `   Global actions: ${ACTION_GLOBAL_NAMES.join(', ')}\n` +
+      `   Available prefixes: ${Object.keys(ACTION_PREFIXES).join(', ')}`
   );
-
-  if (!hasPrefix && !actionName.startsWith('_')) {
-    nativeLoggerConsole.warn(
-      `⚠️ [ActionRegistry] 动作 "${actionName}" 未使用模块前缀。\n` +
-        `   推荐格式: <prefix>_<action>，例如: keyword_hunter_syncToInput\n` +
-        `   可用前缀: ${Object.keys(NAMING_CONVENTIONS.prefixes).join(', ')}`
-    );
-  }
 
   return true;
 }
@@ -146,7 +54,7 @@ function _validateActionName(actionName: string): boolean {
  * 注册动作处理函数
  */
 export function registerAction(actionName: string, handler: ActionHandler): void {
-  _validateActionName(actionName);
+  validateActionNameForRegistry(actionName);
 
   if (ActionRegistry[actionName]) {
     nativeLoggerConsole.warn(`[ActionRegistry] 动作 "${actionName}" 已存在，将被覆盖`);

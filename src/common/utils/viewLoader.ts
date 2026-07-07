@@ -6,7 +6,7 @@
 // ================================================================
 
 import { APP_VERSION } from '../constants/constants';
-import { StorageService, CACHE_PREFIXES } from '../../services/storageService';
+import { StorageService, CACHE_PREFIXES } from '@/services/storageService';
 import { getViewPathByRoute } from '../config/menuConfig';
 import { SystemError } from '@/common/errors/AppError';
 import { createSafeFragment, escapeHtml } from '@/common/utils/security';

@@ -1,6 +1,6 @@
 // src/types/modules-business.d.ts
 import type { UserProductProfile } from './prompt-profile';
-import type { ScraperProxyType } from '../common/config/scraperProxies';
+import type { ScraperProxyType } from '@/common/config/scraperProxies';
 // ================================================================
 // 业务模块类型定义
 // 为各业务模块提供完整的类型约束

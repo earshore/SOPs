@@ -13,17 +13,17 @@ import type {
 import type { ScraperSite } from '@/types/modules-business';
 import type { ScraperState } from '@/types/state';
 import { appStore } from '@/stores/useAppStore';
-import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
-import { ErrorService } from '../../../../../../services/errorService';
-import { showToast } from '../../../../../../common/ui';
-import { APP_EVENTS } from '../../../../../../common/constants/eventConstants';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import { showToast } from '@/common/ui';
+import { ErrorService } from '@/services/errorService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { extractValidAsins } from '../utils/validators';
 import { getFlag, getSiteName, getSiteUrl, formatDate } from '../utils/formatters';
 import {
   DEFAULT_SCRAPER_PROXY_TYPE,
   getScraperProxyDisplayName,
   getScraperProxyProvider,
-} from '../../../../../../common/config/scraperProxies';
+} from '@/common/config/scraperProxies';
 import {
   startScrape,
   handleScrapeComplete,
@@ -75,7 +75,7 @@ type ScraperPanelThis = ScraperPanelState & {
   loadHistory(): void;
   restoreState(): void;
   saveState(): void;
-  _renderInitialData(): void;
+  renderInitialData(): void;
   updateDataPreview(data: ScrapedData | null): void;
   renderDataPanel(): void;
   toggleCardExpand(asin: string): void;
@@ -487,7 +487,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
 
     // 从 state 恢复状态
     this.restoreState();
-    this._renderInitialData();
+    this.renderInitialData();
 
     // 保存事件处理函数引用
     const historyUpdatedHandler = () => {
@@ -518,7 +518,7 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
   },
 
   // 如果有数据则渲染预览（这部分代码应该在 init 方法内）
-  _renderInitialData() {
+  renderInitialData() {
     if (this.hasData && this.dataPreview) {
       this.dataPreview.checkLargeDataset();
 

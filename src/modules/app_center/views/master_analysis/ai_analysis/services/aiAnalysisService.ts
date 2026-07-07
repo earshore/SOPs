@@ -2,16 +2,16 @@
  * AI 分析服务 - 调用大模型进行真实数据分析
  */
 
-import { callLLM, type ChatMessage, type LLMOptions } from '../../../../../../services/llmService';
-import { StorageService, STORAGE_KEYS } from '../../../../../../services/storageService';
-import { applyToolTargetModel } from '../../../../../../services/toolStrategyService';
-import { getRuntimeLlmAnalysisOptions } from '../../../../../../services/runtimeStrategyService';
+import { callLLM, type ChatMessage, type LLMOptions } from '@/services/llmService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+import { applyToolTargetModel } from '@/services/toolStrategyService';
+import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { Product } from '../config/sampleData';
 import { generateAnalysisPrompt, getReviewSamplingMetadata } from '../prompts/analysisPrompts';
 import { calculateFullReportConfidence, calculateOverallConfidence } from './confidenceCalculator';
 import { parseAnalysisResponse, validateAnalysisResult } from './analysisResultParser';
-import { ValidationError, AppError, ErrorLevel, ErrorCategory } from '@common/errors/AppError';
+import { ValidationError, AppError, ErrorLevel, ErrorCategory } from '@/common/errors/AppError';
 import { getMasterAnalysisTargetMaxTokens } from '../../services/llmOutputBudget';
 
 const nativeLoggerConsole = globalThis.console;

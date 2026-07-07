@@ -17,7 +17,7 @@ import type {
   PromptLabState,
   LLMProviderConfig,
   ProxyConfig,
-} from '../../types/state';
+} from '@/types/state';
 
 import type {
   ApiResponse,
@@ -28,7 +28,7 @@ import type {
   AmazonProductData,
   AnalysisReportResponse,
   AnalysisSection,
-} from '../../types/api';
+} from '@/types/api';
 
 import type {
   RouteChangedEventPayload,
@@ -36,9 +36,9 @@ import type {
   StateChangedEventPayload,
   ErrorOccurredEventPayload,
   PerformanceMetricEventPayload,
-} from '../../types/events';
+} from '@/types/events';
 
-import type { AnalysisReport } from '../../types/modules-business';
+import type { AnalysisReport } from '@/types/modules-business';
 
 // 导入 Zod schemas
 import {

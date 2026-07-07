@@ -29,7 +29,7 @@ async function importAnimationManager(options: {
 
   vi.resetModules();
   vi.doMock('@/services/storageService', () => ({ StorageService: storage }));
-  vi.doMock('@common/EventBus', () => ({ default: eventBus }));
+  vi.doMock('@/common/EventBus', () => ({ default: eventBus }));
   vi.spyOn(window, 'matchMedia').mockReturnValue(mediaQuery as unknown as MediaQueryList);
 
   const module = await import('@/services/animation-manager');
@@ -53,7 +53,7 @@ async function importAnimationManager(options: {
 
   afterEach(() => {
     vi.doUnmock('@/services/storageService');
-    vi.doUnmock('@common/EventBus');
+    vi.doUnmock('@/common/EventBus');
     vi.restoreAllMocks();
   });
 

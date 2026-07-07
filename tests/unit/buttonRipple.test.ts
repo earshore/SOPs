@@ -26,7 +26,7 @@ async function importButtonRipple(options: {
   vi.resetModules();
   vi.doMock('@/services/animation-manager', () => ({ animationManager }));
   vi.doMock('@/utils/animation-utils', () => ({ createRipple }));
-  vi.doMock('@common/EventBus', () => ({ default: eventBus }));
+  vi.doMock('@/common/EventBus', () => ({ default: eventBus }));
 
   const module = await import('@/components/button-ripple');
 
@@ -51,7 +51,7 @@ describe('button ripple', () => {
   afterEach(() => {
     vi.doUnmock('@/services/animation-manager');
     vi.doUnmock('@/utils/animation-utils');
-    vi.doUnmock('@common/EventBus');
+    vi.doUnmock('@/common/EventBus');
     vi.restoreAllMocks();
   });
 

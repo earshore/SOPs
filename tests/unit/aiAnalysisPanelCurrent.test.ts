@@ -3,7 +3,7 @@ import { createAiAnalysisPanel } from '@/modules/app_center/views/master_analysi
 import * as actions from '@/modules/app_center/views/master_analysis/ai_analysis/components/actions';
 import { parseAnalysisReport } from '@/modules/app_center/views/master_analysis/ai_analysis/services/analysisService';
 import { checkAndLoadScraperData, checkLoadedReport } from '@/modules/app_center/views/master_analysis/ai_analysis/components/dataLoaders';
-import { cleanupSubscriptions } from '@common/utils/stateSync';
+import { cleanupSubscriptions } from '@/common/utils/stateSync';
 
 const panelMocks = vi.hoisted(() => {
   const storeState = {
@@ -109,7 +109,7 @@ vi.mock('@/stores/useAppStore', () => ({
   },
 }));
 
-vi.mock('@common/utils/stateSync', () => ({
+vi.mock('@/common/utils/stateSync', () => ({
   createMultipleStateSyncs: panelMocks.createMultipleStateSyncs,
   cleanupSubscriptions: panelMocks.cleanupSubscriptions,
 }));

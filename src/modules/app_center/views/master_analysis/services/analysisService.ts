@@ -5,9 +5,9 @@
 // 🎯 P0优化: 使用统一类型定义
 // ================================================================
 
-import { callLLM } from '../../../../../services/llmService';
-import { configCenter } from '../../../../../common/config/ConfigCenter';
-import { ApiError, ValidationError } from '@common/errors/AppError';
+import { callLLM } from '@/services/llmService';
+import { configCenter } from '@/common/config/ConfigCenter';
+import { ApiError, ValidationError } from '@/common/errors/AppError';
 import { TRANSLATE_PROMPT_TEMPLATE } from '../constants/prompts';
 import { jsonrepair } from 'jsonrepair';
 import { sanitizePromptInput } from '../ai_analysis/prompts/promptSanitizer';

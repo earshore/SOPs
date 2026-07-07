@@ -5,7 +5,7 @@
 // ================================================================
 
 import { MENU_CONFIG } from '../menuConfig';
-import type { MenuConfig } from '../../../types/config';
+import type { MenuConfig } from '@/types/config';
 
 /**
  * 加载路由配置

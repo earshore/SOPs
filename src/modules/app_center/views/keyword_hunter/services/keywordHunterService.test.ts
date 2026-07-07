@@ -10,11 +10,11 @@ const mocks = vi.hoisted(() => ({
   localDataSet: vi.fn(),
 }));
 
-vi.mock('../../../../../services/llmService', () => ({
+vi.mock('@/services/llmService', () => ({
   callLLM: mocks.callLLM,
 }));
 
-vi.mock('../../../../../services/storageService', () => ({
+vi.mock('@/services/storageService', () => ({
   STORAGE_KEYS: {
     LLM_ACTIVE_PROVIDER: 'llm_active_provider',
     TOOL_STRATEGY_SETTINGS: 'tool_strategy_settings',
@@ -27,7 +27,7 @@ vi.mock('../../../../../services/storageService', () => ({
   },
 }));
 
-vi.mock('../../../../../services/localDataStore', () => ({
+vi.mock('@/services/localDataStore', () => ({
   LocalDataStore: {
     get: mocks.localDataGet,
     set: mocks.localDataSet,

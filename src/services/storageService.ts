@@ -7,15 +7,15 @@
 // 🎯 P0-4.1.8: 在数据边界使用类型守卫
 // ================================================================
 
-import type { IStorageService } from '../types/services';
-import type { LLMProviderConfig } from '../types/state';
-import type { HistoryItem, ProxyConfig } from '../types/modules-business';
-import { handleSystemError } from '../common/errors';
-import { isLLMProviderConfig, isProxyConfig } from '../common/guards/typeGuards';
+import { handleSystemError } from '@/common/errors';
+import { isLLMProviderConfig, isProxyConfig } from '@/common/guards/typeGuards';
 import {
   DEFAULT_SCRAPER_PROXY_TYPE,
   SCRAPER_PROXY_CREDENTIAL_TYPES,
-} from '../common/config/scraperProxies';
+} from '@/common/config/scraperProxies';
+import type { HistoryItem, ProxyConfig } from '@/types/modules-business';
+import type { IStorageService } from '@/types/services';
+import type { LLMProviderConfig } from '@/types/state';
 import { isSopsManagedLocalStorageKey, LocalDataStore } from './localDataStore';
 
 /**
@@ -1099,7 +1099,7 @@ class StorageServiceClass implements IStorageService {
    */
   async setSecure(key: string, value: unknown): Promise<boolean> {
     try {
-      const { SecureStorage } = await import('../common/utils/secureStorage');
+      const { SecureStorage } = await import('@/common/utils/secureStorage');
       return await SecureStorage.setSecure(key, value);
     } catch (e) {
       this._reportStorageReadError('setSecure', key, e as Error);
@@ -1112,7 +1112,7 @@ class StorageServiceClass implements IStorageService {
    */
   async getSecure<T = unknown>(key: string, defaultValue: T | null = null): Promise<T | null> {
     try {
-      const { SecureStorage } = await import('../common/utils/secureStorage');
+      const { SecureStorage } = await import('@/common/utils/secureStorage');
       return await SecureStorage.getSecure(key, defaultValue);
     } catch (e) {
       this._reportStorageReadError('getSecure', key, e as Error);

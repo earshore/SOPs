@@ -2,9 +2,9 @@
  * More 模块 - 使用须知
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 import { renderBusinessScenarioPage } from '../casePageRenderer';
 
 class UsageNoticeModule extends BaseModule {

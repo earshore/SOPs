@@ -33,7 +33,7 @@ vi.mock('./historyService', () => ({
   },
 }));
 
-vi.mock('../../../../../services/storageService', () => ({
+vi.mock('@/services/storageService', () => ({
   STORAGE_KEYS: {
     RUNTIME_STRATEGY_SETTINGS: 'runtime_strategy_settings',
   },
@@ -57,12 +57,12 @@ vi.mock('../../../../../services/storageService', () => ({
   },
 }));
 
-vi.mock('../../../../../common/ui', () => ({
+vi.mock('@/common/ui', () => ({
   sleep: mocks.sleep,
   getErrorSummary: mocks.getErrorSummary,
 }));
 
-vi.mock('../../../../../common/config/ConfigCenter', () => ({
+vi.mock('@/common/config/ConfigCenter', () => ({
   configCenter: {
     get: mocks.configGet,
   },

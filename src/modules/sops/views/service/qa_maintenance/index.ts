@@ -1,40 +1,22 @@
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
-import {
-  registerActionsWithLegacy,
-  unregisterActions,
-} from '../../../../../common/utils/actionRegistry';
-import { StorageService } from '../../../../../services/storageService';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
+import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { copyTextToClipboard } from '../../../utils/clipboard';
+import { createOwnerField } from '../../../utils/ownerField';
 
 const REVIEW_OWNER_STORAGE_KEY = 'qa_maintenance_owner_v1';
 const DEFAULT_REVIEW_OWNER = '客服负责人/运营负责人';
 
-function normalizeReviewOwner(owner: unknown): string {
-  return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_REVIEW_OWNER;
-}
-
-function restoreReviewOwner(): void {
-  const input = document.getElementById('qa-maintenance-owner') as HTMLInputElement | null;
-  if (input)
-    input.value = normalizeReviewOwner(
-      StorageService.get<string>(REVIEW_OWNER_STORAGE_KEY, DEFAULT_REVIEW_OWNER)
-    );
-}
-
-function readReviewOwner(): string {
-  const input = document.getElementById('qa-maintenance-owner') as HTMLInputElement | null;
-  return normalizeReviewOwner(input?.value);
-}
-
-function saveReviewOwner(owner: string): void {
-  StorageService.set(REVIEW_OWNER_STORAGE_KEY, normalizeReviewOwner(owner));
-}
+const reviewOwnerField = createOwnerField({
+  storageKey: REVIEW_OWNER_STORAGE_KEY,
+  defaultOwner: DEFAULT_REVIEW_OWNER,
+  inputId: 'qa-maintenance-owner',
+});
 
 export function buildQaMaintenanceTemplate(owner = DEFAULT_REVIEW_OWNER): string {
   const today = new Date().toISOString().split('T')[0];
-  const reviewOwner = normalizeReviewOwner(owner);
+  const reviewOwner = reviewOwnerField.normalize(owner);
 
   return [
     `# QA 问答维护归档 - ${today}`,
@@ -83,8 +65,8 @@ export function buildQaMaintenanceTemplate(owner = DEFAULT_REVIEW_OWNER): string
 }
 
 async function copyQaMaintenanceTemplate(): Promise<void> {
-  const owner = readReviewOwner();
-  saveReviewOwner(owner);
+  const owner = reviewOwnerField.read();
+  reviewOwnerField.save(owner);
   const reviewTemplate = buildQaMaintenanceTemplate(owner);
 
   try {
@@ -120,7 +102,7 @@ class QaMaintenanceModule extends BaseModule {
   }
 
   protected async init(): Promise<void> {
-    restoreReviewOwner();
+    reviewOwnerField.restore();
 
     this.registeredActions = registerActionsWithLegacy({
       sops_copyQaMaintenanceTemplate: copyQaMaintenanceTemplate as (...args: unknown[]) => void,

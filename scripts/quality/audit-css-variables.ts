@@ -112,7 +112,8 @@ const NAMING_PATTERNS = {
     /^--gradient-(primary|secondary|success|warning|danger|info|rainbow|sunset|ocean|forest|glass|text|aurora)$/,
 
   // 布局和基础交互 token
-  layout: /^--(prose-width|sidebar-width(-collapsed|-wide)?|section-gap(-sm|-lg)?|flow-gap)$/,
+  layout:
+    /^--(prose-width|sidebar-width(-collapsed|-wide)?|section-gap(-sm|-lg)?|flow-gap|layout-[\w-]+|page-[\w-]+)$/,
   scrollbar: /^--scrollbar-(width|width-thin|track|thumb|thumb-hover|thumb-radius)$/,
   focusRing: /^--focus-ring-(width|offset|color|style|shadow|soft)$/,
   breakpoint: /^--breakpoint-(sm|md|lg|xl|2xl)$/,
@@ -125,6 +126,8 @@ const NAMING_PATTERNS = {
   componentOverviewCard:
     /^--overview-card-(accent|accent-bg|bg|border|radius|rail-width|transition-duration)$/,
   componentCallout: /^--callout-(accent|bg|border|rail-width)$/,
+  componentBadge: /^--(badge|status-badge)-[\w-]+$/,
+  componentProgress: /^--progress-[\w-]+$/,
   componentIcon: /^--icon-(size|radius|bg|color)$/,
   componentField:
     /^--field-(height|height-compact|padding-x|padding-y|radius|border|border-hover|bg|bg-muted|text|placeholder|focus|focus-ring)$/,
@@ -132,19 +135,26 @@ const NAMING_PATTERNS = {
     /^--(check|radio)-(size|size-sm|size-lg|radius|border|border-hover|bg|color-active|ring-focus)$/,
   componentHeader: /^--header-(height|height-sm|bg|bg-solid|border|text|shadow|shadow-scrolled)$/,
   componentCode: /^--(code|syntax|json|terminal)-[\w-]+$/,
-  componentSidebar:
-    /^--sidebar-(primary|accent|shadow|active-bg-start|active-bg-end|icon-soft|icon-soft-end|text|border|focus)$/,
+  transition: /^--transition-[\w-]+$/,
+  componentPanel: /^--panel-[\w-]+$/,
+  componentModal: /^--modal-[\w-]+$/,
+  componentSettings: /^--settings-[\w-]+$/,
+  componentDataScan: /^--pc-(data|status)-[\w-]+$/,
+  componentSidebar: /^--sidebar-[\w-]+$/,
   componentStatus: /^--status-(color|glow)$/,
   componentWelcomeBanner: /^--wb-[\w-]+$/,
-  animationRuntime: /^--stagger-index$/,
-  tailwindRuntime: /^--tw-(gradient-stops|shadow)$/,
+  animationRuntime: /^--(stagger-index|animation-expand-height)$/,
+  tailwindRuntime: /^--tw-[\w-]+$/,
   hitArea: /^--hit-area-expand$/,
   moduleAppCenter: /^--app-[\w-]+$/,
   modulePpcTools: /^--ppc-[\w-]+$/,
   moduleKeywordHunter: /^--(kh|keyword)-[\w-]+$/,
   moduleScraper: /^--scraper-(border|radius|surface)$/,
   modulePlayground: /^--playground-[\w-]+$/,
-  moduleSops: /^--(sop|brand-risk)-[\w-]+$/,
+  moduleMasterAnalysis: /^--ma-[\w-]+$/,
+  moduleDeepChat: /^--deep-chat-[\w-]+$/,
+  moduleAccent: /^--module-[\w-]+$/,
+  moduleSops: /^--(sop|sops|brand-risk)-[\w-]+$/,
 };
 
 // 已废弃的变量（需要迁移）
@@ -180,7 +190,7 @@ function extractVariables(content: string, filePath: string): VariableUsage[] {
   const lines = content.split('\n');
 
   // 匹配 var(--variable-name) 或 --variable-name:
-  const varPattern = /(?:var\((--[\w-]+)\)|^[\s]*(--[\w-]+)\s*:)/g;
+  const varPattern = /(?:var\(\s*(--[\w-]+)|^[\s]*(--[\w-]+)\s*:)/g;
 
   lines.forEach((line, index) => {
     let match;

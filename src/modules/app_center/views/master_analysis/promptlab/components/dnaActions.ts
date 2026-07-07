@@ -6,8 +6,8 @@
  */
 
 import { appStore } from '@/stores/useAppStore';
-import SITE_CONFIGS from '../../../../../../common/constants/constants';
-import { showToast } from '../../../../../../common/ui';
+import SITE_CONFIGS from '@/common/constants/constants';
+import { showToast } from '@/common/ui';
 import {
   extractProductDNA,
   canExtractDNA as canExtractDNALegacy,

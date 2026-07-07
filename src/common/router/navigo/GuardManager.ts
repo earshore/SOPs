@@ -34,7 +34,7 @@ export class GuardManager {
     this.routeGuards = new Map();
     this.enableLogging = enableLogging;
 
-    this._log('GuardManager initialized');
+    this.log('GuardManager initialized');
   }
 
   // ==================== 守卫注册 ====================
@@ -70,7 +70,7 @@ export class GuardManager {
     // 检查是否已存在同名守卫
     const existingIndex = this.globalGuards.findIndex(g => g.name === guard.name);
     if (existingIndex !== -1) {
-      this._log(`Replacing existing global guard: ${guard.name}`, 'warn');
+      this.log(`Replacing existing global guard: ${guard.name}`, 'warn');
       this.globalGuards.splice(existingIndex, 1);
     }
 
@@ -84,7 +84,7 @@ export class GuardManager {
       return priorityA - priorityB;
     });
 
-    this._log(`Global guard added: ${guard.name} (priority: ${guard.priority ?? 100})`);
+    this.log(`Global guard added: ${guard.name} (priority: ${guard.priority ?? 100})`);
   }
 
   /**
@@ -98,7 +98,7 @@ export class GuardManager {
 
     if (index !== -1) {
       this.globalGuards.splice(index, 1);
-      this._log(`Global guard removed: ${name}`);
+      this.log(`Global guard removed: ${name}`);
       return true;
     }
 
@@ -133,7 +133,7 @@ export class GuardManager {
     // 检查是否已存在同名守卫
     const existingIndex = guards.findIndex(g => g.name === guard.name);
     if (existingIndex !== -1) {
-      this._log(`Replacing existing route guard: ${guard.name} for ${path}`, 'warn');
+      this.log(`Replacing existing route guard: ${guard.name} for ${path}`, 'warn');
       guards.splice(existingIndex, 1);
     }
 
@@ -147,7 +147,7 @@ export class GuardManager {
       return priorityA - priorityB;
     });
 
-    this._log(`Route guard added: ${guard.name} for ${path} (priority: ${guard.priority ?? 100})`);
+    this.log(`Route guard added: ${guard.name} for ${path} (priority: ${guard.priority ?? 100})`);
   }
 
   /**
@@ -170,7 +170,7 @@ export class GuardManager {
         this.routeGuards.delete(path);
       }
 
-      this._log(`Route guard removed: ${name} for ${path}`);
+      this.log(`Route guard removed: ${name} for ${path}`);
       return true;
     }
 
@@ -183,7 +183,7 @@ export class GuardManager {
   clearAll(): void {
     this.globalGuards = [];
     this.routeGuards.clear();
-    this._log('All guards cleared');
+    this.log('All guards cleared');
   }
 
   // ==================== 守卫执行 ====================
@@ -209,30 +209,30 @@ export class GuardManager {
     to: Route,
     from: Route | null
   ): Promise<{ allowed: boolean; redirect?: string; reason?: string }> {
-    this._log(`Running guards: ${from?.path || 'null'} -> ${to.path}`);
+    this.log(`Running guards: ${from?.path || 'null'} -> ${to.path}`);
 
     // 1. 执行全局守卫
-    const globalResult = await this._runGuardList(this.globalGuards, to, from, 'global');
+    const globalResult = await this.runGuardList(this.globalGuards, to, from, 'global');
     if (!globalResult.allowed) {
       return globalResult;
     }
 
     // 2. 执行路由级守卫
     const routeGuards = this.routeGuards.get(to.path) || [];
-    const routeResult = await this._runGuardList(routeGuards, to, from, 'route');
+    const routeResult = await this.runGuardList(routeGuards, to, from, 'route');
     if (!routeResult.allowed) {
       return routeResult;
     }
 
     // 3. 执行路由配置中的守卫
     if (to.config.guards && to.config.guards.length > 0) {
-      const configResult = await this._runGuardList(to.config.guards, to, from, 'config');
+      const configResult = await this.runGuardList(to.config.guards, to, from, 'config');
       if (!configResult.allowed) {
         return configResult;
       }
     }
 
-    this._log('All guards passed');
+    this.log('All guards passed');
     return { allowed: true };
   }
 
@@ -245,7 +245,7 @@ export class GuardManager {
    * @param type - 守卫类型（用于日志）
    * @returns 执行结果
    */
-  private async _runGuardList(
+  private async runGuardList(
     guards: RouteGuard[],
     to: Route,
     from: Route | null,
@@ -253,13 +253,13 @@ export class GuardManager {
   ): Promise<{ allowed: boolean; redirect?: string; reason?: string }> {
     for (const guard of guards) {
       try {
-        this._log(`Executing ${type} guard: ${guard.name}`);
+        this.log(`Executing ${type} guard: ${guard.name}`);
 
         const startTime = performance.now();
         const result = await guard.check(to, from);
         const duration = Math.round(performance.now() - startTime);
 
-        this._log(`Guard ${guard.name} completed in ${duration}ms`);
+        this.log(`Guard ${guard.name} completed in ${duration}ms`);
 
         // 验证结果
         if (!isGuardResult(result)) {
@@ -275,7 +275,7 @@ export class GuardManager {
         // 处理布尔结果
         if (typeof result === 'boolean') {
           if (!result) {
-            this._log(`Guard ${guard.name} rejected navigation`, 'warn');
+            this.log(`Guard ${guard.name} rejected navigation`, 'warn');
             return {
               allowed: false,
               reason: `Guard ${guard.name} rejected`,
@@ -286,7 +286,7 @@ export class GuardManager {
 
         // 处理对象结果
         if (result.allow === false) {
-          this._log(`Guard ${guard.name} rejected navigation`, 'warn');
+          this.log(`Guard ${guard.name} rejected navigation`, 'warn');
           return {
             allowed: false,
             redirect: result.redirect,
@@ -296,7 +296,7 @@ export class GuardManager {
 
         // 处理重定向
         if (result.redirect) {
-          this._log(`Guard ${guard.name} requested redirect to ${result.redirect}`);
+          this.log(`Guard ${guard.name} requested redirect to ${result.redirect}`);
           return {
             allowed: false,
             redirect: result.redirect,
@@ -304,7 +304,7 @@ export class GuardManager {
           };
         }
       } catch (error) {
-        this._log(`Guard ${guard.name} threw error: ${(error as Error).message}`, 'error');
+        this.log(`Guard ${guard.name} threw error: ${(error as Error).message}`, 'error');
         return {
           allowed: false,
           reason: `Guard ${guard.name} error: ${(error as Error).message}`,
@@ -365,7 +365,7 @@ export class GuardManager {
    * @param message - 日志消息
    * @param level - 日志级别
    */
-  private _log(message: string, level: 'log' | 'warn' | 'error' = 'log'): void {
+  private log(message: string, level: 'log' | 'warn' | 'error' = 'log'): void {
     if (!this.enableLogging) return;
 
     const prefix = '[GuardManager]';

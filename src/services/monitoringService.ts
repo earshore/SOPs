@@ -4,8 +4,8 @@
 // 集成Sentry或其他错误追踪服务
 // ================================================================
 
-import { configCenter } from '../common/config/ConfigCenter';
-import type { ILoggerService } from '../types/services';
+import { configCenter } from '@/common/config/ConfigCenter';
+import type { ILoggerService } from '@/types/services';
 
 /**
  * Sentry事件类型

@@ -63,22 +63,22 @@ export class ErrorHandler {
    */
   handle(error: RouterError, context: ErrorContext): string | null {
     // 记录错误
-    this._recordError(error.code);
+    this.recordError(error.code);
 
     // 日志输出
-    this._log(`Error [${error.code}]: ${error.message}`, context, 'error');
+    this.log(`Error [${error.code}]: ${error.message}`, context, 'error');
 
     // 调用自定义错误处理器
     if (this.config.onError) {
       try {
         this.config.onError(error, context);
       } catch (handlerError) {
-        this._log('Custom error handler failed', handlerError, 'error');
+        this.log('Custom error handler failed', handlerError, 'error');
       }
     }
 
     // 根据错误类型返回恢复路径
-    return this._getRecoveryPath(error, context);
+    return this.getRecoveryPath(error, context);
   }
 
   /**
@@ -248,13 +248,13 @@ export class ErrorHandler {
    */
   clearStats(): void {
     this.errorCount.clear();
-    this._log('Error stats cleared');
+    this.log('Error stats cleared');
   }
 
   /**
    * 记录错误
    */
-  private _recordError(code: RouterErrorCode): void {
+  private recordError(code: RouterErrorCode): void {
     const count = this.errorCount.get(code) || 0;
     this.errorCount.set(code, count + 1);
   }
@@ -262,7 +262,7 @@ export class ErrorHandler {
   /**
    * 获取恢复路径
    */
-  private _getRecoveryPath(error: RouterError, context: ErrorContext): string | null {
+  private getRecoveryPath(error: RouterError, context: ErrorContext): string | null {
     switch (error.code) {
       case RouterErrorCode.ROUTE_NOT_FOUND:
         return this.config.notFoundRoute;
@@ -295,7 +295,7 @@ export class ErrorHandler {
   /**
    * 日志输出
    */
-  private _log(message: string, data?: unknown, level: 'log' | 'error' | 'warn' = 'log'): void {
+  private log(message: string, data?: unknown, level: 'log' | 'error' | 'warn' = 'log'): void {
     if (!this.config.enableLogging) return;
 
     const prefix = '[ErrorHandler]';

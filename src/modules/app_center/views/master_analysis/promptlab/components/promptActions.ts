@@ -11,7 +11,7 @@ import { promptlabService } from '../../services/promptlabService';
 import { HistoryService } from '../../services/historyService';
 import { emitHistoryUpdated } from '../../services/historyEvents';
 import { getReportFingerprint, getScrapedDataFingerprint } from '../../services/reportIdentity';
-import { showToast } from '../../../../../../common/ui';
+import { showToast } from '@/common/ui';
 import { computeIsListingReady, computeIsReady, computeHasReport } from './computed';
 import type { PromptlabAlpineContext } from './types';
 import type {
@@ -19,8 +19,8 @@ import type {
   GeneratedPromptProfileSnapshot,
   GeneratedPromptRecord,
   GeneratedPromptType,
-} from '../../../../../../types/modules-business';
-import type { PromptHistoryItem, PromptInputs } from '../../../../../../types/state';
+} from '@/types/modules-business';
+import type { PromptHistoryItem, PromptInputs } from '@/types/state';
 
 type PromptReadinessOptions = {
   defaultMessage: string;

@@ -4,24 +4,21 @@
 // 🎯 P0优化: 使用统一类型定义
 // ================================================================
 
-import { callLLM, type LLMStreamMetrics } from '../../../../../services/llmService';
-import { LocalDataStore } from '../../../../../services/localDataStore';
-import { ValidationError } from '@common/errors/AppError';
+import { callLLM, type LLMStreamMetrics } from '@/services/llmService';
+import { LocalDataStore } from '@/services/localDataStore';
+import { ValidationError } from '@/common/errors/AppError';
 import {
   ANALYSIS_PROMPT_TEMPLATE,
   TRANSLATE_PROMPT_TEMPLATE as TRANSLATE_PROMPT_TEMPLATE2,
 } from '../constants/prompts';
-import { StorageService, STORAGE_KEYS } from '../../../../../services/storageService';
-import {
-  applyToolTargetModel,
-  type ToolStrategyTargetId,
-} from '../../../../../services/toolStrategyService';
+import { StorageService, STORAGE_KEYS } from '@/services/storageService';
+import { applyToolTargetModel, type ToolStrategyTargetId } from '@/services/toolStrategyService';
 import {
   getRuntimeKeywordHunterListingReviewOptions,
   getRuntimeKeywordHunterSeoOptions,
   getRuntimeLlmAnalysisOptions,
-} from '../../../../../services/runtimeStrategyService';
-import { sanitizePromptInput } from '../../../../../common/utils/promptSanitizer';
+} from '@/services/runtimeStrategyService';
+import { sanitizePromptInput } from '@/common/utils/promptSanitizer';
 import type {
   KeywordMatchResult,
   AnalysisResult,

@@ -13,7 +13,7 @@ import * as actions from './actions';
 import { AlpineContext, FullReportData } from '../types';
 import { createComputedProperties, ComputedProperties } from './computedProperties';
 import type { FullAnalysisReport } from '../config/analysisReportData';
-import { createMultipleStateSyncs, cleanupSubscriptions } from '@common/utils/stateSync';
+import { createMultipleStateSyncs, cleanupSubscriptions } from '@/common/utils/stateSync';
 import { createPerformanceSettingsPanel } from './PerformanceSettings';
 import { navigateToRouteId } from '@/common/router/initRouter';
 

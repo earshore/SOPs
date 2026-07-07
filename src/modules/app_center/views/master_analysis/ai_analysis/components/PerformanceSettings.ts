@@ -8,7 +8,7 @@ import {
   getRuntimeMasterAnalysisOptions,
   getRuntimeStrategySettings,
   saveRuntimeStrategySettings,
-} from '../../../../../../services/runtimeStrategyService';
+} from '@/services/runtimeStrategyService';
 import {
   isSchedulingPreference,
   resolveAnalysisSchedule,
@@ -17,7 +17,7 @@ import {
   type SchedulingPreference,
   type ScheduleTier,
 } from '../services/analysisScheduler';
-import { showToast } from '@common/ui/index';
+import { showToast } from '@/common/ui/index';
 const SETTINGS_VERSION = 3;
 
 export type { AnalysisSchedulePlan, FailureStrategy, SchedulingPreference, ScheduleTier };

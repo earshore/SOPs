@@ -7,9 +7,9 @@
 
 import { escapeHtml } from '@/common/utils/security';
 import { appStore } from '@/stores/useAppStore';
-import SITE_CONFIGS from '../../../../../../common/constants/constants';
+import SITE_CONFIGS from '@/common/constants/constants';
 import type { TargetMarket } from '@/types/state';
-import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { analysisTargets } from '../../ai_analysis/config/analysisTargets';
 import { getFieldTitle, getPreviewText } from './previewExtractor';
 import {

@@ -8,7 +8,7 @@ import {
   getRuntimeStorageStrategyOptions,
   StorageService,
   STORAGE_KEYS,
-} from '../../../../../services/storageService';
+} from '@/services/storageService';
 import type {
   GeneratedPromptRecord,
   HistoryItem,
@@ -16,8 +16,8 @@ import type {
   ScrapedProduct,
   ScrapedData,
   AnalysisReport,
-} from '../../../../../types/modules-business';
-import type { UserProductProfile } from '../../../../../types/state';
+} from '@/types/modules-business';
+import type { UserProductProfile } from '@/types/state';
 import { getReportFingerprint, getScrapedDataFingerprint } from './reportIdentity';
 
 const MAX_PROMPT_RESULT_HISTORY = 20;

@@ -1,7 +1,7 @@
 // src/modules/amz_hub/views/practice/promo_activities/index.ts
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 import './styles.css';
 
 class PromoActivitiesModule extends BaseModule {

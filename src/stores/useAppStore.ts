@@ -7,14 +7,14 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import { persist } from './middleware/persist';
 import { devtools } from './middleware/devtools';
-import { getRuntimeKeywordHunterSeoOptions } from '../services/runtimeStrategyService';
+import { getRuntimeKeywordHunterSeoOptions } from '@/services/runtimeStrategyService';
 import type {
   UIState,
   ScraperState,
   AnalysisState,
   PromptLabState,
   KeywordTrackerState,
-} from '../types/state';
+} from '@/types/state';
 
 /**
  * 应用状态Store

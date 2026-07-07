@@ -3,7 +3,7 @@
  * P1优化: 提供统一的错误处理接口
  */
 
-import { ErrorService } from '../../../services/errorService';
+import { ErrorService } from '@/services/errorService';
 
 /**
  * SOPs 模块错误处理器

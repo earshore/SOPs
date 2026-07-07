@@ -5,10 +5,10 @@
  * Requirements: 1.3
  */
 
-import { animationManager } from '../services/animation-manager';
+import { animationManager } from '@/services/animation-manager';
 import { createRipple } from '../utils/animation-utils';
-import eventBus from '@common/EventBus';
-import { APP_EVENTS } from '@common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
 // ========== 模块级清理函数存储 ==========
 let animationSettingsUnsubscribe: (() => void) | null = null;
 /**

@@ -8,16 +8,16 @@
 // ================================================================
 
 import { ErrorService } from './errorService';
-import { configCenter } from '../common/config/ConfigCenter';
-import { EnvConfig } from '../common/config/envConfig';
-import { ApiError, NetworkError, SystemError } from '../common/errors';
-import { isDangerousEndpoint, getDangerousEndpoints } from '../common/config/apiEndpoints';
-import { DEFAULT_LLM_PROVIDER_ID, DEFAULT_NEW_API_ENDPOINT } from '../common/config/llmProviders';
-import { randomFloat } from '../common/utils/random';
+import { isDangerousEndpoint, getDangerousEndpoints } from '@/common/config/apiEndpoints';
+import { configCenter } from '@/common/config/ConfigCenter';
+import { EnvConfig } from '@/common/config/envConfig';
+import { DEFAULT_LLM_PROVIDER_ID, DEFAULT_NEW_API_ENDPOINT } from '@/common/config/llmProviders';
+import { ApiError, NetworkError, SystemError } from '@/common/errors';
+import { randomFloat } from '@/common/utils/random';
 // 导入统一的 API 响应类型
-import type { LLMChatCompletionResponse, LLMErrorResponse } from '../types/api';
+import type { LLMChatCompletionResponse, LLMErrorResponse } from '@/types/api';
 // 导入类型守卫
-import { isLLMChatCompletionResponse } from '../common/guards/typeGuards';
+import { isLLMChatCompletionResponse } from '@/common/guards/typeGuards';
 
 // ========================
 // 类型定义

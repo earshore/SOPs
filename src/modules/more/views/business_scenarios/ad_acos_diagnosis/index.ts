@@ -2,9 +2,9 @@
  * More 模块 - 广告优化 · 高 ACOS 关键词诊断
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 import { renderBusinessScenarioPage } from '../casePageRenderer';
 
 class AdAcosDiagnosisModule extends BaseModule {

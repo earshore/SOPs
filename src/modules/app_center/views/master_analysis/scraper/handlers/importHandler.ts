@@ -8,12 +8,12 @@ import { validateScrapedData } from '../utils/validators';
 import { getFlag } from '../utils/formatters';
 import { HistoryService } from '../../services/historyService';
 import { emitHistoryUpdated } from '../../services/historyEvents';
-import { LANGUAGE_HEADERS } from '../../../../../../common/constants/constants';
-import { showToast } from '../../../../../../common/ui';
-import eventBus from '../../../../../../common/EventBus';
-import { APP_EVENTS, MODULE_EVENTS } from '../../../../../../common/constants/eventConstants';
-import { SafeRenderer } from '../../../../../../common/infrastructure/SafeRenderer';
-import { ValidationError, BusinessError, SystemError } from '@common/errors/AppError';
+import { LANGUAGE_HEADERS } from '@/common/constants/constants';
+import { APP_EVENTS, MODULE_EVENTS } from '@/common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import { showToast } from '@/common/ui';
+import { ValidationError, BusinessError, SystemError } from '@/common/errors/AppError';
 
 const nativeLoggerConsole = globalThis.console;
 

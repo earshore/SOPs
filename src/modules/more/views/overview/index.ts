@@ -3,9 +3,9 @@
  * 展示 More 模块的功能概览和导航
  */
 
-import BaseModule from '../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../common/utils/security';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
 
 /**
  * 初始化事件监听

@@ -5,7 +5,7 @@
 // ================================================================
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { RequestManager, RequestDeduplicator, RequestCanceller } from '@services/RequestManager';
+import { RequestManager, RequestDeduplicator, RequestCanceller } from '@/services/RequestManager';
 
 describe('RequestDeduplicator', () => {
     let deduplicator: RequestDeduplicator;

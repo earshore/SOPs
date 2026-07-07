@@ -1,4 +1,4 @@
-import { ValidationError } from '@common/errors/AppError';
+import { ValidationError } from '@/common/errors/AppError';
 import { callLLM, type LLMOptions, type LLMStreamMetrics } from '@/services/llmService';
 import { LocalDataStore } from '@/services/localDataStore';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';

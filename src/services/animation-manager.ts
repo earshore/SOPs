@@ -6,14 +6,14 @@
  */
 
 import { StorageService } from './storageService';
-import eventBus from '@common/EventBus';
-import { APP_EVENTS } from '@common/constants/eventConstants';
+import eventBus from '@/common/EventBus';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
 import type {
   AnimationSettings,
   AnimationSpeed,
   AnimationCategory,
   StoredAnimationSettings,
-} from '../types/animation-types';
+} from '@/types/animation-types';
 import {
   DEFAULT_ANIMATION_SETTINGS,
   SPEED_MULTIPLIERS,

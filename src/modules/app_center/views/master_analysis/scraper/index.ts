@@ -9,10 +9,10 @@
  * - 使用 AlpineRegistry 统一管理组件注册
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
-import { AlpineRegistry } from '../../../../../common/infrastructure/AlpineRegistry';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
 import { createScraperPanel } from './components/ScraperPanel';
 import { destroyAlpineComponent, getAlpineData } from '../utils/alpineLifecycle';
 import '../master_analysis_style.css';

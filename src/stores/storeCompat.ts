@@ -6,7 +6,7 @@
 // ================================================================
 
 import { appStore } from './useAppStore';
-import type { ValidStatePath, AppState } from '../types/state';
+import type { ValidStatePath, AppState } from '@/types/state';
 
 /**
  * 路径解析结果

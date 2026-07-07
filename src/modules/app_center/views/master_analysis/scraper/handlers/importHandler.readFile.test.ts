@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SystemError, ValidationError } from '@common/errors/AppError';
+import { SystemError, ValidationError } from '@/common/errors/AppError';
 import { readFileAsJSON } from './importHandler';
 
 function createJsonFile(content: string, filename = 'sample.json'): File {

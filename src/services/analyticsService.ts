@@ -4,8 +4,8 @@
 // 追踪页面浏览、用户操作和自定义事件
 // ================================================================
 
-import type { ILoggerService, IStorageService } from '../types/services';
-import { createRandomId, randomFloat } from '../common/utils/random';
+import { createRandomId, randomFloat } from '@/common/utils/random';
+import type { ILoggerService, IStorageService } from '@/types/services';
 
 /**
  * 事件类型

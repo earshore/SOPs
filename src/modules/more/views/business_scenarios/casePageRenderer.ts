@@ -1,4 +1,4 @@
-import { escapeHtml } from '../../../../common/utils/security';
+import { escapeHtml } from '@/common/utils/security';
 
 type CaseId =
   | 'usage_notice'

@@ -10,14 +10,14 @@
  */
 
 import { marked } from 'marked';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
-import BaseModule from '../../../../../common/BaseModule';
-import { showToast } from '../../../../../common/ui';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import BaseModule from '@/common/BaseModule';
+import { showToast } from '@/common/ui';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { appStore } from '@/stores/useAppStore';
-import { ErrorService } from '../../../../../services/errorService';
-import { createSafeFragment, setSafeHtml } from '../../../../../common/utils/security';
+import { ErrorService } from '@/services/errorService';
+import { createSafeFragment, setSafeHtml } from '@/common/utils/security';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
 import '../styles.css';
 

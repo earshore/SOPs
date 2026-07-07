@@ -6,7 +6,7 @@
 import type { ColorSchemeName } from '../constants/colorSchemes';
 import { ColorContext } from '../utils/ColorContext';
 import { updateRuntimeCssRule } from '../utils/runtimeStyles';
-import { StorageService } from '../../services/storageService';
+import { StorageService } from '@/services/storageService';
 import eventBus from '../EventBus';
 
 export interface ThemeColors {

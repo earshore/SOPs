@@ -1,4 +1,4 @@
-import './common/utils/nativeLoggerConsole';
+import '@/common/utils/nativeLoggerConsole';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 // src/main.ts
@@ -16,7 +16,7 @@ const bootstrapConsole = globalThis.console;
 
 // 🎯 CSS性能监控（仅开发环境）
 if (import.meta.env.DEV) {
-  import('./common/devtools/CSSPerformanceMonitor');
+  import('@/common/devtools/CSSPerformanceMonitor');
 }
 
 // Expose to window for legacy compatibility (仅开发环境)
@@ -31,40 +31,40 @@ if (import.meta.env.DEV) {
 }
 
 // 🎯 导入 Zustand Store
-import { appStore } from './stores/useAppStore';
+import { appStore } from '@/stores/useAppStore';
 
 // 🎯 阶段4: 导入主题管理器
-import { ThemeManager } from './common/config/themeConfig';
+import { ThemeManager } from '@/common/config/themeConfig';
 
-import { container } from './common/di/Container';
-import { initDeferredViews, initHomeView } from './common/utils/viewLoader';
+import { container } from '@/common/di/Container';
+import { initDeferredViews, initHomeView } from '@/common/utils/viewLoader';
 
 // ✅ 导入 Web Components
 import './components/modal/AppModal';
 
 // 🎯 P0优化: 导入服务初始化管理器和注册表
-import { ServiceBootstrap } from './common/bootstrap/ServiceBootstrap';
-import { serviceRegistry } from './common/di/ServiceRegistry';
-import { registerAllServices } from './common/di/services';
+import { ServiceBootstrap } from '@/common/bootstrap/ServiceBootstrap';
+import { serviceRegistry } from '@/common/di/ServiceRegistry';
+import { registerAllServices } from '@/common/di/services';
 
 // 🎯 短期优化：导入 LoadingManager
-import { loadingManager } from './common/utils/LoadingManager';
+import { loadingManager } from '@/common/utils/LoadingManager';
 
 // 🎯 微交互动画系统：导入动画管理器和状态管理
-import { animationManager } from './services/animation-manager';
-import { initializeAnimationStore } from './stores/animation-settings';
+import { animationManager } from '@/services/animation-manager';
+import { initializeAnimationStore } from '@/stores/animation-settings';
 
 // ✅ P1: 导入动作注册中心
 import {
   registerActionsWithLegacy,
   initGlobalEventDelegation,
-} from './common/utils/actionRegistry';
+} from '@/common/utils/actionRegistry';
 
-import { AlpineRegistry } from './common/infrastructure/AlpineRegistry';
-import { triggerInitialNavigation } from './common/router/initRouter';
-import { initEventLogger } from './common/utils/eventLogger';
-import { loadPlugins } from './common/utils/pluginLoader';
-import { applyDeveloperDiagnosticSettings } from './services/developerDiagnosticsService';
+import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
+import { triggerInitialNavigation } from '@/common/router/initRouter';
+import { initEventLogger } from '@/common/utils/eventLogger';
+import { loadPlugins } from '@/common/utils/pluginLoader';
+import { applyDeveloperDiagnosticSettings } from '@/services/developerDiagnosticsService';
 
 // ✅ 全局错误兜底已由GlobalErrorHandler统一处理
 // 见 src/common/errors/GlobalErrorHandler.ts
@@ -91,9 +91,9 @@ import {
   renderMoreMenu,
   initMegaMenuAccessibility,
   showToast,
-} from './common/ui';
-import { APP_EVENTS } from './common/constants/eventConstants';
-import { APP_VERSION } from './common/constants/constants';
+} from '@/common/ui';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
+import { APP_VERSION } from '@/common/constants/constants';
 import { initHomeSplash } from './modules/home/homeDisplay';
 
 // ✅ 自动注册事件监听器的模块 (事件驱动模式)
@@ -371,7 +371,7 @@ function initializeAnimationSystem(): void {
 function initializeLazyEnhancements(): void {
   loadDeferredStyles();
 
-  import('./common/utils/ImageLazyLoader').then(({ imageLazyLoader }) => {
+  import('@/common/utils/ImageLazyLoader').then(({ imageLazyLoader }) => {
     imageLazyLoader.initialize({
       rootMargin: '50px',
       threshold: 0.01,
@@ -431,7 +431,7 @@ function initializeDebugInterface(): void {
     return;
   }
 
-  import('./common/devtools/DebugInterface')
+  import('@/common/devtools/DebugInterface')
     .then(({ debugInterface }) => {
       debugInterface.initialize();
       debugInterface.registerContainer(container);
@@ -581,7 +581,7 @@ registerActionsWithLegacy({
   // 🎯 阶段1: 性能监控
   showPerformanceReport: async () => {
     try {
-      const { performanceService } = await import('./services/performanceService');
+      const { performanceService } = await import('@/services/performanceService');
       const report = performanceService.getReport();
 
       mainLogger.info('性能报告', report);

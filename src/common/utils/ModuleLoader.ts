@@ -594,7 +594,7 @@ export class ModuleLoader {
   ): Promise<IModule> {
     // 动态导入性能服务（避免循环依赖）
     try {
-      const { performanceService } = await import('../../services/performanceService');
+      const { performanceService } = await import('@/services/performanceService');
       return await performanceService.measureModuleLoad(routeId, loader);
     } catch (e) {
       // 如果性能服务不可用，直接加载模块

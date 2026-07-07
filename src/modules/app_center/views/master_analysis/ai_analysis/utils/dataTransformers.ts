@@ -5,7 +5,7 @@
 
 import type { Product } from '../config/sampleData';
 import { ScraperData, ScraperProduct } from '../types';
-import { ValidationError } from '@common/errors/AppError';
+import { ValidationError } from '@/common/errors/AppError';
 
 function pickFirst<T>(...values: T[]): T | undefined {
   return values.find(value => Boolean(value));

@@ -31,7 +31,7 @@ import { AlpineContext } from '../../src/modules/app_center/views/master_analysi
 import type { Product } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/sampleData';
 
 // Mock 依赖
-vi.mock('@common/ui/index', () => ({
+vi.mock('@/common/ui/index', () => ({
   showToast: vi.fn()
 }));
 

@@ -1,40 +1,22 @@
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '../../../../../common/utils/security';
-import {
-  registerActionsWithLegacy,
-  unregisterActions,
-} from '../../../../../common/utils/actionRegistry';
-import { StorageService } from '../../../../../services/storageService';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { setSafeHtml } from '@/common/utils/security';
+import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { copyTextToClipboard } from '../../../utils/clipboard';
+import { createOwnerField } from '../../../utils/ownerField';
 
 const RELEASE_OWNER_STORAGE_KEY = 'fba_shipping_owner_v1';
 const DEFAULT_RELEASE_OWNER = '物流/供应链负责人';
 
-function normalizeReleaseOwner(owner: unknown): string {
-  return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_RELEASE_OWNER;
-}
-
-function restoreReleaseOwner(): void {
-  const input = document.getElementById('fba-shipping-owner') as HTMLInputElement | null;
-  if (input)
-    input.value = normalizeReleaseOwner(
-      StorageService.get<string>(RELEASE_OWNER_STORAGE_KEY, DEFAULT_RELEASE_OWNER)
-    );
-}
-
-function readReleaseOwner(): string {
-  const input = document.getElementById('fba-shipping-owner') as HTMLInputElement | null;
-  return normalizeReleaseOwner(input?.value);
-}
-
-function saveReleaseOwner(owner: string): void {
-  StorageService.set(RELEASE_OWNER_STORAGE_KEY, normalizeReleaseOwner(owner));
-}
+const releaseOwnerField = createOwnerField({
+  storageKey: RELEASE_OWNER_STORAGE_KEY,
+  defaultOwner: DEFAULT_RELEASE_OWNER,
+  inputId: 'fba-shipping-owner',
+});
 
 export function buildFbaShippingTemplate(owner = DEFAULT_RELEASE_OWNER): string {
   const today = new Date().toISOString().split('T')[0];
-  const releaseOwner = normalizeReleaseOwner(owner);
+  const releaseOwner = releaseOwnerField.normalize(owner);
 
   return [
     `# FBA 发货放行/异常登记 - ${today}`,
@@ -92,8 +74,8 @@ export function buildFbaShippingTemplate(owner = DEFAULT_RELEASE_OWNER): string 
 }
 
 async function copyFbaShippingTemplate(): Promise<void> {
-  const owner = readReleaseOwner();
-  saveReleaseOwner(owner);
+  const owner = releaseOwnerField.read();
+  releaseOwnerField.save(owner);
   const releaseTemplate = buildFbaShippingTemplate(owner);
 
   try {
@@ -129,7 +111,7 @@ class FbaShippingModule extends BaseModule {
   }
 
   protected async init(): Promise<void> {
-    restoreReleaseOwner();
+    releaseOwnerField.restore();
 
     this.registeredActions = registerActionsWithLegacy({
       sops_copyFbaShippingTemplate: copyFbaShippingTemplate as (...args: unknown[]) => void,

@@ -93,7 +93,7 @@
           <button
             type="button"
             class="settings-panel-nav-link"
-            x-show="showDeveloperDiagnostics"
+            :hidden="!showDeveloperDiagnostics"
             aria-controls="settings-section-performance"
             @click="scrollToSection('settings-section-performance')"
           >
@@ -1816,7 +1816,7 @@
           <section
             id="settings-section-performance"
             class="settings-panel-section space-y-4"
-            x-show="showDeveloperDiagnostics"
+            :hidden="!showDeveloperDiagnostics"
           >
             <div class="flex items-center gap-2.5 mb-1">
               <div class="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">

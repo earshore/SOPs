@@ -1,6 +1,6 @@
-import { SafeTemplateLoader } from '../../../../common/infrastructure/SafeModuleLoader';
-import BaseModule from '../../../../common/BaseModule';
-import { setSafeHtml } from '../../../../common/utils/security';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import BaseModule from '@/common/BaseModule';
+import { setSafeHtml } from '@/common/utils/security';
 
 class SopsOverviewModule extends BaseModule {
   constructor() {

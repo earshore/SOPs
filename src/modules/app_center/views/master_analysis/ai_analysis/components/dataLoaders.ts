@@ -4,7 +4,7 @@
  */
 
 import { appStore } from '@/stores/useAppStore';
-import { showToast } from '@common/ui/index';
+import { showToast } from '@/common/ui/index';
 import { formatHistoryDate } from '../services/reportGenerator';
 import { AlpineContext, HistoricalReportDetail } from '../types';
 import type { AnalysisReport, ScrapedData } from '@/types/modules-business';

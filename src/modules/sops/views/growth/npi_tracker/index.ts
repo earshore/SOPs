@@ -9,16 +9,13 @@
  * - 已迁移到新架构（系统稳定性优化）
  */
 
-import BaseModule from '../../../../../common/BaseModule';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
-import {
-  registerActionsWithLegacy,
-  unregisterActions,
-} from '../../../../../common/utils/actionRegistry';
-import { escapeHtml } from '../../../../../common/utils/security';
-import { StorageService } from '../../../../../services/storageService';
+import BaseModule from '@/common/BaseModule';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
+import { escapeHtml } from '@/common/utils/security';
 import { copyTextToClipboard } from '../../../utils/clipboard';
+import { createOwnerField } from '../../../utils/ownerField';
 import type {
   NPIProductRecord,
   StageConfig,
@@ -57,6 +54,11 @@ const EXCEL_COLUMNS = {
 
 const REVIEW_OWNER_STORAGE_KEY = 'npi_review_owner_v1';
 const DEFAULT_REVIEW_OWNER = '运营负责人';
+const reviewOwnerField = createOwnerField({
+  storageKey: REVIEW_OWNER_STORAGE_KEY,
+  defaultOwner: DEFAULT_REVIEW_OWNER,
+  inputId: 'npi-review-owner',
+});
 
 const ADS_STRATEGY_LABELS: Record<NPIProductRecord['ads_strategy'], string> = {
   auto: '自动',
@@ -606,7 +608,7 @@ export function buildNpiReviewTemplate(
   owner = DEFAULT_REVIEW_OWNER
 ): string {
   const today = new Date().toISOString().split('T')[0];
-  const reviewOwner = normalizeReviewOwner(owner);
+  const reviewOwner = reviewOwnerField.normalize(owner);
   const keepCount = rows.filter(row => row.decision === 'keep').length;
   const killCount = rows.length - keepCount;
   const reviewItems = buildManualReviewItems(rows, reviewOwner);
@@ -733,8 +735,8 @@ function exportToExcel(): void {
 }
 
 async function copyNpiReviewTemplate(): Promise<void> {
-  const owner = readReviewOwner();
-  saveReviewOwner(owner);
+  const owner = reviewOwnerField.read();
+  reviewOwnerField.save(owner);
   const reviewTemplate = buildNpiReviewTemplate(tableData, owner);
 
   try {
@@ -757,27 +759,6 @@ function filterByStore(store: string): void {
     tableData = SAMPLE_DATA.filter((row: NPIProductRecord) => row.store === store);
   }
   renderTable();
-}
-
-function restoreReviewOwner(): void {
-  const input = document.getElementById('npi-review-owner') as HTMLInputElement | null;
-  if (input)
-    input.value = normalizeReviewOwner(
-      StorageService.get<string>(REVIEW_OWNER_STORAGE_KEY, DEFAULT_REVIEW_OWNER)
-    );
-}
-
-function readReviewOwner(): string {
-  const input = document.getElementById('npi-review-owner') as HTMLInputElement | null;
-  return normalizeReviewOwner(input?.value);
-}
-
-function saveReviewOwner(owner: string): void {
-  StorageService.set(REVIEW_OWNER_STORAGE_KEY, normalizeReviewOwner(owner));
-}
-
-function normalizeReviewOwner(owner: unknown): string {
-  return typeof owner === 'string' && owner.trim() ? owner.trim() : DEFAULT_REVIEW_OWNER;
 }
 
 // Filter by stage
@@ -809,7 +790,7 @@ function setupFilterEventDelegation(container: HTMLElement): void {
   const handleOwnerInput = (event: Event): void => {
     const target = event.target as HTMLInputElement | null;
     if (target?.id === 'npi-review-owner') {
-      saveReviewOwner(target.value);
+      reviewOwnerField.save(target.value);
     }
   };
 
@@ -863,7 +844,7 @@ class NpiTrackerModule extends BaseModule {
     renderer.renderTemplate(container, html);
     container.classList.add('fade-in');
     moveNextStepModalToBody(container);
-    restoreReviewOwner();
+    reviewOwnerField.restore();
   }
 
   protected async init(): Promise<void> {

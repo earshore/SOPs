@@ -2,12 +2,12 @@
  * Amazon SEO 策略 - 关键词优化雷达图
  */
 
-import BaseModule from '../../../../../common/BaseModule';
+import BaseModule from '@/common/BaseModule';
 import { SEO_RADAR_DATA } from '../../../constants/amz_hub_constants';
 import './styles.css';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { loadChartJs, type ChartJS } from '../../../../../common/utils/lazyLibs';
-import { setSafeHtml } from '../../../../../common/utils/security';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { loadChartJs, type ChartJS } from '@/common/utils/lazyLibs';
+import { setSafeHtml } from '@/common/utils/security';
 
 // Chart.js 实例类型定义
 interface ChartInstance {

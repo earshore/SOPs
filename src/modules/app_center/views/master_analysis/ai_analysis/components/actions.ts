@@ -3,7 +3,7 @@
  * 处理所有用户交互操作
  */
 
-import { showToast } from '@common/ui/index';
+import { showToast } from '@/common/ui/index';
 import { analysisTargets } from '../config/analysisTargets';
 import { generateAnalysisPrompt } from '../prompts/analysisPrompts';
 import { parseAnalysisReport } from '../services/analysisService';
@@ -21,7 +21,7 @@ import type { AlpineContext, FullReportData } from '../types';
 import { appStore } from '@/stores/useAppStore';
 import type { FullAnalysisReport } from '../config/analysisReportData';
 import type { AnalysisReport } from '@/types/modules-business';
-import { BusinessError } from '@common/errors/AppError';
+import { BusinessError } from '@/common/errors/AppError';
 import { getPerformanceSettings } from './PerformanceSettings';
 import { emitHistoryUpdated } from '../../services/historyEvents';
 import { getScrapedDataFingerprint } from '../../services/reportIdentity';

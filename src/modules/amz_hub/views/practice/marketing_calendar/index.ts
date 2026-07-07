@@ -6,12 +6,12 @@
 
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
-import BaseModule from '../../../../../common/BaseModule';
-import { SERVICE_NAMES } from '../../../../../common/di/ServiceRegistry';
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
+import BaseModule from '@/common/BaseModule';
+import { SERVICE_NAMES } from '@/common/di/ServiceRegistry';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import type { IStorageService } from '@/types/services';
-import { amzf_countries, amzf_months, amzf_events } from '../../../constants/amz_hub_constants';
-import { configCenter } from '../../../../../common/config/ConfigCenter';
+import { AMZF_COUNTRIES, AMZF_EVENTS, AMZF_MONTHS } from '../../../constants/amz_hub_constants';
+import { configCenter } from '@/common/config/ConfigCenter';
 import type { MarketingEvent, CountryInfo } from '@/types/modules-business';
 import './flag-icons.local.css';
 import './styles.css';
@@ -206,7 +206,7 @@ class MarketingCalendarModule extends BaseModule {
   private getCountrySearchText(codes: string[]): string {
     return codes
       .map(code => {
-        const country = (amzf_countries as CountryInfo[]).find(item => item.code === code);
+        const country = (AMZF_COUNTRIES as CountryInfo[]).find(item => item.code === code);
         return [code, country?.name, ...(AMZF_COUNTRY_SEARCH_ALIASES[code] ?? [])]
           .filter(Boolean)
           .join(' ');
@@ -221,7 +221,7 @@ class MarketingCalendarModule extends BaseModule {
 
   private getMonthSearchText(month: number): string {
     return [
-      (amzf_months as string[])[month - 1],
+      (AMZF_MONTHS as string[])[month - 1],
       ...(AMZF_MONTH_SEARCH_ALIASES[month - 1] ?? []),
     ].join(' ');
   }
@@ -255,7 +255,7 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   getFilteredEvents(): MarketingEvent[] {
-    let candidates = (amzf_events as unknown as MarketingEvent[]).filter(
+    let candidates = (AMZF_EVENTS as unknown as MarketingEvent[]).filter(
       event =>
         this.state.selectedCountry === 'ALL' || event.countries.includes(this.state.selectedCountry)
     );
@@ -285,7 +285,7 @@ class MarketingCalendarModule extends BaseModule {
       const targetName =
         code === 'ALL'
           ? '全部'
-          : (amzf_countries as CountryInfo[]).find(c => c.code === code)?.name;
+          : (AMZF_COUNTRIES as CountryInfo[]).find(c => c.code === code)?.name;
       if (tabText && tabText.includes(targetName || '')) {
         tab.classList.add('amzf_active');
       }
@@ -646,7 +646,7 @@ class MarketingCalendarModule extends BaseModule {
             <span class="amzf_country_flag"><i class="fas fa-globe"></i></span> 全部
         </button>`;
 
-    (amzf_countries as CountryInfo[]).forEach(c => {
+    (AMZF_COUNTRIES as CountryInfo[]).forEach(c => {
       html += `<button class="amzf_country_tab" data-amzf-country="${escapeHtml(c.code)}">
                 <span class="amzf_country_flag">${c.flag}</span> ${c.name}
             </button>`;
@@ -718,7 +718,7 @@ class MarketingCalendarModule extends BaseModule {
     const selectedCountry =
       this.state.selectedCountry === 'ALL'
         ? '全部站点'
-        : (amzf_countries as CountryInfo[]).find(
+        : (AMZF_COUNTRIES as CountryInfo[]).find(
             country => country.code === this.state.selectedCountry
           )?.name || this.state.selectedCountry;
 
@@ -829,7 +829,7 @@ class MarketingCalendarModule extends BaseModule {
                 <div id="${sectionId}" class="amzf_month_section ${isExpanded ? 'amzf_expanded' : ''}">
                     <button type="button" class="amzf_month_header" data-amzf-toggle-section="${escapeHtml(sectionId)}" aria-expanded="${isExpanded}" aria-controls="${escapeHtml(sectionId)}_content">
                         <div class="amzf_month_info">
-                            <span class="amzf_month_name">${(amzf_months as string[])[m - 1]}</span>
+                            <span class="amzf_month_name">${(AMZF_MONTHS as string[])[m - 1]}</span>
                             <span class="amzf_month_badge">${monthEvents.length} 个活动</span>
                         </div>
                         <div class="amzf_month_toggle"><i class="fas fa-chevron-down"></i></div>
@@ -916,7 +916,7 @@ class MarketingCalendarModule extends BaseModule {
   private renderCountryBadges(codes: string[], labelMode: 'code' | 'name' = 'code'): string {
     return codes
       .map((code: string) => {
-        const country = (amzf_countries as CountryInfo[]).find(item => item.code === code);
+        const country = (AMZF_COUNTRIES as CountryInfo[]).find(item => item.code === code);
         const safeCode = escapeHtml(code);
         const safeName = escapeHtml(country?.name ?? code);
         const visibleLabel = labelMode === 'name' ? safeName : safeCode;

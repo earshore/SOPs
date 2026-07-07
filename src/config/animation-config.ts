@@ -3,7 +3,7 @@
  * 定义微交互动画系统的所有配置常量
  */
 
-import type { AnimationConfig, AnimationSettings } from '../types/animation-types';
+import type { AnimationConfig, AnimationSettings } from '@/types/animation-types';
 
 /**
  * 速度倍数映射

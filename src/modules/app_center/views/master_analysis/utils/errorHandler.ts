@@ -3,7 +3,7 @@
 // 🎯 P1优化: Master Analysis 模块专属错误处理器
 // ================================================================
 
-import { ErrorService, type ErrorContext } from '../../../../../services/errorService';
+import { ErrorService, type ErrorContext } from '@/services/errorService';
 import '../master_analysis_style.css';
 
 /**

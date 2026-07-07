@@ -560,7 +560,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
 /* ==================== SOP 详情视图 ==================== */
 .sop-detail-header {
   background: var(--surface-workbench, var(--color-slate-50));
-  border-radius: var(--radius-panel, 8px);
+  border-radius: var(--rounded-panel, 8px);
   padding: 2rem;
   margin-bottom: 2rem;
 }
@@ -673,7 +673,7 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
   max-width: 220px;
   background: var(--color-bg-primary, #ffffff);
   border: 1px solid var(--border-subtle, var(--color-border-default, rgba(0, 0, 0, 0.1)));
-  border-radius: var(--radius-card, 8px);
+  border-radius: var(--rounded-card, 8px);
   padding: var(--spacing-lg, 1.5rem) var(--spacing-md, 1rem);
   text-align: center;
   transition:
@@ -952,11 +952,11 @@ body .npi-lifecycle-table .npi-checkbox-hit input[type='checkbox'][data-action='
     > *
     + *
     :where(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl) {
-    border-radius: var(--radius-card, 8px) !important;
+    border-radius: var(--rounded-card, 8px) !important;
   }
 
   #sops_content_area .sops-overview > * + * :where(.sop-icon-container) {
-    border-radius: var(--radius-card, 8px) !important;
+    border-radius: var(--rounded-card, 8px) !important;
   }
 
   #sops_content_area .sops-overview > * + * .sop-card[class*='border-l-'] {

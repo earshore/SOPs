@@ -7,13 +7,13 @@
 // 🎯 P0-4.1.8: 在数据边界使用类型守卫
 // ================================================================
 
-import { configCenter } from '../common/config/ConfigCenter';
+import { configCenter } from '@/common/config/ConfigCenter';
 import { priorityRequestPool, REQUEST_PRIORITY } from './PriorityRequestPool';
 import { requestManager } from './RequestManager';
 import { httpCacheService, type CacheStrategy } from './HttpCacheService';
-import type { ILoggerService, IConfigService, IHttpService } from '../types/services';
-import type { ApiResponse } from '../types/api';
-import { isApiResponse } from '../common/guards/typeGuards';
+import { isApiResponse } from '@/common/guards/typeGuards';
+import type { ApiResponse } from '@/types/api';
+import type { ILoggerService, IConfigService, IHttpService } from '@/types/services';
 
 /**
  * 请求优先级类型

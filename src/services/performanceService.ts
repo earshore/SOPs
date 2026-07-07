@@ -4,12 +4,12 @@
 // 监控页面加载、Core Web Vitals、用户交互性能
 // ================================================================
 
-import { configCenter } from '../common/config/ConfigCenter';
+import { configCenter } from '@/common/config/ConfigCenter';
 import type {
   ILoggerService,
   PerformanceMetric as IPerformanceMetric,
   PerformanceReport as IPerformanceReport,
-} from '../types/services';
+} from '@/types/services';
 
 /**
  * 性能指标类型

@@ -8,20 +8,17 @@
  * - 使用 registerActionsWithLegacy 注册全局操作
  */
 
-import { SafeTemplateLoader } from '../../../../../common/infrastructure/SafeModuleLoader';
-import { SafeRenderer } from '../../../../../common/infrastructure/SafeRenderer';
-import BaseModule from '../../../../../common/BaseModule';
-import { showToast, showProgress } from '../../../../../common/ui';
-import { navigateToRouteId } from '../../../../../common/router/initRouter';
+import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import BaseModule from '@/common/BaseModule';
+import { showToast, showProgress } from '@/common/ui';
+import { navigateToRouteId } from '@/common/router/initRouter';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
-import { appStore } from '../../../../../stores/useAppStore';
-import {
-  registerActionsWithLegacy,
-  unregisterActions,
-} from '../../../../../common/utils/actionRegistry';
-import type { KeywordHunterSnapshot } from '../../../../../types/modules-business';
-import type { KeywordTrackerState } from '../../../../../types/state';
+import { appStore } from '@/stores/useAppStore';
+import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
+import type { KeywordHunterSnapshot } from '@/types/modules-business';
+import type { KeywordTrackerState } from '@/types/state';
 
 import '../styles.css';
 
