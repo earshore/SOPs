@@ -26,6 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.4-rc.3] - 2026-07-08
+
+### Added
+- 新增 action name、import path 和 source naming 质量审计，并接入 `ci:quality`。
+- 新增 SOPS owner field 共享处理工具和测试覆盖。
+
+### Changed
+- 统一 TypeScript、Vite、Vitest 和源码导入到单一 `@/` 项目别名。
+- 内部私有/工具方法去除前导下划线，并同步调用点、测试和 source-name 审计规则。
+- 同步应用内版本显示到 `3.0.4-rc.3`。
+
+### Fixed
+- 对齐核心工具、组件、路由、bootstrap、服务和单元测试的内部命名约定。
+- 收紧源码命名、导入路径和 action 命名约定，减少后续回归风险。
+
 ## [3.0.4-rc.2] - 2026-07-07
 
 ### Added
