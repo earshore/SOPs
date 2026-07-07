@@ -26,6 +26,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.4-rc.1] - 2026-07-07
+
+### Added
+- 新增运行时策略服务和工具策略服务，统一模型选择、超时、缓存、批处理和默认提供商设置。
+- 系统设置新增工具策略、运行时控制、数据/备份、诊断和危险操作面板。
+- 新增开发者诊断服务与设置面板，支持性能、事件调试、错误/分析、功能开关和日志级别开关。
+
+### Changed
+- Keyword Hunter、Master Analysis、Deep Chat、PPC Search Terms 和 Scraper 接入策略设置。
+- 启动时应用开发者诊断配置，并将 eventLogger 事件日志改为受调试开关门控。
+- 同步应用内版本显示到 `3.0.4-rc.1`。
+
+### Fixed
+- 补充和更新系统设置、策略服务、LLM 行为、存储、Keyword Hunter、PPC 与 release smoke 测试覆盖。
+- 修复监控导入兼容、存储键和 XSS 报告时间戳相关维护项。
+
 ## [3.0.4] - 2026-07-06
 
 ### Added
