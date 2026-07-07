@@ -26,6 +26,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.4-rc.2] - 2026-07-07
+
+### Added
+- 系统设置面板新增原生 `<details>/<summary>` 折叠体验和默认折叠状态测试覆盖。
+
+### Changed
+- 移除 Deep Chat 未使用的 provider status UI，并调整配置刷新与模型选择交互。
+- Keyword Tracker 路由和服务命名收敛为 Keyword Hunter，刷新输入、分析、流程模板与样式。
+- Deep Chat 资源收敛到功能路由目录，并加强请求生命周期、预算、prompt 选择和线程历史行为。
+- PPC Search Terms 更新设置、Agent 分析流、结果控件和相关单元/E2E/视觉测试。
+- 同步应用内版本显示到 `3.0.4-rc.2`。
+
+### Fixed
+- 对齐 Keyword Hunter 快照驱动流程、Deep Chat 发送/预览和 release smoke 覆盖。
+- 刷新 App Center workflow 相关路由、manifest、action registry 与视觉回归测试。
+
 ## [3.0.4-rc.1] - 2026-07-07
 
 ### Added
