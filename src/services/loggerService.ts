@@ -118,9 +118,9 @@ export class LoggerService implements ILoggerService {
     // 如果提供了config服务，使用它
     if (config) {
       try {
-        this._config = config.get<LoggerConfig>('logger') || this._getDefaultConfig();
+        this._config = config.get<LoggerConfig>('logger') || this.getDefaultConfig();
       } catch {
-        this._config = this._getDefaultConfig();
+        this._config = this.getDefaultConfig();
       }
     }
   }
@@ -128,7 +128,7 @@ export class LoggerService implements ILoggerService {
   /**
    * 获取默认配置
    */
-  private _getDefaultConfig(): LoggerConfig {
+  private getDefaultConfig(): LoggerConfig {
     return {
       maxLogs: 100,
       minLevel: 'info',
@@ -154,13 +154,13 @@ export class LoggerService implements ILoggerService {
       try {
         // 优先使用注入的configService
         if (this.configService) {
-          this._config = this.configService.get<LoggerConfig>('logger') || this._getDefaultConfig();
+          this._config = this.configService.get<LoggerConfig>('logger') || this.getDefaultConfig();
         } else {
           // 使用默认配置，避免循环依赖
-          this._config = this._getDefaultConfig();
+          this._config = this.getDefaultConfig();
         }
       } catch {
-        this._config = this._getDefaultConfig();
+        this._config = this.getDefaultConfig();
       }
     }
     return this._config;
@@ -213,7 +213,7 @@ export class LoggerService implements ILoggerService {
   /**
    * 记录日志
    */
-  private _log(level: LogLevelValue, message: string, data: unknown = {}, module = 'App'): void {
+  private log(level: LogLevelValue, message: string, data: unknown = {}, module = 'App'): void {
     // 过滤低于最小级别的日志
     if (level < this.getMinLogLevel()) {
       return;
@@ -242,21 +242,21 @@ export class LoggerService implements ILoggerService {
     }
 
     // 输出到控制台
-    this._consoleLog(entry);
+    this.consoleLog(entry);
 
     // 保存到本地存储
-    this._saveToStorage(entry);
+    this.saveToStorage(entry);
 
     // 发送到远程服务
     if (level >= LOG_LEVELS.ERROR) {
-      this._sendToRemote(entry);
+      this.sendToRemote(entry);
     }
   }
 
   /**
    * 输出到控制台
    */
-  private _consoleLog(entry: LogEntry): void {
+  private consoleLog(entry: LogEntry): void {
     const { level, levelName, message, data, module, timestamp } = entry;
     const time = new Date(timestamp).toLocaleTimeString('zh-CN');
     const color = LEVEL_COLORS[level as LogLevelValue] || '#6B7280';
@@ -288,7 +288,7 @@ export class LoggerService implements ILoggerService {
    * 保存到本地存储
    * 🎯 DI改造：使用注入的StorageService
    */
-  private _saveToStorage(entry: LogEntry): void {
+  private saveToStorage(entry: LogEntry): void {
     // 如果没有注入StorageService，跳过持久化
     if (!this.storageService) {
       return;
@@ -326,7 +326,7 @@ export class LoggerService implements ILoggerService {
   /**
    * 发送到远程服务
    */
-  private _sendToRemote(entry: LogEntry): void {
+  private sendToRemote(entry: LogEntry): void {
     if (!this.remoteEndpoint) {
       return;
     }
@@ -334,11 +334,11 @@ export class LoggerService implements ILoggerService {
     this.pendingLogs.push(entry);
 
     if (this.pendingLogs.length >= this.config.batchSize) {
-      this._flushLogs();
+      this.flushLogs();
     } else {
       if (!this.batchTimer) {
         this.batchTimer = setTimeout(() => {
-          this._flushLogs();
+          this.flushLogs();
         }, this.config.batchTimeout);
       }
     }
@@ -347,7 +347,7 @@ export class LoggerService implements ILoggerService {
   /**
    * 批量发送日志
    */
-  private async _flushLogs(): Promise<void> {
+  private async flushLogs(): Promise<void> {
     if (this.pendingLogs.length === 0) {
       return;
     }
@@ -387,35 +387,35 @@ export class LoggerService implements ILoggerService {
    * DEBUG 级别日志
    */
   debug(message: string, data?: unknown, module = 'App'): void {
-    this._log(LOG_LEVELS.DEBUG, message, normalizeLogData(data), module);
+    this.log(LOG_LEVELS.DEBUG, message, normalizeLogData(data), module);
   }
 
   /**
    * INFO 级别日志
    */
   info(message: string, data?: unknown, module = 'App'): void {
-    this._log(LOG_LEVELS.INFO, message, normalizeLogData(data), module);
+    this.log(LOG_LEVELS.INFO, message, normalizeLogData(data), module);
   }
 
   /**
    * WARN 级别日志
    */
   warn(message: string, data?: unknown, module = 'App'): void {
-    this._log(LOG_LEVELS.WARN, message, normalizeLogData(data), module);
+    this.log(LOG_LEVELS.WARN, message, normalizeLogData(data), module);
   }
 
   /**
    * ERROR 级别日志
    */
   error(message: string, error?: unknown, module = 'App'): void {
-    this._log(LOG_LEVELS.ERROR, message, normalizeErrorData(error), module);
+    this.log(LOG_LEVELS.ERROR, message, normalizeErrorData(error), module);
   }
 
   /**
    * FATAL 级别日志
    */
   fatal(message: string, error?: unknown, module = 'App'): void {
-    this._log(LOG_LEVELS.FATAL, message, normalizeErrorData(error), module);
+    this.log(LOG_LEVELS.FATAL, message, normalizeErrorData(error), module);
   }
 
   /**
@@ -436,13 +436,13 @@ export class LoggerService implements ILoggerService {
    * 实现ILoggerService接口
    */
   getLogs(level?: LogLevelValue): LogEntry[] {
-    return this._getLogsByLevel(level);
+    return this.getLogsByLevel(level);
   }
 
   /**
    * 按级别过滤日志（内部方法）
    */
-  private _getLogsByLevel(level?: LogLevelValue): LogEntry[] {
+  private getLogsByLevel(level?: LogLevelValue): LogEntry[] {
     if (level === undefined) {
       return [...this.logs];
     }
@@ -469,12 +469,12 @@ export class LoggerService implements ILoggerService {
    */
   export(format: 'json' | 'csv' = 'json'): string {
     if (format === 'json') {
-      return JSON.stringify(this._getLogsByLevel(), null, 2);
+      return JSON.stringify(this.getLogsByLevel(), null, 2);
     }
 
     if (format === 'csv') {
       const headers = ['时间', '级别', '模块', '消息', 'URL'];
-      const rows = this._getLogsByLevel().map(log => [
+      const rows = this.getLogsByLevel().map(log => [
         new Date(log.timestamp).toLocaleString('zh-CN'),
         log.levelName.toUpperCase(),
         log.module,

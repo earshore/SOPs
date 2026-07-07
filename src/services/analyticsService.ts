@@ -151,7 +151,7 @@ export class AnalyticsService {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(
+  private log(
     level: 'debug' | 'info' | 'warn' | 'error',
     message: string,
     data: Record<string, unknown> = {}
@@ -185,7 +185,7 @@ export class AnalyticsService {
    */
   init(config?: Partial<AnalyticsConfig>): void {
     if (this.isInitialized) {
-      this._log('warn', 'AnalyticsService already initialized', {});
+      this.log('warn', 'AnalyticsService already initialized', {});
       return;
     }
 
@@ -193,7 +193,7 @@ export class AnalyticsService {
     this.config = { ...this.config, ...config };
 
     if (!this.config.enabled) {
-      this._log('info', 'AnalyticsService is disabled', {});
+      this.log('info', 'AnalyticsService is disabled', {});
       return;
     }
 
@@ -209,7 +209,7 @@ export class AnalyticsService {
     this.setupSessionTimeout();
 
     this.isInitialized = true;
-    this._log(
+    this.log(
       'info',
       '✅ AnalyticsService initialized',
       this.config as unknown as Record<string, unknown>
@@ -229,7 +229,7 @@ export class AnalyticsService {
       userId,
     };
 
-    this._log('debug', 'New session created', { sessionId: this.currentSession.id });
+    this.log('debug', 'New session created', { sessionId: this.currentSession.id });
   }
 
   /**
@@ -363,7 +363,7 @@ export class AnalyticsService {
         const timeSinceLastActivity = now - this.currentSession.lastActivity;
 
         if (timeSinceLastActivity > this.config.sessionTimeout) {
-          this._log('debug', 'Session timeout, creating new session', {});
+          this.log('debug', 'Session timeout, creating new session', {});
           this.createSession(this.currentSession.userId);
         }
       }
@@ -399,7 +399,7 @@ export class AnalyticsService {
       this.currentSession.lastActivity = Date.now();
     }
 
-    this._log('debug', 'Page view tracked', { path, title });
+    this.log('debug', 'Page view tracked', { path, title });
   }
 
   /**
@@ -440,7 +440,7 @@ export class AnalyticsService {
       this.currentSession.lastActivity = Date.now();
     }
 
-    this._log('debug', 'Custom event tracked', { name, properties });
+    this.log('debug', 'Custom event tracked', { name, properties });
   }
 
   /**
@@ -506,7 +506,7 @@ export class AnalyticsService {
     if (this.currentSession) {
       this.currentSession.userId = userId;
     }
-    this._log('debug', 'User ID set', { userId });
+    this.log('debug', 'User ID set', { userId });
   }
 
   /**
@@ -580,7 +580,7 @@ export class AnalyticsService {
    */
   clear(): void {
     this.events = [];
-    this._log('info', 'Analytics events cleared', {});
+    this.log('info', 'Analytics events cleared', {});
   }
 
   /**
@@ -588,11 +588,7 @@ export class AnalyticsService {
    */
   updateConfig(config: Partial<AnalyticsConfig>): void {
     this.config = { ...this.config, ...config };
-    this._log(
-      'info',
-      'Analytics config updated',
-      this.config as unknown as Record<string, unknown>
-    );
+    this.log('info', 'Analytics config updated', this.config as unknown as Record<string, unknown>);
   }
 
   /**
@@ -603,7 +599,7 @@ export class AnalyticsService {
     this.currentSession = null;
     this.currentPageView = null;
     this.isInitialized = false;
-    this._log('info', 'AnalyticsService destroyed', {});
+    this.log('info', 'AnalyticsService destroyed', {});
   }
 }
 

@@ -36,13 +36,34 @@ const PATH_SEGMENT_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9]$/;
 const ALLOWED_PATH_SEGMENTS = new Set(['__tests__']);
 const METHOD_NAME_SCAN_ROOTS = new Set(['components', 'modules']);
 const METHOD_NAME_SCAN_FILES = new Set([
+  'common/BaseModule.ts',
+  'common/bootstrap/ServiceBootstrap.ts',
+  'common/components/OverviewRenderer.ts',
+  'common/components/SidebarRenderer.ts',
+  'common/devtools/MemoryDevTools.ts',
+  'common/EventBus.ts',
+  'common/utils/MemoryLeakDetector.ts',
+  'common/utils/ColorContext.ts',
   'common/router/navigo/ErrorHandler.ts',
   'common/router/navigo/GuardManager.ts',
   'common/router/navigo/MiddlewareManager.ts',
+  'common/router/navigo/NavigoAdapter.ts',
   'common/router/navigo/ParamParser.ts',
   'common/router/navigo/PreloadManager.ts',
   'common/router/navigo/RouteConfigConverter.ts',
+  'common/utils/LoadingManager.ts',
+  'common/utils/ModuleLoader.ts',
   'common/utils/WorkingStateManager.ts',
+  'services/alertService.ts',
+  'services/analyticsService.ts',
+  'services/errorTracker.ts',
+  'services/httpService.ts',
+  'services/loggerService.ts',
+  'services/monitoringService.ts',
+  'services/performanceStorage.ts',
+  'services/performanceService.ts',
+  'services/PriorityRequestPool.ts',
+  'services/storageService.ts',
 ]);
 const ALLOWED_METHOD_NAMES = new Set(['$watch']);
 

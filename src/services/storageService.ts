@@ -240,7 +240,7 @@ class StorageServiceClass implements IStorageService {
       const raw = localStorage.getItem(key);
       if (raw === null) return defaultValue;
 
-      this._updateAccessTime(key);
+      this.updateAccessTime(key);
 
       const parsed = JSON.parse(raw);
 
@@ -288,21 +288,21 @@ class StorageServiceClass implements IStorageService {
     let serialized = '';
 
     try {
-      const valueForStorage = this._sanitizePlainStorageValue(key, value);
-      if (!this._canWritePlainStorage('set', key, valueForStorage)) {
+      const valueForStorage = this.sanitizePlainStorageValue(key, value);
+      if (!this.canWritePlainStorage('set', key, valueForStorage)) {
         return false;
       }
 
       serialized = JSON.stringify(valueForStorage);
 
-      this._checkCacheSize(serialized.length * 2);
+      this.checkCacheSize(serialized.length * 2);
 
       localStorage.setItem(key, serialized);
-      this._updateAccessTime(key);
+      this.updateAccessTime(key);
 
       return true;
     } catch (e) {
-      return this._handleStorageWriteError(
+      return this.handleStorageWriteError(
         'set',
         key,
         serialized,
@@ -320,7 +320,7 @@ class StorageServiceClass implements IStorageService {
       const raw = localStorage.getItem(key);
 
       if (raw !== null) {
-        this._updateAccessTime(key);
+        this.updateAccessTime(key);
       }
 
       return raw !== null ? raw : defaultValue;
@@ -347,18 +347,18 @@ class StorageServiceClass implements IStorageService {
    */
   setRaw(key: string, value: string): boolean {
     try {
-      if (!this._canWritePlainStorage('setRaw', key, value)) {
+      if (!this.canWritePlainStorage('setRaw', key, value)) {
         return false;
       }
 
-      this._checkCacheSize(value.length * 2);
+      this.checkCacheSize(value.length * 2);
 
       localStorage.setItem(key, value);
-      this._updateAccessTime(key);
+      this.updateAccessTime(key);
 
       return true;
     } catch (e) {
-      return this._handleStorageWriteError(
+      return this.handleStorageWriteError(
         'setRaw',
         key,
         value,
@@ -368,7 +368,7 @@ class StorageServiceClass implements IStorageService {
     }
   }
 
-  private _handleStorageWriteError(
+  private handleStorageWriteError(
     action: 'set' | 'setRaw',
     key: string,
     value: string,
@@ -391,22 +391,22 @@ class StorageServiceClass implements IStorageService {
         }
       );
 
-      this._handleQuotaExceeded();
+      this.handleQuotaExceeded();
       try {
         localStorage.setItem(key, value);
-        this._updateAccessTime(key);
+        this.updateAccessTime(key);
         return true;
       } catch (retryError) {
-        this._reportStorageError(action, key, retryError as Error, true);
+        this.reportStorageError(action, key, retryError as Error, true);
         return false;
       }
     }
 
-    this._reportStorageError(action, key, error, false);
+    this.reportStorageError(action, key, error, false);
     return false;
   }
 
-  private _sanitizePlainStorageValue(key: string, value: unknown): unknown {
+  private sanitizePlainStorageValue(key: string, value: unknown): unknown {
     if (
       (key === STORAGE_KEYS.PROXY_CONFIG || key === STORAGE_KEYS.SCRAPER_PROXY_CONFIG) &&
       isRecord(value)
@@ -426,8 +426,8 @@ class StorageServiceClass implements IStorageService {
     return value;
   }
 
-  private _canWritePlainStorage(action: 'set' | 'setRaw', key: string, value: unknown): boolean {
-    if (this._isSensitivePlainStorageKey(key) || hasSensitivePlainValue(value)) {
+  private canWritePlainStorage(action: 'set' | 'setRaw', key: string, value: unknown): boolean {
+    if (this.isSensitivePlainStorageKey(key) || hasSensitivePlainValue(value)) {
       handleSystemError(
         'SYS_STORAGE_ERROR',
         {
@@ -448,7 +448,7 @@ class StorageServiceClass implements IStorageService {
     return true;
   }
 
-  private _isSensitivePlainStorageKey(key: string): boolean {
+  private isSensitivePlainStorageKey(key: string): boolean {
     return (
       key === STORAGE_KEYS.PROXY_KEY_MAP ||
       key.startsWith(LLM_CREDENTIAL_PREFIX) ||
@@ -456,7 +456,7 @@ class StorageServiceClass implements IStorageService {
     );
   }
 
-  private _reportStorageError(
+  private reportStorageError(
     action: 'set' | 'setRaw',
     key: string,
     error: Error,
@@ -478,7 +478,7 @@ class StorageServiceClass implements IStorageService {
     );
   }
 
-  private _reportStorageReadError(action: string, key: string, error: Error): void {
+  private reportStorageReadError(action: string, key: string, error: Error): void {
     handleSystemError(
       'SYS_STORAGE_ERROR',
       {
@@ -500,9 +500,9 @@ class StorageServiceClass implements IStorageService {
   remove(key: string): void {
     try {
       localStorage.removeItem(key);
-      this._removeAccessTime(key);
+      this.removeAccessTime(key);
     } catch (e) {
-      this._reportStorageReadError('remove', key, e as Error);
+      this.reportStorageReadError('remove', key, e as Error);
     }
   }
 
@@ -518,7 +518,7 @@ class StorageServiceClass implements IStorageService {
 
       this.keys(namespace).forEach(key => this.remove(key));
     } catch (e) {
-      this._reportStorageReadError('clear', namespace || '*', e as Error);
+      this.reportStorageReadError('clear', namespace || '*', e as Error);
     }
   }
 
@@ -529,7 +529,7 @@ class StorageServiceClass implements IStorageService {
     try {
       localStorage.clear();
     } catch (e) {
-      this._reportStorageReadError('dangerouslyClearAllLocalStorage', '*', e as Error);
+      this.reportStorageReadError('dangerouslyClearAllLocalStorage', '*', e as Error);
     }
   }
 
@@ -540,7 +540,7 @@ class StorageServiceClass implements IStorageService {
     try {
       return localStorage.getItem(key) !== null;
     } catch (e) {
-      this._reportStorageReadError('has', key, e as Error);
+      this.reportStorageReadError('has', key, e as Error);
       return false;
     }
   }
@@ -564,7 +564,7 @@ class StorageServiceClass implements IStorageService {
       }
       return keys;
     } catch (e) {
-      this._reportStorageReadError('keys', namespace || '*', e as Error);
+      this.reportStorageReadError('keys', namespace || '*', e as Error);
       return [];
     }
   }
@@ -572,8 +572,8 @@ class StorageServiceClass implements IStorageService {
   /**
    * 更新访问时间
    */
-  private _updateAccessTime(key: string): void {
-    if (this._isSensitivePlainStorageKey(key)) {
+  private updateAccessTime(key: string): void {
+    if (this.isSensitivePlainStorageKey(key)) {
       return;
     }
 
@@ -588,7 +588,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 移除访问时间记录
    */
-  private _removeAccessTime(key: string): void {
+  private removeAccessTime(key: string): void {
     try {
       const accessKey = `_lru_access_${key}`;
       localStorage.removeItem(accessKey);
@@ -600,7 +600,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 获取所有键的访问时间
    */
-  private _getAccessTimes(): AccessTimeRecord[] {
+  private getAccessTimes(): AccessTimeRecord[] {
     const items: AccessTimeRecord[] = [];
 
     try {
@@ -641,30 +641,30 @@ class StorageServiceClass implements IStorageService {
   /**
    * 检查缓存大小
    */
-  private _checkCacheSize(newItemSize: number): void {
+  private checkCacheSize(newItemSize: number): void {
     const usage = this.getUsage();
     const projectedUsage = usage.used + newItemSize;
     const threshold =
       this._lruConfig.maxSize * getRuntimeStorageStrategyOptions().lruWarningThreshold;
 
     if (projectedUsage > threshold) {
-      this._cleanupLRU();
+      this.cleanupLRU();
     }
   }
 
   /**
    * LRU清理策略
    */
-  private _cleanupLRU(): void {
+  private cleanupLRU(): void {
     try {
-      const items = this._getAccessTimes();
+      const items = this.getAccessTimes();
       const usage = this.getUsage();
       const targetSize = usage.used * (1 - getRuntimeStorageStrategyOptions().lruCleanupRatio);
 
       let currentSize = usage.used;
 
       for (const item of items) {
-        if (this._isProtectedKey(item.key) || !this._isCacheKey(item.key)) {
+        if (this.isProtectedKey(item.key) || !this.isCacheKey(item.key)) {
           continue;
         }
 
@@ -694,7 +694,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 判断是否为受保护的键
    */
-  private _isProtectedKey(key: string): boolean {
+  private isProtectedKey(key: string): boolean {
     const protectedPrefixes = ['llm_', 'secure_', 'proxy_', 'feature_', 'layout_config_', 'user:'];
 
     const protectedKeys = [
@@ -709,7 +709,7 @@ class StorageServiceClass implements IStorageService {
   /**
    * 判断是否为可自动清理的缓存键
    */
-  private _isCacheKey(key: string): boolean {
+  private isCacheKey(key: string): boolean {
     return CACHE_KEY_PREFIXES.some(prefix => key.startsWith(prefix));
   }
 
@@ -731,7 +731,7 @@ class StorageServiceClass implements IStorageService {
         percent: Math.round((used / total) * 100),
       };
     } catch (e) {
-      this._reportStorageReadError('getUsage', '*', e as Error);
+      this.reportStorageReadError('getUsage', '*', e as Error);
       const total = 5 * 1024 * 1024;
       return {
         used: 0,
@@ -744,8 +744,8 @@ class StorageServiceClass implements IStorageService {
   /**
    * 处理存储空间超限
    */
-  private _handleQuotaExceeded(): void {
-    this._cleanupLRU();
+  private handleQuotaExceeded(): void {
+    this.cleanupLRU();
 
     const history = this.get<unknown[]>(STORAGE_KEYS.SCRAPE_HISTORY, []);
     const maxItems = getRuntimeStorageStrategyOptions().historyMaxItems;
@@ -773,7 +773,7 @@ class StorageServiceClass implements IStorageService {
       const endpoint = config.endpoint || '';
       const storedApiKey =
         (await this.getSecure<string>(getLLMCredentialKey(activeProvider), '')) ||
-        (await this._migrateLegacyPlainLLMKey(activeProvider));
+        (await this.migrateLegacyPlainLLMKey(activeProvider));
       const apiKey = storedApiKey;
       const fullConfig = { ...config, endpoint, apiKey } as LLMProviderConfig;
 
@@ -838,7 +838,7 @@ class StorageServiceClass implements IStorageService {
     this.set(STORAGE_KEYS.LLM_ACTIVE_PROVIDER, provider);
   }
 
-  private async _migrateLegacyPlainLLMKey(provider: string): Promise<string> {
+  private async migrateLegacyPlainLLMKey(provider: string): Promise<string> {
     const legacyKey = getLLMCredentialKey(provider);
     const raw = localStorage.getItem(legacyKey);
     if (raw === null) {
@@ -851,7 +851,7 @@ class StorageServiceClass implements IStorageService {
     }
 
     localStorage.removeItem(legacyKey);
-    this._removeAccessTime(legacyKey);
+    this.removeAccessTime(legacyKey);
     return apiKey;
   }
 
@@ -919,7 +919,7 @@ class StorageServiceClass implements IStorageService {
       await this.setProxyKeyMap(keyMap);
       return keyMap;
     } catch (e) {
-      this._reportStorageReadError('getProxyKeyMap', STORAGE_KEYS.PROXY_KEY_MAP, e as Error);
+      this.reportStorageReadError('getProxyKeyMap', STORAGE_KEYS.PROXY_KEY_MAP, e as Error);
       return {};
     }
   }
@@ -940,7 +940,7 @@ class StorageServiceClass implements IStorageService {
       this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
       return saved;
     } catch (e) {
-      this._reportStorageReadError('setProxyKeyMap', STORAGE_KEYS.PROXY_KEY_MAP, e as Error);
+      this.reportStorageReadError('setProxyKeyMap', STORAGE_KEYS.PROXY_KEY_MAP, e as Error);
       return false;
     }
   }
@@ -958,7 +958,7 @@ class StorageServiceClass implements IStorageService {
 
       return customUrl ? { ...config, customUrl } : config;
     } catch (e) {
-      this._reportStorageReadError(
+      this.reportStorageReadError(
         'getProxyConfigWithCredential',
         STORAGE_KEYS.PROXY_CONFIG,
         e as Error
@@ -980,7 +980,7 @@ class StorageServiceClass implements IStorageService {
       const savedCredential = await this.setSecure(getProxyCredentialKey(type), config.customUrl);
       return savedConfig && savedCredential;
     } catch (e) {
-      this._reportStorageReadError(
+      this.reportStorageReadError(
         'setProxyConfigWithCredential',
         STORAGE_KEYS.PROXY_CONFIG,
         e as Error
@@ -1024,11 +1024,7 @@ class StorageServiceClass implements IStorageService {
 
       return (await LocalDataStore.get<HistoryItem[]>(indexedKey, [])) || [];
     } catch (e) {
-      this._reportStorageReadError(
-        'getScrapeHistoryAsync',
-        STORAGE_KEYS.SCRAPE_HISTORY,
-        e as Error
-      );
+      this.reportStorageReadError('getScrapeHistoryAsync', STORAGE_KEYS.SCRAPE_HISTORY, e as Error);
       return this.getScrapeHistory();
     }
   }
@@ -1043,11 +1039,7 @@ class StorageServiceClass implements IStorageService {
     try {
       return await LocalDataStore.set(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`, trimmed, 'user-data');
     } catch (e) {
-      this._reportStorageReadError(
-        'setScrapeHistoryAsync',
-        STORAGE_KEYS.SCRAPE_HISTORY,
-        e as Error
-      );
+      this.reportStorageReadError('setScrapeHistoryAsync', STORAGE_KEYS.SCRAPE_HISTORY, e as Error);
       return this.setScrapeHistory(trimmed);
     }
   }
@@ -1056,7 +1048,7 @@ class StorageServiceClass implements IStorageService {
     try {
       await LocalDataStore.remove(`user:${STORAGE_KEYS.SCRAPE_HISTORY}`);
     } catch (e) {
-      this._reportStorageReadError(
+      this.reportStorageReadError(
         'removeScrapeHistoryAsync',
         STORAGE_KEYS.SCRAPE_HISTORY,
         e as Error
@@ -1102,7 +1094,7 @@ class StorageServiceClass implements IStorageService {
       const { SecureStorage } = await import('@/common/utils/secureStorage');
       return await SecureStorage.setSecure(key, value);
     } catch (e) {
-      this._reportStorageReadError('setSecure', key, e as Error);
+      this.reportStorageReadError('setSecure', key, e as Error);
       return false;
     }
   }
@@ -1115,7 +1107,7 @@ class StorageServiceClass implements IStorageService {
       const { SecureStorage } = await import('@/common/utils/secureStorage');
       return await SecureStorage.getSecure(key, defaultValue);
     } catch (e) {
-      this._reportStorageReadError('getSecure', key, e as Error);
+      this.reportStorageReadError('getSecure', key, e as Error);
       return defaultValue;
     }
   }

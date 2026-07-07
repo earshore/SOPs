@@ -126,7 +126,7 @@ export class ErrorTracker {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(
+  private log(
     level: 'debug' | 'info' | 'warn' | 'error',
     message: string,
     data: Record<string, unknown> = {}
@@ -143,7 +143,7 @@ export class ErrorTracker {
    */
   init(config?: Partial<ErrorTrackerConfig>): void {
     if (this.isInitialized) {
-      this._log('warn', 'ErrorTracker already initialized', {});
+      this.log('warn', 'ErrorTracker already initialized', {});
       return;
     }
 
@@ -151,7 +151,7 @@ export class ErrorTracker {
     this.config = { ...this.config, ...config };
 
     if (!this.config.enabled) {
-      this._log('info', 'ErrorTracker is disabled', {});
+      this.log('info', 'ErrorTracker is disabled', {});
       return;
     }
 
@@ -159,7 +159,7 @@ export class ErrorTracker {
     this.setupGlobalErrorHandlers();
 
     this.isInitialized = true;
-    this._log(
+    this.log(
       'info',
       '✅ ErrorTracker initialized',
       this.config as unknown as Record<string, unknown>
@@ -467,7 +467,7 @@ export class ErrorTracker {
   clear(): void {
     this.errors.clear();
     this.errorQueue = [];
-    this._log('info', 'Error records cleared', {});
+    this.log('info', 'Error records cleared', {});
   }
 
   /**
@@ -475,7 +475,7 @@ export class ErrorTracker {
    */
   updateConfig(config: Partial<ErrorTrackerConfig>): void {
     this.config = { ...this.config, ...config };
-    this._log(
+    this.log(
       'info',
       'ErrorTracker config updated',
       this.config as unknown as Record<string, unknown>
@@ -488,7 +488,7 @@ export class ErrorTracker {
   destroy(): void {
     this.clear();
     this.isInitialized = false;
-    this._log('info', 'ErrorTracker destroyed', {});
+    this.log('info', 'ErrorTracker destroyed', {});
   }
 }
 

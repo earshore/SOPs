@@ -118,10 +118,10 @@ export class ModuleLoader {
     // const diContainer = config.container || globalContainer;
 
     // 🎯 P1 优化：提取路由前缀用于快速过滤
-    this.routePrefixes = this._extractRoutePrefixes();
+    this.routePrefixes = this.extractRoutePrefixes();
 
     // 自动监听路由变化
-    this._initRouteListener();
+    this.initRouteListener();
   }
 
   /**
@@ -129,7 +129,7 @@ export class ModuleLoader {
    * @returns 路由前缀集合
    * @private
    */
-  private _extractRoutePrefixes(): Set<string> {
+  private extractRoutePrefixes(): Set<string> {
     const prefixes = new Set<string>();
     Object.keys(this.moduleMap).forEach(routeId => {
       // 提取前缀：例如 sops_overview -> sops, amz_hub_overview -> amz
@@ -147,7 +147,7 @@ export class ModuleLoader {
    * @returns 是否应该处理该路由
    * @private
    */
-  private _shouldHandleRoute(routeId: string): boolean {
+  private shouldHandleRoute(routeId: string): boolean {
     const prefix = routeId.split('_')[0];
     return prefix ? this.routePrefixes.has(prefix) : false;
   }
@@ -172,7 +172,7 @@ export class ModuleLoader {
    * @returns 容器元素或null
    * @private
    */
-  private _waitForContainer(id: string, timeout: number = 3000): Promise<HTMLElement | null> {
+  private waitForContainer(id: string, timeout: number = 3000): Promise<HTMLElement | null> {
     return new Promise(resolve => {
       const el = document.getElementById(id);
       if (el) return resolve(el);
@@ -196,9 +196,9 @@ export class ModuleLoader {
    * 卸载当前模块
    * @private
    */
-  private _unmountCurrentModule(): void {
-    this._clearDelayedLoading();
-    this._clearRetry();
+  private unmountCurrentModule(): void {
+    this.clearDelayedLoading();
+    this.clearRetry();
     if (this.currentModule && this.currentModule.unmount) {
       try {
         this.currentModule.unmount();
@@ -220,7 +220,7 @@ export class ModuleLoader {
    * @param container - 容器元素
    * @private
    */
-  private _renderLoading(container: HTMLElement, routeId: string): void {
+  private renderLoading(container: HTMLElement, routeId: string): void {
     const wrapper = document.createElement('div');
     wrapper.className = 'route-loading-skeleton';
     wrapper.setAttribute('role', 'status');
@@ -259,21 +259,21 @@ export class ModuleLoader {
     container.replaceChildren(wrapper);
   }
 
-  private _scheduleDelayedLoading(container: HTMLElement, loadId: number, routeId: string): void {
-    this._clearDelayedLoading();
+  private scheduleDelayedLoading(container: HTMLElement, loadId: number, routeId: string): void {
+    this.clearDelayedLoading();
     this.loadingTimerLoadId = loadId;
     this.loadingTimer = window.setTimeout(() => {
       this.loadingTimer = null;
       this.loadingTimerLoadId = null;
-      if (this._isStaleLoad(loadId) || !this.isLoading) {
+      if (this.isStaleLoad(loadId) || !this.isLoading) {
         return;
       }
 
-      this._renderLoading(container, routeId);
+      this.renderLoading(container, routeId);
     }, MODULE_LOADING_DELAY_MS);
   }
 
-  private _clearDelayedLoading(loadId?: number): void {
+  private clearDelayedLoading(loadId?: number): void {
     if (loadId !== undefined && this.loadingTimerLoadId !== loadId) {
       return;
     }
@@ -285,7 +285,7 @@ export class ModuleLoader {
     }
   }
 
-  private _clearRetry(loadId?: number): void {
+  private clearRetry(loadId?: number): void {
     if (loadId !== undefined && this.retryTimerLoadId !== loadId) {
       return;
     }
@@ -303,7 +303,7 @@ export class ModuleLoader {
    * @param routeId - 路由ID
    * @private
    */
-  private _renderNotRegistered(container: HTMLElement, routeId: string): void {
+  private renderNotRegistered(container: HTMLElement, routeId: string): void {
     container.classList.remove(MODULE_LOADING_HOST_CLASS);
     renderNotRegistered(container, routeId);
   }
@@ -315,7 +315,7 @@ export class ModuleLoader {
    * @param error - 错误对象
    * @private
    */
-  private _renderErrorBoundary(container: HTMLElement, routeId: string, error: Error): void {
+  private renderErrorBoundary(container: HTMLElement, routeId: string, error: Error): void {
     container.classList.remove(MODULE_LOADING_HOST_CLASS);
     renderErrorBoundary(container, error, {
       title: '模块加载失败',
@@ -326,11 +326,11 @@ export class ModuleLoader {
     } as ErrorBoundaryOptions);
   }
 
-  private _isStaleLoad(loadId: number): boolean {
+  private isStaleLoad(loadId: number): boolean {
     return loadId !== this.loadSequence;
   }
 
-  private _shouldSkipLoad(routeId: string): boolean {
+  private shouldSkipLoad(routeId: string): boolean {
     if (this.isLoading && this.pendingRouteId === routeId) {
       return true;
     }
@@ -342,25 +342,25 @@ export class ModuleLoader {
     return false;
   }
 
-  private _startLoad(routeId: string): number {
-    this._clearRetry();
+  private startLoad(routeId: string): number {
+    this.clearRetry();
     const loadId = ++this.loadSequence;
     this.isLoading = true;
     this.pendingRouteId = routeId;
     return loadId;
   }
 
-  private _cancelPendingLoad(): void {
+  private cancelPendingLoad(): void {
     this.loadSequence += 1;
     this.isLoading = false;
     this.pendingRouteId = null;
-    this._clearDelayedLoading();
-    this._clearRetry();
+    this.clearDelayedLoading();
+    this.clearRetry();
   }
 
-  private _clearLoading(loadId: number): void {
-    this._clearDelayedLoading(loadId);
-    if (this._isStaleLoad(loadId)) {
+  private clearLoading(loadId: number): void {
+    this.clearDelayedLoading(loadId);
+    if (this.isStaleLoad(loadId)) {
       return;
     }
 
@@ -368,10 +368,10 @@ export class ModuleLoader {
     this.pendingRouteId = null;
   }
 
-  private async _prepareContainer(routeId: string, loadId: number): Promise<HTMLElement | null> {
-    const container = await this._waitForContainer(this.containerId);
+  private async prepareContainer(routeId: string, loadId: number): Promise<HTMLElement | null> {
+    const container = await this.waitForContainer(this.containerId);
 
-    if (this._isStaleLoad(loadId)) {
+    if (this.isStaleLoad(loadId)) {
       return null;
     }
 
@@ -385,39 +385,39 @@ export class ModuleLoader {
     }
 
     if (this.currentRouteId !== routeId) {
-      this._unmountCurrentModule();
+      this.unmountCurrentModule();
     }
 
     this.currentContainer = container;
-    this._clearContentEnterAnimation(container);
-    this._scheduleDelayedLoading(container, loadId, routeId);
+    this.clearContentEnterAnimation(container);
+    this.scheduleDelayedLoading(container, loadId, routeId);
     return container;
   }
 
-  private _getRegisteredLoader(
+  private getRegisteredLoader(
     container: HTMLElement,
     routeId: string
   ): (() => Promise<IModule>) | null {
     const loader = this.moduleMap[routeId];
     if (!loader) {
-      this._clearDelayedLoading();
-      this._renderNotRegistered(container, routeId);
+      this.clearDelayedLoading();
+      this.renderNotRegistered(container, routeId);
       return null;
     }
 
     return loader;
   }
 
-  private _prepareContainerForMount(container: HTMLElement): void {
-    this._clearDelayedLoading();
-    this._clearContentEnterAnimation(container);
+  private prepareContainerForMount(container: HTMLElement): void {
+    this.clearDelayedLoading();
+    this.clearContentEnterAnimation(container);
     container.classList.remove(MODULE_LOADING_HOST_CLASS);
     container.replaceChildren();
-    this._prepareContentEnterAnimation(container);
+    this.prepareContentEnterAnimation(container);
     void container.offsetHeight;
   }
 
-  private _clearContentEnterAnimation(container: HTMLElement): void {
+  private clearContentEnterAnimation(container: HTMLElement): void {
     if (!this.contentEnterAnimation) {
       return;
     }
@@ -426,7 +426,7 @@ export class ModuleLoader {
     container.classList.remove(LEGACY_CONTENT_ENTER_ANIMATION_CLASS);
   }
 
-  private _applyContentEnterAnimation(container: HTMLElement): void {
+  private applyContentEnterAnimation(container: HTMLElement): void {
     if (!this.contentEnterAnimation) {
       return;
     }
@@ -435,7 +435,7 @@ export class ModuleLoader {
     applyPageEnterAnimation(container);
   }
 
-  private _prepareContentEnterAnimation(container: HTMLElement): void {
+  private prepareContentEnterAnimation(container: HTMLElement): void {
     if (!this.contentEnterAnimation) {
       return;
     }
@@ -443,7 +443,7 @@ export class ModuleLoader {
     preparePageEnterAnimation(container);
   }
 
-  private _renderRetryLoading(container: HTMLElement): void {
+  private renderRetryLoading(container: HTMLElement): void {
     container.classList.remove(MODULE_LOADING_HOST_CLASS);
     const wrapper = document.createElement('div');
     wrapper.className = 'p-10 text-center';
@@ -459,7 +459,7 @@ export class ModuleLoader {
     container.replaceChildren(wrapper);
   }
 
-  private async _mountLoadedModule(
+  private async mountLoadedModule(
     module: IModule,
     container: HTMLElement,
     routeId: string,
@@ -477,7 +477,7 @@ export class ModuleLoader {
 
     await module.mount(container);
 
-    if (this._isStaleLoad(loadId)) {
+    if (this.isStaleLoad(loadId)) {
       if (module.unmount) {
         module.unmount();
       }
@@ -486,56 +486,56 @@ export class ModuleLoader {
 
     this.currentModule = module;
     this.currentRouteId = routeId;
-    this._applyContentEnterAnimation(container);
+    this.applyContentEnterAnimation(container);
   }
 
-  private async _scheduleRetry(routeId: string, retryCount: number, loadId: number): Promise<void> {
-    const container = await this._waitForContainer(this.containerId);
-    if (this._isStaleLoad(loadId)) {
+  private async scheduleRetry(routeId: string, retryCount: number, loadId: number): Promise<void> {
+    const container = await this.waitForContainer(this.containerId);
+    if (this.isStaleLoad(loadId)) {
       return;
     }
 
     if (container) {
-      this._clearDelayedLoading(loadId);
-      this._clearContentEnterAnimation(container);
-      this._renderRetryLoading(container);
+      this.clearDelayedLoading(loadId);
+      this.clearContentEnterAnimation(container);
+      this.renderRetryLoading(container);
     }
 
     this.retryTimerLoadId = loadId;
     this.retryTimer = window.setTimeout(() => {
       this.retryTimer = null;
       this.retryTimerLoadId = null;
-      if (!this.isDestroyed && !this._isStaleLoad(loadId)) {
+      if (!this.isDestroyed && !this.isStaleLoad(loadId)) {
         this.loadModule(routeId, retryCount + 1);
       }
     }, 1000);
   }
 
-  private async _handleLoadError(
+  private async handleLoadError(
     routeId: string,
     retryCount: number,
     loadId: number,
     err: unknown
   ): Promise<void> {
-    if (this._isStaleLoad(loadId)) {
+    if (this.isStaleLoad(loadId)) {
       return;
     }
 
     console.error(`[${this.moduleName}] 加载子模块失败 (重试 ${retryCount}):`, err);
 
     if (retryCount < 1) {
-      await this._scheduleRetry(routeId, retryCount, loadId);
+      await this.scheduleRetry(routeId, retryCount, loadId);
       return;
     }
 
-    const container = await this._waitForContainer(this.containerId);
-    if (this._isStaleLoad(loadId)) {
+    const container = await this.waitForContainer(this.containerId);
+    if (this.isStaleLoad(loadId)) {
       return;
     }
     if (container) {
-      this._clearDelayedLoading(loadId);
-      this._clearContentEnterAnimation(container);
-      this._renderErrorBoundary(container, routeId, err as Error);
+      this.clearDelayedLoading(loadId);
+      this.clearContentEnterAnimation(container);
+      this.renderErrorBoundary(container, routeId, err as Error);
     }
   }
 
@@ -549,35 +549,35 @@ export class ModuleLoader {
       return;
     }
 
-    if (this._shouldSkipLoad(routeId)) {
+    if (this.shouldSkipLoad(routeId)) {
       return;
     }
 
-    const loadId = this._startLoad(routeId);
+    const loadId = this.startLoad(routeId);
 
     try {
-      const container = await this._prepareContainer(routeId, loadId);
+      const container = await this.prepareContainer(routeId, loadId);
       if (!container) {
         return;
       }
 
-      const loader = this._getRegisteredLoader(container, routeId);
+      const loader = this.getRegisteredLoader(container, routeId);
       if (!loader) {
         return;
       }
 
-      const module = await this._measureModuleLoad(routeId, loader);
+      const module = await this.measureModuleLoad(routeId, loader);
 
-      if (this._isStaleLoad(loadId)) {
+      if (this.isStaleLoad(loadId)) {
         return;
       }
 
-      this._prepareContainerForMount(container);
-      await this._mountLoadedModule(module, container, routeId, loadId);
+      this.prepareContainerForMount(container);
+      await this.mountLoadedModule(module, container, routeId, loadId);
     } catch (err) {
-      await this._handleLoadError(routeId, retryCount, loadId, err);
+      await this.handleLoadError(routeId, retryCount, loadId, err);
     } finally {
-      this._clearLoading(loadId);
+      this.clearLoading(loadId);
     }
   }
 
@@ -588,7 +588,7 @@ export class ModuleLoader {
    * @returns 加载的模块
    * @private
    */
-  private async _measureModuleLoad(
+  private async measureModuleLoad(
     routeId: string,
     loader: () => Promise<IModule>
   ): Promise<IModule> {
@@ -606,14 +606,14 @@ export class ModuleLoader {
    * 初始化路由监听器
    * @private
    */
-  private _initRouteListener(): void {
+  private initRouteListener(): void {
     // 监听路由变化事件
     this.routeChangeHandler = (e: Event) => {
       const customEvent = e as CustomEvent;
       const { routeId } = customEvent.detail;
 
       // 🎯 P1 优化：快速前缀过滤，避免无效处理
-      if (!this._shouldHandleRoute(routeId)) {
+      if (!this.shouldHandleRoute(routeId)) {
         return; // 前缀不匹配，直接跳过
       }
 
@@ -639,8 +639,8 @@ export class ModuleLoader {
 
       // 只处理当前模块的卸载
       if (panelId === this.shellId) {
-        this._cancelPendingLoad();
-        this._unmountCurrentModule();
+        this.cancelPendingLoad();
+        this.unmountCurrentModule();
       }
     };
     window.addEventListener(APP_EVENTS.MODULE_UNLOAD, this.moduleUnloadHandler);
@@ -651,8 +651,8 @@ export class ModuleLoader {
    */
   destroy(): void {
     this.isDestroyed = true;
-    this._cancelPendingLoad();
-    this._unmountCurrentModule();
+    this.cancelPendingLoad();
+    this.unmountCurrentModule();
     if (this.routeChangeHandler) {
       window.removeEventListener(APP_EVENTS.ROUTE_CHANGED, this.routeChangeHandler);
       this.routeChangeHandler = null;

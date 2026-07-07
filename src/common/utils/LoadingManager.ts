@@ -72,7 +72,7 @@ export class LoadingManager {
     };
 
     this.tasks.set(taskId, task);
-    this._updateUI();
+    this.updateUI();
 
     // 触发事件
     emitAppEvent(APP_EVENTS.LOADING_START, { taskId, task });
@@ -91,7 +91,7 @@ export class LoadingManager {
 
     const duration = Date.now() - task.startTime;
     this.tasks.delete(taskId);
-    this._updateUI();
+    this.updateUI();
 
     // 触发事件
     emitAppEvent(APP_EVENTS.LOADING_STOP, { taskId, duration });
@@ -139,7 +139,7 @@ export class LoadingManager {
   clearAll(): number {
     const taskIds = Array.from(this.tasks.keys());
     this.tasks.clear();
-    this._updateUI();
+    this.updateUI();
 
     return taskIds.length;
   }
@@ -161,7 +161,7 @@ export class LoadingManager {
    * 更新 UI 显示
    * @private
    */
-  private _updateUI(): void {
+  private updateUI(): void {
     if (!this.globalLoadingElement) return;
 
     if (this.isLoading) {

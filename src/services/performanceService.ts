@@ -95,7 +95,7 @@ export class PerformanceService {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(
+  private log(
     level: 'debug' | 'info' | 'warn' | 'error',
     message: string,
     data: Record<string, unknown> = {}
@@ -131,11 +131,11 @@ export class PerformanceService {
    */
   measurePageLoad(): void {
     if (document.readyState === 'complete') {
-      this._collectPageLoadMetrics();
+      this.collectPageLoadMetrics();
     } else {
       window.addEventListener('load', () => {
         // 延迟收集，确保所有资源加载完成
-        setTimeout(() => this._collectPageLoadMetrics(), 0);
+        setTimeout(() => this.collectPageLoadMetrics(), 0);
       });
     }
   }
@@ -143,7 +143,7 @@ export class PerformanceService {
   /**
    * 收集页面加载指标
    */
-  private _collectPageLoadMetrics(): void {
+  private collectPageLoadMetrics(): void {
     const entries = performance.getEntriesByType('navigation');
     if (entries.length === 0) {
       return;
@@ -168,7 +168,7 @@ export class PerformanceService {
     });
 
     // 发送到分析服务
-    this._sendMetrics(metrics);
+    this.sendMetrics(metrics);
   }
 
   /**
@@ -197,7 +197,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(observer);
     } catch (e) {
-      this._log('debug', 'LCP measurement failed', { error: (e as Error).message });
+      this.log('debug', 'LCP measurement failed', { error: (e as Error).message });
     }
   }
 
@@ -224,7 +224,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['first-input'] });
       this.observers.push(observer);
     } catch (e) {
-      this._log('debug', 'FID measurement failed', { error: (e as Error).message });
+      this.log('debug', 'FID measurement failed', { error: (e as Error).message });
     }
   }
 
@@ -262,7 +262,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(observer);
     } catch (e) {
-      this._log('debug', 'CLS measurement failed', { error: (e as Error).message });
+      this.log('debug', 'CLS measurement failed', { error: (e as Error).message });
     }
   }
 
@@ -288,7 +288,7 @@ export class PerformanceService {
       observer.observe({ entryTypes: ['paint'] });
       this.observers.push(observer);
     } catch (e) {
-      this._log('debug', 'FCP measurement failed', { error: (e as Error).message });
+      this.log('debug', 'FCP measurement failed', { error: (e as Error).message });
     }
   }
 
@@ -317,7 +317,7 @@ export class PerformanceService {
       this.observers.push(observer);
     } catch (e) {
       // longtask 可能不被支持
-      this._log('debug', 'Long task measurement not supported', {});
+      this.log('debug', 'Long task measurement not supported', {});
     }
   }
 
@@ -428,7 +428,7 @@ export class PerformanceService {
     }
 
     // 保存到本地存储（用于离线分析）
-    this._saveMetricsToStorage();
+    this.saveMetricsToStorage();
   }
 
   /**
@@ -465,7 +465,7 @@ export class PerformanceService {
   /**
    * 保存指标到本地存储
    */
-  private _saveMetricsToStorage(): void {
+  private saveMetricsToStorage(): void {
     try {
       // 只保存最近的指标
       const recentMetrics = this.metrics.slice(-50);
@@ -474,17 +474,17 @@ export class PerformanceService {
         StorageService.set('performance_metrics', recentMetrics);
       });
     } catch (e) {
-      this._log('debug', 'Failed to save metrics', { error: (e as Error).message });
+      this.log('debug', 'Failed to save metrics', { error: (e as Error).message });
     }
   }
 
   /**
    * 发送指标到分析服务
    */
-  private _sendMetrics(_metrics: Record<string, number>): void {
+  private sendMetrics(_metrics: Record<string, number>): void {
     // 仅在生产环境发送
     if (!configCenter.isProduction()) {
-      this._log('debug', '开发环境，跳过指标上报', {});
+      this.log('debug', '开发环境，跳过指标上报', {});
       return;
     }
 

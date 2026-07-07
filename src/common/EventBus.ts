@@ -224,12 +224,12 @@ class EventBus {
       try {
         (callback as GenericEventHandler)(data);
       } catch (error) {
-        this._recordListenerError(event, error);
+        this.recordListenerError(event, error);
       }
     });
   }
 
-  private _recordListenerError(event: string, error: unknown): void {
+  private recordListenerError(event: string, error: unknown): void {
     console.error(`[EventBus] 事件 "${event}" 的监听器执行失败`, error);
 
     this._listenerErrors.push({

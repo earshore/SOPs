@@ -79,7 +79,7 @@ export class ServiceBootstrap {
   async initialize(): Promise<InitializeResult> {
     try {
       // 0. 初始化监控服务(优先,所有环境) - 异步不阻塞
-      this._startMonitoringServices();
+      this.startMonitoringServices();
 
       // 1. 验证依赖关系
       const validation = this.container.validateDependencies();
@@ -94,7 +94,7 @@ export class ServiceBootstrap {
       }
 
       // 2. 按依赖层级分组并初始化
-      await this._initServicesInParallel();
+      await this.initServicesInParallel();
 
       return {
         success: this.failedServices.length === 0,
@@ -113,9 +113,9 @@ export class ServiceBootstrap {
    * 并行初始化服务（按依赖层级分组）
    * @private
    */
-  private async _initServicesInParallel(): Promise<void> {
+  private async initServicesInParallel(): Promise<void> {
     // 按依赖层级分组
-    const levels = this._groupByDependencyLevel();
+    const levels = this.groupByDependencyLevel();
 
     // 逐层初始化，同层服务并行
     for (let i = 0; i < levels.length; i++) {
@@ -123,7 +123,7 @@ export class ServiceBootstrap {
       if (!level || level.length === 0) continue;
 
       // 同层服务并行初始化
-      await Promise.all(level.map(serviceName => this._initService(serviceName)));
+      await Promise.all(level.map(serviceName => this.initService(serviceName)));
     }
   }
 
@@ -132,7 +132,7 @@ export class ServiceBootstrap {
    * @returns 分层的服务名称数组
    * @private
    */
-  private _groupByDependencyLevel(): string[][] {
+  private groupByDependencyLevel(): string[][] {
     const levels: string[][] = [];
     const levelMap = new Map<string, number>();
 
@@ -181,12 +181,12 @@ export class ServiceBootstrap {
    * @returns 服务实例
    * @private
    */
-  private async _initService(name: string): Promise<unknown> {
+  private async initService(name: string): Promise<unknown> {
     const config = this.registry.getConfig(name as ServiceName);
     if (!config) {
       throw new SystemError(`服务 "${name}" 未在注册表中找到`, 'BOOTSTRAP_SERVICE_NOT_FOUND', {
         module: 'ServiceBootstrap',
-        action: '_initService',
+        action: 'initService',
         serviceName: name,
       });
     }
@@ -203,7 +203,7 @@ export class ServiceBootstrap {
       const timeout = config.timeout || 5000;
       const result = await Promise.race([
         this.container.resolveAsync(name),
-        this._timeout(timeout, name),
+        this.timeout(timeout, name),
       ]);
 
       this.initializedServices.add(name);
@@ -220,7 +220,7 @@ export class ServiceBootstrap {
           error: errorMessage,
           duration,
         });
-        this._recordWarning({
+        this.recordWarning({
           scope: 'optional-service',
           serviceName: name,
           message: errorMessage,
@@ -246,13 +246,13 @@ export class ServiceBootstrap {
    * @returns Promise that rejects on timeout
    * @private
    */
-  private _timeout(ms: number, serviceName: string): Promise<never> {
+  private timeout(ms: number, serviceName: string): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
         reject(
           new SystemError(`服务 ${serviceName} 初始化超时 (${ms}ms)`, 'BOOTSTRAP_SERVICE_TIMEOUT', {
             module: 'ServiceBootstrap',
-            action: '_timeout',
+            action: 'timeout',
             serviceName,
             timeout: ms,
           })
@@ -261,19 +261,19 @@ export class ServiceBootstrap {
     });
   }
 
-  private _recordWarning(warning: BootstrapWarning): void {
+  private recordWarning(warning: BootstrapWarning): void {
     this.warnings.push(warning);
     nativeLoggerConsole.warn(`⚠️ [Bootstrap] ${warning.scope}: ${warning.message}`);
   }
 
-  private _startMonitoringServices(): void {
+  private startMonitoringServices(): void {
     if (this.monitoringStatus.state === 'starting' || this.monitoringStatus.state === 'ready') {
       return;
     }
 
     const runId = ++this.monitoringRunId;
     this.monitoringStatus = { state: 'starting', warnings: [] };
-    this.monitoringReady = this._initMonitoringServices()
+    this.monitoringReady = this.initMonitoringServices()
       .then(() => {
         if (runId !== this.monitoringRunId) return;
         this.monitoringStatus = { ...this.monitoringStatus, state: 'ready' };
@@ -289,7 +289,7 @@ export class ServiceBootstrap {
           state: 'failed',
           warnings: [...this.monitoringStatus.warnings, warning],
         };
-        this._recordWarning(warning);
+        this.recordWarning(warning);
       });
   }
 
@@ -297,7 +297,7 @@ export class ServiceBootstrap {
    * 初始化监控服务
    * @private
    */
-  private async _initMonitoringServices(): Promise<void> {
+  private async initMonitoringServices(): Promise<void> {
     const { monitoringService } = await import('@/services/monitoringService');
 
     // 1. 外部错误监控（无 DSN 时会保持禁用）
@@ -334,14 +334,14 @@ export class ServiceBootstrap {
     });
 
     // 6. 连接数据流: webVitals -> storage
-    await this._connectMonitoringDataFlow();
+    await this.connectMonitoringDataFlow();
   }
 
   /**
    * 连接监控数据流
    * @private
    */
-  private async _connectMonitoringDataFlow(): Promise<void> {
+  private async connectMonitoringDataFlow(): Promise<void> {
     // 动态导入webVitalsService
     const { webVitalsService } = await import('@/services/webVitalsService');
 
@@ -374,7 +374,7 @@ export class ServiceBootstrap {
     });
 
     // 定期检查错误率(每分钟)
-    this._setMonitoringInterval(() => {
+    this.setMonitoringInterval(() => {
       const stats = errorTracker.getStats();
       const total = stats.total;
 
@@ -397,7 +397,7 @@ export class ServiceBootstrap {
     if (perfWithMemory.memory) {
       let lastMemory = perfWithMemory.memory.usedJSHeapSize;
 
-      this._setMonitoringInterval(() => {
+      this.setMonitoringInterval(() => {
         if (perfWithMemory.memory) {
           const currentMemory = perfWithMemory.memory.usedJSHeapSize;
           const memoryGrowth = currentMemory - lastMemory;
@@ -409,11 +409,11 @@ export class ServiceBootstrap {
     }
   }
 
-  private _setMonitoringInterval(handler: () => void, timeout: number): void {
+  private setMonitoringInterval(handler: () => void, timeout: number): void {
     this.monitoringIntervalIds.push(setInterval(handler, timeout));
   }
 
-  private _clearMonitoringIntervals(): void {
+  private clearMonitoringIntervals(): void {
     this.monitoringIntervalIds.forEach(intervalId => clearInterval(intervalId));
     this.monitoringIntervalIds = [];
   }
@@ -451,7 +451,7 @@ export class ServiceBootstrap {
    */
   reset(): void {
     this.monitoringRunId += 1;
-    this._clearMonitoringIntervals();
+    this.clearMonitoringIntervals();
     this.failedServices = [];
     this.optionalFailedServices = [];
     this.initializedServices.clear();
@@ -465,7 +465,7 @@ export class ServiceBootstrap {
    */
   destroy(): void {
     this.monitoringRunId += 1;
-    this._clearMonitoringIntervals();
+    this.clearMonitoringIntervals();
     this.monitoringStatus = { state: 'idle', warnings: [] };
     this.monitoringReady = null;
   }

@@ -80,11 +80,11 @@ export class ColorContext {
 
     // 1. 优先使用模块配置的 themeColor
     if (module.themeColor) {
-      inferredColor = this._validateColor(module.themeColor);
+      inferredColor = this.validateColor(module.themeColor);
     }
     // 2. 从模块的第一个分类推断
     else {
-      const categoryColor = this._inferFromCategories(moduleId);
+      const categoryColor = this.inferFromCategories(moduleId);
       if (categoryColor) {
         inferredColor = categoryColor;
       }
@@ -106,7 +106,7 @@ export class ColorContext {
    * @returns 推断出的颜色，如果无法推断则返回 null
    * @private
    */
-  private static _inferFromCategories(moduleId: string): ColorSchemeName | null {
+  private static inferFromCategories(moduleId: string): ColorSchemeName | null {
     const routes = getRoutesByModule(moduleId);
     if (routes.length === 0) return null;
 
@@ -115,9 +115,9 @@ export class ColorContext {
     if (!routeWithCategory?.category) return null;
 
     // 查找分类配置
-    const category = this._findCategoryById(routeWithCategory.category);
+    const category = this.findCategoryById(routeWithCategory.category);
     if (category?.color) {
-      return this._validateColor(category.color);
+      return this.validateColor(category.color);
     }
 
     return null;
@@ -129,7 +129,7 @@ export class ColorContext {
    * @returns 分类配置对象，如果未找到则返回 null
    * @private
    */
-  private static _findCategoryById(categoryId: string): CategoryConfig | null {
+  private static findCategoryById(categoryId: string): CategoryConfig | null {
     // 搜索所有分类配置
     const categoryKeys: Array<keyof MenuConfig> = [
       'sopCategories',
@@ -154,7 +154,7 @@ export class ColorContext {
    * @returns 有效的颜色名称，无效时返回默认颜色
    * @private
    */
-  private static _validateColor(color: string): ColorSchemeName {
+  private static validateColor(color: string): ColorSchemeName {
     const validColors: ColorSchemeName[] = [
       'blue',
       'indigo',
@@ -203,10 +203,10 @@ export class ColorContext {
     let source: 'config' | 'category' | 'parent' | 'default' = 'default';
 
     if (module?.themeColor) {
-      color = this._validateColor(module.themeColor);
+      color = this.validateColor(module.themeColor);
       source = 'config';
     } else {
-      const categoryColor = this._inferFromCategories(moduleId);
+      const categoryColor = this.inferFromCategories(moduleId);
       if (categoryColor) {
         color = categoryColor;
         source = 'category';

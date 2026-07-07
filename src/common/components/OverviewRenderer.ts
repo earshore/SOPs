@@ -107,33 +107,33 @@ export class OverviewRenderer {
       : null;
 
     // 按分类分组路由
-    this.routesByCategory = this._groupRoutesByCategory();
+    this.routesByCategory = this.groupRoutesByCategory();
   }
 
   /**
    * 渲染总览页面
    */
   async render(): Promise<void> {
-    const html = this._generateHTML();
-    // ✅ 安全: _generateHTML返回的HTML使用内部配置数据(moduleConfig, routes来自MENU_CONFIG)
+    const html = this.generateHTML();
+    // ✅ 安全: generateHTML返回的HTML使用内部配置数据(moduleConfig, routes来自MENU_CONFIG)
     setSafeHtml(this.container, html);
     this.container.classList.add('fade-in');
 
     // 初始化事件监听
-    this._initEvents();
+    this.initEvents();
   }
 
   /**
    * 生成完整HTML
    */
-  private _generateHTML(): string {
+  private generateHTML(): string {
     return `
       <div class="overview-container" data-module="${this.moduleId}">
-        ${this._renderHeader()}
-        ${this.options.showGuide ? this._renderGuide() : ''}
-        ${this.options.showFilter ? this._renderFilter() : ''}
-        ${this._renderContent()}
-        ${this.options.showStats ? this._renderStats() : ''}
+        ${this.renderHeader()}
+        ${this.options.showGuide ? this.renderGuide() : ''}
+        ${this.options.showFilter ? this.renderFilter() : ''}
+        ${this.renderContent()}
+        ${this.options.showStats ? this.renderStats() : ''}
       </div>
     `;
   }
@@ -141,7 +141,7 @@ export class OverviewRenderer {
   /**
    * 渲染页面头部
    */
-  private _renderHeader(): string {
+  private renderHeader(): string {
     return `
       <header class="text-center mb-8">
         <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
@@ -151,7 +151,7 @@ export class OverviewRenderer {
         <p class="text-slate-600 max-w-3xl mx-auto">
           ${this.moduleConfig.description}
         </p>
-        ${this.options.showSearch ? this._renderSearchBox() : ''}
+        ${this.options.showSearch ? this.renderSearchBox() : ''}
       </header>
     `;
   }
@@ -159,7 +159,7 @@ export class OverviewRenderer {
   /**
    * 渲染搜索框
    */
-  private _renderSearchBox(): string {
+  private renderSearchBox(): string {
     return `
       <div class="max-w-xl mx-auto mt-4">
         <div class="relative">
@@ -179,7 +179,7 @@ export class OverviewRenderer {
   /**
    * 渲染使用指南
    */
-  private _renderGuide(): string {
+  private renderGuide(): string {
     if (this.options.customGuide) {
       return this.options.customGuide;
     }
@@ -198,7 +198,7 @@ export class OverviewRenderer {
             </p>
           </div>
         </div>
-        ${this._renderQuickLinks()}
+        ${this.renderQuickLinks()}
       </div>
     `;
   }
@@ -206,7 +206,7 @@ export class OverviewRenderer {
   /**
    * 渲染快速入口
    */
-  private _renderQuickLinks(): string {
+  private renderQuickLinks(): string {
     // 获取前4个路由作为快速入口
     const quickRoutes = this.routes.filter(r => r.id !== `${this.moduleId}_overview`).slice(0, 4);
 
@@ -241,7 +241,7 @@ export class OverviewRenderer {
   /**
    * 渲染分类筛选器
    */
-  private _renderFilter(): string {
+  private renderFilter(): string {
     if (!this.categories) return '';
 
     const sortedCategories = Object.values(this.categories).sort((a, b) => a.order - b.order);
@@ -277,24 +277,24 @@ export class OverviewRenderer {
   /**
    * 渲染主内容区域
    */
-  private _renderContent(): string {
+  private renderContent(): string {
     switch (this.options.layout) {
       case 'grid':
-        return this._renderGridLayout();
+        return this.renderGridLayout();
       case 'list':
-        return this._renderListLayout();
+        return this.renderListLayout();
       case 'timeline':
-        return this._renderTimelineLayout();
+        return this.renderTimelineLayout();
       case 'card-grid':
       default:
-        return this._renderCardGridLayout();
+        return this.renderCardGridLayout();
     }
   }
 
   /**
    * 渲染卡片网格布局
    */
-  private _renderCardGridLayout(): string {
+  private renderCardGridLayout(): string {
     if (this.categories) {
       // 按分类分组显示
       const sortedCategories = Object.values(this.categories).sort((a, b) => a.order - b.order);
@@ -317,7 +317,7 @@ export class OverviewRenderer {
                 </div>
               </div>
               <div class="overview-card-grid">
-                ${categoryRoutes.map(route => this._renderRouteCard(route, category.color)).join('')}
+                ${categoryRoutes.map(route => this.renderRouteCard(route, category.color)).join('')}
               </div>
             </div>
           </section>
@@ -330,7 +330,7 @@ export class OverviewRenderer {
       return `
         <section class="mb-10">
           <div class="overview-card-grid">
-            ${routes.map(route => this._renderRouteCard(route, 'blue')).join('')}
+            ${routes.map(route => this.renderRouteCard(route, 'blue')).join('')}
           </div>
         </section>
       `;
@@ -340,7 +340,7 @@ export class OverviewRenderer {
   /**
    * 渲染路由卡片
    */
-  private _renderRouteCard(route: RouteConfig & { id: string }, color: string = 'blue'): string {
+  private renderRouteCard(route: RouteConfig & { id: string }, color: string = 'blue'): string {
     return `
       <div 
         class="overview-card overview-accent-card overview-accent-${color} cursor-pointer"
@@ -363,7 +363,7 @@ export class OverviewRenderer {
   /**
    * 渲染列表布局
    */
-  private _renderListLayout(): string {
+  private renderListLayout(): string {
     const routes = this.routes.filter(r => r.id !== `${this.moduleId}_overview`);
 
     return `
@@ -396,7 +396,7 @@ export class OverviewRenderer {
   /**
    * 渲染网格布局
    */
-  private _renderGridLayout(): string {
+  private renderGridLayout(): string {
     const routes = this.routes.filter(r => r.id !== `${this.moduleId}_overview`);
 
     return `
@@ -430,7 +430,7 @@ export class OverviewRenderer {
   /**
    * 渲染时间线布局
    */
-  private _renderTimelineLayout(): string {
+  private renderTimelineLayout(): string {
     const routes = this.routes.filter(r => r.id !== `${this.moduleId}_overview`);
 
     return `
@@ -467,7 +467,7 @@ export class OverviewRenderer {
   /**
    * 渲染统计数据
    */
-  private _renderStats(): string {
+  private renderStats(): string {
     const totalRoutes = this.routes.filter(r => r.id !== `${this.moduleId}_overview`).length;
     const categoryCount = this.categories ? Object.keys(this.categories).length : 0;
 
@@ -505,7 +505,7 @@ export class OverviewRenderer {
   /**
    * 按分类分组路由
    */
-  private _groupRoutesByCategory(): RoutesByCategory {
+  private groupRoutesByCategory(): RoutesByCategory {
     const grouped: RoutesByCategory = {};
 
     this.routes.forEach(route => {
@@ -524,7 +524,7 @@ export class OverviewRenderer {
   /**
    * 初始化事件监听
    */
-  private _initEvents(): void {
+  private initEvents(): void {
     // 搜索功能
     if (this.options.showSearch) {
       const searchInput = this.container.querySelector(
@@ -532,7 +532,7 @@ export class OverviewRenderer {
       ) as HTMLInputElement;
       if (searchInput) {
         searchInput.addEventListener('input', e => {
-          this._handleSearch((e.target as HTMLInputElement).value);
+          this.handleSearch((e.target as HTMLInputElement).value);
         });
       }
     }
@@ -548,7 +548,7 @@ export class OverviewRenderer {
           });
           btn.classList.add('active');
           btn.setAttribute('aria-pressed', 'true');
-          this._handleFilter((btn as HTMLElement).dataset.category || 'all');
+          this.handleFilter((btn as HTMLElement).dataset.category || 'all');
         });
       });
     }
@@ -557,7 +557,7 @@ export class OverviewRenderer {
   /**
    * 处理搜索
    */
-  private _handleSearch(keyword: string): void {
+  private handleSearch(keyword: string): void {
     const cards = this.container.querySelectorAll('.overview-card, [data-action="switch-tab"]');
     const lowerKeyword = keyword.toLowerCase();
 
@@ -585,7 +585,7 @@ export class OverviewRenderer {
   /**
    * 处理分类筛选
    */
-  private _handleFilter(category: string): void {
+  private handleFilter(category: string): void {
     const cards = this.container.querySelectorAll('.overview-card, [data-action="switch-tab"]');
     const sections = this.container.querySelectorAll('section[data-category]');
 

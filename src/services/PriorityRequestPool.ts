@@ -144,14 +144,14 @@ export class PriorityRequestPool {
       (this.queues[priority] as Array<Task<T>>).push(task);
 
       // 尝试执行
-      this._tryExecute();
+      this.tryExecute();
     });
   }
 
   /**
    * 尝试执行队列中的任务
    */
-  private _tryExecute(): void {
+  private tryExecute(): void {
     if (this.running >= this.max) {
       return;
     }
@@ -170,7 +170,7 @@ export class PriorityRequestPool {
       if (queue.length > 0) {
         const task = queue.shift();
         if (!task) return;
-        this._execute(task);
+        this.execute(task);
         return;
       }
     }
@@ -179,7 +179,7 @@ export class PriorityRequestPool {
   /**
    * 执行单个任务
    */
-  private async _execute<T>(task: Task<T>): Promise<void> {
+  private async execute<T>(task: Task<T>): Promise<void> {
     this.running++;
     const startTime = performance.now();
 
@@ -212,7 +212,7 @@ export class PriorityRequestPool {
       task.reject(error);
     } finally {
       this.running--;
-      this._tryExecute();
+      this.tryExecute();
     }
   }
 

@@ -110,7 +110,7 @@ export class AlertService {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(
+  private log(
     level: 'debug' | 'info' | 'warn' | 'error',
     message: string,
     data: Record<string, unknown> = {}
@@ -127,7 +127,7 @@ export class AlertService {
    */
   init(config?: Partial<AlertConfig>): void {
     if (this.isInitialized) {
-      this._log('warn', 'AlertService already initialized', {});
+      this.log('warn', 'AlertService already initialized', {});
       return;
     }
 
@@ -135,7 +135,7 @@ export class AlertService {
     this.config = { ...this.config, ...config };
 
     if (!this.config.enabled) {
-      this._log('info', 'AlertService is disabled', {});
+      this.log('info', 'AlertService is disabled', {});
       return;
     }
 
@@ -148,7 +148,7 @@ export class AlertService {
     }
 
     this.isInitialized = true;
-    this._log(
+    this.log(
       'info',
       '✅ AlertService initialized',
       this.config as unknown as Record<string, unknown>
@@ -260,7 +260,7 @@ export class AlertService {
    */
   registerRule(rule: AlertRule): void {
     this.rules.set(rule.id, rule);
-    this._log('debug', 'Alert rule registered', { ruleId: rule.id });
+    this.log('debug', 'Alert rule registered', { ruleId: rule.id });
   }
 
   /**
@@ -378,7 +378,7 @@ export class AlertService {
     const logLevel =
       alert.level === AlertLevel.CRITICAL || alert.level === AlertLevel.ERROR ? 'error' : 'warn';
 
-    this._log(logLevel, `[${alert.type}] ${alert.message}`, {
+    this.log(logLevel, `[${alert.type}] ${alert.message}`, {
       id: alert.id,
       level: alert.level,
       data: alert.data,
@@ -392,7 +392,7 @@ export class AlertService {
     const alert = this.alerts.get(alertId);
     if (alert) {
       alert.acknowledged = true;
-      this._log('debug', 'Alert acknowledged', { alertId });
+      this.log('debug', 'Alert acknowledged', { alertId });
     }
   }
 
@@ -403,7 +403,7 @@ export class AlertService {
     this.alerts.forEach(alert => {
       alert.acknowledged = true;
     });
-    this._log('info', 'All alerts acknowledged', {});
+    this.log('info', 'All alerts acknowledged', {});
   }
 
   /**
@@ -479,7 +479,7 @@ export class AlertService {
    */
   clear(): void {
     this.alerts.clear();
-    this._log('info', 'All alerts cleared', {});
+    this.log('info', 'All alerts cleared', {});
   }
 
   /**
@@ -489,7 +489,7 @@ export class AlertService {
     const rule = this.rules.get(ruleId);
     if (rule) {
       rule.enabled = enabled;
-      this._log('info', `Alert rule ${enabled ? 'enabled' : 'disabled'}`, { ruleId });
+      this.log('info', `Alert rule ${enabled ? 'enabled' : 'disabled'}`, { ruleId });
     }
   }
 
@@ -498,7 +498,7 @@ export class AlertService {
    */
   updateConfig(config: Partial<AlertConfig>): void {
     this.config = { ...this.config, ...config };
-    this._log(
+    this.log(
       'info',
       'AlertService config updated',
       this.config as unknown as Record<string, unknown>
@@ -512,7 +512,7 @@ export class AlertService {
     this.clear();
     this.rules.clear();
     this.isInitialized = false;
-    this._log('info', 'AlertService destroyed', {});
+    this.log('info', 'AlertService destroyed', {});
   }
 }
 

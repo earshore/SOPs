@@ -202,7 +202,7 @@ class HttpServiceClass implements IHttpService {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(
+  private log(
     level: 'debug' | 'info' | 'warn' | 'error',
     message: string,
     data: Record<string, unknown> = {}
@@ -214,7 +214,7 @@ class HttpServiceClass implements IHttpService {
     }
   }
 
-  private async _getCachedResponse<T>(context: HttpCacheContext): Promise<CacheLookup<T>> {
+  private async getCachedResponse<T>(context: HttpCacheContext): Promise<CacheLookup<T>> {
     if (context.method !== 'GET' || !context.cache || context.forceRefresh) {
       return { hit: false };
     }
@@ -228,11 +228,11 @@ class HttpServiceClass implements IHttpService {
       return { hit: false };
     }
 
-    this._log('debug', '使用缓存响应', { url: context.url, cacheKey: context.cacheKey });
+    this.log('debug', '使用缓存响应', { url: context.url, cacheKey: context.cacheKey });
     return { hit: true, value: cached as T };
   }
 
-  private async _cacheResponse<T>(context: HttpCacheContext, result: T): Promise<void> {
+  private async cacheResponse<T>(context: HttpCacheContext, result: T): Promise<void> {
     if (context.method !== 'GET' || !context.cache) {
       return;
     }
@@ -243,7 +243,7 @@ class HttpServiceClass implements IHttpService {
     });
   }
 
-  private _attachAbortSignal(
+  private attachAbortSignal(
     signal: AbortSignal | null | undefined,
     controller: AbortController
   ): void {
@@ -259,7 +259,7 @@ class HttpServiceClass implements IHttpService {
     signal.addEventListener('abort', () => controller.abort(), { once: true });
   }
 
-  private _createFetchOptions(
+  private createFetchOptions(
     options: HttpRequestExecutionOptions,
     controller: AbortController
   ): RequestInit {
@@ -277,7 +277,7 @@ class HttpServiceClass implements IHttpService {
     return fetchOptions;
   }
 
-  private _isAbortError(error: unknown): boolean {
+  private isAbortError(error: unknown): boolean {
     return (
       typeof error === 'object' &&
       error !== null &&
@@ -286,7 +286,7 @@ class HttpServiceClass implements IHttpService {
     );
   }
 
-  private _createAbortError(): Error {
+  private createAbortError(): Error {
     if (typeof DOMException !== 'undefined') {
       return new DOMException('Aborted', 'AbortError') as Error;
     }
@@ -296,14 +296,14 @@ class HttpServiceClass implements IHttpService {
     return error;
   }
 
-  private _throwIfAborted(...signals: Array<AbortSignal | null | undefined>): void {
+  private throwIfAborted(...signals: Array<AbortSignal | null | undefined>): void {
     if (signals.some(signal => signal?.aborted)) {
-      throw this._createAbortError();
+      throw this.createAbortError();
     }
   }
 
-  private _shouldRetry(error: Error): boolean {
-    if (this._isAbortError(error)) {
+  private shouldRetry(error: Error): boolean {
+    if (this.isAbortError(error)) {
       return false;
     }
 
@@ -314,7 +314,7 @@ class HttpServiceClass implements IHttpService {
     return true;
   }
 
-  private async _parseResponse<T>(response: Response, json: boolean): Promise<T> {
+  private async parseResponse<T>(response: Response, json: boolean): Promise<T> {
     if (!response.ok) {
       const errorText = await response.text();
       throw new HttpError(response.status, errorText, response);
@@ -332,12 +332,12 @@ class HttpServiceClass implements IHttpService {
     return data;
   }
 
-  private async _executeRequestAttempt<T>(
+  private async executeRequestAttempt<T>(
     url: string,
     options: HttpRequestExecutionOptions,
     abortSignal?: AbortSignal
   ): Promise<T> {
-    this._throwIfAborted(options.signal, abortSignal);
+    this.throwIfAborted(options.signal, abortSignal);
 
     const controller = new AbortController();
     let didTimeout = false;
@@ -346,23 +346,23 @@ class HttpServiceClass implements IHttpService {
       controller.abort();
     }, options.timeout);
 
-    this._attachAbortSignal(options.signal, controller);
-    this._attachAbortSignal(abortSignal, controller);
+    this.attachAbortSignal(options.signal, controller);
+    this.attachAbortSignal(abortSignal, controller);
 
     try {
-      const response = await fetch(url, this._createFetchOptions(options, controller));
+      const response = await fetch(url, this.createFetchOptions(options, controller));
       clearTimeout(timeoutId);
-      return await this._parseResponse<T>(response, options.json);
+      return await this.parseResponse<T>(response, options.json);
     } catch (error) {
       clearTimeout(timeoutId);
-      if (didTimeout && this._isAbortError(error)) {
+      if (didTimeout && this.isAbortError(error)) {
         throw new HttpError(408, `Request timed out after ${options.timeout}ms`);
       }
       throw error;
     }
   }
 
-  private async _executeRequestWithRetries<T>(
+  private async executeRequestWithRetries<T>(
     url: string,
     options: HttpRequestExecutionOptions,
     abortSignal?: AbortSignal
@@ -371,16 +371,16 @@ class HttpServiceClass implements IHttpService {
 
     for (let attempt = 0; attempt <= options.retries; attempt++) {
       try {
-        return await this._executeRequestAttempt<T>(url, options, abortSignal);
+        return await this.executeRequestAttempt<T>(url, options, abortSignal);
       } catch (error) {
         lastError = error as Error;
 
-        if (attempt === options.retries || !this._shouldRetry(lastError)) {
+        if (attempt === options.retries || !this.shouldRetry(lastError)) {
           throw error;
         }
 
-        await this._delay(options.retryDelay * (attempt + 1), options.signal, abortSignal);
-        this._log('debug', 'Retry request', {
+        await this.delay(options.retryDelay * (attempt + 1), options.signal, abortSignal);
+        this.log('debug', 'Retry request', {
           attempt: attempt + 1,
           retries: options.retries,
           url,
@@ -391,11 +391,11 @@ class HttpServiceClass implements IHttpService {
     throw lastError;
   }
 
-  private _runRequest<T>(context: HttpRunContext<T>): Promise<T> {
+  private runRequest<T>(context: HttpRunContext<T>): Promise<T> {
     const run = () => context.executeRequest(context.signal);
 
     if (context.measurePerformance) {
-      return this._executeWithPerformance(
+      return this.executeWithPerformance(
         context.url,
         context.method,
         context.usePool,
@@ -451,7 +451,7 @@ class HttpServiceClass implements IHttpService {
       forceRefresh,
       url,
     };
-    const cached = await this._getCachedResponse<T>(cacheContext);
+    const cached = await this.getCachedResponse<T>(cacheContext);
     if (cached.hit) {
       return cached.value as T;
     }
@@ -467,14 +467,14 @@ class HttpServiceClass implements IHttpService {
       signal,
     };
     const executeRequest = (abortSignal?: AbortSignal) =>
-      this._executeRequestWithRetries<T>(url, requestOptions, abortSignal);
+      this.executeRequestWithRetries<T>(url, requestOptions, abortSignal);
 
     let result: T;
     if (deduplicate || cancelPrevious) {
       result = await requestManager.execute(
         requestKey,
         signal =>
-          this._runRequest({
+          this.runRequest({
             url,
             method,
             usePool,
@@ -486,7 +486,7 @@ class HttpServiceClass implements IHttpService {
         { deduplicate, cancelPrevious }
       );
     } else {
-      result = await this._runRequest({
+      result = await this.runRequest({
         url,
         method,
         usePool,
@@ -496,7 +496,7 @@ class HttpServiceClass implements IHttpService {
       });
     }
 
-    await this._cacheResponse(cacheContext, result);
+    await this.cacheResponse(cacheContext, result);
     return result;
   }
 
@@ -504,7 +504,7 @@ class HttpServiceClass implements IHttpService {
    * 执行请求并进行性能监控
    * 🎯 DI改造：移除Logger依赖
    */
-  private async _executeWithPerformance<T>(
+  private async executeWithPerformance<T>(
     url: string,
     method: string,
     usePool: boolean,
@@ -515,7 +515,7 @@ class HttpServiceClass implements IHttpService {
 
     try {
       const { performanceService } = await import('./performanceService');
-      const apiName = this._extractApiName(url);
+      const apiName = this.extractApiName(url);
       const measuredRun = () => {
         requestStarted = true;
         return fn();
@@ -532,7 +532,7 @@ class HttpServiceClass implements IHttpService {
       if (requestStarted) {
         throw e;
       }
-      this._log('debug', '性能监控不可用，直接执行请求', {});
+      this.log('debug', '性能监控不可用，直接执行请求', {});
       return await fn();
     }
   }
@@ -540,7 +540,7 @@ class HttpServiceClass implements IHttpService {
   /**
    * 从URL提取API名称
    */
-  private _extractApiName(url: string): string {
+  private extractApiName(url: string): string {
     try {
       const urlObj = new URL(url);
       const path = urlObj.pathname;
@@ -587,7 +587,7 @@ class HttpServiceClass implements IHttpService {
 
     // 🎯 数据边界验证：验证 API 响应格式
     if (!isApiResponse(response, dataGuard)) {
-      this._log('error', 'API 响应格式无效', { url, response });
+      this.log('error', 'API 响应格式无效', { url, response });
       throw new HttpError(500, 'API 响应格式无效');
     }
 
@@ -620,10 +620,10 @@ class HttpServiceClass implements IHttpService {
   /**
    * 延迟函数
    */
-  private _delay(ms: number, ...signals: Array<AbortSignal | null | undefined>): Promise<void> {
+  private delay(ms: number, ...signals: Array<AbortSignal | null | undefined>): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        this._throwIfAborted(...signals);
+        this.throwIfAborted(...signals);
       } catch (error) {
         reject(error);
         return;
@@ -636,7 +636,7 @@ class HttpServiceClass implements IHttpService {
       const onAbort = () => {
         clearTimeout(timeoutId);
         cleanup();
-        reject(this._createAbortError());
+        reject(this.createAbortError());
       };
       const cleanup = () => {
         signals.forEach(signal => signal?.removeEventListener('abort', onAbort));

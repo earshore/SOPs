@@ -112,7 +112,7 @@ export class SidebarRenderer {
   // ═══════════════════════════════════════════════════════
 
   render(sidebar: HTMLElement, moduleConfig: ModuleConfig, routes: RouteConfig[]): void {
-    this.moduleColor = this._resolveThemeColor(moduleConfig.themeColor);
+    this.moduleColor = this.resolveThemeColor(moduleConfig.themeColor);
     const currentTab = appStore.getState().ui.currentTab || '';
     const currentRouteConfig = MENU_CONFIG.routes[currentTab];
 
@@ -126,27 +126,27 @@ export class SidebarRenderer {
     const lastModuleId = sidebar.dataset.moduleId;
 
     if (existingNav && lastModuleId === this.moduleId) {
-      this._syncThemeClass(sidebar);
-      this._updateNavigationState(sidebar, currentTab, activeCategory);
+      this.syncThemeClass(sidebar);
+      this.updateNavigationState(sidebar, currentTab, activeCategory);
       return;
     }
 
     // 首次渲染
     sidebar.dataset.moduleId = this.moduleId;
-    const categoryTree = this._buildCategoryTree(routes);
-    const html = this._buildHTML(
+    const categoryTree = this.buildCategoryTree(routes);
+    const html = this.buildHTML(
       moduleConfig.title,
       moduleConfig.icon,
       categoryTree,
       currentTab,
       activeCategory
     );
-    // ✅ 安全: _buildHTML返回的HTML使用内部配置数据(categories, routes来自MENU_CONFIG)
+    // ✅ 安全: buildHTML返回的HTML使用内部配置数据(categories, routes来自MENU_CONFIG)
     setSafeHtml(sidebar, html);
-    this._initCategoryToggle(sidebar);
+    this.initCategoryToggle(sidebar);
 
     if (activeCategory) {
-      this._expandCategory(sidebar, activeCategory);
+      this.expandCategory(sidebar, activeCategory);
     }
   }
 
@@ -154,7 +154,7 @@ export class SidebarRenderer {
   // Tree Building
   // ═══════════════════════════════════════════════════════
 
-  private _buildCategoryTree(_routes: RouteConfig[]): CategoryTreeNode[] {
+  private buildCategoryTree(_routes: RouteConfig[]): CategoryTreeNode[] {
     const tree: CategoryTreeNode[] = [];
     const sorted = Object.values(this.categories).sort((a, b) => a.order - b.order);
 
@@ -175,21 +175,21 @@ export class SidebarRenderer {
   // State Management (no re-render)
   // ═══════════════════════════════════════════════════════
 
-  private _updateNavigationState(
+  private updateNavigationState(
     sidebar: HTMLElement,
     currentTab: string,
     activeCategory: string | null
   ): void {
-    this._updateActiveState(sidebar, currentTab);
+    this.updateActiveState(sidebar, currentTab);
 
     const lastActiveCategory = sidebar.dataset.activeCategory;
     if (activeCategory && activeCategory !== lastActiveCategory) {
-      this._expandCategory(sidebar, activeCategory);
+      this.expandCategory(sidebar, activeCategory);
       sidebar.dataset.activeCategory = activeCategory || '';
     }
   }
 
-  private _updateActiveState(sidebar: HTMLElement, currentTab: string): void {
+  private updateActiveState(sidebar: HTMLElement, currentTab: string): void {
     // ── Reset all buttons ──
     const allBtns = sidebar.querySelectorAll('.sidebar-btn');
     allBtns.forEach(btn => {
@@ -271,18 +271,18 @@ export class SidebarRenderer {
   // Toggle & Expand
   // ═══════════════════════════════════════════════════════
 
-  private _initCategoryToggle(sidebar: HTMLElement): void {
+  private initCategoryToggle(sidebar: HTMLElement): void {
     const categoryBtns = sidebar.querySelectorAll('[data-action="toggle-category"]');
 
     categoryBtns.forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
-        this._toggleCategory(sidebar, btn as HTMLElement);
+        this.toggleCategory(sidebar, btn as HTMLElement);
       });
     });
   }
 
-  private _toggleCategory(sidebar: HTMLElement, btn: HTMLElement): void {
+  private toggleCategory(sidebar: HTMLElement, btn: HTMLElement): void {
     const categoryId = btn.dataset.category;
     if (!categoryId) return;
 
@@ -296,21 +296,21 @@ export class SidebarRenderer {
     btn.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
 
     if (isExpanded) {
-      this._collapseCategoryChildren(children, chevron, countBadge);
+      this.collapseCategoryChildren(children, chevron, countBadge);
       return;
     }
 
-    this._expandCategoryChildren(children, chevron, countBadge);
+    this.expandCategoryChildren(children, chevron, countBadge);
   }
 
-  private _collapseCategoryChildren(
+  private collapseCategoryChildren(
     children: HTMLElement,
     chevron: HTMLElement,
     countBadge: HTMLElement | null
   ): void {
-    if (this._prefersReducedMotion()) {
+    if (this.prefersReducedMotion()) {
       children.classList.add('sidebar-category-children--collapsed', 'hidden');
-      this._setChevronExpanded(chevron, false);
+      this.setChevronExpanded(chevron, false);
       countBadge?.classList.remove('opacity-0');
       return;
     }
@@ -319,31 +319,31 @@ export class SidebarRenderer {
     setTimeout(() => {
       children.classList.add('hidden');
     }, SIDEBAR_CATEGORY_ANIMATION_MS);
-    this._setChevronExpanded(chevron, false);
+    this.setChevronExpanded(chevron, false);
     countBadge?.classList.remove('opacity-0');
   }
 
-  private _expandCategoryChildren(
+  private expandCategoryChildren(
     children: HTMLElement,
     chevron: HTMLElement,
     countBadge: HTMLElement | null
   ): void {
     children.classList.remove('hidden');
 
-    if (this._prefersReducedMotion()) {
+    if (this.prefersReducedMotion()) {
       children.classList.remove('sidebar-category-children--collapsed');
-      this._setChevronExpanded(chevron, true);
+      this.setChevronExpanded(chevron, true);
       countBadge?.classList.add('opacity-0');
       return;
     }
 
     void children.offsetHeight; // force reflow
     children.classList.remove('sidebar-category-children--collapsed');
-    this._setChevronExpanded(chevron, true);
+    this.setChevronExpanded(chevron, true);
     countBadge?.classList.add('opacity-0');
   }
 
-  private _expandCategory(sidebar: HTMLElement, categoryId: string): void {
+  private expandCategory(sidebar: HTMLElement, categoryId: string): void {
     const group = sidebar.querySelector(`.sidebar-category-group[data-category="${categoryId}"]`);
     if (!group) return;
 
@@ -356,7 +356,7 @@ export class SidebarRenderer {
       children.classList.remove('sidebar-category-children--collapsed', 'hidden');
     }
     if (chevron) {
-      this._setChevronExpanded(chevron, true);
+      this.setChevronExpanded(chevron, true);
     }
     if (countBadge) {
       countBadge.classList.add('opacity-0');
@@ -370,14 +370,14 @@ export class SidebarRenderer {
   // HTML Building
   // ═══════════════════════════════════════════════════════
 
-  private _buildHTML(
+  private buildHTML(
     title: string,
     icon: string,
     categoryTree: CategoryTreeNode[],
     currentTab: string,
     _activeCategory: string | null
   ): string {
-    const themeClass = this._getThemeClass();
+    const themeClass = this.getThemeClass();
 
     return `
       <div class="sidebar-shell flex flex-col h-full bg-gradient-to-b from-white to-slate-50/50 ${themeClass}">
@@ -391,7 +391,7 @@ export class SidebarRenderer {
             <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">${title}</div>
           </div>
 
-          ${this.enableSearch ? this._buildSearchBox() : ''}
+          ${this.enableSearch ? this.buildSearchBox() : ''}
         </div>
 
         <!-- ═══ Subtle Separator ═══ -->
@@ -400,7 +400,7 @@ export class SidebarRenderer {
         <!-- ═══ Navigation ═══ -->
         <nav id="sidebar-nav-container" aria-label="${title} 导航" class="sidebar-scrollbar-thin flex-1 overflow-y-auto px-3 py-3 space-y-1">
 
-          ${this._buildOverviewButton(currentTab)}
+          ${this.buildOverviewButton(currentTab)}
 
           <!-- Category Divider -->
           <div class="flex items-center gap-2 px-2 pt-3 pb-1">
@@ -408,7 +408,7 @@ export class SidebarRenderer {
             <div class="flex-1 h-px bg-slate-100"></div>
           </div>
 
-          ${categoryTree.map(cat => this._buildCategoryGroup(cat, currentTab)).join('')}
+          ${categoryTree.map(cat => this.buildCategoryGroup(cat, currentTab)).join('')}
         </nav>
 
         <!-- ═══ Footer ═══ -->
@@ -427,7 +427,7 @@ export class SidebarRenderer {
 
   // ── Overview Button ──
 
-  private _getRouteItemClasses(
+  private getRouteItemClasses(
     isActive: boolean,
     inactiveIconContainerCls: string,
     inactiveIconCls: string
@@ -453,12 +453,12 @@ export class SidebarRenderer {
     };
   }
 
-  private _buildOverviewButton(currentTab: string): string {
+  private buildOverviewButton(currentTab: string): string {
     const isActive = currentTab === this.overviewRouteId;
     const overviewRoute = MENU_CONFIG.routes[this.overviewRouteId];
     const label = overviewRoute?.label || '总览';
 
-    const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } = this._getRouteItemClasses(
+    const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } = this.getRouteItemClasses(
       isActive,
       'bg-slate-100 group-hover:bg-slate-200',
       'text-slate-400 group-hover:text-slate-600'
@@ -482,10 +482,10 @@ export class SidebarRenderer {
 
   // ── Category Group ──
 
-  private _buildCategoryGroup(category: CategoryTreeNode, currentTab: string): string {
+  private buildCategoryGroup(category: CategoryTreeNode, currentTab: string): string {
     const categoryColor = category.color || 'slate'; // 分类装饰色
     const scheme = COLOR_SCHEMES[categoryColor as keyof typeof COLOR_SCHEMES] || COLOR_SCHEMES.blue;
-    const lineColorClass = this._getCategoryLineClass(categoryColor);
+    const lineColorClass = this.getCategoryLineClass(categoryColor);
     const childCount = category.children.length;
 
     return `
@@ -533,7 +533,7 @@ export class SidebarRenderer {
             <!-- Vertical accent line - 使用分类自己的颜色 -->
             <div class="sidebar-category-line ${lineColorClass} absolute left-0 top-1 bottom-1 w-[2px] rounded-full opacity-30"></div>
 
-            ${category.children.map(route => this._buildChildRouteItem(route, currentTab)).join('')}
+            ${category.children.map(route => this.buildChildRouteItem(route, currentTab)).join('')}
           </div>
         </div>
       </div>
@@ -542,12 +542,10 @@ export class SidebarRenderer {
 
   // ── Child Route Item ──
 
-  private _buildChildRouteItem(route: RouteConfig & { id: string }, currentTab: string): string {
+  private buildChildRouteItem(route: RouteConfig & { id: string }, currentTab: string): string {
     const isActive = currentTab === route.id;
-    const itemThemeClass = this._getThemeClassForColor(
-      this.categories[route.category || '']?.color
-    );
-    const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } = this._getRouteItemClasses(
+    const itemThemeClass = this.getThemeClassForColor(this.categories[route.category || '']?.color);
+    const { containerCls, iconContainerCls, iconCls, labelCls, dotCls } = this.getRouteItemClasses(
       isActive,
       'bg-slate-100 group-hover:bg-slate-200',
       'text-slate-400 group-hover:text-slate-500'
@@ -574,7 +572,7 @@ export class SidebarRenderer {
 
   // ── Search Box ──
 
-  private _buildSearchBox(): string {
+  private buildSearchBox(): string {
     return `
       <div class="sidebar-search relative group mb-1">
         <!-- Search Icon Container -->
@@ -618,28 +616,25 @@ export class SidebarRenderer {
     `;
   }
 
-  private _getThemeClass(): string {
-    return this._getThemeClassForColor(this.moduleColor);
+  private getThemeClass(): string {
+    return this.getThemeClassForColor(this.moduleColor);
   }
 
-  private _getThemeClassForColor(color?: string): string {
-    const resolvedColor = this._resolveThemeColor(color);
+  private getThemeClassForColor(color?: string): string {
+    const resolvedColor = this.resolveThemeColor(color);
     return SIDEBAR_THEME_CLASSES[resolvedColor];
   }
 
-  private _getCategoryLineClass(categoryColor: string): string {
-    const resolvedColor = this._resolveKnownColor(categoryColor, 'blue');
+  private getCategoryLineClass(categoryColor: string): string {
+    const resolvedColor = this.resolveKnownColor(categoryColor, 'blue');
     return SIDEBAR_CATEGORY_LINE_CLASSES[resolvedColor];
   }
 
-  private _resolveThemeColor(themeColor?: string): ColorSchemeName {
-    return this._resolveKnownColor(themeColor, ColorContext.inferColorFromModule(this.moduleId));
+  private resolveThemeColor(themeColor?: string): ColorSchemeName {
+    return this.resolveKnownColor(themeColor, ColorContext.inferColorFromModule(this.moduleId));
   }
 
-  private _resolveKnownColor(
-    color: string | undefined,
-    fallback: ColorSchemeName
-  ): ColorSchemeName {
+  private resolveKnownColor(color: string | undefined, fallback: ColorSchemeName): ColorSchemeName {
     if (color && color in COLOR_SCHEMES) {
       return color as ColorSchemeName;
     }
@@ -647,20 +642,20 @@ export class SidebarRenderer {
     return fallback;
   }
 
-  private _syncThemeClass(sidebar: HTMLElement): void {
+  private syncThemeClass(sidebar: HTMLElement): void {
     const shell = sidebar.querySelector('.sidebar-shell') as HTMLElement | null;
     if (shell) {
       shell.classList.remove(...SIDEBAR_THEME_CLASS_NAMES);
-      shell.classList.add(this._getThemeClass());
+      shell.classList.add(this.getThemeClass());
     }
   }
 
-  private _setChevronExpanded(chevron: HTMLElement, isExpanded: boolean): void {
+  private setChevronExpanded(chevron: HTMLElement, isExpanded: boolean): void {
     chevron.classList.toggle('rotate-180', isExpanded);
     chevron.classList.toggle('rotate-0', !isExpanded);
   }
 
-  private _prefersReducedMotion(): boolean {
+  private prefersReducedMotion(): boolean {
     return (
       typeof window !== 'undefined' &&
       typeof window.matchMedia === 'function' &&

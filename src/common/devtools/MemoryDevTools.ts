@@ -22,7 +22,7 @@ export class MemoryDevTools {
    */
   init(): void {
     // 创建面板
-    this.panel = this._createPanel();
+    this.panel = this.createPanel();
     document.body.appendChild(this.panel);
 
     // 监听快捷键 (Ctrl+Shift+M)
@@ -43,16 +43,16 @@ export class MemoryDevTools {
     this.panel?.classList.toggle('hidden', !this.isOpen);
 
     if (this.isOpen) {
-      this._startUpdate();
+      this.startUpdate();
     } else {
-      this._stopUpdate();
+      this.stopUpdate();
     }
   }
 
   /**
    * 创建面板DOM
    */
-  private _createPanel(): HTMLElement {
+  private createPanel(): HTMLElement {
     const panel = document.createElement('div');
     panel.id = 'memory-devtools';
     panel.className =
@@ -133,10 +133,10 @@ export class MemoryDevTools {
 
     // 绑定事件
     panel.querySelector('#memory-devtools-close')?.addEventListener('click', () => this.toggle());
-    panel.querySelector('#memory-force-gc')?.addEventListener('click', () => this._forceGC());
+    panel.querySelector('#memory-force-gc')?.addEventListener('click', () => this.forceGC());
     panel
       .querySelector('#memory-clear-snapshots')
-      ?.addEventListener('click', () => this._clearSnapshots());
+      ?.addEventListener('click', () => this.clearSnapshots());
 
     return panel;
   }
@@ -144,15 +144,15 @@ export class MemoryDevTools {
   /**
    * 开始更新
    */
-  private _startUpdate(): void {
-    this._update();
-    this.updateInterval = window.setInterval(() => this._update(), 1000);
+  private startUpdate(): void {
+    this.update();
+    this.updateInterval = window.setInterval(() => this.update(), 1000);
   }
 
   /**
    * 停止更新
    */
-  private _stopUpdate(): void {
+  private stopUpdate(): void {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;
@@ -162,7 +162,7 @@ export class MemoryDevTools {
   /**
    * 更新显示
    */
-  private _update(): void {
+  private update(): void {
     if (!this.panel || !this.isOpen) return;
 
     // 更新当前内存
@@ -205,16 +205,16 @@ export class MemoryDevTools {
     }
 
     // 更新快照列表
-    this._updateSnapshots();
+    this.updateSnapshots();
 
     // 更新泄漏警告
-    this._updateLeakWarnings();
+    this.updateLeakWarnings();
   }
 
   /**
    * 更新快照列表
    */
-  private _updateSnapshots(): void {
+  private updateSnapshots(): void {
     const snapshotsEl = this.panel?.querySelector<HTMLElement>('#memory-snapshots');
     if (!snapshotsEl) return;
 
@@ -248,7 +248,7 @@ export class MemoryDevTools {
   /**
    * 更新泄漏警告
    */
-  private _updateLeakWarnings(): void {
+  private updateLeakWarnings(): void {
     const warningsEl = this.panel?.querySelector<HTMLElement>('#leak-warnings');
     const leakListEl = this.panel?.querySelector<HTMLElement>('#leak-list');
     if (!warningsEl || !leakListEl) return;
@@ -284,18 +284,18 @@ export class MemoryDevTools {
   /**
    * 强制垃圾回收
    */
-  private _forceGC(): void {
+  private forceGC(): void {
     memoryLeakDetector.forceGC();
-    this._update();
+    this.update();
   }
 
   /**
    * 清除快照
    */
-  private _clearSnapshots(): void {
+  private clearSnapshots(): void {
     if (confirm('确定要清除所有内存快照吗?')) {
       memoryLeakDetector.clearSnapshots();
-      this._update();
+      this.update();
     }
   }
 
@@ -303,7 +303,7 @@ export class MemoryDevTools {
    * 销毁开发工具
    */
   destroy(): void {
-    this._stopUpdate();
+    this.stopUpdate();
 
     if (this.keydownHandler) {
       document.removeEventListener('keydown', this.keydownHandler);

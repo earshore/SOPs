@@ -68,7 +68,7 @@ export class PerformanceStorage {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(
+  private log(
     level: 'debug' | 'info' | 'warn' | 'error',
     message: string,
     data: Record<string, unknown> = {}
@@ -85,7 +85,7 @@ export class PerformanceStorage {
    */
   async init(config?: Partial<StorageConfig>): Promise<void> {
     if (this.isInitialized) {
-      this._log('warn', 'PerformanceStorage already initialized', {});
+      this.log('warn', 'PerformanceStorage already initialized', {});
       return;
     }
 
@@ -94,14 +94,14 @@ export class PerformanceStorage {
 
     // 检查IndexedDB支持
     if (!window.indexedDB) {
-      this._log('error', 'IndexedDB not supported', {});
+      this.log('error', 'IndexedDB not supported', {});
       return;
     }
 
     try {
       this.db = await this.openDatabase();
       this.isInitialized = true;
-      this._log(
+      this.log(
         'info',
         '✅ PerformanceStorage initialized',
         this.config as unknown as Record<string, unknown>
@@ -110,7 +110,7 @@ export class PerformanceStorage {
       // 清理过期数据
       await this.cleanupOldRecords();
     } catch (error) {
-      this._log('error', 'Failed to initialize PerformanceStorage', {
+      this.log('error', 'Failed to initialize PerformanceStorage', {
         error: (error as Error).message,
       });
       throw error;
@@ -363,7 +363,7 @@ export class PerformanceStorage {
       const request = objectStore.clear();
 
       request.onsuccess = () => {
-        this._log('info', 'All performance records cleared', {});
+        this.log('info', 'All performance records cleared', {});
         resolve();
       };
 
@@ -407,7 +407,7 @@ export class PerformanceStorage {
 
       transaction.oncomplete = () => {
         if (deletedCount > 0) {
-          this._log('info', `Cleaned up ${deletedCount} old records`, {});
+          this.log('info', `Cleaned up ${deletedCount} old records`, {});
         }
         resolve(deletedCount);
       };
@@ -471,7 +471,7 @@ export class PerformanceStorage {
       await this.saveBatch(records.map(({ id: _id, ...rest }) => rest));
       return records.length;
     } catch (error) {
-      this._log('error', 'Failed to import data', { error: (error as Error).message });
+      this.log('error', 'Failed to import data', { error: (error as Error).message });
       throw error;
     }
   }
@@ -488,7 +488,7 @@ export class PerformanceStorage {
    */
   updateConfig(config: Partial<StorageConfig>): void {
     this.config = { ...this.config, ...config };
-    this._log(
+    this.log(
       'info',
       'PerformanceStorage config updated',
       this.config as unknown as Record<string, unknown>
@@ -504,7 +504,7 @@ export class PerformanceStorage {
       this.db = null;
     }
     this.isInitialized = false;
-    this._log('info', 'PerformanceStorage destroyed', {});
+    this.log('info', 'PerformanceStorage destroyed', {});
   }
 }
 

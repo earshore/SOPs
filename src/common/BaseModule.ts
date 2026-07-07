@@ -221,7 +221,7 @@ export default class BaseModule {
 
     // 2. 同步清理已注册的动作
     if (this._registeredActions.length > 0) {
-      this._unregisterActionsSync();
+      this.unregisterActionsSync();
     }
 
     // 3. 调用子类特定的清理逻辑
@@ -323,7 +323,7 @@ export default class BaseModule {
    * 使用依赖注入容器清理
    * @private
    */
-  private _unregisterActionsSync(): void {
+  private unregisterActionsSync(): void {
     if (this._registeredActions.length === 0) return;
 
     try {

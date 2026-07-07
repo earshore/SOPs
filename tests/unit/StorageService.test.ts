@@ -485,7 +485,7 @@ describe('LRU清理策略', () => {
     localStorage.setItem('secure_llm_key_new_api', JSON.stringify({ encrypted: true }));
     StorageService.set(STORAGE_KEYS.SCRAPE_HISTORY, [{ id: 'legacy' }]);
 
-    (StorageService as any)._cleanupLRU();
+    (StorageService as any).cleanupLRU();
 
     expect(StorageService.getRaw('cache:view:old')).toBeNull();
     expect(StorageService.get('user:scrape_history')).toEqual([{ id: 1 }]);

@@ -71,16 +71,16 @@ export class MemoryLeakDetector {
     }
 
     // 只在支持performance.memory的浏览器中启用
-    if (!this._isMemoryAPIAvailable()) {
+    if (!this.isMemoryAPIAvailable()) {
       return;
     }
 
     // 立即执行一次检测
-    this._check();
+    this.check();
 
     // 定期检测
     this.checkTimer = window.setInterval(() => {
-      this._check();
+      this.check();
     }, this.config.checkInterval);
   }
 
@@ -97,24 +97,24 @@ export class MemoryLeakDetector {
   /**
    * 执行检测
    */
-  private _check(): void {
+  private check(): void {
     // 1. 检测内存增长
-    this._checkMemoryGrowth();
+    this.checkMemoryGrowth();
 
     // 2. 检测EventBus监听器
-    this._checkEventBusListeners();
+    this.checkEventBusListeners();
 
     // 3. 生成报告
     if (this.reports.length > 0) {
-      this._generateReport();
+      this.generateReport();
     }
   }
 
   /**
    * 检测内存增长
    */
-  private _checkMemoryGrowth(): void {
-    if (!this._isMemoryAPIAvailable()) return;
+  private checkMemoryGrowth(): void {
+    if (!this.isMemoryAPIAvailable()) return;
 
     const perfWithMemory = performance as unknown as {
       memory: {
@@ -170,7 +170,7 @@ export class MemoryLeakDetector {
   /**
    * 检测EventBus监听器
    */
-  private _checkEventBusListeners(): void {
+  private checkEventBusListeners(): void {
     const stats = eventBus.getStats();
 
     // 检查是否有事件监听器过多
@@ -207,7 +207,7 @@ export class MemoryLeakDetector {
   /**
    * 生成报告
    */
-  private _generateReport(): void {
+  private generateReport(): void {
     this.completedReports.push(...this.reports);
     this.reports = [];
   }
@@ -215,7 +215,7 @@ export class MemoryLeakDetector {
   /**
    * 检查是否支持Memory API
    */
-  private _isMemoryAPIAvailable(): boolean {
+  private isMemoryAPIAvailable(): boolean {
     return (
       typeof performance !== 'undefined' &&
       'memory' in performance &&
@@ -231,7 +231,7 @@ export class MemoryLeakDetector {
     heapTotal: number;
     percentage: number;
   } | null {
-    if (!this._isMemoryAPIAvailable()) return null;
+    if (!this.isMemoryAPIAvailable()) return null;
 
     const perfWithMemory = performance as unknown as {
       memory: {

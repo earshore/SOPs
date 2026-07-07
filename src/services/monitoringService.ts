@@ -125,7 +125,7 @@ export class MonitoringService {
   /**
    * 记录日志（使用注入的Logger或console）
    */
-  private _log(
+  private log(
     level: 'debug' | 'info' | 'warn' | 'error',
     message: string,
     data: Record<string, unknown> = {}
@@ -137,17 +137,17 @@ export class MonitoringService {
     }
   }
 
-  private _shouldSkipInitialization(config: MonitoringConfig): boolean {
+  private shouldSkipInitialization(config: MonitoringConfig): boolean {
     return !configCenter.isProduction() && !config.forceEnable;
   }
 
-  private _createConfig(config: MonitoringConfig): MonitoringConfig {
+  private createConfig(config: MonitoringConfig): MonitoringConfig {
     return {
       dsn: config.dsn || '',
       environment: config.environment || configCenter.get('environment'),
       release: config.release || '1.0.0',
       tracesSampleRate: config.tracesSampleRate || 0.1,
-      beforeSend: config.beforeSend || this._defaultBeforeSend.bind(this),
+      beforeSend: config.beforeSend || this.defaultBeforeSend.bind(this),
     };
   }
 
@@ -156,27 +156,27 @@ export class MonitoringService {
    */
   async init(config: MonitoringConfig = {}): Promise<void> {
     if (this.isInitialized) {
-      this._log('warn', '监控服务已初始化', {});
+      this.log('warn', '监控服务已初始化', {});
       return;
     }
 
     // 仅在生产环境启用
-    if (this._shouldSkipInitialization(config)) {
-      this._log('info', '开发环境，跳过监控服务初始化', {});
+    if (this.shouldSkipInitialization(config)) {
+      this.log('info', '开发环境，跳过监控服务初始化', {});
       return;
     }
 
-    this.config = this._createConfig(config);
+    this.config = this.createConfig(config);
 
     // 检查DSN
     if (!this.config.dsn) {
-      this._log('warn', '未配置Sentry DSN，监控服务未启用', {});
+      this.log('warn', '未配置Sentry DSN，监控服务未启用', {});
       return;
     }
 
     try {
       // 动态导入Sentry（避免增加初始包大小）
-      const Sentry = await this._loadSentry();
+      const Sentry = await this.loadSentry();
       this.Sentry = Sentry;
 
       // 初始化Sentry
@@ -202,9 +202,9 @@ export class MonitoringService {
       });
 
       this.isInitialized = true;
-      this._log('info', '监控服务初始化成功', { dsn: this.config.dsn });
+      this.log('info', '监控服务初始化成功', { dsn: this.config.dsn });
     } catch (error) {
-      this._log('error', '监控服务初始化失败', { error: (error as Error).message });
+      this.log('error', '监控服务初始化失败', { error: (error as Error).message });
       throw error;
     }
   }
@@ -212,7 +212,7 @@ export class MonitoringService {
   /**
    * 加载Sentry SDK
    */
-  private async _loadSentry(): Promise<SentrySDK> {
+  private async loadSentry(): Promise<SentrySDK> {
     const browserSdk = await import('@sentry/browser');
 
     return browserSdk as unknown as SentrySDK;
@@ -221,7 +221,7 @@ export class MonitoringService {
   /**
    * 默认的beforeSend处理函数
    */
-  private _defaultBeforeSend(event: SentryEvent, _hint: SentryEventHint): SentryEvent | null {
+  private defaultBeforeSend(event: SentryEvent, _hint: SentryEventHint): SentryEvent | null {
     // 过滤敏感信息
     if (event.request) {
       // 移除Cookie
@@ -259,7 +259,7 @@ export class MonitoringService {
    */
   captureException(error: Error, context: ErrorContext = {}): void {
     if (!this.isInitialized || !this.Sentry) {
-      this._log('error', '捕获异常（监控服务未启用）', {
+      this.log('error', '捕获异常（监控服务未启用）', {
         error: error.message,
         module: context.module || 'App',
       });
@@ -274,7 +274,7 @@ export class MonitoringService {
 
     this.Sentry.captureException(error, captureContext);
 
-    this._log('error', '捕获异常', {
+    this.log('error', '捕获异常', {
       error: error.message,
       module: context.module || 'App',
     });
@@ -285,7 +285,7 @@ export class MonitoringService {
    */
   captureMessage(message: string, level: string = 'info', context: ErrorContext = {}): void {
     if (!this.isInitialized || !this.Sentry) {
-      this._log('info', `捕获消息（监控服务未启用）: ${message}`, {});
+      this.log('info', `捕获消息（监控服务未启用）: ${message}`, {});
       return;
     }
 
@@ -297,7 +297,7 @@ export class MonitoringService {
 
     this.Sentry.captureMessage(message, captureContext);
 
-    this._log('info', message, context.extra || {});
+    this.log('info', message, context.extra || {});
   }
 
   /**
@@ -315,7 +315,7 @@ export class MonitoringService {
     };
 
     this.Sentry.setUser(safeUser);
-    this._log('info', '设置用户信息', safeUser);
+    this.log('info', '设置用户信息', safeUser);
   }
 
   /**
