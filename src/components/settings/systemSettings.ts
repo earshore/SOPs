@@ -36,8 +36,8 @@ import {
 } from '../../services/localDataStore';
 import { ErrorService } from '../../services/errorService';
 import { EnvConfig } from '../../common/config/envConfig';
-import { configCenter } from '../../common/config/ConfigCenter';
 import { getDangerousEndpoints } from '../../common/config/apiEndpoints';
+import { initEventLogger } from '../../common/utils/eventLogger';
 import { APP_EVENTS } from '../../common/constants/eventConstants';
 import { SECURE_STORAGE_SECURITY_BOUNDARY } from '../../common/utils/secureStorage';
 import {
@@ -53,6 +53,12 @@ import {
   saveRuntimeStrategySettings,
   type RuntimeStrategySettings,
 } from '../../services/runtimeStrategyService';
+import {
+  getDeveloperDiagnosticSettings,
+  updateDeveloperDiagnosticSetting,
+  type DeveloperDiagnosticSettings,
+  type DeveloperLogLevel,
+} from '../../services/developerDiagnosticsService';
 import type { LLMProviderConfig } from '../../types/state';
 import type { ProxyConfig } from '../../types/modules-business';
 import { appStore } from '../../stores/useAppStore';
@@ -100,6 +106,7 @@ interface SettingsPanelData {
   proxy: ProxyState;
   toolStrategy: ToolStrategyState;
   runtimeStrategy: RuntimeStrategyState;
+  developerDiagnostics: DeveloperDiagnosticSettings;
   currentProviderConfig: ProviderConfig | Record<string, never>;
   llmProviderOptions: LLMProviderOption[];
   defaultLlmEndpoint: string;
@@ -139,7 +146,8 @@ interface SettingsPanelData {
   runtimeDeepChatTimeoutSeconds: number;
   masterAnalysisBudgetItems: RuntimeNumberFieldView[];
   ppcThresholdItems: RuntimeNumberFieldView[];
-  diagnosticStatusItems: DiagnosticStatusView[];
+  showDeveloperDiagnostics: boolean;
+  developerDangerousEndpointText: string;
   testConnectionIconClass: string;
   testConnectionText: string;
   proxyInputType: string;
@@ -183,6 +191,11 @@ interface SettingsPanelData {
   setRuntimeNumber(path: string, event: Event, multiplier?: number): void;
   setRuntimeBoolean(path: string, event: Event): void;
   setRuntimeString(path: string, event: Event): void;
+  setDeveloperDiagnosticBoolean(
+    key: keyof Omit<DeveloperDiagnosticSettings, 'loggerMinLevel'>,
+    event: Event
+  ): void;
+  setDeveloperDiagnosticLogLevel(event: Event): void;
   setProxyType(event: Event): void;
   setProxyCustomUrl(event: Event): void;
   toggleLlmKeyVisibility(): void;
@@ -245,15 +258,6 @@ interface RuntimeNumberFieldView {
   max: number;
   step: number;
   unit?: string;
-}
-
-interface DiagnosticStatusView {
-  id: string;
-  label: string;
-  value: string;
-  description: string;
-  icon: string;
-  toneClass: string;
 }
 
 interface LocalDataBucketMeta {
@@ -635,15 +639,6 @@ function setRuntimePathValue(
   target[lastKey] = value;
 }
 
-function formatEnabledStatus(enabled: boolean): string {
-  return enabled ? '已启用' : '已关闭';
-}
-
-function isStoredFlagEnabled(key: string): boolean {
-  const value = StorageService.get<unknown>(key, 'false');
-  return value === true || value === 'true' || value === '1';
-}
-
 function findPresetModelInfo(provider: string, modelId: string): ModelMetadata | null {
   const config = getLlmProviderConfig(provider);
   if (!config) return null;
@@ -750,7 +745,14 @@ type SettingsPanelPart = Partial<SettingsPanelData> & ThisType<SettingsPanelData
 
 function createSettingsState(): Pick<
   SettingsPanelData,
-  'isOpen' | '_unsubscribers' | 'llm' | 'proxy' | 'toolStrategy' | 'runtimeStrategy' | 'localData'
+  | 'isOpen'
+  | '_unsubscribers'
+  | 'llm'
+  | 'proxy'
+  | 'toolStrategy'
+  | 'runtimeStrategy'
+  | 'developerDiagnostics'
+  | 'localData'
 > {
   return {
     isOpen: false,
@@ -788,6 +790,8 @@ function createSettingsState(): Pick<
       settings: getRuntimeStrategySettings(),
       isSaving: false,
     },
+
+    developerDiagnostics: getDeveloperDiagnosticSettings(),
 
     localData: {
       usage: null,
@@ -984,80 +988,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
     }));
   },
 
-  get diagnosticStatusItems(): DiagnosticStatusView[] {
-    const performanceEnabled = configCenter.get<boolean>('performance.enableMonitoring', true);
-    const eventDebugEnabled = isStoredFlagEnabled('debug_events');
-    const errorTrackerEnabled = configCenter.get<boolean>('errorTracker.enabled', true);
-    const analyticsEnabled = configCenter.get<boolean>('analytics.enabled', true);
-    const featureModes = [
-      configCenter.get<boolean>('features.enableExperimentalFeatures', false),
-      configCenter.get<boolean>('features.enableBetaFeatures', false),
-      configCenter.get<boolean>('features.enableDebugMode', false),
-    ];
-    const enabledFeatureModeCount = featureModes.filter(Boolean).length;
-    const logLevel = configCenter.get<string>('logger.minLevel', 'info');
-    const dangerousEndpointCount = getDangerousEndpoints().length;
+  get showDeveloperDiagnostics(): boolean {
+    return !this.isProduction || this.developerDiagnostics.enableDebugMode;
+  },
 
-    return [
-      {
-        id: 'performance-monitor',
-        label: '性能监控',
-        value: formatEnabledStatus(performanceEnabled),
-        description: 'Web Vitals、加载耗时和运行指标面板',
-        icon: 'fa-tachometer-alt',
-        toneClass: performanceEnabled
-          ? 'bg-emerald-50 text-emerald-700 ring-emerald-100'
-          : 'bg-slate-100 text-slate-600 ring-slate-200',
-      },
-      {
-        id: 'event-debug',
-        label: '事件调试',
-        value: formatEnabledStatus(eventDebugEnabled),
-        description: '读取本地 debug_events 开关，仅用于开发排查',
-        icon: 'fa-code-branch',
-        toneClass: eventDebugEnabled
-          ? 'bg-amber-50 text-amber-700 ring-amber-100'
-          : 'bg-slate-100 text-slate-600 ring-slate-200',
-      },
-      {
-        id: 'feature-flags',
-        label: '功能模式',
-        value: `${enabledFeatureModeCount}/3 开启`,
-        description: '实验功能、Beta 功能和 Debug 模式只读状态',
-        icon: 'fa-toggle-on',
-        toneClass:
-          enabledFeatureModeCount > 0
-            ? 'bg-blue-50 text-blue-700 ring-blue-100'
-            : 'bg-slate-100 text-slate-600 ring-slate-200',
-      },
-      {
-        id: 'logger',
-        label: '日志级别',
-        value: logLevel,
-        description: '当前 logger.minLevel 配置',
-        icon: 'fa-list-check',
-        toneClass: 'bg-indigo-50 text-indigo-700 ring-indigo-100',
-      },
-      {
-        id: 'error-analytics',
-        label: '错误追踪 / 行为分析',
-        value: `${formatEnabledStatus(errorTrackerEnabled)} / ${formatEnabledStatus(analyticsEnabled)}`,
-        description: '错误捕获和用户行为分析运行状态',
-        icon: 'fa-bug',
-        toneClass:
-          errorTrackerEnabled || analyticsEnabled
-            ? 'bg-rose-50 text-rose-700 ring-rose-100'
-            : 'bg-slate-100 text-slate-600 ring-slate-200',
-      },
-      {
-        id: 'endpoint-security',
-        label: '端点安全策略',
-        value: `${dangerousEndpointCount} 个危险端点`,
-        description: '生产环境危险端点需通过代理或企业网关访问',
-        icon: 'fa-shield-halved',
-        toneClass: 'bg-amber-50 text-amber-700 ring-amber-100',
-      },
-    ];
+  get developerDangerousEndpointText(): string {
+    return `${getDangerousEndpoints().length} 个危险端点需通过代理或企业网关访问`;
   },
 
   get testConnectionIconClass(): string {
@@ -1151,6 +1087,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   // Lifecycle
   init() {
     this.loadRuntimeStrategy();
+    this.developerDiagnostics = getDeveloperDiagnosticSettings();
     void this.loadProxyConfig();
     this.loadProviderConfig(this.llm.provider);
     void this.refreshLocalDataUsage();
@@ -1173,6 +1110,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
   open() {
     this.isOpen = true;
     this.loadRuntimeStrategy();
+    this.developerDiagnostics = getDeveloperDiagnosticSettings();
     this.loadProviderConfig(this.llm.provider);
     void this.loadProxyConfig();
     void this.refreshLocalDataUsage();
@@ -1482,6 +1420,22 @@ const settingsPanelBehavior: SettingsPanelPart = {
       path,
       (event.target as HTMLSelectElement).value
     );
+  },
+
+  setDeveloperDiagnosticBoolean(
+    key: keyof Omit<DeveloperDiagnosticSettings, 'loggerMinLevel'>,
+    event: Event
+  ): void {
+    const enabled = (event.target as HTMLInputElement).checked;
+    this.developerDiagnostics = updateDeveloperDiagnosticSetting(key, enabled);
+    if (key === 'eventDebugEnabled' && enabled) {
+      initEventLogger();
+    }
+  },
+
+  setDeveloperDiagnosticLogLevel(event: Event): void {
+    const level = (event.target as HTMLSelectElement).value as DeveloperLogLevel;
+    this.developerDiagnostics = updateDeveloperDiagnosticSetting('loggerMinLevel', level);
   },
 
   setProxyType(event: Event): void {

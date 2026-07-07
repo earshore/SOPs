@@ -64,6 +64,7 @@ import { AlpineRegistry } from './common/infrastructure/AlpineRegistry';
 import { triggerInitialNavigation } from './common/router/initRouter';
 import { initEventLogger } from './common/utils/eventLogger';
 import { loadPlugins } from './common/utils/pluginLoader';
+import { applyDeveloperDiagnosticSettings } from './services/developerDiagnosticsService';
 
 // ✅ 全局错误兜底已由GlobalErrorHandler统一处理
 // 见 src/common/errors/GlobalErrorHandler.ts
@@ -339,6 +340,7 @@ function initializeStartupUtilities(): void {
   }
 
   try {
+    applyDeveloperDiagnosticSettings();
     initEventLogger();
   } catch (e) {
     mainLogger.warn('事件日志初始化失败', e);

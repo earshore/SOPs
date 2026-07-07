@@ -22,12 +22,14 @@ const deps = vi.hoisted(() => {
   const values = new Map<string, unknown>();
   const secureValues = new Map<string, string>();
   const llmConfigs = new Map<string, Record<string, unknown>>();
+  const configValues = new Map<string, unknown>();
   const env = { isProduction: false };
 
   return {
     values,
     secureValues,
     llmConfigs,
+    configValues,
     env,
     fetchModelsFromApi: vi.fn(),
     callLLM: vi.fn(),
@@ -55,6 +57,8 @@ const deps = vi.hoisted(() => {
       show: vi.fn(),
     },
     configGet: vi.fn(),
+    configSet: vi.fn(),
+    initEventLogger: vi.fn(),
   };
 });
 
@@ -180,8 +184,13 @@ vi.mock('@/common/config/envConfig', () => ({
 vi.mock('@/common/config/ConfigCenter', () => ({
   configCenter: {
     get: deps.configGet,
+    set: deps.configSet,
     isProduction: vi.fn(() => deps.env.isProduction),
   },
+}));
+
+vi.mock('@/common/utils/eventLogger', () => ({
+  initEventLogger: deps.initEventLogger,
 }));
 
 vi.mock('@/common/devtools/PerformanceMonitor', () => ({
@@ -216,6 +225,7 @@ beforeEach(() => {
   deps.values.clear();
   deps.secureValues.clear();
   deps.llmConfigs.clear();
+  deps.configValues.clear();
   deps.env.isProduction = false;
   deps.fetchModelsFromApi.mockReset();
   deps.callLLM.mockReset();
@@ -236,18 +246,22 @@ beforeEach(() => {
   deps.performanceMonitor.isInitialized.mockReset().mockReturnValue(false);
   deps.performanceMonitor.initialize.mockReset();
   deps.performanceMonitor.show.mockReset();
-  deps.configGet.mockReset().mockImplementation((key: string, fallback?: unknown) => {
-    const values: Record<string, unknown> = {
-      'llm.testConnectionTimeout': 15000,
-      'performance.enableMonitoring': true,
-      'errorTracker.enabled': true,
-      'analytics.enabled': true,
-      'features.enableExperimentalFeatures': false,
-      'features.enableBetaFeatures': false,
-      'features.enableDebugMode': false,
-      'logger.minLevel': 'info',
-    };
-    return key in values ? values[key] : fallback;
+  deps.initEventLogger.mockReset();
+  deps.configValues.set('llm.testConnectionTimeout', 15000);
+  deps.configValues.set('performance.enableMonitoring', true);
+  deps.configValues.set('errorTracker.enabled', true);
+  deps.configValues.set('analytics.enabled', true);
+  deps.configValues.set('features.enableExperimentalFeatures', false);
+  deps.configValues.set('features.enableBetaFeatures', false);
+  deps.configValues.set('features.enableDebugMode', false);
+  deps.configValues.set('logger.minLevel', 'info');
+  deps.configGet
+    .mockReset()
+    .mockImplementation((key: string, fallback?: unknown) =>
+      deps.configValues.has(key) ? deps.configValues.get(key) : fallback
+    );
+  deps.configSet.mockReset().mockImplementation((key: string, value: unknown) => {
+    deps.configValues.set(key, value);
   });
   document.body.innerHTML = '';
   delete (window as unknown as { Alpine?: unknown }).Alpine;
@@ -301,13 +315,7 @@ it('computes field state, display labels, and local data text', () => {
   expect(panel.formatBytes(1536)).toBe('1.5 KB');
   expect(panel.getProxyDisplayName('custom_proxy')).toBe('HTTP 代理');
   expect(panel.getProxyDisplayName('missing')).toBe('默认');
-  expect(panel.diagnosticStatusItems).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ id: 'performance-monitor', value: '已启用' }),
-      expect.objectContaining({ id: 'event-debug', value: '已关闭' }),
-      expect.objectContaining({ id: 'logger', value: 'info' }),
-    ])
-  );
+  expect(panel.developerDangerousEndpointText).toContain('危险端点需通过代理或企业网关访问');
 
   panel.toggleLlmKeyVisibility();
   panel.toggleProxyKeyVisibility();
@@ -316,6 +324,31 @@ it('computes field state, display labels, and local data text', () => {
   expect(panel.activeFeatureBadges).toEqual([
     { key: 'basic', label: '基础能力', icon: 'fa-message' },
   ]);
+});
+
+it('gates developer diagnostics and saves debug settings', () => {
+  const panel = createPanel();
+
+  expect(panel.showDeveloperDiagnostics).toBe(true);
+  deps.env.isProduction = true;
+  expect(panel.showDeveloperDiagnostics).toBe(false);
+
+  panel.setDeveloperDiagnosticBoolean('enableDebugMode', { target: { checked: true } } as any);
+  expect(panel.showDeveloperDiagnostics).toBe(true);
+  expect(deps.configSet).toHaveBeenCalledWith('features.enableDebugMode', true);
+  expect(StorageService.set).toHaveBeenCalledWith(
+    'developer_diagnostic_settings',
+    expect.objectContaining({ enableDebugMode: true })
+  );
+
+  panel.setDeveloperDiagnosticBoolean('eventDebugEnabled', { target: { checked: true } } as any);
+  expect(StorageService.set).toHaveBeenCalledWith('debug_events', 'true');
+  expect(deps.initEventLogger).toHaveBeenCalledTimes(1);
+  expect(panel.developerDiagnostics.eventDebugEnabled).toBe(true);
+
+  panel.setDeveloperDiagnosticLogLevel({ target: { value: 'debug' } } as any);
+  expect(deps.configSet).toHaveBeenCalledWith('logger.minLevel', 'debug');
+  expect(panel.developerDiagnostics.loggerMinLevel).toBe('debug');
 });
 
 it('loads and saves LLM provider configuration', async () => {
@@ -916,7 +949,13 @@ it('keeps the real settings template optimized for PC category scanning', () => 
   expect(template).toContain('采集运行策略');
   expect(template).toContain('数据与备份');
   expect(template).toContain('数据保留策略');
-  expect(template).toContain('运行诊断');
+  expect(template).toContain('开发者诊断');
+  expect(template).toContain('x-show="showDeveloperDiagnostics"');
+  expect(template).toContain("setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)");
+  expect(template).toContain('setDeveloperDiagnosticLogLevel($event)');
+  expect(template).toContain('developerDangerousEndpointText');
+  expect(template).toContain('这是当前环境的只读安全提示，不属于调试开关。');
+  expect(template).not.toContain('diagnosticStatusItems');
   expect(template).toContain('危险操作');
   expect(template).toContain('清空全部本地数据');
   expect(template).toContain(':aria-label="fetchModelsText"');

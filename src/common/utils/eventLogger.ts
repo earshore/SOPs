@@ -81,6 +81,10 @@ export function initEventLogger(): boolean {
 
   TRACKED_EVENTS.forEach(eventName => {
     window.addEventListener(eventName, event => {
+      if (!isDebugEnabled()) {
+        return;
+      }
+
       const customEvent = event as CustomEvent;
       const logEntry = formatEventForLog(customEvent, 'window');
 

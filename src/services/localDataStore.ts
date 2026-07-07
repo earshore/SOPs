@@ -92,6 +92,7 @@ const CONFIG_KEYS = new Set([
   'app:animation-settings',
   'performance_metrics',
   'debug_events',
+  'developer_diagnostic_settings',
   'enable_legacy_warnings',
 ]);
 const CONFIG_PREFIXES = ['llm_', 'feature_', 'layout_config_', 'modal_ignore_', 'ignore_', 'ppc_'];

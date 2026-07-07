@@ -93,11 +93,12 @@
           <button
             type="button"
             class="settings-panel-nav-link"
+            x-show="showDeveloperDiagnostics"
             aria-controls="settings-section-performance"
             @click="scrollToSection('settings-section-performance')"
           >
             <i class="fas fa-chart-line" aria-hidden="true"></i>
-            <span>运行诊断</span>
+            <span>开发者诊断</span>
           </button>
         </nav>
         <div class="settings-panel-sections space-y-7">
@@ -408,8 +409,12 @@
                 class="rounded-xl border border-indigo-100 bg-white/80 px-3 py-2.5 text-[11px] leading-relaxed text-slate-500 shadow-sm"
               >
                 当前模型池来自
-                <span class="font-semibold text-slate-700" x-text="toolStrategyProviderLabel"></span>
-                。为不同页面和任务设置默认模型，任务执行时会优先使用工具策略；未指定时跟随“AI 模型与连接”的全局模型。
+                <span
+                  class="font-semibold text-slate-700"
+                  x-text="toolStrategyProviderLabel"
+                ></span>
+                。为不同页面和任务设置默认模型，任务执行时会优先使用工具策略；未指定时跟随“AI
+                模型与连接”的全局模型。
               </div>
 
               <div class="rounded-xl border border-indigo-100 bg-white/85 p-3 shadow-sm">
@@ -420,26 +425,68 @@
                       控制所有 AI 工具共用的请求超时、重试和连接测试策略。
                     </p>
                   </div>
-                  <span class="rounded-md bg-indigo-50 px-2 py-1 text-[10px] font-semibold text-indigo-600">
+                  <span
+                    class="rounded-md bg-indigo-50 px-2 py-1 text-[10px] font-semibold text-indigo-600"
+                  >
                     全局生效
                   </span>
                 </div>
                 <div class="mt-3 grid gap-3 sm:grid-cols-4">
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">AI / 工具请求超时（秒）</span>
-                    <input type="number" min="30" max="300" step="5" :value="runtimeAnalysisTimeoutSeconds" @input="setRuntimeNumber('llm.analysisTimeoutMs', $event, 1000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" />
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >AI / 工具请求超时（秒）</span
+                    >
+                    <input
+                      type="number"
+                      min="30"
+                      max="300"
+                      step="5"
+                      :value="runtimeAnalysisTimeoutSeconds"
+                      @input="setRuntimeNumber('llm.analysisTimeoutMs', $event, 1000)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                    />
                   </label>
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">模型重试次数</span>
-                    <input type="number" min="0" max="5" step="1" :value="runtimeStrategy.settings.llm.maxRetries" @input="setRuntimeNumber('llm.maxRetries', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" />
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >模型重试次数</span
+                    >
+                    <input
+                      type="number"
+                      min="0"
+                      max="5"
+                      step="1"
+                      :value="runtimeStrategy.settings.llm.maxRetries"
+                      @input="setRuntimeNumber('llm.maxRetries', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                    />
                   </label>
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">重试间隔（秒）</span>
-                    <input type="number" min="0.25" max="30" step="0.25" :value="getRuntimeNumber('llm.retryDelayMs', 1000)" @input="setRuntimeNumber('llm.retryDelayMs', $event, 1000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" />
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >重试间隔（秒）</span
+                    >
+                    <input
+                      type="number"
+                      min="0.25"
+                      max="30"
+                      step="0.25"
+                      :value="getRuntimeNumber('llm.retryDelayMs', 1000)"
+                      @input="setRuntimeNumber('llm.retryDelayMs', $event, 1000)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                    />
                   </label>
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">连接测试超时（秒）</span>
-                    <input type="number" min="5" max="60" step="5" :value="runtimeTestConnectionTimeoutSeconds" @input="setRuntimeNumber('llm.testConnectionTimeoutMs', $event, 1000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" />
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >连接测试超时（秒）</span
+                    >
+                    <input
+                      type="number"
+                      min="5"
+                      max="60"
+                      step="5"
+                      :value="runtimeTestConnectionTimeoutSeconds"
+                      @input="setRuntimeNumber('llm.testConnectionTimeoutMs', $event, 1000)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                    />
                   </label>
                 </div>
               </div>
@@ -457,33 +504,58 @@
                     <h4 class="text-xs font-bold text-slate-700">Master Analysis</h4>
                     <p class="mt-1 text-[10px] text-slate-500">AI 智能分析报告生成策略。</p>
                   </div>
-                  <span class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500">
+                  <span
+                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                  >
                     1 个模块
                   </span>
                 </div>
-                <template x-for="item in toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])" :key="item.id">
+                <template
+                  x-for="item in toolStrategyTargetItemsByIds(['master-analysis-ai-analysis'])"
+                  :key="item.id"
+                >
                   <div class="mt-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
                           <h5 class="text-xs font-bold text-slate-700" x-text="item.label"></h5>
-                          <span class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600" x-text="item.modelHint"></span>
+                          <span
+                            class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
+                            x-text="item.modelHint"
+                          ></span>
                         </div>
-                        <p class="mt-1 text-[10px] leading-relaxed text-slate-500" x-text="item.description"></p>
+                        <p
+                          class="mt-1 text-[10px] leading-relaxed text-slate-500"
+                          x-text="item.description"
+                        ></p>
                         <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
                           当前执行模型：
                           <span class="font-mono text-slate-700" x-text="item.resolvedModel"></span>
                         </p>
                       </div>
                       <div class="relative w-full sm:w-64">
-                        <label class="sr-only" :for="'tool-strategy-model-' + item.id">默认模型</label>
-                        <select :id="'tool-strategy-model-' + item.id" :name="'tool-strategy-model-' + item.id" :value="item.model" @change="setToolTargetModel(item.id, $event)" :disabled="toolStrategyModelSelectDisabled" class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400">
+                        <label class="sr-only" :for="'tool-strategy-model-' + item.id"
+                          >默认模型</label
+                        >
+                        <select
+                          :id="'tool-strategy-model-' + item.id"
+                          :name="'tool-strategy-model-' + item.id"
+                          :value="item.model"
+                          @change="setToolTargetModel(item.id, $event)"
+                          :disabled="toolStrategyModelSelectDisabled"
+                          class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                        >
                           <option value="">跟随全局模型</option>
                           <template x-for="model in llm.models" :key="getModelValue(model)">
-                            <option :value="getModelValue(model)" x-text="getModelLabel(model)"></option>
+                            <option
+                              :value="getModelValue(model)"
+                              x-text="getModelLabel(model)"
+                            ></option>
                           </template>
                         </select>
-                        <div class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100">
+                        <div
+                          class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100"
+                        >
                           <i class="fas fa-chevron-down text-[9px] text-slate-400"></i>
                         </div>
                       </div>
@@ -492,31 +564,75 @@
                 </template>
                 <div class="mt-3 grid gap-3 sm:grid-cols-3">
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">调度偏好</span>
-                    <select :value="runtimeStrategy.settings.masterAnalysis.schedulingPreference" @change="setRuntimeString('masterAnalysis.schedulingPreference', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20">
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >调度偏好</span
+                    >
+                    <select
+                      :value="runtimeStrategy.settings.masterAnalysis.schedulingPreference"
+                      @change="setRuntimeString('masterAnalysis.schedulingPreference', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                    >
                       <option value="recommended">推荐</option>
                       <option value="reliability">稳定</option>
                       <option value="speed">速度</option>
                     </select>
                   </label>
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">完整报告 Token</span>
-                    <input type="number" min="4096" max="64000" step="1024" :value="runtimeStrategy.settings.masterAnalysis.fullReportMaxTokens" @input="setRuntimeNumber('masterAnalysis.fullReportMaxTokens', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" />
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >完整报告 Token</span
+                    >
+                    <input
+                      type="number"
+                      min="4096"
+                      max="64000"
+                      step="1024"
+                      :value="runtimeStrategy.settings.masterAnalysis.fullReportMaxTokens"
+                      @input="setRuntimeNumber('masterAnalysis.fullReportMaxTokens', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                    />
                   </label>
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">翻译报告 Token</span>
-                    <input type="number" min="4096" max="64000" step="1024" :value="runtimeStrategy.settings.masterAnalysis.translationMaxTokens" @input="setRuntimeNumber('masterAnalysis.translationMaxTokens', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" />
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >翻译报告 Token</span
+                    >
+                    <input
+                      type="number"
+                      min="4096"
+                      max="64000"
+                      step="1024"
+                      :value="runtimeStrategy.settings.masterAnalysis.translationMaxTokens"
+                      @input="setRuntimeNumber('masterAnalysis.translationMaxTokens', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                    />
                   </label>
                 </div>
-                <label class="mt-3 flex min-h-[36px] items-center gap-2 text-xs font-semibold text-slate-700">
-                  <input type="checkbox" :checked="runtimeStrategy.settings.masterAnalysis.enableCache" @change="setRuntimeBoolean('masterAnalysis.enableCache', $event)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+                <label
+                  class="mt-3 flex min-h-[36px] items-center gap-2 text-xs font-semibold text-slate-700"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="runtimeStrategy.settings.masterAnalysis.enableCache"
+                    @change="setRuntimeBoolean('masterAnalysis.enableCache', $event)"
+                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
                   启用分析缓存
                 </label>
                 <div class="mt-3 grid gap-3 sm:grid-cols-4">
                   <template x-for="item in masterAnalysisBudgetItems" :key="item.key">
                     <label class="block">
-                      <span class="mb-1.5 block text-[11px] font-semibold text-slate-600" x-text="item.label"></span>
-                      <input type="number" :min="item.min" :max="item.max" :step="item.step" :value="item.value" @input="setRuntimeNumber(item.path, $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" />
+                      <span
+                        class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                        x-text="item.label"
+                      ></span>
+                      <input
+                        type="number"
+                        :min="item.min"
+                        :max="item.max"
+                        :step="item.step"
+                        :value="item.value"
+                        @input="setRuntimeNumber(item.path, $event)"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                      />
                     </label>
                   </template>
                 </div>
@@ -526,35 +642,62 @@
                 <div class="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h4 class="text-xs font-bold text-slate-700">Playground</h4>
-                    <p class="mt-1 text-[10px] text-slate-500">Deep Chat 对话质量、响应速度和本地保留策略。</p>
+                    <p class="mt-1 text-[10px] text-slate-500">
+                      Deep Chat 对话质量、响应速度和本地保留策略。
+                    </p>
                   </div>
-                  <span class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500">
+                  <span
+                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                  >
                     1 个模块
                   </span>
                 </div>
-                <template x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])" :key="item.id">
+                <template
+                  x-for="item in toolStrategyTargetItemsByIds(['playground-deep-chat'])"
+                  :key="item.id"
+                >
                   <div class="mt-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
                           <h5 class="text-xs font-bold text-slate-700" x-text="item.label"></h5>
-                          <span class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600" x-text="item.modelHint"></span>
+                          <span
+                            class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
+                            x-text="item.modelHint"
+                          ></span>
                         </div>
-                        <p class="mt-1 text-[10px] leading-relaxed text-slate-500" x-text="item.description"></p>
+                        <p
+                          class="mt-1 text-[10px] leading-relaxed text-slate-500"
+                          x-text="item.description"
+                        ></p>
                         <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
                           当前执行模型：
                           <span class="font-mono text-slate-700" x-text="item.resolvedModel"></span>
                         </p>
                       </div>
                       <div class="relative w-full sm:w-64">
-                        <label class="sr-only" :for="'tool-strategy-model-' + item.id">默认模型</label>
-                        <select :id="'tool-strategy-model-' + item.id" :name="'tool-strategy-model-' + item.id" :value="item.model" @change="setToolTargetModel(item.id, $event)" :disabled="toolStrategyModelSelectDisabled" class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400">
+                        <label class="sr-only" :for="'tool-strategy-model-' + item.id"
+                          >默认模型</label
+                        >
+                        <select
+                          :id="'tool-strategy-model-' + item.id"
+                          :name="'tool-strategy-model-' + item.id"
+                          :value="item.model"
+                          @change="setToolTargetModel(item.id, $event)"
+                          :disabled="toolStrategyModelSelectDisabled"
+                          class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                        >
                           <option value="">跟随全局模型</option>
                           <template x-for="model in llm.models" :key="getModelValue(model)">
-                            <option :value="getModelValue(model)" x-text="getModelLabel(model)"></option>
+                            <option
+                              :value="getModelValue(model)"
+                              x-text="getModelLabel(model)"
+                            ></option>
                           </template>
                         </select>
-                        <div class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100">
+                        <div
+                          class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100"
+                        >
                           <i class="fas fa-chevron-down text-[9px] text-slate-400"></i>
                         </div>
                       </div>
@@ -562,14 +705,102 @@
                   </div>
                 </template>
                 <div class="mt-3 grid gap-3 sm:grid-cols-4">
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">请求超时（秒）</span><input type="number" min="30" max="300" step="5" :value="runtimeDeepChatTimeoutSeconds" @input="setRuntimeNumber('deepChat.requestTimeoutMs', $event, 1000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">输出 Token</span><input type="number" min="256" max="16000" step="256" :value="runtimeStrategy.settings.deepChat.maxOutputTokens" @input="setRuntimeNumber('deepChat.maxOutputTokens', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">上下文字符</span><input type="number" min="4000" max="512000" step="1000" :value="runtimeStrategy.settings.deepChat.maxContextChars" @input="setRuntimeNumber('deepChat.maxContextChars', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">会话保留数</span><input type="number" min="1" max="200" step="1" :value="runtimeStrategy.settings.deepChat.maxThreadCount" @input="setRuntimeNumber('deepChat.maxThreadCount', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">单条消息字符</span><input type="number" min="1000" max="512000" step="1000" :value="runtimeStrategy.settings.deepChat.maxMessageChars" @input="setRuntimeNumber('deepChat.maxMessageChars', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">系统提示词字符</span><input type="number" min="1000" max="512000" step="1000" :value="runtimeStrategy.settings.deepChat.maxSystemPromptChars" @input="setRuntimeNumber('deepChat.maxSystemPromptChars', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">每会话消息数</span><input type="number" min="10" max="500" step="10" :value="runtimeStrategy.settings.deepChat.maxThreadMessageCount" @input="setRuntimeNumber('deepChat.maxThreadMessageCount', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">Prompt 草稿数</span><input type="number" min="1" max="100" step="1" :value="runtimeStrategy.settings.deepChat.maxPromptDraftCount" @input="setRuntimeNumber('deepChat.maxPromptDraftCount', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >请求超时（秒）</span
+                    ><input
+                      type="number"
+                      min="30"
+                      max="300"
+                      step="5"
+                      :value="runtimeDeepChatTimeoutSeconds"
+                      @input="setRuntimeNumber('deepChat.requestTimeoutMs', $event, 1000)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >输出 Token</span
+                    ><input
+                      type="number"
+                      min="256"
+                      max="16000"
+                      step="256"
+                      :value="runtimeStrategy.settings.deepChat.maxOutputTokens"
+                      @input="setRuntimeNumber('deepChat.maxOutputTokens', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >上下文字符</span
+                    ><input
+                      type="number"
+                      min="4000"
+                      max="512000"
+                      step="1000"
+                      :value="runtimeStrategy.settings.deepChat.maxContextChars"
+                      @input="setRuntimeNumber('deepChat.maxContextChars', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >会话保留数</span
+                    ><input
+                      type="number"
+                      min="1"
+                      max="200"
+                      step="1"
+                      :value="runtimeStrategy.settings.deepChat.maxThreadCount"
+                      @input="setRuntimeNumber('deepChat.maxThreadCount', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >单条消息字符</span
+                    ><input
+                      type="number"
+                      min="1000"
+                      max="512000"
+                      step="1000"
+                      :value="runtimeStrategy.settings.deepChat.maxMessageChars"
+                      @input="setRuntimeNumber('deepChat.maxMessageChars', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >系统提示词字符</span
+                    ><input
+                      type="number"
+                      min="1000"
+                      max="512000"
+                      step="1000"
+                      :value="runtimeStrategy.settings.deepChat.maxSystemPromptChars"
+                      @input="setRuntimeNumber('deepChat.maxSystemPromptChars', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >每会话消息数</span
+                    ><input
+                      type="number"
+                      min="10"
+                      max="500"
+                      step="10"
+                      :value="runtimeStrategy.settings.deepChat.maxThreadMessageCount"
+                      @input="setRuntimeNumber('deepChat.maxThreadMessageCount', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >Prompt 草稿数</span
+                    ><input
+                      type="number"
+                      min="1"
+                      max="100"
+                      step="1"
+                      :value="runtimeStrategy.settings.deepChat.maxPromptDraftCount"
+                      @input="setRuntimeNumber('deepChat.maxPromptDraftCount', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
                 </div>
               </div>
 
@@ -577,82 +808,218 @@
                 <div class="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h4 class="text-xs font-bold text-slate-700">Keyword Hunter</h4>
-                    <p class="mt-1 text-[10px] text-slate-500">按 SEO 处理和 Listing 评审分别管理模型、缓存和匹配策略。</p>
+                    <p class="mt-1 text-[10px] text-slate-500">
+                      按 SEO 处理和 Listing 评审分别管理模型、缓存和匹配策略。
+                    </p>
                   </div>
-                  <span class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500">
+                  <span
+                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                  >
                     2 个模块
                   </span>
                 </div>
                 <div class="mt-3 grid gap-3 lg:grid-cols-2">
                   <div class="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
-                    <template x-for="item in toolStrategyTargetItemsByIds(['keyword-hunter-seo-process'])" :key="item.id">
+                    <template
+                      x-for="item in toolStrategyTargetItemsByIds(['keyword-hunter-seo-process'])"
+                      :key="item.id"
+                    >
                       <div>
                         <div class="flex flex-wrap items-center gap-2">
                           <h5 class="text-xs font-bold text-slate-700" x-text="item.label"></h5>
-                          <span class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600" x-text="item.modelHint"></span>
+                          <span
+                            class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
+                            x-text="item.modelHint"
+                          ></span>
                         </div>
-                        <p class="mt-1 text-[10px] leading-relaxed text-slate-500" x-text="item.description"></p>
+                        <p
+                          class="mt-1 text-[10px] leading-relaxed text-slate-500"
+                          x-text="item.description"
+                        ></p>
                         <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
                           当前执行模型：
                           <span class="font-mono text-slate-700" x-text="item.resolvedModel"></span>
                         </p>
                         <div class="relative mt-3">
-                          <label class="sr-only" :for="'tool-strategy-model-' + item.id">默认模型</label>
-                          <select :id="'tool-strategy-model-' + item.id" :name="'tool-strategy-model-' + item.id" :value="item.model" @change="setToolTargetModel(item.id, $event)" :disabled="toolStrategyModelSelectDisabled" class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400">
+                          <label class="sr-only" :for="'tool-strategy-model-' + item.id"
+                            >默认模型</label
+                          >
+                          <select
+                            :id="'tool-strategy-model-' + item.id"
+                            :name="'tool-strategy-model-' + item.id"
+                            :value="item.model"
+                            @change="setToolTargetModel(item.id, $event)"
+                            :disabled="toolStrategyModelSelectDisabled"
+                            class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                          >
                             <option value="">跟随全局模型</option>
                             <template x-for="model in llm.models" :key="getModelValue(model)">
-                              <option :value="getModelValue(model)" x-text="getModelLabel(model)"></option>
+                              <option
+                                :value="getModelValue(model)"
+                                x-text="getModelLabel(model)"
+                              ></option>
                             </template>
                           </select>
-                          <div class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100">
+                          <div
+                            class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100"
+                          >
                             <i class="fas fa-chevron-down text-[9px] text-slate-400"></i>
                           </div>
                         </div>
                       </div>
                     </template>
                     <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                      <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">SEO 缓存 TTL（小时）</span><input type="number" min="1" max="720" step="1" :value="getRuntimeNumber('keywordHunterSeoProcess.cacheTtlMs', 3600000)" @input="setRuntimeNumber('keywordHunterSeoProcess.cacheTtlMs', $event, 3600000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                      <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">翻译最大 Token</span><input type="number" min="1024" max="64000" step="1024" :value="runtimeStrategy.settings.keywordHunterSeoProcess.translationMaxTokens" @input="setRuntimeNumber('keywordHunterSeoProcess.translationMaxTokens', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
+                      <label class="block"
+                        ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                          >SEO 缓存 TTL（小时）</span
+                        ><input
+                          type="number"
+                          min="1"
+                          max="720"
+                          step="1"
+                          :value="getRuntimeNumber('keywordHunterSeoProcess.cacheTtlMs', 3600000)"
+                          @input="setRuntimeNumber('keywordHunterSeoProcess.cacheTtlMs', $event, 3600000)"
+                          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                      /></label>
+                      <label class="block"
+                        ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                          >翻译最大 Token</span
+                        ><input
+                          type="number"
+                          min="1024"
+                          max="64000"
+                          step="1024"
+                          :value="runtimeStrategy.settings.keywordHunterSeoProcess.translationMaxTokens"
+                          @input="setRuntimeNumber('keywordHunterSeoProcess.translationMaxTokens', $event)"
+                          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                      /></label>
                     </div>
                     <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" :checked="runtimeStrategy.settings.keywordHunterSeoProcess.enableLlmCache" @change="setRuntimeBoolean('keywordHunterSeoProcess.enableLlmCache', $event)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />SEO 处理缓存</label>
-                      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchPartial" @change="setRuntimeBoolean('keywordHunterSeoProcess.matchPartial', $event)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />允许部分匹配</label>
-                      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchPlural" @change="setRuntimeBoolean('keywordHunterSeoProcess.matchPlural', $event)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />复数匹配</label>
-                      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchStem" @change="setRuntimeBoolean('keywordHunterSeoProcess.matchStem', $event)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />词干匹配</label>
-                      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchCase" @change="setRuntimeBoolean('keywordHunterSeoProcess.matchCase', $event)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />区分大小写</label>
+                      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
+                        ><input
+                          type="checkbox"
+                          :checked="runtimeStrategy.settings.keywordHunterSeoProcess.enableLlmCache"
+                          @change="setRuntimeBoolean('keywordHunterSeoProcess.enableLlmCache', $event)"
+                          class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        />SEO 处理缓存</label
+                      >
+                      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
+                        ><input
+                          type="checkbox"
+                          :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchPartial"
+                          @change="setRuntimeBoolean('keywordHunterSeoProcess.matchPartial', $event)"
+                          class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        />允许部分匹配</label
+                      >
+                      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
+                        ><input
+                          type="checkbox"
+                          :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchPlural"
+                          @change="setRuntimeBoolean('keywordHunterSeoProcess.matchPlural', $event)"
+                          class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        />复数匹配</label
+                      >
+                      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
+                        ><input
+                          type="checkbox"
+                          :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchStem"
+                          @change="setRuntimeBoolean('keywordHunterSeoProcess.matchStem', $event)"
+                          class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        />词干匹配</label
+                      >
+                      <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
+                        ><input
+                          type="checkbox"
+                          :checked="runtimeStrategy.settings.keywordHunterSeoProcess.matchCase"
+                          @change="setRuntimeBoolean('keywordHunterSeoProcess.matchCase', $event)"
+                          class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        />区分大小写</label
+                      >
                     </div>
                   </div>
                   <div class="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
-                    <template x-for="item in toolStrategyTargetItemsByIds(['keyword-hunter-listing-review'])" :key="item.id">
+                    <template
+                      x-for="item in toolStrategyTargetItemsByIds(['keyword-hunter-listing-review'])"
+                      :key="item.id"
+                    >
                       <div>
                         <div class="flex flex-wrap items-center gap-2">
                           <h5 class="text-xs font-bold text-slate-700" x-text="item.label"></h5>
-                          <span class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600" x-text="item.modelHint"></span>
+                          <span
+                            class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
+                            x-text="item.modelHint"
+                          ></span>
                         </div>
-                        <p class="mt-1 text-[10px] leading-relaxed text-slate-500" x-text="item.description"></p>
+                        <p
+                          class="mt-1 text-[10px] leading-relaxed text-slate-500"
+                          x-text="item.description"
+                        ></p>
                         <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
                           当前执行模型：
                           <span class="font-mono text-slate-700" x-text="item.resolvedModel"></span>
                         </p>
                         <div class="relative mt-3">
-                          <label class="sr-only" :for="'tool-strategy-model-' + item.id">默认模型</label>
-                          <select :id="'tool-strategy-model-' + item.id" :name="'tool-strategy-model-' + item.id" :value="item.model" @change="setToolTargetModel(item.id, $event)" :disabled="toolStrategyModelSelectDisabled" class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400">
+                          <label class="sr-only" :for="'tool-strategy-model-' + item.id"
+                            >默认模型</label
+                          >
+                          <select
+                            :id="'tool-strategy-model-' + item.id"
+                            :name="'tool-strategy-model-' + item.id"
+                            :value="item.model"
+                            @change="setToolTargetModel(item.id, $event)"
+                            :disabled="toolStrategyModelSelectDisabled"
+                            class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                          >
                             <option value="">跟随全局模型</option>
                             <template x-for="model in llm.models" :key="getModelValue(model)">
-                              <option :value="getModelValue(model)" x-text="getModelLabel(model)"></option>
+                              <option
+                                :value="getModelValue(model)"
+                                x-text="getModelLabel(model)"
+                              ></option>
                             </template>
                           </select>
-                          <div class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100">
+                          <div
+                            class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100"
+                          >
                             <i class="fas fa-chevron-down text-[9px] text-slate-400"></i>
                           </div>
                         </div>
                       </div>
                     </template>
                     <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                      <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">Listing 缓存 TTL（小时）</span><input type="number" min="1" max="720" step="1" :value="getRuntimeNumber('keywordHunterListingReview.cacheTtlMs', 3600000)" @input="setRuntimeNumber('keywordHunterListingReview.cacheTtlMs', $event, 3600000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                      <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">Listing 评审 Token</span><input type="number" min="1024" max="64000" step="1024" :value="runtimeStrategy.settings.keywordHunterListingReview.listingAnalysisMaxTokens" @input="setRuntimeNumber('keywordHunterListingReview.listingAnalysisMaxTokens', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
+                      <label class="block"
+                        ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                          >Listing 缓存 TTL（小时）</span
+                        ><input
+                          type="number"
+                          min="1"
+                          max="720"
+                          step="1"
+                          :value="getRuntimeNumber('keywordHunterListingReview.cacheTtlMs', 3600000)"
+                          @input="setRuntimeNumber('keywordHunterListingReview.cacheTtlMs', $event, 3600000)"
+                          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                      /></label>
+                      <label class="block"
+                        ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                          >Listing 评审 Token</span
+                        ><input
+                          type="number"
+                          min="1024"
+                          max="64000"
+                          step="1024"
+                          :value="runtimeStrategy.settings.keywordHunterListingReview.listingAnalysisMaxTokens"
+                          @input="setRuntimeNumber('keywordHunterListingReview.listingAnalysisMaxTokens', $event)"
+                          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                      /></label>
                     </div>
-                    <label class="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" :checked="runtimeStrategy.settings.keywordHunterListingReview.enableLlmCache" @change="setRuntimeBoolean('keywordHunterListingReview.enableLlmCache', $event)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />Listing 评审缓存</label>
+                    <label class="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-700"
+                      ><input
+                        type="checkbox"
+                        :checked="runtimeStrategy.settings.keywordHunterListingReview.enableLlmCache"
+                        @change="setRuntimeBoolean('keywordHunterListingReview.enableLlmCache', $event)"
+                        class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />Listing 评审缓存</label
+                    >
                   </div>
                 </div>
               </div>
@@ -661,35 +1028,62 @@
                 <div class="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h4 class="text-xs font-bold text-slate-700">PPC Tools</h4>
-                    <p class="mt-1 text-[10px] text-slate-500">PPC 搜索词分析器的模型复核、批处理和阈值策略。</p>
+                    <p class="mt-1 text-[10px] text-slate-500">
+                      PPC 搜索词分析器的模型复核、批处理和阈值策略。
+                    </p>
                   </div>
-                  <span class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500">
+                  <span
+                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                  >
                     1 个模块
                   </span>
                 </div>
-                <template x-for="item in toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])" :key="item.id">
+                <template
+                  x-for="item in toolStrategyTargetItemsByIds(['ppc-tools-ppc-search-terms'])"
+                  :key="item.id"
+                >
                   <div class="mt-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
                           <h5 class="text-xs font-bold text-slate-700" x-text="item.label"></h5>
-                          <span class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600" x-text="item.modelHint"></span>
+                          <span
+                            class="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600"
+                            x-text="item.modelHint"
+                          ></span>
                         </div>
-                        <p class="mt-1 text-[10px] leading-relaxed text-slate-500" x-text="item.description"></p>
+                        <p
+                          class="mt-1 text-[10px] leading-relaxed text-slate-500"
+                          x-text="item.description"
+                        ></p>
                         <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
                           当前执行模型：
                           <span class="font-mono text-slate-700" x-text="item.resolvedModel"></span>
                         </p>
                       </div>
                       <div class="relative w-full sm:w-64">
-                        <label class="sr-only" :for="'tool-strategy-model-' + item.id">默认模型</label>
-                        <select :id="'tool-strategy-model-' + item.id" :name="'tool-strategy-model-' + item.id" :value="item.model" @change="setToolTargetModel(item.id, $event)" :disabled="toolStrategyModelSelectDisabled" class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400">
+                        <label class="sr-only" :for="'tool-strategy-model-' + item.id"
+                          >默认模型</label
+                        >
+                        <select
+                          :id="'tool-strategy-model-' + item.id"
+                          :name="'tool-strategy-model-' + item.id"
+                          :value="item.model"
+                          @change="setToolTargetModel(item.id, $event)"
+                          :disabled="toolStrategyModelSelectDisabled"
+                          class="w-full appearance-none rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs shadow-sm transition duration-200 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                        >
                           <option value="">跟随全局模型</option>
                           <template x-for="model in llm.models" :key="getModelValue(model)">
-                            <option :value="getModelValue(model)" x-text="getModelLabel(model)"></option>
+                            <option
+                              :value="getModelValue(model)"
+                              x-text="getModelLabel(model)"
+                            ></option>
                           </template>
                         </select>
-                        <div class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100">
+                        <div
+                          class="pointer-events-none absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md bg-slate-100"
+                        >
                           <i class="fas fa-chevron-down text-[9px] text-slate-400"></i>
                         </div>
                       </div>
@@ -697,21 +1091,97 @@
                   </div>
                 </template>
                 <div class="mt-3 grid gap-3 sm:grid-cols-4">
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">PPC 批次大小</span><input type="number" min="20" max="200" step="10" :value="runtimeStrategy.settings.ppcSearchTerms.batchSize" @input="setRuntimeNumber('ppcSearchTerms.batchSize', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">PPC 并发批次</span><input type="number" min="1" max="6" step="1" :value="runtimeStrategy.settings.ppcSearchTerms.maxConcurrentBatches" @input="setRuntimeNumber('ppcSearchTerms.maxConcurrentBatches', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">缓存 TTL（小时）</span><input type="number" min="1" max="720" step="1" :value="getRuntimeNumber('ppcSearchTerms.cacheTtlMs', 3600000)" @input="setRuntimeNumber('ppcSearchTerms.cacheTtlMs', $event, 3600000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">最大输出 Token</span><input type="number" min="1024" max="64000" step="1024" :value="runtimeStrategy.settings.ppcSearchTerms.maxOutputTokens" @input="setRuntimeNumber('ppcSearchTerms.maxOutputTokens', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >PPC 批次大小</span
+                    ><input
+                      type="number"
+                      min="20"
+                      max="200"
+                      step="10"
+                      :value="runtimeStrategy.settings.ppcSearchTerms.batchSize"
+                      @input="setRuntimeNumber('ppcSearchTerms.batchSize', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >PPC 并发批次</span
+                    ><input
+                      type="number"
+                      min="1"
+                      max="6"
+                      step="1"
+                      :value="runtimeStrategy.settings.ppcSearchTerms.maxConcurrentBatches"
+                      @input="setRuntimeNumber('ppcSearchTerms.maxConcurrentBatches', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >缓存 TTL（小时）</span
+                    ><input
+                      type="number"
+                      min="1"
+                      max="720"
+                      step="1"
+                      :value="getRuntimeNumber('ppcSearchTerms.cacheTtlMs', 3600000)"
+                      @input="setRuntimeNumber('ppcSearchTerms.cacheTtlMs', $event, 3600000)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >最大输出 Token</span
+                    ><input
+                      type="number"
+                      min="1024"
+                      max="64000"
+                      step="1024"
+                      :value="runtimeStrategy.settings.ppcSearchTerms.maxOutputTokens"
+                      @input="setRuntimeNumber('ppcSearchTerms.maxOutputTokens', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                  /></label>
                 </div>
                 <div class="mt-3 grid gap-3 sm:grid-cols-3">
-                  <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" :checked="runtimeStrategy.settings.ppcSearchTerms.enableLlmCache" @change="setRuntimeBoolean('ppcSearchTerms.enableLlmCache', $event)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />启用 LLM 缓存</label>
-                  <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" :checked="runtimeStrategy.settings.ppcSearchTerms.useAgent" @change="setRuntimeBoolean('ppcSearchTerms.useAgent', $event)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />默认启用 Agent</label>
-                  <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" :checked="runtimeStrategy.settings.ppcSearchTerms.allowLocalFallback" @change="setRuntimeBoolean('ppcSearchTerms.allowLocalFallback', $event)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />允许本地回退</label>
+                  <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
+                    ><input
+                      type="checkbox"
+                      :checked="runtimeStrategy.settings.ppcSearchTerms.enableLlmCache"
+                      @change="setRuntimeBoolean('ppcSearchTerms.enableLlmCache', $event)"
+                      class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />启用 LLM 缓存</label
+                  >
+                  <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
+                    ><input
+                      type="checkbox"
+                      :checked="runtimeStrategy.settings.ppcSearchTerms.useAgent"
+                      @change="setRuntimeBoolean('ppcSearchTerms.useAgent', $event)"
+                      class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />默认启用 Agent</label
+                  >
+                  <label class="flex items-center gap-2 text-xs font-semibold text-slate-700"
+                    ><input
+                      type="checkbox"
+                      :checked="runtimeStrategy.settings.ppcSearchTerms.allowLocalFallback"
+                      @change="setRuntimeBoolean('ppcSearchTerms.allowLocalFallback', $event)"
+                      class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />允许本地回退</label
+                  >
                 </div>
                 <div class="mt-3 grid gap-3 sm:grid-cols-3">
                   <template x-for="item in ppcThresholdItems" :key="item.key">
                     <label class="block">
-                      <span class="mb-1.5 block text-[11px] font-semibold text-slate-600" x-text="item.label"></span>
-                      <input type="number" :min="item.min" :max="item.max" :step="item.step" :value="item.value" @input="setRuntimeNumber(item.path, $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20" />
+                      <span
+                        class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                        x-text="item.label"
+                      ></span>
+                      <input
+                        type="number"
+                        :min="item.min"
+                        :max="item.max"
+                        :step="item.step"
+                        :value="item.value"
+                        @input="setRuntimeNumber(item.path, $event)"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
+                      />
                     </label>
                   </template>
                 </div>
@@ -798,10 +1268,7 @@
               </div>
 
               <!-- Conditional Input -->
-              <div
-                :hidden="!proxyNeedsInput"
-                class="space-y-3"
-              >
+              <div :hidden="!proxyNeedsInput" class="space-y-3">
                 <label
                   for="proxy-custom-url"
                   class="block text-xs font-semibold text-slate-600"
@@ -868,16 +1335,100 @@
               <div class="rounded-xl border border-cyan-100 bg-white/85 p-3 shadow-sm">
                 <h4 class="text-xs font-bold text-slate-700">采集运行策略</h4>
                 <div class="mt-3 grid gap-3 sm:grid-cols-4">
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">请求超时（秒）</span><input type="number" min="5" max="120" step="5" :value="getRuntimeNumber('scraper.requestTimeoutMs', 1000)" @input="setRuntimeNumber('scraper.requestTimeoutMs', $event, 1000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">最大并发</span><input type="number" min="1" max="10" step="1" :value="runtimeStrategy.settings.scraper.maxConcurrent" @input="setRuntimeNumber('scraper.maxConcurrent', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">最大重试</span><input type="number" min="0" max="10" step="1" :value="runtimeStrategy.settings.scraper.maxRetries" @input="setRuntimeNumber('scraper.maxRetries', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">重试间隔（秒）</span><input type="number" min="0.1" max="30" step="0.1" :value="getRuntimeNumber('scraper.retryDelayMs', 1000)" @input="setRuntimeNumber('scraper.retryDelayMs', $event, 1000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">批次大小</span><input type="number" min="1" max="50" step="1" :value="runtimeStrategy.settings.scraper.batchSize" @input="setRuntimeNumber('scraper.batchSize', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">批次间隔（秒）</span><input type="number" min="0" max="60" step="0.5" :value="getRuntimeNumber('scraper.batchDelayMs', 1000)" @input="setRuntimeNumber('scraper.batchDelayMs', $event, 1000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20" /></label>
-                  <label class="block"><span class="mb-1.5 block text-[11px] font-semibold text-slate-600">缓存时长（小时）</span><input type="number" min="1" max="720" step="1" :value="getRuntimeNumber('scraper.cacheDurationMs', 3600000)" @input="setRuntimeNumber('scraper.cacheDurationMs', $event, 3600000)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20" /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >请求超时（秒）</span
+                    ><input
+                      type="number"
+                      min="5"
+                      max="120"
+                      step="5"
+                      :value="getRuntimeNumber('scraper.requestTimeoutMs', 1000)"
+                      @input="setRuntimeNumber('scraper.requestTimeoutMs', $event, 1000)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >最大并发</span
+                    ><input
+                      type="number"
+                      min="1"
+                      max="10"
+                      step="1"
+                      :value="runtimeStrategy.settings.scraper.maxConcurrent"
+                      @input="setRuntimeNumber('scraper.maxConcurrent', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >最大重试</span
+                    ><input
+                      type="number"
+                      min="0"
+                      max="10"
+                      step="1"
+                      :value="runtimeStrategy.settings.scraper.maxRetries"
+                      @input="setRuntimeNumber('scraper.maxRetries', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >重试间隔（秒）</span
+                    ><input
+                      type="number"
+                      min="0.1"
+                      max="30"
+                      step="0.1"
+                      :value="getRuntimeNumber('scraper.retryDelayMs', 1000)"
+                      @input="setRuntimeNumber('scraper.retryDelayMs', $event, 1000)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >批次大小</span
+                    ><input
+                      type="number"
+                      min="1"
+                      max="50"
+                      step="1"
+                      :value="runtimeStrategy.settings.scraper.batchSize"
+                      @input="setRuntimeNumber('scraper.batchSize', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >批次间隔（秒）</span
+                    ><input
+                      type="number"
+                      min="0"
+                      max="60"
+                      step="0.5"
+                      :value="getRuntimeNumber('scraper.batchDelayMs', 1000)"
+                      @input="setRuntimeNumber('scraper.batchDelayMs', $event, 1000)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                  /></label>
+                  <label class="block"
+                    ><span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >缓存时长（小时）</span
+                    ><input
+                      type="number"
+                      min="1"
+                      max="720"
+                      step="1"
+                      :value="getRuntimeNumber('scraper.cacheDurationMs', 3600000)"
+                      @input="setRuntimeNumber('scraper.cacheDurationMs', $event, 3600000)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20"
+                  /></label>
                 </div>
                 <div class="mt-3 flex justify-end">
-                  <button type="button" @click="saveRuntimeStrategy()" :disabled="runtimeStrategy.isSaving" class="min-h-[36px] rounded-xl bg-cyan-600 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-500/15 transition duration-200 hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2">保存采集策略</button>
+                  <button
+                    type="button"
+                    @click="saveRuntimeStrategy()"
+                    :disabled="runtimeStrategy.isSaving"
+                    class="min-h-[36px] rounded-xl bg-cyan-600 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-500/15 transition duration-200 hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2"
+                  >
+                    保存采集策略
+                  </button>
                 </div>
               </div>
             </div>
@@ -960,20 +1511,57 @@
                 <h4 class="text-xs font-bold text-slate-700">数据保留策略</h4>
                 <div class="mt-3 grid gap-3 sm:grid-cols-3">
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">历史保留条数</span>
-                    <input type="number" min="10" max="500" step="10" :value="runtimeStrategy.settings.storage.historyMaxItems" @input="setRuntimeNumber('storage.historyMaxItems', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20" />
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >历史保留条数</span
+                    >
+                    <input
+                      type="number"
+                      min="10"
+                      max="500"
+                      step="10"
+                      :value="runtimeStrategy.settings.storage.historyMaxItems"
+                      @input="setRuntimeNumber('storage.historyMaxItems', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                    />
                   </label>
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">缓存清理阈值</span>
-                    <input type="number" min="0.5" max="0.95" step="0.05" :value="runtimeStrategy.settings.storage.lruWarningThreshold" @input="setRuntimeNumber('storage.lruWarningThreshold', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20" />
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >缓存清理阈值</span
+                    >
+                    <input
+                      type="number"
+                      min="0.5"
+                      max="0.95"
+                      step="0.05"
+                      :value="runtimeStrategy.settings.storage.lruWarningThreshold"
+                      @input="setRuntimeNumber('storage.lruWarningThreshold', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                    />
                   </label>
                   <label class="block">
-                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">缓存清理比例</span>
-                    <input type="number" min="0.05" max="0.8" step="0.05" :value="runtimeStrategy.settings.storage.lruCleanupRatio" @input="setRuntimeNumber('storage.lruCleanupRatio', $event)" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20" />
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600"
+                      >缓存清理比例</span
+                    >
+                    <input
+                      type="number"
+                      min="0.05"
+                      max="0.8"
+                      step="0.05"
+                      :value="runtimeStrategy.settings.storage.lruCleanupRatio"
+                      @input="setRuntimeNumber('storage.lruCleanupRatio', $event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                    />
                   </label>
                 </div>
                 <div class="mt-3 flex justify-end">
-                  <button type="button" @click="saveRuntimeStrategy()" :disabled="runtimeStrategy.isSaving" class="min-h-[36px] rounded-xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-blue-500/15 transition duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">保存数据策略</button>
+                  <button
+                    type="button"
+                    @click="saveRuntimeStrategy()"
+                    :disabled="runtimeStrategy.isSaving"
+                    class="min-h-[36px] rounded-xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-blue-500/15 transition duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  >
+                    保存数据策略
+                  </button>
                 </div>
               </div>
 
@@ -1004,10 +1592,7 @@
                   </span>
                 </button>
 
-                <div
-                  :hidden="!localData.cleanupItemsExpanded"
-                  class="space-y-2.5"
-                >
+                <div :hidden="!localData.cleanupItemsExpanded" class="space-y-2.5">
                   <template x-for="bucket in localDataBucketItems" :key="bucket.id">
                     <div class="rounded-xl border border-white/80 bg-white/85 p-3 shadow-sm">
                       <div class="flex items-start gap-3">
@@ -1064,10 +1649,7 @@
                               class="min-h-[32px] min-w-[76px] rounded-lg border px-2.5 text-[10px] font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                               :class="bucket.buttonClass"
                             >
-                              <span
-                                :hidden="bucket.isClearing"
-                                x-text="bucket.actionLabel"
-                              ></span>
+                              <span :hidden="bucket.isClearing" x-text="bucket.actionLabel"></span>
                               <span
                                 :hidden="!bucket.isClearing"
                                 class="inline-flex items-center gap-1"
@@ -1124,15 +1706,24 @@
             ></div>
           </div>
 
-          <!-- Section 5: Runtime Diagnostics -->
-          <section id="settings-section-performance" class="settings-panel-section space-y-4">
+          <!-- Section 5: Developer Diagnostics -->
+          <section
+            id="settings-section-performance"
+            class="settings-panel-section space-y-4"
+            x-show="showDeveloperDiagnostics"
+          >
             <div class="flex items-center gap-2.5 mb-1">
               <div class="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
                 <i class="fas fa-chart-line text-emerald-500 text-[10px]"></i>
               </div>
               <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                运行诊断
+                开发者诊断
               </h3>
+              <span
+                class="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-600"
+              >
+                开发者模式
+              </span>
             </div>
 
             <div class="settings-section-frame settings-section-frame--performance space-y-4">
@@ -1161,32 +1752,195 @@
                   </div>
                 </div>
               </button>
-              <div class="grid gap-2.5 sm:grid-cols-2">
-                <template x-for="item in diagnosticStatusItems" :key="item.id">
-                  <div class="rounded-xl border border-white/80 bg-white/85 p-3 shadow-sm">
-                    <div class="flex items-start gap-2.5">
+
+              <div class="rounded-xl border border-emerald-100 bg-white/85 p-3 shadow-sm">
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-700">调试配置</h4>
+                    <p class="mt-1 text-[10px] leading-relaxed text-slate-500">
+                      仅在开发者诊断入口下显示，修改后立即影响当前运行时。
+                    </p>
+                  </div>
+                  <span
+                    class="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500"
+                  >
+                    即时生效
+                  </span>
+                </div>
+
+                <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                  <label
+                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="developerDiagnostics.performanceEnableMonitoring"
+                      @change="setDeveloperDiagnosticBoolean('performanceEnableMonitoring', $event)"
+                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>
+                      <span class="block">性能监控</span>
                       <span
-                        class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1"
-                        :class="item.toneClass"
+                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
                       >
-                        <i class="fas text-[11px]" :class="item.icon"></i>
+                        Web Vitals、加载耗时与运行指标采集
                       </span>
-                      <span class="min-w-0 flex-1">
-                        <span class="flex items-center justify-between gap-2">
-                          <span class="text-xs font-bold text-slate-700" x-text="item.label"></span>
-                          <span
-                            class="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600"
-                            x-text="item.value"
-                          ></span>
-                        </span>
+                    </span>
+                  </label>
+
+                  <label
+                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="developerDiagnostics.eventDebugEnabled"
+                      @change="setDeveloperDiagnosticBoolean('eventDebugEnabled', $event)"
+                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>
+                      <span class="block">事件调试</span>
+                      <span
+                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                      >
+                        记录 app:* 自定义事件流
+                      </span>
+                    </span>
+                  </label>
+
+                  <label
+                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="developerDiagnostics.errorTrackerEnabled"
+                      @change="setDeveloperDiagnosticBoolean('errorTrackerEnabled', $event)"
+                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>
+                      <span class="block">错误追踪</span>
+                      <span
+                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                      >
+                        捕获运行异常与错误上下文
+                      </span>
+                    </span>
+                  </label>
+
+                  <label
+                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="developerDiagnostics.analyticsEnabled"
+                      @change="setDeveloperDiagnosticBoolean('analyticsEnabled', $event)"
+                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>
+                      <span class="block">行为分析</span>
+                      <span
+                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                      >
+                        记录用户行为分析事件
+                      </span>
+                    </span>
+                  </label>
+
+                  <label
+                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="developerDiagnostics.enableExperimentalFeatures"
+                      @change="setDeveloperDiagnosticBoolean('enableExperimentalFeatures', $event)"
+                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>
+                      <span class="block">实验功能</span>
+                      <span
+                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                      >
+                        启用 experimental feature flags
+                      </span>
+                    </span>
+                  </label>
+
+                  <label
+                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="developerDiagnostics.enableBetaFeatures"
+                      @change="setDeveloperDiagnosticBoolean('enableBetaFeatures', $event)"
+                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>
+                      <span class="block">Beta 功能</span>
+                      <span
+                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                      >
+                        启用 beta feature flags
+                      </span>
+                    </span>
+                  </label>
+
+                  <label
+                    class="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-xs font-semibold text-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="developerDiagnostics.enableDebugMode"
+                      @change="setDeveloperDiagnosticBoolean('enableDebugMode', $event)"
+                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>
+                      <span class="block">Debug 模式</span>
+                      <span
+                        class="mt-0.5 block text-[10px] font-normal leading-relaxed text-slate-500"
+                      >
+                        启用调试模式相关运行分支
+                      </span>
+                    </span>
+                  </label>
+
+                  <label class="block rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+                    <span class="mb-1.5 block text-[11px] font-semibold text-slate-600">
+                      日志级别
+                    </span>
+                    <select
+                      :value="developerDiagnostics.loggerMinLevel"
+                      @change="setDeveloperDiagnosticLogLevel($event)"
+                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
+                    >
+                      <option value="debug">debug</option>
+                      <option value="info">info</option>
+                      <option value="warn">warn</option>
+                      <option value="error">error</option>
+                      <option value="fatal">fatal</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="mt-3 rounded-lg border border-amber-100 bg-amber-50/60 p-3">
+                  <div class="flex items-start gap-2.5">
+                    <span
+                      class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700 ring-1 ring-amber-200"
+                    >
+                      <i class="fas fa-shield-halved text-[11px]"></i>
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      <span class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-xs font-bold text-slate-700">端点安全策略</span>
                         <span
-                          class="mt-1 block text-[10px] leading-relaxed text-slate-400"
-                          x-text="item.description"
+                          class="shrink-0 rounded-md bg-white/80 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700"
+                          x-text="developerDangerousEndpointText"
                         ></span>
                       </span>
-                    </div>
+                      <span class="mt-1 block text-[10px] leading-relaxed text-slate-500">
+                        这是当前环境的只读安全提示，不属于调试开关。
+                      </span>
+                    </span>
                   </div>
-                </template>
+                </div>
               </div>
 
               <!-- Info Card -->
