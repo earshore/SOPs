@@ -211,7 +211,6 @@ export async function clearPlaygroundThreadStore(): Promise<void> {
 }
 
 async function refreshLLMConfig(container: HTMLElement): Promise<void> {
-  const statusEl = container.querySelector<HTMLElement>('#playground-provider-status');
   const modelSelect = container.querySelector<HTMLSelectElement>('#playground-model-select');
 
   currentConfig = await StorageService.getLLMConfigWithKey();
@@ -224,10 +223,10 @@ async function refreshLLMConfig(container: HTMLElement): Promise<void> {
     return;
   }
 
-  renderLLMConfigState(statusEl, modelSelect);
+  renderLLMConfigState(modelSelect);
 }
 
-function renderLLMConfigState(statusEl: HTMLElement | null, modelSelect: HTMLSelectElement): void {
+function renderLLMConfigState(modelSelect: HTMLSelectElement): void {
   modelSelect.replaceChildren();
   const settingsButton =
     modelSelect
@@ -241,9 +240,6 @@ function renderLLMConfigState(statusEl: HTMLElement | null, modelSelect: HTMLSel
   }
 
   if (!hasUsableConfig) {
-    if (statusEl) {
-      statusEl.textContent = '未配置模型，请先在系统设置中配置 LLM';
-    }
     modelSelect.disabled = true;
     modelSelect.appendChild(new Option('未配置模型', ''));
     return;
@@ -261,9 +257,6 @@ function renderLLMConfigState(statusEl: HTMLElement | null, modelSelect: HTMLSel
     : visibleModels[0] || '';
   selectedModel = modelSelect.value;
   modelSelect.disabled = visibleModels.length <= 1;
-  if (statusEl) {
-    statusEl.textContent = `${config.provider} / ${selectedModel}`;
-  }
 }
 
 function initDeepChat(container: HTMLElement): void {
@@ -622,7 +615,6 @@ function bindModelControls(refs: ModelControlRefs): void {
 
   const onModelChange = (): void => {
     selectedModel = modelSelect?.value || selectedModel;
-    updateStatus(container);
   };
   modelSelect?.addEventListener('change', onModelChange);
   cleanupCallbacks.push(() => modelSelect?.removeEventListener('change', onModelChange));
@@ -2374,11 +2366,4 @@ function setConversationActive(container: HTMLElement, isActive: boolean): void 
   chat?.classList.toggle('is-chatting', isActive);
   chat?.classList.toggle('is-empty', !isActive);
   syncDraftInputHeight(container);
-}
-
-function updateStatus(container: HTMLElement): void {
-  const statusEl = container.querySelector<HTMLElement>('#playground-provider-status');
-  if (statusEl && currentConfig && selectedModel) {
-    statusEl.textContent = `${currentConfig.provider} / ${selectedModel}`;
-  }
 }

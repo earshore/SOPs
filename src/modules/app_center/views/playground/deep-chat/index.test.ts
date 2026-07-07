@@ -21,10 +21,9 @@ const deepChatTemplate = `
       <section class="playground-main">
         <button id="playground-toggle-rail" type="button" aria-expanded="true" aria-label="收起最近会话"></button>
         <select id="playground-model-select"></select>
-        <span id="playground-provider-status"></span>
+        <button id="playground-refresh-config" type="button"></button>
         <button id="playground-open-settings" type="button" hidden>配置模型</button>
         <button id="playground-open-promptlab" type="button">生成 Prompt</button>
-        <button id="playground-refresh-config" type="button"></button>
         <details class="playground-tuning-panel">
           <summary>Settings</summary>
           <textarea id="playground-system-prompt"></textarea>
@@ -449,6 +448,13 @@ describe('deep-chat playground template copy', () => {
     expect(template).toContain('>最近会话</h3>');
     expect(template).toContain('id="playground-open-settings"');
     expect(template).toContain('id="playground-open-promptlab"');
+    expect(template).not.toContain('playground-provider-status');
+    expect(template.indexOf('id="playground-model-select"')).toBeLessThan(
+      template.indexOf('id="playground-refresh-config"')
+    );
+    expect(template.indexOf('id="playground-refresh-config"')).toBeLessThan(
+      template.indexOf('class="playground-top-actions"')
+    );
     expect(template).toContain('>Prompt</h3>');
     expect(template).toContain('id="playground-chat-search-modal"');
     expect(template).toContain('aria-label="搜索会话"');
@@ -475,9 +481,6 @@ describe('deep-chat playground module', () => {
       loading: { container: { backgroundColor: '#dc2626' } },
       stop: { container: { backgroundColor: '#dc2626' } },
     });
-    expect(container.querySelector('#playground-provider-status')?.textContent).toBe(
-      'openai / gpt-4.1'
-    );
     expect(queryRequired<HTMLButtonElement>(container, '#playground-open-settings').hidden).toBe(
       true
     );
@@ -643,9 +646,6 @@ describe('deep-chat playground thread history', () => {
 
     await mount(container);
 
-    expect(container.querySelector('#playground-provider-status')?.textContent).toBe(
-      'openai / gpt-4.1-mini'
-    );
     expect(queryRequired<HTMLSelectElement>(container, '#playground-model-select').value).toBe(
       'gpt-4.1-mini'
     );
@@ -1205,9 +1205,7 @@ describe('deep-chat playground request errors', () => {
       expect(onClose).toHaveBeenCalled();
     });
     expect(mocks.callLLM).not.toHaveBeenCalled();
-    expect(container.querySelector('#playground-provider-status')?.textContent).toContain(
-      '未配置模型'
-    );
+    expect(queryRequired<HTMLSelectElement>(container, '#playground-model-select').value).toBe('');
 
     unmount();
   });

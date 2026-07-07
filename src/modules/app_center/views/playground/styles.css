@@ -1087,16 +1087,6 @@
   background: var(--color-slate-50, #f8fafc);
 }
 
-.playground-provider-status {
-  max-width: 220px;
-  color: var(--color-slate-500, #64748b);
-  font-size: var(--text-sm, 0.8125rem);
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .playground-config-link,
 .playground-promptlab-link {
   min-height: 36px;
@@ -1622,7 +1612,7 @@
 
   .playground-select {
     min-width: 0;
-    width: min(190px, calc(100vw - 126px));
+    width: min(190px, calc(100vw - 172px));
   }
 
   .playground-stage {
