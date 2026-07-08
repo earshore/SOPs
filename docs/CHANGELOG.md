@@ -26,6 +26,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.4-rc.5] - 2026-07-08
+
+### Added
+- App Center 概览最近项（recent items）新增图标盒与 `RECENT_ARTIFACT_ICONS` 图标映射，区分不同产物类型。
+- 新增相对/绝对时间格式化工具，最近项时间以「刚刚 / N 分钟前 / N 小时前 / N 天前…」展示，并保留绝对时间 tooltip。
+
+### Changed
+- 重构最近项条目结构：图标盒 + 标题（标题 + 相对时间）+ 元信息 + 操作按钮，补充 hover/focus 过渡、reduced-motion 与响应式微调。
+- 同步应用内版本显示到 `3.0.4-rc.5`。
+
+### Fixed
+- 改进最近项 `aria-label`（类型 · 标题 · 相对时间），提升可访问性。
+- 更新 XSS 扫描报告时间戳。
+
 ## [3.0.4-rc.4] - 2026-07-08
 
 ### Added
