@@ -26,6 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.4-rc.4] - 2026-07-08
+
+### Added
+- 新增 App Center catalog、artifact envelope、workflow definitions 和 workspace context 服务。
+- 新增 App Center 工作台评审文档和对应单元测试覆盖。
+
+### Changed
+- App Center 概览改为 catalog-driven 渲染，减少模板内硬编码。
+- PPC Search Terms 增加 action-list 产物导出和 recent UI 衔接。
+- PromptLab、Keyword Hunter 和历史记录服务接入新的产物/最近上下文。
+- 同步应用内版本显示到 `3.0.4-rc.4`。
+
+### Fixed
+- 补充 App Center catalog/workflow/workspace、Keyword Hunter 快照、PPC UI 和历史记录回归覆盖。
+
 ## [3.0.4-rc.3] - 2026-07-08
 
 ### Added
