@@ -26,6 +26,7 @@ const overviewTemplate = `
     <div class="app-overview-filter-row" role="group" aria-label="应用分类"></div>
     <button class="app-overview-view-btn active" data-view-mode="grid" aria-pressed="true"></button>
     <button class="app-overview-view-btn" data-view-mode="list" aria-pressed="false"></button>
+    <div class="app-overview-flow-grid app-overview-flow-grid--tasks"></div>
     <section id="app-module-apps">
       <div class="app-center-card-grid app-overview-grid"></div>
       <div class="app-overview-list hidden"></div>
@@ -85,6 +86,24 @@ describe('App Center Overview', () => {
         '.app-overview-card .app-child-link[data-tab="keyword_hunter_process"]'
       )?.textContent
     ).toContain('SEO 处理');
+  });
+
+  it('renders the competitor Listing workflow steps from workflow definitions', async () => {
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+
+    const workflowSteps = container.querySelectorAll(
+      '.app-overview-flow-grid--tasks .app-flow-step[data-action="switch-tab"]'
+    );
+
+    expect(workflowSteps).toHaveLength(5);
+    expect(workflowSteps[0]?.textContent).toContain('数据采集');
+    expect(workflowSteps[4]?.textContent).toContain('合规复核');
+    expect(
+      container.querySelector('.app-flow-step[data-tab="keyword_hunter_analysis"]')?.textContent
+    ).toContain('高危词');
+    expect(container.textContent).not.toContain('新品作业流');
   });
 
   it('keeps cards as containers and leaves entry buttons on delegated switch-tab routing', async () => {
@@ -311,12 +330,14 @@ describe('App Center Overview', () => {
 
     await overviewModule.mount(wrapper);
 
-    const inputEntry = wrapper.querySelector('.app-child-link[data-tab="keyword_hunter_input"]');
+    const inputEntry = wrapper.querySelector(
+      '.app-overview-card .app-child-link[data-tab="keyword_hunter_input"]'
+    );
     const processEntry = wrapper.querySelector(
-      '.app-child-link[data-tab="keyword_hunter_process"]'
+      '.app-overview-card .app-child-link[data-tab="keyword_hunter_process"]'
     );
     const analysisEntry = wrapper.querySelector(
-      '.app-child-link[data-tab="keyword_hunter_analysis"]'
+      '.app-overview-card .app-child-link[data-tab="keyword_hunter_analysis"]'
     );
 
     expect(inputEntry?.textContent).toContain('输入格式化');

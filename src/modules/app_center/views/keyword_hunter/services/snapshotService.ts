@@ -6,12 +6,15 @@ import {
   STORAGE_KEYS,
 } from '@/services/storageService';
 import type {
+  KeywordHunterSnapshotSource,
   KeywordHunterSnapshot,
   KeywordHunterSnapshotDiff,
   KeywordHunterSnapshotResult,
   KeywordHunterSnapshotStatus,
 } from '@/types/modules-business';
 import type { KeywordTrackerState } from '@/types/state';
+import { registerKeywordSnapshotArtifact } from '../../../artifactEnvelopeService';
+import { getWorkspaceContext } from '../../../workspaceContext';
 
 const SNAPSHOT_STORAGE_KEY = STORAGE_KEYS.KEYWORD_HUNTER_SNAPSHOTS;
 const INDEXED_SNAPSHOT_STORAGE_KEY = `user:${SNAPSHOT_STORAGE_KEY}`;
@@ -125,6 +128,20 @@ function createSnapshotFingerprint(tracker: KeywordTrackerState): string {
   );
 }
 
+function createSnapshotSource(): KeywordHunterSnapshotSource {
+  const context = getWorkspaceContext();
+  if (!context.workItemId) {
+    return { ...MANUAL_SOURCE };
+  }
+
+  return {
+    type: 'manual',
+    workItemId: context.workItemId,
+    sourceRoute: context.sourceRoute || undefined,
+    sourceAsinOrSku: context.asinOrSku || undefined,
+  };
+}
+
 function createWorkflowFingerprintFromKeywordHunterState(tracker: KeywordTrackerState): string {
   return hashText(
     JSON.stringify({
@@ -209,7 +226,7 @@ function createSnapshotFromKeywordHunterState(
     status: getSnapshotStatus(tracker, options.status),
     createdAt: currentSnapshot?.createdAt || now,
     updatedAt: now,
-    source: { ...MANUAL_SOURCE },
+    source: createSnapshotSource(),
     input: {
       keywordsInputText: tracker.keywordsInputText || tracker.keywords.join('\n'),
       copyInputText: copyText,
@@ -235,10 +252,16 @@ function upsertSnapshot(
   return trimSnapshots(next);
 }
 
+function normalizeSnapshotSource(
+  source: KeywordHunterSnapshot['source']
+): KeywordHunterSnapshotSource {
+  return source?.type === 'manual' ? { ...source } : { ...MANUAL_SOURCE };
+}
+
 function normalizeSnapshot(snapshot: KeywordHunterSnapshot): KeywordHunterSnapshot {
   return {
     ...snapshot,
-    source: { ...MANUAL_SOURCE },
+    source: normalizeSnapshotSource(snapshot.source),
   };
 }
 
@@ -345,8 +368,9 @@ export const KeywordHunterSnapshotService = {
 
     appStore.getState().updateKeywordTracker({
       currentSnapshotId: snapshot.id,
-      snapshotSource: { ...MANUAL_SOURCE },
+      snapshotSource: { ...snapshot.source },
     });
+    registerKeywordSnapshotArtifact(snapshot, getWorkspaceContext());
 
     return snapshot;
   },
@@ -371,8 +395,9 @@ export const KeywordHunterSnapshotService = {
     StorageService.remove(SNAPSHOT_STORAGE_KEY);
     appStore.getState().updateKeywordTracker({
       currentSnapshotId: snapshot.id,
-      snapshotSource: { ...MANUAL_SOURCE },
+      snapshotSource: { ...snapshot.source },
     });
+    registerKeywordSnapshotArtifact(snapshot, getWorkspaceContext());
 
     return snapshot;
   },

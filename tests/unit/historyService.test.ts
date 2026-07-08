@@ -1,5 +1,10 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import type { AnalysisReport, GeneratedPromptRecord, HistoryItem, ScrapedData } from '@/types/modules-business';
+import type {
+  AnalysisReport,
+  GeneratedPromptRecord,
+  HistoryItem,
+  ScrapedData,
+} from '@/types/modules-business';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 import { StorageService } from '@/services/storageService';
 import type { UserProductProfile } from '@/types/state';
@@ -13,17 +18,17 @@ const mocks = vi.hoisted(() => {
       scraper: {
         currentHistoryId: null as HistoryItem['id'] | null,
         selectedSite: 'US',
-        scrapedData: null as ScrapedData | null
+        scrapedData: null as ScrapedData | null,
       },
       analysis: {
         analysisReport: null as unknown,
-        translatedReport: null as unknown
+        translatedReport: null as unknown,
       },
       setCurrentHistoryId: vi.fn(),
       setScrapedData: vi.fn(),
       setAnalysisReport: vi.fn(),
-      setTranslatedReport: vi.fn()
-    }
+      setTranslatedReport: vi.fn(),
+    },
   };
 
   mockStore.setScrapeHistory.mockImplementation((history: HistoryItem[]) => {
@@ -46,9 +51,14 @@ const mocks = vi.hoisted(() => {
   return mockStore;
 });
 
+const appCenterProtocolMocks = vi.hoisted(() => ({
+  setWorkspaceContextFromHistoryItem: vi.fn(),
+  registerHistoryArtifacts: vi.fn(),
+}));
+
 vi.mock('@/services/storageService', () => ({
   STORAGE_KEYS: {
-    SCRAPE_HISTORY: 'scrape_history'
+    SCRAPE_HISTORY: 'scrape_history',
   },
   getRuntimeStorageStrategyOptions: vi.fn(() => ({
     historyMaxItems: 50,
@@ -66,20 +76,28 @@ vi.mock('@/services/storageService', () => ({
     removeScrapeHistoryAsync: vi.fn(async () => {
       mocks.history = [];
     }),
-    remove: mocks.remove
-  }
+    remove: mocks.remove,
+  },
 }));
 
 vi.mock('@/common/config/ConfigCenter', () => ({
   configCenter: {
-    get: vi.fn((path: string) => (path === 'storage.historyMaxItems' ? 50 : undefined))
-  }
+    get: vi.fn((path: string) => (path === 'storage.historyMaxItems' ? 50 : undefined)),
+  },
 }));
 
 vi.mock('@/stores/useAppStore', () => ({
   appStore: {
-    getState: vi.fn(() => mocks.state)
-  }
+    getState: vi.fn(() => mocks.state),
+  },
+}));
+
+vi.mock('@/modules/app_center/workspaceContext', () => ({
+  setWorkspaceContextFromHistoryItem: appCenterProtocolMocks.setWorkspaceContextFromHistoryItem,
+}));
+
+vi.mock('@/modules/app_center/artifactEnvelopeService', () => ({
+  registerHistoryArtifacts: appCenterProtocolMocks.registerHistoryArtifacts,
 }));
 
 vi.mock('@/services/loggerService', () => ({
@@ -87,8 +105,8 @@ vi.mock('@/services/loggerService', () => ({
     debug: vi.fn(),
     error: vi.fn(),
     info: vi.fn(),
-    warn: vi.fn()
-  }
+    warn: vi.fn(),
+  },
 }));
 
 function createScrapedData(timestamp: string, asins: string[]): ScrapedData {
@@ -98,9 +116,9 @@ function createScrapedData(timestamp: string, asins: string[]): ScrapedData {
       marketplace: 'US',
       domain: 'amazon.com',
       language: 'English',
-      total_asins: asins.length
+      total_asins: asins.length,
     },
-    products: asins.map((asin) => ({
+    products: asins.map(asin => ({
       asin,
       url: '',
       language: 'English',
@@ -108,8 +126,8 @@ function createScrapedData(timestamp: string, asins: string[]): ScrapedData {
       feature_bullets: [],
       customer_reviews: [],
       scrape_status: 'success',
-      error: ''
-    }))
+      error: '',
+    })),
   };
 }
 
@@ -119,11 +137,14 @@ function createHistoryItem(id: HistoryItem['id'], timestamp: string, asins: stri
     timestamp,
     site: 'US',
     asins,
-    data: createScrapedData(timestamp, asins)
+    data: createScrapedData(timestamp, asins),
   };
 }
 
-function createPromptRecord(type: GeneratedPromptRecord['type'], prompt: string): GeneratedPromptRecord {
+function createPromptRecord(
+  type: GeneratedPromptRecord['type'],
+  prompt: string
+): GeneratedPromptRecord {
   return {
     id: `${type}-prompt`,
     type,
@@ -135,8 +156,8 @@ function createPromptRecord(type: GeneratedPromptRecord['type'], prompt: string)
     profile: {
       targetMarket: 'English',
       keywordsTier1: 'keyword',
-      keywordsTier2: 'longtail'
-    }
+      keywordsTier2: 'longtail',
+    },
   };
 }
 
@@ -157,276 +178,314 @@ function createUserProductProfile(overrides: Partial<UserProductProfile> = {}): 
     useEmoji: true,
     selectedReportSections: [],
     charLimit: 5000,
-    ...overrides
+    ...overrides,
   };
 }
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mocks.history = [];
-    mocks.state.scraper.currentHistoryId = null;
-    mocks.state.scraper.selectedSite = 'US';
-    mocks.state.scraper.scrapedData = null;
-    mocks.state.analysis.analysisReport = null;
-    mocks.state.analysis.translatedReport = null;
-    HistoryService.clear();
-  });
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.history = [];
+  mocks.state.scraper.currentHistoryId = null;
+  mocks.state.scraper.selectedSite = 'US';
+  mocks.state.scraper.scrapedData = null;
+  mocks.state.analysis.analysisReport = null;
+  mocks.state.analysis.translatedReport = null;
+  HistoryService.clear();
+});
 
-  it('creates a new snapshot when scrape timestamp changes', () => {
-    const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
-    const firstId = first[0]?.id;
+it('creates a new snapshot when scrape timestamp changes', () => {
+  const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+  const firstId = first[0]?.id;
 
-    const second = HistoryService.save(createScrapedData('2026-01-01T00:01:00.000Z', ['B000000002']));
+  const second = HistoryService.save(createScrapedData('2026-01-01T00:01:00.000Z', ['B000000002']));
 
-    expect(second).toHaveLength(2);
-    expect(second[0]?.asins).toEqual(['B000000002']);
-    expect(second[1]?.id).toBe(firstId);
-  });
+  expect(second).toHaveLength(2);
+  expect(second[0]?.asins).toEqual(['B000000002']);
+  expect(second[1]?.id).toBe(firstId);
+});
 
-  it('updates the current snapshot when scrape timestamp is unchanged', () => {
-    const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
-    const firstId = first[0]?.id;
+it('updates workspace context and artifact envelopes when saving scraper history', () => {
+  const [snapshot] = HistoryService.save(
+    createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001'])
+  );
 
-    const updated = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001', 'B000000002']));
+  expect(appCenterProtocolMocks.setWorkspaceContextFromHistoryItem).toHaveBeenCalledWith(
+    snapshot,
+    'scraper'
+  );
+  expect(appCenterProtocolMocks.registerHistoryArtifacts).toHaveBeenCalledWith(snapshot);
+});
 
-    expect(updated).toHaveLength(1);
-    expect(updated[0]?.id).toBe(firstId);
-    expect(updated[0]?.asins).toEqual(['B000000001', 'B000000002']);
-  });
+it('updates the current snapshot when scrape timestamp is unchanged', () => {
+  const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+  const firstId = first[0]?.id;
 
-  it('preserves analysis status and prompt results when current snapshot data is unchanged', () => {
-    const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
-    const firstId = first[0]!.id;
-    const analysisReport = { type: 'analysis', data: 'report' } as AnalysisReport;
+  const updated = HistoryService.save(
+    createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001', 'B000000002'])
+  );
 
-    HistoryService.updateAnalysisStatus(firstId, analysisReport);
-    HistoryService.updatePromptResult(
-      firstId,
-      createPromptRecord('listing', 'Listing Prompt')
-    );
+  expect(updated).toHaveLength(1);
+  expect(updated[0]?.id).toBe(firstId);
+  expect(updated[0]?.asins).toEqual(['B000000001', 'B000000002']);
+});
 
-    const updated = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+it('preserves analysis status and prompt results when current snapshot data is unchanged', () => {
+  const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+  const firstId = first[0]!.id;
+  const analysisReport = { type: 'analysis', data: 'report' } as AnalysisReport;
 
-    expect(updated).toHaveLength(1);
-    expect(updated[0]?.id).toBe(firstId);
-    expect(updated[0]?.analysisStatus?.analysisReport).toBe(analysisReport);
-    expect(updated[0]?.promptResults?.listing?.prompt).toBe('Listing Prompt');
-  });
+  HistoryService.updateAnalysisStatus(firstId, analysisReport);
+  HistoryService.updatePromptResult(firstId, createPromptRecord('listing', 'Listing Prompt'));
 
-  it('clears analysis status and prompt results when current snapshot data changes', () => {
-    const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
-    const firstId = first[0]!.id;
-    const analysisReport = { type: 'analysis', data: 'report' } as AnalysisReport;
+  const updated = HistoryService.save(
+    createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001'])
+  );
 
-    HistoryService.updateAnalysisStatus(firstId, analysisReport);
-    HistoryService.updatePromptResult(
-      firstId,
-      createPromptRecord('listing', 'Listing Prompt')
-    );
+  expect(updated).toHaveLength(1);
+  expect(updated[0]?.id).toBe(firstId);
+  expect(updated[0]?.analysisStatus?.analysisReport).toBe(analysisReport);
+  expect(updated[0]?.promptResults?.listing?.prompt).toBe('Listing Prompt');
+});
 
-    const updated = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001', 'B000000002']));
+it('clears analysis status and prompt results when current snapshot data changes', () => {
+  const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+  const firstId = first[0]!.id;
+  const analysisReport = { type: 'analysis', data: 'report' } as AnalysisReport;
 
-    expect(updated).toHaveLength(1);
-    expect(updated[0]?.id).toBe(firstId);
-    expect(updated[0]?.analysisStatus).toBeUndefined();
-    expect(updated[0]?.promptResults).toBeUndefined();
-    expect(updated[0]?.report).toBeUndefined();
-  });
+  HistoryService.updateAnalysisStatus(firstId, analysisReport);
+  HistoryService.updatePromptResult(firstId, createPromptRecord('listing', 'Listing Prompt'));
 
-  it('persists product DNA profile on a snapshot', async () => {
-    mocks.history = [
-      createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
-    ];
+  const updated = HistoryService.save(
+    createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001', 'B000000002'])
+  );
 
-    const saved = await HistoryService.updateUserProductProfileAsync(
-      'hist-001',
-      createUserProductProfile({ keywordsTier1: 'snapshot keyword' })
-    );
+  expect(updated).toHaveLength(1);
+  expect(updated[0]?.id).toBe(firstId);
+  expect(updated[0]?.analysisStatus).toBeUndefined();
+  expect(updated[0]?.promptResults).toBeUndefined();
+  expect(updated[0]?.report).toBeUndefined();
+});
 
-    expect(saved).toBe(true);
-    expect(mocks.history[0]?.userProductProfile?.keywordsTier1).toBe('snapshot keyword');
-    expect(HistoryService.getUserProductProfileById('hist-001')?.keywordsTier1).toBe('snapshot keyword');
-  });
+it('persists product DNA profile on a snapshot', async () => {
+  mocks.history = [createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])];
 
-  it('clears product DNA profile when current snapshot data changes', async () => {
-    const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
-    const firstId = first[0]!.id;
+  const saved = await HistoryService.updateUserProductProfileAsync(
+    'hist-001',
+    createUserProductProfile({ keywordsTier1: 'snapshot keyword' })
+  );
 
-    await HistoryService.updateUserProductProfileAsync(
-      firstId,
-      createUserProductProfile({ keywordsTier1: 'old snapshot keyword' })
-    );
+  expect(saved).toBe(true);
+  expect(mocks.history[0]?.userProductProfile?.keywordsTier1).toBe('snapshot keyword');
+  expect(HistoryService.getUserProductProfileById('hist-001')?.keywordsTier1).toBe(
+    'snapshot keyword'
+  );
+});
 
-    const updated = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001', 'B000000002']));
+it('clears product DNA profile when current snapshot data changes', async () => {
+  const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+  const firstId = first[0]!.id;
 
-    expect(updated[0]?.id).toBe(firstId);
-    expect(updated[0]?.userProductProfile).toBeUndefined();
-  });
+  await HistoryService.updateUserProductProfileAsync(
+    firstId,
+    createUserProductProfile({ keywordsTier1: 'old snapshot keyword' })
+  );
 
-  it('clears prompt results when replacing a snapshot analysis report', () => {
-    const [snapshot] = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
-    const snapshotId = snapshot!.id;
+  const updated = HistoryService.save(
+    createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001', 'B000000002'])
+  );
 
-    HistoryService.updateAnalysisStatus(snapshotId, { type: 'analysis', data: 'old report' } as AnalysisReport);
-    HistoryService.updatePromptResult(
-      snapshotId,
-      createPromptRecord('listing', 'Listing Prompt')
-    );
-    HistoryService.updateAnalysisStatus(snapshotId, { type: 'analysis', data: 'new report' } as AnalysisReport);
+  expect(updated[0]?.id).toBe(firstId);
+  expect(updated[0]?.userProductProfile).toBeUndefined();
+});
 
-    const updated = HistoryService.getById(snapshotId);
-    expect(updated?.analysisStatus?.analysisReport).toEqual({ type: 'analysis', data: 'new report' });
-    expect(updated?.promptResults).toBeUndefined();
-  });
+it('clears prompt results when replacing a snapshot analysis report', () => {
+  const [snapshot] = HistoryService.save(
+    createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001'])
+  );
+  const snapshotId = snapshot!.id;
 
-  it('keeps the newest 50 snapshots', () => {
-    for (let index = 0; index < 55; index += 1) {
-      const timestamp = new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString();
-      HistoryService.save(createScrapedData(timestamp, [`B${String(index).padStart(9, '0')}`]));
-    }
+  HistoryService.updateAnalysisStatus(snapshotId, {
+    type: 'analysis',
+    data: 'old report',
+  } as AnalysisReport);
+  HistoryService.updatePromptResult(snapshotId, createPromptRecord('listing', 'Listing Prompt'));
+  HistoryService.updateAnalysisStatus(snapshotId, {
+    type: 'analysis',
+    data: 'new report',
+  } as AnalysisReport);
 
-    expect(mocks.history).toHaveLength(50);
-    expect(mocks.history[0]?.timestamp).toBe('2026-01-01T00:54:00.000Z');
-    expect(mocks.history[49]?.timestamp).toBe('2026-01-01T00:05:00.000Z');
-  });
+  const updated = HistoryService.getById(snapshotId);
+  expect(updated?.analysisStatus?.analysisReport).toEqual({ type: 'analysis', data: 'new report' });
+  expect(updated?.promptResults).toBeUndefined();
+});
 
-  it('deletes one snapshot by id', () => {
-    const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
-    const firstId = first[0]!.id;
-    const second = HistoryService.save(createScrapedData('2026-01-01T00:01:00.000Z', ['B000000002']));
-    const latestId = second[0]!.id;
+it('keeps the newest 50 snapshots', () => {
+  for (let index = 0; index < 55; index += 1) {
+    const timestamp = new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString();
+    HistoryService.save(createScrapedData(timestamp, [`B${String(index).padStart(9, '0')}`]));
+  }
 
-    const deleted = HistoryService.deleteById(firstId);
+  expect(mocks.history).toHaveLength(50);
+  expect(mocks.history[0]?.timestamp).toBe('2026-01-01T00:54:00.000Z');
+  expect(mocks.history[49]?.timestamp).toBe('2026-01-01T00:05:00.000Z');
+});
 
-    expect(deleted).toBe(true);
-    expect(mocks.history).toEqual([
-      expect.objectContaining({ id: latestId })
-    ]);
-  });
+it('deletes one snapshot by id', () => {
+  const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+  const firstId = first[0]!.id;
+  const second = HistoryService.save(createScrapedData('2026-01-01T00:01:00.000Z', ['B000000002']));
+  const latestId = second[0]!.id;
 
-  it('clears current history id when deleting the loaded snapshot', async () => {
-    mocks.history = [
-      createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
-    ];
-    mocks.state.scraper.currentHistoryId = 'hist-001';
-    mocks.state.scraper.scrapedData = mocks.history[0]!.data;
-    mocks.state.analysis.analysisReport = { type: 'analysis', data: 'report' };
-    mocks.state.analysis.translatedReport = { type: 'translated', data: 'report' };
+  const deleted = HistoryService.deleteById(firstId);
 
-    const deleted = await HistoryService.deleteByIdAsync('hist-001');
+  expect(deleted).toBe(true);
+  expect(mocks.history).toEqual([expect.objectContaining({ id: latestId })]);
+});
 
-    expect(deleted).toBe(true);
-    expect(mocks.state.scraper.currentHistoryId).toBeNull();
-    expect(mocks.state.scraper.scrapedData).toBeNull();
-    expect(mocks.state.analysis.analysisReport).toBeNull();
-    expect(mocks.state.analysis.translatedReport).toBeNull();
-    expect(mocks.state.setCurrentHistoryId).toHaveBeenCalledWith(null);
-    expect(mocks.history).toEqual([]);
-  });
+it('clears current history id when deleting the loaded snapshot', async () => {
+  mocks.history = [createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])];
+  mocks.state.scraper.currentHistoryId = 'hist-001';
+  mocks.state.scraper.scrapedData = mocks.history[0]!.data;
+  mocks.state.analysis.analysisReport = { type: 'analysis', data: 'report' };
+  mocks.state.analysis.translatedReport = { type: 'translated', data: 'report' };
 
-  it('clears current snapshot workspace state when clearing all history', async () => {
-    mocks.history = [
-      createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
-    ];
-    mocks.state.scraper.currentHistoryId = 'hist-001';
-    mocks.state.scraper.scrapedData = mocks.history[0]!.data;
-    mocks.state.analysis.analysisReport = { type: 'analysis', data: 'report' };
-    mocks.state.analysis.translatedReport = { type: 'translated', data: 'report' };
+  const deleted = await HistoryService.deleteByIdAsync('hist-001');
 
-    await HistoryService.clearAsync();
+  expect(deleted).toBe(true);
+  expect(mocks.state.scraper.currentHistoryId).toBeNull();
+  expect(mocks.state.scraper.scrapedData).toBeNull();
+  expect(mocks.state.analysis.analysisReport).toBeNull();
+  expect(mocks.state.analysis.translatedReport).toBeNull();
+  expect(mocks.state.setCurrentHistoryId).toHaveBeenCalledWith(null);
+  expect(mocks.history).toEqual([]);
+});
 
-    expect(mocks.history).toEqual([]);
-    expect(mocks.state.scraper.currentHistoryId).toBeNull();
-    expect(mocks.state.scraper.scrapedData).toBeNull();
-    expect(mocks.state.analysis.analysisReport).toBeNull();
-    expect(mocks.state.analysis.translatedReport).toBeNull();
-  });
+it('clears current snapshot workspace state when clearing all history', async () => {
+  mocks.history = [createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])];
+  mocks.state.scraper.currentHistoryId = 'hist-001';
+  mocks.state.scraper.scrapedData = mocks.history[0]!.data;
+  mocks.state.analysis.analysisReport = { type: 'analysis', data: 'report' };
+  mocks.state.analysis.translatedReport = { type: 'translated', data: 'report' };
 
-  it('does not persist when deleting a missing snapshot id', () => {
-    HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
-    mocks.setScrapeHistory.mockClear();
+  await HistoryService.clearAsync();
 
-    const deleted = HistoryService.deleteById('missing-id');
+  expect(mocks.history).toEqual([]);
+  expect(mocks.state.scraper.currentHistoryId).toBeNull();
+  expect(mocks.state.scraper.scrapedData).toBeNull();
+  expect(mocks.state.analysis.analysisReport).toBeNull();
+  expect(mocks.state.analysis.translatedReport).toBeNull();
+});
 
-    expect(deleted).toBe(false);
-    expect(mocks.setScrapeHistory).not.toHaveBeenCalled();
-    expect(HistoryService.getAll()).toHaveLength(1);
-  });
+it('does not persist when deleting a missing snapshot id', () => {
+  HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+  mocks.setScrapeHistory.mockClear();
 
-  it('persists generated prompt results on a snapshot', async () => {
-    mocks.history = [
-      createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
-    ];
+  const deleted = HistoryService.deleteById('missing-id');
 
-    const savedListing = await HistoryService.updatePromptResultAsync(
-      'hist-001',
-      createPromptRecord('listing', 'Listing Prompt')
-    );
-    const savedVisual = await HistoryService.updatePromptResultAsync(
-      'hist-001',
-      createPromptRecord('visual', 'Visual Prompt')
-    );
+  expect(deleted).toBe(false);
+  expect(mocks.setScrapeHistory).not.toHaveBeenCalled();
+  expect(HistoryService.getAll()).toHaveLength(1);
+});
 
-    expect(savedListing).toBe(true);
-    expect(savedVisual).toBe(true);
-    expect(mocks.history[0]?.promptResults?.listing?.prompt).toBe('Listing Prompt');
-    expect(mocks.history[0]?.promptResults?.visual?.prompt).toBe('Visual Prompt');
-    expect(mocks.history[0]?.promptResults?.history).toHaveLength(2);
-    expect(mocks.history[0]?.promptResults?.history[0]?.historyId).toBe('hist-001');
-  });
+it('persists generated prompt results on a snapshot', async () => {
+  mocks.history = [createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])];
 
-  it('deletes generated prompt results from a snapshot', async () => {
-    mocks.history = [
-      createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])
-    ];
+  const savedListing = await HistoryService.updatePromptResultAsync(
+    'hist-001',
+    createPromptRecord('listing', 'Listing Prompt')
+  );
+  const savedVisual = await HistoryService.updatePromptResultAsync(
+    'hist-001',
+    createPromptRecord('visual', 'Visual Prompt')
+  );
 
-    const oldListing = {
-      ...createPromptRecord('listing', 'Old Listing Prompt'),
-      id: 'listing-old',
-      generatedAt: '2026-01-01T00:05:00.000Z'
-    };
-    const newListing = {
-      ...createPromptRecord('listing', 'New Listing Prompt'),
-      id: 'listing-new',
-      generatedAt: '2026-01-01T00:10:00.000Z'
-    };
-    const visual = {
-      ...createPromptRecord('visual', 'Visual Prompt'),
-      id: 'visual-1',
-      generatedAt: '2026-01-01T00:11:00.000Z'
-    };
+  expect(savedListing).toBe(true);
+  expect(savedVisual).toBe(true);
+  expect(mocks.history[0]?.promptResults?.listing?.prompt).toBe('Listing Prompt');
+  expect(mocks.history[0]?.promptResults?.visual?.prompt).toBe('Visual Prompt');
+  expect(mocks.history[0]?.promptResults?.history).toHaveLength(2);
+  expect(mocks.history[0]?.promptResults?.history[0]?.historyId).toBe('hist-001');
+});
 
-    await HistoryService.updatePromptResultAsync('hist-001', oldListing);
-    await HistoryService.updatePromptResultAsync('hist-001', newListing);
-    await HistoryService.updatePromptResultAsync('hist-001', visual);
+it('refreshes artifact envelopes when analysis and prompt results are saved', async () => {
+  mocks.history = [createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])];
+  appCenterProtocolMocks.registerHistoryArtifacts.mockClear();
 
-    const deleted = await HistoryService.deletePromptResultAsync('listing-new');
+  await HistoryService.updateAnalysisStatusAsync('hist-001', {
+    type: 'analysis',
+    data: 'report',
+  } as AnalysisReport);
+  await HistoryService.updatePromptResultAsync(
+    'hist-001',
+    createPromptRecord('listing', 'Listing Prompt')
+  );
 
-    expect(deleted).toBe(true);
-    expect(mocks.history[0]?.promptResults?.listing?.id).toBe('listing-old');
-    expect(mocks.history[0]?.promptResults?.visual?.id).toBe('visual-1');
-    expect(mocks.history[0]?.promptResults?.history.map((item) => item.id)).toEqual([
-      'visual-1',
-      'listing-old'
-    ]);
-  });
+  expect(appCenterProtocolMocks.registerHistoryArtifacts).toHaveBeenCalledTimes(2);
+  expect(appCenterProtocolMocks.registerHistoryArtifacts).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      id: 'hist-001',
+      promptResults: expect.objectContaining({
+        listing: expect.objectContaining({ prompt: 'Listing Prompt' }),
+      }),
+    })
+  );
+});
 
-  it('treats deleting a missing prompt result as idempotent', async () => {
-    HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
-    vi.mocked(StorageService.setScrapeHistoryAsync).mockClear();
+it('deletes generated prompt results from a snapshot', async () => {
+  mocks.history = [createHistoryItem('hist-001', '2026-01-01T00:00:00.000Z', ['B000000001'])];
 
-    const deleted = await HistoryService.deletePromptResultAsync('missing-prompt');
+  const oldListing = {
+    ...createPromptRecord('listing', 'Old Listing Prompt'),
+    id: 'listing-old',
+    generatedAt: '2026-01-01T00:05:00.000Z',
+  };
+  const newListing = {
+    ...createPromptRecord('listing', 'New Listing Prompt'),
+    id: 'listing-new',
+    generatedAt: '2026-01-01T00:10:00.000Z',
+  };
+  const visual = {
+    ...createPromptRecord('visual', 'Visual Prompt'),
+    id: 'visual-1',
+    generatedAt: '2026-01-01T00:11:00.000Z',
+  };
 
-    expect(deleted).toBe(true);
-    expect(StorageService.setScrapeHistoryAsync).not.toHaveBeenCalled();
-  });
+  await HistoryService.updatePromptResultAsync('hist-001', oldListing);
+  await HistoryService.updatePromptResultAsync('hist-001', newListing);
+  await HistoryService.updatePromptResultAsync('hist-001', visual);
 
-  it('reports prompt result delete persistence failures', async () => {
-    const [snapshot] = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
-    await HistoryService.updatePromptResultAsync(snapshot!.id, createPromptRecord('listing', 'Listing Prompt'));
-    vi.mocked(StorageService.setScrapeHistoryAsync).mockResolvedValueOnce(false);
+  const deleted = await HistoryService.deletePromptResultAsync('listing-new');
 
-    const deleted = await HistoryService.deletePromptResultAsync('listing-prompt');
+  expect(deleted).toBe(true);
+  expect(mocks.history[0]?.promptResults?.listing?.id).toBe('listing-old');
+  expect(mocks.history[0]?.promptResults?.visual?.id).toBe('visual-1');
+  expect(mocks.history[0]?.promptResults?.history.map(item => item.id)).toEqual([
+    'visual-1',
+    'listing-old',
+  ]);
+});
 
-    expect(deleted).toBe(false);
-  });
+it('treats deleting a missing prompt result as idempotent', async () => {
+  HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
+  vi.mocked(StorageService.setScrapeHistoryAsync).mockClear();
+
+  const deleted = await HistoryService.deletePromptResultAsync('missing-prompt');
+
+  expect(deleted).toBe(true);
+  expect(StorageService.setScrapeHistoryAsync).not.toHaveBeenCalled();
+});
+
+it('reports prompt result delete persistence failures', async () => {
+  const [snapshot] = HistoryService.save(
+    createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001'])
+  );
+  await HistoryService.updatePromptResultAsync(
+    snapshot!.id,
+    createPromptRecord('listing', 'Listing Prompt')
+  );
+  vi.mocked(StorageService.setScrapeHistoryAsync).mockResolvedValueOnce(false);
+
+  const deleted = await HistoryService.deletePromptResultAsync('listing-prompt');
+
+  expect(deleted).toBe(false);
+});

@@ -85,4 +85,5 @@ export interface PromptlabAlpineContext {
   saveState(): void;
   renderReportAnalysis(): void;
   initializeGranularSelections(dimensionId: string): void;
+  handoffListingPromptToKeywordHunter(): Promise<void>;
 }

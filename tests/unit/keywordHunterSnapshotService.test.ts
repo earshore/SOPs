@@ -55,6 +55,15 @@ const mocks = vi.hoisted(() => {
     localRemove: vi.fn(async () => {
       mocks.indexedSnapshots = [];
     }),
+    workspaceContext: {
+      workItemId: null as string | null,
+      marketplace: '',
+      language: '',
+      asinOrSku: '',
+      sourceRoute: '',
+      updatedAt: '',
+    },
+    registerKeywordSnapshotArtifact: vi.fn(),
     state,
   };
 });
@@ -96,6 +105,14 @@ vi.mock('@/stores/useAppStore', () => ({
   },
 }));
 
+vi.mock('@/modules/app_center/workspaceContext', () => ({
+  getWorkspaceContext: vi.fn(() => mocks.workspaceContext),
+}));
+
+vi.mock('@/modules/app_center/artifactEnvelopeService', () => ({
+  registerKeywordSnapshotArtifact: mocks.registerKeywordSnapshotArtifact,
+}));
+
 const mockedLocalDataStore = vi.mocked(LocalDataStore);
 
 function resetTracker(): void {
@@ -130,6 +147,14 @@ function resetTracker(): void {
       type: 'manual',
     },
   };
+  mocks.workspaceContext = {
+    workItemId: null,
+    marketplace: '',
+    language: '',
+    asinOrSku: '',
+    sourceRoute: '',
+    updatedAt: '',
+  };
 }
 
 beforeEach(() => {
@@ -155,6 +180,32 @@ it('saves the current Keyword Hunter state as a snapshot', () => {
   expect(mocks.snapshots).toEqual([snapshot]);
   expect(mocks.state.keywordTracker.currentSnapshotId).toBe(snapshot.id);
   expect(mocks.state.keywordTracker.snapshotSource).toEqual({ type: 'manual' });
+});
+
+it('records the active App Center work item on Keyword Hunter snapshots', () => {
+  mocks.workspaceContext = {
+    workItemId: 'competitor_listing:hist-001',
+    marketplace: 'DE',
+    language: 'German',
+    asinOrSku: 'B000000001',
+    sourceRoute: 'keyword_hunter_analysis',
+    updatedAt: '2026-01-01T00:30:00.000Z',
+  };
+
+  const snapshot = KeywordHunterSnapshotService.saveCurrent({
+    title: 'Workflow keyword review',
+  });
+
+  expect(snapshot.source).toEqual({
+    type: 'manual',
+    workItemId: 'competitor_listing:hist-001',
+    sourceRoute: 'keyword_hunter_analysis',
+    sourceAsinOrSku: 'B000000001',
+  });
+  expect(mocks.registerKeywordSnapshotArtifact).toHaveBeenCalledWith(
+    snapshot,
+    mocks.workspaceContext
+  );
 });
 
 it('updates the loaded snapshot instead of creating duplicates', () => {

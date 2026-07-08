@@ -19,6 +19,8 @@ import type {
 } from '@/types/modules-business';
 import type { UserProductProfile } from '@/types/state';
 import { getReportFingerprint, getScrapedDataFingerprint } from './reportIdentity';
+import { registerHistoryArtifacts } from '../../../artifactEnvelopeService';
+import { setWorkspaceContextFromHistoryItem } from '../../../workspaceContext';
 
 const MAX_PROMPT_RESULT_HISTORY = 20;
 
@@ -358,6 +360,18 @@ function createHistoryDraft(
   };
 }
 
+function syncAppCenterWorkspaceFromHistoryItem(item: HistoryItem): void {
+  setWorkspaceContextFromHistoryItem(item, 'scraper');
+  registerHistoryArtifacts(item);
+}
+
+function refreshAppCenterArtifactsForHistoryId(id: HistoryItem['id']): void {
+  const item = getMutableHistoryItem(readHistoryFromStorage(), id);
+  if (item) {
+    registerHistoryArtifacts(item);
+  }
+}
+
 function upsertHistoryItem(history: HistoryItem[], draft: HistoryDraft): void {
   if (draft.shouldUpdateCurrent && draft.currentHistoryIndex >= 0) {
     history[draft.currentHistoryIndex] = draft.historyItem;
@@ -594,6 +608,7 @@ export const HistoryService = {
       throw new Error('保存历史记录失败：本地存储空间不足');
     }
     historyCache = trimmedHistory;
+    syncAppCenterWorkspaceFromHistoryItem(draft.historyItem);
 
     return trimmedHistory;
   },
@@ -621,6 +636,7 @@ export const HistoryService = {
     }
 
     historyCache = trimmedHistory;
+    syncAppCenterWorkspaceFromHistoryItem(draft.historyItem);
     return trimmedHistory;
   },
 
@@ -784,7 +800,15 @@ export const HistoryService = {
   },
 
   updatePromptResult(id: HistoryItem['id'], prompt: GeneratedPromptRecord): boolean {
-    return updateHistoryItem(id, createPromptResultMutation(prompt), '更新 Prompt 结果失败');
+    const updated = updateHistoryItem(
+      id,
+      createPromptResultMutation(prompt),
+      '更新 Prompt 结果失败'
+    );
+    if (updated) {
+      refreshAppCenterArtifactsForHistoryId(id);
+    }
+    return updated;
   },
 
   deletePromptResult(promptId: string): boolean {
@@ -829,7 +853,15 @@ export const HistoryService = {
     id: HistoryItem['id'],
     prompt: GeneratedPromptRecord
   ): Promise<boolean> {
-    return updateHistoryItemAsync(id, createPromptResultMutation(prompt), '更新 Prompt 结果失败');
+    const updated = await updateHistoryItemAsync(
+      id,
+      createPromptResultMutation(prompt),
+      '更新 Prompt 结果失败'
+    );
+    if (updated) {
+      refreshAppCenterArtifactsForHistoryId(id);
+    }
+    return updated;
   },
 
   /**
@@ -842,11 +874,15 @@ export const HistoryService = {
     analysisReport: AnalysisReport,
     binding?: AnalysisSourceBinding
   ): boolean {
-    return updateHistoryItem(
+    const updated = updateHistoryItem(
       id,
       targetItem => applyAnalysisStatus(targetItem, analysisReport, binding),
       '更新分析状态失败'
     );
+    if (updated) {
+      refreshAppCenterArtifactsForHistoryId(id);
+    }
+    return updated;
   },
 
   async updateAnalysisStatusAsync(
@@ -854,10 +890,14 @@ export const HistoryService = {
     analysisReport: AnalysisReport,
     binding?: AnalysisSourceBinding
   ): Promise<boolean> {
-    return updateHistoryItemAsync(
+    const updated = await updateHistoryItemAsync(
       id,
       targetItem => applyAnalysisStatus(targetItem, analysisReport, binding),
       '更新分析状态失败'
     );
+    if (updated) {
+      refreshAppCenterArtifactsForHistoryId(id);
+    }
+    return updated;
   },
 };

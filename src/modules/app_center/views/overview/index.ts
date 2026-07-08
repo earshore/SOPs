@@ -14,6 +14,10 @@ import {
   getAppCenterCatalogCategoryCounts,
   getAppCenterCatalogRoute,
 } from '../../appCatalog';
+import {
+  getAppCenterWorkflowDefinition,
+  type AppCenterWorkflowStep,
+} from '../../workflowDefinitions';
 
 interface OverviewFilterState {
   category: string;
@@ -113,9 +117,48 @@ function initOverviewEvents(container: HTMLElement): void {
 }
 
 function renderOverviewCatalog(container: HTMLElement): void {
+  renderWorkflowSteps(container);
   renderCategoryFilters(container);
   renderCatalogCards(container);
   renderCatalogList(container);
+}
+
+function renderWorkflowSteps(container: HTMLElement): void {
+  const flowGrid = container.querySelector<HTMLElement>('.app-overview-flow-grid--tasks');
+  if (!flowGrid) return;
+
+  const workflow = getAppCenterWorkflowDefinition('competitor_listing');
+  flowGrid.replaceChildren(...workflow.steps.map((step, index) => createWorkflowStep(step, index)));
+}
+
+function createWorkflowStep(step: AppCenterWorkflowStep, index: number): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.className = 'app-flow-step app-child-link';
+  button.type = 'button';
+  button.dataset.action = 'switch-tab';
+  button.dataset.tab = step.routeId;
+
+  const stepIndex = document.createElement('span');
+  stepIndex.className = 'app-flow-index';
+  stepIndex.textContent = String(index + 1).padStart(2, '0');
+
+  const iconBox = document.createElement('span');
+  iconBox.className = 'app-flow-icon';
+  const icon = document.createElement('i');
+  icon.className = step.icon;
+  icon.setAttribute('aria-hidden', 'true');
+  iconBox.append(icon);
+
+  const copy = document.createElement('span');
+  copy.className = 'app-flow-copy';
+  const title = document.createElement('strong');
+  title.textContent = step.title;
+  const summary = document.createElement('small');
+  summary.textContent = `${step.summary} 复核：${step.reviewPoints.join('、')}`;
+  copy.append(title, summary);
+
+  button.append(stepIndex, iconBox, copy);
+  return button;
 }
 
 function renderCategoryFilters(container: HTMLElement): void {

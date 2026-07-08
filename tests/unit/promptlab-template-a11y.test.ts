@@ -14,17 +14,17 @@ describe('PromptLab template accessibility semantics', () => {
   it('keeps PromptLab buttons explicit about non-submit behavior', () => {
     const buttonOpenings = template.match(/<button\b[^>]*>/g) ?? [];
     const implicitButtons = buttonOpenings.filter(
-      (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+      button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
     );
 
-    expect(buttonOpenings).toHaveLength(19);
+    expect(buttonOpenings).toHaveLength(20);
     expect(implicitButtons).toEqual([]);
   });
 
   it('keeps PromptLab report renderer buttons explicit about non-submit behavior', () => {
     const buttonOpenings = reportRenderer.match(/<button\b[^>]*>/g) ?? [];
     const implicitButtons = buttonOpenings.filter(
-      (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+      button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
     );
 
     expect(buttonOpenings).toHaveLength(4);

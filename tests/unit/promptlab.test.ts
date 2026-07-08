@@ -15,6 +15,7 @@ import eventBus from '@/common/EventBus';
 import { MODULE_EVENTS, APP_EVENTS } from '@/common/constants/eventConstants';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 import { getReportFingerprint } from '@/modules/app_center/views/master_analysis/services/reportIdentity';
+import { navigateToRouteId } from '@/common/router/initRouter';
 import type { UserProductProfile } from '@/types/state';
 import type { GeneratedPromptRecord, HistoryItem } from '@/types/modules-business';
 
@@ -28,6 +29,10 @@ vi.mock('@/modules/app_center/views/master_analysis/services/promptlabService', 
     generateMasterPrompt: vi.fn(() => 'Generated Listing Prompt'),
     generateVisualPrompt: vi.fn(() => 'Generated Visual Prompt'),
   },
+}));
+
+vi.mock('@/common/router/initRouter', () => ({
+  navigateToRouteId: vi.fn(async () => true),
 }));
 
 const createUsableAnalysisReport = () => ({
@@ -662,18 +667,14 @@ describe('Computed Properties', () => {
     appStore.getState().updateAnalysis({ analysisReport: { marketplace: 'US' } as any });
     expect(component.hasReport).toBe(false);
 
-    appStore
-      .getState()
-      .updateAnalysis({
-        analysisReport: { metadata: { marketplace: 'US' }, analysisReport: {} } as any,
-      });
+    appStore.getState().updateAnalysis({
+      analysisReport: { metadata: { marketplace: 'US' }, analysisReport: {} } as any,
+    });
     expect(component.hasReport).toBe(false);
 
-    appStore
-      .getState()
-      .updateAnalysis({
-        analysisReport: { marketplace: 'US', results: [{ title: 'Placeholder' }] } as any,
-      });
+    appStore.getState().updateAnalysis({
+      analysisReport: { marketplace: 'US', results: [{ title: 'Placeholder' }] } as any,
+    });
     expect(component.hasReport).toBe(false);
 
     appStore
@@ -889,6 +890,35 @@ describe('Prompt Generation', () => {
     expect(showToast).toHaveBeenCalledWith(expect.stringContaining('不能为空'), {
       type: 'warning',
     });
+  });
+
+  it('should hand off generated Listing Prompt to Keyword Hunter review', async () => {
+    const { showToast } = await import('@/common/ui');
+    component.listingPromptCache = 'Generated Listing Prompt body';
+    component.profile.keywordsTier1 = 'humidifier, cool mist';
+    component.profile.keywordsTier2 = 'bedroom humidifier\nquiet humidifier';
+
+    await component.handoffListingPromptToKeywordHunter();
+
+    expect(appStore.getState().keywordTracker).toMatchObject({
+      keywordsInputText: 'humidifier\ncool mist\nbedroom humidifier\nquiet humidifier',
+      copyInputText: 'Generated Listing Prompt body',
+      processedCopy: 'Generated Listing Prompt body',
+      keywords: ['humidifier', 'cool mist', 'bedroom humidifier', 'quiet humidifier'],
+      currentSnapshotId: null,
+    });
+    expect(navigateToRouteId).toHaveBeenCalledWith('keyword_hunter_input');
+    expect(showToast).toHaveBeenCalledWith('已带入 Keyword Hunter 复核', { type: 'success' });
+  });
+
+  it('should not hand off to Keyword Hunter without a Listing Prompt', async () => {
+    const { showToast } = await import('@/common/ui');
+    component.listingPromptCache = '';
+
+    await component.handoffListingPromptToKeywordHunter();
+
+    expect(navigateToRouteId).not.toHaveBeenCalledWith('keyword_hunter_input');
+    expect(showToast).toHaveBeenCalledWith('请先生成 Listing Prompt', { type: 'warning' });
   });
 });
 

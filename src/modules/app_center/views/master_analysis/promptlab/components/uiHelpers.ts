@@ -12,6 +12,7 @@
 
 import { appStore } from '@/stores/useAppStore';
 import { showToast } from '@/common/ui';
+import { navigateToRouteId } from '@/common/router/initRouter';
 import type { DnaConfidence, PromptlabAlpineContext, ConsoleMode } from './types';
 import type { PromptInputs, UserProductProfile } from '@/types/state';
 import type { AnalysisReport } from '@/types/modules-business';
@@ -200,6 +201,51 @@ export async function copySeoKeywords(ctx: PromptlabAlpineContext): Promise<void
     console.error('[Promptlab] 复制 SEO 关键词失败:', error);
     showToast('复制失败，请重试', { type: 'error' });
   }
+}
+
+function parsePromptlabKeywords(ctx: PromptlabAlpineContext): string[] {
+  const seen = new Set<string>();
+  return [ctx.profile.keywordsTier1, ctx.profile.keywordsTier2]
+    .join('\n')
+    .split(/[\n,;，；]+/)
+    .map(keyword => keyword.trim())
+    .filter(keyword => {
+      const normalized = keyword.toLowerCase();
+      if (!normalized || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
+}
+
+export async function handoffListingPromptToKeywordHunter(
+  ctx: PromptlabAlpineContext
+): Promise<void> {
+  const listingPrompt = ctx.listingPromptCache.trim();
+  if (!listingPrompt) {
+    showToast('请先生成 Listing Prompt', { type: 'warning' });
+    return;
+  }
+
+  const keywords = parsePromptlabKeywords(ctx);
+  appStore.getState().updateKeywordTracker({
+    keywordsInputText: keywords.join('\n'),
+    copyInputText: listingPrompt,
+    keywords,
+    processedCopy: listingPrompt,
+    matchedKeywords: [],
+    unmatchedKeywords: [],
+    wordFrequency: [],
+    paragraphs: [],
+    llmAnalysisResult: '',
+    currentSnapshotId: null,
+    keywordLocationIndex: {},
+    snapshotSource: { type: 'manual' },
+  });
+
+  const didNavigate = await navigateToRouteId('keyword_hunter_input');
+  showToast(didNavigate ? '已带入 Keyword Hunter 复核' : '无法打开 Keyword Hunter', {
+    type: didNavigate ? 'success' : 'warning',
+  });
 }
 
 /** 默认空白 profile，用于清空操作 */

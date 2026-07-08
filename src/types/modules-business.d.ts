@@ -611,6 +611,9 @@ export type KeywordHunterSnapshotSourceType = 'manual';
 
 export interface KeywordHunterSnapshotSource {
   type: KeywordHunterSnapshotSourceType;
+  workItemId?: string;
+  sourceRoute?: string;
+  sourceAsinOrSku?: string;
 }
 
 export interface KeywordHunterSnapshotSettings {
