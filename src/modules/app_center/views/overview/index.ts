@@ -42,6 +42,15 @@ const RECENT_ARTIFACT_LABELS: Record<AppCenterArtifactType, string> = {
   compliance_check: '合规复核',
 };
 
+const RECENT_ARTIFACT_ICONS: Record<AppCenterArtifactType, string> = {
+  scrape_history: 'fas fa-database',
+  analysis_report: 'fas fa-brain',
+  listing_prompt: 'fas fa-wand-magic-sparkles',
+  keyword_snapshot: 'fas fa-key',
+  ppc_action_list: 'fas fa-list-check',
+  compliance_check: 'fas fa-shield-halved',
+};
+
 const RECENT_ARTIFACT_NEXT_ROUTE_IDS: Record<AppCenterArtifactType, AppCenterRouteId> = {
   scrape_history: 'ai_analysis',
   analysis_report: 'promptlab',
@@ -200,27 +209,82 @@ function renderRecentArtifacts(container: HTMLElement): void {
   empty?.classList.toggle('hidden', artifacts.length > 0);
 }
 
+function formatRelativeTime(value: string): string {
+  const time = new Date(value).getTime();
+  if (!Number.isFinite(time)) return '';
+  const diff = Date.now() - time;
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+  if (diff < minute) return '刚刚';
+  if (diff < hour) return `${Math.floor(diff / minute)} 分钟前`;
+  if (diff < day) return `${Math.floor(diff / hour)} 小时前`;
+  if (diff < 7 * day) return `${Math.floor(diff / day)} 天前`;
+  if (diff < 30 * day) return `${Math.floor(diff / (7 * day))} 周前`;
+  return `${Math.floor(diff / (30 * day))} 个月前`;
+}
+
+function formatAbsoluteTime(value: string): string {
+  const time = new Date(value).getTime();
+  if (!Number.isFinite(time)) return '';
+  return new Date(value).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 function createRecentArtifactItem(artifact: AppCenterArtifactEnvelope): HTMLElement {
   const item = document.createElement('article');
   item.className = 'app-overview-recent-item';
   item.dataset.workItemId = artifact.workItemId;
   item.setAttribute('role', 'listitem');
 
+  const iconBox = document.createElement('span');
+  iconBox.className = 'app-overview-recent-icon';
+  iconBox.setAttribute('aria-hidden', 'true');
+  const icon = document.createElement('i');
+  icon.className = RECENT_ARTIFACT_ICONS[artifact.type];
+  iconBox.append(icon);
+
   const copy = document.createElement('div');
   copy.className = 'app-overview-recent-copy';
 
-  const meta = document.createElement('span');
-  meta.className = 'app-overview-recent-meta';
-  meta.textContent = RECENT_ARTIFACT_LABELS[artifact.type];
+  const headline = document.createElement('div');
+  headline.className = 'app-overview-recent-headline';
 
   const title = document.createElement('strong');
+  title.className = 'app-overview-recent-title';
   title.textContent = artifact.title;
 
-  const summary = document.createElement('small');
-  summary.textContent = artifact.summary;
+  const createdTime = new Date(artifact.createdAt).getTime();
+  const isFresh = Number.isFinite(createdTime) && Date.now() - createdTime < 60 * 60 * 1000;
+  const relative = formatRelativeTime(artifact.createdAt);
 
-  copy.append(meta, title, summary);
-  item.append(copy, createRecentArtifactAction(artifact));
+  const time = document.createElement('time');
+  time.className = isFresh
+    ? 'app-overview-recent-time app-overview-recent-time--fresh'
+    : 'app-overview-recent-time';
+  time.dateTime = artifact.createdAt;
+  time.textContent = relative;
+  time.setAttribute('title', formatAbsoluteTime(artifact.createdAt));
+  if (!relative) time.classList.add('hidden');
+
+  headline.append(title, time);
+
+  const meta = document.createElement('p');
+  meta.className = 'app-overview-recent-meta';
+  meta.textContent = artifact.summary;
+
+  copy.append(headline, meta);
+  item.append(iconBox, copy, createRecentArtifactAction(artifact));
+
+  item.setAttribute(
+    'aria-label',
+    `${RECENT_ARTIFACT_LABELS[artifact.type]} · ${artifact.title}${relative ? ` · ${relative}` : ''}`
+  );
   return item;
 }
 
