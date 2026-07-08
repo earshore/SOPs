@@ -6,6 +6,14 @@
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import BaseModule from '@/common/BaseModule';
 import { setSafeHtml } from '@/common/utils/security';
+import {
+  APP_CENTER_CATALOG_CATEGORIES,
+  APP_CENTER_CATALOG_GROUPS,
+  type AppCenterCatalogCategory,
+  type AppCenterCatalogGroup,
+  getAppCenterCatalogCategoryCounts,
+  getAppCenterCatalogRoute,
+} from '../../appCatalog';
 
 interface OverviewFilterState {
   category: string;
@@ -29,6 +37,7 @@ class AppCenterOverviewModule extends BaseModule {
     this.container.classList.add('fade-in');
     // ✅ 安全: html来自本地静态template.html，无用户输入
     setSafeHtml(this.container, html);
+    renderOverviewCatalog(this.container);
   }
 
   protected async init(): Promise<void> {
@@ -101,6 +110,219 @@ function initOverviewEvents(container: HTMLElement): void {
   });
 
   applyOverviewFilters(container, state);
+}
+
+function renderOverviewCatalog(container: HTMLElement): void {
+  renderCategoryFilters(container);
+  renderCatalogCards(container);
+  renderCatalogList(container);
+}
+
+function renderCategoryFilters(container: HTMLElement): void {
+  const filterRow = container.querySelector<HTMLElement>('.app-overview-filter-row');
+  if (!filterRow) return;
+
+  const counts = getAppCenterCatalogCategoryCounts();
+  const allCategory: AppCenterCatalogCategory = {
+    id: 'all',
+    label: '全部应用',
+    icon: 'fas fa-th',
+  };
+
+  filterRow.replaceChildren(
+    createCategoryButton(allCategory, counts.all || 0, true),
+    ...APP_CENTER_CATALOG_CATEGORIES.map(category =>
+      createCategoryButton(category, counts[category.id] || 0, false)
+    )
+  );
+}
+
+function createCategoryButton(
+  category: AppCenterCatalogCategory,
+  count: number,
+  isActive: boolean
+): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.className = `category-filter-btn${isActive ? ' active' : ''}`;
+  button.type = 'button';
+  button.dataset.category = category.id;
+  button.setAttribute('aria-pressed', String(isActive));
+
+  const icon = document.createElement('i');
+  icon.className = category.icon;
+  icon.setAttribute('aria-hidden', 'true');
+
+  const label = document.createElement('span');
+  label.textContent = category.label;
+
+  const countText = document.createElement('em');
+  countText.textContent = String(count);
+
+  button.append(icon, label, countText);
+  return button;
+}
+
+function renderCatalogCards(container: HTMLElement): void {
+  const grid = container.querySelector<HTMLElement>('.app-overview-grid');
+  if (!grid) return;
+
+  grid.replaceChildren(...APP_CENTER_CATALOG_GROUPS.map(createCatalogCard));
+}
+
+function createCatalogCard(group: AppCenterCatalogGroup): HTMLElement {
+  const card = document.createElement('article');
+  card.className = `app-overview-card ${group.cardClass}`;
+  card.dataset.category = group.category;
+  card.dataset.search = getCatalogSearchText(group);
+
+  const head = document.createElement('div');
+  head.className = 'app-card-head';
+
+  const iconBox = document.createElement('div');
+  iconBox.className = 'app-card-icon';
+  const icon = document.createElement('i');
+  icon.className = group.icon;
+  icon.setAttribute('aria-hidden', 'true');
+  iconBox.append(icon);
+
+  const badge = document.createElement('span');
+  badge.className = 'app-card-badge';
+  badge.textContent = group.badge;
+  head.append(iconBox, badge);
+
+  const titleRow = document.createElement('div');
+  titleRow.className = 'app-card-title-row';
+  const titleCopy = document.createElement('div');
+  const title = document.createElement('h3');
+  title.textContent = group.title;
+  const subtitle = document.createElement('p');
+  subtitle.textContent = group.subtitle;
+  titleCopy.append(title, subtitle);
+  titleRow.append(titleCopy, createPrimaryLink(group));
+
+  const description = document.createElement('p');
+  description.className = 'app-card-desc';
+  description.textContent = group.description;
+
+  const actions = document.createElement('div');
+  actions.className =
+    group.routeIds.length === 1 ? 'app-card-actions app-card-actions-single' : 'app-card-actions';
+  actions.append(...group.routeIds.map(routeId => createChildLink(routeId)));
+
+  card.append(head, titleRow, description, actions);
+  return card;
+}
+
+function createPrimaryLink(group: AppCenterCatalogGroup): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.className = 'app-card-primary-link';
+  button.type = 'button';
+  button.dataset.action = 'switch-tab';
+  button.dataset.tab = group.primaryRouteId;
+  button.setAttribute(
+    'aria-label',
+    `打开 ${group.title} ${getAppCenterCatalogRoute(group.primaryRouteId).label}`
+  );
+
+  const label = document.createElement('span');
+  label.textContent = '打开';
+  const icon = document.createElement('i');
+  icon.className = 'fas fa-arrow-right';
+  icon.setAttribute('aria-hidden', 'true');
+  button.append(label, icon);
+
+  return button;
+}
+
+function createChildLink(routeId: AppCenterCatalogGroup['routeIds'][number]): HTMLButtonElement {
+  const route = getAppCenterCatalogRoute(routeId);
+  const button = document.createElement('button');
+  button.className = 'app-child-link';
+  button.type = 'button';
+  button.dataset.action = 'switch-tab';
+  button.dataset.tab = route.routeId;
+
+  const icon = document.createElement('i');
+  icon.className = route.icon;
+  icon.setAttribute('aria-hidden', 'true');
+  const label = document.createElement('span');
+  label.textContent = route.label;
+
+  button.append(icon, label);
+  return button;
+}
+
+function renderCatalogList(container: HTMLElement): void {
+  const list = container.querySelector<HTMLElement>('.app-overview-list');
+  if (!list) return;
+
+  list.replaceChildren(...APP_CENTER_CATALOG_GROUPS.map(createCatalogListRow));
+}
+
+function createCatalogListRow(group: AppCenterCatalogGroup): HTMLElement {
+  const row = document.createElement('div');
+  row.className = `app-overview-list-row ${group.cardClass}`;
+  row.setAttribute('role', 'listitem');
+  row.dataset.category = group.category;
+  row.dataset.search = getCatalogSearchText(group);
+
+  const main = document.createElement('div');
+  main.className = 'app-overview-list-main';
+  const icon = document.createElement('span');
+  icon.className = 'app-overview-list-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  const iconInner = document.createElement('i');
+  iconInner.className = group.icon;
+  icon.append(iconInner);
+  const copy = document.createElement('div');
+  copy.className = 'app-overview-list-copy';
+  const title = document.createElement('h3');
+  title.textContent = group.title;
+  const subtitle = document.createElement('p');
+  subtitle.textContent = group.subtitle;
+  copy.append(title, subtitle);
+  main.append(icon, copy);
+
+  const value = document.createElement('p');
+  value.className = 'app-overview-list-value';
+  value.textContent = group.description;
+
+  const meta = document.createElement('div');
+  meta.className = 'app-overview-list-meta';
+  meta.setAttribute('aria-label', `${group.title} 标签`);
+  const badge = document.createElement('span');
+  badge.className = 'app-overview-list-badge';
+  badge.textContent = group.badge;
+  meta.append(badge, ...group.tags.map(createListTag));
+
+  const actions = document.createElement('div');
+  actions.className = 'app-overview-list-actions';
+  const secondary = document.createElement('div');
+  secondary.className = 'app-overview-list-secondary';
+  secondary.append(...group.routeIds.map(routeId => createChildLink(routeId)));
+  actions.append(createPrimaryLink(group), secondary);
+
+  row.append(main, value, meta, actions);
+  return row;
+}
+
+function createListTag(tag: string): HTMLElement {
+  const element = document.createElement('span');
+  element.className = 'app-overview-list-tag';
+  element.textContent = tag;
+  return element;
+}
+
+function getCatalogSearchText(group: AppCenterCatalogGroup): string {
+  const routeLabels = group.routeIds.map(routeId => getAppCenterCatalogRoute(routeId).label);
+  return [
+    group.title,
+    group.subtitle,
+    group.description,
+    ...group.tags,
+    ...group.searchKeywords,
+    ...routeLabels,
+  ].join(' ');
 }
 
 /**

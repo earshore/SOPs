@@ -23,29 +23,12 @@ const overviewTemplate = `
     <input id="app-overview-search" type="search">
     <button id="app-overview-clear-search" class="hidden" type="button"></button>
     <p id="app-overview-visible-count"></p>
-    <button class="category-filter-btn active bg-blue-600 text-white" data-category="all"></button>
-    <button class="category-filter-btn bg-white text-slate-700 border border-slate-300" data-category="master_analysis"></button>
-    <button class="category-filter-btn bg-white text-slate-700 border border-slate-300" data-category="ppc_tools"></button>
+    <div class="app-overview-filter-row" role="group" aria-label="应用分类"></div>
     <button class="app-overview-view-btn active" data-view-mode="grid" aria-pressed="true"></button>
     <button class="app-overview-view-btn" data-view-mode="list" aria-pressed="false"></button>
     <section id="app-module-apps">
-      <div class="app-center-card-grid app-overview-grid">
-        <article data-category="master_analysis" data-search="master analysis 数据采集">
-          <button class="app-card-primary-link" data-action="switch-tab" data-tab="scraper"></button>
-          <button class="app-child-link" data-action="switch-tab" data-tab="ai_analysis"></button>
-        </article>
-        <article data-category="ppc_tools" data-search="ppc search term 广告">
-          <button class="app-card-primary-link" data-action="switch-tab" data-tab="ppc_search_terms"></button>
-        </article>
-      </div>
-      <div class="app-overview-list hidden">
-        <div class="app-overview-list-row" data-category="master_analysis" data-search="master analysis 数据采集">
-          <button class="app-card-primary-link" data-action="switch-tab" data-tab="scraper"></button>
-        </div>
-        <div class="app-overview-list-row" data-category="ppc_tools" data-search="ppc search term 广告">
-          <button class="app-card-primary-link" data-action="switch-tab" data-tab="ppc_search_terms"></button>
-        </div>
-      </div>
+      <div class="app-center-card-grid app-overview-grid"></div>
+      <div class="app-overview-list hidden"></div>
       <div id="app-overview-empty" class="hidden"></div>
     </section>
   </div>
@@ -80,6 +63,30 @@ describe('App Center Overview', () => {
     expect(container.querySelector('.app-overview-container')).not.toBeNull();
   });
 
+  it('renders category controls, app cards, and compact rows from catalog data', async () => {
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+
+    expect(container.querySelectorAll('.category-filter-btn[data-category]')).toHaveLength(5);
+    expect(
+      container.querySelector('.category-filter-btn[data-category="all"]')?.textContent
+    ).toContain('全部应用');
+    expect(
+      container.querySelector('.category-filter-btn[data-category="master_analysis"]')?.textContent
+    ).toContain('1');
+    expect(container.querySelectorAll('.app-overview-card[data-category]')).toHaveLength(4);
+    expect(container.querySelectorAll('.app-overview-list-row[data-category]')).toHaveLength(4);
+    expect(
+      container.querySelector('.app-overview-card[data-category="keyword_hunter"]')?.textContent
+    ).toContain('Keyword Hunter');
+    expect(
+      container.querySelector(
+        '.app-overview-card .app-child-link[data-tab="keyword_hunter_process"]'
+      )?.textContent
+    ).toContain('SEO 处理');
+  });
+
   it('keeps cards as containers and leaves entry buttons on delegated switch-tab routing', async () => {
     const container = document.createElement('div');
 
@@ -108,14 +115,17 @@ describe('App Center Overview', () => {
     const container = document.createElement('div');
 
     await overviewModule.mount(container);
-    container.querySelector<HTMLElement>('[data-category="ppc_tools"]')?.click();
+    container
+      .querySelector<HTMLElement>('.category-filter-btn[data-category="ppc_tools"]')
+      ?.click();
 
     expect(
-      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.hidden
+      container.querySelector<HTMLElement>('.app-overview-card[data-category="master_analysis"]')
+        ?.hidden
     ).toBe(true);
-    expect(container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.hidden).toBe(
-      false
-    );
+    expect(
+      container.querySelector<HTMLElement>('.app-overview-card[data-category="ppc_tools"]')?.hidden
+    ).toBe(false);
     expect(
       container.querySelector<HTMLElement>(
         '.app-overview-list-row[data-category="master_analysis"]'
@@ -130,7 +140,7 @@ describe('App Center Overview', () => {
     );
     expect(
       container
-        .querySelector<HTMLElement>('[data-category="ppc_tools"]')
+        .querySelector<HTMLElement>('.category-filter-btn[data-category="ppc_tools"]')
         ?.classList.contains('active')
     ).toBe(true);
   });
@@ -150,11 +160,12 @@ describe('App Center Overview', () => {
     searchInput.dispatchEvent(new Event('input'));
 
     expect(
-      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.hidden
+      container.querySelector<HTMLElement>('.app-overview-card[data-category="master_analysis"]')
+        ?.hidden
     ).toBe(true);
-    expect(container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.hidden).toBe(
-      false
-    );
+    expect(
+      container.querySelector<HTMLElement>('.app-overview-card[data-category="ppc_tools"]')?.hidden
+    ).toBe(false);
     expect(
       container.querySelector<HTMLElement>(
         '.app-overview-list-row[data-category="master_analysis"]'
@@ -173,11 +184,12 @@ describe('App Center Overview', () => {
 
     expect(searchInput.value).toBe('');
     expect(
-      container.querySelector<HTMLElement>('article[data-category="master_analysis"]')?.hidden
+      container.querySelector<HTMLElement>('.app-overview-card[data-category="master_analysis"]')
+        ?.hidden
     ).toBe(false);
-    expect(container.querySelector<HTMLElement>('article[data-category="ppc_tools"]')?.hidden).toBe(
-      false
-    );
+    expect(
+      container.querySelector<HTMLElement>('.app-overview-card[data-category="ppc_tools"]')?.hidden
+    ).toBe(false);
     expect(
       container.querySelector<HTMLElement>(
         '.app-overview-list-row[data-category="master_analysis"]'
@@ -214,7 +226,7 @@ describe('App Center Overview', () => {
     expect(gridBtn?.getAttribute('aria-pressed')).toBe('false');
     expect(listBtn?.getAttribute('aria-pressed')).toBe('true');
     expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
-      '显示 2 个应用'
+      '显示 4 个应用'
     );
   });
 
@@ -250,10 +262,13 @@ describe('App Center Overview', () => {
     expect(taskPathSection?.hasAttribute('open')).toBe(false);
   });
 
-  it('keeps real app cards non-interactive and exposes explicit entry buttons', () => {
-    const html = readFileSync(realOverviewTemplatePath, 'utf8');
+  it('keeps real app cards non-interactive and exposes explicit entry buttons', async () => {
+    safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(
+      readFileSync(realOverviewTemplatePath, 'utf8')
+    );
     const wrapper = document.createElement('div');
-    wrapper.innerHTML = html;
+
+    await overviewModule.mount(wrapper);
 
     expect(wrapper.querySelector('.app-overview-card[role="button"]')).toBeNull();
     expect(wrapper.querySelector('.app-overview-card[tabindex]')).toBeNull();
@@ -264,10 +279,13 @@ describe('App Center Overview', () => {
     ).toHaveLength(4);
   });
 
-  it('exposes the PC compact list view as non-interactive rows with explicit buttons', () => {
-    const html = readFileSync(realOverviewTemplatePath, 'utf8');
+  it('exposes the PC compact list view as non-interactive rows with explicit buttons', async () => {
+    safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(
+      readFileSync(realOverviewTemplatePath, 'utf8')
+    );
     const wrapper = document.createElement('div');
-    wrapper.innerHTML = html;
+
+    await overviewModule.mount(wrapper);
 
     const viewModeButtons = wrapper.querySelectorAll('.app-overview-view-btn[data-view-mode]');
     const list = wrapper.querySelector('.app-overview-list');
@@ -285,10 +303,13 @@ describe('App Center Overview', () => {
     ).toHaveLength(4);
   });
 
-  it('uses the current Keyword Hunter entry labels', () => {
-    const html = readFileSync(realOverviewTemplatePath, 'utf8');
+  it('uses the current Keyword Hunter entry labels', async () => {
+    safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(
+      readFileSync(realOverviewTemplatePath, 'utf8')
+    );
     const wrapper = document.createElement('div');
-    wrapper.innerHTML = html;
+
+    await overviewModule.mount(wrapper);
 
     const inputEntry = wrapper.querySelector('.app-child-link[data-tab="keyword_hunter_input"]');
     const processEntry = wrapper.querySelector(
