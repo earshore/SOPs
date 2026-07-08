@@ -50,6 +50,15 @@ const mocks = vi.hoisted(() => ({
   storageSet: vi.fn(),
   storageRemove: vi.fn(),
   showToast: vi.fn(),
+  registerPpcActionListArtifact: vi.fn(),
+  workspaceContext: {
+    workItemId: 'competitor_listing:hist-001',
+    marketplace: 'DE',
+    language: 'German',
+    asinOrSku: 'B000000001',
+    sourceRoute: 'ppc_search_terms',
+    updatedAt: '2026-01-01T00:40:00.000Z',
+  },
   template: `
     <div>
       <div id="ppc-search-terms-stat-rows"></div>
@@ -176,6 +185,14 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/modules/app_center/artifactEnvelopeService', () => ({
+  registerPpcActionListArtifact: mocks.registerPpcActionListArtifact,
+}));
+
+vi.mock('@/modules/app_center/workspaceContext', () => ({
+  getWorkspaceContext: vi.fn(() => mocks.workspaceContext),
+}));
+
 vi.mock(
   '@/modules/app_center/views/ppc_tools/ppc_search_terms/services/llmAnalysisService',
   () => ({
@@ -225,6 +242,7 @@ beforeEach(async () => {
   mocks.storageSet.mockClear();
   mocks.storageRemove.mockClear();
   mocks.showToast.mockClear();
+  mocks.registerPpcActionListArtifact.mockClear();
   mocks.loadTemplate.mockReset();
   mocks.loadTemplate.mockResolvedValue(mocks.template);
   mocks.analyzeWithAgent.mockReset();
@@ -288,6 +306,18 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     );
     expect(anchorClick).toHaveBeenCalled();
     expect(mocks.storageSet).toHaveBeenCalledWith('ppc_search_terms_action_owner_v1', '广告负责人');
+    expect(mocks.registerPpcActionListArtifact).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: expect.stringMatching(/^ppc-search_term-scale_budget-\d{4}-\d{2}-\d{2}-2$/),
+        reportType: 'search_term',
+        filter: 'scale_budget',
+        rowCount: 2,
+        owner: '广告负责人',
+        requiresHumanConfirmation: true,
+        createdAt: expect.any(String),
+      }),
+      mocks.workspaceContext
+    );
     expect(showToast).toHaveBeenCalledWith('导出完成', {
       type: 'success',
       description: '2 行动作已导出',

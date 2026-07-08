@@ -1,5 +1,8 @@
 import { showToast } from '@/common/ui/notifications';
+import { registerPpcActionListArtifact } from '@/modules/app_center/artifactEnvelopeService';
+import { getWorkspaceContext } from '@/modules/app_center/workspaceContext';
 import { buildActionCsv } from '../actions/actionCsv';
+import { requiresHumanConfirmation } from '../actions/actionItems';
 import { today } from '../utils/formatters';
 import { buildSummaryText } from './summaryText';
 import { filterRows, searchRows, type FilterType } from '../utils/filters';
@@ -28,8 +31,21 @@ export function exportActionRows(
 
   const owner = readActionOwner(container);
   saveActionOwner(owner);
+  const reportType = state.getReportType();
   const csv = buildActionCsv(rows, owner);
-  downloadText(`ppc-${state.getReportType()}-actions-${filter}-${today()}.csv`, csv);
+  downloadText(`ppc-${reportType}-actions-${filter}-${today()}.csv`, csv);
+  registerPpcActionListArtifact(
+    {
+      id: createPpcActionListId(reportType, filter, rows.length),
+      reportType,
+      filter,
+      rowCount: rows.length,
+      owner,
+      requiresHumanConfirmation: rows.some(requiresHumanConfirmation),
+      createdAt: new Date().toISOString(),
+    },
+    getWorkspaceContext()
+  );
   showToast('导出完成', { type: 'success', description: `${rows.length} 行动作已导出` });
 }
 
@@ -67,4 +83,12 @@ function downloadText(filename: string, content: string): void {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+function createPpcActionListId(
+  reportType: ReportType,
+  filter: FilterType,
+  rowCount: number
+): string {
+  return `ppc-${reportType}-${filter}-${today()}-${rowCount}`;
 }

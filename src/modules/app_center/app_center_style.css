@@ -266,6 +266,7 @@
 }
 
 .app-overview-flow,
+.app-overview-recent-panel,
 .app-overview-filter-panel {
   padding: 0;
   margin-bottom: 2rem;
@@ -325,6 +326,10 @@
 }
 
 .app-overview-filter-panel .app-overview-section-title::before {
+  display: none;
+}
+
+.app-overview-recent-panel .app-overview-section-title::before {
   display: none;
 }
 
@@ -546,6 +551,66 @@
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.4;
+}
+
+.app-overview-recent-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.app-overview-recent-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 5rem;
+  padding: 1rem;
+  border: 1px solid var(--app-overview-border);
+  border-radius: var(--rounded-panel, 8px);
+  background: var(--app-overview-surface);
+  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
+.app-overview-recent-copy {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.app-overview-recent-meta {
+  color: var(--app-overview-accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.app-overview-recent-copy strong {
+  color: var(--app-overview-text-primary);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.app-overview-recent-copy small {
+  color: var(--app-overview-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.app-overview-recent-copy strong,
+.app-overview-recent-copy small {
+  overflow-wrap: anywhere;
+}
+
+.app-overview-recent-action.app-child-link {
+  min-height: 2.25rem;
+  white-space: nowrap;
+}
+
+.app-overview-recent-empty {
+  margin-top: 0;
 }
 
 .app-overview-toolbar {
@@ -1048,7 +1113,8 @@
 }
 
 @media (max-width: 900px) {
-  .app-overview-flow-grid {
+  .app-overview-flow-grid,
+  .app-overview-recent-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1071,6 +1137,7 @@
   }
 
   .app-overview-flow,
+  .app-overview-recent-panel,
   .app-overview-filter-panel {
     padding: 0.875rem;
   }
@@ -1101,7 +1168,8 @@
     flex-direction: column;
   }
 
-  .app-overview-flow-grid {
+  .app-overview-flow-grid,
+  .app-overview-recent-list {
     grid-template-columns: 1fr;
   }
 

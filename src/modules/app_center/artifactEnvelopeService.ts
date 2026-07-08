@@ -41,6 +41,7 @@ export interface AppCenterArtifactEnvelope {
   summary: string;
   payloadRef: string;
   createdAt: string;
+  metadata?: Record<string, string | number | boolean>;
 }
 
 export interface ArtifactPayloadResolvers {
@@ -51,6 +52,16 @@ export interface ArtifactPayloadResolvers {
 }
 
 export type ArtifactPayloadStatus = 'available' | 'missing' | 'unknown';
+
+export interface AppCenterPpcActionListArtifactInput {
+  id: string;
+  reportType: string;
+  filter: string;
+  rowCount: number;
+  owner: string;
+  requiresHumanConfirmation: boolean;
+  createdAt: string;
+}
 
 interface ArtifactPayloadLookup {
   id: string;
@@ -236,6 +247,36 @@ function createKeywordSnapshotWorkItem(
   };
 }
 
+function getPpcActionListWorkItemId(
+  actionList: AppCenterPpcActionListArtifactInput,
+  context: AppCenterWorkspaceContext
+): string {
+  return context.workItemId || `ppc_review:${actionList.id}`;
+}
+
+function getPpcActionListWorkItemType(workItemId: string): AppCenterWorkItemType {
+  return workItemId.startsWith('competitor_listing:') ? 'competitor_listing' : 'ppc_review';
+}
+
+function createPpcActionListWorkItem(
+  actionList: AppCenterPpcActionListArtifactInput,
+  context: AppCenterWorkspaceContext
+): AppCenterWorkItem {
+  const workItemId = getPpcActionListWorkItemId(actionList, context);
+
+  return {
+    id: workItemId,
+    type: getPpcActionListWorkItemType(workItemId),
+    title: `${context.marketplace || 'PPC'} ${context.asinOrSku || '搜索词'} 动作复核`,
+    status: actionList.requiresHumanConfirmation ? 'review_required' : 'done',
+    marketplace: context.marketplace,
+    asinOrSku: context.asinOrSku,
+    sourceRoute: 'ppc_search_terms',
+    createdAt: actionList.createdAt,
+    updatedAt: actionList.createdAt,
+  };
+}
+
 export function getWorkItems(): AppCenterWorkItem[] {
   return sortByCreatedAt(readWorkItems());
 }
@@ -280,6 +321,35 @@ export function registerKeywordSnapshotArtifact(
     summary: `${snapshot.result.keywords.length} 关键词 · 覆盖率 ${snapshot.result.coverageRate}%`,
     payloadRef: `keyword_snapshot:${snapshot.id}`,
     createdAt: snapshot.updatedAt,
+  });
+}
+
+export function registerPpcActionListArtifact(
+  actionList: AppCenterPpcActionListArtifactInput,
+  context: AppCenterWorkspaceContext
+): AppCenterArtifactEnvelope {
+  const workItemId = getPpcActionListWorkItemId(actionList, context);
+
+  upsertWorkItem(createPpcActionListWorkItem(actionList, context));
+
+  return upsertArtifact({
+    id: `${workItemId}:ppc_action_list:${actionList.id}`,
+    workItemId,
+    type: 'ppc_action_list',
+    sourceRoute: 'ppc_search_terms',
+    title: 'PPC 动作清单',
+    summary: `${actionList.rowCount} 行动作 · Owner ${actionList.owner} · ${
+      actionList.requiresHumanConfirmation ? '待人工确认' : '无需人工确认'
+    }`,
+    payloadRef: `ppc_action_list:${actionList.id}`,
+    createdAt: actionList.createdAt,
+    metadata: {
+      owner: actionList.owner,
+      requiresHumanConfirmation: actionList.requiresHumanConfirmation,
+      rowCount: actionList.rowCount,
+      reportType: actionList.reportType,
+      filter: actionList.filter,
+    },
   });
 }
 

@@ -3,6 +3,10 @@ import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as overviewModule from '@/modules/app_center/views/overview/index';
+import {
+  clearArtifactEnvelopeIndex,
+  registerPpcActionListArtifact,
+} from '@/modules/app_center/artifactEnvelopeService';
 
 const safeTemplateLoaderMocks = vi.hoisted(() => ({
   loadTemplate: vi.fn(),
@@ -27,6 +31,8 @@ const overviewTemplate = `
     <button class="app-overview-view-btn active" data-view-mode="grid" aria-pressed="true"></button>
     <button class="app-overview-view-btn" data-view-mode="list" aria-pressed="false"></button>
     <div class="app-overview-flow-grid app-overview-flow-grid--tasks"></div>
+    <div class="app-overview-recent-list"></div>
+    <div class="app-overview-recent-empty hidden"></div>
     <section id="app-module-apps">
       <div class="app-center-card-grid app-overview-grid"></div>
       <div class="app-overview-list hidden"></div>
@@ -37,6 +43,8 @@ const overviewTemplate = `
 
 describe('App Center Overview', () => {
   beforeEach(() => {
+    localStorage.clear();
+    clearArtifactEnvelopeIndex();
     safeTemplateLoaderMocks.loadTemplate.mockReset();
     safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(overviewTemplate);
     vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -104,6 +112,42 @@ describe('App Center Overview', () => {
       container.querySelector('.app-flow-step[data-tab="keyword_hunter_analysis"]')?.textContent
     ).toContain('高危词');
     expect(container.textContent).not.toContain('新品作业流');
+  });
+
+  it('renders recent artifacts with next step entries', async () => {
+    registerPpcActionListArtifact(
+      {
+        id: 'ppc-export-001',
+        reportType: 'search_term',
+        filter: 'scale_budget',
+        rowCount: 2,
+        owner: '广告小张',
+        requiresHumanConfirmation: true,
+        createdAt: '2026-01-01T00:40:00.000Z',
+      },
+      {
+        workItemId: 'competitor_listing:hist-001',
+        marketplace: 'DE',
+        language: 'German',
+        asinOrSku: 'B000000001',
+        sourceRoute: 'ppc_search_terms',
+        updatedAt: '2026-01-01T00:40:00.000Z',
+      }
+    );
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+
+    const recentItems = container.querySelectorAll('.app-overview-recent-item');
+    const continueButton = container.querySelector<HTMLButtonElement>(
+      '.app-overview-recent-item [data-action="switch-tab"]'
+    );
+
+    expect(recentItems).toHaveLength(1);
+    expect(recentItems[0]?.textContent).toContain('PPC 动作清单');
+    expect(recentItems[0]?.textContent).toContain('Owner 广告小张');
+    expect(continueButton?.dataset.tab).toBe('ppc_search_terms');
+    expect(container.querySelector('.app-overview-recent-empty')?.classList).toContain('hidden');
   });
 
   it('keeps cards as containers and leaves entry buttons on delegated switch-tab routing', async () => {

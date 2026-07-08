@@ -14,6 +14,7 @@ import {
   getWorkItems,
   registerHistoryArtifacts,
   registerKeywordSnapshotArtifact,
+  registerPpcActionListArtifact,
 } from '@/modules/app_center/artifactEnvelopeService';
 
 function createScrapedData(): ScrapedData {
@@ -184,15 +185,62 @@ describe('App Center artifact envelope service', () => {
     expect(getRecentArtifacts(1)).toEqual([expect.objectContaining({ id: envelope?.id })]);
   });
 
+  it('registers PPC action lists with owner and manual confirmation metadata', () => {
+    const envelope = registerPpcActionListArtifact(
+      {
+        id: 'ppc-export-001',
+        reportType: 'search_term',
+        filter: 'scale_budget',
+        rowCount: 2,
+        owner: '广告小张',
+        requiresHumanConfirmation: true,
+        createdAt: '2026-01-01T00:40:00.000Z',
+      },
+      createWorkspaceContext()
+    );
+
+    expect(envelope).toMatchObject({
+      workItemId: 'competitor_listing:hist-001',
+      type: 'ppc_action_list',
+      sourceRoute: 'ppc_search_terms',
+      payloadRef: 'ppc_action_list:ppc-export-001',
+      metadata: {
+        owner: '广告小张',
+        requiresHumanConfirmation: true,
+        rowCount: 2,
+        reportType: 'search_term',
+        filter: 'scale_budget',
+      },
+    });
+    expect(getRecentArtifacts(1)).toEqual([expect.objectContaining({ id: envelope.id })]);
+  });
+
   it('reports missing payloads through explicit artifact resolvers', () => {
     registerHistoryArtifacts(createHistoryItem());
     const [listingPrompt] = getArtifactsForWorkItem('competitor_listing:hist-001');
+    const ppcActionList = registerPpcActionListArtifact(
+      {
+        id: 'ppc-export-001',
+        reportType: 'search_term',
+        filter: 'all',
+        rowCount: 1,
+        owner: '广告负责人',
+        requiresHumanConfirmation: false,
+        createdAt: '2026-01-01T00:40:00.000Z',
+      },
+      createWorkspaceContext()
+    );
 
     expect(
       getArtifactPayloadStatus(listingPrompt!, {
         historyExists: () => true,
         promptExists: () => false,
         keywordSnapshotExists: () => true,
+      })
+    ).toBe('missing');
+    expect(
+      getArtifactPayloadStatus(ppcActionList, {
+        ppcActionListExists: () => false,
       })
     ).toBe('missing');
   });

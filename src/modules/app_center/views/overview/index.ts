@@ -9,6 +9,7 @@ import { setSafeHtml } from '@/common/utils/security';
 import {
   APP_CENTER_CATALOG_CATEGORIES,
   APP_CENTER_CATALOG_GROUPS,
+  type AppCenterRouteId,
   type AppCenterCatalogCategory,
   type AppCenterCatalogGroup,
   getAppCenterCatalogCategoryCounts,
@@ -18,12 +19,37 @@ import {
   getAppCenterWorkflowDefinition,
   type AppCenterWorkflowStep,
 } from '../../workflowDefinitions';
+import {
+  getRecentArtifacts,
+  type AppCenterArtifactEnvelope,
+  type AppCenterArtifactType,
+} from '../../artifactEnvelopeService';
 
 interface OverviewFilterState {
   category: string;
   query: string;
   viewMode: 'grid' | 'list';
 }
+
+const RECENT_ARTIFACT_LIMIT = 10;
+
+const RECENT_ARTIFACT_LABELS: Record<AppCenterArtifactType, string> = {
+  scrape_history: '采集历史',
+  analysis_report: 'AI 分析',
+  listing_prompt: 'Listing Prompt',
+  keyword_snapshot: '关键词快照',
+  ppc_action_list: 'PPC 动作清单',
+  compliance_check: '合规复核',
+};
+
+const RECENT_ARTIFACT_NEXT_ROUTE_IDS: Record<AppCenterArtifactType, AppCenterRouteId> = {
+  scrape_history: 'ai_analysis',
+  analysis_report: 'promptlab',
+  listing_prompt: 'keyword_hunter_input',
+  keyword_snapshot: 'keyword_hunter_analysis',
+  ppc_action_list: 'ppc_search_terms',
+  compliance_check: 'keyword_hunter_analysis',
+};
 
 class AppCenterOverviewModule extends BaseModule {
   constructor() {
@@ -118,6 +144,7 @@ function initOverviewEvents(container: HTMLElement): void {
 
 function renderOverviewCatalog(container: HTMLElement): void {
   renderWorkflowSteps(container);
+  renderRecentArtifacts(container);
   renderCategoryFilters(container);
   renderCatalogCards(container);
   renderCatalogList(container);
@@ -158,6 +185,62 @@ function createWorkflowStep(step: AppCenterWorkflowStep, index: number): HTMLBut
   copy.append(title, summary);
 
   button.append(stepIndex, iconBox, copy);
+  return button;
+}
+
+function renderRecentArtifacts(container: HTMLElement): void {
+  const list = container.querySelector<HTMLElement>('.app-overview-recent-list');
+  if (!list) return;
+
+  const artifacts = getRecentArtifacts(RECENT_ARTIFACT_LIMIT);
+  const empty = container.querySelector<HTMLElement>('.app-overview-recent-empty');
+
+  list.replaceChildren(...artifacts.map(createRecentArtifactItem));
+  list.classList.toggle('hidden', artifacts.length === 0);
+  empty?.classList.toggle('hidden', artifacts.length > 0);
+}
+
+function createRecentArtifactItem(artifact: AppCenterArtifactEnvelope): HTMLElement {
+  const item = document.createElement('article');
+  item.className = 'app-overview-recent-item';
+  item.dataset.workItemId = artifact.workItemId;
+  item.setAttribute('role', 'listitem');
+
+  const copy = document.createElement('div');
+  copy.className = 'app-overview-recent-copy';
+
+  const meta = document.createElement('span');
+  meta.className = 'app-overview-recent-meta';
+  meta.textContent = RECENT_ARTIFACT_LABELS[artifact.type];
+
+  const title = document.createElement('strong');
+  title.textContent = artifact.title;
+
+  const summary = document.createElement('small');
+  summary.textContent = artifact.summary;
+
+  copy.append(meta, title, summary);
+  item.append(copy, createRecentArtifactAction(artifact));
+  return item;
+}
+
+function createRecentArtifactAction(artifact: AppCenterArtifactEnvelope): HTMLButtonElement {
+  const routeId = RECENT_ARTIFACT_NEXT_ROUTE_IDS[artifact.type];
+  const route = getAppCenterCatalogRoute(routeId);
+  const button = document.createElement('button');
+  button.className = 'app-overview-recent-action app-child-link';
+  button.type = 'button';
+  button.dataset.action = 'switch-tab';
+  button.dataset.tab = routeId;
+  button.setAttribute('aria-label', `继续 ${artifact.title} 到 ${route.label}`);
+
+  const label = document.createElement('span');
+  label.textContent = '继续';
+  const icon = document.createElement('i');
+  icon.className = 'fas fa-arrow-right';
+  icon.setAttribute('aria-hidden', 'true');
+
+  button.append(label, icon);
   return button;
 }
 
