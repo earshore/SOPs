@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildCompetitorReviewTemplate, mount, unmount } from '@/modules/sops/views/growth/competitor_monitoring/index';
+import {
+  buildCompetitorReviewTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/growth/competitor_monitoring/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="competitor-review-owner" value="运营负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('Competitor monitoring review workflow', () => {
   let container: HTMLElement;
 
@@ -46,7 +55,7 @@ describe('Competitor monitoring review workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -69,7 +78,9 @@ describe('Competitor monitoring review workflow', () => {
 
   it('copies the review template', async () => {
     await mount(container);
-    const ownerInput = document.getElementById('competitor-review-owner') as HTMLInputElement | null;
+    const ownerInput = document.getElementById(
+      'competitor-review-owner'
+    ) as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '运营小李';
 
     await window.sops_copyCompetitorReviewTemplate?.();
@@ -77,8 +88,12 @@ describe('Competitor monitoring review workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/growth/competitor_monitoring/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：运营小李'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：运营小李')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('competitor_review_owner_v1', '运营小李');
-    expect(global.alert).toHaveBeenCalledWith('已复制竞品周复盘模板，可粘贴到周报或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith('已复制竞品周复盘模板，可粘贴到周报或归档文档。', {
+      type: 'success',
+    });
   });
 });

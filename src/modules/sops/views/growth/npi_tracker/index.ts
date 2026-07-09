@@ -12,11 +12,12 @@
 import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import { showToast } from '@/common/ui/notifications';
 import '@/components/modal/AppModal';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { escapeHtml } from '@/common/utils/security';
-import { copyTextToClipboard } from '../../../utils/clipboard';
 import { createOwnerField } from '../../../utils/ownerField';
+import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 import type {
   NPIProductRecord,
   StageConfig,
@@ -740,39 +741,31 @@ function downloadCsv(csvContent: string): void {
 function exportToExcel(): void {
   const exportData = tableData.map(buildExportRow);
   if (exportData.length === 0) {
-    alert('没有数据可导出');
+    showToast('没有数据可导出', { type: 'warning' });
     return;
   }
 
   const csvContent = buildCsvContent(exportData);
   if (!csvContent) {
-    alert('数据格式错误');
+    showToast('数据格式错误', { type: 'error' });
     return;
   }
 
   downloadCsv(csvContent);
 
-  // Show notification
-  alert(
-    '导出成功！CSV文件包含Excel兼容公式，使用Excel打开后公式会自动计算。\n\n提示：价格列仅为配送费占比预警，不代表净利润；正式定价必须进入欧洲站SKU利润表复核。'
-  );
+  showToast('导出成功！CSV文件包含Excel兼容公式，使用Excel打开后公式会自动计算。', {
+    type: 'success',
+    description:
+      '提示：价格列仅为配送费占比预警，不代表净利润；正式定价必须进入欧洲站SKU利润表复核。',
+  });
 }
 
-async function copyNpiReviewTemplate(): Promise<void> {
-  const owner = reviewOwnerField.read();
-  reviewOwnerField.save(owner);
-  const reviewTemplate = buildNpiReviewTemplate(tableData, owner);
-
-  try {
-    if (!(await copyTextToClipboard(reviewTemplate))) {
-      throw new Error('clipboard unavailable');
-    }
-
-    alert('已复制 NPI 复盘模板，可粘贴到周报或归档文档。');
-  } catch {
-    alert('复制失败，请使用导出 CSV 或手动复制复盘模板。');
-  }
-}
+const copyNpiReviewTemplate = createTemplateCopyAction({
+  ownerField: reviewOwnerField,
+  buildTemplate: owner => buildNpiReviewTemplate(tableData, owner),
+  successMessage: '已复制 NPI 复盘模板，可粘贴到周报或归档文档。',
+  failureMessage: '复制失败，请使用导出 CSV 或手动复制复盘模板。',
+});
 
 // Filter by store
 function filterByStore(store: string): void {

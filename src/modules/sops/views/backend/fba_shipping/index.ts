@@ -2,8 +2,8 @@ import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '@/common/utils/security';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
-import { copyTextToClipboard } from '../../../utils/clipboard';
 import { createOwnerField } from '../../../utils/ownerField';
+import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
 const RELEASE_OWNER_STORAGE_KEY = 'fba_shipping_owner_v1';
 const DEFAULT_RELEASE_OWNER = '物流/供应链负责人';
@@ -73,21 +73,12 @@ export function buildFbaShippingTemplate(owner = DEFAULT_RELEASE_OWNER): string 
   ].join('\n');
 }
 
-async function copyFbaShippingTemplate(): Promise<void> {
-  const owner = releaseOwnerField.read();
-  releaseOwnerField.save(owner);
-  const releaseTemplate = buildFbaShippingTemplate(owner);
-
-  try {
-    if (!(await copyTextToClipboard(releaseTemplate))) {
-      throw new Error('clipboard unavailable');
-    }
-
-    alert('已复制 FBA 发货放行/异常登记模板，可粘贴到周报或归档文档。');
-  } catch {
-    alert('复制失败，请手动复制 FBA 发货模板或稍后重试。');
-  }
-}
+const copyFbaShippingTemplate = createTemplateCopyAction({
+  ownerField: releaseOwnerField,
+  buildTemplate: buildFbaShippingTemplate,
+  successMessage: '已复制 FBA 发货放行/异常登记模板，可粘贴到周报或归档文档。',
+  failureMessage: '复制失败，请手动复制 FBA 发货模板或稍后重试。',
+});
 
 declare global {
   interface Window {

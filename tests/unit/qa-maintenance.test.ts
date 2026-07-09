@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildQaMaintenanceTemplate, mount, unmount } from '@/modules/sops/views/service/qa_maintenance/index';
+import {
+  buildQaMaintenanceTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/service/qa_maintenance/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="qa-maintenance-owner" value="客服负责人/运营负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('QA maintenance archive workflow', () => {
   let container: HTMLElement;
 
@@ -46,7 +55,7 @@ describe('QA maintenance archive workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -77,8 +86,13 @@ describe('QA maintenance archive workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/service/qa_maintenance/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：客服小周'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：客服小周')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('qa_maintenance_owner_v1', '客服小周');
-    expect(global.alert).toHaveBeenCalledWith('已复制 QA 维护归档模板，可粘贴到周报或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制 QA 维护归档模板，可粘贴到周报或归档文档。',
+      { type: 'success' }
+    );
   });
 });

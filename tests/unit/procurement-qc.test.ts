@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildProcurementQcTemplate, mount, unmount } from '@/modules/sops/views/backend/procurement_qc/index';
+import {
+  buildProcurementQcTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/backend/procurement_qc/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="procurement-qc-owner" value="采购/质检负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('Procurement QC review workflow', () => {
   let container: HTMLElement;
 
@@ -46,7 +55,7 @@ describe('Procurement QC review workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -77,8 +86,13 @@ describe('Procurement QC review workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/backend/procurement_qc/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：质检小周'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：质检小周')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('procurement_qc_owner_v1', '质检小周');
-    expect(global.alert).toHaveBeenCalledWith('已复制采购/QC 放行复盘模板，可粘贴到周报或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制采购/QC 放行复盘模板，可粘贴到周报或归档文档。',
+      { type: 'success' }
+    );
   });
 });

@@ -2,8 +2,8 @@ import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '@/common/utils/security';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
-import { copyTextToClipboard } from '../../../utils/clipboard';
 import { createOwnerField } from '../../../utils/ownerField';
+import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
 const REVIEW_OWNER_STORAGE_KEY = 'procurement_qc_owner_v1';
 const DEFAULT_REVIEW_OWNER = '采购/质检负责人';
@@ -75,21 +75,12 @@ export function buildProcurementQcTemplate(owner = DEFAULT_REVIEW_OWNER): string
   ].join('\n');
 }
 
-async function copyProcurementQcTemplate(): Promise<void> {
-  const owner = reviewOwnerField.read();
-  reviewOwnerField.save(owner);
-  const reviewTemplate = buildProcurementQcTemplate(owner);
-
-  try {
-    if (!(await copyTextToClipboard(reviewTemplate))) {
-      throw new Error('clipboard unavailable');
-    }
-
-    alert('已复制采购/QC 放行复盘模板，可粘贴到周报或归档文档。');
-  } catch {
-    alert('复制失败，请手动复制采购/QC 模板或稍后重试。');
-  }
-}
+const copyProcurementQcTemplate = createTemplateCopyAction({
+  ownerField: reviewOwnerField,
+  buildTemplate: buildProcurementQcTemplate,
+  successMessage: '已复制采购/QC 放行复盘模板，可粘贴到周报或归档文档。',
+  failureMessage: '复制失败，请手动复制采购/QC 模板或稍后重试。',
+});
 
 declare global {
   interface Window {

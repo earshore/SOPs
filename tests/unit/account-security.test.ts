@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildAccountSecurityTemplate, mount, unmount } from '@/modules/sops/views/safety/account_security/index';
+import {
+  buildAccountSecurityTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/safety/account_security/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="account-security-owner" value="账号安全负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('Account security review workflow', () => {
   let container: HTMLElement;
 
@@ -46,7 +55,7 @@ describe('Account security review workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -77,8 +86,13 @@ describe('Account security review workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/safety/account_security/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：安全小周'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：安全小周')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('account_security_owner_v1', '安全小周');
-    expect(global.alert).toHaveBeenCalledWith('已复制账号登录异常登记模板，可粘贴到工作群或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制账号登录异常登记模板，可粘贴到工作群或归档文档。',
+      { type: 'success' }
+    );
   });
 });

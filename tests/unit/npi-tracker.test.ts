@@ -9,8 +9,13 @@ import { buildNpiReviewTemplate, mount, unmount } from '@/modules/sops/views/gro
 import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { StorageService } from '@/services/storageService';
+import { showToast } from '@/common/ui/notifications';
 
 // Mock 依赖
+vi.mock('@/common/ui/notifications', () => ({
+    showToast: vi.fn(),
+}));
+
 vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
     MOCK_PRODUCTS: [
         {
@@ -143,8 +148,8 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
         global.URL.revokeObjectURL = vi.fn();
         anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
-        // Mock alert
-        global.alert = vi.fn();
+        // Mock toast
+        vi.mocked(showToast).mockReset();
         vi.spyOn(StorageService, 'get').mockReturnValue({});
         vi.spyOn(StorageService, 'set').mockReturnValue(true);
     });
@@ -559,7 +564,10 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
                 expect(global.URL.createObjectURL).toHaveBeenCalled();
                 
                 // 验证：显示了成功提示
-                expect(global.alert).toHaveBeenCalled();
+                expect(showToast).toHaveBeenCalledWith('导出成功！CSV文件包含Excel兼容公式，使用Excel打开后公式会自动计算。', {
+                    type: 'success',
+                    description: '提示：价格列仅为配送费占比预警，不代表净利润；正式定价必须进入欧洲站SKU利润表复核。',
+                });
             }
         });
 
@@ -654,7 +662,7 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
             expect(writeText).toHaveBeenCalledWith(expect.stringContaining('NPI 周复盘归档'));
             expect(writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：运营小李'));
             expect(StorageService.set).toHaveBeenCalledWith('npi_review_owner_v1', '运营小李');
-            expect(global.alert).toHaveBeenCalledWith('已复制 NPI 复盘模板，可粘贴到周报或归档文档。');
+            expect(showToast).toHaveBeenCalledWith('已复制 NPI 复盘模板，可粘贴到周报或归档文档。', { type: 'success' });
         });
     });
 

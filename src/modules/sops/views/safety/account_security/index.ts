@@ -2,8 +2,8 @@ import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '@/common/utils/security';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
-import { copyTextToClipboard } from '../../../utils/clipboard';
 import { createOwnerField } from '../../../utils/ownerField';
+import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
 const ACCOUNT_SECURITY_OWNER_STORAGE_KEY = 'account_security_owner_v1';
 const DEFAULT_REVIEW_OWNER = '账号安全负责人';
@@ -67,21 +67,12 @@ export function buildAccountSecurityTemplate(owner = DEFAULT_REVIEW_OWNER): stri
   ].join('\n');
 }
 
-async function copyAccountSecurityTemplate(): Promise<void> {
-  const owner = reviewOwnerField.read();
-  reviewOwnerField.save(owner);
-  const reviewTemplate = buildAccountSecurityTemplate(owner);
-
-  try {
-    if (!(await copyTextToClipboard(reviewTemplate))) {
-      throw new Error('clipboard unavailable');
-    }
-
-    alert('已复制账号登录异常登记模板，可粘贴到工作群或归档文档。');
-  } catch {
-    alert('复制失败，请手动复制账号安全模板或稍后重试。');
-  }
-}
+const copyAccountSecurityTemplate = createTemplateCopyAction({
+  ownerField: reviewOwnerField,
+  buildTemplate: buildAccountSecurityTemplate,
+  successMessage: '已复制账号登录异常登记模板，可粘贴到工作群或归档文档。',
+  failureMessage: '复制失败，请手动复制账号安全模板或稍后重试。',
+});
 
 declare global {
   interface Window {

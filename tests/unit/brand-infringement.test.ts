@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildBrandInfringementTemplate, mount, unmount } from '@/modules/sops/views/safety/brand_infringement/index';
+import {
+  buildBrandInfringementTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/safety/brand_infringement/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="brand-infringement-owner" value="品牌/合规负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('Brand infringement review workflow', () => {
   let container: HTMLElement;
 
@@ -46,7 +55,7 @@ describe('Brand infringement review workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -69,7 +78,9 @@ describe('Brand infringement review workflow', () => {
 
   it('copies the review template', async () => {
     await mount(container);
-    const ownerInput = document.getElementById('brand-infringement-owner') as HTMLInputElement | null;
+    const ownerInput = document.getElementById(
+      'brand-infringement-owner'
+    ) as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '合规小周';
 
     await window.sops_copyBrandInfringementTemplate?.();
@@ -77,8 +88,13 @@ describe('Brand infringement review workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/safety/brand_infringement/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：合规小周'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：合规小周')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('brand_infringement_owner_v1', '合规小周');
-    expect(global.alert).toHaveBeenCalledWith('已复制品牌/侵权审核复盘模板，可粘贴到周报或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制品牌/侵权审核复盘模板，可粘贴到周报或归档文档。',
+      { type: 'success' }
+    );
   });
 });

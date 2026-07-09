@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildNegativeReviewTemplate, mount, unmount } from '@/modules/sops/views/service/negative_review/index';
+import {
+  buildNegativeReviewTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/service/negative_review/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="negative-review-owner" value="客服负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('Negative review VOC workflow', () => {
   let container: HTMLElement;
 
@@ -46,7 +55,7 @@ describe('Negative review VOC workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -77,8 +86,13 @@ describe('Negative review VOC workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/service/negative_review/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：客服小王'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：客服小王')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('negative_review_owner_v1', '客服小王');
-    expect(global.alert).toHaveBeenCalledWith('已复制差评 VOC 复盘模板，可粘贴到周报或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制差评 VOC 复盘模板，可粘贴到周报或归档文档。',
+      { type: 'success' }
+    );
   });
 });

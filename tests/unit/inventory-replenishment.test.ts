@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildInventoryReplenishmentTemplate, mount, unmount } from '@/modules/sops/views/backend/inventory_replenishment/index';
+import {
+  buildInventoryReplenishmentTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/backend/inventory_replenishment/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="inventory-replenishment-owner" value="供应链/运营负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('Inventory replenishment report workflow', () => {
   let container: HTMLElement;
 
@@ -46,7 +55,7 @@ describe('Inventory replenishment report workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -69,7 +78,9 @@ describe('Inventory replenishment report workflow', () => {
 
   it('copies the report template', async () => {
     await mount(container);
-    const ownerInput = document.getElementById('inventory-replenishment-owner') as HTMLInputElement | null;
+    const ownerInput = document.getElementById(
+      'inventory-replenishment-owner'
+    ) as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '供应链小周';
 
     await window.sops_copyInventoryReplenishmentTemplate?.();
@@ -77,8 +88,16 @@ describe('Inventory replenishment report workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/backend/inventory_replenishment/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：供应链小周'));
-    expect(StorageService.set).toHaveBeenCalledWith('inventory_replenishment_owner_v1', '供应链小周');
-    expect(global.alert).toHaveBeenCalledWith('已复制库存补货周报复盘模板，可粘贴到周报或归档文档。');
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：供应链小周')
+    );
+    expect(StorageService.set).toHaveBeenCalledWith(
+      'inventory_replenishment_owner_v1',
+      '供应链小周'
+    );
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制库存补货周报复盘模板，可粘贴到周报或归档文档。',
+      { type: 'success' }
+    );
   });
 });

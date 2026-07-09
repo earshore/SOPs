@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildPromotionSubmissionTemplate, mount, unmount } from '@/modules/sops/views/growth/promotion_submission/index';
+import {
+  buildPromotionSubmissionTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/growth/promotion_submission/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="promotion-submission-owner" value="运营负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('Promotion submission archive workflow', () => {
   let container: HTMLElement;
 
@@ -46,7 +55,7 @@ describe('Promotion submission archive workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -70,7 +79,9 @@ describe('Promotion submission archive workflow', () => {
 
   it('copies the archive template', async () => {
     await mount(container);
-    const ownerInput = document.getElementById('promotion-submission-owner') as HTMLInputElement | null;
+    const ownerInput = document.getElementById(
+      'promotion-submission-owner'
+    ) as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '运营小周';
 
     await window.sops_copyPromotionSubmissionTemplate?.();
@@ -78,8 +89,13 @@ describe('Promotion submission archive workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/growth/promotion_submission/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：运营小周'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：运营小周')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('promotion_submission_owner_v1', '运营小周');
-    expect(global.alert).toHaveBeenCalledWith('已复制促销提报/复盘模板，可粘贴到周报或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制促销提报/复盘模板，可粘贴到周报或归档文档。',
+      { type: 'success' }
+    );
   });
 });

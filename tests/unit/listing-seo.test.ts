@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildListingReviewTemplate, mount, unmount } from '@/modules/sops/views/growth/listing_seo/index';
+import {
+  buildListingReviewTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/growth/listing_seo/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="listing-review-owner" value="内容负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('Listing SEO review workflow', () => {
   let container: HTMLElement;
 
@@ -43,7 +52,7 @@ describe('Listing SEO review workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -73,8 +82,13 @@ describe('Listing SEO review workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/growth/listing_seo/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：内容小李'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：内容小李')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('listing_review_owner_v1', '内容小李');
-    expect(global.alert).toHaveBeenCalledWith('已复制 Listing 改稿复盘模板，可粘贴到周报或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制 Listing 改稿复盘模板，可粘贴到周报或归档文档。',
+      { type: 'success' }
+    );
   });
 });

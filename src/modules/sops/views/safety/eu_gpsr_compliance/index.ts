@@ -2,8 +2,8 @@ import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { setSafeHtml } from '@/common/utils/security';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
-import { copyTextToClipboard } from '../../../utils/clipboard';
 import { createOwnerField } from '../../../utils/ownerField';
+import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
 const REVIEW_OWNER_STORAGE_KEY = 'gpsr_compliance_owner_v1';
 const DEFAULT_REVIEW_OWNER = '合规负责人/运营负责人';
@@ -76,21 +76,12 @@ export function buildGpsrComplianceTemplate(owner = DEFAULT_REVIEW_OWNER): strin
   ].join('\n');
 }
 
-async function copyGpsrComplianceTemplate(): Promise<void> {
-  const owner = reviewOwnerField.read();
-  reviewOwnerField.save(owner);
-  const reviewTemplate = buildGpsrComplianceTemplate(owner);
-
-  try {
-    if (!(await copyTextToClipboard(reviewTemplate))) {
-      throw new Error('clipboard unavailable');
-    }
-
-    alert('已复制 GPSR 合规交付件归档模板，可粘贴到周报或归档文档。');
-  } catch {
-    alert('复制失败，请手动复制 GPSR 合规模板或稍后重试。');
-  }
-}
+const copyGpsrComplianceTemplate = createTemplateCopyAction({
+  ownerField: reviewOwnerField,
+  buildTemplate: buildGpsrComplianceTemplate,
+  successMessage: '已复制 GPSR 合规交付件归档模板，可粘贴到周报或归档文档。',
+  failureMessage: '复制失败，请手动复制 GPSR 合规模板或稍后重试。',
+});
 
 declare global {
   interface Window {

@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildFbaShippingTemplate, mount, unmount } from '@/modules/sops/views/backend/fba_shipping/index';
+import {
+  buildFbaShippingTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/backend/fba_shipping/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="fba-shipping-owner" value="物流/供应链负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('FBA shipping release workflow', () => {
   let container: HTMLElement;
 
@@ -46,7 +55,7 @@ describe('FBA shipping release workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -77,8 +86,13 @@ describe('FBA shipping release workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/backend/fba_shipping/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：物流小周'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：物流小周')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('fba_shipping_owner_v1', '物流小周');
-    expect(global.alert).toHaveBeenCalledWith('已复制 FBA 发货放行/异常登记模板，可粘贴到周报或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制 FBA 发货放行/异常登记模板，可粘贴到周报或归档文档。',
+      { type: 'success' }
+    );
   });
 });

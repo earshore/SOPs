@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildProductComplianceTemplate, mount, unmount } from '@/modules/sops/views/safety/product_compliance/index';
+import {
+  buildProductComplianceTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/safety/product_compliance/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   template: `
     <section>
       <input id="product-compliance-owner" value="合规负责人" />
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
   },
 }));
 
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
+}));
+
 describe('Product compliance review workflow', () => {
   let container: HTMLElement;
 
@@ -46,7 +55,7 @@ describe('Product compliance review workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -69,7 +78,9 @@ describe('Product compliance review workflow', () => {
 
   it('copies the review template', async () => {
     await mount(container);
-    const ownerInput = document.getElementById('product-compliance-owner') as HTMLInputElement | null;
+    const ownerInput = document.getElementById(
+      'product-compliance-owner'
+    ) as HTMLInputElement | null;
     if (ownerInput) ownerInput.value = '合规小周';
 
     await window.sops_copyProductComplianceTemplate?.();
@@ -77,8 +88,13 @@ describe('Product compliance review workflow', () => {
     expect(mocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/sops/views/safety/product_compliance/template.html'
     );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：合规小周'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：合规小周')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('product_compliance_owner_v1', '合规小周');
-    expect(global.alert).toHaveBeenCalledWith('已复制产品合规复盘模板，可粘贴到周报或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制产品合规复盘模板，可粘贴到周报或归档文档。',
+      { type: 'success' }
+    );
   });
 });

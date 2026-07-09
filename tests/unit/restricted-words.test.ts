@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildRestrictedWordsTemplate, mount, unmount } from '@/modules/sops/views/growth/restricted_words/index';
+import {
+  buildRestrictedWordsTemplate,
+  mount,
+  unmount,
+} from '@/modules/sops/views/growth/restricted_words/index';
 import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
   storageSet: vi.fn(),
   loadTemplate: vi.fn(),
+  showToast: vi.fn(),
   initPanel: vi.fn(),
   cleanupPanel: vi.fn(),
   template: `
@@ -29,6 +34,10 @@ vi.mock('@/services/storageService', () => ({
     get: mocks.storageGet,
     set: mocks.storageSet,
   },
+}));
+
+vi.mock('@/common/ui/notifications', () => ({
+  showToast: mocks.showToast,
 }));
 
 vi.mock('@/modules/sops/views/growth/restricted_words/restrictedWordsHandler', () => ({
@@ -55,7 +64,7 @@ describe('Restricted words review workflow', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
-    global.alert = vi.fn();
+    mocks.showToast.mockClear();
   });
 
   afterEach(() => {
@@ -87,8 +96,13 @@ describe('Restricted words review workflow', () => {
       'src/modules/sops/views/growth/restricted_words/template.html'
     );
     expect(mocks.initPanel).toHaveBeenCalled();
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('作业负责人：合规小周'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('作业负责人：合规小周')
+    );
     expect(StorageService.set).toHaveBeenCalledWith('restricted_words_owner_v1', '合规小周');
-    expect(global.alert).toHaveBeenCalledWith('已复制高危词检查复盘模板，可粘贴到周报或归档文档。');
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      '已复制高危词检查复盘模板，可粘贴到周报或归档文档。',
+      { type: 'success' }
+    );
   });
 });
