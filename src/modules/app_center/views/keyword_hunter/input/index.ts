@@ -15,6 +15,7 @@ import { showToast, showProgress } from '@/common/ui';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
+import { confirmWithModal } from '../utils/confirmModal';
 import { appStore } from '@/stores/useAppStore';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import type { KeywordHunterSnapshot } from '@/types/modules-business';
@@ -603,9 +604,12 @@ async function restoreInputSnapshot(snapshot: KeywordHunterSnapshot): Promise<vo
   showToast('快照已载入输入页', { type: 'success' });
 }
 
-async function deleteInputSnapshot(id: string): Promise<void> {
-  const confirmed = window.confirm(
-    '确定删除这个 Keyword Hunter 快照吗？删除后无法从本地历史恢复该快照。'
+export async function deleteInputSnapshot(id: string): Promise<void> {
+  const confirmed = await confirmWithModal(
+    '删除输入快照',
+    '确定要删除这个 Keyword Hunter 快照吗？<br/><span class="text-xs text-red-600 mt-1 block">此操作无法撤销</span>',
+    'kh_ignore_delete_input_snapshot',
+    '删除快照'
   );
   if (!confirmed) {
     return;
