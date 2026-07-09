@@ -26,6 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.4-rc.7] - 2026-07-09
+
+### Added
+- Deep Chat 线程支持内联重命名，减少进入管理菜单的来回切换。
+
+### Changed
+- 同步应用内版本显示到 `3.0.4-rc.7`。
+
 ## [3.0.4-rc.6] - 2026-07-09
 
 ### Added
