@@ -323,9 +323,9 @@ git revert <commit-hash>
 
 ## 📝 相关文档
 
-- [第三批修复计划](.kiro/arch-debt/batch-3-plan.md) - ANIMATION_SETTINGS_CHANGED 修复记录
-- [事件常量文件](../src/common/constants/eventConstants.ts)
-- [EventBus实现](../src/common/EventBus.ts)
+- [第三批修复计划](./batch-3-plan.md) - ANIMATION_SETTINGS_CHANGED 修复记录
+- [事件常量文件](../../src/common/constants/eventConstants.ts)
+- [EventBus实现](../../src/common/EventBus.ts)
 
 ---
 

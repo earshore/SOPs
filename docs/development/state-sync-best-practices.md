@@ -398,6 +398,6 @@ this._unsubscribe = createStateSync({
 
 ## 参考资源
 
-- [状态同步工具源码](../src/common/utils/stateSync.ts)
-- [使用示例](../examples/state-sync-usage.ts)
+- [状态同步工具源码](../../src/common/utils/stateSync.ts)
+- [使用示例](../../examples/state-sync-usage.ts)
 - [Zustand 文档](https://github.com/pmndrs/zustand)

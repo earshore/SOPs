@@ -72,19 +72,18 @@ docs/
 │   ├── bug-fix-reports/        #   单次 Bug 修复记录（2篇）
 │   ├── knowledge-review/       #   知识库内容评审和整改记录
 │   ├── quality/                #   质量门禁、构建修复、技术债和安全修复报告
-│   ├── ui-audit/               #   视觉审计、welcome banner 修复和 UX backlog
-│   ├── verification/           #   阶段性验收报告（4篇）
-│   └── misc/                   #   其他过期文档（5篇）
+│   ├── ui-audit/               #   视觉审计、PC UI 优化和确认弹窗计划
+│   ├── verification/           #   阶段性验收报告
+│   └── misc/                   #   其他过期文档
 ├── development/                # 开发规范、最佳实践、AI辅助上下文
 ├── guides/                     # 功能使用指南
 │   ├── css/                    #   CSS 架构体系
 │   └── naming-validator/       #   命名验证工具
 ├── screenshots/                # 项目截图
 ├── testing/                    # 测试配置与使用指南
-├── troubleshooting/            # 故障排查
-└── verification/               # （历史验收报告已归档至 archive/verification/）
+└── troubleshooting/            # 故障排查
 ```
 
 ---
 
-**最后更新**: 2026-07-03
+**最后更新**: 2026-07-09

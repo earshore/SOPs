@@ -6,6 +6,8 @@
 **最后更新：** 2025-01-XX  
 **适用范围：** 所有使用新基础设施架构的开发者和运维人员
 
+> 维护说明（2026-07-09）：本文中的 StateManager 排查内容保留为迁移上下文；当前状态管理问题优先参考 Zustand 迁移和状态同步文档。
+
 ---
 
 ## 概述
@@ -1922,12 +1924,12 @@ npm run test:coverage
 
 ### 方式 1：查看文档
 
-- [SafeModuleLoader API 文档](./api/SafeModuleLoader.md)
-- [AlpineRegistry API 文档](./api/AlpineRegistry.md)
-- [SafeRenderer API 文档](./api/SafeRenderer.md)
-- [StateManager API 文档](./api/StateManager.md)
-- [迁移指南](./migration-guide.md)
-- [最佳实践](./best-practices.md)
+- [SafeModuleLoader API 文档](../api/SafeModuleLoader.md)
+- [AlpineRegistry API 文档](../api/AlpineRegistry.md)
+- [SafeRenderer API 文档](../api/SafeRenderer.md)
+- [Zustand 迁移指南](../development/zustand-migration-guide.md)
+- [状态同步最佳实践](../development/state-sync-best-practices.md)
+- [系统稳定性最佳实践](../development/best-practices.md)
 
 ### 方式 2：查看示例代码
 
@@ -2078,14 +2080,14 @@ grep -r "error message" tests/
 
 ## 相关文档
 
-- [SafeModuleLoader API 文档](./api/SafeModuleLoader.md)
-- [AlpineRegistry API 文档](./api/AlpineRegistry.md)
-- [SafeRenderer API 文档](./api/SafeRenderer.md)
-- [StateManager API 文档](./api/StateManager.md)
-- [迁移指南](./migration-guide.md)
-- [最佳实践](./best-practices.md)
-- [系统稳定性优化 - 设计文档](../.kiro/specs/system-stability-optimization/design.md)
-- [系统稳定性优化 - 需求文档](../.kiro/specs/system-stability-optimization/requirements.md)
+- [SafeModuleLoader API 文档](../api/SafeModuleLoader.md)
+- [AlpineRegistry API 文档](../api/AlpineRegistry.md)
+- [SafeRenderer API 文档](../api/SafeRenderer.md)
+- [Zustand 迁移指南](../development/zustand-migration-guide.md)
+- [状态同步最佳实践](../development/state-sync-best-practices.md)
+- [系统稳定性最佳实践](../development/best-practices.md)
+- [系统稳定性优化 - 设计文档](../../.kiro/specs/system-stability-optimization/design.md)
+- [系统稳定性优化 - 需求文档](../../.kiro/specs/system-stability-optimization/requirements.md)
 
 ---
 

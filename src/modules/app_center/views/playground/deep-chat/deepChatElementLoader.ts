@@ -1,5 +1,6 @@
-import deepChatBundleUrl from 'deep-chat/dist/deepChat.bundle.js?url';
 import { DEEP_CHAT_SCRIPT_MARKER } from './constants';
+
+const DEEP_CHAT_BUNDLE_PATH = 'assets/vendor/deepChat.bundle.js';
 
 let deepChatElementLoadPromise: Promise<void> | null = null;
 
@@ -39,7 +40,7 @@ function loadDeepChatElementScript(): Promise<void> {
     const script = document.createElement('script');
     script.type = 'module';
     script.async = true;
-    script.src = deepChatBundleUrl;
+    script.src = new URL(DEEP_CHAT_BUNDLE_PATH, document.baseURI).toString();
     script.dataset.loader = DEEP_CHAT_SCRIPT_MARKER;
     script.addEventListener(
       'load',

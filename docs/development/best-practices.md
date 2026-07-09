@@ -6,6 +6,8 @@
 **最后更新：** 2026-04-17  
 **适用范围：** 所有使用新基础设施架构的开发者
 
+> 维护说明（2026-07-09）：本文中的 StateManager 内容保留为迁移上下文；当前全局状态以 Zustand 相关文档和 `src/stores/` 实现为准。
+
 ---
 
 ## 概述
@@ -1749,13 +1751,13 @@ class UserFactory {
 
 ## 相关文档
 
-- [SafeModuleLoader API 文档](./api/SafeModuleLoader.md)
-- [AlpineRegistry API 文档](./api/AlpineRegistry.md)
-- [SafeRenderer API 文档](./api/SafeRenderer.md)
-- [StateManager API 文档](./api/StateManager.md)
-- [迁移指南](./migration-guide.md)
-- [系统稳定性优化 - 设计文档](../.kiro/specs/system-stability-optimization/design.md)
-- [系统稳定性优化 - 需求文档](../.kiro/specs/system-stability-optimization/requirements.md)
+- [SafeModuleLoader API 文档](../api/SafeModuleLoader.md)
+- [AlpineRegistry API 文档](../api/AlpineRegistry.md)
+- [SafeRenderer API 文档](../api/SafeRenderer.md)
+- [Zustand 迁移指南](./zustand-migration-guide.md)
+- [状态同步最佳实践](./state-sync-best-practices.md)
+- [系统稳定性优化 - 设计文档](../../.kiro/specs/system-stability-optimization/design.md)
+- [系统稳定性优化 - 需求文档](../../.kiro/specs/system-stability-optimization/requirements.md)
 
 ---
 

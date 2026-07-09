@@ -854,10 +854,9 @@ registry.register('AIAnalysisPanel', () => ({ /* ... */ }));
 
 - [SafeModuleLoader API 文档](./SafeModuleLoader.md)
 - [SafeRenderer API 文档](./SafeRenderer.md)
-- [StateManager API 文档](./StateManager.md)
 - [Alpine.js 官方文档](https://alpinejs.dev/)
-- [迁移指南](../guides/migration-guide.md)
-- [最佳实践](../guides/best-practices.md)
+- [Zustand 迁移指南](../development/zustand-migration-guide.md)
+- [系统稳定性最佳实践](../development/best-practices.md)
 
 ---
 

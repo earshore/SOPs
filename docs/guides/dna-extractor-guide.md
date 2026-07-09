@@ -453,10 +453,9 @@ console.log('数据来源:', dna.metadata?.sourceFields);
 
 ## 相关文档
 
-- [架构设计文档](./dna-extractor-zero-hardcoding-architecture.md)
-- [实现报告](./dna-extractor-refactor-implementation.md)
-- [测试总结](./dna-extractor-test-summary.md)
-- [代码审查报告](./dna-extractor-code-review.md)
+- [历史验证归档](../archive/verification/README.md)
+- [DNA 提取器相关类型](../../src/modules/app_center/views/master_analysis/types/extendedDNA.ts)
+- [Universal DNA Extractor](../../src/modules/app_center/views/master_analysis/services/universalDNAExtractor.ts)
 
 ## 更新日志
 

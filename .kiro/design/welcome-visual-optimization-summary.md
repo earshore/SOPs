@@ -215,11 +215,11 @@ python scripts/update-welcome-visual.py
 
 ## 相关文档
 
-- 📄 [完整优化方案](.kiro/design/welcome-visual-optimization-plan.md)
-- 📄 [配色方案参考](.kiro/design/welcome-banner-color-scheme.md)
-- 📄 [快速参考指南](.kiro/design/welcome-banner-quick-reference.md)
-- 📄 [CSS 组件文档](src/css/components/welcome-banner.css)
-- 📄 [更新脚本](scripts/update-welcome-visual.py)
+- 📄 [完整优化方案](./welcome-visual-optimization-plan.md)
+- 📄 [配色方案参考](./welcome-banner-color-scheme.md)
+- 📄 [快速参考指南](./welcome-banner-quick-reference.md)
+- 📄 [CSS 组件文档](../../src/css/components/welcome-banner.css)
+- 📄 `scripts/update-welcome-visual.py`（历史脚本，当前仓库已移除）
 
 ---
 

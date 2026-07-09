@@ -101,7 +101,7 @@
     "css:cleanup": "tsx scripts/dev/cleanup-unused-css.ts",
     "docs:api": "node scripts/build/generate-api-docs.js",
     "docs:serve": "npx http-server docs/api -p 8080 -o",
-    "circular:check": "madge --circular --extensions ts --ts-config tsconfig.json src",
+    "circular:check": "tsx scripts/quality/check-circular-dependencies.ts",
     "ci:security": "npm run xss:gate && npm run secret:scan && npm run circular:check",
     "ci:test-quality": "npm run type-check:tests && npm run lint:tests",
     "ci:format": "npm run format:check",

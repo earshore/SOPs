@@ -318,9 +318,9 @@ A:
 ## 参考资源
 
 - [Zustand 官方文档](https://github.com/pmndrs/zustand)
-- [项目示例代码](../examples/zustand-usage.ts)
-- [迁移报告](./zustand-migration-report-2026-02-26.md)
-- [Store 实现](../src/stores/useAppStore.ts)
+- [项目示例代码](../../examples/zustand-usage.ts)
+- [状态同步最佳实践](./state-sync-best-practices.md)
+- [Store 实现](../../src/stores/useAppStore.ts)
 
 ## 获取帮助
 

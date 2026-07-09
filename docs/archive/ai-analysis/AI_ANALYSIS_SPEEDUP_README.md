@@ -246,9 +246,9 @@ npm run test -- parallelAnalysisService.test.ts
 
 ## 相关文档
 
-- [详细技术文档](./docs/ai-analysis-performance-optimization.md)
-- [实施总结](./docs/ai-analysis-speedup-summary.md)
-- [使用示例](./examples/parallel-analysis-usage.ts)
+- [详细技术文档](./ai-analysis-performance-optimization.md)
+- [实施总结](./ai-analysis-speedup-summary.md)
+- [使用示例](../../../examples/parallel-analysis-usage.ts)
 
 ## 团队成员
 

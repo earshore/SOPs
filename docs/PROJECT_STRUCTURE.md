@@ -1,6 +1,6 @@
 # Project Structure Review
 
-Date: 2026-07-03
+Date: 2026-07-09
 
 ## Scope
 
@@ -38,8 +38,9 @@ This review keeps the application layout intact and only documents the current s
 - Updated XSS script paths from `tools/` to `tools/security/` in package scripts, docs, and tool internals.
 - Removed empty local directories that were not part of git tracking: `guides/`, `testing/`, and `docs/verification/`.
 - Moved one-off root reports and completed content/UI review documents into `docs/archive/knowledge-review/`, `docs/archive/ui-audit/`, and `docs/archive/quality/`.
+- Moved completed Deep Chat, Keyword Hunter, and PC UI one-off plans from the repository root into `docs/archive/ui-audit/`.
 - Kept active references in the root and `docs/` top level: README, changelog, deployment, current quality/security reports, product roadmap, and active design/architecture guidelines.
-- Removed local AI tool state, generated quality reports, exported sample data, and local plugin bundles from Git tracking through `.gitignore` plus index cleanup.
+- Kept local AI tool state, generated quality reports, exported sample data, and local plugin bundles out of Git through `.gitignore`.
 
 ## Remaining Review Items
 

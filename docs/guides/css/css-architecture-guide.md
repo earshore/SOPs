@@ -551,10 +551,10 @@ A: 使用预编译的主题 class，避免运行时修改大量 CSS 变量。
 
 ## 相关文档
 
-- [CSS 架构优化方案](./css-architecture-optimization-plan.md)
-- [设计令牌配置](../src/common/config/design-tokens.ts)
-- [主题配置](../src/common/config/themeConfig.ts)
-- [颜色方案](../src/common/constants/colorSchemes.ts)
+- [CSS 架构快速开始](./CSS-ARCHITECTURE-README.md)
+- [设计令牌配置](../../../src/common/config/design-tokens.ts)
+- [主题配置](../../../src/common/config/themeConfig.ts)
+- [颜色方案](../../../src/common/constants/colorSchemes.ts)
 
 ---
 

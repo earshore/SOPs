@@ -1,5 +1,7 @@
 # 系统设置目录结构合理性审查报告
 
+> 归档说明（2026-07-09）：本文件为 2026-07-06 系统设置结构审查快照，当前设置实现以 `src/components/settings/systemSettings.*` 和最新产品决策为准。
+
 审查日期：2026-07-06  
 审查范围：`src/components/settings/systemSettings.ts`、`src/components/settings/systemSettings.html`、`src/components/settings/systemSettings.css`、相关配置/存储服务与模块内设置。  
 边界说明：仓库中未发现独立中文目录“系统设置”；当前产品实现为右侧抽屉式全局设置面板，入口为 `index.html` 的“全局设置”按钮，主体为 `src/components/settings/systemSettings.*`。

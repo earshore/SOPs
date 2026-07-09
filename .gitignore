@@ -66,6 +66,7 @@ tests/test-results/
 playwright/.cache/
 .playwright-cli/
 /output/
+/preview-shots/
 
 # Screenshots (保留目录结构，忽略截图文件)
 tests/screenshots/**/*.png
@@ -101,13 +102,15 @@ tests/quality/quality-history.json
 tests/quality/quality-report-*.html
 tests/quality/quality-report-*.json
 tests/quality/quality-trend.html
+tests/quality/security-audit-*.html
+tests/quality/security-audit-*.json
 tests/quality/tech-debt-*.html
 tests/quality/tech-debt-*.json
 tests/quality/unused-code-report.html
 tests/quality/unused-code-report.json
 tests/quality/reports/
-complexity-report-*.html
-complexity-report-*.md
+/complexity-report-*.html
+/complexity-report-*.md
 unused-imports-report-*.html
 unused-imports-report-*.json
 docs/css-module-analysis-report.md
@@ -117,11 +120,11 @@ test-output.txt
 # 4. Documentation
 # ==============================================================================
 # 保留文档目录，仅忽略草稿和临时文件
+/deliverables/
 jsdoc-debug.html
 docs/**/*.draft.md
 docs/**/.temp/
 docs/**/temp-*.md
-
 
 # ==============================================================================
 # 5. System Files

@@ -721,9 +721,8 @@ await safeModuleLoader.loadModule(container, modulePath);
 
 - [AlpineRegistry API 文档](./AlpineRegistry.md)
 - [SafeRenderer API 文档](./SafeRenderer.md)
-- [StateManager API 文档](./StateManager.md)
-- [错误处理指南](../guides/error-handling.md)
-- [迁移指南](../guides/migration-guide.md)
+- [系统稳定性最佳实践](../development/best-practices.md)
+- [通用故障排查指南](../troubleshooting/troubleshooting-guide.md)
 
 ---
 

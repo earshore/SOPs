@@ -103,9 +103,9 @@ npm run docs:api
 
 ## 相关文档
 
-- [最佳实践](./best-practices.md) - API 使用最佳实践
-- [架构设计](./CSS-ARCHITECTURE-README.md) - 系统架构说明
-- [迁移指南](./zustand-migration-guide.md) - 状态管理迁移
+- [系统稳定性最佳实践](../../development/best-practices.md) - API 使用最佳实践
+- [CSS 架构快速开始](../../guides/css/CSS-ARCHITECTURE-README.md) - 系统架构说明
+- [Zustand 迁移指南](../../development/zustand-migration-guide.md) - 状态管理迁移
 
 ---
 

@@ -380,15 +380,13 @@ npm run generate:tokens
 
 ### 详细文档
 - [CSS 架构指南](./css-architecture-guide.md) - 完整使用指南
-- [CSS 架构优化方案](./css-architecture-optimization-plan.md) - 5 阶段方案
-- [最终总结报告](./css-architecture-final-summary.md) - 项目总结
 
 ### 示例代码
-- [最佳实践示例](../examples/css-best-practices/component-example.css) - 6 个组件示例
+- [最佳实践示例](../../../examples/css-best-practices/component-example.css) - 6 个组件示例
 
 ### 源代码
-- [设计令牌配置](../src/common/config/design-tokens.ts) - 令牌定义
-- [生成脚本](../scripts/) - 自动化脚本
+- [设计令牌配置](../../../src/common/config/design-tokens.ts) - 令牌定义
+- [生成脚本](../../../scripts/) - 自动化脚本
 
 ---
 

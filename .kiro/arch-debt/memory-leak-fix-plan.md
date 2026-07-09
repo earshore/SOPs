@@ -454,9 +454,9 @@ describe('内存泄漏集成测试', () => {
 
 ## 🔗 相关文档
 
-- [内存泄漏分析报告](.kiro/arch-debt/memory-leak-analysis.md)
-- [架构债务清单](.kiro/arch-debt/debt-list.md)
-- [EventBus API文档](src/common/EventBus.ts)
+- [内存泄漏分析报告](./memory-leak-analysis.md)
+- [架构债务清单](./debt-list.md)
+- [EventBus API文档](../../src/common/EventBus.ts)
 - [Alpine.js生命周期文档](https://alpinejs.dev/essentials/lifecycle)
 
 ---

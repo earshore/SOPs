@@ -13,4 +13,4 @@
 
 ## 交付文件
 
-- `ui-pc-optimization-plan.md`：PC 端专用 UI 优化方案。
+- `PC_UI_OPTIMIZATION_PLAN_2026-07-05.md`：PC 端专用 UI 优化方案。

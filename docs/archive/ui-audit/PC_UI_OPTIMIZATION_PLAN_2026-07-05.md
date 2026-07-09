@@ -335,7 +335,7 @@
 
 1. 逐项审计 PC 验收清单并补齐剩余证据链。
    - 状态：已完成。
-   - 范围：`src/modules/sops/sops_style.css`、`src/common/components/OverviewRenderer.ts`、`src/modules/app_center/views/master_analysis/scraper/template.html`、`scripts/quality/audit-card-ui.ts`、`scripts/quality/audit-workbench-ui.ts`、`tests/unit/pc-design-token-css.test.ts`、`tests/unit/scraper-template-a11y.test.ts`、`ui-pc-optimization-plan.md`。
+   - 范围：`src/modules/sops/sops_style.css`、`src/common/components/OverviewRenderer.ts`、`src/modules/app_center/views/master_analysis/scraper/template.html`、`scripts/quality/audit-card-ui.ts`、`scripts/quality/audit-workbench-ui.ts`、`tests/unit/pc-design-token-css.test.ts`、`tests/unit/scraper-template-a11y.test.ts`、本归档方案文档。
    - PC 端影响：最终验收发现 NPI 长说明在 1920px 下会拉到 1384px，影响大屏阅读行长；同时严格扫描发现生成器按钮缺少显式类型、Scraper 站点按钮缺少稳定可读名称，UI audit 对折叠区和同类选择器路由切换存在时序误判。
    - 优化方案：NPI 页面段落增加 `max-width: min(100%, 64rem)`，将 1920px 下最长说明收敛到 1024px；OverviewRenderer 快速入口按钮补齐 `type="button"`；Scraper 站点按钮补动态 `aria-label`；Card audit 检查 App Center 任务路径前先展开折叠区；Workbench audit 等待目标页面就绪文本后再采样同类面板。
    - 验收：Playwright 桌面采样覆盖 1366 / 1440 / 1536 / 1920，首页、应用中心、SOPS、NPI 横向溢出均为 0；NPI 最长段落收敛到 1024px；`npm run ui:audit` 三段通过；按钮语义扫描为 `roleButtons 0`、`implicitButtons 0`、`iconOnlyWithoutName 0`；相关 Vitest、类型检查和构建通过。

@@ -1,10 +1,12 @@
 # 上线前全面检查概览
 
+> 归档说明（2026-07-09）：本文件为 2026-07-05 上线前检查阶段性概览，当前质量状态以 `docs/TECH_DEBT_AUDIT.md`、`docs/CI-QUALITY-GATES.md` 和实际脚本输出为准。
+
 ## 完成内容
 
 - 完成 SOPS 前端项目上线前全面检查汇总。
 - 协作范围覆盖代码质量审查、安全审计、QA 质量门禁。
-- 完整报告已保存到 `deliverables/gstack/pre-launch-check-sops-2026-07-05.md`。
+- 完整报告已归档为 [`PRE_LAUNCH_CHECK_SOPS_2026-07-05.md`](./PRE_LAUNCH_CHECK_SOPS_2026-07-05.md)。
 
 ## 关键结论
 

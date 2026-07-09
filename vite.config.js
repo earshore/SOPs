@@ -5,7 +5,8 @@ import { execFileSync } from 'child_process';
 import { createRequire } from 'module';
 import { promisify } from 'util';
 import { gzip, brotliCompress, constants as zlibConstants } from 'zlib';
-import { readdir, readFile, stat, writeFile } from 'fs/promises';
+import { createReadStream } from 'fs';
+import { copyFile, mkdir, readdir, readFile, stat, writeFile } from 'fs/promises';
 
 // ES 模块兼容的 __dirname 定义
 const __filename = fileURLToPath(import.meta.url);
@@ -14,6 +15,8 @@ const require = createRequire(import.meta.url);
 const packageJson = require('./package.json');
 const gzipAsync = promisify(gzip);
 const brotliCompressAsync = promisify(brotliCompress);
+const deepChatBundleSource = require.resolve('deep-chat/dist/deepChat.bundle.js');
+const deepChatBundlePublicPath = '/assets/vendor/deepChat.bundle.js';
 const devServerForwardConsole = {
     enabled: true,
     unhandledErrors: true,
@@ -92,6 +95,40 @@ function createPrecompressPlugin({ threshold = 10240 } = {}) {
     };
 }
 
+function createDeepChatBundleAssetPlugin() {
+    let outputDir;
+    let shouldCopyBundle = false;
+
+    return {
+        name: 'sops:deep-chat-bundle-asset',
+        configureServer(server) {
+            server.middlewares.use((request, response, next) => {
+                const requestPath = request.url?.split('?')[0];
+                if (requestPath !== deepChatBundlePublicPath) {
+                    next();
+                    return;
+                }
+
+                response.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+                createReadStream(deepChatBundleSource).pipe(response);
+            });
+        },
+        configResolved(config) {
+            shouldCopyBundle = config.command === 'build';
+            outputDir = resolve(config.root, config.build.outDir);
+        },
+        async writeBundle() {
+            if (!shouldCopyBundle) {
+                return;
+            }
+
+            const targetPath = resolve(outputDir, deepChatBundlePublicPath.slice(1));
+            await mkdir(dirname(targetPath), { recursive: true });
+            await copyFile(deepChatBundleSource, targetPath);
+        }
+    };
+}
+
 export default defineConfig({
     publicDir: 'public',
     define: {
@@ -100,6 +137,7 @@ export default defineConfig({
         __SERVER_FORWARD_CONSOLE__: JSON.stringify(devServerForwardConsole)
     },
     plugins: [
+        createDeepChatBundleAssetPlugin(),
         createPrecompressPlugin()
     ],
 

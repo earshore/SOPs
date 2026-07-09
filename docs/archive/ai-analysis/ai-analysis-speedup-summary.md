@@ -171,8 +171,8 @@ onProgress(completedCount, totalCount, currentTasks)
 ## 📚 相关文档
 
 - [详细技术文档](./ai-analysis-performance-optimization.md)
-- [API 文档](./api/SafeRenderer.md)
-- [最佳实践](./best-practices.md)
+- [API 文档](../../api/SafeRenderer.md)
+- [系统稳定性最佳实践](../../development/best-practices.md)
 
 ## ✅ 验收标准
 

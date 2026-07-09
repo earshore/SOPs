@@ -213,9 +213,21 @@ export class MonitoringService {
    * 加载Sentry SDK
    */
   private async loadSentry(): Promise<SentrySDK> {
-    const browserSdk = await import('@sentry/browser');
+    const [browserSdk, coreSdk] = await Promise.all([
+      import('@sentry/browser/esm/sdk.js'),
+      import('@sentry/core'),
+    ]);
 
-    return browserSdk as unknown as SentrySDK;
+    return {
+      init: browserSdk.init as SentrySDK['init'],
+      captureException: coreSdk.captureException as unknown as SentrySDK['captureException'],
+      captureMessage: coreSdk.captureMessage as unknown as SentrySDK['captureMessage'],
+      setUser: coreSdk.setUser as unknown as SentrySDK['setUser'],
+      setTag: coreSdk.setTag as unknown as SentrySDK['setTag'],
+      setContext: coreSdk.setContext as unknown as SentrySDK['setContext'],
+      addBreadcrumb: coreSdk.addBreadcrumb as unknown as SentrySDK['addBreadcrumb'],
+      startTransaction: coreSdk.startTransaction as unknown as SentrySDK['startTransaction'],
+    };
   }
 
   /**

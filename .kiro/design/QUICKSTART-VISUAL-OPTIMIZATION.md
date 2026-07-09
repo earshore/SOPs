@@ -211,9 +211,9 @@ A: welcome-banner.css 已包含暗色模式适配，检查是否有其他样式�
 ## 📞 获取帮助
 
 如有问题，请查看：
-- 📄 [完整优化方案](.kiro/design/welcome-visual-optimization-plan.md)
-- 📄 [优化总结](.kiro/design/welcome-visual-optimization-summary.md)
-- 📄 [CSS 组件文档](src/css/components/welcome-banner.css)
+- 📄 [完整优化方案](./welcome-visual-optimization-plan.md)
+- 📄 [优化总结](./welcome-visual-optimization-summary.md)
+- 📄 [CSS 组件文档](../../src/css/components/welcome-banner.css)
 
 ---
 

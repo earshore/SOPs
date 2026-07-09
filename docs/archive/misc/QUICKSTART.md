@@ -163,9 +163,9 @@
 
 ## 下一步
 
-- 📖 阅读 [详细技术文档](./docs/ai-analysis-performance-optimization.md)
-- 📝 查看 [实施总结](./docs/ai-analysis-speedup-summary.md)
-- 💻 参考 [代码示例](./examples/parallel-analysis-usage.ts)
+- 📖 阅读 [详细技术文档](../ai-analysis/ai-analysis-performance-optimization.md)
+- 📝 查看 [实施总结](../ai-analysis/ai-analysis-speedup-summary.md)
+- 💻 参考 [代码示例](../../../examples/parallel-analysis-usage.ts)
 
 ## 需要帮助？
 

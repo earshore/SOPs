@@ -242,8 +242,8 @@ export function createComponent() {
 ## 🔗 相关文档
 
 - [Alpine.js 生命周期文档](https://alpinejs.dev/essentials/lifecycle)
-- [内存泄漏修复计划](.kiro/arch-debt/memory-leak-fix-plan.md)
-- [架构债务进度](.kiro/arch-debt/progress.md)
+- [内存泄漏修复计划](../arch-debt/memory-leak-fix-plan.md)
+- [架构债务进度](../arch-debt/progress.md)
 
 ---
 
