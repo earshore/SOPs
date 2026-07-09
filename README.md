@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 `https://new.hongecb.store/v1` 中转站；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按当前发布版本 `v3.0.5`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按当前发布版本 `v3.0.5-rc.1`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,7 +10,15 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-当前发布版本是 `v3.0.5`（2026-07-09，stable）；最新稳定 tag 是 `v3.0.5`。`v3.0.5` 整合 `v3.0.4-rc.1` 至 `v3.0.4-rc.7` 的候选版能力，并补充质量门禁与发布资料归档，延续 `v3.0.4` 的运营作业系统收敛，带来以下面向运营和维护的变化：
+当前发布版本是 `v3.0.5-rc.1`（2026-07-10，release candidate）；最新稳定 tag 仍是 `v3.0.5`。`v3.0.5-rc.1` 基于 `v3.0.5` 之后的 Modal 与 SOPS 模板收敛工作，带来以下面向运营和维护的变化：
+
+- 新增共享确认弹窗，并将 Keyword Hunter、Master Analysis、Deep Chat 等模块的重复确认逻辑收敛到公共组件。
+- 增强 AppModal 的可组合能力与回归测试覆盖，补充 Modal 开发指南，降低后续弹窗实现分叉风险。
+- SOPS 工具页新增共享模板模块与复制动作封装，统一流程说明、复制反馈和页面测试夹具。
+- 替换 SOPS 页面里的分散剪贴板调用与 `alert` 反馈，改用统一复制结果处理。
+- 调整页面架构审计以识别共享 SOP 模板模块，并同步应用内版本显示到 `3.0.5-rc.1`。
+
+`v3.0.5` stable 基线继续包含以下变化：
 
 - 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
 - 新增工作流导向条和统一确认弹窗，减少高风险数据操作误触。

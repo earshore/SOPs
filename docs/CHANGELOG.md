@@ -26,6 +26,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.5-rc.1] - 2026-07-10
+
+### Added
+- 新增共享确认弹窗组件，并补充 AppModal 与确认弹窗回归测试覆盖。
+- 新增 Modal 开发指南，沉淀触发、焦点、关闭行为和测试约定。
+- 新增 SOPS 共享模板模块、复制动作封装和页面复制工作流测试夹具。
+
+### Changed
+- 将 Keyword Hunter、Master Analysis、Deep Chat 等模块的确认逻辑收敛到共享确认弹窗。
+- 将 SOPS 页面里的分散模板渲染与剪贴板反馈收敛到共享工具，减少页面重复实现。
+- 更新页面架构审计以识别共享 SOP 模板模块。
+- 同步应用内版本显示到 `3.0.5-rc.1`。
+
+### Fixed
+- 替换多个 SOPS 页面里的 `alert` 复制反馈，统一成功与失败提示行为。
+- 强化 NPI Tracker、Restricted Words、Prompt Library 和系统设置相关回归测试覆盖。
+
 ## [3.0.5] - 2026-07-09
 
 ### Added
