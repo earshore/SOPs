@@ -31,10 +31,15 @@ function buildDom(): void {
     </select>
     <div id="rw-stats-display"></div>
     <table><tbody id="rw-results-tbody"></tbody></table>
-    <div id="rw-detail-modal" class="hidden">
-      <div id="rw-modal-header"></div>
-      <div id="rw-detail-content"></div>
-    </div>
+    <app-modal id="rw-detail-modal" class="hidden" title="高危词详情" size="2xl" no-header>
+      <div slot="body">
+        <div id="rw-modal-header"></div>
+        <div id="rw-detail-content"></div>
+      </div>
+      <div slot="footer">
+        <button type="button" data-action="closeWordDetail">关闭 (Esc)</button>
+      </div>
+    </app-modal>
   `;
 }
 
@@ -144,10 +149,16 @@ beforeEach(() => {
     vi.useFakeTimers();
     initFreshPanel();
 
-    rows()[0]?.querySelector<HTMLButtonElement>('button')?.click();
+    const opener = rows()[0]?.querySelector<HTMLButtonElement>('button');
+    opener?.focus();
+    opener?.click();
     await vi.advanceTimersByTimeAsync(16);
 
     const modal = document.getElementById('rw-detail-modal');
+    const panel = modal?.shadowRoot?.querySelector<HTMLElement>('[role="dialog"]');
+    expect(modal?.tagName.toLowerCase()).toBe('app-modal');
+    expect(panel?.getAttribute('aria-modal')).toBe('true');
+    expect(panel?.getAttribute('aria-label')).toContain('高危词详情');
     expect(modal?.classList.contains('hidden')).toBe(false);
     expect(modal?.classList.contains('show')).toBe(true);
     expect(document.getElementById('rw-modal-header')?.textContent).toContain('ID:');
@@ -155,6 +166,13 @@ beforeEach(() => {
 
     window.closeWordDetail?.();
     expect(modal?.classList.contains('show')).toBe(false);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(modal?.classList.contains('hidden')).toBe(true);
+    await vi.advanceTimersByTimeAsync(150);
+    expect(document.activeElement).toBe(opener);
+
+    opener?.click();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await vi.advanceTimersByTimeAsync(200);
     expect(modal?.classList.contains('hidden')).toBe(true);
 

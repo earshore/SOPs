@@ -2,6 +2,14 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { initAlpineSettings } from '@/components/settings/systemSettings';
 import { LocalDataStore, type LocalDataBucketId, type LocalDataUsage } from '@/services/localDataStore';
 
+const modalMocks = vi.hoisted(() => ({
+  confirmWithModal: vi.fn(),
+}));
+
+vi.mock('@/components/modal/confirmModal', () => ({
+  confirmWithModal: modalMocks.confirmWithModal,
+}));
+
 interface SettingsPanelForTest {
   llm: {
     provider: string;
@@ -43,6 +51,7 @@ function createSettingsPanel(): SettingsPanelForTest {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    modalMocks.confirmWithModal.mockResolvedValue(true);
     localStorage.clear();
     await LocalDataStore.clearAll();
     document.body.innerHTML = '<div id="toast-container"></div>';
@@ -114,7 +123,7 @@ function createSettingsPanel(): SettingsPanelForTest {
   });
 
   it('clears a selected local data bucket and refreshes usage', async () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const nativeConfirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
     await LocalDataStore.set('user:scrape_history', [{ id: 1 }], 'user-data');
     await LocalDataStore.set('user:playground_deep_chat_threads_v1', { threads: [] }, 'user-data');
 
@@ -125,7 +134,8 @@ function createSettingsPanel(): SettingsPanelForTest {
     const history = panel.localDataBucketItems.find(bucket => bucket.id === 'scrape-history');
     const chat = panel.localDataBucketItems.find(bucket => bucket.id === 'chat-history');
 
-    expect(confirmSpy).toHaveBeenCalled();
+    expect(modalMocks.confirmWithModal).toHaveBeenCalled();
+    expect(nativeConfirm).not.toHaveBeenCalled();
     expect(await LocalDataStore.get('user:scrape_history')).toBeNull();
     expect(await LocalDataStore.get('user:playground_deep_chat_threads_v1')).toEqual({ threads: [] });
     expect(panel.localData.clearingBucketId).toBeNull();
@@ -134,7 +144,7 @@ function createSettingsPanel(): SettingsPanelForTest {
   });
 
   it('clears runtime-persisted workspace state when clearing all local data', async () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const nativeConfirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
     localStorage.setItem('app-storage', JSON.stringify({ state: { promptlab: { history: [{ id: 'p1' }] } } }));
     localStorage.setItem('llm_active_provider', JSON.stringify('new_api'));
     await LocalDataStore.set('user:scrape_history', [{ id: 1 }], 'user-data');
@@ -142,7 +152,8 @@ function createSettingsPanel(): SettingsPanelForTest {
     const panel = createSettingsPanel();
     await panel.clearAllLocalData();
 
-    expect(confirmSpy).toHaveBeenCalledTimes(2);
+    expect(modalMocks.confirmWithModal).toHaveBeenCalledTimes(2);
+    expect(nativeConfirm).not.toHaveBeenCalled();
     expect(localStorage.getItem('app-storage')).toBeNull();
     expect(localStorage.getItem('llm_active_provider')).toBeNull();
     expect(await LocalDataStore.get('user:scrape_history')).toBeNull();

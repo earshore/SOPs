@@ -228,6 +228,24 @@ describe('AppModal regression accessibility', () => {
     expect(buttonOpenings).toHaveLength(3);
     expect(implicitButtons).toEqual([]);
   });
+});
+
+describe('AppModal regression interaction', () => {
+  it('does not dispatch a stale close event after reopening during the close transition', () => {
+    vi.useFakeTimers();
+    const modal = createModal('重开测试');
+    const closeListener = vi.fn();
+    modal.addEventListener('close', closeListener);
+
+    modal.open();
+    modal.close();
+    vi.advanceTimersByTime(100);
+    modal.open();
+    vi.advanceTimersByTime(250);
+
+    expect(closeListener).not.toHaveBeenCalled();
+    expect(getModalContainer(modal).hidden).toBe(false);
+  });
 
   it('moves focus into the modal and restores the opener focus after close', () => {
     vi.useFakeTimers();
@@ -246,5 +264,66 @@ describe('AppModal regression accessibility', () => {
     vi.advanceTimersByTime(350);
 
     expect(document.activeElement).toBe(opener);
+  });
+
+  it('traps Tab focus inside shadow and slotted controls', () => {
+    const modal = createHeaderModal('焦点循环');
+    const closeButton = getCloseButton(modal);
+    const firstFooterButton = document.createElement('button');
+    const lastFooterButton = document.createElement('button');
+
+    firstFooterButton.type = 'button';
+    firstFooterButton.slot = 'footer';
+    firstFooterButton.textContent = 'Cancel';
+    lastFooterButton.type = 'button';
+    lastFooterButton.slot = 'footer';
+    lastFooterButton.textContent = 'Confirm';
+    modal.append(firstFooterButton, lastFooterButton);
+
+    modal.open();
+
+    expect(modal.shadowRoot?.activeElement).toBe(closeButton);
+
+    closeButton.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, composed: true })
+    );
+    expect(document.activeElement).toBe(lastFooterButton);
+
+    lastFooterButton.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, composed: true })
+    );
+    expect(modal.shadowRoot?.activeElement).toBe(closeButton);
+  });
+
+  it('locks body scrolling while open and restores it after close', () => {
+    vi.useFakeTimers();
+    document.body.style.overflow = 'auto';
+    const modal = createModal();
+
+    modal.open();
+    expect(document.body.style.overflow).toBe('hidden');
+
+    modal.close();
+    vi.advanceTimersByTime(350);
+
+    expect(document.body.style.overflow).toBe('auto');
+  });
+
+  it('allows backdrop and Escape closing to be configured separately', () => {
+    const modal = createModal();
+    const backdrop = getModalBackdrop(modal);
+
+    modal.setAttribute('close-on-backdrop', 'false');
+    modal.open();
+    backdrop.click();
+    expect((modal as unknown as { _isOpen: boolean })._isOpen).toBe(true);
+
+    modal.setAttribute('close-on-escape', 'false');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect((modal as unknown as { _isOpen: boolean })._isOpen).toBe(true);
+
+    modal.setAttribute('close-on-escape', 'true');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect((modal as unknown as { _isOpen: boolean })._isOpen).toBe(false);
   });
 });

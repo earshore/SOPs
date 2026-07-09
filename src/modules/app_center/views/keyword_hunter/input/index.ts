@@ -584,8 +584,11 @@ async function confirmBeforeRestore(snapshot: KeywordHunterSnapshot): Promise<bo
     return true;
   }
 
-  return window.confirm(
-    '当前输入与目标快照不同。恢复后，页面中的关键词和 Listing 文案会被该快照覆盖。确定恢复快照吗？'
+  return confirmWithModal(
+    '恢复输入快照',
+    '当前输入与目标快照不同。恢复后，页面中的关键词和 Listing 文案会被该快照覆盖。确定恢复快照吗？',
+    '',
+    '恢复快照'
   );
 }
 

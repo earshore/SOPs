@@ -351,8 +351,8 @@
     </section>
 
     <!-- Prompt Detail Modal -->
-    <div id="prompt-detail-modal" class="prompt-detail-modal hidden">
-        <div class="prompt-detail-modal__dialog bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col">
+    <app-modal id="prompt-detail-modal" class="hidden" title="提示词详情" size="full" no-header>
+        <div slot="body" class="prompt-detail-modal__dialog bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col">
 
             <!-- Modal Header -->
             <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 p-6 text-white">
@@ -441,5 +441,5 @@
                 </button>
             </div>
         </div>
-    </div>
+    </app-modal>
 </div>

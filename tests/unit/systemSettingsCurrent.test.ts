@@ -59,6 +59,7 @@ const deps = vi.hoisted(() => {
     configGet: vi.fn(),
     configSet: vi.fn(),
     initEventLogger: vi.fn(),
+    confirmWithModal: vi.fn(),
   };
 });
 
@@ -139,6 +140,10 @@ vi.mock('@/services/llmService', () => ({
 
 vi.mock('@/common/ui', () => ({
   showToast: deps.showToast,
+}));
+
+vi.mock('@/components/modal/confirmModal', () => ({
+  confirmWithModal: deps.confirmWithModal,
 }));
 
 vi.mock('@/services/errorService', () => ({
@@ -247,6 +252,7 @@ beforeEach(() => {
   deps.performanceMonitor.initialize.mockReset();
   deps.performanceMonitor.show.mockReset();
   deps.initEventLogger.mockReset();
+  deps.confirmWithModal.mockReset().mockResolvedValue(true);
   deps.configValues.set('llm.testConnectionTimeout', 15000);
   deps.configValues.set('performance.enableMonitoring', true);
   deps.configValues.set('errorTracker.enabled', true);
@@ -729,12 +735,14 @@ it('opens the dev performance monitor from panel and bridge exports', async () =
 });
 
 it('handles local data clear all confirmation flow', async () => {
-  const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(true).mockReturnValueOnce(true);
+  const nativeConfirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  deps.confirmWithModal.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
   const panel = createPanel();
 
   await panel.clearAllLocalData();
 
-  expect(confirm).toHaveBeenCalledTimes(2);
+  expect(deps.confirmWithModal).toHaveBeenCalledTimes(2);
+  expect(nativeConfirm).not.toHaveBeenCalled();
   expect(LocalDataStore.clearAll).toHaveBeenCalledTimes(1);
   expect(deps.appStoreState.resetScraper).toHaveBeenCalledTimes(1);
   expect(deps.appStoreState.resetAnalysis).toHaveBeenCalledTimes(1);
@@ -761,12 +769,14 @@ it('handles local data clear all confirmation flow', async () => {
 });
 
 it('clears persisted local data even when runtime cleanup fails', async () => {
-  vi.spyOn(window, 'confirm').mockReturnValueOnce(true).mockReturnValueOnce(true);
+  const nativeConfirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  deps.confirmWithModal.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
   deps.historyClearAsync.mockRejectedValueOnce(new Error('history cleanup failed'));
   const panel = createPanel();
 
   await panel.clearAllLocalData();
 
+  expect(nativeConfirm).not.toHaveBeenCalled();
   expect(LocalDataStore.clearAll).toHaveBeenCalledTimes(1);
   expect(deps.appStoreState.resetScraper.mock.invocationCallOrder[0]).toBeGreaterThan(
     vi.mocked(LocalDataStore.clearAll).mock.invocationCallOrder[0]
@@ -783,12 +793,13 @@ it('clears persisted local data even when runtime cleanup fails', async () => {
 });
 
 it('clears selected local data buckets through runtime-aware cleanup', async () => {
-  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+  const nativeConfirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
   const panel = createPanel();
 
   await panel.clearLocalDataBucket('keyword-history');
 
-  expect(confirm).toHaveBeenCalledTimes(1);
+  expect(deps.confirmWithModal).toHaveBeenCalledTimes(1);
+  expect(nativeConfirm).not.toHaveBeenCalled();
   expect(LocalDataStore.clearBucket).toHaveBeenCalledWith('keyword-history');
   expect(deps.keywordHistoryClearAsync).toHaveBeenCalledTimes(1);
   expect(LocalDataStore.getUsage).toHaveBeenCalledTimes(1);
@@ -797,13 +808,19 @@ it('clears selected local data buckets through runtime-aware cleanup', async () 
 });
 
 it('warns before exporting sensitive local data backups', async () => {
-  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  const nativeConfirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+  const confirm = vi.fn();
+  deps.confirmWithModal.mockImplementationOnce((_title: string, content: string) => {
+    confirm(content);
+    return Promise.resolve(false);
+  });
   const panel = createPanel();
 
   await panel.exportLocalData();
 
   expect(confirm).toHaveBeenCalledWith(expect.stringContaining('敏感本地数据'));
   expect(confirm).toHaveBeenCalledWith(expect.stringContaining('不是服务端密钥托管'));
+  expect(nativeConfirm).not.toHaveBeenCalled();
   expect(LocalDataStore.exportAll).not.toHaveBeenCalled();
   expect(panel.localData.isBusy).toBe(false);
 });
@@ -833,7 +850,8 @@ it('imports local data in replace mode and schedules a reload', async () => {
   vi.spyOn(document, 'createElement').mockImplementation((tagName: string) =>
     tagName === 'input' ? input : createElement(tagName)
   );
-  vi.spyOn(window, 'confirm').mockReturnValue(true);
+  const nativeConfirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  deps.confirmWithModal.mockResolvedValueOnce(true);
   const setTimeoutSpy = vi.spyOn(window, 'setTimeout').mockImplementation(() => 1);
 
   await panel.importLocalData();
@@ -841,6 +859,8 @@ it('imports local data in replace mode and schedules a reload', async () => {
   await changeHandler?.(new Event('change'));
   await Promise.resolve();
 
+  expect(deps.confirmWithModal).toHaveBeenCalledTimes(1);
+  expect(nativeConfirm).not.toHaveBeenCalled();
   expect(LocalDataStore.importAll).toHaveBeenCalledWith(backup, { mode: 'replace' });
   expect(LocalDataStore.getUsage).toHaveBeenCalledTimes(1);
   expect(showToast).toHaveBeenCalledWith('本地数据已导入，页面即将刷新以应用恢复结果', {

@@ -118,11 +118,15 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
                 <input id="npi-review-owner" value="运营小李" />
                 <button onclick="exportToExcel()">导出Excel</button>
                 <button data-action="copyNpiReviewTemplate">复制复盘模板</button>
-                <div id="next-step-modal" class="hidden">
-                    <div id="next-step-checkboxes"></div>
-                    <button onclick="saveNextSteps()">保存</button>
-                    <button onclick="closeNextStepModal()">关闭</button>
-                </div>
+                <app-modal id="next-step-modal" class="hidden" title="编辑 Next Step" size="md" no-header>
+                    <div slot="body">
+                        <div id="next-step-checkboxes"></div>
+                    </div>
+                    <div slot="footer">
+                        <button type="button" data-action="closeNextStepModal">关闭</button>
+                        <button type="button" data-action="saveNextSteps">保存</button>
+                    </div>
+                </app-modal>
             </div>
         `;
 
@@ -467,19 +471,43 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
 
         it('should open next step editor', () => {
             if (window.openNextStepEditor) {
+                const opener = document.querySelector<HTMLElement>('[data-action="open-next-step-editor"]');
+                opener?.focus();
                 window.openNextStepEditor(0);
                 
                 const modal = document.getElementById('next-step-modal');
+                const panel = modal?.shadowRoot?.querySelector<HTMLElement>('[role="dialog"]');
+                expect(modal?.tagName.toLowerCase()).toBe('app-modal');
                 expect(modal?.classList.contains('hidden')).toBe(false);
+                expect(panel?.getAttribute('aria-modal')).toBe('true');
+                expect(panel?.getAttribute('aria-label')).toBe('编辑 Next Step');
             }
         });
 
-        it('should close next step modal', () => {
+        it('should close next step modal', async () => {
             if (window.openNextStepEditor && window.closeNextStepModal) {
+                const opener = document.querySelector<HTMLElement>('[data-action="open-next-step-editor"]');
+                opener?.focus();
                 window.openNextStepEditor(0);
                 window.closeNextStepModal();
                 
                 const modal = document.getElementById('next-step-modal');
+                expect(modal?.classList.contains('hidden')).toBe(true);
+                await new Promise(resolve => setTimeout(resolve, 360));
+                expect(document.activeElement).toBe(opener);
+            }
+        });
+
+        it('should close next step modal with Escape', async () => {
+            if (window.openNextStepEditor) {
+                window.openNextStepEditor(0);
+
+                const modal = document.getElementById('next-step-modal');
+                expect(modal?.classList.contains('hidden')).toBe(false);
+
+                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+                await new Promise(resolve => setTimeout(resolve, 360));
                 expect(modal?.classList.contains('hidden')).toBe(true);
             }
         });

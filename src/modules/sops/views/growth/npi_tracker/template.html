@@ -926,9 +926,8 @@
                         </table>
                 </div>
         </div>
-        <div id="next-step-modal"
-                class="hidden fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center overflow-y-auto p-4">
-                <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-hidden flex flex-col">
+        <app-modal id="next-step-modal" class="hidden" title="编辑 Next Step" size="md" no-header>
+                <div slot="body" class="bg-white rounded-xl border border-slate-200 shadow-xl w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-hidden flex flex-col">
                         <div class="px-5 py-4 border-b border-slate-100">
                                 <h3 class="text-base font-bold text-slate-800">编辑 Next Step</h3>
                         </div>
@@ -942,7 +941,7 @@
                                         data-action="saveNextSteps">保存</button>
                         </div>
                 </div>
-        </div>
+        </app-modal>
         <!-- ==================== 新增：阶段升降级规则速查表 ==================== -->
         <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
                 <h2 id="npi-stage-rules-table-title" class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">

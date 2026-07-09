@@ -5,6 +5,7 @@
 
 import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
+import '@/components/modal/AppModal';
 import { setSafeHtml } from '@/common/utils/security';
 import {
   PROMPT_CATEGORIES,
@@ -29,6 +30,11 @@ let currentKeyword = '';
 let moduleRoot: HTMLElement | null = null;
 let searchInputRef: HTMLInputElement | null = null;
 let promptModalRef: HTMLElement | null = null;
+
+type AppModalElement = HTMLElement & {
+  open?: () => void;
+  close?: () => void;
+};
 
 function getPromptModal(): HTMLElement | null {
   return promptModalRef || (document.getElementById('prompt-detail-modal') as HTMLElement | null);
@@ -176,6 +182,12 @@ function handleModalBackdropClick(e: Event): void {
   }
 }
 
+function syncPromptModalClosed(): void {
+  const modal = getPromptModal();
+  modal?.classList.add('hidden');
+  modal?.classList.remove('flex');
+}
+
 function handleDocumentKeydown(e: KeyboardEvent): void {
   if (e.key !== 'Escape') return;
 
@@ -195,6 +207,7 @@ function initEventListeners(root: HTMLElement): void {
   searchInputRef?.addEventListener('input', handleSearch);
   root.addEventListener('click', handleModuleClick);
   getPromptModal()?.addEventListener('click', handleModalBackdropClick);
+  getPromptModal()?.addEventListener('close', syncPromptModalClosed);
   document.addEventListener('keydown', handleDocumentKeydown);
 }
 
@@ -202,6 +215,7 @@ function removeEventListeners(): void {
   searchInputRef?.removeEventListener('input', handleSearch);
   moduleRoot?.removeEventListener('click', handleModuleClick);
   getPromptModal()?.removeEventListener('click', handleModalBackdropClick);
+  getPromptModal()?.removeEventListener('close', syncPromptModalClosed);
   document.removeEventListener('keydown', handleDocumentKeydown);
 
   searchInputRef = null;
@@ -441,6 +455,7 @@ function updatePromptModalHeader(prompt: Prompt, category: PromptCategory): void
   const model = getModelInfo(prompt.recommendedModel);
 
   if (titleEl) titleEl.textContent = prompt.title;
+  getPromptModal()?.setAttribute('title', prompt.title);
   if (categoryEl) renderPromptCategory(categoryEl, category);
   if (modelEl) modelEl.textContent = model.name;
   if (descEl) descEl.textContent = prompt.description;
@@ -449,6 +464,7 @@ function updatePromptModalHeader(prompt: Prompt, category: PromptCategory): void
 function showPromptModal(modal: HTMLElement): void {
   modal.classList.remove('hidden');
   modal.classList.add('flex');
+  (modal as AppModalElement).open?.();
 }
 
 function handleViewPrompt(promptId: string): void {
@@ -482,6 +498,7 @@ function handleClosePromptModal(): void {
 
   modal.classList.add('hidden');
   modal.classList.remove('flex');
+  (modal as AppModalElement).close?.();
 }
 
 function copyTextToClipboard(text: string, successMessage: string): void {

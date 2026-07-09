@@ -12,6 +12,7 @@ import {
 import * as actionRegistry from '@/common/utils/actionRegistry';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
+import '@/components/modal/AppModal';
 
 type SearchMode = 'fuzzy' | 'exact' | 'fulltext' | 'regex';
 type SiteContext = string;
@@ -25,6 +26,10 @@ type WordDisplay = {
 };
 type RiskConfig = (typeof RISK_LEVELS)[RiskLevel];
 type CategoryConfig = (typeof WORD_CATEGORIES)[WordCategory];
+type AppModalElement = HTMLElement & {
+  open?: () => void;
+  close?: () => void;
+};
 
 interface ActiveFilters {
   category: string;
@@ -189,8 +194,13 @@ function bindEventListeners(): void {
   const searchBtn = document.getElementById('rw-search-btn');
   const clearBtn = document.getElementById('rw-clear-btn');
   const searchModeSelect = document.getElementById('rw-search-mode') as HTMLSelectElement | null;
+  const detailModal = document.getElementById('rw-detail-modal');
 
   addListener(searchBtn, 'click', () => executeSearch());
+  addListener(detailModal, 'close', () => {
+    detailModal?.classList.add('hidden');
+    detailModal?.classList.remove('show');
+  });
   addListener(searchInput, 'keypress', e => {
     if ((e as KeyboardEvent).key === 'Enter') executeSearch();
   });
@@ -754,6 +764,7 @@ function createWordDetailContent(word: RestrictedWord): HTMLDivElement {
 
 function openWordDetailModal(modal: HTMLElement): void {
   modal.classList.remove('hidden');
+  (modal as AppModalElement).open?.();
   requestAnimationFrame(() => {
     modal.classList.add('show');
   });
@@ -771,6 +782,8 @@ function showWordDetail(wordId: string): void {
   const content = document.getElementById('rw-detail-content');
 
   if (!modal || !header || !content) return;
+
+  modal.setAttribute('title', `高危词详情：${word.keyword}`);
 
   clearElement(header);
   header.appendChild(
@@ -794,6 +807,7 @@ function closeWordDetail(): void {
   if (!modal) return;
 
   modal.classList.remove('show');
+  (modal as AppModalElement).close?.();
   setTimeout(() => {
     modal.classList.add('hidden');
   }, 200); // 等待动画结束

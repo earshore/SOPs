@@ -28,11 +28,22 @@ import modalStylesUrl from './AppModal.css?url';
  * modal.setTitle('New Title')
  */
 export class AppModal extends HTMLElement {
+  private static openModalCount = 0;
+  private static previousBodyOverflow: string | null = null;
+
   private _isOpen: boolean = false;
   private _shadowRoot: ShadowRoot;
   private _previousActiveElement: HTMLElement | null = null;
-  private _handleEscape = (e: KeyboardEvent): void => {
-    if (this._isOpen && e.key === 'Escape' && this.getAttribute('closable') !== 'false') {
+  private _hasLockedScroll = false;
+  private _handleDocumentKeydown = (e: KeyboardEvent): void => {
+    if (!this._isOpen) return;
+
+    if (e.key === 'Tab') {
+      this.trapFocus(e);
+      return;
+    }
+
+    if (e.key === 'Escape' && this.canCloseOnEscape()) {
       this.close();
     }
   };
@@ -43,7 +54,7 @@ export class AppModal extends HTMLElement {
   }
 
   static get observedAttributes(): string[] {
-    return ['title', 'size', 'closable'];
+    return ['title', 'size', 'closable', 'close-on-backdrop', 'close-on-escape'];
   }
 
   connectedCallback(): void {
@@ -52,7 +63,11 @@ export class AppModal extends HTMLElement {
   }
 
   disconnectedCallback(): void {
-    document.removeEventListener('keydown', this._handleEscape);
+    document.removeEventListener('keydown', this._handleDocumentKeydown);
+    this._shadowRoot.removeEventListener('keydown', this._handleDocumentKeydown as EventListener);
+    if (this._hasLockedScroll) {
+      this.unlockBodyScroll();
+    }
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
@@ -84,6 +99,7 @@ export class AppModal extends HTMLElement {
     container.hidden = false;
     container.classList.remove('hidden');
     container.classList.add('is-open');
+    this.lockBodyScroll();
     this.focusInitialElement(panel);
     // Trigger reflow for transition
     requestAnimationFrame(() => {
@@ -95,6 +111,7 @@ export class AppModal extends HTMLElement {
   }
 
   close(): void {
+    const wasOpen = this._isOpen;
     this._isOpen = false;
     const container = this._shadowRoot.querySelector('.modal-container') as HTMLElement;
     const backdrop = this._shadowRoot.querySelector('.modal-backdrop') as HTMLElement;
@@ -110,9 +127,12 @@ export class AppModal extends HTMLElement {
       if (!this._isOpen && container) {
         container.hidden = true;
         container.classList.add('hidden');
+        if (wasOpen) {
+          this.unlockBodyScroll();
+        }
         this.restoreFocus();
+        this.dispatchEvent(new CustomEvent('close'));
       }
-      this.dispatchEvent(new CustomEvent('close'));
     }, 350);
   }
 
@@ -160,6 +180,81 @@ export class AppModal extends HTMLElement {
     target.focus({ preventScroll: true });
   }
 
+  private getFocusableElements(): HTMLElement[] {
+    const selector = [
+      'button:not([disabled])',
+      'a[href]',
+      'area[href]',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',');
+    const shadowElements = Array.from(this._shadowRoot.querySelectorAll<HTMLElement>(selector));
+    const slottedElements = Array.from(this.querySelectorAll<HTMLElement>(selector));
+    const candidates = [...shadowElements, ...slottedElements].filter(element => {
+      if (element.hasAttribute('disabled')) return false;
+      if (element.getAttribute('aria-hidden') === 'true') return false;
+      return true;
+    });
+
+    return candidates.length > 0
+      ? candidates
+      : [this._shadowRoot.querySelector<HTMLElement>('.modal-panel')].filter(
+          (element): element is HTMLElement => Boolean(element)
+        );
+  }
+
+  private getActiveElement(): Element | null {
+    return this._shadowRoot.activeElement || document.activeElement;
+  }
+
+  private isFocusAtFirst(
+    first: HTMLElement,
+    activeElement: Element | null,
+    shadowActiveElement: Element | null
+  ): boolean {
+    const isFocusedOnHost = document.activeElement === this;
+    return (
+      activeElement === first ||
+      (isFocusedOnHost && (!shadowActiveElement || shadowActiveElement === first))
+    );
+  }
+
+  private isFocusAtLast(
+    last: HTMLElement,
+    activeElement: Element | null,
+    shadowActiveElement: Element | null
+  ): boolean {
+    return (
+      activeElement === last || (document.activeElement === this && shadowActiveElement === last)
+    );
+  }
+
+  private trapFocus(event: KeyboardEvent): void {
+    const focusableElements = this.getFocusableElements();
+    if (focusableElements.length === 0) return;
+
+    const first = focusableElements[0];
+    const last = focusableElements[focusableElements.length - 1];
+    if (!first || !last) return;
+    const activeElement = this.getActiveElement();
+    const shadowActiveElement = this._shadowRoot.activeElement;
+    const isAtFirst = this.isFocusAtFirst(first, activeElement, shadowActiveElement);
+    const isAtLast = this.isFocusAtLast(last, activeElement, shadowActiveElement);
+
+    if (event.shiftKey && isAtFirst) {
+      event.preventDefault();
+      last.focus({ preventScroll: true });
+      return;
+    }
+
+    if (!event.shiftKey && isAtLast) {
+      event.preventDefault();
+      first.focus({ preventScroll: true });
+    }
+  }
+
   private restoreFocus(): void {
     const target = this._previousActiveElement;
     this._previousActiveElement = null;
@@ -175,7 +270,7 @@ export class AppModal extends HTMLElement {
 
     if (backdrop) {
       backdrop.addEventListener('click', () => {
-        if (this.getAttribute('closable') !== 'false') this.close();
+        if (this.canCloseOnBackdrop()) this.close();
       });
     }
 
@@ -195,8 +290,45 @@ export class AppModal extends HTMLElement {
     });
 
     // ESC key
-    document.removeEventListener('keydown', this._handleEscape);
-    document.addEventListener('keydown', this._handleEscape);
+    this._shadowRoot.removeEventListener('keydown', this._handleDocumentKeydown as EventListener);
+    this._shadowRoot.addEventListener('keydown', this._handleDocumentKeydown as EventListener);
+    document.removeEventListener('keydown', this._handleDocumentKeydown);
+    document.addEventListener('keydown', this._handleDocumentKeydown);
+  }
+
+  private isClosable(): boolean {
+    return this.getAttribute('closable') !== 'false';
+  }
+
+  private canCloseOnBackdrop(): boolean {
+    return this.isClosable() && this.getAttribute('close-on-backdrop') !== 'false';
+  }
+
+  private canCloseOnEscape(): boolean {
+    return this.isClosable() && this.getAttribute('close-on-escape') !== 'false';
+  }
+
+  private lockBodyScroll(): void {
+    if (this._hasLockedScroll) return;
+    if (AppModal.openModalCount === 0) {
+      AppModal.previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open');
+    }
+    AppModal.openModalCount += 1;
+    this._hasLockedScroll = true;
+  }
+
+  private unlockBodyScroll(): void {
+    if (!this._hasLockedScroll) return;
+    AppModal.openModalCount = Math.max(0, AppModal.openModalCount - 1);
+    this._hasLockedScroll = false;
+
+    if (AppModal.openModalCount === 0) {
+      document.body.style.overflow = AppModal.previousBodyOverflow || '';
+      document.body.classList.remove('modal-open');
+      AppModal.previousBodyOverflow = null;
+    }
   }
 
   private render(): void {

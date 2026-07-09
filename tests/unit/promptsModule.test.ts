@@ -9,17 +9,19 @@ const promptMocks = vi.hoisted(() => {
       <input id="prompt-search" />
       <div id="category-container"></div>
       <div id="prompt-list"></div>
-      <div id="prompt-detail-modal" class="prompt-detail-modal hidden">
-        <h2 id="modal-prompt-title"></h2>
-        <span id="modal-prompt-category"></span>
-        <span id="modal-prompt-model"></span>
-        <p id="modal-prompt-description"></p>
-        <button data-prompt-modal-action="close"></button>
-        <button data-prompt-modal-action="copy"></button>
-        <button data-prompt-lang="zh" data-lang="zh" class="lang-btn"></button>
-        <button data-prompt-lang="en" data-lang="en" class="lang-btn"></button>
-        <pre id="modal-prompt-content"></pre>
-      </div>
+      <app-modal id="prompt-detail-modal" class="hidden" title="提示词详情" size="full" no-header>
+        <div slot="body">
+          <h2 id="modal-prompt-title"></h2>
+          <span id="modal-prompt-category"></span>
+          <span id="modal-prompt-model"></span>
+          <p id="modal-prompt-description"></p>
+          <button data-prompt-modal-action="close"></button>
+          <button data-prompt-modal-action="copy"></button>
+          <button data-prompt-lang="zh" data-lang="zh" class="lang-btn"></button>
+          <button data-prompt-lang="en" data-lang="en" class="lang-btn"></button>
+          <pre id="modal-prompt-content"></pre>
+        </div>
+      </app-modal>
     </section>
   `;
 
@@ -131,7 +133,11 @@ beforeEach(() => {
     click(firstCard);
 
     const modal = document.body.querySelector<HTMLElement>('#prompt-detail-modal');
-    expect(modal?.classList.contains('flex')).toBe(true);
+    const panel = modal?.shadowRoot?.querySelector<HTMLElement>('[role="dialog"]');
+    expect(modal?.tagName.toLowerCase()).toBe('app-modal');
+    expect(modal?.classList.contains('hidden')).toBe(false);
+    expect(panel?.getAttribute('aria-modal')).toBe('true');
+    expect(panel?.getAttribute('aria-label')).toBe(document.body.querySelector('#modal-prompt-title')?.textContent);
     expect(document.body.querySelector('#modal-prompt-title')?.textContent).not.toBe('');
     expect(document.body.querySelector('#modal-prompt-content')?.textContent).not.toBe('');
 
@@ -174,13 +180,17 @@ beforeEach(() => {
 
   it('handles modal keyboard close and unregisters window actions on unmount', async () => {
     const container = await mountPrompts();
-    click(container.querySelector('.prompt-card[data-prompt-id]'));
+    const opener = container.querySelector<HTMLElement>('[data-action="view-prompt"][data-prompt-id]');
+    opener?.focus();
+    click(opener);
 
     const modal = document.body.querySelector('#prompt-detail-modal');
     expect(modal?.classList.contains('hidden')).toBe(false);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(modal?.classList.contains('hidden')).toBe(true);
+    await new Promise(resolve => setTimeout(resolve, 360));
+    expect(document.activeElement).toBe(opener);
 
     unmount();
 

@@ -171,6 +171,7 @@ function createInputMocks(mockApi: typeof vi) {
       return index >= 0;
     }),
     confirm: mockApi.fn(() => true),
+    confirmWithModal: mockApi.fn(async () => true),
     getAllAsync: mockApi.fn(async () => snapshots),
     loadTemplate: mockApi.fn(async () => template),
     navigateToRouteId: mockApi.fn(async () => true),
@@ -247,6 +248,10 @@ vi.mock('@/modules/app_center/views/keyword_hunter/services/snapshotService', ()
   },
 }));
 
+vi.mock('@/modules/app_center/views/keyword_hunter/utils/confirmModal', () => ({
+  confirmWithModal: inputMocks.confirmWithModal,
+}));
+
 vi.mock('@/stores/useAppStore', () => ({
   appStore: {
     getState: () => inputMocks.state,
@@ -294,6 +299,7 @@ beforeEach(() => {
   document.body.innerHTML = '';
   vi.clearAllMocks();
   inputMocks.confirm.mockReturnValue(true);
+  inputMocks.confirmWithModal.mockResolvedValue(true);
   inputMocks.actions = {};
   resetKeywordHunterState();
   inputMocks.resetSnapshots();
@@ -393,8 +399,11 @@ it('renders the embedded history snapshot panel on the input page', async () => 
 
   click(container.querySelector('button[title="删除快照"]'));
   await vi.waitFor(() => {
-    expect(inputMocks.confirm).toHaveBeenCalledWith(
-      expect.stringContaining('删除后无法从本地历史恢复')
+    expect(inputMocks.confirmWithModal).toHaveBeenCalledWith(
+      '删除输入快照',
+      expect.stringContaining('此操作无法撤销'),
+      'kh_ignore_delete_input_snapshot',
+      '删除快照'
     );
   });
   await vi.waitFor(() => {
@@ -417,8 +426,9 @@ it('renders the embedded history snapshot panel on the input page', async () => 
 });
 
 it('asks before restoring a snapshot over the local draft', async () => {
-  inputMocks.confirm.mockReturnValueOnce(false);
+  inputMocks.confirmWithModal.mockResolvedValueOnce(false);
   const container = await mountInput();
+  const nativeConfirm = vi.spyOn(window, 'confirm');
   container.querySelector<HTMLTextAreaElement>('#keyword-hunter-keywords-input')!.value =
     'unsaved keyword';
   container.querySelector<HTMLTextAreaElement>('#keyword-hunter-copy-input')!.value =
@@ -427,8 +437,14 @@ it('asks before restoring a snapshot over the local draft', async () => {
   click(container.querySelector('button[title="恢复到输入页"]'));
 
   await vi.waitFor(() => {
-    expect(inputMocks.confirm).toHaveBeenCalledWith(expect.stringContaining('确定恢复快照吗'));
+    expect(inputMocks.confirmWithModal).toHaveBeenCalledWith(
+      '恢复输入快照',
+      expect.stringContaining('确定恢复快照吗'),
+      '',
+      '恢复快照'
+    );
   });
+  expect(nativeConfirm).not.toHaveBeenCalled();
   expect(KeywordHunterSnapshotService.restore).not.toHaveBeenCalled();
   expect(
     container.querySelector<HTMLTextAreaElement>('#keyword-hunter-keywords-input')?.value

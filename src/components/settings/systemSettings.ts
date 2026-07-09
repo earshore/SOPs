@@ -29,6 +29,7 @@ import {
   type ScraperProxyProviderConfig,
 } from '@/common/config/scraperProxies';
 import { showToast } from '@/common/ui';
+import { confirmWithModal } from '@/components/modal/confirmModal';
 import { initEventLogger } from '@/common/utils/eventLogger';
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorage';
@@ -539,6 +540,14 @@ async function syncRuntimeAfterClearAllLocalData(): Promise<void> {
 
 function reloadAfterLocalDataImport(): void {
   window.setTimeout(() => window.location.reload(), 800);
+}
+
+function confirmSettingsAction(
+  title: string,
+  content: string,
+  confirmLabel = '确认'
+): Promise<boolean> {
+  return confirmWithModal(title, content, '', confirmLabel);
 }
 
 function getModelId(model: ModelOption): string {
@@ -1475,8 +1484,10 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   async exportLocalData(): Promise<void> {
-    const confirmed = window.confirm(
-      `导出的备份文件可能包含本地加密的 API Key、代理凭据、配置和历史记录等敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`
+    const confirmed = await confirmSettingsAction(
+      '导出本地数据',
+      `导出的备份文件可能包含本地加密的 API Key、代理凭据、配置和历史记录等敏感本地数据。${SECURE_STORAGE_SECURITY_BOUNDARY} 请仅保存在可信位置。继续导出？`,
+      '继续导出'
     );
     if (!confirmed) return;
 
@@ -1511,11 +1522,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
       try {
         this.localData.isBusy = true;
         const text = await file.text();
-        const mode = window.confirm(
-          '导入前是否先清空当前本地数据？确定=完整恢复到备份状态；取消=合并导入并保留备份外数据。'
-        )
-          ? 'replace'
-          : 'merge';
+        const shouldReplace = await confirmSettingsAction(
+          '导入本地数据',
+          '导入前是否先清空当前本地数据？确认=完整恢复到备份状态；取消=合并导入并保留备份外数据。',
+          '完整恢复'
+        );
+        const mode = shouldReplace ? 'replace' : 'merge';
         await LocalDataStore.importAll(JSON.parse(text), { mode });
         await this.refreshLocalDataUsage();
         showToast('本地数据已导入，页面即将刷新以应用恢复结果', { type: 'success' });
@@ -1541,8 +1553,13 @@ const settingsPanelBehavior: SettingsPanelPart = {
     const meta = LOCAL_DATA_BUCKET_META[bucketId];
     if (!meta) return;
 
-    if (meta.confirmMessage && !window.confirm(meta.confirmMessage)) {
-      return;
+    if (meta.confirmMessage) {
+      const confirmed = await confirmSettingsAction(
+        meta.actionLabel,
+        meta.confirmMessage,
+        meta.actionLabel
+      );
+      if (!confirmed) return;
     }
 
     try {
@@ -1560,12 +1577,16 @@ const settingsPanelBehavior: SettingsPanelPart = {
   },
 
   async clearAllLocalData(): Promise<void> {
-    const confirmed = window.confirm(
-      '这会删除本浏览器中的配置、密钥、采集历史、聊天记录和缓存。请先导出备份。继续？'
+    const confirmed = await confirmSettingsAction(
+      '清空全部本地数据',
+      '这会删除本浏览器中的配置、密钥、采集历史、聊天记录和缓存。请先导出备份。继续？',
+      '继续'
     );
     if (!confirmed) return;
-    const confirmedAgain = window.confirm(
-      '二次确认：清空后无法恢复，除非你已有导出的备份文件。确定清空全部本地数据？'
+    const confirmedAgain = await confirmSettingsAction(
+      '二次确认',
+      '二次确认：清空后无法恢复，除非你已有导出的备份文件。确定清空全部本地数据？',
+      '清空全部'
     );
     if (!confirmedAgain) return;
 

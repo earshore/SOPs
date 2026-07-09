@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   deleteByIdAsync: vi.fn(),
   getAllAsync: vi.fn(),
+  restore: vi.fn(),
   confirmWithModal: vi.fn(),
   showToast: vi.fn(),
 }));
@@ -11,6 +12,7 @@ vi.mock('../services/snapshotService', () => ({
   KeywordHunterSnapshotService: {
     deleteByIdAsync: mocks.deleteByIdAsync,
     getAllAsync: mocks.getAllAsync,
+    restore: mocks.restore,
   },
 }));
 
@@ -24,11 +26,35 @@ vi.mock('@/common/ui', () => ({
 
 import { deleteInputSnapshot } from './index';
 
+function appendTextarea(id: string, value: string): void {
+  const textarea = document.createElement('textarea');
+  textarea.id = id;
+  textarea.value = value;
+  document.body.appendChild(textarea);
+}
+
+function appendDiv(id: string): void {
+  const div = document.createElement('div');
+  div.id = id;
+  document.body.appendChild(div);
+}
+
+function buildKeywordHunterInputFixture(): void {
+  document.body.replaceChildren();
+  appendTextarea('keyword-hunter-keywords-input', 'current keywords');
+  appendTextarea('keyword-hunter-copy-input', 'current listing copy');
+  appendDiv('keyword-hunter-input-snapshot-list');
+  appendDiv('keyword-hunter-input-snapshot-empty');
+  appendDiv('keyword-hunter-input-snapshot-count');
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.confirmWithModal.mockResolvedValue(true);
   mocks.deleteByIdAsync.mockResolvedValue(undefined);
   mocks.getAllAsync.mockResolvedValue([]);
+  mocks.restore.mockReturnValue(true);
+  buildKeywordHunterInputFixture();
 });
 
 afterEach(() => {

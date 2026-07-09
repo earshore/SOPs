@@ -12,6 +12,7 @@
 import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
+import '@/components/modal/AppModal';
 import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { escapeHtml } from '@/common/utils/security';
 import { copyTextToClipboard } from '../../../utils/clipboard';
@@ -124,15 +125,33 @@ interface TableRowRenderContext {
   decisionClass: string;
 }
 
+type AppModalElement = HTMLElement & {
+  open?: () => void;
+  close?: () => void;
+};
+
 // 模块状态
 let tableData: NPIProductRecord[] = [...SAMPLE_DATA];
 let registeredActions: string[] = [];
 let removeFilterListener: (() => void) | null = null;
 const tableEventHandlers = new WeakMap<HTMLElement, EventListener>();
+const nextStepModalCloseHandlers = new WeakSet<HTMLElement>();
+
+function syncNextStepModalClosed(modal: HTMLElement): void {
+  modal.classList.add('hidden');
+}
+
+function bindNextStepModalCloseSync(modal: HTMLElement): void {
+  if (nextStepModalCloseHandlers.has(modal)) return;
+  modal.addEventListener('close', () => syncNextStepModalClosed(modal));
+  nextStepModalCloseHandlers.add(modal);
+}
 
 function moveNextStepModalToBody(container: HTMLElement): void {
   const modal = container.querySelector('#next-step-modal');
   if (!modal) return;
+
+  bindNextStepModalCloseSync(modal as HTMLElement);
 
   const existingBodyModal = document.body.querySelector('#next-step-modal');
   if (existingBodyModal && existingBodyModal !== modal) {
@@ -483,6 +502,7 @@ function openNextStepEditor(index: number): void {
   });
 
   modal.classList.remove('hidden');
+  (modal as AppModalElement).open?.();
 }
 
 // Save Next Steps
@@ -500,6 +520,7 @@ function saveNextSteps(): void {
 
   row.next_step = Array.from(checkboxes).map(cb => (cb as HTMLInputElement).value);
   modal.classList.add('hidden');
+  (modal as AppModalElement).close?.();
   renderTable();
 }
 
@@ -534,7 +555,10 @@ const TABLE_ACTION_HANDLERS: Record<string, TableActionHandler> = {
 // Close modal
 function closeNextStepModal(): void {
   const modal = document.getElementById('next-step-modal');
-  if (modal) modal.classList.add('hidden');
+  if (!modal) return;
+
+  modal.classList.add('hidden');
+  (modal as AppModalElement).close?.();
 }
 
 function getComplianceLabel(record: NPIProductRecord): string {
