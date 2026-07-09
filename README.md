@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 `https://new.hongecb.store/v1` 中转站；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按当前待发布版本 `v3.0.4-rc.7`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按当前发布版本 `v3.0.5`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,7 +10,7 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-当前待发布版本是 `v3.0.4-rc.7`（2026-07-09，release candidate）；最新稳定 tag 是 `v3.0.4`。`v3.0.4-rc.7` 聚焦 Deep Chat 线程内联重命名，延续 `v3.0.4` 的运营作业系统收敛，带来以下面向运营和维护的变化：
+当前发布版本是 `v3.0.5`（2026-07-09，stable）；最新稳定 tag 是 `v3.0.5`。`v3.0.5` 整合 `v3.0.4-rc.1` 至 `v3.0.4-rc.7` 的候选版能力，并补充质量门禁与发布资料归档，延续 `v3.0.4` 的运营作业系统收敛，带来以下面向运营和维护的变化：
 
 - 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
 - 新增工作流导向条和统一确认弹窗，减少高风险数据操作误触。
@@ -104,7 +104,8 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 - 新增 Deep Chat 与 Keyword Hunter 快照删除的主题化确认弹窗，替换原生 `confirm()`，支持取消、Esc、点击遮罩关闭与「不再询问」持久化。
 - 补充删除确认弹窗与快照删除流程的单元测试。
 - Deep Chat 线程支持内联重命名，减少进入管理菜单的来回切换。
-- 同步应用内版本显示到 `3.0.4-rc.7`。
+- 归档历史预发布检查、UI 审计与安全审计报告，新增循环依赖检查脚本并稳定 Deep Chat bundle 与 Sentry 加载链路。
+- 同步应用内版本显示到 `3.0.5`。
 
 ## 快速开始
 

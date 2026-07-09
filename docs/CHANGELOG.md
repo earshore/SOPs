@@ -26,6 +26,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.5] - 2026-07-09
+
+### Added
+- 新增循环依赖检查脚本，统一处理 Vite `?url` 资源导入后再执行 Madge 审计。
+- 整合 `v3.0.4-rc.1` 至 `v3.0.4-rc.7` 的 App Center 工作台、Deep Chat、Keyword Hunter、PPC Search Terms、系统设置和质量门禁更新为稳定版。
+
+### Changed
+- 归档历史预发布检查、UI 审计、安全审计和技术债务报告，收敛文档索引与项目结构说明。
+- 将 Deep Chat bundle 固定输出到 `assets/vendor/deepChat.bundle.js`，减少构建产物散列变动对加载器和循环依赖检查的影响。
+- 同步应用内版本显示到 `3.0.5`。
+
+### Fixed
+- 调整 Sentry 加载方式，按浏览器 SDK 和 core API 显式映射监控方法，提升生产构建兼容性。
+
 ## [3.0.4-rc.7] - 2026-07-09
 
 ### Added
