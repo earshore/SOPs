@@ -92,22 +92,14 @@ describe('confirmWithModal 组件行为', () => {
     checkbox.checked = true;
     confirmBtn.click();
     await expect(promise).resolves.toBe(true);
-    expect(mocks.storageSet).toHaveBeenCalledWith(
-      'modal_ignore_dc_ignore_delete_prompt',
-      true
-    );
+    expect(mocks.storageSet).toHaveBeenCalledWith('modal_ignore_dc_ignore_delete_prompt', true);
   });
 
   it('ignoreKey 已持久化时直接返回 true 且不挂载弹窗', async () => {
     mocks.storageGet.mockReturnValue(true);
 
     await expect(
-      confirmWithModal(
-        '删除会话',
-        '确定删除吗？',
-        'dc_ignore_delete_thread',
-        '删除会话'
-      )
+      confirmWithModal('删除会话', '确定删除吗？', 'dc_ignore_delete_thread', '删除会话')
     ).resolves.toBe(true);
     expect(getBackdrop()).toBeNull();
   });

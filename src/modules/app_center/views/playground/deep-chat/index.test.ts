@@ -719,9 +719,17 @@ describe('deep-chat playground thread menu', () => {
       'user-data'
     );
 
-    vi.spyOn(window, 'prompt').mockReturnValue('Renamed thread');
     openThreadMenu('thread-2');
     queryRequired<HTMLButtonElement>(container, '[data-thread-menu-action="rename"]').click();
+
+    const editInput = queryRequired<HTMLInputElement>(
+      container,
+      '[data-thread-edit-id="thread-2"]'
+    );
+    editInput.value = 'Renamed thread';
+    editInput.dispatchEvent(new Event('input', { bubbles: true }));
+    editInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await vi.runAllTimersAsync();
 
     expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
       'Renamed thread'
@@ -1318,6 +1326,162 @@ describe('deep-chat playground empty responses', () => {
     expectStoredAssistantMessage(
       mocks.localDataStore.set,
       '请求失败：模型没有返回任何内容，请稍后重试或检查模型/上下文配置。'
+    );
+
+    unmount();
+  });
+});
+
+function startInlineRename(container: HTMLElement, threadId: string): HTMLInputElement {
+  queryRequired<HTMLButtonElement>(container, `[data-thread-menu-id="${threadId}"]`).click();
+  queryRequired<HTMLButtonElement>(container, '[data-thread-menu-action="rename"]').click();
+  return queryRequired<HTMLInputElement>(container, `[data-thread-edit-id="${threadId}"]`);
+}
+
+describe('deep-chat playground inline rename commits', () => {
+  it('enters inline edit mode with the current title preselected', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount } = await importDeepChat();
+    await mount(container);
+
+    queryRequired<HTMLButtonElement>(container, '[data-thread-menu-id="thread-1"]').click();
+    queryRequired<HTMLButtonElement>(container, '[data-thread-menu-action="rename"]').click();
+
+    const input = queryRequired<HTMLInputElement>(container, '[data-thread-edit-id="thread-1"]');
+    expect(input).toBeInstanceOf(HTMLInputElement);
+    expect(input.value).toBe('Existing thread');
+    expect(input.getAttribute('maxlength')).toBe('120');
+
+    unmount();
+  });
+
+  it('commits the new name on Enter and persists it', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat();
+    await mount(container);
+
+    const input = startInlineRename(container, 'thread-2');
+    input.value = 'Renamed thread';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await vi.runAllTimersAsync();
+
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
+      'Renamed thread'
+    );
+    expect(mocks.localDataStore.set).toHaveBeenCalledWith(
+      'user:playground_deep_chat_threads_v1',
+      expect.objectContaining({
+        threads: expect.arrayContaining([
+          expect.objectContaining({
+            id: 'thread-2',
+            title: 'Renamed thread',
+            customTitle: 'Renamed thread',
+          }),
+        ]),
+      }),
+      'user-data'
+    );
+
+    unmount();
+  });
+
+  it('commits the new name on blur', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat();
+    await mount(container);
+
+    const input = startInlineRename(container, 'thread-2');
+    input.value = 'Blurred name';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    await vi.runAllTimersAsync();
+
+    expect(mocks.localDataStore.set).toHaveBeenCalledWith(
+      'user:playground_deep_chat_threads_v1',
+      expect.objectContaining({
+        threads: expect.arrayContaining([
+          expect.objectContaining({
+            id: 'thread-2',
+            title: 'Blurred name',
+            customTitle: 'Blurred name',
+          }),
+        ]),
+      }),
+      'user-data'
+    );
+
+    unmount();
+  });
+});
+
+describe('deep-chat playground inline rename validation', () => {
+  it('cancels the rename on Escape without persisting', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat();
+    await mount(container);
+
+    const input = startInlineRename(container, 'thread-2');
+    input.value = 'Abandoned name';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await vi.runAllTimersAsync();
+
+    expect(mocks.localDataStore.set).not.toHaveBeenCalledWith(
+      'user:playground_deep_chat_threads_v1',
+      expect.objectContaining({
+        threads: expect.arrayContaining([
+          expect.objectContaining({ id: 'thread-2', customTitle: 'Abandoned name' }),
+        ]),
+      }),
+      'user-data'
+    );
+    expect(container.querySelector('input.deep-chat-thread-name-input')).toBeNull();
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
+      'Other thread'
+    );
+
+    unmount();
+  });
+
+  it('rejects an empty name and keeps the original title', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat();
+    await mount(container);
+
+    const input = startInlineRename(container, 'thread-2');
+    input.value = '   ';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await vi.runAllTimersAsync();
+
+    expect(mocks.toast).toHaveBeenCalledWith('会话名称不能为空', { type: 'warning' });
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
+      'Other thread'
+    );
+
+    unmount();
+  });
+
+  it('does not persist when the name is unchanged', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat();
+    await mount(container);
+
+    const input = startInlineRename(container, 'thread-2');
+    const callsBefore = mocks.localDataStore.set.mock.calls.length;
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await vi.runAllTimersAsync();
+
+    expect(mocks.localDataStore.set.mock.calls.length).toBe(callsBefore);
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
+      'Other thread'
     );
 
     unmount();

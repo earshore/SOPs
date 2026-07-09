@@ -13,11 +13,17 @@ export interface ThreadMenuState {
   placement: 'above' | 'below';
 }
 
+export interface ThreadEditingState {
+  id: string;
+  value: string;
+}
+
 export function renderThreadList(
   container: HTMLElement,
   threadStore: DeepChatThreadStore,
   pendingRequests: Map<string, PendingDeepChatRequest>,
-  threadMenuState: ThreadMenuState | null = null
+  threadMenuState: ThreadMenuState | null = null,
+  editingState: ThreadEditingState | null = null
 ): void {
   const list = container.querySelector<HTMLElement>('#deep-chat-thread-list');
   if (!list) {
@@ -29,7 +35,13 @@ export function renderThreadList(
     list,
     sortedThreads
       .map(thread =>
-        renderThreadItem(thread, threadStore.activeThreadId, pendingRequests, threadMenuState)
+        renderThreadItem(
+          thread,
+          threadStore.activeThreadId,
+          pendingRequests,
+          threadMenuState,
+          editingState
+        )
       )
       .join('')
   );
@@ -46,8 +58,13 @@ function renderThreadItem(
   thread: DeepChatThread,
   activeThreadId: string,
   pendingRequests: Map<string, PendingDeepChatRequest>,
-  threadMenuState: ThreadMenuState | null
+  threadMenuState: ThreadMenuState | null,
+  editingState: ThreadEditingState | null = null
 ): string {
+  if (editingState && thread.id === editingState.id) {
+    return renderThreadEditItem(thread, editingState.value);
+  }
+
   const isActive = thread.id === activeThreadId;
   const isPinned = Boolean(thread.pinnedAt);
   const isMenuOpen = thread.id === threadMenuState?.threadId;
@@ -70,6 +87,17 @@ function renderThreadItem(
     `;
 }
 
+function renderThreadEditItem(thread: DeepChatThread, value: string): string {
+  const escapedThreadId = escapeHTML(thread.id);
+  const escapedValue = escapeHTML(value);
+  const escapedTitle = escapeHTML(thread.title);
+  return `
+      <div class="deep-chat-thread-item is-editing">
+        <span class="deep-chat-thread-copy">
+          <input class="deep-chat-thread-name deep-chat-thread-name-input" type="text" value="${escapedValue}" data-thread-edit-id="${escapedThreadId}" aria-label="重命名会话 ${escapedTitle}" maxlength="120" />
+        </span>
+      </div>`;
+}
 function getThreadItemClassName(isActive: boolean, isPinned: boolean, isMenuOpen: boolean): string {
   return [
     'deep-chat-thread-item',

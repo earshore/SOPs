@@ -122,6 +122,8 @@ let cleanupDraftInputHeightListener: (() => void) | null = null;
 let cleanupSubmitStopButtonListener: (() => void) | null = null;
 let submitStopButtonSyncRetryTimer: number | null = null;
 let openThreadMenu: ThreadMenuState | null = null;
+let editingThreadId: string | null = null;
+let editingThreadValue: string = '';
 const draftPersistController = createDraftPersistController(
   persistThreadStore,
   DRAFT_PERSIST_DEBOUNCE_MS
@@ -176,6 +178,8 @@ class DeepChatModule extends BaseModule {
     clearSubmitStopButtonSync();
     cleanupMessageToolbars();
     openThreadMenu = null;
+    editingThreadId = null;
+    editingThreadValue = '';
   }
 }
 
@@ -193,6 +197,8 @@ export async function clearDeepChatThreadStore(): Promise<void> {
   clearAllPendingDisplayTimers();
   draftPersistController.cancel();
   openThreadMenu = null;
+  editingThreadId = null;
+  editingThreadValue = '';
   threadStore = createDefaultThreadStore();
 
   await LocalDataStore.remove(`user:${THREAD_STORAGE_KEY}`);
@@ -685,6 +691,8 @@ function bindThreadControls(
   threadList?.addEventListener('click', onThreadListClick);
   cleanupCallbacks.push(() => threadList?.removeEventListener('click', onThreadListClick));
 
+  bindThreadEditControls(container, threadList);
+
   const onDocumentClick = (event: MouseEvent): void => {
     if (!openThreadMenu) {
       return;
@@ -737,6 +745,51 @@ function bindThreadControls(
     renderPromptDraftsForActiveThread(container);
   });
   cleanupCallbacks.push(unsubscribePromptDrafts);
+}
+
+function bindThreadEditControls(container: HTMLElement, threadList: HTMLElement | null): void {
+  const onThreadListInput = (event: Event): void => {
+    const input = (event.target as HTMLElement | null)?.closest<HTMLInputElement>(
+      '.deep-chat-thread-name-input'
+    );
+    if (!input || input.dataset.threadEditId !== editingThreadId) {
+      return;
+    }
+    editingThreadValue = input.value;
+  };
+  threadList?.addEventListener('input', onThreadListInput);
+  cleanupCallbacks.push(() => threadList?.removeEventListener('input', onThreadListInput));
+
+  const onThreadListKeydown = (event: KeyboardEvent): void => {
+    const input = (event.target as HTMLElement | null)?.closest<HTMLInputElement>(
+      '.deep-chat-thread-name-input'
+    );
+    if (!input) {
+      return;
+    }
+    const editThreadId = input.dataset.threadEditId ?? '';
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      commitThreadRename(container, editThreadId, input.value);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      cancelThreadRename();
+    }
+  };
+  threadList?.addEventListener('keydown', onThreadListKeydown);
+  cleanupCallbacks.push(() => threadList?.removeEventListener('keydown', onThreadListKeydown));
+
+  const onThreadListFocusOut = (event: FocusEvent): void => {
+    const input = (event.target as HTMLElement | null)?.closest<HTMLInputElement>(
+      '.deep-chat-thread-name-input'
+    );
+    if (!input || input.dataset.threadEditId !== editingThreadId) {
+      return;
+    }
+    commitThreadRename(container, input.dataset.threadEditId ?? '', input.value);
+  };
+  threadList?.addEventListener('focusout', onThreadListFocusOut);
+  cleanupCallbacks.push(() => threadList?.removeEventListener('focusout', onThreadListFocusOut));
 }
 
 function openModelSettings(): void {
@@ -1700,7 +1753,17 @@ function renderMountedThreadList(): void {
 }
 
 function renderHistoryThreadList(container: HTMLElement): void {
-  renderThreadList(container, getHistoryThreadStore(), pendingRequests, openThreadMenu);
+  const editingState = editingThreadId ? { id: editingThreadId, value: editingThreadValue } : null;
+  renderThreadList(
+    container,
+    getHistoryThreadStore(),
+    pendingRequests,
+    openThreadMenu,
+    editingState
+  );
+  if (editingThreadId) {
+    focusEditingInput(container, false);
+  }
 }
 
 function getHistoryThreadStore(): DeepChatThreadStore {
@@ -1775,27 +1838,87 @@ function handleThreadMenuAction(container: HTMLElement, threadId: string, action
 }
 
 function renameThread(container: HTMLElement, threadId: string): void {
+  beginThreadRename(container, threadId);
+}
+
+function beginThreadRename(container: HTMLElement, threadId: string): void {
   const thread = threadStore.threads.find(item => item.id === threadId);
   if (!thread) {
     return;
   }
 
-  const title = window.prompt('重命名会话', thread.customTitle || thread.title);
-  if (title === null) {
+  closeThreadMenu(container);
+  editingThreadId = threadId;
+  editingThreadValue = thread.customTitle || thread.title;
+  renderHistoryThreadList(container);
+  focusEditingInput(container, true);
+}
+
+function commitThreadRename(container: HTMLElement, threadId: string, rawValue: string): void {
+  if (editingThreadId !== threadId) {
     return;
   }
 
-  const trimmedTitle = title.replace(/\s+/g, ' ').trim();
-  if (!trimmedTitle) {
+  const thread = threadStore.threads.find(item => item.id === threadId);
+  if (!thread) {
+    exitThreadEdit();
+    renderHistoryThreadList(container);
+    return;
+  }
+
+  const trimmed = rawValue.replace(/\s+/g, ' ').trim();
+  const originalTitle = thread.customTitle || thread.title;
+  if (!trimmed) {
     showToast('会话名称不能为空', { type: 'warning' });
+    exitThreadEdit();
+    renderHistoryThreadList(container);
     return;
   }
 
+  if (trimmed === originalTitle) {
+    exitThreadEdit();
+    renderHistoryThreadList(container);
+    return;
+  }
+
+  exitThreadEdit();
   updateThreadMetadata(container, threadId, {
-    title: trimmedTitle,
-    customTitle: trimmedTitle,
+    title: trimmed,
+    customTitle: trimmed,
     updatedAt: Date.now(),
   });
+}
+
+function cancelThreadRename(): void {
+  exitThreadEdit();
+  const container = getMountedRenderContainer();
+  if (container) {
+    renderHistoryThreadList(container);
+  }
+}
+
+function exitThreadEdit(): void {
+  editingThreadId = null;
+  editingThreadValue = '';
+}
+
+function focusEditingInput(container: HTMLElement, selectAll: boolean): void {
+  if (!editingThreadId) {
+    return;
+  }
+
+  const input = container.querySelector<HTMLInputElement>('.deep-chat-thread-name-input');
+  if (!input || input.dataset.threadEditId !== editingThreadId) {
+    return;
+  }
+
+  input.focus();
+  if (selectAll) {
+    input.select();
+  } else {
+    const end = input.value.length;
+    input.setSelectionRange(end, end);
+  }
 }
 
 function togglePinnedThread(container: HTMLElement, threadId: string): void {
