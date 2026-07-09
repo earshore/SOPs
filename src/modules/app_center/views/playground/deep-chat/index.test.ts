@@ -279,6 +279,7 @@ async function importDeepChat(options: ImportOptions = {}) {
     emit: vi.fn(),
   };
   const navigateToRouteId = vi.fn(async () => true);
+  const confirmWithModal = vi.fn(async () => true);
 
   vi.resetModules();
   vi.doMock('@/common/infrastructure/SafeModuleLoader', () => ({
@@ -313,6 +314,7 @@ async function importDeepChat(options: ImportOptions = {}) {
   vi.doMock('@/modules/app_center/views/master_analysis/services/historyService', () => ({
     HistoryService: historyService,
   }));
+  vi.doMock('./utils/confirmModal', () => ({ confirmWithModal }));
 
   const module = await import('./index');
 
@@ -321,6 +323,7 @@ async function importDeepChat(options: ImportOptions = {}) {
     mocks: {
       appStore,
       callLLM,
+      confirmWithModal,
       eventBus,
       historyService,
       localDataStore,
@@ -410,7 +413,6 @@ beforeEach(() => {
     return 1;
   });
   vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
-  vi.spyOn(window, 'confirm').mockReturnValue(true);
   Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
   Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
   global.ResizeObserver = class TestResizeObserver {
@@ -431,6 +433,7 @@ afterEach(() => {
   vi.doUnmock('@/common/EventBus');
   vi.doUnmock('@/common/router/initRouter');
   vi.doUnmock('@/modules/app_center/views/master_analysis/services/historyService');
+  vi.doUnmock('./utils/confirmModal');
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
@@ -739,6 +742,7 @@ describe('deep-chat playground thread menu', () => {
 
     openThreadMenu('thread-2');
     queryRequired<HTMLButtonElement>(container, '[data-thread-menu-action="delete"]').click();
+    await vi.runAllTimersAsync();
 
     expect(container.querySelector('#deep-chat-thread-list')?.textContent).not.toContain(
       'Renamed thread'

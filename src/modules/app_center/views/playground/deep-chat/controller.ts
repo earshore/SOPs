@@ -14,6 +14,7 @@ import { LocalDataStore } from '@/services/localDataStore';
 import { appStore } from '@/stores/useAppStore';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 import type { LLMProviderConfig } from '@/types/state';
+import { confirmWithModal } from './utils/confirmModal';
 import {
   buildStoredThreadMessages,
   mergeThreadHistoryWithRequest,
@@ -1549,7 +1550,12 @@ async function deletePromptDraft(container: HTMLElement, promptId: string): Prom
     return;
   }
 
-  const confirmed = window.confirm('删除后将移除该 Prompt 生成记录，无法恢复。确定删除吗？');
+  const confirmed = await confirmWithModal(
+    '删除 Prompt 生成记录',
+    '删除后将移除该 Prompt 生成记录，<br/><span class="text-xs text-red-400 mt-1 block">无法恢复</span>',
+    'dc_ignore_delete_prompt',
+    '删除 Prompt'
+  );
   if (!confirmed) {
     return;
   }
@@ -1625,14 +1631,17 @@ function switchThread(container: HTMLElement, threadId: string): void {
   replaceChat(container);
 }
 
-function deleteThread(container: HTMLElement, threadId: string): void {
+async function deleteThread(container: HTMLElement, threadId: string): Promise<void> {
   const thread = threadStore.threads.find(item => item.id === threadId);
   if (!thread) {
     return;
   }
 
-  const confirmed = window.confirm(
-    '删除后仅移除本地 Deep Chat 历史，无法恢复。确定删除这个会话吗？'
+  const confirmed = await confirmWithModal(
+    '删除会话',
+    '删除后仅移除本地 Deep Chat 历史，<br/><span class="text-xs text-red-400 mt-1 block">无法恢复</span>',
+    'dc_ignore_delete_thread',
+    '删除会话'
   );
   if (!confirmed) {
     return;
