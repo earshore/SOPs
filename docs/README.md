@@ -11,10 +11,12 @@
 - [Promptlab 置信度用户指南](./guides/promptlab-confidence-user-guide.md)
 
 ### CSS 体系 (`guides/css/`)
+
 - [CSS 架构快速开始](./guides/css/CSS-ARCHITECTURE-README.md)
 - [CSS 架构完整指南](./guides/css/css-architecture-guide.md)
 
 ### 命名验证器 (`guides/naming-validator/`)
+
 - [README](./guides/naming-validator/naming-validator-README.md) — 功能说明和命名规范
 - [使用指南](./guides/naming-validator/naming-validator-USAGE.md) — CLI 命令和配置
 
@@ -25,6 +27,7 @@
 - [系统稳定性最佳实践](./development/best-practices.md)
 - [状态同步最佳实践](./development/state-sync-best-practices.md) — Alpine ↔ Zustand 同步规范
 - [Zustand 迁移指南](./development/zustand-migration-guide.md) — 旧 StateManager → Zustand 的迁移参考
+- [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md) — 弹窗选型、实现、可访问性、测试与验证门禁
 - [AI 辅助开发上下文](./development/CLAUDE.md) — 供 AI 工具使用的项目上下文
 
 ---
@@ -86,4 +89,4 @@ docs/
 
 ---
 
-**最后更新**: 2026-07-09
+**最后更新**: 2026-07-10

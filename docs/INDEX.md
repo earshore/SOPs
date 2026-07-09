@@ -24,6 +24,7 @@
 - [状态同步最佳实践](./development/state-sync-best-practices.md) - Alpine 与 Zustand 状态同步规范。
 - [Zustand 迁移指南](./development/zustand-migration-guide.md) - 旧 StateManager 到 Zustand 的迁移参考。
 - [页面实现模板规范](./guides/modules/page-implementation-templates.md) - 页面入口、加载、DI 和 CSS 策略约束。
+- [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md) - 弹窗选型、实现、可访问性、测试与验证门禁。
 - [AI 辅助开发上下文](./development/CLAUDE.md) - 供 AI 工具使用的项目上下文。
 
 ## 功能指南
@@ -56,6 +57,7 @@
 
 - [稳定主题系统规范](./THEME_SYSTEM_GUIDELINES.md)
 - [视觉设计规范指南](./VISUAL_DESIGN_GUIDELINES.md)
+- [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md)
 - [页面访问动画规范](./PAGE_ENTRY_ANIMATION_GUIDELINES.md)
 - [卡片 UI 债务收敛计划](./CARD_UI_DEBT_REDUCTION_PLAN.md)
 
@@ -73,5 +75,5 @@
 
 ---
 
-**最后更新**: 2026-07-09
+**最后更新**: 2026-07-10
 **维护者**: sops 开发团队
