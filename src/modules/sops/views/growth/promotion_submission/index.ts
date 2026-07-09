@@ -3,10 +3,10 @@
  * Promotion Submission SOP - EU Sites
  */
 
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
-import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
+import {
+  createSopTemplateModule,
+  type SopTemplateModuleContext,
+} from '../../../utils/sopTemplateModule';
 import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
@@ -123,10 +123,7 @@ declare global {
   }
 }
 
-class PromotionSubmissionModule extends BaseModule {
-  private removeCalculatorListeners: (() => void) | null = null;
-  private registeredActions: string[] = [];
-
+class PromotionSubmissionController {
   /**
    * 计算利润
    */
@@ -271,9 +268,14 @@ class PromotionSubmissionModule extends BaseModule {
     }
   }
 
-  private bindCalculatorEvents(container: HTMLElement): void {
-    this.removeCalculatorListeners?.();
+  init(container: HTMLElement, context: SopTemplateModuleContext): void {
+    this.bindCalculatorEvents(container, context);
+    context.setTimeout(() => {
+      this.calculateProfit();
+    }, 100);
+  }
 
+  private bindCalculatorEvents(container: HTMLElement, context: SopTemplateModuleContext): void {
     const calculatorInputIds = new Set([
       'calc-original-price',
       'calc-cost',
@@ -296,54 +298,27 @@ class PromotionSubmissionModule extends BaseModule {
       }
     };
 
-    container.addEventListener('input', handleCalculatorChange);
-    container.addEventListener('change', handleCalculatorChange);
-    this.removeCalculatorListeners = () => {
-      container.removeEventListener('input', handleCalculatorChange);
-      container.removeEventListener('change', handleCalculatorChange);
-      this.removeCalculatorListeners = null;
-    };
-  }
-
-  /**
-   * 挂载模块
-   */
-  async mount(container: HTMLElement): Promise<void> {
-    const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/sops/views/growth/promotion_submission/template.html'
-    );
-    // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(container, html);
-    container.classList.add('fade-in');
-    this.bindCalculatorEvents(container);
-    reviewOwnerField.restore();
-
-    // Initialize calculator after DOM is ready
-    setTimeout(() => {
-      this.calculateProfit();
-    }, 100);
-
-    this.registeredActions = registerActionsWithLegacy({
-      sops_copyPromotionSubmissionTemplate: copyPromotionSubmissionTemplate as (
-        ...args: unknown[]
-      ) => void,
-    });
-  }
-
-  /**
-   * 卸载模块
-   */
-  unmount(): void {
-    this.removeCalculatorListeners?.();
-    if (this.registeredActions.length > 0) {
-      unregisterActions(this.registeredActions);
-      this.registeredActions = [];
-    }
+    context.addEventListener(container, 'input', handleCalculatorChange);
+    context.addEventListener(container, 'change', handleCalculatorChange);
   }
 }
 
-// 导出模块实例
-const promotionSubmissionModule = new PromotionSubmissionModule('promotion_submission');
+const promotionSubmissionController = new PromotionSubmissionController();
 
-export const mount = (container: HTMLElement) => promotionSubmissionModule.mount(container);
-export const unmount = () => promotionSubmissionModule.unmount();
+const promotionSubmissionModule = createSopTemplateModule({
+  moduleId: 'promotion_submission',
+  templatePath: 'src/modules/sops/views/growth/promotion_submission/template.html',
+  ownerFields: [reviewOwnerField],
+  actions: {
+    sops_copyPromotionSubmissionTemplate: copyPromotionSubmissionTemplate,
+  },
+  onInit: (container, context) => {
+    promotionSubmissionController.init(container, context);
+  },
+});
+
+export const mount = (container: HTMLElement): Promise<void> =>
+  promotionSubmissionModule.mount(container);
+export const unmount = (): void => {
+  promotionSubmissionModule.unmount();
+};

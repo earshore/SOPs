@@ -1,12 +1,9 @@
+import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 /**
  * 欧洲本土化高危词库 (Restricted Words) SOP
  * EU Localized Restricted Words Database SOP
  */
 
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
-import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 import { cleanupRestrictedWordsPanel, initRestrictedWordsPanel } from './restrictedWordsHandler';
@@ -80,43 +77,21 @@ declare global {
   }
 }
 
-class RestrictedWordsModule extends BaseModule {
-  private registeredActions: string[] = [];
-
-  /**
-   * 挂载模块
-   */
-  async mount(container: HTMLElement): Promise<void> {
-    const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/sops/views/growth/restricted_words/template.html'
-    );
-    // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(container, html);
-    container.classList.add('fade-in');
-
-    // 初始化词库面板功能
+const restrictedWordsModule = createSopTemplateModule({
+  moduleId: 'restricted_words',
+  templatePath: 'src/modules/sops/views/growth/restricted_words/template.html',
+  ownerFields: [reviewOwnerField],
+  actions: {
+    sops_copyRestrictedWordsTemplate: copyRestrictedWordsTemplate,
+  },
+  onInit: () => {
     initRestrictedWordsPanel();
-    reviewOwnerField.restore();
+  },
+  onUnmount: cleanupRestrictedWordsPanel,
+});
 
-    this.registeredActions = registerActionsWithLegacy({
-      sops_copyRestrictedWordsTemplate: copyRestrictedWordsTemplate as (...args: unknown[]) => void,
-    });
-  }
-
-  /**
-   * 卸载模块
-   */
-  unmount(): void {
-    cleanupRestrictedWordsPanel();
-    if (this.registeredActions.length > 0) {
-      unregisterActions(this.registeredActions);
-      this.registeredActions = [];
-    }
-  }
-}
-
-// 导出模块实例
-const restrictedWordsModule = new RestrictedWordsModule('restricted_words');
-
-export const mount = (container: HTMLElement) => restrictedWordsModule.mount(container);
-export const unmount = () => restrictedWordsModule.unmount();
+export const mount = (container: HTMLElement): Promise<void> =>
+  restrictedWordsModule.mount(container);
+export const unmount = (): void => {
+  restrictedWordsModule.unmount();
+};

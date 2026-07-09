@@ -1,7 +1,4 @@
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
-import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
+import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
@@ -78,37 +75,14 @@ declare global {
 }
 
 // QA 问答维护 SOP
-class QaMaintenanceModule extends BaseModule {
-  private registeredActions: string[] = [];
-
-  protected async render(): Promise<void> {
-    if (!this.container) return;
-
-    const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/sops/views/service/qa_maintenance/template.html'
-    );
-    // ✅ 安全: html来自静态模板文件，无用户输入
-    setSafeHtml(this.container, html);
-    this.container.classList.add('fade-in');
-  }
-
-  protected async init(): Promise<void> {
-    reviewOwnerField.restore();
-
-    this.registeredActions = registerActionsWithLegacy({
-      sops_copyQaMaintenanceTemplate: copyQaMaintenanceTemplate as (...args: unknown[]) => void,
-    });
-  }
-
-  protected onUnmount(): void {
-    if (this.registeredActions.length > 0) {
-      unregisterActions(this.registeredActions);
-      this.registeredActions = [];
-    }
-  }
-}
-
-const qaMaintenanceModule = new QaMaintenanceModule('qa_maintenance');
+const qaMaintenanceModule = createSopTemplateModule({
+  moduleId: 'qa_maintenance',
+  templatePath: 'src/modules/sops/views/service/qa_maintenance/template.html',
+  ownerFields: [reviewOwnerField],
+  actions: {
+    sops_copyQaMaintenanceTemplate: copyQaMaintenanceTemplate,
+  },
+});
 
 export const mount = (container: HTMLElement): Promise<void> =>
   qaMaintenanceModule.mount(container);

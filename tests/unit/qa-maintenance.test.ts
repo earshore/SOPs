@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createSopCopyWorkflowFixture } from '../helpers/sopCopyWorkflowFixture';
 import {
   buildQaMaintenanceTemplate,
   mount,
   unmount,
 } from '@/modules/sops/views/service/qa_maintenance/index';
-import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
@@ -38,30 +38,19 @@ vi.mock('@/common/ui/notifications', () => ({
   showToast: mocks.showToast,
 }));
 
+const copyFixture = createSopCopyWorkflowFixture({ mocks, unmount });
+
 describe('QA maintenance archive workflow', () => {
   let container: HTMLElement;
 
   beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
-      if (key === 'qa_maintenance_owner_v1') return '客服负责人/运营负责人';
-      return fallback;
+    container = copyFixture.setup({
+      storageKey: 'qa_maintenance_owner_v1',
+      defaultOwner: '客服负责人/运营负责人',
     });
-    mocks.storageSet.mockClear();
-    mocks.loadTemplate.mockResolvedValue(mocks.template);
-    mocks.loadTemplate.mockClear();
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText: vi.fn().mockResolvedValue(undefined) },
-    });
-    mocks.showToast.mockClear();
   });
-
   afterEach(() => {
-    unmount();
-    document.body.innerHTML = '';
-    vi.restoreAllMocks();
+    copyFixture.cleanup();
   });
 
   it('builds a fixed QA maintenance archive template', () => {
@@ -77,22 +66,15 @@ describe('QA maintenance archive workflow', () => {
   });
 
   it('copies the archive template', async () => {
-    await mount(container);
-    const ownerInput = document.getElementById('qa-maintenance-owner') as HTMLInputElement | null;
-    if (ownerInput) ownerInput.value = '客服小周';
-
-    await window.sops_copyQaMaintenanceTemplate?.();
-
-    expect(mocks.loadTemplate).toHaveBeenCalledWith(
-      'src/modules/sops/views/service/qa_maintenance/template.html'
-    );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('作业负责人：客服小周')
-    );
-    expect(StorageService.set).toHaveBeenCalledWith('qa_maintenance_owner_v1', '客服小周');
-    expect(mocks.showToast).toHaveBeenCalledWith(
-      '已复制 QA 维护归档模板，可粘贴到周报或归档文档。',
-      { type: 'success' }
-    );
+    await copyFixture.copyAndExpectSuccess({
+      mount,
+      action: () => window.sops_copyQaMaintenanceTemplate?.(),
+      ownerInputId: 'qa-maintenance-owner',
+      ownerValue: '客服小周',
+      templatePath: 'src/modules/sops/views/service/qa_maintenance/template.html',
+      storageKey: 'qa_maintenance_owner_v1',
+      copiedText: '作业负责人：客服小周',
+      successMessage: '已复制 QA 维护归档模板，可粘贴到周报或归档文档。',
+    });
   });
 });

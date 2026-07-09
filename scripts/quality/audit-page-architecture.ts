@@ -6,6 +6,7 @@ interface PageArchitectureRecord {
   file: string;
   implementationFiles: string[];
   extendsBaseModule: boolean;
+  usesSopTemplateModule: boolean;
   exportsNakedMount: boolean;
   usesViewLoader: boolean;
   usesSafeTemplateLoader: boolean;
@@ -112,6 +113,7 @@ function inspectPage(file: string): PageArchitectureRecord {
       normalizePath(relative(projectRoot, item))
     ),
     extendsBaseModule: /\bextends\s+BaseModule\b/.test(content),
+    usesSopTemplateModule: /\bcreateSopTemplateModule\b/.test(content),
     exportsNakedMount: /\bexport\s+(?:async\s+)?function\s+mount\b/.test(content),
     usesViewLoader: /\bviewLoader\b|common\/utils\/viewLoader/.test(content),
     usesSafeTemplateLoader: /\bSafeTemplateLoader\b|\bsafeTemplateLoader\b/.test(content),
@@ -189,11 +191,11 @@ function collectHardIssues(records: PageArchitectureRecord[]): PageArchitectureI
   ];
 
   const missingBaseModuleIssues = records
-    .filter(record => !record.extendsBaseModule)
+    .filter(record => !record.extendsBaseModule && !record.usesSopTemplateModule)
     .map(record => ({
       check: 'base-module',
       file: record.file,
-      message: 'Page entry implementation must extend BaseModule.',
+      message: 'Page entry implementation must extend BaseModule or use createSopTemplateModule.',
     }));
 
   return [
@@ -293,6 +295,7 @@ console.log('='.repeat(80));
 console.log(`Page entries: ${records.length}`);
 console.log(`Errors: ${issues.length}`);
 console.log(`Extends BaseModule: ${countBy(records, 'extendsBaseModule')}`);
+console.log(`Uses SOP template shell: ${countBy(records, 'usesSopTemplateModule')}`);
 console.log(`Naked mount exports: ${countBy(records, 'exportsNakedMount')}`);
 console.log(`Uses viewLoader: ${countBy(records, 'usesViewLoader')}`);
 console.log(`Uses SafeTemplateLoader: ${countBy(records, 'usesSafeTemplateLoader')}`);
@@ -319,8 +322,10 @@ console.log(
 
 printFileList('Naked mount entries', listFiles(records, 'exportsNakedMount'));
 printFileList(
-  'Missing BaseModule entries',
-  records.filter(record => !record.extendsBaseModule).map(record => record.file)
+  'Missing BaseModule/shared shell entries',
+  records
+    .filter(record => !record.extendsBaseModule && !record.usesSopTemplateModule)
+    .map(record => record.file)
 );
 printFileList('viewLoader entries', listFiles(records, 'usesViewLoader'));
 printFileList('raw template entries', listFiles(records, 'importsRawTemplate'));

@@ -46,7 +46,7 @@ const explicitMotionTemplatePaths = [
   resolve(process.cwd(), 'src/common/ui/navigation.ts'),
   resolve(process.cwd(), 'src/common/ui/megaMenu.ts'),
   resolve(process.cwd(), 'src/common/ui/search.ts'),
-  resolve(process.cwd(), 'src/modules/app_center/views/master_analysis/utils/confirmModal.ts'),
+  resolve(process.cwd(), 'src/components/modal/confirmModal.ts'),
   resolve(
     process.cwd(),
     'src/modules/app_center/views/master_analysis/scraper/handlers/importHandler.ts'

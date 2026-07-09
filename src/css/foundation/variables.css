@@ -424,6 +424,8 @@
   --rounded-full: 9999px;
   --rounded-card: var(--rounded-md);
   --rounded-panel: var(--rounded-md);
+  --radius-card: var(--rounded-card);
+  --radius-panel: var(--rounded-panel);
 
   /* ========================================
      7. 阴影

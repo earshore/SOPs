@@ -1,7 +1,4 @@
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
-import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
+import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
@@ -73,39 +70,14 @@ declare global {
 }
 
 // 绩效通知处理 SOP
-class PerformanceNotificationModule extends BaseModule {
-  private registeredActions: string[] = [];
-
-  protected async render(): Promise<void> {
-    if (!this.container) return;
-
-    const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/sops/views/safety/performance_notification/template.html'
-    );
-    // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(this.container, html);
-    this.container.classList.add('fade-in');
-  }
-
-  protected async init(): Promise<void> {
-    reportOwnerField.restore();
-
-    this.registeredActions = registerActionsWithLegacy({
-      sops_copyPerformanceNotificationTemplate: copyPerformanceNotificationTemplate as (
-        ...args: unknown[]
-      ) => void,
-    });
-  }
-
-  protected onUnmount(): void {
-    if (this.registeredActions.length > 0) {
-      unregisterActions(this.registeredActions);
-      this.registeredActions = [];
-    }
-  }
-}
-
-const performanceNotificationModule = new PerformanceNotificationModule('performance_notification');
+const performanceNotificationModule = createSopTemplateModule({
+  moduleId: 'performance_notification',
+  templatePath: 'src/modules/sops/views/safety/performance_notification/template.html',
+  ownerFields: [reportOwnerField],
+  actions: {
+    sops_copyPerformanceNotificationTemplate: copyPerformanceNotificationTemplate,
+  },
+});
 
 export const mount = (container: HTMLElement): Promise<void> =>
   performanceNotificationModule.mount(container);

@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createSopCopyWorkflowFixture } from '../helpers/sopCopyWorkflowFixture';
 import {
   buildFbaShippingTemplate,
   mount,
   unmount,
 } from '@/modules/sops/views/backend/fba_shipping/index';
-import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
@@ -38,30 +38,19 @@ vi.mock('@/common/ui/notifications', () => ({
   showToast: mocks.showToast,
 }));
 
+const copyFixture = createSopCopyWorkflowFixture({ mocks, unmount });
+
 describe('FBA shipping release workflow', () => {
   let container: HTMLElement;
 
   beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
-      if (key === 'fba_shipping_owner_v1') return '物流/供应链负责人';
-      return fallback;
+    container = copyFixture.setup({
+      storageKey: 'fba_shipping_owner_v1',
+      defaultOwner: '物流/供应链负责人',
     });
-    mocks.storageSet.mockClear();
-    mocks.loadTemplate.mockResolvedValue(mocks.template);
-    mocks.loadTemplate.mockClear();
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText: vi.fn().mockResolvedValue(undefined) },
-    });
-    mocks.showToast.mockClear();
   });
-
   afterEach(() => {
-    unmount();
-    document.body.innerHTML = '';
-    vi.restoreAllMocks();
+    copyFixture.cleanup();
   });
 
   it('builds a fixed FBA shipping release archive template', () => {
@@ -77,22 +66,15 @@ describe('FBA shipping release workflow', () => {
   });
 
   it('copies the release template', async () => {
-    await mount(container);
-    const ownerInput = document.getElementById('fba-shipping-owner') as HTMLInputElement | null;
-    if (ownerInput) ownerInput.value = '物流小周';
-
-    await window.sops_copyFbaShippingTemplate?.();
-
-    expect(mocks.loadTemplate).toHaveBeenCalledWith(
-      'src/modules/sops/views/backend/fba_shipping/template.html'
-    );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('作业负责人：物流小周')
-    );
-    expect(StorageService.set).toHaveBeenCalledWith('fba_shipping_owner_v1', '物流小周');
-    expect(mocks.showToast).toHaveBeenCalledWith(
-      '已复制 FBA 发货放行/异常登记模板，可粘贴到周报或归档文档。',
-      { type: 'success' }
-    );
+    await copyFixture.copyAndExpectSuccess({
+      mount,
+      action: () => window.sops_copyFbaShippingTemplate?.(),
+      ownerInputId: 'fba-shipping-owner',
+      ownerValue: '物流小周',
+      templatePath: 'src/modules/sops/views/backend/fba_shipping/template.html',
+      storageKey: 'fba_shipping_owner_v1',
+      copiedText: '作业负责人：物流小周',
+      successMessage: '已复制 FBA 发货放行/异常登记模板，可粘贴到周报或归档文档。',
+    });
   });
 });

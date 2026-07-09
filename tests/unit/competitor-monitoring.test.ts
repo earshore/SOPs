@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createSopCopyWorkflowFixture } from '../helpers/sopCopyWorkflowFixture';
 import {
   buildCompetitorReviewTemplate,
   mount,
   unmount,
 } from '@/modules/sops/views/growth/competitor_monitoring/index';
-import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
@@ -38,30 +38,19 @@ vi.mock('@/common/ui/notifications', () => ({
   showToast: mocks.showToast,
 }));
 
+const copyFixture = createSopCopyWorkflowFixture({ mocks, unmount });
+
 describe('Competitor monitoring review workflow', () => {
   let container: HTMLElement;
 
   beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
-      if (key === 'competitor_review_owner_v1') return '运营负责人';
-      return fallback;
+    container = copyFixture.setup({
+      storageKey: 'competitor_review_owner_v1',
+      defaultOwner: '运营负责人',
     });
-    mocks.storageSet.mockClear();
-    mocks.loadTemplate.mockResolvedValue(mocks.template);
-    mocks.loadTemplate.mockClear();
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText: vi.fn().mockResolvedValue(undefined) },
-    });
-    mocks.showToast.mockClear();
   });
-
   afterEach(() => {
-    unmount();
-    document.body.innerHTML = '';
-    vi.restoreAllMocks();
+    copyFixture.cleanup();
   });
 
   it('builds a fixed competitor review archive template', () => {
@@ -77,23 +66,15 @@ describe('Competitor monitoring review workflow', () => {
   });
 
   it('copies the review template', async () => {
-    await mount(container);
-    const ownerInput = document.getElementById(
-      'competitor-review-owner'
-    ) as HTMLInputElement | null;
-    if (ownerInput) ownerInput.value = '运营小李';
-
-    await window.sops_copyCompetitorReviewTemplate?.();
-
-    expect(mocks.loadTemplate).toHaveBeenCalledWith(
-      'src/modules/sops/views/growth/competitor_monitoring/template.html'
-    );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('作业负责人：运营小李')
-    );
-    expect(StorageService.set).toHaveBeenCalledWith('competitor_review_owner_v1', '运营小李');
-    expect(mocks.showToast).toHaveBeenCalledWith('已复制竞品周复盘模板，可粘贴到周报或归档文档。', {
-      type: 'success',
+    await copyFixture.copyAndExpectSuccess({
+      mount,
+      action: () => window.sops_copyCompetitorReviewTemplate?.(),
+      ownerInputId: 'competitor-review-owner',
+      ownerValue: '运营小李',
+      templatePath: 'src/modules/sops/views/growth/competitor_monitoring/template.html',
+      storageKey: 'competitor_review_owner_v1',
+      copiedText: '作业负责人：运营小李',
+      successMessage: '已复制竞品周复盘模板，可粘贴到周报或归档文档。',
     });
   });
 });

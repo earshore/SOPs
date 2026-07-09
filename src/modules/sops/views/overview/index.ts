@@ -1,32 +1,15 @@
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import BaseModule from '@/common/BaseModule';
-import { setSafeHtml } from '@/common/utils/security';
+import {
+  createSopTemplateModule,
+  type SopTemplateModuleContext,
+} from '../../utils/sopTemplateModule';
 
-class SopsOverviewModule extends BaseModule {
-  constructor() {
-    super('sops_overview');
-  }
-
-  protected async render(): Promise<void> {
-    if (!this.container) return;
-
-    const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/sops/views/overview/template.html'
-    );
-    // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(this.container, html);
-    this.container.classList.add('fade-in');
-  }
-
-  protected async init(): Promise<void> {
-    if (!this.container) return;
-
-    // 初始化事件监听
-    initOverviewEvents(this.container);
-  }
-}
-
-const sopsOverviewModule = new SopsOverviewModule();
+const sopsOverviewModule = createSopTemplateModule({
+  moduleId: 'sops_overview',
+  templatePath: 'src/modules/sops/views/overview/template.html',
+  onInit: (container, context) => {
+    initOverviewEvents(container, context);
+  },
+});
 
 export const mount = (container: HTMLElement): Promise<void> => sopsOverviewModule.mount(container);
 export const unmount = (): void => {
@@ -57,11 +40,11 @@ export function scrollToModule(categoryId: string): void {
   }
 }
 
-function initOverviewEvents(container: HTMLElement): void {
+function initOverviewEvents(container: HTMLElement, context: SopTemplateModuleContext): void {
   // 分类筛选按钮事件
   const filterBtns = container.querySelectorAll('.category-filter-btn');
   filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
+    context.addEventListener(btn, 'click', () => {
       // 移除所有按钮的 active 状态
       filterBtns.forEach(b => {
         b.classList.remove('active');
@@ -83,7 +66,7 @@ function initOverviewEvents(container: HTMLElement): void {
   // 分类筛选标签点击事件
   const categoryTabs = container.querySelectorAll('.sop-category-tab');
   categoryTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
+    context.addEventListener(tab, 'click', () => {
       // 移除所有active状态
       categoryTabs.forEach(t => t.classList.remove('active'));
       // 添加当前active状态
@@ -99,7 +82,7 @@ function initOverviewEvents(container: HTMLElement): void {
   // 搜索框事件
   const searchInput = container.querySelector('#sop-search-input') as HTMLInputElement;
   if (searchInput) {
-    searchInput.addEventListener('input', e => {
+    context.addEventListener(searchInput, 'input', e => {
       searchSOPs(container, (e.target as HTMLInputElement).value);
     });
   }
@@ -113,13 +96,11 @@ function filterByCategory(container: HTMLElement, category: string): void {
     if (category === 'all') {
       sectionElement.hidden = false;
       sectionElement.classList.add('fade-in');
+    } else if (sectionElement.dataset.category === category) {
+      sectionElement.hidden = false;
+      sectionElement.classList.add('fade-in');
     } else {
-      if (sectionElement.dataset.category === category) {
-        sectionElement.hidden = false;
-        sectionElement.classList.add('fade-in');
-      } else {
-        sectionElement.hidden = true;
-      }
+      sectionElement.hidden = true;
     }
   });
 }
@@ -144,10 +125,6 @@ function searchSOPs(container: HTMLElement, keyword: string): void {
     const cardElement = card as HTMLElement;
     const title = cardElement.querySelector('h3')?.textContent?.toLowerCase() || '';
     const desc = cardElement.querySelector('p')?.textContent?.toLowerCase() || '';
-    if (title.includes(lowerKeyword) || desc.includes(lowerKeyword)) {
-      cardElement.hidden = false;
-    } else {
-      cardElement.hidden = true;
-    }
+    cardElement.hidden = !title.includes(lowerKeyword) && !desc.includes(lowerKeyword);
   });
 }

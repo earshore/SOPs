@@ -1,12 +1,12 @@
+import {
+  createSopTemplateModule,
+  type SopTemplateModuleContext,
+} from '../../../utils/sopTemplateModule';
 /**
  * 邮件回复模板 SOP - 静态版
  * Email Reply Templates SOP - Static Version
  */
 
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
-import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
 import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
@@ -79,62 +79,30 @@ declare global {
   }
 }
 
-class EmailTemplatesModule extends BaseModule {
-  private removeTemplateToggleListener: (() => void) | null = null;
-  private registeredActions: string[] = [];
+function bindTemplateToggles(container: HTMLElement, context: SopTemplateModuleContext): void {
+  const handleToggleClick = (event: Event): void => {
+    const target = event.target as HTMLElement | null;
+    const toggle = target?.closest<HTMLElement>('[data-email-template-toggle]');
+    if (!toggle || !container.contains(toggle)) return;
 
-  private bindTemplateToggles(container: HTMLElement): void {
-    this.removeTemplateToggleListener?.();
+    toggle.nextElementSibling?.classList.toggle('hidden');
+  };
 
-    const handleToggleClick = (event: Event): void => {
-      const target = event.target as HTMLElement | null;
-      const toggle = target?.closest<HTMLElement>('[data-email-template-toggle]');
-      if (!toggle || !container.contains(toggle)) return;
-
-      toggle.nextElementSibling?.classList.toggle('hidden');
-    };
-
-    container.addEventListener('click', handleToggleClick);
-    this.removeTemplateToggleListener = () => {
-      container.removeEventListener('click', handleToggleClick);
-      this.removeTemplateToggleListener = null;
-    };
-  }
-
-  /**
-   * 挂载模块
-   */
-  async mount(container: HTMLElement): Promise<void> {
-    const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/sops/views/service/email_templates/template.html'
-    );
-    // ✅ 安全: html来自本地静态template.html，无用户输入
-    setSafeHtml(container, html);
-    container.classList.add('fade-in');
-    this.bindTemplateToggles(container);
-    reviewOwnerField.restore();
-
-    this.registeredActions = registerActionsWithLegacy({
-      sops_copyEmailTemplatesReviewTemplate: copyEmailTemplatesReviewTemplate as (
-        ...args: unknown[]
-      ) => void,
-    });
-  }
-
-  /**
-   * 卸载模块
-   */
-  unmount(): void {
-    this.removeTemplateToggleListener?.();
-    if (this.registeredActions.length > 0) {
-      unregisterActions(this.registeredActions);
-      this.registeredActions = [];
-    }
-  }
+  context.addEventListener(container, 'click', handleToggleClick);
 }
 
-// 导出模块实例
-const emailTemplatesModule = new EmailTemplatesModule('email_templates');
+const emailTemplatesModule = createSopTemplateModule({
+  moduleId: 'email_templates',
+  templatePath: 'src/modules/sops/views/service/email_templates/template.html',
+  ownerFields: [reviewOwnerField],
+  actions: {
+    sops_copyEmailTemplatesReviewTemplate: copyEmailTemplatesReviewTemplate,
+  },
+  onInit: bindTemplateToggles,
+});
 
-export const mount = (container: HTMLElement) => emailTemplatesModule.mount(container);
-export const unmount = () => emailTemplatesModule.unmount();
+export const mount = (container: HTMLElement): Promise<void> =>
+  emailTemplatesModule.mount(container);
+export const unmount = (): void => {
+  emailTemplatesModule.unmount();
+};

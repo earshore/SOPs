@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createSopCopyWorkflowFixture } from '../helpers/sopCopyWorkflowFixture';
 import {
   buildAccountSecurityTemplate,
   mount,
   unmount,
 } from '@/modules/sops/views/safety/account_security/index';
-import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
@@ -38,30 +38,19 @@ vi.mock('@/common/ui/notifications', () => ({
   showToast: mocks.showToast,
 }));
 
+const copyFixture = createSopCopyWorkflowFixture({ mocks, unmount });
+
 describe('Account security review workflow', () => {
   let container: HTMLElement;
 
   beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
-      if (key === 'account_security_owner_v1') return '账号安全负责人';
-      return fallback;
+    container = copyFixture.setup({
+      storageKey: 'account_security_owner_v1',
+      defaultOwner: '账号安全负责人',
     });
-    mocks.storageSet.mockClear();
-    mocks.loadTemplate.mockResolvedValue(mocks.template);
-    mocks.loadTemplate.mockClear();
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText: vi.fn().mockResolvedValue(undefined) },
-    });
-    mocks.showToast.mockClear();
   });
-
   afterEach(() => {
-    unmount();
-    document.body.innerHTML = '';
-    vi.restoreAllMocks();
+    copyFixture.cleanup();
   });
 
   it('builds a fixed account security anomaly archive template', () => {
@@ -77,22 +66,15 @@ describe('Account security review workflow', () => {
   });
 
   it('copies the review template', async () => {
-    await mount(container);
-    const ownerInput = document.getElementById('account-security-owner') as HTMLInputElement | null;
-    if (ownerInput) ownerInput.value = '安全小周';
-
-    await window.sops_copyAccountSecurityTemplate?.();
-
-    expect(mocks.loadTemplate).toHaveBeenCalledWith(
-      'src/modules/sops/views/safety/account_security/template.html'
-    );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('作业负责人：安全小周')
-    );
-    expect(StorageService.set).toHaveBeenCalledWith('account_security_owner_v1', '安全小周');
-    expect(mocks.showToast).toHaveBeenCalledWith(
-      '已复制账号登录异常登记模板，可粘贴到工作群或归档文档。',
-      { type: 'success' }
-    );
+    await copyFixture.copyAndExpectSuccess({
+      mount,
+      action: () => window.sops_copyAccountSecurityTemplate?.(),
+      ownerInputId: 'account-security-owner',
+      ownerValue: '安全小周',
+      templatePath: 'src/modules/sops/views/safety/account_security/template.html',
+      storageKey: 'account_security_owner_v1',
+      copiedText: '作业负责人：安全小周',
+      successMessage: '已复制账号登录异常登记模板，可粘贴到工作群或归档文档。',
+    });
   });
 });

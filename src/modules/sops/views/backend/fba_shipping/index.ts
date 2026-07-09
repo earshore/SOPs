@@ -1,7 +1,4 @@
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
-import { registerActionsWithLegacy, unregisterActions } from '@/common/utils/actionRegistry';
+import { createSopTemplateModule } from '../../../utils/sopTemplateModule';
 import { createOwnerField } from '../../../utils/ownerField';
 import { createTemplateCopyAction } from '../../../utils/templateCopyAction';
 
@@ -87,37 +84,14 @@ declare global {
 }
 
 // FBA发货与物流跟踪 SOP
-class FbaShippingModule extends BaseModule {
-  private registeredActions: string[] = [];
-
-  protected async render(): Promise<void> {
-    if (!this.container) return;
-
-    const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/sops/views/backend/fba_shipping/template.html'
-    );
-    // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(this.container, html);
-    this.container.classList.add('fade-in');
-  }
-
-  protected async init(): Promise<void> {
-    releaseOwnerField.restore();
-
-    this.registeredActions = registerActionsWithLegacy({
-      sops_copyFbaShippingTemplate: copyFbaShippingTemplate as (...args: unknown[]) => void,
-    });
-  }
-
-  protected onUnmount(): void {
-    if (this.registeredActions.length > 0) {
-      unregisterActions(this.registeredActions);
-      this.registeredActions = [];
-    }
-  }
-}
-
-const fbaShippingModule = new FbaShippingModule('fba_shipping');
+const fbaShippingModule = createSopTemplateModule({
+  moduleId: 'fba_shipping',
+  templatePath: 'src/modules/sops/views/backend/fba_shipping/template.html',
+  ownerFields: [releaseOwnerField],
+  actions: {
+    sops_copyFbaShippingTemplate: copyFbaShippingTemplate,
+  },
+});
 
 export const mount = (container: HTMLElement): Promise<void> => fbaShippingModule.mount(container);
 export const unmount = (): void => {

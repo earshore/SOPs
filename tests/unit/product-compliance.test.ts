@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createSopCopyWorkflowFixture } from '../helpers/sopCopyWorkflowFixture';
 import {
   buildProductComplianceTemplate,
   mount,
   unmount,
 } from '@/modules/sops/views/safety/product_compliance/index';
-import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
@@ -38,30 +38,19 @@ vi.mock('@/common/ui/notifications', () => ({
   showToast: mocks.showToast,
 }));
 
+const copyFixture = createSopCopyWorkflowFixture({ mocks, unmount });
+
 describe('Product compliance review workflow', () => {
   let container: HTMLElement;
 
   beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
-      if (key === 'product_compliance_owner_v1') return '合规负责人';
-      return fallback;
+    container = copyFixture.setup({
+      storageKey: 'product_compliance_owner_v1',
+      defaultOwner: '合规负责人',
     });
-    mocks.storageSet.mockClear();
-    mocks.loadTemplate.mockResolvedValue(mocks.template);
-    mocks.loadTemplate.mockClear();
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText: vi.fn().mockResolvedValue(undefined) },
-    });
-    mocks.showToast.mockClear();
   });
-
   afterEach(() => {
-    unmount();
-    document.body.innerHTML = '';
-    vi.restoreAllMocks();
+    copyFixture.cleanup();
   });
 
   it('builds a fixed product compliance archive template', () => {
@@ -77,24 +66,15 @@ describe('Product compliance review workflow', () => {
   });
 
   it('copies the review template', async () => {
-    await mount(container);
-    const ownerInput = document.getElementById(
-      'product-compliance-owner'
-    ) as HTMLInputElement | null;
-    if (ownerInput) ownerInput.value = '合规小周';
-
-    await window.sops_copyProductComplianceTemplate?.();
-
-    expect(mocks.loadTemplate).toHaveBeenCalledWith(
-      'src/modules/sops/views/safety/product_compliance/template.html'
-    );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('作业负责人：合规小周')
-    );
-    expect(StorageService.set).toHaveBeenCalledWith('product_compliance_owner_v1', '合规小周');
-    expect(mocks.showToast).toHaveBeenCalledWith(
-      '已复制产品合规复盘模板，可粘贴到周报或归档文档。',
-      { type: 'success' }
-    );
+    await copyFixture.copyAndExpectSuccess({
+      mount,
+      action: () => window.sops_copyProductComplianceTemplate?.(),
+      ownerInputId: 'product-compliance-owner',
+      ownerValue: '合规小周',
+      templatePath: 'src/modules/sops/views/safety/product_compliance/template.html',
+      storageKey: 'product_compliance_owner_v1',
+      copiedText: '作业负责人：合规小周',
+      successMessage: '已复制产品合规复盘模板，可粘贴到周报或归档文档。',
+    });
   });
 });

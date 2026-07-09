@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createSopCopyWorkflowFixture } from '../helpers/sopCopyWorkflowFixture';
 import {
   buildProcurementQcTemplate,
   mount,
   unmount,
 } from '@/modules/sops/views/backend/procurement_qc/index';
-import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
@@ -38,30 +38,19 @@ vi.mock('@/common/ui/notifications', () => ({
   showToast: mocks.showToast,
 }));
 
+const copyFixture = createSopCopyWorkflowFixture({ mocks, unmount });
+
 describe('Procurement QC review workflow', () => {
   let container: HTMLElement;
 
   beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
-      if (key === 'procurement_qc_owner_v1') return '采购/质检负责人';
-      return fallback;
+    container = copyFixture.setup({
+      storageKey: 'procurement_qc_owner_v1',
+      defaultOwner: '采购/质检负责人',
     });
-    mocks.storageSet.mockClear();
-    mocks.loadTemplate.mockResolvedValue(mocks.template);
-    mocks.loadTemplate.mockClear();
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText: vi.fn().mockResolvedValue(undefined) },
-    });
-    mocks.showToast.mockClear();
   });
-
   afterEach(() => {
-    unmount();
-    document.body.innerHTML = '';
-    vi.restoreAllMocks();
+    copyFixture.cleanup();
   });
 
   it('builds a fixed procurement QC release archive template', () => {
@@ -77,22 +66,15 @@ describe('Procurement QC review workflow', () => {
   });
 
   it('copies the review template', async () => {
-    await mount(container);
-    const ownerInput = document.getElementById('procurement-qc-owner') as HTMLInputElement | null;
-    if (ownerInput) ownerInput.value = '质检小周';
-
-    await window.sops_copyProcurementQcTemplate?.();
-
-    expect(mocks.loadTemplate).toHaveBeenCalledWith(
-      'src/modules/sops/views/backend/procurement_qc/template.html'
-    );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('作业负责人：质检小周')
-    );
-    expect(StorageService.set).toHaveBeenCalledWith('procurement_qc_owner_v1', '质检小周');
-    expect(mocks.showToast).toHaveBeenCalledWith(
-      '已复制采购/QC 放行复盘模板，可粘贴到周报或归档文档。',
-      { type: 'success' }
-    );
+    await copyFixture.copyAndExpectSuccess({
+      mount,
+      action: () => window.sops_copyProcurementQcTemplate?.(),
+      ownerInputId: 'procurement-qc-owner',
+      ownerValue: '质检小周',
+      templatePath: 'src/modules/sops/views/backend/procurement_qc/template.html',
+      storageKey: 'procurement_qc_owner_v1',
+      copiedText: '作业负责人：质检小周',
+      successMessage: '已复制采购/QC 放行复盘模板，可粘贴到周报或归档文档。',
+    });
   });
 });

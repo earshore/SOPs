@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createSopCopyWorkflowFixture } from '../helpers/sopCopyWorkflowFixture';
 import {
   buildNegativeReviewTemplate,
   mount,
   unmount,
 } from '@/modules/sops/views/service/negative_review/index';
-import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
@@ -38,30 +38,19 @@ vi.mock('@/common/ui/notifications', () => ({
   showToast: mocks.showToast,
 }));
 
+const copyFixture = createSopCopyWorkflowFixture({ mocks, unmount });
+
 describe('Negative review VOC workflow', () => {
   let container: HTMLElement;
 
   beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
-      if (key === 'negative_review_owner_v1') return '客服负责人';
-      return fallback;
+    container = copyFixture.setup({
+      storageKey: 'negative_review_owner_v1',
+      defaultOwner: '客服负责人',
     });
-    mocks.storageSet.mockClear();
-    mocks.loadTemplate.mockResolvedValue(mocks.template);
-    mocks.loadTemplate.mockClear();
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText: vi.fn().mockResolvedValue(undefined) },
-    });
-    mocks.showToast.mockClear();
   });
-
   afterEach(() => {
-    unmount();
-    document.body.innerHTML = '';
-    vi.restoreAllMocks();
+    copyFixture.cleanup();
   });
 
   it('builds a fixed negative review VOC archive template', () => {
@@ -77,22 +66,15 @@ describe('Negative review VOC workflow', () => {
   });
 
   it('copies the VOC template', async () => {
-    await mount(container);
-    const ownerInput = document.getElementById('negative-review-owner') as HTMLInputElement | null;
-    if (ownerInput) ownerInput.value = '客服小王';
-
-    await window.sops_copyNegativeReviewTemplate?.();
-
-    expect(mocks.loadTemplate).toHaveBeenCalledWith(
-      'src/modules/sops/views/service/negative_review/template.html'
-    );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('作业负责人：客服小王')
-    );
-    expect(StorageService.set).toHaveBeenCalledWith('negative_review_owner_v1', '客服小王');
-    expect(mocks.showToast).toHaveBeenCalledWith(
-      '已复制差评 VOC 复盘模板，可粘贴到周报或归档文档。',
-      { type: 'success' }
-    );
+    await copyFixture.copyAndExpectSuccess({
+      mount,
+      action: () => window.sops_copyNegativeReviewTemplate?.(),
+      ownerInputId: 'negative-review-owner',
+      ownerValue: '客服小王',
+      templatePath: 'src/modules/sops/views/service/negative_review/template.html',
+      storageKey: 'negative_review_owner_v1',
+      copiedText: '作业负责人：客服小王',
+      successMessage: '已复制差评 VOC 复盘模板，可粘贴到周报或归档文档。',
+    });
   });
 });

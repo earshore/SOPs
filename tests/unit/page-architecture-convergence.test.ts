@@ -89,9 +89,15 @@ function collectPageImplementationContent(entryFile: string): string {
 }
 
 describe('page architecture convergence', () => {
-  it('keeps every page entry implementation on BaseModule', () => {
+  it('keeps every page entry implementation on BaseModule or the shared SOP template shell', () => {
     const offenders = collectPageEntries()
-      .filter(file => !/\bextends\s+BaseModule\b/.test(collectPageImplementationContent(file)))
+      .filter(file => {
+        const content = collectPageImplementationContent(file);
+        return (
+          !/\bextends\s+BaseModule\b/.test(content) &&
+          !/\bcreateSopTemplateModule\b/.test(content)
+        );
+      })
       .map(file => normalizePath(relative(cwd(), file)));
 
     expect(offenders).toEqual([]);

@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createSopCopyWorkflowFixture } from '../helpers/sopCopyWorkflowFixture';
 import {
   buildPromotionSubmissionTemplate,
   mount,
   unmount,
 } from '@/modules/sops/views/growth/promotion_submission/index';
-import { StorageService } from '@/services/storageService';
 
 const mocks = vi.hoisted(() => ({
   storageGet: vi.fn(),
@@ -38,30 +38,19 @@ vi.mock('@/common/ui/notifications', () => ({
   showToast: mocks.showToast,
 }));
 
+const copyFixture = createSopCopyWorkflowFixture({ mocks, unmount });
+
 describe('Promotion submission archive workflow', () => {
   let container: HTMLElement;
 
   beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    mocks.storageGet.mockImplementation((key: string, fallback: unknown) => {
-      if (key === 'promotion_submission_owner_v1') return '运营负责人';
-      return fallback;
+    container = copyFixture.setup({
+      storageKey: 'promotion_submission_owner_v1',
+      defaultOwner: '运营负责人',
     });
-    mocks.storageSet.mockClear();
-    mocks.loadTemplate.mockResolvedValue(mocks.template);
-    mocks.loadTemplate.mockClear();
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText: vi.fn().mockResolvedValue(undefined) },
-    });
-    mocks.showToast.mockClear();
   });
-
   afterEach(() => {
-    unmount();
-    document.body.innerHTML = '';
-    vi.restoreAllMocks();
+    copyFixture.cleanup();
   });
 
   it('builds a fixed promotion submission archive template', () => {
@@ -78,24 +67,15 @@ describe('Promotion submission archive workflow', () => {
   });
 
   it('copies the archive template', async () => {
-    await mount(container);
-    const ownerInput = document.getElementById(
-      'promotion-submission-owner'
-    ) as HTMLInputElement | null;
-    if (ownerInput) ownerInput.value = '运营小周';
-
-    await window.sops_copyPromotionSubmissionTemplate?.();
-
-    expect(mocks.loadTemplate).toHaveBeenCalledWith(
-      'src/modules/sops/views/growth/promotion_submission/template.html'
-    );
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('作业负责人：运营小周')
-    );
-    expect(StorageService.set).toHaveBeenCalledWith('promotion_submission_owner_v1', '运营小周');
-    expect(mocks.showToast).toHaveBeenCalledWith(
-      '已复制促销提报/复盘模板，可粘贴到周报或归档文档。',
-      { type: 'success' }
-    );
+    await copyFixture.copyAndExpectSuccess({
+      mount,
+      action: () => window.sops_copyPromotionSubmissionTemplate?.(),
+      ownerInputId: 'promotion-submission-owner',
+      ownerValue: '运营小周',
+      templatePath: 'src/modules/sops/views/growth/promotion_submission/template.html',
+      storageKey: 'promotion_submission_owner_v1',
+      copiedText: '作业负责人：运营小周',
+      successMessage: '已复制促销提报/复盘模板，可粘贴到周报或归档文档。',
+    });
   });
 });
