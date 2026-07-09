@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 同步应用内版本显示到 `3.0.5-rc.1`。
 
 ### Fixed
+- 修复 AppModal 打开态 host 元素不可见导致浏览器自动化无法识别弹窗的问题，并稳定 NPI Tracker 移动端 Next Step smoke 覆盖。
 - 替换多个 SOPS 页面里的 `alert` 复制反馈，统一成功与失败提示行为。
 - 强化 NPI Tracker、Restricted Words、Prompt Library 和系统设置相关回归测试覆盖。
 

@@ -531,10 +531,26 @@ test.describe('release candidate smoke', () => {
     await expect(modal).toBeVisible();
     await expect(page.locator('#next-step-checkboxes')).toContainText('降价/Coupon');
 
-    const dialogBox = await page.locator('#next-step-modal > div').boundingBox();
     const viewport = page.viewportSize();
-    expect(dialogBox, 'NPI Next Step modal should have a measurable dialog box').not.toBeNull();
     expect(viewport, 'mobile viewport should be available').not.toBeNull();
+
+    const dialogPanel = page.locator('#next-step-modal .modal-panel');
+    await expect
+      .poll(
+        async () => {
+          const box = await dialogPanel.boundingBox();
+          if (!box || !viewport) return false;
+          return box.y >= 0 && box.y + box.height <= viewport.height + 1;
+        },
+        {
+          message: 'NPI Next Step modal should settle within the mobile viewport',
+          timeout: 5000,
+        }
+      )
+      .toBe(true);
+
+    const dialogBox = await dialogPanel.boundingBox();
+    expect(dialogBox, 'NPI Next Step modal should have a measurable dialog box').not.toBeNull();
     expect(dialogBox!.y).toBeGreaterThanOrEqual(0);
     expect(dialogBox!.y + dialogBox!.height).toBeLessThanOrEqual(viewport!.height + 1);
 

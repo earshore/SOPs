@@ -96,6 +96,7 @@ export class AppModal extends HTMLElement {
 
     if (!container || !backdrop || !panel) return;
 
+    this.setAttribute('open', '');
     container.hidden = false;
     container.classList.remove('hidden');
     container.classList.add('is-open');
@@ -119,6 +120,7 @@ export class AppModal extends HTMLElement {
 
     if (!backdrop || !panel) return;
 
+    this.removeAttribute('open');
     container?.classList.remove('is-open');
     backdrop.classList.remove('active');
     panel.classList.remove('active');

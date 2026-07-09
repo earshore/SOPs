@@ -33,6 +33,12 @@
     0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 32px 64px -8px rgba(0, 0, 0, 0.12);
 }
 
+:host([open]) {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
 .hidden {
   display: none !important;
 }

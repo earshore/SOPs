@@ -14,6 +14,7 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 - 新增共享确认弹窗，并将 Keyword Hunter、Master Analysis、Deep Chat 等模块的重复确认逻辑收敛到公共组件。
 - 增强 AppModal 的可组合能力与回归测试覆盖，补充 Modal 开发指南，降低后续弹窗实现分叉风险。
+- 修复 AppModal 打开态下 host 元素不可见的问题，稳定 NPI Tracker 移动端 Next Step 弹窗 smoke 覆盖。
 - SOPS 工具页新增共享模板模块与复制动作封装，统一流程说明、复制反馈和页面测试夹具。
 - 替换 SOPS 页面里的分散剪贴板调用与 `alert` 反馈，改用统一复制结果处理。
 - 调整页面架构审计以识别共享 SOP 模板模块，并同步应用内版本显示到 `3.0.5-rc.1`。

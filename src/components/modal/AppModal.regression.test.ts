@@ -118,6 +118,24 @@ describe('AppModal regression visibility', () => {
     expect(container.hasAttribute('hidden')).toBe(true);
   });
 
+  it('marks the host as open while the modal is visible to browser automation', () => {
+    vi.useFakeTimers();
+    const modal = createModal('可见性检查');
+    const styleText = readModalStyles();
+
+    expect(styleText).toContain(':host([open])');
+    expect(modal.hasAttribute('open')).toBe(false);
+
+    modal.open();
+
+    expect(modal.hasAttribute('open')).toBe(true);
+
+    modal.close();
+
+    expect(modal.hasAttribute('open')).toBe(false);
+    vi.advanceTimersByTime(350);
+  });
+
   it('stops intercepting the page as soon as close starts', () => {
     vi.useFakeTimers();
     const modal = createModal();

@@ -441,7 +441,11 @@ function setupTableEventDelegation(tbody: HTMLElement): void {
     const action = target.getAttribute('data-action');
     if (!action) return;
 
-    TABLE_ACTION_HANDLERS[action]?.(target, index);
+    const handler = TABLE_ACTION_HANDLERS[action];
+    if (!handler) return;
+
+    e.stopPropagation();
+    handler(target, index);
   };
 
   // 保存处理器引用以便后续移除

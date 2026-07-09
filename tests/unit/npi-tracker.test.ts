@@ -489,6 +489,18 @@ vi.mock('@/modules/sops/views/growth/npi_tracker/data/mockData', () => ({
             }
         });
 
+        it('should open next step editor from the table data-action click', () => {
+            const opener = document.querySelector<HTMLButtonElement>('[data-action=open-next-step-editor]');
+            opener?.click();
+
+            const modal = document.getElementById('next-step-modal');
+            const panel = modal?.shadowRoot?.querySelector<HTMLElement>('[role=dialog]');
+            expect(modal?.classList.contains('hidden')).toBe(false);
+            expect(modal?.hasAttribute('open')).toBe(true);
+            expect(panel?.getAttribute('aria-label')).toBe('编辑 Next Step');
+            expect(document.getElementById('next-step-checkboxes')?.textContent).toContain('降价/Coupon');
+        });
+
         it('should close next step modal', async () => {
             if (window.openNextStepEditor && window.closeNextStepModal) {
                 const opener = document.querySelector<HTMLElement>('[data-action="open-next-step-editor"]');
