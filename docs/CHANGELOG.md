@@ -26,6 +26,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.4-rc.6] - 2026-07-09
+
+### Added
+- 新增 Deep Chat 删除确认弹窗，替换原生 `confirm()`，支持取消、Esc、点击遮罩关闭与「不再询问」持久化。
+- 新增 Keyword Hunter 快照删除确认弹窗，支持取消、Esc、点击遮罩关闭与「不再询问」持久化。
+- 补充删除确认弹窗与快照删除流程的单元测试。
+
+### Changed
+- 同步应用内版本显示到 `3.0.4-rc.6`。
+
 ## [3.0.4-rc.5] - 2026-07-08
 
 ### Added
