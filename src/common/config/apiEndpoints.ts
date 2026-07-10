@@ -6,6 +6,7 @@
 
 import { DEFAULT_NEW_API_DOMAIN } from './llmProviders';
 import { getScraperProxyEndpointConfigs } from './scraperProxies';
+import { SITE_DOMAIN_MAP } from '@/common/constants/constants';
 
 /**
  * API端点配置
@@ -78,19 +79,7 @@ export const API_ENDPOINTS: Record<string, ApiEndpointConfig> = {
 /**
  * Amazon域名配置
  */
-export const AMAZON_DOMAINS = [
-  'amazon.com',
-  'amazon.de',
-  'amazon.co.uk',
-  'amazon.fr',
-  'amazon.it',
-  'amazon.es',
-  'amazon.nl',
-  'amazon.se',
-  'amazon.pl',
-  'amazon.be',
-  'amazon.ie',
-] as const;
+export const AMAZON_DOMAINS = Array.from(new Set(Object.values(SITE_DOMAIN_MAP))) as string[];
 
 /**
  * 检查端点是否为危险端点

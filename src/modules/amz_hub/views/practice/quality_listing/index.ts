@@ -2,29 +2,15 @@
  * 教你打造优质Listing 视图模块
  */
 
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
+import { createStaticTemplateModule } from '@/common/utils/createStaticTemplateModule';
 import './styles.css';
 
-class QualityListingModule extends BaseModule {
-  constructor() {
-    super('amz_quality_listing');
-  }
+const instance = createStaticTemplateModule({
+  moduleId: 'amz_quality_listing',
+  templatePath: 'src/modules/amz_hub/views/practice/quality_listing/template.html',
+});
 
-  async render(): Promise<void> {
-    const container = this.container;
-    if (!container) return;
-
-    // ✅ 安全: 静态HTML模板，无用户输入
-    const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/amz_hub/views/practice/quality_listing/template.html'
-    );
-    setSafeHtml(container, html);
-    container.classList.add('fade-in');
-  }
-}
-
-const instance = new QualityListingModule();
-export const mount = (c: HTMLElement) => instance.mount(c);
-export const unmount = () => instance.unmount();
+export const mount = (container: HTMLElement): Promise<void> => instance.mount(container);
+export const unmount = (): void => {
+  instance.unmount();
+};

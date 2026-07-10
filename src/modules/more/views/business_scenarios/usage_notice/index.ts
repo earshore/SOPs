@@ -1,26 +1,14 @@
 /**
- * More 模块 - 使用须知
+ * More 模块 - business scenario page
  */
 
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
-import { renderBusinessScenarioPage } from '../casePageRenderer';
+import { createBusinessScenarioModule } from '../createBusinessScenarioModule';
 
-class UsageNoticeModule extends BaseModule {
-  async mount(container: HTMLElement): Promise<void> {
-    const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/more/views/business_scenarios/usage_notice/template.html'
-    );
-    // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(container, renderBusinessScenarioPage(html, 'usage_notice'));
-    container.classList.add('fade-in');
-  }
+const scenarioModule = createBusinessScenarioModule({
+  moduleId: 'more_ziniao_usage_notice',
+  templatePath: 'src/modules/more/views/business_scenarios/usage_notice/template.html',
+  caseId: 'usage_notice',
+});
 
-  unmount(): void {}
-}
-
-const usageNoticeModule = new UsageNoticeModule('more_ziniao_usage_notice');
-
-export const mount = (container: HTMLElement) => usageNoticeModule.mount(container);
-export const unmount = () => usageNoticeModule.unmount();
+export const mount = (container: HTMLElement) => scenarioModule.mount(container);
+export const unmount = () => scenarioModule.unmount();

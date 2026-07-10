@@ -1,26 +1,14 @@
 /**
- * More 模块 - 评论监控 · 全店铺多语种聚合
+ * More 模块 - business scenario page
  */
 
-import BaseModule from '@/common/BaseModule';
-import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
-import { setSafeHtml } from '@/common/utils/security';
-import { renderBusinessScenarioPage } from '../casePageRenderer';
+import { createBusinessScenarioModule } from '../createBusinessScenarioModule';
 
-class ReviewMonitorModule extends BaseModule {
-  async mount(container: HTMLElement): Promise<void> {
-    const html = await SafeTemplateLoader.getInstance().loadTemplate(
-      'src/modules/more/views/business_scenarios/review_monitor/template.html'
-    );
-    // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(container, renderBusinessScenarioPage(html, 'review_monitor'));
-    container.classList.add('fade-in');
-  }
+const scenarioModule = createBusinessScenarioModule({
+  moduleId: 'more_review_monitor',
+  templatePath: 'src/modules/more/views/business_scenarios/review_monitor/template.html',
+  caseId: 'review_monitor',
+});
 
-  unmount(): void {}
-}
-
-const reviewMonitorModule = new ReviewMonitorModule('more_review_monitor');
-
-export const mount = (container: HTMLElement) => reviewMonitorModule.mount(container);
-export const unmount = () => reviewMonitorModule.unmount();
+export const mount = (container: HTMLElement) => scenarioModule.mount(container);
+export const unmount = () => scenarioModule.unmount();

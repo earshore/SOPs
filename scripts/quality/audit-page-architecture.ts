@@ -7,6 +7,7 @@ interface PageArchitectureRecord {
   implementationFiles: string[];
   extendsBaseModule: boolean;
   usesSopTemplateModule: boolean;
+  usesSharedTemplateShell: boolean;
   exportsNakedMount: boolean;
   usesViewLoader: boolean;
   usesSafeTemplateLoader: boolean;
@@ -114,6 +115,10 @@ function inspectPage(file: string): PageArchitectureRecord {
     ),
     extendsBaseModule: /\bextends\s+BaseModule\b/.test(content),
     usesSopTemplateModule: /\bcreateSopTemplateModule\b/.test(content),
+    usesSharedTemplateShell:
+      /\bcreateSopTemplateModule\b/.test(content) ||
+      /\bcreateStaticTemplateModule\b/.test(content) ||
+      /\bcreateBusinessScenarioModule\b/.test(content),
     exportsNakedMount: /\bexport\s+(?:async\s+)?function\s+mount\b/.test(content),
     usesViewLoader: /\bviewLoader\b|common\/utils\/viewLoader/.test(content),
     usesSafeTemplateLoader: /\bSafeTemplateLoader\b|\bsafeTemplateLoader\b/.test(content),
@@ -191,11 +196,12 @@ function collectHardIssues(records: PageArchitectureRecord[]): PageArchitectureI
   ];
 
   const missingBaseModuleIssues = records
-    .filter(record => !record.extendsBaseModule && !record.usesSopTemplateModule)
+    .filter(record => !record.extendsBaseModule && !record.usesSharedTemplateShell)
     .map(record => ({
       check: 'base-module',
       file: record.file,
-      message: 'Page entry implementation must extend BaseModule or use createSopTemplateModule.',
+      message:
+        'Page entry implementation must extend BaseModule or use a shared template shell (createSopTemplateModule / createStaticTemplateModule / createBusinessScenarioModule).',
     }));
 
   return [
@@ -296,6 +302,7 @@ console.log(`Page entries: ${records.length}`);
 console.log(`Errors: ${issues.length}`);
 console.log(`Extends BaseModule: ${countBy(records, 'extendsBaseModule')}`);
 console.log(`Uses SOP template shell: ${countBy(records, 'usesSopTemplateModule')}`);
+console.log(`Uses shared template shell: ${countBy(records, 'usesSharedTemplateShell')}`);
 console.log(`Naked mount exports: ${countBy(records, 'exportsNakedMount')}`);
 console.log(`Uses viewLoader: ${countBy(records, 'usesViewLoader')}`);
 console.log(`Uses SafeTemplateLoader: ${countBy(records, 'usesSafeTemplateLoader')}`);
@@ -324,7 +331,7 @@ printFileList('Naked mount entries', listFiles(records, 'exportsNakedMount'));
 printFileList(
   'Missing BaseModule/shared shell entries',
   records
-    .filter(record => !record.extendsBaseModule && !record.usesSopTemplateModule)
+    .filter(record => !record.extendsBaseModule && !record.usesSharedTemplateShell)
     .map(record => record.file)
 );
 printFileList('viewLoader entries', listFiles(records, 'usesViewLoader'));

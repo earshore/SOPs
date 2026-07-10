@@ -245,7 +245,7 @@ function buildTableRowContext(row: NPIProductRecord): TableRowRenderContext {
   const suggestedPrice = calcCurrentPrice(row.delivery_fee);
   const deliveryPercent = calcDeliveryPercent(row.delivery_fee, parseFloat(suggestedPrice));
   const compliance = getComplianceStatus(row);
-  const domain = siteDomainsMap[row.site] || 'amazon.de';
+  const domain = siteDomainsMap[row.site] || siteDomainsMap.DE || 'amazon.de';
   const flag = siteFlagsMap[row.site] || row.site;
   const inventoryClass = row.inventory_days > 60 ? 'text-red-600 font-bold' : '';
   const suggestedPriceClass =

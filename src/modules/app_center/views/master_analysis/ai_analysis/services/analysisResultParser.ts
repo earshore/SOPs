@@ -1,5 +1,5 @@
-import { jsonrepair } from 'jsonrepair';
 import { z } from 'zod';
+import { parseLlmJson } from '@/common/utils/parseLlmJson';
 
 const looseRecord = z.record(z.string(), z.unknown());
 const objectArray = z.array(looseRecord);
@@ -85,7 +85,7 @@ export interface ParsedAnalysisResponse {
 }
 
 export function parseAnalysisResponse(targetId: string, response: string): ParsedAnalysisResponse {
-  const parsed = parseJsonLikeObject(response);
+  const parsed = parseLlmJson(response);
   const unwrapped = unwrapAnalysisResult(targetId, parsed.value);
   const schema = analysisSchemas[targetId];
 
@@ -130,50 +130,4 @@ function unwrapAnalysisResult(targetId: string, value: unknown): Record<string, 
   }
 
   return objectValue;
-}
-
-function parseJsonLikeObject(response: string): { value: unknown; wasRepaired: boolean } {
-  const trimmed = stripCodeFence(response.trim());
-
-  try {
-    return { value: JSON.parse(trimmed), wasRepaired: false };
-  } catch {
-    // Continue to recovery paths.
-  }
-
-  const objectText = extractJsonObject(trimmed);
-  if (objectText) {
-    try {
-      return { value: JSON.parse(objectText), wasRepaired: true };
-    } catch {
-      try {
-        return { value: JSON.parse(jsonrepair(objectText)), wasRepaired: true };
-      } catch {
-        // Continue to full-text repair.
-      }
-    }
-  }
-
-  try {
-    return { value: JSON.parse(jsonrepair(trimmed)), wasRepaired: true };
-  } catch {
-    throw new Error('AI analysis response is not valid JSON');
-  }
-}
-
-function stripCodeFence(value: string): string {
-  return value
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```$/i, '')
-    .trim();
-}
-
-function extractJsonObject(value: string): string | null {
-  const start = value.indexOf('{');
-  const end = value.lastIndexOf('}');
-  if (start < 0 || end <= start) {
-    return null;
-  }
-
-  return value.slice(start, end + 1);
 }

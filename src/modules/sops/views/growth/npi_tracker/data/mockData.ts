@@ -4,6 +4,24 @@
 // Production data should come from an API or persisted workspace source.
 // ================================================================
 
+import {
+  SITE_DOMAIN_MAP as COMMON_SITE_DOMAIN_MAP,
+  SITE_NAME_MAP as COMMON_SITE_NAME_MAP,
+  languageFlagMap as COMMON_SITE_FLAG_MAP,
+} from '@/common/constants/constants';
+
+function requireSiteValue(
+  map: Record<string, string>,
+  code: string,
+  fallbackCode?: string
+): string {
+  const value = map[code] || (fallbackCode ? map[fallbackCode] : undefined);
+  if (!value) {
+    throw new Error(`Missing site config for ${code}`);
+  }
+  return value;
+}
+
 /**
  * 产品阶段类型
  */
@@ -245,30 +263,30 @@ export const STAGE_CONFIG: Record<ProductStage, StageConfig> = {
  * 站点标志
  */
 export const SITE_FLAGS: Record<SiteCode, string> = {
-  DE: '🇩🇪',
-  FR: '🇫🇷',
-  IT: '🇮🇹',
-  ES: '🇪🇸',
-  GB: '🇬🇧',
-  NL: '🇳🇱',
-  SE: '🇸🇪',
-  PL: '🇵🇱',
-  BE: '🇧🇪',
+  DE: requireSiteValue(COMMON_SITE_FLAG_MAP, 'DE'),
+  FR: requireSiteValue(COMMON_SITE_FLAG_MAP, 'FR'),
+  IT: requireSiteValue(COMMON_SITE_FLAG_MAP, 'IT'),
+  ES: requireSiteValue(COMMON_SITE_FLAG_MAP, 'ES'),
+  GB: requireSiteValue(COMMON_SITE_FLAG_MAP, 'GB', 'UK'),
+  NL: requireSiteValue(COMMON_SITE_FLAG_MAP, 'NL'),
+  SE: requireSiteValue(COMMON_SITE_FLAG_MAP, 'SE'),
+  PL: requireSiteValue(COMMON_SITE_FLAG_MAP, 'PL'),
+  BE: requireSiteValue(COMMON_SITE_FLAG_MAP, 'BE'),
 };
 
 /**
  * 站点域名
  */
 export const SITE_DOMAINS: Record<SiteCode, string> = {
-  DE: 'amazon.de',
-  FR: 'amazon.fr',
-  IT: 'amazon.it',
-  ES: 'amazon.es',
-  GB: 'amazon.co.uk',
-  NL: 'amazon.nl',
-  SE: 'amazon.se',
-  PL: 'amazon.pl',
-  BE: 'amazon.com.be',
+  DE: requireSiteValue(COMMON_SITE_DOMAIN_MAP, 'DE'),
+  FR: requireSiteValue(COMMON_SITE_DOMAIN_MAP, 'FR'),
+  IT: requireSiteValue(COMMON_SITE_DOMAIN_MAP, 'IT'),
+  ES: requireSiteValue(COMMON_SITE_DOMAIN_MAP, 'ES'),
+  GB: requireSiteValue(COMMON_SITE_DOMAIN_MAP, 'GB', 'UK'),
+  NL: requireSiteValue(COMMON_SITE_DOMAIN_MAP, 'NL'),
+  SE: requireSiteValue(COMMON_SITE_DOMAIN_MAP, 'SE'),
+  PL: requireSiteValue(COMMON_SITE_DOMAIN_MAP, 'PL'),
+  BE: requireSiteValue(COMMON_SITE_DOMAIN_MAP, 'BE'),
 };
 
 /**
@@ -285,16 +303,13 @@ export const STORE_LIST: string[] = [
 /**
  * 站点列表
  */
-export const SITE_LIST: SiteInfo[] = [
-  { code: 'DE', name: '德国', flag: '🇩🇪' },
-  { code: 'FR', name: '法国', flag: '🇫🇷' },
-  { code: 'IT', name: '意大利', flag: '🇮🇹' },
-  { code: 'ES', name: '西班牙', flag: '🇪🇸' },
-  { code: 'GB', name: '英国', flag: '🇬🇧' },
-  { code: 'NL', name: '荷兰', flag: '🇳🇱' },
-  { code: 'PL', name: '波兰', flag: '🇵🇱' },
-  { code: 'SE', name: '瑞典', flag: '🇸🇪' },
-];
+export const SITE_LIST: SiteInfo[] = (
+  ['DE', 'FR', 'IT', 'ES', 'GB', 'NL', 'PL', 'SE'] as const
+).map(code => ({
+  code,
+  name: requireSiteValue(COMMON_SITE_NAME_MAP, code, code === 'GB' ? 'UK' : undefined),
+  flag: SITE_FLAGS[code],
+}));
 
 export default {
   MOCK_PRODUCTS,
