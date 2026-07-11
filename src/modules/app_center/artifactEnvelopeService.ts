@@ -281,6 +281,10 @@ export function getWorkItems(): AppCenterWorkItem[] {
   return sortByCreatedAt(readWorkItems());
 }
 
+export function getWorkItemById(workItemId: string): AppCenterWorkItem | null {
+  return readWorkItems().find(item => item.id === workItemId) || null;
+}
+
 export function getArtifactsForWorkItem(workItemId: string): AppCenterArtifactEnvelope[] {
   return sortByCreatedAt(readArtifacts().filter(artifact => artifact.workItemId === workItemId));
 }

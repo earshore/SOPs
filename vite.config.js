@@ -329,8 +329,10 @@ export default defineConfig({
     },
     // 生产环境压缩
     minify: 'oxc',
-    // Chunk大小警告阈值
-    chunkSizeWarningLimit: 300,
+    // Deferred system-settings chunk is intentionally large (~400kB raw /
+    // ~100kB gzip) and excluded from modulePreload. Keep threshold above it so
+    // accidental entry-chunk bloat still warns without noise on the known async panel.
+    chunkSizeWarningLimit: 450,
     // CSS代码分割
     cssCodeSplit: true,
     // 启用CSS压缩 - 临时使用esbuild进行测试

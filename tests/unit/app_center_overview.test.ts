@@ -31,8 +31,18 @@ const overviewTemplate = `
     <button class="app-overview-view-btn active" data-view-mode="grid" aria-pressed="true"></button>
     <button class="app-overview-view-btn" data-view-mode="list" aria-pressed="false"></button>
     <div class="app-overview-flow-grid app-overview-flow-grid--tasks"></div>
-    <div class="app-overview-recent-list"></div>
-    <div class="app-overview-recent-empty hidden"></div>
+    <div class="app-overview-recent-heading-actions">
+      <div class="app-overview-recent-columns-toggle" role="group" aria-label="最近继续列数">
+        <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="1" aria-pressed="false"></button>
+        <button class="app-overview-recent-columns-btn active" type="button" data-recent-columns="2" aria-pressed="true"></button>
+        <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="3" aria-pressed="false"></button>
+      </div>
+      <span class="app-overview-mini-badge">最近 10</span>
+    </div>
+    <div class="app-overview-recent-shell" data-recent-columns="2">
+      <div class="app-overview-recent-list"></div>
+      <div class="app-overview-recent-empty hidden"></div>
+    </div>
     <section id="app-module-apps">
       <div class="app-center-card-grid app-overview-grid"></div>
       <div class="app-overview-list hidden"></div>
@@ -144,10 +154,98 @@ describe('App Center Overview', () => {
     );
 
     expect(recentItems).toHaveLength(1);
-    expect(recentItems[0]?.textContent).toContain('PPC 动作清单');
+    expect(recentItems[0]?.classList.contains('app-overview-recent-item--ppc_action_list')).toBe(
+      true
+    );
+    // Context-first title; short type once; facts as chips (not raw summary dump)
+    expect(recentItems[0]?.querySelector('.app-overview-recent-type')?.textContent).toBe('PPC');
+    expect(recentItems[0]?.querySelector('.app-overview-recent-title')?.textContent).toBe(
+      'DE · B000000001'
+    );
     expect(recentItems[0]?.textContent).toContain('Owner 广告小张');
+    expect(recentItems[0]?.textContent).toContain('2 条动作');
+    expect(recentItems[0]?.textContent).toContain('待人工确认');
+    expect(recentItems[0]?.querySelectorAll('.app-overview-recent-fact').length).toBeGreaterThan(0);
+    expect(recentItems[0]?.textContent).not.toContain('PPC 动作清单');
+    expect(continueButton?.classList.contains('app-card-primary-link')).toBe(true);
+    expect(continueButton?.dataset.action).toBe('switch-tab');
     expect(continueButton?.dataset.tab).toBe('ppc_search_terms');
+    expect(continueButton?.textContent?.trim()).toContain('继续');
     expect(container.querySelector('.app-overview-recent-empty')?.classList).toContain('hidden');
+  });
+
+  it('shows recent empty state guidance when no artifacts exist', async () => {
+    safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(
+      readFileSync(realOverviewTemplatePath, 'utf8')
+    );
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+
+    const empty = container.querySelector<HTMLElement>('.app-overview-recent-empty');
+    const list = container.querySelector<HTMLElement>('.app-overview-recent-list');
+
+    expect(list?.classList.contains('hidden')).toBe(true);
+    expect(empty?.classList.contains('hidden')).toBe(false);
+    expect(empty?.textContent).toContain('还没有可继续的作业产物');
+    expect(
+      empty?.querySelector<HTMLButtonElement>('[data-tab="scraper"]')?.textContent
+    ).toContain('开始采集');
+  });
+
+  it('lets users switch recent columns and persists the preference', async () => {
+    safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(
+      readFileSync(realOverviewTemplatePath, 'utf8')
+    );
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+
+    const shell = container.querySelector<HTMLElement>('.app-overview-recent-shell');
+    const oneColBtn = container.querySelector<HTMLButtonElement>(
+      '.app-overview-recent-columns-btn[data-recent-columns="1"]'
+    );
+    const threeColBtn = container.querySelector<HTMLButtonElement>(
+      '.app-overview-recent-columns-btn[data-recent-columns="3"]'
+    );
+
+    expect(shell?.getAttribute('data-recent-columns')).toBe('2');
+    expect(
+      container.querySelector(
+        '.app-overview-recent-columns-btn[data-recent-columns="2"]'
+      )?.getAttribute('aria-pressed')
+    ).toBe('true');
+
+    threeColBtn?.click();
+
+    expect(shell?.getAttribute('data-recent-columns')).toBe('3');
+    expect(threeColBtn?.getAttribute('aria-pressed')).toBe('true');
+    expect(localStorage.getItem('app_center_overview_recent_columns_v1')).toBe('3');
+
+    oneColBtn?.click();
+
+    expect(shell?.getAttribute('data-recent-columns')).toBe('1');
+    expect(oneColBtn?.getAttribute('aria-pressed')).toBe('true');
+    expect(localStorage.getItem('app_center_overview_recent_columns_v1')).toBe('1');
+  });
+
+  it('restores the saved recent columns preference on mount', async () => {
+    localStorage.setItem('app_center_overview_recent_columns_v1', '3');
+    safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(
+      readFileSync(realOverviewTemplatePath, 'utf8')
+    );
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+
+    expect(
+      container.querySelector('.app-overview-recent-shell')?.getAttribute('data-recent-columns')
+    ).toBe('3');
+    expect(
+      container
+        .querySelector('.app-overview-recent-columns-btn[data-recent-columns="3"]')
+        ?.getAttribute('aria-pressed')
+    ).toBe('true');
   });
 
   it('keeps cards as containers and leaves entry buttons on delegated switch-tab routing', async () => {

@@ -1,0 +1,268 @@
+import type {
+  AppCenterArtifactEnvelope,
+  AppCenterArtifactType,
+  AppCenterWorkItem,
+} from './artifactEnvelopeService';
+
+export interface RecentArtifactPresentation {
+  typeLabel: string;
+  primaryTitle: string;
+  facts: string[];
+  relativeTime: string;
+  absoluteTime: string;
+  isFresh: boolean;
+}
+
+/** Short type labels — shown once, not as a duplicated full title. */
+export const RECENT_ARTIFACT_TYPE_LABELS: Record<AppCenterArtifactType, string> = {
+  scrape_history: '采集',
+  analysis_report: 'AI 分析',
+  listing_prompt: 'Prompt',
+  keyword_snapshot: '关键词',
+  ppc_action_list: 'PPC',
+  compliance_check: '合规',
+};
+
+const GENERIC_TITLE_NORMALIZED = new Set(
+  [
+    '采集历史',
+    '采集',
+    'ai分析',
+    'ai分析报告',
+    '分析报告',
+    'listingprompt',
+    'prompt',
+    '关键词快照',
+    '关键词',
+    'ppc动作清单',
+    'ppc',
+    '合规复核',
+    '合规',
+  ].map(normalizeRecentText)
+);
+
+export function normalizeRecentText(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, '');
+}
+
+export function firstAsinOrSku(value: string | undefined): string {
+  if (!value) return '';
+  return value.split(',')[0]?.trim() || '';
+}
+
+export function formatWorkContext(workItem: AppCenterWorkItem | null | undefined): string {
+  if (!workItem) return '';
+  const marketplace = workItem.marketplace?.trim() || '';
+  const asin = firstAsinOrSku(workItem.asinOrSku);
+  if (marketplace && asin) return `${marketplace} · ${asin}`;
+  return asin || marketplace;
+}
+
+export function isGenericArtifactTitle(title: string, typeLabel: string): boolean {
+  const normalizedTitle = normalizeRecentText(title);
+  const normalizedLabel = normalizeRecentText(typeLabel);
+  if (!normalizedTitle) return true;
+  if (normalizedTitle === normalizedLabel) return true;
+  return GENERIC_TITLE_NORMALIZED.has(normalizedTitle);
+}
+
+export function formatRelativeTime(value: string, now = Date.now()): string {
+  const time = new Date(value).getTime();
+  if (!Number.isFinite(time)) return '';
+  const diff = now - time;
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+  if (diff < minute) return '刚刚';
+  if (diff < hour) return `${Math.floor(diff / minute)} 分钟前`;
+  if (diff < day) return `${Math.floor(diff / hour)} 小时前`;
+  if (diff < 7 * day) return `${Math.floor(diff / day)} 天前`;
+  if (diff < 30 * day) return `${Math.floor(diff / (7 * day))} 周前`;
+  return `${Math.floor(diff / (30 * day))} 个月前`;
+}
+
+export function formatAbsoluteTime(value: string): string {
+  const time = new Date(value).getTime();
+  if (!Number.isFinite(time)) return '';
+  return new Date(value).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function pushUniqueFact(facts: string[], value: string, blocked: Set<string>): void {
+  const trimmed = value.trim();
+  if (!trimmed) return;
+  const normalized = normalizeRecentText(trimmed);
+  if (!normalized || blocked.has(normalized)) return;
+  if (facts.some(fact => normalizeRecentText(fact) === normalized)) return;
+  facts.push(trimmed);
+  blocked.add(normalized);
+}
+
+function countAsins(workItem: AppCenterWorkItem | null | undefined): number {
+  if (!workItem?.asinOrSku) return 0;
+  return workItem.asinOrSku
+    .split(',')
+    .map(part => part.trim())
+    .filter(Boolean).length;
+}
+
+function createFactBlockedSet(
+  artifact: AppCenterArtifactEnvelope,
+  workItem: AppCenterWorkItem | null | undefined,
+  typeLabel: string,
+  primaryTitle: string
+): Set<string> {
+  const blocked = new Set(
+    [typeLabel, primaryTitle, artifact.title, '站点', 'marketplace']
+      .map(normalizeRecentText)
+      .filter(Boolean)
+  );
+  const marketplace = workItem?.marketplace?.trim() || '';
+  const asin = firstAsinOrSku(workItem?.asinOrSku);
+
+  if (marketplace) blocked.add(normalizeRecentText(marketplace));
+  if (asin) blocked.add(normalizeRecentText(asin));
+  if (marketplace && asin) {
+    blocked.add(normalizeRecentText(`${marketplace} · ${asin}`));
+    blocked.add(normalizeRecentText(`${marketplace} ${asin}`));
+  }
+  return blocked;
+}
+
+function pushSummaryParts(
+  facts: string[],
+  summary: string,
+  blocked: Set<string>,
+  options?: { skipHistoryBound?: boolean }
+): void {
+  summary
+    .split('·')
+    .map(part => part.trim())
+    .filter(Boolean)
+    .forEach(part => {
+      if (options?.skipHistoryBound && part.includes('绑定当前采集历史')) return;
+      pushUniqueFact(facts, part, blocked);
+    });
+}
+
+function appendAsinCountFact(
+  facts: string[],
+  workItem: AppCenterWorkItem | null | undefined,
+  blocked: Set<string>
+): void {
+  const asinCount = countAsins(workItem);
+  if (asinCount > 0) pushUniqueFact(facts, `${asinCount} ASIN`, blocked);
+}
+
+function appendPpcFacts(
+  facts: string[],
+  meta: Record<string, string | number | boolean>,
+  blocked: Set<string>
+): void {
+  if (typeof meta.rowCount === 'number') {
+    pushUniqueFact(facts, `${meta.rowCount} 条动作`, blocked);
+  }
+  if (typeof meta.owner === 'string' && meta.owner.trim()) {
+    pushUniqueFact(facts, `Owner ${meta.owner.trim()}`, blocked);
+  }
+  if (meta.requiresHumanConfirmation === true) {
+    pushUniqueFact(facts, '待人工确认', blocked);
+  } else if (meta.requiresHumanConfirmation === false) {
+    pushUniqueFact(facts, '无需确认', blocked);
+  }
+  if (typeof meta.filter === 'string' && meta.filter && meta.filter !== 'all') {
+    pushUniqueFact(facts, meta.filter, blocked);
+  }
+}
+
+function appendTypeSpecificFacts(
+  facts: string[],
+  artifact: AppCenterArtifactEnvelope,
+  workItem: AppCenterWorkItem | null | undefined,
+  blocked: Set<string>
+): void {
+  const meta = artifact.metadata || {};
+  const handlers: Partial<
+    Record<AppCenterArtifactType, () => void>
+  > = {
+    scrape_history: () => appendAsinCountFact(facts, workItem, blocked),
+    analysis_report: () => pushUniqueFact(facts, '分析已就绪', blocked),
+    listing_prompt: () => {
+      appendAsinCountFact(facts, workItem, blocked);
+      pushUniqueFact(facts, '可继续关键词', blocked);
+    },
+    keyword_snapshot: () => pushSummaryParts(facts, artifact.summary, blocked),
+    ppc_action_list: () => appendPpcFacts(facts, meta, blocked),
+    compliance_check: () => pushSummaryParts(facts, artifact.summary, blocked),
+  };
+  handlers[artifact.type]?.();
+}
+
+export function extractRecentFacts(
+  artifact: AppCenterArtifactEnvelope,
+  workItem: AppCenterWorkItem | null | undefined,
+  typeLabel: string,
+  primaryTitle: string
+): string[] {
+  const facts: string[] = [];
+  const blocked = createFactBlockedSet(artifact, workItem, typeLabel, primaryTitle);
+  appendTypeSpecificFacts(facts, artifact, workItem, blocked);
+
+  if (facts.length === 0 && artifact.summary.trim()) {
+    pushSummaryParts(facts, artifact.summary, blocked, { skipHistoryBound: true });
+  }
+
+  return facts;
+}
+
+export function resolvePrimaryTitle(
+  artifact: AppCenterArtifactEnvelope,
+  workItem: AppCenterWorkItem | null | undefined,
+  typeLabel: string
+): string {
+  const workContext = formatWorkContext(workItem);
+
+  if (
+    artifact.type === 'keyword_snapshot' &&
+    artifact.title.trim() &&
+    !isGenericArtifactTitle(artifact.title, typeLabel)
+  ) {
+    return artifact.title.trim();
+  }
+  if (workContext) return workContext;
+  if (artifact.title.trim() && !isGenericArtifactTitle(artifact.title, typeLabel)) {
+    return artifact.title.trim();
+  }
+  if (workItem?.title?.trim()) return workItem.title.trim();
+  return typeLabel;
+}
+
+/**
+ * Pure presentation transform for the App Center "最近继续" resume queue.
+ * Does not touch DOM or storage — safe for unit tests with fake envelopes.
+ */
+export function buildRecentArtifactPresentation(
+  artifact: AppCenterArtifactEnvelope,
+  workItem?: AppCenterWorkItem | null,
+  now = Date.now()
+): RecentArtifactPresentation {
+  const typeLabel = RECENT_ARTIFACT_TYPE_LABELS[artifact.type];
+  const primaryTitle = resolvePrimaryTitle(artifact, workItem, typeLabel);
+  const createdTime = new Date(artifact.createdAt).getTime();
+  const relativeTime = formatRelativeTime(artifact.createdAt, now);
+  const absoluteTime = formatAbsoluteTime(artifact.createdAt);
+
+  return {
+    typeLabel,
+    primaryTitle,
+    facts: extractRecentFacts(artifact, workItem, typeLabel, primaryTitle),
+    relativeTime,
+    absoluteTime,
+    isFresh: Number.isFinite(createdTime) && now - createdTime < 60 * 60 * 1000,
+  };
+}

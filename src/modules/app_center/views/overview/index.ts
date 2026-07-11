@@ -21,9 +21,12 @@ import {
 } from '../../workflowDefinitions';
 import {
   getRecentArtifacts,
+  getWorkItemById,
   type AppCenterArtifactEnvelope,
   type AppCenterArtifactType,
 } from '../../artifactEnvelopeService';
+import { buildRecentArtifactPresentation } from '../../recentArtifactPresenter';
+import { StorageService } from '@/services/storageService';
 
 interface OverviewFilterState {
   category: string;
@@ -31,16 +34,11 @@ interface OverviewFilterState {
   viewMode: 'grid' | 'list';
 }
 
-const RECENT_ARTIFACT_LIMIT = 10;
+type RecentColumns = 1 | 2 | 3;
 
-const RECENT_ARTIFACT_LABELS: Record<AppCenterArtifactType, string> = {
-  scrape_history: '采集历史',
-  analysis_report: 'AI 分析',
-  listing_prompt: 'Listing Prompt',
-  keyword_snapshot: '关键词快照',
-  ppc_action_list: 'PPC 动作清单',
-  compliance_check: '合规复核',
-};
+const RECENT_ARTIFACT_LIMIT = 10;
+const RECENT_COLUMNS_STORAGE_KEY = 'app_center_overview_recent_columns_v1';
+const DEFAULT_RECENT_COLUMNS: RecentColumns = 2;
 
 const RECENT_ARTIFACT_ICONS: Record<AppCenterArtifactType, string> = {
   scrape_history: 'fas fa-database',
@@ -109,6 +107,9 @@ function initOverviewEvents(container: HTMLElement): void {
   const viewModeBtns = container.querySelectorAll<HTMLButtonElement>(
     '.app-overview-view-btn[data-view-mode]'
   );
+  const recentColumnBtns = container.querySelectorAll<HTMLButtonElement>(
+    '.app-overview-recent-columns-btn[data-recent-columns]'
+  );
 
   // Event delegation: category buttons are rendered into the filter row at mount time.
   filterRow?.addEventListener('click', event => {
@@ -138,6 +139,14 @@ function initOverviewEvents(container: HTMLElement): void {
     });
   });
 
+  recentColumnBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const columns = parseRecentColumns(btn.dataset.recentColumns);
+      if (!columns) return;
+      applyRecentColumns(container, columns, true);
+    });
+  });
+
   const searchInput = container.querySelector<HTMLInputElement>('#app-overview-search');
   const clearSearchBtn = container.querySelector<HTMLButtonElement>('#app-overview-clear-search');
 
@@ -160,9 +169,44 @@ function initOverviewEvents(container: HTMLElement): void {
 function renderOverviewCatalog(container: HTMLElement): void {
   renderWorkflowSteps(container);
   renderRecentArtifacts(container);
+  applyRecentColumns(container, getStoredRecentColumns(), false);
   renderCategoryFilters(container);
   renderCatalogCards(container);
   renderCatalogList(container);
+}
+
+function parseRecentColumns(value: string | undefined): RecentColumns | null {
+  if (value === '1' || value === '2' || value === '3') {
+    return Number(value) as RecentColumns;
+  }
+  return null;
+}
+
+function getStoredRecentColumns(): RecentColumns {
+  return parseRecentColumns(StorageService.getRaw(RECENT_COLUMNS_STORAGE_KEY) || undefined) ||
+    DEFAULT_RECENT_COLUMNS;
+}
+
+function applyRecentColumns(
+  container: HTMLElement,
+  columns: RecentColumns,
+  persist: boolean
+): void {
+  const shell = container.querySelector<HTMLElement>('.app-overview-recent-shell');
+  const buttons = container.querySelectorAll<HTMLButtonElement>(
+    '.app-overview-recent-columns-btn[data-recent-columns]'
+  );
+
+  shell?.setAttribute('data-recent-columns', String(columns));
+  buttons.forEach(btn => {
+    const isActive = parseRecentColumns(btn.dataset.recentColumns) === columns;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+
+  if (persist) {
+    StorageService.setRaw(RECENT_COLUMNS_STORAGE_KEY, String(columns));
+  }
 }
 
 function renderWorkflowSteps(container: HTMLElement): void {
@@ -215,37 +259,14 @@ function renderRecentArtifacts(container: HTMLElement): void {
   empty?.classList.toggle('hidden', artifacts.length > 0);
 }
 
-function formatRelativeTime(value: string): string {
-  const time = new Date(value).getTime();
-  if (!Number.isFinite(time)) return '';
-  const diff = Date.now() - time;
-  const minute = 60 * 1000;
-  const hour = 60 * minute;
-  const day = 24 * hour;
-  if (diff < minute) return '刚刚';
-  if (diff < hour) return `${Math.floor(diff / minute)} 分钟前`;
-  if (diff < day) return `${Math.floor(diff / hour)} 小时前`;
-  if (diff < 7 * day) return `${Math.floor(diff / day)} 天前`;
-  if (diff < 30 * day) return `${Math.floor(diff / (7 * day))} 周前`;
-  return `${Math.floor(diff / (30 * day))} 个月前`;
-}
-
-function formatAbsoluteTime(value: string): string {
-  const time = new Date(value).getTime();
-  if (!Number.isFinite(time)) return '';
-  return new Date(value).toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 function createRecentArtifactItem(artifact: AppCenterArtifactEnvelope): HTMLElement {
+  const workItem = getWorkItemById(artifact.workItemId);
+  const presentation = buildRecentArtifactPresentation(artifact, workItem);
+
   const item = document.createElement('article');
-  item.className = 'app-overview-recent-item';
+  item.className = `app-overview-recent-item app-overview-recent-item--${artifact.type}`;
   item.dataset.workItemId = artifact.workItemId;
+  item.dataset.artifactType = artifact.type;
   item.setAttribute('role', 'listitem');
 
   const iconBox = document.createElement('span');
@@ -255,54 +276,76 @@ function createRecentArtifactItem(artifact: AppCenterArtifactEnvelope): HTMLElem
   icon.className = RECENT_ARTIFACT_ICONS[artifact.type];
   iconBox.append(icon);
 
-  const copy = document.createElement('div');
-  copy.className = 'app-overview-recent-copy';
+  const body = document.createElement('div');
+  body.className = 'app-overview-recent-body';
 
-  const headline = document.createElement('div');
-  headline.className = 'app-overview-recent-headline';
+  const metaRow = document.createElement('div');
+  metaRow.className = 'app-overview-recent-meta-row';
 
-  const title = document.createElement('strong');
-  title.className = 'app-overview-recent-title';
-  title.textContent = artifact.title;
-
-  const createdTime = new Date(artifact.createdAt).getTime();
-  const isFresh = Number.isFinite(createdTime) && Date.now() - createdTime < 60 * 60 * 1000;
-  const relative = formatRelativeTime(artifact.createdAt);
+  const typeChip = document.createElement('span');
+  typeChip.className = 'app-overview-recent-type';
+  typeChip.textContent = presentation.typeLabel;
 
   const time = document.createElement('time');
-  time.className = isFresh
+  time.className = presentation.isFresh
     ? 'app-overview-recent-time app-overview-recent-time--fresh'
     : 'app-overview-recent-time';
   time.dateTime = artifact.createdAt;
-  time.textContent = relative;
-  time.setAttribute('title', formatAbsoluteTime(artifact.createdAt));
-  if (!relative) time.classList.add('hidden');
+  time.textContent = presentation.relativeTime || presentation.absoluteTime;
+  if (presentation.relativeTime && presentation.absoluteTime) {
+    time.setAttribute('title', presentation.absoluteTime);
+  }
+  if (!presentation.relativeTime && !presentation.absoluteTime) time.classList.add('hidden');
 
-  headline.append(title, time);
+  metaRow.append(typeChip, time);
 
-  const meta = document.createElement('p');
-  meta.className = 'app-overview-recent-meta';
-  meta.textContent = artifact.summary;
+  const title = document.createElement('strong');
+  title.className = 'app-overview-recent-title';
+  title.textContent = presentation.primaryTitle;
 
-  copy.append(headline, meta);
-  item.append(iconBox, copy, createRecentArtifactAction(artifact));
+  body.append(metaRow, title);
+
+  if (presentation.facts.length > 0) {
+    const facts = document.createElement('div');
+    facts.className = 'app-overview-recent-facts';
+    facts.setAttribute('aria-label', '关键信息');
+    presentation.facts.forEach(factText => {
+      const fact = document.createElement('span');
+      fact.className = 'app-overview-recent-fact';
+      fact.textContent = factText;
+      facts.append(fact);
+    });
+    body.append(facts);
+  }
+
+  item.append(iconBox, body, createRecentArtifactAction(artifact, presentation.primaryTitle));
 
   item.setAttribute(
     'aria-label',
-    `${RECENT_ARTIFACT_LABELS[artifact.type]} · ${artifact.title}${relative ? ` · ${relative}` : ''}`
+    [
+      presentation.typeLabel,
+      presentation.primaryTitle,
+      ...presentation.facts,
+      presentation.relativeTime || presentation.absoluteTime,
+    ]
+      .filter(Boolean)
+      .join(' · ')
   );
   return item;
 }
 
-function createRecentArtifactAction(artifact: AppCenterArtifactEnvelope): HTMLButtonElement {
+function createRecentArtifactAction(
+  artifact: AppCenterArtifactEnvelope,
+  primaryTitle: string
+): HTMLButtonElement {
   const routeId = RECENT_ARTIFACT_NEXT_ROUTE_IDS[artifact.type];
   const route = getAppCenterCatalogRoute(routeId);
   const button = document.createElement('button');
-  button.className = 'app-overview-recent-action app-child-link';
+  button.className = 'app-overview-recent-action app-card-primary-link';
   button.type = 'button';
   button.dataset.action = 'switch-tab';
   button.dataset.tab = routeId;
-  button.setAttribute('aria-label', `继续 ${artifact.title} 到 ${route.label}`);
+  button.setAttribute('aria-label', `继续 ${primaryTitle} 到 ${route.label}`);
 
   const label = document.createElement('span');
   label.textContent = '继续';

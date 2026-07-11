@@ -226,26 +226,48 @@ tools/patches/
 # ==============================================================================
 # 9. AI & Development Tools
 # ==============================================================================
-# AI Assistants
+# AI assistant local installs / machine-specific skill copies
+# (do not commit; install per machine via CLI or plugin marketplace)
 .agent/
+.agents/
+.augment/
 .claude/
 .codebuddy/
 .codex/
-.gemini/
-.cursor/
+.continue/
 .copilot/
-.workbuddy/
+.cursor/
+.factory/
+.gemini/
+.grok/
+.kilocode/
 .mcp.json
+.opencode/
+.qoder/
+.roo/
+.trae/
+.warp/
+.windsurf/
+.workbuddy/
 
-# Kiro local machine state
+# GitHub Copilot / agent prompt dumps (keep workflows tracked)
+.github/prompts/
+.github/chatmodes/
+.github/agents/
+.github/instructions/
+
+# Kiro local machine state + CLI-synced skill steering dumps
 .kiro/hooks/
 .kiro/settings/
+.kiro/steering/
 
 # Development artifacts
 test-new-llm-service.html
 *.local.html
 *.test.local.*
 public/downloads/amazon-scraper-*.zip
+build-output.log
+.tmp-build-err.log
 
 # ==============================================================================
 # 10. Project Specific

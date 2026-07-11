@@ -32,7 +32,7 @@ import { showToast } from '@/common/ui';
 import { confirmWithModal } from '@/components/modal/confirmModal';
 import { initEventLogger } from '@/common/utils/eventLogger';
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
-import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorage';
+import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorageBoundary';
 import { fetchModelsFromApi, callLLM } from '@/services/llmService';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {

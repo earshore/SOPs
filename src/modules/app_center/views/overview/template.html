@@ -70,14 +70,92 @@
           <i class="fa-solid fa-clock-rotate-left app-overview-section-icon" aria-hidden="true"></i>
           最近继续
         </h2>
-        <p class="app-overview-eyebrow">最近登记的作业产物和下一步入口。</p>
+        <p class="app-overview-eyebrow">恢复最近作业产物，直接进入下一步，避免重新找入口。</p>
       </div>
-      <span class="app-overview-mini-badge">最近 10</span>
+      <div class="app-overview-recent-heading-actions">
+        <div
+          class="app-overview-recent-columns-toggle"
+          role="group"
+          aria-label="最近继续列数"
+        >
+          <button
+            class="app-overview-recent-columns-btn"
+            type="button"
+            data-recent-columns="1"
+            aria-pressed="false"
+            title="单列"
+          >
+            <i class="fas fa-bars" aria-hidden="true"></i>
+            <span>1 列</span>
+          </button>
+          <button
+            class="app-overview-recent-columns-btn"
+            type="button"
+            data-recent-columns="2"
+            aria-pressed="true"
+            title="双列"
+          >
+            <i class="fas fa-table-columns" aria-hidden="true"></i>
+            <span>2 列</span>
+          </button>
+          <button
+            class="app-overview-recent-columns-btn"
+            type="button"
+            data-recent-columns="3"
+            aria-pressed="false"
+            title="三列"
+          >
+            <i class="fas fa-table-cells" aria-hidden="true"></i>
+            <span>3 列</span>
+          </button>
+        </div>
+        <span class="app-overview-mini-badge">最近 10</span>
+      </div>
     </div>
-    <div class="app-overview-recent-list" role="list" aria-label="最近产物"></div>
-    <div class="app-overview-recent-empty hidden" aria-live="polite">
-      <i class="fas fa-folder-open" aria-hidden="true"></i>
-      <div class="app-overview-empty-title">暂无最近产物</div>
+
+    <div class="app-overview-recent-shell" data-recent-columns="2">
+      <div class="app-overview-recent-list" role="list" aria-label="最近产物"></div>
+
+      <div class="app-overview-recent-empty hidden" aria-live="polite">
+        <div class="app-overview-recent-empty-icon" aria-hidden="true">
+          <i class="fas fa-clock-rotate-left"></i>
+        </div>
+        <div class="app-overview-recent-empty-copy">
+          <div class="app-overview-empty-title">还没有可继续的作业产物</div>
+          <p>
+            完成采集、AI 分析、关键词处理或 PPC 导出后，产物会自动出现在这里，方便直接回到下一步。
+          </p>
+        </div>
+        <div class="app-overview-recent-empty-actions">
+          <button
+            class="app-card-primary-link"
+            type="button"
+            data-action="switch-tab"
+            data-tab="scraper"
+          >
+            <span>开始采集</span>
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </button>
+          <button
+            class="app-child-link app-overview-recent-empty-secondary"
+            type="button"
+            data-action="switch-tab"
+            data-tab="keyword_hunter_input"
+          >
+            <i class="fas fa-key" aria-hidden="true"></i>
+            <span>关键词输入</span>
+          </button>
+          <button
+            class="app-child-link app-overview-recent-empty-secondary"
+            type="button"
+            data-action="switch-tab"
+            data-tab="ppc_search_terms"
+          >
+            <i class="fas fa-list-check" aria-hidden="true"></i>
+            <span>PPC 搜索词</span>
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 
