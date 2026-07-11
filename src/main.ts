@@ -1,5 +1,8 @@
 import '@/common/utils/nativeLoggerConsole';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+// Critical icon set only — brands (~100KB woff2) load after first paint.
+import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
+import '@fortawesome/fontawesome-free/css/solid.min.css';
+import '@fortawesome/fontawesome-free/css/regular.min.css';
 
 // src/main.ts
 // ================================================================
@@ -69,20 +72,24 @@ import { applyDeveloperDiagnosticSettings } from '@/services/developerDiagnostic
 // ✅ 全局错误兜底已由GlobalErrorHandler统一处理
 // 见 src/common/errors/GlobalErrorHandler.ts
 
-// 1. 导入各模块的初始化函数和业务函数
-import {
-  initAlpineSettings, // [NEW] Alpine Init
-  updateModelStatus,
-  openSettings,
-  closeSettings,
-  saveProviderConfig,
-  loadProviderConfig, // [RESTORED]
-  fetchModels,
-  toggleApiKeyVisibility, // [RESTORED]
-  testConnection,
-  saveProxyConfig,
-  openPerformanceMonitor, // [NEW] 性能监控面板
-} from './components/settings/systemSettings';
+// Settings panel is large and only needed for Alpine settings + settings actions.
+// Keep it out of the static entry graph; load on demand.
+type SystemSettingsModule = typeof import('./components/settings/systemSettings');
+let systemSettingsModulePromise: Promise<SystemSettingsModule> | null = null;
+
+function loadSystemSettingsModule(): Promise<SystemSettingsModule> {
+  if (!systemSettingsModulePromise) {
+    systemSettingsModulePromise = import('./components/settings/systemSettings');
+  }
+  return systemSettingsModulePromise;
+}
+
+async function withSystemSettings<T>(
+  run: (settings: SystemSettingsModule) => T | Promise<T>
+): Promise<T> {
+  const settings = await loadSystemSettingsModule();
+  return run(settings);
+}
 
 import {
   renderMegaMenu,
@@ -96,11 +103,16 @@ import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { APP_VERSION } from '@/common/constants/constants';
 import { initHomeSplash } from './modules/home/homeDisplay';
 
-// ✅ 自动注册事件监听器的模块 (事件驱动模式)
-import './modules/amz_hub/amz_hub';
-import './modules/sops/sops';
-import './modules/more/more';
-import './modules/app_center/app_center';
+// Domain shells register route listeners — load them in parallel with bootstrap
+// instead of blocking the static entry parse graph.
+function loadDomainModules(): Promise<unknown[]> {
+  return Promise.all([
+    import('./modules/amz_hub/amz_hub'),
+    import('./modules/sops/sops'),
+    import('./modules/more/more'),
+    import('./modules/app_center/app_center'),
+  ]);
+}
 
 // ✅ Alpine.js
 import Alpine from '@alpinejs/csp';
@@ -252,8 +264,12 @@ async function exposeCoreServicesForDebug(): Promise<void> {
 
 function initializeAlpineRuntime(): void {
   mainLogger.info('Initializing Alpine.js...');
-  initAlpineSettings();
-  mainLogger.info('Alpine components registered');
+  void withSystemSettings(settings => {
+    settings.initAlpineSettings();
+    mainLogger.info('Alpine components registered');
+  }).catch(error => {
+    mainLogger.error('Alpine settings registration failed', error);
+  });
 
   Alpine.start();
   mainLogger.info('Alpine.js started');
@@ -371,6 +387,11 @@ function initializeAnimationSystem(): void {
 function initializeLazyEnhancements(): void {
   loadDeferredStyles();
 
+  // Brands icons are rarely needed on first paint; fetch after shell is interactive.
+  void import('@fortawesome/fontawesome-free/css/brands.min.css').catch(error => {
+    mainLogger.warn('Font Awesome brands stylesheet load failed', error);
+  });
+
   import('@/common/utils/ImageLazyLoader').then(({ imageLazyLoader }) => {
     imageLazyLoader.initialize({
       rootMargin: '50px',
@@ -456,7 +477,11 @@ async function continueStartup(
   initializeLazyEnhancements();
   renderGlobalMenus();
   await emitAppInitialized();
-  updateModelStatus();
+  void withSystemSettings(settings => {
+    settings.updateModelStatus();
+  }).catch(error => {
+    mainLogger.warn('Model status update skipped', error);
+  });
   initializeDebugInterface();
 }
 
@@ -487,6 +512,10 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
   const shouldWaitForHomeView = isInitialHomeRoute();
   const homeViewReady = initHomeView();
   const mainStylesReady = loadMainStyles();
+  const domainModulesReady = loadDomainModules().catch(error => {
+    mainLogger.error('Domain module registration failed', error);
+    throw error;
+  });
 
   if (shouldWaitForHomeView) {
     await homeViewReady;
@@ -503,7 +532,7 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
   // 执行初始化
   // ================================================================
   try {
-    const result = await bootstrap.initialize();
+    const [result] = await Promise.all([bootstrap.initialize(), domainModulesReady]);
 
     if (!result.success) {
       mainLogger.error('部分服务初始化失败，应用可能无法正常工作');
@@ -567,16 +596,16 @@ registerActionsWithLegacy({
     }
   },
 
-  // === Settings 设置 ===
-  openSettings,
-  closeSettings,
-  saveProviderConfig,
-  loadProviderConfig,
-  fetchModels,
-  toggleApiKeyVisibility,
-  testConnection,
-  saveProxyConfig,
-  openPerformanceMonitor,
+  // === Settings 设置（懒加载 settings 模块） ===
+  openSettings: async () => withSystemSettings(s => s.openSettings()),
+  closeSettings: async () => withSystemSettings(s => s.closeSettings()),
+  saveProviderConfig: async () => withSystemSettings(s => s.saveProviderConfig()),
+  loadProviderConfig: async () => withSystemSettings(s => s.loadProviderConfig()),
+  fetchModels: async () => withSystemSettings(s => s.fetchModels()),
+  toggleApiKeyVisibility: async () => withSystemSettings(s => s.toggleApiKeyVisibility()),
+  testConnection: async () => withSystemSettings(s => s.testConnection()),
+  saveProxyConfig: async () => withSystemSettings(s => s.saveProxyConfig()),
+  openPerformanceMonitor: async () => withSystemSettings(s => s.openPerformanceMonitor()),
 
   // 🎯 阶段1: 性能监控
   showPerformanceReport: async () => {
