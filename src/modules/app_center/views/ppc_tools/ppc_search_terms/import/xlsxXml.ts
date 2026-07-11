@@ -19,10 +19,16 @@ export function parseXml(xml: string, fileName: string): Document {
 
   const doc = new DOMParser().parseFromString(xml, 'application/xml');
   if (doc.getElementsByTagName('parsererror').length > 0) {
-    throw new ValidationError(`XLSX XML 解析失败: ${fileName}`, 'PPC_XLSX_002', 'fileName', fileName, {
-      module: 'ppc_search_terms',
-      action: 'parseXml',
-    });
+    throw new ValidationError(
+      `XLSX XML 解析失败: ${fileName}`,
+      'PPC_XLSX_002',
+      'fileName',
+      fileName,
+      {
+        module: 'ppc_search_terms',
+        action: 'parseXml',
+      }
+    );
   }
   return doc;
 }
