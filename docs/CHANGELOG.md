@@ -26,6 +26,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.5-rc.3] - 2026-07-12
+
+### Added
+- 应用中心总览「最近继续」重做为高密度 Resume Queue：作业上下文优先标题、短类型标签、去重 fact chips、1/2/3 列偏好持久化与空状态快捷入口。
+- 新增 `recentArtifactPresenter` 纯展示变换与对应单元测试，并补充设计规格文档。
+
+### Changed
+- 拆分 `SECURE_STORAGE_SECURITY_BOUNDARY` 常量，恢复 `secureStorage` 动态导入拆包；提高 Vite chunk 体积告警阈值以匹配已知 deferred `system-settings` 包。
+- 优化入口加载：拆分系统设置、domain shells 与 Font Awesome brands 异步块。
+- 同步应用内版本显示到 `3.0.5-rc.3`。
+
+### Fixed
+- 修复 Alpine 设置面板在懒加载后的注册竞态。
+- 修复阻塞 Vercel 构建的 Prettier 格式问题，并清理误入发布树的构建临时文件。
+- 通过 CSS 变量命名与 ESLint 复杂度拆分，恢复 `css:audit` / `lint:warning-gate` 通过。
+
 ## [3.0.5-rc.2] - 2026-07-11
 
 ### Added
