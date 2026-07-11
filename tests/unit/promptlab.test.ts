@@ -1094,12 +1094,15 @@ describe('Action Functions', () => {
     const textarea = document.getElementById('final-prompt-output') as HTMLTextAreaElement;
     textarea.value = 'Test prompt content';
 
-    // Mock execCommand
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: undefined,
+    });
     document.execCommand = vi.fn().mockReturnValue(true);
     const execCommandSpy = vi.spyOn(document, 'execCommand');
     const { showToast } = await import('@/common/ui');
 
-    component.copyPrompt();
+    await component.copyPrompt();
 
     expect(execCommandSpy).toHaveBeenCalledWith('copy');
     expect(showToast).toHaveBeenCalledWith('Prompt 已复制', { type: 'success' });

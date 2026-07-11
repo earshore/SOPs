@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { beforeEach, expect, it, vi } from 'vitest';
+// vi.waitFor is used by async clipboard assertions
 import { mount, unmount } from '@/modules/more/views/explore/prompts';
 import { showToast } from '@/common/ui';
 
@@ -145,11 +146,11 @@ beforeEach(() => {
     expect(document.body.querySelector('[data-prompt-lang="en"]')?.classList.contains('active')).toBe(true);
 
     click(document.body.querySelector('[data-prompt-modal-action="copy"]'));
-    await Promise.resolve();
-
-    expect(promptMocks.writeText).toHaveBeenCalledWith(expect.any(String));
-    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('提示词已复制到剪贴板'), {
-      type: 'success',
+    await vi.waitFor(() => {
+      expect(promptMocks.writeText).toHaveBeenCalledWith(expect.any(String));
+      expect(showToast).toHaveBeenCalledWith(expect.stringContaining('提示词已复制到剪贴板'), {
+        type: 'success',
+      });
     });
 
     click(document.body.querySelector('[data-prompt-modal-action="close"]'));
@@ -165,17 +166,16 @@ beforeEach(() => {
     const copyButton = container.querySelector('[data-action="copy-prompt"][data-prompt-id]');
 
     click(copyButton);
-    await Promise.resolve();
-
-    expect(promptMocks.writeText).toHaveBeenCalledWith(expect.any(String));
-    expect(showToast).toHaveBeenCalledWith('提示词已复制到剪贴板', { type: 'success' });
+    await vi.waitFor(() => {
+      expect(promptMocks.writeText).toHaveBeenCalledWith(expect.any(String));
+      expect(showToast).toHaveBeenCalledWith('提示词已复制到剪贴板', { type: 'success' });
+    });
 
     promptMocks.writeText.mockRejectedValueOnce(new Error('blocked'));
     click(copyButton);
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(showToast).toHaveBeenCalledWith('复制失败,请手动复制', { type: 'error' });
+    await vi.waitFor(() => {
+      expect(showToast).toHaveBeenCalledWith('复制失败，请手动选择文本复制', { type: 'error' });
+    });
   });
 
   it('handles modal keyboard close and unregisters window actions on unmount', async () => {

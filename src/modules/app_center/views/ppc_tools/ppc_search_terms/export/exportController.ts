@@ -1,3 +1,4 @@
+import { copyTextToClipboard } from '@/common/utils/clipboard';
 import { showToast } from '@/common/ui/notifications';
 import { registerPpcActionListArtifact } from '@/modules/app_center/artifactEnvelopeService';
 import { getWorkspaceContext } from '@/modules/app_center/workspaceContext';
@@ -62,15 +63,14 @@ export async function copyActionSummary(
   const owner = readActionOwner(container);
   saveActionOwner(owner);
   const summary = buildSummaryText(rows, owner);
-  try {
-    if (!navigator.clipboard?.writeText) {
-      throw new Error('Clipboard API unavailable');
-    }
-    await navigator.clipboard.writeText(summary);
-    showToast('复盘模板已复制', { type: 'success' });
-  } catch {
-    showToast('复制失败', { type: 'error', description: '当前浏览器没有开放剪贴板写入权限' });
+  if (!(await copyTextToClipboard(summary))) {
+    showToast('复制失败', {
+      type: 'error',
+      description: '当前浏览器没有开放剪贴板写入权限',
+    });
+    return;
   }
+  showToast('复盘模板已复制', { type: 'success' });
 }
 
 function downloadText(filename: string, content: string): void {

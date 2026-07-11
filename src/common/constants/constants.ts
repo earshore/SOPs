@@ -313,6 +313,7 @@ export const SITE_NAME_MAP: Record<string, string> = Object.entries(SITE_CONFIGS
 export const SITE_DOMAIN_MAP: Record<string, string> = Object.entries(SITE_CONFIGS).reduce(
   (acc, [key, config]) => {
     acc[key] = config.domain;
+    if (key === 'UK') acc['GB'] = config.domain;
     return acc;
   },
   {} as Record<string, string>

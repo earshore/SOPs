@@ -1,3 +1,5 @@
+import { copyTextToClipboard } from '@/common/utils/clipboard';
+
 /**
  * Promptlab UI 辅助模块
  *
@@ -145,13 +147,15 @@ export function toggleConsoleMode(
 /**
  * 复制 #final-prompt-output textarea 的内容到剪贴板
  */
-export function copyPrompt(): void {
+export async function copyPrompt(): Promise<void> {
   const el = document.getElementById('final-prompt-output') as HTMLTextAreaElement | null;
-  if (el && el.value.length > 10) {
-    el.select();
-    document.execCommand('copy');
-    showToast('Prompt 已复制', { type: 'success' });
+  if (!el || el.value.length <= 10) return;
+
+  if (!(await copyTextToClipboard(el.value))) {
+    showToast('复制失败，请重试', { type: 'error' });
+    return;
   }
+  showToast('Prompt 已复制', { type: 'success' });
 }
 
 // ==========================================
@@ -167,22 +171,6 @@ function createSeoCopyInputs(ctx: PromptlabAlpineContext): PromptInputs {
   return { ...ctx.profile, useAnalysisData: true };
 }
 
-async function writeTextToClipboard(text: string): Promise<void> {
-  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', 'true');
-  textarea.className = 'sr-only';
-  document.body.appendChild(textarea);
-  textarea.select();
-  document.execCommand('copy');
-  document.body.removeChild(textarea);
-}
-
 export async function copySeoKeywords(ctx: PromptlabAlpineContext): Promise<void> {
   const text = promptlabService.buildSeoKeywordCopyText(
     createSeoCopyInputs(ctx),
@@ -194,13 +182,11 @@ export async function copySeoKeywords(ctx: PromptlabAlpineContext): Promise<void
     return;
   }
 
-  try {
-    await writeTextToClipboard(text);
-    showToast('SEO 关键词已复制', { type: 'success' });
-  } catch (error) {
-    console.error('[Promptlab] 复制 SEO 关键词失败:', error);
+  if (!(await copyTextToClipboard(text))) {
     showToast('复制失败，请重试', { type: 'error' });
+    return;
   }
+  showToast('SEO 关键词已复制', { type: 'success' });
 }
 
 function parsePromptlabKeywords(ctx: PromptlabAlpineContext): string[] {

@@ -45,8 +45,8 @@ describe('PC design token CSS contract', () => {
   it('defines component and module semantic aliases instead of forcing raw colors in pages', () => {
     const css = readFileSync(variablesCssPath, 'utf8');
 
-    expect(css).toContain('--radius-card: var(--rounded-card)');
-    expect(css).toContain('--radius-panel: var(--rounded-panel)');
+    expect(css).toContain('--rounded-card: var(--rounded-md)');
+    expect(css).toContain('--rounded-panel: var(--rounded-md)');
     expect(css).toContain('--card-bg: var(--surface-card)');
     expect(css).toContain('--card-border: var(--border-subtle)');
     expect(css).toContain('--panel-bg: var(--surface-panel)');

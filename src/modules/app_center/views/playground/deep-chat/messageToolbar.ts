@@ -1,3 +1,5 @@
+import { copyTextToClipboard } from '@/common/utils/clipboard';
+
 import { setSafeHtml } from '@/common/utils/security';
 import { showToast } from '@/common/ui/notifications';
 import { MESSAGE_TOOLBAR_CLASS } from './constants';
@@ -198,51 +200,17 @@ function copyMessageContent(bubble: HTMLElement): void {
     return;
   }
 
-  void writeClipboardText(content)
-    .then(() => showToast('消息已复制', { type: 'success' }))
+  void copyTextToClipboard(content)
+    .then(ok => {
+      if (!ok) {
+        showToast('复制失败，请手动选择文本复制', { type: 'error' });
+        return;
+      }
+      showToast('消息已复制', { type: 'success' });
+    })
     .catch(() => {
       showToast('复制失败，请手动选择文本复制', { type: 'error' });
     });
-}
-
-async function writeClipboardText(content: string): Promise<void> {
-  try {
-    const clipboard = window.navigator?.clipboard;
-    if (clipboard?.writeText) {
-      await clipboard.writeText(content);
-      return;
-    }
-  } catch {
-    // Continue with the selection-based fallback below.
-  }
-
-  copyTextWithSelectionFallback(content);
-}
-
-function copyTextWithSelectionFallback(content: string): void {
-  const textarea = document.createElement('textarea');
-  textarea.value = content;
-  textarea.setAttribute('readonly', 'true');
-  textarea.className = 'sr-only';
-  document.body.appendChild(textarea);
-
-  const selection = document.getSelection();
-  const selectedRanges = selection
-    ? Array.from({ length: selection.rangeCount }, (_, index) => selection.getRangeAt(index))
-    : [];
-
-  textarea.select();
-  const copied = document.execCommand('copy');
-  document.body.removeChild(textarea);
-
-  if (selection) {
-    selection.removeAllRanges();
-    selectedRanges.forEach(range => selection.addRange(range));
-  }
-
-  if (!copied) {
-    throw new Error('document.execCommand("copy") returned false');
-  }
 }
 
 function editMessageContent(chat: DeepChatElement, bubble: HTMLElement): void {

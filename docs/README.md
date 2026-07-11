@@ -28,6 +28,7 @@
 - [状态同步最佳实践](./development/state-sync-best-practices.md) — Alpine ↔ Zustand 同步规范
 - [Zustand 迁移指南](./development/zustand-migration-guide.md) — 旧 StateManager → Zustand 的迁移参考
 - [模态框开发规范指南](./MODAL_DEVELOPMENT_GUIDELINES.md) — 弹窗选型、实现、可访问性、测试与验证门禁
+- [共享能力复用指南](./SHARED_CAPABILITIES_GUIDE.md) — 页面壳、剪贴板、LLM JSON、Overview、站点映射等高回报轮子
 - [AI 辅助开发上下文](./development/CLAUDE.md) — 供 AI 工具使用的项目上下文
 
 ---

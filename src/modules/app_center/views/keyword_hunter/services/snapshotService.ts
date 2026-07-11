@@ -13,6 +13,7 @@ import type {
   KeywordHunterSnapshotStatus,
 } from '@/types/modules-business';
 import type { KeywordTrackerState } from '@/types/state';
+import { SystemError } from '@/common/errors/AppError';
 import { registerKeywordSnapshotArtifact } from '../../../artifactEnvelopeService';
 import { getWorkspaceContext } from '../../../workspaceContext';
 
@@ -363,7 +364,11 @@ export const KeywordHunterSnapshotService = {
     const next = upsertSnapshot(snapshots, snapshot);
 
     if (!StorageService.set(SNAPSHOT_STORAGE_KEY, next)) {
-      throw new Error('保存 Keyword Hunter 历史快照失败：本地存储空间不足');
+      throw new SystemError(
+        '保存 Keyword Hunter 历史快照失败：本地存储空间不足',
+        'KH_SNAPSHOT_001',
+        { module: 'snapshotService', action: 'saveCurrent' }
+      );
     }
 
     appStore.getState().updateKeywordTracker({
@@ -389,7 +394,11 @@ export const KeywordHunterSnapshotService = {
     const saved = await LocalDataStore.set(INDEXED_SNAPSHOT_STORAGE_KEY, next, 'user-data');
 
     if (!saved) {
-      throw new Error('保存 Keyword Hunter 历史快照失败：IndexedDB 不可写');
+      throw new SystemError(
+        '保存 Keyword Hunter 历史快照失败：IndexedDB 不可写',
+        'KH_SNAPSHOT_002',
+        { module: 'snapshotService', action: 'saveCurrentAsync' }
+      );
     }
 
     StorageService.remove(SNAPSHOT_STORAGE_KEY);
@@ -424,7 +433,11 @@ export const KeywordHunterSnapshotService = {
     }
 
     if (!StorageService.set(SNAPSHOT_STORAGE_KEY, next)) {
-      throw new Error('删除 Keyword Hunter 历史快照失败：本地存储空间不足');
+      throw new SystemError(
+        '删除 Keyword Hunter 历史快照失败：本地存储空间不足',
+        'KH_SNAPSHOT_003',
+        { module: 'snapshotService', action: 'deleteById' }
+      );
     }
 
     clearCurrentSnapshotIfMatches(id);
@@ -441,7 +454,11 @@ export const KeywordHunterSnapshotService = {
 
     const saved = await LocalDataStore.set(INDEXED_SNAPSHOT_STORAGE_KEY, next, 'user-data');
     if (!saved) {
-      throw new Error('删除 Keyword Hunter 历史快照失败：IndexedDB 不可写');
+      throw new SystemError(
+        '删除 Keyword Hunter 历史快照失败：IndexedDB 不可写',
+        'KH_SNAPSHOT_004',
+        { module: 'snapshotService', action: 'deleteByIdAsync' }
+      );
     }
 
     StorageService.remove(SNAPSHOT_STORAGE_KEY);

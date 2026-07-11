@@ -9,13 +9,13 @@ import { callLLM } from '@/services/llmService';
 import { configCenter } from '@/common/config/ConfigCenter';
 import { ApiError, ValidationError } from '@/common/errors/AppError';
 import { TRANSLATE_PROMPT_TEMPLATE } from '../constants/prompts';
-import { jsonrepair } from 'jsonrepair';
 import { sanitizePromptInput } from '../ai_analysis/prompts/promptSanitizer';
 import {
   getMasterAnalysisFullReportMaxTokens,
   getMasterAnalysisTranslationMaxTokens,
 } from './llmOutputBudget';
 import type { ProductData, DataOptions, LLMConfig, AnalysisReport } from '@/types/modules-business';
+import { parseLlmJson } from '@/common/utils/parseLlmJson';
 
 const nativeLoggerConsole = globalThis.console;
 
@@ -119,49 +119,17 @@ function parseAnalysisResponse(response: string, language: string): AnalysisRepo
 function robustParseJSON(text: string): unknown {
   if (!text) return null;
 
-  // 1. 尝试直接解析
   try {
-    return JSON.parse(text);
-  } catch (e) {
-    // 2. 尝试提取 Markdown JSON 块 ```json ... ```
-    const mdMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
-    if (mdMatch && mdMatch[1]) {
-      try {
-        return JSON.parse(mdMatch[1]);
-      } catch (e2) {
-        /* ignore */
-      }
-    }
-
-    // 3. 尝试使用花括号匹配提取最外层的 {}
-    const braceMatch = text.match(/\{[\s\S]*\}/);
-    if (braceMatch) {
-      try {
-        return JSON.parse(braceMatch[0]);
-      } catch (e3) {
-        /* ignore */
-      }
-      try {
-        return JSON.parse(jsonrepair(braceMatch[0]));
-      } catch (e4) {
-        /* ignore */
-      }
-    }
-
-    try {
-      return JSON.parse(jsonrepair(text));
-    } catch (e5) {
-      /* ignore */
-    }
+    return parseLlmJson(text).value;
+  } catch {
+    throw new ValidationError(
+      '无法从响应中解析有效的 JSON 数据',
+      'ERR_JSON_PARSE_FAILED',
+      'response',
+      text,
+      { module: 'AnalysisService', action: 'robustParseJSON' }
+    );
   }
-
-  throw new ValidationError(
-    '无法从响应中解析有效的 JSON 数据',
-    'ERR_JSON_PARSE_FAILED',
-    'response',
-    text,
-    { module: 'AnalysisService', action: 'robustParseJSON' }
-  );
 }
 
 // ========================

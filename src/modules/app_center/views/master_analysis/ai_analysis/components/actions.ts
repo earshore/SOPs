@@ -1,3 +1,5 @@
+import { copyTextToClipboard } from '@/common/utils/clipboard';
+
 /**
  * Alpine 组件用户动作
  * 处理所有用户交互操作
@@ -142,9 +144,12 @@ export function copyPrompt(
   const language = getMarketLanguage();
   const prompt = generateAnalysisPrompt(targetId, mergedProduct, language);
 
-  navigator.clipboard
-    .writeText(prompt)
-    .then(() => {
+  void copyTextToClipboard(prompt)
+    .then(ok => {
+      if (!ok) {
+        showToast('复制失败', { type: 'error' });
+        return;
+      }
       showToast('提示词已复制', { type: 'success' });
     })
     .catch(() => {
@@ -173,9 +178,12 @@ export function copyJson(context: AlpineContext, dataSourceMarketplace: string):
 
   const reportData = createJsonReportData(context, dataSourceMarketplace);
   const json = JSON.stringify(reportData, null, 2);
-  navigator.clipboard
-    .writeText(json)
-    .then(() => {
+  void copyTextToClipboard(json)
+    .then(ok => {
+      if (!ok) {
+        showToast('复制失败', { type: 'error' });
+        return;
+      }
       showToast('完整 JSON 报告已复制', { type: 'success' });
     })
     .catch(() => {
@@ -209,9 +217,12 @@ export function copyMarkdown(
     dataSourceLabel
   );
 
-  navigator.clipboard
-    .writeText(markdown)
-    .then(() => {
+  void copyTextToClipboard(markdown)
+    .then(ok => {
+      if (!ok) {
+        showToast('复制失败', { type: 'error' });
+        return;
+      }
       showToast('Markdown 报告已复制', { type: 'success' });
     })
     .catch(() => {

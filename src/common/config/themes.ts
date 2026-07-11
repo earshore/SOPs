@@ -6,6 +6,7 @@
 
 import { StorageService } from '@/services/storageService';
 import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
+import { SystemError } from '@/common/errors/AppError';
 
 /**
  * 主题颜色配置
@@ -219,7 +220,10 @@ export function getTheme(themeId: string): ThemeConfig | undefined {
 export function getThemeOrDefault(themeId: string): ThemeConfig {
   const fallbackTheme = THEMES.blue;
   if (!fallbackTheme) {
-    throw new Error('[themes] Default blue theme is not configured');
+    throw new SystemError('[themes] Default blue theme is not configured', 'THEME_001', {
+      module: 'themes',
+      action: 'getThemeOrDefault',
+    });
   }
   return THEMES[themeId] || fallbackTheme;
 }

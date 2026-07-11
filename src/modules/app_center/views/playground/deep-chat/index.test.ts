@@ -1204,7 +1204,7 @@ describe('deep-chat playground request errors', () => {
 
     expect(settingsButton.hidden).toBe(false);
     settingsButton.click();
-    expect(mocks.eventBus.emit).toHaveBeenCalledWith('open-settings');
+    expect(mocks.eventBus.emit).toHaveBeenCalledWith('app:settings-open');
 
     getChat(container).connect?.handler({ text: 'Hello' }, { onResponse, onClose });
 

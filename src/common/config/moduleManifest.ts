@@ -1,5 +1,6 @@
 import type { ModuleLoaderFn, ModuleMap } from '@/types/modules-business';
 import type { RouteMeta } from '@/common/router/navigo/types';
+import { SystemError } from '@/common/errors/AppError';
 
 export interface ModuleManifestRoute {
   key: string;
@@ -128,8 +129,15 @@ export function buildModuleMapFromLoaderPaths(
 
     const loader = loaders[route.loaderPath];
     if (!loader) {
-      throw new Error(
-        `Manifest route "${route.routeId}" declares loaderPath "${route.loaderPath}" but no loader was generated`
+      throw new SystemError(
+        `Manifest route "${route.routeId}" declares loaderPath "${route.loaderPath}" but no loader was generated`,
+        'MODULE_MANIFEST_001',
+        {
+          module: 'moduleManifest',
+          action: 'buildModuleMapFromManifest',
+          routeId: route.routeId,
+          loaderPath: route.loaderPath,
+        }
       );
     }
 

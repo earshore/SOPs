@@ -1,4 +1,6 @@
-﻿/**
+import { copyTextToClipboard } from '@/common/utils/clipboard';
+
+/**
  * More 模块 - 提示词页面
  * 提示词库浏览、搜索和复制功能
  */
@@ -501,22 +503,19 @@ function handleClosePromptModal(): void {
   (modal as AppModalElement).close?.();
 }
 
-function copyTextToClipboard(text: string, successMessage: string): void {
-  navigator.clipboard
-    .writeText(text)
-    .then(() => {
-      showToast(successMessage, { type: 'success' });
-    })
-    .catch(() => {
-      showToast('复制失败,请手动复制', { type: 'error' });
-    });
+async function copyPromptText(text: string, successMessage: string): Promise<void> {
+  if (!(await copyTextToClipboard(text))) {
+    showToast('复制失败，请手动选择文本复制', { type: 'error' });
+    return;
+  }
+  showToast(successMessage, { type: 'success' });
 }
 
 function handleCopyPrompt(promptId: string): void {
   const prompt = getPromptById(promptId);
   if (!prompt) return;
 
-  copyTextToClipboard(prompt.prompt, '提示词已复制到剪贴板');
+  copyPromptText(prompt.prompt, '提示词已复制到剪贴板');
 }
 
 function getCurrentPromptText(): string | null {
@@ -531,7 +530,7 @@ function handleCopyModalPrompt(): void {
   if (!promptText) return;
 
   const langName = currentLang === 'zh' ? '中文' : '英文';
-  copyTextToClipboard(promptText, `${langName}提示词已复制到剪贴板`);
+  copyPromptText(promptText, `${langName}提示词已复制到剪贴板`);
 }
 
 // 扩展Window接口

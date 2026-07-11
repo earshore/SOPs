@@ -57,7 +57,7 @@ import {
     });
 
     it('应该为未知站点返回原始代码', () => {
-      expect(getSiteName('US')).toBe('US');
+      expect(getSiteName('US')).toBe('美国');
       expect(getSiteName('UNKNOWN')).toBe('UNKNOWN');
       expect(getSiteName('')).toBe('');
     });

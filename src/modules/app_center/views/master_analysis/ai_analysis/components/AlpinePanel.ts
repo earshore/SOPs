@@ -16,6 +16,7 @@ import type { FullAnalysisReport } from '../config/analysisReportData';
 import { createMultipleStateSyncs, cleanupSubscriptions } from '@/common/utils/stateSync';
 import { createPerformanceSettingsPanel } from './PerformanceSettings';
 import { navigateToRouteId } from '@/common/router/initRouter';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
 
 type AlpineWatchContext = {
   $watch: (property: string, callback: (newValue: unknown) => void) => void;
@@ -259,7 +260,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
     this._navigationHandler = (() => {
       this.navigateToScraper();
     }) as EventListener;
-    window.addEventListener('navigate-to-scraper', this._navigationHandler);
+    window.addEventListener(APP_EVENTS.NAVIGATE_TO_SCRAPER, this._navigationHandler);
 
     // 检查是否有新的 Scraper 数据
     checkAndLoadScraperData(this);
@@ -278,7 +279,7 @@ const aiAnalysisPanelBehavior: AiAnalysisPanelBehavior = {
 
     // 清理导航事件监听器
     if (this._navigationHandler) {
-      window.removeEventListener('navigate-to-scraper', this._navigationHandler);
+      window.removeEventListener(APP_EVENTS.NAVIGATE_TO_SCRAPER, this._navigationHandler);
       this._navigationHandler = null;
     }
   },

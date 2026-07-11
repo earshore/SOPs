@@ -1,15 +1,22 @@
+import { ValidationError } from '@/common/errors/AppError';
 import { getZipText, parseXml, type XlsxZipFiles } from './xlsxXml';
 
 export function getFirstWorksheetPath(files: XlsxZipFiles): string {
   const workbookXml = getZipText(files, 'xl/workbook.xml');
   if (!workbookXml) {
-    throw new Error('XLSX 文件没有可读取的工作簿');
+    throw new ValidationError('XLSX 文件没有可读取的工作簿', 'PPC_XLSX_003', 'workbook', null, {
+      module: 'ppc_search_terms',
+      action: 'getFirstWorksheetPath',
+    });
   }
 
   const workbook = parseXml(workbookXml, 'xl/workbook.xml');
   const firstSheet = Array.from(workbook.getElementsByTagName('sheet'))[0];
   if (!firstSheet) {
-    throw new Error('XLSX 文件没有可读取的工作表');
+    throw new ValidationError('XLSX 文件没有可读取的工作表', 'PPC_XLSX_004', 'sheet', null, {
+      module: 'ppc_search_terms',
+      action: 'getFirstWorksheetPath',
+    });
   }
 
   const relationId = firstSheet.getAttribute('r:id');

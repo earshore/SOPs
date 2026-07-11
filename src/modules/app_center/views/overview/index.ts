@@ -105,20 +105,26 @@ function initOverviewEvents(container: HTMLElement): void {
     viewMode: 'grid',
   };
 
-  const filterBtns = container.querySelectorAll<HTMLElement>('.category-filter-btn');
+  const filterRow = container.querySelector<HTMLElement>('.app-overview-filter-row');
   const viewModeBtns = container.querySelectorAll<HTMLButtonElement>(
     '.app-overview-view-btn[data-view-mode]'
   );
 
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const category = btn.dataset.category;
-      if (category) {
-        state.category = category;
-        setActiveCategory(filterBtns, btn);
-        applyOverviewFilters(container, state);
-      }
-    });
+  // Event delegation: category buttons are rendered into the filter row at mount time.
+  filterRow?.addEventListener('click', event => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const btn = target.closest<HTMLElement>('.category-filter-btn[data-category]');
+    if (!btn || !filterRow.contains(btn)) return;
+
+    const category = btn.dataset.category;
+    if (!category) return;
+
+    state.category = category;
+    const filterBtns = filterRow.querySelectorAll<HTMLElement>('.category-filter-btn');
+    setActiveCategory(filterBtns, btn);
+    applyOverviewFilters(container, state);
   });
 
   viewModeBtns.forEach(btn => {
@@ -565,21 +571,17 @@ function applyOverviewFilters(container: HTMLElement, state: OverviewFilterState
 
   cards.forEach(card => {
     const isVisible = overviewItemMatches(card, state);
-
-    card.hidden = !isVisible;
+    setOverviewItemVisibility(card, isVisible);
     if (isVisible) {
       visibleCount += 1;
-      card.classList.add('fade-in');
     }
   });
 
   listRows.forEach(row => {
     const isVisible = overviewItemMatches(row, state);
-
-    row.hidden = !isVisible;
+    setOverviewItemVisibility(row, isVisible);
     if (isVisible) {
       visibleListCount += 1;
-      row.classList.add('fade-in');
     }
   });
 
@@ -606,4 +608,15 @@ function overviewItemMatches(item: HTMLElement, state: OverviewFilterState): boo
   const queryMatches = !state.query || searchableText.includes(state.query);
 
   return categoryMatches && queryMatches;
+}
+
+/**
+ * Author CSS sets `display: flex` on overview cards/rows, which overrides the UA
+ * `[hidden] { display: none }` rule. Use the shared `.hidden` utility
+ * (`display: none !important`) so category filters actually hide items visually.
+ */
+function setOverviewItemVisibility(item: HTMLElement, isVisible: boolean): void {
+  item.hidden = !isVisible;
+  item.classList.toggle('hidden', !isVisible);
+  item.classList.toggle('fade-in', isVisible);
 }

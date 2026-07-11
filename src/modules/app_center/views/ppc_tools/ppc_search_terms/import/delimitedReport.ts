@@ -1,3 +1,4 @@
+import { ValidationError } from '@/common/errors/AppError';
 import { assertReportRowLimit } from '../analysis/reportLimits';
 
 export type RawRecord = Record<string, string>;
@@ -13,7 +14,13 @@ export function parseReport(text: string): ParsedReport {
   assertReportRowLimit(Math.max(0, rows.length - 1));
   const headerRow = rows[0];
   if (!headerRow || headerRow.length < 2) {
-    throw new Error('未识别到表头，请确认首行包含列名');
+    throw new ValidationError(
+      '未识别到表头，请确认首行包含列名',
+      'PPC_IMPORT_003',
+      'headers',
+      headerRow,
+      { module: 'ppc_search_terms', action: 'parseReport' }
+    );
   }
 
   const headers = headerRow.map((header, index) => header.trim() || `column_${index + 1}`);

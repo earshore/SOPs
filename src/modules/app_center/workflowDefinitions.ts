@@ -1,3 +1,4 @@
+import { SystemError } from '@/common/errors/AppError';
 import { appCenterManifest } from './module.manifest';
 import { sopsManifest } from '../sops/module.manifest';
 import type { AppCenterRouteId } from './appCatalog';
@@ -138,7 +139,11 @@ export function getAppCenterWorkflowDefinition(
   const workflow = APP_CENTER_WORKFLOW_DEFINITIONS.find(item => item.id === id);
 
   if (!workflow) {
-    throw new Error(`Unknown App Center workflow "${id}"`);
+    throw new SystemError(`Unknown App Center workflow "${id}"`, 'APP_WORKFLOW_001', {
+      module: 'workflowDefinitions',
+      action: 'getAppCenterWorkflowDefinition',
+      id,
+    });
   }
 
   return workflow;
@@ -146,8 +151,10 @@ export function getAppCenterWorkflowDefinition(
 
 APP_CENTER_COMPLIANCE_CHECKLIST.forEach(item => {
   if (!sopsRouteIds.has(item.routeId)) {
-    throw new Error(
-      `App Center compliance checklist references unknown SOPS route "${item.routeId}"`
+    throw new SystemError(
+      `App Center compliance checklist references unknown SOPS route "${item.routeId}"`,
+      'APP_WORKFLOW_002',
+      { module: 'workflowDefinitions', action: 'validateCompliance', routeId: item.routeId }
     );
   }
 });
@@ -155,12 +162,20 @@ APP_CENTER_COMPLIANCE_CHECKLIST.forEach(item => {
 APP_CENTER_WORKFLOW_DEFINITIONS.forEach(workflow => {
   workflow.steps.forEach(step => {
     if (!appCenterRouteIds.has(step.routeId)) {
-      throw new Error(`App Center workflow references unknown route "${step.routeId}"`);
+      throw new SystemError(
+        `App Center workflow references unknown route "${step.routeId}"`,
+        'APP_WORKFLOW_003',
+        { module: 'workflowDefinitions', action: 'validateWorkflow', routeId: step.routeId }
+      );
     }
 
     step.complianceRouteIds.forEach(routeId => {
       if (!sopsRouteIds.has(routeId)) {
-        throw new Error(`App Center workflow references unknown compliance route "${routeId}"`);
+        throw new SystemError(
+          `App Center workflow references unknown compliance route "${routeId}"`,
+          'APP_WORKFLOW_004',
+          { module: 'workflowDefinitions', action: 'validateWorkflow', routeId }
+        );
       }
     });
   });

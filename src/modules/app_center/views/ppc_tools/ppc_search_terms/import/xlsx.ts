@@ -1,4 +1,5 @@
 import { unzipSync } from 'fflate';
+import { ValidationError } from '@/common/errors/AppError';
 import { assertReportRowLimit } from '../analysis/reportLimits';
 import { getFirstWorksheetPath, parseSharedStrings } from './xlsxWorkbook';
 import { parseWorksheetRows, rowsToDelimitedText } from './xlsxRows';
@@ -9,7 +10,10 @@ export async function xlsxArrayBufferToDelimitedText(buffer: ArrayBuffer): Promi
   const sheetPath = getFirstWorksheetPath(files);
   const sheetXml = getZipText(files, sheetPath);
   if (!sheetXml) {
-    throw new Error('XLSX 工作表读取失败');
+    throw new ValidationError('XLSX 工作表读取失败', 'PPC_XLSX_005', 'sheetPath', sheetPath, {
+      module: 'ppc_search_terms',
+      action: 'xlsxArrayBufferToDelimitedText',
+    });
   }
 
   const sharedStrings = parseSharedStrings(files);
@@ -17,7 +21,10 @@ export async function xlsxArrayBufferToDelimitedText(buffer: ArrayBuffer): Promi
   assertReportRowLimit(rows.length - 1);
   const text = rowsToDelimitedText(rows);
   if (!text.trim()) {
-    throw new Error('XLSX 工作表为空');
+    throw new ValidationError('XLSX 工作表为空', 'PPC_XLSX_006', 'sheetPath', sheetPath, {
+      module: 'ppc_search_terms',
+      action: 'xlsxArrayBufferToDelimitedText',
+    });
   }
 
   return text;

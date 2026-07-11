@@ -140,7 +140,7 @@ vi.mock('@/common/ui', () => ({
 
 vi.mock('@/common/constants/eventConstants', () => ({
   APP_EVENTS: {
-    HISTORY_UPDATED: 'history-updated',
+    HISTORY_UPDATED: 'app:history-updated',
   },
 }));
 

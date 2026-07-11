@@ -26,6 +26,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.5-rc.2] - 2026-07-11
+
+### Added
+- 新增共享剪贴板、模板与 LLM JSON 工具，沉淀 Shared Capabilities Guide。
+- 统一生产路径错误为 `ValidationError` / `SystemError` 等结构化错误，覆盖 PPC、History、Keyword Hunter、Deep Chat 等模块。
+
+### Changed
+- 将应用级事件命名统一为 `app:` + kebab-case。
+- 对齐部署 CSP `connect-src` 与站点清单，覆盖 Amazon 全站点域名。
+- 同步应用内版本显示到 `3.0.5-rc.2`。
+
+### Fixed
+- 修复应用中心总览「应用矩阵」分类筛选不生效：作者样式 `display:flex/grid` 覆盖了 `[hidden]`，改为 `.hidden` + 模块 CSS 强制隐藏。
+- 修复共享剪贴板在无 `execCommand` 环境下的降级路径，并同步 Promptlab / Prompts 相关测试。
+- 移除废弃 CSS 半径别名 `--radius-card` / `--radius-panel`。
+
 ## [3.0.5-rc.1] - 2026-07-10
 
 ### Added

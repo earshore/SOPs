@@ -1,3 +1,4 @@
+import { SystemError } from '@/common/errors/AppError';
 import { appCenterManifest } from './module.manifest';
 
 type AppCenterManifestRoute = (typeof appCenterManifest.routes)[number];
@@ -96,7 +97,11 @@ export function getAppCenterCatalogRoute(routeId: AppCenterRouteId): AppCenterMa
   const route = appCenterManifest.routes.find(item => item.routeId === routeId);
 
   if (!route) {
-    throw new Error(`App Center catalog route "${routeId}" is not declared in module.manifest.ts`);
+    throw new SystemError(
+      `App Center catalog route "${routeId}" is not declared in module.manifest.ts`,
+      'APP_CATALOG_001',
+      { module: 'appCatalog', action: 'getAppCenterCatalogRoute', routeId }
+    );
   }
 
   return route;
@@ -120,12 +125,20 @@ export function getAppCenterCatalogCategoryCounts(): Record<string, number> {
 
 APP_CENTER_CATALOG_GROUPS.forEach(group => {
   if (!group.routeIds.includes(group.primaryRouteId)) {
-    throw new Error(`App Center catalog group "${group.id}" does not include its primary route`);
+    throw new SystemError(
+      `App Center catalog group "${group.id}" does not include its primary route`,
+      'APP_CATALOG_002',
+      { module: 'appCatalog', action: 'validateCatalog', groupId: group.id }
+    );
   }
 
   group.routeIds.forEach(routeId => {
     if (!manifestRouteIds.has(routeId)) {
-      throw new Error(`App Center catalog references unknown route "${routeId}"`);
+      throw new SystemError(
+        `App Center catalog references unknown route "${routeId}"`,
+        'APP_CATALOG_003',
+        { module: 'appCatalog', action: 'validateCatalog', routeId }
+      );
     }
   });
 });
@@ -133,6 +146,10 @@ APP_CENTER_CATALOG_GROUPS.forEach(group => {
 const catalogRouteIds = new Set(getAppCenterCatalogRouteIds());
 appCenterManifest.routes.forEach(route => {
   if (route.routeId !== 'app_center_overview' && !catalogRouteIds.has(route.routeId)) {
-    throw new Error(`App Center catalog is missing manifest route "${route.routeId}"`);
+    throw new SystemError(
+      `App Center catalog is missing manifest route "${route.routeId}"`,
+      'APP_CATALOG_004',
+      { module: 'appCatalog', action: 'validateCatalog', routeId: route.routeId }
+    );
   }
 });

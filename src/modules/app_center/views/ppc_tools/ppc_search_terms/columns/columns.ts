@@ -1,4 +1,5 @@
 import type { ReportType } from '../types';
+import { ValidationError } from '@/common/errors/AppError';
 import {
   COLUMN_ALIASES,
   getRequiredFields,
@@ -38,7 +39,13 @@ export function mapColumns(headers: string[], reportType: ReportType): ColumnMap
   const requiredFields = getRequiredFields(reportType);
   const missing = requiredFields.filter(key => !found[key]);
   if (missing.length > 0) {
-    throw new Error(`缺少必要列：${missing.map(key => labelColumn(key)).join('、')}`);
+    throw new ValidationError(
+      `缺少必要列：${missing.map(key => labelColumn(key)).join('、')}`,
+      'PPC_IMPORT_002',
+      'columns',
+      missing,
+      { module: 'ppc_search_terms', action: 'mapColumns', reportType }
+    );
   }
 
   return { reportType, found, missing };
