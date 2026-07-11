@@ -182,22 +182,28 @@ describe('App Center Overview', () => {
       .querySelector<HTMLElement>('.category-filter-btn[data-category="ppc_tools"]')
       ?.click();
 
-    expect(
-      container.querySelector<HTMLElement>('.app-overview-card[data-category="master_analysis"]')
-        ?.hidden
-    ).toBe(true);
-    expect(
-      container.querySelector<HTMLElement>('.app-overview-card[data-category="ppc_tools"]')?.hidden
-    ).toBe(false);
-    expect(
-      container.querySelector<HTMLElement>(
-        '.app-overview-list-row[data-category="master_analysis"]'
-      )?.hidden
-    ).toBe(true);
-    expect(
-      container.querySelector<HTMLElement>('.app-overview-list-row[data-category="ppc_tools"]')
-        ?.hidden
-    ).toBe(false);
+    const masterCard = container.querySelector<HTMLElement>(
+      '.app-overview-card[data-category="master_analysis"]'
+    );
+    const ppcCard = container.querySelector<HTMLElement>(
+      '.app-overview-card[data-category="ppc_tools"]'
+    );
+    const masterRow = container.querySelector<HTMLElement>(
+      '.app-overview-list-row[data-category="master_analysis"]'
+    );
+    const ppcRow = container.querySelector<HTMLElement>(
+      '.app-overview-list-row[data-category="ppc_tools"]'
+    );
+
+    // Author CSS uses display:flex on cards; only `.hidden` reliably hides them.
+    expect(masterCard?.hidden).toBe(true);
+    expect(masterCard?.classList.contains('hidden')).toBe(true);
+    expect(ppcCard?.hidden).toBe(false);
+    expect(ppcCard?.classList.contains('hidden')).toBe(false);
+    expect(masterRow?.hidden).toBe(true);
+    expect(masterRow?.classList.contains('hidden')).toBe(true);
+    expect(ppcRow?.hidden).toBe(false);
+    expect(ppcRow?.classList.contains('hidden')).toBe(false);
     expect(container.querySelector('#app-overview-visible-count')?.textContent).toBe(
       '显示 1 个应用'
     );

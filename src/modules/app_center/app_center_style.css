@@ -787,6 +787,14 @@
   overflow: visible;
 }
 
+/* Author display:flex above beats the UA [hidden] rule — force hide for filters. */
+.app-overview-card[hidden],
+.app-overview-card.hidden,
+.app-overview-list-row[hidden],
+.app-overview-list-row.hidden {
+  display: none !important;
+}
+
 .app-card-blue {
   --color-accent: var(--color-indigo-600);
   --color-bg-selected: var(--color-indigo-50);
