@@ -262,25 +262,10 @@ async function exposeCoreServicesForDebug(): Promise<void> {
   }
 }
 
-function initializeAlpineRuntime(): void {
-  mainLogger.info('Initializing Alpine.js...');
-  void withSystemSettings(settings => {
+async function ensureAlpineSettingsReady(): Promise<void> {
+  await withSystemSettings(settings => {
     settings.initAlpineSettings();
-    mainLogger.info('Alpine components registered');
-  }).catch(error => {
-    mainLogger.error('Alpine settings registration failed', error);
   });
-
-  Alpine.start();
-  mainLogger.info('Alpine.js started');
-
-  try {
-    const registry = AlpineRegistry.getInstance();
-    registry.init();
-    mainLogger.info('AlpineRegistry initialized');
-  } catch (e) {
-    mainLogger.error('AlpineRegistry initialization failed', e);
-  }
 }
 
 function isInitialHomeRoute(): boolean {
@@ -469,7 +454,23 @@ async function continueStartup(
   shouldWaitForHomeView: boolean
 ): Promise<void> {
   await exposeCoreServicesForDebug();
-  initializeAlpineRuntime();
+  // Wait for settings Alpine component registration before starting Alpine and
+  // before deferred settings HTML can evaluate x-data="settingsPanel".
+  await ensureAlpineSettingsReady();
+  if (!(window as unknown as { __sopsAlpineStarted?: boolean }).__sopsAlpineStarted) {
+    Alpine.start();
+    (window as unknown as { __sopsAlpineStarted?: boolean }).__sopsAlpineStarted = true;
+    mainLogger.info('Alpine.js started');
+  }
+
+  try {
+    const registry = AlpineRegistry.getInstance();
+    registry.init();
+    mainLogger.info('AlpineRegistry initialized');
+  } catch (e) {
+    mainLogger.error('AlpineRegistry initialization failed', e);
+  }
+
   await loadCriticalViewsAndNavigate(homeViewReady, shouldWaitForHomeView);
   initializeStartupUtilities();
   ThemeManager.restoreTheme();
