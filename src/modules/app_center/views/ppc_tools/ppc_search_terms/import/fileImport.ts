@@ -1,4 +1,5 @@
 import { showToast } from '@/common/ui/notifications';
+import { ValidationError } from '@/common/errors/AppError';
 import { getInput, getTextarea, setText } from '../ui/dom';
 import { MAX_IMPORT_FILE_SIZE_BYTES } from '../analysis/reportLimits';
 import { xlsxArrayBufferToDelimitedText } from './xlsx';
@@ -58,8 +59,12 @@ export function loadSampleReport(container: HTMLElement, callbacks: ReportImport
 
 async function readReportFile(file: File, callbacks: ReportImportCallbacks): Promise<string> {
   if (file.size > MAX_IMPORT_FILE_SIZE_BYTES) {
-    throw new Error(
-      `报表文件超过 ${callbacks.formatFileSize(MAX_IMPORT_FILE_SIZE_BYTES)}，请拆分后再导入`
+    throw new ValidationError(
+      `报表文件超过 ${callbacks.formatFileSize(MAX_IMPORT_FILE_SIZE_BYTES)}，请拆分后再导入`,
+      'PPC_IMPORT_004',
+      'fileSize',
+      file.size,
+      { module: 'ppc_search_terms', action: 'readReportFile' }
     );
   }
 

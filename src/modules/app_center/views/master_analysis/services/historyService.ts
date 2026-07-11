@@ -18,6 +18,7 @@ import type {
   AnalysisReport,
 } from '@/types/modules-business';
 import type { UserProductProfile } from '@/types/state';
+import { SystemError } from '@/common/errors/AppError';
 import { getReportFingerprint, getScrapedDataFingerprint } from './reportIdentity';
 import { registerHistoryArtifacts } from '../../../artifactEnvelopeService';
 import { setWorkspaceContextFromHistoryItem } from '../../../workspaceContext';
@@ -605,7 +606,10 @@ export const HistoryService = {
     const trimmedHistory = trimHistory(history);
     const saved = StorageService.setScrapeHistory(trimmedHistory);
     if (!saved) {
-      throw new Error('保存历史记录失败：本地存储空间不足');
+      throw new SystemError('保存历史记录失败：本地存储空间不足', 'HISTORY_001', {
+        module: 'historyService',
+        action: 'save',
+      });
     }
     historyCache = trimmedHistory;
     syncAppCenterWorkspaceFromHistoryItem(draft.historyItem);
@@ -632,7 +636,11 @@ export const HistoryService = {
 
     const saved = await StorageService.setScrapeHistoryAsync(trimmedHistory);
     if (!saved) {
-      throw new Error('保存历史记录失败：本地存储空间不足，请导出备份后清理缓存');
+      throw new SystemError(
+        '保存历史记录失败：本地存储空间不足，请导出备份后清理缓存',
+        'HISTORY_002',
+        { module: 'historyService', action: 'saveAsync' }
+      );
     }
 
     historyCache = trimmedHistory;
@@ -677,7 +685,11 @@ export const HistoryService = {
 
     const saved = StorageService.setScrapeHistory(nextHistory);
     if (!saved) {
-      throw new Error('删除历史记录失败：本地存储空间不足，请导出备份后清理缓存');
+      throw new SystemError(
+        '删除历史记录失败：本地存储空间不足，请导出备份后清理缓存',
+        'HISTORY_003',
+        { module: 'historyService', action: 'delete' }
+      );
     }
 
     historyCache = nextHistory;
@@ -695,7 +707,11 @@ export const HistoryService = {
 
     const saved = await StorageService.setScrapeHistoryAsync(nextHistory);
     if (!saved) {
-      throw new Error('删除历史记录失败：本地存储空间不足，请导出备份后清理缓存');
+      throw new SystemError(
+        '删除历史记录失败：本地存储空间不足，请导出备份后清理缓存',
+        'HISTORY_003',
+        { module: 'historyService', action: 'delete' }
+      );
     }
 
     historyCache = nextHistory;

@@ -210,15 +210,15 @@ beforeEach(() => {
     expect(checkAndLoadScraperData).toHaveBeenCalledWith(panel);
     expect(checkLoadedReport).toHaveBeenCalledWith(panel);
     expect(panel.$watch).toHaveBeenCalledWith('analysisReport', expect.any(Function));
-    expect(addSpy).toHaveBeenCalledWith('navigate-to-scraper', expect.any(Function));
+    expect(addSpy).toHaveBeenCalledWith('app:navigate-to-scraper', expect.any(Function));
 
-    window.dispatchEvent(new Event('navigate-to-scraper'));
+    window.dispatchEvent(new Event('app:navigate-to-scraper'));
     expect(panelMocks.navigateToRouteId).toHaveBeenCalledWith('scraper');
 
     panel.destroy();
 
     expect(cleanupSubscriptions).toHaveBeenCalledWith(expect.any(Array));
-    expect(removeSpy).toHaveBeenCalledWith('navigate-to-scraper', expect.any(Function));
+    expect(removeSpy).toHaveBeenCalledWith('app:navigate-to-scraper', expect.any(Function));
   });
 
   it('computes selection, target, prompt, and visual class branches', () => {

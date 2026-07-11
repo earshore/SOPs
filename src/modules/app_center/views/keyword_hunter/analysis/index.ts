@@ -14,6 +14,7 @@ import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import BaseModule from '@/common/BaseModule';
 import { showToast } from '@/common/ui';
+import { ValidationError } from '@/common/errors/AppError';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { appStore } from '@/stores/useAppStore';
 import { ErrorService } from '@/services/errorService';
@@ -195,7 +196,10 @@ function isAnalysisRunForCurrentCopy(run: ActiveAnalysisRun): boolean {
 
 function finalizeAnalysisSuccess(run: ActiveAnalysisRun, response: string): string {
   if (!response || !response.trim()) {
-    throw new Error('AI 返回内容为空，请重试');
+    throw new ValidationError('AI 返回内容为空，请重试', 'KH_ANALYSIS_001', 'response', response, {
+      module: 'keyword_hunter',
+      action: 'finalizeAnalysisSuccess',
+    });
   }
 
   run.status = 'success';

@@ -5,6 +5,7 @@ import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import { showToast } from '@/common/ui/notifications';
+import { ValidationError } from '@/common/errors/AppError';
 import { setSafeHtml } from '@/common/utils/security';
 import { callLLM, type ChatMessage } from '@/services/llmService';
 import { StorageService } from '@/services/storageService';
@@ -1512,7 +1513,13 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
 
   const assistantText = (finalText || streamedText).trim();
   if (!assistantText) {
-    throw new Error('模型没有返回任何内容，请稍后重试或检查模型/上下文配置。');
+    throw new ValidationError(
+      '模型没有返回任何内容，请稍后重试或检查模型/上下文配置。',
+      'DEEP_CHAT_001',
+      'assistantText',
+      assistantText,
+      { module: 'deep-chat', action: 'resolveAssistantText' }
+    );
   }
 
   return assistantText;

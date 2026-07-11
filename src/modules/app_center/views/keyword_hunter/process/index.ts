@@ -13,6 +13,7 @@ import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import BaseModule from '@/common/BaseModule';
 import { showToast } from '@/common/ui';
+import { ValidationError } from '@/common/errors/AppError';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import * as KeywordHunterService from '../services/keywordHunterService';
 import { KeywordHunterSnapshotService } from '../services/snapshotService';
@@ -411,7 +412,11 @@ function getNextTranslationModel(
   const modelExists = models.some(model => getTranslationModelId(model) === selectedModel);
   const fallbackModel = models[0];
   if (!fallbackModel) {
-    throw new Error('未能获取到有效模型列表');
+    throw new ValidationError('未能获取到有效模型列表', 'KH_PROCESS_001', 'models', models, {
+      module: 'keyword_hunter',
+      action: 'getNextTranslationModel',
+      provider,
+    });
   }
   return modelExists ? selectedModel : getTranslationModelId(fallbackModel);
 }

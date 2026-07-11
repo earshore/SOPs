@@ -9,6 +9,7 @@ import {
   SITE_NAME_MAP as COMMON_SITE_NAME_MAP,
   languageFlagMap as COMMON_SITE_FLAG_MAP,
 } from '@/common/constants/constants';
+import { SystemError } from '@/common/errors/AppError';
 
 function requireSiteValue(
   map: Record<string, string>,
@@ -17,7 +18,11 @@ function requireSiteValue(
 ): string {
   const value = map[code] || (fallbackCode ? map[fallbackCode] : undefined);
   if (!value) {
-    throw new Error(`Missing site config for ${code}`);
+    throw new SystemError(`Missing site config for ${code}`, 'NPI_MOCK_001', {
+      module: 'npi_tracker',
+      action: 'requireSiteValue',
+      code,
+    });
   }
   return value;
 }

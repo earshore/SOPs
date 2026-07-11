@@ -16,7 +16,7 @@ export const APP_EVENTS = {
   ROUTE_CHANGED: 'app:route-changed',
   ROUTE_BEFORE_CHANGE: 'app:route-before-change',
   ROUTE_ERROR: 'app:route-error',
-  ROUTE_REDIRECT: 'route-redirect', // 路由重定向
+  ROUTE_REDIRECT: 'app:route-redirect',
 
   // 应用生命周期
   INITIALIZED: 'app:initialized',
@@ -62,19 +62,19 @@ export const APP_EVENTS = {
   LOADING_STOP: 'app:loading-stop',
 
   // 设置相关
-  SETTINGS_OPEN: 'open-settings',
-  SETTINGS_CLOSE: 'close-settings',
+  SETTINGS_OPEN: 'app:settings-open',
+  SETTINGS_CLOSE: 'app:settings-close',
 
   // 历史记录相关
-  HISTORY_UPDATED: 'history-updated',
+  HISTORY_UPDATED: 'app:history-updated',
 
   // 导航相关
-  NAVIGATE_TO_SCRAPER: 'navigate-to-scraper',
-  NAVIGATE_TO_AI_ANALYSIS: 'navigate-to-ai-analysis',
+  NAVIGATE_TO_SCRAPER: 'app:navigate-to-scraper',
+  NAVIGATE_TO_AI_ANALYSIS: 'app:navigate-to-ai-analysis',
 
   // 动作注册
-  REGISTER_ACTIONS: 'registerActions',
-  UNREGISTER_ACTIONS: 'unregisterActions',
+  REGISTER_ACTIONS: 'app:register-actions',
+  UNREGISTER_ACTIONS: 'app:unregister-actions',
 
   // 动画相关
   ANIMATION_SETTINGS_CHANGED: 'app:animation-settings-changed',

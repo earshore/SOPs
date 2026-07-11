@@ -36,7 +36,11 @@ function copyTextWithSelectionFallback(text: string): boolean {
 
   let copied = false;
   try {
-    copied = document.execCommand('copy');
+    if (typeof document.execCommand === 'function') {
+      copied = document.execCommand('copy');
+    }
+  } catch {
+    copied = false;
   } finally {
     textarea.remove();
     if (selection) {

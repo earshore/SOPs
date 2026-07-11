@@ -15,14 +15,11 @@ export function createTemplateCopyAction(config: TemplateCopyActionConfig): () =
     config.ownerField.save(owner);
     const template = config.buildTemplate(owner);
 
-    try {
-      if (!(await copyTextToClipboard(template))) {
-        throw new Error('clipboard unavailable');
-      }
-
-      showToast(config.successMessage, { type: 'success' });
-    } catch {
+    if (!(await copyTextToClipboard(template))) {
       showToast(config.failureMessage, { type: 'error' });
+      return;
     }
+
+    showToast(config.successMessage, { type: 'success' });
   };
 }

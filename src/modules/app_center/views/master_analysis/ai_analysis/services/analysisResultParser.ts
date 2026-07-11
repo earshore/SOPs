@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ValidationError } from '@/common/errors/AppError';
 import { parseLlmJson } from '@/common/utils/parseLlmJson';
 
 const looseRecord = z.record(z.string(), z.unknown());
@@ -99,7 +100,13 @@ export function parseAnalysisResponse(targetId: string, response: string): Parse
       .slice(0, 3)
       .map(issue => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
       .join('; ');
-    throw new Error(`AI analysis result schema mismatch for ${targetId}: ${reason}`);
+    throw new ValidationError(
+      `AI analysis result schema mismatch for ${targetId}: ${reason}`,
+      'AI_PARSER_001',
+      'result',
+      unwrapped,
+      { module: 'analysisResultParser', action: 'parseAnalysisResult', targetId }
+    );
   }
 
   return { data: validation.data, wasRepaired: parsed.wasRepaired };
@@ -120,7 +127,13 @@ export function validateAnalysisResult(targetId: string, result: unknown): boole
 
 function unwrapAnalysisResult(targetId: string, value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error(`AI analysis response for ${targetId} is not a JSON object`);
+    throw new ValidationError(
+      `AI analysis response for ${targetId} is not a JSON object`,
+      'AI_PARSER_002',
+      'response',
+      value,
+      { module: 'analysisResultParser', action: 'unwrapAnalysisResult', targetId }
+    );
   }
 
   const objectValue = value as Record<string, unknown>;

@@ -4,6 +4,7 @@
  */
 
 import { jsonrepair } from 'jsonrepair';
+import { ValidationError } from '@/common/errors/AppError';
 
 export interface ParseLlmJsonResult {
   value: unknown;
@@ -13,7 +14,10 @@ export interface ParseLlmJsonResult {
 export function parseLlmJson(response: string): ParseLlmJsonResult {
   const trimmed = stripCodeFence(response.trim());
   if (!trimmed) {
-    throw new Error('Empty LLM response');
+    throw new ValidationError('Empty LLM response', 'PARSE_LLM_001', 'response', response, {
+      module: 'parseLlmJson',
+      action: 'parseLlmJson',
+    });
   }
 
   try {
@@ -38,14 +42,26 @@ export function parseLlmJson(response: string): ParseLlmJsonResult {
   try {
     return { value: JSON.parse(jsonrepair(trimmed)), wasRepaired: true };
   } catch {
-    throw new Error('Unable to parse valid JSON from LLM response');
+    throw new ValidationError(
+      'Unable to parse valid JSON from LLM response',
+      'PARSE_LLM_002',
+      'response',
+      response,
+      {
+        module: 'parseLlmJson',
+        action: 'parseLlmJson',
+      }
+    );
   }
 }
 
 export function parseLlmJsonObject(response: string): Record<string, unknown> {
   const { value } = parseLlmJson(response);
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error('模型返回不是有效 JSON 对象');
+    throw new ValidationError('模型返回不是有效 JSON 对象', 'PARSE_LLM_003', 'response', value, {
+      module: 'parseLlmJson',
+      action: 'parseLlmJsonObject',
+    });
   }
   return value as Record<string, unknown>;
 }

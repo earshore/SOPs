@@ -504,14 +504,11 @@ function handleClosePromptModal(): void {
 }
 
 async function copyPromptText(text: string, successMessage: string): Promise<void> {
-  try {
-    if (!(await copyTextToClipboard(text))) {
-      throw new Error('clipboard unavailable');
-    }
-    showToast(successMessage, { type: 'success' });
-  } catch {
+  if (!(await copyTextToClipboard(text))) {
     showToast('复制失败，请手动选择文本复制', { type: 'error' });
+    return;
   }
+  showToast(successMessage, { type: 'success' });
 }
 
 function handleCopyPrompt(promptId: string): void {

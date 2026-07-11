@@ -151,14 +151,11 @@ export async function copyPrompt(): Promise<void> {
   const el = document.getElementById('final-prompt-output') as HTMLTextAreaElement | null;
   if (!el || el.value.length <= 10) return;
 
-  try {
-    if (!(await copyTextToClipboard(el.value))) {
-      throw new Error('clipboard unavailable');
-    }
-    showToast('Prompt 已复制', { type: 'success' });
-  } catch {
+  if (!(await copyTextToClipboard(el.value))) {
     showToast('复制失败，请重试', { type: 'error' });
+    return;
   }
+  showToast('Prompt 已复制', { type: 'success' });
 }
 
 // ==========================================
@@ -185,15 +182,11 @@ export async function copySeoKeywords(ctx: PromptlabAlpineContext): Promise<void
     return;
   }
 
-  try {
-    if (!(await copyTextToClipboard(text))) {
-      throw new Error('clipboard unavailable');
-    }
-    showToast('SEO 关键词已复制', { type: 'success' });
-  } catch (error) {
-    console.error('[Promptlab] 复制 SEO 关键词失败:', error);
+  if (!(await copyTextToClipboard(text))) {
     showToast('复制失败，请重试', { type: 'error' });
+    return;
   }
+  showToast('SEO 关键词已复制', { type: 'success' });
 }
 
 function parsePromptlabKeywords(ctx: PromptlabAlpineContext): string[] {

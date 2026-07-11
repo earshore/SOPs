@@ -6,6 +6,8 @@ const nativeLoggerConsole = globalThis.console;
 // localStorage remains the small synchronous config/secret layer.
 // ================================================================
 
+import { SystemError, ValidationError } from '@/common/errors/AppError';
+
 export type StorageClass = 'config' | 'secret' | 'user-data' | 'cache';
 export type LocalDataBucketId =
   | 'config'
@@ -265,7 +267,10 @@ function assertSupportedLocalDataExport(data: LocalDataExport): void {
     !isRecord(data.localStorage) ||
     !Array.isArray(data.indexedDB)
   ) {
-    throw new Error('不支持的本地数据备份格式');
+    throw new ValidationError('不支持的本地数据备份格式', 'LOCAL_DATA_001', 'export', data, {
+      module: 'LocalDataStore',
+      action: 'assertSupportedLocalDataExport',
+    });
   }
 }
 
@@ -275,7 +280,16 @@ function collectImportLocalStorageEntries(
   const localStorageEntries: Array<[string, string]> = [];
   for (const [key, value] of Object.entries(localStorageData)) {
     if (typeof value !== 'string') {
-      throw new Error('本地数据备份中包含无效的 localStorage 值');
+      throw new ValidationError(
+        '本地数据备份中包含无效的 localStorage 值',
+        'LOCAL_DATA_002',
+        key,
+        value,
+        {
+          module: 'LocalDataStore',
+          action: 'collectImportLocalStorageEntries',
+        }
+      );
     }
     if (classifyLocalStorageKey(key) !== null) {
       localStorageEntries.push([key, value]);
@@ -381,7 +395,10 @@ class LocalDataStoreClass {
 
   async clearBucket(bucketId: LocalDataBucketId): Promise<number> {
     if (!LOCAL_DATA_BUCKET_IDS.includes(bucketId)) {
-      throw new Error('不支持的本地数据分类');
+      throw new ValidationError('不支持的本地数据分类', 'LOCAL_DATA_003', 'bucketId', bucketId, {
+        module: 'LocalDataStore',
+        action: 'clearBucket',
+      });
     }
 
     let removed = 0;
@@ -485,7 +502,11 @@ class LocalDataStoreClass {
     for (const record of prepared.indexedRecords) {
       const saved = await this.set(record.key, record.value, record.storageClass);
       if (!saved) {
-        throw new Error(`导入 IndexedDB 记录失败: ${record.key}`);
+        throw new SystemError(`导入 IndexedDB 记录失败: ${record.key}`, 'LOCAL_DATA_004', {
+          module: 'LocalDataStore',
+          action: 'writePreparedImport',
+          key: record.key,
+        });
       }
     }
   }

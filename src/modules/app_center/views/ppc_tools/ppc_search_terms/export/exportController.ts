@@ -63,17 +63,14 @@ export async function copyActionSummary(
   const owner = readActionOwner(container);
   saveActionOwner(owner);
   const summary = buildSummaryText(rows, owner);
-  try {
-    if (!(await copyTextToClipboard(summary))) {
-      throw new Error('Clipboard API unavailable');
-    }
-    showToast('复盘模板已复制', { type: 'success' });
-  } catch {
+  if (!(await copyTextToClipboard(summary))) {
     showToast('复制失败', {
       type: 'error',
       description: '当前浏览器没有开放剪贴板写入权限',
     });
+    return;
   }
+  showToast('复盘模板已复制', { type: 'success' });
 }
 
 function downloadText(filename: string, content: string): void {

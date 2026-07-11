@@ -1,3 +1,4 @@
+import { ValidationError } from '@/common/errors/AppError';
 import { ACTION_LABELS } from '../actions/actionMetadata';
 import type { AnalysisResult } from '../analysis/analysisEngine';
 import type { PpcSearchTermsLlmDecision } from '../services/llmAnalysisService';
@@ -19,7 +20,13 @@ export function applyModelDecisions(
   const missingCount = rows.filter(row => !byId.has(row.id)).length;
 
   if (missingCount > 0) {
-    throw new Error(`模型返回结果不完整，缺少 ${missingCount} 行动作`);
+    throw new ValidationError(
+      `模型返回结果不完整，缺少 ${missingCount} 行动作`,
+      'PPC_AGENT_002',
+      'decisions',
+      missingCount,
+      { module: 'ppc_search_terms', action: 'applyModelDecisions' }
+    );
   }
 
   return rows
