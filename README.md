@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 `https://new.hongecb.store/v1` 中转站；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按当前发布版本 `v3.0.5-rc.1`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按当前发布版本 `v3.0.5-rc.2`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,7 +10,15 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-当前发布版本是 `v3.0.5-rc.1`（2026-07-10，release candidate）；最新稳定 tag 仍是 `v3.0.5`。`v3.0.5-rc.1` 基于 `v3.0.5` 之后的 Modal 与 SOPS 模板收敛工作，带来以下面向运营和维护的变化：
+当前发布版本是 `v3.0.5-rc.2`（2026-07-11，release candidate）；最新稳定 tag 仍是 `v3.0.5`。`v3.0.5-rc.2` 在 `v3.0.5-rc.1` 基础上继续收敛共享能力与架构债务，带来以下面向运营和维护的变化：
+
+- 修复应用中心总览「应用矩阵」分类筛选在生产预览包中不生效的问题，确保卡片/列表真正隐藏。
+- 统一生产路径结构化错误处理与应用级事件命名，降低模块间错误/事件风格分叉。
+- 新增共享剪贴板、模板与 LLM JSON 工具，并补充 Shared Capabilities Guide。
+- 对齐部署 CSP `connect-src` 与 Amazon 站点清单，移除废弃 CSS 半径别名。
+- 同步应用内版本显示到 `3.0.5-rc.2`。
+
+`v3.0.5-rc.1` 基线继续包含以下变化：
 
 - 新增共享确认弹窗，并将 Keyword Hunter、Master Analysis、Deep Chat 等模块的重复确认逻辑收敛到公共组件。
 - 增强 AppModal 的可组合能力与回归测试覆盖，补充 Modal 开发指南，降低后续弹窗实现分叉风险。
