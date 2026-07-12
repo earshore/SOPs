@@ -26,7 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
-## [3.0.5-rc.3] - 2026-07-12
+## [3.0.6-rc.3] - 2026-07-12
+
+> 说明：本 RC 及 `3.0.6-rc.1` / `3.0.6-rc.2` 最初误用 `3.0.5-rc.*` 标签（落在稳定版 `3.0.5` 之后）。已按 SemVer 更正为下一版本线 `3.0.6-rc.*`。
 
 ### Added
 - 应用中心总览「最近继续」重做为高密度 Resume Queue：作业上下文优先标题、短类型标签、去重 fact chips、1/2/3 列偏好持久化与空状态快捷入口。
@@ -35,14 +37,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - 拆分 `SECURE_STORAGE_SECURITY_BOUNDARY` 常量，恢复 `secureStorage` 动态导入拆包；提高 Vite chunk 体积告警阈值以匹配已知 deferred `system-settings` 包。
 - 优化入口加载：拆分系统设置、domain shells 与 Font Awesome brands 异步块。
-- 同步应用内版本显示到 `3.0.5-rc.3`。
+- 同步应用内版本显示到 `3.0.6-rc.3`。
+- 应用版本号改为只读 `package.json`，避免非 semver git tag（如 `latest`）污染 UI 版本展示。
 
 ### Fixed
 - 修复 Alpine 设置面板在懒加载后的注册竞态。
 - 修复阻塞 Vercel 构建的 Prettier 格式问题，并清理误入发布树的构建临时文件。
 - 通过 CSS 变量命名与 ESLint 复杂度拆分，恢复 `css:audit` / `lint:warning-gate` 通过。
 
-## [3.0.5-rc.2] - 2026-07-11
+## [3.0.6-rc.2] - 2026-07-11
 
 ### Added
 - 新增共享剪贴板、模板与 LLM JSON 工具，沉淀 Shared Capabilities Guide。
@@ -51,14 +54,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - 将应用级事件命名统一为 `app:` + kebab-case。
 - 对齐部署 CSP `connect-src` 与站点清单，覆盖 Amazon 全站点域名。
-- 同步应用内版本显示到 `3.0.5-rc.2`。
+- 同步应用内版本显示到 `3.0.6-rc.2`。
 
 ### Fixed
 - 修复应用中心总览「应用矩阵」分类筛选不生效：作者样式 `display:flex/grid` 覆盖了 `[hidden]`，改为 `.hidden` + 模块 CSS 强制隐藏。
 - 修复共享剪贴板在无 `execCommand` 环境下的降级路径，并同步 Promptlab / Prompts 相关测试。
 - 移除废弃 CSS 半径别名 `--radius-card` / `--radius-panel`。
 
-## [3.0.5-rc.1] - 2026-07-10
+## [3.0.6-rc.1] - 2026-07-10
 
 ### Added
 - 新增共享确认弹窗组件，并补充 AppModal 与确认弹窗回归测试覆盖。
@@ -69,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 将 Keyword Hunter、Master Analysis、Deep Chat 等模块的确认逻辑收敛到共享确认弹窗。
 - 将 SOPS 页面里的分散模板渲染与剪贴板反馈收敛到共享工具，减少页面重复实现。
 - 更新页面架构审计以识别共享 SOP 模板模块。
-- 同步应用内版本显示到 `3.0.5-rc.1`。
+- 同步应用内版本显示到 `3.0.6-rc.1`。
 
 ### Fixed
 - 修复 AppModal 打开态 host 元素不可见导致浏览器自动化无法识别弹窗的问题，并稳定 NPI Tracker 移动端 Next Step smoke 覆盖。
