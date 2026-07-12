@@ -2,7 +2,7 @@
 
 sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 `https://new.hongecb.store/v1` 中转站；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按当前发布版本 `v3.0.6-rc.3`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按当前发布版本 `v3.0.4-rc.11`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
 
 ## 产品收敛方向
 
@@ -10,48 +10,41 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-当前发布版本是 `v3.0.6-rc.3`（2026-07-12，release candidate）。GitHub `Latest` 徽章指向最新**稳定版** `v3.0.5`；当前在研 RC 为 `3.0.6` 版本线。
+当前发布版本是 `v3.0.4-rc.11`（2026-07-12，release candidate）。GitHub `Latest` 徽章指向最新**稳定版** `v3.0.4`；当前在研 RC 继续走 `3.0.4-rc.*` 序列。
 
-> SemVer 更正：曾误将稳定版 `v3.0.5` 之后的开发标记为 `v3.0.5-rc.*`。按规范 RC 只能出现在对应正式版之前，因此已整线更名为 `v3.0.6-rc.1` / `rc.2` / `rc.3`。
+> 版本线更正：曾误标为 `v3.0.5` / `v3.0.5-rc.*` / `v3.0.6-rc.*`。现统一并入 `v3.0.4-rc.8` … `v3.0.4-rc.11`。
 
-`v3.0.6-rc.3` 在 `v3.0.6-rc.2` 基础上聚焦应用中心总览与构建体验，带来以下面向运营和维护的变化：
+`v3.0.4-rc.11` 在 `v3.0.4-rc.10` 基础上聚焦应用中心总览与构建体验，带来以下面向运营和维护的变化：
 
 - 应用中心「最近继续」改为高密度 Resume Queue：上下文优先标题、fact chips、列数偏好与空状态引导。
 - 拆分安全存储边界常量，消除无效动态导入告警；调整 chunk 告警阈值匹配 deferred 系统设置包。
 - 优化入口异步加载（系统设置 / domain shells / FA brands），修复 Alpine 设置注册竞态与 Prettier 构建阻塞。
-- 应用版本号只读 `package.json`，避免非 semver git tag 污染 UI 展示；同步应用内版本到 `3.0.6-rc.3`。
+- 应用版本号只读 `package.json`，避免非 semver git tag 污染 UI 展示；同步应用内版本到 `3.0.4-rc.11`。
 
-`v3.0.6-rc.2` 基线继续包含以下变化：
+`v3.0.4-rc.10` 基线继续包含以下变化：
 
 - 修复应用中心总览「应用矩阵」分类筛选在生产预览包中不生效的问题，确保卡片/列表真正隐藏。
 - 统一生产路径结构化错误处理与应用级事件命名，降低模块间错误/事件风格分叉。
 - 新增共享剪贴板、模板与 LLM JSON 工具，并补充 Shared Capabilities Guide。
 - 对齐部署 CSP `connect-src` 与 Amazon 站点清单，移除废弃 CSS 半径别名。
-- 同步应用内版本显示到 `3.0.6-rc.2`。
+- 同步应用内版本显示到 `3.0.4-rc.10`。
 
-`v3.0.6-rc.1` 基线继续包含以下变化：
+`v3.0.4-rc.9` 基线继续包含以下变化：
 
 - 新增共享确认弹窗，并将 Keyword Hunter、Master Analysis、Deep Chat 等模块的重复确认逻辑收敛到公共组件。
 - 增强 AppModal 的可组合能力与回归测试覆盖，补充 Modal 开发指南，降低后续弹窗实现分叉风险。
 - 修复 AppModal 打开态下 host 元素不可见的问题，稳定 NPI Tracker 移动端 Next Step 弹窗 smoke 覆盖。
 - SOPS 工具页新增共享模板模块与复制动作封装，统一流程说明、复制反馈和页面测试夹具。
 - 替换 SOPS 页面里的分散剪贴板调用与 `alert` 反馈，改用统一复制结果处理。
-- 调整页面架构审计以识别共享 SOP 模板模块，并同步应用内版本显示到 `3.0.6-rc.1`。
+- 调整页面架构审计以识别共享 SOP 模板模块，并同步应用内版本显示到 `3.0.4-rc.9`。
 
-`v3.0.5` stable 基线继续包含以下变化：
+`v3.0.4-rc.8` 基线继续包含以下变化：
 
-- 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
-- 新增工作流导向条和统一确认弹窗，减少高风险数据操作误触。
-- 调整 Scraper 历史记录、数据操作和端到端测试，覆盖新的确认流程。
-- 新增 Card、Callout、Workbench UI 审计和回归测试审计脚本。
-- 统一报告与状态文案中的图标渲染，减少 emoji 依赖。
-- NPI Tracker 改用 `data-action` 操作绑定并增加确认弹窗覆盖。
-- Deep Chat prompt preview 支持 pointer-aware 交互并补充回归测试。
-- AI Analysis 报告绑定 scraped-data 指纹，减少旧报告与新采集数据混用。
-- Promptlab 拆分 readiness 状态并补充 SEO context，提升生成提示词的输入完整性。
-- 增加 Vercel 部署兼容配置，同时保留 Cloudflare Pages 作为生产部署链路。
-- 统一 AMZ_HUB 与 SOPS 内容、元数据和页面脚手架。
-- 新增 AMZ_HUB 成熟期运营视图并调整模块命名。
+- 新增循环依赖检查脚本，统一处理 Vite `?url` 资源导入后再执行 Madge 审计。
+- 整合 `v3.0.4-rc.1` 至 `v3.0.4-rc.7` 的 App Center 工作台、Deep Chat、Keyword Hunter、PPC Search Terms、系统设置和质量门禁更新。
+- 归档历史预发布检查、UI 审计、安全审计和技术债务报告，收敛文档索引与项目结构说明。
+- 将 Deep Chat bundle 固定输出到 `assets/vendor/deepChat.bundle.js`。
+- 调整 Sentry 加载方式，提升生产构建兼容性；同步应用内版本到 `3.0.4-rc.8`。
 - 沉淀质量报告与技术债务报告，优化 AI 翻译 UI。
 - 修复暗色 tile 对比度和标签重叠问题。
 - Keyword Hunter 输入页新增历史快照面板与快照服务，支持保存、恢复和删除分析状态。
