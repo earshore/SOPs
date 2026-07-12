@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import { execFileSync } from 'child_process';
 import { createRequire } from 'module';
 import { promisify } from 'util';
 import { gzip, brotliCompress, constants as zlibConstants } from 'zlib';
@@ -25,21 +24,11 @@ const devServerForwardConsole = {
 const compressibleAssetPattern = /\.(js|mjs|json|css|html)$/i;
 
 function getAppVersion() {
-  try {
-    const tag = execFileSync('git', ['describe', '--tags', '--abbrev=0'], {
-      cwd: __dirname,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-
-    if (tag) {
-      return tag.replace(/^v/i, '');
-    }
-  } catch {
-    // Fallback for builds without git metadata.
-  }
-
-  return packageJson.version;
+  // package.json is the single source of truth for the displayed app version.
+  // Do not use `git describe`: lightweight/non-semver tags (e.g. "latest")
+  // would otherwise surface as the UI version label.
+  const version = typeof packageJson.version === 'string' ? packageJson.version.trim() : '';
+  return version || '0.0.0';
 }
 
 async function collectCompressibleFiles(directory) {

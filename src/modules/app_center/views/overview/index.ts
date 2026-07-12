@@ -183,8 +183,10 @@ function parseRecentColumns(value: string | undefined): RecentColumns | null {
 }
 
 function getStoredRecentColumns(): RecentColumns {
-  return parseRecentColumns(StorageService.getRaw(RECENT_COLUMNS_STORAGE_KEY) || undefined) ||
-    DEFAULT_RECENT_COLUMNS;
+  return (
+    parseRecentColumns(StorageService.getRaw(RECENT_COLUMNS_STORAGE_KEY) || undefined) ||
+    DEFAULT_RECENT_COLUMNS
+  );
 }
 
 function applyRecentColumns(

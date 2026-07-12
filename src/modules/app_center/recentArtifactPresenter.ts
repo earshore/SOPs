@@ -187,9 +187,7 @@ function appendTypeSpecificFacts(
   blocked: Set<string>
 ): void {
   const meta = artifact.metadata || {};
-  const handlers: Partial<
-    Record<AppCenterArtifactType, () => void>
-  > = {
+  const handlers: Partial<Record<AppCenterArtifactType, () => void>> = {
     scrape_history: () => appendAsinCountFact(facts, workItem, blocked),
     analysis_report: () => pushUniqueFact(facts, '分析已就绪', blocked),
     listing_prompt: () => {
