@@ -7,38 +7,88 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- 新增 CBA 网关提供商支持
+- 新增 KR 网关提供商和 Anthropic 适配器
+- 新增 ChatAnywhere 支持
+- 新增 Cloudflare 环境部署脚本
+- 新增 NEW/CPA 网关占位符到环境文件
+
+### Changed
+- 替换旧版网关为 new_api 和 cpa
+- 更新 CB-E 网关 URL 为 sds.dpdns.org
+- 使用 chatanywhere.org 并修复 OpenAI 域名
+- 集中化 CORS 头部并优化响应
+
+### Fixed
+- 修复 CSS 构建和 API 认证问题（Cloudflare Pages）
+- 修复 Alpine.js `$cleanup` 生命周期钩子错误
+- 修复 Keyword Hunter 路由路径错误
+- 修复最小化按钮不可见问题
+
 ## [3.0.5] - 2026-07-13
 
 > 正式 GA。整合 `v3.0.4` 之后冻结线 `3.0.4-rc.1`…`rc.11` 的全部能力，并落地企业级发布治理。  
-> 本版本取代误打的历史 tag `v3.0.5`（旧指向无 Release 的中间提交）。
+> 本版本取代误打且无 Release 的历史 tag 指向；各 RC 章节下文**完整保留**，本 GA 章节在汇总之外补充发布治理与运维信息。  
+> 回滚版本：`v3.0.4`。部署目标：https://sops.hongecb.store
 
 ### Added
 - 企业级发布治理：`docs/RELEASE_POLICY.md`、Release Notes 模板、`SECURITY.md`
-- 发版脚本 `npm run release:validate|notes|package` 与 GitHub Release 流水线（产物 zip / build-info / SHA256）
-- 应用中心「最近继续」高密度 Resume Queue：上下文优先标题、fact chips、列数偏好与空状态引导
-- `recentArtifactPresenter` 展示层与单元测试
-- 共享剪贴板、SOP 模板、LLM JSON 工具与 Shared Capabilities Guide
-- 共享确认弹窗与 Modal 开发指南；Keyword Hunter / Master Analysis / Deep Chat 等收敛确认逻辑
-- App Center catalog / artifact envelope / workflow / workspace 服务与工作台能力
-- 循环依赖检查、action/import/source 命名审计接入质量门禁
-- Deep Chat 线程内联重命名、删除确认与 Keyword Hunter 快照删除确认
+- 发版脚本：`npm run release:validate` / `release:notes` / `release:package`（CHANGELOG 抽取、产物与 SHA256）
+- GitHub Release 流水线：`.github/workflows/release.yml` 与自动 notes 分类 `.github/release.yml`
+- 应用中心总览「最近继续」重做为高密度 Resume Queue：作业上下文优先标题、短类型标签、去重 fact chips、1/2/3 列偏好持久化与空状态快捷入口
+- 新增 `recentArtifactPresenter` 纯展示变换与对应单元测试，并补充设计规格文档
+- 新增共享剪贴板、模板与 LLM JSON 工具，沉淀 Shared Capabilities Guide
+- 统一生产路径错误为 `ValidationError` / `SystemError` 等结构化错误，覆盖 PPC、History、Keyword Hunter、Deep Chat 等模块
+- 新增共享确认弹窗组件，并补充 AppModal 与确认弹窗回归测试覆盖
+- 新增 Modal 开发指南，沉淀触发、焦点、关闭行为和测试约定
+- 新增 SOPS 共享模板模块、复制动作封装和页面复制工作流测试夹具
+- 新增循环依赖检查脚本，统一处理 Vite `?url` 资源导入后再执行 Madge 审计
+- 新增 App Center catalog、artifact envelope、workflow definitions 和 workspace context 服务
+- 新增 App Center 工作台评审文档和对应单元测试覆盖
+- 新增 action name、import path 和 source naming 质量审计，并接入 `ci:quality`
+- 新增 SOPS owner field 共享处理工具和测试覆盖
+- Deep Chat 线程支持内联重命名；Deep Chat / Keyword Hunter 快照删除主题化确认弹窗（取消 / Esc / 遮罩 /「不再询问」）
+- App Center 概览最近项图标盒、相对/绝对时间展示与改进 aria-label
+- PPC Search Terms 增加 action-list 产物导出和 recent UI 衔接
+- PromptLab、Keyword Hunter 和历史记录服务接入新的产物/最近上下文
 
 ### Changed
-- 应用版本号只读 `package.json`（经 Vite 注入），避免非 semver git tag 污染 UI
-- 入口异步拆分：系统设置、domain shells、Font Awesome brands
-- 生产路径统一结构化错误与 `app:` + kebab-case 事件命名
-- 对齐部署 CSP `connect-src` 与 Amazon 站点清单
-- GitHub Latest 通道规范：仅 GA 可 Latest；RC 必须 Pre-release
+- GitHub Latest 纠正为稳定版通道（本版 `v3.0.5` 为 Latest）；RC 保持 Pre-release
 - 仓库 homepage 对齐生产域 `https://sops.hongecb.store`
-- 冻结 `3.0.4-rc.*`；本版本为该线的正式收口 GA
+- 冻结 `3.0.4-rc.*` 版本线；本 GA 为其正式收口
+- 应用版本号改为只读 `package.json`（经 Vite 注入），避免非 semver git tag 污染 UI 版本展示
+- 拆分 `SECURE_STORAGE_SECURITY_BOUNDARY` 常量，恢复 `secureStorage` 动态导入拆包；提高 Vite chunk 体积告警阈值以匹配已知 deferred `system-settings` 包
+- 优化入口加载：拆分系统设置、domain shells 与 Font Awesome brands 异步块
+- 将应用级事件命名统一为 `app:` + kebab-case
+- 对齐部署 CSP `connect-src` 与站点清单，覆盖 Amazon 全站点域名
+- 将 Keyword Hunter、Master Analysis、Deep Chat 等模块的确认逻辑收敛到共享确认弹窗
+- 将 SOPS 页面里的分散模板渲染与剪贴板反馈收敛到共享工具，减少页面重复实现
+- 归档历史预发布检查、UI 审计、安全审计和技术债务报告，收敛文档索引与项目结构说明
+- 将 Deep Chat bundle 固定输出到 `assets/vendor/deepChat.bundle.js`
+- App Center 概览改为 catalog-driven 渲染，减少模板内硬编码
+- 统一 TypeScript、Vite、Vitest 和源码导入到单一 `@/` 项目别名
+- 同步应用内版本显示到 `3.0.5`
 
 ### Fixed
-- 应用矩阵分类筛选在生产包中不生效（`[hidden]` 被 display 覆盖）
-- Alpine 设置面板懒加载注册竞态
-- AppModal 打开态 host 不可见导致自动化无法识别
-- Prettier 格式阻塞构建；css/lint 门禁与废弃 CSS 半径别名
-- 剪贴板在无 `execCommand` 环境下的降级路径
-- Sentry 加载方式与生产构建兼容性
+- 修复应用中心总览「应用矩阵」分类筛选不生效：作者样式 `display:flex/grid` 覆盖了 `[hidden]`，改为 `.hidden` + 模块 CSS 强制隐藏
+- 修复 Alpine 设置面板在懒加载后的注册竞态
+- 修复 AppModal 打开态 host 元素不可见导致浏览器自动化无法识别弹窗的问题，并稳定 NPI Tracker 移动端 Next Step smoke 覆盖
+- 修复阻塞 Vercel 构建的 Prettier 格式问题，并清理误入发布树的构建临时文件
+- 通过 CSS 变量命名与 ESLint 复杂度拆分，恢复 `css:audit` / `lint:warning-gate` 通过
+- 修复共享剪贴板在无 `execCommand` 环境下的降级路径，并同步 Promptlab / Prompts 相关测试
+- 移除废弃 CSS 半径别名 `--radius-card` / `--radius-panel`
+- 替换多个 SOPS 页面里的 `alert` 复制反馈，统一成功与失败提示行为
+- 调整 Sentry 加载方式，按浏览器 SDK 和 core API 显式映射监控方法，提升生产构建兼容性
+- 强化 NPI Tracker、Restricted Words、Prompt Library 和系统设置相关回归测试覆盖
+
+### 里程碑对照（完整 RC 叙述见下文各章节）
+- `3.0.4-rc.11` — Resume Queue、版本只读 package.json、入口异步拆分、Alpine/Prettier/css 门禁修复
+- `3.0.4-rc.10` — 共享剪贴板/模板/LLM JSON、结构化错误、事件命名、应用矩阵筛选、CSP
+- `3.0.4-rc.9` — 共享确认弹窗、Modal 指南、SOP 模板模块、AppModal 可见性
+- `3.0.4-rc.8` — 循环依赖检查、rc.1–rc.7 整合、Deep Chat bundle 固定、Sentry 兼容
+- `3.0.4-rc.7`…`rc.1` — Deep Chat 重命名/删除确认、recent items 图标与时间、App Center catalog/workflow、质量审计等（详见各 RC 章节）
+
 
 ## [3.0.4-rc.11] - 2026-07-12
 

@@ -123,6 +123,8 @@ function buildReleaseBody(version: string, changelogSection: string): string {
     ? '\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA。\n'
     : '';
 
+  // Prefer full CHANGELOG section; never invent a shorter substitute.
+  // Historical RC / baseline narratives stay in docs/CHANGELOG.md and README.
   return `## SOPs ${version}
 
 **发布通道：** ${channel}  
@@ -135,13 +137,15 @@ ${preNote}
 ### 运维与部署
 
 - 产物：\`sops-dist-${version}.zip\`、\`build-info.json\`、\`SHA256SUMS.txt\`
-- 回滚：上一 GA 见 GitHub Releases（Latest 以外的正式版）
+- 回滚：上一 GA 见 GitHub Releases（Latest 以外的正式版）；README「最新发布」保留完整历史发版描述
 - 验证：首页可达、核心路由可进、LLM 网关连通、\`npm run test:e2e:smoke\`
 - 部署步骤：docs/DEPLOYMENT.md
+- 发布策略：docs/RELEASE_POLICY.md（禁止删减历史发版叙述；CHANGELOG 为 SSOT）
 
 ### 完整变更
 
-详见仓库 \`docs/CHANGELOG.md\` 中 \`${version}\` 章节。
+以下正文直接摘自 \`docs/CHANGELOG.md\` 的 \`${version}\` 章节（**完整保留，不压缩**）。  
+更早 RC / 基线的逐条描述见同文件各历史章节与仓库 README「最新发布」。
 
 ---
 

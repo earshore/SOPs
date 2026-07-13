@@ -48,13 +48,21 @@
 ## 4. 变更说明（SSOT）
 
 - **唯一事实源**：`docs/CHANGELOG.md`（Keep a Changelog）。
-- Release body 由脚本从 CHANGELOG 对应版本段落生成，再套用 [Release Notes 模板](./templates/RELEASE_NOTES_TEMPLATE.md) 补齐运维字段。
+- Release body 由脚本从 CHANGELOG 对应版本段落**完整**生成，再套用 [Release Notes 模板](./templates/RELEASE_NOTES_TEMPLATE.md) 补齐运维字段。
 - 分区至少包含：`Added` / `Changed` / `Fixed`；涉及安全时必须有 `Security`；破坏性变更用 `### Breaking` 或明确迁移步骤。
+
+### 叙述保留规则（硬性）
+
+1. **禁止**为“简洁”而删除、折叠或覆盖既有版本章节（含历史 RC / GA）。
+2. 新 GA 可在该版本章节内做**汇总 + 细化**，但必须保留此前各 RC 章节原文，或在 README「最新发布」中保留完整历史发版描述。
+3. Release Notes / README 更新时只能**追加或细化**，不得用短列表替换长列表除非原条目已原样迁入 CHANGELOG 对应章节。
+4. `Unreleased` 中尚未随本版发布的条目不得丢弃；应留在 `Unreleased` 或明确迁入正确版本号。
 
 发版前检查：
 
-- [ ] CHANGELOG 已有目标版本章节（日期正确）
-- [ ] `Unreleased` 中已落地条目已迁入该版本
+- [ ] CHANGELOG 已有目标版本章节（日期正确、条目完整）
+- [ ] `Unreleased` 中已落地条目已迁入该版本；未发布条目仍保留在 `Unreleased`
+- [ ] README / Release 未删减历史发版描述
 - [ ] 无密钥、内网账号、真实 API key
 
 ## 5. 发版门禁

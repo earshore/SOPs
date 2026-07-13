@@ -45,11 +45,12 @@
 
 ### 完整变更
 
-详见 [CHANGELOG {{VERSION}}](../CHANGELOG.md)
+Release body **必须**粘贴 CHANGELOG 中该版本的完整章节，禁止改写成更短的 bullet 列表。  
+历史 RC / 更早基线的叙述保留在 `docs/CHANGELOG.md` 与 README「最新发布」，发版时不要删除。
 
 ---
 
-### CHANGELOG 原文
+### CHANGELOG 原文（完整，不压缩）
 
 {{CHANGELOG_SECTION}}
 ```
