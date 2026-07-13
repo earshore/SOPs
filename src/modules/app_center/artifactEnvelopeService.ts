@@ -7,6 +7,7 @@ import type {
 } from '@/types/modules-business';
 import type { AppCenterWorkspaceContext } from './workspaceContext';
 import { createWorkItemIdFromHistoryItem } from './workspaceContext';
+import type { AppCenterListingCopy } from './listingCopyService';
 import { APP_CENTER_COMPLIANCE_CHECKLIST } from './workflowDefinitions';
 import {
   createComplianceReviewStates,
@@ -24,15 +25,17 @@ export type AppCenterArtifactType =
   | 'scrape_history'
   | 'analysis_report'
   | 'listing_prompt'
+  | 'listing_copy'
   | 'keyword_snapshot'
   | 'ppc_action_list'
   | 'compliance_check';
 
-/** Competitor listing workflow artifact types used for progress (5 steps). */
+/** Competitor listing workflow artifact types used for progress (6 steps). */
 export const COMPETITOR_LISTING_PROGRESS_TYPES: readonly AppCenterArtifactType[] = [
   'scrape_history',
   'analysis_report',
   'listing_prompt',
+  'listing_copy',
   'keyword_snapshot',
   'compliance_check',
 ] as const;
@@ -66,6 +69,7 @@ export interface AppCenterArtifactEnvelope {
 export interface ArtifactPayloadResolvers {
   historyExists?: (id: string) => boolean;
   promptExists?: (id: string) => boolean;
+  listingCopyExists?: (id: string) => boolean;
   keywordSnapshotExists?: (id: string) => boolean;
   ppcActionListExists?: (id: string) => boolean;
 }
@@ -407,6 +411,40 @@ export function registerKeywordSnapshotArtifact(
   });
 }
 
+function createListingCopyWorkItem(copy: AppCenterListingCopy): AppCenterWorkItem {
+  return {
+    id: copy.workItemId,
+    type: 'competitor_listing',
+    title: `${copy.marketplace || 'Marketplace'} ${copy.asinOrSku || 'Listing'} 文案作业`,
+    status: 'review_required',
+    marketplace: copy.marketplace,
+    asinOrSku: copy.asinOrSku,
+    sourceRoute: 'playground_deep_chat',
+    createdAt: copy.createdAt,
+    updatedAt: copy.createdAt,
+  };
+}
+
+export function registerListingCopyArtifact(copy: AppCenterListingCopy): AppCenterArtifactEnvelope {
+  upsertWorkItem(createListingCopyWorkItem(copy));
+
+  return upsertArtifact({
+    id: `${copy.workItemId}:listing_copy:${copy.id}`,
+    workItemId: copy.workItemId,
+    type: 'listing_copy',
+    sourceRoute: 'playground_deep_chat',
+    title: '产品文案',
+    summary: `${copy.seoKeywords.length} 个 SEO 关键词 · Deep Chat 生成`,
+    payloadRef: `listing_copy:${copy.id}`,
+    createdAt: copy.createdAt,
+    metadata: {
+      promptId: copy.promptId,
+      threadId: copy.threadId,
+      keywordCount: copy.seoKeywords.length,
+    },
+  });
+}
+
 export function registerPpcActionListArtifact(
   actionList: AppCenterPpcActionListArtifactInput,
   context: AppCenterWorkspaceContext
@@ -532,12 +570,7 @@ export function getWorkItemProgress(workItemId: string): AppCenterWorkItemProgre
     };
   }
 
-  const completedTypes = COMPETITOR_LISTING_PROGRESS_TYPES.filter(type => {
-    const artifact = artifacts.find(item => item.type === type);
-    if (!artifact) return false;
-    if (type !== 'compliance_check') return true;
-    return getComplianceReviewView(artifact).complete;
-  });
+  const completedTypes = getCompletedCompetitorListingTypes(artifacts);
   const completedSteps = completedTypes.length;
   const totalSteps = COMPETITOR_LISTING_PROGRESS_TYPES.length;
 
@@ -548,6 +581,32 @@ export function getWorkItemProgress(workItemId: string): AppCenterWorkItemProgre
     completedTypes: [...completedTypes],
     label: `已完成 ${completedSteps}/${totalSteps} 步`,
   };
+}
+
+function getCompletedCompetitorListingTypes(
+  artifacts: AppCenterArtifactEnvelope[]
+): AppCenterArtifactType[] {
+  if (!artifacts.some(artifact => artifact.type === 'scrape_history')) {
+    return COMPETITOR_LISTING_PROGRESS_TYPES.filter(type => {
+      const artifact = artifacts.find(item => item.type === type);
+      return Boolean(
+        artifact && (type !== 'compliance_check' || getComplianceReviewView(artifact).complete)
+      );
+    });
+  }
+
+  const completedTypes: AppCenterArtifactType[] = [];
+  let previousStageTime = 0;
+  for (const type of COMPETITOR_LISTING_PROGRESS_TYPES) {
+    const artifact = artifacts.find(
+      item => item.type === type && getTime(item.createdAt) >= previousStageTime
+    );
+    if (!artifact) break;
+    if (type === 'compliance_check' && !getComplianceReviewView(artifact).complete) break;
+    completedTypes.push(type);
+    previousStageTime = getTime(artifact.createdAt);
+  }
+  return completedTypes;
 }
 
 function createHistoryPayloadLookup(
@@ -580,6 +639,16 @@ function createKeywordSnapshotPayloadLookup(
   };
 }
 
+function createListingCopyPayloadLookup(
+  artifact: AppCenterArtifactEnvelope,
+  resolvers: ArtifactPayloadResolvers
+): ArtifactPayloadLookup {
+  return {
+    id: artifact.payloadRef.replace(/^listing_copy:/, ''),
+    exists: resolvers.listingCopyExists,
+  };
+}
+
 function createPpcActionListPayloadLookup(
   artifact: AppCenterArtifactEnvelope,
   resolvers: ArtifactPayloadResolvers
@@ -602,6 +671,7 @@ const ARTIFACT_PAYLOAD_LOOKUP_FACTORIES: Partial<
   scrape_history: createHistoryPayloadLookup,
   analysis_report: createHistoryPayloadLookup,
   listing_prompt: createPromptPayloadLookup,
+  listing_copy: createListingCopyPayloadLookup,
   keyword_snapshot: createKeywordSnapshotPayloadLookup,
   ppc_action_list: createPpcActionListPayloadLookup,
 };

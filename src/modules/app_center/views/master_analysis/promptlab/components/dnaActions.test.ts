@@ -68,7 +68,7 @@ function createContext(profile: Partial<UserProductProfile> = {}): PromptlabAlpi
     saveState: vi.fn(),
     renderReportAnalysis: vi.fn(),
     initializeGranularSelections: vi.fn(),
-    handoffListingPromptToKeywordHunter: vi.fn(),
+    handoffListingPromptToDeepChat: vi.fn(),
   };
 }
 

@@ -14,6 +14,18 @@ import { getRuntimeDeepChatOptions } from '@/services/runtimeStrategyService';
 import { LocalDataStore } from '@/services/localDataStore';
 import { appStore } from '@/stores/useAppStore';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
+import { registerListingCopyArtifact } from '@/modules/app_center/artifactEnvelopeService';
+import { applyListingCopyToKeywordHunter } from '@/modules/app_center/keywordHunterListingHandoff';
+import {
+  saveListingCopy,
+  type AppCenterListingCopy,
+} from '@/modules/app_center/listingCopyService';
+import {
+  consumeListingPromptForDeepChat,
+  createListingPromptWorkflowContext,
+  type ListingPromptWorkflowContext,
+} from '@/modules/app_center/listingWorkflowHandoff';
+import { setWorkspaceContext } from '@/modules/app_center/workspaceContext';
 import type { LLMProviderConfig } from '@/types/state';
 import { confirmWithModal } from './utils/confirmModal';
 import {
@@ -160,6 +172,10 @@ class DeepChatModule extends BaseModule {
     initDeepChat(this.container);
     await refreshLLMConfig(this.container);
     bindControls(this.container);
+    const promptContext = consumeListingPromptForDeepChat();
+    if (promptContext) {
+      createThreadFromListingPromptContext(this.container, promptContext);
+    }
   }
 
   protected onUnmount(): void {
@@ -278,7 +294,10 @@ function initDeepChat(container: HTMLElement): void {
   configureDeepChatStyles(chat);
   configureDeepChatConnection(chat, container, handleDeepChatRequest);
   chat.onRender?.();
-  setupMessageToolbars(chat, () => getThreadDisplayMessages(getActiveThread()));
+  setupMessageToolbars(chat, () => getThreadDisplayMessages(getActiveThread()), {
+    canSendToKeywordHunter: () => Boolean(getActiveListingPromptContext()),
+    sendToKeywordHunter: (content, message) => sendAssistantCopyToKeywordHunter(content, message),
+  });
   setConversationActive(
     container,
     activeThread.messages.length > 0 || pendingRequests.has(activeThread.id)
@@ -1199,7 +1218,9 @@ async function handleDeepChatRequest(
     lifecyclePendingRequest = pendingRequest;
     bindStopSignal(signals, pendingRequest);
     pendingRequests.set(activeThread.id, pendingRequest);
-    saveThreadMessages(container, conversationMessages, '', { threadId: activeThread.id });
+    saveThreadMessages(container, conversationMessages, '', {
+      threadId: activeThread.id,
+    });
     syncPendingRequestView(activeThread.id);
     notifyContextBudgetApplied(droppedMessageCount);
 
@@ -1308,7 +1329,9 @@ async function prepareDeepChatRequest(
 }
 
 async function rejectDeepChatRequest(signals: DeepChatSignals, error: string): Promise<void> {
-  await emitDeepChatResponse(signals, { text: formatDeepChatErrorResponse(error) });
+  await emitDeepChatResponse(signals, {
+    text: formatDeepChatErrorResponse(error),
+  });
 }
 
 function formatDeepChatErrorResponse(error: string): string {
@@ -1462,7 +1485,9 @@ function stopPendingRequest(threadId: string, options: { replaceChat?: boolean }
   preserveStoppedResponse(threadId);
   pendingRequests.delete(threadId);
   renderMountedThreadList();
-  syncPendingRequestView(threadId, { replaceChat: options.replaceChat ?? true });
+  syncPendingRequestView(threadId, {
+    replaceChat: options.replaceChat ?? true,
+  });
   return true;
 }
 
@@ -1576,6 +1601,12 @@ function createThread(container: HTMLElement, options: CreateThreadOptions = {})
   const nextThread: DeepChatThread = {
     ...createEmptyThread(),
     ...(options.promptDraftId ? { promptDraftId: options.promptDraftId } : {}),
+    ...(options.listingPromptContext
+      ? {
+          listingPromptContext: cloneListingPromptContext(options.listingPromptContext),
+        }
+      : {}),
+    ...(options.draftText ? { draftText: options.draftText } : {}),
   };
   threadStore = {
     activeThreadId: nextThread.id,
@@ -1587,20 +1618,128 @@ function createThread(container: HTMLElement, options: CreateThreadOptions = {})
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
   if (options.toastMessage !== null) {
-    showToast(options.toastMessage || '已创建新的 Deep Chat 会话', { type: 'success' });
+    showToast(options.toastMessage || '已创建新的 Deep Chat 会话', {
+      type: 'success',
+    });
   }
 }
 
 function createThreadFromPromptDraft(container: HTMLElement, promptId: string): void {
   const promptDraft = getPromptDrafts().find(item => item.id === promptId);
   if (!promptDraft) {
-    showToast('未找到可用 Prompt，请回到 Prompt 生成页面重新生成', { type: 'warning' });
+    showToast('未找到可用 Prompt，请回到 Prompt 生成页面重新生成', {
+      type: 'warning',
+    });
     renderPromptDraftsForActiveThread(container);
     return;
   }
 
-  createThread(container, { toastMessage: null, promptDraftId: promptId });
+  const listingPromptContext =
+    promptDraft.promptType === 'listing'
+      ? createListingPromptWorkflowContext(promptDraft)
+      : undefined;
+  createThread(container, {
+    toastMessage: null,
+    promptDraftId: promptId,
+    listingPromptContext,
+    draftText: promptDraft.prompt,
+  });
   window.setTimeout(() => fillPromptDraftInput(container, promptDraft.prompt), 80);
+}
+
+function createThreadFromListingPromptContext(
+  container: HTMLElement,
+  promptContext: ListingPromptWorkflowContext
+): void {
+  createThread(container, {
+    toastMessage: null,
+    promptDraftId: promptContext.promptId,
+    listingPromptContext: promptContext,
+    draftText: promptContext.prompt,
+  });
+  window.setTimeout(() => fillPromptDraftInput(container, promptContext.prompt), 80);
+}
+
+function cloneListingPromptContext(
+  context: ListingPromptWorkflowContext
+): ListingPromptWorkflowContext {
+  return {
+    ...context,
+    seoKeywords: [...context.seoKeywords],
+  };
+}
+
+function getActiveListingPromptContext(): ListingPromptWorkflowContext | null {
+  const activeThread = getActiveThread();
+  if (activeThread.listingPromptContext) {
+    return cloneListingPromptContext(activeThread.listingPromptContext);
+  }
+
+  if (!activeThread.promptDraftId) return null;
+  const prompt = getPromptDrafts().find(
+    item => item.id === activeThread.promptDraftId && item.promptType === 'listing'
+  );
+  return prompt ? createListingPromptWorkflowContext(prompt) : null;
+}
+
+async function sendAssistantCopyToKeywordHunter(
+  content: string,
+  message?: DeepChatMessage
+): Promise<void> {
+  const promptContext = getActiveListingPromptContext();
+  if (!promptContext) {
+    showToast('请先在右侧 Prompt 列表选择一个 Listing Prompt', {
+      type: 'warning',
+    });
+    return;
+  }
+  if (promptContext.seoKeywords.length === 0) {
+    showToast('当前 Prompt 没有关联 SEO 关键词，请回到 Prompt 生成页面补充', {
+      type: 'warning',
+    });
+    return;
+  }
+
+  const trimmedContent = content.trim();
+  if (!trimmedContent) return;
+  const activeThread = getActiveThread();
+  const createdAtMs = Number.isFinite(message?.createdAt) ? Number(message?.createdAt) : Date.now();
+  const copy: AppCenterListingCopy = {
+    id: `${activeThread.id}:${createdAtMs}`,
+    workItemId: promptContext.workItemId,
+    promptId: promptContext.promptId,
+    threadId: activeThread.id,
+    content: trimmedContent,
+    seoKeywords: [...promptContext.seoKeywords],
+    marketplace: promptContext.marketplace,
+    asinOrSku: promptContext.asinOrSku,
+    createdAt: new Date().toISOString(),
+  };
+
+  try {
+    saveListingCopy(copy);
+    registerListingCopyArtifact(copy);
+    applyListingCopyToKeywordHunter(copy);
+    setWorkspaceContext({
+      workItemId: copy.workItemId,
+      marketplace: copy.marketplace as never,
+      asinOrSku: copy.asinOrSku,
+      sourceRoute: 'keyword_hunter_input',
+    });
+
+    const didNavigate = await navigateToRouteId('keyword_hunter_input');
+    showToast(
+      didNavigate
+        ? `已带入产品文案和 ${copy.seoKeywords.length} 个 SEO 关键词`
+        : '产品文案已保存，但无法打开 Keyword Hunter',
+      { type: didNavigate ? 'success' : 'warning' }
+    );
+  } catch (error) {
+    console.error('[DeepChat] 推送产品文案失败:', error);
+    showToast(error instanceof Error ? error.message : '推送产品文案失败，请重试', {
+      type: 'error',
+    });
+  }
 }
 
 async function deletePromptDraft(container: HTMLElement, promptId: string): Promise<void> {
@@ -1646,7 +1785,9 @@ function fillPromptDraftInput(container: HTMLElement, prompt: string, attempts =
       window.setTimeout(() => fillPromptDraftInput(container, prompt, attempts - 1), 50);
       return;
     }
-    showToast('已创建新会话，但输入框尚未就绪，请稍后重试', { type: 'warning' });
+    showToast('已创建新会话，但输入框尚未就绪，请稍后重试', {
+      type: 'warning',
+    });
     return;
   }
 
@@ -1657,7 +1798,9 @@ function fillPromptDraftInput(container: HTMLElement, prompt: string, attempts =
     const latestInput = getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#text-input');
     if (latestInput?.textContent?.includes(prompt)) {
       chat.focusInput?.();
-      showToast('已创建新会话并填入 Prompt，确认后可手动发送', { type: 'success' });
+      showToast('已创建新会话并填入 Prompt，确认后可手动发送', {
+        type: 'success',
+      });
       return;
     }
 
@@ -1666,7 +1809,9 @@ function fillPromptDraftInput(container: HTMLElement, prompt: string, attempts =
       return;
     }
 
-    showToast('已创建新会话，但输入框尚未就绪，请稍后重试', { type: 'warning' });
+    showToast('已创建新会话，但输入框尚未就绪，请稍后重试', {
+      type: 'warning',
+    });
   }, 80);
 }
 
@@ -2050,7 +2195,9 @@ function persistThreadStore(): void {
     'user-data'
   ).then(saved => {
     if (!saved) {
-      showToast('Deep Chat 会话保存失败：空间不足，请导出备份后清理缓存', { type: 'error' });
+      showToast('Deep Chat 会话保存失败：空间不足，请导出备份后清理缓存', {
+        type: 'error',
+      });
     }
   });
 }
@@ -2161,7 +2308,9 @@ function createPendingRequest(
   conversationMessages: ChatMessage[],
   controller: AbortController
 ): PendingDeepChatRequest {
-  return createPendingDeepChatRequest(threadId, conversationMessages, { controller });
+  return createPendingDeepChatRequest(threadId, conversationMessages, {
+    controller,
+  });
 }
 
 function appendPendingAssistantText(pendingRequest: PendingDeepChatRequest, delta: string): void {
@@ -2452,12 +2601,31 @@ function getSanitizedThreadOptionalFields(thread: DeepChatThread): Partial<DeepC
   const customTitle = getOptionalString(thread.customTitle);
   const promptDraftId = getOptionalString(thread.promptDraftId);
   const pinnedAt = getOptionalFiniteTimestamp(thread.pinnedAt);
+  const listingPromptContext = getSanitizedListingPromptContext(thread.listingPromptContext);
 
   return {
     ...(customTitle ? { customTitle } : {}),
     ...(promptDraftId ? { promptDraftId } : {}),
+    ...(listingPromptContext ? { listingPromptContext } : {}),
     ...(pinnedAt ? { pinnedAt } : {}),
   };
+}
+
+function getSanitizedListingPromptContext(value: unknown): ListingPromptWorkflowContext | null {
+  if (!value || typeof value !== 'object') return null;
+  const context = value as Partial<ListingPromptWorkflowContext>;
+  if (
+    typeof context.promptId !== 'string' ||
+    typeof context.prompt !== 'string' ||
+    typeof context.workItemId !== 'string' ||
+    typeof context.marketplace !== 'string' ||
+    typeof context.asinOrSku !== 'string' ||
+    !Array.isArray(context.seoKeywords) ||
+    !context.seoKeywords.every(keyword => typeof keyword === 'string')
+  ) {
+    return null;
+  }
+  return cloneListingPromptContext(context as ListingPromptWorkflowContext);
 }
 
 function getSanitizedThreadMessages(

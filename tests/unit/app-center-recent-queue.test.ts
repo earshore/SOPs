@@ -9,6 +9,8 @@ import {
   getWorkItemProgress,
   registerComplianceCheckArtifact,
   registerHistoryArtifacts,
+  registerKeywordSnapshotArtifact,
+  registerListingCopyArtifact,
   registerPpcActionListArtifact,
 } from '@/modules/app_center/artifactEnvelopeService';
 import {
@@ -23,7 +25,7 @@ import {
   type RecentQueueViewOptions,
 } from '@/modules/app_center/recentQueueService';
 import { buildResumeClipboardSummary } from '@/modules/app_center/recentArtifactPresenter';
-import type { HistoryItem, ScrapedData } from '@/types/modules-business';
+import type { HistoryItem, KeywordHunterSnapshot, ScrapedData } from '@/types/modules-business';
 
 function createScrapedData(): ScrapedData {
   return {
@@ -62,6 +64,88 @@ function createHistoryItem(): HistoryItem {
       analysisReport: { type: 'analysis', data: 'report' } as never,
     },
   };
+}
+
+function createHistoryItemWithPrompt(): HistoryItem {
+  const history = createHistoryItem();
+  const prompt = {
+    id: 'prompt-001',
+    type: 'listing' as const,
+    prompt: 'Generate product copy',
+    generatedAt: '2026-01-01T00:20:00.000Z',
+    historyId: history.id,
+    asins: history.asins,
+    marketplace: history.site,
+    profile: { keywordsTier1: 'haupt keyword', keywordsTier2: 'longtail' },
+  };
+  history.promptResults = {
+    listing: prompt,
+    history: [prompt],
+    updatedAt: prompt.generatedAt,
+  };
+  return history;
+}
+
+function createKeywordSnapshot(): KeywordHunterSnapshot {
+  return {
+    id: 'keyword-001',
+    schemaVersion: 1,
+    title: 'First keyword review',
+    status: 'matched',
+    createdAt: '2026-01-01T00:30:00.000Z',
+    updatedAt: '2026-01-01T00:30:00.000Z',
+    source: { type: 'manual' },
+    input: {
+      keywordsInputText: 'haupt keyword\nlongtail',
+      copyInputText: 'First product copy',
+      settings: {
+        matchPlural: true,
+        matchStem: true,
+        matchCase: false,
+        matchPartial: false,
+      },
+    },
+    result: {
+      keywords: ['haupt keyword', 'longtail'],
+      processedCopy: 'First product copy',
+      matchedKeywords: [],
+      unmatchedKeywords: [],
+      wordFrequency: [],
+      paragraphs: [],
+      llmAnalysisResult: '',
+      coverageRate: 100,
+    },
+    derived: {
+      keywordCount: 2,
+      matchedCount: 2,
+      unmatchedCount: 0,
+      copyHash: 'copy-hash',
+      snapshotFingerprint: 'snapshot-fingerprint',
+    },
+  };
+}
+
+function registerWorkflowThroughKeywordReview(): void {
+  registerHistoryArtifacts(createHistoryItemWithPrompt());
+  registerListingCopyArtifact({
+    id: 'copy-001',
+    workItemId: 'competitor_listing:hist-001',
+    promptId: 'prompt-001',
+    threadId: 'thread-1',
+    content: 'First product copy',
+    seoKeywords: ['haupt keyword', 'longtail'],
+    marketplace: 'DE',
+    asinOrSku: 'B000000001',
+    createdAt: '2026-01-01T00:25:00.000Z',
+  });
+  registerKeywordSnapshotArtifact(createKeywordSnapshot(), {
+    workItemId: 'competitor_listing:hist-001',
+    marketplace: 'DE',
+    language: 'German',
+    asinOrSku: 'B000000001',
+    sourceRoute: 'keyword_hunter_analysis',
+    updatedAt: '2026-01-01T00:30:00.000Z',
+  });
 }
 
 function makeEnvelope(
@@ -110,7 +194,11 @@ describe('App Center recent queue service', () => {
         type: 'ppc_action_list',
         payloadRef: 'ppc_action_list:p1',
         createdAt: '2026-01-01T02:00:00.000Z',
-        metadata: { requiresHumanConfirmation: true, rowCount: 2, owner: '广告小张' },
+        metadata: {
+          requiresHumanConfirmation: true,
+          rowCount: 2,
+          owner: '广告小张',
+        },
       }),
     ];
     const workItems = [makeWorkItem()];
@@ -154,7 +242,10 @@ describe('App Center recent queue service', () => {
       }),
     ];
     const workItems = [
-      makeWorkItem({ id: 'competitor_listing:hist-001', status: 'review_required' }),
+      makeWorkItem({
+        id: 'competitor_listing:hist-001',
+        status: 'review_required',
+      }),
       makeWorkItem({
         id: 'competitor_listing:hist-002',
         status: 'in_progress',
@@ -215,7 +306,10 @@ describe('App Center recent queue service', () => {
     ];
     const workItems = [
       makeWorkItem({ id: 'competitor_listing:hist-001' }),
-      makeWorkItem({ id: 'competitor_listing:hist-002', asinOrSku: 'B000000002' }),
+      makeWorkItem({
+        id: 'competitor_listing:hist-002',
+        asinOrSku: 'B000000002',
+      }),
     ];
 
     const items = buildRecentQueueItems(envelopes, workItems, {
@@ -252,7 +346,10 @@ describe('App Center recent queue service', () => {
     ];
     const workItems = [
       makeWorkItem({ id: 'competitor_listing:hist-001' }),
-      makeWorkItem({ id: 'competitor_listing:hist-002', asinOrSku: 'B000000002' }),
+      makeWorkItem({
+        id: 'competitor_listing:hist-002',
+        asinOrSku: 'B000000002',
+      }),
     ];
 
     const items = buildRecentQueueItems(envelopes, workItems, {
@@ -302,7 +399,9 @@ describe('App Center recent queue service', () => {
     const workItems = [makeWorkItem({ id: workItemId })];
 
     pinRecentArtifact(workItemId);
-    let items = buildRecentQueueItems([scrape], workItems, { collapseStagesByWorkItem: true });
+    let items = buildRecentQueueItems([scrape], workItems, {
+      collapseStagesByWorkItem: true,
+    });
     expect(items[0]?.pinned).toBe(true);
 
     const analysis = makeEnvelope({
@@ -320,7 +419,9 @@ describe('App Center recent queue service', () => {
 
     dismissRecentArtifact(workItemId);
     expect(
-      buildRecentQueueItems([scrape, analysis], workItems, { collapseStagesByWorkItem: true })
+      buildRecentQueueItems([scrape, analysis], workItems, {
+        collapseStagesByWorkItem: true,
+      })
     ).toHaveLength(0);
     expect(
       buildRecentQueueItems([scrape, analysis], workItems, {
@@ -334,12 +435,38 @@ describe('App Center recent queue service', () => {
     registerHistoryArtifacts(createHistoryItem());
     const progress = getWorkItemProgress('competitor_listing:hist-001');
     expect(progress.completedSteps).toBeGreaterThanOrEqual(2);
-    expect(progress.totalSteps).toBe(5);
-    expect(progress.label).toMatch(/已完成 \d+\/5 步/);
+    expect(progress.totalSteps).toBe(6);
+    expect(progress.label).toMatch(/已完成 \d+\/6 步/);
+  });
+
+  it('requires a new keyword review after a newer product copy is selected', () => {
+    registerWorkflowThroughKeywordReview();
+    expect(getWorkItemProgress('competitor_listing:hist-001').completedTypes).toContain(
+      'keyword_snapshot'
+    );
+
+    registerListingCopyArtifact({
+      id: 'copy-002',
+      workItemId: 'competitor_listing:hist-001',
+      promptId: 'prompt-001',
+      threadId: 'thread-1',
+      content: 'Revised product copy',
+      seoKeywords: ['haupt keyword', 'longtail'],
+      marketplace: 'DE',
+      asinOrSku: 'B000000001',
+      createdAt: '2026-01-01T00:35:00.000Z',
+    });
+
+    expect(getWorkItemProgress('competitor_listing:hist-001').completedTypes).toEqual([
+      'scrape_history',
+      'analysis_report',
+      'listing_prompt',
+      'listing_copy',
+    ]);
   });
 
   it('does not count a pending compliance checklist as a completed step', () => {
-    registerHistoryArtifacts(createHistoryItem());
+    registerWorkflowThroughKeywordReview();
     registerComplianceCheckArtifact(
       {
         id: 'compliance-001',

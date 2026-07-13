@@ -8,7 +8,7 @@ import {
 } from '@/modules/app_center/workflowDefinitions';
 
 describe('App Center workflow definitions', () => {
-  it('defines a five-step competitor and Listing workflow with review gates', () => {
+  it('defines the complete competitor and Listing workflow with review gates', () => {
     const workflow = getAppCenterWorkflowDefinition('competitor_listing');
 
     expect(workflow.title).toBe('竞品与 Listing 作业流');
@@ -16,6 +16,7 @@ describe('App Center workflow definitions', () => {
       'scrape',
       'ai_analysis',
       'prompt_generation',
+      'listing_copy',
       'keyword_review',
       'compliance_review',
     ]);

@@ -15,11 +15,18 @@ import { copyTextToClipboard } from '@/common/utils/clipboard';
 import { appStore } from '@/stores/useAppStore';
 import { showToast } from '@/common/ui';
 import { navigateToRouteId } from '@/common/router/initRouter';
+import {
+  clearListingPromptHandoff,
+  createListingPromptWorkflowContext,
+  queueListingPromptForDeepChat,
+  type ListingPromptSource,
+} from '@/modules/app_center/listingWorkflowHandoff';
 import type { DnaConfidence, PromptlabAlpineContext, ConsoleMode } from './types';
 import type { PromptInputs, UserProductProfile } from '@/types/state';
 import type { AnalysisReport } from '@/types/modules-business';
 import { confirmWithModal } from '../../utils/confirmModal';
 import { promptlabService } from '../../services/promptlabService';
+import { HistoryService } from '../../services/historyService';
 
 // ==========================================
 // 输入框高度自适应
@@ -189,47 +196,50 @@ export async function copySeoKeywords(ctx: PromptlabAlpineContext): Promise<void
   showToast('SEO 关键词已复制', { type: 'success' });
 }
 
-function parsePromptlabKeywords(ctx: PromptlabAlpineContext): string[] {
-  const seen = new Set<string>();
-  return [ctx.profile.keywordsTier1, ctx.profile.keywordsTier2]
-    .join('\n')
-    .split(/[\n,;，；]+/)
-    .map(keyword => keyword.trim())
-    .filter(keyword => {
-      const normalized = keyword.toLowerCase();
-      if (!normalized || seen.has(normalized)) return false;
-      seen.add(normalized);
-      return true;
-    });
+function findCurrentListingPrompt(ctx: PromptlabAlpineContext): ListingPromptSource | null {
+  const listingPrompt = ctx.listingPromptCache.trim();
+  const state = appStore.getState();
+  const currentHistoryId = state.scraper.currentHistoryId;
+  const historyPrompt =
+    currentHistoryId !== null && currentHistoryId !== undefined
+      ? HistoryService.getPromptResultsById(currentHistoryId)?.history.find(
+          prompt => prompt.type === 'listing' && prompt.prompt.trim() === listingPrompt
+        )
+      : null;
+  if (historyPrompt) return historyPrompt;
+
+  return (
+    [...(state.promptlab.history || [])]
+      .filter(
+        prompt =>
+          prompt.promptType === 'listing' &&
+          prompt.prompt.trim() === listingPrompt &&
+          (currentHistoryId === null ||
+            currentHistoryId === undefined ||
+            String(prompt.historyId) === String(currentHistoryId))
+      )
+      .sort((left, right) => right.timestamp - left.timestamp)[0] || null
+  );
 }
 
-export async function handoffListingPromptToKeywordHunter(
-  ctx: PromptlabAlpineContext
-): Promise<void> {
-  const listingPrompt = ctx.listingPromptCache.trim();
-  if (!listingPrompt) {
+export async function handoffListingPromptToDeepChat(ctx: PromptlabAlpineContext): Promise<void> {
+  if (!ctx.listingPromptCache.trim()) {
     showToast('请先生成 Listing Prompt', { type: 'warning' });
     return;
   }
 
-  const keywords = parsePromptlabKeywords(ctx);
-  appStore.getState().updateKeywordTracker({
-    keywordsInputText: keywords.join('\n'),
-    copyInputText: listingPrompt,
-    keywords,
-    processedCopy: listingPrompt,
-    matchedKeywords: [],
-    unmatchedKeywords: [],
-    wordFrequency: [],
-    paragraphs: [],
-    llmAnalysisResult: '',
-    currentSnapshotId: null,
-    keywordLocationIndex: {},
-    snapshotSource: { type: 'manual' },
-  });
+  const prompt = findCurrentListingPrompt(ctx);
+  if (!prompt) {
+    showToast('未找到当前 Prompt 的生成记录，请重新生成后再试', {
+      type: 'warning',
+    });
+    return;
+  }
 
-  const didNavigate = await navigateToRouteId('keyword_hunter_input');
-  showToast(didNavigate ? '已带入 Keyword Hunter 复核' : '无法打开 Keyword Hunter', {
+  queueListingPromptForDeepChat(createListingPromptWorkflowContext(prompt));
+  const didNavigate = await navigateToRouteId('playground_deep_chat');
+  if (!didNavigate) clearListingPromptHandoff();
+  showToast(didNavigate ? '已将当前 Prompt 带入 Deep Chat' : '无法打开 Deep Chat', {
     type: didNavigate ? 'success' : 'warning',
   });
 }

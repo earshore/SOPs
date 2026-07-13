@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ListingPromptWorkflowContext } from '@/modules/app_center/listingWorkflowHandoff';
 
 const deepChatTemplate = `
   <div class="deep-chat-shell">
@@ -87,6 +88,7 @@ type ImportOptions = {
   promptHistory?: PromptHistoryState['promptlab']['history'];
   toolStrategySettings?: Record<string, unknown> | null;
   callLLM?: (...args: unknown[]) => Promise<string>;
+  pendingPromptContext?: ListingPromptWorkflowContext;
 };
 
 type TestChatMessage = {
@@ -240,6 +242,36 @@ function createDeepChatStorageService(options: ImportOptions) {
   };
 }
 
+function installListingWorkflowMocks() {
+  const mocks = {
+    saveListingCopy: vi.fn((copy: unknown) => copy),
+    registerListingCopyArtifact: vi.fn(),
+    applyListingCopyToKeywordHunter: vi.fn(),
+    setWorkspaceContext: vi.fn(),
+  };
+  vi.doMock('@/modules/app_center/listingCopyService', () => ({
+    saveListingCopy: mocks.saveListingCopy,
+  }));
+  vi.doMock('@/modules/app_center/artifactEnvelopeService', () => ({
+    registerListingCopyArtifact: mocks.registerListingCopyArtifact,
+  }));
+  vi.doMock('@/modules/app_center/keywordHunterListingHandoff', () => ({
+    applyListingCopyToKeywordHunter: mocks.applyListingCopyToKeywordHunter,
+  }));
+  vi.doMock('@/modules/app_center/workspaceContext', () => ({
+    setWorkspaceContext: mocks.setWorkspaceContext,
+  }));
+  return mocks;
+}
+
+async function prepareListingPromptHandoff(options: ImportOptions) {
+  const handoff = await import('@/modules/app_center/listingWorkflowHandoff');
+  if (options.pendingPromptContext) {
+    handoff.queueListingPromptForDeepChat(options.pendingPromptContext);
+  }
+  return handoff;
+}
+
 async function importDeepChat(options: ImportOptions = {}) {
   const localDataStore = {
     migrateLocalStorageKey: vi.fn(async () => options.storedThreadStore ?? storedThreadStore),
@@ -282,6 +314,7 @@ async function importDeepChat(options: ImportOptions = {}) {
   const confirmWithModal = vi.fn(async () => true);
 
   vi.resetModules();
+  const listingWorkflowMocks = installListingWorkflowMocks();
   vi.doMock('@/common/infrastructure/SafeModuleLoader', () => ({
     SafeTemplateLoader: {
       getInstance: () => ({
@@ -305,7 +338,9 @@ async function importDeepChat(options: ImportOptions = {}) {
     STORAGE_KEYS: deepChatStorageKeys,
     StorageService: storageService,
   }));
-  vi.doMock('@/services/localDataStore', () => ({ LocalDataStore: localDataStore }));
+  vi.doMock('@/services/localDataStore', () => ({
+    LocalDataStore: localDataStore,
+  }));
   vi.doMock('@/services/llmService', () => ({ callLLM }));
   vi.doMock('@/common/ui/notifications', () => ({ showToast: toast }));
   vi.doMock('@/stores/useAppStore', () => ({ appStore }));
@@ -316,6 +351,7 @@ async function importDeepChat(options: ImportOptions = {}) {
   }));
   vi.doMock('./utils/confirmModal', () => ({ confirmWithModal }));
 
+  const listingWorkflowHandoff = await prepareListingPromptHandoff(options);
   const module = await import('./index');
 
   return {
@@ -327,7 +363,9 @@ async function importDeepChat(options: ImportOptions = {}) {
       eventBus,
       historyService,
       localDataStore,
+      listingWorkflowHandoff,
       navigateToRouteId,
+      ...listingWorkflowMocks,
       state,
       storageService,
       toast,
@@ -413,8 +451,14 @@ beforeEach(() => {
     return 1;
   });
   vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
-  Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
-  Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+  Object.defineProperty(window, 'innerWidth', {
+    configurable: true,
+    value: 1280,
+  });
+  Object.defineProperty(window, 'innerHeight', {
+    configurable: true,
+    value: 800,
+  });
   global.ResizeObserver = class TestResizeObserver {
     observe(): void {}
     disconnect(): void {}
@@ -433,6 +477,10 @@ afterEach(() => {
   vi.doUnmock('@/common/EventBus');
   vi.doUnmock('@/common/router/initRouter');
   vi.doUnmock('@/modules/app_center/views/master_analysis/services/historyService');
+  vi.doUnmock('@/modules/app_center/listingCopyService');
+  vi.doUnmock('@/modules/app_center/artifactEnvelopeService');
+  vi.doUnmock('@/modules/app_center/keywordHunterListingHandoff');
+  vi.doUnmock('@/modules/app_center/workspaceContext');
   vi.doUnmock('./utils/confirmModal');
   vi.useRealTimers();
   vi.restoreAllMocks();
@@ -517,7 +565,9 @@ describe('deep-chat playground module', () => {
     container.querySelector<HTMLButtonElement>('#deep-chat-reset-tuning')?.click();
     expect(systemPrompt.value).toBe('');
     expect(temperature.value).toBe('0.3');
-    expect(mocks.toast).toHaveBeenCalledWith('Deep Chat 调试参数已重置', { type: 'success' });
+    expect(mocks.toast).toHaveBeenCalledWith('Deep Chat 调试参数已重置', {
+      type: 'success',
+    });
 
     container.querySelector<HTMLButtonElement>('#deep-chat-toggle-rail')?.click();
     expect(
@@ -578,6 +628,126 @@ describe('deep-chat playground module', () => {
   });
 });
 
+describe('deep-chat Listing workflow handoff', () => {
+  it('adds an icon beside copy that sends generated copy with the selected Prompt keywords', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const selectedPromptThreadStore = {
+      activeThreadId: 'thread-1',
+      threads: [
+        {
+          ...storedThreadStore.threads[0],
+          promptDraftId: 'prompt-1',
+          listingPromptContext: {
+            promptId: 'prompt-1',
+            prompt: 'Rewrite this listing with sharper benefits',
+            seoKeywords: ['wireless earbuds', 'long battery life'],
+            workItemId: 'competitor_listing:history-1',
+            marketplace: 'US',
+            asinOrSku: 'B001',
+          },
+        },
+        storedThreadStore.threads[1],
+      ],
+    };
+    const { mount, unmount, mocks } = await importDeepChat({
+      storedThreadStore: selectedPromptThreadStore,
+    });
+
+    await mount(container);
+    const shadowRoot = getChat(container).shadowRoot;
+    if (!shadowRoot) throw new Error('Deep Chat shadow root not found');
+    const outer = document.createElement('div');
+    outer.className = 'outer-message-container deep-chat-outer-container-role-ai';
+    const inner = document.createElement('div');
+    inner.className = 'inner-message-container';
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+    bubble.textContent = 'Saved answer';
+    inner.append(bubble);
+    outer.append(inner);
+    shadowRoot.querySelector('#messages')?.append(outer);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await vi.waitFor(() => {
+      expect(
+        shadowRoot.querySelector<HTMLButtonElement>('[aria-label="推送到 Keyword Hunter 复核"]')
+      ).not.toBeNull();
+    });
+    const sendButton = queryRequired<HTMLButtonElement>(
+      shadowRoot,
+      '[aria-label="推送到 Keyword Hunter 复核"]'
+    );
+    expect(sendButton.previousElementSibling?.getAttribute('aria-label')).toBe('复制消息');
+
+    sendButton.click();
+    await vi.waitFor(() => {
+      expect(mocks.navigateToRouteId).toHaveBeenCalledWith('keyword_hunter_input');
+    });
+    expect(mocks.saveListingCopy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        promptId: 'prompt-1',
+        content: 'Saved answer',
+        seoKeywords: ['wireless earbuds', 'long battery life'],
+        workItemId: 'competitor_listing:history-1',
+      })
+    );
+    expect(mocks.registerListingCopyArtifact).toHaveBeenCalled();
+    expect(mocks.applyListingCopyToKeywordHunter).toHaveBeenCalled();
+    expect(mocks.setWorkspaceContext).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workItemId: 'competitor_listing:history-1',
+        sourceRoute: 'keyword_hunter_input',
+      })
+    );
+
+    unmount();
+  });
+});
+
+describe('deep-chat Prompt handoff', () => {
+  it('consumes a Prompt handoff by creating a selected product-copy conversation', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const promptContext: ListingPromptWorkflowContext = {
+      promptId: 'prompt-1',
+      prompt: 'Rewrite this listing with sharper benefits',
+      seoKeywords: ['wireless earbuds', 'long battery life'],
+      workItemId: 'competitor_listing:history-1',
+      marketplace: 'US',
+      asinOrSku: 'B001',
+    };
+    const { mount, unmount, mocks } = await importDeepChat({
+      pendingPromptContext: promptContext,
+    });
+
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(600);
+
+    expect(getChat(container).shadowRoot?.querySelector('#text-input')?.textContent).toBe(
+      promptContext.prompt
+    );
+    expect(container.querySelector('.deep-chat-prompt-item.is-selected')?.textContent).toContain(
+      'Rewrite this listing'
+    );
+    expect(mocks.listingWorkflowHandoff.consumeListingPromptForDeepChat()).toBeNull();
+    expect(mocks.localDataStore.set).toHaveBeenCalledWith(
+      'user:playground_deep_chat_threads_v1',
+      expect.objectContaining({
+        threads: expect.arrayContaining([
+          expect.objectContaining({
+            promptDraftId: 'prompt-1',
+            listingPromptContext: promptContext,
+          }),
+        ]),
+      }),
+      'user-data'
+    );
+
+    unmount();
+  });
+});
+
 describe('deep-chat playground thread history', () => {
   it('keeps a new empty thread out of recent history until it has draft content', async () => {
     const container = document.createElement('main');
@@ -608,7 +778,10 @@ describe('deep-chat playground thread history', () => {
       throw new Error('Deep Chat shadow root not found');
     }
     queryRequired<HTMLElement>(shadowRoot, '#text-input').textContent = 'Draft only';
-    chat.onInput?.({ content: { text: 'Draft only', files: [] }, isUser: true });
+    chat.onInput?.({
+      content: { text: 'Draft only', files: [] },
+      isUser: true,
+    });
 
     expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain('New Thread');
     expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain('草稿');
@@ -855,7 +1028,9 @@ describe('deep-chat playground prompt empty state', () => {
   it('marks the PC prompt rail empty state and links to Prompt generation', async () => {
     const container = document.createElement('main');
     document.body.append(container);
-    const { mount, unmount, mocks } = await importDeepChat({ promptHistory: [] });
+    const { mount, unmount, mocks } = await importDeepChat({
+      promptHistory: [],
+    });
 
     await mount(container);
 
@@ -1140,7 +1315,11 @@ describe('deep-chat playground request stopping', () => {
         threads: expect.arrayContaining([
           expect.objectContaining({
             messages: expect.arrayContaining([
-              expect.objectContaining({ role: 'ai', text: '已停止生成。', status: 'stopped' }),
+              expect.objectContaining({
+                role: 'ai',
+                text: '已停止生成。',
+                status: 'stopped',
+              }),
             ]),
           }),
         ]),
@@ -1286,7 +1465,9 @@ describe('deep-chat playground timeout responses', () => {
 
     expect(onResponse).toHaveBeenCalledWith({ text: '已生成的' });
     expect(onResponse).toHaveBeenCalledWith({ text: '回复内容' });
-    expect(onResponse).not.toHaveBeenCalledWith({ text: '请求失败：模型响应超时(90秒)' });
+    expect(onResponse).not.toHaveBeenCalledWith({
+      text: '请求失败：模型响应超时(90秒)',
+    });
     expectStoredAssistantMessage(mocks.localDataStore.set, '已生成的回复内容');
     expect(JSON.stringify(mocks.localDataStore.set.mock.calls)).not.toContain(
       '请求失败：模型响应超时(90秒)'
@@ -1435,7 +1616,10 @@ describe('deep-chat playground inline rename validation', () => {
       'user:playground_deep_chat_threads_v1',
       expect.objectContaining({
         threads: expect.arrayContaining([
-          expect.objectContaining({ id: 'thread-2', customTitle: 'Abandoned name' }),
+          expect.objectContaining({
+            id: 'thread-2',
+            customTitle: 'Abandoned name',
+          }),
         ]),
       }),
       'user-data'
@@ -1460,7 +1644,9 @@ describe('deep-chat playground inline rename validation', () => {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     await vi.runAllTimersAsync();
 
-    expect(mocks.toast).toHaveBeenCalledWith('会话名称不能为空', { type: 'warning' });
+    expect(mocks.toast).toHaveBeenCalledWith('会话名称不能为空', {
+      type: 'warning',
+    });
     expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
       'Other thread'
     );

@@ -13,6 +13,12 @@ import {
   type ArtifactPayloadStatus,
 } from './artifactEnvelopeService';
 import { setWorkspaceContext, type AppCenterWorkspaceContext } from './workspaceContext';
+import { getListingCopyById } from './listingCopyService';
+import { applyListingCopyToKeywordHunter } from './keywordHunterListingHandoff';
+import {
+  createListingPromptWorkflowContext,
+  queueListingPromptForDeepChat,
+} from './listingWorkflowHandoff';
 import { HistoryService } from './views/master_analysis/services/historyService';
 import { KeywordHunterSnapshotService } from './views/keyword_hunter/services/snapshotService';
 import {
@@ -27,6 +33,7 @@ export type ResumeMode = 'open' | 'continue';
 export type ParsedPayloadRef =
   | { kind: 'history'; id: string; fragment?: string }
   | { kind: 'prompt'; id: string }
+  | { kind: 'listing_copy'; id: string }
   | { kind: 'keyword_snapshot'; id: string }
   | { kind: 'ppc_action_list'; id: string }
   | { kind: 'compliance_check'; id: string }
@@ -38,6 +45,7 @@ export interface ResumeRestoreTargets {
   ppcActionListId?: string;
   complianceCheckId?: string;
   promptId?: string;
+  listingCopyId?: string;
 }
 
 export interface ResumePlanOk {
@@ -78,6 +86,7 @@ const OPEN_ROUTE_BY_TYPE: Record<AppCenterArtifactType, string> = {
   scrape_history: 'scraper',
   analysis_report: 'ai_analysis',
   listing_prompt: 'promptlab',
+  listing_copy: 'keyword_hunter_input',
   keyword_snapshot: 'keyword_hunter_analysis',
   ppc_action_list: 'ppc_search_terms',
   compliance_check: 'keyword_hunter_analysis',
@@ -86,7 +95,8 @@ const OPEN_ROUTE_BY_TYPE: Record<AppCenterArtifactType, string> = {
 const NEXT_ROUTE_BY_TYPE: Record<AppCenterArtifactType, string> = {
   scrape_history: 'ai_analysis',
   analysis_report: 'promptlab',
-  listing_prompt: 'keyword_hunter_input',
+  listing_prompt: 'playground_deep_chat',
+  listing_copy: 'keyword_hunter_input',
   keyword_snapshot: 'keyword_hunter_analysis',
   ppc_action_list: 'ppc_search_terms',
   compliance_check: 'sops_restricted_words',
@@ -135,8 +145,17 @@ const RESUME_ACTIONS_BY_TYPE: Record<AppCenterArtifactType, readonly ArtifactRes
     },
     {
       mode: 'continue',
-      label: '进入关键词复核',
-      title: '将这个 Prompt 带入关键词复核',
+      label: '生成产品文案',
+      title: '使用这个 Prompt 在 Deep Chat 生成产品文案',
+      icon: 'fas fa-arrow-right',
+      primary: true,
+    },
+  ],
+  listing_copy: [
+    {
+      mode: 'continue',
+      label: '复核此产品文案',
+      title: '将产品文案与对应 SEO 关键词带入 Keyword Hunter',
       icon: 'fas fa-arrow-right',
       primary: true,
     },
@@ -208,14 +227,26 @@ export function parseArtifactPayloadRef(payloadRef: string): ParsedPayloadRef {
   if (trimmed.startsWith('prompt:')) {
     return { kind: 'prompt', id: trimmed.slice('prompt:'.length) };
   }
+  if (trimmed.startsWith('listing_copy:')) {
+    return { kind: 'listing_copy', id: trimmed.slice('listing_copy:'.length) };
+  }
   if (trimmed.startsWith('keyword_snapshot:')) {
-    return { kind: 'keyword_snapshot', id: trimmed.slice('keyword_snapshot:'.length) };
+    return {
+      kind: 'keyword_snapshot',
+      id: trimmed.slice('keyword_snapshot:'.length),
+    };
   }
   if (trimmed.startsWith('ppc_action_list:')) {
-    return { kind: 'ppc_action_list', id: trimmed.slice('ppc_action_list:'.length) };
+    return {
+      kind: 'ppc_action_list',
+      id: trimmed.slice('ppc_action_list:'.length),
+    };
   }
   if (trimmed.startsWith('compliance_check:')) {
-    return { kind: 'compliance_check', id: trimmed.slice('compliance_check:'.length) };
+    return {
+      kind: 'compliance_check',
+      id: trimmed.slice('compliance_check:'.length),
+    };
   }
   return { kind: 'unknown', id: trimmed };
 }
@@ -227,6 +258,8 @@ function buildRestoreTargets(parsed: ParsedPayloadRef): ResumeRestoreTargets {
     case 'prompt':
       // Listing prompts live on history items; resume via work item history id when possible.
       return { promptId: parsed.id };
+    case 'listing_copy':
+      return { listingCopyId: parsed.id };
     case 'keyword_snapshot':
       return { snapshotId: parsed.id };
     case 'ppc_action_list':
@@ -251,6 +284,7 @@ function createDefaultPayloadResolvers(): ArtifactPayloadResolvers {
     // Prompt / PPC / compliance envelopes are index-only; treat present envelope as available
     // unless a caller supplies a stricter resolver.
     promptExists: () => true,
+    listingCopyExists: id => Boolean(getListingCopyById(id)),
     ppcActionListExists: () => true,
   };
 }
@@ -277,6 +311,7 @@ const ASYNC_PAYLOAD_STATUS_RESOLVERS: Partial<
   history: async id => ((await HistoryService.getByIdAsync(id)) ? 'available' : 'missing'),
   prompt: async id =>
     findPromptInHistory(await HistoryService.getAllAsync(), id) ? 'available' : 'missing',
+  listing_copy: async id => (getListingCopyById(id) ? 'available' : 'missing'),
   keyword_snapshot: async id =>
     (await KeywordHunterSnapshotService.getByIdAsync(id)) ? 'available' : 'missing',
   ppc_action_list: async id => ((await getPpcActionListSnapshotById(id)) ? 'available' : 'missing'),
@@ -449,20 +484,16 @@ async function restorePromptPayload(
       prompt: selection.prompt,
     });
   } else {
-    const keywordLines = [
-      selection.prompt.profile.keywordsTier1,
-      selection.prompt.profile.keywordsTier2,
-    ]
-      .map(value => value?.trim())
-      .filter(Boolean)
-      .join('\n');
-    appStore.getState().updateKeywordTracker({
-      copyInputText: selection.prompt.prompt,
-      keywordsInputText: keywordLines,
-      currentSnapshotId: null,
-    });
+    queueListingPromptForDeepChat(createListingPromptWorkflowContext(selection.prompt));
   }
   return selection;
+}
+
+function restoreListingCopyPayload(listingCopyId: string): boolean {
+  const copy = getListingCopyById(listingCopyId);
+  if (!copy) return false;
+  applyListingCopyToKeywordHunter(copy);
+  return true;
 }
 
 async function restorePpcActionListPayload(actionListId: string): Promise<boolean> {
@@ -491,6 +522,13 @@ async function restoreKeywordTarget(plan: ResumePlanOk): Promise<string> {
     : '找不到这次关键词结果，请从最近作业中移除该记录。';
 }
 
+function restoreListingCopyTarget(plan: ResumePlanOk): string {
+  if (!plan.restore.listingCopyId) return '';
+  return restoreListingCopyPayload(plan.restore.listingCopyId)
+    ? ''
+    : '找不到这份产品文案，请从 Deep Chat 重新生成。';
+}
+
 async function restorePpcTarget(plan: ResumePlanOk): Promise<string> {
   if (!plan.restore.ppcActionListId) return '';
   return (await restorePpcActionListPayload(plan.restore.ppcActionListId))
@@ -502,6 +540,7 @@ export async function executeResumePlan(plan: ResumePlanOk): Promise<ResumeExecu
   try {
     const failureReason =
       (await restoreHistoryTarget(plan)) ||
+      restoreListingCopyTarget(plan) ||
       (await restoreKeywordTarget(plan)) ||
       (await restorePpcTarget(plan));
     if (failureReason) return { ok: false, reason: failureReason };

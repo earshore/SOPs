@@ -14,6 +14,7 @@ import {
   getWorkItems,
   registerHistoryArtifacts,
   registerKeywordSnapshotArtifact,
+  registerListingCopyArtifact,
   registerPpcActionListArtifact,
 } from '@/modules/app_center/artifactEnvelopeService';
 
@@ -186,6 +187,33 @@ describe('App Center artifact envelope service', () => {
       payloadRef: 'keyword_snapshot:kh-001',
     });
     expect(getRecentArtifacts(1)).toEqual([expect.objectContaining({ id: envelope?.id })]);
+  });
+
+  it('registers a Deep Chat product copy as the stage before keyword review', () => {
+    registerHistoryArtifacts(createHistoryItem());
+
+    const envelope = registerListingCopyArtifact({
+      id: 'thread-1:2000',
+      workItemId: 'competitor_listing:hist-001',
+      promptId: 'listing-prompt-001',
+      threadId: 'thread-1',
+      content: 'Generated product copy',
+      seoKeywords: ['haupt keyword', 'longtail'],
+      marketplace: 'DE',
+      asinOrSku: 'B000000001',
+      createdAt: '2026-01-01T00:25:00.000Z',
+    });
+
+    expect(envelope).toMatchObject({
+      type: 'listing_copy',
+      sourceRoute: 'playground_deep_chat',
+      payloadRef: 'listing_copy:thread-1:2000',
+      metadata: {
+        promptId: 'listing-prompt-001',
+        keywordCount: 2,
+      },
+    });
+    expect(getRecentArtifacts(1)[0]?.type).toBe('listing_copy');
   });
 
   it('registers PPC action lists with owner and manual confirmation metadata', () => {

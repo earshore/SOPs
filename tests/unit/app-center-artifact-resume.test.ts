@@ -10,6 +10,7 @@ import {
   registerComplianceCheckArtifact,
   registerHistoryArtifacts,
   registerKeywordSnapshotArtifact,
+  registerListingCopyArtifact,
   registerPpcActionListArtifact,
 } from '@/modules/app_center/artifactEnvelopeService';
 import {
@@ -33,6 +34,11 @@ import type {
 } from '@/types/modules-business';
 import type { AppCenterWorkspaceContext } from '@/modules/app_center/workspaceContext';
 import eventBus from '@/common/EventBus';
+import { saveListingCopy } from '@/modules/app_center/listingCopyService';
+import {
+  clearListingPromptHandoff,
+  consumeListingPromptForDeepChat,
+} from '@/modules/app_center/listingWorkflowHandoff';
 
 const historyMocks = vi.hoisted(() => ({
   getById: vi.fn(),
@@ -241,6 +247,7 @@ describe('App Center artifact resume protocol', () => {
     localStorage.clear();
     clearArtifactEnvelopeIndex();
     clearWorkspaceContext();
+    clearListingPromptHandoff();
     historyMocks.getById.mockReset();
     historyMocks.getByIdAsync.mockReset();
     historyMocks.getAllAsync.mockReset();
@@ -254,7 +261,7 @@ describe('App Center artifact resume protocol', () => {
     vi.restoreAllMocks();
   });
 
-  it('parses payload refs for history, prompt, snapshot, ppc, and compliance', () => {
+  it('parses payload refs for every resumable workflow artifact', () => {
     expect(parseArtifactPayloadRef('history:hist-001#analysis')).toEqual({
       kind: 'history',
       id: 'hist-001',
@@ -263,6 +270,10 @@ describe('App Center artifact resume protocol', () => {
     expect(parseArtifactPayloadRef('prompt:listing-prompt-001')).toEqual({
       kind: 'prompt',
       id: 'listing-prompt-001',
+    });
+    expect(parseArtifactPayloadRef('listing_copy:thread-1:2000')).toEqual({
+      kind: 'listing_copy',
+      id: 'thread-1:2000',
     });
     expect(parseArtifactPayloadRef('keyword_snapshot:kh-001')).toEqual({
       kind: 'keyword_snapshot',
@@ -284,7 +295,9 @@ describe('App Center artifact resume protocol', () => {
     expect(getArtifactOpenRouteId('analysis_report')).toBe('ai_analysis');
     expect(getArtifactNextRouteId('analysis_report')).toBe('promptlab');
     expect(getArtifactOpenRouteId('listing_prompt')).toBe('promptlab');
-    expect(getArtifactNextRouteId('listing_prompt')).toBe('keyword_hunter_input');
+    expect(getArtifactNextRouteId('listing_prompt')).toBe('playground_deep_chat');
+    expect(getArtifactOpenRouteId('listing_copy')).toBe('keyword_hunter_input');
+    expect(getArtifactNextRouteId('listing_copy')).toBe('keyword_hunter_input');
     expect(getArtifactOpenRouteId('keyword_snapshot')).toBe('keyword_hunter_analysis');
     expect(getArtifactNextRouteId('keyword_snapshot')).toBe('keyword_hunter_analysis');
     expect(getArtifactOpenRouteId('ppc_action_list')).toBe('ppc_search_terms');
@@ -300,7 +313,10 @@ describe('App Center artifact resume protocol', () => {
     ]);
     expect(getArtifactResumeActions('listing_prompt').map(action => action.label)).toEqual([
       '查看此 Prompt',
-      '进入关键词复核',
+      '生成产品文案',
+    ]);
+    expect(getArtifactResumeActions('listing_copy').map(action => action.label)).toEqual([
+      '复核此产品文案',
     ]);
     expect(getArtifactResumeActions('ppc_action_list').map(action => action.label)).toEqual([
       '查看 PPC 建议',
@@ -412,7 +428,7 @@ describe('App Center artifact resume protocol', () => {
     expect(snapshotMocks.restoreAsync).toHaveBeenCalledWith('kh-001');
   });
 
-  it('restores the selected Prompt version and carries it into keyword review', async () => {
+  it('restores the selected Prompt version and carries it into Deep Chat', async () => {
     const prompt = createPromptRecord();
     const historyItem = {
       ...createHistoryItem(),
@@ -438,11 +454,46 @@ describe('App Center artifact resume protocol', () => {
     if (!plan.ok) return;
 
     await expect(executeResumePlan(plan)).resolves.toMatchObject({ ok: true });
-    expect(appStoreMocks.state.updateKeywordTracker).toHaveBeenCalledWith({
-      copyInputText: 'Exact listing prompt',
-      keywordsInputText: 'haupt keyword\nlongtail keyword',
-      currentSnapshotId: null,
+    expect(consumeListingPromptForDeepChat()).toEqual({
+      promptId: 'listing-prompt-001',
+      prompt: 'Exact listing prompt',
+      seoKeywords: ['haupt keyword', 'longtail keyword'],
+      workItemId: 'competitor_listing:hist-001',
+      marketplace: 'DE',
+      asinOrSku: 'B000000001',
     });
+    expect(appStoreMocks.state.updateKeywordTracker).not.toHaveBeenCalled();
+  });
+
+  it('restores a selected product copy and its SEO keywords into Keyword Hunter', async () => {
+    const copy = saveListingCopy({
+      id: 'thread-1:2000',
+      workItemId: 'competitor_listing:hist-001',
+      promptId: 'listing-prompt-001',
+      threadId: 'thread-1',
+      content: 'Generated product copy',
+      seoKeywords: ['haupt keyword', 'longtail keyword'],
+      marketplace: 'DE',
+      asinOrSku: 'B000000001',
+      createdAt: '2026-01-01T00:25:00.000Z',
+    });
+    const envelope = registerListingCopyArtifact(copy);
+    const plan = buildResumePlan(envelope, createWorkItem(), 'continue');
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+
+    await expect(executeResumePlan(plan)).resolves.toMatchObject({ ok: true });
+    expect(appStoreMocks.state.updateKeywordTracker).toHaveBeenCalledWith(
+      expect.objectContaining({
+        copyInputText: 'Generated product copy',
+        keywordsInputText: 'haupt keyword\nlongtail keyword',
+        keywords: ['haupt keyword', 'longtail keyword'],
+        snapshotSource: expect.objectContaining({
+          workItemId: 'competitor_listing:hist-001',
+          sourceRoute: 'playground_deep_chat',
+        }),
+      })
+    );
   });
 
   it('restores the saved PPC suggestion snapshot before navigation', async () => {
@@ -480,7 +531,10 @@ describe('App Center artifact resume protocol', () => {
 
     expect(
       resolveResumePayloadStatus(
-        createEnvelope({ payloadRef: 'history:hist-001', type: 'scrape_history' })
+        createEnvelope({
+          payloadRef: 'history:hist-001',
+          type: 'scrape_history',
+        })
       )
     ).toBe('available');
     expect(
@@ -494,7 +548,10 @@ describe('App Center artifact resume protocol', () => {
     historyMocks.getById.mockReturnValue(undefined);
     expect(
       resolveResumePayloadStatus(
-        createEnvelope({ payloadRef: 'history:missing', type: 'scrape_history' })
+        createEnvelope({
+          payloadRef: 'history:missing',
+          type: 'scrape_history',
+        })
       )
     ).toBe('missing');
   });

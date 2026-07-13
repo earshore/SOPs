@@ -70,7 +70,7 @@ import {
   toggleConsoleMode,
   copyPrompt,
   copySeoKeywords,
-  handoffListingPromptToKeywordHunter,
+  handoffListingPromptToDeepChat,
   clearInputs,
   selectAllReportSections,
   clearReportSections,
@@ -776,8 +776,8 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     await copySeoKeywords(this as unknown as PromptlabAlpineContext);
   },
 
-  async handoffListingPromptToKeywordHunter() {
-    await handoffListingPromptToKeywordHunter(this as unknown as PromptlabAlpineContext);
+  async handoffListingPromptToDeepChat() {
+    await handoffListingPromptToDeepChat(this as unknown as PromptlabAlpineContext);
   },
 
   async clearInputs() {

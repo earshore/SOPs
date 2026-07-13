@@ -10,9 +10,15 @@ let messageToolbarObserver: MutationObserver | null = null;
 let messageToolbarTimer: number | null = null;
 let messageToolbarFrame: number | null = null;
 
+export interface MessageToolbarActions {
+  canSendToKeywordHunter?: () => boolean;
+  sendToKeywordHunter?: (content: string, message?: DeepChatMessage) => void | Promise<void>;
+}
+
 export function setupMessageToolbars(
   chat: DeepChatElement,
-  getStoredMessages: () => DeepChatMessage[]
+  getStoredMessages: () => DeepChatMessage[],
+  actions: MessageToolbarActions = {}
 ): void {
   cleanupMessageToolbars();
 
@@ -22,9 +28,9 @@ export function setupMessageToolbars(
       return;
     }
 
-    scheduleRenderMessageToolbars(chat, getStoredMessages);
+    scheduleRenderMessageToolbars(chat, getStoredMessages, actions);
     messageToolbarObserver = new MutationObserver(() =>
-      scheduleRenderMessageToolbars(chat, getStoredMessages)
+      scheduleRenderMessageToolbars(chat, getStoredMessages, actions)
     );
     messageToolbarObserver.observe(root, { childList: true, subtree: true });
   };
@@ -49,7 +55,8 @@ export function cleanupMessageToolbars(): void {
 
 function scheduleRenderMessageToolbars(
   chat: DeepChatElement,
-  getStoredMessages: () => DeepChatMessage[]
+  getStoredMessages: () => DeepChatMessage[],
+  actions: MessageToolbarActions
 ): void {
   if (messageToolbarFrame !== null) {
     return;
@@ -57,13 +64,14 @@ function scheduleRenderMessageToolbars(
 
   messageToolbarFrame = window.requestAnimationFrame(() => {
     messageToolbarFrame = null;
-    renderMessageToolbars(chat, getStoredMessages);
+    renderMessageToolbars(chat, getStoredMessages, actions);
   });
 }
 
 function renderMessageToolbars(
   chat: DeepChatElement,
-  getStoredMessages: () => DeepChatMessage[]
+  getStoredMessages: () => DeepChatMessage[],
+  actions: MessageToolbarActions
 ): void {
   const root = chat.shadowRoot;
   if (!root) {
@@ -91,7 +99,8 @@ function renderMessageToolbars(
         chat,
         bubble,
         role,
-        findStoredMessageForToolbar(storedMessages, usedStoredMessageIndexes, role, content)
+        findStoredMessageForToolbar(storedMessages, usedStoredMessageIndexes, role, content),
+        actions
       )
     );
   });
@@ -150,7 +159,8 @@ function createMessageToolbar(
   chat: DeepChatElement,
   bubble: HTMLElement,
   role: 'user' | 'ai',
-  storedMessage?: DeepChatMessage
+  storedMessage: DeepChatMessage | undefined,
+  actions: MessageToolbarActions
 ): HTMLElement {
   const toolbar = document.createElement('div');
   toolbar.className = MESSAGE_TOOLBAR_CLASS;
@@ -169,6 +179,14 @@ function createMessageToolbar(
   toolbar.appendChild(
     createToolbarButton('复制消息', getCopyIcon(), () => copyMessageContent(bubble))
   );
+
+  if (role === 'ai' && actions.sendToKeywordHunter && actions.canSendToKeywordHunter?.()) {
+    toolbar.appendChild(
+      createToolbarButton('推送到 Keyword Hunter 复核', getSendIcon(), () => {
+        void actions.sendToKeywordHunter?.(getMessageContent(bubble), storedMessage);
+      })
+    );
+  }
 
   if (role === 'user') {
     toolbar.appendChild(
@@ -259,6 +277,15 @@ function getEditIcon(): string {
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M12 20h9"></path>
       <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
+    </svg>
+  `;
+}
+
+function getSendIcon(): string {
+  return `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M22 2 11 13"></path>
+      <path d="m22 2-7 20-4-9-9-4Z"></path>
     </svg>
   `;
 }

@@ -66,7 +66,8 @@ export const APP_CENTER_WORKFLOW_DEFINITIONS: readonly AppCenterWorkflowDefiniti
   {
     id: 'competitor_listing',
     title: '竞品与 Listing 作业流',
-    description: '复用采集、AI 分析、Prompt 生成和 Keyword Hunter，形成可复核的 Listing 优化链路。',
+    description:
+      '从采集与 AI 分析生成 Prompt，在 Deep Chat 完成产品文案后，再进入关键词与合规复核。',
     primaryRouteId: 'scraper',
     steps: [
       {
@@ -103,12 +104,23 @@ export const APP_CENTER_WORKFLOW_DEFINITIONS: readonly AppCenterWorkflowDefiniti
         complianceRouteIds: [],
       },
       {
+        id: 'listing_copy',
+        title: '生成产品文案',
+        summary: '在 Deep Chat 使用选中的 Listing Prompt 生成产品文案。',
+        routeId: 'playground_deep_chat',
+        icon: 'fa-regular fa-comments',
+        inputs: ['listing_prompt', 'keyword list'],
+        outputs: ['listing_copy artifact'],
+        reviewPoints: ['确认当前会话使用的 Prompt 与 SEO 关键词来自同一次作业'],
+        complianceRouteIds: [],
+      },
+      {
         id: 'keyword_review',
         title: '关键词复核',
-        summary: '把 Prompt 或 Listing 文案带入 Keyword Hunter 复核。',
+        summary: '把 Deep Chat 生成的产品文案和对应 SEO 关键词带入 Keyword Hunter。',
         routeId: 'keyword_hunter_input',
         icon: 'fas fa-search',
-        inputs: ['listing_prompt', 'keyword list'],
+        inputs: ['listing_copy', 'keyword list'],
         outputs: ['keyword_snapshot artifact'],
         reviewPoints: ['确认补词、覆盖率和 Listing 评审结果'],
         complianceRouteIds: [],
@@ -119,7 +131,7 @@ export const APP_CENTER_WORKFLOW_DEFINITIONS: readonly AppCenterWorkflowDefiniti
         summary: '复制或导出前完成高危词、侵权、产品合规和 GPSR 复核。',
         routeId: 'keyword_hunter_analysis',
         icon: 'fas fa-shield-halved',
-        inputs: ['listing_prompt', 'keyword_snapshot'],
+        inputs: ['listing_copy', 'keyword_snapshot'],
         outputs: ['compliance_check artifact'],
         reviewPoints: ['高危词', '品牌与侵权', '产品合规', 'GPSR'],
         complianceRouteIds: [
@@ -154,7 +166,11 @@ APP_CENTER_COMPLIANCE_CHECKLIST.forEach(item => {
     throw new SystemError(
       `App Center compliance checklist references unknown SOPS route "${item.routeId}"`,
       'APP_WORKFLOW_002',
-      { module: 'workflowDefinitions', action: 'validateCompliance', routeId: item.routeId }
+      {
+        module: 'workflowDefinitions',
+        action: 'validateCompliance',
+        routeId: item.routeId,
+      }
     );
   }
 });
@@ -165,7 +181,11 @@ APP_CENTER_WORKFLOW_DEFINITIONS.forEach(workflow => {
       throw new SystemError(
         `App Center workflow references unknown route "${step.routeId}"`,
         'APP_WORKFLOW_003',
-        { module: 'workflowDefinitions', action: 'validateWorkflow', routeId: step.routeId }
+        {
+          module: 'workflowDefinitions',
+          action: 'validateWorkflow',
+          routeId: step.routeId,
+        }
       );
     }
 
@@ -174,7 +194,11 @@ APP_CENTER_WORKFLOW_DEFINITIONS.forEach(workflow => {
         throw new SystemError(
           `App Center workflow references unknown compliance route "${routeId}"`,
           'APP_WORKFLOW_004',
-          { module: 'workflowDefinitions', action: 'validateWorkflow', routeId }
+          {
+            module: 'workflowDefinitions',
+            action: 'validateWorkflow',
+            routeId,
+          }
         );
       }
     });

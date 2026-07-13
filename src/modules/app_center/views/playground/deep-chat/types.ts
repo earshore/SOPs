@@ -2,6 +2,7 @@ import type { ChatMessage } from '@/services/llmService';
 import type { LLMProviderConfig } from '@/types/state';
 import type { DeepChatMessage, DeepChatMessageStatus, DeepChatRole } from './conversationContext';
 import type { PendingDeepChatRequest } from './requestLifecycle';
+import type { ListingPromptWorkflowContext } from '@/modules/app_center/listingWorkflowHandoff';
 
 export interface DeepChatRequestBody {
   messages?: DeepChatMessage[];
@@ -55,6 +56,7 @@ export interface DeepChatThread {
   messages: DeepChatMessage[];
   draftText?: string;
   promptDraftId?: string;
+  listingPromptContext?: ListingPromptWorkflowContext;
   customTitle?: string;
   pinnedAt?: number;
   createdAt: number;
@@ -122,6 +124,8 @@ export interface PromptPreviewLeftOptions {
 export interface CreateThreadOptions {
   toastMessage?: string | null;
   promptDraftId?: string;
+  listingPromptContext?: ListingPromptWorkflowContext;
+  draftText?: string;
 }
 
 export interface SaveThreadMessagesOptions {

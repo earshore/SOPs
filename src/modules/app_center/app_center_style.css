@@ -1027,6 +1027,13 @@
   --app-recent-accent-border: var(--color-rose-100, #ffe4e6);
 }
 
+.app-overview-recent-item--listing_copy {
+  --app-recent-accent: var(--color-blue-600, #2563eb);
+  --app-recent-accent-strong: var(--color-blue-700, #1d4ed8);
+  --app-recent-accent-soft: var(--color-blue-50, #eff6ff);
+  --app-recent-accent-border: var(--color-blue-100, #dbeafe);
+}
+
 .app-overview-recent-item--keyword_snapshot {
   --app-recent-accent: var(--color-emerald-600, #059669);
   --app-recent-accent-strong: var(--color-emerald-700, #047857);

@@ -49,6 +49,7 @@ const RECENT_ARTIFACT_ICONS: Record<AppCenterArtifactType, string> = {
   scrape_history: 'fas fa-database',
   analysis_report: 'fas fa-brain',
   listing_prompt: 'fas fa-wand-magic-sparkles',
+  listing_copy: 'fas fa-file-pen',
   keyword_snapshot: 'fas fa-key',
   ppc_action_list: 'fas fa-list-check',
   compliance_check: 'fas fa-shield-halved',
@@ -76,6 +77,7 @@ const TYPE_FILTERS: Array<{
   { id: 'scrape_history', label: '采集' },
   { id: 'analysis_report', label: '分析' },
   { id: 'listing_prompt', label: 'Prompt' },
+  { id: 'listing_copy', label: '文案' },
   { id: 'keyword_snapshot', label: '关键词' },
   { id: 'ppc_action_list', label: 'PPC' },
   { id: 'compliance_check', label: '合规' },
@@ -354,15 +356,9 @@ function getCompetitorListingJourney(item: RecentQueueItem): RecentJourney {
     (highest, type, index) => (reachedTypes.has(type) ? index : highest),
     -1
   );
-  const currentIndex = complete
-    ? -1
+  const resolvedCurrentIndex = reachedTypes.has('scrape_history')
+    ? Math.min(progress.completedTypes.length, workflow.steps.length - 1)
     : Math.min(Math.max(highestReachedIndex + 1, 0), workflow.steps.length - 1);
-  const reachedCurrentIndex = COMPETITOR_LISTING_PROGRESS_TYPES.reduce(
-    (current, type, index) =>
-      reachedTypes.has(type) && !progress.completedTypes.includes(type) ? index : current,
-    -1
-  );
-  const resolvedCurrentIndex = reachedCurrentIndex >= 0 ? reachedCurrentIndex : currentIndex;
 
   return {
     currentLabel: complete
