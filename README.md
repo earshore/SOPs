@@ -15,96 +15,18 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 | 通道 | 版本 | 说明 |
 |------|------|------|
-| **GitHub Latest（稳定 GA）** | `v3.0.4` | 生产推荐版本 |
-| 当前在研 / package.json | `3.0.4-rc.11` | 预发布候选（**Pre-release**，不占 Latest） |
+| **GitHub Latest（稳定 GA）** | `v3.0.5` | 生产推荐版本 |
+| package.json | `3.0.5` | 与 tag / Release 一致 |
 
-- 历史误序：`v3.0.4` GA 之后曾继续发布 `v3.0.4-rc.*`，并误标过 `3.0.5` / `3.0.6-rc.*`。`3.0.4-rc.*` **已冻结**，后续候选走 **`3.0.5-rc.N` → `3.0.5` GA**。
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
+- 完整变更见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 
-`v3.0.4-rc.11` 在 `v3.0.4-rc.10` 基础上聚焦应用中心总览与构建体验，带来以下面向运营和维护的变化：
+`v3.0.5` 在 `v3.0.4` 之上的主要变化：
 
-- 应用中心「最近继续」改为高密度 Resume Queue：上下文优先标题、fact chips、列数偏好与空状态引导。
-- 拆分安全存储边界常量，消除无效动态导入告警；调整 chunk 告警阈值匹配 deferred 系统设置包。
-- 优化入口异步加载（系统设置 / domain shells / FA brands），修复 Alpine 设置注册竞态与 Prettier 构建阻塞。
-- 应用版本号只读 `package.json`，避免非 semver git tag 污染 UI 展示；同步应用内版本到 `3.0.4-rc.11`。
-
-`v3.0.4-rc.10` 基线继续包含以下变化：
-
-- 修复应用中心总览「应用矩阵」分类筛选在生产预览包中不生效的问题，确保卡片/列表真正隐藏。
-- 统一生产路径结构化错误处理与应用级事件命名，降低模块间错误/事件风格分叉。
-- 新增共享剪贴板、模板与 LLM JSON 工具，并补充 Shared Capabilities Guide。
-- 对齐部署 CSP `connect-src` 与 Amazon 站点清单，移除废弃 CSS 半径别名。
-- 同步应用内版本显示到 `3.0.4-rc.10`。
-
-`v3.0.4-rc.9` 基线继续包含以下变化：
-
-- 新增共享确认弹窗，并将 Keyword Hunter、Master Analysis、Deep Chat 等模块的重复确认逻辑收敛到公共组件。
-- 增强 AppModal 的可组合能力与回归测试覆盖，补充 Modal 开发指南，降低后续弹窗实现分叉风险。
-- 修复 AppModal 打开态下 host 元素不可见的问题，稳定 NPI Tracker 移动端 Next Step 弹窗 smoke 覆盖。
-- SOPS 工具页新增共享模板模块与复制动作封装，统一流程说明、复制反馈和页面测试夹具。
-- 替换 SOPS 页面里的分散剪贴板调用与 `alert` 反馈，改用统一复制结果处理。
-- 调整页面架构审计以识别共享 SOP 模板模块，并同步应用内版本显示到 `3.0.4-rc.9`。
-
-`v3.0.4-rc.8` 基线继续包含以下变化：
-
-- 新增循环依赖检查脚本，统一处理 Vite `?url` 资源导入后再执行 Madge 审计。
-- 整合 `v3.0.4-rc.1` 至 `v3.0.4-rc.7` 的 App Center 工作台、Deep Chat、Keyword Hunter、PPC Search Terms、系统设置和质量门禁更新。
-- 归档历史预发布检查、UI 审计、安全审计和技术债务报告，收敛文档索引与项目结构说明。
-- 将 Deep Chat bundle 固定输出到 `assets/vendor/deepChat.bundle.js`。
-- 调整 Sentry 加载方式，提升生产构建兼容性；同步应用内版本到 `3.0.4-rc.8`。
-- 沉淀质量报告与技术债务报告，优化 AI 翻译 UI。
-- 修复暗色 tile 对比度和标签重叠问题。
-- Keyword Hunter 输入页新增历史快照面板与快照服务，支持保存、恢复和删除分析状态。
-- Keyword Hunter 分析结果支持自动归档，减少跨步骤状态丢失。
-- Scraper 页面挂载时渲染当前采集数据，并补充当前数据与历史快照回归测试。
-- Deep Chat 增加发送回归覆盖、停止遮罩和停止竞态修复。
-- Promptlab 页面选择器、DNA 提取流程和端到端测试进一步稳定。
-- 持久化分析运行记录，处理空 LLM 响应并提升请求预算控制。
-- 拆分 AI Analysis、PPC Search Terms、Scraper import、Prompt Library 与 Keyword Highlight 热点模块。
-- 新增主题系统文档，整合 CSS token、共享 keyframes、badge/icon 样式和质量工具。
-- 刷新 Keyword Hunter 分析、输入页和快照服务测试覆盖。
-- 清理历史复杂度/技术债务报告，更新架构债务与 Kiro 状态文档。
-- 强化 Promptlab 视觉 readiness 状态与 E2E helper，减少选择器和等待抖动。
-- 新增功能开关服务和路由守卫集成，支持模块按开关控制访问。
-- 拆分 PPC Search Terms 动作、Agent、分析、导入导出、规则和 UI 模块。
-- 持久化沉浸式翻译运行记录，并补充 AI Analysis 端到端 fixture。
-- 强化 LLM streaming 解析和 Promptlab/Scraper 性能测试阈值。
-- 路由系统迁移到 routeId 优先 API，并支持 manifest 路径与重定向。
-- 移除 LegacyAdapter 和全局 legacy 路由 API，集中维护历史路由别名。
-- 增加延迟路由/模块加载骨架，减少页面切换空白感。
-- 将 PPC Search Terms 迁移到 PPC Tools，并拆分 Deep Chat 模块文件。
-- 新增路由审计脚本并整理历史本地工具/报告归档。
-- 规范化 App Center 路由命名，并补充历史路由别名。
-- 提升欢迎页、卡片、弹窗、导航与模板控件的 ARIA/focus/accessibility 支持。
-- Deep Chat 增加 pending assistant 文案和打字机反馈，稳定请求生命周期测试。
-- Scraper 导入面板补充导入状态、可访问性文案和回归覆盖。
-- Home 页面增加 Workbench 入口并统一 welcome/app_center 设计 token。
-- 强化 CSP 与 SafeRenderer 安全处理，减少内联脚本和渲染风险。
-- 收紧 LLM secret 暴露面并移除旧 timeout wrapper。
-- 增加认证路由守卫和相关测试覆盖。
-- 将 Floating Workbench 命名统一回 App Center。
-- 补充安全审计报告和 CI 质量门禁文档。
-- App Center 切换到 DeepSeek 蓝主题并更新主题色、图标和 mega-menu 语义类名。
-- 重构 Master Analysis、Promptlab、Scraper 和 App Center 概览模板与样式。
-- 新增 LLM provider 与 Scraper proxy 配置，补充系统设置入口。
-- SOPS 工具页增加统一剪贴板辅助能力。
-- 规范引号和压缩 CSS 格式，减少样式噪声。
-- 导航流程支持排队执行，并新增可折叠概览交互。
-- 重命名 Keyword Hunter 标签并格式化相关样式与测试。
-- PPC Search Terms 增加阈值设置面板并优化导入/结果布局。
-- 强化报告 UI，修复报告区块模板嵌套。
-- 刷新 App Center 与 SOPS 主题，并启用 Deep Chat prompt panel。
-- 新增 async DI、`loaderPath` API 与 SafeTemplateLoader，推动页面架构收敛。
-- 增加页面架构审计、预发布检查文档和模板实现指南。
-- 收敛 PC 端模块、模板、设计 token、动效 CSS 与概览列表视图。
-- 空状态改为任务导向并补充按钮类型、ARIA 与可访问性测试。
-- 强化模块错误、卸载流程、Loader 和 StorageService 安全性。
-- 收紧 LLM 网关配置、CSP/headers 和直连 new_api 访问。
-- 拆分 AppModal 样式并补充安全审计与发布 smoke 覆盖。
-- 使用系统字体并调整 Deep Chat、Restricted Words 与代码高亮样式。
-- 强化 HttpService Abort/timeout/retry 行为、EventBus 错误记录和持久化状态清洗。
-- 新增 Sentry SDK、监控初始化、secret leak scanner 和安全 CI 门禁。
-- 本地化 flag icons 并继续收紧 CSP 与 release 安全检查。
+- 应用中心 Resume Queue、共享确认弹窗 / 剪贴板 / SOP 模板、App Center catalog 与工作台能力。
+- 结构化错误与 `app:` 事件命名统一；CSP 与入口异步加载优化。
+- 应用版本只读 `package.json`；企业级发布治理（策略文档、Release 流水线、产物与校验和）。
+- 修复应用矩阵筛选、Alpine 设置竞态、AppModal 可见性与构建门禁阻塞等问题。
 - Deep Chat 新增 Search Chats 弹窗、线程菜单、历史线程过滤和中文界面。
 - 持久化 prompt 选择，优化 PromptLab、Settings 和 Playground 渲染体验。
 - 强化 Keyword Hunter 可访问性、拖拽交互、追踪服务和分析流程状态。

@@ -7,30 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.5] - 2026-07-13
+
+> 正式 GA。整合 `v3.0.4` 之后冻结线 `3.0.4-rc.1`…`rc.11` 的全部能力，并落地企业级发布治理。  
+> 本版本取代误打的历史 tag `v3.0.5`（旧指向无 Release 的中间提交）。
+
 ### Added
-- 发布治理：`docs/RELEASE_POLICY.md`、Release Notes 模板、`SECURITY.md`
-- 发版脚本：`npm run release:validate|notes|package`（CHANGELOG 抽取、产物与 SHA256）
-- GitHub Release 流水线：`.github/workflows/release.yml` 与自动 notes 分类 `.github/release.yml`
-- 新增 CBA 网关提供商支持
-- 新增 KR 网关提供商和 Anthropic 适配器
-- 新增 ChatAnywhere 支持
-- 新增 Cloudflare 环境部署脚本
-- 新增 NEW/CPA 网关占位符到环境文件
+- 企业级发布治理：`docs/RELEASE_POLICY.md`、Release Notes 模板、`SECURITY.md`
+- 发版脚本 `npm run release:validate|notes|package` 与 GitHub Release 流水线（产物 zip / build-info / SHA256）
+- 应用中心「最近继续」高密度 Resume Queue：上下文优先标题、fact chips、列数偏好与空状态引导
+- `recentArtifactPresenter` 展示层与单元测试
+- 共享剪贴板、SOP 模板、LLM JSON 工具与 Shared Capabilities Guide
+- 共享确认弹窗与 Modal 开发指南；Keyword Hunter / Master Analysis / Deep Chat 等收敛确认逻辑
+- App Center catalog / artifact envelope / workflow / workspace 服务与工作台能力
+- 循环依赖检查、action/import/source 命名审计接入质量门禁
+- Deep Chat 线程内联重命名、删除确认与 Keyword Hunter 快照删除确认
 
 ### Changed
-- GitHub Latest 纠正为稳定版 `v3.0.4`；`v3.0.4-rc.11` 标记为 Pre-release
+- 应用版本号只读 `package.json`（经 Vite 注入），避免非 semver git tag 污染 UI
+- 入口异步拆分：系统设置、domain shells、Font Awesome brands
+- 生产路径统一结构化错误与 `app:` + kebab-case 事件命名
+- 对齐部署 CSP `connect-src` 与 Amazon 站点清单
+- GitHub Latest 通道规范：仅 GA 可 Latest；RC 必须 Pre-release
 - 仓库 homepage 对齐生产域 `https://sops.hongecb.store`
-- 冻结 `3.0.4-rc.*` 版本线；后续候选使用 `3.0.5-rc.N`
-- 替换旧版网关为 new_api 和 cpa
-- 更新 CB-E 网关 URL 为 sds.dpdns.org
-- 使用 chatanywhere.org 并修复 OpenAI 域名
-- 集中化 CORS 头部并优化响应
+- 冻结 `3.0.4-rc.*`；本版本为该线的正式收口 GA
 
 ### Fixed
-- 修复 CSS 构建和 API 认证问题（Cloudflare Pages）
-- 修复 Alpine.js `$cleanup` 生命周期钩子错误
-- 修复 Keyword Hunter 路由路径错误
-- 修复最小化按钮不可见问题
+- 应用矩阵分类筛选在生产包中不生效（`[hidden]` 被 display 覆盖）
+- Alpine 设置面板懒加载注册竞态
+- AppModal 打开态 host 不可见导致自动化无法识别
+- Prettier 格式阻塞构建；css/lint 门禁与废弃 CSS 半径别名
+- 剪贴板在无 `execCommand` 环境下的降级路径
+- Sentry 加载方式与生产构建兼容性
 
 ## [3.0.4-rc.11] - 2026-07-12
 
