@@ -238,6 +238,7 @@ function createToolbarButton(options: {
   ariaPressed?: boolean;
   ariaExpanded?: boolean;
   ariaControls?: string;
+  iconOnly?: boolean;
 }): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
@@ -255,6 +256,7 @@ function createToolbarButton(options: {
   button.append(createIcon(options.icon));
   const span = document.createElement('span');
   span.textContent = options.label;
+  if (options.iconOnly) span.className = 'sr-only';
   button.append(span);
   button.addEventListener('click', event => {
     event.preventDefault();
@@ -277,24 +279,13 @@ function createGroupHeader(item: RecentQueueItem): HTMLElement {
 }
 
 function createRecentMetaRow(item: RecentQueueItem, missing: boolean): HTMLElement {
-  const { artifact, presentation } = item;
+  const { presentation } = item;
   const metaRow = document.createElement('div');
   metaRow.className = 'app-overview-recent-meta-row';
 
   const typeChip = document.createElement('span');
   typeChip.className = 'app-overview-recent-type';
   typeChip.textContent = presentation.typeLabel;
-
-  const time = document.createElement('time');
-  time.className = presentation.isFresh
-    ? 'app-overview-recent-time app-overview-recent-time--fresh'
-    : 'app-overview-recent-time';
-  time.dateTime = artifact.createdAt;
-  time.textContent = presentation.relativeTime || presentation.absoluteTime;
-  if (presentation.relativeTime && presentation.absoluteTime) {
-    time.setAttribute('title', presentation.absoluteTime);
-  }
-  if (!presentation.relativeTime && !presentation.absoluteTime) time.classList.add('hidden');
 
   metaRow.append(typeChip);
 
@@ -312,9 +303,22 @@ function createRecentMetaRow(item: RecentQueueItem, missing: boolean): HTMLEleme
     metaRow.append(missingBadge);
   }
 
-  metaRow.append(time);
-
   return metaRow;
+}
+
+function createRecentTime(item: RecentQueueItem): HTMLTimeElement {
+  const { artifact, presentation } = item;
+  const time = document.createElement('time');
+  time.className = presentation.isFresh
+    ? 'app-overview-recent-time app-overview-recent-time--fresh'
+    : 'app-overview-recent-time';
+  time.dateTime = artifact.createdAt;
+  time.textContent = presentation.relativeTime || presentation.absoluteTime;
+  if (presentation.relativeTime && presentation.absoluteTime) {
+    time.setAttribute('title', presentation.absoluteTime);
+  }
+  if (!presentation.relativeTime && !presentation.absoluteTime) time.classList.add('hidden');
+  return time;
 }
 
 function getPpcJourney(item: RecentQueueItem): RecentJourney {
@@ -430,10 +434,13 @@ function createRecentUtilityActions(
   const { artifact } = item;
   return [
     createToolbarButton({
-      className: `app-overview-recent-icon-btn${item.pinned ? ' active' : ''}`,
+      className: `app-overview-recent-icon-btn app-overview-recent-card-tool${
+        item.pinned ? ' active' : ''
+      }`,
       label: item.pinned ? '取消置顶' : '置顶',
       title: item.pinned ? '取消置顶' : '置顶到最近作业顶部',
       icon: 'fa-solid fa-thumb-tack',
+      iconOnly: true,
       ariaPressed: item.pinned,
       onClick: () => {
         if (item.pinned) unpinRecentArtifact(artifact.id);
@@ -442,10 +449,11 @@ function createRecentUtilityActions(
       },
     }),
     createToolbarButton({
-      className: 'app-overview-recent-icon-btn',
+      className: 'app-overview-recent-icon-btn app-overview-recent-card-tool',
       label: '复制摘要',
       title: '复制作业摘要到剪贴板',
       icon: 'fas fa-copy',
+      iconOnly: true,
       onClick: () => {
         void handleCopySummary(item);
       },
@@ -453,10 +461,11 @@ function createRecentUtilityActions(
     createToolbarButton(
       item.dismissed
         ? {
-            className: 'app-overview-recent-icon-btn',
+            className: 'app-overview-recent-icon-btn app-overview-recent-card-tool',
             label: '恢复到列表',
             title: '恢复到最近作业列表',
             icon: 'fas fa-rotate-left',
+            iconOnly: true,
             onClick: () => {
               undismissRecentArtifact(artifact.id);
               showToast('已恢复到最近作业', { type: 'success' });
@@ -464,10 +473,12 @@ function createRecentUtilityActions(
             },
           }
         : {
-            className: 'app-overview-recent-icon-btn app-overview-recent-icon-btn--danger',
+            className:
+              'app-overview-recent-icon-btn app-overview-recent-card-tool app-overview-recent-icon-btn--danger',
             label: '从列表移除',
             title: '从最近作业列表移除，可立即撤销',
             icon: 'fas fa-eye-slash',
+            iconOnly: true,
             onClick: () => {
               dismissRecentArtifact(artifact.id);
               onRemoved(artifact.id);
@@ -477,26 +488,39 @@ function createRecentUtilityActions(
   ];
 }
 
+function createRecentCardCorner(
+  item: RecentQueueItem,
+  onRefresh: () => void,
+  onRemoved: (artifactId: string) => void
+): HTMLElement {
+  const corner = document.createElement('div');
+  corner.className = 'app-overview-recent-card-corner';
+  const tools = document.createElement('div');
+  tools.className = 'app-overview-recent-card-tools';
+  const buttons = createRecentUtilityActions(item, onRefresh, onRemoved);
+  buttons.forEach(button => {
+    button.dataset.tooltip = button.getAttribute('aria-label') || '';
+  });
+  tools.append(...buttons);
+  corner.append(tools, createRecentTime(item));
+  return corner;
+}
+
 function createRecentActions(
   item: RecentQueueItem,
   missing: boolean,
   callbacks: {
-    onRefresh: () => void;
-    onRemoved: (artifactId: string) => void;
     compliancePanelId?: string;
     onToggleCompliance?: () => void;
   }
 ): HTMLElement {
   const { artifact } = item;
-  const { onRefresh, onRemoved, compliancePanelId, onToggleCompliance } = callbacks;
+  const { compliancePanelId, onToggleCompliance } = callbacks;
   const actions = document.createElement('div');
   actions.className = 'app-overview-recent-actions';
   const primaryActions = document.createElement('div');
   primaryActions.className =
     'app-overview-recent-action-group app-overview-recent-action-group--primary';
-  const utilityActions = document.createElement('div');
-  utilityActions.className =
-    'app-overview-recent-action-group app-overview-recent-action-group--utility';
 
   const complianceView =
     artifact.type === 'compliance_check' ? getComplianceReviewView(artifact) : null;
@@ -538,8 +562,7 @@ function createRecentActions(
       })
     )
   );
-  utilityActions.append(...createRecentUtilityActions(item, onRefresh, onRemoved));
-  actions.append(primaryActions, utilityActions);
+  actions.append(primaryActions);
 
   return actions;
 }
@@ -599,13 +622,11 @@ function createRecentArtifactItem(
     body.append(facts);
   }
 
-  el.append(iconBox, body);
+  el.append(iconBox, body, createRecentCardCorner(item, onRefresh, onRemoved));
   const journey = createRecentJourney(item);
   if (journey) el.append(journey);
   el.append(
     createRecentActions(item, missing, {
-      onRefresh,
-      onRemoved,
       compliancePanelId,
       onToggleCompliance: toggleCompliance,
     })
@@ -641,6 +662,34 @@ function createRecentArtifactItem(
   return el;
 }
 
+function createRecentFilterDirectory<T extends string>(options: {
+  label: string;
+  ariaLabel: string;
+  filters: ReadonlyArray<{ id: T; label: string }>;
+  value: T;
+  onChange: (value: T) => void;
+}): HTMLLabelElement {
+  const label = document.createElement('label');
+  label.className = 'app-overview-recent-filter-directory';
+  const caption = document.createElement('span');
+  caption.textContent = options.label;
+  const select = document.createElement('select');
+  select.className = 'app-overview-recent-filter-select';
+  select.setAttribute('aria-label', options.ariaLabel);
+  select.append(
+    ...options.filters.map(filter => {
+      const option = document.createElement('option');
+      option.value = filter.id;
+      option.textContent = filter.label;
+      return option;
+    })
+  );
+  select.value = options.value;
+  select.addEventListener('change', () => options.onChange(select.value as T));
+  label.append(caption, select);
+  return label;
+}
+
 function renderTypeFilters(
   container: HTMLElement,
   state: RecentPanelState,
@@ -650,20 +699,15 @@ function renderTypeFilters(
   if (!row) return;
 
   row.replaceChildren(
-    ...TYPE_FILTERS.map(filter => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `app-overview-recent-type-filter${
-        state.typeFilter === filter.id ? ' active' : ''
-      }`;
-      button.dataset.typeFilter = filter.id;
-      button.setAttribute('aria-pressed', String(state.typeFilter === filter.id));
-      button.textContent = filter.label;
-      button.addEventListener('click', () => {
-        state.typeFilter = filter.id;
+    createRecentFilterDirectory({
+      label: '结果类型',
+      ariaLabel: '按作业结果类型筛选',
+      filters: TYPE_FILTERS,
+      value: state.typeFilter,
+      onChange: value => {
+        state.typeFilter = value;
         onChange();
-      });
-      return button;
+      },
     })
   );
 }
@@ -676,20 +720,15 @@ function renderStatusFilters(
   const row = container.querySelector<HTMLElement>('.app-overview-recent-status-filters');
   if (!row) return;
   row.replaceChildren(
-    ...STATUS_FILTERS.map(filter => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `app-overview-recent-type-filter${
-        state.statusFilter === filter.id ? ' active' : ''
-      }`;
-      button.dataset.statusFilter = filter.id;
-      button.setAttribute('aria-pressed', String(state.statusFilter === filter.id));
-      button.textContent = filter.label;
-      button.addEventListener('click', () => {
-        state.statusFilter = filter.id;
+    createRecentFilterDirectory({
+      label: '作业状态',
+      ariaLabel: '按作业状态筛选',
+      filters: STATUS_FILTERS,
+      value: state.statusFilter,
+      onChange: value => {
+        state.statusFilter = value;
         onChange();
-      });
-      return button;
+      },
     })
   );
 }
