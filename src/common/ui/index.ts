@@ -97,18 +97,20 @@ window.clearHubSearch = clearHubSearch;
 window.searchSidebar = searchSidebar;
 window.clearSidebarSearch = clearSidebarSearch;
 
-document.addEventListener('input', event => {
+const sidebarSearchInputHandler = (event: Event): void => {
   const target = event.target as HTMLInputElement | null;
   if (target?.id === 'sidebar-search-input') {
     searchSidebar(target.value);
   }
-});
+};
+
+document.addEventListener('input', sidebarSearchInputHandler);
 
 // ========================
 // 注册动作到 ActionRegistry
 // ========================
 
-import { registerActions } from '../utils/actionRegistry';
+import { registerActions, unregisterActions } from '../utils/actionRegistry';
 import {
   toggleSOPGroup,
   scrollToSOPModule,
@@ -116,7 +118,7 @@ import {
   scrollToMoreModule,
 } from './navigation';
 
-registerActions({
+const UI_ACTIONS = {
   // 路由导航（通过 data-action="switch-tab" data-tab="xxx" 触发）
   'switch-tab': async (params: Record<string, unknown>, event: Event) => {
     event.preventDefault();
@@ -141,4 +143,15 @@ registerActions({
     scrollToHubModule(params.category as string),
   'scroll-to-more-module': (params: Record<string, unknown>) =>
     scrollToMoreModule(params.category as string),
-});
+};
+
+const uiActionNames = Object.keys(UI_ACTIONS);
+unregisterActions(uiActionNames);
+registerActions(UI_ACTIONS);
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    document.removeEventListener('input', sidebarSearchInputHandler);
+    unregisterActions(uiActionNames);
+  });
+}

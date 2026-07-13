@@ -208,6 +208,7 @@ describe('ActionRegistry', () => {
       
       expect(handler).not.toHaveBeenCalled();
     });
+
   });
 
   describe('getRegisteredActions', () => {

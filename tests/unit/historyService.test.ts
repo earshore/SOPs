@@ -193,14 +193,16 @@ beforeEach(() => {
   HistoryService.clear();
 });
 
-it('creates a new snapshot when scrape timestamp changes', () => {
+it('creates a new execution snapshot when the same marketplace and ASIN are scraped again', () => {
   const first = HistoryService.save(createScrapedData('2026-01-01T00:00:00.000Z', ['B000000001']));
   const firstId = first[0]?.id;
 
-  const second = HistoryService.save(createScrapedData('2026-01-01T00:01:00.000Z', ['B000000002']));
+  const second = HistoryService.save(createScrapedData('2026-01-01T00:01:00.000Z', ['B000000001']));
 
   expect(second).toHaveLength(2);
-  expect(second[0]?.asins).toEqual(['B000000002']);
+  expect(second[0]?.asins).toEqual(['B000000001']);
+  expect(second[0]?.site).toBe(second[1]?.site);
+  expect(second[0]?.id).not.toBe(firstId);
   expect(second[1]?.id).toBe(firstId);
 });
 

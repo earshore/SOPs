@@ -11,6 +11,7 @@ vi.mock('@/common/utils/actionRegistry', () => ({
   registerActions: vi.fn((actions: Record<string, ActionHandler>) => {
     mocks.actions = actions;
   }),
+  unregisterActions: vi.fn(),
 }));
 
 vi.mock('@/common/router/initRouter', () => ({

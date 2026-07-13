@@ -21,6 +21,8 @@ export interface RecentQueueViewOptions {
   typeFilter?: AppCenterArtifactType | 'all';
   query?: string;
   groupByWorkItem?: boolean;
+  /** Merge stage artifacts only when they belong to the same execution work item. */
+  collapseStagesByWorkItem?: boolean;
   includeDismissed?: boolean;
   dismissedOnly?: boolean;
   statusFilter?: 'all' | 'actionable' | 'review' | 'missing';
@@ -30,6 +32,8 @@ export interface RecentQueueViewOptions {
 }
 
 export interface RecentQueueItem {
+  /** Stable identity of one execution card, independent from its latest stage artifact. */
+  queueId: string;
   artifact: AppCenterArtifactEnvelope;
   workItem: AppCenterWorkItem | null;
   pinned: boolean;
@@ -237,14 +241,22 @@ function toQueueItem(
   workItem: AppCenterWorkItem | null,
   prefs: RecentQueuePreferences,
   now: number,
-  options?: { isGroupHeader?: boolean; groupTitle?: string }
+  options?: {
+    isGroupHeader?: boolean;
+    groupTitle?: string;
+    queueId?: string;
+    preferenceIds?: readonly string[];
+  }
 ): RecentQueueItem {
   const progress = workItem ? getWorkItemProgress(workItem.id) : null;
+  const queueId = options?.queueId || artifact.id;
+  const preferenceIds = options?.preferenceIds || [queueId];
   return {
+    queueId,
     artifact,
     workItem,
-    pinned: prefs.pinnedIds.includes(artifact.id),
-    dismissed: prefs.dismissedIds.includes(artifact.id),
+    pinned: preferenceIds.some(id => prefs.pinnedIds.includes(id)),
+    dismissed: preferenceIds.some(id => prefs.dismissedIds.includes(id)),
     needsAttention: artifactNeedsAttention(artifact, workItem),
     payloadStatus: 'unknown',
     isGroupHeader: Boolean(options?.isGroupHeader),
@@ -252,6 +264,127 @@ function toQueueItem(
     progressLabel: progress?.label,
     presentation: buildRecentArtifactPresentation(artifact, workItem, now),
   };
+}
+
+interface CollapsedQueueGroup {
+  queueId: string;
+  artifacts: AppCenterArtifactEnvelope[];
+  representative: AppCenterArtifactEnvelope;
+  workItem: AppCenterWorkItem | null;
+  preferenceIds: string[];
+  pinned: boolean;
+  dismissed: boolean;
+  needsAttention: boolean;
+  payloadStatus: RecentQueueItem['payloadStatus'];
+  lastOpenedAt: number;
+}
+
+function createCollapsedQueueGroups(
+  artifacts: AppCenterArtifactEnvelope[],
+  workItemById: Map<string, AppCenterWorkItem>,
+  prefs: RecentQueuePreferences,
+  payloadStatuses: RecentQueueViewOptions['payloadStatuses']
+): CollapsedQueueGroup[] {
+  const artifactsByWorkItem = new Map<string, AppCenterArtifactEnvelope[]>();
+  artifacts.forEach(artifact => {
+    const queueId = artifact.workItemId || artifact.id;
+    const group = artifactsByWorkItem.get(queueId) || [];
+    group.push(artifact);
+    artifactsByWorkItem.set(queueId, group);
+  });
+
+  return [...artifactsByWorkItem.entries()].flatMap(([queueId, groupArtifacts]) => {
+    const sortedArtifacts = [...groupArtifacts].sort(
+      (left, right) => getTime(right.createdAt) - getTime(left.createdAt)
+    );
+    const representative = sortedArtifacts[0];
+    if (!representative) return [];
+
+    const preferenceIds = [queueId, ...sortedArtifacts.map(artifact => artifact.id)];
+    const workItem = workItemById.get(queueId) || null;
+    return [
+      {
+        queueId,
+        artifacts: sortedArtifacts,
+        representative,
+        workItem,
+        preferenceIds,
+        pinned: preferenceIds.some(id => prefs.pinnedIds.includes(id)),
+        dismissed: preferenceIds.some(id => prefs.dismissedIds.includes(id)),
+        needsAttention: sortedArtifacts.some(artifact =>
+          artifactNeedsAttention(artifact, workItem)
+        ),
+        payloadStatus: payloadStatuses?.[representative.id] || 'unknown',
+        lastOpenedAt: Math.max(...preferenceIds.map(id => getTime(prefs.lastOpenedAt[id] || ''))),
+      },
+    ];
+  });
+}
+
+function matchesCollapsedQueueFilters(
+  group: CollapsedQueueGroup,
+  options: RecentQueueViewOptions,
+  typeFilter: AppCenterArtifactType | 'all',
+  statusFilter: NonNullable<RecentQueueViewOptions['statusFilter']>,
+  query: string
+): boolean {
+  if (!isDismissedStateVisible(group.dismissed, options)) return false;
+  if (typeFilter !== 'all' && group.representative.type !== typeFilter) return false;
+  if (query && !group.artifacts.some(artifact => matchesQuery(artifact, group.workItem, query))) {
+    return false;
+  }
+  if (statusFilter === 'missing') return group.payloadStatus === 'missing';
+  if (statusFilter === 'actionable') return group.payloadStatus !== 'missing';
+  if (statusFilter === 'review') return group.needsAttention;
+  return true;
+}
+
+function buildCollapsedRecentQueueItems(
+  artifacts: AppCenterArtifactEnvelope[],
+  workItemById: Map<string, AppCenterWorkItem>,
+  prefs: RecentQueuePreferences,
+  options: RecentQueueViewOptions
+): RecentQueueItem[] {
+  const now = options.now ?? Date.now();
+  const limit = options.limit ?? 10;
+  const typeFilter = options.typeFilter || 'all';
+  const statusFilter = options.statusFilter || 'all';
+  const query = (options.query || '').trim().toLowerCase();
+  const groups = createCollapsedQueueGroups(
+    artifacts,
+    workItemById,
+    prefs,
+    options.payloadStatuses
+  );
+
+  return groups
+    .filter(group => matchesCollapsedQueueFilters(group, options, typeFilter, statusFilter, query))
+    .sort((left, right) =>
+      compareRanks(
+        [
+          left.pinned ? 1 : 0,
+          left.needsAttention ? 1 : 0,
+          left.lastOpenedAt,
+          getTime(left.representative.createdAt),
+        ],
+        [
+          right.pinned ? 1 : 0,
+          right.needsAttention ? 1 : 0,
+          right.lastOpenedAt,
+          getTime(right.representative.createdAt),
+        ]
+      )
+    )
+    .slice(0, limit)
+    .map(group => {
+      const item = toQueueItem(group.representative, group.workItem, prefs, now, {
+        queueId: group.queueId,
+        preferenceIds: group.preferenceIds,
+      });
+      item.needsAttention = group.needsAttention;
+      item.payloadStatus = group.payloadStatus;
+      return item;
+    });
 }
 
 /**
@@ -272,6 +405,11 @@ export function buildRecentQueueItems(
   const now = options.now ?? Date.now();
   const limit = options.limit ?? 10;
   const workItemById = new Map(workItems.map(item => [item.id, item]));
+
+  if (options.collapseStagesByWorkItem) {
+    return buildCollapsedRecentQueueItems(artifacts, workItemById, prefs, options);
+  }
+
   const filterContext: QueueFilterContext = {
     dismissedIds,
     options,

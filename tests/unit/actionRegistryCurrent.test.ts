@@ -26,6 +26,7 @@ describe('ActionRegistry naming conventions', () => {
   afterEach(() => {
     GLOBAL_SYSTEM_ACTIONS.forEach(actionName => unregisterAction(actionName));
     unregisterAction('keyword_hunter_delegatedAction');
+    unregisterAction('keyword_hunter_rejectedAction');
     unregisterAction('badAction');
     destroyGlobalEventDelegation();
     vi.restoreAllMocks();
@@ -63,6 +64,25 @@ describe('ActionRegistry naming conventions', () => {
       expect.objectContaining({ id: '42' }),
       expect.any(MouseEvent)
     );
+  });
+
+  it('consumes rejected promises from delegated actions', async () => {
+    const error = new Error('action failed');
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    registerAction('keyword_hunter_rejectedAction', async () => {
+      throw error;
+    });
+    document.body.innerHTML =
+      '<button type="button" data-action="keyword_hunter_rejectedAction">Run</button>';
+    initGlobalEventDelegation();
+
+    document.querySelector('button')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await vi.waitFor(() => {
+      expect(consoleError).toHaveBeenCalledWith(
+        '[ActionRegistry] 动作 "keyword_hunter_rejectedAction" 执行失败',
+        error
+      );
+    });
   });
 
   it('ignores malformed action registry event payloads', () => {

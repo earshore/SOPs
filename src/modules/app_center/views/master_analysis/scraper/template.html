@@ -142,7 +142,7 @@
           <!-- Empty State - Clickable Upload Area -->
           <button
             type="button"
-            @click="triggerImport()"
+            data-scraper-import-trigger
             class="upload-area empty-state w-full appearance-none text-center py-16 cursor-pointer rounded-2xl border-2 border-dashed border-slate-200 bg-gradient-to-b from-slate-50/30 to-white group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             id="no-data-msg"
             aria-label="导入 JSON 产品数据文件"
@@ -191,7 +191,7 @@
             <!-- Floating Import Trigger -->
             <button
               type="button"
-              @click="triggerImport()"
+              data-scraper-import-trigger
               class="import-trigger mb-4 w-full appearance-none p-4 rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-r from-slate-50/50 to-white hover:border-blue-300 hover:bg-blue-50/30 cursor-pointer group flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               aria-label="重新导入 JSON 产品数据文件"
               aria-describedby="scraper-reimport-help scraper-import-status"

@@ -13,6 +13,7 @@ export type AddListener = (
 ) => void;
 
 export interface PpcSearchTermsEventHandlers {
+  openReportPicker(): void;
   importReport(): void;
   analyzeTextarea(): Promise<void>;
   loadSample(): void;
@@ -37,6 +38,11 @@ export function bindPpcSearchTermsEvents(
   addListener: AddListener,
   handlers: PpcSearchTermsEventHandlers
 ): void {
+  addListener(
+    getElement(container, 'ppc-search-terms-file-trigger'),
+    'click',
+    handlers.openReportPicker
+  );
   addListener(
     getElement(container, 'ppc-search-terms-file-input'),
     'change',

@@ -13,6 +13,8 @@ import BaseModule from '@/common/BaseModule';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
+import { showToast } from '@/common/ui/notifications';
+import { openFilePicker } from '@/common/utils/filePicker';
 import { createScraperPanel } from './components/ScraperPanel';
 import { destroyAlpineComponent, getAlpineData } from '../utils/alpineLifecycle';
 import '../master_analysis_style.css';
@@ -59,6 +61,23 @@ class ScraperModule extends BaseModule {
     // 添加淡入动画（在渲染前添加）
     container.classList.add('fade-in');
     renderer.renderTemplate(container, html);
+  }
+
+  protected async init(): Promise<void> {
+    const container = this.container;
+    if (!container) return;
+
+    const input = container.querySelector<HTMLInputElement>('#import-file-input');
+    container.querySelectorAll<HTMLElement>('[data-scraper-import-trigger]').forEach(trigger => {
+      this.addEventListener(trigger, 'click', () => {
+        if (!openFilePicker(input)) {
+          showToast('无法打开文件选择器', {
+            type: 'error',
+            description: '请刷新页面后重试，或重新进入数据采集页面。',
+          });
+        }
+      });
+    });
   }
 
   protected onUnmount(): void {

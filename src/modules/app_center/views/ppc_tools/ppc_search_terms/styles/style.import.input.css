@@ -15,6 +15,7 @@
 
 .ppc-search-terms-dropzone {
   display: flex;
+  width: 100%;
   height: auto;
   min-height: 188px;
   flex-direction: column;
@@ -25,11 +26,18 @@
   border-radius: 8px;
   background: linear-gradient(180deg, var(--color-emerald-50, #ecfdf5), #ffffff);
   text-align: center;
+  font: inherit;
+  appearance: none;
   cursor: pointer;
   transition:
     transform 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     border-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1)),
     background-color 170ms var(--ease-smooth, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.ppc-search-terms-dropzone:focus-visible {
+  outline: 2px solid var(--ppc-search-terms-accent, #16a34a);
+  outline-offset: 2px;
 }
 
 .ppc-search-terms-dropzone:hover {

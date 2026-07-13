@@ -116,6 +116,14 @@ export function getRegisteredActions(): string[] {
   return Object.keys(ActionRegistry);
 }
 
+function handleDelegatedActionResult(actionName: string, result: unknown): void {
+  if (!result || typeof (result as PromiseLike<unknown>).then !== 'function') return;
+
+  void Promise.resolve(result).catch(error => {
+    nativeLoggerConsole.error(`[ActionRegistry] 动作 "${actionName}" 执行失败`, error);
+  });
+}
+
 // ================================================================
 // 🛡️ 全局事件委托监听器
 // ================================================================
@@ -142,7 +150,7 @@ export function initGlobalEventDelegation(): void {
     delete params.action; // 移除 action 本身
 
     // 执行动作
-    executeAction(actionName, params, event);
+    handleDelegatedActionResult(actionName, executeAction(actionName, params, event));
   };
 
   document.addEventListener('click', delegatedClickHandler);

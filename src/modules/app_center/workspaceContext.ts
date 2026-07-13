@@ -146,6 +146,8 @@ function getHistoryLanguage(historyItem: HistoryItem): string {
 }
 
 export function createWorkItemIdFromHistoryItem(historyItem: Pick<HistoryItem, 'id'>): string {
+  // A work item identifies one execution snapshot. Marketplace and ASIN are deliberately excluded:
+  // rerunning the same product must create another work item, while its downstream stages share this ID.
   return `competitor_listing:${String(historyItem.id)}`;
 }
 

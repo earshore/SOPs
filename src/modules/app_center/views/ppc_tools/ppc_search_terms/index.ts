@@ -1,6 +1,8 @@
 import { SafeRenderer } from '@/common/infrastructure/SafeRenderer';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import BaseModule from '@/common/BaseModule';
+import { showToast } from '@/common/ui/notifications';
+import { openFilePicker } from '@/common/utils/filePicker';
 import {
   analyzeReportText,
   cancelActiveAnalysis,
@@ -197,6 +199,14 @@ export const unmount = (): void => {
 
 function bindEvents(container: HTMLElement): void {
   bindPpcSearchTermsEvents(container, listenerRegistry.add, {
+    openReportPicker: () => {
+      if (!openFilePicker(getInput(container, 'ppc-search-terms-file-input'))) {
+        showToast('无法打开文件选择器', {
+          type: 'error',
+          description: '请刷新页面后重试，或直接粘贴报表内容。',
+        });
+      }
+    },
     importReport: () => handleReportFileImport(container, reportImportCallbacks),
     analyzeTextarea: () => analyzeTextarea(container),
     loadSample: () => loadSampleReport(container, reportImportCallbacks),

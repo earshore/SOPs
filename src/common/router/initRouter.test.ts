@@ -305,6 +305,19 @@ describe('initRouter navigation and teardown', () => {
 });
 
 describe('initRouter route helper APIs', () => {
+  it('initializes the router when navigation is requested after a module reload', async () => {
+    const { getRouter, navigateToRouteId } = await loadInitRouter();
+
+    await expect(navigateToRouteId('ppc_search_terms')).resolves.toBe(true);
+
+    expect(mocks.createRouter).toHaveBeenCalledTimes(1);
+    expect(getRouter()).toBe(mocks.router);
+    expect(mocks.router.navigate).toHaveBeenCalledWith(
+      '/app-center/ppc-tools/ppc-search-terms',
+      undefined
+    );
+  });
+
   it('exposes route-id navigation and current route helpers', async () => {
     const { initRouter, navigateTo, navigateToRouteId, hasRoute, getCurrentRoute } =
       await loadInitRouter();
@@ -380,12 +393,15 @@ describe('initRouter teardown and error handling', () => {
     expect(() => getRouter()).toThrow('Router not initialized');
   });
 
-  it('does not navigate initial route when router is missing', async () => {
+  it('initializes the router when initial navigation runs after a module reload', async () => {
     const { triggerInitialNavigation } = await loadInitRouter();
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     triggerInitialNavigation();
 
-    expect(consoleError).toHaveBeenCalledWith('[triggerInitialNavigation] Router not initialized');
+    expect(mocks.createRouter).toHaveBeenCalledTimes(1);
+    expect(mocks.router.navigate).toHaveBeenCalledWith('/home', {
+      updateHistory: true,
+      skipMiddleware: false,
+    });
   });
 });

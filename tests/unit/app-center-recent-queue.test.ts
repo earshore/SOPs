@@ -5,6 +5,7 @@ import type {
 } from '@/modules/app_center/artifactEnvelopeService';
 import {
   clearArtifactEnvelopeIndex,
+  getWorkItems,
   getWorkItemProgress,
   registerComplianceCheckArtifact,
   registerHistoryArtifacts,
@@ -224,6 +225,109 @@ describe('App Center recent queue service', () => {
 
     expect(items.filter(item => item.isGroupHeader)).toHaveLength(2);
     expect(items.some(item => item.artifact.id === 'a' && !item.isGroupHeader)).toBe(true);
+  });
+
+  it('collapses each work item to one card represented by its latest stage', () => {
+    const envelopes = [
+      makeEnvelope({
+        id: 'scrape-stage',
+        workItemId: 'competitor_listing:hist-001',
+        title: '采集历史',
+        createdAt: '2026-01-01T00:10:00.000Z',
+      }),
+      makeEnvelope({
+        id: 'analysis-stage',
+        workItemId: 'competitor_listing:hist-001',
+        type: 'analysis_report',
+        title: 'AI 分析报告',
+        payloadRef: 'history:hist-001#analysis',
+        createdAt: '2026-01-01T00:20:00.000Z',
+      }),
+      makeEnvelope({
+        id: 'another-job',
+        workItemId: 'competitor_listing:hist-002',
+        title: '其他作业结果',
+        createdAt: '2026-01-01T00:30:00.000Z',
+      }),
+    ];
+    const workItems = [
+      makeWorkItem({ id: 'competitor_listing:hist-001' }),
+      makeWorkItem({ id: 'competitor_listing:hist-002', asinOrSku: 'B000000002' }),
+    ];
+
+    const items = buildRecentQueueItems(envelopes, workItems, {
+      collapseStagesByWorkItem: true,
+      query: '采集历史',
+      now: Date.parse('2026-01-01T04:00:00.000Z'),
+    });
+
+    expect(items).toHaveLength(1);
+    expect(items[0]?.queueId).toBe('competitor_listing:hist-001');
+    expect(items[0]?.artifact.id).toBe('analysis-stage');
+    expect(items[0]?.isGroupHeader).toBe(false);
+  });
+
+  it('keeps repeated executions separate when marketplace and ASIN are identical', () => {
+    const firstRun = createHistoryItem();
+    const secondRun = createHistoryItem();
+    secondRun.id = 'hist-002';
+    secondRun.timestamp = '2026-01-01T01:00:00.000Z';
+    if (secondRun.analysisStatus) {
+      secondRun.analysisStatus.analyzedAt = '2026-01-01T01:10:00.000Z';
+    }
+
+    const artifacts = [
+      ...registerHistoryArtifacts(firstRun),
+      ...registerHistoryArtifacts(secondRun),
+    ];
+    const workItems = getWorkItems();
+    const items = buildRecentQueueItems(artifacts, workItems, {
+      collapseStagesByWorkItem: true,
+      now: Date.parse('2026-01-01T02:00:00.000Z'),
+    });
+
+    expect(workItems.map(item => item.marketplace)).toEqual(['DE', 'DE']);
+    expect(workItems.map(item => item.asinOrSku)).toEqual(['B000000001', 'B000000001']);
+    expect(items).toHaveLength(2);
+    expect(items.map(item => item.queueId)).toEqual([
+      'competitor_listing:hist-002',
+      'competitor_listing:hist-001',
+    ]);
+    expect(items.every(item => item.artifact.type === 'analysis_report')).toBe(true);
+  });
+
+  it('keeps work-item preferences when the representative stage advances', () => {
+    const workItemId = 'competitor_listing:hist-001';
+    const scrape = makeEnvelope({ id: 'scrape-stage', workItemId });
+    const workItems = [makeWorkItem({ id: workItemId })];
+
+    pinRecentArtifact(workItemId);
+    let items = buildRecentQueueItems([scrape], workItems, { collapseStagesByWorkItem: true });
+    expect(items[0]?.pinned).toBe(true);
+
+    const analysis = makeEnvelope({
+      id: 'analysis-stage',
+      workItemId,
+      type: 'analysis_report',
+      payloadRef: 'history:hist-001#analysis',
+      createdAt: '2026-01-01T00:20:00.000Z',
+    });
+    items = buildRecentQueueItems([scrape, analysis], workItems, {
+      collapseStagesByWorkItem: true,
+    });
+    expect(items[0]?.artifact.id).toBe('analysis-stage');
+    expect(items[0]?.pinned).toBe(true);
+
+    dismissRecentArtifact(workItemId);
+    expect(
+      buildRecentQueueItems([scrape, analysis], workItems, { collapseStagesByWorkItem: true })
+    ).toHaveLength(0);
+    expect(
+      buildRecentQueueItems([scrape, analysis], workItems, {
+        collapseStagesByWorkItem: true,
+        dismissedOnly: true,
+      })[0]?.artifact.id
+    ).toBe('analysis-stage');
   });
 
   it('computes competitor listing progress from registered artifact types', () => {

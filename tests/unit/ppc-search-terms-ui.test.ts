@@ -89,6 +89,7 @@ const mocks = vi.hoisted(() => ({
       <textarea id="ppc-search-terms-paste-input" aria-describedby="ppc-search-terms-paste-help ppc-search-terms-paste-error ppc-search-terms-mapping-status"></textarea>
       <p id="ppc-search-terms-paste-help">首行必须包含列名；文件导入和粘贴内容二选一即可。</p>
       <p id="ppc-search-terms-paste-error" class="ppc-search-terms-field-error hidden" role="alert"></p>
+      <button id="ppc-search-terms-file-trigger" type="button">选择报表文件</button>
       <input id="ppc-search-terms-file-input" type="file" aria-describedby="ppc-search-terms-file-name ppc-search-terms-mapping-status" />
       <button
         id="ppc-search-terms-threshold-toggle"
@@ -729,6 +730,17 @@ describe('PPC 搜索词分析器 UI - 导入流程', () => {
 
     expect(mocks.analyzeWithAgent).toHaveBeenCalled();
     expect(container.querySelector('#ppc-search-terms-stat-rows')?.textContent).toBe('1');
+  });
+
+  it('通过可见按钮同步打开文件选择器', () => {
+    const input = container.querySelector<HTMLInputElement>('#ppc-search-terms-file-input');
+    const showPicker = vi.fn();
+    Object.defineProperty(input, 'showPicker', { configurable: true, value: showPicker });
+
+    container.querySelector<HTMLButtonElement>('#ppc-search-terms-file-trigger')?.click();
+
+    expect(showPicker).toHaveBeenCalledOnce();
+    expect(mocks.analyzeWithAgent).not.toHaveBeenCalled();
   });
 
   it('报表文件读取失败时标记上传控件并切换为错误状态', async () => {

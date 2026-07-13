@@ -15,6 +15,7 @@ import type { ScraperState } from '@/types/state';
 import { appStore } from '@/stores/useAppStore';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { showToast } from '@/common/ui';
+import { openFilePicker } from '@/common/utils/filePicker';
 import { ErrorService } from '@/services/errorService';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { extractValidAsins } from '../utils/validators';
@@ -736,10 +737,12 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
   // ========== 数据导入功能 ==========
 
   triggerImport(): void {
-    const input = document.getElementById('import-file-input') as HTMLInputElement;
-    if (input) {
-      input.value = '';
-      input.click();
+    const input = document.getElementById('import-file-input') as HTMLInputElement | null;
+    if (!openFilePicker(input)) {
+      showToast('无法打开文件选择器', {
+        type: 'error',
+        description: '请刷新页面后重试，或重新进入数据采集页面。',
+      });
     }
   },
 

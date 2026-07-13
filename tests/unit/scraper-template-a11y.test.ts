@@ -13,7 +13,8 @@ const renderers = readFileSync(
 describe('Scraper template accessibility semantics', () => {
   it('keeps import triggers keyboard reachable and names the hidden file input', () => {
     expect(template).toContain('id="no-data-msg"');
-    expect(template).toContain('@click="triggerImport()"');
+    expect(template.match(/data-scraper-import-trigger/g)).toHaveLength(2);
+    expect(template).not.toContain('@click="triggerImport()"');
     expect(template).toContain('aria-label="导入 JSON 产品数据文件"');
     expect(template).toContain('aria-label="重新导入 JSON 产品数据文件"');
     expect(template).toContain('focus-visible:ring-2 focus-visible:ring-blue-500');
@@ -40,7 +41,7 @@ describe('Scraper template accessibility semantics', () => {
     const source = `${template}\n${renderers}`;
     const buttonOpenings = source.match(/<button\b[^>]*>/g) ?? [];
     const implicitButtons = buttonOpenings.filter(
-      (button) => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
+      button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
     );
 
     expect(implicitButtons).toEqual([]);
@@ -70,7 +71,9 @@ describe('Scraper template accessibility semantics', () => {
     const normalizedTemplate = template.replace(/\s+/g, ' ');
 
     expect(template).toContain('还没有产品数据');
-    expect(normalizedTemplate).toContain('推荐操作：点击导入 JSON 文件，或在下方输入 ASIN 开始采集。');
+    expect(normalizedTemplate).toContain(
+      '推荐操作：点击导入 JSON 文件，或在下方输入 ASIN 开始采集。'
+    );
     expect(template).toContain('还没有历史快照');
     expect(template).toContain('当前还没有可恢复的采集快照');
     expect(template).toContain('快照会记录站点、ASIN 数量和最近采集时间。');

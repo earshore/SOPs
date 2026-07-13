@@ -213,27 +213,24 @@ export function destroyRouter(): void {
  * 应在视图加载完成后调用
  */
 export function triggerInitialNavigation(): void {
-  if (!routerInstance) {
-    console.error('[triggerInitialNavigation] Router not initialized');
-    return;
-  }
+  const router = routerInstance || initRouter();
 
   const currentHash = window.location.hash.replace('#', '');
 
   if (!currentHash || currentHash === '/' || currentHash === '') {
-    routerInstance.navigate('/home', {
+    router.navigate('/home', {
       updateHistory: true,
       skipMiddleware: false,
     });
   } else {
     const normalizedHash = normalizeRoutePath(currentHash);
     if (shouldReplaceLegacyRoute(normalizedHash)) {
-      void routerInstance.navigate(normalizedHash, {
+      void router.navigate(normalizedHash, {
         replace: true,
         skipMiddleware: false,
       });
     } else {
-      void routerInstance.navigate(normalizedHash, {
+      void router.navigate(normalizedHash, {
         updateHistory: false,
         skipMiddleware: false,
       });
@@ -253,8 +250,14 @@ export async function navigateTo(
     state?: Record<string, unknown>;
   }
 ): Promise<boolean> {
-  const router = getRouter();
+  const router = routerInstance || initRouter();
   return router.navigate(path, options);
+}
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    destroyRouter();
+  });
 }
 
 /**

@@ -148,20 +148,26 @@
             </div>
           </div>
           <div class="ppc-search-terms-import-grid grid grid-cols-1 lg:grid-cols-[280px,1fr] gap-4">
-            <label class="ppc-search-terms-dropzone">
+            <button
+              id="ppc-search-terms-file-trigger"
+              type="button"
+              class="ppc-search-terms-dropzone"
+              aria-describedby="ppc-search-terms-file-name ppc-search-terms-mapping-status"
+            >
               <i class="fas fa-cloud-arrow-up ppc-search-terms-dropzone-icon"></i>
               <span class="ppc-search-terms-dropzone-title">选择报表文件</span>
               <span class="ppc-search-terms-dropzone-meta"
                 >Amazon Ads 或 ERP 导出的 CSV/TSV/XLSX</span
               >
-              <input
-                id="ppc-search-terms-file-input"
-                type="file"
-                class="sr-only"
-                aria-describedby="ppc-search-terms-file-name ppc-search-terms-mapping-status"
-                accept=".csv,.tsv,.txt,.xlsx,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              />
-            </label>
+            </button>
+            <input
+              id="ppc-search-terms-file-input"
+              type="file"
+              class="hidden"
+              aria-label="选择 PPC 报表文件"
+              aria-describedby="ppc-search-terms-file-name ppc-search-terms-mapping-status"
+              accept=".csv,.tsv,.txt,.xlsx,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            />
             <div class="ppc-search-terms-paste-column">
               <label for="ppc-search-terms-paste-input" class="ppc-search-terms-field-label"
                 >粘贴广告报表内容</label

@@ -48,7 +48,6 @@ const overviewTemplate = `
     <div class="app-overview-recent-heading-actions">
       <button class="app-overview-recent-group-btn hidden" type="button" data-recent-undo-remove></button>
       <button class="app-overview-recent-group-btn" type="button" data-recent-removed-toggle aria-pressed="false"></button>
-      <button class="app-overview-recent-group-btn" type="button" data-recent-group-toggle aria-pressed="false"></button>
       <div class="app-overview-recent-columns-toggle" role="group" aria-label="最近继续列数">
         <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="1" aria-pressed="false"></button>
         <button class="app-overview-recent-columns-btn active" type="button" data-recent-columns="2" aria-pressed="true"></button>
@@ -240,6 +239,36 @@ describe('App Center Overview', () => {
           ?.value
       ).toBe('analysis_report');
     });
+  });
+
+  it('shows one advancing card when the same work item has multiple stage artifacts', async () => {
+    registerRecentPpcArtifact();
+    registerComplianceCheckArtifact(
+      {
+        id: 'compliance-latest',
+        checklistIds: ['restricted_words'],
+        createdAt: '2026-01-01T00:50:00.000Z',
+      },
+      {
+        workItemId: 'competitor_listing:hist-001',
+        marketplace: 'DE',
+        language: 'German',
+        asinOrSku: 'B000000001',
+        sourceRoute: 'keyword_hunter_analysis',
+        updatedAt: '2026-01-01T00:50:00.000Z',
+      }
+    );
+    const container = document.createElement('div');
+
+    await overviewModule.mount(container);
+
+    const recentItems = container.querySelectorAll('.app-overview-recent-item');
+    expect(recentItems).toHaveLength(1);
+    expect(recentItems[0]?.getAttribute('data-artifact-type')).toBe('compliance_check');
+    expect(container.querySelector('.app-overview-recent-count-badge')?.textContent).toBe(
+      '显示 1 项'
+    );
+    expect(container.querySelector('[data-recent-group-toggle]')).toBeNull();
   });
 
   it('shows a visible pin state and supports remove undo', async () => {

@@ -38,6 +38,7 @@ export const COMPETITOR_LISTING_PROGRESS_TYPES: readonly AppCenterArtifactType[]
 ] as const;
 
 export interface AppCenterWorkItem {
+  /** Unique execution instance; multiple runs may have the same marketplace and ASIN. */
   id: string;
   type: AppCenterWorkItemType;
   title: string;
@@ -51,6 +52,7 @@ export interface AppCenterWorkItem {
 
 export interface AppCenterArtifactEnvelope {
   id: string;
+  /** Execution instance that owns this stage artifact. */
   workItemId: string;
   type: AppCenterArtifactType;
   sourceRoute: string;

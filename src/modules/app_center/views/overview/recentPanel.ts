@@ -12,7 +12,6 @@ import {
   getWorkItemById,
   getWorkItems,
   registerComplianceCheckArtifact,
-  type AppCenterArtifactEnvelope,
   type AppCenterArtifactType,
 } from '../../artifactEnvelopeService';
 import {
@@ -42,7 +41,6 @@ import { createComplianceReviewPanel } from './recentComplianceReview';
 
 const RECENT_ARTIFACT_LIMIT = 10;
 const RECENT_COLUMNS_STORAGE_KEY = 'app_center_overview_recent_columns_v1';
-const RECENT_GROUP_STORAGE_KEY = 'app_center_overview_recent_group_v1';
 const DEFAULT_RECENT_COLUMNS: RecentColumns = 2;
 
 type RecentColumns = 1 | 2 | 3;
@@ -97,10 +95,9 @@ interface RecentPanelState {
   typeFilter: AppCenterArtifactType | 'all';
   statusFilter: 'all' | 'actionable' | 'review' | 'missing';
   query: string;
-  groupByWorkItem: boolean;
   columns: RecentColumns;
   showDismissed: boolean;
-  lastRemovedArtifactId: string;
+  lastRemovedQueueId: string;
 }
 
 let unsubscribers: Array<() => void> = [];
@@ -120,10 +117,6 @@ function getStoredRecentColumns(): RecentColumns {
     parseRecentColumns(StorageService.getRaw(RECENT_COLUMNS_STORAGE_KEY) || undefined) ||
     DEFAULT_RECENT_COLUMNS
   );
-}
-
-function getStoredGroupMode(): boolean {
-  return StorageService.getRaw(RECENT_GROUP_STORAGE_KEY) === '1';
 }
 
 function applyRecentColumns(
@@ -164,15 +157,16 @@ async function getQueueItems(state: RecentPanelState): Promise<RecentQueueItem[]
     statusFilter: state.statusFilter,
     payloadStatuses,
     query: state.query,
-    groupByWorkItem: state.groupByWorkItem,
+    collapseStagesByWorkItem: true,
     includeDismissed: state.showDismissed,
     dismissedOnly: state.showDismissed,
     limit: RECENT_ARTIFACT_LIMIT,
   });
 }
 
-async function handleResume(artifact: AppCenterArtifactEnvelope, mode: ResumeMode): Promise<void> {
-  const workItem = getWorkItemById(artifact.workItemId);
+async function handleResume(item: RecentQueueItem, mode: ResumeMode): Promise<void> {
+  const { artifact } = item;
+  const workItem = item.workItem || getWorkItemById(artifact.workItemId);
   const plan = await buildResumePlanAsync(artifact, workItem, mode);
 
   if (!plan.ok) {
@@ -192,8 +186,16 @@ async function handleResume(artifact: AppCenterArtifactEnvelope, mode: ResumeMod
     return;
   }
 
-  markRecentArtifactOpened(artifact.id);
+  markRecentArtifactOpened(item.queueId);
+  registerComplianceReviewOnContinue(item.artifact, workItem, mode, plan.routeId);
+}
 
+function registerComplianceReviewOnContinue(
+  artifact: RecentQueueItem['artifact'],
+  workItem: RecentQueueItem['workItem'],
+  mode: ResumeMode,
+  sourceRoute: string
+): void {
   if (mode === 'continue' && artifact.type === 'keyword_snapshot') {
     const currentContext = getWorkspaceContext();
     registerComplianceCheckArtifact(
@@ -207,7 +209,7 @@ async function handleResume(artifact: AppCenterArtifactEnvelope, mode: ResumeMod
         workItemId: artifact.workItemId,
         marketplace: (workItem?.marketplace || currentContext.marketplace || '') as never,
         asinOrSku: workItem?.asinOrSku || currentContext.asinOrSku,
-        sourceRoute: plan.routeId,
+        sourceRoute,
       }
     );
   }
@@ -429,9 +431,9 @@ function createRecentJourney(item: RecentQueueItem): HTMLElement | null {
 function createRecentUtilityActions(
   item: RecentQueueItem,
   onRefresh: () => void,
-  onRemoved: (artifactId: string) => void
+  onRemoved: (queueId: string) => void
 ): HTMLElement[] {
-  const { artifact } = item;
+  const { queueId } = item;
   return [
     createToolbarButton({
       className: `app-overview-recent-icon-btn app-overview-recent-card-tool${
@@ -443,8 +445,8 @@ function createRecentUtilityActions(
       iconOnly: true,
       ariaPressed: item.pinned,
       onClick: () => {
-        if (item.pinned) unpinRecentArtifact(artifact.id);
-        else pinRecentArtifact(artifact.id);
+        if (item.pinned) unpinRecentArtifact(queueId);
+        else pinRecentArtifact(queueId);
         onRefresh();
       },
     }),
@@ -467,7 +469,7 @@ function createRecentUtilityActions(
             icon: 'fas fa-rotate-left',
             iconOnly: true,
             onClick: () => {
-              undismissRecentArtifact(artifact.id);
+              undismissRecentArtifact(queueId);
               showToast('已恢复到最近作业', { type: 'success' });
               onRefresh();
             },
@@ -480,8 +482,8 @@ function createRecentUtilityActions(
             icon: 'fas fa-eye-slash',
             iconOnly: true,
             onClick: () => {
-              dismissRecentArtifact(artifact.id);
-              onRemoved(artifact.id);
+              dismissRecentArtifact(queueId);
+              onRemoved(queueId);
             },
           }
     ),
@@ -491,7 +493,7 @@ function createRecentUtilityActions(
 function createRecentCardCorner(
   item: RecentQueueItem,
   onRefresh: () => void,
-  onRemoved: (artifactId: string) => void
+  onRemoved: (queueId: string) => void
 ): HTMLElement {
   const corner = document.createElement('div');
   corner.className = 'app-overview-recent-card-corner';
@@ -557,7 +559,7 @@ function createRecentActions(
             onToggleCompliance?.();
             return;
           }
-          void handleResume(artifact, action.mode);
+          void handleResume(item, action.mode);
         },
       })
     )
@@ -570,7 +572,7 @@ function createRecentActions(
 function createRecentArtifactItem(
   item: RecentQueueItem,
   onRefresh: () => void,
-  onRemoved: (artifactId: string) => void
+  onRemoved: (queueId: string) => void
 ): HTMLElement {
   const { artifact, presentation } = item;
   const missing = item.payloadStatus === 'missing';
@@ -805,8 +807,8 @@ async function renderRecentList(container: HTMLElement, state: RecentPanelState)
         () => {
           void renderRecentList(container, state);
         },
-        artifactId => {
-          state.lastRemovedArtifactId = artifactId;
+        queueId => {
+          state.lastRemovedQueueId = queueId;
           showToast('已从最近作业移除，可使用“撤销”恢复。', {
             type: 'success',
           });
@@ -831,21 +833,17 @@ async function renderRecentList(container: HTMLElement, state: RecentPanelState)
   }
   container
     .querySelector<HTMLButtonElement>('[data-recent-undo-remove]')
-    ?.classList.toggle('hidden', !state.lastRemovedArtifactId);
+    ?.classList.toggle('hidden', !state.lastRemovedQueueId);
 }
 
 function updateRecentPanelControls(container: HTMLElement, state: RecentPanelState): void {
   applyRecentColumns(container, state.columns, false);
-  const groupBtn = container.querySelector<HTMLButtonElement>('[data-recent-group-toggle]');
-  groupBtn?.classList.toggle('active', state.groupByWorkItem);
-  groupBtn?.setAttribute('aria-pressed', String(state.groupByWorkItem));
-
   const removedBtn = container.querySelector<HTMLButtonElement>('[data-recent-removed-toggle]');
   removedBtn?.classList.toggle('active', state.showDismissed);
   removedBtn?.setAttribute('aria-pressed', String(state.showDismissed));
   container
     .querySelector<HTMLButtonElement>('[data-recent-undo-remove]')
-    ?.classList.toggle('hidden', !state.lastRemovedArtifactId);
+    ?.classList.toggle('hidden', !state.lastRemovedQueueId);
 }
 
 export async function renderRecentPanel(container: HTMLElement): Promise<void> {
@@ -853,10 +851,9 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
     typeFilter: 'all',
     statusFilter: 'all',
     query: '',
-    groupByWorkItem: getStoredGroupMode(),
     columns: getStoredRecentColumns(),
     showDismissed: false,
-    lastRemovedArtifactId: '',
+    lastRemovedQueueId: '',
   };
 
   const refresh = async (): Promise<void> => {
@@ -887,13 +884,6 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
     void renderRecentList(container, state);
   });
 
-  const groupBtn = container.querySelector<HTMLButtonElement>('[data-recent-group-toggle]');
-  groupBtn?.addEventListener('click', () => {
-    state.groupByWorkItem = !state.groupByWorkItem;
-    StorageService.setRaw(RECENT_GROUP_STORAGE_KEY, state.groupByWorkItem ? '1' : '0');
-    void refresh();
-  });
-
   const removedBtn = container.querySelector<HTMLButtonElement>('[data-recent-removed-toggle]');
   removedBtn?.addEventListener('click', () => {
     state.showDismissed = !state.showDismissed;
@@ -902,9 +892,9 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
 
   const undoButton = container.querySelector<HTMLButtonElement>('[data-recent-undo-remove]');
   undoButton?.addEventListener('click', () => {
-    if (!state.lastRemovedArtifactId) return;
-    undismissRecentArtifact(state.lastRemovedArtifactId);
-    state.lastRemovedArtifactId = '';
+    if (!state.lastRemovedQueueId) return;
+    undismissRecentArtifact(state.lastRemovedQueueId);
+    state.lastRemovedQueueId = '';
     showToast('已恢复到最近作业', { type: 'success' });
     void refresh();
   });
