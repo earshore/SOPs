@@ -11,6 +11,9 @@
 - [项目结构审查](./PROJECT_STRUCTURE.md) - 当前目录职责、清理规则和归档边界。
 - [贡献指南](../.kiro/CONTRIBUTING.md) - 提交流程和协作约定。
 - [变更日志](./CHANGELOG.md) - 发布与变更记录。
+- [发布策略](./RELEASE_POLICY.md) - 版本通道、Latest/Pre-release、产物与发版门禁。
+- [Release Notes 模板](./templates/RELEASE_NOTES_TEMPLATE.md) - GitHub Release 正文结构。
+- [安全策略](../SECURITY.md) - 漏洞上报与支持版本窗口。
 
 ## 质量与安全
 
@@ -76,5 +79,5 @@
 
 ---
 
-**最后更新**: 2026-07-10
+**最后更新**: 2026-07-13
 **维护者**: sops 开发团队

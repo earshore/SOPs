@@ -2,6 +2,8 @@
 
 本文档描述当前生产部署形态：Cloudflare Pages 只负责托管 Vite 构建后的静态资源，LLM 请求由浏览器直接调用自部署 new-api 中转站 `https://new.hongecb.store/v1`。
 
+版本通道、GitHub Release 与产物约定见 [RELEASE_POLICY.md](./RELEASE_POLICY.md)。
+
 ## 架构边界
 
 - 静态站点：Cloudflare Pages，构建输出目录为 `dist/`。

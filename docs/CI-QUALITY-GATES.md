@@ -1,7 +1,7 @@
 # CI质量门禁文档
 
 **生成时间**: 2026-06-07  
-**版本**: 1.0.0  
+**版本**: 1.1.0  
 **维护团队**: DevOps & Security Team
 
 ---
@@ -9,6 +9,8 @@
 ## 📋 概述
 
 本文档定义了SOPs项目的CI质量门禁标准，确保所有代码变更都通过自动化安全检查和质量验证，防止P0级技术债务回退。
+
+发版通道、产物与 tag 规则见 [RELEASE_POLICY.md](./RELEASE_POLICY.md)。推送 `v*` tag 时由 `.github/workflows/release.yml` 执行校验、构建与 GitHub Release 上传。
 
 ---
 

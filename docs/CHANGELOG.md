@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- 发布治理：`docs/RELEASE_POLICY.md`、Release Notes 模板、`SECURITY.md`
+- 发版脚本：`npm run release:validate|notes|package`（CHANGELOG 抽取、产物与 SHA256）
+- GitHub Release 流水线：`.github/workflows/release.yml` 与自动 notes 分类 `.github/release.yml`
 - 新增 CBA 网关提供商支持
 - 新增 KR 网关提供商和 Anthropic 适配器
 - 新增 ChatAnywhere 支持
@@ -15,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 新增 NEW/CPA 网关占位符到环境文件
 
 ### Changed
+- GitHub Latest 纠正为稳定版 `v3.0.4`；`v3.0.4-rc.11` 标记为 Pre-release
+- 仓库 homepage 对齐生产域 `https://sops.hongecb.store`
+- 冻结 `3.0.4-rc.*` 版本线；后续候选使用 `3.0.5-rc.N`
 - 替换旧版网关为 new_api 和 cpa
 - 更新 CB-E 网关 URL 为 sds.dpdns.org
 - 使用 chatanywhere.org 并修复 OpenAI 域名

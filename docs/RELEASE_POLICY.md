@@ -1,0 +1,151 @@
+# SOPs 发布策略
+
+本文档定义 GitHub Releases、版本号、变更说明与发版门禁的企业级约定。  
+与 [变更日志](./CHANGELOG.md)、[部署指南](./DEPLOYMENT.md)、[CI 质量门禁](./CI-QUALITY-GATES.md) 配套使用。
+
+## 1. 目标
+
+- **可消费**：`Latest` 始终指向可上生产的稳定版（GA）。
+- **可审计**：每个 Release 有完整 notes、commit SHA、构建信息与产物校验和。
+- **可回滚**：产物可复现部署；notes 标明上一 GA 与回滚步骤。
+- **通道清晰**：预发布不得抢占 Latest，不得在同号 GA 之后再发同号 RC。
+
+## 2. 版本通道（SemVer）
+
+| 通道 | Tag 格式 | package.json | GitHub | 用途 |
+|------|----------|--------------|--------|------|
+| Alpha | `vX.Y.Z-alpha.N` | 同左无 `v` | **Pre-release** | 探索性功能，不保证 API |
+| Beta | `vX.Y.Z-beta.N` | 同左无 `v` | **Pre-release** | 功能基本完整，邀请内测 |
+| RC | `vX.Y.Z-rc.N` | 同左无 `v` | **Pre-release** | 功能冻结后的发布候选 |
+| GA | `vX.Y.Z` | 同左无 `v` | **Latest**（正式） | 生产推荐版本 |
+
+### 硬性规则
+
+1. **仅 GA 可设为 Latest**；所有带 `alpha` / `beta` / `rc` 的 tag **必须**标记为 Pre-release。
+2. **禁止**「先发 `vX.Y.Z` GA，再发 `vX.Y.Z-rc.N`」。GA 之后的下一条候选必须进入 **下一版本号**（如 `vX.Y.(Z+1)-rc.1` 或 `vX.(Y+1).0-rc.1`）。
+3. **禁止** force-move / retag 已发布的远程 tag（紧急纠错须 24h 内全员通知，并在 CHANGELOG 记录；优先发新版本说明废弃）。
+4. **三者一致**：`package.json` 的 `version`、git tag（去掉前缀 `v`）、Release tag 名称必须相同。
+5. UI 版本号只读 `package.json`（经 `VITE_APP_VERSION` 注入），不得从随意 git tag 推断。
+
+### 历史版本线说明（只读）
+
+- `v3.0.4` 为已发布 GA。
+- `v3.0.4-rc.1` … `v3.0.4-rc.11` 为历史误序 RC（GA 之后继续同号候选），**冻结**：不再新增 `3.0.4-rc.*`。
+- 曾出现的 `3.0.5` / `3.0.6-rc.*` 误标已并入上述序列说明；后续在研线使用 **`3.0.5-rc.N` → `3.0.5` GA**（或按变更体量升 minor）。
+
+## 3. 何时创建 GitHub Release
+
+| 活动 | 是否创建 Release | 说明 |
+|------|------------------|------|
+| 日常 merge 到 `main` | 否 | 依赖 CI 与部署日志 |
+| 功能联调 / Staging 部署 | 可选 Draft | 不公开为正式通道 |
+| 功能冻结后的候选 | 是，Pre-release | `*-rc.N` |
+| 生产里程碑 | 是，GA + Latest | `vX.Y.Z` |
+
+**原则**：Release 是产品里程碑，不是开发日记。同一 RC 系列内合并相关提交后再打 tag，避免每个 commit 一个 Release。
+
+## 4. 变更说明（SSOT）
+
+- **唯一事实源**：`docs/CHANGELOG.md`（Keep a Changelog）。
+- Release body 由脚本从 CHANGELOG 对应版本段落生成，再套用 [Release Notes 模板](./templates/RELEASE_NOTES_TEMPLATE.md) 补齐运维字段。
+- 分区至少包含：`Added` / `Changed` / `Fixed`；涉及安全时必须有 `Security`；破坏性变更用 `### Breaking` 或明确迁移步骤。
+
+发版前检查：
+
+- [ ] CHANGELOG 已有目标版本章节（日期正确）
+- [ ] `Unreleased` 中已落地条目已迁入该版本
+- [ ] 无密钥、内网账号、真实 API key
+
+## 5. 发版门禁
+
+发布 tag 触发 `.github/workflows/release.yml`，至少通过：
+
+1. 版本一致性校验（`npm run release:validate`）
+2. 安全门：`npm run ci:security`
+3. 质量门：`npm run type-check`、`npm run lint`、`npm run lint:warning-gate`（完整 `ci:quality` 可在本地/主 CI 先行）
+4. 构建：`npm run build:app`（发版流水线内跳过会再次全量 prebuild 的重复，见 workflow）
+5. 产物打包与 SHA256（`npm run release:package`）
+6. （推荐）E2E smoke：`npm run test:e2e:smoke` — workflow 中作为必需步骤
+
+人工验收（GA 必做，RC 建议做）：
+
+- [ ] 生产或 Staging 首页可打开，CSP 正常
+- [ ] 核心 SOP / App Center 路径可进入
+- [ ] LLM 网关连通（用户自备 key，不把生产 key 写入仓库）
+- [ ] 回滚版本号已写在 Release notes
+
+## 6. 产物（Artifacts）
+
+每个 Release 应附带（由流水线上传）：
+
+| 文件 | 说明 |
+|------|------|
+| `sops-dist-<version>.zip` | `dist/` 构建产物 |
+| `build-info.json` | version、git SHA、构建时间、Node 版本 |
+| `SHA256SUMS.txt` | 上述文件的校验和 |
+
+Source code zip/tarball 由 GitHub 自动提供，**不能**替代 `dist` 产物。
+
+## 7. 操作流程
+
+### 7.1 发布 RC
+
+```bash
+# 1. 更新 package.json version，例如 3.0.5-rc.1
+# 2. 将 Unreleased 迁入 docs/CHANGELOG.md 对应章节
+# 3. 提交并推送 main
+# 4. 打 tag 并推送（触发 release workflow）
+git tag -a v3.0.5-rc.1 -m "v3.0.5-rc.1"
+git push origin v3.0.5-rc.1
+```
+
+### 7.2 发布 GA
+
+```bash
+# version → 3.0.5（去掉 -rc.N），CHANGELOG 定稿
+git tag -a v3.0.5 -m "v3.0.5"
+git push origin v3.0.5
+```
+
+### 7.3 本地校验（不推送）
+
+```bash
+npm run release:validate
+npm run release:notes
+npm run build:app
+npm run release:package
+```
+
+### 7.4 手动纠正 Pre-release / Latest（应急）
+
+```bash
+gh release edit vX.Y.Z-rc.N --prerelease
+gh release edit vX.Y.Z --latest
+```
+
+## 8. 环境与链接
+
+| 环境 | URL | 说明 |
+|------|-----|------|
+| Production | https://sops.hongecb.store | Cloudflare Pages；GitHub `homepage` 指向此处 |
+| 文档中的部署步骤 | [DEPLOYMENT.md](./DEPLOYMENT.md) | 构建与 wrangler 部署 |
+
+仓库与 Pages **不**存放生产 LLM API key；密钥由用户在浏览器设置页配置，治理在 new-api 后台。
+
+## 9. 角色与审批
+
+| 动作 | 建议 |
+|------|------|
+| 推送 `v*-rc.*` tag | 维护者；CI 全绿 |
+| 推送 GA tag | 维护者；人工验收清单完成 |
+| 修改本策略 | PR 评审后合并 |
+
+后续可引入 `CODEOWNERS` 强制 `docs/CHANGELOG.md`、`.github/workflows/release.yml` 的评审。
+
+## 10. 相关命令
+
+```bash
+npm run release:validate   # 校验 package version / tag / 预发布规则
+npm run release:notes      # 从 CHANGELOG 生成 release body 片段
+npm run release:package    # 打包 dist + build-info + SHA256SUMS
+```

@@ -2,7 +2,10 @@
 
 sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，提供 SOP 流程、Amazon 智库、应用中心和大模型探索工具。当前部署形态是 Cloudflare Pages 托管静态资源，浏览器端按用户配置调用 `https://new.hongecb.store/v1` 中转站；仓库和 Pages 项目不应保存生产 API key。
 
-> 本 README 已按当前发布版本 `v3.0.4-rc.11`、当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+> 本 README 已按当前代码结构、`package.json` 脚本和部署文档重新核对。`docs/archive/` 与 `.kiro/specs/` 中的阶段性文档可作历史参考，不建议直接作为当前开发依据。
+
+**生产站点：** [https://sops.hongecb.store](https://sops.hongecb.store)  
+**发布策略：** [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md) · **安全策略：** [SECURITY.md](./SECURITY.md)
 
 ## 产品收敛方向
 
@@ -10,9 +13,13 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-当前发布版本是 `v3.0.4-rc.11`（2026-07-12，release candidate）。GitHub `Latest` 徽章指向最新**稳定版** `v3.0.4`；当前在研 RC 继续走 `3.0.4-rc.*` 序列。
+| 通道 | 版本 | 说明 |
+|------|------|------|
+| **GitHub Latest（稳定 GA）** | `v3.0.4` | 生产推荐版本 |
+| 当前在研 / package.json | `3.0.4-rc.11` | 预发布候选（**Pre-release**，不占 Latest） |
 
-> 版本线更正：曾误标为 `v3.0.5` / `v3.0.5-rc.*` / `v3.0.6-rc.*`。现统一并入 `v3.0.4-rc.8` … `v3.0.4-rc.11`。
+- 历史误序：`v3.0.4` GA 之后曾继续发布 `v3.0.4-rc.*`，并误标过 `3.0.5` / `3.0.6-rc.*`。`3.0.4-rc.*` **已冻结**，后续候选走 **`3.0.5-rc.N` → `3.0.5` GA**。
+- 发版命令：`npm run release:validate` / `release:notes` / `release:package`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
 
 `v3.0.4-rc.11` 在 `v3.0.4-rc.10` 基础上聚焦应用中心总览与构建体验，带来以下面向运营和维护的变化：
 
