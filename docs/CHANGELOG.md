@@ -30,44 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
-## [3.0.5-rc.2] - 2026-07-13
-
-> **Superseded / 已取代**：误标版本线 tag，勿用于生产。请使用 GA `v3.0.5`。
-
-> Historical notes imported from GitHub Release `v3.0.5-rc.2` (2026-07-13).
-
-## SOPs 3.0.5-rc.2（已取代 / Superseded）
-
-**发布通道：** Release Candidate（归档）  
-**状态：** 历史误标版本线中的 tag，**不要**用于生产或新开发基线。
-
-该 tag 属于曾误标的 `3.0.5-rc` 线，内容已并入冻结线 `3.0.4-rc.*` 并收口于 GA `v3.0.5`。本 Release 仅作归档说明，避免孤儿 tag 无文档。
-
-**请使用：**
-- 稳定 GA：`v3.0.5`（GitHub Latest）
-- 冻结线叙述：`v3.0.4-rc.*` 各章节与 README「最新发布」
-
-**Commit：** `551ea9cb3d01`
-
-## [3.0.5-rc.1] - 2026-07-13
-
-> **Superseded / 已取代**：误标版本线 tag，勿用于生产。请使用 GA `v3.0.5`。
-
-> Historical notes imported from GitHub Release `v3.0.5-rc.1` (2026-07-13).
-
-## SOPs 3.0.5-rc.1（已取代 / Superseded）
-
-**发布通道：** Release Candidate（归档）  
-**状态：** 历史误标版本线中的 tag，**不要**用于生产或新开发基线。
-
-该 tag 属于曾误标的 `3.0.5-rc` 线，内容已并入冻结线 `3.0.4-rc.*` 并收口于 GA `v3.0.5`。本 Release 仅作归档说明，避免孤儿 tag 无文档。
-
-**请使用：**
-- 稳定 GA：`v3.0.5`（GitHub Latest）
-- 冻结线叙述：`v3.0.4-rc.*` 各章节与 README「最新发布」
-
-**Commit：** `9666edc58a7c`
-
 ## [3.0.5] - 2026-07-13
 
 > 正式 GA。整合 `v3.0.4` 之后冻结线 `3.0.4-rc.1`…`rc.11` 的全部能力，并落地企业级发布治理。  
@@ -130,6 +92,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `3.0.4-rc.9` — 共享确认弹窗、Modal 指南、SOP 模板模块、AppModal 可见性
 - `3.0.4-rc.8` — 循环依赖检查、rc.1–rc.7 整合、Deep Chat bundle 固定、Sentry 兼容
 - `3.0.4-rc.7`…`rc.1` — Deep Chat 重命名/删除确认、recent items 图标与时间、App Center catalog/workflow、质量审计等（详见各 RC 章节）
+
+## [3.0.5-rc.2] - 2026-07-13
+
+> **Superseded / 已取代**：误标版本线 tag，勿用于生产。请使用 GA `v3.0.5`。
+
+该 tag 属于曾误标的 `3.0.5-rc` 线，内容已并入冻结线 `3.0.4-rc.*` 并收口于 GA `v3.0.5`。
+本条目仅作归档说明，避免孤儿 tag 无文档。
+
+## [3.0.5-rc.1] - 2026-07-13
+
+> **Superseded / 已取代**：误标版本线 tag，勿用于生产。请使用 GA `v3.0.5`。
+
+该 tag 属于曾误标的 `3.0.5-rc` 线，内容已并入冻结线 `3.0.4-rc.*` 并收口于 GA `v3.0.5`。
+本条目仅作归档说明，避免孤儿 tag 无文档。
+
+## [3.0.4] - 2026-07-06
+
+### Added
+- 新增 Keyword Hunter AI 翻译模型选择器和界面刷新。
+- 新增 AI 功能深度优化建议文档。
+
+### Changed
+- Deep Chat/Playground 请求预算改为动态计算，并延续 rc 系列的线程、搜索、本地化和 prompt 持久化体验。
+- 整合 `v3.0.3-rc.7` 至 `v3.0.3-rc.23` 的监控、安全门禁、PPC 分析器、Keyword Hunter、PromptLab、Settings 和 UI 可访问性改进。
+- 同步应用内版本显示到 `3.0.4`。
+
+### Fixed
+- 修复 LLM abort 边界行为和动态请求预算回归。
+- 补充 Keyword Hunter 翻译模型选择与 LLM 行为测试覆盖。
 
 ## [3.0.4-rc.11] - 2026-07-12
 
@@ -291,21 +282,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - 补充和更新系统设置、策略服务、LLM 行为、存储、Keyword Hunter、PPC 与 release smoke 测试覆盖。
 - 修复监控导入兼容、存储键和 XSS 报告时间戳相关维护项。
-
-## [3.0.4] - 2026-07-06
-
-### Added
-- 新增 Keyword Hunter AI 翻译模型选择器和界面刷新。
-- 新增 AI 功能深度优化建议文档。
-
-### Changed
-- Deep Chat/Playground 请求预算改为动态计算，并延续 rc 系列的线程、搜索、本地化和 prompt 持久化体验。
-- 整合 `v3.0.3-rc.7` 至 `v3.0.3-rc.23` 的监控、安全门禁、PPC 分析器、Keyword Hunter、PromptLab、Settings 和 UI 可访问性改进。
-- 同步应用内版本显示到 `3.0.4`。
-
-### Fixed
-- 修复 LLM abort 边界行为和动态请求预算回归。
-- 补充 Keyword Hunter 翻译模型选择与 LLM 行为测试覆盖。
 
 ## [3.0.3-rc.23] - 2026-07-06
 
@@ -1013,57 +989,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `deep-chat` 等少数 chunk 仍超过 300 kB；当前不阻断发布，后续可继续按页面或功能拆包优化。
 - `package.json` 内部包版本字段仍为历史值 `1.0.0`，本次 GitHub 发布版本以 tag/release `v3.0.2` 为准。
 
-## [3.0.1-alpha.2] - 2026-06-07
-
-> Historical notes imported from GitHub Release `v3.0.1-alpha.2` (2026-06-07).
-
-## 历史版本定位
-
-历史日期：2026-06-07
-Target commit：`829b42f15fbd71a45272edd1dab3e58d6a94b3d6`
-
-PPC Search Terms Analyzer 首次进入应用中心。
-
-关键 commit：`829b42f1` feat(app-center): add PPC search terms analyzer。
-
-## Cloudflare Pages 对照
-
-Cloudflare Pages `sops` recent deployment source observed: `829b42f`.
-
-## [3.0.1-alpha.1] - 2026-06-07
-
-> Historical notes imported from GitHub Release `v3.0.1-alpha.1` (2026-06-07).
-
-## 历史版本定位
-
-历史日期：2026-06-07
-Target commit：`7d0fd7f36d3c51682d716f0cc4783000e72d1584`
-
-v3.0.1 候选线的第一个 alpha，补入 onboarding checklist 和 UI tweaks。
-
-关键 commit：`7d0fd7f3` Add onboarding checklists and UI tweaks。
-
-## Cloudflare Pages 对照
-
-Cloudflare Pages `sops` recent deployment source observed: `7d0fd7f`.
-
-## [3.0.1-beta.1] - 2026-06-07
-
-> Historical notes imported from GitHub Release `v3.0.1-beta.1` (2026-06-07).
-
-## 历史版本定位
-
-历史日期：2026-06-08
-Target commit：`c2c18453b0b3a25b7511d3abf89e2b002f749ab5`
-
-v3.0.1 beta 节点，完成 welcome banner 样式重做和 UI polish。
-
-关键 commit：`c2c18453` Revamp welcome banner styles and UI polish。
-
-## Cloudflare Pages 对照
-
-Cloudflare Pages `sops` recent deployment source observed: `c2c1845`; this was the latest observed Cloudflare deployment during this audit.
-
 ## [3.0.1-rc.4] - 2026-06-09
 
 > Historical notes imported from GitHub Release `v3.0.1-rc.4` (2026-06-09).
@@ -1305,6 +1230,57 @@ Release 指向提交：`11d2c78b17c38c015328a04d48035eacae93753e`。
 Cloudflare Pages 项目核对：未发现 `spos` 项目，实际项目为 `sops`，域名包括 `sops-3js.pages.dev` 和 `sops.hongecb.store`。最近生产部署 source 覆盖 `f16010f`、`f621b8c`、`3f778dd`、`734d70f`、`625f6d2`、`7d0fd7f`、`829b42f`、`c2c1845` 等节点。
 
 审计时最新 Cloudflare Pages 部署 source 为 `c2c1845`，对应 `v3.0.1-beta.1`。`v3.0.1-rc` tag 指向 `11d2c78b17c38c015328a04d48035eacae93753e`，该提交已作为 GitHub release candidate 标记，但未在 Wrangler 最近部署列表中观察到对应生产部署记录。
+
+## [3.0.1-beta.1] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v3.0.1-beta.1` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-08
+Target commit：`c2c18453b0b3a25b7511d3abf89e2b002f749ab5`
+
+v3.0.1 beta 节点，完成 welcome banner 样式重做和 UI polish。
+
+关键 commit：`c2c18453` Revamp welcome banner styles and UI polish。
+
+## Cloudflare Pages 对照
+
+Cloudflare Pages `sops` recent deployment source observed: `c2c1845`; this was the latest observed Cloudflare deployment during this audit.
+
+## [3.0.1-alpha.2] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v3.0.1-alpha.2` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-07
+Target commit：`829b42f15fbd71a45272edd1dab3e58d6a94b3d6`
+
+PPC Search Terms Analyzer 首次进入应用中心。
+
+关键 commit：`829b42f1` feat(app-center): add PPC search terms analyzer。
+
+## Cloudflare Pages 对照
+
+Cloudflare Pages `sops` recent deployment source observed: `829b42f`.
+
+## [3.0.1-alpha.1] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v3.0.1-alpha.1` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-07
+Target commit：`7d0fd7f36d3c51682d716f0cc4783000e72d1584`
+
+v3.0.1 候选线的第一个 alpha，补入 onboarding checklist 和 UI tweaks。
+
+关键 commit：`7d0fd7f3` Add onboarding checklists and UI tweaks。
+
+## Cloudflare Pages 对照
+
+Cloudflare Pages `sops` recent deployment source observed: `7d0fd7f`.
 
 ## [3.0.0] - 2026-06-07
 

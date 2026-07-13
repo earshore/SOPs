@@ -65,15 +65,14 @@ function parseSemver(version) {
   if (!m) {
     return { major: 0, minor: 0, patch: 0, preType: 99, preNum: 0, raw: version };
   }
-  // Within same major.minor.patch, list pre-releases first (rc.N high→low), then GA.
-  // Matches historical freeze line: 3.0.4-rc.11 … rc.1, then 3.0.4.
-  const preMap = { alpha: 3, beta: 2, rc: 1 };
+  // Within same major.minor.patch: GA first, then rc/beta/alpha high→low.
+  const preMap = { rc: 3, beta: 2, alpha: 1 };
   const isGa = !m[4];
   return {
     major: Number(m[1]),
     minor: Number(m[2]),
     patch: Number(m[3]),
-    preRank: isGa ? 0 : preMap[m[4].toLowerCase()] || 1,
+    preRank: isGa ? 100 : preMap[m[4].toLowerCase()] || 0,
     preNum: m[5] != null ? Number(m[5]) : m[4] ? 0 : 0,
     raw: version,
   };
@@ -85,7 +84,6 @@ function compareVersionsDesc(a, b) {
   if (pa.major !== pb.major) return pb.major - pa.major;
   if (pa.minor !== pb.minor) return pb.minor - pa.minor;
   if (pa.patch !== pb.patch) return pb.patch - pa.patch;
-  // Higher preRank first (rc before GA); then higher preNum (rc.11 before rc.1)
   if (pa.preRank !== pb.preRank) return pb.preRank - pa.preRank;
   return pb.preNum - pa.preNum;
 }
@@ -146,24 +144,34 @@ function stripGeneratedWrapper(body, version) {
 }
 
 function sectionFromRelease(version, release, existingBody) {
+  // Special-case superseded mistaken line — keep a short stable blurb
+  if (version === '3.0.5-rc.1' || version === '3.0.5-rc.2') {
+    return [
+      '> **Superseded / 已取代**：误标版本线 tag，勿用于生产。请使用 GA `v3.0.5`。',
+      '',
+      '该 tag 属于曾误标的 `3.0.5-rc` 线，内容已并入冻结线 `3.0.4-rc.*` 并收口于 GA `v3.0.5`。',
+      '本条目仅作归档说明，避免孤儿 tag 无文档。',
+    ].join('\n');
+  }
+
   if (existingBody && existingBody.length > 40) {
-    return stripLeadingVersionHeading(existingBody.trim(), version);
+    let body = stripLeadingVersionHeading(existingBody.trim(), version);
+    // Unwrap accidentally nested full release templates
+    if (body.includes('## SOPs ') || body.includes('### CHANGELOG')) {
+      body = stripGeneratedWrapper(body, version);
+    }
+    if (body.length > 40) return body;
   }
   const raw = stripGeneratedWrapper(release.body || '', version);
   const date = dateOnly(release.published_at);
-  const lines = [];
-  if (version === '3.0.5-rc.1' || version === '3.0.5-rc.2') {
-    lines.push(
-      '> **Superseded / 已取代**：误标版本线 tag，勿用于生产。请使用 GA `v3.0.5`。',
-      ''
-    );
-  }
-  lines.push(
+  const lines = [
     `> Historical notes imported from GitHub Release \`${release.tag_name}\` (${date}).`,
-    ''
-  );
-  if (raw) {
+    '',
+  ];
+  if (raw && !raw.startsWith('## SOPs ')) {
     lines.push(raw);
+  } else if (raw) {
+    lines.push(stripGeneratedWrapper(raw, version) || raw);
   } else {
     lines.push('### Notes');
     lines.push(`- Release \`${release.tag_name}\` (${release.name || version}).`);
@@ -316,10 +324,8 @@ function main() {
     const release = byVersion.get(version);
     const existingBody = existing.get(version);
     // Prefer existing CHANGELOG detail whenever present and non-trivial
-    let body =
-      existingBody && existingBody.length > 40
-        ? stripLeadingVersionHeading(existingBody, version)
-        : sectionFromRelease(version, release, existingBody);
+    // Always run through sectionFromRelease so superseded / unwrap rules apply
+    let body = sectionFromRelease(version, release, existingBody);
     versionSectionsOrdered.push({
       version,
       date: dateOnly(release.published_at),
