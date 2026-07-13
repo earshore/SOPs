@@ -1,4 +1,3 @@
-import type { AppCenterArtifactEnvelope } from './artifactEnvelopeService';
 import { APP_CENTER_COMPLIANCE_CHECKLIST } from './workflowDefinitions';
 
 export type ComplianceReviewStatus = 'pending' | 'confirmed' | 'skipped';
@@ -19,6 +18,10 @@ export interface ComplianceReviewView {
   totalCount: number;
   complete: boolean;
   nextItem: ComplianceReviewItemView | null;
+}
+
+interface ComplianceReviewArtifact {
+  metadata?: Record<string, string | number | boolean>;
 }
 
 function isReviewStatus(value: unknown): value is ComplianceReviewStatus {
@@ -58,7 +61,7 @@ export function parseComplianceReviewStates(value: unknown): ComplianceReviewSta
   }
 }
 
-export function getComplianceReviewView(artifact: AppCenterArtifactEnvelope): ComplianceReviewView {
+export function getComplianceReviewView(artifact: ComplianceReviewArtifact): ComplianceReviewView {
   const metadata = artifact.metadata || {};
   const checklistIds =
     typeof metadata.checklistIds === 'string' && metadata.checklistIds

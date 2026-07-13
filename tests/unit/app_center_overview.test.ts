@@ -188,6 +188,14 @@ describe('App Center Overview', () => {
       '.app-overview-recent-action.app-card-primary-link'
     );
     const pinButton = container.querySelector<HTMLButtonElement>('[aria-label="置顶"]');
+    const cardTools = recentItems[0]?.querySelectorAll('.app-overview-recent-card-tool');
+    const cardCorner = recentItems[0]?.querySelector('.app-overview-recent-card-corner');
+    const typeSelect = container.querySelector<HTMLSelectElement>(
+      '.app-overview-recent-type-filters select'
+    );
+    const statusSelect = container.querySelector<HTMLSelectElement>(
+      '.app-overview-recent-status-filters select'
+    );
 
     expect(recentItems).toHaveLength(1);
     expect(recentItems[0]?.classList.contains('app-overview-recent-item--ppc_action_list')).toBe(
@@ -205,13 +213,33 @@ describe('App Center Overview', () => {
     expect(recentItems[0]?.textContent).not.toContain('PPC 动作清单');
     expect(reviewButton?.textContent).toContain('查看 PPC 建议');
     expect(container.querySelectorAll('.app-overview-recent-action')).toHaveLength(1);
+    const ppcJourneySteps = recentItems[0]?.querySelectorAll('.app-overview-recent-journey-step');
+    expect(ppcJourneySteps).toHaveLength(2);
+    expect(ppcJourneySteps?.[0]?.textContent).toContain('生成建议');
+    expect(ppcJourneySteps?.[1]?.textContent).toContain('人工复核');
+    expect(ppcJourneySteps?.[1]?.classList).toContain('app-overview-recent-journey-step--current');
+    expect(cardTools).toHaveLength(3);
+    expect(cardCorner?.querySelector('time')).not.toBeNull();
+    expect(cardTools?.[0]?.querySelector('span')?.classList).toContain('sr-only');
+    expect(pinButton?.getAttribute('title')).toContain('置顶');
     expect(pinButton?.querySelector('i')?.className).toBe('fa-solid fa-thumb-tack');
     expect(pinButton?.getAttribute('aria-pressed')).toBe('false');
     expect(recentItems[0]?.classList.contains('app-overview-recent-item--attention')).toBe(true);
-    expect(
-      container.querySelector('.app-overview-recent-type-filters')?.children.length
-    ).toBeGreaterThan(0);
+    expect(typeSelect?.options).toHaveLength(7);
+    expect(statusSelect?.options).toHaveLength(4);
+    expect(container.querySelectorAll('.app-overview-recent-type-filter')).toHaveLength(0);
     expect(container.querySelector('.app-overview-recent-empty')?.classList).toContain('hidden');
+
+    if (!typeSelect) throw new Error('Recent type select was not rendered');
+    typeSelect.value = 'analysis_report';
+    typeSelect.dispatchEvent(new Event('change'));
+    await vi.waitFor(() => {
+      expect(container.querySelectorAll('.app-overview-recent-item')).toHaveLength(0);
+      expect(
+        container.querySelector<HTMLSelectElement>('.app-overview-recent-type-filters select')
+          ?.value
+      ).toBe('analysis_report');
+    });
   });
 
   it('shows a visible pin state and supports remove undo', async () => {
@@ -221,9 +249,9 @@ describe('App Center Overview', () => {
 
     container.querySelector<HTMLButtonElement>('[aria-label="置顶"]')?.click();
     await vi.waitFor(() => {
-      expect(container.querySelector('[aria-label="取消置顶"]')?.getAttribute('aria-pressed')).toBe(
-        'true'
-      );
+      const pinnedButton = container.querySelector('[aria-label="取消置顶"]');
+      expect(pinnedButton?.getAttribute('aria-pressed')).toBe('true');
+      expect(pinnedButton?.classList).toContain('active');
     });
 
     container.querySelector<HTMLButtonElement>('[aria-label="从列表移除"]')?.click();
@@ -289,6 +317,16 @@ describe('App Center Overview', () => {
     expect(progressButton?.getAttribute('aria-expanded')).toBe('true');
     expect(container.querySelector('.app-overview-compliance-review.hidden')).toBeNull();
     expect(container.textContent).toContain('不会自动修改 Listing 或广告');
+    const journey = container.querySelector('.app-overview-recent-journey');
+    const journeySteps = journey?.querySelectorAll('.app-overview-recent-journey-step');
+    expect(journeySteps).toHaveLength(5);
+    expect(journeySteps?.[0]?.textContent).toContain('数据采集');
+    expect(journeySteps?.[4]?.textContent).toContain('合规复核');
+    expect(journeySteps?.[4]?.classList).toContain('app-overview-recent-journey-step--current');
+    expect(journey?.textContent).toContain('当前：合规复核');
+    expect(container.querySelector('.app-overview-recent-item')?.textContent).not.toContain(
+      '已完成 0/5 步'
+    );
 
     const firstStatus = container.querySelector<HTMLSelectElement>(
       '[data-compliance-item-id="restricted_words"]'

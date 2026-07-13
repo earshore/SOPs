@@ -192,11 +192,6 @@ function appendPpcFacts(
   if (typeof meta.owner === 'string' && meta.owner.trim()) {
     pushUniqueFact(facts, `负责人：${meta.owner.trim()}`, blocked);
   }
-  if (meta.requiresHumanConfirmation === true) {
-    pushUniqueFact(facts, '需人工复核', blocked);
-  } else if (meta.requiresHumanConfirmation === false) {
-    pushUniqueFact(facts, '已人工复核', blocked);
-  }
   if (typeof meta.filter === 'string' && meta.filter && meta.filter !== 'all') {
     pushUniqueFact(facts, PPC_FILTER_LABELS[meta.filter] || meta.filter, blocked);
   }
@@ -212,18 +207,13 @@ function appendTypeSpecificFacts(
   const handlers: Partial<Record<AppCenterArtifactType, () => void>> = {
     scrape_history: () => appendAsinCountFact(facts, workItem, blocked),
     analysis_report: () => pushUniqueFact(facts, '分析报告已生成', blocked),
-    listing_prompt: () => {
-      appendAsinCountFact(facts, workItem, blocked);
-      pushUniqueFact(facts, '下一步：关键词复核', blocked);
-    },
+    listing_prompt: () => appendAsinCountFact(facts, workItem, blocked),
     keyword_snapshot: () => pushSummaryParts(facts, artifact.summary, blocked),
     ppc_action_list: () => appendPpcFacts(facts, meta, blocked),
     compliance_check: () => {
       const review = getComplianceReviewView(artifact);
       pushUniqueFact(facts, `已复核 ${review.reviewedCount}/${review.totalCount} 项`, blocked);
-      if (review.nextItem) {
-        pushUniqueFact(facts, `下一步：${review.nextItem.label}`, blocked);
-      } else if (review.complete) {
+      if (review.complete) {
         pushUniqueFact(facts, '人工复核已完成', blocked);
       }
     },
@@ -242,7 +232,9 @@ export function extractRecentFacts(
   appendTypeSpecificFacts(facts, artifact, workItem, blocked);
 
   if (facts.length === 0 && artifact.summary.trim()) {
-    pushSummaryParts(facts, artifact.summary, blocked, { skipHistoryBound: true });
+    pushSummaryParts(facts, artifact.summary, blocked, {
+      skipHistoryBound: true,
+    });
   }
 
   return facts;
@@ -264,7 +256,7 @@ export function resolvePrimaryTitle(
 }
 
 /**
- * Pure presentation transform for the App Center "最近继续" resume queue.
+ * Pure presentation transform for the App Center "最近作业" resume queue.
  * Does not touch DOM or storage — safe for unit tests with fake envelopes.
  */
 export function buildRecentArtifactPresentation(

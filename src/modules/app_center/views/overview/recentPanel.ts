@@ -5,7 +5,10 @@ import { copyTextToClipboard } from '@/common/utils/clipboard';
 import { StorageService } from '@/services/storageService';
 import {
   APP_CENTER_ARTIFACTS_CHANGED,
+  COMPETITOR_LISTING_PROGRESS_TYPES,
   getAllArtifacts,
+  getArtifactsForWorkItem,
+  getWorkItemProgress,
   getWorkItemById,
   getWorkItems,
   registerComplianceCheckArtifact,
@@ -34,6 +37,7 @@ import {
 } from '../../recentQueueService';
 import { getWorkspaceContext } from '../../workspaceContext';
 import { getComplianceReviewView } from '../../complianceReviewState';
+import { getAppCenterWorkflowDefinition } from '../../workflowDefinitions';
 import { createComplianceReviewPanel } from './recentComplianceReview';
 
 const RECENT_ARTIFACT_LIMIT = 10;
@@ -52,7 +56,24 @@ const RECENT_ARTIFACT_ICONS: Record<AppCenterArtifactType, string> = {
   compliance_check: 'fas fa-shield-halved',
 };
 
-const TYPE_FILTERS: Array<{ id: AppCenterArtifactType | 'all'; label: string }> = [
+type RecentJourneyStepState = 'complete' | 'current' | 'upcoming';
+
+interface RecentJourneyStep {
+  id: string;
+  label: string;
+  state: RecentJourneyStepState;
+}
+
+interface RecentJourney {
+  currentLabel: string;
+  complete: boolean;
+  steps: RecentJourneyStep[];
+}
+
+const TYPE_FILTERS: Array<{
+  id: AppCenterArtifactType | 'all';
+  label: string;
+}> = [
   { id: 'all', label: '全部' },
   { id: 'scrape_history', label: '采集' },
   { id: 'analysis_report', label: '分析' },
@@ -251,11 +272,7 @@ function createGroupHeader(item: RecentQueueItem): HTMLElement {
   const title = document.createElement('strong');
   title.textContent = item.groupTitle || item.presentation.primaryTitle;
 
-  const progress = document.createElement('span');
-  progress.className = 'app-overview-recent-progress';
-  progress.textContent = item.progressLabel || '';
-
-  header.append(title, progress);
+  header.append(title);
   return header;
 }
 
@@ -279,20 +296,13 @@ function createRecentMetaRow(item: RecentQueueItem, missing: boolean): HTMLEleme
   }
   if (!presentation.relativeTime && !presentation.absoluteTime) time.classList.add('hidden');
 
-  metaRow.append(typeChip, time);
+  metaRow.append(typeChip);
 
   if (item.needsAttention) {
     const badge = document.createElement('span');
     badge.className = 'app-overview-recent-attention-badge';
     badge.textContent = '需人工复核';
     metaRow.append(badge);
-  }
-
-  if (item.progressLabel) {
-    const progress = document.createElement('span');
-    progress.className = 'app-overview-recent-progress';
-    progress.textContent = item.progressLabel;
-    metaRow.append(progress);
   }
 
   if (missing) {
@@ -302,63 +312,123 @@ function createRecentMetaRow(item: RecentQueueItem, missing: boolean): HTMLEleme
     metaRow.append(missingBadge);
   }
 
+  metaRow.append(time);
+
   return metaRow;
 }
 
-function createRecentActions(
+function getPpcJourney(item: RecentQueueItem): RecentJourney {
+  const progress = getWorkItemProgress(item.artifact.workItemId);
+  const complete = progress.completedSteps >= progress.totalSteps;
+  return {
+    currentLabel: complete ? '全部完成' : '人工复核',
+    complete,
+    steps: [
+      { id: 'suggestions', label: '生成建议', state: 'complete' },
+      {
+        id: 'manual_review',
+        label: '人工复核',
+        state: complete ? 'complete' : 'current',
+      },
+    ],
+  };
+}
+
+function getCompetitorListingJourney(item: RecentQueueItem): RecentJourney {
+  const workflow = getAppCenterWorkflowDefinition('competitor_listing');
+  const progress = getWorkItemProgress(item.artifact.workItemId);
+  const reachedTypes = new Set(
+    getArtifactsForWorkItem(item.artifact.workItemId).map(artifact => artifact.type)
+  );
+  reachedTypes.add(item.artifact.type);
+
+  const lastType = COMPETITOR_LISTING_PROGRESS_TYPES.at(-1);
+  const complete = Boolean(lastType && progress.completedTypes.includes(lastType));
+  const highestReachedIndex = COMPETITOR_LISTING_PROGRESS_TYPES.reduce(
+    (highest, type, index) => (reachedTypes.has(type) ? index : highest),
+    -1
+  );
+  const currentIndex = complete
+    ? -1
+    : Math.min(Math.max(highestReachedIndex + 1, 0), workflow.steps.length - 1);
+  const reachedCurrentIndex = COMPETITOR_LISTING_PROGRESS_TYPES.reduce(
+    (current, type, index) =>
+      reachedTypes.has(type) && !progress.completedTypes.includes(type) ? index : current,
+    -1
+  );
+  const resolvedCurrentIndex = reachedCurrentIndex >= 0 ? reachedCurrentIndex : currentIndex;
+
+  return {
+    currentLabel: complete
+      ? '全部完成'
+      : workflow.steps[resolvedCurrentIndex]?.title || workflow.steps[0]?.title || '数据采集',
+    complete,
+    steps: workflow.steps.map((step, index) => ({
+      id: step.id,
+      label: step.title,
+      state: complete
+        ? 'complete'
+        : index < resolvedCurrentIndex
+          ? 'complete'
+          : index === resolvedCurrentIndex
+            ? 'current'
+            : 'upcoming',
+    })),
+  };
+}
+
+function createRecentJourney(item: RecentQueueItem): HTMLElement | null {
+  if (item.workItem?.type === 'npi_reference') return null;
+  const journey =
+    item.workItem?.type === 'ppc_review' || item.artifact.type === 'ppc_action_list'
+      ? getPpcJourney(item)
+      : getCompetitorListingJourney(item);
+
+  const container = document.createElement('div');
+  container.className = 'app-overview-recent-journey';
+  container.setAttribute(
+    'aria-label',
+    journey.complete ? '作业链路：全部完成' : `作业链路：当前位于${journey.currentLabel}`
+  );
+
+  const heading = document.createElement('div');
+  heading.className = 'app-overview-recent-journey-heading';
+  const title = document.createElement('span');
+  title.textContent = '作业链路';
+  const current = document.createElement('span');
+  current.className = 'app-overview-recent-journey-current';
+  current.textContent = journey.complete ? '全部完成' : `当前：${journey.currentLabel}`;
+  heading.append(title, current);
+
+  const steps = document.createElement('ol');
+  steps.className = 'app-overview-recent-journey-steps';
+  steps.style.setProperty('--app-recent-journey-steps', String(journey.steps.length));
+  journey.steps.forEach(step => {
+    const stepEl = document.createElement('li');
+    stepEl.className = `app-overview-recent-journey-step app-overview-recent-journey-step--${step.state}`;
+    if (step.state === 'current') stepEl.setAttribute('aria-current', 'step');
+
+    const marker = document.createElement('span');
+    marker.className = 'app-overview-recent-journey-marker';
+    marker.setAttribute('aria-hidden', 'true');
+    const label = document.createElement('span');
+    label.className = 'app-overview-recent-journey-label';
+    label.textContent = step.label;
+    stepEl.append(marker, label);
+    steps.append(stepEl);
+  });
+
+  container.append(heading, steps);
+  return container;
+}
+
+function createRecentUtilityActions(
   item: RecentQueueItem,
-  missing: boolean,
-  callbacks: {
-    onRefresh: () => void;
-    onRemoved: (artifactId: string) => void;
-    compliancePanelId?: string;
-    onToggleCompliance?: () => void;
-  }
-): HTMLElement {
+  onRefresh: () => void,
+  onRemoved: (artifactId: string) => void
+): HTMLElement[] {
   const { artifact } = item;
-  const { onRefresh, onRemoved, compliancePanelId, onToggleCompliance } = callbacks;
-  const actions = document.createElement('div');
-  actions.className = 'app-overview-recent-actions';
-
-  const complianceView =
-    artifact.type === 'compliance_check' ? getComplianceReviewView(artifact) : null;
-  const resumeActions = getArtifactResumeActions(artifact.type)
-    .filter(action => !(complianceView?.complete && action.mode === 'continue'))
-    .map(action => ({
-      ...action,
-      label:
-        action.mode === 'continue' && complianceView?.nextItem
-          ? `继续复核：${complianceView.nextItem.label}`
-          : action.label,
-    }));
-
-  actions.append(
-    ...resumeActions.map(action =>
-      createToolbarButton({
-        className: action.primary
-          ? 'app-overview-recent-action app-card-primary-link'
-          : 'app-overview-recent-action app-overview-recent-action--secondary',
-        label: action.label,
-        title: action.title,
-        icon: action.icon,
-        disabled: missing,
-        ariaExpanded:
-          artifact.type === 'compliance_check' && action.mode === 'open'
-            ? expandedComplianceIds.has(artifact.id)
-            : undefined,
-        ariaControls:
-          artifact.type === 'compliance_check' && action.mode === 'open'
-            ? compliancePanelId
-            : undefined,
-        onClick: () => {
-          if (artifact.type === 'compliance_check' && action.mode === 'open') {
-            onToggleCompliance?.();
-            return;
-          }
-          void handleResume(artifact, action.mode);
-        },
-      })
-    ),
+  return [
     createToolbarButton({
       className: `app-overview-recent-icon-btn${item.pinned ? ' active' : ''}`,
       label: item.pinned ? '取消置顶' : '置顶',
@@ -403,8 +473,73 @@ function createRecentActions(
               onRemoved(artifact.id);
             },
           }
+    ),
+  ];
+}
+
+function createRecentActions(
+  item: RecentQueueItem,
+  missing: boolean,
+  callbacks: {
+    onRefresh: () => void;
+    onRemoved: (artifactId: string) => void;
+    compliancePanelId?: string;
+    onToggleCompliance?: () => void;
+  }
+): HTMLElement {
+  const { artifact } = item;
+  const { onRefresh, onRemoved, compliancePanelId, onToggleCompliance } = callbacks;
+  const actions = document.createElement('div');
+  actions.className = 'app-overview-recent-actions';
+  const primaryActions = document.createElement('div');
+  primaryActions.className =
+    'app-overview-recent-action-group app-overview-recent-action-group--primary';
+  const utilityActions = document.createElement('div');
+  utilityActions.className =
+    'app-overview-recent-action-group app-overview-recent-action-group--utility';
+
+  const complianceView =
+    artifact.type === 'compliance_check' ? getComplianceReviewView(artifact) : null;
+  const resumeActions = getArtifactResumeActions(artifact.type)
+    .filter(action => !(complianceView?.complete && action.mode === 'continue'))
+    .map(action => ({
+      ...action,
+      label:
+        action.mode === 'continue' && complianceView?.nextItem
+          ? `继续复核：${complianceView.nextItem.label}`
+          : action.label,
+    }));
+
+  primaryActions.append(
+    ...resumeActions.map(action =>
+      createToolbarButton({
+        className: action.primary
+          ? 'app-overview-recent-action app-card-primary-link'
+          : 'app-overview-recent-action app-overview-recent-action--secondary',
+        label: action.label,
+        title: action.title,
+        icon: action.icon,
+        disabled: missing,
+        ariaExpanded:
+          artifact.type === 'compliance_check' && action.mode === 'open'
+            ? expandedComplianceIds.has(artifact.id)
+            : undefined,
+        ariaControls:
+          artifact.type === 'compliance_check' && action.mode === 'open'
+            ? compliancePanelId
+            : undefined,
+        onClick: () => {
+          if (artifact.type === 'compliance_check' && action.mode === 'open') {
+            onToggleCompliance?.();
+            return;
+          }
+          void handleResume(artifact, action.mode);
+        },
+      })
     )
   );
+  utilityActions.append(...createRecentUtilityActions(item, onRefresh, onRemoved));
+  actions.append(primaryActions, utilityActions);
 
   return actions;
 }
@@ -464,9 +599,10 @@ function createRecentArtifactItem(
     body.append(facts);
   }
 
+  el.append(iconBox, body);
+  const journey = createRecentJourney(item);
+  if (journey) el.append(journey);
   el.append(
-    iconBox,
-    body,
     createRecentActions(item, missing, {
       onRefresh,
       onRemoved,
@@ -632,7 +768,9 @@ async function renderRecentList(container: HTMLElement, state: RecentPanelState)
         },
         artifactId => {
           state.lastRemovedArtifactId = artifactId;
-          showToast('已从最近作业移除，可使用“撤销”恢复。', { type: 'success' });
+          showToast('已从最近作业移除，可使用“撤销”恢复。', {
+            type: 'success',
+          });
           void renderRecentList(container, state);
         }
       )
@@ -657,6 +795,20 @@ async function renderRecentList(container: HTMLElement, state: RecentPanelState)
     ?.classList.toggle('hidden', !state.lastRemovedArtifactId);
 }
 
+function updateRecentPanelControls(container: HTMLElement, state: RecentPanelState): void {
+  applyRecentColumns(container, state.columns, false);
+  const groupBtn = container.querySelector<HTMLButtonElement>('[data-recent-group-toggle]');
+  groupBtn?.classList.toggle('active', state.groupByWorkItem);
+  groupBtn?.setAttribute('aria-pressed', String(state.groupByWorkItem));
+
+  const removedBtn = container.querySelector<HTMLButtonElement>('[data-recent-removed-toggle]');
+  removedBtn?.classList.toggle('active', state.showDismissed);
+  removedBtn?.setAttribute('aria-pressed', String(state.showDismissed));
+  container
+    .querySelector<HTMLButtonElement>('[data-recent-undo-remove]')
+    ?.classList.toggle('hidden', !state.lastRemovedArtifactId);
+}
+
 export async function renderRecentPanel(container: HTMLElement): Promise<void> {
   const state: RecentPanelState = {
     typeFilter: 'all',
@@ -676,25 +828,9 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
       void refresh();
     });
     await renderRecentList(container, state);
-    applyRecentColumns(container, state.columns, false);
-
-    const groupBtn = container.querySelector<HTMLButtonElement>('[data-recent-group-toggle]');
-    if (groupBtn) {
-      groupBtn.classList.toggle('active', state.groupByWorkItem);
-      groupBtn.setAttribute('aria-pressed', String(state.groupByWorkItem));
-    }
-
-    const removedBtn = container.querySelector<HTMLButtonElement>('[data-recent-removed-toggle]');
-    if (removedBtn) {
-      removedBtn.classList.toggle('active', state.showDismissed);
-      removedBtn.setAttribute('aria-pressed', String(state.showDismissed));
-    }
-    container
-      .querySelector<HTMLButtonElement>('[data-recent-undo-remove]')
-      ?.classList.toggle('hidden', !state.lastRemovedArtifactId);
+    updateRecentPanelControls(container, state);
   };
 
-  // Column toggles
   container
     .querySelectorAll<HTMLButtonElement>('.app-overview-recent-columns-btn[data-recent-columns]')
     .forEach(btn => {
@@ -706,14 +842,12 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
       });
     });
 
-  // Search
   const searchInput = container.querySelector<HTMLInputElement>('#app-overview-recent-search');
   searchInput?.addEventListener('input', () => {
     state.query = searchInput.value.trim();
     void renderRecentList(container, state);
   });
 
-  // Group toggle
   const groupBtn = container.querySelector<HTMLButtonElement>('[data-recent-group-toggle]');
   groupBtn?.addEventListener('click', () => {
     state.groupByWorkItem = !state.groupByWorkItem;
@@ -748,7 +882,6 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
     void refresh();
   });
 
-  // Live refresh when artifacts change
   const unsubscribe = eventBus.on(APP_CENTER_ARTIFACTS_CHANGED, () => {
     if (!container.isConnected) return;
     void renderRecentList(container, state);
