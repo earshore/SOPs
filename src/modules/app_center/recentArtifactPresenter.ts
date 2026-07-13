@@ -21,6 +21,7 @@ export const RECENT_ARTIFACT_TYPE_LABELS: Record<AppCenterArtifactType, string> 
   listing_prompt: 'Prompt',
   listing_copy: '产品文案',
   keyword_snapshot: '关键词',
+  listing_review: '文案评审',
   ppc_action_list: 'PPC',
   compliance_check: '合规',
 };
@@ -59,6 +60,7 @@ const GENERIC_TITLE_NORMALIZED = new Set(
     '文案',
     '关键词快照',
     '关键词',
+    '文案评审',
     'ppc动作清单',
     'ppc',
     '合规复核',
@@ -213,6 +215,7 @@ function appendTypeSpecificFacts(
     listing_prompt: () => appendAsinCountFact(facts, workItem, blocked),
     listing_copy: () => pushSummaryParts(facts, artifact.summary, blocked),
     keyword_snapshot: () => pushSummaryParts(facts, artifact.summary, blocked),
+    listing_review: () => pushSummaryParts(facts, artifact.summary, blocked),
     ppc_action_list: () => appendPpcFacts(facts, meta, blocked),
     compliance_check: () => {
       const review = getComplianceReviewView(artifact);

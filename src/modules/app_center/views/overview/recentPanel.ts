@@ -12,12 +12,12 @@ import {
   getWorkItemById,
   getWorkItems,
   registerComplianceCheckArtifact,
+  type AppCenterArtifactEnvelope,
   type AppCenterArtifactType,
 } from '../../artifactEnvelopeService';
 import {
   buildResumePlanAsync,
   executeResumePlan,
-  getArtifactResumeActions,
   resolveResumePayloadStatusAsync,
   type ResumeMode,
 } from '../../artifactResumeService';
@@ -35,7 +35,6 @@ import {
   type RecentQueueItem,
 } from '../../recentQueueService';
 import { getWorkspaceContext } from '../../workspaceContext';
-import { getComplianceReviewView } from '../../complianceReviewState';
 import { getAppCenterWorkflowDefinition } from '../../workflowDefinitions';
 import { createComplianceReviewPanel } from './recentComplianceReview';
 
@@ -51,6 +50,7 @@ const RECENT_ARTIFACT_ICONS: Record<AppCenterArtifactType, string> = {
   listing_prompt: 'fas fa-wand-magic-sparkles',
   listing_copy: 'fas fa-file-pen',
   keyword_snapshot: 'fas fa-key',
+  listing_review: 'fas fa-file-circle-check',
   ppc_action_list: 'fas fa-list-check',
   compliance_check: 'fas fa-shield-halved',
 };
@@ -61,6 +61,10 @@ interface RecentJourneyStep {
   id: string;
   label: string;
   state: RecentJourneyStepState;
+  action:
+    | { kind: 'resume'; artifact: AppCenterArtifactEnvelope; mode: ResumeMode }
+    | { kind: 'compliance'; artifact: AppCenterArtifactEnvelope | null }
+    | null;
 }
 
 interface RecentJourney {
@@ -79,6 +83,7 @@ const TYPE_FILTERS: Array<{
   { id: 'listing_prompt', label: 'Prompt' },
   { id: 'listing_copy', label: '文案' },
   { id: 'keyword_snapshot', label: '关键词' },
+  { id: 'listing_review', label: '文案评审' },
   { id: 'ppc_action_list', label: 'PPC' },
   { id: 'compliance_check', label: '合规' },
 ];
@@ -104,7 +109,7 @@ interface RecentPanelState {
 
 let unsubscribers: Array<() => void> = [];
 let renderSequence = 0;
-const expandedComplianceIds = new Set<string>();
+const openComplianceDialogIds = new Set<string>();
 let pendingFocusSelector = '';
 
 function parseRecentColumns(value: string | undefined): RecentColumns | null {
@@ -166,55 +171,23 @@ async function getQueueItems(state: RecentPanelState): Promise<RecentQueueItem[]
   });
 }
 
-async function handleResume(item: RecentQueueItem, mode: ResumeMode): Promise<void> {
-  const { artifact } = item;
+async function handleResume(
+  item: RecentQueueItem,
+  artifact: AppCenterArtifactEnvelope,
+  mode: ResumeMode
+): Promise<void> {
   const workItem = item.workItem || getWorkItemById(artifact.workItemId);
   const plan = await buildResumePlanAsync(artifact, workItem, mode);
 
-  if (!plan.ok) {
-    showToast(plan.reason, { type: 'warning' });
-    return;
-  }
+  if (!plan.ok) return showToast(plan.reason, { type: 'warning' });
 
   const result = await executeResumePlan(plan);
-  if (!result.ok) {
-    showToast(result.reason || '恢复作业失败', { type: 'error' });
-    return;
-  }
+  if (!result.ok) return showToast(result.reason || '恢复作业失败', { type: 'error' });
 
   const didNavigate = await navigateToRouteId(plan.routeId);
-  if (!didNavigate) {
-    showToast('未能进入下一步，请重试。', { type: 'error' });
-    return;
-  }
+  if (!didNavigate) return showToast('未能进入对应作业阶段，请重试。', { type: 'error' });
 
   markRecentArtifactOpened(item.queueId);
-  registerComplianceReviewOnContinue(item.artifact, workItem, mode, plan.routeId);
-}
-
-function registerComplianceReviewOnContinue(
-  artifact: RecentQueueItem['artifact'],
-  workItem: RecentQueueItem['workItem'],
-  mode: ResumeMode,
-  sourceRoute: string
-): void {
-  if (mode === 'continue' && artifact.type === 'keyword_snapshot') {
-    const currentContext = getWorkspaceContext();
-    registerComplianceCheckArtifact(
-      {
-        id: `review-${artifact.payloadRef.replace('keyword_snapshot:', '')}`,
-        createdAt: new Date().toISOString(),
-        note: '从关键词结果开始人工合规复核',
-      },
-      {
-        ...currentContext,
-        workItemId: artifact.workItemId,
-        marketplace: (workItem?.marketplace || currentContext.marketplace || '') as never,
-        asinOrSku: workItem?.asinOrSku || currentContext.asinOrSku,
-        sourceRoute,
-      }
-    );
-  }
 }
 
 async function handleCopySummary(item: RecentQueueItem): Promise<void> {
@@ -328,15 +301,26 @@ function createRecentTime(item: RecentQueueItem): HTMLTimeElement {
 function getPpcJourney(item: RecentQueueItem): RecentJourney {
   const progress = getWorkItemProgress(item.artifact.workItemId);
   const complete = progress.completedSteps >= progress.totalSteps;
+  const openAction = {
+    kind: 'resume',
+    artifact: item.artifact,
+    mode: 'open',
+  } as const;
   return {
     currentLabel: complete ? '全部完成' : '人工复核',
     complete,
     steps: [
-      { id: 'suggestions', label: '生成建议', state: 'complete' },
+      {
+        id: 'suggestions',
+        label: '生成建议',
+        state: 'complete',
+        action: openAction,
+      },
       {
         id: 'manual_review',
         label: '人工复核',
         state: complete ? 'complete' : 'current',
+        action: openAction,
       },
     ],
   };
@@ -345,9 +329,8 @@ function getPpcJourney(item: RecentQueueItem): RecentJourney {
 function getCompetitorListingJourney(item: RecentQueueItem): RecentJourney {
   const workflow = getAppCenterWorkflowDefinition('competitor_listing');
   const progress = getWorkItemProgress(item.artifact.workItemId);
-  const reachedTypes = new Set(
-    getArtifactsForWorkItem(item.artifact.workItemId).map(artifact => artifact.type)
-  );
+  const artifacts = getArtifactsForWorkItem(item.artifact.workItemId);
+  const reachedTypes = new Set(artifacts.map(artifact => artifact.type));
   reachedTypes.add(item.artifact.type);
 
   const lastType = COMPETITOR_LISTING_PROGRESS_TYPES.at(-1);
@@ -365,21 +348,94 @@ function getCompetitorListingJourney(item: RecentQueueItem): RecentJourney {
       ? '全部完成'
       : workflow.steps[resolvedCurrentIndex]?.title || workflow.steps[0]?.title || '数据采集',
     complete,
-    steps: workflow.steps.map((step, index) => ({
-      id: step.id,
-      label: step.title,
-      state: complete
+    steps: workflow.steps.map((step, index) => {
+      const state: RecentJourneyStepState = complete
         ? 'complete'
         : index < resolvedCurrentIndex
           ? 'complete'
           : index === resolvedCurrentIndex
             ? 'current'
-            : 'upcoming',
-    })),
+            : 'upcoming';
+      const stageType = COMPETITOR_LISTING_PROGRESS_TYPES[index];
+      const stageArtifact = artifacts.find(artifact => artifact.type === stageType) || null;
+      const previousType = COMPETITOR_LISTING_PROGRESS_TYPES[index - 1];
+      const previousArtifact = artifacts.find(artifact => artifact.type === previousType);
+      const action = getJourneyStepAction(stageType, state, stageArtifact, previousArtifact);
+      return { id: step.id, label: step.title, state, action };
+    }),
   };
 }
 
-function createRecentJourney(item: RecentQueueItem): HTMLElement | null {
+function getJourneyStepAction(
+  stageType: AppCenterArtifactType | undefined,
+  state: RecentJourneyStepState,
+  stageArtifact: AppCenterArtifactEnvelope | null,
+  previousArtifact: AppCenterArtifactEnvelope | undefined
+): RecentJourneyStep['action'] {
+  if (stageType === 'compliance_check' && state !== 'upcoming') {
+    return { kind: 'compliance', artifact: stageArtifact };
+  }
+  if (state === 'complete' && stageArtifact) {
+    return { kind: 'resume', artifact: stageArtifact, mode: 'open' };
+  }
+  if (state === 'current' && previousArtifact) {
+    return { kind: 'resume', artifact: previousArtifact, mode: 'continue' };
+  }
+  return null;
+}
+
+function getJourneyStepAriaLabel(step: RecentJourneyStep): string {
+  if (step.action?.kind === 'compliance') {
+    return `${step.action.artifact ? '查看' : '开始'}合规复核，${step.state === 'complete' ? '已完成' : '当前阶段'}`;
+  }
+  if (step.state === 'complete') return `查看本次${step.label}阶段结果，已完成`;
+  if (step.state === 'current') return `开始${step.label}，当前阶段`;
+  return `${step.label}，尚未到达`;
+}
+
+function createJourneyStepButton(
+  step: RecentJourneyStep,
+  item: RecentQueueItem,
+  compliancePanelId: string,
+  onCompliance: (artifact: AppCenterArtifactEnvelope | null) => void
+): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'app-overview-recent-journey-button';
+  button.disabled = step.action === null;
+  button.title = getJourneyStepAriaLabel(step);
+  button.setAttribute('aria-label', button.title);
+  if (step.action?.kind === 'compliance') {
+    button.setAttribute('aria-controls', compliancePanelId);
+    button.setAttribute('aria-haspopup', 'dialog');
+    button.setAttribute(
+      'aria-expanded',
+      String(Boolean(step.action.artifact && openComplianceDialogIds.has(step.action.artifact.id)))
+    );
+  }
+  button.addEventListener('click', () => {
+    if (step.action?.kind === 'compliance') {
+      onCompliance(step.action.artifact);
+    } else if (step.action?.kind === 'resume') {
+      void handleResume(item, step.action.artifact, step.action.mode);
+    }
+  });
+
+  const marker = document.createElement('span');
+  marker.className = 'app-overview-recent-journey-marker';
+  marker.setAttribute('aria-hidden', 'true');
+  const label = document.createElement('span');
+  label.className = 'app-overview-recent-journey-label';
+  label.textContent = step.label;
+  button.append(marker, label);
+  return button;
+}
+
+function createRecentJourney(
+  item: RecentQueueItem,
+  compliancePanelId: string,
+  onCompliance: (artifact: AppCenterArtifactEnvelope | null) => void
+): HTMLElement | null {
   if (item.workItem?.type === 'npi_reference') return null;
   const journey =
     item.workItem?.type === 'ppc_review' || item.artifact.type === 'ppc_action_list'
@@ -388,6 +444,9 @@ function createRecentJourney(item: RecentQueueItem): HTMLElement | null {
 
   const container = document.createElement('div');
   container.className = 'app-overview-recent-journey';
+  if (journey.steps.length <= 2) {
+    container.classList.add('app-overview-recent-journey--short');
+  }
   container.setAttribute(
     'aria-label',
     journey.complete ? '作业链路：全部完成' : `作业链路：当前位于${journey.currentLabel}`
@@ -410,13 +469,7 @@ function createRecentJourney(item: RecentQueueItem): HTMLElement | null {
     stepEl.className = `app-overview-recent-journey-step app-overview-recent-journey-step--${step.state}`;
     if (step.state === 'current') stepEl.setAttribute('aria-current', 'step');
 
-    const marker = document.createElement('span');
-    marker.className = 'app-overview-recent-journey-marker';
-    marker.setAttribute('aria-hidden', 'true');
-    const label = document.createElement('span');
-    label.className = 'app-overview-recent-journey-label';
-    label.textContent = step.label;
-    stepEl.append(marker, label);
+    stepEl.append(createJourneyStepButton(step, item, compliancePanelId, onCompliance));
     steps.append(stepEl);
   });
 
@@ -504,65 +557,190 @@ function createRecentCardCorner(
   return corner;
 }
 
-function createRecentActions(
-  item: RecentQueueItem,
-  missing: boolean,
-  callbacks: {
-    compliancePanelId?: string;
-    onToggleCompliance?: () => void;
-  }
-): HTMLElement {
-  const { artifact } = item;
-  const { compliancePanelId, onToggleCompliance } = callbacks;
-  const actions = document.createElement('div');
-  actions.className = 'app-overview-recent-actions';
-  const primaryActions = document.createElement('div');
-  primaryActions.className =
-    'app-overview-recent-action-group app-overview-recent-action-group--primary';
-
-  const complianceView =
-    artifact.type === 'compliance_check' ? getComplianceReviewView(artifact) : null;
-  const resumeActions = getArtifactResumeActions(artifact.type)
-    .filter(action => !(complianceView?.complete && action.mode === 'continue'))
-    .map(action => ({
-      ...action,
-      label:
-        action.mode === 'continue' && complianceView?.nextItem
-          ? `继续复核：${complianceView.nextItem.label}`
-          : action.label,
-    }));
-
-  primaryActions.append(
-    ...resumeActions.map(action =>
-      createToolbarButton({
-        className: action.primary
-          ? 'app-overview-recent-action app-card-primary-link'
-          : 'app-overview-recent-action app-overview-recent-action--secondary',
-        label: action.label,
-        title: action.title,
-        icon: action.icon,
-        disabled: missing,
-        ariaExpanded:
-          artifact.type === 'compliance_check' && action.mode === 'open'
-            ? expandedComplianceIds.has(artifact.id)
-            : undefined,
-        ariaControls:
-          artifact.type === 'compliance_check' && action.mode === 'open'
-            ? compliancePanelId
-            : undefined,
-        onClick: () => {
-          if (artifact.type === 'compliance_check' && action.mode === 'open') {
-            onToggleCompliance?.();
-            return;
-          }
-          void handleResume(item, action.mode);
-        },
-      })
-    )
+function getComplianceArtifact(item: RecentQueueItem): AppCenterArtifactEnvelope | null {
+  return (
+    getArtifactsForWorkItem(item.artifact.workItemId).find(
+      artifact => artifact.type === 'compliance_check'
+    ) || null
   );
-  actions.append(primaryActions);
+}
 
-  return actions;
+function getComplianceDialogId(workItemId: string): string {
+  return `app-overview-compliance-dialog-${workItemId.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+}
+
+function showComplianceDialogElement(dialog: HTMLDialogElement): void {
+  if (dialog.open) return;
+  if (typeof dialog.showModal === 'function') dialog.showModal();
+  else dialog.setAttribute('open', '');
+}
+
+function closeComplianceDialogElement(dialog: HTMLDialogElement): void {
+  if (typeof dialog.close === 'function') dialog.close();
+  else {
+    dialog.removeAttribute('open');
+    dialog.dispatchEvent(new Event('close'));
+  }
+}
+
+function openComplianceDialog(
+  el: HTMLElement,
+  artifact: AppCenterArtifactEnvelope,
+  dialogId: string
+): void {
+  const dialog = el.querySelector<HTMLDialogElement>(`#${dialogId}`);
+  if (!dialog) return;
+  openComplianceDialogIds.add(artifact.id);
+  el.querySelector<HTMLButtonElement>(`[aria-controls="${dialogId}"]`)?.setAttribute(
+    'aria-expanded',
+    'true'
+  );
+  showComplianceDialogElement(dialog);
+}
+
+function createComplianceArtifact(item: RecentQueueItem): AppCenterArtifactEnvelope | null {
+  const currentContext = getWorkspaceContext();
+  const sourceArtifact =
+    getArtifactsForWorkItem(item.artifact.workItemId).find(
+      artifact => artifact.type === 'listing_review'
+    ) || item.artifact;
+  const snapshotId = sourceArtifact.payloadRef.replace(/^keyword_snapshot:/, '');
+  return registerComplianceCheckArtifact(
+    {
+      id: `review-${snapshotId}`,
+      createdAt: new Date().toISOString(),
+      note: '基于已完成的文案评审进行人工合规复核',
+    },
+    {
+      ...currentContext,
+      workItemId: item.artifact.workItemId,
+      marketplace: (item.workItem?.marketplace || currentContext.marketplace || '') as never,
+      asinOrSku: item.workItem?.asinOrSku || currentContext.asinOrSku,
+      sourceRoute: 'keyword_hunter_analysis',
+    }
+  );
+}
+
+function handleComplianceNode(
+  item: RecentQueueItem,
+  artifact: AppCenterArtifactEnvelope | null,
+  el: HTMLElement,
+  panelId: string,
+  onRefresh: () => void
+): void {
+  if (artifact) {
+    openComplianceDialog(el, artifact, panelId);
+    return;
+  }
+
+  const created = createComplianceArtifact(item);
+  if (!created) {
+    showToast('未能创建本地合规复核清单，请重试。', { type: 'error' });
+    return;
+  }
+  openComplianceDialogIds.add(created.id);
+  onRefresh();
+}
+
+function createRecentCardBody(item: RecentQueueItem, missing: boolean): HTMLElement {
+  const { presentation } = item;
+  const body = document.createElement('div');
+  body.className = 'app-overview-recent-body';
+  const title = document.createElement('strong');
+  title.className = 'app-overview-recent-title';
+  title.textContent = presentation.primaryTitle;
+  body.append(createRecentMetaRow(item, missing), title);
+
+  if (presentation.facts.length === 0) return body;
+  const facts = document.createElement('div');
+  facts.className = 'app-overview-recent-facts';
+  facts.setAttribute('aria-label', '关键信息');
+  presentation.facts.forEach(factText => {
+    const fact = document.createElement('span');
+    fact.className = 'app-overview-recent-fact';
+    fact.textContent = factText;
+    facts.append(fact);
+  });
+  body.append(facts);
+  return body;
+}
+
+function createComplianceDialog(
+  el: HTMLElement,
+  item: RecentQueueItem,
+  artifact: AppCenterArtifactEnvelope,
+  dialogId: string,
+  onRefresh: () => void
+): HTMLDialogElement {
+  const dialog = document.createElement('dialog');
+  dialog.id = dialogId;
+  dialog.className = 'app-overview-compliance-dialog';
+  dialog.setAttribute('aria-labelledby', `${dialogId}-title`);
+  if (openComplianceDialogIds.has(artifact.id)) dialog.dataset.autoOpen = 'true';
+
+  const surface = document.createElement('div');
+  surface.className = 'app-overview-compliance-dialog-surface';
+  const header = document.createElement('header');
+  header.className = 'app-overview-compliance-dialog-header';
+  const heading = document.createElement('div');
+  const title = document.createElement('h3');
+  title.id = `${dialogId}-title`;
+  title.textContent = '合规复核';
+  const context = document.createElement('p');
+  context.textContent = item.presentation.primaryTitle;
+  heading.append(title, context);
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className = 'app-overview-compliance-dialog-close';
+  closeButton.setAttribute('aria-label', '关闭合规复核窗口');
+  closeButton.title = '关闭合规复核窗口';
+  closeButton.append(createIcon('fas fa-xmark'));
+  closeButton.addEventListener('click', () => closeComplianceDialogElement(dialog));
+  header.append(heading, closeButton);
+
+  const panel = createComplianceReviewPanel(artifact, item.workItem, true, itemId => {
+    pendingFocusSelector = itemId ? `#${dialogId} [data-compliance-item-id="${itemId}"]` : '';
+    onRefresh();
+  });
+  panel.id = `${dialogId}-panel`;
+  surface.append(header, panel);
+  dialog.append(surface);
+  dialog.addEventListener('close', () => {
+    openComplianceDialogIds.delete(artifact.id);
+    el.querySelector<HTMLButtonElement>(`[aria-controls="${dialogId}"]`)?.setAttribute(
+      'aria-expanded',
+      'false'
+    );
+  });
+  dialog.addEventListener('click', event => {
+    if (event.target === dialog) closeComplianceDialogElement(dialog);
+  });
+  return dialog;
+}
+
+function appendComplianceDialog(
+  el: HTMLElement,
+  item: RecentQueueItem,
+  artifact: AppCenterArtifactEnvelope | null,
+  dialogId: string,
+  onRefresh: () => void
+): void {
+  if (!artifact) return;
+  el.append(createComplianceDialog(el, item, artifact, dialogId, onRefresh));
+}
+
+function buildRecentCardAriaLabel(item: RecentQueueItem, missing: boolean): string {
+  const { presentation } = item;
+  return [
+    presentation.typeLabel,
+    presentation.primaryTitle,
+    ...presentation.facts,
+    presentation.relativeTime || presentation.absoluteTime,
+    missing ? '原始数据不可用' : '',
+    item.needsAttention ? '需人工复核' : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
 
 function createRecentArtifactItem(
@@ -570,7 +748,7 @@ function createRecentArtifactItem(
   onRefresh: () => void,
   onRemoved: (queueId: string) => void
 ): HTMLElement {
-  const { artifact, presentation } = item;
+  const { artifact } = item;
   const missing = item.payloadStatus === 'missing';
 
   const el = document.createElement('article');
@@ -582,81 +760,25 @@ function createRecentArtifactItem(
   el.dataset.artifactType = artifact.type;
   el.dataset.artifactId = artifact.id;
   el.setAttribute('role', 'listitem');
-  const compliancePanelId = `app-overview-compliance-${artifact.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
-  const toggleCompliance = (): void => {
-    if (expandedComplianceIds.has(artifact.id)) expandedComplianceIds.delete(artifact.id);
-    else expandedComplianceIds.add(artifact.id);
-    const expanded = expandedComplianceIds.has(artifact.id);
-    el.querySelector<HTMLElement>(`#${compliancePanelId}`)?.classList.toggle('hidden', !expanded);
-    el.querySelector<HTMLButtonElement>(`[aria-controls="${compliancePanelId}"]`)?.setAttribute(
-      'aria-expanded',
-      String(expanded)
-    );
-  };
+  const complianceArtifact = getComplianceArtifact(item);
+  const complianceDialogId = getComplianceDialogId(artifact.workItemId);
 
   const iconBox = document.createElement('span');
   iconBox.className = 'app-overview-recent-icon';
   iconBox.setAttribute('aria-hidden', 'true');
   iconBox.append(createIcon(RECENT_ARTIFACT_ICONS[artifact.type]));
 
-  const body = document.createElement('div');
-  body.className = 'app-overview-recent-body';
-
-  const title = document.createElement('strong');
-  title.className = 'app-overview-recent-title';
-  title.textContent = presentation.primaryTitle;
-  body.append(createRecentMetaRow(item, missing), title);
-
-  if (presentation.facts.length > 0) {
-    const facts = document.createElement('div');
-    facts.className = 'app-overview-recent-facts';
-    facts.setAttribute('aria-label', '关键信息');
-    presentation.facts.forEach(factText => {
-      const fact = document.createElement('span');
-      fact.className = 'app-overview-recent-fact';
-      fact.textContent = factText;
-      facts.append(fact);
-    });
-    body.append(facts);
-  }
-
-  el.append(iconBox, body, createRecentCardCorner(item, onRefresh, onRemoved));
-  const journey = createRecentJourney(item);
-  if (journey) el.append(journey);
   el.append(
-    createRecentActions(item, missing, {
-      compliancePanelId,
-      onToggleCompliance: toggleCompliance,
-    })
+    iconBox,
+    createRecentCardBody(item, missing),
+    createRecentCardCorner(item, onRefresh, onRemoved)
   );
-  if (artifact.type === 'compliance_check') {
-    const panel = createComplianceReviewPanel(
-      artifact,
-      item.workItem,
-      expandedComplianceIds.has(artifact.id),
-      itemId => {
-        pendingFocusSelector = itemId
-          ? `[data-artifact-id="${artifact.id}"] [data-compliance-item-id="${itemId}"]`
-          : '';
-        onRefresh();
-      }
-    );
-    panel.id = compliancePanelId;
-    el.append(panel);
-  }
-  el.setAttribute(
-    'aria-label',
-    [
-      presentation.typeLabel,
-      presentation.primaryTitle,
-      ...presentation.facts,
-      presentation.relativeTime || presentation.absoluteTime,
-      missing ? '原始数据不可用' : '',
-      item.needsAttention ? '需人工复核' : '',
-    ]
-      .filter(Boolean)
-      .join(' · ')
-  );
+  const journey = createRecentJourney(item, complianceDialogId, complianceArtifact => {
+    handleComplianceNode(item, complianceArtifact, el, complianceDialogId, onRefresh);
+  });
+  if (journey) el.append(journey);
+  appendComplianceDialog(el, item, complianceArtifact, complianceDialogId, onRefresh);
+  el.setAttribute('aria-label', buildRecentCardAriaLabel(item, missing));
   return el;
 }
 
@@ -815,6 +937,10 @@ async function renderRecentList(container: HTMLElement, state: RecentPanelState)
   });
 
   list.replaceChildren(fragment);
+  list.querySelectorAll<HTMLDialogElement>('dialog[data-auto-open="true"]').forEach(dialog => {
+    delete dialog.dataset.autoOpen;
+    showComplianceDialogElement(dialog);
+  });
   if (pendingFocusSelector) {
     list.querySelector<HTMLElement>(pendingFocusSelector)?.focus();
     pendingFocusSelector = '';
@@ -918,7 +1044,7 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
 
 export function cleanupRecentPanel(): void {
   renderSequence += 1;
-  expandedComplianceIds.clear();
+  openComplianceDialogIds.clear();
   pendingFocusSelector = '';
   unsubscribers.forEach(unsub => unsub());
   unsubscribers = [];

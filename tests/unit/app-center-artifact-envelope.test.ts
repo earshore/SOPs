@@ -96,7 +96,7 @@ function createKeywordSnapshot(): KeywordHunterSnapshot {
     id: 'kh-001',
     schemaVersion: 1,
     title: 'Keyword review',
-    status: 'reported',
+    status: 'matched',
     createdAt: '2026-01-01T00:30:00.000Z',
     updatedAt: '2026-01-01T00:30:00.000Z',
     source: { type: 'manual' },
@@ -117,7 +117,7 @@ function createKeywordSnapshot(): KeywordHunterSnapshot {
       unmatchedKeywords: [],
       wordFrequency: [['haupt', 1]],
       paragraphs: [],
-      llmAnalysisResult: 'Looks good',
+      llmAnalysisResult: '',
       coverageRate: 100,
     },
     derived: {
@@ -187,6 +187,28 @@ describe('App Center artifact envelope service', () => {
       payloadRef: 'keyword_snapshot:kh-001',
     });
     expect(getRecentArtifacts(1)).toEqual([expect.objectContaining({ id: envelope?.id })]);
+  });
+
+  it('registers a distinct listing review artifact for a reported Keyword Hunter snapshot', () => {
+    const snapshot = createKeywordSnapshot();
+    snapshot.status = 'reported';
+    snapshot.result.llmAnalysisResult = '# Listing review';
+
+    registerKeywordSnapshotArtifact(snapshot, createWorkspaceContext());
+
+    expect(getArtifactsForWorkItem('competitor_listing:hist-001')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'keyword_snapshot',
+          payloadRef: 'keyword_snapshot:kh-001',
+        }),
+        expect.objectContaining({
+          type: 'listing_review',
+          payloadRef: 'keyword_snapshot:kh-001',
+          metadata: { keywordSnapshotId: 'kh-001' },
+        }),
+      ])
+    );
   });
 
   it('registers a Deep Chat product copy as the stage before keyword review', () => {

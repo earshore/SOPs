@@ -21,6 +21,7 @@ import {
   type AppCenterListingCopy,
 } from '@/modules/app_center/listingCopyService';
 import {
+  consumeDeepChatThreadResume,
   consumeListingPromptForDeepChat,
   createListingPromptWorkflowContext,
   type ListingPromptWorkflowContext,
@@ -164,7 +165,9 @@ class DeepChatModule extends BaseModule {
       return;
     }
 
-    threadStore = applyPendingRequestsToThreadStore(await loadThreadStore());
+    threadStore = applyDeepChatThreadResume(
+      applyPendingRequestsToThreadStore(await loadThreadStore())
+    );
     renderHistoryThreadList(this.container);
     renderPromptDraftsForActiveThread(this.container);
 
@@ -201,6 +204,12 @@ class DeepChatModule extends BaseModule {
 }
 
 const deepChatModule = new DeepChatModule();
+
+function applyDeepChatThreadResume(store: DeepChatThreadStore): DeepChatThreadStore {
+  const threadId = consumeDeepChatThreadResume();
+  if (!threadId || !store.threads.some(thread => thread.id === threadId)) return store;
+  return { ...store, activeThreadId: threadId };
+}
 
 export const mount = (container: HTMLElement): Promise<void> => deepChatModule.mount(container);
 

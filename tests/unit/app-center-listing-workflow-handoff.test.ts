@@ -2,8 +2,10 @@ import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   clearListingPromptHandoff,
+  consumeDeepChatThreadResume,
   consumeListingPromptForDeepChat,
   createListingPromptWorkflowContext,
+  queueDeepChatThreadResume,
   queueListingPromptForDeepChat,
 } from '@/modules/app_center/listingWorkflowHandoff';
 
@@ -43,6 +45,13 @@ describe('App Center Listing workflow handoff', () => {
 
     expect(consumeListingPromptForDeepChat()).toEqual(context);
     expect(consumeListingPromptForDeepChat()).toBeNull();
+  });
+
+  it('consumes a queued Deep Chat thread exactly once', () => {
+    queueDeepChatThreadResume('thread-2');
+
+    expect(consumeDeepChatThreadResume()).toBe('thread-2');
+    expect(consumeDeepChatThreadResume()).toBeNull();
   });
 
   it('keeps SEO keyword copy but routes product-copy generation to Deep Chat', () => {

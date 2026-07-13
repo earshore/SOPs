@@ -17,6 +17,7 @@ import { getListingCopyById } from './listingCopyService';
 import { applyListingCopyToKeywordHunter } from './keywordHunterListingHandoff';
 import {
   createListingPromptWorkflowContext,
+  queueDeepChatThreadResume,
   queueListingPromptForDeepChat,
 } from './listingWorkflowHandoff';
 import { HistoryService } from './views/master_analysis/services/historyService';
@@ -86,8 +87,9 @@ const OPEN_ROUTE_BY_TYPE: Record<AppCenterArtifactType, string> = {
   scrape_history: 'scraper',
   analysis_report: 'ai_analysis',
   listing_prompt: 'promptlab',
-  listing_copy: 'keyword_hunter_input',
-  keyword_snapshot: 'keyword_hunter_analysis',
+  listing_copy: 'playground_deep_chat',
+  keyword_snapshot: 'keyword_hunter_process',
+  listing_review: 'keyword_hunter_analysis',
   ppc_action_list: 'ppc_search_terms',
   compliance_check: 'keyword_hunter_analysis',
 };
@@ -98,6 +100,7 @@ const NEXT_ROUTE_BY_TYPE: Record<AppCenterArtifactType, string> = {
   listing_prompt: 'playground_deep_chat',
   listing_copy: 'keyword_hunter_input',
   keyword_snapshot: 'keyword_hunter_analysis',
+  listing_review: 'keyword_hunter_analysis',
   ppc_action_list: 'ppc_search_terms',
   compliance_check: 'sops_restricted_words',
 };
@@ -170,8 +173,24 @@ const RESUME_ACTIONS_BY_TYPE: Record<AppCenterArtifactType, readonly ArtifactRes
     },
     {
       mode: 'continue',
+      label: '进行文案评审',
+      title: '恢复关键词结果并生成 Listing 文案评审报告',
+      icon: 'fas fa-arrow-right',
+      primary: true,
+    },
+  ],
+  listing_review: [
+    {
+      mode: 'open',
+      label: '查看文案评审',
+      title: '恢复并查看这次 Listing 文案评审报告',
+      icon: 'fas fa-file-circle-check',
+      primary: false,
+    },
+    {
+      mode: 'continue',
       label: '开始合规复核',
-      title: '恢复关键词结果并开始人工合规复核',
+      title: '基于本次文案评审结果开始人工合规复核',
       icon: 'fas fa-arrow-right',
       primary: true,
     },
@@ -188,14 +207,14 @@ const RESUME_ACTIONS_BY_TYPE: Record<AppCenterArtifactType, readonly ArtifactRes
   compliance_check: [
     {
       mode: 'open',
-      label: '查看复核进度',
+      label: '查看合规复核清单',
       title: '查看本地保存的人工合规复核进度',
       icon: 'fas fa-shield-halved',
       primary: false,
     },
     {
       mode: 'continue',
-      label: '继续合规复核',
+      label: '前往下一项合规检查',
       title: '进入下一项尚未完成的人工合规检查',
       icon: 'fas fa-arrow-right',
       primary: true,
@@ -489,10 +508,11 @@ async function restorePromptPayload(
   return selection;
 }
 
-function restoreListingCopyPayload(listingCopyId: string): boolean {
+function restoreListingCopyPayload(listingCopyId: string, mode: ResumeMode): boolean {
   const copy = getListingCopyById(listingCopyId);
   if (!copy) return false;
-  applyListingCopyToKeywordHunter(copy);
+  if (mode === 'open') queueDeepChatThreadResume(copy.threadId);
+  else applyListingCopyToKeywordHunter(copy);
   return true;
 }
 
@@ -524,7 +544,7 @@ async function restoreKeywordTarget(plan: ResumePlanOk): Promise<string> {
 
 function restoreListingCopyTarget(plan: ResumePlanOk): string {
   if (!plan.restore.listingCopyId) return '';
-  return restoreListingCopyPayload(plan.restore.listingCopyId)
+  return restoreListingCopyPayload(plan.restore.listingCopyId, plan.mode)
     ? ''
     : '找不到这份产品文案，请从 Deep Chat 重新生成。';
 }

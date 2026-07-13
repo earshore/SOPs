@@ -67,7 +67,7 @@ export const APP_CENTER_WORKFLOW_DEFINITIONS: readonly AppCenterWorkflowDefiniti
     id: 'competitor_listing',
     title: '竞品与 Listing 作业流',
     description:
-      '从采集与 AI 分析生成 Prompt，在 Deep Chat 完成产品文案后，再进入关键词与合规复核。',
+      '从采集与 AI 分析生成 Prompt，在 Deep Chat 完成产品文案后，再依次完成关键词、文案与合规复核。',
     primaryRouteId: 'scraper',
     steps: [
       {
@@ -118,11 +118,22 @@ export const APP_CENTER_WORKFLOW_DEFINITIONS: readonly AppCenterWorkflowDefiniti
         id: 'keyword_review',
         title: '关键词复核',
         summary: '把 Deep Chat 生成的产品文案和对应 SEO 关键词带入 Keyword Hunter。',
-        routeId: 'keyword_hunter_input',
+        routeId: 'keyword_hunter_process',
         icon: 'fas fa-search',
         inputs: ['listing_copy', 'keyword list'],
         outputs: ['keyword_snapshot artifact'],
-        reviewPoints: ['确认补词、覆盖率和 Listing 评审结果'],
+        reviewPoints: ['确认补词与关键词覆盖率'],
+        complianceRouteIds: [],
+      },
+      {
+        id: 'listing_review',
+        title: '文案评审',
+        summary: '在 Keyword Hunter 生成并保存 Listing 文案评审报告。',
+        routeId: 'keyword_hunter_analysis',
+        icon: 'fas fa-file-circle-check',
+        inputs: ['listing_copy', 'keyword_snapshot'],
+        outputs: ['listing_review artifact'],
+        reviewPoints: ['确认文案结构、关键词使用与可读性评审结果'],
         complianceRouteIds: [],
       },
       {
@@ -131,7 +142,7 @@ export const APP_CENTER_WORKFLOW_DEFINITIONS: readonly AppCenterWorkflowDefiniti
         summary: '复制或导出前完成高危词、侵权、产品合规和 GPSR 复核。',
         routeId: 'keyword_hunter_analysis',
         icon: 'fas fa-shield-halved',
-        inputs: ['listing_copy', 'keyword_snapshot'],
+        inputs: ['listing_copy', 'keyword_snapshot', 'listing_review'],
         outputs: ['compliance_check artifact'],
         reviewPoints: ['高危词', '品牌与侵权', '产品合规', 'GPSR'],
         complianceRouteIds: [

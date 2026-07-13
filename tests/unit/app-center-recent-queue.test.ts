@@ -148,6 +148,22 @@ function registerWorkflowThroughKeywordReview(): void {
   });
 }
 
+function registerWorkflowThroughListingReview(): void {
+  registerWorkflowThroughKeywordReview();
+  const snapshot = createKeywordSnapshot();
+  snapshot.status = 'reported';
+  snapshot.updatedAt = '2026-01-01T00:35:00.000Z';
+  snapshot.result.llmAnalysisResult = '# Listing review';
+  registerKeywordSnapshotArtifact(snapshot, {
+    workItemId: 'competitor_listing:hist-001',
+    marketplace: 'DE',
+    language: 'German',
+    asinOrSku: 'B000000001',
+    sourceRoute: 'keyword_hunter_analysis',
+    updatedAt: snapshot.updatedAt,
+  });
+}
+
 function makeEnvelope(
   overrides: Partial<AppCenterArtifactEnvelope> = {}
 ): AppCenterArtifactEnvelope {
@@ -435,8 +451,8 @@ describe('App Center recent queue service', () => {
     registerHistoryArtifacts(createHistoryItem());
     const progress = getWorkItemProgress('competitor_listing:hist-001');
     expect(progress.completedSteps).toBeGreaterThanOrEqual(2);
-    expect(progress.totalSteps).toBe(6);
-    expect(progress.label).toMatch(/已完成 \d+\/6 步/);
+    expect(progress.totalSteps).toBe(7);
+    expect(progress.label).toMatch(/已完成 \d+\/7 步/);
   });
 
   it('requires a new keyword review after a newer product copy is selected', () => {
@@ -466,7 +482,7 @@ describe('App Center recent queue service', () => {
   });
 
   it('does not count a pending compliance checklist as a completed step', () => {
-    registerWorkflowThroughKeywordReview();
+    registerWorkflowThroughListingReview();
     registerComplianceCheckArtifact(
       {
         id: 'compliance-001',
@@ -475,7 +491,7 @@ describe('App Center recent queue service', () => {
           restricted_words: 'pending',
           brand_infringement: 'pending',
         },
-        createdAt: '2026-01-01T00:30:00.000Z',
+        createdAt: '2026-01-01T00:40:00.000Z',
       },
       {
         workItemId: 'competitor_listing:hist-001',
@@ -483,7 +499,7 @@ describe('App Center recent queue service', () => {
         language: 'German',
         asinOrSku: 'B000000001',
         sourceRoute: 'keyword_hunter_analysis',
-        updatedAt: '2026-01-01T00:30:00.000Z',
+        updatedAt: '2026-01-01T00:40:00.000Z',
       }
     );
     expect(getWorkItemProgress('competitor_listing:hist-001').completedTypes).not.toContain(
@@ -498,7 +514,7 @@ describe('App Center recent queue service', () => {
           restricted_words: 'confirmed',
           brand_infringement: 'skipped',
         },
-        createdAt: '2026-01-01T00:30:00.000Z',
+        createdAt: '2026-01-01T00:40:00.000Z',
       },
       {
         workItemId: 'competitor_listing:hist-001',

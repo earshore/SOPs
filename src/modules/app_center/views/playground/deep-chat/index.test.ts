@@ -89,6 +89,7 @@ type ImportOptions = {
   toolStrategySettings?: Record<string, unknown> | null;
   callLLM?: (...args: unknown[]) => Promise<string>;
   pendingPromptContext?: ListingPromptWorkflowContext;
+  pendingThreadId?: string;
 };
 
 type TestChatMessage = {
@@ -268,6 +269,9 @@ async function prepareListingPromptHandoff(options: ImportOptions) {
   const handoff = await import('@/modules/app_center/listingWorkflowHandoff');
   if (options.pendingPromptContext) {
     handoff.queueListingPromptForDeepChat(options.pendingPromptContext);
+  }
+  if (options.pendingThreadId) {
+    handoff.queueDeepChatThreadResume(options.pendingThreadId);
   }
   return handoff;
 }
@@ -629,6 +633,21 @@ describe('deep-chat playground module', () => {
 });
 
 describe('deep-chat Listing workflow handoff', () => {
+  it('selects the queued thread when reopening a generated product copy', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount } = await importDeepChat({ pendingThreadId: 'thread-2' });
+
+    await mount(container);
+
+    expect(
+      container
+        .querySelector<HTMLButtonElement>('[data-thread-id="thread-2"]')
+        ?.closest('.deep-chat-thread-item')?.classList
+    ).toContain('is-active');
+    unmount();
+  });
+
   it('adds an icon beside copy that sends generated copy with the selected Prompt keywords', async () => {
     const container = document.createElement('main');
     document.body.append(container);

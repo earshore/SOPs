@@ -27,16 +27,18 @@ export type AppCenterArtifactType =
   | 'listing_prompt'
   | 'listing_copy'
   | 'keyword_snapshot'
+  | 'listing_review'
   | 'ppc_action_list'
   | 'compliance_check';
 
-/** Competitor listing workflow artifact types used for progress (6 steps). */
+/** Competitor listing workflow artifact types used for progress (7 steps). */
 export const COMPETITOR_LISTING_PROGRESS_TYPES: readonly AppCenterArtifactType[] = [
   'scrape_history',
   'analysis_report',
   'listing_prompt',
   'listing_copy',
   'keyword_snapshot',
+  'listing_review',
   'compliance_check',
 ] as const;
 
@@ -399,7 +401,7 @@ export function registerKeywordSnapshotArtifact(
 
   upsertWorkItem(createKeywordSnapshotWorkItem(snapshot, boundContext));
 
-  return upsertArtifact({
+  const keywordArtifact = upsertArtifact({
     id: `${workItemId}:keyword_snapshot:${snapshot.id}`,
     workItemId,
     type: 'keyword_snapshot',
@@ -409,6 +411,22 @@ export function registerKeywordSnapshotArtifact(
     payloadRef: `keyword_snapshot:${snapshot.id}`,
     createdAt: snapshot.updatedAt,
   });
+
+  if (snapshot.status === 'reported' && snapshot.result.llmAnalysisResult?.trim()) {
+    upsertArtifact({
+      id: `${workItemId}:listing_review:${snapshot.id}`,
+      workItemId,
+      type: 'listing_review',
+      sourceRoute: context.sourceRoute || 'keyword_hunter_analysis',
+      title: '文案评审',
+      summary: `${snapshot.result.keywords.length} 关键词 · Listing 评审报告已生成`,
+      payloadRef: `keyword_snapshot:${snapshot.id}`,
+      createdAt: snapshot.updatedAt,
+      metadata: { keywordSnapshotId: snapshot.id },
+    });
+  }
+
+  return keywordArtifact;
 }
 
 function createListingCopyWorkItem(copy: AppCenterListingCopy): AppCenterWorkItem {
@@ -673,6 +691,7 @@ const ARTIFACT_PAYLOAD_LOOKUP_FACTORIES: Partial<
   listing_prompt: createPromptPayloadLookup,
   listing_copy: createListingCopyPayloadLookup,
   keyword_snapshot: createKeywordSnapshotPayloadLookup,
+  listing_review: createKeywordSnapshotPayloadLookup,
   ppc_action_list: createPpcActionListPayloadLookup,
 };
 

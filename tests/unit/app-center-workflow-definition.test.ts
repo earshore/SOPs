@@ -18,8 +18,12 @@ describe('App Center workflow definitions', () => {
       'prompt_generation',
       'listing_copy',
       'keyword_review',
+      'listing_review',
       'compliance_review',
     ]);
+    expect(workflow.steps.find(step => step.id === 'keyword_review')?.routeId).toBe(
+      'keyword_hunter_process'
+    );
 
     workflow.steps.forEach(step => {
       expect(step.inputs.length, step.id).toBeGreaterThan(0);

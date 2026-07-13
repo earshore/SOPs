@@ -20,6 +20,7 @@ export interface ListingPromptWorkflowContext {
 }
 
 let pendingPromptContext: ListingPromptWorkflowContext | null = null;
+let pendingDeepChatThreadId: string | null = null;
 
 function parseSeoKeywords(profile: GeneratedPromptProfileSnapshot | undefined): string[] {
   const seen = new Set<string>();
@@ -72,6 +73,17 @@ export function consumeListingPromptForDeepChat(): ListingPromptWorkflowContext 
   return context;
 }
 
+export function queueDeepChatThreadResume(threadId: string): void {
+  pendingDeepChatThreadId = threadId.trim() || null;
+}
+
+export function consumeDeepChatThreadResume(): string | null {
+  const threadId = pendingDeepChatThreadId;
+  pendingDeepChatThreadId = null;
+  return threadId;
+}
+
 export function clearListingPromptHandoff(): void {
   pendingPromptContext = null;
+  pendingDeepChatThreadId = null;
 }

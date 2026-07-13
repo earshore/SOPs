@@ -37,6 +37,7 @@ import eventBus from '@/common/EventBus';
 import { saveListingCopy } from '@/modules/app_center/listingCopyService';
 import {
   clearListingPromptHandoff,
+  consumeDeepChatThreadResume,
   consumeListingPromptForDeepChat,
 } from '@/modules/app_center/listingWorkflowHandoff';
 
@@ -296,10 +297,12 @@ describe('App Center artifact resume protocol', () => {
     expect(getArtifactNextRouteId('analysis_report')).toBe('promptlab');
     expect(getArtifactOpenRouteId('listing_prompt')).toBe('promptlab');
     expect(getArtifactNextRouteId('listing_prompt')).toBe('playground_deep_chat');
-    expect(getArtifactOpenRouteId('listing_copy')).toBe('keyword_hunter_input');
+    expect(getArtifactOpenRouteId('listing_copy')).toBe('playground_deep_chat');
     expect(getArtifactNextRouteId('listing_copy')).toBe('keyword_hunter_input');
-    expect(getArtifactOpenRouteId('keyword_snapshot')).toBe('keyword_hunter_analysis');
+    expect(getArtifactOpenRouteId('keyword_snapshot')).toBe('keyword_hunter_process');
     expect(getArtifactNextRouteId('keyword_snapshot')).toBe('keyword_hunter_analysis');
+    expect(getArtifactOpenRouteId('listing_review')).toBe('keyword_hunter_analysis');
+    expect(getArtifactNextRouteId('listing_review')).toBe('keyword_hunter_analysis');
     expect(getArtifactOpenRouteId('ppc_action_list')).toBe('ppc_search_terms');
     expect(getArtifactNextRouteId('ppc_action_list')).toBe('ppc_search_terms');
     expect(getArtifactOpenRouteId('compliance_check')).toBe('keyword_hunter_analysis');
@@ -317,6 +320,14 @@ describe('App Center artifact resume protocol', () => {
     ]);
     expect(getArtifactResumeActions('listing_copy').map(action => action.label)).toEqual([
       '复核此产品文案',
+    ]);
+    expect(getArtifactResumeActions('keyword_snapshot').map(action => action.label)).toEqual([
+      '查看关键词结果',
+      '进行文案评审',
+    ]);
+    expect(getArtifactResumeActions('listing_review').map(action => action.label)).toEqual([
+      '查看文案评审',
+      '开始合规复核',
     ]);
     expect(getArtifactResumeActions('ppc_action_list').map(action => action.label)).toEqual([
       '查看 PPC 建议',
@@ -494,6 +505,27 @@ describe('App Center artifact resume protocol', () => {
         }),
       })
     );
+  });
+
+  it('opens a generated product copy in its Deep Chat thread without changing Keyword Hunter', async () => {
+    const copy = saveListingCopy({
+      id: 'thread-2:2000',
+      workItemId: 'competitor_listing:hist-001',
+      promptId: 'listing-prompt-001',
+      threadId: 'thread-2',
+      content: 'Generated product copy',
+      seoKeywords: ['haupt keyword'],
+      marketplace: 'DE',
+      asinOrSku: 'B000000001',
+      createdAt: '2026-01-01T00:25:00.000Z',
+    });
+    const plan = buildResumePlan(registerListingCopyArtifact(copy), createWorkItem(), 'open');
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+
+    await expect(executeResumePlan(plan)).resolves.toMatchObject({ ok: true });
+    expect(consumeDeepChatThreadResume()).toBe('thread-2');
+    expect(appStoreMocks.state.updateKeywordTracker).not.toHaveBeenCalled();
   });
 
   it('restores the saved PPC suggestion snapshot before navigation', async () => {

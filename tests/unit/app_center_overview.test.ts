@@ -7,6 +7,7 @@ import {
   clearArtifactEnvelopeIndex,
   getArtifactsForWorkItem,
   registerComplianceCheckArtifact,
+  registerKeywordSnapshotArtifact,
   registerPpcActionListArtifact,
 } from '@/modules/app_center/artifactEnvelopeService';
 
@@ -167,12 +168,12 @@ describe('App Center Overview', () => {
       '.app-overview-flow-grid--tasks .app-flow-step[data-action="switch-tab"]'
     );
 
-    expect(workflowSteps).toHaveLength(5);
+    expect(workflowSteps).toHaveLength(7);
     expect(workflowSteps[0]?.textContent).toContain('数据采集');
-    expect(workflowSteps[4]?.textContent).toContain('合规复核');
-    expect(
-      container.querySelector('.app-flow-step[data-tab="keyword_hunter_analysis"]')?.textContent
-    ).toContain('高危词');
+    expect(workflowSteps[4]?.textContent).toContain('关键词复核');
+    expect(workflowSteps[5]?.textContent).toContain('文案评审');
+    expect(workflowSteps[6]?.textContent).toContain('合规复核');
+    expect(workflowSteps[6]?.textContent).toContain('高危词');
     expect(container.textContent).not.toContain('新品作业流');
   });
 
@@ -184,7 +185,7 @@ describe('App Center Overview', () => {
 
     const recentItems = container.querySelectorAll('.app-overview-recent-item');
     const reviewButton = container.querySelector<HTMLButtonElement>(
-      '.app-overview-recent-action.app-card-primary-link'
+      '.app-overview-recent-journey-step--current .app-overview-recent-journey-button'
     );
     const pinButton = container.querySelector<HTMLButtonElement>('[aria-label="置顶"]');
     const cardTools = recentItems[0]?.querySelectorAll('.app-overview-recent-card-tool');
@@ -210,8 +211,9 @@ describe('App Center Overview', () => {
     expect(recentItems[0]?.textContent).toContain('需人工复核');
     expect(recentItems[0]?.querySelectorAll('.app-overview-recent-fact').length).toBeGreaterThan(0);
     expect(recentItems[0]?.textContent).not.toContain('PPC 动作清单');
-    expect(reviewButton?.textContent).toContain('查看 PPC 建议');
-    expect(container.querySelectorAll('.app-overview-recent-action')).toHaveLength(1);
+    expect(reviewButton?.textContent).toContain('人工复核');
+    expect(reviewButton?.getAttribute('aria-label')).toContain('开始人工复核');
+    expect(container.querySelectorAll('.app-overview-recent-action')).toHaveLength(0);
     const ppcJourneySteps = recentItems[0]?.querySelectorAll('.app-overview-recent-journey-step');
     expect(ppcJourneySteps).toHaveLength(2);
     expect(ppcJourneySteps?.[0]?.textContent).toContain('生成建议');
@@ -224,7 +226,7 @@ describe('App Center Overview', () => {
     expect(pinButton?.querySelector('i')?.className).toBe('fa-solid fa-thumb-tack');
     expect(pinButton?.getAttribute('aria-pressed')).toBe('false');
     expect(recentItems[0]?.classList.contains('app-overview-recent-item--attention')).toBe(true);
-    expect(typeSelect?.options).toHaveLength(7);
+    expect(typeSelect?.options).toHaveLength(9);
     expect(statusSelect?.options).toHaveLength(4);
     expect(container.querySelectorAll('.app-overview-recent-type-filter')).toHaveLength(0);
     expect(container.querySelector('.app-overview-recent-empty')?.classList).toContain('hidden');
@@ -321,7 +323,7 @@ describe('App Center Overview', () => {
     });
   });
 
-  it('expands the local compliance checklist and saves a manual status', async () => {
+  it('opens the local compliance checklist in a floating dialog and saves a manual status', async () => {
     registerComplianceCheckArtifact(
       {
         id: 'compliance-001',
@@ -340,18 +342,24 @@ describe('App Center Overview', () => {
     const container = document.createElement('div');
     await overviewModule.mount(container);
 
-    const progressButton =
-      container.querySelector<HTMLButtonElement>('[aria-label="查看复核进度"]');
+    const progressButton = container.querySelector<HTMLButtonElement>(
+      '.app-overview-recent-journey-step--current [aria-controls]'
+    );
     progressButton?.click();
     expect(progressButton?.getAttribute('aria-expanded')).toBe('true');
+    expect(progressButton?.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(container.querySelector('.app-overview-compliance-dialog')?.hasAttribute('open')).toBe(
+      true
+    );
     expect(container.querySelector('.app-overview-compliance-review.hidden')).toBeNull();
     expect(container.textContent).toContain('不会自动修改 Listing 或广告');
     const journey = container.querySelector('.app-overview-recent-journey');
     const journeySteps = journey?.querySelectorAll('.app-overview-recent-journey-step');
-    expect(journeySteps).toHaveLength(5);
+    expect(journeySteps).toHaveLength(7);
     expect(journeySteps?.[0]?.textContent).toContain('数据采集');
-    expect(journeySteps?.[4]?.textContent).toContain('合规复核');
-    expect(journeySteps?.[4]?.classList).toContain('app-overview-recent-journey-step--current');
+    expect(journeySteps?.[5]?.textContent).toContain('文案评审');
+    expect(journeySteps?.[6]?.textContent).toContain('合规复核');
+    expect(journeySteps?.[6]?.classList).toContain('app-overview-recent-journey-step--current');
     expect(journey?.textContent).toContain('当前：合规复核');
     expect(container.querySelector('.app-overview-recent-item')?.textContent).not.toContain(
       '已完成 0/5 步'
@@ -368,6 +376,60 @@ describe('App Center Overview', () => {
       const [artifact] = getArtifactsForWorkItem('competitor_listing:hist-001');
       expect(String(artifact?.metadata?.reviewStates)).toContain('confirmed');
     });
+
+    container.querySelector<HTMLButtonElement>('[aria-label="关闭合规复核窗口"]')?.click();
+    expect(container.querySelector('.app-overview-compliance-dialog')?.hasAttribute('open')).toBe(
+      false
+    );
+  });
+
+  it('creates and opens a local compliance checklist from the compliance journey node', async () => {
+    registerKeywordSnapshotArtifact(
+      {
+        id: 'kh-reported-001',
+        schemaVersion: 1,
+        title: 'Listing review',
+        status: 'reported',
+        createdAt: '2026-01-01T00:30:00.000Z',
+        updatedAt: '2026-01-01T00:35:00.000Z',
+        source: { type: 'manual' },
+        result: {
+          keywords: ['haupt keyword'],
+          coverageRate: 100,
+          llmAnalysisResult: '# Listing review',
+        },
+      } as never,
+      {
+        workItemId: 'competitor_listing:hist-001',
+        marketplace: 'DE',
+        language: 'German',
+        asinOrSku: 'B000000001',
+        sourceRoute: 'keyword_hunter_analysis',
+        updatedAt: '2026-01-01T00:35:00.000Z',
+      }
+    );
+    const container = document.createElement('div');
+    await overviewModule.mount(container);
+
+    const complianceNode = container.querySelector<HTMLButtonElement>(
+      '.app-overview-recent-journey-step--current [aria-label^="开始合规复核"]'
+    );
+    complianceNode?.click();
+
+    await vi.waitFor(() => {
+      const dialog = container.querySelector('.app-overview-compliance-dialog');
+      const panel = container.querySelector('.app-overview-compliance-review');
+      expect(dialog?.hasAttribute('open')).toBe(true);
+      expect(panel?.classList).not.toContain('hidden');
+      expect(panel?.querySelectorAll('.app-overview-compliance-open')).toHaveLength(4);
+      expect(panel?.querySelectorAll('.app-overview-compliance-status')).toHaveLength(4);
+      expect(
+        getArtifactsForWorkItem('competitor_listing:hist-001').some(
+          artifact => artifact.type === 'compliance_check'
+        )
+      ).toBe(true);
+    });
+    expect(container.querySelectorAll('.app-overview-recent-action')).toHaveLength(0);
   });
 
   it('shows recent empty state guidance when no artifacts exist', async () => {
