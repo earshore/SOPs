@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- 发版回填与审计脚本：`npm run release:backfill-notes` / `release:audit`（CHANGELOG 完整章节回填 GitHub Release）
 - 新增 CBA 网关提供商支持
 - 新增 KR 网关提供商和 Anthropic 适配器
 - 新增 ChatAnywhere 支持
@@ -15,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 新增 NEW/CPA 网关占位符到环境文件
 
 ### Changed
+- 回填 `v3.0.5`、`v3.0.4`、`v3.0.4-rc.1`…`rc.11` 的 GitHub Release notes（完整 CHANGELOG，不压缩）
+- 为误标孤儿 tag `v3.0.5-rc.1` / `v3.0.5-rc.2` 创建 superseded 预发布说明
+- `v3.0.5` Release 补充 Cloudflare Pages 生产部署记录
 - 替换旧版网关为 new_api 和 cpa
 - 更新 CB-E 网关 URL 为 sds.dpdns.org
 - 使用 chatanywhere.org 并修复 OpenAI 域名

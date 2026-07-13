@@ -109,7 +109,9 @@
     "ci:all": "npm run ci:security && npm run ci:quality && npm run build:app",
     "release:validate": "tsx scripts/release/prepare-release.ts validate",
     "release:notes": "tsx scripts/release/prepare-release.ts notes",
-    "release:package": "tsx scripts/release/prepare-release.ts package"
+    "release:package": "tsx scripts/release/prepare-release.ts package",
+    "release:backfill-notes": "node scripts/release/backfill-release-notes.mjs",
+    "release:audit": "node scripts/release/audit-releases.mjs"
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^8.0.0",

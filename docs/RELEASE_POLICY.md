@@ -154,7 +154,16 @@ gh release edit vX.Y.Z --latest
 ## 10. 相关命令
 
 ```bash
-npm run release:validate   # 校验 package version / tag / 预发布规则
-npm run release:notes      # 从 CHANGELOG 生成 release body 片段
-npm run release:package    # 打包 dist + build-info + SHA256SUMS
+npm run release:validate         # 校验 package version / tag / 预发布规则
+npm run release:notes            # 从 CHANGELOG 生成 release body 片段
+npm run release:package          # 打包 dist + build-info + SHA256SUMS
+npm run release:backfill-notes   # 将 CHANGELOG 完整章节回填到已有 GitHub Release（不压缩）
+npm run release:audit            # 审计 tag / Release / CHANGELOG / 产物 / 短 notes
+```
+
+回填示例：
+
+```bash
+npm run release:backfill-notes -- --dry-run
+npm run release:backfill-notes -- --only 3.0.4,3.0.4-rc.11
 ```
