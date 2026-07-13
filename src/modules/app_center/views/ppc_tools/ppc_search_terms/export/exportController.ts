@@ -6,6 +6,7 @@ import { buildActionCsv } from '../actions/actionCsv';
 import { requiresHumanConfirmation } from '../actions/actionItems';
 import { today } from '../utils/formatters';
 import { buildSummaryText } from './summaryText';
+import { savePpcActionListSnapshot } from './actionListSnapshotService';
 import { filterRows, searchRows, type FilterType } from '../utils/filters';
 import { readActionOwner, saveActionOwner } from '../settings/settings';
 import type { AnalyzedRow, ReportType } from '../types';
@@ -16,12 +17,12 @@ export interface ExportControllerState {
   getSearchQuery(): string;
 }
 
-export function exportActionRows(
+export async function exportActionRows(
   container: HTMLElement,
   filter: FilterType,
   includeSearch: boolean,
   state: ExportControllerState
-): void {
+): Promise<void> {
   const sourceRows = state.getRows();
   const baseRows = includeSearch ? searchRows(sourceRows, state.getSearchQuery()) : sourceRows;
   const rows = filterRows(baseRows, filter);
@@ -34,16 +35,33 @@ export function exportActionRows(
   saveActionOwner(owner);
   const reportType = state.getReportType();
   const csv = buildActionCsv(rows, owner);
+  const createdAt = new Date().toISOString();
+  const id = createPpcActionListId(reportType, filter, createdAt);
   downloadText(`ppc-${reportType}-actions-${filter}-${today()}.csv`, csv);
+  const snapshot = await savePpcActionListSnapshot({
+    id,
+    reportType,
+    filter,
+    owner,
+    rows,
+    createdAt,
+  });
+  if (!snapshot) {
+    showToast('导出完成，但未能保存本地建议快照', {
+      type: 'warning',
+      description: 'CSV 已下载；释放本地存储空间后可重新导出。',
+    });
+    return;
+  }
   registerPpcActionListArtifact(
     {
-      id: createPpcActionListId(reportType, filter, rows.length),
+      id,
       reportType,
       filter,
       rowCount: rows.length,
       owner,
       requiresHumanConfirmation: rows.some(requiresHumanConfirmation),
-      createdAt: new Date().toISOString(),
+      createdAt,
     },
     getWorkspaceContext()
   );
@@ -88,7 +106,9 @@ function downloadText(filename: string, content: string): void {
 function createPpcActionListId(
   reportType: ReportType,
   filter: FilterType,
-  rowCount: number
+  createdAt: string
 ): string {
-  return `ppc-${reportType}-${filter}-${today()}-${rowCount}`;
+  const timestamp = new Date(createdAt).getTime().toString(36);
+  const suffix = globalThis.crypto?.randomUUID?.().slice(0, 8) || timestamp;
+  return `ppc-${reportType}-${filter}-${timestamp}-${suffix}`;
 }

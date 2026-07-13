@@ -658,6 +658,15 @@ export const HistoryService = {
   },
 
   /**
+   * 根据 ID 从 IndexedDB 主存储读取单条记录。
+   * 用于冷启动恢复，避免只检查同步 localStorage 镜像。
+   */
+  async getByIdAsync(id: number | string): Promise<HistoryItem | undefined> {
+    const history = await this.getAllAsync();
+    return history.find(h => isSameHistoryId(h.id, id));
+  },
+
+  /**
    * 清空所有记录
    */
   clear(): void {

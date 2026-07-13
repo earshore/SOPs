@@ -163,13 +163,16 @@ describe('App Center artifact envelope service', () => {
     ]);
   });
 
-  it('registers keyword snapshots against the active work item only when context is available', () => {
-    expect(
-      registerKeywordSnapshotArtifact(createKeywordSnapshot(), {
-        ...createWorkspaceContext(),
-        workItemId: null,
-      })
-    ).toBeNull();
+  it('registers keyword snapshots against the active work item, or a local snapshot work item', () => {
+    const standalone = registerKeywordSnapshotArtifact(createKeywordSnapshot(), {
+      ...createWorkspaceContext(),
+      workItemId: null,
+    });
+    expect(standalone).toMatchObject({
+      type: 'keyword_snapshot',
+      workItemId: 'competitor_listing:keyword_snapshot:kh-001',
+      payloadRef: 'keyword_snapshot:kh-001',
+    });
 
     const envelope = registerKeywordSnapshotArtifact(
       createKeywordSnapshot(),

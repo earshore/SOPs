@@ -1,3 +1,4 @@
+import eventBus from '@/common/EventBus';
 import { StorageService } from '@/services/storageService';
 import type {
   GeneratedPromptRecord,
@@ -6,9 +7,16 @@ import type {
 } from '@/types/modules-business';
 import type { AppCenterWorkspaceContext } from './workspaceContext';
 import { createWorkItemIdFromHistoryItem } from './workspaceContext';
+import { APP_CENTER_COMPLIANCE_CHECKLIST } from './workflowDefinitions';
+import {
+  createComplianceReviewStates,
+  getComplianceReviewView,
+  type ComplianceReviewStates,
+} from './complianceReviewState';
 
 export const APP_CENTER_WORK_ITEMS_STORAGE_KEY = 'app_center_work_items_v1';
 export const APP_CENTER_ARTIFACTS_STORAGE_KEY = 'app_center_artifact_envelopes_v1';
+export const APP_CENTER_ARTIFACTS_CHANGED = 'app-center:artifacts-changed';
 
 export type AppCenterWorkItemType = 'competitor_listing' | 'ppc_review' | 'npi_reference';
 export type AppCenterWorkItemStatus = 'draft' | 'in_progress' | 'review_required' | 'done';
@@ -19,6 +27,15 @@ export type AppCenterArtifactType =
   | 'keyword_snapshot'
   | 'ppc_action_list'
   | 'compliance_check';
+
+/** Competitor listing workflow artifact types used for progress (5 steps). */
+export const COMPETITOR_LISTING_PROGRESS_TYPES: readonly AppCenterArtifactType[] = [
+  'scrape_history',
+  'analysis_report',
+  'listing_prompt',
+  'keyword_snapshot',
+  'compliance_check',
+] as const;
 
 export interface AppCenterWorkItem {
   id: string;
@@ -60,7 +77,31 @@ export interface AppCenterPpcActionListArtifactInput {
   rowCount: number;
   owner: string;
   requiresHumanConfirmation: boolean;
+  reviewStatus?: 'pending' | 'confirmed' | 'skipped';
+  note?: string;
   createdAt: string;
+}
+
+export interface AppCenterComplianceCheckArtifactInput {
+  id: string;
+  checklistIds?: readonly string[];
+  completedIds?: readonly string[];
+  itemStates?: Readonly<ComplianceReviewStates>;
+  createdAt: string;
+  note?: string;
+}
+
+export interface AppCenterWorkItemProgress {
+  workItemId: string;
+  completedSteps: number;
+  totalSteps: number;
+  completedTypes: AppCenterArtifactType[];
+  label: string;
+}
+
+export interface ArtifactsChangedPayload {
+  reason: 'upsert' | 'clear' | 'preferences';
+  artifactId?: string;
 }
 
 interface ArtifactPayloadLookup {
@@ -110,6 +151,10 @@ function persistArtifacts(artifacts: AppCenterArtifactEnvelope[]): void {
   StorageService.set(APP_CENTER_ARTIFACTS_STORAGE_KEY, artifacts);
 }
 
+function emitArtifactsChanged(payload: ArtifactsChangedPayload): void {
+  eventBus.emit(APP_CENTER_ARTIFACTS_CHANGED, payload);
+}
+
 function getTime(value: string): number {
   const time = new Date(value).getTime();
   return Number.isFinite(time) ? time : 0;
@@ -120,14 +165,27 @@ function sortByCreatedAt<T extends { createdAt: string }>(items: T[]): T[] {
 }
 
 function upsertWorkItem(workItem: AppCenterWorkItem): AppCenterWorkItem {
-  persistWorkItems([workItem, ...readWorkItems().filter(item => item.id !== workItem.id)]);
-  return workItem;
+  const workItems = readWorkItems();
+  const previous = workItems.find(item => item.id === workItem.id);
+  const merged: AppCenterWorkItem = previous
+    ? {
+        ...previous,
+        ...workItem,
+        title: previous.title || workItem.title,
+        marketplace: workItem.marketplace || previous.marketplace,
+        asinOrSku: workItem.asinOrSku || previous.asinOrSku,
+        createdAt: previous.createdAt || workItem.createdAt,
+      }
+    : workItem;
+  persistWorkItems([merged, ...workItems.filter(item => item.id !== workItem.id)]);
+  return merged;
 }
 
 function upsertArtifact(envelope: AppCenterArtifactEnvelope): AppCenterArtifactEnvelope {
   persistArtifacts(
     sortByCreatedAt([envelope, ...readArtifacts().filter(item => item.id !== envelope.id)])
   );
+  emitArtifactsChanged({ reason: 'upsert', artifactId: envelope.id });
   return envelope;
 }
 
@@ -263,12 +321,19 @@ function createPpcActionListWorkItem(
   context: AppCenterWorkspaceContext
 ): AppCenterWorkItem {
   const workItemId = getPpcActionListWorkItemId(actionList, context);
+  const existing = readWorkItems().find(item => item.id === workItemId);
+  const isListingWorkItem = getPpcActionListWorkItemType(workItemId) === 'competitor_listing';
 
   return {
     id: workItemId,
     type: getPpcActionListWorkItemType(workItemId),
     title: `${context.marketplace || 'PPC'} ${context.asinOrSku || '搜索词'} 动作复核`,
-    status: actionList.requiresHumanConfirmation ? 'review_required' : 'done',
+    status:
+      isListingWorkItem && existing
+        ? existing.status
+        : actionList.requiresHumanConfirmation
+          ? 'review_required'
+          : 'done',
     marketplace: context.marketplace,
     asinOrSku: context.asinOrSku,
     sourceRoute: 'ppc_search_terms',
@@ -293,6 +358,10 @@ export function getRecentArtifacts(limit = 10): AppCenterArtifactEnvelope[] {
   return sortByCreatedAt(readArtifacts()).slice(0, limit);
 }
 
+export function getAllArtifacts(): AppCenterArtifactEnvelope[] {
+  return sortByCreatedAt(readArtifacts());
+}
+
 export function registerHistoryArtifacts(historyItem: HistoryItem): AppCenterArtifactEnvelope[] {
   upsertWorkItem(createWorkItemFromHistoryItem(historyItem));
 
@@ -310,15 +379,23 @@ export function registerKeywordSnapshotArtifact(
   snapshot: KeywordHunterSnapshot,
   context: AppCenterWorkspaceContext
 ): AppCenterArtifactEnvelope | null {
-  if (!context.workItemId) {
-    return null;
-  }
+  // Prefer active workspace work item; otherwise bind a local-only work item to the snapshot
+  // so pure Keyword Hunter usage still appears in 最近继续 (no cloud / multi-user identity).
+  const workItemId =
+    context.workItemId ||
+    (snapshot.source && 'workItemId' in snapshot.source && snapshot.source.workItemId) ||
+    `competitor_listing:keyword_snapshot:${snapshot.id}`;
 
-  upsertWorkItem(createKeywordSnapshotWorkItem(snapshot, context));
+  const boundContext: AppCenterWorkspaceContext = {
+    ...context,
+    workItemId,
+  };
+
+  upsertWorkItem(createKeywordSnapshotWorkItem(snapshot, boundContext));
 
   return upsertArtifact({
-    id: `${context.workItemId}:keyword_snapshot:${snapshot.id}`,
-    workItemId: context.workItemId,
+    id: `${workItemId}:keyword_snapshot:${snapshot.id}`,
+    workItemId,
     type: 'keyword_snapshot',
     sourceRoute: context.sourceRoute || 'keyword_hunter_analysis',
     title: snapshot.title,
@@ -342,8 +419,8 @@ export function registerPpcActionListArtifact(
     type: 'ppc_action_list',
     sourceRoute: 'ppc_search_terms',
     title: 'PPC 动作清单',
-    summary: `${actionList.rowCount} 行动作 · Owner ${actionList.owner} · ${
-      actionList.requiresHumanConfirmation ? '待人工确认' : '无需人工确认'
+    summary: `${actionList.rowCount} 条建议动作 · 负责人：${actionList.owner} · ${
+      actionList.requiresHumanConfirmation ? '需人工复核' : '已人工复核'
     }`,
     payloadRef: `ppc_action_list:${actionList.id}`,
     createdAt: actionList.createdAt,
@@ -353,8 +430,122 @@ export function registerPpcActionListArtifact(
       rowCount: actionList.rowCount,
       reportType: actionList.reportType,
       filter: actionList.filter,
+      reviewStatus:
+        actionList.reviewStatus || (actionList.requiresHumanConfirmation ? 'pending' : 'confirmed'),
+      note: actionList.note || '',
     },
   });
+}
+
+function createComplianceCheckWorkItem(
+  input: AppCenterComplianceCheckArtifactInput,
+  context: AppCenterWorkspaceContext
+): AppCenterWorkItem {
+  const workItemId = context.workItemId || `competitor_listing:compliance:${input.id}`;
+  const checklistIds = input.checklistIds?.length
+    ? input.checklistIds
+    : APP_CENTER_COMPLIANCE_CHECKLIST.map(item => item.id);
+  const states = createComplianceReviewStates(checklistIds, input.itemStates, input.completedIds);
+  const completedCount = Object.values(states).filter(status => status !== 'pending').length;
+  const total = checklistIds.length;
+  const done = total > 0 && completedCount >= total;
+
+  return {
+    id: workItemId,
+    type: workItemId.startsWith('ppc_review:') ? 'ppc_review' : 'competitor_listing',
+    title: `${context.marketplace || 'Marketplace'} ${context.asinOrSku || '作业'} 合规复核`,
+    status: done ? 'done' : 'review_required',
+    marketplace: context.marketplace,
+    asinOrSku: context.asinOrSku,
+    sourceRoute: context.sourceRoute || 'keyword_hunter_analysis',
+    createdAt: input.createdAt,
+    updatedAt: input.createdAt,
+  };
+}
+
+/**
+ * Registers a compliance_check artifact for the active work item.
+ * Checklist IDs default to APP_CENTER_COMPLIANCE_CHECKLIST when omitted.
+ * Does not auto-execute any compliance action — only records human review progress.
+ */
+export function registerComplianceCheckArtifact(
+  input: AppCenterComplianceCheckArtifactInput,
+  context: AppCenterWorkspaceContext
+): AppCenterArtifactEnvelope | null {
+  if (!context.workItemId && !input.id) {
+    return null;
+  }
+
+  const checklistIds = input.checklistIds?.length
+    ? [...input.checklistIds]
+    : APP_CENTER_COMPLIANCE_CHECKLIST.map(item => item.id);
+  const completedIds = (input.completedIds || []).filter(id => checklistIds.includes(id));
+  const itemStates = createComplianceReviewStates(checklistIds, input.itemStates, completedIds);
+  const reviewedIds = Object.entries(itemStates)
+    .filter(([, status]) => status !== 'pending')
+    .map(([id]) => id);
+  const workItem = createComplianceCheckWorkItem(
+    { ...input, checklistIds, completedIds: reviewedIds, itemStates },
+    context
+  );
+  upsertWorkItem(workItem);
+
+  const completedCount = reviewedIds.length;
+  const total = checklistIds.length;
+  const pending = total - completedCount;
+
+  return upsertArtifact({
+    id: `${workItem.id}:compliance_check:${input.id}`,
+    workItemId: workItem.id,
+    type: 'compliance_check',
+    sourceRoute: context.sourceRoute || 'keyword_hunter_analysis',
+    title: '合规复核',
+    summary: `${completedCount}/${total} 项已复核${pending > 0 ? ' · 待人工确认' : ' · 已完成'}`,
+    payloadRef: `compliance_check:${input.id}`,
+    createdAt: input.createdAt,
+    metadata: {
+      checklistCount: total,
+      completedCount,
+      requiresHumanConfirmation: pending > 0,
+      checklistIds: checklistIds.join(','),
+      completedIds: reviewedIds.join(','),
+      reviewStates: JSON.stringify(itemStates),
+      note: input.note || '',
+    },
+  });
+}
+
+export function getWorkItemProgress(workItemId: string): AppCenterWorkItemProgress {
+  const artifacts = getArtifactsForWorkItem(workItemId);
+  const workItem = getWorkItemById(workItemId);
+  if (workItem?.type === 'ppc_review') {
+    const ppcArtifact = artifacts.find(artifact => artifact.type === 'ppc_action_list');
+    const complete = ppcArtifact?.metadata?.requiresHumanConfirmation === false;
+    return {
+      workItemId,
+      completedSteps: complete ? 1 : 0,
+      totalSteps: 1,
+      completedTypes: complete ? ['ppc_action_list'] : [],
+      label: `已完成 ${complete ? 1 : 0}/1 步`,
+    };
+  }
+
+  const completedTypes = COMPETITOR_LISTING_PROGRESS_TYPES.filter(type => {
+    const artifact = artifacts.find(item => item.type === type);
+    if (!artifact) return false;
+    if (type !== 'compliance_check') return true;
+    return getComplianceReviewView(artifact).complete;
+  });
+  const completedSteps = completedTypes.length;
+  const totalSteps = COMPETITOR_LISTING_PROGRESS_TYPES.length;
+
+  return {
+    workItemId,
+    completedSteps,
+    totalSteps,
+    completedTypes: [...completedTypes],
+    label: `已完成 ${completedSteps}/${totalSteps} 步`,
+  };
 }
 
 function createHistoryPayloadLookup(
@@ -425,4 +616,5 @@ export function getArtifactPayloadStatus(
 export function clearArtifactEnvelopeIndex(): void {
   StorageService.remove(APP_CENTER_WORK_ITEMS_STORAGE_KEY);
   StorageService.remove(APP_CENTER_ARTIFACTS_STORAGE_KEY);
+  emitArtifactsChanged({ reason: 'clear' });
 }

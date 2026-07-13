@@ -42,6 +42,11 @@ import { createActionListState } from './actions/actionListState';
 import type { AnalyzedRow, ReportType } from './types';
 import type { ColumnMapping } from './columns/columns';
 import type { AnalysisStatusTone } from './analysis/analysisFlowTypes';
+import {
+  consumePpcActionListResume,
+  type PpcActionListSnapshot,
+} from './export/actionListSnapshotService';
+import { renderPpcResumeReviewBanner } from './resumeReviewBanner';
 
 import '../style.css';
 
@@ -58,6 +63,7 @@ let activeReportType: ReportType = 'search_term';
 let isAnalyzing = false;
 let retainAnalyzerState = false;
 let activeContainer: HTMLElement | null = null;
+let activeResumeSnapshot: PpcActionListSnapshot | null = null;
 const listenerRegistry = createListenerRegistry();
 
 interface StatusSnapshot {
@@ -133,7 +139,10 @@ class PpcSearchTermsModule extends BaseModule {
     if (!this.container) return;
 
     activeContainer = this.container;
-    if (!retainAnalyzerState) {
+    const resumeSnapshot = consumePpcActionListResume();
+    if (resumeSnapshot) {
+      restorePpcActionListSnapshot(resumeSnapshot);
+    } else if (!retainAnalyzerState) {
       resetAnalyzerState();
     }
     const html = await SafeTemplateLoader.getInstance().loadTemplate(
@@ -156,8 +165,15 @@ class PpcSearchTermsModule extends BaseModule {
     restoreAnalysisSettings(this.container);
     updateContextFieldsVisibility(this.container);
     restoreActionOwner(this.container);
+    if (activeResumeSnapshot) {
+      const ownerInput = getInput(this.container, 'ppc-search-terms-action-owner');
+      if (ownerInput) ownerInput.value = activeResumeSnapshot.owner;
+    }
     bindEvents(this.container);
     restoreAnalyzerView(this.container);
+    if (activeResumeSnapshot) {
+      renderPpcResumeReviewBanner(this.container, activeResumeSnapshot);
+    }
   }
 
   protected onUnmount(): void {
@@ -187,18 +203,18 @@ function bindEvents(container: HTMLElement): void {
     clearAnalyzer: () => clearAnalyzer(container),
     toggleThresholdPanel: () => toggleThresholdPanel(container),
     handleReportSelectionChange: () => handleReportSelectionChange(container),
-    exportAll: () => exportActionRows(container, 'all', false, exportControllerState),
+    exportAll: () => void exportActionRows(container, 'all', false, exportControllerState),
     exportCurrent: () =>
-      exportActionRows(container, actionListState.getFilter(), true, exportControllerState),
+      void exportActionRows(container, actionListState.getFilter(), true, exportControllerState),
     exportWaste: () =>
-      exportActionRows(
+      void exportActionRows(
         container,
         getWasteExportFilter(activeReportType),
         false,
         exportControllerState
       ),
     exportGrowth: () =>
-      exportActionRows(
+      void exportActionRows(
         container,
         getGrowthExportFilter(activeReportType),
         false,
@@ -362,5 +378,21 @@ function resetAnalyzerState(): void {
   retainAnalyzerState = false;
   statusSnapshot = null;
   mappingStatusSnapshot = null;
+  activeResumeSnapshot = null;
+  actionListState.reset();
+}
+
+function restorePpcActionListSnapshot(snapshot: PpcActionListSnapshot): void {
+  sourceText = '';
+  analyzedRows = snapshot.rows.map(row => ({ ...row }));
+  activeReportType = snapshot.reportType;
+  isAnalyzing = false;
+  retainAnalyzerState = true;
+  activeResumeSnapshot = snapshot;
+  mappingStatusSnapshot = null;
+  statusSnapshot = {
+    message: `已恢复 ${snapshot.rows.length} 条本地 PPC 建议，请人工确认后再处理广告。`,
+    tone: 'status',
+  };
   actionListState.reset();
 }

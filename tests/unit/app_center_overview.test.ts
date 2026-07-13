@@ -5,11 +5,17 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as overviewModule from '@/modules/app_center/views/overview/index';
 import {
   clearArtifactEnvelopeIndex,
+  getArtifactsForWorkItem,
+  registerComplianceCheckArtifact,
   registerPpcActionListArtifact,
 } from '@/modules/app_center/artifactEnvelopeService';
 
 const safeTemplateLoaderMocks = vi.hoisted(() => ({
   loadTemplate: vi.fn(),
+}));
+
+const ppcSnapshotMocks = vi.hoisted(() => ({
+  getById: vi.fn(),
 }));
 
 vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
@@ -19,6 +25,14 @@ vi.mock('@/common/infrastructure/SafeModuleLoader', () => ({
     }),
   },
 }));
+
+vi.mock(
+  '@/modules/app_center/views/ppc_tools/ppc_search_terms/export/actionListSnapshotService',
+  () => ({
+    getPpcActionListSnapshotById: ppcSnapshotMocks.getById,
+    queuePpcActionListResume: vi.fn(),
+  })
+);
 
 const realOverviewTemplatePath = join(cwd(), 'src/modules/app_center/views/overview/template.html');
 
@@ -32,16 +46,29 @@ const overviewTemplate = `
     <button class="app-overview-view-btn" data-view-mode="list" aria-pressed="false"></button>
     <div class="app-overview-flow-grid app-overview-flow-grid--tasks"></div>
     <div class="app-overview-recent-heading-actions">
+      <button class="app-overview-recent-group-btn hidden" type="button" data-recent-undo-remove></button>
+      <button class="app-overview-recent-group-btn" type="button" data-recent-removed-toggle aria-pressed="false"></button>
+      <button class="app-overview-recent-group-btn" type="button" data-recent-group-toggle aria-pressed="false"></button>
       <div class="app-overview-recent-columns-toggle" role="group" aria-label="最近继续列数">
         <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="1" aria-pressed="false"></button>
         <button class="app-overview-recent-columns-btn active" type="button" data-recent-columns="2" aria-pressed="true"></button>
         <button class="app-overview-recent-columns-btn" type="button" data-recent-columns="3" aria-pressed="false"></button>
       </div>
-      <span class="app-overview-mini-badge">最近 10</span>
+      <span class="app-overview-mini-badge app-overview-recent-count-badge">显示 0 项</span>
+    </div>
+    <div class="app-overview-recent-toolbar">
+      <input id="app-overview-recent-search" type="search">
+      <div class="app-overview-recent-type-filters"></div>
+      <div class="app-overview-recent-status-filters"></div>
     </div>
     <div class="app-overview-recent-shell" data-recent-columns="2">
       <div class="app-overview-recent-list"></div>
-      <div class="app-overview-recent-empty hidden"></div>
+      <div class="app-overview-recent-empty hidden">
+        <div data-recent-empty-title></div>
+        <p data-recent-empty-description></p>
+        <button data-recent-empty-start></button>
+        <button data-recent-empty-clear class="hidden"><span></span></button>
+      </div>
     </div>
     <section id="app-module-apps">
       <div class="app-center-card-grid app-overview-grid"></div>
@@ -51,12 +78,38 @@ const overviewTemplate = `
   </div>
 `;
 
+function registerRecentPpcArtifact(): void {
+  registerPpcActionListArtifact(
+    {
+      id: 'ppc-export-001',
+      reportType: 'search_term',
+      filter: 'scale_budget',
+      rowCount: 2,
+      owner: '广告小张',
+      requiresHumanConfirmation: true,
+      createdAt: '2026-01-01T00:40:00.000Z',
+    },
+    {
+      workItemId: 'competitor_listing:hist-001',
+      marketplace: 'DE',
+      language: 'German',
+      asinOrSku: 'B000000001',
+      sourceRoute: 'ppc_search_terms',
+      updatedAt: '2026-01-01T00:40:00.000Z',
+    }
+  );
+}
+
 describe('App Center Overview', () => {
   beforeEach(() => {
     localStorage.clear();
     clearArtifactEnvelopeIndex();
     safeTemplateLoaderMocks.loadTemplate.mockReset();
     safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(overviewTemplate);
+    ppcSnapshotMocks.getById.mockResolvedValue({
+      id: 'ppc-export-001',
+      rows: [],
+    });
     vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
@@ -124,34 +177,17 @@ describe('App Center Overview', () => {
     expect(container.textContent).not.toContain('新品作业流');
   });
 
-  it('renders recent artifacts with next step entries', async () => {
-    registerPpcActionListArtifact(
-      {
-        id: 'ppc-export-001',
-        reportType: 'search_term',
-        filter: 'scale_budget',
-        rowCount: 2,
-        owner: '广告小张',
-        requiresHumanConfirmation: true,
-        createdAt: '2026-01-01T00:40:00.000Z',
-      },
-      {
-        workItemId: 'competitor_listing:hist-001',
-        marketplace: 'DE',
-        language: 'German',
-        asinOrSku: 'B000000001',
-        sourceRoute: 'ppc_search_terms',
-        updatedAt: '2026-01-01T00:40:00.000Z',
-      }
-    );
+  it('renders recent artifacts with a specific PPC review action', async () => {
+    registerRecentPpcArtifact();
     const container = document.createElement('div');
 
     await overviewModule.mount(container);
 
     const recentItems = container.querySelectorAll('.app-overview-recent-item');
-    const continueButton = container.querySelector<HTMLButtonElement>(
-      '.app-overview-recent-item [data-action="switch-tab"]'
+    const reviewButton = container.querySelector<HTMLButtonElement>(
+      '.app-overview-recent-action.app-card-primary-link'
     );
+    const pinButton = container.querySelector<HTMLButtonElement>('[aria-label="置顶"]');
 
     expect(recentItems).toHaveLength(1);
     expect(recentItems[0]?.classList.contains('app-overview-recent-item--ppc_action_list')).toBe(
@@ -162,16 +198,109 @@ describe('App Center Overview', () => {
     expect(recentItems[0]?.querySelector('.app-overview-recent-title')?.textContent).toBe(
       'DE · B000000001'
     );
-    expect(recentItems[0]?.textContent).toContain('Owner 广告小张');
-    expect(recentItems[0]?.textContent).toContain('2 条动作');
-    expect(recentItems[0]?.textContent).toContain('待人工确认');
+    expect(recentItems[0]?.textContent).toContain('负责人：广告小张');
+    expect(recentItems[0]?.textContent).toContain('2 条建议动作');
+    expect(recentItems[0]?.textContent).toContain('需人工复核');
     expect(recentItems[0]?.querySelectorAll('.app-overview-recent-fact').length).toBeGreaterThan(0);
     expect(recentItems[0]?.textContent).not.toContain('PPC 动作清单');
-    expect(continueButton?.classList.contains('app-card-primary-link')).toBe(true);
-    expect(continueButton?.dataset.action).toBe('switch-tab');
-    expect(continueButton?.dataset.tab).toBe('ppc_search_terms');
-    expect(continueButton?.textContent?.trim()).toContain('继续');
+    expect(reviewButton?.textContent).toContain('查看 PPC 建议');
+    expect(container.querySelectorAll('.app-overview-recent-action')).toHaveLength(1);
+    expect(pinButton?.querySelector('i')?.className).toBe('fa-solid fa-thumb-tack');
+    expect(pinButton?.getAttribute('aria-pressed')).toBe('false');
+    expect(recentItems[0]?.classList.contains('app-overview-recent-item--attention')).toBe(true);
+    expect(
+      container.querySelector('.app-overview-recent-type-filters')?.children.length
+    ).toBeGreaterThan(0);
     expect(container.querySelector('.app-overview-recent-empty')?.classList).toContain('hidden');
+  });
+
+  it('shows a visible pin state and supports remove undo', async () => {
+    registerRecentPpcArtifact();
+    const container = document.createElement('div');
+    await overviewModule.mount(container);
+
+    container.querySelector<HTMLButtonElement>('[aria-label="置顶"]')?.click();
+    await vi.waitFor(() => {
+      expect(container.querySelector('[aria-label="取消置顶"]')?.getAttribute('aria-pressed')).toBe(
+        'true'
+      );
+    });
+
+    container.querySelector<HTMLButtonElement>('[aria-label="从列表移除"]')?.click();
+    await vi.waitFor(() => {
+      expect(container.querySelectorAll('.app-overview-recent-item')).toHaveLength(0);
+      expect(
+        container
+          .querySelector<HTMLButtonElement>('[data-recent-undo-remove]')
+          ?.classList.contains('hidden')
+      ).toBe(false);
+    });
+
+    container.querySelector<HTMLButtonElement>('[data-recent-undo-remove]')?.click();
+    await vi.waitFor(() => {
+      expect(container.querySelectorAll('.app-overview-recent-item')).toHaveLength(1);
+    });
+  });
+
+  it('distinguishes filtered empty state and clears recent filters', async () => {
+    registerRecentPpcArtifact();
+    const container = document.createElement('div');
+    await overviewModule.mount(container);
+    const search = container.querySelector<HTMLInputElement>('#app-overview-recent-search');
+    if (!search) throw new Error('Recent search input was not rendered');
+
+    search.value = 'not-found';
+    search.dispatchEvent(new Event('input'));
+    await vi.waitFor(() => {
+      expect(container.querySelector('[data-recent-empty-title]')?.textContent).toBe(
+        '没有符合条件的作业'
+      );
+    });
+
+    container.querySelector<HTMLButtonElement>('[data-recent-empty-clear]')?.click();
+    await vi.waitFor(() => {
+      expect(search.value).toBe('');
+      expect(container.querySelectorAll('.app-overview-recent-item')).toHaveLength(1);
+    });
+  });
+
+  it('expands the local compliance checklist and saves a manual status', async () => {
+    registerComplianceCheckArtifact(
+      {
+        id: 'compliance-001',
+        checklistIds: ['restricted_words', 'brand_infringement'],
+        createdAt: '2026-01-01T00:50:00.000Z',
+      },
+      {
+        workItemId: 'competitor_listing:hist-001',
+        marketplace: 'DE',
+        language: 'German',
+        asinOrSku: 'B000000001',
+        sourceRoute: 'keyword_hunter_analysis',
+        updatedAt: '2026-01-01T00:50:00.000Z',
+      }
+    );
+    const container = document.createElement('div');
+    await overviewModule.mount(container);
+
+    const progressButton =
+      container.querySelector<HTMLButtonElement>('[aria-label="查看复核进度"]');
+    progressButton?.click();
+    expect(progressButton?.getAttribute('aria-expanded')).toBe('true');
+    expect(container.querySelector('.app-overview-compliance-review.hidden')).toBeNull();
+    expect(container.textContent).toContain('不会自动修改 Listing 或广告');
+
+    const firstStatus = container.querySelector<HTMLSelectElement>(
+      '[data-compliance-item-id="restricted_words"]'
+    );
+    if (!firstStatus) throw new Error('Compliance status control was not rendered');
+    firstStatus.value = 'confirmed';
+    firstStatus.dispatchEvent(new Event('change'));
+
+    await vi.waitFor(() => {
+      const [artifact] = getArtifactsForWorkItem('competitor_listing:hist-001');
+      expect(String(artifact?.metadata?.reviewStates)).toContain('confirmed');
+    });
   });
 
   it('shows recent empty state guidance when no artifacts exist', async () => {
@@ -187,10 +316,10 @@ describe('App Center Overview', () => {
 
     expect(list?.classList.contains('hidden')).toBe(true);
     expect(empty?.classList.contains('hidden')).toBe(false);
-    expect(empty?.textContent).toContain('还没有可继续的作业产物');
-    expect(
-      empty?.querySelector<HTMLButtonElement>('[data-tab="scraper"]')?.textContent
-    ).toContain('开始采集');
+    expect(empty?.textContent).toContain('暂无最近作业');
+    expect(empty?.querySelector<HTMLButtonElement>('[data-tab="scraper"]')?.textContent).toContain(
+      '开始采集'
+    );
   });
 
   it('lets users switch recent columns and persists the preference', async () => {
@@ -211,9 +340,9 @@ describe('App Center Overview', () => {
 
     expect(shell?.getAttribute('data-recent-columns')).toBe('2');
     expect(
-      container.querySelector(
-        '.app-overview-recent-columns-btn[data-recent-columns="2"]'
-      )?.getAttribute('aria-pressed')
+      container
+        .querySelector('.app-overview-recent-columns-btn[data-recent-columns="2"]')
+        ?.getAttribute('aria-pressed')
     ).toBe('true');
 
     threeColBtn?.click();

@@ -3,6 +3,7 @@ import type {
   AppCenterArtifactType,
   AppCenterWorkItem,
 } from './artifactEnvelopeService';
+import { getComplianceReviewView } from './complianceReviewState';
 
 export interface RecentArtifactPresentation {
   typeLabel: string;
@@ -21,6 +22,27 @@ export const RECENT_ARTIFACT_TYPE_LABELS: Record<AppCenterArtifactType, string> 
   keyword_snapshot: '关键词',
   ppc_action_list: 'PPC',
   compliance_check: '合规',
+};
+
+const WORK_ITEM_STATUS_LABELS: Record<AppCenterWorkItem['status'], string> = {
+  draft: '尚未开始',
+  in_progress: '进行中',
+  review_required: '需人工复核',
+  done: '已完成',
+};
+
+const PPC_FILTER_LABELS: Record<string, string> = {
+  negative_exact: '否定关键词建议',
+  harvest_exact: '收割精准词建议',
+  scale_budget: '增加预算候选',
+  bid_down: '降低竞价候选',
+  listing_term: 'Listing 补词建议',
+  campaign_fix_status: '广告活动状态修复',
+  campaign_pause: '暂停活动候选',
+  campaign_scale: '扩大投放候选',
+  campaign_bid_down: '降低活动竞价候选',
+  campaign_structure: '调整活动结构候选',
+  observe: '继续观察',
 };
 
 const GENERIC_TITLE_NORMALIZED = new Set(
@@ -165,18 +187,18 @@ function appendPpcFacts(
   blocked: Set<string>
 ): void {
   if (typeof meta.rowCount === 'number') {
-    pushUniqueFact(facts, `${meta.rowCount} 条动作`, blocked);
+    pushUniqueFact(facts, `${meta.rowCount} 条建议动作`, blocked);
   }
   if (typeof meta.owner === 'string' && meta.owner.trim()) {
-    pushUniqueFact(facts, `Owner ${meta.owner.trim()}`, blocked);
+    pushUniqueFact(facts, `负责人：${meta.owner.trim()}`, blocked);
   }
   if (meta.requiresHumanConfirmation === true) {
-    pushUniqueFact(facts, '待人工确认', blocked);
+    pushUniqueFact(facts, '需人工复核', blocked);
   } else if (meta.requiresHumanConfirmation === false) {
-    pushUniqueFact(facts, '无需确认', blocked);
+    pushUniqueFact(facts, '已人工复核', blocked);
   }
   if (typeof meta.filter === 'string' && meta.filter && meta.filter !== 'all') {
-    pushUniqueFact(facts, meta.filter, blocked);
+    pushUniqueFact(facts, PPC_FILTER_LABELS[meta.filter] || meta.filter, blocked);
   }
 }
 
@@ -189,14 +211,22 @@ function appendTypeSpecificFacts(
   const meta = artifact.metadata || {};
   const handlers: Partial<Record<AppCenterArtifactType, () => void>> = {
     scrape_history: () => appendAsinCountFact(facts, workItem, blocked),
-    analysis_report: () => pushUniqueFact(facts, '分析已就绪', blocked),
+    analysis_report: () => pushUniqueFact(facts, '分析报告已生成', blocked),
     listing_prompt: () => {
       appendAsinCountFact(facts, workItem, blocked);
-      pushUniqueFact(facts, '可继续关键词', blocked);
+      pushUniqueFact(facts, '下一步：关键词复核', blocked);
     },
     keyword_snapshot: () => pushSummaryParts(facts, artifact.summary, blocked),
     ppc_action_list: () => appendPpcFacts(facts, meta, blocked),
-    compliance_check: () => pushSummaryParts(facts, artifact.summary, blocked),
+    compliance_check: () => {
+      const review = getComplianceReviewView(artifact);
+      pushUniqueFact(facts, `已复核 ${review.reviewedCount}/${review.totalCount} 项`, blocked);
+      if (review.nextItem) {
+        pushUniqueFact(facts, `下一步：${review.nextItem.label}`, blocked);
+      } else if (review.complete) {
+        pushUniqueFact(facts, '人工复核已完成', blocked);
+      }
+    },
   };
   handlers[artifact.type]?.();
 }
@@ -225,13 +255,6 @@ export function resolvePrimaryTitle(
 ): string {
   const workContext = formatWorkContext(workItem);
 
-  if (
-    artifact.type === 'keyword_snapshot' &&
-    artifact.title.trim() &&
-    !isGenericArtifactTitle(artifact.title, typeLabel)
-  ) {
-    return artifact.title.trim();
-  }
   if (workContext) return workContext;
   if (artifact.title.trim() && !isGenericArtifactTitle(artifact.title, typeLabel)) {
     return artifact.title.trim();
@@ -263,4 +286,28 @@ export function buildRecentArtifactPresentation(
     absoluteTime,
     isFresh: Number.isFinite(createdTime) && now - createdTime < 60 * 60 * 1000,
   };
+}
+
+/**
+ * Plain-text summary for clipboard / 复盘 — no cloud sync, local operator aid only.
+ */
+export function buildResumeClipboardSummary(
+  artifact: AppCenterArtifactEnvelope,
+  workItem?: AppCenterWorkItem | null,
+  now = Date.now()
+): string {
+  const presentation = buildRecentArtifactPresentation(artifact, workItem, now);
+  const lines = [
+    `作业：${presentation.primaryTitle}`,
+    `类型：${presentation.typeLabel}`,
+    workItem?.status ? `状态：${WORK_ITEM_STATUS_LABELS[workItem.status]}` : '',
+    workItem?.marketplace ? `站点：${workItem.marketplace}` : '',
+    workItem?.asinOrSku ? `ASIN/SKU：${workItem.asinOrSku}` : '',
+    presentation.facts.length ? `要点：${presentation.facts.join(' · ')}` : '',
+    presentation.absoluteTime || presentation.relativeTime
+      ? `时间：${presentation.absoluteTime || presentation.relativeTime}`
+      : '',
+  ].filter(Boolean);
+
+  return lines.join('\n');
 }

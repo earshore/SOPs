@@ -397,6 +397,18 @@ it('saves async snapshots in IndexedDB and removes the localStorage mirror', asy
   expect(mocks.state.keywordTracker.currentSnapshotId).toBe(snapshot.id);
 });
 
+it('finds and restores an IndexedDB snapshot by ID after localStorage is empty', async () => {
+  const snapshot = await KeywordHunterSnapshotService.saveCurrentAsync({
+    title: 'Cold-start snapshot',
+  });
+  mocks.snapshots.splice(0, mocks.snapshots.length);
+  mocks.state.keywordTracker.copyInputText = '';
+
+  await expect(KeywordHunterSnapshotService.getByIdAsync(snapshot.id)).resolves.toEqual(snapshot);
+  await expect(KeywordHunterSnapshotService.restoreAsync(snapshot.id)).resolves.toEqual(snapshot);
+  expect(mocks.state.keywordTracker.copyInputText).toBe('Wireless earbuds for travel.');
+});
+
 it('removes legacy localStorage snapshots after a successful migration', async () => {
   const snapshot = KeywordHunterSnapshotService.saveCurrent({
     title: 'Legacy snapshot',

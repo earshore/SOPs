@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount, unmount } from '@/modules/app_center/views/ppc_tools/ppc_search_terms/index';
 import { showToast } from '@/common/ui/notifications';
+import {
+  queuePpcActionListResume,
+  savePpcActionListSnapshot,
+} from '@/modules/app_center/views/ppc_tools/ppc_search_terms/export/actionListSnapshotService';
+import type { AnalyzedRow } from '@/modules/app_center/views/ppc_tools/ppc_search_terms/types';
 
 interface LlmMockRow {
   id: string;
@@ -120,6 +125,7 @@ const mocks = vi.hoisted(() => ({
       <div id="ppc-search-terms-filter-buttons"></div>
       <h2 id="ppc-search-terms-results-title">动作清单</h2>
       <p id="ppc-search-terms-result-count"></p>
+      <div class="ppc-search-terms-action-toolbar"></div>
       <div id="ppc-search-terms-empty-state"><div id="ppc-search-terms-empty-title"></div><p id="ppc-search-terms-empty-description"></p></div>
       <div
         id="ppc-search-terms-table-wrapper"
@@ -291,6 +297,59 @@ afterEach(() => {
 });
 
 describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
+  it('恢复本地建议快照并只记录人工复核结果', async () => {
+    unmount();
+    const row: AnalyzedRow = {
+      id: 'resume-row',
+      reportType: 'search_term',
+      campaign: 'Campaign',
+      adGroup: 'Ad group',
+      searchTerm: 'waterproof dog jacket',
+      keyword: 'dog jacket',
+      matchType: 'broad',
+      impressions: 100,
+      clicks: 10,
+      spend: 20,
+      sales: 80,
+      orders: 2,
+      ctr: 0.1,
+      cvr: 0.2,
+      cpc: 2,
+      acos: 0.25,
+      action: 'scale_budget',
+      actionLabel: '增加预算',
+      reason: '表现良好',
+      priority: 1,
+    };
+    const snapshot = await savePpcActionListSnapshot({
+      id: 'ppc-resume-001',
+      reportType: 'search_term',
+      filter: 'all',
+      owner: '广告小张',
+      rows: [row],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    });
+    if (!snapshot) throw new Error('PPC snapshot was not saved');
+    queuePpcActionListResume(snapshot);
+    await mount(container);
+
+    expect(container.querySelector('#ppc-search-terms-results-body')?.textContent).toContain(
+      'waterproof dog jacket'
+    );
+    expect(container.textContent).toContain('不会自动修改广告');
+    container.querySelector<HTMLButtonElement>('[data-review-status="confirmed"]')?.click();
+    await vi.waitFor(() => {
+      expect(mocks.registerPpcActionListArtifact).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'ppc-resume-001',
+          reviewStatus: 'confirmed',
+          requiresHumanConfirmation: false,
+        }),
+        mocks.workspaceContext
+      );
+    });
+  });
+
   it('加载样例后可调用模型、筛选并导出当前筛选', async () => {
     await loadSampleAndAnalyze(container);
     container.querySelector<HTMLButtonElement>('[data-filter="scale_budget"]')?.click();
@@ -306,18 +365,20 @@ describe('PPC 搜索词分析器 UI - 初始化和阈值', () => {
     );
     expect(anchorClick).toHaveBeenCalled();
     expect(mocks.storageSet).toHaveBeenCalledWith('ppc_search_terms_action_owner_v1', '广告负责人');
-    expect(mocks.registerPpcActionListArtifact).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: expect.stringMatching(/^ppc-search_term-scale_budget-\d{4}-\d{2}-\d{2}-2$/),
-        reportType: 'search_term',
-        filter: 'scale_budget',
-        rowCount: 2,
-        owner: '广告负责人',
-        requiresHumanConfirmation: true,
-        createdAt: expect.any(String),
-      }),
-      mocks.workspaceContext
-    );
+    await vi.waitFor(() => {
+      expect(mocks.registerPpcActionListArtifact).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: expect.stringMatching(/^ppc-search_term-scale_budget-[a-z0-9]+-/),
+          reportType: 'search_term',
+          filter: 'scale_budget',
+          rowCount: 2,
+          owner: '广告负责人',
+          requiresHumanConfirmation: true,
+          createdAt: expect.any(String),
+        }),
+        mocks.workspaceContext
+      );
+    });
     expect(showToast).toHaveBeenCalledWith('导出完成', {
       type: 'success',
       description: '2 行动作已导出',
@@ -547,9 +608,11 @@ describe('PPC 搜索词分析器 UI - 筛选和复制', () => {
     expect(container.querySelectorAll('#ppc-search-terms-results-body tr')).toHaveLength(1);
 
     container.querySelector<HTMLButtonElement>('#ppc-search-terms-export-current')?.click();
-    expect(showToast).toHaveBeenCalledWith('导出完成', {
-      type: 'success',
-      description: '1 行动作已导出',
+    await vi.waitFor(() => {
+      expect(showToast).toHaveBeenCalledWith('导出完成', {
+        type: 'success',
+        description: '1 行动作已导出',
+      });
     });
 
     container.querySelector<HTMLButtonElement>('#ppc-search-terms-action-search-clear')?.click();

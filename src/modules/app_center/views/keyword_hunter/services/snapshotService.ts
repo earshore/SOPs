@@ -351,6 +351,11 @@ export const KeywordHunterSnapshotService = {
     return this.getAll().find(snapshot => snapshot.id === id);
   },
 
+  async getByIdAsync(id: string): Promise<KeywordHunterSnapshot | undefined> {
+    const snapshots = await this.getAllAsync();
+    return snapshots.find(snapshot => snapshot.id === id);
+  },
+
   saveCurrent(options: SaveSnapshotOptions = {}): KeywordHunterSnapshot {
     const snapshots = this.getAll();
     const snapshot = createSnapshotFromKeywordHunterState(
@@ -415,6 +420,22 @@ export const KeywordHunterSnapshotService = {
     const snapshot =
       typeof snapshotOrId === 'string'
         ? this.getById(snapshotOrId)
+        : normalizeSnapshot(snapshotOrId);
+
+    if (!snapshot) {
+      return null;
+    }
+
+    restoreSnapshotToState(snapshot);
+    return snapshot;
+  },
+
+  async restoreAsync(
+    snapshotOrId: KeywordHunterSnapshot | string
+  ): Promise<KeywordHunterSnapshot | null> {
+    const snapshot =
+      typeof snapshotOrId === 'string'
+        ? await this.getByIdAsync(snapshotOrId)
         : normalizeSnapshot(snapshotOrId);
 
     if (!snapshot) {

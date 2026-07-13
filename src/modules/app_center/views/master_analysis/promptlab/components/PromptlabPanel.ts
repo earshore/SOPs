@@ -19,6 +19,7 @@
 import { appStore } from '@/stores/useAppStore';
 import { APP_EVENTS, MODULE_EVENTS } from '@/common/constants/eventConstants';
 import eventBus from '@/common/EventBus';
+import { consumePromptResume } from '@/modules/app_center/artifactResumeSelection';
 import { HistoryService } from '../../services/historyService';
 import { getReportFingerprint } from '../../services/reportIdentity';
 // ── 子模块导入 ────────────────────────────────────────────────────────────────
@@ -659,6 +660,16 @@ const promptlabPanelBehavior: PromptlabPanelBehavior = {
     if (currentHistoryId === null || currentHistoryId === undefined) {
       this.listingPromptCache = '';
       this.visualPromptCache = '';
+      return;
+    }
+
+    const resumedPrompt = consumePromptResume(currentHistoryId);
+    if (resumedPrompt) {
+      this.currentConsoleMode = resumedPrompt.prompt.type === 'visual' ? 'visual' : 'listing';
+      this.listingPromptCache =
+        resumedPrompt.prompt.type === 'listing' ? resumedPrompt.prompt.prompt : '';
+      this.visualPromptCache =
+        resumedPrompt.prompt.type === 'visual' ? resumedPrompt.prompt.prompt : '';
       return;
     }
 
