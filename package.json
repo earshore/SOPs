@@ -111,6 +111,7 @@
     "release:notes": "tsx scripts/release/prepare-release.ts notes",
     "release:package": "tsx scripts/release/prepare-release.ts package",
     "release:backfill-notes": "node scripts/release/backfill-release-notes.mjs",
+    "release:sync-all": "node scripts/release/fetch-all-releases.mjs && node scripts/release/sync-all-releases.mjs",
     "release:audit": "node scripts/release/audit-releases.mjs"
   },
   "devDependencies": {

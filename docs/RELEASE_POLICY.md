@@ -157,13 +157,23 @@ gh release edit vX.Y.Z --latest
 npm run release:validate         # 校验 package version / tag / 预发布规则
 npm run release:notes            # 从 CHANGELOG 生成 release body 片段
 npm run release:package          # 打包 dist + build-info + SHA256SUMS
-npm run release:backfill-notes   # 将 CHANGELOG 完整章节回填到已有 GitHub Release（不压缩）
+npm run release:backfill-notes   # 将指定版本 CHANGELOG 章节回填到 GitHub Release
+npm run release:sync-all         # 全量：CHANGELOG 覆盖全部 Release + 回写全部 GitHub notes
 npm run release:audit            # 审计 tag / Release / CHANGELOG / 产物 / 短 notes
 ```
 
-回填示例：
+回填 / 全量同步示例：
 
 ```bash
 npm run release:backfill-notes -- --dry-run
 npm run release:backfill-notes -- --only 3.0.4,3.0.4-rc.11
+npm run release:sync-all -- --dry-run
+npm run release:sync-all
 ```
+
+`release:sync-all` 规则：
+
+1. 以 GitHub 全部 Release 为清单，保证每个版本在 `docs/CHANGELOG.md` 有章节。
+2. 已有 CHANGELOG 详述**优先保留**；缺失章节从 GitHub 原文导入（标注 historical）。
+3. 每个 GitHub Release body = 运维头 + 对应 CHANGELOG **完整**章节（不压缩、不删历史）。
+4. 不改变 Latest：仅 `v3.0.5`（当前 GA）使用 `--latest`；RC 保持 `--prerelease`。

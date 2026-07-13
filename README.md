@@ -20,7 +20,8 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 上一 GA | `v3.0.4` | 回滚参考 |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- 完整变更见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.5` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
 - 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`3.0.4-rc.*` 已冻结，本版 `v3.0.5` 为其正式收口 GA。
 
 `v3.0.5`（2026-07-13，稳定 GA）在 `v3.0.4` 与冻结线 `3.0.4-rc.1`…`rc.11` 之上，面向生产的主要增量：

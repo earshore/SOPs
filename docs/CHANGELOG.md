@@ -30,6 +30,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复 Keyword Hunter 路由路径错误
 - 修复最小化按钮不可见问题
 
+## [3.0.5-rc.2] - 2026-07-13
+
+> **Superseded / 已取代**：误标版本线 tag，勿用于生产。请使用 GA `v3.0.5`。
+
+> Historical notes imported from GitHub Release `v3.0.5-rc.2` (2026-07-13).
+
+## SOPs 3.0.5-rc.2（已取代 / Superseded）
+
+**发布通道：** Release Candidate（归档）  
+**状态：** 历史误标版本线中的 tag，**不要**用于生产或新开发基线。
+
+该 tag 属于曾误标的 `3.0.5-rc` 线，内容已并入冻结线 `3.0.4-rc.*` 并收口于 GA `v3.0.5`。本 Release 仅作归档说明，避免孤儿 tag 无文档。
+
+**请使用：**
+- 稳定 GA：`v3.0.5`（GitHub Latest）
+- 冻结线叙述：`v3.0.4-rc.*` 各章节与 README「最新发布」
+
+**Commit：** `551ea9cb3d01`
+
+## [3.0.5-rc.1] - 2026-07-13
+
+> **Superseded / 已取代**：误标版本线 tag，勿用于生产。请使用 GA `v3.0.5`。
+
+> Historical notes imported from GitHub Release `v3.0.5-rc.1` (2026-07-13).
+
+## SOPs 3.0.5-rc.1（已取代 / Superseded）
+
+**发布通道：** Release Candidate（归档）  
+**状态：** 历史误标版本线中的 tag，**不要**用于生产或新开发基线。
+
+该 tag 属于曾误标的 `3.0.5-rc` 线，内容已并入冻结线 `3.0.4-rc.*` 并收口于 GA `v3.0.5`。本 Release 仅作归档说明，避免孤儿 tag 无文档。
+
+**请使用：**
+- 稳定 GA：`v3.0.5`（GitHub Latest）
+- 冻结线叙述：`v3.0.4-rc.*` 各章节与 README「最新发布」
+
+**Commit：** `9666edc58a7c`
+
 ## [3.0.5] - 2026-07-13
 
 > 正式 GA。整合 `v3.0.4` 之后冻结线 `3.0.4-rc.1`…`rc.11` 的全部能力，并落地企业级发布治理。  
@@ -93,7 +131,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `3.0.4-rc.8` — 循环依赖检查、rc.1–rc.7 整合、Deep Chat bundle 固定、Sentry 兼容
 - `3.0.4-rc.7`…`rc.1` — Deep Chat 重命名/删除确认、recent items 图标与时间、App Center catalog/workflow、质量审计等（详见各 RC 章节）
 
-
 ## [3.0.4-rc.11] - 2026-07-12
 
 > 版本线说明：曾误标为 `3.0.5` / `3.0.5-rc.*` / `3.0.6-rc.*`。按当前约定并入 `3.0.4` 预发布序列：`rc.8`–`rc.11`。
@@ -113,7 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复阻塞 Vercel 构建的 Prettier 格式问题，并清理误入发布树的构建临时文件。
 - 通过 CSS 变量命名与 ESLint 复杂度拆分，恢复 `css:audit` / `lint:warning-gate` 通过。
 
-## [3.0.4-rc.10] - 2026-07-11
+## [3.0.4-rc.10] - 2026-07-12
 
 ### Added
 - 新增共享剪贴板、模板与 LLM JSON 工具，沉淀 Shared Capabilities Guide。
@@ -129,7 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复共享剪贴板在无 `execCommand` 环境下的降级路径，并同步 Promptlab / Prompts 相关测试。
 - 移除废弃 CSS 半径别名 `--radius-card` / `--radius-panel`。
 
-## [3.0.4-rc.9] - 2026-07-10
+## [3.0.4-rc.9] - 2026-07-12
 
 ### Added
 - 新增共享确认弹窗组件，并补充 AppModal 与确认弹窗回归测试覆盖。
@@ -147,7 +184,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 替换多个 SOPS 页面里的 `alert` 复制反馈，统一成功与失败提示行为。
 - 强化 NPI Tracker、Restricted Words、Prompt Library 和系统设置相关回归测试覆盖。
 
-## [3.0.4-rc.8] - 2026-07-09
+## [3.0.4-rc.8] - 2026-07-12
 
 ### Added
 - 新增循环依赖检查脚本，统一处理 Vite `?url` 资源导入后再执行 Madge 审计。
@@ -208,7 +245,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - 补充 App Center catalog/workflow/workspace、Keyword Hunter 快照、PPC UI 和历史记录回归覆盖。
 
-## [3.0.4-rc.3] - 2026-07-08
+## [3.0.4-rc.3] - 2026-07-07
 
 ### Added
 - 新增 action name、import path 和 source naming 质量审计，并接入 `ci:quality`。
@@ -288,7 +325,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 加固 release 安全门禁、CSP 和 secret 泄露检查。
 - 修复监控、存储、模块加载、图片懒加载和模板可访问性回归。
 
-## [3.0.3-rc.22] - 2026-07-06
+## [3.0.3-rc.22] - 2026-07-05
 
 ### Added
 - 新增安全审计报告、release smoke E2E 覆盖和持久化清洗测试。
@@ -319,7 +356,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - 修复模块错误处理、卸载流程、Loader 和 StorageService 安全性。
 
-## [3.0.3-rc.20] - 2026-07-05
+## [3.0.3-rc.20] - 2026-07-04
 
 ### Added
 - 新增导航队列处理与可折叠概览交互。
@@ -480,7 +517,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - 将构建配置文件从符号链接转换为常规文件，提升 Vercel 构建兼容性。
 
-## [3.0.3-rc.9] - 2026-06-13
+## [3.0.3-rc.9] - 2026-06-12
 
 ### Changed
 - NPI Tracker 改用 `data-action` 操作绑定，并更新页面对象和端到端测试。
@@ -506,7 +543,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - 稳定 Restricted Words E2E 的导航、搜索和详情断言。
 
-## [3.0.3-rc.7] - 2026-06-12
+## [3.0.3-rc.7] - 2026-06-11
 
 ### Changed
 - 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
@@ -516,7 +553,1035 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 新增统一确认弹窗并接入 Scraper 数据操作流程，降低误清空和误覆盖风险。
 - 更新 Scraper 端到端测试和页面对象以匹配新的确认交互。
 
-## [1.0.0] - 2026-03-22
+## [3.0.3-rc.6] - 2026-06-11
+
+> Historical notes imported from GitHub Release `v3.0.3-rc.6` (2026-06-11).
+
+## 版本定位
+
+`v3.0.3-rc.6` 是 `v3.0.3` 的第 6 个候选版本，基于 `v3.0.3-rc.5` 之后的 Keyword Hunter、Deep Chat 存储与工具栏、系统设置布局、CSS token 和导航状态优化提交发布，用于验证 App Center 工具链、视觉 token 收敛和 Keyword Hunter 数据流。
+
+- 发布分支：`main`
+- 目标提交：`1445fcdf2201cd990498f3469c64f095457c97fb`
+- 对比基线：`v3.0.3-rc.5`
+- 变更规模：4 个提交，37 个文件变更，约 1,799 行新增 / 831 行删除
+
+## 关键提交
+
+- `2c8c952c` Refactor settings panel styling/layout
+- `dafde3cf` Refactor CSS tokens and update navigation state
+- `69134d2d` Enhance Deep Chat storage, toolbar & UI
+- `1445fcdf` Keyword Hunter: undo clean, matching & tests
+
+## 详细更新
+
+### Keyword Hunter 数据流与测试
+
+- 优化 Keyword Hunter 输入、流程页和 tracker service，增强 undo clean、关键词匹配和状态追踪能力。
+- 新增 Keyword Hunter e2e fixture 与 input/process/analysis 测试，覆盖关键工作流。
+- 新增 `keywordHunterTrackerService` 单测，覆盖 tracker service 的匹配与状态行为。
+
+### Deep Chat 存储、工具栏与 UI
+
+- 增强 Deep Chat conversation context 和存储逻辑，补充更完整的上下文与历史处理。
+- 更新 Deep Chat 消息工具栏、聊天模板和 Playground 样式，优化操作入口与状态表达。
+- 扩展 conversation context 测试，覆盖新增存储与上下文处理路径。
+
+### Settings、导航状态与 CSS token
+
+- 重构系统设置面板布局与样式，提升配置区的扫描性和操作密度。
+- 收敛 CSS foundation token、header、toast、home、More、SOPs、AMZ Hub 和 App Center 等模块样式。
+- 更新 navigation 状态处理和主题配置，减少重复或过时的视觉变量。
+- 更新 CSS module 分析报告与 CSS variable audit 脚本。
+
+### PPC 与视觉回归细节
+
+- 调整 PPC search terms 样式，延续导入区和工具界面的布局稳定性。
+- 更新 visual test 相关配置，配合视觉 token 调整后的页面状态。
+
+## 验证结果
+
+已在本地执行 `npm run build`，完整通过：
+
+- XSS gate：扫描 356 个 `src` 文件，0 findings
+- Circular dependency check：Madge 处理 354 个文件，未发现循环依赖，保留 1 条非阻断 warning
+- Type check：通过
+- ESLint：通过
+- ESLint warning gate：`0/0 warning(s)`
+- Vite production build：通过，Vite v8.0.16，405 modules transformed，构建耗时约 16.13s
+
+## 已知非阻断提示
+
+- 构建仍提示插件耗时较高，主要集中在 terser、CSS post-processing、asset 和 CSS 阶段。
+- `deep-chat` 等少数 chunk 仍超过 300 kB；当前不阻断候选版发布，后续可继续按页面或功能拆包优化。
+- `package.json` 内部包版本字段仍为历史值 `1.0.0`，本次 GitHub 发布版本以 tag/release `v3.0.3-rc.6` 为准。
+
+## [3.0.3-rc.5] - 2026-06-11
+
+> Historical notes imported from GitHub Release `v3.0.3-rc.5` (2026-06-11).
+
+## 版本定位
+
+`v3.0.3-rc.5` 是 `v3.0.3` 的第 5 个候选版本，基于 `v3.0.3-rc.4` 之后的分析进度追踪、Deep Chat pending drafts 和 PromptLab 草稿状态优化提交发布，用于验证 App Center 生成式工作流的处理中状态、草稿队列和分析反馈链路。
+
+- 发布分支：`main`
+- 目标提交：`b2aee88aea6da32b0446eb004398beccef633bef`
+- 对比基线：`v3.0.3-rc.4`
+- 变更规模：1 个提交，15 个文件变更，约 811 行新增 / 130 行删除
+
+## 关键提交
+
+- `b2aee88a` Track analysis progress & deep-chat pending drafts
+
+## 详细更新
+
+### 分析进度与反馈状态
+
+- 更新 AI Analysis action 流程，补充分析处理中状态和用户反馈入口。
+- 调整 Alpine panel 相关逻辑，增强分析执行过程的可见性。
+- 扩展 `ai-analysis-actions` 测试，覆盖新增状态与动作行为。
+
+### PromptLab 草稿状态
+
+- 增强 PromptLab computed 状态，支持更完整的草稿生成、等待和展示逻辑。
+- 调整 prompt action 与 panel 交互，减少生成草稿时的状态断层。
+- 扩展 PromptLab 单测，覆盖 pending drafts 和草稿状态展示。
+
+### Deep Chat pending drafts
+
+- 更新 Deep Chat Playground 逻辑和模板，支持 pending draft 相关交互与显示。
+- 调整 Playground 样式，优化生成中草稿和聊天状态的界面反馈。
+- 更新 app store 类型与状态，补充 pending draft 数据结构。
+
+### Scraper 与 PPC 体验细节
+
+- 调整 Scraper 模板与样式，精简部分不再需要的布局样式。
+- 微调 PPC search terms 样式，保持导入区域布局更稳定。
+
+## 验证结果
+
+已在本地执行 `npm run build`，完整通过：
+
+- XSS gate：扫描 356 个 `src` 文件，0 findings
+- Circular dependency check：Madge 处理 354 个文件，未发现循环依赖，保留 1 条非阻断 warning
+- Type check：通过
+- ESLint：通过
+- ESLint warning gate：`0/0 warning(s)`
+- Vite production build：通过，Vite v8.0.16，405 modules transformed，构建耗时约 12.50s
+
+## 已知非阻断提示
+
+- 构建仍提示插件耗时较高，主要集中在 terser、asset、CSS post-processing 和 CSS 阶段。
+- `deep-chat` 等少数 chunk 仍超过 300 kB；当前不阻断候选版发布，后续可继续按页面或功能拆包优化。
+- `package.json` 内部包版本字段仍为历史值 `1.0.0`，本次 GitHub 发布版本以 tag/release `v3.0.3-rc.5` 为准。
+
+## [3.0.3-rc.4] - 2026-06-11
+
+> Historical notes imported from GitHub Release `v3.0.3-rc.4` (2026-06-11).
+
+## 版本定位
+
+`v3.0.3-rc.4` 是 `v3.0.3` 的第 4 个候选版本，基于 `v3.0.3-rc.3` 之后的 Playground / Deep Chat、PromptLab 草稿持久化、系统设置与 release 门禁修复提交发布，用于验证 App Center 工具体验和本地数据持久化链路。
+
+- 发布分支：`main`
+- 目标提交：`807e9504dfc6c26aa2da9a8f83be3d2d15f5bb2e`
+- 对比基线：`v3.0.3-rc.3`
+- 变更规模：6 个提交，27 个文件变更，约 2,229 行新增 / 279 行删除
+
+## 关键提交
+
+- `83dc13d4` refactor(deep-chat): align visual design with project standards
+- `a1bef029` fix(deep-chat): remove redundant provider status message
+- `54d62fc3` fix(deep-chat): fix tuning panel z-index to prevent input overlay
+- `c6e44381` Add Playground module, UI and menu ordering
+- `a2bc965d` Persist generated prompts and add drafts UI
+- `807e9504` Fix release gate for playground controls
+
+## 详细更新
+
+### Playground / Deep Chat
+
+- 增加 App Center Playground 入口，并调整模块 manifest、overview 和菜单排序。
+- 优化 Deep Chat 视觉结构、控制区布局、线程 rail、调参面板和输入区体验。
+- 修复调参面板 z-index，避免覆盖或干扰输入区域。
+- 移除冗余 provider 状态提示，降低界面噪音。
+- 拆分 Deep Chat 控制绑定逻辑，消除 release 门禁中的 ESLint warning。
+
+### PromptLab 草稿与本地持久化
+
+- 扩展 PromptLab prompt action 流程，支持生成内容持久化为草稿。
+- 增强 `historyService` 和 `LocalDataStore`，补齐本地数据结构、schema 和存取逻辑。
+- 更新 app store 状态类型与持久化测试，覆盖新增草稿数据链路。
+
+### 系统设置与模型元信息
+
+- 扩展系统设置页面和配置逻辑，补充模型元信息展示与测试覆盖。
+- 更新相关 zod schema、状态类型和业务类型定义，保证配置数据结构一致。
+
+### PPC 导入区微调
+
+- 调整 PPC search terms 导入区域布局，为文件上传和粘贴输入列增加更稳定的布局约束。
+- 优化 textarea 显示高度和列宽，减少导入区域在不同 viewport 下的挤压。
+
+## 验证结果
+
+已在本地执行 `npm run build`，完整通过：
+
+- XSS gate：扫描 356 个 `src` 文件，0 findings
+- Circular dependency check：Madge 处理 354 个文件，未发现循环依赖，保留 1 条非阻断 warning
+- Type check：通过
+- ESLint：通过
+- ESLint warning gate：`0/0 warning(s)`
+- Vite production build：通过，Vite v8.0.16，405 modules transformed，构建耗时约 11.47s
+
+## 已知非阻断提示
+
+- 构建仍提示插件耗时较高，主要集中在 terser、asset、CSS 和 CSS post-processing 阶段。
+- `deep-chat` 等少数 chunk 仍超过 300 kB；当前不阻断候选版发布，后续可继续按页面或功能拆包优化。
+- `package.json` 内部包版本字段仍为历史值 `1.0.0`，本次 GitHub 发布版本以 tag/release `v3.0.3-rc.4` 为准。
+
+## [3.0.3-rc.3] - 2026-06-11
+
+> Historical notes imported from GitHub Release `v3.0.3-rc.3` (2026-06-11).
+
+## 版本定位
+
+`v3.0.3-rc.3` 是 `v3.0.3` 的第 3 个候选版本，基于 `v3.0.3-rc.2` 之后的 SOP 作业元信息、动作指标与测试覆盖提交发布，用于验证 SOP 页面从静态流程文档进一步收敛到可记录、可复用、可审计的运营动作体系。
+
+- 发布分支：`main`
+- 目标提交：`285dce80762be2b09104e94a2b1c1d835ca4a7f0`
+- 对比基线：`v3.0.3-rc.2`
+- 变更规模：2 个提交，72 个文件变更，约 5,903 行新增 / 763 行删除
+
+## 关键提交
+
+- `c54c2b9b` Add ops metrics, action owner & roadmap
+- `285dce80` Add SOP action owner coverage
+
+## 详细更新
+
+### SOP 作业负责人和人工确认点
+
+- 为增长、后端、安全、客服等 SOP 页面补齐作业元信息，明确 Owner、更新时间、适用站点、输入、输出和人工确认点。
+- 在多个 SOP 页面增加可复制的复盘、登记、提报或归档模板，减少纯说明型页面带来的执行断点。
+- 将账号安全、权限管理、产品合规、GPSR、品牌侵权、绩效通知、库存补货、采购 QC、FBA 发货、客服邮件、差评处理、QA 维护、竞品监控、促销提报和高危词复盘等页面接入统一的作业动作输出。
+
+### 运营动作指标
+
+- 扩展 `opsMetrics` 指标集合，覆盖更多 SOP 页面模板复制与动作输出。
+- SOP overview 增加更多本地记录卡片，用于展示各类运营动作的次数和最近执行时间。
+- PPC、NPI、Listing SEO 等既有工具动作继续接入本地指标记录，保持 overview 统计口径一致。
+
+### Agent Center 与路线图
+
+- 新增/更新运营系统路线图，记录 SOP 从流程文档走向可执行运营工作台的演进方向。
+- 调整 App Center overview 与 Agent Center 相关入口，增强运营动作与工具入口之间的收敛关系。
+- 更新 README 与文档索引，补充运营系统路线图入口。
+
+### 测试覆盖
+
+- 新增 SOP 元信息守卫测试，要求真实 SOP 页面保持 Owner、输入、输出和人工确认点等关键字段。
+- 新增多组 SOP 页面复制模板测试，覆盖账号安全、品牌侵权、GPSR、库存补货、采购 QC、FBA 发货、客服邮件、差评处理、权限管理、产品合规、促销提报、QA 维护等页面。
+- 扩展 `opsMetrics`、SOP overview、PPC search terms、NPI tracker、Listing SEO 和 restricted words 相关测试，覆盖新增动作指标与模板输出。
+
+## 验证结果
+
+已在本地执行以下验证，均通过：
+
+- `git diff --check`
+- `npx vitest run`
+- `npm run build`
+
+`npm run build` 完整通过：
+
+- XSS gate：扫描 356 个 `src` 文件，0 findings
+- Circular dependency check：Madge 处理 354 个文件，未发现循环依赖，保留 1 条非阻断 warning
+- Type check：通过
+- ESLint：通过
+- ESLint warning gate：`0/0 warning(s)`
+- Vite production build：通过，Vite v8.0.16，405 modules transformed，构建耗时约 9.03s
+
+## 已知非阻断提示
+
+- 构建仍提示插件耗时较高，主要集中在 terser、asset、CSS 和 CSS post-processing 阶段。
+- `deep-chat` 等少数 chunk 仍超过 300 kB；当前不阻断候选版发布，后续可继续按页面或功能拆包优化。
+- `package.json` 内部包版本字段仍为历史值 `1.0.0`，本次 GitHub 发布版本以 tag/release `v3.0.3-rc.3` 为准。
+
+## [3.0.3-rc.2] - 2026-06-10
+
+> Historical notes imported from GitHub Release `v3.0.3-rc.2` (2026-06-10).
+
+## 版本定位
+
+`v3.0.3-rc.2` 是 `v3.0.3` 的第 2 个候选版本，基于 `v3.0.3-rc.1` 之后的 UI/CSS 与可访问性优化提交发布，用于验证 welcome banner 统一、菜单与侧边栏交互、More 探索页体验和视觉设计规范落地。
+
+- 发布分支：`main`
+- 目标提交：`7f6608d018c532e4ccd2cf77a3e37eff31f4081f`
+- 对比基线：`v3.0.3-rc.1`
+- 变更规模：5 个提交，90 个文件变更，约 5,123 行新增 / 6,065 行删除
+
+## 关键提交
+
+- `d4e3166b` Welcome banner: theme vars, animations, a11y
+- `800ea97f` Normalize welcome banners for accessibility
+- `762d55bf` Improve accessibility for menus and sidebar
+- `4b4470b9` Refactor mega menu: accessibility, behavior, styles
+- `7f6608d0` Add visual design guide; UI/CSS & a11y updates
+
+## 详细更新
+
+### Welcome banner 与主题视觉
+
+- 统一 welcome banner 的主题变量、动画表现和可访问性结构。
+- 补齐多模块页面的 banner 语义和交互一致性，覆盖 SOPs、AMZ Hub、App Center、More 等页面模板。
+- 调整卡片、表单、主导航 header、代码高亮和模块样式，降低不同页面之间的视觉割裂。
+- 新增 `welcomeBannerA11y` 工具与测试，集中处理 banner 相关的可访问性行为。
+
+### 菜单、侧边栏与导航可访问性
+
+- 重构 mega menu 的行为、样式和可访问性状态，减少分散样式和交互分支。
+- 改进侧边栏与菜单的键盘导航、状态表达和 ARIA 语义。
+- 更新 navigation、mega menu、SidebarRenderer 和相关类型定义，保持菜单组件之间的交互一致。
+- 为 `ModuleLoader` 补充测试覆盖，验证模块加载相关行为在 UI 调整后仍保持稳定。
+
+### More 探索页与业务页面整理
+
+- 优化 More / Explore 的 prompts 与 workflows 页面结构和样式。
+- 调整 prompt library 数据组织，减少页面模板中的重复内容和样式堆叠。
+- 业务场景页面进一步复用 `casePageRenderer`，移除多个页面中的重复模板结构。
+- 更新 More overview、Agents、Prompts、Workflows 等页面的视觉细节与响应式表现。
+
+### App Center 与工具页面体验
+
+- 优化 Deep Chat playground 的模板、交互入口和页面样式。
+- 调整 PPC search terms、Master Analysis、Scraper、PromptLab 等工具页面的布局与视觉细节。
+- 更新 NPI tracker、promotion submission、restricted words 等 SOP 页面模板，保持 banner 与模块主题一致。
+
+### 文档与设计规范
+
+- 新增 `docs/VISUAL_DESIGN_GUIDELINES.md`，沉淀视觉设计规范。
+- 新增 banner 修复与优化相关文档，记录 medium priority 修复、优化进展和汇总信息。
+- 更新 `docs/INDEX.md` 与 `docs/XSS_SCAN_REPORT.md`，保持文档索引和安全扫描信息同步。
+
+## 验证结果
+
+已在本地执行 `npm run build`，完整通过：
+
+- XSS gate：扫描 355 个 `src` 文件，0 findings
+- Circular dependency check：Madge 处理 353 个文件，未发现循环依赖，保留 1 条非阻断 warning
+- Type check：通过
+- ESLint：通过
+- ESLint warning gate：`0/0 warning(s)`
+- Vite production build：通过，Vite v8.0.16，404 modules transformed，构建耗时约 14.03s
+
+## 已知非阻断提示
+
+- 构建仍提示插件耗时较高，主要集中在 terser、asset、CSS post-processing 和 CSS 阶段。
+- `deep-chat` 等少数 chunk 仍超过 300 kB；当前不阻断候选版发布，后续可继续按页面或功能拆包优化。
+- `package.json` 内部包版本字段仍为历史值 `1.0.0`，本次 GitHub 发布版本以 tag/release `v3.0.3-rc.2` 为准。
+
+## [3.0.3-rc.1] - 2026-06-09
+
+> Historical notes imported from GitHub Release `v3.0.3-rc.1` (2026-06-09).
+
+## 版本定位
+
+`v3.0.3-rc.1` 是 `v3.0.3` 的第 1 个候选版本，替代误发布的 `v3.0.2-rc.1`。本版本基于 `v3.0.2` 之后的 UI 主题优化提交发布，用于验证 overview 页面视觉统一、侧边栏主题变量和模块总览交互细节。
+
+- 发布分支：`main`
+- 目标提交：`410d53f35cc2df46addd2d5a328fc996c31a27b3`
+- 对比基线：`v3.0.2`
+- 变更规模：1 个提交，18 个文件变更，约 974 行新增 / 197 行删除
+- 关键提交：`410d53f3` Polish overview themes and sidebar visuals
+
+## 详细更新
+
+### 侧边栏主题系统
+
+- 为 `SidebarRenderer` 增加按模块主题色解析的 CSS 变量注入能力。
+- 新增 `src/css/components/sidebar-renderer.css`，统一侧边栏 active 状态、图标容器、搜索框 focus、分类 hover 等样式。
+- 引入 `SIDEBAR_THEMES` 主题映射，覆盖 blue、sky、indigo、violet、purple、fuchsia、emerald、teal、green、lime、amber、orange、red、rose、pink、cyan、slate 等主题。
+- 侧边栏复用现有 DOM 时会同步主题 style，避免模块切换后主题色残留。
+- 分类竖线改为从设计 token 取色，减少 Tailwind 动态类无法被构建扫描覆盖的风险。
+
+### 模块 overview 视觉统一
+
+- SOPs、More、AMZ Hub、App Center 四个 overview 页面补充模块级主题样式。
+- welcome banner 图标阴影改为 CSS 变量控制，使不同模块可以注入自己的阴影和主题强调色。
+- AMZ Hub overview 新增独立视觉增强：hero、filter panel、模块 section、卡片网格、状态 badge 和移动端适配。
+- SOPs / More overview 新增模块主题变量、banner 背景、筛选按钮 active/hover 状态和徽章颜色。
+- App Center overview 调整为更统一的紫粉主题，优化流程卡片、应用卡片、筛选工具条、状态徽章和 focus 样式。
+
+### 交互与可访问性细节
+
+- overview 分类筛选按钮增加 `aria-pressed` 状态同步。
+- active 按钮状态由 CSS 类统一接管，减少 inline Tailwind 类堆叠带来的颜色不一致。
+- App Center overview 移除本页搜索过滤逻辑，保留分类筛选，降低复杂度并避免搜索框 UI 与新工具条冲突。
+- More 菜单探索分组主题色从 `lime` 调整为 `teal`，与业务场景和探索内容区的视觉定位更一致。
+
+### 安全扫描报告
+
+- 更新 `docs/XSS_SCAN_REPORT.md`，扫描文件数从 341 更新到 352。
+- 本次发布前重新执行 XSS gate，结果为 0 findings、13 audited skips、0 clear-DOM skips。
+
+## 验证结果
+
+已在本地执行 `npm run build`，完整通过：
+
+- XSS gate：扫描 352 个 `src` 文件，0 findings
+- Circular dependency check：Madge 处理 351 个文件，未发现循环依赖，保留 1 条非阻断 warning
+- Type check：通过
+- ESLint：通过
+- ESLint warning gate：`0/0 warning(s)`
+- Vite production build：通过，Vite v8.0.16，403 modules transformed，构建耗时约 13.57s
+
+## 已知非阻断提示
+
+- 构建仍提示插件耗时较高，主要集中在 terser、asset、CSS 阶段。
+- 部分 chunk 仍超过 300 kB；当前不阻断候选版发布，后续可继续按模块拆包优化。
+- `package.json` 内部包版本字段仍为历史值 `1.0.0`，本次 GitHub 发布版本以 tag/release `v3.0.3-rc.1` 为准。
+
+## [3.0.2] - 2026-06-09
+
+> Historical notes imported from GitHub Release `v3.0.2` (2026-06-09).
+
+## 版本定位
+
+`v3.0.2` 是从 `v3.0.1-rc.4` 之后发布的正式稳定版本，主要补齐业务场景入口、模型能力配置、历史记录管理和首屏加载优化。
+
+- 发布分支：`main`
+- 目标提交：`fb9c4d7f48a47c86ab8daf20890b99fc972889ef`
+- 对比基线：`v3.0.1-rc.4`
+- 变更规模：4 个提交，37 个文件变更，约 3,779 行新增 / 109 行删除
+
+## 关键提交
+
+- `673d4397` Lazy-load non-critical CSS into deferred.css
+- `b1eb8c04` Lazy-load dev libs and update scan time
+- `a4824f1e` Support model context/features and history delete
+- `fb9c4d7f` Add business_scenarios views, menu & styles
+
+## 详细更新
+
+### More / 业务场景页
+
+- 新增 `business_scenarios` 业务场景模块入口，并接入 More 模块菜单与 overview 页面。
+- 新增 5 个业务场景页面：
+  - `usage_notice`：使用须知与场景说明
+  - `review_monitor`：评论监控场景
+  - `ad_acos_diagnosis`：广告 ACOS 诊断场景
+  - `amazon_daily_report`：Amazon 日报场景
+  - `bad_review_response`：差评回复场景
+- 新增 `casePageRenderer`，统一业务场景页的渲染结构、内容区块、操作入口和页面组织方式。
+- 新增/扩展 `more_style.css`，补充业务场景页需要的布局、卡片、表单、提示区和响应式样式。
+- 更新 `menuConfig`、`module.loaders.ts`、`module.manifest.ts`，确保新页面可以通过现有模块加载与导航体系访问。
+
+### 模型配置与系统设置
+
+- 扩展模型配置常量与类型定义，支持模型 context、features 等元数据。
+- 更新系统设置面板的模型展示与配置逻辑，增强模型能力信息在 UI 中的表达。
+- 更新 `llmService` 对模型元数据的读取和测试覆盖，降低模型配置变化时的回归风险。
+- 新增 `providerModels.test.ts` 与 `systemSettingsModelMetadata.test.ts`，覆盖 provider/model 元数据、系统设置展示和能力字段。
+
+### Scraper 历史记录管理
+
+- 为 Master Analysis / Scraper 历史记录补充删除能力。
+- 更新 `HistoryPanel`、`ScraperPanel` 和 scraper template，提供历史项删除入口和状态同步。
+- 扩展 `historyService`，补充删除逻辑及对应单元测试。
+- 更新相关状态类型，保证历史记录删除与现有数据结构一致。
+
+### 加载性能与资源组织
+
+- 将非关键 CSS 拆入 `src/css/deferred.css`，减少主样式包压力。
+- 更新 `main.ts`，延迟加载非关键样式和开发辅助库。
+- 调整 `homeDisplay.css` 与 `main.css`，把不必阻塞首屏的样式移出主链路。
+- 优化开发工具库加载路径，避免不必要的初始加载开销。
+
+### 安全扫描与质量验证
+
+- 本地执行 `npm run build` 已完整通过。
+- XSS gate：扫描 352 个 `src` 文件，0 findings，13 audited skips，0 clear-DOM skips。
+- Circular dependency check：Madge 处理 350 个文件，未发现循环依赖，保留 1 条非阻断 warning。
+- Type check：通过。
+- ESLint：通过。
+- ESLint warning gate：`0/0 warning(s)`。
+- Vite production build：通过，Vite v8.0.16，构建耗时约 11.67s。
+
+## 已知非阻断提示
+
+- 构建仍提示部分插件耗时较高，主要集中在 terser、CSS post-processing 和 asset 阶段。
+- `deep-chat` 等少数 chunk 仍超过 300 kB；当前不阻断发布，后续可继续按页面或功能拆包优化。
+- `package.json` 内部包版本字段仍为历史值 `1.0.0`，本次 GitHub 发布版本以 tag/release `v3.0.2` 为准。
+
+## [3.0.1-alpha.2] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v3.0.1-alpha.2` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-07
+Target commit：`829b42f15fbd71a45272edd1dab3e58d6a94b3d6`
+
+PPC Search Terms Analyzer 首次进入应用中心。
+
+关键 commit：`829b42f1` feat(app-center): add PPC search terms analyzer。
+
+## Cloudflare Pages 对照
+
+Cloudflare Pages `sops` recent deployment source observed: `829b42f`.
+
+## [3.0.1-alpha.1] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v3.0.1-alpha.1` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-07
+Target commit：`7d0fd7f36d3c51682d716f0cc4783000e72d1584`
+
+v3.0.1 候选线的第一个 alpha，补入 onboarding checklist 和 UI tweaks。
+
+关键 commit：`7d0fd7f3` Add onboarding checklists and UI tweaks。
+
+## Cloudflare Pages 对照
+
+Cloudflare Pages `sops` recent deployment source observed: `7d0fd7f`.
+
+## [3.0.1-beta.1] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v3.0.1-beta.1` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-08
+Target commit：`c2c18453b0b3a25b7511d3abf89e2b002f749ab5`
+
+v3.0.1 beta 节点，完成 welcome banner 样式重做和 UI polish。
+
+关键 commit：`c2c18453` Revamp welcome banner styles and UI polish。
+
+## Cloudflare Pages 对照
+
+Cloudflare Pages `sops` recent deployment source observed: `c2c1845`; this was the latest observed Cloudflare deployment during this audit.
+
+## [3.0.1-rc.4] - 2026-06-09
+
+> Historical notes imported from GitHub Release `v3.0.1-rc.4` (2026-06-09).
+
+## 版本定位
+
+`v3.0.1-rc.4` 是 `v3.0.1` 的第 4 个候选版本，定位为进入正式版前的稳定性、构建链路和质量基线强化版本。
+
+- 发布分支：`main`
+- 目标提交：`045cd3224ff39cdc3cd43d7996adebce0796c468`
+- 对比基线：`v3.0.1-rc.3`
+- 变更规模：9 个提交，234 个文件变更，约 18,570 行新增 / 14,441 行删除
+
+## 关键提交
+
+- `12536688` Tech-debt audit, CSS analysis, replace xlsx
+- `669a716c` Upgrade Vite/Vitest/esbuild & update docs/tests
+- `9a234ec4` Reduce ESLint baseline and add safe rendering
+- `a8f7c284` Update ESLint baseline, add tests & docs edits
+- `85e960f6` Refactor preview extractor and product card
+- `f17872a4` Refactor analysis services/adapters; add modal close
+- `fc8f22cf` Refactor report generator & LLM API; add tests
+- `11f723d5` Refactor logging, errors, and core service setup
+- `045cd322` Quiet logs, enhance EventBus, update Vite config
+
+## 详细更新
+
+### 构建链路与依赖
+
+- 升级前端构建与测试工具链：Vite `^8.0.16`、Vitest `^4.1.8`、esbuild `^0.27.3`。
+- 更新根级 `vite.config.js` 与 `config/vite.config.js`，同步构建配置、开发服务器和产物配置。
+- 调整 `package-lock.json` 与依赖树，减少历史依赖负担，并替换高风险/维护成本较高的表格处理依赖路径。
+- 新增/更新 `public/_headers`，补充静态发布环境相关响应头配置。
+
+### 质量基线、安全扫描与审计文档
+
+- 将 ESLint warning baseline 进一步压降到 `0/0 warning(s)`，把 warning gate 固化为发布阻断项。
+- 更新 XSS 扫描报告与质量检查脚本，本轮扫描范围为 `src/` 下 341 个文件，结果为 0 命中。
+- 增补技术债审计、CSS module 分析、UI/UX 视觉审计和修复 backlog 文档，方便后续正式版前继续跟踪风险。
+- 调整 `.gitignore` 与质量脚本输出管理，避免临时审计产物和构建副作用污染发布内容。
+
+### 安全渲染与模块加载
+
+- 强化 `SafeModuleLoader`、`SafeRenderer`、`BaseModule`、`StandardModule` 相关安全渲染路径。
+- 拆分并补充 `module.loaders.ts`，替代旧的 manifest 聚合方式，降低模块加载耦合。
+- 更新导航、搜索、sidebar、overview、modal、loading 等公共 UI 初始化与挂载流程，减少直接 DOM 注入和不安全渲染入口。
+- 补充 `safeMount`、`security`、`xssFixer` 相关调整，与 XSS gate 保持一致。
+
+### Core services、事件与日志
+
+- 重构 core service bootstrap、DI service registry、错误模型和全局错误处理路径。
+- 增强 `EventBus` 行为和单元测试覆盖，改善事件订阅、派发和清理逻辑。
+- 收敛 logger、errorService、monitoring、performance、web vitals 等运行期服务日志噪声，减少开发和生产环境无效输出。
+- 更新 HTTP、缓存、存储、LLM timeout、本地数据存储等服务的边界处理与测试覆盖。
+
+### Master Analysis、PromptLab 与数据处理
+
+- 重构 Master Analysis 相关 analysis services/adapters，覆盖 full analysis、competitor report、product overview、semantic analysis 等适配路径。
+- 更新 report generator 与 LLM API 调用链，补充报告生成和 AI analysis service 单元测试。
+- 优化 PromptLab preview extractor、report renderer、product card 与 prompt actions，提升预览抽取和报告展示稳定性。
+- 调整 scraper import handler、data operations、renderers、validators、history panel 和 data preview，补充文件导入读取、处理和回归测试。
+- 更新 PPC search terms、NPI tracker、restricted words 等业务模块的渲染、数据处理与测试。
+
+### UI 与交互稳定性
+
+- 修复/增强 `AppModal` 关闭行为并补充 regression test。
+- 更新 skeleton loader、navigation animation、button ripple、modal animation、settings panel 等通用交互组件。
+- 增补 PerformanceSettings、promo tools、scraper modal、parser service、ParamParser 等测试，覆盖更多用户路径和边界行为。
+
+## 验证结果
+
+已在本地执行 `npm run build`，完整通过：
+
+- XSS gate：341 个文件，0 findings，13 audited skips，0 clear-DOM skips
+- Circular dependency check：通过，Madge 处理 343 个文件，保留 1 条非阻断 warning
+- Type check：通过
+- ESLint：通过
+- ESLint warning gate：`0/0 warning(s)`
+- Vite production build：通过，Vite v8.0.16，构建耗时约 11.46s
+
+## 已知非阻断提示
+
+- Vite 构建仍存在部分插件耗时提示。
+- 部分 chunk 超过 300 kB，当前未作为发布阻断项；后续可继续拆包或按页面级懒加载优化。
+- Madge 保留 1 条 warning，本轮没有发现阻断发布的循环依赖问题。
+
+## [3.0.1-rc.3] - 2026-06-08
+
+> Historical notes imported from GitHub Release `v3.0.1-rc.3` (2026-06-08).
+
+## 版本定位
+
+`v3.0.1-rc.3` 是 `v3.0.1` 的第三个候选版本，基于 `v3.0.1-rc.2` 继续补充运行时版本标识、视图缓存版本化、Scraper UI、持久化修复，以及 AMZ Hub 官方数据指导内容。
+
+Release 指向提交：`c30fbc6ea96ad4262f231a8fd39a72473a952b95`。
+
+## 新增提交
+
+- `13f614ff` Add runtime app version & view cache versioning
+- `13f04743` Update scraper UI, store persistence and tests
+- `c30fbc6e` Expand AMZ Hub official-data guidance
+
+## 主要变化
+
+- 增加运行时 app version 信息，便于版本识别和排查。
+- 增加 view cache versioning，降低旧视图缓存影响新版本的风险。
+- 更新 scraper UI 和 store persistence 相关逻辑。
+- 补充/更新对应测试。
+- 扩展 AMZ Hub 知识页内容：EU Insights 与 SEO Strategy 增加 Amazon 官方数据入口、SEO/本地化执行框架、周度运营闭环和官方参考链接。
+
+## 验证状态
+
+`npm run build` 已通过。
+
+通过项包括：
+- XSS gate
+- 循环依赖检查
+- TypeScript type-check
+- ESLint 本体检查
+- ESLint warning gate
+- Vite build
+
+保留既有非阻断 warning：Madge warning、ESLint baseline 内 warning、Vite chunk size / dynamic import warning。
+
+## 说明
+
+这是 prerelease，用于 rc.3 验收与部署前回归。此 release 的 tag 已从原 `13f04743` 更新到 `c30fbc6e`，以包含本次补充提交。
+
+## [3.0.1-rc.2] - 2026-06-08
+
+> Historical notes imported from GitHub Release `v3.0.1-rc.2` (2026-06-08).
+
+## 版本定位
+
+`v3.0.1-rc.2` 是 `v3.0.1` 的第二个候选版本，使用正确的 prerelease 版本号格式，替代此前误命名的 `v3.0.1-rc2`。
+
+Release 指向提交：`5335215ed58e1db09ff1e41cd5bbcbb5ab844554`。
+
+## 新增提交
+
+- `797a7afd` Add ERP campaign report type & XLSX import
+- `b9826869` Add PPC Agent flow and reviewed UI
+- `dc8a38d0` Support ERP search-term reports; update Agent Center
+- `5335215e` Fix PPC search terms warning gate
+
+## 主要变化
+
+- 增加 ERP campaign 报告类型识别和 XLSX 导入能力。
+- 增加 PPC Agent 流程与 reviewed UI 状态。
+- 支持 ERP search-term reports，并更新 Agent Center 入口与展示。
+- 拆分 PPC 搜索词分析中的复杂逻辑，修复 ESLint warning gate 失败。
+
+## 验证状态
+
+`npm run build` 已通过。
+
+通过项包括：
+- XSS gate
+- 循环依赖检查
+- TypeScript type-check
+- ESLint 本体检查
+- ESLint warning gate
+- Vite build
+
+保留既有非阻断 warning：Madge warning、ESLint baseline 内 warning、Vite chunk size / dynamic import warning。
+
+## 说明
+
+这是 prerelease，用于 rc.2 验收与部署前回归。此前错误命名的 `v3.0.1-rc2` 不再作为推荐版本使用。
+
+## [3.0.1-rc] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v3.0.1-rc` (2026-06-07).
+
+## 版本定位
+
+`v3.0.1-rc` 是当前 `main` 分支的候选发布版本，用于主线验收、Cloudflare Pages 部署前回归和后续稳定版整理。本次仅补齐 GitHub release/tag 元数据，未修改 `package.json` 的包版本。
+
+Release 指向提交：`11d2c78b17c38c015328a04d48035eacae93753e`。
+
+## 主线审计结论
+
+- `main` 工作区干净，并与远端 `sops/main` 同步。
+- 当前仓库此前没有 GitHub release 或 version tag。
+- `npm run build` 已通过：XSS gate、循环依赖检查、type-check、lint warning gate、Vite build 均完成。
+- 保留既有 warning：ESLint warning baseline、Madge warning、Vite chunk size / dynamic import warning，未阻断本次 rc 发布。
+
+## 关键提交节点
+
+### 业务与 AI 功能
+
+- `11d2c78b` Integrate LLM analysis for PPC search terms
+- `829b42f1` feat(app-center): add PPC search terms analyzer
+- `b24d4441` Improve deep-chat empty state and layout
+- `fdae3252` Extract deep-chat conversation context & add tests
+- `422a9904` Add Playground module to App Center
+- `8dc0a07d` Promptlab: add reports, UI/service updates, tests
+- `c60f5050` Add granular 3-level report selection UI
+- `f5cbd6c0` feat: AI 智能分析性能优化 - 并行分析引擎
+- `2ee7ea97` feat: 实现产品DNA自动提取功能
+
+### 架构、安全与质量
+
+- `028ff66a` Replace innerHTML with safe mount + retry UI
+- `734d70f1` Refactor ModuleLoader; add Alpine lifecycle & tests
+- `d6d511df` Add CI quality gate, ESLint XSS rules and docs
+- `f621b8cb` Add XSS scan report & scanner; adjust lint and UI
+- `f16010f4` Migrate to @alpinejs/csp and remove user guide
+- `b8408d3f` Introduce LocalDataStore and async storage
+- `d02f6c35` feat: 完成路由系统迁移至 Navigo (Week 1-5)
+- `9b978a27` Merge: 架构债务消除 - 统一错误处理和存储访问
+- `a604de15` 代码质量改进和 CSS 设计令牌迁移 (#28)
+
+### 云部署与网关
+
+- `4a4720b7` Fix CSS build and API authentication for Cloudflare Pages
+- `af3b29df` ci: add cloudflare pages deploy workflow
+- `52f4836a` feat: implement gateway auto-discovery system
+- `f8bbadf6` feat: switch to optimized gateway APIs
+- `c8f5cc94` feat: integrate frontend gateway service
+- `8576ff29` Add ChatAnywhere support & CF env deploy script
+- `0e465322` Add CB (cb2api) provider and endpoint
+
+### 产品内容与体验
+
+- `c2c18453` Revamp welcome banner styles and UI polish
+- `ca66b303` refactor: 重构 welcome banner 配色方案，提升可读性和无障碍性
+- `fc54a25c` feat(sops): 添加欧洲GPSR合规SOP模块
+- `c3ea6cbf` 新增'新品30天极速突围'页面
+- `f63e3bb5` Add Keyword Index Check panel to SEO template
+- `26d01e73` Add dual-page guide UI to promo pages
+
+## Release 说明
+
+- 当前版本定位为 Release Candidate，适合验收、演示和部署前回归，不直接作为长期稳定基线。
+- 下一步稳定版建议在确认既有 warning 风险后发布 `v3.0.1`。
+## Cloudflare Pages 对照
+
+Cloudflare Pages 项目核对：未发现 `spos` 项目，实际项目为 `sops`，域名包括 `sops-3js.pages.dev` 和 `sops.hongecb.store`。最近生产部署 source 覆盖 `f16010f`、`f621b8c`、`3f778dd`、`734d70f`、`625f6d2`、`7d0fd7f`、`829b42f`、`c2c1845` 等节点。
+
+审计时最新 Cloudflare Pages 部署 source 为 `c2c1845`，对应 `v3.0.1-beta.1`。`v3.0.1-rc` tag 指向 `11d2c78b17c38c015328a04d48035eacae93753e`，该提交已作为 GitHub release candidate 标记，但未在 Wrangler 最近部署列表中观察到对应生产部署记录。
+
+## [3.0.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v3.0.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-07  
+Target commit：`625f6d2e8f3865b2b81969313248d5720f99a352`
+
+`v3.0.0` 标记 CSP 迁移、安全扫描、CI 质量门禁、LocalDataStore 和 ModuleLoader 生命周期进入新的安全与架构基线。后续 `v3.0.1-rc` 在此基础上加入 PPC 搜索词分析和 LLM 分析集成。
+
+## 关键提交
+
+- `b8408d3f` Introduce LocalDataStore and async storage
+- `f16010f4` Migrate to @alpinejs/csp and remove user guide
+- `f621b8cb` Add XSS scan report & scanner; adjust lint and UI
+- `d6d511df` Add CI quality gate, ESLint XSS rules and docs
+- `734d70f1` Refactor ModuleLoader; add Alpine lifecycle & tests
+- `028ff66a` Replace innerHTML with safe mount + retry UI
+- `625f6d2e` Refactor module manifests and CI workflows
+
+## [2.7.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.7.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-07
+Target commit：`734d70f1deb99a6530cf8a450efadf7490bfebab`
+
+ModuleLoader、Alpine 生命周期和相关测试进入新的运行时加载基线。
+
+关键 commit：`734d70f1` Refactor ModuleLoader; add Alpine lifecycle & tests。
+
+## Cloudflare Pages 对照
+
+Cloudflare Pages `sops` recent deployment source observed: `734d70f`.
+
+## [2.6.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.6.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-07
+Target commit：`3f778dde63c3d5b8f330ed3360b68e5055e038e1`
+
+补齐 ESLint warning baseline 和 CI gate，使质量门禁可以稳定执行。
+
+关键 commit：`d6d511df` CI quality gate；`3f778dde` Add ESLint warning baseline and CI gate。
+
+## Cloudflare Pages 对照
+
+Cloudflare Pages `sops` recent deployment source observed: `3f778dd`.
+
+## [2.5.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.5.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-06
+Target commit：`f621b8cb62e1289fd57df2af8890057fc198e62e`
+
+新增 XSS 扫描报告与扫描器，安全审计开始进入可自动化门禁。
+
+关键 commit：`f621b8cb` Add XSS scan report & scanner; adjust lint and UI。
+
+## Cloudflare Pages 对照
+
+Cloudflare Pages `sops` recent deployment source observed: `f621b8c`.
+
+## [2.4.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.4.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-05
+Target commit：`f16010f410bfc0188276152ed87ec07a0c1d8210`
+
+迁移到 @alpinejs/csp，移除用户指南，进入 CSP 安全收敛阶段。
+
+关键 commit：`f16010f4` Migrate to @alpinejs/csp and remove user guide。
+
+## Cloudflare Pages 对照
+
+Cloudflare Pages `sops` recent deployment source observed: `f16010f`.
+
+## [2.3.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.3.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-06-05
+Target commit：`b8408d3fed75b62b0340c7d2e05d4c0a68016c18`
+
+引入 LocalDataStore 和异步存储能力，为后续 CSP、安全与模块加载收敛铺底。
+
+关键 commit：`b8408d3f` Introduce LocalDataStore and async storage。
+
+## [2.2.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.2.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-05-20  
+Target commit：`b24d44418c02483479615961d09f177ac12e8cb4`
+
+`v2.2.0` 标记 Deep Chat 从 Playground 演进为应用中心能力，并补齐线程上下文、消息工具和空状态体验。
+
+## 关键提交
+
+- `422a9904` Add Playground module to App Center
+- `8a67d325` Rename Playground to Deep Chat; routes & thread store
+- `b4bab6bb` Use Deep Chat playground with message tools
+- `fe454b7d` Merge thread history with request messages
+- `fdae3252` Extract deep-chat conversation context & add tests
+- `b24d4441` Improve deep-chat empty state and layout
+
+## [2.1.3] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.1.3` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-05-20
+Target commit：`fdae32527a347a81235d2e0194ae90c8568b85dd`
+
+Deep Chat 线程历史合并、上下文抽取和测试补齐。
+
+关键 commit：`fe454b7d` Merge thread history with request messages；`fdae3252` Extract deep-chat conversation context & add tests。
+
+## [2.1.2] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.1.2` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-05-20
+Target commit：`8a67d325f8696951e514717abca119801048badc`
+
+Playground 重命名为 Deep Chat，并补齐路由和线程存储。
+
+关键 commit：`8a67d325` Rename Playground to Deep Chat; routes & thread store；`b4bab6bb` message tools。
+
+## [2.1.1] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.1.1` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-05-20
+Target commit：`422a9904de03b6a9d59472f826869db4afe1e690`
+
+应用中心新增 Playground 模块，作为 Deep Chat 演进的起点。
+
+关键 commit：`422a9904` Add Playground module to App Center。
+
+## [2.1.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.1.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-05-01  
+Target commit：`11c5d41b2ff3752dcc6f271194a9b5844589e634`
+
+`v2.1.0` 标记 PromptLab 报告能力、历史处理、构建路径和 NEW API 模型配置的一组增量稳定更新。
+
+## 关键提交
+
+- `afb1d2a8` Cleanup docs, tools, and remove backups
+- `094829da` Remove CPA gateway and update gateway examples
+- `d735baa4` Improve history handling and increase limit to 50
+- `ab06e385` Add timing headers & fix build script paths
+- `8dc0a07d` Promptlab: add reports, UI/service updates, tests
+- `11c5d41b` Update NEW API models, env, and docs
+
+## [2.0.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v2.0.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-04-17  
+Target commit：`9f143cf7967025dd4d551b665b7cbf77e8b07649`
+
+`v2.0.0` 标记项目文档重构、LLM 网关优化、安全凭据清理和 Master Analysis 范围收敛后的主版本基线。
+
+## 关键提交
+
+- `ed5ac629` Docs overhaul, changelog added, project renamed
+- `52f4836a` feat: implement gateway auto-discovery system
+- `f8bbadf6` feat: switch to optimized gateway APIs
+- `c8f5cc94` feat: integrate frontend gateway service
+- `baa21809` security: remove hardcoded password from wrangler.toml
+- `e714566e` security: remove all hardcoded credentials from documentation
+- `c60f5050` Add granular 3-level report selection UI
+- `9f143cf7` refactor: remove Q&A预研 (QALab) module from Master Analysis
+
+## [1.4.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v1.4.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-04-15
+Target commit：`4a4720b75820f78ddb7715aa011f6d2b51aeeb52`
+
+完成 legacy gateway 替换后的 Cloudflare Pages CSS 构建和 API 认证修复。
+
+关键 commit：`c6d6f9c1` Replace legacy gateways with new_api and cpa；`4a4720b7` Fix CSS build and API authentication for Cloudflare Pages。
+
+## [1.3.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v1.3.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-03-29
+Target commit：`8576ff29158fb86ed1d63910695ad13b4b6a8b9b`
+
+补入 ChatAnywhere 支持，并加入 Cloudflare env 部署脚本。
+
+关键 commit：`8576ff29` Add ChatAnywhere support & CF env deploy script；`a546152f` Centralize CORS headers。
+
+## [1.2.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v1.2.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-03-28
+Target commit：`3f576833da743a097d5fb105efd337328d3989e0`
+
+LLM 网关开始多 provider、多路由和 AUTH_PASSWORD 检查的基础演进。
+
+关键 commit：`0e465322` CB provider；`3f576833` multi-gateway routing and AUTH_PASSWORD checks。
+
+## [1.1.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v1.1.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-03-24  
+Target commit：`04b58fd8472b3b8dbcbd8f6a6cb36e44936d7992`
+
+`v1.1.0` 标记 Cloudflare Pages CI/构建链路修复完成，并补入 SEO Keyword Index Check 能力。
+
+## 关键提交
+
+- `f63e3bb5` Add Keyword Index Check panel to SEO template
+- `af3b29df` ci: add cloudflare pages deploy workflow
+- `345943dd` build: fix vite alias resolution for pages
+- `46cb1a27` build: make vite aliases explicit for pages
+- `d5088be5` fix(pages): preserve static asset routes
+- `04b58fd8` fix(build): resolve tailwind scan paths for pages
+
+## [1.0.1] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v1.0.1` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-03-24
+Target commit：`f63e3bb5796777f5e81c19fee64fc2e9086c2f23`
+
+在 SEO 模板中补入 Keyword Index Check panel，作为 v1.1 部署基线前的功能补丁。
+
+关键 commit：`f63e3bb5` Add Keyword Index Check panel to SEO template。
+
+## [1.0.0] - 2026-06-07
 
 ### Added
 - 完整的设计令牌系统
@@ -598,7 +1663,129 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 完成事件机制迁移（56%）
 - 架构债务整体完成率：79%
 
-## [0.1.0] - 2025-12-01
+## [0.9.6] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v0.9.6` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-03-18
+Target commit：`256c0f86f46dd7dd0a3da03bbacb6b0b50dd1926`
+
+欢迎横幅视觉、可读性和无障碍配色完成阶段性升级。
+
+关键 commit：`ca66b303` welcome banner 配色重构；`256c0f86` 合并 branch3-17welcome。
+
+## [0.9.5] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v0.9.5` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-03-14
+Target commit：`dbb8516df43a58a947945ea9f1fcc76bde2beb66`
+
+完成错误处理、存储访问、事件机制和动画生命周期的一组架构债务收敛。
+
+关键 commit：`9b978a27` 架构债务消除；`dbb8516d` 动画系统事件机制配对修复。
+
+## [0.9.4] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v0.9.4` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-03-13
+Target commit：`2ce494ac40d71579ba71733870332015f919e436`
+
+AI 智能分析进入并行分析引擎阶段，并补充交付文档。
+
+关键 commit：`f5cbd6c0` 并行分析引擎；`2ce494ac` 合并 branch3-13。
+
+## [0.9.3] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v0.9.3` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-03-07
+Target commit：`467121e4fa77e02d76a0c764b03f951f874ef573`
+
+产品 DNA 提取器完成技术债务修复、路径别名补齐和单元测试补充。
+
+关键 commit：`467121e4` Merge branch3-6 - DNA 提取器技术债务修复完成。
+
+## [0.9.2] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v0.9.2` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-03-06
+Target commit：`a604de1508871da37e7ff4904048fbba2665c3d1`
+
+补齐代码质量改进和 CSS 设计令牌迁移，为后续架构基线收敛做准备。
+
+关键 commit：`a604de15` 代码质量改进和 CSS 设计令牌迁移 (#28)。
+
+## [0.9.1] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v0.9.1` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-02-28
+Target commit：`6959c6df1affffb194d5d44e4886207c67c1ea86`
+
+集中修复前端显示、加载动画、QALab 样式和操作按钮问题。
+
+关键 commit：`6959c6df` 合并 branch2-28，覆盖页面显示和 Q&A 预研体验修复。
+
+## [0.9.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v0.9.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-02-21  
+Target commit：`0e55dc2128048d766c5347b1fc4e6456fd2d7182`
+
+`v0.9.0` 标记早期生产可用性修复、测试基础设施和 PromptLab 容器污染修复后的候选稳定基线。
+
+## 关键提交
+
+- `68bd0d0d` Merge branch 'feature/data-collection-integration'
+- `19e382c8` Merge branch2-21: 修复生产环境页面显示问题
+- `27b03dc3` feat: 系统稳定性优化 - 添加测试框架和基础设施改进
+- `0e55dc21` Merge branch2-21: 修复Promptlab默认勾选和容器污染问题
+
+## [0.8.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v0.8.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-02-18
+Target commit：`68bd0d0d3f91f0347413c8454e42f4633f7f21c3`
+
+合并数据采集集成分支，进入 v0.9 生产稳定化之前的功能集成节点。
+
+关键 commit：`68bd0d0d` Merge branch feature/data-collection-integration。
+
+## [0.2.0] - 2026-06-07
+
+> Historical notes imported from GitHub Release `v0.2.0` (2026-06-07).
+
+## 历史版本定位
+
+历史日期：2026-01-22
+Target commit：`68ca6cadb0f58488d5b1504bace844087e826890`
+
+合并早期 branch1-21 主线工作，作为一月迭代后的可追溯节点。
+
+关键 commit：`68ca6cad` Merge pull request #8 from earshore/branch1-21。
+
+## [0.1.0] - 2026-06-07
 
 ### Added
 - 初始项目结构
