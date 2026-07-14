@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { QualityMonitor, type MonitorConfig } from '../../tools/quality-monitor';
 
 const config: MonitorConfig = {
@@ -195,5 +198,62 @@ describe('QualityMonitor measured results', () => {
 
     expect(report.passed).toBe(false);
     expect(monitor.shouldBlockBuild(report)).toBe(false);
+  });
+});
+
+describe('QualityMonitor trend output', () => {
+  it('shows each complexity point as its violation count above its stored threshold', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'quality-monitor-trend-'));
+    const historyFile = join(tempDir, 'history.json');
+    const outputFile = join(tempDir, 'trend.html');
+    const baseMetrics = {
+      timestamp: '2026-07-14T00:00:00.000Z',
+      duplication: { percentage: 0, lines: 0, tokens: 0, files: 1 },
+      coverage: { lines: 84, statements: 82, functions: 84, branches: 68 },
+      typeCoverage: { percentage: 99, total: 100, covered: 99, uncovered: 1 },
+      lintErrors: 0,
+      lintWarnings: 0,
+    };
+
+    try {
+      writeFileSync(
+        historyFile,
+        JSON.stringify([
+          {
+            date: '2026-07-13',
+            metrics: { ...baseMetrics, complexity: { threshold: 10, violations: [] } },
+          },
+          {
+            date: '2026-07-14',
+            metrics: {
+              ...baseMetrics,
+              complexity: {
+                threshold: 12,
+                violations: [
+                  {
+                    cyclomatic: 13,
+                    cognitive: 0,
+                    file: 'src/example.ts',
+                    function: 'example',
+                    line: 1,
+                  },
+                ],
+              },
+            },
+          },
+        ]),
+        'utf8'
+      );
+      const monitor = new QualityMonitor({ ...config, historyFile });
+
+      monitor.generateTrendChart(outputFile);
+
+      const html = readFileSync(outputFile, 'utf8');
+      expect(html).toContain('0 violations above 10');
+      expect(html).toContain('1 violations above 12');
+      expect(html).toContain('complexityLabels[context.dataIndex]');
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 });

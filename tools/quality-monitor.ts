@@ -1231,6 +1231,10 @@ ${this.renderViolations(report)}
     return {
       dates: history.map(h => h.date),
       complexityData: history.map(h => h.metrics.complexity.violations.length),
+      complexityLabels: history.map(
+        h =>
+          `${h.metrics.complexity.violations.length} violations above ${h.metrics.complexity.threshold}`
+      ),
       duplicationData: history.map(h => h.metrics.duplication.percentage),
       coverageData: history.map(h => h.metrics.coverage.lines),
       typeCoverageData: history.map(h => h.metrics.typeCoverage.percentage)
@@ -1289,12 +1293,17 @@ ${this.renderViolations(report)}
 `;
   }
 
-  private renderChartOptions(includePercentScale: boolean): string {
+  private renderChartOptions(includePercentScale: boolean, tooltipLabels?: string): string {
     return `{
         responsive: true,
         maintainAspectRatio: true,
         plugins: {
-          legend: { display: true }
+          legend: { display: true }${tooltipLabels ? `,
+          tooltip: {
+            callbacks: {
+              label: context => ${tooltipLabels}[context.dataIndex]
+            }
+          }` : ''}
         }${includePercentScale ? `,
         scales: {
           y: {
@@ -1312,7 +1321,8 @@ ${this.renderViolations(report)}
     data: number[],
     borderColor: string,
     backgroundColor: string,
-    includePercentScale = false
+    includePercentScale = false,
+    tooltipLabels?: string
   ): string {
     return `
     // ${comment}
@@ -1328,7 +1338,7 @@ ${this.renderViolations(report)}
           tension: 0.4
         }]
       },
-      options: ${this.renderChartOptions(includePercentScale)}
+      options: ${this.renderChartOptions(includePercentScale, tooltipLabels)}
     });
 `;
   }
@@ -1339,13 +1349,16 @@ ${this.renderViolations(report)}
     return `
   <script>
     const dates = ${JSON.stringify(data.dates)};
+    const complexityLabels = ${JSON.stringify(data.complexityLabels)};
     ${this.renderLineChartScript(
       '复杂度图表',
       'complexityChart',
       '复杂度违规数',
       data.complexityData,
       '#3b82f6',
-      'rgba(59, 130, 246, 0.1)'
+      'rgba(59, 130, 246, 0.1)',
+      false,
+      'complexityLabels'
     )}
     ${this.renderLineChartScript(
       '重复率图表',
