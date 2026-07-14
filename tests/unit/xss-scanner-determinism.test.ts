@@ -25,10 +25,13 @@ describe('xss-scanner report', () => {
         const result = spawnSync(process.execPath, [join(scannerDirectory, 'xss-scanner.js')], {
           cwd: projectRoot,
           encoding: 'utf8',
+          timeout: 30_000,
+          killSignal: 'SIGKILL',
         });
 
         expect(result.error).toBeUndefined();
         expect(result.status, result.stderr).toBe(0);
+        expect(result.signal).toBeNull();
         return readFileSync(reportPath, 'utf8');
       };
 
