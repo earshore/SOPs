@@ -58,10 +58,26 @@ export function validateStaticArtifact(root: string): string[] {
       );
     }
   }
+  if (
+    rules.length !== REQUIRED_REDIRECTS.length ||
+    rules.some((rule, index) => JSON.stringify(rule) !== JSON.stringify(REQUIRED_REDIRECTS[index]))
+  ) {
+    errors.push('redirect declarations must exactly match required order');
+  }
   if (rules.some(rule => rule.status === 200 && rule.destination === '/index.html')) {
     errors.push('clean routes must not rewrite to index.html with status 200');
   }
-  if (/\/assets\/\*[\s\S]*?immutable/i.test(headersText)) {
+  const assetsHeaders: string[] = [];
+  let inAssetsBlock = false;
+  for (const line of headersText.split(/\r?\n/)) {
+    if (line.trim().length === 0) continue;
+    if (!/^\s/.test(line)) {
+      inAssetsBlock = line.trim() === '/assets/*';
+    } else if (inAssetsBlock) {
+      assetsHeaders.push(line.trim());
+    }
+  }
+  if (assetsHeaders.some(header => /\bimmutable\b/i.test(header))) {
     errors.push('/assets/* must not apply immutable caching to missing resources');
   }
   if (/\/\*\.(?:js|mjs|ts|css)/i.test(headersText)) {

@@ -1,14 +1,17 @@
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
   parseRedirectRules,
   validateStaticArtifact,
 } from '../../scripts/release/static-artifact-contract';
 
+const artifactRoots: string[] = [];
+
 function makeArtifact(): string {
   const root = mkdtempSync(join(tmpdir(), 'sops-static-contract-'));
+  artifactRoots.push(root);
   mkdirSync(join(root, 'assets'));
   writeFileSync(join(root, 'index.html'), '<!doctype html><title>SOPs</title>');
   writeFileSync(join(root, '404.html'), '<!doctype html><title>Not Found</title>');
@@ -34,6 +37,11 @@ function makeArtifact(): string {
   return root;
 }
 
+afterEach(() => {
+  for (const root of artifactRoots) rmSync(root, { recursive: true, force: true });
+  artifactRoots.length = 0;
+});
+
 describe('static artifact contract', () => {
   it('parses redirect source, destination, and status', () => {
     expect(parseRedirectRules('/home /#/home 302\n')).toEqual([
@@ -43,6 +51,34 @@ describe('static artifact contract', () => {
 
   it('accepts a standalone 404 and safe redirect/header declarations', () => {
     expect(validateStaticArtifact(makeArtifact())).toEqual([]);
+  });
+
+  it('rejects redirect rules that shadow the required sequence', () => {
+    const root = makeArtifact();
+    const redirectsPath = join(root, '_redirects');
+    writeFileSync(redirectsPath, `/home /wrong 301\n${readFileSync(redirectsPath, 'utf8')}`);
+
+    expect(validateStaticArtifact(root)).toContain(
+      'redirect declarations must exactly match required order'
+    );
+  });
+
+  it('scopes immutable caching checks to the assets header block', () => {
+    const root = makeArtifact();
+    writeFileSync(
+      join(root, '_headers'),
+      [
+        '/assets/*',
+        '  Cache-Control: public, max-age=31536000',
+        '/private/*',
+        '  Cache-Control: public, max-age=31536000, immutable',
+        '',
+      ].join('\n')
+    );
+
+    expect(validateStaticArtifact(root)).not.toContain(
+      '/assets/* must not apply immutable caching to missing resources'
+    );
   });
 
   it('rejects an artifact without a standalone 404 document', () => {
