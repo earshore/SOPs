@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { renderThreadList } from './renderers';
+import type { DeepChatThreadStore } from './types';
 
-// Minimal store shape; typing is intentionally loose for the unit test.
-function makeStore(): any {
+function makeStore(): DeepChatThreadStore {
   return {
     activeThreadId: 'thread-1',
     threads: [

@@ -373,6 +373,11 @@ function refreshAppCenterArtifactsForHistoryId(id: HistoryItem['id']): void {
   }
 }
 
+function refreshHistoryArtifactsAfterUpdate(id: HistoryItem['id'], updated: boolean): boolean {
+  if (updated) refreshAppCenterArtifactsForHistoryId(id);
+  return updated;
+}
+
 function upsertHistoryItem(history: HistoryItem[], draft: HistoryDraft): void {
   if (draft.shouldUpdateCurrent && draft.currentHistoryIndex >= 0) {
     history[draft.currentHistoryIndex] = draft.historyItem;
@@ -408,6 +413,20 @@ function clearCurrentSnapshotStateIfMatches(id: HistoryItem['id']): void {
   if (currentHistoryId !== null && isSameHistoryId(currentHistoryId, id)) {
     clearCurrentSnapshotState();
   }
+}
+
+function finishHistoryDeletion(nextHistory: HistoryItem[], id: HistoryItem['id']): true {
+  historyCache = nextHistory;
+  clearCurrentSnapshotStateIfMatches(id);
+  return true;
+}
+
+function createHistoryDeleteError(): SystemError {
+  return new SystemError(
+    '删除历史记录失败：本地存储空间不足，请导出备份后清理缓存',
+    'HISTORY_003',
+    { module: 'historyService', action: 'delete' }
+  );
 }
 
 function upsertPromptResult(item: HistoryItem, prompt: GeneratedPromptRecord): void {
@@ -694,16 +713,10 @@ export const HistoryService = {
 
     const saved = StorageService.setScrapeHistory(nextHistory);
     if (!saved) {
-      throw new SystemError(
-        '删除历史记录失败：本地存储空间不足，请导出备份后清理缓存',
-        'HISTORY_003',
-        { module: 'historyService', action: 'delete' }
-      );
+      throw createHistoryDeleteError();
     }
 
-    historyCache = nextHistory;
-    clearCurrentSnapshotStateIfMatches(id);
-    return true;
+    return finishHistoryDeletion(nextHistory, id);
   },
 
   async deleteByIdAsync(id: HistoryItem['id']): Promise<boolean> {
@@ -716,16 +729,10 @@ export const HistoryService = {
 
     const saved = await StorageService.setScrapeHistoryAsync(nextHistory);
     if (!saved) {
-      throw new SystemError(
-        '删除历史记录失败：本地存储空间不足，请导出备份后清理缓存',
-        'HISTORY_003',
-        { module: 'historyService', action: 'delete' }
-      );
+      throw createHistoryDeleteError();
     }
 
-    historyCache = nextHistory;
-    clearCurrentSnapshotStateIfMatches(id);
-    return true;
+    return finishHistoryDeletion(nextHistory, id);
   },
 
   async updateSnapshotDataAsync(id: HistoryItem['id'], data: ScrapedData): Promise<boolean> {
@@ -830,10 +837,7 @@ export const HistoryService = {
       createPromptResultMutation(prompt),
       '更新 Prompt 结果失败'
     );
-    if (updated) {
-      refreshAppCenterArtifactsForHistoryId(id);
-    }
-    return updated;
+    return refreshHistoryArtifactsAfterUpdate(id, updated);
   },
 
   deletePromptResult(promptId: string): boolean {
@@ -883,10 +887,7 @@ export const HistoryService = {
       createPromptResultMutation(prompt),
       '更新 Prompt 结果失败'
     );
-    if (updated) {
-      refreshAppCenterArtifactsForHistoryId(id);
-    }
-    return updated;
+    return refreshHistoryArtifactsAfterUpdate(id, updated);
   },
 
   /**
