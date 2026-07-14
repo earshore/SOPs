@@ -37,30 +37,13 @@ export type ColorPaletteName =
  * 颜色色阶 (50-950)
  */
 export type ColorShade =
-  | '50'
-  | '100'
-  | '200'
-  | '300'
-  | '400'
-  | '500'
-  | '600'
-  | '700'
-  | '800'
-  | '900'
-  | '950';
+  '50' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900' | '950';
 
 /**
  * 语义颜色名称
  */
 export type SemanticColorName =
-  | 'primary'
-  | 'secondary'
-  | 'accent'
-  | 'success'
-  | 'warning'
-  | 'danger'
-  | 'error'
-  | 'info';
+  'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'danger' | 'error' | 'info';
 
 // ═══════════════════════════════════════════════════════════
 // 间距系统类型
@@ -119,18 +102,7 @@ export type FontFamilyName = 'sans' | 'serif' | 'mono' | 'display';
  * 字体大小名称
  */
 export type FontSizeName =
-  | '2xs'
-  | 'xs'
-  | 'sm'
-  | 'base'
-  | 'md'
-  | 'lg'
-  | 'xl'
-  | '2xl'
-  | '3xl'
-  | '4xl'
-  | '5xl'
-  | '6xl';
+  '2xs' | 'xs' | 'sm' | 'base' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl';
 
 /**
  * 字重名称
@@ -154,15 +126,7 @@ export type FontWeightName =
  * 圆角大小名称
  */
 export type BorderRadiusName =
-  | 'none'
-  | 'sm'
-  | 'DEFAULT'
-  | 'md'
-  | 'lg'
-  | 'xl'
-  | '2xl'
-  | '3xl'
-  | 'full';
+  'none' | 'sm' | 'DEFAULT' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
 
 // ═══════════════════════════════════════════════════════════
 // 阴影系统类型

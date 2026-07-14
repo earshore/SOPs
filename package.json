@@ -140,6 +140,7 @@
     "jscpd": "^4.0.5",
     "jsdoc": "^4.0.5",
     "jsdom": "^23.0.0",
+    "lighthouse": "12.6.1",
     "lightningcss": "^1.31.1",
     "madge": "^8.0.0",
     "pixelmatch": "^7.1.0",

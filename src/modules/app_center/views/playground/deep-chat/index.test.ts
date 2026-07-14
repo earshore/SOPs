@@ -310,8 +310,7 @@ async function importDeepChat(options: ImportOptions = {}) {
     options.callLLM ||
       (async (...args: unknown[]) => {
         const callOptions = args[5] as
-          | { onStreamUpdate?: (update: { delta: string }) => void }
-          | undefined;
+          { onStreamUpdate?: (update: { delta: string }) => void } | undefined;
         callOptions?.onStreamUpdate?.({ delta: 'Streamed ' });
         callOptions?.onStreamUpdate?.({ delta: 'answer' });
         return 'Streamed answer';
@@ -1322,8 +1321,7 @@ describe('deep-chat playground remount streaming', () => {
     const { mount, unmount, mocks } = await importDeepChat({
       callLLM: async (...args: unknown[]) => {
         const callOptions = args[5] as
-          | { onStreamUpdate?: (update: { delta: string }) => void }
-          | undefined;
+          { onStreamUpdate?: (update: { delta: string }) => void } | undefined;
         callOptions?.onStreamUpdate?.({ delta: 'First ' });
         await streamGate;
         callOptions?.onStreamUpdate?.({ delta: 'Second' });
@@ -1562,8 +1560,7 @@ describe('deep-chat playground timeout responses', () => {
     const { mount, unmount, mocks } = await importDeepChat({
       callLLM: async (...args: unknown[]) => {
         const callOptions = args[5] as
-          | { onStreamUpdate?: (update: { delta: string }) => void }
-          | undefined;
+          { onStreamUpdate?: (update: { delta: string }) => void } | undefined;
         callOptions?.onStreamUpdate?.({ delta: '已生成的' });
         callOptions?.onStreamUpdate?.({ delta: '回复内容' });
         throw timeoutError;

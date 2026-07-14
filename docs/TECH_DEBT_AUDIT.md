@@ -1,7 +1,7 @@
 # 技术债务审计与消除计划
 
 **审计日期**: 2026-06-08
-**最新更新**: 2026-07-09
+**最新更新**: 2026-07-15
 **审计范围**: 当前 CI 门禁、依赖审计、`src/` 代码质量、CSS 变量与模块样式、技术债扫描、单元/集成测试。
 **结论**: 当前没有仍阻塞 `ci:all` 的 P0 债务；本轮已消除循环依赖门禁、生产依赖漏洞、开发依赖漏洞、`ConfigCenter` 构建导入 warning、构建性能 warning、ESLint warning 基线、格式化基线、技术债扫描基线、安全审计 findings、Vitest 输出噪声、质量脚本失效问题、`src/` 非测试运行时代码复杂度热点、测试/工具复杂度噪声、CSS 变量命名基线和 CSS 模块重复建议。当前技术债扫描、复杂度分析和安全审计均为 0 issue；剩余事项为发布验证和未来真实身份服务接入条件，不作为当前代码债务。
 
@@ -105,6 +105,27 @@
 | 复杂度分析               | `npm run code:analyze:complexity`                                                                                                                                                                                                                                                                                                                                                                                     | 705 个文件，13,701 个函数，0 个过长函数、0 个高复杂度函数、0 个问题函数                                                             |
 | 技术债扫描               | `npm run tech-debt:scan`                                                                                                                                                                                                                                                                                                                                                                                              | 410 个文件，101,928 行，0 issue，债务比率 0.00%                                                                                      |
 | 安全审计                 | `npm run security:audit`                                                                                                                                                                                                                                                                                                                                                                                              | 435 个文件，133,491 行，0 issue，风险分 0/100；生成报告为本地忽略产物，不再跟踪 dated 报告                                            |
+
+## Release hardening：兼容依赖更新与 breaking-major 隔离
+
+- 2026-07-15 使用 Node 24.11.1、npm 11.12.0 执行无 `--force` 的 `npm update`；未扩大或改变已有依赖 major range，更新后 `npm outdated --json` 的所有条目均满足 `current === wanted`。
+- 仓库直接使用 `playwright-lighthouse` 并执行 Lighthouse CLI，而 `playwright-lighthouse@4.0.0` 要求 `lighthouse >=10.0.0` peer，因此显式精确声明 `lighthouse@12.6.1` 以保证 `npm ci` 可重现。自动选择 Lighthouse 13.4.0 会引入 `@sentry/node@9.47.1` / `@opentelemetry/core@1.30.1` 链并产生 17 个 moderate vulnerability；恢复 12.6.1 后 fresh `npm audit` 为 0 vulnerabilities。
+- `flag-icons` 继续保持精确 pin `7.3.2`，声明与 lock 均未漂移。fresh `test:coverage` 实值为 lines 84.22%、statements 82.40%、functions 84.51%、branches 68.64%，分别高于 82%/80%/82%/65% ratchet；`type-check` 与 `build:app` 通过。质量、复杂度、技术债和安全扫描 ratchet 继续沿用上方验证快照中的 0-warning/0-issue 基线。
+
+以下每个跨 major 条目均保持在当前 `wanted` 版本；不得合并迁移，必须分别建立独立迁移计划，并通过完整 release gate 后再升级。
+
+| 依赖              | 当前 / wanted | latest  | 延后原因与迁移 gate                                                                                                            |
+| ----------------- | ------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `@sentry/browser` | 7.120.4       | 10.65.0 | 7 → 10 涉及 SDK、集成与 tracing 行为变化；独立迁移并完整验证错误采集、构建和浏览器 gate。                                      |
+| `@types/node`     | 20.19.43      | 26.1.1  | 20 → 26 必须与 Node runtime 支持策略、全量类型检查和构建一起独立验证。                                                         |
+| `eslint`          | 8.57.1        | 10.7.0  | 8 → 10 涉及配置、规则和插件兼容；独立迁移并跑完整 lint、warning baseline 和 release gate。                                     |
+| `jscpd`           | 4.2.5         | 5.0.12  | 4 → 5 可能改变扫描器 CLI、报告 schema 与重复率口径；独立迁移并锁定 scanner ratchet。                                           |
+| `jsdom`           | 23.2.0        | 29.1.1  | 23 → 29 涉及 Node 支持与 DOM 测试语义；独立迁移并跑全量 Vitest、覆盖率和 release gate。                                        |
+| `lighthouse`      | 12.6.1        | 13.4.0  | 12 → 13 当前会引入上述 vulnerable Sentry/OpenTelemetry 链；需等待安全解析可用后独立迁移，并跑 audit、性能与完整 release gate。 |
+| `marked`          | 17.0.6        | 18.0.6  | 17 → 18 可能改变 Markdown 解析/渲染输出；独立迁移并验证安全渲染、快照和完整 gate。                                             |
+| `tailwindcss`     | 3.4.19        | 4.3.2   | 3 → 4 是配置、构建插件与 CSS 输出迁移；独立计划并跑构建、视觉回归和完整 release gate。                                         |
+| `typescript`      | 5.9.3         | 7.0.2   | 5 → 7 涉及编译器、标准库和检查器行为；独立迁移并跑应用/测试类型检查及完整 release gate。                                       |
+| `flag-icons`      | 7.3.2         | 7.5.0   | 非 major gap；当前有意保持精确 pin，后续仅在明确验证静态资产差异时单独更新。                                                   |
 
 ## 非阻塞跟进项
 

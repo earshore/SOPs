@@ -102,8 +102,7 @@ export class OverviewRenderer {
     // 获取分类配置
     this.categories = this.options.categoryKey
       ? ((MENU_CONFIG as unknown as Record<string, unknown>)[this.options.categoryKey] as
-          | Record<string, CategoryConfig>
-          | undefined) || null
+          Record<string, CategoryConfig> | undefined) || null
       : null;
 
     // 按分类分组路由

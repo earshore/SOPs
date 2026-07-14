@@ -850,63 +850,60 @@ function registerRestrictedWordsActions(): void {
 const registry = AlpineRegistry.getInstance();
 
 // 注册 Restricted Words 面板组件
-registry.register(
-  'restrictedWordsPanel',
-  (): RestrictedWordsPanelComponent => ({
-    // 初始化
-    init() {
-      initRestrictedWordsPanel();
-    },
+registry.register('restrictedWordsPanel', (): RestrictedWordsPanelComponent => ({
+  // 初始化
+  init() {
+    initRestrictedWordsPanel();
+  },
 
-    // 搜索关键词
-    searchKeyword: '',
+  // 搜索关键词
+  searchKeyword: '',
 
-    // 搜索模式
-    searchMode: 'fuzzy' as SearchMode,
+  // 搜索模式
+  searchMode: 'fuzzy' as SearchMode,
 
-    // 选中的分类
-    selectedCategory: '',
+  // 选中的分类
+  selectedCategory: '',
 
-    // 选中的风险等级
-    selectedRiskLevel: '',
+  // 选中的风险等级
+  selectedRiskLevel: '',
 
-    // 选中的站点
-    selectedSite: 'ALL',
+  // 选中的站点
+  selectedSite: 'ALL',
 
-    // 执行搜索
-    performSearch(this: RestrictedWordsPanelComponent) {
-      const input = document.getElementById('rw-search-input') as HTMLInputElement;
-      if (input) {
-        input.value = this.searchKeyword;
-      }
+  // 执行搜索
+  performSearch(this: RestrictedWordsPanelComponent) {
+    const input = document.getElementById('rw-search-input') as HTMLInputElement;
+    if (input) {
+      input.value = this.searchKeyword;
+    }
 
-      const searchBtn = document.getElementById('rw-search-btn') as HTMLButtonElement;
-      if (searchBtn) {
-        searchBtn.click();
-      }
-    },
+    const searchBtn = document.getElementById('rw-search-btn') as HTMLButtonElement;
+    if (searchBtn) {
+      searchBtn.click();
+    }
+  },
 
-    // 清空搜索
-    clearFilters(this: RestrictedWordsPanelComponent) {
-      this.searchKeyword = '';
-      this.selectedCategory = '';
-      this.selectedRiskLevel = '';
-      this.selectedSite = 'ALL';
+  // 清空搜索
+  clearFilters(this: RestrictedWordsPanelComponent) {
+    this.searchKeyword = '';
+    this.selectedCategory = '';
+    this.selectedRiskLevel = '';
+    this.selectedSite = 'ALL';
 
-      const clearBtn = document.getElementById('rw-clear-btn') as HTMLButtonElement;
-      if (clearBtn) {
-        clearBtn.click();
-      }
-    },
+    const clearBtn = document.getElementById('rw-clear-btn') as HTMLButtonElement;
+    if (clearBtn) {
+      clearBtn.click();
+    }
+  },
 
-    // 查看详情
-    viewDetail(wordId: string) {
-      showWordDetail(wordId);
-    },
+  // 查看详情
+  viewDetail(wordId: string) {
+    showWordDetail(wordId);
+  },
 
-    // 关闭详情
-    closeDetailModal() {
-      closeWordDetail();
-    },
-  })
-);
+  // 关闭详情
+  closeDetailModal() {
+    closeWordDetail();
+  },
+}));
