@@ -18,6 +18,14 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import * as ts from 'typescript';
+import {
+  compareCoverage,
+  parseCoverageSummary,
+  parseDuplicationReport,
+  requireMeasurement,
+  type CoverageMetrics,
+  type DuplicationMetrics,
+} from './quality/measurements';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,57 +42,9 @@ interface ComplexityMetrics {
   line: number;
 }
 
-interface DuplicationMetrics {
-  percentage: number;
-  lines: number;
-  tokens: number;
-  files: number;
-}
-
-interface JscpdReportTotals {
-  percentage?: number;
-  lines?: number;
-  tokens?: number;
-  sources?: number;
-  files?: number;
-}
-
-interface JscpdReport {
-  statistics?: {
-    total?: JscpdReportTotals;
-  };
-  total?: JscpdReportTotals;
-}
-
-interface CoverageMetrics {
-  statements: number;
-  branches: number;
-  functions: number;
-  lines: number;
-}
-
-interface CoverageSummaryPart {
-  pct?: number;
-  covered?: number;
-  total?: number;
-}
-
-interface CoverageSummaryTotal {
-  statements?: CoverageSummaryPart;
-  branches?: CoverageSummaryPart;
-  functions?: CoverageSummaryPart;
-  lines?: CoverageSummaryPart;
-}
-
-interface CompleteCoverageSummaryTotal {
-  statements: CoverageSummaryPart;
-  branches: CoverageSummaryPart;
-  functions: CoverageSummaryPart;
-  lines: CoverageSummaryPart;
-}
-
-interface CoverageSummaryReport {
-  total?: CoverageSummaryTotal;
+interface ComplexitySummary {
+  threshold: number;
+  violations: ComplexityMetrics[];
 }
 
 interface TypeCoverageMetrics {
@@ -143,11 +103,7 @@ interface ESLintResult {
 
 interface QualityMetrics {
   timestamp: string;
-  complexity: {
-    average: number;
-    max: number;
-    violations: ComplexityMetrics[];
-  };
+  complexity: ComplexitySummary;
   duplication: DuplicationMetrics;
   coverage: CoverageMetrics;
   typeCoverage: TypeCoverageMetrics;
@@ -159,7 +115,7 @@ interface QualityThresholds {
   maxCyclomaticComplexity: number;
   maxCognitiveComplexity: number;
   maxDuplicationPercentage: number;
-  minCoveragePercentage: number;
+  coverage: CoverageMetrics;
   minTypeCoveragePercentage: number;
   maxLintErrors: number;
 }
@@ -185,7 +141,7 @@ interface TrendData {
   metrics: QualityMetrics;
 }
 
-interface MonitorConfig {
+export interface MonitorConfig {
   srcDir: string;
   testDir: string;
   outputDir: string;
@@ -195,7 +151,20 @@ interface MonitorConfig {
   enableDuplication: boolean;
   enableCoverage: boolean;
   enableTypeCoverage: boolean;
+  strict: boolean;
 }
+
+export interface QualityMonitorDependencies {
+  exec(command: string, options?: Parameters<typeof execSync>[1]): string | Buffer;
+  exists(path: string): boolean;
+  read(path: string): string;
+}
+
+const DEFAULT_DEPENDENCIES: QualityMonitorDependencies = {
+  exec: (command, options) => execSync(command, options),
+  exists: file => fs.existsSync(file),
+  read: file => fs.readFileSync(file, 'utf8'),
+};
 
 // ============================================================================
 // 配置
@@ -205,7 +174,12 @@ const DEFAULT_THRESHOLDS: QualityThresholds = {
   maxCyclomaticComplexity: 10,
   maxCognitiveComplexity: 15,
   maxDuplicationPercentage: 5,
-  minCoveragePercentage: 80,
+  coverage: {
+    lines: 82,
+    statements: 80,
+    functions: 82,
+    branches: 65
+  },
   minTypeCoveragePercentage: 90,
   maxLintErrors: 0
 };
@@ -219,7 +193,8 @@ const CONFIG: MonitorConfig = {
   enableESLint: true,
   enableDuplication: true,
   enableCoverage: true,
-  enableTypeCoverage: true
+  enableTypeCoverage: true,
+  strict: process.argv.includes('--strict'),
 };
 
 // ============================================================================
@@ -228,11 +203,16 @@ const CONFIG: MonitorConfig = {
 
 class QualityMonitor {
   private config: MonitorConfig;
+  private dependencies: QualityMonitorDependencies;
   private metrics: QualityMetrics;
   private violations: QualityViolation[] = [];
 
-  constructor(config: MonitorConfig) {
+  constructor(
+    config: MonitorConfig,
+    dependencies: QualityMonitorDependencies = DEFAULT_DEPENDENCIES
+  ) {
     this.config = config;
+    this.dependencies = dependencies;
     this.metrics = this.initializeMetrics();
   }
 
@@ -243,8 +223,7 @@ class QualityMonitor {
     return {
       timestamp: new Date().toISOString(),
       complexity: {
-        average: 0,
-        max: 0,
+        threshold: this.config.thresholds.maxCyclomaticComplexity,
         violations: []
       },
       duplication: {
@@ -329,9 +308,6 @@ class QualityMonitor {
     try {
       const results = this.runEslintJson();
       const complexityViolations: ComplexityMetrics[] = [];
-      let totalComplexity = 0;
-      let functionCount = 0;
-      let maxComplexity = 0;
 
       // 解析 ESLint 结果
       for (const result of results) {
@@ -341,9 +317,6 @@ class QualityMonitor {
           // 检查圈复杂度规则
           if (message.ruleId === 'complexity') {
             const complexity = this.extractComplexityFromMessage(message.message);
-            totalComplexity += complexity;
-            functionCount++;
-            maxComplexity = Math.max(maxComplexity, complexity);
 
             if (complexity > this.config.thresholds.maxCyclomaticComplexity) {
               complexityViolations.push({
@@ -359,16 +332,16 @@ class QualityMonitor {
       }
 
       this.metrics.complexity = {
-        average: functionCount > 0 ? totalComplexity / functionCount : 0,
-        max: maxComplexity,
+        threshold: this.config.thresholds.maxCyclomaticComplexity,
         violations: complexityViolations
       };
 
-      console.log(`  ✓ 平均复杂度: ${this.metrics.complexity.average.toFixed(2)}`);
-      console.log(`  ✓ 最大复杂度: ${this.metrics.complexity.max}`);
-      console.log(`  ✓ 违规函数: ${complexityViolations.length}\n`);
+      console.log(
+        `  ✓ ${complexityViolations.length} violations above ${this.metrics.complexity.threshold}\n`
+      );
     } catch (error: any) {
       console.warn('  ⚠ ESLint 检查失败:', error.message, '\n');
+      throw error;
     }
   }
 
@@ -377,7 +350,8 @@ class QualityMonitor {
    */
   private extractComplexityFromMessage(message: string): number {
     const match = message.match(/complexity of (\d+)/i);
-    return match ? parseInt(match[1], 10) : 0;
+    const complexity = match?.[1];
+    return complexity ? parseInt(complexity, 10) : 0;
   }
 
   /**
@@ -388,73 +362,45 @@ class QualityMonitor {
 
     try {
       this.ensureOutputDir();
-      if (!this.isJscpdAvailable()) {
-        return;
-      }
-
-      execSync(this.buildJscpdCommand(), {
+      this.dependencies.exec(this.buildJscpdCommand(), {
         encoding: 'utf-8',
         stdio: 'pipe',
         maxBuffer: 10 * 1024 * 1024
       });
 
-      this.loadDuplicationReport('  ⚠ jscpd 报告文件未生成\n');
-    } catch (error: any) {
-      // 即使 jscpd 返回非零退出码，也尝试读取报告
-      this.loadDuplicationReport('  ⚠ 代码重复检测失败\n');
+      this.loadDuplicationReport();
+    } catch (error) {
+      console.warn('  ⚠ 代码重复检测失败\n');
+      throw error;
     }
   }
 
   private ensureOutputDir(): void {
-    if (!fs.existsSync(this.config.outputDir)) {
+    if (!this.dependencies.exists(this.config.outputDir)) {
       fs.mkdirSync(this.config.outputDir, { recursive: true });
-    }
-  }
-
-  private isJscpdAvailable(): boolean {
-    try {
-      execSync('npx jscpd --version', { stdio: 'ignore' });
-      return true;
-    } catch {
-      console.warn('  ⚠ jscpd 未安装，跳过重复代码检测');
-      console.warn('  💡 安装命令: npm install --save-dev jscpd\n');
-      return false;
     }
   }
 
   private buildJscpdCommand(): string {
     const configFile = path.join(__dirname, '../.jscpd.json');
-    if (fs.existsSync(configFile)) {
+    if (this.dependencies.exists(configFile)) {
       return `npx jscpd ${this.config.srcDir} --config ${configFile}`;
     }
     return `npx jscpd ${this.config.srcDir} --reporters json,console --format typescript,javascript --min-lines 10 --min-tokens 50 --output ${this.config.outputDir}`;
   }
 
-  private loadDuplicationReport(missingMessage: string): void {
+  private loadDuplicationReport(): void {
     const outputFile = path.join(this.config.outputDir, 'jscpd-report.json');
-    if (!fs.existsSync(outputFile)) {
-      console.warn(missingMessage);
-      return;
+    if (!this.dependencies.exists(outputFile)) {
+      throw new Error(`jscpd report is missing: ${outputFile}`);
     }
 
-    try {
-      this.metrics.duplication = this.readDuplicationMetrics(outputFile);
-      this.logDuplicationMetrics();
-    } catch {
-      console.warn('  ⚠ 代码重复检测失败\n');
-    }
+    this.metrics.duplication = this.readDuplicationMetrics(outputFile);
+    this.logDuplicationMetrics();
   }
 
   private readDuplicationMetrics(outputFile: string): DuplicationMetrics {
-    const report = JSON.parse(fs.readFileSync(outputFile, 'utf-8')) as JscpdReport;
-    const statistics = report.statistics?.total || report.total || {};
-
-    return {
-      percentage: statistics.percentage || 0,
-      lines: statistics.lines || 0,
-      tokens: statistics.tokens || 0,
-      files: statistics.sources || statistics.files || 0
-    };
+    return requireMeasurement(parseDuplicationReport(this.dependencies.read(outputFile)));
   }
 
   private logDuplicationMetrics(): void {
@@ -470,28 +416,28 @@ class QualityMonitor {
   private async checkCoverage(): Promise<void> {
     console.log('📈 检查测试覆盖率...');
 
-    if (!this.config.enableCoverage) {
-      console.log('  ⊘ 测试覆盖率检查已禁用\n');
-      return;
-    }
-
     try {
       const projectRoot = path.join(__dirname, '..');
       const coverageFile = path.join(projectRoot, 'coverage', 'coverage-summary.json');
 
       console.log(`  📂 覆盖率文件路径: ${coverageFile}`);
+      console.log('  ⏳ 运行命令: npm run test:coverage');
 
-      if (!this.ensureCoverageReport(projectRoot, coverageFile)) {
-        return;
+      this.dependencies.exec('npm run test:coverage', {
+        stdio: 'pipe',
+        timeout: 120000,
+        cwd: projectRoot,
+        encoding: 'utf-8',
+      });
+
+      if (!this.dependencies.exists(coverageFile)) {
+        throw new Error(`coverage summary is missing: ${coverageFile}`);
       }
 
-      const total = this.readCoverageSummary(coverageFile);
-      if (!total) {
-        return;
-      }
-
-      this.metrics.coverage = this.toCoverageMetrics(total);
-      this.logCoverageMetrics(total);
+      this.metrics.coverage = requireMeasurement(
+        parseCoverageSummary(this.dependencies.read(coverageFile))
+      );
+      this.logCoverageMetrics();
     } catch (error: any) {
       console.warn('  ⚠ 测试覆盖率检查失败:');
       console.warn(`  错误信息: ${error.message}`);
@@ -499,96 +445,15 @@ class QualityMonitor {
         console.warn(`  堆栈: ${error.stack.split('\n').slice(0, 3).join('\n')}`);
       }
       console.warn('');
+      throw error;
     }
   }
 
-  private ensureCoverageReport(projectRoot: string, coverageFile: string): boolean {
-    if (fs.existsSync(coverageFile)) {
-      return true;
-    }
-
-    console.log('  ⚠ 覆盖率文件不存在，尝试运行测试生成覆盖率报告...');
-    if (!this.runCoverageCommand(projectRoot)) {
-      return false;
-    }
-
-    if (!fs.existsSync(coverageFile)) {
-      console.warn('  ⚠ 覆盖率文件仍然不存在，可能测试未生成覆盖率报告\n');
-      return false;
-    }
-
-    return true;
-  }
-
-  private runCoverageCommand(projectRoot: string): boolean {
-    try {
-      console.log('  ⏳ 运行命令: npm run test:coverage');
-      console.log('  ⏱ 超时设置: 120秒');
-
-      execSync('npm run test:coverage', {
-        stdio: 'pipe',
-        timeout: 120000,
-        cwd: projectRoot,
-        encoding: 'utf-8'
-      });
-
-      console.log('  ✓ 测试运行完成');
-      return true;
-    } catch (error: any) {
-      console.warn('  ⚠ 测试运行失败:');
-      if (error.stdout) {
-        console.warn('  输出:', error.stdout.toString().slice(0, 500));
-      }
-      if (error.stderr) {
-        console.warn('  错误:', error.stderr.toString().slice(0, 500));
-      }
-      console.warn('  ⚠ 跳过覆盖率检查\n');
-      return false;
-    }
-  }
-
-  private readCoverageSummary(coverageFile: string): CompleteCoverageSummaryTotal | null {
-    console.log('  📖 读取覆盖率数据...');
-    const coverageData = fs.readFileSync(coverageFile, 'utf-8');
-    const coverage = JSON.parse(coverageData) as CoverageSummaryReport;
-
-    if (!coverage.total) {
-      console.warn('  ⚠ 覆盖率数据格式不正确，缺少 total 字段\n');
-      return null;
-    }
-
-    if (!this.hasCompleteCoverageSummary(coverage.total)) {
-      console.warn('  ⚠ 覆盖率数据不完整\n');
-      return null;
-    }
-
-    return coverage.total;
-  }
-
-  private hasCompleteCoverageSummary(
-    total: CoverageSummaryTotal
-  ): total is CompleteCoverageSummaryTotal {
-    return Boolean(total.statements && total.branches && total.functions && total.lines);
-  }
-
-  private toCoverageMetrics(total: CompleteCoverageSummaryTotal): CoverageMetrics {
-    return {
-      statements: total.statements.pct || 0,
-      branches: total.branches.pct || 0,
-      functions: total.functions.pct || 0,
-      lines: total.lines.pct || 0
-    };
-  }
-
-  private logCoverageMetrics(total: CompleteCoverageSummaryTotal): void {
+  private logCoverageMetrics(): void {
     console.log(`  ✓ 语句覆盖率: ${this.metrics.coverage.statements.toFixed(2)}%`);
     console.log(`  ✓ 分支覆盖率: ${this.metrics.coverage.branches.toFixed(2)}%`);
     console.log(`  ✓ 函数覆盖率: ${this.metrics.coverage.functions.toFixed(2)}%`);
-    console.log(`  ✓ 行覆盖率: ${this.metrics.coverage.lines.toFixed(2)}%`);
-    console.log(`  📊 已测试: ${total.statements.covered}/${total.statements.total} 语句`);
-    console.log(`  📊 已测试: ${total.branches.covered}/${total.branches.total} 分支`);
-    console.log(`  📊 已测试: ${total.functions.covered}/${total.functions.total} 函数`);
-    console.log(`  📊 已测试: ${total.lines.covered}/${total.lines.total} 行\n`);
+    console.log(`  ✓ 行覆盖率: ${this.metrics.coverage.lines.toFixed(2)}%\n`);
   }
 
   /**
@@ -649,12 +514,7 @@ class QualityMonitor {
 
       } catch (error) {
         console.warn('  ⚠ 类型覆盖率检查失败:', error);
-        this.metrics.typeCoverage = {
-          percentage: 0,
-          total: 0,
-          covered: 0,
-          uncovered: 0
-        };
+        throw error;
       }
     }
 
@@ -799,6 +659,7 @@ class QualityMonitor {
       console.log(`  ✓ Lint 警告: ${warningCount}\n`);
     } catch (error: any) {
       console.warn('  ⚠ Lint 检查失败:', error.message, '\n');
+      throw error;
     }
   }
 
@@ -812,7 +673,7 @@ class QualityMonitor {
     const cmd = `npx eslint "${this.config.srcDir}" ${ignoredTestFiles} --format json`;
 
     try {
-      const output = execSync(cmd, {
+      const output = this.dependencies.exec(cmd, {
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe'],
         maxBuffer: 20 * 1024 * 1024
@@ -833,51 +694,61 @@ class QualityMonitor {
     const thresholds = this.config.thresholds;
 
     // 检查复杂度
-    if (this.metrics.complexity.max > thresholds.maxCyclomaticComplexity) {
-      this.violations.push({
-        type: 'complexity',
-        message: `最大圈复杂度超过阈值`,
-        severity: 'error',
-        actual: this.metrics.complexity.max,
-        expected: thresholds.maxCyclomaticComplexity
-      });
+    if (this.config.enableESLint) {
+      for (const violation of this.metrics.complexity.violations) {
+        this.violations.push({
+          type: 'complexity',
+          message: `圈复杂度超过阈值`,
+          severity: 'error',
+          actual: violation.cyclomatic,
+          expected: thresholds.maxCyclomaticComplexity
+        });
+      }
     }
 
     // 检查重复率
-    if (this.metrics.duplication.percentage > thresholds.maxDuplicationPercentage) {
+    if (
+      this.config.enableDuplication &&
+      this.metrics.duplication.percentage > thresholds.maxDuplicationPercentage
+    ) {
       this.violations.push({
         type: 'duplication',
         message: `代码重复率超过阈值`,
-        severity: 'warning',
+        severity: this.config.strict ? 'error' : 'warning',
         actual: this.metrics.duplication.percentage,
         expected: thresholds.maxDuplicationPercentage
       });
     }
 
     // 检查测试覆盖率
-    if (this.metrics.coverage.lines < thresholds.minCoveragePercentage) {
-      this.violations.push({
-        type: 'coverage',
-        message: `测试覆盖率低于阈值`,
-        severity: 'warning',
-        actual: this.metrics.coverage.lines,
-        expected: thresholds.minCoveragePercentage
-      });
+    if (this.config.enableCoverage) {
+      for (const deficit of compareCoverage(this.metrics.coverage, thresholds.coverage)) {
+        this.violations.push({
+          type: 'coverage',
+          message: `测试覆盖率 ${deficit.dimension} 低于阈值`,
+          severity: this.config.strict ? 'error' : 'warning',
+          actual: deficit.actual,
+          expected: deficit.expected
+        });
+      }
     }
 
     // 检查类型覆盖率
-    if (this.metrics.typeCoverage.percentage < thresholds.minTypeCoveragePercentage) {
+    if (
+      this.config.enableTypeCoverage &&
+      this.metrics.typeCoverage.percentage < thresholds.minTypeCoveragePercentage
+    ) {
       this.violations.push({
         type: 'type-coverage',
         message: `类型覆盖率低于阈值`,
-        severity: 'warning',
+        severity: this.config.strict ? 'error' : 'warning',
         actual: this.metrics.typeCoverage.percentage,
         expected: thresholds.minTypeCoveragePercentage
       });
     }
 
     // 检查 Lint 错误
-    if (this.metrics.lintErrors > thresholds.maxLintErrors) {
+    if (this.config.enableESLint && this.metrics.lintErrors > thresholds.maxLintErrors) {
       this.violations.push({
         type: 'lint',
         message: `Lint 错误数超过阈值`,
@@ -899,21 +770,30 @@ class QualityMonitor {
     score -= complexityPenalty;
 
     // 重复率扣分（最多扣 15 分）
-    const duplicationPenalty = Math.min(15, this.metrics.duplication.percentage * 3);
+    const duplicationPenalty = this.config.enableDuplication
+      ? Math.min(15, this.metrics.duplication.percentage * 3)
+      : 0;
     score -= duplicationPenalty;
 
     // 覆盖率扣分（最多扣 25 分）
-    const coverageDeficit = Math.max(0, this.config.thresholds.minCoveragePercentage - this.metrics.coverage.lines);
+    const coverageDeficit = this.config.enableCoverage
+      ? Math.max(0, this.config.thresholds.coverage.lines - this.metrics.coverage.lines)
+      : 0;
     const coveragePenalty = Math.min(25, coverageDeficit / 2);
     score -= coveragePenalty;
 
     // 类型覆盖率扣分（最多扣 20 分）
-    const typeCoverageDeficit = Math.max(0, this.config.thresholds.minTypeCoveragePercentage - this.metrics.typeCoverage.percentage);
+    const typeCoverageDeficit = this.config.enableTypeCoverage
+      ? Math.max(
+          0,
+          this.config.thresholds.minTypeCoveragePercentage - this.metrics.typeCoverage.percentage
+        )
+      : 0;
     const typeCoveragePenalty = Math.min(20, typeCoverageDeficit / 2);
     score -= typeCoveragePenalty;
 
     // Lint 错误扣分（最多扣 20 分）
-    const lintPenalty = Math.min(20, this.metrics.lintErrors * 2);
+    const lintPenalty = this.config.enableESLint ? Math.min(20, this.metrics.lintErrors * 2) : 0;
     score -= lintPenalty;
 
     return Math.max(0, Math.round(score));
@@ -1045,6 +925,10 @@ class QualityMonitor {
    * 检查是否应该阻止构建
    */
   public shouldBlockBuild(report: QualityReport): boolean {
+    if (!this.config.strict) {
+      return false;
+    }
+
     // 如果有错误级别的违规，阻止构建
     const hasErrors = report.violations.some(v => v.severity === 'error');
     
@@ -1078,7 +962,7 @@ class QualityMonitor {
 
       // 添加新数据
       history.push({
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().slice(0, 10),
         metrics: report.metrics
       });
 
@@ -1099,150 +983,6 @@ class QualityMonitor {
       console.error('❌ 保存历史数据失败:', error);
     }
   }
-  /**
-   * 发送告警通知
-   */
-  public sendAlerts(report: QualityReport): void {
-    if (report.violations.length === 0) {
-      return;
-    }
-
-    console.log('\n🚨 质量告警触发！');
-    console.log('=====================================');
-
-    // 按严重程度分组
-    const errors = report.violations.filter(v => v.severity === 'error');
-    const warnings = report.violations.filter(v => v.severity === 'warning');
-
-    if (errors.length > 0) {
-      console.log('\n🔴 错误级别告警:');
-      errors.forEach((violation, index) => {
-        console.log(`  ${index + 1}. ${violation.message}`);
-        console.log(`     类型: ${violation.type}`);
-        console.log(`     实际值: ${violation.actual.toFixed(2)}`);
-        console.log(`     期望值: ${violation.expected.toFixed(2)}`);
-        console.log(`     差距: ${Math.abs(violation.actual - violation.expected).toFixed(2)}`);
-      });
-    }
-
-    if (warnings.length > 0) {
-      console.log('\n🟡 警告级别告警:');
-      warnings.forEach((violation, index) => {
-        console.log(`  ${index + 1}. ${violation.message}`);
-        console.log(`     类型: ${violation.type}`);
-        console.log(`     实际值: ${violation.actual.toFixed(2)}`);
-        console.log(`     期望值: ${violation.expected.toFixed(2)}`);
-        console.log(`     差距: ${Math.abs(violation.actual - violation.expected).toFixed(2)}`);
-      });
-    }
-
-    console.log('\n📋 建议措施:');
-    this.generateRecommendations(report.violations);
-
-    console.log('=====================================\n');
-
-    // 保存告警到文件
-    this.saveAlertLog(report);
-  }
-
-  /**
-   * 生成改进建议
-   */
-  private generateRecommendations(violations: QualityViolation[]): void {
-    const recommendations = new Map<string, string>();
-
-    violations.forEach(violation => {
-      switch (violation.type) {
-        case 'complexity':
-          recommendations.set('complexity',
-            '  • 重构高复杂度函数，拆分为更小的函数\n' +
-            '  • 使用提前返回（early return）减少嵌套\n' +
-            '  • 考虑使用策略模式或状态模式简化逻辑');
-          break;
-        case 'duplication':
-          recommendations.set('duplication',
-            '  • 提取重复代码为公共函数或类\n' +
-            '  • 使用继承或组合消除重复\n' +
-            '  • 考虑使用工具类或辅助函数');
-          break;
-        case 'coverage':
-          recommendations.set('coverage',
-            '  • 为核心业务逻辑添加单元测试\n' +
-            '  • 为关键用户流程添加集成测试\n' +
-            '  • 使用测试覆盖率报告识别未测试代码');
-          break;
-        case 'type-coverage':
-          recommendations.set('type-coverage',
-            '  • 为函数参数和返回值添加类型注解\n' +
-            '  • 消除 any 类型的使用\n' +
-            '  • 使用类型守卫增强类型安全');
-          break;
-        case 'lint':
-          recommendations.set('lint',
-            '  • 运行 npm run lint:fix 自动修复\n' +
-            '  • 检查并修复剩余的 lint 错误\n' +
-            '  • 配置编辑器实时显示 lint 错误');
-          break;
-      }
-    });
-
-    recommendations.forEach(recommendation => {
-      console.log(recommendation);
-    });
-  }
-
-  /**
-   * 保存告警日志
-   */
-  private saveAlertLog(report: QualityReport): void {
-    try {
-      const alertLogPath = path.join(this.config.outputDir, 'quality-alerts.log');
-      const timestamp = new Date().toISOString();
-
-      let logContent = `\n${'='.repeat(80)}\n`;
-      logContent += `[${timestamp}] 质量告警\n`;
-      logContent += `${'='.repeat(80)}\n`;
-      logContent += `质量分数: ${report.score}/100\n`;
-      logContent += `违规数量: ${report.violations.length}\n\n`;
-
-      report.violations.forEach((violation, index) => {
-        logContent += `${index + 1}. [${violation.severity.toUpperCase()}] ${violation.message}\n`;
-        logContent += `   类型: ${violation.type}\n`;
-        logContent += `   实际值: ${violation.actual.toFixed(2)}\n`;
-        logContent += `   期望值: ${violation.expected.toFixed(2)}\n`;
-        logContent += `   差距: ${Math.abs(violation.actual - violation.expected).toFixed(2)}\n\n`;
-      });
-
-      // 追加到日志文件
-      fs.appendFileSync(alertLogPath, logContent, 'utf-8');
-      console.log(`📝 告警日志已保存: ${alertLogPath}`);
-    } catch (error) {
-      console.error('保存告警日志失败:', error);
-    }
-  }
-
-  /**
-   * 检查是否应该阻止构建
-   */
-  public shouldBlockBuild(report: QualityReport): boolean {
-    // 如果有错误级别的违规，阻止构建
-    const hasErrors = report.violations.some(v => v.severity === 'error');
-
-    // 如果质量分数过低，阻止构建
-    const scoreThreshold = 60; // 最低可接受分数
-    const scoreTooLow = report.score < scoreThreshold;
-
-    if (hasErrors) {
-      console.log('\n❌ 构建阻止: 存在错误级别的质量违规');
-    }
-
-    if (scoreTooLow) {
-      console.log(`\n❌ 构建阻止: 质量分数过低 (${report.score} < ${scoreThreshold})`);
-    }
-
-    return hasErrors || scoreTooLow;
-  }
-
 
   /**
    * 生成 JSON 报告
@@ -1375,8 +1115,8 @@ class QualityMonitor {
     <div class="metrics">
       <div class="metric-card">
         <div class="metric-label">代码复杂度</div>
-        <div class="metric-value">${report.metrics.complexity.average.toFixed(1)}</div>
-        <div class="metric-detail">平均 | 最大: ${report.metrics.complexity.max}</div>
+        <div class="metric-value">${report.metrics.complexity.violations.length} violations above ${report.metrics.complexity.threshold}</div>
+        <div class="metric-detail">圈复杂度违规</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">代码重复率</div>
@@ -1490,7 +1230,7 @@ ${this.renderViolations(report)}
   private getTrendChartData(history: TrendData[]) {
     return {
       dates: history.map(h => h.date),
-      complexityData: history.map(h => h.metrics.complexity.average),
+      complexityData: history.map(h => h.metrics.complexity.violations.length),
       duplicationData: history.map(h => h.metrics.duplication.percentage),
       coverageData: history.map(h => h.metrics.coverage.lines),
       typeCoverageData: history.map(h => h.metrics.typeCoverage.percentage)
@@ -1602,7 +1342,7 @@ ${this.renderViolations(report)}
     ${this.renderLineChartScript(
       '复杂度图表',
       'complexityChart',
-      '平均复杂度',
+      '复杂度违规数',
       data.complexityData,
       '#3b82f6',
       'rgba(59, 130, 246, 0.1)'
@@ -1697,7 +1437,7 @@ async function main(): Promise<void> {
     console.log(`质量分数: ${report.score}/100`);
     console.log(`状态: ${report.passed ? '✓ 通过' : '✗ 未通过'}`);
     console.log('-------------------------------------');
-    console.log(`平均复杂度: ${report.metrics.complexity.average.toFixed(2)}`);
+    console.log(`复杂度: ${report.metrics.complexity.violations.length} violations above ${report.metrics.complexity.threshold}`);
     console.log(`代码重复率: ${report.metrics.duplication.percentage.toFixed(2)}%`);
     console.log(`测试覆盖率: ${report.metrics.coverage.lines.toFixed(2)}%`);
     console.log(`类型覆盖率: ${report.metrics.typeCoverage.percentage.toFixed(2)}%`);

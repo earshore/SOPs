@@ -46,7 +46,7 @@
     "replace-console": "tsx scripts/quality/replace-console-statements.ts",
     "tech-debt:scan": "tsx tools/tech-debt-scanner.ts",
     "quality:monitor": "tsx tools/quality-monitor.ts",
-    "quality:monitor:ci": "tsx tools/quality-monitor.ts",
+    "quality:monitor:ci": "tsx tools/quality-monitor.ts --strict",
     "quality:trend": "tsx tools/quality-monitor.ts",
     "quality:report": "tsx tools/quality-monitor.ts",
     "unused-imports:scan": "tsx tools/unused-imports-cleaner.ts",
