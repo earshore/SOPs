@@ -75,7 +75,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : process.env.WORKERS ? parseInt(process.env.WORKERS) : 2,
 
   // 失败时重试次数
-  retries: process.env.CI ? 2 : 0,
+  retries: 0,
 
   // 测试超时（30秒）
   timeout: 30000,
@@ -188,13 +188,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        // Chrome 特定配置
-        launchOptions: {
-          args: ['--disable-web-security', '--disable-features=IsolateOrigins,site-per-process'],
-        },
-      },
+      use: { ...devices['Desktop Chrome'] },
       // 移除 testMatch 限制，使用全局 testMatch 配置
     },
 
