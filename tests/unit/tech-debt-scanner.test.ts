@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -30,6 +30,37 @@ describe('dedupeDuplicateCandidates', () => {
 
     expect(dedupeDuplicateCandidates(candidates)).toEqual([
       { occurrences: [10, 50], blockLines: 12, preview: 'a' },
+    ]);
+  });
+
+  it('orders a copied candidate list by the first occurrence before deduping', () => {
+    const occurrencesC = [12, 52];
+    const occurrencesA = [10, 50];
+    const occurrencesB = [11, 51];
+    const candidates: DuplicateCandidate[] = [
+      { occurrences: occurrencesC, blockLines: 10, preview: 'c' },
+      { occurrences: occurrencesA, blockLines: 10, preview: 'a' },
+      { occurrences: occurrencesB, blockLines: 10, preview: 'b' },
+    ];
+    const originalCandidates = structuredClone(candidates);
+
+    expect(dedupeDuplicateCandidates(candidates)).toEqual([
+      { occurrences: [10, 50], blockLines: 12, preview: 'a' },
+    ]);
+    expect(candidates).toEqual(originalCandidates);
+    expect(candidates[0]?.occurrences).toBe(occurrencesC);
+    expect(candidates[1]?.occurrences).toBe(occurrencesA);
+    expect(candidates[2]?.occurrences).toBe(occurrencesB);
+  });
+
+  it('extends a clone group from the first corresponding occurrence', () => {
+    const candidates: DuplicateCandidate[] = [
+      { occurrences: [10, 100], blockLines: 10, preview: 'first' },
+      { occurrences: [11, 109], blockLines: 10, preview: 'second' },
+    ];
+
+    expect(dedupeDuplicateCandidates(candidates)).toEqual([
+      { occurrences: [10, 100], blockLines: 11, preview: 'first' },
     ]);
   });
 
@@ -159,6 +190,45 @@ describe('tech debt scanner CLI', () => {
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain('--fail-on must be one of: medium, high, critical');
+  });
+
+  it('uses high by default and fails at an explicit medium floor', () => {
+    const projectRoot = mkdtempSync(join(resolve('.'), '.tech-debt-scanner-cli-'));
+    temporaryDirectories.push(projectRoot);
+    const toolsDirectory = join(projectRoot, 'tools');
+    const sourceDirectory = join(projectRoot, 'src');
+    mkdirSync(toolsDirectory);
+    mkdirSync(sourceDirectory);
+
+    const scannerPath = join(toolsDirectory, 'tech-debt-scanner.ts');
+    copyFileSync(resolve('tools/tech-debt-scanner.ts'), scannerPath);
+    const repeatedLines = Array.from(
+      { length: 10 },
+      (_, index) => `duplicateCall${String(index + 1).padStart(2, '0')}();`
+    );
+    writeFileSync(
+      join(sourceDirectory, 'medium-duplicate.ts'),
+      [
+        "const firstMarker = 'first';",
+        ...repeatedLines,
+        "const middleMarker = 'middle';",
+        ...repeatedLines,
+        "const lastMarker = 'last';",
+      ].join('\n')
+    );
+
+    const runScanner = (args: string[]) =>
+      spawnSync(process.execPath, ['--import', 'tsx', scannerPath, ...args], {
+        cwd: projectRoot,
+        encoding: 'utf8',
+      });
+    const defaultResult = runScanner([]);
+    const mediumResult = runScanner(['--fail-on', 'medium']);
+
+    expect(defaultResult.status).toBe(0);
+    expect(defaultResult.stdout).toContain('🟠 高: 0');
+    expect(defaultResult.stdout).toContain('🟡 中: 1');
+    expect(mediumResult.status).toBe(1);
   });
 
   it('provides a package gate at the medium severity floor', () => {

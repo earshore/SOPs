@@ -63,8 +63,13 @@ function dedupeDuplicateCandidates(
   candidates: DuplicateCandidate[]
 ): DuplicateCandidate[] {
   const deduped: DuplicateCandidate[] = [];
+  const orderedCandidates = [...candidates].sort(
+    (left, right) =>
+      (left.occurrences[0] ?? Number.POSITIVE_INFINITY) -
+      (right.occurrences[0] ?? Number.POSITIVE_INFINITY)
+  );
 
-  for (const candidate of candidates) {
+  for (const candidate of orderedCandidates) {
     const existing = deduped.find(group => sameCloneWindow(candidate, group));
     if (!existing) {
       deduped.push({
@@ -74,12 +79,7 @@ function dedupeDuplicateCandidates(
       continue;
     }
 
-    const extension = candidate.occurrences.reduce((longest, line, index) => {
-      const existingLine = existing.occurrences[index];
-      return existingLine === undefined
-        ? longest
-        : Math.max(longest, Math.abs(line - existingLine));
-    }, 0);
+    const extension = candidate.occurrences[0]! - existing.occurrences[0]!;
     existing.blockLines = Math.max(existing.blockLines, candidate.blockLines + extension);
   }
 
