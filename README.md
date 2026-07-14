@@ -15,14 +15,23 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 | 通道 | 版本 | 说明 |
 |------|------|------|
-| **GitHub Latest（稳定 GA）** | `v3.0.5` | 生产推荐版本 |
-| package.json | `3.0.5` | 与 tag / Release 一致 |
-| 上一 GA | `v3.0.4` | 回滚参考 |
+| **GitHub Latest（稳定 GA）** | `v3.0.6` | 生产推荐版本 |
+| package.json | `3.0.6` | 与 tag / Release 一致 |
+| 上一 GA | `v3.0.5` | 回滚参考 |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.5` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.6` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`3.0.4-rc.*` 已冻结，本版 `v3.0.5` 为其正式收口 GA。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.6`。
+
+`v3.0.6`（2026-07-14，稳定 GA）聚焦应用中心本地作业闭环与生产可靠性：
+
+- **完整 Listing 作业链路**：数据采集、AI 分析、Prompt、Deep Chat 产品文案、关键词复核、文案评审、合规复核全部纳入同一执行实例；相同站点 / ASIN 的二次执行仍保持独立。
+- **最近作业体验**：链路节点直接导航，1 / 2 / 3 列布局、分类与状态筛选、需处理 / 最近更新排序、显示更多、右上角图标操作和多 ASIN 标题。
+- **Deep Chat 与 Keyword Hunter 交接**：根据选中的 Listing Prompt 生成产品文案，再将该文案与对应 SEO 关键词送入 Keyword Hunter 输入格式化页面。
+- **人工复核边界**：合规复核使用浮动对话框并记录通过 / 问题 / 不适用状态；PPC 动作清单保持独立作业且只记录人工复核，不自动修改广告或 Listing。
+- **生产可靠性**：共享文件选择器修复 preview 文件导入，Router / ActionRegistry 初始化顺序修复，最近作业缺失载荷和旧版合规状态具有明确兼容路径。
+- **发布治理**：补全 Release notes 回填、全量同步和审计工具，继续以 CHANGELOG 完整章节作为 GitHub Release 唯一事实源。
 
 `v3.0.5`（2026-07-13，稳定 GA）在 `v3.0.4` 与冻结线 `3.0.4-rc.1`…`rc.11` 之上，面向生产的主要增量：
 

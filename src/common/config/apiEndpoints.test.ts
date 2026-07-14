@@ -256,7 +256,10 @@ describe('apiEndpoints inline style policy', () => {
 
   it('bundles Font Awesome locally instead of loading it from bootcdn', () => {
     expect(readIndexHtml()).not.toContain('cdn.bootcdn.net');
-    expect(readMainEntry()).toContain('@fortawesome/fontawesome-free/css/all.min.css');
+    expect(readMainEntry()).toContain('@fortawesome/fontawesome-free/css/fontawesome.min.css');
+    expect(readMainEntry()).toContain('@fortawesome/fontawesome-free/css/solid.min.css');
+    expect(readMainEntry()).toContain('@fortawesome/fontawesome-free/css/regular.min.css');
+    expect(readMainEntry()).toContain('@fortawesome/fontawesome-free/css/brands.min.css');
 
     for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
       expect(extractCspDirective(csp, 'style-src')).not.toContain('cdn.bootcdn.net');

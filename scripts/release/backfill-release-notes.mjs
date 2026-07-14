@@ -17,6 +17,7 @@ const OUT_DIR = join(ROOT, 'release-artifacts/backfill');
 const PRE_RE = /-(alpha|beta|rc)(\.|$)/i;
 
 const DEFAULT_VERSIONS = [
+  '3.0.6',
   '3.0.5',
   '3.0.4',
   '3.0.4-rc.11',
@@ -97,17 +98,19 @@ function buildBody(version, section, extra = '') {
   const shortSha = sha.slice(0, 12);
   const pre = isPre(version);
   const preNote = pre
-    ? '\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA（当前为 `v3.0.5`）。\n'
+    ? '\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA（当前为 `v3.0.6`）。\n'
     : '';
 
   const rollback =
-    version === '3.0.5'
-      ? '上一 GA：`v3.0.4`'
-      : version === '3.0.4'
-        ? '上一 GA：`v3.0.2`；后继 GA：`v3.0.5`'
-        : pre
-          ? '后继收口 GA：`v3.0.5`；同线完整叙述见 CHANGELOG 各 RC 章节与 README「最新发布」'
-          : '见 GitHub Releases 中更早正式版';
+    version === '3.0.6'
+      ? '上一 GA：`v3.0.5`'
+      : version === '3.0.5'
+        ? '上一 GA：`v3.0.4`'
+        : version === '3.0.4'
+          ? '上一 GA：`v3.0.2`；后继 GA：`v3.0.5`'
+          : pre
+            ? '后继收口 GA：`v3.0.5`；同线完整叙述见 CHANGELOG 各 RC 章节与 README「最新发布」'
+            : '见 GitHub Releases 中更早正式版';
 
   return `## SOPs ${version}
 
@@ -170,12 +173,12 @@ function applyNotes(version, bodyPath, dryRun) {
     sh(`gh release edit ${tag} --prerelease --notes-file "${bodyPath}" --title "${tag}"`, {
       stdio: 'inherit',
     });
-  } else if (version === '3.0.5') {
+  } else if (version === '3.0.6') {
     sh(`gh release edit ${tag} --latest --notes-file "${bodyPath}" --title "${tag}"`, {
       stdio: 'inherit',
     });
   } else {
-    // Do not steal Latest from 3.0.5
+    // Do not steal Latest from 3.0.6
     sh(`gh release edit ${tag} --notes-file "${bodyPath}" --title "${tag}"`, {
       stdio: 'inherit',
     });
@@ -193,7 +196,7 @@ function createSupersededPrerelease(version, note, dryRun) {
 ${note}
 
 **请使用：**
-- 稳定 GA：\`v3.0.5\`（GitHub Latest）
+- 稳定 GA：\`v3.0.6\`（GitHub Latest）
 - 冻结线叙述：\`v3.0.4-rc.*\` 各章节与 README「最新发布」
 
 **Commit：** \`${tagSha(version).slice(0, 12)}\`

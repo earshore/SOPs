@@ -77,7 +77,7 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
     const presentation = buildRecentArtifactPresentation(makePpcArtifact(), makeWorkItem());
 
     expect(presentation.facts).toEqual(
-      expect.arrayContaining(['2 条动作', 'Owner 广告小张', '待人工确认', 'scale_budget'])
+      expect.arrayContaining(['2 条建议动作', '负责人：广告小张', '增加预算候选'])
     );
     expect(presentation.facts).not.toContain('PPC');
     expect(presentation.facts).not.toContain('PPC 动作清单');
@@ -93,7 +93,7 @@ describe('buildRecentArtifactPresentation (shipped presenter)', () => {
     );
 
     expect(presentation.typeLabel).toBe('采集');
-    expect(presentation.primaryTitle).toBe('DE · B000000001');
+    expect(presentation.primaryTitle).toBe('DE · B000000001 +1 ASIN');
     expect(presentation.primaryTitle).not.toBe('采集历史');
     expect(presentation.facts).toContain('2 ASIN');
     expect(presentation.facts).not.toContain('采集');

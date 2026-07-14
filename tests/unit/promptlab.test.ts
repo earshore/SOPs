@@ -16,6 +16,10 @@ import { MODULE_EVENTS, APP_EVENTS } from '@/common/constants/eventConstants';
 import { HistoryService } from '@/modules/app_center/views/master_analysis/services/historyService';
 import { getReportFingerprint } from '@/modules/app_center/views/master_analysis/services/reportIdentity';
 import { navigateToRouteId } from '@/common/router/initRouter';
+import {
+  clearListingPromptHandoff,
+  consumeListingPromptForDeepChat,
+} from '@/modules/app_center/listingWorkflowHandoff';
 import type { UserProductProfile } from '@/types/state';
 import type { GeneratedPromptRecord, HistoryItem } from '@/types/modules-business';
 
@@ -100,6 +104,7 @@ beforeEach(() => {
     .updateScraper({ scrapedData: null, currentHistoryId: null, selectedSite: '' });
   appStore.getState().updatePromptLab({ currentPrompt: '', history: [] });
   HistoryService.clear();
+  clearListingPromptHandoff();
 
   // 重置 store
   appStore.getState().setUserProductProfile({
@@ -892,32 +897,32 @@ describe('Prompt Generation', () => {
     });
   });
 
-  it('should hand off generated Listing Prompt to Keyword Hunter review', async () => {
+  it('should hand off generated Listing Prompt to Deep Chat', async () => {
     const { showToast } = await import('@/common/ui');
-    component.listingPromptCache = 'Generated Listing Prompt body';
     component.profile.keywordsTier1 = 'humidifier, cool mist';
     component.profile.keywordsTier2 = 'bedroom humidifier\nquiet humidifier';
+    component.generateListingPrompt();
 
-    await component.handoffListingPromptToKeywordHunter();
+    await component.handoffListingPromptToDeepChat();
 
-    expect(appStore.getState().keywordTracker).toMatchObject({
-      keywordsInputText: 'humidifier\ncool mist\nbedroom humidifier\nquiet humidifier',
-      copyInputText: 'Generated Listing Prompt body',
-      processedCopy: 'Generated Listing Prompt body',
-      keywords: ['humidifier', 'cool mist', 'bedroom humidifier', 'quiet humidifier'],
-      currentSnapshotId: null,
+    expect(consumeListingPromptForDeepChat()).toMatchObject({
+      prompt: 'Generated Listing Prompt',
+      seoKeywords: ['humidifier', 'cool mist', 'bedroom humidifier', 'quiet humidifier'],
     });
-    expect(navigateToRouteId).toHaveBeenCalledWith('keyword_hunter_input');
-    expect(showToast).toHaveBeenCalledWith('已带入 Keyword Hunter 复核', { type: 'success' });
+    expect(navigateToRouteId).toHaveBeenCalledWith('playground_deep_chat');
+    expect(showToast).toHaveBeenCalledWith('已将当前 Prompt 带入 Deep Chat', {
+      type: 'success',
+    });
   });
 
-  it('should not hand off to Keyword Hunter without a Listing Prompt', async () => {
+  it('should not hand off to Deep Chat without a Listing Prompt', async () => {
     const { showToast } = await import('@/common/ui');
     component.listingPromptCache = '';
 
-    await component.handoffListingPromptToKeywordHunter();
+    await component.handoffListingPromptToDeepChat();
 
-    expect(navigateToRouteId).not.toHaveBeenCalledWith('keyword_hunter_input');
+    expect(consumeListingPromptForDeepChat()).toBeNull();
+    expect(navigateToRouteId).not.toHaveBeenCalledWith('playground_deep_chat');
     expect(showToast).toHaveBeenCalledWith('请先生成 Listing Prompt', { type: 'warning' });
   });
 });

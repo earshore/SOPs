@@ -31,8 +31,9 @@
 
 - `v3.0.4` 为历史 GA。
 - `v3.0.4-rc.1` … `v3.0.4-rc.11` 为历史误序 RC（GA 之后继续同号候选），**冻结**：不再新增 `3.0.4-rc.*`。
-- `v3.0.5`（2026-07-13）为当前 GA：收口上述 RC 线并落地发布治理；取代误打且无 Release 的旧 `v3.0.5` tag 指向。
-- 下一候选线：`3.0.6-rc.N` → `3.0.6`（或按变更体量升 minor）。
+- `v3.0.5`（2026-07-13）为上一 GA：收口上述 RC 线并落地发布治理；取代误打且无 Release 的旧 `v3.0.5` tag 指向。
+- `v3.0.6`（2026-07-14）为当前 GA：发布应用中心本地作业闭环与生产预览可靠性更新。
+- 下一候选线：`3.0.7-rc.N` → `3.0.7`（或按变更体量升 minor）。
 
 ## 3. 何时创建 GitHub Release
 
@@ -100,20 +101,20 @@ Source code zip/tarball 由 GitHub 自动提供，**不能**替代 `dist` 产物
 ### 7.1 发布 RC
 
 ```bash
-# 1. 更新 package.json version，例如 3.0.5-rc.1
+# 1. 更新 package.json version，例如 3.0.7-rc.1
 # 2. 将 Unreleased 迁入 docs/CHANGELOG.md 对应章节
 # 3. 提交并推送 main
 # 4. 打 tag 并推送（触发 release workflow）
-git tag -a v3.0.5-rc.1 -m "v3.0.5-rc.1"
-git push origin v3.0.5-rc.1
+git tag -a v3.0.7-rc.1 -m "v3.0.7-rc.1"
+git push sops v3.0.7-rc.1
 ```
 
 ### 7.2 发布 GA
 
 ```bash
-# version → 3.0.5（去掉 -rc.N），CHANGELOG 定稿
-git tag -a v3.0.5 -m "v3.0.5"
-git push origin v3.0.5
+# version → 3.0.6（去掉 -rc.N），CHANGELOG 定稿
+git tag -a v3.0.6 -m "v3.0.6"
+git push sops v3.0.6
 ```
 
 ### 7.3 本地校验（不推送）
@@ -176,4 +177,4 @@ npm run release:sync-all
 1. 以 GitHub 全部 Release 为清单，保证每个版本在 `docs/CHANGELOG.md` 有章节。
 2. 已有 CHANGELOG 详述**优先保留**；缺失章节从 GitHub 原文导入（标注 historical）。
 3. 每个 GitHub Release body = 运维头 + 对应 CHANGELOG **完整**章节（不压缩、不删历史）。
-4. 不改变 Latest：仅 `v3.0.5`（当前 GA）使用 `--latest`；RC 保持 `--prerelease`。
+4. 不改变 Latest：仅 `v3.0.6`（当前 GA）使用 `--latest`；RC 保持 `--prerelease`。

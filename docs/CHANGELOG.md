@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.6] - 2026-07-14
+
+> 正式 GA。聚焦应用中心本地作业闭环、生产预览可靠性与发布治理。
+> 同站点 / ASIN 的重复执行保持独立作业；不会引入多人协作、云同步、NPI 最近作业或 AI 自动执行 PPC / Listing 动作。
+> 回滚版本：`v3.0.5`。部署目标：https://sops.hongecb.store
+
 ### Added
+- 应用中心「最近作业」增加本地作业索引、按执行实例聚合的恢复队列、逐阶段载荷可用性检查和复制摘要。
+- Listing 作业链路补齐为「数据采集 → AI 分析 → Prompt 生成 → Deep Chat 产品文案 → 关键词复核 → 文案评审 → 合规复核」，链路节点可直接进入对应阶段。
+- Deep Chat 增加 Listing Prompt 与 SEO 关键词工作流交接、产品文案产物保存，以及将选中文案和对应关键词送入 Keyword Hunter 输入格式化页的能力。
+- Keyword Hunter 独立作业使用「关键词复核 → 文案评审 → 合规复核」三阶段链路。
+- 合规复核增加本地浮动对话框、逐项人工状态、风险节点和旧版 `confirmed` / `skipped` 状态迁移。
+- PPC 搜索词分析增加独立动作清单快照、人工复核恢复横幅和最近作业入口。
+- 最近作业增加 1 / 2 / 3 列偏好、分类与状态下拉筛选、优先级 / 最近更新排序、总数和分批显示更多。
+- 新增共享文件选择器，供数据采集与 PPC 报表导入复用。
 - 发版回填与审计脚本：`npm run release:backfill-notes` / `release:audit`（CHANGELOG 完整章节回填 GitHub Release）
 - 新增 CBA 网关提供商支持
 - 新增 KR 网关提供商和 Anthropic 适配器
@@ -16,6 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 新增 NEW/CPA 网关占位符到环境文件
 
 ### Changed
+- 最近作业默认按「置顶 → 需人工处理 → 业务更新时间 → 最近查看时间」排序，单纯打开旧记录不再挤占新作业位置。
+- 作业卡标题优先展示站点、主 ASIN / SKU 与多 ASIN 范围，并补充执行开始时间和有业务含义的产物信息。
+- 置顶、复制摘要和从列表移除改为卡片右上角纯图标操作；置顶状态保持透明背景，以图标颜色和角度区分。
+- 完整链路在单列使用横向节点，在双列 / 三列卡片内使用纵向节点；节点 hover 只突出圆点和文字。
+- PPC 导出始终创建独立 `ppc_review:*` 作业，不再继承过期的 Listing `workItemId`。
+- 合规人工状态统一为 `pending` / `passed` / `issue_found` / `not_applicable`，完成但存在问题的作业保持需复核状态。
+- 每个折叠作业卡保留所有阶段的载荷状态；历史载荷缺失时使用明确的不可用节点，不再跳转到失效页面。
 - 回填 `v3.0.5`、`v3.0.4`、`v3.0.4-rc.1`…`rc.11` 的 GitHub Release notes（完整 CHANGELOG，不压缩）
 - 为误标孤儿 tag `v3.0.5-rc.1` / `v3.0.5-rc.2` 创建 superseded 预发布说明
 - `v3.0.5` Release 补充 Cloudflare Pages 生产部署记录
@@ -25,6 +46,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 集中化 CORS 头部并优化响应
 
 ### Fixed
+- 修复生产预览包中原生 file input 偶发无法打开文件选择框的问题，并避免隐藏 input 被重复点击链路阻断。
+- 修复开发环境 HMR 后 ActionRegistry 重复覆盖动作及初始导航早于 Router 初始化的问题。
+- 修复同一 Listing 作业跨「数据采集 / AI 分析 / Prompt / Deep Chat / Keyword Hunter」推进时生成多张最近作业卡的问题。
+- 修复 Prompt 生成直接跳转 Keyword Hunter、产品文案与关键词复核节点目标页面错误的问题。
+- 修复最近作业置顶图标状态不清晰、链路布局拥挤、合规复核以内联展开代替浮动窗口的问题。
+- 清零最近作业相关 ESLint 复杂度与函数长度警告，恢复 `lint:warning-gate` 通过。
 - 修复 CSS 构建和 API 认证问题（Cloudflare Pages）
 - 修复 Alpine.js `$cleanup` 生命周期钩子错误
 - 修复 Keyword Hunter 路由路径错误
