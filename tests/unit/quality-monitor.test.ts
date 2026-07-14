@@ -40,9 +40,12 @@ function writeDuplicationReport(directory: string): void {
   writeFileSync(join(directory, 'jscpd-report.json'), duplicationReport, 'utf8');
 }
 
-function createCoverageMonitor(coverage: MonitorConfig['thresholds']['coverage']): QualityMonitor {
+function createCoverageMonitor(
+  coverage: MonitorConfig['thresholds']['coverage'],
+  strict = config.strict
+): QualityMonitor {
   return new QualityMonitor(
-    { ...config, enableESLint: false, enableCoverage: true },
+    { ...config, strict, enableESLint: false, enableCoverage: true },
     {
       exec: vi.fn(() => ''),
       exists: file => file.endsWith('coverage-summary.json'),
@@ -58,6 +61,13 @@ function createCoverageMonitor(coverage: MonitorConfig['thresholds']['coverage']
     }
   );
 }
+
+const belowThresholdCoverage = {
+  lines: 81,
+  statements: 79,
+  functions: 81,
+  branches: 64,
+};
 
 describe('QualityMonitor collection failures', () => {
   it('rejects an ESLint command failure', async () => {
@@ -177,6 +187,38 @@ describe('QualityMonitor report identity', () => {
     }
   });
 
+  it('normalizes a nested jscpd source path to forward slashes', async () => {
+    const outputDir = mkdtempSync(join(tmpdir(), 'quality-monitor-jscpd-path-'));
+    const exec = vi.fn((command: string, _options?: unknown) => {
+      writeDuplicationReport(readJscpdOutputDirectory(command));
+      return '';
+    });
+    const monitor = new QualityMonitor(
+      {
+        ...config,
+        srcDir: join(process.cwd(), 'src', 'common'),
+        outputDir,
+        enableESLint: false,
+        enableDuplication: true,
+      },
+      {
+        exec,
+        exists: existsSync,
+        read: file => readFileSync(file, 'utf8'),
+      }
+    );
+
+    try {
+      await monitor.runAll();
+
+      const [command, options] = exec.mock.calls[0];
+      expect(command).toMatch(/^npx jscpd "src\/common" /);
+      expect(options).toMatchObject({ cwd: process.cwd() });
+    } finally {
+      rmSync(outputDir, { recursive: true, force: true });
+    }
+  });
+
   it('rejects a stale legacy duplication report after a no-op producer', async () => {
     const outputDir = mkdtempSync(join(tmpdir(), 'quality-monitor-stale-'));
     writeDuplicationReport(outputDir);
@@ -270,6 +312,113 @@ describe('QualityMonitor report identity', () => {
     } finally {
       rmSync(outputDir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('QualityMonitor coverage collection', () => {
+  it('disables all child coverage thresholds so the monitor owns threshold evaluation', async () => {
+    const exec = vi.fn(() => '');
+    const monitor = new QualityMonitor(
+      { ...config, enableESLint: false, enableCoverage: true },
+      {
+        exec,
+        exists: file => file.endsWith('coverage-summary.json'),
+        read: () =>
+          JSON.stringify({
+            total: {
+              lines: { pct: config.thresholds.coverage.lines },
+              statements: { pct: config.thresholds.coverage.statements },
+              functions: { pct: config.thresholds.coverage.functions },
+              branches: { pct: config.thresholds.coverage.branches },
+            },
+          }),
+      }
+    );
+
+    await monitor.runAll();
+
+    const command = exec.mock.calls[0][0];
+    expect(command).toContain('--coverage.thresholds.lines=0');
+    expect(command).toContain('--coverage.thresholds.statements=0');
+    expect(command).toContain('--coverage.thresholds.functions=0');
+    expect(command).toContain('--coverage.thresholds.branches=0');
+  });
+
+  it('allows the coverage collector up to five minutes to finish', async () => {
+    const exec = vi.fn(() => '');
+    const monitor = new QualityMonitor(
+      { ...config, enableESLint: false, enableCoverage: true },
+      {
+        exec,
+        exists: file => file.endsWith('coverage-summary.json'),
+        read: () =>
+          JSON.stringify({
+            total: {
+              lines: { pct: config.thresholds.coverage.lines },
+              statements: { pct: config.thresholds.coverage.statements },
+              functions: { pct: config.thresholds.coverage.functions },
+              branches: { pct: config.thresholds.coverage.branches },
+            },
+          }),
+      }
+    );
+
+    await monitor.runAll();
+
+    expect(exec.mock.calls[0][1]).toMatchObject({ timeout: 300000 });
+  });
+
+  it('reports fresh below-threshold coverage as strict blocking errors', async () => {
+    const monitor = createCoverageMonitor(belowThresholdCoverage);
+
+    const report = await monitor.runAll();
+    const coverageViolations = report.violations.filter(violation => violation.type === 'coverage');
+
+    expect(coverageViolations).toHaveLength(4);
+    expect(coverageViolations.every(violation => violation.severity === 'error')).toBe(true);
+    expect(report.passed).toBe(false);
+    expect(monitor.shouldBlockBuild(report)).toBe(true);
+    expect(report.score).toBeLessThan(100);
+  });
+
+  it('reports fresh below-threshold coverage as non-strict warnings', async () => {
+    const monitor = createCoverageMonitor(belowThresholdCoverage, false);
+
+    const report = await monitor.runAll();
+    const coverageViolations = report.violations.filter(violation => violation.type === 'coverage');
+
+    expect(coverageViolations).toHaveLength(4);
+    expect(coverageViolations.every(violation => violation.severity === 'warning')).toBe(true);
+    expect(report.passed).toBe(true);
+    expect(monitor.shouldBlockBuild(report)).toBe(false);
+    expect(report.score).toBeLessThan(100);
+  });
+
+  it('rejects a genuine coverage producer failure even when a summary looks available', async () => {
+    const producerFailure = new Error('coverage tests failed');
+    const read = vi.fn(() =>
+      JSON.stringify({
+        total: {
+          lines: { pct: 100 },
+          statements: { pct: 100 },
+          functions: { pct: 100 },
+          branches: { pct: 100 },
+        },
+      })
+    );
+    const monitor = new QualityMonitor(
+      { ...config, enableESLint: false, enableCoverage: true },
+      {
+        exec: vi.fn(() => {
+          throw producerFailure;
+        }),
+        exists: vi.fn(() => true),
+        read,
+      }
+    );
+
+    await expect(monitor.runAll()).rejects.toBe(producerFailure);
+    expect(read).not.toHaveBeenCalled();
   });
 });
 

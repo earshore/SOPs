@@ -408,7 +408,7 @@ class QualityMonitor {
 
   private buildJscpdCommand(reportDirectory: string, projectRoot: string): string {
     const configFile = path.join(__dirname, '../.jscpd.json');
-    const sourceDirectory = path.relative(projectRoot, this.config.srcDir);
+    const sourceDirectory = path.relative(projectRoot, this.config.srcDir).replace(/\\/g, '/');
     if (this.dependencies.exists(configFile)) {
       return `npx jscpd "${sourceDirectory}" --config "${configFile}" --output "${reportDirectory}"`;
     }
@@ -451,10 +451,12 @@ class QualityMonitor {
       console.log('  ⏳ 运行命令: npm run test:coverage');
 
       this.dependencies.exec(
-        `npm run test:coverage -- --coverage.reportsDirectory="${reportDirectory}"`,
+        `npm run test:coverage -- --coverage.reportsDirectory="${reportDirectory}" ` +
+          '--coverage.thresholds.lines=0 --coverage.thresholds.statements=0 ' +
+          '--coverage.thresholds.functions=0 --coverage.thresholds.branches=0',
         {
           stdio: 'pipe',
-          timeout: 120000,
+          timeout: 300000,
           cwd: projectRoot,
           encoding: 'utf-8',
         }
