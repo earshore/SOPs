@@ -843,7 +843,7 @@ it('navigates from process to analysis with the current copy', async () => {
   expect(processMocks.state.keywordTracker.processedCopy).toContain('Wireless earbuds');
 });
 
-it('restores the latest matched snapshot when process state is empty', async () => {
+it('does not auto-restore historical snapshots when process state is empty', async () => {
   Object.assign(processMocks.state.keywordTracker, {
     processedCopy: '',
     keywords: [],
@@ -874,26 +874,17 @@ it('restores the latest matched snapshot when process state is empty', async () 
     },
   };
   processMocks.getAllSnapshotsAsync.mockResolvedValueOnce([snapshot]);
-  processMocks.restoreSnapshot.mockImplementationOnce(() => {
-    Object.assign(processMocks.state.keywordTracker, {
-      processedCopy: snapshot.result.processedCopy,
-      keywords: snapshot.result.keywords,
-      matchedKeywords: snapshot.result.matchedKeywords,
-      unmatchedKeywords: snapshot.result.unmatchedKeywords,
-      wordFrequency: snapshot.result.wordFrequency,
-      paragraphs: [],
-      translationMode: false,
-    });
-    return snapshot;
-  });
 
   await mountProcess();
 
-  expect(processMocks.restoreSnapshot).toHaveBeenCalledWith(snapshot);
-  expect(document.querySelector('#keyword-hunter-copy-display')?.textContent).toContain(
+  expect(processMocks.getAllSnapshotsAsync).not.toHaveBeenCalled();
+  expect(processMocks.restoreSnapshot).not.toHaveBeenCalled();
+  expect(document.querySelector('#keyword-hunter-copy-display')?.textContent || '').not.toContain(
     'Wireless earbuds restored copy'
   );
-  expect(document.querySelector('#keyword-hunter-coverage-rate')?.textContent).toBe('100%');
+  expect(document.querySelector('#keyword-hunter-word-frequency-list')?.textContent).toContain(
+    '还没有词频数据'
+  );
 });
 
 it('recomputes keyword coverage from edited process copy before analysis', async () => {

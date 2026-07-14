@@ -29,7 +29,6 @@ import {
 import { getRuntimeKeywordHunterSeoOptions } from '@/services/runtimeStrategyService';
 import { createSafeFragment } from '@/common/utils/security';
 import { updateRuntimeCssRule } from '@/common/utils/runtimeStyles';
-import type { KeywordHunterSnapshot } from '@/types/modules-business';
 import type { LLMProviderConfig } from '@/types/state';
 import '../styles.css';
 
@@ -496,36 +495,6 @@ function ensureKeywordHunterState(): KeywordHunterStoreState {
   return appStore.getState().keywordTracker;
 }
 
-function getLatestSnapshotForProcess(
-  snapshots: KeywordHunterSnapshot[]
-): KeywordHunterSnapshot | undefined {
-  return snapshots.find(
-    snapshot =>
-      (snapshot.status === 'matched' || snapshot.status === 'reported') &&
-      !!(snapshot.result.processedCopy || snapshot.input.copyInputText).trim()
-  );
-}
-
-async function restoreLatestProcessSnapshotIfNeeded(): Promise<void> {
-  const tracker = ensureKeywordHunterState();
-  if (tracker.processedCopy?.trim()) {
-    return;
-  }
-
-  try {
-    const snapshot = getLatestSnapshotForProcess(await KeywordHunterSnapshotService.getAllAsync());
-    if (snapshot) {
-      KeywordHunterSnapshotService.restore(snapshot);
-    }
-  } catch (error) {
-    ErrorService.handle(error as Error, {
-      action: 'restoreLatestProcessSnapshot',
-      module: 'keywordHunter',
-      notify: false,
-    });
-  }
-}
-
 function getProcessCopyTextFromDisplay(): string {
   const tracker = ensureKeywordHunterState();
   if (tracker.translationMode && tracker.paragraphs.length > 0) {
@@ -597,10 +566,11 @@ function saveProcessStateToState(): void {
 }
 
 /**
- * 从 state 恢复处理状态
+ * 从内存 state 恢复处理状态。
+ * 刷新后 store 只会保留匹配设置，不自动回填历史快照。
  */
-async function restoreProcessStateFromState(): Promise<void> {
-  await restoreLatestProcessSnapshotIfNeeded();
+function restoreProcessStateFromState(): void {
+  ensureKeywordHunterState();
 
   // 恢复翻译显示状态
   const showTransCheckbox = document.getElementById(
@@ -2045,8 +2015,8 @@ class KeywordHunterProcessModule extends BaseModule {
       // 3. 设置事件监听器
       setupEventListeners(container);
 
-      // 4. 从 state 恢复状态
-      await restoreProcessStateFromState();
+      // 4. 从内存 state 恢复状态（不自动回填历史快照）
+      restoreProcessStateFromState();
 
       // 5. 管理浮动窗口显示 - 延迟执行确保 DOM 已渲染
       addTimeout(() => {
