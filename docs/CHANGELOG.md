@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- 将重复误标的 `v3.0.5-rc.1` / `v3.0.5-rc.2` 固定为仅保留 tag 的历史别名，避免其重复 Release 混入 `v3.0.4-rc.*` 发布序列。
+
 ## [3.0.6] - 2026-07-14
 
 > 正式 GA。聚焦应用中心本地作业闭环、生产预览可靠性与发布治理。

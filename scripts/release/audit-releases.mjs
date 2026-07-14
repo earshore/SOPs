@@ -6,6 +6,7 @@ import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isTagOnlyArchiveTag } from './release-history-policy.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -55,6 +56,8 @@ const report = {
     tagsWithoutRelease: [],
     releasesWithoutChangelog: [],
     changelogWithoutRelease: [],
+    tagOnlyArchives: [],
+    tagOnlyArchiveReleases: [],
   },
 };
 
@@ -73,6 +76,10 @@ for (const r of flat) {
   const body = r.body || '';
   const assets = (r.assets || []).map((a) => a.name);
   const isPreName = preRe.test(tag);
+
+  if (isTagOnlyArchiveTag(tag)) {
+    report.inventory.tagOnlyArchiveReleases.push(tag);
+  }
 
   if (r.prerelease) report.inventory.prerelease.push(tag);
   else report.inventory.ga.push(tag);
@@ -93,13 +100,16 @@ for (const r of flat) {
 }
 
 for (const t of tags) {
-  if (!relTags.has(t)) report.inventory.tagsWithoutRelease.push(t);
+  if (!relTags.has(t)) {
+    if (isTagOnlyArchiveTag(t)) report.inventory.tagOnlyArchives.push(t);
+    else report.inventory.tagsWithoutRelease.push(t);
+  }
 }
 
 for (const v of clVersions) {
   if (v === 'Unreleased') continue;
   if (!relTags.has(`v${v}`) && !relTags.has(v)) {
-    report.inventory.changelogWithoutRelease.push(v);
+    if (!isTagOnlyArchiveTag(`v${v}`)) report.inventory.changelogWithoutRelease.push(v);
   }
 }
 
@@ -130,6 +140,13 @@ if (report.inventory.tagsWithoutRelease.length) {
     severity: 'P1',
     id: 'orphan-tags',
     detail: report.inventory.tagsWithoutRelease.join(', '),
+  });
+}
+if (report.inventory.tagOnlyArchiveReleases.length) {
+  report.issues.push({
+    severity: 'P1',
+    id: 'tag-only-archives-published',
+    detail: report.inventory.tagOnlyArchiveReleases.join(', '),
   });
 }
 if (report.inventory.withAssets.length < 3) {
@@ -199,6 +216,8 @@ console.log('\nGA releases (' + report.inventory.ga.length + '):', report.invent
 console.log('\nPrereleases (' + report.inventory.prerelease.length + ') sample:', report.inventory.prerelease.slice(-12).join(', '));
 console.log('\nWith assets:', report.inventory.withAssets);
 console.log('\nTags without release:', report.inventory.tagsWithoutRelease);
+console.log('\nTag-only archives:', report.inventory.tagOnlyArchives);
+console.log('\nTag-only archives published as releases:', report.inventory.tagOnlyArchiveReleases);
 console.log('\nRC not pre-release flag:', report.inventory.rcNotPre);
 console.log('\nShort bodies:', report.inventory.shortBody);
 console.log('\nReleases without CHANGELOG section count:', report.inventory.releasesWithoutChangelog.length);

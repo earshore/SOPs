@@ -17,6 +17,10 @@ import {
 } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  isTagOnlyArchiveVersion,
+  TAG_ONLY_ARCHIVE_VERSIONS,
+} from './release-history-policy.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const CHANGELOG_PATH = join(ROOT, 'docs/CHANGELOG.md');
@@ -125,6 +129,14 @@ function stripLeadingVersionHeading(text, version) {
 function dateOnly(iso) {
   if (!iso) return 'unknown';
   return iso.slice(0, 10);
+}
+
+function changelogDate(text, version) {
+  const heading = new RegExp(
+    `^## \\[${escapeRegExp(version)}\\] - (\\d{4}-\\d{2}-\\d{2})$`,
+    'm'
+  );
+  return heading.exec(text)?.[1] || 'unknown';
 }
 
 function stripGeneratedWrapper(body, version) {
@@ -316,6 +328,21 @@ function main() {
     if (!byVersion.has(v)) byVersion.set(v, r);
   }
 
+  for (const version of TAG_ONLY_ARCHIVE_VERSIONS) {
+    if (!byVersion.has(version) && existing.has(version)) {
+      byVersion.set(version, {
+        tag_name: `v${version}`,
+        name: `${version} (tag-only archive)`,
+        prerelease: true,
+        draft: false,
+        published_at: `${changelogDate(changelogText, version)}T00:00:00Z`,
+        body: existing.get(version),
+        assets: [],
+        target_commitish: sh(`git rev-list -n 1 v${version}`),
+      });
+    }
+  }
+
   // Semver descending (GA of a triple ranks above its RCs)
   const versions = [...byVersion.keys()].sort(compareVersionsDesc);
 
@@ -358,6 +385,11 @@ function main() {
   const summary = [];
   if (!flags.skipGithub) {
     for (const { version, release } of versionSectionsOrdered) {
+      if (isTagOnlyArchiveVersion(version)) {
+        summary.push({ version, status: 'tag-only-archive' });
+        console.log('skipped tag-only archive', `v${version}`);
+        continue;
+      }
       const sectionBody = finalSections.get(version) || sectionFromRelease(version, release, null);
       const notes = buildReleaseNotes(version, sectionBody, release);
       const notesPath = join(OUT_DIR, `notes-${version}.md`);

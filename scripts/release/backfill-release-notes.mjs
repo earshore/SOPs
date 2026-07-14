@@ -10,6 +10,7 @@ import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isTagOnlyArchiveVersion } from './release-history-policy.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const CHANGELOG_PATH = join(ROOT, 'docs/CHANGELOG.md');
@@ -186,52 +187,6 @@ function applyNotes(version, bodyPath, dryRun) {
   console.log(`updated ${tag}`);
 }
 
-function createSupersededPrerelease(version, note, dryRun) {
-  const tag = `v${version}`;
-  const body = `## SOPs ${version}（已取代 / Superseded）
-
-**发布通道：** Release Candidate（归档）  
-**状态：** 历史误标版本线中的 tag，**不要**用于生产或新开发基线。
-
-${note}
-
-**请使用：**
-- 稳定 GA：\`v3.0.6\`（GitHub Latest）
-- 冻结线叙述：\`v3.0.4-rc.*\` 各章节与 README「最新发布」
-
-**Commit：** \`${tagSha(version).slice(0, 12)}\`
-`;
-  const path = join(OUT_DIR, `RELEASE_BODY_${version}.md`);
-  writeFileSync(path, body, 'utf8');
-  if (dryRun) {
-    console.log(`[dry-run] would create pre-release ${tag}`);
-    return;
-  }
-  if (releaseExists(tag)) {
-    sh(`gh release edit ${tag} --prerelease --notes-file "${path}" --title "${tag} (superseded)"`, {
-      stdio: 'inherit',
-    });
-    console.log(`updated superseded ${tag}`);
-    return;
-  }
-  // Tag may be local-only; push or create release against commit SHA.
-  const sha = tagSha(version);
-  try {
-    sh(`git push sops ${tag}`, { stdio: 'inherit' });
-  } catch {
-    console.warn(`push ${tag} failed or already exists; creating release with --target ${sha.slice(0, 12)}`);
-  }
-  try {
-    sh(
-      `gh release create ${tag} --prerelease --notes-file "${path}" --title "${tag} (superseded)" --target ${sha}`,
-      { stdio: 'inherit' }
-    );
-    console.log(`created superseded ${tag}`);
-  } catch (error) {
-    console.error(`could not create ${tag}:`, error.message || error);
-  }
-}
-
 function main() {
   const flags = parseArgs(process.argv.slice(2));
   const versions = flags.only ?? DEFAULT_VERSIONS;
@@ -242,7 +197,12 @@ function main() {
   for (const version of versions) {
     const tag = `v${version}`;
     try {
-      if (!releaseExists(tag) && !['3.0.5-rc.1', '3.0.5-rc.2'].includes(version)) {
+      if (isTagOnlyArchiveVersion(version)) {
+        results.push({ version, status: 'tag-only-archive' });
+        console.log(`skip ${tag}: tag-only archive`);
+        continue;
+      }
+      if (!releaseExists(tag)) {
         results.push({ version, status: 'skip-no-release' });
         console.warn(`skip ${tag}: no GitHub release`);
         continue;
@@ -259,18 +219,6 @@ function main() {
       console.error(`fail ${version}:`, error.message || error);
     }
   }
-
-  // Orphan tags → superseded pre-releases
-  createSupersededPrerelease(
-    '3.0.5-rc.1',
-    '该 tag 属于曾误标的 `3.0.5-rc` 线，内容已并入冻结线 `3.0.4-rc.*` 并收口于 GA `v3.0.5`。本 Release 仅作归档说明，避免孤儿 tag 无文档。',
-    flags.dryRun
-  );
-  createSupersededPrerelease(
-    '3.0.5-rc.2',
-    '该 tag 属于曾误标的 `3.0.5-rc` 线，内容已并入冻结线 `3.0.4-rc.*` 并收口于 GA `v3.0.5`。本 Release 仅作归档说明，避免孤儿 tag 无文档。',
-    flags.dryRun
-  );
 
   const summaryPath = join(OUT_DIR, 'SUMMARY.json');
   writeFileSync(summaryPath, `${JSON.stringify({ results, dryRun: flags.dryRun }, null, 2)}\n`, 'utf8');
