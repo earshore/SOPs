@@ -37,9 +37,6 @@ class AppCenterOverviewModule extends BaseModule {
     const html = await SafeTemplateLoader.getInstance().loadTemplate(
       'src/modules/app_center/views/overview/template.html'
     );
-    // ✅ 安全: 静态HTML模板，无用户输入
-    // 为overview页面添加淡入动画（在渲染前添加）
-    this.container.classList.add('fade-in');
     // ✅ 安全: html来自本地静态template.html，无用户输入
     setSafeHtml(this.container, html);
     renderOverviewCatalog(this.container);

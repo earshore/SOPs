@@ -7,7 +7,6 @@ import { copyTextToClipboard } from '@/common/utils/clipboard';
  * - 输入框高度自适应（initAutoHeightInputs / expandInput / restoreInput）
  * - 控制台模式切换（toggleConsoleMode）
  * - 复制 Prompt（copyPrompt）
- * - 复制 SEO 关键词（copySeoKeywords）
  * - 用 Listing Prompt 生成产品文案（handoffListingPromptToDeepChat）
  * - 清空输入（clearInputs）
  * - 报告模块全选 / 清空（selectAllReportSections / clearReportSections）
@@ -24,10 +23,8 @@ import {
   type ListingPromptSource,
 } from '@/modules/app_center/listingWorkflowHandoff';
 import type { DnaConfidence, PromptlabAlpineContext, ConsoleMode } from './types';
-import type { PromptInputs, UserProductProfile } from '@/types/state';
-import type { AnalysisReport } from '@/types/modules-business';
+import type { UserProductProfile } from '@/types/state';
 import { confirmWithModal } from '../../utils/confirmModal';
-import { promptlabService } from '../../services/promptlabService';
 import { HistoryService } from '../../services/historyService';
 
 // ==========================================
@@ -165,33 +162,6 @@ export async function copyPrompt(): Promise<void> {
     return;
   }
   showToast('Prompt 已复制', { type: 'success' });
-}
-
-function getPromptAnalysisReport(): AnalysisReport | null {
-  const analysisReport = appStore.getState().analysis.analysisReport;
-  return analysisReport && typeof analysisReport !== 'string' ? analysisReport : null;
-}
-
-function createSeoCopyInputs(ctx: PromptlabAlpineContext): PromptInputs {
-  return { ...ctx.profile, useAnalysisData: true };
-}
-
-export async function copySeoKeywords(ctx: PromptlabAlpineContext): Promise<void> {
-  const text = promptlabService.buildSeoKeywordCopyText(
-    createSeoCopyInputs(ctx),
-    getPromptAnalysisReport()
-  );
-
-  if (!text.trim()) {
-    showToast('暂无可复制的 SEO 关键词', { type: 'warning' });
-    return;
-  }
-
-  if (!(await copyTextToClipboard(text))) {
-    showToast('复制失败，请重试', { type: 'error' });
-    return;
-  }
-  showToast('SEO 关键词已复制', { type: 'success' });
 }
 
 function findCurrentListingPrompt(ctx: PromptlabAlpineContext): ListingPromptSource | null {

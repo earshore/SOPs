@@ -158,8 +158,33 @@ describe('App Center Overview', () => {
     expect(safeTemplateLoaderMocks.loadTemplate).toHaveBeenCalledWith(
       'src/modules/app_center/views/overview/template.html'
     );
-    expect(container.classList.contains('fade-in')).toBe(true);
+    expect(container.classList.contains('fade-in')).toBe(false);
     expect(container.querySelector('.app-overview-container')).not.toBeNull();
+  });
+
+  it('leaves page entry animation ownership to ModuleLoader while recent data resolves', async () => {
+    registerRecentPpcArtifact();
+    let resolveSnapshot: ((value: { id: string; rows: never[] } | null) => void) | undefined;
+    ppcSnapshotMocks.getById.mockImplementation(
+      () =>
+        new Promise(resolve => {
+          resolveSnapshot = resolve;
+        })
+    );
+    const container = document.createElement('div');
+    container.classList.add('view-fade-in-initial');
+
+    const mountPromise = overviewModule.mount(container);
+    await vi.waitFor(() => {
+      expect(container.querySelector('.app-overview-container')).not.toBeNull();
+    });
+
+    try {
+      expect(container.classList.contains('fade-in')).toBe(false);
+    } finally {
+      resolveSnapshot?.(null);
+      await mountPromise;
+    }
   });
 
   it('renders category controls, app cards, and compact rows from catalog data', async () => {

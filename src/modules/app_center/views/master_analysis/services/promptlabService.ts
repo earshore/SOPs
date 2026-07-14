@@ -1023,19 +1023,6 @@ function extractSeoTermsFromReportValue(value: unknown, max: number): string[] {
   return uniqueTextValues(value.slice(0, max).map(formatReportSeoTerm).filter(Boolean));
 }
 
-function extractSeoKeywordsFromReportValue(value: unknown, max: number): string[] {
-  if (!hasArrayItems(value)) return [];
-
-  return uniqueTextValues(value.slice(0, max).map(formatReportSeoKeyword).filter(Boolean));
-}
-
-function formatReportSeoKeyword(item: unknown): string {
-  const itemRecord = asRecord(item);
-  if (!itemRecord) return cleanText(item);
-
-  return cleanText(itemRecord.keyword ?? itemRecord.term ?? itemRecord.phrase ?? itemRecord.value);
-}
-
 function formatReportSeoTerm(item: unknown): string {
   const itemRecord = asRecord(item);
   if (!itemRecord) return cleanText(item);
@@ -1088,63 +1075,6 @@ function uniqueTextValues(values: string[]): string[] {
   });
 
   return uniqueValues;
-}
-
-/**
- * 构建 SEO 部分 (SEO Section)
- */
-function getTitleKeywordDataForCopy(
-  analysisReport: AnalysisReport | null
-): Record<string, unknown> | null {
-  if (!analysisReport) return null;
-
-  const report = getPromptReportData(analysisReport);
-  if (!report) return null;
-
-  return asRecord(report['title-keywords'] ?? report.title_keywords ?? report.title_seo_roots);
-}
-
-function getKeywordClusterDataForCopy(
-  analysisReport: AnalysisReport | null
-): Record<string, unknown> | null {
-  if (!analysisReport) return null;
-
-  const report = getPromptReportData(analysisReport);
-  if (!report) return null;
-
-  return asRecord(report.keywordClusters ?? report.keyword_clusters ?? report.keywords);
-}
-
-function getClusterKeywords(
-  clusters: Record<string, unknown> | null,
-  keys: string[],
-  max: number
-): string[] {
-  if (!clusters) return [];
-
-  return uniqueTextValues(
-    keys.flatMap(key => extractSeoKeywordsFromReportValue(clusters[key], max))
-  );
-}
-
-function buildSeoKeywordCopyText(
-  inputs: PromptInputs,
-  analysisReport: AnalysisReport | null
-): string {
-  const titleKeywordData = getTitleKeywordDataForCopy(analysisReport);
-  const keywordClusters = getKeywordClusterDataForCopy(analysisReport);
-
-  return uniqueTextValues([
-    ...splitSeoTerms(inputs.keywordsTier1),
-    ...splitSeoTerms(inputs.keywordsTier2),
-    ...extractSeoKeywordsFromReportValue(titleKeywordData?.primary_keywords, 20),
-    ...getClusterKeywords(keywordClusters, ['core', 'primary'], 20),
-    ...extractSeoKeywordsFromReportValue(titleKeywordData?.secondary_keywords, 30),
-    ...getClusterKeywords(keywordClusters, ['longTail', 'long_tail', 'secondary'], 30),
-    ...extractSeoKeywordsFromReportValue(titleKeywordData?.scene_keywords, 20),
-    ...getClusterKeywords(keywordClusters, ['intent', 'scene', 'scenes'], 20),
-    ...extractSeoKeywordsFromReportValue(titleKeywordData?.audience_keywords, 20),
-  ]).join('\n');
 }
 
 const buildSeoSection = (
@@ -1296,9 +1226,6 @@ function getMissingManualProductFields(inputs: PromptInputs): string[] {
 // ============================================================
 
 export const promptlabService = {
-  buildSeoKeywordCopyText: (inputs: PromptInputs, analysisReport: AnalysisReport | null): string =>
-    buildSeoKeywordCopyText(inputs, analysisReport),
-
   /**
    * 生成 Listing Prompt
    */

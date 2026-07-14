@@ -17,7 +17,7 @@ describe('PromptLab template accessibility semantics', () => {
       button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
     );
 
-    expect(buttonOpenings).toHaveLength(20);
+    expect(buttonOpenings).toHaveLength(19);
     expect(implicitButtons).toEqual([]);
   });
 
