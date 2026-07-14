@@ -1,15 +1,13 @@
-# Static files are served directly by Cloudflare Pages.
-# Keep SPA fallback scoped so missing /assets/* chunks return 404 instead of
-# index.html with JavaScript MIME/cache headers.
-/home  /index.html  200
-/app-center  /index.html  200
-/app-center/*  /index.html  200
-/sops  /index.html  200
-/sops/*  /index.html  200
-/amz-hub  /index.html  200
-/amz-hub/*  /index.html  200
-/more  /index.html  200
-/more/*  /index.html  200
-/sops_*  /index.html  200
-/amz_*  /index.html  200
-/more_*  /index.html  200
+# Hash URLs are canonical. Clean paths are compatibility redirects only.
+/home /#/home 302
+/app-center /#/app-center 302
+/app-center/* /#/app-center/:splat 302
+/sops /#/sops 302
+/sops/* /#/sops/:splat 302
+/amz-hub /#/amz-hub 302
+/amz-hub/* /#/amz-hub/:splat 302
+/more /#/more 302
+/more/* /#/more/:splat 302
+/sops_* /#/sops_:splat 302
+/amz_* /#/amz_:splat 302
+/more_* /#/more_:splat 302

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export interface RedirectRule {
@@ -44,11 +44,13 @@ function readRequired(root: string, name: string, errors: string[]): string {
 }
 
 export function validateStaticArtifact(root: string): string[] {
+  const resolvedRoot = resolve(root);
   const errors: string[] = [];
-  const redirectsText = readRequired(root, '_redirects', errors);
-  const headersText = readRequired(root, '_headers', errors);
-  const notFound = readRequired(root, '404.html', errors);
-  readRequired(root, 'index.html', errors);
+  const redirectsText = readRequired(resolvedRoot, '_redirects', errors);
+  const headersText = readRequired(resolvedRoot, '_headers', errors);
+  const notFound = readRequired(resolvedRoot, '404.html', errors);
+  const indexRoot = basename(resolvedRoot) === 'public' ? dirname(resolvedRoot) : resolvedRoot;
+  readRequired(indexRoot, 'index.html', errors);
 
   const rules = parseRedirectRules(redirectsText);
   for (const required of REQUIRED_REDIRECTS) {

@@ -103,4 +103,19 @@ describe('static artifact contract', () => {
     writeFileSync(join(root, '404.html'), '<script type="module" src="/src/main.ts"></script>');
     expect(validateStaticArtifact(root)).toContain('404.html must not bootstrap the application');
   });
+
+  it('accepts a Vite source layout with index.html at the project root', () => {
+    const projectRoot = makeArtifact();
+    const publicRoot = join(projectRoot, 'public');
+    mkdirSync(publicRoot);
+    for (const name of ['_redirects', '_headers', '404.html']) {
+      writeFileSync(join(publicRoot, name), readFileSync(join(projectRoot, name), 'utf8'));
+    }
+
+    expect(validateStaticArtifact(publicRoot)).toEqual([]);
+  });
+
+  it('keeps public hosting declarations release-safe', () => {
+    expect(validateStaticArtifact('public')).toEqual([]);
+  });
 });
