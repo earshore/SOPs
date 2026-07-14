@@ -100,11 +100,13 @@ Local tests do not claim to prove Cloudflare behavior. `release:production-gate`
 1. security and secret checks;
 2. type checks, lint, warning baseline, formatting, and architecture audits;
 3. full Vitest with four-dimensional coverage thresholds;
-4. one production build of `dist`;
-5. local artifact-contract verification;
-6. release smoke against that existing `dist`;
-7. isolated performance gate;
-8. release packaging, archive inspection, SBOM generation, build metadata verification, and SHA256 verification.
+4. fail-closed quality measurement and the medium-or-higher technical-debt gate;
+5. one production build of `dist`;
+6. local artifact-contract verification;
+7. the complete functional E2E inventory;
+8. release smoke against that existing `dist`;
+9. isolated performance gate;
+10. release packaging, archive inspection, SBOM generation, build metadata verification, and SHA256 verification.
 
 The command must not rebuild between smoke, performance, and packaging. All downstream checks consume the same `dist` directory.
 
@@ -260,7 +262,7 @@ Sentry remains optional for development and dry-run builds. A production artifac
 1. include the approved `VITE_SENTRY_DSN` at build time and demonstrate a controlled preview event reaching the expected Sentry project; or
 2. carry an explicit release decision accepting an unmonitored production launch.
 
-The DSN is never committed. A waiver records a non-empty reason, approving GitHub identity, and approval timestamp in `release-artifacts/release-readiness.json`. The default production verdict is blocked when neither verified evidence nor a complete waiver exists. Local release-candidate success alone does not imply monitoring is configured.
+The DSN is never committed. A waiver records a non-empty reason, approving GitHub identity, and approval timestamp in `release-artifacts/production-readiness.json`. The default production verdict is blocked when neither verified evidence nor a complete waiver exists. Local release-candidate success alone does not imply monitoring is configured.
 
 ### Production gate interface
 
@@ -271,7 +273,7 @@ Monitoring has two explicit modes:
 - `verified`: the preview is built with the approved DSN, a controlled event is triggered, and Sentry API credentials supplied only through the process environment confirm that event in the expected organization and project;
 - `waived`: the required reason, approver, and timestamp are written to the readiness record and the final human-readable verdict states that production has no application error monitoring.
 
-Secrets and DSN values are redacted from command output and readiness artifacts. The command writes `release-artifacts/release-readiness.json` with `passed`, `failed`, or `externally_unverified` for every production contract. Any failed or externally unverified required contract makes the production-ready verdict false.
+Secrets and DSN values are redacted from command output and readiness artifacts. `release-artifacts/release-readiness.json` remains the immutable, SHA256-covered release-candidate record. The command writes external verification results to `release-artifacts/production-readiness.json`, using `passed`, `failed`, or `externally_unverified` for every production contract. Any failed or externally unverified required contract makes the production-ready verdict false.
 
 ### Repository and deployment controls
 
@@ -290,8 +292,10 @@ clean checkout
   -> dependency install on supported Node
   -> security and quality checks
   -> full unit coverage
+  -> fail-closed quality + technical-debt gates
   -> one production build
   -> artifact contract
+  -> complete functional E2E inventory
   -> release smoke
   -> isolated performance gate
   -> package + SBOM + hashes
@@ -316,7 +320,7 @@ Any failed or missing node stops its path. A downstream pass cannot compensate f
 
 - Commands return a non-zero exit code for failed checks, missing evidence, malformed reports, timeout, interruption, or incomplete selection.
 - Human-readable output names the failed stage and preserves the underlying command/report path.
-- Machine-readable release-readiness output records each contract as passed, failed, or externally unverified. “Externally unverified” is never converted to passed.
+- Machine-readable `release-readiness.json` records immutable release-candidate evidence; `production-readiness.json` records each external production contract as passed, failed, or externally unverified. “Externally unverified” is never converted to passed.
 - Generated reports and timestamps remain ignored unless they are deliberate release artifacts or documentation updates.
 - GitHub quota failures are reported as unavailable infrastructure and excluded from the local product verdict; they do not convert a failed product check into a pass.
 
