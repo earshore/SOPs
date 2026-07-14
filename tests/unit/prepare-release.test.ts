@@ -39,7 +39,7 @@ describe('extractChangelogSection', () => {
 });
 
 describe('buildReleaseBody', () => {
-  it('describes v3.0.7-rc.1 as a production verification prerelease', () => {
+  it('describes v3.0.7 release candidates as production verification prereleases', () => {
     const buildReleaseBody = (
       releaseHelpers as typeof releaseHelpers & {
         buildReleaseBody?: (version: string, changelogSection: string) => string;
@@ -47,7 +47,7 @@ describe('buildReleaseBody', () => {
     ).buildReleaseBody;
 
     expect(typeof buildReleaseBody).toBe('function');
-    const body = buildReleaseBody?.('3.0.7-rc.1', '## [3.0.7-rc.1]\n\n### Fixed\n- item');
+    const body = buildReleaseBody?.('3.0.7-rc.2', '## [3.0.7-rc.2]\n\n### Fixed\n- item');
     expect(body).toContain('**发布通道：** Release Candidate');
     expect(body).toContain('**环境：** Production verification');
     expect(body).toContain('GitHub Latest 应仍指向最新 GA');

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.7-rc.2] - 2026-07-14
+
+> 生产验证候选版。GitHub Release 保持 Pre-release，Latest 继续指向稳定 GA `v3.0.6`。
+> 本版覆盖部署到 `https://sops.hongecb.store`；生产回滚目标为 `v3.0.6` 对应的上一条 Pages 部署。
+
+### Changed
+- PromptLab 移除 welcome banner 中语义重复的「复制 SEO 关键词」入口及其专用格式化链路；Listing Prompt 仍携带对应 SEO 关键词交接到 Deep Chat。
+
+### Fixed
+- 修复应用总览存在最近作业数据时，旧 `fade-in` 与模块统一入场动画重复执行导致页面加载闪烁的问题。
+
 ## [3.0.7-rc.1] - 2026-07-14
 
 > 生产验证候选版。GitHub Release 保持 Pre-release，Latest 继续指向稳定 GA `v3.0.6`。

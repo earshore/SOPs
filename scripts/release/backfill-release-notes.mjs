@@ -18,6 +18,7 @@ const OUT_DIR = join(ROOT, 'release-artifacts/backfill');
 const PRE_RE = /-(alpha|beta|rc)(\.|$)/i;
 
 const DEFAULT_VERSIONS = [
+  '3.0.7-rc.2',
   '3.0.7-rc.1',
   '3.0.6',
   '3.0.5',
@@ -99,8 +100,11 @@ function buildBody(version, section, extra = '') {
   const sha = tagSha(version);
   const shortSha = sha.slice(0, 12);
   const pre = isPre(version);
+  const productionVerification = version.startsWith('3.0.7-rc.');
   const preNote = pre
-    ? '\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA（当前为 `v3.0.6`）。\n'
+    ? productionVerification
+      ? '\n> ⚠ 预发布候选，已批准覆盖生产域进行验证；GitHub Latest 应仍指向最新 GA（当前为 `v3.0.6`）。\n'
+      : '\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA（当前为 `v3.0.6`）。\n'
     : '';
 
   const rollback =
@@ -119,7 +123,7 @@ function buildBody(version, section, extra = '') {
   return `## SOPs ${version}
 
 **发布通道：** ${channelOf(version)}  
-**环境：** ${version === '3.0.7-rc.1' ? 'Production verification' : pre ? 'Staging / 历史候选' : 'Production'}${'  '}
+**环境：** ${productionVerification ? 'Production verification' : pre ? 'Staging / 历史候选' : 'Production'}${'  '}
 **部署目标：** https://sops.hongecb.store  
 **Git tag：** v${version}  
 **Commit：** \`${shortSha}\`  

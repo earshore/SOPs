@@ -119,7 +119,7 @@ export function buildReleaseBody(version: string, changelogSection: string): str
   const sha = git('rev-parse HEAD') || process.env.GITHUB_SHA || 'unknown';
   const shortSha = sha.slice(0, 12);
   const buildTime = new Date().toISOString();
-  const productionVerification = version === '3.0.7-rc.1';
+  const productionVerification = version.startsWith('3.0.7-rc.');
   const preNote = isPreRelease(version)
     ? productionVerification
       ? '\n> ⚠ 预发布候选，已批准覆盖生产域进行验证；GitHub Latest 应仍指向最新 GA。\n'

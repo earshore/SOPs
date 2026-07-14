@@ -34,8 +34,9 @@
 - `v3.0.5-rc.1` / `v3.0.5-rc.2` 分别与 `v3.0.4-rc.9` / `v3.0.4-rc.10` 指向同一提交，仅保留为归档 tag；不得为其创建 GitHub Release，以免重复条目打乱发布页。
 - `v3.0.5`（2026-07-13）为上一 GA：收口上述 RC 线并落地发布治理；取代误打且无 Release 的旧 `v3.0.5` tag 指向。
 - `v3.0.6`（2026-07-14）为当前 GA：发布应用中心本地作业闭环与生产预览可靠性更新。
-- `v3.0.7-rc.1`（2026-07-14）为当前生产验证候选：GitHub 保持 Pre-release，Cloudflare Pages 生产域用于候选验收。
-- 下一候选：`3.0.7-rc.2`；收口目标为 `3.0.7` GA（或按变更体量升 minor）。
+- `v3.0.7-rc.1`（2026-07-14）为上一生产验证候选：完成 Keyword Hunter / PromptLab 链路收敛与历史 Release 去重。
+- `v3.0.7-rc.2`（2026-07-14）为当前生产验证候选：修复应用总览数据加载闪屏并移除 PromptLab SEO 关键词复制入口。
+- 下一候选：`3.0.7-rc.3`；收口目标为 `3.0.7` GA（或按变更体量升 minor）。
 
 ## 3. 何时创建 GitHub Release
 
@@ -103,12 +104,12 @@ Source code zip/tarball 由 GitHub 自动提供，**不能**替代 `dist` 产物
 ### 7.1 发布 RC
 
 ```bash
-# 1. 更新 package.json version，例如 3.0.7-rc.1
+# 1. 更新 package.json version，例如 3.0.7-rc.2
 # 2. 将 Unreleased 迁入 docs/CHANGELOG.md 对应章节
 # 3. 提交并推送 main
 # 4. 打 tag 并推送（触发 release workflow）
-git tag -a v3.0.7-rc.1 -m "v3.0.7-rc.1"
-git push sops v3.0.7-rc.1
+git tag -a v3.0.7-rc.2 -m "v3.0.7-rc.2"
+git push sops v3.0.7-rc.2
 ```
 
 ### 7.2 发布 GA
