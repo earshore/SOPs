@@ -52,16 +52,30 @@ function sameCloneWindow(
     return false;
   }
 
-  const overlapLines = Math.min(candidate.blockLines, existing.blockLines);
+  const candidateStart = candidate.occurrences[0];
+  const existingStart = existing.occurrences[0];
+  if (candidateStart === undefined || existingStart === undefined) {
+    return false;
+  }
+
+  const offset = candidateStart - existingStart;
+  if (offset < 0 || offset > existing.blockLines) {
+    return false;
+  }
+
   return candidate.occurrences.every((line, index) => {
     const existingLine = existing.occurrences[index];
-    return existingLine !== undefined && Math.abs(line - existingLine) < overlapLines;
+    return existingLine !== undefined && line - existingLine === offset;
   });
 }
 
 function dedupeDuplicateCandidates(
   candidates: DuplicateCandidate[]
 ): DuplicateCandidate[] {
+  if (candidates.some(candidate => candidate.occurrences.length < 2)) {
+    throw new Error('Duplicate candidates must contain at least two occurrences');
+  }
+
   const deduped: DuplicateCandidate[] = [];
   const orderedCandidates = [...candidates].sort(
     (left, right) =>
@@ -98,23 +112,30 @@ function shouldFailOnSeverity(
 
 function parseFailOnSeverity(args: string[]): FailOnSeverity {
   let selected: FailOnSeverity = 'high';
+  let hasFailOn = false;
 
   for (let index = 0; index < args.length; index++) {
-    const argument = args[index];
-    if (argument !== '--fail-on') {
-      if (argument?.startsWith('--fail-on=')) {
-        throw new Error('--fail-on must be one of: medium, high, critical');
-      }
-      continue;
+    const argument = args[index]!;
+    let value: string | undefined;
+
+    if (argument === '--fail-on') {
+      value = args[++index];
+    } else if (argument.startsWith('--fail-on=')) {
+      value = argument.slice('--fail-on='.length);
+    } else {
+      throw new Error(`Unknown argument: ${argument}`);
     }
 
-    const value = args[index + 1];
+    if (hasFailOn) {
+      throw new Error('--fail-on may only be specified once');
+    }
+    hasFailOn = true;
+
     if (!FAIL_ON_SEVERITIES.includes(value as FailOnSeverity)) {
-      throw new Error('--fail-on must be one of: medium, high, critical');
+      throw new Error('Invalid --fail-on value: expected medium, high, or critical');
     }
 
     selected = value as FailOnSeverity;
-    index++;
   }
 
   return selected;
@@ -1109,11 +1130,14 @@ function main(): void {
 // 兼容 Windows 和 Unix 系统
 const isMainModule = () => {
   if (typeof process.argv[1] === 'undefined') return false;
-  
-  const scriptPath = fileURLToPath(import.meta.url);
-  const argPath = path.resolve(process.argv[1]);
-  
-  return scriptPath === argPath;
+
+  try {
+    const scriptPath = fs.realpathSync(fileURLToPath(import.meta.url));
+    const argPath = fs.realpathSync(path.resolve(process.argv[1]));
+    return scriptPath === argPath;
+  } catch {
+    return false;
+  }
 };
 
 if (isMainModule()) {
