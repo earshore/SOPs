@@ -98,7 +98,7 @@ async function holdMockTranslationRequest(page: Page): Promise<{
 }
 
 test.describe('Keyword Hunter 处理页', () => {
-  test('恢复分析数据并支持同步回输入页', async ({ page }) => {
+  test('恢复分析数据并展示匹配统计与词云图例', async ({ page }) => {
     await openProcessWithState(
       page,
       createKeywordHunterState({
@@ -117,13 +117,11 @@ test.describe('Keyword Hunter 处理页', () => {
     await expect(page.locator('#keyword-hunter-copy-display')).toContainText(TRANSLATED_COPY);
     await expect(page.locator('#keyword-hunter-stat-matched')).toHaveText('1');
     await expect(page.locator('#keyword-hunter-stat-unmatched')).toHaveText('1');
-
-    await page.locator('#keyword-hunter-sync-to-input-btn').click();
-
-    await expect(page.locator('#keyword-hunter-module-input')).toBeVisible();
-    await expect(page.locator('#keyword-hunter-copy-input')).toHaveValue(
-      'Wireless earbuds with active noise cancelling and long battery life.'
-    );
+    await expect(page.locator('.keyword-hunter-word-legend')).toBeVisible();
+    await expect(page.locator('.keyword-hunter-word-legend-swatch--matched')).toBeVisible();
+    await expect(page.locator('.keyword-hunter-word-legend-swatch--unmatched')).toBeVisible();
+    await expect(page.locator('.keyword-hunter-word-legend-swatch--other')).toBeVisible();
+    await expect(page.locator('#keyword-hunter-sync-to-input-btn')).toHaveCount(0);
   });
 
   test('翻译期间切换页面后仍显示进行中状态', async ({ page }) => {

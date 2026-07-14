@@ -11,7 +11,6 @@ import { StorageService } from '@/services/storageService';
 const processMocks = vi.hoisted(() => {
   const template = `
     <section>
-      <button id="keyword-hunter-sync-to-input-btn"></button>
       <button id="keyword-hunter-go-analysis-btn"></button>
       <select id="keyword-hunter-translation-model-select" aria-describedby="keyword-hunter-translation-model-status"></select>
       <button id="keyword-hunter-refresh-models-btn" aria-label="重新获取 AI 翻译可用模型"><i id="keyword-hunter-refresh-models-icon"></i></button>
@@ -317,7 +316,7 @@ it('keeps process template buttons explicit about non-submit behavior', () => {
     button => !/\btype\s*=|:type\s*=|x-bind:type\s*=/.test(button)
   );
 
-  expect(buttonOpenings).toHaveLength(6);
+  expect(buttonOpenings).toHaveLength(5);
   expect(implicitButtons).toEqual([]);
 });
 
@@ -796,24 +795,9 @@ it('keeps translated text visible when snapshot persistence fails', async () => 
   });
 });
 
-it('syncs original translation text back to input and toggles floating window state', async () => {
+it('toggles floating keyword window minimize and restore state', async () => {
   vi.useFakeTimers();
-  processMocks.state.keywordTracker.translationMode = true;
-  processMocks.state.keywordTracker.paragraphs = [
-    { original: 'Original one', translation: '译文一' },
-    { original: 'Original two', translation: '译文二' },
-  ];
   await mountProcess();
-
-  click(document.querySelector('#keyword-hunter-sync-to-input-btn'));
-  await vi.waitFor(() => {
-    expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('keyword_hunter_input');
-  });
-
-  expect(processMocks.state.keywordTracker.processedCopy).toBe('Original one\nOriginal two');
-  expect(processMocks.state.keywordTracker.copyInputText).toBe('Original one\nOriginal two');
-  expect(processMocks.navigateToRouteId).toHaveBeenCalledWith('keyword_hunter_input');
-  expect(showToast).toHaveBeenCalledWith('已同步原文到输入格式化');
 
   click(document.querySelector('#keyword-hunter-minimize-keywords-btn'));
   vi.advanceTimersByTime(200);
@@ -830,6 +814,22 @@ it('syncs original translation text back to input and toggles floating window st
     document.querySelector('#keyword-hunter-keywords-floating')?.classList.contains('show')
   ).toBe(true);
   expect(processMocks.state.keywordTracker.isWindowMinimized).toBe(false);
+});
+
+it('renders word-cloud legend swatches for matched, unmatched, and other roots', async () => {
+  const template = readFileSync(
+    'src/modules/app_center/views/keyword_hunter/process/template.html',
+    'utf8'
+  );
+
+  expect(template).toContain('keyword-hunter-word-legend-swatch--matched');
+  expect(template).toContain('keyword-hunter-word-legend-swatch--unmatched');
+  expect(template).toContain('keyword-hunter-word-legend-swatch--other');
+  expect(template).toContain('已匹配词根');
+  expect(template).toContain('未匹配词根');
+  expect(template).toContain('其他词根');
+  expect(template).not.toContain('keyword-hunter-sync-to-input-btn');
+  expect(template).not.toContain('同步回输入');
 });
 
 it('navigates from process to analysis with the current copy', async () => {

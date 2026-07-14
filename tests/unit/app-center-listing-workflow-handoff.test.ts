@@ -54,14 +54,16 @@ describe('App Center Listing workflow handoff', () => {
     expect(consumeDeepChatThreadResume()).toBeNull();
   });
 
-  it('keeps SEO keyword copy but routes product-copy generation to Deep Chat', () => {
+  it('routes product-copy generation to Deep Chat from the Listing Prompt header', () => {
     const template = readFileSync(
       'src/modules/app_center/views/master_analysis/promptlab/template.html',
       'utf8'
     );
 
-    expect(template).toContain('复制 SEO 关键词');
+    expect(template).toContain('handoffListingPromptToDeepChat');
     expect(template).toContain('用此 Prompt 生成产品文案');
+    expect(template).not.toContain('复制 SEO 关键词');
+    expect(template).not.toContain('copySeoKeywords');
     expect(template).not.toContain('进入 Keyword Hunter 复核');
     expect(template).not.toContain('handoffListingPromptToKeywordHunter');
   });

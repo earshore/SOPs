@@ -858,6 +858,43 @@ describe('Prompt Generation', () => {
     );
   });
 
+  it('should not push duplicate Listing Prompt to history on repeated generate', async () => {
+    const { promptlabService } =
+      await import('@/modules/app_center/views/master_analysis/services/promptlabService');
+
+    component.generateListingPrompt();
+    component.generateListingPrompt();
+    component.generateListingPrompt();
+
+    expect(promptlabService.generateMasterPrompt).toHaveBeenCalledTimes(3);
+    expect(component.listingPromptCache).toBe('Generated Listing Prompt');
+    expect(appStore.getState().promptlab.history).toHaveLength(1);
+    expect(appStore.getState().promptlab.history?.[0]).toEqual(
+      expect.objectContaining({
+        prompt: 'Generated Listing Prompt',
+        promptType: 'listing',
+      })
+    );
+  });
+
+  it('should still push Listing Prompt when content changes', async () => {
+    const { promptlabService } =
+      await import('@/modules/app_center/views/master_analysis/services/promptlabService');
+
+    vi.mocked(promptlabService.generateMasterPrompt)
+      .mockReturnValueOnce('Generated Listing Prompt v1')
+      .mockReturnValueOnce('Generated Listing Prompt v2');
+
+    component.generateListingPrompt();
+    component.generateListingPrompt();
+
+    expect(appStore.getState().promptlab.history).toHaveLength(2);
+    expect(appStore.getState().promptlab.history?.map(item => item.prompt)).toEqual([
+      'Generated Listing Prompt v2',
+      'Generated Listing Prompt v1',
+    ]);
+  });
+
   it('should generate listing prompt from manual DNA without an analysis report', async () => {
     const { promptlabService } =
       await import('@/modules/app_center/views/master_analysis/services/promptlabService');

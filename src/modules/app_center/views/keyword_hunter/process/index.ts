@@ -1436,46 +1436,6 @@ function updateMinimizedBadge(): void {
 // Action Functions
 // ==========================================
 
-/**
- * 同步到输入模块
- */
-async function syncToInput(): Promise<void> {
-  let text = '';
-
-  // 如果是翻译模式，只提取原文
-  if (
-    appStore.getState().keywordTracker.translationMode &&
-    appStore.getState().keywordTracker.paragraphs &&
-    appStore.getState().keywordTracker.paragraphs.length > 0
-  ) {
-    // 从 paragraphs 中提取所有原文
-    text = appStore
-      .getState()
-      .keywordTracker.paragraphs.map(p =>
-        typeof p === 'object' && 'original' in p ? p.original : p
-      )
-      .filter(t => t && t.trim())
-      .join('\n');
-  } else {
-    // 普通模式：直接获取显示区域的文本
-    const display = document.getElementById('keyword-hunter-copy-display');
-    text = display ? display.innerText : '';
-  }
-
-  // 保存到 state
-  if (text && text.trim()) {
-    saveProcessCopyText(text);
-  } else {
-    showToast('没有可同步的内容', { type: 'warning' });
-    return;
-  }
-
-  showToast('已同步原文到输入格式化');
-
-  // 切换到输入模块
-  await navigateToRouteId('keyword_hunter_input');
-}
-
 async function goToAnalysis(): Promise<void> {
   saveProcessStateToState();
 
@@ -1978,13 +1938,6 @@ function setupEventListeners(container: HTMLElement): void {
   if (refreshModelsBtn) {
     addEventListener(refreshModelsBtn, 'click', () => {
       void refreshTranslationModels();
-    });
-  }
-
-  const syncBtn = document.getElementById('keyword-hunter-sync-to-input-btn');
-  if (syncBtn) {
-    addEventListener(syncBtn, 'click', () => {
-      void syncToInput();
     });
   }
 

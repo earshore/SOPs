@@ -886,6 +886,15 @@
             <div class="flex items-center gap-1.5">
               <button
                 type="button"
+                @click="handoffListingPromptToDeepChat"
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition duration-200 cursor-pointer border border-transparent hover:border-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                title="用此 Prompt 生成产品文案"
+                aria-label="用此 Prompt 生成产品文案"
+              >
+                <i class="fa-regular fa-comments text-xs"></i>
+              </button>
+              <button
+                type="button"
                 @click="copyPrompt"
                 class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition duration-200 cursor-pointer border border-transparent hover:border-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                 title="复制"
@@ -948,24 +957,6 @@
             </div>
           </div>
         </div>
-        <button
-          type="button"
-          @click="copySeoKeywords"
-          class="w-full h-11 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition duration-200 flex items-center justify-center gap-2 text-xs font-bold shadow-sm shadow-emerald-100/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
-          title="复制 AI 分析报告与产品 DNA 补充中的 SEO 搜索关键词"
-        >
-          <i class="fas fa-key text-[11px]"></i>
-          <span>复制 SEO 关键词</span>
-        </button>
-        <button
-          type="button"
-          @click="handoffListingPromptToDeepChat"
-          class="w-full h-11 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition duration-200 flex items-center justify-center gap-2 text-xs font-bold shadow-sm shadow-blue-100/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-          title="使用当前 Listing Prompt 在 Deep Chat 生成产品文案"
-        >
-          <i class="fa-regular fa-comments text-[11px]"></i>
-          <span>用此 Prompt 生成产品文案</span>
-        </button>
       </div>
     </div>
   </div>

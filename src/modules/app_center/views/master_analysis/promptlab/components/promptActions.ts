@@ -134,6 +134,36 @@ function createPromptHistoryItem(record: GeneratedPromptRecord): PromptHistoryIt
   };
 }
 
+function isSameHistoryBinding(
+  left: PromptHistoryItem['historyId'] | GeneratedPromptRecord['historyId'],
+  right: PromptHistoryItem['historyId'] | GeneratedPromptRecord['historyId']
+): boolean {
+  if (left === null || left === undefined) {
+    return right === null || right === undefined;
+  }
+  if (right === null || right === undefined) {
+    return false;
+  }
+  return String(left) === String(right);
+}
+
+/**
+ * 同一快照下，内容完全相同的 Prompt 不再重复写入历史（避免 Deep Chat 清单刷屏）。
+ */
+function hasDuplicatePromptHistory(
+  type: GeneratedPromptType,
+  prompt: string,
+  historyId: GeneratedPromptRecord['historyId']
+): boolean {
+  const history = appStore.getState().promptlab.history || [];
+  return history.some(
+    item =>
+      item.promptType === type &&
+      item.prompt === prompt &&
+      isSameHistoryBinding(item.historyId, historyId)
+  );
+}
+
 function persistPromptRecord(
   ctx: PromptlabAlpineContext,
   type: GeneratedPromptType,
@@ -144,6 +174,11 @@ function persistPromptRecord(
   const state = appStore.getState();
 
   state.setCurrentPrompt(prompt);
+
+  if (hasDuplicatePromptHistory(type, prompt, record.historyId)) {
+    return;
+  }
+
   state.addPromptHistory(createPromptHistoryItem(record));
 
   if (record.historyId === null || record.historyId === undefined) {

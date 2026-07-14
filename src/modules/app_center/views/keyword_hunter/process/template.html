@@ -164,14 +164,6 @@
               <i class="fas fa-check-circle text-[10px] text-emerald-500" aria-hidden="true"></i>
               已自动保存
             </span>
-            <!-- Sync Back -->
-            <button
-              type="button"
-              class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-semibold transition duration-200 border border-emerald-200 hover:border-emerald-300 hover:shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
-              id="keyword-hunter-sync-to-input-btn"
-            >
-              <i class="fas fa-reply text-[10px]"></i> 同步回输入
-            </button>
             <button
               type="button"
               class="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-semibold transition duration-200 border border-rose-200 hover:border-rose-300 hover:shadow-sm active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
@@ -237,19 +229,26 @@
               >
             </h3>
             <!-- Legend -->
-            <div class="flex items-center gap-3">
-              <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
-                <!-- <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-indigo-400 to-indigo-500"></div> -->
-                <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-green-400 to-green-500"></div>
+            <div class="keyword-hunter-word-legend" aria-label="词云图例">
+              <div class="keyword-hunter-word-legend-item">
+                <span
+                  class="keyword-hunter-word-legend-swatch keyword-hunter-word-legend-swatch--matched"
+                  aria-hidden="true"
+                ></span>
                 已匹配词根
               </div>
-              <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
-                <!-- <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-indigo-400 to-indigo-500"></div> -->
-                <div class="w-4 h-2 rounded-sm bg-gradient-to-r from-red-400 to-red-500"></div>
+              <div class="keyword-hunter-word-legend-item">
+                <span
+                  class="keyword-hunter-word-legend-swatch keyword-hunter-word-legend-swatch--unmatched"
+                  aria-hidden="true"
+                ></span>
                 未匹配词根
               </div>
-              <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
-                <div class="w-4 h-2 rounded-sm bg-slate-200"></div>
+              <div class="keyword-hunter-word-legend-item">
+                <span
+                  class="keyword-hunter-word-legend-swatch keyword-hunter-word-legend-swatch--other"
+                  aria-hidden="true"
+                ></span>
                 其他词根
               </div>
             </div>
