@@ -7,8 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.7-rc.1] - 2026-07-14
+
+> 生产验证候选版。GitHub Release 保持 Pre-release，Latest 继续指向稳定 GA `v3.0.6`。
+> 本版覆盖部署到 `https://sops.hongecb.store`；生产回滚目标为 `v3.0.6` 对应的上一条 Pages 部署。
+
+### Added
+- Keyword Hunter 词云增加可访问的「已匹配词根 / 未匹配词根 / 其他词根」图例和独立视觉标记。
+- PromptLab 标题区增加将当前 Listing Prompt 交接到 Deep Chat 的明确入口。
+
+### Changed
+- Keyword Hunter 处理页移除「同步回输入」旧入口，避免用户误以为处理结果需要回退到输入格式化阶段。
+- Keyword Hunter 处理页只恢复当前内存状态，不再自动载入历史匹配快照，防止旧文案和词频覆盖新的作业上下文。
+- PromptLab 保留 SEO 关键词复制能力，同时通过 Deep Chat 携带 Prompt 与对应关键词进入文案生成链路。
+- `v3.0.5-rc.1` / `v3.0.5-rc.2` 固定为仅保留 tag 的历史别名，发布同步和审计不会再次把它们创建为重复 Release。
+
 ### Fixed
-- 将重复误标的 `v3.0.5-rc.1` / `v3.0.5-rc.2` 固定为仅保留 tag 的历史别名，避免其重复 Release 混入 `v3.0.4-rc.*` 发布序列。
+- 修复同一快照、同一类型和相同内容的 Listing Prompt 被重复写入历史记录的问题。
+- 修复 PromptLab 重构时误删「复制 SEO 关键词」按钮与动作的问题。
+- 移除重复误标 Release 后恢复 `v3.0.4-rc.1` 至 `rc.11` 的连续展示顺序，同时保留原 tag 与 CHANGELOG 追溯。
 
 ## [3.0.6] - 2026-07-14
 

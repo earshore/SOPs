@@ -32,6 +32,7 @@ vi.mock('@/modules/app_center/views/master_analysis/services/promptlabService', 
   promptlabService: {
     generateMasterPrompt: vi.fn(() => 'Generated Listing Prompt'),
     generateVisualPrompt: vi.fn(() => 'Generated Visual Prompt'),
+    buildSeoKeywordCopyText: vi.fn(() => 'humidifier\ncool mist'),
   },
 }));
 
@@ -1163,6 +1164,28 @@ describe('Action Functions', () => {
     component.copyPrompt();
 
     expect(execCommandSpy).not.toHaveBeenCalled();
+
+    execCommandSpy.mockRestore();
+  });
+
+  it('should keep the SEO keyword copy action available', async () => {
+    const copySeoKeywords = (
+      component as typeof component & { copySeoKeywords?: () => Promise<void> }
+    ).copySeoKeywords;
+    expect(typeof copySeoKeywords).toBe('function');
+
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: undefined,
+    });
+    document.execCommand = vi.fn().mockReturnValue(true);
+    const execCommandSpy = vi.spyOn(document, 'execCommand');
+    const { showToast } = await import('@/common/ui');
+
+    await copySeoKeywords?.call(component);
+
+    expect(execCommandSpy).toHaveBeenCalledWith('copy');
+    expect(showToast).toHaveBeenCalledWith('SEO 关键词已复制', { type: 'success' });
 
     execCommandSpy.mockRestore();
   });

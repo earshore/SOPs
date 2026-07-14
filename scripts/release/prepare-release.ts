@@ -108,7 +108,7 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function buildReleaseBody(version: string, changelogSection: string): string {
+export function buildReleaseBody(version: string, changelogSection: string): string {
   const channel = isPreRelease(version)
     ? version.includes('-rc')
       ? 'Release Candidate'
@@ -119,8 +119,11 @@ function buildReleaseBody(version: string, changelogSection: string): string {
   const sha = git('rev-parse HEAD') || process.env.GITHUB_SHA || 'unknown';
   const shortSha = sha.slice(0, 12);
   const buildTime = new Date().toISOString();
+  const productionVerification = version === '3.0.7-rc.1';
   const preNote = isPreRelease(version)
-    ? '\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA。\n'
+    ? productionVerification
+      ? '\n> ⚠ 预发布候选，已批准覆盖生产域进行验证；GitHub Latest 应仍指向最新 GA。\n'
+      : '\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA。\n'
     : '';
 
   // Prefer full CHANGELOG section; never invent a shorter substitute.
@@ -128,7 +131,7 @@ function buildReleaseBody(version: string, changelogSection: string): string {
   return `## SOPs ${version}
 
 **发布通道：** ${channel}  
-**环境：** ${isPreRelease(version) ? 'Staging' : 'Production'}  
+**环境：** ${productionVerification ? 'Production verification' : isPreRelease(version) ? 'Staging' : 'Production'}${'  '}
 **部署目标：** https://sops.hongecb.store  
 **Git tag：** v${version}  
 **Commit：** \`${shortSha}\`  

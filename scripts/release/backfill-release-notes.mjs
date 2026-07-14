@@ -18,6 +18,7 @@ const OUT_DIR = join(ROOT, 'release-artifacts/backfill');
 const PRE_RE = /-(alpha|beta|rc)(\.|$)/i;
 
 const DEFAULT_VERSIONS = [
+  '3.0.7-rc.1',
   '3.0.6',
   '3.0.5',
   '3.0.4',
@@ -103,7 +104,9 @@ function buildBody(version, section, extra = '') {
     : '';
 
   const rollback =
-    version === '3.0.6'
+    version.startsWith('3.0.7-')
+      ? '生产回滚：`v3.0.6` 对应的上一条 Pages 部署；GitHub Latest 保持 `v3.0.6`'
+      : version === '3.0.6'
       ? '上一 GA：`v3.0.5`'
       : version === '3.0.5'
         ? '上一 GA：`v3.0.4`'
@@ -116,7 +119,7 @@ function buildBody(version, section, extra = '') {
   return `## SOPs ${version}
 
 **发布通道：** ${channelOf(version)}  
-**环境：** ${pre ? 'Staging / 历史候选' : 'Production'}  
+**环境：** ${version === '3.0.7-rc.1' ? 'Production verification' : pre ? 'Staging / 历史候选' : 'Production'}${'  '}
 **部署目标：** https://sops.hongecb.store  
 **Git tag：** v${version}  
 **Commit：** \`${shortSha}\`  

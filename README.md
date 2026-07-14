@@ -16,13 +16,22 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道 | 版本 | 说明 |
 |------|------|------|
 | **GitHub Latest（稳定 GA）** | `v3.0.6` | 生产推荐版本 |
-| package.json | `3.0.6` | 与 tag / Release 一致 |
+| 当前生产候选 | `v3.0.7-rc.1` | Pre-release，生产验证中 |
+| package.json | `3.0.7-rc.1` | 与候选 tag / Release 一致 |
 | 上一 GA | `v3.0.5` | 回滚参考 |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.6` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.7-rc.1` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
 - 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.6`。
+
+`v3.0.7-rc.1`（2026-07-14，生产验证候选）聚焦 Keyword Hunter 与 PromptLab 的链路收敛：
+
+- Keyword Hunter 词云补齐清晰图例，移除容易造成流程倒退误解的「同步回输入」。
+- 处理页不再自动恢复历史快照，避免旧文案和词频覆盖新作业。
+- PromptLab 保留 SEO 关键词复制能力，将 Listing Prompt 明确交接到 Deep Chat，并对相同 Prompt 历史去重。
+- 清理重复误标的历史 Release，同时保留 tag 与 CHANGELOG 可追溯性。
+- 本候选版覆盖生产域验证，但 GitHub Latest 仍保持稳定 GA `v3.0.6`。
 
 `v3.0.6`（2026-07-14，稳定 GA）聚焦应用中心本地作业闭环与生产可靠性：
 

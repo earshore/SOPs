@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { extractChangelogSection } from '../../scripts/release/prepare-release';
+import * as releaseHelpers from '../../scripts/release/prepare-release';
+
+const { extractChangelogSection } = releaseHelpers;
 
 describe('extractChangelogSection', () => {
   const sample = `# Changelog
@@ -33,5 +35,21 @@ describe('extractChangelogSection', () => {
 
   it('throws when the version section is missing', () => {
     expect(() => extractChangelogSection(sample, '9.9.9')).toThrow(/no section/);
+  });
+});
+
+describe('buildReleaseBody', () => {
+  it('describes v3.0.7-rc.1 as a production verification prerelease', () => {
+    const buildReleaseBody = (
+      releaseHelpers as typeof releaseHelpers & {
+        buildReleaseBody?: (version: string, changelogSection: string) => string;
+      }
+    ).buildReleaseBody;
+
+    expect(typeof buildReleaseBody).toBe('function');
+    const body = buildReleaseBody?.('3.0.7-rc.1', '## [3.0.7-rc.1]\n\n### Fixed\n- item');
+    expect(body).toContain('**发布通道：** Release Candidate');
+    expect(body).toContain('**环境：** Production verification');
+    expect(body).toContain('GitHub Latest 应仍指向最新 GA');
   });
 });
