@@ -54,6 +54,7 @@ async function saveReview(
       reviewStatus: updated.reviewStatus,
       note: updated.note,
       createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
     },
     getWorkspaceContext()
   );

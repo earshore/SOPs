@@ -136,16 +136,13 @@
           autocomplete="off"
         />
       </label>
-      <div
-        class="app-overview-recent-type-filters"
-        role="group"
-        aria-label="按作业结果类型筛选"
-      ></div>
+      <div class="app-overview-recent-type-filters" role="group" aria-label="按当前阶段筛选"></div>
       <div
         class="app-overview-recent-status-filters"
         role="group"
         aria-label="按作业状态筛选"
       ></div>
+      <div class="app-overview-recent-sort" role="group" aria-label="最近作业排序"></div>
     </div>
 
     <div class="app-overview-recent-shell" data-recent-columns="2">
@@ -202,6 +199,10 @@
           </button>
         </div>
       </div>
+      <button class="app-overview-recent-load-more hidden" type="button" data-recent-load-more>
+        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+        <span>显示更多</span>
+      </button>
     </div>
   </section>
 

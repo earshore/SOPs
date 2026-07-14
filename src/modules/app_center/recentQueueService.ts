@@ -17,6 +17,8 @@ export interface RecentQueuePreferences {
   lastOpenedAt: Record<string, string>;
 }
 
+export type RecentQueueSortMode = 'priority' | 'activity';
+
 export interface RecentQueueViewOptions {
   typeFilter?: AppCenterArtifactType | 'all';
   query?: string;
@@ -29,6 +31,7 @@ export interface RecentQueueViewOptions {
   payloadStatuses?: Readonly<Record<string, 'available' | 'missing' | 'unknown'>>;
   now?: number;
   limit?: number;
+  sortMode?: RecentQueueSortMode;
 }
 
 export interface RecentQueueItem {
@@ -40,6 +43,8 @@ export interface RecentQueueItem {
   dismissed: boolean;
   needsAttention: boolean;
   payloadStatus: 'available' | 'missing' | 'unknown';
+  stagePayloadStatuses: Readonly<Record<string, 'available' | 'missing' | 'unknown'>>;
+  hasMissingPayload: boolean;
   isGroupHeader: boolean;
   groupTitle?: string;
   progressLabel?: string;
@@ -141,6 +146,10 @@ function getTime(value: string): number {
   return Number.isFinite(time) ? time : 0;
 }
 
+function getArtifactActivityTime(artifact: AppCenterArtifactEnvelope): number {
+  return Math.max(getTime(artifact.createdAt), getTime(artifact.updatedAt || ''));
+}
+
 function artifactNeedsAttention(
   artifact: AppCenterArtifactEnvelope,
   workItem: AppCenterWorkItem | null
@@ -176,15 +185,30 @@ function sortQueueArtifacts(
   artifacts: AppCenterArtifactEnvelope[],
   workItemById: Map<string, AppCenterWorkItem>,
   pinnedIds: Set<string>,
-  lastOpenedAt: Readonly<Record<string, string>>
+  lastOpenedAt: Readonly<Record<string, string>>,
+  sortMode: RecentQueueSortMode
 ): AppCenterArtifactEnvelope[] {
-  const getRank = (artifact: AppCenterArtifactEnvelope): number[] => [
-    pinnedIds.has(artifact.id) ? 1 : 0,
-    artifactNeedsAttention(artifact, workItemById.get(artifact.workItemId) || null) ? 1 : 0,
-    getTime(lastOpenedAt[artifact.id] || ''),
-    getTime(artifact.createdAt),
-  ];
+  const getRank = (artifact: AppCenterArtifactEnvelope): number[] =>
+    getQueueRank(
+      pinnedIds.has(artifact.id),
+      artifactNeedsAttention(artifact, workItemById.get(artifact.workItemId) || null),
+      getArtifactActivityTime(artifact),
+      getTime(lastOpenedAt[artifact.id] || ''),
+      sortMode
+    );
   return [...artifacts].sort((left, right) => compareRanks(getRank(left), getRank(right)));
+}
+
+function getQueueRank(
+  pinned: boolean,
+  needsAttention: boolean,
+  activityAt: number,
+  lastOpenedAt: number,
+  sortMode: RecentQueueSortMode
+): number[] {
+  return sortMode === 'activity'
+    ? [pinned ? 1 : 0, activityAt, needsAttention ? 1 : 0, lastOpenedAt]
+    : [pinned ? 1 : 0, needsAttention ? 1 : 0, activityAt, lastOpenedAt];
 }
 
 function compareRanks(left: readonly number[], right: readonly number[]): number {
@@ -246,6 +270,7 @@ function toQueueItem(
     groupTitle?: string;
     queueId?: string;
     preferenceIds?: readonly string[];
+    stagePayloadStatuses?: Readonly<Record<string, RecentQueueItem['payloadStatus']>>;
   }
 ): RecentQueueItem {
   const progress = workItem ? getWorkItemProgress(workItem.id) : null;
@@ -258,7 +283,9 @@ function toQueueItem(
     pinned: preferenceIds.some(id => prefs.pinnedIds.includes(id)),
     dismissed: preferenceIds.some(id => prefs.dismissedIds.includes(id)),
     needsAttention: artifactNeedsAttention(artifact, workItem),
-    payloadStatus: 'unknown',
+    payloadStatus: options?.stagePayloadStatuses?.[artifact.id] || 'unknown',
+    stagePayloadStatuses: options?.stagePayloadStatuses || {},
+    hasMissingPayload: Object.values(options?.stagePayloadStatuses || {}).includes('missing'),
     isGroupHeader: Boolean(options?.isGroupHeader),
     groupTitle: options?.groupTitle,
     progressLabel: progress?.label,
@@ -276,6 +303,9 @@ interface CollapsedQueueGroup {
   dismissed: boolean;
   needsAttention: boolean;
   payloadStatus: RecentQueueItem['payloadStatus'];
+  stagePayloadStatuses: Record<string, RecentQueueItem['payloadStatus']>;
+  hasMissingPayload: boolean;
+  activityAt: number;
   lastOpenedAt: number;
 }
 
@@ -295,13 +325,16 @@ function createCollapsedQueueGroups(
 
   return [...artifactsByWorkItem.entries()].flatMap(([queueId, groupArtifacts]) => {
     const sortedArtifacts = [...groupArtifacts].sort(
-      (left, right) => getTime(right.createdAt) - getTime(left.createdAt)
+      (left, right) => getArtifactActivityTime(right) - getArtifactActivityTime(left)
     );
     const representative = sortedArtifacts[0];
     if (!representative) return [];
 
     const preferenceIds = [queueId, ...sortedArtifacts.map(artifact => artifact.id)];
     const workItem = workItemById.get(queueId) || null;
+    const stagePayloadStatuses = Object.fromEntries(
+      sortedArtifacts.map(artifact => [artifact.id, payloadStatuses?.[artifact.id] || 'unknown'])
+    );
     return [
       {
         queueId,
@@ -315,6 +348,12 @@ function createCollapsedQueueGroups(
           artifactNeedsAttention(artifact, workItem)
         ),
         payloadStatus: payloadStatuses?.[representative.id] || 'unknown',
+        stagePayloadStatuses,
+        hasMissingPayload: Object.values(stagePayloadStatuses).includes('missing'),
+        activityAt: Math.max(
+          getTime(workItem?.updatedAt || ''),
+          ...sortedArtifacts.map(getArtifactActivityTime)
+        ),
         lastOpenedAt: Math.max(...preferenceIds.map(id => getTime(prefs.lastOpenedAt[id] || ''))),
       },
     ];
@@ -333,7 +372,7 @@ function matchesCollapsedQueueFilters(
   if (query && !group.artifacts.some(artifact => matchesQuery(artifact, group.workItem, query))) {
     return false;
   }
-  if (statusFilter === 'missing') return group.payloadStatus === 'missing';
+  if (statusFilter === 'missing') return group.hasMissingPayload;
   if (statusFilter === 'actionable') return group.payloadStatus !== 'missing';
   if (statusFilter === 'review') return group.needsAttention;
   return true;
@@ -350,6 +389,7 @@ function buildCollapsedRecentQueueItems(
   const typeFilter = options.typeFilter || 'all';
   const statusFilter = options.statusFilter || 'all';
   const query = (options.query || '').trim().toLowerCase();
+  const sortMode = options.sortMode || 'priority';
   const groups = createCollapsedQueueGroups(
     artifacts,
     workItemById,
@@ -361,18 +401,20 @@ function buildCollapsedRecentQueueItems(
     .filter(group => matchesCollapsedQueueFilters(group, options, typeFilter, statusFilter, query))
     .sort((left, right) =>
       compareRanks(
-        [
-          left.pinned ? 1 : 0,
-          left.needsAttention ? 1 : 0,
+        getQueueRank(
+          left.pinned,
+          left.needsAttention,
+          left.activityAt,
           left.lastOpenedAt,
-          getTime(left.representative.createdAt),
-        ],
-        [
-          right.pinned ? 1 : 0,
-          right.needsAttention ? 1 : 0,
+          sortMode
+        ),
+        getQueueRank(
+          right.pinned,
+          right.needsAttention,
+          right.activityAt,
           right.lastOpenedAt,
-          getTime(right.representative.createdAt),
-        ]
+          sortMode
+        )
       )
     )
     .slice(0, limit)
@@ -380,9 +422,11 @@ function buildCollapsedRecentQueueItems(
       const item = toQueueItem(group.representative, group.workItem, prefs, now, {
         queueId: group.queueId,
         preferenceIds: group.preferenceIds,
+        stagePayloadStatuses: group.stagePayloadStatuses,
       });
       item.needsAttention = group.needsAttention;
       item.payloadStatus = group.payloadStatus;
+      item.hasMissingPayload = group.hasMissingPayload;
       return item;
     });
 }
@@ -405,6 +449,7 @@ export function buildRecentQueueItems(
   const now = options.now ?? Date.now();
   const limit = options.limit ?? 10;
   const workItemById = new Map(workItems.map(item => [item.id, item]));
+  const sortMode = options.sortMode || 'priority';
 
   if (options.collapseStagesByWorkItem) {
     return buildCollapsedRecentQueueItems(artifacts, workItemById, prefs, options);
@@ -423,16 +468,22 @@ export function buildRecentQueueItems(
     return matchesQueueFilters(artifact, workItem, filterContext);
   });
 
-  filtered = sortQueueArtifacts(filtered, workItemById, pinnedIds, prefs.lastOpenedAt).slice(
-    0,
-    limit
-  );
+  filtered = sortQueueArtifacts(
+    filtered,
+    workItemById,
+    pinnedIds,
+    prefs.lastOpenedAt,
+    sortMode
+  ).slice(0, limit);
 
   if (!options.groupByWorkItem) {
     return filtered.map(artifact => {
-      const item = toQueueItem(artifact, workItemById.get(artifact.workItemId) || null, prefs, now);
-      item.payloadStatus = options.payloadStatuses?.[artifact.id] || 'unknown';
-      return item;
+      const stagePayloadStatuses = {
+        [artifact.id]: options.payloadStatuses?.[artifact.id] || 'unknown',
+      };
+      return toQueueItem(artifact, workItemById.get(artifact.workItemId) || null, prefs, now, {
+        stagePayloadStatuses,
+      });
     });
   }
 
@@ -466,6 +517,8 @@ export function buildRecentQueueItems(
     groupArtifacts.forEach(artifact => {
       const item = toQueueItem(artifact, workItem, prefs, now);
       item.payloadStatus = options.payloadStatuses?.[artifact.id] || 'unknown';
+      item.stagePayloadStatuses = { [artifact.id]: item.payloadStatus };
+      item.hasMissingPayload = item.payloadStatus === 'missing';
       items.push(item);
     });
   });

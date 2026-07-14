@@ -24,7 +24,11 @@ import {
   markRecentArtifactOpened,
   type RecentQueueViewOptions,
 } from '@/modules/app_center/recentQueueService';
-import { buildResumeClipboardSummary } from '@/modules/app_center/recentArtifactPresenter';
+import {
+  buildRecentArtifactPresentation,
+  buildResumeClipboardSummary,
+} from '@/modules/app_center/recentArtifactPresenter';
+import { getComplianceReviewView } from '@/modules/app_center/complianceReviewState';
 import type { HistoryItem, KeywordHunterSnapshot, ScrapedData } from '@/types/modules-business';
 
 function createScrapedData(): ScrapedData {
@@ -274,6 +278,12 @@ describe('App Center recent queue service', () => {
     });
     expect(items[0]?.artifact.id).toBe('review');
     expect(items[0]?.needsAttention).toBe(true);
+
+    const activityItems = buildRecentQueueItems(envelopes, workItems, {
+      now: Date.parse('2026-01-01T04:00:00.000Z'),
+      sortMode: 'activity',
+    });
+    expect(activityItems[0]?.artifact.id).toBe('normal');
   });
 
   it('filters by type and search query', () => {
@@ -511,8 +521,8 @@ describe('App Center recent queue service', () => {
         id: 'compliance-001',
         checklistIds: ['restricted_words', 'brand_infringement'],
         itemStates: {
-          restricted_words: 'confirmed',
-          brand_infringement: 'skipped',
+          restricted_words: 'passed',
+          brand_infringement: 'not_applicable',
         },
         createdAt: '2026-01-01T00:40:00.000Z',
       },
@@ -528,16 +538,112 @@ describe('App Center recent queue service', () => {
     expect(getWorkItemProgress('competitor_listing:hist-001').completedTypes).toContain(
       'compliance_check'
     );
+    expect(getWorkItems().find(item => item.id === 'competitor_listing:hist-001')?.status).toBe(
+      'done'
+    );
+
+    registerComplianceCheckArtifact(
+      {
+        id: 'compliance-001',
+        checklistIds: ['restricted_words', 'brand_infringement'],
+        itemStates: {
+          restricted_words: 'passed',
+          brand_infringement: 'issue_found',
+        },
+        createdAt: '2026-01-01T00:40:00.000Z',
+        updatedAt: '2026-01-01T00:45:00.000Z',
+      },
+      {
+        workItemId: 'competitor_listing:hist-001',
+        marketplace: 'DE',
+        language: 'German',
+        asinOrSku: 'B000000001',
+        sourceRoute: 'keyword_hunter_analysis',
+        updatedAt: '2026-01-01T00:45:00.000Z',
+      }
+    );
+    expect(getWorkItemProgress('competitor_listing:hist-001').completedTypes).toContain(
+      'compliance_check'
+    );
+    expect(getWorkItems().find(item => item.id === 'competitor_listing:hist-001')?.status).toBe(
+      'review_required'
+    );
   });
 
-  it('moves a recently opened older artifact ahead of newer items', () => {
+  it('migrates legacy compliance statuses when reading saved review metadata', () => {
+    const view = getComplianceReviewView({
+      metadata: {
+        checklistIds: 'restricted_words,brand_infringement',
+        reviewStates: JSON.stringify({
+          restricted_words: 'confirmed',
+          brand_infringement: 'skipped',
+        }),
+      },
+    });
+
+    expect(view.items.map(item => item.status)).toEqual(['passed', 'not_applicable']);
+    expect(view.complete).toBe(true);
+    expect(view.notApplicableCount).toBe(1);
+  });
+
+  it('keeps newer business activity ahead of an older artifact that was only opened', () => {
     const envelopes = [
       makeEnvelope({ id: 'older', createdAt: '2026-01-01T00:00:00.000Z' }),
       makeEnvelope({ id: 'newer', createdAt: '2026-01-02T00:00:00.000Z' }),
     ];
     markRecentArtifactOpened('older', '2026-01-03T00:00:00.000Z');
     const items = buildRecentQueueItems(envelopes, [makeWorkItem()]);
-    expect(items[0]?.artifact.id).toBe('older');
+    expect(items[0]?.artifact.id).toBe('newer');
+  });
+
+  it('uses artifact updates as business activity for ordering', () => {
+    const envelopes = [
+      makeEnvelope({
+        id: 'updated',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-03T00:00:00.000Z',
+      }),
+      makeEnvelope({ id: 'newer-created', createdAt: '2026-01-02T00:00:00.000Z' }),
+    ];
+    const items = buildRecentQueueItems(envelopes, [makeWorkItem()]);
+    expect(items[0]?.artifact.id).toBe('updated');
+  });
+
+  it('retains missing payload state for every stage in a collapsed card', () => {
+    const workItemId = 'competitor_listing:hist-001';
+    const scrape = makeEnvelope({ id: 'scrape', workItemId });
+    const analysis = makeEnvelope({
+      id: 'analysis',
+      workItemId,
+      type: 'analysis_report',
+      payloadRef: 'history:hist-001#analysis',
+      createdAt: '2026-01-01T00:10:00.000Z',
+    });
+    const options = {
+      collapseStagesByWorkItem: true,
+      payloadStatuses: { scrape: 'missing', analysis: 'available' },
+    } as const;
+    const [item] = buildRecentQueueItems([scrape, analysis], [makeWorkItem()], options);
+    expect(item?.payloadStatus).toBe('available');
+    expect(item?.hasMissingPayload).toBe(true);
+    expect(item?.stagePayloadStatuses.scrape).toBe('missing');
+    expect(
+      buildRecentQueueItems([scrape, analysis], [makeWorkItem()], {
+        ...options,
+        statusFilter: 'missing',
+      })
+    ).toHaveLength(1);
+  });
+
+  it('shows multi-ASIN scope, execution time, and a meaningful artifact name', () => {
+    const presentation = buildRecentArtifactPresentation(
+      makeEnvelope({ title: '春季关键词复核' }),
+      makeWorkItem({ asinOrSku: 'B000000001, B000000002' }),
+      Date.parse('2026-01-01T04:00:00.000Z')
+    );
+    expect(presentation.primaryTitle).toBe('DE · B000000001 +1 ASIN');
+    expect(presentation.facts).toContain('名称：春季关键词复核');
+    expect(presentation.facts.some(fact => fact.startsWith('执行开始 '))).toBe(true);
   });
 
   it('builds a clipboard summary for resume context', () => {

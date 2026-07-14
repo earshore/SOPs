@@ -6,6 +6,7 @@ import { StorageService } from '@/services/storageService';
 import {
   APP_CENTER_ARTIFACTS_CHANGED,
   COMPETITOR_LISTING_PROGRESS_TYPES,
+  KEYWORD_REVIEW_PROGRESS_TYPES,
   getAllArtifacts,
   getArtifactsForWorkItem,
   getWorkItemProgress,
@@ -14,6 +15,7 @@ import {
   registerComplianceCheckArtifact,
   type AppCenterArtifactEnvelope,
   type AppCenterArtifactType,
+  type ArtifactsChangedPayload,
 } from '../../artifactEnvelopeService';
 import {
   buildResumePlanAsync,
@@ -33,12 +35,15 @@ import {
   unpinRecentArtifact,
   undismissRecentArtifact,
   type RecentQueueItem,
+  type RecentQueueSortMode,
 } from '../../recentQueueService';
 import { getWorkspaceContext } from '../../workspaceContext';
+import { getComplianceReviewView } from '../../complianceReviewState';
 import { getAppCenterWorkflowDefinition } from '../../workflowDefinitions';
 import { createComplianceReviewPanel } from './recentComplianceReview';
 
 const RECENT_ARTIFACT_LIMIT = 10;
+const PAYLOAD_STATUS_CACHE_TTL = 5_000;
 const RECENT_COLUMNS_STORAGE_KEY = 'app_center_overview_recent_columns_v1';
 const DEFAULT_RECENT_COLUMNS: RecentColumns = 2;
 
@@ -55,7 +60,7 @@ const RECENT_ARTIFACT_ICONS: Record<AppCenterArtifactType, string> = {
   compliance_check: 'fas fa-shield-halved',
 };
 
-type RecentJourneyStepState = 'complete' | 'current' | 'upcoming';
+type RecentJourneyStepState = 'complete' | 'current' | 'upcoming' | 'issue' | 'unavailable';
 
 interface RecentJourneyStep {
   id: string;
@@ -70,6 +75,7 @@ interface RecentJourneyStep {
 interface RecentJourney {
   currentLabel: string;
   complete: boolean;
+  issueCount: number;
   steps: RecentJourneyStep[];
 }
 
@@ -98,10 +104,17 @@ const STATUS_FILTERS: Array<{
   { id: 'missing', label: '数据不可用' },
 ];
 
+const SORT_OPTIONS: Array<{ id: RecentQueueSortMode; label: string }> = [
+  { id: 'priority', label: '需处理优先' },
+  { id: 'activity', label: '最近更新' },
+];
+
 interface RecentPanelState {
   typeFilter: AppCenterArtifactType | 'all';
   statusFilter: 'all' | 'actionable' | 'review' | 'missing';
   query: string;
+  sortMode: RecentQueueSortMode;
+  visibleLimit: number;
   columns: RecentColumns;
   showDismissed: boolean;
   lastRemovedQueueId: string;
@@ -111,6 +124,11 @@ let unsubscribers: Array<() => void> = [];
 let renderSequence = 0;
 const openComplianceDialogIds = new Set<string>();
 let pendingFocusSelector = '';
+let searchDebounceTimer: number | undefined;
+const payloadStatusCache = new Map<
+  string,
+  { signature: string; checkedAt: number; status: RecentQueueItem['payloadStatus'] }
+>();
 
 function parseRecentColumns(value: string | undefined): RecentColumns | null {
   if (value === '1' || value === '2' || value === '3') {
@@ -148,18 +166,34 @@ function applyRecentColumns(
   }
 }
 
-async function getQueueItems(state: RecentPanelState): Promise<RecentQueueItem[]> {
+async function resolveCachedPayloadStatus(
+  artifact: AppCenterArtifactEnvelope
+): Promise<RecentQueueItem['payloadStatus']> {
+  const signature = `${artifact.payloadRef}:${artifact.updatedAt || artifact.createdAt}`;
+  const cached = payloadStatusCache.get(artifact.id);
+  if (
+    cached &&
+    cached.signature === signature &&
+    Date.now() - cached.checkedAt < PAYLOAD_STATUS_CACHE_TTL
+  ) {
+    return cached.status;
+  }
+  const status = await resolveResumePayloadStatusAsync(artifact);
+  payloadStatusCache.set(artifact.id, { signature, checkedAt: Date.now(), status });
+  return status;
+}
+
+async function getQueueItems(
+  state: RecentPanelState
+): Promise<{ items: RecentQueueItem[]; total: number }> {
   const artifacts = getAllArtifacts();
   const workItems = getWorkItems();
   const payloadStatuses = Object.fromEntries(
     await Promise.all(
-      artifacts.map(async artifact => [
-        artifact.id,
-        await resolveResumePayloadStatusAsync(artifact),
-      ])
+      artifacts.map(async artifact => [artifact.id, await resolveCachedPayloadStatus(artifact)])
     )
   );
-  return buildRecentQueueItems(artifacts, workItems, {
+  const allItems = buildRecentQueueItems(artifacts, workItems, {
     typeFilter: state.typeFilter,
     statusFilter: state.statusFilter,
     payloadStatuses,
@@ -167,8 +201,10 @@ async function getQueueItems(state: RecentPanelState): Promise<RecentQueueItem[]
     collapseStagesByWorkItem: true,
     includeDismissed: state.showDismissed,
     dismissedOnly: state.showDismissed,
-    limit: RECENT_ARTIFACT_LIMIT,
+    sortMode: state.sortMode,
+    limit: Number.MAX_SAFE_INTEGER,
   });
+  return { items: allItems.slice(0, state.visibleLimit), total: allItems.length };
 }
 
 async function handleResume(
@@ -255,7 +291,7 @@ function createGroupHeader(item: RecentQueueItem): HTMLElement {
   return header;
 }
 
-function createRecentMetaRow(item: RecentQueueItem, missing: boolean): HTMLElement {
+function createRecentMetaRow(item: RecentQueueItem): HTMLElement {
   const { presentation } = item;
   const metaRow = document.createElement('div');
   metaRow.className = 'app-overview-recent-meta-row';
@@ -273,10 +309,11 @@ function createRecentMetaRow(item: RecentQueueItem, missing: boolean): HTMLEleme
     metaRow.append(badge);
   }
 
-  if (missing) {
+  if (item.hasMissingPayload) {
     const missingBadge = document.createElement('span');
     missingBadge.className = 'app-overview-recent-missing-badge';
-    missingBadge.textContent = '原始数据不可用';
+    missingBadge.textContent =
+      item.payloadStatus === 'missing' ? '当前阶段数据不可用' : '部分历史数据不可用';
     metaRow.append(missingBadge);
   }
 
@@ -289,7 +326,7 @@ function createRecentTime(item: RecentQueueItem): HTMLTimeElement {
   time.className = presentation.isFresh
     ? 'app-overview-recent-time app-overview-recent-time--fresh'
     : 'app-overview-recent-time';
-  time.dateTime = artifact.createdAt;
+  time.dateTime = artifact.updatedAt || artifact.createdAt;
   time.textContent = presentation.relativeTime || presentation.absoluteTime;
   if (presentation.relativeTime && presentation.absoluteTime) {
     time.setAttribute('title', presentation.absoluteTime);
@@ -306,61 +343,77 @@ function getPpcJourney(item: RecentQueueItem): RecentJourney {
     artifact: item.artifact,
     mode: 'open',
   } as const;
+  const unavailable = item.payloadStatus === 'missing';
   return {
     currentLabel: complete ? '全部完成' : '人工复核',
     complete,
+    issueCount: 0,
     steps: [
       {
         id: 'suggestions',
         label: '生成建议',
-        state: 'complete',
-        action: openAction,
+        state: unavailable ? 'unavailable' : 'complete',
+        action: unavailable ? null : openAction,
       },
       {
         id: 'manual_review',
         label: '人工复核',
-        state: complete ? 'complete' : 'current',
-        action: openAction,
+        state: unavailable ? 'unavailable' : complete ? 'complete' : 'current',
+        action: unavailable ? null : openAction,
       },
     ],
   };
 }
 
-function getCompetitorListingJourney(item: RecentQueueItem): RecentJourney {
-  const workflow = getAppCenterWorkflowDefinition('competitor_listing');
+function getSequentialJourney(
+  item: RecentQueueItem,
+  workflowId: 'competitor_listing' | 'keyword_review',
+  progressTypes: readonly AppCenterArtifactType[]
+): RecentJourney {
+  const workflow = getAppCenterWorkflowDefinition(workflowId);
   const progress = getWorkItemProgress(item.artifact.workItemId);
   const artifacts = getArtifactsForWorkItem(item.artifact.workItemId);
-  const reachedTypes = new Set(artifacts.map(artifact => artifact.type));
-  reachedTypes.add(item.artifact.type);
 
-  const lastType = COMPETITOR_LISTING_PROGRESS_TYPES.at(-1);
+  const lastType = progressTypes.at(-1);
   const complete = Boolean(lastType && progress.completedTypes.includes(lastType));
-  const highestReachedIndex = COMPETITOR_LISTING_PROGRESS_TYPES.reduce(
-    (highest, type, index) => (reachedTypes.has(type) ? index : highest),
-    -1
-  );
-  const resolvedCurrentIndex = reachedTypes.has('scrape_history')
-    ? Math.min(progress.completedTypes.length, workflow.steps.length - 1)
-    : Math.min(Math.max(highestReachedIndex + 1, 0), workflow.steps.length - 1);
+  const resolvedCurrentIndex = Math.min(progress.completedTypes.length, workflow.steps.length - 1);
+  const complianceArtifact = artifacts.find(artifact => artifact.type === 'compliance_check');
+  const complianceReached = resolvedCurrentIndex === workflow.steps.length - 1;
+  const issueCount =
+    complianceArtifact && complianceReached
+      ? getComplianceReviewView(complianceArtifact).issueCount
+      : 0;
 
   return {
-    currentLabel: complete
-      ? '全部完成'
-      : workflow.steps[resolvedCurrentIndex]?.title || workflow.steps[0]?.title || '数据采集',
+    currentLabel:
+      issueCount > 0
+        ? `合规复核发现 ${issueCount} 项问题`
+        : complete
+          ? '全部完成'
+          : workflow.steps[resolvedCurrentIndex]?.title || workflow.steps[0]?.title || '数据采集',
     complete,
+    issueCount,
     steps: workflow.steps.map((step, index) => {
-      const state: RecentJourneyStepState = complete
+      let state: RecentJourneyStepState = complete
         ? 'complete'
         : index < resolvedCurrentIndex
           ? 'complete'
           : index === resolvedCurrentIndex
             ? 'current'
             : 'upcoming';
-      const stageType = COMPETITOR_LISTING_PROGRESS_TYPES[index];
+      const stageType = progressTypes[index];
       const stageArtifact = artifacts.find(artifact => artifact.type === stageType) || null;
-      const previousType = COMPETITOR_LISTING_PROGRESS_TYPES[index - 1];
+      const previousType = progressTypes[index - 1];
       const previousArtifact = artifacts.find(artifact => artifact.type === previousType);
-      const action = getJourneyStepAction(stageType, state, stageArtifact, previousArtifact);
+      const action = getJourneyStepAction(
+        stageType,
+        state,
+        stageArtifact,
+        previousArtifact,
+        item.stagePayloadStatuses
+      );
+      if (stageType === 'compliance_check' && issueCount > 0 && complete) state = 'issue';
+      else if (state !== 'upcoming' && action === null) state = 'unavailable';
       return { id: step.id, label: step.title, state, action };
     }),
   };
@@ -370,21 +423,26 @@ function getJourneyStepAction(
   stageType: AppCenterArtifactType | undefined,
   state: RecentJourneyStepState,
   stageArtifact: AppCenterArtifactEnvelope | null,
-  previousArtifact: AppCenterArtifactEnvelope | undefined
+  previousArtifact: AppCenterArtifactEnvelope | undefined,
+  payloadStatuses: Readonly<Record<string, 'available' | 'missing' | 'unknown'>>
 ): RecentJourneyStep['action'] {
   if (stageType === 'compliance_check' && state !== 'upcoming') {
     return { kind: 'compliance', artifact: stageArtifact };
   }
   if (state === 'complete' && stageArtifact) {
+    if (payloadStatuses[stageArtifact.id] === 'missing') return null;
     return { kind: 'resume', artifact: stageArtifact, mode: 'open' };
   }
   if (state === 'current' && previousArtifact) {
+    if (payloadStatuses[previousArtifact.id] === 'missing') return null;
     return { kind: 'resume', artifact: previousArtifact, mode: 'continue' };
   }
   return null;
 }
 
 function getJourneyStepAriaLabel(step: RecentJourneyStep): string {
+  if (step.state === 'unavailable') return `${step.label}，本地数据不可用`;
+  if (step.state === 'issue') return `${step.label}，发现待处理问题`;
   if (step.action?.kind === 'compliance') {
     return `${step.action.artifact ? '查看' : '开始'}合规复核，${step.state === 'complete' ? '已完成' : '当前阶段'}`;
   }
@@ -417,7 +475,10 @@ function createJourneyStepButton(
     if (step.action?.kind === 'compliance') {
       onCompliance(step.action.artifact);
     } else if (step.action?.kind === 'resume') {
-      void handleResume(item, step.action.artifact, step.action.mode);
+      button.disabled = true;
+      void handleResume(item, step.action.artifact, step.action.mode).finally(() => {
+        if (button.isConnected) button.disabled = false;
+      });
     }
   });
 
@@ -431,25 +492,37 @@ function createJourneyStepButton(
   return button;
 }
 
+function getRecentJourney(item: RecentQueueItem): RecentJourney {
+  if (item.workItem?.type === 'ppc_review' || item.artifact.type === 'ppc_action_list') {
+    return getPpcJourney(item);
+  }
+  if (item.workItem?.type === 'keyword_review') {
+    return getSequentialJourney(item, 'keyword_review', KEYWORD_REVIEW_PROGRESS_TYPES);
+  }
+  return getSequentialJourney(item, 'competitor_listing', COMPETITOR_LISTING_PROGRESS_TYPES);
+}
+
 function createRecentJourney(
   item: RecentQueueItem,
   compliancePanelId: string,
   onCompliance: (artifact: AppCenterArtifactEnvelope | null) => void
 ): HTMLElement | null {
   if (item.workItem?.type === 'npi_reference') return null;
-  const journey =
-    item.workItem?.type === 'ppc_review' || item.artifact.type === 'ppc_action_list'
-      ? getPpcJourney(item)
-      : getCompetitorListingJourney(item);
+  const journey = getRecentJourney(item);
 
   const container = document.createElement('div');
   container.className = 'app-overview-recent-journey';
+  if (journey.issueCount > 0) container.classList.add('app-overview-recent-journey--issue');
   if (journey.steps.length <= 2) {
     container.classList.add('app-overview-recent-journey--short');
   }
   container.setAttribute(
     'aria-label',
-    journey.complete ? '作业链路：全部完成' : `作业链路：当前位于${journey.currentLabel}`
+    journey.issueCount > 0
+      ? `作业链路：${journey.currentLabel}`
+      : journey.complete
+        ? '作业链路：全部完成'
+        : `作业链路：当前位于${journey.currentLabel}`
   );
 
   const heading = document.createElement('div');
@@ -458,7 +531,12 @@ function createRecentJourney(
   title.textContent = '作业链路';
   const current = document.createElement('span');
   current.className = 'app-overview-recent-journey-current';
-  current.textContent = journey.complete ? '全部完成' : `当前：${journey.currentLabel}`;
+  current.textContent =
+    journey.issueCount > 0
+      ? journey.currentLabel
+      : journey.complete
+        ? '全部完成'
+        : `当前：${journey.currentLabel}`;
   heading.append(title, current);
 
   const steps = document.createElement('ol');
@@ -479,7 +557,6 @@ function createRecentJourney(
 
 function createRecentUtilityActions(
   item: RecentQueueItem,
-  onRefresh: () => void,
   onRemoved: (queueId: string) => void
 ): HTMLElement[] {
   const { queueId } = item;
@@ -496,7 +573,6 @@ function createRecentUtilityActions(
       onClick: () => {
         if (item.pinned) unpinRecentArtifact(queueId);
         else pinRecentArtifact(queueId);
-        onRefresh();
       },
     }),
     createToolbarButton({
@@ -520,7 +596,6 @@ function createRecentUtilityActions(
             onClick: () => {
               undismissRecentArtifact(queueId);
               showToast('已恢复到最近作业', { type: 'success' });
-              onRefresh();
             },
           }
         : {
@@ -531,8 +606,8 @@ function createRecentUtilityActions(
             icon: 'fas fa-eye-slash',
             iconOnly: true,
             onClick: () => {
-              dismissRecentArtifact(queueId);
               onRemoved(queueId);
+              dismissRecentArtifact(queueId);
             },
           }
     ),
@@ -541,14 +616,13 @@ function createRecentUtilityActions(
 
 function createRecentCardCorner(
   item: RecentQueueItem,
-  onRefresh: () => void,
   onRemoved: (queueId: string) => void
 ): HTMLElement {
   const corner = document.createElement('div');
   corner.className = 'app-overview-recent-card-corner';
   const tools = document.createElement('div');
   tools.className = 'app-overview-recent-card-tools';
-  const buttons = createRecentUtilityActions(item, onRefresh, onRemoved);
+  const buttons = createRecentUtilityActions(item, onRemoved);
   buttons.forEach(button => {
     button.dataset.tooltip = button.getAttribute('aria-label') || '';
   });
@@ -605,10 +679,12 @@ function createComplianceArtifact(item: RecentQueueItem): AppCenterArtifactEnvel
       artifact => artifact.type === 'listing_review'
     ) || item.artifact;
   const snapshotId = sourceArtifact.payloadRef.replace(/^keyword_snapshot:/, '');
+  const createdAt = new Date().toISOString();
   return registerComplianceCheckArtifact(
     {
       id: `review-${snapshotId}`,
-      createdAt: new Date().toISOString(),
+      createdAt,
+      updatedAt: createdAt,
       note: '基于已完成的文案评审进行人工合规复核',
     },
     {
@@ -642,14 +718,14 @@ function handleComplianceNode(
   onRefresh();
 }
 
-function createRecentCardBody(item: RecentQueueItem, missing: boolean): HTMLElement {
+function createRecentCardBody(item: RecentQueueItem): HTMLElement {
   const { presentation } = item;
   const body = document.createElement('div');
   body.className = 'app-overview-recent-body';
   const title = document.createElement('strong');
   title.className = 'app-overview-recent-title';
   title.textContent = presentation.primaryTitle;
-  body.append(createRecentMetaRow(item, missing), title);
+  body.append(createRecentMetaRow(item), title);
 
   if (presentation.facts.length === 0) return body;
   const facts = document.createElement('div');
@@ -669,8 +745,7 @@ function createComplianceDialog(
   el: HTMLElement,
   item: RecentQueueItem,
   artifact: AppCenterArtifactEnvelope,
-  dialogId: string,
-  onRefresh: () => void
+  dialogId: string
 ): HTMLDialogElement {
   const dialog = document.createElement('dialog');
   dialog.id = dialogId;
@@ -700,7 +775,6 @@ function createComplianceDialog(
 
   const panel = createComplianceReviewPanel(artifact, item.workItem, true, itemId => {
     pendingFocusSelector = itemId ? `#${dialogId} [data-compliance-item-id="${itemId}"]` : '';
-    onRefresh();
   });
   panel.id = `${dialogId}-panel`;
   surface.append(header, panel);
@@ -722,11 +796,10 @@ function appendComplianceDialog(
   el: HTMLElement,
   item: RecentQueueItem,
   artifact: AppCenterArtifactEnvelope | null,
-  dialogId: string,
-  onRefresh: () => void
+  dialogId: string
 ): void {
   if (!artifact) return;
-  el.append(createComplianceDialog(el, item, artifact, dialogId, onRefresh));
+  el.append(createComplianceDialog(el, item, artifact, dialogId));
 }
 
 function buildRecentCardAriaLabel(item: RecentQueueItem, missing: boolean): string {
@@ -736,7 +809,7 @@ function buildRecentCardAriaLabel(item: RecentQueueItem, missing: boolean): stri
     presentation.primaryTitle,
     ...presentation.facts,
     presentation.relativeTime || presentation.absoluteTime,
-    missing ? '原始数据不可用' : '',
+    missing ? '部分作业数据不可用' : '',
     item.needsAttention ? '需人工复核' : '',
   ]
     .filter(Boolean)
@@ -749,7 +822,7 @@ function createRecentArtifactItem(
   onRemoved: (queueId: string) => void
 ): HTMLElement {
   const { artifact } = item;
-  const missing = item.payloadStatus === 'missing';
+  const missing = item.hasMissingPayload;
 
   const el = document.createElement('article');
   el.className = `app-overview-recent-item app-overview-recent-item--${artifact.type}`;
@@ -768,16 +841,12 @@ function createRecentArtifactItem(
   iconBox.setAttribute('aria-hidden', 'true');
   iconBox.append(createIcon(RECENT_ARTIFACT_ICONS[artifact.type]));
 
-  el.append(
-    iconBox,
-    createRecentCardBody(item, missing),
-    createRecentCardCorner(item, onRefresh, onRemoved)
-  );
+  el.append(iconBox, createRecentCardBody(item), createRecentCardCorner(item, onRemoved));
   const journey = createRecentJourney(item, complianceDialogId, complianceArtifact => {
     handleComplianceNode(item, complianceArtifact, el, complianceDialogId, onRefresh);
   });
   if (journey) el.append(journey);
-  appendComplianceDialog(el, item, complianceArtifact, complianceDialogId, onRefresh);
+  appendComplianceDialog(el, item, complianceArtifact, complianceDialogId);
   el.setAttribute('aria-label', buildRecentCardAriaLabel(item, missing));
   return el;
 }
@@ -820,12 +889,13 @@ function renderTypeFilters(
 
   row.replaceChildren(
     createRecentFilterDirectory({
-      label: '结果类型',
-      ariaLabel: '按作业结果类型筛选',
+      label: '当前阶段',
+      ariaLabel: '按当前阶段筛选',
       filters: TYPE_FILTERS,
       value: state.typeFilter,
       onChange: value => {
         state.typeFilter = value;
+        state.visibleLimit = RECENT_ARTIFACT_LIMIT;
         onChange();
       },
     })
@@ -847,6 +917,29 @@ function renderStatusFilters(
       value: state.statusFilter,
       onChange: value => {
         state.statusFilter = value;
+        state.visibleLimit = RECENT_ARTIFACT_LIMIT;
+        onChange();
+      },
+    })
+  );
+}
+
+function renderSortControl(
+  container: HTMLElement,
+  state: RecentPanelState,
+  onChange: () => void
+): void {
+  const row = container.querySelector<HTMLElement>('.app-overview-recent-sort');
+  if (!row) return;
+  row.replaceChildren(
+    createRecentFilterDirectory({
+      label: '排序',
+      ariaLabel: '最近作业排序',
+      filters: SORT_OPTIONS,
+      value: state.sortMode,
+      onChange: value => {
+        state.sortMode = value;
+        state.visibleLimit = RECENT_ARTIFACT_LIMIT;
         onChange();
       },
     })
@@ -910,7 +1003,7 @@ async function renderRecentList(container: HTMLElement, state: RecentPanelState)
 
   const currentRender = ++renderSequence;
   const empty = container.querySelector<HTMLElement>('.app-overview-recent-empty');
-  const items = await getQueueItems(state);
+  const { items, total } = await getQueueItems(state);
   if (currentRender !== renderSequence) return;
   const fragment = document.createDocumentFragment();
 
@@ -930,7 +1023,6 @@ async function renderRecentList(container: HTMLElement, state: RecentPanelState)
           showToast('已从最近作业移除，可使用“撤销”恢复。', {
             type: 'success',
           });
-          void renderRecentList(container, state);
         }
       )
     );
@@ -951,8 +1043,12 @@ async function renderRecentList(container: HTMLElement, state: RecentPanelState)
 
   const badge = container.querySelector<HTMLElement>('.app-overview-recent-count-badge');
   if (badge) {
-    badge.textContent = `显示 ${items.filter(item => !item.isGroupHeader).length} 项`;
+    const visibleCount = items.filter(item => !item.isGroupHeader).length;
+    badge.textContent =
+      total > visibleCount ? `显示 ${visibleCount} / 共 ${total} 项` : `显示 ${visibleCount} 项`;
   }
+  const loadMore = container.querySelector<HTMLButtonElement>('[data-recent-load-more]');
+  loadMore?.classList.toggle('hidden', items.length >= total || total === 0);
   container
     .querySelector<HTMLButtonElement>('[data-recent-undo-remove]')
     ?.classList.toggle('hidden', !state.lastRemovedQueueId);
@@ -973,6 +1069,8 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
     typeFilter: 'all',
     statusFilter: 'all',
     query: '',
+    sortMode: 'priority',
+    visibleLimit: RECENT_ARTIFACT_LIMIT,
     columns: getStoredRecentColumns(),
     showDismissed: false,
     lastRemovedQueueId: '',
@@ -983,6 +1081,9 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
       void refresh();
     });
     renderStatusFilters(container, state, () => {
+      void refresh();
+    });
+    renderSortControl(container, state, () => {
       void refresh();
     });
     await renderRecentList(container, state);
@@ -1003,22 +1104,35 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
   const searchInput = container.querySelector<HTMLInputElement>('#app-overview-recent-search');
   searchInput?.addEventListener('input', () => {
     state.query = searchInput.value.trim();
-    void renderRecentList(container, state);
+    state.visibleLimit = RECENT_ARTIFACT_LIMIT;
+    if (searchDebounceTimer !== undefined) window.clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = window.setTimeout(() => {
+      searchDebounceTimer = undefined;
+      void renderRecentList(container, state);
+    }, 160);
   });
 
   const removedBtn = container.querySelector<HTMLButtonElement>('[data-recent-removed-toggle]');
   removedBtn?.addEventListener('click', () => {
     state.showDismissed = !state.showDismissed;
+    state.visibleLimit = RECENT_ARTIFACT_LIMIT;
     void refresh();
   });
+
+  container
+    .querySelector<HTMLButtonElement>('[data-recent-load-more]')
+    ?.addEventListener('click', () => {
+      state.visibleLimit += RECENT_ARTIFACT_LIMIT;
+      void renderRecentList(container, state);
+    });
 
   const undoButton = container.querySelector<HTMLButtonElement>('[data-recent-undo-remove]');
   undoButton?.addEventListener('click', () => {
     if (!state.lastRemovedQueueId) return;
-    undismissRecentArtifact(state.lastRemovedQueueId);
+    const queueId = state.lastRemovedQueueId;
     state.lastRemovedQueueId = '';
+    undismissRecentArtifact(queueId);
     showToast('已恢复到最近作业', { type: 'success' });
-    void refresh();
   });
 
   const clearRecentFilters = container.querySelector<HTMLButtonElement>(
@@ -1028,13 +1142,19 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
     state.query = '';
     state.typeFilter = 'all';
     state.statusFilter = 'all';
+    state.sortMode = 'priority';
+    state.visibleLimit = RECENT_ARTIFACT_LIMIT;
     state.showDismissed = false;
     if (searchInput) searchInput.value = '';
     void refresh();
   });
 
-  const unsubscribe = eventBus.on(APP_CENTER_ARTIFACTS_CHANGED, () => {
-    if (!container.isConnected) return;
+  const unsubscribe = eventBus.on(APP_CENTER_ARTIFACTS_CHANGED, payload => {
+    const change = payload as ArtifactsChangedPayload;
+    if (change.reason === 'clear') payloadStatusCache.clear();
+    else if (change.reason === 'upsert' && change.artifactId) {
+      payloadStatusCache.delete(change.artifactId);
+    }
     void renderRecentList(container, state);
   });
   unsubscribers.push(unsubscribe);
@@ -1044,8 +1164,11 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
 
 export function cleanupRecentPanel(): void {
   renderSequence += 1;
+  if (searchDebounceTimer !== undefined) window.clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = undefined;
   openComplianceDialogIds.clear();
   pendingFocusSelector = '';
+  payloadStatusCache.clear();
   unsubscribers.forEach(unsub => unsub());
   unsubscribers = [];
 }

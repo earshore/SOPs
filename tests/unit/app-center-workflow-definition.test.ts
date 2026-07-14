@@ -49,4 +49,14 @@ describe('App Center workflow definitions', () => {
       expect(sopsRouteIds.has(item.routeId), item.id).toBe(true);
     });
   });
+
+  it('defines a partial workflow for standalone Keyword Hunter work', () => {
+    const workflow = getAppCenterWorkflowDefinition('keyword_review');
+    expect(workflow.steps.map(step => step.id)).toEqual([
+      'keyword_review',
+      'listing_review',
+      'compliance_review',
+    ]);
+    expect(workflow.primaryRouteId).toBe('keyword_hunter_process');
+  });
 });

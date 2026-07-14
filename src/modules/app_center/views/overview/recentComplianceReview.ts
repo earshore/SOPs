@@ -15,8 +15,9 @@ import type { AppCenterWorkspaceContext } from '../../workspaceContext';
 
 const STATUS_OPTIONS: ReadonlyArray<{ value: ComplianceReviewStatus; label: string }> = [
   { value: 'pending', label: '待复核' },
-  { value: 'confirmed', label: '已人工确认' },
-  { value: 'skipped', label: '暂不处理' },
+  { value: 'passed', label: '通过' },
+  { value: 'issue_found', label: '发现问题' },
+  { value: 'not_applicable', label: '不适用' },
 ];
 
 function buildContext(
@@ -47,6 +48,7 @@ function saveComplianceReview(
       checklistIds: Object.keys(states),
       itemStates: states,
       createdAt: artifact.createdAt,
+      updatedAt: new Date().toISOString(),
       note,
     },
     buildContext(artifact, workItem)
@@ -55,13 +57,14 @@ function saveComplianceReview(
 
 function createStatusSelect(
   itemId: string,
+  itemLabel: string,
   status: ComplianceReviewStatus,
   onChange: (status: ComplianceReviewStatus) => void
 ): HTMLSelectElement {
   const select = document.createElement('select');
   select.className = 'app-overview-compliance-status';
   select.dataset.complianceItemId = itemId;
-  select.setAttribute('aria-label', '人工复核状态');
+  select.setAttribute('aria-label', `${itemLabel}状态`);
   STATUS_OPTIONS.forEach(option => {
     const element = document.createElement('option');
     element.value = option.value;
@@ -111,16 +114,17 @@ export function createComplianceReviewPanel(
     openButton.type = 'button';
     openButton.className = 'app-overview-compliance-open';
     openButton.textContent = '打开检查项';
+    openButton.setAttribute('aria-label', `打开${item.label}检查项`);
     openButton.addEventListener('click', () => {
       void navigateToRouteId(item.routeId).then(ok => {
         if (!ok) showToast('未能打开合规检查项，请重试。', { type: 'error' });
       });
     });
 
-    const select = createStatusSelect(item.id, item.status, status => {
+    const select = createStatusSelect(item.id, item.label, item.status, status => {
       states[item.id] = status;
-      saveComplianceReview(artifact, workItem, states, view.note);
       onSaved(item.id);
+      saveComplianceReview(artifact, workItem, states, view.note);
     });
     row.append(copy, openButton, select);
     panel.append(row);

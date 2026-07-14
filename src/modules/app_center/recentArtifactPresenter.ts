@@ -77,12 +77,22 @@ export function firstAsinOrSku(value: string | undefined): string {
   return value.split(',')[0]?.trim() || '';
 }
 
+function getAsinOrSkuCount(value: string | undefined): number {
+  if (!value) return 0;
+  return value
+    .split(',')
+    .map(part => part.trim())
+    .filter(Boolean).length;
+}
+
 export function formatWorkContext(workItem: AppCenterWorkItem | null | undefined): string {
   if (!workItem) return '';
   const marketplace = workItem.marketplace?.trim() || '';
   const asin = firstAsinOrSku(workItem.asinOrSku);
-  if (marketplace && asin) return `${marketplace} · ${asin}`;
-  return asin || marketplace;
+  const additionalCount = Math.max(0, getAsinOrSkuCount(workItem.asinOrSku) - 1);
+  const asinLabel = additionalCount > 0 ? `${asin} +${additionalCount} ASIN` : asin;
+  if (marketplace && asinLabel) return `${marketplace} · ${asinLabel}`;
+  return asinLabel || marketplace;
 }
 
 export function isGenericArtifactTitle(title: string, typeLabel: string): boolean {
@@ -139,15 +149,12 @@ function countAsins(workItem: AppCenterWorkItem | null | undefined): number {
 }
 
 function createFactBlockedSet(
-  artifact: AppCenterArtifactEnvelope,
   workItem: AppCenterWorkItem | null | undefined,
   typeLabel: string,
   primaryTitle: string
 ): Set<string> {
   const blocked = new Set(
-    [typeLabel, primaryTitle, artifact.title, '站点', 'marketplace']
-      .map(normalizeRecentText)
-      .filter(Boolean)
+    [typeLabel, primaryTitle, '站点', 'marketplace'].map(normalizeRecentText).filter(Boolean)
   );
   const marketplace = workItem?.marketplace?.trim() || '';
   const asin = firstAsinOrSku(workItem?.asinOrSku);
@@ -220,12 +227,29 @@ function appendTypeSpecificFacts(
     compliance_check: () => {
       const review = getComplianceReviewView(artifact);
       pushUniqueFact(facts, `已复核 ${review.reviewedCount}/${review.totalCount} 项`, blocked);
-      if (review.complete) {
+      if (review.issueCount > 0) {
+        pushUniqueFact(facts, `发现 ${review.issueCount} 项问题`, blocked);
+      }
+      if (review.notApplicableCount > 0) {
+        pushUniqueFact(facts, `${review.notApplicableCount} 项不适用`, blocked);
+      }
+      if (review.complete && !review.hasIssues) {
         pushUniqueFact(facts, '人工复核已完成', blocked);
       }
     },
   };
   handlers[artifact.type]?.();
+}
+
+function formatExecutionStart(value: string): string {
+  const time = new Date(value).getTime();
+  if (!Number.isFinite(time)) return '';
+  return new Date(time).toLocaleString('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export function extractRecentFacts(
@@ -235,7 +259,16 @@ export function extractRecentFacts(
   primaryTitle: string
 ): string[] {
   const facts: string[] = [];
-  const blocked = createFactBlockedSet(artifact, workItem, typeLabel, primaryTitle);
+  const blocked = createFactBlockedSet(workItem, typeLabel, primaryTitle);
+  const executionStart = formatExecutionStart(workItem?.createdAt || '');
+  if (executionStart) pushUniqueFact(facts, `执行开始 ${executionStart}`, blocked);
+  if (
+    artifact.title.trim() &&
+    !isGenericArtifactTitle(artifact.title, typeLabel) &&
+    normalizeRecentText(artifact.title) !== normalizeRecentText(primaryTitle)
+  ) {
+    pushUniqueFact(facts, `名称：${artifact.title.trim()}`, blocked);
+  }
   appendTypeSpecificFacts(facts, artifact, workItem, blocked);
 
   if (facts.length === 0 && artifact.summary.trim()) {
@@ -273,9 +306,10 @@ export function buildRecentArtifactPresentation(
 ): RecentArtifactPresentation {
   const typeLabel = RECENT_ARTIFACT_TYPE_LABELS[artifact.type];
   const primaryTitle = resolvePrimaryTitle(artifact, workItem, typeLabel);
-  const createdTime = new Date(artifact.createdAt).getTime();
-  const relativeTime = formatRelativeTime(artifact.createdAt, now);
-  const absoluteTime = formatAbsoluteTime(artifact.createdAt);
+  const activityAt = artifact.updatedAt || artifact.createdAt;
+  const activityTime = new Date(activityAt).getTime();
+  const relativeTime = formatRelativeTime(activityAt, now);
+  const absoluteTime = formatAbsoluteTime(activityAt);
 
   return {
     typeLabel,
@@ -283,8 +317,12 @@ export function buildRecentArtifactPresentation(
     facts: extractRecentFacts(artifact, workItem, typeLabel, primaryTitle),
     relativeTime,
     absoluteTime,
-    isFresh: Number.isFinite(createdTime) && now - createdTime < 60 * 60 * 1000,
+    isFresh: Number.isFinite(activityTime) && now - activityTime < 60 * 60 * 1000,
   };
+}
+
+function getExecutionId(workItem: AppCenterWorkItem | null | undefined): string {
+  return workItem?.id.split(':').at(-1) || '';
 }
 
 /**
@@ -296,8 +334,11 @@ export function buildResumeClipboardSummary(
   now = Date.now()
 ): string {
   const presentation = buildRecentArtifactPresentation(artifact, workItem, now);
+  const executionId = getExecutionId(workItem);
   const lines = [
     `作业：${presentation.primaryTitle}`,
+    executionId ? `执行编号：${executionId}` : '',
+    workItem?.createdAt ? `执行开始：${formatAbsoluteTime(workItem.createdAt)}` : '',
     `类型：${presentation.typeLabel}`,
     workItem?.status ? `状态：${WORK_ITEM_STATUS_LABELS[workItem.status]}` : '',
     workItem?.marketplace ? `站点：${workItem.marketplace}` : '',

@@ -25,7 +25,7 @@ export interface AppCenterWorkflowStep {
 }
 
 export interface AppCenterWorkflowDefinition {
-  id: 'competitor_listing';
+  id: 'competitor_listing' | 'keyword_review';
   title: string;
   description: string;
   primaryRouteId: AppCenterRouteId;
@@ -143,6 +143,52 @@ export const APP_CENTER_WORKFLOW_DEFINITIONS: readonly AppCenterWorkflowDefiniti
         routeId: 'keyword_hunter_analysis',
         icon: 'fas fa-shield-halved',
         inputs: ['listing_copy', 'keyword_snapshot', 'listing_review'],
+        outputs: ['compliance_check artifact'],
+        reviewPoints: ['高危词', '品牌与侵权', '产品合规', 'GPSR'],
+        complianceRouteIds: [
+          'sops_restricted_words',
+          'sops_brand_infringement',
+          'sops_product_compliance',
+          'sops_eu_gpsr_compliance',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'keyword_review',
+    title: '关键词与文案复核作业流',
+    description: '从独立关键词复核开始，继续完成文案评审与人工合规复核。',
+    primaryRouteId: 'keyword_hunter_process',
+    steps: [
+      {
+        id: 'keyword_review',
+        title: '关键词复核',
+        summary: '检查关键词覆盖率并保存本次复核结果。',
+        routeId: 'keyword_hunter_process',
+        icon: 'fas fa-search',
+        inputs: ['keyword list', 'listing copy'],
+        outputs: ['keyword_snapshot artifact'],
+        reviewPoints: ['确认补词、覆盖率和文案输入'],
+        complianceRouteIds: [],
+      },
+      {
+        id: 'listing_review',
+        title: '文案评审',
+        summary: '基于关键词复核结果生成并保存文案评审报告。',
+        routeId: 'keyword_hunter_analysis',
+        icon: 'fas fa-file-circle-check',
+        inputs: ['keyword_snapshot'],
+        outputs: ['listing_review artifact'],
+        reviewPoints: ['确认文案结构、关键词使用与可读性评审结果'],
+        complianceRouteIds: [],
+      },
+      {
+        id: 'compliance_review',
+        title: '合规复核',
+        summary: '对评审后的文案完成人工合规检查并记录结论。',
+        routeId: 'keyword_hunter_analysis',
+        icon: 'fas fa-shield-halved',
+        inputs: ['listing_review'],
         outputs: ['compliance_check artifact'],
         reviewPoints: ['高危词', '品牌与侵权', '产品合规', 'GPSR'],
         complianceRouteIds: [

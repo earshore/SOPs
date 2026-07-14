@@ -596,7 +596,8 @@
 }
 
 .app-overview-recent-type-filters,
-.app-overview-recent-status-filters {
+.app-overview-recent-status-filters,
+.app-overview-recent-sort {
   display: block;
   flex: 0 0 auto;
 }
@@ -914,6 +915,33 @@
 }
 
 .app-overview-recent-list.hidden {
+  display: none;
+}
+
+.app-overview-recent-load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-top: 1px solid var(--app-overview-border);
+  background: var(--app-overview-surface-muted);
+  color: var(--app-overview-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app-overview-recent-load-more:hover,
+.app-overview-recent-load-more:focus-visible {
+  background: var(--app-overview-accent-surface);
+  color: var(--app-overview-accent-strong);
+}
+
+.app-overview-recent-load-more.hidden {
   display: none;
 }
 
@@ -1282,6 +1310,57 @@
 .app-overview-recent-journey-step--current .app-overview-recent-journey-label {
   color: var(--app-recent-accent-strong);
   font-weight: 700;
+}
+
+.app-overview-recent-journey-step--issue .app-overview-recent-journey-marker {
+  border-color: var(--color-red-600, #dc2626);
+  background: var(--color-red-600, #dc2626);
+}
+
+.app-overview-recent-journey-step--issue .app-overview-recent-journey-marker::after {
+  content: '!';
+  color: var(--app-overview-text-inverse);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.app-overview-recent-journey-step--issue .app-overview-recent-journey-label,
+.app-overview-recent-journey--issue .app-overview-recent-journey-current {
+  color: var(--color-red-700, #b91c1c);
+  font-weight: 700;
+}
+
+.app-overview-recent-journey-step--issue
+  .app-overview-recent-journey-button:hover:not(:disabled)
+  .app-overview-recent-journey-marker {
+  border-color: var(--color-red-600, #dc2626);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-red-600, #dc2626) 12%, transparent);
+}
+
+.app-overview-recent-journey-step--issue
+  .app-overview-recent-journey-button:hover:not(:disabled)
+  .app-overview-recent-journey-label {
+  color: var(--color-red-700, #b91c1c);
+}
+
+.app-overview-recent-journey-step--unavailable .app-overview-recent-journey-marker {
+  border-style: dashed;
+  border-color: var(--color-amber-600, #d97706);
+  background: var(--app-overview-surface);
+}
+
+.app-overview-recent-journey-step--unavailable .app-overview-recent-journey-marker::after {
+  content: '!';
+  color: var(--color-amber-700, #b45309);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.app-overview-recent-journey-step--unavailable .app-overview-recent-journey-label {
+  color: var(--color-amber-700, #b45309);
+  font-weight: 600;
 }
 
 .app-overview-recent-journey-label {

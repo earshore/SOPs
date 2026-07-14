@@ -11,6 +11,7 @@ import {
   getArtifactPayloadStatus,
   getArtifactsForWorkItem,
   getRecentArtifacts,
+  getWorkItemProgress,
   getWorkItems,
   registerHistoryArtifacts,
   registerKeywordSnapshotArtifact,
@@ -171,8 +172,16 @@ describe('App Center artifact envelope service', () => {
     });
     expect(standalone).toMatchObject({
       type: 'keyword_snapshot',
-      workItemId: 'competitor_listing:keyword_snapshot:kh-001',
+      workItemId: 'keyword_review:kh-001',
       payloadRef: 'keyword_snapshot:kh-001',
+    });
+    expect(getWorkItems().find(item => item.id === 'keyword_review:kh-001')?.type).toBe(
+      'keyword_review'
+    );
+    expect(getWorkItemProgress('keyword_review:kh-001')).toMatchObject({
+      completedSteps: 1,
+      totalSteps: 3,
+      completedTypes: ['keyword_snapshot'],
     });
 
     const envelope = registerKeywordSnapshotArtifact(
@@ -253,7 +262,7 @@ describe('App Center artifact envelope service', () => {
     );
 
     expect(envelope).toMatchObject({
-      workItemId: 'competitor_listing:hist-001',
+      workItemId: 'ppc_review:ppc-export-001',
       type: 'ppc_action_list',
       sourceRoute: 'ppc_search_terms',
       payloadRef: 'ppc_action_list:ppc-export-001',
@@ -265,6 +274,7 @@ describe('App Center artifact envelope service', () => {
         filter: 'scale_budget',
       },
     });
+    expect(getWorkItems().find(item => item.id === envelope.workItemId)?.type).toBe('ppc_review');
     expect(getRecentArtifacts(1)).toEqual([expect.objectContaining({ id: envelope.id })]);
   });
 

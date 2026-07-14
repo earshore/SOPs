@@ -100,6 +100,33 @@ function registerRecentPpcArtifact(): void {
   );
 }
 
+function registerRecentListingReviewArtifact(): void {
+  registerKeywordSnapshotArtifact(
+    {
+      id: 'kh-reported-001',
+      schemaVersion: 1,
+      title: 'Listing review',
+      status: 'reported',
+      createdAt: '2026-01-01T00:30:00.000Z',
+      updatedAt: '2026-01-01T00:35:00.000Z',
+      source: { type: 'manual' },
+      result: {
+        keywords: ['haupt keyword'],
+        coverageRate: 100,
+        llmAnalysisResult: '# Listing review',
+      },
+    } as never,
+    {
+      workItemId: 'competitor_listing:hist-001',
+      marketplace: 'DE',
+      language: 'German',
+      asinOrSku: 'B000000001',
+      sourceRoute: 'keyword_hunter_analysis',
+      updatedAt: '2026-01-01T00:35:00.000Z',
+    }
+  );
+}
+
 describe('App Center Overview', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -244,7 +271,7 @@ describe('App Center Overview', () => {
   });
 
   it('shows one advancing card when the same work item has multiple stage artifacts', async () => {
-    registerRecentPpcArtifact();
+    registerRecentListingReviewArtifact();
     registerComplianceCheckArtifact(
       {
         id: 'compliance-latest',
@@ -324,6 +351,7 @@ describe('App Center Overview', () => {
   });
 
   it('opens the local compliance checklist in a floating dialog and saves a manual status', async () => {
+    registerRecentListingReviewArtifact();
     registerComplianceCheckArtifact(
       {
         id: 'compliance-001',
@@ -355,11 +383,11 @@ describe('App Center Overview', () => {
     expect(container.textContent).toContain('不会自动修改 Listing 或广告');
     const journey = container.querySelector('.app-overview-recent-journey');
     const journeySteps = journey?.querySelectorAll('.app-overview-recent-journey-step');
-    expect(journeySteps).toHaveLength(7);
-    expect(journeySteps?.[0]?.textContent).toContain('数据采集');
-    expect(journeySteps?.[5]?.textContent).toContain('文案评审');
-    expect(journeySteps?.[6]?.textContent).toContain('合规复核');
-    expect(journeySteps?.[6]?.classList).toContain('app-overview-recent-journey-step--current');
+    expect(journeySteps).toHaveLength(3);
+    expect(journeySteps?.[0]?.textContent).toContain('关键词复核');
+    expect(journeySteps?.[1]?.textContent).toContain('文案评审');
+    expect(journeySteps?.[2]?.textContent).toContain('合规复核');
+    expect(journeySteps?.[2]?.classList).toContain('app-overview-recent-journey-step--current');
     expect(journey?.textContent).toContain('当前：合规复核');
     expect(container.querySelector('.app-overview-recent-item')?.textContent).not.toContain(
       '已完成 0/5 步'
@@ -369,12 +397,20 @@ describe('App Center Overview', () => {
       '[data-compliance-item-id="restricted_words"]'
     );
     if (!firstStatus) throw new Error('Compliance status control was not rendered');
-    firstStatus.value = 'confirmed';
+    expect(firstStatus.getAttribute('aria-label')).toBe('高危词复核状态');
+    expect([...firstStatus.options].map(option => option.textContent)).toEqual([
+      '待复核',
+      '通过',
+      '发现问题',
+      '不适用',
+    ]);
+    expect(container.querySelector('[aria-label="打开高危词复核检查项"]')).not.toBeNull();
+    firstStatus.value = 'passed';
     firstStatus.dispatchEvent(new Event('change'));
 
     await vi.waitFor(() => {
       const [artifact] = getArtifactsForWorkItem('competitor_listing:hist-001');
-      expect(String(artifact?.metadata?.reviewStates)).toContain('confirmed');
+      expect(String(artifact?.metadata?.reviewStates)).toContain('passed');
     });
 
     container.querySelector<HTMLButtonElement>('[aria-label="关闭合规复核窗口"]')?.click();
@@ -384,30 +420,7 @@ describe('App Center Overview', () => {
   });
 
   it('creates and opens a local compliance checklist from the compliance journey node', async () => {
-    registerKeywordSnapshotArtifact(
-      {
-        id: 'kh-reported-001',
-        schemaVersion: 1,
-        title: 'Listing review',
-        status: 'reported',
-        createdAt: '2026-01-01T00:30:00.000Z',
-        updatedAt: '2026-01-01T00:35:00.000Z',
-        source: { type: 'manual' },
-        result: {
-          keywords: ['haupt keyword'],
-          coverageRate: 100,
-          llmAnalysisResult: '# Listing review',
-        },
-      } as never,
-      {
-        workItemId: 'competitor_listing:hist-001',
-        marketplace: 'DE',
-        language: 'German',
-        asinOrSku: 'B000000001',
-        sourceRoute: 'keyword_hunter_analysis',
-        updatedAt: '2026-01-01T00:35:00.000Z',
-      }
-    );
+    registerRecentListingReviewArtifact();
     const container = document.createElement('div');
     await overviewModule.mount(container);
 
@@ -430,6 +443,40 @@ describe('App Center Overview', () => {
       ).toBe(true);
     });
     expect(container.querySelectorAll('.app-overview-recent-action')).toHaveLength(0);
+  });
+
+  it('marks a completed compliance review with issues as a risk outcome', async () => {
+    registerRecentListingReviewArtifact();
+    registerComplianceCheckArtifact(
+      {
+        id: 'compliance-risk',
+        checklistIds: ['restricted_words', 'brand_infringement'],
+        itemStates: {
+          restricted_words: 'passed',
+          brand_infringement: 'issue_found',
+        },
+        createdAt: '2026-01-01T00:50:00.000Z',
+      },
+      {
+        workItemId: 'competitor_listing:hist-001',
+        marketplace: 'DE',
+        language: 'German',
+        asinOrSku: 'B000000001',
+        sourceRoute: 'keyword_hunter_analysis',
+        updatedAt: '2026-01-01T00:50:00.000Z',
+      }
+    );
+    const container = document.createElement('div');
+    await overviewModule.mount(container);
+
+    const issueStep = container.querySelector('.app-overview-recent-journey-step--issue');
+    expect(issueStep?.textContent).toContain('合规复核');
+    expect(container.querySelector('.app-overview-recent-journey')?.textContent).toContain(
+      '发现 1 项问题'
+    );
+    expect(container.querySelector('.app-overview-recent-item')?.textContent).toContain(
+      '发现 1 项问题'
+    );
   });
 
   it('shows recent empty state guidance when no artifacts exist', async () => {
@@ -504,6 +551,51 @@ describe('App Center Overview', () => {
         .querySelector('.app-overview-recent-columns-btn[data-recent-columns="3"]')
         ?.getAttribute('aria-pressed')
     ).toBe('true');
+  });
+
+  it('shows the queue total, sorting control, and loads additional recent jobs', async () => {
+    safeTemplateLoaderMocks.loadTemplate.mockResolvedValue(
+      readFileSync(realOverviewTemplatePath, 'utf8')
+    );
+    for (let index = 0; index < 12; index += 1) {
+      registerPpcActionListArtifact(
+        {
+          id: `ppc-export-${index}`,
+          reportType: 'search_term',
+          filter: 'all',
+          rowCount: index + 1,
+          owner: '广告负责人',
+          requiresHumanConfirmation: true,
+          createdAt: new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString(),
+        },
+        {
+          workItemId: 'competitor_listing:stale-context',
+          marketplace: 'DE',
+          language: 'German',
+          asinOrSku: `B0000000${index}`,
+          sourceRoute: 'ppc_search_terms',
+          updatedAt: new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString(),
+        }
+      );
+    }
+    const container = document.createElement('div');
+    await overviewModule.mount(container);
+
+    expect(container.querySelectorAll('.app-overview-recent-item')).toHaveLength(10);
+    expect(container.querySelector('.app-overview-recent-count-badge')?.textContent).toBe(
+      '显示 10 / 共 12 项'
+    );
+    expect(
+      container.querySelector<HTMLSelectElement>('.app-overview-recent-sort select')?.value
+    ).toBe('priority');
+
+    container.querySelector<HTMLButtonElement>('[data-recent-load-more]')?.click();
+    await vi.waitFor(() => {
+      expect(container.querySelectorAll('.app-overview-recent-item')).toHaveLength(12);
+    });
+    expect(
+      container.querySelector<HTMLButtonElement>('[data-recent-load-more]')?.classList
+    ).toContain('hidden');
   });
 
   it('keeps cards as containers and leaves entry buttons on delegated switch-tab routing', async () => {
