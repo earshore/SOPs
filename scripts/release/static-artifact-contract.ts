@@ -70,11 +70,12 @@ export function validateStaticArtifact(root: string): string[] {
   const assetsHeaders: string[] = [];
   let inAssetsBlock = false;
   for (const line of headersText.split(/\r?\n/)) {
-    if (line.trim().length === 0) continue;
+    const trimmed = line.trim();
+    if (trimmed.length === 0 || trimmed.startsWith('#')) continue;
     if (!/^\s/.test(line)) {
-      inAssetsBlock = line.trim() === '/assets/*';
+      inAssetsBlock = trimmed === '/assets/*';
     } else if (inAssetsBlock) {
-      assetsHeaders.push(line.trim());
+      assetsHeaders.push(trimmed);
     }
   }
   if (assetsHeaders.some(header => /\bimmutable\b/i.test(header))) {

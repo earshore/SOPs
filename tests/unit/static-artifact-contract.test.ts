@@ -81,6 +81,23 @@ describe('static artifact contract', () => {
     );
   });
 
+  it('rejects immutable assets caching after a comment', () => {
+    const root = makeArtifact();
+    writeFileSync(
+      join(root, '_headers'),
+      [
+        '/assets/*',
+        '# cache policy',
+        '  Cache-Control: public, max-age=31536000, immutable',
+        '',
+      ].join('\n')
+    );
+
+    expect(validateStaticArtifact(root)).toContain(
+      '/assets/* must not apply immutable caching to missing resources'
+    );
+  });
+
   it('rejects an artifact without a standalone 404 document', () => {
     const root = makeArtifact();
     writeFileSync(join(root, '404.html'), '<script type="module" src="/src/main.ts"></script>');
