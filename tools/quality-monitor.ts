@@ -17,6 +17,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
+import { randomUUID } from 'crypto';
 import * as ts from 'typescript';
 import {
   compareCoverage,
@@ -99,6 +100,17 @@ interface ESLintResult {
   messages?: ESLintMessage[];
   errorCount?: number;
   warningCount?: number;
+}
+
+function isESLintFindingsFailure(
+  error: unknown
+): error is { status: 1; stdout: string | Buffer } {
+  if (typeof error !== 'object' || error === null) return false;
+  const failure = error as { status?: unknown; stdout?: unknown };
+  return (
+    failure.status === 1 &&
+    (typeof failure.stdout === 'string' || Buffer.isBuffer(failure.stdout))
+  );
 }
 
 interface QualityMetrics {
@@ -359,19 +371,24 @@ class QualityMonitor {
    */
   private async checkDuplication(): Promise<void> {
     console.log('🔄 检查代码重复...');
+    const reportDirectory = this.createReportDirectory('duplication');
+    const projectRoot = path.join(__dirname, '..');
 
     try {
       this.ensureOutputDir();
-      this.dependencies.exec(this.buildJscpdCommand(), {
+      this.dependencies.exec(this.buildJscpdCommand(reportDirectory, projectRoot), {
         encoding: 'utf-8',
         stdio: 'pipe',
-        maxBuffer: 10 * 1024 * 1024
+        maxBuffer: 10 * 1024 * 1024,
+        cwd: projectRoot
       });
 
-      this.loadDuplicationReport();
+      this.loadDuplicationReport(reportDirectory);
     } catch (error) {
       console.warn('  ⚠ 代码重复检测失败\n');
       throw error;
+    } finally {
+      this.cleanupReportDirectory(reportDirectory);
     }
   }
 
@@ -381,16 +398,25 @@ class QualityMonitor {
     }
   }
 
-  private buildJscpdCommand(): string {
-    const configFile = path.join(__dirname, '../.jscpd.json');
-    if (this.dependencies.exists(configFile)) {
-      return `npx jscpd ${this.config.srcDir} --config ${configFile}`;
-    }
-    return `npx jscpd ${this.config.srcDir} --reporters json,console --format typescript,javascript --min-lines 10 --min-tokens 50 --output ${this.config.outputDir}`;
+  private createReportDirectory(collector: 'duplication' | 'coverage'): string {
+    return path.join(this.config.outputDir, 'reports', `${collector}-${randomUUID()}`);
   }
 
-  private loadDuplicationReport(): void {
-    const outputFile = path.join(this.config.outputDir, 'jscpd-report.json');
+  private cleanupReportDirectory(reportDirectory: string): void {
+    fs.rmSync(reportDirectory, { recursive: true, force: true });
+  }
+
+  private buildJscpdCommand(reportDirectory: string, projectRoot: string): string {
+    const configFile = path.join(__dirname, '../.jscpd.json');
+    const sourceDirectory = path.relative(projectRoot, this.config.srcDir);
+    if (this.dependencies.exists(configFile)) {
+      return `npx jscpd "${sourceDirectory}" --config "${configFile}" --output "${reportDirectory}"`;
+    }
+    return `npx jscpd "${sourceDirectory}" --reporters json,console --format typescript,javascript --min-lines 10 --min-tokens 50 --output "${reportDirectory}"`;
+  }
+
+  private loadDuplicationReport(reportDirectory: string): void {
+    const outputFile = path.join(reportDirectory, 'jscpd-report.json');
     if (!this.dependencies.exists(outputFile)) {
       throw new Error(`jscpd report is missing: ${outputFile}`);
     }
@@ -415,20 +441,24 @@ class QualityMonitor {
    */
   private async checkCoverage(): Promise<void> {
     console.log('📈 检查测试覆盖率...');
+    const reportDirectory = this.createReportDirectory('coverage');
 
     try {
       const projectRoot = path.join(__dirname, '..');
-      const coverageFile = path.join(projectRoot, 'coverage', 'coverage-summary.json');
+      const coverageFile = path.join(reportDirectory, 'coverage-summary.json');
 
       console.log(`  📂 覆盖率文件路径: ${coverageFile}`);
       console.log('  ⏳ 运行命令: npm run test:coverage');
 
-      this.dependencies.exec('npm run test:coverage', {
-        stdio: 'pipe',
-        timeout: 120000,
-        cwd: projectRoot,
-        encoding: 'utf-8',
-      });
+      this.dependencies.exec(
+        `npm run test:coverage -- --coverage.reportsDirectory="${reportDirectory}"`,
+        {
+          stdio: 'pipe',
+          timeout: 120000,
+          cwd: projectRoot,
+          encoding: 'utf-8',
+        }
+      );
 
       if (!this.dependencies.exists(coverageFile)) {
         throw new Error(`coverage summary is missing: ${coverageFile}`);
@@ -446,6 +476,8 @@ class QualityMonitor {
       }
       console.warn('');
       throw error;
+    } finally {
+      this.cleanupReportDirectory(reportDirectory);
     }
   }
 
@@ -679,9 +711,9 @@ class QualityMonitor {
         maxBuffer: 20 * 1024 * 1024
       }).toString();
       return JSON.parse(output) as ESLintResult[];
-    } catch (error: any) {
-      if (error.stdout) {
-        return JSON.parse(error.stdout) as ESLintResult[];
+    } catch (error) {
+      if (isESLintFindingsFailure(error)) {
+        return JSON.parse(error.stdout.toString()) as ESLintResult[];
       }
       throw error;
     }
@@ -776,10 +808,22 @@ class QualityMonitor {
     score -= duplicationPenalty;
 
     // 覆盖率扣分（最多扣 25 分）
-    const coverageDeficit = this.config.enableCoverage
-      ? Math.max(0, this.config.thresholds.coverage.lines - this.metrics.coverage.lines)
-      : 0;
-    const coveragePenalty = Math.min(25, coverageDeficit / 2);
+    const coverageDeficits = this.config.enableCoverage
+      ? compareCoverage(this.metrics.coverage, this.config.thresholds.coverage)
+      : [];
+    const coveragePenalty =
+      coverageDeficits.length === 0
+        ? 0
+        : Math.min(
+            25,
+            Math.max(
+              1,
+              coverageDeficits.reduce(
+                (total, deficit) => total + deficit.expected - deficit.actual,
+                0
+              )
+            )
+          );
     score -= coveragePenalty;
 
     // 类型覆盖率扣分（最多扣 20 分）
@@ -1231,10 +1275,14 @@ ${this.renderViolations(report)}
     return {
       dates: history.map(h => h.date),
       complexityData: history.map(h => h.metrics.complexity.violations.length),
-      complexityLabels: history.map(
-        h =>
-          `${h.metrics.complexity.violations.length} violations above ${h.metrics.complexity.threshold}`
-      ),
+      complexityLabels: history.map(h => {
+        const threshold = h.metrics.complexity.threshold;
+        const thresholdLabel =
+          typeof threshold === 'number' && Number.isFinite(threshold)
+            ? threshold
+            : 'threshold unavailable';
+        return `${h.metrics.complexity.violations.length} violations above ${thresholdLabel}`;
+      }),
       duplicationData: history.map(h => h.metrics.duplication.percentage),
       coverageData: history.map(h => h.metrics.coverage.lines),
       typeCoverageData: history.map(h => h.metrics.typeCoverage.percentage)
