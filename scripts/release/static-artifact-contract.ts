@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { basename, dirname, resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export interface RedirectRule {
@@ -22,6 +22,9 @@ const REQUIRED_REDIRECTS: RedirectRule[] = [
   { source: '/amz_*', destination: '/#/amz_:splat', status: 302 },
   { source: '/more_*', destination: '/#/more_:splat', status: 302 },
 ];
+
+const REPOSITORY_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const REPOSITORY_PUBLIC = resolve(REPOSITORY_ROOT, 'public');
 
 export function parseRedirectRules(source: string): RedirectRule[] {
   return source
@@ -49,7 +52,11 @@ export function validateStaticArtifact(root: string): string[] {
   const redirectsText = readRequired(resolvedRoot, '_redirects', errors);
   const headersText = readRequired(resolvedRoot, '_headers', errors);
   const notFound = readRequired(resolvedRoot, '404.html', errors);
-  const indexRoot = basename(resolvedRoot) === 'public' ? dirname(resolvedRoot) : resolvedRoot;
+  const isRepositoryPublic =
+    process.platform === 'win32'
+      ? resolvedRoot.toLowerCase() === REPOSITORY_PUBLIC.toLowerCase()
+      : resolvedRoot === REPOSITORY_PUBLIC;
+  const indexRoot = isRepositoryPublic ? REPOSITORY_ROOT : resolvedRoot;
   readRequired(indexRoot, 'index.html', errors);
 
   const rules = parseRedirectRules(redirectsText);

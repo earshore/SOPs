@@ -104,7 +104,7 @@ describe('static artifact contract', () => {
     expect(validateStaticArtifact(root)).toContain('404.html must not bootstrap the application');
   });
 
-  it('accepts a Vite source layout with index.html at the project root', () => {
+  it('rejects an arbitrary public directory without its own index.html', () => {
     const projectRoot = makeArtifact();
     const publicRoot = join(projectRoot, 'public');
     mkdirSync(publicRoot);
@@ -112,7 +112,7 @@ describe('static artifact contract', () => {
       writeFileSync(join(publicRoot, name), readFileSync(join(projectRoot, name), 'utf8'));
     }
 
-    expect(validateStaticArtifact(publicRoot)).toEqual([]);
+    expect(validateStaticArtifact(publicRoot)).toContain('index.html is missing');
   });
 
   it('keeps public hosting declarations release-safe', () => {
