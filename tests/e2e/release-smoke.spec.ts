@@ -202,7 +202,7 @@ async function waitForSettingsPanel(page: Page): Promise<void> {
 }
 
 async function openGlobalSettings(page: Page): Promise<void> {
-  await openRoute(page, '/home');
+  await openRoute(page, '/#/home');
   await expectNoRouteErrorText(page);
   await waitForSettingsPanel(page);
 
@@ -218,7 +218,7 @@ async function openGlobalSettings(page: Page): Promise<void> {
 <<<<<<< HEAD
 =======
 async function switchTabFromHome(page: Page, tab: string): Promise<void> {
-  await openRoute(page, '/home');
+  await openRoute(page, '/#/home');
   await expectNoRouteErrorText(page);
 
   if (tab.startsWith('sops_')) {
