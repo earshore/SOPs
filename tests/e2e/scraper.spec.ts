@@ -46,19 +46,15 @@ async function setupScraperNetworkFixture(page: Page): Promise<void> {
 }
 
 async function seedScraperProxyConfig(page: Page): Promise<void> {
-  await page.evaluate(async () => {
-    localStorage.setItem('proxy_config', JSON.stringify({ type: 'custom_api', enabled: true }));
+  await page.evaluate(() => {
+    localStorage.removeItem('proxy_config');
     localStorage.setItem(
       'scraper_proxy_config',
-      JSON.stringify({ type: 'custom_api', enabled: true })
-    );
-    const secureStorage = (window as any).SecureStorage;
-    if (!secureStorage?.setSecure) {
-      throw new Error('SecureStorage is required for scraper E2E proxy setup');
-    }
-    await secureStorage.setSecure(
-      'proxy_key_custom_api',
-      'http://localhost:5173/e2e-scraper-proxy?url='
+      JSON.stringify({
+        type: 'custom_api',
+        enabled: true,
+        customUrl: 'http://localhost:5173/e2e-scraper-proxy?url=',
+      })
     );
   });
 }

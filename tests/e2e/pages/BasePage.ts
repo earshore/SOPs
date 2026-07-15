@@ -63,7 +63,7 @@ export interface ScreenshotOptions {
  * ```typescript
  * export class MyPage extends BasePage {
  *   constructor(page: Page) {
- *     super(page, { baseUrl: 'http://localhost:5173' });
+ *     super(page);
  *   }
  * 
  *   async navigate(): Promise<void> {
@@ -80,7 +80,7 @@ export abstract class BasePage {
 
   constructor(page: Page, options: BasePageOptions = {}) {
     this.page = page;
-    this.baseUrl = options.baseUrl || 'http://localhost:5173';
+    this.baseUrl = options.baseUrl ?? '';
     this.defaultTimeout = options.timeout || 5000;
   }
 

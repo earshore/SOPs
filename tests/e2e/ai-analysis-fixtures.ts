@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import type { FullAnalysisReport } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/analysisReportData';
 import { SAMPLE_ANALYSIS_REPORT } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/analysisReportData';
 import type { ScrapedData } from '../../src/types/modules-business';
@@ -139,3 +140,53 @@ export const E2E_AI_ANALYSIS_REPORT: FullAnalysisReport = {
     sourceAsins: E2E_AI_ANALYSIS_ASINS,
   },
 };
+
+export async function loadAnalysisHistoryFixture(
+  page: Page,
+  report: unknown | null = E2E_AI_ANALYSIS_REPORT
+): Promise<void> {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.evaluate(
+    ({ asins, data, reportValue }) => {
+      localStorage.setItem(
+        'scrape_history',
+        JSON.stringify([
+          {
+            id: 'e2e-ai-analysis-history',
+            timestamp: data.metadata?.scrape_timestamp,
+            site: data.metadata?.marketplace || 'DE',
+            asins,
+            data,
+            ...(reportValue ? { report: reportValue } : {}),
+          },
+        ])
+      );
+    },
+    {
+      asins: E2E_AI_ANALYSIS_ASINS,
+      data: E2E_AI_ANALYSIS_SCRAPED_DATA,
+      reportValue: report,
+    }
+  );
+
+  await page.goto('/#/app-center/master-analysis/scraper', { waitUntil: 'domcontentloaded' });
+  await page
+    .locator('#main-content[data-current-route="scraper"]')
+    .waitFor({ state: 'visible', timeout: 15000 });
+  const loadSnapshotButton = page.locator('button[aria-label="加载快照"]').first();
+  await loadSnapshotButton.waitFor({ state: 'visible', timeout: 15000 });
+  await loadSnapshotButton.click();
+  await page
+    .locator('#toast-container .toast.toast-success .toast-content strong')
+    .filter({ hasText: report ? '历史快照已加载（包含分析报告）' : '历史快照已加载' })
+    .last()
+    .waitFor({ state: 'visible', timeout: 5000 });
+}
+
+export async function clearAnalysisHistoryFixture(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    localStorage.removeItem('scrape_history');
+    localStorage.removeItem('app-storage');
+  });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+}

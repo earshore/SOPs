@@ -7,9 +7,10 @@
 import { type Download, type Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 import {
+  clearAnalysisHistoryFixture,
   E2E_AI_ANALYSIS_ASINS,
   E2E_AI_ANALYSIS_REPORT,
-  E2E_AI_ANALYSIS_SCRAPED_DATA,
+  loadAnalysisHistoryFixture,
 } from '../ai-analysis-fixtures';
 
 const TARGET_ID_ALIASES: Record<string, string> = {
@@ -29,11 +30,9 @@ function installDeterministicAnalysisMockInPage({
     Alpine?: { $data?: (element: Element) => Record<string, any> };
   }).Alpine;
   const component = alpine?.$data?.(element);
-  const appStore = (window as Window & { appStore?: { getState: () => any } }).appStore;
-  const state = appStore?.getState?.();
 
-  if (!component || !state) {
-    throw new Error('AI Analysis component and appStore are required for deterministic mock');
+  if (!component) {
+    throw new Error('AI Analysis component is required for deterministic mock');
   }
 
   component.runAnalysis = async function runDeterministicAnalysis(this: Record<string, any>) {
@@ -41,8 +40,7 @@ function installDeterministicAnalysisMockInPage({
 
     this.analysisReport = null;
     this.hasReport = false;
-    state.setAnalysisReport(null);
-    updateAnalysisProgress(this, state, true, 5, 'E2E fixture analysis started');
+    updateAnalysisProgress(this, true, 5, 'E2E fixture analysis started');
     refreshReportView(this);
 
     await new Promise(resolve => window.setTimeout(resolve, 250));
@@ -50,11 +48,10 @@ function installDeterministicAnalysisMockInPage({
     const deterministicReport = buildDeterministicReport(this, report);
     this.analysisReport = deterministicReport;
     this.hasReport = true;
-    state.setAnalysisReport(deterministicReport);
-    updateAnalysisProgress(this, state, true, 100, '分析完成');
+    updateAnalysisProgress(this, true, 100, '分析完成');
     refreshReportView(this);
 
-    updateAnalysisProgress(this, state, false, 100, '分析完成');
+    updateAnalysisProgress(this, false, 100, '分析完成');
     (window as Window & {
       showToast?: (message: string, options?: { type?: string }) => void;
     }).showToast?.('分析完成！', { type: 'success' });
@@ -66,7 +63,6 @@ function installDeterministicAnalysisMockInPage({
 
   function updateAnalysisProgress(
     target: Record<string, any>,
-    storeState: Record<string, any>,
     isAnalyzing: boolean,
     progress: number,
     currentStep: string
@@ -74,7 +70,6 @@ function installDeterministicAnalysisMockInPage({
     target.isAnalyzing = isAnalyzing;
     target.progress = progress;
     target.currentStep = currentStep;
-    storeState.updateAnalysis({ isAnalyzing, progress, currentStep });
   }
 
   function refreshReportView(target: Record<string, any>): void {
@@ -216,7 +211,7 @@ export class AIAnalysisPage extends BasePage {
   };
 
   constructor(page: Page) {
-    super(page, { baseUrl: 'http://localhost:5173' });
+    super(page);
   }
 
   useE2EFixture(): this {
@@ -284,15 +279,12 @@ export class AIAnalysisPage extends BasePage {
 
   private async setSelectedAsins(asins: string[]): Promise<void> {
     await this.page.evaluate(selectedAsins => {
-      const appStore = (window as Window & { appStore?: { getState: () => any } }).appStore;
-      const state = appStore?.getState?.();
       const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
       const alpine = (window as Window & {
         Alpine?: { $data?: (element: Element) => Record<string, unknown> };
       }).Alpine;
       const component = element && alpine?.$data ? alpine.$data(element) : null;
 
-      state?.setSelectedAsins?.([...selectedAsins]);
       if (component) {
         component.selectedAsins = [...selectedAsins];
         if (typeof component.refreshReportView === 'function') {
@@ -343,81 +335,9 @@ export class AIAnalysisPage extends BasePage {
     );
   }
 
-  async seedScraperFixture(): Promise<void> {
-    await this.page.evaluate(
-      ({ scrapedData, selectedAsins }) => {
-        const appStore = (window as Window & { appStore?: { getState: () => any } }).appStore;
-        const state = appStore?.getState?.();
-        if (!state) {
-          throw new Error('appStore is required for AI Analysis E2E fixture setup');
-        }
-
-        state.setScrapedData(scrapedData);
-        state.setSelectedSite(scrapedData.metadata?.marketplace || 'DE');
-        state.setCurrentHistoryId('e2e-ai-analysis-history');
-        state.setSelectedAsins([...selectedAsins]);
-        state.setAnalysisReport(null);
-
-        const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
-        const alpine = (window as Window & {
-          Alpine?: { $data?: (element: Element) => Record<string, unknown> };
-        }).Alpine;
-        const component = element && alpine?.$data ? alpine.$data(element) : null;
-        if (component) {
-          component.selectedAsins = [...selectedAsins];
-          component.analysisReport = null;
-          component.hasReport = false;
-          component.dataSource = 'scraper';
-          component.showSelectionPanel = true;
-          if (typeof component.refreshReportView === 'function') {
-            component.refreshReportView();
-          }
-        }
-      },
-      {
-        scrapedData: E2E_AI_ANALYSIS_SCRAPED_DATA,
-        selectedAsins: E2E_AI_ANALYSIS_ASINS,
-      }
-    );
-
-    await this.page.waitForFunction(() => {
-      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
-      const alpine = (window as Window & {
-        Alpine?: { $data?: (element: Element) => Record<string, unknown> };
-      }).Alpine;
-      const data = element && alpine?.$data ? alpine.$data(element) : null;
-      return Array.isArray(data?.availableAsins) && data.availableAsins.length > 0;
-    });
-  }
-
   async clearScraperFixture(): Promise<void> {
-    await this.page.evaluate(() => {
-      const appStore = (window as Window & { appStore?: { getState: () => any } }).appStore;
-      const state = appStore?.getState?.();
-      if (!state) {
-        throw new Error('appStore is required for AI Analysis E2E fixture cleanup');
-      }
-
-      state.setScrapedData(null);
-      state.setSelectedAsins([]);
-      state.setAnalysisReport(null);
-      state.setCurrentHistoryId(null);
-
-      const element = document.querySelector('[x-data="aiAnalysisPanel"]') as Element | null;
-      const alpine = (window as Window & {
-        Alpine?: { $data?: (element: Element) => Record<string, unknown> };
-      }).Alpine;
-      const component = element && alpine?.$data ? alpine.$data(element) : null;
-      if (component) {
-        component.selectedAsins = [];
-        component.analysisReport = null;
-        component.hasReport = false;
-        component.showSelectionPanel = true;
-        if (typeof component.refreshReportView === 'function') {
-          component.refreshReportView();
-        }
-      }
-    });
+    await clearAnalysisHistoryFixture(this.page);
+    await this.waitForPageReady();
   }
 
   async installDeterministicAnalysisMock(): Promise<void> {
@@ -433,10 +353,12 @@ export class AIAnalysisPage extends BasePage {
    * 导航到 AI 分析页面
    */
   async navigate(): Promise<void> {
+    if (this.useDeterministicFixture) {
+      await loadAnalysisHistoryFixture(this.page, null);
+    }
     await super.navigate('/#/app-center/master-analysis/ai-analysis');
     await this.waitForPageReady();
     if (this.useDeterministicFixture) {
-      await this.seedScraperFixture();
       await this.installDeterministicAnalysisMock();
     }
   }

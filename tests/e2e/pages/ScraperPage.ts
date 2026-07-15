@@ -120,7 +120,7 @@ export class ScraperPage extends BasePage {
   };
 
   constructor(page: Page) {
-    super(page, { baseUrl: 'http://localhost:5173' });
+    super(page);
   }
 
   private async getScraperStateValue<T>(property: string, fallback: T): Promise<T> {

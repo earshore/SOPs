@@ -21,8 +21,8 @@ export async function setupAPIConfig(
   // 导航到首页
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-  // 在 localStorage / SecureStorage 中设置 API 配置
-  await page.evaluate(async ({ apiKey, provider }) => {
+  // 在 localStorage 中设置 API 配置
+  await page.evaluate(({ apiKey, provider }) => {
     // 设置活跃的 LLM 提供商
     localStorage.setItem('llm_active_provider', JSON.stringify(provider));
 
@@ -36,8 +36,7 @@ export async function setupAPIConfig(
     };
     localStorage.setItem(`llm_${provider}`, JSON.stringify(llmConfig));
 
-    const { SecureStorage } = await import('/src/common/utils/secureStorage.ts');
-    await SecureStorage.setSecure(`llm_key_${provider}`, apiKey);
+    localStorage.setItem(`llm_key_${provider}`, JSON.stringify(apiKey));
 
     // 设置应用初始化标志
     localStorage.setItem('app_initialized', JSON.stringify(true));
@@ -58,24 +57,4 @@ export async function cleanupTestEnvironment(page: Page): Promise<void> {
   });
 
   console.log('🧹 测试环境已清理');
-}
-
-/**
- * 等待应用初始化完成
- *
- * @param page - Playwright Page 对象
- * @param timeout - 超时时间（毫秒）
- */
-export async function waitForAppReady(page: Page, timeout: number = 10000): Promise<void> {
-  // 等待 Alpine.js 初始化
-  await page.waitForFunction(() => {
-    return window.hasOwnProperty('Alpine') && (window as any).Alpine !== undefined;
-  }, { timeout });
-
-  // 等待路由器初始化
-  await page.waitForFunction(() => {
-    return window.hasOwnProperty('router') || window.hasOwnProperty('Router');
-  }, { timeout });
-
-  console.log('✅ 应用初始化完成');
 }
