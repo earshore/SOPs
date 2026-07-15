@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 import { resolve } from 'node:path';
 
+const listOnly = process.argv.includes('--list');
+
 export default defineConfig({
   testDir: resolve(process.cwd(), 'tests/performance'),
   testMatch: 'release-performance-gate.test.ts',
@@ -9,15 +11,17 @@ export default defineConfig({
   retries: 0,
   timeout: 210_000,
   globalTimeout: 10 * 60 * 1000,
-  reporter: [
-    ['list'],
-    [
-      'json',
-      {
-        outputFile: resolve(process.cwd(), 'tests/playwright-report/performance-gate.json'),
-      },
-    ],
-  ],
+  reporter: listOnly
+    ? [['list']]
+    : [
+        ['list'],
+        [
+          'json',
+          {
+            outputFile: resolve(process.cwd(), 'tests/playwright-report/performance-gate.json'),
+          },
+        ],
+      ],
   use: {
     baseURL: 'http://127.0.0.1:4174',
     trace: 'retain-on-failure',
