@@ -8,6 +8,7 @@ const DEEP_CHAT_PROMPT_ID = 'release-smoke-deep-chat-generated-prompt';
 const DEEP_CHAT_PROMPT_MARKER = 'RELEASE_SMOKE_GENERATED_PROMPT_MARKER';
 
 const CORE_ROUTES = [
+<<<<<<< HEAD
   { label: 'Home', path: '/home', target: '#home-splash-container' },
   { label: 'SOPs', path: '/sops', target: '.sops-overview' },
   { label: 'App Center', path: '/app-center', target: '.app-overview-container' },
@@ -42,6 +43,36 @@ const CORE_ROUTES = [
 ] as const;
 
 const OVERFLOW_ROUTES = CORE_ROUTES;
+=======
+  { label: 'Home', path: '/#/home', routeId: 'home' },
+  { label: 'SOPs', path: '/#/sops', routeId: 'sops_overview' },
+  { label: 'App Center', path: '/#/app-center', routeId: 'app_center_overview' },
+  { label: 'Scraper', path: '/#/app-center/master-analysis/scraper', routeId: 'scraper' },
+  {
+    label: 'AI Analysis',
+    path: '/#/app-center/master-analysis/ai-analysis',
+    routeId: 'ai_analysis',
+  },
+  { label: 'Promptlab', path: '/#/app-center/master-analysis/promptlab', routeId: 'promptlab' },
+  {
+    label: 'Deep Chat',
+    path: '/#/app-center/playground/deep-chat',
+    routeId: 'playground_deep_chat',
+  },
+  {
+    label: 'Keyword Hunter Input',
+    path: '/#/app-center/keyword-hunter/input',
+    routeId: 'keyword_hunter_input',
+  },
+  {
+    label: 'PPC Search Terms',
+    path: '/#/app-center/ppc-tools/ppc-search-terms',
+    routeId: 'ppc_search_terms',
+  },
+  { label: 'AMZ Hub', path: '/#/amz-hub', routeId: 'amz_hub_overview' },
+  { label: 'More', path: '/#/more', routeId: 'more_overview' },
+] as const;
+>>>>>>> e8a4032b (test: verify exact release routes)
 
 const ERROR_TEXT_PATTERNS = [
   /module load failed/i,
@@ -82,9 +113,14 @@ async function expectNoRouteErrorText(page: Page): Promise<void> {
 }
 
 async function openRoute(page: Page, path: string): Promise<void> {
+<<<<<<< HEAD
   await page.goto(`/#${path}`, { waitUntil: 'domcontentloaded' });
   await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => undefined);
   await expect.poll(() => new URL(page.url()).hash).toBe(`#${path}`);
+=======
+  await page.goto(path, { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('networkidle', { timeout: 10000 });
+>>>>>>> e8a4032b (test: verify exact release routes)
 }
 
 async function expectNoSevereMobileOverflow(page: Page, label: string): Promise<void> {
@@ -160,8 +196,7 @@ async function seedDeepChatPromptDraftBeforeLoad(page: Page): Promise<void> {
 async function waitForSettingsPanel(page: Page): Promise<void> {
   await page.waitForFunction(() => {
     const root = document.querySelector('[x-data="settingsPanel"]') as
-      | (HTMLElement & { _x_dataStack?: unknown[] })
-      | null;
+      (HTMLElement & { _x_dataStack?: unknown[] }) | null;
     return Array.isArray(root?._x_dataStack);
   });
 }
@@ -180,14 +215,109 @@ async function openGlobalSettings(page: Page): Promise<void> {
   ).toBeVisible();
 }
 
+<<<<<<< HEAD
+=======
+async function switchTabFromHome(page: Page, tab: string): Promise<void> {
+  await openRoute(page, '/home');
+  await expectNoRouteErrorText(page);
+
+  if (tab.startsWith('sops_')) {
+    const overviewAction = page.locator(
+      '#panel-home [data-action="switch-tab"][data-tab="sops_overview"]'
+    );
+    await expect(overviewAction).toHaveCount(1);
+    await expect(overviewAction).toBeVisible();
+    await overviewAction.click();
+    await expect(page.locator('#main-content')).toHaveAttribute(
+      'data-current-route',
+      'sops_overview'
+    );
+    if (tab === 'sops_overview') return;
+
+    const targetAction = page.locator(
+      `#sop-module-growth [data-action="switch-tab"][data-tab="${tab}"]`
+    );
+    await expect(targetAction).toHaveCount(1);
+    await expect(targetAction).toBeVisible();
+    await targetAction.click();
+    await expect(page.locator('#main-content')).toHaveAttribute('data-current-route', tab);
+    return;
+  }
+
+  const parentRoute = tab.startsWith('amz_')
+    ? { menu: '#hub-mega-menu', overview: 'amz_hub_overview', trigger: '#nav-hub' }
+    : { menu: '#apps-mega-menu', overview: 'app_center_overview', trigger: '#nav-apps' };
+
+  const navTrigger = page.locator(parentRoute.trigger);
+  await expect(navTrigger).toHaveCount(1);
+  await expect(navTrigger).toBeVisible();
+  await navTrigger.click();
+
+  const overviewAction = page.locator(
+    `${parentRoute.menu} [data-action="switch-tab"][data-tab="${parentRoute.overview}"]`
+  );
+  await expect(overviewAction).toHaveCount(1);
+  await expect(overviewAction).toBeVisible();
+  await overviewAction.click();
+  await expect(page.locator('#main-content')).toHaveAttribute(
+    'data-current-route',
+    parentRoute.overview
+  );
+  if (tab === parentRoute.overview) return;
+
+  const targetAction = page.locator(
+    `#sidebar-btn-${tab}[data-action="switch-tab"][data-tab="${tab}"]`
+  );
+  await expect(targetAction).toHaveCount(1);
+  const categoryGroup = targetAction.locator(
+    'xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " sidebar-category-group ")]'
+  );
+  await expect(categoryGroup).toHaveCount(1);
+
+  const categoryToggle = categoryGroup.locator('.sidebar-category-btn');
+  await expect(categoryToggle).toHaveCount(1);
+  await expect(categoryToggle).toBeVisible();
+  await categoryToggle.click();
+
+  await expect(targetAction).toBeVisible();
+  await targetAction.click();
+  await expect(page.locator('#main-content')).toHaveAttribute('data-current-route', tab);
+}
+
+>>>>>>> e8a4032b (test: verify exact release routes)
 test.describe('release candidate smoke', () => {
   for (const route of CORE_ROUTES) {
     test(`${route.label} renders without console or route errors`, async ({ page }) => {
       const consoleListener = setupConsoleErrorListener(page);
+      const assetResponses: Array<{ url: string; status: number; contentType: string }> = [];
+      page.on('response', response => {
+        const pathname = new URL(response.url()).pathname;
+        if (/\.(?:js|mjs|css)$/.test(pathname)) {
+          assetResponses.push({
+            url: response.url(),
+            status: response.status(),
+            contentType: response.headers()['content-type'] ?? '',
+          });
+        }
+      });
 
       await openRoute(page, route.path);
+      expect(new URL(page.url()).hash).toBe(route.path.slice(1));
+      await expect(page.locator('#main-content')).toHaveAttribute(
+        'data-current-route',
+        route.routeId
+      );
       await expectNoRouteErrorText(page);
+<<<<<<< HEAD
       await expect(page.locator(route.target)).toBeVisible();
+=======
+      expect(assetResponses.length).toBeGreaterThan(0);
+      for (const asset of assetResponses) {
+        expect(asset.status, asset.url).toBeLessThan(400);
+        if (/\.css(?:$|\?)/.test(asset.url)) expect(asset.contentType).toContain('text/css');
+        else expect(asset.contentType).toMatch(/javascript/);
+      }
+>>>>>>> e8a4032b (test: verify exact release routes)
 
       expect(
         consoleListener.getErrors(),
@@ -199,7 +329,7 @@ test.describe('release candidate smoke', () => {
   test('core routes do not create severe mobile horizontal overflow', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
 
-    for (const route of OVERFLOW_ROUTES) {
+    for (const route of CORE_ROUTES) {
       await openRoute(page, route.path);
       await expect(page.locator(route.target)).toBeVisible();
       await expectNoRouteErrorText(page);
@@ -221,7 +351,11 @@ test.describe('release candidate smoke', () => {
       }
     });
 
+<<<<<<< HEAD
     await openRoute(page, '/amz-hub/practice/marketing-calendar');
+=======
+    await switchTabFromHome(page, 'amz_marketing_calendar');
+>>>>>>> e8a4032b (test: verify exact release routes)
     await expectNoRouteErrorText(page);
     await expect(page.getByRole('heading', { name: 'EU营销日历' })).toBeVisible();
 
@@ -322,6 +456,7 @@ test.describe('release candidate smoke', () => {
 
     const startAnalysisButton = page.locator('#keyword-hunter-btn-start-analysis');
     const emptyInputToast = page.locator('#toast-container .toast').last();
+    await expect(startAnalysisButton).toBeVisible();
     await expect(startAnalysisButton).toBeEnabled();
     await startAnalysisButton.click();
     await expect(emptyInputToast).toContainText('请先输入关键词和文案');

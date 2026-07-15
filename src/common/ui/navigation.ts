@@ -304,7 +304,15 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
     emitPanelUnloadIfNeeded(targetPanelId);
     currentActivePanel = targetPanelId;
 
+<<<<<<< HEAD
     showRoutePanel(targetPanelId);
+=======
+  showRoutePanel(targetPanelId);
+  const mainContent = getEl('main-content');
+  if (mainContent) {
+    mainContent.dataset.currentRoute = cleanTab;
+  }
+>>>>>>> e8a4032b (test: verify exact release routes)
 
     // 更新导航高亮
     if (fullConfig) {

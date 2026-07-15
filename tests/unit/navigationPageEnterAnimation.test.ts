@@ -40,6 +40,7 @@ describe('navigation page enter animation', () => {
     expect(homePanel.classList.contains('view-fade-in-initial')).toBe(false);
     expect(homePanel.classList.contains('view-fade-in')).toBe(false);
     expect(document.body.classList.contains('home-shell-active')).toBe(false);
+    expect(document.getElementById('main-content')?.dataset.currentRoute).toBe('home');
   });
 
   it('shows another panel without applying the immersive home shell state', async () => {
@@ -47,6 +48,7 @@ describe('navigation page enter animation', () => {
 
     expect(document.getElementById('panel-sops')?.classList.contains('hidden')).toBe(false);
     expect(document.body.classList.contains('home-shell-active')).toBe(false);
+    expect(document.getElementById('main-content')?.dataset.currentRoute).toBe('sops_overview');
   });
 
   it('loads the route view once while preserving the page enter sequence', async () => {
