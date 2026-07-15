@@ -304,13 +304,18 @@ export async function updateUIForRoute(routeId: string): Promise<void> {
     emitPanelUnloadIfNeeded(targetPanelId);
     currentActivePanel = targetPanelId;
 
-<<<<<<< HEAD
-    showRoutePanel(targetPanelId);
-=======
   showRoutePanel(targetPanelId);
+=======
+  const visiblePanel = showRoutePanel(targetPanelId);
   const mainContent = getEl('main-content');
   if (mainContent) {
-    mainContent.dataset.currentRoute = cleanTab;
+    if (visiblePanel?.id === targetPanelId && fullConfig) {
+      mainContent.dataset.currentRoute = cleanTab;
+    } else if (visiblePanel?.id === 'panel-home') {
+      mainContent.dataset.currentRoute = 'home';
+    } else {
+      delete mainContent.dataset.currentRoute;
+    }
   }
 >>>>>>> e8a4032b (test: verify exact release routes)
 

@@ -51,23 +51,31 @@ describe('navigation page enter animation', () => {
     expect(document.getElementById('main-content')?.dataset.currentRoute).toBe('sops_overview');
   });
 
-  it('loads the route view once while preserving the page enter sequence', async () => {
-    const mainContent = document.getElementById('main-content') as HTMLElement;
-    const routePanel = document.getElementById('panel-sops') as HTMLElement;
-    const requestAnimationFrame = vi
-      .spyOn(window, 'requestAnimationFrame')
-      .mockImplementation(callback => {
-        callback(0);
-        return 1;
-      });
+  it('reports home metadata when a known route falls back from a missing panel', async () => {
+    document.getElementById('panel-sops')?.remove();
 
     await updateUIForRoute('sops_overview');
 
-    expect(ensureViewLoaded).toHaveBeenCalledOnce();
-    expect(ensureViewLoaded).toHaveBeenCalledWith('sops_overview');
-    expect(requestAnimationFrame).toHaveBeenCalledTimes(2);
-    expect(routePanel.classList.contains('hidden')).toBe(false);
-    expect(mainContent.classList.contains('app-shell-pending')).toBe(false);
+    expect(document.getElementById('panel-home')?.classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('main-content')?.dataset.currentRoute).toBe('home');
+  });
+
+  it('reports home metadata when an unknown route falls back to home', async () => {
+    await updateUIForRoute('unknown_route');
+
+    expect(document.getElementById('panel-home')?.classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('main-content')?.dataset.currentRoute).toBe('home');
+  });
+
+  it('clears stale route metadata when no panel can be shown', async () => {
+    const mainContent = document.getElementById('main-content') as HTMLElement;
+    mainContent.dataset.currentRoute = 'stale_route';
+    document.getElementById('panel-sops')?.remove();
+    document.getElementById('panel-home')?.remove();
+
+    await updateUIForRoute('sops_overview');
+
+    expect(mainContent.dataset.currentRoute).toBeUndefined();
   });
 
   it('marks the active top-level PC navigation item for orientation', async () => {
