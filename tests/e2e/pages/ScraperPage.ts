@@ -432,6 +432,7 @@ export class ScraperPage extends BasePage {
 
         return tasks.every((task: any) => task.status === 'success' || task.status === 'failed');
       },
+      undefined,
       { timeout }
     );
 

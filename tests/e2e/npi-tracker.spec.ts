@@ -287,7 +287,9 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
             await npiTracker.openNextStepEditor(0);
 
-            const dialogBox = await page.locator('#next-step-modal > div').boundingBox();
+            const dialogPanel = page.locator('#next-step-modal [slot="body"]');
+            await expect(dialogPanel).toHaveCount(1);
+            const dialogBox = await dialogPanel.boundingBox();
             const viewport = page.viewportSize();
 
             expect(dialogBox).not.toBeNull();
