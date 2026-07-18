@@ -12,7 +12,7 @@ import {
   type NavigoAdapter,
 } from './navigo';
 import { MENU_CONFIG } from '../config/menuConfig';
-import { updateUIForRoute } from '../ui/navigation';
+import { prepareUIForRoute, updateUIForRoute } from '../ui/navigation';
 import { SystemError } from '@/common/errors/AppError';
 import { normalizeRoutePath, routeIdToPath, routeIdToPathStrict } from './routePaths';
 import { LEGACY_ROUTE_ALIASES, shouldReplaceLegacyRoute } from './legacyRouteAliases';
@@ -108,6 +108,7 @@ function configureRouteMiddlewares(router: NavigoAdapter): void {
   router.useAfter(async (context, next) => {
     try {
       const routeId = context.to.config.routeId || context.to.config.moduleId;
+      prepareUIForRoute(routeId);
       await updateUIForRoute(routeId);
     } catch (error) {
       console.error('[initRouter] ❌ UI update failed:', error);
@@ -125,7 +126,11 @@ function setupBrowserNavigation(): void {
       const shouldReplaceLegacyPath = shouldReplaceLegacyRoute(normalizedHash);
       const currentRoute = routerInstance.getCurrentRoute();
 
-      if (!shouldReplaceLegacyPath && currentRoute?.path === normalizedHash) {
+      if (
+        !shouldReplaceLegacyPath &&
+        currentRoute?.path === normalizedHash &&
+        !routerInstance.isNavigationInProgress()
+      ) {
         return;
       }
 

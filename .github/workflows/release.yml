@@ -10,15 +10,21 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to release (e.g. v3.0.5-rc.1). Leave empty to use package.json version only for dry packaging.'
+        description: 'Existing tag to build (must include v, e.g. v3.0.5-rc.1). Leave empty for package.json dry packaging.'
         required: false
         type: string
+      publish:
+        description: 'Publish or update the GitHub Release'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
+  actions: read
   contents: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -28,15 +34,31 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag != '' && inputs.tag || github.ref }}
 
       - name: Resolve release tag
         id: meta
         shell: pwsh
+        env:
+          RAW_TAG_INPUT: ${{ inputs.tag }}
+          RAW_PUBLISH_INPUT: ${{ inputs.publish }}
         run: |
-          $tag = '${{ github.event.inputs.tag }}'
+          $inputTag = ([string]$env:RAW_TAG_INPUT).Trim()
+          $manualPublish = $env:RAW_PUBLISH_INPUT -eq 'true'
+
+          if (
+            $env:GITHUB_EVENT_NAME -eq 'workflow_dispatch' -and
+            $manualPublish -and
+            [string]::IsNullOrWhiteSpace($inputTag)
+          ) {
+            throw 'tag is required when publish=true'
+          }
+
+          $tag = $inputTag
           if ([string]::IsNullOrWhiteSpace($tag)) {
             if ($env:GITHUB_REF_TYPE -eq 'tag') {
               $tag = $env:GITHUB_REF_NAME
@@ -46,20 +68,72 @@ jobs:
               Write-Host "workflow_dispatch without tag input; using package.json -> $tag"
             }
           }
-          if ($tag -notmatch '^v') { $tag = "v$tag" }
+          if ($tag -notmatch '^v\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)\.\d+)?$') {
+            throw "Invalid release tag: $tag"
+          }
           $version = $tag.Substring(1)
           $isPre = [bool]($version -match '-(alpha|beta|rc)(\.|$)')
+          if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
+            $shouldPublish = $manualPublish
+          } else {
+            $shouldPublish = $env:GITHUB_REF_TYPE -eq 'tag'
+          }
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
+          "publish=$($shouldPublish.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
           if ($isPre) {
             "is_prerelease=true" >> $env:GITHUB_OUTPUT
           } else {
             "is_prerelease=false" >> $env:GITHUB_OUTPUT
           }
-          Write-Host "tag=$tag version=$version prerelease=$isPre"
+          Write-Host "tag=$tag version=$version prerelease=$isPre publish=$shouldPublish"
+
+      - name: Verify tag and successful Quality Gate
+        if: steps.meta.outputs.publish == 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          $tag = $env:RELEASE_TAG
+
+          git show-ref --verify --quiet "refs/tags/$tag"
+          if ($LASTEXITCODE -ne 0) { throw "Tag does not exist: $tag" }
+
+          $tagType = (git cat-file -t "refs/tags/$tag").Trim()
+          if ($LASTEXITCODE -ne 0) { throw "Unable to inspect tag object: $tag" }
+          if ($tagType -ne 'tag') { throw "Release tag must be annotated: $tag" }
+
+          $headSha = (git rev-parse HEAD).Trim()
+          $tagSha = (git rev-list -n 1 $tag).Trim()
+          if ($headSha -ne $tagSha) {
+            throw "Checkout/tag mismatch: HEAD=$headSha tag=$tagSha"
+          }
+
+          $json = & gh run list `
+            --repo $env:GITHUB_REPOSITORY `
+            --workflow test.yml `
+            --commit $tagSha `
+            --event push `
+            --limit 20 `
+            --json status,conclusion,headBranch,url
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to query Quality Gate runs' }
+
+          $runs = $json | ConvertFrom-Json
+          $gate = $runs |
+            Where-Object {
+              $_.headBranch -eq 'main' -and
+              $_.status -eq 'completed' -and
+              $_.conclusion -eq 'success'
+            } |
+            Select-Object -First 1
+
+          if (-not $gate) {
+            throw "No successful Quality Gate for $tagSha"
+          }
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '20.x'
           cache: npm
@@ -69,8 +143,10 @@ jobs:
 
       - name: Validate version / CHANGELOG
         shell: pwsh
+        env:
+          RELEASE_TAG: ${{ steps.meta.outputs.tag }}
         run: |
-          npx tsx scripts/release/prepare-release.ts validate --tag ${{ steps.meta.outputs.tag }}
+          npx tsx scripts/release/prepare-release.ts validate --tag $env:RELEASE_TAG
 
       - name: Security gate
         run: npm run ci:security
@@ -95,28 +171,35 @@ jobs:
 
       - name: Generate release notes
         shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          npx tsx scripts/release/prepare-release.ts notes --version ${{ steps.meta.outputs.version }} --out release-artifacts/RELEASE_BODY.md
+          npx tsx scripts/release/prepare-release.ts notes --version $env:RELEASE_VERSION --out release-artifacts/RELEASE_BODY.md
 
       - name: Package artifacts
         shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          npx tsx scripts/release/prepare-release.ts package --version ${{ steps.meta.outputs.version }}
+          npx tsx scripts/release/prepare-release.ts package --version $env:RELEASE_VERSION
 
       - name: Upload workflow artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: release-${{ steps.meta.outputs.version }}
           path: release-artifacts/
           retention-days: 30
 
       - name: Create or update GitHub Release
+        if: steps.meta.outputs.publish == 'true'
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.meta.outputs.tag }}
+          RELEASE_IS_PRERELEASE: ${{ steps.meta.outputs.is_prerelease }}
         run: |
-          $tag = '${{ steps.meta.outputs.tag }}'
-          $isPre = '${{ steps.meta.outputs.is_prerelease }}' -eq 'true'
+          $tag = $env:RELEASE_TAG
+          $isPre = $env:RELEASE_IS_PRERELEASE -eq 'true'
           $notes = 'release-artifacts/RELEASE_BODY.md'
           $assetList = @()
           $dist = Get-ChildItem 'release-artifacts/sops-dist-*' -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -126,26 +209,46 @@ jobs:
           }
           if ($assetList.Count -eq 0) { throw 'No release artifacts found to upload' }
 
-          $exists = $false
-          gh release view $tag 2>$null | Out-Null
-          if ($LASTEXITCODE -eq 0) { $exists = $true }
+          $releaseLookupErrorActionPreference = $ErrorActionPreference
+          try {
+            $ErrorActionPreference = 'Continue'
+            $releaseLookup = & gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" 2>&1
+            $releaseLookupExitCode = $LASTEXITCODE
+          } finally {
+            $ErrorActionPreference = $releaseLookupErrorActionPreference
+          }
+          if ($releaseLookupExitCode -eq 0) {
+            $exists = $true
+          } elseif (($releaseLookup | Out-String) -match '\(HTTP 404\)') {
+            $exists = $false
+          } else {
+            throw "Unable to query release ${tag}: $($releaseLookup | Out-String)"
+          }
 
           if ($exists) {
             Write-Host "Updating existing release $tag"
             & gh release upload $tag @assetList --clobber
+            if ($LASTEXITCODE -ne 0) { throw "Failed to upload release assets: $tag" }
             if ($isPre) {
-              & gh release edit $tag --prerelease --notes-file $notes --title $tag
+              & gh release edit $tag --draft=false --prerelease --notes-file $notes --title $tag
+              if ($LASTEXITCODE -ne 0) { throw "Failed to update prerelease: $tag" }
             } else {
-              & gh release edit $tag --latest --notes-file $notes --title $tag
+              & gh release edit $tag --draft=false --prerelease=false --notes-file $notes --title $tag
+              if ($LASTEXITCODE -ne 0) { throw "Failed to update release: $tag" }
             }
           } else {
             Write-Host "Creating release $tag"
-            $createArgs = @('release', 'create', $tag, '--notes-file', $notes, '--title', $tag)
-            if ($isPre) { $createArgs += '--prerelease' } else { $createArgs += '--latest' }
+            $createArgs = @('release', 'create', $tag, '--verify-tag', '--draft=false', '--notes-file', $notes, '--title', $tag)
+            if ($isPre) { $createArgs += '--prerelease' }
             $createArgs += $assetList
             & gh @createArgs
+            if ($LASTEXITCODE -ne 0) { throw "Failed to create release: $tag" }
           }
 
-          if ($isPre) {
-            & gh release edit $tag --prerelease
+          $releaseStateJson = & gh release view $tag --json isDraft,isPrerelease
+          if ($LASTEXITCODE -ne 0) { throw "Unable to verify release state: $tag" }
+          $releaseState = $releaseStateJson | ConvertFrom-Json
+          if ([bool]$releaseState.isDraft) { throw "Release is still a draft: $tag" }
+          if ([bool]$releaseState.isPrerelease -ne $isPre) {
+            throw "Release prerelease state mismatch: expected=$isPre actual=$($releaseState.isPrerelease)"
           }

@@ -100,6 +100,10 @@ body {
   display: none !important;
 }
 
+.app-shell-pending {
+  visibility: hidden;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

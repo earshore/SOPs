@@ -4,7 +4,7 @@
 // 当前生产链路主要使用模板加载能力；子模块加载由 ModuleLoader 负责。
 // ================================================================
 
-import { createErrorTracker } from '@/services/errorTracker';
+import { errorTracker } from '@/services/errorTracker';
 import { AppError, NetworkError, SystemError } from '@/common/errors/AppError';
 import { setSafeHtml } from '@/common/utils/security';
 import { randomBetween } from '@/common/utils/random';
@@ -151,7 +151,7 @@ export class SafeModuleLoader {
   private static instance: SafeModuleLoader;
   private loadedModules: Map<string, unknown>;
   private loadingModules: Map<string, Promise<unknown>>;
-  private errorTrackerInstance: ReturnType<typeof createErrorTracker>;
+  private errorTrackerInstance: typeof errorTracker;
 
   /**
    * 私有构造函数（单例模式）
@@ -160,8 +160,7 @@ export class SafeModuleLoader {
     this.loadedModules = new Map();
     this.loadingModules = new Map();
 
-    // 使用错误追踪器（不再需要 logger 参数）
-    this.errorTrackerInstance = createErrorTracker();
+    this.errorTrackerInstance = errorTracker;
   }
 
   /**
@@ -203,11 +202,23 @@ export class SafeModuleLoader {
     }
   }
 
-  private async waitForExistingModuleLoad(modulePath: string): Promise<void> {
-    const existingLoad = this.loadingModules.get(modulePath);
+  private getOrCreateInFlight<T>(key: string, load: () => Promise<T>): Promise<T> {
+    const existingLoad = this.loadingModules.get(key);
     if (existingLoad) {
-      await existingLoad;
+      return existingLoad as Promise<T>;
     }
+
+    const loadPromise = Promise.resolve().then(load);
+    this.loadingModules.set(key, loadPromise);
+
+    const clearInFlight = (): void => {
+      if (this.loadingModules.get(key) === loadPromise) {
+        this.loadingModules.delete(key);
+      }
+    };
+    void loadPromise.then(clearInFlight, clearInFlight);
+
+    return loadPromise;
   }
 
   private renderCachedModuleIfAvailable(
@@ -230,16 +241,15 @@ export class SafeModuleLoader {
     timeout: number,
     retryCount: number
   ): Promise<RetryLoadResult<unknown>> {
-    const loadResult = await this.retryLoad(
-      () => this.loadModuleWithTimeout(modulePath, timeout),
-      retryCount
-    );
+    return this.getOrCreateInFlight(`module:${modulePath}`, async () => {
+      const loadResult = await this.retryLoad(
+        () => this.loadModuleWithTimeout(modulePath, timeout),
+        retryCount
+      );
 
-    this.loadingModules.set(modulePath, Promise.resolve(loadResult.data));
-    this.loadedModules.set(modulePath, loadResult.data);
-    this.loadingModules.delete(modulePath);
-
-    return loadResult;
+      this.loadedModules.set(modulePath, loadResult.data);
+      return loadResult;
+    });
   }
 
   private createModuleLoadSuccessResult(
@@ -285,8 +295,6 @@ export class SafeModuleLoader {
     startTime: number,
     options: ResolvedModuleLoadOptions
   ): ModuleLoadResult {
-    this.loadingModules.delete(modulePath);
-
     const classifiedError = this.classifyError(error as Error, modulePath);
     this.errorTrackerInstance.captureAppError(classifiedError);
     this.handleErrorCallback(options.onError, classifiedError, modulePath);
@@ -318,8 +326,6 @@ export class SafeModuleLoader {
     this.showModuleLoadingIndicator(container, loadOptions);
 
     try {
-      await this.waitForExistingModuleLoad(modulePath);
-
       const cachedResult = this.renderCachedModuleIfAvailable(container, modulePath, startTime);
       if (cachedResult) {
         return cachedResult;
@@ -367,9 +373,8 @@ export class SafeModuleLoader {
       }
 
       // 加载模板（带重试）
-      const loadResult = await this.retryLoad(
-        () => this.loadTemplateWithTimeout(templatePath, timeout),
-        retryCount
+      const loadResult = await this.getOrCreateInFlight(`template:${templatePath}`, () =>
+        this.retryLoad(() => this.loadTemplateWithTimeout(templatePath, timeout), retryCount)
       );
 
       const template = loadResult.data;

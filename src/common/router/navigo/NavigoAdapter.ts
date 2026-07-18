@@ -354,17 +354,18 @@ export class NavigoAdapter {
   }
 
   private queueNavigation(normalizedPath: string, options: NavigateOptions): Promise<boolean> {
-    if (
-      normalizedPath === this.activeNavigationPath ||
-      normalizedPath === this.pendingNavigation?.path
-    ) {
+    if (normalizedPath === this.activeNavigationPath) {
+      this.cancelPendingNavigation();
+      this.log(`Navigation in progress, active target retained: ${normalizedPath}`);
+      return Promise.resolve(false);
+    }
+
+    if (normalizedPath === this.pendingNavigation?.path) {
       this.log(`Navigation in progress, duplicate target skipped: ${normalizedPath}`);
       return Promise.resolve(false);
     }
 
-    if (this.pendingNavigation) {
-      this.pendingNavigation.resolve(false);
-    }
+    this.cancelPendingNavigation();
 
     this.log(`Navigation in progress, queued latest target: ${normalizedPath}`);
     return new Promise(resolve => {
@@ -374,6 +375,14 @@ export class NavigoAdapter {
         resolve,
       };
     });
+  }
+
+  private cancelPendingNavigation(): void {
+    const pendingNavigation = this.pendingNavigation;
+    if (!pendingNavigation) return;
+
+    this.pendingNavigation = null;
+    pendingNavigation.resolve(false);
   }
 
   private createNavigationTarget(path: string, options: NavigateOptions): NavigationTarget | null {
@@ -477,10 +486,13 @@ export class NavigoAdapter {
     this.log('Updating browser history');
 
     if (options.replace) {
-      this.navigo.navigate(normalizedPath, { historyAPIMethod: 'replaceState' });
+      this.navigo.navigate(normalizedPath, {
+        historyAPIMethod: 'replaceState',
+        callHandler: false,
+      });
       return;
     }
-    this.navigo.navigate(normalizedPath);
+    this.navigo.navigate(normalizedPath, { callHandler: false });
   }
 
   private async runAfterNavigation(
@@ -746,6 +758,10 @@ export class NavigoAdapter {
    */
   getCurrentRoute(): Route | null {
     return this.currentRoute;
+  }
+
+  isNavigationInProgress(): boolean {
+    return this.isNavigating;
   }
 
   /**

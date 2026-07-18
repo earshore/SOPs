@@ -26,7 +26,11 @@ const navigoMock = vi.hoisted(() => {
       this.handlers.set(path, handler);
       return this;
     });
-    this.navigate = vi.fn();
+    this.navigate = vi.fn((path: string, navigateOptions?: { callHandler?: boolean }) => {
+      if (navigateOptions?.callHandler !== false) {
+        void this.handlers.get(path)?.();
+      }
+    });
     this.resolve = vi.fn();
     this.destroy = vi.fn();
     state.instances.push(this);
@@ -145,7 +149,7 @@ it('navigates through middleware, updates history, and syncs store state', async
   expect(storeSync.syncNavigating).toHaveBeenCalledWith(false);
   expect(before).toHaveBeenCalledTimes(1);
   expect(after).toHaveBeenCalledTimes(1);
-  expect(latestNavigo().navigate).toHaveBeenCalledWith('/orders');
+  expect(latestNavigo().navigate).toHaveBeenCalledWith('/orders', { callHandler: false });
 });
 
 it('resolves aliases, supports replace navigation, and lets Navigo handlers skip browser history', async () => {
@@ -157,6 +161,7 @@ it('resolves aliases, supports replace navigation, and lets Navigo handlers skip
   await expect(adapter.navigate('/alias', { replace: true })).resolves.toBe(true);
   expect(instance.navigate).toHaveBeenCalledWith('/orders', {
     historyAPIMethod: 'replaceState',
+    callHandler: false,
   });
 
   instance.navigate.mockClear();
@@ -183,6 +188,7 @@ it('redirects after guard rejection without being blocked by active navigation',
   expect(adapter.getCurrentRoute()?.path).toBe('/home');
   expect(instance.navigate).toHaveBeenCalledWith('/home', {
     historyAPIMethod: 'replaceState',
+    callHandler: false,
   });
 });
 
@@ -203,6 +209,7 @@ it('redirects after before middleware requests a redirect', async () => {
   expect(adapter.getCurrentRoute()?.path).toBe('/home');
   expect(instance.navigate).toHaveBeenCalledWith('/home', {
     historyAPIMethod: 'replaceState',
+    callHandler: false,
   });
 });
 
@@ -220,6 +227,7 @@ it('falls back from missing routes to the configured default route when no 404 r
   expect(adapter.getCurrentRoute()?.path).toBe('/home');
   expect(instance.navigate).toHaveBeenCalledWith('/home', {
     historyAPIMethod: 'replaceState',
+    callHandler: false,
   });
 });
 
@@ -262,6 +270,20 @@ it('returns false for missing routes, blocked middleware, blocked guards, and re
   expect(nestedNavigation).toHaveBeenCalledWith(false);
 });
 
+it('does not commit route state when preparation middleware fails', async () => {
+  const adapter = createRouter();
+  adapter.register('/orders', routeConfig());
+  adapter.use(async () => {
+    throw new Error('view chunk failed');
+  });
+
+  await expect(adapter.navigate('/orders')).resolves.toBe(false);
+
+  expect(adapter.getCurrentRoute()).toBeNull();
+  expect(adapter.getHistory()).toEqual([]);
+  expect(latestNavigo().navigate).not.toHaveBeenCalled();
+});
+
 it('runs the latest different navigation queued while another navigation is finishing', async () => {
   const adapter = createRouter();
   let shouldHoldAfterNavigation = true;
@@ -293,6 +315,69 @@ it('runs the latest different navigation queued while another navigation is fini
   await expect(firstNavigation).resolves.toBe(true);
   await expect(queuedNavigation).resolves.toBe(true);
   expect(adapter.getCurrentRoute()?.path).toBe('/reports');
+});
+
+it('keeps a route queued while the active route is still in before middleware', async () => {
+  const adapter = createRouter();
+  let releaseBeforeNavigation = (): void => {};
+  const beforeNavigationStarted = new Promise<void>(resolve => {
+    adapter.use(async (_context, next) => {
+      resolve();
+      await new Promise<void>(release => {
+        releaseBeforeNavigation = release;
+      });
+      await next();
+    });
+  });
+
+  adapter.register('/orders', routeConfig());
+  adapter.register('/reports', routeConfig({ label: 'Reports', panelId: 'panel-reports' }));
+
+  const firstNavigation = adapter.navigate('/orders');
+  await beforeNavigationStarted;
+  const queuedNavigation = adapter.navigate('/reports', { skipMiddleware: true });
+
+  releaseBeforeNavigation();
+
+  await expect(firstNavigation).resolves.toBe(true);
+  await expect(queuedNavigation).resolves.toBe(true);
+  expect(adapter.getCurrentRoute()?.path).toBe('/reports');
+});
+
+it('cancels a stale pending route when the latest target returns to the active route', async () => {
+  const adapter = createRouter();
+  let shouldHoldAfterNavigation = true;
+  let releaseAfterNavigation = (): void => {};
+  const afterNavigationStarted = new Promise<void>(resolve => {
+    adapter.useAfter(async (_context, next) => {
+      if (shouldHoldAfterNavigation) {
+        shouldHoldAfterNavigation = false;
+        resolve();
+        await new Promise<void>(release => {
+          releaseAfterNavigation = release;
+        });
+      }
+      await next();
+    });
+  });
+
+  adapter.register('/orders', routeConfig());
+  adapter.register('/reports', routeConfig({ label: 'Reports', panelId: 'panel-reports' }));
+
+  const firstNavigation = adapter.navigate('/orders');
+  await afterNavigationStarted;
+
+  const staleNavigation = adapter.navigate('/reports');
+  const latestNavigation = adapter.navigate('/orders');
+  expect(adapter.isNavigationInProgress()).toBe(true);
+
+  releaseAfterNavigation();
+
+  await expect(firstNavigation).resolves.toBe(true);
+  await expect(staleNavigation).resolves.toBe(false);
+  await expect(latestNavigation).resolves.toBe(false);
+  expect(adapter.isNavigationInProgress()).toBe(false);
+  expect(adapter.getCurrentRoute()?.path).toBe('/orders');
 });
 
 it('syncs navigation errors raised while committing route state', async () => {

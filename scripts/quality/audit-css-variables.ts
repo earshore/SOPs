@@ -145,6 +145,7 @@ const NAMING_PATTERNS = {
   componentWelcomeBanner: /^--wb-[\w-]+$/,
   animationRuntime: /^--(stagger-index|animation-expand-height)$/,
   tailwindRuntime: /^--tw-[\w-]+$/,
+  fontAwesomeRuntime: /^--fa-family-classic$/,
   hitArea: /^--hit-area-expand$/,
   moduleAppCenter: /^--app-[\w-]+$/,
   modulePpcTools: /^--ppc-[\w-]+$/,

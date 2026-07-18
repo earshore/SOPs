@@ -36,6 +36,7 @@ export class GlobalErrorHandler {
   private static instance: GlobalErrorHandler;
   private errorCount: number = 0;
   private lastErrorTime: number = 0;
+  private lastGlobalNotificationTime: number = 0;
   private errorThrottleMs: number = 2000;
   private isHandlingError: boolean = false; // 🔧 添加：防止循环调用标志
 
@@ -87,15 +88,18 @@ export class GlobalErrorHandler {
    * 处理全局错误
    */
   private handleGlobalError(error: unknown, options: ErrorHandlerOptions = {}): void {
-    // 节流:避免错误刷屏
     const now = Date.now();
-    if (now - this.lastErrorTime < this.errorThrottleMs) {
-      return;
-    }
-    this.lastErrorTime = now;
-
     const appError = toAppError(error, options.context);
-    this.handle(appError, options);
+    const shouldNotify =
+      options.notify !== false &&
+      appError.notify &&
+      now - this.lastGlobalNotificationTime >= this.errorThrottleMs;
+
+    if (shouldNotify) {
+      this.lastGlobalNotificationTime = now;
+    }
+
+    this.handle(appError, { ...options, notify: shouldNotify });
   }
 
   /**
@@ -240,6 +244,7 @@ export class GlobalErrorHandler {
   resetStats(): void {
     this.errorCount = 0;
     this.lastErrorTime = 0;
+    this.lastGlobalNotificationTime = 0;
   }
 
   /**

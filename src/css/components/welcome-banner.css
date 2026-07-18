@@ -1279,7 +1279,7 @@
 /* 图标右下角的小徽章 - 使用伪元素 */
 .wb-container--simple .wb-icon::after {
   content: '\f0e7';
-  font-family: 'Font Awesome 6 Free';
+  font-family: var(--fa-family-classic, 'Font Awesome 7 Free');
   font-weight: 900;
   position: absolute;
   bottom: var(--wb-icon-badge-offset, -4px);

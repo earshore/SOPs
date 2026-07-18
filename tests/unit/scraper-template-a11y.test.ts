@@ -12,22 +12,35 @@ const renderers = readFileSync(
 
 describe('Scraper template accessibility semantics', () => {
   it('keeps import triggers keyboard reachable and names the hidden file input', () => {
-    expect(template).toContain('id="no-data-msg"');
+    const emptyStateButton = template.match(
+      /<button\b[^>]*\bid="no-data-msg"[^>]*>/
+    )?.[0];
+    const hiddenFileInput = template.match(
+      /<input\b[^>]*\bid="import-file-input"[^>]*>/
+    )?.[0];
+
+    if (!emptyStateButton) {
+      throw new Error('Expected an opening button tag with id="no-data-msg"');
+    }
+    if (!hiddenFileInput) {
+      throw new Error('Expected an opening input tag with id="import-file-input"');
+    }
+
     expect(template.match(/data-scraper-import-trigger/g)).toHaveLength(2);
     expect(template).not.toContain('@click="triggerImport()"');
-    expect(template).toContain('aria-label="导入 JSON 产品数据文件"');
+    expect(hiddenFileInput).toContain('aria-label="导入 JSON 产品数据文件"');
     expect(template).toContain('aria-label="重新导入 JSON 产品数据文件"');
     expect(template).toContain('focus-visible:ring-2 focus-visible:ring-blue-500');
-    expect(template).not.toContain('role="button"');
-    expect(template).not.toContain('tabindex="0"');
-    expect(template).not.toContain('@keydown.enter.prevent="triggerImport()"');
-    expect(template).not.toContain('@keydown.space.prevent="triggerImport()"');
+    expect(emptyStateButton).not.toContain('role="button"');
+    expect(emptyStateButton).not.toContain('tabindex="0"');
+    expect(emptyStateButton).not.toContain('@keydown.enter.prevent="triggerImport()"');
+    expect(emptyStateButton).not.toContain('@keydown.space.prevent="triggerImport()"');
     expect(template).toContain('id="scraper-import-status"');
-    expect(template).toContain('aria-describedby="scraper-import-help scraper-import-status"');
+    expect(emptyStateButton).toContain('aria-describedby="scraper-import-status"');
     expect(template).toContain('aria-describedby="scraper-reimport-help scraper-import-status"');
     expect(template).toContain(':role="importStatusRole"');
     expect(template).toContain(':aria-live="importStatusLive"');
-    expect(template).toContain('aria-describedby="scraper-import-status"');
+    expect(hiddenFileInput).toContain('aria-describedby="scraper-import-status"');
   });
 
   it('names Alpine-driven manual scrape controls', () => {

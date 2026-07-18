@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    "typeRoots": ["../node_modules/@types", "../src/types"]
+  },
+  "include": [
+    "../config/playwright.config.ts",
+    "../tests/performance/lighthousePageAudit.ts",
+    "../tests/performance/ai-analysis-performance.test.ts",
+    "../tests/performance/promptlab-performance.test.ts",
+    "../tests/performance/scraper-performance.test.ts",
+    "../tests/unit/performance-workflow.test.ts",
+    "../tests/unit/lighthousePageAudit.test.ts"
+  ],
+  "exclude": ["../node_modules", "../dist"]
+}

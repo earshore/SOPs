@@ -261,6 +261,15 @@ describe('apiEndpoints inline style policy', () => {
     expect(readMainEntry()).toContain('@fortawesome/fontawesome-free/css/regular.min.css');
     expect(readMainEntry()).toContain('@fortawesome/fontawesome-free/css/brands.min.css');
 
+    const legacyFontFamilyDeclarations = readRuntimeTextFiles(['src'])
+      .filter(
+        ({ path, source }) =>
+          path.endsWith('.css') && /font-family\s*:\s*['"]Font Awesome 6 Free['"]/i.test(source)
+      )
+      .map(({ path }) => path);
+
+    expect(legacyFontFamilyDeclarations).toEqual([]);
+
     for (const csp of [readPublicHeadersCsp(), readVercelCsp()]) {
       expect(extractCspDirective(csp, 'style-src')).not.toContain('cdn.bootcdn.net');
       expect(extractCspDirective(csp, 'style-src-elem')).not.toContain('cdn.bootcdn.net');
@@ -291,5 +300,20 @@ describe('apiEndpoints inline style policy', () => {
       expect(extractCspDirective(csp, 'style-src')).not.toContain('cdn.jsdelivr.net');
       expect(extractCspDirective(csp, 'style-src-elem')).not.toContain('cdn.jsdelivr.net');
     }
+  });
+});
+
+describe('Font Awesome CSS policy', () => {
+  it('keeps the welcome banner badge on the Font Awesome 7 classic solid glyph', () => {
+    const css = readProjectFile('src/css/components/welcome-banner.css');
+    const rule = css.match(/\.wb-container--simple\s+\.wb-icon::after\s*\{([^}]*)\}/)?.[1] ?? '';
+
+    expect(rule).not.toBe('');
+    expect(rule).toMatch(/content:\s*['"]\\f0e7['"]\s*;/);
+    expect(rule).toMatch(/font-weight:\s*900\s*;/);
+    expect(rule).toMatch(
+      /font-family:\s*var\(--fa-family-classic(?:,\s*['"]Font Awesome 7 Free['"])?\)\s*;/
+    );
+    expect(rule).not.toContain('Font Awesome 6 Free');
   });
 });

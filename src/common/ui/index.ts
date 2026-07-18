@@ -19,6 +19,8 @@ export {
 // 导航和路由
 export {
   updateUIForRoute,
+  prepareUIForRoute,
+  revealMainContent,
   registerSidebarRenderer,
   toggleSOPGroup,
   scrollToSOPModule,

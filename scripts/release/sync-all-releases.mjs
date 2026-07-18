@@ -92,6 +92,16 @@ function compareVersionsDesc(a, b) {
   return pb.preNum - pa.preNum;
 }
 
+function previousGaFor(version, versionSectionsOrdered) {
+  const currentIndex = versionSectionsOrdered.findIndex(candidate => candidate.version === version);
+  if (currentIndex < 0) return null;
+
+  const previousGa = versionSectionsOrdered
+    .slice(currentIndex + 1)
+    .find(candidate => !isPre(candidate.version));
+  return previousGa?.version ?? null;
+}
+
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -192,7 +202,7 @@ function sectionFromRelease(version, release, existingBody) {
   return lines.join('\n').trim();
 }
 
-function buildReleaseNotes(version, section, release) {
+function buildReleaseNotes(version, section, release, previousGa) {
   const pre = isPre(version) || release.prerelease;
   const shaTry = (() => {
     try {
@@ -204,7 +214,7 @@ function buildReleaseNotes(version, section, release) {
   const shortSha = String(shaTry).slice(0, 12);
   const date = dateOnly(release.published_at);
   const preNote = pre
-    ? '\n> ⚠ 预发布或历史候选。GitHub Latest 仅指向稳定 GA（当前 `v3.0.6`）。\n'
+    ? '\n> ⚠ 预发布或历史候选。GitHub Latest 仅指向稳定 GA（当前 `v3.0.7`）。\n'
     : '';
 
   let extra = '';
@@ -230,6 +240,9 @@ function buildReleaseNotes(version, section, release) {
     (release.assets || []).length > 0
       ? `- 产物：${release.assets.map((a) => `\`${a}\``).join('、')}`
       : '- 产物：本版本无归档 dist（历史 release）；以源码 tag 为准。自 `v3.0.4-rc.11` / `v3.0.5` 起新发版附带 zip + SHA256';
+  const rollbackNote = previousGa
+    ? `上一 GA 为 \`v${previousGa}\``
+    : '未找到更早 GA；请按 GitHub Releases 确认回滚目标';
 
   return `## SOPs ${version}
 
@@ -244,7 +257,7 @@ ${preNote}
 ### 运维与部署
 
 ${assetsNote}
-- 回滚：优先使用上一 GA；当前 Latest 为 \`v3.0.6\`
+- 回滚：${rollbackNote}；当前 Latest 为 \`v3.0.7\`
 - 验证：首页可达、核心路由可进、LLM 网关连通
 - 部署步骤：docs/DEPLOYMENT.md
 - 发布策略：docs/RELEASE_POLICY.md
@@ -291,7 +304,7 @@ function updateGithubRelease(version, notesPath, release, dryRun) {
     console.log(`[dry-run] gh release edit ${tag}`);
     return;
   }
-  if (version === '3.0.6' && !pre) {
+  if (version === '3.0.7' && !pre) {
     sh(`gh release edit ${tag} --latest --notes-file "${notesPath}" --title "${tag}"`, {
       stdio: 'inherit',
     });
@@ -391,7 +404,8 @@ function main() {
         continue;
       }
       const sectionBody = finalSections.get(version) || sectionFromRelease(version, release, null);
-      const notes = buildReleaseNotes(version, sectionBody, release);
+      const previousGa = previousGaFor(version, versionSectionsOrdered);
+      const notes = buildReleaseNotes(version, sectionBody, release, previousGa);
       const notesPath = join(OUT_DIR, `notes-${version}.md`);
       writeFileSync(notesPath, notes, 'utf8');
       try {

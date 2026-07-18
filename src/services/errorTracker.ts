@@ -109,6 +109,10 @@ export class ErrorTracker {
     this.logger = logger || null;
   }
 
+  setLogger(logger: ILoggerService): void {
+    this.logger = logger;
+  }
+
   /**
    * 获取单例实例
    */

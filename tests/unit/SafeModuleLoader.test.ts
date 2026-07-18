@@ -4,8 +4,44 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { SafeModuleLoader } from '@/common/infrastructure/SafeModuleLoader';
+import {
+  SafeModuleLoader,
+  safeTemplateLoader,
+} from '@/common/infrastructure/SafeModuleLoader';
 import { NetworkError, SystemError } from '@/common/errors/AppError';
+
+const errorTrackerMocks = vi.hoisted(() => {
+  const sharedErrorTracker = { captureAppError: vi.fn() };
+  const isolatedErrorTracker = { captureAppError: vi.fn() };
+
+  return {
+    sharedErrorTracker,
+    isolatedErrorTracker,
+    createErrorTracker: vi.fn(() => isolatedErrorTracker),
+  };
+});
+
+vi.mock('@/services/errorTracker', () => ({
+  errorTracker: errorTrackerMocks.sharedErrorTracker,
+  createErrorTracker: errorTrackerMocks.createErrorTracker,
+}));
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+}
+
+async function flushAsyncWork(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+}
 
   let loader: SafeModuleLoader;
   let container: HTMLElement;
@@ -15,7 +51,6 @@ import { NetworkError, SystemError } from '@/common/errors/AppError';
     container = document.createElement('div');
     document.body.appendChild(container);
   });
-
   afterEach(() => {
     document.body.removeChild(container);
     loader.clearCache();
@@ -27,6 +62,20 @@ import { NetworkError, SystemError } from '@/common/errors/AppError';
       const instance1 = SafeModuleLoader.getInstance();
       const instance2 = SafeModuleLoader.getInstance();
       expect(instance1).toBe(instance2);
+    });
+
+    it('应该使用共享errorTracker记录加载错误', async () => {
+      vi.clearAllMocks();
+      expect(loader).toBe(safeTemplateLoader);
+      vi.spyOn(loader as any, 'loadTemplateInternal').mockRejectedValue(new Error('load failed'));
+
+      await expect(
+        loader.loadTemplate('./shared-error-tracker.html', { retryCount: 0 })
+      ).rejects.toBeDefined();
+
+      expect(errorTrackerMocks.createErrorTracker).not.toHaveBeenCalled();
+      expect(errorTrackerMocks.sharedErrorTracker.captureAppError).toHaveBeenCalledTimes(1);
+      expect(errorTrackerMocks.isolatedErrorTracker.captureAppError).not.toHaveBeenCalled();
     });
   });
 
@@ -88,6 +137,37 @@ import { NetworkError, SystemError } from '@/common/errors/AppError';
       await loader.loadModule(container, './test-module');
       expect(loadSpy).toHaveBeenCalledTimes(1);
     });
+
+    it('应该为同路径并发模块加载复用底层请求并分别渲染', async () => {
+      const mockModule = { render: vi.fn() };
+      const pendingModule = deferred<typeof mockModule>();
+      const loadSpy = vi.spyOn(loader as any, 'loadModuleInternal')
+        .mockImplementation(() => pendingModule.promise);
+      const secondContainer = document.createElement('div');
+
+      const firstLoad = loader.loadModule(container, './shared-module', { showLoading: false });
+      const secondLoad = loader.loadModule(secondContainer, './shared-module', {
+        showLoading: false,
+      });
+      await flushAsyncWork();
+
+      const callsBeforeResolve = loadSpy.mock.calls.length;
+      const loadingBeforeResolve = loader.getCacheStats().loadingModules;
+
+      pendingModule.resolve(mockModule);
+      const [firstResult, secondResult] = await Promise.all([firstLoad, secondLoad]);
+
+      expect(callsBeforeResolve).toBe(1);
+      expect(loadingBeforeResolve).toBe(1);
+      expect(firstResult.success).toBe(true);
+      expect(secondResult.success).toBe(true);
+      expect(firstResult.data).toBe(mockModule);
+      expect(secondResult.data).toBe(mockModule);
+      expect(mockModule.render).toHaveBeenCalledTimes(2);
+      expect(mockModule.render).toHaveBeenCalledWith(container);
+      expect(mockModule.render).toHaveBeenCalledWith(secondContainer);
+      expect(loader.getCacheStats().loadingModules).toBe(0);
+    });
   });
 
   describe('模板加载', () => {
@@ -114,6 +194,100 @@ import { NetworkError, SystemError } from '@/common/errors/AppError';
       expect(loadSpy).toHaveBeenCalledTimes(2);
 
       (import.meta.env as any).DEV = originalEnv;
+    });
+
+    it('应该在开发环境为同路径并发模板加载复用底层请求', async () => {
+      const originalEnv = import.meta.env.DEV;
+      (import.meta.env as any).DEV = true;
+      const mockTemplate = '<div>Shared Template</div>';
+      const pendingTemplate = deferred<string>();
+      const loadSpy = vi.spyOn(loader as any, 'loadTemplateInternal')
+        .mockImplementation(() => pendingTemplate.promise);
+
+      try {
+        const firstLoad = loader.loadTemplate('./shared-template.html');
+        const secondLoad = loader.loadTemplate('./shared-template.html');
+        await flushAsyncWork();
+
+        const callsBeforeResolve = loadSpy.mock.calls.length;
+        const loadingBeforeResolve = loader.getCacheStats().loadingModules;
+
+        pendingTemplate.resolve(mockTemplate);
+        const templates = await Promise.all([firstLoad, secondLoad]);
+
+        expect(callsBeforeResolve).toBe(1);
+        expect(loadingBeforeResolve).toBe(1);
+        expect(templates).toEqual([mockTemplate, mockTemplate]);
+        expect(loader.getCacheStats().loadingModules).toBe(0);
+      } finally {
+        (import.meta.env as any).DEV = originalEnv;
+      }
+    });
+
+    it('应该隔离同路径模块与模板的并发加载', async () => {
+      const originalEnv = import.meta.env.DEV;
+      (import.meta.env as any).DEV = true;
+      const sharedPath = './shared-resource';
+      const mockModule = { render: vi.fn() };
+      const mockTemplate = '<div>Template</div>';
+      const pendingModule = deferred<typeof mockModule>();
+      const pendingTemplate = deferred<string>();
+      const moduleLoadSpy = vi.spyOn(loader as any, 'loadModuleInternal')
+        .mockImplementation(() => pendingModule.promise);
+      const templateLoadSpy = vi.spyOn(loader as any, 'loadTemplateInternal')
+        .mockImplementation(() => pendingTemplate.promise);
+
+      try {
+        const moduleLoad = loader.loadModule(container, sharedPath, { showLoading: false });
+        const templateLoad = loader.loadTemplate(sharedPath);
+        await flushAsyncWork();
+
+        const moduleCallsBeforeResolve = moduleLoadSpy.mock.calls.length;
+        const templateCallsBeforeResolve = templateLoadSpy.mock.calls.length;
+        const loadingBeforeResolve = loader.getCacheStats().loadingModules;
+
+        pendingModule.resolve(mockModule);
+        pendingTemplate.resolve(mockTemplate);
+        const [moduleResult, template] = await Promise.all([moduleLoad, templateLoad]);
+
+        expect(moduleCallsBeforeResolve).toBe(1);
+        expect(templateCallsBeforeResolve).toBe(1);
+        expect(loadingBeforeResolve).toBe(2);
+        expect(moduleResult.success).toBe(true);
+        expect(template).toBe(mockTemplate);
+        expect(loader.getCacheStats().loadingModules).toBe(0);
+      } finally {
+        (import.meta.env as any).DEV = originalEnv;
+      }
+    });
+
+    it('应该在共享模板加载失败后清理状态并允许重新加载', async () => {
+      const pendingTemplate = deferred<string>();
+      const loadSpy = vi.spyOn(loader as any, 'loadTemplateInternal')
+        .mockImplementation(() => pendingTemplate.promise);
+      const templatePath = './retry-template.html';
+
+      const firstLoad = loader.loadTemplate(templatePath, { retryCount: 0 });
+      const secondLoad = loader.loadTemplate(templatePath, { retryCount: 0 });
+      await flushAsyncWork();
+
+      const callsBeforeReject = loadSpy.mock.calls.length;
+      const loadingBeforeReject = loader.getCacheStats().loadingModules;
+
+      pendingTemplate.reject(new Error('load failed'));
+      const failedLoads = await Promise.allSettled([firstLoad, secondLoad]);
+
+      expect(callsBeforeReject).toBe(1);
+      expect(loadingBeforeReject).toBe(1);
+      expect(failedLoads.every(result => result.status === 'rejected')).toBe(true);
+      expect(loader.getCacheStats().loadingModules).toBe(0);
+
+      loadSpy.mockResolvedValueOnce('<div>Recovered</div>');
+
+      await expect(loader.loadTemplate(templatePath, { retryCount: 0 }))
+        .resolves.toBe('<div>Recovered</div>');
+      expect(loadSpy).toHaveBeenCalledTimes(2);
+      expect(loader.getCacheStats().loadingModules).toBe(0);
     });
   });
 

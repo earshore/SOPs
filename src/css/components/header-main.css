@@ -254,7 +254,7 @@
 }
 
 .nav-trigger[aria-current='page'] {
-  color: var(--color-primary, #6366f1);
+  color: var(--color-primary-darker, #1d4ed8);
 }
 
 .nav-trigger[aria-current='page']::after {
@@ -835,12 +835,12 @@
 .dark .nav-trigger:hover,
 [data-theme='dark'] .nav-group:hover .nav-trigger,
 [data-theme='dark'] .nav-trigger:hover {
-  color: var(--color-primary-light, #818cf8);
+  color: var(--color-primary, #818cf8);
 }
 
 .dark .nav-trigger[aria-current='page'],
 [data-theme='dark'] .nav-trigger[aria-current='page'] {
-  color: var(--color-primary-light, #818cf8);
+  color: var(--color-primary, #818cf8);
 }
 
 .dark .mega-menu-inner,

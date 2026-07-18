@@ -97,6 +97,7 @@ import {
   renderHubMegaMenu,
   renderMoreMenu,
   initMegaMenuAccessibility,
+  revealMainContent,
   showToast,
 } from '@/common/ui';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
@@ -518,26 +519,28 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
     throw error;
   });
 
-  if (shouldWaitForHomeView) {
-    await homeViewReady;
-    if (revealInitialHomeView()) {
-      initializeHomeSplashOnce();
-    }
-  }
-
-  await mainStylesReady;
-  updateAppVersionLabel();
-  const bootstrap = createServiceBootstrap();
-
-  // ================================================================
-  // 执行初始化
-  // ================================================================
   try {
+    if (shouldWaitForHomeView) {
+      await Promise.all([homeViewReady, mainStylesReady]);
+      if (revealInitialHomeView()) {
+        initializeHomeSplashOnce();
+        revealMainContent();
+      }
+    }
+
+    await mainStylesReady;
+    updateAppVersionLabel();
+    const bootstrap = createServiceBootstrap();
+
+    // ================================================================
+    // 执行初始化
+    // ================================================================
     const [result] = await Promise.all([bootstrap.initialize(), domainModulesReady]);
 
     if (!result.success) {
       mainLogger.error('部分服务初始化失败，应用可能无法正常工作');
       showToast('应用初始化失败，请刷新页面重试', { type: 'error' });
+      revealMainContent();
       return;
     }
 
@@ -549,6 +552,7 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
     mainLogger.info('System: Ready');
   } catch (error) {
     mainLogger.error('应用启动失败', error);
+    revealMainContent();
     showToast('应用启动失败，请刷新页面重试', { type: 'error' });
   }
 });

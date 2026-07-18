@@ -267,7 +267,7 @@
 
 .amzpa_nav_step::after {
   content: '\f054';
-  font-family: 'Font Awesome 6 Free';
+  font-family: var(--fa-family-classic, 'Font Awesome 7 Free');
   font-weight: 900;
   position: absolute;
   top: 50%;

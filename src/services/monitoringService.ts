@@ -122,6 +122,10 @@ export class MonitoringService {
     this.logger = logger || null;
   }
 
+  setLogger(logger: ILoggerService): void {
+    this.logger = logger;
+  }
+
   /**
    * 记录日志（使用注入的Logger或console）
    */

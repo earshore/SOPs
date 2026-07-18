@@ -8,32 +8,40 @@ const DEEP_CHAT_PROMPT_ID = 'release-smoke-deep-chat-generated-prompt';
 const DEEP_CHAT_PROMPT_MARKER = 'RELEASE_SMOKE_GENERATED_PROMPT_MARKER';
 
 const CORE_ROUTES = [
-  { label: 'Home', path: '/home' },
-  { label: 'SOPs', path: '/sops' },
-  { label: 'App Center', path: '/app-center' },
-  { label: 'Scraper', path: '/app-center/master-analysis/scraper' },
-  { label: 'AI Analysis', path: '/app-center/master-analysis/ai-analysis' },
-  { label: 'Promptlab', path: '/app-center/master-analysis/promptlab' },
-  { label: 'Deep Chat', path: '/app-center/playground/deep-chat' },
-  { label: 'Keyword Hunter Input', path: '/app-center/keyword-hunter/input' },
-  { label: 'PPC Search Terms', path: '/app-center/ppc-tools/ppc-search-terms' },
-  { label: 'AMZ Hub', path: '/amz-hub' },
-  { label: 'More', path: '/more' },
+  { label: 'Home', path: '/home', target: '#home-splash-container' },
+  { label: 'SOPs', path: '/sops', target: '.sops-overview' },
+  { label: 'App Center', path: '/app-center', target: '.app-overview-container' },
+  {
+    label: 'Scraper',
+    path: '/app-center/master-analysis/scraper',
+    target: '[x-data="scraperPanel"]',
+  },
+  {
+    label: 'AI Analysis',
+    path: '/app-center/master-analysis/ai-analysis',
+    target: '.ai-analysis-wrapper',
+  },
+  {
+    label: 'Promptlab',
+    path: '/app-center/master-analysis/promptlab',
+    target: '[x-data="promptlabPanel"]',
+  },
+  { label: 'Deep Chat', path: '/app-center/playground/deep-chat', target: '#deep-chat-view' },
+  {
+    label: 'Keyword Hunter Input',
+    path: '/app-center/keyword-hunter/input',
+    target: '#keyword-hunter-module-input',
+  },
+  {
+    label: 'PPC Search Terms',
+    path: '/app-center/ppc-tools/ppc-search-terms',
+    target: '.ppc-search-terms-app',
+  },
+  { label: 'AMZ Hub', path: '/amz-hub', target: '.amz-hub-overview' },
+  { label: 'More', path: '/more', target: '.more-overview' },
 ] as const;
 
-const OVERFLOW_ROUTES = [
-  { label: 'Home', path: '/home' },
-  { label: 'SOPs', path: '/sops' },
-  { label: 'App Center', path: '/app-center' },
-  { label: 'Scraper', path: '/app-center/master-analysis/scraper' },
-  { label: 'AI Analysis', path: '/app-center/master-analysis/ai-analysis' },
-  { label: 'Promptlab', path: '/app-center/master-analysis/promptlab' },
-  { label: 'Deep Chat', path: '/app-center/playground/deep-chat' },
-  { label: 'Keyword Hunter Input', path: '/app-center/keyword-hunter/input' },
-  { label: 'PPC Search Terms', path: '/app-center/ppc-tools/ppc-search-terms' },
-  { label: 'AMZ Hub', path: '/amz-hub' },
-  { label: 'More', path: '/more' },
-] as const;
+const OVERFLOW_ROUTES = CORE_ROUTES;
 
 const ERROR_TEXT_PATTERNS = [
   /module load failed/i,
@@ -74,8 +82,9 @@ async function expectNoRouteErrorText(page: Page): Promise<void> {
 }
 
 async function openRoute(page: Page, path: string): Promise<void> {
-  await page.goto(path, { waitUntil: 'domcontentloaded' });
+  await page.goto(`/#${path}`, { waitUntil: 'domcontentloaded' });
   await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => undefined);
+  await expect.poll(() => new URL(page.url()).hash).toBe(`#${path}`);
 }
 
 async function expectNoSevereMobileOverflow(page: Page, label: string): Promise<void> {
@@ -171,33 +180,6 @@ async function openGlobalSettings(page: Page): Promise<void> {
   ).toBeVisible();
 }
 
-async function switchTabFromHome(page: Page, tab: string): Promise<void> {
-  await openRoute(page, '/home');
-  await expectNoRouteErrorText(page);
-  await page.waitForFunction(() => {
-    const registry = (
-      window as Window & {
-        ActionRegistry?: Record<
-          string,
-          (params: Record<string, unknown>, event: Event) => Promise<void> | void
-        >;
-      }
-    ).ActionRegistry;
-    return typeof registry?.['switch-tab'] === 'function';
-  });
-  await page.evaluate(async targetTab => {
-    const registry = (
-      window as Window & {
-        ActionRegistry?: Record<
-          string,
-          (params: Record<string, unknown>, event: Event) => Promise<void> | void
-        >;
-      }
-    ).ActionRegistry;
-    await registry?.['switch-tab']?.({ tab: targetTab }, new MouseEvent('click'));
-  }, tab);
-}
-
 test.describe('release candidate smoke', () => {
   for (const route of CORE_ROUTES) {
     test(`${route.label} renders without console or route errors`, async ({ page }) => {
@@ -205,6 +187,7 @@ test.describe('release candidate smoke', () => {
 
       await openRoute(page, route.path);
       await expectNoRouteErrorText(page);
+      await expect(page.locator(route.target)).toBeVisible();
 
       expect(
         consoleListener.getErrors(),
@@ -218,6 +201,7 @@ test.describe('release candidate smoke', () => {
 
     for (const route of OVERFLOW_ROUTES) {
       await openRoute(page, route.path);
+      await expect(page.locator(route.target)).toBeVisible();
       await expectNoRouteErrorText(page);
 
       await expectNoSevereMobileOverflow(page, route.label);
@@ -237,29 +221,7 @@ test.describe('release candidate smoke', () => {
       }
     });
 
-    await openRoute(page, '/home');
-    await page.waitForFunction(() => {
-      const registry = (
-        window as Window & {
-          ActionRegistry?: Record<
-            string,
-            (params: Record<string, unknown>, event: Event) => Promise<void> | void
-          >;
-        }
-      ).ActionRegistry;
-      return typeof registry?.['switch-tab'] === 'function';
-    });
-    await page.evaluate(async () => {
-      const registry = (
-        window as Window & {
-          ActionRegistry?: Record<
-            string,
-            (params: Record<string, unknown>, event: Event) => Promise<void> | void
-          >;
-        }
-      ).ActionRegistry;
-      await registry?.['switch-tab']?.({ tab: 'amz_marketing_calendar' }, new MouseEvent('click'));
-    });
+    await openRoute(page, '/amz-hub/practice/marketing-calendar');
     await expectNoRouteErrorText(page);
     await expect(page.getByRole('heading', { name: 'EU营销日历' })).toBeVisible();
 
@@ -290,7 +252,7 @@ test.describe('release candidate smoke', () => {
   }) => {
     const consoleListener = setupConsoleErrorListener(page);
 
-    await switchTabFromHome(page, 'scraper');
+    await openRoute(page, '/app-center/master-analysis/scraper');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('[x-data="scraperPanel"]')).toBeVisible();
@@ -332,7 +294,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
-    await switchTabFromHome(page, 'ai_analysis');
+    await openRoute(page, '/app-center/master-analysis/ai-analysis');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('.ai-analysis-wrapper')).toBeVisible();
@@ -352,31 +314,16 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
-    await switchTabFromHome(page, 'keyword_hunter_input');
+    await openRoute(page, '/app-center/keyword-hunter/input');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('#keyword-hunter-module-input')).toBeVisible();
     await expect(page.locator('#keyword-hunter-input-draft-label')).toHaveText('空白');
-    await page.waitForFunction(() => {
-      const registry = (window as Window & { ActionRegistry?: Record<string, unknown> })
-        .ActionRegistry;
-      return typeof registry?.keyword_hunter_startAnalysis === 'function';
-    });
 
     const startAnalysisButton = page.locator('#keyword-hunter-btn-start-analysis');
     const emptyInputToast = page.locator('#toast-container .toast').last();
     await expect(startAnalysisButton).toBeEnabled();
-    await page.evaluate(() => {
-      const registry = (
-        window as Window & {
-          ActionRegistry?: Record<
-            string,
-            (params: Record<string, unknown>, event: Event) => Promise<void> | void
-          >;
-        }
-      ).ActionRegistry;
-      return registry?.keyword_hunter_startAnalysis?.({}, new MouseEvent('click'));
-    });
+    await startAnalysisButton.click();
     await expect(emptyInputToast).toContainText('请先输入关键词和文案');
     await expect(page.locator('#keyword-hunter-module-input')).toBeVisible();
     await expect(page.locator('#keyword-hunter-module-process')).toHaveCount(0);
@@ -413,7 +360,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await switchTabFromHome(page, 'sops_overview');
+    await openRoute(page, '/sops');
     await expectNoRouteErrorText(page);
     await expectNoSevereMobileOverflow(page, 'SOPs overview before workflow navigation');
 
@@ -450,7 +397,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await switchTabFromHome(page, 'sops_restricted_words');
+    await openRoute(page, '/sops/growth/restricted-words');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('#rw-search-input')).toBeVisible();
@@ -510,7 +457,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await switchTabFromHome(page, 'sops_npi_tracker');
+    await openRoute(page, '/sops/growth/npi-tracker');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('.npi-tracker-page')).toBeVisible();
@@ -570,7 +517,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
-    await switchTabFromHome(page, 'ppc_search_terms');
+    await openRoute(page, '/app-center/ppc-tools/ppc-search-terms');
     await expectNoRouteErrorText(page);
 
     const pasteInput = page.locator('#ppc-search-terms-paste-input');
@@ -643,7 +590,7 @@ test.describe('release candidate smoke', () => {
     });
 
     await clearBrowserStorageBeforeLoad(page);
-    await switchTabFromHome(page, 'promptlab');
+    await openRoute(page, '/app-center/master-analysis/promptlab');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('[x-data="promptlabPanel"]')).toBeVisible();
@@ -710,7 +657,7 @@ test.describe('release candidate smoke', () => {
     });
 
     await seedDeepChatPromptDraftBeforeLoad(page);
-    await switchTabFromHome(page, 'playground_deep_chat');
+    await openRoute(page, '/app-center/playground/deep-chat');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('#deep-chat-view')).toBeVisible();

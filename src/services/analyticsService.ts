@@ -138,6 +138,10 @@ export class AnalyticsService {
     // storage参数保留用于未来扩展
   }
 
+  setLogger(logger: ILoggerService): void {
+    this.logger = logger;
+  }
+
   /**
    * 获取单例实例
    */
@@ -604,7 +608,7 @@ export class AnalyticsService {
 }
 
 // 创建全局实例（向后兼容）
-/** @deprecated 请使用 container.resolve('analytics') 获取AnalyticsService实例 */
+/** @deprecated 请使用 container.resolveAsync('analytics') 获取AnalyticsService实例 */
 export const analyticsService = AnalyticsService.getInstance();
 
 // 默认导出

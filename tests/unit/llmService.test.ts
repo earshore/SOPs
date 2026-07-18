@@ -18,7 +18,6 @@ const createJsonResponse = (body: unknown, overrides: Record<string, unknown> = 
   text: async () => JSON.stringify(body),
   ...overrides,
 });
-
 const createChatCompletion = (content: string) => ({
   id: 'chatcmpl-test',
   object: 'chat.completion' as const,
@@ -35,6 +34,18 @@ const createChatCompletion = (content: string) => ({
     },
   ],
 });
+
+const rejectWhenAborted = (signal?: AbortSignal | null): Promise<never> =>
+  new Promise((_, reject) => {
+    const rejectAbort = () => reject(new DOMException('Aborted', 'AbortError'));
+
+    if (signal?.aborted) {
+      rejectAbort();
+      return;
+    }
+
+    signal?.addEventListener('abort', rejectAbort, { once: true });
+  });
 
 // Mock configCenter
 vi.mock('../../src/common/config/ConfigCenter', () => ({
@@ -72,6 +83,7 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.clearAllMocks();
 });
 
@@ -334,6 +346,53 @@ describe('模型列表同步', () => {
       })
     );
   });
+
+  it('读取模型列表响应体期间应保持 10 秒超时', async () => {
+    vi.useFakeTimers();
+    let requestSignal!: AbortSignal;
+    let rejectBody!: (reason: Error) => void;
+
+    (global.fetch as any).mockImplementationOnce((_url: string, init: RequestInit) => {
+      requestSignal = init.signal as AbortSignal;
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        text: () =>
+          new Promise<string>((_resolve, reject) => {
+            rejectBody = reject;
+            requestSignal.addEventListener(
+              'abort',
+              () => reject(new DOMException('Aborted', 'AbortError')),
+              { once: true }
+            );
+          }),
+      });
+    });
+
+    const { fetchModelsFromApi } = await import('../../src/services/llmService');
+    const request = fetchModelsFromApi(
+      'new_api',
+      'https://api.example.com/v1',
+      'test-api-key'
+    );
+    const outcome = request.then(
+      () => null,
+      error => error as Error
+    );
+
+    await vi.advanceTimersByTimeAsync(0);
+    expect(rejectBody).toBeTypeOf('function');
+
+    await vi.advanceTimersByTimeAsync(10000);
+    const bodyWasAborted = requestSignal.aborted;
+    if (!bodyWasAborted) {
+      rejectBody(new Error('test cleanup'));
+    }
+    const error = await outcome;
+
+    expect(bodyWasAborted).toBe(true);
+    expect(error).toMatchObject({ name: 'AbortError' });
+  });
 });
 
 it('应该处理401认证错误', async () => {
@@ -486,16 +545,10 @@ describe('重试机制', () => {
 });
 
 describe('取消信号支持', () => {
-  it('应该支持外部取消信号', async () => {
+  it('请求中外部取消应只调用一次 fetch 且不应映射为 LLM_TIMEOUT', async () => {
     const controller = new AbortController();
-
-    (global.fetch as any).mockImplementationOnce(
-      () =>
-        new Promise((_, reject) => {
-          const error = new Error('Aborted');
-          error.name = 'AbortError';
-          setTimeout(() => reject(error), 100);
-        })
+    (global.fetch as any).mockImplementation((_url: string, init: RequestInit) =>
+      rejectWhenAborted(init.signal)
     );
 
     const { callLLM } = await import('../../src/services/llmService');
@@ -503,12 +556,90 @@ describe('取消信号支持', () => {
     const messages = [{ role: 'user' as const, content: 'Test' }];
     const promise = callLLM(messages, 'openai', 'https://api.example.com/v1', 'test-key', 'gpt-4', {
       signal: controller.signal,
-      retries: 0,
+      retries: 2,
+      retryDelay: 1,
+    });
+    const rejection = promise.then(
+      () => null,
+      reason => reason as Error & { code?: string }
+    );
+
+    await vi.waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
+    controller.abort();
+
+    const error = await rejection;
+
+    expect(error).toMatchObject({ name: 'AbortError' });
+    expect(error?.code).not.toBe('LLM_TIMEOUT');
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('退避期间外部取消不应启动下一次 fetch', async () => {
+    vi.useFakeTimers();
+    const controller = new AbortController();
+    let callCount = 0;
+
+    (global.fetch as any).mockImplementation((_url: string, init: RequestInit) => {
+      callCount += 1;
+      if (callCount === 1) {
+        return Promise.reject(new Error('Network error'));
+      }
+      return rejectWhenAborted(init.signal);
     });
 
-    setTimeout(() => controller.abort(), 50);
+    const { callLLM } = await import('../../src/services/llmService');
+    const promise = callLLM(
+      [{ role: 'user' as const, content: 'Test' }],
+      'openai',
+      'https://api.example.com/v1',
+      'test-key',
+      'gpt-4',
+      {
+        signal: controller.signal,
+        retries: 2,
+        retryDelay: 1000,
+      }
+    );
+    const rejection = promise.then(
+      () => null,
+      reason => reason as Error & { code?: string }
+    );
 
-    await expect(promise).rejects.toThrow();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+
+    controller.abort();
+    await vi.runAllTimersAsync();
+
+    const error = await rejection;
+
+    expect(error).toMatchObject({ name: 'AbortError' });
+    expect(error?.code).not.toBe('LLM_TIMEOUT');
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('内部请求超时仍应映射为 LLM_TIMEOUT', async () => {
+    vi.useFakeTimers();
+    (global.fetch as any).mockImplementation((_url: string, init: RequestInit) =>
+      rejectWhenAborted(init.signal)
+    );
+
+    const { callLLM } = await import('../../src/services/llmService');
+    const promise = callLLM(
+      [{ role: 'user' as const, content: 'Test' }],
+      'openai',
+      'https://api.example.com/v1',
+      'test-key',
+      'gpt-4',
+      { retries: 1, retryDelay: 10, timeout: 50 }
+    );
+    const rejection = expect(promise).rejects.toMatchObject({ code: 'LLM_TIMEOUT' });
+
+    await vi.runAllTimersAsync();
+
+    await rejection;
+    expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
   it('passes through an already aborted external signal', async () => {

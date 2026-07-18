@@ -27,7 +27,9 @@ export class RequestDeduplicator {
     // 执行新请求
     const promise = fn().finally(() => {
       // 请求完成后清理
-      this.pending.delete(key);
+      if (this.pending.get(key) === promise) {
+        this.pending.delete(key);
+      }
     });
 
     this.pending.set(key, promise);
@@ -101,9 +103,13 @@ export class RequestCanceller {
   /**
    * 清理已完成的请求
    * @param key 请求唯一标识
+   * @param signal 当前请求的取消信号
    */
-  cleanup(key: string): void {
-    this.controllers.delete(key);
+  cleanup(key: string, signal: AbortSignal): void {
+    const controller = this.controllers.get(key);
+    if (controller?.signal === signal) {
+      this.controllers.delete(key);
+    }
   }
 
   /**
@@ -122,6 +128,51 @@ export class RequestManager {
   private deduplicator = new RequestDeduplicator();
   private canceller = new RequestCanceller();
 
+  private getAbortReason(signal: AbortSignal): unknown {
+    if (signal.reason !== undefined) {
+      return signal.reason;
+    }
+
+    if (typeof DOMException !== 'undefined') {
+      return new DOMException('Aborted', 'AbortError');
+    }
+
+    const error = new Error('Aborted');
+    error.name = 'AbortError';
+    return error;
+  }
+
+  private waitForCaller<T>(request: Promise<T>, signal?: AbortSignal | null): Promise<T> {
+    if (!signal) {
+      return request;
+    }
+
+    return new Promise<T>((resolve, reject) => {
+      const onAbort = () => {
+        signal.removeEventListener('abort', onAbort);
+        reject(this.getAbortReason(signal));
+      };
+
+      request.then(
+        value => {
+          signal.removeEventListener('abort', onAbort);
+          resolve(value);
+        },
+        error => {
+          signal.removeEventListener('abort', onAbort);
+          reject(error);
+        }
+      );
+
+      if (signal.aborted) {
+        onAbort();
+        return;
+      }
+
+      signal.addEventListener('abort', onAbort, { once: true });
+    });
+  }
+
   /**
    * 执行请求(带去重和取消支持)
    * @param key 请求唯一标识
@@ -135,36 +186,36 @@ export class RequestManager {
     options: {
       deduplicate?: boolean;
       cancelPrevious?: boolean;
+      signal?: AbortSignal | null;
     } = {}
   ): Promise<T> {
-    const { deduplicate = true, cancelPrevious = false } = options;
+    const { deduplicate = true, cancelPrevious = false, signal: callerSignal } = options;
 
-    // 如果需要取消之前的请求
     if (cancelPrevious) {
-      this.canceller.cancel(key);
+      this.cancel(key);
     }
 
-    // 创建AbortSignal
-    const signal = this.canceller.create(key);
-
     // 包装请求函数
-    const wrappedFn = async () => {
+    const executeWithController = async () => {
+      const signal = this.canceller.create(key);
+
       try {
         const result = await fn(signal);
-        this.canceller.cleanup(key);
+        this.canceller.cleanup(key, signal);
         return result;
       } catch (error) {
-        this.canceller.cleanup(key);
+        this.canceller.cleanup(key, signal);
         throw error;
       }
     };
 
     // 如果需要去重
     if (deduplicate) {
-      return this.deduplicator.deduplicate(key, wrappedFn);
+      const request = this.deduplicator.deduplicate(key, executeWithController);
+      return this.waitForCaller(request, callerSignal);
     }
 
-    return wrappedFn();
+    return this.waitForCaller(executeWithController(), callerSignal);
   }
 
   /**

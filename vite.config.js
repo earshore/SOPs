@@ -185,6 +185,7 @@ export default defineConfig({
     testTimeout: 10000,
     hookTimeout: 10000,
     threads: true,
+    maxWorkers: '33%',
     isolate: true,
   },
 

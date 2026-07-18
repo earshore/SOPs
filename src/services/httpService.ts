@@ -246,17 +246,19 @@ class HttpServiceClass implements IHttpService {
   private attachAbortSignal(
     signal: AbortSignal | null | undefined,
     controller: AbortController
-  ): void {
+  ): () => void {
     if (!signal) {
-      return;
+      return () => undefined;
     }
 
     if (signal.aborted) {
       controller.abort();
-      return;
+      return () => undefined;
     }
 
-    signal.addEventListener('abort', () => controller.abort(), { once: true });
+    const onAbort = () => controller.abort();
+    signal.addEventListener('abort', onAbort, { once: true });
+    return () => signal.removeEventListener('abort', onAbort);
   }
 
   private createFetchOptions(
@@ -342,23 +344,28 @@ class HttpServiceClass implements IHttpService {
     const controller = new AbortController();
     let didTimeout = false;
     const timeoutId = setTimeout(() => {
-      didTimeout = true;
-      controller.abort();
+      if (!controller.signal.aborted) {
+        didTimeout = true;
+        controller.abort();
+      }
     }, options.timeout);
 
-    this.attachAbortSignal(options.signal, controller);
-    this.attachAbortSignal(abortSignal, controller);
+    const detachAbortSignals = [
+      this.attachAbortSignal(options.signal, controller),
+      this.attachAbortSignal(abortSignal, controller),
+    ];
 
     try {
       const response = await fetch(url, this.createFetchOptions(options, controller));
-      clearTimeout(timeoutId);
       return await this.parseResponse<T>(response, options.json);
     } catch (error) {
-      clearTimeout(timeoutId);
       if (didTimeout && this.isAbortError(error)) {
         throw new HttpError(408, `Request timed out after ${options.timeout}ms`);
       }
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
+      detachAbortSignals.forEach(detach => detach());
     }
   }
 
@@ -414,6 +421,18 @@ class HttpServiceClass implements IHttpService {
     return run();
   }
 
+  private resolveRetryCount(
+    method: NonNullable<HttpOptions['method']>,
+    configuredRetries: number | undefined
+  ): number {
+    return (
+      configuredRetries ??
+      (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE'
+        ? 0
+        : this.defaults.retries)
+    );
+  }
+
   /**
    * 发送 HTTP 请求
    */
@@ -423,7 +442,7 @@ class HttpServiceClass implements IHttpService {
       headers = {},
       body = null,
       timeout = this.defaults.timeout,
-      retries = this.defaults.retries,
+      retries: configuredRetries,
       retryDelay = this.defaults.retryDelay,
       json = true,
       signal = null,
@@ -440,6 +459,7 @@ class HttpServiceClass implements IHttpService {
       cacheKey = null,
       forceRefresh = false,
     } = options;
+    const retries = this.resolveRetryCount(method, configuredRetries);
 
     const requestKey = deduplicateKey || `${method}:${url}`;
     const finalCacheKey = cacheKey || requestKey;
@@ -464,7 +484,7 @@ class HttpServiceClass implements IHttpService {
       retries,
       retryDelay,
       json,
-      signal,
+      signal: deduplicate ? null : signal,
     };
     const executeRequest = (abortSignal?: AbortSignal) =>
       this.executeRequestWithRetries<T>(url, requestOptions, abortSignal);
@@ -483,7 +503,7 @@ class HttpServiceClass implements IHttpService {
             executeRequest,
             signal,
           }),
-        { deduplicate, cancelPrevious }
+        { deduplicate, cancelPrevious, signal }
       );
     } else {
       result = await this.runRequest({

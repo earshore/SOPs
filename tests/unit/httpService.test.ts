@@ -9,6 +9,8 @@ import { HttpService, HttpError, REQUEST_PRIORITY } from '../../src/services/htt
 // Mock fetch
 global.fetch = vi.fn();
 
+const originalDefaultRetries = HttpService.defaults.retries;
+
 // Mock performanceService
 vi.mock('../../src/services/performanceService', () => ({
   performanceService: {
@@ -22,6 +24,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  HttpService.defaults.retries = originalDefaultRetries;
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -181,6 +185,108 @@ describe('超时处理', () => {
     });
 
     expect(global.fetch).toHaveBeenCalled();
+  });
+
+  it('should keep the timeout active while parsing the response body', async () => {
+    vi.useFakeTimers();
+
+    let requestSignal: AbortSignal | undefined;
+    let resolveBodyStarted: (() => void) | undefined;
+    const bodyStarted = new Promise<void>(resolve => {
+      resolveBodyStarted = resolve;
+    });
+    let resolveBody: ((value: unknown) => void) | undefined;
+
+    (global.fetch as any).mockImplementationOnce((_url: string, options: RequestInit) => {
+      requestSignal = options.signal as AbortSignal;
+
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => {
+          resolveBodyStarted?.();
+          return new Promise((resolve, reject) => {
+            resolveBody = resolve;
+            requestSignal?.addEventListener(
+              'abort',
+              () => reject(new DOMException('Aborted', 'AbortError')),
+              { once: true }
+            );
+          });
+        },
+      });
+    });
+
+    const request = HttpService.get('https://api.example.com/test', {
+      timeout: 50,
+      retries: 0,
+      measurePerformance: false,
+    });
+    const requestResult = request.then(
+      value => ({ value, error: undefined as unknown }),
+      error => ({ value: undefined, error })
+    );
+
+    await bodyStarted;
+    await vi.advanceTimersByTimeAsync(50);
+
+    if (!requestSignal?.aborted) {
+      resolveBody?.({ success: true });
+    }
+    const { error: requestError } = await requestResult;
+
+    expect(requestSignal?.aborted).toBe(true);
+    expect(requestError).toMatchObject({ status: 408 });
+  });
+
+  it('should preserve an external AbortError when body rejection arrives after the timeout', async () => {
+    vi.useFakeTimers();
+
+    const externalController = new AbortController();
+    let requestSignal!: AbortSignal;
+    let resolveBodyStarted!: () => void;
+    const bodyStarted = new Promise<void>(resolve => {
+      resolveBodyStarted = resolve;
+    });
+    const response = new Response(null, { status: 200 });
+    vi.spyOn(response, 'json').mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          resolveBodyStarted();
+          requestSignal.addEventListener(
+            'abort',
+            () => {
+              setTimeout(() => reject(new DOMException('Aborted', 'AbortError')), 75);
+            },
+            { once: true }
+          );
+        })
+    );
+
+    (global.fetch as any).mockImplementationOnce((_url: string, options: RequestInit) => {
+      requestSignal = options.signal as AbortSignal;
+      return Promise.resolve(response);
+    });
+
+    const request = HttpService.get('https://api.example.com/delayed-abort', {
+      signal: externalController.signal,
+      timeout: 50,
+      retries: 0,
+      measurePerformance: false,
+    });
+    const requestResult = request.then(
+      value => ({ value, error: undefined as unknown }),
+      error => ({ value: undefined, error })
+    );
+
+    await bodyStarted;
+    externalController.abort();
+    expect(requestSignal.aborted).toBe(true);
+
+    await vi.advanceTimersByTimeAsync(75);
+    const { error: requestError } = await requestResult;
+
+    expect(requestError).toMatchObject({ name: 'AbortError' });
   });
 });
 
@@ -493,6 +599,194 @@ describe('AbortSignal支持', () => {
     expect(requestOptions.signal.aborted).toBe(false);
   });
 
+  it('allows a deduplicated follower to abort without aborting the owner fetch', async () => {
+    const ownerController = new AbortController();
+    const followerController = new AbortController();
+    let fetchSignal!: AbortSignal;
+    let markFetchStarted!: () => void;
+    const fetchStarted = new Promise<void>(resolve => {
+      markFetchStarted = resolve;
+    });
+    let resolveResponse!: (response: Response) => void;
+
+    (global.fetch as any).mockImplementationOnce((_url: string, options: RequestInit) => {
+      fetchSignal = options.signal as AbortSignal;
+      markFetchStarted();
+      return new Promise<Response>(resolve => {
+        resolveResponse = resolve;
+      });
+    });
+
+    const url = 'https://api.example.com/deduplicated-follower-abort';
+    const owner = HttpService.get<{ success: boolean }>(url, {
+      deduplicate: true,
+      signal: ownerController.signal,
+      retries: 0,
+      measurePerformance: false,
+    });
+    const follower = HttpService.get<{ success: boolean }>(url, {
+      deduplicate: true,
+      signal: followerController.signal,
+      retries: 0,
+      measurePerformance: false,
+    });
+
+    await fetchStarted;
+    followerController.abort();
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(fetchSignal.aborted).toBe(false);
+    expect(ownerController.signal.aborted).toBe(false);
+
+    resolveResponse({
+      ok: true,
+      json: async () => ({ success: true }),
+    } as Response);
+
+    const [ownerResult, followerResult] = await Promise.allSettled([owner, follower]);
+
+    expect(ownerResult).toEqual({ status: 'fulfilled', value: { success: true } });
+    expect(followerResult).toMatchObject({
+      status: 'rejected',
+      reason: { name: 'AbortError' },
+    });
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows a deduplicated owner to abort without aborting a follower fetch', async () => {
+    const ownerController = new AbortController();
+    let fetchSignal!: AbortSignal;
+    let markFetchStarted!: () => void;
+    const fetchStarted = new Promise<void>(resolve => {
+      markFetchStarted = resolve;
+    });
+    let resolveResponse!: (response: Response) => void;
+
+    (global.fetch as any).mockImplementationOnce((_url: string, options: RequestInit) => {
+      fetchSignal = options.signal as AbortSignal;
+      markFetchStarted();
+
+      return new Promise<Response>((resolve, reject) => {
+        resolveResponse = resolve;
+        fetchSignal.addEventListener(
+          'abort',
+          () => reject(new DOMException('Aborted', 'AbortError')),
+          { once: true }
+        );
+      });
+    });
+
+    const url = 'https://api.example.com/deduplicated-owner-abort';
+    const owner = HttpService.get<{ success: boolean }>(url, {
+      deduplicate: true,
+      signal: ownerController.signal,
+      retries: 0,
+      measurePerformance: false,
+    });
+    const follower = HttpService.get<{ success: boolean }>(url, {
+      deduplicate: true,
+      retries: 0,
+      measurePerformance: false,
+    });
+    const followerOutcome = follower.then(
+      value => ({ value, error: null }),
+      error => ({ value: null, error })
+    );
+
+    await fetchStarted;
+    ownerController.abort();
+    resolveResponse({
+      ok: true,
+      json: async () => ({ success: true }),
+    } as Response);
+
+    await expect(owner).rejects.toMatchObject({ name: 'AbortError' });
+    expect(fetchSignal.aborted).toBe(false);
+    await expect(followerOutcome).resolves.toEqual({ value: { success: true }, error: null });
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('should remove the external abort listener after a successful request', async () => {
+    const controller = new AbortController();
+    const addSpy = vi.spyOn(controller.signal, 'addEventListener');
+    const removeSpy = vi.spyOn(controller.signal, 'removeEventListener');
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+
+    await HttpService.get('https://api.example.com/test', {
+      signal: controller.signal,
+      retries: 0,
+      measurePerformance: false,
+    });
+
+    const addedListeners = addSpy.mock.calls
+      .filter(([type]) => type === 'abort')
+      .map(([, listener]) => listener);
+    const removedListeners = removeSpy.mock.calls
+      .filter(([type]) => type === 'abort')
+      .map(([, listener]) => listener);
+
+    expect(removedListeners).toHaveLength(addedListeners.length);
+    expect(removedListeners).toEqual(expect.arrayContaining(addedListeners));
+  });
+
+  it('should remove the external abort listener after a failed request', async () => {
+    const controller = new AbortController();
+    const addSpy = vi.spyOn(controller.signal, 'addEventListener');
+    const removeSpy = vi.spyOn(controller.signal, 'removeEventListener');
+
+    (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
+
+    await expect(
+      HttpService.get('https://api.example.com/test', {
+        signal: controller.signal,
+        retries: 0,
+        measurePerformance: false,
+      })
+    ).rejects.toThrow('Network error');
+
+    const addedListeners = addSpy.mock.calls
+      .filter(([type]) => type === 'abort')
+      .map(([, listener]) => listener);
+    const removedListeners = removeSpy.mock.calls
+      .filter(([type]) => type === 'abort')
+      .map(([, listener]) => listener);
+
+    expect(removedListeners).toHaveLength(addedListeners.length);
+    expect(removedListeners).toEqual(expect.arrayContaining(addedListeners));
+  });
+
+  it('should remove every external abort listener after a retry succeeds', async () => {
+    const controller = new AbortController();
+    const addSpy = vi.spyOn(controller.signal, 'addEventListener');
+    const removeSpy = vi.spyOn(controller.signal, 'removeEventListener');
+
+    (global.fetch as any).mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+
+    await HttpService.get('https://api.example.com/test', {
+      signal: controller.signal,
+      retries: 1,
+      retryDelay: 0,
+      measurePerformance: false,
+    });
+
+    const addedListeners = addSpy.mock.calls
+      .filter(([type]) => type === 'abort')
+      .map(([, listener]) => listener);
+    const removedListeners = removeSpy.mock.calls
+      .filter(([type]) => type === 'abort')
+      .map(([, listener]) => listener);
+
+    expect(removedListeners).toHaveLength(addedListeners.length);
+    expect(removedListeners).toEqual(expect.arrayContaining(addedListeners));
+  });
+
   it('应该在请求被取消时抛出错误', async () => {
     const controller = new AbortController();
 
@@ -679,6 +973,41 @@ describe('重试策略', () => {
       retryDelay: 10,
     });
 
+    expect(result).toEqual({ success: true });
+  });
+
+  it.each(['POST', 'PUT', 'PATCH', 'DELETE'] as const)(
+    '%s should not retry a network error by default',
+    async method => {
+      HttpService.defaults.retries = 1;
+      (global.fetch as any).mockRejectedValue(new Error('Network error'));
+
+      await expect(
+        HttpService.request('https://api.example.com/test', {
+          method,
+          body: { value: 'test' },
+          retryDelay: 0,
+          measurePerformance: false,
+        })
+      ).rejects.toThrow('Network error');
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it('GET should continue to use the default retry count for network errors', async () => {
+    HttpService.defaults.retries = 1;
+    (global.fetch as any).mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+
+    const result = await HttpService.get('https://api.example.com/test', {
+      retryDelay: 0,
+      measurePerformance: false,
+    });
+
+    expect(global.fetch).toHaveBeenCalledTimes(2);
     expect(result).toEqual({ success: true });
   });
 

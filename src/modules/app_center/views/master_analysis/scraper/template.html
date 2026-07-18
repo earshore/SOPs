@@ -145,8 +145,7 @@
             data-scraper-import-trigger
             class="upload-area empty-state w-full appearance-none text-center py-16 cursor-pointer rounded-2xl border-2 border-dashed border-slate-200 bg-gradient-to-b from-slate-50/30 to-white group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             id="no-data-msg"
-            aria-label="导入 JSON 产品数据文件"
-            aria-describedby="scraper-import-help scraper-import-status"
+            aria-describedby="scraper-import-status"
           >
             <div class="flex flex-col items-center pointer-events-none">
               <!-- Icon Container -->
@@ -633,7 +632,12 @@ B0EXAMPLE1"
             <i class="fas fa-trash-alt text-[10px]"></i> 清空
           </button>
         </div>
-        <div class="p-4 space-y-2 max-h-[301px] overflow-y-auto custom-scrollbar">
+        <div
+          class="p-4 space-y-2 max-h-[301px] overflow-y-auto custom-scrollbar"
+          role="region"
+          aria-label="历史快照列表"
+          tabindex="0"
+        >
           <div
             class="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700"
             :class="historyLoadError ? '' : 'hidden'"
@@ -797,7 +801,7 @@ B0EXAMPLE1"
               <div class="flex flex-col">
                 <span
                   class="text-xs font-bold text-slate-700 group-hover:text-slate-800 transition-colors"
-                  >Amazon Scraper 插件</span
+                  >Amazon Product Insight 插件</span
                 >
                 <div class="flex items-center gap-2 mt-0.5">
                   <span class="text-[10px] text-slate-400">Chrome 扩展</span>
@@ -808,8 +812,8 @@ B0EXAMPLE1"
               type="button"
               @click="downloadPlugin()"
               class="download-btn w-8 h-8 flex items-center justify-center rounded-lg bg-white border-2 border-slate-200 text-slate-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-200 transition duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
-              title="前往 GitHub 下载"
-              aria-label="前往 GitHub 下载"
+              title="前往 GitHub 下载 Latest 版本"
+              aria-label="前往 GitHub 下载 Latest 版本"
             >
               <i class="fa-solid fa-download text-xs"></i>
             </button>

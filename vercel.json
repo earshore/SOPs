@@ -18,7 +18,11 @@
       "destination": "/logo.svg"
     },
     {
-      "source": "/((?!assets|downloads|logo\\.svg).*)",
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/((?!assets|downloads|logo\\.svg|robots\\.txt).*)",
       "destination": "/index.html"
     }
   ],

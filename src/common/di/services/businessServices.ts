@@ -9,9 +9,9 @@ import { SERVICE_NAMES } from '../ServiceRegistry';
 import type { ILoggerService } from '@/types/services';
 
 import { analyticsService } from '@/services/analyticsService';
-import { createErrorTracker } from '@/services/errorTracker';
-import { createAlertService } from '@/services/alertService';
-import { createPerformanceStorage } from '@/services/performanceStorage';
+import { errorTracker } from '@/services/errorTracker';
+import { alertService } from '@/services/alertService';
+import { performanceStorage } from '@/services/performanceStorage';
 /**
  * 注册业务服务到注册表
  */
@@ -24,9 +24,10 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.PERFORMANCE,
     factory: async c => {
-      const { createPerformanceService } = await import('@/services/performanceService');
+      const { performanceService } = await import('@/services/performanceService');
       const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
-      return createPerformanceService(logger);
+      performanceService.setLogger(logger);
+      return performanceService;
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
@@ -37,11 +38,14 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   // AnalyticsService - 用户行为分析服务
   registry.register({
     name: SERVICE_NAMES.ANALYTICS,
-    factory: () => {
+    factory: async c => {
+      const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
+      analyticsService.setLogger(logger);
       return analyticsService;
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER, SERVICE_NAMES.STORAGE],
+    async: true,
     optional: true,
   });
 
@@ -50,7 +54,8 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
     name: SERVICE_NAMES.ERROR_TRACKER,
     factory: async c => {
       const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
-      return createErrorTracker(logger);
+      errorTracker.setLogger(logger);
+      return errorTracker;
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
@@ -62,9 +67,10 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.MONITORING,
     factory: async c => {
-      const { createMonitoringService } = await import('@/services/monitoringService');
+      const { monitoringService } = await import('@/services/monitoringService');
       const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
-      return createMonitoringService(logger);
+      monitoringService.setLogger(logger);
+      return monitoringService;
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
@@ -76,8 +82,8 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
   registry.register({
     name: SERVICE_NAMES.WEB_VITALS,
     factory: async () => {
-      const { createWebVitalsService } = await import('@/services/webVitalsService');
-      return createWebVitalsService();
+      const { webVitalsService } = await import('@/services/webVitalsService');
+      return webVitalsService;
     },
     lifetime: 'singleton',
     dependencies: [],
@@ -90,7 +96,8 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
     name: SERVICE_NAMES.ALERT,
     factory: async c => {
       const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
-      return createAlertService(logger);
+      alertService.setLogger(logger);
+      return alertService;
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],
@@ -103,7 +110,8 @@ export function registerBusinessServices(registry: ServiceRegistry): void {
     name: SERVICE_NAMES.PERFORMANCE_STORAGE,
     factory: async c => {
       const logger = await c.resolveAsync<ILoggerService>(SERVICE_NAMES.LOGGER);
-      return createPerformanceStorage(logger);
+      performanceStorage.setLogger(logger);
+      return performanceStorage;
     },
     lifetime: 'singleton',
     dependencies: [SERVICE_NAMES.LOGGER],

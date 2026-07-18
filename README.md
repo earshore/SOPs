@@ -15,15 +15,24 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 | 通道 | 版本 | 说明 |
 |------|------|------|
-| **GitHub Latest（稳定 GA）** | `v3.0.6` | 生产推荐版本 |
-| 当前生产候选 | `v3.0.7-rc.2` | Pre-release，生产验证中 |
-| package.json | `3.0.7-rc.2` | 与候选 tag / Release 一致 |
-| 上一 GA | `v3.0.5` | 回滚参考 |
+| **GitHub Latest（稳定 GA）** | `v3.0.7` | 生产推荐版本 |
+| 下一候选命名（未发布） | `v3.0.8-rc.1` | 如继续 patch 线；必须标记为 Pre-release |
+| package.json | `3.0.7` | 与 GA tag / Release 一致 |
+| 上一 GA | `v3.0.6` | 回滚参考 |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.7-rc.2` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.7` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.6`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.7`。
+
+`v3.0.7`（2026-07-18，稳定 GA）收口生产性能、路由启动、HTTP 请求与发布治理门禁：
+
+- **生产性能证据**：Lighthouse 覆盖 AI Analysis、PromptLab、Scraper 三条 canonical hash route，缺少最终路由、资源或 console 证据时直接失败。
+- **启动与请求稳定性**：鉴权后路由只执行一次 prepare，首屏等待 view 与 style；HTTP 写方法默认不重试，并区分 timeout、abort 与去重 follower 取消。
+- **共享服务可靠性**：singleton 使用统一 logger，模块与模板并发加载复用 inflight 请求并可靠清理。
+- **搜索与可访问性**：补齐 SEO description、独立 `robots.txt`、Vercel fallback 例外、首屏等待态及导航对比度。
+- **发布治理**：Release workflow 固定 Action commit，并以精确 annotated tag、checkout SHA 与对应 `main` Quality Gate 作为发布前置条件。
+- 发布后 GitHub Latest 指向 `v3.0.7`；上一 GA 与生产回滚基线为 `v3.0.6`，生产目标为 `https://sops.hongecb.store`。
 
 `v3.0.7-rc.2`（2026-07-14，生产验证候选）聚焦应用中心加载稳定性与 PromptLab 操作收敛：
 

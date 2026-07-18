@@ -18,6 +18,7 @@ const OUT_DIR = join(ROOT, 'release-artifacts/backfill');
 const PRE_RE = /-(alpha|beta|rc)(\.|$)/i;
 
 const DEFAULT_VERSIONS = [
+  '3.0.7',
   '3.0.7-rc.2',
   '3.0.7-rc.1',
   '3.0.6',
@@ -103,22 +104,24 @@ function buildBody(version, section, extra = '') {
   const productionVerification = version.startsWith('3.0.7-rc.');
   const preNote = pre
     ? productionVerification
-      ? '\n> ⚠ 预发布候选，已批准覆盖生产域进行验证；GitHub Latest 应仍指向最新 GA（当前为 `v3.0.6`）。\n'
-      : '\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA（当前为 `v3.0.6`）。\n'
+      ? '\n> ⚠ 历史预发布候选，发布时获准覆盖生产域验证；现已收口于 GA `v3.0.7`，GitHub Latest 应指向 `v3.0.7`。\n'
+      : '\n> ⚠ 预发布候选，**不要**默认用于生产。GitHub Latest 应仍指向最新 GA（当前为 `v3.0.7`）。\n'
     : '';
 
   const rollback =
-    version.startsWith('3.0.7-')
-      ? '生产回滚：`v3.0.6` 对应的上一条 Pages 部署；GitHub Latest 保持 `v3.0.6`'
+    version === '3.0.7'
+      ? '上一 GA：`v3.0.6`；生产回滚：`v3.0.6` 对应的上一条 Pages 部署'
+      : version.startsWith('3.0.7-')
+        ? '历史生产验证候选；生产回滚：`v3.0.6` 对应的上一条 Pages 部署；已收口于 GA `v3.0.7`'
       : version === '3.0.6'
-      ? '上一 GA：`v3.0.5`'
-      : version === '3.0.5'
-        ? '上一 GA：`v3.0.4`'
-        : version === '3.0.4'
-          ? '上一 GA：`v3.0.2`；后继 GA：`v3.0.5`'
-          : pre
-            ? '后继收口 GA：`v3.0.5`；同线完整叙述见 CHANGELOG 各 RC 章节与 README「最新发布」'
-            : '见 GitHub Releases 中更早正式版';
+        ? '上一 GA：`v3.0.5`'
+        : version === '3.0.5'
+          ? '上一 GA：`v3.0.4`'
+          : version === '3.0.4'
+            ? '上一 GA：`v3.0.2`；后继 GA：`v3.0.5`'
+            : pre
+              ? '后继收口 GA：`v3.0.5`；同线完整叙述见 CHANGELOG 各 RC 章节与 README「最新发布」'
+              : '见 GitHub Releases 中更早正式版';
 
   return `## SOPs ${version}
 
@@ -181,12 +184,12 @@ function applyNotes(version, bodyPath, dryRun) {
     sh(`gh release edit ${tag} --prerelease --notes-file "${bodyPath}" --title "${tag}"`, {
       stdio: 'inherit',
     });
-  } else if (version === '3.0.6') {
+  } else if (version === '3.0.7') {
     sh(`gh release edit ${tag} --latest --notes-file "${bodyPath}" --title "${tag}"`, {
       stdio: 'inherit',
     });
   } else {
-    // Do not steal Latest from 3.0.6
+    // Do not steal Latest from 3.0.7
     sh(`gh release edit ${tag} --notes-file "${bodyPath}" --title "${tag}"`, {
       stdio: 'inherit',
     });

@@ -39,6 +39,16 @@
 
 import { defineConfig, devices } from '@playwright/test';
 
+const useStartupDevServer = process.env.npm_lifecycle_event === 'test:startup';
+const usePreviewServer =
+  !useStartupDevServer &&
+  (process.env.PLAYWRIGHT_USE_PREVIEW === 'true' ||
+    process.env.npm_lifecycle_event === 'test:performance' ||
+    process.env.npm_lifecycle_event === 'test:e2e:smoke');
+const defaultBaseURL = usePreviewServer ? 'http://127.0.0.1:4173' : 'http://localhost:5173';
+const baseURL =
+  useStartupDevServer || usePreviewServer ? defaultBaseURL : process.env.BASE_URL || defaultBaseURL;
+
 /**
  * Playwright 配置
  * @see https://playwright.dev/docs/test-configuration
@@ -52,11 +62,9 @@ export default defineConfig({
     '**/startup/**/*.test.ts',
     '**/e2e/**/*.spec.ts',
     '**/visual/**/*.test.ts',
-    '**/performance/**/*.test.ts'
+    '**/performance/**/*.test.ts',
   ],
-  testIgnore: [
-    '**/*.perf.test.ts'
-  ],
+  testIgnore: ['**/*.perf.test.ts'],
 
   // 最大失败次数（0 = 不限制）
   maxFailures: 0,
@@ -86,7 +94,7 @@ export default defineConfig({
 
   // 期望超时（5秒）
   expect: {
-    timeout: 5000
+    timeout: 5000,
   },
 
   // 不在同一 spec 文件内并发执行测试；文件之间仍由 workers 并行。
@@ -102,38 +110,50 @@ export default defineConfig({
   // 报告配置
   reporter: [
     // HTML 报告（主要报告格式）
-    ['html', {
-      outputFolder: 'tests/playwright-report',
-      open: 'never',
-      host: 'localhost',
-      port: 9323
-    }],
+    [
+      'html',
+      {
+        outputFolder: 'tests/playwright-report',
+        open: 'never',
+        host: 'localhost',
+        port: 9323,
+      },
+    ],
 
     // JSON 报告（用于自定义处理）
-    ['json', {
-      outputFile: 'tests/playwright-report/results.json'
-    }],
+    [
+      'json',
+      {
+        outputFile: 'tests/playwright-report/results.json',
+      },
+    ],
 
     // JUnit XML 报告（用于 CI/CD 集成）
-    ['junit', {
-      outputFile: 'tests/playwright-report/junit.xml',
-      embedAnnotationsAsProperties: true,
-      embedAttachmentsAsProperty: 'testrun.attachments'
-    }],
+    [
+      'junit',
+      {
+        outputFile: 'tests/playwright-report/junit.xml',
+        embedAnnotationsAsProperties: true,
+        embedAttachmentsAsProperty: 'testrun.attachments',
+      },
+    ],
 
     // 控制台列表报告
-    ['list', {
-      printSteps: true
-    }],
+    [
+      'list',
+      {
+        printSteps: true,
+      },
+    ],
 
     // CI 环境使用 GitHub Actions 报告
-    ...(process.env.CI && process.env.GITHUB_ACTIONS ? [['github']] : [])
+    ...(process.env.CI && process.env.GITHUB_ACTIONS ? ([['github']] as const) : []),
   ],
 
   // 共享设置
   use: {
     // 基础 URL
-    baseURL: process.env.BASE_URL || 'http://localhost:5173',
+    baseURL,
 
     // 追踪配置（失败时保留）
     // 追踪文件包含完整的测试执行记录，可用于调试
@@ -161,7 +181,7 @@ export default defineConfig({
     actionTimeout: 10000,
 
     // 导航超时
-    navigationTimeout: 30000
+    navigationTimeout: 30000,
   },
 
   // 项目配置（不同浏览器）
@@ -172,47 +192,59 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         // Chrome 特定配置
         launchOptions: {
-          args: [
-            '--disable-web-security',
-            '--disable-features=IsolateOrigins,site-per-process'
-          ]
-        }
-      }
+          args: ['--disable-web-security', '--disable-features=IsolateOrigins,site-per-process'],
+        },
+      },
       // 移除 testMatch 限制，使用全局 testMatch 配置
     },
 
     // 可选：Firefox 测试（通过环境变量控制）
-    ...(process.env.SKIP_FIREFOX ? [] : [{
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] }
-    }]),
+    ...(process.env.SKIP_FIREFOX
+      ? []
+      : [
+          {
+            name: 'firefox',
+            use: { ...devices['Desktop Firefox'] },
+          },
+        ]),
 
     // 可选：WebKit 测试（通过环境变量控制）
-    ...(process.env.SKIP_WEBKIT ? [] : [{
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] }
-    }]),
+    ...(process.env.SKIP_WEBKIT
+      ? []
+      : [
+          {
+            name: 'webkit',
+            use: { ...devices['Desktop Safari'] },
+          },
+        ]),
 
     // 可选：移动端浏览器测试（默认跳过，通过环境变量启用）
-    ...(process.env.ENABLE_MOBILE ? [
-      {
-        name: 'Mobile Chrome',
-        use: { ...devices['Pixel 5'] }
-      },
-      {
-        name: 'Mobile Safari',
-        use: { ...devices['iPhone 12'] }
-      }
-    ] : [])
+    ...(process.env.ENABLE_MOBILE
+      ? [
+          {
+            name: 'Mobile Chrome',
+            use: { ...devices['Pixel 5'] },
+          },
+          {
+            name: 'Mobile Safari',
+            use: { ...devices['iPhone 12'] },
+          },
+        ]
+      : []),
   ],
 
   // Web Server 配置（自动启动开发服务器）
-  webServer: process.env.SKIP_WEBSERVER ? undefined : {
-    command: 'node scripts/dev/playwright-web-server.js',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-    stdout: 'ignore',
-    stderr: 'pipe'
-  }
+  webServer:
+    process.env.SKIP_WEBSERVER && !useStartupDevServer && !usePreviewServer
+      ? undefined
+      : {
+          command: usePreviewServer
+            ? 'npm run preview -- --host 127.0.0.1 --port 4173'
+            : 'node scripts/dev/playwright-web-server.js',
+          url: baseURL,
+          reuseExistingServer: !process.env.CI && !useStartupDevServer && !usePreviewServer,
+          timeout: 120000,
+          stdout: 'ignore',
+          stderr: 'pipe',
+        },
 });

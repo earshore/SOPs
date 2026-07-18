@@ -51,6 +51,10 @@ export class PerformanceStorage {
     this.logger = logger || null;
   }
 
+  setLogger(logger: ILoggerService): void {
+    this.logger = logger;
+  }
+
   static create(logger?: ILoggerService): PerformanceStorage {
     return new PerformanceStorage(logger);
   }

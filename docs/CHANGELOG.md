@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.7] - 2026-07-18
+
+> 正式 GA。发布后 GitHub Latest 指向 `v3.0.7`；上一 GA 与生产回滚基线均为 `v3.0.6`。
+> 生产目标为 `https://sops.hongecb.store`，不在本章节声明尚未完成的部署结果或性能分数。
+
+### Added
+- 新增生产预览 Lighthouse 证据门禁，分别审计 `/app-center/master-analysis/ai-analysis`、`/app-center/master-analysis/promptlab`、`/app-center/master-analysis/scraper` 三条 canonical hash route，并对最终路由、资源总量与 console 结果执行缺失即失败的证据校验。
+- 补充页面搜索描述、显式 `robots.txt` 及对应发布资产契约，确保爬虫策略由独立静态资源提供。
+
+### Changed
+- 鉴权后的路由更新收敛为单次同步 prepare 后再加载视图；首屏同时等待 home view 与主样式就绪后再显示内容，失败路径也会解除等待态。
+- 业务 singleton 统一注入已解析 logger；SafeModuleLoader 为同路径模块与模板加载复用 inflight 请求，并在完成或失败后清理状态。
+- Release workflow 改为命令失败即中止，固定第三方 Action commit，校验精确 annotated tag、checkout SHA 与 `main` 上同 SHA 的成功 Quality Gate 后才允许发布。
+
+### Fixed
+- HTTP 写方法默认不再重试网络错误；区分 timeout 与外部 abort 的归因，并允许去重请求的 follower 独立取消而不终止 owner 请求。
+- 修复 Vercel SPA fallback 吞掉 `robots.txt`、首屏内容提前闪现，以及导航当前态在明暗主题下的对比度与可访问性问题。
+
 ## [3.0.7-rc.2] - 2026-07-14
 
 > 生产验证候选版。GitHub Release 保持 Pre-release，Latest 继续指向稳定 GA `v3.0.6`。

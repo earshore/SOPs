@@ -32,11 +32,12 @@
 - `v3.0.4` 为历史 GA。
 - `v3.0.4-rc.1` … `v3.0.4-rc.11` 为历史误序 RC（GA 之后继续同号候选），**冻结**：不再新增 `3.0.4-rc.*`。
 - `v3.0.5-rc.1` / `v3.0.5-rc.2` 分别与 `v3.0.4-rc.9` / `v3.0.4-rc.10` 指向同一提交，仅保留为归档 tag；不得为其创建 GitHub Release，以免重复条目打乱发布页。
-- `v3.0.5`（2026-07-13）为上一 GA：收口上述 RC 线并落地发布治理；取代误打且无 Release 的旧 `v3.0.5` tag 指向。
-- `v3.0.6`（2026-07-14）为当前 GA：发布应用中心本地作业闭环与生产预览可靠性更新。
-- `v3.0.7-rc.1`（2026-07-14）为上一生产验证候选：完成 Keyword Hunter / PromptLab 链路收敛与历史 Release 去重。
-- `v3.0.7-rc.2`（2026-07-14）为当前生产验证候选：修复应用总览数据加载闪屏并移除 PromptLab SEO 关键词复制入口。
-- 下一候选：`3.0.7-rc.3`；收口目标为 `3.0.7` GA（或按变更体量升 minor）。
+- `v3.0.5`（2026-07-13）为历史 GA：收口上述 RC 线并落地发布治理；取代误打且无 Release 的旧 `v3.0.5` tag 指向。
+- `v3.0.6`（2026-07-14）为上一 GA：发布应用中心本地作业闭环与生产预览可靠性更新。
+- `v3.0.7-rc.1`（2026-07-14）为历史生产验证候选：完成 Keyword Hunter / PromptLab 链路收敛与历史 Release 去重。
+- `v3.0.7-rc.2`（2026-07-14）为历史生产验证候选：修复应用总览数据加载闪屏并移除 PromptLab SEO 关键词复制入口。
+- `v3.0.7`（2026-07-18）为当前 GA：收口 `v3.0.7-rc.1`、`v3.0.7-rc.2` 与本次 GA 定稿变更。
+- GA 后不得再发 `v3.0.7-rc.*`；下一 patch 候选为 `v3.0.8-rc.1`，若按变更体量升 minor 则为 `v3.1.0-rc.1`。
 
 ## 3. 何时创建 GitHub Release
 
@@ -71,7 +72,11 @@
 
 ## 5. 发版门禁
 
-发布 tag 触发 `.github/workflows/release.yml`，至少通过：
+发布 tag 触发 `.github/workflows/release.yml`。创建或更新 GitHub Release 前，tag 必须指向当前检出的提交，且该提交必须已有 `main` 分支上完成并成功的 Quality Gate 运行。
+
+手动运行 `workflow_dispatch` 默认只构建并上传 workflow artifact；只有同时提供已存在的 tag 并显式设置 `publish=true` 才允许发布，且仍须通过上述精确 SHA 门禁。
+
+发版流水线至少通过：
 
 1. 版本一致性校验（`npm run release:validate`）
 2. 安全门：`npm run ci:security`
@@ -104,20 +109,24 @@ Source code zip/tarball 由 GitHub 自动提供，**不能**替代 `dist` 产物
 ### 7.1 发布 RC
 
 ```bash
-# 1. 更新 package.json version，例如 3.0.7-rc.2
+# 1. 更新 package.json version，例如 3.0.8-rc.1
 # 2. 将 Unreleased 迁入 docs/CHANGELOG.md 对应章节
 # 3. 提交并推送 main
-# 4. 打 tag 并推送（触发 release workflow）
-git tag -a v3.0.7-rc.2 -m "v3.0.7-rc.2"
-git push sops v3.0.7-rc.2
+# 4. 等待该提交的 main Quality Gate 成功（release workflow 会拒绝尚未通过的 SHA）
+# 5. 打 tag 并推送（触发 release workflow）
+git tag -a v3.0.8-rc.1 -m "v3.0.8-rc.1"
+git push sops v3.0.8-rc.1
 ```
 
 ### 7.2 发布 GA
 
 ```bash
-# version → 3.0.6（去掉 -rc.N），CHANGELOG 定稿
-git tag -a v3.0.6 -m "v3.0.6"
-git push sops v3.0.6
+# version → 3.0.7（去掉 -rc.N），CHANGELOG 定稿
+# 1. 提交并推送 main
+# 2. 等待该提交的 main Quality Gate 成功
+# 3. 仅在同一 SHA 已通过门禁后，创建并推送 annotated tag
+git tag -a v3.0.7 -m "v3.0.7"
+git push sops v3.0.7
 ```
 
 ### 7.3 本地校验（不推送）
@@ -180,4 +189,4 @@ npm run release:sync-all
 1. 以 GitHub 全部 Release 为清单，保证每个版本在 `docs/CHANGELOG.md` 有章节。
 2. 已有 CHANGELOG 详述**优先保留**；缺失章节从 GitHub 原文导入（标注 historical）。
 3. 每个 GitHub Release body = 运维头 + 对应 CHANGELOG **完整**章节（不压缩、不删历史）。
-4. 不改变 Latest：仅 `v3.0.6`（当前 GA）使用 `--latest`；RC 保持 `--prerelease`。
+4. 不改变 Latest：仅 `v3.0.7`（当前 GA）使用 `--latest`；RC 保持 `--prerelease`。

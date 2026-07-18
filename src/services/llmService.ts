@@ -122,7 +122,39 @@ export interface ModelInfo {
 /**
  * 睡眠函数
  */
-const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+function getAbortError(signal: AbortSignal): Error {
+  if (signal.reason instanceof Error && signal.reason.name === 'AbortError') {
+    return signal.reason;
+  }
+
+  const error = new Error(signal.reason instanceof Error ? signal.reason.message : 'Aborted');
+  error.name = 'AbortError';
+  return error;
+}
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  if (!signal) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  if (signal.aborted) {
+    return Promise.reject(getAbortError(signal));
+  }
+
+  return new Promise((resolve, reject) => {
+    const handleAbort = (): void => {
+      clearTimeout(timeoutId);
+      signal.removeEventListener('abort', handleAbort);
+      reject(getAbortError(signal));
+    };
+    const timeoutId = setTimeout(() => {
+      signal.removeEventListener('abort', handleAbort);
+      resolve();
+    }, ms);
+
+    signal.addEventListener('abort', handleAbort, { once: true });
+  });
+}
 
 function resolveProviderEndpoint(provider: string, endpoint: string): string {
   const trimmedEndpoint = (endpoint || '').trim();
@@ -413,6 +445,11 @@ interface LLMAttemptFailure {
   shouldRetry: boolean;
 }
 
+interface LLMAttemptState {
+  timedOut: boolean;
+  externallyAborted: boolean;
+}
+
 function resolveLLMOptions(options: LLMOptions): ResolvedLLMOptions {
   return {
     temperature: options.temperature ?? 0.3,
@@ -479,17 +516,29 @@ async function waitBeforeLLMRetry(attempt: number, options: ResolvedLLMOptions):
   }
 
   const delay = options.retryDelay * Math.pow(2, attempt - 1) * (1 + randomFloat() * 0.2);
-  await sleep(delay);
+  await sleep(delay, options.signal);
 }
 
-function createLLMAbortResources(options: ResolvedLLMOptions): {
+function createLLMAbortResources(
+  options: ResolvedLLMOptions,
+  state: LLMAttemptState
+): {
   controller: AbortController;
   clearRequestTimeout: () => void;
   resetRequestTimeout: () => void;
 } {
   const controller = new AbortController();
-  let timeoutId = setTimeout(() => controller.abort(), options.timeout);
-  const abortFromExternalSignal = (): void => controller.abort();
+  const abortOnTimeout = (): void => {
+    if (controller.signal.aborted) return;
+    state.timedOut = true;
+    controller.abort();
+  };
+  const abortFromExternalSignal = (): void => {
+    if (controller.signal.aborted) return;
+    state.externallyAborted = true;
+    controller.abort();
+  };
+  let timeoutId = setTimeout(abortOnTimeout, options.timeout);
   const clearTimeoutOnly = (): void => clearTimeout(timeoutId);
   const clearRequestTimeout = (): void => {
     clearTimeoutOnly();
@@ -497,10 +546,12 @@ function createLLMAbortResources(options: ResolvedLLMOptions): {
   };
   const resetRequestTimeout = (): void => {
     clearTimeoutOnly();
-    timeoutId = setTimeout(() => controller.abort(), options.timeout);
+    if (!controller.signal.aborted) {
+      timeoutId = setTimeout(abortOnTimeout, options.timeout);
+    }
   };
   if (options.signal?.aborted) {
-    controller.abort();
+    abortFromExternalSignal();
   } else {
     options.signal?.addEventListener('abort', abortFromExternalSignal, { once: true });
   }
@@ -651,11 +702,16 @@ function getLLMResponseContent(payload: LLMResponsePayload): string {
   return payload.content || getCompletionContent(payload.data);
 }
 
-async function executeLLMAttempt(context: LLMCallContext, attempt: number): Promise<string> {
+async function executeLLMAttempt(
+  context: LLMCallContext,
+  attempt: number,
+  state: LLMAttemptState
+): Promise<string> {
   await waitBeforeLLMRetry(attempt, context.options);
 
   const { clearRequestTimeout, controller, resetRequestTimeout } = createLLMAbortResources(
-    context.options
+    context.options,
+    state
   );
   const attemptContext: LLMCallContext = context.options.stream
     ? {
@@ -730,15 +786,24 @@ function createLLMNetworkError(
 function resolveLLMAttemptFailure(
   errorValue: unknown,
   context: LLMCallContext,
-  attempt: number
+  attempt: number,
+  state: LLMAttemptState
 ): LLMAttemptFailure {
   const error = errorValue as Error & { name?: string; status?: number };
+
+  if (state.externallyAborted && context.options.signal) {
+    return { error: getAbortError(context.options.signal), shouldRetry: false };
+  }
 
   if (error instanceof ApiError) {
     return { error, shouldRetry: shouldRetryApiError(error, context, attempt) };
   }
 
   if (error.name === 'AbortError') {
+    if (!state.timedOut) {
+      return { error, shouldRetry: false };
+    }
+
     const timeoutError = createLLMTimeoutError(error, context, attempt);
     return { error: timeoutError, shouldRetry: attempt < context.options.retries };
   }
@@ -797,10 +862,14 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= resolvedOptions.retries; attempt++) {
+    const attemptState: LLMAttemptState = {
+      timedOut: false,
+      externallyAborted: false,
+    };
     try {
-      return await executeLLMAttempt(context, attempt);
+      return await executeLLMAttempt(context, attempt, attemptState);
     } catch (errorValue) {
-      const failure = resolveLLMAttemptFailure(errorValue, context, attempt);
+      const failure = resolveLLMAttemptFailure(errorValue, context, attempt, attemptState);
       if (!failure.shouldRetry) {
         throw failure.error;
       }
@@ -850,29 +919,32 @@ async function fetchModelsRawText(context: FetchModelsContext): Promise<string> 
     headers.Authorization = `Bearer ${context.apiKey}`;
   }
 
-  const response = await fetch(`${context.normalizedEndpoint}/models`, {
-    headers,
-    signal: controller.signal,
-  }).finally(() => clearTimeout(timeoutId));
+  try {
+    const response = await fetch(`${context.normalizedEndpoint}/models`, {
+      headers,
+      signal: controller.signal,
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new ApiError(
-      `HTTP ${response.status}: ${errorText.substring(0, 200)}`,
-      'LLM_API_ERROR',
-      response.status,
-      errorText,
-      {
-        module: 'LLMService',
-        action: 'fetchModelsFromApi',
-        provider: context.provider,
-        endpoint: context.endpoint,
-      }
-    );
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new ApiError(
+        `HTTP ${response.status}: ${errorText.substring(0, 200)}`,
+        'LLM_API_ERROR',
+        response.status,
+        errorText,
+        {
+          module: 'LLMService',
+          action: 'fetchModelsFromApi',
+          provider: context.provider,
+          endpoint: context.endpoint,
+        }
+      );
+    }
+
+    return await response.text();
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  const rawText = await response.text();
-  return rawText;
 }
 
 function parseModelsJson(rawText: string, context: FetchModelsContext): unknown {

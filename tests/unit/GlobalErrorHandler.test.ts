@@ -55,7 +55,6 @@ vi.mock('@/services/monitoringService', () => ({
     // Mock window.showToast
     (window as any).showToast = vi.fn();
   });
-
   afterEach(() => {
     // 清理
     delete (window as any).showToast;
@@ -441,26 +440,57 @@ vi.mock('@/services/monitoringService', () => ({
       expect(() => handler.setThrottleMs(1000)).not.toThrow();
     });
 
-    it('节流时间内的错误应该被忽略', () => {
+    it('节流时间内应处理不同全局错误但只通知一次', () => {
       handler.setThrottleMs(1000);
       handler.resetStats();
+      const eventSpy = vi.fn();
+      const unsubscribe = eventBus.on(APP_EVENTS.ERROR_OCCURRED, eventSpy);
 
-      // 第一个错误应该被处理
       window.dispatchEvent(new ErrorEvent('error', {
         error: new AppError('错误1', 'E1'),
         message: '错误1'
       }));
-      expect(console.error).toHaveBeenCalledTimes(1);
 
-      // 立即发生的第二个错误应该被节流
       window.dispatchEvent(new ErrorEvent('error', {
         error: new AppError('错误2', 'E2'),
         message: '错误2'
       }));
-      expect(console.error).toHaveBeenCalledTimes(1); // 仍然是1次
+
+      expect(console.error).toHaveBeenCalledTimes(2);
+      expect(mockErrorTracker.captureAppError).toHaveBeenCalledTimes(2);
+      expect(mockErrorTracker.captureAppError).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ code: 'E1' })
+      );
+      expect(mockErrorTracker.captureAppError).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ code: 'E2' })
+      );
+      expect(handler.getStats().errorCount).toBe(2);
+      expect(eventSpy).toHaveBeenCalledTimes(2);
+      expect((window as any).showToast).toHaveBeenCalledTimes(1);
+
+      unsubscribe();
 
       // 恢复默认节流时间
       handler.setThrottleMs(2000);
+    });
+
+    it('resetStats应重置全局通知节流状态', () => {
+      handler.setThrottleMs(1000);
+
+      window.dispatchEvent(new ErrorEvent('error', {
+        error: new AppError('错误1', 'E1'),
+        message: '错误1'
+      }));
+      handler.resetStats();
+      window.dispatchEvent(new ErrorEvent('error', {
+        error: new AppError('错误2', 'E2'),
+        message: '错误2'
+      }));
+
+      expect((window as any).showToast).toHaveBeenCalledTimes(2);
+      expect(handler.getStats().errorCount).toBe(1);
     });
   });
 

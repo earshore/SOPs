@@ -6,12 +6,14 @@ const mocks = vi.hoisted(() => ({
     register: vi.fn(),
     registerAlias: vi.fn(),
     setStoreSync: vi.fn(),
+    use: vi.fn(),
     useAfter: vi.fn(),
     navigate: vi.fn(),
     resolve: vi.fn(),
     destroy: vi.fn(),
     hasRoute: vi.fn(),
     getCurrentRoute: vi.fn(),
+    isNavigationInProgress: vi.fn(),
   },
   store: {
     getState: vi.fn(),
@@ -28,6 +30,7 @@ const mocks = vi.hoisted(() => ({
   convertMenuConfig: vi.fn(),
   createRouterStore: vi.fn(),
   createRouterStoreSync: vi.fn(),
+  prepareUIForRoute: vi.fn(),
   updateUIForRoute: vi.fn(),
   normalizeRoutePath: vi.fn((path: string) => (path.startsWith('/') ? path : `/${path}`)),
   routeIdToPath: vi.fn((routeId: string) => {
@@ -53,6 +56,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 const originalCi = process.env.CI;
+const loadedRouterDestroyers: Array<() => void> = [];
 
 vi.mock('../EventBus', () => ({
   default: {
@@ -80,6 +84,7 @@ vi.mock('../config/menuConfig', () => ({
 }));
 
 vi.mock('../ui/navigation', () => ({
+  prepareUIForRoute: mocks.prepareUIForRoute,
   updateUIForRoute: mocks.updateUIForRoute,
 }));
 
@@ -91,7 +96,9 @@ vi.mock('./routePaths', () => ({
 
 async function loadInitRouter() {
   vi.resetModules();
-  return import('./initRouter');
+  const initRouterModule = await import('./initRouter');
+  loadedRouterDestroyers.push(initRouterModule.destroyRouter);
+  return initRouterModule;
 }
 
 beforeEach(() => {
@@ -101,12 +108,14 @@ beforeEach(() => {
   mocks.router.register.mockReset();
   mocks.router.registerAlias.mockReset();
   mocks.router.setStoreSync.mockReset();
+  mocks.router.use.mockReset();
   mocks.router.useAfter.mockReset();
   mocks.router.navigate.mockReset().mockResolvedValue(true);
   mocks.router.resolve.mockReset();
   mocks.router.destroy.mockReset();
   mocks.router.hasRoute.mockReset().mockReturnValue(true);
   mocks.router.getCurrentRoute.mockReset().mockReturnValue({ id: 'home' });
+  mocks.router.isNavigationInProgress.mockReset().mockReturnValue(false);
   mocks.storeState.reset.mockReset();
   mocks.store.getState.mockReset().mockReturnValue(mocks.storeState);
   mocks.storeSync.subscribe.mockReset();
@@ -129,6 +138,7 @@ beforeEach(() => {
   });
   mocks.createRouterStore.mockReset().mockReturnValue(mocks.store);
   mocks.createRouterStoreSync.mockReset().mockReturnValue(mocks.storeSync);
+  mocks.prepareUIForRoute.mockReset();
   mocks.updateUIForRoute.mockReset().mockResolvedValue(undefined);
   mocks.normalizeRoutePath.mockClear();
   mocks.routeIdToPath.mockClear();
@@ -137,6 +147,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  loadedRouterDestroyers.splice(0).forEach(destroyRouter => destroyRouter());
+
   if (originalCi === undefined) {
     delete process.env.CI;
   } else {
@@ -154,7 +166,6 @@ describe('initRouter setup', () => {
 
   it('initializes routes, aliases, store sync, and middleware once', async () => {
     const { initRouter, getRouter, getRouterStore } = await loadInitRouter();
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     expect(initRouter()).toBe(mocks.router);
     expect(initRouter()).toBe(mocks.router);
@@ -206,14 +217,46 @@ describe('initRouter setup', () => {
       '/app-center/playground/deep-chat'
     );
     expect(mocks.router.setStoreSync).toHaveBeenCalledWith(mocks.storeSync);
+    expect(mocks.router.use).not.toHaveBeenCalled();
+    expect(mocks.router.useAfter).toHaveBeenCalledTimes(1);
     expect(getRouter()).toBe(mocks.router);
     expect(getRouterStore()).toBe(mocks.store);
+  });
+});
+
+describe('initRouter middleware', () => {
+  it('prepares each route synchronously before updating the UI after navigation', async () => {
+    const { initRouter } = await loadInitRouter();
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    initRouter();
 
     const middleware = mocks.router.useAfter.mock.calls[0]?.[0];
     const next = vi.fn(async () => undefined);
+    let preparedWhenUpdateStarted = false;
+    mocks.updateUIForRoute.mockImplementationOnce(async () => {
+      preparedWhenUpdateStarted = mocks.prepareUIForRoute.mock.calls.length === 1;
+    });
     await middleware?.({ to: { config: { routeId: 'home' } } }, next);
+    expect(preparedWhenUpdateStarted).toBe(true);
+    expect(mocks.prepareUIForRoute).toHaveBeenCalledOnce();
+    expect(mocks.prepareUIForRoute).toHaveBeenCalledWith('home');
+    expect(mocks.updateUIForRoute).toHaveBeenCalledOnce();
     expect(mocks.updateUIForRoute).toHaveBeenCalledWith('home');
+    expect(mocks.prepareUIForRoute.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.updateUIForRoute.mock.invocationCallOrder[0] ?? Number.MAX_SAFE_INTEGER
+    );
     expect(next).toHaveBeenCalledTimes(1);
+
+    mocks.prepareUIForRoute.mockClear();
+    mocks.updateUIForRoute.mockClear();
+    await middleware?.({ to: { config: { moduleId: 'fallback-module' } } }, next);
+    expect(mocks.prepareUIForRoute).toHaveBeenCalledOnce();
+    expect(mocks.prepareUIForRoute).toHaveBeenCalledWith('fallback-module');
+    expect(mocks.updateUIForRoute).toHaveBeenCalledOnce();
+    expect(mocks.updateUIForRoute).toHaveBeenCalledWith('fallback-module');
+    expect(mocks.prepareUIForRoute.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.updateUIForRoute.mock.invocationCallOrder[0] ?? Number.MAX_SAFE_INTEGER
+    );
 
     mocks.updateUIForRoute.mockRejectedValueOnce(new Error('ui failed'));
     await middleware?.({ to: { config: { moduleId: 'fallback-module' } } }, next);
@@ -264,6 +307,25 @@ describe('initRouter navigation and teardown', () => {
     window.location.hash = '#/home';
     window.dispatchEvent(new HashChangeEvent('hashchange'));
     expect(mocks.router.navigate).toHaveBeenCalledWith('/home', {
+      updateHistory: false,
+      replace: false,
+      skipMiddleware: false,
+    });
+  });
+
+  it('forwards a same-route browser intent while navigation is still in progress', async () => {
+    const { initRouter } = await loadInitRouter();
+    initRouter();
+    mocks.router.navigate.mockClear();
+    mocks.router.getCurrentRoute.mockReturnValue({ path: '/orders' });
+    window.location.hash = '#/orders';
+
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    expect(mocks.router.navigate).not.toHaveBeenCalled();
+
+    mocks.router.isNavigationInProgress.mockReturnValue(true);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    expect(mocks.router.navigate).toHaveBeenCalledWith('/orders', {
       updateHistory: false,
       replace: false,
       skipMiddleware: false,

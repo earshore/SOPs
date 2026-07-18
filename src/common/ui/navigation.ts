@@ -111,6 +111,21 @@ function renderSidebar(moduleId: string | null): void {
   sidebar.classList.remove('hidden', '-ml-64');
 }
 
+export function revealMainContent(): void {
+  getEl('main-content')?.classList.remove('app-shell-pending');
+}
+
+export function prepareUIForRoute(routeId: string): void {
+  const fullConfig = getRouteFullConfig(String(routeId).trim());
+  const targetModuleId = fullConfig ? fullConfig.module.id : null;
+
+  try {
+    renderSidebar(targetModuleId);
+  } finally {
+    revealMainContent();
+  }
+}
+
 /**
  * 统一侧边栏内容渲染
  */
@@ -192,7 +207,7 @@ function renderDefaultSidebar(
  */
 function updateHeaderNav(fullConfig: RouteFullConfig): void {
   document.querySelectorAll<HTMLElement>('.nav-trigger').forEach(el => {
-    el.classList.remove('text-blue-600', 'border-blue-600');
+    el.classList.remove('text-blue-600', 'text-blue-700', 'border-blue-600');
     el.classList.add('text-slate-600', 'border-transparent');
     el.removeAttribute('aria-current');
   });
@@ -200,7 +215,7 @@ function updateHeaderNav(fullConfig: RouteFullConfig): void {
   const targetBtn = getEl(`nav-${fullConfig.context.id}`);
   if (targetBtn) {
     targetBtn.classList.remove('text-slate-600', 'border-transparent');
-    targetBtn.classList.add('text-blue-600', 'border-blue-600');
+    targetBtn.classList.add('text-blue-700', 'border-blue-600');
     targetBtn.setAttribute('aria-current', 'page');
   }
 }
@@ -212,17 +227,21 @@ function updateHeaderNav(fullConfig: RouteFullConfig): void {
 // 记录当前激活的主模块 Panel
 let currentActivePanel: string | null = null;
 
-async function loadRouteView(routeId: string): Promise<void> {
+export async function ensureRouteViewAvailable(routeId: string): Promise<void> {
   try {
-    await ensureViewLoaded(routeId);
-
-    // 等待 DOM 更新完成
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await ensureViewLoaded(String(routeId).trim());
   } catch (err) {
     console.error('[Navigation] ❌ View lazy load failed:', err);
     showToast('页面资源加载失败，请重试', { type: 'error' });
     throw err;
   }
+}
+
+async function loadRouteView(routeId: string): Promise<void> {
+  await ensureRouteViewAvailable(routeId);
+
+  // 等待 DOM 更新完成
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
 function getTargetPanelId(fullConfig: RouteFullConfig | null): string {
@@ -266,37 +285,41 @@ function showRoutePanel(targetPanelId: string): HTMLElement | null {
 export async function updateUIForRoute(routeId: string): Promise<void> {
   const cleanTab = String(routeId).trim();
 
-  // 按需加载视图
-  await loadRouteView(cleanTab);
+  try {
+    // 按需加载视图
+    await loadRouteView(cleanTab);
 
-  // 更新全局状态
-  appStore.getState().setCurrentTab(cleanTab);
-  const fullConfig = getRouteFullConfig(cleanTab);
+    // 更新全局状态
+    appStore.getState().setCurrentTab(cleanTab);
+    const fullConfig = getRouteFullConfig(cleanTab);
 
-  // 渲染侧边栏
-  const targetModuleId = fullConfig ? fullConfig.module.id : null;
-  renderSidebar(targetModuleId);
+    // 渲染侧边栏
+    const targetModuleId = fullConfig ? fullConfig.module.id : null;
+    renderSidebar(targetModuleId);
 
-  // 面板显隐
-  const targetPanelId = getTargetPanelId(fullConfig);
+    // 面板显隐
+    const targetPanelId = getTargetPanelId(fullConfig);
 
-  // 主模块生命周期管理
-  emitPanelUnloadIfNeeded(targetPanelId);
-  currentActivePanel = targetPanelId;
+    // 主模块生命周期管理
+    emitPanelUnloadIfNeeded(targetPanelId);
+    currentActivePanel = targetPanelId;
 
-  showRoutePanel(targetPanelId);
+    showRoutePanel(targetPanelId);
 
-  // 更新导航高亮
-  if (fullConfig) {
-    updateHeaderNav(fullConfig);
+    // 更新导航高亮
+    if (fullConfig) {
+      updateHeaderNav(fullConfig);
+    }
+
+    // 分发路由变更事件
+    emitAppEvent(APP_EVENTS.ROUTE_CHANGED, {
+      routeId: cleanTab,
+      moduleId: targetModuleId,
+      config: fullConfig,
+    });
+  } finally {
+    revealMainContent();
   }
-
-  // 分发路由变更事件
-  emitAppEvent(APP_EVENTS.ROUTE_CHANGED, {
-    routeId: cleanTab,
-    moduleId: targetModuleId,
-    config: fullConfig,
-  });
 }
 
 // ========================
