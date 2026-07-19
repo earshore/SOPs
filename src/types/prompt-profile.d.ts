@@ -1,5 +1,12 @@
 export type TargetMarket =
-  'English' | 'German' | 'French' | 'Italian' | 'Spanish' | 'Japanese' | 'Chinese' | '';
+  | 'English'
+  | 'German'
+  | 'French'
+  | 'Italian'
+  | 'Spanish'
+  | 'Japanese'
+  | 'Chinese'
+  | '';
 
 export type ToneStyle =
   | 'professional'
@@ -14,7 +21,13 @@ export type ToneStyle =
   | '';
 
 export type UserProductDnaField =
-  'keywordsTier1' | 'keywordsTier2' | 'negative' | 'audience' | 'usps' | 'specs' | 'socialHook';
+  | 'keywordsTier1'
+  | 'keywordsTier2'
+  | 'negative'
+  | 'audience'
+  | 'usps'
+  | 'specs'
+  | 'socialHook';
 
 export interface UserProductProfile {
   targetMarket: TargetMarket;

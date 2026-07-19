@@ -100,7 +100,7 @@ describe('static artifact contract', () => {
   it.each([
     {
       description: 'missing',
-      headers: publicHeaders.replace(/  X-Frame-Options: DENY\r?\n/, ''),
+      headers: publicHeaders.replace(/ {2}X-Frame-Options: DENY\r?\n/, ''),
       error: 'missing root security header: X-Frame-Options',
     },
     {

@@ -27,7 +27,12 @@ export interface DnaConfidence {
 export type DnaExtractionStatus = 'high' | 'low' | 'empty';
 
 export type DnaExtractionFieldName =
-  'keywordsTier1' | 'keywordsTier2' | 'negative' | 'audience' | 'usps' | 'specs';
+  | 'keywordsTier1'
+  | 'keywordsTier2'
+  | 'negative'
+  | 'audience'
+  | 'usps'
+  | 'specs';
 
 export interface DnaExtractionFieldSummary {
   field: DnaExtractionFieldName;
