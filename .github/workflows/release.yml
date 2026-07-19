@@ -49,6 +49,9 @@ jobs:
         run: |
           $inputTag = ([string]$env:RAW_TAG_INPUT).Trim()
           $manualPublish = $env:RAW_PUBLISH_INPUT -eq 'true'
+          $tagBound =
+            -not [string]::IsNullOrWhiteSpace($inputTag) -or
+            $env:GITHUB_REF_TYPE -eq 'tag'
 
           if (
             $env:GITHUB_EVENT_NAME -eq 'workflow_dispatch' -and
@@ -80,6 +83,7 @@ jobs:
           }
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
+          "tag_bound=$($tagBound.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
           "publish=$($shouldPublish.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
           if ($isPre) {
             "is_prerelease=true" >> $env:GITHUB_OUTPUT
@@ -145,8 +149,15 @@ jobs:
         shell: pwsh
         env:
           RELEASE_TAG: ${{ steps.meta.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.meta.outputs.version }}
+          RELEASE_TAG_BOUND: ${{ steps.meta.outputs.tag_bound }}
         run: |
-          npx tsx scripts/release/prepare-release.ts validate --tag $env:RELEASE_TAG
+          if ($env:RELEASE_TAG_BOUND -eq 'true') {
+            npx tsx scripts/release/prepare-release.ts validate --tag $env:RELEASE_TAG
+          } else {
+            Remove-Item Env:RELEASE_TAG -ErrorAction SilentlyContinue
+            npx tsx scripts/release/prepare-release.ts validate --version $env:RELEASE_VERSION
+          }
 
       - name: Security gate
         run: npm run ci:security
@@ -172,16 +183,30 @@ jobs:
       - name: Generate release notes
         shell: pwsh
         env:
+          RELEASE_TAG: ${{ steps.meta.outputs.tag }}
           RELEASE_VERSION: ${{ steps.meta.outputs.version }}
+          RELEASE_TAG_BOUND: ${{ steps.meta.outputs.tag_bound }}
         run: |
-          npx tsx scripts/release/prepare-release.ts notes --version $env:RELEASE_VERSION --out release-artifacts/RELEASE_BODY.md
+          if ($env:RELEASE_TAG_BOUND -eq 'true') {
+            npx tsx scripts/release/prepare-release.ts notes --tag $env:RELEASE_TAG --out release-artifacts/RELEASE_BODY.md
+          } else {
+            Remove-Item Env:RELEASE_TAG -ErrorAction SilentlyContinue
+            npx tsx scripts/release/prepare-release.ts notes --version $env:RELEASE_VERSION --out release-artifacts/RELEASE_BODY.md
+          }
 
       - name: Package artifacts
         shell: pwsh
         env:
+          RELEASE_TAG: ${{ steps.meta.outputs.tag }}
           RELEASE_VERSION: ${{ steps.meta.outputs.version }}
+          RELEASE_TAG_BOUND: ${{ steps.meta.outputs.tag_bound }}
         run: |
-          npx tsx scripts/release/prepare-release.ts package --version $env:RELEASE_VERSION
+          if ($env:RELEASE_TAG_BOUND -eq 'true') {
+            npx tsx scripts/release/prepare-release.ts package --tag $env:RELEASE_TAG
+          } else {
+            Remove-Item Env:RELEASE_TAG -ErrorAction SilentlyContinue
+            npx tsx scripts/release/prepare-release.ts package --version $env:RELEASE_VERSION
+          }
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -196,18 +221,51 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ steps.meta.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.meta.outputs.version }}
           RELEASE_IS_PRERELEASE: ${{ steps.meta.outputs.is_prerelease }}
         run: |
           $tag = $env:RELEASE_TAG
           $isPre = $env:RELEASE_IS_PRERELEASE -eq 'true'
           $notes = 'release-artifacts/RELEASE_BODY.md'
-          $assetList = @()
-          $dist = Get-ChildItem 'release-artifacts/sops-dist-*' -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($dist) { $assetList += $dist.FullName }
+          $expectedSha = (git rev-parse HEAD).Trim()
+          if ([string]::IsNullOrWhiteSpace($expectedSha)) { throw 'Unable to resolve release HEAD SHA' }
+          $archiveCandidates = @(
+            Get-ChildItem 'release-artifacts' -File -ErrorAction SilentlyContinue |
+              Where-Object {
+                $_.Name -in @(
+                  "sops-dist-$($env:RELEASE_VERSION).zip",
+                  "sops-dist-$($env:RELEASE_VERSION).tar.gz"
+                )
+              }
+          )
+          if ($archiveCandidates.Count -ne 1) {
+            throw "Expected exactly one release archive for $($env:RELEASE_VERSION), found $($archiveCandidates.Count)"
+          }
+          $assetList = @($archiveCandidates[0].FullName)
           foreach ($f in @('release-artifacts/build-info.json', 'release-artifacts/SHA256SUMS.txt')) {
             if (Test-Path $f) { $assetList += (Resolve-Path $f).Path }
           }
           if ($assetList.Count -eq 0) { throw 'No release artifacts found to upload' }
+
+          function Assert-RemoteAnnotatedTagAtSha {
+            param(
+              [string]$tag,
+              [string]$expectedSha
+            )
+
+            $tagRefJson = & gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/$tag"
+            if ($LASTEXITCODE -ne 0) { throw "Unable to resolve remote release tag: $tag" }
+            $tagRef = $tagRefJson | ConvertFrom-Json
+            if ($tagRef.object.type -ne 'tag') { throw "Remote release tag must be annotated: $tag" }
+
+            $tagObjectJson = & gh api "repos/$env:GITHUB_REPOSITORY/git/tags/$($tagRef.object.sha)"
+            if ($LASTEXITCODE -ne 0) { throw "Unable to inspect remote release tag object: $tag" }
+            $tagObject = $tagObjectJson | ConvertFrom-Json
+            if ($tagObject.object.type -ne 'commit') { throw "Remote release tag does not point to a commit: $tag" }
+            if ($tagObject.object.sha -ne $expectedSha) {
+              throw "Remote release tag/HEAD mismatch: tag=$($tagObject.object.sha) HEAD=$expectedSha"
+            }
+          }
 
           $releaseLookupErrorActionPreference = $ErrorActionPreference
           try {
@@ -227,12 +285,15 @@ jobs:
 
           if ($exists) {
             Write-Host "Updating existing release $tag"
+            Assert-RemoteAnnotatedTagAtSha $tag $expectedSha
             & gh release upload $tag @assetList --clobber
             if ($LASTEXITCODE -ne 0) { throw "Failed to upload release assets: $tag" }
             if ($isPre) {
+              Assert-RemoteAnnotatedTagAtSha $tag $expectedSha
               & gh release edit $tag --draft=false --prerelease --notes-file $notes --title $tag
               if ($LASTEXITCODE -ne 0) { throw "Failed to update prerelease: $tag" }
             } else {
+              Assert-RemoteAnnotatedTagAtSha $tag $expectedSha
               & gh release edit $tag --draft=false --prerelease=false --notes-file $notes --title $tag
               if ($LASTEXITCODE -ne 0) { throw "Failed to update release: $tag" }
             }
@@ -241,6 +302,7 @@ jobs:
             $createArgs = @('release', 'create', $tag, '--verify-tag', '--draft=false', '--notes-file', $notes, '--title', $tag)
             if ($isPre) { $createArgs += '--prerelease' }
             $createArgs += $assetList
+            Assert-RemoteAnnotatedTagAtSha $tag $expectedSha
             & gh @createArgs
             if ($LASTEXITCODE -ne 0) { throw "Failed to create release: $tag" }
           }
@@ -252,3 +314,4 @@ jobs:
           if ([bool]$releaseState.isPrerelease -ne $isPre) {
             throw "Release prerelease state mismatch: expected=$isPre actual=$($releaseState.isPrerelease)"
           }
+          Assert-RemoteAnnotatedTagAtSha $tag $expectedSha

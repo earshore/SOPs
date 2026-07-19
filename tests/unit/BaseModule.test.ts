@@ -60,6 +60,10 @@ class TestModule extends BaseModule {
     return this.getAbortSignal();
   }
 
+  isCurrentSignal(signal: AbortSignal): boolean {
+    return this.isCurrentMount(signal);
+  }
+
   service<T = unknown>(name: string): T {
     return this.getService<T>(name as never);
   }
@@ -230,6 +234,81 @@ function createContainer() {
     expect(timeoutHandler).toHaveBeenCalledTimes(1);
     expect(intervalHandler).toHaveBeenCalledTimes(2);
     expect(disposable).toHaveBeenCalledTimes(1);
+  });
+
+  it('cleans resources registered after an unmounted mount resumes', async () => {
+    let resumeRender!: () => void;
+    const renderGate = new Promise<void>(resolve => {
+      resumeRender = resolve;
+    });
+    const lateListener = vi.fn();
+    const module = new (class extends TestModule {
+      async render(): Promise<void> {
+        await renderGate;
+        this.listen(window, 'base-module-late-resume', lateListener);
+      }
+    })('late-resume-module');
+
+    const mountPromise = module.mount(host);
+    await Promise.resolve();
+    module.unmount();
+    resumeRender();
+    await mountPromise;
+
+    module.unmount();
+    window.dispatchEvent(new Event('base-module-late-resume'));
+
+    expect(module.initCalled).toBe(0);
+    expect(lateListener).not.toHaveBeenCalled();
+    expect(module.unmountCalled).toBe(2);
+  });
+
+  it('does not initialize a stale mount after the same instance remounts', async () => {
+    let resumeFirstRender!: () => void;
+    let resumeSecondRender!: () => void;
+    const firstRender = new Promise<void>(resolve => {
+      resumeFirstRender = resolve;
+    });
+    const secondRender = new Promise<void>(resolve => {
+      resumeSecondRender = resolve;
+    });
+    const staleListener = vi.fn();
+    const currentListener = vi.fn();
+    let renderCount = 0;
+    const module = new (class extends TestModule {
+      async render(): Promise<void> {
+        const renderIndex = ++renderCount;
+        const mountSignal = this.signal();
+        await (renderIndex === 1 ? firstRender : secondRender);
+        if (!this.isCurrentSignal(mountSignal)) return;
+
+        host.textContent = `mount ${renderIndex}`;
+        this.listen(
+          window,
+          'base-module-same-instance-remount',
+          renderIndex === 1 ? staleListener : currentListener
+        );
+      }
+    })('same-instance-remount-module');
+
+    const firstMount = module.mount(host);
+    await Promise.resolve();
+    module.unmount();
+
+    const secondMount = module.mount(host);
+    await Promise.resolve();
+    resumeSecondRender();
+    await secondMount;
+
+    resumeFirstRender();
+    await firstMount;
+
+    window.dispatchEvent(new Event('base-module-same-instance-remount'));
+
+    expect(host.textContent).toBe('mount 2');
+    expect(module.initCalled).toBe(1);
+    expect(staleListener).not.toHaveBeenCalled();
+    expect(currentListener).toHaveBeenCalledTimes(1);
   });
 
   it('continues cleanup when a disposable throws', async () => {

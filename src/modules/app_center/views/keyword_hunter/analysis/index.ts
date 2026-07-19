@@ -147,7 +147,7 @@ function renderReport(container: HTMLElement, markdown: string): void {
   }
 
   const renderer = SafeRenderer.getInstance();
-  renderer.renderTemplate(container, html);
+  renderer.renderUntrustedHtml(container, html);
 
   // DOM 写入后，下一帧再运行增强逻辑，确保布局已完成
   requestAnimationFrame(() => {
@@ -341,7 +341,7 @@ async function restoreAnalysisStateFromState(): Promise<void> {
     if (isLikelyHtml) {
       // 旧版本兼容：直接注入 HTML，再运行幂等增强以同步新版报告封面。
       const renderer = SafeRenderer.getInstance();
-      renderer.renderTemplate(resultDiv, savedMarkdown);
+      renderer.renderUntrustedHtml(resultDiv, savedMarkdown);
       requestAnimationFrame(() => {
         highlightScores(resultDiv);
       });
@@ -1094,6 +1094,7 @@ class KeywordHunterAnalysisModule extends BaseModule {
   protected async render(): Promise<void> {
     const container = this.container;
     if (!container) return;
+    const mountSignal = this.getAbortSignal();
 
     try {
       analysisViewVersion += 1;
@@ -1114,10 +1115,12 @@ class KeywordHunterAnalysisModule extends BaseModule {
           },
         }
       );
+      if (!this.isCurrentMount(mountSignal)) return;
 
       container.classList.add('fade-in');
       renderer.renderTemplate(container, html);
     } catch (error) {
+      if (!this.isCurrentMount(mountSignal)) return;
       handleAnalysisMountError(error);
     }
   }

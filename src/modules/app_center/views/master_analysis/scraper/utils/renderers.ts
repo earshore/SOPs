@@ -3,14 +3,33 @@
  */
 
 import type { ProductData } from '../types';
-import { sanitizeProductData } from './sanitizers';
+import { escapeHtml, sanitizeProductData } from './sanitizers';
 import { getErrorSummary, getSiteDomain } from './formatters';
+
+const SUPPORTED_SITE_KEYS = new Set([
+  'US',
+  'DE',
+  'FR',
+  'IT',
+  'ES',
+  'NL',
+  'SE',
+  'PL',
+  'BE',
+  'IE',
+  'UK',
+  'CA',
+  'JP',
+]);
+
+const JSON_TOKEN_RE =
+  /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g;
 
 /**
  * 渲染星级评分
  */
 export function renderStars(rating?: number): string {
-  if (!rating) return '';
+  if (typeof rating !== 'number' || !Number.isFinite(rating)) return '';
   return `<div class="flex items-center gap-0.5 text-sm" title="${rating} 分">
         ${[1, 2, 3, 4, 5]
           .map(star => {
@@ -27,18 +46,26 @@ export function renderStars(rating?: number): string {
  * JSON语法高亮
  */
 export function syntaxHighlight(json: string): string {
-  return json.replace(
-    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
-    match => {
-      let cls = 'json-number';
-      if (/^"/.test(match)) {
-        cls = /:$/.test(match) ? 'json-key' : 'json-string';
-      } else if (/true|false/.test(match)) {
-        cls = 'json-boolean';
-      }
-      return `<span class="${cls}">${match}</span>`;
+  let result = '';
+  let previousIndex = 0;
+
+  for (const tokenMatch of json.matchAll(JSON_TOKEN_RE)) {
+    const token = tokenMatch[0];
+    const index = tokenMatch.index ?? 0;
+    result += escapeHtml(json.slice(previousIndex, index));
+
+    let cls = 'json-number';
+    if (/^"/.test(token)) {
+      cls = /:$/.test(token) ? 'json-key' : 'json-string';
+    } else if (/true|false/.test(token)) {
+      cls = 'json-boolean';
     }
-  );
+
+    result += `<span class="${cls}">${escapeHtml(token)}</span>`;
+    previousIndex = index + token.length;
+  }
+
+  return result + escapeHtml(json.slice(previousIndex));
 }
 
 /**
@@ -79,7 +106,13 @@ const STATUS_CONFIG: Record<string, StatusBadgeConfig> = {
 };
 
 function normalizeSiteKey(product: ProductData, globalSiteCode: string): string {
-  const siteKey = globalSiteCode || product.metadata?.marketplace || 'US';
+  const candidate = globalSiteCode || product.metadata?.marketplace || 'US';
+  const siteKey = typeof candidate === 'string' ? candidate.trim().toUpperCase() : 'US';
+
+  if (!SUPPORTED_SITE_KEYS.has(siteKey)) {
+    return 'US';
+  }
+
   return siteKey === 'UK' ? 'GB' : siteKey;
 }
 

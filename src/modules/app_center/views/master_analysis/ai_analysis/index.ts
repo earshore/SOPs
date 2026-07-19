@@ -26,6 +26,7 @@ class AiAnalysisModule extends BaseModule {
   protected async render(): Promise<void> {
     const container = this.container;
     if (!container) return;
+    const mountSignal = this.getAbortSignal();
 
     const registry = AlpineRegistry.getInstance();
     registry.register('aiAnalysisPanel', createAiAnalysisPanel);
@@ -42,6 +43,7 @@ class AiAnalysisModule extends BaseModule {
         },
       }
     );
+    if (!this.isCurrentMount(mountSignal)) return;
 
     // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
     const renderer = SafeRenderer.getInstance();

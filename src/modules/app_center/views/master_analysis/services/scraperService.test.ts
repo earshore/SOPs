@@ -7,6 +7,17 @@ const mocks = vi.hoisted(() => ({
   getProxyConfigWithCredential: vi.fn(),
   getByAsinAsync: vi.fn(),
   sleep: vi.fn(async (_ms: number) => undefined),
+  runtimeStrategySettings: {
+    scraper: {
+      requestTimeoutMs: 100,
+      maxConcurrent: 2,
+      maxRetries: 2,
+      retryDelayMs: 1000,
+      batchSize: 2,
+      batchDelayMs: 1,
+      cacheDurationMs: 24 * 60 * 60 * 1000,
+    },
+  },
   getErrorSummary: vi.fn((message: string) => `summary:${message}`),
   configGet: vi.fn((key: string) => {
     const values: Record<string, number> = {
@@ -39,19 +50,7 @@ vi.mock('@/services/storageService', () => ({
   },
   StorageService: {
     get: vi.fn((key: string) =>
-      key === 'runtime_strategy_settings'
-        ? {
-            scraper: {
-              requestTimeoutMs: 100,
-              maxConcurrent: 2,
-              maxRetries: 2,
-              retryDelayMs: 1000,
-              batchSize: 2,
-              batchDelayMs: 1,
-              cacheDurationMs: 24 * 60 * 60 * 1000,
-            },
-          }
-        : null
+      key === 'runtime_strategy_settings' ? mocks.runtimeStrategySettings : null
     ),
     getProxyConfigWithCredential: mocks.getProxyConfigWithCredential,
   },
@@ -76,6 +75,7 @@ function createResponse(body = '<html>product</html>', status = 200): Response {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.runtimeStrategySettings.scraper.maxRetries = 2;
   mocks.getProxyConfigWithCredential.mockResolvedValue({
     type: 'custom_api',
     customUrl: 'https://proxy.example/?url=',
@@ -132,6 +132,57 @@ describe('scrapeAsin validation and cache', () => {
     expect(result).toBe(cachedProduct);
     expect(fetchMock).not.toHaveBeenCalled();
     expect(status).toHaveBeenCalledWith('B001', 'success', expect.stringContaining('命中缓存'));
+  });
+});
+
+describe('scrapeAsin with retries disabled', () => {
+  it('attempts a scrape when retries are disabled', async () => {
+    const status = vi.fn();
+    mocks.runtimeStrategySettings.scraper.maxRetries = 0;
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      createResponse('<html>listing</html>')
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await scrapeAsin('B000', 'US', false, status);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(result.scrape_status).toBe('success');
+  });
+
+  it('makes one proxy request on failure when retries are disabled', async () => {
+    const status = vi.fn();
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    mocks.runtimeStrategySettings.scraper.maxRetries = 0;
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      createResponse('upstream failure', 500)
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await scrapeAsin('B004', 'US', false, status);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(mocks.parseProductPage).not.toHaveBeenCalled();
+    expect(result.scrape_status).toBe('failed');
+  });
+
+  it('makes one scrape attempt on title validation failure when retries are disabled', async () => {
+    const status = vi.fn();
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    mocks.runtimeStrategySettings.scraper.maxRetries = 0;
+    mocks.parseProductPage.mockReturnValue({ title: 'Robot Check', bullets: [] });
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      createResponse('<html>listing</html>')
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await scrapeAsin('B005', 'US', false, status);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(mocks.parseProductPage).toHaveBeenCalledTimes(1);
+    expect(result.scrape_status).toBe('failed');
+    expect(result.error).toContain('Robot Check');
   });
 });
 

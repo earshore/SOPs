@@ -60,6 +60,9 @@ export default class BaseModule {
   /** 请求取消控制器 */
   private _abortController: AbortController = new AbortController();
 
+  /** 最近一次卸载所取消的挂载信号，用于清理晚到的异步续体。 */
+  private _lastUnmountedSignal: AbortSignal | null = null;
+
   /** 已注册的动作名称列表 */
   private _registeredActions: string[] = [];
 
@@ -154,15 +157,30 @@ export default class BaseModule {
     this.container = container;
     this._isMounted = true;
     this._disposables = []; // 重置清理列表
+    const mountSignal = this._abortController.signal;
 
     try {
       await this.render();
+      if (!this.isCurrentMount(mountSignal)) {
+        this.cleanupLateMount(mountSignal);
+        return;
+      }
+
       await this.init();
     } catch (error) {
+      if (!this.isCurrentMount(mountSignal)) {
+        this.cleanupLateMount(mountSignal);
+        return;
+      }
+
       const moduleError = error as Error;
       this.handleError(moduleError);
       this.emitModuleError(moduleError, 'mount');
       throw moduleError;
+    }
+
+    if (!this.isCurrentMount(mountSignal)) {
+      this.cleanupLateMount(mountSignal);
     }
   }
 
@@ -207,17 +225,11 @@ export default class BaseModule {
     if (!this._isMounted) return;
 
     // 0. 取消所有进行中的请求
+    this._lastUnmountedSignal = this._abortController.signal;
     this._abortController.abort();
 
     // 1. 执行注册的清理函数
-    this._disposables.forEach(dispose => {
-      try {
-        dispose();
-      } catch {
-        // 继续清理剩余资源。
-      }
-    });
-    this._disposables = [];
+    this.disposeResources();
 
     // 2. 同步清理已注册的动作
     if (this._registeredActions.length > 0) {
@@ -362,6 +374,37 @@ export default class BaseModule {
    */
   protected getAbortSignal(): AbortSignal {
     return this._abortController.signal;
+  }
+
+  /**
+   * 判断由某次挂载捕获的信号是否仍代表当前挂载。
+   * 异步渲染在 await 后提交 DOM 前应调用此方法，避免旧挂载覆盖新页面。
+   */
+  protected isCurrentMount(signal: AbortSignal): boolean {
+    return this._isMounted && !signal.aborted && this._abortController.signal === signal;
+  }
+
+  private disposeResources(): void {
+    this._disposables.forEach(dispose => {
+      try {
+        dispose();
+      } catch {
+        // 继续清理剩余资源。
+      }
+    });
+    this._disposables = [];
+  }
+
+  private cleanupLateMount(signal: AbortSignal): void {
+    if (this._isMounted || this._lastUnmountedSignal !== signal) {
+      return;
+    }
+
+    this.disposeResources();
+    if (this._registeredActions.length > 0) {
+      this.unregisterActionsSync();
+    }
+    this.onUnmount();
   }
 
   /**

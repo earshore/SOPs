@@ -974,6 +974,7 @@ class KeywordHunterInputModule extends BaseModule {
   protected async render(): Promise<void> {
     const container = this.container;
     if (!container) return;
+    const mountSignal = this.getAbortSignal();
 
     try {
       // 1. 使用 SafeTemplateLoader 加载模板
@@ -990,12 +991,14 @@ class KeywordHunterInputModule extends BaseModule {
           },
         }
       );
+      if (!this.isCurrentMount(mountSignal)) return;
 
       // 使用 SafeRenderer 渲染模板
       // 添加淡入动画（在渲染前添加）
       container.classList.add('fade-in');
       renderer.renderTemplate(container, html);
     } catch (error) {
+      if (!this.isCurrentMount(mountSignal)) return;
       console.error('[Input] ❌ 子模块挂载失败:', error);
       throw error;
     }

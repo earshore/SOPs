@@ -1474,7 +1474,8 @@ function countAlpineFunctionality(
 async function hasAppContainer(page: Page): Promise<boolean> {
   return page.evaluate(() => {
     return (
-      window.hasOwnProperty('__container__') || typeof (window as any).container !== 'undefined'
+      Object.prototype.hasOwnProperty.call(window, '__container__') ||
+      typeof (window as any).container !== 'undefined'
     );
   });
 }
@@ -1627,7 +1628,10 @@ test('1.5.4 测试所有服务初始化成功', async ({ page }) => {
   // 等待应用初始化完成事件
   await page.waitForFunction(
     () => {
-      return window.hasOwnProperty('Alpine') && (window as any).Alpine !== undefined;
+      return (
+        Object.prototype.hasOwnProperty.call(window, 'Alpine') &&
+        (window as any).Alpine !== undefined
+      );
     },
     { timeout: 10000 }
   );
@@ -1663,7 +1667,7 @@ test('1.5.5 测试 Alpine.js 正确加载', async ({ page }) => {
   await page.waitForFunction(
     () => {
       return (
-        window.hasOwnProperty('Alpine') &&
+        Object.prototype.hasOwnProperty.call(window, 'Alpine') &&
         (window as any).Alpine !== undefined &&
         (window as any).Alpine !== null
       );
@@ -1709,7 +1713,10 @@ test('1.5.7 测试路由系统初始化', async ({ page }) => {
   // 等待应用初始化完成
   await page.waitForFunction(
     () => {
-      return window.hasOwnProperty('Alpine') && (window as any).Alpine !== undefined;
+      return (
+        Object.prototype.hasOwnProperty.call(window, 'Alpine') &&
+        (window as any).Alpine !== undefined
+      );
     },
     { timeout: 10000 }
   );
@@ -1820,7 +1827,10 @@ test('1.5.9 测试内存占用 < 100MB', async ({ page }) => {
   // 等待应用完全初始化
   await page.waitForFunction(
     () => {
-      return window.hasOwnProperty('Alpine') && (window as any).Alpine !== undefined;
+      return (
+        Object.prototype.hasOwnProperty.call(window, 'Alpine') &&
+        (window as any).Alpine !== undefined
+      );
     },
     { timeout: 10000 }
   );
@@ -1904,7 +1914,10 @@ test('1.5.10 测试无 console.error 输出', async ({ page }) => {
   // 等待应用完全初始化
   await page.waitForFunction(
     () => {
-      return window.hasOwnProperty('Alpine') && (window as any).Alpine !== undefined;
+      return (
+        Object.prototype.hasOwnProperty.call(window, 'Alpine') &&
+        (window as any).Alpine !== undefined
+      );
     },
     { timeout: 10000 }
   );
@@ -1941,7 +1954,7 @@ test('1.5.6 测试 Zustand store 初始化', async ({ page }) => {
   await page.waitForFunction(
     () => {
       return (
-        window.hasOwnProperty('useAppStore') &&
+        Object.prototype.hasOwnProperty.call(window, 'useAppStore') &&
         (window as any).useAppStore !== undefined &&
         (window as any).useAppStore !== null
       );

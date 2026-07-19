@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { AppModal } from '@/components/modal/AppModal';
 
 describe('AppModal Component', () => {
@@ -76,7 +76,7 @@ describe('AppModal Component', () => {
       expect(container.classList.contains('hidden')).toBe(false);
     });
 
-    it('should close modal', (done) => {
+    it('should close modal', done => {
       modal.open();
       modal.close();
 
@@ -99,7 +99,7 @@ describe('AppModal Component', () => {
       expect(openHandler).toHaveBeenCalled();
     });
 
-    it('should dispatch close event', (done) => {
+    it('should dispatch close event', done => {
       const closeHandler = vi.fn();
       modal.addEventListener('close', closeHandler);
 
@@ -117,7 +117,7 @@ describe('AppModal Component', () => {
     it('should apply animation classes on open', () => {
       modal.open();
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         requestAnimationFrame(() => {
           const backdrop = modal.shadowRoot.querySelector('.modal-backdrop');
           const panel = modal.shadowRoot.querySelector('.modal-panel');
@@ -223,7 +223,7 @@ describe('AppModal Component', () => {
       // Simulate click on slotted button
       const clickEvent = new MouseEvent('click', { bubbles: true, composed: true });
       Object.defineProperty(clickEvent, 'composedPath', {
-        value: () => [button, modal]
+        value: () => [button, modal],
       });
 
       modal.shadowRoot.dispatchEvent(clickEvent);

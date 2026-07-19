@@ -158,6 +158,13 @@ function validateCustomerReviews(customerReviews: unknown): ValidationResult | n
     if (!isObjectLike(review)) {
       return invalid(`评论[${i}]不是有效对象`);
     }
+
+    if (
+      review.star_rating !== undefined &&
+      (typeof review.star_rating !== 'number' || !Number.isFinite(review.star_rating))
+    ) {
+      return invalid(`评论[${i}].star_rating必须是有限数字`);
+    }
   }
 
   return null;

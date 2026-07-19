@@ -302,8 +302,9 @@ async function fetchWithProxy(
   };
 
   let lastError: Error | undefined;
+  const attemptLimit = Math.max(1, retries);
 
-  for (let i = 0; i < retries; i++) {
+  for (let i = 0; i < attemptLimit; i++) {
     try {
       return await fetchProxyAttempt(context, i);
     } catch (e) {
@@ -488,14 +489,14 @@ async function handleScrapeAttemptFailure(
 }
 
 async function runScrapeAttempts(context: ScrapeContext, result: ScrapedProduct): Promise<void> {
-  const maxRetries = getRuntimeScraperOptions().maxRetries;
+  const attemptLimit = Math.max(1, getRuntimeScraperOptions().maxRetries);
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  for (let attempt = 1; attempt <= attemptLimit; attempt++) {
     try {
       applyScrapedContent(result, await scrapeProductContent(context, attempt));
       return;
     } catch (error) {
-      await handleScrapeAttemptFailure(error, attempt, maxRetries, result, context.asin);
+      await handleScrapeAttemptFailure(error, attempt, attemptLimit, result, context.asin);
     }
   }
 }

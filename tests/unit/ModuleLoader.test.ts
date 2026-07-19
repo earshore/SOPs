@@ -1,4 +1,5 @@
 import { it, expect, beforeEach, afterEach, vi } from 'vitest';
+import BaseModule from '@/common/BaseModule';
 import { ModuleLoader, type IModule } from '@/common/utils/ModuleLoader';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 
@@ -221,6 +222,78 @@ async function flushAsyncWork(): Promise<void> {
     expect(sharedModule.mount).toHaveBeenCalledTimes(2);
     expect(sharedModule.unmount).toHaveBeenCalledTimes(2);
     expect(active).toBe(true);
+  });
+
+  it('keeps a newer BaseModule singleton mounted when its stale mount completes', async () => {
+    const firstRender = deferred<void>();
+    const secondRender = deferred<void>();
+    const staleListener = vi.fn();
+    const currentListener = vi.fn();
+    let renderCount = 0;
+    class GuardedModule extends BaseModule {
+      initCalls = 0;
+
+      constructor() {
+        super('guarded-module');
+      }
+
+      protected async render(): Promise<void> {
+        const renderIndex = ++renderCount;
+        const mountSignal = this.getAbortSignal();
+        await (renderIndex === 1 ? firstRender.promise : secondRender.promise);
+        if (mountSignal.aborted || mountSignal !== this.getAbortSignal() || !this.isMounted) {
+          return;
+        }
+
+        this.container!.textContent = `Guarded ${renderIndex}`;
+        this.addEventListener(
+          window,
+          'module-loader-base-module-singleton',
+          renderIndex === 1 ? staleListener : currentListener
+        );
+      }
+
+      protected async init(): Promise<void> {
+        this.initCalls += 1;
+      }
+    }
+
+    const instance = new GuardedModule();
+    const sharedModule: IModule = {
+      mount: container => instance.mount(container),
+      unmount: () => instance.unmount(),
+    };
+    const nextModule = createModule('Next');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_shared: vi.fn(() => Promise.resolve(sharedModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    const firstLoad = loader.loadModule('race_shared');
+    await vi.waitFor(() => expect(renderCount).toBe(1));
+
+    await loader.loadModule('race_next');
+    const secondLoad = loader.loadModule('race_shared');
+    await vi.waitFor(() => expect(renderCount).toBe(2));
+
+    secondRender.resolve();
+    await secondLoad;
+    firstRender.resolve();
+    await firstLoad;
+
+    window.dispatchEvent(new Event('module-loader-base-module-singleton'));
+
+    expect(document.getElementById('content')?.textContent).toBe('Guarded 2');
+    expect(instance.initCalls).toBe(1);
+    expect(staleListener).not.toHaveBeenCalled();
+    expect(currentListener).toHaveBeenCalledTimes(1);
+
+    loader.destroy();
   });
 
   it.each([

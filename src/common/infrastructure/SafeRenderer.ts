@@ -53,6 +53,52 @@ const DEFAULT_ALLOWED_TAGS = ['p', 'br', 'strong', 'em', 'u', 'span', 'ul', 'ol'
  */
 const DEFAULT_ALLOWED_ATTRS = ['href', 'src', 'alt', 'title', 'class'];
 
+const UNTRUSTED_ALLOWED_TAGS = [
+  'a',
+  'blockquote',
+  'br',
+  'code',
+  'del',
+  'div',
+  'em',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'hr',
+  'img',
+  'input',
+  'li',
+  'ol',
+  'p',
+  'pre',
+  'span',
+  'strong',
+  'table',
+  'tbody',
+  'td',
+  'th',
+  'thead',
+  'tr',
+  'ul',
+];
+
+const UNTRUSTED_ALLOWED_ATTRS = [
+  'alt',
+  'checked',
+  'class',
+  'colspan',
+  'disabled',
+  'href',
+  'rowspan',
+  'scope',
+  'src',
+  'title',
+  'type',
+];
+
 /**
  * SafeRenderer 类
  *
@@ -145,6 +191,40 @@ export class SafeRenderer {
     }
 
     setSafeHtml(container, html);
+  }
+
+  /**
+   * Render HTML from an untrusted source such as an LLM response.
+   * Framework directives are intentionally excluded from this allowlist.
+   */
+  public renderUntrustedHtml(container: HTMLElement, html: string): void {
+    if (!container) {
+      throw new ValidationError(
+        'SafeRenderer: container is required',
+        'SAFE_RENDERER_NO_CONTAINER',
+        'container',
+        container,
+        { module: 'SafeRenderer', action: 'renderUntrustedHtml' }
+      );
+    }
+
+    if (typeof html !== 'string') {
+      throw new ValidationError(
+        'SafeRenderer: html must be a string',
+        'SAFE_RENDERER_INVALID_HTML',
+        'html',
+        typeof html,
+        { module: 'SafeRenderer', action: 'renderUntrustedHtml' }
+      );
+    }
+
+    setSafeHtml(
+      container,
+      this.sanitizeHtml(html, {
+        allowedTags: UNTRUSTED_ALLOWED_TAGS,
+        allowedAttrs: UNTRUSTED_ALLOWED_ATTRS,
+      })
+    );
   }
 
   /**

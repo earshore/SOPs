@@ -8,6 +8,7 @@ import { errorTracker } from '@/services/errorTracker';
 import { AppError, NetworkError, SystemError } from '@/common/errors/AppError';
 import { setSafeHtml } from '@/common/utils/security';
 import { randomBetween } from '@/common/utils/random';
+import { loadTemplate as viewLoaderLoadTemplate } from '@/common/utils/viewLoader';
 
 /**
  * 模块加载选项
@@ -449,8 +450,6 @@ export class SafeModuleLoader {
     try {
       // 🎯 修复: 使用 viewLoader 的 loadTemplate 函数，它使用 Vite glob 导入
       // 避免在生产环境中使用 fetch 导致返回整个 index.html
-      const { loadTemplate: viewLoaderLoadTemplate } = await import('@/common/utils/viewLoader');
-
       // 标准化路径：确保以 / 开头
       let normalizedPath = templatePath;
       if (!normalizedPath.startsWith('/')) {

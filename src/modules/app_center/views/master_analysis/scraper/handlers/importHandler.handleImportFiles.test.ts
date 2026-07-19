@@ -108,6 +108,24 @@ describe('handleImportFiles', () => {
     });
   });
 
+  it('drops unsupported marketplace values before rendering a site selection modal', async () => {
+    document.body.innerHTML = '';
+
+    const result = await handleImportFiles(
+      [
+        createImportFile(createImportData('<img x-init=notify()>')),
+        createImportFile(createImportData('<img x-init=notifyAgain()>')),
+      ],
+      null,
+      'DE'
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.data?.metadata?.marketplace).toBe('DE');
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('[x-init]')).toBeNull();
+  });
+
   it('keeps the selected marketplace product as the merge master when current data already has the same ASIN', () => {
     const currentProduct = createProduct('DE', 'Existing DE title', [
       createReview('R-SAME', 'Existing duplicate review'),

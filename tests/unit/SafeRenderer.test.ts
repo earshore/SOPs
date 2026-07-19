@@ -397,6 +397,21 @@ script:alert('xss')">Bad link</a>
       expect(container.querySelector('section')?.hasAttribute('style')).toBe(false);
     });
 
+    it('strips Alpine directives from untrusted report HTML while retaining safe markup', () => {
+      renderer.renderUntrustedHtml(
+        container,
+        '<h2 class="report-title">Report</h2><img src="https://safe.example/image.png" x-bind:src="leak()"><button @click="run()" :title="label">Action</button>'
+      );
+
+      expect(container.querySelector('h2')?.textContent).toBe('Report');
+      expect(container.querySelector('img')?.getAttribute('src')).toBe(
+        'https://safe.example/image.png'
+      );
+      expect(container.innerHTML).not.toContain('x-bind:');
+      expect(container.innerHTML).not.toContain('@click');
+      expect(container.innerHTML).not.toContain(':title');
+    });
+
     it('应该抛出错误（HTML 不是字符串）', () => {
       expect(() => {
         renderer.renderSanitizedHtml(container, 123 as any);

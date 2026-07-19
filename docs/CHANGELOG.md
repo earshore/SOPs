@@ -13,15 +13,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > 生产目标为 `https://sops.hongecb.store`。
 
 ### Added
+
 - 新增启动故障注入回归覆盖：无关 domain import 失败时 App Center 深链继续可用；目标 App Center domain import 失败时回退完整首页。
 
 ### Changed
+
+- Release scripts and workflow bind tag-bound operations to an annotated tag at the final HEAD, then recheck the remote tag SHA around mutations.
+- Test quality now validates executable `test` and `spec` sources, excludes generated reports, and uses a dedicated TypeScript project for root tests.
+- Removed the incorrect `system-settings` manual chunk so the strict per-chunk production warning remains meaningful without known large-chunk noise.
 - 启动阶段按 domain 独立记录动态 import 结果，避免单个可选 domain 的失败中断全局初始化。
 
 ### Fixed
+
 - 修复 App Center singleton 在 A → B → A 快速路由切换时，旧异步 mount 完成后卸载新实例的问题。
 - 修复 App Center 初始深链在自身 domain chunk 无法加载时留下空壳的问题，改为回退首页并提示用户。
 - 修复 Deep Chat 初次挂载及重建会话时注入 Google Fonts，导致本地 CSP 报错的问题。
+
+- Fixed proxy and LLM credential migration so failed secure writes or cleanup cannot delete legacy values or overwrite an existing secure credential.
+- Hardened untrusted LLM/import rendering and scraper site validation before data reaches the page.
+- Replaced SafeModuleLoader's ineffective dynamic `viewLoader` import with its actual static dependency, removing the production build warning.
 
 ## [3.0.7] - 2026-07-18
 
@@ -29,15 +39,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > 生产目标为 `https://sops.hongecb.store`，不在本章节声明尚未完成的部署结果或性能分数。
 
 ### Added
+
 - 新增生产预览 Lighthouse 证据门禁，分别审计 `/app-center/master-analysis/ai-analysis`、`/app-center/master-analysis/promptlab`、`/app-center/master-analysis/scraper` 三条 canonical hash route，并对最终路由、资源总量与 console 结果执行缺失即失败的证据校验。
 - 补充页面搜索描述、显式 `robots.txt` 及对应发布资产契约，确保爬虫策略由独立静态资源提供。
 
 ### Changed
+
 - 鉴权后的路由更新收敛为单次同步 prepare 后再加载视图；首屏同时等待 home view 与主样式就绪后再显示内容，失败路径也会解除等待态。
 - 业务 singleton 统一注入已解析 logger；SafeModuleLoader 为同路径模块与模板加载复用 inflight 请求，并在完成或失败后清理状态。
 - Release workflow 改为命令失败即中止，固定第三方 Action commit，校验精确 annotated tag、checkout SHA 与 `main` 上同 SHA 的成功 Quality Gate 后才允许发布。
 
 ### Fixed
+
 - HTTP 写方法默认不再重试网络错误；区分 timeout 与外部 abort 的归因，并允许去重请求的 follower 独立取消而不终止 owner 请求。
 - 修复 Vercel SPA fallback 吞掉 `robots.txt`、首屏内容提前闪现，以及导航当前态在明暗主题下的对比度与可访问性问题。
 
@@ -47,9 +60,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > 本版覆盖部署到 `https://sops.hongecb.store`；生产回滚目标为 `v3.0.6` 对应的上一条 Pages 部署。
 
 ### Changed
+
 - PromptLab 移除 welcome banner 中语义重复的「复制 SEO 关键词」入口及其专用格式化链路；Listing Prompt 仍携带对应 SEO 关键词交接到 Deep Chat。
 
 ### Fixed
+
 - 修复应用总览存在最近作业数据时，旧 `fade-in` 与模块统一入场动画重复执行导致页面加载闪烁的问题。
 
 ## [3.0.7-rc.1] - 2026-07-14
@@ -58,16 +73,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > 本版覆盖部署到 `https://sops.hongecb.store`；生产回滚目标为 `v3.0.6` 对应的上一条 Pages 部署。
 
 ### Added
+
 - Keyword Hunter 词云增加可访问的「已匹配词根 / 未匹配词根 / 其他词根」图例和独立视觉标记。
 - PromptLab 标题区增加将当前 Listing Prompt 交接到 Deep Chat 的明确入口。
 
 ### Changed
+
 - Keyword Hunter 处理页移除「同步回输入」旧入口，避免用户误以为处理结果需要回退到输入格式化阶段。
 - Keyword Hunter 处理页只恢复当前内存状态，不再自动载入历史匹配快照，防止旧文案和词频覆盖新的作业上下文。
 - PromptLab 保留 SEO 关键词复制能力，同时通过 Deep Chat 携带 Prompt 与对应关键词进入文案生成链路。
 - `v3.0.5-rc.1` / `v3.0.5-rc.2` 固定为仅保留 tag 的历史别名，发布同步和审计不会再次把它们创建为重复 Release。
 
 ### Fixed
+
 - 修复同一快照、同一类型和相同内容的 Listing Prompt 被重复写入历史记录的问题。
 - 修复 PromptLab 重构时误删「复制 SEO 关键词」按钮与动作的问题。
 - 移除重复误标 Release 后恢复 `v3.0.4-rc.1` 至 `rc.11` 的连续展示顺序，同时保留原 tag 与 CHANGELOG 追溯。
@@ -79,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > 回滚版本：`v3.0.5`。部署目标：https://sops.hongecb.store
 
 ### Added
+
 - 应用中心「最近作业」增加本地作业索引、按执行实例聚合的恢复队列、逐阶段载荷可用性检查和复制摘要。
 - Listing 作业链路补齐为「数据采集 → AI 分析 → Prompt 生成 → Deep Chat 产品文案 → 关键词复核 → 文案评审 → 合规复核」，链路节点可直接进入对应阶段。
 - Deep Chat 增加 Listing Prompt 与 SEO 关键词工作流交接、产品文案产物保存，以及将选中文案和对应关键词送入 Keyword Hunter 输入格式化页的能力。
@@ -95,6 +114,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 新增 NEW/CPA 网关占位符到环境文件
 
 ### Changed
+
 - 最近作业默认按「置顶 → 需人工处理 → 业务更新时间 → 最近查看时间」排序，单纯打开旧记录不再挤占新作业位置。
 - 作业卡标题优先展示站点、主 ASIN / SKU 与多 ASIN 范围，并补充执行开始时间和有业务含义的产物信息。
 - 置顶、复制摘要和从列表移除改为卡片右上角纯图标操作；置顶状态保持透明背景，以图标颜色和角度区分。
@@ -111,6 +131,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 集中化 CORS 头部并优化响应
 
 ### Fixed
+
 - 修复生产预览包中原生 file input 偶发无法打开文件选择框的问题，并避免隐藏 input 被重复点击链路阻断。
 - 修复开发环境 HMR 后 ActionRegistry 重复覆盖动作及初始导航早于 Router 初始化的问题。
 - 修复同一 Listing 作业跨「数据采集 / AI 分析 / Prompt / Deep Chat / Keyword Hunter」推进时生成多张最近作业卡的问题。
@@ -129,6 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > 回滚版本：`v3.0.4`。部署目标：https://sops.hongecb.store
 
 ### Added
+
 - 企业级发布治理：`docs/RELEASE_POLICY.md`、Release Notes 模板、`SECURITY.md`
 - 发版脚本：`npm run release:validate` / `release:notes` / `release:package`（CHANGELOG 抽取、产物与 SHA256）
 - GitHub Release 流水线：`.github/workflows/release.yml` 与自动 notes 分类 `.github/release.yml`
@@ -150,6 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PromptLab、Keyword Hunter 和历史记录服务接入新的产物/最近上下文
 
 ### Changed
+
 - GitHub Latest 纠正为稳定版通道（本版 `v3.0.5` 为 Latest）；RC 保持 Pre-release
 - 仓库 homepage 对齐生产域 `https://sops.hongecb.store`
 - 冻结 `3.0.4-rc.*` 版本线；本 GA 为其正式收口
@@ -167,6 +190,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 同步应用内版本显示到 `3.0.5`
 
 ### Fixed
+
 - 修复应用中心总览「应用矩阵」分类筛选不生效：作者样式 `display:flex/grid` 覆盖了 `[hidden]`，改为 `.hidden` + 模块 CSS 强制隐藏
 - 修复 Alpine 设置面板在懒加载后的注册竞态
 - 修复 AppModal 打开态 host 元素不可见导致浏览器自动化无法识别弹窗的问题，并稳定 NPI Tracker 移动端 Next Step smoke 覆盖
@@ -179,6 +203,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 强化 NPI Tracker、Restricted Words、Prompt Library 和系统设置相关回归测试覆盖
 
 ### 里程碑对照（完整 RC 叙述见下文各章节）
+
 - `3.0.4-rc.11` — Resume Queue、版本只读 package.json、入口异步拆分、Alpine/Prettier/css 门禁修复
 - `3.0.4-rc.10` — 共享剪贴板/模板/LLM JSON、结构化错误、事件命名、应用矩阵筛选、CSP
 - `3.0.4-rc.9` — 共享确认弹窗、Modal 指南、SOP 模板模块、AppModal 可见性
@@ -202,15 +227,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.4] - 2026-07-06
 
 ### Added
+
 - 新增 Keyword Hunter AI 翻译模型选择器和界面刷新。
 - 新增 AI 功能深度优化建议文档。
 
 ### Changed
+
 - Deep Chat/Playground 请求预算改为动态计算，并延续 rc 系列的线程、搜索、本地化和 prompt 持久化体验。
 - 整合 `v3.0.3-rc.7` 至 `v3.0.3-rc.23` 的监控、安全门禁、PPC 分析器、Keyword Hunter、PromptLab、Settings 和 UI 可访问性改进。
 - 同步应用内版本显示到 `3.0.4`。
 
 ### Fixed
+
 - 修复 LLM abort 边界行为和动态请求预算回归。
 - 补充 Keyword Hunter 翻译模型选择与 LLM 行为测试覆盖。
 
@@ -219,16 +247,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > 版本线说明：曾误标为 `3.0.5` / `3.0.5-rc.*` / `3.0.6-rc.*`。按当前约定并入 `3.0.4` 预发布序列：`rc.8`–`rc.11`。
 
 ### Added
+
 - 应用中心总览「最近继续」重做为高密度 Resume Queue：作业上下文优先标题、短类型标签、去重 fact chips、1/2/3 列偏好持久化与空状态快捷入口。
 - 新增 `recentArtifactPresenter` 纯展示变换与对应单元测试，并补充设计规格文档。
 
 ### Changed
+
 - 拆分 `SECURE_STORAGE_SECURITY_BOUNDARY` 常量，恢复 `secureStorage` 动态导入拆包；提高 Vite chunk 体积告警阈值以匹配已知 deferred `system-settings` 包。
 - 优化入口加载：拆分系统设置、domain shells 与 Font Awesome brands 异步块。
 - 同步应用内版本显示到 `3.0.4-rc.11`。
 - 应用版本号改为只读 `package.json`，避免非 semver git tag（如 `latest`）污染 UI 版本展示。
 
 ### Fixed
+
 - 修复 Alpine 设置面板在懒加载后的注册竞态。
 - 修复阻塞 Vercel 构建的 Prettier 格式问题，并清理误入发布树的构建临时文件。
 - 通过 CSS 变量命名与 ESLint 复杂度拆分，恢复 `css:audit` / `lint:warning-gate` 通过。
@@ -236,15 +267,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.4-rc.10] - 2026-07-12
 
 ### Added
+
 - 新增共享剪贴板、模板与 LLM JSON 工具，沉淀 Shared Capabilities Guide。
 - 统一生产路径错误为 `ValidationError` / `SystemError` 等结构化错误，覆盖 PPC、History、Keyword Hunter、Deep Chat 等模块。
 
 ### Changed
+
 - 将应用级事件命名统一为 `app:` + kebab-case。
 - 对齐部署 CSP `connect-src` 与站点清单，覆盖 Amazon 全站点域名。
 - 同步应用内版本显示到 `3.0.4-rc.10`。
 
 ### Fixed
+
 - 修复应用中心总览「应用矩阵」分类筛选不生效：作者样式 `display:flex/grid` 覆盖了 `[hidden]`，改为 `.hidden` + 模块 CSS 强制隐藏。
 - 修复共享剪贴板在无 `execCommand` 环境下的降级路径，并同步 Promptlab / Prompts 相关测试。
 - 移除废弃 CSS 半径别名 `--radius-card` / `--radius-panel`。
@@ -252,17 +286,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.4-rc.9] - 2026-07-12
 
 ### Added
+
 - 新增共享确认弹窗组件，并补充 AppModal 与确认弹窗回归测试覆盖。
 - 新增 Modal 开发指南，沉淀触发、焦点、关闭行为和测试约定。
 - 新增 SOPS 共享模板模块、复制动作封装和页面复制工作流测试夹具。
 
 ### Changed
+
 - 将 Keyword Hunter、Master Analysis、Deep Chat 等模块的确认逻辑收敛到共享确认弹窗。
 - 将 SOPS 页面里的分散模板渲染与剪贴板反馈收敛到共享工具，减少页面重复实现。
 - 更新页面架构审计以识别共享 SOP 模板模块。
 - 同步应用内版本显示到 `3.0.4-rc.9`。
 
 ### Fixed
+
 - 修复 AppModal 打开态 host 元素不可见导致浏览器自动化无法识别弹窗的问题，并稳定 NPI Tracker 移动端 Next Step smoke 覆盖。
 - 替换多个 SOPS 页面里的 `alert` 复制反馈，统一成功与失败提示行为。
 - 强化 NPI Tracker、Restricted Words、Prompt Library 和系统设置相关回归测试覆盖。
@@ -270,85 +307,103 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.4-rc.8] - 2026-07-12
 
 ### Added
+
 - 新增循环依赖检查脚本，统一处理 Vite `?url` 资源导入后再执行 Madge 审计。
 - 整合 `v3.0.4-rc.1` 至 `v3.0.4-rc.7` 的 App Center 工作台、Deep Chat、Keyword Hunter、PPC Search Terms、系统设置和质量门禁更新。
 
 ### Changed
+
 - 归档历史预发布检查、UI 审计、安全审计和技术债务报告，收敛文档索引与项目结构说明。
 - 将 Deep Chat bundle 固定输出到 `assets/vendor/deepChat.bundle.js`，减少构建产物散列变动对加载器和循环依赖检查的影响。
 - 同步应用内版本显示到 `3.0.4-rc.8`。
 
 ### Fixed
+
 - 调整 Sentry 加载方式，按浏览器 SDK 和 core API 显式映射监控方法，提升生产构建兼容性。
 
 ## [3.0.4-rc.7] - 2026-07-09
 
 ### Added
+
 - Deep Chat 线程支持内联重命名，减少进入管理菜单的来回切换。
 
 ### Changed
+
 - 同步应用内版本显示到 `3.0.4-rc.7`。
 
 ## [3.0.4-rc.6] - 2026-07-09
 
 ### Added
+
 - 新增 Deep Chat 删除确认弹窗，替换原生 `confirm()`，支持取消、Esc、点击遮罩关闭与「不再询问」持久化。
 - 新增 Keyword Hunter 快照删除确认弹窗，支持取消、Esc、点击遮罩关闭与「不再询问」持久化。
 - 补充删除确认弹窗与快照删除流程的单元测试。
 
 ### Changed
+
 - 同步应用内版本显示到 `3.0.4-rc.6`。
 
 ## [3.0.4-rc.5] - 2026-07-08
 
 ### Added
+
 - App Center 概览最近项（recent items）新增图标盒与 `RECENT_ARTIFACT_ICONS` 图标映射，区分不同产物类型。
 - 新增相对/绝对时间格式化工具，最近项时间以「刚刚 / N 分钟前 / N 小时前 / N 天前…」展示，并保留绝对时间 tooltip。
 
 ### Changed
+
 - 重构最近项条目结构：图标盒 + 标题（标题 + 相对时间）+ 元信息 + 操作按钮，补充 hover/focus 过渡、reduced-motion 与响应式微调。
 - 同步应用内版本显示到 `3.0.4-rc.5`。
 
 ### Fixed
+
 - 改进最近项 `aria-label`（类型 · 标题 · 相对时间），提升可访问性。
 - 更新 XSS 扫描报告时间戳。
 
 ## [3.0.4-rc.4] - 2026-07-08
 
 ### Added
+
 - 新增 App Center catalog、artifact envelope、workflow definitions 和 workspace context 服务。
 - 新增 App Center 工作台评审文档和对应单元测试覆盖。
 
 ### Changed
+
 - App Center 概览改为 catalog-driven 渲染，减少模板内硬编码。
 - PPC Search Terms 增加 action-list 产物导出和 recent UI 衔接。
 - PromptLab、Keyword Hunter 和历史记录服务接入新的产物/最近上下文。
 - 同步应用内版本显示到 `3.0.4-rc.4`。
 
 ### Fixed
+
 - 补充 App Center catalog/workflow/workspace、Keyword Hunter 快照、PPC UI 和历史记录回归覆盖。
 
 ## [3.0.4-rc.3] - 2026-07-07
 
 ### Added
+
 - 新增 action name、import path 和 source naming 质量审计，并接入 `ci:quality`。
 - 新增 SOPS owner field 共享处理工具和测试覆盖。
 
 ### Changed
+
 - 统一 TypeScript、Vite、Vitest 和源码导入到单一 `@/` 项目别名。
 - 内部私有/工具方法去除前导下划线，并同步调用点、测试和 source-name 审计规则。
 - 同步应用内版本显示到 `3.0.4-rc.3`。
 
 ### Fixed
+
 - 对齐核心工具、组件、路由、bootstrap、服务和单元测试的内部命名约定。
 - 收紧源码命名、导入路径和 action 命名约定，减少后续回归风险。
 
 ## [3.0.4-rc.2] - 2026-07-07
 
 ### Added
+
 - 系统设置面板新增原生 `<details>/<summary>` 折叠体验和默认折叠状态测试覆盖。
 
 ### Changed
+
 - 移除 Deep Chat 未使用的 provider status UI，并调整配置刷新与模型选择交互。
 - Keyword Tracker 路由和服务命名收敛为 Keyword Hunter，刷新输入、分析、流程模板与样式。
 - Deep Chat 资源收敛到功能路由目录，并加强请求生命周期、预算、prompt 选择和线程历史行为。
@@ -356,39 +411,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 同步应用内版本显示到 `3.0.4-rc.2`。
 
 ### Fixed
+
 - 对齐 Keyword Hunter 快照驱动流程、Deep Chat 发送/预览和 release smoke 覆盖。
 - 刷新 App Center workflow 相关路由、manifest、action registry 与视觉回归测试。
 
 ## [3.0.4-rc.1] - 2026-07-07
 
 ### Added
+
 - 新增运行时策略服务和工具策略服务，统一模型选择、超时、缓存、批处理和默认提供商设置。
 - 系统设置新增工具策略、运行时控制、数据/备份、诊断和危险操作面板。
 - 新增开发者诊断服务与设置面板，支持性能、事件调试、错误/分析、功能开关和日志级别开关。
 
 ### Changed
+
 - Keyword Hunter、Master Analysis、Deep Chat、PPC Search Terms 和 Scraper 接入策略设置。
 - 启动时应用开发者诊断配置，并将 eventLogger 事件日志改为受调试开关门控。
 - 同步应用内版本显示到 `3.0.4-rc.1`。
 
 ### Fixed
+
 - 补充和更新系统设置、策略服务、LLM 行为、存储、Keyword Hunter、PPC 与 release smoke 测试覆盖。
 - 修复监控导入兼容、存储键和 XSS 报告时间戳相关维护项。
 
 ## [3.0.3-rc.23] - 2026-07-06
 
 ### Added
+
 - 新增 Sentry SDK、监控初始化、secret leak scanner 和安全 CI 门禁。
 - 新增本地 flag icons、Deep Chat Search Chats 弹窗和线程菜单 UI。
 - 新增 release smoke 覆盖、PPC 分析器状态测试和安全审计报告。
 
 ### Changed
+
 - Deep Chat 完成界面本地化、历史线程过滤和 prompt 选择持久化。
 - 优化 PromptLab、Settings、Playground 渲染器、Sidebar 和 loading/skeleton 体验。
 - PPC Search Terms 分析器改用回调驱动 UI，并保留分析状态。
 - 同步应用内版本显示到 `3.0.3-rc.23`。
 
 ### Fixed
+
 - 修复 Keyword Hunter 可访问性、拖拽交互、追踪服务和分析流程状态问题。
 - 加固 release 安全门禁、CSP 和 secret 泄露检查。
 - 修复监控、存储、模块加载、图片懒加载和模板可访问性回归。
@@ -396,15 +458,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.3-rc.22] - 2026-07-05
 
 ### Added
+
 - 新增安全审计报告、release smoke E2E 覆盖和持久化清洗测试。
 - 新增 AppModal 独立样式文件与 Restricted Words 样式入口。
 
 ### Changed
+
 - 收紧 LLM 网关、CSP/headers、系统设置和 new_api 直连配置。
 - 使用系统字体并调整 Deep Chat、Restricted Words 与代码高亮样式。
 - 同步应用内版本显示到 `3.0.3-rc.22`。
 
 ### Fixed
+
 - 修复 HttpService Abort/timeout/retry 行为和性能包装重复执行风险。
 - 修复 EventBus 错误记录上限、可选服务监控清理和事件解绑元数据。
 - 修复持久化中间件对异常 payload 的清洗与恢复。
@@ -412,87 +477,104 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.3-rc.21] - 2026-07-05
 
 ### Added
+
 - 新增 async DI、`loaderPath` API 与 SafeTemplateLoader。
 - 新增页面架构审计、预发布检查文档和模板实现指南。
 - 新增 PC 端设计 token、动效 CSS 和页面架构收敛测试。
 
 ### Changed
+
 - 收敛 PC 端模块、模板、空状态和概览列表视图。
 - 为模板按钮补充显式类型、ARIA 和可访问性测试覆盖。
 - 同步应用内版本显示到 `3.0.3-rc.21`。
 
 ### Fixed
+
 - 修复模块错误处理、卸载流程、Loader 和 StorageService 安全性。
 
 ## [3.0.3-rc.20] - 2026-07-04
 
 ### Added
+
 - 新增导航队列处理与可折叠概览交互。
 - PPC Search Terms 新增阈值设置面板。
 - Deep Chat 启用 prompt panel。
 
 ### Changed
+
 - 重命名 Keyword Hunter 标签并格式化相关样式与 TypeScript。
 - 刷新 App Center 与 SOPS 主题体验。
 - 优化报告 UI、PPC 导入流程和结果布局。
 - 同步应用内版本显示到 `3.0.3-rc.20`。
 
 ### Fixed
+
 - 修复报告区块模板嵌套问题。
 
 ## [3.0.3-rc.19] - 2026-07-04
 
 ### Added
+
 - 新增 LLM provider 与 Scraper proxy 配置。
 - SOPS 工具页新增统一剪贴板辅助能力。
 
 ### Changed
+
 - App Center 切换到 DeepSeek 蓝主题，并更新主题色、图标和 mega-menu 语义类名。
 - 重构 Master Analysis、Promptlab、Scraper 和 App Center 概览模板与样式。
 - 规范引号并压缩 CSS 格式。
 - 同步应用内版本显示到 `3.0.3-rc.19`。
 
 ### Fixed
+
 - 修复 NPI Tracker mock data 类型与 App Center 相关模板测试覆盖。
 
 ## [3.0.3-rc.18] - 2026-07-04
 
 ### Added
+
 - 新增认证路由守卫与 API endpoint 安全测试。
 - 新增 2026-07-04 安全审计报告与 CI 质量门禁说明。
 
 ### Changed
+
 - 强化 CSP、SafeRenderer 和安全工具处理，减少渲染与内联脚本风险。
 - 收紧 LLM secret 处理并移除旧 timeout wrapper。
 - 将 Floating Workbench 命名统一回 App Center。
 - 同步应用内版本显示到 `3.0.3-rc.18`。
 
 ### Fixed
+
 - 修复本地存储、安全渲染、PPC 导入和路由守卫相关回归覆盖。
 
 ## [3.0.3-rc.17] - 2026-07-04
 
 ### Added
+
 - Deep Chat 增加 pending assistant 文案和打字机反馈。
 - Home 页面新增 Workbench 入口。
 - Scraper 导入面板增加导入状态与可访问性回归覆盖。
 
 ### Changed
+
 - 规范化 App Center 路由命名为 kebab-case，并补充历史路由别名。
 - 使用设计 token 调整 welcome 与 app_center 样式。
 - 强化卡片、弹窗、导航、模板控件和 decorative controls 的 ARIA/focus/accessibility 支持。
 - 同步应用内版本显示到 `3.0.3-rc.17`。
 
 ### Fixed
+
 - 稳定 Deep Chat 请求生命周期、Scraper 模板可访问性和导航页面入场动画测试。
 
 ## [3.0.3-rc.16] - 2026-07-03
 
 ### Added
+
 - 新增延迟路由/模块加载骨架，提升页面切换反馈。
 - 新增路由审计脚本，覆盖 manifest 路径与导航配置。
 
 ### Changed
+
 - 路由系统迁移到 routeId 优先 API，并支持 manifest route paths 与 redirects。
 - PPC Search Terms 迁移到 PPC Tools 目录结构。
 - Deep Chat 拆分为 controller、配置、样式、预览和渲染模块。
@@ -500,41 +582,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 同步应用内版本显示到 `3.0.3-rc.16`。
 
 ### Removed
+
 - 移除 LegacyAdapter、全局 legacy 路由 API 和旧 routeEvents 入口。
 
 ## [3.0.3-rc.15] - 2026-07-03
 
 ### Added
+
 - 新增功能开关服务及路由守卫集成。
 - 新增 AI Analysis 端到端 fixture，覆盖沉浸式翻译运行恢复。
 
 ### Changed
+
 - 拆分 PPC Search Terms 动作、Agent、分析、导入导出、规则、设置和 UI 模块。
 - 持久化沉浸式翻译运行记录。
 - 放宽 Promptlab/Scraper 性能端到端阈值并强化等待逻辑。
 - 同步应用内版本显示到 `3.0.3-rc.15`。
 
 ### Fixed
+
 - 强化 LLM streaming 响应解析与空响应处理。
 
 ## [3.0.3-rc.14] - 2026-07-03
 
 ### Changed
+
 - 刷新 Keyword Hunter 分析、输入页和快照服务测试覆盖。
 - 清理历史复杂度/技术债务报告，更新架构债务与 Kiro 状态文档。
 - 强化 Promptlab 视觉 readiness 状态与 E2E helper。
 - 同步应用内版本显示到 `3.0.3-rc.14`。
 
 ### Fixed
+
 - 稳定 Keyword Hunter、Promptlab 和 Scraper 端到端页面对象与等待逻辑。
 
 ## [3.0.3-rc.13] - 2026-07-03
 
 ### Added
+
 - Deep Chat 增加发送流程端到端测试、停止遮罩和请求生命周期覆盖。
 - 新增主题系统文档、CSS 性能/调试工具测试和质量报告沉淀。
 
 ### Changed
+
 - 持久化分析运行记录，处理空 LLM 响应并提升请求预算控制。
 - 拆分 AI Analysis、PPC Search Terms、Scraper import、Prompt Library 与 Keyword Highlight 热点模块。
 - 整合 CSS token、共享 keyframes、badge/icon 样式和质量工具。
@@ -542,16 +632,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 同步应用内版本显示到 `3.0.3-rc.13`。
 
 ### Fixed
+
 - 修复 Deep Chat 停止竞态并稳定 Promptlab 端到端测试。
 - 更新 Deep Chat stop button 选择器和断言，降低 Playwright 超时与并发抖动。
 
 ## [3.0.3-rc.12] - 2026-07-02
 
 ### Added
+
 - Keyword Hunter 输入页新增历史快照面板与快照服务，支持保存、恢复和删除分析状态。
 - 为 Keyword Hunter 快照服务、输入页和 Scraper 当前数据渲染补充单元测试。
 
 ### Changed
+
 - Keyword Hunter 分析结果改为自动归档，减少手动快照操作和跨步骤状态丢失。
 - Scraper 页面挂载时渲染当前采集数据。
 - 同步应用内版本显示到 `3.0.3-rc.12`。
@@ -559,65 +652,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.3-rc.11] - 2026-07-01
 
 ### Added
+
 - 新增 AMZ_HUB 成熟期运营视图。
 - 新增质量报告、技术债务报告和知识库评审执行报告。
 
 ### Changed
+
 - 统一 AMZ_HUB 与 SOPS 内容、元数据和页面脚手架。
 - 调整 AMZ_HUB 模块命名和导航内容呈现。
 - 优化 AI 翻译 UI。
 - 同步应用内版本显示到 `3.0.3-rc.11`。
 
 ### Fixed
+
 - 修复暗色 tile 对比度和标签重叠问题。
 
 ## [3.0.3-rc.10] - 2026-06-30
 
 ### Added
+
 - 新增 Vercel 部署配置和静态资源路由兼容设置。
 - 新增 Master Analysis 报告身份指纹服务及相关单元测试。
 
 ### Changed
+
 - AI Analysis 报告绑定 scraped-data 指纹，减少旧报告与新采集数据混用。
 - Promptlab 拆分 readiness 状态并补充 SEO context。
 - 同步应用内版本显示到 `3.0.3-rc.10`。
 
 ### Fixed
+
 - 将构建配置文件从符号链接转换为常规文件，提升 Vercel 构建兼容性。
 
 ## [3.0.3-rc.9] - 2026-06-12
 
 ### Changed
+
 - NPI Tracker 改用 `data-action` 操作绑定，并更新页面对象和端到端测试。
 - Deep Chat prompt preview 支持 pointer-aware 交互。
 - 同步应用内版本显示到 `3.0.3-rc.9`。
 
 ### Fixed
+
 - 为 NPI Tracker 高风险操作增加确认弹窗覆盖。
 - 放宽表格渲染耗时断言到 5000ms，降低环境抖动导致的误报。
 
 ## [3.0.3-rc.8] - 2026-06-12
 
 ### Added
+
 - 新增 Card、Callout、Workbench UI 审计脚本和 `ui:audit` 聚合命令。
 - 新增页面进入动画工具和使用指南。
 - 新增回归测试审计脚本，用于汇总覆盖率、Playwright 结果和显式 skip。
 
 ### Changed
+
 - 优化卡片、工作台和多个模块页面的边框、动效与视觉一致性。
 - 将报告、站点标识和状态文案中的结构性 emoji 替换为文本或 Font Awesome 图标。
 - 同步应用内版本显示到 `3.0.3-rc.8`。
 
 ### Fixed
+
 - 稳定 Restricted Words E2E 的导航、搜索和详情断言。
 
 ## [3.0.3-rc.7] - 2026-06-11
 
 ### Changed
+
 - 优化 Master Analysis 的 AI Analysis、Scraper 和 Promptlab 工作流界面。
 - 同步应用内版本显示到 `3.0.3-rc.7`。
 
 ### Fixed
+
 - 新增统一确认弹窗并接入 Scraper 数据操作流程，降低误清空和误覆盖风险。
 - 更新 Scraper 端到端测试和页面对象以匹配新的确认交互。
 
@@ -1196,6 +1302,7 @@ Release 指向提交：`c30fbc6ea96ad4262f231a8fd39a72473a952b95`。
 `npm run build` 已通过。
 
 通过项包括：
+
 - XSS gate
 - 循环依赖检查
 - TypeScript type-check
@@ -1238,6 +1345,7 @@ Release 指向提交：`5335215ed58e1db09ff1e41cd5bbcbb5ab844554`。
 `npm run build` 已通过。
 
 通过项包括：
+
 - XSS gate
 - 循环依赖检查
 - TypeScript type-check
@@ -1317,6 +1425,7 @@ Release 指向提交：`11d2c78b17c38c015328a04d48035eacae93753e`。
 
 - 当前版本定位为 Release Candidate，适合验收、演示和部署前回归，不直接作为长期稳定基线。
 - 下一步稳定版建议在确认既有 warning 风险后发布 `v3.0.1`。
+
 ## Cloudflare Pages 对照
 
 Cloudflare Pages 项目核对：未发现 `spos` 项目，实际项目为 `sops`，域名包括 `sops-3js.pages.dev` 和 `sops.hongecb.store`。最近生产部署 source 覆盖 `f16010f`、`f621b8c`、`3f778dd`、`734d70f`、`625f6d2`、`7d0fd7f`、`829b42f`、`c2c1845` 等节点。
@@ -1652,6 +1761,7 @@ Target commit：`f63e3bb5796777f5e81c19fee64fc2e9086c2f23`
 ## [1.0.0] - 2026-06-07
 
 ### Added
+
 - 完整的设计令牌系统
   - 300+ 个设计令牌统一管理
   - 自动生成 CSS 变量、Tailwind 配置和 TypeScript 类型
@@ -1685,12 +1795,14 @@ Target commit：`f63e3bb5796777f5e81c19fee64fc2e9086c2f23`
   - 安全审计工具
 
 ### Changed
+
 - 采用 Vite 作为构建工具
 - 使用 Alpine.js 作为响应式框架
 - 使用 Tailwind CSS 作为 CSS 框架
 - 使用 Zustand 进行状态管理
 
 ### Architecture
+
 - 实现事件总线系统（EventBus）
   - 替代 window.dispatchEvent
   - 类型安全的事件系统
@@ -1709,6 +1821,7 @@ Target commit：`f63e3bb5796777f5e81c19fee64fc2e9086c2f23`
   - 性能监控集成
 
 ### Documentation
+
 - 添加 CLAUDE.md 开发指南
 - 添加 CSS 架构系统文档
 - 添加最佳实践文档
@@ -1717,6 +1830,7 @@ Target commit：`f63e3bb5796777f5e81c19fee64fc2e9086c2f23`
 - 添加故障排查指南
 
 ### Performance
+
 - CSS 代码分割
 - 模块懒加载
 - 资源压缩（Gzip + Brotli）
@@ -1726,6 +1840,7 @@ Target commit：`f63e3bb5796777f5e81c19fee64fc2e9086c2f23`
 - 路由预加载
 
 ### Technical Debt
+
 - 完成错误处理标准化（100%）
 - 完成内存泄漏修复（100%）
 - 完成事件机制迁移（56%）
@@ -1856,6 +1971,7 @@ Target commit：`68ca6cadb0f58488d5b1504bace844087e826890`
 ## [0.1.0] - 2026-06-07
 
 ### Added
+
 - 初始项目结构
 - 基础模块系统
 - 基础路由系统
@@ -1866,11 +1982,13 @@ Target commit：`68ca6cadb0f58488d5b1504bace844087e826890`
 ## 版本说明
 
 ### 版本号规则
+
 - **主版本号（Major）**: 不兼容的 API 修改
 - **次版本号（Minor）**: 向下兼容的功能性新增
 - **修订号（Patch）**: 向下兼容的问题修正
 
 ### 变更类型
+
 - **Added**: 新增功能
 - **Changed**: 功能变更
 - **Deprecated**: 即将废弃的功能

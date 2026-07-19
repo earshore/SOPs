@@ -86,6 +86,7 @@ type ImportOptions = {
   config?: Record<string, unknown> | null;
   storedThreadStore?: Record<string, unknown> | null;
   threadStoreLoadDelay?: Promise<void>;
+  threadStoreLoadDelays?: Promise<void>[];
   promptHistory?: PromptHistoryState['promptlab']['history'];
   toolStrategySettings?: Record<string, unknown> | null;
   callLLM?: (...args: unknown[]) => Promise<string>;
@@ -287,16 +288,22 @@ async function prepareListingPromptHandoff(options: ImportOptions) {
   return handoff;
 }
 
-async function importDeepChat(options: ImportOptions = {}) {
-  const localDataStore = {
+function createLocalDataStoreMock(options: ImportOptions) {
+  let threadStoreLoadIndex = 0;
+  return {
     migrateLocalStorageKey: vi.fn(async () => {
-      await options.threadStoreLoadDelay;
+      await (options.threadStoreLoadDelays?.[threadStoreLoadIndex++] ??
+        options.threadStoreLoadDelay);
       return options.storedThreadStore ?? storedThreadStore;
     }),
     get: vi.fn(async () => null),
     set: vi.fn(async () => true),
     remove: vi.fn(async () => true),
   };
+}
+
+async function importDeepChat(options: ImportOptions = {}) {
+  const localDataStore = createLocalDataStoreMock(options);
   const storageService = createDeepChatStorageService(options);
   const toast = vi.fn();
   const callLLM = vi.fn(
@@ -536,7 +543,7 @@ describe('deep-chat playground template copy', () => {
   });
 });
 
-describe('deep-chat playground module', () => {
+describe('deep-chat playground font initialization', () => {
   it('sets the system font before an already-defined Deep Chat element can load Google Fonts', async () => {
     const container = document.createElement('main');
     document.body.append(container);
@@ -578,7 +585,66 @@ describe('deep-chat playground module', () => {
       unmount();
     }
   });
+});
 
+describe('deep-chat playground lifecycle', () => {
+  it('does not let a stale init bind controls after a remount', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    let releaseFirstLoad!: () => void;
+    let releaseSecondLoad!: () => void;
+    const firstLoad = new Promise<void>(resolve => {
+      releaseFirstLoad = resolve;
+    });
+    const secondLoad = new Promise<void>(resolve => {
+      releaseSecondLoad = resolve;
+    });
+    const { mount, unmount, mocks } = await importDeepChat({
+      threadStoreLoadDelays: [firstLoad, secondLoad],
+    });
+    const documentAddEventListener = vi.spyOn(document, 'addEventListener');
+
+    const firstMount = mount(container);
+    let secondMount: Promise<void> | undefined;
+
+    try {
+      await vi.waitFor(() => {
+        expect(mocks.localDataStore.migrateLocalStorageKey).toHaveBeenCalledTimes(1);
+      });
+
+      unmount();
+      container.textContent = 'route-b';
+      secondMount = mount(container);
+      await vi.waitFor(() => {
+        expect(mocks.localDataStore.migrateLocalStorageKey).toHaveBeenCalledTimes(2);
+      });
+
+      releaseSecondLoad();
+      await secondMount;
+      const currentConfigCalls = mocks.storageService.getLLMConfigWithKey.mock.calls.length;
+      const currentDocumentListenerCalls = documentAddEventListener.mock.calls.length;
+      const currentSubscribeCalls = mocks.appStore.subscribe.mock.calls.length;
+      const threadList = queryRequired<HTMLElement>(container, '#deep-chat-thread-list');
+      const replaceChildren = vi.spyOn(threadList, 'replaceChildren');
+
+      releaseFirstLoad();
+      await firstMount;
+
+      expect(mocks.storageService.getLLMConfigWithKey).toHaveBeenCalledTimes(currentConfigCalls);
+      expect(documentAddEventListener).toHaveBeenCalledTimes(currentDocumentListenerCalls);
+      expect(mocks.appStore.subscribe).toHaveBeenCalledTimes(currentSubscribeCalls);
+      expect(replaceChildren).not.toHaveBeenCalled();
+      expect(container.querySelector('#deep-chat-view')).toBeInstanceOf(TestDeepChatElement);
+    } finally {
+      releaseFirstLoad();
+      releaseSecondLoad();
+      await Promise.allSettled([firstMount, ...(secondMount ? [secondMount] : [])]);
+      unmount();
+    }
+  });
+});
+
+describe('deep-chat playground module', () => {
   it('mounts stored threads, model config, prompt history, and tuning controls', async () => {
     const container = document.createElement('main');
     document.body.append(container);

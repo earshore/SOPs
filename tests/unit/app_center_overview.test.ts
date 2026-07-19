@@ -187,6 +187,42 @@ describe('App Center Overview', () => {
     }
   });
 
+  it('does not let a stale recent refresh overwrite current columns after remount', async () => {
+    registerRecentPpcArtifact();
+    let resolveFirstSnapshot: ((value: { id: string; rows: never[] } | null) => void) | undefined;
+    const firstSnapshot = new Promise<{ id: string; rows: never[] } | null>(resolve => {
+      resolveFirstSnapshot = resolve;
+    });
+    ppcSnapshotMocks.getById.mockImplementationOnce(() => firstSnapshot);
+    localStorage.setItem('app_center_overview_recent_columns_v1', '1');
+    const container = document.createElement('div');
+    const firstMount = overviewModule.mount(container);
+    let secondMount: Promise<void> | undefined;
+
+    try {
+      await vi.waitFor(() => {
+        expect(ppcSnapshotMocks.getById).toHaveBeenCalled();
+      });
+      expect(resolveFirstSnapshot).toEqual(expect.any(Function));
+
+      overviewModule.unmount();
+      localStorage.setItem('app_center_overview_recent_columns_v1', '3');
+      secondMount = overviewModule.mount(container);
+      await secondMount;
+
+      expect(container.querySelector('.app-overview-recent-shell')?.dataset.recentColumns).toBe('3');
+
+      resolveFirstSnapshot?.(null);
+      await firstMount;
+
+      expect(container.querySelector('.app-overview-recent-shell')?.dataset.recentColumns).toBe('3');
+    } finally {
+      resolveFirstSnapshot?.(null);
+      await Promise.allSettled([firstMount, ...(secondMount ? [secondMount] : [])]);
+      overviewModule.unmount();
+    }
+  });
+
   it('renders category controls, app cards, and compact rows from catalog data', async () => {
     const container = document.createElement('div');
 

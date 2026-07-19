@@ -33,6 +33,7 @@ class PromptlabModule extends BaseModule {
   protected async render(): Promise<void> {
     const container = this.container;
     if (!container) return;
+    const mountSignal = this.getAbortSignal();
 
     const registry = AlpineRegistry.getInstance();
     registry.register('promptlabPanel', createPromptlabPanel);
@@ -48,6 +49,7 @@ class PromptlabModule extends BaseModule {
     const html = await loader.loadTemplate(
       'src/modules/app_center/views/master_analysis/promptlab/template.html'
     );
+    if (!this.isCurrentMount(mountSignal)) return;
 
     const renderer = SafeRenderer.getInstance();
     container.classList.add('fade-in');

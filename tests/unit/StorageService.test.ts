@@ -269,6 +269,28 @@ describe('LLM配置管理', () => {
     await expect(StorageService.getSecure(legacyKey)).resolves.toBe('legacy-key');
   });
 
+  it('keeps a legacy LLM key when secure migration cannot persist it', async () => {
+    const provider = 'new_api';
+    const legacyKey = `llm_key_${provider}`;
+    const legacyValue = JSON.stringify('legacy-key');
+
+    StorageService.setLLMConfig(provider, {
+      provider,
+      model: 'gpt-5',
+      apiKey: '',
+      endpoint: 'https://new.hongecb.store/v1',
+      models: ['gpt-5'],
+      enabled: true,
+    });
+    localStorage.setItem(legacyKey, legacyValue);
+    vi.spyOn(StorageService, 'setSecure').mockResolvedValue(false);
+
+    await expect(StorageService.getLLMConfigWithKey(provider)).resolves.toMatchObject({
+      apiKey: 'legacy-key',
+    });
+    expect(localStorage.getItem(legacyKey)).toBe(legacyValue);
+  });
+
   it('生产默认new_api应该读取为浏览器直连中转站配置', async () => {
     const provider = 'new_api';
     StorageService.setLLMConfig(provider, {
@@ -338,6 +360,97 @@ describe('代理配置管理', () => {
       type: 'scraperapi',
       enabled: true,
     });
+  });
+
+  it('keeps legacy proxy credentials when secure migration cannot persist them', async () => {
+    const legacyKeyMap = { zenrows: 'map-secret' };
+    const legacyConfig = {
+      type: 'scraperapi' as const,
+      enabled: true,
+      customUrl: 'config-secret',
+    };
+    const legacyKeyMapValue = JSON.stringify(legacyKeyMap);
+    const legacyConfigValue = JSON.stringify(legacyConfig);
+
+    localStorage.setItem(STORAGE_KEYS.PROXY_KEY_MAP, legacyKeyMapValue);
+    localStorage.setItem(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, legacyConfigValue);
+    vi.spyOn(StorageService, 'setSecure').mockResolvedValue(false);
+
+    await expect(StorageService.getProxyConfigWithCredential()).resolves.toEqual(legacyConfig);
+    expect(localStorage.getItem(STORAGE_KEYS.PROXY_KEY_MAP)).toBe(legacyKeyMapValue);
+    expect(localStorage.getItem(STORAGE_KEYS.SCRAPER_PROXY_CONFIG)).toBe(legacyConfigValue);
+  });
+
+  it('keeps an existing secure credential when a later legacy migration write fails', async () => {
+    const legacyKeyMap = {
+      scraperapi: 'old-scraperapi-secret',
+      zenrows: 'zenrows-secret',
+    };
+    const legacyKeyMapValue = JSON.stringify(legacyKeyMap);
+    const setSecure = StorageService.setSecure.bind(StorageService);
+
+    await StorageService.setSecure('proxy_key_scraperapi', 'new-scraperapi-secret');
+    localStorage.setItem(STORAGE_KEYS.PROXY_KEY_MAP, legacyKeyMapValue);
+    vi.spyOn(StorageService, 'setSecure').mockImplementation((key, value) => {
+      if (key === 'proxy_key_zenrows') {
+        return Promise.resolve(false);
+      }
+
+      return setSecure(key, value);
+    });
+
+    await expect(StorageService.getProxyKeyMap()).resolves.toMatchObject({
+      scraperapi: 'new-scraperapi-secret',
+      zenrows: 'zenrows-secret',
+    });
+    await expect(StorageService.getSecure('proxy_key_scraperapi')).resolves.toBe(
+      'new-scraperapi-secret'
+    );
+    expect(localStorage.getItem(STORAGE_KEYS.PROXY_KEY_MAP)).toBe(legacyKeyMapValue);
+  });
+
+  it('keeps legacy proxy data when config cleanup fails after secure migration', async () => {
+    const legacyKeyMap = { zenrows: 'map-secret' };
+    const legacyConfig = {
+      type: 'scraperapi' as const,
+      enabled: true,
+      customUrl: 'config-secret',
+    };
+    const legacyKeyMapValue = JSON.stringify(legacyKeyMap);
+    const legacyConfigValue = JSON.stringify(legacyConfig);
+
+    localStorage.setItem(STORAGE_KEYS.PROXY_KEY_MAP, legacyKeyMapValue);
+    localStorage.setItem(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, legacyConfigValue);
+    vi.spyOn(StorageService, 'setSecure').mockResolvedValue(true);
+    vi.spyOn(StorageService, 'setProxyConfig').mockReturnValue(false);
+
+    await expect(StorageService.getProxyKeyMap()).resolves.toMatchObject({
+      zenrows: 'map-secret',
+      scraperapi: 'config-secret',
+    });
+    expect(localStorage.getItem(STORAGE_KEYS.PROXY_KEY_MAP)).toBe(legacyKeyMapValue);
+    expect(localStorage.getItem(STORAGE_KEYS.SCRAPER_PROXY_CONFIG)).toBe(legacyConfigValue);
+  });
+
+  it('cleans a surviving legacy proxy config after a partial config write', async () => {
+    const safeConfig = {
+      type: 'scraperapi' as const,
+      enabled: true,
+    };
+    const legacyConfig = {
+      ...safeConfig,
+      customUrl: 'config-secret',
+    };
+
+    StorageService.setProxyConfig(safeConfig);
+    localStorage.setItem(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, JSON.stringify(legacyConfig));
+    vi.spyOn(StorageService, 'setSecure').mockResolvedValue(true);
+
+    await expect(StorageService.getProxyKeyMap()).resolves.toMatchObject({
+      scraperapi: 'config-secret',
+    });
+    expect(StorageService.getRaw(STORAGE_KEYS.PROXY_CONFIG)).not.toContain('config-secret');
+    expect(StorageService.getRaw(STORAGE_KEYS.SCRAPER_PROXY_CONFIG)).not.toContain('config-secret');
   });
 
   it('应该安全保存和读取代理服务商密钥缓存', async () => {

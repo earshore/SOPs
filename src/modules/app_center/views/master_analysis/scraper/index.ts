@@ -40,6 +40,7 @@ class ScraperModule extends BaseModule {
   protected async render(): Promise<void> {
     const container = this.container;
     if (!container) return;
+    const mountSignal = this.getAbortSignal();
 
     const registry = AlpineRegistry.getInstance();
     registry.register('scraperPanel', createScraperPanel);
@@ -56,6 +57,7 @@ class ScraperModule extends BaseModule {
         },
       }
     );
+    if (!this.isCurrentMount(mountSignal)) return;
 
     // 2. 使用 SafeRenderer 渲染模板（静态模板，已审计）
     // 添加淡入动画（在渲染前添加）

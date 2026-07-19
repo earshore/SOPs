@@ -846,12 +846,10 @@ class StorageServiceClass implements IStorageService {
     }
 
     const apiKey = parseLegacyPlainSecret(raw);
-    if (apiKey) {
-      await this.setSecure(legacyKey, apiKey);
+    if (apiKey && (await this.setSecure(legacyKey, apiKey))) {
+      localStorage.removeItem(legacyKey);
+      this.removeAccessTime(legacyKey);
     }
-
-    localStorage.removeItem(legacyKey);
-    this.removeAccessTime(legacyKey);
     return apiKey;
   }
 
@@ -890,33 +888,72 @@ class StorageServiceClass implements IStorageService {
     );
   }
 
-  async getProxyKeyMap(): Promise<Record<string, string>> {
-    try {
-      const keyMap: Record<string, string> = {};
+  private async readProxyKeyMap(): Promise<Record<string, string>> {
+    const keyMap: Record<string, string> = {};
 
-      for (const type of SCRAPER_PROXY_CREDENTIAL_TYPES) {
-        const credential = await this.getSecure<string>(getProxyCredentialKey(type), '');
-        if (credential) {
+    for (const type of SCRAPER_PROXY_CREDENTIAL_TYPES) {
+      const credential = await this.getSecure<string>(getProxyCredentialKey(type), '');
+      if (credential) {
+        keyMap[type] = credential;
+      }
+    }
+
+    const legacyKeyMap = this.get<Record<string, string>>(STORAGE_KEYS.PROXY_KEY_MAP, {});
+    if (isStringMap(legacyKeyMap)) {
+      for (const [type, credential] of Object.entries(legacyKeyMap)) {
+        if (!keyMap[type]) {
           keyMap[type] = credential;
         }
       }
+    }
 
-      const legacyKeyMap = this.get<Record<string, string>>(STORAGE_KEYS.PROXY_KEY_MAP, {});
-      if (isStringMap(legacyKeyMap)) {
-        Object.assign(keyMap, legacyKeyMap);
-        this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
-      }
+    return keyMap;
+  }
 
-      const legacyConfig =
-        this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null) ||
-        this.get<ProxyConfig>(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, null);
-      const legacyType = legacyConfig?.type || DEFAULT_SCRAPER_PROXY_TYPE;
-      if (legacyConfig?.customUrl) {
+  private getLegacyProxyConfig(): ProxyConfig | null {
+    const proxyConfig = this.get<ProxyConfig>(STORAGE_KEYS.PROXY_CONFIG, null);
+    const scraperProxyConfig = this.get<ProxyConfig>(STORAGE_KEYS.SCRAPER_PROXY_CONFIG, null);
+
+    if (proxyConfig?.customUrl) {
+      return proxyConfig;
+    }
+
+    if (scraperProxyConfig?.customUrl) {
+      return scraperProxyConfig;
+    }
+
+    return proxyConfig || scraperProxyConfig;
+  }
+
+  private async migrateLegacyProxyKeyMap(
+    keyMap: Record<string, string>,
+    legacyConfig: ProxyConfig | null
+  ): Promise<void> {
+    if (legacyConfig?.customUrl) {
+      const legacyType = legacyConfig.type || DEFAULT_SCRAPER_PROXY_TYPE;
+      if (!keyMap[legacyType]) {
         keyMap[legacyType] = legacyConfig.customUrl;
-        this.setProxyConfig(legacyConfig);
       }
+    }
 
-      await this.setProxyKeyMap(keyMap);
+    const saved = await this.setProxyKeyMap(keyMap, false);
+    if (!saved) {
+      return;
+    }
+
+    if (legacyConfig?.customUrl && !this.setProxyConfig(legacyConfig)) {
+      return;
+    }
+
+    this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
+  }
+
+  async getProxyKeyMap(): Promise<Record<string, string>> {
+    try {
+      const keyMap = await this.readProxyKeyMap();
+      const legacyConfig = this.getLegacyProxyConfig();
+
+      await this.migrateLegacyProxyKeyMap(keyMap, legacyConfig);
       return keyMap;
     } catch (e) {
       this.reportStorageReadError('getProxyKeyMap', STORAGE_KEYS.PROXY_KEY_MAP, e as Error);
@@ -924,7 +961,10 @@ class StorageServiceClass implements IStorageService {
     }
   }
 
-  async setProxyKeyMap(keyMap: Record<string, string>): Promise<boolean> {
+  async setProxyKeyMap(
+    keyMap: Record<string, string>,
+    removeLegacyKey: boolean = true
+  ): Promise<boolean> {
     try {
       let saved = true;
 
@@ -937,7 +977,9 @@ class StorageServiceClass implements IStorageService {
         saved = (await this.setSecure(getProxyCredentialKey(type), credential)) && saved;
       }
 
-      this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
+      if (saved && removeLegacyKey) {
+        this.remove(STORAGE_KEYS.PROXY_KEY_MAP);
+      }
       return saved;
     } catch (e) {
       this.reportStorageReadError('setProxyKeyMap', STORAGE_KEYS.PROXY_KEY_MAP, e as Error);

@@ -39,6 +39,21 @@ type MarketplaceSelectionCleanup = () => void;
 
 const MAX_IMPORT_FILE_SIZE = 10 * 1024 * 1024;
 const LARGE_IMPORT_FILE_SIZE = 5 * 1024 * 1024;
+const SUPPORTED_IMPORTED_MARKETPLACES = new Set<ScraperSite>([
+  'US',
+  'DE',
+  'FR',
+  'IT',
+  'ES',
+  'NL',
+  'SE',
+  'PL',
+  'BE',
+  'IE',
+  'UK',
+  'CA',
+  'JP',
+]);
 
 function createEmptyFileError(file: File, content: string): ValidationError {
   return new ValidationError(`文件 ${file.name} 内容为空`, 'SCRAPER_IMP_001', 'content', content, {
@@ -521,12 +536,17 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function getMetadataMarketplace(value: unknown): string | null {
+function getMetadataMarketplace(value: unknown): ScraperSite | null {
   if (!isObjectRecord(value) || !isObjectRecord(value.metadata)) return null;
-  return typeof value.metadata.marketplace === 'string' ? value.metadata.marketplace : null;
+  if (typeof value.metadata.marketplace !== 'string') return null;
+
+  const marketplace = value.metadata.marketplace.trim().toUpperCase();
+  return SUPPORTED_IMPORTED_MARKETPLACES.has(marketplace as ScraperSite)
+    ? (marketplace as ScraperSite)
+    : null;
 }
 
-function getImportedFileSite(data: unknown): string | null {
+function getImportedFileSite(data: unknown): ScraperSite | null {
   if (isObjectRecord(data)) {
     return getMetadataMarketplace(data);
   }

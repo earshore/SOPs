@@ -32,22 +32,28 @@ class AppCenterOverviewModule extends BaseModule {
   }
 
   protected async render(): Promise<void> {
-    if (!this.container) return;
+    const container = this.container;
+    if (!container) return;
+    const mountSignal = this.getAbortSignal();
 
     const html = await SafeTemplateLoader.getInstance().loadTemplate(
       'src/modules/app_center/views/overview/template.html'
     );
+    if (!this.isCurrentMount(mountSignal)) return;
+
     // ✅ 安全: html来自本地静态template.html，无用户输入
-    setSafeHtml(this.container, html);
-    renderOverviewCatalog(this.container);
+    setSafeHtml(container, html);
+    renderOverviewCatalog(container);
   }
 
   protected async init(): Promise<void> {
-    if (!this.container) return;
+    const container = this.container;
+    if (!container) return;
+    const mountSignal = this.getAbortSignal();
 
     // 初始化事件监听
-    initOverviewEvents(this.container);
-    await renderRecentPanel(this.container);
+    initOverviewEvents(container);
+    await renderRecentPanel(container, () => this.isCurrentMount(mountSignal));
   }
 
   protected onUnmount(): void {

@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -51,16 +51,13 @@ function releaseMutationIndexes(lines: string[]): number[] {
   return lines
     .map((line, index) => ({ line, index }))
     .filter(
-      ({ line }) =>
-        /^& gh release (?:upload|edit|create)\b/.test(line) || /^& gh @\w+$/.test(line)
+      ({ line }) => /^& gh release (?:upload|edit|create)\b/.test(line) || /^& gh @\w+$/.test(line)
     )
     .map(({ index }) => index);
 }
 
 function extractReleaseLookupDecision(): string {
-  const lines = effectivePowerShellLines(
-    extractReleaseRunBlock('Create or update GitHub Release')
-  );
+  const lines = effectivePowerShellLines(extractReleaseRunBlock('Create or update GitHub Release'));
   const start = lines.findIndex(
     line =>
       line.startsWith('$releaseLookupErrorActionPreference =') ||
@@ -108,9 +105,12 @@ function runReleaseLookupWithHttpError(statusCode: number) {
   }
 }
 
-function runResolveReleaseTagForTagPush() {
+function runResolveReleaseTag(environmentOverrides: Record<string, string>) {
   const tempDirectory = mkdtempSync(join(tmpdir(), 'release-tag-push-'));
+  const workspaceDirectory = join(tempDirectory, 'workspace');
   const outputPath = join(tempDirectory, 'github-output.txt');
+  mkdirSync(workspaceDirectory);
+  writeFileSync(join(workspaceDirectory, 'package.json'), '{"version":"3.0.8"}\n');
   const environment = { ...process.env };
   for (const key of Object.keys(environment)) {
     if (key.toLowerCase() === 'raw_tag_input' || key.toLowerCase() === 'raw_publish_input') {
@@ -118,10 +118,8 @@ function runResolveReleaseTagForTagPush() {
     }
   }
   Object.assign(environment, {
-    GITHUB_EVENT_NAME: 'push',
-    GITHUB_REF_NAME: 'v3.0.8',
-    GITHUB_REF_TYPE: 'tag',
     GITHUB_OUTPUT: outputPath,
+    ...environmentOverrides,
   });
 
   try {
@@ -135,7 +133,7 @@ function runResolveReleaseTagForTagPush() {
           '\r\n'
         ),
       ],
-      { cwd: process.cwd(), encoding: 'utf8', env: environment, windowsHide: true }
+      { cwd: workspaceDirectory, encoding: 'utf8', env: environment, windowsHide: true }
     );
     const outputBytes = result.status === 0 ? readFileSync(outputPath) : Buffer.alloc(0);
     const output =
@@ -146,6 +144,34 @@ function runResolveReleaseTagForTagPush() {
   } finally {
     rmSync(tempDirectory, { recursive: true, force: true });
   }
+}
+
+function runResolveReleaseTagForTagPush() {
+  return runResolveReleaseTag({
+    GITHUB_EVENT_NAME: 'push',
+    GITHUB_REF_NAME: 'v3.0.8',
+    GITHUB_REF_TYPE: 'tag',
+  });
+}
+
+function runResolveReleaseTagForManualDryPackage() {
+  return runResolveReleaseTag({
+    GITHUB_EVENT_NAME: 'workflow_dispatch',
+    GITHUB_REF_NAME: 'main',
+    GITHUB_REF_TYPE: 'branch',
+    RAW_TAG_INPUT: '',
+    RAW_PUBLISH_INPUT: 'false',
+  });
+}
+
+function runResolveReleaseTagForManualTag() {
+  return runResolveReleaseTag({
+    GITHUB_EVENT_NAME: 'workflow_dispatch',
+    GITHUB_REF_NAME: 'main',
+    GITHUB_REF_TYPE: 'branch',
+    RAW_TAG_INPUT: 'v3.0.8',
+    RAW_PUBLISH_INPUT: 'false',
+  });
 }
 
 describe('release workflow safety contract', () => {
@@ -196,6 +222,30 @@ describe('release workflow safety contract', () => {
     expect(output).toContain('version=3.0.8');
     expect(output).toContain('publish=true');
     expect(output).toContain('is_prerelease=false');
+    expect(output).toContain('tag_bound=true');
+  });
+
+  it('keeps an empty manual dry package unbound to a synthesized tag', () => {
+    const { output, result } = runResolveReleaseTagForManualDryPackage();
+
+    expect(result.status, result.stderr).toBe(0);
+    expect(output).toContain('tag=v3.0.8');
+    expect(output).toContain('version=3.0.8');
+    expect(output).toContain('publish=false');
+    expect(output).toContain('tag_bound=false');
+    expect(releaseWorkflow).toContain('RELEASE_TAG_BOUND: ${{ steps.meta.outputs.tag_bound }}');
+    expect(releaseWorkflow).toContain("if ($env:RELEASE_TAG_BOUND -eq 'true')");
+    expect(releaseWorkflow).toContain('Remove-Item Env:RELEASE_TAG -ErrorAction SilentlyContinue');
+    expect(releaseWorkflow).toContain('--version $env:RELEASE_VERSION');
+  });
+
+  it('keeps an explicitly selected manual tag bound', () => {
+    const { output, result } = runResolveReleaseTagForManualTag();
+
+    expect(result.status, result.stderr).toBe(0);
+    expect(output).toContain('tag=v3.0.8');
+    expect(output).toContain('publish=false');
+    expect(output).toContain('tag_bound=true');
   });
 
   it('fails closed unless the tag SHA has a successful main Quality Gate run', () => {
@@ -341,8 +391,7 @@ describe('release workflow safety contract', () => {
     const editCalls = lines.filter(line => line.startsWith('& gh release edit '));
     const prereleaseEdit = editCalls.find(
       line =>
-        hasPowerShellToken(line, '--prerelease') &&
-        !hasPowerShellToken(line, '--prerelease=false')
+        hasPowerShellToken(line, '--prerelease') && !hasPowerShellToken(line, '--prerelease=false')
     );
     const gaEdit = editCalls.find(line => hasPowerShellToken(line, '--prerelease=false'));
     const createArgs = lines.find(line => line.startsWith('$createArgs = @('));
@@ -377,6 +426,40 @@ describe('release workflow safety contract', () => {
     expect(releaseRun).toContain('if ([bool]$releaseState.isDraft)');
     expect(releaseRun).toContain('if ([bool]$releaseState.isPrerelease -ne $isPre)');
   });
+
+  it('selects exactly one archive for the resolved release version', () => {
+    const releaseRun = extractReleaseRunBlock('Create or update GitHub Release');
+
+    expect(releaseRun).toContain('$archiveCandidates = @(');
+    expect(releaseRun).toContain('sops-dist-$($env:RELEASE_VERSION).zip');
+    expect(releaseRun).toContain('sops-dist-$($env:RELEASE_VERSION).tar.gz');
+    expect(releaseRun).toContain('if ($archiveCandidates.Count -ne 1)');
+    expect(releaseRun).not.toContain("Get-ChildItem 'release-artifacts/sops-dist-*'");
+  });
+
+  it('rechecks the remote annotated tag before every mutation and after publishing', () => {
+    const releaseRun = extractReleaseRunBlock('Create or update GitHub Release');
+    const lines = effectivePowerShellLines(releaseRun);
+    const mutationIndexes = releaseMutationIndexes(lines);
+    const tagCheck = 'Assert-RemoteAnnotatedTagAtSha $tag $expectedSha';
+    const tagCheckIndexes = lines
+      .map((line, index) => ({ line, index }))
+      .filter(({ line }) => line === tagCheck)
+      .map(({ index }) => index);
+    const stateCheckIndex = lines.indexOf('if ([bool]$releaseState.isPrerelease -ne $isPre) {');
+
+    expect(releaseRun).toContain('function Assert-RemoteAnnotatedTagAtSha');
+    expect(releaseRun).toContain('git/ref/tags/$tag');
+    expect(releaseRun).toContain('git/tags/$($tagRef.object.sha)');
+    expect(releaseRun).toContain("if ($tagRef.object.type -ne 'tag')");
+    expect(releaseRun).toContain("if ($tagObject.object.type -ne 'commit')");
+    expect(releaseRun).toContain('if ($tagObject.object.sha -ne $expectedSha)');
+    expect(tagCheckIndexes).toHaveLength(mutationIndexes.length + 1);
+    for (const mutationIndex of mutationIndexes) {
+      expect(lines.slice(Math.max(0, mutationIndex - 3), mutationIndex)).toContain(tagCheck);
+    }
+    expect(tagCheckIndexes.at(-1)).toBeGreaterThan(stateCheckIndex);
+  });
 });
 
 describe('quality workflow safety contract', () => {
@@ -393,7 +476,7 @@ describe('quality workflow safety contract', () => {
   });
 
   it('runs the production dependency audit even when performance fails', () => {
-    const auditJob = qualityWorkflow.match(/\n  npm-audit:[\s\S]*?\n  required:/)?.[0];
+    const auditJob = qualityWorkflow.match(/\n {2}npm-audit:[\s\S]*?\n {2}required:/)?.[0];
 
     expect(auditJob).toBeDefined();
     expect(auditJob).toContain('needs: build');

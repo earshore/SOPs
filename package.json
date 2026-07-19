@@ -15,7 +15,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ignore-pattern \"**/*.test.ts\" --ignore-pattern \"**/*.test.tsx\" --ignore-pattern \"**/*.spec.ts\" --ignore-pattern \"**/*.spec.tsx\"",
-    "lint:tests": "eslint \"src/**/*.{test,spec}.ts\"",
+    "lint:tests": "eslint \"src/**/*.{test,spec}.{ts,tsx,js,jsx}\" \"tests/**/*.{test,spec}.{ts,tsx,js,jsx}\" --no-error-on-unmatched-pattern --max-warnings=0",
     "lint:performance": "eslint --parser-options project:./config/tsconfig.performance.json config/playwright.config.ts tests/performance/lighthousePageAudit.ts tests/performance/ai-analysis-performance.test.ts tests/performance/promptlab-performance.test.ts tests/performance/scraper-performance.test.ts tests/unit/performance-workflow.test.ts tests/unit/lighthousePageAudit.test.ts",
     "lint:fix": "eslint src --fix",
     "lint:warning-gate": "tsx scripts/quality/eslint-warning-gate.ts",

@@ -1064,7 +1064,10 @@ function updateRecentPanelControls(container: HTMLElement, state: RecentPanelSta
     ?.classList.toggle('hidden', !state.lastRemovedQueueId);
 }
 
-export async function renderRecentPanel(container: HTMLElement): Promise<void> {
+export async function renderRecentPanel(
+  container: HTMLElement,
+  isCurrent: () => boolean = () => true
+): Promise<void> {
   const state: RecentPanelState = {
     typeFilter: 'all',
     statusFilter: 'all',
@@ -1087,6 +1090,7 @@ export async function renderRecentPanel(container: HTMLElement): Promise<void> {
       void refresh();
     });
     await renderRecentList(container, state);
+    if (!isCurrent()) return;
     updateRecentPanelControls(container, state);
   };
 

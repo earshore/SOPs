@@ -286,12 +286,6 @@ export default defineConfig({
         manualChunks(id) {
           const normalizedId = id.replace(/\\/g, '/');
 
-          // Keep the settings panel out of the entry chunk even if
-          // some paths still pull it transitively.
-          if (normalizedId.includes('/src/components/settings/systemSettings')) {
-            return 'system-settings';
-          }
-
           if (!normalizedId.includes('/node_modules/')) {
             return undefined;
           }
@@ -341,9 +335,7 @@ export default defineConfig({
     },
     // 生产环境压缩
     minify: 'oxc',
-    // Deferred system-settings chunk is intentionally large (~400kB raw /
-    // ~100kB gzip) and excluded from modulePreload. Keep threshold above it so
-    // accidental entry-chunk bloat still warns without noise on the known async panel.
+    // Keep a strict per-chunk guard so oversized production assets fail visibly.
     chunkSizeWarningLimit: 450,
     // CSS代码分割
     cssCodeSplit: true,

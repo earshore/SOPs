@@ -1964,6 +1964,7 @@ class KeywordHunterProcessModule extends BaseModule {
   protected async render(): Promise<void> {
     const container = this.container;
     if (!container) return;
+    const mountSignal = this.getAbortSignal();
 
     try {
       processViewVersion += 1;
@@ -1985,6 +1986,7 @@ class KeywordHunterProcessModule extends BaseModule {
           },
         }
       );
+      if (!this.isCurrentMount(mountSignal)) return;
 
       // 使用 SafeRenderer 渲染模板
       // 添加淡入动画（在渲染前添加）
@@ -2003,6 +2005,7 @@ class KeywordHunterProcessModule extends BaseModule {
         document.body.appendChild(minBtn);
       }
     } catch (error) {
+      if (!this.isCurrentMount(mountSignal)) return;
       handleProcessMountError(error);
     }
   }

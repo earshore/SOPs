@@ -151,17 +151,21 @@ class DeepChatModule extends BaseModule {
   }
 
   protected async render(): Promise<void> {
-    if (!this.container) {
+    const container = this.container;
+    if (!container) {
       return;
     }
+    const mountSignal = this.getAbortSignal();
 
     const html = await SafeTemplateLoader.getInstance().loadTemplate(DEEP_CHAT_TEMPLATE_PATH);
+    if (!this.isCurrentMount(mountSignal)) return;
+
     const renderer = SafeRenderer.getInstance();
 
-    mountedContainer = this.container;
-    renderer.renderTemplate(this.container, html);
+    mountedContainer = container;
+    renderer.renderTemplate(container, html);
 
-    const chatHost = this.container.querySelector<HTMLElement>('#deep-chat-view');
+    const chatHost = container.querySelector<HTMLElement>('#deep-chat-view');
     if (chatHost) {
       // Prevent Deep Chat from injecting its Google-hosted Inter stylesheet under the local-only CSP.
       chatHost.style.fontFamily = DEEP_CHAT_SYSTEM_FONT_STACK;
@@ -169,23 +173,27 @@ class DeepChatModule extends BaseModule {
   }
 
   protected async init(): Promise<void> {
-    if (!this.container) {
+    const container = this.container;
+    if (!container) {
       return;
     }
+    const mountSignal = this.getAbortSignal();
 
-    threadStore = applyDeepChatThreadResume(
-      applyPendingRequestsToThreadStore(await loadThreadStore())
-    );
-    renderHistoryThreadList(this.container);
-    renderPromptDraftsForActiveThread(this.container);
+    const storedThreadStore = await loadThreadStore();
+    if (!this.isCurrentMount(mountSignal)) return;
+    threadStore = applyDeepChatThreadResume(applyPendingRequestsToThreadStore(storedThreadStore));
+    renderHistoryThreadList(container);
+    renderPromptDraftsForActiveThread(container);
 
     await ensureDeepChatElementDefined();
-    initDeepChat(this.container);
-    await refreshLLMConfig(this.container);
-    bindControls(this.container);
+    if (!this.isCurrentMount(mountSignal)) return;
+    initDeepChat(container);
+    await refreshLLMConfig(container, () => this.isCurrentMount(mountSignal));
+    if (!this.isCurrentMount(mountSignal)) return;
+    bindControls(container);
     const promptContext = consumeListingPromptForDeepChat();
     if (promptContext) {
-      createThreadFromListingPromptContext(this.container, promptContext);
+      createThreadFromListingPromptContext(container, promptContext);
     }
   }
 
@@ -251,10 +259,16 @@ export async function clearDeepChatThreadStore(): Promise<void> {
   syncPendingStatus(container);
 }
 
-async function refreshLLMConfig(container: HTMLElement): Promise<void> {
+async function refreshLLMConfig(
+  container: HTMLElement,
+  isCurrent: () => boolean = () => true
+): Promise<void> {
   const modelSelect = container.querySelector<HTMLSelectElement>('#deep-chat-model-select');
 
-  currentConfig = await StorageService.getLLMConfigWithKey();
+  const config = await StorageService.getLLMConfigWithKey();
+  if (!isCurrent()) return;
+
+  currentConfig = config;
   selectedModel =
     resolveToolTargetModel('playground-deep-chat', currentConfig) ||
     getFirstModel(currentConfig) ||

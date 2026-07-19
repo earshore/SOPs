@@ -1,9 +1,26 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import * as releaseHelpers from '../../scripts/release/prepare-release';
 
 const { extractChangelogSection } = releaseHelpers;
+const assertAnnotatedTagAtHead = (
+  releaseHelpers as typeof releaseHelpers & {
+    assertAnnotatedTagAtHead?: (binding: {
+      tag: string;
+      exists: boolean;
+      objectType?: string;
+      tagSha?: string;
+      headSha: string;
+    }) => void;
+  }
+).assertAnnotatedTagAtHead;
+const clearCurrentVersionArchives = (
+  releaseHelpers as typeof releaseHelpers & {
+    clearCurrentVersionArchives?: (artifactsDir: string, version: string) => void;
+  }
+).clearCurrentVersionArchives;
 
 function readRepoFile(path: string): string {
   return readFileSync(resolve(process.cwd(), path), 'utf8');
@@ -57,6 +74,93 @@ describe('buildReleaseBody', () => {
     expect(body).toContain('**发布通道：** Release Candidate');
     expect(body).toContain('**环境：** Production verification');
     expect(body).toContain('GitHub Latest 应仍指向最新 GA');
+  });
+});
+
+describe('release tag binding', () => {
+  const HEAD_SHA = '0123456789abcdef0123456789abcdef01234567';
+  const TAG_SHA = 'fedcba9876543210fedcba9876543210fedcba98';
+
+  it('rejects a missing release tag', () => {
+    expect(() =>
+      assertAnnotatedTagAtHead?.({
+        tag: 'v3.0.8',
+        exists: false,
+        headSha: HEAD_SHA,
+      })
+    ).toThrow(/does not exist/i);
+  });
+
+  it('rejects a lightweight tag', () => {
+    expect(() =>
+      assertAnnotatedTagAtHead?.({
+        tag: 'v3.0.8',
+        exists: true,
+        objectType: 'commit',
+        tagSha: HEAD_SHA,
+        headSha: HEAD_SHA,
+      })
+    ).toThrow(/annotated/i);
+  });
+
+  it('rejects an annotated tag that points at another commit', () => {
+    expect(() =>
+      assertAnnotatedTagAtHead?.({
+        tag: 'v3.0.8',
+        exists: true,
+        objectType: 'tag',
+        tagSha: TAG_SHA,
+        headSha: HEAD_SHA,
+      })
+    ).toThrow(/mismatch/i);
+  });
+
+  it('accepts an annotated tag at HEAD', () => {
+    expect(() =>
+      assertAnnotatedTagAtHead?.({
+        tag: 'v3.0.8',
+        exists: true,
+        objectType: 'tag',
+        tagSha: HEAD_SHA,
+        headSha: HEAD_SHA,
+      })
+    ).not.toThrow();
+  });
+});
+
+describe('tag-bound release commands', () => {
+  it('routes notes and packages through the shared validated release context', () => {
+    const source = readRepoFile('scripts/release/prepare-release.ts');
+
+    expect(source).toMatch(
+      /function commandNotes[\s\S]*?resolveValidatedReleaseContext\(flags, true\)/
+    );
+    expect(source).toMatch(
+      /async function commandPackage[\s\S]*?resolveValidatedReleaseContext\(flags, true\)/
+    );
+  });
+});
+
+describe('release archive cleanup', () => {
+  it('removes only stale archives for the version being packaged', () => {
+    const artifactsDir = mkdtempSync(join(tmpdir(), 'release-artifacts-'));
+    const currentZip = join(artifactsDir, 'sops-dist-3.0.8.zip');
+    const currentTgz = join(artifactsDir, 'sops-dist-3.0.8.tar.gz');
+    const historicalZip = join(artifactsDir, 'sops-dist-3.0.7.zip');
+
+    writeFileSync(currentZip, 'stale zip');
+    writeFileSync(currentTgz, 'stale tarball');
+    writeFileSync(historicalZip, 'keep');
+
+    try {
+      clearCurrentVersionArchives?.(artifactsDir, '3.0.8');
+
+      expect(existsSync(currentZip)).toBe(false);
+      expect(existsSync(currentTgz)).toBe(false);
+      expect(existsSync(historicalZip)).toBe(true);
+    } finally {
+      rmSync(artifactsDir, { recursive: true, force: true });
+    }
   });
 });
 

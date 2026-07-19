@@ -138,9 +138,11 @@ class PpcSearchTermsModule extends BaseModule {
   }
 
   protected async render(): Promise<void> {
-    if (!this.container) return;
+    const container = this.container;
+    if (!container) return;
+    const mountSignal = this.getAbortSignal();
 
-    activeContainer = this.container;
+    activeContainer = container;
     const resumeSnapshot = consumePpcActionListResume();
     if (resumeSnapshot) {
       restorePpcActionListSnapshot(resumeSnapshot);
@@ -150,8 +152,10 @@ class PpcSearchTermsModule extends BaseModule {
     const html = await SafeTemplateLoader.getInstance().loadTemplate(
       'src/modules/app_center/views/ppc_tools/ppc_search_terms/template.html'
     );
+    if (!this.isCurrentMount(mountSignal)) return;
+
     const renderer = SafeRenderer.getInstance();
-    renderer.renderTemplate(this.container, html);
+    renderer.renderTemplate(container, html);
   }
 
   protected async init(): Promise<void> {

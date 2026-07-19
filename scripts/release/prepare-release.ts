@@ -13,6 +13,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
@@ -28,10 +29,24 @@ const DIST_DIR = join(ROOT, 'dist');
 const ARTIFACTS_DIR = join(ROOT, 'release-artifacts');
 
 const PRE_RELEASE_RE = /-(alpha|beta|rc)(\.|$)/i;
-const SEMVER_RE =
-  /^\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)(?:\.\d+)?)?$/i;
+const SEMVER_RE = /^\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)(?:\.\d+)?)?$/i;
 
 type PackageJson = { version: string; name?: string };
+type ReleaseTarget = { version: string; tag?: string };
+type ValidatedReleaseContext = {
+  version: string;
+  tag?: string;
+  changelog: string;
+  sha?: string;
+};
+
+export type ReleaseTagBinding = {
+  tag: string;
+  exists: boolean;
+  objectType?: string;
+  tagSha?: string;
+  headSha: string;
+};
 
 function readPackageVersion(): string {
   const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, 'utf8')) as PackageJson;
@@ -75,6 +90,18 @@ function git(args: readonly string[]): string {
   }).trim();
 }
 
+function gitSucceeds(args: readonly string[]): boolean {
+  try {
+    execFileSync('git', args, {
+      cwd: ROOT,
+      stdio: 'ignore',
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function resolveCleanReleaseCommit(status: string, headSha: string): string {
   const changes = status
     .split(/\r?\n/)
@@ -99,27 +126,93 @@ function resolveReleaseCommit(): string {
   );
 }
 
-function resolveTagVersion(flags: Record<string, string>): string {
-  if (flags.tag) return normalizeTag(flags.tag);
-  if (flags.version) return normalizeTag(flags.version);
-  const envTag = process.env.GITHUB_REF_NAME || process.env.RELEASE_TAG || '';
-  if (envTag.startsWith('v') || SEMVER_RE.test(envTag)) {
-    return normalizeTag(envTag);
+export function assertAnnotatedTagAtHead(binding: ReleaseTagBinding): void {
+  if (!binding.exists) {
+    throw new Error(`Release tag does not exist: ${binding.tag}`);
   }
-  return readPackageVersion();
+  if (binding.objectType !== 'tag') {
+    throw new Error(`Release tag must be annotated: ${binding.tag}`);
+  }
+  if (!binding.tagSha || binding.tagSha.trim() !== binding.headSha.trim()) {
+    throw new Error(
+      `Release tag/HEAD mismatch: tag=${binding.tagSha || 'unresolved'} HEAD=${binding.headSha}`
+    );
+  }
+}
+
+function resolveReleaseTarget(flags: Record<string, string>): ReleaseTarget {
+  const environmentTag =
+    process.env.RELEASE_TAG ||
+    (process.env.GITHUB_REF_TYPE === 'tag' ? process.env.GITHUB_REF_NAME || '' : '');
+  const tag = flags.tag || environmentTag || undefined;
+  const version = normalizeTag(flags.version || tag || readPackageVersion());
+
+  if (tag && normalizeTag(tag) !== version) {
+    throw new Error(`Version mismatch: tag=${tag} version=${version}`);
+  }
+
+  return { version, tag };
+}
+
+function assertTagBinding(tag: string, headSha: string): void {
+  const tagRef = `refs/tags/${tag}`;
+  if (!gitSucceeds(['show-ref', '--verify', '--quiet', tagRef])) {
+    assertAnnotatedTagAtHead({ tag, exists: false, headSha });
+    return;
+  }
+
+  const objectType = git(['cat-file', '-t', tagRef]);
+  if (objectType !== 'tag') {
+    assertAnnotatedTagAtHead({ tag, exists: true, objectType, headSha });
+    return;
+  }
+
+  assertAnnotatedTagAtHead({
+    tag,
+    exists: true,
+    objectType,
+    tagSha: git(['rev-parse', `${tag}^{commit}`]),
+    headSha,
+  });
+}
+
+function resolveValidatedReleaseContext(
+  flags: Record<string, string>,
+  requireClean: boolean
+): ValidatedReleaseContext {
+  const { tag, version } = resolveReleaseTarget(flags);
+  const packageVersion = readPackageVersion();
+
+  if (!SEMVER_RE.test(packageVersion)) {
+    throw new Error(`package.json version is not supported semver: ${packageVersion}`);
+  }
+  if (!SEMVER_RE.test(version)) {
+    throw new Error(`tag/version is not supported semver: ${version}`);
+  }
+  if (packageVersion !== version) {
+    throw new Error(`Version mismatch: package.json=${packageVersion} tag/expected=${version}`);
+  }
+  if (tag && tag !== `v${version}`) {
+    throw new Error(`Release tag must include the v prefix: ${tag}`);
+  }
+
+  const changelog = readFileSync(CHANGELOG_PATH, 'utf8');
+  extractChangelogSection(changelog, version);
+  const sha = requireClean ? resolveReleaseCommit() : tag ? git(['rev-parse', 'HEAD']) : undefined;
+
+  if (tag && sha) {
+    assertTagBinding(tag, sha);
+  }
+
+  return { version, tag, changelog, sha };
 }
 
 /** Extract ## [version] section from CHANGELOG (until next ## ). */
 export function extractChangelogSection(changelog: string, version: string): string {
-  const headingRe = new RegExp(
-    `^## \\[${escapeRegExp(version)}\\][^\\n]*\\n`,
-    'm'
-  );
+  const headingRe = new RegExp(`^## \\[${escapeRegExp(version)}\\][^\\n]*\\n`, 'm');
   const match = headingRe.exec(changelog);
   if (!match || match.index === undefined) {
-    throw new Error(
-      `CHANGELOG.md has no section for [${version}]. Add it before releasing.`
-    );
+    throw new Error(`CHANGELOG.md has no section for [${version}]. Add it before releasing.`);
   }
   const start = match.index + match[0].length;
   const rest = changelog.slice(start);
@@ -186,45 +279,31 @@ ${changelogSection.trim()}
 }
 
 function commandValidate(flags: Record<string, string>): void {
-  const pkgVersion = readPackageVersion();
-  const tagVersion = resolveTagVersion(flags);
-
-  if (!SEMVER_RE.test(pkgVersion)) {
-    throw new Error(`package.json version is not supported semver: ${pkgVersion}`);
-  }
-  if (!SEMVER_RE.test(tagVersion)) {
-    throw new Error(`tag/version is not supported semver: ${tagVersion}`);
-  }
-  if (pkgVersion !== tagVersion) {
-    throw new Error(
-      `Version mismatch: package.json=${pkgVersion} tag/expected=${tagVersion}`
-    );
-  }
+  const { tag, version } = resolveValidatedReleaseContext(flags, false);
 
   // Hard rule: if validating a GA tag name without pre-release, package must match.
   // Pre-release tags must never be treated as GA by callers (workflow sets --prerelease).
-  if (isPreRelease(tagVersion)) {
-    console.log(`OK: pre-release version ${tagVersion} (must publish as GitHub Pre-release)`);
+  if (isPreRelease(version)) {
+    console.log(`OK: pre-release version ${version} (must publish as GitHub Pre-release)`);
   } else {
-    console.log(`OK: GA version ${tagVersion} (eligible for GitHub Latest)`);
+    console.log(`OK: GA version ${version} (eligible for GitHub Latest)`);
   }
 
-  // Ensure CHANGELOG section exists
-  const changelog = readFileSync(CHANGELOG_PATH, 'utf8');
-  extractChangelogSection(changelog, tagVersion);
-  console.log(`OK: CHANGELOG section found for ${tagVersion}`);
-  console.log(`OK: pre-release flag should be: ${isPreRelease(tagVersion)}`);
+  console.log(`OK: CHANGELOG section found for ${version}`);
+  if (tag) {
+    console.log(`OK: annotated tag ${tag} points at HEAD`);
+  }
+  console.log(`OK: pre-release flag should be: ${isPreRelease(version)}`);
 }
 
 function commandNotes(flags: Record<string, string>): void {
-  const sha = resolveReleaseCommit();
-  const version = resolveTagVersion(flags);
-  const changelog = readFileSync(CHANGELOG_PATH, 'utf8');
+  const { changelog, sha, version } = resolveValidatedReleaseContext(flags, true);
+  if (!sha) {
+    throw new Error('Unable to resolve git HEAD for release notes.');
+  }
   const section = extractChangelogSection(changelog, version);
   const body = buildReleaseBody(version, section, sha);
-  const outPath = flags.out
-    ? resolve(ROOT, flags.out)
-    : join(ARTIFACTS_DIR, 'RELEASE_BODY.md');
+  const outPath = flags.out ? resolve(ROOT, flags.out) : join(ARTIFACTS_DIR, 'RELEASE_BODY.md');
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, body, 'utf8');
   console.log(`Wrote release notes: ${relative(ROOT, outPath)}`);
@@ -233,11 +312,9 @@ function commandNotes(flags: Record<string, string>): void {
     writeFileSync(process.env.GITHUB_OUTPUT, `notes_path=${outPath}\n`, {
       flag: 'a',
     });
-    writeFileSync(
-      process.env.GITHUB_OUTPUT,
-      `is_prerelease=${isPreRelease(version)}\n`,
-      { flag: 'a' }
-    );
+    writeFileSync(process.env.GITHUB_OUTPUT, `is_prerelease=${isPreRelease(version)}\n`, {
+      flag: 'a',
+    });
     writeFileSync(process.env.GITHUB_OUTPUT, `version=${version}\n`, {
       flag: 'a',
     });
@@ -264,9 +341,6 @@ async function createDistArchive(version: string): Promise<string> {
 
   // Prefer tar (Git Bash / GitHub runners often have it). Format zip if possible.
   try {
-    if (existsSync(zipPath)) {
-      // overwrite
-    }
     execSync(`tar -a -cf "${zipPath}" -C "${DIST_DIR}" .`, {
       cwd: ROOT,
       stdio: 'inherit',
@@ -308,14 +382,23 @@ async function createDistArchive(version: string): Promise<string> {
   }
 }
 
+export function clearCurrentVersionArchives(artifactsDir: string, version: string): void {
+  for (const extension of ['zip', 'tar.gz']) {
+    rmSync(join(artifactsDir, `sops-dist-${version}.${extension}`), { force: true });
+  }
+}
+
 async function commandPackage(flags: Record<string, string>): Promise<void> {
-  const sha = resolveReleaseCommit();
-  const version = resolveTagVersion(flags);
+  const { sha, version } = resolveValidatedReleaseContext(flags, true);
+  if (!sha) {
+    throw new Error('Unable to resolve git HEAD for release package.');
+  }
   const shortSha = sha.slice(0, 12);
   const nodeVersion = process.version;
   const buildTime = new Date().toISOString();
 
   mkdirSync(ARTIFACTS_DIR, { recursive: true });
+  clearCurrentVersionArchives(ARTIFACTS_DIR, version);
 
   const buildInfo = {
     name: 'sops',
@@ -379,9 +462,7 @@ async function main(): Promise<void> {
   }
 }
 
-const isDirectRun =
-  process.argv[1] &&
-  fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
 
 if (isDirectRun) {
   main().catch((error: unknown) => {
