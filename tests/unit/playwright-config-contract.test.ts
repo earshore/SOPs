@@ -42,6 +42,20 @@ async function importPerformanceConfig(listOnly = false) {
   }
 }
 
+async function importFunctionalPerformanceConfig(listOnly = false) {
+  const savedArgv = [...process.argv];
+
+  try {
+    process.argv = listOnly
+      ? [...savedArgv.filter(argument => argument !== '--list'), '--list']
+      : savedArgv.filter(argument => argument !== '--list');
+    vi.resetModules();
+    return (await import('../../config/playwright.functional-performance.config')).default;
+  } finally {
+    process.argv = savedArgv;
+  }
+}
+
 afterEach(() => {
   process.argv = [...originalArgv];
   vi.unstubAllEnvs();
@@ -181,6 +195,40 @@ describe('Playwright configuration contract', () => {
     expect(config.reporter).toEqual([['list']]);
   });
 
+  it('defines the functional performance runtime contract', async () => {
+    const config = await importFunctionalPerformanceConfig();
+
+    expect(config).toMatchObject({
+      testDir: resolve(process.cwd(), 'tests/e2e'),
+      testMatch: '*-performance.spec.ts',
+      fullyParallel: false,
+      workers: 1,
+      retries: 0,
+      globalTimeout: 10 * 60 * 1000,
+      reporter: [
+        ['list'],
+        ['json', { outputFile: resolve(reportDirectory, 'functional-performance.json') }],
+      ],
+      use: {
+        baseURL: 'http://127.0.0.1:4175',
+        trace: 'retain-on-failure',
+        screenshot: 'only-on-failure',
+      },
+      webServer: {
+        command: 'npm run preview -- --host 127.0.0.1 --port 4175 --strictPort',
+        url: 'http://127.0.0.1:4175',
+        reuseExistingServer: false,
+        timeout: 120_000,
+      },
+    });
+  });
+
+  it('uses only the list reporter for functional performance discovery', async () => {
+    const config = await importFunctionalPerformanceConfig(true);
+
+    expect(config.reporter).toEqual([['list']]);
+  });
+
   it('keeps package scripts wired to the dedicated configs', () => {
     const packageJson = JSON.parse(
       readFileSync(resolve(process.cwd(), 'package.json'), 'utf8')
@@ -192,6 +240,8 @@ describe('Playwright configuration contract', () => {
       preview: 'vite preview',
       'test:e2e:smoke:release': 'playwright test --config=config/playwright.release.config.ts',
       'test:performance:gate': 'playwright test --config=config/playwright.performance.config.ts',
+      'test:performance:functional':
+        'playwright test --config=config/playwright.functional-performance.config.ts',
     });
   });
 });
