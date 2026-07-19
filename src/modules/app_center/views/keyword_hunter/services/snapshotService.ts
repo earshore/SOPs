@@ -293,6 +293,14 @@ function restoreSnapshotToState(snapshot: KeywordHunterSnapshot): void {
   });
 }
 
+function restoreResolvedSnapshot(
+  snapshot: KeywordHunterSnapshot | null
+): KeywordHunterSnapshot | null {
+  if (!snapshot) return null;
+  restoreSnapshotToState(snapshot);
+  return snapshot;
+}
+
 function clearCurrentSnapshotIfMatches(id: string): void {
   if (appStore.getState().keywordTracker.currentSnapshotId !== id) {
     return;
@@ -419,15 +427,9 @@ export const KeywordHunterSnapshotService = {
   restore(snapshotOrId: KeywordHunterSnapshot | string): KeywordHunterSnapshot | null {
     const snapshot =
       typeof snapshotOrId === 'string'
-        ? this.getById(snapshotOrId)
+        ? (this.getById(snapshotOrId) ?? null)
         : normalizeSnapshot(snapshotOrId);
-
-    if (!snapshot) {
-      return null;
-    }
-
-    restoreSnapshotToState(snapshot);
-    return snapshot;
+    return restoreResolvedSnapshot(snapshot);
   },
 
   async restoreAsync(
@@ -435,15 +437,9 @@ export const KeywordHunterSnapshotService = {
   ): Promise<KeywordHunterSnapshot | null> {
     const snapshot =
       typeof snapshotOrId === 'string'
-        ? await this.getByIdAsync(snapshotOrId)
+        ? ((await this.getByIdAsync(snapshotOrId)) ?? null)
         : normalizeSnapshot(snapshotOrId);
-
-    if (!snapshot) {
-      return null;
-    }
-
-    restoreSnapshotToState(snapshot);
-    return snapshot;
+    return restoreResolvedSnapshot(snapshot);
   },
 
   deleteById(id: string): boolean {

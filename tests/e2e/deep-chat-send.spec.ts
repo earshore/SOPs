@@ -5,6 +5,7 @@ const DEEP_CHAT_ROUTE = '/#/app-center/playground/deep-chat';
 const MOCK_PROVIDER = 'playwright_mock';
 const MOCK_MODEL = 'mock-chat-model';
 const MOCK_ENDPOINT = 'http://localhost:5173/mock-llm';
+const MOCK_API_KEY = 'playwright-test-key';
 const USER_PROMPT = '请用一句话确认 Deep Chat 发送正常';
 const ASSISTANT_REPLY = 'Deep Chat 浏览器发送正常';
 const GENERATED_PROMPT_ID = 'deep-chat-generated-prompt-send-test';
@@ -52,9 +53,10 @@ async function seedMockProviderStorage(
   endpoint = MOCK_ENDPOINT
 ): Promise<void> {
   await page.addInitScript(
-    ({ endpoint, model, promptDraft, provider }) => {
+    ({ apiKey, endpoint, model, promptDraft, provider }) => {
       window.localStorage.clear();
       window.localStorage.setItem('llm_active_provider', JSON.stringify(provider));
+      window.localStorage.setItem(`llm_key_${provider}`, JSON.stringify(apiKey));
       window.localStorage.setItem(
         `llm_${provider}`,
         JSON.stringify({
@@ -92,7 +94,13 @@ async function seedMockProviderStorage(
         );
       }
     },
-    { endpoint, model: MOCK_MODEL, promptDraft, provider: MOCK_PROVIDER }
+    {
+      apiKey: MOCK_API_KEY,
+      endpoint,
+      model: MOCK_MODEL,
+      promptDraft,
+      provider: MOCK_PROVIDER,
+    }
   );
 }
 
@@ -233,36 +241,6 @@ async function holdLLMRequest(page: Page): Promise<{
 
 async function openDeepChatAndRefreshMockConfig(page: Page): Promise<void> {
   await page.goto(DEEP_CHAT_ROUTE, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() =>
-    Boolean((window as Window & { SecureStorage?: unknown }).SecureStorage)
-  );
-  await page.evaluate(async provider => {
-    const secureStorage = (
-      window as Window & {
-        SecureStorage?: { setSecure: (key: string, value: unknown) => Promise<boolean> };
-      }
-    ).SecureStorage;
-    if (!secureStorage) {
-      throw new Error('SecureStorage is not available');
-    }
-    await secureStorage.setSecure(`llm_key_${provider}`, 'playwright-test-key');
-  }, MOCK_PROVIDER);
-  await page.waitForFunction(
-    async provider => {
-      const secureStorage = (
-        window as Window & {
-          SecureStorage?: { getSecure: (key: string, defaultValue?: string) => Promise<string> };
-        }
-      ).SecureStorage;
-      if (!secureStorage) {
-        return false;
-      }
-      return (await secureStorage.getSecure(`llm_key_${provider}`, '')) === 'playwright-test-key';
-    },
-    MOCK_PROVIDER,
-    { timeout: 5000 }
-  );
-
   await page.locator('#deep-chat-refresh-config').click();
 }
 

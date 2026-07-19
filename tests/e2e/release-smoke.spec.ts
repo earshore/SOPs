@@ -8,40 +8,102 @@ const DEEP_CHAT_PROMPT_ID = 'release-smoke-deep-chat-generated-prompt';
 const DEEP_CHAT_PROMPT_MARKER = 'RELEASE_SMOKE_GENERATED_PROMPT_MARKER';
 
 const CORE_ROUTES = [
-  { label: 'Home', path: '/home', target: '#home-splash-container' },
-  { label: 'SOPs', path: '/sops', target: '.sops-overview' },
-  { label: 'App Center', path: '/app-center', target: '.app-overview-container' },
+  { label: 'Home', path: '/#/home', readySelector: '#panel-home:not(.hidden)', routeId: 'home' },
+  {
+    label: 'SOPs',
+    path: '/#/sops',
+    readySelector: '#panel-sops:not(.hidden) .sops-overview',
+    routeId: 'sops_overview',
+  },
+  {
+    label: 'App Center',
+    path: '/#/app-center',
+    readySelector: '#panel-app_center:not(.hidden) .app-overview-container',
+    routeId: 'app_center_overview',
+  },
   {
     label: 'Scraper',
-    path: '/app-center/master-analysis/scraper',
-    target: '[x-data="scraperPanel"]',
+    path: '/#/app-center/master-analysis/scraper',
+    readySelector: '#panel-app_center:not(.hidden) [x-data="scraperPanel"]',
+    routeId: 'scraper',
   },
   {
     label: 'AI Analysis',
-    path: '/app-center/master-analysis/ai-analysis',
-    target: '.ai-analysis-wrapper',
+    path: '/#/app-center/master-analysis/ai-analysis',
+    readySelector: '#panel-app_center:not(.hidden) .ai-analysis-wrapper',
+    routeId: 'ai_analysis',
   },
   {
     label: 'Promptlab',
-    path: '/app-center/master-analysis/promptlab',
-    target: '[x-data="promptlabPanel"]',
+    path: '/#/app-center/master-analysis/promptlab',
+    readySelector: '#panel-app_center:not(.hidden) [x-data="promptlabPanel"]',
+    routeId: 'promptlab',
   },
-  { label: 'Deep Chat', path: '/app-center/playground/deep-chat', target: '#deep-chat-view' },
+  {
+    label: 'Deep Chat',
+    path: '/#/app-center/playground/deep-chat',
+    readySelector: '#panel-app_center:not(.hidden) #deep-chat-view',
+    routeId: 'playground_deep_chat',
+  },
   {
     label: 'Keyword Hunter Input',
-    path: '/app-center/keyword-hunter/input',
-    target: '#keyword-hunter-module-input',
+    path: '/#/app-center/keyword-hunter/input',
+    readySelector: '#panel-app_center:not(.hidden) #keyword-hunter-module-input',
+    routeId: 'keyword_hunter_input',
   },
   {
     label: 'PPC Search Terms',
-    path: '/app-center/ppc-tools/ppc-search-terms',
-    target: '.ppc-search-terms-app',
+    path: '/#/app-center/ppc-tools/ppc-search-terms',
+    readySelector: '#panel-app_center:not(.hidden) .ppc-search-terms-app',
+    routeId: 'ppc_search_terms',
   },
-  { label: 'AMZ Hub', path: '/amz-hub', target: '.amz-hub-overview' },
-  { label: 'More', path: '/more', target: '.more-overview' },
+  {
+    label: 'AMZ Hub',
+    path: '/#/amz-hub',
+    readySelector: '#panel-amz_hub:not(.hidden) .amz-hub-overview',
+    routeId: 'amz_hub_overview',
+  },
+  {
+    label: 'More',
+    path: '/#/more',
+    readySelector: '#panel-more:not(.hidden) .more-overview',
+    routeId: 'more_overview',
+  },
 ] as const;
 
-const OVERFLOW_ROUTES = CORE_ROUTES;
+type CoreRoute = (typeof CORE_ROUTES)[number];
+type AssetKind = 'script' | 'style';
+
+interface AssetResponseEvidence {
+  contentType: string;
+  status: number;
+  url: string;
+}
+
+interface FailedAssetRequestEvidence {
+  errorText: string;
+  kind: AssetKind;
+  url: string;
+}
+
+function getAssetKind(url: string): AssetKind | null {
+  const pathname = new URL(url).pathname;
+  if (/\.(?:js|mjs)$/i.test(pathname)) return 'script';
+  if (/\.css$/i.test(pathname)) return 'style';
+  return null;
+}
+
+async function expectRouteReady(page: Page, route: CoreRoute): Promise<void> {
+  await Promise.all([
+    expect
+      .poll(() => new URL(page.url()).hash, {
+        message: `${route.label} should keep its canonical hash`,
+      })
+      .toBe(route.path.slice(1)),
+    expect(page.locator('#main-content')).toHaveAttribute('data-current-route', route.routeId),
+    expect(page.locator(route.readySelector)).toBeVisible(),
+  ]);
+}
 
 const ERROR_TEXT_PATTERNS = [
   /module load failed/i,
@@ -82,9 +144,8 @@ async function expectNoRouteErrorText(page: Page): Promise<void> {
 }
 
 async function openRoute(page: Page, path: string): Promise<void> {
-  await page.goto(`/#${path}`, { waitUntil: 'domcontentloaded' });
-  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => undefined);
-  await expect.poll(() => new URL(page.url()).hash).toBe(`#${path}`);
+  await page.goto(path, { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('networkidle', { timeout: 10000 });
 }
 
 async function expectNoSevereMobileOverflow(page: Page, label: string): Promise<void> {
@@ -160,14 +221,13 @@ async function seedDeepChatPromptDraftBeforeLoad(page: Page): Promise<void> {
 async function waitForSettingsPanel(page: Page): Promise<void> {
   await page.waitForFunction(() => {
     const root = document.querySelector('[x-data="settingsPanel"]') as
-      | (HTMLElement & { _x_dataStack?: unknown[] })
-      | null;
+      (HTMLElement & { _x_dataStack?: unknown[] }) | null;
     return Array.isArray(root?._x_dataStack);
   });
 }
 
 async function openGlobalSettings(page: Page): Promise<void> {
-  await openRoute(page, '/home');
+  await openRoute(page, '/#/home');
   await expectNoRouteErrorText(page);
   await waitForSettingsPanel(page);
 
@@ -180,14 +240,163 @@ async function openGlobalSettings(page: Page): Promise<void> {
   ).toBeVisible();
 }
 
+type SwitchTabTarget =
+  | { kind: 'sops'; targetActionSelector: string | null }
+  | { kind: 'sidebar'; menu: string; overview: string; trigger: string };
+
+const APP_CENTER_TARGET = {
+  kind: 'sidebar',
+  menu: '#apps-mega-menu',
+  overview: 'app_center_overview',
+  trigger: '#nav-apps',
+} as const;
+const AMZ_HUB_TARGET = {
+  kind: 'sidebar',
+  menu: '#hub-mega-menu',
+  overview: 'amz_hub_overview',
+  trigger: '#nav-hub',
+} as const;
+const SWITCH_TAB_TARGETS: Record<string, SwitchTabTarget> = {
+  ai_analysis: APP_CENTER_TARGET,
+  amz_marketing_calendar: AMZ_HUB_TARGET,
+  keyword_hunter_input: APP_CENTER_TARGET,
+  playground_deep_chat: APP_CENTER_TARGET,
+  ppc_search_terms: APP_CENTER_TARGET,
+  promptlab: APP_CENTER_TARGET,
+  scraper: APP_CENTER_TARGET,
+  sops_npi_tracker: {
+    kind: 'sops',
+    targetActionSelector:
+      '#sop-module-growth [data-action="switch-tab"][data-tab="sops_npi_tracker"]',
+  },
+  sops_overview: { kind: 'sops', targetActionSelector: null },
+  sops_restricted_words: {
+    kind: 'sops',
+    targetActionSelector:
+      '#sop-module-growth [data-action="switch-tab"][data-tab="sops_restricted_words"]',
+  },
+};
+
+async function switchTabFromHome(page: Page, tab: string): Promise<void> {
+  await openRoute(page, '/#/home');
+  await expectNoRouteErrorText(page);
+
+  const navigationTarget = SWITCH_TAB_TARGETS[tab];
+  if (!navigationTarget) {
+    throw new Error(`Unsupported release-smoke route target: ${tab}`);
+  }
+
+  if (navigationTarget.kind === 'sops') {
+    const overviewAction = page.locator(
+      '#panel-home [data-action="switch-tab"][data-tab="sops_overview"]'
+    );
+    await expect(overviewAction).toHaveCount(1);
+    await expect(overviewAction).toBeVisible();
+    await overviewAction.click();
+    await expect(page.locator('#main-content')).toHaveAttribute(
+      'data-current-route',
+      'sops_overview'
+    );
+    if (!navigationTarget.targetActionSelector) return;
+
+    const targetAction = page.locator(navigationTarget.targetActionSelector);
+    await expect(targetAction).toHaveCount(1);
+    await expect(targetAction).toBeVisible();
+    await targetAction.click();
+    await expect(page.locator('#main-content')).toHaveAttribute('data-current-route', tab);
+    return;
+  }
+
+  const navTrigger = page.locator(navigationTarget.trigger);
+  await expect(navTrigger).toHaveCount(1);
+  await expect(navTrigger).toBeVisible();
+  await navTrigger.click();
+
+  const overviewAction = page.locator(
+    `${navigationTarget.menu} [data-action="switch-tab"][data-tab="${navigationTarget.overview}"]`
+  );
+  await expect(overviewAction).toHaveCount(1);
+  await expect(overviewAction).toBeVisible();
+  await overviewAction.click();
+  await expect(page.locator('#main-content')).toHaveAttribute(
+    'data-current-route',
+    navigationTarget.overview
+  );
+
+  const targetAction = page.locator(
+    `#sidebar-btn-${tab}[data-action="switch-tab"][data-tab="${tab}"]`
+  );
+  await expect(targetAction).toHaveCount(1);
+  const categoryGroup = targetAction.locator(
+    'xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " sidebar-category-group ")]'
+  );
+  await expect(categoryGroup).toHaveCount(1);
+
+  const categoryToggle = categoryGroup.locator('.sidebar-category-btn');
+  await expect(categoryToggle).toHaveCount(1);
+  const categoryExpanded = (await categoryToggle.getAttribute('aria-expanded')) === 'true';
+  if (!(await targetAction.isVisible()) && !categoryExpanded) {
+    await expect(categoryToggle).toBeVisible();
+    await categoryToggle.click();
+  }
+
+  await expect(targetAction).toBeVisible();
+  await targetAction.click();
+  await expect(page.locator('#main-content')).toHaveAttribute('data-current-route', tab);
+}
+
 test.describe('release candidate smoke', () => {
   for (const route of CORE_ROUTES) {
     test(`${route.label} renders without console or route errors`, async ({ page }) => {
       const consoleListener = setupConsoleErrorListener(page);
+      const scriptResponses: AssetResponseEvidence[] = [];
+      const styleResponses: AssetResponseEvidence[] = [];
+      const failedAssetRequests: FailedAssetRequestEvidence[] = [];
+      page.on('response', response => {
+        const kind = getAssetKind(response.url());
+        if (!kind) return;
+
+        const evidence = {
+          contentType: response.headers()['content-type'] ?? '',
+          status: response.status(),
+          url: response.url(),
+        };
+        if (kind === 'script') scriptResponses.push(evidence);
+        else styleResponses.push(evidence);
+      });
+      page.on('requestfailed', request => {
+        const kind = getAssetKind(request.url());
+        if (!kind) return;
+
+        failedAssetRequests.push({
+          errorText: request.failure()?.errorText ?? 'unknown failure',
+          kind,
+          url: request.url(),
+        });
+      });
 
       await openRoute(page, route.path);
+      await expectRouteReady(page, route);
       await expectNoRouteErrorText(page);
-      await expect(page.locator(route.target)).toBeVisible();
+      expect(
+        scriptResponses.length,
+        `${route.label} should load JavaScript assets`
+      ).toBeGreaterThan(0);
+      expect(styleResponses.length, `${route.label} should load CSS assets`).toBeGreaterThan(0);
+      for (const asset of scriptResponses) {
+        expect(asset.status, asset.url).toBeGreaterThanOrEqual(200);
+        expect(asset.status, asset.url).toBeLessThan(400);
+        expect(asset.contentType, asset.url).toMatch(/javascript/i);
+      }
+      for (const asset of styleResponses) {
+        expect(asset.status, asset.url).toBeGreaterThanOrEqual(200);
+        expect(asset.status, asset.url).toBeLessThan(400);
+        expect(asset.contentType, asset.url).toContain('text/css');
+      }
+      expect(
+        failedAssetRequests,
+        `${route.label} should not have failed JavaScript or CSS requests`
+      ).toEqual([]);
 
       expect(
         consoleListener.getErrors(),
@@ -197,14 +406,19 @@ test.describe('release candidate smoke', () => {
   }
 
   test('core routes do not create severe mobile horizontal overflow', async ({ page }) => {
+    const consoleListener = setupConsoleErrorListener(page);
     await page.setViewportSize({ width: 390, height: 844 });
 
-    for (const route of OVERFLOW_ROUTES) {
+    for (const route of CORE_ROUTES) {
       await openRoute(page, route.path);
-      await expect(page.locator(route.target)).toBeVisible();
+      await expectRouteReady(page, route);
       await expectNoRouteErrorText(page);
 
       await expectNoSevereMobileOverflow(page, route.label);
+      expect(
+        consoleListener.getErrors(),
+        `${route.label} mobile route should not emit console/page errors`
+      ).toEqual([]);
     }
   });
 
@@ -221,7 +435,7 @@ test.describe('release candidate smoke', () => {
       }
     });
 
-    await openRoute(page, '/amz-hub/practice/marketing-calendar');
+    await switchTabFromHome(page, 'amz_marketing_calendar');
     await expectNoRouteErrorText(page);
     await expect(page.getByRole('heading', { name: 'EU营销日历' })).toBeVisible();
 
@@ -252,7 +466,7 @@ test.describe('release candidate smoke', () => {
   }) => {
     const consoleListener = setupConsoleErrorListener(page);
 
-    await openRoute(page, '/app-center/master-analysis/scraper');
+    await switchTabFromHome(page, 'scraper');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('[x-data="scraperPanel"]')).toBeVisible();
@@ -294,7 +508,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
-    await openRoute(page, '/app-center/master-analysis/ai-analysis');
+    await switchTabFromHome(page, 'ai_analysis');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('.ai-analysis-wrapper')).toBeVisible();
@@ -314,7 +528,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
-    await openRoute(page, '/app-center/keyword-hunter/input');
+    await switchTabFromHome(page, 'keyword_hunter_input');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('#keyword-hunter-module-input')).toBeVisible();
@@ -322,6 +536,7 @@ test.describe('release candidate smoke', () => {
 
     const startAnalysisButton = page.locator('#keyword-hunter-btn-start-analysis');
     const emptyInputToast = page.locator('#toast-container .toast').last();
+    await expect(startAnalysisButton).toBeVisible();
     await expect(startAnalysisButton).toBeEnabled();
     await startAnalysisButton.click();
     await expect(emptyInputToast).toContainText('请先输入关键词和文案');
@@ -360,7 +575,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await openRoute(page, '/sops');
+    await switchTabFromHome(page, 'sops_overview');
     await expectNoRouteErrorText(page);
     await expectNoSevereMobileOverflow(page, 'SOPs overview before workflow navigation');
 
@@ -397,7 +612,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await openRoute(page, '/sops/growth/restricted-words');
+    await switchTabFromHome(page, 'sops_restricted_words');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('#rw-search-input')).toBeVisible();
@@ -457,7 +672,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await openRoute(page, '/sops/growth/npi-tracker');
+    await switchTabFromHome(page, 'sops_npi_tracker');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('.npi-tracker-page')).toBeVisible();
@@ -517,7 +732,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
-    await openRoute(page, '/app-center/ppc-tools/ppc-search-terms');
+    await switchTabFromHome(page, 'ppc_search_terms');
     await expectNoRouteErrorText(page);
 
     const pasteInput = page.locator('#ppc-search-terms-paste-input');
@@ -590,7 +805,7 @@ test.describe('release candidate smoke', () => {
     });
 
     await clearBrowserStorageBeforeLoad(page);
-    await openRoute(page, '/app-center/master-analysis/promptlab');
+    await switchTabFromHome(page, 'promptlab');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('[x-data="promptlabPanel"]')).toBeVisible();
@@ -657,7 +872,7 @@ test.describe('release candidate smoke', () => {
     });
 
     await seedDeepChatPromptDraftBeforeLoad(page);
-    await openRoute(page, '/app-center/playground/deep-chat');
+    await switchTabFromHome(page, 'playground_deep_chat');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('#deep-chat-view')).toBeVisible();

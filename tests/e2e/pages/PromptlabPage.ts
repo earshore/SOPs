@@ -119,7 +119,7 @@ export class PromptlabPage extends BasePage {
   };
 
   constructor(page: Page) {
-    super(page, { baseUrl: 'http://localhost:5173' });
+    super(page);
   }
 
   // ========== 导航方法 ==========
@@ -141,6 +141,7 @@ export class PromptlabPage extends BasePage {
    * 等待页面就绪
    */
   async waitForPageReady(): Promise<void> {
+    await this.waitForElement('#main-content[data-current-route="promptlab"]', { timeout: 10000 });
     await this.waitForElement(this.selectors.productDnaCard, { timeout: 10000 });
     await this.waitForElement(this.selectors.generatePromptButton, { timeout: 10000 });
     await this.waitForPromptlabAlpineReady();

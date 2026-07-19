@@ -129,15 +129,19 @@ function createSnapshotDerived(
 
 export async function seedKeywordHunterStorage(
   page: Page,
-  keywordTracker: Record<string, unknown> = createKeywordHunterState()
+  keywordTracker: Record<string, unknown> = createKeywordHunterState(),
+  additionalStorage: Record<string, string> = {}
 ): Promise<void> {
-  await page.addInitScript((snapshot) => {
+  await page.addInitScript(({ snapshot, storage }) => {
     window.localStorage.clear();
     window.localStorage.setItem(
       'keyword_hunter_snapshots',
       JSON.stringify([snapshot])
     );
-  }, createKeywordHunterSnapshot(keywordTracker));
+    for (const [key, value] of Object.entries(storage)) {
+      window.localStorage.setItem(key, value);
+    }
+  }, { snapshot: createKeywordHunterSnapshot(keywordTracker), storage: additionalStorage });
 }
 
 export async function clearAppStorage(page: Page): Promise<void> {

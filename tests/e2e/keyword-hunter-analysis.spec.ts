@@ -8,6 +8,18 @@ import {
 const MOCK_PROVIDER = 'keyword_hunter_mock';
 const MOCK_MODEL = 'mock-keyword-hunter-model';
 const MOCK_ENDPOINT = 'http://localhost:5173/keyword-hunter-mock';
+const MOCK_API_KEY = 'playwright-test-key';
+const MOCK_PROVIDER_STORAGE = {
+  llm_active_provider: JSON.stringify(MOCK_PROVIDER),
+  [`llm_${MOCK_PROVIDER}`]: JSON.stringify({
+    apiKey: '',
+    enabled: true,
+    endpoint: MOCK_ENDPOINT,
+    model: MOCK_MODEL,
+    provider: MOCK_PROVIDER,
+  }),
+  [`llm_key_${MOCK_PROVIDER}`]: JSON.stringify(MOCK_API_KEY),
+};
 const GENERATED_REPORT = [
   '## 88/100 — 良好',
   '',
@@ -28,40 +40,6 @@ const SEEDED_REPORT = [
   '| SEO覆盖 | 28/35 | 核心关键词已覆盖 |',
   '| 违规 | +0 | 未发现风险 |',
 ].join('\n');
-
-async function configureMockLLMProvider(page: Page): Promise<void> {
-  await page.evaluate(
-    ({ endpoint, model, provider }) => {
-      window.localStorage.setItem('llm_active_provider', JSON.stringify(provider));
-      window.localStorage.setItem(
-        `llm_${provider}`,
-        JSON.stringify({
-          apiKey: '',
-          enabled: true,
-          endpoint,
-          model,
-          provider,
-        })
-      );
-    },
-    { endpoint: MOCK_ENDPOINT, model: MOCK_MODEL, provider: MOCK_PROVIDER }
-  );
-
-  await page.waitForFunction(() =>
-    Boolean((window as Window & { SecureStorage?: unknown }).SecureStorage)
-  );
-  await page.evaluate(async provider => {
-    const secureStorage = (
-      window as Window & {
-        SecureStorage?: { setSecure: (key: string, value: unknown) => Promise<boolean> };
-      }
-    ).SecureStorage;
-    if (!secureStorage) {
-      throw new Error('SecureStorage is not available');
-    }
-    await secureStorage.setSecure(`llm_key_${provider}`, 'playwright-test-key');
-  }, MOCK_PROVIDER);
-}
 
 async function holdMockAnalysisRequest(page: Page): Promise<{
   getRequestCount: () => number;
@@ -142,13 +120,16 @@ test.describe('Keyword Hunter 分析页', () => {
   });
 
   test('生成报告期间切换页面后仍显示进行中状态', async ({ page }) => {
-    await seedKeywordHunterStorage(page, createKeywordHunterState());
+    await seedKeywordHunterStorage(
+      page,
+      createKeywordHunterState(),
+      MOCK_PROVIDER_STORAGE
+    );
     const heldRequest = await holdMockAnalysisRequest(page);
     await restoreSeededSnapshotFromInput(page);
 
     await page.goto(KEYWORD_HUNTER_ROUTES.analysis);
     await page.waitForSelector('#keyword-hunter-llm-analysis-result', { timeout: 15000 });
-    await configureMockLLMProvider(page);
 
     await expect(page.locator('#keyword-hunter-analyze-btn')).toBeEnabled();
     await page.locator('#keyword-hunter-analyze-btn').click();

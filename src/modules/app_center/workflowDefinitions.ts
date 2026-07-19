@@ -5,6 +5,14 @@ import type { AppCenterRouteId } from './appCatalog';
 
 type SopsRouteId = (typeof sopsManifest.routes)[number]['routeId'];
 
+const COMPLIANCE_REVIEW_POINTS = ['高危词', '品牌与侵权', '产品合规', 'GPSR'] as const;
+const COMPLIANCE_REVIEW_ROUTE_IDS = [
+  'sops_restricted_words',
+  'sops_brand_infringement',
+  'sops_product_compliance',
+  'sops_eu_gpsr_compliance',
+] as const satisfies readonly SopsRouteId[];
+
 export interface AppCenterComplianceChecklistItem {
   id: string;
   label: string;
@@ -144,13 +152,8 @@ export const APP_CENTER_WORKFLOW_DEFINITIONS: readonly AppCenterWorkflowDefiniti
         icon: 'fas fa-shield-halved',
         inputs: ['listing_copy', 'keyword_snapshot', 'listing_review'],
         outputs: ['compliance_check artifact'],
-        reviewPoints: ['高危词', '品牌与侵权', '产品合规', 'GPSR'],
-        complianceRouteIds: [
-          'sops_restricted_words',
-          'sops_brand_infringement',
-          'sops_product_compliance',
-          'sops_eu_gpsr_compliance',
-        ],
+        reviewPoints: [...COMPLIANCE_REVIEW_POINTS],
+        complianceRouteIds: [...COMPLIANCE_REVIEW_ROUTE_IDS],
       },
     ],
   },
@@ -190,13 +193,8 @@ export const APP_CENTER_WORKFLOW_DEFINITIONS: readonly AppCenterWorkflowDefiniti
         icon: 'fas fa-shield-halved',
         inputs: ['listing_review'],
         outputs: ['compliance_check artifact'],
-        reviewPoints: ['高危词', '品牌与侵权', '产品合规', 'GPSR'],
-        complianceRouteIds: [
-          'sops_restricted_words',
-          'sops_brand_infringement',
-          'sops_product_compliance',
-          'sops_eu_gpsr_compliance',
-        ],
+        reviewPoints: [...COMPLIANCE_REVIEW_POINTS],
+        complianceRouteIds: [...COMPLIANCE_REVIEW_ROUTE_IDS],
       },
     ],
   },

@@ -5,9 +5,13 @@
 // ================================================================
 
 import { test, expect } from '@playwright/test';
+import {
+  clearAnalysisHistoryFixture,
+  loadAnalysisHistoryFixture,
+} from './ai-analysis-fixtures';
 import { PromptlabPage } from './pages/PromptlabPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
-import { setupAPIConfig, waitForAppReady } from '../helpers/test-setup';
+import { setupAPIConfig } from '../helpers/test-setup';
 import { SAMPLE_ANALYSIS_REPORT } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/analysisReportData';
 
 test.setTimeout(45_000);
@@ -28,46 +32,14 @@ const PROMPTLAB_E2E_REPORT = {
   },
 };
 
-type AppStoreWindow = Window & {
-  appStore?: { getState?: () => { setAnalysisReport?: (report: unknown) => void } };
-};
-
-async function setAnalysisReport(
-  page: import('@playwright/test').Page,
-  report: unknown
-): Promise<void> {
-  await page.waitForFunction(() => {
-    const appWindow = window as AppStoreWindow;
-    return typeof appWindow.appStore?.getState?.().setAnalysisReport === 'function';
-  });
-
-  await page.evaluate(reportValue => {
-    const appWindow = window as AppStoreWindow;
-    appWindow.appStore?.getState?.().setAnalysisReport?.(reportValue);
-  }, report);
-}
-
 async function clearAnalysisReport(page: import('@playwright/test').Page): Promise<void> {
-  await setAnalysisReport(page, null);
+  await clearAnalysisHistoryFixture(page);
   await page
     .locator('#lab-analysis-status')
     .getByText(/未检测到分析报告/)
     .waitFor({
       timeout: 5000,
     });
-}
-
-async function seedPromptlabReport(page: import('@playwright/test').Page): Promise<void> {
-  await setAnalysisReport(page, PROMPTLAB_E2E_REPORT);
-  await page
-    .locator('#lab-analysis-status')
-    .getByText(/分析报告已就绪/)
-    .waitFor({
-      timeout: 5000,
-    });
-  await expect(page.locator('button:has-text("从报告加载")')).toBeEnabled({
-    timeout: 5000,
-  });
 }
 
 async function findOverwriteModal(page: import('@playwright/test').Page, timeout = 1000) {
@@ -112,13 +84,16 @@ test.beforeEach(async ({ page }) => {
   // 配置 API 密钥
   await setupAPIConfig(page, 'AI2026');
 
-  // 等待应用初始化
-  await waitForAppReady(page);
+  await loadAnalysisHistoryFixture(page, PROMPTLAB_E2E_REPORT);
 
   // 导航到 Promptlab 页面
   promptlab = new PromptlabPage(page);
   await promptlab.navigate();
-  await seedPromptlabReport(page);
+  await page
+    .locator('#lab-analysis-status')
+    .getByText(/分析报告已就绪/)
+    .waitFor({ timeout: 5000 });
+  await expect(page.locator('button:has-text("从报告加载")')).toBeEnabled({ timeout: 5000 });
 });
 
 test.describe('按钮状态测试', () => {

@@ -27,6 +27,120 @@ const __dirname = path.dirname(__filename);
 
 type Severity = 'low' | 'medium' | 'high' | 'critical';
 
+interface DuplicateCandidate {
+  occurrences: number[];
+  blockLines: number;
+  preview: string;
+}
+
+const SEVERITY_RANK: Record<Severity, number> = {
+  low: 0,
+  medium: 1,
+  high: 2,
+  critical: 3
+};
+
+const FAIL_ON_SEVERITIES = ['medium', 'high', 'critical'] as const;
+
+type FailOnSeverity = (typeof FAIL_ON_SEVERITIES)[number];
+
+function sameCloneWindow(
+  candidate: DuplicateCandidate,
+  existing: DuplicateCandidate
+): boolean {
+  if (candidate.occurrences.length !== existing.occurrences.length) {
+    return false;
+  }
+
+  const candidateStart = candidate.occurrences[0];
+  const existingStart = existing.occurrences[0];
+  if (candidateStart === undefined || existingStart === undefined) {
+    return false;
+  }
+
+  const offset = candidateStart - existingStart;
+  if (offset < 0 || offset > existing.blockLines) {
+    return false;
+  }
+
+  return candidate.occurrences.every((line, index) => {
+    const existingLine = existing.occurrences[index];
+    return existingLine !== undefined && line - existingLine === offset;
+  });
+}
+
+function dedupeDuplicateCandidates(
+  candidates: DuplicateCandidate[]
+): DuplicateCandidate[] {
+  if (candidates.some(candidate => candidate.occurrences.length < 2)) {
+    throw new Error('Duplicate candidates must contain at least two occurrences');
+  }
+
+  const deduped: DuplicateCandidate[] = [];
+  const orderedCandidates = [...candidates].sort(
+    (left, right) =>
+      (left.occurrences[0] ?? Number.POSITIVE_INFINITY) -
+      (right.occurrences[0] ?? Number.POSITIVE_INFINITY)
+  );
+
+  for (const candidate of orderedCandidates) {
+    const existing = deduped.find(group => sameCloneWindow(candidate, group));
+    if (!existing) {
+      deduped.push({
+        ...candidate,
+        occurrences: [...candidate.occurrences]
+      });
+      continue;
+    }
+
+    const extension = candidate.occurrences[0]! - existing.occurrences[0]!;
+    existing.blockLines = Math.max(existing.blockLines, candidate.blockLines + extension);
+  }
+
+  return deduped;
+}
+
+function shouldFailOnSeverity(
+  counts: Record<Severity, number>,
+  selectedFloor: Severity
+): boolean {
+  const selectedRank = SEVERITY_RANK[selectedFloor];
+  return (Object.keys(SEVERITY_RANK) as Severity[]).some(
+    severity => SEVERITY_RANK[severity] >= selectedRank && counts[severity] > 0
+  );
+}
+
+function parseFailOnSeverity(args: string[]): FailOnSeverity {
+  let selected: FailOnSeverity = 'high';
+  let hasFailOn = false;
+
+  for (let index = 0; index < args.length; index++) {
+    const argument = args[index]!;
+    let value: string | undefined;
+
+    if (argument === '--fail-on') {
+      value = args[++index];
+    } else if (argument.startsWith('--fail-on=')) {
+      value = argument.slice('--fail-on='.length);
+    } else {
+      throw new Error(`Unknown argument: ${argument}`);
+    }
+
+    if (hasFailOn) {
+      throw new Error('--fail-on may only be specified once');
+    }
+    hasFailOn = true;
+
+    if (!FAIL_ON_SEVERITIES.includes(value as FailOnSeverity)) {
+      throw new Error('Invalid --fail-on value: expected medium, high, or critical');
+    }
+
+    selected = value as FailOnSeverity;
+  }
+
+  return selected;
+}
+
 interface ScanRule {
   id: string;
   name: string;
@@ -694,20 +808,32 @@ class TechDebtScanner {
     }
     
     // 找出重复的代码块
-    for (const [hash, occurrences] of blockMap.entries()) {
+    const duplicateCandidates: DuplicateCandidate[] = [];
+    for (const occurrences of blockMap.values()) {
       if (occurrences.length > 1) {
         // 只报告第一次出现的位置
         const firstOccurrence = occurrences[0];
         const codePreview = this.getCodePreview(firstOccurrence.originalCode);
-        
+
+        duplicateCandidates.push({
+          occurrences: occurrences.map(occurrence => occurrence.line),
+          blockLines: MIN_DUPLICATE_LINES,
+          preview: codePreview
+        });
+      }
+    }
+
+    for (const candidate of dedupeDuplicateCandidates(duplicateCandidates)) {
+      const firstLine = candidate.occurrences[0];
+      if (firstLine !== undefined) {
         this.addIssue({
           ruleId: 'duplicate-code',
           severity: 'medium',
-          message: `发现重复代码块（共 ${occurrences.length} 处，行数 ≥ ${MIN_DUPLICATE_LINES}）`,
+          message: `发现重复代码块（共 ${candidate.occurrences.length} 处，行数 ≥ ${candidate.blockLines}）`,
           file: filePath,
-          line: firstOccurrence.line,
+          line: firstLine,
           column: 1,
-          code: codePreview
+          code: candidate.preview
         });
       }
     }
@@ -948,6 +1074,15 @@ ${this.renderIssueDetails(report)}
 // ============================================================================
 
 function main(): void {
+  let failOnSeverity: FailOnSeverity;
+  try {
+    failOnSeverity = parseFailOnSeverity(process.argv.slice(2));
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+    return;
+  }
+
   console.log('🔍 开始扫描技术债务...\n');
 
   // 创建扫描器
@@ -985,9 +1120,9 @@ function main(): void {
   console.log(`债务比率: ${(report.metrics.debtRatio * 100).toFixed(2)}%`);
   console.log('=====================================\n');
 
-  // 如果有严重或高优先级问题，返回非零退出码
-  if (report.summary.bySeverity.critical > 0 || report.summary.bySeverity.high > 0) {
-    process.exit(1);
+  // 如果达到选定严重级别的问题存在，返回非零退出码
+  if (shouldFailOnSeverity(report.summary.bySeverity, failOnSeverity)) {
+    process.exitCode = 1;
   }
 }
 
@@ -995,15 +1130,27 @@ function main(): void {
 // 兼容 Windows 和 Unix 系统
 const isMainModule = () => {
   if (typeof process.argv[1] === 'undefined') return false;
-  
-  const scriptPath = fileURLToPath(import.meta.url);
-  const argPath = path.resolve(process.argv[1]);
-  
-  return scriptPath === argPath;
+
+  try {
+    const scriptPath = fs.realpathSync(fileURLToPath(import.meta.url));
+    const argPath = fs.realpathSync(path.resolve(process.argv[1]));
+    return scriptPath === argPath;
+  } catch {
+    return false;
+  }
 };
 
 if (isMainModule()) {
   main();
 }
 
-export { TechDebtScanner, TechDebtReport, TechDebtIssue, ScanRule };
+export {
+  dedupeDuplicateCandidates,
+  shouldFailOnSeverity,
+  TechDebtScanner,
+  TechDebtReport,
+  TechDebtIssue,
+  ScanRule,
+  DuplicateCandidate,
+  Severity
+};

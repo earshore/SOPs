@@ -310,8 +310,7 @@ async function importDeepChat(options: ImportOptions = {}) {
     options.callLLM ||
       (async (...args: unknown[]) => {
         const callOptions = args[5] as
-          | { onStreamUpdate?: (update: { delta: string }) => void }
-          | undefined;
+          { onStreamUpdate?: (update: { delta: string }) => void } | undefined;
         callOptions?.onStreamUpdate?.({ delta: 'Streamed ' });
         callOptions?.onStreamUpdate?.({ delta: 'answer' });
         return 'Streamed answer';
@@ -396,6 +395,34 @@ async function importDeepChat(options: ImportOptions = {}) {
       toast,
     },
   };
+}
+
+type DeepChatMocks = Awaited<ReturnType<typeof importDeepChat>>['mocks'];
+
+function expectPersistedThread(
+  mocks: DeepChatMocks,
+  expectedThread: Record<string, unknown>
+): void {
+  expect(mocks.localDataStore.set).toHaveBeenLastCalledWith(
+    'user:playground_deep_chat_threads_v1',
+    expect.objectContaining({
+      threads: expect.arrayContaining([expect.objectContaining(expectedThread)]),
+    }),
+    'user-data'
+  );
+}
+
+function expectSelectedPrompt(container: HTMLElement, text: string, pressed: boolean): void {
+  const prompt = [
+    ...container.querySelectorAll<HTMLButtonElement>('[data-use-prompt-draft-id]'),
+  ].find(item => item.textContent?.includes(text));
+  expect(prompt, `Prompt not found: ${text}`).toBeDefined();
+  expect(prompt?.getAttribute('aria-pressed')).toBe(String(pressed));
+  if (pressed) {
+    expect(container.querySelector('.deep-chat-prompt-item.is-selected')?.textContent).toContain(
+      text
+    );
+  }
 }
 
 function getChat(container: HTMLElement): TestDeepChatElement {
@@ -873,18 +900,10 @@ describe('deep-chat Prompt handoff', () => {
       'Rewrite this listing'
     );
     expect(mocks.listingWorkflowHandoff.consumeListingPromptForDeepChat()).toBeNull();
-    expect(mocks.localDataStore.set).toHaveBeenCalledWith(
-      'user:playground_deep_chat_threads_v1',
-      expect.objectContaining({
-        threads: expect.arrayContaining([
-          expect.objectContaining({
-            promptDraftId: 'prompt-1',
-            listingPromptContext: promptContext,
-          }),
-        ]),
-      }),
-      'user-data'
-    );
+    expectPersistedThread(mocks, {
+      promptDraftId: 'prompt-1',
+      listingPromptContext: promptContext,
+    });
 
     unmount();
   });
@@ -1049,19 +1068,11 @@ describe('deep-chat playground thread menu', () => {
     expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
       'Renamed thread'
     );
-    expect(mocks.localDataStore.set).toHaveBeenLastCalledWith(
-      'user:playground_deep_chat_threads_v1',
-      expect.objectContaining({
-        threads: expect.arrayContaining([
-          expect.objectContaining({
-            id: 'thread-2',
-            title: 'Renamed thread',
-            customTitle: 'Renamed thread',
-          }),
-        ]),
-      }),
-      'user-data'
-    );
+    expectPersistedThread(mocks, {
+      id: 'thread-2',
+      title: 'Renamed thread',
+      customTitle: 'Renamed thread',
+    });
 
     openThreadMenu('thread-2');
     queryRequired<HTMLButtonElement>(container, '[data-thread-menu-action="delete"]').click();
@@ -1085,43 +1096,17 @@ describe('deep-chat playground prompt selection', () => {
 
     queryRequired<HTMLButtonElement>(container, '[data-use-prompt-draft-id="prompt-1"]').click();
 
-    expect(container.querySelector('.deep-chat-prompt-item.is-selected')?.textContent).toContain(
-      'Rewrite this listing'
-    );
-    expect(
-      queryRequired<HTMLButtonElement>(
-        container,
-        '[data-use-prompt-draft-id="prompt-1"]'
-      ).getAttribute('aria-pressed')
-    ).toBe('true');
+    expectSelectedPrompt(container, 'Rewrite this listing', true);
 
     queryRequired<HTMLButtonElement>(container, '[data-thread-id="thread-1"]').click();
 
     expect(container.querySelector('.deep-chat-prompt-item.is-selected')).toBeNull();
-    expect(
-      queryRequired<HTMLButtonElement>(
-        container,
-        '[data-use-prompt-draft-id="prompt-1"]'
-      ).getAttribute('aria-pressed')
-    ).toBe('false');
+    expectSelectedPrompt(container, 'Rewrite this listing', false);
 
     queryRequired<HTMLButtonElement>(container, '[data-use-prompt-draft-id="prompt-2"]').click();
 
-    expect(container.querySelector('.deep-chat-prompt-item.is-selected')?.textContent).toContain(
-      'Create a visual concept'
-    );
-    expect(
-      queryRequired<HTMLButtonElement>(
-        container,
-        '[data-use-prompt-draft-id="prompt-2"]'
-      ).getAttribute('aria-pressed')
-    ).toBe('true');
-    expect(
-      queryRequired<HTMLButtonElement>(
-        container,
-        '[data-use-prompt-draft-id="prompt-1"]'
-      ).getAttribute('aria-pressed')
-    ).toBe('false');
+    expectSelectedPrompt(container, 'Create a visual concept', true);
+    expectSelectedPrompt(container, 'Rewrite this listing', false);
 
     unmount();
   });
@@ -1152,15 +1137,7 @@ describe('deep-chat playground prompt selection', () => {
     unmount();
     await mount(container);
 
-    expect(container.querySelector('.deep-chat-prompt-item.is-selected')?.textContent).toContain(
-      'Rewrite this listing'
-    );
-    expect(
-      queryRequired<HTMLButtonElement>(
-        container,
-        '[data-use-prompt-draft-id="prompt-1"]'
-      ).getAttribute('aria-pressed')
-    ).toBe('true');
+    expectSelectedPrompt(container, 'Rewrite this listing', true);
 
     unmount();
   });
@@ -1344,8 +1321,7 @@ describe('deep-chat playground remount streaming', () => {
     const { mount, unmount, mocks } = await importDeepChat({
       callLLM: async (...args: unknown[]) => {
         const callOptions = args[5] as
-          | { onStreamUpdate?: (update: { delta: string }) => void }
-          | undefined;
+          { onStreamUpdate?: (update: { delta: string }) => void } | undefined;
         callOptions?.onStreamUpdate?.({ delta: 'First ' });
         await streamGate;
         callOptions?.onStreamUpdate?.({ delta: 'Second' });
@@ -1584,8 +1560,7 @@ describe('deep-chat playground timeout responses', () => {
     const { mount, unmount, mocks } = await importDeepChat({
       callLLM: async (...args: unknown[]) => {
         const callOptions = args[5] as
-          | { onStreamUpdate?: (update: { delta: string }) => void }
-          | undefined;
+          { onStreamUpdate?: (update: { delta: string }) => void } | undefined;
         callOptions?.onStreamUpdate?.({ delta: '已生成的' });
         callOptions?.onStreamUpdate?.({ delta: '回复内容' });
         throw timeoutError;
@@ -1723,19 +1698,11 @@ describe('deep-chat playground inline rename commits', () => {
     input.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
     await vi.runAllTimersAsync();
 
-    expect(mocks.localDataStore.set).toHaveBeenCalledWith(
-      'user:playground_deep_chat_threads_v1',
-      expect.objectContaining({
-        threads: expect.arrayContaining([
-          expect.objectContaining({
-            id: 'thread-2',
-            title: 'Blurred name',
-            customTitle: 'Blurred name',
-          }),
-        ]),
-      }),
-      'user-data'
-    );
+    expectPersistedThread(mocks, {
+      id: 'thread-2',
+      title: 'Blurred name',
+      customTitle: 'Blurred name',
+    });
 
     unmount();
   });

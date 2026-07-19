@@ -525,7 +525,17 @@ import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
       // 验证：应该显示无数据提示
       await expect(page.getByRole('heading', { name: '还没有产品数据' }).first()).toBeVisible();
-      await expect(page.getByRole('link', { name: /前往数据采集/ })).toBeVisible();
+      await expect(page.getByRole('button', { name: '去数据采集' }).first()).toBeVisible();
+
+      await page.goto('/#/app-center/master-analysis/scraper', { waitUntil: 'domcontentloaded' });
+      await page
+        .locator('#main-content[data-current-route="scraper"]')
+        .waitFor({ state: 'visible', timeout: 15000 });
+      await expect(page.getByText('正在加载历史快照...', { exact: true })).toBeHidden({
+        timeout: 15000,
+      });
+      await expect(page.getByText('还没有历史快照', { exact: true })).toBeVisible();
+      await expect(page.locator('button[aria-label="加载快照"]')).toHaveCount(0);
 
       console.log('✅ 无数据提示显示正确');
     });

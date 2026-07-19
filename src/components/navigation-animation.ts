@@ -58,9 +58,7 @@ export interface DropdownAnimationOptions {
 }
 
 type NavigationAnimationOptions =
-  | PageTransitionOptions
-  | SidebarAnimationOptions
-  | DropdownAnimationOptions;
+  PageTransitionOptions | SidebarAnimationOptions | DropdownAnimationOptions;
 
 interface NavigationTransitionRunner {
   isComplete: () => boolean;

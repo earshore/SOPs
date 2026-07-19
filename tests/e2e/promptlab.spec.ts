@@ -4,7 +4,11 @@
 // 测试 Promptlab 完整流程：填写产品 DNA、选择分析报告、生成 Prompt
 // ================================================================
 
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import {
+  clearAnalysisHistoryFixture,
+  loadAnalysisHistoryFixture,
+} from './ai-analysis-fixtures';
 import { PromptlabPage } from './pages/PromptlabPage';
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 import { SAMPLE_ANALYSIS_REPORT } from '../../src/modules/app_center/views/master_analysis/ai_analysis/config/analysisReportData';
@@ -19,44 +23,17 @@ const PROMPTLAB_E2E_REPORT = {
   },
 };
 
-type AppStoreWindow = Window & {
-  appStore?: { getState?: () => { setAnalysisReport?: (report: unknown) => void } };
-};
-
-async function setAnalysisReport(page: Page, report: unknown): Promise<void> {
-  await page.waitForFunction(() => {
-    const appWindow = window as AppStoreWindow;
-    return typeof appWindow.appStore?.getState?.().setAnalysisReport === 'function';
-  });
-
-  await page.evaluate(reportValue => {
-    const appWindow = window as AppStoreWindow;
-    appWindow.appStore?.getState?.().setAnalysisReport?.(reportValue);
-  }, report);
-}
-
-async function seedPromptlabReport(page: Page): Promise<void> {
-  await setAnalysisReport(page, PROMPTLAB_E2E_REPORT);
-  await page.locator('#lab-analysis-status').getByText(/分析报告已就绪/).waitFor({
-    timeout: 5000,
-  });
-}
-
-async function clearAnalysisReport(page: Page): Promise<void> {
-  await setAnalysisReport(page, null);
-  await page.locator('#lab-analysis-status').getByText(/未检测到分析报告/).waitFor({
-    timeout: 5000,
-  });
-}
-
   let promptlab: PromptlabPage;
 
   test.beforeEach(async ({ page }) => {
+    await loadAnalysisHistoryFixture(page, PROMPTLAB_E2E_REPORT);
     promptlab = new PromptlabPage(page);
     
     // 导航到 Promptlab 页面
     await promptlab.navigate();
-    await seedPromptlabReport(page);
+    await page.locator('#lab-analysis-status').getByText(/分析报告已就绪/).waitFor({
+      timeout: 5000,
+    });
   });
 
   test.describe('页面加载与初始化', () => {
@@ -504,7 +481,7 @@ async function clearAnalysisReport(page: Page): Promise<void> {
     });
 
     test('应该在没有分析报告时显示提示', async ({ page }) => {
-      await clearAnalysisReport(page);
+      await clearAnalysisHistoryFixture(page);
 
       // 填写必填字段
       await promptlab.fillProductDNA({
