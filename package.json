@@ -76,7 +76,7 @@
     "test:startup": "playwright test tests/startup --workers=1",
     "test:performance": "npm run test:performance:gate",
     "test:performance:gate": "playwright test --config=config/playwright.performance.config.ts",
-\n    "performance:report": "tsx tests/performance/generate-performance-report.ts",
+    "performance:report": "tsx tests/performance/generate-performance-report.ts",
     "test:visual": "playwright test tests/visual",
     "test:visual:update": "playwright test tests/visual --update-snapshots",
     "test:visual:headed": "playwright test tests/visual --headed",
@@ -118,7 +118,8 @@
     "release:package": "tsx scripts/release/prepare-release.ts package",
     "release:backfill-notes": "node scripts/release/backfill-release-notes.mjs",
     "release:sync-all": "node scripts/release/fetch-all-releases.mjs && node scripts/release/sync-all-releases.mjs",
-    "release:audit": "node scripts/release/audit-releases.mjs"
+    "release:audit": "node scripts/release/audit-releases.mjs",
+    "test:performance:functional": "playwright test --config=config/playwright.functional-performance.config.ts"
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^8.0.0",
