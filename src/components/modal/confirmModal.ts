@@ -53,19 +53,27 @@ function buildDontAskMarkup(modalId: string, ignoreKey: string): string {
     `;
 }
 
-function buildModalContent(
-  modalId: string,
-  request: ConfirmModalRequest,
-  renderer: SafeRenderer
-): string {
-  const titleId = `${modalId}-title`;
-  const descriptionId = `${modalId}-description`;
-  const variantClass = request.isDestructive
+function buildDialogShell(options: {
+  modalId: string;
+  title: string;
+  descriptionHtml: string;
+  isDestructive: boolean;
+  bodyExtraHtml?: string;
+  actionsHtml: string;
+  descriptionClass?: string;
+  actionsClass?: string;
+  renderer: SafeRenderer;
+}): string {
+  const titleId = `${options.modalId}-title`;
+  const descriptionId = `${options.modalId}-description`;
+  const variantClass = options.isDestructive
     ? 'app-confirm-modal--danger'
     : 'app-confirm-modal--theme';
-  const iconClass = request.isDestructive
+  const iconClass = options.isDestructive
     ? 'fas fa-exclamation-triangle'
     : 'fas fa-circle-question';
+  const descriptionClass = options.descriptionClass || 'text-slate-600 text-sm mb-4';
+  const actionsClass = options.actionsClass || 'flex justify-end gap-3';
 
   return `
         <div class="app-confirm-modal ${variantClass} bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition"
@@ -76,25 +84,60 @@ function buildModalContent(
             <div class="app-confirm-modal-header p-5 text-white">
                 <h3 id="${titleId}" class="text-lg font-bold flex items-center gap-2">
                     <i class="${iconClass}" aria-hidden="true"></i>
-                    ${renderer.escapeHtml(request.title)}
+                    ${options.renderer.escapeHtml(options.title)}
                 </h3>
             </div>
 
             <div class="p-6">
-                <p id="${descriptionId}" class="text-slate-600 text-sm mb-4">${request.content}</p>
-                ${buildDontAskMarkup(modalId, request.ignoreKey)}
+                <p id="${descriptionId}" class="${descriptionClass}">${options.descriptionHtml}</p>
+                ${options.bodyExtraHtml || ''}
 
-                <div class="flex justify-end gap-3">
-                    <button type="button" id="btn-cancel-${modalId}" class="min-h-10 px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
-                        取消
-                    </button>
-                    <button type="button" id="btn-confirm-${modalId}" class="app-confirm-modal-confirm min-h-10 px-5 py-2 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
-                        ${renderer.escapeHtml(request.confirmLabel)}
-                    </button>
+                <div class="${actionsClass}">
+                    ${options.actionsHtml}
                 </div>
             </div>
         </div>
     `;
+}
+
+function buildCancelButton(modalId: string, label: string, renderer: SafeRenderer): string {
+  return `
+                    <button type="button" id="btn-cancel-${modalId}" class="min-h-10 px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
+                        ${renderer.escapeHtml(label)}
+                    </button>`;
+}
+
+function buildPrimaryButton(
+  modalId: string,
+  buttonId: string,
+  label: string,
+  renderer: SafeRenderer
+): string {
+  return `
+                    <button type="button" id="${buttonId}-${modalId}" class="app-confirm-modal-confirm min-h-10 px-5 py-2 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+                        ${renderer.escapeHtml(label)}
+                    </button>`;
+}
+
+function buildModalContent(
+  modalId: string,
+  request: ConfirmModalRequest,
+  renderer: SafeRenderer
+): string {
+  return buildDialogShell({
+    modalId,
+    title: request.title,
+    descriptionHtml: request.content,
+    isDestructive: request.isDestructive,
+    bodyExtraHtml: buildDontAskMarkup(modalId, request.ignoreKey),
+    actionsHtml: `${buildCancelButton(modalId, '取消', renderer)}${buildPrimaryButton(
+      modalId,
+      'btn-confirm',
+      request.confirmLabel,
+      renderer
+    )}`,
+    renderer,
+  });
 }
 
 function getElements(modalId: string, backdrop: HTMLDivElement): ConfirmModalElements {
@@ -248,46 +291,27 @@ function buildChoiceModalContent(
   request: ChoiceModalRequest,
   renderer: SafeRenderer
 ): string {
-  const titleId = `${modalId}-title`;
-  const descriptionId = `${modalId}-description`;
-  const variantClass = request.primaryIsDestructive
-    ? 'app-confirm-modal--danger'
-    : 'app-confirm-modal--theme';
-  const iconClass = request.primaryIsDestructive
-    ? 'fas fa-exclamation-triangle'
-    : 'fas fa-circle-question';
   const safeContent = renderer.escapeHtml(request.content).replace(/\r\n|\n|\r/g, '<br>');
-
-  return `
-        <div class="app-confirm-modal ${variantClass} bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="${titleId}"
-            aria-describedby="${descriptionId}">
-            <div class="app-confirm-modal-header p-5 text-white">
-                <h3 id="${titleId}" class="text-lg font-bold flex items-center gap-2">
-                    <i class="${iconClass}" aria-hidden="true"></i>
-                    ${renderer.escapeHtml(request.title)}
-                </h3>
-            </div>
-
-            <div class="p-6">
-                <p id="${descriptionId}" class="text-slate-600 text-sm mb-4 leading-relaxed">${safeContent}</p>
-
-                <div class="flex flex-wrap justify-end gap-2">
-                    <button type="button" id="btn-cancel-${modalId}" class="min-h-10 px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
-                        ${renderer.escapeHtml(request.cancelLabel)}
-                    </button>
+  const secondaryButton = `
                     <button type="button" id="btn-secondary-${modalId}" class="min-h-10 px-4 py-2 border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                         ${renderer.escapeHtml(request.secondaryLabel)}
-                    </button>
-                    <button type="button" id="btn-primary-${modalId}" class="app-confirm-modal-confirm min-h-10 px-5 py-2 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
-                        ${renderer.escapeHtml(request.primaryLabel)}
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
+                    </button>`;
+
+  return buildDialogShell({
+    modalId,
+    title: request.title,
+    descriptionHtml: safeContent,
+    isDestructive: request.primaryIsDestructive,
+    descriptionClass: 'text-slate-600 text-sm mb-4 leading-relaxed',
+    actionsClass: 'flex flex-wrap justify-end gap-2',
+    actionsHtml: `${buildCancelButton(modalId, request.cancelLabel, renderer)}${secondaryButton}${buildPrimaryButton(
+      modalId,
+      'btn-primary',
+      request.primaryLabel,
+      renderer
+    )}`,
+    renderer,
+  });
 }
 
 function mountChoiceModal(request: ChoiceModalRequest): void {
