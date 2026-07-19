@@ -633,7 +633,7 @@ B0EXAMPLE1"
           </button>
         </div>
         <div
-          class="p-4 space-y-2 max-h-[301px] overflow-y-auto custom-scrollbar"
+          class="p-4 space-y-2"
           role="region"
           aria-label="历史快照列表"
           tabindex="0"
@@ -755,7 +755,7 @@ B0EXAMPLE1"
           </template>
           <!-- Empty State -->
           <div
-            class="empty-state flex min-h-[261px] flex-col items-center justify-center py-16 text-slate-300 border-2 border-dashed border-slate-100 rounded-2xl bg-gradient-to-b from-slate-50/50 to-white"
+            class="empty-state flex flex-col items-center justify-center py-10 text-slate-300 border-2 border-dashed border-slate-100 rounded-2xl bg-gradient-to-b from-slate-50/50 to-white"
             :class="showHistoryEmpty ? '' : 'hidden'"
             x-transition:enter="transition ease-out duration-500"
             x-transition:enter-end="opacity-100 scale-100"
