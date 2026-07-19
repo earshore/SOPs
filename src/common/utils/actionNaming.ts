@@ -6,6 +6,7 @@ export const ACTION_GLOBAL_NAMES = [
   'clear-sidebar-search',
   'openSettings',
   'closeSettings',
+  'downloadAmazonInsightPlugin',
   'saveProviderConfig',
   'loadProviderConfig',
   'fetchModels',

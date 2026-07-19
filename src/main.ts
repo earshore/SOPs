@@ -97,11 +97,13 @@ import {
   renderHubMegaMenu,
   renderMoreMenu,
   initMegaMenuAccessibility,
+  closeMegaMenus,
   revealMainContent,
   showToast,
 } from '@/common/ui';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { APP_VERSION } from '@/common/constants/constants';
+import { openAmazonInsightPluginDownload } from '@/common/utils/openAmazonInsightPluginDownload';
 import { initHomeSplash } from './modules/home/homeDisplay';
 
 // Domain shells register route listeners — load them in parallel with bootstrap
@@ -676,6 +678,10 @@ registerActionsWithLegacy({
   // === Settings 设置（懒加载 settings 模块） ===
   openSettings: async () => withSystemSettings(s => s.openSettings()),
   closeSettings: async () => withSystemSettings(s => s.closeSettings()),
+  downloadAmazonInsightPlugin: () => {
+    closeMegaMenus({ blurActive: true });
+    openAmazonInsightPluginDownload();
+  },
   saveProviderConfig: async () => withSystemSettings(s => s.saveProviderConfig()),
   loadProviderConfig: async () => withSystemSettings(s => s.loadProviderConfig()),
   fetchModels: async () => withSystemSettings(s => s.fetchModels()),

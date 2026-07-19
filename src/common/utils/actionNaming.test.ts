@@ -11,6 +11,10 @@ describe('action naming conventions', () => {
       valid: true,
       kind: 'global',
     });
+    expect(validateRegistryActionName('downloadAmazonInsightPlugin')).toMatchObject({
+      valid: true,
+      kind: 'global',
+    });
   });
 
   it('accepts prefixed legacy registry actions with camelCase suffixes', () => {

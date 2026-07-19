@@ -465,7 +465,7 @@ it('imports files, deletes data, and handles delete results', async () => {
   expect(panel.dataPreview.updateData).toHaveBeenCalled();
 });
 
-it('handles import/download edge branches without data changes', async () => {
+it('handles import edge branches without data changes', async () => {
   const panel = createScraperPanel() as ScraperPanel;
   const input = document.createElement('input');
   Object.defineProperty(input, 'files', {
@@ -487,16 +487,6 @@ it('handles import/download edge branches without data changes', async () => {
   fileInput.remove();
   expect(() => panel.triggerImport()).not.toThrow();
 
-  const openSpy = vi.spyOn(window, 'open').mockReturnValueOnce(null);
-  panel.downloadPlugin();
-  expect(showToast).toHaveBeenCalledWith('请允许浏览器弹窗以打开下载页面', { type: 'warning' });
-
-  openSpy.mockImplementationOnce(() => {
-    throw new Error('blocked');
-  });
-  panel.downloadPlugin();
-  expect(showToast).toHaveBeenCalledWith('打开下载页面失败', { type: 'error' });
-  openSpy.mockRestore();
 });
 
 it('runs scrape success and failure paths', async () => {

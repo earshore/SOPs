@@ -746,19 +746,6 @@ const scraperPanelBehavior: ScraperPanelBehavior = {
     }
   },
 
-  downloadPlugin(): void {
-    const url = 'https://github.com/earshore/Amazon-Scraper/releases';
-    try {
-      const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-      if (!newWindow) {
-        showToast('请允许浏览器弹窗以打开下载页面', { type: 'warning' });
-      }
-    } catch (error) {
-      console.error('[Scraper] ❌ 打开窗口失败:', error);
-      showToast('打开下载页面失败', { type: 'error' });
-    }
-  },
-
   async handleImportFiles(event: Event): Promise<void> {
     const target = event.target as HTMLInputElement;
     const files = Array.from(target.files || []);
