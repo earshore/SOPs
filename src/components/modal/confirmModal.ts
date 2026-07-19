@@ -221,3 +221,167 @@ export function confirmWithModal(
     });
   });
 }
+
+export type ModalChoice = 'primary' | 'secondary' | 'cancel';
+
+export interface ChooseWithModalOptions {
+  title: string;
+  content: string;
+  primaryLabel: string;
+  secondaryLabel: string;
+  cancelLabel?: string;
+  primaryIsDestructive?: boolean;
+}
+
+interface ChoiceModalRequest {
+  title: string;
+  content: string;
+  primaryLabel: string;
+  secondaryLabel: string;
+  cancelLabel: string;
+  primaryIsDestructive: boolean;
+  resolve: (result: ModalChoice) => void;
+}
+
+function buildChoiceModalContent(
+  modalId: string,
+  request: ChoiceModalRequest,
+  renderer: SafeRenderer
+): string {
+  const titleId = `${modalId}-title`;
+  const descriptionId = `${modalId}-description`;
+  const variantClass = request.primaryIsDestructive
+    ? 'app-confirm-modal--danger'
+    : 'app-confirm-modal--theme';
+  const iconClass = request.primaryIsDestructive
+    ? 'fas fa-exclamation-triangle'
+    : 'fas fa-circle-question';
+  const safeContent = renderer.escapeHtml(request.content).replace(/\r\n|\n|\r/g, '<br>');
+
+  return `
+        <div class="app-confirm-modal ${variantClass} bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="${titleId}"
+            aria-describedby="${descriptionId}">
+            <div class="app-confirm-modal-header p-5 text-white">
+                <h3 id="${titleId}" class="text-lg font-bold flex items-center gap-2">
+                    <i class="${iconClass}" aria-hidden="true"></i>
+                    ${renderer.escapeHtml(request.title)}
+                </h3>
+            </div>
+
+            <div class="p-6">
+                <p id="${descriptionId}" class="text-slate-600 text-sm mb-4 leading-relaxed">${safeContent}</p>
+
+                <div class="flex flex-wrap justify-end gap-2">
+                    <button type="button" id="btn-cancel-${modalId}" class="min-h-10 px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
+                        ${renderer.escapeHtml(request.cancelLabel)}
+                    </button>
+                    <button type="button" id="btn-secondary-${modalId}" class="min-h-10 px-4 py-2 border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                        ${renderer.escapeHtml(request.secondaryLabel)}
+                    </button>
+                    <button type="button" id="btn-primary-${modalId}" class="app-confirm-modal-confirm min-h-10 px-5 py-2 text-white rounded-lg text-sm font-bold shadow-md transition-transform transform active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+                        ${renderer.escapeHtml(request.primaryLabel)}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function mountChoiceModal(request: ChoiceModalRequest): void {
+  const renderer = SafeRenderer.getInstance();
+  const modalId = `choice-modal-${Date.now()}`;
+  const backdrop = createBackdrop(modalId);
+  const previousActiveElement = getPreviousActiveElement();
+
+  renderer.renderTemplate(backdrop, buildChoiceModalContent(modalId, request, renderer));
+  document.body.appendChild(backdrop);
+
+  const elements = {
+    backdrop,
+    btnPrimary: document.getElementById(`btn-primary-${modalId}`) as HTMLButtonElement | null,
+    btnSecondary: document.getElementById(`btn-secondary-${modalId}`) as HTMLButtonElement | null,
+    btnCancel: document.getElementById(`btn-cancel-${modalId}`) as HTMLButtonElement | null,
+  };
+
+  let resolved = false;
+  const handlers = {
+    handlePrimary: (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      finish('primary');
+    },
+    handleSecondary: (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      finish('secondary');
+    },
+    handleCancel: (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      finish('cancel');
+    },
+    handleBackdropClick: (event: MouseEvent) => {
+      if (event.target === elements.backdrop) finish('cancel');
+    },
+    handleEscape: (event: KeyboardEvent) => {
+      if (event.key === 'Escape') finish('cancel');
+    },
+  };
+
+  const finish = (result: ModalChoice) => {
+    if (resolved) return;
+    resolved = true;
+    elements.btnPrimary?.removeEventListener('click', handlers.handlePrimary);
+    elements.btnSecondary?.removeEventListener('click', handlers.handleSecondary);
+    elements.btnCancel?.removeEventListener('click', handlers.handleCancel);
+    elements.backdrop.removeEventListener('click', handlers.handleBackdropClick);
+    document.removeEventListener('keydown', handlers.handleEscape);
+    try {
+      if (document.body.contains(elements.backdrop)) {
+        document.body.removeChild(elements.backdrop);
+      }
+      if (previousActiveElement?.isConnected) {
+        previousActiveElement.focus();
+      }
+    } catch (error) {
+      console.error('[AppConfirmModal] failed to clean up choice dialog', error);
+    }
+    request.resolve(result);
+  };
+
+  if (!elements.btnPrimary || !elements.btnSecondary || !elements.btnCancel) {
+    console.error('[AppConfirmModal] choice dialog rendered without required controls');
+    finish('cancel');
+    return;
+  }
+
+  elements.btnPrimary.addEventListener('click', handlers.handlePrimary, { once: true });
+  elements.btnSecondary.addEventListener('click', handlers.handleSecondary, { once: true });
+  elements.btnCancel.addEventListener('click', handlers.handleCancel, { once: true });
+  elements.backdrop.addEventListener('click', handlers.handleBackdropClick);
+  document.addEventListener('keydown', handlers.handleEscape);
+  requestAnimationFrame(() => elements.btnCancel?.focus());
+}
+
+/**
+ * Three-way choice dialog: primary / secondary / cancel.
+ * Escape, backdrop click, and cancel all resolve to "cancel".
+ */
+export function chooseWithModal(options: ChooseWithModalOptions): Promise<ModalChoice> {
+  return new Promise(resolve => {
+    mountChoiceModal({
+      title: options.title,
+      content: options.content,
+      primaryLabel: options.primaryLabel,
+      secondaryLabel: options.secondaryLabel,
+      cancelLabel: options.cancelLabel || '取消',
+      primaryIsDestructive:
+        options.primaryIsDestructive ??
+        isDestructiveConfirmation(options.title, options.content, options.primaryLabel),
+      resolve,
+    });
+  });
+}

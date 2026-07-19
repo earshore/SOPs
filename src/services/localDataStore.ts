@@ -41,6 +41,15 @@ export interface LocalDataImportOptions {
   mode?: 'merge' | 'replace';
 }
 
+export interface LocalDataExportSummary {
+  exportedAt: string;
+  storageVersion: string;
+  localStorageKeys: number;
+  indexedDbRecords: number;
+  estimatedBytes: number;
+  includesSecrets: boolean;
+}
+
 export interface LocalDataUsage {
   localStorage: {
     used: number;
@@ -272,6 +281,52 @@ function assertSupportedLocalDataExport(data: LocalDataExport): void {
       action: 'assertSupportedLocalDataExport',
     });
   }
+}
+
+function exportIncludesSecrets(data: LocalDataExport): boolean {
+  for (const key of Object.keys(data.localStorage)) {
+    if (isSecretBucketKey(key)) {
+      return true;
+    }
+  }
+
+  for (const record of data.indexedDB) {
+    if (
+      record &&
+      typeof record.key === 'string' &&
+      isSecretBucketKey(record.key, record.storageClass)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Validate a backup payload and return a human-readable import summary.
+ */
+export function summarizeLocalDataExport(data: unknown): LocalDataExportSummary {
+  assertSupportedLocalDataExport(data as LocalDataExport);
+  const exportData = data as LocalDataExport;
+  const localStorageKeys = Object.keys(exportData.localStorage).length;
+  const indexedDbRecords = exportData.indexedDB.length;
+  let estimatedBytes = 0;
+
+  try {
+    estimatedBytes = JSON.stringify(exportData).length * 2;
+  } catch {
+    estimatedBytes = localStorageKeys * 32 + indexedDbRecords * 64;
+  }
+
+  return {
+    exportedAt: exportData.exportedAt || '未知时间',
+    storageVersion: exportData.metadata.storageVersion,
+    localStorageKeys,
+    indexedDbRecords,
+    estimatedBytes,
+    includesSecrets: exportIncludesSecrets(exportData),
+  };
 }
 
 function collectImportLocalStorageEntries(

@@ -38,7 +38,7 @@ vi.mock('@/common/infrastructure/SafeRenderer', () => ({
   },
 }));
 
-import { confirmWithModal } from './confirmModal';
+import { chooseWithModal, confirmWithModal } from './confirmModal';
 
 function getBackdrop(): HTMLElement | null {
   return document.querySelector('.app-confirm-modal-backdrop');
@@ -165,5 +165,79 @@ describe('shared confirmWithModal', () => {
       '[AppConfirmModal] confirmation dialog rendered without required controls'
     );
     errorSpy.mockRestore();
+  });
+});
+
+describe('shared chooseWithModal', () => {
+  function getPrimaryButton(): HTMLButtonElement {
+    const button = document.querySelector('.app-confirm-modal-confirm');
+    expect(button).toBeInstanceOf(HTMLButtonElement);
+    return button as HTMLButtonElement;
+  }
+
+  function getSecondaryButton(): HTMLButtonElement {
+    const buttons = Array.from(document.querySelectorAll('.app-confirm-modal button'));
+    const secondary = buttons.find(button => button.textContent?.includes('合并导入'));
+    expect(secondary).toBeInstanceOf(HTMLButtonElement);
+    return secondary as HTMLButtonElement;
+  }
+
+  function getCancelButton(): HTMLButtonElement {
+    const buttons = Array.from(document.querySelectorAll('.app-confirm-modal button'));
+    const cancel = buttons.find(button => button.textContent?.includes('取消'));
+    expect(cancel).toBeInstanceOf(HTMLButtonElement);
+    return cancel as HTMLButtonElement;
+  }
+
+  it('resolves primary, secondary, and cancel distinctly', async () => {
+    const primaryPromise = chooseWithModal({
+      title: '导入本地数据',
+      content: '选择导入方式',
+      primaryLabel: '完整恢复',
+      secondaryLabel: '合并导入',
+      cancelLabel: '取消',
+      primaryIsDestructive: true,
+    });
+    getPrimaryButton().click();
+    await expect(primaryPromise).resolves.toBe('primary');
+    expect(getBackdrop()).toBeNull();
+
+    const secondaryPromise = chooseWithModal({
+      title: '导入本地数据',
+      content: '选择导入方式',
+      primaryLabel: '完整恢复',
+      secondaryLabel: '合并导入',
+    });
+    getSecondaryButton().click();
+    await expect(secondaryPromise).resolves.toBe('secondary');
+
+    const cancelPromise = chooseWithModal({
+      title: '导入本地数据',
+      content: '选择导入方式',
+      primaryLabel: '完整恢复',
+      secondaryLabel: '合并导入',
+    });
+    getCancelButton().click();
+    await expect(cancelPromise).resolves.toBe('cancel');
+  });
+
+  it('treats escape and backdrop click as cancel without importing', async () => {
+    const escapePromise = chooseWithModal({
+      title: '导入本地数据',
+      content: '选择导入方式',
+      primaryLabel: '完整恢复',
+      secondaryLabel: '合并导入',
+    });
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await expect(escapePromise).resolves.toBe('cancel');
+
+    const backdropPromise = chooseWithModal({
+      title: '导入本地数据',
+      content: '选择导入方式',
+      primaryLabel: '完整恢复',
+      secondaryLabel: '合并导入',
+    });
+    getBackdrop()?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await expect(backdropPromise).resolves.toBe('cancel');
   });
 });

@@ -29,7 +29,7 @@ import {
   type ScraperProxyProviderConfig,
 } from '@/common/config/scraperProxies';
 import { showToast } from '@/common/ui';
-import { confirmWithModal } from '@/components/modal/confirmModal';
+import { chooseWithModal, confirmWithModal } from '@/components/modal/confirmModal';
 import { initEventLogger } from '@/common/utils/eventLogger';
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorageBoundary';
@@ -37,7 +37,9 @@ import { fetchModelsFromApi, callLLM } from '@/services/llmService';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
   LocalDataStore,
+  summarizeLocalDataExport,
   type LocalDataBucketId,
+  type LocalDataExportSummary,
   type LocalDataUsage,
 } from '@/services/localDataStore';
 import { ErrorService } from '@/services/errorService';
@@ -538,7 +540,9 @@ async function syncRuntimeAfterClearAllLocalData(): Promise<void> {
   await LocalDataStore.clearBucket('workspace-state');
 }
 
-function reloadAfterLocalDataImport(): void {
+const LOCAL_DATA_EXPORT_SIZE_WARN_BYTES = 2 * 1024 * 1024;
+
+function reloadAfterLocalDataChange(): void {
   window.setTimeout(() => window.location.reload(), 800);
 }
 
@@ -548,6 +552,32 @@ function confirmSettingsAction(
   confirmLabel = '确认'
 ): Promise<boolean> {
   return confirmWithModal(title, content, '', confirmLabel);
+}
+
+function formatLocalDataBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  return `${(bytes / Math.pow(1024, index)).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+}
+
+function buildLocalDataImportChoiceContent(summary: LocalDataExportSummary): string {
+  const lines = [
+    '请选择导入方式。取消不会修改当前数据。',
+    '',
+    `导出时间：${summary.exportedAt}`,
+    `存储版本：${summary.storageVersion}`,
+    `localStorage：${summary.localStorageKeys} 项`,
+    `IndexedDB：${summary.indexedDbRecords} 条记录`,
+    `预估体积：约 ${formatLocalDataBytes(summary.estimatedBytes)}`,
+    summary.includesSecrets
+      ? '包含密钥/凭据：是（备份中可能含本地加密 API Key 或代理凭据）'
+      : '包含密钥/凭据：否',
+    '',
+    '完整恢复：先清空当前本地数据，再写入备份（与备份一致）。',
+    '合并导入：保留当前备份外的本地数据，用备份覆盖同名项。',
+  ];
+  return lines.join('\n');
 }
 
 function getModelId(model: ModelOption): string {
@@ -1494,7 +1524,18 @@ const settingsPanelBehavior: SettingsPanelPart = {
     try {
       this.localData.isBusy = true;
       const data = await LocalDataStore.exportAll();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const payload = JSON.stringify(data, null, 2);
+      const estimatedBytes = payload.length * 2;
+      if (estimatedBytes >= LOCAL_DATA_EXPORT_SIZE_WARN_BYTES) {
+        const sizeConfirmed = await confirmSettingsAction(
+          '备份体积较大',
+          `本次备份预估约 ${formatLocalDataBytes(estimatedBytes)}，下载与后续导入可能较慢。仍要导出？`,
+          '继续导出'
+        );
+        if (!sizeConfirmed) return;
+      }
+
+      const blob = new Blob([payload], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -1522,16 +1563,42 @@ const settingsPanelBehavior: SettingsPanelPart = {
       try {
         this.localData.isBusy = true;
         const text = await file.text();
-        const shouldReplace = await confirmSettingsAction(
-          '导入本地数据',
-          '导入前是否先清空当前本地数据？确认=完整恢复到备份状态；取消=合并导入并保留备份外数据。',
-          '完整恢复'
-        );
-        const mode = shouldReplace ? 'replace' : 'merge';
-        await LocalDataStore.importAll(JSON.parse(text), { mode });
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          showToast('备份文件不是有效的 JSON，无法导入', { type: 'error' });
+          return;
+        }
+
+        let summary: LocalDataExportSummary;
+        try {
+          summary = summarizeLocalDataExport(parsed);
+        } catch (error) {
+          ErrorService.handle(error as Error, { action: 'importLocalData', module: 'settings' });
+          return;
+        }
+
+        const choice = await chooseWithModal({
+          title: '导入本地数据',
+          content: buildLocalDataImportChoiceContent(summary),
+          primaryLabel: '完整恢复',
+          secondaryLabel: '合并导入',
+          cancelLabel: '取消',
+          primaryIsDestructive: true,
+        });
+
+        if (choice === 'cancel') {
+          return;
+        }
+
+        const mode = choice === 'primary' ? 'replace' : 'merge';
+        await LocalDataStore.importAll(parsed as Parameters<typeof LocalDataStore.importAll>[0], {
+          mode,
+        });
         await this.refreshLocalDataUsage();
         showToast('本地数据已导入，页面即将刷新以应用恢复结果', { type: 'success' });
-        reloadAfterLocalDataImport();
+        reloadAfterLocalDataChange();
       } catch (error) {
         ErrorService.handle(error as Error, { action: 'importLocalData', module: 'settings' });
       } finally {
@@ -1595,7 +1662,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
       await LocalDataStore.clearAll();
       await syncRuntimeAfterClearAllLocalData();
       this.localData.usage = await LocalDataStore.getUsage();
-      showToast('全部本地数据已清空，请刷新页面重新初始化', { type: 'success' });
+      showToast('全部本地数据已清空，页面即将刷新以应用清理结果', { type: 'success' });
+      reloadAfterLocalDataChange();
     } catch (error) {
       ErrorService.handle(error as Error, { action: 'clearAllLocalData', module: 'settings' });
     } finally {

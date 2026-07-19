@@ -60,6 +60,7 @@ const deps = vi.hoisted(() => {
     configSet: vi.fn(),
     initEventLogger: vi.fn(),
     confirmWithModal: vi.fn(),
+    chooseWithModal: vi.fn(),
   };
 });
 
@@ -144,6 +145,7 @@ vi.mock('@/common/ui', () => ({
 
 vi.mock('@/components/modal/confirmModal', () => ({
   confirmWithModal: deps.confirmWithModal,
+  chooseWithModal: deps.chooseWithModal,
 }));
 
 vi.mock('@/services/errorService', () => ({
@@ -152,9 +154,13 @@ vi.mock('@/services/errorService', () => ({
   },
 }));
 
-vi.mock('@/services/localDataStore', () => ({
-  LocalDataStore: deps.localData,
-}));
+vi.mock('@/services/localDataStore', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/services/localDataStore')>();
+  return {
+    ...actual,
+    LocalDataStore: deps.localData,
+  };
+});
 
 vi.mock('@/stores/useAppStore', () => ({
   appStore: {
@@ -253,6 +259,7 @@ beforeEach(() => {
   deps.performanceMonitor.show.mockReset();
   deps.initEventLogger.mockReset();
   deps.confirmWithModal.mockReset().mockResolvedValue(true);
+  deps.chooseWithModal.mockReset().mockResolvedValue('cancel');
   deps.configValues.set('llm.testConnectionTimeout', 15000);
   deps.configValues.set('performance.enableMonitoring', true);
   deps.configValues.set('errorTracker.enabled', true);
@@ -762,16 +769,34 @@ it('handles local data clear all confirmation flow', async () => {
   expect(vi.mocked(LocalDataStore.getUsage).mock.invocationCallOrder[0]).toBeGreaterThan(
     vi.mocked(LocalDataStore.clearBucket).mock.invocationCallOrder[0]
   );
-  expect(showToast).toHaveBeenCalledWith('全部本地数据已清空，请刷新页面重新初始化', {
+  expect(showToast).toHaveBeenCalledWith('全部本地数据已清空，页面即将刷新以应用清理结果', {
     type: 'success',
   });
   expect(panel.localData.isBusy).toBe(false);
+});
+
+it('reloads the page after clearing all local data', async () => {
+  deps.confirmWithModal.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
+  const setTimeoutSpy = vi
+    .spyOn(window, 'setTimeout')
+    .mockImplementation(() => 1 as unknown as number);
+  const panel = createPanel();
+
+  await panel.clearAllLocalData();
+
+  expect(showToast).toHaveBeenCalledWith('全部本地数据已清空，页面即将刷新以应用清理结果', {
+    type: 'success',
+  });
+  expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 800);
 });
 
 it('clears persisted local data even when runtime cleanup fails', async () => {
   const nativeConfirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
   deps.confirmWithModal.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
   deps.historyClearAsync.mockRejectedValueOnce(new Error('history cleanup failed'));
+  const setTimeoutSpy = vi
+    .spyOn(window, 'setTimeout')
+    .mockImplementation(() => 1 as unknown as number);
   const panel = createPanel();
 
   await panel.clearAllLocalData();
@@ -787,9 +812,10 @@ it('clears persisted local data even when runtime cleanup fails', async () => {
     notify: false,
   });
   expect(LocalDataStore.clearBucket).toHaveBeenCalledWith('workspace-state');
-  expect(showToast).toHaveBeenCalledWith('全部本地数据已清空，请刷新页面重新初始化', {
+  expect(showToast).toHaveBeenCalledWith('全部本地数据已清空，页面即将刷新以应用清理结果', {
     type: 'success',
   });
+  expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 800);
 });
 
 it('clears selected local data buckets through runtime-aware cleanup', async () => {
@@ -825,15 +851,7 @@ it('warns before exporting sensitive local data backups', async () => {
   expect(panel.localData.isBusy).toBe(false);
 });
 
-it('imports local data in replace mode and schedules a reload', async () => {
-  const panel = createPanel();
-  const backup = {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    localStorage: {},
-    indexedDB: [],
-    metadata: { app: 'sops', storageVersion: 'local-data-v1' },
-  };
+async function runImportFilePicker(panel: TestPanel, backup: unknown): Promise<void> {
   const file = { text: vi.fn(async () => JSON.stringify(backup)) };
   const input = document.createElement('input');
   const createElement = document.createElement.bind(document);
@@ -850,16 +868,43 @@ it('imports local data in replace mode and schedules a reload', async () => {
   vi.spyOn(document, 'createElement').mockImplementation((tagName: string) =>
     tagName === 'input' ? input : createElement(tagName)
   );
-  const nativeConfirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
-  deps.confirmWithModal.mockResolvedValueOnce(true);
-  const setTimeoutSpy = vi.spyOn(window, 'setTimeout').mockImplementation(() => 1);
 
   await panel.importLocalData();
   expect(changeHandler).toBeTypeOf('function');
   await changeHandler?.(new Event('change'));
   await Promise.resolve();
+}
 
-  expect(deps.confirmWithModal).toHaveBeenCalledTimes(1);
+it('imports local data in replace mode via explicit full-restore choice', async () => {
+  const panel = createPanel();
+  const backup = {
+    version: 1,
+    exportedAt: '2026-07-20T00:00:00.000Z',
+    localStorage: {
+      secure_llm_key_new_api: JSON.stringify({ encrypted: true }),
+    },
+    indexedDB: [],
+    metadata: { app: 'sops', storageVersion: 'local-data-v1' },
+  };
+  const nativeConfirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  deps.chooseWithModal.mockResolvedValueOnce('primary');
+  const setTimeoutSpy = vi
+    .spyOn(window, 'setTimeout')
+    .mockImplementation(() => 1 as unknown as number);
+
+  await runImportFilePicker(panel, backup);
+
+  expect(deps.chooseWithModal).toHaveBeenCalledWith(
+    expect.objectContaining({
+      title: '导入本地数据',
+      primaryLabel: '完整恢复',
+      secondaryLabel: '合并导入',
+      cancelLabel: '取消',
+      primaryIsDestructive: true,
+      content: expect.stringContaining('包含密钥/凭据：是'),
+    })
+  );
+  expect(deps.confirmWithModal).not.toHaveBeenCalled();
   expect(nativeConfirm).not.toHaveBeenCalled();
   expect(LocalDataStore.importAll).toHaveBeenCalledWith(backup, { mode: 'replace' });
   expect(LocalDataStore.getUsage).toHaveBeenCalledTimes(1);
@@ -867,6 +912,46 @@ it('imports local data in replace mode and schedules a reload', async () => {
     type: 'success',
   });
   expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 800);
+  expect(panel.localData.isBusy).toBe(false);
+});
+
+it('imports local data in merge mode via explicit merge choice', async () => {
+  const panel = createPanel();
+  const backup = {
+    version: 1,
+    exportedAt: '2026-07-20T00:00:00.000Z',
+    localStorage: {
+      app_theme: JSON.stringify('dark'),
+    },
+    indexedDB: [],
+    metadata: { app: 'sops', storageVersion: 'local-data-v1' },
+  };
+  deps.chooseWithModal.mockResolvedValueOnce('secondary');
+  vi.spyOn(window, 'setTimeout').mockImplementation(() => 1 as unknown as number);
+
+  await runImportFilePicker(panel, backup);
+
+  expect(LocalDataStore.importAll).toHaveBeenCalledWith(backup, { mode: 'merge' });
+  expect(showToast).toHaveBeenCalledWith('本地数据已导入，页面即将刷新以应用恢复结果', {
+    type: 'success',
+  });
+});
+
+it('does not import when the user cancels the import choice dialog', async () => {
+  const panel = createPanel();
+  const backup = {
+    version: 1,
+    exportedAt: '2026-07-20T00:00:00.000Z',
+    localStorage: {},
+    indexedDB: [],
+    metadata: { app: 'sops', storageVersion: 'local-data-v1' },
+  };
+  deps.chooseWithModal.mockResolvedValueOnce('cancel');
+
+  await runImportFilePicker(panel, backup);
+
+  expect(LocalDataStore.importAll).not.toHaveBeenCalled();
+  expect(showToast).not.toHaveBeenCalledWith(expect.stringContaining('已导入'), expect.anything());
   expect(panel.localData.isBusy).toBe(false);
 });
 
