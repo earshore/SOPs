@@ -850,9 +850,9 @@ describe('deep-chat Listing workflow handoff', () => {
     );
     expect(sendButton.previousElementSibling?.getAttribute('aria-label')).toBe('复制消息');
     expect(sendButton.className).toContain('deep-chat-message-tool--emphasized');
-    expect(
-      shadowRoot.querySelector('[aria-label="复制消息"]')?.className
-    ).not.toContain('deep-chat-message-tool--emphasized');
+    expect(shadowRoot.querySelector('[aria-label="复制消息"]')?.className).not.toContain(
+      'deep-chat-message-tool--emphasized'
+    );
 
     sendButton.click();
     await vi.waitFor(() => {
