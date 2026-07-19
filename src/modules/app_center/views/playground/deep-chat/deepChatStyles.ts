@@ -243,19 +243,20 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     outline: none;
   }
 
+  /* Emphasize via icon color only — no fill/border so it stays aligned with sibling tools */
   .deep-chat-message-tool--emphasized {
-    background: #eef2ff;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
     color: #4f46e5;
-    border: 1px solid #c7d2fe;
-    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.12);
   }
 
   .deep-chat-message-tool--emphasized:hover,
   .deep-chat-message-tool--emphasized:focus-visible {
-    background: #e0e7ff;
+    background: #f2f3f5;
+    border: 0;
+    box-shadow: none;
     color: #4338ca;
-    border-color: #a5b4fc;
-    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.18);
     outline: none;
   }
 
