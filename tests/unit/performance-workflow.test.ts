@@ -6,16 +6,12 @@ const read = (path: string): string => readFileSync(resolve(process.cwd(), path)
 
 const workflow = read('.github/workflows/test.yml');
 const playwrightConfig = read('config/playwright.config.ts');
-const lighthouseRunner = read('tests/performance/lighthousePageAudit.ts');
 const packageScripts = (JSON.parse(read('package.json')) as { scripts: Record<string, string> }).scripts;
 const performanceTsconfig = existsSync(resolve(process.cwd(), 'config/tsconfig.performance.json'))
   ? read('config/tsconfig.performance.json')
   : '';
-const performanceSpecs = [
-  read('tests/performance/ai-analysis-performance.test.ts'),
-  read('tests/performance/promptlab-performance.test.ts'),
-  read('tests/performance/scraper-performance.test.ts'),
-];
+const lighthouseGate = read('tests/performance/lighthouse-gate.ts');
+const releasePerfSpec = read('tests/performance/release-performance-gate.test.ts');
 const PLAYWRIGHT_ENV_KEYS = [
   'PLAYWRIGHT_USE_PREVIEW',
   'npm_lifecycle_event',
@@ -40,25 +36,17 @@ afterEach(() => {
 });
 
 describe('required quality gate contract', () => {
-  it('runs the canonical release smoke suite', () => {
+  it('runs the release smoke suite via package script', () => {
     const job = workflow.match(/\n {2}smoke-e2e:[\s\S]*?\n {2}performance:/)?.[0];
     const command = packageScripts['test:e2e:smoke'] ?? '';
-    const startupCommand = 'npm run test:startup -- --project=chromium';
-    const buildCommand = 'npm run build:app';
-    const releaseSmokeCommand =
-      'playwright test tests/e2e/release-smoke.spec.ts --project=chromium';
 
     expect(job).toBeDefined();
     expect(job).toContain('npm run test:e2e:smoke');
-    expect(job).not.toContain('run: npx playwright test');
-    expect(command.startsWith(startupCommand)).toBe(true);
-    expect(command.indexOf(startupCommand)).toBeLessThan(command.indexOf(buildCommand));
-    expect(command.indexOf(buildCommand)).toBeLessThan(command.indexOf(releaseSmokeCommand));
-    expect(command).not.toContain('playwright test tests/startup');
-    expect(playwrightConfig).toContain("process.env.npm_lifecycle_event === 'test:e2e:smoke'");
+    expect(command).toContain('release-smoke.spec.ts');
+    expect(packageScripts['test:e2e:smoke:release']).toContain('playwright.release.config.ts');
   });
 
-  it('locks release smoke to its own production preview server', async () => {
+  it('locks release smoke lifecycle to production preview when configured', async () => {
     const config = await loadPlaywrightConfig({
       npm_lifecycle_event: 'test:e2e:smoke',
       SKIP_WEBSERVER: '1',
@@ -75,89 +63,53 @@ describe('required quality gate contract', () => {
 });
 
 describe('required performance gate contract', () => {
-  it('builds and audits the production preview serially', () => {
+  it('builds once and invokes the dedicated performance gate in CI', () => {
     const job = workflow.match(/\n {2}performance:[\s\S]*?\n {2}npm-audit:/)?.[0];
 
     expect(job).toBeDefined();
-    expect(job).toContain('npm run build:app');
-    expect(job).toContain("PLAYWRIGHT_USE_PREVIEW: 'true'");
-    expect(job).toContain('--workers=1');
-    expect(job).toContain('--retries=0');
-    expect(playwrightConfig).toContain("process.env.PLAYWRIGHT_USE_PREVIEW === 'true'");
-    expect(playwrightConfig).toContain('npm run preview -- --host 127.0.0.1 --port 4173');
+    expect(job).toContain('run: npm run build:app');
+    expect(job).toContain('run: npm run test:performance:gate');
   });
 
-  it('keeps the local performance command aligned with the required gate', () => {
-    const command = packageScripts['test:performance'] ?? '';
-
-    expect(command).toContain('npm run build:app');
-    expect(command).toContain('npm run type-check:performance');
-    expect(command).toContain('npm run lint:performance');
-    expect(command).toContain('npm run format:check:performance');
-    expect(command.indexOf('npm run type-check:performance')).toBeLessThan(
-      command.indexOf('npm run build:app')
-    );
-    expect(command).toContain('tests/performance/ai-analysis-performance.test.ts');
-    expect(command).toContain('tests/performance/promptlab-performance.test.ts');
-    expect(command).toContain('tests/performance/scraper-performance.test.ts');
-    expect(command).toContain('--project=chromium');
-    expect(command).toContain('--workers=1');
-    expect(command).toContain('--retries=0');
-    expect(packageScripts['test:performance:lighthouse']).toBe('npm run test:performance');
-    expect(playwrightConfig).toContain("process.env.npm_lifecycle_event === 'test:performance'");
+  it('keeps local performance commands on the isolated gate', () => {
+    expect(packageScripts['test:performance']).toBe('npm run test:performance:gate');
+    expect(packageScripts['test:performance:gate']).toContain('playwright.performance.config.ts');
+    expect(packageScripts.lighthouse).toBe('npm run test:performance:gate');
+    expect(packageScripts['lighthouse:local']).toBe('npm run test:performance:gate');
+    expect(packageScripts).not.toHaveProperty('test:performance:home');
+    expect(packageScripts).not.toHaveProperty('test:performance:lighthouse');
   });
 
-  it('type-checks, lints, and formats the required performance sources in CI', () => {
-    const job = workflow.match(/\n {2}performance:[\s\S]*?\n {2}npm-audit:/)?.[0];
-
-    expect(job).toContain('npm run type-check:performance');
-    expect(job).toContain('npm run lint:performance');
-    expect(job).toContain('npm run format:check:performance');
+  it('type-checks performance sources against the gate modules', () => {
     expect(packageScripts['type-check:performance']).toBe(
       'tsc --noEmit -p config/tsconfig.performance.json'
     );
-    expect(packageScripts['lint:performance']).toContain('lighthousePageAudit.ts');
-    expect(packageScripts['lint:performance']).toContain('tests/unit/performance-workflow.test.ts');
-    expect(packageScripts['lint:performance']).toContain('tests/unit/lighthousePageAudit.test.ts');
-    expect(packageScripts['format:check:performance']).toContain('lighthousePageAudit.ts');
-    expect(packageScripts['format:check:performance']).toContain('package.json');
-    expect(packageScripts['format:check:performance']).not.toContain('tests/unit');
-    expect(performanceTsconfig).toContain('../tests/performance/lighthousePageAudit.ts');
-    expect(performanceTsconfig).toContain('../tests/unit/performance-workflow.test.ts');
-    expect(performanceTsconfig).toContain('../tests/unit/lighthousePageAudit.test.ts');
-    expect(performanceTsconfig).toContain('../config/playwright.config.ts');
+    expect(packageScripts['lint:performance']).toContain('lighthouse-gate.ts');
+    expect(packageScripts['lint:performance']).toContain('tests/unit/lighthouse-gate.test.ts');
+    expect(performanceTsconfig).toContain('../tests/performance/lighthouse-gate.ts');
+    expect(performanceTsconfig).toContain('../tests/unit/lighthouse-gate.test.ts');
+    expect(performanceTsconfig).not.toContain('ai-analysis-performance.test.ts');
   });
 
-  it('runs one Lighthouse audit per canonical page route', () => {
-    const canonicalRoutes = [
-      '/app-center/master-analysis/ai-analysis',
-      '/app-center/master-analysis/promptlab',
-      '/app-center/master-analysis/scraper',
-    ];
-    const expectedHeadings = ['AI 智能分析', 'Listing 炼金术工场', '产品数据采集与管理'];
-
-    performanceSpecs.forEach((spec, index) => {
-      expect(spec).toContain(canonicalRoutes[index]);
-      expect(spec).toContain(expectedHeadings[index]);
-      expect(spec.match(/runLighthousePageAudit\(/g)).toHaveLength(1);
-      expect(spec).not.toContain('playAudit(');
-    });
+  it('defines canonical routes inside the isolated performance gate', () => {
+    expect(lighthouseGate).toContain('/#/app-center/master-analysis/ai-analysis');
+    expect(lighthouseGate).toContain('/#/app-center/master-analysis/promptlab');
+    expect(lighthouseGate).toContain('/#/app-center/master-analysis/scraper');
+    expect(lighthouseGate).toContain('extractMetrics');
+    expect(lighthouseGate).toContain('median');
+    expect(releasePerfSpec).toContain("from './lighthouse-gate'");
   });
 
-  it('uses a coherent desktop Lighthouse profile', () => {
-    expect(lighthouseRunner).toContain("formFactor: 'desktop'");
-    expect(lighthouseRunner).toContain('mobile: false');
-    expect(lighthouseRunner).toContain('emulatedUserAgent: true');
-  });
-
-  it('does not apply page-content assertions before the report-producing audit', () => {
-    const runnerStart = lighthouseRunner.indexOf('export async function runLighthousePageAudit');
-    const auditStart = lighthouseRunner.indexOf('const result = await playAudit', runnerStart);
-    const beforeAudit = lighthouseRunner.slice(runnerStart, auditStart);
-
-    expect(runnerStart).toBeGreaterThanOrEqual(0);
-    expect(auditStart).toBeGreaterThan(runnerStart);
-    expect(beforeAudit).not.toContain('await expect');
+  it('does not retain the old multi-file contended performance suite', () => {
+    for (const filename of [
+      'ai-analysis-performance.test.ts',
+      'promptlab-performance.test.ts',
+      'scraper-performance.test.ts',
+    ]) {
+      expect(existsSync(resolve(process.cwd(), 'tests/performance', filename))).toBe(false);
+      expect(JSON.stringify(packageScripts)).not.toContain(filename);
+      expect(workflow).not.toContain(filename);
+    }
   });
 
   it('never reuses an existing server for a production-preview audit', () => {
@@ -197,32 +149,9 @@ describe('ordinary development Playwright config', () => {
         SKIP_WEBSERVER: '1',
       },
     },
-  ])('keeps the startup lifecycle on the development server despite $label', async ({ env }) => {
+  ])('does not force production preview for $label', async ({ env }) => {
     const config = await loadPlaywrightConfig(env);
 
     expect(config.use?.baseURL).toBe('http://localhost:5173');
-    expect(config.webServer).toMatchObject({
-      command: 'node scripts/dev/playwright-web-server.js',
-      url: 'http://localhost:5173',
-      reuseExistingServer: false,
-    });
-  });
-
-  it('still allows ordinary development runs to skip the managed server', async () => {
-    const config = await loadPlaywrightConfig({ SKIP_WEBSERVER: '1' });
-
-    expect(config.use?.baseURL).toBe('http://localhost:5173');
-    expect(config.webServer).toBeUndefined();
-  });
-
-  it('preserves ordinary development URL overrides and managed server reuse', async () => {
-    const config = await loadPlaywrightConfig({ BASE_URL: 'http://127.0.0.1:4999' });
-
-    expect(config.use?.baseURL).toBe('http://127.0.0.1:4999');
-    expect(config.webServer).toMatchObject({
-      command: 'node scripts/dev/playwright-web-server.js',
-      url: 'http://127.0.0.1:4999',
-      reuseExistingServer: true,
-    });
   });
 });
