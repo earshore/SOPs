@@ -111,10 +111,10 @@ const ERROR_TEXT_PATTERNS = [
   /cannot read properties/i,
   /is not a function/i,
   /is not defined/i,
-  /妯″潡鍔犺浇澶辫触/,
-  /椤甸潰鍔犺浇澶辫触/,
-  /灏氭湭寮€鍙戞垨鏈敞鍐?,
-  /鏈嶅姟鏈敞鍐?,
+  /模块加载失败/,
+  /页面加载失败/,
+  /尚未开发或未注册/,
+  /服务未注册/,
 ] as const;
 
 async function waitForMainContent(page: Page): Promise<string> {
@@ -232,11 +232,11 @@ async function openGlobalSettings(page: Page): Promise<void> {
   await waitForSettingsPanel(page);
 
   await page.locator('#nav-more').click();
-  await page.getByRole('button', { name: '鍏ㄥ眬璁剧疆' }).click();
+  await page.getByRole('button', { name: '全局设置' }).click();
 
-  await expect(page.getByRole('heading', { name: '绯荤粺璁剧疆' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '系统设置' })).toBeVisible();
   await expect(
-    page.locator('#settings-section-llm').getByRole('heading', { name: 'AI 妯″瀷涓庤繛鎺? })
+    page.locator('#settings-section-llm').getByRole('heading', { name: 'AI 模型与连接' })
   ).toBeVisible();
 }
 
@@ -437,7 +437,7 @@ test.describe('release candidate smoke', () => {
 
     await switchTabFromHome(page, 'amz_marketing_calendar');
     await expectNoRouteErrorText(page);
-    await expect(page.getByRole('heading', { name: 'EU钀ラ攢鏃ュ巻' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'EU营销日历' })).toBeVisible();
 
     const germanFlag = page.locator('.fi-de').first();
     await expect(germanFlag).toBeVisible();
@@ -466,12 +466,12 @@ test.describe('release candidate smoke', () => {
   }) => {
     const consoleListener = setupConsoleErrorListener(page);
 
-    await openRoute(page, '/app-center/master-analysis/scraper');
+    await switchTabFromHome(page, 'scraper');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('[x-data="scraperPanel"]')).toBeVisible();
-    await expect(page.locator('#no-data-msg')).toContainText('杩樻病鏈変骇鍝佹暟鎹?);
-    await expect(page.locator('#no-data-msg')).toContainText('杈撳叆 ASIN');
+    await expect(page.locator('#no-data-msg')).toContainText('还没有产品数据');
+    await expect(page.locator('#no-data-msg')).toContainText('输入 ASIN');
 
     const asinInput = page.locator('#scraper-asin-input');
     const startButton = page.locator('.manual-start-button');
@@ -482,19 +482,19 @@ test.describe('release candidate smoke', () => {
     }
     await expect(asinInput).toBeEditable();
 
-    await expect(asinStatus).toContainText('绛夊緟杈撳叆');
+    await expect(asinStatus).toContainText('等待输入');
     await expect(startButton).toBeDisabled();
 
     await asinInput.fill('INVALID-ASIN\n12345');
 
-    await expect(asinStatus).toContainText('杩囨护');
+    await expect(asinStatus).toContainText('过滤');
     await expect(asinStatus).toContainText('2');
     await expect(startButton).toBeDisabled();
 
-    await page.getByRole('button', { name: /娓呯┖/ }).click();
+    await page.getByRole('button', { name: /清空/ }).click();
 
     await expect(asinInput).toHaveValue('');
-    await expect(asinStatus).toContainText('绛夊緟杈撳叆');
+    await expect(asinStatus).toContainText('等待输入');
     await expect(startButton).toBeDisabled();
     expect(
       consoleListener.getErrors(),
@@ -508,13 +508,13 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
-    await openRoute(page, '/app-center/master-analysis/ai-analysis');
+    await switchTabFromHome(page, 'ai_analysis');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('.ai-analysis-wrapper')).toBeVisible();
-    await expect(page.getByRole('heading', { name: '杩樻病鏈変骇鍝佹暟鎹? }).first()).toBeVisible();
-    await expect(page.getByRole('button', { name: '鍘绘暟鎹噰闆? }).first()).toBeVisible();
-    await expect(page.locator('button:has-text("寮€濮嬪垎鏋?)').first()).toBeDisabled();
+    await expect(page.getByRole('heading', { name: '还没有产品数据' }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: '去数据采集' }).first()).toBeVisible();
+    await expect(page.locator('button:has-text("开始分析")').first()).toBeDisabled();
 
     expect(
       consoleListener.getErrors(),
@@ -528,18 +528,18 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
-    await openRoute(page, '/app-center/keyword-hunter/input');
+    await switchTabFromHome(page, 'keyword_hunter_input');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('#keyword-hunter-module-input')).toBeVisible();
-    await expect(page.locator('#keyword-hunter-input-draft-label')).toHaveText('绌虹櫧');
+    await expect(page.locator('#keyword-hunter-input-draft-label')).toHaveText('空白');
 
     const startAnalysisButton = page.locator('#keyword-hunter-btn-start-analysis');
     const emptyInputToast = page.locator('#toast-container .toast').last();
     await expect(startAnalysisButton).toBeVisible();
     await expect(startAnalysisButton).toBeEnabled();
     await startAnalysisButton.click();
-    await expect(emptyInputToast).toContainText('璇峰厛杈撳叆鍏抽敭璇嶅拰鏂囨');
+    await expect(emptyInputToast).toContainText('请先输入关键词和文案');
     await expect(page.locator('#keyword-hunter-module-input')).toBeVisible();
     await expect(page.locator('#keyword-hunter-module-process')).toHaveCount(0);
 
@@ -575,20 +575,20 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await openRoute(page, '/sops');
+    await switchTabFromHome(page, 'sops_overview');
     await expectNoRouteErrorText(page);
     await expectNoSevereMobileOverflow(page, 'SOPs overview before workflow navigation');
 
     const listingSeoCard = page
       .locator('.sops-overview [data-action="switch-tab"][data-tab="sops_listing_seo"]')
-      .filter({ hasText: 'Listing 鏋佽嚧浼樺寲 (SEO) SOP' })
+      .filter({ hasText: 'Listing 极致优化 (SEO) SOP' })
       .last();
     await expect(listingSeoCard).toBeVisible();
     await listingSeoCard.click();
 
     await expect(page).toHaveURL(/\/sops\/growth\/listing-seo/);
     await expect(page.locator('.listing-seo-page')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Listing 鏋佽嚧浼樺寲 (SEO) SOP' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Listing 极致优化 (SEO) SOP' })).toBeVisible();
     await expectNoSevereMobileOverflow(page, 'Listing SEO SOP mobile page');
 
     await page
@@ -597,7 +597,7 @@ test.describe('release candidate smoke', () => {
 
     await expect(page).toHaveURL(/\/amz-hub\/knowledge\/seo-strategy/);
     await expect(page.locator('.seo-page')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'SEO 绛栫暐' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'SEO 策略' })).toBeVisible();
     await expect(page.locator('#amz_keywordRadarChart')).toBeAttached();
     await expectNoSevereMobileOverflow(page, 'AMZ Hub SEO strategy mobile page');
     expect(
@@ -612,7 +612,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await openRoute(page, '/sops/growth/restricted-words');
+    await switchTabFromHome(page, 'sops_restricted_words');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('#rw-search-input')).toBeVisible();
@@ -622,8 +622,8 @@ test.describe('release candidate smoke', () => {
     await page.locator('#rw-search-input').fill('[');
     await page.locator('#rw-search-btn').click();
 
-    await expect(page.locator('#rw-results-tbody')).toContainText('娌℃湁鎵惧埌鐩稿叧楂樺嵄璇嶆潯');
-    await expect(page.locator('#rw-stats-display')).toContainText('鏄剧ず 0 鏉＄粨鏋?);
+    await expect(page.locator('#rw-results-tbody')).toContainText('没有找到相关高危词条');
+    await expect(page.locator('#rw-stats-display')).toContainText('显示 0 条结果');
     await expectNoSevereMobileOverflow(page, 'Restricted Words invalid-regex results');
 
     await page.locator('#rw-clear-btn').click();
@@ -634,7 +634,7 @@ test.describe('release candidate smoke', () => {
     await page.locator('#rw-search-btn').click();
 
     await expect(page.locator('#rw-results-tbody')).toContainText('Bamboo');
-    await page.locator('#rw-results-tbody button:has-text("璇︽儏")').first().click();
+    await page.locator('#rw-results-tbody button:has-text("详情")').first().click();
 
     const detailModal = page.locator('#rw-detail-modal');
     await expect(detailModal).toHaveClass(/show/);
@@ -672,7 +672,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await openRoute(page, '/sops/growth/npi-tracker');
+    await switchTabFromHome(page, 'sops_npi_tracker');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('.npi-tracker-page')).toBeVisible();
@@ -691,7 +691,7 @@ test.describe('release candidate smoke', () => {
 
     const modal = page.locator('#next-step-modal');
     await expect(modal).toBeVisible();
-    await expect(page.locator('#next-step-checkboxes')).toContainText('闄嶄环/Coupon');
+    await expect(page.locator('#next-step-checkboxes')).toContainText('降价/Coupon');
 
     const viewport = page.viewportSize();
     expect(viewport, 'mobile viewport should be available').not.toBeNull();
@@ -716,11 +716,11 @@ test.describe('release candidate smoke', () => {
     expect(dialogBox!.y).toBeGreaterThanOrEqual(0);
     expect(dialogBox!.y + dialogBox!.height).toBeLessThanOrEqual(viewport!.height + 1);
 
-    await page.locator('#next-step-checkboxes input[value="闄嶄环/Coupon (CVR浣?"]').check();
+    await page.locator('#next-step-checkboxes input[value="降价/Coupon (CVR低)"]').check();
     await page.locator('button[data-action="saveNextSteps"]').click();
 
     await expect(modal).toBeHidden();
-    await expect(firstRow.locator('td').last()).toContainText('闄嶄环/Coupon (CVR浣?');
+    await expect(firstRow.locator('td').last()).toContainText('降价/Coupon (CVR低)');
     await expectNoSevereMobileOverflow(page, 'NPI Tracker mobile after Next Step edit');
     expect(
       consoleListener.getErrors(),
@@ -732,7 +732,7 @@ test.describe('release candidate smoke', () => {
     const consoleListener = setupConsoleErrorListener(page);
 
     await clearBrowserStorageBeforeLoad(page);
-    await openRoute(page, '/app-center/ppc-tools/ppc-search-terms');
+    await switchTabFromHome(page, 'ppc_search_terms');
     await expectNoRouteErrorText(page);
 
     const pasteInput = page.locator('#ppc-search-terms-paste-input');
@@ -755,10 +755,10 @@ test.describe('release candidate smoke', () => {
       )
       .toBe('true');
     await expect(page.locator('#ppc-search-terms-paste-error')).toContainText(
-      '璇峰厛绮樿创鎶ヨ〃鍐呭鎴栭€夋嫨鎶ヨ〃鏂囦欢'
+      '请先粘贴报表内容或选择报表文件'
     );
     await expect(page.locator('#ppc-search-terms-mapping-status')).toContainText(
-      '娌℃湁鍙垎鏋愮殑鏁版嵁'
+      '没有可分析的数据'
     );
 
     await page.locator('#ppc-search-terms-btn-sample').click();
@@ -767,7 +767,7 @@ test.describe('release candidate smoke', () => {
       'true'
     );
     await expect(page.locator('#ppc-search-terms-paste-error')).toHaveText('');
-    await expect(page.locator('#ppc-search-terms-mapping-status')).toContainText('鏍蜂緥鏁版嵁宸插姞杞?);
+    await expect(page.locator('#ppc-search-terms-mapping-status')).toContainText('样例数据已加载');
     await expect(page.locator('#ppc-search-terms-stat-rows')).toHaveText('0');
 
     const useAgent = page.locator('#ppc-search-terms-use-agent');
@@ -779,12 +779,12 @@ test.describe('release candidate smoke', () => {
     await page.locator('#ppc-search-terms-btn-parse').click();
 
     await expect(page.locator('#ppc-search-terms-stat-rows')).toHaveText('10');
-    await expect(page.locator('#ppc-search-terms-result-count')).toContainText('鍏?10 琛?);
+    await expect(page.locator('#ppc-search-terms-result-count')).toContainText('共 10 行');
     await expect(page.locator('#ppc-search-terms-table-wrapper')).toBeVisible();
     await expect(page.locator('#ppc-search-terms-results-body tr')).toHaveCount(10);
 
     await page.locator('#ppc-search-terms-action-search').fill('wireless');
-    await expect(page.locator('#ppc-search-terms-result-count')).toContainText('褰撳墠绛涢€?);
+    await expect(page.locator('#ppc-search-terms-result-count')).toContainText('当前筛选');
     expect(
       consoleListener.getErrors(),
       'PPC Search Terms smoke should not emit console/page errors'
@@ -805,7 +805,7 @@ test.describe('release candidate smoke', () => {
     });
 
     await clearBrowserStorageBeforeLoad(page);
-    await openRoute(page, '/app-center/master-analysis/promptlab');
+    await switchTabFromHome(page, 'promptlab');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('[x-data="promptlabPanel"]')).toBeVisible();
@@ -820,9 +820,9 @@ test.describe('release candidate smoke', () => {
       return !!data?.profile && typeof data.generateListingPrompt === 'function';
     });
 
-    await expect(page.locator('#lab-analysis-status')).toContainText('鏈娴嬪埌鍒嗘瀽鎶ュ憡');
-    await expect(page.locator('#report-sections-container')).toContainText('杩樻病鏈夋姤鍛婄淮搴?);
-    await expect(page.locator('#report-sections-container')).toContainText('鎵嬪姩濉啓涓嬫柟浜у搧 DNA');
+    await expect(page.locator('#lab-analysis-status')).toContainText('未检测到分析报告');
+    await expect(page.locator('#report-sections-container')).toContainText('还没有报告维度');
+    await expect(page.locator('#report-sections-container')).toContainText('手动填写下方产品 DNA');
 
     const generateButton = page.locator('#btn-generate-prompt');
     await expect(generateButton).toBeDisabled();
@@ -839,7 +839,7 @@ test.describe('release candidate smoke', () => {
 
     await expect(
       page.locator('#toast-container .toast.toast-success .toast-content strong').last()
-    ).toContainText('Listing Prompt 宸茬敓鎴?);
+    ).toContainText('Listing Prompt 已生成');
     await expect(page.locator('#final-prompt-output')).toHaveValue(/# ROLE/);
     await expect(page.locator('#prompt-word-count')).toHaveText(/^[1-9]/);
 
@@ -872,7 +872,7 @@ test.describe('release candidate smoke', () => {
     });
 
     await seedDeepChatPromptDraftBeforeLoad(page);
-    await openRoute(page, '/app-center/playground/deep-chat');
+    await switchTabFromHome(page, 'playground_deep_chat');
     await expectNoRouteErrorText(page);
 
     await expect(page.locator('#deep-chat-view')).toBeVisible();
@@ -891,7 +891,7 @@ test.describe('release candidate smoke', () => {
     await expect(chatInput).toContainText(DEEP_CHAT_PROMPT_MARKER, { timeout: 5000 });
     await expect(
       page.locator('#toast-container .toast.toast-success .toast-content strong').last()
-    ).toContainText('宸插垱寤烘柊浼氳瘽骞跺～鍏?Prompt');
+    ).toContainText('已创建新会话并填入 Prompt');
     expect(llmRequestUrls, 'using a Deep Chat prompt draft should not call LLM endpoints').toEqual(
       []
     );
@@ -940,11 +940,11 @@ test.describe('release candidate smoke', () => {
       .then(() => true)
       .catch(() => false);
 
-    await llmSection.getByRole('button', { name: '鑾峰彇妯″瀷鍒楄〃' }).click();
+    await llmSection.getByRole('button', { name: '获取模型列表' }).click();
 
     await expect(
       page.locator('#toast-container .toast.toast-warning .toast-content strong').last()
-    ).toHaveText('璇峰厛杈撳叆 API Key');
+    ).toHaveText('请先输入 API Key');
     expect(await modelRequest, 'empty API key should not issue any direct /models request').toBe(
       false
     );
@@ -958,7 +958,7 @@ test.describe('release candidate smoke', () => {
       /\/models(?:[?#].*)?$/.test(request.url())
     );
 
-    await llmSection.getByRole('button', { name: '鑾峰彇妯″瀷鍒楄〃' }).click();
+    await llmSection.getByRole('button', { name: '获取模型列表' }).click();
 
     const request = await directModelRequest;
     expect(request.url(), 'model sync should request the direct new-api /models endpoint').toBe(
@@ -1008,15 +1008,14 @@ test.describe('release candidate smoke', () => {
       .last();
     await llmSection.locator('#llm-api-key').fill('fake-browser-key');
 
-    await llmSection.getByRole('button', { name: '鑾峰彇妯″瀷鍒楄〃' }).click();
-    await expect(errorToast).toContainText('鑾峰彇妯″瀷澶辫触');
-    await expect(errorToast).toContainText('API Key 鏃犳晥鎴栧凡杩囨湡');
+    await llmSection.getByRole('button', { name: '获取模型列表' }).click();
+    await expect(errorToast).toContainText('获取模型失败');
+    await expect(errorToast).toContainText('API Key 无效或已过期');
 
-    await llmSection.getByRole('button', { name: '鑾峰彇妯″瀷鍒楄〃' }).click();
-    await expect(errorToast).toContainText('鑾峰彇妯″瀷澶辫触');
+    await llmSection.getByRole('button', { name: '获取模型列表' }).click();
+    await expect(errorToast).toContainText('获取模型失败');
     await expect(errorToast).toContainText('Rate limit exceeded');
 
     expect(modelRequests).toEqual([DEFAULT_LLM_MODELS_URL, DEFAULT_LLM_MODELS_URL]);
   });
 });
-
