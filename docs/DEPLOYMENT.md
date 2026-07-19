@@ -23,9 +23,19 @@ cp .env.example .env
 
 ## 构建
 
+本地完整门禁 + 构建（开发/发版推荐）：
+
 ```bash
 npm run build
 ```
+
+仅产物构建（**Vercel / 纯静态宿主**使用；不重复跑 `prebuild` 里的 security/quality 门禁）：
+
+```bash
+npm run build:app
+```
+
+`vercel.json` 的 `buildCommand` 必须是 `npm run build:app`。`npm run build` 会经 `prebuild` 跑完整 `ci:security` + `ci:quality`，适合本地与 CI，不适合作为 Vercel 构建命令（易把格式/lint 门禁失败当成部署失败）。
 
 构建完成后确认 `dist/` 存在，且 `dist/_headers` 的 CSP `connect-src` 包含 `https://new.hongecb.store`。
 生产环境不应在 `connect-src` 中放行 OpenAI、Gemini、腾讯混元等模型直连域；LLM 统一通过 new-api 中转站治理。
