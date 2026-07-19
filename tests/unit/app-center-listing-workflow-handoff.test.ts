@@ -61,7 +61,8 @@ describe('App Center Listing workflow handoff', () => {
     );
 
     expect(template).toContain('handoffListingPromptToDeepChat');
-    expect(template).toContain('用此 Prompt 生成产品文案');
+    expect(template).toContain('推送至Deep Chat生成产品文案');
+    expect(template).toContain('promptlab-handoff-deepchat-btn');
     expect(template).not.toContain('复制 SEO 关键词');
     expect(template).not.toContain('copySeoKeywords');
     expect(template).not.toContain('进入 Keyword Hunter 复核');

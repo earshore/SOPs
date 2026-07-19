@@ -182,9 +182,14 @@ function createMessageToolbar(
 
   if (role === 'ai' && actions.sendToKeywordHunter && actions.canSendToKeywordHunter?.()) {
     toolbar.appendChild(
-      createToolbarButton('推送到 Keyword Hunter 复核', getSendIcon(), () => {
-        void actions.sendToKeywordHunter?.(getMessageContent(bubble), storedMessage);
-      })
+      createToolbarButton(
+        '推送到 Keyword Hunter 复核',
+        getSendIcon(),
+        () => {
+          void actions.sendToKeywordHunter?.(getMessageContent(bubble), storedMessage);
+        },
+        { emphasized: true }
+      )
     );
   }
 
@@ -197,10 +202,17 @@ function createMessageToolbar(
   return toolbar;
 }
 
-function createToolbarButton(label: string, icon: string, onClick: () => void): HTMLButtonElement {
+function createToolbarButton(
+  label: string,
+  icon: string,
+  onClick: () => void,
+  options: { emphasized?: boolean } = {}
+): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'deep-chat-message-tool';
+  button.className = options.emphasized
+    ? 'deep-chat-message-tool deep-chat-message-tool--emphasized'
+    : 'deep-chat-message-tool';
   button.title = label;
   button.setAttribute('aria-label', label);
   setSafeHtml(button, icon);

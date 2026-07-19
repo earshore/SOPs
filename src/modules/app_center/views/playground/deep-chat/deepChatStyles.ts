@@ -233,13 +233,29 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     background: transparent;
     color: #64748b;
     cursor: pointer;
-    transition: background 140ms ease, color 140ms ease;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
   }
 
   .deep-chat-message-tool:hover,
   .deep-chat-message-tool:focus-visible {
     background: #f2f3f5;
     color: #4b5563;
+    outline: none;
+  }
+
+  .deep-chat-message-tool--emphasized {
+    background: #eef2ff;
+    color: #4f46e5;
+    border: 1px solid #c7d2fe;
+    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.12);
+  }
+
+  .deep-chat-message-tool--emphasized:hover,
+  .deep-chat-message-tool--emphasized:focus-visible {
+    background: #e0e7ff;
+    color: #4338ca;
+    border-color: #a5b4fc;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.18);
     outline: none;
   }
 
