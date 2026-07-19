@@ -15,15 +15,22 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 | 通道 | 版本 | 说明 |
 |------|------|------|
-| **GitHub Latest（稳定 GA）** | `v3.0.9` | 生产推荐版本 |
-| 下一候选命名（未发布） | `v3.0.10-rc.1` | 如继续 patch 线；必须标记为 Pre-release |
-| package.json | `3.0.9` | 与 GA tag / Release 一致 |
-| 上一 GA | `v3.0.8` | 回滚参考 |
+| **GitHub Latest（稳定 GA）** | `v3.0.10` | 生产推荐版本 |
+| 下一候选命名（未发布） | `v3.0.11-rc.1` | 如继续 patch 线；必须标记为 Pre-release |
+| package.json | `3.0.10` | 与 GA tag / Release 一致 |
+| 上一 GA | `v3.0.9` | 回滚参考 |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.9` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.10` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.9`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`。
+
+`v3.0.10`（2026-07-20，稳定 GA）收口 `v3.0.9` 后热修，恢复版本与生产一致：
+
+- **数据备份 UX**：本地导入三向选择（合并 / 覆盖 / 取消）；清空全部本地数据后自动刷新。
+- **部署与债务**：Vercel 使用 `build:app` 避开远端 prebuild CI 失败；confirm 弹窗共享 shell，medium 技术债归零。
+- **界面打磨**：PromptLab / Deep Chat / Keyword Hunter 交接按钮与标签；更多菜单采集插件下载；采集历史限高滚动。
+- 发布后 GitHub Latest 指向 `v3.0.10`；上一 GA 与生产回滚基线为 `v3.0.9`，生产目标为 `https://sops.hongecb.store`。
 
 `v3.0.9`（2026-07-19，稳定 GA）落地 release-debt hardening 与构建门禁收口：
 

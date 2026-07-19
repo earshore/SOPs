@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.10] - 2026-07-20
+
+> 正式 GA。发布后 GitHub Latest 指向 `v3.0.10`；上一 GA 与生产回滚基线均为 `v3.0.9`。
+> 生产目标为 `https://sops.hongecb.store`。
+> 本版收口 `v3.0.9` 后已上线热修，使 package / tag / Release / 生产产物重新三者一致。
+
+### Added
+
+- 更多菜单快捷入口增加「采集插件下载」，与 Chrome 扩展分发入口对齐。
+
+### Changed
+
+- Vercel 构建改为 `build:app`，避免 `prebuild` 在远端重复跑本地 CI 门禁导致部署失败。
+- 本地数据导入改为三向选择（合并 / 覆盖 / 取消），清空全部本地数据后自动刷新页面。
+- PromptLab / Deep Chat / Keyword Hunter 交接按钮与 DNA 字段标签样式收敛；采集历史快照列表限高可滚动。
+- 确认弹窗抽取共享 shell，消除 medium 级重复代码技术债；`tech-debt:gate --fail-on medium` 保持 0 问题。
+
+### Fixed
+
+- 本地备份导入文案与清空后状态不一致问题。
+- XSS 扫描报告与当前 `src/` 文件数对齐（534 文件 / 清空 DOM 跳过 8）。
+
 ## [3.0.9] - 2026-07-19
 
 > 正式 GA。发布后 GitHub Latest 指向 `v3.0.9`；上一 GA 与生产回滚基线均为 `v3.0.8`。

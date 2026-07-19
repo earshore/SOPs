@@ -38,8 +38,9 @@
 - `v3.0.7-rc.2`（2026-07-14）为历史生产验证候选：修复应用总览数据加载闪屏并移除 PromptLab SEO 关键词复制入口。
 - `v3.0.7`（2026-07-18）为上一 GA：收口 `v3.0.7-rc.1`、`v3.0.7-rc.2` 与本次 GA 定稿变更。
 - `v3.0.8`（2026-07-19）为历史 GA：修复 App Center 启动降级、模块异步 mount 竞态与 Deep Chat CSP 兼容问题。
-- `v3.0.9`（2026-07-19）为当前 GA：落地 release-debt hardening（静态托管合同、质量/浏览器门禁、本地 `release:gate`）并收口构建质量门。
-- GA 后不得再发 `v3.0.9-rc.*`；下一 patch 候选为 `v3.0.10-rc.1`，若按变更体量升 minor 则为 `v3.1.0-rc.1`。
+- `v3.0.9`（2026-07-19）为历史 GA：落地 release-debt hardening（静态托管合同、质量/浏览器门禁、本地 `release:gate`）并收口构建质量门。
+- `v3.0.10`（2026-07-20）为当前 GA：收口 `v3.0.9` 后热修（数据备份 UX、Vercel 构建、UI 打磨、confirm 弹窗去重）并恢复 package / tag / Release / 生产三者一致。
+- GA 后不得再发 `v3.0.10-rc.*`；下一 patch 候选为 `v3.0.11-rc.1`，若按变更体量升 minor 则为 `v3.1.0-rc.1`。
 
 ## 3. 何时创建 GitHub Release
 
@@ -191,4 +192,4 @@ npm run release:sync-all
 1. 以 GitHub 全部 Release 为清单，保证每个版本在 `docs/CHANGELOG.md` 有章节。
 2. 已有 CHANGELOG 详述**优先保留**；缺失章节从 GitHub 原文导入（标注 historical）。
 3. 每个 GitHub Release body = 运维头 + 对应 CHANGELOG **完整**章节（不压缩、不删历史）。
-4. 不改变 Latest：仅 `v3.0.8`（当前 GA）使用 `--latest`；RC 保持 `--prerelease`。
+4. 不改变 Latest：仅当前稳定 GA（现为 `v3.0.10`）使用 `--latest`；RC 保持 `--prerelease`。
