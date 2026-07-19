@@ -67,7 +67,7 @@ export function generateLanguageOptions(): void {
   if (!select) return;
 
   const renderer = SafeRenderer.getInstance();
-  renderer.renderTemplate(select, '<option value="" selected></option>');
+  renderer.renderTemplate(select, '<option value="" selected>站点/语言</option>');
 
   Object.entries(SITE_CONFIGS).forEach(([_code, config]) => {
     const option = document.createElement('option');

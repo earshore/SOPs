@@ -208,7 +208,7 @@ export function generateListingPrompt(ctx: PromptlabAlpineContext): void {
     showToast(
       getPromptReadinessMessage(ctx, {
         defaultMessage: '未就绪',
-        missingTargetMarketMessage: '请先在产品 DNA 补充区域选择目标语言/站点',
+        missingTargetMarketMessage: '请先在产品 DNA 补充区域选择站点/语言',
       }),
       { type: 'warning' }
     );
@@ -243,7 +243,7 @@ export function generateVisualPrompt(ctx: PromptlabAlpineContext): void {
     showToast(
       getPromptReadinessMessage(ctx, {
         defaultMessage: '配置信息不完整',
-        missingTargetMarketMessage: '请先选择目标语言/站点',
+        missingTargetMarketMessage: '请先选择站点/语言',
       }),
       { type: 'warning' }
     );
