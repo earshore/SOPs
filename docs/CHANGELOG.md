@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.9] - 2026-07-19
+
+> 正式 GA。发布后 GitHub Latest 指向 `v3.0.9`；上一 GA 与生产回滚基线均为 `v3.0.8`。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Added
+
+- 新增静态产物合同校验（`release:artifact-contract`）：Hash 规范 clean URL 的 `302` 映射、独立 `404.html`、安全响应头集合。
+- 新增本地发布编排 `npm run release:gate` 与只读生产探测 `npm run release:production-gate`。
+- 新增隔离的发布 Playwright 配置与性能门禁（`test:e2e:smoke:release`、`test:performance:gate` / lighthouse-gate）。
+- 新增功能 E2E 分组 runner（`test:e2e:functional`）与发布就绪状态说明文档。
+- 声明 Node engines 与 `.node-version`，对齐 Vite 8 运行时下限；coverage 四维阈值抬升。
+
+### Changed
+
+- Clean URL 由 SPA `200` rewrite 改为指向 canonical Hash 的临时重定向；`_headers` 去掉扩展名级 MIME 强覆盖。
+- Playwright Chromium 恢复正常浏览器安全（移除全局 `--disable-web-security`）；性能路径收敛为单 worker 隔离门禁。
+- quality-monitor / tech-debt 扫描 fail-closed；`tech-debt:gate` 对 medium 及以上失败。
+- Keyword Hunter 单元 mock 对齐 `SafeRenderer.renderUntrustedHtml`；忽略本地 `.worktrees/`。
+
+### Fixed
+
+- 修复 `npm run build` 预检：`static-artifact-contract` 测试正则触发 `no-regex-spaces`，以及 hardening 合入后 14 个源文件 Prettier 未过 `format:check` 的问题。
+
 ## [3.0.8] - 2026-07-19
 
 > 正式 GA。发布后 GitHub Latest 指向 `v3.0.8`；上一 GA 与生产回滚基线均为 `v3.0.7`。
