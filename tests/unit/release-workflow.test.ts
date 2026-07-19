@@ -119,7 +119,7 @@ function runResolveReleaseTagForTagPush() {
   }
   Object.assign(environment, {
     GITHUB_EVENT_NAME: 'push',
-    GITHUB_REF_NAME: 'v3.0.7',
+    GITHUB_REF_NAME: 'v3.0.8',
     GITHUB_REF_TYPE: 'tag',
     GITHUB_OUTPUT: outputPath,
   });
@@ -192,8 +192,8 @@ describe('release workflow safety contract', () => {
     const { output, result } = runResolveReleaseTagForTagPush();
 
     expect(result.status, result.stderr).toBe(0);
-    expect(output).toContain('tag=v3.0.7');
-    expect(output).toContain('version=3.0.7');
+    expect(output).toContain('tag=v3.0.8');
+    expect(output).toContain('version=3.0.8');
     expect(output).toContain('publish=true');
     expect(output).toContain('is_prerelease=false');
   });

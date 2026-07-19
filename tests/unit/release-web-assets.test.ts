@@ -191,8 +191,39 @@ describe('release web assets', () => {
     expect(startup).toMatch(
       /if \(!result\.success\)\s*{[\s\S]*?revealMainContent\(\);[\s\S]*?return;/
     );
+    expect(startup).toMatch(/catch \(error\)\s*{[\s\S]*?revealMainContent\(\);[\s\S]*?showToast/);
+  });
+
+  it('keeps unrelated domain registration failures from aborting startup', () => {
+    const mainSource = read('src/main.ts');
+    const startup = mainSource.slice(
+      mainSource.indexOf("document.addEventListener('DOMContentLoaded'")
+    );
+
+    expect(mainSource).toMatch(
+      /async function loadDomainModules\(\)\s*{[\s\S]*?Promise\.allSettled\(/
+    );
+    expect(startup).toContain('const domainModulesReady = loadDomainModules();');
+    expect(startup).not.toContain('const domainModulesReady = loadDomainModules().catch(');
+  });
+
+  it('returns an initial domain route to home when its domain registration fails', () => {
+    const mainSource = read('src/main.ts');
+    const startup = mainSource.slice(
+      mainSource.indexOf("document.addEventListener('DOMContentLoaded'")
+    );
+
+    expect(mainSource).toMatch(
+      /const DOMAIN_ROUTE_MATCHERS[\s\S]*?app_center[\s\S]*?ppc_search_terms[\s\S]*?sops[\s\S]*?amz_hub[\s\S]*?more/
+    );
+    expect(mainSource).toMatch(
+      /function getDomainModuleIdForRoute\(route: string\): DomainModuleId \| null\s*{[\s\S]*?DOMAIN_ROUTE_MATCHERS\.find/
+    );
     expect(startup).toMatch(
-      /catch \(error\)\s*{[\s\S]*?revealMainContent\(\);[\s\S]*?showToast/
+      /if \(redirectFailedDomainRoute\(domainModuleResults\)\)\s*{[\s\S]*?shouldWaitForHomeView = true;/
+    );
+    expect(mainSource).toMatch(
+      /function guardFailedDomainRoutes\(domainModuleResults: DomainModuleResults\)[\s\S]*?initRouter\(\)\.addGuard\([\s\S]*?getDomainModuleIdForRoute\(to\.path\)[\s\S]*?redirect: '\/home'/
     );
   });
 });

@@ -35,6 +35,14 @@ export interface IModule {
   unmount?: () => void;
 }
 
+type MountOutcome = 'pending' | 'fulfilled' | 'rejected';
+
+interface MountAttempt {
+  loadId: number;
+  module: IModule;
+  outcome: MountOutcome;
+}
+
 /**
  * 模块加载器配置
  */
@@ -89,6 +97,9 @@ export class ModuleLoader {
   private loadingTimerLoadId: number | null;
   private retryTimer: number | null;
   private retryTimerLoadId: number | null;
+  private mountAttempts: Map<number, MountAttempt>;
+  private deferredStaleCleanupIds: Set<number>;
+  private currentMountLoadId: number | null;
   private routeChangeHandler: ((event: Event) => void) | null;
   private moduleUnloadHandler: ((event: Event) => void) | null;
   private isDestroyed: boolean;
@@ -110,6 +121,9 @@ export class ModuleLoader {
     this.loadingTimerLoadId = null;
     this.retryTimer = null;
     this.retryTimerLoadId = null;
+    this.mountAttempts = new Map();
+    this.deferredStaleCleanupIds = new Set();
+    this.currentMountLoadId = null;
     this.routeChangeHandler = null;
     this.moduleUnloadHandler = null;
     this.isDestroyed = false;
@@ -199,18 +213,22 @@ export class ModuleLoader {
   private unmountCurrentModule(): void {
     this.clearDelayedLoading();
     this.clearRetry();
-    if (this.currentModule && this.currentModule.unmount) {
-      try {
-        this.currentModule.unmount();
-      } catch (unmountErr) {
-        console.error(`[${this.moduleName}] 卸载模块时出错:`, unmountErr);
-      }
+    const module = this.currentModule;
+    const currentMountLoadId = this.currentMountLoadId;
+    this.currentModule = null;
+    this.currentMountLoadId = null;
+
+    if (module) {
+      this.safeUnmount(module);
+      this.retireDeferredStaleMountAttemptsForModule(module);
+    }
+    if (currentMountLoadId !== null) {
+      this.retireMountAttempt(currentMountLoadId);
     }
     if (this.currentContainer) {
       this.currentContainer.classList.remove(MODULE_LOADING_HOST_CLASS);
       this.currentContainer.replaceChildren();
     }
-    this.currentModule = null;
     this.currentContainer = null;
     this.currentRouteId = null; // 🔧 清除路由ID记录
   }
@@ -345,6 +363,7 @@ export class ModuleLoader {
   private startLoad(routeId: string): number {
     this.clearRetry();
     const loadId = ++this.loadSequence;
+    this.cleanUpStaleMountAttempts();
     this.isLoading = true;
     this.pendingRouteId = routeId;
     return loadId;
@@ -352,6 +371,7 @@ export class ModuleLoader {
 
   private cancelPendingLoad(): void {
     this.loadSequence += 1;
+    this.cleanUpStaleMountAttempts();
     this.isLoading = false;
     this.pendingRouteId = null;
     this.clearDelayedLoading();
@@ -459,6 +479,93 @@ export class ModuleLoader {
     container.replaceChildren(wrapper);
   }
 
+  private safeUnmount(module: IModule): void {
+    try {
+      module.unmount?.();
+    } catch (unmountErr) {
+      console.error(`[${this.moduleName}] 卸载模块时出错:`, unmountErr);
+    }
+  }
+
+  private retireMountAttempt(loadId: number): void {
+    this.deferredStaleCleanupIds.delete(loadId);
+    this.mountAttempts.delete(loadId);
+  }
+
+  private retireDeferredStaleMountAttemptsForModule(module: IModule): void {
+    for (const loadId of [...this.deferredStaleCleanupIds]) {
+      const attempt = this.mountAttempts.get(loadId);
+      if (!attempt || attempt.module === module) {
+        this.retireMountAttempt(loadId);
+      }
+    }
+  }
+
+  private retireStaleMountAttemptsAbsorbedByCurrent(module: IModule, loadId: number): void {
+    for (const attempt of [...this.mountAttempts.values()]) {
+      if (attempt.module === module && attempt.loadId < loadId && attempt.outcome !== 'pending') {
+        this.retireMountAttempt(attempt.loadId);
+      }
+    }
+  }
+
+  private hasNewerPendingSameInstance(attempt: MountAttempt): boolean {
+    return [...this.mountAttempts.values()].some(
+      other =>
+        other.module === attempt.module &&
+        other.loadId > attempt.loadId &&
+        other.outcome === 'pending'
+    );
+  }
+
+  private cleanUpCompletedMountAttempt(attempt: MountAttempt): void {
+    this.safeUnmount(attempt.module);
+    this.retireMountAttempt(attempt.loadId);
+    this.retireDeferredStaleMountAttemptsForModule(attempt.module);
+  }
+
+  private completeNonCurrentMountAttempt(attempt: MountAttempt): void {
+    if (this.currentModule === attempt.module) {
+      this.retireMountAttempt(attempt.loadId);
+      return;
+    }
+
+    if (this.hasNewerPendingSameInstance(attempt)) {
+      this.deferredStaleCleanupIds.add(attempt.loadId);
+      return;
+    }
+
+    this.cleanUpCompletedMountAttempt(attempt);
+  }
+
+  private cleanUpStaleMountAttempts(): void {
+    const modulesToUnmount = new Set<IModule>();
+    const terminalAttemptIds = new Set<number>();
+
+    for (const attempt of this.mountAttempts.values()) {
+      if (this.currentModule === attempt.module || !this.isStaleLoad(attempt.loadId)) {
+        continue;
+      }
+
+      if (attempt.outcome === 'pending') {
+        modulesToUnmount.add(attempt.module);
+        continue;
+      }
+
+      if (this.deferredStaleCleanupIds.has(attempt.loadId)) {
+        modulesToUnmount.add(attempt.module);
+        terminalAttemptIds.add(attempt.loadId);
+      }
+    }
+
+    for (const module of modulesToUnmount) {
+      this.safeUnmount(module);
+    }
+    for (const loadId of terminalAttemptIds) {
+      this.retireMountAttempt(loadId);
+    }
+  }
+
   private async mountLoadedModule(
     module: IModule,
     container: HTMLElement,
@@ -471,21 +578,40 @@ export class ModuleLoader {
         'MODULE_INVALID_INTERFACE',
         'module',
         module,
-        { module: 'ModuleLoader', action: 'loadModule', routeId, moduleName: this.moduleName }
+        {
+          module: 'ModuleLoader',
+          action: 'loadModule',
+          routeId,
+          moduleName: this.moduleName,
+        }
       );
     }
 
-    await module.mount(container);
+    const attempt: MountAttempt = {
+      loadId,
+      module,
+      outcome: 'pending',
+    };
+    this.mountAttempts.set(loadId, attempt);
+    try {
+      await module.mount(container);
+    } catch (err) {
+      attempt.outcome = 'rejected';
+      this.completeNonCurrentMountAttempt(attempt);
+      throw err;
+    }
+
+    attempt.outcome = 'fulfilled';
 
     if (this.isStaleLoad(loadId)) {
-      if (module.unmount) {
-        module.unmount();
-      }
+      this.completeNonCurrentMountAttempt(attempt);
       return;
     }
 
     this.currentModule = module;
+    this.currentMountLoadId = loadId;
     this.currentRouteId = routeId;
+    this.retireStaleMountAttemptsAbsorbedByCurrent(module, loadId);
     this.applyContentEnterAnimation(container);
   }
 

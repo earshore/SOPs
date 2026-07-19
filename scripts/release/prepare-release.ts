@@ -19,7 +19,7 @@ import {
 import { dirname, join, relative, resolve } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const CHANGELOG_PATH = join(ROOT, 'docs/CHANGELOG.md');
@@ -67,12 +67,36 @@ function parseArgs(argv: string[]): { command: string; flags: Record<string, str
   return { command, flags };
 }
 
-function git(cmd: string): string {
-  try {
-    return execSync(`git ${cmd}`, { cwd: ROOT, encoding: 'utf8' }).trim();
-  } catch {
-    return '';
+function git(args: readonly string[]): string {
+  return execFileSync('git', args, {
+    cwd: ROOT,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
+}
+
+export function resolveCleanReleaseCommit(status: string, headSha: string): string {
+  const changes = status
+    .split(/\r?\n/)
+    .filter(entry => entry && !entry.startsWith('!! ') && entry !== ' M docs/XSS_SCAN_REPORT.md');
+  if (changes.length > 0) {
+    throw new Error(
+      'Release notes and packages require a clean git worktree. Commit or stash changes before releasing.'
+    );
   }
+
+  const sha = headSha.trim();
+  if (!sha) {
+    throw new Error('Unable to resolve git HEAD for release metadata.');
+  }
+  return sha;
+}
+
+function resolveReleaseCommit(): string {
+  return resolveCleanReleaseCommit(
+    git(['status', '--porcelain=v1', '--untracked-files=all']),
+    git(['rev-parse', 'HEAD'])
+  );
 }
 
 function resolveTagVersion(flags: Record<string, string>): string {
@@ -108,7 +132,11 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export function buildReleaseBody(version: string, changelogSection: string): string {
+export function buildReleaseBody(
+  version: string,
+  changelogSection: string,
+  sha = 'unknown'
+): string {
   const channel = isPreRelease(version)
     ? version.includes('-rc')
       ? 'Release Candidate'
@@ -116,7 +144,6 @@ export function buildReleaseBody(version: string, changelogSection: string): str
         ? 'Beta'
         : 'Alpha'
     : 'Stable (GA)';
-  const sha = git('rev-parse HEAD') || process.env.GITHUB_SHA || 'unknown';
   const shortSha = sha.slice(0, 12);
   const buildTime = new Date().toISOString();
   const productionVerification = version.startsWith('3.0.7-rc.');
@@ -190,10 +217,11 @@ function commandValidate(flags: Record<string, string>): void {
 }
 
 function commandNotes(flags: Record<string, string>): void {
+  const sha = resolveReleaseCommit();
   const version = resolveTagVersion(flags);
   const changelog = readFileSync(CHANGELOG_PATH, 'utf8');
   const section = extractChangelogSection(changelog, version);
-  const body = buildReleaseBody(version, section);
+  const body = buildReleaseBody(version, section, sha);
   const outPath = flags.out
     ? resolve(ROOT, flags.out)
     : join(ARTIFACTS_DIR, 'RELEASE_BODY.md');
@@ -281,8 +309,8 @@ async function createDistArchive(version: string): Promise<string> {
 }
 
 async function commandPackage(flags: Record<string, string>): Promise<void> {
+  const sha = resolveReleaseCommit();
   const version = resolveTagVersion(flags);
-  const sha = git('rev-parse HEAD') || process.env.GITHUB_SHA || 'unknown';
   const shortSha = sha.slice(0, 12);
   const nodeVersion = process.version;
   const buildTime = new Date().toISOString();

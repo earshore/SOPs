@@ -130,6 +130,8 @@ let threadStore: DeepChatThreadStore = createDefaultThreadStore();
 let mountedContainer: HTMLElement | null = null;
 const pendingRequests = new Map<string, PendingDeepChatRequest>();
 const pendingDisplayTimers = new Map<string, number>();
+const DEEP_CHAT_SYSTEM_FONT_STACK =
+  'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 let draftInputResizeObserver: ResizeObserver | null = null;
 let draftInputResizeRetryTimer: number | null = null;
 let cleanupDraftInputHeightListener: (() => void) | null = null;
@@ -158,6 +160,12 @@ class DeepChatModule extends BaseModule {
 
     mountedContainer = this.container;
     renderer.renderTemplate(this.container, html);
+
+    const chatHost = this.container.querySelector<HTMLElement>('#deep-chat-view');
+    if (chatHost) {
+      // Prevent Deep Chat from injecting its Google-hosted Inter stylesheet under the local-only CSP.
+      chatHost.style.fontFamily = DEEP_CHAT_SYSTEM_FONT_STACK;
+    }
   }
 
   protected async init(): Promise<void> {
@@ -1901,6 +1909,7 @@ function replaceChat(container: HTMLElement): void {
   const nextChat = document.createElement('deep-chat') as DeepChatElement;
   nextChat.id = 'deep-chat-view';
   nextChat.className = 'deep-chat-view';
+  nextChat.style.fontFamily = DEEP_CHAT_SYSTEM_FONT_STACK;
   chat.replaceWith(nextChat);
   initDeepChat(container);
 }

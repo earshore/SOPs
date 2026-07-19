@@ -85,6 +85,7 @@ type PromptHistoryState = {
 type ImportOptions = {
   config?: Record<string, unknown> | null;
   storedThreadStore?: Record<string, unknown> | null;
+  threadStoreLoadDelay?: Promise<void>;
   promptHistory?: PromptHistoryState['promptlab']['history'];
   toolStrategySettings?: Record<string, unknown> | null;
   callLLM?: (...args: unknown[]) => Promise<string>;
@@ -101,6 +102,8 @@ type TestChatMessage = {
 };
 
 class TestDeepChatElement extends HTMLElement {
+  static vendorOnRender?: (element: TestDeepChatElement) => void;
+
   history?: TestChatMessage[];
   defaultInput?: { text?: string };
   auxiliaryStyle?: string;
@@ -168,6 +171,14 @@ class TestDeepChatElement extends HTMLElement {
     messages.id = 'messages';
 
     root.append(textInputContainer, submitButton, messages);
+  }
+
+  connectedCallback(): void {
+    if (!TestDeepChatElement.vendorOnRender) {
+      return;
+    }
+
+    window.setTimeout(() => TestDeepChatElement.vendorOnRender?.(this), 20);
   }
 }
 
@@ -278,7 +289,10 @@ async function prepareListingPromptHandoff(options: ImportOptions) {
 
 async function importDeepChat(options: ImportOptions = {}) {
   const localDataStore = {
-    migrateLocalStorageKey: vi.fn(async () => options.storedThreadStore ?? storedThreadStore),
+    migrateLocalStorageKey: vi.fn(async () => {
+      await options.threadStoreLoadDelay;
+      return options.storedThreadStore ?? storedThreadStore;
+    }),
     get: vi.fn(async () => null),
     set: vi.fn(async () => true),
     remove: vi.fn(async () => true),
@@ -471,6 +485,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  TestDeepChatElement.vendorOnRender = undefined;
   vi.doUnmock('@/common/infrastructure/SafeModuleLoader');
   vi.doUnmock('@/common/infrastructure/SafeRenderer');
   vi.doUnmock('@/services/storageService');
@@ -522,6 +537,48 @@ describe('deep-chat playground template copy', () => {
 });
 
 describe('deep-chat playground module', () => {
+  it('sets the system font before an already-defined Deep Chat element can load Google Fonts', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    let releaseThreadStoreLoad: () => void = () => {};
+    const threadStoreLoadDelay = new Promise<void>(resolve => {
+      releaseThreadStoreLoad = resolve;
+    });
+    let fontFamilyAtVendorRender = '';
+    TestDeepChatElement.vendorOnRender = element => {
+      fontFamilyAtVendorRender = element.style.fontFamily;
+      if (!fontFamilyAtVendorRender) {
+        const googleFont = document.createElement('link');
+        googleFont.href = 'https://fonts.googleapis.com/css2?family=Inter';
+        document.head.append(googleFont);
+      }
+    };
+    const { mount, unmount } = await importDeepChat({ threadStoreLoadDelay });
+
+    const mountPromise = mount(container);
+    await vi.advanceTimersByTimeAsync(0);
+
+    try {
+      expect(customElements.get('deep-chat')).toBe(TestDeepChatElement);
+      expect(getChat(container)).toBeInstanceOf(TestDeepChatElement);
+
+      await vi.advanceTimersByTimeAsync(20);
+
+      expect(fontFamilyAtVendorRender).toContain('system-ui');
+      expect(document.head.querySelector('link[href*="fonts.googleapis.com"]')).toBeNull();
+
+      releaseThreadStoreLoad();
+      await mountPromise;
+
+      queryRequired<HTMLButtonElement>(container, '#deep-chat-clear-chat').click();
+      expect(getChat(container).style.fontFamily).toContain('system-ui');
+    } finally {
+      releaseThreadStoreLoad();
+      await mountPromise;
+      unmount();
+    }
+  });
+
   it('mounts stored threads, model config, prompt history, and tuning controls', async () => {
     const container = document.createElement('main');
     document.body.append(container);

@@ -214,7 +214,7 @@ function buildReleaseNotes(version, section, release, previousGa) {
   const shortSha = String(shaTry).slice(0, 12);
   const date = dateOnly(release.published_at);
   const preNote = pre
-    ? '\n> ⚠ 预发布或历史候选。GitHub Latest 仅指向稳定 GA（当前 `v3.0.7`）。\n'
+    ? '\n> ⚠ 预发布或历史候选。GitHub Latest 仅指向稳定 GA（当前 `v3.0.8`）。\n'
     : '';
 
   let extra = '';
@@ -257,7 +257,7 @@ ${preNote}
 ### 运维与部署
 
 ${assetsNote}
-- 回滚：${rollbackNote}；当前 Latest 为 \`v3.0.7\`
+- 回滚：${rollbackNote}；当前 Latest 为 \`v3.0.8\`
 - 验证：首页可达、核心路由可进、LLM 网关连通
 - 部署步骤：docs/DEPLOYMENT.md
 - 发布策略：docs/RELEASE_POLICY.md
@@ -304,7 +304,7 @@ function updateGithubRelease(version, notesPath, release, dryRun) {
     console.log(`[dry-run] gh release edit ${tag}`);
     return;
   }
-  if (version === '3.0.7' && !pre) {
+  if (version === '3.0.8' && !pre) {
     sh(`gh release edit ${tag} --latest --notes-file "${notesPath}" --title "${tag}"`, {
       stdio: 'inherit',
     });

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.8] - 2026-07-19
+
+> 正式 GA。发布后 GitHub Latest 指向 `v3.0.8`；上一 GA 与生产回滚基线均为 `v3.0.7`。
+> 生产目标为 `https://sops.hongecb.store`。
+
+### Added
+- 新增启动故障注入回归覆盖：无关 domain import 失败时 App Center 深链继续可用；目标 App Center domain import 失败时回退完整首页。
+
+### Changed
+- 启动阶段按 domain 独立记录动态 import 结果，避免单个可选 domain 的失败中断全局初始化。
+
+### Fixed
+- 修复 App Center singleton 在 A → B → A 快速路由切换时，旧异步 mount 完成后卸载新实例的问题。
+- 修复 App Center 初始深链在自身 domain chunk 无法加载时留下空壳的问题，改为回退首页并提示用户。
+- 修复 Deep Chat 初次挂载及重建会话时注入 Google Fonts，导致本地 CSP 报错的问题。
+
 ## [3.0.7] - 2026-07-18
 
 > 正式 GA。发布后 GitHub Latest 指向 `v3.0.7`；上一 GA 与生产回滚基线均为 `v3.0.6`。

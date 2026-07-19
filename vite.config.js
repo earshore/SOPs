@@ -22,6 +22,35 @@ const devServerForwardConsole = {
   logLevels: ['error', 'warn'],
 };
 const compressibleAssetPattern = /\.(js|mjs|json|css|html)$/i;
+const domainShellChunkPattern = /(?:^|\/)domain-shells-[^/]+\.js$/;
+
+export function assertNoDomainShellChunk(bundle) {
+  const chunks = Object.values(bundle).filter(output => output.type === 'chunk');
+  const domainShellChunk = chunks.find(chunk => domainShellChunkPattern.test(chunk.fileName));
+
+  if (domainShellChunk) {
+    throw new Error(`Unexpected domain-shells chunk: ${domainShellChunk.fileName}`);
+  }
+
+  const entryImport = chunks
+    .filter(chunk => chunk.isEntry)
+    .flatMap(chunk => chunk.imports)
+    .find(importedFileName => domainShellChunkPattern.test(importedFileName));
+
+  if (entryImport) {
+    throw new Error(`Entry chunk statically imports domain-shells: ${entryImport}`);
+  }
+}
+
+function createDomainShellEntryGuardPlugin() {
+  return {
+    name: 'sops:domain-shell-entry-guard',
+    apply: 'build',
+    generateBundle(_outputOptions, bundle) {
+      assertNoDomainShellChunk(bundle);
+    },
+  };
+}
 
 function getAppVersion() {
   // package.json is the single source of truth for the displayed app version.
@@ -129,7 +158,11 @@ export default defineConfig({
     __BUNDLED_DEV__: 'false',
     __SERVER_FORWARD_CONSOLE__: JSON.stringify(devServerForwardConsole),
   },
-  plugins: [createDeepChatBundleAssetPlugin(), createPrecompressPlugin()],
+  plugins: [
+    createDeepChatBundleAssetPlugin(),
+    createPrecompressPlugin(),
+    createDomainShellEntryGuardPlugin(),
+  ],
 
   // ================================================================
   // Vitest 测试配置
@@ -227,7 +260,6 @@ export default defineConfig({
         return deps.filter(
           dep =>
             !dep.includes('system-settings') &&
-            !dep.includes('domain-shells') &&
             !dep.includes('vendor-fa-brands')
         );
       },
@@ -258,16 +290,6 @@ export default defineConfig({
           // some paths still pull it transitively.
           if (normalizedId.includes('/src/components/settings/systemSettings')) {
             return 'system-settings';
-          }
-
-          // Domain shells should load as separate async chunks.
-          if (
-            normalizedId.includes('/src/modules/app_center/app_center') ||
-            normalizedId.includes('/src/modules/sops/sops') ||
-            normalizedId.includes('/src/modules/more/more') ||
-            normalizedId.includes('/src/modules/amz_hub/amz_hub')
-          ) {
-            return 'domain-shells';
           }
 
           if (!normalizedId.includes('/node_modules/')) {

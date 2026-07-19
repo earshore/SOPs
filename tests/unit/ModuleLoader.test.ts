@@ -180,6 +180,710 @@ async function flushAsyncWork(): Promise<void> {
     expect(content.textContent).toBe('Fast');
   });
 
+  it('does not unmount a newer mount when a stale mount of the same module completes', async () => {
+    const firstMount = deferred<void>();
+    let mountCount = 0;
+    let active = false;
+    const sharedModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn((container: HTMLElement) => {
+        mountCount += 1;
+        active = true;
+        container.textContent = `Shared ${mountCount}`;
+        return mountCount === 1 ? firstMount.promise : undefined;
+      }),
+      unmount: vi.fn(() => {
+        active = false;
+      }),
+    };
+    const nextModule = createModule('Next');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_shared: vi.fn(() => Promise.resolve(sharedModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    const firstSharedLoad = loader.loadModule('race_shared');
+    await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(1));
+
+    await loader.loadModule('race_next');
+    await loader.loadModule('race_shared');
+
+    firstMount.resolve();
+    await firstSharedLoad;
+
+    expect(sharedModule.mount).toHaveBeenCalledTimes(2);
+    expect(sharedModule.unmount).toHaveBeenCalledTimes(2);
+    expect(active).toBe(true);
+  });
+
+  it.each([
+    ['a newer route supersedes it', async (loader: ModuleLoader) => {
+      await loader.loadModule('race_next');
+    }],
+    ['its shell unloads', (loader: ModuleLoader) => {
+      window.dispatchEvent(new CustomEvent(APP_EVENTS.MODULE_UNLOAD, {
+        detail: { panelId: 'shell' }
+      }));
+    }],
+    ['the loader is destroyed', (loader: ModuleLoader) => {
+      loader.destroy();
+    }]
+  ])('unmounts a partially initialized pending mount when %s', async (_boundary, cancel) => {
+    const pendingMount = deferred<void>();
+    let listenerCalls = 0;
+    const onPendingMount = () => {
+      listenerCalls += 1;
+    };
+    const pendingModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async () => {
+        window.addEventListener('module-loader-pending-mount', onPendingMount);
+        await pendingMount.promise;
+      }),
+      unmount: vi.fn(() => {
+        window.removeEventListener('module-loader-pending-mount', onPendingMount);
+      })
+    };
+    const nextModule = createModule('Next');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_pending: vi.fn(() => Promise.resolve(pendingModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule))
+      },
+      moduleName: 'TestLoader'
+    });
+
+    const pendingLoad = loader.loadModule('race_pending');
+    await vi.waitFor(() => expect(pendingModule.mount).toHaveBeenCalledTimes(1));
+
+    try {
+      window.dispatchEvent(new Event('module-loader-pending-mount'));
+      expect(listenerCalls).toBe(1);
+
+      await cancel(loader);
+      window.dispatchEvent(new Event('module-loader-pending-mount'));
+
+      expect(listenerCalls).toBe(1);
+      expect(pendingModule.unmount).toHaveBeenCalledTimes(1);
+    } finally {
+      pendingMount.resolve();
+      await pendingLoad;
+      window.removeEventListener('module-loader-pending-mount', onPendingMount);
+    }
+  });
+
+  it('re-cleans a stale pending mount that creates effects after an earlier supersede', async () => {
+    const firstPause = deferred<void>();
+    const secondPause = deferred<void>();
+    let lateEffectCreated = false;
+    let listenerCalls = 0;
+    const onLateEffect = () => {
+      listenerCalls += 1;
+    };
+    const pendingModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async () => {
+        await firstPause.promise;
+        lateEffectCreated = true;
+        window.addEventListener('module-loader-late-pending-effect', onLateEffect);
+        await secondPause.promise;
+      }),
+      unmount: vi.fn(() => {
+        window.removeEventListener('module-loader-late-pending-effect', onLateEffect);
+      })
+    };
+    const nextModule = createModule('Next');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_pending: vi.fn(() => Promise.resolve(pendingModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule))
+      },
+      moduleName: 'TestLoader'
+    });
+
+    const pendingLoad = loader.loadModule('race_pending');
+    await vi.waitFor(() => expect(pendingModule.mount).toHaveBeenCalledTimes(1));
+
+    try {
+      await loader.loadModule('race_next');
+      firstPause.resolve();
+      await vi.waitFor(() => expect(lateEffectCreated).toBe(true));
+      window.dispatchEvent(new Event('module-loader-late-pending-effect'));
+      expect(listenerCalls).toBe(1);
+
+      loader.destroy();
+      window.dispatchEvent(new Event('module-loader-late-pending-effect'));
+
+      expect(listenerCalls).toBe(1);
+      expect(pendingModule.unmount).toHaveBeenCalledTimes(2);
+    } finally {
+      secondPause.resolve();
+      await pendingLoad;
+      window.removeEventListener('module-loader-late-pending-effect', onLateEffect);
+    }
+  });
+
+  it('cleans up partial effects when the current mount rejects', async () => {
+    let listenerCalls = 0;
+    const onPartialMount = () => {
+      listenerCalls += 1;
+    };
+    const failingModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async () => {
+        window.addEventListener('module-loader-current-failure', onPartialMount);
+        throw new Error('current mount failed');
+      }),
+      unmount: vi.fn(() => {
+        window.removeEventListener('module-loader-current-failure', onPartialMount);
+      }),
+    };
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        current_failure: vi.fn(() => Promise.resolve(failingModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    try {
+      await loader.loadModule('current_failure', 1);
+      window.dispatchEvent(new Event('module-loader-current-failure'));
+
+      expect(listenerCalls).toBe(0);
+      expect(failingModule.unmount).toHaveBeenCalledTimes(1);
+    } finally {
+      window.removeEventListener('module-loader-current-failure', onPartialMount);
+    }
+  });
+
+  it('cleans up a late rejected successor after route supersede', async () => {
+    const firstMount = deferred<void>();
+    const successorMount = deferred<void>();
+    let mountCount = 0;
+    let staleListenerCalls = 0;
+    let successorListenerCalls = 0;
+    const onStaleMount = () => {
+      staleListenerCalls += 1;
+    };
+    const onSuccessorMount = () => {
+      successorListenerCalls += 1;
+    };
+    const sharedModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async () => {
+        const mountId = ++mountCount;
+        await (mountId === 1 ? firstMount.promise : successorMount.promise);
+
+        if (mountId === 1) {
+          window.addEventListener('module-loader-superseded-stale', onStaleMount);
+          return;
+        }
+
+        window.addEventListener('module-loader-superseded-successor', onSuccessorMount);
+        throw new Error('successor mount failed');
+      }),
+      unmount: vi.fn(() => {
+        window.removeEventListener('module-loader-superseded-stale', onStaleMount);
+        window.removeEventListener('module-loader-superseded-successor', onSuccessorMount);
+      }),
+    };
+    const nextModule = createModule('Next');
+    const finalModule = createModule('Final');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_shared: vi.fn(() => Promise.resolve(sharedModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule)),
+        race_final: vi.fn(() => Promise.resolve(finalModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    try {
+      const firstLoad = loader.loadModule('race_shared');
+      await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(1));
+
+      await loader.loadModule('race_next');
+      const successorLoad = loader.loadModule('race_shared', 1);
+      await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(2));
+
+      firstMount.resolve();
+      await firstLoad;
+      window.dispatchEvent(new Event('module-loader-superseded-stale'));
+      expect(staleListenerCalls).toBe(1);
+
+      await loader.loadModule('race_final');
+      successorMount.resolve();
+      await successorLoad;
+      window.dispatchEvent(new Event('module-loader-superseded-stale'));
+      window.dispatchEvent(new Event('module-loader-superseded-successor'));
+
+      expect(staleListenerCalls).toBe(1);
+      expect(successorListenerCalls).toBe(0);
+      expect(sharedModule.unmount).toHaveBeenCalledTimes(4);
+    } finally {
+      window.removeEventListener('module-loader-superseded-stale', onStaleMount);
+      window.removeEventListener('module-loader-superseded-successor', onSuccessorMount);
+    }
+  });
+
+  it('cleans up a late rejected successor after its shell unloads', async () => {
+    const firstMount = deferred<void>();
+    const successorMount = deferred<void>();
+    let mountCount = 0;
+    let staleListenerCalls = 0;
+    let successorListenerCalls = 0;
+    const onStaleMount = () => {
+      staleListenerCalls += 1;
+    };
+    const onSuccessorMount = () => {
+      successorListenerCalls += 1;
+    };
+    const sharedModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async () => {
+        const mountId = ++mountCount;
+        await (mountId === 1 ? firstMount.promise : successorMount.promise);
+
+        if (mountId === 1) {
+          window.addEventListener('module-loader-unloaded-stale', onStaleMount);
+          return;
+        }
+
+        window.addEventListener('module-loader-unloaded-successor', onSuccessorMount);
+        throw new Error('successor mount failed');
+      }),
+      unmount: vi.fn(() => {
+        window.removeEventListener('module-loader-unloaded-stale', onStaleMount);
+        window.removeEventListener('module-loader-unloaded-successor', onSuccessorMount);
+      }),
+    };
+    const nextModule = createModule('Next');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_shared: vi.fn(() => Promise.resolve(sharedModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    try {
+      const firstLoad = loader.loadModule('race_shared');
+      await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(1));
+
+      await loader.loadModule('race_next');
+      const successorLoad = loader.loadModule('race_shared', 1);
+      await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(2));
+
+      firstMount.resolve();
+      await firstLoad;
+      window.dispatchEvent(new Event('module-loader-unloaded-stale'));
+      expect(staleListenerCalls).toBe(1);
+
+      window.dispatchEvent(
+        new CustomEvent(APP_EVENTS.MODULE_UNLOAD, {
+          detail: { panelId: 'shell' },
+        })
+      );
+      successorMount.resolve();
+      await successorLoad;
+      window.dispatchEvent(new Event('module-loader-unloaded-stale'));
+      window.dispatchEvent(new Event('module-loader-unloaded-successor'));
+
+      expect(staleListenerCalls).toBe(1);
+      expect(successorListenerCalls).toBe(0);
+      expect(sharedModule.unmount).toHaveBeenCalledTimes(4);
+    } finally {
+      window.removeEventListener('module-loader-unloaded-stale', onStaleMount);
+      window.removeEventListener('module-loader-unloaded-successor', onSuccessorMount);
+    }
+  });
+
+  it('cleans up a late rejected successor after the loader is destroyed', async () => {
+    const firstMount = deferred<void>();
+    const successorMount = deferred<void>();
+    let mountCount = 0;
+    let staleListenerCalls = 0;
+    let successorListenerCalls = 0;
+    const onStaleMount = () => {
+      staleListenerCalls += 1;
+    };
+    const onSuccessorMount = () => {
+      successorListenerCalls += 1;
+    };
+    const sharedModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async () => {
+        const mountId = ++mountCount;
+        await (mountId === 1 ? firstMount.promise : successorMount.promise);
+
+        if (mountId === 1) {
+          window.addEventListener('module-loader-destroyed-stale', onStaleMount);
+          return;
+        }
+
+        window.addEventListener('module-loader-destroyed-successor', onSuccessorMount);
+        throw new Error('successor mount failed');
+      }),
+      unmount: vi.fn(() => {
+        window.removeEventListener('module-loader-destroyed-stale', onStaleMount);
+        window.removeEventListener('module-loader-destroyed-successor', onSuccessorMount);
+      }),
+    };
+    const nextModule = createModule('Next');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_shared: vi.fn(() => Promise.resolve(sharedModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    try {
+      const firstLoad = loader.loadModule('race_shared');
+      await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(1));
+
+      await loader.loadModule('race_next');
+      const successorLoad = loader.loadModule('race_shared', 1);
+      await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(2));
+
+      firstMount.resolve();
+      await firstLoad;
+      window.dispatchEvent(new Event('module-loader-destroyed-stale'));
+      expect(staleListenerCalls).toBe(1);
+
+      loader.destroy();
+      successorMount.resolve();
+      await successorLoad;
+      window.dispatchEvent(new Event('module-loader-destroyed-stale'));
+      window.dispatchEvent(new Event('module-loader-destroyed-successor'));
+
+      expect(staleListenerCalls).toBe(1);
+      expect(successorListenerCalls).toBe(0);
+      expect(sharedModule.unmount).toHaveBeenCalledTimes(4);
+    } finally {
+      window.removeEventListener('module-loader-destroyed-stale', onStaleMount);
+      window.removeEventListener('module-loader-destroyed-successor', onSuccessorMount);
+    }
+  });
+
+  it('continues a route supersede when stale cleanup unmount throws', async () => {
+    const firstMount = deferred<void>();
+    const successorMount = deferred<void>();
+    let mountCount = 0;
+    const throwingModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async () => {
+        mountCount += 1;
+        await (mountCount === 1 ? firstMount.promise : successorMount.promise);
+      }),
+      unmount: vi.fn(() => {
+        throw new Error('unmount failed');
+      }),
+    };
+    const nextModule = createModule('Next');
+    const finalModule = createModule('Final');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_shared: vi.fn(() => Promise.resolve(throwingModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule)),
+        race_final: vi.fn(() => Promise.resolve(finalModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    const firstLoad = loader.loadModule('race_shared');
+    await vi.waitFor(() => expect(throwingModule.mount).toHaveBeenCalledTimes(1));
+    await loader.loadModule('race_next');
+    const successorLoad = loader.loadModule('race_shared');
+    await vi.waitFor(() => expect(throwingModule.mount).toHaveBeenCalledTimes(2));
+
+    try {
+      firstMount.resolve();
+      await firstLoad;
+
+      await expect(loader.loadModule('race_final')).resolves.toBeUndefined();
+      expect(finalModule.mount).toHaveBeenCalledTimes(1);
+    } finally {
+      successorMount.resolve();
+      await successorLoad;
+    }
+  });
+
+  it('cleans up a stale singleton mount after a newer mount of it fails', async () => {
+    const staleMount = deferred<void>();
+    const newerMount = deferred<void>();
+    const content = document.getElementById('content') as HTMLElement;
+    let mountCount = 0;
+    let active = false;
+    const sharedModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async (container: HTMLElement) => {
+        const mountId = ++mountCount;
+        await (mountId === 1 ? staleMount.promise : newerMount.promise);
+
+        if (mountId === 2) {
+          throw new Error('newer mount failed');
+        }
+
+        active = true;
+        container.textContent = 'Stale singleton';
+      }),
+      unmount: vi.fn(() => {
+        active = false;
+        content.replaceChildren();
+      }),
+    };
+    const nextModule = createModule('Next');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_shared: vi.fn(() => Promise.resolve(sharedModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    const staleLoad = loader.loadModule('race_shared');
+    await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(1));
+
+    await loader.loadModule('race_next');
+    const newerLoad = loader.loadModule('race_shared', 1);
+    await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(2));
+
+    newerMount.resolve();
+    await newerLoad;
+    staleMount.resolve();
+    await staleLoad;
+
+    expect(active).toBe(false);
+    expect(content.textContent).toBe('');
+    expect(sharedModule.unmount).toHaveBeenCalledTimes(4);
+  });
+
+  it('cleans up a completed stale singleton when its pending successor fails', async () => {
+    const firstMount = deferred<void>();
+    const newerMount = deferred<void>();
+    let mountCount = 0;
+    let active = false;
+    let listenerCalls = 0;
+    const onStaleMount = () => {
+      listenerCalls += 1;
+    };
+    const sharedModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async () => {
+        const mountId = ++mountCount;
+        await (mountId === 1 ? firstMount.promise : newerMount.promise);
+
+        if (mountId === 2) {
+          throw new Error('newer mount failed');
+        }
+
+        active = true;
+        window.addEventListener('module-loader-stale-mount', onStaleMount);
+      }),
+      unmount: vi.fn(() => {
+        active = false;
+        window.removeEventListener('module-loader-stale-mount', onStaleMount);
+      }),
+    };
+    const nextModule = createModule('Next');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_shared: vi.fn(() => Promise.resolve(sharedModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    try {
+      const firstLoad = loader.loadModule('race_shared');
+      await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(1));
+
+      await loader.loadModule('race_next');
+      const newerLoad = loader.loadModule('race_shared', 1);
+      await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(2));
+
+      firstMount.resolve();
+      await firstLoad;
+      window.dispatchEvent(new Event('module-loader-stale-mount'));
+      expect(active).toBe(true);
+      expect(listenerCalls).toBe(1);
+
+      newerMount.resolve();
+      await newerLoad;
+      window.dispatchEvent(new Event('module-loader-stale-mount'));
+
+      expect(active).toBe(false);
+      expect(listenerCalls).toBe(1);
+      expect(sharedModule.unmount).toHaveBeenCalledTimes(3);
+    } finally {
+      window.removeEventListener('module-loader-stale-mount', onStaleMount);
+    }
+  });
+
+  it('cleans up a completed stale singleton when the owner unloads its pending successor', async () => {
+    const firstMount = deferred<void>();
+    const successorMount = deferred<void>();
+    let mountCount = 0;
+    let listenerCalls = 0;
+    const onStaleMount = () => {
+      listenerCalls += 1;
+    };
+    const sharedModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async () => {
+        const mountId = ++mountCount;
+        await (mountId === 1 ? firstMount.promise : successorMount.promise);
+        window.addEventListener('module-loader-stale-mount', onStaleMount);
+      }),
+      unmount: vi.fn(() => {
+        window.removeEventListener('module-loader-stale-mount', onStaleMount);
+      }),
+    };
+    const nextModule = createModule('Next');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_shared: vi.fn(() => Promise.resolve(sharedModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    const firstLoad = loader.loadModule('race_shared');
+    await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(1));
+
+    await loader.loadModule('race_next');
+    const successorLoad = loader.loadModule('race_shared');
+    await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(2));
+
+    try {
+      firstMount.resolve();
+      await firstLoad;
+      window.dispatchEvent(new Event('module-loader-stale-mount'));
+      expect(listenerCalls).toBe(1);
+
+      window.dispatchEvent(
+        new CustomEvent(APP_EVENTS.MODULE_UNLOAD, {
+          detail: { panelId: 'shell' },
+        })
+      );
+      window.dispatchEvent(new Event('module-loader-stale-mount'));
+
+      expect(listenerCalls).toBe(1);
+      expect(sharedModule.unmount).toHaveBeenCalledTimes(3);
+    } finally {
+      successorMount.resolve();
+      await successorLoad;
+      window.removeEventListener('module-loader-stale-mount', onStaleMount);
+    }
+  });
+
+  it('cleans up a completed stale singleton when a new route supersedes its pending successor', async () => {
+    const firstMount = deferred<void>();
+    const successorMount = deferred<void>();
+    let mountCount = 0;
+    let listenerCalls = 0;
+    const onStaleMount = () => {
+      listenerCalls += 1;
+    };
+    const sharedModule: IModule & {
+      mount: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    } = {
+      mount: vi.fn(async () => {
+        const mountId = ++mountCount;
+        await (mountId === 1 ? firstMount.promise : successorMount.promise);
+        window.addEventListener('module-loader-stale-mount', onStaleMount);
+      }),
+      unmount: vi.fn(() => {
+        window.removeEventListener('module-loader-stale-mount', onStaleMount);
+      }),
+    };
+    const nextModule = createModule('Next');
+    const finalModule = createModule('Final');
+    const loader = new ModuleLoader({
+      containerId: 'content',
+      shellId: 'shell',
+      moduleMap: {
+        race_shared: vi.fn(() => Promise.resolve(sharedModule)),
+        race_next: vi.fn(() => Promise.resolve(nextModule)),
+        race_final: vi.fn(() => Promise.resolve(finalModule)),
+      },
+      moduleName: 'TestLoader',
+    });
+
+    const firstLoad = loader.loadModule('race_shared');
+    await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(1));
+
+    await loader.loadModule('race_next');
+    const successorLoad = loader.loadModule('race_shared');
+    await vi.waitFor(() => expect(sharedModule.mount).toHaveBeenCalledTimes(2));
+
+    try {
+      firstMount.resolve();
+      await firstLoad;
+      window.dispatchEvent(new Event('module-loader-stale-mount'));
+      expect(listenerCalls).toBe(1);
+
+      await loader.loadModule('race_final');
+      window.dispatchEvent(new Event('module-loader-stale-mount'));
+
+      expect(listenerCalls).toBe(1);
+      expect(sharedModule.unmount).toHaveBeenCalledTimes(3);
+    } finally {
+      successorMount.resolve();
+      await successorLoad;
+      window.removeEventListener('module-loader-stale-mount', onStaleMount);
+    }
+  });
+
   it('cancels pending route loads when the owning module unloads', async () => {
     const content = document.getElementById('content') as HTMLElement;
     const pending = deferred<IModule>();

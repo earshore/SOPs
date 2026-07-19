@@ -33,11 +33,12 @@
 - `v3.0.4-rc.1` … `v3.0.4-rc.11` 为历史误序 RC（GA 之后继续同号候选），**冻结**：不再新增 `3.0.4-rc.*`。
 - `v3.0.5-rc.1` / `v3.0.5-rc.2` 分别与 `v3.0.4-rc.9` / `v3.0.4-rc.10` 指向同一提交，仅保留为归档 tag；不得为其创建 GitHub Release，以免重复条目打乱发布页。
 - `v3.0.5`（2026-07-13）为历史 GA：收口上述 RC 线并落地发布治理；取代误打且无 Release 的旧 `v3.0.5` tag 指向。
-- `v3.0.6`（2026-07-14）为上一 GA：发布应用中心本地作业闭环与生产预览可靠性更新。
+- `v3.0.6`（2026-07-14）为历史 GA：发布应用中心本地作业闭环与生产预览可靠性更新。
 - `v3.0.7-rc.1`（2026-07-14）为历史生产验证候选：完成 Keyword Hunter / PromptLab 链路收敛与历史 Release 去重。
 - `v3.0.7-rc.2`（2026-07-14）为历史生产验证候选：修复应用总览数据加载闪屏并移除 PromptLab SEO 关键词复制入口。
-- `v3.0.7`（2026-07-18）为当前 GA：收口 `v3.0.7-rc.1`、`v3.0.7-rc.2` 与本次 GA 定稿变更。
-- GA 后不得再发 `v3.0.7-rc.*`；下一 patch 候选为 `v3.0.8-rc.1`，若按变更体量升 minor 则为 `v3.1.0-rc.1`。
+- `v3.0.7`（2026-07-18）为上一 GA：收口 `v3.0.7-rc.1`、`v3.0.7-rc.2` 与本次 GA 定稿变更。
+- `v3.0.8`（2026-07-19）为当前 GA：修复 App Center 启动降级、模块异步 mount 竞态与 Deep Chat CSP 兼容问题。
+- GA 后不得再发 `v3.0.8-rc.*`；下一 patch 候选为 `v3.0.9-rc.1`，若按变更体量升 minor 则为 `v3.1.0-rc.1`。
 
 ## 3. 何时创建 GitHub Release
 
@@ -109,24 +110,24 @@ Source code zip/tarball 由 GitHub 自动提供，**不能**替代 `dist` 产物
 ### 7.1 发布 RC
 
 ```bash
-# 1. 更新 package.json version，例如 3.0.8-rc.1
+# 1. 更新 package.json version，例如 3.0.9-rc.1
 # 2. 将 Unreleased 迁入 docs/CHANGELOG.md 对应章节
 # 3. 提交并推送 main
 # 4. 等待该提交的 main Quality Gate 成功（release workflow 会拒绝尚未通过的 SHA）
 # 5. 打 tag 并推送（触发 release workflow）
-git tag -a v3.0.8-rc.1 -m "v3.0.8-rc.1"
-git push sops v3.0.8-rc.1
+git tag -a v3.0.9-rc.1 -m "v3.0.9-rc.1"
+git push sops v3.0.9-rc.1
 ```
 
 ### 7.2 发布 GA
 
 ```bash
-# version → 3.0.7（去掉 -rc.N），CHANGELOG 定稿
+# version → 3.0.9（去掉 -rc.N），CHANGELOG 定稿
 # 1. 提交并推送 main
 # 2. 等待该提交的 main Quality Gate 成功
 # 3. 仅在同一 SHA 已通过门禁后，创建并推送 annotated tag
-git tag -a v3.0.7 -m "v3.0.7"
-git push sops v3.0.7
+git tag -a v3.0.9 -m "v3.0.9"
+git push sops v3.0.9
 ```
 
 ### 7.3 本地校验（不推送）
@@ -189,4 +190,4 @@ npm run release:sync-all
 1. 以 GitHub 全部 Release 为清单，保证每个版本在 `docs/CHANGELOG.md` 有章节。
 2. 已有 CHANGELOG 详述**优先保留**；缺失章节从 GitHub 原文导入（标注 historical）。
 3. 每个 GitHub Release body = 运维头 + 对应 CHANGELOG **完整**章节（不压缩、不删历史）。
-4. 不改变 Latest：仅 `v3.0.7`（当前 GA）使用 `--latest`；RC 保持 `--prerelease`。
+4. 不改变 Latest：仅 `v3.0.8`（当前 GA）使用 `--latest`；RC 保持 `--prerelease`。

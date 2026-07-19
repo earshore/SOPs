@@ -64,7 +64,7 @@ import {
 } from '@/common/utils/actionRegistry';
 
 import { AlpineRegistry } from '@/common/infrastructure/AlpineRegistry';
-import { triggerInitialNavigation } from '@/common/router/initRouter';
+import { initRouter, triggerInitialNavigation } from '@/common/router/initRouter';
 import { initEventLogger } from '@/common/utils/eventLogger';
 import { loadPlugins } from '@/common/utils/pluginLoader';
 import { applyDeveloperDiagnosticSettings } from '@/services/developerDiagnosticsService';
@@ -106,13 +106,27 @@ import { initHomeSplash } from './modules/home/homeDisplay';
 
 // Domain shells register route listeners — load them in parallel with bootstrap
 // instead of blocking the static entry parse graph.
-function loadDomainModules(): Promise<unknown[]> {
-  return Promise.all([
+async function loadDomainModules() {
+  const [amzHub, sops, more, appCenter] = await Promise.allSettled([
     import('./modules/amz_hub/amz_hub'),
     import('./modules/sops/sops'),
     import('./modules/more/more'),
     import('./modules/app_center/app_center'),
   ]);
+  const results = {
+    amz_hub: amzHub,
+    sops,
+    more,
+    app_center: appCenter,
+  };
+
+  Object.entries(results).forEach(([domain, result]) => {
+    if (result.status === 'rejected') {
+      mainLogger.error(`Domain module registration failed: ${domain}`, result.reason);
+    }
+  });
+
+  return results;
 }
 
 // ✅ Alpine.js
@@ -272,6 +286,59 @@ async function ensureAlpineSettingsReady(): Promise<void> {
 function isInitialHomeRoute(): boolean {
   const currentHash = window.location.hash.replace(/^#/, '').trim();
   return !currentHash || currentHash === '/' || currentHash === '/home' || currentHash === 'home';
+}
+
+type DomainModuleId = 'amz_hub' | 'sops' | 'more' | 'app_center';
+type DomainModuleResults = Record<DomainModuleId, PromiseSettledResult<unknown>>;
+const DOMAIN_ROUTE_MATCHERS: ReadonlyArray<readonly [DomainModuleId, RegExp]> = [
+  ['app_center', /^\/app(?:-|_)center(?:\/|$)|^\/ppc_search_terms$/],
+  ['sops', /^\/sops(?:\/|$)|^\/sops_/],
+  ['amz_hub', /^\/amz-hub(?:\/|$)|^\/amz_/],
+  ['more', /^\/more(?:\/|$)|^\/more_/],
+];
+
+function getDomainModuleIdForRoute(route: string): DomainModuleId | null {
+  const normalizedRoute = route.trim().replace(/^#/, '');
+  const normalizedHash = normalizedRoute.startsWith('/') ? normalizedRoute : `/${normalizedRoute}`;
+
+  return DOMAIN_ROUTE_MATCHERS.find(([, matcher]) => matcher.test(normalizedHash))?.[0] ?? null;
+}
+
+function redirectFailedDomainRoute(domainModuleResults: DomainModuleResults): boolean {
+  const domainModuleId = getDomainModuleIdForRoute(window.location.hash);
+  if (!domainModuleId || domainModuleResults[domainModuleId].status !== 'rejected') {
+    return false;
+  }
+
+  window.history.replaceState(null, '', '#/home');
+  showToast(
+    domainModuleId === 'app_center'
+      ? '应用中心暂时无法加载，已返回首页，请刷新后重试'
+      : '当前页面所需模块暂时无法加载，已返回首页，请刷新后重试',
+    { type: 'error' }
+  );
+  return true;
+}
+
+function guardFailedDomainRoutes(domainModuleResults: DomainModuleResults): void {
+  initRouter().addGuard({
+    name: 'failed-domain-module',
+    priority: 0,
+    check: to => {
+      const domainModuleId = getDomainModuleIdForRoute(to.path);
+      if (!domainModuleId || domainModuleResults[domainModuleId].status !== 'rejected') {
+        return true;
+      }
+
+      showToast(
+        domainModuleId === 'app_center'
+          ? '应用中心暂时无法加载，已返回首页，请刷新后重试'
+          : '当前页面所需模块暂时无法加载，已返回首页，请刷新后重试',
+        { type: 'error' }
+      );
+      return { allow: false, redirect: '/home', reason: 'domain_module_unavailable' };
+    },
+  });
 }
 
 function revealInitialHomeView(): boolean {
@@ -511,13 +578,10 @@ if (import.meta.env.DEV) {
 document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
   mainLogger.info('System: Application Booting...');
 
-  const shouldWaitForHomeView = isInitialHomeRoute();
+  let shouldWaitForHomeView = isInitialHomeRoute();
   const homeViewReady = initHomeView();
   const mainStylesReady = loadMainStyles();
-  const domainModulesReady = loadDomainModules().catch(error => {
-    mainLogger.error('Domain module registration failed', error);
-    throw error;
-  });
+  const domainModulesReady = loadDomainModules();
 
   try {
     if (shouldWaitForHomeView) {
@@ -535,7 +599,10 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
     // ================================================================
     // 执行初始化
     // ================================================================
-    const [result] = await Promise.all([bootstrap.initialize(), domainModulesReady]);
+    const [result, domainModuleResults] = await Promise.all([
+      bootstrap.initialize(),
+      domainModulesReady,
+    ]);
 
     if (!result.success) {
       mainLogger.error('部分服务初始化失败，应用可能无法正常工作');
@@ -543,6 +610,11 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
       revealMainContent();
       return;
     }
+
+    if (redirectFailedDomainRoute(domainModuleResults)) {
+      shouldWaitForHomeView = true;
+    }
+    guardFailedDomainRoutes(domainModuleResults);
 
     // ================================================================
     // 初始化成功，继续启动流程
