@@ -119,7 +119,9 @@
     "release:backfill-notes": "node scripts/release/backfill-release-notes.mjs",
     "release:sync-all": "node scripts/release/fetch-all-releases.mjs && node scripts/release/sync-all-releases.mjs",
     "release:audit": "node scripts/release/audit-releases.mjs",
-    "test:performance:functional": "playwright test --config=config/playwright.functional-performance.config.ts"
+    "test:performance:functional": "playwright test --config=config/playwright.functional-performance.config.ts",
+    "release:gate": "tsx scripts/release/run-release-gate.ts",
+    "release:production-gate": "tsx scripts/release/production-gate.ts"
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^8.0.0",
