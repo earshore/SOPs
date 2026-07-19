@@ -7,12 +7,6 @@ const DEFAULT_LLM_MODELS_URL = `${DEFAULT_LLM_ENDPOINT}/models`;
 const DEEP_CHAT_PROMPT_ID = 'release-smoke-deep-chat-generated-prompt';
 const DEEP_CHAT_PROMPT_MARKER = 'RELEASE_SMOKE_GENERATED_PROMPT_MARKER';
 
-const CORE_ROUTES = [
-  { label: 'Home', path: '/#/home', routeId: 'home' },
-  { label: 'SOPs', path: '/#/sops', routeId: 'sops_overview' },
-  { label: 'App Center', path: '/#/app-center', routeId: 'app_center_overview' },
-  { label: 'Scraper', path: '/#/app-center/master-analysis/scraper', routeId: 'scraper' },
-=======
   { label: 'Home', path: '/#/home', readySelector: '#panel-home:not(.hidden)', routeId: 'home' },
   {
     label: 'SOPs',
@@ -75,7 +69,6 @@ const CORE_ROUTES = [
     routeId: 'more_overview',
   },
 ] as const;
->>>>>>> e8a4032b (test: verify exact release routes)
 
 type CoreRoute = (typeof CORE_ROUTES)[number];
 type AssetKind = 'script' | 'style';
@@ -246,7 +239,6 @@ async function openGlobalSettings(page: Page): Promise<void> {
   ).toBeVisible();
 }
 
-=======
 type SwitchTabTarget =
   | { kind: 'sops'; targetActionSelector: string | null }
   | { kind: 'sidebar'; menu: string; overview: string; trigger: string };
@@ -352,7 +344,6 @@ async function switchTabFromHome(page: Page, tab: string): Promise<void> {
   await expect(page.locator('#main-content')).toHaveAttribute('data-current-route', tab);
 }
 
->>>>>>> e8a4032b (test: verify exact release routes)
 test.describe('release candidate smoke', () => {
   for (const route of CORE_ROUTES) {
     test(`${route.label} renders without console or route errors`, async ({ page }) => {
@@ -386,9 +377,6 @@ test.describe('release candidate smoke', () => {
       await openRoute(page, route.path);
       await expectRouteReady(page, route);
       await expectNoRouteErrorText(page);
-      expect(assetResponses.length).toBeGreaterThan(0);
-      for (const asset of assetResponses) {
-=======
       expect(
         scriptResponses.length,
         `${route.label} should load JavaScript assets`
@@ -1030,3 +1018,4 @@ test.describe('release candidate smoke', () => {
     expect(modelRequests).toEqual([DEFAULT_LLM_MODELS_URL, DEFAULT_LLM_MODELS_URL]);
   });
 });
+
