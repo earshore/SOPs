@@ -1,4 +1,4 @@
-﻿import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 import { setupConsoleErrorListener } from '../helpers/playwright-utils';
 
@@ -7,6 +7,7 @@ const DEFAULT_LLM_MODELS_URL = `${DEFAULT_LLM_ENDPOINT}/models`;
 const DEEP_CHAT_PROMPT_ID = 'release-smoke-deep-chat-generated-prompt';
 const DEEP_CHAT_PROMPT_MARKER = 'RELEASE_SMOKE_GENERATED_PROMPT_MARKER';
 
+const CORE_ROUTES = [
   { label: 'Home', path: '/#/home', readySelector: '#panel-home:not(.hidden)', routeId: 'home' },
   {
     label: 'SOPs',
