@@ -35,6 +35,9 @@ const analysisMocks = vi.hoisted(() => {
     renderTemplate: vi.fn((container: HTMLElement, html: string) => {
       container.innerHTML = html;
     }),
+    renderUntrustedHtml: vi.fn((container: HTMLElement, html: string) => {
+      container.innerHTML = html;
+    }),
     showToast: vi.fn(),
     localDataGet: vi.fn(),
     localDataSet: vi.fn(),
@@ -65,6 +68,7 @@ vi.mock('@/common/infrastructure/SafeRenderer', () => ({
   SafeRenderer: {
     getInstance: vi.fn(() => ({
       renderTemplate: analysisMocks.renderTemplate,
+      renderUntrustedHtml: analysisMocks.renderUntrustedHtml,
     })),
   },
 }));

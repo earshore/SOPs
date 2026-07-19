@@ -250,6 +250,7 @@ tools/patches/
 .warp/
 .windsurf/
 .workbuddy/
+.worktrees/
 
 # GitHub Copilot / agent prompt dumps (keep workflows tracked)
 .github/prompts/
