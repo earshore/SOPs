@@ -246,6 +246,8 @@ tools/patches/
 .opencode/
 .qoder/
 .roo/
+# Superpowers / SDD local session scratch (task briefs, agent reports, progress ledgers)
+.superpowers/
 .trae/
 .warp/
 .windsurf/
