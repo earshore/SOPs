@@ -75,8 +75,9 @@ function renderCtaButton(cta: PrimaryCta, attr: 'data-amzf-primary-cta' | 'data-
     return `<button type="button" class="${baseClass}" ${attr}="${safeKey}" data-action="switch-tab" data-tab="${escapeHtml(cta.routeId)}">${safeLabel}</button>`;
   }
 
+  // Scroll target via data attr — never href="#..." (fights Navigo hash router)
   if (cta.kind === 'anchor' && cta.anchorId) {
-    return `<a class="${baseClass}" ${attr}="${safeKey}" href="#${escapeHtml(cta.anchorId)}">${safeLabel}</a>`;
+    return `<button type="button" class="${baseClass}" ${attr}="${safeKey}" data-amzf-scroll-source="${escapeHtml(cta.anchorId)}">${safeLabel}</button>`;
   }
 
   // local actions (execute / review) — button only; handlers wired later

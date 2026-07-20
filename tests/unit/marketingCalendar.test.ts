@@ -6,9 +6,14 @@ import {
 } from '@/modules/amz_hub/views/practice/marketing_calendar';
 import { AMZF_COPY } from '@/modules/amz_hub/data/marketingCalendar/copy';
 import { buildOpsViews } from '@/modules/amz_hub/views/practice/marketing_calendar/opsCalendarEngine';
-import { renderOpsCard } from '@/modules/amz_hub/views/practice/marketing_calendar/renderOps';
+import {
+  renderOpsCard,
+  renderPendingSection,
+} from '@/modules/amz_hub/views/practice/marketing_calendar/renderOps';
 import { resolveYear } from '@/modules/amz_hub/data/marketingCalendar/resolveYear';
 import { renderEncyclopedia } from '@/modules/amz_hub/views/practice/marketing_calendar/renderEncyclopedia';
+import { getPrimaryCtas } from '@/modules/amz_hub/data/marketingCalendar/primaryCtas';
+import type { EventOccurrence } from '@/modules/amz_hub/data/marketingCalendar/types';
 
 const mocks = vi.hoisted(() => ({
   storage: {
@@ -281,8 +286,77 @@ beforeEach(() => {
 
     const html = renderOpsCard(prime!);
     expect(html.match(/data-amzf-primary-cta=/g)?.length).toBe(2);
+    expect(html).toContain('data-action="switch-tab"');
     expect(html).toContain('data-tab="amz_promo_tools"');
     expect(html).toContain('data-tab="sops_ppc_advertising"');
+  });
+
+  it('renders switch-tab primary CTAs for inventory + enroll sample (T-25)', () => {
+    const occs = resolveYear(2026);
+    const views = buildOpsViews(
+      occs,
+      {
+        selectedCountry: 'ALL',
+        selectedTypes: [],
+        timeWindow: 'all',
+        showEnded: true,
+        searchTerm: '',
+      },
+      '2026-05-29',
+      new Set()
+    );
+    const prime = views.find(v => v.occurrence.templateId === 'prime-day');
+    expect(prime).toBeDefined();
+    expect(prime!.primaryCtas.map(c => c.routeId).sort()).toEqual(
+      ['sops_inventory_replenishment', 'sops_promotion_submission'].sort()
+    );
+
+    const html = renderOpsCard(prime!);
+    expect(html).toContain('data-action="switch-tab"');
+    expect(html).toContain('data-tab="sops_inventory_replenishment"');
+    expect(html).toContain('data-tab="sops_promotion_submission"');
+    expect(html.match(/data-action="switch-tab"/g)?.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('pending primary CTA uses data-amzf-scroll-source, not hash href', () => {
+    const pendingOcc: EventOccurrence = {
+      occurrenceId: 'prime-day:pending',
+      templateId: 'prime-day',
+      year: 2026,
+      name: 'Prime Day',
+      nameEn: 'Prime Day',
+      emoji: '📦',
+      type: 'shopping',
+      priority: 'S',
+      countries: ['DE'],
+      description: 'pending',
+      strategy: 'wait',
+      tags: [],
+      startDate: '',
+      endDate: '',
+      dateLabel: '',
+      confidence: 'pending_official',
+      amazonOfficial: true,
+    };
+    const ctas = getPrimaryCtas(pendingOcc, '2026-05-01');
+    expect(ctas[0]?.kind).toBe('anchor');
+    expect(ctas[0]?.anchorId).toBe('amzf_source_panel');
+
+    const cardHtml = renderOpsCard({
+      occurrence: pendingOcc,
+      openPhases: [],
+      lifecycle: 'pending',
+      primaryCtas: ctas,
+      secondaryCtas: [],
+      watched: false,
+    });
+    expect(cardHtml).toContain('data-amzf-scroll-source="amzf_source_panel"');
+    expect(cardHtml).not.toContain('href="#amzf_source_panel"');
+    expect(cardHtml).toContain('data-amzf-primary-cta="pendingSource"');
+
+    const sectionHtml = renderPendingSection([pendingOcc]);
+    expect(sectionHtml).toContain('data-amzf-scroll-source="amzf_source_panel"');
+    expect(sectionHtml).not.toContain('href="#amzf_source_panel"');
   });
 
   it('renderEncyclopedia builds month and event views from occurrences', () => {

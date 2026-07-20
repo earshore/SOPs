@@ -772,6 +772,14 @@ class MarketingCalendarModule extends BaseModule {
       return true;
     }
 
+    // Pending / source-panel scroll (button, not hash href — avoids Navigo conflict)
+    const scrollSource = this.findCalendarTarget(target, '[data-amzf-scroll-source]');
+    if (scrollSource) {
+      const id = scrollSource.dataset.amzfScrollSource;
+      if (id) document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      return true;
+    }
+
     return false;
   }
 
