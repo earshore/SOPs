@@ -7,8 +7,17 @@ import type { EventType } from '@/modules/amz_hub/data/marketingCalendar/types';
 
 export const OPS_STATE_KEY = 'amzf_ops_state_v2';
 
+/** sessionStorage key for outbound primary CTA → return highlight */
+export const RETURN_CONTEXT_KEY = 'amzf_return_context';
+
 export type OpsTimeWindow = 'month' | 'd30' | 'd60' | 'all';
 export type OpsMainTab = 'ops' | 'encyclopedia';
+
+export interface AmzfReturnContext {
+  templateId: string;
+  year: number;
+  tab?: OpsMainTab;
+}
 
 export interface UserCalendarState {
   version: 2;

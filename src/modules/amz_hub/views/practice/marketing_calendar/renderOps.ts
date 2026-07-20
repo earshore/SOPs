@@ -122,8 +122,15 @@ function dateLine(occ: EventOccurrence, lifecycle: OpsEventView['lifecycle']): s
   return `<span class="amzf_event_date"><i class="fas fa-calendar-alt"></i> ${approx}${escapeHtml(range)}${life ? ` · ${escapeHtml(life)}` : ''}</span>`;
 }
 
+function renderWatchButton(templateId: string, watched: boolean): string {
+  const label = watched ? AMZF_COPY['cta.watched'] : AMZF_COPY['cta.watch'];
+  const pressed = watched ? 'true' : 'false';
+  const activeClass = watched ? ' amzf_watch_btn--on' : '';
+  return `<button type="button" class="amzf_watch_btn${activeClass}" data-amzf-watch="${escapeHtml(templateId)}" aria-label="${escapeHtml(AMZF_COPY['aria.watch'])}" aria-pressed="${pressed}">${escapeHtml(label)}</button>`;
+}
+
 export function renderOpsCard(view: OpsEventView): string {
-  const { occurrence: occ, openPhases, primaryCtas, secondaryCtas, lifecycle } = view;
+  const { occurrence: occ, openPhases, primaryCtas, secondaryCtas, lifecycle, watched } = view;
   const typeLabel = AMZF_COPY[TYPE_COPY[occ.type] ?? 'filter.type.holiday'];
   const openAttr = openPhases.join(',');
   const openAria = openPhases.length
@@ -139,6 +146,7 @@ export function renderOpsCard(view: OpsEventView): string {
       class="amzf_ops_card amzf_type_${escapeHtml(occ.type)} amzf_life_${escapeHtml(lifecycle)}"
       data-amzf-occurrence="${escapeHtml(occ.occurrenceId)}"
       data-amzf-template="${escapeHtml(occ.templateId)}"
+      data-amzf-year="${escapeHtml(String(occ.year))}"
       data-amzf-open-phases="${escapeHtml(openAttr)}"
       ${openAria ? `aria-description="${openAria}"` : ''}
     >
@@ -152,6 +160,7 @@ export function renderOpsCard(view: OpsEventView): string {
           </div>
           <h3 class="amzf_ops_card_title">${escapeHtml(occ.name)}<span class="amzf_ops_card_title_en">${escapeHtml(occ.nameEn)}</span></h3>
         </div>
+        ${renderWatchButton(occ.templateId, watched)}
       </div>
       ${phaseSummary(openPhases)}
       <div class="amzf_event_strategy">

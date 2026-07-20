@@ -715,6 +715,51 @@
   color: #fff;
 }
 
+.amzf_year_switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  align-items: center;
+}
+
+.amzf_year_switch .amzf_year_label {
+  font-size: 0.8rem;
+  color: var(--color-slate-500);
+  margin-right: 4px;
+}
+
+.amzf_watch_btn {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 999px;
+  background: var(--color-white);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-slate-600);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.amzf_watch_btn:hover {
+  border-color: var(--color-indigo-400);
+  color: var(--color-indigo-600);
+}
+
+.amzf_watch_btn--on {
+  background: var(--color-indigo-50, #eef2ff);
+  border-color: var(--color-indigo-400);
+  color: var(--color-indigo-700);
+}
+
+.amzf_ops_card.amzf_return_highlight {
+  outline: 2px solid var(--color-indigo-500);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
 .amzf_filter_hint {
   width: 100%;
   margin: -6px 0 0;

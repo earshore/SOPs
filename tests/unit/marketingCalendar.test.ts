@@ -14,6 +14,12 @@ import { resolveYear } from '@/modules/amz_hub/data/marketingCalendar/resolveYea
 import { renderEncyclopedia } from '@/modules/amz_hub/views/practice/marketing_calendar/renderEncyclopedia';
 import { getPrimaryCtas } from '@/modules/amz_hub/data/marketingCalendar/primaryCtas';
 import type { EventOccurrence } from '@/modules/amz_hub/data/marketingCalendar/types';
+import {
+  OPS_STATE_KEY,
+  RETURN_CONTEXT_KEY,
+  pageChecklistKey,
+  type UserCalendarState,
+} from '@/modules/amz_hub/views/practice/marketing_calendar/userState';
 
 const mocks = vi.hoisted(() => ({
   storage: {
@@ -25,6 +31,7 @@ const mocks = vi.hoisted(() => ({
     resolve: vi.fn(),
     has: vi.fn(),
   },
+  opsState: null as UserCalendarState | null,
 }));
 
 vi.mock('@/common/config/ConfigCenter', () => ({
@@ -58,8 +65,19 @@ beforeEach(() => {
   vi.useRealTimers();
   document.body.innerHTML = '';
   __setTodayForTests(null);
-  mocks.storage.get.mockReset().mockReturnValue(['Prime Day', '圣诞']);
-  mocks.storage.set.mockReset();
+  mocks.opsState = null;
+  sessionStorage.clear();
+  mocks.storage.get.mockReset().mockImplementation((key: string, defaultValue: unknown = null) => {
+    if (key === 'amzf_search_history') return ['Prime Day', '圣诞'];
+    if (key === OPS_STATE_KEY) return mocks.opsState ?? defaultValue;
+    return defaultValue;
+  });
+  mocks.storage.set.mockReset().mockImplementation((key: string, value: unknown) => {
+    if (key === OPS_STATE_KEY) {
+      mocks.opsState = value as UserCalendarState;
+    }
+    return true;
+  });
   mocks.configGet.mockReset().mockReturnValue(5);
   mocks.container.resolve.mockReset().mockImplementation((name: string) => {
     if (name === 'storage') return mocks.storage;
@@ -377,4 +395,153 @@ beforeEach(() => {
     });
     expect(eventHtml).toContain('amzf_event_view');
     expect(eventHtml).toContain('amzf_event_comparison');
+  });
+
+  it('watch toggle persists watchedTemplateIds via storage.set', async () => {
+    __setTodayForTests('2026-06-01');
+    const container = await mountCalendar();
+    click(container.querySelector('[data-amzf-time-window="all"]'));
+
+    const watchBtn = container.querySelector<HTMLElement>('[data-amzf-watch]');
+    expect(watchBtn).not.toBeNull();
+    const templateId = watchBtn!.dataset.amzfWatch;
+    expect(templateId).toBeTruthy();
+
+    click(watchBtn);
+    expect(mocks.storage.set).toHaveBeenCalledWith(
+      OPS_STATE_KEY,
+      expect.objectContaining({
+        version: 2,
+        watchedTemplateIds: expect.arrayContaining([templateId]),
+      })
+    );
+
+    // Button shows watched state after re-render
+    const watchedBtn = container.querySelector(`[data-amzf-watch="${templateId}"]`);
+    expect(watchedBtn?.getAttribute('aria-pressed')).toBe('true');
+    expect(watchedBtn?.textContent).toContain(AMZF_COPY['cta.watched']);
+  });
+
+  it('page checklist persists year-scoped key and restores on remount', async () => {
+    const year = new Date().getFullYear();
+    const container = await mountCalendar();
+
+    const checkbox = container.querySelector<HTMLInputElement>(
+      '[data-amzf-page-check="scan_month"]'
+    );
+    expect(checkbox).not.toBeNull();
+    expect(checkbox!.checked).toBe(false);
+
+    checkbox!.checked = true;
+    checkbox!.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const key = pageChecklistKey(year, 'scan_month');
+    expect(mocks.storage.set).toHaveBeenCalledWith(
+      OPS_STATE_KEY,
+      expect.objectContaining({
+        checklist: expect.objectContaining({ [key]: true }),
+      })
+    );
+
+    unmount();
+    document.body.innerHTML = '';
+    const remounted = await mountCalendar();
+    const restored = remounted.querySelector<HTMLInputElement>(
+      '[data-amzf-page-check="scan_month"]'
+    );
+    expect(restored?.checked).toBe(true);
+  });
+
+  it('year switch pins year and persists activeYear + yearPinned', async () => {
+    const systemYear = new Date().getFullYear();
+    const targetYear = systemYear + 1;
+    const container = await mountCalendar();
+
+    expect(container.querySelector('#amzf_year_switch')).not.toBeNull();
+    const yearBtn = container.querySelector(`[data-amzf-year="${targetYear}"]`);
+    expect(yearBtn).not.toBeNull();
+
+    click(yearBtn);
+    expect(mocks.storage.set).toHaveBeenCalledWith(
+      OPS_STATE_KEY,
+      expect.objectContaining({
+        activeYear: targetYear,
+        yearPinned: true,
+      })
+    );
+    expect(
+      container.querySelector(`[data-amzf-year="${targetYear}"]`)?.classList.contains('amzf_active')
+    ).toBe(true);
+  });
+
+  it('outbound primary CTA writes amzf_return_context; mount scrolls and clears key', async () => {
+    __setTodayForTests('2026-05-29');
+    mocks.opsState = {
+      version: 2,
+      activeYear: 2026,
+      yearPinned: true,
+      selectedCountry: 'ALL',
+      selectedTypes: [],
+      timeWindow: 'all',
+      mainTab: 'ops',
+      watchedTemplateIds: [],
+      checklist: {},
+      showEnded: true,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const container = await mountCalendar();
+    const primary = container.querySelector<HTMLElement>(
+      '[data-amzf-primary-cta][data-action="switch-tab"]'
+    );
+    expect(primary).not.toBeNull();
+    const card = primary!.closest<HTMLElement>('[data-amzf-template]');
+    const templateId = card?.dataset.amzfTemplate;
+    expect(templateId).toBeTruthy();
+    const year = Number(card?.dataset.amzfYear || 2026);
+
+    click(primary);
+    const raw = sessionStorage.getItem(RETURN_CONTEXT_KEY);
+    expect(raw).toBeTruthy();
+    expect(JSON.parse(raw!)).toEqual(
+      expect.objectContaining({ templateId, year, tab: 'ops' })
+    );
+
+    const scrollSpy = vi.fn();
+    Element.prototype.scrollIntoView = scrollSpy;
+
+    // Remount with same filters so the card is in the list; context still set from click
+    unmount();
+    document.body.innerHTML = '';
+    __setTodayForTests('2026-05-29');
+    const final = await mountCalendar();
+    const highlighted = final.querySelector(
+      `[data-amzf-template="${templateId}"].amzf_return_highlight`
+    );
+    expect(highlighted).not.toBeNull();
+    expect(scrollSpy).toHaveBeenCalled();
+    expect(sessionStorage.getItem(RETURN_CONTEXT_KEY)).toBeNull();
+  });
+
+  it('renderOpsCard includes data-amzf-watch and year attrs', () => {
+    const occs = resolveYear(2026);
+    const views = buildOpsViews(
+      occs,
+      {
+        selectedCountry: 'ALL',
+        selectedTypes: [],
+        timeWindow: 'all',
+        showEnded: true,
+        searchTerm: '',
+      },
+      '2026-06-01',
+      new Set(['prime-day'])
+    );
+    const prime = views.find(v => v.occurrence.templateId === 'prime-day');
+    expect(prime).toBeDefined();
+    const html = renderOpsCard(prime!);
+    expect(html).toContain('data-amzf-watch="prime-day"');
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain(AMZF_COPY['cta.watched']);
+    expect(html).toContain('data-amzf-year="2026"');
   });

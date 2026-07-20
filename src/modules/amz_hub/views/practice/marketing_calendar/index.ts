@@ -13,6 +13,7 @@ import type { IStorageService } from '@/types/services';
 import { AMZF_COUNTRIES, AMZF_MONTHS } from '../../../constants/amz_hub_constants';
 import { configCenter } from '@/common/config/ConfigCenter';
 import type { CountryInfo } from '@/types/modules-business';
+import { AMZF_COPY } from '@/modules/amz_hub/data/marketingCalendar/copy';
 import { toIsoDate } from '@/modules/amz_hub/data/marketingCalendar/dateRules';
 import { resolveYear } from '@/modules/amz_hub/data/marketingCalendar/resolveYear';
 import type {
@@ -27,8 +28,18 @@ import {
   renderEncyclopedia,
   type EncyclopediaView,
 } from './renderEncyclopedia';
+import { getOpsHorizonYears } from './activeYear';
 import { renderOps } from './renderOps';
-import { defaultUserState, type OpsMainTab } from './userState';
+import {
+  defaultUserState,
+  loadUserState,
+  pageChecklistKey,
+  RETURN_CONTEXT_KEY,
+  saveUserState,
+  type AmzfReturnContext,
+  type OpsMainTab,
+  type UserCalendarState,
+} from './userState';
 import './flag-icons.local.css';
 import './styles.css';
 
@@ -114,6 +125,9 @@ interface MarketingCalendarState {
   selectedTypes: EventType[];
   showEnded: boolean;
   activeYear: number;
+  yearPinned: boolean;
+  watchedTemplateIds: string[];
+  checklist: Record<string, boolean>;
 }
 
 /** Test-only override for "today"; null = system clock. */
@@ -142,7 +156,7 @@ class MarketingCalendarModule extends BaseModule {
     const systemYear = new Date().getFullYear();
     const defaults = defaultUserState(systemYear);
 
-    // State Initialization (M1: in-memory defaults; search history still persisted)
+    // State Initialization (M2: filters/watch/checklist/year restored in init via loadUserState)
     this.state = {
       currentView: 'country',
       selectedCountry: defaults.selectedCountry,
@@ -154,6 +168,9 @@ class MarketingCalendarModule extends BaseModule {
       selectedTypes: [...defaults.selectedTypes],
       showEnded: defaults.showEnded,
       activeYear: defaults.activeYear,
+      yearPinned: defaults.yearPinned,
+      watchedTemplateIds: [...defaults.watchedTemplateIds],
+      checklist: { ...defaults.checklist },
     };
   }
 
@@ -170,31 +187,85 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   async init(): Promise<void> {
-    // Singleton module: reset in-memory UI state on each mount (M1 defaults)
-    this.resetSessionState();
+    // Singleton module: load M2 user state (or defaults) on each mount
+    this.loadSessionStateFromStorage();
     this.loadSearchHistory();
     this.renderCountryTabs();
+    this.renderYearSwitch();
     this.syncMainTabUi();
     this.syncTimeChipUi();
     this.syncTypeChipUi();
+    this.syncPageChecklistUi();
     this.renderStats();
     this.refreshList();
     this.bindCalendarClickEvents();
+    this.bindPageChecklistChange();
     this.bindSearchEvents();
+    this.applyReturnContextAfterRender();
   }
 
-  private resetSessionState(): void {
+  private bindPageChecklistChange(): void {
+    const section = document.getElementById('amzf_page_checklist');
+    if (!section) return;
+    this.addEventListener(section, 'change', event => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      if (!target.matches('[data-amzf-page-check]')) return;
+      const id = target.dataset.amzfPageCheck;
+      if (id) this.setPageChecklistItem(id, target.checked);
+    });
+  }
+
+  /** Apply persisted v2 state; search term / expanded sections always reset. */
+  private loadSessionStateFromStorage(): void {
     const systemYear = new Date().getFullYear();
-    const defaults = defaultUserState(systemYear);
     this.state.currentView = 'country';
-    this.state.selectedCountry = defaults.selectedCountry;
     this.state.searchTerm = '';
     this.state.expandedSections = new Set();
-    this.state.mainTab = defaults.mainTab;
-    this.state.timeWindow = defaults.timeWindow;
-    this.state.selectedTypes = [...defaults.selectedTypes];
-    this.state.showEnded = defaults.showEnded;
-    this.state.activeYear = defaults.activeYear;
+
+    try {
+      const storage = this.getService<IStorageService>(SERVICE_NAMES.STORAGE);
+      this.applyUserState(loadUserState(storage, systemYear));
+    } catch {
+      this.applyUserState(defaultUserState(systemYear));
+    }
+  }
+
+  private applyUserState(s: UserCalendarState): void {
+    this.state.selectedCountry = s.selectedCountry;
+    this.state.mainTab = s.mainTab;
+    this.state.timeWindow = s.timeWindow;
+    this.state.selectedTypes = [...s.selectedTypes];
+    this.state.showEnded = s.showEnded;
+    this.state.activeYear = s.activeYear;
+    this.state.yearPinned = s.yearPinned;
+    this.state.watchedTemplateIds = [...s.watchedTemplateIds];
+    this.state.checklist = { ...s.checklist };
+  }
+
+  private toUserCalendarState(): UserCalendarState {
+    return {
+      version: 2,
+      activeYear: this.state.activeYear,
+      yearPinned: this.state.yearPinned,
+      selectedCountry: this.state.selectedCountry,
+      selectedTypes: [...this.state.selectedTypes],
+      timeWindow: this.state.timeWindow,
+      mainTab: this.state.mainTab,
+      watchedTemplateIds: [...this.state.watchedTemplateIds],
+      checklist: { ...this.state.checklist },
+      showEnded: this.state.showEnded,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  private persistUserState(): void {
+    try {
+      const storage = this.getService<IStorageService>(SERVICE_NAMES.STORAGE);
+      saveUserState(storage, this.toUserCalendarState());
+    } catch {
+      // Ops state persistence is optional when storage is unavailable.
+    }
   }
 
   /** Local civil today as IsoDate (overridable via __setTodayForTests). */
@@ -254,15 +325,35 @@ class MarketingCalendarModule extends BaseModule {
     });
   }
 
+  /** Resolve occurrences for active year (+ horizon when unpinned system year in Oct–Dec). */
+  private resolveActiveOccurrences(): EventOccurrence[] {
+    const todayIso = this.getTodayIso();
+    const todayDate = new Date(`${todayIso}T12:00:00`);
+    const years = getOpsHorizonYears(
+      todayDate,
+      this.state.activeYear,
+      this.state.yearPinned
+    );
+    const seen = new Set<string>();
+    const out: EventOccurrence[] = [];
+    for (const year of years) {
+      for (const occ of resolveYear(year)) {
+        if (seen.has(occ.occurrenceId)) continue;
+        seen.add(occ.occurrenceId);
+        out.push(occ);
+      }
+    }
+    return out;
+  }
+
   renderOpsWorkbench(): void {
     const main = document.getElementById('amzf_main');
     const pendingEl = document.getElementById('amzf_pending_section');
     if (!main) return;
 
-    const year = this.state.activeYear;
     const today = this.getTodayIso();
-    let occurrences = resolveYear(year);
-    const watched = new Set<string>(); // M1: no watch persist yet
+    let occurrences = this.resolveActiveOccurrences();
+    const watched = new Set(this.state.watchedTemplateIds);
 
     // Scored search on occurrences; empty term = all. Pass '' into engine to avoid weak includes.
     const searchTerm = this.state.searchTerm.trim();
@@ -303,8 +394,8 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     // Pending: no exact dates (S-priority official big deals or any pending_official)
-    // Re-resolve full year so pending strip is not wiped by search narrowing
-    const allYear = resolveYear(year);
+    // Re-resolve full horizon so pending strip is not wiped by search narrowing
+    const allYear = this.resolveActiveOccurrences();
     const pending = allYear.filter(
       occ =>
         (occ.confidence === 'pending_official' || !occ.startDate || !occ.endDate) &&
@@ -331,6 +422,7 @@ class MarketingCalendarModule extends BaseModule {
 
   switchMainTab(tab: OpsMainTab): void {
     this.state.mainTab = tab;
+    this.persistUserState();
     this.syncMainTabUi();
     this.state.expandedSections.clear();
     this.refreshList();
@@ -338,6 +430,7 @@ class MarketingCalendarModule extends BaseModule {
 
   setTimeWindow(window: OpsTimeWindow): void {
     this.state.timeWindow = window;
+    this.persistUserState();
     this.syncTimeChipUi();
     if (this.state.mainTab === 'ops') {
       this.renderOpsWorkbench();
@@ -356,10 +449,50 @@ class MarketingCalendarModule extends BaseModule {
         this.state.selectedTypes = [...this.state.selectedTypes, t];
       }
     }
+    this.persistUserState();
     this.syncTypeChipUi();
     if (this.state.mainTab === 'ops') {
       this.renderOpsWorkbench();
     }
+  }
+
+  setActiveYear(year: number): void {
+    const y = Math.trunc(year);
+    if (!Number.isFinite(y)) return;
+    this.state.activeYear = y;
+    this.state.yearPinned = true;
+    this.persistUserState();
+    this.renderYearSwitch();
+    this.syncPageChecklistUi();
+    this.renderStats();
+    this.refreshList();
+  }
+
+  toggleWatch(templateId: string): void {
+    if (!templateId) return;
+    const set = new Set(this.state.watchedTemplateIds);
+    if (set.has(templateId)) {
+      set.delete(templateId);
+    } else {
+      set.add(templateId);
+    }
+    this.state.watchedTemplateIds = [...set];
+    this.persistUserState();
+    if (this.state.mainTab === 'ops') {
+      this.renderOpsWorkbench();
+    }
+    this.renderStats();
+  }
+
+  setPageChecklistItem(id: string, checked: boolean): void {
+    if (!id) return;
+    const key = pageChecklistKey(this.state.activeYear, id);
+    if (checked) {
+      this.state.checklist[key] = true;
+    } else {
+      delete this.state.checklist[key];
+    }
+    this.persistUserState();
   }
 
   resetFilters(): void {
@@ -368,6 +501,7 @@ class MarketingCalendarModule extends BaseModule {
     this.state.timeWindow = 'd60';
     this.state.showEnded = false;
     this.state.searchTerm = '';
+    this.persistUserState();
     const input = document.getElementById('amzf_search') as HTMLInputElement | null;
     const clearBtn = document.getElementById('amzf_clear');
     if (input) input.value = '';
@@ -498,9 +632,9 @@ class MarketingCalendarModule extends BaseModule {
     return score;
   }
 
-  /** Country + scored search over resolveYear(activeYear). */
+  /** Country + scored search over active year (and horizon when applicable). */
   getFilteredOccurrences(): EventOccurrence[] {
-    let candidates = resolveYear(this.state.activeYear).filter(
+    let candidates = this.resolveActiveOccurrences().filter(
       occ =>
         this.state.selectedCountry === 'ALL' || occ.countries.includes(this.state.selectedCountry)
     );
@@ -521,6 +655,7 @@ class MarketingCalendarModule extends BaseModule {
 
   selectCountry(code: string): void {
     this.state.selectedCountry = code;
+    this.persistUserState();
 
     // Update Tabs UI via data attribute (stable vs text match)
     const tabs = this.container?.querySelectorAll<HTMLElement>('[data-amzf-country]') ?? [];
@@ -536,6 +671,7 @@ class MarketingCalendarModule extends BaseModule {
     this.state.currentView = view === 'event' ? 'event' : 'country';
     // Encyclopedia view toggle implies encyclopedia tab
     this.state.mainTab = 'encyclopedia';
+    this.persistUserState();
     this.syncMainTabUi();
     document
       .getElementById('amzf_btn_country')
@@ -723,10 +859,35 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   private handleCalendarSelectionClick(target: HTMLElement): boolean {
+    // Capture return context before global switch-tab navigates away
+    const outboundCta = this.findCalendarTarget(
+      target,
+      '[data-amzf-primary-cta][data-action="switch-tab"]'
+    );
+    if (outboundCta) {
+      this.captureReturnContextFromCard(outboundCta);
+      // Do not return true — let global switch-tab handler proceed
+    }
+
     const mainTabBtn = this.findCalendarTarget(target, '[data-amzf-main-tab]');
     if (mainTabBtn) {
       const tab = (mainTabBtn.dataset.amzfMainTab || 'ops') as OpsMainTab;
       this.switchMainTab(tab === 'encyclopedia' ? 'encyclopedia' : 'ops');
+      return true;
+    }
+
+    // Year chips only (not ops cards which also carry data-amzf-year)
+    const yearChip = this.findCalendarTarget(target, '#amzf_year_switch [data-amzf-year]');
+    if (yearChip) {
+      const y = Number(yearChip.dataset.amzfYear);
+      if (Number.isFinite(y)) this.setActiveYear(y);
+      return true;
+    }
+
+    const watchBtn = this.findCalendarTarget(target, '[data-amzf-watch]');
+    if (watchBtn) {
+      const templateId = watchBtn.dataset.amzfWatch;
+      if (templateId) this.toggleWatch(templateId);
       return true;
     }
 
@@ -781,6 +942,85 @@ class MarketingCalendarModule extends BaseModule {
     }
 
     return false;
+  }
+
+  private captureReturnContextFromCard(ctaEl: HTMLElement): void {
+    const card = ctaEl.closest<HTMLElement>('[data-amzf-template]');
+    const templateId = card?.dataset.amzfTemplate;
+    if (!templateId) return;
+    const yearRaw = card?.dataset.amzfYear;
+    const year =
+      yearRaw && Number.isFinite(Number(yearRaw))
+        ? Number(yearRaw)
+        : this.state.activeYear;
+    const ctx: AmzfReturnContext = { templateId, year, tab: 'ops' };
+    try {
+      sessionStorage.setItem(RETURN_CONTEXT_KEY, JSON.stringify(ctx));
+    } catch {
+      // sessionStorage may be unavailable (private mode / quota)
+    }
+  }
+
+  /** After list render: scroll/highlight card from outbound CTA return context. */
+  private applyReturnContextAfterRender(): void {
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem(RETURN_CONTEXT_KEY);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+
+    try {
+      sessionStorage.removeItem(RETURN_CONTEXT_KEY);
+    } catch {
+      // ignore
+    }
+
+    let ctx: AmzfReturnContext | null = null;
+    try {
+      const parsed = JSON.parse(raw) as Partial<AmzfReturnContext>;
+      if (typeof parsed.templateId === 'string' && parsed.templateId) {
+        ctx = {
+          templateId: parsed.templateId,
+          year:
+            typeof parsed.year === 'number' && Number.isFinite(parsed.year)
+              ? parsed.year
+              : this.state.activeYear,
+          tab: parsed.tab === 'encyclopedia' ? 'encyclopedia' : 'ops',
+        };
+      }
+    } catch {
+      return;
+    }
+    if (!ctx) return;
+
+    if (ctx.year !== this.state.activeYear) {
+      this.state.activeYear = ctx.year;
+      this.state.yearPinned = true;
+      this.persistUserState();
+      this.renderYearSwitch();
+      this.syncPageChecklistUi();
+    }
+    if (ctx.tab && ctx.tab !== this.state.mainTab) {
+      this.state.mainTab = ctx.tab;
+      this.persistUserState();
+      this.syncMainTabUi();
+    }
+    this.refreshList();
+
+    const templateId = ctx.templateId;
+    requestAnimationFrame(() => {
+      const cards =
+        this.container?.querySelectorAll<HTMLElement>('[data-amzf-template]') ?? [];
+      let card: HTMLElement | null = null;
+      cards.forEach(el => {
+        if (el.dataset.amzfTemplate === templateId) card = el;
+      });
+      if (!card) return;
+      card.classList.add('amzf_return_highlight');
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   }
 
   private handleCalendarActionClick(target: HTMLElement): void {
@@ -918,18 +1158,53 @@ class MarketingCalendarModule extends BaseModule {
     const container = document.getElementById('amzf_country_tabs');
     if (!container) return;
 
-    let html = `<button class="amzf_country_tab amzf_active" data-amzf-country="ALL">
+    const selected = this.state.selectedCountry;
+    let html = `<button class="amzf_country_tab${selected === 'ALL' ? ' amzf_active' : ''}" data-amzf-country="ALL">
             <span class="amzf_country_flag"><i class="fas fa-globe"></i></span> 全部
         </button>`;
 
     (AMZF_COUNTRIES as CountryInfo[]).forEach(c => {
-      html += `<button class="amzf_country_tab" data-amzf-country="${escapeHtml(c.code)}">
+      const active = selected === c.code ? ' amzf_active' : '';
+      html += `<button class="amzf_country_tab${active}" data-amzf-country="${escapeHtml(c.code)}">
                 <span class="amzf_country_flag">${c.flag}</span> ${c.name}
             </button>`;
     });
 
     // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, html);
+  }
+
+  renderYearSwitch(): void {
+    const container = document.getElementById('amzf_year_switch');
+    if (!container) return;
+
+    const systemYear = new Date().getFullYear();
+    const years = new Set([systemYear - 1, systemYear, systemYear + 1, this.state.activeYear]);
+    const sorted = [...years].filter(y => Number.isFinite(y)).sort((a, b) => a - b);
+    const yearLabel = AMZF_COPY['page.yearLabel'].replace('{year}', String(this.state.activeYear));
+
+    const chips = sorted
+      .map(y => {
+        const active = y === this.state.activeYear ? ' amzf_active' : '';
+        return `<button type="button" class="amzf_chip${active}" data-amzf-year="${y}">${y}</button>`;
+      })
+      .join('');
+
+    setSafeHtml(
+      container,
+      `<span class="amzf_year_label">${escapeHtml(yearLabel)}</span>${chips}`
+    );
+  }
+
+  syncPageChecklistUi(): void {
+    const year = this.state.activeYear;
+    const inputs =
+      this.container?.querySelectorAll<HTMLInputElement>('[data-amzf-page-check]') ?? [];
+    inputs.forEach(input => {
+      const id = input.dataset.amzfPageCheck;
+      if (!id) return;
+      input.checked = this.state.checklist[pageChecklistKey(year, id)] === true;
+    });
   }
 
   renderSearchHistory(): void {
