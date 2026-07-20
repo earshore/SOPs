@@ -927,7 +927,16 @@ export interface KnowledgeArticle {
 }
 
 /**
- * 营销日历事件
+ * 营销日历事件（legacy global shape — do not extend for new work）
+ *
+ * Runtime source of truth for AMZ Hub calendar:
+ * - Evergreen templates: `src/modules/amz_hub/data/marketingCalendar/types.ts`
+ *   (`MarketingEventTemplate`, `EventOccurrence`)
+ * - Legacy encyclopedia list shape: local `MarketingEvent` in
+ *   `src/modules/amz_hub/constants/amz_hub_constants.ts` (id: number, EventType, …)
+ *
+ * This interface remains for historical typing only; it does not match the
+ * module local interface 1:1 (string id / category vs numeric id / EventType).
  */
 export interface MarketingEvent {
   id: string;
@@ -936,7 +945,7 @@ export interface MarketingEvent {
   description: string;
   category: 'holiday' | 'promotion' | 'seasonal' | 'custom';
   markets?: string[];
-  // AMZ Hub specific fields
+  // AMZ Hub specific fields (partial legacy overlay)
   name: string;
   nameEn: string;
   emoji: string;

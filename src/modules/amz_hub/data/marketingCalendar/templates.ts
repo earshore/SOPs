@@ -394,9 +394,9 @@ export const MARKETING_EVENT_TEMPLATES: MarketingEventTemplate[] = [
     priority: 'B',
     countries: ['DE'],
     description:
-      '德国的父亲节（Vatertag）通常在耶稣升天节庆祝。按照传统，男士们会组织徒步旅行，并享用啤酒和美食。',
+      '德国的父亲节（Vatertag）通常在耶稣升天节（Christi Himmelfahrt）庆祝。按照传统，男士们会组织徒步旅行，并享用啤酒和美食。',
     strategy:
-      '耶稣升天节(德国父亲节)=复活节+39天。男士们拉着手推车徒步喝酒。啤酒周边、户外装备、烧烤架热销。',
+      '德国父亲节随耶稣升天节浮动（复活节后第39天，每年日期不同，勿按固定月日备货）。啤酒周边、户外装备、烧烤架热销。',
     tags: ['啤酒用品', '户外', '男士礼品'],
     dateRule: { kind: 'easter_offset', offsetDays: 39 },
     defaultMonth: 5,
