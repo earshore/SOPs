@@ -22,6 +22,7 @@ import type {
   IsoDate,
   OpsTimeWindow,
 } from '@/modules/amz_hub/data/marketingCalendar/types';
+import { getOpenPhases } from '@/modules/amz_hub/data/marketingCalendar/prepRules';
 import { buildOpsViews } from './opsCalendarEngine';
 import {
   getOccurrenceMonth,
@@ -32,6 +33,7 @@ import { getOpsHorizonYears } from './activeYear';
 import { renderOps } from './renderOps';
 import {
   defaultUserState,
+  eventChecklistKey,
   loadUserState,
   pageChecklistKey,
   RETURN_CONTEXT_KEY,
@@ -128,13 +130,15 @@ interface MarketingCalendarState {
   yearPinned: boolean;
   watchedTemplateIds: string[];
   checklist: Record<string, boolean>;
+  /** Ops cards with expanded checklist / strategy (session memory, not persisted). */
+  expandedOccurrenceIds: Set<string>;
 }
 
 /** Test-only override for "today"; null = system clock. */
 let todayOverrideForTests: IsoDate | null = null;
 
 /** Optional test hook — prefer pure render/engine tests with fixed today. */
-export function __setTodayForTests(iso: IsoDate | null): void {
+export function setTodayForTests(iso: IsoDate | null): void {
   todayOverrideForTests = iso;
 }
 
@@ -171,6 +175,7 @@ class MarketingCalendarModule extends BaseModule {
       yearPinned: defaults.yearPinned,
       watchedTemplateIds: [...defaults.watchedTemplateIds],
       checklist: { ...defaults.checklist },
+      expandedOccurrenceIds: new Set(),
     };
   }
 
@@ -200,7 +205,9 @@ class MarketingCalendarModule extends BaseModule {
     this.refreshList();
     this.bindCalendarClickEvents();
     this.bindPageChecklistChange();
+    this.bindEventChecklistChange();
     this.bindSearchEvents();
+    this.syncShowEndedUi();
     this.applyReturnContextAfterRender();
   }
 
@@ -213,6 +220,22 @@ class MarketingCalendarModule extends BaseModule {
       if (!target.matches('[data-amzf-page-check]')) return;
       const id = target.dataset.amzfPageCheck;
       if (id) this.setPageChecklistItem(id, target.checked);
+    });
+  }
+
+  private bindEventChecklistChange(): void {
+    // Ops cards are re-rendered into #amzf_main; listen on document scoped to this module.
+    this.addEventListener(document, 'change', event => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      if (!target.matches('[data-amzf-event-check]')) return;
+      if (!this.container?.contains(target)) return;
+      const templateId = target.dataset.amzfTemplate || '';
+      const year = Number(target.dataset.amzfYear);
+      const phase = target.dataset.amzfPhase || '';
+      if (templateId && phase && Number.isFinite(year)) {
+        this.setEventChecklistItem(templateId, year, phase, target.checked);
+      }
     });
   }
 
@@ -268,7 +291,7 @@ class MarketingCalendarModule extends BaseModule {
     }
   }
 
-  /** Local civil today as IsoDate (overridable via __setTodayForTests). */
+  /** Local civil today as IsoDate (overridable via setTodayForTests). */
   private getTodayIso(): IsoDate {
     if (todayOverrideForTests) return todayOverrideForTests;
     const now = new Date();
@@ -329,11 +352,7 @@ class MarketingCalendarModule extends BaseModule {
   private resolveActiveOccurrences(): EventOccurrence[] {
     const todayIso = this.getTodayIso();
     const todayDate = new Date(`${todayIso}T12:00:00`);
-    const years = getOpsHorizonYears(
-      todayDate,
-      this.state.activeYear,
-      this.state.yearPinned
-    );
+    const years = getOpsHorizonYears(todayDate, this.state.activeYear, this.state.yearPinned);
     const seen = new Set<string>();
     const out: EventOccurrence[] = [];
     for (const year of years) {
@@ -413,11 +432,14 @@ class MarketingCalendarModule extends BaseModule {
       pending,
       searchTerm: this.state.searchTerm,
       filtersNarrowed,
+      checklist: this.state.checklist,
+      expandedOccurrenceIds: this.state.expandedOccurrenceIds,
     });
 
     this.renderSearchStatus(views.length);
     setSafeHtml(main, listHtml);
     if (pendingEl) setSafeHtml(pendingEl, pendingHtml);
+    this.syncShowEndedUi();
   }
 
   switchMainTab(tab: OpsMainTab): void {
@@ -495,6 +517,50 @@ class MarketingCalendarModule extends BaseModule {
     this.persistUserState();
   }
 
+  setEventChecklistItem(templateId: string, year: number, phase: string, checked: boolean): void {
+    if (!templateId || !phase) return;
+    const key = eventChecklistKey(templateId, year, phase);
+    if (checked) {
+      this.state.checklist[key] = true;
+    } else {
+      delete this.state.checklist[key];
+    }
+    this.persistUserState();
+    if (this.state.mainTab === 'ops') {
+      this.renderOpsWorkbench();
+    }
+  }
+
+  expandOccurrence(occurrenceId: string): void {
+    if (!occurrenceId) return;
+    this.state.expandedOccurrenceIds.add(occurrenceId);
+    if (this.state.mainTab === 'ops') {
+      this.renderOpsWorkbench();
+    }
+  }
+
+  setShowEnded(show: boolean): void {
+    this.state.showEnded = show;
+    this.persistUserState();
+    this.syncShowEndedUi();
+    if (this.state.mainTab === 'ops') {
+      this.renderOpsWorkbench();
+    }
+  }
+
+  toggleShowEnded(): void {
+    this.setShowEnded(!this.state.showEnded);
+  }
+
+  syncShowEndedUi(): void {
+    const btn = document.getElementById('amzf_show_ended');
+    if (!btn) return;
+    btn.classList.toggle('amzf_active', this.state.showEnded);
+    btn.textContent = this.state.showEnded
+      ? AMZF_COPY['filter.hideEnded']
+      : AMZF_COPY['filter.showEnded'];
+  }
+
   resetFilters(): void {
     this.state.selectedCountry = 'ALL';
     this.state.selectedTypes = [];
@@ -508,6 +574,7 @@ class MarketingCalendarModule extends BaseModule {
     clearBtn?.classList.remove('amzf_visible');
     this.syncTimeChipUi();
     this.syncTypeChipUi();
+    this.syncShowEndedUi();
     this.renderCountryTabs();
     this.renderStats();
     this.refreshList();
@@ -859,89 +926,105 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   private handleCalendarSelectionClick(target: HTMLElement): boolean {
-    // Capture return context before global switch-tab navigates away
+    this.noteOutboundReturnContext(target);
+    if (this.handleOpsChromeClick(target)) return true;
+    if (this.handleFilterClick(target)) return true;
+    if (this.handleSearchChromeClick(target)) return true;
+    return this.handleScrollSourceClick(target);
+  }
+
+  /** Remember card when leaving via switch-tab (does not consume the click). */
+  private noteOutboundReturnContext(target: HTMLElement): void {
     const outboundCta = this.findCalendarTarget(
       target,
-      '[data-amzf-primary-cta][data-action="switch-tab"]'
+      '[data-action="switch-tab"][data-amzf-primary-cta], [data-action="switch-tab"][data-amzf-secondary-cta]'
     );
-    if (outboundCta) {
-      this.captureReturnContextFromCard(outboundCta);
-      // Do not return true — let global switch-tab handler proceed
-    }
+    if (outboundCta) this.captureReturnContextFromCard(outboundCta);
+  }
 
+  private handleOpsChromeClick(target: HTMLElement): boolean {
+    if (this.findCalendarTarget(target, '#amzf_show_ended, [data-amzf-show-ended]')) {
+      this.toggleShowEnded();
+      return true;
+    }
+    const localCta = this.findCalendarTarget(target, '[data-amzf-local-cta]');
+    if (localCta) {
+      this.handleLocalCta(localCta);
+      return true;
+    }
     const mainTabBtn = this.findCalendarTarget(target, '[data-amzf-main-tab]');
     if (mainTabBtn) {
       const tab = (mainTabBtn.dataset.amzfMainTab || 'ops') as OpsMainTab;
       this.switchMainTab(tab === 'encyclopedia' ? 'encyclopedia' : 'ops');
       return true;
     }
-
-    // Year chips only (not ops cards which also carry data-amzf-year)
     const yearChip = this.findCalendarTarget(target, '#amzf_year_switch [data-amzf-year]');
     if (yearChip) {
       const y = Number(yearChip.dataset.amzfYear);
       if (Number.isFinite(y)) this.setActiveYear(y);
       return true;
     }
-
     const watchBtn = this.findCalendarTarget(target, '[data-amzf-watch]');
-    if (watchBtn) {
-      const templateId = watchBtn.dataset.amzfWatch;
-      if (templateId) this.toggleWatch(templateId);
+    if (watchBtn?.dataset.amzfWatch) {
+      this.toggleWatch(watchBtn.dataset.amzfWatch);
       return true;
     }
+    return false;
+  }
 
+  private handleFilterClick(target: HTMLElement): boolean {
     const timeChip = this.findCalendarTarget(target, '[data-amzf-time-window]');
     if (timeChip) {
       const w = timeChip.dataset.amzfTimeWindow as OpsTimeWindow | undefined;
-      if (w === 'month' || w === 'd30' || w === 'd60' || w === 'all') {
-        this.setTimeWindow(w);
-      }
+      if (w === 'month' || w === 'd30' || w === 'd60' || w === 'all') this.setTimeWindow(w);
       return true;
     }
-
     const typeChip = this.findCalendarTarget(target, '[data-amzf-type]');
     if (typeChip) {
       this.toggleTypeFilter(typeChip.dataset.amzfType ?? '');
       return true;
     }
-
     const countryBtn = this.findCalendarTarget(target, '[data-amzf-country]');
     if (countryBtn) {
       this.selectCountry(countryBtn.dataset.amzfCountry || 'ALL');
       return true;
     }
-
-    const historyItem = this.findCalendarTarget(target, '[data-amzf-history-item]');
-    if (historyItem) {
-      const term = historyItem.dataset.amzfHistoryItem;
-      if (term) this.selectHistoryItem(term);
-      return true;
-    }
-
-    const quickTag = this.findCalendarTarget(target, '[data-amzf-quick-tag]');
-    if (quickTag) {
-      const term = quickTag.dataset.amzfQuickTag;
-      if (term) this.selectHistoryItem(term, true);
-      return true;
-    }
-
-    const sectionToggle = this.findCalendarTarget(target, '[data-amzf-toggle-section]');
-    if (sectionToggle) {
-      const id = sectionToggle.dataset.amzfToggleSection;
-      if (id) this.toggleSection(id);
-      return true;
-    }
-
-    // Pending / source-panel scroll (button, not hash href — avoids Navigo conflict)
-    const scrollSource = this.findCalendarTarget(target, '[data-amzf-scroll-source]');
-    if (scrollSource) {
-      const id = scrollSource.dataset.amzfScrollSource;
-      if (id) document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-      return true;
-    }
-
     return false;
+  }
+
+  private handleSearchChromeClick(target: HTMLElement): boolean {
+    const historyItem = this.findCalendarTarget(target, '[data-amzf-history-item]');
+    if (historyItem?.dataset.amzfHistoryItem) {
+      this.selectHistoryItem(historyItem.dataset.amzfHistoryItem);
+      return true;
+    }
+    const quickTag = this.findCalendarTarget(target, '[data-amzf-quick-tag]');
+    if (quickTag?.dataset.amzfQuickTag) {
+      this.selectHistoryItem(quickTag.dataset.amzfQuickTag, true);
+      return true;
+    }
+    const sectionToggle = this.findCalendarTarget(target, '[data-amzf-toggle-section]');
+    if (sectionToggle?.dataset.amzfToggleSection) {
+      this.toggleSection(sectionToggle.dataset.amzfToggleSection);
+      return true;
+    }
+    return false;
+  }
+
+  private handleScrollSourceClick(target: HTMLElement): boolean {
+    const scrollSource = this.findCalendarTarget(target, '[data-amzf-scroll-source]');
+    if (!scrollSource) return false;
+    const id = scrollSource.dataset.amzfScrollSource;
+    if (id) document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    return true;
+  }
+
+  private getStorageOrNull(): IStorageService | null {
+    try {
+      return this.getService<IStorageService>(SERVICE_NAMES.STORAGE);
+    } catch {
+      return null;
+    }
   }
 
   private captureReturnContextFromCard(ctaEl: HTMLElement): void {
@@ -950,49 +1033,48 @@ class MarketingCalendarModule extends BaseModule {
     if (!templateId) return;
     const yearRaw = card?.dataset.amzfYear;
     const year =
-      yearRaw && Number.isFinite(Number(yearRaw))
-        ? Number(yearRaw)
-        : this.state.activeYear;
+      yearRaw && Number.isFinite(Number(yearRaw)) ? Number(yearRaw) : this.state.activeYear;
     const ctx: AmzfReturnContext = { templateId, year, tab: 'ops' };
-    try {
-      sessionStorage.setItem(RETURN_CONTEXT_KEY, JSON.stringify(ctx));
-    } catch {
-      // sessionStorage may be unavailable (private mode / quota)
+    this.getStorageOrNull()?.set(RETURN_CONTEXT_KEY, ctx);
+  }
+
+  private cardYear(card: HTMLElement | null): number {
+    const yearRaw = card?.dataset.amzfYear;
+    return yearRaw && Number.isFinite(Number(yearRaw)) ? Number(yearRaw) : this.state.activeYear;
+  }
+
+  private handleLocalCta(btn: HTMLElement): void {
+    const key = btn.dataset.amzfLocalCta || '';
+    const card = btn.closest<HTMLElement>('[data-amzf-occurrence]');
+    const occurrenceId = card?.dataset.amzfOccurrence || '';
+    const templateId = card?.dataset.amzfTemplate || '';
+    const year = this.cardYear(card);
+    if (key === 'review' || key === 'reviewMark') {
+      if (templateId) this.setEventChecklistItem(templateId, year, 'review', true);
     }
+    if (occurrenceId) this.expandOccurrence(occurrenceId);
+  }
+
+  private parseReturnContext(raw: unknown): AmzfReturnContext | null {
+    if (!raw || typeof raw !== 'object') return null;
+    const parsed = raw as Partial<AmzfReturnContext>;
+    if (typeof parsed.templateId !== 'string' || !parsed.templateId) return null;
+    return {
+      templateId: parsed.templateId,
+      year:
+        typeof parsed.year === 'number' && Number.isFinite(parsed.year)
+          ? parsed.year
+          : this.state.activeYear,
+      tab: parsed.tab === 'encyclopedia' ? 'encyclopedia' : 'ops',
+    };
   }
 
   /** After list render: scroll/highlight card from outbound CTA return context. */
   private applyReturnContextAfterRender(): void {
-    let raw: string | null = null;
-    try {
-      raw = sessionStorage.getItem(RETURN_CONTEXT_KEY);
-    } catch {
-      return;
-    }
-    if (!raw) return;
-
-    try {
-      sessionStorage.removeItem(RETURN_CONTEXT_KEY);
-    } catch {
-      // ignore
-    }
-
-    let ctx: AmzfReturnContext | null = null;
-    try {
-      const parsed = JSON.parse(raw) as Partial<AmzfReturnContext>;
-      if (typeof parsed.templateId === 'string' && parsed.templateId) {
-        ctx = {
-          templateId: parsed.templateId,
-          year:
-            typeof parsed.year === 'number' && Number.isFinite(parsed.year)
-              ? parsed.year
-              : this.state.activeYear,
-          tab: parsed.tab === 'encyclopedia' ? 'encyclopedia' : 'ops',
-        };
-      }
-    } catch {
-      return;
-    }
+    const storage = this.getStorageOrNull();
+    if (!storage) return;
+    const ctx = this.parseReturnContext(storage.get(RETURN_CONTEXT_KEY, null));
+    storage.set(RETURN_CONTEXT_KEY, null);
     if (!ctx) return;
 
     if (ctx.year !== this.state.activeYear) {
@@ -1002,21 +1084,22 @@ class MarketingCalendarModule extends BaseModule {
       this.renderYearSwitch();
       this.syncPageChecklistUi();
     }
-    if (ctx.tab && ctx.tab !== this.state.mainTab) {
-      this.state.mainTab = ctx.tab;
+    const tab: OpsMainTab = ctx.tab === 'encyclopedia' ? 'encyclopedia' : 'ops';
+    if (tab !== this.state.mainTab) {
+      this.state.mainTab = tab;
       this.persistUserState();
       this.syncMainTabUi();
     }
     this.refreshList();
+    this.highlightReturnCard(ctx.templateId);
+  }
 
-    const templateId = ctx.templateId;
+  private highlightReturnCard(templateId: string): void {
     requestAnimationFrame(() => {
-      const cards =
-        this.container?.querySelectorAll<HTMLElement>('[data-amzf-template]') ?? [];
-      let card: HTMLElement | null = null;
-      cards.forEach(el => {
-        if (el.dataset.amzfTemplate === templateId) card = el;
-      });
+      const cards = Array.from(
+        this.container?.querySelectorAll<HTMLElement>('[data-amzf-template]') ?? []
+      );
+      const card = cards.find(el => el.dataset.amzfTemplate === templateId);
       if (!card) return;
       card.classList.add('amzf_return_highlight');
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1190,10 +1273,7 @@ class MarketingCalendarModule extends BaseModule {
       })
       .join('');
 
-    setSafeHtml(
-      container,
-      `<span class="amzf_year_label">${escapeHtml(yearLabel)}</span>${chips}`
-    );
+    setSafeHtml(container, `<span class="amzf_year_label">${escapeHtml(yearLabel)}</span>${chips}`);
   }
 
   syncPageChecklistUi(): void {
@@ -1295,32 +1375,51 @@ class MarketingCalendarModule extends BaseModule {
     const container = document.getElementById('amzf_stats');
     if (!container) return;
 
-    const holidays = filtered.filter(e => e.type === 'holiday').length;
-    const shopping = filtered.filter(e => e.type === 'shopping').length;
+    const today = this.getTodayIso();
+    const watchedSet = new Set(this.state.watchedTemplateIds);
+    const watchedCount = filtered.filter(e => watchedSet.has(e.templateId)).length;
+    const inventoryOpen = filtered.filter(
+      e =>
+        e.confidence !== 'pending_official' &&
+        e.startDate &&
+        getOpenPhases(e, today).includes('inventory')
+    ).length;
+    const pendingCount = this.resolveActiveOccurrences().filter(
+      e =>
+        (e.confidence === 'pending_official' || !e.startDate || !e.endDate) &&
+        (e.priority === 'S' || e.amazonOfficial === true)
+    ).length;
+    const note = escapeHtml(AMZF_COPY['stats.doubleCountNote']);
 
-    // ✅ 安全: 统计值为本地计算数字，并通过escapeHtml转义后插入静态模板
     setSafeHtml(
       container,
       `
-            <div class="amzf_stat_item">
+            <div class="amzf_stat_item" title="${note}">
                 <div class="amzf_stat_icon amzf_blue"><i class="fa-solid fa-timeline text-purple-500"></i></div>
                 <div>
-                    <div class="amzf_stat_value">${escapeHtml(filtered.length.toString())}</div>
-                    <div class="amzf_stat_label">营销节点</div>
+                    <div class="amzf_stat_value">${escapeHtml(String(filtered.length))}</div>
+                    <div class="amzf_stat_label">${escapeHtml(AMZF_COPY['stats.nodes'])}</div>
                 </div>
             </div>
-            <div class="amzf_stat_item">
-                <div class="amzf_stat_icon amzf_green"><i class="fas fa-gifts text-purple-500"></i></div>
+            <div class="amzf_stat_item" title="${note}">
+                <div class="amzf_stat_icon amzf_green"><i class="fas fa-star text-purple-500"></i></div>
                 <div>
-                    <div class="amzf_stat_value">${escapeHtml(holidays.toString())}</div>
-                    <div class="amzf_stat_label">重要节日</div>
+                    <div class="amzf_stat_value">${escapeHtml(String(watchedCount))}</div>
+                    <div class="amzf_stat_label">${escapeHtml(AMZF_COPY['stats.watched'])}</div>
                 </div>
             </div>
-            <div class="amzf_stat_item">
-                <div class="amzf_stat_icon amzf_orange"><i class="fas fa-shopping-cart text-purple-500"></i></div>
+            <div class="amzf_stat_item" title="${note}">
+                <div class="amzf_stat_icon amzf_orange"><i class="fas fa-boxes-stacked text-purple-500"></i></div>
                 <div>
-                    <div class="amzf_stat_value">${escapeHtml(shopping.toString())}</div>
-                    <div class="amzf_stat_label">电商大促</div>
+                    <div class="amzf_stat_value">${escapeHtml(String(inventoryOpen))}</div>
+                    <div class="amzf_stat_label">${escapeHtml(AMZF_COPY['stats.inventoryOpen'])}</div>
+                </div>
+            </div>
+            <div class="amzf_stat_item" title="${note}">
+                <div class="amzf_stat_icon amzf_blue"><i class="fas fa-bullhorn text-purple-500"></i></div>
+                <div>
+                    <div class="amzf_stat_value">${escapeHtml(String(pendingCount))}</div>
+                    <div class="amzf_stat_label">${escapeHtml(AMZF_COPY['stats.pending'])}</div>
                 </div>
             </div>
         `

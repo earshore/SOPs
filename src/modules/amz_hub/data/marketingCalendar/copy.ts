@@ -106,8 +106,7 @@ export const AMZF_COPY = {
 
   // 8. 待确认专区
   'pending.sectionTitle': '待官方确认的大促',
-  'pending.lead':
-    '下列节点策略可先看；具体日期以 Amazon 公告 / 后台为准，确认后会显示倒计时。',
+  'pending.lead': '下列节点策略可先看；具体日期以 Amazon 公告 / 后台为准，确认后会显示倒计时。',
 
   // 9. 空态
   'empty.search.title': '没有匹配的节点',
@@ -138,27 +137,20 @@ export const AMZF_COPY = {
 
   // 11. 页面级清单 / 误区
   'pageChecklist.title': '本年度作战习惯',
-  'pageChecklist.scan_month':
-    '每月初扫描本月营销节点，标记与本品类相关的节日（至少提前 4 周）。',
-  'pageChecklist.filter_core_markets':
-    '按站点筛选，重点核对德国/英国/法国等主力市场节日。',
-  'pageChecklist.inventory_lead':
-    '节前 6–8 周完成备货入仓（海运周期 + 清关 + FBA 上架缓冲）。',
-  'pageChecklist.promo_margin':
-    '节前 2–4 周确认 Coupon/Deal/广告活动资格，核算促销折后利润 ≥ 0。',
+  'pageChecklist.scan_month': '每月初扫描本月营销节点，标记与本品类相关的节日（至少提前 4 周）。',
+  'pageChecklist.filter_core_markets': '按站点筛选，重点核对德国/英国/法国等主力市场节日。',
+  'pageChecklist.inventory_lead': '节前 6–8 周完成备货入仓（海运周期 + 清关 + FBA 上架缓冲）。',
+  'pageChecklist.promo_margin': '节前 2–4 周确认 Coupon/Deal/广告活动资格，核算促销折后利润 ≥ 0。',
   'pageChecklist.preflight_week':
     '节前 1 周检查 Prime 配送、广告预算、关键词本地化和节日素材是否齐全。',
   'pageChecklist.post_review': '节后 1 周内复盘：实际销量 vs 预期、库存周转、ACOS。',
   'pitfalls.title': '常见误区',
   'pitfalls.unified.title': '全站点统一营销节奏',
-  'pitfalls.unified.body':
-    '→ 各国节日不同（如母亲节日期差异大），需按国家单独规划广告投放。',
+  'pitfalls.unified.body': '→ 各国节日不同（如母亲节日期差异大），需按国家单独规划广告投放。',
   'pitfalls.lateStock.title': '节前才备货',
-  'pitfalls.lateStock.body':
-    '→ 海运周期 4–6 周 + 清关 1–2 周，必须提前约 6 周完成入仓，否则断货。',
+  'pitfalls.lateStock.body': '→ 海运周期 4–6 周 + 清关 1–2 周，必须提前约 6 周完成入仓，否则断货。',
   'pitfalls.mt.title': '忽视小语种节日文案本地化',
-  'pitfalls.mt.body':
-    '→ 节日关键词必须用目标市场母语，机翻会严重拉低转化率。',
+  'pitfalls.mt.body': '→ 节日关键词必须用目标市场母语，机翻会严重拉低转化率。',
   'pitfalls.allSales.title': '把所有节日都当大促做',
   'pitfalls.allSales.body':
     '→ 区分购物类节日（黑五/Prime Day）与文化类节日；后者重在场景化文案而非一味折扣。',

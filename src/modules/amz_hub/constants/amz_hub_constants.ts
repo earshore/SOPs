@@ -263,7 +263,7 @@ export interface MarketingEvent {
  * Single source of truth: evergreen templates + resolveYear(2026).
  */
 function toLegacyMarketingEvents(year: number): MarketingEvent[] {
-  const templateById = new Map(MARKETING_EVENT_TEMPLATES.map((t) => [t.id, t]));
+  const templateById = new Map(MARKETING_EVENT_TEMPLATES.map(t => [t.id, t]));
   return resolveYear(year).map((occ, index) => {
     const template = templateById.get(occ.templateId);
     let month = template?.defaultMonth ?? 1;

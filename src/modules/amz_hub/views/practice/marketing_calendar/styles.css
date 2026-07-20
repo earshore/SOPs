@@ -1988,3 +1988,77 @@
     background: var(--surface-card-hover, var(--color-slate-50));
   }
 }
+
+/* ---- Ops closed-loop: event checklist + showEnded ---- */
+.amzf_ended_toggle_row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.amzf_event_checklist {
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border-radius: 10px;
+  background: var(--color-slate-50, #f8fafc);
+}
+
+.amzf_event_checklist:not(.amzf_expanded) .amzf_event_checklist_body {
+  display: none;
+}
+
+.amzf_event_checklist.amzf_expanded .amzf_event_checklist_body,
+.amzf_ops_card.amzf_card_expanded .amzf_event_checklist .amzf_event_checklist_body {
+  display: grid;
+  gap: 6px;
+}
+
+.amzf_event_checklist_head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.amzf_event_checklist_title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-slate-700, #334155);
+}
+
+.amzf_card_done_badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #047857;
+  background: #d1fae5;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.amzf_event_check_item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-slate-700, #334155);
+  cursor: pointer;
+}
+
+.amzf_event_desc {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--color-slate-600, #475569);
+  display: none;
+}
+
+.amzf_strategy_expanded .amzf_event_desc,
+.amzf_ops_card.amzf_card_expanded .amzf_event_desc {
+  display: block;
+}
+
+.amzf_event_checklist:not(.amzf_expanded) {
+  cursor: pointer;
+}

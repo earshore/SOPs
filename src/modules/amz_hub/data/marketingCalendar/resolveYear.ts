@@ -107,7 +107,7 @@ function mergeOccurrence(
  */
 export function resolveYear(year: number): EventOccurrence[] {
   const overrides = getOverridesForYear(year);
-  const byTemplate = new Map(overrides.map((o) => [o.templateId, o]));
+  const byTemplate = new Map(overrides.map(o => [o.templateId, o]));
 
   const result: EventOccurrence[] = [];
   for (const template of MARKETING_EVENT_TEMPLATES) {

@@ -41,10 +41,7 @@ describe('resolveDateRule', () => {
 
   it('nth_weekday 4th Thursday of November 2026', () => {
     expect(
-      resolveDateRule(
-        { kind: 'nth_weekday', month: 11, weekday: 4, nth: 4 },
-        2026
-      )?.start
+      resolveDateRule({ kind: 'nth_weekday', month: 11, weekday: 4, nth: 4 }, 2026)?.start
     ).toBe('2026-11-26');
   });
 
@@ -119,19 +116,19 @@ describe('resolveDateRule multi-year fixtures (2025–2028)', () => {
     2028: '2028-11-24',
   };
 
-  it.each([2025, 2026, 2027, 2028] as const)('easter %i', (year) => {
+  it.each([2025, 2026, 2027, 2028] as const)('easter %i', year => {
     expect(resolveDateRule({ kind: 'easter_offset', offsetDays: 0 }, year)?.start).toBe(
       easterByYear[year]
     );
   });
 
-  it.each([2025, 2026, 2027, 2028] as const)('mothering sunday %i', (year) => {
+  it.each([2025, 2026, 2027, 2028] as const)('mothering sunday %i', year => {
     expect(resolveDateRule({ kind: 'mothering_sunday' }, year)?.start).toBe(
       motheringSundayByYear[year]
     );
   });
 
-  it.each([2025, 2026, 2027, 2028] as const)('black friday %i', (year) => {
+  it.each([2025, 2026, 2027, 2028] as const)('black friday %i', year => {
     expect(resolveDateRule({ kind: 'black_friday' }, year)?.start).toBe(blackFridayByYear[year]);
   });
 

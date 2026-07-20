@@ -4,6 +4,7 @@
 
 import { escapeHtml } from '@/common/utils/security';
 import { AMZF_COPY } from '@/modules/amz_hub/data/marketingCalendar/copy';
+import { getPhaseWindows } from '@/modules/amz_hub/data/marketingCalendar/prepRules';
 import type {
   DateConfidence,
   EventOccurrence,
@@ -12,6 +13,7 @@ import type {
   PrepPhaseId,
   PrimaryCta,
 } from '@/modules/amz_hub/data/marketingCalendar/types';
+import { eventChecklistKey } from './userState';
 
 const PHASE_COPY: Record<PrepPhaseId, keyof typeof AMZF_COPY> = {
   inventory: 'phase.inventory',
@@ -38,12 +40,24 @@ const TYPE_COPY: Record<EventType, keyof typeof AMZF_COPY> = {
 
 export type OpsEmptyKind = 'search' | 'filter' | 'onlyPending' | null;
 
+const EVENT_CHECK_COPY: Record<PrepPhaseId, keyof typeof AMZF_COPY> = {
+  inventory: 'eventCheck.inventory',
+  enroll: 'eventCheck.enroll',
+  ads: 'eventCheck.ads',
+  execute: 'eventCheck.execute',
+  review: 'eventCheck.review',
+};
+
 export interface RenderOpsInput {
   views: OpsEventView[];
   pending: EventOccurrence[];
   searchTerm?: string;
   /** True when types / country / timeWindow differ from defaults enough to warrant filter empty. */
   filtersNarrowed?: boolean;
+  /** Persisted checklist map (page + event keys). */
+  checklist?: Record<string, boolean>;
+  /** Occurrence ids with expanded event checklist / strategy. */
+  expandedOccurrenceIds?: ReadonlySet<string>;
 }
 
 function fillCopy(template: string, vars: Record<string, string | number>): string {
@@ -65,11 +79,13 @@ function phaseSummary(openPhases: PrepPhaseId[]): string {
   return `<div class="amzf_open_phases_summary">${escapeHtml(text)}</div>`;
 }
 
-function renderCtaButton(cta: PrimaryCta, attr: 'data-amzf-primary-cta' | 'data-amzf-secondary-cta'): string {
+function renderCtaButton(
+  cta: PrimaryCta,
+  attr: 'data-amzf-primary-cta' | 'data-amzf-secondary-cta'
+): string {
   const safeKey = escapeHtml(cta.key);
   const safeLabel = escapeHtml(cta.label);
-  const baseClass =
-    attr === 'data-amzf-primary-cta' ? 'amzf_primary_cta' : 'amzf_secondary_cta';
+  const baseClass = attr === 'data-amzf-primary-cta' ? 'amzf_primary_cta' : 'amzf_secondary_cta';
 
   if (cta.kind === 'route' && cta.routeId) {
     return `<button type="button" class="${baseClass}" ${attr}="${safeKey}" data-action="switch-tab" data-tab="${escapeHtml(cta.routeId)}">${safeLabel}</button>`;
@@ -80,8 +96,51 @@ function renderCtaButton(cta: PrimaryCta, attr: 'data-amzf-primary-cta' | 'data-
     return `<button type="button" class="${baseClass}" ${attr}="${safeKey}" data-amzf-scroll-source="${escapeHtml(cta.anchorId)}">${safeLabel}</button>`;
   }
 
-  // local actions (execute / review) — button only; handlers wired later
+  // local actions (execute / review / endedReview) — handled in index click path
   return `<button type="button" class="${baseClass}" ${attr}="${safeKey}" data-amzf-local-cta="${safeKey}">${safeLabel}</button>`;
+}
+
+function relevantPhases(occ: EventOccurrence): PrepPhaseId[] {
+  if (occ.confidence === 'pending_official' || !occ.startDate) return [];
+  return getPhaseWindows(occ).map(w => w.id);
+}
+
+function renderEventChecklist(
+  occ: EventOccurrence,
+  checklist: Record<string, boolean>,
+  expanded: boolean
+): string {
+  const phases = relevantPhases(occ);
+  if (phases.length === 0) return '';
+
+  const items = phases
+    .map(phase => {
+      const key = eventChecklistKey(occ.templateId, occ.year, phase);
+      const checked = checklist[key] === true;
+      const label = AMZF_COPY[EVENT_CHECK_COPY[phase]];
+      return `<label class="amzf_event_check_item"><input type="checkbox" class="amzf_event_check_input" data-amzf-event-check data-amzf-template="${escapeHtml(occ.templateId)}" data-amzf-year="${escapeHtml(String(occ.year))}" data-amzf-phase="${escapeHtml(phase)}" ${checked ? 'checked' : ''} /><span>${escapeHtml(label)}</span></label>`;
+    })
+    .join('');
+
+  const allDone = phases.every(
+    phase => checklist[eventChecklistKey(occ.templateId, occ.year, phase)] === true
+  );
+  const doneBadge = allDone
+    ? `<span class="amzf_card_done_badge">${escapeHtml(AMZF_COPY['card.doneBadge'])}</span>`
+    : '';
+
+  // Always show body so phase checkboxes are one click (L2 closed loop).
+  // `expanded` still expands strategy/description for local CTAs.
+  void expanded;
+  return `
+    <div class="amzf_event_checklist amzf_expanded" data-amzf-event-checklist="${escapeHtml(occ.occurrenceId)}">
+      <div class="amzf_event_checklist_head">
+        <span class="amzf_event_checklist_title">${escapeHtml(AMZF_COPY['card.eventChecklistTitle'])}</span>
+        ${doneBadge}
+      </div>
+      <div class="amzf_event_checklist_body">${items}</div>
+    </div>
+  `;
 }
 
 function renderPrimaryCtas(ctas: PrimaryCta[]): string {
@@ -92,34 +151,35 @@ function renderPrimaryCtas(ctas: PrimaryCta[]): string {
 
 function renderSecondaryMore(secondary: PrimaryCta[]): string {
   if (secondary.length === 0) return '';
-  const items = secondary
-    .map(c => renderCtaButton(c, 'data-amzf-secondary-cta'))
-    .join('');
+  const items = secondary.map(c => renderCtaButton(c, 'data-amzf-secondary-cta')).join('');
   return `<details class="amzf_more_menu"><summary class="amzf_more_summary">${escapeHtml(AMZF_COPY['cta.more'])}</summary><div class="amzf_more_body">${items}</div></details>`;
+}
+
+function formatEventRange(occ: EventOccurrence): string {
+  if (occ.startDate && occ.endDate && occ.startDate !== occ.endDate) {
+    return fillCopy(AMZF_COPY['date.range'], { start: occ.startDate, end: occ.endDate });
+  }
+  return occ.dateLabel || occ.startDate || '';
+}
+
+function lifecycleLabel(lifecycle: OpsEventView['lifecycle']): string {
+  if (lifecycle === 'active') return AMZF_COPY['life.active'];
+  if (lifecycle === 'ended') return AMZF_COPY['life.ended'];
+  return '';
 }
 
 function dateLine(occ: EventOccurrence, lifecycle: OpsEventView['lifecycle']): string {
   if (lifecycle === 'pending' || occ.confidence === 'pending_official' || !occ.startDate) {
-    // No fake D-day for pending
     return `<span class="amzf_life_pending"><i class="fas fa-clock"></i> ${escapeHtml(AMZF_COPY['life.pendingDate'])}</span>`;
   }
-
-  const range =
-    occ.startDate && occ.endDate && occ.startDate !== occ.endDate
-      ? fillCopy(AMZF_COPY['date.range'], { start: occ.startDate, end: occ.endDate })
-      : occ.dateLabel || occ.startDate;
-
-  let life = '';
-  if (lifecycle === 'active') {
-    life = AMZF_COPY['life.active'];
-  } else if (lifecycle === 'ended') {
-    life = AMZF_COPY['life.ended'];
-  }
-
+  const range = formatEventRange(occ);
+  const life = lifecycleLabel(lifecycle);
   const approx =
-    occ.confidence === 'approximate' ? `<span class="amzf_approx">${escapeHtml(AMZF_COPY['life.approxPrefix'])}</span> ` : '';
-
-  return `<span class="amzf_event_date"><i class="fas fa-calendar-alt"></i> ${approx}${escapeHtml(range)}${life ? ` · ${escapeHtml(life)}` : ''}</span>`;
+    occ.confidence === 'approximate'
+      ? `<span class="amzf_approx">${escapeHtml(AMZF_COPY['life.approxPrefix'])}</span> `
+      : '';
+  const lifePart = life ? ` · ${escapeHtml(life)}` : '';
+  return `<span class="amzf_event_date"><i class="fas fa-calendar-alt"></i> ${approx}${escapeHtml(range)}${lifePart}</span>`;
 }
 
 function renderWatchButton(templateId: string, watched: boolean): string {
@@ -129,8 +189,13 @@ function renderWatchButton(templateId: string, watched: boolean): string {
   return `<button type="button" class="amzf_watch_btn${activeClass}" data-amzf-watch="${escapeHtml(templateId)}" aria-label="${escapeHtml(AMZF_COPY['aria.watch'])}" aria-pressed="${pressed}">${escapeHtml(label)}</button>`;
 }
 
-export function renderOpsCard(view: OpsEventView): string {
+export function renderOpsCard(
+  view: OpsEventView,
+  options: { checklist?: Record<string, boolean>; expanded?: boolean } = {}
+): string {
   const { occurrence: occ, openPhases, primaryCtas, secondaryCtas, lifecycle, watched } = view;
+  const checklist = options.checklist ?? {};
+  const expanded = options.expanded === true;
   const typeLabel = AMZF_COPY[TYPE_COPY[occ.type] ?? 'filter.type.holiday'];
   const openAttr = openPhases.join(',');
   const openAria = openPhases.length
@@ -143,7 +208,7 @@ export function renderOpsCard(view: OpsEventView): string {
 
   return `
     <article
-      class="amzf_ops_card amzf_type_${escapeHtml(occ.type)} amzf_life_${escapeHtml(lifecycle)}"
+      class="amzf_ops_card amzf_type_${escapeHtml(occ.type)} amzf_life_${escapeHtml(lifecycle)}${expanded ? ' amzf_card_expanded' : ''}"
       data-amzf-occurrence="${escapeHtml(occ.occurrenceId)}"
       data-amzf-template="${escapeHtml(occ.templateId)}"
       data-amzf-year="${escapeHtml(String(occ.year))}"
@@ -163,10 +228,12 @@ export function renderOpsCard(view: OpsEventView): string {
         ${renderWatchButton(occ.templateId, watched)}
       </div>
       ${phaseSummary(openPhases)}
-      <div class="amzf_event_strategy">
+      <div class="amzf_event_strategy${expanded ? ' amzf_strategy_expanded' : ''}">
         <div class="amzf_strategy_title"><i class="fas fa-lightbulb text-yellow-500"></i> ${escapeHtml(AMZF_COPY['card.strategyTitle'])}</div>
         <div class="amzf_strategy_content">${escapeHtml(occ.strategy)}</div>
+        ${occ.description ? `<p class="amzf_event_desc">${escapeHtml(occ.description)}</p>` : ''}
       </div>
+      ${renderEventChecklist(occ, checklist, expanded)}
       <div class="amzf_ops_cta_block">
         ${renderPrimaryCtas(primaryCtas)}
         ${renderSecondaryMore(secondaryCtas)}
@@ -285,7 +352,16 @@ export function renderOpsListHtml(input: RenderOpsInput): string {
     return renderOpsEmpty(emptyKind, input.searchTerm?.trim() ?? '');
   }
 
-  return `<div class="amzf_ops_list">${input.views.map(renderOpsCard).join('')}</div>`;
+  const checklist = input.checklist ?? {};
+  const expanded = input.expandedOccurrenceIds ?? new Set<string>();
+  return `<div class="amzf_ops_list">${input.views
+    .map(view =>
+      renderOpsCard(view, {
+        checklist,
+        expanded: expanded.has(view.occurrence.occurrenceId),
+      })
+    )
+    .join('')}</div>`;
 }
 
 /**

@@ -7,7 +7,7 @@ import type { EventType } from '@/modules/amz_hub/data/marketingCalendar/types';
 
 export const OPS_STATE_KEY = 'amzf_ops_state_v2';
 
-/** sessionStorage key for outbound primary CTA → return highlight */
+/** StorageService key for outbound primary CTA → return highlight (cleared after apply). */
 export const RETURN_CONTEXT_KEY = 'amzf_return_context';
 
 export type OpsTimeWindow = 'month' | 'd30' | 'd60' | 'all';
@@ -56,11 +56,7 @@ export function pageChecklistKey(year: number, id: string): string {
 }
 
 /** Event-level checklist key: `event:{templateId}:{year}:{phase}` */
-export function eventChecklistKey(
-  templateId: string,
-  year: number,
-  phase: string
-): string {
+export function eventChecklistKey(templateId: string, year: number, phase: string): string {
   return `event:${templateId}:${year}:${phase}`;
 }
 
@@ -107,40 +103,60 @@ function normalizeChecklist(value: unknown): Record<string, boolean> {
   return out;
 }
 
-function isValidV2Shape(raw: unknown): raw is Record<string, unknown> {
-  if (!isRecord(raw)) return false;
-  if (raw.version !== 2) return false;
-  if (typeof raw.activeYear !== 'number' || !Number.isFinite(raw.activeYear)) return false;
-  if (typeof raw.yearPinned !== 'boolean') return false;
-  if (typeof raw.selectedCountry !== 'string') return false;
-  if (!Array.isArray(raw.selectedTypes)) return false;
-  if (typeof raw.timeWindow !== 'string' || !TIME_WINDOWS.includes(raw.timeWindow as OpsTimeWindow)) {
-    return false;
-  }
-  if (typeof raw.mainTab !== 'string' || !MAIN_TABS.includes(raw.mainTab as OpsMainTab)) {
-    return false;
-  }
-  if (!Array.isArray(raw.watchedTemplateIds)) return false;
-  if (!isRecord(raw.checklist)) return false;
-  if (typeof raw.showEnded !== 'boolean') return false;
-  if (typeof raw.updatedAt !== 'string') return false;
-  if (
-    raw.lastFocusedTemplateId !== undefined &&
-    typeof raw.lastFocusedTemplateId !== 'string'
-  ) {
-    return false;
-  }
-  return true;
+interface UserStateV2Raw {
+  version: 2;
+  activeYear: number;
+  yearPinned: boolean;
+  selectedCountry: string;
+  selectedTypes: unknown[];
+  timeWindow: OpsTimeWindow;
+  mainTab: OpsMainTab;
+  watchedTemplateIds: unknown[];
+  checklist: Record<string, unknown>;
+  showEnded: boolean;
+  updatedAt: string;
+  lastFocusedTemplateId?: string;
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isOpsTimeWindow(value: unknown): value is OpsTimeWindow {
+  return typeof value === 'string' && TIME_WINDOWS.includes(value as OpsTimeWindow);
+}
+
+function isOpsMainTab(value: unknown): value is OpsMainTab {
+  return typeof value === 'string' && MAIN_TABS.includes(value as OpsMainTab);
+}
+
+function hasCoreV2Fields(raw: Record<string, unknown>): boolean {
+  return (
+    raw.version === 2 &&
+    isFiniteNumber(raw.activeYear) &&
+    typeof raw.yearPinned === 'boolean' &&
+    typeof raw.selectedCountry === 'string' &&
+    Array.isArray(raw.selectedTypes) &&
+    isOpsTimeWindow(raw.timeWindow) &&
+    isOpsMainTab(raw.mainTab)
+  );
+}
+
+function hasMetaV2Fields(raw: Record<string, unknown>): boolean {
+  if (!Array.isArray(raw.watchedTemplateIds) || !isRecord(raw.checklist)) return false;
+  if (typeof raw.showEnded !== 'boolean' || typeof raw.updatedAt !== 'string') return false;
+  return raw.lastFocusedTemplateId === undefined || typeof raw.lastFocusedTemplateId === 'string';
+}
+
+function isValidV2Shape(raw: unknown): raw is UserStateV2Raw {
+  return isRecord(raw) && hasCoreV2Fields(raw) && hasMetaV2Fields(raw);
 }
 
 /**
  * Load v2 user state. Missing/corrupt/invalid → defaults for systemYear.
  * When yearPinned is false, activeYear always tracks systemYear.
  */
-export function loadUserState(
-  storage: UserStateStorage,
-  systemYear: number
-): UserCalendarState {
+export function loadUserState(storage: UserStateStorage, systemYear: number): UserCalendarState {
   let raw: unknown;
   try {
     raw = storage.get(OPS_STATE_KEY, null);

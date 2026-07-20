@@ -41,8 +41,8 @@ function isExpanded(
 ): boolean {
   if (searchActive) return true;
   if (!expanded) return false;
-  if (expanded instanceof Set) return expanded.has(sectionId);
-  return expanded.includes(sectionId);
+  if (Array.isArray(expanded)) return expanded.includes(sectionId);
+  return expanded.has(sectionId);
 }
 
 /** Month 1–12 for grouping; pending without startDate uses template defaultMonth. */

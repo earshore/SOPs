@@ -29,9 +29,7 @@
       <i class="fa-brands fa-amazon"></i>
       官方口径
     </div>
-    <p>
-      节日可由规则推算；Amazon 官方活动的资格、报名窗、费用与门槛，以 Seller Central 当期为准。
-    </p>
+    <p>节日可由规则推算；Amazon 官方活动的资格、报名窗、费用与门槛，以 Seller Central 当期为准。</p>
     <div class="amzf_source_links">
       <a
         href="https://www.aboutamazon.eu/news/retail/spring-into-savings-amazon-spring-deal-days-returns-march-10-to-16"
@@ -81,12 +79,7 @@
     </div>
 
     <!-- 运营年切换（M2）；点击后 yearPinned=true -->
-    <div
-      class="amzf_year_switch"
-      id="amzf_year_switch"
-      role="group"
-      aria-label="选择运营年"
-    ></div>
+    <div class="amzf_year_switch" id="amzf_year_switch" role="group" aria-label="选择运营年"></div>
 
     <!-- 搜索框 -->
     <div class="amzf_search_wrapper">
@@ -158,6 +151,12 @@
     </div>
 
     <div class="amzf_country_tabs" id="amzf_country_tabs"></div>
+
+    <div class="amzf_ended_toggle_row">
+      <button type="button" class="amzf_chip" id="amzf_show_ended" data-amzf-show-ended>
+        显示已结束
+      </button>
+    </div>
   </div>
   <div class="amzf_search_status" id="amzf_search_status" aria-live="polite"></div>
 
@@ -181,9 +180,11 @@
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-700">
       <label class="flex items-start gap-2"
-        ><input type="checkbox" class="mt-1 accent-emerald-600" data-amzf-page-check="scan_month" /><span
-          >每月初扫描本月营销节点，标记与本品类相关的节日（至少提前 4 周）。</span
-        ></label
+        ><input
+          type="checkbox"
+          class="mt-1 accent-emerald-600"
+          data-amzf-page-check="scan_month"
+        /><span>每月初扫描本月营销节点，标记与本品类相关的节日（至少提前 4 周）。</span></label
       >
       <label class="flex items-start gap-2"
         ><input
@@ -204,23 +205,21 @@
           type="checkbox"
           class="mt-1 accent-emerald-600"
           data-amzf-page-check="promo_margin"
-        /><span
-          >节前 2–4 周确认 Coupon/Deal/广告活动资格，核算促销折后利润 ≥ 0。</span
-        ></label
+        /><span>节前 2–4 周确认 Coupon/Deal/广告活动资格，核算促销折后利润 ≥ 0。</span></label
       >
       <label class="flex items-start gap-2"
         ><input
           type="checkbox"
           class="mt-1 accent-emerald-600"
           data-amzf-page-check="preflight_week"
-        /><span
-          >节前 1 周检查 Prime 配送、广告预算、关键词本地化和节日素材是否齐全。</span
-        ></label
+        /><span>节前 1 周检查 Prime 配送、广告预算、关键词本地化和节日素材是否齐全。</span></label
       >
       <label class="flex items-start gap-2"
-        ><input type="checkbox" class="mt-1 accent-emerald-600" data-amzf-page-check="post_review" /><span
-          >节后 1 周内复盘：实际销量 vs 预期、库存周转、ACOS。</span
-        ></label
+        ><input
+          type="checkbox"
+          class="mt-1 accent-emerald-600"
+          data-amzf-page-check="post_review"
+        /><span>节后 1 周内复盘：实际销量 vs 预期、库存周转、ACOS。</span></label
       >
     </div>
   </section>

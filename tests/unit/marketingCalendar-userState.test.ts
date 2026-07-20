@@ -68,12 +68,8 @@ describe('checklist year keys', () => {
   it('page and event keys embed the year so years do not collide', () => {
     expect(pageChecklistKey(2026, 'scan_month')).toBe('page:2026:scan_month');
     expect(pageChecklistKey(2027, 'scan_month')).toBe('page:2027:scan_month');
-    expect(eventChecklistKey('prime-day', 2026, 'enroll')).toBe(
-      'event:prime-day:2026:enroll'
-    );
-    expect(eventChecklistKey('prime-day', 2027, 'enroll')).toBe(
-      'event:prime-day:2027:enroll'
-    );
+    expect(eventChecklistKey('prime-day', 2026, 'enroll')).toBe('event:prime-day:2026:enroll');
+    expect(eventChecklistKey('prime-day', 2027, 'enroll')).toBe('event:prime-day:2027:enroll');
   });
 
   it('persisted checklist keeps year-scoped keys across year switch', () => {

@@ -9,11 +9,7 @@
  * - Unpinned system year in Oct–Dec (month >= 10) → [systemYear, systemYear+1]
  * - Otherwise → [systemYear]
  */
-export function getOpsHorizonYears(
-  today: Date,
-  activeYear: number,
-  yearPinned: boolean
-): number[] {
+export function getOpsHorizonYears(today: Date, activeYear: number, yearPinned: boolean): number[] {
   const systemYear = today.getFullYear();
   if (yearPinned || activeYear !== systemYear) {
     return [activeYear];

@@ -161,8 +161,7 @@ export const MARKETING_EVENT_TEMPLATES: MarketingEventTemplate[] = [
     countries: ['IE'],
     description:
       '爱尔兰国庆日，纪念守护神圣帕特里克。欧洲爱尔兰社群和爱尔兰文化爱好者会以绿色、三叶草和游行为核心符号庆祝。',
-    strategy:
-      'IE站重点关注绿色服饰、三叶草装饰、派对用品、爱尔兰威士忌周边等本地化需求。',
+    strategy: 'IE站重点关注绿色服饰、三叶草装饰、派对用品、爱尔兰威士忌周边等本地化需求。',
     tags: ['绿色服饰', '装饰品', '派对用品', '酒具'],
     dateRule: { kind: 'fixed', month: 3, day: 17 },
     defaultMonth: 3,
@@ -211,7 +210,8 @@ export const MARKETING_EVENT_TEMPLATES: MarketingEventTemplate[] = [
     countries: ['GB', 'IE'],
     description:
       '赞颂母亲、母爱、母系纽带以及母亲的社会影响力的节日。赠送礼物是常见的庆祝方式，顾客通常会提前几周挑选礼物。',
-    strategy: '英国和爱尔兰母亲节为 Mothering Sunday（随复活推算）。礼品、园艺工具、定制相框、美容仪热销。',
+    strategy:
+      '英国和爱尔兰母亲节为 Mothering Sunday（随复活推算）。礼品、园艺工具、定制相框、美容仪热销。',
     tags: ['礼品', '珠宝', '园艺', '美妆'],
     dateRule: { kind: 'mothering_sunday' },
     defaultMonth: 3,
@@ -756,8 +756,7 @@ export const MARKETING_EVENT_TEMPLATES: MarketingEventTemplate[] = [
     priority: 'S',
     countries: ['DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'GB', 'SE'],
     description: 'Q4核心购物节点，欧洲站通常在11月下旬进入黑五到圣诞的连续大促窗口。',
-    strategy:
-      '欧洲站全年最关键大促之一，电子、家电、时尚、家居需求集中爆发，务必保证库存充足。',
+    strategy: '欧洲站全年最关键大促之一，电子、家电、时尚、家居需求集中爆发，务必保证库存充足。',
     tags: ['全品类', '大促', '电子', '家居'],
     dateRule: { kind: 'black_friday' },
     defaultMonth: 11,

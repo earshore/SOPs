@@ -74,9 +74,7 @@ export function collectOpenCandidates(occ: EventOccurrence, today: IsoDate): Cta
         );
         break;
       case 'enroll':
-        candidates.push(
-          routeCta('enroll', 'cta.enroll', 'sops_promotion_submission', end, phase)
-        );
+        candidates.push(routeCta('enroll', 'cta.enroll', 'sops_promotion_submission', end, phase));
         break;
       case 'ads':
         candidates.push(
@@ -175,7 +173,7 @@ export function getSecondaryCtas(
   today: IsoDate,
   primary: PrimaryCta[]
 ): PrimaryCta[] {
-  const primaryKeys = new Set(primary.map((c) => c.key));
+  const primaryKeys = new Set(primary.map(c => c.key));
   const secondary: PrimaryCta[] = [];
 
   const openCandidates = collectOpenCandidates(occ, today);

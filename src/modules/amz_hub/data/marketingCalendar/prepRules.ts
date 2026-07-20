@@ -135,6 +135,6 @@ export function isDateInWindow(today: IsoDate, start: IsoDate, end: IsoDate): bo
  */
 export function getOpenPhases(occ: EventOccurrence, today: IsoDate): PrepPhaseId[] {
   return getPhaseWindows(occ)
-    .filter((w) => isDateInWindow(today, w.start, w.end))
-    .map((w) => w.id);
+    .filter(w => isDateInWindow(today, w.start, w.end))
+    .map(w => w.id);
 }

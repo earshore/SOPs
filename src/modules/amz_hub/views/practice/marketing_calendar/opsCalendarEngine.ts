@@ -16,7 +16,11 @@ export {
 } from '@/modules/amz_hub/data/marketingCalendar/primaryCtas';
 export type { PrimaryCta } from '@/modules/amz_hub/data/marketingCalendar/primaryCtas';
 
-import { addDaysIso, parseIsoDateLocal, toIsoDate } from '@/modules/amz_hub/data/marketingCalendar/dateRules';
+import {
+  addDaysIso,
+  parseIsoDateLocal,
+  toIsoDate,
+} from '@/modules/amz_hub/data/marketingCalendar/dateRules';
 import { getOpenPhases } from '@/modules/amz_hub/data/marketingCalendar/prepRules';
 import {
   getPrimaryCtas,
@@ -26,6 +30,7 @@ import {
 import type {
   EventLifecycle,
   EventOccurrence,
+  EventType,
   IsoDate,
   OpsEventView,
   OpsFilters,
@@ -75,53 +80,34 @@ export function resolveTimeWindowBounds(
   return { start: today, end: addDaysIso(today, days) };
 }
 
-function matchesFilters(
-  occ: EventOccurrence,
-  filters: OpsFilters,
-  today: IsoDate
-): boolean {
-  const country = filters.selectedCountry;
-  if (country && country !== 'ALL' && !occ.countries.includes(country)) {
-    return false;
-  }
+function matchesCountry(occ: EventOccurrence, country: string | undefined): boolean {
+  return !country || country === 'ALL' || occ.countries.includes(country);
+}
 
-  const types = filters.selectedTypes;
-  if (types && types.length > 0 && !types.includes(occ.type)) {
-    return false;
-  }
+function matchesTypes(occ: EventOccurrence, types: EventType[] | undefined): boolean {
+  return !types || types.length === 0 || types.includes(occ.type);
+}
+
+function matchesSearchTerm(occ: EventOccurrence, term: string | undefined): boolean {
+  const q = term?.trim().toLowerCase();
+  if (!q) return true;
+  const hay = [occ.name, occ.nameEn, occ.description, occ.strategy, ...occ.tags, ...occ.countries]
+    .join(' ')
+    .toLowerCase();
+  return hay.includes(q);
+}
+
+function matchesFilters(occ: EventOccurrence, filters: OpsFilters, today: IsoDate): boolean {
+  if (!matchesCountry(occ, filters.selectedCountry)) return false;
+  if (!matchesTypes(occ, filters.selectedTypes)) return false;
 
   const lifecycle = getLifecycle(occ, today);
-  if (lifecycle === 'pending') {
-    // pending stays out of time-window main list
-    return false;
-  }
+  if (lifecycle === 'pending') return false;
+  if (filters.showEnded === false && lifecycle === 'ended') return false;
 
-  if (filters.showEnded === false && lifecycle === 'ended') {
-    return false;
-  }
-
-  const tw = filters.timeWindow ?? 'd60';
-  const bounds = resolveTimeWindowBounds(tw, today);
-  if (!eventIntersectsWindow(occ, bounds)) {
-    return false;
-  }
-
-  const term = filters.searchTerm?.trim().toLowerCase();
-  if (term) {
-    const hay = [
-      occ.name,
-      occ.nameEn,
-      occ.description,
-      occ.strategy,
-      ...occ.tags,
-      ...occ.countries,
-    ]
-      .join(' ')
-      .toLowerCase();
-    if (!hay.includes(term)) return false;
-  }
-
-  return true;
+  const bounds = resolveTimeWindowBounds(filters.timeWindow ?? 'd60', today);
+  if (!eventIntersectsWindow(occ, bounds)) return false;
+  return matchesSearchTerm(occ, filters.searchTerm);
 }
 
 /**

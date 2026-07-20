@@ -4,7 +4,13 @@ export type { DateRule, IsoDate } from './types';
 
 /** Parse `YYYY-MM-DD` into local civil y/m/d. Never uses Date timezone parsing. */
 export function parseIsoDateLocal(iso: IsoDate): { y: number; m: number; d: number } {
-  const [y, m, d] = iso.split('-').map((part) => Number(part));
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!match) {
+    throw new Error(`Invalid IsoDate: ${iso}`);
+  }
+  const y = Number(match[1]);
+  const m = Number(match[2]);
+  const d = Number(match[3]);
   return { y, m, d };
 }
 
@@ -54,7 +60,12 @@ export function westernEaster(year: number): { month: number; day: number } {
   return { month, day };
 }
 
-function singleDay(y: number, m: number, d: number, durationDays?: number): {
+function singleDay(
+  y: number,
+  m: number,
+  d: number,
+  durationDays?: number
+): {
   start: IsoDate;
   end: IsoDate;
 } {
