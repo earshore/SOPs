@@ -1,6 +1,14 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { mount, unmount } from '@/modules/amz_hub/views/practice/marketing_calendar';
+import {
+  __setTodayForTests,
+  mount,
+  unmount,
+} from '@/modules/amz_hub/views/practice/marketing_calendar';
 import { AMZF_COPY } from '@/modules/amz_hub/data/marketingCalendar/copy';
+import { buildOpsViews } from '@/modules/amz_hub/views/practice/marketing_calendar/opsCalendarEngine';
+import { renderOpsCard } from '@/modules/amz_hub/views/practice/marketing_calendar/renderOps';
+import { resolveYear } from '@/modules/amz_hub/data/marketingCalendar/resolveYear';
+import { renderEncyclopedia } from '@/modules/amz_hub/views/practice/marketing_calendar/renderEncyclopedia';
 
 const mocks = vi.hoisted(() => ({
   storage: {
@@ -44,6 +52,7 @@ async function mountCalendar(): Promise<HTMLElement> {
 beforeEach(() => {
   vi.useRealTimers();
   document.body.innerHTML = '';
+  __setTodayForTests(null);
   mocks.storage.get.mockReset().mockReturnValue(['Prime Day', '圣诞']);
   mocks.storage.set.mockReset();
   mocks.configGet.mockReset().mockReturnValue(5);
@@ -174,4 +183,124 @@ beforeEach(() => {
 
     unmount();
     expect(document.body.querySelector('#amzf_search_history')).toBeNull();
+  });
+
+  it('switches main tab between ops and encyclopedia', async () => {
+    const container = await mountCalendar();
+
+    expect(container.querySelector('[data-amzf-main-tab="ops"]')?.classList.contains('amzf_active')).toBe(
+      true
+    );
+    expect(container.querySelector('#amzf_time_chips')?.classList.contains('amzf_hidden')).toBe(false);
+    expect(container.querySelector('#amzf_main')?.querySelector('.amzf_ops_list, .amzf_empty')).not.toBeNull();
+
+    click(container.querySelector('[data-amzf-main-tab="encyclopedia"]'));
+
+    expect(
+      container.querySelector('[data-amzf-main-tab="encyclopedia"]')?.classList.contains('amzf_active')
+    ).toBe(true);
+    expect(container.querySelector('#amzf_time_chips')?.classList.contains('amzf_hidden')).toBe(true);
+    expect(container.querySelector('#amzf_encyclopedia_view_toggle')?.classList.contains('amzf_hidden')).toBe(
+      false
+    );
+    expect(container.querySelector('#amzf_main')?.querySelector('.amzf_timeline, .amzf_empty')).not.toBeNull();
+    expect(container.querySelector('#amzf_pending_section')?.innerHTML).toBe('');
+
+    click(container.querySelector('[data-amzf-main-tab="ops"]'));
+    expect(container.querySelector('[data-amzf-main-tab="ops"]')?.classList.contains('amzf_active')).toBe(
+      true
+    );
+    expect(container.querySelector('#amzf_time_chips')?.classList.contains('amzf_hidden')).toBe(false);
+  });
+
+  it('applies country filter on ops list', async () => {
+    __setTodayForTests('2026-06-01');
+    const container = await mountCalendar();
+
+    // all-year window so DE-only filter is visible without empty d60
+    click(container.querySelector('[data-amzf-time-window="all"]'));
+    const allCount = container.querySelectorAll('#amzf_main [data-amzf-occurrence]').length;
+    expect(allCount).toBeGreaterThan(0);
+
+    click(container.querySelector('[data-amzf-country="DE"]'));
+    expect(container.querySelector('[data-amzf-country="DE"]')?.classList.contains('amzf_active')).toBe(
+      true
+    );
+
+    const deCards = container.querySelectorAll('#amzf_main [data-amzf-occurrence]');
+    expect(deCards.length).toBeGreaterThan(0);
+    expect(deCards.length).toBeLessThanOrEqual(allCount);
+
+    // encyclopedia with DE filter still renders month sections from EventOccurrence
+    click(container.querySelector('[data-amzf-main-tab="encyclopedia"]'));
+    expect(container.querySelector('#amzf_main .amzf_month_section, #amzf_main .amzf_empty')).not.toBeNull();
+  });
+
+  it('switches time window chips and re-renders ops list', async () => {
+    __setTodayForTests('2026-06-01');
+    const container = await mountCalendar();
+
+    const d60 = container.querySelector('[data-amzf-time-window="d60"]');
+    expect(d60?.classList.contains('amzf_active')).toBe(true);
+    const d60Count = container.querySelectorAll('#amzf_main [data-amzf-occurrence]').length;
+
+    click(container.querySelector('[data-amzf-time-window="month"]'));
+    expect(
+      container.querySelector('[data-amzf-time-window="month"]')?.classList.contains('amzf_active')
+    ).toBe(true);
+    expect(d60?.classList.contains('amzf_active')).toBe(false);
+
+    const monthCount = container.querySelectorAll('#amzf_main [data-amzf-occurrence]').length;
+    // June 2026 window ⊆ next 60 days from June 1 — month count ≤ d60
+    expect(monthCount).toBeLessThanOrEqual(d60Count);
+
+    click(container.querySelector('[data-amzf-time-window="all"]'));
+    const allCount = container.querySelectorAll('#amzf_main [data-amzf-occurrence]').length;
+    expect(allCount).toBeGreaterThanOrEqual(d60Count);
+  });
+
+  it('shows dual primary CTAs on Prime Day ads window (fixed today)', () => {
+    // Pure path: fixed today without mount hook
+    const occs = resolveYear(2026);
+    const views = buildOpsViews(
+      occs,
+      {
+        selectedCountry: 'ALL',
+        selectedTypes: [],
+        timeWindow: 'all',
+        showEnded: true,
+        searchTerm: '',
+      },
+      '2026-06-18',
+      new Set()
+    );
+    const prime = views.find(v => v.occurrence.templateId === 'prime-day');
+    expect(prime).toBeDefined();
+    expect(prime!.primaryCtas).toHaveLength(2);
+    expect(prime!.primaryCtas.map(c => c.key)).toEqual(['promoTools', 'ppc']);
+
+    const html = renderOpsCard(prime!);
+    expect(html.match(/data-amzf-primary-cta=/g)?.length).toBe(2);
+    expect(html).toContain('data-tab="amz_promo_tools"');
+    expect(html).toContain('data-tab="sops_ppc_advertising"');
+  });
+
+  it('renderEncyclopedia builds month and event views from occurrences', () => {
+    const occs = resolveYear(2026).slice(0, 8);
+    const monthHtml = renderEncyclopedia({
+      occurrences: occs,
+      view: 'country',
+      searchTerm: '',
+    });
+    expect(monthHtml).toContain('amzf_timeline');
+    expect(monthHtml).toContain('amzf_month_section');
+    expect(monthHtml).toContain('data-amzf-occurrence=');
+
+    const eventHtml = renderEncyclopedia({
+      occurrences: occs,
+      view: 'event',
+      searchTerm: '',
+    });
+    expect(eventHtml).toContain('amzf_event_view');
+    expect(eventHtml).toContain('amzf_event_comparison');
   });

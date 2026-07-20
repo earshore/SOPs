@@ -10,16 +10,23 @@ import BaseModule from '@/common/BaseModule';
 import { SERVICE_NAMES } from '@/common/di/ServiceRegistry';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
 import type { IStorageService } from '@/types/services';
-import { AMZF_COUNTRIES, AMZF_EVENTS, AMZF_MONTHS } from '../../../constants/amz_hub_constants';
+import { AMZF_COUNTRIES, AMZF_MONTHS } from '../../../constants/amz_hub_constants';
 import { configCenter } from '@/common/config/ConfigCenter';
-import type { MarketingEvent, CountryInfo } from '@/types/modules-business';
+import type { CountryInfo } from '@/types/modules-business';
 import { toIsoDate } from '@/modules/amz_hub/data/marketingCalendar/dateRules';
 import { resolveYear } from '@/modules/amz_hub/data/marketingCalendar/resolveYear';
 import type {
+  EventOccurrence,
   EventType,
+  IsoDate,
   OpsTimeWindow,
 } from '@/modules/amz_hub/data/marketingCalendar/types';
 import { buildOpsViews } from './opsCalendarEngine';
+import {
+  getOccurrenceMonth,
+  renderEncyclopedia,
+  type EncyclopediaView,
+} from './renderEncyclopedia';
 import { renderOps } from './renderOps';
 import { defaultUserState, type OpsMainTab } from './userState';
 import './flag-icons.local.css';
@@ -97,7 +104,7 @@ const AMZF_MONTH_SEARCH_ALIASES: string[][] = [
 ];
 
 interface MarketingCalendarState {
-  currentView: 'country' | 'event';
+  currentView: EncyclopediaView;
   selectedCountry: string;
   searchTerm: string;
   expandedSections: Set<string>;
@@ -107,6 +114,14 @@ interface MarketingCalendarState {
   selectedTypes: EventType[];
   showEnded: boolean;
   activeYear: number;
+}
+
+/** Test-only override for "today"; null = system clock. */
+let todayOverrideForTests: IsoDate | null = null;
+
+/** Optional test hook — prefer pure render/engine tests with fixed today. */
+export function __setTodayForTests(iso: IsoDate | null): void {
+  todayOverrideForTests = iso;
 }
 
 interface MarketingCalendarSearchElements {
@@ -182,8 +197,9 @@ class MarketingCalendarModule extends BaseModule {
     this.state.activeYear = defaults.activeYear;
   }
 
-  /** Local civil today as IsoDate (injectable later via tests if needed). */
-  private getTodayIso(): string {
+  /** Local civil today as IsoDate (overridable via __setTodayForTests). */
+  private getTodayIso(): IsoDate {
+    if (todayOverrideForTests) return todayOverrideForTests;
     const now = new Date();
     return toIsoDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
   }
@@ -245,13 +261,24 @@ class MarketingCalendarModule extends BaseModule {
 
     const year = this.state.activeYear;
     const today = this.getTodayIso();
-    const occurrences = resolveYear(year);
+    let occurrences = resolveYear(year);
     const watched = new Set<string>(); // M1: no watch persist yet
 
+    // Scored search on occurrences; empty term = all. Pass '' into engine to avoid weak includes.
+    const searchTerm = this.state.searchTerm.trim();
+    if (searchTerm) {
+      const terms = this.tokenizeSearchTerm(searchTerm);
+      const scoredIds = new Set(
+        occurrences
+          .map(occ => ({ id: occ.occurrenceId, score: this.calculateScore(occ, terms) }))
+          .filter(item => item.score > 0)
+          .map(item => item.id)
+      );
+      occurrences = occurrences.filter(occ => scoredIds.has(occ.occurrenceId));
+    }
+
     // Non-empty search is year-scoped so nodes stay findable outside the active time chip
-    const timeWindow = this.state.searchTerm.trim()
-      ? ('all' as OpsTimeWindow)
-      : this.state.timeWindow;
+    const timeWindow = searchTerm ? ('all' as OpsTimeWindow) : this.state.timeWindow;
 
     const views = buildOpsViews(
       occurrences,
@@ -260,14 +287,25 @@ class MarketingCalendarModule extends BaseModule {
         selectedTypes: this.state.selectedTypes,
         timeWindow,
         showEnded: this.state.showEnded,
-        searchTerm: this.state.searchTerm,
+        searchTerm: '', // scoring already applied above
       },
       today,
       watched
     );
 
+    // Sort ops search hits by score when searching (engine sorts by watch + startDate)
+    if (searchTerm) {
+      const terms = this.tokenizeSearchTerm(searchTerm);
+      views.sort(
+        (a, b) =>
+          this.calculateScore(b.occurrence, terms) - this.calculateScore(a.occurrence, terms)
+      );
+    }
+
     // Pending: no exact dates (S-priority official big deals or any pending_official)
-    const pending = occurrences.filter(
+    // Re-resolve full year so pending strip is not wiped by search narrowing
+    const allYear = resolveYear(year);
+    const pending = allYear.filter(
       occ =>
         (occ.confidence === 'pending_official' || !occ.startDate || !occ.endDate) &&
         (occ.priority === 'S' || occ.amazonOfficial === true)
@@ -348,7 +386,7 @@ class MarketingCalendarModule extends BaseModule {
       container.remove();
     }
 
-    // 清理全局代理
+    todayOverrideForTests = null;
   }
 
   // ==================== Core Logic ====================
@@ -415,7 +453,7 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   private getEventTypeSearchText(type: string): string {
-    const meta = this.getEventTypeMeta(type);
+    const meta = AMZF_EVENT_TYPE_META[type] ?? { label: '营销节点', icon: '' };
     return [type, meta.label, ...(AMZF_EVENT_TYPE_SEARCH_ALIASES[type] ?? [])].join(' ');
   }
 
@@ -426,16 +464,22 @@ class MarketingCalendarModule extends BaseModule {
     ].join(' ');
   }
 
-  calculateScore(event: MarketingEvent, terms: string[]): number {
+  /** Weighted multi-field score for EventOccurrence; 0 = no match for some term. */
+  calculateScore(occ: EventOccurrence, terms: string[]): number {
     let score = 0;
+    const month = getOccurrenceMonth(occ);
     const searchFields = [
-      { weight: 120, text: `${event.name} ${event.nameEn}` },
-      { weight: 80, text: this.getCountrySearchText(event.countries) },
-      { weight: 70, text: (event.tags || []).join(' ') },
-      { weight: 55, text: event.strategy },
-      { weight: 45, text: this.getEventTypeSearchText(event.type) },
-      { weight: 35, text: `${event.date} ${this.getMonthSearchText(event.month)}` },
-      { weight: 20, text: event.description },
+      { weight: 120, text: `${occ.name} ${occ.nameEn}` },
+      { weight: 80, text: this.getCountrySearchText(occ.countries) },
+      { weight: 70, text: (occ.tags || []).join(' ') },
+      { weight: 55, text: occ.strategy },
+      { weight: 45, text: this.getEventTypeSearchText(occ.type) },
+      {
+        weight: 35,
+        text: `${occ.dateLabel} ${occ.startDate} ${this.getMonthSearchText(month)}`,
+      },
+      { weight: 20, text: occ.description },
+      { weight: 15, text: occ.templateId },
     ].map(field => ({
       ...field,
       text: this.normalizeSearchText(field.text),
@@ -454,10 +498,11 @@ class MarketingCalendarModule extends BaseModule {
     return score;
   }
 
-  getFilteredEvents(): MarketingEvent[] {
-    let candidates = (AMZF_EVENTS as unknown as MarketingEvent[]).filter(
-      event =>
-        this.state.selectedCountry === 'ALL' || event.countries.includes(this.state.selectedCountry)
+  /** Country + scored search over resolveYear(activeYear). */
+  getFilteredOccurrences(): EventOccurrence[] {
+    let candidates = resolveYear(this.state.activeYear).filter(
+      occ =>
+        this.state.selectedCountry === 'ALL' || occ.countries.includes(this.state.selectedCountry)
     );
 
     if (!this.state.searchTerm || this.state.searchTerm.trim() === '') {
@@ -466,10 +511,10 @@ class MarketingCalendarModule extends BaseModule {
 
     const terms = this.tokenizeSearchTerm(this.state.searchTerm);
     return candidates
-      .map(event => ({ event, score: this.calculateScore(event, terms) }))
+      .map(occ => ({ occ, score: this.calculateScore(occ, terms) }))
       .filter(item => item.score > 0)
       .sort((a, b) => b.score - a.score)
-      .map(item => item.event);
+      .map(item => item.occ);
   }
 
   // ==================== Actions ====================
@@ -477,18 +522,10 @@ class MarketingCalendarModule extends BaseModule {
   selectCountry(code: string): void {
     this.state.selectedCountry = code;
 
-    // Update Tabs UI
-    const tabs = this.container?.querySelectorAll('.amzf_country_tab') ?? [];
+    // Update Tabs UI via data attribute (stable vs text match)
+    const tabs = this.container?.querySelectorAll<HTMLElement>('[data-amzf-country]') ?? [];
     tabs.forEach(tab => {
-      tab.classList.remove('amzf_active');
-      const tabText = (tab as HTMLElement).innerText || (tab as HTMLElement).textContent;
-      const targetName =
-        code === 'ALL'
-          ? '全部'
-          : (AMZF_COUNTRIES as CountryInfo[]).find(c => c.code === code)?.name;
-      if (tabText && tabText.includes(targetName || '')) {
-        tab.classList.add('amzf_active');
-      }
+      tab.classList.toggle('amzf_active', tab.dataset.amzfCountry === code);
     });
 
     this.renderStats();
@@ -496,17 +533,19 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   switchView(view: string): void {
-    this.state.currentView = view as 'country' | 'event';
+    this.state.currentView = view === 'event' ? 'event' : 'country';
     // Encyclopedia view toggle implies encyclopedia tab
     this.state.mainTab = 'encyclopedia';
     this.syncMainTabUi();
     document
       .getElementById('amzf_btn_country')
-      ?.classList.toggle('amzf_active', view === 'country');
-    document.getElementById('amzf_btn_event')?.classList.toggle('amzf_active', view === 'event');
+      ?.classList.toggle('amzf_active', this.state.currentView === 'country');
+    document
+      .getElementById('amzf_btn_event')
+      ?.classList.toggle('amzf_active', this.state.currentView === 'event');
 
     this.state.expandedSections.clear();
-    this.renderContent();
+    this.refreshList();
   }
 
   toggleSection(id: string): void {
@@ -969,7 +1008,7 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   renderStats(): void {
-    const filtered = this.getFilteredEvents();
+    const filtered = this.getFilteredOccurrences();
     const container = document.getElementById('amzf_stats');
     if (!container) return;
 
@@ -1009,204 +1048,20 @@ class MarketingCalendarModule extends BaseModule {
     const container = document.getElementById('amzf_main');
     if (!container) return;
 
-    const filtered = this.getFilteredEvents();
+    const filtered = this.getFilteredOccurrences();
     this.renderSearchStatus(filtered.length);
 
-    if (filtered.length === 0) {
-      // ✅ 安全: 静态HTML模板，无用户输入
-      const term = this.state.searchTerm.trim();
-      setSafeHtml(
-        container,
-        `
-                <div class="amzf_empty amzf_animate">
-                    <div class="amzf_empty_icon"><i class="fas fa-search"></i></div>
-                    <div class="amzf_empty_text">未找到${term ? ` “${escapeHtml(term)}” ` : ''}匹配的活动</div>
-                    <p class="amzf_empty_hint">可尝试国家名/代码、月份、活动类型或品类词，例如“德国”“3月”“电商大促”“玩具”。</p>
-                    ${term ? '<button type="button" class="amzf_empty_action" data-action="amzf_clearSearch">清除搜索</button>' : ''}
-                </div>
-            `
-      );
-      return;
-    }
-
-    if (this.state.currentView === 'country') {
-      this.renderCountryView(filtered, container);
-    } else {
-      this.renderEventView(filtered, container);
-    }
-  }
-
-  renderCountryView(events: MarketingEvent[], container: HTMLElement): void {
     container.classList.add('amzf_list_entering');
-    const byMonth: Record<number, MarketingEvent[]> = {};
-    events.forEach(event => {
-      const monthEvents = byMonth[event.month] ?? [];
-      monthEvents.push(event);
-      byMonth[event.month] = monthEvents;
+    const html = renderEncyclopedia({
+      occurrences: filtered,
+      view: this.state.currentView,
+      searchTerm: this.state.searchTerm,
+      expandedSections: this.state.expandedSections,
+      months: AMZF_MONTHS as string[],
+      countries: AMZF_COUNTRIES as CountryInfo[],
     });
-
-    let html = '<div class="amzf_timeline">';
-    const isSearchActive = this.state.searchTerm && this.state.searchTerm.length > 0;
-
-    for (let m = 1; m <= 12; m++) {
-      const monthEvents = byMonth[m];
-      if (!monthEvents) continue;
-      const sectionId = `amzf_group_month_${m}`;
-      const isExpanded = isSearchActive || this.state.expandedSections.has(sectionId);
-
-      html += `
-                <div id="${sectionId}" class="amzf_month_section ${isExpanded ? 'amzf_expanded' : ''}">
-                    <button type="button" class="amzf_month_header" data-amzf-toggle-section="${escapeHtml(sectionId)}" aria-expanded="${isExpanded}" aria-controls="${escapeHtml(sectionId)}_content">
-                        <div class="amzf_month_info">
-                            <span class="amzf_month_name">${(AMZF_MONTHS as string[])[m - 1]}</span>
-                            <span class="amzf_month_badge">${monthEvents.length} 个活动</span>
-                        </div>
-                        <div class="amzf_month_toggle"><i class="fas fa-chevron-down"></i></div>
-                    </button>
-                    <div id="${escapeHtml(sectionId)}_content" class="amzf_month_content">
-                        <div class="amzf_events_grid">
-                            ${monthEvents.map(e => this.renderEventCard(e)).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-    }
-    html += '</div>';
-    // ✅ 安全: 静态HTML模板，无用户输入
     setSafeHtml(container, html);
     this.setTimeout(() => container.classList.remove('amzf_list_entering'), 500);
-  }
-
-  renderEventView(events: MarketingEvent[], container: HTMLElement): void {
-    container.classList.add('amzf_list_entering');
-    interface EventGroup {
-      emoji: string;
-      events: MarketingEvent[];
-      name: string;
-      nameEn: string;
-    }
-    const eventGroups: Record<string, EventGroup> = {};
-    events.forEach(event => {
-      let groupKey = event.nameEn
-        .replace(
-          /\s+(DE|UK|GB|IT|ES|FR|PL|EU|NL|BE|SE|IE|TR)(\/(DE|UK|GB|IT|ES|FR|PL|EU|NL|BE|SE|IE|TR))*$/i,
-          ''
-        )
-        .trim();
-      const group = eventGroups[groupKey] ?? {
-        emoji: event.emoji,
-        events: [],
-        name: event.name.replace(/\(.*?\)$/, '').trim(), // 提取中文名称（去除国家后缀）
-        nameEn: groupKey,
-      };
-      group.events.push(event);
-      eventGroups[groupKey] = group;
-    });
-
-    let html = '<div class="amzf_event_view">';
-    const isSearchActive = this.state.searchTerm && this.state.searchTerm.length > 0;
-
-    Object.keys(eventGroups).forEach(key => {
-      const group = eventGroups[key];
-      if (!group) return;
-      const safeKey = key.replace(/[^a-zA-Z0-9]/g, '_');
-      const sectionId = `amzf_group_event_${safeKey}`;
-      const isExpanded = isSearchActive || this.state.expandedSections.has(sectionId);
-      const displayName = `${escapeHtml(group.name)}(${escapeHtml(group.nameEn)})`;
-
-      html += `
-                <div id="${sectionId}" class="amzf_event_comparison ${isExpanded ? 'amzf_expanded' : ''}">
-                    <button type="button" class="amzf_comparison_header" data-amzf-toggle-section="${escapeHtml(sectionId)}" aria-expanded="${isExpanded}" aria-controls="${escapeHtml(sectionId)}_content">
-                        <div class="amzf_comparison_title">
-                            <span>${group.emoji}</span>
-                            <span>${displayName}</span>
-                            <span class="amzf_month_badge">${new Set(group.events.flatMap(e => e.countries)).size} 个站点</span>
-                        </div>
-                        <div class="amzf_month_toggle"><i class="fas fa-chevron-down"></i></div>
-                    </button>
-                    <div id="${escapeHtml(sectionId)}_content" class="amzf_comparison_content">
-                        <div class="amzf_country_list">
-                            ${group.events.map(e => this.renderCountryEvent(e)).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-    });
-    html += '</div>';
-    // ✅ 安全: 静态HTML模板，无用户输入
-    setSafeHtml(container, html);
-    this.setTimeout(() => container.classList.remove('amzf_list_entering'), 500);
-  }
-
-  private getEventTypeMeta(type: string): { label: string; icon: string } {
-    return AMZF_EVENT_TYPE_META[type] ?? { label: '营销节点', icon: 'fas fa-calendar-day' };
-  }
-
-  private renderCountryBadges(codes: string[], labelMode: 'code' | 'name' = 'code'): string {
-    return codes
-      .map((code: string) => {
-        const country = (AMZF_COUNTRIES as CountryInfo[]).find(item => item.code === code);
-        const safeCode = escapeHtml(code);
-        const safeName = escapeHtml(country?.name ?? code);
-        const visibleLabel = labelMode === 'name' ? safeName : safeCode;
-        const flag = country?.flag ?? safeCode;
-        return `<span class="amzf_country_badge" title="${safeName}" aria-label="${safeName}">${flag}<span>${visibleLabel}</span></span>`;
-      })
-      .join('');
-  }
-
-  renderEventCard(event: MarketingEvent): string {
-    const typeClass = `amzf_type_${event.type}`;
-    const typeMeta = this.getEventTypeMeta(event.type);
-    const countryBadges = this.renderCountryBadges(event.countries);
-
-    return `
-            <div class="amzf_event_card ${typeClass}">
-                <div class="amzf_event_header">
-                    <div class="amzf_event_title_wrapper">
-                        <span class="amzf_event_emoji" aria-hidden="true">${event.emoji}</span>
-                        <div class="amzf_event_title_stack">
-                            <div class="amzf_event_meta_row">
-                                <span class="amzf_event_type amzf_event_type_${escapeHtml(event.type)}"><i class="${typeMeta.icon}"></i>${typeMeta.label}</span>
-                                <span class="amzf_event_date"><i class="fas fa-calendar-alt"></i> ${escapeHtml(event.date)}</span>
-                            </div>
-                            <div class="amzf_event_title">${escapeHtml(event.name)}<span>${escapeHtml(event.nameEn)}</span></div>
-                            <p class="amzf_event_desc">${escapeHtml(event.description)}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="amzf_event_countries">${countryBadges}</div>
-                <div class="amzf_event_strategy">
-                    <div class="amzf_strategy_title"><i class="fas fa-lightbulb text-yellow-500"></i> 电商切入策略</div>
-                    <div class="amzf_strategy_content">${escapeHtml(event.strategy)}</div>
-                    <div class="amzf_strategy_tags">
-                        ${(event.tags || []).map((t: string) => `<span class="amzf_tag">#${escapeHtml(t)}</span>`).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-  }
-
-  renderCountryEvent(event: MarketingEvent): string {
-    const typeMeta = this.getEventTypeMeta(event.type);
-    const countryBadges = this.renderCountryBadges(event.countries, 'name');
-
-    return `
-            <div class="amzf_country_event amzf_type_${escapeHtml(event.type)}">
-                <div class="amzf_country_info">
-                    ${countryBadges}
-                </div>
-                <div class="amzf_country_strategy_brief">
-                    <div class="amzf_country_event_meta">
-                        <span class="amzf_event_type amzf_event_type_${escapeHtml(event.type)}"><i class="${typeMeta.icon}"></i>${typeMeta.label}</span>
-                        <span class="amzf_country_date"><i class="fas fa-calendar-alt"></i> ${escapeHtml(event.date)}</span>
-                    </div>
-                    <div class="amzf_country_event_title">${escapeHtml(event.name)}<span>${escapeHtml(event.nameEn)}</span></div>
-                    <p>${escapeHtml(event.description)}</p>
-                    <div class="amzf_country_event_strategy"><i class="fas fa-lightbulb text-yellow-500"></i> ${escapeHtml(event.strategy)}</div>
-                </div>
-            </div>
-        `;
   }
 }
 
