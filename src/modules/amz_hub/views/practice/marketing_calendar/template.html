@@ -12,7 +12,7 @@
         </span>
       </div>
       <p class="wb-description">
-        欧洲全年营销节点、Amazon官方活动、促销时机与备货计划 - 把握每个营销机会
+        按站点查看欧洲营销节点，理清备货、提报、广告与复盘节奏。官方大促以 Seller Central 为准。
       </p>
       <div class="wb-meta">
         <span><i class="fas fa-tag mr-1"></i>入门实操宝典</span>
@@ -24,15 +24,13 @@
     <div class="amzf_stats justify-end" id="amzf_stats"></div>
   </div>
 
-  <section class="amzf_source_panel" aria-label="官方信息来源">
+  <section class="amzf_source_panel" id="amzf_source_panel" aria-label="官方信息来源">
     <div class="amzf_source_label">
       <i class="fa-brands fa-amazon"></i>
       官方口径
     </div>
     <p>
-      已补充 Amazon 官方公告的 2026 Spring Deal Days（3月10-16日）与 Prime
-      Day（6月23-26日）。节日日期按2026年欧洲站运营口径整理，活动资格、报名入口、费用和价格门槛仍以
-      Seller Central 当期后台提示为准。
+      节日可由规则推算；Amazon 官方活动的资格、报名窗、费用与门槛，以 Seller Central 当期为准。
     </p>
     <div class="amzf_source_links">
       <a
@@ -40,26 +38,48 @@
         target="_blank"
         rel="noopener noreferrer"
       >
-        Spring Deal Days
+        Spring Deal Days 公告
       </a>
       <a
         href="https://www.aboutamazon.eu/news/retail/amazon-prime-day-2026-date"
         target="_blank"
         rel="noopener noreferrer"
       >
-        Prime Day 2026
+        Prime Day 公告
       </a>
       <a
         href="https://advertising.amazon.com/library/guides/global-shopping-events"
         target="_blank"
         rel="noopener noreferrer"
       >
-        Amazon Ads零售节日表
+        Ads 零售节日表
       </a>
     </div>
   </section>
 
   <div class="amzf_controls">
+    <!-- 主 Tab：作业台 / 全年百科 -->
+    <div class="amzf_main_tabs" role="tablist" aria-label="主视图">
+      <button
+        type="button"
+        class="amzf_main_tab amzf_active"
+        data-amzf-main-tab="ops"
+        role="tab"
+        aria-selected="true"
+      >
+        <i class="fas fa-clipboard-list"></i> 作业台
+      </button>
+      <button
+        type="button"
+        class="amzf_main_tab"
+        data-amzf-main-tab="encyclopedia"
+        role="tab"
+        aria-selected="false"
+      >
+        <i class="fas fa-book"></i> 全年百科
+      </button>
+    </div>
+
     <!-- 搜索框 -->
     <div class="amzf_search_wrapper">
       <div class="amzf_search_box" id="amzf_search_box">
@@ -71,7 +91,7 @@
           aria-label="搜索节日、国家或关键词"
           aria-controls="amzf_search_history"
           aria-expanded="false"
-          placeholder="搜索节日、国家、月份、类型或关键词... (如: 德国, 3月, 电商大促)"
+          placeholder="搜节日、站点、月份或品类，如：德国、3月、Prime Day"
           autocomplete="off"
         />
         <button
@@ -88,14 +108,36 @@
       <div class="amzf_search_history" id="amzf_search_history" aria-label="搜索建议"></div>
     </div>
 
-    <div class="amzf_view_toggle">
+    <!-- 时间窗 chips（作业台） -->
+    <div class="amzf_time_chips" id="amzf_time_chips" role="group" aria-label="时间范围">
+      <button type="button" class="amzf_chip" data-amzf-time-window="month">本月</button>
+      <button type="button" class="amzf_chip" data-amzf-time-window="d30">30 天内</button>
+      <button type="button" class="amzf_chip amzf_active" data-amzf-time-window="d60">
+        60 天内
+      </button>
+      <button type="button" class="amzf_chip" data-amzf-time-window="all">全年</button>
+    </div>
+    <p class="amzf_filter_hint">含正在进行中的活动</p>
+
+    <!-- 类型 chips -->
+    <div class="amzf_type_chips" id="amzf_type_chips" role="group" aria-label="活动类型">
+      <button type="button" class="amzf_chip amzf_active" data-amzf-type="">全部类型</button>
+      <button type="button" class="amzf_chip" data-amzf-type="holiday">节日礼赠</button>
+      <button type="button" class="amzf_chip" data-amzf-type="shopping">电商大促</button>
+      <button type="button" class="amzf_chip" data-amzf-type="cultural">文化场景</button>
+      <button type="button" class="amzf_chip" data-amzf-type="financial">消费力窗口</button>
+      <button type="button" class="amzf_chip" data-amzf-type="season">季节需求</button>
+    </div>
+
+    <!-- 百科内视图切换（保留既有 id/action 以兼容搜索与历史测试） -->
+    <div class="amzf_view_toggle" id="amzf_encyclopedia_view_toggle">
       <button
         class="amzf_view_btn amzf_active"
         id="amzf_btn_country"
         data-action="amzf_switchView"
         data-param="country"
       >
-        <i class="fa-solid fa-location-dot"></i> 按国家/地区
+        <i class="fa-solid fa-location-dot"></i> 按月份
       </button>
       <button
         class="amzf_view_btn"
@@ -110,42 +152,66 @@
     <div class="amzf_country_tabs" id="amzf_country_tabs"></div>
   </div>
   <div class="amzf_search_status" id="amzf_search_status" aria-live="polite"></div>
-  <main class="amzf_main" id="amzf_main"></main>
 
-  <!-- 实操指引：关键动作清单 + 常见误区 -->
-  <section class="bg-white rounded-xl border border-emerald-200 p-6 mt-8 mb-6">
+  <div id="amzf_ops_root" class="amzf_ops_root">
+    <main class="amzf_main" id="amzf_main"></main>
+    <section
+      class="amzf_pending_section"
+      id="amzf_pending_section"
+      aria-label="待官方确认的大促"
+    ></section>
+  </div>
+
+  <!-- 本年度作战习惯 -->
+  <section
+    class="bg-white rounded-xl border border-emerald-200 p-6 mt-8 mb-6"
+    id="amzf_page_checklist"
+    aria-label="本年度作战习惯"
+  >
     <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-      <i class="fas fa-list-check text-emerald-500"></i>关键动作清单
+      <i class="fas fa-list-check text-emerald-500"></i>本年度作战习惯
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-700">
       <label class="flex items-start gap-2"
-        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
-          >每月初扫描本月营销节点，标记与本品类相关的节日（至少提前4周）。</span
+        ><input type="checkbox" class="mt-1 accent-emerald-600" data-amzf-page-check="scan_month" /><span
+          >每月初扫描本月营销节点，标记与本品类相关的节日（至少提前 4 周）。</span
         ></label
       >
       <label class="flex items-start gap-2"
-        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
-          >按国家筛选，重点核对德国/英国/法国三大主力市场节日。</span
+        ><input
+          type="checkbox"
+          class="mt-1 accent-emerald-600"
+          data-amzf-page-check="filter_core_markets"
+        /><span>按站点筛选，重点核对德国/英国/法国等主力市场节日。</span></label
+      >
+      <label class="flex items-start gap-2"
+        ><input
+          type="checkbox"
+          class="mt-1 accent-emerald-600"
+          data-amzf-page-check="inventory_lead"
+        /><span>节前 6–8 周完成备货入仓（海运周期 + 清关 + FBA 上架缓冲）。</span></label
+      >
+      <label class="flex items-start gap-2"
+        ><input
+          type="checkbox"
+          class="mt-1 accent-emerald-600"
+          data-amzf-page-check="promo_margin"
+        /><span
+          >节前 2–4 周确认 Coupon/Deal/广告活动资格，核算促销折后利润 ≥ 0。</span
         ></label
       >
       <label class="flex items-start gap-2"
-        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
-          >节前6-8周完成备货入仓（海运周期+清关+FBA上架缓冲）。</span
+        ><input
+          type="checkbox"
+          class="mt-1 accent-emerald-600"
+          data-amzf-page-check="preflight_week"
+        /><span
+          >节前 1 周检查 Prime 配送、广告预算、关键词本地化和节日素材是否齐全。</span
         ></label
       >
       <label class="flex items-start gap-2"
-        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
-          >节前2-4周确认Coupon/Deal/广告活动资格，核算促销折后利润≥0。</span
-        ></label
-      >
-      <label class="flex items-start gap-2"
-        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
-          >节前1周检查Prime配送、广告预算、关键词本地化和节日素材是否齐全。</span
-        ></label
-      >
-      <label class="flex items-start gap-2"
-        ><input type="checkbox" class="mt-1 accent-emerald-600" /><span
-          >节后1周内复盘：实际销量 vs 预期、库存周转、ACOS。</span
+        ><input type="checkbox" class="mt-1 accent-emerald-600" data-amzf-page-check="post_review" /><span
+          >节后 1 周内复盘：实际销量 vs 预期、库存周转、ACOS。</span
         ></label
       >
     </div>
@@ -174,7 +240,7 @@
           <div>
             <h4 class="font-bold text-slate-800 text-sm mb-1">节前才备货</h4>
             <p class="text-xs text-slate-600">
-              → 海运周期4-6周+清关1-2周，必须提前6周完成入仓，否则断货。
+              → 海运周期 4–6 周 + 清关 1–2 周，必须提前约 6 周完成入仓，否则断货。
             </p>
           </div>
         </div>
@@ -196,8 +262,7 @@
           <div>
             <h4 class="font-bold text-slate-800 text-sm mb-1">把所有节日都当大促做</h4>
             <p class="text-xs text-slate-600">
-              → 区分"购物类节日"（黑五/Prime
-              Day）与"文化类节日"（圣尼古拉斯节），后者重在场景化文案而非折扣。
+              → 区分购物类节日（黑五/Prime Day）与文化类节日；后者重在场景化文案而非一味折扣。
             </p>
           </div>
         </div>

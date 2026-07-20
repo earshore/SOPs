@@ -1,5 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { mount, unmount } from '@/modules/amz_hub/views/practice/marketing_calendar';
+import { AMZF_COPY } from '@/modules/amz_hub/data/marketingCalendar/copy';
 
 const mocks = vi.hoisted(() => ({
   storage: {
@@ -64,8 +65,25 @@ beforeEach(() => {
     expect(container.classList.contains('fade-in')).toBe(true);
     expect(container.querySelector('#amzf_stats')?.textContent).toContain('营销节点');
     expect(container.querySelector('#amzf_country_tabs')?.textContent).toContain('全部');
-    expect(container.querySelector('#amzf_main')?.textContent).toContain('电商切入策略');
+    expect(container.querySelector('#amzf_main')?.textContent).toMatch(/怎么打|电商切入策略/);
     expect(mocks.storage.get).toHaveBeenCalledWith('amzf_search_history', []);
+  });
+
+  it('mounts ops workbench shell: 作业台 tab, default 60-day chip, source panel', async () => {
+    const container = await mountCalendar();
+
+    expect(container.textContent).toContain(AMZF_COPY['tab.ops']);
+    expect(container.querySelector('[data-amzf-main-tab="ops"]')).not.toBeNull();
+    expect(container.querySelector('[data-amzf-main-tab="encyclopedia"]')).not.toBeNull();
+
+    const d60 = container.querySelector('[data-amzf-time-window="d60"]');
+    expect(d60).not.toBeNull();
+    expect(d60?.classList.contains('amzf_active')).toBe(true);
+
+    expect(container.querySelector('#amzf_source_panel')).not.toBeNull();
+    expect(container.querySelector('#amzf_ops_root')).not.toBeNull();
+    expect(container.querySelector('#amzf_pending_section')).not.toBeNull();
+    expect(container.querySelector('#amzf_page_checklist')).not.toBeNull();
   });
 
   it('searches, persists history, and clears search state', async () => {

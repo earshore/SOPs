@@ -13,6 +13,15 @@ import type { IStorageService } from '@/types/services';
 import { AMZF_COUNTRIES, AMZF_EVENTS, AMZF_MONTHS } from '../../../constants/amz_hub_constants';
 import { configCenter } from '@/common/config/ConfigCenter';
 import type { MarketingEvent, CountryInfo } from '@/types/modules-business';
+import { toIsoDate } from '@/modules/amz_hub/data/marketingCalendar/dateRules';
+import { resolveYear } from '@/modules/amz_hub/data/marketingCalendar/resolveYear';
+import type {
+  EventType,
+  OpsTimeWindow,
+} from '@/modules/amz_hub/data/marketingCalendar/types';
+import { buildOpsViews } from './opsCalendarEngine';
+import { renderOps } from './renderOps';
+import { defaultUserState, type OpsMainTab } from './userState';
 import './flag-icons.local.css';
 import './styles.css';
 
@@ -93,6 +102,11 @@ interface MarketingCalendarState {
   searchTerm: string;
   expandedSections: Set<string>;
   searchHistory: string[];
+  mainTab: OpsMainTab;
+  timeWindow: OpsTimeWindow;
+  selectedTypes: EventType[];
+  showEnded: boolean;
+  activeYear: number;
 }
 
 interface MarketingCalendarSearchElements {
@@ -110,13 +124,21 @@ class MarketingCalendarModule extends BaseModule {
   constructor() {
     super('amz_marketing_calendar');
 
-    // State Initialization
+    const systemYear = new Date().getFullYear();
+    const defaults = defaultUserState(systemYear);
+
+    // State Initialization (M1: in-memory defaults; search history still persisted)
     this.state = {
       currentView: 'country',
-      selectedCountry: 'ALL',
+      selectedCountry: defaults.selectedCountry,
       searchTerm: '',
       expandedSections: new Set(),
       searchHistory: [],
+      mainTab: defaults.mainTab,
+      timeWindow: defaults.timeWindow,
+      selectedTypes: [...defaults.selectedTypes],
+      showEnded: defaults.showEnded,
+      activeYear: defaults.activeYear,
     };
   }
 
@@ -133,12 +155,190 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   async init(): Promise<void> {
+    // Singleton module: reset in-memory UI state on each mount (M1 defaults)
+    this.resetSessionState();
     this.loadSearchHistory();
     this.renderCountryTabs();
+    this.syncMainTabUi();
+    this.syncTimeChipUi();
+    this.syncTypeChipUi();
     this.renderStats();
-    this.renderContent();
+    this.refreshList();
     this.bindCalendarClickEvents();
     this.bindSearchEvents();
+  }
+
+  private resetSessionState(): void {
+    const systemYear = new Date().getFullYear();
+    const defaults = defaultUserState(systemYear);
+    this.state.currentView = 'country';
+    this.state.selectedCountry = defaults.selectedCountry;
+    this.state.searchTerm = '';
+    this.state.expandedSections = new Set();
+    this.state.mainTab = defaults.mainTab;
+    this.state.timeWindow = defaults.timeWindow;
+    this.state.selectedTypes = [...defaults.selectedTypes];
+    this.state.showEnded = defaults.showEnded;
+    this.state.activeYear = defaults.activeYear;
+  }
+
+  /** Local civil today as IsoDate (injectable later via tests if needed). */
+  private getTodayIso(): string {
+    const now = new Date();
+    return toIsoDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  }
+
+  private refreshList(): void {
+    if (this.state.mainTab === 'ops') {
+      this.renderOpsWorkbench();
+    } else {
+      this.renderContent();
+      // Clear pending when viewing encyclopedia
+      const pending = document.getElementById('amzf_pending_section');
+      if (pending) setSafeHtml(pending, '');
+    }
+  }
+
+  private syncMainTabUi(): void {
+    const tabs = this.container?.querySelectorAll<HTMLElement>('[data-amzf-main-tab]') ?? [];
+    tabs.forEach(tab => {
+      const isActive = tab.dataset.amzfMainTab === this.state.mainTab;
+      tab.classList.toggle('amzf_active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    this.container
+      ?.querySelector('#amzf_time_chips')
+      ?.classList.toggle('amzf_hidden', this.state.mainTab !== 'ops');
+    this.container
+      ?.querySelector('#amzf_type_chips')
+      ?.classList.toggle('amzf_hidden', this.state.mainTab !== 'ops');
+    this.container
+      ?.querySelector('.amzf_filter_hint')
+      ?.classList.toggle('amzf_hidden', this.state.mainTab !== 'ops');
+    this.container
+      ?.querySelector('#amzf_encyclopedia_view_toggle')
+      ?.classList.toggle('amzf_hidden', this.state.mainTab !== 'encyclopedia');
+  }
+
+  private syncTimeChipUi(): void {
+    const chips = this.container?.querySelectorAll<HTMLElement>('[data-amzf-time-window]') ?? [];
+    chips.forEach(chip => {
+      chip.classList.toggle('amzf_active', chip.dataset.amzfTimeWindow === this.state.timeWindow);
+    });
+  }
+
+  private syncTypeChipUi(): void {
+    const chips = this.container?.querySelectorAll<HTMLElement>('[data-amzf-type]') ?? [];
+    const selected = this.state.selectedTypes;
+    chips.forEach(chip => {
+      const type = chip.dataset.amzfType ?? '';
+      const isAll = type === '';
+      const active = isAll ? selected.length === 0 : selected.includes(type as EventType);
+      chip.classList.toggle('amzf_active', active);
+    });
+  }
+
+  renderOpsWorkbench(): void {
+    const main = document.getElementById('amzf_main');
+    const pendingEl = document.getElementById('amzf_pending_section');
+    if (!main) return;
+
+    const year = this.state.activeYear;
+    const today = this.getTodayIso();
+    const occurrences = resolveYear(year);
+    const watched = new Set<string>(); // M1: no watch persist yet
+
+    // Non-empty search is year-scoped so nodes stay findable outside the active time chip
+    const timeWindow = this.state.searchTerm.trim()
+      ? ('all' as OpsTimeWindow)
+      : this.state.timeWindow;
+
+    const views = buildOpsViews(
+      occurrences,
+      {
+        selectedCountry: this.state.selectedCountry,
+        selectedTypes: this.state.selectedTypes,
+        timeWindow,
+        showEnded: this.state.showEnded,
+        searchTerm: this.state.searchTerm,
+      },
+      today,
+      watched
+    );
+
+    // Pending: no exact dates (S-priority official big deals or any pending_official)
+    const pending = occurrences.filter(
+      occ =>
+        (occ.confidence === 'pending_official' || !occ.startDate || !occ.endDate) &&
+        (occ.priority === 'S' || occ.amazonOfficial === true)
+    );
+
+    const filtersNarrowed =
+      this.state.selectedCountry !== 'ALL' ||
+      this.state.selectedTypes.length > 0 ||
+      this.state.timeWindow !== 'd60' ||
+      this.state.showEnded === true;
+
+    const { listHtml, pendingHtml } = renderOps({
+      views,
+      pending,
+      searchTerm: this.state.searchTerm,
+      filtersNarrowed,
+    });
+
+    this.renderSearchStatus(views.length);
+    setSafeHtml(main, listHtml);
+    if (pendingEl) setSafeHtml(pendingEl, pendingHtml);
+  }
+
+  switchMainTab(tab: OpsMainTab): void {
+    this.state.mainTab = tab;
+    this.syncMainTabUi();
+    this.state.expandedSections.clear();
+    this.refreshList();
+  }
+
+  setTimeWindow(window: OpsTimeWindow): void {
+    this.state.timeWindow = window;
+    this.syncTimeChipUi();
+    if (this.state.mainTab === 'ops') {
+      this.renderOpsWorkbench();
+    }
+  }
+
+  toggleTypeFilter(type: string): void {
+    if (!type) {
+      this.state.selectedTypes = [];
+    } else {
+      const t = type as EventType;
+      const idx = this.state.selectedTypes.indexOf(t);
+      if (idx >= 0) {
+        this.state.selectedTypes = this.state.selectedTypes.filter(x => x !== t);
+      } else {
+        this.state.selectedTypes = [...this.state.selectedTypes, t];
+      }
+    }
+    this.syncTypeChipUi();
+    if (this.state.mainTab === 'ops') {
+      this.renderOpsWorkbench();
+    }
+  }
+
+  resetFilters(): void {
+    this.state.selectedCountry = 'ALL';
+    this.state.selectedTypes = [];
+    this.state.timeWindow = 'd60';
+    this.state.showEnded = false;
+    this.state.searchTerm = '';
+    const input = document.getElementById('amzf_search') as HTMLInputElement | null;
+    const clearBtn = document.getElementById('amzf_clear');
+    if (input) input.value = '';
+    clearBtn?.classList.remove('amzf_visible');
+    this.syncTimeChipUi();
+    this.syncTypeChipUi();
+    this.renderCountryTabs();
+    this.renderStats();
+    this.refreshList();
   }
 
   onUnmount(): void {
@@ -292,11 +492,14 @@ class MarketingCalendarModule extends BaseModule {
     });
 
     this.renderStats();
-    this.renderContent();
+    this.refreshList();
   }
 
   switchView(view: string): void {
     this.state.currentView = view as 'country' | 'event';
+    // Encyclopedia view toggle implies encyclopedia tab
+    this.state.mainTab = 'encyclopedia';
+    this.syncMainTabUi();
     document
       .getElementById('amzf_btn_country')
       ?.classList.toggle('amzf_active', view === 'country');
@@ -335,7 +538,7 @@ class MarketingCalendarModule extends BaseModule {
     this.state.searchTerm = '';
     this.hideSearchHistory();
     this.renderStats();
-    this.renderContent();
+    this.refreshList();
   }
 
   // ==================== Search History Actions ====================
@@ -354,7 +557,7 @@ class MarketingCalendarModule extends BaseModule {
     if (saveToHistory) this.addToHistory(term);
     this.hideSearchHistory();
     this.renderStats();
-    this.renderContent();
+    this.refreshList();
   }
 
   deleteHistoryItem(index: number): void {
@@ -481,6 +684,28 @@ class MarketingCalendarModule extends BaseModule {
   }
 
   private handleCalendarSelectionClick(target: HTMLElement): boolean {
+    const mainTabBtn = this.findCalendarTarget(target, '[data-amzf-main-tab]');
+    if (mainTabBtn) {
+      const tab = (mainTabBtn.dataset.amzfMainTab || 'ops') as OpsMainTab;
+      this.switchMainTab(tab === 'encyclopedia' ? 'encyclopedia' : 'ops');
+      return true;
+    }
+
+    const timeChip = this.findCalendarTarget(target, '[data-amzf-time-window]');
+    if (timeChip) {
+      const w = timeChip.dataset.amzfTimeWindow as OpsTimeWindow | undefined;
+      if (w === 'month' || w === 'd30' || w === 'd60' || w === 'all') {
+        this.setTimeWindow(w);
+      }
+      return true;
+    }
+
+    const typeChip = this.findCalendarTarget(target, '[data-amzf-type]');
+    if (typeChip) {
+      this.toggleTypeFilter(typeChip.dataset.amzfType ?? '');
+      return true;
+    }
+
     const countryBtn = this.findCalendarTarget(target, '[data-amzf-country]');
     if (countryBtn) {
       this.selectCountry(countryBtn.dataset.amzfCountry || 'ALL');
@@ -520,6 +745,10 @@ class MarketingCalendarModule extends BaseModule {
       this.switchView(actionEl.dataset.param || 'country');
     } else if (action === 'amzf_clearSearch') {
       this.clearSearch();
+    } else if (action === 'amzf_resetFilters') {
+      this.resetFilters();
+    } else if (action === 'amzf_scrollPending') {
+      document.getElementById('amzf_pending_section')?.scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -588,7 +817,7 @@ class MarketingCalendarModule extends BaseModule {
     this.debounceTimer = this.setTimeout(() => {
       this.state.searchTerm = this.normalizeSearchText(value);
       this.renderStats();
-      this.renderContent();
+      this.refreshList();
     }, 300);
   }
 
