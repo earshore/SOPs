@@ -93,3 +93,42 @@ export type OpsFilters = {
   showEnded?: boolean;
   searchTerm?: string;
 };
+
+/** Evergreen marketing event template (no year-specific dates). */
+export interface MarketingEventTemplate {
+  id: string;
+  name: string;
+  nameEn: string;
+  emoji: string;
+  type: EventType;
+  priority: EventPriority;
+  countries: string[];
+  description: string;
+  strategy: string;
+  tags: string[];
+  dateRule: DateRule;
+  /** Encyclopedia month when dates are pending (1–12). */
+  defaultMonth?: number;
+  dateLabelPattern?: string;
+  prepOverrides?: Partial<Record<PrepPhaseId, PrepPhaseOffset>>;
+  links?: Array<{ label: string; routeId: string }>;
+  amazonOfficial?: boolean;
+  contentVerifiedAt?: IsoDate;
+  /** Stable legacy numeric id for AMZF_EVENTS compatibility. */
+  legacyId?: number;
+}
+
+/** Thin per-year date / metadata override for a template. */
+export interface YearEventOverride {
+  templateId: string;
+  year: number;
+  startDate: IsoDate;
+  endDate: IsoDate;
+  dateLabel?: string;
+  confidence?: DateConfidence;
+  countries?: string[];
+  priority?: EventPriority;
+  sources?: Array<{ label: string; url: string; verifiedAt?: IsoDate }>;
+  disabled?: boolean;
+  note?: string;
+}
