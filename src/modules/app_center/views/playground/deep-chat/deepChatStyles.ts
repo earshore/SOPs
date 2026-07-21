@@ -391,8 +391,18 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     display: none !important;
   }
 
+  #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__chips {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    margin-top: 0.35rem !important;
+    min-width: 0 !important;
+  }
+
   #text-input-container {
     box-sizing: border-box !important;
+    position: relative !important;
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -408,7 +418,8 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border-radius: 29px !important;
     background: #ffffff !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
-    overflow-y: auto !important;
+    /* 容器不滚：发送钮贴底固定；长文在 #text-input 内滚动 */
+    overflow: hidden !important;
   }
 
   #text-input {
@@ -417,10 +428,16 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     min-width: 0 !important;
     max-width: 100% !important;
     min-height: 24px !important;
+    /* 相对容器 max-height 留出上下 padding，避免长文被裁切且无法滚动 */
+    max-height: min(calc(42vh - 20px), 400px) !important;
     padding: 18px 62px 16px 22px !important;
     color: #0f172a !important;
     font-size: 15px !important;
     line-height: 1.55 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
     overflow-wrap: anywhere !important;
     word-break: break-word !important;
     white-space: pre-wrap !important;
@@ -659,11 +676,14 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
       min-height: 56px !important;
       max-height: min(46vh, 340px) !important;
       border-radius: 28px !important;
+      overflow: hidden !important;
     }
 
     #text-input {
+      max-height: min(calc(46vh - 18px), 320px) !important;
       padding: 17px 60px 15px 18px !important;
       font-size: 14px !important;
+      overflow-y: auto !important;
     }
 
     .inside-end.input-button,

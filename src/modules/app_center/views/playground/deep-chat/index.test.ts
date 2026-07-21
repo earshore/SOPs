@@ -956,20 +956,21 @@ async function queueProfitSkillAndMount() {
 }
 
 describe('deep-chat skill trial context bar render', () => {
-  it('shows skill bar above composer and inline skill chips in the input', async () => {
+  it('shows skill bar chips above composer without forcing chips into the input', async () => {
     const { container, unmount, mocks, skillHandoff } = await queueProfitSkillAndMount();
 
     const bar = container.querySelector<HTMLElement>('#deep-chat-skill-context-bar');
     const input = getChat(container).shadowRoot?.querySelector('#text-input');
-    const inputChip = input?.querySelector('.deep-chat-context-chip');
+    const barChip = bar?.querySelector('.deep-chat-context-chip');
 
     expect(bar?.hidden).toBe(false);
     expect(container.querySelector('#deep-chat-skill-context-bar-hint')?.textContent).toContain(
       '系统提示词已更新为「利润测算」方法论'
     );
-    // Chip 与正文混排在输入框内
-    expect(inputChip?.textContent).toContain('利润测算');
-    expect(inputChip?.classList.contains('deep-chat-context-chip--dismissible')).toBe(true);
+    // 会话技能 Chip 在 Context Bar；输入框只放业务草稿
+    expect(barChip?.textContent).toContain('利润测算');
+    expect(barChip?.classList.contains('deep-chat-context-chip--dismissible')).toBe(true);
+    expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
     expect(input?.textContent).toContain('业务数据');
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
@@ -984,9 +985,7 @@ describe('deep-chat skill trial context bar render', () => {
     });
     expect(skillHandoff.consumeSkillForDeepChat()).toBeNull();
 
-    const dismiss = input?.querySelector<HTMLButtonElement>(
-      '[data-action="dismiss-skill-context"]'
-    );
+    const dismiss = bar?.querySelector<HTMLButtonElement>('[data-action="dismiss-skill-context"]');
     expect(dismiss).not.toBeNull();
     dismiss?.click();
     await vi.advanceTimersByTimeAsync(50);
@@ -996,10 +995,8 @@ describe('deep-chat skill trial context bar render', () => {
       ''
     );
     expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
-    // 业务草稿仍在，且不残留技能标题纯文本
     expect(input?.textContent).toContain('业务数据');
     expect(input?.textContent).not.toContain('利润测算');
-    expect(input?.textContent).not.toContain('「');
 
     const undo = container.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
     expect(undo?.hidden).toBe(false);
@@ -1009,9 +1006,41 @@ describe('deep-chat skill trial context bar render', () => {
       false
     );
     expect(
-      getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
-        ?.textContent
+      container.querySelector('#deep-chat-skill-context-bar .deep-chat-context-chip')?.textContent
     ).toContain('利润测算');
+    // 撤销不把 Chip 塞回输入框
+    expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
+
+    unmount();
+  });
+
+  it('does not re-inject skill chips into the input after a completed reply', async () => {
+    const { container, unmount } = await queueProfitSkillAndMount();
+    const input = getChat(container).shadowRoot?.querySelector('#text-input');
+    expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
+
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Follow-up after skill mount' }] },
+      {
+        onResponse: vi.fn(async () => undefined),
+        onClose: vi.fn(),
+        stopClicked: { listener: vi.fn() },
+      }
+    );
+    await vi.waitFor(() => {
+      expect(container.querySelector('#deep-chat-thread-list')?.textContent).not.toMatch(
+        /生成中|输出中/
+      );
+    });
+    await vi.advanceTimersByTimeAsync(400);
+
+    // 输出完成 / hydrate 后：Context Bar 仍可展示技能；输入框不得强制回填 Chip
+    const bar =
+      container.querySelector('#deep-chat-skill-context-bar') ||
+      getChat(container).shadowRoot?.querySelector('#deep-chat-skill-context-bar');
+    expect(bar?.hasAttribute('hidden')).toBe(false);
+    const latestInput = getChat(container).shadowRoot?.querySelector('#text-input');
+    expect(latestInput?.querySelector('.deep-chat-context-chip')).toBeNull();
 
     unmount();
   });
@@ -1156,10 +1185,16 @@ describe('deep-chat skill trial attach and second handoff', () => {
     expect(consumePendingSkillHandoff(container)).toBe(true);
     await vi.advanceTimersByTimeAsync(200);
     expect(mocks.confirmWithModal).not.toHaveBeenCalled();
+    const barChipText =
+      container.querySelector('#deep-chat-skill-context-bar .deep-chat-context-chip')
+        ?.textContent ||
+      getChat(container).shadowRoot?.querySelector(
+        '#deep-chat-skill-context-bar .deep-chat-context-chip'
+      )?.textContent;
+    expect(barChipText).toContain('第二技能');
     expect(
       getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
-        ?.textContent
-    ).toContain('第二技能');
+    ).toBeNull();
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
     ).toContain('Second Skill');
@@ -1194,12 +1229,20 @@ describe('deep-chat skill trial attach and second handoff', () => {
     mocks.confirmWithModal.mockResolvedValueOnce(true);
     expect(consumePendingSkillHandoff(container)).toBe(true);
     await vi.advanceTimersByTimeAsync(200);
-    const chipTexts = [
+    const barChips = [
       ...Array.from(
-        getChat(container).shadowRoot?.querySelectorAll('#text-input .deep-chat-context-chip') || []
+        container.querySelectorAll('#deep-chat-skill-context-bar .deep-chat-context-chip')
+      ),
+      ...Array.from(
+        getChat(container).shadowRoot?.querySelectorAll(
+          '#deep-chat-skill-context-bar .deep-chat-context-chip'
+        ) || []
       ),
     ].map(el => el.textContent || '');
-    expect(chipTexts.some(t => t.includes('附加技能'))).toBe(true);
+    expect(barChips.some(t => t.includes('附加技能'))).toBe(true);
+    expect(
+      getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
+    ).toBeNull();
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
     ).toContain('Attach Me');

@@ -94,6 +94,8 @@ function configureDeepChatTextInputStyles(chat: DeepChatElement): void {
         fontSize: '15px',
         lineHeight: '1.45',
         padding: '18px 62px 16px 22px',
+        maxHeight: 'min(calc(42vh - 20px), 400px)',
+        overflowY: 'auto',
       },
     },
   };

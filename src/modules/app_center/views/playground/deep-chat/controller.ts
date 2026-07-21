@@ -30,12 +30,12 @@ import {
   buildSystemPromptFromSkillContexts,
   consumeSkillForDeepChat,
   normalizeSkillChipDraftText,
-  prefixDraftWithSkillContexts,
   stripSkillMarkersFromDraft,
   type SkillDeepChatContext,
 } from '@/modules/app_center/skillDeepChatHandoff';
 import {
   SKILL_CHIP_CLASS,
+  createSkillContextChip,
   serializeChipContainingElement,
   setContentWithInlineSkillChips,
   textContainsSkillChipMarker,
@@ -538,15 +538,28 @@ function composerHasSessionSkillChips(
   );
 }
 
+function resolveComposerDraftText(
+  rawDraft: string,
+  contexts: DeepChatSkillContext[]
+): { draftText: string; hasMarkers: boolean } {
+  const hasMarkers = contexts.length > 0 && textContainsSkillChipMarker(rawDraft || '', contexts);
+  return {
+    hasMarkers,
+    draftText: hasMarkers ? normalizeSkillChipDraftText(rawDraft || '', contexts) : rawDraft || '',
+  };
+}
+
 function isDraftInputReady(
   input: HTMLElement,
   draftText: string,
   contexts: DeepChatSkillContext[]
 ): boolean {
-  const expected =
-    contexts.length > 0 ? prefixDraftWithSkillContexts(draftText, contexts) : draftText;
-  // 纯文本「技能名」序列化后与草稿一致，但仍须存在 Chip DOM，否则切页回来会丢 Chip 形态
-  return serializeDraftInput(input) === expected && composerHasSessionSkillChips(input, contexts);
+  // 不因 skillContexts 强制要求输入框 Chip；仅当草稿已含标记时才校验 Chip DOM
+  const { draftText: expected, hasMarkers } = resolveComposerDraftText(draftText, contexts);
+  if (serializeDraftInput(input) !== expected) {
+    return false;
+  }
+  return !hasMarkers || composerHasSessionSkillChips(input, contexts);
 }
 
 function restoreActiveThreadDraftInput(container: HTMLElement, attempts = 8): void {
@@ -560,12 +573,12 @@ function restoreActiveThreadDraftInput(container: HTMLElement, attempts = 8): vo
 
   const activeThread = getActiveThread();
   const contexts = activeThread.skillContexts || [];
-  const draftText = prefixDraftWithSkillContexts(
-    normalizeSkillChipDraftText(activeThread.draftText || '', contexts),
+  // 会话技能由 Context Bar 展示；空草稿/纯业务正文不强制回填 Chip
+  const { draftText, hasMarkers } = resolveComposerDraftText(
+    activeThread.draftText || '',
     contexts
   );
-  // 修复历史脏数据 / 补全缺失的技能 Chip 标记
-  if (draftText !== (activeThread.draftText || '')) {
+  if (hasMarkers && draftText !== (activeThread.draftText || '')) {
     updateThreadDraft(activeThread.id, draftText);
   }
 
@@ -2273,7 +2286,7 @@ function rescueSkillContextBarToStage(container: HTMLElement): void {
 
 /**
  * 将「已挂载技能」提示条贴在输入框上方。
- * Chip 在输入框内与正文混排；提示条仅展示状态 + 撤销。
+ * 会话技能 Chip 挂在提示条内（可移除）；输入框仅承载业务草稿，发送/完成后不回填 Chip。
  */
 function renderSkillContextBar(container: HTMLElement): void {
   placeSkillContextBarAboveComposer(container);
@@ -2285,6 +2298,10 @@ function renderSkillContextBar(container: HTMLElement): void {
   const contexts = getActiveThread().skillContexts || [];
   if (contexts.length === 0) {
     bar.hidden = true;
+    const emptyHost = bar.querySelector<HTMLElement>('.deep-chat-skill-context-bar__chips');
+    if (emptyHost) {
+      emptyHost.replaceChildren();
+    }
     return;
   }
 
@@ -2294,9 +2311,20 @@ function renderSkillContextBar(container: HTMLElement): void {
     const titles = contexts.map(c => c.skillTitle).filter(Boolean);
     hint.textContent =
       titles.length === 1
-        ? `系统提示词已更新为「${titles[0]}」方法论 · Chip 可在输入框内移除`
-        : `系统提示词已合并 ${titles.length} 个技能 · Chip 可在输入框内移除`;
+        ? `系统提示词已更新为「${titles[0]}」方法论`
+        : `系统提示词已合并 ${titles.length} 个技能`;
   }
+
+  let chipHost = bar.querySelector<HTMLElement>('.deep-chat-skill-context-bar__chips');
+  if (!chipHost) {
+    chipHost = document.createElement('div');
+    chipHost.className = 'deep-chat-skill-context-bar__chips';
+    chipHost.setAttribute('aria-label', '已挂载技能列表');
+    bar.appendChild(chipHost);
+  }
+  chipHost.replaceChildren(
+    ...contexts.map(context => createSkillContextChip(context, 'dismissible'))
+  );
 }
 
 function bindSkillContextBarControls(container: HTMLElement): void {
@@ -2358,8 +2386,8 @@ function dismissSessionSkillContext(container: HTMLElement, skillId: string): vo
   const input = getDraftInput(container);
   // serialize 会把 Chip 变成「技能名」；必须显式剥掉已移除技能，避免留下纯文本标题
   const rawDraft = input ? serializeDraftInput(input) : activeThread.draftText || '';
-  const withoutRemoved = stripSkillMarkersFromDraft(rawDraft, [removed.skillTitle]);
-  const nextDraft = prefixDraftWithSkillContexts(withoutRemoved, nextContexts);
+  // 不因剩余 skillContexts 强制回填输入框 Chip
+  const nextDraft = stripSkillMarkersFromDraft(rawDraft, [removed.skillTitle]);
   // 同步系统提示词：剩余技能重建；全部移除则清空（避免残留技能全文）
   const nextSystemPrompt = buildSystemPromptFromSkillContexts(nextContexts);
 
@@ -2374,6 +2402,7 @@ function dismissSessionSkillContext(container: HTMLElement, skillId: string): vo
     notifyDeepChatComposerInput(input, nextDraft);
     syncDraftInputHeight(container, { instant: true });
   }
+  renderSkillContextBar(container);
 
   clearPendingSkillDismissUndo();
   const undoBtn =
@@ -2414,8 +2443,8 @@ function undoSessionSkillDismiss(container: HTMLElement): void {
     pending.skill,
   ];
   const input = getDraftInput(container);
-  const rawDraft = input ? serializeDraftInput(input) : activeThread.draftText || '';
-  const nextDraft = prefixDraftWithSkillContexts(rawDraft, nextContexts);
+  // 撤销只恢复会话 skillContexts；输入框不强制回填 Chip
+  const nextDraft = input ? serializeDraftInput(input) : activeThread.draftText || '';
 
   clearPendingSkillDismissUndo();
   updateActiveThreadFields(container, {
@@ -2428,6 +2457,7 @@ function undoSessionSkillDismiss(container: HTMLElement): void {
     notifyDeepChatComposerInput(input, nextDraft);
     syncDraftInputHeight(container, { instant: true });
   }
+  renderSkillContextBar(container);
   showToast(`已恢复技能「${pending.skill.skillTitle}」`, { type: 'success' });
 }
 
@@ -2437,17 +2467,16 @@ function serializeDraftInput(input: HTMLElement): string {
 }
 
 /**
- * 写入草稿：含「技能名」标记时水合为可移除 Chip（与正文混排）。
- * 有会话 skillContexts 时会自动把缺失的 Chip 前缀补上。
+ * 写入草稿：仅当正文已含「技能名」标记时水合为 Chip。
+ * 会话 skillContexts 存在时也不强制前缀 Chip（挂载态看 Context Bar）。
  */
 function setDraftInputWithInlineChips(
   input: HTMLElement,
   plainText: string,
   contexts: DeepChatSkillContext[]
 ): void {
-  const withSkills =
-    contexts.length > 0 ? prefixDraftWithSkillContexts(plainText, contexts) : plainText;
-  const normalized = normalizeSkillChipDraftText(withSkills, contexts);
+  const normalized =
+    contexts.length > 0 ? normalizeSkillChipDraftText(plainText, contexts) : plainText;
   if (contexts.length > 0 && textContainsSkillChipMarker(normalized, contexts)) {
     setContentWithInlineSkillChips(input, normalized, contexts, 'dismissible');
     return;
@@ -2495,7 +2524,23 @@ function refillComposerWithSkillChips(container: HTMLElement, plainText: string)
   getChat(container)?.focusInput?.();
 }
 
-/** 恢复草稿：有 skillContexts 时确保输入框内有对应 Chip DOM */
+/**
+ * 恢复草稿：仅当草稿文本本身含技能标记时才水合 Chip DOM。
+ * 发送清空后 / 空草稿 + 仍有 skillContexts 时，不把 Chip 塞回输入框。
+ */
+function shouldRewriteComposerDraft(
+  input: HTMLElement,
+  draftText: string,
+  contexts: DeepChatSkillContext[],
+  hasMarkers: boolean
+): boolean {
+  const serialized = serializeDraftInput(input);
+  if (hasMarkers) {
+    return serialized !== draftText || !composerHasSessionSkillChips(input, contexts);
+  }
+  return Boolean(input.querySelector(`.${SKILL_CHIP_CLASS}`)) || serialized !== draftText;
+}
+
 function hydrateActiveThreadInlineSkillChips(container: HTMLElement, attempts = 12): void {
   const input = getDraftInput(container);
   if (!input) {
@@ -2506,13 +2551,9 @@ function hydrateActiveThreadInlineSkillChips(container: HTMLElement, attempts = 
   }
   const activeThread = getActiveThread();
   const contexts = activeThread.skillContexts || [];
-  const draftText = prefixDraftWithSkillContexts(
-    activeThread.draftText || serializeDraftInput(input),
-    contexts
-  );
-  const needsHydrate =
-    serializeDraftInput(input) !== draftText || !composerHasSessionSkillChips(input, contexts);
-  if (needsHydrate) {
+  const rawDraft = activeThread.draftText || serializeDraftInput(input) || '';
+  const { draftText, hasMarkers } = resolveComposerDraftText(rawDraft, contexts);
+  if (shouldRewriteComposerDraft(input, draftText, contexts, hasMarkers)) {
     setDraftInputWithInlineChips(input, draftText, contexts);
     if (draftText !== (activeThread.draftText || '')) {
       updateThreadDraft(activeThread.id, draftText);
@@ -2528,14 +2569,21 @@ function bindInlineSkillChipControls(container: HTMLElement, root: ShadowRoot): 
     const dismissBtn = target?.closest<HTMLElement>('[data-action="dismiss-skill-context"]');
     if (!dismissBtn?.dataset.skillId) return;
     const input = getDraftInput(container);
-    if (!input || !input.contains(dismissBtn)) return;
+    const bar = findSkillContextBar(container);
+    // Context Bar 或输入框内 Chip 均可移除会话技能
+    const inComposer = Boolean(input?.contains(dismissBtn));
+    const inBar = Boolean(bar?.contains(dismissBtn));
+    if (!inComposer && !inBar) return;
     event.preventDefault();
     event.stopPropagation();
-    // 输入框 Chip 移除 = 解除会话技能挂载（可撤销）
     dismissSessionSkillContext(container, dismissBtn.dataset.skillId);
   };
   root.addEventListener('click', onClick);
-  cleanupCallbacks.push(() => root.removeEventListener('click', onClick));
+  container.addEventListener('click', onClick);
+  cleanupCallbacks.push(() => {
+    root.removeEventListener('click', onClick);
+    container.removeEventListener('click', onClick);
+  });
 }
 
 /** 这些字段变化才应影响「最近会话」排序；调参/切会话写回不应打乱列表 */
@@ -2737,7 +2785,9 @@ function fillPromptDraftInput(container: HTMLElement, prompt: string, attempts =
   }
 
   const skillContexts = getActiveThread().skillContexts || [];
-  const normalizedPrompt = prefixDraftWithSkillContexts(prompt, skillContexts);
+  // 业务草稿原样写入；会话技能由 Context Bar 展示，不前缀 Chip
+  const normalizedPrompt =
+    skillContexts.length > 0 ? normalizeSkillChipDraftText(prompt, skillContexts) : prompt;
   setDraftInputWithInlineChips(input, normalizedPrompt, skillContexts);
   updateThreadDraft(threadStore.activeThreadId, normalizedPrompt);
   syncDraftInputHeight(container, { instant: true });
