@@ -8,7 +8,7 @@
       <div class="wb-title-row">
         <h1 class="wb-title">技能</h1>
         <span aria-label="技能运营" class="wb-badge wb-badge-hub">
-          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>SKILL OPS
+          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>技能运营
         </span>
       </div>
       <p class="wb-description">
@@ -18,7 +18,7 @@
       <div class="wb-tags">
         <div class="wb-tag">
           <div class="wb-tag-dot wb-tag-dot--violet"></div>
-          <span id="skill-banner-total">Skills</span>
+          <span id="skill-banner-total">0 个技能</span>
         </div>
         <div class="wb-tag">
           <div class="wb-tag-dot wb-tag-dot--indigo"></div>
@@ -42,7 +42,7 @@
         </div>
         <span
           class="text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-md px-2 py-1"
-          >TOTAL</span
+          >总数</span
         >
       </div>
       <div id="metric-total" class="text-2xl font-bold text-slate-900">0</div>
@@ -57,7 +57,7 @@
         </div>
         <span
           class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-md px-2 py-1"
-          >CATEGORY</span
+          >分类</span
         >
       </div>
       <div id="metric-category" class="text-2xl font-bold text-slate-900">0</div>
@@ -72,11 +72,11 @@
         </div>
         <span
           class="text-xs font-semibold text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-100 rounded-md px-2 py-1"
-          >SCRIPTS</span
+          >脚本</span
         >
       </div>
       <div id="metric-scripts" class="text-2xl font-bold text-slate-900">0</div>
-      <div class="text-sm text-slate-500 mt-1">含 scripts（不执行）</div>
+      <div class="text-sm text-slate-500 mt-1">含辅助脚本（本页不执行）</div>
     </div>
     <div class="bg-white border border-slate-200 rounded-lg p-5">
       <div class="flex items-center justify-between mb-4">
@@ -87,27 +87,27 @@
         </div>
         <span
           class="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-md px-2 py-1"
-          >BETA</span
+          >试用</span
         >
       </div>
       <div id="metric-beta" class="text-2xl font-bold text-slate-900">0</div>
-      <div class="text-sm text-slate-500 mt-1">Beta 技能</div>
+      <div class="text-sm text-slate-500 mt-1">试用版技能</div>
     </div>
   </div>
 
   <section class="bg-white border border-slate-200 rounded-lg p-6 mb-6">
     <div class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between mb-4">
       <div>
-        <p class="text-xs font-semibold text-violet-600 uppercase">How to use</p>
+        <p class="text-xs font-semibold text-violet-600 uppercase">使用说明</p>
         <h2 class="text-xl font-bold text-slate-900 mt-1">运营怎么用</h2>
       </div>
-      <p class="text-sm text-slate-500">本页是技能目录，不是调试台；不要复制 ID，直接用正文。</p>
+      <p class="text-sm text-slate-500">本页是技能目录，不是调试台；直接复制全文到 AI 对话。</p>
     </div>
     <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
       <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
         <div class="text-xs font-semibold text-violet-600 mb-2">01 找技能</div>
         <p class="text-sm text-slate-700 leading-6">
-          按分类或关键词找到业务场景（PPC、Listing、FBA 等）。
+          按分类或关键词找到业务场景（广告、Listing、FBA 等）。
         </p>
       </article>
       <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
@@ -126,25 +126,25 @@
   <section class="bg-white border border-slate-200 rounded-lg p-6 mb-6">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
       <div>
-        <p class="text-xs font-semibold text-violet-600 uppercase">Skill Library</p>
-        <h2 class="text-xl font-bold text-slate-900 mt-1">技能目录</h2>
+        <p class="text-xs font-semibold text-violet-600 uppercase">技能目录</p>
+        <h2 class="text-xl font-bold text-slate-900 mt-1">全部技能</h2>
       </div>
       <p id="skill-result-count" class="text-sm text-slate-500" aria-live="polite">
         显示 0 / 共 0 个技能
       </p>
     </div>
 
-    <div class="mb-6 skill-search-wrap">
+    <div class="mb-6">
       <label for="skill-search" class="sr-only">搜索技能</label>
-      <div class="skill-search-field">
-        <span class="skill-search-icon" aria-hidden="true">
+      <div class="catalog-search-field">
+        <span class="catalog-search-icon" aria-hidden="true">
           <i class="fas fa-search"></i>
         </span>
         <input
           type="text"
           id="skill-search"
-          placeholder="搜索技能名称或能力描述，如 PPC、Listing、FBA…"
-          class="skill-search-input"
+          placeholder="搜索技能名称或能力描述，如广告、Listing、FBA…"
+          class="catalog-search-input"
           aria-label="搜索技能"
           autocomplete="off"
         />
@@ -171,28 +171,20 @@
     <code class="text-slate-600">skillRegistry</code>，不依赖本页复制 ID。本页不执行 skill scripts。
   </p>
 
+  <!-- no-header：关闭钮由 AppModal 浮动提供，body 内勿再放 X -->
   <app-modal id="skill-detail-modal" class="hidden" title="技能详情" size="full" no-header>
     <div
       slot="body"
       class="skill-detail-modal__dialog bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col"
     >
-      <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 p-6 text-white">
+      <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 p-6 text-white pr-14">
         <div class="flex items-start justify-between mb-3 gap-4">
           <div class="flex-1 min-w-0">
             <h2 id="modal-skill-title" class="text-2xl font-bold mb-2"></h2>
             <div class="flex flex-wrap items-center gap-3 text-sm text-violet-100">
               <span id="modal-skill-category"></span>
-              <span id="modal-skill-status"></span>
             </div>
           </div>
-          <button
-            type="button"
-            data-skill-modal-action="close"
-            class="text-white/80 hover:text-white transition-colors flex-shrink-0"
-            aria-label="关闭技能详情"
-          >
-            <i class="fas fa-times text-2xl" aria-hidden="true"></i>
-          </button>
         </div>
         <p id="modal-skill-description" class="text-violet-50 text-sm leading-6"></p>
       </div>

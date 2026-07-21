@@ -1,5 +1,53 @@
 /* 提示词模块样式 */
 
+/* Flex search field: icon and text never overlap (shared pattern with skills) */
+.catalog-search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.75rem 1rem;
+  box-sizing: border-box;
+  background-color: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+}
+
+.catalog-search-field:focus-within {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--color-violet-500);
+}
+
+.catalog-search-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  color: var(--color-slate-400);
+  pointer-events: none;
+}
+
+.catalog-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-slate-800);
+}
+
+.catalog-search-input::placeholder {
+  color: var(--color-slate-400);
+}
+
 /* 详情模态框 */
 .prompt-detail-modal {
   position: fixed;

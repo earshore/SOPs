@@ -46,18 +46,6 @@ function displayTitle(title: string): string {
   return chars.slice(i).join('').trim() || title.trim();
 }
 
-function statusLabel(status: SkillMeta['status']): string {
-  if (status === 'available') return '可用';
-  if (status === 'beta') return 'Beta';
-  return '其他';
-}
-
-function statusClass(status: SkillMeta['status']): string {
-  if (status === 'available') return 'skill-status-available';
-  if (status === 'beta') return 'skill-status-beta';
-  return 'skill-status-unknown';
-}
-
 function clearElement(element: Element): void {
   element.textContent = '';
 }
@@ -104,7 +92,7 @@ function renderMetrics(): void {
   setText('metric-beta', beta);
 
   const banner = moduleRoot.querySelector('#skill-banner-total');
-  if (banner) banner.textContent = `${stats.total} Skills`;
+  if (banner) banner.textContent = `${stats.total} 个技能`;
 }
 
 function renderCategories(): void {
@@ -183,42 +171,36 @@ function createSkillCard(skill: SkillMeta): HTMLElement {
   card.setAttribute('aria-label', `查看技能：${displayTitle(skill.title)}`);
 
   const header = document.createElement('div');
-  header.className = 'flex items-start justify-between gap-2 mb-3';
+  header.className = 'mb-3';
 
   const catBadge = document.createElement('span');
   catBadge.className =
     'text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-md px-2 py-1';
   catBadge.textContent = skill.categoryLabel;
-
-  const st = document.createElement('span');
-  st.className = statusClass(skill.status);
-  st.textContent = statusLabel(skill.status);
-  header.append(catBadge, st);
+  header.appendChild(catBadge);
 
   const title = document.createElement('h3');
   title.className = 'skill-title';
+  // 技能名称保持原文（去装饰 emoji）
   title.textContent = displayTitle(skill.title);
 
   const desc = document.createElement('p');
   desc.className = 'skill-description';
-  desc.textContent = skill.description || '（无描述）';
+  // 技能简介保持原文
+  desc.textContent = skill.description || '暂无简介';
 
   const footer = document.createElement('div');
-  footer.className = 'flex items-center justify-between mt-4 pt-4 border-t border-slate-100';
-
-  const left = document.createElement('div');
-  left.className = 'text-xs text-slate-400';
-  left.textContent = skill.hasScripts ? '含辅助脚本（本页不执行）' : '方法论文档';
+  footer.className = 'flex items-center justify-end mt-4 pt-4 border-t border-slate-100';
 
   const actions = document.createElement('div');
   actions.className = 'flex gap-2';
   const titleText = displayTitle(skill.title);
-  // 运营主路径：查看方法 + 复制全文。禁止「复制 skillId」。
+  // 运营主路径：查看方法 + 复制全文。不展示无信息量的状态/文档标签。
   actions.append(
     createActionButton(skill.id, 'view-skill', 'fas fa-eye', '查看详情', titleText),
     createActionButton(skill.id, 'copy-skill-raw', 'fas fa-copy', '复制全文', titleText)
   );
-  footer.append(left, actions);
+  footer.appendChild(actions);
   card.append(header, title, desc, footer);
   return card;
 }
@@ -290,7 +272,6 @@ function openDetail(skillId: string): void {
 
   set('modal-skill-title', displayTitle(skill.title));
   set('modal-skill-category', skill.categoryLabel);
-  set('modal-skill-status', statusLabel(skill.status));
   set('modal-skill-description', skill.description || '');
   set('modal-skill-content', skill.raw);
 
