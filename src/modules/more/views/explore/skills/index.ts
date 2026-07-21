@@ -141,7 +141,7 @@ function setMetricText(id: string, value: string | number): void {
   if (el) el.textContent = String(value);
 }
 
-/** FB4：空库时同步 Hero / 筛选 / 次要区引导 */
+/** FB4：空库时同步 Hero / 筛选 / 页脚指标引导 */
 function syncEmptyLibraryChrome(empty: boolean, total: number): void {
   if (!moduleRoot) return;
   const banner = moduleRoot.querySelector('#skill-banner-total');
@@ -152,8 +152,6 @@ function syncEmptyLibraryChrome(empty: boolean, total: number): void {
   moduleRoot.classList.toggle('skills-page--empty-library', empty);
   const sticky = moduleRoot.querySelector<HTMLElement>('.skills-catalog-sticky');
   if (sticky) sticky.hidden = empty;
-  const secondary = moduleRoot.querySelector<HTMLDetailsElement>('.skills-secondary');
-  if (secondary) secondary.open = empty;
   const emptyHint = moduleRoot.querySelector<HTMLElement>('#skills-library-empty-hint');
   if (emptyHint) emptyHint.hidden = !empty;
 }

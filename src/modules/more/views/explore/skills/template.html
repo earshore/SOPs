@@ -1,6 +1,6 @@
-<!-- More - 技能 Template -->
+<!-- More - 技能 Template（叙事对齐提示词页 · 方案 B） -->
 <div class="module-container skills-page py-6">
-  <!-- Welcome Banner：结构对齐 welcome-banner 规范（description + wb-tags） -->
+  <!-- Welcome Banner -->
   <div class="wb-container wb-container--simple wb-theme-violet">
     <div class="wb-content">
       <div class="wb-icon">
@@ -13,7 +13,8 @@
         </span>
       </div>
       <p class="wb-description">
-        按场景浏览方法论，在 Deep Chat 试用或复制全文；工作台可自动加载，无需填 ID。
+        按场景浏览可挂载方法论：在 Deep Chat 试用，或复制全文到外部 Agent；工作台可自动加载，无需填
+        ID。
       </p>
       <div class="wb-tags">
         <div class="wb-tag">
@@ -32,17 +33,139 @@
     </div>
   </div>
 
-  <!-- 技能目录置首；筛选随页滚动（不吸顶） -->
+  <!-- 使用原则 ×4 -->
+  <section
+    class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 mb-6"
+    aria-label="技能使用原则"
+  >
+    <article class="bg-white border border-slate-200 rounded-lg p-5">
+      <div
+        class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center mb-4"
+      >
+        <i class="fa-solid fa-compass" aria-hidden="true"></i>
+      </div>
+      <h2 class="font-bold text-slate-900 mb-2">场景对齐</h2>
+      <p class="text-sm text-slate-600 leading-6">
+        按广告、Listing、利润、选品等业务场景选技能，不把万能 skill 套到所有问题上。
+      </p>
+    </article>
+    <article class="bg-white border border-slate-200 rounded-lg p-5">
+      <div
+        class="w-10 h-10 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center mb-4"
+      >
+        <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+      </div>
+      <h2 class="font-bold text-slate-900 mb-2">读清边界</h2>
+      <p class="text-sm text-slate-600 leading-6">
+        先看能力边界、输入要求与输出格式，再试用；避免把技能当成黑盒提示词。
+      </p>
+    </article>
+    <article class="bg-white border border-slate-200 rounded-lg p-5">
+      <div
+        class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-4"
+      >
+        <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+      </div>
+      <h2 class="font-bold text-slate-900 mb-2">一键试用</h2>
+      <p class="text-sm text-slate-600 leading-6">
+        在 Deep Chat 挂载方法论为系统提示词；业务数据、报表与样本由你补充，模型不猜实时市场。
+      </p>
+    </article>
+    <article class="bg-white border border-slate-200 rounded-lg p-5">
+      <div
+        class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4"
+      >
+        <i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
+      </div>
+      <h2 class="font-bold text-slate-900 mb-2">结果可验收</h2>
+      <p class="text-sm text-slate-600 leading-6">
+        输出要能进入 SOP、报表动作或审稿清单；拒绝「看起来很专业」的空话结论。
+      </p>
+    </article>
+  </section>
+
+  <!-- 技能使用公式 -->
+  <section class="bg-white border border-slate-200 rounded-lg p-6 mb-6" aria-label="技能使用公式">
+    <div class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between mb-5">
+      <div>
+        <p class="text-xs font-semibold text-violet-600 uppercase">Skill Formula</p>
+        <h2 class="text-xl font-bold text-slate-900 mt-1">技能使用公式</h2>
+      </div>
+      <p class="text-sm text-slate-500">先把业务问题对齐技能，再让模型按方法论产出。</p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
+      <div class="lg:col-span-3 bg-slate-950 rounded-lg p-5 text-slate-100">
+        <div class="text-xs font-semibold text-violet-300 mb-3">COPYABLE STRUCTURE</div>
+        <ol class="space-y-3 text-sm leading-6">
+          <li>
+            <span class="text-violet-300 font-semibold">1. 选场景</span
+            >：广告、Listing、利润、选品等，一次只挂一个主技能。
+          </li>
+          <li>
+            <span class="text-violet-300 font-semibold">2. 读边界</span
+            >：打开详情，确认能力边界、输入要求与输出格式。
+          </li>
+          <li>
+            <span class="text-violet-300 font-semibold">3. 准备输入</span
+            >：粘贴真实报表、竞品页、评论或 ASIN 事实，并标注时间范围。
+          </li>
+          <li>
+            <span class="text-violet-300 font-semibold">4. 挂载试用</span>：Deep Chat
+            试用挂载系统提示词，或复制全文到外部 Agent。
+          </li>
+          <li>
+            <span class="text-violet-300 font-semibold">5. 补业务数据</span
+            >：在对话里补充样本、毛利约束、禁用词与人工红线。
+          </li>
+          <li>
+            <span class="text-violet-300 font-semibold">6. 验收归档</span
+            >：对照可执行动作与复核点，再沉淀到 SOP 或下一轮作业。
+          </li>
+        </ol>
+      </div>
+      <div class="lg:col-span-2 grid grid-cols-1 gap-3">
+        <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+          <h3 class="font-semibold text-slate-900 mb-2">上线前五问</h3>
+          <ul class="text-sm text-slate-600 space-y-2">
+            <li>是否用了真实数据，而不是让模型编市场事实？</li>
+            <li>技能边界是否覆盖本轮问题，而不是万能套用？</li>
+            <li>输出是否能被运营直接执行或审稿？</li>
+            <li>缺数据时模型是否会拒绝下结论？</li>
+            <li>是否有合规、费用、政策的人工复核点？</li>
+          </ul>
+        </div>
+        <div class="border border-violet-100 rounded-lg p-4 bg-violet-50">
+          <h3 class="font-semibold text-violet-900 mb-2">不要这样用</h3>
+          <p class="text-sm text-violet-800 leading-6">
+            不要「随便挂一个技能帮我写爆款 Listing」。应先选 Listing
+            场景技能，读清输入与输出，再粘贴关键词、竞品与评论证据，按可审稿结构产出。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 技能目录（主入口；筛选不吸顶） -->
   <section class="bg-white border border-slate-200 rounded-lg p-6 mb-6 skills-catalog">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
       <div>
-        <p class="text-xs font-semibold text-violet-600 uppercase">技能目录</p>
-        <h2 class="text-xl font-bold text-slate-900 mt-1">全部技能</h2>
+        <p class="text-xs font-semibold text-violet-600 uppercase">Skill Library</p>
+        <h2 class="text-xl font-bold text-slate-900 mt-1">可试用方法论</h2>
       </div>
       <p id="skill-result-count" class="text-sm text-slate-500" aria-live="polite">
         显示 0 / 共 0 个技能
       </p>
     </div>
+    <p class="text-sm text-slate-500 mb-4">先读边界，再 Deep Chat 试用或复制全文。</p>
+
+    <p
+      id="skills-library-empty-hint"
+      class="skills-library-empty-hint text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4"
+      hidden
+    >
+      技能库未接入时统计为「—」。接入 submodule 后刷新页面即可浏览目录并试用。
+    </p>
 
     <div class="skills-catalog-sticky">
       <div class="mb-4">
@@ -69,77 +192,237 @@
     <div id="skill-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
   </section>
 
-  <!-- 指标与使用说明下沉，默认可折叠（L2） -->
-  <details class="skills-secondary bg-white border border-slate-200 rounded-lg mb-6">
-    <summary class="skills-secondary__summary">
-      <span class="font-semibold text-slate-800">数据与使用说明</span>
-      <span class="text-sm text-slate-500">技能统计 · 三步用法</span>
-    </summary>
-    <div class="skills-secondary__body p-6 pt-2 border-t border-slate-100">
-      <p
-        id="skills-library-empty-hint"
-        class="skills-library-empty-hint text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4"
-        hidden
-      >
-        技能库未接入时统计为「—」。接入 submodule 后刷新页面即可浏览目录并试用。
-      </p>
-      <div class="grid grid-cols-2 gap-3 xl:grid-cols-4 mb-6">
-        <div class="border border-slate-200 rounded-lg p-4">
-          <div class="text-xs font-semibold text-violet-700 mb-1">总数</div>
-          <div id="metric-total" class="text-xl font-bold text-slate-900">0</div>
-          <div class="text-xs text-slate-500 mt-0.5">已注册技能</div>
-        </div>
-        <div class="border border-slate-200 rounded-lg p-4">
-          <div class="text-xs font-semibold text-indigo-700 mb-1">分类</div>
-          <div id="metric-category" class="text-xl font-bold text-slate-900">0</div>
-          <div class="text-xs text-slate-500 mt-0.5">业务分类</div>
-        </div>
-        <div class="border border-slate-200 rounded-lg p-4">
-          <div class="text-xs font-semibold text-fuchsia-700 mb-1">脚本</div>
-          <div id="metric-scripts" class="text-xl font-bold text-slate-900">0</div>
-          <div class="text-xs text-slate-500 mt-0.5">含辅助脚本</div>
-        </div>
-        <div class="border border-slate-200 rounded-lg p-4">
-          <div class="text-xs font-semibold text-amber-700 mb-1">试用版</div>
-          <div id="metric-beta" class="text-xl font-bold text-slate-900">0</div>
-          <div class="text-xs text-slate-500 mt-0.5">试用版技能</div>
-        </div>
+  <!-- 高频实战路径 -->
+  <section class="mb-6" aria-label="高频实战路径">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
+      <div>
+        <p class="text-xs font-semibold text-slate-500 uppercase">Seller Playbooks</p>
+        <h2 class="text-xl font-bold text-slate-900 mt-1">四条高频实战路径</h2>
       </div>
-      <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
-          <div class="text-xs font-semibold text-violet-600 mb-2">01 找技能</div>
-          <p class="text-sm text-slate-700 leading-6">
-            按分类或关键词找到业务场景（广告、Listing、FBA 等）。
-          </p>
-        </article>
-        <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
-          <div class="text-xs font-semibold text-violet-600 mb-2">02 读方法</div>
-          <p class="text-sm text-slate-700 leading-6">打开详情，看能力边界、输入要求与输出格式。</p>
-        </article>
-        <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
-          <div class="text-xs font-semibold text-violet-600 mb-2">
-            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
-            03 在 Deep Chat 试用
+      <p class="text-sm text-slate-500">从场景到技能：方法论负责判断与组织，你负责数据与拍板。</p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <article class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0"
+          >
+            <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
           </div>
-          <p class="text-sm text-slate-700 leading-6">
-            一键挂载方法论到 Deep Chat，或复制全文到外部 Agent。
-          </p>
-        </article>
+          <div>
+            <h3 class="font-bold text-slate-900">Listing 转化</h3>
+            <p class="text-sm text-slate-500 mt-1">
+              关键词 + 竞品页 + VOC → 标题/五点/A+ 结构与合规自检。
+            </p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+            输入：关键词、竞品、评论痛点
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+            处理：意图分组、卖点排序
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+            输出：可审稿文案和风险项
+          </div>
+        </div>
+      </article>
+
+      <article class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0"
+          >
+            <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900">广告分诊</h3>
+            <p class="text-sm text-slate-500 mt-1">
+              搜索词报表 + 毛利约束 → 加词、否词、降价、预算与 Listing 承接。
+            </p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+            输入：点击、花费、订单、ACOS
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+            处理：样本量与目标分桶
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">输出：保守/激进动作表</div>
+        </div>
+      </article>
+
+      <article class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0"
+          >
+            <i class="fa-solid fa-calculator" aria-hidden="true"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900">利润与定价</h3>
+            <p class="text-sm text-slate-500 mt-1">
+              费用、FBA、关税与毛利事实 → 定价区间、底线与调价风险。
+            </p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+            输入：成本、费用、售价、退货
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+            处理：利润结构与敏感点
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">输出：可执行价格带</div>
+        </div>
+      </article>
+
+      <article class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0"
+          >
+            <i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900">选品与竞品</h3>
+            <p class="text-sm text-slate-500 mt-1">
+              词库、趋势与竞品页 → 机会点、风险与「可跟进 / 不建议模仿」。
+            </p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+            输入：关键词、竞品、评论
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+            处理：机会聚类与证据检查
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">输出：行动优先级清单</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 业务规则如何进入技能 -->
+  <section
+    class="bg-white border border-slate-200 rounded-lg p-6 mb-8"
+    aria-label="业务规则如何进入技能"
+  >
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
+      <div>
+        <p class="text-xs font-semibold text-slate-500 uppercase">Business Operating Rules</p>
+        <h2 class="text-xl font-bold text-slate-900 mt-1">业务规则如何进入技能</h2>
+      </div>
+      <p class="text-sm text-slate-500">
+        把平台规则、报表事实和卖家实践，内化为技能的输入、边界与验收动作。
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <article class="skill-source-card">
+        <span class="skill-source-card__label">Listing 合规</span>
+        <strong>先合规，再转化</strong>
+        <p>
+          标题、五点、描述和图片文案必须围绕同一商品事实展开，禁用促销语、夸大声明与无证据认证。
+        </p>
+        <div class="skill-business-rule">
+          <span>技能要求</span>
+          <p>输入产品事实与禁用词；输出文案时同步列出可上线 / 需证据 / 不建议写。</p>
+        </div>
+      </article>
+
+      <article class="skill-source-card">
+        <span class="skill-source-card__label">关键词口径</span>
+        <strong>分组后再进页面位置</strong>
+        <p>关键词要先按核心词、属性词、场景词、问题词分组，再决定放在标题、五点、A+ 或后台词。</p>
+        <div class="skill-business-rule">
+          <span>技能要求</span>
+          <p>要求先分组、再分配位置；不能用未提供的搜索量/销量/排名做判断。</p>
+        </div>
+      </article>
+
+      <article class="skill-source-card">
+        <span class="skill-source-card__label">广告样本量</span>
+        <strong>低样本只观察</strong>
+        <p>PPC 动作必须基于点击、花费、订单、ACOS/ROAS 与样本量；低样本不能直接否词或大幅调价。</p>
+        <div class="skill-business-rule">
+          <span>技能要求</span>
+          <p>区分加词、否词、降价、提预算、Listing 承接差；每个动作写依据、风险和复查时间。</p>
+        </div>
+      </article>
+
+      <article class="skill-source-card">
+        <span class="skill-source-card__label">VOC 证据</span>
+        <strong>评论是责任分发</strong>
+        <p>评论、QA、退货要先聚类，再拆给产品、Listing、客服与合规，避免情绪化空总结。</p>
+        <div class="skill-business-rule">
+          <span>技能要求</span>
+          <p>每条洞察带原始证据、严重度、责任方、行动项和验证方式。</p>
+        </div>
+      </article>
+
+      <article class="skill-source-card">
+        <span class="skill-source-card__label">利润口径</span>
+        <strong>费用与毛利是事实</strong>
+        <p>定价与利润技能必须以成本、FBA、关税、退货与广告费为输入，不做空中毛利承诺。</p>
+        <div class="skill-business-rule">
+          <span>技能要求</span>
+          <p>输出价格带与敏感点时标明假设；缺费用数据时拒绝给「保证利润」结论。</p>
+        </div>
+      </article>
+
+      <article class="skill-source-card">
+        <span class="skill-source-card__label">挂载与复核</span>
+        <strong>技能给方法，人来拍板</strong>
+        <p>Deep Chat 挂载提供方法论；最终动作、预算与合规声明必须经过运营人工确认。</p>
+        <div class="skill-business-rule">
+          <span>技能要求</span>
+          <p>试用后检查系统提示词与输出验收点；不要把模型输出直接当平台事实提交。</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 页脚：统计 + 来源 -->
+  <footer class="skills-page-footer mb-6" aria-label="技能库统计与来源">
+    <div class="grid grid-cols-2 gap-3 xl:grid-cols-4 mb-4">
+      <div class="border border-slate-200 rounded-lg p-4 bg-white">
+        <div class="text-xs font-semibold text-violet-700 mb-1">总数</div>
+        <div id="metric-total" class="text-xl font-bold text-slate-900">0</div>
+        <div class="text-xs text-slate-500 mt-0.5">已注册技能</div>
+      </div>
+      <div class="border border-slate-200 rounded-lg p-4 bg-white">
+        <div class="text-xs font-semibold text-indigo-700 mb-1">分类</div>
+        <div id="metric-category" class="text-xl font-bold text-slate-900">0</div>
+        <div class="text-xs text-slate-500 mt-0.5">业务分类</div>
+      </div>
+      <div class="border border-slate-200 rounded-lg p-4 bg-white">
+        <div class="text-xs font-semibold text-fuchsia-700 mb-1">脚本</div>
+        <div id="metric-scripts" class="text-xl font-bold text-slate-900">0</div>
+        <div class="text-xs text-slate-500 mt-0.5">含辅助脚本</div>
+      </div>
+      <div class="border border-slate-200 rounded-lg p-4 bg-white">
+        <div class="text-xs font-semibold text-amber-700 mb-1">试用版</div>
+        <div id="metric-beta" class="text-xl font-bold text-slate-900">0</div>
+        <div class="text-xs text-slate-500 mt-0.5">试用版技能</div>
       </div>
     </div>
-  </details>
-
-  <p class="text-xs text-slate-500 leading-6 mb-2">
-    技能正文来自
-    <a
-      class="text-violet-700 hover:text-violet-800"
-      href="https://github.com/nexscope-ai/Amazon-Skills"
-      target="_blank"
-      rel="noopener noreferrer"
-      >nexscope-ai/Amazon-Skills</a
-    >
-    （MIT）。工作台若需编程加载，使用内部 skillRegistry，不暴露 skillId 给运营复制。
-  </p>
+    <p class="text-xs text-slate-500 leading-6">
+      技能正文来自
+      <a
+        class="text-violet-700 hover:text-violet-800"
+        href="https://github.com/nexscope-ai/Amazon-Skills"
+        target="_blank"
+        rel="noopener noreferrer"
+        >nexscope-ai/Amazon-Skills</a
+      >
+      （MIT）。工作台若需编程加载，使用内部 skillRegistry，不暴露 skillId 给运营复制。
+    </p>
+  </footer>
 </div>
 
 <!-- 技能详情：app-modal 自身为根（与提示词页一致），open()/close() 才能生效 -->
@@ -148,7 +431,6 @@
     slot="body"
     class="skill-detail-modal__dialog bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
   >
-    <!-- no-header 时关闭 X 由 AppModal 浮动按钮提供 -->
     <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 p-6 text-white pr-14">
       <div class="flex items-start justify-between mb-3 gap-4">
         <div class="flex-1 min-w-0">
