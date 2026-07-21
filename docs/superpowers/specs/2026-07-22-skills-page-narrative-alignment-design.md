@@ -1,7 +1,7 @@
 # Skills 页叙事对齐设计（方案 B）
 
 **日期：** 2026-07-22  
-**状态：** Approved for planning（待用户审阅本 spec 后进入实现计划）  
+**状态：** Spec approved · Plan ready（`docs/superpowers/plans/2026-07-22-skills-page-narrative-alignment.md`）  
 **范围：** 更多 → 大模型探索 → 技能页 UI/文案/板块结构  
 **对照页：** 更多 → 大模型探索 → 提示词（`prompts/template.html`）
 
