@@ -30,6 +30,7 @@ import {
   buildSystemPromptFromSkillContexts,
   consumeSkillForDeepChat,
   normalizeSkillChipDraftText,
+  prefixDraftWithSkillContexts,
   stripSkillMarkersFromDraft,
   type SkillDeepChatContext,
 } from '@/modules/app_center/skillDeepChatHandoff';
@@ -1948,9 +1949,10 @@ function bindSkillHandoffListeners(container: HTMLElement): void {
 }
 
 /**
- * Skills 页试用：skill 全文 → 系统提示词；Context Bar 展示挂载；输入框仅业务草稿。
+ * Skills 页试用：skill 全文 → 系统提示词；Context Bar + 输入框 Chip 展示挂载。
  * F2：若当前会话已有对话/技能，可选择「新建会话」或「附加到当前」。
  * FB2：仅「附加到当前会话」时，若会覆盖已有系统提示词才需确认（新建会话不弹覆盖框）。
+ * 注意：发送清空后 hydrate 不会把 Chip 再塞回空输入框。
  */
 async function createThreadFromSkillContext(
   container: HTMLElement,
@@ -1996,15 +1998,19 @@ async function createThreadFromSkillContext(
     return;
   }
 
-  // 新建会话：不沿用当前会话的系统提示词，无需「覆盖」确认
+  // 新建会话：草稿前缀技能 Chip 标记，便于输入框立即可见
+  const draftWithChip = prefixDraftWithSkillContexts(skillContext.userDraft, [skillChip]);
   showSkillLoadBanner(container, skillContext.skillTitle);
   createThread(container, {
     toastMessage: `已附加技能「${skillContext.skillTitle}」`,
-    draftText: skillContext.userDraft,
+    draftText: draftWithChip,
     skillContexts: [skillChip],
   });
 
-  window.setTimeout(() => fillPromptDraftInput(container, skillContext.userDraft), 80);
+  // 多次重试：replaceChat / shadow 就绪后确保 Chip 水合进输入框
+  window.setTimeout(() => fillSkillComposerDraft(container, skillContext.userDraft), 0);
+  window.setTimeout(() => fillSkillComposerDraft(container, skillContext.userDraft), 80);
+  window.setTimeout(() => fillSkillComposerDraft(container, skillContext.userDraft), 200);
   renderSkillContextBar(container);
 }
 
@@ -2042,15 +2048,20 @@ function attachSkillToActiveThread(
   const existing = activeThread.skillContexts || [];
   const withoutDup = existing.filter(item => item.skillId !== skillChip.skillId);
   const nextContexts = [...withoutDup, skillChip];
-  const nextDraft =
+  const baseDraft =
     activeThread.draftText?.trim() || skillContext.userDraft || activeThread.draftText || '';
+  // 附加技能时在输入框前缀 Chip，Context Bar 同步展示
+  const nextDraft = prefixDraftWithSkillContexts(baseDraft, nextContexts);
 
   updateActiveThreadFields(container, {
     skillContexts: nextContexts,
     draftText: nextDraft,
   });
   applySkillContextsToSession(container);
-  window.setTimeout(() => fillPromptDraftInput(container, nextDraft), 80);
+  window.setTimeout(() => fillSkillComposerDraft(container, baseDraft), 0);
+  window.setTimeout(() => fillSkillComposerDraft(container, baseDraft), 80);
+  window.setTimeout(() => fillSkillComposerDraft(container, baseDraft), 200);
+  renderSkillContextBar(container);
   showToast(`已将技能「${skillContext.skillTitle}」附加到当前会话`, {
     type: 'success',
   });
@@ -2473,8 +2484,8 @@ function serializeDraftInput(input: HTMLElement): string {
 }
 
 /**
- * 写入草稿：仅当正文已含「技能名」标记时水合为 Chip。
- * 会话 skillContexts 存在时也不强制前缀 Chip（挂载态看 Context Bar）。
+ * 写入草稿：正文含「技能名」标记时水合为 Chip DOM。
+ * 调用方负责是否 prefix；本函数不因 skillContexts 自动前缀（避免发送清空后回填）。
  */
 function setDraftInputWithInlineChips(
   input: HTMLElement,
@@ -2775,6 +2786,47 @@ async function deletePromptDraft(container: HTMLElement, promptId: string): Prom
   showToast('已删除 Prompt 生成记录', { type: 'success' });
 }
 
+/**
+ * 技能挂载后写入输入框：业务草稿 + 技能 Chip（用户可见）。
+ * 与 fillPromptDraftInput 分离，避免普通 Prompt 填入也强制前缀 Chip。
+ */
+function fillSkillComposerDraft(
+  container: HTMLElement,
+  businessDraft: string,
+  attempts = 10
+): void {
+  const chat = getChat(container);
+  const input = chat?.shadowRoot?.querySelector<HTMLElement>('#text-input');
+  const skillContexts = getActiveThread().skillContexts || [];
+
+  if (!chat || !input) {
+    if (attempts > 0) {
+      window.setTimeout(() => fillSkillComposerDraft(container, businessDraft, attempts - 1), 50);
+    }
+    return;
+  }
+
+  const normalizedPrompt =
+    skillContexts.length > 0
+      ? prefixDraftWithSkillContexts(businessDraft, skillContexts)
+      : businessDraft;
+  setDraftInputWithInlineChips(input, normalizedPrompt, skillContexts);
+  updateThreadDraft(threadStore.activeThreadId, normalizedPrompt);
+  renderSkillContextBar(container);
+  placeSkillComposerChrome(container);
+  syncDraftInputHeight(container, { instant: true });
+  notifyDeepChatComposerInput(input, normalizedPrompt);
+
+  // 若 Chip DOM 仍未就绪，继续重试
+  if (
+    skillContexts.length > 0 &&
+    !composerHasSessionSkillChips(input, skillContexts) &&
+    attempts > 0
+  ) {
+    window.setTimeout(() => fillSkillComposerDraft(container, businessDraft, attempts - 1), 50);
+  }
+}
+
 function fillPromptDraftInput(container: HTMLElement, prompt: string, attempts = 8): void {
   const chat = getChat(container);
   const input = chat?.shadowRoot?.querySelector<HTMLElement>('#text-input');
@@ -2791,9 +2843,11 @@ function fillPromptDraftInput(container: HTMLElement, prompt: string, attempts =
   }
 
   const skillContexts = getActiveThread().skillContexts || [];
-  // 试用/填入时：业务草稿原样；会话 Chip 只在 Context Bar，不塞进输入框
+  // 普通 Prompt 填入：不强制 Chip；若草稿已含技能标记则保留 Chip 形态
   const normalizedPrompt =
-    skillContexts.length > 0 ? normalizeSkillChipDraftText(prompt, skillContexts) : prompt;
+    skillContexts.length > 0 && textContainsSkillChipMarker(prompt, skillContexts)
+      ? normalizeSkillChipDraftText(prompt, skillContexts)
+      : prompt;
   setDraftInputWithInlineChips(input, normalizedPrompt, skillContexts);
   updateThreadDraft(threadStore.activeThreadId, normalizedPrompt);
   renderSkillContextBar(container);

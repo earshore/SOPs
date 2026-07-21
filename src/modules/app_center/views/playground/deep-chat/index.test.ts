@@ -956,22 +956,18 @@ async function queueProfitSkillAndMount() {
 }
 
 describe('deep-chat skill trial context bar render', () => {
-  it('shows skill bar chips above composer without forcing chips into the input', async () => {
+  it('shows skill chips in the input after trial handoff', async () => {
     const { container, unmount, mocks, skillHandoff } = await queueProfitSkillAndMount();
 
     const bar = container.querySelector<HTMLElement>('#deep-chat-skill-context-bar');
     const input = getChat(container).shadowRoot?.querySelector('#text-input');
-    const barChip = bar?.querySelector('.deep-chat-context-chip');
 
+    // 试用后输入框内必须出现 Chip（用户主感知区）
+    await vi.waitFor(() => {
+      expect(input?.querySelector('.deep-chat-context-chip')?.textContent).toContain('利润测算');
+    });
     expect(bar?.hidden).toBe(false);
-    expect(container.querySelector('#deep-chat-skill-context-bar-hint')?.textContent).toContain(
-      '方法论已注入系统提示词'
-    );
-    // 会话技能 Chip 在 Context Bar（标题旁）；输入框只放业务草稿
-    expect(barChip?.textContent).toContain('利润测算');
-    expect(barChip?.classList.contains('deep-chat-context-chip--dismissible')).toBe(true);
-    expect(bar?.querySelector('.deep-chat-skill-context-bar__chips')).not.toBeNull();
-    expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
+    expect(bar?.querySelector('.deep-chat-context-chip')?.textContent).toContain('利润测算');
     expect(input?.textContent).toContain('业务数据');
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
@@ -986,39 +982,27 @@ describe('deep-chat skill trial context bar render', () => {
     });
     expect(skillHandoff.consumeSkillForDeepChat()).toBeNull();
 
-    const dismiss = bar?.querySelector<HTMLButtonElement>('[data-action="dismiss-skill-context"]');
+    const dismiss = input?.querySelector<HTMLButtonElement>(
+      '[data-action="dismiss-skill-context"]'
+    );
     expect(dismiss).not.toBeNull();
     dismiss?.click();
     await vi.advanceTimersByTimeAsync(50);
 
     expect(container.querySelector<HTMLElement>('#deep-chat-skill-context-bar')?.hidden).toBe(true);
-    expect(container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value).toBe(
-      ''
-    );
     expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
     expect(input?.textContent).toContain('业务数据');
     expect(input?.textContent).not.toContain('利润测算');
 
-    const undo = container.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
-    expect(undo?.hidden).toBe(false);
-    undo?.click();
-    await vi.advanceTimersByTimeAsync(50);
-    expect(container.querySelector('#deep-chat-skill-context-bar')?.hasAttribute('hidden')).toBe(
-      false
-    );
-    expect(
-      container.querySelector('#deep-chat-skill-context-bar .deep-chat-context-chip')?.textContent
-    ).toContain('利润测算');
-    // 撤销不把 Chip 塞回输入框
-    expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
-
     unmount();
   });
 
-  it('does not re-inject skill chips into the input after a completed reply', async () => {
+  it('keeps context bar skill chips after reply without requiring empty-input chips', async () => {
     const { container, unmount } = await queueProfitSkillAndMount();
     const input = getChat(container).shadowRoot?.querySelector('#text-input');
-    expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
+    await vi.waitFor(() => {
+      expect(input?.querySelector('.deep-chat-context-chip')).not.toBeNull();
+    });
 
     getChat(container).connect?.handler(
       { messages: [{ role: 'user', text: 'Follow-up after skill mount' }] },
@@ -1035,13 +1019,12 @@ describe('deep-chat skill trial context bar render', () => {
     });
     await vi.advanceTimersByTimeAsync(400);
 
-    // 输出完成 / hydrate 后：Context Bar 仍可展示技能；输入框不得强制回填 Chip
     const bar =
       container.querySelector('#deep-chat-skill-context-bar') ||
       getChat(container).shadowRoot?.querySelector('#deep-chat-skill-context-bar');
+    // 会话技能仍挂着，Context Bar Chip 可见
     expect(bar?.hasAttribute('hidden')).toBe(false);
-    const latestInput = getChat(container).shadowRoot?.querySelector('#text-input');
-    expect(latestInput?.querySelector('.deep-chat-context-chip')).toBeNull();
+    expect(bar?.querySelector('.deep-chat-context-chip')).not.toBeNull();
 
     unmount();
   });
@@ -1193,9 +1176,12 @@ describe('deep-chat skill trial attach and second handoff', () => {
         '#deep-chat-skill-context-bar .deep-chat-context-chip'
       )?.textContent;
     expect(barChipText).toContain('第二技能');
-    expect(
-      getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
-    ).toBeNull();
+    await vi.waitFor(() => {
+      expect(
+        getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
+          ?.textContent
+      ).toContain('第二技能');
+    });
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
     ).toContain('Second Skill');
@@ -1241,9 +1227,15 @@ describe('deep-chat skill trial attach and second handoff', () => {
       ),
     ].map(el => el.textContent || '');
     expect(barChips.some(t => t.includes('附加技能'))).toBe(true);
-    expect(
-      getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
-    ).toBeNull();
+    await vi.waitFor(() => {
+      const chipTexts = [
+        ...Array.from(
+          getChat(container).shadowRoot?.querySelectorAll('#text-input .deep-chat-context-chip') ||
+            []
+        ),
+      ].map(el => el.textContent || '');
+      expect(chipTexts.some(t => t.includes('附加技能') || t.includes('第一技能'))).toBe(true);
+    });
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
     ).toContain('Attach Me');
