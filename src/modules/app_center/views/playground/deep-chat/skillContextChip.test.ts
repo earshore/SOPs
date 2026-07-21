@@ -23,7 +23,11 @@ describe('skillContextChip', () => {
     const staticChip = createSkillContextChip(contexts[0]!, 'static');
 
     expect(dismissible.classList.contains(SKILL_CHIP_DISMISSIBLE_CLASS)).toBe(true);
-    expect(dismissible.querySelector('[data-action="dismiss-skill-context"]')).not.toBeNull();
+    const dismiss = dismissible.querySelector<HTMLButtonElement>(
+      '[data-action="dismiss-skill-context"]'
+    );
+    expect(dismiss).not.toBeNull();
+    expect(dismiss?.tabIndex).toBe(0);
 
     expect(staticChip.classList.contains(SKILL_CHIP_STATIC_CLASS)).toBe(true);
     expect(staticChip.querySelector('[data-action="dismiss-skill-context"]')).toBeNull();

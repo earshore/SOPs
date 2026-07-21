@@ -39,6 +39,7 @@ const deepChatTemplate = `
           <div class="deep-chat-skill-context-bar__head">
             <span class="deep-chat-skill-context-bar__label">已挂载技能</span>
             <span id="deep-chat-skill-context-bar-hint" class="deep-chat-skill-context-bar__hint"></span>
+            <button id="deep-chat-skill-undo" class="deep-chat-skill-undo" type="button" hidden>撤销移除</button>
           </div>
           <div id="deep-chat-skill-context-chips" class="deep-chat-skill-context-bar__chips" role="list"></div>
         </div>
@@ -988,6 +989,17 @@ describe('deep-chat skill trial context bar', () => {
     );
     // 业务草稿仍在
     expect(input?.textContent).toContain('业务数据');
+
+    const undo = container.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
+    expect(undo?.hidden).toBe(false);
+    undo?.click();
+    await vi.advanceTimersByTimeAsync(50);
+    expect(container.querySelector('#deep-chat-skill-context-bar')?.hasAttribute('hidden')).toBe(
+      false
+    );
+    expect(
+      container.querySelector('#deep-chat-skill-context-chips .deep-chat-context-chip')?.textContent
+    ).toContain('利润测算');
 
     unmount();
   });

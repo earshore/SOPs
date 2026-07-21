@@ -51,6 +51,13 @@
   </div>
 
   <div class="deep-chat-page">
+    <button
+      id="deep-chat-drawer-backdrop"
+      class="deep-chat-drawer-backdrop"
+      type="button"
+      aria-label="关闭侧栏"
+      hidden
+    ></button>
     <aside id="deep-chat-thread-rail" class="deep-chat-thread-rail" aria-label="Deep Chat 会话">
       <div class="deep-chat-rail-brand">
         <h1 class="text-base font-bold text-slate-800 flex items-center gap-2.5">
@@ -79,6 +86,26 @@
     </aside>
 
     <section class="deep-chat-main" aria-label="Deep Chat">
+      <div class="deep-chat-mobile-rail-bar" aria-label="窄屏侧栏">
+        <button
+          id="deep-chat-open-thread-drawer"
+          class="deep-chat-mobile-rail-btn"
+          type="button"
+          data-drawer="thread"
+        >
+          <i class="far fa-comments" aria-hidden="true"></i>
+          <span>会话</span>
+        </button>
+        <button
+          id="deep-chat-open-prompt-drawer"
+          class="deep-chat-mobile-rail-btn"
+          type="button"
+          data-drawer="prompt"
+        >
+          <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+          <span>Prompt</span>
+        </button>
+      </div>
       <header class="deep-chat-topbar">
         <div class="deep-chat-model-area">
           <button
@@ -180,6 +207,9 @@
               id="deep-chat-skill-context-bar-hint"
               class="deep-chat-skill-context-bar__hint"
             ></span>
+            <button id="deep-chat-skill-undo" class="deep-chat-skill-undo" type="button" hidden>
+              撤销移除
+            </button>
           </div>
           <div
             id="deep-chat-skill-context-chips"

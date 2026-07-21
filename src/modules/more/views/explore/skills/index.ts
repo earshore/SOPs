@@ -330,6 +330,41 @@ function trySkillInDeepChat(skillId: string): void {
     });
 }
 
+function hasActiveSkillFilters(): boolean {
+  return currentCategory !== 'all' || Boolean(currentKeyword);
+}
+
+/** FB4：筛选无结果时的空态 + 清空筛选 */
+function createNoMatchEmptyState(): HTMLElement {
+  const filtered = hasActiveSkillFilters();
+  const empty = createEmptyState({
+    role: 'status',
+    live: true,
+    iconClass: 'fas fa-search text-4xl text-slate-300 mb-4',
+    title: '未找到匹配的技能',
+    help: filtered
+      ? '当前分类与搜索组合无结果。可清空筛选后重试，或尝试关键词 PPC、Listing、FBA。'
+      : '推荐：清空搜索、切回「全部」，或尝试关键词 PPC、Listing、FBA。',
+  });
+  if (!filtered) {
+    return empty;
+  }
+  const clearBtn = document.createElement('button');
+  clearBtn.type = 'button';
+  clearBtn.className = 'skill-cta-primary mt-4';
+  clearBtn.textContent = '清空筛选';
+  clearBtn.addEventListener('click', () => {
+    currentCategory = 'all';
+    currentKeyword = '';
+    if (searchInputRef) searchInputRef.value = '';
+    persistFilters();
+    renderCategories();
+    renderList();
+  });
+  empty.appendChild(clearBtn);
+  return empty;
+}
+
 function renderList(): void {
   const container = moduleRoot?.querySelector('#skill-list');
   const countEl = moduleRoot?.querySelector('#skill-result-count');
@@ -357,15 +392,7 @@ function renderList(): void {
   }
 
   if (skills.length === 0) {
-    container.appendChild(
-      createEmptyState({
-        role: 'status',
-        live: true,
-        iconClass: 'fas fa-search text-4xl text-slate-300 mb-4',
-        title: '未找到匹配的技能',
-        help: '推荐：清空搜索、切回「全部」，或尝试关键词 PPC、Listing、FBA。',
-      })
-    );
+    container.appendChild(createNoMatchEmptyState());
     return;
   }
 
@@ -382,6 +409,95 @@ async function copyText(text: string, successMessage: string): Promise<void> {
   showToast(successMessage, { type: 'success' });
 }
 
+/** L4：从 Markdown 二级标题抽取结构化预览 */
+function extractSkillSections(body: string): Array<{ title: string; content: string }> {
+  const lines = body.replace(/\r\n/g, '\n').split('\n');
+  const sections: Array<{ title: string; content: string }> = [];
+  let currentTitle = '';
+  let currentLines: string[] = [];
+
+  const flush = (): void => {
+    const content = currentLines.join('\n').trim();
+    if (currentTitle && content) {
+      sections.push({ title: currentTitle, content });
+    }
+    currentTitle = '';
+    currentLines = [];
+  };
+
+  for (const line of lines) {
+    const match = /^(#{2,3})\s+(.+)$/.exec(line.trim());
+    if (match?.[2]) {
+      flush();
+      currentTitle = match[2].replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim();
+      continue;
+    }
+    if (currentTitle) {
+      currentLines.push(line);
+    }
+  }
+  flush();
+
+  const preferred = [
+    /能力|capability|capabilities/i,
+    /输入|input/i,
+    /输出|output/i,
+    /用法|usage|how it works|工作方式/i,
+  ];
+  const picked: Array<{ title: string; content: string }> = [];
+  for (const pattern of preferred) {
+    const found = sections.find(
+      section => pattern.test(section.title) && !picked.includes(section)
+    );
+    if (found) {
+      picked.push(found);
+    }
+  }
+  if (picked.length === 0) {
+    return sections.slice(0, 3).map(section => ({
+      title: section.title,
+      content: section.content.slice(0, 480),
+    }));
+  }
+  return picked.slice(0, 4).map(section => ({
+    title: section.title,
+    content: section.content.slice(0, 480),
+  }));
+}
+
+function renderSkillStructuredPreview(skill: Skill): void {
+  const host = document.getElementById('modal-skill-structured');
+  const rawDetails = document.getElementById(
+    'modal-skill-raw-details'
+  ) as HTMLDetailsElement | null;
+  if (!host) return;
+  clearElement(host);
+
+  const body = skill.body || skill.raw;
+  const sections = extractSkillSections(body);
+  if (sections.length === 0) {
+    host.hidden = true;
+    if (rawDetails) rawDetails.open = true;
+    return;
+  }
+
+  host.hidden = false;
+  if (rawDetails) rawDetails.open = false;
+
+  for (const section of sections) {
+    const card = document.createElement('article');
+    card.className = 'rounded-xl border border-slate-200 bg-white p-4';
+    const h = document.createElement('h4');
+    h.className = 'text-sm font-bold text-slate-800 mb-2';
+    h.textContent = section.title;
+    const p = document.createElement('p');
+    p.className = 'text-sm text-slate-600 leading-6 whitespace-pre-wrap';
+    p.textContent = section.content;
+    card.append(h, p);
+    host.appendChild(card);
+  }
+}
+
 function openDetail(skillId: string): void {
   const skill = skillRegistry.getSkill(skillId);
   if (!skill) return;
@@ -396,9 +512,10 @@ function openDetail(skillId: string): void {
   };
 
   set('modal-skill-title', displayTitle(skill.title));
-  set('modal-skill-category', skill.categoryLabel);
+  set('modal-skill-category', `${skill.categoryLabel} · ${statusLabel(skill.status)}`);
   set('modal-skill-description', skill.description || '');
   set('modal-skill-content', skill.raw);
+  renderSkillStructuredPreview(skill);
 
   modal.classList.remove('hidden');
   modal.classList.add('flex');

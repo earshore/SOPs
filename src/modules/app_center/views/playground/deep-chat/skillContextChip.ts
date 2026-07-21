@@ -74,7 +74,8 @@ export function createSkillContextChip(
     dismiss.dataset.skillId = context.skillId;
     dismiss.setAttribute('aria-label', `移除技能上下文 ${context.skillTitle}`);
     dismiss.title = '移除';
-    dismiss.tabIndex = -1;
+    // U5：允许键盘 Tab 聚焦移除（配合 :focus-within 显示 ×）
+    dismiss.tabIndex = 0;
     dismiss.appendChild(createSvgIcon(['M18 6 6 18M6 6l12 12'], 12, '2.2'));
     leading.appendChild(dismiss);
   }

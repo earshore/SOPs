@@ -717,6 +717,7 @@ function bindControls(container: HTMLElement): void {
   bindThreadControls(container, threadList, promptList);
   bindChatSearchControls(container);
   bindSkillContextBarControls(container);
+  bindMobileDrawerControls(container);
   bindTuningControls({
     systemPromptInput,
     temperatureInput,
@@ -1292,6 +1293,50 @@ function toggleThreadRail(container: HTMLElement): void {
   const shouldCollapse = !page.classList.contains(THREAD_RAIL_COLLAPSED_CLASS);
   page.classList.toggle(THREAD_RAIL_COLLAPSED_CLASS, shouldCollapse);
   syncThreadRailState(container);
+}
+
+/** U4：窄屏会话 / Prompt 抽屉 */
+function bindMobileDrawerControls(container: HTMLElement): void {
+  const page = container.querySelector<HTMLElement>('.deep-chat-page');
+  const backdrop = container.querySelector<HTMLButtonElement>('#deep-chat-drawer-backdrop');
+  if (!page) {
+    return;
+  }
+
+  const closeDrawers = (): void => {
+    page.classList.remove('is-thread-drawer-open', 'is-prompt-drawer-open');
+    if (backdrop) {
+      backdrop.hidden = true;
+    }
+  };
+
+  const openDrawer = (kind: 'thread' | 'prompt'): void => {
+    page.classList.toggle('is-thread-drawer-open', kind === 'thread');
+    page.classList.toggle('is-prompt-drawer-open', kind === 'prompt');
+    if (backdrop) {
+      backdrop.hidden = false;
+    }
+  };
+
+  const onBarClick = (event: Event): void => {
+    const target = event.target as HTMLElement | null;
+    const button = target?.closest<HTMLButtonElement>('[data-drawer]');
+    const drawer = button?.dataset.drawer;
+    if (drawer !== 'thread' && drawer !== 'prompt') {
+      return;
+    }
+    event.preventDefault();
+    openDrawer(drawer);
+  };
+
+  const bar = container.querySelector('.deep-chat-mobile-rail-bar');
+  bar?.addEventListener('click', onBarClick);
+  backdrop?.addEventListener('click', closeDrawers);
+  cleanupCallbacks.push(() => {
+    bar?.removeEventListener('click', onBarClick);
+    backdrop?.removeEventListener('click', closeDrawers);
+    closeDrawers();
+  });
 }
 
 function syncThreadRailState(container: HTMLElement): void {
@@ -2016,11 +2061,45 @@ function bindSkillContextBarControls(container: HTMLElement): void {
 
   chips.addEventListener('click', onClick);
   cleanupCallbacks.push(() => chips.removeEventListener('click', onClick));
+
+  const undoBtn = container.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
+  if (undoBtn) {
+    const onUndo = (event: Event): void => {
+      event.preventDefault();
+      undoSessionSkillDismiss(container);
+    };
+    undoBtn.addEventListener('click', onUndo);
+    cleanupCallbacks.push(() => undoBtn.removeEventListener('click', onUndo));
+  }
 }
 
-/** 从会话移除技能挂载（Context Bar），并同步系统提示词 */
+type PendingSkillDismissUndo = {
+  threadId: string;
+  skill: DeepChatSkillContext;
+  timer: number;
+};
+
+let pendingSkillDismissUndo: PendingSkillDismissUndo | null = null;
+
+function clearPendingSkillDismissUndo(): void {
+  if (pendingSkillDismissUndo?.timer) {
+    window.clearTimeout(pendingSkillDismissUndo.timer);
+  }
+  pendingSkillDismissUndo = null;
+  const undoBtn = mountedContainer?.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
+  if (undoBtn) {
+    undoBtn.hidden = true;
+  }
+}
+
+/** 从会话移除技能挂载（Context Bar），并提供短时撤销（FB3） */
 function dismissSessionSkillContext(container: HTMLElement, skillId: string): void {
   const activeThread = getActiveThread();
+  const removed = (activeThread.skillContexts || []).find(context => context.skillId === skillId);
+  if (!removed) {
+    return;
+  }
+
   const nextContexts = (activeThread.skillContexts || []).filter(
     context => context.skillId !== skillId
   );
@@ -2029,7 +2108,48 @@ function dismissSessionSkillContext(container: HTMLElement, skillId: string): vo
     skillContexts: nextContexts.length > 0 ? nextContexts : undefined,
   });
   applySkillContextsToSession(container);
-  showToast('已移除技能上下文', { type: 'success' });
+
+  clearPendingSkillDismissUndo();
+  const undoBtn = container.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
+  if (undoBtn) {
+    undoBtn.hidden = false;
+  }
+  pendingSkillDismissUndo = {
+    threadId: activeThread.id,
+    skill: { ...removed },
+    timer: window.setTimeout(() => {
+      clearPendingSkillDismissUndo();
+    }, 5000),
+  };
+
+  showToast('已移除技能上下文', {
+    type: 'success',
+    description: '5 秒内可点击「撤销移除」恢复',
+    duration: 5000,
+  });
+}
+
+function undoSessionSkillDismiss(container: HTMLElement): void {
+  const pending = pendingSkillDismissUndo;
+  if (!pending) {
+    return;
+  }
+  if (getActiveThread().id !== pending.threadId) {
+    clearPendingSkillDismissUndo();
+    showToast('会话已切换，无法撤销', { type: 'warning' });
+    return;
+  }
+
+  const activeThread = getActiveThread();
+  const existing = activeThread.skillContexts || [];
+  const nextContexts = [
+    ...existing.filter(item => item.skillId !== pending.skill.skillId),
+    pending.skill,
+  ];
+  clearPendingSkillDismissUndo();
+  updateActiveThreadFields(container, { skillContexts: nextContexts });
+  applySkillContextsToSession(container);
+  showToast(`已恢复技能「${pending.skill.skillTitle}」`, { type: 'success' });
 }
 
 /** 将 contenteditable 中的 Chip 与文本序列化为纯文本（Chip → 「技能名」） */
