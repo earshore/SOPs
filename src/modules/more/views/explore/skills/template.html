@@ -1,6 +1,7 @@
 <!-- More - 技能 Template -->
 <div class="module-container skills-page py-6">
-  <div class="wb-container wb-container--simple wb-theme-violet">
+  <!-- 紧凑页头：说明与标签一行级信息（L2） -->
+  <div class="wb-container wb-container--simple wb-theme-violet skills-hero">
     <div class="wb-content">
       <div class="wb-icon">
         <i class="fas fa-graduation-cap" aria-hidden="true"></i>
@@ -11,120 +12,19 @@
           <i class="fa-solid fa-layer-group" aria-hidden="true"></i>技能运营
         </span>
       </div>
-      <p class="wb-description">
-        Amazon 运营技能库：按业务场景浏览专业方法论，复制技能全文到 AI
-        对话使用；系统工作台按场景自动加载，无需手工填 ID。
-      </p>
-      <div class="wb-tags">
-        <div class="wb-tag">
-          <div class="wb-tag-dot wb-tag-dot--violet"></div>
+      <p class="wb-description skills-hero__desc">
+        按场景浏览方法论，在 Deep Chat 试用或复制全文；工作台可自动加载，无需填 ID。
+        <span class="skills-hero__meta">
           <span id="skill-banner-total">0 个技能</span>
-        </div>
-        <div class="wb-tag">
-          <div class="wb-tag-dot wb-tag-dot--indigo"></div>
-          <span>全文可复制</span>
-        </div>
-        <div class="wb-tag">
-          <div class="wb-tag-dot wb-tag-dot--fuchsia"></div>
-          <span>中文外壳 / 英文原文</span>
-        </div>
-      </div>
+          · 正式 / 试用版 · 中文外壳 / 英文原文
+        </span>
+      </p>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 mb-6">
-    <div class="bg-white border border-slate-200 rounded-lg p-5">
-      <div class="flex items-center justify-between mb-4">
-        <div
-          class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center"
-        >
-          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
-        </div>
-        <span
-          class="text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-md px-2 py-1"
-          >总数</span
-        >
-      </div>
-      <div id="metric-total" class="text-2xl font-bold text-slate-900">0</div>
-      <div class="text-sm text-slate-500 mt-1">已注册技能</div>
-    </div>
-    <div class="bg-white border border-slate-200 rounded-lg p-5">
-      <div class="flex items-center justify-between mb-4">
-        <div
-          class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"
-        >
-          <i class="fa-solid fa-folder-tree" aria-hidden="true"></i>
-        </div>
-        <span
-          class="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-md px-2 py-1"
-          >分类</span
-        >
-      </div>
-      <div id="metric-category" class="text-2xl font-bold text-slate-900">0</div>
-      <div class="text-sm text-slate-500 mt-1">业务分类</div>
-    </div>
-    <div class="bg-white border border-slate-200 rounded-lg p-5">
-      <div class="flex items-center justify-between mb-4">
-        <div
-          class="w-10 h-10 rounded-lg bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center"
-        >
-          <i class="fa-solid fa-terminal" aria-hidden="true"></i>
-        </div>
-        <span
-          class="text-xs font-semibold text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-100 rounded-md px-2 py-1"
-          >脚本</span
-        >
-      </div>
-      <div id="metric-scripts" class="text-2xl font-bold text-slate-900">0</div>
-      <div class="text-sm text-slate-500 mt-1">含辅助脚本（本页不执行）</div>
-    </div>
-    <div class="bg-white border border-slate-200 rounded-lg p-5">
-      <div class="flex items-center justify-between mb-4">
-        <div
-          class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"
-        >
-          <i class="fa-solid fa-flask" aria-hidden="true"></i>
-        </div>
-        <span
-          class="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-md px-2 py-1"
-          >试用</span
-        >
-      </div>
-      <div id="metric-beta" class="text-2xl font-bold text-slate-900">0</div>
-      <div class="text-sm text-slate-500 mt-1">试用版技能</div>
-    </div>
-  </div>
-
-  <section class="bg-white border border-slate-200 rounded-lg p-6 mb-6">
-    <div class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between mb-4">
-      <div>
-        <p class="text-xs font-semibold text-violet-600 uppercase">使用说明</p>
-        <h2 class="text-xl font-bold text-slate-900 mt-1">运营怎么用</h2>
-      </div>
-      <p class="text-sm text-slate-500">本页是技能目录，不是调试台；直接复制全文到 AI 对话。</p>
-    </div>
-    <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-      <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
-        <div class="text-xs font-semibold text-violet-600 mb-2">01 找技能</div>
-        <p class="text-sm text-slate-700 leading-6">
-          按分类或关键词找到业务场景（广告、Listing、FBA 等）。
-        </p>
-      </article>
-      <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
-        <div class="text-xs font-semibold text-violet-600 mb-2">02 读方法</div>
-        <p class="text-sm text-slate-700 leading-6">打开详情，看能力边界、输入要求与输出格式。</p>
-      </article>
-      <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
-        <div class="text-xs font-semibold text-violet-600 mb-2">03 复制全文</div>
-        <p class="text-sm text-slate-700 leading-6">
-          一键复制技能原文到 Deep Chat 或外部 Agent，再贴上真实业务数据。
-        </p>
-      </article>
-    </div>
-  </section>
-
-  <section class="bg-white border border-slate-200 rounded-lg p-6 mb-6">
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
+  <!-- 技能目录置首 + 吸顶筛选（L2） -->
+  <section class="bg-white border border-slate-200 rounded-lg p-6 mb-6 skills-catalog">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
       <div>
         <p class="text-xs font-semibold text-violet-600 uppercase">技能目录</p>
         <h2 class="text-xl font-bold text-slate-900 mt-1">全部技能</h2>
@@ -134,29 +34,80 @@
       </p>
     </div>
 
-    <div class="mb-6">
-      <label for="skill-search" class="sr-only">搜索技能</label>
-      <div class="catalog-search-field">
-        <span class="catalog-search-icon" aria-hidden="true">
-          <i class="fas fa-search"></i>
-        </span>
-        <input
-          type="text"
-          id="skill-search"
-          placeholder="搜索技能名称或能力描述，如广告、Listing、FBA…"
-          class="catalog-search-input"
-          aria-label="搜索技能"
-          autocomplete="off"
-        />
+    <div class="skills-catalog-sticky">
+      <div class="mb-4">
+        <label for="skill-search" class="sr-only">搜索技能</label>
+        <div class="catalog-search-field">
+          <span class="catalog-search-icon" aria-hidden="true">
+            <i class="fas fa-search"></i>
+          </span>
+          <input
+            type="text"
+            id="skill-search"
+            placeholder="搜索技能名称或能力描述，如广告、Listing、FBA…"
+            class="catalog-search-input"
+            aria-label="搜索技能"
+            autocomplete="off"
+          />
+        </div>
       </div>
-    </div>
-
-    <div class="mb-8">
-      <div id="skill-category-container" class="flex flex-wrap gap-3 justify-center"></div>
+      <div class="mb-4">
+        <div id="skill-category-container" class="flex flex-wrap gap-2 justify-center"></div>
+      </div>
     </div>
 
     <div id="skill-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
   </section>
+
+  <!-- 指标与使用说明下沉，默认可折叠（L2） -->
+  <details class="skills-secondary bg-white border border-slate-200 rounded-lg mb-6">
+    <summary class="skills-secondary__summary">
+      <span class="font-semibold text-slate-800">数据与使用说明</span>
+      <span class="text-sm text-slate-500">技能统计 · 三步用法</span>
+    </summary>
+    <div class="skills-secondary__body p-6 pt-2 border-t border-slate-100">
+      <div class="grid grid-cols-2 gap-3 xl:grid-cols-4 mb-6">
+        <div class="border border-slate-200 rounded-lg p-4">
+          <div class="text-xs font-semibold text-violet-700 mb-1">总数</div>
+          <div id="metric-total" class="text-xl font-bold text-slate-900">0</div>
+          <div class="text-xs text-slate-500 mt-0.5">已注册技能</div>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4">
+          <div class="text-xs font-semibold text-indigo-700 mb-1">分类</div>
+          <div id="metric-category" class="text-xl font-bold text-slate-900">0</div>
+          <div class="text-xs text-slate-500 mt-0.5">业务分类</div>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4">
+          <div class="text-xs font-semibold text-fuchsia-700 mb-1">脚本</div>
+          <div id="metric-scripts" class="text-xl font-bold text-slate-900">0</div>
+          <div class="text-xs text-slate-500 mt-0.5">含辅助脚本</div>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4">
+          <div class="text-xs font-semibold text-amber-700 mb-1">试用版</div>
+          <div id="metric-beta" class="text-xl font-bold text-slate-900">0</div>
+          <div class="text-xs text-slate-500 mt-0.5">试用版技能</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+          <div class="text-xs font-semibold text-violet-600 mb-2">01 找技能</div>
+          <p class="text-sm text-slate-700 leading-6">
+            按分类或关键词找到业务场景（广告、Listing、FBA 等）。
+          </p>
+        </article>
+        <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+          <div class="text-xs font-semibold text-violet-600 mb-2">02 读方法</div>
+          <p class="text-sm text-slate-700 leading-6">打开详情，看能力边界、输入要求与输出格式。</p>
+        </article>
+        <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+          <div class="text-xs font-semibold text-violet-600 mb-2">03 在 Deep Chat 试用</div>
+          <p class="text-sm text-slate-700 leading-6">
+            一键挂载方法论到 Deep Chat，或复制全文到外部 Agent。
+          </p>
+        </article>
+      </div>
+    </div>
+  </details>
 
   <p class="text-xs text-slate-500 leading-6 mb-2">
     技能正文来自
@@ -167,16 +118,25 @@
       rel="noopener noreferrer"
       >nexscope-ai/Amazon-Skills</a
     >
-    （MIT）。工作台若需编程加载，使用内部
-    <code class="text-slate-600">skillRegistry</code>，不依赖本页复制 ID。本页不执行 skill scripts。
+    （MIT）。工作台若需编程加载，使用内部 skillRegistry，不暴露 skillId 给运营复制。
   </p>
+</div>
 
-  <!-- no-header：关闭钮由 AppModal 浮动提供，body 内勿再放 X -->
-  <app-modal id="skill-detail-modal" class="hidden" title="技能详情" size="full" no-header>
-    <div
-      slot="body"
-      class="skill-detail-modal__dialog bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col"
-    >
+<!-- 技能详情模态框：挂到 body 避免被父级 transform 影响 fixed 定位 -->
+<div
+  id="skill-detail-modal"
+  class="skill-detail-modal hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-skill-title"
+>
+  <app-modal
+    size="2xl"
+    no-header
+    no-padding
+    class="skill-detail-modal__dialog max-w-4xl w-full max-h-[90vh] flex flex-col"
+  >
+    <div slot="body" class="flex flex-col max-h-[90vh] overflow-hidden">
       <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 p-6 text-white pr-14">
         <div class="flex items-start justify-between mb-3 gap-4">
           <div class="flex-1 min-w-0">

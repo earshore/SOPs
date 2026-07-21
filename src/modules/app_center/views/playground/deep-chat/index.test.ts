@@ -348,6 +348,7 @@ async function importDeepChat(options: ImportOptions = {}) {
   };
   const navigateToRouteId = vi.fn(async () => true);
   const confirmWithModal = vi.fn(async () => true);
+  const chooseWithModal = vi.fn(async (): Promise<'primary' | 'secondary' | 'cancel'> => 'primary');
 
   vi.resetModules();
   const listingWorkflowMocks = installListingWorkflowMocks();
@@ -385,7 +386,7 @@ async function importDeepChat(options: ImportOptions = {}) {
   vi.doMock('@/modules/app_center/views/master_analysis/services/historyService', () => ({
     HistoryService: historyService,
   }));
-  vi.doMock('./utils/confirmModal', () => ({ confirmWithModal }));
+  vi.doMock('./utils/confirmModal', () => ({ confirmWithModal, chooseWithModal }));
 
   const listingWorkflowHandoff = await prepareListingPromptHandoff(options);
   const module = await import('./index');
@@ -396,6 +397,7 @@ async function importDeepChat(options: ImportOptions = {}) {
       appStore,
       callLLM,
       confirmWithModal,
+      chooseWithModal,
       eventBus,
       historyService,
       localDataStore,
@@ -1043,6 +1045,8 @@ describe('deep-chat skill trial context bar', () => {
       userDraft: skillHandoff.buildSkillDeepChatUserDraft('第二技能'),
     });
 
+    // 已有会话内容时选择「新建会话」
+    mocks.chooseWithModal.mockResolvedValueOnce('primary');
     expect(consumePendingSkillHandoff(container)).toBe(true);
     await vi.advanceTimersByTimeAsync(200);
 
@@ -1056,6 +1060,45 @@ describe('deep-chat skill trial context bar', () => {
       skillContexts: [expect.objectContaining({ skillId: 'skill-second' })],
     });
     expect(skillHandoff.consumeSkillForDeepChat()).toBeNull();
+
+    unmount();
+  });
+
+  it('can attach a skill to the current session when user chooses attach', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+
+    const { mount, unmount, mocks } = await importDeepChat();
+    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+    skillHandoff.queueSkillForDeepChat({
+      skillId: 'skill-first',
+      skillTitle: '第一技能',
+      skillRaw: '# First',
+      userDraft: skillHandoff.buildSkillDeepChatUserDraft('第一技能'),
+    });
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(300);
+
+    const { consumePendingSkillHandoff } = await import('./controller');
+    skillHandoff.queueSkillForDeepChat({
+      skillId: 'skill-attach',
+      skillTitle: '附加技能',
+      skillRaw: '# Attach Me',
+      userDraft: skillHandoff.buildSkillDeepChatUserDraft('附加技能'),
+    });
+    mocks.chooseWithModal.mockResolvedValueOnce('secondary');
+    mocks.confirmWithModal.mockResolvedValueOnce(true);
+
+    expect(consumePendingSkillHandoff(container)).toBe(true);
+    await vi.advanceTimersByTimeAsync(200);
+
+    const chipTexts = [
+      ...container.querySelectorAll('#deep-chat-skill-context-chips .deep-chat-context-chip'),
+    ].map(el => el.textContent || '');
+    expect(chipTexts.some(t => t.includes('附加技能'))).toBe(true);
+    expect(
+      container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
+    ).toContain('Attach Me');
 
     unmount();
   });

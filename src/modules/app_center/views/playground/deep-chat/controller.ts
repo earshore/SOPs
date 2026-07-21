@@ -41,7 +41,7 @@ import {
 } from './skillContextChip';
 import { setWorkspaceContext } from '@/modules/app_center/workspaceContext';
 import type { LLMProviderConfig } from '@/types/state';
-import { confirmWithModal } from './utils/confirmModal';
+import { chooseWithModal, confirmWithModal } from './utils/confirmModal';
 import {
   buildStoredThreadMessages,
   mergeThreadHistoryWithRequest,
@@ -1831,12 +1831,37 @@ function bindSkillHandoffListeners(container: HTMLElement): void {
 
 /**
  * Skills 页试用：skill 全文 → 系统提示词；Context Bar 展示挂载；输入框仅业务草稿。
- * 若当前已有自定义系统提示词，挂载前确认是否覆盖（FB2）。
+ * F2：若当前会话已有对话/技能，可选择「新建会话」或「附加到当前」。
+ * FB2：若将覆盖自定义系统提示词，需确认。
  */
 async function createThreadFromSkillContext(
   container: HTMLElement,
   skillContext: SkillDeepChatContext
 ): Promise<void> {
+  const activeThread = getActiveThread();
+  const canAttachToCurrent =
+    Boolean(activeThread) &&
+    (activeThread.messages.length > 0 ||
+      Boolean(activeThread.skillContexts?.length) ||
+      Boolean(activeThread.draftText?.trim()));
+
+  let attachToCurrent = false;
+  if (canAttachToCurrent) {
+    const choice = await chooseWithModal({
+      title: '挂载技能',
+      content: `如何挂载技能「${skillContext.skillTitle}」？\n新建会话可保留当前对话不变；附加到当前会话会更新本会话的系统提示词与业务草稿。`,
+      primaryLabel: '新建会话',
+      secondaryLabel: '附加到当前会话',
+      cancelLabel: '取消',
+      primaryIsDestructive: false,
+    });
+    if (choice === 'cancel') {
+      showToast('已取消挂载技能', { type: 'warning' });
+      return;
+    }
+    attachToCurrent = choice === 'secondary';
+  }
+
   const existingPrompt = getCurrentSessionSystemPrompt(container);
   const nextPrompt = skillContext.skillRaw.trim();
   if (existingPrompt && existingPrompt !== nextPrompt) {
@@ -1860,6 +1885,11 @@ async function createThreadFromSkillContext(
     skillRaw: skillContext.skillRaw,
   };
 
+  if (attachToCurrent) {
+    attachSkillToActiveThread(container, skillContext, skillChip);
+    return;
+  }
+
   createThread(container, {
     toastMessage: `已附加技能「${skillContext.skillTitle}」`,
     draftText: skillContext.userDraft,
@@ -1868,6 +1898,28 @@ async function createThreadFromSkillContext(
 
   window.setTimeout(() => fillPromptDraftInput(container, skillContext.userDraft), 80);
   renderSkillContextBar(container);
+}
+
+/** F2：将技能挂到当前会话（更新 skillContexts / 草稿 / 系统提示） */
+function attachSkillToActiveThread(
+  container: HTMLElement,
+  skillContext: SkillDeepChatContext,
+  skillChip: DeepChatSkillContext
+): void {
+  const activeThread = getActiveThread();
+  const existing = activeThread.skillContexts || [];
+  const withoutDup = existing.filter(item => item.skillId !== skillChip.skillId);
+  const nextContexts = [...withoutDup, skillChip];
+  const nextDraft =
+    activeThread.draftText?.trim() || skillContext.userDraft || activeThread.draftText || '';
+
+  updateActiveThreadFields(container, {
+    skillContexts: nextContexts,
+    draftText: nextDraft,
+  });
+  applySkillContextsToSession(container);
+  window.setTimeout(() => fillPromptDraftInput(container, nextDraft), 80);
+  showToast(`已将技能「${skillContext.skillTitle}」附加到当前会话`, { type: 'success' });
 }
 
 function getCurrentSessionSystemPrompt(container: HTMLElement): string {

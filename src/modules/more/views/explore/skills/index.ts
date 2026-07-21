@@ -11,6 +11,7 @@ import { copyTextToClipboard } from '@/common/utils/clipboard';
 import { showToast } from '@/common/ui';
 import { skillRegistry } from '@/services/skillRegistry';
 import type { Skill, SkillCategoryId, SkillMeta } from '@/services/skillRegistry';
+import { StorageService } from '@/services/storageService';
 import {
   buildSkillDeepChatUserDraft,
   queueSkillForDeepChat,
@@ -26,6 +27,13 @@ type AppModalElement = HTMLElement & {
   close?: () => void;
 };
 
+type SkillsFilterState = {
+  category?: SkillCategoryId | 'all';
+  keyword?: string;
+};
+
+const SKILLS_FILTER_STORAGE_KEY = 'skills:filters:v1';
+
 let moduleRoot: HTMLElement | null = null;
 let searchInputRef: HTMLInputElement | null = null;
 let skillModalRef: HTMLElement | null = null;
@@ -33,6 +41,25 @@ let currentCategory: SkillCategoryId | 'all' = 'all';
 let currentKeyword = '';
 let currentSkill: Skill | null = null;
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** F4：跨试用往返保留筛选（StorageService） */
+function loadPersistedFilters(): void {
+  const data = StorageService.get(SKILLS_FILTER_STORAGE_KEY, null) as SkillsFilterState | null;
+  if (!data || typeof data !== 'object') return;
+  if (data.category === 'all' || typeof data.category === 'string') {
+    currentCategory = data.category || 'all';
+  }
+  if (typeof data.keyword === 'string') {
+    currentKeyword = data.keyword;
+  }
+}
+
+function persistFilters(): void {
+  StorageService.set(SKILLS_FILTER_STORAGE_KEY, {
+    category: currentCategory,
+    keyword: currentKeyword,
+  });
+}
 
 function isDecorativeCodePoint(cp: number): boolean {
   if (cp === 0xfe0f || cp === 0x200d || cp === 0x20 || cp === 0xa0) return true;
@@ -53,10 +80,11 @@ function displayTitle(title: string): string {
   return chars.slice(i).join('').trim() || title.trim();
 }
 
+/** C2：状态标签中文统一；动作仍称「在 Deep Chat 试用」 */
 function statusLabel(status: SkillMeta['status']): string {
-  if (status === 'beta') return 'Beta';
-  if (status === 'available') return 'Available';
-  return 'Unknown';
+  if (status === 'beta') return '试用版';
+  if (status === 'available') return '正式';
+  return '未标注';
 }
 
 function statusClass(status: SkillMeta['status']): string {
@@ -390,6 +418,7 @@ function handleCategoryClick(categoryBtn: HTMLElement): void {
   const cat = categoryBtn.dataset.category as SkillCategoryId | 'all' | undefined;
   if (!cat) return;
   currentCategory = cat;
+  persistFilters();
   renderCategories();
   renderList();
 }
@@ -478,6 +507,7 @@ function handleSearchInput(e: Event): void {
   if (searchTimer) clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
     currentKeyword = value.trim();
+    persistFilters();
     renderList();
   }, 200);
 }
@@ -516,8 +546,7 @@ class SkillsModule extends BaseModule {
       'src/modules/more/views/explore/skills/template.html'
     );
 
-    currentCategory = 'all';
-    currentKeyword = '';
+    loadPersistedFilters();
     currentSkill = null;
     removeSkillModal();
 
@@ -527,18 +556,21 @@ class SkillsModule extends BaseModule {
     skillRegistry.ensureInitialized();
     mountSkillModal(container);
     initEventListeners(container);
+    if (searchInputRef && currentKeyword) {
+      searchInputRef.value = currentKeyword;
+    }
     renderMetrics();
     renderCategories();
     renderList();
   }
 
   unmount(): void {
+    persistFilters();
     closeDetail();
     removeEventListeners();
     removeSkillModal();
-    currentCategory = 'all';
-    currentKeyword = '';
     currentSkill = null;
+    // 不重置 category/keyword：F4 下次 mount 从 sessionStorage 恢复
   }
 }
 
