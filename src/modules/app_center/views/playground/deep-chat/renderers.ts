@@ -128,8 +128,9 @@ function getThreadMeta(
   pendingRequest: PendingDeepChatRequest | undefined
 ): string {
   if (pendingRequest) {
+    // 用 startedAt（稳定）而非 updatedAt，避免每个 stream token 改文案触发整表重绘后仍看起来在「跳」
     const stateLabel = pendingRequest.isSettled ? '输出中' : '生成中';
-    return `${stateLabel} · ${formatThreadTime(pendingRequest.updatedAt)}`;
+    return `${stateLabel} · ${formatThreadTime(pendingRequest.startedAt)}`;
   }
 
   if (thread.draftText?.trim()) {

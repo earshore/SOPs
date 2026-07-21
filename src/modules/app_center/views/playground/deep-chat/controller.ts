@@ -1447,6 +1447,8 @@ async function handleDeepChatRequest(
       threadId: activeThread.id,
     });
     syncPendingRequestView(activeThread.id);
+    // 仅在进入生成态时刷新列表（勿在每个 stream token 重绘，否则无法点选其他会话）
+    renderMountedThreadList();
     notifyContextBudgetApplied(droppedMessageCount);
 
     const assistantText = await callDeepChatLLM({
@@ -2034,7 +2036,9 @@ function attachSkillToActiveThread(
   });
   applySkillContextsToSession(container);
   window.setTimeout(() => fillPromptDraftInput(container, nextDraft), 80);
-  showToast(`已将技能「${skillContext.skillTitle}」附加到当前会话`, { type: 'success' });
+  showToast(`已将技能「${skillContext.skillTitle}」附加到当前会话`, {
+    type: 'success',
+  });
 }
 
 function getCurrentSessionSystemPrompt(container: HTMLElement): string {
@@ -2809,6 +2813,10 @@ function switchThread(container: HTMLElement, threadId: string): void {
     return;
   }
 
+  // 允许在「生成中」切到其他会话：后台 pending 继续跑，仅停止对当前屏的打字机渲染
+  const previousThreadId = threadStore.activeThreadId;
+  clearPendingDisplayTimer(previousThreadId);
+
   saveActiveThreadDraft(container);
   saveActiveThreadTuning(container);
   threadStore = {
@@ -2823,6 +2831,11 @@ function switchThread(container: HTMLElement, threadId: string): void {
   applySkillContextsToSession(container);
   applyThreadTuningToSession(container);
   hydrateActiveThreadInlineSkillChips(container);
+  // 若目标会话本身也在生成/输出，恢复其屏幕上的打字机
+  if (pendingRequests.has(threadId)) {
+    schedulePendingAssistantDisplay(threadId);
+    syncPendingStatus(container);
+  }
 }
 
 async function deleteThread(container: HTMLElement, threadId: string): Promise<void> {
@@ -3346,11 +3359,16 @@ function drainPendingAssistantDisplay(threadId: string): void {
     return;
   }
 
+  const wasSettled = pendingRequest.isSettled;
   const nextDisplayText = getNextPendingAssistantDisplayText(pendingRequest);
   markPendingDeepChatAssistantTextDisplayed(pendingRequest, nextDisplayText);
   renderPendingAssistantDisplay(container, pendingRequest);
   syncPendingStatus(container);
-  renderMountedThreadList();
+
+  // 不在每个打字机 tick 重绘会话列表（会打掉点击）；仅状态翻转时刷新 meta
+  if (wasSettled !== pendingRequest.isSettled) {
+    renderMountedThreadList();
+  }
 
   if (isPendingDeepChatDisplayComplete(pendingRequest)) {
     completeSettledPendingDisplay(threadId, pendingRequest);
