@@ -57,30 +57,17 @@
   transform: rotate(180deg);
 }
 
-.skill-detail-modal {
-  position: fixed;
-  top: var(--header-height, 64px);
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: var(--z-modal-backdrop, 55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(1rem, 2vw, 1.5rem);
-  background: rgba(15, 23, 42, 0.52);
-  backdrop-filter: var(--backdrop-blur-sm, blur(4px));
-  overflow-y: auto;
-}
-
-.skill-detail-modal.hidden {
-  display: none;
-}
-
+/* 详情面板尺寸（遮罩/定位由 AppModal shadow 负责） */
 .skill-detail-modal__dialog {
   position: relative;
   margin: auto;
   max-height: calc(100dvh - var(--header-height, 64px) - clamp(2rem, 4vw, 3rem));
+}
+
+@supports not (height: 100dvh) {
+  .skill-detail-modal__dialog {
+    max-height: calc(100vh - var(--header-height, 64px) - clamp(2rem, 4vw, 3rem));
+  }
 }
 
 /* Flex search field: icon and text never overlap */

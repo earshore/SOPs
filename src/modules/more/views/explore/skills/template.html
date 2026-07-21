@@ -132,69 +132,60 @@
   </p>
 </div>
 
-<!-- 技能详情模态框：挂到 body 避免被父级 transform 影响 fixed 定位 -->
-<div
-  id="skill-detail-modal"
-  class="skill-detail-modal hidden"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="modal-skill-title"
->
-  <app-modal
-    size="2xl"
-    no-header
-    no-padding
-    class="skill-detail-modal__dialog max-w-4xl w-full max-h-[90vh] flex flex-col"
+<!-- 技能详情：app-modal 自身为根（与提示词页一致），open()/close() 才能生效 -->
+<app-modal id="skill-detail-modal" class="hidden" title="技能详情" size="2xl" no-header>
+  <div
+    slot="body"
+    class="skill-detail-modal__dialog bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
   >
-    <div slot="body" class="flex flex-col max-h-[90vh] overflow-hidden">
-      <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 p-6 text-white pr-14">
-        <div class="flex items-start justify-between mb-3 gap-4">
-          <div class="flex-1 min-w-0">
-            <h2 id="modal-skill-title" class="text-2xl font-bold mb-2"></h2>
-            <div class="flex flex-wrap items-center gap-3 text-sm text-violet-100">
-              <span id="modal-skill-category"></span>
-            </div>
+    <!-- no-header 时关闭 X 由 AppModal 浮动按钮提供 -->
+    <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 p-6 text-white pr-14">
+      <div class="flex items-start justify-between mb-3 gap-4">
+        <div class="flex-1 min-w-0">
+          <h2 id="modal-skill-title" class="text-2xl font-bold mb-2"></h2>
+          <div class="flex flex-wrap items-center gap-3 text-sm text-violet-100">
+            <span id="modal-skill-category"></span>
           </div>
         </div>
-        <p id="modal-skill-description" class="text-violet-50 text-sm leading-6"></p>
       </div>
+      <p id="modal-skill-description" class="text-violet-50 text-sm leading-6"></p>
+    </div>
 
-      <div class="flex-1 overflow-y-auto p-6 space-y-4">
-        <div id="modal-skill-structured" class="space-y-3" hidden></div>
-        <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
-          <details id="modal-skill-raw-details" open>
-            <summary
-              class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2 cursor-pointer list-none"
-            >
-              <i class="fas fa-file-lines" aria-hidden="true"></i>
-              技能全文（复制后贴到 AI 对话）
-            </summary>
-            <pre
-              id="modal-skill-content"
-              class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-mono"
-            ></pre>
-          </details>
-        </div>
-      </div>
-
-      <div class="border-t border-slate-200 p-4 flex flex-wrap gap-2 justify-end bg-white">
-        <button type="button" data-skill-modal-action="close" class="skill-action-secondary">
-          <i class="fas fa-xmark" aria-hidden="true"></i>
-          <span>关闭</span>
-        </button>
-        <button type="button" data-skill-modal-action="copy-raw" class="skill-action-secondary">
-          <i class="fas fa-copy" aria-hidden="true"></i>
-          <span>复制全文</span>
-        </button>
-        <button
-          type="button"
-          data-skill-modal-action="try-deep-chat"
-          class="skill-cta-primary skill-cta-primary--modal"
-        >
-          <i class="fas fa-graduation-cap" aria-hidden="true"></i>
-          <span>在 Deep Chat 试用</span>
-        </button>
+    <div class="flex-1 overflow-y-auto p-6 space-y-4">
+      <div id="modal-skill-structured" class="space-y-3" hidden></div>
+      <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
+        <details id="modal-skill-raw-details" open>
+          <summary
+            class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2 cursor-pointer list-none"
+          >
+            <i class="fas fa-file-lines" aria-hidden="true"></i>
+            技能全文（复制后贴到 AI 对话）
+          </summary>
+          <pre
+            id="modal-skill-content"
+            class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-mono"
+          ></pre>
+        </details>
       </div>
     </div>
-  </app-modal>
-</div>
+
+    <div class="border-t border-slate-200 p-4 flex flex-wrap gap-2 justify-end bg-white">
+      <button type="button" data-skill-modal-action="close" class="skill-action-secondary">
+        <i class="fas fa-xmark" aria-hidden="true"></i>
+        <span>关闭</span>
+      </button>
+      <button type="button" data-skill-modal-action="copy-raw" class="skill-action-secondary">
+        <i class="fas fa-copy" aria-hidden="true"></i>
+        <span>复制全文</span>
+      </button>
+      <button
+        type="button"
+        data-skill-modal-action="try-deep-chat"
+        class="skill-cta-primary skill-cta-primary--modal"
+      >
+        <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+        <span>在 Deep Chat 试用</span>
+      </button>
+    </div>
+  </div>
+</app-modal>

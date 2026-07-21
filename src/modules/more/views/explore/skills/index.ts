@@ -222,7 +222,8 @@ function createActionButton(
 ): HTMLButtonElement {
   const btn = document.createElement('button');
   btn.type = 'button';
-  btn.dataset.action = action;
+  // 使用 data-skill-action，避免全局 ActionRegistry 拦截未注册的 data-action
+  btn.dataset.skillAction = action;
   btn.dataset.skillId = skillId;
   btn.className = 'btn-icon';
   btn.title = label;
@@ -235,7 +236,7 @@ function createActionButton(
 function createTryDeepChatButton(skillId: string, skillTitle: string): HTMLButtonElement {
   const btn = document.createElement('button');
   btn.type = 'button';
-  btn.dataset.action = 'try-deep-chat';
+  btn.dataset.skillAction = 'try-deep-chat';
   btn.dataset.skillId = skillId;
   btn.className = 'skill-cta-primary';
   btn.setAttribute('aria-label', `在 Deep Chat 试用：${skillTitle}`);
@@ -304,7 +305,7 @@ function createSkillCard(skill: SkillMeta): HTMLElement {
 
 function setTryDeepChatLoading(skillId: string, loading: boolean): void {
   const selectors = [
-    `[data-action="try-deep-chat"][data-skill-id="${skillId}"]`,
+    `[data-skill-action="try-deep-chat"][data-skill-id="${skillId}"]`,
     `[data-skill-modal-action="try-deep-chat"][data-skill-id="${skillId}"]`,
   ];
   const roots: Array<ParentNode | null> = [moduleRoot, getSkillModal()];
@@ -546,6 +547,7 @@ function openDetail(skillId: string): void {
   set('modal-skill-description', skill.description || '');
   set('modal-skill-content', skill.raw);
   renderSkillStructuredPreview(skill);
+  modal.setAttribute('title', displayTitle(skill.title));
 
   // L3：模态主 CTA 与卡片共用 skillId，便于 loading 态同步
   const tryBtn = modal.querySelector<HTMLButtonElement>(
@@ -567,6 +569,14 @@ function closeDetail(): void {
   modal.classList.add('hidden');
   modal.classList.remove('flex');
   (modal as AppModalElement).close?.();
+  currentSkill = null;
+}
+
+/** AppModal 浮动关闭 / 遮罩关闭后同步外层 class */
+function syncSkillModalClosed(): void {
+  const modal = getSkillModal();
+  modal?.classList.add('hidden');
+  modal?.classList.remove('flex');
   currentSkill = null;
 }
 
@@ -604,10 +614,11 @@ function handleModuleClick(e: Event): void {
     return;
   }
 
-  const actionBtn = target.closest('[data-action][data-skill-id]') as HTMLElement | null;
+  const actionBtn = target.closest('[data-skill-action][data-skill-id]') as HTMLElement | null;
   if (actionBtn && moduleRoot.contains(actionBtn) && actionBtn.dataset.skillId) {
+    e.preventDefault();
     e.stopPropagation();
-    handleSkillAction(actionBtn.dataset.skillId, actionBtn.dataset.action);
+    handleSkillAction(actionBtn.dataset.skillId, actionBtn.dataset.skillAction);
     return;
   }
 
@@ -623,7 +634,7 @@ function handleModuleKeydown(e: KeyboardEvent): void {
   if (!target || !moduleRoot) return;
   const card = target.closest('.skill-card[data-skill-id]') as HTMLElement | null;
   if (!card?.dataset.skillId || !moduleRoot.contains(card)) return;
-  if (target.closest('[data-action]')) return;
+  if (target.closest('[data-skill-action]')) return;
   e.preventDefault();
   openDetail(card.dataset.skillId);
 }
@@ -681,6 +692,7 @@ function initEventListeners(root: HTMLElement): void {
   root.addEventListener('click', handleModuleClick);
   root.addEventListener('keydown', handleModuleKeydown);
   getSkillModal()?.addEventListener('click', handleModalClick);
+  getSkillModal()?.addEventListener('close', syncSkillModalClosed);
   document.addEventListener('keydown', handleDocumentKeydown);
 }
 
@@ -691,6 +703,7 @@ function removeEventListeners(): void {
   moduleRoot?.removeEventListener('click', handleModuleClick);
   moduleRoot?.removeEventListener('keydown', handleModuleKeydown);
   getSkillModal()?.removeEventListener('click', handleModalClick);
+  getSkillModal()?.removeEventListener('close', syncSkillModalClosed);
   document.removeEventListener('keydown', handleDocumentKeydown);
   searchInputRef = null;
   moduleRoot = null;
