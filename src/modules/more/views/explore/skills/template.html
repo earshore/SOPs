@@ -66,6 +66,13 @@
       <span class="text-sm text-slate-500">技能统计 · 三步用法</span>
     </summary>
     <div class="skills-secondary__body p-6 pt-2 border-t border-slate-100">
+      <p
+        id="skills-library-empty-hint"
+        class="skills-library-empty-hint text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4"
+        hidden
+      >
+        技能库未接入时统计为「—」。接入 submodule 后刷新页面即可浏览目录并试用。
+      </p>
       <div class="grid grid-cols-2 gap-3 xl:grid-cols-4 mb-6">
         <div class="border border-slate-200 rounded-lg p-4">
           <div class="text-xs font-semibold text-violet-700 mb-1">总数</div>
@@ -100,7 +107,10 @@
           <p class="text-sm text-slate-700 leading-6">打开详情，看能力边界、输入要求与输出格式。</p>
         </article>
         <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
-          <div class="text-xs font-semibold text-violet-600 mb-2">03 在 Deep Chat 试用</div>
+          <div class="text-xs font-semibold text-violet-600 mb-2">
+            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+            03 在 Deep Chat 试用
+          </div>
           <p class="text-sm text-slate-700 leading-6">
             一键挂载方法论到 Deep Chat，或复制全文到外部 Agent。
           </p>
@@ -168,19 +178,13 @@
       </div>
 
       <div class="border-t border-slate-200 p-4 flex flex-wrap gap-2 justify-end bg-white">
-        <button
-          type="button"
-          data-skill-modal-action="close"
-          class="px-4 py-2 text-sm font-medium rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
-        >
-          关闭
+        <button type="button" data-skill-modal-action="close" class="skill-action-secondary">
+          <i class="fas fa-xmark" aria-hidden="true"></i>
+          <span>关闭</span>
         </button>
-        <button
-          type="button"
-          data-skill-modal-action="copy-raw"
-          class="px-4 py-2 text-sm font-medium rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
-        >
-          复制全文
+        <button type="button" data-skill-modal-action="copy-raw" class="skill-action-secondary">
+          <i class="fas fa-copy" aria-hidden="true"></i>
+          <span>复制全文</span>
         </button>
         <button
           type="button"

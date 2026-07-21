@@ -33,6 +33,8 @@ type SkillsFilterState = {
 };
 
 const SKILLS_FILTER_STORAGE_KEY = 'skills:filters:v1';
+/** C4：技能试用链路统一图标（技能页 CTA / Deep Chat 徽标一致） */
+const SKILL_TRIAL_ICON = 'fas fa-graduation-cap';
 
 let moduleRoot: HTMLElement | null = null;
 let searchInputRef: HTMLInputElement | null = null;
@@ -121,25 +123,45 @@ function removeSkillModal(): void {
   skillModalRef = null;
 }
 
+function setMetricText(id: string, value: string | number): void {
+  const el = moduleRoot?.querySelector(`#${id}`);
+  if (el) el.textContent = String(value);
+}
+
+/** FB4：空库时同步 Hero / 筛选 / 次要区引导 */
+function syncEmptyLibraryChrome(empty: boolean, total: number): void {
+  if (!moduleRoot) return;
+  const banner = moduleRoot.querySelector('#skill-banner-total');
+  if (banner) {
+    banner.textContent = empty ? '技能库为空' : `${total} 个技能`;
+  }
+  moduleRoot.classList.toggle('skills-page--empty-library', empty);
+  const sticky = moduleRoot.querySelector<HTMLElement>('.skills-catalog-sticky');
+  if (sticky) sticky.hidden = empty;
+  const secondary = moduleRoot.querySelector<HTMLDetailsElement>('.skills-secondary');
+  if (secondary) secondary.open = empty;
+  const emptyHint = moduleRoot.querySelector<HTMLElement>('#skills-library-empty-hint');
+  if (emptyHint) emptyHint.hidden = !empty;
+}
+
 function renderMetrics(): void {
   if (!moduleRoot) return;
   const stats = skillRegistry.getStats();
-  const scripts = skillRegistry.listSkills({ hasScripts: true }).length;
-  const beta = skillRegistry.listSkills({ status: 'beta' }).length;
-  const categories = skillRegistry.getCategories().length;
+  const empty = stats.total === 0;
 
-  const setText = (id: string, value: string | number) => {
-    const el = moduleRoot?.querySelector(`#${id}`);
-    if (el) el.textContent = String(value);
-  };
-
-  setText('metric-total', stats.total);
-  setText('metric-category', categories);
-  setText('metric-scripts', scripts);
-  setText('metric-beta', beta);
-
-  const banner = moduleRoot.querySelector('#skill-banner-total');
-  if (banner) banner.textContent = `${stats.total} 个技能`;
+  // FB4：库为空时用「—」避免 Hero/指标裸显示 0 造成「已接入但没数据」的错觉
+  if (empty) {
+    setMetricText('metric-total', '—');
+    setMetricText('metric-category', '—');
+    setMetricText('metric-scripts', '—');
+    setMetricText('metric-beta', '—');
+  } else {
+    setMetricText('metric-total', stats.total);
+    setMetricText('metric-category', skillRegistry.getCategories().length);
+    setMetricText('metric-scripts', skillRegistry.listSkills({ hasScripts: true }).length);
+    setMetricText('metric-beta', skillRegistry.listSkills({ status: 'beta' }).length);
+  }
+  syncEmptyLibraryChrome(empty, stats.total);
 }
 
 function renderCategories(): void {
@@ -217,7 +239,7 @@ function createTryDeepChatButton(skillId: string, skillTitle: string): HTMLButto
   btn.dataset.skillId = skillId;
   btn.className = 'skill-cta-primary';
   btn.setAttribute('aria-label', `在 Deep Chat 试用：${skillTitle}`);
-  appendIcon(btn, 'fas fa-graduation-cap');
+  appendIcon(btn, SKILL_TRIAL_ICON);
   const text = document.createElement('span');
   text.textContent = '在 Deep Chat 试用';
   btn.appendChild(text);
@@ -281,14 +303,21 @@ function createSkillCard(skill: SkillMeta): HTMLElement {
 }
 
 function setTryDeepChatLoading(skillId: string, loading: boolean): void {
-  const buttons = moduleRoot?.querySelectorAll<HTMLButtonElement>(
-    `[data-action="try-deep-chat"][data-skill-id="${skillId}"]`
-  );
-  buttons?.forEach(btn => {
-    btn.disabled = loading;
-    btn.classList.toggle('is-loading', loading);
-    btn.setAttribute('aria-busy', loading ? 'true' : 'false');
-  });
+  const selectors = [
+    `[data-action="try-deep-chat"][data-skill-id="${skillId}"]`,
+    `[data-skill-modal-action="try-deep-chat"][data-skill-id="${skillId}"]`,
+  ];
+  const roots: Array<ParentNode | null> = [moduleRoot, getSkillModal()];
+  for (const root of roots) {
+    if (!root) continue;
+    for (const selector of selectors) {
+      root.querySelectorAll<HTMLButtonElement>(selector).forEach(btn => {
+        btn.disabled = loading;
+        btn.classList.toggle('is-loading', loading);
+        btn.setAttribute('aria-busy', loading ? 'true' : 'false');
+      });
+    }
+  }
 }
 
 function trySkillInDeepChat(skillId: string): void {
@@ -380,12 +409,13 @@ function renderList(): void {
   clearElement(container);
 
   if (total === 0) {
+    // FB4：整页一致引导（Hero 文案 + 目录空态 + 指标「—」）
     container.appendChild(
       createEmptyState({
         role: 'alert',
         iconClass: 'fas fa-triangle-exclamation text-4xl text-amber-400 mb-4',
-        title: '技能库为空',
-        help: '请确认 vendor/amazon-skills 已接入，或执行：git submodule update --init --recursive',
+        title: '技能库尚未接入',
+        help: '页头与下方统计也会显示为空。请确认 vendor/amazon-skills 已接入，或在仓库根目录执行：git submodule update --init --recursive',
       })
     );
     return;
@@ -516,6 +546,15 @@ function openDetail(skillId: string): void {
   set('modal-skill-description', skill.description || '');
   set('modal-skill-content', skill.raw);
   renderSkillStructuredPreview(skill);
+
+  // L3：模态主 CTA 与卡片共用 skillId，便于 loading 态同步
+  const tryBtn = modal.querySelector<HTMLButtonElement>(
+    '[data-skill-modal-action="try-deep-chat"]'
+  );
+  if (tryBtn) {
+    tryBtn.dataset.skillId = skill.id;
+    tryBtn.setAttribute('aria-label', `在 Deep Chat 试用：${displayTitle(skill.title)}`);
+  }
 
   modal.classList.remove('hidden');
   modal.classList.add('flex');

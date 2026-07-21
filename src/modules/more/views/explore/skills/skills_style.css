@@ -235,6 +235,53 @@
   background-color: #faf3ee;
 }
 
+/* L3：模态次要操作 = 图标 + 文字，与卡片次要语义对齐 */
+.skill-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--color-slate-200, #e2e8f0);
+  border-radius: var(--rounded-lg, 0.5rem);
+  background: #fff;
+  color: var(--color-slate-700, #334155);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast, 150ms),
+    color var(--duration-fast, 150ms),
+    border-color var(--duration-fast, 150ms);
+}
+
+.skill-action-secondary:hover {
+  color: #8f4f33;
+  background: #faf3ee;
+  border-color: rgba(168, 95, 63, 0.28);
+}
+
+.skill-action-secondary:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px #a85f3f;
+}
+
+/* FB4：技能库为空 — 隐藏筛选、突出目录空态 */
+.skills-page--empty-library .skills-catalog-sticky[hidden] {
+  display: none !important;
+}
+
+.skills-page--empty-library .skills-hero__meta {
+  color: var(--color-amber-700, #b45309);
+}
+
+.skills-page--empty-library .skills-secondary__body .grid:first-child {
+  opacity: 0.72;
+}
+
 /* F3/C1：主操作「在 Deep Chat 试用」（色值对齐 Deep Chat accent #a85f3f） */
 .skill-cta-primary {
   display: inline-flex;
@@ -302,7 +349,7 @@
   outline: none;
   box-shadow:
     0 0 0 2px white,
-    0 0 0 4px var(--color-violet-500);
+    0 0 0 4px #a85f3f;
 }
 
 /* 与上游仓库 Available / Beta 标注对齐 */
