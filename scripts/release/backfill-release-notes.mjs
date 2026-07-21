@@ -18,6 +18,7 @@ const OUT_DIR = join(ROOT, 'release-artifacts/backfill');
 const PRE_RE = /-(alpha|beta|rc)(\.|$)/i;
 
 const DEFAULT_VERSIONS = [
+  '3.0.11-rc.2',
   '3.0.11-rc.1',
   '3.0.10',
   '3.0.9',
@@ -113,7 +114,7 @@ function buildBody(version, section, extra = '') {
     : '';
 
   const rollback =
-    version === '3.0.11-rc.1'
+    version === '3.0.11-rc.2' || version === '3.0.11-rc.1'
       ? '上一 GA：`v3.0.10`；生产回滚：`v3.0.10` 对应的上一条 Pages 部署'
       : version === '3.0.10'
       ? '上一 GA：`v3.0.9`；生产回滚：`v3.0.9` 对应的上一条 Pages 部署'

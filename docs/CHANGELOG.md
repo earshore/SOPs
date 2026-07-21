@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.11-rc.2] - 2026-07-22
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.1` 之后的技能页叙事对齐与 Deep Chat 技能 Chip / 输入体验热修。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- 技能页叙事对齐提示词页（方案 B）：使用原则 ×4、技能使用公式、高频实战路径 ×4、业务规则 ×6、页脚统计与来源说明。
+- 技能目录 eyebrow 调整为 Skill Library / 可试用方法论；筛选区随页滚动（不吸顶）。
+
+### Changed
+
+- 技能页移除底部「数据与使用说明」折叠区；指标迁移到页脚。
+- Deep Chat 技能挂载：试用/附加时输入框前缀 Chip 并重试水合；Context Bar 同步展示可移除 Chip。
+
+### Fixed
+
+- 发送/输出完成后空输入框被强制回填技能 Chip。
+- Context Bar 胶囊样式裁切导致 Chip 不可见。
+- 输入框长草稿无法纵向滚动（发送钮贴底固定）。
+- 技能页 `skills-catalog-sticky` 滚动吸顶干扰阅读。
+
 ## [3.0.11-rc.1] - 2026-07-21
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
