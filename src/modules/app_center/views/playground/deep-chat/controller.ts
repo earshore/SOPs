@@ -27,6 +27,7 @@ import {
   type ListingPromptWorkflowContext,
 } from '@/modules/app_center/listingWorkflowHandoff';
 import {
+  buildSystemPromptFromSkillContexts,
   consumeSkillForDeepChat,
   type SkillDeepChatContext,
 } from '@/modules/app_center/skillDeepChatHandoff';
@@ -86,6 +87,7 @@ import type {
   DeepChatLLMCallContext,
   DeepChatRequestMessages,
   DeepChatRequestModelConfig,
+  DeepChatSkillContext,
   DeepChatThread,
   DeepChatThreadStore,
   PreparedDeepChatRequest,
@@ -378,6 +380,8 @@ function setupDraftInputHeightSync(
   }
 
   restoreActiveThreadDraftInput(container);
+  // 输入容器就绪后，把技能 Chip 挂到输入框内部原 skill 名称位置
+  renderContextChips(container);
 
   const onDraftInput = (): void => {
     saveActiveThreadDraft(container);
@@ -635,6 +639,7 @@ function bindControls(container: HTMLElement): void {
   bindStopOverlayControl(container, stopButton);
   bindThreadControls(container, threadList, promptList);
   bindChatSearchControls(container);
+  bindContextChipControls(container);
   bindTuningControls({
     systemPromptInput,
     temperatureInput,
@@ -642,6 +647,13 @@ function bindControls(container: HTMLElement): void {
     resetTuningButton,
     tuningPanel,
   });
+  applySkillContextsToSession(container);
+  renderContextChips(container);
+}
+
+function bindContextChipControls(container: HTMLElement): void {
+  // Chip 挂在 deep-chat shadow 内，点击委托在 render 时绑定到 host
+  void container;
 }
 
 function bindStopOverlayControl(
@@ -1646,6 +1658,9 @@ function createThread(container: HTMLElement, options: CreateThreadOptions = {})
           listingPromptContext: cloneListingPromptContext(options.listingPromptContext),
         }
       : {}),
+    ...(options.skillContexts && options.skillContexts.length > 0
+      ? { skillContexts: cloneSkillContexts(options.skillContexts) }
+      : {}),
     ...(options.draftText ? { draftText: options.draftText } : {}),
   };
   threadStore = {
@@ -1657,6 +1672,8 @@ function createThread(container: HTMLElement, options: CreateThreadOptions = {})
   renderPromptDraftsForActiveThread(container);
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
+  applySkillContextsToSession(container);
+  renderContextChips(container);
   if (options.toastMessage !== null) {
     showToast(options.toastMessage || '已创建新的 Deep Chat 会话', {
       type: 'success',
@@ -1700,25 +1717,183 @@ function createThreadFromListingPromptContext(
   window.setTimeout(() => fillPromptDraftInput(container, promptContext.prompt), 80);
 }
 
-/** Skills 页试用：技能全文 → 系统提示词；用户草稿 → 输入框 */
+/** Skills 页试用：技能全文 → 系统提示词；名称 → 可移除上下文 Chip；草稿 → 输入框 */
 function createThreadFromSkillContext(
   container: HTMLElement,
   skillContext: SkillDeepChatContext
 ): void {
+  const skillChip: DeepChatSkillContext = {
+    skillId: skillContext.skillId,
+    skillTitle: skillContext.skillTitle,
+    skillRaw: skillContext.skillRaw,
+  };
+
   createThread(container, {
-    toastMessage: `已载入技能「${skillContext.skillTitle}」到系统提示词`,
+    toastMessage: `已附加技能「${skillContext.skillTitle}」`,
     draftText: skillContext.userDraft,
+    skillContexts: [skillChip],
   });
 
-  sessionSystemPrompt = skillContext.skillRaw;
+  window.setTimeout(() => fillPromptDraftInput(container, skillContext.userDraft), 80);
+}
+
+function cloneSkillContexts(contexts: DeepChatSkillContext[]): DeepChatSkillContext[] {
+  return contexts.map(context => ({
+    skillId: context.skillId,
+    skillTitle: context.skillTitle,
+    skillRaw: context.skillRaw,
+  }));
+}
+
+function applySkillContextsToSession(container: HTMLElement): void {
+  const contexts = getActiveThread().skillContexts || [];
+  const systemPrompt = buildSystemPromptFromSkillContexts(contexts);
+  sessionSystemPrompt = systemPrompt;
   const systemPromptInput = container.querySelector<HTMLTextAreaElement>(
     '#deep-chat-system-prompt'
   );
   if (systemPromptInput) {
-    systemPromptInput.value = skillContext.skillRaw;
+    systemPromptInput.value = systemPrompt;
+  }
+}
+
+/**
+ * 将上下文 Chip 注入 deep-chat 的 #text-input-container 内部顶部，
+ * 与原先 skill 名称出现在输入框内的位置保持一致。
+ */
+function renderContextChips(container: HTMLElement, attempts = 8): void {
+  const chat = getChat(container);
+  const inputContainer = chat?.shadowRoot?.querySelector<HTMLElement>('#text-input-container');
+  if (!chat?.shadowRoot || !inputContainer) {
+    if (attempts > 0) {
+      window.setTimeout(() => renderContextChips(container, attempts - 1), 50);
+    }
+    return;
   }
 
-  window.setTimeout(() => fillPromptDraftInput(container, skillContext.userDraft), 80);
+  const contexts = getActiveThread().skillContexts || [];
+  let host = inputContainer.querySelector<HTMLElement>('#deep-chat-context-chips-host');
+
+  if (contexts.length === 0) {
+    host?.remove();
+    window.requestAnimationFrame(() => syncDraftInputHeight(container));
+    return;
+  }
+
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'deep-chat-context-chips-host';
+    host.setAttribute('role', 'list');
+    host.setAttribute('aria-label', '会话上下文');
+    const textInput = inputContainer.querySelector('#text-input');
+    if (textInput) {
+      inputContainer.insertBefore(host, textInput);
+    } else {
+      inputContainer.prepend(host);
+    }
+
+    const onContextClick = (event: Event): void => {
+      const target = event.target as HTMLElement | null;
+      const dismissBtn = target?.closest<HTMLElement>('[data-action="dismiss-skill-context"]');
+      if (!dismissBtn?.dataset.skillId || !host?.contains(dismissBtn)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      dismissSkillContext(container, dismissBtn.dataset.skillId);
+    };
+    host.addEventListener('click', onContextClick);
+  }
+
+  host.replaceChildren();
+  for (const context of contexts) {
+    host.appendChild(createSkillContextChip(context));
+  }
+  window.requestAnimationFrame(() => syncDraftInputHeight(container));
+}
+
+function createSvgIcon(paths: string[], size = 12, strokeWidth = '2'): SVGSVGElement {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('width', String(size));
+  svg.setAttribute('height', String(size));
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', strokeWidth);
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  for (const d of paths) {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    svg.appendChild(path);
+  }
+  return svg;
+}
+
+function createSkillContextChip(context: DeepChatSkillContext): HTMLElement {
+  const chip = document.createElement('div');
+  chip.className = 'deep-chat-context-chip';
+  chip.setAttribute('role', 'listitem');
+  chip.dataset.skillId = context.skillId;
+
+  const icon = document.createElement('span');
+  icon.className = 'deep-chat-context-chip__icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.appendChild(createSvgIcon(['M22 10v6M2 10l10-5 10 5-10 5z', 'M6 12v5c3 3 9 3 12 0v-5']));
+
+  const label = document.createElement('span');
+  label.className = 'deep-chat-context-chip__label';
+  label.textContent = context.skillTitle;
+
+  const dismiss = document.createElement('button');
+  dismiss.type = 'button';
+  dismiss.className = 'deep-chat-context-chip__dismiss';
+  dismiss.dataset.action = 'dismiss-skill-context';
+  dismiss.dataset.skillId = context.skillId;
+  dismiss.setAttribute('aria-label', `移除技能上下文 ${context.skillTitle}`);
+  dismiss.title = '移除';
+  dismiss.appendChild(createSvgIcon(['M18 6 6 18M6 6l12 12'], 12, '2.2'));
+
+  chip.append(icon, label, dismiss);
+  return chip;
+}
+
+function dismissSkillContext(container: HTMLElement, skillId: string): void {
+  const activeThread = getActiveThread();
+  const nextContexts = (activeThread.skillContexts || []).filter(
+    context => context.skillId !== skillId
+  );
+
+  updateActiveThreadFields(container, {
+    skillContexts: nextContexts.length > 0 ? nextContexts : undefined,
+  });
+  applySkillContextsToSession(container);
+  renderContextChips(container);
+  showToast('已移除技能上下文', { type: 'success' });
+}
+
+function updateActiveThreadFields(container: HTMLElement, fields: Partial<DeepChatThread>): void {
+  const activeThread = getActiveThread();
+  const nextThread: DeepChatThread = {
+    ...activeThread,
+    ...fields,
+    updatedAt: Date.now(),
+  };
+
+  // skillContexts 显式清空时删除字段
+  if ('skillContexts' in fields && !fields.skillContexts) {
+    delete nextThread.skillContexts;
+  }
+
+  threadStore = {
+    activeThreadId: nextThread.id,
+    threads: [
+      nextThread,
+      ...threadStore.threads.filter(thread => thread.id !== nextThread.id),
+    ].slice(0, getMaxThreadCount()),
+  };
+  persistThreadStoreNow();
+  renderHistoryThreadList(container);
+  refreshChatSearchResultsIfOpen(container);
 }
 
 function cloneListingPromptContext(
@@ -1895,6 +2070,8 @@ function switchThread(container: HTMLElement, threadId: string): void {
   renderPromptDraftsForActiveThread(container);
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
+  applySkillContextsToSession(container);
+  renderContextChips(container);
 }
 
 async function deleteThread(container: HTMLElement, threadId: string): Promise<void> {
@@ -2279,7 +2456,11 @@ function getPersistableThreadStore(): DeepChatThreadStore {
 }
 
 function isPersistableThread(thread: DeepChatThread): boolean {
-  return thread.messages.length > 0 || Boolean(thread.draftText?.trim());
+  return (
+    thread.messages.length > 0 ||
+    Boolean(thread.draftText?.trim()) ||
+    Boolean(thread.skillContexts && thread.skillContexts.length > 0)
+  );
 }
 
 function createDefaultThreadStore(): DeepChatThreadStore {
@@ -2664,13 +2845,33 @@ function getSanitizedThreadOptionalFields(thread: DeepChatThread): Partial<DeepC
   const promptDraftId = getOptionalString(thread.promptDraftId);
   const pinnedAt = getOptionalFiniteTimestamp(thread.pinnedAt);
   const listingPromptContext = getSanitizedListingPromptContext(thread.listingPromptContext);
+  const skillContexts = getSanitizedSkillContexts(thread.skillContexts);
 
   return {
     ...(customTitle ? { customTitle } : {}),
     ...(promptDraftId ? { promptDraftId } : {}),
     ...(listingPromptContext ? { listingPromptContext } : {}),
+    ...(skillContexts ? { skillContexts } : {}),
     ...(pinnedAt ? { pinnedAt } : {}),
   };
+}
+
+function parseSkillContextItem(item: unknown): DeepChatSkillContext | null {
+  if (!item || typeof item !== 'object') return null;
+  const context = item as Partial<DeepChatSkillContext>;
+  const skillId = typeof context.skillId === 'string' ? context.skillId.trim() : '';
+  const skillTitle = typeof context.skillTitle === 'string' ? context.skillTitle.trim() : '';
+  const skillRaw = typeof context.skillRaw === 'string' ? context.skillRaw.trim() : '';
+  if (!skillId || !skillTitle || !skillRaw) return null;
+  return { skillId, skillTitle, skillRaw };
+}
+
+function getSanitizedSkillContexts(value: unknown): DeepChatSkillContext[] | null {
+  if (!Array.isArray(value) || value.length === 0) return null;
+  const contexts = value
+    .map(parseSkillContextItem)
+    .filter((context): context is DeepChatSkillContext => context !== null);
+  return contexts.length > 0 ? contexts : null;
 }
 
 function getSanitizedListingPromptContext(value: unknown): ListingPromptWorkflowContext | null {

@@ -3,6 +3,13 @@ import type { LLMProviderConfig } from '@/types/state';
 import type { DeepChatMessage, DeepChatMessageStatus, DeepChatRole } from './conversationContext';
 import type { PendingDeepChatRequest } from './requestLifecycle';
 import type { ListingPromptWorkflowContext } from '@/modules/app_center/listingWorkflowHandoff';
+import type { SkillDeepChatContext } from '@/modules/app_center/skillDeepChatHandoff';
+
+/** 会话上下文 Chip：持久化 skill 引用（系统提示词来源） */
+export type DeepChatSkillContext = Pick<
+  SkillDeepChatContext,
+  'skillId' | 'skillTitle' | 'skillRaw'
+>;
 
 export interface DeepChatRequestBody {
   messages?: DeepChatMessage[];
@@ -57,6 +64,8 @@ export interface DeepChatThread {
   draftText?: string;
   promptDraftId?: string;
   listingPromptContext?: ListingPromptWorkflowContext;
+  /** Skills 页试用附加的上下文 Chip 列表 */
+  skillContexts?: DeepChatSkillContext[];
   customTitle?: string;
   pinnedAt?: number;
   createdAt: number;
@@ -125,6 +134,7 @@ export interface CreateThreadOptions {
   toastMessage?: string | null;
   promptDraftId?: string;
   listingPromptContext?: ListingPromptWorkflowContext;
+  skillContexts?: DeepChatSkillContext[];
   draftText?: string;
 }
 

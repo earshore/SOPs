@@ -55,8 +55,9 @@ describe('skillRegistry production assets', () => {
     const pending = consumeSkillForDeepChat();
     expect(pending?.skillRaw).toContain('amazon-keyword-research');
     expect(pending?.userDraft).toContain('业务数据');
-    // 模拟 Deep Chat：系统提示词 = skill 全文；用户草稿待补业务数据
+    // 模拟 Deep Chat：系统提示词 = skill 全文；名称由 Chip 展示，草稿不含 skill 名
     const systemPrompt = pending?.skillRaw ?? '';
     expect(systemPrompt.length).toBeLessThan(102400);
+    expect(pending?.userDraft).not.toContain(skill.title);
   });
 });

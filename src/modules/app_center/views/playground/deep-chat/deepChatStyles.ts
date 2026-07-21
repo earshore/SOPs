@@ -291,6 +291,8 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
 
   #text-input-container {
     box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
     width: min(100%, 768px) !important;
     min-width: 0 !important;
     max-width: 100% !important;
@@ -304,8 +306,102 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     overflow-y: auto !important;
   }
 
+  /* 技能上下文 Chip：落在输入框内部顶部，保持原 skill 名称前缀位置 */
+  #deep-chat-context-chips-host {
+    display: none;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 54px 0 18px;
+  }
+
+  #deep-chat-context-chips-host:not(:empty) {
+    display: flex !important;
+  }
+
+  #deep-chat-context-chips-host:not(:empty) + #text-input {
+    padding-top: 8px !important;
+  }
+
+  .deep-chat-context-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    max-width: min(100%, 20rem);
+    min-height: 1.75rem;
+    padding: 0.2rem 0.3rem 0.2rem 0.55rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(168, 95, 63, 0.28);
+    background: #faf3ee;
+    color: #8f4f33;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.25;
+    cursor: default;
+  }
+
+  .deep-chat-context-chip:hover,
+  .deep-chat-context-chip:focus-within {
+    border-color: rgba(168, 95, 63, 0.4);
+    background: #ffffff;
+  }
+
+  .deep-chat-context-chip__icon {
+    flex-shrink: 0;
+    width: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #a85f3f;
+    font-size: 0.7rem;
+  }
+
+  .deep-chat-context-chip__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .deep-chat-context-chip__dismiss {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.7rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms cubic-bezier(0, 0, 0.2, 1), background 150ms cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  .deep-chat-context-chip:hover .deep-chat-context-chip__dismiss,
+  .deep-chat-context-chip:focus-within .deep-chat-context-chip__dismiss {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .deep-chat-context-chip__dismiss:hover,
+  .deep-chat-context-chip__dismiss:focus-visible {
+    background: rgba(168, 95, 63, 0.12);
+    color: #8f4f33;
+    outline: none;
+  }
+
   #text-input {
     box-sizing: border-box !important;
+    flex: 1 1 auto !important;
     min-width: 0 !important;
     max-width: 100% !important;
     min-height: 24px !important;

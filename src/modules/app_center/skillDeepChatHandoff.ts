@@ -32,11 +32,21 @@ export function consumeSkillForDeepChat(): SkillDeepChatContext | null {
   return context;
 }
 
-export function buildSkillDeepChatUserDraft(skillTitle: string): string {
+/** 输入框草稿：技能名称由上下文 Chip 承载，不写进正文 */
+export function buildSkillDeepChatUserDraft(_skillTitle?: string): string {
   return [
-    `请根据系统提示词中的 Amazon 技能「${skillTitle}」方法论，结合我补充的业务数据给出可执行分析。`,
+    '请根据已附加的技能方法论，结合我补充的业务数据给出可执行分析。',
     '',
     '业务数据：',
     '（在此粘贴真实数据，如 ASIN、报表摘要、成本等）',
   ].join('\n');
+}
+
+export function buildSystemPromptFromSkillContexts(
+  contexts: ReadonlyArray<Pick<SkillDeepChatContext, 'skillRaw'>>
+): string {
+  return contexts
+    .map(context => context.skillRaw.trim())
+    .filter(Boolean)
+    .join('\n\n---\n\n');
 }
