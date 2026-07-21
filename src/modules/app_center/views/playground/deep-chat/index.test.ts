@@ -1665,9 +1665,13 @@ describe('deep-chat playground successful requests', () => {
 });
 
 describe('deep-chat playground remount streaming', () => {
-  it('aborts in-flight LLM on unmount so remount does not continue the old stream', async () => {
+  it('keeps generating state across unmount and resumes display on remount', async () => {
     const container = document.createElement('main');
     document.body.append(container);
+    let releaseStream = (): void => {};
+    const streamGate = new Promise<void>(resolve => {
+      releaseStream = resolve;
+    });
     let sawAbort = false;
     const { mount, unmount } = await importDeepChat({
       callLLM: async (...args: unknown[]) => {
@@ -1678,16 +1682,16 @@ describe('deep-chat playground remount streaming', () => {
             }
           | undefined;
         callOptions?.onStreamUpdate?.({ delta: 'First ' });
-        return new Promise<string>((_resolve, reject) => {
-          callOptions?.signal?.addEventListener(
-            'abort',
-            () => {
-              sawAbort = true;
-              reject(new DOMException('Aborted', 'AbortError'));
-            },
-            { once: true }
-          );
-        });
+        callOptions?.signal?.addEventListener(
+          'abort',
+          () => {
+            sawAbort = true;
+          },
+          { once: true }
+        );
+        await streamGate;
+        callOptions?.onStreamUpdate?.({ delta: 'Second' });
+        return 'First Second';
       },
     });
 
@@ -1696,7 +1700,7 @@ describe('deep-chat playground remount streaming', () => {
     const onClose = vi.fn();
 
     getChat(container).connect?.handler(
-      { messages: [{ role: 'user', text: 'Abort on leave' }] },
+      { messages: [{ role: 'user', text: 'Keep generating across leave' }] },
       { onResponse, onClose, stopClicked: { listener: vi.fn() } }
     );
 
@@ -1704,21 +1708,28 @@ describe('deep-chat playground remount streaming', () => {
       expect(onResponse).toHaveBeenCalledWith({ text: 'First ' });
     });
 
-    // 审查收口：卸载必须 abort 在飞请求，避免继续耗 token
+    // 切出页面：不应 abort 在飞生成
     unmount();
-    await vi.waitFor(() => {
-      expect(sawAbort).toBe(true);
-    });
+    expect(sawAbort).toBe(false);
+
+    // 切回：列表应仍显示生成态，并继续输出
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(
+      container.querySelector('.deep-chat-thread-item.is-active .deep-chat-thread-meta')
+        ?.textContent
+    ).toMatch(/生成中|输出中/);
+
+    releaseStream();
     await vi.waitFor(() => {
       expect(onClose).toHaveBeenCalled();
     });
+    await vi.advanceTimersByTimeAsync(400);
 
-    // 重新挂载不应从旧流续写 "Second"
-    await mount(container);
-    await vi.advanceTimersByTimeAsync(200);
-    expect(getChat(container).history).not.toEqual(
+    expect(getChat(container).history).toEqual(
       expect.arrayContaining([expect.objectContaining({ role: 'ai', text: 'First Second' })])
     );
+    expect(sawAbort).toBe(false);
 
     unmount();
   });

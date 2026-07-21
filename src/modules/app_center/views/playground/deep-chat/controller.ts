@@ -229,8 +229,15 @@ class DeepChatModule extends BaseModule {
     clearDraftInputHeightSync();
     clearSubmitStopButtonSync();
     cleanupMessageToolbars();
-    // 立即取消在飞 LLM，避免卸载后继续耗 token；条目随 settle 自删
-    disposeActiveSession({ clearPendingMap: false });
+    // 软卸载：保留 pendingRequests，生成可在后台继续；remount 后恢复「生成中/输出中」
+    // 不 abort 在飞 LLM（与「清空对话」的 disposeActiveSession 区分）
+    openThreadMenu = null;
+    editingThreadId = null;
+    editingThreadValue = '';
+    clearPendingSkillDismissUndo();
+    clearAllPendingDisplayTimers();
+    sessionSystemPrompt = '';
+    sessionTemperature = 0.3;
     mountedContainer = null;
     currentConfig = null;
     selectedModel = '';
@@ -372,7 +379,13 @@ function initDeepChat(container: HTMLElement): void {
   syncPendingStatus(container);
   setupDraftInputHeightSync(container, chat);
   setupSubmitStopButtonSync(container, chat);
-  schedulePendingAssistantDisplay(activeThread.id);
+  // 恢复所有在飞/待输出会话（切出页面再回来时「生成中」不丢）
+  pendingRequests.forEach((_request, threadId) => {
+    schedulePendingAssistantDisplay(threadId);
+  });
+  if (!pendingRequests.has(activeThread.id)) {
+    schedulePendingAssistantDisplay(activeThread.id);
+  }
 }
 
 function setupDraftInputHeightSync(
@@ -2519,12 +2532,27 @@ function bindInlineSkillChipControls(container: HTMLElement, root: ShadowRoot): 
   cleanupCallbacks.push(() => root.removeEventListener('click', onClick));
 }
 
+/** 这些字段变化才应影响「最近会话」排序；调参/切会话写回不应打乱列表 */
+const THREAD_ACTIVITY_SORT_KEYS = new Set([
+  'messages',
+  'title',
+  'customTitle',
+  'pinnedAt',
+  'skillContexts',
+  'draftText',
+]);
+
 function updateActiveThreadFields(container: HTMLElement, fields: Partial<DeepChatThread>): void {
   const activeThread = getActiveThread();
+  if (!hasThreadFieldChanges(activeThread, fields)) {
+    return;
+  }
+
+  const bumpsSortOrder = Object.keys(fields).some(key => THREAD_ACTIVITY_SORT_KEYS.has(key));
   const nextThread: DeepChatThread = {
     ...activeThread,
     ...fields,
-    updatedAt: Date.now(),
+    updatedAt: bumpsSortOrder ? Date.now() : activeThread.updatedAt,
   };
 
   // 显式清空时删除可选字段（避免 undefined 持久化为 null 语义）
@@ -2535,16 +2563,40 @@ function updateActiveThreadFields(container: HTMLElement, fields: Partial<DeepCh
     delete nextThread.systemPrompt;
   }
 
+  // 保持 threads 数组相对顺序，避免仅因写回字段就把当前会话挪到首位
   threadStore = {
     activeThreadId: nextThread.id,
-    threads: [
-      nextThread,
-      ...threadStore.threads.filter(thread => thread.id !== nextThread.id),
-    ].slice(0, getMaxThreadCount()),
+    threads: threadStore.threads
+      .map(thread => (thread.id === nextThread.id ? nextThread : thread))
+      .slice(0, getMaxThreadCount()),
   };
   persistThreadStoreNow();
   renderHistoryThreadList(container);
   refreshChatSearchResultsIfOpen(container);
+}
+
+function hasThreadFieldChanges(thread: DeepChatThread, fields: Partial<DeepChatThread>): boolean {
+  for (const [key, value] of Object.entries(fields) as Array<
+    [keyof DeepChatThread, DeepChatThread[keyof DeepChatThread]]
+  >) {
+    const current = thread[key];
+    if (key === 'skillContexts') {
+      if (JSON.stringify(current ?? null) !== JSON.stringify(value ?? null)) {
+        return true;
+      }
+      continue;
+    }
+    if (value === undefined) {
+      if (current !== undefined && current !== '') {
+        return true;
+      }
+      continue;
+    }
+    if (current !== value) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function cloneListingPromptContext(
