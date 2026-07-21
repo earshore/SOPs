@@ -26,6 +26,58 @@
   max-height: calc(100dvh - var(--header-height, 64px) - clamp(2rem, 4vw, 3rem));
 }
 
+/* Search: icon and text must not overlap */
+.skill-search-wrap {
+  width: 100%;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.skill-search-field {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.skill-search-icon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  pointer-events: none;
+  color: var(--color-slate-400);
+}
+
+.skill-search-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-slate-800);
+  background-color: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+}
+
+.skill-search-input::placeholder {
+  color: var(--color-slate-400);
+}
+
+.skill-search-input:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--color-violet-500);
+}
+
 .category-btn {
   padding: 0.5rem 1rem;
   border-radius: var(--rounded-md);
@@ -56,6 +108,13 @@
   border-color: var(--color-violet-600);
 }
 
+.category-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 4px var(--color-violet-500);
+}
+
 .skill-card {
   background-color: white;
   border-radius: var(--rounded-lg);
@@ -76,19 +135,19 @@
   color: var(--color-violet-600);
 }
 
+.skill-card:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 4px var(--color-violet-500);
+}
+
 .skill-title {
   font-size: 1.125rem;
   font-weight: 700;
   color: var(--color-slate-800);
-  margin-bottom: 0.25rem;
-  transition: color var(--duration-fast);
-}
-
-.skill-id {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.75rem;
-  color: var(--color-slate-500);
   margin-bottom: 0.5rem;
+  transition: color var(--duration-fast);
 }
 
 .skill-description {
@@ -102,8 +161,10 @@
 }
 
 .btn-icon {
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -120,6 +181,13 @@
   background-color: var(--color-violet-50);
 }
 
+.btn-icon:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 4px var(--color-violet-500);
+}
+
 .skill-status-available {
   font-size: 0.75rem;
   font-weight: 600;
@@ -133,9 +201,9 @@
 .skill-status-beta {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #b45309;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
+  color: var(--color-amber-700, #b45309);
+  background: var(--color-amber-50, #fffbeb);
+  border: 1px solid var(--color-amber-200, #fde68a);
   border-radius: var(--rounded-md);
   padding: 0.125rem 0.5rem;
 }

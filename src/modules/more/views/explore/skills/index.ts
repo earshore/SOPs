@@ -1,6 +1,7 @@
 /**
  * More 模块 - 技能页面
- * Amazon Skills 目录：浏览 / 搜索 / 详情 / 复制；数据来自 skillRegistry
+ * 运营目录：浏览 / 搜索 / 读方法 / 复制全文到 AI 对话
+ * 不提供「复制 skillId」入口（工作台编程加载，用户不走 ID 调用）
  */
 
 import BaseModule from '@/common/BaseModule';
@@ -26,8 +27,21 @@ let currentKeyword = '';
 let currentSkill: Skill | null = null;
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
-function installCmd(id: string): string {
-  return `npx skills add nexscope-ai/Amazon-Skills --skill ${id} -g`;
+function isDecorativeCodePoint(cp: number): boolean {
+  if (cp === 0xfe0f || cp === 0x200d || cp === 0x20 || cp === 0xa0) return true;
+  if (cp >= 0x1f300 && cp <= 0x1faff) return true;
+  if (cp >= 0x2600 && cp <= 0x27bf) return true;
+  return false;
+}
+
+/** 展示用标题：去掉上游 H1 自带 emoji，结构图标只用 FA */
+function displayTitle(title: string): string {
+  const chars = Array.from(title.trim());
+  let i = 0;
+  while (i < chars.length && isDecorativeCodePoint(chars[i].codePointAt(0) ?? 0)) {
+    i += 1;
+  }
+  return chars.slice(i).join('').trim() || title.trim();
 }
 
 function statusLabel(status: SkillMeta['status']): string {
@@ -144,7 +158,8 @@ function createActionButton(
   skillId: string,
   action: string,
   icon: string,
-  label: string
+  label: string,
+  skillTitle: string
 ): HTMLButtonElement {
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -152,7 +167,7 @@ function createActionButton(
   btn.dataset.skillId = skillId;
   btn.className = 'btn-icon';
   btn.title = label;
-  btn.setAttribute('aria-label', `${label}：${skillId}`);
+  btn.setAttribute('aria-label', `${label}：${skillTitle}`);
   appendIcon(btn, icon);
   return btn;
 }
@@ -161,6 +176,9 @@ function createSkillCard(skill: SkillMeta): HTMLElement {
   const card = document.createElement('div');
   card.className = 'skill-card group';
   card.dataset.skillId = skill.id;
+  card.tabIndex = 0;
+  card.setAttribute('role', 'button');
+  card.setAttribute('aria-label', `查看技能：${displayTitle(skill.title)}`);
 
   const header = document.createElement('div');
   header.className = 'flex items-start justify-between gap-2 mb-3';
@@ -177,11 +195,7 @@ function createSkillCard(skill: SkillMeta): HTMLElement {
 
   const title = document.createElement('h3');
   title.className = 'skill-title';
-  title.textContent = skill.emoji ? `${skill.emoji} ${skill.title}` : skill.title;
-
-  const idEl = document.createElement('div');
-  idEl.className = 'skill-id';
-  idEl.textContent = skill.id;
+  title.textContent = displayTitle(skill.title);
 
   const desc = document.createElement('p');
   desc.className = 'skill-description';
@@ -192,17 +206,18 @@ function createSkillCard(skill: SkillMeta): HTMLElement {
 
   const left = document.createElement('div');
   left.className = 'text-xs text-slate-400';
-  left.textContent = skill.hasScripts ? '含 scripts' : '纯文档';
+  left.textContent = skill.hasScripts ? '含辅助脚本（本页不执行）' : '方法论文档';
 
   const actions = document.createElement('div');
   actions.className = 'flex gap-2';
+  const titleText = displayTitle(skill.title);
+  // 运营主路径：查看方法 + 复制全文。禁止「复制 skillId」。
   actions.append(
-    createActionButton(skill.id, 'view-skill', 'fas fa-eye', '查看详情'),
-    createActionButton(skill.id, 'copy-skill-id', 'fas fa-fingerprint', '复制 skillId'),
-    createActionButton(skill.id, 'copy-skill-raw', 'fas fa-copy', '复制正文')
+    createActionButton(skill.id, 'view-skill', 'fas fa-eye', '查看详情', titleText),
+    createActionButton(skill.id, 'copy-skill-raw', 'fas fa-copy', '复制全文', titleText)
   );
   footer.append(left, actions);
-  card.append(header, title, idEl, desc, footer);
+  card.append(header, title, desc, footer);
   return card;
 }
 
@@ -239,7 +254,7 @@ function renderList(): void {
         live: true,
         iconClass: 'fas fa-search text-4xl text-slate-300 mb-4',
         title: '未找到匹配的技能',
-        help: '推荐：清空搜索、切回「全部」，或尝试关键词 ppc / listing / keyword。',
+        help: '推荐：清空搜索、切回「全部」，或尝试关键词 PPC、Listing、FBA。',
       })
     );
     return;
@@ -271,8 +286,7 @@ function openDetail(skillId: string): void {
     if (el) el.textContent = text;
   };
 
-  set('modal-skill-title', skill.emoji ? `${skill.emoji} ${skill.title}` : skill.title);
-  set('modal-skill-id', skill.id);
+  set('modal-skill-title', displayTitle(skill.title));
   set('modal-skill-category', skill.categoryLabel);
   set('modal-skill-status', statusLabel(skill.status));
   set('modal-skill-description', skill.description || '');
@@ -305,13 +319,9 @@ function handleSkillAction(skillId: string, action: string | undefined): void {
     openDetail(skillId);
     return;
   }
-  if (action === 'copy-skill-id') {
-    void copyText(skillId, 'skillId 已复制');
-    return;
-  }
   if (action === 'copy-skill-raw') {
     const skill = skillRegistry.getSkill(skillId);
-    if (skill) void copyText(skill.raw, '技能正文已复制');
+    if (skill) void copyText(skill.raw, '技能全文已复制，可粘贴到 AI 对话');
   }
 }
 
@@ -327,6 +337,7 @@ function handleModuleClick(e: Event): void {
 
   const actionBtn = target.closest('[data-action][data-skill-id]') as HTMLElement | null;
   if (actionBtn && moduleRoot.contains(actionBtn) && actionBtn.dataset.skillId) {
+    e.stopPropagation();
     handleSkillAction(actionBtn.dataset.skillId, actionBtn.dataset.action);
     return;
   }
@@ -337,16 +348,24 @@ function handleModuleClick(e: Event): void {
   }
 }
 
+function handleModuleKeydown(e: KeyboardEvent): void {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const target = e.target as HTMLElement | null;
+  if (!target || !moduleRoot) return;
+  const card = target.closest('.skill-card[data-skill-id]') as HTMLElement | null;
+  if (!card?.dataset.skillId || !moduleRoot.contains(card)) return;
+  if (target.closest('[data-action]')) return;
+  e.preventDefault();
+  openDetail(card.dataset.skillId);
+}
+
 function runModalAction(action: string | undefined): void {
   if (action === 'close') {
     closeDetail();
     return;
   }
-  if (!currentSkill) return;
-  if (action === 'copy-id') void copyText(currentSkill.id, 'skillId 已复制');
-  else if (action === 'copy-raw') void copyText(currentSkill.raw, '技能全文已复制');
-  else if (action === 'copy-install') {
-    void copyText(installCmd(currentSkill.id), '安装命令已复制');
+  if (action === 'copy-raw' && currentSkill) {
+    void copyText(currentSkill.raw, '技能全文已复制，可粘贴到 AI 对话');
   }
 }
 
@@ -384,6 +403,7 @@ function initEventListeners(root: HTMLElement): void {
   searchInputRef = root.querySelector('#skill-search');
   searchInputRef?.addEventListener('input', handleSearchInput);
   root.addEventListener('click', handleModuleClick);
+  root.addEventListener('keydown', handleModuleKeydown);
   getSkillModal()?.addEventListener('click', handleModalClick);
   document.addEventListener('keydown', handleDocumentKeydown);
 }
@@ -393,6 +413,7 @@ function removeEventListeners(): void {
   searchTimer = null;
   searchInputRef?.removeEventListener('input', handleSearchInput);
   moduleRoot?.removeEventListener('click', handleModuleClick);
+  moduleRoot?.removeEventListener('keydown', handleModuleKeydown);
   getSkillModal()?.removeEventListener('click', handleModalClick);
   document.removeEventListener('keydown', handleDocumentKeydown);
   searchInputRef = null;
