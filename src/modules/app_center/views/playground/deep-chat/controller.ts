@@ -34,6 +34,7 @@ import {
   type SkillDeepChatContext,
 } from '@/modules/app_center/skillDeepChatHandoff';
 import {
+  SKILL_CHIP_CLASS,
   serializeChipContainingElement,
   setContentWithInlineSkillChips,
   textContainsSkillChipMarker,
@@ -497,15 +498,33 @@ function updateThreadDraft(threadId: string, draftText: string): void {
   }
 }
 
+/** 会话技能是否已在输入框内水合为 Chip DOM（非纯文本「技能名」） */
+function composerHasSessionSkillChips(
+  input: HTMLElement,
+  contexts: DeepChatSkillContext[]
+): boolean {
+  if (contexts.length === 0) {
+    return true;
+  }
+  return contexts.every(context =>
+    Array.from(input.querySelectorAll<HTMLElement>(`.${SKILL_CHIP_CLASS}`)).some(
+      chip => chip.dataset.skillId === context.skillId
+    )
+  );
+}
+
 function isDraftInputReady(
   input: HTMLElement,
   draftText: string,
-  _contexts: DeepChatSkillContext[]
+  contexts: DeepChatSkillContext[]
 ): boolean {
-  return serializeDraftInput(input) === draftText;
+  const expected =
+    contexts.length > 0 ? prefixDraftWithSkillContexts(draftText, contexts) : draftText;
+  // 纯文本「技能名」序列化后与草稿一致，但仍须存在 Chip DOM，否则切页回来会丢 Chip 形态
+  return serializeDraftInput(input) === expected && composerHasSessionSkillChips(input, contexts);
 }
 
-function restoreActiveThreadDraftInput(container: HTMLElement, attempts = 4): void {
+function restoreActiveThreadDraftInput(container: HTMLElement, attempts = 8): void {
   const input = getDraftInput(container);
   if (!input) {
     if (attempts > 0) {
@@ -516,8 +535,11 @@ function restoreActiveThreadDraftInput(container: HTMLElement, attempts = 4): vo
 
   const activeThread = getActiveThread();
   const contexts = activeThread.skillContexts || [];
-  const draftText = normalizeSkillChipDraftText(activeThread.draftText || '', contexts);
-  // 修复历史脏数据（Chip 两侧被浏览器/innerText 注入的换行）
+  const draftText = prefixDraftWithSkillContexts(
+    normalizeSkillChipDraftText(activeThread.draftText || '', contexts),
+    contexts
+  );
+  // 修复历史脏数据 / 补全缺失的技能 Chip 标记
   if (draftText !== (activeThread.draftText || '')) {
     updateThreadDraft(activeThread.id, draftText);
   }
@@ -527,6 +549,7 @@ function restoreActiveThreadDraftInput(container: HTMLElement, attempts = 4): vo
   }
   // 不派发 input：避免 deep-chat 用 innerText 回写脏草稿
   syncDraftInputHeight(container, { instant: true });
+  renderSkillContextBar(container);
 
   if (attempts > 0) {
     window.setTimeout(() => {
@@ -2283,7 +2306,7 @@ function refillComposerWithSkillChips(container: HTMLElement, plainText: string)
   getChat(container)?.focusInput?.();
 }
 
-/** 恢复草稿：有 skillContexts 时确保输入框内有对应 Chip */
+/** 恢复草稿：有 skillContexts 时确保输入框内有对应 Chip DOM */
 function hydrateActiveThreadInlineSkillChips(container: HTMLElement, attempts = 12): void {
   const input = getDraftInput(container);
   if (!input) {
@@ -2298,7 +2321,9 @@ function hydrateActiveThreadInlineSkillChips(container: HTMLElement, attempts = 
     activeThread.draftText || serializeDraftInput(input),
     contexts
   );
-  if (serializeDraftInput(input) !== draftText) {
+  const needsHydrate =
+    serializeDraftInput(input) !== draftText || !composerHasSessionSkillChips(input, contexts);
+  if (needsHydrate) {
     setDraftInputWithInlineChips(input, draftText, contexts);
     if (draftText !== (activeThread.draftText || '')) {
       updateThreadDraft(activeThread.id, draftText);

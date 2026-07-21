@@ -116,7 +116,18 @@ class TestDeepChatElement extends HTMLElement {
   static vendorOnRender?: (element: TestDeepChatElement) => void;
 
   history?: TestChatMessage[];
-  defaultInput?: { text?: string };
+  /** 模拟 deep-chat：defaultInput 以纯文本写入输入框（不含水合 Chip） */
+  private _defaultInput?: { text?: string };
+  get defaultInput(): { text?: string } | undefined {
+    return this._defaultInput;
+  }
+  set defaultInput(value: { text?: string } | undefined) {
+    this._defaultInput = value;
+    const input = this.shadowRoot?.querySelector<HTMLElement>('#text-input');
+    if (input) {
+      input.textContent = value?.text || '';
+    }
+  }
   auxiliaryStyle?: string;
   connect?: {
     stream?: boolean;
@@ -998,6 +1009,65 @@ describe('deep-chat skill trial context bar', () => {
     ).toContain('利润测算');
 
     unmount();
+  });
+
+  it('rehydrates skill chips after remount when draft only has plain skill markers', async () => {
+    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+    const segment = skillHandoff.formatSkillTitleSegment('利润测算');
+    const draftText = `${segment}\n业务数据：ASIN-1`;
+    const container = document.createElement('main');
+    document.body.append(container);
+
+    const stored = {
+      activeThreadId: 'thread-skill-persist',
+      threads: [
+        {
+          id: 'thread-skill-persist',
+          title: '技能会话',
+          messages: [{ role: 'user', text: 'hello', createdAt: 1000 }],
+          draftText,
+          skillContexts: [
+            {
+              skillId: 'profit-calculator',
+              skillTitle: '利润测算',
+              skillRaw: '# Profit Calculator',
+            },
+          ],
+          createdAt: 1000,
+          updatedAt: 2000,
+        },
+      ],
+    };
+
+    const first = await importDeepChat({ storedThreadStore: stored });
+    await first.mount(container);
+    await vi.advanceTimersByTimeAsync(400);
+
+    // defaultInput 写入纯文本后，restore 必须再水合为 Chip
+    expect(
+      getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
+        ?.textContent
+    ).toContain('利润测算');
+    expect(getChat(container).shadowRoot?.querySelector('#text-input')?.textContent).toContain(
+      '业务数据'
+    );
+
+    first.unmount();
+    container.replaceChildren();
+
+    const second = await importDeepChat({ storedThreadStore: stored });
+    await second.mount(container);
+    await vi.advanceTimersByTimeAsync(400);
+
+    expect(
+      getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
+        ?.textContent
+    ).toContain('利润测算');
+    expect(
+      getChat(container).shadowRoot?.querySelectorAll('#text-input .deep-chat-context-chip').length
+    ).toBe(1);
+
+    second.unmount();
   });
 
   it('asks before overwriting a non-empty system prompt when mounting a skill', async () => {
