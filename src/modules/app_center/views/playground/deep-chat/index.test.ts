@@ -965,11 +965,12 @@ describe('deep-chat skill trial context bar render', () => {
 
     expect(bar?.hidden).toBe(false);
     expect(container.querySelector('#deep-chat-skill-context-bar-hint')?.textContent).toContain(
-      '系统提示词已更新为「利润测算」方法论'
+      '方法论已注入系统提示词'
     );
-    // 会话技能 Chip 在 Context Bar；输入框只放业务草稿
+    // 会话技能 Chip 在 Context Bar（标题旁）；输入框只放业务草稿
     expect(barChip?.textContent).toContain('利润测算');
     expect(barChip?.classList.contains('deep-chat-context-chip--dismissible')).toBe(true);
+    expect(bar?.querySelector('.deep-chat-skill-context-bar__chips')).not.toBeNull();
     expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
     expect(input?.textContent).toContain('业务数据');
     expect(

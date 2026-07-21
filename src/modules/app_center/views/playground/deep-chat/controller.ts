@@ -2286,7 +2286,7 @@ function rescueSkillContextBarToStage(container: HTMLElement): void {
 
 /**
  * 将「已挂载技能」提示条贴在输入框上方。
- * 会话技能 Chip 挂在提示条内（可移除）；输入框仅承载业务草稿，发送/完成后不回填 Chip。
+ * 会话技能 Chip 始终在提示条内展示（可移除）；发送清空后不往输入框回填 Chip。
  */
 function renderSkillContextBar(container: HTMLElement): void {
   placeSkillContextBarAboveComposer(container);
@@ -2296,31 +2296,37 @@ function renderSkillContextBar(container: HTMLElement): void {
   }
 
   const contexts = getActiveThread().skillContexts || [];
-  if (contexts.length === 0) {
-    bar.hidden = true;
-    const emptyHost = bar.querySelector<HTMLElement>('.deep-chat-skill-context-bar__chips');
-    if (emptyHost) {
-      emptyHost.replaceChildren();
-    }
-    return;
-  }
-
-  bar.hidden = false;
-  const hint = bar.querySelector<HTMLElement>('#deep-chat-skill-context-bar-hint');
-  if (hint) {
-    const titles = contexts.map(c => c.skillTitle).filter(Boolean);
-    hint.textContent =
-      titles.length === 1
-        ? `系统提示词已更新为「${titles[0]}」方法论`
-        : `系统提示词已合并 ${titles.length} 个技能`;
-  }
-
   let chipHost = bar.querySelector<HTMLElement>('.deep-chat-skill-context-bar__chips');
   if (!chipHost) {
     chipHost = document.createElement('div');
     chipHost.className = 'deep-chat-skill-context-bar__chips';
     chipHost.setAttribute('aria-label', '已挂载技能列表');
-    bar.appendChild(chipHost);
+    // 优先插在 head 内（与标题同行），更醒目；否则挂 bar 末尾
+    const head = bar.querySelector('.deep-chat-skill-context-bar__head');
+    if (head) {
+      const hint = head.querySelector('#deep-chat-skill-context-bar-hint');
+      if (hint) {
+        head.insertBefore(chipHost, hint);
+      } else {
+        head.appendChild(chipHost);
+      }
+    } else {
+      bar.appendChild(chipHost);
+    }
+  }
+
+  if (contexts.length === 0) {
+    bar.hidden = true;
+    chipHost.replaceChildren();
+    return;
+  }
+
+  bar.hidden = false;
+  bar.removeAttribute('hidden');
+  const hint = bar.querySelector<HTMLElement>('#deep-chat-skill-context-bar-hint');
+  if (hint) {
+    hint.textContent =
+      contexts.length === 1 ? '方法论已注入系统提示词' : `已合并 ${contexts.length} 个技能方法论`;
   }
   chipHost.replaceChildren(
     ...contexts.map(context => createSkillContextChip(context, 'dismissible'))
@@ -2785,11 +2791,12 @@ function fillPromptDraftInput(container: HTMLElement, prompt: string, attempts =
   }
 
   const skillContexts = getActiveThread().skillContexts || [];
-  // 业务草稿原样写入；会话技能由 Context Bar 展示，不前缀 Chip
+  // 试用/填入时：业务草稿原样；会话 Chip 只在 Context Bar，不塞进输入框
   const normalizedPrompt =
     skillContexts.length > 0 ? normalizeSkillChipDraftText(prompt, skillContexts) : prompt;
   setDraftInputWithInlineChips(input, normalizedPrompt, skillContexts);
   updateThreadDraft(threadStore.activeThreadId, normalizedPrompt);
+  renderSkillContextBar(container);
   syncDraftInputHeight(container, { instant: true });
   // 始终通知 deep-chat（否则附加到当前会话后发送可能无响应）
   notifyDeepChatComposerInput(input, normalizedPrompt);

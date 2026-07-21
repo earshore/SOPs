@@ -319,7 +319,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     display: none !important;
   }
 
-  /* 已挂载技能提示：在输入框同一列、正上方，不绝对定位叠层 */
+  /* 已挂载技能提示：输入框上方；Chip 在条内，圆角卡片避免胶囊裁切 */
   #input > .deep-chat-skill-context-bar {
     position: relative !important;
     left: auto !important;
@@ -334,13 +334,14 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     width: min(100%, 768px) !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 0.4rem 0.75rem !important;
-    border: 1px solid rgba(168, 95, 63, 0.24) !important;
-    border-radius: 9999px !important;
-    background: rgba(255, 255, 255, 0.98) !important;
+    padding: 0.5rem 0.75rem !important;
+    border: 1px solid rgba(168, 95, 63, 0.28) !important;
+    border-radius: 1rem !important;
+    background: #ffffff !important;
     color: #8f4f33 !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08) !important;
     transform: none !important;
+    overflow: visible !important;
   }
 
   #input > .deep-chat-skill-context-bar[hidden] {
@@ -351,7 +352,8 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
-    gap: 0.35rem 0.65rem !important;
+    gap: 0.4rem 0.55rem !important;
+    min-width: 0 !important;
   }
 
   #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__label {
@@ -367,17 +369,17 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
 
   #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__hint {
     min-width: 0 !important;
-    flex: 1 1 auto !important;
-    font-size: 0.75rem !important;
+    flex: 1 1 8rem !important;
+    font-size: 0.72rem !important;
     font-weight: 500 !important;
     line-height: 1.35 !important;
-    color: #475569 !important;
+    color: #64748b !important;
   }
 
   #input > .deep-chat-skill-context-bar .deep-chat-skill-undo {
     margin-left: auto !important;
     flex-shrink: 0 !important;
-    padding: 0.15rem 0.55rem !important;
+    padding: 0.2rem 0.6rem !important;
     border: 1px solid rgba(168, 95, 63, 0.28) !important;
     border-radius: 9999px !important;
     background: #faf3ee !important;
@@ -392,12 +394,22 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__chips {
-    display: flex !important;
+    display: inline-flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
     gap: 0.35rem !important;
-    margin-top: 0.35rem !important;
+    flex: 1 1 auto !important;
     min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Context Bar 内 Chip 略放大，避免与条背景糊在一起 */
+  #input > .deep-chat-skill-context-bar .deep-chat-context-chip {
+    font-size: 0.8125rem !important;
+    border: 1px solid rgba(168, 95, 63, 0.4) !important;
+    background: #faf3ee !important;
+    color: #6f3925 !important;
+    box-shadow: 0 1px 2px rgba(111, 57, 37, 0.08) !important;
   }
 
   #text-input-container {
