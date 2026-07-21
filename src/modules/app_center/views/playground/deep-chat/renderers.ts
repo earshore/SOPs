@@ -68,17 +68,22 @@ function renderThreadItem(
   const isActive = thread.id === activeThreadId;
   const isPinned = Boolean(thread.pinnedAt);
   const isMenuOpen = thread.id === threadMenuState?.threadId;
+  const hasUnread = Boolean(thread.hasUnread) && !isActive;
   const escapedThreadId = escapeHTML(thread.id);
   const escapedTitle = escapeHTML(thread.title);
   const skillBadge = renderThreadSkillBadge(thread);
+  const unreadDot = hasUnread
+    ? '<span class="deep-chat-thread-unread" aria-label="有新回复" title="有新回复"></span>'
+    : '';
 
   return `
-      <div class="${getThreadItemClassName(isActive, isPinned, isMenuOpen)}">
+      <div class="${getThreadItemClassName(isActive, isPinned, isMenuOpen, hasUnread)}">
         <button class="deep-chat-thread-select" type="button" data-thread-id="${escapedThreadId}">
           <span class="deep-chat-thread-copy">
             <span class="deep-chat-thread-name">${skillBadge}${escapedTitle}</span>
             <span class="deep-chat-thread-meta">${escapeHTML(getThreadMeta(thread, pendingRequests.get(thread.id)))}</span>
           </span>
+          ${unreadDot}
         </button>
         <button class="deep-chat-thread-menu-toggle" type="button" data-thread-menu-id="${escapedThreadId}" aria-label="打开会话 ${escapedTitle} 的更多操作" aria-haspopup="menu" aria-expanded="${String(isMenuOpen)}" aria-controls="deep-chat-thread-menu-${escapedThreadId}" title="更多操作">
           <i class="fas fa-ellipsis" aria-hidden="true"></i>
@@ -112,12 +117,18 @@ function renderThreadEditItem(thread: DeepChatThread, value: string): string {
         </span>
       </div>`;
 }
-function getThreadItemClassName(isActive: boolean, isPinned: boolean, isMenuOpen: boolean): string {
+function getThreadItemClassName(
+  isActive: boolean,
+  isPinned: boolean,
+  isMenuOpen: boolean,
+  hasUnread = false
+): string {
   return [
     'deep-chat-thread-item',
     isActive ? 'is-active' : '',
     isPinned ? 'is-pinned' : '',
     isMenuOpen ? 'is-menu-open' : '',
+    hasUnread ? 'is-unread' : '',
   ]
     .filter(Boolean)
     .join(' ');

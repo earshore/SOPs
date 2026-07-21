@@ -198,6 +198,8 @@ class DeepChatModule extends BaseModule {
     const storedThreadStore = await loadThreadStore();
     if (!this.isCurrentMount(mountSignal)) return;
     threadStore = applyDeepChatThreadResume(applyPendingRequestsToThreadStore(storedThreadStore));
+    // 回到当前会话即视为已读
+    clearThreadUnread(threadStore.activeThreadId);
     renderHistoryThreadList(container);
     renderPromptDraftsForActiveThread(container);
 
@@ -2813,12 +2815,10 @@ function switchThread(container: HTMLElement, threadId: string): void {
     return;
   }
 
-  // 允许在「生成中」切到其他会话：后台 pending 继续跑，仅停止对当前屏的打字机渲染
-  const previousThreadId = threadStore.activeThreadId;
-  clearPendingDisplayTimer(previousThreadId);
-
+  // 允许在「生成中/输出中」切走：上一会话的打字机在后台静默推进直至完成（不 clear timer）
   saveActiveThreadDraft(container);
   saveActiveThreadTuning(container);
+  clearThreadUnread(threadId);
   threadStore = {
     ...threadStore,
     activeThreadId: threadId,
@@ -2831,7 +2831,7 @@ function switchThread(container: HTMLElement, threadId: string): void {
   applySkillContextsToSession(container);
   applyThreadTuningToSession(container);
   hydrateActiveThreadInlineSkillChips(container);
-  // 若目标会话本身也在生成/输出，恢复其屏幕上的打字机
+  // 目标会话若仍在生成/输出，确保有 drain 在跑（可能已在后台 tick）
   if (pendingRequests.has(threadId)) {
     schedulePendingAssistantDisplay(threadId);
     syncPendingStatus(container);
@@ -3341,7 +3341,8 @@ function schedulePendingAssistantDisplay(threadId: string): void {
     return;
   }
 
-  if (pendingDisplayTimers.has(threadId) || !getRenderContainerForThread(threadId)) {
+  // 非当前会话也继续调度：后台静默推进 displayed 文本直至完成
+  if (pendingDisplayTimers.has(threadId)) {
     return;
   }
 
@@ -3354,16 +3355,20 @@ function schedulePendingAssistantDisplay(threadId: string): void {
 function drainPendingAssistantDisplay(threadId: string): void {
   pendingDisplayTimers.delete(threadId);
   const pendingRequest = pendingRequests.get(threadId);
-  const container = getRenderContainerForThread(threadId);
-  if (!pendingRequest || !container) {
+  if (!pendingRequest) {
     return;
   }
 
   const wasSettled = pendingRequest.isSettled;
   const nextDisplayText = getNextPendingAssistantDisplayText(pendingRequest);
   markPendingDeepChatAssistantTextDisplayed(pendingRequest, nextDisplayText);
-  renderPendingAssistantDisplay(container, pendingRequest);
-  syncPendingStatus(container);
+
+  const container = getRenderContainerForThread(threadId);
+  if (container) {
+    renderPendingAssistantDisplay(container, pendingRequest);
+    syncPendingStatus(container);
+  }
+  // 无 container：仅推进内存中的 displayedAssistantText（静默输出）
 
   // 不在每个打字机 tick 重绘会话列表（会打掉点击）；仅状态翻转时刷新 meta
   if (wasSettled !== pendingRequest.isSettled) {
@@ -3427,12 +3432,54 @@ function completeSettledPendingDisplay(
 
   clearPendingDisplayTimer(threadId);
   pendingRequests.delete(threadId);
+
+  // 后台完成：极简未读实心圆点；当前会话完成则不标未读
+  if (threadStore.activeThreadId !== threadId) {
+    markThreadUnread(threadId);
+  }
+
   renderMountedThreadList();
 
   const container = getRenderContainerForThread(threadId);
   if (container) {
     syncPendingStatus(container);
   }
+}
+
+function markThreadUnread(threadId: string): void {
+  const thread = threadStore.threads.find(item => item.id === threadId);
+  if (!thread || thread.hasUnread) {
+    return;
+  }
+
+  threadStore = {
+    ...threadStore,
+    threads: threadStore.threads.map(item =>
+      item.id === threadId ? { ...item, hasUnread: true } : item
+    ),
+  };
+  persistThreadStoreNow();
+}
+
+function clearThreadUnread(threadId: string): void {
+  const thread = threadStore.threads.find(item => item.id === threadId);
+  if (!thread?.hasUnread) {
+    return;
+  }
+
+  threadStore = {
+    ...threadStore,
+    threads: threadStore.threads.map(item => {
+      if (item.id !== threadId) {
+        return item;
+      }
+      const next = { ...item };
+      delete next.hasUnread;
+      return next;
+    }),
+  };
+  // 调用方会 persist / 重绘；此处仅更新内存。若仅清未读也需落盘：
+  persistThreadStoreNow();
 }
 
 function clearPendingDisplayTimer(threadId: string): void {
@@ -3615,26 +3662,24 @@ function sanitizeThread(thread: DeepChatThread): DeepChatThread | null {
 }
 
 function getSanitizedThreadOptionalFields(thread: DeepChatThread): Partial<DeepChatThread> {
+  const fields: Partial<DeepChatThread> = {};
   const customTitle = getOptionalString(thread.customTitle);
   const promptDraftId = getOptionalString(thread.promptDraftId);
   const systemPrompt = getOptionalString(thread.systemPrompt);
   const pinnedAt = getOptionalFiniteTimestamp(thread.pinnedAt);
   const listingPromptContext = getSanitizedListingPromptContext(thread.listingPromptContext);
   const skillContexts = getSanitizedSkillContexts(thread.skillContexts);
-  const temperature =
-    typeof thread.temperature === 'number' && Number.isFinite(thread.temperature)
-      ? normalizeTemperature(String(thread.temperature))
-      : undefined;
-
-  return {
-    ...(customTitle ? { customTitle } : {}),
-    ...(promptDraftId ? { promptDraftId } : {}),
-    ...(systemPrompt ? { systemPrompt } : {}),
-    ...(typeof temperature === 'number' ? { temperature } : {}),
-    ...(listingPromptContext ? { listingPromptContext } : {}),
-    ...(skillContexts ? { skillContexts } : {}),
-    ...(pinnedAt ? { pinnedAt } : {}),
-  };
+  if (customTitle) fields.customTitle = customTitle;
+  if (promptDraftId) fields.promptDraftId = promptDraftId;
+  if (systemPrompt) fields.systemPrompt = systemPrompt;
+  if (typeof thread.temperature === 'number' && Number.isFinite(thread.temperature)) {
+    fields.temperature = normalizeTemperature(String(thread.temperature));
+  }
+  if (listingPromptContext) fields.listingPromptContext = listingPromptContext;
+  if (skillContexts) fields.skillContexts = skillContexts;
+  if (pinnedAt) fields.pinnedAt = pinnedAt;
+  if (thread.hasUnread === true) fields.hasUnread = true;
+  return fields;
 }
 
 /** 日志脱敏：避免 apiKey / token 等敏感字段进入 console */

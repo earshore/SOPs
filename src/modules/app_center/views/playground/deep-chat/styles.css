@@ -314,7 +314,9 @@
 .deep-chat-thread-select {
   width: 100%;
   min-width: 0;
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-1-5, 0.375rem);
   padding: var(--spacing-2, 0.5rem) var(--spacing-1-5, 0.375rem);
   border: 0;
   background: transparent;
@@ -325,7 +327,20 @@
 
 .deep-chat-thread-copy {
   min-width: 0;
+  flex: 1 1 auto;
   display: block;
+}
+
+/* 后台完成回复的极简未读：实心圆点 */
+.deep-chat-thread-unread {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin-top: 0.4em;
+  border-radius: 999px;
+  background: var(--deep-chat-accent, #a85f3f);
+  box-shadow: 0 0 0 2px rgba(var(--deep-chat-accent-rgb, 168, 95, 63), 0.12);
+  pointer-events: none;
 }
 
 .deep-chat-thread-name,

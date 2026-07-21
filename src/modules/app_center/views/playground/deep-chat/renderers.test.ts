@@ -57,6 +57,34 @@ describe('renderThreadList skill badge', () => {
   });
 });
 
+describe('renderThreadList unread indicator', () => {
+  it('shows a solid unread dot for inactive threads with hasUnread', () => {
+    const container = createThreadListContainer();
+    const store = makeStore();
+    store.threads[1] = {
+      ...store.threads[1]!,
+      hasUnread: true,
+    };
+    renderThreadList(container, store, new Map());
+    const unreadItem = container.querySelector('.deep-chat-thread-item.is-unread');
+    expect(unreadItem).not.toBeNull();
+    expect(unreadItem?.querySelector('.deep-chat-thread-unread')).not.toBeNull();
+    expect(unreadItem?.textContent).toContain('Second thread');
+  });
+
+  it('does not show unread on the active thread even if hasUnread is set', () => {
+    const container = createThreadListContainer();
+    const store = makeStore();
+    store.threads[0] = {
+      ...store.threads[0]!,
+      hasUnread: true,
+    };
+    renderThreadList(container, store, new Map());
+    expect(container.querySelector('.deep-chat-thread-unread')).toBeNull();
+    expect(container.querySelector('.deep-chat-thread-item.is-unread')).toBeNull();
+  });
+});
+
 describe('renderThreadList inline rename editing', () => {
   it('renders a normal text item when not editing', () => {
     const container = createThreadListContainer();

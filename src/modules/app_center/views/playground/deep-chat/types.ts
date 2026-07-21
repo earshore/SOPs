@@ -72,6 +72,8 @@ export interface DeepChatThread {
   temperature?: number;
   customTitle?: string;
   pinnedAt?: number;
+  /** 后台完成回复后的未读标记（切回会话时清除） */
+  hasUnread?: boolean;
   createdAt: number;
   updatedAt: number;
 }
