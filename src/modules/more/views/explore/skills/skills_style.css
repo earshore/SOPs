@@ -230,9 +230,8 @@
 }
 
 .btn-icon:hover {
-  /* C3：次要操作 hover 使用 Deep Chat 赤陶软色，强化链路识别 */
-  color: #8f4f33;
-  background-color: #faf3ee;
+  color: var(--color-violet-600);
+  background-color: var(--color-violet-50);
 }
 
 /* L3：模态次要操作 = 图标 + 文字，与卡片次要语义对齐 */
@@ -257,16 +256,16 @@
 }
 
 .skill-action-secondary:hover {
-  color: #8f4f33;
-  background: #faf3ee;
-  border-color: rgba(168, 95, 63, 0.28);
+  color: var(--color-violet-700);
+  background: var(--color-violet-50);
+  border-color: var(--color-violet-200);
 }
 
 .skill-action-secondary:focus-visible {
   outline: none;
   box-shadow:
     0 0 0 2px #fff,
-    0 0 0 4px #a85f3f;
+    0 0 0 4px var(--color-violet-500);
 }
 
 /* FB4：技能库为空 — 隐藏筛选、突出目录空态 */
@@ -282,7 +281,7 @@
   opacity: 0.72;
 }
 
-/* F3/C1：主操作「在 Deep Chat 试用」（色值对齐 Deep Chat accent #a85f3f） */
+/* F3/C1：主操作「在 Deep Chat 试用」— 沿用技能页紫/品红，不串 Deep Chat 赤陶 */
 .skill-cta-primary {
   display: inline-flex;
   align-items: center;
@@ -292,7 +291,7 @@
   padding: 0.4rem 0.85rem;
   border: 1px solid transparent;
   border-radius: var(--rounded-md, 0.375rem);
-  background: #a85f3f;
+  background: var(--color-violet-600);
   color: #fff;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -305,15 +304,15 @@
 }
 
 .skill-cta-primary:hover:not(:disabled) {
-  background: #8f4f33;
-  box-shadow: 0 2px 8px rgba(168, 95, 63, 0.28);
+  background: var(--color-violet-700);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-violet-600) 35%, transparent);
 }
 
 .skill-cta-primary:focus-visible {
   outline: none;
   box-shadow:
     0 0 0 2px #fff,
-    0 0 0 4px #a85f3f;
+    0 0 0 4px var(--color-violet-500);
 }
 
 .skill-cta-primary:disabled,
@@ -349,7 +348,7 @@
   outline: none;
   box-shadow:
     0 0 0 2px white,
-    0 0 0 4px #a85f3f;
+    0 0 0 4px var(--color-violet-500);
 }
 
 /* 与上游仓库 Available / Beta 标注对齐 */
