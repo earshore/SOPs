@@ -16,6 +16,27 @@ const gzipAsync = promisify(gzip);
 const brotliCompressAsync = promisify(brotliCompress);
 const deepChatBundleSource = require.resolve('deep-chat/dist/deepChat.bundle.js');
 const deepChatBundlePublicPath = '/assets/vendor/deepChat.bundle.js';
+/**
+ * deep-chat 在 messageToElements 为空时仍调用 getFirstMessageContentEl，
+ * 访问 [length-1][1] 会抛 TypeError: Cannot read properties of undefined (reading '1')。
+ * 在分发 bundle 时打上防护补丁（dev middleware + build copy）。
+ */
+const DEEP_CHAT_SCROLL_BUG =
+  'getFirstMessageContentEl(){const{text:t,html:e,files:s}=this.messageToElements[this.messageToElements.length-1][1];return t||e||(null==s?void 0:s[0])}';
+const DEEP_CHAT_SCROLL_FIX =
+  'getFirstMessageContentEl(){const n=this.messageToElements[this.messageToElements.length-1];if(!n||!n[1])return;const{text:t,html:e,files:s}=n[1];return t||e||(null==s?void 0:s[0])}';
+
+function patchDeepChatBundleSource(source) {
+  if (!source.includes(DEEP_CHAT_SCROLL_BUG)) {
+    if (!source.includes(DEEP_CHAT_SCROLL_FIX)) {
+      console.warn(
+        '[sops:deep-chat-bundle-asset] scroll guard pattern not found; vendor may have changed'
+      );
+    }
+    return source;
+  }
+  return source.replace(DEEP_CHAT_SCROLL_BUG, DEEP_CHAT_SCROLL_FIX);
+}
 const devServerForwardConsole = {
   enabled: true,
   unhandledErrors: true,
@@ -120,19 +141,36 @@ function createPrecompressPlugin({ threshold = 10240 } = {}) {
 function createDeepChatBundleAssetPlugin() {
   let outputDir;
   let shouldCopyBundle = false;
+  /** @type {string | null} */
+  let patchedBundleCache = null;
+
+  async function getPatchedDeepChatBundle() {
+    if (patchedBundleCache !== null) {
+      return patchedBundleCache;
+    }
+    const raw = await readFile(deepChatBundleSource, 'utf8');
+    patchedBundleCache = patchDeepChatBundleSource(raw);
+    return patchedBundleCache;
+  }
 
   return {
     name: 'sops:deep-chat-bundle-asset',
     configureServer(server) {
-      server.middlewares.use((request, response, next) => {
+      server.middlewares.use(async (request, response, next) => {
         const requestPath = request.url?.split('?')[0];
         if (requestPath !== deepChatBundlePublicPath) {
           next();
           return;
         }
 
-        response.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-        createReadStream(deepChatBundleSource).pipe(response);
+        try {
+          const body = await getPatchedDeepChatBundle();
+          response.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+          response.setHeader('Cache-Control', 'no-cache');
+          response.end(body);
+        } catch (error) {
+          next(error);
+        }
       });
     },
     configResolved(config) {
@@ -146,7 +184,8 @@ function createDeepChatBundleAssetPlugin() {
 
       const targetPath = resolve(outputDir, deepChatBundlePublicPath.slice(1));
       await mkdir(dirname(targetPath), { recursive: true });
-      await copyFile(deepChatBundleSource, targetPath);
+      const body = await getPatchedDeepChatBundle();
+      await writeFile(targetPath, body, 'utf8');
     },
   };
 }
