@@ -1,95 +1,76 @@
-# Amazon Skills 页与 Skill Registry 设计规格
+﻿# Amazon Skills 椤典笌 Skill Registry 璁捐瑙勬牸
 
-**日期：** 2026-07-21  
-**状态：** Ready for review  
-**范围代号：** Phase A — Skills 页 + 可调用 Registry（非工作台 UI）
-
+**鏃ユ湡锛?* 2026-07-21  
+**鐘舵€侊細** Ready for review  
+**鑼冨洿浠ｅ彿锛?* Phase A 鈥?Skills 椤?+ 鍙皟鐢?Registry锛堥潪宸ヤ綔鍙?UI锛?
 ---
 
-## 1. 背景与目标
+## 1. 鑳屾櫙涓庣洰鏍?
+### 1.1 鑳屾櫙
 
-### 1.1 背景
+SOPs銆屾洿澶?鈫?澶фā鍨嬫帰绱€嶇幇鏈変笁椤碉細鏅鸿兘浣撱€佹彁绀鸿瘝銆佸伐浣滄祦銆傛櫤鑳戒綋椤靛凡鐢诲嚭 `Role 鈫?Goal 鈫?Skill 鈫?MCP 鈫?Tool 鈫?Report` 閾捐矾锛屼絾 Skill Library 浠嶄负鍗犱綅銆?
+澶栭儴璧勪骇 [nexscope-ai/Amazon-Skills](https://github.com/nexscope-ai/Amazon-Skills) 鎻愪緵绾?53 涓爣鍑?Agent Skills锛堟瘡鐩綍 `SKILL.md` + 鍙€?`scripts/`锛夛紝鍙 OpenClaw / Claude Code / Cursor 绛夊姞杞姐€傞渶灏嗗叾鍚堢悊妞嶅叆鏈郴缁燂紝渚涚洰褰曟祻瑙堬紝骞惰鍚庣画宸ヤ綔鍙?Agent **鐪熷疄鎸?id 璋冪敤鍏ㄩ儴 skill**銆?
+### 1.2 鐩爣
 
-SOPs「更多 → 大模型探索」现有三页：智能体、提示词、工作流。智能体页已画出 `Role → Goal → Skill → MCP → Tool → Report` 链路，但 Skill Library 仍为占位。
-
-外部资产 [nexscope-ai/Amazon-Skills](https://github.com/nexscope-ai/Amazon-Skills) 提供约 53 个标准 Agent Skills（每目录 `SKILL.md` + 可选 `scripts/`），可被 OpenClaw / Claude Code / Cursor 等加载。需将其合理植入本系统，供目录浏览，并让后续工作台/Agent **真实按 id 调用全部 skill**。
-
-### 1.2 目标
-
-1. 在「更多 → 大模型探索」新增 **技能** 页，风格与规范对齐现有 explore 体系。
-2. 以 Git submodule 引入 Amazon-Skills 全文资产。
-3. 落地全站 **`skillRegistry`**：`list` / `get` / `loadSkillContext`，与 Skills 页同源。
-4. 工作台/Agent **本期不改业务绑定**，但 API 必须就绪，任意 skillId 可同步加载进 LLM 上下文。
-5. 更多总览补「技能」入口卡片。
-
-### 1.3 非目标（本期不做）
-
-- 工作台 UI、页内执行 skill `scripts/`、页内调用 LLM
-- 将 PPC / 日报等现有 Agent 强制绑定具体 skill
-- 全量中文翻译 `SKILL.md` 正文
-- 新 npm 依赖做 frontmatter / markdown 渲染
-- 挂载到 DI `ServiceRegistry`（一期直接 export 单例）
-- 一次把 53 个 skill 全部注入上下文（禁止默认行为）
-
+1. 鍦ㄣ€屾洿澶?鈫?澶фā鍨嬫帰绱€嶆柊澧?**鎶€鑳?* 椤碉紝椋庢牸涓庤鑼冨榻愮幇鏈?explore 浣撶郴銆?2. 浠?Git submodule 寮曞叆 Amazon-Skills 鍏ㄦ枃璧勪骇銆?3. 钀藉湴鍏ㄧ珯 **`skillRegistry`**锛歚list` / `get` / `loadSkillContext`锛屼笌 Skills 椤靛悓婧愩€?4. 宸ヤ綔鍙?Agent **鏈湡涓嶆敼涓氬姟缁戝畾**锛屼絾 API 蹇呴』灏辩华锛屼换鎰?skillId 鍙悓姝ュ姞杞借繘 LLM 涓婁笅鏂囥€?5. 鏇村鎬昏琛ャ€屾妧鑳姐€嶅叆鍙ｅ崱鐗囥€?
+### 1.3 闈炵洰鏍囷紙鏈湡涓嶅仛锛?
+- 宸ヤ綔鍙?UI銆侀〉鍐呮墽琛?skill `scripts/`銆侀〉鍐呰皟鐢?LLM
+- 灏?PPC / 鏃ユ姤绛夌幇鏈?Agent 寮哄埗缁戝畾鍏蜂綋 skill
+- 鍏ㄩ噺涓枃缈昏瘧 `SKILL.md` 姝ｆ枃
+- 鏂?npm 渚濊禆鍋?frontmatter / markdown 娓叉煋
+- 鎸傝浇鍒?DI `ServiceRegistry`锛堜竴鏈熺洿鎺?export 鍗曚緥锛?- 涓€娆℃妸 53 涓?skill 鍏ㄩ儴娉ㄥ叆涓婁笅鏂囷紙绂佹榛樿琛屼负锛?
 ---
 
-## 2. 已锁定决策
-
-| # | 决策 | 结论 |
+## 2. 宸查攣瀹氬喅绛?
+| # | 鍐崇瓥 | 缁撹 |
 |---|---|---|
-| D1 | 范围 | Skills 页 + Registry；工作台可调全部 skill（按 id 显式 load） |
-| D2 | 资产来源 | Git submodule → `nexscope-ai/Amazon-Skills` |
-| D3 | 加载方式 | Vite `import.meta.glob` + 运行时解析（路径 1） |
-| D4 | 主调用方 | 本应用内 Agent / 工作流 |
-| D5 | 语言 | 中文外壳 + 上游英文 `SKILL.md` 原文 |
-| D6 | 注入默认格式 | `loadSkillContext` 默认 `raw`（完整 SKILL.md） |
-| D7 | scripts | 仅元数据探测；浏览器不执行；禁止 `?raw` 内联脚本进业务包 |
-| D8 | DI | 一期 `export const skillRegistry` 单例，不挂 DI |
-| D9 | UI 范式 | explore violet + 提示词页搜索/分类/卡片/modal；ui-ux-pro-max 作目录型信息架构参考 |
-| D10 | 总览 | 必做「技能」卡；徽章 **已接入**；顺序：智能体 → 技能 → 提示词 → 工作流 |
+| D1 | 鑼冨洿 | Skills 椤?+ Registry锛涘伐浣滃彴鍙皟鍏ㄩ儴 skill锛堟寜 id 鏄惧紡 load锛?|
+| D2 | 璧勪骇鏉ユ簮 | Git submodule 鈫?`nexscope-ai/Amazon-Skills` |
+| D3 | 鍔犺浇鏂瑰紡 | Vite `import.meta.glob` + 杩愯鏃惰В鏋愶紙璺緞 1锛?|
+| D4 | 涓昏皟鐢ㄦ柟 | 鏈簲鐢ㄥ唴 Agent / 宸ヤ綔娴?|
+| D5 | 璇█ | 涓枃澶栧３ + 涓婃父鑻辨枃 `SKILL.md` 鍘熸枃 |
+| D6 | 娉ㄥ叆榛樿鏍煎紡 | `loadSkillContext` 榛樿 `raw`锛堝畬鏁?SKILL.md锛?|
+| D7 | scripts | 浠呭厓鏁版嵁鎺㈡祴锛涙祻瑙堝櫒涓嶆墽琛岋紱绂佹 `?raw` 鍐呰仈鑴氭湰杩涗笟鍔″寘 |
+| D8 | DI | 涓€鏈?`export const skillRegistry` 鍗曚緥锛屼笉鎸?DI |
+| D9 | UI 鑼冨紡 | explore violet + 鎻愮ず璇嶉〉鎼滅储/鍒嗙被/鍗＄墖/modal锛泆i-ux-pro-max 浣滅洰褰曞瀷淇℃伅鏋舵瀯鍙傝€?|
+| D10 | 鎬昏 | 蹇呭仛銆屾妧鑳姐€嶅崱锛涘窘绔?**宸叉帴鍏?*锛涢『搴忥細鏅鸿兘浣?鈫?鎶€鑳?鈫?鎻愮ず璇?鈫?宸ヤ綔娴?|
 
 ---
 
-## 3. 信息架构与路由
+## 3. 淇℃伅鏋舵瀯涓庤矾鐢?
+### 3.1 鑿滃崟浣嶇疆
 
-### 3.1 菜单位置
-
-| 项 | 值 |
+| 椤?| 鍊?|
 |---|---|
-| 模块 | 更多 (`more_core`) |
-| 分组 | 大模型探索 (`explore`) |
-| 侧栏标签 | 技能 |
-| 图标 | `fas fa-graduation-cap` |
-| 顺序 | 智能体 → **技能** → 提示词 → 工作流 |
+| 妯″潡 | 鏇村 (`more_core`) |
+| 鍒嗙粍 | 澶фā鍨嬫帰绱?(`explore`) |
+| 渚ф爮鏍囩 | 鎶€鑳?|
+| 鍥炬爣 | `fas fa-graduation-cap` |
+| 椤哄簭 | 鏅鸿兘浣?鈫?**鎶€鑳?* 鈫?鎻愮ず璇?鈫?宸ヤ綔娴?|
 
-同步更新 `menuConfig.moreCategories.explore.description`：
+鍚屾鏇存柊 `menuConfig.moreCategories.explore.description`锛?
+> 鏅鸿兘浣撱€佹妧鑳姐€佹彁绀鸿瘝銆佸伐浣滄祦绛夊疄鐢ㄥ姛鑳姐€?
+### 3.2 璺敱濂戠害
 
-> 智能体、技能、提示词、工作流等实用功能。
-
-### 3.2 路由契约
-
-| 字段 | 值 |
+| 瀛楁 | 鍊?|
 |---|---|
 | `key` | `SKILLS` |
 | `routeId` | `more_skills` |
 | `path` | `/more/explore/skills` |
-| `label` | 技能 |
+| `label` | 鎶€鑳?|
 | `category` | `explore` |
 | `loaderPath` | `./views/explore/skills/index.ts` |
 
-联动：
-
+鑱斿姩锛?
 - `src/modules/more/module.manifest.ts`
-- `src/common/router/legacyRouteAliases.ts`（`/more_skills` → `more_skills`）
-- `MODULE_MAP` 由 `import.meta.glob` 自动拾取
-- 路由相关单测（若有枚举）补 `more_skills`
+- `src/common/router/legacyRouteAliases.ts`锛坄/more_skills` 鈫?`more_skills`锛?- `MODULE_MAP` 鐢?`import.meta.glob` 鑷姩鎷惧彇
+- 璺敱鐩稿叧鍗曟祴锛堣嫢鏈夋灇涓撅級琛?`more_skills`
 
-### 3.3 目录结构
+### 3.3 鐩綍缁撴瀯
 
 ```text
 vendor/amazon-skills/                    # git submodule
-src/services/skillRegistry/              # 全站可调用
-  types.ts
+src/services/skillRegistry/              # 鍏ㄧ珯鍙皟鐢?  types.ts
   parseSkillMd.ts
   categoryMap.ts
   loadSkillModules.ts
@@ -102,29 +83,22 @@ src/modules/more/views/explore/skills/
   skills_style.css
 ```
 
-原则：**资产在 submodule；解析与索引在 `src/services/skillRegistry`**。工作台禁止依赖 more 模块 UI。
-
-### 3.4 与相邻页关系
+鍘熷垯锛?*璧勪骇鍦?submodule锛涜В鏋愪笌绱㈠紩鍦?`src/services/skillRegistry`**銆傚伐浣滃彴绂佹渚濊禆 more 妯″潡 UI銆?
+### 3.4 涓庣浉閭婚〉鍏崇郴
 
 ```text
-智能体 ──发现入口──▶ 技能（目录 + Registry）
-提示词 ──并行层──▶ 技能（Prompt 模板 ≠ Agent Skill）
-工作流 ──后续可引用──▶ skillId（本期不改工作流页）
-更多总览 ──必做卡片──▶ more_skills
+鏅鸿兘浣?鈹€鈹€鍙戠幇鍏ュ彛鈹€鈹€鈻?鎶€鑳斤紙鐩綍 + Registry锛?鎻愮ず璇?鈹€鈹€骞惰灞傗攢鈹€鈻?鎶€鑳斤紙Prompt 妯℃澘 鈮?Agent Skill锛?宸ヤ綔娴?鈹€鈹€鍚庣画鍙紩鐢ㄢ攢鈹€鈻?skillId锛堟湰鏈熶笉鏀瑰伐浣滄祦椤碉級
+鏇村鎬昏 鈹€鈹€蹇呭仛鍗＄墖鈹€鈹€鈻?more_skills
 ```
 
 ---
 
-## 4. Skill Registry（工作台契约）
+## 4. Skill Registry锛堝伐浣滃彴濂戠害锛?
+### 4.1 璁捐鐩爣
 
-### 4.1 设计目标
-
-- 单一真相源：`vendor/amazon-skills/*/SKILL.md`
-- 构建期打入包内，运行时 **同步** `getSkill` / `loadSkillContext`（无网络）
-- Skills 页与工作台共用同一 API：「页上可见 ⟺ 可 load」
-- 可单测：解析、分类、搜索、缺 skill、空库
-
-### 4.2 类型
+- 鍗曚竴鐪熺浉婧愶細`vendor/amazon-skills/*/SKILL.md`
+- 鏋勫缓鏈熸墦鍏ュ寘鍐咃紝杩愯鏃?**鍚屾** `getSkill` / `loadSkillContext`锛堟棤缃戠粶锛?- Skills 椤典笌宸ヤ綔鍙板叡鐢ㄥ悓涓€ API锛氥€岄〉涓婂彲瑙?鉄?鍙?load銆?- 鍙崟娴嬶細瑙ｆ瀽銆佸垎绫汇€佹悳绱€佺己 skill銆佺┖搴?
+### 4.2 绫诲瀷
 
 ```ts
 type SkillCategoryId =
@@ -172,30 +146,28 @@ interface SkillSearchQuery {
 }
 ```
 
-### 4.3 分类映射
+### 4.3 鍒嗙被鏄犲皠
 
-- `categoryMap.ts`：skill id / 目录名 → `SkillCategoryId` + 中文 label + status
-- 与上游 README 业务分组对齐
-- **未入表 skill 仍完整入库并可 load**，UI 归「其他」、status 为 `unknown`
-- categoryMap 只影响展示分组，不影响「可调用全部」
-
-### 4.4 加载
+- `categoryMap.ts`锛歴kill id / 鐩綍鍚?鈫?`SkillCategoryId` + 涓枃 label + status
+- 涓庝笂娓?README 涓氬姟鍒嗙粍瀵归綈
+- **鏈叆琛?skill 浠嶅畬鏁村叆搴撳苟鍙?load**锛孶I 褰掋€屽叾浠栥€嶃€乻tatus 涓?`unknown`
+- categoryMap 鍙奖鍝嶅睍绀哄垎缁勶紝涓嶅奖鍝嶃€屽彲璋冪敤鍏ㄩ儴銆?
+### 4.4 鍔犺浇
 
 ```ts
-// loadSkillModules.ts — 路径相对该文件
-import.meta.glob(
+// loadSkillModules.ts 鈥?璺緞鐩稿璇ユ枃浠?import.meta.glob(
   '../../../vendor/amazon-skills/*/SKILL.md',
   { query: '?raw', import: 'default', eager: true }
 );
 
-// scripts 仅路径/URL 探测，禁止 ?raw 内联脚本正文
+// scripts 浠呰矾寰?URL 鎺㈡祴锛岀姝??raw 鍐呰仈鑴氭湰姝ｆ枃
 import.meta.glob(
   '../../../vendor/amazon-skills/*/scripts/**',
   { query: '?url', import: 'default', eager: true }
 );
 ```
 
-类型声明（`src/types/global.d.ts`）：
+绫诲瀷澹版槑锛坄src/types/global.d.ts`锛夛細
 
 ```ts
 declare module '*.md?raw' {
@@ -204,30 +176,28 @@ declare module '*.md?raw' {
 }
 ```
 
-初始化（懒加载，`ensureInitialized`）：
+鍒濆鍖栵紙鎳掑姞杞斤紝`ensureInitialized`锛夛細
 
-1. 遍历 SKILL.md glob
-2. `parseSkillMd(raw)` → name / description / body / frontmatter
-3. 父目录名 + scripts glob → `hasScripts`
-4. `Map<id, Skill>`；**id 冲突 first-wins + warn**
-5. 缺 `name`：用父目录名作 id + warn，**仍纳入**
-6. 单文件 parse 失败：skip + `parseFailures++` + warn，不阻断其余
+1. 閬嶅巻 SKILL.md glob
+2. `parseSkillMd(raw)` 鈫?name / description / body / frontmatter
+3. 鐖剁洰褰曞悕 + scripts glob 鈫?`hasScripts`
+4. `Map<id, Skill>`锛?*id 鍐茬獊 first-wins + warn**
+5. 缂?`name`锛氱敤鐖剁洰褰曞悕浣?id + warn锛?*浠嶇撼鍏?*
+6. 鍗曟枃浠?parse 澶辫触锛歴kip + `parseFailures++` + warn锛屼笉闃绘柇鍏朵綑
 
-**空库策略（软失败）：**
+**绌哄簱绛栫暐锛堣蒋澶辫触锛夛細**
 
-- `ensureInitialized()` 得到 0 个 skill → 空 Map + `Logger.error`，**不**抛错拖垮整站
-- 页面展示空态（提示 submodule init）
-- 工作台 `loadSkillContext` / strict 批量在空库时抛 `SystemError` `SKILL_REG_002`
+- `ensureInitialized()` 寰楀埌 0 涓?skill 鈫?绌?Map + `Logger.error`锛?*涓?*鎶涢敊鎷栧灝鏁寸珯
+- 椤甸潰灞曠ず绌烘€侊紙鎻愮ず submodule init锛?- 宸ヤ綔鍙?`loadSkillContext` / strict 鎵归噺鍦ㄧ┖搴撴椂鎶?`SystemError` `SKILL_REG_002`
 
-### 4.5 Frontmatter 解析
+### 4.5 Frontmatter 瑙ｆ瀽
 
-- **零新依赖**
-- 匹配文件头 `---\n...\n---`
-- 解析标量：`name`、`description`（行级 `key: value` / 引号字符串）
-- `metadata` 可选解析 `nexscope.emoji`；失败则忽略 emoji
-- 不依赖完整 YAML 规范；非法 frontmatter → 该文件 skip（`SKILL_REG_003` 语义）
-
-### 4.6 对外 API
+- **闆舵柊渚濊禆**
+- 鍖归厤鏂囦欢澶?`---\n...\n---`
+- 瑙ｆ瀽鏍囬噺锛歚name`銆乣description`锛堣绾?`key: value` / 寮曞彿瀛楃涓诧級
+- `metadata` 鍙€夎В鏋?`nexscope.emoji`锛涘け璐ュ垯蹇界暐 emoji
+- 涓嶄緷璧栧畬鏁?YAML 瑙勮寖锛涢潪娉?frontmatter 鈫?璇ユ枃浠?skip锛坄SKILL_REG_003` 璇箟锛?
+### 4.6 瀵瑰 API
 
 ```ts
 interface SkillRegistry {
@@ -238,13 +208,11 @@ interface SkillRegistry {
   hasSkill(id: string): boolean;
   getCategories(): Array<{ id: SkillCategoryId; label: string; count: number }>;
 
-  /** 未知 id → ValidationError SKILL_REG_001；空库 → SystemError SKILL_REG_002 */
+  /** 鏈煡 id 鈫?ValidationError SKILL_REG_001锛涚┖搴?鈫?SystemError SKILL_REG_002 */
   loadSkillContext(id: string, options?: SkillLoadOptions): string;
 
   /**
-   * 批量加载。strict:true 时任一缺失/空库抛错；
-   * 默认 skip 缺失 + warn。
-   */
+   * 鎵归噺鍔犺浇銆俿trict:true 鏃朵换涓€缂哄け/绌哄簱鎶涢敊锛?   * 榛樿 skip 缂哄け + warn銆?   */
   loadSkillsContext(
     ids: string[],
     options?: SkillLoadOptions & { strict?: boolean }
@@ -259,8 +227,7 @@ interface SkillRegistry {
 }
 ```
 
-批量拼接模板：
-
+鎵归噺鎷兼帴妯℃澘锛?
 ```text
 ---
 # Skill: {id}
@@ -268,23 +235,21 @@ interface SkillRegistry {
 ---
 ```
 
-导出：`src/services/skillRegistry/index.ts` → `export { skillRegistry } from './skillRegistryService'`
+瀵煎嚭锛歚src/services/skillRegistry/index.ts` 鈫?`export { skillRegistry } from './skillRegistryService'`
 
-### 4.7 错误码
-
-| Code | 类型 | 场景 |
+### 4.7 閿欒鐮?
+| Code | 绫诲瀷 | 鍦烘櫙 |
 |---|---|---|
-| `SKILL_REG_001` | ValidationError | 指定 skill id 不存在 |
-| `SKILL_REG_002` | SystemError | load 时 registry 为空（submodule/glob 失败） |
-| `SKILL_REG_003` | （内部） | 单文件 parse 失败，skip + warn |
+| `SKILL_REG_001` | ValidationError | 鎸囧畾 skill id 涓嶅瓨鍦?|
+| `SKILL_REG_002` | SystemError | load 鏃?registry 涓虹┖锛坰ubmodule/glob 澶辫触锛?|
+| `SKILL_REG_003` | 锛堝唴閮級 | 鍗曟枃浠?parse 澶辫触锛宻kip + warn |
 
-### 4.8 工作台调用约定
-
+### 4.8 宸ヤ綔鍙拌皟鐢ㄧ害瀹?
 ```ts
 import { skillRegistry } from '@/services/skillRegistry';
 
 const block = skillRegistry.loadSkillContext('amazon-ppc-campaign');
-// 拼入 system / developer 消息，勿与不可信用户数据混段
+// 鎷煎叆 system / developer 娑堟伅锛屽嬁涓庝笉鍙俊鐢ㄦ埛鏁版嵁娣锋
 
 const multi = skillRegistry.loadSkillsContext([
   'amazon-keyword-research',
@@ -292,204 +257,185 @@ const multi = skillRegistry.loadSkillsContext([
 ]);
 ```
 
-细则：
-
-1. **按 id 显式加载**；禁止默认注入全部 53
-2. skill 正文视为可信内部资产（submodule）
-3. 用户业务数据仍按现有规则 untrusted
-4. scripts 不在浏览器执行；宿主执行层另开期
-5. Agent 在配置/代码中声明依赖的 `skillId[]`
+缁嗗垯锛?
+1. **鎸?id 鏄惧紡鍔犺浇**锛涚姝㈤粯璁ゆ敞鍏ュ叏閮?53
+2. skill 姝ｆ枃瑙嗕负鍙俊鍐呴儴璧勪骇锛坰ubmodule锛?3. 鐢ㄦ埛涓氬姟鏁版嵁浠嶆寜鐜版湁瑙勫垯 untrusted
+4. scripts 涓嶅湪娴忚鍣ㄦ墽琛岋紱瀹夸富鎵ц灞傚彟寮€鏈?5. Agent 鍦ㄩ厤缃?浠ｇ爜涓０鏄庝緷璧栫殑 `skillId[]`
 
 ---
 
-## 5. Skills 页 UI / 交互
+## 5. Skills 椤?UI / 浜や簰
 
-### 5.1 设计原则
+### 5.1 璁捐鍘熷垯
 
-吸收 **ui-ux-pro-max** 的文档目录模式（Search-first + 分类 + 列表 + 详情），视觉与组件 **强制贴合** more/explore：
-
-| 采用 | 拒绝（防孤岛） |
+鍚告敹 **ui-ux-pro-max** 鐨勬枃妗ｇ洰褰曟ā寮忥紙Search-first + 鍒嗙被 + 鍒楄〃 + 璇︽儏锛夛紝瑙嗚涓庣粍浠?**寮哄埗璐村悎** more/explore锛?
+| 閲囩敤 | 鎷掔粷锛堥槻瀛ゅ矝锛?|
 |---|---|
-| `wb-theme-violet`、白底 `border-slate-200` 卡片 | 新字体、OLED 暗色主题 |
-| 提示词页搜索 / `category-btn` / 卡片 / `app-modal` | 独立 design system 色板 |
-| Font Awesome 结构图标 | emoji 作导航/结构图标 |
-| design tokens / 现有 Tailwind violet-slate | glass 重特效 |
-| `textContent` 渲染 skill 正文 | `innerHTML` 渲染不可信/外部 md |
+| `wb-theme-violet`銆佺櫧搴?`border-slate-200` 鍗＄墖 | 鏂板瓧浣撱€丱LED 鏆楄壊涓婚 |
+| 鎻愮ず璇嶉〉鎼滅储 / `category-btn` / 鍗＄墖 / `app-modal` | 鐙珛 design system 鑹叉澘 |
+| Font Awesome 缁撴瀯鍥炬爣 | emoji 浣滃鑸?缁撴瀯鍥炬爣 |
+| design tokens / 鐜版湁 Tailwind violet-slate | glass 閲嶇壒鏁?|
+| `textContent` 娓叉煋 skill 姝ｆ枃 | `innerHTML` 娓叉煋涓嶅彲淇?澶栭儴 md |
 
-上游 `emoji` 仅作标题旁次要文本装饰，不作图标容器。
+涓婃父 `emoji` 浠呬綔鏍囬鏃佹瑕佹枃鏈楗帮紝涓嶄綔鍥炬爣瀹瑰櫒銆?
+### 5.2 椤甸潰缁撴瀯
 
-### 5.2 页面结构
+1. Welcome Banner锛坄wb-container--simple wb-theme-violet`锛?2. 鎸囨爣鏉?4 鍗★紙`getStats()`锛?3. 宸ヤ綔鍙拌皟鐢ㄨ鏄庯紙鍙浠ｇ爜鍧?+ 濂戠害璇存槑锛?4. Skill Library锛氭悳绱?+ 鍒嗙被 + 缁撴灉璁℃暟 + 鍗＄墖缃戞牸
+5. 璇︽儏 Modal
+6. 椤佃剼褰掑睘锛圡IT / 婧愪粨搴?/ 涓嶆墽琛?scripts锛?
+### 5.3 Banner 鏂囨
 
-1. Welcome Banner（`wb-container--simple wb-theme-violet`）
-2. 指标条 4 卡（`getStats()`）
-3. 工作台调用说明（只读代码块 + 契约说明）
-4. Skill Library：搜索 + 分类 + 结果计数 + 卡片网格
-5. 详情 Modal
-6. 页脚归属（MIT / 源仓库 / 不执行 scripts）
+- 鏍囬锛氭妧鑳? 
+- Badge锛歚SKILL OPS`  
+- 鎻忚堪锛欰mazon Skills 璧勪骇鐩綍锛氭祻瑙堛€佹绱€佸鍒?skill 姝ｆ枃涓?skillId锛涘伐浣滃彴閫氳繃 skillRegistry 鎸?id 鍔犺浇锛屼笌鏈〉鍚屾簮銆? 
+- Tags锛歚{total} Skills`锛堟潵鑷?`getStats().total`锛岀姝㈠啓姝?53锛壜?`Registry 鍙皟鐢╜ 路 `涓枃澶栧３ / 鑻辨枃鍘熸枃`
 
-### 5.3 Banner 文案
-
-- 标题：技能  
-- Badge：`SKILL OPS`  
-- 描述：Amazon Skills 资产目录：浏览、检索、复制 skill 正文与 skillId；工作台通过 skillRegistry 按 id 加载，与本页同源。  
-- Tags：`{total} Skills`（来自 `getStats().total`，禁止写死 53）· `Registry 可调用` · `中文外壳 / 英文原文`
-
-### 5.4 指标条
-
-| 卡 | 数据 |
+### 5.4 鎸囨爣鏉?
+| 鍗?| 鏁版嵁 |
 |---|---|
 | TOTAL | `stats.total` |
-| CATEGORY | 有计数的分类数 |
-| SCRIPTS | `hasScripts === true` 数量 |
-| BETA | `status === 'beta'` 数量 |
+| CATEGORY | 鏈夎鏁扮殑鍒嗙被鏁?|
+| SCRIPTS | `hasScripts === true` 鏁伴噺 |
+| BETA | `status === 'beta'` 鏁伴噺 |
 
-### 5.5 Library 交互
+### 5.5 Library 浜や簰
 
-- 搜索：`#skill-search`，debounce 200ms，`listSkills({ keyword, category })`
-- 分类：全部 + `getCategories()`；`aria-pressed`；active 用现有 `category-btn.active`
-- 结果计数：`显示 N / 共 M 个技能`，`aria-live="polite"`
-- 网格：`grid-cols-1 md:grid-cols-2 xl:grid-cols-3`
-- 卡片：分类 badge、status（色+文）、title、`id` mono、description 两行 clamp、查看/复制 id/复制正文
-- 空态：无匹配（建议清空/示例词）；registry 空（submodule 命令 + `role="alert"`）
-- DOM：`createElement` + `textContent`，对齐 prompts 安全渲染
+- 鎼滅储锛歚#skill-search`锛宒ebounce 200ms锛宍listSkills({ keyword, category })`
+- 鍒嗙被锛氬叏閮?+ `getCategories()`锛沗aria-pressed`锛沘ctive 鐢ㄧ幇鏈?`category-btn.active`
+- 缁撴灉璁℃暟锛歚鏄剧ず N / 鍏?M 涓妧鑳絗锛宍aria-live="polite"`
+- 缃戞牸锛歚grid-cols-1 md:grid-cols-2 xl:grid-cols-3`
+- 鍗＄墖锛氬垎绫?badge銆乻tatus锛堣壊+鏂囷級銆乼itle銆乣id` mono銆乨escription 涓よ clamp銆佹煡鐪?澶嶅埗 id/澶嶅埗姝ｆ枃
+- 绌烘€侊細鏃犲尮閰嶏紙寤鸿娓呯┖/绀轰緥璇嶏級锛況egistry 绌猴紙submodule 鍛戒护 + `role="alert"`锛?- DOM锛歚createElement` + `textContent`锛屽榻?prompts 瀹夊叏娓叉煋
 
-### 5.6 详情 Modal
+### 5.6 璇︽儏 Modal
 
-- 复用 `app-modal`；header 渐变与 prompts 一致（`violet → fuchsia`）
-- 展示 meta + **`raw` 只读 pre/text**（一期不做 markdown 渲染）
-- 操作：复制 raw、复制 skillId、复制  
+- 澶嶇敤 `app-modal`锛沨eader 娓愬彉涓?prompts 涓€鑷达紙`violet 鈫?fuchsia`锛?- 灞曠ず meta + **`raw` 鍙 pre/text**锛堜竴鏈熶笉鍋?markdown 娓叉煋锛?- 鎿嶄綔锛氬鍒?raw銆佸鍒?skillId銆佸鍒? 
   `npx skills add nexscope-ai/Amazon-Skills --skill {id} -g`  
-  关闭（按钮 / backdrop / Escape）
-- Toast：`showToast`；clipboard：`copyTextToClipboard`
+  鍏抽棴锛堟寜閽?/ backdrop / Escape锛?- Toast锛歚showToast`锛沜lipboard锛歚copyTextToClipboard`
 
-### 5.7 不做
+### 5.7 涓嶅仛
 
-- 页内运行 skill / 调 LLM  
-- 虚拟列表（53 量级无需）  
-- URL query 深链（二期可选 `?skill=id`）  
-- 新 icon 库 / 新字体 / 独立主题  
+- 椤靛唴杩愯 skill / 璋?LLM  
+- 铏氭嫙鍒楄〃锛?3 閲忕骇鏃犻渶锛? 
+- URL query 娣遍摼锛堜簩鏈熷彲閫?`?skill=id`锛? 
+- 鏂?icon 搴?/ 鏂板瓧浣?/ 鐙珛涓婚  
 
-### 5.8 UI 自检清单
+### 5.8 UI 鑷娓呭崟
 
-- [ ] FA 结构图标；无 emoji 导航图标  
-- [ ] hover + cursor-pointer；过渡用现有 duration token  
-- [ ] 正文对比 ≥ 4.5:1  
-- [ ] 可见 focus ring  
-- [ ] 图标按钮 `aria-label`  
-- [ ] 空态有恢复路径  
-- [ ] status 不单靠颜色  
-- [ ] 无新增装饰动画；尊重 reduced-motion 全局策略  
-- [ ] 375–1440 无横向溢出  
-- [ ] skill 正文不用 `innerHTML`  
+- [ ] FA 缁撴瀯鍥炬爣锛涙棤 emoji 瀵艰埅鍥炬爣  
+- [ ] hover + cursor-pointer锛涜繃娓＄敤鐜版湁 duration token  
+- [ ] 姝ｆ枃瀵规瘮 鈮?4.5:1  
+- [ ] 鍙 focus ring  
+- [ ] 鍥炬爣鎸夐挳 `aria-label`  
+- [ ] 绌烘€佹湁鎭㈠璺緞  
+- [ ] status 涓嶅崟闈犻鑹? 
+- [ ] 鏃犳柊澧炶楗板姩鐢伙紱灏婇噸 reduced-motion 鍏ㄥ眬绛栫暐  
+- [ ] 375鈥?440 鏃犳í鍚戞孩鍑? 
+- [ ] skill 姝ｆ枃涓嶇敤 `innerHTML`  
 
 ---
 
-## 6. 更多总览（必做）
+## 6. 鏇村鎬昏锛堝繀鍋氾級
 
-**文件：** `src/modules/more/views/overview/template.html`
+**鏂囦欢锛?* `src/modules/more/views/overview/template.html`
 
-1. 探索区副标题改为含「技能」  
-2. 在智能体与提示词之间插入技能卡：
-
-| 字段 | 值 |
+1. 鎺㈢储鍖哄壇鏍囬鏀逛负鍚€屾妧鑳姐€? 
+2. 鍦ㄦ櫤鑳戒綋涓庢彁绀鸿瘝涔嬮棿鎻掑叆鎶€鑳藉崱锛?
+| 瀛楁 | 鍊?|
 |---|---|
-| 导航 | `data-action="switch-tab" data-tab="more_skills"` |
-| 样式 | `sop-card overview-accent-card overview-accent-violet` |
-| 图标 | `fas fa-graduation-cap` + `bg-violet-50 text-violet-600` |
-| 徽章 | `sop-status-badge sop-status-active` + **已接入** |
-| 标题 | 技能 |
-| 描述 | Amazon Skills 资产目录：浏览、检索、复制 skill 正文与 skillId；工作台经 skillRegistry 同源调用。 |
-| 底栏 | `Agent Skill · 可调用 Registry` |
+| 瀵艰埅 | `data-action="switch-tab" data-tab="more_skills"` |
+| 鏍峰紡 | `sop-card overview-accent-card overview-accent-violet` |
+| 鍥炬爣 | `fas fa-graduation-cap` + `bg-violet-50 text-violet-600` |
+| 寰界珷 | `sop-status-badge sop-status-active` + **宸叉帴鍏?* |
+| 鏍囬 | 鎶€鑳?|
+| 鎻忚堪 | Amazon Skills 璧勪骇鐩綍锛氭祻瑙堛€佹绱€佸鍒?skill 姝ｆ枃涓?skillId锛涘伐浣滃彴缁?skillRegistry 鍚屾簮璋冪敤銆?|
+| 搴曟爮 | `Agent Skill 路 鍙皟鐢?Registry` |
 
-3. 顺序：智能体 → 技能 → 提示词 → 工作流  
-4. 一期不做总览动态 skill 计数；不新增总览专用 CSS  
+3. 椤哄簭锛氭櫤鑳戒綋 鈫?鎶€鑳?鈫?鎻愮ず璇?鈫?宸ヤ綔娴? 
+4. 涓€鏈熶笉鍋氭€昏鍔ㄦ€?skill 璁℃暟锛涗笉鏂板鎬昏涓撶敤 CSS  
 
 ---
 
-## 7. Submodule 工程约定
+## 7. Submodule 宸ョ▼绾﹀畾
 
-| 项 | 约定 |
+| 椤?| 绾﹀畾 |
 |---|---|
-| 路径 | `vendor/amazon-skills` |
-| 远程 | `https://github.com/nexscope-ai/Amazon-Skills.git` |
-| 指针 | 锁定 commit SHA |
-| 本地 | `git submodule update --init --recursive` |
-| CI | checkout 开启 submodules 或显式 init |
-| 升级 | 更新指针 + 新 skill 补 categoryMap |
+| 璺緞 | `vendor/amazon-skills` |
+| 杩滅▼ | `https://github.com/nexscope-ai/Amazon-Skills.git` |
+| 鎸囬拡 | 閿佸畾 commit SHA |
+| 鏈湴 | `git submodule update --init --recursive` |
+| CI | checkout 寮€鍚?submodules 鎴栨樉寮?init |
+| 鍗囩骇 | 鏇存柊鎸囬拡 + 鏂?skill 琛?categoryMap |
 
 ---
 
-## 8. 实现顺序
+## 8. 瀹炵幇椤哄簭
 
-1. submodule + `*.md?raw` 类型  
-2. parseSkillMd + categoryMap + loadSkillModules + skillRegistry + 单测  
-3. module.manifest + alias + menu 文案  
-4. Skills 页 UI  
-5. 更多总览卡片  
-6. （可选）Agent 页 Skill Library 链到 `more_skills`  
-7. type-check / 相关单测 / 手工冒烟  
+1. submodule + `*.md?raw` 绫诲瀷  
+2. parseSkillMd + categoryMap + loadSkillModules + skillRegistry + 鍗曟祴  
+3. module.manifest + alias + menu 鏂囨  
+4. Skills 椤?UI  
+5. 鏇村鎬昏鍗＄墖  
+6. 锛堝彲閫夛級Agent 椤?Skill Library 閾惧埌 `more_skills`  
+7. type-check / 鐩稿叧鍗曟祴 / 鎵嬪伐鍐掔儫  
 
-Registry 先于 UI，保证工作台契约不依赖页面。
-
+Registry 鍏堜簬 UI锛屼繚璇佸伐浣滃彴濂戠害涓嶄緷璧栭〉闈€?
 ---
 
-## 9. 测试与验收
-
-### 9.1 自动化
-
-| 用例 | 期望 |
+## 9. 娴嬭瘯涓庨獙鏀?
+### 9.1 鑷姩鍖?
+| 鐢ㄤ緥 | 鏈熸湜 |
 |---|---|
-| frontmatter 正常 | name / description / body |
-| 缺 name | 父目录名作 id，仍入库 |
-| 坏文件 | skip + parseFailures++ |
-| id 冲突 | first-wins |
-| listSkills 关键词 | 匹配 id/title/description，大小写不敏感 |
-| 未映射分类 | other，仍可 load |
-| 未知 id load | ValidationError `SKILL_REG_001` |
-| 空库 load | SystemError `SKILL_REG_002` |
-| 批量 strict / 非 strict | 符合 4.6 |
-| 路由 | `routeIdToPath('more_skills') === '/more/explore/skills'` |
+| frontmatter 姝ｅ父 | name / description / body |
+| 缂?name | 鐖剁洰褰曞悕浣?id锛屼粛鍏ュ簱 |
+| 鍧忔枃浠?| skip + parseFailures++ |
+| id 鍐茬獊 | first-wins |
+| listSkills 鍏抽敭璇?| 鍖归厤 id/title/description锛屽ぇ灏忓啓涓嶆晱鎰?|
+| 鏈槧灏勫垎绫?| other锛屼粛鍙?load |
+| 鏈煡 id load | ValidationError `SKILL_REG_001` |
+| 绌哄簱 load | SystemError `SKILL_REG_002` |
+| 鎵归噺 strict / 闈?strict | 绗﹀悎 4.6 |
+| 璺敱 | `routeIdToPath('more_skills') === '/more/explore/skills'` |
 
-### 9.2 手工冒烟
+### 9.2 鎵嬪伐鍐掔儫
 
-1. 侧栏出现「技能」，顺序正确  
-2. `/more/explore/skills` 列表非空（submodule 已 init）  
-3. 搜索与分类有效  
-4. 详情复制 raw / id / 安装命令 + toast  
-5. 总览「技能」→ 进入页；徽章「已接入」  
-6. `listSkills().length` 与 TOTAL 一致  
-7. `loadSkillContext('amazon-keyword-research')` 非空  
+1. 渚ф爮鍑虹幇銆屾妧鑳姐€嶏紝椤哄簭姝ｇ‘  
+2. `/more/explore/skills` 鍒楄〃闈炵┖锛坰ubmodule 宸?init锛? 
+3. 鎼滅储涓庡垎绫绘湁鏁? 
+4. 璇︽儏澶嶅埗 raw / id / 瀹夎鍛戒护 + toast  
+5. 鎬昏銆屾妧鑳姐€嶁啋 杩涘叆椤碉紱寰界珷銆屽凡鎺ュ叆銆? 
+6. `listSkills().length` 涓?TOTAL 涓€鑷? 
+7. `loadSkillContext('amazon-keyword-research')` 闈炵┖  
 
-### 9.3 不算失败
+### 9.3 涓嶇畻澶辫触
 
-- 不执行 scripts  
-- 不自动改造 PPC Agent  
-- 不翻译 SKILL 正文  
+- 涓嶆墽琛?scripts  
+- 涓嶈嚜鍔ㄦ敼閫?PPC Agent  
+- 涓嶇炕璇?SKILL 姝ｆ枃  
 
 ---
 
-## 10. 风险
+## 10. 椋庨櫓
 
-| 风险 | 缓解 |
+| 椋庨櫓 | 缂撹В |
 |---|---|
-| 未 init submodule | 空态 + 命令；load 时 `SKILL_REG_002` |
-| 上游新 skill 未映射 | 仍可调用，UI「其他」 |
-| 包体积 | 一期可接受；lazy 属契约变更，另开期 |
-| frontmatter 非标 | 最小解析 + skip |
-| 样式分叉 | 复用 category-btn / modal / violet |
+| 鏈?init submodule | 绌烘€?+ 鍛戒护锛沴oad 鏃?`SKILL_REG_002` |
+| 涓婃父鏂?skill 鏈槧灏?| 浠嶅彲璋冪敤锛孶I銆屽叾浠栥€?|
+| 鍖呬綋绉?| 涓€鏈熷彲鎺ュ彈锛沴azy 灞炲绾﹀彉鏇达紝鍙﹀紑鏈?|
+| frontmatter 闈炴爣 | 鏈€灏忚В鏋?+ skip |
+| 鏍峰紡鍒嗗弶 | 澶嶇敤 category-btn / modal / violet |
 
 ---
 
-## 11. 参考
-
-- 源资产：https://github.com/nexscope-ai/Amazon-Skills  
-- UI 参考 skill：ui-ux-pro-max（`~/.agents/skills/ui-ux-pro-max`），仅用信息架构与 UX 清单  
-- 同构页面：`src/modules/more/views/explore/prompts/`、`agents/`、`overview/`  
+## 11. 鍙傝€?
+- 婧愯祫浜э細https://github.com/nexscope-ai/Amazon-Skills  
+- UI 鍙傝€?skill锛歶i-ux-pro-max锛坄~/.agents/skills/ui-ux-pro-max`锛夛紝浠呯敤淇℃伅鏋舵瀯涓?UX 娓呭崟  
+- 鍚屾瀯椤甸潰锛歚src/modules/more/views/explore/prompts/`銆乣agents/`銆乣overview/`  
 
 ---
 
-## 12. 变更记录
+## 12. 鍙樻洿璁板綍
 
-| 日期 | 说明 |
+| 鏃ユ湡 | 璇存槑 |
 |---|---|
-| 2026-07-21 | 初稿：Section 1–4 用户确认后落盘 |
+| 2026-07-21 | 鍒濈锛歋ection 1鈥? 鐢ㄦ埛纭鍚庤惤鐩?|
