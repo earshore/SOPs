@@ -64,22 +64,35 @@ function persistFilters(): void {
 }
 
 function isDecorativeCodePoint(cp: number): boolean {
+  // 变体选择符 / ZWJ / 空白
   if (cp === 0xfe0f || cp === 0x200d || cp === 0x20 || cp === 0xa0) return true;
+  // 杂项符号与象形、补充符号（含多数 emoji）
   if (cp >= 0x1f300 && cp <= 0x1faff) return true;
+  // 杂项符号（☀ 等）
   if (cp >= 0x2600 && cp <= 0x27bf) return true;
+  // 技术符号 / 杂项符号箭头等装饰
+  if (cp >= 0x2300 && cp <= 0x23ff) return true;
+  if (cp >= 0x2b00 && cp <= 0x2bff) return true;
   return false;
 }
 
-/** 展示用标题：去掉上游 H1 自带 emoji，结构图标只用 FA */
+/** 展示用标题：去掉上游 H1 首尾 emoji，结构图标只用 FA */
 function displayTitle(title: string): string {
   const chars = Array.from(title.trim());
-  let i = 0;
-  while (i < chars.length) {
-    const ch = chars[i];
+  let start = 0;
+  let end = chars.length;
+  while (start < end) {
+    const ch = chars[start];
     if (!ch || !isDecorativeCodePoint(ch.codePointAt(0) ?? 0)) break;
-    i += 1;
+    start += 1;
   }
-  return chars.slice(i).join('').trim() || title.trim();
+  while (end > start) {
+    const ch = chars[end - 1];
+    if (!ch || !isDecorativeCodePoint(ch.codePointAt(0) ?? 0)) break;
+    end -= 1;
+  }
+  // 去掉标题与尾部 emoji 之间的残留空白
+  return chars.slice(start, end).join('').trim() || title.trim();
 }
 
 /** C2：状态标签中文统一；动作仍称「在 Deep Chat 试用」 */
