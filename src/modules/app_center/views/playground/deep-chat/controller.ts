@@ -1902,7 +1902,7 @@ function bindSkillHandoffListeners(container: HTMLElement): void {
 /**
  * Skills 页试用：skill 全文 → 系统提示词；Context Bar 展示挂载；输入框仅业务草稿。
  * F2：若当前会话已有对话/技能，可选择「新建会话」或「附加到当前」。
- * FB2：若将覆盖自定义系统提示词，需确认。
+ * FB2：仅「附加到当前会话」时，若会覆盖已有系统提示词才需确认（新建会话不弹覆盖框）。
  */
 async function createThreadFromSkillContext(
   container: HTMLElement,
@@ -1932,23 +1932,6 @@ async function createThreadFromSkillContext(
     attachToCurrent = choice === 'secondary';
   }
 
-  const existingPrompt = getCurrentSessionSystemPrompt(container);
-  const nextPrompt = skillContext.skillRaw.trim();
-  if (existingPrompt && existingPrompt !== nextPrompt) {
-    const confirmed = await confirmWithModal(
-      '覆盖系统提示词',
-      `当前已有自定义系统提示词。挂载技能「${skillContext.skillTitle}」将用技能方法论<strong>覆盖</strong>该内容。<br/><span class="text-xs text-slate-500 mt-1 block">可在右上角 Settings 中查看与编辑系统提示词。</span>`,
-      'dc_skill_overwrite_system_prompt',
-      '覆盖并挂载'
-    );
-    if (!confirmed) {
-      showToast('已取消挂载技能', { type: 'warning' });
-      return;
-    }
-  }
-
-  showSkillLoadBanner(container, skillContext.skillTitle);
-
   const skillChip: DeepChatSkillContext = {
     skillId: skillContext.skillId,
     skillTitle: skillContext.skillTitle,
@@ -1956,10 +1939,17 @@ async function createThreadFromSkillContext(
   };
 
   if (attachToCurrent) {
+    // 仅附加到当前会话时，覆盖已有系统提示词需要确认
+    if (!(await confirmOverwriteSystemPromptIfNeeded(container, skillContext))) {
+      return;
+    }
+    showSkillLoadBanner(container, skillContext.skillTitle);
     attachSkillToActiveThread(container, skillContext, skillChip);
     return;
   }
 
+  // 新建会话：不沿用当前会话的系统提示词，无需「覆盖」确认
+  showSkillLoadBanner(container, skillContext.skillTitle);
   createThread(container, {
     toastMessage: `已附加技能「${skillContext.skillTitle}」`,
     draftText: skillContext.userDraft,
@@ -1968,6 +1958,30 @@ async function createThreadFromSkillContext(
 
   window.setTimeout(() => fillPromptDraftInput(container, skillContext.userDraft), 80);
   renderSkillContextBar(container);
+}
+
+/** 附加到当前会话时：若已有非空且不同的系统提示词，确认是否覆盖 */
+async function confirmOverwriteSystemPromptIfNeeded(
+  container: HTMLElement,
+  skillContext: SkillDeepChatContext
+): Promise<boolean> {
+  const existingPrompt = getCurrentSessionSystemPrompt(container);
+  const nextPrompt = skillContext.skillRaw.trim();
+  if (!existingPrompt || existingPrompt === nextPrompt) {
+    return true;
+  }
+
+  const confirmed = await confirmWithModal(
+    '覆盖系统提示词',
+    `当前会话已有系统提示词。将技能「${skillContext.skillTitle}」附加到本会话会用技能方法论<strong>覆盖</strong>该内容。<br/><span class="text-xs text-slate-500 mt-1 block">若不想覆盖，可改选「新建会话」。可在右上角 Settings 中查看与编辑系统提示词。</span>`,
+    'dc_skill_overwrite_system_prompt',
+    '覆盖并附加'
+  );
+  if (!confirmed) {
+    showToast('已取消挂载技能', { type: 'warning' });
+    return false;
+  }
+  return true;
 }
 
 /** F2：将技能挂到当前会话（更新 skillContexts / 草稿 / 系统提示） */

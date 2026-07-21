@@ -1070,7 +1070,7 @@ describe('deep-chat skill trial context bar', () => {
     second.unmount();
   });
 
-  it('asks before overwriting a non-empty system prompt when mounting a skill', async () => {
+  it('does not ask overwrite confirm when creating a new skill session', async () => {
     const container = document.createElement('main');
     document.body.append(container);
 
@@ -1083,6 +1083,42 @@ describe('deep-chat skill trial context bar', () => {
     systemPrompt!.value = '用户自定义系统提示词';
     systemPrompt!.dispatchEvent(new Event('input', { bubbles: true }));
 
+    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+    const { consumePendingSkillHandoff } = await import('./controller');
+    skillHandoff.queueSkillForDeepChat({
+      skillId: 'skill-new-session',
+      skillTitle: '新建会话技能',
+      skillRaw: '# New Session Skill',
+      userDraft: skillHandoff.buildSkillDeepChatUserDraft('新建会话技能'),
+    });
+
+    // 已有内容 → 选择「新建会话」，不应再弹「覆盖系统提示词」
+    mocks.chooseWithModal.mockResolvedValueOnce('primary');
+    expect(consumePendingSkillHandoff(container)).toBe(true);
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(mocks.confirmWithModal).not.toHaveBeenCalled();
+    expect(
+      container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
+    ).toContain('New Session Skill');
+
+    unmount();
+  });
+
+  it('asks overwrite confirm only when attaching skill to current session', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+
+    const { mount, unmount, mocks } = await importDeepChat();
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(200);
+
+    const systemPrompt = container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt');
+    expect(systemPrompt).not.toBeNull();
+    systemPrompt!.value = '用户自定义系统提示词';
+    systemPrompt!.dispatchEvent(new Event('input', { bubbles: true }));
+
+    mocks.chooseWithModal.mockResolvedValueOnce('secondary');
     mocks.confirmWithModal.mockResolvedValueOnce(false);
 
     const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
@@ -1097,10 +1133,8 @@ describe('deep-chat skill trial context bar', () => {
     expect(consumePendingSkillHandoff(container)).toBe(true);
     await vi.advanceTimersByTimeAsync(100);
 
+    expect(mocks.chooseWithModal).toHaveBeenCalled();
     expect(mocks.confirmWithModal).toHaveBeenCalled();
-    expect(container.querySelector('#deep-chat-skill-context-bar')?.hasAttribute('hidden')).toBe(
-      true
-    );
     expect(systemPrompt?.value).toBe('用户自定义系统提示词');
 
     unmount();
@@ -1123,11 +1157,12 @@ describe('deep-chat skill trial context bar', () => {
       userDraft: skillHandoff.buildSkillDeepChatUserDraft('第二技能'),
     });
 
-    // 已有会话内容时选择「新建会话」
+    // 已有会话内容时选择「新建会话」——无需覆盖确认
     mocks.chooseWithModal.mockResolvedValueOnce('primary');
     expect(consumePendingSkillHandoff(container)).toBe(true);
     await vi.advanceTimersByTimeAsync(200);
 
+    expect(mocks.confirmWithModal).not.toHaveBeenCalled();
     expect(
       getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
         ?.textContent
