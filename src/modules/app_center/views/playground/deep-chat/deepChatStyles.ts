@@ -586,12 +586,15 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .inside-end.loading-button {
     width: 36px !important;
     height: 36px !important;
-    /* 相对输入框上下居中（勿用 inset-block-end 贴底） */
+    /*
+     * 贴底定位：单行时 min-height(58) - 按钮(36) = 22 → 上下各 11px，视觉居中；
+     * 多行撑高后仍贴底，不会漂在输入区中间。
+     */
     inset-inline-end: max(11px, calc((100% - 768px) / 2 + 11px)) !important;
-    inset-block-end: auto !important;
-    inset-block-start: 50% !important;
+    inset-block-end: 11px !important;
+    inset-block-start: auto !important;
     margin: 0 !important;
-    transform: translateY(-50%) !important;
+    transform: none !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -668,9 +671,9 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     .inside-end.disabled-button,
     .inside-end.loading-button {
       inset-inline-end: 10px !important;
-      inset-block-end: auto !important;
-      inset-block-start: 50% !important;
-      transform: translateY(-50%) !important;
+      inset-block-end: 10px !important;
+      inset-block-start: auto !important;
+      transform: none !important;
     }
   }
 `;
