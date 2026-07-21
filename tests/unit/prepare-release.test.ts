@@ -164,79 +164,76 @@ describe('release archive cleanup', () => {
   });
 });
 
-describe('v3.0.8 GA release metadata', () => {
-  it('locks package and lockfile root versions to 3.0.8', () => {
+describe('v3.0.11-rc.1 release metadata', () => {
+  it('locks package and lockfile root versions to 3.0.11-rc.1', () => {
     const packageJson = JSON.parse(readRepoFile('package.json')) as { version: string };
     const packageLock = JSON.parse(readRepoFile('package-lock.json')) as {
       version: string;
       packages: Record<string, { version?: string }>;
     };
 
-    expect(packageJson.version).toBe('3.0.8');
-    expect(packageLock.version).toBe('3.0.8');
-    expect(packageLock.packages['']?.version).toBe('3.0.8');
+    expect(packageJson.version).toBe('3.0.11-rc.1');
+    expect(packageLock.version).toBe('3.0.11-rc.1');
+    expect(packageLock.packages['']?.version).toBe('3.0.11-rc.1');
   });
 
-  it('places complete 3.0.8 GA notes before the preserved 3.0.7 section', () => {
+  it('places 3.0.11-rc.1 notes before the preserved 3.0.10 GA section', () => {
     const changelog = readRepoFile('docs/CHANGELOG.md');
-    const gaStart = changelog.indexOf('## [3.0.8] - 2026-07-19');
-    const previousGaStart = changelog.indexOf('## [3.0.7] - 2026-07-18');
+    const rcStart = changelog.indexOf('## [3.0.11-rc.1] - 2026-07-21');
+    const gaStart = changelog.indexOf('## [3.0.10] - 2026-07-20');
 
-    expect(gaStart).toBeGreaterThan(-1);
-    expect(previousGaStart).toBeGreaterThan(gaStart);
+    expect(rcStart).toBeGreaterThan(-1);
+    expect(gaStart).toBeGreaterThan(rcStart);
 
-    const gaSection = changelog.slice(gaStart, previousGaStart);
-    expect(gaSection).toMatch(/GA/);
-    expect(gaSection).toMatch(/Latest/);
-    expect(gaSection).toMatch(/`v3\.0\.7`/);
-    expect(gaSection).toContain('https://sops.hongecb.store');
-    expect(gaSection).toContain('### Added');
-    expect(gaSection).toContain('### Changed');
-    expect(gaSection).toContain('### Fixed');
+    const rcSection = changelog.slice(rcStart, gaStart);
+    expect(rcSection).toMatch(/Pre-release|生产验证候选/);
+    expect(rcSection).toMatch(/`v3\.0\.10`/);
+    expect(rcSection).toContain('https://sops.hongecb.store');
+    expect(rcSection).toContain('### Added');
+    expect(rcSection).toContain('### Changed');
+    expect(rcSection).toContain('### Fixed');
   });
 
-  it('publishes the current, previous, package, and next README versions', () => {
+  it('publishes the current GA, package RC, and previous GA in README', () => {
     const readme = readRepoFile('README.md');
 
-    expect(readme).toContain('| **GitHub Latest（稳定 GA）** | `v3.0.8` |');
-    expect(readme).toContain('| 下一候选命名（未发布） | `v3.0.9-rc.1` |');
-    expect(readme).toContain('| package.json | `3.0.8` |');
-    expect(readme).toContain('| 上一 GA | `v3.0.7` |');
-    expect(readme).toContain('`0.1.0`…`3.0.8`');
-    expect(readme).toContain('当前稳定版为 `v3.0.8`');
+    expect(readme).toMatch(/\|\s*\*\*GitHub Latest（稳定 GA）\*\*\s*\|\s*`v3\.0\.10`\s*\|/);
+    expect(readme).toMatch(/\|\s*\*\*当前 Pre-release 候选\*\*\s*\|\s*`v3\.0\.11-rc\.1`\s*\|/);
+    expect(readme).toMatch(/\|\s*package\.json\s*\|\s*`3\.0\.11-rc\.1`\s*\|/);
+    expect(readme).toMatch(/\|\s*上一 GA\s*\|\s*`v3\.0\.10`\s*\|/);
+    expect(readme).toContain('`0.1.0`…`3.0.11-rc.1`');
+    expect(readme).toContain('当前稳定版为 `v3.0.10`');
   });
 
-  it('declares 3.0.8 GA and moves the next candidate to a new version line', () => {
+  it('declares 3.0.10 GA and 3.0.11-rc.1 candidate in release policy', () => {
     const policy = readRepoFile('docs/RELEASE_POLICY.md');
 
-    expect(policy).toMatch(/`v3\.0\.8`.*2026-07-19.*GA/);
-    expect(policy).toMatch(/`v3\.0\.9-rc\.1`/);
+    expect(policy).toMatch(/`v3\.0\.10`.*2026-07-20.*GA/);
+    expect(policy).toMatch(/`v3\.0\.11-rc\.1`/);
     expect(policy).toContain('`v3.1.0-rc.1`');
-    expect(policy).not.toMatch(/下一 patch 候选[^\n]*`v3\.0\.8-rc\.1`/);
+    expect(policy).not.toMatch(/下一 patch 候选[^\n]*`v3\.0\.10-rc\.1`/);
   });
 
-  it('uses the next patch version in active RC and GA commands', () => {
+  it('uses illustrative RC and GA commands that do not re-open closed GA lines', () => {
     const policy = readRepoFile('docs/RELEASE_POLICY.md');
     const rcCommands = policy.slice(policy.indexOf('### 7.1'), policy.indexOf('### 7.2'));
     const gaCommands = policy.slice(policy.indexOf('### 7.2'), policy.indexOf('### 7.3'));
 
-    expect(rcCommands).toContain('git tag -a v3.0.9-rc.1 -m "v3.0.9-rc.1"');
-    expect(rcCommands).toContain('git push sops v3.0.9-rc.1');
-    expect(rcCommands).not.toContain('3.0.8');
-    expect(gaCommands).toContain('git tag -a v3.0.9 -m "v3.0.9"');
-    expect(gaCommands).toContain('git push sops v3.0.9');
-    expect(gaCommands).not.toContain('3.0.8');
+    expect(rcCommands).toMatch(/git tag -a v3\.\d+\.\d+-rc\.\d+/);
+    expect(rcCommands).toContain('git push sops');
+    expect(gaCommands).toMatch(/git tag -a v3\.\d+\.\d+/);
+    expect(gaCommands).toContain('git push sops');
   });
 
-  it('promotes only 3.0.8 as Latest in release maintenance scripts', () => {
+  it('promotes only current GA as Latest in release maintenance scripts', () => {
     const backfill = readRepoFile('scripts/release/backfill-release-notes.mjs');
     const syncAll = readRepoFile('scripts/release/sync-all-releases.mjs');
 
-    expect(backfill).toMatch(/const DEFAULT_VERSIONS = \[\s*'3\.0\.8',/);
-    expect(backfill).toContain("else if (version === '3.0.8')");
-    expect(backfill).not.toContain("else if (version === '3.0.7')");
-    expect(syncAll).toContain("if (version === '3.0.8' && !pre)");
-    expect(syncAll).not.toContain("if (version === '3.0.7' && !pre)");
+    expect(backfill).toMatch(/const DEFAULT_VERSIONS = \[\s*'3\.0\.11-rc\.1',\s*'3\.0\.10',/);
+    expect(backfill).toContain("else if (version === '3.0.10')");
+    expect(backfill).not.toContain("else if (version === '3.0.9')");
+    expect(syncAll).toContain("if (version === '3.0.10' && !pre)");
+    expect(syncAll).not.toContain("if (version === '3.0.9' && !pre)");
   });
 
   it('derives rollback GA from the nearest following stable release', () => {

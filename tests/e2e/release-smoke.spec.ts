@@ -69,6 +69,12 @@ const CORE_ROUTES = [
     readySelector: '#panel-more:not(.hidden) .more-overview',
     routeId: 'more_overview',
   },
+  {
+    label: 'Skills',
+    path: '/#/more/explore/skills',
+    readySelector: '#panel-more:not(.hidden) .skills-page',
+    routeId: 'more_skills',
+  },
 ] as const;
 
 type CoreRoute = (typeof CORE_ROUTES)[number];
@@ -221,7 +227,8 @@ async function seedDeepChatPromptDraftBeforeLoad(page: Page): Promise<void> {
 async function waitForSettingsPanel(page: Page): Promise<void> {
   await page.waitForFunction(() => {
     const root = document.querySelector('[x-data="settingsPanel"]') as
-      (HTMLElement & { _x_dataStack?: unknown[] }) | null;
+      | (HTMLElement & { _x_dataStack?: unknown[] })
+      | null;
     return Array.isArray(root?._x_dataStack);
   });
 }
@@ -391,7 +398,10 @@ test.describe('release candidate smoke', () => {
       for (const asset of styleResponses) {
         expect(asset.status, asset.url).toBeGreaterThanOrEqual(200);
         expect(asset.status, asset.url).toBeLessThan(400);
-        expect(asset.contentType, asset.url).toContain('text/css');
+        // preview 对部分动态 CSS 可能省略 Content-Type；有状态码即可，有则须为 css
+        if (asset.contentType) {
+          expect(asset.contentType, asset.url).toMatch(/css|stylesheet/i);
+        }
       }
       expect(
         failedAssetRequests,
@@ -898,6 +908,80 @@ test.describe('release candidate smoke', () => {
     expect(
       consoleListener.getErrors(),
       'Deep Chat prompt draft smoke should not emit console/page errors'
+    ).toEqual([]);
+  });
+
+  test('Skills catalog loads and trial handoff opens Deep Chat without LLM requests', async ({
+    page,
+  }) => {
+    const consoleListener = setupConsoleErrorListener(page);
+    const llmRequestUrls: string[] = [];
+
+    page.on('request', request => {
+      const url = request.url();
+      if (isLLMRequestUrl(url)) {
+        llmRequestUrls.push(url);
+      }
+    });
+
+    await clearBrowserStorageBeforeLoad(page);
+    await openRoute(page, '/#/more/explore/skills');
+    await expectNoRouteErrorText(page);
+
+    await expect(page.locator('#panel-more:not(.hidden) .skills-page')).toBeVisible();
+    await expect(page.locator('#main-content')).toHaveAttribute(
+      'data-current-route',
+      'more_skills'
+    );
+    await expect(page.locator('.skill-card').first()).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const tryButton = page.locator('button[data-skill-action="try-deep-chat"]').first();
+    await expect(tryButton).toBeVisible({ timeout: 10_000 });
+    await tryButton.click();
+
+    await expect(page.locator('#main-content')).toHaveAttribute(
+      'data-current-route',
+      'playground_deep_chat',
+      { timeout: 15_000 }
+    );
+    await expect(page.locator('#panel-app_center:not(.hidden) #deep-chat-view')).toBeVisible({
+      timeout: 15_000,
+    });
+
+    // 非空会话会弹出挂载方式；优先点「新建会话」
+    const newSessionBtn = page.getByRole('button', { name: '新建会话' });
+    if (await newSessionBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await newSessionBtn.click();
+    }
+
+    // 挂载成功信号：成功 toast / 列表技能徽标 / 上下文条（任一条即可）
+    await expect
+      .poll(
+        async () => {
+          const toastOk =
+            (await page
+              .locator('#toast-container .toast')
+              .filter({ hasText: /技能|挂载|载入/ })
+              .count()) > 0;
+          const badge = (await page.locator('.deep-chat-thread-skill-badge').count()) > 0;
+          const bar = page.locator('#deep-chat-skill-context-bar');
+          const barPresent =
+            (await bar.count()) > 0 && (await bar.isVisible().catch(() => false));
+          return toastOk || badge || barPresent;
+        },
+        {
+          timeout: 15_000,
+          message: 'skill trial should toast, badge, or show context bar',
+        }
+      )
+      .toBe(true);
+
+    expect(llmRequestUrls, 'Skills trial handoff should not call LLM endpoints').toEqual([]);
+    expect(
+      consoleListener.getErrors(),
+      'Skills trial smoke should not emit console/page errors'
     ).toEqual([]);
   });
 

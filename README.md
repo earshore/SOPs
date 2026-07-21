@@ -13,17 +13,24 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 ## 最新发布
 
-| 通道 | 版本 | 说明 |
-|------|------|------|
-| **GitHub Latest（稳定 GA）** | `v3.0.10` | 生产推荐版本 |
-| 下一候选命名（未发布） | `v3.0.11-rc.1` | 如继续 patch 线；必须标记为 Pre-release |
-| package.json | `3.0.10` | 与 GA tag / Release 一致 |
-| 上一 GA | `v3.0.9` | 回滚参考 |
+| 通道                         | 版本           | 说明                                          |
+| ---------------------------- | -------------- | --------------------------------------------- |
+| **GitHub Latest（稳定 GA）** | `v3.0.10`      | 生产推荐版本                                  |
+| **当前 Pre-release 候选**    | `v3.0.11-rc.1` | Skills + Deep Chat 技能链路；**勿**默认当生产 |
+| package.json                 | `3.0.11-rc.1`  | 与 RC tag / Release 一致（GA 前）             |
+| 上一 GA                      | `v3.0.10`      | 回滚参考                                      |
 
-- 发版命令：`npm run release:validate` / `release:notes` / `release:package`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.10` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.1` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.1`。
+
+`v3.0.11-rc.1`（2026-07-21，Pre-release）Skills 与 Deep Chat 技能挂载候选：
+
+- **技能目录**：更多 → 大模型探索 → 技能（只读目录 + skillRegistry + vendor Amazon-Skills）。
+- **Deep Chat 试用**：事件交接、新建/附加、Context Bar / Chip、调参持久化、生成中可切换会话、后台静默输出、未读圆点。
+- **稳定性**：deep-chat 空滚动 vendor 补丁（构建 fail-closed）；release smoke 覆盖 Skills 路由。
+- GitHub Latest **仍指向** `v3.0.10`；回滚基线为 `v3.0.10`。
 
 `v3.0.10`（2026-07-20，稳定 GA）收口 `v3.0.9` 后热修，恢复版本与生产一致：
 

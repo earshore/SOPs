@@ -12,7 +12,7 @@ import {
   stripSkillMarkersFromDraft,
 } from './skillDeepChatHandoff';
 
-describe('skillDeepChatHandoff', () => {
+describe('skillDeepChatHandoff queue and draft builders', () => {
   it('queues, peeks without clearing, and consumes once', () => {
     queueSkillForDeepChat({
       skillId: 'amazon-ppc-campaign',
@@ -114,7 +114,9 @@ describe('skillDeepChatHandoff', () => {
     expect(consumeSkillForDeepChat()?.skillId).toBe('skill-b');
     expect(consumeSkillForDeepChat()).toBeNull();
   });
+});
 
+describe('skillDeepChatHandoff chip normalize and system prompt', () => {
   it('strips injected newlines around skill chip segments without double-wrapping', () => {
     const title = '利润测算';
     const segment = `「${title}」`;

@@ -938,23 +938,26 @@ describe('deep-chat Prompt handoff', () => {
   });
 });
 
-describe('deep-chat skill trial context bar', () => {
+async function queueProfitSkillAndMount() {
+  const container = document.createElement('main');
+  document.body.append(container);
+  const { mount, unmount, mocks } = await importDeepChat();
+  const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+  const userDraft = skillHandoff.buildSkillDeepChatUserDraft('利润测算');
+  skillHandoff.queueSkillForDeepChat({
+    skillId: 'profit-calculator',
+    skillTitle: '利润测算',
+    skillRaw: '# Profit Calculator\n\nUse margin tables.',
+    userDraft,
+  });
+  await mount(container);
+  await vi.advanceTimersByTimeAsync(600);
+  return { container, unmount, mocks, skillHandoff, userDraft };
+}
+
+describe('deep-chat skill trial context bar render', () => {
   it('shows skill bar above composer and inline skill chips in the input', async () => {
-    const container = document.createElement('main');
-    document.body.append(container);
-
-    const { mount, unmount, mocks } = await importDeepChat();
-    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
-    const userDraft = skillHandoff.buildSkillDeepChatUserDraft('利润测算');
-    skillHandoff.queueSkillForDeepChat({
-      skillId: 'profit-calculator',
-      skillTitle: '利润测算',
-      skillRaw: '# Profit Calculator\n\nUse margin tables.',
-      userDraft,
-    });
-
-    await mount(container);
-    await vi.advanceTimersByTimeAsync(600);
+    const { container, unmount, mocks, skillHandoff } = await queueProfitSkillAndMount();
 
     const bar = container.querySelector<HTMLElement>('#deep-chat-skill-context-bar');
     const input = getChat(container).shadowRoot?.querySelector('#text-input');
@@ -1012,7 +1015,9 @@ describe('deep-chat skill trial context bar', () => {
 
     unmount();
   });
+});
 
+describe('deep-chat skill trial rehydrate', () => {
   it('rehydrates skill chips after remount when draft only has plain skill markers', async () => {
     const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
     const segment = skillHandoff.formatSkillTitleSegment('利润测算');
@@ -1071,11 +1076,12 @@ describe('deep-chat skill trial context bar', () => {
 
     second.unmount();
   });
+});
 
+describe('deep-chat skill trial confirm flows', () => {
   it('does not ask overwrite confirm when creating a new skill session', async () => {
     const container = document.createElement('main');
     document.body.append(container);
-
     const { mount, unmount, mocks } = await importDeepChat();
     await mount(container);
     await vi.advanceTimersByTimeAsync(200);
@@ -1093,36 +1099,27 @@ describe('deep-chat skill trial context bar', () => {
       skillRaw: '# New Session Skill',
       userDraft: skillHandoff.buildSkillDeepChatUserDraft('新建会话技能'),
     });
-
-    // 已有内容 → 选择「新建会话」，不应再弹「覆盖系统提示词」
     mocks.chooseWithModal.mockResolvedValueOnce('primary');
     expect(consumePendingSkillHandoff(container)).toBe(true);
     await vi.advanceTimersByTimeAsync(200);
-
     expect(mocks.confirmWithModal).not.toHaveBeenCalled();
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
     ).toContain('New Session Skill');
-
     unmount();
   });
 
   it('asks overwrite confirm only when attaching skill to current session', async () => {
     const container = document.createElement('main');
     document.body.append(container);
-
     const { mount, unmount, mocks } = await importDeepChat();
     await mount(container);
     await vi.advanceTimersByTimeAsync(200);
-
     const systemPrompt = container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt');
-    expect(systemPrompt).not.toBeNull();
     systemPrompt!.value = '用户自定义系统提示词';
     systemPrompt!.dispatchEvent(new Event('input', { bubbles: true }));
-
     mocks.chooseWithModal.mockResolvedValueOnce('secondary');
     mocks.confirmWithModal.mockResolvedValueOnce(false);
-
     const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
     const { consumePendingSkillHandoff } = await import('./controller');
     skillHandoff.queueSkillForDeepChat({
@@ -1131,25 +1128,22 @@ describe('deep-chat skill trial context bar', () => {
       skillRaw: '# Blocked',
       userDraft: skillHandoff.buildSkillDeepChatUserDraft('被取消技能'),
     });
-
     expect(consumePendingSkillHandoff(container)).toBe(true);
     await vi.advanceTimersByTimeAsync(100);
-
     expect(mocks.chooseWithModal).toHaveBeenCalled();
     expect(mocks.confirmWithModal).toHaveBeenCalled();
     expect(systemPrompt?.value).toBe('用户自定义系统提示词');
-
     unmount();
   });
+});
 
+describe('deep-chat skill trial attach and second handoff', () => {
   it('consumes a second skill handoff while Deep Chat is already mounted', async () => {
     const container = document.createElement('main');
     document.body.append(container);
-
     const { mount, unmount, mocks } = await importDeepChat();
     await mount(container);
     await vi.advanceTimersByTimeAsync(200);
-
     const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
     const { consumePendingSkillHandoff } = await import('./controller');
     skillHandoff.queueSkillForDeepChat({
@@ -1158,12 +1152,9 @@ describe('deep-chat skill trial context bar', () => {
       skillRaw: '# Second Skill',
       userDraft: skillHandoff.buildSkillDeepChatUserDraft('第二技能'),
     });
-
-    // 已有会话内容时选择「新建会话」——无需覆盖确认
     mocks.chooseWithModal.mockResolvedValueOnce('primary');
     expect(consumePendingSkillHandoff(container)).toBe(true);
     await vi.advanceTimersByTimeAsync(200);
-
     expect(mocks.confirmWithModal).not.toHaveBeenCalled();
     expect(
       getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
@@ -1176,14 +1167,12 @@ describe('deep-chat skill trial context bar', () => {
       skillContexts: [expect.objectContaining({ skillId: 'skill-second' })],
     });
     expect(skillHandoff.consumeSkillForDeepChat()).toBeNull();
-
     unmount();
   });
 
   it('can attach a skill to the current session when user chooses attach', async () => {
     const container = document.createElement('main');
     document.body.append(container);
-
     const { mount, unmount, mocks } = await importDeepChat();
     const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
     skillHandoff.queueSkillForDeepChat({
@@ -1194,7 +1183,6 @@ describe('deep-chat skill trial context bar', () => {
     });
     await mount(container);
     await vi.advanceTimersByTimeAsync(300);
-
     const { consumePendingSkillHandoff } = await import('./controller');
     skillHandoff.queueSkillForDeepChat({
       skillId: 'skill-attach',
@@ -1204,10 +1192,8 @@ describe('deep-chat skill trial context bar', () => {
     });
     mocks.chooseWithModal.mockResolvedValueOnce('secondary');
     mocks.confirmWithModal.mockResolvedValueOnce(true);
-
     expect(consumePendingSkillHandoff(container)).toBe(true);
     await vi.advanceTimersByTimeAsync(200);
-
     const chipTexts = [
       ...Array.from(
         getChat(container).shadowRoot?.querySelectorAll('#text-input .deep-chat-context-chip') || []
@@ -1217,49 +1203,28 @@ describe('deep-chat skill trial context bar', () => {
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
     ).toContain('Attach Me');
-
     unmount();
   });
+});
 
+describe('deep-chat skill trial after send', () => {
   it('keeps system prompt after send when skill remains on the session', async () => {
-    const container = document.createElement('main');
-    document.body.append(container);
-
-    const { mount, unmount, mocks } = await importDeepChat();
-    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
-    const userDraft = skillHandoff.buildSkillDeepChatUserDraft('利润测算');
-    skillHandoff.queueSkillForDeepChat({
-      skillId: 'profit-calculator',
-      skillTitle: '利润测算',
-      skillRaw: '# Profit Calculator\n\nUse margin tables.',
-      userDraft,
-    });
-
-    await mount(container);
-    await vi.advanceTimersByTimeAsync(600);
-
+    const { container, unmount, mocks, userDraft } = await queueProfitSkillAndMount();
     expect(container.querySelector('#deep-chat-skill-context-bar')?.hasAttribute('hidden')).toBe(
       false
     );
-
     const onResponse = vi.fn();
     const onClose = vi.fn();
     getChat(container).connect?.handler({ text: userDraft }, { onResponse, onClose });
     await vi.advanceTimersByTimeAsync(50);
     await Promise.resolve();
     await vi.advanceTimersByTimeAsync(100);
-
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
     ).toContain('Profit Calculator');
     expectPersistedThread(mocks, {
-      skillContexts: [
-        expect.objectContaining({
-          skillId: 'profit-calculator',
-        }),
-      ],
+      skillContexts: [expect.objectContaining({ skillId: 'profit-calculator' })],
     });
-
     unmount();
   });
 });
@@ -1659,6 +1624,88 @@ describe('deep-chat playground successful requests', () => {
     expectStoredAssistantMessage(mocks.localDataStore.set, 'Streamed answer', {
       title: 'Saved question',
     });
+
+    unmount();
+  });
+});
+
+describe('deep-chat playground concurrent sessions', () => {
+  it('allows switching threads while generating and marks unread when background output finishes', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    let releaseStream = (): void => {};
+    const streamGate = new Promise<void>(resolve => {
+      releaseStream = resolve;
+    });
+    const { mount, unmount } = await importDeepChat({
+      callLLM: async (...args: unknown[]) => {
+        const callOptions = args[5] as
+          | {
+              onStreamUpdate?: (update: { delta: string }) => void;
+              signal?: AbortSignal;
+            }
+          | undefined;
+        callOptions?.onStreamUpdate?.({ delta: 'Background ' });
+        await streamGate;
+        callOptions?.onStreamUpdate?.({ delta: 'complete' });
+        return 'Background complete';
+      },
+    });
+
+    await mount(container);
+    const onClose = vi.fn();
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Generate in thread 1' }] },
+      { onResponse: vi.fn(async () => undefined), onClose, stopClicked: { listener: vi.fn() } }
+    );
+
+    await vi.waitFor(() => {
+      expect(
+        container.querySelector('.deep-chat-thread-item.is-active .deep-chat-thread-meta')
+          ?.textContent
+      ).toMatch(/生成中|输出中/);
+    });
+
+    const otherThreadButton = queryRequired<HTMLButtonElement>(
+      container,
+      '[data-thread-id="thread-2"]'
+    );
+    otherThreadButton.click();
+
+    await vi.waitFor(() => {
+      expect(container.querySelector('.deep-chat-thread-item.is-active')?.textContent).toContain(
+        'Other thread'
+      );
+    });
+
+    // 生成中会话仍应在列表中可见，且切走后不阻断
+    expect(container.querySelector('#deep-chat-thread-list')?.textContent).toMatch(/生成中|输出中/);
+
+    releaseStream();
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+    // 后台打字机推进至完成
+    await vi.advanceTimersByTimeAsync(2000);
+
+    await vi.waitFor(() => {
+      const thread1 = container
+        .querySelector('[data-thread-id="thread-1"]')
+        ?.closest('.deep-chat-thread-item');
+      expect(
+        thread1?.classList.contains('is-unread') ||
+          thread1?.querySelector('.deep-chat-thread-unread')
+      ).toBeTruthy();
+    });
+
+    queryRequired<HTMLButtonElement>(container, '[data-thread-id="thread-1"]').click();
+    await vi.waitFor(() => {
+      const active = container.querySelector('.deep-chat-thread-item.is-active');
+      expect(active?.querySelector('[data-thread-id="thread-1"]')).not.toBeNull();
+    });
+    // 切回即清除未读
+    expect(container.querySelector('.deep-chat-thread-unread')).toBeNull();
+    expect(container.querySelector('.deep-chat-thread-item.is-unread')).toBeNull();
 
     unmount();
   });

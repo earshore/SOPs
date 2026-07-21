@@ -32,16 +32,19 @@
 }
 
 .skills-secondary__summary::after {
-  content: '\f078';
-  font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free', sans-serif;
-  font-weight: 900;
-  font-size: 0.75rem;
-  color: var(--color-slate-400, #94a3b8);
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-top: 0.15rem;
+  border-right: 2px solid var(--color-slate-400, #94a3b8);
+  border-bottom: 2px solid var(--color-slate-400, #94a3b8);
+  transform: rotate(45deg);
   transition: transform 150ms ease;
 }
 
 .skills-secondary[open] .skills-secondary__summary::after {
-  transform: rotate(180deg);
+  margin-top: 0.35rem;
+  transform: rotate(225deg);
 }
 
 /* 详情面板尺寸（遮罩/定位由 AppModal shadow 负责） */

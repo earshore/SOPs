@@ -304,7 +304,7 @@ function updateGithubRelease(version, notesPath, release, dryRun) {
     console.log(`[dry-run] gh release edit ${tag}`);
     return;
   }
-  if (version === '3.0.8' && !pre) {
+  if (version === '3.0.10' && !pre) {
     sh(`gh release edit ${tag} --latest --notes-file "${notesPath}" --title "${tag}"`, {
       stdio: 'inherit',
     });

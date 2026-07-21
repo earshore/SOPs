@@ -12,12 +12,12 @@
 
 ## 2. 版本通道（SemVer）
 
-| 通道 | Tag 格式 | package.json | GitHub | 用途 |
-|------|----------|--------------|--------|------|
-| Alpha | `vX.Y.Z-alpha.N` | 同左无 `v` | **Pre-release** | 探索性功能，不保证 API |
-| Beta | `vX.Y.Z-beta.N` | 同左无 `v` | **Pre-release** | 功能基本完整，邀请内测 |
-| RC | `vX.Y.Z-rc.N` | 同左无 `v` | **Pre-release** | 功能冻结后的发布候选 |
-| GA | `vX.Y.Z` | 同左无 `v` | **Latest**（正式） | 生产推荐版本 |
+| 通道  | Tag 格式         | package.json | GitHub             | 用途                   |
+| ----- | ---------------- | ------------ | ------------------ | ---------------------- |
+| Alpha | `vX.Y.Z-alpha.N` | 同左无 `v`   | **Pre-release**    | 探索性功能，不保证 API |
+| Beta  | `vX.Y.Z-beta.N`  | 同左无 `v`   | **Pre-release**    | 功能基本完整，邀请内测 |
+| RC    | `vX.Y.Z-rc.N`    | 同左无 `v`   | **Pre-release**    | 功能冻结后的发布候选   |
+| GA    | `vX.Y.Z`         | 同左无 `v`   | **Latest**（正式） | 生产推荐版本           |
 
 ### 硬性规则
 
@@ -40,16 +40,17 @@
 - `v3.0.8`（2026-07-19）为历史 GA：修复 App Center 启动降级、模块异步 mount 竞态与 Deep Chat CSP 兼容问题。
 - `v3.0.9`（2026-07-19）为历史 GA：落地 release-debt hardening（静态托管合同、质量/浏览器门禁、本地 `release:gate`）并收口构建质量门。
 - `v3.0.10`（2026-07-20）为当前 GA：收口 `v3.0.9` 后热修（数据备份 UX、Vercel 构建、UI 打磨、confirm 弹窗去重）并恢复 package / tag / Release / 生产三者一致。
-- GA 后不得再发 `v3.0.10-rc.*`；下一 patch 候选为 `v3.0.11-rc.1`，若按变更体量升 minor 则为 `v3.1.0-rc.1`。
+- `v3.0.11-rc.1`（2026-07-21）为生产验证候选：Amazon Skills 目录 + Deep Chat 技能挂载 / 并发会话体验；**Pre-release**，Latest 仍为 `v3.0.10`。
+- GA 后不得再发 `v3.0.10-rc.*`；当前 patch 候选为 `v3.0.11-rc.1`，GA 定稿后升 `v3.0.11`；若后续变更体量升 minor 则为 `v3.1.0-rc.1`。
 
 ## 3. 何时创建 GitHub Release
 
-| 活动 | 是否创建 Release | 说明 |
-|------|------------------|------|
-| 日常 merge 到 `main` | 否 | 依赖 CI 与部署日志 |
-| 功能联调 / Staging 部署 | 可选 Draft | 不公开为正式通道 |
-| 功能冻结后的候选 | 是，Pre-release | `*-rc.N` |
-| 生产里程碑 | 是，GA + Latest | `vX.Y.Z` |
+| 活动                    | 是否创建 Release | 说明               |
+| ----------------------- | ---------------- | ------------------ |
+| 日常 merge 到 `main`    | 否               | 依赖 CI 与部署日志 |
+| 功能联调 / Staging 部署 | 可选 Draft       | 不公开为正式通道   |
+| 功能冻结后的候选        | 是，Pre-release  | `*-rc.N`           |
+| 生产里程碑              | 是，GA + Latest  | `vX.Y.Z`           |
 
 **原则**：Release 是产品里程碑，不是开发日记。同一 RC 系列内合并相关提交后再打 tag，避免每个 commit 一个 Release。
 
@@ -99,11 +100,11 @@
 
 每个 Release 应附带（由流水线上传）：
 
-| 文件 | 说明 |
-|------|------|
-| `sops-dist-<version>.zip` | `dist/` 构建产物 |
-| `build-info.json` | version、git SHA、构建时间、Node 版本 |
-| `SHA256SUMS.txt` | 上述文件的校验和 |
+| 文件                      | 说明                                  |
+| ------------------------- | ------------------------------------- |
+| `sops-dist-<version>.zip` | `dist/` 构建产物                      |
+| `build-info.json`         | version、git SHA、构建时间、Node 版本 |
+| `SHA256SUMS.txt`          | 上述文件的校验和                      |
 
 Source code zip/tarball 由 GitHub 自动提供，**不能**替代 `dist` 产物。
 
@@ -150,20 +151,20 @@ gh release edit vX.Y.Z --latest
 
 ## 8. 环境与链接
 
-| 环境 | URL | 说明 |
-|------|-----|------|
-| Production | https://sops.hongecb.store | Cloudflare Pages；GitHub `homepage` 指向此处 |
-| 文档中的部署步骤 | [DEPLOYMENT.md](./DEPLOYMENT.md) | 构建与 wrangler 部署 |
+| 环境             | URL                              | 说明                                         |
+| ---------------- | -------------------------------- | -------------------------------------------- |
+| Production       | https://sops.hongecb.store       | Cloudflare Pages；GitHub `homepage` 指向此处 |
+| 文档中的部署步骤 | [DEPLOYMENT.md](./DEPLOYMENT.md) | 构建与 wrangler 部署                         |
 
 仓库与 Pages **不**存放生产 LLM API key；密钥由用户在浏览器设置页配置，治理在 new-api 后台。
 
 ## 9. 角色与审批
 
-| 动作 | 建议 |
-|------|------|
-| 推送 `v*-rc.*` tag | 维护者；CI 全绿 |
-| 推送 GA tag | 维护者；人工验收清单完成 |
-| 修改本策略 | PR 评审后合并 |
+| 动作               | 建议                     |
+| ------------------ | ------------------------ |
+| 推送 `v*-rc.*` tag | 维护者；CI 全绿          |
+| 推送 GA tag        | 维护者；人工验收清单完成 |
+| 修改本策略         | PR 评审后合并            |
 
 后续可引入 `CODEOWNERS` 强制 `docs/CHANGELOG.md`、`.github/workflows/release.yml` 的评审。
 

@@ -43,8 +43,11 @@ describe('release accessibility contract', () => {
   });
 
   it('makes the Scraper history scroller a named keyboard-focusable region', () => {
-    const region = scraper.match(/<div[^>]*class="[^"]*max-h-\[301px\][^"]*"[^>]*>/)?.[0];
+    const region =
+      scraper.match(/<div[^>]*aria-label="历史快照列表"[^>]*>/)?.[0] ||
+      scraper.match(/<div[^>]*class="[^"]*max-h-\[min\(60vh,28rem\)\][^"]*"[^>]*>/)?.[0];
 
+    expect(region).toBeTruthy();
     expect(region).toContain('role="region"');
     expect(region).toContain('aria-label="历史快照列表"');
     expect(region).toContain('tabindex="0"');

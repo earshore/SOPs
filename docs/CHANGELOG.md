@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.11-rc.1] - 2026-07-21
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 本版覆盖部署到 Staging / 候选生产验证；生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- **更多 → 大模型探索 → 技能**：只读技能目录（搜索 / 分类 / 详情 / 复制全文）、Overview 入口（已接入）、`skillRegistry` 运行时注册表（构建期加载 `vendor/amazon-skills/*/SKILL.md`）。
+- **Deep Chat × 技能试用链路**：技能页「在 Deep Chat 试用」事件交接（含已挂载 Deep Chat 二次试用）；新建会话或附加到当前会话；系统提示覆盖确认；Context Bar + 输入框 Chip；短时撤销；会话列表技能徽标。
+- Deep Chat 会话级 `systemPrompt` / `temperature` 随线程持久化。
+- Deep Chat 后台完成回复后的极简**未读实心圆点**（切回会话清除）。
+- 技能筛选状态跨试用往返保留（StorageService）。
+- release smoke / 单测覆盖 Skills 路由与生成中切会话、后台输出、未读标记。
+
+### Changed
+
+- Deep Chat 软卸载：离开模块时保留在飞 LLM（不 abort），显示定时器清空，remount 后恢复「生成中 / 输出中」；会话间切换时打字机后台静默推进直至完成。
+- deep-chat vendor bundle 在构建期对空 `messageToElements` 滚动崩溃打防护补丁；**生产构建若补丁模式未命中则 fail-closed**。
+- 技能页主 CTA 使用探索紫系；试用链路图标与 Deep Chat 徽标统一为 graduation-cap。
+
+### Fixed
+
+- 生成中无法点击切换其他会话（列表每 tick 重绘导致点击丢失）。
+- 「输出中」切走后输出暂停，须切回才继续；现已后台静默推进。
+- 会话列表因调参写回被打乱排序。
+- deep-chat 空历史滚动 `TypeError`（vendor 补丁）。
+- 技能 Chip remount 后不可见、dismiss 残留标题、系统提示确认误弹、skill bar 叠层、发送按钮垂直对齐、用户气泡 Chip 对比度等体验问题。
+- 技能详情弹窗挂载根、卡片标题尾部 emoji、welcome banner 标签等 Skills 页收口。
+
+### Security
+
+- Deep Chat 错误日志经脱敏后再输出，避免 apiKey 等敏感字段进入 console。
+
 ## [3.0.10] - 2026-07-20
 
 > 正式 GA。发布后 GitHub Latest 指向 `v3.0.10`；上一 GA 与生产回滚基线均为 `v3.0.9`。

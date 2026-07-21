@@ -6,6 +6,7 @@ import { promisify } from 'util';
 import { gzip, brotliCompress, constants as zlibConstants } from 'zlib';
 import { createReadStream } from 'fs';
 import { copyFile, mkdir, readdir, readFile, stat, writeFile } from 'fs/promises';
+import { patchDeepChatBundleSource } from './config/patch-deep-chat-bundle.mjs';
 
 // ES 模块兼容的 __dirname 定义
 const __filename = fileURLToPath(import.meta.url);
@@ -16,27 +17,6 @@ const gzipAsync = promisify(gzip);
 const brotliCompressAsync = promisify(brotliCompress);
 const deepChatBundleSource = require.resolve('deep-chat/dist/deepChat.bundle.js');
 const deepChatBundlePublicPath = '/assets/vendor/deepChat.bundle.js';
-/**
- * deep-chat 在 messageToElements 为空时仍调用 getFirstMessageContentEl，
- * 访问 [length-1][1] 会抛 TypeError: Cannot read properties of undefined (reading '1')。
- * 在分发 bundle 时打上防护补丁（dev middleware + build copy）。
- */
-const DEEP_CHAT_SCROLL_BUG =
-  'getFirstMessageContentEl(){const{text:t,html:e,files:s}=this.messageToElements[this.messageToElements.length-1][1];return t||e||(null==s?void 0:s[0])}';
-const DEEP_CHAT_SCROLL_FIX =
-  'getFirstMessageContentEl(){const n=this.messageToElements[this.messageToElements.length-1];if(!n||!n[1])return;const{text:t,html:e,files:s}=n[1];return t||e||(null==s?void 0:s[0])}';
-
-function patchDeepChatBundleSource(source) {
-  if (!source.includes(DEEP_CHAT_SCROLL_BUG)) {
-    if (!source.includes(DEEP_CHAT_SCROLL_FIX)) {
-      console.warn(
-        '[sops:deep-chat-bundle-asset] scroll guard pattern not found; vendor may have changed'
-      );
-    }
-    return source;
-  }
-  return source.replace(DEEP_CHAT_SCROLL_BUG, DEEP_CHAT_SCROLL_FIX);
-}
 const devServerForwardConsole = {
   enabled: true,
   unhandledErrors: true,
@@ -144,12 +124,12 @@ function createDeepChatBundleAssetPlugin() {
   /** @type {string | null} */
   let patchedBundleCache = null;
 
-  async function getPatchedDeepChatBundle() {
+  async function getPatchedDeepChatBundle(strict) {
     if (patchedBundleCache !== null) {
       return patchedBundleCache;
     }
     const raw = await readFile(deepChatBundleSource, 'utf8');
-    patchedBundleCache = patchDeepChatBundleSource(raw);
+    patchedBundleCache = patchDeepChatBundleSource(raw, { strict });
     return patchedBundleCache;
   }
 
@@ -164,7 +144,7 @@ function createDeepChatBundleAssetPlugin() {
         }
 
         try {
-          const body = await getPatchedDeepChatBundle();
+          const body = await getPatchedDeepChatBundle(false);
           response.setHeader('Content-Type', 'application/javascript; charset=utf-8');
           response.setHeader('Cache-Control', 'no-cache');
           response.end(body);
@@ -184,7 +164,8 @@ function createDeepChatBundleAssetPlugin() {
 
       const targetPath = resolve(outputDir, deepChatBundlePublicPath.slice(1));
       await mkdir(dirname(targetPath), { recursive: true });
-      const body = await getPatchedDeepChatBundle();
+      // 生产构建必须命中补丁，避免 deep-chat 升级后静默回退崩溃
+      const body = await getPatchedDeepChatBundle(true);
       await writeFile(targetPath, body, 'utf8');
     },
   };
@@ -297,9 +278,7 @@ export default defineConfig({
     modulePreload: {
       resolveDependencies(_filename, deps) {
         return deps.filter(
-          dep =>
-            !dep.includes('system-settings') &&
-            !dep.includes('vendor-fa-brands')
+          dep => !dep.includes('system-settings') && !dep.includes('vendor-fa-brands')
         );
       },
     },
