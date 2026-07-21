@@ -66,6 +66,10 @@ export interface DeepChatThread {
   listingPromptContext?: ListingPromptWorkflowContext;
   /** Skills 页试用附加的上下文 Chip 列表 */
   skillContexts?: DeepChatSkillContext[];
+  /** 会话级系统提示词（含技能派生或用户手写，随线程持久化） */
+  systemPrompt?: string;
+  /** 会话级 temperature，默认 0.3 */
+  temperature?: number;
   customTitle?: string;
   pinnedAt?: number;
   createdAt: number;

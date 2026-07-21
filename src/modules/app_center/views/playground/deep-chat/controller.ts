@@ -220,22 +220,20 @@ class DeepChatModule extends BaseModule {
   protected onUnmount(): void {
     if (mountedContainer && document.body.contains(mountedContainer)) {
       saveActiveThreadDraft(mountedContainer);
+      saveActiveThreadTuning(mountedContainer);
       draftPersistController.flush();
     }
     cleanupCallbacks.forEach(cleanup => cleanup());
     cleanupCallbacks = [];
-    mountedContainer = null;
-    currentConfig = null;
-    selectedModel = '';
-    sessionSystemPrompt = '';
-    sessionTemperature = 0.3;
     resetPromptPreviewState();
     clearDraftInputHeightSync();
     clearSubmitStopButtonSync();
     cleanupMessageToolbars();
-    openThreadMenu = null;
-    editingThreadId = null;
-    editingThreadValue = '';
+    // 立即取消在飞 LLM，避免卸载后继续耗 token；条目随 settle 自删
+    disposeActiveSession({ clearPendingMap: false });
+    mountedContainer = null;
+    currentConfig = null;
+    selectedModel = '';
   }
 }
 
@@ -253,14 +251,24 @@ export function unmount(): void {
   deepChatModule.unmount();
 }
 
-export async function clearDeepChatThreadStore(): Promise<void> {
+/** 取消在飞请求与显示定时器；可选清空 pending Map（仅「清空对话」） */
+function disposeActiveSession(options: { clearPendingMap?: boolean } = {}): void {
   abortAllPendingRequests('cleared');
-  pendingRequests.clear();
   clearAllPendingDisplayTimers();
-  draftPersistController.cancel();
+  if (options.clearPendingMap) {
+    pendingRequests.clear();
+  }
   openThreadMenu = null;
   editingThreadId = null;
   editingThreadValue = '';
+  sessionSystemPrompt = '';
+  sessionTemperature = 0.3;
+  clearPendingSkillDismissUndo();
+}
+
+export async function clearDeepChatThreadStore(): Promise<void> {
+  disposeActiveSession({ clearPendingMap: true });
+  draftPersistController.cancel();
   threadStore = createDefaultThreadStore();
 
   await LocalDataStore.remove(`user:${THREAD_STORAGE_KEY}`);
@@ -277,6 +285,7 @@ export async function clearDeepChatThreadStore(): Promise<void> {
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
   syncPendingStatus(container);
+  applyThreadTuningToSession(container);
 }
 
 async function refreshLLMConfig(
@@ -744,7 +753,7 @@ function bindControls(container: HTMLElement): void {
   bindChatSearchControls(container);
   bindSkillContextBarControls(container);
   bindMobileDrawerControls(container);
-  bindTuningControls({
+  bindTuningControls(container, {
     systemPromptInput,
     temperatureInput,
     temperatureValue,
@@ -752,6 +761,7 @@ function bindControls(container: HTMLElement): void {
     tuningPanel,
   });
   applySkillContextsToSession(container);
+  applyThreadTuningToSession(container);
   hydrateActiveThreadInlineSkillChips(container);
 }
 
@@ -1255,12 +1265,15 @@ function getChatSearchRefs(container: HTMLElement): ChatSearchRefs | null {
   };
 }
 
-function bindTuningControls(refs: TuningControlRefs): void {
+function bindTuningControls(container: HTMLElement, refs: TuningControlRefs): void {
   const { systemPromptInput, temperatureInput, temperatureValue, resetTuningButton, tuningPanel } =
     refs;
 
   const onSystemPromptInput = (): void => {
     sessionSystemPrompt = systemPromptInput?.value.trim() || '';
+    updateActiveThreadFields(container, {
+      systemPrompt: sessionSystemPrompt || undefined,
+    });
   };
   systemPromptInput?.addEventListener('input', onSystemPromptInput);
   cleanupCallbacks.push(() => systemPromptInput?.removeEventListener('input', onSystemPromptInput));
@@ -1271,8 +1284,8 @@ function bindTuningControls(refs: TuningControlRefs): void {
       temperatureValue.value = sessionTemperature.toFixed(1);
     }
     updateTemperatureTrack(temperatureInput);
+    updateActiveThreadFields(container, { temperature: sessionTemperature });
   };
-  updateTemperatureTrack(temperatureInput);
   temperatureInput?.addEventListener('input', onTemperatureInput);
   cleanupCallbacks.push(() => temperatureInput?.removeEventListener('input', onTemperatureInput));
 
@@ -1289,6 +1302,10 @@ function bindTuningControls(refs: TuningControlRefs): void {
       temperatureValue.value = '0.3';
     }
     updateTemperatureTrack(temperatureInput);
+    updateActiveThreadFields(container, {
+      systemPrompt: undefined,
+      temperature: 0.3,
+    });
     showToast('Deep Chat 调试参数已重置', { type: 'success' });
   };
   resetTuningButton?.addEventListener('click', onResetTuning);
@@ -1445,7 +1462,7 @@ async function handleDeepChatRequest(
     }
     const message = error instanceof Error ? error.message : '模型调用失败';
     const responseText = formatDeepChatErrorResponse(message);
-    console.error('[Deep Chat] LLM 调用失败:', error);
+    nativeLoggerConsole.error('[Deep Chat] LLM 调用失败:', redactSensitiveError(error));
     saveFailedDeepChatResponse(pendingThreadId, responseText);
     await emitDeepChatResponse(signals, { text: responseText });
   } finally {
@@ -2045,9 +2062,18 @@ function cloneSkillContexts(contexts: DeepChatSkillContext[]): DeepChatSkillCont
   }));
 }
 
+/**
+ * 技能上下文 → 会话系统提示词。
+ * 有技能：以技能派生为主并写回线程；
+ * 无技能：使用线程已持久化的用户 systemPrompt（不含已移除技能的残留全文）。
+ */
 function applySkillContextsToSession(container: HTMLElement): void {
-  const contexts = getActiveThread().skillContexts || [];
-  const systemPrompt = buildSystemPromptFromSkillContexts(contexts);
+  const activeThread = getActiveThread();
+  const contexts = activeThread.skillContexts || [];
+  const skillPrompt = buildSystemPromptFromSkillContexts(contexts);
+  const persisted = (activeThread.systemPrompt || '').trim();
+  const systemPrompt = skillPrompt || (contexts.length === 0 ? persisted : '');
+
   sessionSystemPrompt = systemPrompt;
   const systemPromptInput = container.querySelector<HTMLTextAreaElement>(
     '#deep-chat-system-prompt'
@@ -2055,7 +2081,76 @@ function applySkillContextsToSession(container: HTMLElement): void {
   if (systemPromptInput) {
     systemPromptInput.value = systemPrompt;
   }
+
+  // 有技能时把派生提示词写回线程，保证切会话/重载可恢复
+  if (skillPrompt && skillPrompt !== persisted) {
+    updateActiveThreadFields(container, { systemPrompt: skillPrompt });
+  }
+
+  warnIfSystemPromptOverBudget(systemPrompt);
   renderSkillContextBar(container);
+}
+
+/** 将当前线程的 temperature / systemPrompt 恢复到会话变量与调试面板 */
+function applyThreadTuningToSession(container: HTMLElement | null): void {
+  if (!container) {
+    return;
+  }
+  const thread = getActiveThread();
+  sessionTemperature =
+    typeof thread.temperature === 'number' && Number.isFinite(thread.temperature)
+      ? normalizeTemperature(String(thread.temperature))
+      : 0.3;
+
+  // 技能优先；否则用线程持久化 systemPrompt
+  const skillPrompt = buildSystemPromptFromSkillContexts(thread.skillContexts || []);
+  sessionSystemPrompt = skillPrompt || (thread.systemPrompt || '').trim();
+
+  const systemPromptInput = container.querySelector<HTMLTextAreaElement>(
+    '#deep-chat-system-prompt'
+  );
+  const temperatureInput = container.querySelector<HTMLInputElement>('#deep-chat-temperature');
+  const temperatureValue = container.querySelector<HTMLOutputElement>(
+    '#deep-chat-temperature-value'
+  );
+  if (systemPromptInput) {
+    systemPromptInput.value = sessionSystemPrompt;
+  }
+  if (temperatureInput) {
+    temperatureInput.value = sessionTemperature.toFixed(1);
+  }
+  if (temperatureValue) {
+    temperatureValue.value = sessionTemperature.toFixed(1);
+  }
+  updateTemperatureTrack(temperatureInput);
+}
+
+/** 卸载 / 切会话前，把调试面板当前值写回线程 */
+function saveActiveThreadTuning(container: HTMLElement): void {
+  const systemPromptInput = container.querySelector<HTMLTextAreaElement>(
+    '#deep-chat-system-prompt'
+  );
+  const temperatureInput = container.querySelector<HTMLInputElement>('#deep-chat-temperature');
+  const systemPrompt = (systemPromptInput?.value ?? sessionSystemPrompt).trim();
+  const temperature = temperatureInput
+    ? normalizeTemperature(temperatureInput.value)
+    : sessionTemperature;
+  updateActiveThreadFields(container, {
+    systemPrompt: systemPrompt || undefined,
+    temperature,
+  });
+}
+
+/** 挂载技能后若系统提示词超预算，即时预警（不必等到发送） */
+function warnIfSystemPromptOverBudget(systemPrompt: string): void {
+  const budgetError = getDeepChatSystemPromptBudgetError(systemPrompt);
+  if (!budgetError) {
+    return;
+  }
+  showToast(budgetError, {
+    type: 'warning',
+    description: '请缩短技能全文或系统提示词后再发送',
+  });
 }
 
 /** 在 light DOM / shadow 中查找技能 UI 节点 */
@@ -2246,10 +2341,13 @@ function dismissSessionSkillContext(container: HTMLElement, skillId: string): vo
   const rawDraft = input ? serializeDraftInput(input) : activeThread.draftText || '';
   const withoutRemoved = stripSkillMarkersFromDraft(rawDraft, [removed.skillTitle]);
   const nextDraft = prefixDraftWithSkillContexts(withoutRemoved, nextContexts);
+  // 同步系统提示词：剩余技能重建；全部移除则清空（避免残留技能全文）
+  const nextSystemPrompt = buildSystemPromptFromSkillContexts(nextContexts);
 
   updateActiveThreadFields(container, {
     skillContexts: nextContexts.length > 0 ? nextContexts : undefined,
     draftText: nextDraft,
+    systemPrompt: nextSystemPrompt || undefined,
   });
   applySkillContextsToSession(container);
   if (input) {
@@ -2429,9 +2527,12 @@ function updateActiveThreadFields(container: HTMLElement, fields: Partial<DeepCh
     updatedAt: Date.now(),
   };
 
-  // skillContexts 显式清空时删除字段
+  // 显式清空时删除可选字段（避免 undefined 持久化为 null 语义）
   if ('skillContexts' in fields && !fields.skillContexts) {
     delete nextThread.skillContexts;
+  }
+  if ('systemPrompt' in fields && !fields.systemPrompt) {
+    delete nextThread.systemPrompt;
   }
 
   threadStore = {
@@ -2657,6 +2758,7 @@ function switchThread(container: HTMLElement, threadId: string): void {
   }
 
   saveActiveThreadDraft(container);
+  saveActiveThreadTuning(container);
   threadStore = {
     ...threadStore,
     activeThreadId: threadId,
@@ -2667,6 +2769,7 @@ function switchThread(container: HTMLElement, threadId: string): void {
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
   applySkillContextsToSession(container);
+  applyThreadTuningToSession(container);
   hydrateActiveThreadInlineSkillChips(container);
 }
 
@@ -3444,17 +3547,51 @@ function sanitizeThread(thread: DeepChatThread): DeepChatThread | null {
 function getSanitizedThreadOptionalFields(thread: DeepChatThread): Partial<DeepChatThread> {
   const customTitle = getOptionalString(thread.customTitle);
   const promptDraftId = getOptionalString(thread.promptDraftId);
+  const systemPrompt = getOptionalString(thread.systemPrompt);
   const pinnedAt = getOptionalFiniteTimestamp(thread.pinnedAt);
   const listingPromptContext = getSanitizedListingPromptContext(thread.listingPromptContext);
   const skillContexts = getSanitizedSkillContexts(thread.skillContexts);
+  const temperature =
+    typeof thread.temperature === 'number' && Number.isFinite(thread.temperature)
+      ? normalizeTemperature(String(thread.temperature))
+      : undefined;
 
   return {
     ...(customTitle ? { customTitle } : {}),
     ...(promptDraftId ? { promptDraftId } : {}),
+    ...(systemPrompt ? { systemPrompt } : {}),
+    ...(typeof temperature === 'number' ? { temperature } : {}),
     ...(listingPromptContext ? { listingPromptContext } : {}),
     ...(skillContexts ? { skillContexts } : {}),
     ...(pinnedAt ? { pinnedAt } : {}),
   };
+}
+
+/** 日志脱敏：避免 apiKey / token 等敏感字段进入 console */
+function redactSensitiveError(error: unknown): unknown {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      // 不展开 cause/stack 里可能夹带的配置对象
+      stack: error.stack,
+    };
+  }
+  if (!error || typeof error !== 'object') {
+    return error;
+  }
+  try {
+    return JSON.parse(
+      JSON.stringify(error, (key, value) => {
+        if (/api[_-]?key|authorization|password|secret|token|bearer/i.test(key)) {
+          return '[REDACTED]';
+        }
+        return value;
+      })
+    );
+  } catch {
+    return String(error);
+  }
 }
 
 function parseSkillContextItem(item: unknown): DeepChatSkillContext | null {

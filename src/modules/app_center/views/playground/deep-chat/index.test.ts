@@ -1665,37 +1665,38 @@ describe('deep-chat playground successful requests', () => {
 });
 
 describe('deep-chat playground remount streaming', () => {
-  it('continues pending typewriter output after remounting during a stream', async () => {
+  it('aborts in-flight LLM on unmount so remount does not continue the old stream', async () => {
     const container = document.createElement('main');
     document.body.append(container);
-    let releaseStream = (): void => {};
-    const streamGate = new Promise<void>(resolve => {
-      releaseStream = resolve;
-    });
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const { mount, unmount, mocks } = await importDeepChat({
+    let sawAbort = false;
+    const { mount, unmount } = await importDeepChat({
       callLLM: async (...args: unknown[]) => {
         const callOptions = args[5] as
-          | { onStreamUpdate?: (update: { delta: string }) => void }
+          | {
+              onStreamUpdate?: (update: { delta: string }) => void;
+              signal?: AbortSignal;
+            }
           | undefined;
         callOptions?.onStreamUpdate?.({ delta: 'First ' });
-        await streamGate;
-        callOptions?.onStreamUpdate?.({ delta: 'Second' });
-        return 'First Second';
+        return new Promise<string>((_resolve, reject) => {
+          callOptions?.signal?.addEventListener(
+            'abort',
+            () => {
+              sawAbort = true;
+              reject(new DOMException('Aborted', 'AbortError'));
+            },
+            { once: true }
+          );
+        });
       },
     });
 
     await mount(container);
-    let originalChatMounted = true;
-    const onResponse = vi.fn(async () => {
-      if (!originalChatMounted) {
-        throw new Error('old Deep Chat instance is unmounted');
-      }
-    });
+    const onResponse = vi.fn(async () => undefined);
     const onClose = vi.fn();
 
     getChat(container).connect?.handler(
-      { messages: [{ role: 'user', text: 'Keep typing across remount' }] },
+      { messages: [{ role: 'user', text: 'Abort on leave' }] },
       { onResponse, onClose, stopClicked: { listener: vi.fn() } }
     );
 
@@ -1703,43 +1704,20 @@ describe('deep-chat playground remount streaming', () => {
       expect(onResponse).toHaveBeenCalledWith({ text: 'First ' });
     });
 
-    originalChatMounted = false;
+    // 审查收口：卸载必须 abort 在飞请求，避免继续耗 token
     unmount();
-    await mount(container);
-
-    expect(getChat(container).history).toEqual(
-      expect.arrayContaining([expect.objectContaining({ role: 'ai', text: 'First' })])
-    );
-    expect(getChat(container).history).not.toEqual(
-      expect.arrayContaining([expect.objectContaining({ role: 'ai', text: 'First Second' })])
-    );
-
-    releaseStream();
-
+    await vi.waitFor(() => {
+      expect(sawAbort).toBe(true);
+    });
     await vi.waitFor(() => {
       expect(onClose).toHaveBeenCalled();
     });
-    await vi.advanceTimersByTimeAsync(200);
 
-    expect(getChat(container).history).toEqual(
+    // 重新挂载不应从旧流续写 "Second"
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(getChat(container).history).not.toEqual(
       expect.arrayContaining([expect.objectContaining({ role: 'ai', text: 'First Second' })])
-    );
-    expect(mocks.localDataStore.set).toHaveBeenCalledWith(
-      'user:playground_deep_chat_threads_v1',
-      expect.objectContaining({
-        threads: expect.arrayContaining([
-          expect.objectContaining({
-            messages: expect.arrayContaining([
-              expect.objectContaining({ role: 'ai', text: 'First Second' }),
-            ]),
-          }),
-        ]),
-      }),
-      'user-data'
-    );
-    expect(warnSpy).toHaveBeenCalledWith(
-      '[Deep Chat] 忽略已卸载会话的响应更新:',
-      expect.any(Error)
     );
 
     unmount();

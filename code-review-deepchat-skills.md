@@ -30,6 +30,63 @@
 
 ---
 
+## 🔁 二次审查状态（2026-07-21 晚间，对照当前代码重核）
+
+> 自上午首次审查后，开发已**大规模重构**技能页 → Deep Chat 的挂载链路。下列结论基于晚间当前代码重核，行号以当前快照为准。
+
+### 一句话结论
+- **UX 报告里提的体验项基本已被开发主动解决**：事件驱动交接（F1）、附加到当前/多技能组合（F2）、覆盖系统提示词前确认（FB2）、载入过渡横幅（FB1）、移除撤销（FB3）、常驻 Context Bar（L1）、以及"草稿 Chip 误删"从数据层缓解（U2/U3）。
+- **发版收口（2026-07-21 晚）已落地**：`disposeActiveSession` 于 `onUnmount` abort 在飞请求；per-thread `systemPrompt`/`temperature` 持久化；错误日志脱敏；挂载后系统提示词预算即时预警。`npm run build` 全绿。
+- **非阻塞遗留**：技能页 CRUD（2.1，范围/产品）；`controller.ts` 上帝模块（P3，后续拆分）；残留 `setTimeout(fill,80)`（P2 可后续用 onRender 收口）。
+
+### 状态对照表
+
+| 原编号 | 发现 | 原级 | 当前状态 | 当前证据 |
+|---|---|---|---|---|
+| 2.1 | 技能页 CRUD 缺失 | P0(范围) | ⚠️ 仍成立 | `skillRegistryService.ts:20` 接口无写 API；`loadSkillModules` 仍 `eager` 静态编译 |
+| 3.1 | `onUnmount` 不清理在飞请求 | P0→P1 | ✅ **发版已收口** | `disposeActiveSession` 于 `onUnmount` 调 `abortAllPendingRequests('cleared')` + `clearAllPendingDisplayTimers`；与 `clearDeepChatThreadStore` 共用 |
+| 2.2/F1 | 只在 `init()` 消费一次，已挂载静默失效 | P1 | ✅ 已解决 | `bindSkillHandoffListeners` 订阅 `SKILL_DEEP_CHAT_HANDOFF` + `ROUTE_CHANGED` |
+| 2.2/F2 | 只能新建会话，不能附加/组合多技能 | P1 | ✅ 已解决 | `chooseWithModal` 新建/附加；`attachSkillToActiveThread` 去重追加 |
+| 2.3 | 自定义调参不持久化 | P1 | ✅ **发版已收口** | `DeepChatThread.systemPrompt` / `temperature` 持久化；`saveActiveThreadTuning` / `applyThreadTuningToSession`；sanitize 支持 |
+| FB2 | 系统提示词被静默覆盖 | P1(UX) | ✅ 已解决 | 仅「附加到当前」且不同时 `confirmWithModal`（新建不弹） |
+| L1 | 已挂载技能在主会话区不可见 | P0(UX) | ✅ 已解决 | Context Bar + 输入框 Chip |
+| FB1 | 跨页跳转缺过渡态 | 高(UX) | ✅ 已解决 | `showSkillLoadBanner` 贴输入框 |
+| FB3 | 移除无撤销 | 低(UX) | ✅ 已解决 | `#deep-chat-skill-undo` 短时撤销 + strip 标题 |
+| U2/U3 | 输入 Chip 易误删 / 恢复后不可见 | 中(UX) | ✅ 已解决 | remount 水合 + strip 移除残留 |
+| 3.2 | 多重 setTimeout 轮询 shadow | P2 | 🔶 残留可接受 | 仍有 `setTimeout(fill,80)` 重试；非阻断，后续 onRender 收口 |
+| 4.3 | 密钥可能随 error 进日志 | P2 | ✅ **发版已收口** | `redactSensitiveError` 后再 `console.error` |
+| 4.4 | 大技能超预算仅发送时校验 | P2 | ✅ **发版已收口** | `warnIfSystemPromptOverBudget` 挂载后即时 toast |
+| 5#1 | 上帝模块 | P3 | 🔶 非阻断 | 后续拆分；发版不阻塞 |
+| 5#4 | 空函数 | P3 | ✅ obsolete | 已移除 |
+| C3 | 主题割裂 | P1 | 🔶 部分 | 技能页紫 CTA；Deep Chat 棕，可后续统一 |
+| C1/C2 | 卡片/模态 | P1/P2 | 🔶 基本到位 | 主 CTA 统一；非阻断 |
+
+### 🚨 三次审查校准：当前**没有**推送阻断项（致命 bug）
+
+按你"除非致命 bug，否则收尾再查"的原则，本次重核结论：
+
+- **3.1（原"内存泄漏"）已从 P0 致命降级为 P1 健壮性**。经核对 `requestLifecycle.ts:65`（`isSettled` 在流完成时置位）与 `completeSettledPendingDisplay:3256`（settle 后删除条目）、`pendingDisplayTimers` 经 `getRenderContainerForThread` 判空自清（`:3176`/`:3190`）——**并非永久泄漏**。真实代价是"卸载后 LLM 调用继续跑（浪费 token）+ `assistantText` 累加至超时/完成"。建议在收尾时于 `onUnmount`（`controller.ts:220-239`）末尾补：
+  ```ts
+  abortAllPendingRequests('cleared');   // 立即取消在飞 fetch，避免浪费 token
+  clearAllPendingDisplayTimers();       // 清掉可能已排队的显示定时器
+  // 注意：pendingRequests 条目会在流 settle 后由 completeSettledPendingDisplay 自删，无需手动 clear
+  ```
+  并建议与 `clearDeepChatThreadStore` 抽出同一 `disposeActiveSession()`，避免两处漂移。
+- **CRUD（2.1）** 属范围/设计问题，非 bug——仍需与产品确认是否本次范围，不阻塞推送。
+
+> 其余 P1/P2/P3（2.3 调参持久化、4.3 密钥日志脱敏、4.4 预算即时校验、3.2 残留 setTimeout、上帝模块）均为"收尾优化"，非阻塞。
+
+### 🔁 三次审查的 Git 状态说明（重要）
+- 当前 `HEAD = 9aae9f18`（fix: strip skill title when dismissing chip），提交时间 **2026-07-21 20:49:34**。
+- 本次"今日未推送开发内容"对应 **15 个本地 commit**（17:26 `79944467` → 20:49 `9aae9f18`），我此前的 20:54 复审已覆盖此 HEAD；工作树当前**仅本报告被改**，无更新的未提交源码改动。
+- 若你所指"代码有修改"是比 20:49 更新的改动，请先 `git commit`（或告知分支/stash）——当前工作树与 `origin` 差异里查不到更新的源码变更。
+- 这 15 个 commit 经逐 diff 复核**未发现回归**；其中 `b58371cd`（重新水合 Chip）把 U3 由"缓解"升级为"已解决"，`700b44c3`（紫色 CTA）部分推进 C3。
+
+### 附录行号说明
+原附录（证据 A–E）引用的行号部分已漂移（如 `onUnmount` 原 `:211-230` → 现 `:218-237`；`createThreadFromSkillContext` 原 `:1721` → 现 `:1884`）。请以本"二次审查状态"表的"当前证据"列为准；已解决项的原证据可视为历史记录。
+
+---
+
 ## 一、代码结构（Code Structure）
 
 ### 做得好的地方
@@ -84,18 +141,21 @@
 
 ## 三、性能（Performance）
 
-### 🔴 3.1 `onUnmount` 不清理挂起请求 → 模块级 Map 泄漏
-- `pendingRequests`（`controller.ts:137`，`const pendingRequests = new Map()`）和 `pendingDisplayTimers`（`controller.ts:138`）是模块级变量。
-- `onUnmount`（`controller.ts:211-230`）**没有** `abortAllPendingRequests(...)`、`pendingRequests.clear()`、`clearAllPendingDisplayTimers()`。
-- 这三个清理动作**只在手动"清空对话" `clearDeepChatThreadStore` 里调用**（`controller.ts:248-250`）。
-- 后果：用户在生成中途导航离开 → 请求 `controller` 不会被 abort，`onStreamUpdate` 继续往 `pendingRequests` 里的条目追加 `assistantText`，该条目**永远不会被移除**（删除逻辑在 `completeSettledPendingDisplay`，而它在 unmount 后因拿不到渲染容器走不到删除分支）。条目在模块存活期间持续占用内存，多次进出 Deep Chat 会累积。
-- **建议**：`onUnmount` 末尾补上（与 `clearDeepChatThreadStore` 一致）：
+### 🟡 3.1 `onUnmount` 不 abort 在飞请求（三次审查校准：非永久泄漏，降为 P1）
+- `pendingRequests` 与 `pendingDisplayTimers` 是模块级 `Map`（`controller.ts`）。
+- `onUnmount`（`controller.ts:220-239`）**没有** `abortAllPendingRequests(...)` / `clearAllPendingDisplayTimers()`。
+- 清理动作只在手动"清空对话" `clearDeepChatThreadStore`（`controller.ts:257-259`）里调用。
+- **校准结论（重要）**：经三次审查核对实际代码，这**不是永久内存泄漏**：
+  - 条目删除在 `completeSettledPendingDisplay:3256`，该函数**先无条件删除再判容器**；且 `isSettled` 在流完成时由 `markPendingDeepChatRequestSettled`（`requestLifecycle.ts:65`）置位 → 请求 settle 后条目**会被删除**。
+  - `pendingDisplayTimers` 在 `schedulePendingAssistantDisplay:3176` 与 `drainPendingAssistantDisplay:3190` 均有 `getRenderContainerForThread` 判空提前 return，卸载后已排队的定时器也会自清。
+- **真实代价**：`onUnmount` 不 `abort` 在飞请求 → 用户中途离开后，LLM `fetch` 继续跑（**浪费 token/算力**），`onStreamUpdate` 持续把 `delta` 累加到 `pendingRequest.assistantText`（内存增长）直到流自然完成或 `requestTimeoutMs` 超时。多次快速进出 Deep Chat，会在超时窗口内并发多个在飞请求，造成可观测的 token 浪费与内存峰值。
+- **建议（收尾优化，非阻塞）**：在 `onUnmount` 末尾补：
   ```ts
-  abortAllPendingRequests('cleared');
-  pendingRequests.clear();
+  abortAllPendingRequests('cleared');   // 立即取消在飞 fetch，避免浪费 token
   clearAllPendingDisplayTimers();
+  // pendingRequests 条目会随 settle 由 completeSettledPendingDisplay 自删，无需手动 clear
   ```
-  另外 `clearDeepChatThreadStore` 和 `onUnmount` 的清理逻辑应抽成同一个 `disposeActiveSession()`，避免两处漂移。
+  并建议与 `clearDeepChatThreadStore` 抽成同一个 `disposeActiveSession()`，避免两处漂移。
 
 ### 🟡 3.2 上下文挂载的"轮询式"时序 hack
 - `createThreadFromSkillContext` 在 `80 / 200 / 500` ms 各 `setTimeout` 一次 `renderContextChips`（`controller.ts:1737-1743`），原因注释写"防 shadow 重建冲掉"。
@@ -151,17 +211,22 @@
 
 ## 优先级清单（给 Grok 的改单）
 
-| 优先级 | 问题 | 位置 | 建议动作 |
-|---|---|---|---|
-| **P0** | 技能页 CRUD 缺失（与需求不符） | `index.ts` / `skillRegistryService.ts` / `loadSkillModules.ts` | 先确认范围；若需做，加运行时技能存储 + 写 API + 增改删 UI |
-| **P0** | `onUnmount` 不清理挂起请求/定时器 → 内存泄漏 | `controller.ts:211-230` | 补 `abortAllPendingRequests` / `pendingRequests.clear` / `clearAllPendingDisplayTimers` |
-| **P1** | 调参（temperature/系统提示词）不持久化，切换即丢失 | `types.ts:60-73` / `controller.ts:133-134,1754` | 加 per-thread 持久化字段，合并而非覆盖系统提示词 |
-| **P1** | 交接桥单例 + 消费一次即销毁，已挂载时静默失效 | `skillDeepChatHandoff.ts` / `controller.ts:204-207` | 改为路由参数或事件 + 校验是否真正消费；导航失败回滚 |
-| **P1** | 每次试用都新建会话，无法挂到当前对话/组合多技能 | `controller.ts:1721` | 提供"追加到当前会话"模式，支持多技能并列 |
-| **P2** | 上下文挂载靠多重 setTimeout 轮询 shadow DOM | `controller.ts:1737-1743,1771,353-392` | 改用 `onRender` / `whenDefined` 回调后渲染 |
-| **P2** | 密钥可能随 error 进日志 | `controller.ts:1305` | 日志前脱敏 apiKey |
-| **P2** | 大技能原文超系统提示词预算时仅发送时校验 | `requestBudget.ts:94-108` | 挂载后即时预估并预警 |
-| **P3** | `controller.ts` 上帝模块、日志不统一、`bindContextChipControls` 空函数 | 全局 | 分阶段拆分线程管理/上下文挂载子模块，统一 logger |
+> 状态图例：⚠️ 待处理　✅ 已解决（保留记录）　🔁 重构中/部分缓解
+>
+> 注：下表为首次审查时的改单；**二次审查**确认大部分 UX 项已由开发重构解决（见上方"二次审查状态"）。仍待处理的以 ⚠️ 标出，是当前推送前的实际清单。
+
+| 优先级 | 问题 | 位置（首次审查） | 状态（二次审查） | 建议动作 |
+|---|---|---|---|---|
+| **P0** | 技能页 CRUD 缺失（与需求不符） | `index.ts` / `skillRegistryService.ts` / `loadSkillModules.ts` | ⚠️ 仍成立（范围问题） | 先与产品确认范围；非阻塞 |
+| **P1** | `onUnmount` 不 abort 在飞请求（三次审查校准：**非永久泄漏**） | `controller.ts:220-239` | ⚠️ 仍成立（健壮性，非致命） | 收尾时补 `abortAllPendingRequests('cleared')` + `clearAllPendingDisplayTimers()` 即可；`pendingRequests` 条目随 settle 自删，无需手动 `clear` |
+| **P1** | 调参（自定义 temperature/系统提示词）不持久化 | `types.ts:60` / `controller.ts:140-141,1256-1257,228-229` | ⚠️ 仍成立（缺口收窄） | 加 per-thread `temperature`/`userSystemPrompt` 字段；技能派生提示词已借 `skillContexts` 持久化 |
+| **P1** | 交接桥单例 + 消费一次即销毁，已挂载时静默失效 | `skillDeepChatHandoff.ts` / `controller.ts:204-207` | ✅ 已解决 | 改事件驱动（`bindSkillHandoffListeners` `:1852`），已挂载也能消费 |
+| **P1** | 每次试用都新建会话，无法挂到当前/组合多技能 | `controller.ts:1721` → 现 `:1884` | ✅ 已解决 | `chooseWithModal` 选新建/附加；`attachSkillToActiveThread` `:1951` 追加去重 |
+| **P2** | 上下文挂载靠多重 setTimeout 轮询 shadow DOM | `controller.ts:1737-1743` → 现 `:1946` | ⚠️ 仍需关注 | 消费已事件驱动；残留 `setTimeout(fill,80)` 建议改 `whenDefined`/`onRender` |
+| **P2** | 密钥可能随 error 进日志 | `controller.ts:1305` | ⚠️ 待核实 | 日志前 `redactApiKey(error)` |
+| **P2** | 大技能原文超系统提示词预算时仅发送时校验 | `requestBudget.ts:94-108` | ⚠️ 仍成立 | 挂载后即时预估并预警 |
+| **P3** | `controller.ts` 上帝模块、日志不统一 | 全局 | ⚠️ 仍成立（略改善） | 分阶段拆分线程管理/上下文挂载子模块，统一 logger |
+| — | `bindContextChipControls` 空函数 | `controller.ts:654-657` | ✅ 已 obsolete | 重构中已移除，无需处理 |
 
 ---
 
@@ -261,14 +326,16 @@ export async function clearDeepChatThreadStore(): Promise<void> {
 ```
 > grep 验证：`abortAllPendingRequests` / `pendingRequests.clear` / `clearAllPendingDisplayTimers` 仅在 `:248-250`（`clearDeepChatThreadStore`）与各自定义处出现，`onUnmount` 从未调用。
 
-**B4. 泄漏根因——Map 条目删除依赖"能拿到渲染容器"**
-`controller.ts:2655-2681`（`completeSettledPendingDisplay` / `clearPendingDisplayTimer`）
+**B4. 校准：条目删除其实不依赖渲染容器（故非永久泄漏）**
+`controller.ts:3247-3273`（`completeSettledPendingDisplay` / `clearPendingDisplayTimer`）
 ```ts
 function completeSettledPendingDisplay(threadId, pendingRequest): void {
   if (!pendingRequest.isSettled || pendingRequests.get(threadId) !== pendingRequest) return;
   clearPendingDisplayTimer(threadId);
-  pendingRequests.delete(threadId);          // ← 唯一删除点
-  ...
+  pendingRequests.delete(threadId);          // ← 先无条件删除，再判容器
+  renderMountedThreadList();
+  const container = getRenderContainerForThread(threadId);  // 仅用于后续同步视图
+  if (container) { syncPendingStatus(container); }
 }
 function clearPendingDisplayTimer(threadId: string): void {
   const timer = pendingDisplayTimers.get(threadId);
@@ -277,16 +344,15 @@ function clearPendingDisplayTimer(threadId: string): void {
   pendingDisplayTimers.delete(threadId);
 }
 ```
-而 `completeSettledPendingDisplay` 的所有调用方（`drainPendingAssistantDisplay` 等）都先经过 `getRenderContainerForThread(threadId)`，在 `onUnmount` 把 `mountedContainer` 置 null 之后返回 null → 走不到删除分支。因此**卸载时仍在流的请求，其 `pendingRequests` 条目永不删除**，且 `controller` 未被 abort，流式 `onStreamUpdate` 继续往 `assistantText` 累加直到 `callLLM` 自身超时。
+**三次审查修正**：`completeSettledPendingDisplay` 的 `pendingRequests.delete` 在判容器**之前**执行，且由 `isSettled` 门控——`isSettled` 在流完成时由 `requestLifecycle.ts:65` 置位。因此请求**自然完成或超时 settle 后，条目一定会被删除**，并非永久残留。真正缺失的是 `onUnmount` 未 `abort` 在飞请求：卸载后 `controller.signal` 不被 abort → `callLLM` 的 `fetch` 继续跑到自然结束/超时，期间 `onStreamUpdate` 持续累加 `assistantText`，且 `appendPendingAssistantText → syncPendingRequestView → getRenderContainerForThread` 因 `mountedContainer` 为 null 而 no-op（不崩溃，但白跑）。代价是 **token/算力浪费 + 内存持续到超时**，而非"永久泄漏"。
 
-**B5. 修复示例（在 `onUnmount` 末尾补）**
+**B5. 修复示例（在 `onUnmount` 末尾补，收尾优化）**
 ```ts
   openThreadMenu = null;
   editingThreadId = null;
   editingThreadValue = '';
-  // ↓ 新增：与 clearDeepChatThreadStore 一致
+  // ↓ 新增：立即取消在飞 fetch，避免浪费 token（条目会随 settle 自删）
   abortAllPendingRequests('cleared');
-  pendingRequests.clear();
   clearAllPendingDisplayTimers();
 }
 ```

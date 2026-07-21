@@ -63,17 +63,17 @@ function persistFilters(): void {
   });
 }
 
+/** 标题首尾可剥除的装饰码点区间（emoji / 符号） */
+const DECORATIVE_CODE_RANGES: ReadonlyArray<readonly [number, number]> = [
+  [0x2300, 0x23ff],
+  [0x2600, 0x27bf],
+  [0x2b00, 0x2bff],
+  [0x1f300, 0x1faff],
+];
+
 function isDecorativeCodePoint(cp: number): boolean {
-  // 变体选择符 / ZWJ / 空白
   if (cp === 0xfe0f || cp === 0x200d || cp === 0x20 || cp === 0xa0) return true;
-  // 杂项符号与象形、补充符号（含多数 emoji）
-  if (cp >= 0x1f300 && cp <= 0x1faff) return true;
-  // 杂项符号（☀ 等）
-  if (cp >= 0x2600 && cp <= 0x27bf) return true;
-  // 技术符号 / 杂项符号箭头等装饰
-  if (cp >= 0x2300 && cp <= 0x23ff) return true;
-  if (cp >= 0x2b00 && cp <= 0x2bff) return true;
-  return false;
+  return DECORATIVE_CODE_RANGES.some(([lo, hi]) => cp >= lo && cp <= hi);
 }
 
 /** 展示用标题：去掉上游 H1 首尾 emoji，结构图标只用 FA */
