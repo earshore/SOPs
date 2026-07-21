@@ -38,7 +38,9 @@ function isDecorativeCodePoint(cp: number): boolean {
 function displayTitle(title: string): string {
   const chars = Array.from(title.trim());
   let i = 0;
-  while (i < chars.length && isDecorativeCodePoint(chars[i].codePointAt(0) ?? 0)) {
+  while (i < chars.length) {
+    const ch = chars[i];
+    if (!ch || !isDecorativeCodePoint(ch.codePointAt(0) ?? 0)) break;
     i += 1;
   }
   return chars.slice(i).join('').trim() || title.trim();
