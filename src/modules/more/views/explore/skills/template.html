@@ -1,7 +1,7 @@
 <!-- More - 技能 Template -->
 <div class="module-container skills-page py-6">
-  <!-- 紧凑页头：说明与标签一行级信息（L2） -->
-  <div class="wb-container wb-container--simple wb-theme-violet skills-hero">
+  <!-- Welcome Banner：结构对齐 welcome-banner 规范（description + wb-tags） -->
+  <div class="wb-container wb-container--simple wb-theme-violet">
     <div class="wb-content">
       <div class="wb-icon">
         <i class="fas fa-graduation-cap" aria-hidden="true"></i>
@@ -12,13 +12,23 @@
           <i class="fa-solid fa-layer-group" aria-hidden="true"></i>技能运营
         </span>
       </div>
-      <p class="wb-description skills-hero__desc">
+      <p class="wb-description">
         按场景浏览方法论，在 Deep Chat 试用或复制全文；工作台可自动加载，无需填 ID。
-        <span class="skills-hero__meta">
-          <span id="skill-banner-total">0 个技能</span>
-          · 正式 / 试用版 · 中文外壳 / 英文原文
-        </span>
       </p>
+      <div class="wb-tags">
+        <div class="wb-tag">
+          <div class="wb-tag-dot wb-tag-dot--violet"></div>
+          <span id="skill-banner-total">0 个技能</span>
+        </div>
+        <div class="wb-tag">
+          <div class="wb-tag-dot wb-tag-dot--indigo"></div>
+          <span>正式 / 试用版</span>
+        </div>
+        <div class="wb-tag">
+          <div class="wb-tag-dot wb-tag-dot--fuchsia"></div>
+          <span>中文外壳 / 英文原文</span>
+        </div>
+      </div>
     </div>
   </div>
 

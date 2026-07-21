@@ -133,6 +133,7 @@ function syncEmptyLibraryChrome(empty: boolean, total: number): void {
   if (!moduleRoot) return;
   const banner = moduleRoot.querySelector('#skill-banner-total');
   if (banner) {
+    // Welcome Banner 规范：动态数量写在 wb-tag 文案中
     banner.textContent = empty ? '技能库为空' : `${total} 个技能`;
   }
   moduleRoot.classList.toggle('skills-page--empty-library', empty);

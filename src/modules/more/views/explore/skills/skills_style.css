@@ -1,18 +1,5 @@
 /* Skills page — aligned with prompts explore styles */
 
-/* L2：紧凑 Hero */
-.skills-hero .skills-hero__desc {
-  max-width: 42rem;
-}
-
-.skills-hero .skills-hero__meta {
-  display: inline;
-  margin-left: 0.25rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.875em;
-  white-space: nowrap;
-}
-
 /* L2：筛选吸顶 */
 .skills-catalog-sticky {
   position: sticky;
@@ -260,7 +247,7 @@
   display: none !important;
 }
 
-.skills-page--empty-library .skills-hero__meta {
+.skills-page--empty-library #skill-banner-total {
   color: var(--color-amber-700, #b45309);
 }
 
