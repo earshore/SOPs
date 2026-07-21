@@ -1,13 +1,10 @@
 /* Skills page — aligned with prompts explore styles */
 
-/* L2：筛选吸顶 */
+/* 筛选区：随页面滚动，不吸顶悬浮 */
 .skills-catalog-sticky {
-  position: sticky;
-  top: calc(var(--header-height, 64px) + 0.5rem);
-  z-index: 5;
-  margin: 0 -0.25rem 0.5rem;
-  padding: 0.5rem 0.25rem 0.75rem;
-  background: linear-gradient(180deg, #fff 70%, rgba(255, 255, 255, 0.92));
+  position: static;
+  margin: 0 0 0.5rem;
+  padding: 0 0 0.75rem;
   border-bottom: 1px solid var(--color-slate-100, #f1f5f9);
 }
 
