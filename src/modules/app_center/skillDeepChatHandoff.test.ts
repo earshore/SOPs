@@ -4,8 +4,10 @@ import {
   buildSystemPromptFromSkillContexts,
   consumeSkillForDeepChat,
   extractSkillUsageExamplesDraft,
+  formatSkillTitleSegment,
   normalizeSkillChipDraftText,
   peekSkillForDeepChat,
+  prefixDraftWithSkillContexts,
   queueSkillForDeepChat,
 } from './skillDeepChatHandoff';
 
@@ -58,6 +60,15 @@ describe('skillDeepChatHandoff', () => {
     expect(buildSkillDeepChatUserDraft('PPC', raw)).toBe(
       'Research the keyword "portable blender" on Amazon US'
     );
+  });
+
+  it('prefixes draft with skill chip segments without duplicating', () => {
+    const contexts = [{ skillTitle: '利润测算' }];
+    const body = '业务数据：ASIN';
+    const once = prefixDraftWithSkillContexts(body, contexts);
+    expect(once.startsWith(formatSkillTitleSegment('利润测算'))).toBe(true);
+    expect(once).toContain('业务数据：ASIN');
+    expect(prefixDraftWithSkillContexts(once, contexts)).toBe(once);
   });
 
   it('skips bash/json usage fences and falls back to generic draft', () => {

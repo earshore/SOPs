@@ -49,6 +49,43 @@ function escapeRegExp(value: string): string {
 }
 
 /**
+ * 将会话技能 Chip 标记置于草稿前部，与业务正文混排。
+ * 已含对应「技能名」标记时不重复插入。
+ */
+export function prefixDraftWithSkillContexts(
+  draft: string,
+  contexts: ReadonlyArray<{ skillTitle: string }>
+): string {
+  if (contexts.length === 0) {
+    return draft;
+  }
+
+  let body = draft || '';
+  // 去掉草稿中已有的技能标记，再统一前缀，避免重复
+  for (const context of contexts) {
+    const title = context.skillTitle.trim();
+    if (!title) continue;
+    const segment = formatSkillTitleSegment(title);
+    body = body.replace(new RegExp(escapeRegExp(segment), 'g'), '');
+    body = body.replace(new RegExp(`(?<!「)${escapeRegExp(title)}(?!」)`, 'g'), '');
+  }
+  body = body
+    .replace(/^\n+/, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trimStart();
+
+  const prefix = contexts
+    .map(context => formatSkillTitleSegment(context.skillTitle.trim()))
+    .filter(Boolean)
+    .join('');
+  if (!prefix) {
+    return normalizeSkillChipDraftText(body, contexts);
+  }
+  const combined = body ? `${prefix}\n${body}` : prefix;
+  return normalizeSkillChipDraftText(combined, contexts);
+}
+
+/**
  * 去掉 Chip 文本段两侧的换行。
  * 浏览器 / deep-chat innerText 会在 contenteditable=false 节点旁注入 \n。
  */
