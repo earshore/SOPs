@@ -1,4 +1,4 @@
-﻿# Amazon Skills 椤典笌 Skill Registry 璁捐瑙勬牸
+# Amazon Skills 椤典笌 Skill Registry 璁捐瑙勬牸
 
 **鏃ユ湡锛?* 2026-07-21  
 **鐘舵€侊細** Ready for review  
