@@ -1,15 +1,5 @@
 /* Skills page — aligned with prompts explore styles */
 
-/* C3：与 Deep Chat 赤陶链路对齐的试用强调色（紫页上的技能→对话 CTA） */
-.skills-page,
-.skill-detail-modal {
-  --skill-link-accent: #a85f3f;
-  --skill-link-accent-hover: #8f4f33;
-  --skill-link-accent-active: #6f3925;
-  --skill-link-accent-soft: #faf3ee;
-  --skill-link-accent-border: rgba(168, 95, 63, 0.28);
-}
-
 .skill-detail-modal {
   position: fixed;
   top: var(--header-height, 64px);
@@ -183,11 +173,12 @@
 }
 
 .btn-icon:hover {
-  color: var(--skill-link-accent-hover, var(--color-violet-600));
-  background-color: var(--skill-link-accent-soft, var(--color-violet-50));
+  /* C3：次要操作 hover 使用 Deep Chat 赤陶软色，强化链路识别 */
+  color: #8f4f33;
+  background-color: #faf3ee;
 }
 
-/* F3/C1：主操作「在 Deep Chat 试用」 */
+/* F3/C1：主操作「在 Deep Chat 试用」（色值对齐 Deep Chat accent #a85f3f） */
 .skill-cta-primary {
   display: inline-flex;
   align-items: center;
@@ -197,7 +188,7 @@
   padding: 0.4rem 0.85rem;
   border: 1px solid transparent;
   border-radius: var(--rounded-md, 0.375rem);
-  background: var(--skill-link-accent, #a85f3f);
+  background: #a85f3f;
   color: #fff;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -210,7 +201,7 @@
 }
 
 .skill-cta-primary:hover:not(:disabled) {
-  background: var(--skill-link-accent-hover, #8f4f33);
+  background: #8f4f33;
   box-shadow: 0 2px 8px rgba(168, 95, 63, 0.28);
 }
 
@@ -218,7 +209,7 @@
   outline: none;
   box-shadow:
     0 0 0 2px #fff,
-    0 0 0 4px var(--skill-link-accent, #a85f3f);
+    0 0 0 4px #a85f3f;
 }
 
 .skill-cta-primary:disabled,
