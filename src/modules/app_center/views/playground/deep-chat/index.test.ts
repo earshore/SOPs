@@ -32,15 +32,15 @@ const deepChatTemplate = `
           <input id="deep-chat-temperature" type="range" value="0.3">
           <button id="deep-chat-reset-tuning" type="button"></button>
         </details>
-        <div id="deep-chat-skill-load-banner" class="deep-chat-skill-load-banner" hidden>
-          <span id="deep-chat-skill-load-banner-text">正在载入技能…</span>
-        </div>
         <div id="deep-chat-pending-status" hidden>
           <span id="deep-chat-pending-status-text"></span>
         </div>
         <div class="deep-chat-wrap">
           <deep-chat id="deep-chat-view" class="deep-chat-view"></deep-chat>
           <button id="deep-chat-stop-generation" type="button" hidden>Stop</button>
+        </div>
+        <div id="deep-chat-skill-load-banner" class="deep-chat-skill-load-banner" hidden>
+          <span id="deep-chat-skill-load-banner-text">正在载入技能…</span>
         </div>
         <div id="deep-chat-skill-context-bar" class="deep-chat-skill-context-bar" aria-label="已挂载技能" hidden>
           <div class="deep-chat-skill-context-bar__head">

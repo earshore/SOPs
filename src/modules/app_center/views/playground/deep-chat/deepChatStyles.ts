@@ -293,6 +293,32 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     height: auto !important;
   }
 
+  /* 正在载入技能：贴输入框上方，无边框背景 */
+  #input > .deep-chat-skill-load-banner {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.35rem !important;
+    flex: 0 0 auto !important;
+    width: min(100%, 768px) !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0.1rem 0.25rem !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #8f4f33 !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
+  }
+
+  #input > .deep-chat-skill-load-banner[hidden] {
+    display: none !important;
+  }
+
   /* 已挂载技能提示：在输入框同一列、正上方，不绝对定位叠层 */
   #input > .deep-chat-skill-context-bar {
     position: relative !important;

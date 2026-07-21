@@ -396,7 +396,7 @@ function setupDraftInputHeightSync(
 
   restoreActiveThreadDraftInput(container);
   bindInlineSkillChipControls(container, root);
-  placeSkillContextBarAboveComposer(container);
+  placeSkillComposerChrome(container);
 
   const onDraftInput = (): void => {
     saveActiveThreadDraft(container);
@@ -2015,15 +2015,20 @@ function getCurrentSessionSystemPrompt(container: HTMLElement): string {
   return input?.value.trim() || '';
 }
 
-/** 挂载技能时的短暂到达横幅（FB1） */
+/** 挂载技能时的短暂到达提示（FB1）：贴输入框上方 */
 function showSkillLoadBanner(container: HTMLElement, skillTitle: string): void {
-  const banner = container.querySelector<HTMLElement>('#deep-chat-skill-load-banner');
-  const text = container.querySelector<HTMLElement>('#deep-chat-skill-load-banner-text');
+  placeSkillComposerChrome(container);
+  const banner = findSkillLoadBanner(container);
+  const text =
+    banner?.querySelector<HTMLElement>('#deep-chat-skill-load-banner-text') ||
+    container.querySelector<HTMLElement>('#deep-chat-skill-load-banner-text');
   if (!banner || !text) {
     return;
   }
   text.textContent = `正在载入技能「${skillTitle}」…`;
   banner.hidden = false;
+  // 保证在输入框正上方（若 context bar 也在，则 banner 在 bar 之上）
+  placeSkillLoadBannerAboveComposer(container);
   window.setTimeout(() => {
     if (banner.isConnected) {
       banner.hidden = true;
@@ -2052,19 +2057,62 @@ function applySkillContextsToSession(container: HTMLElement): void {
   renderSkillContextBar(container);
 }
 
-/** 在 light DOM / shadow 中查找技能提示条 */
-function findSkillContextBar(container: HTMLElement): HTMLElement | null {
+/** 在 light DOM / shadow 中查找技能 UI 节点 */
+function findSkillChromeElement(
+  container: HTMLElement,
+  id: 'deep-chat-skill-context-bar' | 'deep-chat-skill-load-banner'
+): HTMLElement | null {
   return (
-    container.querySelector<HTMLElement>('#deep-chat-skill-context-bar') ||
-    getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#deep-chat-skill-context-bar') ||
+    container.querySelector<HTMLElement>(`#${id}`) ||
+    getChat(container)?.shadowRoot?.querySelector<HTMLElement>(`#${id}`) ||
     null
   );
 }
 
+function findSkillContextBar(container: HTMLElement): HTMLElement | null {
+  return findSkillChromeElement(container, 'deep-chat-skill-context-bar');
+}
+
+function findSkillLoadBanner(container: HTMLElement): HTMLElement | null {
+  return findSkillChromeElement(container, 'deep-chat-skill-load-banner');
+}
+
 /**
- * 将「已挂载技能」提示条挂入 deep-chat 输入列（#input），位于输入框正上方。
- * 使用文档流 flex，避免 absolute 与输入框叠层。
+ * 将技能相关 chrome 挂入 deep-chat 输入列（#input），位于输入框正上方。
+ * 顺序：load banner → context bar → text-input-container
  */
+function placeSkillChromeInComposer(
+  container: HTMLElement,
+  element: HTMLElement,
+  options: { beforeContextBar?: boolean } = {}
+): void {
+  const inputArea = getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#input');
+  if (!inputArea) {
+    return;
+  }
+
+  const textContainer = inputArea.querySelector('#text-input-container');
+  const contextBar = findSkillContextBar(container);
+  let anchor: Element | null = textContainer;
+
+  if (options.beforeContextBar && contextBar && contextBar.parentElement === inputArea) {
+    anchor = contextBar;
+  }
+
+  if (element.parentElement === inputArea) {
+    if (anchor && element.nextElementSibling !== anchor && element !== anchor) {
+      inputArea.insertBefore(element, anchor);
+    }
+    return;
+  }
+
+  if (anchor) {
+    inputArea.insertBefore(element, anchor);
+  } else {
+    inputArea.prepend(element);
+  }
+}
+
 function placeSkillContextBarAboveComposer(container: HTMLElement, attempts = 12): void {
   const bar = findSkillContextBar(container);
   const inputArea = getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#input');
@@ -2074,31 +2122,38 @@ function placeSkillContextBarAboveComposer(container: HTMLElement, attempts = 12
     }
     return;
   }
+  placeSkillChromeInComposer(container, bar);
+}
 
-  const textContainer = inputArea.querySelector('#text-input-container');
-  if (bar.parentElement === inputArea) {
-    // 保证在输入框之前
-    if (textContainer && bar.nextElementSibling !== textContainer) {
-      inputArea.insertBefore(bar, textContainer);
+function placeSkillLoadBannerAboveComposer(container: HTMLElement, attempts = 12): void {
+  const banner = findSkillLoadBanner(container);
+  const inputArea = getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#input');
+  if (!banner || !inputArea) {
+    if (attempts > 0) {
+      window.setTimeout(() => placeSkillLoadBannerAboveComposer(container, attempts - 1), 50);
     }
     return;
   }
-
-  if (textContainer) {
-    inputArea.insertBefore(bar, textContainer);
-  } else {
-    inputArea.prepend(bar);
-  }
+  placeSkillChromeInComposer(container, banner, { beforeContextBar: true });
 }
 
-/** 切换会话 / 重建 deep-chat 前，把提示条挪回 light DOM，避免随 shadow 销毁 */
+function placeSkillComposerChrome(container: HTMLElement): void {
+  placeSkillContextBarAboveComposer(container);
+  placeSkillLoadBannerAboveComposer(container);
+}
+
+/** 切换会话 / 重建 deep-chat 前，把 chrome 挪回 light DOM，避免随 shadow 销毁 */
 function rescueSkillContextBarToStage(container: HTMLElement): void {
   const stage = container.querySelector<HTMLElement>('.deep-chat-stage');
-  const bar = findSkillContextBar(container);
-  if (!stage || !bar || bar.parentElement === stage) {
+  if (!stage) {
     return;
   }
-  stage.appendChild(bar);
+  for (const id of ['deep-chat-skill-load-banner', 'deep-chat-skill-context-bar'] as const) {
+    const el = findSkillChromeElement(container, id);
+    if (el && el.parentElement !== stage) {
+      stage.appendChild(el);
+    }
+  }
 }
 
 /**
@@ -2674,7 +2729,7 @@ function replaceChat(container: HTMLElement): void {
   nextChat.style.fontFamily = DEEP_CHAT_SYSTEM_FONT_STACK;
   chat.replaceWith(nextChat);
   initDeepChat(container);
-  placeSkillContextBarAboveComposer(container);
+  placeSkillComposerChrome(container);
   renderSkillContextBar(container);
 }
 

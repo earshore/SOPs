@@ -1430,22 +1430,24 @@
     padding 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* 技能试用到达横幅（FB1） */
+/* 技能试用到达提示（FB1）：无边框/背景，贴近输入框 */
 .deep-chat-skill-load-banner {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-content: center;
+  gap: 0.35rem;
   box-sizing: border-box;
   width: min(768px, 100%);
-  margin: 0 auto var(--spacing-2, 0.5rem);
-  padding: 0.5rem 0.85rem;
-  border: 1px solid var(--deep-chat-accent-border, rgba(168, 95, 63, 0.24));
-  border-radius: 9999px;
-  background: #fff;
+  margin: 0 auto;
+  padding: 0.15rem 0.25rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   color: var(--deep-chat-accent-hover, #8f4f33);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(168, 95, 63, 0.1);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .deep-chat-skill-load-banner[hidden] {
