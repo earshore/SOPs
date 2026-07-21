@@ -117,6 +117,95 @@ function renderCategories(): void {
   }
 }
 
+function createEmptyState(options: {
+  role: string;
+  iconClass: string;
+  title: string;
+  help: string;
+  live?: boolean;
+}): HTMLElement {
+  const empty = document.createElement('div');
+  empty.className = 'col-span-full text-center py-12 px-6';
+  empty.setAttribute('role', options.role);
+  if (options.live) empty.setAttribute('aria-live', 'polite');
+  appendIcon(empty, options.iconClass);
+  const title = document.createElement('p');
+  title.className = 'text-sm font-semibold text-slate-700';
+  title.textContent = options.title;
+  empty.appendChild(title);
+  const help = document.createElement('p');
+  help.className = 'mt-2 text-sm text-slate-500';
+  help.textContent = options.help;
+  empty.appendChild(help);
+  return empty;
+}
+
+function createActionButton(
+  skillId: string,
+  action: string,
+  icon: string,
+  label: string
+): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.dataset.action = action;
+  btn.dataset.skillId = skillId;
+  btn.className = 'btn-icon';
+  btn.title = label;
+  btn.setAttribute('aria-label', `${label}：${skillId}`);
+  appendIcon(btn, icon);
+  return btn;
+}
+
+function createSkillCard(skill: SkillMeta): HTMLElement {
+  const card = document.createElement('div');
+  card.className = 'skill-card group';
+  card.dataset.skillId = skill.id;
+
+  const header = document.createElement('div');
+  header.className = 'flex items-start justify-between gap-2 mb-3';
+
+  const catBadge = document.createElement('span');
+  catBadge.className =
+    'text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-md px-2 py-1';
+  catBadge.textContent = skill.categoryLabel;
+
+  const st = document.createElement('span');
+  st.className = statusClass(skill.status);
+  st.textContent = statusLabel(skill.status);
+  header.append(catBadge, st);
+
+  const title = document.createElement('h3');
+  title.className = 'skill-title';
+  title.textContent = skill.emoji ? `${skill.emoji} ${skill.title}` : skill.title;
+
+  const idEl = document.createElement('div');
+  idEl.className = 'skill-id';
+  idEl.textContent = skill.id;
+
+  const desc = document.createElement('p');
+  desc.className = 'skill-description';
+  desc.textContent = skill.description || '（无描述）';
+
+  const footer = document.createElement('div');
+  footer.className = 'flex items-center justify-between mt-4 pt-4 border-t border-slate-100';
+
+  const left = document.createElement('div');
+  left.className = 'text-xs text-slate-400';
+  left.textContent = skill.hasScripts ? '含 scripts' : '纯文档';
+
+  const actions = document.createElement('div');
+  actions.className = 'flex gap-2';
+  actions.append(
+    createActionButton(skill.id, 'view-skill', 'fas fa-eye', '查看详情'),
+    createActionButton(skill.id, 'copy-skill-id', 'fas fa-fingerprint', '复制 skillId'),
+    createActionButton(skill.id, 'copy-skill-raw', 'fas fa-copy', '复制正文')
+  );
+  footer.append(left, actions);
+  card.append(header, title, idEl, desc, footer);
+  return card;
+}
+
 function renderList(): void {
   const container = moduleRoot?.querySelector('#skill-list');
   const countEl = moduleRoot?.querySelector('#skill-result-count');
@@ -128,115 +217,36 @@ function renderList(): void {
     category: currentCategory,
   });
 
-  if (countEl) {
-    countEl.textContent = `显示 ${skills.length} / 共 ${total} 个技能`;
-  }
-
+  if (countEl) countEl.textContent = `显示 ${skills.length} / 共 ${total} 个技能`;
   clearElement(container);
 
   if (total === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'col-span-full text-center py-12 px-6';
-    empty.setAttribute('role', 'alert');
-    appendIcon(empty, 'fas fa-triangle-exclamation text-4xl text-amber-400 mb-4');
-    const title = document.createElement('p');
-    title.className = 'text-sm font-semibold text-slate-700';
-    title.textContent = '技能库为空';
-    empty.appendChild(title);
-    const help = document.createElement('p');
-    help.className = 'mt-2 text-sm text-slate-500';
-    help.textContent =
-      '请确认 vendor/amazon-skills 已接入，或执行：git submodule update --init --recursive';
-    empty.appendChild(help);
-    container.appendChild(empty);
+    container.appendChild(
+      createEmptyState({
+        role: 'alert',
+        iconClass: 'fas fa-triangle-exclamation text-4xl text-amber-400 mb-4',
+        title: '技能库为空',
+        help: '请确认 vendor/amazon-skills 已接入，或执行：git submodule update --init --recursive',
+      })
+    );
     return;
   }
 
   if (skills.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'col-span-full text-center py-12 px-6';
-    empty.setAttribute('role', 'status');
-    empty.setAttribute('aria-live', 'polite');
-    appendIcon(empty, 'fas fa-search text-4xl text-slate-300 mb-4');
-    const title = document.createElement('p');
-    title.className = 'text-sm font-semibold text-slate-600';
-    title.textContent = '未找到匹配的技能';
-    empty.appendChild(title);
-    const help = document.createElement('p');
-    help.className = 'mt-2 text-sm text-slate-500';
-    help.textContent = '推荐：清空搜索、切回「全部」，或尝试关键词 ppc / listing / keyword。';
-    empty.appendChild(help);
-    container.appendChild(empty);
+    container.appendChild(
+      createEmptyState({
+        role: 'status',
+        live: true,
+        iconClass: 'fas fa-search text-4xl text-slate-300 mb-4',
+        title: '未找到匹配的技能',
+        help: '推荐：清空搜索、切回「全部」，或尝试关键词 ppc / listing / keyword。',
+      })
+    );
     return;
   }
 
   for (const skill of skills) {
-    const card = document.createElement('div');
-    card.className = 'skill-card group';
-    card.dataset.skillId = skill.id;
-
-    const header = document.createElement('div');
-    header.className = 'flex items-start justify-between gap-2 mb-3';
-
-    const catBadge = document.createElement('span');
-    catBadge.className =
-      'text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-md px-2 py-1';
-    catBadge.textContent = skill.categoryLabel;
-
-    const st = document.createElement('span');
-    st.className = statusClass(skill.status);
-    st.textContent = statusLabel(skill.status);
-
-    header.appendChild(catBadge);
-    header.appendChild(st);
-
-    const title = document.createElement('h3');
-    title.className = 'skill-title';
-    title.textContent = skill.emoji ? `${skill.emoji} ${skill.title}` : skill.title;
-
-    const idEl = document.createElement('div');
-    idEl.className = 'skill-id';
-    idEl.textContent = skill.id;
-
-    const desc = document.createElement('p');
-    desc.className = 'skill-description';
-    desc.textContent = skill.description || '（无描述）';
-
-    const footer = document.createElement('div');
-    footer.className = 'flex items-center justify-between mt-4 pt-4 border-t border-slate-100';
-
-    const left = document.createElement('div');
-    left.className = 'text-xs text-slate-400';
-    left.textContent = skill.hasScripts ? '含 scripts' : '纯文档';
-
-    const actions = document.createElement('div');
-    actions.className = 'flex gap-2';
-
-    const makeAction = (action: string, icon: string, label: string) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.dataset.action = action;
-      btn.dataset.skillId = skill.id;
-      btn.className = 'btn-icon';
-      btn.title = label;
-      btn.setAttribute('aria-label', `${label}：${skill.id}`);
-      appendIcon(btn, icon);
-      return btn;
-    };
-
-    actions.appendChild(makeAction('view-skill', 'fas fa-eye', '查看详情'));
-    actions.appendChild(makeAction('copy-skill-id', 'fas fa-fingerprint', '复制 skillId'));
-    actions.appendChild(makeAction('copy-skill-raw', 'fas fa-copy', '复制正文'));
-
-    footer.appendChild(left);
-    footer.appendChild(actions);
-
-    card.appendChild(header);
-    card.appendChild(title);
-    card.appendChild(idEl);
-    card.appendChild(desc);
-    card.appendChild(footer);
-    container.appendChild(card);
+    container.appendChild(createSkillCard(skill));
   }
 }
 
@@ -282,38 +292,61 @@ function closeDetail(): void {
   currentSkill = null;
 }
 
+function handleCategoryClick(categoryBtn: HTMLElement): void {
+  const cat = categoryBtn.dataset.category as SkillCategoryId | 'all' | undefined;
+  if (!cat) return;
+  currentCategory = cat;
+  renderCategories();
+  renderList();
+}
+
+function handleSkillAction(skillId: string, action: string | undefined): void {
+  if (action === 'view-skill') {
+    openDetail(skillId);
+    return;
+  }
+  if (action === 'copy-skill-id') {
+    void copyText(skillId, 'skillId 已复制');
+    return;
+  }
+  if (action === 'copy-skill-raw') {
+    const skill = skillRegistry.getSkill(skillId);
+    if (skill) void copyText(skill.raw, '技能正文已复制');
+  }
+}
+
 function handleModuleClick(e: Event): void {
   const target = e.target as HTMLElement | null;
   if (!target || !moduleRoot) return;
 
   const categoryBtn = target.closest('.category-btn') as HTMLElement | null;
   if (categoryBtn && moduleRoot.contains(categoryBtn)) {
-    const cat = categoryBtn.dataset.category as SkillCategoryId | 'all' | undefined;
-    if (cat) {
-      currentCategory = cat;
-      renderCategories();
-      renderList();
-    }
+    handleCategoryClick(categoryBtn);
     return;
   }
 
   const actionBtn = target.closest('[data-action][data-skill-id]') as HTMLElement | null;
-  if (actionBtn && moduleRoot.contains(actionBtn)) {
-    const skillId = actionBtn.dataset.skillId;
-    const action = actionBtn.dataset.action;
-    if (!skillId) return;
-    if (action === 'view-skill') openDetail(skillId);
-    else if (action === 'copy-skill-id') copyText(skillId, 'skillId 已复制');
-    else if (action === 'copy-skill-raw') {
-      const skill = skillRegistry.getSkill(skillId);
-      if (skill) copyText(skill.raw, '技能正文已复制');
-    }
+  if (actionBtn && moduleRoot.contains(actionBtn) && actionBtn.dataset.skillId) {
+    handleSkillAction(actionBtn.dataset.skillId, actionBtn.dataset.action);
     return;
   }
 
   const card = target.closest('.skill-card[data-skill-id]') as HTMLElement | null;
-  if (card && moduleRoot.contains(card) && card.dataset.skillId) {
+  if (card?.dataset.skillId && moduleRoot.contains(card)) {
     openDetail(card.dataset.skillId);
+  }
+}
+
+function runModalAction(action: string | undefined): void {
+  if (action === 'close') {
+    closeDetail();
+    return;
+  }
+  if (!currentSkill) return;
+  if (action === 'copy-id') void copyText(currentSkill.id, 'skillId 已复制');
+  else if (action === 'copy-raw') void copyText(currentSkill.raw, '技能全文已复制');
+  else if (action === 'copy-install') {
+    void copyText(installCmd(currentSkill.id), '安装命令已复制');
   }
 }
 
@@ -324,13 +357,7 @@ function handleModalClick(e: Event): void {
 
   const actionBtn = target.closest('[data-skill-modal-action]') as HTMLElement | null;
   if (actionBtn && modal.contains(actionBtn)) {
-    const action = actionBtn.dataset.skillModalAction;
-    if (action === 'close') closeDetail();
-    else if (action === 'copy-id' && currentSkill) copyText(currentSkill.id, 'skillId 已复制');
-    else if (action === 'copy-raw' && currentSkill) copyText(currentSkill.raw, '技能全文已复制');
-    else if (action === 'copy-install' && currentSkill) {
-      copyText(installCmd(currentSkill.id), '安装命令已复制');
-    }
+    runModalAction(actionBtn.dataset.skillModalAction);
     return;
   }
 
