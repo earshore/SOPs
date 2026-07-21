@@ -93,6 +93,12 @@ declare module '*.html?raw' {
   export default content;
 }
 
+// Markdown?raw（Amazon Skills SKILL.md 等）
+declare module '*.md?raw' {
+  const content: string;
+  export default content;
+}
+
 // CSS模块
 declare module '*.css' {
   const content: string;
