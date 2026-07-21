@@ -533,6 +533,25 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     vertical-align: text-bottom;
   }
 
+  /*
+   * 用户气泡底色 #faf3ee 与默认 Chip 同色会糊成一片。
+   * 气泡内改用白底 + 实色描边，保证 Chip 从旗袍背景中跳出来。
+   */
+  .message-bubble.user-message .deep-chat-context-chip,
+  .message-bubble.user-message-text .deep-chat-context-chip,
+  .user-message .deep-chat-context-chip {
+    border: 1px solid rgba(168, 95, 63, 0.45);
+    background: #ffffff;
+    color: #6f3925;
+    box-shadow: 0 1px 2px rgba(111, 57, 37, 0.1);
+  }
+
+  .message-bubble.user-message .deep-chat-context-chip__icon,
+  .message-bubble.user-message-text .deep-chat-context-chip__icon,
+  .user-message .deep-chat-context-chip__icon {
+    color: #a85f3f;
+  }
+
   .input-button-container.inner-button-container {
     position: absolute !important;
     inset: 0 !important;
