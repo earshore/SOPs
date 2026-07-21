@@ -9,6 +9,7 @@ import {
   peekSkillForDeepChat,
   prefixDraftWithSkillContexts,
   queueSkillForDeepChat,
+  stripSkillMarkersFromDraft,
 } from './skillDeepChatHandoff';
 
 describe('skillDeepChatHandoff', () => {
@@ -69,6 +70,17 @@ describe('skillDeepChatHandoff', () => {
     expect(once.startsWith(formatSkillTitleSegment('利润测算'))).toBe(true);
     expect(once).toContain('业务数据：ASIN');
     expect(prefixDraftWithSkillContexts(once, contexts)).toBe(once);
+  });
+
+  it('strips dismissed skill markers so chip remove does not leave plain title text', () => {
+    const segment = formatSkillTitleSegment('Amazon Brand Registry');
+    const draft = `${segment}\n业务数据：ASIN`;
+    const cleaned = stripSkillMarkersFromDraft(draft, ['Amazon Brand Registry']);
+    expect(cleaned).toBe('业务数据：ASIN');
+    expect(cleaned).not.toContain('Amazon Brand Registry');
+    expect(cleaned).not.toContain('「');
+    // 移除后仅剩业务正文，不再前缀空技能
+    expect(prefixDraftWithSkillContexts(cleaned, [])).toBe('业务数据：ASIN');
   });
 
   it('skips bash/json usage fences and falls back to generic draft', () => {

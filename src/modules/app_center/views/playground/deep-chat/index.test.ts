@@ -993,8 +993,10 @@ describe('deep-chat skill trial context bar', () => {
       ''
     );
     expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
-    // 业务草稿仍在
+    // 业务草稿仍在，且不残留技能标题纯文本
     expect(input?.textContent).toContain('业务数据');
+    expect(input?.textContent).not.toContain('利润测算');
+    expect(input?.textContent).not.toContain('「');
 
     const undo = container.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
     expect(undo?.hidden).toBe(false);

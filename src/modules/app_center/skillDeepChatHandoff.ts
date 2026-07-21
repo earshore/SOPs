@@ -48,6 +48,23 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/** 从草稿中移除指定技能标题的 Chip 标记（「技能名」与裸标题） */
+export function stripSkillMarkersFromDraft(draft: string, titles: ReadonlyArray<string>): string {
+  let body = draft || '';
+  for (const rawTitle of titles) {
+    const title = rawTitle.trim();
+    if (!title) continue;
+    const segment = formatSkillTitleSegment(title);
+    body = body.replace(new RegExp(escapeRegExp(segment), 'g'), '');
+    body = body.replace(new RegExp(`(?<!「)${escapeRegExp(title)}(?!」)`, 'g'), '');
+  }
+  return body
+    .replace(/^\n+/, '')
+    .replace(/\n+$/, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 /**
  * 将会话技能 Chip 标记置于草稿前部，与业务正文混排。
  * 已含对应「技能名」标记时不重复插入。
@@ -56,23 +73,15 @@ export function prefixDraftWithSkillContexts(
   draft: string,
   contexts: ReadonlyArray<{ skillTitle: string }>
 ): string {
-  if (contexts.length === 0) {
-    return draft;
-  }
+  // 先清掉仍在列表中的技能标记，再统一前缀
+  let body = stripSkillMarkersFromDraft(
+    draft,
+    contexts.map(context => context.skillTitle)
+  );
 
-  let body = draft || '';
-  // 去掉草稿中已有的技能标记，再统一前缀，避免重复
-  for (const context of contexts) {
-    const title = context.skillTitle.trim();
-    if (!title) continue;
-    const segment = formatSkillTitleSegment(title);
-    body = body.replace(new RegExp(escapeRegExp(segment), 'g'), '');
-    body = body.replace(new RegExp(`(?<!「)${escapeRegExp(title)}(?!」)`, 'g'), '');
+  if (contexts.length === 0) {
+    return body;
   }
-  body = body
-    .replace(/^\n+/, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trimStart();
 
   const prefix = contexts
     .map(context => formatSkillTitleSegment(context.skillTitle.trim()))

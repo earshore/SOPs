@@ -31,6 +31,7 @@ import {
   consumeSkillForDeepChat,
   normalizeSkillChipDraftText,
   prefixDraftWithSkillContexts,
+  stripSkillMarkersFromDraft,
   type SkillDeepChatContext,
 } from '@/modules/app_center/skillDeepChatHandoff';
 import {
@@ -2241,8 +2242,10 @@ function dismissSessionSkillContext(container: HTMLElement, skillId: string): vo
     context => context.skillId !== skillId
   );
   const input = getDraftInput(container);
+  // serialize 会把 Chip 变成「技能名」；必须显式剥掉已移除技能，避免留下纯文本标题
   const rawDraft = input ? serializeDraftInput(input) : activeThread.draftText || '';
-  const nextDraft = prefixDraftWithSkillContexts(rawDraft, nextContexts);
+  const withoutRemoved = stripSkillMarkersFromDraft(rawDraft, [removed.skillTitle]);
+  const nextDraft = prefixDraftWithSkillContexts(withoutRemoved, nextContexts);
 
   updateActiveThreadFields(container, {
     skillContexts: nextContexts.length > 0 ? nextContexts : undefined,
