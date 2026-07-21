@@ -183,3 +183,37 @@
     0 0 0 2px white,
     0 0 0 4px var(--color-violet-500);
 }
+
+/* 与上游仓库 Available / Beta 标注对齐 */
+.skill-status-available {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-emerald-700, #047857);
+  background: var(--color-emerald-50, #ecfdf5);
+  border: 1px solid var(--color-emerald-200, #a7f3d0);
+  border-radius: var(--rounded-md);
+  padding: 0.125rem 0.5rem;
+}
+
+.skill-status-beta {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-amber-700, #b45309);
+  background: var(--color-amber-50, #fffbeb);
+  border: 1px solid var(--color-amber-200, #fde68a);
+  border-radius: var(--rounded-md);
+  padding: 0.125rem 0.5rem;
+}
+
+.skill-status-unknown {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-slate-600);
+  background: var(--color-slate-100);
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--rounded-md);
+  padding: 0.125rem 0.5rem;
+}

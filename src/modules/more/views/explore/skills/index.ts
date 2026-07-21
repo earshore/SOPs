@@ -11,6 +11,11 @@ import { copyTextToClipboard } from '@/common/utils/clipboard';
 import { showToast } from '@/common/ui';
 import { skillRegistry } from '@/services/skillRegistry';
 import type { Skill, SkillCategoryId, SkillMeta } from '@/services/skillRegistry';
+import {
+  buildSkillDeepChatUserDraft,
+  queueSkillForDeepChat,
+} from '@/modules/app_center/skillDeepChatHandoff';
+import { navigateToRouteId } from '@/common/router/initRouter';
 import '@/components/modal/AppModal';
 import './skills_style.css';
 
@@ -44,6 +49,18 @@ function displayTitle(title: string): string {
     i += 1;
   }
   return chars.slice(i).join('').trim() || title.trim();
+}
+
+function statusLabel(status: SkillMeta['status']): string {
+  if (status === 'beta') return 'Beta';
+  if (status === 'available') return 'Available';
+  return 'Unknown';
+}
+
+function statusClass(status: SkillMeta['status']): string {
+  if (status === 'beta') return 'skill-status-beta';
+  if (status === 'available') return 'skill-status-available';
+  return 'skill-status-unknown';
 }
 
 function clearElement(element: Element): void {
@@ -171,13 +188,24 @@ function createSkillCard(skill: SkillMeta): HTMLElement {
   card.setAttribute('aria-label', `查看技能：${displayTitle(skill.title)}`);
 
   const header = document.createElement('div');
-  header.className = 'mb-3';
+  header.className = 'flex items-start justify-between gap-2 mb-3';
 
   const catBadge = document.createElement('span');
   catBadge.className =
     'text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-md px-2 py-1';
   catBadge.textContent = skill.categoryLabel;
-  header.appendChild(catBadge);
+
+  // 与上游仓库标注对齐：Available / Beta（可区分，非全员同文案噪音）
+  const st = document.createElement('span');
+  st.className = statusClass(skill.status);
+  st.textContent = statusLabel(skill.status);
+  st.title =
+    skill.status === 'beta'
+      ? '试用版：功能可用，持续改进中'
+      : skill.status === 'available'
+        ? '正式可用'
+        : '未标注状态';
+  header.append(catBadge, st);
 
   const title = document.createElement('h3');
   title.className = 'skill-title';
@@ -195,14 +223,44 @@ function createSkillCard(skill: SkillMeta): HTMLElement {
   const actions = document.createElement('div');
   actions.className = 'flex gap-2';
   const titleText = displayTitle(skill.title);
-  // 运营主路径：查看方法 + 复制全文。不展示无信息量的状态/文档标签。
   actions.append(
     createActionButton(skill.id, 'view-skill', 'fas fa-eye', '查看详情', titleText),
-    createActionButton(skill.id, 'copy-skill-raw', 'fas fa-copy', '复制全文', titleText)
+    createActionButton(skill.id, 'copy-skill-raw', 'fas fa-copy', '复制全文', titleText),
+    createActionButton(
+      skill.id,
+      'try-deep-chat',
+      'fas fa-paper-plane',
+      '在 Deep Chat 试用',
+      titleText
+    )
   );
   footer.appendChild(actions);
   card.append(header, title, desc, footer);
   return card;
+}
+
+function trySkillInDeepChat(skillId: string): void {
+  const skill = skillRegistry.getSkill(skillId);
+  if (!skill) {
+    showToast('未找到该技能', { type: 'error' });
+    return;
+  }
+
+  const skillTitle = displayTitle(skill.title);
+  queueSkillForDeepChat({
+    skillId: skill.id,
+    skillTitle,
+    skillRaw: skill.raw,
+    userDraft: buildSkillDeepChatUserDraft(skillTitle),
+  });
+
+  void navigateToRouteId('playground_deep_chat').then(ok => {
+    if (!ok) {
+      showToast('无法打开 Deep Chat，请检查路由', { type: 'error' });
+      return;
+    }
+    showToast(`正在 Deep Chat 载入技能「${skillTitle}」`, { type: 'success' });
+  });
 }
 
 function renderList(): void {
@@ -305,6 +363,10 @@ function handleSkillAction(skillId: string, action: string | undefined): void {
   if (action === 'copy-skill-raw') {
     const skill = skillRegistry.getSkill(skillId);
     if (skill) void copyText(skill.raw, '技能全文已复制，可粘贴到 AI 对话');
+    return;
+  }
+  if (action === 'try-deep-chat') {
+    trySkillInDeepChat(skillId);
   }
 }
 
@@ -349,6 +411,12 @@ function runModalAction(action: string | undefined): void {
   }
   if (action === 'copy-raw' && currentSkill) {
     void copyText(currentSkill.raw, '技能全文已复制，可粘贴到 AI 对话');
+    return;
+  }
+  if (action === 'try-deep-chat' && currentSkill) {
+    const skillId = currentSkill.id;
+    closeDetail();
+    trySkillInDeepChat(skillId);
   }
 }
 

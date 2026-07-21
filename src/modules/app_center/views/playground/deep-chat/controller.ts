@@ -26,6 +26,10 @@ import {
   createListingPromptWorkflowContext,
   type ListingPromptWorkflowContext,
 } from '@/modules/app_center/listingWorkflowHandoff';
+import {
+  consumeSkillForDeepChat,
+  type SkillDeepChatContext,
+} from '@/modules/app_center/skillDeepChatHandoff';
 import { setWorkspaceContext } from '@/modules/app_center/workspaceContext';
 import type { LLMProviderConfig } from '@/types/state';
 import { confirmWithModal } from './utils/confirmModal';
@@ -194,6 +198,11 @@ class DeepChatModule extends BaseModule {
     const promptContext = consumeListingPromptForDeepChat();
     if (promptContext) {
       createThreadFromListingPromptContext(container, promptContext);
+    } else {
+      const skillContext = consumeSkillForDeepChat();
+      if (skillContext) {
+        createThreadFromSkillContext(container, skillContext);
+      }
     }
   }
 
@@ -1689,6 +1698,27 @@ function createThreadFromListingPromptContext(
     draftText: promptContext.prompt,
   });
   window.setTimeout(() => fillPromptDraftInput(container, promptContext.prompt), 80);
+}
+
+/** Skills 页试用：技能全文 → 系统提示词；用户草稿 → 输入框 */
+function createThreadFromSkillContext(
+  container: HTMLElement,
+  skillContext: SkillDeepChatContext
+): void {
+  createThread(container, {
+    toastMessage: `已载入技能「${skillContext.skillTitle}」到系统提示词`,
+    draftText: skillContext.userDraft,
+  });
+
+  sessionSystemPrompt = skillContext.skillRaw;
+  const systemPromptInput = container.querySelector<HTMLTextAreaElement>(
+    '#deep-chat-system-prompt'
+  );
+  if (systemPromptInput) {
+    systemPromptInput.value = skillContext.skillRaw;
+  }
+
+  window.setTimeout(() => fillPromptDraftInput(container, skillContext.userDraft), 80);
 }
 
 function cloneListingPromptContext(
