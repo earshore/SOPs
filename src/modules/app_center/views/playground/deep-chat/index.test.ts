@@ -32,6 +32,10 @@ const deepChatTemplate = `
           <input id="deep-chat-temperature" type="range" value="0.3">
           <button id="deep-chat-reset-tuning" type="button"></button>
         </details>
+        <div id="deep-chat-skill-context-bar" class="deep-chat-skill-context-bar" aria-label="已挂载技能" hidden>
+          <span class="deep-chat-skill-context-bar__label">已挂载技能</span>
+          <div id="deep-chat-skill-context-chips" class="deep-chat-skill-context-bar__chips" role="list"></div>
+        </div>
         <div id="deep-chat-pending-status" hidden>
           <span id="deep-chat-pending-status-text"></span>
         </div>
@@ -334,6 +338,7 @@ async function importDeepChat(options: ImportOptions = {}) {
   };
   const eventBus = {
     emit: vi.fn(),
+    on: vi.fn(() => vi.fn()),
   };
   const navigateToRouteId = vi.fn(async () => true);
   const confirmWithModal = vi.fn(async () => true);
@@ -908,6 +913,145 @@ describe('deep-chat Prompt handoff', () => {
     expectPersistedThread(mocks, {
       promptDraftId: 'prompt-1',
       listingPromptContext: promptContext,
+    });
+
+    unmount();
+  });
+});
+
+describe('deep-chat skill trial context bar', () => {
+  it('shows session context bar after trial handoff without composer session chips', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+
+    const { mount, unmount, mocks } = await importDeepChat();
+    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+    const userDraft = skillHandoff.buildSkillDeepChatUserDraft('利润测算');
+    skillHandoff.queueSkillForDeepChat({
+      skillId: 'profit-calculator',
+      skillTitle: '利润测算',
+      skillRaw: '# Profit Calculator\n\nUse margin tables.',
+      userDraft,
+    });
+
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(600);
+
+    const bar = container.querySelector<HTMLElement>('#deep-chat-skill-context-bar');
+    const barChip = container.querySelector(
+      '#deep-chat-skill-context-chips .deep-chat-context-chip'
+    );
+    const input = getChat(container).shadowRoot?.querySelector('#text-input');
+
+    expect(bar?.hidden).toBe(false);
+    expect(barChip?.textContent).toContain('利润测算');
+    expect(barChip?.classList.contains('deep-chat-context-chip--dismissible')).toBe(true);
+    // 输入框仅为业务草稿，不承载会话级 Chip
+    expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
+    expect(input?.textContent).toContain('已挂载的技能方法论');
+    expect(input?.textContent).toContain('业务数据');
+    expect(
+      container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
+    ).toContain('Profit Calculator');
+    expectPersistedThread(mocks, {
+      skillContexts: [
+        expect.objectContaining({
+          skillId: 'profit-calculator',
+          skillTitle: '利润测算',
+        }),
+      ],
+      draftText: userDraft,
+    });
+    expect(skillHandoff.consumeSkillForDeepChat()).toBeNull();
+
+    const dismiss = container.querySelector<HTMLButtonElement>(
+      '#deep-chat-skill-context-chips [data-action="dismiss-skill-context"]'
+    );
+    expect(dismiss).not.toBeNull();
+    dismiss?.click();
+    await vi.advanceTimersByTimeAsync(50);
+
+    expect(container.querySelector<HTMLElement>('#deep-chat-skill-context-bar')?.hidden).toBe(true);
+    expect(container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value).toBe(
+      ''
+    );
+    // 业务草稿仍在
+    expect(input?.textContent).toContain('业务数据');
+
+    unmount();
+  });
+
+  it('consumes a second skill handoff while Deep Chat is already mounted', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+
+    const { mount, unmount, mocks } = await importDeepChat();
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(200);
+
+    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+    const { consumePendingSkillHandoff } = await import('./controller');
+    skillHandoff.queueSkillForDeepChat({
+      skillId: 'skill-second',
+      skillTitle: '第二技能',
+      skillRaw: '# Second Skill',
+      userDraft: skillHandoff.buildSkillDeepChatUserDraft('第二技能'),
+    });
+
+    expect(consumePendingSkillHandoff(container)).toBe(true);
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(
+      container.querySelector('#deep-chat-skill-context-chips .deep-chat-context-chip')?.textContent
+    ).toContain('第二技能');
+    expect(
+      container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
+    ).toContain('Second Skill');
+    expectPersistedThread(mocks, {
+      skillContexts: [expect.objectContaining({ skillId: 'skill-second' })],
+    });
+    expect(skillHandoff.consumeSkillForDeepChat()).toBeNull();
+
+    unmount();
+  });
+
+  it('keeps system prompt after send when skill remains on the session', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+
+    const { mount, unmount, mocks } = await importDeepChat();
+    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+    const userDraft = skillHandoff.buildSkillDeepChatUserDraft('利润测算');
+    skillHandoff.queueSkillForDeepChat({
+      skillId: 'profit-calculator',
+      skillTitle: '利润测算',
+      skillRaw: '# Profit Calculator\n\nUse margin tables.',
+      userDraft,
+    });
+
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(600);
+
+    expect(container.querySelector('#deep-chat-skill-context-bar')?.hasAttribute('hidden')).toBe(
+      false
+    );
+
+    const onResponse = vi.fn();
+    const onClose = vi.fn();
+    getChat(container).connect?.handler({ text: userDraft }, { onResponse, onClose });
+    await vi.advanceTimersByTimeAsync(50);
+    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(100);
+
+    expect(
+      container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
+    ).toContain('Profit Calculator');
+    expectPersistedThread(mocks, {
+      skillContexts: [
+        expect.objectContaining({
+          skillId: 'profit-calculator',
+        }),
+      ],
     });
 
     unmount();

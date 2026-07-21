@@ -72,6 +72,9 @@ export const APP_EVENTS = {
   NAVIGATE_TO_SCRAPER: 'app:navigate-to-scraper',
   NAVIGATE_TO_AI_ANALYSIS: 'app:navigate-to-ai-analysis',
 
+  /** Skills 页已 queue 技能试用 handoff（Deep Chat 已挂载时立即消费） */
+  SKILL_DEEP_CHAT_HANDOFF: 'app:skill-deep-chat-handoff',
+
   // 动作注册
   REGISTER_ACTIONS: 'app:register-actions',
   UNREGISTER_ACTIONS: 'app:unregister-actions',

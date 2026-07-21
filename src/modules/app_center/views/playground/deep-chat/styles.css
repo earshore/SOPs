@@ -1430,6 +1430,165 @@
     padding 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
+/* 会话级技能 Context Bar（light DOM，不依赖输入框） */
+.deep-chat-skill-context-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  box-sizing: border-box;
+  width: min(768px, 100%);
+  margin: 0 auto var(--spacing-3, 0.75rem);
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--deep-chat-accent-border, rgba(168, 95, 63, 0.24));
+  border-radius: 12px;
+  background: var(--deep-chat-accent-soft, #faf3ee);
+  color: var(--deep-chat-accent-hover, #8f4f33);
+}
+
+.deep-chat-skill-context-bar[hidden] {
+  display: none !important;
+}
+
+.deep-chat-skill-context-bar__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--deep-chat-accent-active, #6f3925);
+}
+
+.deep-chat-skill-context-bar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+/* light DOM Chip（与 shadow 内视觉一致，供 Context Bar 使用） */
+.deep-chat-skill-context-bar .deep-chat-context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  max-width: min(100%, 14rem);
+  margin: 0;
+  padding: 0.1rem 0.45rem 0.1rem 0.28rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(168, 95, 63, 0.28);
+  background: #fff;
+  color: #8f4f33;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.25;
+  user-select: none;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.deep-chat-skill-context-bar .deep-chat-context-chip--dismissible:hover,
+.deep-chat-skill-context-bar .deep-chat-context-chip--dismissible:focus-within {
+  border-color: rgba(168, 95, 63, 0.4);
+  box-shadow: 0 1px 2px rgba(168, 95, 63, 0.14);
+}
+
+.deep-chat-skill-context-bar .deep-chat-context-chip__leading {
+  position: relative;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deep-chat-skill-context-bar .deep-chat-context-chip__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #a85f3f;
+  transition: opacity 120ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.deep-chat-skill-context-bar .deep-chat-context-chip__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deep-chat-skill-context-bar .deep-chat-context-chip__dismiss {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: #8f4f33;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 120ms cubic-bezier(0, 0, 0.2, 1),
+    background 120ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.deep-chat-skill-context-bar
+  .deep-chat-context-chip--dismissible:hover
+  .deep-chat-context-chip__icon,
+.deep-chat-skill-context-bar
+  .deep-chat-context-chip--dismissible:focus-within
+  .deep-chat-context-chip__icon {
+  opacity: 0;
+}
+
+.deep-chat-skill-context-bar
+  .deep-chat-context-chip--dismissible:hover
+  .deep-chat-context-chip__dismiss,
+.deep-chat-skill-context-bar
+  .deep-chat-context-chip--dismissible:focus-within
+  .deep-chat-context-chip__dismiss {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.deep-chat-skill-context-bar .deep-chat-context-chip__dismiss:hover,
+.deep-chat-skill-context-bar .deep-chat-context-chip__dismiss:focus-visible {
+  background: rgba(168, 95, 63, 0.14);
+  outline: none;
+}
+
+.deep-chat-thread-skill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-right: 0.35rem;
+  color: var(--deep-chat-accent, #a85f3f);
+  font-size: 0.7rem;
+  vertical-align: -0.05em;
+}
+
+.deep-chat-thread-name {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
 .deep-chat-wrap {
   height: 168px;
   min-width: 0;
@@ -1441,11 +1600,14 @@
   background: transparent;
   overflow: visible;
   box-shadow: none;
+  /* 不 transition height：试用填入 Chip 草稿时避免输入区上下晃动 */
   transition:
-    height 200ms cubic-bezier(0, 0, 0.2, 1),
-    min-height 200ms cubic-bezier(0, 0, 0.2, 1),
     border-radius 200ms cubic-bezier(0, 0, 0.2, 1),
     box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.deep-chat-wrap.is-height-instant {
+  transition: none !important;
 }
 
 .deep-chat-wrap.is-draft-height-md {

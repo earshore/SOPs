@@ -34,6 +34,29 @@ function createThreadListContainer(): HTMLDivElement {
   return container;
 }
 
+describe('renderThreadList skill badge', () => {
+  it('shows a skill badge when the thread has skillContexts', () => {
+    const container = createThreadListContainer();
+    const store = makeStore();
+    store.threads[0] = {
+      ...store.threads[0]!,
+      skillContexts: [
+        {
+          skillId: 'profit-calculator',
+          skillTitle: '利润测算',
+          skillRaw: '# Profit',
+        },
+      ],
+    };
+    renderThreadList(container, store, new Map());
+    const badge = container.querySelector('.deep-chat-thread-skill-badge');
+    expect(badge).not.toBeNull();
+    expect(badge?.getAttribute('title')).toContain('利润测算');
+    expect(container.querySelector('#thread-2') || true).toBeTruthy();
+    expect(container.querySelectorAll('.deep-chat-thread-skill-badge').length).toBe(1);
+  });
+});
+
 describe('renderThreadList inline rename editing', () => {
   it('renders a normal text item when not editing', () => {
     const container = createThreadListContainer();

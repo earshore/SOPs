@@ -292,7 +292,9 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   #text-input-container {
     box-sizing: border-box !important;
     display: flex !important;
-    flex-direction: column !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-end !important;
     width: min(100%, 768px) !important;
     min-width: 0 !important;
     max-width: 100% !important;
@@ -306,56 +308,72 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     overflow-y: auto !important;
   }
 
-  /* 技能上下文 Chip：落在输入框内部顶部，保持原 skill 名称前缀位置 */
-  #deep-chat-context-chips-host {
-    display: none;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.375rem;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px 54px 0 18px;
+  #text-input {
+    box-sizing: border-box !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    min-height: 24px !important;
+    padding: 18px 62px 16px 22px !important;
+    color: #0f172a !important;
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    white-space: pre-wrap !important;
   }
 
-  #deep-chat-context-chips-host:not(:empty) {
-    display: flex !important;
-  }
-
-  #deep-chat-context-chips-host:not(:empty) + #text-input {
-    padding-top: 8px !important;
-  }
-
+  /*
+   * 全局技能上下文 Chip（输入框 / 消息气泡共用）
+   * - --dismissible：输入框、编辑回填 — hover 时 × 覆盖左侧图标
+   * - --static：已发送消息 — 仅展示，永不显示 ×
+   */
   .deep-chat-context-chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    max-width: min(100%, 20rem);
-    min-height: 1.75rem;
-    padding: 0.2rem 0.3rem 0.2rem 0.55rem;
+    gap: 0.28rem;
+    max-width: min(100%, 14rem);
+    margin: 0 0.12em;
+    padding: 0.1rem 0.45rem 0.1rem 0.28rem;
     border-radius: 9999px;
     border: 1px solid rgba(168, 95, 63, 0.28);
     background: #faf3ee;
     color: #8f4f33;
-    font-size: 12.5px;
+    font-size: 0.8125em;
     font-weight: 600;
     line-height: 1.25;
+    vertical-align: baseline;
+    user-select: none;
     cursor: default;
+    -webkit-user-modify: read-only;
+    white-space: nowrap;
   }
 
-  .deep-chat-context-chip:hover,
-  .deep-chat-context-chip:focus-within {
+  .deep-chat-context-chip--dismissible:hover,
+  .deep-chat-context-chip--dismissible:focus-within {
     border-color: rgba(168, 95, 63, 0.4);
     background: #ffffff;
+    box-shadow: 0 1px 2px rgba(168, 95, 63, 0.14);
   }
 
-  .deep-chat-context-chip__icon {
+  .deep-chat-context-chip__leading {
+    position: relative;
     flex-shrink: 0;
-    width: 0.9rem;
+    width: 1rem;
+    height: 1rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .deep-chat-context-chip__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     color: #a85f3f;
-    font-size: 0.7rem;
+    transition: opacity 120ms cubic-bezier(0, 0, 0.2, 1);
   }
 
   .deep-chat-context-chip__label {
@@ -366,52 +384,50 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .deep-chat-context-chip__dismiss {
-    flex-shrink: 0;
+    position: absolute;
+    inset: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 100%;
+    height: 100%;
     margin: 0;
     padding: 0;
     border: 0;
     border-radius: 9999px;
     background: transparent;
-    color: #64748b;
-    font-size: 0.7rem;
+    color: #8f4f33;
     line-height: 1;
     cursor: pointer;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 150ms cubic-bezier(0, 0, 0.2, 1), background 150ms cubic-bezier(0, 0, 0.2, 1);
+    transition:
+      opacity 120ms cubic-bezier(0, 0, 0.2, 1),
+      background 120ms cubic-bezier(0, 0, 0.2, 1);
   }
 
-  .deep-chat-context-chip:hover .deep-chat-context-chip__dismiss,
-  .deep-chat-context-chip:focus-within .deep-chat-context-chip__dismiss {
+  /* 仅可编辑场景：hover 用 × 覆盖技能图标 */
+  .deep-chat-context-chip--dismissible:hover .deep-chat-context-chip__icon,
+  .deep-chat-context-chip--dismissible:focus-within .deep-chat-context-chip__icon {
+    opacity: 0;
+  }
+
+  .deep-chat-context-chip--dismissible:hover .deep-chat-context-chip__dismiss,
+  .deep-chat-context-chip--dismissible:focus-within .deep-chat-context-chip__dismiss {
     opacity: 1;
     pointer-events: auto;
   }
 
-  .deep-chat-context-chip__dismiss:hover,
-  .deep-chat-context-chip__dismiss:focus-visible {
-    background: rgba(168, 95, 63, 0.12);
-    color: #8f4f33;
+  .deep-chat-context-chip--dismissible .deep-chat-context-chip__dismiss:hover,
+  .deep-chat-context-chip--dismissible .deep-chat-context-chip__dismiss:focus-visible {
+    background: rgba(168, 95, 63, 0.14);
     outline: none;
   }
 
-  #text-input {
-    box-sizing: border-box !important;
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    min-height: 24px !important;
-    padding: 18px 62px 16px 22px !important;
-    color: #0f172a !important;
-    font-size: 15px !important;
-    line-height: 1.45 !important;
-    overflow-wrap: anywhere !important;
-    word-break: break-word !important;
-    white-space: pre-wrap !important;
+  /* 消息气泡内 static Chip：略紧凑，无交互态 */
+  .message-bubble .deep-chat-context-chip--static {
+    font-size: 0.78em;
+    vertical-align: text-bottom;
   }
 
   .input-button-container.inner-button-container {

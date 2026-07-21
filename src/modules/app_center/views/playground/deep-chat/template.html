@@ -156,6 +156,22 @@
 
       <div class="deep-chat-stage">
         <div
+          id="deep-chat-skill-context-bar"
+          class="deep-chat-skill-context-bar"
+          aria-label="已挂载技能"
+          hidden
+        >
+          <span class="deep-chat-skill-context-bar__label">
+            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+            已挂载技能
+          </span>
+          <div
+            id="deep-chat-skill-context-chips"
+            class="deep-chat-skill-context-bar__chips"
+            role="list"
+          ></div>
+        </div>
+        <div
           id="deep-chat-pending-status"
           class="deep-chat-pending-status"
           aria-live="polite"

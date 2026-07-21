@@ -15,6 +15,8 @@ import {
   buildSkillDeepChatUserDraft,
   queueSkillForDeepChat,
 } from '@/modules/app_center/skillDeepChatHandoff';
+import eventBus from '@/common/EventBus';
+import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { navigateToRouteId } from '@/common/router/initRouter';
 import '@/components/modal/AppModal';
 import './skills_style.css';
@@ -253,13 +255,18 @@ function trySkillInDeepChat(skillId: string): void {
     skillRaw: skill.raw,
     userDraft: buildSkillDeepChatUserDraft(skillTitle),
   });
+  // Deep Chat 已挂载时立即消费；否则 init / 路由重入时消费
+  eventBus.emit(APP_EVENTS.SKILL_DEEP_CHAT_HANDOFF, {
+    skillId: skill.id,
+    skillTitle,
+  });
 
   void navigateToRouteId('playground_deep_chat').then(ok => {
     if (!ok) {
       showToast('无法打开 Deep Chat，请检查路由', { type: 'error' });
       return;
     }
-    showToast(`正在 Deep Chat 载入技能「${skillTitle}」`, { type: 'success' });
+    showToast(`正在打开 Deep Chat…`, { type: 'success' });
   });
 }
 

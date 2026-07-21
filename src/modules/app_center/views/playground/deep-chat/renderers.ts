@@ -70,12 +70,13 @@ function renderThreadItem(
   const isMenuOpen = thread.id === threadMenuState?.threadId;
   const escapedThreadId = escapeHTML(thread.id);
   const escapedTitle = escapeHTML(thread.title);
+  const skillBadge = renderThreadSkillBadge(thread);
 
   return `
       <div class="${getThreadItemClassName(isActive, isPinned, isMenuOpen)}">
         <button class="deep-chat-thread-select" type="button" data-thread-id="${escapedThreadId}">
           <span class="deep-chat-thread-copy">
-            <span class="deep-chat-thread-name">${escapedTitle}</span>
+            <span class="deep-chat-thread-name">${skillBadge}${escapedTitle}</span>
             <span class="deep-chat-thread-meta">${escapeHTML(getThreadMeta(thread, pendingRequests.get(thread.id)))}</span>
           </span>
         </button>
@@ -85,6 +86,19 @@ function renderThreadItem(
         ${renderThreadMenu(thread, isPinned, isMenuOpen, threadMenuState)}
       </div>
     `;
+}
+
+function renderThreadSkillBadge(thread: DeepChatThread): string {
+  const contexts = thread.skillContexts || [];
+  if (contexts.length === 0) {
+    return '';
+  }
+  const titles = contexts
+    .map(context => context.skillTitle.trim())
+    .filter(Boolean)
+    .join('、');
+  const titleAttr = escapeHTML(titles ? `已挂载技能：${titles}` : '已挂载技能');
+  return `<span class="deep-chat-thread-skill-badge" title="${titleAttr}" aria-label="${titleAttr}"><i class="fas fa-graduation-cap" aria-hidden="true"></i></span>`;
 }
 
 function renderThreadEditItem(thread: DeepChatThread, value: string): string {

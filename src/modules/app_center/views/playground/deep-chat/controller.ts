@@ -29,8 +29,16 @@ import {
 import {
   buildSystemPromptFromSkillContexts,
   consumeSkillForDeepChat,
+  normalizeSkillChipDraftText,
   type SkillDeepChatContext,
 } from '@/modules/app_center/skillDeepChatHandoff';
+import {
+  SKILL_CHIP_CLASS,
+  createSkillContextChip,
+  serializeChipContainingElement,
+  setContentWithInlineSkillChips,
+  textContainsSkillChipMarker,
+} from './skillContextChip';
 import { setWorkspaceContext } from '@/modules/app_center/workspaceContext';
 import type { LLMProviderConfig } from '@/types/state';
 import { confirmWithModal } from './utils/confirmModal';
@@ -140,6 +148,7 @@ const DEEP_CHAT_SYSTEM_FONT_STACK =
   'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 let draftInputResizeObserver: ResizeObserver | null = null;
 let draftInputResizeRetryTimer: number | null = null;
+let draftHeightSyncRaf: number | null = null;
 let cleanupDraftInputHeightListener: (() => void) | null = null;
 let cleanupSubmitStopButtonListener: (() => void) | null = null;
 let submitStopButtonSyncRetryTimer: number | null = null;
@@ -197,15 +206,14 @@ class DeepChatModule extends BaseModule {
     await refreshLLMConfig(container, () => this.isCurrentMount(mountSignal));
     if (!this.isCurrentMount(mountSignal)) return;
     bindControls(container);
+    bindSkillHandoffListeners(container);
     const promptContext = consumeListingPromptForDeepChat();
     if (promptContext) {
       createThreadFromListingPromptContext(container, promptContext);
     } else {
-      const skillContext = consumeSkillForDeepChat();
-      if (skillContext) {
-        createThreadFromSkillContext(container, skillContext);
-      }
+      consumePendingSkillHandoff(container);
     }
+    renderSkillContextBar(container);
   }
 
   protected onUnmount(): void {
@@ -333,12 +341,19 @@ function initDeepChat(container: HTMLElement): void {
 
   const activeThread = getActiveThread();
   configureDeepChatBase(chat, activeThread, updateThreadDraft, getThreadDisplayMessages);
+  // deep-chat 默认用 innerText 抽正文，会在 contenteditable=false 的 Chip 两侧插入换行；
+  // 统一走 serialize，避免刷新后换行累积。
+  chat.onInput = () => {
+    updateThreadDraft(threadStore.activeThreadId, getDraftInputText(container));
+  };
   configureDeepChatStyles(chat);
   configureDeepChatConnection(chat, container, handleDeepChatRequest);
   chat.onRender?.();
   setupMessageToolbars(chat, () => getThreadDisplayMessages(getActiveThread()), {
     canSendToKeywordHunter: () => Boolean(getActiveListingPromptContext()),
     sendToKeywordHunter: (content, message) => sendAssistantCopyToKeywordHunter(content, message),
+    getSkillContexts: () => getActiveThread().skillContexts || [],
+    refillComposerWithText: text => refillComposerWithSkillChips(container, text),
   });
   setConversationActive(
     container,
@@ -380,8 +395,7 @@ function setupDraftInputHeightSync(
   }
 
   restoreActiveThreadDraftInput(container);
-  // 输入容器就绪后，把技能 Chip 挂到输入框内部原 skill 名称位置
-  renderContextChips(container);
+  bindInlineSkillChipControls(container, root);
 
   const onDraftInput = (): void => {
     saveActiveThreadDraft(container);
@@ -391,27 +405,65 @@ function setupDraftInputHeightSync(
   cleanupDraftInputHeightListener = () => root.removeEventListener('input', onDraftInput);
 }
 
-function syncDraftInputHeight(container: HTMLElement): void {
-  const wrap = container.querySelector<HTMLElement>('.deep-chat-wrap');
-  if (!wrap) {
+function syncDraftInputHeight(container: HTMLElement, options: { instant?: boolean } = {}): void {
+  const apply = (): void => {
+    draftHeightSyncRaf = null;
+    const wrap = container.querySelector<HTMLElement>('.deep-chat-wrap');
+    if (!wrap) {
+      return;
+    }
+
+    const page = container.querySelector<HTMLElement>('.deep-chat-page');
+    if (page?.classList.contains('is-chatting')) {
+      wrap.classList.remove('is-draft-height-md', 'is-draft-height-lg', 'is-draft-height-xl');
+      return;
+    }
+
+    const inputContainer =
+      getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#text-input-container');
+    const inputHeight = Math.ceil(
+      inputContainer?.getBoundingClientRect().height || EMPTY_CHAT_WRAP_HEIGHT
+    );
+    const draftHeight = Math.max(EMPTY_CHAT_WRAP_HEIGHT, inputHeight);
+    const nextMd = draftHeight > EMPTY_CHAT_WRAP_HEIGHT;
+    const nextLg = draftHeight > 240;
+    const nextXl = draftHeight > 340;
+    const changed =
+      wrap.classList.contains('is-draft-height-md') !== nextMd ||
+      wrap.classList.contains('is-draft-height-lg') !== nextLg ||
+      wrap.classList.contains('is-draft-height-xl') !== nextXl;
+    if (!changed) {
+      return;
+    }
+
+    if (options.instant) {
+      wrap.classList.add('is-height-instant');
+    }
+    wrap.classList.toggle('is-draft-height-md', nextMd);
+    wrap.classList.toggle('is-draft-height-lg', nextLg);
+    wrap.classList.toggle('is-draft-height-xl', nextXl);
+    if (options.instant) {
+      // 强制应用瞬时高度，再下一帧恢复 transition，避免试用进入时上下晃动
+      void wrap.offsetHeight;
+      window.requestAnimationFrame(() => {
+        wrap.classList.remove('is-height-instant');
+      });
+    }
+  };
+
+  if (options.instant) {
+    if (draftHeightSyncRaf !== null) {
+      window.cancelAnimationFrame(draftHeightSyncRaf);
+      draftHeightSyncRaf = null;
+    }
+    apply();
     return;
   }
 
-  const page = container.querySelector<HTMLElement>('.deep-chat-page');
-  if (page?.classList.contains('is-chatting')) {
-    wrap.classList.remove('is-draft-height-md', 'is-draft-height-lg', 'is-draft-height-xl');
+  if (draftHeightSyncRaf !== null) {
     return;
   }
-
-  const inputContainer =
-    getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#text-input-container');
-  const inputHeight = Math.ceil(
-    inputContainer?.getBoundingClientRect().height || EMPTY_CHAT_WRAP_HEIGHT
-  );
-  const draftHeight = Math.max(EMPTY_CHAT_WRAP_HEIGHT, inputHeight);
-  wrap.classList.toggle('is-draft-height-md', draftHeight > EMPTY_CHAT_WRAP_HEIGHT);
-  wrap.classList.toggle('is-draft-height-lg', draftHeight > 240);
-  wrap.classList.toggle('is-draft-height-xl', draftHeight > 340);
+  draftHeightSyncRaf = window.requestAnimationFrame(apply);
 }
 
 function getDraftInput(container: HTMLElement): HTMLElement | null {
@@ -419,7 +471,8 @@ function getDraftInput(container: HTMLElement): HTMLElement | null {
 }
 
 function getDraftInputText(container: HTMLElement): string {
-  return getDraftInput(container)?.textContent || '';
+  const input = getDraftInput(container);
+  return input ? serializeDraftInput(input) : '';
 }
 
 function saveActiveThreadDraft(container: HTMLElement): void {
@@ -444,6 +497,14 @@ function updateThreadDraft(threadId: string, draftText: string): void {
   }
 }
 
+function isDraftInputReady(
+  input: HTMLElement,
+  draftText: string,
+  _contexts: DeepChatSkillContext[]
+): boolean {
+  return serializeDraftInput(input) === draftText;
+}
+
 function restoreActiveThreadDraftInput(container: HTMLElement, attempts = 4): void {
   const input = getDraftInput(container);
   if (!input) {
@@ -453,15 +514,27 @@ function restoreActiveThreadDraftInput(container: HTMLElement, attempts = 4): vo
     return;
   }
 
-  const draftText = getActiveThread().draftText || '';
-  if (input.textContent !== draftText) {
-    input.textContent = draftText;
-    input.dispatchEvent(createTextInputEvent(draftText));
-    syncDraftInputHeight(container);
+  const activeThread = getActiveThread();
+  const contexts = activeThread.skillContexts || [];
+  const draftText = normalizeSkillChipDraftText(activeThread.draftText || '', contexts);
+  // 修复历史脏数据（Chip 两侧被浏览器/innerText 注入的换行）
+  if (draftText !== (activeThread.draftText || '')) {
+    updateThreadDraft(activeThread.id, draftText);
   }
 
+  if (!isDraftInputReady(input, draftText, contexts)) {
+    setDraftInputWithInlineChips(input, draftText, contexts);
+  }
+  // 不派发 input：避免 deep-chat 用 innerText 回写脏草稿
+  syncDraftInputHeight(container, { instant: true });
+
   if (attempts > 0) {
-    window.setTimeout(() => restoreActiveThreadDraftInput(container, attempts - 1), 80);
+    window.setTimeout(() => {
+      const latest = getDraftInput(container);
+      if (!latest || !isDraftInputReady(latest, draftText, contexts)) {
+        restoreActiveThreadDraftInput(container, attempts - 1);
+      }
+    }, 80);
   }
 }
 
@@ -473,6 +546,10 @@ function clearDraftInputHeightSync(): void {
   if (draftInputResizeRetryTimer !== null) {
     window.clearTimeout(draftInputResizeRetryTimer);
     draftInputResizeRetryTimer = null;
+  }
+  if (draftHeightSyncRaf !== null) {
+    window.cancelAnimationFrame(draftHeightSyncRaf);
+    draftHeightSyncRaf = null;
   }
 }
 
@@ -639,7 +716,7 @@ function bindControls(container: HTMLElement): void {
   bindStopOverlayControl(container, stopButton);
   bindThreadControls(container, threadList, promptList);
   bindChatSearchControls(container);
-  bindContextChipControls(container);
+  bindSkillContextBarControls(container);
   bindTuningControls({
     systemPromptInput,
     temperatureInput,
@@ -648,12 +725,7 @@ function bindControls(container: HTMLElement): void {
     tuningPanel,
   });
   applySkillContextsToSession(container);
-  renderContextChips(container);
-}
-
-function bindContextChipControls(container: HTMLElement): void {
-  // Chip 挂在 deep-chat shadow 内，点击委托在 render 时绑定到 host
-  void container;
+  hydrateActiveThreadInlineSkillChips(container);
 }
 
 function bindStopOverlayControl(
@@ -1673,7 +1745,7 @@ function createThread(container: HTMLElement, options: CreateThreadOptions = {})
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
   applySkillContextsToSession(container);
-  renderContextChips(container);
+  hydrateActiveThreadInlineSkillChips(container);
   if (options.toastMessage !== null) {
     showToast(options.toastMessage || '已创建新的 Deep Chat 会话', {
       type: 'success',
@@ -1717,7 +1789,47 @@ function createThreadFromListingPromptContext(
   window.setTimeout(() => fillPromptDraftInput(container, promptContext.prompt), 80);
 }
 
-/** Skills 页试用：技能全文 → 系统提示词；名称 → 可移除上下文 Chip；草稿 → 输入框 */
+/**
+ * 消费 Skills→Deep Chat 试用 handoff（可被 init / 路由重入 / handoff 事件调用）。
+ * @returns 是否成功创建了技能会话
+ */
+export function consumePendingSkillHandoff(container: HTMLElement): boolean {
+  const skillContext = consumeSkillForDeepChat();
+  if (!skillContext) {
+    return false;
+  }
+  createThreadFromSkillContext(container, skillContext);
+  return true;
+}
+
+function bindSkillHandoffListeners(container: HTMLElement): void {
+  const tryConsume = (): void => {
+    if (!mountedContainer || mountedContainer !== container) {
+      return;
+    }
+    if (!document.body.contains(container)) {
+      return;
+    }
+    consumePendingSkillHandoff(container);
+  };
+
+  const onRouteChanged = (event: Event): void => {
+    const detail = (event as CustomEvent<{ routeId?: string }>).detail;
+    if (detail?.routeId !== 'playground_deep_chat') {
+      return;
+    }
+    tryConsume();
+  };
+
+  const unsubHandoff = eventBus.on(APP_EVENTS.SKILL_DEEP_CHAT_HANDOFF, tryConsume);
+  window.addEventListener(APP_EVENTS.ROUTE_CHANGED, onRouteChanged);
+  cleanupCallbacks.push(() => {
+    unsubHandoff();
+    window.removeEventListener(APP_EVENTS.ROUTE_CHANGED, onRouteChanged);
+  });
+}
+
+/** Skills 页试用：skill 全文 → 系统提示词；Context Bar 展示挂载；输入框仅业务草稿 */
 function createThreadFromSkillContext(
   container: HTMLElement,
   skillContext: SkillDeepChatContext
@@ -1735,6 +1847,7 @@ function createThreadFromSkillContext(
   });
 
   window.setTimeout(() => fillPromptDraftInput(container, skillContext.userDraft), 80);
+  renderSkillContextBar(container);
 }
 
 function cloneSkillContexts(contexts: DeepChatSkillContext[]): DeepChatSkillContext[] {
@@ -1755,109 +1868,53 @@ function applySkillContextsToSession(container: HTMLElement): void {
   if (systemPromptInput) {
     systemPromptInput.value = systemPrompt;
   }
+  renderSkillContextBar(container);
 }
 
-/**
- * 将上下文 Chip 注入 deep-chat 的 #text-input-container 内部顶部，
- * 与原先 skill 名称出现在输入框内的位置保持一致。
- */
-function renderContextChips(container: HTMLElement, attempts = 8): void {
-  const chat = getChat(container);
-  const inputContainer = chat?.shadowRoot?.querySelector<HTMLElement>('#text-input-container');
-  if (!chat?.shadowRoot || !inputContainer) {
-    if (attempts > 0) {
-      window.setTimeout(() => renderContextChips(container, attempts - 1), 50);
-    }
+/** 会话级 Context Bar：已挂载技能的唯一可移除入口（不依赖输入框） */
+function renderSkillContextBar(container: HTMLElement): void {
+  const bar = container.querySelector<HTMLElement>('#deep-chat-skill-context-bar');
+  const chips = container.querySelector<HTMLElement>('#deep-chat-skill-context-chips');
+  if (!bar || !chips) {
     return;
   }
 
   const contexts = getActiveThread().skillContexts || [];
-  let host = inputContainer.querySelector<HTMLElement>('#deep-chat-context-chips-host');
-
+  chips.replaceChildren();
   if (contexts.length === 0) {
-    host?.remove();
-    window.requestAnimationFrame(() => syncDraftInputHeight(container));
+    bar.hidden = true;
     return;
   }
 
-  if (!host) {
-    host = document.createElement('div');
-    host.id = 'deep-chat-context-chips-host';
-    host.setAttribute('role', 'list');
-    host.setAttribute('aria-label', '会话上下文');
-    const textInput = inputContainer.querySelector('#text-input');
-    if (textInput) {
-      inputContainer.insertBefore(host, textInput);
-    } else {
-      inputContainer.prepend(host);
-    }
-
-    const onContextClick = (event: Event): void => {
-      const target = event.target as HTMLElement | null;
-      const dismissBtn = target?.closest<HTMLElement>('[data-action="dismiss-skill-context"]');
-      if (!dismissBtn?.dataset.skillId || !host?.contains(dismissBtn)) return;
-      event.preventDefault();
-      event.stopPropagation();
-      dismissSkillContext(container, dismissBtn.dataset.skillId);
-    };
-    host.addEventListener('click', onContextClick);
-  }
-
-  host.replaceChildren();
+  bar.hidden = false;
   for (const context of contexts) {
-    host.appendChild(createSkillContextChip(context));
+    chips.appendChild(createSkillContextChip(context, 'dismissible'));
   }
-  window.requestAnimationFrame(() => syncDraftInputHeight(container));
 }
 
-function createSvgIcon(paths: string[], size = 12, strokeWidth = '2'): SVGSVGElement {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('width', String(size));
-  svg.setAttribute('height', String(size));
-  svg.setAttribute('fill', 'none');
-  svg.setAttribute('stroke', 'currentColor');
-  svg.setAttribute('stroke-width', strokeWidth);
-  svg.setAttribute('stroke-linecap', 'round');
-  svg.setAttribute('stroke-linejoin', 'round');
-  svg.setAttribute('aria-hidden', 'true');
-  for (const d of paths) {
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', d);
-    svg.appendChild(path);
+function bindSkillContextBarControls(container: HTMLElement): void {
+  const chips = container.querySelector<HTMLElement>('#deep-chat-skill-context-chips');
+  if (!chips) {
+    return;
   }
-  return svg;
+
+  const onClick = (event: Event): void => {
+    const target = event.target as HTMLElement | null;
+    const dismissBtn = target?.closest<HTMLElement>('[data-action="dismiss-skill-context"]');
+    if (!dismissBtn?.dataset.skillId || !chips.contains(dismissBtn)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    dismissSessionSkillContext(container, dismissBtn.dataset.skillId);
+  };
+
+  chips.addEventListener('click', onClick);
+  cleanupCallbacks.push(() => chips.removeEventListener('click', onClick));
 }
 
-function createSkillContextChip(context: DeepChatSkillContext): HTMLElement {
-  const chip = document.createElement('div');
-  chip.className = 'deep-chat-context-chip';
-  chip.setAttribute('role', 'listitem');
-  chip.dataset.skillId = context.skillId;
-
-  const icon = document.createElement('span');
-  icon.className = 'deep-chat-context-chip__icon';
-  icon.setAttribute('aria-hidden', 'true');
-  icon.appendChild(createSvgIcon(['M22 10v6M2 10l10-5 10 5-10 5z', 'M6 12v5c3 3 9 3 12 0v-5']));
-
-  const label = document.createElement('span');
-  label.className = 'deep-chat-context-chip__label';
-  label.textContent = context.skillTitle;
-
-  const dismiss = document.createElement('button');
-  dismiss.type = 'button';
-  dismiss.className = 'deep-chat-context-chip__dismiss';
-  dismiss.dataset.action = 'dismiss-skill-context';
-  dismiss.dataset.skillId = context.skillId;
-  dismiss.setAttribute('aria-label', `移除技能上下文 ${context.skillTitle}`);
-  dismiss.title = '移除';
-  dismiss.appendChild(createSvgIcon(['M18 6 6 18M6 6l12 12'], 12, '2.2'));
-
-  chip.append(icon, label, dismiss);
-  return chip;
-}
-
-function dismissSkillContext(container: HTMLElement, skillId: string): void {
+/** 从会话移除技能挂载（Context Bar），并同步系统提示词 */
+function dismissSessionSkillContext(container: HTMLElement, skillId: string): void {
   const activeThread = getActiveThread();
   const nextContexts = (activeThread.skillContexts || []).filter(
     context => context.skillId !== skillId
@@ -1867,8 +1924,88 @@ function dismissSkillContext(container: HTMLElement, skillId: string): void {
     skillContexts: nextContexts.length > 0 ? nextContexts : undefined,
   });
   applySkillContextsToSession(container);
-  renderContextChips(container);
   showToast('已移除技能上下文', { type: 'success' });
+}
+
+/** 将 contenteditable 中的 Chip 与文本序列化为纯文本（Chip → 「技能名」） */
+function serializeDraftInput(input: HTMLElement): string {
+  return serializeChipContainingElement(input, getActiveThread().skillContexts || []);
+}
+
+/**
+ * 写入草稿：仅当正文含「技能名」标记时水合为可移除 Chip（编辑历史消息用）。
+ * 会话级技能挂载不写入输入框。
+ */
+function setDraftInputWithInlineChips(
+  input: HTMLElement,
+  plainText: string,
+  contexts: DeepChatSkillContext[]
+): void {
+  const normalized = normalizeSkillChipDraftText(plainText, contexts);
+  if (contexts.length > 0 && textContainsSkillChipMarker(normalized, contexts)) {
+    setContentWithInlineSkillChips(input, normalized, contexts, 'dismissible');
+    return;
+  }
+  input.textContent = normalized;
+}
+
+/** 编辑消息回填：若正文含技能名标记则保持 Chip，否则纯文本 */
+function refillComposerWithSkillChips(container: HTMLElement, plainText: string): void {
+  const input = getDraftInput(container);
+  if (!input) {
+    return;
+  }
+  const contexts = getActiveThread().skillContexts || [];
+  const normalized = normalizeSkillChipDraftText(plainText, contexts);
+  setDraftInputWithInlineChips(input, normalized, contexts);
+  updateThreadDraft(threadStore.activeThreadId, normalized);
+  syncDraftInputHeight(container, { instant: true });
+  getChat(container)?.focusInput?.();
+}
+
+/** 恢复草稿文本；不因 skillContexts 强制注入输入 Chip */
+function hydrateActiveThreadInlineSkillChips(container: HTMLElement, attempts = 12): void {
+  const input = getDraftInput(container);
+  if (!input) {
+    if (attempts > 0) {
+      window.setTimeout(() => hydrateActiveThreadInlineSkillChips(container, attempts - 1), 50);
+    }
+    return;
+  }
+  const activeThread = getActiveThread();
+  const contexts = activeThread.skillContexts || [];
+  const draftText = normalizeSkillChipDraftText(
+    activeThread.draftText || serializeDraftInput(input),
+    contexts
+  );
+  if (serializeDraftInput(input) !== draftText) {
+    setDraftInputWithInlineChips(input, draftText, contexts);
+  }
+  syncDraftInputHeight(container, { instant: true });
+  renderSkillContextBar(container);
+}
+
+function bindInlineSkillChipControls(container: HTMLElement, root: ShadowRoot): void {
+  const onClick = (event: Event): void => {
+    const target = event.target as HTMLElement | null;
+    const dismissBtn = target?.closest<HTMLElement>('[data-action="dismiss-skill-context"]');
+    if (!dismissBtn?.dataset.skillId) return;
+    const input = getDraftInput(container);
+    // 输入框内 Chip 仅移除 DOM 标记，不拆会话 skillContexts（会话绑定在 Context Bar）
+    if (!input || !input.contains(dismissBtn)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const chip = Array.from(input.querySelectorAll<HTMLElement>(`.${SKILL_CHIP_CLASS}`)).find(
+      item => item.dataset.skillId === dismissBtn.dataset.skillId
+    );
+    chip?.remove();
+    const nextDraft = serializeDraftInput(input);
+    updateThreadDraft(threadStore.activeThreadId, nextDraft);
+    input.dispatchEvent(createTextInputEvent(nextDraft));
+    syncDraftInputHeight(container);
+  };
+  root.addEventListener('click', onClick);
+  cleanupCallbacks.push(() => root.removeEventListener('click', onClick));
 }
 
 function updateActiveThreadFields(container: HTMLElement, fields: Partial<DeepChatThread>): void {
@@ -2027,16 +2164,26 @@ function fillPromptDraftInput(container: HTMLElement, prompt: string, attempts =
     return;
   }
 
-  input.textContent = prompt;
-  updateThreadDraft(threadStore.activeThreadId, prompt);
-  input.dispatchEvent(createTextInputEvent(prompt));
+  const skillContexts = getActiveThread().skillContexts || [];
+  const normalizedPrompt = normalizeSkillChipDraftText(prompt, skillContexts);
+  setDraftInputWithInlineChips(input, normalizedPrompt, skillContexts);
+  updateThreadDraft(threadStore.activeThreadId, normalizedPrompt);
+  syncDraftInputHeight(container, { instant: true });
+  // 技能 Chip 草稿不派发 input，避免 deep-chat innerText 污染；普通 Prompt 仍通知组件
+  if (skillContexts.length === 0) {
+    input.dispatchEvent(createTextInputEvent(normalizedPrompt));
+  }
   window.setTimeout(() => {
     const latestInput = getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#text-input');
-    if (latestInput?.textContent?.includes(prompt)) {
+    const latestText = latestInput ? serializeDraftInput(latestInput) : '';
+    if (latestText === normalizedPrompt || latestText.includes(normalizedPrompt)) {
       chat.focusInput?.();
-      showToast('已创建新会话并填入 Prompt，确认后可手动发送', {
-        type: 'success',
-      });
+      if (skillContexts.length === 0) {
+        showToast('已创建新会话并填入 Prompt，确认后可手动发送', {
+          type: 'success',
+        });
+      }
+      syncDraftInputHeight(container, { instant: true });
       return;
     }
 
@@ -2071,7 +2218,7 @@ function switchThread(container: HTMLElement, threadId: string): void {
   refreshChatSearchResultsIfOpen(container);
   replaceChat(container);
   applySkillContextsToSession(container);
-  renderContextChips(container);
+  hydrateActiveThreadInlineSkillChips(container);
 }
 
 async function deleteThread(container: HTMLElement, threadId: string): Promise<void> {

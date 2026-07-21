@@ -1,3 +1,3 @@
 import './styles.css';
 
-export { clearDeepChatThreadStore, mount, unmount } from './controller';
+export { clearDeepChatThreadStore, consumePendingSkillHandoff, mount, unmount } from './controller';
