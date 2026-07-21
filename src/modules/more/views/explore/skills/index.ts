@@ -335,7 +335,7 @@ function trySkillInDeepChat(skillId: string): void {
     skillId: skill.id,
     skillTitle,
     skillRaw: skill.raw,
-    userDraft: buildSkillDeepChatUserDraft(skillTitle),
+    userDraft: buildSkillDeepChatUserDraft(skillTitle, skill.raw),
   });
   // Deep Chat 已挂载时立即消费；否则 init / 路由重入时消费
   eventBus.emit(APP_EVENTS.SKILL_DEEP_CHAT_HANDOFF, {

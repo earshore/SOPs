@@ -3,6 +3,7 @@ import {
   buildSkillDeepChatUserDraft,
   buildSystemPromptFromSkillContexts,
   consumeSkillForDeepChat,
+  extractSkillUsageExamplesDraft,
   normalizeSkillChipDraftText,
   peekSkillForDeepChat,
   queueSkillForDeepChat,
@@ -28,6 +29,50 @@ describe('skillDeepChatHandoff', () => {
     expect(first?.userDraft).not.toContain('Amazon PPC Campaign');
     expect(consumeSkillForDeepChat()).toBeNull();
     expect(peekSkillForDeepChat()).toBeNull();
+  });
+
+  it('builds user draft from Usage Examples natural-language fences', () => {
+    const raw = [
+      '# PPC',
+      '',
+      '## Usage Examples',
+      '',
+      '### Build',
+      '',
+      '```',
+      'Research the keyword "portable blender" on Amazon US',
+      '```',
+      '',
+      '```',
+      'My ACoS is too high, help me fix it',
+      '```',
+      '',
+      '## Workflow',
+      '',
+      'More steps',
+    ].join('\n');
+
+    expect(extractSkillUsageExamplesDraft(raw)).toBe(
+      'Research the keyword "portable blender" on Amazon US'
+    );
+    expect(buildSkillDeepChatUserDraft('PPC', raw)).toBe(
+      'Research the keyword "portable blender" on Amazon US'
+    );
+  });
+
+  it('skips bash/json usage fences and falls back to generic draft', () => {
+    const raw = [
+      '# FBA',
+      '## Usage',
+      '```bash',
+      'python3 scripts/calculator.py',
+      '```',
+      '## Other',
+      'x',
+    ].join('\n');
+
+    expect(extractSkillUsageExamplesDraft(raw)).toBeNull();
+    expect(buildSkillDeepChatUserDraft('FBA', raw)).toContain('已挂载的技能方法论');
   });
 
   it('latest queue wins when overwriting pending handoff', () => {

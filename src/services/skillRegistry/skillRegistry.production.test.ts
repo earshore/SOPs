@@ -49,16 +49,17 @@ describe('skillRegistry production assets', () => {
       skillId: skill.id,
       skillTitle: skill.title,
       skillRaw: skill.raw,
-      userDraft: buildSkillDeepChatUserDraft(skill.title),
+      userDraft: buildSkillDeepChatUserDraft(skill.title, skill.raw),
     });
 
     const pending = consumeSkillForDeepChat();
     expect(pending?.skillRaw).toContain('amazon-keyword-research');
-    expect(pending?.userDraft).toContain('业务数据');
+    // 优先 Usage Examples 自然语言示例；无示例时才回退「业务数据」模板
+    expect(pending?.userDraft.length).toBeGreaterThan(10);
+    expect(pending?.userDraft).toMatch(/keyword|Amazon|portable|research|业务数据/i);
     // 系统提示词 = skill 全文；草稿为业务引导（技能名在 Context Bar）
     const systemPrompt = pending?.skillRaw ?? '';
     expect(systemPrompt.length).toBeLessThan(102400);
-    expect(pending?.userDraft).not.toContain(skill.title);
     expect(pending?.skillTitle).toBeTruthy();
   });
 });

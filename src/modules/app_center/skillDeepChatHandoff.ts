@@ -73,11 +73,82 @@ export function normalizeSkillChipDraftText(
   return next;
 }
 
+/** 代码块语言：脚本/数据类不当作用户试用提示词 */
+const USAGE_EXAMPLE_SKIP_LANG =
+  /^(bash|sh|shell|zsh|powershell|ps1|cmd|json|ya?ml|python|py|javascript|js|typescript|ts|html|css|sql|toml|xml)$/i;
+
+function isNaturalLanguageUsageExample(lang: string, body: string): boolean {
+  if (!body || body.length < 8) {
+    return false;
+  }
+  if (lang && USAGE_EXAMPLE_SKIP_LANG.test(lang)) {
+    return false;
+  }
+  // 无语言标记的脚本/JSON 示例也跳过
+  if (/^(npx |python3? |pip |npm |curl |git |#!|\{[\s\S]*"[\w-]+"\s*:)/m.test(body)) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * 从 SKILL.md 抽取「Usage Examples / Usage」中可作为用户草稿的自然语言示例。
+ * 优先第一个自然语言代码块；无合适示例时返回 null。
+ */
+export function extractSkillUsageExamplesDraft(skillRaw: string): string | null {
+  const section = extractMarkdownSection(skillRaw, [/^##\s+Usage Examples\b/i, /^##\s+Usage\b/i]);
+  if (!section) {
+    return null;
+  }
+
+  const fencePattern = /```([^\n`]*)\n([\s\S]*?)```/g;
+  let match: RegExpExecArray | null;
+  while ((match = fencePattern.exec(section)) !== null) {
+    const lang = (match[1] || '').trim();
+    const body = (match[2] || '').trim();
+    if (isNaturalLanguageUsageExample(lang, body)) {
+      return body.slice(0, 4000);
+    }
+  }
+  return null;
+}
+
+/** 截取从匹配标题到下一个同级/更高级标题之间的正文 */
+function extractMarkdownSection(raw: string, headingPatterns: RegExp[]): string | null {
+  const lines = raw.replace(/\r\n/g, '\n').split('\n');
+  let start = -1;
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i] || '';
+    if (headingPatterns.some(pattern => pattern.test(line.trim()))) {
+      start = i + 1;
+      break;
+    }
+  }
+  if (start < 0) {
+    return null;
+  }
+
+  const body: string[] = [];
+  for (let i = start; i < lines.length; i += 1) {
+    const line = lines[i] || '';
+    if (/^##\s+/.test(line.trim())) {
+      break;
+    }
+    body.push(line);
+  }
+  return body.join('\n').trim() || null;
+}
+
 /**
  * 可编辑业务草稿（不含技能名 Chip）。
+ * 优先使用 skill 的 Usage Examples；否则回退通用引导。
  * 技能挂载由会话 Context Bar 展示；系统提示词 = skill 全文。
  */
-export function buildSkillDeepChatUserDraft(_skillTitle?: string): string {
+export function buildSkillDeepChatUserDraft(_skillTitle?: string, skillRaw?: string): string {
+  const fromExamples = skillRaw ? extractSkillUsageExamplesDraft(skillRaw) : null;
+  if (fromExamples) {
+    return fromExamples;
+  }
   return [
     '请根据已挂载的技能方法论，结合我补充的业务数据给出可执行分析。',
     '',

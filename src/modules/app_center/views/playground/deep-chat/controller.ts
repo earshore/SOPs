@@ -563,7 +563,9 @@ function setupSubmitStopButtonSync(
     const button = getSubmitButtonFromEventPath(event, chat);
     const threadId =
       button?.getAttribute('data-deep-chat-stop-thread-id') || threadStore.activeThreadId;
-    if (!button || !pendingRequests.has(threadId)) {
+    const pending = pendingRequests.get(threadId);
+    // 仅「生成中」劫持为停止；已 settled 的流式展示阶段不拦截发送
+    if (!button || !pending || pending.isSettled) {
       return;
     }
 
@@ -2174,6 +2176,14 @@ function setDraftInputWithInlineChips(
   input.textContent = normalized;
 }
 
+/**
+ * 程序化写入草稿后通知 deep-chat 内部 TextInput 状态。
+ * 仅改 DOM 不派发 input 时，发送按钮可能无响应（需切会话重建才恢复）。
+ */
+function notifyDeepChatComposerInput(input: HTMLElement, text: string): void {
+  input.dispatchEvent(createTextInputEvent(text));
+}
+
 /** 编辑消息回填：若正文含技能名标记则保持 Chip，否则纯文本 */
 function refillComposerWithSkillChips(container: HTMLElement, plainText: string): void {
   const input = getDraftInput(container);
@@ -2184,6 +2194,24 @@ function refillComposerWithSkillChips(container: HTMLElement, plainText: string)
   const normalized = normalizeSkillChipDraftText(plainText, contexts);
   setDraftInputWithInlineChips(input, normalized, contexts);
   updateThreadDraft(threadStore.activeThreadId, normalized);
+  // 必须通知 deep-chat，否则 submitFromInput 可能仍视为空/状态未刷新
+  notifyDeepChatComposerInput(input, normalized);
+  // deep-chat 可能用 innerText 回写并注入换行：再规范一次并同步草稿
+  window.setTimeout(() => {
+    const latestInput = getDraftInput(container);
+    if (!latestInput) {
+      return;
+    }
+    const after = serializeDraftInput(latestInput);
+    const cleaned = normalizeSkillChipDraftText(after, getActiveThread().skillContexts || []);
+    if (cleaned !== after) {
+      setDraftInputWithInlineChips(latestInput, cleaned, getActiveThread().skillContexts || []);
+      updateThreadDraft(threadStore.activeThreadId, cleaned);
+    } else if (after !== normalized) {
+      updateThreadDraft(threadStore.activeThreadId, after);
+    }
+    syncDraftInputHeight(container, { instant: true });
+  }, 0);
   syncDraftInputHeight(container, { instant: true });
   getChat(container)?.focusInput?.();
 }
@@ -2394,33 +2422,69 @@ function fillPromptDraftInput(container: HTMLElement, prompt: string, attempts =
   setDraftInputWithInlineChips(input, normalizedPrompt, skillContexts);
   updateThreadDraft(threadStore.activeThreadId, normalizedPrompt);
   syncDraftInputHeight(container, { instant: true });
-  // 技能 Chip 草稿不派发 input，避免 deep-chat innerText 污染；普通 Prompt 仍通知组件
-  if (skillContexts.length === 0) {
-    input.dispatchEvent(createTextInputEvent(normalizedPrompt));
-  }
+  // 始终通知 deep-chat（否则附加到当前会话后发送可能无响应）
+  notifyDeepChatComposerInput(input, normalizedPrompt);
   window.setTimeout(() => {
-    const latestInput = getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#text-input');
-    const latestText = latestInput ? serializeDraftInput(latestInput) : '';
-    if (latestText === normalizedPrompt || latestText.includes(normalizedPrompt)) {
-      chat.focusInput?.();
-      if (skillContexts.length === 0) {
-        showToast('已创建新会话并填入 Prompt，确认后可手动发送', {
-          type: 'success',
-        });
-      }
-      syncDraftInputHeight(container, { instant: true });
-      return;
-    }
-
-    if (attempts > 0) {
-      fillPromptDraftInput(container, prompt, attempts - 1);
-      return;
-    }
-
-    showToast('已创建新会话，但输入框尚未就绪，请稍后重试', {
-      type: 'warning',
+    settleFilledPromptDraft({
+      container,
+      chat,
+      prompt,
+      normalizedPrompt,
+      skillContexts,
+      attempts,
     });
   }, 80);
+}
+
+function retryOrWarnPromptDraft(container: HTMLElement, prompt: string, attempts: number): void {
+  if (attempts > 0) {
+    fillPromptDraftInput(container, prompt, attempts - 1);
+    return;
+  }
+  showToast('已创建新会话，但输入框尚未就绪，请稍后重试', {
+    type: 'warning',
+  });
+}
+
+function settleFilledPromptDraft(options: {
+  container: HTMLElement;
+  chat: DeepChatElement;
+  prompt: string;
+  normalizedPrompt: string;
+  skillContexts: DeepChatSkillContext[];
+  attempts: number;
+}): void {
+  const { container, chat, prompt, normalizedPrompt, skillContexts, attempts } = options;
+  const latestInput = getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#text-input');
+  if (!latestInput) {
+    retryOrWarnPromptDraft(container, prompt, attempts);
+    return;
+  }
+
+  // 回写后可能注入换行：再规范一次
+  const latestText = serializeDraftInput(latestInput);
+  const cleaned = normalizeSkillChipDraftText(latestText, getActiveThread().skillContexts || []);
+  if (cleaned !== latestText) {
+    setDraftInputWithInlineChips(latestInput, cleaned, getActiveThread().skillContexts || []);
+    updateThreadDraft(threadStore.activeThreadId, cleaned);
+  }
+
+  const matched =
+    cleaned === normalizedPrompt ||
+    cleaned.includes(normalizedPrompt) ||
+    latestText === normalizedPrompt;
+  if (!matched) {
+    retryOrWarnPromptDraft(container, prompt, attempts);
+    return;
+  }
+
+  chat.focusInput?.();
+  if (skillContexts.length === 0) {
+    showToast('已创建新会话并填入 Prompt，确认后可手动发送', {
+      type: 'success',
+    });
+  }
+  syncDraftInputHeight(container, { instant: true });
 }
 
 function switchThread(container: HTMLElement, threadId: string): void {
