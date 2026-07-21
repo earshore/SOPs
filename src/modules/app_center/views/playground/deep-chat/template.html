@@ -156,15 +156,31 @@
 
       <div class="deep-chat-stage">
         <div
+          id="deep-chat-skill-load-banner"
+          class="deep-chat-skill-load-banner"
+          role="status"
+          aria-live="polite"
+          hidden
+        >
+          <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+          <span id="deep-chat-skill-load-banner-text">正在载入技能…</span>
+        </div>
+        <div
           id="deep-chat-skill-context-bar"
           class="deep-chat-skill-context-bar"
           aria-label="已挂载技能"
           hidden
         >
-          <span class="deep-chat-skill-context-bar__label">
-            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
-            已挂载技能
-          </span>
+          <div class="deep-chat-skill-context-bar__head">
+            <span class="deep-chat-skill-context-bar__label">
+              <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+              已挂载技能
+            </span>
+            <span
+              id="deep-chat-skill-context-bar-hint"
+              class="deep-chat-skill-context-bar__hint"
+            ></span>
+          </div>
           <div
             id="deep-chat-skill-context-chips"
             class="deep-chat-skill-context-bar__chips"

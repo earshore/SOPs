@@ -181,6 +181,21 @@ function createActionButton(
   return btn;
 }
 
+/** 主 CTA：带文字实心按钮「在 Deep Chat 试用」（F3/C1） */
+function createTryDeepChatButton(skillId: string, skillTitle: string): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.dataset.action = 'try-deep-chat';
+  btn.dataset.skillId = skillId;
+  btn.className = 'skill-cta-primary';
+  btn.setAttribute('aria-label', `在 Deep Chat 试用：${skillTitle}`);
+  appendIcon(btn, 'fas fa-graduation-cap');
+  const text = document.createElement('span');
+  text.textContent = '在 Deep Chat 试用';
+  btn.appendChild(text);
+  return btn;
+}
+
 function createSkillCard(skill: SkillMeta): HTMLElement {
   const card = document.createElement('div');
   card.className = 'skill-card group';
@@ -220,25 +235,32 @@ function createSkillCard(skill: SkillMeta): HTMLElement {
   desc.textContent = skill.description || '暂无简介';
 
   const footer = document.createElement('div');
-  footer.className = 'flex items-center justify-end mt-4 pt-4 border-t border-slate-100';
+  footer.className =
+    'flex flex-wrap items-center justify-between gap-2 mt-4 pt-4 border-t border-slate-100';
 
-  const actions = document.createElement('div');
-  actions.className = 'flex gap-2';
+  const secondary = document.createElement('div');
+  secondary.className = 'flex gap-1';
   const titleText = displayTitle(skill.title);
-  actions.append(
+  secondary.append(
     createActionButton(skill.id, 'view-skill', 'fas fa-eye', '查看详情', titleText),
-    createActionButton(skill.id, 'copy-skill-raw', 'fas fa-copy', '复制全文', titleText),
-    createActionButton(
-      skill.id,
-      'try-deep-chat',
-      'fas fa-paper-plane',
-      '在 Deep Chat 试用',
-      titleText
-    )
+    createActionButton(skill.id, 'copy-skill-raw', 'fas fa-copy', '复制全文', titleText)
   );
-  footer.appendChild(actions);
+
+  const primary = createTryDeepChatButton(skill.id, titleText);
+  footer.append(secondary, primary);
   card.append(header, title, desc, footer);
   return card;
+}
+
+function setTryDeepChatLoading(skillId: string, loading: boolean): void {
+  const buttons = moduleRoot?.querySelectorAll<HTMLButtonElement>(
+    `[data-action="try-deep-chat"][data-skill-id="${skillId}"]`
+  );
+  buttons?.forEach(btn => {
+    btn.disabled = loading;
+    btn.classList.toggle('is-loading', loading);
+    btn.setAttribute('aria-busy', loading ? 'true' : 'false');
+  });
 }
 
 function trySkillInDeepChat(skillId: string): void {
@@ -249,6 +271,8 @@ function trySkillInDeepChat(skillId: string): void {
   }
 
   const skillTitle = displayTitle(skill.title);
+  setTryDeepChatLoading(skillId, true);
+
   queueSkillForDeepChat({
     skillId: skill.id,
     skillTitle,
@@ -261,13 +285,21 @@ function trySkillInDeepChat(skillId: string): void {
     skillTitle,
   });
 
-  void navigateToRouteId('playground_deep_chat').then(ok => {
-    if (!ok) {
-      showToast('无法打开 Deep Chat，请检查路由', { type: 'error' });
-      return;
-    }
-    showToast(`正在打开 Deep Chat…`, { type: 'success' });
-  });
+  void navigateToRouteId('playground_deep_chat')
+    .then(ok => {
+      if (!ok) {
+        setTryDeepChatLoading(skillId, false);
+        showToast('无法打开 Deep Chat，请检查路由', { type: 'error' });
+        return;
+      }
+      showToast('正在打开 Deep Chat 并载入技能…', { type: 'success' });
+      // 页面即将切换；若仍停留在本页则稍后恢复按钮
+      window.setTimeout(() => setTryDeepChatLoading(skillId, false), 2500);
+    })
+    .catch(() => {
+      setTryDeepChatLoading(skillId, false);
+      showToast('无法打开 Deep Chat，请稍后重试', { type: 'error' });
+    });
 }
 
 function renderList(): void {

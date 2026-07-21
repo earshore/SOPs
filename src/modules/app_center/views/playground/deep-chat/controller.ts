@@ -1798,7 +1798,7 @@ export function consumePendingSkillHandoff(container: HTMLElement): boolean {
   if (!skillContext) {
     return false;
   }
-  createThreadFromSkillContext(container, skillContext);
+  void createThreadFromSkillContext(container, skillContext);
   return true;
 }
 
@@ -1829,11 +1829,31 @@ function bindSkillHandoffListeners(container: HTMLElement): void {
   });
 }
 
-/** Skills 页试用：skill 全文 → 系统提示词；Context Bar 展示挂载；输入框仅业务草稿 */
-function createThreadFromSkillContext(
+/**
+ * Skills 页试用：skill 全文 → 系统提示词；Context Bar 展示挂载；输入框仅业务草稿。
+ * 若当前已有自定义系统提示词，挂载前确认是否覆盖（FB2）。
+ */
+async function createThreadFromSkillContext(
   container: HTMLElement,
   skillContext: SkillDeepChatContext
-): void {
+): Promise<void> {
+  const existingPrompt = getCurrentSessionSystemPrompt(container);
+  const nextPrompt = skillContext.skillRaw.trim();
+  if (existingPrompt && existingPrompt !== nextPrompt) {
+    const confirmed = await confirmWithModal(
+      '覆盖系统提示词',
+      `当前已有自定义系统提示词。挂载技能「${skillContext.skillTitle}」将用技能方法论<strong>覆盖</strong>该内容。<br/><span class="text-xs text-slate-500 mt-1 block">可在右上角 Settings 中查看与编辑系统提示词。</span>`,
+      'dc_skill_overwrite_system_prompt',
+      '覆盖并挂载'
+    );
+    if (!confirmed) {
+      showToast('已取消挂载技能', { type: 'warning' });
+      return;
+    }
+  }
+
+  showSkillLoadBanner(container, skillContext.skillTitle);
+
   const skillChip: DeepChatSkillContext = {
     skillId: skillContext.skillId,
     skillTitle: skillContext.skillTitle,
@@ -1848,6 +1868,31 @@ function createThreadFromSkillContext(
 
   window.setTimeout(() => fillPromptDraftInput(container, skillContext.userDraft), 80);
   renderSkillContextBar(container);
+}
+
+function getCurrentSessionSystemPrompt(container: HTMLElement): string {
+  const fromSession = sessionSystemPrompt.trim();
+  if (fromSession) {
+    return fromSession;
+  }
+  const input = container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt');
+  return input?.value.trim() || '';
+}
+
+/** 挂载技能时的短暂到达横幅（FB1） */
+function showSkillLoadBanner(container: HTMLElement, skillTitle: string): void {
+  const banner = container.querySelector<HTMLElement>('#deep-chat-skill-load-banner');
+  const text = container.querySelector<HTMLElement>('#deep-chat-skill-load-banner-text');
+  if (!banner || !text) {
+    return;
+  }
+  text.textContent = `正在载入技能「${skillTitle}」…`;
+  banner.hidden = false;
+  window.setTimeout(() => {
+    if (banner.isConnected) {
+      banner.hidden = true;
+    }
+  }, 2200);
 }
 
 function cloneSkillContexts(contexts: DeepChatSkillContext[]): DeepChatSkillContext[] {
@@ -1889,6 +1934,14 @@ function renderSkillContextBar(container: HTMLElement): void {
   bar.hidden = false;
   for (const context of contexts) {
     chips.appendChild(createSkillContextChip(context, 'dismissible'));
+  }
+  const hint = bar.querySelector<HTMLElement>('#deep-chat-skill-context-bar-hint');
+  if (hint) {
+    const titles = contexts.map(c => c.skillTitle).filter(Boolean);
+    hint.textContent =
+      titles.length === 1
+        ? `系统提示词已更新为「${titles[0]}」方法论`
+        : `系统提示词已合并 ${titles.length} 个技能方法论`;
   }
 }
 

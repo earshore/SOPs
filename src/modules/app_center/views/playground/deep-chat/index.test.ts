@@ -32,8 +32,14 @@ const deepChatTemplate = `
           <input id="deep-chat-temperature" type="range" value="0.3">
           <button id="deep-chat-reset-tuning" type="button"></button>
         </details>
+        <div id="deep-chat-skill-load-banner" class="deep-chat-skill-load-banner" hidden>
+          <span id="deep-chat-skill-load-banner-text">正在载入技能…</span>
+        </div>
         <div id="deep-chat-skill-context-bar" class="deep-chat-skill-context-bar" aria-label="已挂载技能" hidden>
-          <span class="deep-chat-skill-context-bar__label">已挂载技能</span>
+          <div class="deep-chat-skill-context-bar__head">
+            <span class="deep-chat-skill-context-bar__label">已挂载技能</span>
+            <span id="deep-chat-skill-context-bar-hint" class="deep-chat-skill-context-bar__hint"></span>
+          </div>
           <div id="deep-chat-skill-context-chips" class="deep-chat-skill-context-bar__chips" role="list"></div>
         </div>
         <div id="deep-chat-pending-status" hidden>
@@ -946,6 +952,9 @@ describe('deep-chat skill trial context bar', () => {
     expect(bar?.hidden).toBe(false);
     expect(barChip?.textContent).toContain('利润测算');
     expect(barChip?.classList.contains('deep-chat-context-chip--dismissible')).toBe(true);
+    expect(container.querySelector('#deep-chat-skill-context-bar-hint')?.textContent).toContain(
+      '系统提示词已更新为「利润测算」方法论'
+    );
     // 输入框仅为业务草稿，不承载会话级 Chip
     expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
     expect(input?.textContent).toContain('已挂载的技能方法论');
@@ -977,6 +986,42 @@ describe('deep-chat skill trial context bar', () => {
     );
     // 业务草稿仍在
     expect(input?.textContent).toContain('业务数据');
+
+    unmount();
+  });
+
+  it('asks before overwriting a non-empty system prompt when mounting a skill', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+
+    const { mount, unmount, mocks } = await importDeepChat();
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(200);
+
+    const systemPrompt = container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt');
+    expect(systemPrompt).not.toBeNull();
+    systemPrompt!.value = '用户自定义系统提示词';
+    systemPrompt!.dispatchEvent(new Event('input', { bubbles: true }));
+
+    mocks.confirmWithModal.mockResolvedValueOnce(false);
+
+    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+    const { consumePendingSkillHandoff } = await import('./controller');
+    skillHandoff.queueSkillForDeepChat({
+      skillId: 'skill-blocked',
+      skillTitle: '被取消技能',
+      skillRaw: '# Blocked',
+      userDraft: skillHandoff.buildSkillDeepChatUserDraft('被取消技能'),
+    });
+
+    expect(consumePendingSkillHandoff(container)).toBe(true);
+    await vi.advanceTimersByTimeAsync(100);
+
+    expect(mocks.confirmWithModal).toHaveBeenCalled();
+    expect(container.querySelector('#deep-chat-skill-context-bar')?.hasAttribute('hidden')).toBe(
+      true
+    );
+    expect(systemPrompt?.value).toBe('用户自定义系统提示词');
 
     unmount();
   });
