@@ -231,6 +231,11 @@ export const LEGACY_ROUTE_ALIASES = [
     replace: true,
   },
   {
+    alias: '/more_skills',
+    routeId: 'more_skills',
+    replace: true,
+  },
+  {
     alias: '/more_prompts',
     routeId: 'more_prompts',
     replace: true,

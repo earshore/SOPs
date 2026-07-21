@@ -77,6 +77,7 @@ afterEach(() => {
     expect(routeIdToPath('sops_npi_tracker')).toBe('/sops/growth/npi-tracker');
     expect(routeIdToPath('amz_hub_overview')).toBe('/amz-hub');
     expect(routeIdToPath('more_overview')).toBe('/more');
+    expect(routeIdToPath('more_skills')).toBe('/more/explore/skills');
     expect(routeIdToPath('#/app-center/master-analysis/scraper/')).toBe(
       '/app-center/master-analysis/scraper'
     );
@@ -89,6 +90,11 @@ afterEach(() => {
   });
 
   it('centralizes legacy route alias lookup and replacement policy', () => {
+    expect(getLegacyRouteAlias('/more_skills')).toMatchObject({
+      alias: '/more_skills',
+      routeId: 'more_skills',
+      replace: true,
+    });
     expect(getLegacyRouteAlias('#/ppc_search_terms/')).toMatchObject({
       alias: '/ppc_search_terms',
       routeId: 'ppc_search_terms',

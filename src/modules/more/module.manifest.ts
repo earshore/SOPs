@@ -22,6 +22,15 @@ export const moreManifest = defineModuleManifest({
       loaderPath: './views/explore/agents/index.ts',
     },
     {
+      key: 'SKILLS',
+      routeId: 'more_skills',
+      path: '/more/explore/skills',
+      label: '技能',
+      icon: 'fas fa-graduation-cap',
+      category: 'explore',
+      loaderPath: './views/explore/skills/index.ts',
+    },
+    {
       key: 'PROMPTS',
       routeId: 'more_prompts',
       path: '/more/explore/prompts',

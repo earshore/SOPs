@@ -235,6 +235,7 @@ describe('apiEndpoints inline style policy', () => {
       'src/modules/more/views/business_scenarios/casePageRenderer.ts',
       'src/modules/more/views/explore/agents/template.html',
       'src/modules/more/views/explore/prompts/template.html',
+      'src/modules/more/views/explore/skills/template.html',
       'src/modules/more/views/explore/workflows/template.html',
       'src/modules/more/views/overview/template.html',
       'src/modules/sops/views/growth/npi_tracker/template.html',

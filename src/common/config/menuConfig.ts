@@ -296,7 +296,7 @@ export const MENU_CONFIG: MenuConfig = {
       color: 'violet',
       order: 1,
       version: 'v1.0',
-      description: '智能体、提示词、工作流等实用功能。',
+      description: '智能体、技能、提示词、工作流等实用功能。',
     },
     business_scenarios: {
       id: 'business_scenarios',

@@ -17,7 +17,7 @@ function parseScalarMap(block: string): Record<string, string> {
   const map: Record<string, string> = {};
   for (const line of block.split(/\r?\n/)) {
     const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (!match) continue;
+    if (!match?.[1]) continue;
     map[match[1]] = stripQuotes(match[2] ?? '');
   }
   return map;

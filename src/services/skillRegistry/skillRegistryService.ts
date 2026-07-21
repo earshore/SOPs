@@ -35,9 +35,9 @@ export interface SkillRegistryApi {
 function skillDirFromPath(modulePath: string): string | null {
   const normalized = modulePath.replace(/\\/g, '/');
   const skillMd = normalized.match(/([^/]+)\/SKILL\.md$/i);
-  if (skillMd) return skillMd[1];
+  if (skillMd?.[1]) return skillMd[1];
   const scripts = normalized.match(/([^/]+)\/scripts\//i);
-  if (scripts) return scripts[1];
+  if (scripts?.[1]) return scripts[1];
   return null;
 }
 
