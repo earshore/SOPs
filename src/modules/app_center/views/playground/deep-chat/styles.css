@@ -1452,24 +1452,21 @@
   display: none !important;
 }
 
-/* 已挂载技能提示：贴在输入框上方（Chip 在输入框内与正文混排） */
+/*
+ * 已挂载技能提示：正式展示时挂入 deep-chat shadow 的 #input 列（见 deepChatStyles）。
+ * light DOM 仅作挂载源/回退，默认不占绝对定位，避免与输入框叠层。
+ */
 .deep-chat-skill-context-bar {
-  position: absolute;
-  left: 50%;
-  z-index: 6;
   box-sizing: border-box;
   width: min(768px, 100%);
   max-width: 100%;
-  margin: 0;
+  margin: 0 auto 0.5rem;
   padding: 0.4rem 0.75rem;
   border: 1px solid var(--deep-chat-accent-border, rgba(168, 95, 63, 0.24));
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.98);
   color: var(--deep-chat-accent-hover, #8f4f33);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-  transform: translateX(-50%);
-  /* bottom 由 JS 按输入框位置写入 --deep-chat-skill-bar-bottom */
-  bottom: var(--deep-chat-skill-bar-bottom, 5.5rem);
 }
 
 .deep-chat-skill-context-bar[hidden] {

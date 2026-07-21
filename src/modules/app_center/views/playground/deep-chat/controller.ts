@@ -389,21 +389,17 @@ function setupDraftInputHeightSync(
   if (typeof ResizeObserver === 'function') {
     draftInputResizeObserver = new ResizeObserver(() => {
       syncDraftInputHeight(container);
-      syncSkillContextBarPosition(container);
     });
     draftInputResizeObserver.observe(inputContainer);
   }
 
   restoreActiveThreadDraftInput(container);
   bindInlineSkillChipControls(container, root);
-  syncSkillContextBarPosition(container);
+  placeSkillContextBarAboveComposer(container);
 
   const onDraftInput = (): void => {
     saveActiveThreadDraft(container);
-    window.requestAnimationFrame(() => {
-      syncDraftInputHeight(container);
-      syncSkillContextBarPosition(container);
-    });
+    window.requestAnimationFrame(() => syncDraftInputHeight(container));
   };
   root.addEventListener('input', onDraftInput);
   cleanupDraftInputHeightListener = () => root.removeEventListener('input', onDraftInput);
@@ -2019,12 +2015,62 @@ function applySkillContextsToSession(container: HTMLElement): void {
   renderSkillContextBar(container);
 }
 
+/** 在 light DOM / shadow 中查找技能提示条 */
+function findSkillContextBar(container: HTMLElement): HTMLElement | null {
+  return (
+    container.querySelector<HTMLElement>('#deep-chat-skill-context-bar') ||
+    getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#deep-chat-skill-context-bar') ||
+    null
+  );
+}
+
+/**
+ * 将「已挂载技能」提示条挂入 deep-chat 输入列（#input），位于输入框正上方。
+ * 使用文档流 flex，避免 absolute 与输入框叠层。
+ */
+function placeSkillContextBarAboveComposer(container: HTMLElement, attempts = 12): void {
+  const bar = findSkillContextBar(container);
+  const inputArea = getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#input');
+  if (!bar || !inputArea) {
+    if (attempts > 0) {
+      window.setTimeout(() => placeSkillContextBarAboveComposer(container, attempts - 1), 50);
+    }
+    return;
+  }
+
+  const textContainer = inputArea.querySelector('#text-input-container');
+  if (bar.parentElement === inputArea) {
+    // 保证在输入框之前
+    if (textContainer && bar.nextElementSibling !== textContainer) {
+      inputArea.insertBefore(bar, textContainer);
+    }
+    return;
+  }
+
+  if (textContainer) {
+    inputArea.insertBefore(bar, textContainer);
+  } else {
+    inputArea.prepend(bar);
+  }
+}
+
+/** 切换会话 / 重建 deep-chat 前，把提示条挪回 light DOM，避免随 shadow 销毁 */
+function rescueSkillContextBarToStage(container: HTMLElement): void {
+  const stage = container.querySelector<HTMLElement>('.deep-chat-stage');
+  const bar = findSkillContextBar(container);
+  if (!stage || !bar || bar.parentElement === stage) {
+    return;
+  }
+  stage.appendChild(bar);
+}
+
 /**
  * 将「已挂载技能」提示条贴在输入框上方。
  * Chip 在输入框内与正文混排；提示条仅展示状态 + 撤销。
  */
 function renderSkillContextBar(container: HTMLElement): void {
-  const bar = container.querySelector<HTMLElement>('#deep-chat-skill-context-bar');
+  placeSkillContextBarAboveComposer(container);
+  const bar = findSkillContextBar(container);
   if (!bar) {
     return;
   }
@@ -2032,9 +2078,6 @@ function renderSkillContextBar(container: HTMLElement): void {
   const contexts = getActiveThread().skillContexts || [];
   if (contexts.length === 0) {
     bar.hidden = true;
-    container
-      .querySelector<HTMLElement>('.deep-chat-stage')
-      ?.style.removeProperty('--deep-chat-skill-bar-bottom');
     return;
   }
 
@@ -2047,48 +2090,27 @@ function renderSkillContextBar(container: HTMLElement): void {
         ? `系统提示词已更新为「${titles[0]}」方法论 · Chip 可在输入框内移除`
         : `系统提示词已合并 ${titles.length} 个技能 · Chip 可在输入框内移除`;
   }
-  syncSkillContextBarPosition(container);
-}
-
-/** 按 #text-input-container 实测位置，把提示条摆到输入框正上方 */
-function syncSkillContextBarPosition(container: HTMLElement): void {
-  const stage = container.querySelector<HTMLElement>('.deep-chat-stage');
-  const bar = container.querySelector<HTMLElement>('#deep-chat-skill-context-bar');
-  const inputContainer =
-    getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#text-input-container');
-  if (!stage || !bar || bar.hidden || !inputContainer) {
-    return;
-  }
-
-  const stageRect = stage.getBoundingClientRect();
-  const inputRect = inputContainer.getBoundingClientRect();
-  if (stageRect.height <= 0 || inputRect.height <= 0) {
-    return;
-  }
-
-  const gap = 8;
-  const bottom = Math.max(0, stageRect.bottom - inputRect.top + gap);
-  stage.style.setProperty('--deep-chat-skill-bar-bottom', `${bottom}px`);
-
-  // 宽度与输入框对齐
-  const width = Math.min(inputRect.width, stageRect.width);
-  bar.style.width = `${Math.max(200, width)}px`;
 }
 
 function bindSkillContextBarControls(container: HTMLElement): void {
-  const undoBtn = container.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
-  if (undoBtn) {
-    const onUndo = (event: Event): void => {
-      event.preventDefault();
-      undoSessionSkillDismiss(container);
-    };
-    undoBtn.addEventListener('click', onUndo);
-    cleanupCallbacks.push(() => undoBtn.removeEventListener('click', onUndo));
+  const onUndo = (event: Event): void => {
+    const target = event.target as HTMLElement | null;
+    const undoBtn = target?.closest<HTMLButtonElement>('#deep-chat-skill-undo');
+    if (!undoBtn) {
+      return;
+    }
+    event.preventDefault();
+    undoSessionSkillDismiss(container);
+  };
+  // 提示条可能在 light DOM 或 shadow 内，用捕获委托更稳
+  container.addEventListener('click', onUndo);
+  cleanupCallbacks.push(() => container.removeEventListener('click', onUndo));
+  const chat = getChat(container);
+  const root = chat?.shadowRoot;
+  if (root) {
+    root.addEventListener('click', onUndo);
+    cleanupCallbacks.push(() => root.removeEventListener('click', onUndo));
   }
-
-  const onResize = (): void => syncSkillContextBarPosition(container);
-  window.addEventListener('resize', onResize);
-  cleanupCallbacks.push(() => window.removeEventListener('resize', onResize));
 }
 
 type PendingSkillDismissUndo = {
@@ -2104,7 +2126,12 @@ function clearPendingSkillDismissUndo(): void {
     window.clearTimeout(pendingSkillDismissUndo.timer);
   }
   pendingSkillDismissUndo = null;
-  const undoBtn = mountedContainer?.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
+  const undoBtn =
+    mountedContainer &&
+    (findSkillContextBar(mountedContainer)?.querySelector<HTMLButtonElement>(
+      '#deep-chat-skill-undo'
+    ) ||
+      mountedContainer.querySelector<HTMLButtonElement>('#deep-chat-skill-undo'));
   if (undoBtn) {
     undoBtn.hidden = true;
   }
@@ -2137,7 +2164,8 @@ function dismissSessionSkillContext(container: HTMLElement, skillId: string): vo
   }
 
   clearPendingSkillDismissUndo();
-  const undoBtn = container.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
+  const undoBtn =
+    findSkillContextBar(container)?.querySelector<HTMLButtonElement>('#deep-chat-skill-undo');
   if (undoBtn) {
     undoBtn.hidden = false;
   }
@@ -2594,6 +2622,9 @@ function replaceChat(container: HTMLElement): void {
     return;
   }
 
+  // 提示条若已挂入 shadow，先挪回 stage，避免随 deep-chat 一起被销毁
+  rescueSkillContextBarToStage(container);
+
   if (typeof chat.clearMessages === 'function') {
     chat.clearMessages(true);
   }
@@ -2604,6 +2635,8 @@ function replaceChat(container: HTMLElement): void {
   nextChat.style.fontFamily = DEEP_CHAT_SYSTEM_FONT_STACK;
   chat.replaceWith(nextChat);
   initDeepChat(container);
+  placeSkillContextBarAboveComposer(container);
+  renderSkillContextBar(container);
 }
 
 function renderMountedThreadList(): void {

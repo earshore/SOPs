@@ -273,20 +273,96 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   #input {
     box-sizing: border-box !important;
     position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
     min-height: 0 !important;
     min-width: 0 !important;
     height: 100% !important;
     width: 100% !important;
     max-width: 100% !important;
-    align-items: flex-end !important;
-    justify-content: center !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.5rem !important;
     padding: 0 !important;
     background: transparent !important;
   }
 
   :host(.is-empty) #input {
     align-items: center !important;
+    justify-content: center !important;
     height: auto !important;
+  }
+
+  /* 已挂载技能提示：在输入框同一列、正上方，不绝对定位叠层 */
+  #input > .deep-chat-skill-context-bar {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    top: auto !important;
+    z-index: 2 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 0 0 auto !important;
+    width: min(100%, 768px) !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0.4rem 0.75rem !important;
+    border: 1px solid rgba(168, 95, 63, 0.24) !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    color: #8f4f33 !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+    transform: none !important;
+  }
+
+  #input > .deep-chat-skill-context-bar[hidden] {
+    display: none !important;
+  }
+
+  #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__head {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 0.35rem 0.65rem !important;
+  }
+
+  #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    flex-shrink: 0 !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    color: #6f3925 !important;
+  }
+
+  #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__hint {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
+    color: #475569 !important;
+  }
+
+  #input > .deep-chat-skill-context-bar .deep-chat-skill-undo {
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+    padding: 0.15rem 0.55rem !important;
+    border: 1px solid rgba(168, 95, 63, 0.28) !important;
+    border-radius: 9999px !important;
+    background: #faf3ee !important;
+    color: #8f4f33 !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+  }
+
+  #input > .deep-chat-skill-context-bar .deep-chat-skill-undo[hidden] {
+    display: none !important;
   }
 
   #text-input-container {
@@ -295,6 +371,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: flex-end !important;
+    flex: 0 0 auto !important;
     width: min(100%, 768px) !important;
     min-width: 0 !important;
     max-width: 100% !important;
