@@ -184,10 +184,10 @@ function createMessageToolbar(
   time.className = 'deep-chat-message-time';
   time.textContent = formatToolbarTime(storedMessage?.createdAt);
   toolbar.appendChild(time);
-  if (storedMessage?.status === 'stopped') {
+  if (storedMessage?.status === 'stopped' || storedMessage?.status === 'partial') {
     const status = document.createElement('span');
     status.className = 'deep-chat-message-status';
-    status.textContent = '已停止';
+    status.textContent = storedMessage.status === 'stopped' ? '已停止' : '未完成';
     toolbar.appendChild(status);
   }
   const skillContexts = actions.getSkillContexts?.() || [];

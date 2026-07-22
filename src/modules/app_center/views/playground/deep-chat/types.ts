@@ -148,6 +148,8 @@ export interface SaveThreadMessagesOptions {
   threadId?: string;
   assistantCreatedAt?: number;
   assistantStatus?: DeepChatMessageStatus;
+  /** partial 落盘时跳过列表重绘，避免流式过程中 UI 抖动 */
+  skipUiRefresh?: boolean;
 }
 
 export type { DeepChatMessage, DeepChatMessageStatus, DeepChatRole };

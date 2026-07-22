@@ -6,7 +6,9 @@ import {
   createPendingDeepChatRequest,
   isPendingDeepChatDisplayComplete,
   markPendingDeepChatAssistantTextDisplayed,
+  markPendingDeepChatPartialPersisted,
   markPendingDeepChatRequestSettled,
+  shouldPersistPendingDeepChatPartial,
   shouldPreserveStoppedResponse,
 } from './requestLifecycle';
 
@@ -90,5 +92,60 @@ describe('Playground request lifecycle', () => {
     expect(pendingRequest.isSettled).toBe(true);
     expect(pendingRequest.updatedAt).toBe(1400);
     expect(isPendingDeepChatDisplayComplete(pendingRequest)).toBe(true);
+  });
+
+  it('throttles partial stream persistence by char growth and interval', () => {
+    const pendingRequest = createPendingDeepChatRequest('thread-1', conversationMessages, {
+      now: 1000,
+    });
+
+    appendPendingDeepChatAssistantText(pendingRequest, 'short', 1100);
+    expect(
+      shouldPersistPendingDeepChatPartial(pendingRequest, {
+        minChars: 120,
+        minIntervalMs: 2000,
+        now: 1100,
+      })
+    ).toBe(false);
+
+    appendPendingDeepChatAssistantText(pendingRequest, 'x'.repeat(120), 1200);
+    expect(
+      shouldPersistPendingDeepChatPartial(pendingRequest, {
+        minChars: 120,
+        minIntervalMs: 2000,
+        now: 1200,
+      })
+    ).toBe(true);
+
+    markPendingDeepChatPartialPersisted(pendingRequest, 1200);
+    appendPendingDeepChatAssistantText(pendingRequest, 'more', 1300);
+    expect(
+      shouldPersistPendingDeepChatPartial(pendingRequest, {
+        minChars: 120,
+        minIntervalMs: 2000,
+        now: 1300,
+      })
+    ).toBe(false);
+    expect(
+      shouldPersistPendingDeepChatPartial(pendingRequest, {
+        minChars: 120,
+        minIntervalMs: 2000,
+        now: 3300,
+      })
+    ).toBe(true);
+    expect(
+      shouldPersistPendingDeepChatPartial(pendingRequest, {
+        force: true,
+        now: 1300,
+      })
+    ).toBe(true);
+
+    markPendingDeepChatRequestSettled(pendingRequest, 3400);
+    expect(
+      shouldPersistPendingDeepChatPartial(pendingRequest, {
+        force: true,
+        now: 3500,
+      })
+    ).toBe(false);
   });
 });

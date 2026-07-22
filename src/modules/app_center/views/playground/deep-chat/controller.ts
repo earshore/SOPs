@@ -55,7 +55,9 @@ import {
   createPendingDeepChatRequest,
   isPendingDeepChatDisplayComplete,
   markPendingDeepChatAssistantTextDisplayed,
+  markPendingDeepChatPartialPersisted,
   markPendingDeepChatRequestSettled,
+  shouldPersistPendingDeepChatPartial,
   shouldPreserveStoppedResponse,
   type PendingDeepChatRequest,
   type DeepChatPendingAbortReason,
@@ -121,6 +123,10 @@ const nativeLoggerConsole = globalThis.console;
 const PENDING_ASSISTANT_PLACEHOLDER_TEXT = '正在生成回复...';
 const PENDING_DISPLAY_INTERVAL_MS = 32;
 const PENDING_DISPLAY_CHARS_PER_TICK = 6;
+/** 流式 partial 落盘：累计新增字数阈值 */
+const PENDING_PARTIAL_PERSIST_MIN_CHARS = 120;
+/** 流式 partial 落盘：最短时间间隔 */
+const PENDING_PARTIAL_PERSIST_MIN_MS = 2000;
 const THREAD_MENU_HEIGHT = 132;
 const THREAD_MENU_GAP = 6;
 const CHAT_SEARCH_FOCUSABLE_SELECTOR =
@@ -245,8 +251,9 @@ class DeepChatModule extends BaseModule {
     mountedContainer = null;
     currentConfig = null;
     selectedModel = '';
-    // 页面离开后仍继续静默推进 displayed/结算（不依赖 DOM）
-    pendingRequests.forEach((_request, threadId) => {
+    // 页面离开后：强制 partial 落盘 + 静默推进 displayed/结算（不依赖 DOM）
+    pendingRequests.forEach((request, threadId) => {
+      persistPendingPartialIfNeeded(request, { force: true });
       schedulePendingAssistantDisplay(threadId);
     });
   }
@@ -3455,7 +3462,7 @@ function saveThreadMessages(
     ].slice(0, getMaxThreadCount()),
   };
   persistThreadStoreNow();
-  if (container) {
+  if (container && !options.skipUiRefresh) {
     renderHistoryThreadList(container);
     refreshChatSearchResultsIfOpen(container);
     syncPendingStatus(container);
@@ -3623,6 +3630,41 @@ function createPendingRequest(
 function appendPendingAssistantText(pendingRequest: PendingDeepChatRequest, delta: string): void {
   appendPendingDeepChatAssistantText(pendingRequest, delta);
   syncPendingRequestView(pendingRequest.threadId);
+  persistPendingPartialIfNeeded(pendingRequest);
+}
+
+/** 节流把已接收 stream 文本写入会话存储，刷新后可恢复半截回复 */
+function persistPendingPartialIfNeeded(
+  pendingRequest: PendingDeepChatRequest,
+  options: { force?: boolean } = {}
+): void {
+  if (
+    !shouldPersistPendingDeepChatPartial(pendingRequest, {
+      minChars: PENDING_PARTIAL_PERSIST_MIN_CHARS,
+      minIntervalMs: PENDING_PARTIAL_PERSIST_MIN_MS,
+      force: options.force,
+    })
+  ) {
+    return;
+  }
+
+  const assistantText = pendingRequest.assistantText.trim();
+  if (!assistantText || !threadExists(pendingRequest.threadId)) {
+    return;
+  }
+
+  saveThreadMessages(
+    getMountedRenderContainer(),
+    pendingRequest.conversationMessages,
+    assistantText,
+    {
+      threadId: pendingRequest.threadId,
+      assistantCreatedAt: pendingRequest.startedAt,
+      assistantStatus: 'partial',
+      skipUiRefresh: true,
+    }
+  );
+  markPendingDeepChatPartialPersisted(pendingRequest);
 }
 
 function schedulePendingAssistantDisplay(threadId: string): void {

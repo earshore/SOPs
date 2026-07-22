@@ -2,7 +2,7 @@ import type { ChatMessage } from '@/services/llmService';
 import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
 
 export type DeepChatRole = 'user' | 'ai' | 'assistant' | 'system';
-export type DeepChatMessageStatus = 'stopped';
+export type DeepChatMessageStatus = 'stopped' | 'partial';
 
 export interface DeepChatMessage {
   role?: DeepChatRole;
@@ -145,7 +145,9 @@ function normalizeStoredMessage(
     role: message.role === 'user' ? 'user' : 'ai',
     text,
     createdAt: getFiniteTimestamp(message.createdAt, options.fallbackCreatedAt),
-    ...(message.status === 'stopped' && { status: 'stopped' as const }),
+    ...((message.status === 'stopped' || message.status === 'partial') && {
+      status: message.status,
+    }),
   };
 }
 

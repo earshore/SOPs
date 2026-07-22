@@ -76,6 +76,19 @@ describe('buildStoredThreadMessages', () => {
       { role: 'user', text: '第二轮问题', createdAt: 3000 },
       { role: 'ai', text: '部分回复', createdAt: 4000, status: 'stopped' },
     ]);
+
+    expect(
+      buildStoredThreadMessages(existing, conversation, '半截回复', {
+        now: 3000,
+        assistantCreatedAt: 4000,
+        assistantStatus: 'partial',
+      })
+    ).toEqual([
+      { role: 'user', text: '第一轮问题', createdAt: 1000 },
+      { role: 'ai', text: '第一轮回答', createdAt: 2000 },
+      { role: 'user', text: '第二轮问题', createdAt: 3000 },
+      { role: 'ai', text: '半截回复', createdAt: 4000, status: 'partial' },
+    ]);
   });
 
   it('limits stored history to the newest messages', () => {

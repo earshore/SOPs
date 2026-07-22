@@ -1898,6 +1898,78 @@ describe('deep-chat playground remount streaming', () => {
 
     unmount();
   });
+
+  it('persists partial stream text so a full remount can recover mid-generation output', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    let releaseStream = (): void => {};
+    const streamGate = new Promise<void>(resolve => {
+      releaseStream = resolve;
+    });
+    const partialText = `${'半截回复内容'.repeat(20)}`;
+    const { mount, unmount, mocks } = await importDeepChat({
+      callLLM: async (...args: unknown[]) => {
+        const callOptions = args[5] as
+          | {
+              onStreamUpdate?: (update: { delta: string }) => void;
+            }
+          | undefined;
+        callOptions?.onStreamUpdate?.({ delta: partialText });
+        await streamGate;
+        callOptions?.onStreamUpdate?.({ delta: ' 已补全' });
+        return `${partialText} 已补全`;
+      },
+    });
+
+    await mount(container);
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Recover after refresh' }] },
+      {
+        onResponse: vi.fn(async () => undefined),
+        onClose: vi.fn(),
+        stopClicked: { listener: vi.fn() },
+      }
+    );
+
+    await vi.waitFor(() => {
+      expect(mocks.localDataStore.set).toHaveBeenCalledWith(
+        'user:playground_deep_chat_threads_v1',
+        expect.objectContaining({
+          threads: expect.arrayContaining([
+            expect.objectContaining({
+              messages: expect.arrayContaining([
+                expect.objectContaining({
+                  role: 'ai',
+                  text: partialText,
+                  status: 'partial',
+                }),
+              ]),
+            }),
+          ]),
+        }),
+        'user-data'
+      );
+    });
+
+    // 模拟刷新：卸载并重新加载模块，仅靠存储恢复
+    const persistedStore = mocks.localDataStore.set.mock.calls
+      .filter(call => call[0] === 'user:playground_deep_chat_threads_v1')
+      .at(-1)?.[1];
+    unmount();
+    releaseStream();
+
+    const remounted = await importDeepChat({
+      storedThreadStore: persistedStore as typeof storedThreadStore,
+    });
+    await remounted.mount(container);
+    expect(getChat(container).history).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ role: 'ai', text: partialText, status: 'partial' }),
+      ])
+    );
+
+    remounted.unmount();
+  });
 });
 
 describe('deep-chat playground request stopping', () => {
