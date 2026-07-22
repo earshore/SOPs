@@ -310,14 +310,25 @@ async function prepareListingPromptHandoff(options: ImportOptions) {
 
 function createLocalDataStoreMock(options: ImportOptions) {
   let threadStoreLoadIndex = 0;
+  let persistedThreadStore = options.storedThreadStore ?? storedThreadStore;
   return {
     migrateLocalStorageKey: vi.fn(async () => {
       await (options.threadStoreLoadDelays?.[threadStoreLoadIndex++] ??
         options.threadStoreLoadDelay);
-      return options.storedThreadStore ?? storedThreadStore;
+      return persistedThreadStore;
     }),
-    get: vi.fn(async () => null),
-    set: vi.fn(async () => true),
+    get: vi.fn(async (key: string) => {
+      if (key === 'user:playground_deep_chat_threads_v1') {
+        return persistedThreadStore;
+      }
+      return null;
+    }),
+    set: vi.fn(async (key: string, value: unknown) => {
+      if (key === 'user:playground_deep_chat_threads_v1') {
+        persistedThreadStore = value as typeof persistedThreadStore;
+      }
+      return true;
+    }),
     remove: vi.fn(async () => true),
   };
 }
@@ -1813,6 +1824,77 @@ describe('deep-chat playground remount streaming', () => {
       expect.arrayContaining([expect.objectContaining({ role: 'ai', text: 'First Second' })])
     );
     expect(sawAbort).toBe(false);
+
+    unmount();
+  });
+
+  it('keeps receiving stream text and settles while the page is unmounted', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    let releaseStream = (): void => {};
+    const streamGate = new Promise<void>(resolve => {
+      releaseStream = resolve;
+    });
+    let sawAbort = false;
+    const { mount, unmount, mocks } = await importDeepChat({
+      callLLM: async (...args: unknown[]) => {
+        const callOptions = args[5] as
+          | {
+              onStreamUpdate?: (update: { delta: string }) => void;
+              signal?: AbortSignal;
+            }
+          | undefined;
+        callOptions?.onStreamUpdate?.({ delta: 'Silent ' });
+        callOptions?.signal?.addEventListener(
+          'abort',
+          () => {
+            sawAbort = true;
+          },
+          { once: true }
+        );
+        await streamGate;
+        callOptions?.onStreamUpdate?.({ delta: 'background complete' });
+        return 'Silent background complete';
+      },
+    });
+
+    await mount(container);
+    const onResponse = vi.fn(async () => undefined);
+    const onClose = vi.fn();
+
+    getChat(container).connect?.handler(
+      { messages: [{ role: 'user', text: 'Generate after leave' }] },
+      { onResponse, onClose, stopClicked: { listener: vi.fn() } }
+    );
+
+    await vi.waitFor(() => {
+      expect(onResponse).toHaveBeenCalledWith({ text: 'Silent ' });
+    });
+
+    // 切出后不再向旧 signals 推流，但 LLM 与内存态继续
+    unmount();
+    expect(sawAbort).toBe(false);
+    const responseCallsBeforeBackground = onResponse.mock.calls.length;
+
+    releaseStream();
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+    await vi.advanceTimersByTimeAsync(200);
+
+    // 后台结算：旧 Deep Chat 实例不应再收到后续 delta
+    expect(onResponse.mock.calls.length).toBe(responseCallsBeforeBackground);
+    expectStoredAssistantMessage(mocks.localDataStore.set, 'Silent background complete');
+    expect(sawAbort).toBe(false);
+
+    // 切回即可看到完整回复，无需等待「恢复输出」
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(getChat(container).history).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ role: 'ai', text: 'Silent background complete' }),
+      ])
+    );
 
     unmount();
   });

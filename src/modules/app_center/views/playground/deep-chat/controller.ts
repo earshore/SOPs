@@ -240,12 +240,15 @@ class DeepChatModule extends BaseModule {
     editingThreadId = null;
     editingThreadValue = '';
     clearPendingSkillDismissUndo();
-    clearAllPendingDisplayTimers();
     sessionSystemPrompt = '';
     sessionTemperature = 0.3;
     mountedContainer = null;
     currentConfig = null;
     selectedModel = '';
+    // 页面离开后仍继续静默推进 displayed/结算（不依赖 DOM）
+    pendingRequests.forEach((_request, threadId) => {
+      schedulePendingAssistantDisplay(threadId);
+    });
   }
 }
 
@@ -362,6 +365,12 @@ function initDeepChat(container: HTMLElement): void {
   }
 
   const activeThread = getActiveThread();
+  // 切回页面时先把已接收 stream 同步到 displayed，避免 history 只有占位/长时间打字机追赶
+  pendingRequests.forEach(request => {
+    if (request.assistantText) {
+      markPendingDeepChatAssistantTextDisplayed(request, request.assistantText);
+    }
+  });
   configureDeepChatBase(chat, activeThread, updateThreadDraft, getThreadDisplayMessages);
   // deep-chat 默认用 innerText 抽正文，会在 contenteditable=false 的 Chip 两侧插入换行；
   // 统一走 serialize，避免刷新后换行累积。
@@ -3646,7 +3655,10 @@ function drainPendingAssistantDisplay(threadId: string): void {
   }
 
   const wasSettled = pendingRequest.isSettled;
-  const nextDisplayText = getNextPendingAssistantDisplayText(pendingRequest);
+  // 未挂载页面：跳过打字机节流，直接同步到已接收全文，保证后台可完成结算
+  const nextDisplayText = getMountedRenderContainer()
+    ? getNextPendingAssistantDisplayText(pendingRequest)
+    : pendingRequest.assistantText;
   markPendingDeepChatAssistantTextDisplayed(pendingRequest, nextDisplayText);
 
   const container = getRenderContainerForThread(threadId);
@@ -3892,14 +3904,15 @@ async function emitPendingAssistantDelta(
   sourceChat: DeepChatElement | null,
   delta: string
 ): Promise<void> {
+  // 切走会话/离开页面后不再向已卸载的 Deep Chat signals 推流，避免停滞与无效 await
+  if (!isCurrentResponseTarget(pendingRequest.threadId, sourceChat)) {
+    schedulePendingAssistantDisplay(pendingRequest.threadId);
+    return;
+  }
+
   const previousDisplayedLength = pendingRequest.assistantText.length - delta.length;
   const delivered = await emitDeepChatResponse(signals, { text: delta });
-  const deliveredToMountedChat =
-    delivered && isCurrentResponseTarget(pendingRequest.threadId, sourceChat);
-  if (
-    deliveredToMountedChat &&
-    pendingRequest.displayedAssistantText.length === previousDisplayedLength
-  ) {
+  if (delivered && pendingRequest.displayedAssistantText.length === previousDisplayedLength) {
     markPendingDeepChatAssistantTextDisplayed(pendingRequest, pendingRequest.assistantText);
     return;
   }
