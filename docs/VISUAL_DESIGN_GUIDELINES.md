@@ -1,7 +1,7 @@
 # 视觉设计规范指南
 
 **适用范围**: SOPs 项目 Web 端界面，优先约束 PC 端  
-**更新时间**: 2026-06-10  
+**更新时间**: 2026-07-22  
 **目标**: 为后续页面开发、重构和视觉修复提供统一判断标准，避免新增孤岛式设计。
 
 > 上层主题分层、token 来源、组件视觉底线和验收规则见 [稳定主题系统规范](./THEME_SYSTEM_GUIDELINES.md)。本文继续作为页面视觉和 welcome banner 的细则。
@@ -448,6 +448,62 @@ PPC 使用自定义 `.ppc-hero` 是允许的，但必须满足：
 - 使用模块主题色，而不是随机选择。
 - 保持标题、描述、tag 字号和共享 banner 接近。
 - 不把总览 hero 的强样式复制到普通工具页。
+
+---
+
+### 7.4 Deep Chat 工作台
+
+Deep Chat（`src/modules/app_center/views/playground/deep-chat/`）是应用中心 Playground 下的对话工作台。它使用独立的 terracotta 品牌 token，但必须服从本文的工具优先与层级克制原则。
+
+#### 品牌色（Terracotta）
+
+| Token / 用途 | 值 |
+| --- | --- |
+| 主色 `--deep-chat-accent` | `#a85f3f`（rgb `168, 95, 63`） |
+| Hover `--deep-chat-accent-hover` | `#8f4f33` |
+| Active `--deep-chat-accent-active` | `#6f3925` |
+| Soft 底 `--deep-chat-accent-soft` | `#faf3ee` |
+| 画布底 `--deep-chat-bg` | `#fffaf7` |
+| 主文字 `--deep-chat-ink` | `#0f172a` |
+
+- 主色只用于小面积强调：边框、焦点环、选中态、主操作填充按钮、hover 文字。
+- 工作台背景使用近白奶油渐变，不要整屏偏桃/偏橙染色。
+- 宽屏与窄屏共用同一套环境色，不要在 `≥1024px` 强制回纯白卡片把氛围冲掉。
+
+#### 次级工具按钮（默认黑字）
+
+适用于侧栏「新建会话」「搜索会话」与顶栏「Skill Library」等次级 chrome 按钮。
+
+| 状态 | 背景 | 文字 / 图标 | 描边 |
+| --- | --- | --- | --- |
+| 默认 | `#ffffff` | 黑色 `#0f172a`（`--deep-chat-ink`） | terracotta 低透明度描边 |
+| Hover / Focus | `#ffffff` | terracotta `#8f4f33` | 描边略加重 + 轻阴影 |
+| Active | 同 hover | 同 hover | 可轻微下压 `translateY` |
+
+规则：
+
+1. **默认必须是黑字**，不要默认使用 terracotta 文字或奶油底染色。
+2. **只有 hover / focus 才切换字体与图标颜色**到品牌色。
+3. 图标颜色默认 `inherit`，与文字同步，避免图标单独高亮抢视线。
+4. 同类次级按钮视觉规格应统一：白底、细描边、黑字、hover 变色。
+5. 主发送按钮等主操作仍可用品牌填充色，不与次级按钮混用同一默认态。
+
+#### 会话列表
+
+- 最近会话标题默认字重 `400`（不要加粗抢视线）。
+- 自动标题长度可到约 100 字；窄栏与搜索列表用 CSS 行数裁切（侧栏约 3 行、搜索约 2 行），不要在数据层过早截成极短文案。
+- 未读点、进行中状态用小面积点缀，不要整行高亮成主色块。
+
+#### 搜索会话弹窗
+
+- 弹窗宽度保持适中（约 `680px`），不要为了“少省略”去强行拉满主工作区宽度。
+- 列表内容长度通过标题生成与行数裁切解决，而不是改窗口尺寸。
+
+实现文件：
+
+- 样式：`src/modules/app_center/views/playground/deep-chat/styles.css`
+- 组件内联样式：`deepChatStyles.ts`（widget 内部 chrome）
+- 交互：`controller.ts`、`skillLibrary.ts`
 
 ---
 

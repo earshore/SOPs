@@ -55,13 +55,14 @@ export function createThreadId(): string {
   return `thread-${Date.now()}-${randomBase36(12)}`;
 }
 
-export function getThreadTitle(messages: DeepChatMessage[]): string {
+/** Auto title from first user message. Keep generous length; UI clamps visually. */
+export function getThreadTitle(messages: DeepChatMessage[], maxLength = 100): string {
   const firstUserMessage = messages.find(message => message.role === 'user');
   const title = getMessageText((firstUserMessage || messages[0] || {}) as DeepChatMessage).replace(
     /\s+/g,
     ' '
   );
-  return title ? truncateText(title, 42) : 'New Thread';
+  return title ? truncateText(title, maxLength) : 'New Thread';
 }
 
 export function normalizeChatMessages(

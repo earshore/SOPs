@@ -23,6 +23,57 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     margin-bottom: 26px !important;
   }
 
+  /* 生成中：隐藏原生三点，改用气泡下方 inline status */
+  :host(.is-pending-generation) .deep-chat-loading-message-dots-container {
+    display: none !important;
+  }
+
+  .deep-chat-inline-pending-status {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    max-width: 100% !important;
+    margin-top: 0.5rem !important;
+    padding: 0.28rem 0.7rem !important;
+    border: 1px solid rgba(168, 95, 63, 0.22) !important;
+    border-radius: 999px !important;
+    background: linear-gradient(180deg, #ffffff 0%, #faf3ee 100%) !important;
+    color: #6f3925 !important;
+    font-family: inherit !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    box-shadow: 0 1px 2px rgba(168, 95, 63, 0.08) !important;
+    user-select: none !important;
+  }
+
+  .deep-chat-inline-pending-dot {
+    width: 7px !important;
+    height: 7px !important;
+    flex: 0 0 7px !important;
+    border-radius: 999px !important;
+    background: #a85f3f !important;
+    box-shadow: 0 0 0 4px rgba(168, 95, 63, 0.14) !important;
+    animation: deep-chat-inline-pending-pulse 1s ease-in-out infinite !important;
+  }
+
+  @keyframes deep-chat-inline-pending-pulse {
+    0%,
+    100% {
+      opacity: 0.45;
+      transform: scale(0.86);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .deep-chat-inline-pending-text {
+    min-width: 0 !important;
+  }
+
+
   .inner-message-container {
     display: flex !important;
     flex-direction: column !important;
@@ -737,6 +788,12 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     .deep-chat-context-chip,
     #text-input-container {
       transition-duration: 0.01ms !important;
+    }
+
+    .deep-chat-inline-pending-dot {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
     }
   }
 

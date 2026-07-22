@@ -124,6 +124,9 @@ import {
 
 const nativeLoggerConsole = globalThis.console;
 const PENDING_ASSISTANT_PLACEHOLDER_TEXT = '正在生成回复...';
+const INLINE_PENDING_STATUS_ID = 'deep-chat-inline-pending-status';
+const INLINE_PENDING_STATUS_CLASS = 'deep-chat-inline-pending-status';
+const PENDING_GENERATION_HOST_CLASS = 'is-pending-generation';
 const PENDING_DISPLAY_INTERVAL_MS = 32;
 const PENDING_DISPLAY_CHARS_PER_TICK = 6;
 /** 流式 partial 落盘：累计新增字数阈值 */
@@ -1408,7 +1411,12 @@ function renderChatSearchResults(container: HTMLElement): void {
       ${results
         .map(({ thread }) => {
           const isActive = thread.id === threadStore.activeThreadId;
-          const title = escapeHTML(thread.title);
+          const displayTitle =
+            thread.customTitle ||
+            getThreadTitle(thread.messages, 100) ||
+            thread.title ||
+            'New Thread';
+          const title = escapeHTML(displayTitle);
 
           return `
         <button
@@ -3653,11 +3661,12 @@ function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessage[] {
     return displayMessages;
   }
 
+  // 占位用零宽字符占 AI 槽位，文案改由消息下方 inline status 展示（取代 loading 三点）
   return [
     ...displayMessages,
     {
       role: 'ai',
-      text: PENDING_ASSISTANT_PLACEHOLDER_TEXT,
+      text: '\u200b',
       createdAt: pendingRequest.startedAt,
     },
   ];
@@ -3789,7 +3798,8 @@ function renderPendingAssistantDisplay(
     return;
   }
 
-  const text = pendingRequest.displayedAssistantText || PENDING_ASSISTANT_PLACEHOLDER_TEXT;
+  // 空内容时不把「正在生成」写进气泡正文，改由气泡下方 inline status 展示
+  const text = pendingRequest.displayedAssistantText.trim() || '\u200b';
   if (typeof chat.addMessage === 'function') {
     chat.addMessage({ role: 'ai', text, overwrite: true }, true);
     return;
@@ -3956,30 +3966,125 @@ function syncPendingRequestView(threadId: string, options: { replaceChat?: boole
     return;
   }
 
-  syncPendingStatus(container);
+  // 先 replace 再挂 inline status，避免 status 被 chat 重建冲掉
   if (options.replaceChat) {
     replaceChat(container);
   }
+  syncPendingStatus(container);
+}
+
+function clearInlinePendingStatus(chat: DeepChatElement | null): void {
+  chat?.classList.remove(PENDING_GENERATION_HOST_CLASS);
+  chat?.shadowRoot?.getElementById(INLINE_PENDING_STATUS_ID)?.remove();
+}
+
+function findInlinePendingStatusHost(root: ShadowRoot): HTMLElement | null {
+  const aiInners = root.querySelectorAll<HTMLElement>(
+    [
+      '.deep-chat-outer-container-role-ai .inner-message-container',
+      '.outer-message-container.deep-chat-outer-container-role-ai .inner-message-container',
+    ].join(', ')
+  );
+  if (aiInners.length > 0) {
+    return aiInners[aiInners.length - 1] ?? null;
+  }
+
+  const loadingDots = root.querySelector<HTMLElement>('.deep-chat-loading-message-dots-container');
+  if (loadingDots?.parentElement instanceof HTMLElement) {
+    return loadingDots.parentElement;
+  }
+
+  const loadingBubble = root.querySelector<HTMLElement>(
+    '.deep-chat-loading-message-bubble, .message-bubble.deep-chat-loading-message-bubble'
+  );
+  if (loadingBubble?.parentElement instanceof HTMLElement) {
+    return loadingBubble.parentElement;
+  }
+
+  return null;
+}
+
+function mountInlinePendingStatus(host: HTMLElement, statusText: string): void {
+  const doc = host.ownerDocument;
+  const root = host.getRootNode();
+  const existing =
+    root instanceof ShadowRoot || root instanceof Document
+      ? root.getElementById(INLINE_PENDING_STATUS_ID)
+      : null;
+
+  let statusEl = existing;
+  if (!statusEl) {
+    statusEl = doc.createElement('div');
+    statusEl.id = INLINE_PENDING_STATUS_ID;
+    statusEl.className = INLINE_PENDING_STATUS_CLASS;
+    statusEl.setAttribute('role', 'status');
+    statusEl.setAttribute('aria-live', 'polite');
+
+    const dot = doc.createElement('span');
+    dot.className = 'deep-chat-inline-pending-dot';
+    dot.setAttribute('aria-hidden', 'true');
+
+    const text = doc.createElement('span');
+    text.className = 'deep-chat-inline-pending-text';
+
+    statusEl.append(dot, text);
+  }
+
+  if (statusEl.parentElement !== host) {
+    host.append(statusEl);
+  }
+
+  const textEl = statusEl.querySelector<HTMLElement>('.deep-chat-inline-pending-text');
+  if (textEl && textEl.textContent !== statusText) {
+    textEl.textContent = statusText;
+  }
+}
+
+function ensureInlinePendingStatus(chat: DeepChatElement, statusText: string): void {
+  const root = chat.shadowRoot;
+  if (!root) {
+    return;
+  }
+
+  chat.classList.add(PENDING_GENERATION_HOST_CLASS);
+
+  const host = findInlinePendingStatusHost(root);
+  if (host) {
+    mountInlinePendingStatus(host, statusText);
+    return;
+  }
+
+  // deep-chat 尚未画出 loading/AI 槽时，下一帧再挂一次
+  window.requestAnimationFrame(() => {
+    if (!pendingRequests.get(threadStore.activeThreadId) || !chat.shadowRoot) {
+      return;
+    }
+    const retryHost = findInlinePendingStatusHost(chat.shadowRoot);
+    if (retryHost) {
+      mountInlinePendingStatus(retryHost, statusText);
+    }
+  });
 }
 
 function syncPendingStatus(container: HTMLElement): void {
-  const status = container.querySelector<HTMLElement>('#deep-chat-pending-status');
-  const statusText = container.querySelector<HTMLElement>('#deep-chat-pending-status-text');
-  if (!status || !statusText) {
-    syncSubmitStopButtonState(container);
-    return;
+  // 顶部固定条废弃：始终隐藏（保留节点兼容旧测试/模板）
+  const topStatus = container.querySelector<HTMLElement>('#deep-chat-pending-status');
+  if (topStatus) {
+    topStatus.hidden = true;
   }
 
+  const chat = getChat(container);
   const pendingRequest = pendingRequests.get(threadStore.activeThreadId);
+
   if (!pendingRequest) {
-    status.hidden = true;
-    statusText.textContent = '';
+    clearInlinePendingStatus(chat);
     syncSubmitStopButtonState(container);
     return;
   }
 
-  statusText.textContent = getPendingStatusText(pendingRequest);
-  status.hidden = false;
+  if (chat) {
+    ensureInlinePendingStatus(chat, getPendingStatusText(pendingRequest));
+  }
   syncSubmitStopButtonState(container);
 }
 
@@ -3990,7 +4095,7 @@ function getPendingStatusText(pendingRequest: PendingDeepChatRequest): string {
     return prefix;
   }
 
-  return `${prefix}已收到 ${charCount.toLocaleString('zh-CN')} 字`;
+  return `${prefix} · 已收到 ${charCount.toLocaleString('zh-CN')} 字`;
 }
 
 async function emitPendingAssistantDelta(
@@ -4154,7 +4259,15 @@ function getSanitizedThreadTitle(
   customTitle: string | undefined,
   messages: DeepChatMessage[]
 ): string {
-  return customTitle || getOptionalString(title) || getThreadTitle(messages);
+  if (customTitle) {
+    return customTitle;
+  }
+  // Prefer regenerating from messages so older short titles (e.g. 42 chars) expand.
+  const derived = getThreadTitle(messages);
+  if (derived && derived !== 'New Thread') {
+    return derived;
+  }
+  return getOptionalString(title) || 'New Thread';
 }
 
 function getOptionalString(value: unknown): string | undefined {
