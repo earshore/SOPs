@@ -24,13 +24,26 @@ const deepChatTemplate = `
         <select id="deep-chat-model-select"></select>
         <button id="deep-chat-refresh-config" type="button"></button>
         <button id="deep-chat-open-settings" type="button" hidden>配置模型</button>
-        <details class="deep-chat-tuning-panel">
-          <summary>Settings</summary>
-          <textarea id="deep-chat-system-prompt"></textarea>
-          <output id="deep-chat-temperature-value">0.3</output>
-          <input id="deep-chat-temperature" type="range" value="0.3">
-          <button id="deep-chat-reset-tuning" type="button"></button>
-        </details>
+        <div class="deep-chat-top-actions">
+          <button
+            id="deep-chat-skill-library"
+            class="deep-chat-skill-library-btn"
+            type="button"
+            aria-label="Skill Library"
+            aria-haspopup="dialog"
+            aria-controls="deep-chat-skill-library-modal"
+            aria-expanded="false"
+          >
+            Skill Library
+          </button>
+          <details class="deep-chat-tuning-panel">
+            <summary>Settings</summary>
+            <textarea id="deep-chat-system-prompt"></textarea>
+            <output id="deep-chat-temperature-value">0.3</output>
+            <input id="deep-chat-temperature" type="range" value="0.3">
+            <button id="deep-chat-reset-tuning" type="button"></button>
+          </details>
+        </div>
         <div id="deep-chat-pending-status" hidden>
           <span id="deep-chat-pending-status-text"></span>
         </div>
@@ -71,6 +84,25 @@ const deepChatTemplate = `
           新建会话
         </button>
         <div id="deep-chat-search-results" class="deep-chat-search-results" aria-live="polite"></div>
+      </section>
+    </div>
+    <div id="deep-chat-skill-library-modal" class="deep-chat-skill-library-modal" aria-hidden="true" hidden>
+      <div class="deep-chat-skill-library-backdrop" data-skill-library-close></div>
+      <section
+        class="deep-chat-skill-library-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="deep-chat-skill-library-title"
+      >
+        <header class="deep-chat-skill-library-header">
+          <h2 id="deep-chat-skill-library-title">Skill Library</h2>
+          <button type="button" data-skill-library-close aria-label="关闭 Skill Library">关闭</button>
+        </header>
+        <input id="deep-chat-skill-library-search" type="search" aria-label="搜索技能">
+        <select id="deep-chat-skill-library-category" aria-label="技能分类">
+          <option value="all">全部分类</option>
+        </select>
+        <div id="deep-chat-skill-library-results" class="deep-chat-skill-library-results" aria-live="polite"></div>
       </section>
     </div>
   </div>
@@ -400,6 +432,45 @@ async function importDeepChat(options: ImportOptions = {}) {
     LocalDataStore: localDataStore,
   }));
   vi.doMock('@/services/llmService', () => ({ callLLM }));
+  vi.doMock('@/services/skillRegistry', () => ({
+    skillRegistry: {
+      ensureInitialized: vi.fn(),
+      getCategories: vi.fn(() => [
+        { id: 'pricing_profit', label: '定价利润', count: 1 },
+      ]),
+      listSkills: vi.fn(() => [
+        {
+          id: 'profit-calculator',
+          title: '利润测算',
+          description: '快速测算 FBA 利润',
+          category: 'pricing_profit',
+          categoryLabel: '定价利润',
+          status: 'available',
+          hasScripts: false,
+          source: 'amazon-skills',
+          repoPath: 'profit-calculator/SKILL.md',
+        },
+      ]),
+      getSkill: vi.fn((id: string) =>
+        id === 'profit-calculator'
+          ? {
+              id: 'profit-calculator',
+              title: '利润测算',
+              description: '快速测算 FBA 利润',
+              category: 'pricing_profit',
+              categoryLabel: '定价利润',
+              status: 'available',
+              hasScripts: false,
+              source: 'amazon-skills',
+              repoPath: 'profit-calculator/SKILL.md',
+              body: '# Profit',
+              raw: '# Profit Calculator\n\nUse this skill for FBA profit.',
+              frontmatter: {},
+            }
+          : undefined
+      ),
+    },
+  }));
   vi.doMock('@/common/ui/notifications', () => ({ showToast: toast }));
   vi.doMock('@/stores/useAppStore', () => ({ appStore }));
   vi.doMock('@/common/EventBus', () => ({ default: eventBus }));
@@ -1634,6 +1705,52 @@ describe('deep-chat playground search chats', () => {
     );
 
     unmount();
+  });
+});
+
+describe('deep-chat playground skill library', () => {
+  it('opens Skill Library to the left of tuning controls and applies a skill without leaving the page', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat();
+
+    await mount(container);
+
+    const openButton = queryRequired<HTMLButtonElement>(container, '#deep-chat-skill-library');
+    const tuningPanel = queryRequired<HTMLDetailsElement>(container, '.deep-chat-tuning-panel');
+    expect(openButton.compareDocumentPosition(tuningPanel) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(openButton.textContent).toContain('Skill Library');
+
+    openButton.click();
+    const modal = queryRequired<HTMLElement>(document, '#deep-chat-skill-library-modal');
+    const results = queryRequired<HTMLElement>(document, '#deep-chat-skill-library-results');
+
+    expect(modal.hidden).toBe(false);
+    expect(modal.parentElement).toBe(document.body);
+    expect(openButton.getAttribute('aria-expanded')).toBe('true');
+    expect(results.textContent).toContain('利润测算');
+    expect(results.textContent).toContain('定价利润');
+
+    queryRequired<HTMLButtonElement>(results, '[data-skill-library-apply="profit-calculator"]').click();
+
+    await vi.waitFor(() => {
+      expect(modal.hidden).toBe(true);
+    });
+    expect(openButton.getAttribute('aria-expanded')).toBe('false');
+    expect(mocks.navigateToRouteId).not.toHaveBeenCalled();
+    expect(mocks.toast).toHaveBeenCalledWith(
+      expect.stringContaining('利润测算'),
+      expect.objectContaining({ type: 'success' })
+    );
+    expect(
+      container.querySelector('#deep-chat-skill-context-bar')?.textContent ||
+        document.body.textContent
+    ).toMatch(/利润测算|已挂载/);
+
+    unmount();
+    expect(document.querySelector('#deep-chat-skill-library-modal')).toBeNull();
   });
 });
 

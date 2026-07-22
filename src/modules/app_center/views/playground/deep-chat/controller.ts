@@ -1,4 +1,4 @@
-import BaseModule from '@/common/BaseModule';
+﻿import BaseModule from '@/common/BaseModule';
 import eventBus from '@/common/EventBus';
 import { APP_EVENTS } from '@/common/constants/eventConstants';
 import { SafeTemplateLoader } from '@/common/infrastructure/SafeModuleLoader';
@@ -27,6 +27,7 @@ import {
   type ListingPromptWorkflowContext,
 } from '@/modules/app_center/listingWorkflowHandoff';
 import {
+  buildSkillDeepChatUserDraft,
   buildSystemPromptFromSkillContexts,
   consumeSkillForDeepChat,
   normalizeSkillChipDraftText,
@@ -34,6 +35,7 @@ import {
   stripSkillMarkersFromDraft,
   type SkillDeepChatContext,
 } from '@/modules/app_center/skillDeepChatHandoff';
+import { skillRegistry } from '@/services/skillRegistry';
 import {
   SKILL_CHIP_CLASS,
   createSkillContextChip,
@@ -90,6 +92,7 @@ import { cleanupMessageToolbars, setupMessageToolbars } from './messageToolbar';
 import { getPromptDrafts } from './promptDrafts';
 import { resetPromptPreviewState, setupPromptPreview } from './promptPreview';
 import { renderPromptDraftList, renderThreadList, type ThreadMenuState } from './renderers';
+import { setupSkillLibrary } from './skillLibrary';
 import type {
   CreateThreadOptions,
   DeepChatElement,
@@ -985,6 +988,7 @@ function bindControls(container: HTMLElement): void {
   bindStopOverlayControl(container, stopButton);
   bindThreadControls(container, threadList, promptList);
   bindChatSearchControls(container);
+  bindSkillLibraryControls(container);
   bindSkillContextBarControls(container);
   bindMobileDrawerControls(container);
   bindTuningControls(container, {
@@ -1209,6 +1213,39 @@ async function openPromptlab(): Promise<void> {
   }
 }
 
+
+function bindSkillLibraryControls(container: HTMLElement): void {
+  setupSkillLibrary(
+    container,
+    skillId => applySkillFromLibrary(container, skillId),
+    cleanup => cleanupCallbacks.push(cleanup)
+  );
+}
+
+/** 从顶栏 Skill Library 挂载技能：不切路由，复用既有挂载流程 */
+async function applySkillFromLibrary(container: HTMLElement, skillId: string): Promise<void> {
+  let skill;
+  try {
+    skill = skillRegistry.getSkill(skillId);
+  } catch {
+    showToast('技能库暂不可用，请稍后重试', { type: 'error' });
+    return;
+  }
+
+  if (!skill) {
+    showToast('未找到该技能', { type: 'error' });
+    return;
+  }
+
+  const skillTitle = skill.title.replace(/^[#\s]+/, '').trim() || skill.id;
+
+  await createThreadFromSkillContext(container, {
+    skillId: skill.id,
+    skillTitle,
+    skillRaw: skill.raw,
+    userDraft: buildSkillDeepChatUserDraft(skillTitle, skill.raw),
+  });
+}
 function bindChatSearchControls(container: HTMLElement): void {
   const refs = getChatSearchRefs(container);
   if (!refs) {
