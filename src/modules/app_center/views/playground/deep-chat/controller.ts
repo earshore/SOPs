@@ -1674,6 +1674,8 @@ async function handleDeepChatRequest(
       threadId: activeThread.id,
     });
     markPendingDeepChatRequestSettled(pendingRequest);
+    // 后台会话：LLM 一完成就标未读并刷新列表（不等打字机 drain）
+    notifyBackgroundPendingSettled(activeThread.id);
     schedulePendingAssistantDisplay(activeThread.id);
   } catch (error) {
     if (requestController?.signal.aborted) {
@@ -1710,9 +1712,16 @@ function cleanupLifecyclePendingRequest(
     preserveStoppedResponse(threadId);
   }
   if (pendingRequest.isSettled && !isPendingDeepChatDisplayComplete(pendingRequest)) {
-    renderMountedThreadList();
+    // 已 settle 的后台会话确保未读已标（防止仅依赖 drain 路径时漏刷）
+    notifyBackgroundPendingSettled(threadId);
     syncPendingRequestView(threadId);
     schedulePendingAssistantDisplay(threadId);
+    return;
+  }
+
+  // 已 settle 且展示完成：统一走 completeSettled（含未读），避免直接 delete 漏标
+  if (pendingRequest.isSettled) {
+    completeSettledPendingDisplay(threadId, pendingRequest);
     return;
   }
 
@@ -1793,6 +1802,7 @@ function preserveTimedOutPartialResponse(threadId: string | null, error: unknown
     }
   );
   markPendingDeepChatRequestSettled(pendingRequest);
+  notifyBackgroundPendingSettled(threadId);
   schedulePendingAssistantDisplay(threadId);
   showToast('模型响应超时，已保留已生成内容', { type: 'warning' });
   return true;
@@ -3774,16 +3784,23 @@ function completeSettledPendingDisplay(
   pendingRequests.delete(threadId);
 
   // 后台完成：极简未读实心圆点；当前会话完成则不标未读
-  if (threadStore.activeThreadId !== threadId) {
-    markThreadUnread(threadId);
-  }
-
-  renderMountedThreadList();
+  notifyBackgroundPendingSettled(threadId);
 
   const container = getRenderContainerForThread(threadId);
   if (container) {
     syncPendingStatus(container);
   }
+}
+
+/** 非当前会话的生成一旦 settle，立即标未读并刷新侧栏（不等打字机播完） */
+function notifyBackgroundPendingSettled(threadId: string): void {
+  if (threadStore.activeThreadId === threadId) {
+    renderMountedThreadList();
+    return;
+  }
+
+  markThreadUnread(threadId);
+  renderMountedThreadList();
 }
 
 function markThreadUnread(threadId: string): void {

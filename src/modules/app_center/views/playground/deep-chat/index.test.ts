@@ -1732,9 +1732,8 @@ describe('deep-chat playground concurrent sessions', () => {
     await vi.waitFor(() => {
       expect(onClose).toHaveBeenCalled();
     });
-    // 后台打字机推进至完成
-    await vi.advanceTimersByTimeAsync(2000);
 
+    // LLM settle 后应立即出现未读圆点，无需再点击会话、也无需等打字机播完
     await vi.waitFor(() => {
       const thread1 = container
         .querySelector('[data-thread-id="thread-1"]')
