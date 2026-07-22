@@ -60,9 +60,9 @@ export function setupSkillLibrary(
     const applyButton = target.closest<HTMLButtonElement>('[data-skill-library-apply]');
     const skillId = applyButton?.dataset.skillLibraryApply;
     if (skillId) {
-      void Promise.resolve(onApply(skillId)).finally(() => {
-        closeSkillLibraryModal(container);
-      });
+      // 必须先关 Skill Library，再弹出「挂载技能」确认框，否则会被本层遮罩挡住无法点击
+      closeSkillLibraryModal(container);
+      void Promise.resolve(onApply(skillId));
     }
   };
   refs.modal.addEventListener('click', onModalClick);

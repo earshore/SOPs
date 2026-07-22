@@ -1735,15 +1735,17 @@ describe('deep-chat playground skill library', () => {
 
     queryRequired<HTMLButtonElement>(results, '[data-skill-library-apply="profit-calculator"]').click();
 
-    await vi.waitFor(() => {
-      expect(modal.hidden).toBe(true);
-    });
+    // 调用后应立刻关闭 Skill Library，避免挡住后续「挂载技能」确认模态框
+    expect(modal.hidden).toBe(true);
     expect(openButton.getAttribute('aria-expanded')).toBe('false');
+
+    await vi.waitFor(() => {
+      expect(mocks.toast).toHaveBeenCalledWith(
+        expect.stringContaining('利润测算'),
+        expect.objectContaining({ type: 'success' })
+      );
+    });
     expect(mocks.navigateToRouteId).not.toHaveBeenCalled();
-    expect(mocks.toast).toHaveBeenCalledWith(
-      expect.stringContaining('利润测算'),
-      expect.objectContaining({ type: 'success' })
-    );
     expect(
       container.querySelector('#deep-chat-skill-context-bar')?.textContent ||
         document.body.textContent
