@@ -224,7 +224,6 @@
   color: inherit;
 }
 
-
 .deep-chat-new-thread:active,
 .deep-chat-search-chats:active {
   transform: translateY(1px);

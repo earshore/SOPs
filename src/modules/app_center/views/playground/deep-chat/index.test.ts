@@ -1189,9 +1189,10 @@ describe('deep-chat skill trial confirm flows', () => {
       skillRaw: '# New Session Skill',
       userDraft: skillHandoff.buildSkillDeepChatUserDraft('新建会话技能'),
     });
-    mocks.chooseWithModal.mockResolvedValueOnce('primary');
     expect(consumePendingSkillHandoff(container)).toBe(true);
     await vi.advanceTimersByTimeAsync(200);
+    // 技能页试用固定新建会话，不询问挂载方式
+    expect(mocks.chooseWithModal).not.toHaveBeenCalled();
     expect(mocks.confirmWithModal).not.toHaveBeenCalled();
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
@@ -1199,27 +1200,35 @@ describe('deep-chat skill trial confirm flows', () => {
     unmount();
   });
 
-  it('asks overwrite confirm only when attaching skill to current session', async () => {
+  it('asks overwrite confirm only when attaching skill to current session from Skill Library', async () => {
     const container = document.createElement('main');
     document.body.append(container);
     const { mount, unmount, mocks } = await importDeepChat();
+    // 先通过技能页 handoff 建出会话，使 Skill Library 可选择「附加」
+    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+    skillHandoff.queueSkillForDeepChat({
+      skillId: 'skill-seed',
+      skillTitle: '种子技能',
+      skillRaw: '# Seed',
+      userDraft: skillHandoff.buildSkillDeepChatUserDraft('种子技能'),
+    });
     await mount(container);
     await vi.advanceTimersByTimeAsync(200);
+
     const systemPrompt = container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt');
     systemPrompt!.value = '用户自定义系统提示词';
     systemPrompt!.dispatchEvent(new Event('input', { bubbles: true }));
+
     mocks.chooseWithModal.mockResolvedValueOnce('secondary');
     mocks.confirmWithModal.mockResolvedValueOnce(false);
-    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
-    const { consumePendingSkillHandoff } = await import('./controller');
-    skillHandoff.queueSkillForDeepChat({
-      skillId: 'skill-blocked',
-      skillTitle: '被取消技能',
-      skillRaw: '# Blocked',
-      userDraft: skillHandoff.buildSkillDeepChatUserDraft('被取消技能'),
-    });
-    expect(consumePendingSkillHandoff(container)).toBe(true);
+
+    queryRequired<HTMLButtonElement>(container, '#deep-chat-skill-library').click();
+    queryRequired<HTMLButtonElement>(
+      document,
+      '[data-skill-library-apply="profit-calculator"]'
+    ).click();
     await vi.advanceTimersByTimeAsync(100);
+
     expect(mocks.chooseWithModal).toHaveBeenCalled();
     expect(mocks.confirmWithModal).toHaveBeenCalled();
     expect(systemPrompt?.value).toBe('用户自定义系统提示词');
@@ -1242,8 +1251,8 @@ describe('deep-chat skill trial attach and second handoff', () => {
       skillRaw: '# Second Skill',
       userDraft: skillHandoff.buildSkillDeepChatUserDraft('第二技能'),
     });
-    mocks.chooseWithModal.mockResolvedValueOnce('primary');
     expect(consumePendingSkillHandoff(container)).toBe(true);
+    expect(mocks.chooseWithModal).not.toHaveBeenCalled();
     await vi.advanceTimersByTimeAsync(200);
     expect(mocks.confirmWithModal).not.toHaveBeenCalled();
     const barChipText =
@@ -1269,7 +1278,7 @@ describe('deep-chat skill trial attach and second handoff', () => {
     unmount();
   });
 
-  it('can attach a skill to the current session when user chooses attach', async () => {
+  it('can attach a skill to the current session from Skill Library when user chooses attach', async () => {
     const container = document.createElement('main');
     document.body.append(container);
     const { mount, unmount, mocks } = await importDeepChat();
@@ -1282,17 +1291,18 @@ describe('deep-chat skill trial attach and second handoff', () => {
     });
     await mount(container);
     await vi.advanceTimersByTimeAsync(300);
-    const { consumePendingSkillHandoff } = await import('./controller');
-    skillHandoff.queueSkillForDeepChat({
-      skillId: 'skill-attach',
-      skillTitle: '附加技能',
-      skillRaw: '# Attach Me',
-      userDraft: skillHandoff.buildSkillDeepChatUserDraft('附加技能'),
-    });
+
+    // 技能页试用固定新建；附加路径只来自 Skill Library「去对话」
     mocks.chooseWithModal.mockResolvedValueOnce('secondary');
     mocks.confirmWithModal.mockResolvedValueOnce(true);
-    expect(consumePendingSkillHandoff(container)).toBe(true);
+    queryRequired<HTMLButtonElement>(container, '#deep-chat-skill-library').click();
+    queryRequired<HTMLButtonElement>(
+      document,
+      '[data-skill-library-apply="profit-calculator"]'
+    ).click();
     await vi.advanceTimersByTimeAsync(200);
+
+    expect(mocks.chooseWithModal).toHaveBeenCalled();
     const barChips = [
       ...Array.from(
         container.querySelectorAll('#deep-chat-skill-context-bar .deep-chat-context-chip')
@@ -1303,7 +1313,7 @@ describe('deep-chat skill trial attach and second handoff', () => {
         ) || []
       ),
     ].map(el => el.textContent || '');
-    expect(barChips.some(t => t.includes('附加技能'))).toBe(true);
+    expect(barChips.some(t => t.includes('利润测算') || t.includes('第一技能'))).toBe(true);
     await vi.waitFor(() => {
       const chipTexts = [
         ...Array.from(
@@ -1311,11 +1321,11 @@ describe('deep-chat skill trial attach and second handoff', () => {
             []
         ),
       ].map(el => el.textContent || '');
-      expect(chipTexts.some(t => t.includes('附加技能') || t.includes('第一技能'))).toBe(true);
+      expect(chipTexts.some(t => t.includes('利润测算') || t.includes('第一技能'))).toBe(true);
     });
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
-    ).toContain('Attach Me');
+    ).toContain('Profit Calculator');
     unmount();
   });
 });

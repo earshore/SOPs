@@ -1241,12 +1241,17 @@ async function applySkillFromLibrary(container: HTMLElement, skillId: string): P
 
   const skillTitle = skill.title.replace(/^[#\s]+/, '').trim() || skill.id;
 
-  await createThreadFromSkillContext(container, {
-    skillId: skill.id,
-    skillTitle,
-    skillRaw: skill.raw,
-    userDraft: buildSkillDeepChatUserDraft(skillTitle, skill.raw),
-  });
+  // Skill Library「去对话」：当前会话有内容时询问新建 / 附加
+  await createThreadFromSkillContext(
+    container,
+    {
+      skillId: skill.id,
+      skillTitle,
+      skillRaw: skill.raw,
+      userDraft: buildSkillDeepChatUserDraft(skillTitle, skill.raw),
+    },
+    { allowAttachChoice: true }
+  );
 }
 function bindChatSearchControls(container: HTMLElement): void {
   const refs = getChatSearchRefs(container);
@@ -2162,7 +2167,8 @@ export function consumePendingSkillHandoff(container: HTMLElement): boolean {
   if (!skillContext) {
     return false;
   }
-  void createThreadFromSkillContext(container, skillContext);
+  // 技能页「在 Deep Chat 试用」：默认新建会话，不弹挂载方式选择
+  void createThreadFromSkillContext(container, skillContext, { allowAttachChoice: false });
   return true;
 }
 
@@ -2194,17 +2200,21 @@ function bindSkillHandoffListeners(container: HTMLElement): void {
 }
 
 /**
- * Skills 页试用：skill 全文 → 系统提示词；Context Bar + 输入框 Chip 展示挂载。
- * F2：若当前会话已有对话/技能，可选择「新建会话」或「附加到当前」。
+ * 挂载技能：skill 全文 → 系统提示词；Context Bar + 输入框 Chip 展示挂载。
+ * - 技能页「在 Deep Chat 试用」：固定新建会话（allowAttachChoice=false）。
+ * - Deep Chat Skill Library「去对话」：当前会话有内容时才询问新建 / 附加（allowAttachChoice=true）。
  * FB2：仅「附加到当前会话」时，若会覆盖已有系统提示词才需确认（新建会话不弹覆盖框）。
  * 注意：发送清空后 hydrate 不会把 Chip 再塞回空输入框。
  */
 async function createThreadFromSkillContext(
   container: HTMLElement,
-  skillContext: SkillDeepChatContext
+  skillContext: SkillDeepChatContext,
+  options: { allowAttachChoice?: boolean } = {}
 ): Promise<void> {
+  const allowAttachChoice = options.allowAttachChoice === true;
   const activeThread = getActiveThread();
   const canAttachToCurrent =
+    allowAttachChoice &&
     Boolean(activeThread) &&
     (activeThread.messages.length > 0 ||
       Boolean(activeThread.skillContexts?.length) ||
