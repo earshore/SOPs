@@ -435,9 +435,7 @@ async function importDeepChat(options: ImportOptions = {}) {
   vi.doMock('@/services/skillRegistry', () => ({
     skillRegistry: {
       ensureInitialized: vi.fn(),
-      getCategories: vi.fn(() => [
-        { id: 'pricing_profit', label: '定价利润', count: 1 },
-      ]),
+      getCategories: vi.fn(() => [{ id: 'pricing_profit', label: '定价利润', count: 1 }]),
       listSkills: vi.fn(() => [
         {
           id: 'profit-calculator',
@@ -1733,7 +1731,10 @@ describe('deep-chat playground skill library', () => {
     expect(results.textContent).toContain('利润测算');
     expect(results.textContent).toContain('定价利润');
 
-    queryRequired<HTMLButtonElement>(results, '[data-skill-library-apply="profit-calculator"]').click();
+    queryRequired<HTMLButtonElement>(
+      results,
+      '[data-skill-library-apply="profit-calculator"]'
+    ).click();
 
     // 调用后应立刻关闭 Skill Library，避免挡住后续「挂载技能」确认模态框
     expect(modal.hidden).toBe(true);

@@ -95,24 +95,19 @@ export interface PersistPendingDeepChatPartialOptions {
   force?: boolean;
 }
 
-/** 流式生成中是否应把已收文本 partial 落盘（刷新后可恢复半截回复） */
-export function shouldPersistPendingDeepChatPartial(
+function isPendingDeepChatPartialEligible(pendingRequest: PendingDeepChatRequest): boolean {
+  return (
+    !pendingRequest.isSettled &&
+    !pendingRequest.abortReason &&
+    pendingRequest.assistantText.trim().length > 0
+  );
+}
+
+function shouldPersistDeepChatPartialGrowth(
   pendingRequest: PendingDeepChatRequest,
-  options: PersistPendingDeepChatPartialOptions = {}
+  options: PersistPendingDeepChatPartialOptions
 ): boolean {
-  if (pendingRequest.isSettled || pendingRequest.abortReason) {
-    return false;
-  }
-
   const text = pendingRequest.assistantText;
-  if (!text.trim()) {
-    return false;
-  }
-
-  if (options.force) {
-    return true;
-  }
-
   const minChars = options.minChars ?? 120;
   const minIntervalMs = options.minIntervalMs ?? 2000;
   const now = options.now ?? Date.now();
@@ -127,9 +122,21 @@ export function shouldPersistPendingDeepChatPartial(
     return text.length >= minChars || now - pendingRequest.startedAt >= minIntervalMs;
   }
 
-  const grown = text.length - lastLen;
-  const elapsed = now - lastAt;
-  return grown >= minChars || elapsed >= minIntervalMs;
+  return text.length - lastLen >= minChars || now - lastAt >= minIntervalMs;
+}
+
+/** 流式生成中是否应把已收文本 partial 落盘（刷新后可恢复半截回复） */
+export function shouldPersistPendingDeepChatPartial(
+  pendingRequest: PendingDeepChatRequest,
+  options: PersistPendingDeepChatPartialOptions = {}
+): boolean {
+  if (!isPendingDeepChatPartialEligible(pendingRequest)) {
+    return false;
+  }
+  if (options.force) {
+    return true;
+  }
+  return shouldPersistDeepChatPartialGrowth(pendingRequest, options);
 }
 
 export function markPendingDeepChatPartialPersisted(

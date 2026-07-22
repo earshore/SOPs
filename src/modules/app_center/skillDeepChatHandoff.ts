@@ -39,6 +39,17 @@ export function consumeSkillForDeepChat(): SkillDeepChatContext | null {
   return context;
 }
 
+/** 展示用：去掉技能标题首尾装饰性 emoji，Chip / 列表更干净 */
+export function displaySkillTitle(skillTitle: string): string {
+  const trimmed = (skillTitle || '').trim();
+  if (!trimmed) return '';
+  const cleaned = trimmed
+    .replace(/^[\p{Extended_Pictographic}\uFE0F\u200D\s]+/u, '')
+    .replace(/[\p{Extended_Pictographic}\uFE0F\u200D\s]+$/u, '')
+    .trim();
+  return cleaned || trimmed;
+}
+
 /** 序列化用：正文中技能名文本段（消息气泡 static Chip 读写） */
 export function formatSkillTitleSegment(skillTitle: string): string {
   return `「${skillTitle}」`;

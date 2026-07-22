@@ -5,6 +5,7 @@
  */
 
 import {
+  displaySkillTitle,
   formatSkillTitleSegment,
   normalizeSkillChipDraftText,
 } from '@/modules/app_center/skillDeepChatHandoff';
@@ -72,7 +73,7 @@ export function createSkillContextChip(
     dismiss.className = 'deep-chat-context-chip__dismiss';
     dismiss.dataset.action = 'dismiss-skill-context';
     dismiss.dataset.skillId = context.skillId;
-    dismiss.setAttribute('aria-label', `移除技能上下文 ${context.skillTitle}`);
+    dismiss.setAttribute('aria-label', `移除技能上下文 ${displaySkillTitle(context.skillTitle)}`);
     dismiss.title = '移除';
     // U5：允许键盘 Tab 聚焦移除（配合 :focus-within 显示 ×）
     dismiss.tabIndex = 0;
@@ -82,7 +83,8 @@ export function createSkillContextChip(
 
   const label = document.createElement('span');
   label.className = 'deep-chat-context-chip__label';
-  label.textContent = context.skillTitle;
+  // 展示去掉首尾装饰 emoji；dataset 仍保留完整 skillTitle 供序列化匹配
+  label.textContent = displaySkillTitle(context.skillTitle);
 
   chip.append(leading, label);
   return chip;

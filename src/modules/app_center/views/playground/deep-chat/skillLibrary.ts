@@ -4,6 +4,7 @@
 import { setSafeHtml } from '@/common/utils/security';
 import { skillRegistry } from '@/services/skillRegistry';
 import type { SkillCategoryId, SkillMeta } from '@/services/skillRegistry';
+import { displaySkillTitle } from '@/modules/app_center/skillDeepChatHandoff';
 import { escapeHTML } from './utils';
 
 export type SkillLibraryApplyHandler = (skillId: string) => void | Promise<void>;
@@ -52,7 +53,10 @@ export function setupSkillLibrary(
       return;
     }
 
-    if (target.closest('[data-skill-library-close]') || !target.closest('.deep-chat-skill-library-dialog')) {
+    if (
+      target.closest('[data-skill-library-close]') ||
+      !target.closest('.deep-chat-skill-library-dialog')
+    ) {
       closeSkillLibraryModal(container);
       return;
     }
@@ -192,6 +196,26 @@ function positionSkillLibraryModal(container: HTMLElement, modal: HTMLElement): 
   modal.style.setProperty('--deep-chat-skill-library-top', `${rect.top + rect.height / 2}px`);
 }
 
+function listSkillLibrarySkills(
+  keyword: string,
+  category: 'all' | SkillCategoryId
+): SkillMeta[] | null {
+  try {
+    skillRegistry.ensureInitialized();
+    return skillRegistry.listSkills({
+      keyword: keyword || undefined,
+      category,
+    });
+  } catch {
+    return null;
+  }
+}
+
+function renderSkillLibraryEmpty(keyword: string, category: 'all' | SkillCategoryId): string {
+  const message = keyword || category !== 'all' ? '未找到匹配技能' : '暂无可用技能';
+  return `<div class="deep-chat-skill-library-empty">${message}</div>`;
+}
+
 function renderSkillLibraryResults(container: HTMLElement): void {
   const refs = getSkillLibraryRefs(container);
   if (!refs) {
@@ -200,17 +224,10 @@ function renderSkillLibraryResults(container: HTMLElement): void {
 
   const keyword = refs.input.value.trim();
   const categoryValue = refs.category.value || 'all';
-  const category =
-    categoryValue === 'all' ? 'all' : (categoryValue as SkillCategoryId);
+  const category = categoryValue === 'all' ? 'all' : (categoryValue as SkillCategoryId);
+  const skills = listSkillLibrarySkills(keyword, category);
 
-  let skills: SkillMeta[] = [];
-  try {
-    skillRegistry.ensureInitialized();
-    skills = skillRegistry.listSkills({
-      keyword: keyword || undefined,
-      category,
-    });
-  } catch {
+  if (!skills) {
     setSafeHtml(
       refs.results,
       `<div class="deep-chat-skill-library-empty">技能库暂不可用，请稍后重试</div>`
@@ -219,17 +236,12 @@ function renderSkillLibraryResults(container: HTMLElement): void {
   }
 
   if (skills.length === 0) {
-    setSafeHtml(
-      refs.results,
-      `<div class="deep-chat-skill-library-empty">${
-        keyword || category !== 'all' ? '未找到匹配技能' : '暂无可用技能'
-      }</div>`
-    );
+    setSafeHtml(refs.results, renderSkillLibraryEmpty(keyword, category));
     return;
   }
 
-  const countLabel = keyword || category !== 'all' ? `匹配 ${skills.length} 个技能` : `共 ${skills.length} 个技能`;
-
+  const filtered = keyword || category !== 'all';
+  const countLabel = filtered ? `匹配 ${skills.length} 个技能` : `共 ${skills.length} 个技能`;
   setSafeHtml(
     refs.results,
     `
@@ -268,22 +280,14 @@ function renderSkillLibraryItem(skill: SkillMeta): string {
         class="deep-chat-skill-library-apply"
         type="button"
         data-skill-library-apply="${escapeHTML(skill.id)}"
-        aria-label="调用技能 ${escapeHTML(title)}"
+        aria-label="去对话 ${escapeHTML(title)}"
         title="挂载到 Deep Chat"
       >
         <i class="fas fa-bolt" aria-hidden="true"></i>
-        <span>调用</span>
+        <span>去对话</span>
       </button>
     </li>
   `;
-}
-
-function displaySkillTitle(title: string): string {
-  // 去掉首尾装饰性 emoji，与 Skills 页展示一致的简洁标题
-  return title
-    .replace(/^[\p{Extended_Pictographic}\uFE0F\u200D\s]+/u, '')
-    .replace(/[\p{Extended_Pictographic}\uFE0F\u200D\s]+$/u, '')
-    .trim() || title.trim();
 }
 
 function truncateText(value: string, maxLength: number): string {
@@ -294,9 +298,9 @@ function truncateText(value: string, maxLength: number): string {
 }
 
 function keepSkillLibraryFocus(modal: HTMLElement, event: KeyboardEvent): void {
-  const focusable = Array.from(
-    modal.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-  ).filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1 && !element.hidden);
+  const focusable = Array.from(modal.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    element => !element.hasAttribute('disabled') && element.tabIndex !== -1 && !element.hidden
+  );
 
   if (focusable.length === 0) {
     event.preventDefault();

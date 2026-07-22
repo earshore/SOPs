@@ -910,9 +910,29 @@ function assertSafeModelsEndpoint(endpoint: string): void {
   );
 }
 
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    (error as { name?: unknown }).name === 'AbortError'
+  );
+}
+
+function createModelsFetchTimeoutError(): Error {
+  const error = new Error('Request timeout');
+  error.name = 'AbortError';
+  return error;
+}
+
 async function fetchModelsRawText(context: FetchModelsContext): Promise<string> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000);
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    // 带 reason，避免浏览器默认 “signal is aborted without reason” 噪音
+    controller.abort(createModelsFetchTimeoutError());
+  }, 10000);
   const headers: Record<string, string> = {};
 
   if (context.apiKey) {
@@ -942,6 +962,11 @@ async function fetchModelsRawText(context: FetchModelsContext): Promise<string> 
     }
 
     return await response.text();
+  } catch (error) {
+    if (timedOut || isAbortError(error)) {
+      throw createModelsFetchTimeoutError();
+    }
+    throw error;
   } finally {
     clearTimeout(timeoutId);
   }
@@ -1082,11 +1107,14 @@ function normalizeModelList(list: unknown[]): ModelInfo[] {
 }
 
 function handleFetchModelsFailure(error: unknown): never {
-  ErrorService.handle(error as Error, {
-    action: 'fetchModelsFromApi',
-    module: 'llm',
-    notify: false,
-  });
+  // 超时/取消是预期控制流，不上报 ErrorTracker（避免 high 级 “aborted without reason” 噪音）
+  if (!isAbortError(error)) {
+    ErrorService.handle(error as Error, {
+      action: 'fetchModelsFromApi',
+      module: 'llm',
+      notify: false,
+    });
+  }
   throw error;
 }
 

@@ -376,9 +376,9 @@
       [type='url'],
       [type='tel']
     ):where(
-      :not(.form-input):not(.sidebar-search-input):not(.amzf_search_input):not(.sr-only):not(
-          .hidden
-        ):not(.border-none):not(.bg-transparent):not(#lab-char-limit)
+      :not(.form-input):not(.sidebar-search-input):not(.amzf_search_input):not(
+          .deep-chat-skill-library-search
+        ):not(.sr-only):not(.hidden):not(.border-none):not(.bg-transparent):not(#lab-char-limit)
     ),
   body
     textarea[class]:where(
@@ -430,9 +430,9 @@
       [type='url'],
       [type='tel']
     ):where(
-      :not(.form-input):not(.sidebar-search-input):not(.amzf_search_input):not(.sr-only):not(
-          .hidden
-        ):not(.border-none):not(.bg-transparent):not(#lab-char-limit)
+      :not(.form-input):not(.sidebar-search-input):not(.amzf_search_input):not(
+          .deep-chat-skill-library-search
+        ):not(.sr-only):not(.hidden):not(.border-none):not(.bg-transparent):not(#lab-char-limit)
     ):hover,
   body
     textarea[class]:where(
@@ -454,9 +454,9 @@
       [type='url'],
       [type='tel']
     ):where(
-      :not(.form-input):not(.sidebar-search-input):not(.amzf_search_input):not(.sr-only):not(
-          .hidden
-        ):not(.border-none):not(.bg-transparent):not(#lab-char-limit)
+      :not(.form-input):not(.sidebar-search-input):not(.amzf_search_input):not(
+          .deep-chat-skill-library-search
+        ):not(.sr-only):not(.hidden):not(.border-none):not(.bg-transparent):not(#lab-char-limit)
     ):focus,
   body
     textarea[class]:where(

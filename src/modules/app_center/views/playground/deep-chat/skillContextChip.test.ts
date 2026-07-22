@@ -43,4 +43,16 @@ describe('skillContextChip', () => {
     expect(host.querySelector('.deep-chat-context-chip')?.textContent).toContain('利润测算');
     expect(serializeChipContainingElement(host, contexts)).toBe(plain);
   });
+
+  it('strips decorative emoji from chip label but keeps dataset title for serialization', () => {
+    const withEmoji = {
+      skillId: 'emoji-skill',
+      skillTitle: '利润测算📊',
+      skillRaw: '# Profit',
+    };
+    const chip = createSkillContextChip(withEmoji, 'static');
+    expect(chip.dataset.skillTitle).toBe(withEmoji.skillTitle);
+    expect(chip.querySelector('.deep-chat-context-chip__label')?.textContent).toBe('利润测算');
+    expect(chip.querySelector('.deep-chat-context-chip__label')?.textContent).not.toContain('📊');
+  });
 });

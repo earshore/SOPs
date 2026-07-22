@@ -25,8 +25,7 @@
   --deep-chat-radius-xl: 1rem;
   --deep-chat-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
   --deep-chat-shadow-md:
-    0 8px 20px -14px rgba(15, 23, 42, 0.18),
-    0 2px 6px -2px rgba(var(--deep-chat-accent-rgb), 0.1);
+    0 8px 20px -14px rgba(15, 23, 42, 0.18), 0 2px 6px -2px rgba(var(--deep-chat-accent-rgb), 0.1);
   --deep-chat-shadow-lg:
     0 18px 36px -22px rgba(15, 23, 42, 0.28),
     0 8px 16px -12px rgba(var(--deep-chat-accent-rgb), 0.14);
@@ -68,12 +67,17 @@
   display: grid;
   grid-template-columns: minmax(220px, 248px) minmax(0, 1fr) minmax(240px, 280px);
   grid-template-areas: 'thread main prompt';
+  /* Workbench desk: soft tinted canvas (same spirit as half-width main stage) */
   background:
-    radial-gradient(1200px 420px at 12% -8%, rgba(var(--deep-chat-accent-rgb), 0.1), transparent 58%),
-    radial-gradient(900px 360px at 92% 0%, rgba(208, 137, 104, 0.1), transparent 52%),
-    linear-gradient(180deg, #fffdfb 0%, var(--deep-chat-bg) 42%, var(--deep-chat-bg-soft) 100%);
+    radial-gradient(
+      1100px 480px at 10% -12%,
+      rgba(var(--deep-chat-accent-rgb), 0.12),
+      transparent 55%
+    ),
+    radial-gradient(900px 420px at 96% 4%, rgba(208, 137, 104, 0.12), transparent 50%),
+    linear-gradient(180deg, #fff7f1 0%, #faf3ee 48%, #f5ebe3 100%);
   color: var(--deep-chat-ink);
-  border: 1px solid var(--deep-chat-border);
+  border: 1px solid rgba(var(--deep-chat-accent-rgb), 0.16);
   border-radius: var(--deep-chat-radius-xl);
   overflow: hidden;
   box-shadow: var(--deep-chat-shadow-lg);
@@ -90,12 +94,8 @@
   grid-area: thread;
   min-width: 0;
   padding: var(--spacing-5, 1.25rem) var(--spacing-4, 1rem);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 253, 251, 0.96) 0%,
-    rgba(250, 243, 238, 0.9) 100%
-  );
-  border-right: 1px solid rgba(234, 214, 200, 0.78);
+  background: linear-gradient(180deg, rgba(255, 250, 247, 0.72) 0%, rgba(250, 243, 238, 0.88) 100%);
+  border-right: 1px solid rgba(var(--deep-chat-accent-rgb), 0.12);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-5, 1.25rem);
@@ -112,12 +112,8 @@
   grid-area: prompt;
   min-width: 0;
   padding: var(--spacing-5, 1.25rem) var(--spacing-4, 1rem);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 250, 247, 0.94) 100%
-  );
-  border-left: 1px solid rgba(234, 214, 200, 0.78);
+  background: linear-gradient(180deg, rgba(255, 252, 249, 0.78) 0%, rgba(250, 243, 238, 0.9) 100%);
+  border-left: 1px solid rgba(var(--deep-chat-accent-rgb), 0.12);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -185,15 +181,15 @@
   align-items: center;
   gap: var(--spacing-2-5, 0.625rem);
   padding: 0 var(--spacing-3-5, 0.875rem);
-  border: 1px solid rgba(234, 214, 200, 0.72);
+  border: 1px solid rgba(var(--deep-chat-accent-rgb), 0.14);
   border-radius: var(--deep-chat-radius-lg, 0.85rem);
-  background: var(--deep-chat-surface-muted, rgba(255, 255, 255, 0.78));
+  background: rgba(255, 255, 255, 0.88);
   color: var(--deep-chat-ink-secondary, #334155);
   font-size: var(--text-base, 0.875rem);
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
-  box-shadow: var(--deep-chat-shadow-sm);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition:
     background 150ms var(--deep-chat-ease, cubic-bezier(0, 0, 0.2, 1)),
     border-color 150ms var(--deep-chat-ease, cubic-bezier(0, 0, 0.2, 1)),
@@ -203,7 +199,7 @@
 }
 
 .deep-chat-new-thread {
-  border-color: rgba(var(--deep-chat-accent-rgb), 0.28);
+  border-color: rgba(var(--deep-chat-accent-rgb), 0.26);
   background: linear-gradient(180deg, #ffffff 0%, var(--deep-chat-accent-soft) 100%);
   color: var(--deep-chat-accent-active);
 }
@@ -281,7 +277,11 @@
   content: '';
   height: 1px;
   flex: 1 1 auto;
-  background: linear-gradient(90deg, rgba(var(--deep-chat-accent-rgb), 0.22), rgba(var(--deep-chat-accent-rgb), 0));
+  background: linear-gradient(
+    90deg,
+    rgba(var(--deep-chat-accent-rgb), 0.22),
+    rgba(var(--deep-chat-accent-rgb), 0)
+  );
 }
 
 .deep-chat-panel-title--prompt::before {
@@ -314,10 +314,11 @@
   position: relative;
   display: block;
   padding: var(--spacing-1, 0.25rem);
-  border: 1px solid transparent;
+  border: 1px solid rgba(var(--deep-chat-accent-rgb), 0.08);
   border-radius: var(--deep-chat-radius-lg, 0.85rem);
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.82);
   color: var(--deep-chat-ink-secondary, #334155);
+  box-shadow: 0 1px 1px rgba(15, 23, 42, 0.03);
   transition:
     background 150ms var(--deep-chat-ease, cubic-bezier(0, 0, 0.2, 1)),
     border-color 150ms var(--deep-chat-ease, cubic-bezier(0, 0, 0.2, 1)),
@@ -550,10 +551,11 @@
   align-items: start;
   gap: var(--spacing-1, 0.25rem);
   padding: var(--spacing-1, 0.25rem);
-  border: 1px solid transparent;
+  border: 1px solid rgba(var(--deep-chat-accent-rgb), 0.08);
   border-radius: var(--deep-chat-radius-lg, 0.85rem);
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.82);
   color: var(--deep-chat-ink-secondary, #334155);
+  box-shadow: 0 1px 1px rgba(15, 23, 42, 0.03);
   transition:
     background 150ms var(--deep-chat-ease, cubic-bezier(0, 0, 0.2, 1)),
     border-color 150ms var(--deep-chat-ease, cubic-bezier(0, 0, 0.2, 1)),
@@ -1086,9 +1088,15 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  /* Primary work surface: soft fill first, lines second */
   background:
-    radial-gradient(720px 280px at 50% -12%, rgba(var(--deep-chat-accent-rgb), 0.07), transparent 62%),
-    linear-gradient(180deg, #ffffff 0%, #fffdfb 48%, #fffaf7 100%);
+    radial-gradient(
+      820px 340px at 50% -10%,
+      rgba(var(--deep-chat-accent-rgb), 0.1),
+      transparent 60%
+    ),
+    radial-gradient(640px 260px at 80% 100%, rgba(208, 137, 104, 0.06), transparent 55%),
+    linear-gradient(180deg, #fffdfb 0%, #fffaf7 42%, #faf3ee 100%);
 }
 
 .deep-chat-topbar {
@@ -1101,10 +1109,10 @@
   justify-content: space-between;
   gap: var(--spacing-4, 1rem);
   padding: var(--spacing-2-5, 0.625rem) var(--spacing-6, 1.5rem);
-  border-bottom: 1px solid rgba(234, 214, 200, 0.7);
-  background: rgba(255, 255, 255, 0.82);
+  border-bottom: 1px solid rgba(var(--deep-chat-accent-rgb), 0.1);
+  background: rgba(255, 253, 251, 0.78);
   backdrop-filter: blur(14px) saturate(1.08);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset;
 }
 
 .deep-chat-model-area,
@@ -1907,15 +1915,21 @@
       transform 200ms cubic-bezier(0, 0, 0.2, 1),
       opacity 200ms cubic-bezier(0, 0, 0.2, 1),
       visibility 200ms;
-    box-shadow: 8px 0 24px rgba(15, 23, 42, 0.12);
+    /* Floating panel on the same warm workbench palette */
+    background: linear-gradient(
+      180deg,
+      rgba(255, 250, 247, 0.96) 0%,
+      rgba(250, 243, 238, 0.98) 100%
+    );
+    box-shadow: 8px 0 28px rgba(111, 57, 37, 0.12);
   }
 
   .deep-chat-prompt-rail {
     right: 0;
     left: auto;
     transform: translateX(110%);
-    border-left: 1px solid var(--color-slate-200, #e2e8f0);
-    box-shadow: -8px 0 24px rgba(15, 23, 42, 0.12);
+    border-left: 1px solid rgba(var(--deep-chat-accent-rgb), 0.14);
+    box-shadow: -8px 0 28px rgba(111, 57, 37, 0.12);
   }
 
   .deep-chat-page.is-thread-drawer-open .deep-chat-thread-rail,
@@ -2484,36 +2498,96 @@
   gap: 0.5rem;
 }
 
+/* wrap = visual field；icon 与 input 同行 flex（modal portal 到 body 后仍生效） */
 .deep-chat-skill-library-search-wrap {
-  position: relative;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
+  gap: 0.45rem;
   min-width: 0;
-}
-
-.deep-chat-skill-library-search-wrap > i {
-  position: absolute;
-  left: 0.7rem;
-  color: var(--color-slate-400, #94a3b8);
-  font-size: 12px;
-  pointer-events: none;
-}
-
-.deep-chat-skill-library-search {
-  width: 100%;
   min-height: 38px;
-  padding: 0.45rem 0.7rem 0.45rem 2rem;
+  padding: 0 0.7rem 0 0.65rem;
   border: 1px solid rgba(148, 163, 184, 0.35);
   border-radius: 0.65rem;
   background: #fff;
-  color: var(--color-slate-800, #1e293b);
-  font-size: 13px;
+  transition:
+    border-color 150ms var(--deep-chat-ease, cubic-bezier(0, 0, 0.2, 1)),
+    box-shadow 150ms var(--deep-chat-ease, cubic-bezier(0, 0, 0.2, 1));
 }
 
-.deep-chat-skill-library-search:focus {
-  outline: none;
+.deep-chat-skill-library-search-wrap:hover {
+  border-color: rgba(var(--deep-chat-accent-rgb), 0.28);
+}
+
+.deep-chat-skill-library-search-wrap:focus-within {
   border-color: var(--deep-chat-accent-border-hover, rgba(168, 95, 63, 0.36));
   box-shadow: 0 0 0 3px var(--deep-chat-focus-ring, rgba(168, 95, 63, 0.18));
+}
+
+.deep-chat-skill-library-search-wrap > i {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--deep-chat-ink-muted, #64748b);
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/*
+ * Modal 会 portal 到 document.body，不能依赖 .deep-chat-shell 祖先。
+ * 用 body + class/id 提高优先级，覆盖全局 forms 兼容层。
+ */
+body input.deep-chat-skill-library-search[type='search'],
+body input.deep-chat-skill-library-search,
+body #deep-chat-skill-library-search {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  color: var(--deep-chat-ink-secondary, #334155);
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: none !important;
+  outline: none !important;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+body input.deep-chat-skill-library-search[type='search']::-webkit-search-decoration,
+body input.deep-chat-skill-library-search[type='search']::-webkit-search-cancel-button,
+body input.deep-chat-skill-library-search[type='search']::-webkit-search-results-button,
+body input.deep-chat-skill-library-search[type='search']::-webkit-search-results-decoration,
+body #deep-chat-skill-library-search::-webkit-search-decoration,
+body #deep-chat-skill-library-search::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+body input.deep-chat-skill-library-search:focus,
+body input.deep-chat-skill-library-search[type='search']:focus,
+body #deep-chat-skill-library-search:focus {
+  outline: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+body input.deep-chat-skill-library-search::placeholder,
+body #deep-chat-skill-library-search::placeholder {
+  color: var(--deep-chat-ink-muted, #64748b);
 }
 
 .deep-chat-skill-library-category {

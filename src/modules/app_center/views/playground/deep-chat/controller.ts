@@ -1213,7 +1213,6 @@ async function openPromptlab(): Promise<void> {
   }
 }
 
-
 function bindSkillLibraryControls(container: HTMLElement): void {
   setupSkillLibrary(
     container,

@@ -1234,7 +1234,11 @@ const settingsPanelBehavior: SettingsPanelPart = {
     } catch (e) {
       const error = e as Error;
       showToast(`获取模型失败: ${getModelFetchErrorMessage(error)}`, { type: 'error' });
-      ErrorService.handle(error, { action: 'fetchModels', module: 'settings' });
+      // Abort/timeout 已在 UI toast 提示；避免再走 ErrorTracker 造成 console high 级噪音
+      const isAbort = error?.name === 'AbortError' || /timeout|aborted/i.test(error?.message || '');
+      if (!isAbort) {
+        ErrorService.handle(error, { action: 'fetchModels', module: 'settings' });
+      }
     } finally {
       this.llm.isFetching = false;
     }
