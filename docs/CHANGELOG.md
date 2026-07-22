@@ -7,14 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.11-rc.3] - 2026-07-22
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.2` 之后的 Deep Chat 会话稳定性、发布门禁与 Skill Library 构建产物优化。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- 发布验证：补充 RC3 发布元数据契约，覆盖当前候选版本、变更日志分区与 Release notes 回填版本列表。
+
 ### Fixed
 
 - Deep Chat：生成结束后清除停止态（仅可中止请求显示停止）；Prompt 空状态 CTA 收敛（去掉顶栏「生成 Prompt」入口）。
 - Deep Chat：发送/停止按钮尺寸与 auxiliaryStyle 对齐，减少 loading → stop 样式闪烁。
+- Deep Chat：水合历史会话时保留已持久化的非默认会话名称，不再被首条消息内容覆盖；搜索弹窗仍展示完整消息摘要。
 
 ### Changed
 
 - CI Quality Gate：覆盖率门槛与 `vite.config.js` 对齐（lines 82 / statements 80 / functions 82 / branches 65）；smoke 改为对 `dist` 跑 `test:e2e:smoke:release` 并复用 build artifact。
+- 构建：将 Skill Registry 的原始 `SKILL.md` 内容按技能名称前缀拆分为 `skill-content-*` 产物，消除单个 450 kB 以上的技能注册表 chunk。
 - Vercel：clean-path 使用 302 → Hash，与 Cloudflare `_redirects` 对齐；移除未知路径 SPA rewrite 到 `index.html`。
 - 文档：产品主推作业流/知识页/探索页口径；Sentry 默认关闭的监控决策；部署双宿主合同说明。
 

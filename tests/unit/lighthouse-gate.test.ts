@@ -238,14 +238,17 @@ describe('Lighthouse gate contract', () => {
     expect(packageJson.scripts).not.toHaveProperty('test:performance:lighthouse');
   });
 
-  it('builds once and invokes the dedicated gate in the performance workflow', () => {
+  it('reuses the build artifact and invokes the dedicated gate in the performance workflow', () => {
     const workflow = readFileSync(resolve(process.cwd(), '.github/workflows/test.yml'), 'utf8');
     const performanceJob = workflow.slice(
       workflow.indexOf('\n  performance:'),
       workflow.indexOf('\n  npm-audit:')
     );
 
-    expect(performanceJob).toContain('run: npm run build:app');
+    expect(performanceJob).toContain('uses: actions/download-artifact@');
+    expect(performanceJob).toContain('name: build-artifact');
+    expect(performanceJob).toContain('path: dist');
+    expect(performanceJob).not.toContain('run: npm run build:app');
     expect(performanceJob).toContain('run: npm run test:performance:gate');
   });
 

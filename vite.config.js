@@ -43,6 +43,46 @@ export function assertNoDomainShellChunk(bundle) {
   }
 }
 
+export function resolveManualChunkName(id) {
+  const normalizedId = id.replace(/\\/g, '/');
+  const skillMatch = normalizedId.match(
+    /\/vendor\/amazon-skills\/amazon-([^/]+)\/SKILL\.md(?:\?.*)?$/i
+  );
+  if (skillMatch?.[1]) {
+    return 'skill-content-' + skillMatch[1].charAt(0).toLowerCase();
+  }
+
+  if (!normalizedId.includes('/node_modules/')) {
+    return undefined;
+  }
+
+  if (normalizedId.includes('/node_modules/@alpinejs/csp/')) {
+    return 'vendor-core';
+  }
+  if (normalizedId.includes('/node_modules/@fortawesome/')) {
+    if (normalizedId.includes('brands')) {
+      return 'vendor-fa-brands';
+    }
+    return 'vendor-fa-core';
+  }
+  if (normalizedId.includes('/node_modules/chart.js/')) {
+    return 'vendor-charts';
+  }
+  if (normalizedId.includes('/node_modules/marked/')) {
+    return 'vendor-markdown';
+  }
+  if (
+    normalizedId.includes('/node_modules/clsx/') ||
+    normalizedId.includes('/node_modules/tailwind-merge/') ||
+    normalizedId.includes('/node_modules/jsonrepair/') ||
+    normalizedId.includes('/node_modules/zod/')
+  ) {
+    return 'vendor-utils';
+  }
+
+  return undefined;
+}
+
 function createDomainShellEntryGuardPlugin() {
   return {
     name: 'sops:domain-shell-entry-guard',
@@ -301,39 +341,7 @@ export default defineConfig({
             legalComments: 'none',
           },
         },
-        manualChunks(id) {
-          const normalizedId = id.replace(/\\/g, '/');
-
-          if (!normalizedId.includes('/node_modules/')) {
-            return undefined;
-          }
-
-          if (normalizedId.includes('/node_modules/@alpinejs/csp/')) {
-            return 'vendor-core';
-          }
-          if (normalizedId.includes('/node_modules/@fortawesome/')) {
-            if (normalizedId.includes('brands')) {
-              return 'vendor-fa-brands';
-            }
-            return 'vendor-fa-core';
-          }
-          if (normalizedId.includes('/node_modules/chart.js/')) {
-            return 'vendor-charts';
-          }
-          if (normalizedId.includes('/node_modules/marked/')) {
-            return 'vendor-markdown';
-          }
-          if (
-            normalizedId.includes('/node_modules/clsx/') ||
-            normalizedId.includes('/node_modules/tailwind-merge/') ||
-            normalizedId.includes('/node_modules/jsonrepair/') ||
-            normalizedId.includes('/node_modules/zod/')
-          ) {
-            return 'vendor-utils';
-          }
-
-          return undefined;
-        },
+        manualChunks: resolveManualChunkName,
         // 优化chunk命名
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',

@@ -14,7 +14,7 @@ import {
 
 const conversationMessages: ChatMessage[] = [{ role: 'user', content: 'hello' }];
 
-describe('Playground request lifecycle', () => {
+describe('Playground request lifecycle construction and aborts', () => {
   it('creates a pending request with an abort controller and stable timestamps', () => {
     const controller = new AbortController();
     const pendingRequest = createPendingDeepChatRequest('thread-1', conversationMessages, {
@@ -71,7 +71,9 @@ describe('Playground request lifecycle', () => {
     expect(pendingRequest.abortReason).toBe('deleted');
     expect(shouldPreserveStoppedResponse(pendingRequest)).toBe(false);
   });
+});
 
+describe('Playground request lifecycle display state', () => {
   it('tracks displayed assistant text separately from received stream text', () => {
     const pendingRequest = createPendingDeepChatRequest('thread-1', conversationMessages, {
       now: 1000,
@@ -93,7 +95,9 @@ describe('Playground request lifecycle', () => {
     expect(pendingRequest.updatedAt).toBe(1400);
     expect(isPendingDeepChatDisplayComplete(pendingRequest)).toBe(true);
   });
+});
 
+describe('Playground request lifecycle partial persistence', () => {
   it('throttles partial stream persistence by char growth and interval', () => {
     const pendingRequest = createPendingDeepChatRequest('thread-1', conversationMessages, {
       now: 1000,

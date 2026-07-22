@@ -164,28 +164,30 @@ describe('release archive cleanup', () => {
   });
 });
 
-describe('v3.0.11-rc.2 release metadata', () => {
-  it('locks package and lockfile root versions to 3.0.11-rc.2', () => {
+describe('v3.0.11-rc.3 release metadata', () => {
+  it('locks package and lockfile root versions to 3.0.11-rc.3', () => {
     const packageJson = JSON.parse(readRepoFile('package.json')) as { version: string };
     const packageLock = JSON.parse(readRepoFile('package-lock.json')) as {
       version: string;
       packages: Record<string, { version?: string }>;
     };
 
-    expect(packageJson.version).toBe('3.0.11-rc.2');
-    expect(packageLock.version).toBe('3.0.11-rc.2');
-    expect(packageLock.packages['']?.version).toBe('3.0.11-rc.2');
+    expect(packageJson.version).toBe('3.0.11-rc.3');
+    expect(packageLock.version).toBe('3.0.11-rc.3');
+    expect(packageLock.packages['']?.version).toBe('3.0.11-rc.3');
   });
 
-  it('places 3.0.11-rc.2 notes before the preserved 3.0.10 GA section', () => {
+  it('places 3.0.11-rc.3 notes before the preserved 3.0.10 GA section', () => {
     const changelog = readRepoFile('docs/CHANGELOG.md');
-    const rcStart = changelog.indexOf('## [3.0.11-rc.2] - 2026-07-22');
+    const rcStart = changelog.indexOf('## [3.0.11-rc.3] - 2026-07-22');
     const gaStart = changelog.indexOf('## [3.0.10] - 2026-07-20');
+    const nextReleaseStart = changelog.indexOf('\n## [', rcStart + 1);
 
     expect(rcStart).toBeGreaterThan(-1);
     expect(gaStart).toBeGreaterThan(rcStart);
+    expect(nextReleaseStart).toBeGreaterThan(rcStart);
 
-    const rcSection = changelog.slice(rcStart, gaStart);
+    const rcSection = changelog.slice(rcStart, nextReleaseStart);
     expect(rcSection).toMatch(/Pre-release|生产验证候选/);
     expect(rcSection).toMatch(/`v3\.0\.10`/);
     expect(rcSection).toContain('https://sops.hongecb.store');
@@ -198,18 +200,18 @@ describe('v3.0.11-rc.2 release metadata', () => {
     const readme = readRepoFile('README.md');
 
     expect(readme).toMatch(/\|\s*\*\*GitHub Latest（稳定 GA）\*\*\s*\|\s*`v3\.0\.10`\s*\|/);
-    expect(readme).toMatch(/\|\s*\*\*当前 Pre-release 候选\*\*\s*\|\s*`v3\.0\.11-rc\.2`\s*\|/);
-    expect(readme).toMatch(/\|\s*package\.json\s*\|\s*`3\.0\.11-rc\.2`\s*\|/);
+    expect(readme).toMatch(/\|\s*\*\*当前 Pre-release 候选\*\*\s*\|\s*`v3\.0\.11-rc\.3`\s*\|/);
+    expect(readme).toMatch(/\|\s*package\.json\s*\|\s*`3\.0\.11-rc\.3`\s*\|/);
     expect(readme).toMatch(/\|\s*上一 GA\s*\|\s*`v3\.0\.10`\s*\|/);
-    expect(readme).toContain('`0.1.0`…`3.0.11-rc.2`');
+    expect(readme).toContain('`0.1.0`…`3.0.11-rc.3`');
     expect(readme).toContain('当前稳定版为 `v3.0.10`');
   });
 
-  it('declares 3.0.10 GA and 3.0.11-rc.2 candidate in release policy', () => {
+  it('declares 3.0.10 GA and 3.0.11-rc.3 candidate in release policy', () => {
     const policy = readRepoFile('docs/RELEASE_POLICY.md');
 
     expect(policy).toMatch(/`v3\.0\.10`.*2026-07-20.*GA/);
-    expect(policy).toMatch(/`v3\.0\.11-rc\.2`/);
+    expect(policy).toMatch(/`v3\.0\.11-rc\.3`.*生产验证候选/);
     expect(policy).toContain('`v3.1.0-rc.1`');
     expect(policy).not.toMatch(/下一 patch 候选[^\n]*`v3\.0\.10-rc\.1`/);
   });
@@ -230,8 +232,9 @@ describe('v3.0.11-rc.2 release metadata', () => {
     const syncAll = readRepoFile('scripts/release/sync-all-releases.mjs');
 
     expect(backfill).toMatch(
-      /const DEFAULT_VERSIONS = \[\s*'3\.0\.11-rc\.2',\s*'3\.0\.11-rc\.1',\s*'3\.0\.10',/
+      /const DEFAULT_VERSIONS = \[\s*'3\.0\.11-rc\.3',\s*'3\.0\.11-rc\.2',\s*'3\.0\.11-rc\.1',\s*'3\.0\.10',/
     );
+    expect(backfill).toContain("version === '3.0.11-rc.3' || version === '3.0.11-rc.2'");
     expect(backfill).toContain("else if (version === '3.0.10')");
     expect(backfill).not.toContain("else if (version === '3.0.9')");
     expect(syncAll).toContain("if (version === '3.0.10' && !pre)");

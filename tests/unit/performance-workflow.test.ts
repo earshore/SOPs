@@ -63,11 +63,14 @@ describe('required quality gate contract', () => {
 });
 
 describe('required performance gate contract', () => {
-  it('builds once and invokes the dedicated performance gate in CI', () => {
+  it('reuses the build artifact and invokes the dedicated performance gate in CI', () => {
     const job = workflow.match(/\n {2}performance:[\s\S]*?\n {2}npm-audit:/)?.[0];
 
     expect(job).toBeDefined();
-    expect(job).toContain('run: npm run build:app');
+    expect(job).toContain('uses: actions/download-artifact@');
+    expect(job).toContain('name: build-artifact');
+    expect(job).toContain('path: dist');
+    expect(job).not.toContain('run: npm run build:app');
     expect(job).toContain('run: npm run test:performance:gate');
   });
 

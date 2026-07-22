@@ -42,7 +42,8 @@
 - `v3.0.10`（2026-07-20）为当前 GA：收口 `v3.0.9` 后热修（数据备份 UX、Vercel 构建、UI 打磨、confirm 弹窗去重）并恢复 package / tag / Release / 生产三者一致。
 - `v3.0.11-rc.1`（2026-07-21）为生产验证候选：Amazon Skills 目录 + Deep Chat 技能挂载 / 并发会话体验；**Pre-release**，Latest 仍为 `v3.0.10`。
 - `v3.0.11-rc.2`（2026-07-22）为生产验证候选：技能页叙事对齐 + Deep Chat Chip/输入热修；**Pre-release**，Latest 仍为 `v3.0.10`。
-- GA 后不得再发 `v3.0.10-rc.*`；当前 patch 候选为 `v3.0.11-rc.2`，GA 定稿后升 `v3.0.11`；若后续变更体量升 minor 则为 `v3.1.0-rc.1`。
+- `v3.0.11-rc.3`（2026-07-22）为生产验证候选：Deep Chat 会话稳定性、发布门禁与 Skill Registry 构建产物优化；**Pre-release**，Latest 仍为 `v3.0.10`。
+- GA 后不得再发 `v3.0.10-rc.*`；当前 patch 候选为 `v3.0.11-rc.3`，GA 定稿后升 `v3.0.11`；若后续变更体量升 minor 则为 `v3.1.0-rc.1`。
 
 ## 3. 何时创建 GitHub Release
 

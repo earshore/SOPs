@@ -4272,12 +4272,12 @@ function getSanitizedThreadTitle(
   if (customTitle) {
     return customTitle;
   }
-  // Prefer regenerating from messages so older short titles (e.g. 42 chars) expand.
-  const derived = getThreadTitle(messages);
-  if (derived && derived !== 'New Thread') {
-    return derived;
+  const persistedTitle = getOptionalString(title);
+  if (persistedTitle && persistedTitle !== 'New Thread') {
+    return persistedTitle;
   }
-  return getOptionalString(title) || 'New Thread';
+  const derived = getThreadTitle(messages);
+  return derived || persistedTitle || 'New Thread';
 }
 
 function getOptionalString(value: unknown): string | undefined {

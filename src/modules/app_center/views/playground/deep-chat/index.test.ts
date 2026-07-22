@@ -365,21 +365,18 @@ function createLocalDataStoreMock(options: ImportOptions) {
   };
 }
 
-async function importDeepChat(options: ImportOptions = {}) {
-  const localDataStore = createLocalDataStoreMock(options);
-  const storageService = createDeepChatStorageService(options);
-  const toast = vi.fn();
-  const callLLM = vi.fn(
-    options.callLLM ||
-      (async (...args: unknown[]) => {
-        const callOptions = args[5] as
-          | { onStreamUpdate?: (update: { delta: string }) => void }
-          | undefined;
-        callOptions?.onStreamUpdate?.({ delta: 'Streamed ' });
-        callOptions?.onStreamUpdate?.({ delta: 'answer' });
-        return 'Streamed answer';
-      })
-  );
+function createDefaultDeepChatCall() {
+  return async (...args: unknown[]) => {
+    const callOptions = args[5] as
+      | { onStreamUpdate?: (update: { delta: string }) => void }
+      | undefined;
+    callOptions?.onStreamUpdate?.({ delta: 'Streamed ' });
+    callOptions?.onStreamUpdate?.({ delta: 'answer' });
+    return 'Streamed answer';
+  };
+}
+
+function createDeepChatPromptHistoryState(options: ImportOptions) {
   const state: PromptHistoryState = {
     promptlab: {
       history: [...(options.promptHistory ?? promptHistory)],
@@ -388,23 +385,38 @@ async function importDeepChat(options: ImportOptions = {}) {
       state.promptlab.history = state.promptlab.history.filter(item => item.id !== id);
     }),
   };
-  const appStore = {
-    getState: vi.fn(() => state),
-    subscribe: vi.fn(() => vi.fn()),
+  return {
+    state,
+    appStore: {
+      getState: vi.fn(() => state),
+      subscribe: vi.fn(() => vi.fn()),
+    },
   };
-  const historyService = {
-    deletePromptResultAsync: vi.fn(async () => true),
-  };
-  const eventBus = {
-    emit: vi.fn(),
-    on: vi.fn(() => vi.fn()),
-  };
-  const navigateToRouteId = vi.fn(async () => true);
-  const confirmWithModal = vi.fn(async () => true);
-  const chooseWithModal = vi.fn(async (): Promise<'primary' | 'secondary' | 'cancel'> => 'primary');
+}
 
-  vi.resetModules();
-  const listingWorkflowMocks = installListingWorkflowMocks();
+function createDeepChatTestRuntime(options: ImportOptions) {
+  const { state, appStore } = createDeepChatPromptHistoryState(options);
+  return {
+    localDataStore: createLocalDataStoreMock(options),
+    storageService: createDeepChatStorageService(options),
+    toast: vi.fn(),
+    callLLM: vi.fn(options.callLLM || createDefaultDeepChatCall()),
+    state,
+    appStore,
+    historyService: {
+      deletePromptResultAsync: vi.fn(async () => true),
+    },
+    eventBus: {
+      emit: vi.fn(),
+      on: vi.fn(() => vi.fn()),
+    },
+    navigateToRouteId: vi.fn(async () => true),
+    confirmWithModal: vi.fn(async () => true),
+    chooseWithModal: vi.fn(async (): Promise<'primary' | 'secondary' | 'cancel'> => 'primary'),
+  };
+}
+
+function installDeepChatTemplateMocks() {
   vi.doMock('@/common/infrastructure/SafeModuleLoader', () => ({
     SafeTemplateLoader: {
       getInstance: () => ({
@@ -424,6 +436,26 @@ async function importDeepChat(options: ImportOptions = {}) {
       }),
     },
   }));
+}
+
+async function importDeepChat(options: ImportOptions = {}) {
+  const {
+    localDataStore,
+    storageService,
+    toast,
+    callLLM,
+    state,
+    appStore,
+    historyService,
+    eventBus,
+    navigateToRouteId,
+    confirmWithModal,
+    chooseWithModal,
+  } = createDeepChatTestRuntime(options);
+
+  vi.resetModules();
+  const listingWorkflowMocks = installListingWorkflowMocks();
+  installDeepChatTemplateMocks();
   vi.doMock('@/services/storageService', () => ({
     STORAGE_KEYS: deepChatStorageKeys,
     StorageService: storageService,
@@ -1648,15 +1680,15 @@ describe('deep-chat playground search chats', () => {
     expect(modal.style.getPropertyValue('--deep-chat-search-left')).toBe('750px');
     expect(modal.style.getPropertyValue('--deep-chat-search-top')).toBe('430px');
     expect(results.textContent).toContain('今天');
-    expect(results.textContent).toContain('Existing thread');
-    expect(results.textContent).toContain('Other thread');
+    expect(results.textContent).toContain('Saved question');
+    expect(results.textContent).toContain('Other question');
 
     input.value = 'Other question';
     input.dispatchEvent(new Event('input', { bubbles: true }));
 
     expect(results.textContent).toContain('搜索结果');
-    expect(results.textContent).toContain('Other thread');
-    expect(results.textContent).not.toContain('Existing thread');
+    expect(results.textContent).toContain('Other question');
+    expect(results.textContent).not.toContain('Saved question');
 
     queryRequired<HTMLButtonElement>(results, '[data-chat-search-thread-id="thread-2"]').click();
 
@@ -1887,7 +1919,7 @@ describe('deep-chat playground concurrent sessions', () => {
   });
 });
 
-describe('deep-chat playground remount streaming', () => {
+describe('deep-chat playground remount streaming display', () => {
   it('keeps generating state across unmount and resumes display on remount', async () => {
     const container = document.createElement('main');
     document.body.append(container);
@@ -1956,7 +1988,9 @@ describe('deep-chat playground remount streaming', () => {
 
     unmount();
   });
+});
 
+describe('deep-chat playground background stream settlement', () => {
   it('keeps receiving stream text and settles while the page is unmounted', async () => {
     const container = document.createElement('main');
     document.body.append(container);
@@ -2027,7 +2061,9 @@ describe('deep-chat playground remount streaming', () => {
 
     unmount();
   });
+});
 
+describe('deep-chat playground partial stream recovery', () => {
   it('persists partial stream text so a full remount can recover mid-generation output', async () => {
     const container = document.createElement('main');
     document.body.append(container);
