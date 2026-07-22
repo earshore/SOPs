@@ -204,11 +204,15 @@ export function renderPromptDraftList(
     setSafeHtml(
       list,
       `
-      <div class="deep-chat-prompt-empty">
+      <div class="deep-chat-prompt-empty" role="status">
+        <div class="deep-chat-prompt-empty-icon" aria-hidden="true">
+          <i class="fas fa-wand-magic-sparkles"></i>
+        </div>
         <div class="deep-chat-prompt-empty-title">暂无 Prompt</div>
         <p>从 Prompt 生成页创建后，可在这里一键带入新会话。</p>
         <button class="deep-chat-prompt-empty-action" type="button" data-open-promptlab>
-          前往 Prompt 生成
+          <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+          <span>生成 Prompt</span>
         </button>
       </div>
     `

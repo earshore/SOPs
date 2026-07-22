@@ -735,19 +735,39 @@
 }
 
 .deep-chat-prompt-empty {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: var(--spacing-2, 0.5rem);
-  padding: var(--spacing-3, 0.75rem);
-  border: 1px dashed rgba(148, 163, 184, 0.32);
-  border-radius: var(--rounded-lg, 0.5rem);
-  color: var(--color-slate-600, #475569);
+  min-height: 180px;
+  padding: var(--spacing-5, 1.25rem) var(--spacing-3, 0.75rem);
+  border: 1px dashed rgba(148, 163, 184, 0.36);
+  border-radius: var(--rounded-xl, 0.75rem);
+  color: var(--color-slate-500, #64748b);
   font-size: 12px;
-  line-height: 1.4;
-  background: rgba(255, 255, 255, 0.45);
+  line-height: 1.5;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.72) 0%, rgba(255, 255, 255, 0.88) 100%);
+}
+
+.deep-chat-prompt-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: var(--spacing-1, 0.25rem);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: var(--rounded-xl, 0.75rem);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--deep-chat-accent);
+  font-size: 1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .deep-chat-prompt-empty-title {
-  color: var(--color-slate-900, #0f172a);
+  color: var(--color-slate-700, #334155);
   font-size: 13px;
   font-weight: 700;
   line-height: 1.3;
@@ -755,14 +775,18 @@
 
 .deep-chat-prompt-empty p {
   margin: 0;
+  max-width: 14rem;
+  color: var(--color-slate-500, #64748b);
 }
 
 .deep-chat-prompt-empty-action {
   width: fit-content;
-  min-height: 32px;
+  min-height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: var(--spacing-2, 0.5rem);
+  margin-top: var(--spacing-1, 0.25rem);
   padding: 0 var(--spacing-3, 0.75rem);
   border: 1px solid var(--deep-chat-accent-border);
   border-radius: var(--rounded-lg, 0.5rem);
@@ -1082,7 +1106,6 @@
 .deep-chat-new-thread:focus-visible,
 .deep-chat-search-chats:focus-visible,
 .deep-chat-config-link:focus-visible,
-.deep-chat-promptlab-link:focus-visible,
 .deep-chat-thread-select:focus-visible,
 .deep-chat-thread-menu-toggle:focus-visible,
 .deep-chat-thread-menu-action:focus-visible,
@@ -1132,8 +1155,7 @@
   background: var(--color-slate-50, #f8fafc);
 }
 
-.deep-chat-config-link,
-.deep-chat-promptlab-link {
+.deep-chat-config-link {
   min-height: 36px;
   display: inline-flex;
   align-items: center;
@@ -1160,8 +1182,7 @@
   display: none;
 }
 
-.deep-chat-config-link:hover,
-.deep-chat-promptlab-link:hover {
+.deep-chat-config-link:hover {
   border-color: var(--deep-chat-accent-border-hover);
   background: var(--deep-chat-accent-muted);
   color: var(--deep-chat-accent-active);
@@ -2072,7 +2093,6 @@
   .deep-chat-new-thread,
   .deep-chat-search-chats,
   .deep-chat-config-link,
-  .deep-chat-promptlab-link,
   .deep-chat-thread-item,
   .deep-chat-thread-menu-toggle,
   .deep-chat-thread-menu-action,
@@ -2080,6 +2100,7 @@
   .deep-chat-prompt-badge,
   .deep-chat-prompt-preview-popover,
   .deep-chat-prompt-empty,
+  .deep-chat-prompt-empty-icon,
   .deep-chat-prompt-empty-action,
   .deep-chat-top-icon,
   .deep-chat-tuning-panel summary,
@@ -2106,8 +2127,7 @@
     color: var(--deep-chat-accent);
   }
 
-  .deep-chat-config-link,
-  .deep-chat-promptlab-link {
+  .deep-chat-config-link {
     background: rgba(255, 255, 255, 0.72);
     border-color: var(--deep-chat-border);
     box-shadow: none;
@@ -2142,9 +2162,7 @@
   }
 
   .deep-chat-config-link:hover,
-  .deep-chat-promptlab-link:hover,
-  .deep-chat-config-link:focus-visible,
-  .deep-chat-promptlab-link:focus-visible {
+  .deep-chat-config-link:focus-visible {
     border-color: var(--deep-chat-accent-border);
     color: var(--deep-chat-accent-hover);
   }
@@ -2209,30 +2227,9 @@
     max-width: calc(100% - 64px);
   }
 
-  .deep-chat-page.is-prompt-empty {
-    grid-template-columns: minmax(220px, 240px) minmax(720px, 1fr) 0;
-  }
-
-  .deep-chat-page.is-prompt-empty.is-rail-collapsed {
-    grid-template-columns: 0 minmax(720px, 1fr) 0;
-  }
-
-  .deep-chat-page.is-prompt-empty .deep-chat-prompt-rail {
-    padding-right: 0;
-    padding-left: 0;
-    border-left-color: transparent;
-    border-left-width: 0;
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
-  }
-
+  /* 列表为空时保留 Prompt 侧栏，展示 empty callout；仅隐藏预览浮层 */
   .deep-chat-page.is-prompt-empty .deep-chat-prompt-preview-popover {
     display: none !important;
-  }
-
-  .deep-chat-page.is-prompt-empty .deep-chat-stage {
-    width: min(920px, calc(100% - 64px));
   }
 }
 
