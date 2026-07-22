@@ -24,7 +24,6 @@ const deepChatTemplate = `
         <select id="deep-chat-model-select"></select>
         <button id="deep-chat-refresh-config" type="button"></button>
         <button id="deep-chat-open-settings" type="button" hidden>配置模型</button>
-        <button id="deep-chat-open-promptlab" type="button">生成 Prompt</button>
         <details class="deep-chat-tuning-panel">
           <summary>Settings</summary>
           <textarea id="deep-chat-system-prompt"></textarea>
@@ -576,7 +575,7 @@ describe('deep-chat playground template copy', () => {
     expect(template).toContain('<span>搜索会话</span>');
     expect(template).toContain('>最近会话</h3>');
     expect(template).toContain('id="deep-chat-open-settings"');
-    expect(template).toContain('id="deep-chat-open-promptlab"');
+    expect(template).not.toContain('id="deep-chat-open-promptlab"');
     expect(template).not.toContain('deep-chat-provider-status');
     expect(template.indexOf('id="deep-chat-model-select"')).toBeLessThan(
       template.indexOf('id="deep-chat-refresh-config"')
@@ -786,10 +785,8 @@ describe('deep-chat playground module', () => {
       'user-data'
     );
 
-    queryRequired<HTMLButtonElement>(container, '#deep-chat-open-promptlab').click();
-    await vi.waitFor(() => {
-      expect(mocks.navigateToRouteId).toHaveBeenCalledWith('promptlab');
-    });
+    expect(container.querySelector('#deep-chat-open-promptlab')).toBeNull();
+    expect(container.querySelector('[data-open-promptlab]')).toBeNull();
 
     container.querySelector<HTMLButtonElement>('[data-delete-prompt-draft-id="prompt-1"]')?.click();
     await vi.runAllTimersAsync();
@@ -1500,7 +1497,7 @@ describe('deep-chat playground prompt selection', () => {
 });
 
 describe('deep-chat playground prompt empty state', () => {
-  it('marks the PC prompt rail empty state and links to Prompt generation', async () => {
+  it('shows the prompt rail empty callout and links to Prompt generation', async () => {
     const container = document.createElement('main');
     document.body.append(container);
     const { mount, unmount, mocks } = await importDeepChat({
@@ -1512,9 +1509,12 @@ describe('deep-chat playground prompt empty state', () => {
     expect(container.querySelector('.deep-chat-page')?.classList.contains('is-prompt-empty')).toBe(
       true
     );
+    expect(container.querySelector('#deep-chat-open-promptlab')).toBeNull();
+    expect(container.querySelector('.deep-chat-prompt-empty')).not.toBeNull();
     expect(container.querySelector('#deep-chat-prompt-list')?.textContent).toContain('暂无 Prompt');
+    expect(container.querySelector('#deep-chat-prompt-list')?.textContent).toContain('生成 Prompt');
     expect(container.querySelector('#deep-chat-prompt-list')?.textContent).toContain(
-      '前往 Prompt 生成'
+      '从 Prompt 生成页创建后，可在这里一键带入新会话。'
     );
 
     queryRequired<HTMLButtonElement>(container, '[data-open-promptlab]').click();
@@ -1846,6 +1846,7 @@ describe('deep-chat playground request stopping', () => {
     );
     expect(submitButton.getAttribute('data-deep-chat-stop-active')).toBe('');
     expect(submitButton.getAttribute('data-deep-chat-stop-thread-id')).toBe('thread-1');
+    expect(submitButton.getAttribute('aria-label')).toBe('停止生成');
 
     submitButton.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
 
@@ -1873,6 +1874,41 @@ describe('deep-chat playground request stopping', () => {
       'user-data'
     );
     expect(mocks.toast).toHaveBeenCalledWith('已停止生成', { type: 'warning' });
+
+    unmount();
+  });
+
+  it('clears stop-active once the request settles (display replay is not a stop state)', async () => {
+    const streamDeferred: { resolve: ((value: string) => void) | null } = { resolve: null };
+    const { container, onClose, unmount } = await mountAndStartStoppableRequest(
+      async (...args: unknown[]) => {
+        const callOptions = args[5] as {
+          onStreamUpdate?: (update: { delta: string }) => void;
+        };
+        callOptions.onStreamUpdate?.({ delta: 'Partial ' });
+        return new Promise<string>(resolve => {
+          streamDeferred.resolve = resolve;
+        });
+      }
+    );
+
+    const getSubmitButton = () =>
+      queryRequired<HTMLButtonElement>(
+        getChat(container).shadowRoot || document,
+        '.input-button.inside-end'
+      );
+
+    expect(getSubmitButton().getAttribute('data-deep-chat-stop-active')).toBe('');
+    expect(getSubmitButton().getAttribute('aria-label')).toBe('停止生成');
+
+    expect(streamDeferred.resolve).not.toBeNull();
+    streamDeferred.resolve?.('Partial answer');
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+      expect(getSubmitButton().hasAttribute('data-deep-chat-stop-active')).toBe(false);
+    });
+    expect(getSubmitButton().getAttribute('aria-label')).toBe('发送消息');
+    expect(getSubmitButton().hasAttribute('data-deep-chat-stop-thread-id')).toBe(false);
 
     unmount();
   });

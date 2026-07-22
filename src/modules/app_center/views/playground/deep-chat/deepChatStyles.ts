@@ -140,21 +140,33 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     background: transparent !important;
   }
 
+  /*
+   * 发送钮状态矩阵（class 由 deep-chat 切换，stop-active 由我们在「可中止生成」时挂上）：
+   * - disabled-button：空输入，灰底不可点
+   * - submit-button / 默认：可发送，旗袍色
+   * - loading-button 或 [data-deep-chat-stop-active]：生成中，红底方块停止
+   * deep-chat 在 stream onOpen 后会去掉 loading-button，只剩 input-button + stop 图标，
+   * 因此颜色/图标必须以 data-deep-chat-stop-active 为准，不能只依赖 loading-button。
+   */
   .input-button.inside-end {
     background: var(--deep-chat-accent, #a85f3f) !important;
     box-shadow: none !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
   }
 
   .input-button.inside-end.disabled-button {
     background: #94a3b8 !important;
     opacity: 0.82 !important;
     box-shadow: none !important;
+    cursor: not-allowed !important;
   }
 
   .input-button.inside-end.loading-button,
   .input-button.inside-end[data-deep-chat-stop-active] {
     background: #dc2626 !important;
     cursor: pointer !important;
+    opacity: 1 !important;
   }
 
   .input-button.inside-end.loading-button:hover,
@@ -164,12 +176,17 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     background: #b91c1c !important;
   }
 
+  /* 生成中统一隐藏原生图标，改用白色方块停止标 */
+  .input-button.inside-end.loading-button #submit-icon,
+  .input-button.inside-end.loading-button .loading-submit-button,
+  .input-button.inside-end.loading-button #stop-icon,
   .input-button.inside-end[data-deep-chat-stop-active] #submit-icon,
   .input-button.inside-end[data-deep-chat-stop-active] .loading-submit-button,
   .input-button.inside-end[data-deep-chat-stop-active] #stop-icon {
     display: none !important;
   }
 
+  .input-button.inside-end.loading-button::before,
   .input-button.inside-end[data-deep-chat-stop-active]::before {
     content: '' !important;
     width: 12px !important;
@@ -184,10 +201,6 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     color: #ffffff !important;
     fill: #ffffff !important;
     stroke: #ffffff !important;
-  }
-
-  #stop-icon {
-    background-color: #ffffff !important;
   }
 
   .${MESSAGE_TOOLBAR_CLASS} {
@@ -581,12 +594,17 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     color: #a85f3f;
   }
 
+  /*
+   * 默认铺满 #input；controller.alignSubmitButtonLayerToTextInput 会把几何对齐到
+   * #text-input-container，避免技能条/gap 把发送钮贴底基准抬偏。
+   */
   .input-button-container.inner-button-container {
     position: absolute !important;
     inset: 0 !important;
     width: 100% !important;
     height: 100% !important;
     pointer-events: none !important;
+    z-index: 2 !important;
   }
 
   .input-button-container.inner-button-container .input-button {
@@ -609,6 +627,11 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     display: none !important;
   }
 
+  /*
+   * 位置与尺寸：覆盖 deep-chat 默认 inside-end（约 10%+0.35em 贴右下）。
+   * 选择器必须包含裸 .input-button.inside-end：stream stop 态会去掉
+   * submit/disabled/loading class，只剩 input-button + inside-end。
+   */
   .inside-end.input-button,
   .inside-end.submit-button,
   .inside-end.disabled-button,
@@ -628,50 +651,36 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     align-items: center !important;
     justify-content: center !important;
     border-radius: 50% !important;
-    background: var(--deep-chat-accent, #a85f3f) !important;
     box-shadow: none !important;
   }
 
-  .inside-end.input-button:hover,
-  .inside-end.input-button:focus-visible,
-  .inside-end.submit-button:hover,
-  .inside-end.submit-button:focus-visible,
-  .inside-end.loading-button:hover,
-  .inside-end.loading-button:focus-visible,
+  /* 可发送：旗袍色 hover；禁用/生成中不走此规则 */
+  .inside-end.input-button:not(.disabled-button):not(.loading-button):not(
+      [data-deep-chat-stop-active]
+    ):hover,
+  .inside-end.input-button:not(.disabled-button):not(.loading-button):not(
+      [data-deep-chat-stop-active]
+    ):focus-visible,
+  .inside-end.submit-button:not(.disabled-button):not(.loading-button):not(
+      [data-deep-chat-stop-active]
+    ):hover,
+  .inside-end.submit-button:not(.disabled-button):not(.loading-button):not(
+      [data-deep-chat-stop-active]
+    ):focus-visible {
+    background: var(--deep-chat-accent-hover, #8f4f33) !important;
+  }
+
   .inside-end.disabled-button:hover,
   .inside-end.disabled-button:focus-visible {
-    background: var(--deep-chat-accent-hover, #8f4f33) !important;
+    background: #94a3b8 !important;
+    opacity: 0.82 !important;
+    cursor: not-allowed !important;
   }
 
   .inside-end #submit-icon {
     width: 17px !important;
     height: 17px !important;
     filter: brightness(0) invert(1) !important;
-  }
-
-  .inside-end #stop-icon {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 50% !important;
-    background: var(--deep-chat-accent, #a85f3f) !important;
-    pointer-events: none !important;
-  }
-
-  .inside-end.loading-button #stop-icon,
-  .inside-end[data-deep-chat-stop-active] #stop-icon {
-    width: 100% !important;
-    height: 100% !important;
-    background: #dc2626 !important;
-  }
-
-  .inside-end #stop-icon::after {
-    content: "" !important;
-    position: absolute !important;
-    inset: 13px !important;
-    border-radius: 2px !important;
-    background: #ffffff !important;
   }
 
   @media (max-width: 640px) {

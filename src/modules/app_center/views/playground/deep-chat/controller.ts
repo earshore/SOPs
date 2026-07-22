@@ -154,6 +154,8 @@ let draftHeightSyncRaf: number | null = null;
 let cleanupDraftInputHeightListener: (() => void) | null = null;
 let cleanupSubmitStopButtonListener: (() => void) | null = null;
 let submitStopButtonSyncRetryTimer: number | null = null;
+let submitButtonStateObserver: MutationObserver | null = null;
+let submitButtonPinObserver: MutationObserver | null = null;
 let openThreadMenu: ThreadMenuState | null = null;
 let editingThreadId: string | null = null;
 let editingThreadValue: string = '';
@@ -426,7 +428,13 @@ function setupDraftInputHeightSync(
 
   const onDraftInput = (): void => {
     saveActiveThreadDraft(container);
-    window.requestAnimationFrame(() => syncDraftInputHeight(container));
+    window.requestAnimationFrame(() => {
+      syncDraftInputHeight(container);
+      const chatEl = getChat(container);
+      if (chatEl) {
+        alignSubmitButtonLayerToTextInput(chatEl);
+      }
+    });
   };
   root.addEventListener('input', onDraftInput);
   cleanupDraftInputHeightListener = () => root.removeEventListener('input', onDraftInput);
@@ -615,6 +623,161 @@ function clearDraftInputHeightSync(): void {
   }
 }
 
+/**
+ * deep-chat 把 inside-end 按钮容器挂在 #input 下（与 #text-input-container 同级）。
+ * #input 还有技能条 / gap，若按钮层 inset:0 铺满整列，单行会相对输入框偏下。
+ * 策略：不依赖 reparent（deep-chat 可能改回），把按钮层几何对齐到输入框矩形。
+ */
+function alignSubmitButtonLayerToTextInput(chat: DeepChatElement): boolean {
+  const root = chat.shadowRoot;
+  const inputArea = root?.querySelector<HTMLElement>('#input');
+  const textContainer = root?.querySelector<HTMLElement>('#text-input-container');
+  const buttonContainer = root?.querySelector<HTMLElement>(
+    '.input-button-container.inner-button-container'
+  );
+  const button = root?.querySelector<HTMLElement>('.input-button.inside-end');
+  if (!inputArea || !textContainer || !buttonContainer || !button) {
+    return false;
+  }
+
+  const inputRect = inputArea.getBoundingClientRect();
+  const textRect = textContainer.getBoundingClientRect();
+  if (inputRect.height <= 0 || textRect.height <= 0) {
+    return false;
+  }
+
+  // 按钮层铺满 #input（实测按钮绝对定位的 containing block 常是 #input，而非按钮层本身）
+  buttonContainer.style.setProperty('position', 'absolute', 'important');
+  buttonContainer.style.setProperty('inset', '0px', 'important');
+  buttonContainer.style.setProperty('top', '0', 'important');
+  buttonContainer.style.setProperty('left', '0', 'important');
+  buttonContainer.style.setProperty('right', '0', 'important');
+  buttonContainer.style.setProperty('bottom', '0', 'important');
+  buttonContainer.style.setProperty('width', '100%', 'important');
+  buttonContainer.style.setProperty('height', '100%', 'important');
+  buttonContainer.style.setProperty('margin', '0', 'important');
+  buttonContainer.style.setProperty('transform', 'none', 'important');
+  buttonContainer.style.setProperty('pointer-events', 'none', 'important');
+  buttonContainer.style.setProperty('z-index', '2', 'important');
+
+  // 用 #input 坐标系把钮放到输入框右下（单行≈居中，多行贴底）
+  const buttonSize = 36;
+  const edgePad = 11;
+  const buttonTop = Math.max(
+    0,
+    Math.round(textRect.top - inputRect.top + textRect.height - buttonSize - edgePad)
+  );
+  const buttonLeft = Math.max(
+    0,
+    Math.round(textRect.left - inputRect.left + textRect.width - buttonSize - edgePad)
+  );
+  button.style.setProperty('position', 'absolute', 'important');
+  button.style.setProperty('top', `${buttonTop}px`, 'important');
+  button.style.setProperty('left', `${buttonLeft}px`, 'important');
+  button.style.setProperty('right', 'auto', 'important');
+  button.style.setProperty('bottom', 'auto', 'important');
+  button.style.setProperty('inset-block-start', `${buttonTop}px`, 'important');
+  button.style.setProperty('inset-block-end', 'auto', 'important');
+  button.style.setProperty('inset-inline-start', `${buttonLeft}px`, 'important');
+  button.style.setProperty('inset-inline-end', 'auto', 'important');
+  button.style.setProperty('width', `${buttonSize}px`, 'important');
+  button.style.setProperty('height', `${buttonSize}px`, 'important');
+  button.style.setProperty('margin', '0', 'important');
+  button.style.setProperty('transform', 'none', 'important');
+  button.style.setProperty('pointer-events', 'auto', 'important');
+
+  return true;
+}
+
+function observeSubmitButtonPin(container: HTMLElement, chat: DeepChatElement): void {
+  submitButtonPinObserver?.disconnect();
+  submitButtonPinObserver = null;
+
+  const root = chat.shadowRoot;
+  const inputArea = root?.querySelector('#input');
+  const textContainer = root?.querySelector('#text-input-container');
+  if (!root || !inputArea || !textContainer) {
+    return;
+  }
+
+  let aligning = false;
+  const realign = (): void => {
+    if (aligning) {
+      return;
+    }
+    aligning = true;
+    try {
+      alignSubmitButtonLayerToTextInput(chat);
+      observeSubmitButtonState(container, chat);
+      // 仅刷新 aria / stop 标记，内部会再 align 但 aligning 期间由上层短路
+      const pending = pendingRequests.get(threadStore.activeThreadId);
+      const isStopActive = Boolean(pending && !pending.isSettled);
+      const button = chat.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+      if (button) {
+        const label = isStopActive ? '停止生成' : '发送消息';
+        button.toggleAttribute('data-deep-chat-stop-active', isStopActive);
+        if (isStopActive) {
+          button.setAttribute('data-deep-chat-stop-thread-id', threadStore.activeThreadId);
+        } else if (button.hasAttribute('data-deep-chat-stop-thread-id')) {
+          button.removeAttribute('data-deep-chat-stop-thread-id');
+        }
+        if (button.getAttribute('aria-label') !== label) {
+          button.setAttribute('aria-label', label);
+        }
+        if (button.title !== label) {
+          button.title = label;
+        }
+      }
+    } finally {
+      aligning = false;
+    }
+  };
+
+  // 只听结构变化，不听 style（我们自己写 style 会对齐触发死循环）
+  submitButtonPinObserver = new MutationObserver(() => {
+    realign();
+  });
+  submitButtonPinObserver.observe(inputArea, {
+    childList: true,
+    subtree: true,
+  });
+
+  if (typeof ResizeObserver !== 'undefined') {
+    const resizeObserver = new ResizeObserver(() => {
+      if (!aligning) {
+        alignSubmitButtonLayerToTextInput(chat);
+      }
+    });
+    resizeObserver.observe(textContainer);
+    resizeObserver.observe(inputArea);
+    const previousDisconnect = submitButtonPinObserver.disconnect.bind(submitButtonPinObserver);
+    submitButtonPinObserver.disconnect = () => {
+      resizeObserver.disconnect();
+      previousDisconnect();
+    };
+  }
+
+  realign();
+}
+
+function observeSubmitButtonState(container: HTMLElement, chat: DeepChatElement): void {
+  submitButtonStateObserver?.disconnect();
+  submitButtonStateObserver = null;
+
+  const button = chat.shadowRoot?.querySelector('.input-button.inside-end');
+  if (!button) {
+    return;
+  }
+
+  submitButtonStateObserver = new MutationObserver(() => {
+    syncSubmitStopButtonState(container);
+  });
+  submitButtonStateObserver.observe(button, {
+    attributes: true,
+    attributeFilter: ['class', 'aria-label', 'aria-disabled', 'aria-busy', 'title'],
+  });
+}
+
 function setupSubmitStopButtonSync(
   container: HTMLElement,
   chat: DeepChatElement,
@@ -643,14 +806,17 @@ function setupSubmitStopButtonSync(
   document.addEventListener('pointerdown', onSubmitButtonStopIntent, true);
   document.addEventListener('click', onSubmitButtonStopIntent, true);
   const root = chat.shadowRoot;
+  const pinned = alignSubmitButtonLayerToTextInput(chat);
   if (root) {
     root.addEventListener('pointerdown', onSubmitButtonStopIntent, true);
     root.addEventListener('click', onSubmitButtonStopIntent, true);
-  } else if (attempts > 0) {
+  }
+  if ((!root || !pinned) && attempts > 0) {
     submitStopButtonSyncRetryTimer = window.setTimeout(
       () => setupSubmitStopButtonSync(container, chat, attempts - 1),
       80
     );
+    // 仍挂上清理，避免失败重试前的监听泄漏；成功路径会 clear 后重建
   }
 
   cleanupSubmitStopButtonListener = () => {
@@ -659,7 +825,18 @@ function setupSubmitStopButtonSync(
     root?.removeEventListener('pointerdown', onSubmitButtonStopIntent, true);
     root?.removeEventListener('click', onSubmitButtonStopIntent, true);
   };
+  observeSubmitButtonPin(container, chat);
+  observeSubmitButtonState(container, chat);
   syncSubmitStopButtonState(container);
+  // deep-chat 初始化/校验会异步清掉 aria，短延迟再刷一次标签与位置
+  window.setTimeout(() => {
+    alignSubmitButtonLayerToTextInput(chat);
+    syncSubmitStopButtonState(container);
+  }, 120);
+  window.setTimeout(() => {
+    alignSubmitButtonLayerToTextInput(chat);
+    syncSubmitStopButtonState(container);
+  }, 400);
 }
 
 function getSubmitButtonFromEventPath(event: Event, chat: DeepChatElement): Element | null {
@@ -709,6 +886,10 @@ function getSubmitButtonFromPointerEvent(event: Event, chat: DeepChatElement): E
 function clearSubmitStopButtonSync(): void {
   cleanupSubmitStopButtonListener?.();
   cleanupSubmitStopButtonListener = null;
+  submitButtonStateObserver?.disconnect();
+  submitButtonStateObserver = null;
+  submitButtonPinObserver?.disconnect();
+  submitButtonPinObserver = null;
   if (submitStopButtonSyncRetryTimer !== null) {
     window.clearTimeout(submitStopButtonSyncRetryTimer);
     submitStopButtonSyncRetryTimer = null;
@@ -716,25 +897,35 @@ function clearSubmitStopButtonSync(): void {
 }
 
 function syncSubmitStopButtonState(container: HTMLElement): void {
-  const isPending = pendingRequests.has(threadStore.activeThreadId);
-  syncStopOverlayState(container, isPending);
+  const chat = getChat(container);
+  if (chat) {
+    alignSubmitButtonLayerToTextInput(chat);
+  }
 
-  const button = getChat(container)?.shadowRoot?.querySelector<HTMLElement>(
-    '.input-button.inside-end'
-  );
+  const pending = pendingRequests.get(threadStore.activeThreadId);
+  // 仅「可中止的生成中」显示停止；LLM 已 settle、本地回放时恢复发送/禁用（与点击劫持逻辑一致）
+  const isStopActive = Boolean(pending && !pending.isSettled);
+  syncStopOverlayState(container, isStopActive);
+
+  const button = chat?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
   if (!button) {
     return;
   }
 
-  const label = isPending ? '停止生成' : '发送消息';
-  button.toggleAttribute('data-deep-chat-stop-active', isPending);
-  if (isPending) {
+  const label = isStopActive ? '停止生成' : '发送消息';
+  button.toggleAttribute('data-deep-chat-stop-active', isStopActive);
+  if (isStopActive) {
     button.setAttribute('data-deep-chat-stop-thread-id', threadStore.activeThreadId);
-  } else {
+  } else if (button.hasAttribute('data-deep-chat-stop-thread-id')) {
     button.removeAttribute('data-deep-chat-stop-thread-id');
   }
-  button.setAttribute('aria-label', label);
-  button.title = label;
+  // deep-chat 切 disabled/submit 时会清掉 aria；只在变更时写入，避免 MutationObserver 死循环
+  if (button.getAttribute('aria-label') !== label) {
+    button.setAttribute('aria-label', label);
+  }
+  if (button.title !== label) {
+    button.title = label;
+  }
 }
 
 function syncStopOverlayState(container: HTMLElement, _isPending: boolean): void {
@@ -766,7 +957,6 @@ function bindControls(container: HTMLElement): void {
   const threadList = container.querySelector<HTMLElement>('#deep-chat-thread-list');
   const promptList = container.querySelector<HTMLElement>('#deep-chat-prompt-list');
   const settingsButton = container.querySelector<HTMLButtonElement>('#deep-chat-open-settings');
-  const promptlabButton = container.querySelector<HTMLButtonElement>('#deep-chat-open-promptlab');
 
   bindModelControls({
     container,
@@ -775,7 +965,6 @@ function bindControls(container: HTMLElement): void {
     clearButton,
     railToggleButton,
     settingsButton,
-    promptlabButton,
   });
   bindStopOverlayControl(container, stopButton);
   bindThreadControls(container, threadList, promptList);
@@ -816,19 +1005,11 @@ interface ModelControlRefs {
   clearButton: HTMLButtonElement | null;
   railToggleButton: HTMLButtonElement | null;
   settingsButton: HTMLButtonElement | null;
-  promptlabButton: HTMLButtonElement | null;
 }
 
 function bindModelControls(refs: ModelControlRefs): void {
-  const {
-    clearButton,
-    container,
-    modelSelect,
-    promptlabButton,
-    railToggleButton,
-    refreshButton,
-    settingsButton,
-  } = refs;
+  const { clearButton, container, modelSelect, railToggleButton, refreshButton, settingsButton } =
+    refs;
 
   const onModelChange = (): void => {
     selectedModel = modelSelect?.value || selectedModel;
@@ -861,12 +1042,6 @@ function bindModelControls(refs: ModelControlRefs): void {
   };
   settingsButton?.addEventListener('click', onOpenSettings);
   cleanupCallbacks.push(() => settingsButton?.removeEventListener('click', onOpenSettings));
-
-  const onOpenPromptlab = (): void => {
-    void openPromptlab();
-  };
-  promptlabButton?.addEventListener('click', onOpenPromptlab);
-  cleanupCallbacks.push(() => promptlabButton?.removeEventListener('click', onOpenPromptlab));
 }
 
 function bindThreadControls(

@@ -102,22 +102,24 @@ function configureDeepChatTextInputStyles(chat: DeepChatElement): void {
 }
 
 function configureDeepChatSubmitButtonStyles(chat: DeepChatElement): void {
+  // 与 auxiliaryStyle 中 36px 圆钮一致，避免 deep-chat 内联 34px 与 CSS 打架闪一下
+  const buttonSize = '36px';
   chat.submitButtonStyles = {
     position: 'inside-end',
     submit: {
       container: {
         borderRadius: '999px',
         backgroundColor: 'var(--deep-chat-accent, #a85f3f)',
-        width: '34px',
-        height: '34px',
+        width: buttonSize,
+        height: buttonSize,
       },
     },
     loading: {
       container: {
         borderRadius: '999px',
         backgroundColor: '#dc2626',
-        width: '34px',
-        height: '34px',
+        width: buttonSize,
+        height: buttonSize,
         cursor: 'pointer',
       },
     },
@@ -125,8 +127,8 @@ function configureDeepChatSubmitButtonStyles(chat: DeepChatElement): void {
       container: {
         borderRadius: '999px',
         backgroundColor: '#dc2626',
-        width: '34px',
-        height: '34px',
+        width: buttonSize,
+        height: buttonSize,
         cursor: 'pointer',
       },
     },
@@ -134,8 +136,8 @@ function configureDeepChatSubmitButtonStyles(chat: DeepChatElement): void {
       container: {
         borderRadius: '999px',
         backgroundColor: '#94a3b8',
-        width: '34px',
-        height: '34px',
+        width: buttonSize,
+        height: buttonSize,
       },
     },
   };
