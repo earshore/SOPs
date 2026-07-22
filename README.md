@@ -11,6 +11,16 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 
 本项目下一阶段不追求外部商用平台能力，而是收敛为小团队内部的运营作业系统：新人能独立完成任务，老手能更快生成动作，团队能沉淀复盘。新增页面、工具或 Agent 前，应先对齐 [运营作业系统落地计划](./docs/OPERATING_SYSTEM_ROADMAP.md) 中的主线、闭环标准和不做事项。
 
+**口径（避免过度承诺「完整 OS」）：**
+
+| 类型           | 含义                                               | 当前主推                                                                 |
+| -------------- | -------------------------------------------------- | ------------------------------------------------------------------------ |
+| **主推作业流** | 有输入 → 工具判断 → 可导出/可交接输出 → 人工复核点 | 新品 NPI；采集 → AI 分析 / PromptLab → Deep Chat；关键词猎人；PPC 搜索词 |
+| **知识页**     | 以说明、规则、案例为主，可不产生作业工件           | AMZ Hub 多数知识/实践页；部分 SOPs 纯说明页                              |
+| **探索页**     | 可试用、可实验，不承诺固定交付物                   | 技能目录、部分 Playground 能力                                           |
+
+当前部署仍是 **单用户 BYOK 静态站**（无多租户、无服务端登录权限）。高风险动作（广告调价、否词、合规处置、客服公开回复等）必须人工确认。
+
 ## 最新发布
 
 | 通道                         | 版本           | 说明                                               |
@@ -407,18 +417,18 @@ npm run quality:track    # 质量趋势跟踪
 多数业务子页面使用 `BaseModule` + `template.html?raw`：
 
 ```typescript
-import BaseModule from '@/common/BaseModule';
-import templateHTML from './template.html?raw';
+import BaseModule from "@/common/BaseModule";
+import templateHTML from "./template.html?raw";
 
 class MyPageModule extends BaseModule {
   constructor() {
-    super('route_id');
+    super("route_id");
   }
 
   async render(): Promise<void> {
     // 仅用于已审计的静态模板；动态内容使用 SafeRenderer 或 SecurityUtils。
     this.container!.innerHTML = templateHTML;
-    this.container!.classList.add('fade-in');
+    this.container!.classList.add("fade-in");
   }
 }
 

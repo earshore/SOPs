@@ -4,6 +4,68 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "vite",
+  "redirects": [
+    {
+      "source": "/home",
+      "destination": "/#/home",
+      "statusCode": 302
+    },
+    {
+      "source": "/app-center",
+      "destination": "/#/app-center",
+      "statusCode": 302
+    },
+    {
+      "source": "/app-center/:path*",
+      "destination": "/#/app-center/:path*",
+      "statusCode": 302
+    },
+    {
+      "source": "/sops",
+      "destination": "/#/sops",
+      "statusCode": 302
+    },
+    {
+      "source": "/sops/:path*",
+      "destination": "/#/sops/:path*",
+      "statusCode": 302
+    },
+    {
+      "source": "/amz-hub",
+      "destination": "/#/amz-hub",
+      "statusCode": 302
+    },
+    {
+      "source": "/amz-hub/:path*",
+      "destination": "/#/amz-hub/:path*",
+      "statusCode": 302
+    },
+    {
+      "source": "/more",
+      "destination": "/#/more",
+      "statusCode": 302
+    },
+    {
+      "source": "/more/:path*",
+      "destination": "/#/more/:path*",
+      "statusCode": 302
+    },
+    {
+      "source": "/sops_:path*",
+      "destination": "/#/sops_:path*",
+      "statusCode": 302
+    },
+    {
+      "source": "/amz_:path*",
+      "destination": "/#/amz_:path*",
+      "statusCode": 302
+    },
+    {
+      "source": "/more_:path*",
+      "destination": "/#/more_:path*",
+      "statusCode": 302
+    }
+  ],
   "rewrites": [
     {
       "source": "/assets/(.*)",
@@ -20,10 +82,6 @@
     {
       "source": "/robots.txt",
       "destination": "/robots.txt"
-    },
-    {
-      "source": "/((?!assets|downloads|logo\\.svg|robots\\.txt).*)",
-      "destination": "/index.html"
     }
   ],
   "headers": [
@@ -34,9 +92,18 @@
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self'; style-src 'self'; style-src-elem 'self'; font-src 'self' data:; img-src 'self' data: https: blob:; connect-src 'self' https://new.hongecb.store https://api.scraperapi.com https://api.zenrows.com https://api.brightdata.com https://*.amazon.de https://*.amazon.fr https://*.amazon.it https://*.amazon.es https://*.amazon.nl https://*.amazon.se https://*.amazon.pl https://*.amazon.com.be https://*.amazon.ie https://*.amazon.co.uk https://*.amazon.com https://*.amazon.ca https://*.amazon.com.mx https://*.amazon.co.jp https://*.amazon.com.au https://*.amazon.in https://*.amazon.sg https://*.amazon.com.br https://*.amazon.com.tr https://*.amazon.ae https://*.amazon.sa; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
         },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"

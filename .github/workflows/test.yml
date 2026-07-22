@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '20.x'
+          node-version: "20.x"
           cache: npm
 
       - name: Install dependencies
@@ -49,7 +49,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '20.x'
+          node-version: "20.x"
           cache: npm
 
       - name: Install dependencies
@@ -79,7 +79,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '20.x'
+          node-version: "20.x"
           cache: npm
 
       - name: Install dependencies
@@ -91,14 +91,27 @@ jobs:
       - name: Check coverage threshold
         shell: pwsh
         run: |
+          # Keep CI floors aligned with vite.config.js test.coverage.thresholds
+          $lineThreshold = 82
+          $statementThreshold = 80
+          $functionThreshold = 82
+          $branchThreshold = 65
           $coverage = Get-Content './coverage/coverage-summary.json' -Raw | ConvertFrom-Json
-          $threshold = 60
           $lines = $coverage.total.lines.pct
           $statements = $coverage.total.statements.pct
-          Write-Host "Line coverage: $lines%"
-          Write-Host "Statement coverage: $statements%"
-          if ($lines -lt $threshold -or $statements -lt $threshold) {
-            Write-Error "Coverage is below the $threshold% threshold."
+          $functions = $coverage.total.functions.pct
+          $branches = $coverage.total.branches.pct
+          Write-Host "Line coverage: $lines% (min $lineThreshold%)"
+          Write-Host "Statement coverage: $statements% (min $statementThreshold%)"
+          Write-Host "Function coverage: $functions% (min $functionThreshold%)"
+          Write-Host "Branch coverage: $branches% (min $branchThreshold%)"
+          if (
+            $lines -lt $lineThreshold -or
+            $statements -lt $statementThreshold -or
+            $functions -lt $functionThreshold -or
+            $branches -lt $branchThreshold
+          ) {
+            Write-Error "Coverage is below the configured thresholds (lines $lineThreshold / statements $statementThreshold / functions $functionThreshold / branches $branchThreshold)."
             exit 1
           }
 
@@ -122,7 +135,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '20.x'
+          node-version: "20.x"
           cache: npm
 
       - name: Install dependencies
@@ -162,17 +175,23 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '20.x'
+          node-version: "20.x"
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Download build artifact
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: build-artifact
+          path: dist
+
       - name: Install Playwright Chromium
         run: npx playwright install chromium
 
-      - name: Run smoke E2E
-        run: npm run test:e2e:smoke
+      - name: Run release smoke E2E against dist
+        run: npm run test:e2e:smoke:release
 
       - name: Upload E2E report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -196,14 +215,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '20.x'
+          node-version: "20.x"
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build application
-        run: npm run build:app
+      - name: Download build artifact
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: build-artifact
+          path: dist
 
       - name: Install Playwright Chromium
         run: npx playwright install chromium
@@ -236,7 +258,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '20.x'
+          node-version: "20.x"
           cache: npm
 
       - name: Install dependencies

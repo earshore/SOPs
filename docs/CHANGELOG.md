@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Deep Chat：生成结束后清除停止态（仅可中止请求显示停止）；Prompt 空状态 CTA 收敛（去掉顶栏「生成 Prompt」入口）。
+- Deep Chat：发送/停止按钮尺寸与 auxiliaryStyle 对齐，减少 loading → stop 样式闪烁。
+
+### Changed
+
+- CI Quality Gate：覆盖率门槛与 `vite.config.js` 对齐（lines 82 / statements 80 / functions 82 / branches 65）；smoke 改为对 `dist` 跑 `test:e2e:smoke:release` 并复用 build artifact。
+- Vercel：clean-path 使用 302 → Hash，与 Cloudflare `_redirects` 对齐；移除未知路径 SPA rewrite 到 `index.html`。
+- 文档：产品主推作业流/知识页/探索页口径；Sentry 默认关闭的监控决策；部署双宿主合同说明。
+
 ## [3.0.11-rc.2] - 2026-07-22
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。

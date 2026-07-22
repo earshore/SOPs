@@ -2,12 +2,12 @@
 
 ## Supported versions
 
-| Version | Supported |
-|---------|-----------|
-| Latest GA (`vX.Y.Z` on GitHub Latest) | Yes — security fixes |
-| Current RC line (`vX.Y.Z-rc.N`) | Best effort — fix lands in next RC/GA |
-| Older GA (previous minor/patch only) | Critical issues may be backported at maintainer discretion |
-| End-of-life / unlisted tags | No |
+| Version                               | Supported                                                  |
+| ------------------------------------- | ---------------------------------------------------------- |
+| Latest GA (`vX.Y.Z` on GitHub Latest) | Yes — security fixes                                       |
+| Current RC line (`vX.Y.Z-rc.N`)       | Best effort — fix lands in next RC/GA                      |
+| Older GA (previous minor/patch only)  | Critical issues may be backported at maintainer discretion |
+| End-of-life / unlisted tags           | No                                                         |
 
 See [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md) for channel rules.
 
@@ -41,6 +41,13 @@ You should receive an acknowledgement within **3 business days**. Critical produ
 - Secret leak scan: `npm run secret:scan`
 - Broader audit helpers: `npm run security:audit`
 - CI aggregates security checks via `npm run ci:security`
+
+## Production monitoring decision
+
+- **Default:** Sentry is **disabled**. No DSN is shipped in the repository or Cloudflare Pages project for LLM/model access, and `.env.example` leaves monitoring off.
+- **Enable only deliberately:** set `VITE_SENTRY_DSN` on a production build, confirm CSP `connect-src` allows the ingest host, then verify one real error event in Sentry.
+- **Without Sentry:** browser console + any in-app error UI remain the operational signal; this is an accepted tradeoff for the current single-user BYOK static deployment.
+- Do not treat “Sentry not configured” as a release blocker unless the release notes claim monitoring is on.
 
 ## Disclosure
 

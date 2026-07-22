@@ -6,11 +6,13 @@
 
 ## 架构边界
 
-- 静态站点：Cloudflare Pages，构建输出目录为 `dist/`。
+- 静态站点：**生产**为 Cloudflare Pages，构建输出目录为 `dist/`。
+- Vercel：仅作可选预览/对照宿主，**不是**生产合同源。`vercel.json` 的 clean-path **302 → Hash** 与 `public/_redirects` 对齐；已移除「未知路径 rewrite 到 `index.html`」的 SPA 回落，避免缺失资源被当成 200 HTML。
 - 模型网关：自部署 new-api，OpenAI 兼容接口，地址为 `https://new.hongecb.store/v1`。
 - 凭据边界：仓库和 Cloudflare Pages 项目不保存生产 LLM API key；用户在浏览器设置页保存自己的 new-api key。
 - 浏览器本地密钥：仅用于减少明文暴露，不是服务端密钥托管，也不是权限边界；同源脚本、浏览器扩展或本机访问仍属于风险面。
 - 治理：模型白名单、额度、过期时间、限流和日志由 new-api 后台管理。
+- 错误监控（Sentry）：**默认关闭**。仅当生产构建显式注入 `VITE_SENTRY_DSN` 且运行在 production 时才会初始化；未配置 DSN 时保持本地日志，不把「未开 Sentry」当作故障。若启用 Sentry，须同步把 DSN 主机加入 CSP `connect-src` 并做一次线上报活。
 
 ## 本地准备
 
