@@ -531,6 +531,51 @@ function getDraftInput(container: HTMLElement): HTMLElement | null {
   return getChat(container)?.shadowRoot?.querySelector<HTMLElement>('#text-input') || null;
 }
 
+function shouldShowSessionSkillChipDock(
+  contexts: DeepChatSkillContext[],
+  draftText: string
+): boolean {
+  if (contexts.length === 0) {
+    return false;
+  }
+  return !textContainsSkillChipMarker(draftText, contexts);
+}
+
+function ensureSessionSkillChipDock(
+  root: ShadowRoot,
+  inputContainer: HTMLElement,
+  input: HTMLElement
+): HTMLElement {
+  const existingDock = root.querySelector<HTMLElement>(`#${SESSION_SKILL_CHIP_DOCK_ID}`);
+  if (existingDock) {
+    return existingDock;
+  }
+
+  const dock = document.createElement('div');
+  dock.id = SESSION_SKILL_CHIP_DOCK_ID;
+  dock.className = 'deep-chat-session-skill-chip-dock';
+  dock.setAttribute('aria-label', '已挂载技能');
+  inputContainer.insertBefore(dock, input);
+  return dock;
+}
+
+function renderSessionSkillChipDockChildren(
+  dock: HTMLElement,
+  contexts: DeepChatSkillContext[]
+): void {
+  const renderedSkillIds = Array.from(
+    dock.querySelectorAll<HTMLElement>(`.${SKILL_CHIP_CLASS}`)
+  ).map(chip => chip.dataset.skillId || '');
+  const nextSkillIds = contexts.map(context => context.skillId);
+  if (
+    renderedSkillIds.length === nextSkillIds.length &&
+    renderedSkillIds.every((skillId, index) => skillId === nextSkillIds[index])
+  ) {
+    return;
+  }
+  dock.replaceChildren(...contexts.map(context => createSkillContextChip(context, 'dismissible')));
+}
+
 /**
  * 发送后 Deep Chat 会清空可编辑输入；会话技能仍应在同一输入框中保留一个可移除入口。
  * Dock 是 #text-input-container 的兄弟节点，绝不进入 contenteditable / 请求文本。
@@ -545,35 +590,16 @@ function syncSessionSkillChipDock(container: HTMLElement): void {
 
   const activeThread = getActiveThread();
   const contexts = activeThread.skillContexts || [];
-  const draftHasInlineMarkers =
-    contexts.length > 0 && textContainsSkillChipMarker(activeThread.draftText || '', contexts);
-  const shouldShowDock = contexts.length > 0 && !draftHasInlineMarkers;
   const existingDock = root.querySelector<HTMLElement>(`#${SESSION_SKILL_CHIP_DOCK_ID}`);
 
-  if (!shouldShowDock) {
+  if (!shouldShowSessionSkillChipDock(contexts, activeThread.draftText || '')) {
     existingDock?.remove();
     inputContainer.classList.remove('has-session-skill-chip-dock');
     return;
   }
 
-  const dock = existingDock || document.createElement('div');
-  if (!existingDock) {
-    dock.id = SESSION_SKILL_CHIP_DOCK_ID;
-    dock.className = 'deep-chat-session-skill-chip-dock';
-    dock.setAttribute('aria-label', '已挂载技能');
-    inputContainer.insertBefore(dock, input);
-  }
-
-  const renderedSkillIds = Array.from(
-    dock.querySelectorAll<HTMLElement>(`.${SKILL_CHIP_CLASS}`)
-  ).map(chip => chip.dataset.skillId || '');
-  const nextSkillIds = contexts.map(context => context.skillId);
-  if (
-    renderedSkillIds.length !== nextSkillIds.length ||
-    renderedSkillIds.some((skillId, index) => skillId !== nextSkillIds[index])
-  ) {
-    dock.replaceChildren(...contexts.map(context => createSkillContextChip(context, 'dismissible')));
-  }
+  const dock = ensureSessionSkillChipDock(root, inputContainer, input);
+  renderSessionSkillChipDockChildren(dock, contexts);
   inputContainer.classList.add('has-session-skill-chip-dock');
 }
 
@@ -3067,6 +3093,40 @@ function scheduleSkillComposerDraftFill(
   }
 }
 
+function retrySkillComposerDraftFill(
+  container: HTMLElement,
+  businessDraft: string,
+  target: SkillComposerDraftFillTarget,
+  attempts: number
+): void {
+  if (attempts <= 0) {
+    return;
+  }
+  window.setTimeout(
+    () => fillSkillComposerDraft(container, businessDraft, target, attempts - 1),
+    50
+  );
+}
+
+function applySkillComposerDraft(
+  container: HTMLElement,
+  input: HTMLElement,
+  businessDraft: string,
+  skillContexts: DeepChatSkillContext[],
+  threadId: string
+): void {
+  const normalizedPrompt =
+    skillContexts.length > 0
+      ? prefixDraftWithSkillContexts(businessDraft, skillContexts)
+      : businessDraft;
+  setDraftInputWithInlineChips(input, normalizedPrompt, skillContexts);
+  updateThreadDraft(threadId, normalizedPrompt);
+  syncSessionSkillChipDock(container);
+  placeSkillComposerChrome(container);
+  syncDraftInputHeight(container, { instant: true });
+  notifyDeepChatComposerInput(input, normalizedPrompt);
+}
+
 function fillSkillComposerDraft(
   container: HTMLElement,
   businessDraft: string,
@@ -3083,36 +3143,15 @@ function fillSkillComposerDraft(
   const skillContexts = activeThread.skillContexts || [];
 
   if (!chat || !input) {
-    if (attempts > 0) {
-      window.setTimeout(
-        () => fillSkillComposerDraft(container, businessDraft, target, attempts - 1),
-        50
-      );
-    }
+    retrySkillComposerDraftFill(container, businessDraft, target, attempts);
     return;
   }
 
-  const normalizedPrompt =
-    skillContexts.length > 0
-      ? prefixDraftWithSkillContexts(businessDraft, skillContexts)
-      : businessDraft;
-  setDraftInputWithInlineChips(input, normalizedPrompt, skillContexts);
-  updateThreadDraft(activeThread.id, normalizedPrompt);
-  syncSessionSkillChipDock(container);
-  placeSkillComposerChrome(container);
-  syncDraftInputHeight(container, { instant: true });
-  notifyDeepChatComposerInput(input, normalizedPrompt);
+  applySkillComposerDraft(container, input, businessDraft, skillContexts, activeThread.id);
 
   // 若 Chip DOM 仍未就绪，继续重试
-  if (
-    skillContexts.length > 0 &&
-    !composerHasSessionSkillChips(input, skillContexts) &&
-    attempts > 0
-  ) {
-    window.setTimeout(
-      () => fillSkillComposerDraft(container, businessDraft, target, attempts - 1),
-      50
-    );
+  if (skillContexts.length > 0 && !composerHasSessionSkillChips(input, skillContexts)) {
+    retrySkillComposerDraftFill(container, businessDraft, target, attempts);
   }
 }
 
