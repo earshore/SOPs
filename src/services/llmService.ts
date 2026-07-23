@@ -18,6 +18,15 @@ import { randomFloat } from '@/common/utils/random';
 import type { LLMChatCompletionResponse, LLMErrorResponse } from '@/types/api';
 // 导入类型守卫
 import { isLLMChatCompletionResponse } from '@/common/guards/typeGuards';
+import {
+  buildChatCompletionsBody,
+  normalizeReasoningUserPrefs,
+  resolveEffectiveReasoning,
+  resolveModelCapability,
+  type ModelsListEntry,
+  type ReasoningUserPrefs,
+  type SessionReasoningOverride,
+} from './modelCapability';
 
 // ========================
 // 类型定义
@@ -59,6 +68,15 @@ export interface LLMOptions {
   stream?: boolean;
   onFirstResponse?: (metrics: LLMStreamMetrics) => void;
   onStreamUpdate?: (update: LLMStreamUpdate) => void;
+  /**
+   * Global or session reasoning prefs (product-level).
+   * Applied only when the model capability registry has a mapRequest.
+   */
+  reasoningPrefs?: ReasoningUserPrefs;
+  /** Session override over reasoningPrefs; omit fields to inherit */
+  reasoningSessionOverride?: SessionReasoningOverride;
+  /** Optional /models list entry for context merge */
+  modelsEntry?: ModelsListEntry | string | null;
 }
 
 export interface LLMStreamMetrics {
@@ -418,6 +436,9 @@ interface ResolvedLLMOptions {
   onFirstResponse: LLMOptions['onFirstResponse'];
   onStreamActivity: OpenAIStreamOptions['onStreamActivity'];
   onStreamUpdate: LLMOptions['onStreamUpdate'];
+  reasoningPrefs: ReasoningUserPrefs | undefined;
+  reasoningSessionOverride: SessionReasoningOverride | undefined;
+  modelsEntry: ModelsListEntry | string | null | undefined;
 }
 
 interface LLMCallContext {
@@ -464,6 +485,9 @@ function resolveLLMOptions(options: LLMOptions): ResolvedLLMOptions {
     onFirstResponse: options.onFirstResponse,
     onStreamActivity: undefined,
     onStreamUpdate: options.onStreamUpdate,
+    reasoningPrefs: options.reasoningPrefs,
+    reasoningSessionOverride: options.reasoningSessionOverride,
+    modelsEntry: options.modelsEntry,
   };
 }
 
@@ -497,17 +521,32 @@ function assertSafeLLMEndpoint(endpoint: string): void {
 function createLLMRequestBody(
   messages: ChatMessage[],
   model: string,
-  options: ResolvedLLMOptions
+  options: ResolvedLLMOptions,
+  provider: string
 ): Record<string, unknown> {
-  return {
+  const capability = resolveModelCapability({
+    provider,
+    modelId: model,
+    modelsEntry: options.modelsEntry,
+  });
+  const globalPrefs = normalizeReasoningUserPrefs(options.reasoningPrefs);
+  const reasoning = resolveEffectiveReasoning(
+    capability,
+    globalPrefs,
+    options.reasoningSessionOverride
+  );
+
+  return buildChatCompletionsBody({
     model,
     messages,
     temperature: options.temperature,
-    ...(options.maxTokens !== undefined && { max_tokens: options.maxTokens }),
-    ...(options.serviceTier !== undefined && { service_tier: options.serviceTier }),
-    ...(options.stream && { stream: true }),
-    ...(options.jsonMode && { response_format: { type: 'json_object' } }),
-  };
+    maxTokens: options.maxTokens,
+    stream: options.stream,
+    jsonMode: options.jsonMode,
+    serviceTier: options.serviceTier,
+    capability,
+    reasoning,
+  });
 }
 
 async function waitBeforeLLMRetry(attempt: number, options: ResolvedLLMOptions): Promise<void> {
@@ -856,7 +895,12 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
     model: request.model,
     messages: request.messages,
     options: resolvedOptions,
-    requestBody: createLLMRequestBody(request.messages, request.model, resolvedOptions),
+    requestBody: createLLMRequestBody(
+      request.messages,
+      request.model,
+      resolvedOptions,
+      request.provider
+    ),
   };
 
   let lastError: Error | null = null;
@@ -1073,8 +1117,10 @@ function assertModelListNotEmpty(
 }
 
 function normalizeModelInfo(model: unknown): ModelInfo | null {
+  // Align unknown-model fallback with capability registry (32_768).
+  const defaultContext = 32_768;
   if (typeof model === 'string') {
-    return { id: model, context: 128000, features: [] };
+    return { id: model, context: defaultContext, features: [] };
   }
 
   if (isRecord(model)) {
@@ -1084,7 +1130,9 @@ function normalizeModelInfo(model: unknown): ModelInfo | null {
     }
 
     const context =
-      typeof model.context === 'number' && Number.isFinite(model.context) ? model.context : 128000;
+      typeof model.context === 'number' && Number.isFinite(model.context) && model.context > 0
+        ? model.context
+        : defaultContext;
     const features = Array.isArray(model.features) ? model.features.map(String) : [];
 
     return {
