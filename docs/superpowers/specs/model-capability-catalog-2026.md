@@ -12,6 +12,7 @@
 4. **关闭推理** → mapper `{}`，不写字段
 5. **jsonMode:true** → 强制 `chat_completions` + `response_format`（分析链路可靠性加固；无 response_format 时 prompt+parseLlmJson 仍可能成功）
 6. **别名：** `5.6-terra` / `openai/gpt-5.5` 等经 `normalizeModelIdForCapability` 匹配
+7. **用户路径：** 系统设置 `apiPath` 覆盖 Registry preferredSurface；四路径见 multi-protocol design
 7. **`/responses` 404** → 降级一次 `chat_completions`
 
 ## 默认 surface

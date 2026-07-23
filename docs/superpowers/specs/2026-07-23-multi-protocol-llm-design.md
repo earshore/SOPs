@@ -1,58 +1,78 @@
 # 真·多协议 LLM 传输设计
 
 **日期：** 2026-07-23  
-**状态：** Implemented  
-**范围：** `chat/completions` + `responses` 双 surface；Claude / Gemini 真实 mapper（非 label 假实现）
+**状态：** Implemented（四路径原生 + 用户可选默认路径）  
+**范围：** `chat/completions` · `responses` · Anthropic `messages` · Gemini `generateContent`
 
 ## 架构
 
 ```
-resolveModelCapability(model)
-  → preferredSurface + mapRequest (per surface)
-buildRequestBodyForSurface
-  → path: /chat/completions | /responses
-  → body: surface-specific fields
-fetch(endpoint + path)
-stream/non-stream parse (completions | responses)
+settings.llm.apiPath (用户默认)
+  → hydrateReasoningOptionsFromStorage (callLLM 缺省)
+  → createLLMTransport
+      pathId = apiPath | jsonMode→chat_completions (Gemini 保留)
+      resolveModelCapability(preferredSurface=pathId)
+      buildBodyForApiPath + buildFullApiUrl
+  → fetch(fullUrl, protocol headers)
+  → stream/non-stream parse per surface
 ```
 
-## Surfaces
+## Surfaces / 路径
 
-| Surface            | Path                | 推理字段（启用时）                                                                                                             |
-| ------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `chat_completions` | `/chat/completions` | OpenAI: `reasoning_effort`；Claude: `thinking.budget_tokens`；Gemini: `reasoning_effort` + `extra_body.google.thinking_config` |
-| `responses`        | `/responses`        | `reasoning: { effort }`                                                                                                        |
+| Path id              | URL 规则                                                  | 推理字段（启用时）                                      |
+| -------------------- | --------------------------------------------------------- | ------------------------------------------------------- |
+| `chat_completions`   | `{endpoint}/chat/completions`                             | OpenAI: `reasoning_effort`；Claude: `thinking`；Gemini 网关 dual fields |
+| `responses`          | `{endpoint}/responses`                                    | `reasoning: { effort }`                                 |
+| `anthropic_messages` | `{endpoint}/messages`                                     | `thinking.budget_tokens` + `anthropic-version` / `x-api-key` |
+| `gemini_generate`    | `{origin}/v1beta/models/{model}:generateContent`          | `thinkingConfig` + `x-goog-api-key`                     |
 
 关闭推理：mapper 返回 `{}`，不写字段。
+
+## 设置 UI
+
+系统设置 → AI 模型与连接：**API Endpoint** 右侧 **API 路径** 下拉，下方 **完整 URL** 预览（`buildFullApiUrl`）。  
+配置持久化字段：`LLMProviderConfig.apiPath`。
 
 ## 禁止 label 假实现
 
 - 某 surface 的 `supportsReasoning: true` **必须** 带 `mapRequest`
 - UI：`shouldShowReasoningControls` = supportsReasoning && mapRequest
-- Claude / Gemini 均有真实 mapper；网关 400 时走明确错误文案，而不是静默隐藏能力
+- Claude / Gemini 均有真实 body builder；网关 400 时走明确错误文案
 
-## 默认 preferredSurface
+## 默认 preferredSurface（Registry，可被用户 apiPath 覆盖）
 
-| 族                      | 默认                                        |
-| ----------------------- | ------------------------------------------- |
-| OpenAI o-series / GPT-5 | `responses`（completions 为备选 surface）   |
-| Grok / DeepSeek / Hy3   | `chat_completions`（responses 备选）        |
-| Claude / Gemini         | `chat_completions`（Anthropic/Gemini 字段） |
+| 族                      | Registry 默认 preferredSurface |
+| ----------------------- | ------------------------------ |
+| OpenAI o-series / GPT-5 | `responses`                    |
+| Grok / DeepSeek / Hy3   | `chat_completions`             |
+| Claude                  | `anthropic_messages`           |
+| Gemini                  | `gemini_generate`              |
 
-## 实测（new.hongecb.store）
+用户在设置里选的 `apiPath` 作为 `preferredSurface` 传入 resolve（路径与 body 一致）。
 
-| 路径                           | 模型                         | 结果                                                  |
-| ------------------------------ | ---------------------------- | ----------------------------------------------------- |
-| `/responses` + reasoning       | grok-4.5                     | 200，含 reasoning output item                         |
-| `/chat/completions` + effort   | grok-4.5 / deepseek-v4-flash | 200                                                   |
-| `/chat/completions` + thinking | claude-sonnet-4-5            | 当前 channel 可能 400（客户端仍发标准 thinking 字段） |
-| gemini-\*                      | —                            | 当前 key 403（无模型权限）                            |
+## 可靠性规则
+
+| 规则 | 行为 |
+| ---- | ---- |
+| jsonMode | 强制 `chat_completions` + `response_format`；Gemini 保留 generateContent + `responseMimeType` |
+| 路径 404/unsupported | 一次性回退 `chat_completions` |
+| 模型 id 别名 | `normalizeModelIdForCapability`（如 `5.6-terra` → `gpt-5.6-terra`） |
+| 推理正文隔离 | 最终 `content` 不含 reasoning 通道；Deep Chat 可折叠展示 `reasoning_content` / thinking |
+
+## Hydrate 范围（文档约定）
+
+`hydrateReasoningOptionsFromStorage` 对 **所有** `callLLM` 调用生效（非仅 playground）：
+
+- 缺省时注入：`reasoningPrefs`、`modelsEntry`、`apiPath`
+- 显式传入的 options 字段优先（Deep Chat 会话覆盖等）
+- **不**收窄为 playground-only：分析等模块同样需要全局默认路径与推理偏好
 
 ## 代码入口
 
-- `src/services/modelCapability/types.ts` — ApiSurface
-- `src/services/modelCapability/mappers.ts` — 各协议 mapper
+- `src/services/modelCapability/apiPaths.ts` — 路径 id / URL 拼接
+- `src/services/modelCapability/protocolBodies.ts` — 各路径 body
+- `src/services/modelCapability/protocolParse.ts` — Anthropic / Gemini 解析
+- `src/services/modelCapability/mappers.ts` — 推理字段 mapper
 - `src/services/modelCapability/registry.ts` — 多 surface 目录
-- `src/services/modelCapability/applyToRequest.ts` — body builders
-- `src/services/modelCapability/responsesParse.ts` — Responses 解析
-- `src/services/llmService.ts` — 按 surface 发请求
+- `src/services/llmService.ts` — transport + hydrate + stream（含 reasoning 通道回调）
+- `src/components/settings/systemSettings.*` — Endpoint + 路径 UI

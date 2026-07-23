@@ -102,8 +102,14 @@ export interface LLMStreamMetrics {
 }
 
 export interface LLMStreamUpdate extends LLMStreamMetrics {
+  /** Visible assistant text delta (never includes reasoning channel). */
   delta: string;
+  /** Accumulated visible assistant text. */
   content: string;
+  /** Optional reasoning / thinking channel delta (display-only; not final answer). */
+  reasoningDelta?: string;
+  /** Accumulated reasoning channel text for this request. */
+  reasoningContent?: string;
 }
 
 /**
@@ -217,6 +223,65 @@ function getChatCompletionsStreamDelta(payload: Record<string, unknown>): string
   return typeof content === 'string' ? content : '';
 }
 
+function getChatCompletionsReasoningDelta(payload: Record<string, unknown>): string {
+  const choices = payload.choices;
+  if (!Array.isArray(choices) || !choices[0]) return '';
+  const first = choices[0] as Record<string, unknown>;
+  const delta = first.delta as Record<string, unknown> | undefined;
+  const message = first.message as Record<string, unknown> | undefined;
+  const fromDelta = delta?.reasoning_content;
+  const fromMessage = message?.reasoning_content;
+  if (typeof fromDelta === 'string') return fromDelta;
+  if (typeof fromMessage === 'string') return fromMessage;
+  return '';
+}
+
+function getAnthropicReasoningDelta(payload: Record<string, unknown>): string {
+  if (payload.type !== 'content_block_delta') return '';
+  const delta = payload.delta as { type?: string; thinking?: string } | undefined;
+  if (delta?.type === 'thinking_delta' && typeof delta.thinking === 'string') {
+    return delta.thinking;
+  }
+  return '';
+}
+
+function getGeminiReasoningDelta(payload: Record<string, unknown>): string {
+  const candidates = payload.candidates;
+  if (!Array.isArray(candidates) || !candidates[0]) return '';
+  const content = (
+    candidates[0] as { content?: { parts?: Array<{ text?: string; thought?: boolean }> } }
+  ).content;
+  const parts = content?.parts;
+  if (!Array.isArray(parts)) return '';
+  const texts: string[] = [];
+  for (const part of parts) {
+    if (part && part.thought === true && typeof part.text === 'string') {
+      texts.push(part.text);
+    }
+  }
+  return texts.join('');
+}
+
+function getResponsesReasoningDelta(payload: Record<string, unknown>): string {
+  const type = typeof payload.type === 'string' ? payload.type : '';
+  if (
+    type === 'response.reasoning_summary_text.delta' ||
+    type.endsWith('reasoning_summary_text.delta')
+  ) {
+    return typeof payload.delta === 'string' ? payload.delta : '';
+  }
+  return '';
+}
+
+/** Reasoning/thinking channel only — never merged into final assistant text. */
+function getReasoningStreamDelta(payload: Record<string, unknown>, surface: ApiSurface): string {
+  if (surface === 'chat_completions') return getChatCompletionsReasoningDelta(payload);
+  if (surface === 'anthropic_messages') return getAnthropicReasoningDelta(payload);
+  if (surface === 'gemini_generate') return getGeminiReasoningDelta(payload);
+  if (surface === 'responses') return getResponsesReasoningDelta(payload);
+  return '';
+}
+
 function getStreamDelta(payload: Record<string, unknown>, surface: ApiSurface): string {
   if (surface === 'responses') {
     return getResponsesStreamTextDelta(payload);
@@ -258,6 +323,7 @@ type OpenAIStreamOptions = Pick<LLMOptions, 'onFirstResponse' | 'onStreamUpdate'
 
 interface OpenAIStreamState {
   content: string;
+  reasoningContent: string;
   firstChunkMs?: number;
   chunkCount: number;
 }
@@ -348,14 +414,28 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
   assertStreamPayloadIsOk(payload, data, context.response);
 
   const delta = getStreamDelta(payload, context.apiSurface);
-  if (!delta) {
+  const reasoningDelta = getReasoningStreamDelta(payload, context.apiSurface);
+  if (!delta && !reasoningDelta) {
     return;
   }
 
-  context.state.content += delta;
+  if (delta) {
+    context.state.content += delta;
+  }
+  if (reasoningDelta) {
+    context.state.reasoningContent += reasoningDelta;
+  }
   context.options.onStreamUpdate?.({
     delta,
     content: context.state.content,
+    ...(reasoningDelta
+      ? {
+          reasoningDelta,
+          reasoningContent: context.state.reasoningContent,
+        }
+      : context.state.reasoningContent
+        ? { reasoningContent: context.state.reasoningContent }
+        : {}),
     elapsedMs: Date.now() - context.requestStartedAt,
     firstChunkMs: context.state.firstChunkMs,
     chunkCount: context.state.chunkCount,
@@ -448,7 +528,7 @@ async function readOpenAIStream(
     return readBufferedOpenAIResponse(response);
   }
 
-  const state: OpenAIStreamState = { content: '', chunkCount: 0 };
+  const state: OpenAIStreamState = { content: '', reasoningContent: '', chunkCount: 0 };
   const lineContext: OpenAIStreamLineContext = {
     response,
     requestStartedAt,

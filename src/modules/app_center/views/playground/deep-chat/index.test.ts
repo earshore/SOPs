@@ -62,6 +62,10 @@ const deepChatTemplate = `
         <div id="deep-chat-pending-status" hidden>
           <span id="deep-chat-pending-status-text"></span>
         </div>
+        <details id="deep-chat-reasoning-stream" class="deep-chat-reasoning-stream" hidden>
+          <summary class="deep-chat-reasoning-stream-summary">思考过程</summary>
+          <pre id="deep-chat-reasoning-stream-body" class="deep-chat-reasoning-stream-body"></pre>
+        </details>
         <div class="deep-chat-wrap">
           <deep-chat id="deep-chat-view" class="deep-chat-view"></deep-chat>
           <button id="deep-chat-stop-generation" type="button" hidden>Stop</button>

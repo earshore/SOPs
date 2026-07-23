@@ -59,6 +59,7 @@ import {
 import {
   abortPendingDeepChatRequest,
   appendPendingDeepChatAssistantText,
+  appendPendingDeepChatReasoningText,
   createPendingDeepChatRequest,
   isPendingDeepChatDisplayComplete,
   markPendingDeepChatAssistantTextDisplayed,
@@ -2060,6 +2061,7 @@ async function handleDeepChatRequest(
     }
     saveThreadMessages(getMountedRenderContainer(), conversationMessages, assistantText, {
       threadId: activeThread.id,
+      assistantReasoning: pendingRequest.reasoningText,
     });
     markPendingDeepChatRequestSettled(pendingRequest);
     // 后台会话：LLM 一完成就标未读并刷新列表（不等打字机 drain）
@@ -2187,6 +2189,7 @@ function preserveTimedOutPartialResponse(threadId: string | null, error: unknown
     {
       threadId,
       assistantCreatedAt: pendingRequest.startedAt,
+      assistantReasoning: pendingRequest.reasoningText,
     }
   );
   markPendingDeepChatRequestSettled(pendingRequest);
@@ -2374,6 +2377,8 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
   const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
   let streamedText = '';
   const reasoningOptions = prepareDeepChatReasoningCallOptions();
+  const mountContainer = getMountedRenderContainer();
+  clearReasoningStreamPanel(mountContainer);
   const finalText = await callLLM(
     messages,
     config.provider,
@@ -2394,6 +2399,14 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
         if (pendingRequest.abortReason) {
           return;
         }
+        if (update.reasoningDelta) {
+          appendPendingDeepChatReasoningText(pendingRequest, update.reasoningDelta);
+          renderReasoningStreamPanel(
+            getMountedRenderContainer(),
+            pendingRequest.reasoningText,
+            { open: true }
+          );
+        }
         streamedText += update.delta;
         if (update.delta) {
           appendPendingAssistantText(pendingRequest, update.delta);
@@ -2404,6 +2417,9 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
   );
 
   if (pendingRequest.abortReason) {
+    if (pendingRequest.reasoningText.trim()) {
+      renderReasoningStreamPanel(mountContainer, pendingRequest.reasoningText, { open: false });
+    }
     return pendingRequest.assistantText.trim();
   }
 
@@ -2421,6 +2437,10 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
       assistantText,
       { module: 'deep-chat', action: 'resolveAssistantText' }
     );
+  }
+
+  if (pendingRequest.reasoningText.trim()) {
+    renderReasoningStreamPanel(mountContainer, pendingRequest.reasoningText, { open: false });
   }
 
   return assistantText;
@@ -2463,6 +2483,7 @@ function preserveStoppedResponse(threadId: string | null): void {
       threadId,
       assistantCreatedAt: pendingRequest.startedAt,
       assistantStatus: 'stopped',
+      assistantReasoning: pendingRequest.reasoningText,
     }
   );
   showToast('已停止生成，已保留当前回复', { type: 'warning' });
@@ -3858,6 +3879,7 @@ function saveThreadMessages(
       now,
       assistantCreatedAt: options.assistantCreatedAt,
       assistantStatus: options.assistantStatus,
+      assistantReasoning: options.assistantReasoning,
     }
   );
 
@@ -4084,10 +4106,62 @@ function persistPendingPartialIfNeeded(
       threadId: pendingRequest.threadId,
       assistantCreatedAt: pendingRequest.startedAt,
       assistantStatus: 'partial',
+      assistantReasoning: pendingRequest.reasoningText,
       skipUiRefresh: true,
     }
   );
   markPendingDeepChatPartialPersisted(pendingRequest);
+}
+
+/** Collapsible display-only reasoning channel (never enters next-turn chat content). */
+function renderReasoningStreamPanel(
+  container: HTMLElement | null,
+  reasoningText: string,
+  options: { open?: boolean } = {}
+): void {
+  if (!container) return;
+  const panel = container.querySelector<HTMLDetailsElement>('#deep-chat-reasoning-stream');
+  const body = container.querySelector<HTMLElement>('#deep-chat-reasoning-stream-body');
+  if (!panel || !body) return;
+
+  const trimmed = reasoningText.trim();
+  if (!trimmed) {
+    panel.hidden = true;
+    body.textContent = '';
+    panel.open = false;
+    return;
+  }
+
+  panel.hidden = false;
+  body.textContent = trimmed;
+  if (options.open !== undefined) {
+    panel.open = options.open;
+  }
+}
+
+function clearReasoningStreamPanel(container: HTMLElement | null): void {
+  renderReasoningStreamPanel(container, '', { open: false });
+}
+
+function syncReasoningStreamPanelForThread(container: HTMLElement, threadId: string): void {
+  const pending = pendingRequests.get(threadId);
+  if (pending?.reasoningText.trim()) {
+    renderReasoningStreamPanel(container, pending.reasoningText, {
+      open: !pending.isSettled,
+    });
+    return;
+  }
+
+  const thread = threadStore.threads.find(item => item.id === threadId);
+  const lastWithReasoning = [...(thread?.messages ?? [])]
+    .reverse()
+    .find(message => typeof message.reasoning === 'string' && message.reasoning.trim());
+  if (lastWithReasoning?.reasoning) {
+    renderReasoningStreamPanel(container, lastWithReasoning.reasoning, { open: false });
+    return;
+  }
+
+  clearReasoningStreamPanel(container);
 }
 
 function schedulePendingAssistantDisplay(threadId: string): void {
@@ -4339,6 +4413,7 @@ function syncPendingRequestView(threadId: string, options: { replaceChat?: boole
     replaceChat(container);
   }
   syncPendingStatus(container);
+  syncReasoningStreamPanelForThread(container, threadId);
 }
 
 function clearInlinePendingStatus(chat: DeepChatElement | null): void {

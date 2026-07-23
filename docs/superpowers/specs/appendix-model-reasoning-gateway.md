@@ -83,6 +83,9 @@ For each production model that should expose reasoning UI:
 ## Related code
 
 - Resolve: `src/services/modelCapability/resolve.ts`
-- Body merge: `src/services/modelCapability/applyToRequest.ts`
-- Auto global prefs: `hydrateReasoningOptionsFromStorage` in `src/services/llmService.ts`
-- Stream isolation: `getStreamDelta` only reads `content` (see `llmService.stream.test.ts`)
+- Body merge: `src/services/modelCapability/applyToRequest.ts` + `protocolBodies.ts`
+- Auto global prefs / apiPath: `hydrateReasoningOptionsFromStorage` in `src/services/llmService.ts`
+  - **Scope:** all `callLLM` callers (not playground-only). Explicit options win over storage.
+- Stream isolation: final answer uses `getStreamDelta` (content only); reasoning channel via
+  `getReasoningStreamDelta` → `onStreamUpdate.reasoningDelta` (Deep Chat collapsible panel).
+- Multi-path: `apiPaths.ts` + settings `llm.apiPath` (see multi-protocol design)

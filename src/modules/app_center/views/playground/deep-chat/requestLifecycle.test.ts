@@ -26,6 +26,7 @@ describe('Playground request lifecycle construction and aborts', () => {
       threadId: 'thread-1',
       conversationMessages,
       assistantText: '',
+      reasoningText: '',
       displayedAssistantText: '',
       startedAt: 1000,
       updatedAt: 1000,

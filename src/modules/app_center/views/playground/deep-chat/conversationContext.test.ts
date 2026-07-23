@@ -53,6 +53,22 @@ describe('mergeThreadHistoryWithRequest', () => {
 });
 
 describe('buildStoredThreadMessages', () => {
+  it('stores assistant reasoning as display-only metadata', () => {
+    const stored = buildStoredThreadMessages(
+      [],
+      [{ role: 'user', content: 'q' }],
+      'answer',
+      { assistantReasoning: '  plan steps  ' }
+    );
+    expect(stored).toEqual([
+      expect.objectContaining({ role: 'user', text: 'q' }),
+      expect.objectContaining({ role: 'ai', text: 'answer', reasoning: 'plan steps' }),
+    ]);
+    // History merge must use text only (no reasoning bleed into next turn).
+    const history = mergeThreadHistoryWithRequest(stored, [{ role: 'user', content: 'next' }]);
+    expect(history.map(m => m.content)).toEqual(['q', 'answer', 'next']);
+  });
+
   it('preserves existing message timestamps and appends stopped assistant text', () => {
     const existing: DeepChatMessage[] = [
       { role: 'user', text: '第一轮问题', createdAt: 1000 },

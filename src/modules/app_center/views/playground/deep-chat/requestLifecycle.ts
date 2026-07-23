@@ -6,6 +6,8 @@ export interface PendingDeepChatRequest {
   threadId: string;
   conversationMessages: ChatMessage[];
   assistantText: string;
+  /** Display-only reasoning channel (not part of assistantText / next-turn context). */
+  reasoningText: string;
   displayedAssistantText: string;
   startedAt: number;
   updatedAt: number;
@@ -34,6 +36,7 @@ export function createPendingDeepChatRequest(
     threadId,
     conversationMessages: [...conversationMessages],
     assistantText: '',
+    reasoningText: '',
     displayedAssistantText: '',
     startedAt: now,
     updatedAt: now,
@@ -47,6 +50,16 @@ export function appendPendingDeepChatAssistantText(
   now = Date.now()
 ): void {
   pendingRequest.assistantText += delta;
+  pendingRequest.updatedAt = now;
+}
+
+export function appendPendingDeepChatReasoningText(
+  pendingRequest: PendingDeepChatRequest,
+  delta: string,
+  now = Date.now()
+): void {
+  if (!delta) return;
+  pendingRequest.reasoningText += delta;
   pendingRequest.updatedAt = now;
 }
 

@@ -9,6 +9,11 @@ export interface DeepChatMessage {
   text?: string;
   html?: string;
   content?: string;
+  /**
+   * Optional model reasoning / thinking channel text (display-only).
+   * Never used as next-turn chat content.
+   */
+  reasoning?: string;
   createdAt?: number;
   status?: DeepChatMessageStatus;
 }
@@ -17,6 +22,8 @@ export interface BuildStoredThreadMessagesOptions {
   now?: number;
   assistantCreatedAt?: number;
   assistantStatus?: DeepChatMessageStatus;
+  /** Display-only reasoning channel for the new assistant message */
+  assistantReasoning?: string;
   maxMessages?: number;
   maxMessageChars?: number;
 }
@@ -98,11 +105,15 @@ export function buildStoredThreadMessages(
 
   const trimmedAssistantText = assistantText.trim();
   if (trimmedAssistantText) {
+    const reasoning = options.assistantReasoning?.trim();
     storedMessages.push({
       role: 'ai',
       text: truncateStoredMessage(trimmedAssistantText, options.maxMessageChars),
       createdAt: getFiniteTimestamp(options.assistantCreatedAt, now),
       status: options.assistantStatus,
+      ...(reasoning
+        ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) }
+        : {}),
     });
   }
 
@@ -141,10 +152,15 @@ function normalizeStoredMessage(
     return null;
   }
 
+  const reasoning =
+    typeof message.reasoning === 'string' ? message.reasoning.trim() : '';
   return {
     role: message.role === 'user' ? 'user' : 'ai',
     text,
     createdAt: getFiniteTimestamp(message.createdAt, options.fallbackCreatedAt),
+    ...(reasoning
+      ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) }
+      : {}),
     ...((message.status === 'stopped' || message.status === 'partial') && {
       status: message.status,
     }),

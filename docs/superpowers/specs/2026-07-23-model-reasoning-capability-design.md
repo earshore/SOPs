@@ -1,8 +1,8 @@
 # 模型能力目录与推理控制设计
 
 **日期：** 2026-07-23  
-**状态：** Implemented（P1 全局 + P2 会话覆盖 + 四路径原生 API + new-api 实测附录；见 appendix-model-reasoning-gateway.md）  
-**范围：** 模型真实能力发现、推理开关 / 思考强度、系统设置全局默认 + Deep Chat 会话覆盖；用户可选默认 API 路径（chat/completions · responses · messages · Gemini generateContent）  
+**状态：** Implemented（P1/P2 + 四路径原生 API + A/B/C 债务收口；见 appendix + multi-protocol design）  
+**范围：** 模型真实能力发现、推理开关 / 思考强度、系统设置全局默认 + Deep Chat 会话覆盖与思考过程折叠展示；用户可选默认 API 路径（chat/completions · responses · messages · Gemini generateContent）  
 **非目标（本期）：** 多租户计费、自动 probe 未知模型、与厂商 SDK 全量字段对等（只实现业务调用所需 body/headers/stream 解析）
 
 ---

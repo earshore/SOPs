@@ -1389,6 +1389,60 @@
   color: var(--color-slate-500, #64748b);
 }
 
+/* Display-only reasoning channel (stream / last turn) — not chat content */
+.deep-chat-reasoning-stream {
+  margin: 0 0 var(--spacing-2, 0.5rem);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: var(--deep-chat-radius-lg, 0.85rem);
+  background: rgba(248, 250, 252, 0.95);
+  color: var(--color-slate-700, #334155);
+}
+
+.deep-chat-reasoning-stream[hidden] {
+  display: none !important;
+}
+
+.deep-chat-reasoning-stream-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2, 0.5rem);
+  padding: var(--spacing-2, 0.5rem) var(--spacing-3, 0.75rem);
+  cursor: pointer;
+  list-style: none;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 600;
+  color: var(--color-slate-600, #475569);
+  user-select: none;
+}
+
+.deep-chat-reasoning-stream-summary::-webkit-details-marker {
+  display: none;
+}
+
+.deep-chat-reasoning-stream-summary i {
+  color: var(--deep-chat-accent, #7c3aed);
+  font-size: 0.7rem;
+}
+
+.deep-chat-reasoning-stream-hint {
+  margin-left: auto;
+  font-weight: 500;
+  color: var(--color-slate-400, #94a3b8);
+}
+
+.deep-chat-reasoning-stream-body {
+  margin: 0;
+  max-height: 12rem;
+  overflow: auto;
+  padding: 0 var(--spacing-3, 0.75rem) var(--spacing-3, 0.75rem);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--color-slate-600, #475569);
+}
+
 .deep-chat-field-temperature input {
   width: 100%;
   height: 20px;

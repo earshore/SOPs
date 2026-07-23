@@ -57,7 +57,17 @@ describe('callLLM streaming', () => {
     );
 
     expect(firstResponse).toHaveBeenCalledTimes(1);
-    expect(streamUpdate).toHaveBeenCalledTimes(1);
+    expect(streamUpdate).toHaveBeenCalledTimes(2);
+    expect(streamUpdate.mock.calls[0]?.[0]).toMatchObject({
+      delta: '',
+      reasoningDelta: '**Generating plan**',
+      reasoningContent: '**Generating plan**',
+    });
+    expect(streamUpdate.mock.calls[1]?.[0]).toMatchObject({
+      delta: '{"ok":true}',
+      content: '{"ok":true}',
+      reasoningContent: '**Generating plan**',
+    });
     expect(response).toBe('{"ok":true}');
   });
 
