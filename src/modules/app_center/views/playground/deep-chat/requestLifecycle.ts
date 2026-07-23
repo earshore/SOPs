@@ -2,6 +2,15 @@ import type { ChatMessage } from '@/services/llmService';
 
 export type DeepChatPendingAbortReason = 'stopped' | 'deleted' | 'cleared';
 
+/**
+ * Streaming UI phases:
+ * - waiting: before any reasoning/content (思考中 / 等待模型响应)
+ * - reasoning: reasoning channel active; hide waiting status
+ * - generating: formal reply tokens flowing (正在生成回复 · 已收到 N 字)
+ * - settled: reply finished; chrome becomes 已完成 Xs only
+ */
+export type DeepChatGenerationPhase = 'waiting' | 'reasoning' | 'generating' | 'settled';
+
 export interface PendingDeepChatRequest {
   threadId: string;
   conversationMessages: ChatMessage[];
@@ -24,6 +33,21 @@ export interface PendingDeepChatRequest {
   lastPersistedAssistantLength?: number;
   /** 最近一次 partial 落盘时间戳 */
   lastPersistedAt?: number;
+}
+
+export function getDeepChatGenerationPhase(
+  pending: Pick<PendingDeepChatRequest, 'isSettled' | 'assistantText' | 'reasoningText'>
+): DeepChatGenerationPhase {
+  if (pending.isSettled) {
+    return 'settled';
+  }
+  if (pending.assistantText.trim().length > 0) {
+    return 'generating';
+  }
+  if (pending.reasoningText.trim().length > 0) {
+    return 'reasoning';
+  }
+  return 'waiting';
 }
 
 interface CreatePendingDeepChatRequestOptions {

@@ -3,7 +3,9 @@ import type { ChatMessage } from '@/services/llmService';
 import {
   abortPendingDeepChatRequest,
   appendPendingDeepChatAssistantText,
+  appendPendingDeepChatReasoningText,
   createPendingDeepChatRequest,
+  getDeepChatGenerationPhase,
   isPendingDeepChatDisplayComplete,
   markPendingDeepChatAssistantTextDisplayed,
   markPendingDeepChatPartialPersisted,
@@ -152,5 +154,27 @@ describe('Playground request lifecycle partial persistence', () => {
         now: 3500,
       })
     ).toBe(false);
+  });
+});
+
+describe('Deep Chat generation phases', () => {
+  it('progresses waiting → reasoning → generating → settled', () => {
+    const pending = createPendingDeepChatRequest('thread-1', conversationMessages, { now: 1000 });
+    expect(getDeepChatGenerationPhase(pending)).toBe('waiting');
+
+    appendPendingDeepChatReasoningText(pending, 'plan', 1100);
+    expect(getDeepChatGenerationPhase(pending)).toBe('reasoning');
+
+    appendPendingDeepChatAssistantText(pending, 'hello', 1200);
+    expect(getDeepChatGenerationPhase(pending)).toBe('generating');
+
+    markPendingDeepChatRequestSettled(pending, 1300);
+    expect(getDeepChatGenerationPhase(pending)).toBe('settled');
+  });
+
+  it('skips reasoning phase when content arrives without reasoning channel', () => {
+    const pending = createPendingDeepChatRequest('thread-1', conversationMessages, { now: 1000 });
+    appendPendingDeepChatAssistantText(pending, 'direct', 1100);
+    expect(getDeepChatGenerationPhase(pending)).toBe('generating');
   });
 });

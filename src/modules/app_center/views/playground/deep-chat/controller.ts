@@ -61,6 +61,7 @@ import {
   appendPendingDeepChatAssistantText,
   appendPendingDeepChatReasoningText,
   createPendingDeepChatRequest,
+  getDeepChatGenerationPhase,
   getPendingReasoningDurationSec,
   isPendingDeepChatDisplayComplete,
   markPendingDeepChatAssistantTextDisplayed,
@@ -130,7 +131,9 @@ import {
 } from './utils';
 
 const nativeLoggerConsole = globalThis.console;
-const PENDING_ASSISTANT_PLACEHOLDER_TEXT = '正在生成回复...';
+const PENDING_GENERATING_PREFIX = '正在生成回复...';
+const WAITING_STATUS_LABELS = ['思考中...', '等待模型响应...', '正在连接模型...'] as const;
+const WAITING_STATUS_ROTATE_MS = 1600;
 const GENERATION_CHROME_CLASS = 'deep-chat-generation-chrome';
 const INLINE_PENDING_STATUS_ID = 'deep-chat-inline-pending-status';
 const INLINE_PENDING_STATUS_CLASS = 'deep-chat-inline-pending-status';
@@ -175,6 +178,7 @@ const pendingDisplayTimers = new Map<string, number>();
 let pendingChromeObserver: MutationObserver | null = null;
 let pendingChromeRetryRaf: number | null = null;
 let reasoningTypewriterTimer: number | null = null;
+let waitingStatusRotateTimer: number | null = null;
 /** Settled 深度思考 expand state keyed by message (`threadId:aiIndex:…`). */
 const settledDeepThinkingUi = new Map<
   string,
@@ -4393,6 +4397,29 @@ function clearPendingChromeObserver(): void {
     window.clearTimeout(reasoningTypewriterTimer);
     reasoningTypewriterTimer = null;
   }
+  clearWaitingStatusRotateTimer();
+}
+
+function clearWaitingStatusRotateTimer(): void {
+  if (waitingStatusRotateTimer !== null) {
+    window.clearInterval(waitingStatusRotateTimer);
+    waitingStatusRotateTimer = null;
+  }
+}
+
+function ensureWaitingStatusRotateTimer(): void {
+  if (waitingStatusRotateTimer !== null) {
+    return;
+  }
+  waitingStatusRotateTimer = window.setInterval(() => {
+    const container = getMountedRenderContainer();
+    const pending = pendingRequests.get(threadStore.activeThreadId);
+    if (!container || !pending || getDeepChatGenerationPhase(pending) !== 'waiting') {
+      clearWaitingStatusRotateTimer();
+      return;
+    }
+    syncPendingStatus(container);
+  }, WAITING_STATUS_ROTATE_MS);
 }
 
 function prefersReducedMotion(): boolean {
@@ -4707,21 +4734,65 @@ function ensureStatusInChrome(chrome: HTMLElement, statusText: string): void {
   statusEl.hidden = false;
 }
 
-function mountStreamingGenerationChrome(
-  host: HTMLElement,
-  statusText: string,
-  pending: PendingDeepChatRequest
-): void {
+function hideStatusInChrome(chrome: HTMLElement): void {
+  const statusEl = chrome.querySelector<HTMLElement>('#' + INLINE_PENDING_STATUS_ID);
+  if (statusEl) {
+    statusEl.hidden = true;
+  }
+}
+
+function getWaitingStatusLabel(pending: PendingDeepChatRequest, now = Date.now()): string {
+  const elapsed = Math.max(0, now - pending.startedAt);
+  const index = Math.floor(elapsed / WAITING_STATUS_ROTATE_MS) % WAITING_STATUS_LABELS.length;
+  return WAITING_STATUS_LABELS[index] ?? WAITING_STATUS_LABELS[0];
+}
+
+function getGeneratingStatusLabel(pending: PendingDeepChatRequest): string {
+  const charCount = pending.assistantText.trim().length;
+  if (charCount === 0) {
+    return PENDING_GENERATING_PREFIX;
+  }
+  return `${PENDING_GENERATING_PREFIX} · 已收到 ${charCount.toLocaleString('zh-CN')} 字`;
+}
+
+/**
+ * Phase-driven streaming chrome:
+ * waiting  → 思考中 / 等待模型响应… (no 深度思考 yet)
+ * reasoning → 深度思考 only (hide waiting status)
+ * generating → 深度思考 (if any) + 正在生成回复 · 已收到 N 字
+ * body typewriter sits below chrome (message bubble)
+ */
+function mountStreamingGenerationChrome(host: HTMLElement, pending: PendingDeepChatRequest): void {
   const chrome = ensureGenerationChromeOnHost(host, STREAMING_DT_KEY, 'streaming');
   // Drop settled nodes only on this generating host (history 已完成 stays on earlier hosts)
   chrome.querySelector('.deep-chat-dt-settled')?.remove();
 
+  const phase = getDeepChatGenerationPhase(pending);
+
+  if (phase === 'waiting') {
+    chrome.querySelector('.deep-chat-dt-stream')?.remove();
+    ensureStatusInChrome(chrome, getWaitingStatusLabel(pending));
+    ensureWaitingStatusRotateTimer();
+    placeGenerationChromeRoot(host, chrome);
+    return;
+  }
+
+  clearWaitingStatusRotateTimer();
+
+  if (phase === 'reasoning') {
+    ensureStreamingDeepThinkingBlock(chrome, pending.reasoningText, pending);
+    hideStatusInChrome(chrome);
+    placeGenerationChromeRoot(host, chrome);
+    return;
+  }
+
+  // generating (and non-settled)
   if (pending.reasoningText.trim()) {
     ensureStreamingDeepThinkingBlock(chrome, pending.reasoningText, pending);
   } else {
     chrome.querySelector('.deep-chat-dt-stream')?.remove();
   }
-  ensureStatusInChrome(chrome, statusText);
+  ensureStatusInChrome(chrome, getGeneratingStatusLabel(pending));
   placeGenerationChromeRoot(host, chrome);
 }
 
@@ -5013,7 +5084,20 @@ function syncAllDeepThinkingChrome(container: HTMLElement): void {
   hosts.forEach((host, hostIndex) => {
     if (pending && hostIndex === streamHostIndex) {
       chat.classList.add(PENDING_GENERATION_HOST_CLASS);
-      mountStreamingGenerationChrome(host, getPendingStatusText(pending), pending);
+      // Reply finished (LLM settled) but body typewriter may still drain → only 已完成 Xs
+      if (getDeepChatGenerationPhase(pending) === 'settled') {
+        clearWaitingStatusRotateTimer();
+        const durationSec = getPendingReasoningDurationSec(pending);
+        if (pending.reasoningText.trim()) {
+          const uiKey = `${thread.id}:pending-settled:${pending.startedAt}`;
+          mountSettledDeepThinkingChrome(host, pending.reasoningText, durationSec, uiKey);
+        } else {
+          // No reasoning channel: remove streaming chrome; body typewriter continues
+          getChromeOnHost(host)?.remove();
+        }
+        return;
+      }
+      mountStreamingGenerationChrome(host, pending);
       return;
     }
 
@@ -5064,16 +5148,6 @@ function syncAllDeepThinkingChrome(container: HTMLElement): void {
 
 function syncPendingStatus(container: HTMLElement): void {
   syncAllDeepThinkingChrome(container);
-}
-
-function getPendingStatusText(pendingRequest: PendingDeepChatRequest): string {
-  const charCount = pendingRequest.assistantText.trim().length;
-  const prefix = pendingRequest.isSettled ? '正在显示回复...' : PENDING_ASSISTANT_PLACEHOLDER_TEXT;
-  if (charCount === 0) {
-    return prefix;
-  }
-
-  return `${prefix} · 已收到 ${charCount.toLocaleString('zh-CN')} 字`;
 }
 
 async function emitPendingAssistantDelta(
