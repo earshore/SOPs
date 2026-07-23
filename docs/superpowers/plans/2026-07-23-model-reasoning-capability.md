@@ -53,7 +53,7 @@
 **Interfaces:**
 - Produces: `resolveModelCapability`, `resolveEffectiveReasoning`, `applyReasoningToRequestBody`, `ModelCapabilityRule`, `ResolvedModelCapability`, `ReasoningUserPrefs`
 
-- [ ] **Step 1: Write failing tests for resolve + prefs + apply**
+- [x] **Step 1: Write failing tests for resolve + prefs + apply**
 
 ```ts
 // resolve.test.ts (sketch — expand in file)
@@ -123,11 +123,11 @@ describe('applyReasoningToRequestBody', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests — expect FAIL (modules missing)**
+- [x] **Step 2: Run tests — expect FAIL (modules missing)**
 
 Run: `npm run test -- --run src/services/modelCapability/`
 
-- [ ] **Step 3: Implement types, empty registry, resolve, prefs, apply**
+- [x] **Step 3: Implement types, empty registry, resolve, prefs, apply**
 
 Minimal registry can start with **zero production patterns** or 1–2 documented placeholders with `mapRequest` returning `{}` until gateway verification — better: include patterns behind comments and only enable after Task 1b verification note in registry file.
 
@@ -135,11 +135,11 @@ Implement `matchModelPattern(pattern, modelId)` supporting `*` as wildcard segme
 
 `applyReasoningToRequestBody` must refuse to overwrite `model` / `messages`.
 
-- [ ] **Step 4: Run tests — expect PASS**
+- [x] **Step 4: Run tests — expect PASS**
 
 Run: `npm run test -- --run src/services/modelCapability/`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/services/modelCapability
@@ -159,7 +159,7 @@ git commit -m "feat(llm): add model capability registry and reasoning resolvers"
 - Consumes: `resolveModelCapability`, `resolveEffectiveReasoning`, `applyReasoningToRequestBody`
 - Produces: `callLLM` / stream paths accept optional `reasoningPrefs` and use active model id
 
-- [ ] **Step 1: Write failing test — body includes mapper fields when prefs enabled**
+- [x] **Step 1: Write failing test — body includes mapper fields when prefs enabled**
 
 Add unit test that mocks capability or injects via options:
 
@@ -171,7 +171,7 @@ expect(body).toMatchObject({ reasoning_effort: 'high' }); // only if test regist
 
 If production registry has no live mapRequest yet, test with **injected capability object** in a new exported `buildLLMRequestBodyForTest` or export `createLLMRequestBody` dependencies via optional hook — cleanest: export `buildChatCompletionsBody` from `applyToRequest.ts` (already planned) and only thin-wrap in llmService.
 
-- [ ] **Step 2: Implement wire-up**
+- [x] **Step 2: Implement wire-up**
 
 In request construction:
 
@@ -181,7 +181,7 @@ In request construction:
 
 Confirm stream path still drops `reasoning_content` from final content (existing test).
 
-- [ ] **Step 3: Run tests**
+- [x] **Step 3: Run tests**
 
 Run:
 
@@ -190,7 +190,7 @@ npm run test -- --run src/services/modelCapability/ src/services/llmService.stre
 npm run type-check
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git commit -m "feat(llm): apply reasoning prefs to chat completions body"
@@ -210,7 +210,7 @@ git commit -m "feat(llm): apply reasoning prefs to chat completions body"
 - Produces: saved `reasoningPrefs` read on LLM calls from settings path
 - UI: toggle + effort select, visible only when `capability.supportsReasoning && capability.mapRequest`
 
-- [ ] **Step 1: Failing test for visibility helper**
+- [x] **Step 1: Failing test for visibility helper**
 
 ```ts
 export function shouldShowReasoningControls(cap: ResolvedModelCapability): boolean {
@@ -218,22 +218,22 @@ export function shouldShowReasoningControls(cap: ResolvedModelCapability): boole
 }
 ```
 
-- [ ] **Step 2: Implement storage load/save defaults**
+- [x] **Step 2: Implement storage load/save defaults**
 
 Default: `{ enabled: false, effort: 'medium' }`.
 
 On model change in settings, recompute capability; if not showable, keep stored prefs but hide UI.
 
-- [ ] **Step 3: When calling test LLM / any settings-originated callLLM, pass global prefs**
+- [x] **Step 3: When calling test LLM / any settings-originated callLLM, pass global prefs**
 
-- [ ] **Step 4: Manual checklist (document in PR)**
+- [x] **Step 4: Manual checklist (document in PR)**
 
 1. Open 系统设置 → LLM  
 2. Select unsupported model → no reasoning controls  
 3. Select supported (after registry entry) → toggle + effort  
 4. Save, reload → prefs persist  
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git commit -m "feat(settings): global reasoning prefs UI and persistence"
@@ -254,11 +254,11 @@ git commit -m "feat(settings): global reasoning prefs UI and persistence"
 
 Record request field names and whether disable omits fields or sends false.
 
-- [ ] **Step 2: Add registry rules with real `mapRequest`**
+- [x] **Step 2: Add registry rules with real `mapRequest`**
 
-- [ ] **Step 3: Snapshot tests for those rules**
+- [x] **Step 3: Snapshot tests for those rules**
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git commit -m "feat(llm): register gateway-verified reasoning mappers"
@@ -278,7 +278,7 @@ git commit -m "feat(llm): register gateway-verified reasoning mappers"
 - Consumes: global prefs from storage/settings service; capability resolve
 - Produces: `EffectiveReasoningPrefs` per request
 
-- [ ] **Step 1: Failing unit tests**
+- [x] **Step 1: Failing unit tests**
 
 ```ts
 it('uses session reasoning override over global when sending', async () => {
@@ -287,20 +287,20 @@ it('uses session reasoning override over global when sending', async () => {
 });
 ```
 
-- [ ] **Step 2: Implement thread field + tuning UI binding**
+- [x] **Step 2: Implement thread field + tuning UI binding**
 
 Reset clears `thread.reasoning` (undefined), not global.
 
-- [ ] **Step 3: Pass effective prefs into llm path used by Deep Chat**
+- [x] **Step 3: Pass effective prefs into llm path used by Deep Chat**
 
-- [ ] **Step 4: Run deep-chat tests + type-check**
+- [x] **Step 4: Run deep-chat tests + type-check**
 
 ```bash
 npm run test -- --run src/modules/app_center/views/playground/deep-chat/index.test.ts src/services/modelCapability/
 npm run type-check
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git commit -m "feat(deep-chat): session reasoning override over global defaults"
@@ -314,11 +314,11 @@ git commit -m "feat(deep-chat): session reasoning override over global defaults"
 - Modify: Spec status → Accepted/Implemented sections as work lands
 - CHANGELOG Unreleased bullet when shipping
 
-- [ ] **Step 1: Update spec status field when P1 done / P2 done**
+- [x] **Step 1: Update spec status field when P1 done / P2 done**
 
-- [ ] **Step 2: CHANGELOG Unreleased**
+- [x] **Step 2: CHANGELOG Unreleased**
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git commit -m "docs: mark model reasoning capability phases and changelog"

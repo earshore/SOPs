@@ -41,6 +41,21 @@ const deepChatTemplate = `
             <textarea id="deep-chat-system-prompt"></textarea>
             <output id="deep-chat-temperature-value">0.3</output>
             <input id="deep-chat-temperature" type="range" value="0.3">
+            <div id="deep-chat-reasoning-controls" class="deep-chat-field deep-chat-field-reasoning" hidden>
+              <span class="deep-chat-reasoning-label">推理（本会话）</span>
+              <label class="deep-chat-reasoning-toggle" for="deep-chat-reasoning-enabled">
+                <input id="deep-chat-reasoning-enabled" type="checkbox" />
+                <span>启用推理</span>
+              </label>
+              <label class="deep-chat-reasoning-effort-wrap" for="deep-chat-reasoning-effort">
+                <span>思考强度</span>
+                <select id="deep-chat-reasoning-effort" aria-label="思考强度">
+                  <option value="low">low</option>
+                  <option value="medium" selected>medium</option>
+                  <option value="high">high</option>
+                </select>
+              </label>
+            </div>
             <button id="deep-chat-reset-tuning" type="button"></button>
           </details>
         </div>
@@ -507,7 +522,10 @@ async function importDeepChat(options: ImportOptions = {}) {
   vi.doMock('@/modules/app_center/views/master_analysis/services/historyService', () => ({
     HistoryService: historyService,
   }));
-  vi.doMock('./utils/confirmModal', () => ({ confirmWithModal, chooseWithModal }));
+  vi.doMock('./utils/confirmModal', () => ({
+    confirmWithModal,
+    chooseWithModal,
+  }));
 
   const listingWorkflowHandoff = await prepareListingPromptHandoff(options);
   const module = await import('./index');
@@ -839,10 +857,11 @@ describe('deep-chat playground module', () => {
     expect(queryRequired<HTMLButtonElement>(container, '#deep-chat-open-settings').hidden).toBe(
       true
     );
-    expect([...container.querySelectorAll('option')].map(option => option.value)).toEqual([
-      'gpt-4.1',
-      'gpt-4.1-mini',
-    ]);
+    expect(
+      [...container.querySelectorAll<HTMLOptionElement>('#deep-chat-model-select option')].map(
+        option => option.value
+      )
+    ).toEqual(['gpt-4.1', 'gpt-4.1-mini']);
     expect(container.querySelector('#deep-chat-thread-list')?.textContent).toContain(
       'Existing thread'
     );
@@ -934,7 +953,9 @@ describe('deep-chat Listing workflow handoff', () => {
   it('selects the queued thread when reopening a generated product copy', async () => {
     const container = document.createElement('main');
     document.body.append(container);
-    const { mount, unmount } = await importDeepChat({ pendingThreadId: 'thread-2' });
+    const { mount, unmount } = await importDeepChat({
+      pendingThreadId: 'thread-2',
+    });
 
     await mount(container);
 
@@ -1431,7 +1452,10 @@ describe('deep-chat skill trial after send', () => {
     );
     dismiss.click();
     input.textContent = '保留这段刚刚编辑的草稿';
-    chat.onInput?.({ content: { text: input.textContent, files: [] }, isUser: true });
+    chat.onInput?.({
+      content: { text: input.textContent, files: [] },
+      isUser: true,
+    });
 
     await vi.advanceTimersByTimeAsync(300);
 
@@ -1930,6 +1954,79 @@ describe('deep-chat playground skill library', () => {
   });
 });
 
+describe('deep-chat playground reasoning prefs', () => {
+  it('passes session reasoning override to callLLM when sending', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'o3-mini',
+        models: [{ id: 'o3-mini', context: 200000, features: ['reasoning'] }],
+        reasoningPrefs: { enabled: false, effort: 'low' },
+      },
+    });
+
+    await mount(container);
+
+    const reasoningRoot = queryRequired<HTMLElement>(container, '#deep-chat-reasoning-controls');
+    // Capability registry maps o3-mini → show controls
+    expect(reasoningRoot.hidden).toBe(false);
+
+    const enabled = queryRequired<HTMLInputElement>(container, '#deep-chat-reasoning-enabled');
+    enabled.checked = true;
+    enabled.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const effort = queryRequired<HTMLSelectElement>(container, '#deep-chat-reasoning-effort');
+    effort.value = 'high';
+    effort.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const chat = getChat(container);
+    const onClose = vi.fn();
+    chat.connect?.handler(
+      { messages: [{ role: 'user', text: 'Reason about margins' }] },
+      { onResponse: vi.fn(), onClose }
+    );
+
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    const options = mocks.callLLM.mock.calls[0]?.[5] as {
+      reasoningSessionOverride?: { enabled?: boolean; effort?: string };
+    };
+    expect(options.reasoningSessionOverride).toEqual({
+      enabled: true,
+      effort: 'high',
+    });
+
+    unmount();
+  });
+
+  it('hides session reasoning controls for models without a mapRequest', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount } = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'gpt-4.1',
+        models: ['gpt-4.1'],
+      },
+    });
+
+    await mount(container);
+    expect(queryRequired<HTMLElement>(container, '#deep-chat-reasoning-controls').hidden).toBe(
+      true
+    );
+    unmount();
+  });
+});
+
 describe('deep-chat playground successful requests', () => {
   it('handles a streamed LLM request and persists the assistant response', async () => {
     const container = document.createElement('main');
@@ -1996,7 +2093,11 @@ describe('deep-chat playground concurrent sessions', () => {
     const onClose = vi.fn();
     getChat(container).connect?.handler(
       { messages: [{ role: 'user', text: 'Generate in thread 1' }] },
-      { onResponse: vi.fn(async () => undefined), onClose, stopClicked: { listener: vi.fn() } }
+      {
+        onResponse: vi.fn(async () => undefined),
+        onClose,
+        stopClicked: { listener: vi.fn() },
+      }
     );
 
     await vi.waitFor(() => {
@@ -2186,7 +2287,10 @@ describe('deep-chat playground background stream settlement', () => {
     await vi.advanceTimersByTimeAsync(100);
     expect(getChat(container).history).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ role: 'ai', text: 'Silent background complete' }),
+        expect.objectContaining({
+          role: 'ai',
+          text: 'Silent background complete',
+        }),
       ])
     );
 
@@ -2260,7 +2364,11 @@ describe('deep-chat playground partial stream recovery', () => {
     await remounted.mount(container);
     expect(getChat(container).history).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ role: 'ai', text: partialText, status: 'partial' }),
+        expect.objectContaining({
+          role: 'ai',
+          text: partialText,
+          status: 'partial',
+        }),
       ])
     );
 
@@ -2329,7 +2437,9 @@ describe('deep-chat playground request stopping', () => {
   });
 
   it('clears stop-active once the request settles (display replay is not a stop state)', async () => {
-    const streamDeferred: { resolve: ((value: string) => void) | null } = { resolve: null };
+    const streamDeferred: { resolve: ((value: string) => void) | null } = {
+      resolve: null,
+    };
     const { container, onClose, unmount } = await mountAndStartStoppableRequest(
       async (...args: unknown[]) => {
         const callOptions = args[5] as {
