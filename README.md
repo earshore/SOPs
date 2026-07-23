@@ -26,14 +26,19 @@ sops 是一个 Vite + TypeScript 前端项目，面向亚马逊运营团队，�
 | 通道                         | 版本           | 说明                                               |
 | ---------------------------- | -------------- | -------------------------------------------------- |
 | **GitHub Latest（稳定 GA）** | `v3.0.10`      | 生产推荐版本                                       |
-| **当前 Pre-release 候选**    | `v3.0.11-rc.4` | Deep Chat 发送钮 pin + Skill Chip dock + 侧栏 Skill Library；**勿**默认当生产 |
-| package.json                 | `3.0.11-rc.4`  | 与 RC tag / Release 一致（GA 前）                  |
+| **当前 Pre-release 候选**    | `v3.0.11-rc.5` | Deep Chat 技能单次执行（发送后消费挂载）；**勿**默认当生产 |
+| package.json                 | `3.0.11-rc.5`  | 与 RC tag / Release 一致（GA 前）                  |
 | 上一 GA                      | `v3.0.10`      | 回滚参考                                           |
 
 - 发版命令：`npm run release:validate` / `release:notes` / `release:package` / `release:gate`；推送 `v*` tag 触发 [Release workflow](./.github/workflows/release.yml)。
-- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.4` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
+- **全部历史版本**的完整叙述见 [docs/CHANGELOG.md](./docs/CHANGELOG.md)（与 GitHub Releases 一一对应，含 `0.1.0`…`3.0.11-rc.5` 及全部 RC/alpha/beta）；策略见 [docs/RELEASE_POLICY.md](./docs/RELEASE_POLICY.md)。
 - 全量同步：`npm run release:sync-all`（CHANGELOG ↔ 全部 GitHub Release notes）。
-- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.4`。
+- 版本线说明：`v3.0.4` GA 之后曾误序发布 `v3.0.4-rc.*` 并误标 `3.0.5` / `3.0.6-rc.*`；`v3.0.5` 已完成历史版本线收口，当前稳定版为 `v3.0.10`，候选为 `v3.0.11-rc.5`。
+
+`v3.0.11-rc.5`（2026-07-23，Pre-release）收口 rc.4 之后的技能语义：
+
+- **单次执行**：挂载技能后发送即消费系统提示与会话 skillContexts；历史消息 Chip 仍可展示，再调用需重新挂载。
+- GitHub Latest **仍指向** `v3.0.10`；回滚基线为 `v3.0.10`。
 
 `v3.0.11-rc.4`（2026-07-23，Pre-release）收口 rc.3 之后的 Deep Chat 作曲器与技能入口：
 

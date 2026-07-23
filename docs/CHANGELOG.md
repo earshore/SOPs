@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.11-rc.5] - 2026-07-23
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.4` 之后的 Deep Chat 技能单次执行语义。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Changed
+
+- Deep Chat：挂载技能改为**单次执行**——用户发送后立即消费 `skillContexts` 与技能派生系统提示；历史消息中的 `「技能名」` 仍可展示 / 编辑回填 Chip，再次调用需从 Skill Library 重新挂载。
+
+### Fixed
+
+- 单测 / E2E：覆盖发送后无会话 dock、无续挂系统提示，以及历史气泡 Chip 仍可见。
+
 ## [3.0.11-rc.4] - 2026-07-23
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。

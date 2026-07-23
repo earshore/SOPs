@@ -18,6 +18,7 @@ const OUT_DIR = join(ROOT, 'release-artifacts/backfill');
 const PRE_RE = /-(alpha|beta|rc)(\.|$)/i;
 
 const DEFAULT_VERSIONS = [
+  '3.0.11-rc.5',
   '3.0.11-rc.4',
   '3.0.11-rc.3',
   '3.0.11-rc.2',
@@ -116,6 +117,7 @@ function buildBody(version, section, extra = '') {
     : '';
 
   const rollback =
+    version === '3.0.11-rc.5' ||
     version === '3.0.11-rc.4' ||
     version === '3.0.11-rc.3' ||
     version === '3.0.11-rc.2' ||
