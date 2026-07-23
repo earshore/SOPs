@@ -157,7 +157,14 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     padding-left: 0.15rem !important;
   }
 
-  /* 深度思考正文：左侧引用竖线 */
+  /* Must beat display:flex !important so collapsed 已完成 hides 深度思考 */
+  .deep-chat-dt-done-panel[hidden],
+  .deep-chat-dt-body[hidden],
+  .deep-chat-dt-stream[hidden] {
+    display: none !important;
+  }
+
+  /* 深度思考正文：左侧引用竖线（仅展开后可见） */
   .deep-chat-dt-body {
     width: 100% !important;
     margin: 0.2rem 0 0.15rem !important;

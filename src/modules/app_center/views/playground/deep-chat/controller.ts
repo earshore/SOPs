@@ -4850,11 +4850,22 @@ function applySettledDeepThinkingUi(
 
   nodes.doneLabel.textContent = formatCompletedDurationLabel(durationSec);
   setToggleExpanded(nodes.doneToggle, state.doneOpen);
-  nodes.donePanel.hidden = !state.doneOpen;
+  // Nested hierarchy: 已完成 collapsed → hide entire panel (深度思考 + body).
+  // Only after 已完成 expands can user toggle 深度思考.
+  if (!state.doneOpen) {
+    state.deepOpen = false;
+    nodes.donePanel.hidden = true;
+    setToggleExpanded(nodes.deepToggle, false);
+    nodes.deepBody.hidden = true;
+    stopReasoningTypewriter();
+    return;
+  }
+
+  nodes.donePanel.hidden = false;
   setToggleExpanded(nodes.deepToggle, state.deepOpen);
   nodes.deepBody.hidden = !state.deepOpen;
 
-  if (!state.doneOpen || !state.deepOpen) {
+  if (!state.deepOpen) {
     stopReasoningTypewriter();
     return;
   }
