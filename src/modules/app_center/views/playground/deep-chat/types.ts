@@ -81,6 +81,13 @@ export interface DeepChatThread {
     enabled?: boolean;
     effort?: 'low' | 'medium' | 'high';
   };
+  /**
+   * Last OpenAI Responses `response.id` for this thread (R3 multi-turn).
+   * Used as previous_response_id when apiPath is responses. Cleared on model change / new thread.
+   */
+  lastResponseId?: string;
+  /** Model id that produced lastResponseId (invalidate chain if model switches). */
+  lastResponseModel?: string;
   customTitle?: string;
   pinnedAt?: number;
   /** 后台完成回复后的未读标记（切回会话时清除） */

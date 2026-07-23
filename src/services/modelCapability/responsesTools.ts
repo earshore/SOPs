@@ -13,16 +13,40 @@ export interface ResponsesFunctionCall {
   itemId?: string;
 }
 
+/** OpenAI Responses built-in tool type strings (pass-through). */
+export const RESPONSES_BUILTIN_TOOL_TYPES = [
+  'web_search',
+  'web_search_preview',
+  'file_search',
+  'code_interpreter',
+  'computer_use_preview',
+  'image_generation',
+  'mcp',
+] as const;
+
+export type ResponsesBuiltInToolType = (typeof RESPONSES_BUILTIN_TOOL_TYPES)[number];
+
+export function isResponsesBuiltInToolType(type: unknown): type is ResponsesBuiltInToolType {
+  return (
+    typeof type === 'string' &&
+    (RESPONSES_BUILTIN_TOOL_TYPES as readonly string[]).includes(type)
+  );
+}
+
 /**
  * Normalize tools from Chat Completions shape to Responses shape when needed.
  * Chat: { type:'function', function: { name, description, parameters } }
  * Responses: { type:'function', name, description, parameters }
+ * Built-in: { type: 'web_search' | 'file_search' | ... } pass-through.
  */
 export function normalizeToolsForResponses(tools: unknown[] | undefined): unknown[] | undefined {
   if (!tools || tools.length === 0) return tools;
   return tools.map(tool => {
     if (!tool || typeof tool !== 'object') return tool;
     const t = tool as Record<string, unknown>;
+    if (isResponsesBuiltInToolType(t.type)) {
+      return t;
+    }
     if (t.type === 'function' && t.function && typeof t.function === 'object') {
       const fn = t.function as Record<string, unknown>;
       return {

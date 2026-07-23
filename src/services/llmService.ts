@@ -25,6 +25,7 @@ import {
   extractGeminiGenerateText,
   DEFAULT_MAX_TOOL_ROUNDS,
   extractResponsesId,
+  extractResponsesIdFromStreamEvent,
   extractResponsesOutputText,
   getAnthropicStreamTextDelta,
   getGeminiStreamTextDelta,
@@ -327,7 +328,10 @@ function getLLMErrorMessage(errorText: string, fallback: string): string {
   }
 }
 
-type OpenAIStreamOptions = Pick<LLMOptions, 'onFirstResponse' | 'onStreamUpdate'> & {
+type OpenAIStreamOptions = Pick<
+  LLMOptions,
+  'onFirstResponse' | 'onStreamUpdate' | 'onResponseId'
+> & {
   onStreamActivity?: () => void;
 };
 
@@ -336,6 +340,7 @@ interface OpenAIStreamState {
   reasoningContent: string;
   firstChunkMs?: number;
   chunkCount: number;
+  responseIdReported?: boolean;
 }
 
 interface OpenAIStreamLineContext {
@@ -407,6 +412,23 @@ function assertStreamPayloadIsOk(
   });
 }
 
+function reportResponsesStreamIdOnce(
+  payload: Record<string, unknown>,
+  context: OpenAIStreamLineContext
+): void {
+  if (context.apiSurface !== 'responses' || context.state.responseIdReported) {
+    return;
+  }
+  const responseId =
+    extractResponsesIdFromStreamEvent(payload) ||
+    extractResponsesId(payload.response as Record<string, unknown> | undefined);
+  if (!responseId) {
+    return;
+  }
+  context.state.responseIdReported = true;
+  context.options.onResponseId?.(responseId);
+}
+
 function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext): void {
   const data = getStreamData(line);
   if (!data) {
@@ -422,6 +444,7 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
   }
 
   assertStreamPayloadIsOk(payload, data, context.response);
+  reportResponsesStreamIdOnce(payload, context);
 
   const delta = getStreamDelta(payload, context.apiSurface);
   const reasoningDelta = getReasoningStreamDelta(payload, context.apiSurface);
@@ -538,7 +561,12 @@ async function readOpenAIStream(
     return readBufferedOpenAIResponse(response);
   }
 
-  const state: OpenAIStreamState = { content: '', reasoningContent: '', chunkCount: 0 };
+  const state: OpenAIStreamState = {
+    content: '',
+    reasoningContent: '',
+    chunkCount: 0,
+    responseIdReported: false,
+  };
   const lineContext: OpenAIStreamLineContext = {
     response,
     requestStartedAt,
@@ -1078,6 +1106,7 @@ async function readLLMResponsePayload(
       onFirstResponse: context.options.onFirstResponse,
       onStreamActivity: context.options.onStreamActivity,
       onStreamUpdate: context.options.onStreamUpdate,
+      onResponseId: context.options.onResponseId,
     },
     context.apiSurface
   );

@@ -153,9 +153,16 @@ export function extractResponsesIdFromStreamEvent(
   if (response && typeof response.id === 'string' && response.id.trim()) {
     return response.id.trim();
   }
-  if (typeof payload.id === 'string' && payload.id.trim() && String(payload.type || '').startsWith('response.')) {
-    // Some events put id on the response object only; ignore bare choice ids
-    return undefined;
+  // response.created / response.completed often put id on the event root
+  const type = typeof payload.type === 'string' ? payload.type : '';
+  if (
+    (type === 'response.created' ||
+      type === 'response.completed' ||
+      type === 'response.in_progress') &&
+    typeof payload.id === 'string' &&
+    payload.id.trim()
+  ) {
+    return payload.id.trim();
   }
-  return extractResponsesId(payload.response as Record<string, unknown> | undefined);
+  return undefined;
 }

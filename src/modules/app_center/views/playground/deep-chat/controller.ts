@@ -9,6 +9,7 @@ import { ValidationError } from '@/common/errors/AppError';
 import { setSafeHtml } from '@/common/utils/security';
 import { callLLM, type ChatMessage } from '@/services/llmService';
 import {
+  normalizeApiPathId,
   normalizeReasoningUserPrefs,
   resolveModelCapability,
   shouldShowReasoningControls,
@@ -1271,7 +1272,15 @@ function bindModelControls(refs: ModelControlRefs): void {
     refs;
 
   const onModelChange = (): void => {
-    selectedModel = modelSelect?.value || selectedModel;
+    const nextModel = modelSelect?.value || selectedModel;
+    if (nextModel !== selectedModel) {
+      // Invalidate Responses multi-turn chain when model changes mid-thread.
+      updateActiveThreadFields(container, {
+        lastResponseId: undefined,
+        lastResponseModel: undefined,
+      });
+    }
+    selectedModel = nextModel;
     // Capability-gated controls must re-evaluate when the model changes.
     syncDeepChatReasoningControlsFromThread(container);
   };
@@ -2396,10 +2405,57 @@ function prepareDeepChatReasoningCallOptions(): {
   };
 }
 
+function resolveDeepChatResponsesChainOptions(
+  config: LLMProviderConfig,
+  model: string
+): {
+  apiPath?: ReturnType<typeof normalizeApiPathId>;
+  previousResponseId?: string;
+  store?: boolean;
+} {
+  const apiPath = normalizeApiPathId(
+    (config as { apiPath?: unknown }).apiPath ??
+      StorageService.getLLMConfig(config.provider)?.apiPath
+  );
+  if (apiPath !== 'responses') {
+    return { apiPath };
+  }
+
+  const thread = getActiveThread();
+  const previousResponseId =
+    thread.lastResponseModel === model && thread.lastResponseId
+      ? thread.lastResponseId
+      : undefined;
+
+  return {
+    apiPath,
+    ...(previousResponseId
+      ? {
+          previousResponseId,
+          // Chain needs server-side state on many gateways
+          store: true,
+        }
+      : {
+          // First turn of chain: still store so next turn can attach previous_response_id
+          store: true,
+        }),
+  };
+}
+
+function persistDeepChatResponseId(model: string, responseId: string): void {
+  const container = getMountedRenderContainer();
+  if (!container) return;
+  updateActiveThreadFields(container, {
+    lastResponseId: responseId,
+    lastResponseModel: model,
+  });
+}
+
 async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string> {
   const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
   let streamedText = '';
   const reasoningOptions = prepareDeepChatReasoningCallOptions();
+  const responsesChain = resolveDeepChatResponsesChainOptions(config, model);
   const finalText = await callLLM(
     messages,
     config.provider,
@@ -2411,11 +2467,15 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
       maxTokens: getDeepChatRequestBudgetDefaults().maxOutputTokens,
       ...(config.serviceTier && { serviceTier: config.serviceTier }),
       ...reasoningOptions,
+      ...responsesChain,
       modelsEntry: findConfigModelsEntry(config, model),
       retries: 0,
       ...getRuntimeDeepChatOptions(),
       signal: controller.signal,
       stream: true,
+      onResponseId: responseId => {
+        persistDeepChatResponseId(model, responseId);
+      },
       onStreamUpdate: update => {
         if (pendingRequest.abortReason) {
           return;
@@ -2428,7 +2488,7 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
           appendPendingAssistantText(pendingRequest, update.delta);
           void emitPendingAssistantDelta(signals, pendingRequest, sourceChat, update.delta);
         } else if (update.reasoningDelta) {
-          // Reasoning-only chunk: refresh chrome under 「正在生成回复…」
+          // Reasoning-only chunk: refresh chrome under generation status
           const container = getMountedRenderContainer();
           if (container) {
             syncPendingStatus(container);

@@ -56,7 +56,10 @@ export {
 export {
   buildFunctionCallOutputItems,
   extractResponsesFunctionCalls,
+  isResponsesBuiltInToolType,
   normalizeToolsForResponses,
+  RESPONSES_BUILTIN_TOOL_TYPES,
+  type ResponsesBuiltInToolType,
   type ResponsesFunctionCall,
 } from './responsesTools';
 export {

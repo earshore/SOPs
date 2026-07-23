@@ -25,6 +25,17 @@ describe('normalizeToolsForResponses', () => {
       parameters: { type: 'object' },
     });
   });
+
+  it('passes through built-in tool types', () => {
+    const out = normalizeToolsForResponses([
+      { type: 'web_search' },
+      { type: 'file_search', vector_store_ids: ['vs_1'] },
+    ]);
+    expect(out).toEqual([
+      { type: 'web_search' },
+      { type: 'file_search', vector_store_ids: ['vs_1'] },
+    ]);
+  });
 });
 
 describe('extractResponsesFunctionCalls', () => {
