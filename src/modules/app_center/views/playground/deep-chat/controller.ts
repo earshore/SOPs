@@ -1746,6 +1746,52 @@ function getChatSearchRefs(container: HTMLElement): ChatSearchRefs | null {
   };
 }
 
+function findConfigModelsEntry(
+  config: { models?: Array<string | { id: string }> } | null | undefined,
+  model: string
+): string | { id: string } {
+  const found = config?.models?.find(item =>
+    typeof item === 'string' ? item === model : item.id === model
+  );
+  return found ?? model;
+}
+
+function parseReasoningEffortValue(value: string | undefined): 'low' | 'medium' | 'high' {
+  return value === 'low' || value === 'medium' || value === 'high' ? value : 'medium';
+}
+
+function bindReasoningTuningControls(container: HTMLElement): void {
+  const reasoningEnabled = container.querySelector<HTMLInputElement>(
+    '#deep-chat-reasoning-enabled'
+  );
+  const reasoningEffort = container.querySelector<HTMLSelectElement>('#deep-chat-reasoning-effort');
+
+  const onReasoningEnabledChange = (): void => {
+    const enabled = Boolean(reasoningEnabled?.checked);
+    if (reasoningEffort) {
+      reasoningEffort.disabled = !enabled;
+    }
+    const prev = getActiveThread().reasoning || {};
+    updateActiveThreadFields(container, {
+      reasoning: { ...prev, enabled },
+    });
+  };
+  const onReasoningEffortChange = (): void => {
+    const effort = parseReasoningEffortValue(reasoningEffort?.value);
+    const prev = getActiveThread().reasoning || {};
+    updateActiveThreadFields(container, {
+      reasoning: { ...prev, effort },
+    });
+  };
+  reasoningEnabled?.addEventListener('change', onReasoningEnabledChange);
+  reasoningEffort?.addEventListener('change', onReasoningEffortChange);
+  cleanupCallbacks.push(() => {
+    reasoningEnabled?.removeEventListener('change', onReasoningEnabledChange);
+    reasoningEffort?.removeEventListener('change', onReasoningEffortChange);
+  });
+  syncDeepChatReasoningControlsFromThread(container);
+}
+
 function bindTuningControls(container: HTMLElement, refs: TuningControlRefs): void {
   const { systemPromptInput, temperatureInput, temperatureValue, resetTuningButton, tuningPanel } =
     refs;
@@ -1770,66 +1816,7 @@ function bindTuningControls(container: HTMLElement, refs: TuningControlRefs): vo
   temperatureInput?.addEventListener('input', onTemperatureInput);
   cleanupCallbacks.push(() => temperatureInput?.removeEventListener('input', onTemperatureInput));
 
-  const reasoningRoot = container.querySelector<HTMLElement>('#deep-chat-reasoning-controls');
-  const reasoningEnabled = container.querySelector<HTMLInputElement>(
-    '#deep-chat-reasoning-enabled'
-  );
-  const reasoningEffort = container.querySelector<HTMLSelectElement>(
-    '#deep-chat-reasoning-effort'
-  );
-
-  const syncReasoningControlsVisibility = (): void => {
-    const config = currentConfig;
-    const model = selectedModel || config?.model || '';
-    if (!reasoningRoot || !config || !model) {
-      if (reasoningRoot) reasoningRoot.hidden = true;
-      return;
-    }
-    const modelsEntry =
-      config.models?.find(item =>
-        typeof item === 'string' ? item === model : item.id === model
-      ) ?? model;
-    const cap = resolveModelCapability({
-      provider: config.provider,
-      modelId: model,
-      modelsEntry,
-    });
-    reasoningRoot.hidden = !shouldShowReasoningControls(cap);
-    if (reasoningEffort && cap.reasoningEfforts.length > 0) {
-      const allowed = new Set(cap.reasoningEfforts);
-      for (const option of Array.from(reasoningEffort.options)) {
-        option.hidden = !allowed.has(option.value as 'low' | 'medium' | 'high');
-      }
-    }
-  };
-
-  const onReasoningEnabledChange = (): void => {
-    const enabled = Boolean(reasoningEnabled?.checked);
-    if (reasoningEffort) {
-      reasoningEffort.disabled = !enabled;
-    }
-    const prev = getActiveThread().reasoning || {};
-    updateActiveThreadFields(container, {
-      reasoning: { ...prev, enabled },
-    });
-  };
-  const onReasoningEffortChange = (): void => {
-    const value = reasoningEffort?.value;
-    const effort =
-      value === 'low' || value === 'medium' || value === 'high' ? value : ('medium' as const);
-    const prev = getActiveThread().reasoning || {};
-    updateActiveThreadFields(container, {
-      reasoning: { ...prev, effort },
-    });
-  };
-  reasoningEnabled?.addEventListener('change', onReasoningEnabledChange);
-  reasoningEffort?.addEventListener('change', onReasoningEffortChange);
-  cleanupCallbacks.push(() => {
-    reasoningEnabled?.removeEventListener('change', onReasoningEnabledChange);
-    reasoningEffort?.removeEventListener('change', onReasoningEffortChange);
-  });
-  syncReasoningControlsVisibility();
-  syncDeepChatReasoningControlsFromThread(container);
+  bindReasoningTuningControls(container);
 
   const onResetTuning = (): void => {
     sessionSystemPrompt = '';
@@ -2287,10 +2274,7 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
   const savedConfig = StorageService.getLLMConfig(config.provider);
   const globalReasoning = normalizeReasoningUserPrefs(savedConfig?.reasoningPrefs);
   const sessionReasoning = getActiveThread().reasoning;
-  const modelsEntry =
-    savedConfig?.models?.find(item =>
-      typeof item === 'string' ? item === model : item.id === model
-    ) ?? model;
+  const modelsEntry = findConfigModelsEntry(savedConfig, model);
 
   const finalText = await callLLM(
     messages,
@@ -2726,41 +2710,42 @@ function applyThreadTuningToSession(container: HTMLElement | null): void {
   syncDeepChatReasoningControlsFromThread(container);
 }
 
+function resolveSessionReasoningUiState(provider: string): {
+  enabled: boolean;
+  effort: 'low' | 'medium' | 'high';
+} {
+  const override = getActiveThread().reasoning;
+  const global = normalizeReasoningUserPrefs(StorageService.getLLMConfig(provider)?.reasoningPrefs);
+  return {
+    enabled: override?.enabled !== undefined ? Boolean(override.enabled) : global.enabled,
+    effort: parseReasoningEffortValue(override?.effort ?? global.effort),
+  };
+}
+
 /** 按当前线程 + 全局默认同步推理控件（会话切换 / 重置） */
 function syncDeepChatReasoningControlsFromThread(container: HTMLElement): void {
   const reasoningRoot = container.querySelector<HTMLElement>('#deep-chat-reasoning-controls');
   const reasoningEnabled = container.querySelector<HTMLInputElement>(
     '#deep-chat-reasoning-enabled'
   );
-  const reasoningEffort = container.querySelector<HTMLSelectElement>(
-    '#deep-chat-reasoning-effort'
-  );
+  const reasoningEffort = container.querySelector<HTMLSelectElement>('#deep-chat-reasoning-effort');
   const config = currentConfig;
   const model = selectedModel || config?.model || '';
   if (!reasoningRoot || !config || !model) {
-    if (reasoningRoot) reasoningRoot.hidden = true;
+    if (reasoningRoot) {
+      reasoningRoot.hidden = true;
+    }
     return;
   }
-  const modelsEntry =
-    config.models?.find(item =>
-      typeof item === 'string' ? item === model : item.id === model
-    ) ?? model;
+
   const cap = resolveModelCapability({
     provider: config.provider,
     modelId: model,
-    modelsEntry,
+    modelsEntry: findConfigModelsEntry(config, model),
   });
   reasoningRoot.hidden = !shouldShowReasoningControls(cap);
 
-  const override = getActiveThread().reasoning;
-  const global = normalizeReasoningUserPrefs(
-    StorageService.getLLMConfig(config.provider)?.reasoningPrefs
-  );
-  const enabled = override?.enabled !== undefined ? Boolean(override.enabled) : global.enabled;
-  const effort =
-    override?.effort === 'low' || override?.effort === 'medium' || override?.effort === 'high'
-      ? override.effort
-      : global.effort;
+  const { enabled, effort } = resolveSessionReasoningUiState(config.provider);
   if (reasoningEnabled) {
     reasoningEnabled.checked = enabled;
   }

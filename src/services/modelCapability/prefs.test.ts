@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  clampEffort,
-  normalizeReasoningUserPrefs,
-  resolveEffectiveReasoning,
-} from './prefs';
+import { clampEffort, normalizeReasoningUserPrefs, resolveEffectiveReasoning } from './prefs';
 import type { ResolvedModelCapability } from './types';
 
 function capable(

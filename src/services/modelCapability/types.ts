@@ -23,10 +23,7 @@ export interface ModelCapabilityRule {
    * Map product prefs to chat/completions top-level fields.
    * When enabled=false or effort=off, return {} or explicit off fields (gateway-dependent).
    */
-  mapRequest?: (prefs: {
-    enabled: boolean;
-    effort: ReasoningEffort;
-  }) => Record<string, unknown>;
+  mapRequest?: (prefs: { enabled: boolean; effort: ReasoningEffort }) => Record<string, unknown>;
 }
 
 export interface ModelsListEntry {

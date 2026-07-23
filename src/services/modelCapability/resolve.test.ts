@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ModelCapabilityRule } from './types';
-import {
-  matchModelPattern,
-  resolveModelCapability,
-  shouldShowReasoningControls,
-} from './resolve';
+import { matchModelPattern, resolveModelCapability, shouldShowReasoningControls } from './resolve';
 
 const sampleRules: ModelCapabilityRule[] = [
   {
@@ -109,19 +105,13 @@ describe('shouldShowReasoningControls', () => {
   it('requires supportsReasoning and mapRequest', () => {
     expect(
       shouldShowReasoningControls(
-        resolveModelCapability(
-          { provider: 'openai', modelId: 'o3-mini' },
-          sampleRules
-        )
+        resolveModelCapability({ provider: 'openai', modelId: 'o3-mini' }, sampleRules)
       )
     ).toBe(true);
 
     expect(
       shouldShowReasoningControls(
-        resolveModelCapability(
-          { provider: 'openai', modelId: 'gpt-4o' },
-          sampleRules
-        )
+        resolveModelCapability({ provider: 'openai', modelId: 'gpt-4o' }, sampleRules)
       )
     ).toBe(false);
 

@@ -1501,7 +1501,9 @@ describe('deep-chat skill trial after send', () => {
       threads?: Array<{ skillContexts?: unknown; systemPrompt?: string }>;
     };
     expect(
-      persistedStore.threads?.some(thread => Array.isArray(thread.skillContexts) && thread.skillContexts.length > 0)
+      persistedStore.threads?.some(
+        thread => Array.isArray(thread.skillContexts) && thread.skillContexts.length > 0
+      )
     ).toBe(false);
     unmount();
   });

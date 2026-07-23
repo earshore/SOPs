@@ -1486,7 +1486,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
   setReasoningEffort(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     const effort =
-      value === 'low' || value === 'medium' || value === 'high' ? value : DEFAULT_REASONING_PREFS.effort;
+      value === 'low' || value === 'medium' || value === 'high'
+        ? value
+        : DEFAULT_REASONING_PREFS.effort;
     this.llm.reasoningPrefs = {
       ...normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
       effort,

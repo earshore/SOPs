@@ -6,10 +6,7 @@ import type {
   ResolvedModelCapability,
   ReasoningEffortLevel,
 } from './types';
-import {
-  DEFAULT_REASONING_EFFORTS,
-  DEFAULT_UNKNOWN_CONTEXT_WINDOW,
-} from './types';
+import { DEFAULT_REASONING_EFFORTS, DEFAULT_UNKNOWN_CONTEXT_WINDOW } from './types';
 
 /** Match model id against pattern with `*` wildcards (glob-style). */
 export function matchModelPattern(pattern: string, modelId: string): boolean {
@@ -17,9 +14,7 @@ export function matchModelPattern(pattern: string, modelId: string): boolean {
   if (pattern === modelId) return true;
   if (!pattern.includes('*')) return pattern === modelId;
 
-  const escaped = pattern
-    .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
-    .replace(/\*/g, '.*');
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
   return new RegExp(`^${escaped}$`).test(modelId);
 }
 
@@ -51,9 +46,61 @@ function findMatchingRule(
 }
 
 function positiveFiniteContext(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isFinite(value) && value > 0
-    ? value
-    : undefined;
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+function readModelsFeatures(entry: ModelsListEntry | undefined): string[] | undefined {
+  if (!entry || !Array.isArray(entry.features)) {
+    return undefined;
+  }
+  return entry.features.map(String);
+}
+
+function resolveReasoningEfforts(
+  rule: ModelCapabilityRule | null,
+  supportsReasoning: boolean
+): ReasoningEffortLevel[] {
+  if (rule?.reasoningEfforts && rule.reasoningEfforts.length > 0) {
+    return [...rule.reasoningEfforts];
+  }
+  return supportsReasoning ? [...DEFAULT_REASONING_EFFORTS] : [];
+}
+
+function resolveDefaultEffort(
+  rule: ModelCapabilityRule | null,
+  reasoningEfforts: ReasoningEffortLevel[]
+): ReasoningEffortLevel {
+  if (rule?.defaultEffort && reasoningEfforts.includes(rule.defaultEffort)) {
+    return rule.defaultEffort;
+  }
+  if (reasoningEfforts.includes('medium')) {
+    return 'medium';
+  }
+  return reasoningEfforts[0] ?? 'medium';
+}
+
+function mergeFeatureLists(
+  ruleFeatures: string[] | undefined,
+  modelsFeatures: string[] | undefined
+): string[] {
+  return [...(ruleFeatures ?? []), ...(modelsFeatures ?? [])].filter(
+    (feature, index, all) => all.indexOf(feature) === index
+  );
+}
+
+function buildCapabilitySource(
+  registryMatched: boolean,
+  modelsContext: number | undefined,
+  modelsFeatures: string[] | undefined
+): ResolvedModelCapability['source'] {
+  const source: ResolvedModelCapability['source'] = { registryMatched };
+  if (modelsContext !== undefined) {
+    source.modelsContext = modelsContext;
+  }
+  if (modelsFeatures !== undefined) {
+    source.modelsFeatures = modelsFeatures;
+  }
+  return source;
 }
 
 /**
@@ -69,51 +116,22 @@ export function resolveModelCapability(
   const rule = modelId ? findMatchingRule(provider, modelId, rules) : null;
 
   const modelsContext = positiveFiniteContext(modelsEntry?.context);
-  const modelsFeatures = Array.isArray(modelsEntry?.features)
-    ? modelsEntry!.features!.map(String)
-    : undefined;
-
+  const modelsFeatures = readModelsFeatures(modelsEntry);
   const registryContext = rule ? positiveFiniteContext(rule.contextWindow) : undefined;
-  const contextWindow =
-    modelsContext ?? registryContext ?? DEFAULT_UNKNOWN_CONTEXT_WINDOW;
-
   const supportsReasoning = Boolean(rule?.supportsReasoning);
-  const mapRequest = rule?.mapRequest ?? null;
-  // Sending requires mapRequest; UI may still see supportsReasoning only when both true via helper
-  const reasoningEfforts: ReasoningEffortLevel[] =
-    rule?.reasoningEfforts && rule.reasoningEfforts.length > 0
-      ? [...rule.reasoningEfforts]
-      : supportsReasoning
-        ? [...DEFAULT_REASONING_EFFORTS]
-        : [];
-
-  const defaultEffort: ReasoningEffortLevel =
-    rule?.defaultEffort && reasoningEfforts.includes(rule.defaultEffort)
-      ? rule.defaultEffort
-      : reasoningEfforts.includes('medium')
-        ? 'medium'
-        : (reasoningEfforts[0] ?? 'medium');
-
-  const features = [
-    ...(rule?.features ?? []),
-    ...(modelsFeatures ?? []),
-  ].filter((f, i, arr) => arr.indexOf(f) === i);
+  const reasoningEfforts = resolveReasoningEfforts(rule, supportsReasoning);
 
   return {
     modelId,
     provider,
-    contextWindow,
+    contextWindow: modelsContext ?? registryContext ?? DEFAULT_UNKNOWN_CONTEXT_WINDOW,
     supportsReasoning,
     reasoningEfforts,
-    defaultEffort,
+    defaultEffort: resolveDefaultEffort(rule, reasoningEfforts),
     temperatureIgnored: Boolean(rule?.temperatureIgnored),
-    features,
-    mapRequest,
-    source: {
-      registryMatched: Boolean(rule),
-      ...(modelsContext !== undefined ? { modelsContext } : {}),
-      ...(modelsFeatures !== undefined ? { modelsFeatures } : {}),
-    },
+    features: mergeFeatureLists(rule?.features, modelsFeatures),
+    mapRequest: rule?.mapRequest ?? null,
+    source: buildCapabilitySource(Boolean(rule), modelsContext, modelsFeatures),
   };
 }
 

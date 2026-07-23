@@ -1,12 +1,32 @@
-import type {
-  EffectiveReasoningPrefs,
-  ResolvedModelCapability,
-} from './types';
+import type { EffectiveReasoningPrefs, ResolvedModelCapability } from './types';
 
 export type ChatCompletionsBodyBase = Record<string, unknown> & {
   model: string;
   messages: unknown;
 };
+
+function applyTemperatureToBody(
+  body: Record<string, unknown>,
+  temperatureIgnored: boolean,
+  temperature: number | undefined
+): void {
+  if (temperatureIgnored) {
+    delete body.temperature;
+    return;
+  }
+  if (temperature !== undefined && body.temperature === undefined) {
+    body.temperature = temperature;
+  }
+}
+
+function mergeMapperFields(body: Record<string, unknown>, extra: Record<string, unknown>): void {
+  for (const [key, value] of Object.entries(extra)) {
+    if (key === 'model' || key === 'messages') {
+      continue;
+    }
+    body[key] = value;
+  }
+}
 
 /**
  * Merge capability mapper output into a chat/completions body.
@@ -22,17 +42,7 @@ export function applyReasoningToRequestBody(
   options?: { temperature?: number }
 ): Record<string, unknown> {
   const body: Record<string, unknown> = { ...base };
-
-  if (
-    !capability.temperatureIgnored &&
-    options?.temperature !== undefined &&
-    body.temperature === undefined
-  ) {
-    body.temperature = options.temperature;
-  }
-  if (capability.temperatureIgnored && 'temperature' in body) {
-    delete body.temperature;
-  }
+  applyTemperatureToBody(body, capability.temperatureIgnored, options?.temperature);
 
   if (!capability.mapRequest) {
     return body;
@@ -42,18 +52,9 @@ export function applyReasoningToRequestBody(
     enabled: reasoning.enabled,
     effort: reasoning.enabled ? reasoning.effort : 'off',
   });
-
-  if (!extra || typeof extra !== 'object') {
-    return body;
+  if (extra && typeof extra === 'object') {
+    mergeMapperFields(body, extra);
   }
-
-  for (const [key, value] of Object.entries(extra)) {
-    if (key === 'model' || key === 'messages') {
-      continue;
-    }
-    body[key] = value;
-  }
-
   return body;
 }
 

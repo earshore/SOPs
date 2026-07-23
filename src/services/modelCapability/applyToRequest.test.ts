@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  applyReasoningToRequestBody,
-  buildChatCompletionsBody,
-} from './applyToRequest';
+import { applyReasoningToRequestBody, buildChatCompletionsBody } from './applyToRequest';
 import type { ResolvedModelCapability } from './types';
 
 const baseCap = {
@@ -13,11 +10,10 @@ const baseCap = {
 
 describe('applyReasoningToRequestBody', () => {
   it('does not write fields when mapRequest is null', () => {
-    const body = applyReasoningToRequestBody(
-      { model: 'm', messages: [] },
-      baseCap,
-      { enabled: true, effort: 'high' }
-    );
+    const body = applyReasoningToRequestBody({ model: 'm', messages: [] }, baseCap, {
+      enabled: true,
+      effort: 'high',
+    });
     expect(body.reasoning_effort).toBeUndefined();
     expect(body.model).toBe('m');
   });
