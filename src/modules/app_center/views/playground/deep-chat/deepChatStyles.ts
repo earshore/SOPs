@@ -23,7 +23,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     margin-bottom: 26px !important;
   }
 
-  /* 生成中：隐藏原生三点，改用气泡下方 inline status */
+  /* 生成中：隐藏原生三点，改用气泡前 inline status（正式回复上方） */
   :host(.is-pending-generation) .deep-chat-loading-message-dots-container {
     display: none !important;
   }
@@ -73,6 +73,59 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     min-width: 0 !important;
   }
 
+  /* 思考过程：在「正在生成回复…」下方、正式回复气泡之前 */
+  .deep-chat-inline-reasoning {
+    display: block !important;
+    width: 100% !important;
+    max-width: min(100%, 42rem) !important;
+    margin: 0.4rem 0 0.55rem !important;
+    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    border-radius: 0.75rem !important;
+    background: rgba(248, 250, 252, 0.98) !important;
+    color: #475569 !important;
+    box-sizing: border-box !important;
+  }
+
+  .deep-chat-inline-reasoning-summary {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    padding: 0.4rem 0.65rem !important;
+    cursor: pointer !important;
+    list-style: none !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    user-select: none !important;
+  }
+
+  .deep-chat-inline-reasoning-summary::-webkit-details-marker {
+    display: none !important;
+  }
+
+  .deep-chat-inline-reasoning-summary i {
+    color: #7c3aed !important;
+    font-size: 0.65rem !important;
+  }
+
+  .deep-chat-inline-reasoning-hint {
+    margin-left: auto !important;
+    font-weight: 500 !important;
+    color: #94a3b8 !important;
+  }
+
+  .deep-chat-inline-reasoning-body {
+    margin: 0 !important;
+    max-height: 10rem !important;
+    overflow: auto !important;
+    padding: 0 0.65rem 0.55rem !important;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+    font-size: 11px !important;
+    line-height: 1.45 !important;
+    color: #475569 !important;
+  }
 
   .inner-message-container {
     display: flex !important;

@@ -132,7 +132,12 @@ const nativeLoggerConsole = globalThis.console;
 const PENDING_ASSISTANT_PLACEHOLDER_TEXT = '正在生成回复...';
 const INLINE_PENDING_STATUS_ID = 'deep-chat-inline-pending-status';
 const INLINE_PENDING_STATUS_CLASS = 'deep-chat-inline-pending-status';
+const INLINE_REASONING_ID = 'deep-chat-inline-reasoning';
+const INLINE_REASONING_CLASS = 'deep-chat-inline-reasoning';
+const INLINE_REASONING_BODY_CLASS = 'deep-chat-inline-reasoning-body';
 const PENDING_GENERATION_HOST_CLASS = 'is-pending-generation';
+/** Shadow DOM rebuild retries when deep-chat recreates loading/AI slots */
+const PENDING_CHROME_MAX_RETRIES = 16;
 const PENDING_DISPLAY_INTERVAL_MS = 32;
 const PENDING_DISPLAY_CHARS_PER_TICK = 6;
 /** 流式 partial 落盘：累计新增字数阈值 */
@@ -164,6 +169,9 @@ let threadStore: DeepChatThreadStore = createDefaultThreadStore();
 let mountedContainer: HTMLElement | null = null;
 const pendingRequests = new Map<string, PendingDeepChatRequest>();
 const pendingDisplayTimers = new Map<string, number>();
+/** Re-attach inline 「正在生成」/思考 chrome when deep-chat rebuilds shadow children */
+let pendingChromeObserver: MutationObserver | null = null;
+let pendingChromeRetryRaf: number | null = null;
 const DEEP_CHAT_SYSTEM_FONT_STACK =
   'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 let draftInputResizeObserver: ResizeObserver | null = null;
@@ -256,6 +264,7 @@ class DeepChatModule extends BaseModule {
     clearDraftInputHeightSync();
     clearSubmitStopButtonSync();
     cleanupMessageToolbars();
+    clearPendingChromeObserver();
     // 软卸载：保留 pendingRequests，生成可在后台继续；remount 后恢复「生成中/输出中」
     // 不 abort 在飞 LLM（与「清空对话」的 disposeActiveSession 区分）
     openThreadMenu = null;
@@ -2377,8 +2386,6 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
   const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
   let streamedText = '';
   const reasoningOptions = prepareDeepChatReasoningCallOptions();
-  const mountContainer = getMountedRenderContainer();
-  clearReasoningStreamPanel(mountContainer);
   const finalText = await callLLM(
     messages,
     config.provider,
@@ -2401,22 +2408,26 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
         }
         if (update.reasoningDelta) {
           appendPendingDeepChatReasoningText(pendingRequest, update.reasoningDelta);
-          renderReasoningStreamPanel(getMountedRenderContainer(), pendingRequest.reasoningText, {
-            open: true,
-          });
         }
         streamedText += update.delta;
         if (update.delta) {
           appendPendingAssistantText(pendingRequest, update.delta);
           void emitPendingAssistantDelta(signals, pendingRequest, sourceChat, update.delta);
+        } else if (update.reasoningDelta) {
+          // Reasoning-only chunk: refresh chrome under 「正在生成回复…」
+          const container = getMountedRenderContainer();
+          if (container) {
+            syncPendingStatus(container);
+          }
         }
       },
     }
   );
 
   if (pendingRequest.abortReason) {
-    if (pendingRequest.reasoningText.trim()) {
-      renderReasoningStreamPanel(mountContainer, pendingRequest.reasoningText, { open: false });
+    const container = getMountedRenderContainer();
+    if (container) {
+      syncPendingStatus(container);
     }
     return pendingRequest.assistantText.trim();
   }
@@ -2435,10 +2446,6 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
       assistantText,
       { module: 'deep-chat', action: 'resolveAssistantText' }
     );
-  }
-
-  if (pendingRequest.reasoningText.trim()) {
-    renderReasoningStreamPanel(mountContainer, pendingRequest.reasoningText, { open: false });
   }
 
   return assistantText;
@@ -3575,11 +3582,11 @@ function switchThread(container: HTMLElement, threadId: string): void {
   applySkillContextsToSession(container);
   applyThreadTuningToSession(container);
   hydrateActiveThreadInlineSkillChips(container);
-  // 目标会话若仍在生成/输出，确保有 drain 在跑（可能已在后台 tick）
+  // 目标会话若仍在生成/输出，确保有 drain 在跑（可能已在后台 tick）；始终同步 chrome
   if (pendingRequests.has(threadId)) {
     schedulePendingAssistantDisplay(threadId);
-    syncPendingStatus(container);
   }
+  syncPendingStatus(container);
 }
 
 async function deleteThread(container: HTMLElement, threadId: string): Promise<void> {
@@ -4111,57 +4118,6 @@ function persistPendingPartialIfNeeded(
   markPendingDeepChatPartialPersisted(pendingRequest);
 }
 
-/** Collapsible display-only reasoning channel (never enters next-turn chat content). */
-function renderReasoningStreamPanel(
-  container: HTMLElement | null,
-  reasoningText: string,
-  options: { open?: boolean } = {}
-): void {
-  if (!container) return;
-  const panel = container.querySelector<HTMLDetailsElement>('#deep-chat-reasoning-stream');
-  const body = container.querySelector<HTMLElement>('#deep-chat-reasoning-stream-body');
-  if (!panel || !body) return;
-
-  const trimmed = reasoningText.trim();
-  if (!trimmed) {
-    panel.hidden = true;
-    body.textContent = '';
-    panel.open = false;
-    return;
-  }
-
-  panel.hidden = false;
-  body.textContent = trimmed;
-  if (options.open !== undefined) {
-    panel.open = options.open;
-  }
-}
-
-function clearReasoningStreamPanel(container: HTMLElement | null): void {
-  renderReasoningStreamPanel(container, '', { open: false });
-}
-
-function syncReasoningStreamPanelForThread(container: HTMLElement, threadId: string): void {
-  const pending = pendingRequests.get(threadId);
-  if (pending?.reasoningText.trim()) {
-    renderReasoningStreamPanel(container, pending.reasoningText, {
-      open: !pending.isSettled,
-    });
-    return;
-  }
-
-  const thread = threadStore.threads.find(item => item.id === threadId);
-  const lastWithReasoning = [...(thread?.messages ?? [])]
-    .reverse()
-    .find(message => typeof message.reasoning === 'string' && message.reasoning.trim());
-  if (lastWithReasoning?.reasoning) {
-    renderReasoningStreamPanel(container, lastWithReasoning.reasoning, { open: false });
-    return;
-  }
-
-  clearReasoningStreamPanel(container);
-}
-
 function schedulePendingAssistantDisplay(threadId: string): void {
   const pendingRequest = pendingRequests.get(threadId);
   if (!pendingRequest) {
@@ -4238,7 +4194,7 @@ function renderPendingAssistantDisplay(
     return;
   }
 
-  // 空内容时不把「正在生成」写进气泡正文，改由气泡下方 inline status 展示
+  // 空内容时不把「正在生成」写进气泡正文，改由气泡前 inline status 展示
   const text = pendingRequest.displayedAssistantText.trim() || '\u200b';
   if (typeof chat.addMessage === 'function') {
     chat.addMessage({ role: 'ai', text, overwrite: true }, true);
@@ -4406,17 +4362,28 @@ function syncPendingRequestView(threadId: string, options: { replaceChat?: boole
     return;
   }
 
-  // 先 replace 再挂 inline status，避免 status 被 chat 重建冲掉
+  // 先 replace 再挂 inline chrome，避免 status 被 chat 重建冲掉
   if (options.replaceChat) {
     replaceChat(container);
   }
   syncPendingStatus(container);
-  syncReasoningStreamPanelForThread(container, threadId);
+}
+
+function clearPendingChromeObserver(): void {
+  pendingChromeObserver?.disconnect();
+  pendingChromeObserver = null;
+  if (pendingChromeRetryRaf !== null) {
+    window.cancelAnimationFrame(pendingChromeRetryRaf);
+    pendingChromeRetryRaf = null;
+  }
 }
 
 function clearInlinePendingStatus(chat: DeepChatElement | null): void {
   chat?.classList.remove(PENDING_GENERATION_HOST_CLASS);
-  chat?.shadowRoot?.getElementById(INLINE_PENDING_STATUS_ID)?.remove();
+  const root = chat?.shadowRoot;
+  root?.getElementById(INLINE_PENDING_STATUS_ID)?.remove();
+  root?.getElementById(INLINE_REASONING_ID)?.remove();
+  clearPendingChromeObserver();
 }
 
 function findInlinePendingStatusHost(root: ShadowRoot): HTMLElement | null {
@@ -4445,7 +4412,55 @@ function findInlinePendingStatusHost(root: ShadowRoot): HTMLElement | null {
   return null;
 }
 
-function mountInlinePendingStatus(host: HTMLElement, statusText: string): void {
+function findMessageBubbleAnchor(host: HTMLElement): HTMLElement | null {
+  return (
+    host.querySelector<HTMLElement>(
+      [
+        ':scope > .message-bubble',
+        ':scope > .deep-chat-loading-message-bubble',
+        ':scope > .deep-chat-loading-message-dots-container',
+        '.message-bubble',
+        '.deep-chat-loading-message-bubble',
+        '.deep-chat-loading-message-dots-container',
+      ].join(', ')
+    ) ?? null
+  );
+}
+
+/**
+ * Reading order before formal reply:
+ * 1) 「正在生成回复…」
+ * 2) 思考过程 (optional)
+ * 3) message bubble / streaming text
+ */
+function placeGenerationChrome(
+  host: HTMLElement,
+  statusEl: HTMLElement,
+  reasoningEl: HTMLElement | null
+): void {
+  const anchor = findMessageBubbleAnchor(host);
+  if (statusEl.parentElement !== host) {
+    if (anchor) {
+      host.insertBefore(statusEl, anchor);
+    } else {
+      host.prepend(statusEl);
+    }
+  } else if (
+    anchor &&
+    statusEl.compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_PRECEDING
+  ) {
+    host.insertBefore(statusEl, anchor);
+  }
+
+  if (!reasoningEl) {
+    return;
+  }
+  if (reasoningEl.parentElement !== host || reasoningEl.previousElementSibling !== statusEl) {
+    statusEl.after(reasoningEl);
+  }
+}
+
+function ensureInlineStatusElement(host: HTMLElement, statusText: string): HTMLElement {
   const doc = host.ownerDocument;
   const root = host.getRootNode();
   const existing =
@@ -4471,60 +4486,251 @@ function mountInlinePendingStatus(host: HTMLElement, statusText: string): void {
     statusEl.append(dot, text);
   }
 
-  if (statusEl.parentElement !== host) {
-    host.append(statusEl);
-  }
-
   const textEl = statusEl.querySelector<HTMLElement>('.deep-chat-inline-pending-text');
   if (textEl && textEl.textContent !== statusText) {
     textEl.textContent = statusText;
   }
+  return statusEl;
 }
 
-function ensureInlinePendingStatus(chat: DeepChatElement, statusText: string): void {
+function ensureInlineReasoningElement(
+  host: HTMLElement,
+  reasoningText: string,
+  options: { open: boolean }
+): HTMLElement | null {
+  const trimmed = reasoningText.trim();
+  const root = host.getRootNode();
+  const existing =
+    root instanceof ShadowRoot || root instanceof Document
+      ? root.getElementById(INLINE_REASONING_ID)
+      : null;
+
+  if (!trimmed) {
+    existing?.remove();
+    return null;
+  }
+
+  const doc = host.ownerDocument;
+  let panel = existing as HTMLDetailsElement | null;
+  if (!panel) {
+    panel = doc.createElement('details');
+    panel.id = INLINE_REASONING_ID;
+    panel.className = INLINE_REASONING_CLASS;
+
+    const summary = doc.createElement('summary');
+    summary.className = 'deep-chat-inline-reasoning-summary';
+    const icon = doc.createElement('i');
+    icon.className = 'fas fa-brain';
+    icon.setAttribute('aria-hidden', 'true');
+    const title = doc.createElement('span');
+    title.textContent = '思考过程';
+    const hint = doc.createElement('span');
+    hint.className = 'deep-chat-inline-reasoning-hint';
+    hint.textContent = '仅展示，不进入下一轮上下文';
+    summary.append(icon, title, hint);
+
+    const body = doc.createElement('pre');
+    body.className = INLINE_REASONING_BODY_CLASS;
+
+    panel.append(summary, body);
+  }
+
+  const body = panel.querySelector<HTMLElement>(`.${INLINE_REASONING_BODY_CLASS}`);
+  if (body && body.textContent !== trimmed) {
+    body.textContent = trimmed;
+  }
+  panel.open = options.open;
+  return panel;
+}
+
+function mountInlineGenerationChrome(
+  host: HTMLElement,
+  statusText: string,
+  reasoningText: string,
+  options: { reasoningOpen: boolean }
+): void {
+  const statusEl = ensureInlineStatusElement(host, statusText);
+  const reasoningEl = ensureInlineReasoningElement(host, reasoningText, {
+    open: options.reasoningOpen,
+  });
+  placeGenerationChrome(host, statusEl, reasoningEl);
+}
+
+function observePendingGenerationChrome(chat: DeepChatElement): void {
   const root = chat.shadowRoot;
   if (!root) {
     return;
   }
 
-  chat.classList.add(PENDING_GENERATION_HOST_CLASS);
-
-  const host = findInlinePendingStatusHost(root);
-  if (host) {
-    mountInlinePendingStatus(host, statusText);
+  if (pendingChromeObserver) {
     return;
   }
 
-  // deep-chat 尚未画出 loading/AI 槽时，下一帧再挂一次
-  window.requestAnimationFrame(() => {
-    if (!pendingRequests.get(threadStore.activeThreadId) || !chat.shadowRoot) {
+  pendingChromeObserver = new MutationObserver(() => {
+    const pending = pendingRequests.get(threadStore.activeThreadId);
+    if (!pending || !chat.shadowRoot) {
       return;
     }
-    const retryHost = findInlinePendingStatusHost(chat.shadowRoot);
-    if (retryHost) {
-      mountInlinePendingStatus(retryHost, statusText);
+    // deep-chat addMessage / loading 重建时把 chrome 冲掉 → 立刻重挂
+    const host = findInlinePendingStatusHost(chat.shadowRoot);
+    const statusEl = chat.shadowRoot.getElementById(INLINE_PENDING_STATUS_ID);
+    const reasoningEl = chat.shadowRoot.getElementById(INLINE_REASONING_ID);
+    const needsReasoning = Boolean(pending.reasoningText.trim());
+    const statusStillMounted = Boolean(host && statusEl && host.contains(statusEl));
+    const reasoningStillMounted =
+      !needsReasoning || Boolean(host && reasoningEl && host.contains(reasoningEl));
+    if (statusStillMounted && reasoningStillMounted) {
+      return;
+    }
+    ensureInlinePendingChrome(chat, getPendingStatusText(pending), pending.reasoningText, {
+      reasoningOpen: !pending.isSettled,
+    });
+  });
+  pendingChromeObserver.observe(root, { childList: true, subtree: true });
+}
+
+function ensureInlinePendingChrome(
+  chat: DeepChatElement,
+  statusText: string,
+  reasoningText: string,
+  options: { reasoningOpen: boolean }
+): void {
+  const root = chat.shadowRoot;
+  if (!root) {
+    schedulePendingChromeRetry(chat, statusText, reasoningText, options);
+    return;
+  }
+
+  chat.classList.add(PENDING_GENERATION_HOST_CLASS);
+  observePendingGenerationChrome(chat);
+
+  const host = findInlinePendingStatusHost(root);
+  if (host) {
+    mountInlineGenerationChrome(host, statusText, reasoningText, options);
+    return;
+  }
+
+  schedulePendingChromeRetry(chat, statusText, reasoningText, options);
+}
+
+function schedulePendingChromeRetry(
+  chat: DeepChatElement,
+  statusText: string,
+  reasoningText: string,
+  options: { reasoningOpen: boolean },
+  attempt = 0
+): void {
+  if (pendingChromeRetryRaf !== null) {
+    return;
+  }
+  pendingChromeRetryRaf = window.requestAnimationFrame(() => {
+    pendingChromeRetryRaf = null;
+    if (!pendingRequests.get(threadStore.activeThreadId)) {
+      return;
+    }
+    const root = chat.shadowRoot;
+    if (!root) {
+      if (attempt + 1 < PENDING_CHROME_MAX_RETRIES) {
+        schedulePendingChromeRetry(chat, statusText, reasoningText, options, attempt + 1);
+      }
+      return;
+    }
+    const host = findInlinePendingStatusHost(root);
+    if (host) {
+      chat.classList.add(PENDING_GENERATION_HOST_CLASS);
+      observePendingGenerationChrome(chat);
+      mountInlineGenerationChrome(host, statusText, reasoningText, options);
+      return;
+    }
+    if (attempt + 1 < PENDING_CHROME_MAX_RETRIES) {
+      schedulePendingChromeRetry(chat, statusText, reasoningText, options, attempt + 1);
     }
   });
 }
 
-function syncPendingStatus(container: HTMLElement): void {
-  // 顶部固定条废弃：始终隐藏（保留节点兼容旧测试/模板）
+/**
+ * Hide legacy light-DOM status/reasoning strips (compat nodes for tests/templates).
+ * Live chrome lives in deep-chat shadow under 「正在生成回复…」.
+ */
+function hideLegacyLightDomGenerationChrome(container: HTMLElement): void {
   const topStatus = container.querySelector<HTMLElement>('#deep-chat-pending-status');
   if (topStatus) {
     topStatus.hidden = true;
   }
+  const lightReasoning = container.querySelector<HTMLElement>('#deep-chat-reasoning-stream');
+  if (lightReasoning) {
+    lightReasoning.hidden = true;
+  }
+}
+
+function getLastAssistantReasoningText(threadId: string): string {
+  const thread = threadStore.threads.find(item => item.id === threadId);
+  const lastWithReasoning = [...(thread?.messages ?? [])]
+    .reverse()
+    .find(message => typeof message.reasoning === 'string' && message.reasoning.trim());
+  return lastWithReasoning?.reasoning?.trim() || '';
+}
+
+/**
+ * After settle: keep collapsed 思考过程 above the final AI bubble (no 「正在生成」).
+ * Display-only; not part of next-turn content.
+ */
+function ensureSettledReasoningChrome(chat: DeepChatElement, reasoningText: string): void {
+  const root = chat.shadowRoot;
+  if (!root) {
+    return;
+  }
+  chat.classList.remove(PENDING_GENERATION_HOST_CLASS);
+  root.getElementById(INLINE_PENDING_STATUS_ID)?.remove();
+  clearPendingChromeObserver();
+
+  const host = findInlinePendingStatusHost(root);
+  if (!host) {
+    return;
+  }
+  const reasoningEl = ensureInlineReasoningElement(host, reasoningText, { open: false });
+  if (!reasoningEl) {
+    return;
+  }
+  const anchor = findMessageBubbleAnchor(host);
+  if (reasoningEl.parentElement !== host) {
+    if (anchor) {
+      host.insertBefore(reasoningEl, anchor);
+    } else {
+      host.prepend(reasoningEl);
+    }
+  } else if (
+    anchor &&
+    reasoningEl.compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_PRECEDING
+  ) {
+    host.insertBefore(reasoningEl, anchor);
+  }
+}
+
+function syncPendingStatus(container: HTMLElement): void {
+  hideLegacyLightDomGenerationChrome(container);
 
   const chat = getChat(container);
   const pendingRequest = pendingRequests.get(threadStore.activeThreadId);
 
   if (!pendingRequest) {
-    clearInlinePendingStatus(chat);
+    const settledReasoning = getLastAssistantReasoningText(threadStore.activeThreadId);
+    if (chat && settledReasoning) {
+      ensureSettledReasoningChrome(chat, settledReasoning);
+    } else {
+      clearInlinePendingStatus(chat);
+    }
     syncSubmitStopButtonState(container);
     return;
   }
 
   if (chat) {
-    ensureInlinePendingStatus(chat, getPendingStatusText(pendingRequest));
+    ensureInlinePendingChrome(
+      chat,
+      getPendingStatusText(pendingRequest),
+      pendingRequest.reasoningText,
+      { reasoningOpen: !pendingRequest.isSettled }
+    );
   }
   syncSubmitStopButtonState(container);
 }
