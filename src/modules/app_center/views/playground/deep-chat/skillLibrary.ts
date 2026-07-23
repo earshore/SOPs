@@ -1,5 +1,5 @@
 /**
- * Deep Chat 顶栏 Skill Library：弹窗浏览 / 搜索 / 快速挂载技能（不离开当前页）
+ * Deep Chat 侧栏 Skill Library：弹窗浏览 / 搜索 / 快速挂载技能（不离开当前页）
  */
 import { setSafeHtml } from '@/common/utils/security';
 import { skillRegistry } from '@/services/skillRegistry';

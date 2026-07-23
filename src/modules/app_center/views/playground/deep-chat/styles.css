@@ -175,8 +175,10 @@
 }
 
 .deep-chat-new-thread,
-.deep-chat-search-chats {
+.deep-chat-search-chats,
+.deep-chat-skill-library-btn {
   height: 38px;
+  width: 100%;
   display: flex;
   align-items: center;
   gap: var(--spacing-2-5, 0.625rem);
@@ -189,6 +191,7 @@
   font-size: var(--text-base, 0.875rem);
   font-weight: 600;
   line-height: 1;
+  letter-spacing: normal;
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition:
@@ -200,32 +203,40 @@
 }
 
 .deep-chat-new-thread i,
-.deep-chat-search-chats i {
+.deep-chat-search-chats i,
+.deep-chat-skill-library-btn i {
   color: inherit;
+  font-size: inherit;
   transition: color 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .deep-chat-new-thread:hover,
 .deep-chat-search-chats:hover,
+.deep-chat-skill-library-btn:hover,
 .deep-chat-new-thread:focus-visible,
-.deep-chat-search-chats:focus-visible {
+.deep-chat-search-chats:focus-visible,
+.deep-chat-skill-library-btn:focus-visible {
   background: #ffffff;
   border-color: rgba(var(--deep-chat-accent-rgb), 0.32);
   color: var(--deep-chat-accent-hover, #8f4f33);
   box-shadow:
     0 4px 10px -4px rgba(var(--deep-chat-accent-rgb), 0.16),
     0 1px 2px rgba(15, 23, 42, 0.04);
+  outline: none;
 }
 
 .deep-chat-new-thread:hover i,
 .deep-chat-search-chats:hover i,
+.deep-chat-skill-library-btn:hover i,
 .deep-chat-new-thread:focus-visible i,
-.deep-chat-search-chats:focus-visible i {
+.deep-chat-search-chats:focus-visible i,
+.deep-chat-skill-library-btn:focus-visible i {
   color: inherit;
 }
 
 .deep-chat-new-thread:active,
-.deep-chat-search-chats:active {
+.deep-chat-search-chats:active,
+.deep-chat-skill-library-btn:active {
   transform: translateY(1px);
 }
 
@@ -1152,6 +1163,7 @@
 .deep-chat-tuning-panel summary:focus-visible,
 .deep-chat-new-thread:focus-visible,
 .deep-chat-search-chats:focus-visible,
+.deep-chat-skill-library-btn:focus-visible,
 .deep-chat-config-link:focus-visible,
 .deep-chat-thread-select:focus-visible,
 .deep-chat-thread-menu-toggle:focus-visible,
@@ -1978,6 +1990,7 @@
   .deep-chat-rail-icon,
   .deep-chat-new-thread,
   .deep-chat-search-chats,
+  .deep-chat-skill-library-btn,
   .deep-chat-config-link,
   .deep-chat-thread-item,
   .deep-chat-thread-menu-toggle,
@@ -2021,7 +2034,8 @@
   }
 
   .deep-chat-new-thread,
-  .deep-chat-search-chats {
+  .deep-chat-search-chats,
+  .deep-chat-skill-library-btn {
     background: #ffffff;
     border-color: rgba(var(--deep-chat-accent-rgb), 0.16);
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
@@ -2030,8 +2044,10 @@
 
   .deep-chat-new-thread:hover,
   .deep-chat-search-chats:hover,
+  .deep-chat-skill-library-btn:hover,
   .deep-chat-new-thread:focus-visible,
-  .deep-chat-search-chats:focus-visible {
+  .deep-chat-search-chats:focus-visible,
+  .deep-chat-skill-library-btn:focus-visible {
     background: #ffffff;
     border-color: rgba(var(--deep-chat-accent-rgb), 0.32);
     color: var(--deep-chat-accent-hover, #8f4f33);
@@ -2042,8 +2058,10 @@
 
   .deep-chat-new-thread:hover i,
   .deep-chat-search-chats:hover i,
+  .deep-chat-skill-library-btn:hover i,
   .deep-chat-new-thread:focus-visible i,
-  .deep-chat-search-chats:focus-visible i {
+  .deep-chat-search-chats:focus-visible i,
+  .deep-chat-skill-library-btn:focus-visible i {
     color: inherit;
   }
 
@@ -2064,6 +2082,7 @@
 
   .deep-chat-new-thread:active,
   .deep-chat-search-chats:active,
+  .deep-chat-skill-library-btn:active,
   .deep-chat-prompt-draft:active {
     transform: none;
   }
@@ -2198,54 +2217,7 @@
   outline-offset: 2px;
 }
 
-/* ---------- Skill Library (topbar + modal) ---------- */
-.deep-chat-skill-library-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  min-height: 36px;
-  padding: 0 0.7rem 0 0.55rem;
-  border: 1px solid rgba(var(--deep-chat-accent-rgb), 0.16);
-  border-radius: var(--deep-chat-radius-lg, 0.85rem);
-  background: #ffffff;
-  /* Default black text; accent color only on hover/focus */
-  color: var(--deep-chat-ink, #0f172a);
-  font-size: 12.5px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  transition:
-    background 150ms cubic-bezier(0, 0, 0.2, 1),
-    border-color 150ms cubic-bezier(0, 0, 0.2, 1),
-    color 150ms cubic-bezier(0, 0, 0.2, 1),
-    box-shadow 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.deep-chat-skill-library-btn i {
-  font-size: 13px;
-  color: inherit;
-}
-
-.deep-chat-skill-library-btn:hover,
-.deep-chat-skill-library-btn:focus-visible {
-  border-color: rgba(var(--deep-chat-accent-rgb), 0.32);
-  background: #ffffff;
-  color: var(--deep-chat-accent-hover, #8f4f33);
-  box-shadow:
-    0 4px 10px -4px rgba(var(--deep-chat-accent-rgb), 0.16),
-    0 1px 2px rgba(15, 23, 42, 0.04);
-  outline: none;
-}
-
-.deep-chat-skill-library-btn:focus-visible {
-  box-shadow: 0 0 0 3px var(--deep-chat-focus-ring, rgba(168, 95, 63, 0.18));
-}
-
-.deep-chat-skill-library-btn:active {
-  transform: translateY(0.5px);
-}
-
+/* ---------- Skill Library modal (trigger lives in thread-rail actions) ---------- */
 .deep-chat-skill-library-modal {
   position: fixed;
   inset: 0;
@@ -2594,16 +2566,6 @@ body #deep-chat-skill-library-search::placeholder {
 }
 
 @media (max-width: 720px) {
-  .deep-chat-skill-library-btn__label {
-    display: none;
-  }
-
-  .deep-chat-skill-library-btn {
-    width: 36px;
-    padding: 0;
-    justify-content: center;
-  }
-
   .deep-chat-skill-library-toolbar {
     grid-template-columns: 1fr;
   }

@@ -15,16 +15,6 @@ const deepChatTemplate = `
             <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
             <span>搜索会话</span>
           </button>
-        </div>
-        <h3 class="deep-chat-panel-title">最近会话</h3>
-        <div id="deep-chat-thread-list"></div>
-      </aside>
-      <section class="deep-chat-main">
-        <button id="deep-chat-toggle-rail" type="button" aria-expanded="true" aria-label="收起最近会话"></button>
-        <select id="deep-chat-model-select"></select>
-        <button id="deep-chat-refresh-config" type="button"></button>
-        <button id="deep-chat-open-settings" type="button" hidden>配置模型</button>
-        <div class="deep-chat-top-actions">
           <button
             id="deep-chat-skill-library"
             class="deep-chat-skill-library-btn"
@@ -36,6 +26,16 @@ const deepChatTemplate = `
           >
             Skill Library
           </button>
+        </div>
+        <h3 class="deep-chat-panel-title">最近会话</h3>
+        <div id="deep-chat-thread-list"></div>
+      </aside>
+      <section class="deep-chat-main">
+        <button id="deep-chat-toggle-rail" type="button" aria-expanded="true" aria-label="收起最近会话"></button>
+        <select id="deep-chat-model-select"></select>
+        <button id="deep-chat-refresh-config" type="button"></button>
+        <button id="deep-chat-open-settings" type="button" hidden>配置模型</button>
+        <div class="deep-chat-top-actions">
           <details class="deep-chat-tuning-panel">
             <summary>Settings</summary>
             <textarea id="deep-chat-system-prompt"></textarea>
@@ -678,6 +678,13 @@ describe('deep-chat playground template copy', () => {
     expect(template).toContain('class="fa-regular fa-pen-to-square"');
     expect(template).toContain('<span>新建会话</span>');
     expect(template).toContain('<span>搜索会话</span>');
+    expect(template).toContain('id="deep-chat-skill-library"');
+    expect(template.indexOf('id="deep-chat-search-chats"')).toBeLessThan(
+      template.indexOf('id="deep-chat-skill-library"')
+    );
+    expect(template.indexOf('id="deep-chat-skill-library"')).toBeLessThan(
+      template.indexOf('>最近会话</h3>')
+    );
     expect(template).toContain('>最近会话</h3>');
     expect(template).toContain('id="deep-chat-open-settings"');
     expect(template).not.toContain('id="deep-chat-open-promptlab"');
@@ -686,6 +693,13 @@ describe('deep-chat playground template copy', () => {
       template.indexOf('id="deep-chat-refresh-config"')
     );
     expect(template.indexOf('id="deep-chat-refresh-config"')).toBeLessThan(
+      template.indexOf('class="deep-chat-top-actions"')
+    );
+    expect(template.indexOf('class="deep-chat-top-actions"')).toBeLessThan(
+      template.indexOf('class="deep-chat-tuning-panel"')
+    );
+    // Skill Library lives in the thread rail, not the top actions cluster.
+    expect(template.indexOf('id="deep-chat-skill-library"')).toBeLessThan(
       template.indexOf('class="deep-chat-top-actions"')
     );
     expect(template).toContain('>Prompt</h3>');
@@ -1844,7 +1858,7 @@ describe('deep-chat playground search chats', () => {
 });
 
 describe('deep-chat playground skill library', () => {
-  it('opens Skill Library to the left of tuning controls and applies a skill without leaving the page', async () => {
+  it('opens Skill Library from the thread rail under Search Chats and applies a skill without leaving the page', async () => {
     const container = document.createElement('main');
     document.body.append(container);
     const { mount, unmount, mocks } = await importDeepChat();
@@ -1852,8 +1866,10 @@ describe('deep-chat playground skill library', () => {
     await mount(container);
 
     const openButton = queryRequired<HTMLButtonElement>(container, '#deep-chat-skill-library');
-    const tuningPanel = queryRequired<HTMLDetailsElement>(container, '.deep-chat-tuning-panel');
-    expect(openButton.compareDocumentPosition(tuningPanel) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+    const searchChats = queryRequired<HTMLButtonElement>(container, '#deep-chat-search-chats');
+    const threadActions = queryRequired<HTMLElement>(container, '.deep-chat-thread-actions');
+    expect(threadActions.contains(openButton)).toBe(true);
+    expect(searchChats.compareDocumentPosition(openButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );
     expect(openButton.textContent).toContain('Skill Library');

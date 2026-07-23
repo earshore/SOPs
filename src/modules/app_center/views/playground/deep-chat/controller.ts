@@ -1362,7 +1362,7 @@ function bindSkillLibraryControls(container: HTMLElement): void {
   );
 }
 
-/** 从顶栏 Skill Library 挂载技能：不切路由，复用既有挂载流程 */
+/** 从侧栏 Skill Library 挂载技能：不切路由，复用既有挂载流程 */
 async function applySkillFromLibrary(container: HTMLElement, skillId: string): Promise<void> {
   let skill;
   try {
