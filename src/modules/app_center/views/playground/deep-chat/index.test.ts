@@ -1453,7 +1453,8 @@ describe('deep-chat skill trial after send', () => {
     await vi.advanceTimersByTimeAsync(300);
 
     expect(
-      queryRequired<HTMLElement>(getChat(container).shadowRoot || document, '#text-input').textContent
+      queryRequired<HTMLElement>(getChat(container).shadowRoot || document, '#text-input')
+        .textContent
     ).toBe('B 草稿应保持不变');
     unmount();
   });
