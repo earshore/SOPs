@@ -64,9 +64,12 @@ export interface DeepChatThread {
   draftText?: string;
   promptDraftId?: string;
   listingPromptContext?: ListingPromptWorkflowContext;
-  /** Skills 页试用附加的上下文 Chip 列表 */
+  /**
+   * 当前挂载的技能（系统提示词来源）。
+   * 产品规则为单次执行：用户发送后即消费清空；历史消息标记仍可展示 Chip。
+   */
   skillContexts?: DeepChatSkillContext[];
-  /** 会话级系统提示词（含技能派生或用户手写，随线程持久化） */
+  /** 会话级系统提示词（技能挂载期间为技能全文；发送消费后清空技能派生提示） */
   systemPrompt?: string;
   /** 会话级 temperature，默认 0.3 */
   temperature?: number;

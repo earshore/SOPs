@@ -398,7 +398,8 @@ function initDeepChat(container: HTMLElement): void {
   setupMessageToolbars(chat, () => getThreadDisplayMessages(getActiveThread()), {
     canSendToKeywordHunter: () => Boolean(getActiveListingPromptContext()),
     sendToKeywordHunter: (content, message) => sendAssistantCopyToKeywordHunter(content, message),
-    getSkillContexts: () => getActiveThread().skillContexts || [],
+    // 气泡 Chip / 编辑回填：优先会话挂载；发送后已消费则从历史消息标记重建展示上下文
+    getSkillContexts: () => collectDisplaySkillContexts(getActiveThread()),
     refillComposerWithText: text => refillComposerWithSkillChips(container, text),
   });
   setConversationActive(
@@ -577,7 +578,75 @@ function renderSessionSkillChipDockChildren(
 }
 
 /**
- * 发送后 Deep Chat 会清空可编辑输入；会话技能仍应在同一输入框中保留一个可移除入口。
+ * 展示用 skill 上下文：仍挂载时用会话 skillContexts；
+ * 发送后已单次消费时，从用户消息中的「技能名」标记重建（不恢复系统提示词）。
+ */
+function collectDisplaySkillContexts(thread: DeepChatThread): DeepChatSkillContext[] {
+  const mounted = thread.skillContexts || [];
+  if (mounted.length > 0) {
+    return cloneSkillContexts(mounted);
+  }
+  return extractSkillContextsFromMessageMarkers(thread.messages || []);
+}
+
+/** 从用户消息正文的「技能名」标记提取轻量上下文（仅展示 / 编辑回填 Chip） */
+function extractSkillContextsFromMessageMarkers(
+  messages: Array<{ role?: string; text?: string }>
+): DeepChatSkillContext[] {
+  const byTitle = new Map<string, DeepChatSkillContext>();
+  for (const message of messages) {
+    if (message.role !== 'user' || !message.text) {
+      continue;
+    }
+    for (const match of message.text.matchAll(/「([^」\n]+)」/g)) {
+      const skillTitle = match[1]?.trim();
+      if (!skillTitle || byTitle.has(skillTitle)) {
+        continue;
+      }
+      byTitle.set(skillTitle, {
+        skillId: `history:${skillTitle}`,
+        skillTitle,
+        skillRaw: '',
+      });
+    }
+  }
+  return [...byTitle.values()];
+}
+
+/**
+ * 单次执行：请求已用当前 skill 系统提示词组装后，立即卸掉会话挂载。
+ * 历史消息里的技能标记仍可渲染 static Chip；再次调用需从 Skill Library 重新挂载。
+ */
+function consumeMountedSkillsAfterSend(container: HTMLElement, threadId: string): void {
+  if (threadStore.activeThreadId !== threadId) {
+    return;
+  }
+  const activeThread = getActiveThread();
+  if (!activeThread.skillContexts?.length) {
+    return;
+  }
+
+  updateActiveThreadFields(container, {
+    skillContexts: undefined,
+    // 技能派生的系统提示一并清掉，避免下一条消息继续带方法论
+    systemPrompt: undefined,
+  });
+  applySkillContextsToSession(container);
+  syncSessionSkillChipDock(container);
+
+  const input = getDraftInput(container);
+  if (input) {
+    const draft = serializeDraftInput(input);
+    setDraftInputWithInlineChips(input, draft, []);
+    if (draft) {
+      notifyDeepChatComposerInput(input, draft);
+    }
+  }
+}
+
+/**
+ * 发送前：若仍有会话技能且草稿无内联 Chip 标记，用 dock 提供可移除入口。
+ * 单次发送消费后 skillContexts 清空，dock 自动消失。
  * Dock 是 #text-input-container 的兄弟节点，绝不进入 contenteditable / 请求文本。
  */
 function syncSessionSkillChipDock(container: HTMLElement): void {
@@ -1840,6 +1909,8 @@ async function handleDeepChatRequest(
     saveThreadMessages(container, conversationMessages, '', {
       threadId: activeThread.id,
     });
+    // 本请求的 messages 已烘焙 skill 系统提示；立即卸挂载（单次执行）
+    consumeMountedSkillsAfterSend(container, activeThread.id);
     syncPendingRequestView(activeThread.id);
     // 仅在进入生成态时刷新列表（勿在每个 stream token 重绘，否则无法点选其他会话）
     renderMountedThreadList();
@@ -2800,13 +2871,18 @@ function notifyDeepChatComposerInput(input: HTMLElement, text: string): void {
   input.dispatchEvent(createTextInputEvent(text));
 }
 
-/** 编辑消息回填：若正文含技能名标记则保持 Chip，否则纯文本 */
+/** 编辑消息回填：若正文含技能名标记则保持 Chip，否则纯文本（不恢复会话挂载） */
 function refillComposerWithSkillChips(container: HTMLElement, plainText: string): void {
   const input = getDraftInput(container);
   if (!input) {
     return;
   }
-  const contexts = getActiveThread().skillContexts || [];
+  // 编辑回填用展示上下文（含历史标记），不重新挂载系统提示
+  const contexts = collectDisplaySkillContexts({
+    ...getActiveThread(),
+    // 优先从待回填正文解析标记
+    messages: [{ role: 'user', text: plainText, createdAt: 0 }],
+  });
   const normalized = normalizeSkillChipDraftText(plainText, contexts);
   setDraftInputWithInlineChips(input, normalized, contexts);
   updateThreadDraft(threadStore.activeThreadId, normalized);
@@ -2820,9 +2896,13 @@ function refillComposerWithSkillChips(container: HTMLElement, plainText: string)
       return;
     }
     const after = serializeDraftInput(latestInput);
-    const cleaned = normalizeSkillChipDraftText(after, getActiveThread().skillContexts || []);
+    const refillContexts = collectDisplaySkillContexts({
+      ...getActiveThread(),
+      messages: [{ role: 'user', text: after, createdAt: 0 }],
+    });
+    const cleaned = normalizeSkillChipDraftText(after, refillContexts);
     if (cleaned !== after) {
-      setDraftInputWithInlineChips(latestInput, cleaned, getActiveThread().skillContexts || []);
+      setDraftInputWithInlineChips(latestInput, cleaned, refillContexts);
       updateThreadDraft(threadStore.activeThreadId, cleaned);
     } else if (after !== normalized) {
       updateThreadDraft(threadStore.activeThreadId, after);

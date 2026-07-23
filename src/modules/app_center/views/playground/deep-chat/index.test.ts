@@ -1341,47 +1341,44 @@ describe('deep-chat skill trial attach and second handoff', () => {
 });
 
 describe('deep-chat skill trial after send', () => {
-  it('keeps a non-message session Chip dock after send and removes the mounted skill from it', async () => {
-    const { container, unmount, mocks, userDraft } = await queueProfitSkillAndMount();
+  it('consumes mounted skill after send (one-shot): no dock, no system prompt, no skillContexts', async () => {
+    const { container, unmount, mocks, userDraft, skillHandoff } = await queueProfitSkillAndMount();
     const chat = getChat(container);
     const root = chat.shadowRoot;
     const input = root?.querySelector<HTMLElement>('#text-input');
     const onResponse = vi.fn();
     const onClose = vi.fn();
 
-    // 真实 deep-chat 会在提交时清空 contenteditable；测试替身没有这段内部行为。
+    // 发送前应仍挂载（系统提示 + 输入 Chip）
+    expect(
+      container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
+    ).toContain('Profit Calculator');
+    expect(input?.querySelector('.deep-chat-context-chip')).not.toBeNull();
+
+    // 模拟真实发送：序列化 Chip 后正文含「技能名」标记
+    const sendText = skillHandoff.prefixDraftWithSkillContexts(userDraft, [
+      { skillTitle: '利润测算' },
+    ]);
     input!.textContent = '';
     chat.onInput?.({ content: { text: '', files: [] }, isUser: true });
-    chat.connect?.handler({ text: userDraft }, { onResponse, onClose });
+    chat.connect?.handler({ text: sendText }, { onResponse, onClose });
 
     await vi.waitFor(() => {
       expect(onClose).toHaveBeenCalled();
     });
 
-    const dock = root?.querySelector<HTMLElement>('#deep-chat-session-skill-chip-dock');
-    expect(dock).not.toBeNull();
-    expect(dock?.parentElement).toBe(input?.parentElement);
-    expect(input?.contains(dock!)).toBe(false);
-    expect(input?.textContent).toBe('');
-    const dismiss = dock?.querySelector<HTMLButtonElement>(
-      '[data-action="dismiss-skill-context"][data-skill-id="profit-calculator"]'
-    );
-    expect(dismiss).not.toBeNull();
-
-    dismiss?.click();
-    await vi.waitFor(() => {
-      expect(root?.querySelector('#deep-chat-session-skill-chip-dock')).toBeNull();
-    });
-
+    // 单次执行：发送后卸掉会话挂载
+    expect(root?.querySelector('#deep-chat-session-skill-chip-dock')).toBeNull();
+    expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
     expect(container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value).toBe(
       ''
     );
 
-    // Fields are omitted after dismiss (not written as explicit undefined).
     const persistedStore = mocks.localDataStore.set.mock.calls.at(-1)?.[1] as {
       threads?: Array<{
         skillContexts?: Array<{ skillId?: string }>;
         systemPrompt?: string;
+        messages?: Array<{ role?: string; text?: string }>;
       }>;
     };
     expect(
@@ -1392,6 +1389,14 @@ describe('deep-chat skill trial after send', () => {
     expect(
       persistedStore.threads?.some(thread => thread.systemPrompt?.includes('Profit Calculator'))
     ).toBe(false);
+    // 用户消息保留技能标记（历史 Chip 展示），但不续挂会话
+    expect(
+      persistedStore.threads?.some(thread =>
+        thread.messages?.some(
+          message => message.role === 'user' && message.text?.includes('「利润测算」')
+        )
+      )
+    ).toBe(true);
 
     unmount();
   });
@@ -1473,7 +1478,7 @@ describe('deep-chat skill trial after send', () => {
     unmount();
   });
 
-  it('keeps system prompt after send when skill remains on the session', async () => {
+  it('does not keep system prompt or skillContexts after send (one-shot skill)', async () => {
     const { container, unmount, mocks, userDraft } = await queueProfitSkillAndMount();
     expect(container.querySelector('#deep-chat-skill-context-bar')).toBeNull();
     expect(getChat(container).shadowRoot?.querySelector('#deep-chat-skill-context-bar')).toBeNull();
@@ -1483,12 +1488,15 @@ describe('deep-chat skill trial after send', () => {
     await vi.advanceTimersByTimeAsync(50);
     await Promise.resolve();
     await vi.advanceTimersByTimeAsync(100);
+    expect(container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value).toBe(
+      ''
+    );
+    const persistedStore = mocks.localDataStore.set.mock.calls.at(-1)?.[1] as {
+      threads?: Array<{ skillContexts?: unknown; systemPrompt?: string }>;
+    };
     expect(
-      container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
-    ).toContain('Profit Calculator');
-    expectPersistedThread(mocks, {
-      skillContexts: [expect.objectContaining({ skillId: 'profit-calculator' })],
-    });
+      persistedStore.threads?.some(thread => Array.isArray(thread.skillContexts) && thread.skillContexts.length > 0)
+    ).toBe(false);
     unmount();
   });
 });

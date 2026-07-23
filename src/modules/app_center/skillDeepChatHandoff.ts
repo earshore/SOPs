@@ -1,6 +1,7 @@
 /**
  * Skills 页 → Deep Chat 试用交接
  * 将 skill 全文作为系统提示词载入；控制器在输入框中渲染可移除的会话 Chip。
+ * 产品规则：技能为单次执行——用户发送后消费挂载（卸系统提示与 skillContexts）。
  */
 
 export interface SkillDeepChatContext {

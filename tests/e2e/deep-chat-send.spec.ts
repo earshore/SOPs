@@ -716,6 +716,18 @@ test('preserves a decorated Skill Chip through send, reload, edit refill, and a 
   expect(latestMessage?.content).toContain(`「${DECORATED_SKILL_TITLE}」`);
   expect(latestMessage?.content?.replace(`「${DECORATED_SKILL_TITLE}」`, '').trim()).not.toBe('');
 
+  // 单次执行：发送后卸掉会话挂载（无 dock、空输入无 dismissible Chip）
+  await expect
+    .poll(async () => {
+      return page.evaluate(() => {
+        const root = document.querySelector('#deep-chat-view')?.shadowRoot;
+        const dock = root?.querySelector('#deep-chat-session-skill-chip-dock');
+        const inputChip = root?.querySelector('#text-input .deep-chat-context-chip--dismissible');
+        return !dock && !inputChip;
+      });
+    })
+    .toBe(true);
+
   const staticChipSelector =
     '.deep-chat-outer-container-role-user .message-bubble .deep-chat-context-chip--static';
   await expect
@@ -733,6 +745,7 @@ test('preserves a decorated Skill Chip through send, reload, edit refill, and a 
   const editButton = page.locator('#deep-chat-view [aria-label="编辑消息"]');
   await expect(editButton).toHaveCount(1);
   await editButton.click();
+  // 编辑回填可从历史标记恢复 Chip 展示，但不恢复会话 skill 挂载
   await expect
     .poll(() => getSkillChipVisualState(page, inputChipSelector))
     .toMatchObject({
