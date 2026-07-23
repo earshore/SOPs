@@ -86,10 +86,11 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border-radius: 0.35rem !important;
     background: transparent !important;
     box-shadow: none !important;
-    color: #475569 !important;
+    /* 默认比正文略淡；hover 与正文同色 */
+    color: #94a3b8 !important;
     font-family: inherit !important;
     font-size: 12px !important;
-    font-weight: 600 !important;
+    font-weight: 400 !important;
     line-height: 1.35 !important;
     cursor: pointer !important;
     user-select: none !important;
@@ -98,8 +99,8 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
 
   .deep-chat-dt-toggle:hover,
   .deep-chat-dt-done-toggle:hover {
-    color: #334155 !important;
-    background: rgba(148, 163, 184, 0.08) !important;
+    color: #64748b !important; /* 与 .deep-chat-dt-text 正文同色 */
+    background: transparent !important;
   }
 
   .deep-chat-dt-toggle:focus-visible,
@@ -111,6 +112,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .deep-chat-dt-label,
   .deep-chat-dt-done-label {
     min-width: 0 !important;
+    font-weight: 400 !important;
   }
 
   /* SVG chevron: 默认可见一点，hover 更清晰；展开旋转 90° 呈向下 */
