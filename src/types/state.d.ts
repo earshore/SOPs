@@ -631,6 +631,14 @@ export interface LLMProviderConfig {
   model: string;
   models?: Array<string | { id: string; name?: string; context?: number; features?: string[] }>;
   serviceTier?: 'auto' | 'default' | 'flex' | 'priority';
+  /**
+   * Global reasoning prefs for this provider config.
+   * Applied only when model capability has mapRequest (see modelCapability).
+   */
+  reasoningPrefs?: {
+    enabled: boolean;
+    effort: 'low' | 'medium' | 'high';
+  };
   enabled: boolean;
 }
 

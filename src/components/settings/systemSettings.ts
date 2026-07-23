@@ -34,6 +34,13 @@ import { initEventLogger } from '@/common/utils/eventLogger';
 import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorageBoundary';
 import { fetchModelsFromApi, callLLM } from '@/services/llmService';
+import {
+  DEFAULT_REASONING_PREFS,
+  normalizeReasoningUserPrefs,
+  resolveModelCapability,
+  shouldShowReasoningControls,
+  type ReasoningUserPrefs,
+} from '@/services/modelCapability';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
   LocalDataStore,
@@ -81,6 +88,7 @@ interface LLMState {
   model: string;
   models: ModelOption[];
   serviceTier?: LLMProviderConfig['serviceTier'];
+  reasoningPrefs: ReasoningUserPrefs;
   showKey: boolean;
   isFetching: boolean;
   isTesting: boolean;
@@ -116,6 +124,9 @@ interface SettingsPanelData {
   commercialProxyOptions: readonly ScraperProxyProviderConfig[];
   directProxyOptions: readonly ScraperProxyProviderConfig[];
   activeModelInfo: ModelMetadata | null;
+  activeModelCapability: import('@/services/modelCapability').ResolvedModelCapability | null;
+  showReasoningControls: boolean;
+  reasoningEffortOptions: Array<'low' | 'medium' | 'high'>;
   isProduction: boolean;
   localData: {
     usage: LocalDataUsage | null;
@@ -188,6 +199,8 @@ interface SettingsPanelData {
   setLlmApiKey(event: Event): void;
   setLlmModel(event: Event): void;
   setLlmServiceTier(event: Event): void;
+  setReasoningEnabled(event: Event): void;
+  setReasoningEffort(event: Event): void;
   setToolTargetModel(targetId: ToolStrategyTargetId, event: Event): void;
   getRuntimeNumber(path: string, divisor?: number): number;
   getRuntimeBoolean(path: string): boolean;
@@ -807,6 +820,7 @@ function createSettingsState(): Pick<
       model: '',
       models: [],
       serviceTier: undefined,
+      reasoningPrefs: { ...DEFAULT_REASONING_PREFS },
       showKey: false,
       isFetching: false,
       isTesting: false,
@@ -872,6 +886,29 @@ const settingsPanelBehavior: SettingsPanelPart = {
     const m = this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model);
     const model = m && typeof m !== 'string' ? m : null;
     return mergeModelMetadata(model, findPresetModelInfo(this.llm.provider, this.llm.model));
+  },
+
+  get activeModelCapability() {
+    if (!this.llm.model) return null;
+    const m = this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model);
+    return resolveModelCapability({
+      provider: this.llm.provider,
+      modelId: this.llm.model,
+      modelsEntry: m ?? this.llm.model,
+    });
+  },
+
+  get showReasoningControls(): boolean {
+    const cap = this.activeModelCapability;
+    return cap ? shouldShowReasoningControls(cap) : false;
+  },
+
+  get reasoningEffortOptions(): Array<'low' | 'medium' | 'high'> {
+    const cap = this.activeModelCapability;
+    if (!cap || cap.reasoningEfforts.length === 0) {
+      return ['low', 'medium', 'high'];
+    }
+    return [...cap.reasoningEfforts];
   },
 
   // 🔒 P0修复: 检查是否为生产环境
@@ -1211,6 +1248,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.llm.models = dedupeModels(getRawProviderModels(savedConfig, config));
     this.llm.model = getInitialModel(savedConfig?.model, this.llm.models);
     this.llm.serviceTier = savedConfig?.serviceTier;
+    this.llm.reasoningPrefs = normalizeReasoningUserPrefs(savedConfig?.reasoningPrefs);
     this.loadToolStrategyDefaults();
   },
 
@@ -1260,6 +1298,9 @@ const settingsPanelBehavior: SettingsPanelPart = {
       showToast('正在发送测试请求...', { type: 'info' });
       const messages = [{ role: 'user' as const, content: "Hello! Reply 'OK'." }];
 
+      const modelsEntry =
+        this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === this.llm.model) ??
+        this.llm.model;
       await callLLM(
         messages,
         this.llm.provider,
@@ -1271,6 +1312,8 @@ const settingsPanelBehavior: SettingsPanelPart = {
           jsonMode: false,
           maxTokens: LLM_TEST_CONNECTION_MAX_TOKENS,
           ...(this.llm.serviceTier && { serviceTier: this.llm.serviceTier }),
+          reasoningPrefs: this.llm.reasoningPrefs,
+          modelsEntry,
           stream: true,
           timeout: this.runtimeStrategy.settings.llm.testConnectionTimeoutMs,
         }
@@ -1298,6 +1341,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
         model: this.llm.model,
         models: this.llm.models,
         ...(this.llm.serviceTier && { serviceTier: this.llm.serviceTier }),
+        reasoningPrefs: normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
         enabled: true,
         apiKey: '', // 占位符,实际存储在安全存储中
       };
@@ -1429,6 +1473,24 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.llm.serviceTier = value
       ? (value as NonNullable<LLMProviderConfig['serviceTier']>)
       : undefined;
+  },
+
+  setReasoningEnabled(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.llm.reasoningPrefs = {
+      ...normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
+      enabled: checked,
+    };
+  },
+
+  setReasoningEffort(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    const effort =
+      value === 'low' || value === 'medium' || value === 'high' ? value : DEFAULT_REASONING_PREFS.effort;
+    this.llm.reasoningPrefs = {
+      ...normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
+      effort,
+    };
   },
 
   setToolTargetModel(targetId: ToolStrategyTargetId, event: Event): void {

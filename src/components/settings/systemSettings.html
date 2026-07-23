@@ -310,6 +310,57 @@
                   </p>
                 </div>
 
+                <!-- Reasoning (capability-gated; global default) -->
+                <div class="group" x-show="showReasoningControls" x-cloak>
+                  <span
+                    class="block text-xs font-semibold text-slate-600 mb-2"
+                    >推理（全局默认）</span
+                  >
+                  <div
+                    class="rounded-xl border border-slate-200 bg-white px-3 py-3 shadow-sm space-y-3"
+                  >
+                    <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                      <input
+                        id="llm-reasoning-enabled"
+                        name="llm-reasoning-enabled"
+                        type="checkbox"
+                        class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        :checked="llm.reasoningPrefs.enabled"
+                        @change="setReasoningEnabled($event)"
+                      />
+                      <span class="text-sm text-slate-700">启用推理</span>
+                    </label>
+                    <div x-show="llm.reasoningPrefs.enabled">
+                      <label
+                        for="llm-reasoning-effort"
+                        class="block text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-1.5"
+                        >思考强度</label
+                      >
+                      <div class="relative">
+                        <select
+                          id="llm-reasoning-effort"
+                          name="llm-reasoning-effort"
+                          class="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm shadow-sm transition duration-200 hover:border-slate-300 cursor-pointer"
+                          :value="llm.reasoningPrefs.effort"
+                          @change="setReasoningEffort($event)"
+                        >
+                          <template x-for="level in reasoningEffortOptions" :key="level">
+                            <option :value="level" x-text="level"></option>
+                          </template>
+                        </select>
+                        <div
+                          class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                        >
+                          <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="text-[10px] leading-relaxed text-slate-500">
+                      仅在能力目录登记且网关可透传时生效；未登记模型不会发送推理字段。
+                    </p>
+                  </div>
+                </div>
+
                 <!-- Model Info Card -->
                 <div
                   :hidden="!activeModelInfo"
