@@ -5,6 +5,7 @@
 import type { EffectiveReasoningPrefs, ResolvedModelCapability } from './types';
 import { buildChatCompletionsBody, buildResponsesBody } from './applyToRequest';
 import type { ApiPathId } from './apiPaths';
+import { normalizeToolsForResponses } from './responsesTools';
 
 export type ChatMessageLike = { role: string; content: string };
 
@@ -174,6 +175,7 @@ export function buildBodyForApiPath(args: {
   tools?: unknown[];
   toolChoice?: unknown;
   visionUserParts?: Array<Record<string, unknown>>;
+  followUpInputItems?: Array<Record<string, unknown>>;
 }): Record<string, unknown> {
   if (args.pathId === 'responses') {
     return buildResponsesBody({
@@ -188,9 +190,10 @@ export function buildBodyForApiPath(args: {
       reasoning: args.reasoning,
       previousResponseId: args.previousResponseId,
       store: args.store,
-      tools: args.tools,
+      tools: normalizeToolsForResponses(args.tools),
       toolChoice: args.toolChoice,
       visionUserParts: args.visionUserParts,
+      followUpInputItems: args.followUpInputItems,
     });
   }
   if (args.pathId === 'anthropic_messages') {

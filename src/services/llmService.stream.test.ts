@@ -409,6 +409,80 @@ describe('callLLM streaming', () => {
     expect(body.thinkingConfig).toMatchObject({ includeThoughts: true });
   });
 
+  it('runs responses tool loop until final text', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(async () =>
+        new Response(
+          JSON.stringify({
+            id: 'resp_tool_1',
+            output: [
+              {
+                type: 'function_call',
+                call_id: 'call_1',
+                name: 'add',
+                arguments: '{"a":2,"b":3}',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      )
+      .mockImplementationOnce(async () =>
+        new Response(
+          JSON.stringify({
+            id: 'resp_tool_2',
+            output_text: '5',
+            output: [
+              {
+                type: 'message',
+                content: [{ type: 'output_text', text: '5' }],
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [{ role: 'user', content: '2+3?' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'gpt-5.5',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'responses',
+        tools: [
+          {
+            type: 'function',
+            name: 'add',
+            description: 'add two numbers',
+            parameters: {
+              type: 'object',
+              properties: { a: { type: 'number' }, b: { type: 'number' } },
+            },
+          },
+        ],
+        executeTool: async ({ name, arguments: args }) => {
+          expect(name).toBe('add');
+          const parsed = JSON.parse(args) as { a: number; b: number };
+          return String(parsed.a + parsed.b);
+        },
+      }
+    );
+
+    expect(text).toBe('5');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const secondBody = JSON.parse(String((fetchMock.mock.calls[1]?.[1] as RequestInit).body));
+    expect(secondBody.previous_response_id).toBe('resp_tool_1');
+    expect(secondBody.input).toEqual([
+      { type: 'function_call_output', call_id: 'call_1', output: '5' },
+    ]);
+  });
+
   it('posts Responses body to /responses when apiPath is responses', async () => {
     const fetchMock = vi.fn(
       async (_url: RequestInfo | URL, _init?: RequestInit): Promise<Response> => {

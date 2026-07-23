@@ -1,0 +1,105 @@
+/**
+ * OpenAI Responses API tools: normalize request tools + parse function_call items.
+ * @see https://developers.openai.com/api/docs/guides/function-calling
+ * @see https://developers.openai.com/api/docs/guides/migrate-to-responses
+ */
+
+export interface ResponsesFunctionCall {
+  /** Stable id for function_call_output.call_id */
+  callId: string;
+  name: string;
+  arguments: string;
+  /** Optional item id from response.output */
+  itemId?: string;
+}
+
+/**
+ * Normalize tools from Chat Completions shape to Responses shape when needed.
+ * Chat: { type:'function', function: { name, description, parameters } }
+ * Responses: { type:'function', name, description, parameters }
+ */
+export function normalizeToolsForResponses(tools: unknown[] | undefined): unknown[] | undefined {
+  if (!tools || tools.length === 0) return tools;
+  return tools.map(tool => {
+    if (!tool || typeof tool !== 'object') return tool;
+    const t = tool as Record<string, unknown>;
+    if (t.type === 'function' && t.function && typeof t.function === 'object') {
+      const fn = t.function as Record<string, unknown>;
+      return {
+        type: 'function',
+        name: fn.name,
+        description: fn.description,
+        parameters: fn.parameters,
+        ...(typeof fn.strict === 'boolean' ? { strict: fn.strict } : {}),
+      };
+    }
+    return tool;
+  });
+}
+
+function readCallId(item: Record<string, unknown>): string {
+  if (typeof item.call_id === 'string' && item.call_id.trim()) return item.call_id.trim();
+  if (typeof item.id === 'string' && item.id.trim()) return item.id.trim();
+  return '';
+}
+
+function readFunctionName(item: Record<string, unknown>): string {
+  if (typeof item.name === 'string' && item.name.trim()) return item.name.trim();
+  const fn = item.function as { name?: unknown } | undefined;
+  if (fn && typeof fn.name === 'string') return fn.name.trim();
+  return '';
+}
+
+function readFunctionArguments(item: Record<string, unknown>): string {
+  if (typeof item.arguments === 'string') return item.arguments;
+  if (item.arguments && typeof item.arguments === 'object') {
+    try {
+      return JSON.stringify(item.arguments);
+    } catch {
+      return '{}';
+    }
+  }
+  const fn = item.function as { arguments?: unknown } | undefined;
+  if (fn && typeof fn.arguments === 'string') return fn.arguments;
+  return '{}';
+}
+
+function parseFunctionCallItem(item: Record<string, unknown>): ResponsesFunctionCall | null {
+  const type = typeof item.type === 'string' ? item.type : '';
+  if (type !== 'function_call' && type !== 'custom_tool_call') return null;
+  const callId = readCallId(item);
+  const name = readFunctionName(item);
+  if (!callId || !name) return null;
+  return {
+    callId,
+    name,
+    arguments: readFunctionArguments(item),
+    ...(typeof item.id === 'string' ? { itemId: item.id } : {}),
+  };
+}
+
+/** Extract function_call items from a Responses non-stream body. */
+export function extractResponsesFunctionCalls(
+  data: Record<string, unknown> | null | undefined
+): ResponsesFunctionCall[] {
+  if (!data || typeof data !== 'object') return [];
+  const output = data.output;
+  if (!Array.isArray(output)) return [];
+  const calls: ResponsesFunctionCall[] = [];
+  for (const raw of output) {
+    if (!raw || typeof raw !== 'object') continue;
+    const parsed = parseFunctionCallItem(raw as Record<string, unknown>);
+    if (parsed) calls.push(parsed);
+  }
+  return calls;
+}
+
+export function buildFunctionCallOutputItems(
+  results: Array<{ callId: string; output: string }>
+): Array<Record<string, unknown>> {
+  return results.map(r => ({
+    type: 'function_call_output',
+    call_id: r.callId,
+    output: r.output,
+  }));
+}

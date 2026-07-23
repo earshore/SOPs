@@ -23,6 +23,7 @@ import {
   buildFullApiUrl,
   extractAnthropicMessagesText,
   extractGeminiGenerateText,
+  DEFAULT_MAX_TOOL_ROUNDS,
   extractResponsesId,
   extractResponsesOutputText,
   getAnthropicStreamTextDelta,
@@ -31,12 +32,14 @@ import {
   getResponsesStreamTextDelta,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
+  processResponsesToolRound,
   resolveEffectiveReasoning,
   resolveModelCapability,
   type ApiPathId,
   type ApiSurface,
   type ModelsListEntry,
   type ReasoningUserPrefs,
+  type ResponsesToolExecutor,
   type ResponsesTransportOptions,
   type SessionReasoningOverride,
 } from './modelCapability';
@@ -104,6 +107,13 @@ export interface LLMOptions {
   visionUserParts?: ResponsesTransportOptions['visionUserParts'];
   /** Called with Responses response.id when available (for chaining). */
   onResponseId?: (responseId: string) => void;
+  /**
+   * Execute a function tool when Responses returns function_call items.
+   * Enables the agent tool loop (non-stream rounds until final text).
+   */
+  executeTool?: ResponsesToolExecutor;
+  /** Max tool rounds (default 5). */
+  maxToolRounds?: number;
 }
 
 export interface LLMStreamMetrics {
@@ -563,6 +573,10 @@ interface ResolvedLLMOptions {
   toolChoice?: unknown;
   visionUserParts?: ResponsesTransportOptions['visionUserParts'];
   onResponseId?: LLMOptions['onResponseId'];
+  executeTool?: ResponsesToolExecutor;
+  maxToolRounds?: number;
+  /** Internal: function_call_output items for next Responses request */
+  followUpInputItems?: Array<Record<string, unknown>>;
 }
 
 interface LLMCallContext {
@@ -585,6 +599,8 @@ interface LLMCallContext {
 interface LLMResponsePayload {
   data: LLMChatCompletionResponse | null;
   content: string;
+  /** Full Responses JSON (non-stream) for tool-loop parsing */
+  rawResponsesData?: Record<string, unknown>;
   streamMetrics?: {
     firstChunkMs?: number;
     chunkCount: number;
@@ -680,6 +696,9 @@ function resolveLLMOptions(
     toolChoice: options.toolChoice,
     visionUserParts: options.visionUserParts,
     onResponseId: options.onResponseId,
+    executeTool: options.executeTool,
+    maxToolRounds: options.maxToolRounds,
+    followUpInputItems: undefined,
   };
 }
 
@@ -840,6 +859,7 @@ function createLLMTransport(args: {
     tools: args.options.tools,
     toolChoice: args.options.toolChoice,
     visionUserParts: args.options.visionUserParts,
+    followUpInputItems: args.options.followUpInputItems,
   });
 
   const { fullUrl, pathSuffix } = buildFullApiUrl(args.endpoint, pathId, args.model);
@@ -1036,7 +1056,11 @@ async function readLLMResponsePayload(
       if (responseId) {
         context.options.onResponseId?.(responseId);
       }
-      return { data: null, content: extractResponsesOutputText(data) };
+      return {
+        data: null,
+        content: extractResponsesOutputText(data),
+        rawResponsesData: data,
+      };
     }
     if (context.apiSurface === 'anthropic_messages') {
       return { data: null, content: extractAnthropicMessagesText(data) };
@@ -1120,11 +1144,11 @@ function getLLMResponseContent(payload: LLMResponsePayload): string {
   return payload.content || getCompletionContent(payload.data);
 }
 
-async function executeLLMAttempt(
+async function executeLLMAttemptPayload(
   context: LLMCallContext,
   attempt: number,
   state: LLMAttemptState
-): Promise<string> {
+): Promise<LLMResponsePayload> {
   await waitBeforeLLMRetry(attempt, context.options);
 
   const { clearRequestTimeout, controller, resetRequestTimeout } = createLLMAbortResources(
@@ -1151,10 +1175,19 @@ async function executeLLMAttempt(
 
     const payload = await readLLMResponsePayload(response, attemptContext, requestStartedAt);
     assertValidLLMResponse(payload, response, attemptContext);
-    return getLLMResponseContent(payload);
+    return payload;
   } finally {
     clearRequestTimeout();
   }
+}
+
+async function executeLLMAttempt(
+  context: LLMCallContext,
+  attempt: number,
+  state: LLMAttemptState
+): Promise<string> {
+  const payload = await executeLLMAttemptPayload(context, attempt, state);
+  return getLLMResponseContent(payload);
 }
 
 function shouldRetryApiError(error: ApiError, context: LLMCallContext, attempt: number): boolean {
@@ -1257,6 +1290,133 @@ function normalizeLLMCallArgs(args: LLMCallArgs): LLMCallRequest {
 // 核心 API 函数
 // ========================
 
+function shouldUseResponsesToolLoop(options: ResolvedLLMOptions): boolean {
+  return (
+    options.apiPath === 'responses' &&
+    typeof options.executeTool === 'function' &&
+    Array.isArray(options.tools) &&
+    options.tools.length > 0
+  );
+}
+
+function buildToolLoopContext(
+  request: LLMCallRequest,
+  roundOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string
+): LLMCallContext {
+  const transport = createLLMTransport({
+    messages: request.messages,
+    model: request.model,
+    options: roundOptions,
+    provider: request.provider,
+    endpoint: normalizedEndpoint,
+    forcePath: 'responses',
+  });
+  return {
+    provider: request.provider,
+    endpoint: request.endpoint,
+    normalizedEndpoint,
+    apiKey: request.apiKey,
+    model: request.model,
+    messages: request.messages,
+    options: roundOptions,
+    requestBody: transport.body,
+    requestUrl: transport.requestUrl,
+    requestPath: transport.path,
+    apiSurface: transport.apiSurface,
+    apiPath: transport.apiPath,
+  };
+}
+
+async function runOneResponsesToolRound(args: {
+  request: LLMCallRequest;
+  baseOptions: ResolvedLLMOptions;
+  normalizedEndpoint: string;
+  previousResponseId?: string;
+  followUpInputItems?: Array<Record<string, unknown>>;
+  executeTool: ResponsesToolExecutor;
+}): Promise<{
+  lastText: string;
+  done: boolean;
+  previousResponseId?: string;
+  followUpInputItems?: Array<Record<string, unknown>>;
+}> {
+  const roundOptions: ResolvedLLMOptions = {
+    ...args.baseOptions,
+    stream: false,
+    previousResponseId: args.previousResponseId,
+    followUpInputItems: args.followUpInputItems,
+    store: args.followUpInputItems?.length ? true : args.baseOptions.store,
+  };
+  const context = buildToolLoopContext(args.request, roundOptions, args.normalizedEndpoint);
+  const payload = await executeLLMAttemptPayload(context, 0, {
+    timedOut: false,
+    externallyAborted: false,
+  });
+  const lastText = getLLMResponseContent(payload);
+  const raw = payload.rawResponsesData;
+  if (!raw) {
+    return { lastText, done: true, previousResponseId: args.previousResponseId };
+  }
+
+  const roundResult = await processResponsesToolRound({
+    responseData: raw,
+    executeTool: args.executeTool,
+  });
+  let previousResponseId = args.previousResponseId;
+  if (roundResult.responseId) {
+    args.baseOptions.onResponseId?.(roundResult.responseId);
+    previousResponseId = roundResult.responseId;
+  }
+  if (roundResult.done || !previousResponseId) {
+    return {
+      lastText: roundResult.text || lastText,
+      done: true,
+      previousResponseId,
+    };
+  }
+  return {
+    lastText,
+    done: false,
+    previousResponseId,
+    followUpInputItems: roundResult.nextInputItems,
+  };
+}
+
+/**
+ * Responses agent tool loop: non-stream rounds until no function_call items.
+ */
+async function callLLMResponsesToolLoop(
+  request: LLMCallRequest,
+  baseOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string
+): Promise<string> {
+  const executeTool = baseOptions.executeTool;
+  if (!executeTool) return '';
+
+  const maxRounds = baseOptions.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS;
+  let previousResponseId = baseOptions.previousResponseId;
+  let followUpInputItems: Array<Record<string, unknown>> | undefined;
+  let lastText = '';
+
+  for (let round = 0; round < maxRounds; round++) {
+    const result = await runOneResponsesToolRound({
+      request,
+      baseOptions,
+      normalizedEndpoint,
+      previousResponseId,
+      followUpInputItems,
+      executeTool,
+    });
+    lastText = result.lastText;
+    previousResponseId = result.previousResponseId;
+    followUpInputItems = result.followUpInputItems;
+    if (result.done) return lastText;
+  }
+
+  return lastText;
+}
+
 /**
  * 通用大语言模型调用接口 (带自动重试)
  */
@@ -1266,14 +1426,28 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
   const normalizedEndpoint = resolveProviderEndpoint(request.provider, request.endpoint);
   assertSafeLLMEndpoint(normalizedEndpoint);
 
-  let transport = createLLMTransport({
+  if (shouldUseResponsesToolLoop(resolvedOptions)) {
+    return callLLMResponsesToolLoop(request, resolvedOptions, normalizedEndpoint);
+  }
+
+  return callLLMWithRetry(request, resolvedOptions, normalizedEndpoint);
+}
+
+function createInitialLLMContext(
+  request: LLMCallRequest,
+  resolvedOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string,
+  forcePath?: ApiPathId
+): LLMCallContext {
+  const transport = createLLMTransport({
     messages: request.messages,
     model: request.model,
     options: resolvedOptions,
     provider: request.provider,
     endpoint: normalizedEndpoint,
+    forcePath,
   });
-  let context: LLMCallContext = {
+  return {
     provider: request.provider,
     endpoint: request.endpoint,
     normalizedEndpoint,
@@ -1287,7 +1461,14 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
     apiSurface: transport.apiSurface,
     apiPath: transport.apiPath,
   };
+}
 
+async function callLLMWithRetry(
+  request: LLMCallRequest,
+  resolvedOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string
+): Promise<string> {
+  let context = createInitialLLMContext(request, resolvedOptions, normalizedEndpoint);
   let lastError: Error | null = null;
   let triedPathFallback = false;
 
@@ -1299,7 +1480,6 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
     try {
       return await executeLLMAttempt(context, attempt, attemptState);
     } catch (errorValue) {
-      // One-shot fallback: non-completions path unavailable → chat/completions
       if (
         !triedPathFallback &&
         context.apiPath !== 'chat_completions' &&
@@ -1307,22 +1487,12 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
         isAlternatePathUnsupportedError(errorValue)
       ) {
         triedPathFallback = true;
-        transport = createLLMTransport({
-          messages: request.messages,
-          model: request.model,
-          options: resolvedOptions,
-          provider: request.provider,
-          endpoint: normalizedEndpoint,
-          forcePath: 'chat_completions',
-        });
-        context = {
-          ...context,
-          requestBody: transport.body,
-          requestUrl: transport.requestUrl,
-          requestPath: transport.path,
-          apiSurface: transport.apiSurface,
-          apiPath: transport.apiPath,
-        };
+        context = createInitialLLMContext(
+          request,
+          resolvedOptions,
+          normalizedEndpoint,
+          'chat_completions'
+        );
         attempt -= 1;
         continue;
       }

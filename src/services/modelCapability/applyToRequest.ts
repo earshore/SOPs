@@ -161,6 +161,11 @@ export type ResponsesBodyExtras = {
   toolChoice?: unknown;
   /** Replace last user message content with multimodal parts. */
   visionUserParts?: Array<Record<string, unknown>>;
+  /**
+   * Tool-loop follow-up items (function_call_output). When set with previousResponseId,
+   * becomes the sole `input` for the next Responses request.
+   */
+  followUpInputItems?: Array<Record<string, unknown>>;
 };
 
 function userContentToText(content: unknown): string {
@@ -284,41 +289,64 @@ export function buildResponsesBody(args: {
   capability: ResolvedModelCapability;
   reasoning: EffectiveReasoningPrefs;
 } & ResponsesBodyExtras): Record<string, unknown> {
+  const useFollowUp =
+    Boolean(args.followUpInputItems?.length) &&
+    Boolean(args.previousResponseId?.trim()) &&
+    args.capability.supportsPreviousResponseId;
+
+  const body = createResponsesBodyBase(args, useFollowUp);
+  applyResponsesOptionalFields(body, args);
+  applyResponsesReasoningMapper(body, args.capability, args.reasoning);
+  return body;
+}
+
+function createResponsesBodyBase(
+  args: {
+    model: string;
+    messages: Array<{ role: string; content: string }>;
+    temperature?: number;
+    maxTokens?: number;
+    stream?: boolean;
+    capability: ResolvedModelCapability;
+    visionUserParts?: Array<Record<string, unknown>>;
+    followUpInputItems?: Array<Record<string, unknown>>;
+  },
+  useFollowUp: boolean
+): Record<string, unknown> {
   const { instructions, input: baseInput } = splitMessagesForResponses(args.messages);
-  const input = applyVisionPartsToResponsesInput(baseInput, args.visionUserParts);
+  const input = useFollowUp
+    ? args.followUpInputItems
+    : applyVisionPartsToResponsesInput(baseInput, args.visionUserParts);
   const body: Record<string, unknown> = {
     model: args.model,
     input,
-    // BYOK privacy default: do not persist unless caller opts in and surface supports store
-    store: false,
+    // Tool loops need store when chaining previous_response_id
+    store: useFollowUp ? true : false,
   };
-  if (instructions) {
+  if (!useFollowUp && instructions) {
     body.instructions = instructions;
   }
-
-  if (args.stream) {
-    body.stream = true;
-  }
-  if (args.maxTokens !== undefined) {
-    body.max_output_tokens = args.maxTokens;
-  }
+  if (args.stream) body.stream = true;
+  if (args.maxTokens !== undefined) body.max_output_tokens = args.maxTokens;
   if (!args.capability.temperatureIgnored && args.temperature !== undefined) {
     body.temperature = args.temperature;
   }
-
-  applyResponsesOptionalFields(body, args);
-
-  if (args.capability.mapRequest) {
-    const extra = args.capability.mapRequest({
-      enabled: args.reasoning.enabled,
-      effort: args.reasoning.enabled ? args.reasoning.effort : 'off',
-    });
-    if (extra && typeof extra === 'object') {
-      mergeMapperFields(body, extra);
-    }
-  }
-
   return body;
+}
+
+function applyResponsesReasoningMapper(
+  body: Record<string, unknown>,
+  capability: ResolvedModelCapability,
+  reasoning: EffectiveReasoningPrefs
+): void {
+  if (!capability.mapRequest) return;
+  const extra = capability.mapRequest({
+    enabled: reasoning.enabled,
+    effort: reasoning.enabled ? reasoning.effort : 'off',
+  });
+  if (extra && typeof extra === 'object') {
+    mergeMapperFields(body, extra);
+  }
 }
 
 /**

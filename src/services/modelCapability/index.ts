@@ -53,6 +53,18 @@ export {
   applyVisionPartsToResponsesInput,
   type ResponsesBodyExtras,
 } from './applyToRequest';
+export {
+  buildFunctionCallOutputItems,
+  extractResponsesFunctionCalls,
+  normalizeToolsForResponses,
+  type ResponsesFunctionCall,
+} from './responsesTools';
+export {
+  DEFAULT_MAX_TOOL_ROUNDS,
+  processResponsesToolRound,
+  type ResponsesToolExecutor,
+  type ResponsesToolLoopRoundResult,
+} from './responsesToolLoop';
 export { readThinkingBudgetTokens } from './mappers';
 export type { ApiPathId, ApiPathOption } from './apiPaths';
 export {
