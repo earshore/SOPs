@@ -46,6 +46,7 @@ import {
   type ApiPathId,
   type ApiPathOption,
   type ReasoningUserPrefs,
+  type ResolvedModelCapability,
 } from '@/services/modelCapability';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import {
@@ -82,6 +83,79 @@ import eventBus from '@/common/EventBus';
 import { ApiError } from '@/common/errors/AppError';
 
 let alpineRetryCount = 0;
+
+type CapabilityBadge = {
+  id: string;
+  label: string;
+  active: boolean;
+  title: string;
+};
+
+function pathIdToBadgeLabel(pathId: ApiPathId): string {
+  if (pathId === 'responses') return 'Responses';
+  if (pathId === 'anthropic_messages') return 'Messages';
+  if (pathId === 'gemini_generate') return 'Gemini';
+  return 'Chat';
+}
+
+/** R7 badges for settings model row (effective path + capability flags). */
+function buildModelCapabilityBadges(
+  pathId: ApiPathId,
+  cap: ResolvedModelCapability
+): CapabilityBadge[] {
+  return [
+    {
+      id: 'path',
+      label: pathIdToBadgeLabel(pathId),
+      active: true,
+      title: `当前请求路径：${pathId}`,
+    },
+    {
+      id: 'reasoning',
+      label: '推理',
+      active: Boolean(cap.supportsReasoning && cap.mapRequest),
+      title: cap.supportsReasoning
+        ? `支持推理（档位：${cap.reasoningEfforts.join('/') || '—'}）`
+        : '当前路径不支持推理字段',
+    },
+    {
+      id: 'structured',
+      label: '结构化',
+      active: cap.supportsStructuredOutput,
+      title: cap.supportsStructuredOutput
+        ? '支持 Structured Outputs（response_format / text.format）'
+        : '当前路径无结构化输出能力',
+    },
+    {
+      id: 'tools',
+      label: 'Tools',
+      active: cap.supportsTools,
+      title: cap.supportsTools ? '支持 function / tools 请求' : '当前路径不声明 tools',
+    },
+    {
+      id: 'vision',
+      label: 'Vision',
+      active: cap.supportsVision,
+      title: cap.supportsVision ? '支持多模态图片输入' : '当前路径不声明 vision',
+    },
+    {
+      id: 'chain',
+      label: '多轮链',
+      active: cap.supportsPreviousResponseId,
+      title: cap.supportsPreviousResponseId
+        ? '支持 previous_response_id 多轮（Deep Chat 可链式）'
+        : '当前路径不支持 previous_response_id',
+    },
+    {
+      id: 'builtin',
+      label: '内置工具',
+      active: cap.supportsBuiltInTools,
+      title: cap.supportsBuiltInTools
+        ? '支持 web_search 等 built-in tools 透传'
+        : '当前路径不声明 built-in tools',
+    },
+  ];
+}
 
 // ==========================================
 // 类型定义
@@ -138,6 +212,12 @@ interface SettingsPanelData {
   apiPathOptions: readonly ApiPathOption[];
   fullApiUrlPreview: string;
   apiPathCapabilityHint: string;
+  modelCapabilityBadges: Array<{
+    id: string;
+    label: string;
+    active: boolean;
+    title: string;
+  }>;
   isProduction: boolean;
   localData: {
     usage: LocalDataUsage | null;
@@ -967,6 +1047,30 @@ const settingsPanelBehavior: SettingsPanelPart = {
       return '该模型目录默认推荐 /responses（推理更完整）；当前为 chat/completions。';
     }
     return '';
+  },
+
+  /**
+   * R7: Capability badges for current model on the effective path (user apiPath).
+   * Active = surface supports the flag; inactive shown dimmed for transparency.
+   */
+  get modelCapabilityBadges(): Array<{
+    id: string;
+    label: string;
+    active: boolean;
+    title: string;
+  }> {
+    const model = (this.llm.model || '').trim();
+    if (!model) return [];
+    const pathId = normalizeApiPathId(this.llm.apiPath);
+    const modelsEntry =
+      this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === model) ?? model;
+    const cap = resolveModelCapability({
+      provider: this.llm.provider,
+      modelId: model,
+      modelsEntry,
+      preferredSurface: pathId,
+    });
+    return buildModelCapabilityBadges(pathId, cap);
   },
 
   // 🔒 P0修复: 检查是否为生产环境
