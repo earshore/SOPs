@@ -588,7 +588,7 @@ function createLLMRequestBody(
     options.reasoningSessionOverride
   );
 
-  return buildChatCompletionsBody({
+  const body = buildChatCompletionsBody({
     model,
     messages,
     temperature: options.temperature,
@@ -599,6 +599,21 @@ function createLLMRequestBody(
     capability,
     reasoning,
   });
+
+  // Browser console: prove whether reasoning_effort is in the outbound JSON (gateway may not surface it).
+  // Use console (not Logger) — llmService must not import loggerService (circular dependency rule).
+  if (body.reasoning_effort !== undefined) {
+    console.info(
+      `[LLM] 请求将发送推理参数 model=${model} reasoning_effort=${String(body.reasoning_effort)}`
+    );
+  } else if (capability.supportsReasoning && capability.mapRequest) {
+    console.info(
+      `[LLM] 推理控件可用但未启用（不会发送 reasoning_effort） model=${model} ` +
+        `globalEnabled=${globalPrefs.enabled} session=${JSON.stringify(options.reasoningSessionOverride ?? null)}`
+    );
+  }
+
+  return body;
 }
 
 async function waitBeforeLLMRetry(attempt: number, options: ResolvedLLMOptions): Promise<void> {

@@ -195,13 +195,15 @@
                 <label class="deep-chat-reasoning-effort-wrap" for="deep-chat-reasoning-effort">
                   <span>思考强度</span>
                   <select id="deep-chat-reasoning-effort" aria-label="思考强度">
-                    <option value="low">low</option>
-                    <option value="medium" selected>medium</option>
-                    <option value="high">high</option>
+                    <option value="low">低 (low)</option>
+                    <option value="medium" selected>中 (medium)</option>
+                    <option value="high">高 (high)</option>
                   </select>
                 </label>
                 <p class="deep-chat-reasoning-hint">
-                  仅勾选启用后请求才会带 reasoning_effort；关闭时不发送该字段。
+                  勾选启用并把强度设为「高」后，浏览器控制台应出现
+                  <code>reasoning_effort=high</code
+                  >；网关日志请查<strong>请求体</strong>顶层字段（不是回复正文）。
                 </p>
               </div>
               <button id="deep-chat-reset-tuning" class="deep-chat-reset-tuning" type="button">

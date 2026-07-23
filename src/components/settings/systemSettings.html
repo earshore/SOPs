@@ -344,7 +344,16 @@
                           @change="setReasoningEffort($event)"
                         >
                           <template x-for="level in reasoningEffortOptions" :key="level">
-                            <option :value="level" x-text="level"></option>
+                            <option
+                              :value="level"
+                              x-text="
+                                level === 'low'
+                                  ? '低 (low)'
+                                  : level === 'high'
+                                    ? '高 (high)'
+                                    : '中 (medium)'
+                              "
+                            ></option>
                           </template>
                         </select>
                         <div

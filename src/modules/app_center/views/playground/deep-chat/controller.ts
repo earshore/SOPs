@@ -2343,11 +2343,10 @@ function abortAllPendingRequests(reason: DeepChatPendingAbortReason): void {
   });
 }
 
-async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string> {
-  const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
-  let streamedText = '';
-  // Global reasoningPrefs + modelsEntry hydrate inside callLLM from StorageService.
-  // Session override: live DOM when controls are visible (WYSIWYG), else thread/global.
+function prepareDeepChatReasoningCallOptions(): {
+  reasoningPrefs?: { enabled: boolean; effort: 'low' | 'medium' | 'high' };
+  reasoningSessionOverride?: DeepChatReasoningSessionOverride;
+} {
   const mountContainer = getMountedRenderContainer();
   const reasoningSessionOverride = resolveDeepChatReasoningSessionOverride(mountContainer);
   if (reasoningSessionOverride && mountContainer) {
@@ -2358,6 +2357,23 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
       },
     });
   }
+  // Explicit prefs so hydrate cannot fall back to stale disabled global.
+  if (reasoningSessionOverride === undefined) {
+    return {};
+  }
+  return {
+    reasoningSessionOverride,
+    reasoningPrefs: {
+      enabled: reasoningSessionOverride.enabled,
+      effort: parseReasoningEffortValue(reasoningSessionOverride.effort),
+    },
+  };
+}
+
+async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string> {
+  const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
+  let streamedText = '';
+  const reasoningOptions = prepareDeepChatReasoningCallOptions();
   const finalText = await callLLM(
     messages,
     config.provider,
@@ -2368,7 +2384,7 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
       temperature: sessionTemperature,
       maxTokens: getDeepChatRequestBudgetDefaults().maxOutputTokens,
       ...(config.serviceTier && { serviceTier: config.serviceTier }),
-      reasoningSessionOverride,
+      ...reasoningOptions,
       modelsEntry: findConfigModelsEntry(config, model),
       retries: 0,
       ...getRuntimeDeepChatOptions(),

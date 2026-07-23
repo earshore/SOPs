@@ -46,11 +46,10 @@ function openAiReasoningRule(
 /**
  * Narrow allowlist only. Prefer exact ids / tight prefixes over broad globs.
  *
- * Live probe (2026-07-23, new.hongecb.store, key-scoped model list):
- * - deepseek-v4-flash: 200 with/without reasoning_effort; stream deltas include reasoning_content
- * - grok-4.5: same field accepted; reasoning_tokens increase with effort
- * - o-series: not on that token's /models list; keep OpenAI-compatible mapRequest for when catalog includes them
- * - deepseek-r1 / deepseek-reasoner: not on catalog; no mapRequest (UI hidden) until ids appear
+ * Live probe (2026-07-23, new.hongecb.store):
+ * - deepseek-v4-flash, grok-4.5, hy3-preview: 200 with reasoning_effort=high; reasoning_tokens present
+ * - claude-sonnet-4-5-*: 400 with reasoning_effort — do NOT register mapRequest
+ * - o-series: OpenAI-compatible contract when catalog includes them
  */
 export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   // OpenAI o-series (common new-api / OpenAI-compatible names)
@@ -61,17 +60,23 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   openAiReasoningRule('o3', 200_000),
   openAiReasoningRule('o3-mini', 200_000),
   openAiReasoningRule('o3-pro', 200_000),
-  // Tight prefix for dated variants e.g. o3-mini-2025-01-31 — still o3-mini* not o3*
   openAiReasoningRule('o1-mini-*', 128_000),
   openAiReasoningRule('o3-mini-*', 200_000),
+  openAiReasoningRule('o1-pro-*', 200_000),
+  openAiReasoningRule('o3-pro-*', 200_000),
 
-  // Gateway-verified chat-style reasoning models (keep temperature)
+  // Gateway-verified (2026-07-23): keep temperature for chat-style models
   openAiReasoningRule('deepseek-v4-flash', 128_000, { temperatureIgnored: false }),
   openAiReasoningRule('deepseek-v4-flash-*', 128_000, { temperatureIgnored: false }),
+  openAiReasoningRule('deepseek-v4-*', 128_000, { temperatureIgnored: false }),
   openAiReasoningRule('grok-4.5', 256_000, { temperatureIgnored: false }),
   openAiReasoningRule('grok-4.5-*', 256_000, { temperatureIgnored: false }),
+  // gateway may echo grok-4.5-build-free; request id is still grok-4.5 / grok-4*
+  openAiReasoningRule('grok-4*', 256_000, { temperatureIgnored: false }),
+  openAiReasoningRule('hy3-preview', 128_000, { temperatureIgnored: false }),
+  openAiReasoningRule('hy3-*', 128_000, { temperatureIgnored: false }),
 
-  // Known reasoning labels without catalog presence / live mapRequest on this gateway yet
+  // Label-only until live mapRequest verified (UI hidden — no mapRequest)
   {
     modelPattern: 'deepseek-r1',
     contextWindow: 128_000,
@@ -80,7 +85,15 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
     defaultEffort: 'medium',
     temperatureIgnored: true,
     features: ['reasoning'],
-    // mapRequest omitted until model id appears on project gateway and is re-probed
+  },
+  {
+    modelPattern: 'deepseek-r1-*',
+    contextWindow: 128_000,
+    supportsReasoning: true,
+    reasoningEfforts: ['low', 'medium', 'high'],
+    defaultEffort: 'medium',
+    temperatureIgnored: true,
+    features: ['reasoning'],
   },
   {
     modelPattern: 'deepseek-reasoner',

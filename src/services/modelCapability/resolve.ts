@@ -8,14 +8,17 @@ import type {
 } from './types';
 import { DEFAULT_REASONING_EFFORTS, DEFAULT_UNKNOWN_CONTEXT_WINDOW } from './types';
 
-/** Match model id against pattern with `*` wildcards (glob-style). */
+/** Match model id against pattern with `*` wildcards (glob-style, case-insensitive). */
 export function matchModelPattern(pattern: string, modelId: string): boolean {
   if (!pattern) return false;
-  if (pattern === modelId) return true;
-  if (!pattern.includes('*')) return pattern === modelId;
+  const id = modelId.trim();
+  const pat = pattern.trim();
+  if (!id || !pat) return false;
+  if (pat.toLowerCase() === id.toLowerCase()) return true;
+  if (!pat.includes('*')) return pat.toLowerCase() === id.toLowerCase();
 
-  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-  return new RegExp(`^${escaped}$`).test(modelId);
+  const escaped = pat.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+  return new RegExp(`^${escaped}$`, 'i').test(id);
 }
 
 function normalizeModelsEntry(

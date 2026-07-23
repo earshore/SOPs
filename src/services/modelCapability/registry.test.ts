@@ -17,11 +17,13 @@ describe('mapOpenAiReasoningEffort', () => {
 });
 
 describe('MODEL_CAPABILITY_RULES allowlist', () => {
-  it('does not use broad *r1* or bare o3* wildcards', () => {
+  it('does not use overly broad wildcards', () => {
     for (const rule of MODEL_CAPABILITY_RULES) {
       expect(rule.modelPattern).not.toBe('*r1*');
+      // bare o3* / o1* without hyphen are forbidden; o3-mini-* / o3-* are ok
       expect(rule.modelPattern).not.toBe('o3*');
       expect(rule.modelPattern).not.toBe('o1*');
+      expect(rule.modelPattern).not.toBe('*');
     }
   });
 
@@ -52,6 +54,15 @@ describe('MODEL_CAPABILITY_RULES allowlist', () => {
     );
     expect(shouldShowReasoningControls(grok)).toBe(true);
     expect(grok.temperatureIgnored).toBe(false);
+    expect(grok.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
+      reasoning_effort: 'high',
+    });
+
+    const hy3 = resolveModelCapability(
+      { provider: 'new_api', modelId: 'hy3-preview' },
+      getModelCapabilityRules()
+    );
+    expect(shouldShowReasoningControls(hy3)).toBe(true);
 
     const o1 = resolveModelCapability(
       { provider: 'new_api', modelId: 'o1-mini' },

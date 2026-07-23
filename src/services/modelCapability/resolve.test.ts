@@ -28,6 +28,11 @@ describe('matchModelPattern', () => {
     expect(matchModelPattern('o3*', 'gpt-4o')).toBe(false);
     expect(matchModelPattern('*r1*', 'deepseek-r1-distill')).toBe(true);
   });
+
+  it('matches case-insensitively', () => {
+    expect(matchModelPattern('grok-4.5', 'Grok-4.5')).toBe(true);
+    expect(matchModelPattern('hy3-*', 'Hy3-preview')).toBe(true);
+  });
 });
 
 describe('resolveModelCapability', () => {
