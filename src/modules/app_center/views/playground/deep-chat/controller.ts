@@ -131,10 +131,11 @@ import {
 
 const nativeLoggerConsole = globalThis.console;
 const PENDING_ASSISTANT_PLACEHOLDER_TEXT = '正在生成回复...';
-const INLINE_GENERATION_CHROME_ID = 'deep-chat-generation-chrome';
+const GENERATION_CHROME_CLASS = 'deep-chat-generation-chrome';
 const INLINE_PENDING_STATUS_ID = 'deep-chat-inline-pending-status';
 const INLINE_PENDING_STATUS_CLASS = 'deep-chat-inline-pending-status';
 const PENDING_GENERATION_HOST_CLASS = 'is-pending-generation';
+const STREAMING_DT_KEY = 'pending';
 /** Shadow DOM rebuild retries when deep-chat recreates loading/AI slots */
 const PENDING_CHROME_MAX_RETRIES = 16;
 const REASONING_TYPEWRITER_INTERVAL_MS = 28;
@@ -174,7 +175,7 @@ const pendingDisplayTimers = new Map<string, number>();
 let pendingChromeObserver: MutationObserver | null = null;
 let pendingChromeRetryRaf: number | null = null;
 let reasoningTypewriterTimer: number | null = null;
-/** Settled 深度思考 nested expand state per thread (display-only). */
+/** Settled 深度思考 expand state keyed by message (`threadId:aiIndex:…`). */
 const settledDeepThinkingUi = new Map<
   string,
   { doneOpen: boolean; deepOpen: boolean; displayedLength: number }
@@ -4402,36 +4403,53 @@ function prefersReducedMotion(): boolean {
   );
 }
 
-function clearInlinePendingStatus(chat: DeepChatElement | null): void {
+function clearStreamingGenerationChrome(chat: DeepChatElement | null): void {
   chat?.classList.remove(PENDING_GENERATION_HOST_CLASS);
-  chat?.shadowRoot?.getElementById(INLINE_GENERATION_CHROME_ID)?.remove();
+  chat?.shadowRoot
+    ?.querySelectorAll(`.${GENERATION_CHROME_CLASS}.is-streaming`)
+    .forEach(node => node.remove());
   clearPendingChromeObserver();
 }
 
-function findInlinePendingStatusHost(root: ShadowRoot): HTMLElement | null {
-  const aiInners = root.querySelectorAll<HTMLElement>(
+function isAssistantMessageRole(role?: string): boolean {
+  return role === 'ai' || role === 'assistant';
+}
+
+function listAiMessageHosts(root: ShadowRoot): HTMLElement[] {
+  const nodes = root.querySelectorAll<HTMLElement>(
     [
       '.deep-chat-outer-container-role-ai .inner-message-container',
       '.outer-message-container.deep-chat-outer-container-role-ai .inner-message-container',
     ].join(', ')
   );
-  if (aiInners.length > 0) {
-    return aiInners[aiInners.length - 1] ?? null;
+  if (nodes.length > 0) {
+    return Array.from(nodes);
   }
 
+  const fallback: HTMLElement[] = [];
   const loadingDots = root.querySelector<HTMLElement>('.deep-chat-loading-message-dots-container');
   if (loadingDots?.parentElement instanceof HTMLElement) {
-    return loadingDots.parentElement;
+    fallback.push(loadingDots.parentElement);
+  } else {
+    const loadingBubble = root.querySelector<HTMLElement>(
+      '.deep-chat-loading-message-bubble, .message-bubble.deep-chat-loading-message-bubble'
+    );
+    if (loadingBubble?.parentElement instanceof HTMLElement) {
+      fallback.push(loadingBubble.parentElement);
+    }
   }
+  return fallback;
+}
 
-  const loadingBubble = root.querySelector<HTMLElement>(
-    '.deep-chat-loading-message-bubble, .message-bubble.deep-chat-loading-message-bubble'
-  );
-  if (loadingBubble?.parentElement instanceof HTMLElement) {
-    return loadingBubble.parentElement;
-  }
+function findInlinePendingStatusHost(root: ShadowRoot): HTMLElement | null {
+  const hosts = listAiMessageHosts(root);
+  return hosts[hosts.length - 1] ?? null;
+}
 
-  return null;
+function buildSettledDtKey(threadId: string, aiIndex: number, message: DeepChatMessage): string {
+  const stamp = message.createdAt ?? 0;
+  const snippet = (message.text || message.content || '').slice(0, 32);
+  return `${threadId}:ai${aiIndex}:${stamp}:${snippet}`;
 }
 
 function findMessageBubbleAnchor(host: HTMLElement): HTMLElement | null {
@@ -4470,11 +4488,29 @@ function placeGenerationChromeRoot(host: HTMLElement, chromeRoot: HTMLElement): 
   }
 }
 
+/** Inline SVG chevron (shadow DOM has no Font Awesome). Collapsed: >; expanded: rotate to v. */
 function createChevronIcon(doc: Document): HTMLElement {
-  const icon = doc.createElement('i');
-  icon.className = 'fas fa-chevron-right deep-chat-dt-chevron';
-  icon.setAttribute('aria-hidden', 'true');
-  return icon;
+  const wrap = doc.createElement('span');
+  wrap.className = 'deep-chat-dt-chevron';
+  wrap.setAttribute('aria-hidden', 'true');
+
+  const svg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  svg.setAttribute('width', '12');
+  svg.setAttribute('height', '12');
+  svg.setAttribute('focusable', 'false');
+
+  const path = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
+  // Chevron pointing right (>)
+  path.setAttribute('d', 'M6 3.2 L11 8 L6 12.8');
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', 'currentColor');
+  path.setAttribute('stroke-width', '1.8');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(path);
+  wrap.appendChild(svg);
+  return wrap;
 }
 
 function setToggleExpanded(toggle: HTMLElement, expanded: boolean): void {
@@ -4524,18 +4560,23 @@ function scheduleReasoningTypewriter(
   run();
 }
 
-function ensureGenerationChromeRoot(host: HTMLElement): HTMLElement {
-  const rootNode = host.getRootNode();
-  const existing =
-    rootNode instanceof ShadowRoot || rootNode instanceof Document
-      ? rootNode.getElementById(INLINE_GENERATION_CHROME_ID)
-      : null;
-  if (existing) {
-    return existing;
+function getChromeOnHost(host: HTMLElement): HTMLElement | null {
+  return host.querySelector<HTMLElement>(`:scope > .${GENERATION_CHROME_CLASS}`);
+}
+
+function ensureGenerationChromeOnHost(
+  host: HTMLElement,
+  key: string,
+  mode: 'streaming' | 'settled'
+): HTMLElement {
+  let chrome = getChromeOnHost(host);
+  if (!chrome) {
+    chrome = host.ownerDocument.createElement('div');
+    chrome.className = GENERATION_CHROME_CLASS;
   }
-  const chrome = host.ownerDocument.createElement('div');
-  chrome.id = INLINE_GENERATION_CHROME_ID;
-  chrome.className = 'deep-chat-generation-chrome';
+  chrome.dataset.dtKey = key;
+  chrome.classList.toggle('is-streaming', mode === 'streaming');
+  chrome.classList.toggle('is-settled', mode === 'settled');
   return chrome;
 }
 
@@ -4671,12 +4712,8 @@ function mountStreamingGenerationChrome(
   statusText: string,
   pending: PendingDeepChatRequest
 ): void {
-  const chrome = ensureGenerationChromeRoot(host);
-  chrome.classList.remove('is-settled');
-  chrome.classList.add('is-streaming');
-  // New generation replaces previous settled 已完成 / nested expand state
-  settledDeepThinkingUi.delete(pending.threadId);
-  // Drop settled-only nodes if remounted mid-flight
+  const chrome = ensureGenerationChromeOnHost(host, STREAMING_DT_KEY, 'streaming');
+  // Drop settled nodes only on this generating host (history 已完成 stays on earlier hosts)
   chrome.querySelector('.deep-chat-dt-settled')?.remove();
 
   if (pending.reasoningText.trim()) {
@@ -4692,15 +4729,15 @@ function formatCompletedDurationLabel(durationSec: number): string {
   return `已完成 ${Math.max(0, Math.round(durationSec))}s`;
 }
 
-function getOrCreateSettledUiState(threadId: string): {
+function getOrCreateSettledUiState(uiKey: string): {
   doneOpen: boolean;
   deepOpen: boolean;
   displayedLength: number;
 } {
-  let state = settledDeepThinkingUi.get(threadId);
+  let state = settledDeepThinkingUi.get(uiKey);
   if (!state) {
     state = { doneOpen: false, deepOpen: false, displayedLength: 0 };
-    settledDeepThinkingUi.set(threadId, state);
+    settledDeepThinkingUi.set(uiKey, state);
   }
   return state;
 }
@@ -4709,31 +4746,29 @@ function mountSettledDeepThinkingChrome(
   host: HTMLElement,
   reasoningText: string,
   durationSec: number,
-  threadId: string
+  uiKey: string
 ): void {
   const full = reasoningText.trim();
   if (!full) {
-    const root = host.getRootNode();
-    if (root instanceof ShadowRoot) {
-      root.getElementById(INLINE_GENERATION_CHROME_ID)?.remove();
+    const existing = getChromeOnHost(host);
+    if (existing?.classList.contains('is-settled')) {
+      existing.remove();
     }
     return;
   }
 
-  const chrome = ensureGenerationChromeRoot(host);
-  chrome.classList.add('is-settled');
-  chrome.classList.remove('is-streaming');
+  const chrome = ensureGenerationChromeOnHost(host, uiKey, 'settled');
   chrome.querySelector('.deep-chat-dt-stream')?.remove();
   chrome.querySelector('#' + INLINE_PENDING_STATUS_ID)?.remove();
 
   const doc = host.ownerDocument;
   let settled = chrome.querySelector<HTMLElement>('.deep-chat-dt-settled');
   if (!settled) {
-    settled = createSettledDeepThinkingDom(doc, full, durationSec, threadId);
+    settled = createSettledDeepThinkingDom(doc, full, durationSec, uiKey);
     chrome.append(settled);
   }
 
-  applySettledDeepThinkingUi(settled, full, durationSec, threadId);
+  applySettledDeepThinkingUi(settled, full, durationSec, uiKey);
   placeGenerationChromeRoot(host, chrome);
 }
 
@@ -4741,7 +4776,7 @@ function createSettledDeepThinkingDom(
   doc: Document,
   full: string,
   durationSec: number,
-  threadId: string
+  uiKey: string
 ): HTMLElement {
   const settled = doc.createElement('div');
   settled.className = 'deep-chat-dt-settled';
@@ -4775,18 +4810,18 @@ function createSettledDeepThinkingDom(
   deepBody.append(deepText);
 
   doneToggle.addEventListener('click', () => {
-    const state = getOrCreateSettledUiState(threadId);
+    const state = getOrCreateSettledUiState(uiKey);
     state.doneOpen = !state.doneOpen;
     if (!state.doneOpen) {
       state.deepOpen = false;
     }
-    applySettledDeepThinkingUi(settled, full, durationSec, threadId);
+    applySettledDeepThinkingUi(settled, full, durationSec, uiKey);
   });
 
   deepToggle.addEventListener('click', () => {
-    const state = getOrCreateSettledUiState(threadId);
+    const state = getOrCreateSettledUiState(uiKey);
     state.deepOpen = !state.deepOpen;
-    applySettledDeepThinkingUi(settled, full, durationSec, threadId);
+    applySettledDeepThinkingUi(settled, full, durationSec, uiKey);
   });
 
   donePanel.append(deepToggle, deepBody);
@@ -4805,9 +4840,9 @@ function applySettledDeepThinkingUi(
   settled: HTMLElement,
   fullText: string,
   durationSec: number,
-  threadId: string
+  uiKey: string
 ): void {
-  const state = getOrCreateSettledUiState(threadId);
+  const state = getOrCreateSettledUiState(uiKey);
   const nodes = readSettledDeepThinkingNodes(settled);
   if (!nodes) {
     return;
@@ -4824,7 +4859,7 @@ function applySettledDeepThinkingUi(
     return;
   }
 
-  runSettledReasoningTypewriter(nodes.deepText, fullText, state, threadId);
+  runSettledReasoningTypewriter(nodes.deepText, fullText, state, uiKey);
 }
 
 function readSettledDeepThinkingNodes(settled: HTMLElement): {
@@ -4851,7 +4886,7 @@ function runSettledReasoningTypewriter(
   deepText: HTMLElement,
   fullText: string,
   state: { doneOpen: boolean; deepOpen: boolean; displayedLength: number },
-  threadId: string
+  uiKey: string
 ): void {
   if (prefersInstantReasoningText()) {
     deepText.textContent = fullText;
@@ -4867,10 +4902,8 @@ function runSettledReasoningTypewriter(
       state.displayedLength = n;
     },
     () => {
-      const current = settledDeepThinkingUi.get(threadId);
-      return (
-        Boolean(current?.doneOpen && current.deepOpen) && threadStore.activeThreadId === threadId
-      );
+      const current = settledDeepThinkingUi.get(uiKey);
+      return Boolean(current?.doneOpen && current.deepOpen);
     }
   );
 }
@@ -4882,74 +4915,40 @@ function observePendingGenerationChrome(chat: DeepChatElement): void {
   }
 
   pendingChromeObserver = new MutationObserver(() => {
+    const container = getMountedRenderContainer();
+    if (!container || !chat.shadowRoot) {
+      return;
+    }
     const pending = pendingRequests.get(threadStore.activeThreadId);
-    if (!pending || !chat.shadowRoot) {
-      return;
+    if (pending) {
+      const host = findInlinePendingStatusHost(chat.shadowRoot);
+      const chrome = host?.querySelector(`:scope > .${GENERATION_CHROME_CLASS}.is-streaming`);
+      if (host && chrome) {
+        return;
+      }
     }
-    const host = findInlinePendingStatusHost(chat.shadowRoot);
-    const chrome = chat.shadowRoot.getElementById(INLINE_GENERATION_CHROME_ID);
-    if (host && chrome && host.contains(chrome)) {
-      return;
-    }
-    // deep-chat rebuilt message DOM and dropped chrome → remount
-    ensureInlinePendingChrome(chat, getPendingStatusText(pending), pending);
+    // History or stream chrome dropped after deep-chat rebuild → reattach all
+    syncAllDeepThinkingChrome(container);
   });
   pendingChromeObserver.observe(root, { childList: true, subtree: true });
 }
 
-function ensureInlinePendingChrome(
-  chat: DeepChatElement,
-  statusText: string,
-  pending: PendingDeepChatRequest
-): void {
-  const root = chat.shadowRoot;
-  if (!root) {
-    schedulePendingChromeRetry(chat, statusText, pending);
-    return;
-  }
-
-  chat.classList.add(PENDING_GENERATION_HOST_CLASS);
-  observePendingGenerationChrome(chat);
-
-  const host = findInlinePendingStatusHost(root);
-  if (host) {
-    mountStreamingGenerationChrome(host, statusText, pending);
-    return;
-  }
-
-  schedulePendingChromeRetry(chat, statusText, pending);
-}
-
-function schedulePendingChromeRetry(
-  chat: DeepChatElement,
-  statusText: string,
-  pending: PendingDeepChatRequest,
-  attempt = 0
-): void {
+function scheduleDeepThinkingChromeRetry(container: HTMLElement, attempt = 0): void {
   if (pendingChromeRetryRaf !== null) {
     return;
   }
   pendingChromeRetryRaf = window.requestAnimationFrame(() => {
     pendingChromeRetryRaf = null;
-    if (!pendingRequests.get(threadStore.activeThreadId)) {
+    const chat = getChat(container);
+    if (!chat) {
       return;
     }
-    const root = chat.shadowRoot;
-    if (!root) {
-      if (attempt + 1 < PENDING_CHROME_MAX_RETRIES) {
-        schedulePendingChromeRetry(chat, statusText, pending, attempt + 1);
-      }
-      return;
-    }
-    const host = findInlinePendingStatusHost(root);
-    if (host) {
-      chat.classList.add(PENDING_GENERATION_HOST_CLASS);
-      observePendingGenerationChrome(chat);
-      mountStreamingGenerationChrome(host, statusText, pending);
+    if (chat.shadowRoot && listAiMessageHosts(chat.shadowRoot).length > 0) {
+      syncAllDeepThinkingChrome(container);
       return;
     }
     if (attempt + 1 < PENDING_CHROME_MAX_RETRIES) {
-      schedulePendingChromeRetry(chat, statusText, pending, attempt + 1);
+      scheduleDeepThinkingChromeRetry(container, attempt + 1);
     }
   });
 }
@@ -4965,70 +4964,95 @@ function hideLegacyLightDomGenerationChrome(container: HTMLElement): void {
   }
 }
 
-function getLastAssistantReasoningMeta(threadId: string): {
-  reasoning: string;
-  durationSec: number;
-} | null {
-  const thread = threadStore.threads.find(item => item.id === threadId);
-  const lastWithReasoning = [...(thread?.messages ?? [])]
-    .reverse()
-    .find(message => typeof message.reasoning === 'string' && message.reasoning.trim());
-  if (!lastWithReasoning?.reasoning?.trim()) {
-    return null;
-  }
-  const durationSec =
-    typeof lastWithReasoning.reasoningDurationSec === 'number'
-      ? lastWithReasoning.reasoningDurationSec
-      : 0;
-  return { reasoning: lastWithReasoning.reasoning.trim(), durationSec };
-}
-
-function ensureSettledReasoningChrome(
-  chat: DeepChatElement,
-  reasoningText: string,
-  durationSec: number,
-  threadId: string
-): void {
-  const root = chat.shadowRoot;
-  if (!root) {
-    return;
-  }
-  chat.classList.remove(PENDING_GENERATION_HOST_CLASS);
-  clearPendingChromeObserver();
-
-  const host = findInlinePendingStatusHost(root);
-  if (!host) {
-    return;
-  }
-  mountSettledDeepThinkingChrome(host, reasoningText, durationSec, threadId);
-}
-
-function syncPendingStatus(container: HTMLElement): void {
+/**
+ * Attach 已完成 / 深度思考 chrome to every AI bubble that has stored reasoning,
+ * and streaming chrome only on the latest bubble while generating.
+ * Historical blocks are never removed when a new message starts.
+ */
+function syncAllDeepThinkingChrome(container: HTMLElement): void {
   hideLegacyLightDomGenerationChrome(container);
 
   const chat = getChat(container);
-  const pendingRequest = pendingRequests.get(threadStore.activeThreadId);
-
-  if (!pendingRequest) {
-    const settled = getLastAssistantReasoningMeta(threadStore.activeThreadId);
-    if (chat && settled) {
-      ensureSettledReasoningChrome(
-        chat,
-        settled.reasoning,
-        settled.durationSec,
-        threadStore.activeThreadId
-      );
-    } else {
-      clearInlinePendingStatus(chat);
-    }
+  if (!chat) {
     syncSubmitStopButtonState(container);
     return;
   }
 
-  if (chat) {
-    ensureInlinePendingChrome(chat, getPendingStatusText(pendingRequest), pendingRequest);
+  const root = chat.shadowRoot;
+  if (!root) {
+    scheduleDeepThinkingChromeRetry(container);
+    syncSubmitStopButtonState(container);
+    return;
   }
+
+  const thread = getActiveThread();
+  const pending = pendingRequests.get(thread.id);
+  const hosts = listAiMessageHosts(root);
+  if (hosts.length === 0) {
+    scheduleDeepThinkingChromeRetry(container);
+    syncSubmitStopButtonState(container);
+    return;
+  }
+
+  observePendingGenerationChrome(chat);
+
+  const storedAi = thread.messages.filter(message => isAssistantMessageRole(message.role));
+  const streamHostIndex = pending ? hosts.length - 1 : -1;
+
+  hosts.forEach((host, hostIndex) => {
+    if (pending && hostIndex === streamHostIndex) {
+      chat.classList.add(PENDING_GENERATION_HOST_CLASS);
+      mountStreamingGenerationChrome(host, getPendingStatusText(pending), pending);
+      return;
+    }
+
+    // Map earlier hosts 1:1 onto stored AI messages (skip streaming last host).
+    const storedIndex = hostIndex;
+    const message = storedAi[storedIndex];
+    if (message?.reasoning?.trim()) {
+      const uiKey = buildSettledDtKey(thread.id, storedIndex, message);
+      mountSettledDeepThinkingChrome(
+        host,
+        message.reasoning,
+        typeof message.reasoningDurationSec === 'number' ? message.reasoningDurationSec : 0,
+        uiKey
+      );
+      return;
+    }
+
+    // No reasoning for this bubble: keep only non-streaming chrome removal on this host
+    const chrome = getChromeOnHost(host);
+    if (chrome?.classList.contains('is-settled')) {
+      chrome.remove();
+    }
+  });
+
+  if (!pending) {
+    clearStreamingGenerationChrome(chat);
+    // Re-attach settled after clearing streaming (clear only removes is-streaming)
+    hosts.forEach((host, hostIndex) => {
+      const message = storedAi[hostIndex];
+      if (!message?.reasoning?.trim()) {
+        return;
+      }
+      if (getChromeOnHost(host)?.classList.contains('is-settled')) {
+        return;
+      }
+      const uiKey = buildSettledDtKey(thread.id, hostIndex, message);
+      mountSettledDeepThinkingChrome(
+        host,
+        message.reasoning,
+        typeof message.reasoningDurationSec === 'number' ? message.reasoningDurationSec : 0,
+        uiKey
+      );
+    });
+  }
+
   syncSubmitStopButtonState(container);
+}
+
+function syncPendingStatus(container: HTMLElement): void {
+  syncAllDeepThinkingChrome(container);
 }
 
 function getPendingStatusText(pendingRequest: PendingDeepChatRequest): string {

@@ -113,29 +113,38 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     min-width: 0 !important;
   }
 
-  /* Hover 显示右侧 >；展开后保持可见并朝下 */
+  /* SVG chevron: 默认可见一点，hover 更清晰；展开旋转 90° 呈向下 */
   .deep-chat-dt-chevron {
-    margin-left: 0.15rem !important;
-    font-size: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin-left: 0.2rem !important;
     color: #94a3b8 !important;
-    opacity: 0 !important;
+    opacity: 0.55 !important;
     transform: rotate(0deg) !important;
     transition: opacity 160ms ease, transform 200ms ease, color 160ms ease !important;
   }
 
+  .deep-chat-dt-chevron svg {
+    display: block !important;
+    width: 12px !important;
+    height: 12px !important;
+  }
+
   .deep-chat-dt-toggle:hover .deep-chat-dt-chevron,
-  .deep-chat-dt-done-toggle:hover .deep-chat-dt-chevron,
+  .deep-chat-dt-done-toggle:hover .deep-chat-dt-chevron {
+    opacity: 1 !important;
+    color: #64748b !important;
+  }
+
   .deep-chat-dt-toggle.is-expanded .deep-chat-dt-chevron,
   .deep-chat-dt-done-toggle.is-expanded .deep-chat-dt-chevron,
   .deep-chat-dt-toggle[aria-expanded='true'] .deep-chat-dt-chevron,
   .deep-chat-dt-done-toggle[aria-expanded='true'] .deep-chat-dt-chevron {
     opacity: 1 !important;
-  }
-
-  .deep-chat-dt-toggle.is-expanded .deep-chat-dt-chevron,
-  .deep-chat-dt-done-toggle.is-expanded .deep-chat-dt-chevron,
-  .deep-chat-dt-toggle[aria-expanded='true'] .deep-chat-dt-chevron,
-  .deep-chat-dt-done-toggle[aria-expanded='true'] .deep-chat-dt-chevron {
     transform: rotate(90deg) !important;
     color: #64748b !important;
   }
@@ -148,11 +157,15 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     padding-left: 0.15rem !important;
   }
 
+  /* 深度思考正文：左侧引用竖线 */
   .deep-chat-dt-body {
     width: 100% !important;
-    margin: 0.15rem 0 0.1rem !important;
+    margin: 0.2rem 0 0.15rem !important;
+    padding: 0.1rem 0 0.1rem 0.7rem !important;
     border: none !important;
+    border-left: 2px solid rgba(148, 163, 184, 0.65) !important;
     background: transparent !important;
+    box-sizing: border-box !important;
   }
 
   .deep-chat-dt-text {
@@ -160,7 +173,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     max-height: 12.5rem !important; /* ~200px：超出后滚动 */
     overflow-x: hidden !important;
     overflow-y: auto !important;
-    padding: 0.15rem 0.1rem 0.25rem !important;
+    padding: 0.05rem 0.15rem 0.2rem 0 !important;
     border: none !important;
     background: transparent !important;
     white-space: pre-wrap !important;
