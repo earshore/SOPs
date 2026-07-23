@@ -639,6 +639,11 @@ export interface LLMProviderConfig {
     enabled: boolean;
     effort: 'low' | 'medium' | 'high';
   };
+  /**
+   * User-selected default API path mode (appended to endpoint base).
+   * chat_completions | responses | anthropic_messages | gemini_generate
+   */
+  apiPath?: 'chat_completions' | 'responses' | 'anthropic_messages' | 'gemini_generate';
   enabled: boolean;
 }
 

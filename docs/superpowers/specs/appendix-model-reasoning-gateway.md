@@ -44,11 +44,10 @@ Rules source: `src/services/modelCapability/registry.ts`
 | DeepSeek        | `deepseek-v4*`, `deepseek-r1*`, `deepseek-reasoner` | **Live** `deepseek-v4-flash` |
 | Hy3             | `hy3-*`                                             | **Live** `hy3-preview`       |
 
-### label tier (known reasoning, **no UI** until field verified)
+### Real mappers (UI on) vs channel risk
 
-Claude Opus/Sonnet/Haiku 4.x · Gemini 2.5/3.x · Kimi K2 · Qwen3/QwQ · GLM-4.5 — see catalog doc.
-
-**Claude on this new-api:** plain chat 200; `reasoning_effort` / `thinking` → **400** → stays label.
+Claude / Gemini / Kimi / Qwen 等均有 **真实 mapRequest**（非 label 假实现）。  
+**Claude on this new-api:** plain 200；`thinking` 字段当前 channel 可能 **400**——客户端仍会发送标准 Anthropic thinking；需 channel 开启 extended thinking。
 
 Disabled / rejected patterns (do not reintroduce without review):
 

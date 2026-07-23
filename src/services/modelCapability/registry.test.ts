@@ -71,12 +71,12 @@ describe('multi-protocol flagship catalog', () => {
     });
   });
 
-  it('uses anthropic thinking mapper for Claude on chat_completions', () => {
+  it('uses anthropic thinking mapper for Claude on anthropic_messages', () => {
     const cap = resolveModelCapability(
       { provider: 'new_api', modelId: 'claude-sonnet-4-5-20250929' },
       getModelCapabilityRules()
     );
-    expect(cap.apiSurface).toBe('chat_completions');
+    expect(cap.apiSurface).toBe('anthropic_messages');
     expect(cap.mapRequest?.({ enabled: true, effort: 'high' })).toEqual(
       mapAnthropicThinking({ enabled: true, effort: 'high' })
     );

@@ -97,10 +97,10 @@ function claudeThinking(modelPattern: string, contextWindow: number): ModelCapab
   return entry(
     modelPattern,
     contextWindow,
-    'chat_completions',
+    'anthropic_messages',
     {
+      anthropic_messages: surfaceAnthropic(),
       chat_completions: surfaceAnthropic(),
-      // Some gateways expose Claude only on completions; still register responses effort if routed
       responses: surfaceResponses({ temperatureIgnored: true }),
     },
     ['reasoning', 'claude']
@@ -108,11 +108,17 @@ function claudeThinking(modelPattern: string, contextWindow: number): ModelCapab
 }
 
 function geminiThinking(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+  const geminiSurface: SurfaceCapability = surfaceGemini();
   return entry(
     modelPattern,
     contextWindow,
-    'chat_completions',
+    'gemini_generate',
     {
+      gemini_generate: {
+        ...geminiSurface,
+        // Native Gemini body uses thinkingConfig (built in protocolBodies)
+        mapRequest: geminiSurface.mapRequest,
+      },
       chat_completions: surfaceGemini(),
       responses: surfaceResponses({ temperatureIgnored: false }),
     },

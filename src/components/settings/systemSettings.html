@@ -174,29 +174,65 @@
                   </div>
                 </div>
 
-                <!-- Endpoint -->
+                <!-- Endpoint + API Path (URL base + route) -->
                 <div class="group">
-                  <label
-                    for="llm-endpoint"
-                    class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
-                    >API Endpoint</label
-                  >
-                  <div class="relative">
-                    <div
-                      class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-emerald-100 flex items-center justify-center"
-                    >
-                      <i class="fas fa-link text-emerald-500 text-[9px]"></i>
+                  <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
+                    <div class="min-w-0 flex-1">
+                      <label
+                        for="llm-endpoint"
+                        class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                        >API Endpoint</label
+                      >
+                      <div class="relative">
+                        <div
+                          class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 w-5 h-5 rounded bg-emerald-100 flex items-center justify-center"
+                        >
+                          <i class="fas fa-link text-emerald-500 text-[9px]"></i>
+                        </div>
+                        <input
+                          type="text"
+                          id="llm-endpoint"
+                          name="llm-endpoint"
+                          :value="llm.endpoint"
+                          @input="setLlmEndpoint($event)"
+                          class="settings-leading-icon-input w-full pl-12 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
+                          :placeholder="defaultLlmEndpoint"
+                        />
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      id="llm-endpoint"
-                      name="llm-endpoint"
-                      :value="llm.endpoint"
-                      @input="setLlmEndpoint($event)"
-                      class="settings-leading-icon-input w-full pl-12 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-sm font-mono text-slate-600 shadow-sm transition duration-200 hover:border-slate-300 placeholder:text-slate-300"
-                      :placeholder="defaultLlmEndpoint"
-                    />
+                    <div class="w-full sm:w-[min(17.5rem,42%)] shrink-0">
+                      <label
+                        for="llm-api-path"
+                        class="block text-xs font-semibold text-slate-600 mb-2 group-focus-within:text-blue-600 transition-colors"
+                        >API 路径</label
+                      >
+                      <div class="relative">
+                        <select
+                          id="llm-api-path"
+                          name="llm-api-path"
+                          :value="llm.apiPath"
+                          @change="setLlmApiPath($event)"
+                          class="w-full pl-3 pr-10 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none bg-white text-sm font-mono text-slate-700 shadow-sm transition duration-200 hover:border-slate-300 cursor-pointer"
+                        >
+                          <template x-for="opt in apiPathOptions" :key="opt.id">
+                            <option
+                              :value="opt.id"
+                              x-text="opt.pathLabel + ' · ' + opt.label"
+                            ></option>
+                          </template>
+                        </select>
+                        <div
+                          class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center"
+                        >
+                          <i class="fas fa-chevron-down text-slate-400 text-[9px]"></i>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                  <p
+                    class="mt-1.5 text-[10px] leading-relaxed text-slate-500 font-mono break-all"
+                    x-text="'完整 URL：' + fullApiUrlPreview"
+                  ></p>
                 </div>
 
                 <!-- API Key -->
@@ -364,11 +400,8 @@
                       </div>
                     </div>
                     <p class="text-[10px] leading-relaxed text-slate-500">
-                      仅在能力目录登记且网关可透传时生效。默认关闭：关闭时请求体<strong
-                        >不包含</strong
-                      >
-                      <code class="text-[10px]">reasoning_effort</code>；勾选并保存后才会发送。
-                      未登记模型不会出现此控件、也不会写推理字段。
+                      仅在能力目录登记且网关可透传时生效。默认关闭时不发送推理字段；勾选并保存后才会发送。
+                      Claude 等渠道若未开启 extended thinking，启用后可能 400——可关闭推理后重试。
                     </p>
                   </div>
                 </div>

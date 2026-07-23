@@ -162,6 +162,99 @@ describe('callLLM streaming', () => {
     expect(body.model).toBe('deepseek-v4-flash');
   });
 
+  it('forces chat_completions with response_format when jsonMode on gpt-5.5', async () => {
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      void url;
+      void init;
+      return new Response(
+        JSON.stringify({
+          id: 'chatcmpl-test',
+          object: 'chat.completion',
+          created: 1_700_000_000,
+          model: 'gpt-5.5',
+          choices: [
+            {
+              index: 0,
+              message: { role: 'assistant', content: '{"ok":true}' },
+              finish_reason: 'stop',
+            },
+          ],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await callLLM(
+      [{ role: 'user', content: 'Return JSON.' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'gpt-5.5',
+      {
+        stream: false,
+        retries: 0,
+        jsonMode: true,
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+
+    const url = String(fetchMock.mock.calls[0]?.[0]);
+    const body = JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body));
+    expect(url).toContain('/chat/completions');
+    expect(url).not.toContain('/responses');
+    expect(body.response_format).toEqual({ type: 'json_object' });
+  });
+
+  it('falls back from /responses 404 to chat_completions once', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(async () => {
+        return new Response(JSON.stringify({ error: { message: 'not found' } }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      })
+      .mockImplementationOnce(async () => {
+        return new Response(
+          JSON.stringify({
+            id: 'chatcmpl-test',
+            object: 'chat.completion',
+            created: 1,
+            model: 'gpt-5.5',
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: 'ok' },
+                finish_reason: 'stop',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'gpt-5.5',
+      {
+        stream: false,
+        retries: 0,
+        apiPath: 'responses',
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+
+    expect(text).toBe('ok');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('/responses');
+    expect(String(fetchMock.mock.calls[1]?.[0])).toContain('/chat/completions');
+  });
+
   it('omits reasoning_effort when prefs are disabled', async () => {
     const fetchMock = vi.fn(
       async (_url: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -204,5 +297,126 @@ describe('callLLM streaming', () => {
     expect(callInit).toBeDefined();
     const body = JSON.parse(String(callInit?.body)) as Record<string, unknown>;
     expect(body.reasoning_effort).toBeUndefined();
+  });
+
+  it('posts Anthropic Messages body to /messages with dual auth headers', async () => {
+    const fetchMock = vi.fn(async () =>
+      createSseResponse([
+        'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hello"}}',
+        'data: {"type":"message_stop"}',
+      ])
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [
+        { role: 'system', content: 'sys' },
+        { role: 'user', content: 'hi' },
+      ],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'claude-sonnet-4-5',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'anthropic_messages',
+        reasoningPrefs: { enabled: true, effort: 'high' },
+      }
+    );
+
+    expect(text).toBe('Hello');
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe('https://new.hongecb.store/v1/messages');
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe('Bearer test-key');
+    expect(headers['x-api-key']).toBe('test-key');
+    expect(headers['anthropic-version']).toBe('2023-06-01');
+    const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+    expect(body.system).toBe('sys');
+    expect(body.stream).toBe(true);
+    expect(body.thinking).toEqual({ type: 'enabled', budget_tokens: 10_000 });
+  });
+
+  it('posts Gemini generateContent body to v1beta models path', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          candidates: [
+            {
+              content: {
+                parts: [{ text: 'thought', thought: true }, { text: 'answer' }],
+              },
+            },
+          ],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [
+        { role: 'system', content: 's' },
+        { role: 'user', content: 'u' },
+      ],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'gemini-2.5-flash',
+      {
+        stream: false,
+        retries: 0,
+        apiPath: 'gemini_generate',
+        reasoningPrefs: { enabled: true, effort: 'medium' },
+      }
+    );
+
+    expect(text).toBe('answer');
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      'https://new.hongecb.store/v1beta/models/gemini-2.5-flash:generateContent'
+    );
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    const headers = init.headers as Record<string, string>;
+    expect(headers['x-goog-api-key']).toBe('test-key');
+    const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+    expect(body.systemInstruction).toBeTruthy();
+    expect(Array.isArray(body.contents)).toBe(true);
+    expect(body.thinkingConfig).toMatchObject({ includeThoughts: true });
+  });
+
+  it('posts Responses body to /responses when apiPath is responses', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          output: [{ type: 'message', content: [{ type: 'output_text', text: 'resp-ok' }] }],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'gpt-5.5',
+      {
+        stream: false,
+        retries: 0,
+        apiPath: 'responses',
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+
+    expect(text).toBe('resp-ok');
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe('https://new.hongecb.store/v1/responses');
+    const body = JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body)) as Record<
+      string,
+      unknown
+    >;
+    expect(body.input).toBeDefined();
+    expect(body.messages).toBeUndefined();
   });
 });

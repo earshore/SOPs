@@ -166,6 +166,9 @@ export const LLMProviderConfigSchema = z.object({
       effort: z.enum(['low', 'medium', 'high']),
     })
     .optional(),
+  apiPath: z
+    .enum(['chat_completions', 'responses', 'anthropic_messages', 'gemini_generate'])
+    .optional(),
   enabled: z.boolean(),
 });
 

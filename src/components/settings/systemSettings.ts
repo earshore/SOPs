@@ -35,10 +35,16 @@ import { escapeHtml, setSafeHtml } from '@/common/utils/security';
 import { SECURE_STORAGE_SECURITY_BOUNDARY } from '@/common/utils/secureStorageBoundary';
 import { fetchModelsFromApi, callLLM } from '@/services/llmService';
 import {
+  API_PATH_OPTIONS,
+  DEFAULT_API_PATH_ID,
   DEFAULT_REASONING_PREFS,
+  buildFullApiUrl,
+  normalizeApiPathId,
   normalizeReasoningUserPrefs,
   resolveModelCapability,
   shouldShowReasoningControls,
+  type ApiPathId,
+  type ApiPathOption,
   type ReasoningUserPrefs,
 } from '@/services/modelCapability';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
@@ -89,6 +95,8 @@ interface LLMState {
   models: ModelOption[];
   serviceTier?: LLMProviderConfig['serviceTier'];
   reasoningPrefs: ReasoningUserPrefs;
+  /** Default call path next to endpoint (URL + path layout). */
+  apiPath: ApiPathId;
   showKey: boolean;
   isFetching: boolean;
   isTesting: boolean;
@@ -127,6 +135,8 @@ interface SettingsPanelData {
   activeModelCapability: import('@/services/modelCapability').ResolvedModelCapability | null;
   showReasoningControls: boolean;
   reasoningEffortOptions: Array<'low' | 'medium' | 'high'>;
+  apiPathOptions: readonly ApiPathOption[];
+  fullApiUrlPreview: string;
   isProduction: boolean;
   localData: {
     usage: LocalDataUsage | null;
@@ -196,6 +206,7 @@ interface SettingsPanelData {
   saveProxyConfig(): Promise<void>;
   setLlmProvider(event: Event): void;
   setLlmEndpoint(event: Event): void;
+  setLlmApiPath(event: Event): void;
   setLlmApiKey(event: Event): void;
   setLlmModel(event: Event): void;
   setLlmServiceTier(event: Event): void;
@@ -821,6 +832,7 @@ function createSettingsState(): Pick<
       models: [],
       serviceTier: undefined,
       reasoningPrefs: { ...DEFAULT_REASONING_PREFS },
+      apiPath: DEFAULT_API_PATH_ID,
       showKey: false,
       isFetching: false,
       isTesting: false,
@@ -909,6 +921,19 @@ const settingsPanelBehavior: SettingsPanelPart = {
       return ['low', 'medium', 'high'];
     }
     return [...cap.reasoningEfforts];
+  },
+
+  get apiPathOptions(): readonly ApiPathOption[] {
+    return API_PATH_OPTIONS;
+  },
+
+  get fullApiUrlPreview(): string {
+    const { fullUrl } = buildFullApiUrl(
+      this.llm.endpoint || this.defaultLlmEndpoint,
+      normalizeApiPathId(this.llm.apiPath),
+      this.llm.model || '{model}'
+    );
+    return fullUrl || '—';
   },
 
   // 🔒 P0修复: 检查是否为生产环境
@@ -1249,6 +1274,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
     this.llm.model = getInitialModel(savedConfig?.model, this.llm.models);
     this.llm.serviceTier = savedConfig?.serviceTier;
     this.llm.reasoningPrefs = normalizeReasoningUserPrefs(savedConfig?.reasoningPrefs);
+    this.llm.apiPath = normalizeApiPathId(savedConfig?.apiPath);
     this.loadToolStrategyDefaults();
   },
 
@@ -1313,6 +1339,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
           maxTokens: LLM_TEST_CONNECTION_MAX_TOKENS,
           ...(this.llm.serviceTier && { serviceTier: this.llm.serviceTier }),
           reasoningPrefs: this.llm.reasoningPrefs,
+          apiPath: normalizeApiPathId(this.llm.apiPath),
           modelsEntry,
           stream: true,
           timeout: this.runtimeStrategy.settings.llm.testConnectionTimeoutMs,
@@ -1342,6 +1369,7 @@ const settingsPanelBehavior: SettingsPanelPart = {
         models: this.llm.models,
         ...(this.llm.serviceTier && { serviceTier: this.llm.serviceTier }),
         reasoningPrefs: normalizeReasoningUserPrefs(this.llm.reasoningPrefs),
+        apiPath: normalizeApiPathId(this.llm.apiPath),
         enabled: true,
         apiKey: '', // 占位符,实际存储在安全存储中
       };
@@ -1458,6 +1486,10 @@ const settingsPanelBehavior: SettingsPanelPart = {
 
   setLlmEndpoint(event: Event): void {
     this.llm.endpoint = (event.target as HTMLInputElement).value;
+  },
+
+  setLlmApiPath(event: Event): void {
+    this.llm.apiPath = normalizeApiPathId((event.target as HTMLSelectElement).value);
   },
 
   setLlmApiKey(event: Event): void {

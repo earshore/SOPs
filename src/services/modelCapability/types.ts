@@ -10,11 +10,17 @@ export type ReasoningEffort = 'off' | 'low' | 'medium' | 'high';
 export type ReasoningEffortLevel = Exclude<ReasoningEffort, 'off'>;
 
 /**
- * Transport surface for LLM calls.
+ * Transport surface / API path mode for LLM calls.
  * - chat_completions: POST {base}/chat/completions
- * - responses: POST {base}/responses (OpenAI Responses API)
+ * - responses: POST {base}/responses
+ * - anthropic_messages: POST {base}/messages
+ * - gemini_generate: POST {origin}/v1beta/models/{model}:generateContent
  */
-export type ApiSurface = 'chat_completions' | 'responses';
+export type ApiSurface =
+  | 'chat_completions'
+  | 'responses'
+  | 'anthropic_messages'
+  | 'gemini_generate';
 
 export interface SurfaceCapability {
   supportsReasoning: boolean;

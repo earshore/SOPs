@@ -142,7 +142,7 @@ describe('buildResponsesBody', () => {
     expect(built.body.input).toBe('hi');
   });
 
-  it('builds multi-turn input array', () => {
+  it('builds multi-turn input array and moves system to instructions', () => {
     const capability = {
       apiSurface: 'responses' as const,
       temperatureIgnored: true,
@@ -153,6 +153,7 @@ describe('buildResponsesBody', () => {
     const body = buildResponsesBody({
       model: 'm',
       messages: [
+        { role: 'system', content: 'You are helpful' },
         { role: 'user', content: 'a' },
         { role: 'assistant', content: 'b' },
         { role: 'user', content: 'c' },
@@ -160,6 +161,7 @@ describe('buildResponsesBody', () => {
       capability,
       reasoning: { enabled: false, effort: 'off' },
     });
+    expect(body.instructions).toBe('You are helpful');
     expect(Array.isArray(body.input)).toBe(true);
     expect(body.input).toHaveLength(3);
   });

@@ -19,12 +19,19 @@ import type { LLMChatCompletionResponse, LLMErrorResponse } from '@/types/api';
 // 导入类型守卫
 import { isLLMChatCompletionResponse } from '@/common/guards/typeGuards';
 import {
-  buildRequestBodyForSurface,
+  buildBodyForApiPath,
+  buildFullApiUrl,
+  extractAnthropicMessagesText,
+  extractGeminiGenerateText,
   extractResponsesOutputText,
+  getAnthropicStreamTextDelta,
+  getGeminiStreamTextDelta,
   getResponsesStreamTextDelta,
+  normalizeApiPathId,
   normalizeReasoningUserPrefs,
   resolveEffectiveReasoning,
   resolveModelCapability,
+  type ApiPathId,
   type ApiSurface,
   type ModelsListEntry,
   type ReasoningUserPrefs,
@@ -81,6 +88,11 @@ export interface LLMOptions {
   reasoningSessionOverride?: SessionReasoningOverride;
   /** Optional /models list entry for context merge */
   modelsEntry?: ModelsListEntry | string | null;
+  /**
+   * User-selected API path mode (system settings).
+   * Overrides model preferred surface when set.
+   */
+  apiPath?: ApiPathId;
 }
 
 export interface LLMStreamMetrics {
@@ -208,6 +220,12 @@ function getChatCompletionsStreamDelta(payload: Record<string, unknown>): string
 function getStreamDelta(payload: Record<string, unknown>, surface: ApiSurface): string {
   if (surface === 'responses') {
     return getResponsesStreamTextDelta(payload);
+  }
+  if (surface === 'anthropic_messages') {
+    return getAnthropicStreamTextDelta(payload);
+  }
+  if (surface === 'gemini_generate') {
+    return getGeminiStreamTextDelta(payload);
   }
   return getChatCompletionsStreamDelta(payload);
 }
@@ -458,6 +476,7 @@ interface ResolvedLLMOptions {
   reasoningPrefs: ReasoningUserPrefs | undefined;
   reasoningSessionOverride: SessionReasoningOverride | undefined;
   modelsEntry: ModelsListEntry | string | null | undefined;
+  apiPath: ApiPathId;
 }
 
 interface LLMCallContext {
@@ -469,9 +488,12 @@ interface LLMCallContext {
   messages: ChatMessage[];
   options: ResolvedLLMOptions;
   requestBody: Record<string, unknown>;
-  /** Relative path under base endpoint, e.g. /chat/completions or /responses */
+  /** Full request URL (endpoint + path mode). */
+  requestUrl: string;
+  /** Relative path suffix for logging */
   requestPath: string;
   apiSurface: ApiSurface;
+  apiPath: ApiPathId;
 }
 
 interface LLMResponsePayload {
@@ -517,24 +539,28 @@ function hydrateReasoningOptionsFromStorage(
   provider: string,
   model: string,
   options: LLMOptions
-): Pick<LLMOptions, 'reasoningPrefs' | 'modelsEntry'> {
-  if (options.reasoningPrefs !== undefined && options.modelsEntry !== undefined) {
-    return {
-      reasoningPrefs: options.reasoningPrefs,
-      modelsEntry: options.modelsEntry,
-    };
-  }
-
+): Pick<LLMOptions, 'reasoningPrefs' | 'modelsEntry' | 'apiPath'> {
   try {
     const stored = StorageService.getLLMConfig(provider);
     return {
-      reasoningPrefs: options.reasoningPrefs ?? normalizeReasoningUserPrefs(stored?.reasoningPrefs),
-      modelsEntry: options.modelsEntry ?? findStoredModelsEntry(stored?.models, model) ?? model,
+      reasoningPrefs:
+        options.reasoningPrefs !== undefined
+          ? options.reasoningPrefs
+          : normalizeReasoningUserPrefs(stored?.reasoningPrefs),
+      modelsEntry:
+        options.modelsEntry !== undefined
+          ? options.modelsEntry
+          : (findStoredModelsEntry(stored?.models, model) ?? model),
+      apiPath:
+        options.apiPath !== undefined
+          ? normalizeApiPathId(options.apiPath)
+          : normalizeApiPathId((stored as { apiPath?: unknown } | null | undefined)?.apiPath),
     };
   } catch {
     return {
       reasoningPrefs: options.reasoningPrefs,
       modelsEntry: options.modelsEntry,
+      apiPath: normalizeApiPathId(options.apiPath),
     };
   }
 }
@@ -561,6 +587,7 @@ function resolveLLMOptions(
     reasoningPrefs: hydrated.reasoningPrefs,
     reasoningSessionOverride: options.reasoningSessionOverride,
     modelsEntry: hydrated.modelsEntry,
+    apiPath: hydrated.apiPath ?? normalizeApiPathId(options.apiPath),
   };
 }
 
@@ -612,6 +639,10 @@ function extractOutboundReasoningMarker(body: Record<string, unknown>): string |
   if (thinking?.budget_tokens !== undefined) {
     return `budget:${String(thinking.budget_tokens)}`;
   }
+  const thinkingConfig = body.thinkingConfig as { thinkingBudget?: unknown } | undefined;
+  if (thinkingConfig?.thinkingBudget !== undefined) {
+    return `geminiBudget:${String(thinkingConfig.thinkingBudget)}`;
+  }
   return undefined;
 }
 
@@ -624,6 +655,13 @@ function logReasoningTransport(args: {
   session: SessionReasoningOverride | undefined;
 }): void {
   const effort = extractOutboundReasoningMarker(args.body);
+  // Production: silent. Dev: console for gateway field verification.
+  const isDev =
+    typeof import.meta !== 'undefined' &&
+    Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV);
+  if (!isDev) {
+    return;
+  }
   if (effort !== undefined) {
     console.info(
       `[LLM] 请求将发送推理参数 surface=${args.surface} model=${args.model} effort=${effort}`
@@ -638,46 +676,76 @@ function logReasoningTransport(args: {
   }
 }
 
-function createLLMTransport(
-  messages: ChatMessage[],
-  model: string,
-  options: ResolvedLLMOptions,
-  provider: string
-): { body: Record<string, unknown>; path: string; apiSurface: ApiSurface } {
+function resolveTransportPathId(options: ResolvedLLMOptions, forcePath?: ApiPathId): ApiPathId {
+  if (forcePath) return forcePath;
+  // jsonMode: force chat_completions (response_format). Gemini keep native path + mime type.
+  if (options.jsonMode === true) {
+    const current = options.apiPath ?? 'chat_completions';
+    if (current === 'gemini_generate') return 'gemini_generate';
+    return 'chat_completions';
+  }
+  return options.apiPath ?? 'chat_completions';
+}
+
+function createLLMTransport(args: {
+  messages: ChatMessage[];
+  model: string;
+  options: ResolvedLLMOptions;
+  provider: string;
+  endpoint: string;
+  forcePath?: ApiPathId;
+}): {
+  body: Record<string, unknown>;
+  path: string;
+  requestUrl: string;
+  apiSurface: ApiSurface;
+  apiPath: ApiPathId;
+} {
+  const pathId = resolveTransportPathId(args.options, args.forcePath);
   const capability = resolveModelCapability({
-    provider,
-    modelId: model,
-    modelsEntry: options.modelsEntry,
+    provider: args.provider,
+    modelId: args.model,
+    modelsEntry: args.options.modelsEntry,
+    preferredSurface: pathId,
   });
-  const globalPrefs = normalizeReasoningUserPrefs(options.reasoningPrefs);
+  const globalPrefs = normalizeReasoningUserPrefs(args.options.reasoningPrefs);
   const reasoning = resolveEffectiveReasoning(
     capability,
     globalPrefs,
-    options.reasoningSessionOverride
+    args.options.reasoningSessionOverride
   );
 
-  const built = buildRequestBodyForSurface({
+  const body = buildBodyForApiPath({
+    pathId,
+    model: args.model,
+    messages: normalizeMessagesForTransport(args.messages),
+    temperature: args.options.temperature,
+    maxTokens: args.options.maxTokens,
+    stream: args.options.stream,
+    jsonMode: args.options.jsonMode,
+    serviceTier: args.options.serviceTier,
     capability,
-    model,
-    messages: normalizeMessagesForTransport(messages),
-    temperature: options.temperature,
-    maxTokens: options.maxTokens,
-    stream: options.stream,
-    jsonMode: options.jsonMode,
-    serviceTier: options.serviceTier,
     reasoning,
   });
 
+  const { fullUrl, pathSuffix } = buildFullApiUrl(args.endpoint, pathId, args.model);
+
   logReasoningTransport({
-    model,
-    surface: built.surface,
-    body: built.body,
+    model: args.model,
+    surface: pathId,
+    body,
     capabilitySupports: Boolean(capability.supportsReasoning && capability.mapRequest),
     globalEnabled: globalPrefs.enabled,
-    session: options.reasoningSessionOverride,
+    session: args.options.reasoningSessionOverride,
   });
 
-  return { body: built.body, path: built.path, apiSurface: built.surface };
+  return {
+    body,
+    path: pathSuffix,
+    requestUrl: fullUrl,
+    apiSurface: pathId,
+    apiPath: pathId,
+  };
 }
 
 async function waitBeforeLLMRetry(attempt: number, options: ResolvedLLMOptions): Promise<void> {
@@ -728,24 +796,40 @@ function createLLMAbortResources(
   return { controller, clearRequestTimeout, resetRequestTimeout };
 }
 
+/**
+ * Build request headers for the selected API path.
+ * Always sets Content-Type + Bearer when key present (new-api / OpenAI-compatible).
+ * Anthropic path also sets anthropic-version + x-api-key (native Anthropic / dual-auth gateways).
+ * Gemini path also sets x-goog-api-key (Google AI Studio style).
+ */
+function buildLLMRequestHeaders(
+  apiPath: ApiPathId,
+  apiKey: string | undefined
+): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (!apiKey) {
+    return headers;
+  }
+  headers.Authorization = `Bearer ${apiKey}`;
+  if (apiPath === 'anthropic_messages') {
+    headers['anthropic-version'] = '2023-06-01';
+    headers['x-api-key'] = apiKey;
+  }
+  if (apiPath === 'gemini_generate') {
+    headers['x-goog-api-key'] = apiKey;
+  }
+  return headers;
+}
+
 async function fetchLLMResponse(
   context: LLMCallContext,
   controller: AbortController
 ): Promise<Response> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  if (context.apiKey) {
-    headers.Authorization = `Bearer ${context.apiKey}`;
-  }
-
-  const path = context.requestPath.startsWith('/')
-    ? context.requestPath
-    : `/${context.requestPath}`;
-  return fetch(`${context.normalizedEndpoint}${path}`, {
+  return fetch(context.requestUrl, {
     method: 'POST',
-    headers,
+    headers: buildLLMRequestHeaders(context.apiPath, context.apiKey),
     body: JSON.stringify(context.requestBody),
     signal: controller.signal,
   });
@@ -753,7 +837,19 @@ async function fetchLLMResponse(
 
 function isReasoningGatewayError(message: string, rawBody: string): boolean {
   const blob = `${message}\n${rawBody}`.toLowerCase();
-  return /reasoning_effort|reasoning content|reasoning_content|thinking_effort|enable_thinking|unsupported[^\n]{0,40}reasoning|unknown[^\n]{0,40}reasoning|invalid[^\n]{0,40}reasoning/.test(
+  return /reasoning_effort|reasoning content|reasoning_content|thinking_effort|enable_thinking|budget_tokens|\bthinking\b|unsupported[^\n]{0,40}reasoning|unknown[^\n]{0,40}reasoning|invalid[^\n]{0,40}reasoning/.test(
+    blob
+  );
+}
+
+/** Non-chat path 404/unsupported → one-shot fallback to chat_completions. */
+function isAlternatePathUnsupportedError(error: ApiError): boolean {
+  if (error.statusCode === 404) return true;
+  if (error.statusCode !== 400 && error.statusCode !== 404) return false;
+  const responseText =
+    typeof error.response === 'string' ? error.response : JSON.stringify(error.response ?? '');
+  const blob = `${error.message}\n${responseText}`.toLowerCase();
+  return /\/responses|\/messages|generatecontent|unknown url|not found|no route|invalid url path|does not exist/.test(
     blob
   );
 }
@@ -822,10 +918,13 @@ async function readLLMResponsePayload(
   if (!context.options.stream) {
     const data = (await response.json()) as Record<string, unknown>;
     if (context.apiSurface === 'responses') {
-      return {
-        data: null,
-        content: extractResponsesOutputText(data),
-      };
+      return { data: null, content: extractResponsesOutputText(data) };
+    }
+    if (context.apiSurface === 'anthropic_messages') {
+      return { data: null, content: extractAnthropicMessagesText(data) };
+    }
+    if (context.apiSurface === 'gemini_generate') {
+      return { data: null, content: extractGeminiGenerateText(data) };
     }
     return { data: data as unknown as LLMChatCompletionResponse, content: '' };
   }
@@ -1049,13 +1148,14 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
   const normalizedEndpoint = resolveProviderEndpoint(request.provider, request.endpoint);
   assertSafeLLMEndpoint(normalizedEndpoint);
 
-  const transport = createLLMTransport(
-    request.messages,
-    request.model,
-    resolvedOptions,
-    request.provider
-  );
-  const context: LLMCallContext = {
+  let transport = createLLMTransport({
+    messages: request.messages,
+    model: request.model,
+    options: resolvedOptions,
+    provider: request.provider,
+    endpoint: normalizedEndpoint,
+  });
+  let context: LLMCallContext = {
     provider: request.provider,
     endpoint: request.endpoint,
     normalizedEndpoint,
@@ -1064,11 +1164,14 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
     messages: request.messages,
     options: resolvedOptions,
     requestBody: transport.body,
+    requestUrl: transport.requestUrl,
     requestPath: transport.path,
     apiSurface: transport.apiSurface,
+    apiPath: transport.apiPath,
   };
 
   let lastError: Error | null = null;
+  let triedPathFallback = false;
 
   for (let attempt = 0; attempt <= resolvedOptions.retries; attempt++) {
     const attemptState: LLMAttemptState = {
@@ -1078,6 +1181,34 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
     try {
       return await executeLLMAttempt(context, attempt, attemptState);
     } catch (errorValue) {
+      // One-shot fallback: non-completions path unavailable → chat/completions
+      if (
+        !triedPathFallback &&
+        context.apiPath !== 'chat_completions' &&
+        errorValue instanceof ApiError &&
+        isAlternatePathUnsupportedError(errorValue)
+      ) {
+        triedPathFallback = true;
+        transport = createLLMTransport({
+          messages: request.messages,
+          model: request.model,
+          options: resolvedOptions,
+          provider: request.provider,
+          endpoint: normalizedEndpoint,
+          forcePath: 'chat_completions',
+        });
+        context = {
+          ...context,
+          requestBody: transport.body,
+          requestUrl: transport.requestUrl,
+          requestPath: transport.path,
+          apiSurface: transport.apiSurface,
+          apiPath: transport.apiPath,
+        };
+        attempt -= 1;
+        continue;
+      }
+
       const failure = resolveLLMAttemptFailure(errorValue, context, attempt, attemptState);
       if (!failure.shouldRetry) {
         throw failure.error;

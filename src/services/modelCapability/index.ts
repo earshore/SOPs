@@ -27,6 +27,7 @@ export {
   MODEL_CAPABILITY_RULES,
 } from './registry';
 export { matchModelPattern, resolveModelCapability, shouldShowReasoningControls } from './resolve';
+export { normalizeModelIdForCapability, stripVendorPrefix } from './normalizeModelId';
 export { clampEffort, normalizeReasoningUserPrefs, resolveEffectiveReasoning } from './prefs';
 export {
   applyReasoningToRequestBody,
@@ -34,6 +35,29 @@ export {
   buildRequestBodyForSurface,
   buildResponsesBody,
   messagesToResponsesInput,
+  shouldForceChatCompletionsForJsonMode,
+  splitMessagesForResponses,
 } from './applyToRequest';
 export { extractResponsesOutputText, getResponsesStreamTextDelta } from './responsesParse';
 export { readThinkingBudgetTokens } from './mappers';
+export type { ApiPathId, ApiPathOption } from './apiPaths';
+export {
+  API_PATH_OPTIONS,
+  DEFAULT_API_PATH_ID,
+  apiPathIdToSurface,
+  buildFullApiUrl,
+  isApiPathId,
+  normalizeApiPathId,
+  stripTrailingSlash,
+} from './apiPaths';
+export {
+  buildAnthropicMessagesBody,
+  buildBodyForApiPath,
+  buildGeminiGenerateBody,
+} from './protocolBodies';
+export {
+  extractAnthropicMessagesText,
+  extractGeminiGenerateText,
+  getAnthropicStreamTextDelta,
+  getGeminiStreamTextDelta,
+} from './protocolParse';

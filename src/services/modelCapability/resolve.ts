@@ -1,4 +1,5 @@
 import { getModelCapabilityRules } from './registry';
+import { normalizeModelIdForCapability } from './normalizeModelId';
 import type {
   ApiSurface,
   ModelCapabilityRule,
@@ -17,7 +18,7 @@ import {
 /** Match model id against pattern with `*` wildcards (glob-style, case-insensitive). */
 export function matchModelPattern(pattern: string, modelId: string): boolean {
   if (!pattern) return false;
-  const id = modelId.trim();
+  const id = normalizeModelIdForCapability(modelId);
   const pat = pattern.trim();
   if (!id || !pat) return false;
   if (pat.toLowerCase() === id.toLowerCase()) return true;
@@ -43,11 +44,16 @@ function findMatchingRule(
   modelId: string,
   rules: readonly ModelCapabilityRule[]
 ): ModelCapabilityRule | null {
+  const normalizedId = normalizeModelIdForCapability(modelId);
   for (const rule of rules) {
     if (rule.provider && rule.provider !== provider) {
       continue;
     }
-    if (matchModelPattern(rule.modelPattern, modelId)) {
+    // matchModelPattern already normalizes modelId; pass raw or normalized both OK
+    if (
+      matchModelPattern(rule.modelPattern, modelId) ||
+      matchModelPattern(rule.modelPattern, normalizedId)
+    ) {
       return rule;
     }
   }
@@ -85,8 +91,14 @@ function pickSurface(
   const order: ApiSurface[] = [];
   if (preferred) order.push(preferred);
   if (!order.includes(rule.preferredSurface)) order.push(rule.preferredSurface);
-  if (!order.includes('chat_completions')) order.push('chat_completions');
-  if (!order.includes('responses')) order.push('responses');
+  for (const s of [
+    'chat_completions',
+    'responses',
+    'anthropic_messages',
+    'gemini_generate',
+  ] as const) {
+    if (!order.includes(s)) order.push(s);
+  }
 
   for (const surface of order) {
     const capability = rule.surfaces[surface];
