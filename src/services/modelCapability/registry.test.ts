@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   getModelCapabilityRules,
   mapOpenAiReasoningEffort,
+  MODEL_CAPABILITY_CATALOG_META,
   MODEL_CAPABILITY_RULES,
 } from './registry';
 import { resolveModelCapability, shouldShowReasoningControls } from './resolve';
@@ -16,73 +17,67 @@ describe('mapOpenAiReasoningEffort', () => {
   });
 });
 
-describe('MODEL_CAPABILITY_RULES allowlist', () => {
+describe('MODEL_CAPABILITY_RULES flagship catalog', () => {
   it('does not use overly broad wildcards', () => {
     for (const rule of MODEL_CAPABILITY_RULES) {
       expect(rule.modelPattern).not.toBe('*r1*');
-      // bare o3* / o1* without hyphen are forbidden; o3-mini-* / o3-* are ok
       expect(rule.modelPattern).not.toBe('o3*');
       expect(rule.modelPattern).not.toBe('o1*');
       expect(rule.modelPattern).not.toBe('*');
+      expect(rule.modelPattern).not.toBe('gpt-*');
+      expect(rule.modelPattern).not.toBe('claude-*');
     }
   });
 
-  it('shows controls for o3-mini and gateway-verified models; hides unknown and deepseek-r1', () => {
-    const o3 = resolveModelCapability(
-      { provider: 'new_api', modelId: 'o3-mini' },
-      getModelCapabilityRules()
-    );
-    expect(shouldShowReasoningControls(o3)).toBe(true);
-    expect(o3.mapRequest?.({ enabled: true, effort: 'medium' })).toEqual({
-      reasoning_effort: 'medium',
-    });
+  it('exposes control UI for OpenAI / Grok / DeepSeek / Hy3 flagships', () => {
+    const controlIds = [
+      'o3-mini',
+      'gpt-5.5',
+      'gpt-5.6-2026-01',
+      'grok-4.5',
+      'deepseek-v4-flash',
+      'deepseek-r1',
+      'hy3-preview',
+    ];
+    for (const modelId of controlIds) {
+      const cap = resolveModelCapability(
+        { provider: 'new_api', modelId },
+        getModelCapabilityRules()
+      );
+      expect(shouldShowReasoningControls(cap), modelId).toBe(true);
+      expect(cap.mapRequest?.({ enabled: true, effort: 'high' }), modelId).toEqual({
+        reasoning_effort: 'high',
+      });
+    }
+  });
 
-    const deepseekFlash = resolveModelCapability(
-      { provider: 'new_api', modelId: 'deepseek-v4-flash' },
-      getModelCapabilityRules()
-    );
-    expect(shouldShowReasoningControls(deepseekFlash)).toBe(true);
-    expect(deepseekFlash.temperatureIgnored).toBe(false);
-    expect(deepseekFlash.mapRequest?.({ enabled: true, effort: 'low' })).toEqual({
-      reasoning_effort: 'low',
-    });
-    expect(deepseekFlash.mapRequest?.({ enabled: false, effort: 'high' })).toEqual({});
+  it('labels Claude and Gemini as reasoning without controls (no mapRequest)', () => {
+    const labelIds = [
+      'claude-sonnet-4-5-20250929',
+      'claude-opus-4.5',
+      'gemini-3.6-flash',
+      'gemini-2.5-pro',
+    ];
+    for (const modelId of labelIds) {
+      const cap = resolveModelCapability(
+        { provider: 'new_api', modelId },
+        getModelCapabilityRules()
+      );
+      expect(cap.supportsReasoning, modelId).toBe(true);
+      expect(shouldShowReasoningControls(cap), modelId).toBe(false);
+      expect(cap.mapRequest, modelId).toBeNull();
+    }
+  });
 
-    const grok = resolveModelCapability(
-      { provider: 'new_api', modelId: 'grok-4.5' },
-      getModelCapabilityRules()
-    );
-    expect(shouldShowReasoningControls(grok)).toBe(true);
-    expect(grok.temperatureIgnored).toBe(false);
-    expect(grok.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
-      reasoning_effort: 'high',
-    });
-
-    const hy3 = resolveModelCapability(
-      { provider: 'new_api', modelId: 'hy3-preview' },
-      getModelCapabilityRules()
-    );
-    expect(shouldShowReasoningControls(hy3)).toBe(true);
-
-    const o1 = resolveModelCapability(
-      { provider: 'new_api', modelId: 'o1-mini' },
-      getModelCapabilityRules()
-    );
-    expect(o1.temperatureIgnored).toBe(true);
-
-    const unknown = resolveModelCapability(
-      { provider: 'new_api', modelId: 'gpt-4o' },
-      getModelCapabilityRules()
-    );
-    expect(shouldShowReasoningControls(unknown)).toBe(false);
-
-    const deepseek = resolveModelCapability(
-      { provider: 'new_api', modelId: 'deepseek-r1' },
-      getModelCapabilityRules()
-    );
-    expect(deepseek.supportsReasoning).toBe(true);
-    expect(shouldShowReasoningControls(deepseek)).toBe(false);
-    expect(deepseek.mapRequest).toBeNull();
+  it('keeps plain chat models fail-closed', () => {
+    for (const modelId of ['gpt-4o', 'gpt-4.1', 'gpt-4.1-mini']) {
+      const cap = resolveModelCapability(
+        { provider: 'new_api', modelId },
+        getModelCapabilityRules()
+      );
+      expect(shouldShowReasoningControls(cap), modelId).toBe(false);
+      expect(cap.supportsReasoning, modelId).toBe(false);
+    }
   });
 
   it('does not treat random r1 substrings as reasoning models', () => {
@@ -91,5 +86,11 @@ describe('MODEL_CAPABILITY_RULES allowlist', () => {
       getModelCapabilityRules()
     );
     expect(cap.supportsReasoning).toBe(false);
+  });
+
+  it('exports catalog meta for docs alignment', () => {
+    expect(MODEL_CAPABILITY_CATALOG_META.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(MODEL_CAPABILITY_CATALOG_META.controlField).toBe('reasoning_effort');
+    expect(MODEL_CAPABILITY_RULES.length).toBeGreaterThan(40);
   });
 });

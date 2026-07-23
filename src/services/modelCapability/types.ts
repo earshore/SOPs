@@ -9,7 +9,7 @@ export type ReasoningEffort = 'off' | 'low' | 'medium' | 'high';
 export type ReasoningEffortLevel = Exclude<ReasoningEffort, 'off'>;
 
 export interface ModelCapabilityRule {
-  /** Exact id or simple glob with `*` wildcards (case-sensitive as model ids are). */
+  /** Exact id or simple glob with `*` wildcards (matched case-insensitively). */
   modelPattern: string;
   /** Empty / omit = any provider */
   provider?: string;

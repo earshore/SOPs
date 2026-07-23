@@ -26,20 +26,34 @@ If the model is not allowlisted, or the checkbox is off, logs will never show in
 | User turns reasoning **off**            | Mapper returns `{}` — **omit** `reasoning_effort` (do not send false/none)                                |
 | Stream isolation                        | Only `delta.content` / `message.content` enter final text; `reasoning_content` is ignored by `llmService` |
 
-## Current allowlist (`src/services/modelCapability/registry.ts`)
+## Current catalog
 
-| Pattern                                              | mapRequest | Request fields when enabled                     | Probe basis                                                 |
-| ---------------------------------------------------- | ---------- | ----------------------------------------------- | ----------------------------------------------------------- |
-| `o1`, `o1-mini`, `o1-preview`, `o1-pro`, `o1-mini-*` | yes        | `{ reasoning_effort: 'low'\|'medium'\|'high' }` | OpenAI-compatible contract; not on 2026-07-23 token catalog |
-| `o3`, `o3-mini`, `o3-pro`, `o3-mini-*`               | yes        | same                                            | same                                                        |
-| `deepseek-v4-flash`, `deepseek-v4-flash-*`           | yes        | same                                            | **Live 2026-07-23**                                         |
-| `grok-4.5`, `grok-4.5-*`                             | yes        | same                                            | **Live 2026-07-23**                                         |
-| `deepseek-r1`, `deepseek-reasoner`                   | **no**     | none                                            | ids not on catalog this probe                               |
+Full flagship table (OpenAI GPT-5.x / o-series, Grok, DeepSeek, Claude, Gemini, Qwen, Kimi, GLM…):
+
+→ **`docs/superpowers/specs/model-capability-catalog-2026.md`**
+
+Rules source: `src/services/modelCapability/registry.ts`
+
+### control tier (UI + `reasoning_effort`)
+
+| Family          | Patterns (summary)                                  | Probe / basis                |
+| --------------- | --------------------------------------------------- | ---------------------------- |
+| OpenAI o-series | `o1*`, `o3*`, `o4-mini*` (tight)                    | OpenAI-compatible contract   |
+| OpenAI GPT-5    | `gpt-5`, `gpt-5.1`…`gpt-5.6`, `gpt-5-*`             | OpenAI-compatible contract   |
+| xAI Grok        | `grok-4*`, `grok-3*`                                | **Live** `grok-4.5`          |
+| DeepSeek        | `deepseek-v4*`, `deepseek-r1*`, `deepseek-reasoner` | **Live** `deepseek-v4-flash` |
+| Hy3             | `hy3-*`                                             | **Live** `hy3-preview`       |
+
+### label tier (known reasoning, **no UI** until field verified)
+
+Claude Opus/Sonnet/Haiku 4.x · Gemini 2.5/3.x · Kimi K2 · Qwen3/QwQ · GLM-4.5 — see catalog doc.
+
+**Claude on this new-api:** plain chat 200; `reasoning_effort` / `thinking` → **400** → stays label.
 
 Disabled / rejected patterns (do not reintroduce without review):
 
-- `*r1*` (false positives)
-- bare `o3*` / `o1*` (too broad)
+- `*r1*` as a lone pattern (false positives on unrelated ids)
+- bare `o3*` / `o1*` / `gpt-*` / `claude-*` (too broad)
 
 ## Verification checklist
 
