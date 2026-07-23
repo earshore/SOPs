@@ -2271,11 +2271,8 @@ function abortAllPendingRequests(reason: DeepChatPendingAbortReason): void {
 async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string> {
   const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
   let streamedText = '';
-  const savedConfig = StorageService.getLLMConfig(config.provider);
-  const globalReasoning = normalizeReasoningUserPrefs(savedConfig?.reasoningPrefs);
-  const sessionReasoning = getActiveThread().reasoning;
-  const modelsEntry = findConfigModelsEntry(savedConfig, model);
-
+  // Global reasoningPrefs + modelsEntry hydrate inside callLLM from StorageService.
+  // Only pass session override here.
   const finalText = await callLLM(
     messages,
     config.provider,
@@ -2286,9 +2283,8 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
       temperature: sessionTemperature,
       maxTokens: getDeepChatRequestBudgetDefaults().maxOutputTokens,
       ...(config.serviceTier && { serviceTier: config.serviceTier }),
-      reasoningPrefs: globalReasoning,
-      reasoningSessionOverride: sessionReasoning,
-      modelsEntry,
+      reasoningSessionOverride: getActiveThread().reasoning,
+      modelsEntry: findConfigModelsEntry(config, model),
       retries: 0,
       ...getRuntimeDeepChatOptions(),
       signal: controller.signal,

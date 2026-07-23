@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- 模型能力目录与推理控制：`modelCapability` Registry（fail-closed）+ `/models` context 合并；系统设置全局推理开关/强度；Deep Chat 会话级覆盖；`llmService` 请求体 mapper（无 mapRequest 不写字段）。
+- 模型能力目录与推理控制：`modelCapability` Registry（fail-closed）+ `/models` context 合并；系统设置全局推理开关/强度；Deep Chat 会话级覆盖；`llmService` 请求体 mapper（无 mapRequest 不写字段）；`callLLM` 自动从已存 provider 配置注入全局 reasoningPrefs。
 
 ## [3.0.11-rc.5] - 2026-07-23
 

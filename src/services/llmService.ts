@@ -27,6 +27,7 @@ import {
   type ReasoningUserPrefs,
   type SessionReasoningOverride,
 } from './modelCapability';
+import { StorageService } from './storageService';
 
 // ========================
 // 类型定义
@@ -471,7 +472,58 @@ interface LLMAttemptState {
   externallyAborted: boolean;
 }
 
-function resolveLLMOptions(options: LLMOptions): ResolvedLLMOptions {
+function findStoredModelsEntry(
+  models: Array<string | { id: string }> | undefined,
+  modelId: string
+): ModelsListEntry | string | undefined {
+  if (!models || !modelId) {
+    return undefined;
+  }
+  const found = models.find(item =>
+    typeof item === 'string' ? item === modelId : item.id === modelId
+  );
+  if (!found) {
+    return undefined;
+  }
+  return typeof found === 'string' ? found : found;
+}
+
+/**
+ * When callers omit reasoningPrefs / modelsEntry, load global defaults from stored provider config.
+ * Session override still comes only from explicit options (Deep Chat).
+ */
+function hydrateReasoningOptionsFromStorage(
+  provider: string,
+  model: string,
+  options: LLMOptions
+): Pick<LLMOptions, 'reasoningPrefs' | 'modelsEntry'> {
+  if (options.reasoningPrefs !== undefined && options.modelsEntry !== undefined) {
+    return {
+      reasoningPrefs: options.reasoningPrefs,
+      modelsEntry: options.modelsEntry,
+    };
+  }
+
+  try {
+    const stored = StorageService.getLLMConfig(provider);
+    return {
+      reasoningPrefs: options.reasoningPrefs ?? normalizeReasoningUserPrefs(stored?.reasoningPrefs),
+      modelsEntry: options.modelsEntry ?? findStoredModelsEntry(stored?.models, model) ?? model,
+    };
+  } catch {
+    return {
+      reasoningPrefs: options.reasoningPrefs,
+      modelsEntry: options.modelsEntry,
+    };
+  }
+}
+
+function resolveLLMOptions(
+  options: LLMOptions,
+  provider: string,
+  model: string
+): ResolvedLLMOptions {
+  const hydrated = hydrateReasoningOptionsFromStorage(provider, model, options);
   return {
     temperature: options.temperature ?? 0.3,
     jsonMode: options.jsonMode ?? false,
@@ -485,9 +537,9 @@ function resolveLLMOptions(options: LLMOptions): ResolvedLLMOptions {
     onFirstResponse: options.onFirstResponse,
     onStreamActivity: undefined,
     onStreamUpdate: options.onStreamUpdate,
-    reasoningPrefs: options.reasoningPrefs,
+    reasoningPrefs: hydrated.reasoningPrefs,
     reasoningSessionOverride: options.reasoningSessionOverride,
-    modelsEntry: options.modelsEntry,
+    modelsEntry: hydrated.modelsEntry,
   };
 }
 
@@ -883,7 +935,7 @@ function normalizeLLMCallArgs(args: LLMCallArgs): LLMCallRequest {
  */
 export async function callLLM(...args: LLMCallArgs): Promise<string> {
   const request = normalizeLLMCallArgs(args);
-  const resolvedOptions = resolveLLMOptions(request.options || {});
+  const resolvedOptions = resolveLLMOptions(request.options || {}, request.provider, request.model);
   const normalizedEndpoint = resolveProviderEndpoint(request.provider, request.endpoint);
   assertSafeLLMEndpoint(normalizedEndpoint);
 

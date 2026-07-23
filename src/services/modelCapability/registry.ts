@@ -1,56 +1,75 @@
 /**
  * Static model capability rules.
- * mapRequest field names are provisional until verified against the project gateway (new-api).
- * Prefer empty / fail-closed until Task 4 probes real models.
+ *
+ * Contract:
+ * - Only emit mapRequest for narrow, well-known OpenAI-style reasoning ids.
+ * - Unknown / ambiguous ids stay fail-closed (no mapRequest → no UI, no request fields).
+ * - Field names assume OpenAI-compatible gateways that pass through `reasoning_effort`.
+ * - Re-verify against the project new-api before expanding patterns.
  */
 
-import type { ModelCapabilityRule } from './types';
+import type { ModelCapabilityRule, ReasoningEffort } from './types';
+
+/** Shared OpenAI-compatible reasoning_effort mapper (empty when off). */
+export function mapOpenAiReasoningEffort(prefs: {
+  enabled: boolean;
+  effort: ReasoningEffort;
+}): Record<string, unknown> {
+  if (!prefs.enabled || prefs.effort === 'off') {
+    return {};
+  }
+  return { reasoning_effort: prefs.effort };
+}
+
+function openAiReasoningRule(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+  return {
+    modelPattern,
+    contextWindow,
+    supportsReasoning: true,
+    reasoningEfforts: ['low', 'medium', 'high'],
+    defaultEffort: 'medium',
+    temperatureIgnored: true,
+    features: ['reasoning'],
+    mapRequest: mapOpenAiReasoningEffort,
+  };
+}
 
 /**
- * Production patterns with mapRequest should only be added after gateway verification.
- * Placeholder patterns may set supportsReasoning with mapRequest: null to hide send fields.
- */
-/**
- * Provisional mappers for common OpenAI-compatible reasoning models.
- * Field names assume gateway pass-through of `reasoning_effort`.
- * Re-verify against the project new-api before treating as production contract.
+ * Narrow allowlist only. Prefer exact ids / tight prefixes over broad globs.
+ * DeepSeek-style models are listed as capability tags without mapRequest until gateway-verified.
  */
 export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
+  // OpenAI o-series (common new-api / OpenAI-compatible names)
+  openAiReasoningRule('o1', 200_000),
+  openAiReasoningRule('o1-mini', 128_000),
+  openAiReasoningRule('o1-preview', 128_000),
+  openAiReasoningRule('o1-pro', 200_000),
+  openAiReasoningRule('o3', 200_000),
+  openAiReasoningRule('o3-mini', 200_000),
+  openAiReasoningRule('o3-pro', 200_000),
+  // Tight prefix for dated variants e.g. o3-mini-2025-01-31 — still o3-mini* not o3*
+  openAiReasoningRule('o1-mini-*', 128_000),
+  openAiReasoningRule('o3-mini-*', 200_000),
+
+  // Known reasoning models without a verified request mapper yet (UI hidden).
   {
-    modelPattern: 'o3*',
-    contextWindow: 200_000,
-    supportsReasoning: true,
-    reasoningEfforts: ['low', 'medium', 'high'],
-    defaultEffort: 'medium',
-    temperatureIgnored: true,
-    features: ['reasoning'],
-    mapRequest: ({ enabled, effort }) =>
-      enabled && effort !== 'off' ? { reasoning_effort: effort } : {},
-  },
-  {
-    modelPattern: 'o1*',
-    contextWindow: 200_000,
-    supportsReasoning: true,
-    reasoningEfforts: ['low', 'medium', 'high'],
-    defaultEffort: 'medium',
-    temperatureIgnored: true,
-    features: ['reasoning'],
-    mapRequest: ({ enabled, effort }) =>
-      enabled && effort !== 'off' ? { reasoning_effort: effort } : {},
-  },
-  {
-    modelPattern: '*r1*',
+    modelPattern: 'deepseek-r1',
     contextWindow: 128_000,
     supportsReasoning: true,
     reasoningEfforts: ['low', 'medium', 'high'],
     defaultEffort: 'medium',
     temperatureIgnored: true,
     features: ['reasoning'],
-    // Some gateways use enable_thinking; prefer reasoning_effort when OpenAI-shaped.
-    mapRequest: ({ enabled, effort }) =>
-      enabled && effort !== 'off'
-        ? { enable_thinking: true, reasoning_effort: effort }
-        : { enable_thinking: false },
+    // mapRequest intentionally omitted until new-api field is verified
+  },
+  {
+    modelPattern: 'deepseek-reasoner',
+    contextWindow: 128_000,
+    supportsReasoning: true,
+    reasoningEfforts: ['low', 'medium', 'high'],
+    defaultEffort: 'medium',
+    temperatureIgnored: true,
+    features: ['reasoning'],
   },
 ];
 
