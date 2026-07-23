@@ -3,7 +3,11 @@
  */
 
 import type { EffectiveReasoningPrefs, ResolvedModelCapability } from './types';
-import { buildChatCompletionsBody, buildResponsesBody } from './applyToRequest';
+import {
+  buildChatCompletionsBody,
+  buildResponsesBody,
+  type ResponsesJsonSchemaFormat,
+} from './applyToRequest';
 import type { ApiPathId } from './apiPaths';
 import { normalizeToolsForResponses } from './responsesTools';
 
@@ -176,6 +180,7 @@ export function buildBodyForApiPath(args: {
   toolChoice?: unknown;
   visionUserParts?: Array<Record<string, unknown>>;
   followUpInputItems?: Array<Record<string, unknown>>;
+  jsonSchema?: ResponsesJsonSchemaFormat;
 }): Record<string, unknown> {
   if (args.pathId === 'responses') {
     return buildResponsesBody({
@@ -185,6 +190,7 @@ export function buildBodyForApiPath(args: {
       maxTokens: args.maxTokens,
       stream: args.stream,
       jsonMode: args.jsonMode,
+      jsonSchema: args.jsonSchema,
       serviceTier: args.serviceTier,
       capability: args.capability,
       reasoning: args.reasoning,

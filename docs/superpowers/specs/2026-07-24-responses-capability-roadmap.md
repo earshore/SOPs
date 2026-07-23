@@ -2,7 +2,7 @@
 
 **日期：** 2026-07-24  
 **对照：** [Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses)  
-**状态：** A/B/C + R1–R3 + R6 已落地；R4/R5/R7 继续
+**状态：** A/B/C + R1–R6 已落地；R7 待做
 
 ## 产品边界（当前）
 
@@ -11,58 +11,47 @@
 | Text generation | ✅ |
 | Reasoning (`reasoning.effort` + summary stream) | ✅ |
 | Structured Outputs (`text.format` json_object) | ✅ |
-| `store` 默认 false + 可选 true | ✅ |
-| `previous_response_id` + `onResponseId`（含 stream） | ✅ |
+| Structured Outputs (`text.format` json_schema + strict) | ✅ R5 |
+| `store` / `previous_response_id` / `onResponseId` | ✅ |
 | Function tool loop (`executeTool`) | ✅ R1 |
-| Built-in tools **透传**（web_search / file_search / …） | ✅ R2 |
-| Deep Chat 会话 `lastResponseId` 链 | ✅ R3 |
-| Conversations API | ❌ 可选 |
-| Reasoning items 回灌 | ❌ R4 |
-| json_schema strict | ❌ R5 |
+| Built-in tools 透传 | ✅ R2 |
+| Deep Chat 会话 lastResponseId 链 | ✅ R3 |
+| 链上 latest-user-only（服务端保留 reasoning items） | ✅ R4 |
 | Capability UI 徽章 | ❌ R7 |
+| Conversations API | ❌ 可选 |
 
-## R3：Deep Chat 多轮
+## R3 + R4：多轮
 
-- 线程字段：`lastResponseId` / `lastResponseModel`
-- 当系统设置 `apiPath === 'responses'`：
-  - 发送时附带 `previousResponseId`（模型未变）
-  - `store: true` 以便网关保留状态
-  - `onResponseId` 写回线程并持久化
-- 切换模型或新建会话会清空链
+- Deep Chat 持久化 `lastResponseId` / `lastResponseModel`
+- 有 `previous_response_id` 时：`input` **仅最新 user**，`store: true`，不重放历史 / instructions
+- 服务端保留 reasoning items（官方多轮推理优势）
 
-## R1：tool loop 用法
+## R5：json_schema
 
 ```ts
 await callLLM(messages, provider, endpoint, key, model, {
   apiPath: 'responses',
-  tools: [
-    { type: 'function', name: 'lookup', description: '…', parameters: { type: 'object' } },
-    // R2 built-in pass-through:
-    { type: 'web_search' },
-  ],
-  executeTool: async ({ name, arguments: args }) => JSON.stringify({ ok: true }),
-  maxToolRounds: 5,
+  jsonSchema: {
+    name: 'analysis',
+    schema: {
+      type: 'object',
+      properties: { ok: { type: 'boolean' } },
+      required: ['ok'],
+      additionalProperties: false,
+    },
+    strict: true, // default true when omitted
+  },
 });
 ```
+
+优先于 `jsonMode` 的 `json_object`。
 
 ## 下一阶段
 
 | 阶段 | 目标 | 状态 |
 |------|------|------|
-| R1 tool loop | ✅ |
-| R2 built-in 透传 | ✅ |
-| R3 Deep Chat previous_id | ✅ |
-| R6 probe 脚本 | ✅（表格待 key 实跑） |
-| R4 Reasoning items 回灌 | 待做 |
-| R5 json_schema strict | 待做 |
-| R7 Capability UI | 待做 |
-
-## 代码入口
-
-- `responsesTools.ts` / `responsesToolLoop.ts`
-- `llmService.ts` — tool loop + stream onResponseId
-- `deep-chat/controller.ts` — lastResponseId 链
-- `tools/probe-responses-gateway.mjs`
+| R1–R6 | 见上 | ✅ |
+| **R7** | 设置页 Capability 徽章（tools/vision/structured/responses） | 待做 |
 
 ## Probe
 

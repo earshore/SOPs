@@ -201,8 +201,82 @@ describe('buildResponsesBody', () => {
     expect(body.previous_response_id).toBe('resp_123');
     expect(body.store).toBe(true);
     expect(body.tools).toHaveLength(1);
+    // R4 chain: only latest user turn as input (with vision parts)
     expect(Array.isArray(body.input)).toBe(true);
     const first = (body.input as Array<{ content: unknown }>)[0];
     expect(Array.isArray(first.content)).toBe(true);
+  });
+
+  it('R4: previous_response_id chain sends only latest user (keeps server reasoning items)', () => {
+    const capability = {
+      apiSurface: 'responses' as const,
+      temperatureIgnored: true,
+      mapRequest: null,
+      supportsReasoning: true,
+      supportsPreviousResponseId: true,
+      supportsStore: true,
+      supportsStructuredOutput: false,
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildResponsesBody({
+      model: 'gpt-5.5',
+      messages: [
+        { role: 'system', content: 'sys' },
+        { role: 'user', content: 'first' },
+        { role: 'assistant', content: 'ans1' },
+        { role: 'user', content: 'second turn' },
+      ],
+      previousResponseId: 'resp_prev',
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+    });
+
+    expect(body.previous_response_id).toBe('resp_prev');
+    expect(body.store).toBe(true);
+    expect(body.instructions).toBeUndefined();
+    expect(body.input).toBe('second turn');
+  });
+
+  it('R5: text.format json_schema with strict', () => {
+    const capability = {
+      apiSurface: 'responses' as const,
+      temperatureIgnored: true,
+      mapRequest: null,
+      supportsStructuredOutput: true,
+      supportsPreviousResponseId: false,
+      supportsStore: false,
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildResponsesBody({
+      model: 'gpt-5.5',
+      messages: [{ role: 'user', content: 'x' }],
+      jsonMode: true,
+      jsonSchema: {
+        name: 'result',
+        schema: {
+          type: 'object',
+          properties: { ok: { type: 'boolean' } },
+          required: ['ok'],
+          additionalProperties: false,
+        },
+        strict: true,
+      },
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+    });
+
+    expect(body.text).toEqual({
+      format: {
+        type: 'json_schema',
+        name: 'result',
+        schema: {
+          type: 'object',
+          properties: { ok: { type: 'boolean' } },
+          required: ['ok'],
+          additionalProperties: false,
+        },
+        strict: true,
+      },
+    });
   });
 });

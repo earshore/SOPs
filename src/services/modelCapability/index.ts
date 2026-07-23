@@ -51,7 +51,9 @@ export {
 } from './responsesParse';
 export {
   applyVisionPartsToResponsesInput,
+  extractLatestUserInputForResponsesChain,
   type ResponsesBodyExtras,
+  type ResponsesJsonSchemaFormat,
 } from './applyToRequest';
 export {
   buildFunctionCallOutputItems,

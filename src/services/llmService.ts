@@ -40,6 +40,7 @@ import {
   type ApiSurface,
   type ModelsListEntry,
   type ReasoningUserPrefs,
+  type ResponsesJsonSchemaFormat,
   type ResponsesToolExecutor,
   type ResponsesTransportOptions,
   type SessionReasoningOverride,
@@ -115,6 +116,11 @@ export interface LLMOptions {
   executeTool?: ResponsesToolExecutor;
   /** Max tool rounds (default 5). */
   maxToolRounds?: number;
+  /**
+   * Responses Structured Outputs (json_schema). Takes precedence over jsonMode json_object.
+   * Requires supportsStructuredOutput on the resolved surface.
+   */
+  jsonSchema?: ResponsesJsonSchemaFormat;
 }
 
 export interface LLMStreamMetrics {
@@ -603,6 +609,7 @@ interface ResolvedLLMOptions {
   onResponseId?: LLMOptions['onResponseId'];
   executeTool?: ResponsesToolExecutor;
   maxToolRounds?: number;
+  jsonSchema?: ResponsesJsonSchemaFormat;
   /** Internal: function_call_output items for next Responses request */
   followUpInputItems?: Array<Record<string, unknown>>;
 }
@@ -726,6 +733,7 @@ function resolveLLMOptions(
     onResponseId: options.onResponseId,
     executeTool: options.executeTool,
     maxToolRounds: options.maxToolRounds,
+    jsonSchema: options.jsonSchema,
     followUpInputItems: undefined,
   };
 }
@@ -888,6 +896,7 @@ function createLLMTransport(args: {
     toolChoice: args.options.toolChoice,
     visionUserParts: args.options.visionUserParts,
     followUpInputItems: args.options.followUpInputItems,
+    jsonSchema: args.options.jsonSchema,
   });
 
   const { fullUrl, pathSuffix } = buildFullApiUrl(args.endpoint, pathId, args.model);

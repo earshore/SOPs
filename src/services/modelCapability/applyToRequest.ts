@@ -149,13 +149,23 @@ export function messagesToResponsesInput(
   return splitMessagesForResponses(messages).input;
 }
 
+/** OpenAI Responses text.format json_schema (strict structured outputs). */
+export interface ResponsesJsonSchemaFormat {
+  name: string;
+  schema: Record<string, unknown>;
+  strict?: boolean;
+  description?: string;
+}
+
 export type ResponsesBodyExtras = {
-  /** OpenAI Responses structured outputs (jsonMode). */
+  /** OpenAI Responses structured outputs (json_object when no jsonSchema). */
   jsonMode?: boolean;
+  /** Prefer over jsonMode: text.format type=json_schema */
+  jsonSchema?: ResponsesJsonSchemaFormat;
   serviceTier?: string;
   /** previous_response_id multi-turn (when capability allows). */
   previousResponseId?: string;
-  /** store override; default false for BYOK. */
+  /** store override; default false for BYOK; chain/tool-follow-up default true. */
   store?: boolean;
   tools?: unknown[];
   toolChoice?: unknown;
@@ -167,6 +177,22 @@ export type ResponsesBodyExtras = {
    */
   followUpInputItems?: Array<Record<string, unknown>>;
 };
+
+/**
+ * R4: With previous_response_id, only the latest user turn is sent as input so the
+ * server retains prior reasoning items / tool state (OpenAI multi-turn guidance).
+ */
+export function extractLatestUserInputForResponsesChain(
+  messages: Array<{ role: string; content: string }>
+): string {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m?.role === 'user') {
+      return typeof m.content === 'string' ? m.content : String(m.content ?? '');
+    }
+  }
+  return '';
+}
 
 function userContentToText(content: unknown): string {
   if (typeof content === 'string') return content;
@@ -250,11 +276,40 @@ function applyResponsesToolsFields(
   }
 }
 
+function applyResponsesTextFormat(
+  body: Record<string, unknown>,
+  args: {
+    capability: ResolvedModelCapability;
+    jsonMode?: boolean;
+    jsonSchema?: ResponsesJsonSchemaFormat;
+  }
+): void {
+  if (!args.capability.supportsStructuredOutput) return;
+
+  if (args.jsonSchema?.name && args.jsonSchema.schema) {
+    body.text = {
+      format: {
+        type: 'json_schema',
+        name: args.jsonSchema.name,
+        schema: args.jsonSchema.schema,
+        ...(args.jsonSchema.strict !== undefined ? { strict: args.jsonSchema.strict } : { strict: true }),
+        ...(args.jsonSchema.description ? { description: args.jsonSchema.description } : {}),
+      },
+    };
+    return;
+  }
+
+  if (args.jsonMode) {
+    body.text = { format: { type: 'json_object' } };
+  }
+}
+
 function applyResponsesOptionalFields(
   body: Record<string, unknown>,
   args: {
     capability: ResolvedModelCapability;
     jsonMode?: boolean;
+    jsonSchema?: ResponsesJsonSchemaFormat;
     serviceTier?: string;
     previousResponseId?: string;
     store?: boolean;
@@ -265,9 +320,7 @@ function applyResponsesOptionalFields(
   if (args.serviceTier) {
     body.service_tier = args.serviceTier;
   }
-  if (args.jsonMode && args.capability.supportsStructuredOutput) {
-    body.text = { format: { type: 'json_object' } };
-  }
+  applyResponsesTextFormat(body, args);
   const prev = args.previousResponseId?.trim();
   if (prev && args.capability.supportsPreviousResponseId) {
     body.previous_response_id = prev;
@@ -289,15 +342,41 @@ export function buildResponsesBody(args: {
   capability: ResolvedModelCapability;
   reasoning: EffectiveReasoningPrefs;
 } & ResponsesBodyExtras): Record<string, unknown> {
+  const prevId = args.previousResponseId?.trim();
   const useFollowUp =
     Boolean(args.followUpInputItems?.length) &&
-    Boolean(args.previousResponseId?.trim()) &&
+    Boolean(prevId) &&
     args.capability.supportsPreviousResponseId;
+  /** R4: conversational chain — server keeps reasoning items via previous_response_id */
+  const useConversationChain =
+    !useFollowUp && Boolean(prevId) && args.capability.supportsPreviousResponseId;
 
-  const body = createResponsesBodyBase(args, useFollowUp);
+  const body = createResponsesBodyBase(args, {
+    useFollowUp,
+    useConversationChain,
+  });
   applyResponsesOptionalFields(body, args);
   applyResponsesReasoningMapper(body, args.capability, args.reasoning);
   return body;
+}
+
+function resolveResponsesInput(
+  args: {
+    messages: Array<{ role: string; content: string }>;
+    visionUserParts?: Array<Record<string, unknown>>;
+    followUpInputItems?: Array<Record<string, unknown>>;
+  },
+  mode: { useFollowUp: boolean; useConversationChain: boolean },
+  baseInput: unknown
+): unknown {
+  if (mode.useFollowUp) {
+    return args.followUpInputItems;
+  }
+  if (mode.useConversationChain) {
+    const latestUser = extractLatestUserInputForResponsesChain(args.messages);
+    return applyVisionPartsToResponsesInput(latestUser, args.visionUserParts);
+  }
+  return applyVisionPartsToResponsesInput(baseInput, args.visionUserParts);
 }
 
 function createResponsesBodyBase(
@@ -311,19 +390,17 @@ function createResponsesBodyBase(
     visionUserParts?: Array<Record<string, unknown>>;
     followUpInputItems?: Array<Record<string, unknown>>;
   },
-  useFollowUp: boolean
+  mode: { useFollowUp: boolean; useConversationChain: boolean }
 ): Record<string, unknown> {
   const { instructions, input: baseInput } = splitMessagesForResponses(args.messages);
-  const input = useFollowUp
-    ? args.followUpInputItems
-    : applyVisionPartsToResponsesInput(baseInput, args.visionUserParts);
+  const input = resolveResponsesInput(args, mode, baseInput);
   const body: Record<string, unknown> = {
     model: args.model,
     input,
-    // Tool loops need store when chaining previous_response_id
-    store: useFollowUp ? true : false,
+    store: mode.useFollowUp || mode.useConversationChain,
   };
-  if (!useFollowUp && instructions) {
+  // First turn only: system → instructions. Chain turns omit (kept server-side).
+  if (!mode.useFollowUp && !mode.useConversationChain && instructions) {
     body.instructions = instructions;
   }
   if (args.stream) body.stream = true;
