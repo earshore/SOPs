@@ -24,6 +24,7 @@ import {
   extractAnthropicMessagesText,
   extractGeminiGenerateText,
   DEFAULT_MAX_TOOL_ROUNDS,
+  extractResponsesFunctionCalls,
   extractResponsesId,
   extractResponsesIdFromStreamEvent,
   extractResponsesOutputText,
@@ -33,6 +34,7 @@ import {
   getResponsesReasoningStreamDelta,
   getResponsesStreamTextDelta,
   harvestResponsesReasoningIncrement,
+  isResponsesTerminalEvent,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
   processResponsesToolRound,
@@ -373,6 +375,10 @@ interface OpenAIStreamState {
   firstChunkMs?: number;
   chunkCount: number;
   responseIdReported?: boolean;
+  /** Last terminal Responses payload (for tool-call harvest after stream). */
+  lastResponsesPayload?: Record<string, unknown>;
+  /** Accumulated function_call items seen on stream/completed events. */
+  functionCalls?: import('./modelCapability').ResponsesFunctionCall[];
 }
 
 interface OpenAIStreamLineContext {
@@ -388,6 +394,9 @@ interface OpenAIStreamReadResult {
   fallbackJson: LLMChatCompletionResponse | null;
   firstChunkMs?: number;
   chunkCount: number;
+  lastResponsesPayload?: Record<string, unknown>;
+  functionCalls?: import('./modelCapability').ResponsesFunctionCall[];
+  reasoningContent?: string;
 }
 
 function getCompletionContent(
@@ -477,6 +486,7 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
 
   assertStreamPayloadIsOk(payload, data, context.response);
   reportResponsesStreamIdOnce(payload, context);
+  harvestResponsesStreamSideChannels(payload, context);
 
   const delta = getStreamDelta(payload, context.apiSurface);
   const reasoningDelta = resolveStreamReasoningDelta(payload, context);
@@ -485,6 +495,55 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
   }
 
   emitOpenAIStreamUpdate(context, delta, reasoningDelta);
+}
+
+function collectStreamFunctionCalls(
+  payload: Record<string, unknown>
+): import('./modelCapability').ResponsesFunctionCall[] {
+  const fromPayload = extractResponsesFunctionCalls(payload);
+  const fromNested =
+    payload.response && typeof payload.response === 'object'
+      ? extractResponsesFunctionCalls(payload.response as Record<string, unknown>)
+      : [];
+  const item = payload.item;
+  const fromItem =
+    item && typeof item === 'object' ? extractResponsesFunctionCalls({ output: [item] }) : [];
+  return [...fromPayload, ...fromNested, ...fromItem];
+}
+
+function mergeStreamFunctionCalls(
+  existing: import('./modelCapability').ResponsesFunctionCall[] | undefined,
+  incoming: import('./modelCapability').ResponsesFunctionCall[]
+): import('./modelCapability').ResponsesFunctionCall[] | undefined {
+  if (incoming.length === 0) return existing;
+  const next = existing ? [...existing] : [];
+  const seen = new Set(next.map(c => c.callId));
+  for (const call of incoming) {
+    if (!seen.has(call.callId)) {
+      next.push(call);
+      seen.add(call.callId);
+    }
+  }
+  return next;
+}
+
+/** Capture completed Responses payload + function_call items for post-stream tool loop. */
+function harvestResponsesStreamSideChannels(
+  payload: Record<string, unknown>,
+  context: OpenAIStreamLineContext
+): void {
+  if (context.apiSurface !== 'responses') return;
+
+  if (isResponsesTerminalEvent(payload)) {
+    const nested = payload.response;
+    context.state.lastResponsesPayload =
+      nested && typeof nested === 'object' ? (nested as Record<string, unknown>) : payload;
+  }
+
+  context.state.functionCalls = mergeStreamFunctionCalls(
+    context.state.functionCalls,
+    collectStreamFunctionCalls(payload)
+  );
 }
 
 function resolveStreamReasoningDelta(
@@ -597,6 +656,9 @@ function createOpenAIStreamResult(
     fallbackJson,
     firstChunkMs: state.firstChunkMs,
     chunkCount: state.chunkCount,
+    lastResponsesPayload: state.lastResponsesPayload,
+    functionCalls: state.functionCalls,
+    reasoningContent: state.reasoningContent,
   };
 }
 
@@ -682,6 +744,8 @@ interface LLMResponsePayload {
   content: string;
   /** Full Responses JSON (non-stream) for tool-loop parsing */
   rawResponsesData?: Record<string, unknown>;
+  /** Function calls harvested from stream terminal events */
+  streamFunctionCalls?: import('./modelCapability').ResponsesFunctionCall[];
   streamMetrics?: {
     firstChunkMs?: number;
     chunkCount: number;
@@ -1172,6 +1236,8 @@ async function readLLMResponsePayload(
   return {
     data: streamResult.fallbackJson,
     content: streamResult.content,
+    rawResponsesData: streamResult.lastResponsesPayload,
+    streamFunctionCalls: streamResult.functionCalls,
     streamMetrics: {
       firstChunkMs: streamResult.firstChunkMs,
       chunkCount: streamResult.chunkCount,
@@ -1506,6 +1572,38 @@ async function callLLMResponsesToolLoop(
 }
 
 /**
+ * Stream-first tool path: keep reasoning/text SSE for Deep Chat UX; if the model
+ * only emitted function_call items (empty assistant text), fall back to non-stream tool loop.
+ */
+async function callLLMStreamFirstThenToolLoop(
+  request: LLMCallRequest,
+  baseOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string
+): Promise<string> {
+  const streamOptions: ResolvedLLMOptions = {
+    ...baseOptions,
+    stream: true,
+    // Do not enter pure non-stream tool-loop entry for the first hop.
+    enableToolLoop: false,
+  };
+  const streamed = await callLLMWithRetry(request, streamOptions, normalizedEndpoint);
+  if (streamed.trim()) {
+    return streamed;
+  }
+
+  // Empty stream text: model may have requested tools only — run non-stream tool loop.
+  return callLLMResponsesToolLoop(
+    request,
+    {
+      ...baseOptions,
+      stream: false,
+      enableToolLoop: true,
+    },
+    normalizedEndpoint
+  );
+}
+
+/**
  * 通用大语言模型调用接口 (带自动重试)
  */
 export async function callLLM(...args: LLMCallArgs): Promise<string> {
@@ -1515,6 +1613,10 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
   assertSafeLLMEndpoint(normalizedEndpoint);
 
   if (shouldUseResponsesToolLoop(resolvedOptions)) {
+    // Stream-first preserves 深度思考 / 已完成 chrome; tool loop only when needed.
+    if (resolvedOptions.stream) {
+      return callLLMStreamFirstThenToolLoop(request, resolvedOptions, normalizedEndpoint);
+    }
     return callLLMResponsesToolLoop(request, resolvedOptions, normalizedEndpoint);
   }
 

@@ -52,6 +52,13 @@ export {
   isResponsesTerminalEvent,
 } from './responsesParse';
 export {
+  OPENAI_PLATFORM_CAPABILITY_MATRIX,
+  listCapabilitiesByStatus,
+  summarizePlatformCapability,
+  type PlatformCapabilityRow,
+  type PlatformCapabilityStatus,
+} from './platformCapability';
+export {
   applyVisionPartsToResponsesInput,
   extractLatestUserInputForResponsesChain,
   type ResponsesBodyExtras,

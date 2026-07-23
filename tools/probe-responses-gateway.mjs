@@ -126,10 +126,28 @@ row(
   await responses(model, { reasoning: { effort: 'low' } })
 );
 row(
+  'reasoning.summary=auto',
+  await responses(model, { reasoning: { effort: 'low', summary: 'auto' } })
+);
+row(
   'text.format json_object',
   await responses(model, {
     input: 'Return JSON object with key ok set to true only.',
     text: { format: { type: 'json_object' } },
+  })
+);
+row(
+  'tools function (noop schema)',
+  await responses(model, {
+    input: 'Call get_ping if you can tools, else reply pong',
+    tools: [
+      {
+        type: 'function',
+        name: 'get_ping',
+        description: 'Return pong',
+        parameters: { type: 'object', properties: {}, additionalProperties: false },
+      },
+    ],
   })
 );
 row(

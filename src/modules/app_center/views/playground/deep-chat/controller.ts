@@ -14,6 +14,10 @@ import {
   resolveModelCapability,
   shouldShowReasoningControls,
 } from '@/services/modelCapability';
+import {
+  createDeepChatBusinessToolExecutor,
+  DEEP_CHAT_BUSINESS_TOOLS,
+} from './deepChatBusinessTools';
 import { StorageService } from '@/services/storageService';
 import { resolveToolTargetModel } from '@/services/toolStrategyService';
 import { getRuntimeDeepChatOptions } from '@/services/runtimeStrategyService';
@@ -2417,6 +2421,10 @@ function resolveDeepChatResponsesChainOptions(
   apiPath?: ReturnType<typeof normalizeApiPathId>;
   previousResponseId?: string;
   store?: boolean;
+  tools?: unknown[];
+  executeTool?: ReturnType<typeof createDeepChatBusinessToolExecutor>;
+  enableToolLoop?: boolean;
+  maxToolRounds?: number;
 } {
   const apiPath = normalizeApiPathId(
     (config as { apiPath?: unknown }).apiPath ??
@@ -2430,12 +2438,32 @@ function resolveDeepChatResponsesChainOptions(
   const previousResponseId =
     thread.lastResponseModel === model && thread.lastResponseId ? thread.lastResponseId : undefined;
 
-  // Never enableToolLoop here: it forces non-stream rounds and drops
-  // reasoning_summary_text.delta → 深度思考 / 已完成 chrome never mounts.
+  const cap = resolveModelCapability({
+    provider: config.provider,
+    modelId: model,
+    preferredSurface: 'responses',
+  });
+
+  // Read-only business tools whenever Responses tools are supported.
+  // callLLM uses stream-first + tool-loop fallback so 深度思考 chrome is preserved.
+  const toolOptions = cap.supportsTools
+    ? {
+        tools: DEEP_CHAT_BUSINESS_TOOLS,
+        executeTool: createDeepChatBusinessToolExecutor({
+          getThread: () => getActiveThread(),
+          getModel: () => model,
+          getProvider: () => config.provider,
+        }),
+        enableToolLoop: true,
+        maxToolRounds: 4,
+      }
+    : {};
+
   // Only request store when chaining; many new-api gateways reject store=true.
   return {
     apiPath,
     ...(previousResponseId ? { previousResponseId, store: true } : { store: false }),
+    ...toolOptions,
   };
 }
 
@@ -2469,10 +2497,20 @@ function clearDeepChatResponseChain(): void {
   });
 }
 
-function stripResponsesChainForRetry(): ReturnType<typeof resolveDeepChatResponsesChainOptions> {
+function stripResponsesChainForRetry(
+  chain: ReturnType<typeof resolveDeepChatResponsesChainOptions>
+): ReturnType<typeof resolveDeepChatResponsesChainOptions> {
   return {
     apiPath: 'responses',
     store: false,
+    ...(chain.tools
+      ? {
+          tools: chain.tools,
+          executeTool: chain.executeTool,
+          enableToolLoop: chain.enableToolLoop,
+          maxToolRounds: chain.maxToolRounds,
+        }
+      : {}),
   };
 }
 
@@ -2536,7 +2574,7 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
       throw error;
     }
     clearDeepChatResponseChain();
-    responsesChain = stripResponsesChainForRetry();
+    responsesChain = stripResponsesChainForRetry(responsesChain);
     streamState.streamedText = '';
     finalText = await run(responsesChain);
   }
