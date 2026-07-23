@@ -2401,11 +2401,9 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
         }
         if (update.reasoningDelta) {
           appendPendingDeepChatReasoningText(pendingRequest, update.reasoningDelta);
-          renderReasoningStreamPanel(
-            getMountedRenderContainer(),
-            pendingRequest.reasoningText,
-            { open: true }
-          );
+          renderReasoningStreamPanel(getMountedRenderContainer(), pendingRequest.reasoningText, {
+            open: true,
+          });
         }
         streamedText += update.delta;
         if (update.delta) {

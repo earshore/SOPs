@@ -54,12 +54,9 @@ describe('mergeThreadHistoryWithRequest', () => {
 
 describe('buildStoredThreadMessages', () => {
   it('stores assistant reasoning as display-only metadata', () => {
-    const stored = buildStoredThreadMessages(
-      [],
-      [{ role: 'user', content: 'q' }],
-      'answer',
-      { assistantReasoning: '  plan steps  ' }
-    );
+    const stored = buildStoredThreadMessages([], [{ role: 'user', content: 'q' }], 'answer', {
+      assistantReasoning: '  plan steps  ',
+    });
     expect(stored).toEqual([
       expect.objectContaining({ role: 'user', text: 'q' }),
       expect.objectContaining({ role: 'ai', text: 'answer', reasoning: 'plan steps' }),

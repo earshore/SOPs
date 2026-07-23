@@ -310,11 +310,15 @@ describe('callLLM streaming', () => {
   });
 
   it('posts Anthropic Messages body to /messages with dual auth headers', async () => {
-    const fetchMock = vi.fn(async () =>
-      createSseResponse([
-        'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hello"}}',
-        'data: {"type":"message_stop"}',
-      ])
+    const fetchMock = vi.fn(
+      async (_url: RequestInfo | URL, _init?: RequestInit): Promise<Response> => {
+        void _url;
+        void _init;
+        return createSseResponse([
+          'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hello"}}',
+          'data: {"type":"message_stop"}',
+        ]);
+      }
     );
     vi.stubGlobal('fetch', fetchMock);
 
@@ -336,32 +340,39 @@ describe('callLLM streaming', () => {
     );
 
     expect(text).toBe('Hello');
-    expect(String(fetchMock.mock.calls[0]?.[0])).toBe('https://new.hongecb.store/v1/messages');
-    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
-    const headers = init.headers as Record<string, string>;
+    const call = fetchMock.mock.calls[0];
+    expect(call).toBeDefined();
+    expect(String(call?.[0])).toBe('https://new.hongecb.store/v1/messages');
+    const init = call?.[1];
+    expect(init).toBeDefined();
+    const headers = init?.headers as Record<string, string>;
     expect(headers.Authorization).toBe('Bearer test-key');
     expect(headers['x-api-key']).toBe('test-key');
     expect(headers['anthropic-version']).toBe('2023-06-01');
-    const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+    const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
     expect(body.system).toBe('sys');
     expect(body.stream).toBe(true);
     expect(body.thinking).toEqual({ type: 'enabled', budget_tokens: 10_000 });
   });
 
   it('posts Gemini generateContent body to v1beta models path', async () => {
-    const fetchMock = vi.fn(async () =>
-      new Response(
-        JSON.stringify({
-          candidates: [
-            {
-              content: {
-                parts: [{ text: 'thought', thought: true }, { text: 'answer' }],
+    const fetchMock = vi.fn(
+      async (_url: RequestInfo | URL, _init?: RequestInit): Promise<Response> => {
+        void _url;
+        void _init;
+        return new Response(
+          JSON.stringify({
+            candidates: [
+              {
+                content: {
+                  parts: [{ text: 'thought', thought: true }, { text: 'answer' }],
+                },
               },
-            },
-          ],
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      )
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
     );
     vi.stubGlobal('fetch', fetchMock);
 
@@ -383,26 +394,33 @@ describe('callLLM streaming', () => {
     );
 
     expect(text).toBe('answer');
-    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+    const call = fetchMock.mock.calls[0];
+    expect(call).toBeDefined();
+    expect(String(call?.[0])).toBe(
       'https://new.hongecb.store/v1beta/models/gemini-2.5-flash:generateContent'
     );
-    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
-    const headers = init.headers as Record<string, string>;
+    const init = call?.[1];
+    expect(init).toBeDefined();
+    const headers = init?.headers as Record<string, string>;
     expect(headers['x-goog-api-key']).toBe('test-key');
-    const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+    const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
     expect(body.systemInstruction).toBeTruthy();
     expect(Array.isArray(body.contents)).toBe(true);
     expect(body.thinkingConfig).toMatchObject({ includeThoughts: true });
   });
 
   it('posts Responses body to /responses when apiPath is responses', async () => {
-    const fetchMock = vi.fn(async () =>
-      new Response(
-        JSON.stringify({
-          output: [{ type: 'message', content: [{ type: 'output_text', text: 'resp-ok' }] }],
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      )
+    const fetchMock = vi.fn(
+      async (_url: RequestInfo | URL, _init?: RequestInit): Promise<Response> => {
+        void _url;
+        void _init;
+        return new Response(
+          JSON.stringify({
+            output: [{ type: 'message', content: [{ type: 'output_text', text: 'resp-ok' }] }],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
     );
     vi.stubGlobal('fetch', fetchMock);
 
@@ -421,11 +439,10 @@ describe('callLLM streaming', () => {
     );
 
     expect(text).toBe('resp-ok');
-    expect(String(fetchMock.mock.calls[0]?.[0])).toBe('https://new.hongecb.store/v1/responses');
-    const body = JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body)) as Record<
-      string,
-      unknown
-    >;
+    const call = fetchMock.mock.calls[0];
+    expect(call).toBeDefined();
+    expect(String(call?.[0])).toBe('https://new.hongecb.store/v1/responses');
+    const body = JSON.parse(String(call?.[1]?.body)) as Record<string, unknown>;
     expect(body.input).toBeDefined();
     expect(body.messages).toBeUndefined();
   });

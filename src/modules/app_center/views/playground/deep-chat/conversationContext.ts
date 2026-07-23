@@ -152,15 +152,12 @@ function normalizeStoredMessage(
     return null;
   }
 
-  const reasoning =
-    typeof message.reasoning === 'string' ? message.reasoning.trim() : '';
+  const reasoning = typeof message.reasoning === 'string' ? message.reasoning.trim() : '';
   return {
     role: message.role === 'user' ? 'user' : 'ai',
     text,
     createdAt: getFiniteTimestamp(message.createdAt, options.fallbackCreatedAt),
-    ...(reasoning
-      ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) }
-      : {}),
+    ...(reasoning ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) } : {}),
     ...((message.status === 'stopped' || message.status === 'partial') && {
       status: message.status,
     }),
