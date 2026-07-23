@@ -41,7 +41,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     box-sizing: border-box !important;
   }
 
-  /* 正在生成回复…：无边框，位于深度思考下方 */
+  /* 状态行（等待 / 正在生成）：无边框，位于深度思考下方 */
   .deep-chat-inline-pending-status {
     display: inline-flex !important;
     align-items: center !important;
@@ -52,12 +52,17 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    color: #64748b !important;
+    color: #94a3b8 !important;
     font-family: inherit !important;
     font-size: 12px !important;
-    font-weight: 500 !important;
+    font-weight: 400 !important;
     line-height: 1.4 !important;
     user-select: none !important;
+  }
+
+  /* Beat display:inline-flex !important so reasoning phase fully hides waiting status */
+  .deep-chat-inline-pending-status[hidden] {
+    display: none !important;
   }
 
   .deep-chat-inline-pending-text {

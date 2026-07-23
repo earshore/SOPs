@@ -4738,6 +4738,8 @@ function hideStatusInChrome(chrome: HTMLElement): void {
   const statusEl = chrome.querySelector<HTMLElement>('#' + INLINE_PENDING_STATUS_ID);
   if (statusEl) {
     statusEl.hidden = true;
+    // Remove so waiting copy cannot flash back via stale DOM / CSS edge cases
+    statusEl.remove();
   }
 }
 
@@ -4780,8 +4782,9 @@ function mountStreamingGenerationChrome(host: HTMLElement, pending: PendingDeepC
   clearWaitingStatusRotateTimer();
 
   if (phase === 'reasoning') {
-    ensureStreamingDeepThinkingBlock(chrome, pending.reasoningText, pending);
+    // 深度思考出现后：彻底去掉「思考中 / 等待模型响应…」
     hideStatusInChrome(chrome);
+    ensureStreamingDeepThinkingBlock(chrome, pending.reasoningText, pending);
     placeGenerationChromeRoot(host, chrome);
     return;
   }
