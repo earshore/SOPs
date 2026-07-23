@@ -89,3 +89,5 @@ For each production model that should expose reasoning UI:
 - Stream isolation: final answer uses `getStreamDelta` (content only); reasoning channel via
   `getReasoningStreamDelta` → `onStreamUpdate.reasoningDelta` (Deep Chat collapsible panel).
 - Multi-path: `apiPaths.ts` + settings `llm.apiPath` (see multi-protocol design)
+- Responses parity roadmap: `docs/superpowers/specs/2026-07-24-responses-capability-roadmap.md`
+- Responses structured: `text.format` when `supportsStructuredOutput` (not silent chat-only)

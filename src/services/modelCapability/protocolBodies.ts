@@ -169,6 +169,11 @@ export function buildBodyForApiPath(args: {
   serviceTier?: string;
   capability: ResolvedModelCapability;
   reasoning: EffectiveReasoningPrefs;
+  previousResponseId?: string;
+  store?: boolean;
+  tools?: unknown[];
+  toolChoice?: unknown;
+  visionUserParts?: Array<Record<string, unknown>>;
 }): Record<string, unknown> {
   if (args.pathId === 'responses') {
     return buildResponsesBody({
@@ -177,8 +182,15 @@ export function buildBodyForApiPath(args: {
       temperature: args.temperature,
       maxTokens: args.maxTokens,
       stream: args.stream,
+      jsonMode: args.jsonMode,
+      serviceTier: args.serviceTier,
       capability: args.capability,
       reasoning: args.reasoning,
+      previousResponseId: args.previousResponseId,
+      store: args.store,
+      tools: args.tools,
+      toolChoice: args.toolChoice,
+      visionUserParts: args.visionUserParts,
     });
   }
   if (args.pathId === 'anthropic_messages') {

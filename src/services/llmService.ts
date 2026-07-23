@@ -23,9 +23,11 @@ import {
   buildFullApiUrl,
   extractAnthropicMessagesText,
   extractGeminiGenerateText,
+  extractResponsesId,
   extractResponsesOutputText,
   getAnthropicStreamTextDelta,
   getGeminiStreamTextDelta,
+  getResponsesReasoningStreamDelta,
   getResponsesStreamTextDelta,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
@@ -35,6 +37,7 @@ import {
   type ApiSurface,
   type ModelsListEntry,
   type ReasoningUserPrefs,
+  type ResponsesTransportOptions,
   type SessionReasoningOverride,
 } from './modelCapability';
 import { StorageService } from './storageService';
@@ -93,6 +96,14 @@ export interface LLMOptions {
    * Overrides model preferred surface when set.
    */
   apiPath?: ApiPathId;
+  /** Responses multi-turn / tools / vision extras */
+  previousResponseId?: string;
+  store?: boolean;
+  tools?: unknown[];
+  toolChoice?: unknown;
+  visionUserParts?: ResponsesTransportOptions['visionUserParts'];
+  /** Called with Responses response.id when available (for chaining). */
+  onResponseId?: (responseId: string) => void;
 }
 
 export interface LLMStreamMetrics {
@@ -262,23 +273,12 @@ function getGeminiReasoningDelta(payload: Record<string, unknown>): string {
   return texts.join('');
 }
 
-function getResponsesReasoningDelta(payload: Record<string, unknown>): string {
-  const type = typeof payload.type === 'string' ? payload.type : '';
-  if (
-    type === 'response.reasoning_summary_text.delta' ||
-    type.endsWith('reasoning_summary_text.delta')
-  ) {
-    return typeof payload.delta === 'string' ? payload.delta : '';
-  }
-  return '';
-}
-
 /** Reasoning/thinking channel only — never merged into final assistant text. */
 function getReasoningStreamDelta(payload: Record<string, unknown>, surface: ApiSurface): string {
   if (surface === 'chat_completions') return getChatCompletionsReasoningDelta(payload);
   if (surface === 'anthropic_messages') return getAnthropicReasoningDelta(payload);
   if (surface === 'gemini_generate') return getGeminiReasoningDelta(payload);
-  if (surface === 'responses') return getResponsesReasoningDelta(payload);
+  if (surface === 'responses') return getResponsesReasoningStreamDelta(payload);
   return '';
 }
 
@@ -557,6 +557,12 @@ interface ResolvedLLMOptions {
   reasoningSessionOverride: SessionReasoningOverride | undefined;
   modelsEntry: ModelsListEntry | string | null | undefined;
   apiPath: ApiPathId;
+  previousResponseId?: string;
+  store?: boolean;
+  tools?: unknown[];
+  toolChoice?: unknown;
+  visionUserParts?: ResponsesTransportOptions['visionUserParts'];
+  onResponseId?: LLMOptions['onResponseId'];
 }
 
 interface LLMCallContext {
@@ -668,6 +674,12 @@ function resolveLLMOptions(
     reasoningSessionOverride: options.reasoningSessionOverride,
     modelsEntry: hydrated.modelsEntry,
     apiPath: hydrated.apiPath ?? normalizeApiPathId(options.apiPath),
+    previousResponseId: options.previousResponseId,
+    store: options.store,
+    tools: options.tools,
+    toolChoice: options.toolChoice,
+    visionUserParts: options.visionUserParts,
+    onResponseId: options.onResponseId,
   };
 }
 
@@ -756,15 +768,21 @@ function logReasoningTransport(args: {
   }
 }
 
-function resolveTransportPathId(options: ResolvedLLMOptions, forcePath?: ApiPathId): ApiPathId {
+function resolveTransportPathId(
+  options: ResolvedLLMOptions,
+  capabilitySupportsStructuredOutput: boolean,
+  forcePath?: ApiPathId
+): ApiPathId {
   if (forcePath) return forcePath;
-  // jsonMode: force chat_completions (response_format). Gemini keep native path + mime type.
+  const current = options.apiPath ?? 'chat_completions';
+  // jsonMode: keep Gemini native; keep Responses when structured output (text.format) is supported;
+  // otherwise force chat_completions + response_format.
   if (options.jsonMode === true) {
-    const current = options.apiPath ?? 'chat_completions';
     if (current === 'gemini_generate') return 'gemini_generate';
+    if (current === 'responses' && capabilitySupportsStructuredOutput) return 'responses';
     return 'chat_completions';
   }
-  return options.apiPath ?? 'chat_completions';
+  return current;
 }
 
 function createLLMTransport(args: {
@@ -781,7 +799,18 @@ function createLLMTransport(args: {
   apiSurface: ApiSurface;
   apiPath: ApiPathId;
 } {
-  const pathId = resolveTransportPathId(args.options, args.forcePath);
+  const preferredPath = args.forcePath ?? args.options.apiPath ?? 'chat_completions';
+  const probeCapability = resolveModelCapability({
+    provider: args.provider,
+    modelId: args.model,
+    modelsEntry: args.options.modelsEntry,
+    preferredSurface: preferredPath,
+  });
+  const pathId = resolveTransportPathId(
+    args.options,
+    probeCapability.supportsStructuredOutput,
+    args.forcePath
+  );
   const capability = resolveModelCapability({
     provider: args.provider,
     modelId: args.model,
@@ -806,6 +835,11 @@ function createLLMTransport(args: {
     serviceTier: args.options.serviceTier,
     capability,
     reasoning,
+    previousResponseId: args.options.previousResponseId,
+    store: args.options.store,
+    tools: args.options.tools,
+    toolChoice: args.options.toolChoice,
+    visionUserParts: args.options.visionUserParts,
   });
 
   const { fullUrl, pathSuffix } = buildFullApiUrl(args.endpoint, pathId, args.model);
@@ -998,6 +1032,10 @@ async function readLLMResponsePayload(
   if (!context.options.stream) {
     const data = (await response.json()) as Record<string, unknown>;
     if (context.apiSurface === 'responses') {
+      const responseId = extractResponsesId(data);
+      if (responseId) {
+        context.options.onResponseId?.(responseId);
+      }
       return { data: null, content: extractResponsesOutputText(data) };
     }
     if (context.apiSurface === 'anthropic_messages') {

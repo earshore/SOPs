@@ -148,6 +148,11 @@ describe('buildResponsesBody', () => {
       temperatureIgnored: true,
       mapRequest: null,
       supportsReasoning: false,
+      supportsStructuredOutput: true,
+      supportsPreviousResponseId: true,
+      supportsStore: true,
+      supportsTools: true,
+      supportsVision: true,
     } as unknown as ResolvedModelCapability;
 
     const body = buildResponsesBody({
@@ -164,5 +169,40 @@ describe('buildResponsesBody', () => {
     expect(body.instructions).toBe('You are helpful');
     expect(Array.isArray(body.input)).toBe(true);
     expect(body.input).toHaveLength(3);
+    expect(body.store).toBe(false);
+  });
+
+  it('adds text.format, previous_response_id, tools, and vision parts', () => {
+    const capability = {
+      apiSurface: 'responses' as const,
+      temperatureIgnored: true,
+      mapRequest: null,
+      supportsReasoning: false,
+      supportsStructuredOutput: true,
+      supportsPreviousResponseId: true,
+      supportsStore: true,
+      supportsTools: true,
+      supportsVision: true,
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildResponsesBody({
+      model: 'gpt-5.5',
+      messages: [{ role: 'user', content: 'see image' }],
+      jsonMode: true,
+      previousResponseId: 'resp_123',
+      store: true,
+      tools: [{ type: 'function', name: 'lookup', parameters: { type: 'object' } }],
+      visionUserParts: [{ type: 'input_image', image_url: 'https://x/a.png' }],
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+    });
+
+    expect(body.text).toEqual({ format: { type: 'json_object' } });
+    expect(body.previous_response_id).toBe('resp_123');
+    expect(body.store).toBe(true);
+    expect(body.tools).toHaveLength(1);
+    expect(Array.isArray(body.input)).toBe(true);
+    const first = (body.input as Array<{ content: unknown }>)[0];
+    expect(Array.isArray(first.content)).toBe(true);
   });
 });

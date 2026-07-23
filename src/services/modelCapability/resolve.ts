@@ -158,6 +158,13 @@ function buildResolvedCapability(args: {
     temperatureIgnored: Boolean(capability?.temperatureIgnored),
     features: mergeFeatureLists(args.rule?.features, modelsFeatures),
     mapRequest: capability?.mapRequest ?? null,
+    supportsStructuredOutput: Boolean(capability?.supportsStructuredOutput),
+    supportsTools: Boolean(capability?.supportsTools),
+    supportsVision: Boolean(capability?.supportsVision),
+    supportsPreviousResponseId: Boolean(capability?.supportsPreviousResponseId),
+    supportsStore: Boolean(capability?.supportsStore),
+    supportsBuiltInTools: Boolean(capability?.supportsBuiltInTools),
+    supportsReasoningSummary: Boolean(capability?.supportsReasoningSummary),
     source: {
       registryMatched: Boolean(args.rule),
       preferredSurface: surface,

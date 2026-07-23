@@ -1,38 +1,54 @@
 import { describe, expect, it } from 'vitest';
-import { extractResponsesOutputText, getResponsesStreamTextDelta } from './responsesParse';
+import {
+  extractResponsesId,
+  extractResponsesOutputText,
+  extractResponsesRefusal,
+  getResponsesReasoningStreamDelta,
+  getResponsesStreamTextDelta,
+  isResponsesTerminalEvent,
+} from './responsesParse';
 
 describe('responsesParse', () => {
-  it('extracts message output_text from completed response', () => {
-    const text = extractResponsesOutputText({
-      output_text: '',
-      output: [
-        { type: 'reasoning', summary: [{ type: 'summary_text', text: 'thinking…' }] },
-        {
-          type: 'message',
-          role: 'assistant',
-          content: [{ type: 'output_text', text: 'OK' }],
-        },
-      ],
-    });
-    expect(text).toBe('OK');
-  });
-
-  it('prefers top-level output_text when present', () => {
-    expect(extractResponsesOutputText({ output_text: 'Hello' })).toBe('Hello');
-  });
-
-  it('stream delta ignores reasoning events', () => {
+  it('extracts output_text shortcut and message items', () => {
+    expect(extractResponsesOutputText({ output_text: 'hi' })).toBe('hi');
     expect(
-      getResponsesStreamTextDelta({
-        type: 'response.reasoning_summary_text.delta',
-        delta: 'secret thoughts',
+      extractResponsesOutputText({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'output_text', text: 'a' }, { type: 'output_text', text: 'b' }],
+          },
+        ],
       })
-    ).toBe('');
+    ).toBe('ab');
+  });
+
+  it('extracts refusal when no text', () => {
+    expect(extractResponsesRefusal({ refusal: 'nope' })).toBe('nope');
+    expect(
+      extractResponsesOutputText({
+        output: [{ type: 'message', refusal: 'blocked' }],
+      })
+    ).toBe('blocked');
+  });
+
+  it('parses stream text and reasoning summary deltas', () => {
     expect(
       getResponsesStreamTextDelta({
         type: 'response.output_text.delta',
-        delta: 'Hi',
+        delta: 'hello',
       })
-    ).toBe('Hi');
+    ).toBe('hello');
+    expect(
+      getResponsesReasoningStreamDelta({
+        type: 'response.reasoning_summary_text.delta',
+        delta: 'think',
+      })
+    ).toBe('think');
+  });
+
+  it('detects terminal events and response id', () => {
+    expect(isResponsesTerminalEvent({ type: 'response.completed' })).toBe(true);
+    expect(extractResponsesId({ id: 'resp_abc' })).toBe('resp_abc');
   });
 });

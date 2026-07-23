@@ -34,6 +34,14 @@ function surfaceResponses(opts?: { temperatureIgnored?: boolean }): SurfaceCapab
     defaultEffort: 'medium',
     temperatureIgnored: opts?.temperatureIgnored ?? true,
     mapRequest: mapResponsesReasoning,
+    // OpenAI Responses capability matrix (text-first SOPs subset + declared parity flags)
+    supportsStructuredOutput: true,
+    supportsTools: true,
+    supportsVision: true,
+    supportsPreviousResponseId: true,
+    supportsStore: true,
+    supportsBuiltInTools: true,
+    supportsReasoningSummary: true,
   };
 }
 

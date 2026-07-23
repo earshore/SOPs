@@ -149,8 +149,131 @@ export function messagesToResponsesInput(
   return splitMessagesForResponses(messages).input;
 }
 
+export type ResponsesBodyExtras = {
+  /** OpenAI Responses structured outputs (jsonMode). */
+  jsonMode?: boolean;
+  serviceTier?: string;
+  /** previous_response_id multi-turn (when capability allows). */
+  previousResponseId?: string;
+  /** store override; default false for BYOK. */
+  store?: boolean;
+  tools?: unknown[];
+  toolChoice?: unknown;
+  /** Replace last user message content with multimodal parts. */
+  visionUserParts?: Array<Record<string, unknown>>;
+};
+
+function userContentToText(content: unknown): string {
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) return '';
+  return String(content ?? '');
+}
+
+function buildUserVisionContent(
+  text: string,
+  visionUserParts: Array<Record<string, unknown>>
+): Array<Record<string, unknown>> {
+  const parts: Array<Record<string, unknown>> = [];
+  if (text.trim()) {
+    parts.push({ type: 'input_text', text });
+  }
+  parts.push(...visionUserParts);
+  return parts;
+}
+
+/**
+ * Apply vision parts to Responses input (last user message only).
+ */
+export function applyVisionPartsToResponsesInput(
+  input: unknown,
+  visionUserParts: Array<Record<string, unknown>> | undefined
+): unknown {
+  if (!visionUserParts || visionUserParts.length === 0) {
+    return input;
+  }
+  if (typeof input === 'string') {
+    return [
+      {
+        role: 'user',
+        content: buildUserVisionContent(input, visionUserParts),
+      },
+    ];
+  }
+  if (!Array.isArray(input) || input.length === 0) {
+    return [{ role: 'user', content: visionUserParts }];
+  }
+  const next = input.map(item =>
+    item && typeof item === 'object' ? { ...(item as Record<string, unknown>) } : item
+  );
+  for (let i = next.length - 1; i >= 0; i--) {
+    const row = next[i] as { role?: string; content?: unknown };
+    if (row?.role === 'user') {
+      next[i] = {
+        ...row,
+        content: buildUserVisionContent(userContentToText(row.content), visionUserParts),
+      };
+      break;
+    }
+  }
+  return next;
+}
+
+function applyResponsesStoreField(
+  body: Record<string, unknown>,
+  store: boolean | undefined,
+  supportsStore: boolean
+): void {
+  if (store === true && supportsStore) {
+    body.store = true;
+    return;
+  }
+  if (store === false) {
+    body.store = false;
+  }
+}
+
+function applyResponsesToolsFields(
+  body: Record<string, unknown>,
+  tools: unknown[] | undefined,
+  toolChoice: unknown,
+  supportsTools: boolean
+): void {
+  if (!tools || tools.length === 0 || !supportsTools) return;
+  body.tools = tools;
+  if (toolChoice !== undefined) {
+    body.tool_choice = toolChoice;
+  }
+}
+
+function applyResponsesOptionalFields(
+  body: Record<string, unknown>,
+  args: {
+    capability: ResolvedModelCapability;
+    jsonMode?: boolean;
+    serviceTier?: string;
+    previousResponseId?: string;
+    store?: boolean;
+    tools?: unknown[];
+    toolChoice?: unknown;
+  }
+): void {
+  if (args.serviceTier) {
+    body.service_tier = args.serviceTier;
+  }
+  if (args.jsonMode && args.capability.supportsStructuredOutput) {
+    body.text = { format: { type: 'json_object' } };
+  }
+  const prev = args.previousResponseId?.trim();
+  if (prev && args.capability.supportsPreviousResponseId) {
+    body.previous_response_id = prev;
+  }
+  applyResponsesStoreField(body, args.store, args.capability.supportsStore);
+  applyResponsesToolsFields(body, args.tools, args.toolChoice, args.capability.supportsTools);
+}
+
 /**
  * OpenAI Responses API body builder.
+ * Subset + expanding parity: text.format, store, previous_response_id, tools, vision parts.
  */
 export function buildResponsesBody(args: {
   model: string;
@@ -160,11 +283,14 @@ export function buildResponsesBody(args: {
   stream?: boolean;
   capability: ResolvedModelCapability;
   reasoning: EffectiveReasoningPrefs;
-}): Record<string, unknown> {
-  const { instructions, input } = splitMessagesForResponses(args.messages);
+} & ResponsesBodyExtras): Record<string, unknown> {
+  const { instructions, input: baseInput } = splitMessagesForResponses(args.messages);
+  const input = applyVisionPartsToResponsesInput(baseInput, args.visionUserParts);
   const body: Record<string, unknown> = {
     model: args.model,
     input,
+    // BYOK privacy default: do not persist unless caller opts in and surface supports store
+    store: false,
   };
   if (instructions) {
     body.instructions = instructions;
@@ -180,6 +306,8 @@ export function buildResponsesBody(args: {
     body.temperature = args.temperature;
   }
 
+  applyResponsesOptionalFields(body, args);
+
   if (args.capability.mapRequest) {
     const extra = args.capability.mapRequest({
       enabled: args.reasoning.enabled,
@@ -194,16 +322,18 @@ export function buildResponsesBody(args: {
 }
 
 /**
- * Reliability rule (verified 2026-07-23):
- * Analysis passes jsonMode:true and parses with parseLlmJson (prompt + repair).
- * That often still works WITHOUT response_format — so production may not "explode".
- * Forcing chat_completions when jsonMode is set applies response_format for reliability.
+ * Force chat/completions for jsonMode only when the resolved surface cannot do
+ * structured outputs natively (Responses uses text.format when supported).
  */
 export function shouldForceChatCompletionsForJsonMode(
   jsonMode: boolean | undefined,
-  surface: ResolvedModelCapability['apiSurface']
+  surface: ResolvedModelCapability['apiSurface'],
+  supportsStructuredOutput?: boolean
 ): boolean {
-  return Boolean(jsonMode) && surface === 'responses';
+  if (!jsonMode) return false;
+  if (surface === 'responses' && supportsStructuredOutput) return false;
+  if (surface === 'gemini_generate') return false;
+  return surface === 'responses' && !supportsStructuredOutput;
 }
 
 /** Build request body for the resolved API surface. */
@@ -229,7 +359,11 @@ export function buildRequestBodyForSurface(args: {
 } {
   const forceCompletions =
     args.forceChatCompletions === true ||
-    shouldForceChatCompletionsForJsonMode(args.jsonMode, args.capability.apiSurface);
+    shouldForceChatCompletionsForJsonMode(
+      args.jsonMode,
+      args.capability.apiSurface,
+      args.capability.supportsStructuredOutput
+    );
 
   const useResponses = !forceCompletions && args.capability.apiSurface === 'responses';
 
@@ -243,6 +377,8 @@ export function buildRequestBodyForSurface(args: {
         temperature: args.temperature,
         maxTokens: args.maxTokens,
         stream: args.stream,
+        jsonMode: args.jsonMode,
+        serviceTier: args.serviceTier,
         capability: args.capability,
         reasoning: args.reasoning,
       }),

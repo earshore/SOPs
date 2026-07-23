@@ -2,6 +2,7 @@
  * Model capability registry types (multi-protocol surfaces + reasoning).
  * Spec: docs/superpowers/specs/2026-07-23-model-reasoning-capability-design.md
  * Multi-protocol: docs/superpowers/specs/2026-07-23-multi-protocol-llm-design.md
+ * Responses parity: docs/superpowers/specs/2026-07-24-responses-capability-roadmap.md
  */
 
 /** Product-side thinking intensity; 'off' means disabled (not listed in efforts). */
@@ -22,7 +23,28 @@ export type ApiSurface =
   | 'anthropic_messages'
   | 'gemini_generate';
 
-export interface SurfaceCapability {
+/**
+ * Extended surface flags beyond reasoning (OpenAI Responses capability matrix).
+ * Fail-closed defaults: unset = false / unsupported on that surface.
+ */
+export interface SurfaceCapabilityFlags {
+  /** Structured Outputs: chat uses response_format; responses uses text.format */
+  supportsStructuredOutput?: boolean;
+  /** Function / custom tools on this surface */
+  supportsTools?: boolean;
+  /** Multimodal image input parts */
+  supportsVision?: boolean;
+  /** previous_response_id multi-turn chaining (Responses) */
+  supportsPreviousResponseId?: boolean;
+  /** store:true stateful responses (Responses); BYOK default is false */
+  supportsStore?: boolean;
+  /** Built-in tools: web_search, file_search, code_interpreter, etc. */
+  supportsBuiltInTools?: boolean;
+  /** Reasoning summary channel in stream/output */
+  supportsReasoningSummary?: boolean;
+}
+
+export interface SurfaceCapability extends SurfaceCapabilityFlags {
   supportsReasoning: boolean;
   reasoningEfforts?: ReasoningEffortLevel[];
   defaultEffort?: ReasoningEffortLevel;
@@ -73,6 +95,14 @@ export interface ResolvedModelCapability {
   features: string[];
   /** null when this surface has no mapRequest — never write reasoning fields */
   mapRequest: SurfaceCapability['mapRequest'] | null;
+  /** Extended flags for the resolved surface (fail-closed). */
+  supportsStructuredOutput: boolean;
+  supportsTools: boolean;
+  supportsVision: boolean;
+  supportsPreviousResponseId: boolean;
+  supportsStore: boolean;
+  supportsBuiltInTools: boolean;
+  supportsReasoningSummary: boolean;
   source: {
     registryMatched: boolean;
     modelsContext?: number;
@@ -91,6 +121,23 @@ export type SessionReasoningOverride = Partial<ReasoningUserPrefs>;
 export interface EffectiveReasoningPrefs {
   enabled: boolean;
   effort: ReasoningEffort;
+}
+
+/** Optional Responses multi-turn / tools / vision args (callLLM options). */
+export interface ResponsesTransportOptions {
+  /** previous_response_id for chaining (when surface supports it) */
+  previousResponseId?: string;
+  /** Explicit store override; default false for BYOK privacy */
+  store?: boolean;
+  /** OpenAI-compatible tools array (function tools or built-in shorthand) */
+  tools?: unknown[];
+  /** tool_choice when tools present */
+  toolChoice?: unknown;
+  /**
+   * Multimodal input parts for the last user turn (vision).
+   * When set, replaces string content of the last user message in Responses input.
+   */
+  visionUserParts?: Array<Record<string, unknown>>;
 }
 
 export const DEFAULT_UNKNOWN_CONTEXT_WINDOW = 32_768;

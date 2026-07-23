@@ -8,8 +8,10 @@ export type {
   ReasoningUserPrefs,
   ResolveModelCapabilityInput,
   ResolvedModelCapability,
+  ResponsesTransportOptions,
   SessionReasoningOverride,
   SurfaceCapability,
+  SurfaceCapabilityFlags,
 } from './types';
 export {
   DEFAULT_API_SURFACE,
@@ -38,7 +40,19 @@ export {
   shouldForceChatCompletionsForJsonMode,
   splitMessagesForResponses,
 } from './applyToRequest';
-export { extractResponsesOutputText, getResponsesStreamTextDelta } from './responsesParse';
+export {
+  extractResponsesId,
+  extractResponsesIdFromStreamEvent,
+  extractResponsesOutputText,
+  extractResponsesRefusal,
+  getResponsesReasoningStreamDelta,
+  getResponsesStreamTextDelta,
+  isResponsesTerminalEvent,
+} from './responsesParse';
+export {
+  applyVisionPartsToResponsesInput,
+  type ResponsesBodyExtras,
+} from './applyToRequest';
 export { readThinkingBudgetTokens } from './mappers';
 export type { ApiPathId, ApiPathOption } from './apiPaths';
 export {

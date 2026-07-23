@@ -137,6 +137,7 @@ interface SettingsPanelData {
   reasoningEffortOptions: Array<'low' | 'medium' | 'high'>;
   apiPathOptions: readonly ApiPathOption[];
   fullApiUrlPreview: string;
+  apiPathCapabilityHint: string;
   isProduction: boolean;
   localData: {
     usage: LocalDataUsage | null;
@@ -934,6 +935,38 @@ const settingsPanelBehavior: SettingsPanelPart = {
       this.llm.model || '{model}'
     );
     return fullUrl || '—';
+  },
+
+  /**
+   * When user-selected API path differs from registry preferred surface for the
+   * current model, surface a soft warning (still allowed — gateways vary).
+   */
+  get apiPathCapabilityHint(): string {
+    const model = (this.llm.model || '').trim();
+    if (!model) return '';
+    const pathId = normalizeApiPathId(this.llm.apiPath);
+    const modelsEntry =
+      this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === model) ?? model;
+    // Resolve without user path override → registry preferred surface
+    const registryCap = resolveModelCapability({
+      provider: this.llm.provider,
+      modelId: model,
+      modelsEntry,
+    });
+    if (!registryCap.source.registryMatched) {
+      if (pathId === 'responses') {
+        return '当前模型未在能力目录中：/responses 可能 404，失败时会回退 chat/completions。';
+      }
+      return '';
+    }
+    const preferred = registryCap.apiSurface;
+    if (pathId === 'responses' && preferred !== 'responses') {
+      return `目录默认路径为 ${preferred}；你选择了 /responses，网关需支持该路径。`;
+    }
+    if (pathId === 'chat_completions' && preferred === 'responses') {
+      return '该模型目录默认推荐 /responses（推理更完整）；当前为 chat/completions。';
+    }
+    return '';
   },
 
   // 🔒 P0修复: 检查是否为生产环境

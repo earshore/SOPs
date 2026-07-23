@@ -19,12 +19,12 @@ settings.llm.apiPath (用户默认)
 
 ## Surfaces / 路径
 
-| Path id              | URL 规则                                                  | 推理字段（启用时）                                      |
-| -------------------- | --------------------------------------------------------- | ------------------------------------------------------- |
-| `chat_completions`   | `{endpoint}/chat/completions`                             | OpenAI: `reasoning_effort`；Claude: `thinking`；Gemini 网关 dual fields |
-| `responses`          | `{endpoint}/responses`                                    | `reasoning: { effort }`                                 |
-| `anthropic_messages` | `{endpoint}/messages`                                     | `thinking.budget_tokens` + `anthropic-version` / `x-api-key` |
-| `gemini_generate`    | `{origin}/v1beta/models/{model}:generateContent`          | `thinkingConfig` + `x-goog-api-key`                     |
+| Path id              | URL 规则                                         | 推理字段（启用时）                                                      |
+| -------------------- | ------------------------------------------------ | ----------------------------------------------------------------------- |
+| `chat_completions`   | `{endpoint}/chat/completions`                    | OpenAI: `reasoning_effort`；Claude: `thinking`；Gemini 网关 dual fields |
+| `responses`          | `{endpoint}/responses`                           | `reasoning: { effort }`                                                 |
+| `anthropic_messages` | `{endpoint}/messages`                            | `thinking.budget_tokens` + `anthropic-version` / `x-api-key`            |
+| `gemini_generate`    | `{origin}/v1beta/models/{model}:generateContent` | `thinkingConfig` + `x-goog-api-key`                                     |
 
 关闭推理：mapper 返回 `{}`，不写字段。
 
@@ -52,12 +52,17 @@ settings.llm.apiPath (用户默认)
 
 ## 可靠性规则
 
-| 规则 | 行为 |
-| ---- | ---- |
-| jsonMode | 强制 `chat_completions` + `response_format`；Gemini 保留 generateContent + `responseMimeType` |
-| 路径 404/unsupported | 一次性回退 `chat_completions` |
-| 模型 id 别名 | `normalizeModelIdForCapability`（如 `5.6-terra` → `gpt-5.6-terra`） |
-| 推理正文隔离 | 最终 `content` 不含 reasoning 通道；Deep Chat 可折叠展示 `reasoning_content` / thinking |
+| 规则                 | 行为                                                                                                                                    |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| jsonMode             | **Responses** 且 `supportsStructuredOutput` → `text.format: { type: 'json_object' }`；否则 chat + `response_format`；Gemini → mime type |
+| 路径 404/unsupported | 一次性回退 `chat_completions`                                                                                                           |
+| 模型 id 别名         | `normalizeModelIdForCapability`（如 `5.6-terra` → `gpt-5.6-terra`）                                                                     |
+| 推理正文隔离         | 最终 `content` 不含 reasoning 通道；Deep Chat 可折叠展示                                                                                |
+| Responses store      | 默认 `store: false`（BYOK）；可选 `store: true` + `previous_response_id`                                                                |
+
+## Responses 子集 vs 官方全量
+
+详见 **`2026-07-24-responses-capability-roadmap.md`**。当前已实现文本 + 推理 + structured（text.format）+ tools/vision/previous_response_id **请求管道**；agent 循环与 built-in tools 运行时未做。
 
 ## Hydrate 范围（文档约定）
 

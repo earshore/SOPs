@@ -43,20 +43,21 @@ describe('jsonMode surface force (reliability, not always-broken)', () => {
     expect(built.body.response_format).toEqual({ type: 'json_object' });
   });
 
-  it('without force, gpt-5.5 prefers responses and omits response_format (pre-fix gap)', () => {
+  it('keeps responses + text.format when jsonMode and surface supports structured output', () => {
     const cap = resolveModelCapability({ provider: 'new_api', modelId: 'gpt-5.5' });
+    expect(cap.apiSurface).toBe('responses');
+    expect(cap.supportsStructuredOutput).toBe(true);
     const reasoning = resolveEffectiveReasoning(cap, { enabled: false, effort: 'medium' });
     const built = buildRequestBodyForSurface({
       capability: cap,
       model: 'gpt-5.5',
       messages: [{ role: 'user', content: 'x' }],
       jsonMode: true,
-      // no forceChatCompletions — capability still responses-shaped mapRequest
       stream: false,
       reasoning,
     });
-    // After shouldForceChatCompletionsForJsonMode in builder:
-    expect(built.path).toBe('/chat/completions');
-    expect(built.body.response_format).toEqual({ type: 'json_object' });
+    expect(built.path).toBe('/responses');
+    expect(built.body.text).toEqual({ format: { type: 'json_object' } });
+    expect(built.body.response_format).toBeUndefined();
   });
 });
