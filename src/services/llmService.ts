@@ -669,9 +669,17 @@ async function fetchLLMResponse(
   });
 }
 
+function isReasoningGatewayError(message: string, rawBody: string): boolean {
+  const blob = `${message}\n${rawBody}`.toLowerCase();
+  return /reasoning_effort|reasoning content|reasoning_content|thinking_effort|enable_thinking|unsupported[^\n]{0,40}reasoning|unknown[^\n]{0,40}reasoning|invalid[^\n]{0,40}reasoning/.test(
+    blob
+  );
+}
+
 function getLLMStatusError(
   status: number,
-  errorMsg: string
+  errorMsg: string,
+  errorText = ''
 ): { errorCode: string; errorMsg: string } {
   if (status === 401) {
     return {
@@ -691,6 +699,14 @@ function getLLMStatusError(
   }
 
   if (status === 400) {
+    if (isReasoningGatewayError(errorMsg, errorText)) {
+      return {
+        errorCode: 'API_INVALID_REQUEST',
+        errorMsg:
+          `${errorMsg}\n\n当前网关可能未透传推理参数（reasoning_effort）。` +
+          `可关闭推理后重试，或确认模型已在能力目录登记且网关支持该字段。`,
+      };
+    }
     return { errorCode: 'API_INVALID_REQUEST', errorMsg };
   }
 
@@ -705,7 +721,7 @@ async function createLLMResponseError(
   const errorText = await response.text();
   const fallbackErrorMsg = `服务器返回错误 ${response.status}`;
   const errorMsg = getLLMErrorMessage(errorText, fallbackErrorMsg);
-  const statusError = getLLMStatusError(response.status, errorMsg);
+  const statusError = getLLMStatusError(response.status, errorMsg, errorText);
 
   return new ApiError(statusError.errorMsg, statusError.errorCode, response.status, errorText, {
     module: 'LLMService',

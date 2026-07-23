@@ -2025,6 +2025,117 @@ describe('deep-chat playground reasoning prefs', () => {
     );
     unmount();
   });
+
+  it('re-syncs reasoning controls when the model select changes', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount } = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'o3-mini',
+        models: ['o3-mini', 'gpt-4.1'],
+      },
+    });
+
+    await mount(container);
+    const reasoningRoot = queryRequired<HTMLElement>(container, '#deep-chat-reasoning-controls');
+    expect(reasoningRoot.hidden).toBe(false);
+
+    const modelSelect = queryRequired<HTMLSelectElement>(container, '#deep-chat-model-select');
+    modelSelect.value = 'gpt-4.1';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(reasoningRoot.hidden).toBe(true);
+
+    modelSelect.value = 'o3-mini';
+    modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(reasoningRoot.hidden).toBe(false);
+
+    unmount();
+  });
+
+  it('forces reasoning off for unsupported models even if thread override was on', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'gpt-4.1',
+        models: ['gpt-4.1'],
+        reasoningPrefs: { enabled: true, effort: 'high' },
+      },
+    });
+
+    await mount(container);
+    expect(queryRequired<HTMLElement>(container, '#deep-chat-reasoning-controls').hidden).toBe(
+      true
+    );
+
+    const chat = getChat(container);
+    const onClose = vi.fn();
+    chat.connect?.handler(
+      { messages: [{ role: 'user', text: 'No reasoning fields please' }] },
+      { onResponse: vi.fn(), onClose }
+    );
+
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    const options = mocks.callLLM.mock.calls[0]?.[5] as {
+      reasoningSessionOverride?: { enabled?: boolean; effort?: string };
+    };
+    expect(options.reasoningSessionOverride).toEqual({ enabled: false });
+
+    unmount();
+  });
+
+  it('clears session reasoning override on reset tuning', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount, mocks } = await importDeepChat({
+      config: {
+        provider: 'openai',
+        endpoint: 'https://llm-proxy.example/v1',
+        apiKey: 'test-key',
+        model: 'o3-mini',
+        models: ['o3-mini'],
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      },
+    });
+
+    await mount(container);
+    const enabled = queryRequired<HTMLInputElement>(container, '#deep-chat-reasoning-enabled');
+    enabled.checked = true;
+    enabled.dispatchEvent(new Event('change', { bubbles: true }));
+
+    queryRequired<HTMLButtonElement>(container, '#deep-chat-reset-tuning').click();
+    expect(enabled.checked).toBe(false);
+
+    const chat = getChat(container);
+    const onClose = vi.fn();
+    chat.connect?.handler(
+      { messages: [{ role: 'user', text: 'After reset' }] },
+      { onResponse: vi.fn(), onClose }
+    );
+
+    await vi.waitFor(() => {
+      expect(mocks.callLLM).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    const options = mocks.callLLM.mock.calls[0]?.[5] as {
+      reasoningSessionOverride?: { enabled?: boolean; effort?: string };
+    };
+    // Controls visible; live DOM after reset is unchecked → session override enabled:false
+    expect(options.reasoningSessionOverride?.enabled).toBe(false);
+
+    unmount();
+  });
 });
 
 describe('deep-chat playground successful requests', () => {

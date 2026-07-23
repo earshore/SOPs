@@ -51,6 +51,22 @@ describe('applyReasoningToRequestBody', () => {
     expect(body.temperature).toBeUndefined();
     expect(body.reasoning_effort).toBe('low');
   });
+
+  it('keeps temperature when temperatureIgnored is false even if reasoning is off', () => {
+    const body = applyReasoningToRequestBody(
+      { model: 'm', messages: [] },
+      {
+        temperatureIgnored: false,
+        mapRequest: ({ enabled, effort }) =>
+          enabled && effort !== 'off' ? { reasoning_effort: effort } : {},
+        supportsReasoning: true,
+      },
+      { enabled: false, effort: 'off' },
+      { temperature: 0.5 }
+    );
+    expect(body.temperature).toBe(0.5);
+    expect(body.reasoning_effort).toBeUndefined();
+  });
 });
 
 describe('buildChatCompletionsBody', () => {

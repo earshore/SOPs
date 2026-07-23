@@ -7,6 +7,9 @@
  * - Field names: OpenAI-compatible `reasoning_effort` (live-probed on project new-api 2026-07-23).
  * - Off: omit fields (mapper returns {}).
  * - Stream: gateway emits `delta.reasoning_content` (isolated from final content in llmService).
+ *
+ * Important: clients only send `reasoning_effort` when product prefs.enabled === true.
+ * Default prefs are enabled:false — gateway logs will NOT show the field until the user enables reasoning.
  */
 
 import type { ModelCapabilityRule, ReasoningEffort } from './types';
@@ -22,14 +25,19 @@ export function mapOpenAiReasoningEffort(prefs: {
   return { reasoning_effort: prefs.effort };
 }
 
-function openAiReasoningRule(modelPattern: string, contextWindow: number): ModelCapabilityRule {
+function openAiReasoningRule(
+  modelPattern: string,
+  contextWindow: number,
+  options?: { temperatureIgnored?: boolean }
+): ModelCapabilityRule {
   return {
     modelPattern,
     contextWindow,
     supportsReasoning: true,
     reasoningEfforts: ['low', 'medium', 'high'],
     defaultEffort: 'medium',
-    temperatureIgnored: true,
+    // o-series typically ignore temperature; chat-style reasoning models should not.
+    temperatureIgnored: options?.temperatureIgnored ?? true,
     features: ['reasoning'],
     mapRequest: mapOpenAiReasoningEffort,
   };
@@ -57,11 +65,11 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   openAiReasoningRule('o1-mini-*', 128_000),
   openAiReasoningRule('o3-mini-*', 200_000),
 
-  // Gateway-verified (2026-07-23 new.hongecb.store)
-  openAiReasoningRule('deepseek-v4-flash', 128_000),
-  openAiReasoningRule('deepseek-v4-flash-*', 128_000),
-  openAiReasoningRule('grok-4.5', 256_000),
-  openAiReasoningRule('grok-4.5-*', 256_000),
+  // Gateway-verified chat-style reasoning models (keep temperature)
+  openAiReasoningRule('deepseek-v4-flash', 128_000, { temperatureIgnored: false }),
+  openAiReasoningRule('deepseek-v4-flash-*', 128_000, { temperatureIgnored: false }),
+  openAiReasoningRule('grok-4.5', 256_000, { temperatureIgnored: false }),
+  openAiReasoningRule('grok-4.5-*', 256_000, { temperatureIgnored: false }),
 
   // Known reasoning labels without catalog presence / live mapRequest on this gateway yet
   {

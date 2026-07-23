@@ -40,15 +40,24 @@ describe('MODEL_CAPABILITY_RULES allowlist', () => {
       getModelCapabilityRules()
     );
     expect(shouldShowReasoningControls(deepseekFlash)).toBe(true);
+    expect(deepseekFlash.temperatureIgnored).toBe(false);
     expect(deepseekFlash.mapRequest?.({ enabled: true, effort: 'low' })).toEqual({
       reasoning_effort: 'low',
     });
+    expect(deepseekFlash.mapRequest?.({ enabled: false, effort: 'high' })).toEqual({});
 
     const grok = resolveModelCapability(
       { provider: 'new_api', modelId: 'grok-4.5' },
       getModelCapabilityRules()
     );
     expect(shouldShowReasoningControls(grok)).toBe(true);
+    expect(grok.temperatureIgnored).toBe(false);
+
+    const o1 = resolveModelCapability(
+      { provider: 'new_api', modelId: 'o1-mini' },
+      getModelCapabilityRules()
+    );
+    expect(o1.temperatureIgnored).toBe(true);
 
     const unknown = resolveModelCapability(
       { provider: 'new_api', modelId: 'gpt-4o' },

@@ -4,6 +4,18 @@
 **Status:** Verified (live probe against project new-api; key-scoped model catalog)  
 **Gateway target:** OpenAI-compatible `POST {endpoint}/chat/completions` (SOPs default: `https://new.hongecb.store/v1`)
 
+## Why gateway logs may show no reasoning intensity
+
+Product default is **`reasoningPrefs.enabled: false`**. The mapper returns `{}` when off, so the HTTP body **does not include** `reasoning_effort` at all. That is intentional (fail-closed / no blind fields), not a missing implementation.
+
+To see the field on the gateway:
+
+1. Model id must match allowlist with `mapRequest` (e.g. `deepseek-v4-flash`, `grok-4.5`, `o3-mini`).
+2. User must **enable** reasoning (settings global + Save, or Deep Chat session checkbox).
+3. Inspect request JSON for top-level `"reasoning_effort":"low"|"medium"|"high"`.
+
+If the model is not allowlisted, or the checkbox is off, logs will never show intensity — correctly.
+
 ## Policy
 
 | Rule                                    | Behavior                                                                                                  |

@@ -160,6 +160,12 @@ export const LLMProviderConfigSchema = z.object({
     )
     .optional(),
   serviceTier: z.enum(['auto', 'default', 'flex', 'priority']).optional(),
+  reasoningPrefs: z
+    .object({
+      enabled: z.boolean(),
+      effort: z.enum(['low', 'medium', 'high']),
+    })
+    .optional(),
   enabled: z.boolean(),
 });
 

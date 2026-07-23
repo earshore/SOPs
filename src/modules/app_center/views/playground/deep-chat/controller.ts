@@ -339,10 +339,12 @@ async function refreshLLMConfig(
     '';
 
   if (!modelSelect) {
+    syncDeepChatReasoningControlsFromThread(container);
     return;
   }
 
   renderLLMConfigState(modelSelect);
+  syncDeepChatReasoningControlsFromThread(container);
 }
 
 function renderLLMConfigState(modelSelect: HTMLSelectElement): void {
@@ -1248,6 +1250,8 @@ function bindModelControls(refs: ModelControlRefs): void {
 
   const onModelChange = (): void => {
     selectedModel = modelSelect?.value || selectedModel;
+    // Capability-gated controls must re-evaluate when the model changes.
+    syncDeepChatReasoningControlsFromThread(container);
   };
   modelSelect?.addEventListener('change', onModelChange);
   cleanupCallbacks.push(() => modelSelect?.removeEventListener('change', onModelChange));
@@ -1760,6 +1764,71 @@ function parseReasoningEffortValue(value: string | undefined): 'low' | 'medium' 
   return value === 'low' || value === 'medium' || value === 'high' ? value : 'medium';
 }
 
+type DeepChatReasoningSessionOverride = {
+  enabled: boolean;
+  effort?: 'low' | 'medium' | 'high';
+};
+
+function readLiveReasoningOverrideFromDom(
+  container: HTMLElement
+): DeepChatReasoningSessionOverride | null {
+  const root = container.querySelector<HTMLElement>('#deep-chat-reasoning-controls');
+  const enabledEl = container.querySelector<HTMLInputElement>('#deep-chat-reasoning-enabled');
+  const effortEl = container.querySelector<HTMLSelectElement>('#deep-chat-reasoning-effort');
+  if (!root || root.hidden || !enabledEl) {
+    return null;
+  }
+  return {
+    enabled: Boolean(enabledEl.checked),
+    effort: parseReasoningEffortValue(effortEl?.value),
+  };
+}
+
+function readStoredReasoningOverride(): DeepChatReasoningSessionOverride | undefined {
+  const stored = getActiveThread().reasoning;
+  if (!stored) {
+    return undefined;
+  }
+  return {
+    enabled: Boolean(stored.enabled),
+    ...(stored.effort ? { effort: parseReasoningEffortValue(stored.effort) } : {}),
+  };
+}
+
+/**
+ * Session override for the next request.
+ * When reasoning controls are visible, read live DOM (WYSIWYG) so enabling in the UI
+ * always maps to request fields even if thread.reasoning lagged behind the checkbox state.
+ * When controls are hidden, force enabled:false so no reasoning fields are sent.
+ */
+function resolveDeepChatReasoningSessionOverride(
+  container: HTMLElement | null
+): DeepChatReasoningSessionOverride | undefined {
+  const config = currentConfig;
+  const model = selectedModel || config?.model || '';
+  if (!config || !model) {
+    return undefined;
+  }
+
+  const cap = resolveModelCapability({
+    provider: config.provider,
+    modelId: model,
+    modelsEntry: findConfigModelsEntry(config, model),
+  });
+  if (!shouldShowReasoningControls(cap)) {
+    return { enabled: false };
+  }
+
+  if (container) {
+    const live = readLiveReasoningOverrideFromDom(container);
+    if (live) {
+      return live;
+    }
+  }
+
+  return readStoredReasoningOverride();
+}
+
 function bindReasoningTuningControls(container: HTMLElement): void {
   const reasoningEnabled = container.querySelector<HTMLInputElement>(
     '#deep-chat-reasoning-enabled'
@@ -1773,14 +1842,20 @@ function bindReasoningTuningControls(container: HTMLElement): void {
     }
     const prev = getActiveThread().reasoning || {};
     updateActiveThreadFields(container, {
-      reasoning: { ...prev, enabled },
+      reasoning: {
+        ...prev,
+        enabled,
+        effort: parseReasoningEffortValue(reasoningEffort?.value ?? prev.effort),
+      },
     });
   };
   const onReasoningEffortChange = (): void => {
     const effort = parseReasoningEffortValue(reasoningEffort?.value);
     const prev = getActiveThread().reasoning || {};
+    const enabled =
+      prev.enabled !== undefined ? Boolean(prev.enabled) : Boolean(reasoningEnabled?.checked);
     updateActiveThreadFields(container, {
-      reasoning: { ...prev, effort },
+      reasoning: { ...prev, enabled, effort },
     });
   };
   reasoningEnabled?.addEventListener('change', onReasoningEnabledChange);
@@ -2272,7 +2347,17 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
   const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
   let streamedText = '';
   // Global reasoningPrefs + modelsEntry hydrate inside callLLM from StorageService.
-  // Only pass session override here.
+  // Session override: live DOM when controls are visible (WYSIWYG), else thread/global.
+  const mountContainer = getMountedRenderContainer();
+  const reasoningSessionOverride = resolveDeepChatReasoningSessionOverride(mountContainer);
+  if (reasoningSessionOverride && mountContainer) {
+    updateActiveThreadFields(mountContainer, {
+      reasoning: {
+        enabled: reasoningSessionOverride.enabled,
+        ...(reasoningSessionOverride.effort ? { effort: reasoningSessionOverride.effort } : {}),
+      },
+    });
+  }
   const finalText = await callLLM(
     messages,
     config.provider,
@@ -2283,7 +2368,7 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
       temperature: sessionTemperature,
       maxTokens: getDeepChatRequestBudgetDefaults().maxOutputTokens,
       ...(config.serviceTier && { serviceTier: config.serviceTier }),
-      reasoningSessionOverride: getActiveThread().reasoning,
+      reasoningSessionOverride,
       modelsEntry: findConfigModelsEntry(config, model),
       retries: 0,
       ...getRuntimeDeepChatOptions(),
