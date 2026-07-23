@@ -73,6 +73,14 @@ export interface DeepChatThread {
   systemPrompt?: string;
   /** 会话级 temperature，默认 0.3 */
   temperature?: number;
+  /**
+   * 会话级推理偏好覆盖（缺省字段继承系统设置全局默认）。
+   * 仅当模型 capability 支持且有 mapRequest 时生效。
+   */
+  reasoning?: {
+    enabled?: boolean;
+    effort?: 'low' | 'medium' | 'high';
+  };
   customTitle?: string;
   pinnedAt?: number;
   /** 后台完成回复后的未读标记（切回会话时清除） */

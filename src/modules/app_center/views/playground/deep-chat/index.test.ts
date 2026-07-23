@@ -296,6 +296,12 @@ function createDeepChatStorageService(options: ImportOptions) {
     getLLMConfigWithKey: vi.fn(async () =>
       options.config === undefined ? defaultConfig : options.config
     ),
+    getLLMConfig: vi.fn(() => {
+      const config = options.config === undefined ? defaultConfig : options.config;
+      if (!config) return null;
+      const { apiKey: _apiKey, ...rest } = config as { apiKey?: string };
+      return rest;
+    }),
     remove: vi.fn(),
   };
 }

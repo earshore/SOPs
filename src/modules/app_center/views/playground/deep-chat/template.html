@@ -182,6 +182,25 @@
                   value="0.3"
                 />
               </label>
+              <div
+                id="deep-chat-reasoning-controls"
+                class="deep-chat-field deep-chat-field-reasoning"
+                hidden
+              >
+                <span class="deep-chat-reasoning-label">推理（本会话）</span>
+                <label class="deep-chat-reasoning-toggle" for="deep-chat-reasoning-enabled">
+                  <input id="deep-chat-reasoning-enabled" type="checkbox" />
+                  <span>启用推理</span>
+                </label>
+                <label class="deep-chat-reasoning-effort-wrap" for="deep-chat-reasoning-effort">
+                  <span>思考强度</span>
+                  <select id="deep-chat-reasoning-effort" aria-label="思考强度">
+                    <option value="low">low</option>
+                    <option value="medium" selected>medium</option>
+                    <option value="high">high</option>
+                  </select>
+                </label>
+              </div>
               <button id="deep-chat-reset-tuning" class="deep-chat-reset-tuning" type="button">
                 重置参数
               </button>
