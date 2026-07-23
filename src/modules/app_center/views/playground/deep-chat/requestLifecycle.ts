@@ -8,12 +8,18 @@ export interface PendingDeepChatRequest {
   assistantText: string;
   /** Display-only reasoning channel (not part of assistantText / next-turn context). */
   reasoningText: string;
+  /** Streaming UI: 深度思考 expanded */
+  reasoningUiExpanded?: boolean;
+  /** Streaming typewriter cursor into reasoningText */
+  reasoningDisplayedLength?: number;
   displayedAssistantText: string;
   startedAt: number;
   updatedAt: number;
   controller: AbortController;
   abortReason?: DeepChatPendingAbortReason;
   isSettled?: boolean;
+  /** Wall-clock settle time (ms) for 「已完成 Xs」 */
+  settledAt?: number;
   /** 最近一次 partial 落盘时的 assistantText 长度 */
   lastPersistedAssistantLength?: number;
   /** 最近一次 partial 落盘时间戳 */
@@ -80,7 +86,18 @@ export function markPendingDeepChatRequestSettled(
   now = Date.now()
 ): void {
   pendingRequest.isSettled = true;
+  pendingRequest.settledAt = now;
   pendingRequest.updatedAt = now;
+  // Collapse 深度思考 into 「已完成 Xs」 after the formal reply settles.
+  pendingRequest.reasoningUiExpanded = false;
+}
+
+export function getPendingReasoningDurationSec(
+  pendingRequest: Pick<PendingDeepChatRequest, 'startedAt' | 'settledAt' | 'updatedAt'>,
+  now = Date.now()
+): number {
+  const end = pendingRequest.settledAt ?? now;
+  return Math.max(0, Math.round((end - pendingRequest.startedAt) / 1000));
 }
 
 export function isPendingDeepChatDisplayComplete(pendingRequest: PendingDeepChatRequest): boolean {

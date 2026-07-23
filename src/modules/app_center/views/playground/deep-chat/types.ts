@@ -161,6 +161,8 @@ export interface SaveThreadMessagesOptions {
   assistantStatus?: DeepChatMessageStatus;
   /** Display-only reasoning channel for the assistant message */
   assistantReasoning?: string;
+  /** Whole seconds for settled 「已完成 Xs」 */
+  assistantReasoningDurationSec?: number;
   /** partial 落盘时跳过列表重绘，避免流式过程中 UI 抖动 */
   skipUiRefresh?: boolean;
 }

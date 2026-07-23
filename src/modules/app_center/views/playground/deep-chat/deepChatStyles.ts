@@ -23,108 +23,160 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     margin-bottom: 26px !important;
   }
 
-  /* 生成中：隐藏原生三点，改用气泡前 inline status（正式回复上方） */
+  /* 生成中：隐藏原生三点；chrome 在正式回复气泡前 */
   :host(.is-pending-generation) .deep-chat-loading-message-dots-container {
     display: none !important;
   }
 
+  .deep-chat-generation-chrome {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
+    max-width: min(100%, 42rem) !important;
+    margin: 0 0 0.45rem !important;
+    border: none !important;
+    background: transparent !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 正在生成回复…：无边框，位于深度思考下方 */
   .deep-chat-inline-pending-status {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 0.4rem !important;
     max-width: 100% !important;
-    margin-top: 0.5rem !important;
-    padding: 0.28rem 0.7rem !important;
-    border: 1px solid rgba(168, 95, 63, 0.22) !important;
-    border-radius: 999px !important;
-    background: linear-gradient(180deg, #ffffff 0%, #faf3ee 100%) !important;
-    color: #6f3925 !important;
+    margin: 0 !important;
+    padding: 0.1rem 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #64748b !important;
     font-family: inherit !important;
     font-size: 12px !important;
-    font-weight: 600 !important;
-    line-height: 1.35 !important;
-    box-shadow: 0 1px 2px rgba(168, 95, 63, 0.08) !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
     user-select: none !important;
-  }
-
-  .deep-chat-inline-pending-dot {
-    width: 7px !important;
-    height: 7px !important;
-    flex: 0 0 7px !important;
-    border-radius: 999px !important;
-    background: #a85f3f !important;
-    box-shadow: 0 0 0 4px rgba(168, 95, 63, 0.14) !important;
-    animation: deep-chat-inline-pending-pulse 1s ease-in-out infinite !important;
-  }
-
-  @keyframes deep-chat-inline-pending-pulse {
-    0%,
-    100% {
-      opacity: 0.45;
-      transform: scale(0.86);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1);
-    }
   }
 
   .deep-chat-inline-pending-text {
     min-width: 0 !important;
   }
 
-  /* 思考过程：在「正在生成回复…」下方、正式回复气泡之前 */
-  .deep-chat-inline-reasoning {
-    display: block !important;
-    width: 100% !important;
-    max-width: min(100%, 42rem) !important;
-    margin: 0.4rem 0 0.55rem !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    border-radius: 0.75rem !important;
-    background: rgba(248, 250, 252, 0.98) !important;
-    color: #475569 !important;
-    box-sizing: border-box !important;
-  }
-
-  .deep-chat-inline-reasoning-summary {
+  .deep-chat-dt-stream,
+  .deep-chat-dt-settled {
     display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .deep-chat-dt-toggle,
+  .deep-chat-dt-done-toggle {
+    display: inline-flex !important;
     align-items: center !important;
-    gap: 0.4rem !important;
-    padding: 0.4rem 0.65rem !important;
-    cursor: pointer !important;
-    list-style: none !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    color: #475569 !important;
-    user-select: none !important;
-  }
-
-  .deep-chat-inline-reasoning-summary::-webkit-details-marker {
-    display: none !important;
-  }
-
-  .deep-chat-inline-reasoning-summary i {
-    color: #7c3aed !important;
-    font-size: 0.65rem !important;
-  }
-
-  .deep-chat-inline-reasoning-hint {
-    margin-left: auto !important;
-    font-weight: 500 !important;
-    color: #94a3b8 !important;
-  }
-
-  .deep-chat-inline-reasoning-body {
+    gap: 0.45rem !important;
+    min-height: 32px !important;
     margin: 0 !important;
-    max-height: 10rem !important;
-    overflow: auto !important;
-    padding: 0 0.65rem 0.55rem !important;
+    padding: 0.15rem 0.1rem !important;
+    border: none !important;
+    border-radius: 0.35rem !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #475569 !important;
+    font-family: inherit !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    transition: color 160ms ease, background-color 160ms ease !important;
+  }
+
+  .deep-chat-dt-toggle:hover,
+  .deep-chat-dt-done-toggle:hover {
+    color: #334155 !important;
+    background: rgba(148, 163, 184, 0.08) !important;
+  }
+
+  .deep-chat-dt-toggle:focus-visible,
+  .deep-chat-dt-done-toggle:focus-visible {
+    outline: 2px solid rgba(124, 58, 237, 0.45) !important;
+    outline-offset: 2px !important;
+  }
+
+  .deep-chat-dt-label,
+  .deep-chat-dt-done-label {
+    min-width: 0 !important;
+  }
+
+  /* Hover 显示右侧 >；展开后保持可见并朝下 */
+  .deep-chat-dt-chevron {
+    margin-left: 0.15rem !important;
+    font-size: 10px !important;
+    color: #94a3b8 !important;
+    opacity: 0 !important;
+    transform: rotate(0deg) !important;
+    transition: opacity 160ms ease, transform 200ms ease, color 160ms ease !important;
+  }
+
+  .deep-chat-dt-toggle:hover .deep-chat-dt-chevron,
+  .deep-chat-dt-done-toggle:hover .deep-chat-dt-chevron,
+  .deep-chat-dt-toggle.is-expanded .deep-chat-dt-chevron,
+  .deep-chat-dt-done-toggle.is-expanded .deep-chat-dt-chevron,
+  .deep-chat-dt-toggle[aria-expanded='true'] .deep-chat-dt-chevron,
+  .deep-chat-dt-done-toggle[aria-expanded='true'] .deep-chat-dt-chevron {
+    opacity: 1 !important;
+  }
+
+  .deep-chat-dt-toggle.is-expanded .deep-chat-dt-chevron,
+  .deep-chat-dt-done-toggle.is-expanded .deep-chat-dt-chevron,
+  .deep-chat-dt-toggle[aria-expanded='true'] .deep-chat-dt-chevron,
+  .deep-chat-dt-done-toggle[aria-expanded='true'] .deep-chat-dt-chevron {
+    transform: rotate(90deg) !important;
+    color: #64748b !important;
+  }
+
+  .deep-chat-dt-done-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.2rem !important;
+    width: 100% !important;
+    padding-left: 0.15rem !important;
+  }
+
+  .deep-chat-dt-body {
+    width: 100% !important;
+    margin: 0.15rem 0 0.1rem !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .deep-chat-dt-text {
+    margin: 0 !important;
+    max-height: 12.5rem !important; /* ~200px：超出后滚动 */
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    padding: 0.15rem 0.1rem 0.25rem !important;
+    border: none !important;
+    background: transparent !important;
     white-space: pre-wrap !important;
     word-break: break-word !important;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
     font-size: 11px !important;
-    line-height: 1.45 !important;
-    color: #475569 !important;
+    line-height: 1.5 !important;
+    color: #64748b !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .deep-chat-dt-chevron,
+    .deep-chat-dt-toggle,
+    .deep-chat-dt-done-toggle {
+      transition-duration: 0.01ms !important;
+    }
   }
 
   .inner-message-container {

@@ -14,6 +14,8 @@ export interface DeepChatMessage {
    * Never used as next-turn chat content.
    */
   reasoning?: string;
+  /** Generation wall time in whole seconds (for 「已完成 Xs」). */
+  reasoningDurationSec?: number;
   createdAt?: number;
   status?: DeepChatMessageStatus;
 }
@@ -24,6 +26,8 @@ export interface BuildStoredThreadMessagesOptions {
   assistantStatus?: DeepChatMessageStatus;
   /** Display-only reasoning channel for the new assistant message */
   assistantReasoning?: string;
+  /** Whole seconds from request start to settle (「已完成 Xs」). */
+  assistantReasoningDurationSec?: number;
   maxMessages?: number;
   maxMessageChars?: number;
 }
@@ -106,6 +110,7 @@ export function buildStoredThreadMessages(
   const trimmedAssistantText = assistantText.trim();
   if (trimmedAssistantText) {
     const reasoning = options.assistantReasoning?.trim();
+    const durationSec = options.assistantReasoningDurationSec;
     storedMessages.push({
       role: 'ai',
       text: truncateStoredMessage(trimmedAssistantText, options.maxMessageChars),
@@ -113,6 +118,9 @@ export function buildStoredThreadMessages(
       status: options.assistantStatus,
       ...(reasoning
         ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) }
+        : {}),
+      ...(typeof durationSec === 'number' && Number.isFinite(durationSec) && durationSec >= 0
+        ? { reasoningDurationSec: Math.max(0, Math.round(durationSec)) }
         : {}),
     });
   }
@@ -142,6 +150,13 @@ export function getDeepChatMessageText(message: DeepChatMessage): string {
   return typeof content === 'string' ? content.trim() : '';
 }
 
+function normalizeReasoningDurationSec(value: unknown): number | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    return undefined;
+  }
+  return Math.max(0, Math.round(value));
+}
+
 function normalizeStoredMessage(
   message: DeepChatMessage,
   options: Required<Pick<NormalizeStoredThreadMessagesOptions, 'fallbackCreatedAt'>> &
@@ -153,14 +168,16 @@ function normalizeStoredMessage(
   }
 
   const reasoning = typeof message.reasoning === 'string' ? message.reasoning.trim() : '';
+  const durationSec = normalizeReasoningDurationSec(message.reasoningDurationSec);
+  const status =
+    message.status === 'stopped' || message.status === 'partial' ? message.status : undefined;
   return {
     role: message.role === 'user' ? 'user' : 'ai',
     text,
     createdAt: getFiniteTimestamp(message.createdAt, options.fallbackCreatedAt),
     ...(reasoning ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) } : {}),
-    ...((message.status === 'stopped' || message.status === 'partial') && {
-      status: message.status,
-    }),
+    ...(durationSec !== undefined ? { reasoningDurationSec: durationSec } : {}),
+    ...(status ? { status } : {}),
   };
 }
 
