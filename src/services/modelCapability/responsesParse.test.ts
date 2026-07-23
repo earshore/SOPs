@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   extractResponsesId,
   extractResponsesOutputText,
+  extractResponsesReasoningSummary,
   extractResponsesRefusal,
   getResponsesReasoningStreamDelta,
   getResponsesStreamTextDelta,
+  harvestResponsesReasoningIncrement,
   isResponsesTerminalEvent,
 } from './responsesParse';
 
@@ -16,7 +18,10 @@ describe('responsesParse', () => {
         output: [
           {
             type: 'message',
-            content: [{ type: 'output_text', text: 'a' }, { type: 'output_text', text: 'b' }],
+            content: [
+              { type: 'output_text', text: 'a' },
+              { type: 'output_text', text: 'b' },
+            ],
           },
         ],
       })
@@ -50,5 +55,42 @@ describe('responsesParse', () => {
   it('detects terminal events and response id', () => {
     expect(isResponsesTerminalEvent({ type: 'response.completed' })).toBe(true);
     expect(extractResponsesId({ id: 'resp_abc' })).toBe('resp_abc');
+  });
+
+  it('extracts reasoning summary from completed output items', () => {
+    expect(
+      extractResponsesReasoningSummary({
+        output: [
+          {
+            type: 'reasoning',
+            summary: [
+              { type: 'summary_text', text: 'step one. ' },
+              { type: 'summary_text', text: 'step two.' },
+            ],
+          },
+          {
+            type: 'message',
+            content: [{ type: 'output_text', text: 'answer' }],
+          },
+        ],
+      })
+    ).toBe('step one. step two.');
+  });
+
+  it('harvests incremental reasoning from completed stream events', () => {
+    const completed = {
+      type: 'response.completed',
+      response: {
+        output: [
+          {
+            type: 'reasoning',
+            summary: [{ type: 'summary_text', text: 'plan A then B' }],
+          },
+        ],
+      },
+    };
+    expect(harvestResponsesReasoningIncrement(completed, '')).toBe('plan A then B');
+    expect(harvestResponsesReasoningIncrement(completed, 'plan A then B')).toBe('');
+    expect(harvestResponsesReasoningIncrement(completed, 'plan A')).toBe(' then B');
   });
 });

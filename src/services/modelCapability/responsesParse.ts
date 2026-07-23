@@ -15,10 +15,7 @@ function collectOutputTextFromMessageItem(item: Record<string, unknown>): string
   for (const block of content) {
     if (!block || typeof block !== 'object') continue;
     const b = block as Record<string, unknown>;
-    if (
-      (b.type === 'output_text' || b.type === 'text') &&
-      typeof b.text === 'string'
-    ) {
+    if ((b.type === 'output_text' || b.type === 'text') && typeof b.text === 'string') {
       parts.push(b.text);
     }
   }
@@ -78,7 +75,9 @@ export function extractResponsesOutputText(
 }
 
 /** Response id for previous_response_id chaining. */
-export function extractResponsesId(data: Record<string, unknown> | null | undefined): string | undefined {
+export function extractResponsesId(
+  data: Record<string, unknown> | null | undefined
+): string | undefined {
   if (!data || typeof data !== 'object') return undefined;
   return typeof data.id === 'string' && data.id.trim() ? data.id.trim() : undefined;
 }
@@ -119,20 +118,108 @@ export function getResponsesStreamTextDelta(payload: Record<string, unknown>): s
   return readDeltaTextPayload(payload.delta);
 }
 
+function readReasoningDeltaField(delta: unknown): string {
+  if (typeof delta === 'string') return delta;
+  if (!delta || typeof delta !== 'object') return '';
+  const obj = delta as { text?: unknown; content?: unknown };
+  if (typeof obj.text === 'string') return obj.text;
+  if (typeof obj.content === 'string') return obj.content;
+  return '';
+}
+
 /** Reasoning summary stream deltas (display-only). */
 export function getResponsesReasoningStreamDelta(payload: Record<string, unknown>): string {
   const type = typeof payload.type === 'string' ? payload.type : '';
   if (
     type === 'response.reasoning_summary_text.delta' ||
     type === 'response.reasoning_summary_part.delta' ||
+    type === 'response.reasoning_text.delta' ||
     type.endsWith('reasoning_summary_text.delta') ||
+    type.endsWith('reasoning_summary_part.delta') ||
+    type.endsWith('reasoning_text.delta') ||
     type.endsWith('reasoning.delta')
   ) {
-    if (typeof payload.delta === 'string') return payload.delta;
-    const deltaObj = payload.delta as { text?: unknown } | undefined;
-    if (deltaObj && typeof deltaObj.text === 'string') return deltaObj.text;
+    return readReasoningDeltaField(payload.delta);
   }
   return '';
+}
+
+function collectReasoningCandidatesFromEvent(payload: Record<string, unknown>): string[] {
+  const candidates: string[] = [];
+  const nested = payload.response;
+  if (nested && typeof nested === 'object') {
+    candidates.push(extractResponsesReasoningSummary(nested as Record<string, unknown>));
+  }
+  candidates.push(extractResponsesReasoningSummary(payload));
+  const item = payload.item;
+  if (item && typeof item === 'object') {
+    candidates.push(readReasoningItemText(item as Record<string, unknown>).join(''));
+  }
+  return candidates.filter(Boolean);
+}
+
+function suffixNotAlreadyHave(best: string, alreadyHave: string): string {
+  if (!alreadyHave) return best;
+  if (best.startsWith(alreadyHave)) return best.slice(alreadyHave.length);
+  if (alreadyHave.includes(best)) return '';
+  if (best.length > alreadyHave.length) return best.slice(alreadyHave.length);
+  return '';
+}
+
+/**
+ * Incremental reasoning text from non-delta stream events
+ * (response.completed, output_item.done with reasoning item, etc.).
+ * Returns only the suffix not already present in `alreadyHave`.
+ */
+export function harvestResponsesReasoningIncrement(
+  payload: Record<string, unknown>,
+  alreadyHave = ''
+): string {
+  const best = collectReasoningCandidatesFromEvent(payload).reduce(
+    (a, b) => (b.length > a.length ? b : a),
+    ''
+  );
+  return best ? suffixNotAlreadyHave(best, alreadyHave) : '';
+}
+
+function readSummaryTextBlocks(summary: unknown): string[] {
+  if (!Array.isArray(summary)) return [];
+  const parts: string[] = [];
+  for (const block of summary) {
+    if (!block || typeof block !== 'object') continue;
+    const text = (block as { text?: unknown }).text;
+    if (typeof text === 'string' && text) parts.push(text);
+  }
+  return parts;
+}
+
+function readReasoningItemText(item: Record<string, unknown>): string[] {
+  if (item.type !== 'reasoning') return [];
+  const parts = readSummaryTextBlocks(item.summary);
+  // Some gateways put plain text on the reasoning item
+  if (typeof item.content === 'string' && item.content.trim()) {
+    parts.push(item.content);
+  }
+  return parts;
+}
+
+/**
+ * Collect reasoning summary text from a completed Responses payload (non-stream).
+ * Shape: output[] items type=reasoning with summary[] { type: summary_text, text }.
+ */
+export function extractResponsesReasoningSummary(
+  data: Record<string, unknown> | null | undefined
+): string {
+  if (!data || typeof data !== 'object' || !Array.isArray(data.output)) {
+    return '';
+  }
+  const parts: string[] = [];
+  for (const item of data.output) {
+    if (item && typeof item === 'object') {
+      parts.push(...readReasoningItemText(item as Record<string, unknown>));
+    }
+  }
+  return parts.join('');
 }
 
 /** response.completed / response.failed terminal events */

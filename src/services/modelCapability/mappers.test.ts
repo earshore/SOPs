@@ -15,9 +15,9 @@ describe('multi-protocol mappers', () => {
     });
   });
 
-  it('responses reasoning object', () => {
+  it('responses reasoning object requests summary channel for UI', () => {
     expect(mapResponsesReasoning({ enabled: true, effort: 'low' })).toEqual({
-      reasoning: { effort: 'low' },
+      reasoning: { effort: 'low', summary: 'auto' },
     });
     expect(mapResponsesReasoning({ enabled: false, effort: 'high' })).toEqual({});
   });

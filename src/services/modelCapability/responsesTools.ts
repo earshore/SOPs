@@ -28,8 +28,7 @@ export type ResponsesBuiltInToolType = (typeof RESPONSES_BUILTIN_TOOL_TYPES)[num
 
 export function isResponsesBuiltInToolType(type: unknown): type is ResponsesBuiltInToolType {
   return (
-    typeof type === 'string' &&
-    (RESPONSES_BUILTIN_TOOL_TYPES as readonly string[]).includes(type)
+    typeof type === 'string' && (RESPONSES_BUILTIN_TOOL_TYPES as readonly string[]).includes(type)
   );
 }
 

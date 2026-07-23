@@ -17,7 +17,8 @@ export function mapOpenAiReasoningEffort(prefs: {
 
 /**
  * OpenAI Responses API reasoning control.
- * Gateway probe (new-api): `{ reasoning: { effort } }` accepted with 200.
+ * `summary: 'auto'` is required for reasoning_summary_text stream/output (深度思考 UI).
+ * Without it, many gateways run internal reasoning but never emit a summary channel.
  */
 export function mapResponsesReasoning(prefs: {
   enabled: boolean;
@@ -26,7 +27,12 @@ export function mapResponsesReasoning(prefs: {
   if (!prefs.enabled || prefs.effort === 'off') {
     return {};
   }
-  return { reasoning: { effort: prefs.effort } };
+  return {
+    reasoning: {
+      effort: prefs.effort,
+      summary: 'auto',
+    },
+  };
 }
 
 /**

@@ -102,6 +102,15 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     transition: color 160ms ease, background-color 160ms ease !important;
   }
 
+  /* 无深度思考内容时「已完成 Xs」仅作状态展示，不展开 */
+  .deep-chat-dt-done-toggle.is-static {
+    cursor: default !important;
+  }
+
+  .deep-chat-dt-done-toggle.is-static .deep-chat-dt-chevron {
+    display: none !important;
+  }
+
   .deep-chat-dt-toggle:hover,
   .deep-chat-dt-done-toggle:hover {
     color: #64748b !important; /* 与 .deep-chat-dt-text 正文同色 */

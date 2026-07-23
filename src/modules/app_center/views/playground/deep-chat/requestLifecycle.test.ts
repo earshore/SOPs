@@ -164,12 +164,15 @@ describe('Deep Chat generation phases', () => {
 
     appendPendingDeepChatReasoningText(pending, 'plan', 1100);
     expect(getDeepChatGenerationPhase(pending)).toBe('reasoning');
+    // First reasoning chunk auto-expands 深度思考 for stable streaming UX
+    expect(pending.reasoningUiExpanded).toBe(true);
 
     appendPendingDeepChatAssistantText(pending, 'hello', 1200);
     expect(getDeepChatGenerationPhase(pending)).toBe('generating');
 
     markPendingDeepChatRequestSettled(pending, 1300);
     expect(getDeepChatGenerationPhase(pending)).toBe('settled');
+    expect(pending.reasoningUiExpanded).toBe(false);
   });
 
   it('skips reasoning phase when content arrives without reasoning channel', () => {

@@ -5,8 +5,13 @@ import { formatPromptDraftPreviewMeta, getPromptDrafts } from './promptDrafts';
 import type { PromptPreviewLeftOptions, PromptPreviewPointer } from './types';
 import { escapeHTML } from './utils';
 
+/** Hover must stay still this long before the Listing Prompt bubble appears. */
+const PROMPT_PREVIEW_SHOW_DELAY_MS = 1000;
+
 let activePromptPreviewId: string | null = null;
 let promptPreviewHideTimer: number | null = null;
+let promptPreviewShowTimer: number | null = null;
+let pendingPromptPreviewId: string | null = null;
 let isPromptPreviewHovered = false;
 
 export function setupPromptPreview(
@@ -19,7 +24,10 @@ export function setupPromptPreview(
     return;
   }
   document.body.appendChild(preview);
-  addCleanup(() => preview.remove());
+  addCleanup(() => {
+    clearPromptPreviewShowTimer();
+    preview.remove();
+  });
 
   const onPromptPointerOver = (event: PointerEvent): void => {
     const target = event.target as HTMLElement | null;
@@ -30,12 +38,20 @@ export function setupPromptPreview(
       return;
     }
 
-    if (promptId) {
-      showPromptPreview(container, promptId, promptButton, {
-        clientX: event.clientX,
-        clientY: event.clientY,
-      });
+    if (!promptId || !promptButton) {
+      return;
     }
+
+    // Already showing this prompt — keep it; cancel any hide.
+    if (activePromptPreviewId === promptId) {
+      clearPromptPreviewHideTimer();
+      return;
+    }
+
+    schedulePromptPreviewShow(container, promptId, promptButton, {
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
   };
 
   const onPromptFocusIn = (event: FocusEvent): void => {
@@ -43,17 +59,21 @@ export function setupPromptPreview(
     const promptButton = target?.closest<HTMLButtonElement>('[data-preview-prompt-id]');
     const promptId = promptButton?.dataset.previewPromptId;
     if (promptId) {
+      // Keyboard focus: show immediately (no hover dwell).
+      clearPromptPreviewShowTimer();
       showPromptPreview(container, promptId, promptButton);
     }
   };
 
   const onPromptPointerLeave = (): void => {
+    clearPromptPreviewShowTimer();
     schedulePromptPreviewHide(container);
   };
 
   const onPreviewPointerEnter = (): void => {
     isPromptPreviewHovered = true;
     clearPromptPreviewHideTimer();
+    clearPromptPreviewShowTimer();
   };
 
   const onPreviewPointerLeave = (): void => {
@@ -67,12 +87,43 @@ export function setupPromptPreview(
   preview.addEventListener('pointerenter', onPreviewPointerEnter);
   preview.addEventListener('pointerleave', onPreviewPointerLeave);
   addCleanup(() => {
+    clearPromptPreviewShowTimer();
     promptList.removeEventListener('pointerover', onPromptPointerOver);
     promptList.removeEventListener('focusin', onPromptFocusIn);
     promptList.removeEventListener('pointerleave', onPromptPointerLeave);
     preview.removeEventListener('pointerenter', onPreviewPointerEnter);
     preview.removeEventListener('pointerleave', onPreviewPointerLeave);
   });
+}
+
+function schedulePromptPreviewShow(
+  container: HTMLElement,
+  promptId: string,
+  anchor: HTMLElement,
+  pointer: PromptPreviewPointer
+): void {
+  // Same item already waiting to show — keep the original dwell timer.
+  if (pendingPromptPreviewId === promptId && promptPreviewShowTimer !== null) {
+    return;
+  }
+
+  clearPromptPreviewShowTimer();
+  clearPromptPreviewHideTimer();
+  pendingPromptPreviewId = promptId;
+
+  promptPreviewShowTimer = window.setTimeout(() => {
+    promptPreviewShowTimer = null;
+    pendingPromptPreviewId = null;
+    showPromptPreview(container, promptId, anchor, pointer);
+  }, PROMPT_PREVIEW_SHOW_DELAY_MS);
+}
+
+function clearPromptPreviewShowTimer(): void {
+  if (promptPreviewShowTimer !== null) {
+    window.clearTimeout(promptPreviewShowTimer);
+    promptPreviewShowTimer = null;
+  }
+  pendingPromptPreviewId = null;
 }
 
 export function showPromptPreview(
@@ -87,6 +138,7 @@ export function showPromptPreview(
     return;
   }
 
+  clearPromptPreviewShowTimer();
   clearPromptPreviewHideTimer();
   activePromptPreviewId = promptId;
   renderPromptPreview(container, promptDraft, anchor, pointer);
@@ -123,6 +175,7 @@ export function renderPromptPreview(
 }
 
 export function hidePromptPreview(container: HTMLElement): void {
+  clearPromptPreviewShowTimer();
   clearPromptPreviewHideTimer();
   activePromptPreviewId = null;
   syncPromptPreviewHighlight(container);
@@ -137,6 +190,7 @@ export function hidePromptPreview(container: HTMLElement): void {
 
 export function resetPromptPreviewState(): void {
   activePromptPreviewId = null;
+  clearPromptPreviewShowTimer();
   clearPromptPreviewHideTimer();
   isPromptPreviewHovered = false;
 }

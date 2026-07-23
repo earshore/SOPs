@@ -14,10 +14,6 @@ import {
   resolveModelCapability,
   shouldShowReasoningControls,
 } from '@/services/modelCapability';
-import {
-  createDeepChatBusinessToolExecutor,
-  DEEP_CHAT_BUSINESS_TOOLS,
-} from './deepChatBusinessTools';
 import { StorageService } from '@/services/storageService';
 import { resolveToolTargetModel } from '@/services/toolStrategyService';
 import { getRuntimeDeepChatOptions } from '@/services/runtimeStrategyService';
@@ -2099,6 +2095,11 @@ async function handleDeepChatRequest(
       assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
     });
     markPendingDeepChatRequestSettled(pendingRequest);
+    // Paint 「已完成」 immediately (before body typewriter finishes draining).
+    {
+      const mount = getMountedRenderContainer();
+      if (mount) syncAllDeepThinkingChrome(mount);
+    }
     // 后台会话：LLM 一完成就标未读并刷新列表（不等打字机 drain）
     notifyBackgroundPendingSettled(activeThread.id);
     schedulePendingAssistantDisplay(activeThread.id);
@@ -2416,9 +2417,6 @@ function resolveDeepChatResponsesChainOptions(
   apiPath?: ReturnType<typeof normalizeApiPathId>;
   previousResponseId?: string;
   store?: boolean;
-  tools?: unknown[];
-  executeTool?: ReturnType<typeof createDeepChatBusinessToolExecutor>;
-  maxToolRounds?: number;
 } {
   const apiPath = normalizeApiPathId(
     (config as { apiPath?: unknown }).apiPath ??
@@ -2432,34 +2430,12 @@ function resolveDeepChatResponsesChainOptions(
   const previousResponseId =
     thread.lastResponseModel === model && thread.lastResponseId ? thread.lastResponseId : undefined;
 
-  const cap = resolveModelCapability({
-    provider: config.provider,
-    modelId: model,
-    preferredSurface: 'responses',
-  });
-
-  // Read-only business tools when path supports tools AND session reasoning is on
-  // (advanced mode). enableToolLoop forces non-stream tool rounds only when opted in.
-  const reasoningOn = Boolean(getActiveThread().reasoning?.enabled);
-  const toolOptions =
-    cap.supportsTools && reasoningOn
-      ? {
-          tools: DEEP_CHAT_BUSINESS_TOOLS,
-          executeTool: createDeepChatBusinessToolExecutor({
-            getThread: () => getActiveThread(),
-            getModel: () => model,
-            getProvider: () => config.provider,
-          }),
-          enableToolLoop: true,
-          maxToolRounds: 4,
-        }
-      : {};
-
+  // Never enableToolLoop here: it forces non-stream rounds and drops
+  // reasoning_summary_text.delta → 深度思考 / 已完成 chrome never mounts.
   // Only request store when chaining; many new-api gateways reject store=true.
   return {
     apiPath,
     ...(previousResponseId ? { previousResponseId, store: true } : { store: false }),
-    ...toolOptions,
   };
 }
 
@@ -2493,20 +2469,10 @@ function clearDeepChatResponseChain(): void {
   });
 }
 
-function stripResponsesChainForRetry(
-  chain: ReturnType<typeof resolveDeepChatResponsesChainOptions>
-): ReturnType<typeof resolveDeepChatResponsesChainOptions> {
+function stripResponsesChainForRetry(): ReturnType<typeof resolveDeepChatResponsesChainOptions> {
   return {
     apiPath: 'responses',
     store: false,
-    ...(chain.tools
-      ? {
-          tools: chain.tools,
-          executeTool: chain.executeTool,
-          enableToolLoop: true,
-          maxToolRounds: chain.maxToolRounds,
-        }
-      : {}),
   };
 }
 
@@ -2570,7 +2536,7 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
       throw error;
     }
     clearDeepChatResponseChain();
-    responsesChain = stripResponsesChainForRetry(responsesChain);
+    responsesChain = stripResponsesChainForRetry();
     streamState.streamedText = '';
     finalText = await run(responsesChain);
   }
@@ -2586,6 +2552,8 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
     await emitPendingAssistantDelta(signals, pendingRequest, sourceChat, finalText);
   }
 
+  syncMountedDeepThinkingChrome();
+
   const assistantText = (finalText || streamState.streamedText).trim();
   if (!assistantText) {
     throw new ValidationError(
@@ -2598,6 +2566,11 @@ async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string>
   }
 
   return assistantText;
+}
+
+function syncMountedDeepThinkingChrome(): void {
+  const container = getMountedRenderContainer();
+  if (container) syncPendingStatus(container);
 }
 
 function preserveStoppedResponse(threadId: string | null): void {
@@ -3011,10 +2984,15 @@ function syncDeepChatReasoningControlsFromThread(container: HTMLElement): void {
     return;
   }
 
+  const apiPath = normalizeApiPathId(
+    (config as { apiPath?: unknown }).apiPath ??
+      StorageService.getLLMConfig(config.provider)?.apiPath
+  );
   const cap = resolveModelCapability({
     provider: config.provider,
     modelId: model,
     modelsEntry: findConfigModelsEntry(config, model),
+    preferredSurface: apiPath,
   });
   reasoningRoot.hidden = !shouldShowReasoningControls(cap);
 
@@ -4382,7 +4360,15 @@ function completeSettledPendingDisplay(
 
   const container = getRenderContainerForThread(threadId);
   if (container) {
-    syncPendingStatus(container);
+    // Immediate + deferred remount: deep-chat may rebuild the AI bubble one
+    // or two frames after addMessage overwrite, which drops settled chrome.
+    syncAllDeepThinkingChrome(container);
+    scheduleDeepThinkingChromeRetry(container);
+    window.setTimeout(() => {
+      if (getRenderContainerForThread(threadId) === container) {
+        syncAllDeepThinkingChrome(container);
+      }
+    }, 80);
   }
 }
 
@@ -4570,7 +4556,8 @@ function clearStreamingGenerationChrome(chat: DeepChatElement | null): void {
   chat?.shadowRoot
     ?.querySelectorAll(`.${GENERATION_CHROME_CLASS}.is-streaming`)
     .forEach(node => node.remove());
-  clearPendingChromeObserver();
+  // Do NOT disconnect MutationObserver here — deep-chat often rebuilds the last
+  // AI bubble after settle; without the observer 「已完成」 never remounts.
 }
 
 function isAssistantMessageRole(role?: string): boolean {
@@ -4684,24 +4671,32 @@ function prefersInstantReasoningText(): boolean {
   return prefersReducedMotion();
 }
 
-function scheduleReasoningTypewriter(
-  textEl: HTMLElement,
-  fullText: string,
-  getDisplayed: () => number,
-  setDisplayed: (n: number) => void,
-  isActive: () => boolean
-): void {
+function stopReasoningTypewriter(): void {
   if (reasoningTypewriterTimer !== null) {
     window.clearTimeout(reasoningTypewriterTimer);
     reasoningTypewriterTimer = null;
   }
+}
+
+/**
+ * Streaming-only typewriter. Reads full text live each tick so collapse→expand
+ * and late reasoning chunks keep advancing (no stale snapshot freeze).
+ */
+function scheduleReasoningTypewriter(
+  textEl: HTMLElement,
+  getFullText: () => string,
+  getDisplayed: () => number,
+  setDisplayed: (n: number) => void,
+  isActive: () => boolean
+): void {
+  stopReasoningTypewriter();
 
   const run = (): void => {
     if (!isActive()) {
       reasoningTypewriterTimer = null;
       return;
     }
-    const full = fullText;
+    const full = getFullText();
     let displayed = getDisplayed();
     if (prefersInstantReasoningText() || displayed >= full.length) {
       if (textEl.textContent !== full) {
@@ -4709,6 +4704,8 @@ function scheduleReasoningTypewriter(
       }
       setDisplayed(full.length);
       textEl.scrollTop = textEl.scrollHeight;
+      // Stay armed: more reasoning may still arrive while expanded.
+      // Next ensureStreamingDeepThinkingBlock / resume will restart if full grows.
       reasoningTypewriterTimer = null;
       return;
     }
@@ -4720,6 +4717,33 @@ function scheduleReasoningTypewriter(
   };
 
   run();
+}
+
+function isStreamingReasoningTypewriterActive(pending: PendingDeepChatRequest): boolean {
+  return (
+    pending.reasoningUiExpanded === true &&
+    !pending.isSettled &&
+    pendingRequests.get(pending.threadId) === pending &&
+    threadStore.activeThreadId === pending.threadId
+  );
+}
+
+function resumeStreamingReasoningTypewriter(
+  textEl: HTMLElement,
+  pending: PendingDeepChatRequest
+): void {
+  if (pending.reasoningDisplayedLength === undefined) {
+    pending.reasoningDisplayedLength = 0;
+  }
+  scheduleReasoningTypewriter(
+    textEl,
+    () => pending.reasoningText,
+    () => pending.reasoningDisplayedLength ?? 0,
+    n => {
+      pending.reasoningDisplayedLength = n;
+    },
+    () => isStreamingReasoningTypewriterActive(pending)
+  );
 }
 
 function getChromeOnHost(host: HTMLElement): HTMLElement | null {
@@ -4776,23 +4800,11 @@ function ensureStreamingDeepThinkingBlock(
       setToggleExpanded(toggle, next);
       body.hidden = !next;
       if (next) {
-        if (pending.reasoningDisplayedLength === undefined) {
-          pending.reasoningDisplayedLength = 0;
-        }
-        scheduleReasoningTypewriter(
-          text,
-          pending.reasoningText,
-          () => pending.reasoningDisplayedLength ?? 0,
-          n => {
-            pending.reasoningDisplayedLength = n;
-          },
-          () =>
-            Boolean(pendingRequests.get(pending.threadId)?.reasoningUiExpanded) &&
-            threadStore.activeThreadId === pending.threadId
-        );
-      } else if (reasoningTypewriterTimer !== null) {
-        window.clearTimeout(reasoningTypewriterTimer);
-        reasoningTypewriterTimer = null;
+        // Resume from displayed cursor; live full text so output does not freeze.
+        resumeStreamingReasoningTypewriter(text, pending);
+      } else {
+        // Pause only — keep reasoningDisplayedLength so re-expand continues.
+        stopReasoningTypewriter();
       }
     });
 
@@ -4818,34 +4830,37 @@ function ensureStreamingDeepThinkingBlock(
   }
   block.hidden = false;
 
+  // Collapsed: keep cursor; do not drive the typewriter timer.
   if (!expanded) {
     return;
   }
 
-  const displayed = pending.reasoningDisplayedLength ?? 0;
+  paintOrResumeStreamingReasoning(text, pending, full);
+}
+
+function paintOrResumeStreamingReasoning(
+  textEl: HTMLElement,
+  pending: PendingDeepChatRequest,
+  full: string
+): void {
   if (prefersInstantReasoningText()) {
-    text.textContent = full;
+    textEl.textContent = full;
     pending.reasoningDisplayedLength = full.length;
+    stopReasoningTypewriter();
     return;
   }
 
+  const displayed = pending.reasoningDisplayedLength ?? 0;
   if (displayed >= full.length) {
-    text.textContent = full;
+    if (textEl.textContent !== full) {
+      textEl.textContent = full;
+    }
     pending.reasoningDisplayedLength = full.length;
     return;
   }
 
-  scheduleReasoningTypewriter(
-    text,
-    full,
-    () => pending.reasoningDisplayedLength ?? 0,
-    n => {
-      pending.reasoningDisplayedLength = n;
-    },
-    () =>
-      Boolean(pendingRequests.get(pending.threadId)?.reasoningUiExpanded) &&
-      threadStore.activeThreadId === pending.threadId
-  );
+  // New chunks or re-expand with remaining text → keep typewriter running.
+  resumeStreamingReasoningTypewriter(textEl, pending);
 }
 
 function ensureStatusInChrome(chrome: HTMLElement, statusText: string): void {
@@ -4951,6 +4966,10 @@ function getOrCreateSettledUiState(uiKey: string): {
   return state;
 }
 
+/**
+ * Settled chrome: always show 「已完成 Xs」 after a generation finishes.
+ * Nested 「深度思考」 only when reasoning text is non-empty.
+ */
 function mountSettledDeepThinkingChrome(
   host: HTMLElement,
   reasoningText: string,
@@ -4958,14 +4977,6 @@ function mountSettledDeepThinkingChrome(
   uiKey: string
 ): void {
   const full = reasoningText.trim();
-  if (!full) {
-    const existing = getChromeOnHost(host);
-    if (existing?.classList.contains('is-settled')) {
-      existing.remove();
-    }
-    return;
-  }
-
   const chrome = ensureGenerationChromeOnHost(host, uiKey, 'settled');
   chrome.querySelector('.deep-chat-dt-stream')?.remove();
   chrome.querySelector('#' + INLINE_PENDING_STATUS_ID)?.remove();
@@ -4973,20 +4984,19 @@ function mountSettledDeepThinkingChrome(
   const doc = host.ownerDocument;
   let settled = chrome.querySelector<HTMLElement>('.deep-chat-dt-settled');
   if (!settled) {
-    settled = createSettledDeepThinkingDom(doc, full, durationSec, uiKey);
+    settled = createSettledDeepThinkingDom(doc, uiKey);
     chrome.append(settled);
   }
+
+  // Keep latest text/duration on the node so click handlers stay current after remounts
+  settled.dataset.dtFull = full;
+  settled.dataset.dtDuration = String(Math.max(0, Math.round(durationSec)));
 
   applySettledDeepThinkingUi(settled, full, durationSec, uiKey);
   placeGenerationChromeRoot(host, chrome);
 }
 
-function createSettledDeepThinkingDom(
-  doc: Document,
-  full: string,
-  durationSec: number,
-  uiKey: string
-): HTMLElement {
+function createSettledDeepThinkingDom(doc: Document, uiKey: string): HTMLElement {
   const settled = doc.createElement('div');
   settled.className = 'deep-chat-dt-settled';
 
@@ -5018,31 +5028,38 @@ function createSettledDeepThinkingDom(
   deepText.className = 'deep-chat-dt-text';
   deepBody.append(deepText);
 
+  const readModel = (): { full: string; durationSec: number } => ({
+    full: settled.dataset.dtFull ?? '',
+    durationSec: Number(settled.dataset.dtDuration ?? '0') || 0,
+  });
+
   doneToggle.addEventListener('click', () => {
+    const model = readModel();
+    // No nested 深度思考 → 已完成 is display-only (no expand)
+    if (!model.full.trim()) {
+      return;
+    }
     const state = getOrCreateSettledUiState(uiKey);
     state.doneOpen = !state.doneOpen;
     if (!state.doneOpen) {
       state.deepOpen = false;
     }
-    applySettledDeepThinkingUi(settled, full, durationSec, uiKey);
+    applySettledDeepThinkingUi(settled, model.full, model.durationSec, uiKey);
   });
 
   deepToggle.addEventListener('click', () => {
+    const model = readModel();
+    if (!model.full.trim()) {
+      return;
+    }
     const state = getOrCreateSettledUiState(uiKey);
     state.deepOpen = !state.deepOpen;
-    applySettledDeepThinkingUi(settled, full, durationSec, uiKey);
+    applySettledDeepThinkingUi(settled, model.full, model.durationSec, uiKey);
   });
 
   donePanel.append(deepToggle, deepBody);
   settled.append(doneToggle, donePanel);
   return settled;
-}
-
-function stopReasoningTypewriter(): void {
-  if (reasoningTypewriterTimer !== null) {
-    window.clearTimeout(reasoningTypewriterTimer);
-    reasoningTypewriterTimer = null;
-  }
 }
 
 function applySettledDeepThinkingUi(
@@ -5057,7 +5074,24 @@ function applySettledDeepThinkingUi(
     return;
   }
 
+  const full = fullText.trim();
   nodes.doneLabel.textContent = formatCompletedDurationLabel(durationSec);
+  nodes.doneToggle.classList.toggle('is-static', !full);
+  nodes.doneToggle.setAttribute('aria-disabled', full ? 'false' : 'true');
+
+  // No reasoning channel: show 「已完成 Xs」 only (non-expandable).
+  if (!full) {
+    state.doneOpen = false;
+    state.deepOpen = false;
+    setToggleExpanded(nodes.doneToggle, false);
+    nodes.donePanel.hidden = true;
+    nodes.deepToggle.hidden = true;
+    nodes.deepBody.hidden = true;
+    stopReasoningTypewriter();
+    return;
+  }
+
+  nodes.deepToggle.hidden = false;
   setToggleExpanded(nodes.doneToggle, state.doneOpen);
   // Nested hierarchy: 已完成 collapsed → hide entire panel (深度思考 + body).
   // Only after 已完成 expands can user toggle 深度思考.
@@ -5079,7 +5113,10 @@ function applySettledDeepThinkingUi(
     return;
   }
 
-  runSettledReasoningTypewriter(nodes.deepText, fullText, state, uiKey);
+  // Settled: content is final — always show full text immediately (no typewriter).
+  stopReasoningTypewriter();
+  nodes.deepText.textContent = full;
+  state.displayedLength = full.length;
 }
 
 function readSettledDeepThinkingNodes(settled: HTMLElement): {
@@ -5102,32 +5139,6 @@ function readSettledDeepThinkingNodes(settled: HTMLElement): {
   return { doneToggle, doneLabel, donePanel, deepToggle, deepBody, deepText };
 }
 
-function runSettledReasoningTypewriter(
-  deepText: HTMLElement,
-  fullText: string,
-  state: { doneOpen: boolean; deepOpen: boolean; displayedLength: number },
-  uiKey: string
-): void {
-  if (prefersInstantReasoningText()) {
-    deepText.textContent = fullText;
-    state.displayedLength = fullText.length;
-    return;
-  }
-
-  scheduleReasoningTypewriter(
-    deepText,
-    fullText,
-    () => state.displayedLength,
-    n => {
-      state.displayedLength = n;
-    },
-    () => {
-      const current = settledDeepThinkingUi.get(uiKey);
-      return Boolean(current?.doneOpen && current.deepOpen);
-    }
-  );
-}
-
 function observePendingGenerationChrome(chat: DeepChatElement): void {
   const root = chat.shadowRoot;
   if (!root || pendingChromeObserver) {
@@ -5139,18 +5150,34 @@ function observePendingGenerationChrome(chat: DeepChatElement): void {
     if (!container || !chat.shadowRoot) {
       return;
     }
-    const pending = pendingRequests.get(threadStore.activeThreadId);
-    if (pending) {
-      const host = findInlinePendingStatusHost(chat.shadowRoot);
-      const chrome = host?.querySelector(`:scope > .${GENERATION_CHROME_CLASS}.is-streaming`);
-      if (host && chrome) {
-        return;
-      }
+    // Any missing chrome on hosts that should have it → full reattach.
+    // Cheap check first: last AI host during/after generation must keep chrome.
+    if (shouldSkipChromeRemount(chat.shadowRoot)) {
+      return;
     }
-    // History or stream chrome dropped after deep-chat rebuild → reattach all
     syncAllDeepThinkingChrome(container);
   });
   pendingChromeObserver.observe(root, { childList: true, subtree: true });
+}
+
+/** True when generation chrome already present where required (avoid thrash). */
+function shouldSkipChromeRemount(root: ShadowRoot): boolean {
+  const pending = pendingRequests.get(threadStore.activeThreadId);
+  const host = findInlinePendingStatusHost(root);
+  if (!host) {
+    return false;
+  }
+  if (pending) {
+    const phase = getDeepChatGenerationPhase(pending);
+    const selector =
+      phase === 'settled'
+        ? `:scope > .${GENERATION_CHROME_CLASS}.is-settled`
+        : `:scope > .${GENERATION_CHROME_CLASS}.is-streaming`;
+    return Boolean(host.querySelector(selector));
+  }
+  // No pending: every finished AI host should keep settled chrome.
+  // If the last one is missing it, remount (deep-chat rebuild dropped it).
+  return Boolean(host.querySelector(`:scope > .${GENERATION_CHROME_CLASS}.is-settled`));
 }
 
 function scheduleDeepThinkingChromeRetry(container: HTMLElement, attempt = 0): void {
@@ -5185,9 +5212,64 @@ function hideLegacyLightDomGenerationChrome(container: HTMLElement): void {
 }
 
 /**
- * Attach 已完成 / 深度思考 chrome to every AI bubble that has stored reasoning,
+ * Completed AI replies get 「已完成」 chrome.
+ * Partial (still streaming to disk) does not — unless it already has reasoning metadata.
+ */
+function messageHasSettledChrome(message: DeepChatMessage | undefined): boolean {
+  if (!message) return false;
+  if (message.status === 'partial') {
+    return (
+      Boolean(message.reasoning?.trim()) ||
+      (typeof message.reasoningDurationSec === 'number' &&
+        Number.isFinite(message.reasoningDurationSec))
+    );
+  }
+  // Finished AI message: always show 已完成 (duration 0 if unknown).
+  return true;
+}
+
+function mountSettledChromeForMessage(
+  host: HTMLElement,
+  threadId: string,
+  storedIndex: number,
+  message: DeepChatMessage
+): void {
+  const uiKey = buildSettledDtKey(threadId, storedIndex, message);
+  mountSettledDeepThinkingChrome(
+    host,
+    message.reasoning ?? '',
+    typeof message.reasoningDurationSec === 'number' ? message.reasoningDurationSec : 0,
+    uiKey
+  );
+}
+
+/**
+ * Align AI DOM hosts to stored AI messages from the end.
+ * deep-chat sometimes inserts an extra loading host; head-align would steal the last message.
+ */
+function resolveStoredAiForHost(
+  hostIndex: number,
+  hostsLength: number,
+  storedAi: DeepChatMessage[]
+): { message: DeepChatMessage; storedIndex: number } | null {
+  if (storedAi.length === 0 || hostsLength === 0) {
+    return null;
+  }
+  // Map last host → last stored AI, second-last → second-last, ...
+  const storedIndex = storedAi.length - 1 - (hostsLength - 1 - hostIndex);
+  if (storedIndex < 0 || storedIndex >= storedAi.length) {
+    return null;
+  }
+  const message = storedAi[storedIndex];
+  if (!message) {
+    return null;
+  }
+  return { message, storedIndex };
+}
+
+/**
+ * Attach 已完成 / 深度思考 chrome to finished AI bubbles,
  * and streaming chrome only on the latest bubble while generating.
- * Historical blocks are never removed when a new message starts.
  */
 function syncAllDeepThinkingChrome(container: HTMLElement): void {
   hideLegacyLightDomGenerationChrome(container);
@@ -5214,6 +5296,7 @@ function syncAllDeepThinkingChrome(container: HTMLElement): void {
     return;
   }
 
+  // Keep observer alive across settle so deep-chat rebuilds re-attach chrome.
   observePendingGenerationChrome(chat);
 
   const storedAi = thread.messages.filter(message => isAssistantMessageRole(message.role));
@@ -5222,62 +5305,49 @@ function syncAllDeepThinkingChrome(container: HTMLElement): void {
   hosts.forEach((host, hostIndex) => {
     if (pending && hostIndex === streamHostIndex) {
       chat.classList.add(PENDING_GENERATION_HOST_CLASS);
-      // Reply finished (LLM settled) but body typewriter may still drain → only 已完成 Xs
+      // Reply finished (LLM settled) but body typewriter may still drain → 已完成 Xs
       if (getDeepChatGenerationPhase(pending) === 'settled') {
         clearWaitingStatusRotateTimer();
         const durationSec = getPendingReasoningDurationSec(pending);
-        if (pending.reasoningText.trim()) {
-          const uiKey = `${thread.id}:pending-settled:${pending.startedAt}`;
-          mountSettledDeepThinkingChrome(host, pending.reasoningText, durationSec, uiKey);
-        } else {
-          // No reasoning channel: remove streaming chrome; body typewriter continues
-          getChromeOnHost(host)?.remove();
-        }
+        const uiKey = `${thread.id}:pending-settled:${pending.startedAt}`;
+        mountSettledDeepThinkingChrome(host, pending.reasoningText, durationSec, uiKey);
         return;
       }
       mountStreamingGenerationChrome(host, pending);
       return;
     }
 
-    // Map earlier hosts 1:1 onto stored AI messages (skip streaming last host).
-    const storedIndex = hostIndex;
-    const message = storedAi[storedIndex];
-    if (message?.reasoning?.trim()) {
-      const uiKey = buildSettledDtKey(thread.id, storedIndex, message);
-      mountSettledDeepThinkingChrome(
-        host,
-        message.reasoning,
-        typeof message.reasoningDurationSec === 'number' ? message.reasoningDurationSec : 0,
-        uiKey
-      );
+    // Historical hosts while generating: exclude last stored AI (belongs to live turn).
+    // Finished thread: end-align all hosts to all stored AI messages.
+    const mapped = pending
+      ? resolveStoredAiForHost(
+          hostIndex,
+          Math.max(0, streamHostIndex),
+          storedAi.length >= hosts.length ? storedAi.slice(0, -1) : storedAi
+        )
+      : resolveStoredAiForHost(hostIndex, hosts.length, storedAi);
+
+    if (mapped && messageHasSettledChrome(mapped.message)) {
+      mountSettledChromeForMessage(host, thread.id, mapped.storedIndex, mapped.message);
       return;
     }
 
-    // No reasoning for this bubble: keep only non-streaming chrome removal on this host
+    // Only strip settled chrome when this host clearly has no finished AI mapping
+    // (e.g. transient loading host). Never strip is-streaming here — stream path owns it.
     const chrome = getChromeOnHost(host);
-    if (chrome?.classList.contains('is-settled')) {
+    if (chrome?.classList.contains('is-settled') && !pending) {
       chrome.remove();
     }
   });
 
   if (!pending) {
     clearStreamingGenerationChrome(chat);
-    // Re-attach settled after clearing streaming (clear only removes is-streaming)
+    // Re-attach settled after clearing streaming nodes (observer stays alive).
     hosts.forEach((host, hostIndex) => {
-      const message = storedAi[hostIndex];
-      if (!message?.reasoning?.trim()) {
-        return;
+      const mapped = resolveStoredAiForHost(hostIndex, hosts.length, storedAi);
+      if (mapped && messageHasSettledChrome(mapped.message)) {
+        mountSettledChromeForMessage(host, thread.id, mapped.storedIndex, mapped.message);
       }
-      if (getChromeOnHost(host)?.classList.contains('is-settled')) {
-        return;
-      }
-      const uiKey = buildSettledDtKey(thread.id, hostIndex, message);
-      mountSettledDeepThinkingChrome(
-        host,
-        message.reasoning,
-        typeof message.reasoningDurationSec === 'number' ? message.reasoningDurationSec : 0,
-        uiKey
-      );
     });
   }
 

@@ -44,9 +44,11 @@ export {
   extractResponsesId,
   extractResponsesIdFromStreamEvent,
   extractResponsesOutputText,
+  extractResponsesReasoningSummary,
   extractResponsesRefusal,
   getResponsesReasoningStreamDelta,
   getResponsesStreamTextDelta,
+  harvestResponsesReasoningIncrement,
   isResponsesTerminalEvent,
 } from './responsesParse';
 export {

@@ -292,7 +292,9 @@ function applyResponsesTextFormat(
         type: 'json_schema',
         name: args.jsonSchema.name,
         schema: args.jsonSchema.schema,
-        ...(args.jsonSchema.strict !== undefined ? { strict: args.jsonSchema.strict } : { strict: true }),
+        ...(args.jsonSchema.strict !== undefined
+          ? { strict: args.jsonSchema.strict }
+          : { strict: true }),
         ...(args.jsonSchema.description ? { description: args.jsonSchema.description } : {}),
       },
     };
@@ -333,15 +335,17 @@ function applyResponsesOptionalFields(
  * OpenAI Responses API body builder.
  * Subset + expanding parity: text.format, store, previous_response_id, tools, vision parts.
  */
-export function buildResponsesBody(args: {
-  model: string;
-  messages: Array<{ role: string; content: string }>;
-  temperature?: number;
-  maxTokens?: number;
-  stream?: boolean;
-  capability: ResolvedModelCapability;
-  reasoning: EffectiveReasoningPrefs;
-} & ResponsesBodyExtras): Record<string, unknown> {
+export function buildResponsesBody(
+  args: {
+    model: string;
+    messages: Array<{ role: string; content: string }>;
+    temperature?: number;
+    maxTokens?: number;
+    stream?: boolean;
+    capability: ResolvedModelCapability;
+    reasoning: EffectiveReasoningPrefs;
+  } & ResponsesBodyExtras
+): Record<string, unknown> {
   const prevId = args.previousResponseId?.trim();
   const useFollowUp =
     Boolean(args.followUpInputItems?.length) &&

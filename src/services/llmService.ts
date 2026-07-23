@@ -27,10 +27,12 @@ import {
   extractResponsesId,
   extractResponsesIdFromStreamEvent,
   extractResponsesOutputText,
+  extractResponsesReasoningSummary,
   getAnthropicStreamTextDelta,
   getGeminiStreamTextDelta,
   getResponsesReasoningStreamDelta,
   getResponsesStreamTextDelta,
+  harvestResponsesReasoningIncrement,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
   processResponsesToolRound,
@@ -304,6 +306,25 @@ function getReasoningStreamDelta(payload: Record<string, unknown>, surface: ApiS
   return '';
 }
 
+/** Notify Deep Chat (etc.) of reasoning summary from a completed non-stream Responses body. */
+function emitResponsesReasoningFromPayload(
+  data: Record<string, unknown>,
+  onStreamUpdate: LLMOptions['onStreamUpdate'],
+  requestStartedAt: number
+): void {
+  if (!onStreamUpdate) return;
+  const reasoning = extractResponsesReasoningSummary(data);
+  if (!reasoning.trim()) return;
+  onStreamUpdate({
+    delta: '',
+    content: '',
+    reasoningDelta: reasoning,
+    reasoningContent: reasoning,
+    elapsedMs: Date.now() - requestStartedAt,
+    chunkCount: 0,
+  });
+}
+
 function getStreamDelta(payload: Record<string, unknown>, surface: ApiSurface): string {
   if (surface === 'responses') {
     return getResponsesStreamTextDelta(payload);
@@ -458,11 +479,30 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
   reportResponsesStreamIdOnce(payload, context);
 
   const delta = getStreamDelta(payload, context.apiSurface);
-  const reasoningDelta = getReasoningStreamDelta(payload, context.apiSurface);
+  const reasoningDelta = resolveStreamReasoningDelta(payload, context);
   if (!delta && !reasoningDelta) {
     return;
   }
 
+  emitOpenAIStreamUpdate(context, delta, reasoningDelta);
+}
+
+function resolveStreamReasoningDelta(
+  payload: Record<string, unknown>,
+  context: OpenAIStreamLineContext
+): string {
+  const direct = getReasoningStreamDelta(payload, context.apiSurface);
+  if (direct) return direct;
+  // Many gateways only attach summary on completed / output_item events.
+  if (context.apiSurface !== 'responses') return '';
+  return harvestResponsesReasoningIncrement(payload, context.state.reasoningContent);
+}
+
+function emitOpenAIStreamUpdate(
+  context: OpenAIStreamLineContext,
+  delta: string,
+  reasoningDelta: string
+): void {
   if (delta) {
     context.state.content += delta;
   }
@@ -1100,6 +1140,8 @@ async function readLLMResponsePayload(
       if (responseId) {
         context.options.onResponseId?.(responseId);
       }
+      // Non-stream / tool-loop: still surface reasoning summary for 深度思考 UI
+      emitResponsesReasoningFromPayload(data, context.options.onStreamUpdate, requestStartedAt);
       return {
         data: null,
         content: extractResponsesOutputText(data),

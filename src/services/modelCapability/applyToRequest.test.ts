@@ -204,7 +204,8 @@ describe('buildResponsesBody', () => {
     // R4 chain: only latest user turn as input (with vision parts)
     expect(Array.isArray(body.input)).toBe(true);
     const first = (body.input as Array<{ content: unknown }>)[0];
-    expect(Array.isArray(first.content)).toBe(true);
+    expect(first).toBeDefined();
+    expect(Array.isArray(first?.content)).toBe(true);
   });
 
   it('R4: previous_response_id chain sends only latest user (keeps server reasoning items)', () => {

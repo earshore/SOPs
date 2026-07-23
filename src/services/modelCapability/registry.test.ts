@@ -67,7 +67,7 @@ describe('multi-protocol flagship catalog', () => {
     );
     expect(cap.apiSurface).toBe('responses');
     expect(cap.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
-      reasoning: { effort: 'high' },
+      reasoning: { effort: 'high', summary: 'auto' },
     });
   });
 

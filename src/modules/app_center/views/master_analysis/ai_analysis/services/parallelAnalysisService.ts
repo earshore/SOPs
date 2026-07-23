@@ -623,11 +623,11 @@ async function executeAnalysisTask(
           maxTokens: getMasterAnalysisTargetMaxTokens(task.targetId),
           ...(config.serviceTier && { serviceTier: config.serviceTier }),
           stream: true,
-          onFirstResponse: metrics => {
+          onFirstResponse: (metrics: LLMStreamMetrics) => {
             task.firstResponseMs = metrics.elapsedMs;
             onFirstResponse?.(task, metrics);
           },
-          onStreamUpdate: update => {
+          onStreamUpdate: (update: { chunkCount: number; content: string }) => {
             task.streamChunks = update.chunkCount;
             task.streamedChars = update.content.length;
           },

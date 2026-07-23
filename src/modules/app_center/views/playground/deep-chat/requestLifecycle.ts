@@ -89,8 +89,13 @@ export function appendPendingDeepChatReasoningText(
   now = Date.now()
 ): void {
   if (!delta) return;
+  const wasEmpty = !pendingRequest.reasoningText.trim();
   pendingRequest.reasoningText += delta;
   pendingRequest.updatedAt = now;
+  // First reasoning chunk: auto-expand so 深度思考 body is visible while streaming.
+  if (wasEmpty && pendingRequest.reasoningUiExpanded === undefined) {
+    pendingRequest.reasoningUiExpanded = true;
+  }
 }
 
 export function markPendingDeepChatAssistantTextDisplayed(

@@ -412,36 +412,38 @@ describe('callLLM streaming', () => {
   it('runs responses tool loop until final text', async () => {
     const fetchMock = vi
       .fn()
-      .mockImplementationOnce(async () =>
-        new Response(
-          JSON.stringify({
-            id: 'resp_tool_1',
-            output: [
-              {
-                type: 'function_call',
-                call_id: 'call_1',
-                name: 'add',
-                arguments: '{"a":2,"b":3}',
-              },
-            ],
-          }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } }
-        )
+      .mockImplementationOnce(
+        async () =>
+          new Response(
+            JSON.stringify({
+              id: 'resp_tool_1',
+              output: [
+                {
+                  type: 'function_call',
+                  call_id: 'call_1',
+                  name: 'add',
+                  arguments: '{"a":2,"b":3}',
+                },
+              ],
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
       )
-      .mockImplementationOnce(async () =>
-        new Response(
-          JSON.stringify({
-            id: 'resp_tool_2',
-            output_text: '5',
-            output: [
-              {
-                type: 'message',
-                content: [{ type: 'output_text', text: '5' }],
-              },
-            ],
-          }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } }
-        )
+      .mockImplementationOnce(
+        async () =>
+          new Response(
+            JSON.stringify({
+              id: 'resp_tool_2',
+              output_text: '5',
+              output: [
+                {
+                  type: 'message',
+                  content: [{ type: 'output_text', text: '5' }],
+                },
+              ],
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          )
       );
     vi.stubGlobal('fetch', fetchMock);
 
