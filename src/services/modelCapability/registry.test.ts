@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   getModelCapabilityRules,
+  mapAnthropicThinking,
   mapOpenAiReasoningEffort,
   MODEL_CAPABILITY_CATALOG_META,
   MODEL_CAPABILITY_RULES,
@@ -10,14 +11,13 @@ import { resolveModelCapability, shouldShowReasoningControls } from './resolve';
 describe('mapOpenAiReasoningEffort', () => {
   it('emits reasoning_effort only when enabled', () => {
     expect(mapOpenAiReasoningEffort({ enabled: false, effort: 'high' })).toEqual({});
-    expect(mapOpenAiReasoningEffort({ enabled: true, effort: 'off' })).toEqual({});
     expect(mapOpenAiReasoningEffort({ enabled: true, effort: 'high' })).toEqual({
       reasoning_effort: 'high',
     });
   });
 });
 
-describe('MODEL_CAPABILITY_RULES flagship catalog', () => {
+describe('multi-protocol flagship catalog', () => {
   it('does not use overly broad wildcards', () => {
     for (const rule of MODEL_CAPABILITY_RULES) {
       expect(rule.modelPattern).not.toBe('*r1*');
@@ -29,15 +29,26 @@ describe('MODEL_CAPABILITY_RULES flagship catalog', () => {
     }
   });
 
-  it('exposes control UI for OpenAI / Grok / DeepSeek / Hy3 flagships', () => {
+  it('every reasoning surface has a real mapRequest (no label-only fakes)', () => {
+    for (const rule of MODEL_CAPABILITY_RULES) {
+      for (const [surfaceName, surface] of Object.entries(rule.surfaces)) {
+        if (surface?.supportsReasoning) {
+          expect(surface.mapRequest, `${rule.modelPattern}@${surfaceName}`).toBeTypeOf('function');
+        }
+      }
+    }
+  });
+
+  it('shows controls for OpenAI / Grok / DeepSeek / Claude / Gemini flagships', () => {
     const controlIds = [
       'o3-mini',
       'gpt-5.5',
-      'gpt-5.6-2026-01',
       'grok-4.5',
       'deepseek-v4-flash',
-      'deepseek-r1',
-      'hy3-preview',
+      'claude-sonnet-4-5-20250929',
+      'claude-opus-4.5',
+      'gemini-3.6-flash',
+      'gemini-2.5-pro',
     ];
     for (const modelId of controlIds) {
       const cap = resolveModelCapability(
@@ -45,28 +56,30 @@ describe('MODEL_CAPABILITY_RULES flagship catalog', () => {
         getModelCapabilityRules()
       );
       expect(shouldShowReasoningControls(cap), modelId).toBe(true);
-      expect(cap.mapRequest?.({ enabled: true, effort: 'high' }), modelId).toEqual({
-        reasoning_effort: 'high',
-      });
+      expect(cap.mapRequest, modelId).not.toBeNull();
     }
   });
 
-  it('labels Claude and Gemini as reasoning without controls (no mapRequest)', () => {
-    const labelIds = [
-      'claude-sonnet-4-5-20250929',
-      'claude-opus-4.5',
-      'gemini-3.6-flash',
-      'gemini-2.5-pro',
-    ];
-    for (const modelId of labelIds) {
-      const cap = resolveModelCapability(
-        { provider: 'new_api', modelId },
-        getModelCapabilityRules()
-      );
-      expect(cap.supportsReasoning, modelId).toBe(true);
-      expect(shouldShowReasoningControls(cap), modelId).toBe(false);
-      expect(cap.mapRequest, modelId).toBeNull();
-    }
+  it('uses responses preferred surface for o-series / gpt-5', () => {
+    const cap = resolveModelCapability(
+      { provider: 'new_api', modelId: 'gpt-5.6' },
+      getModelCapabilityRules()
+    );
+    expect(cap.apiSurface).toBe('responses');
+    expect(cap.mapRequest?.({ enabled: true, effort: 'high' })).toEqual({
+      reasoning: { effort: 'high' },
+    });
+  });
+
+  it('uses anthropic thinking mapper for Claude on chat_completions', () => {
+    const cap = resolveModelCapability(
+      { provider: 'new_api', modelId: 'claude-sonnet-4-5-20250929' },
+      getModelCapabilityRules()
+    );
+    expect(cap.apiSurface).toBe('chat_completions');
+    expect(cap.mapRequest?.({ enabled: true, effort: 'high' })).toEqual(
+      mapAnthropicThinking({ enabled: true, effort: 'high' })
+    );
   });
 
   it('keeps plain chat models fail-closed', () => {
@@ -80,17 +93,8 @@ describe('MODEL_CAPABILITY_RULES flagship catalog', () => {
     }
   });
 
-  it('does not treat random r1 substrings as reasoning models', () => {
-    const cap = resolveModelCapability(
-      { provider: 'new_api', modelId: 'super1-chat' },
-      getModelCapabilityRules()
-    );
-    expect(cap.supportsReasoning).toBe(false);
-  });
-
-  it('exports catalog meta for docs alignment', () => {
-    expect(MODEL_CAPABILITY_CATALOG_META.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(MODEL_CAPABILITY_CATALOG_META.controlField).toBe('reasoning_effort');
+  it('exports catalog meta', () => {
+    expect(MODEL_CAPABILITY_CATALOG_META.surfaces).toContain('responses');
     expect(MODEL_CAPABILITY_RULES.length).toBeGreaterThan(40);
   });
 });

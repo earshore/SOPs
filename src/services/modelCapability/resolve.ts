@@ -1,12 +1,18 @@
 import { getModelCapabilityRules } from './registry';
 import type {
+  ApiSurface,
   ModelCapabilityRule,
   ModelsListEntry,
   ResolveModelCapabilityInput,
   ResolvedModelCapability,
   ReasoningEffortLevel,
+  SurfaceCapability,
 } from './types';
-import { DEFAULT_REASONING_EFFORTS, DEFAULT_UNKNOWN_CONTEXT_WINDOW } from './types';
+import {
+  DEFAULT_API_SURFACE,
+  DEFAULT_REASONING_EFFORTS,
+  DEFAULT_UNKNOWN_CONTEXT_WINDOW,
+} from './types';
 
 /** Match model id against pattern with `*` wildcards (glob-style, case-insensitive). */
 export function matchModelPattern(pattern: string, modelId: string): boolean {
@@ -59,29 +65,6 @@ function readModelsFeatures(entry: ModelsListEntry | undefined): string[] | unde
   return entry.features.map(String);
 }
 
-function resolveReasoningEfforts(
-  rule: ModelCapabilityRule | null,
-  supportsReasoning: boolean
-): ReasoningEffortLevel[] {
-  if (rule?.reasoningEfforts && rule.reasoningEfforts.length > 0) {
-    return [...rule.reasoningEfforts];
-  }
-  return supportsReasoning ? [...DEFAULT_REASONING_EFFORTS] : [];
-}
-
-function resolveDefaultEffort(
-  rule: ModelCapabilityRule | null,
-  reasoningEfforts: ReasoningEffortLevel[]
-): ReasoningEffortLevel {
-  if (rule?.defaultEffort && reasoningEfforts.includes(rule.defaultEffort)) {
-    return rule.defaultEffort;
-  }
-  if (reasoningEfforts.includes('medium')) {
-    return 'medium';
-  }
-  return reasoningEfforts[0] ?? 'medium';
-}
-
 function mergeFeatureLists(
   ruleFeatures: string[] | undefined,
   modelsFeatures: string[] | undefined
@@ -91,23 +74,90 @@ function mergeFeatureLists(
   );
 }
 
-function buildCapabilitySource(
-  registryMatched: boolean,
-  modelsContext: number | undefined,
-  modelsFeatures: string[] | undefined
-): ResolvedModelCapability['source'] {
-  const source: ResolvedModelCapability['source'] = { registryMatched };
-  if (modelsContext !== undefined) {
-    source.modelsContext = modelsContext;
+function pickSurface(
+  rule: ModelCapabilityRule | null,
+  preferred?: ApiSurface
+): { surface: ApiSurface; capability: SurfaceCapability | null } {
+  if (!rule) {
+    return { surface: preferred ?? DEFAULT_API_SURFACE, capability: null };
   }
-  if (modelsFeatures !== undefined) {
-    source.modelsFeatures = modelsFeatures;
+
+  const order: ApiSurface[] = [];
+  if (preferred) order.push(preferred);
+  if (!order.includes(rule.preferredSurface)) order.push(rule.preferredSurface);
+  if (!order.includes('chat_completions')) order.push('chat_completions');
+  if (!order.includes('responses')) order.push('responses');
+
+  for (const surface of order) {
+    const capability = rule.surfaces[surface];
+    if (capability) {
+      return { surface, capability };
+    }
   }
-  return source;
+
+  return { surface: rule.preferredSurface, capability: null };
+}
+
+function resolveReasoningEfforts(surface: SurfaceCapability | null): ReasoningEffortLevel[] {
+  if (surface?.reasoningEfforts && surface.reasoningEfforts.length > 0) {
+    return [...surface.reasoningEfforts];
+  }
+  if (surface?.supportsReasoning) {
+    return [...DEFAULT_REASONING_EFFORTS];
+  }
+  return [];
+}
+
+function resolveDefaultEffort(
+  surface: SurfaceCapability | null,
+  reasoningEfforts: ReasoningEffortLevel[]
+): ReasoningEffortLevel {
+  if (surface?.defaultEffort && reasoningEfforts.includes(surface.defaultEffort)) {
+    return surface.defaultEffort;
+  }
+  if (reasoningEfforts.includes('medium')) {
+    return 'medium';
+  }
+  return reasoningEfforts[0] ?? 'medium';
+}
+
+function buildResolvedCapability(args: {
+  modelId: string;
+  provider: string;
+  rule: ModelCapabilityRule | null;
+  modelsEntry: ModelsListEntry | undefined;
+  preferredSurface?: ApiSurface;
+}): ResolvedModelCapability {
+  const modelsContext = positiveFiniteContext(args.modelsEntry?.context);
+  const modelsFeatures = readModelsFeatures(args.modelsEntry);
+  const registryContext = args.rule ? positiveFiniteContext(args.rule.contextWindow) : undefined;
+  const { surface, capability } = pickSurface(args.rule, args.preferredSurface);
+  const supportsReasoning = Boolean(capability?.supportsReasoning && capability.mapRequest);
+  const reasoningEfforts = resolveReasoningEfforts(capability);
+
+  return {
+    modelId: args.modelId,
+    provider: args.provider,
+    contextWindow: modelsContext ?? registryContext ?? DEFAULT_UNKNOWN_CONTEXT_WINDOW,
+    apiSurface: surface,
+    supportsReasoning,
+    reasoningEfforts,
+    defaultEffort: resolveDefaultEffort(capability, reasoningEfforts),
+    temperatureIgnored: Boolean(capability?.temperatureIgnored),
+    features: mergeFeatureLists(args.rule?.features, modelsFeatures),
+    mapRequest: capability?.mapRequest ?? null,
+    source: {
+      registryMatched: Boolean(args.rule),
+      preferredSurface: surface,
+      ...(modelsContext !== undefined ? { modelsContext } : {}),
+      ...(modelsFeatures !== undefined ? { modelsFeatures } : {}),
+    },
+  };
 }
 
 /**
  * Merge registry + optional /models entry. Fail-closed for reasoning when unmatched.
+ * Picks an API surface with a real mapRequest when possible.
  */
 export function resolveModelCapability(
   input: ResolveModelCapabilityInput,
@@ -117,28 +167,16 @@ export function resolveModelCapability(
   const provider = (input.provider || '').trim() || 'unknown';
   const modelsEntry = normalizeModelsEntry(input.modelsEntry);
   const rule = modelId ? findMatchingRule(provider, modelId, rules) : null;
-
-  const modelsContext = positiveFiniteContext(modelsEntry?.context);
-  const modelsFeatures = readModelsFeatures(modelsEntry);
-  const registryContext = rule ? positiveFiniteContext(rule.contextWindow) : undefined;
-  const supportsReasoning = Boolean(rule?.supportsReasoning);
-  const reasoningEfforts = resolveReasoningEfforts(rule, supportsReasoning);
-
-  return {
+  return buildResolvedCapability({
     modelId,
     provider,
-    contextWindow: modelsContext ?? registryContext ?? DEFAULT_UNKNOWN_CONTEXT_WINDOW,
-    supportsReasoning,
-    reasoningEfforts,
-    defaultEffort: resolveDefaultEffort(rule, reasoningEfforts),
-    temperatureIgnored: Boolean(rule?.temperatureIgnored),
-    features: mergeFeatureLists(rule?.features, modelsFeatures),
-    mapRequest: rule?.mapRequest ?? null,
-    source: buildCapabilitySource(Boolean(rule), modelsContext, modelsFeatures),
-  };
+    rule,
+    modelsEntry,
+    preferredSurface: input.preferredSurface,
+  });
 }
 
-/** UI: show controls only when reasoning is supported AND mapper can emit fields. */
+/** UI: show controls only when this surface can emit reasoning fields. */
 export function shouldShowReasoningControls(cap: ResolvedModelCapability): boolean {
   return Boolean(cap.supportsReasoning && cap.mapRequest);
 }

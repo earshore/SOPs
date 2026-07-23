@@ -7,17 +7,27 @@ const sampleRules: ModelCapabilityRule[] = [
     modelPattern: 'o3*',
     provider: 'openai',
     contextWindow: 200_000,
-    supportsReasoning: true,
-    reasoningEfforts: ['low', 'medium', 'high'],
-    defaultEffort: 'medium',
-    temperatureIgnored: true,
-    mapRequest: ({ enabled, effort }) =>
-      enabled && effort !== 'off' ? { reasoning_effort: effort } : {},
+    preferredSurface: 'chat_completions',
+    surfaces: {
+      chat_completions: {
+        supportsReasoning: true,
+        reasoningEfforts: ['low', 'medium', 'high'],
+        defaultEffort: 'medium',
+        temperatureIgnored: true,
+        mapRequest: ({ enabled, effort }) =>
+          enabled && effort !== 'off' ? { reasoning_effort: effort } : {},
+      },
+    },
   },
   {
     modelPattern: 'gpt-4o',
     contextWindow: 128_000,
-    supportsReasoning: false,
+    preferredSurface: 'chat_completions',
+    surfaces: {
+      chat_completions: {
+        supportsReasoning: false,
+      },
+    },
   },
 ];
 
@@ -48,6 +58,7 @@ describe('resolveModelCapability', () => {
     expect(cap.supportsReasoning).toBe(false);
     expect(cap.mapRequest).toBeNull();
     expect(cap.contextWindow).toBe(32_768);
+    expect(cap.apiSurface).toBe('chat_completions');
     expect(cap.source.registryMatched).toBe(false);
   });
 
@@ -107,7 +118,7 @@ describe('resolveModelCapability', () => {
 });
 
 describe('shouldShowReasoningControls', () => {
-  it('requires supportsReasoning and mapRequest', () => {
+  it('requires supportsReasoning and mapRequest on resolved surface', () => {
     expect(
       shouldShowReasoningControls(
         resolveModelCapability({ provider: 'openai', modelId: 'o3-mini' }, sampleRules)
@@ -124,8 +135,13 @@ describe('shouldShowReasoningControls', () => {
       {
         modelPattern: 'think-*',
         contextWindow: 64_000,
-        supportsReasoning: true,
-        // mapRequest omitted
+        preferredSurface: 'chat_completions',
+        surfaces: {
+          chat_completions: {
+            supportsReasoning: true,
+            // mapRequest omitted → no UI
+          },
+        },
       },
     ];
     expect(

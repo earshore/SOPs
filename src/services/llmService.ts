@@ -19,10 +19,13 @@ import type { LLMChatCompletionResponse, LLMErrorResponse } from '@/types/api';
 // 导入类型守卫
 import { isLLMChatCompletionResponse } from '@/common/guards/typeGuards';
 import {
-  buildChatCompletionsBody,
+  buildRequestBodyForSurface,
+  extractResponsesOutputText,
+  getResponsesStreamTextDelta,
   normalizeReasoningUserPrefs,
   resolveEffectiveReasoning,
   resolveModelCapability,
+  type ApiSurface,
   type ModelsListEntry,
   type ReasoningUserPrefs,
   type SessionReasoningOverride,
@@ -188,7 +191,7 @@ function resolveProviderEndpoint(provider: string, endpoint: string): string {
   return EnvConfig.api.normalizeEndpoint(trimmedEndpoint);
 }
 
-function getStreamDelta(payload: Record<string, unknown>): string {
+function getChatCompletionsStreamDelta(payload: Record<string, unknown>): string {
   const choices = payload.choices;
   if (!Array.isArray(choices) || choices.length === 0) {
     return '';
@@ -200,6 +203,13 @@ function getStreamDelta(payload: Record<string, unknown>): string {
 
   const content = delta?.content ?? message?.content;
   return typeof content === 'string' ? content : '';
+}
+
+function getStreamDelta(payload: Record<string, unknown>, surface: ApiSurface): string {
+  if (surface === 'responses') {
+    return getResponsesStreamTextDelta(payload);
+  }
+  return getChatCompletionsStreamDelta(payload);
 }
 
 function parseBufferedJsonCompletion(rawText: string): LLMChatCompletionResponse | null {
@@ -239,6 +249,7 @@ interface OpenAIStreamLineContext {
   requestStartedAt: number;
   options: OpenAIStreamOptions;
   state: OpenAIStreamState;
+  apiSurface: ApiSurface;
 }
 
 interface OpenAIStreamReadResult {
@@ -318,7 +329,7 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
 
   assertStreamPayloadIsOk(payload, data, context.response);
 
-  const delta = getStreamDelta(payload);
+  const delta = getStreamDelta(payload, context.apiSurface);
   if (!delta) {
     return;
   }
@@ -410,7 +421,8 @@ function createOpenAIStreamResult(
 async function readOpenAIStream(
   response: Response,
   requestStartedAt: number,
-  options: OpenAIStreamOptions
+  options: OpenAIStreamOptions,
+  apiSurface: ApiSurface = 'chat_completions'
 ): Promise<OpenAIStreamReadResult> {
   const reader = response.body?.getReader();
 
@@ -419,7 +431,13 @@ async function readOpenAIStream(
   }
 
   const state: OpenAIStreamState = { content: '', chunkCount: 0 };
-  const lineContext: OpenAIStreamLineContext = { response, requestStartedAt, options, state };
+  const lineContext: OpenAIStreamLineContext = {
+    response,
+    requestStartedAt,
+    options,
+    state,
+    apiSurface,
+  };
   const rawText = await readOpenAIStreamBody(reader, lineContext);
   return createOpenAIStreamResult(state, rawText);
 }
@@ -451,6 +469,9 @@ interface LLMCallContext {
   messages: ChatMessage[];
   options: ResolvedLLMOptions;
   requestBody: Record<string, unknown>;
+  /** Relative path under base endpoint, e.g. /chat/completions or /responses */
+  requestPath: string;
+  apiSurface: ApiSurface;
 }
 
 interface LLMResponsePayload {
@@ -570,12 +591,59 @@ function assertSafeLLMEndpoint(endpoint: string): void {
   );
 }
 
-function createLLMRequestBody(
+function normalizeMessagesForTransport(
+  messages: ChatMessage[]
+): Array<{ role: string; content: string }> {
+  return messages.map(message => ({
+    role: message.role,
+    content: typeof message.content === 'string' ? message.content : String(message.content ?? ''),
+  }));
+}
+
+function extractOutboundReasoningMarker(body: Record<string, unknown>): string | undefined {
+  if (body.reasoning_effort !== undefined) {
+    return String(body.reasoning_effort);
+  }
+  const reasoning = body.reasoning as { effort?: unknown } | undefined;
+  if (reasoning?.effort !== undefined) {
+    return String(reasoning.effort);
+  }
+  const thinking = body.thinking as { budget_tokens?: unknown } | undefined;
+  if (thinking?.budget_tokens !== undefined) {
+    return `budget:${String(thinking.budget_tokens)}`;
+  }
+  return undefined;
+}
+
+function logReasoningTransport(args: {
+  model: string;
+  surface: ApiSurface;
+  body: Record<string, unknown>;
+  capabilitySupports: boolean;
+  globalEnabled: boolean;
+  session: SessionReasoningOverride | undefined;
+}): void {
+  const effort = extractOutboundReasoningMarker(args.body);
+  if (effort !== undefined) {
+    console.info(
+      `[LLM] 请求将发送推理参数 surface=${args.surface} model=${args.model} effort=${effort}`
+    );
+    return;
+  }
+  if (args.capabilitySupports) {
+    console.info(
+      `[LLM] 推理可用但未启用 surface=${args.surface} model=${args.model} ` +
+        `globalEnabled=${args.globalEnabled} session=${JSON.stringify(args.session ?? null)}`
+    );
+  }
+}
+
+function createLLMTransport(
   messages: ChatMessage[],
   model: string,
   options: ResolvedLLMOptions,
   provider: string
-): Record<string, unknown> {
+): { body: Record<string, unknown>; path: string; apiSurface: ApiSurface } {
   const capability = resolveModelCapability({
     provider,
     modelId: model,
@@ -588,32 +656,28 @@ function createLLMRequestBody(
     options.reasoningSessionOverride
   );
 
-  const body = buildChatCompletionsBody({
+  const built = buildRequestBodyForSurface({
+    capability,
     model,
-    messages,
+    messages: normalizeMessagesForTransport(messages),
     temperature: options.temperature,
     maxTokens: options.maxTokens,
     stream: options.stream,
     jsonMode: options.jsonMode,
     serviceTier: options.serviceTier,
-    capability,
     reasoning,
   });
 
-  // Browser console: prove whether reasoning_effort is in the outbound JSON (gateway may not surface it).
-  // Use console (not Logger) — llmService must not import loggerService (circular dependency rule).
-  if (body.reasoning_effort !== undefined) {
-    console.info(
-      `[LLM] 请求将发送推理参数 model=${model} reasoning_effort=${String(body.reasoning_effort)}`
-    );
-  } else if (capability.supportsReasoning && capability.mapRequest) {
-    console.info(
-      `[LLM] 推理控件可用但未启用（不会发送 reasoning_effort） model=${model} ` +
-        `globalEnabled=${globalPrefs.enabled} session=${JSON.stringify(options.reasoningSessionOverride ?? null)}`
-    );
-  }
+  logReasoningTransport({
+    model,
+    surface: built.surface,
+    body: built.body,
+    capabilitySupports: Boolean(capability.supportsReasoning && capability.mapRequest),
+    globalEnabled: globalPrefs.enabled,
+    session: options.reasoningSessionOverride,
+  });
 
-  return body;
+  return { body: built.body, path: built.path, apiSurface: built.surface };
 }
 
 async function waitBeforeLLMRetry(attempt: number, options: ResolvedLLMOptions): Promise<void> {
@@ -676,7 +740,10 @@ async function fetchLLMResponse(
     headers.Authorization = `Bearer ${context.apiKey}`;
   }
 
-  return fetch(`${context.normalizedEndpoint}/chat/completions`, {
+  const path = context.requestPath.startsWith('/')
+    ? context.requestPath
+    : `/${context.requestPath}`;
+  return fetch(`${context.normalizedEndpoint}${path}`, {
     method: 'POST',
     headers,
     body: JSON.stringify(context.requestBody),
@@ -718,8 +785,8 @@ function getLLMStatusError(
       return {
         errorCode: 'API_INVALID_REQUEST',
         errorMsg:
-          `${errorMsg}\n\n当前网关可能未透传推理参数（reasoning_effort）。` +
-          `可关闭推理后重试，或确认模型已在能力目录登记且网关支持该字段。`,
+          `${errorMsg}\n\n当前网关可能未透传推理参数（reasoning_effort / thinking / responses.reasoning）。` +
+          `可关闭推理后重试，或检查模型 channel 是否支持对应协议字段。`,
       };
     }
     return { errorCode: 'API_INVALID_REQUEST', errorMsg };
@@ -753,14 +820,26 @@ async function readLLMResponsePayload(
   requestStartedAt: number
 ): Promise<LLMResponsePayload> {
   if (!context.options.stream) {
-    return { data: await response.json(), content: '' };
+    const data = (await response.json()) as Record<string, unknown>;
+    if (context.apiSurface === 'responses') {
+      return {
+        data: null,
+        content: extractResponsesOutputText(data),
+      };
+    }
+    return { data: data as unknown as LLMChatCompletionResponse, content: '' };
   }
 
-  const streamResult = await readOpenAIStream(response, requestStartedAt, {
-    onFirstResponse: context.options.onFirstResponse,
-    onStreamActivity: context.options.onStreamActivity,
-    onStreamUpdate: context.options.onStreamUpdate,
-  });
+  const streamResult = await readOpenAIStream(
+    response,
+    requestStartedAt,
+    {
+      onFirstResponse: context.options.onFirstResponse,
+      onStreamActivity: context.options.onStreamActivity,
+      onStreamUpdate: context.options.onStreamUpdate,
+    },
+    context.apiSurface
+  );
 
   return {
     data: streamResult.fallbackJson,
@@ -970,6 +1049,12 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
   const normalizedEndpoint = resolveProviderEndpoint(request.provider, request.endpoint);
   assertSafeLLMEndpoint(normalizedEndpoint);
 
+  const transport = createLLMTransport(
+    request.messages,
+    request.model,
+    resolvedOptions,
+    request.provider
+  );
   const context: LLMCallContext = {
     provider: request.provider,
     endpoint: request.endpoint,
@@ -978,12 +1063,9 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
     model: request.model,
     messages: request.messages,
     options: resolvedOptions,
-    requestBody: createLLMRequestBody(
-      request.messages,
-      request.model,
-      resolvedOptions,
-      request.provider
-    ),
+    requestBody: transport.body,
+    requestPath: transport.path,
+    apiSurface: transport.apiSurface,
   };
 
   let lastError: Error | null = null;
