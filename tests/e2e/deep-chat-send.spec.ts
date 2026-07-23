@@ -4,7 +4,10 @@ import { expect, test, type Page } from '@playwright/test';
 const DEEP_CHAT_ROUTE = '/#/app-center/playground/deep-chat';
 const MOCK_PROVIDER = 'playwright_mock';
 const MOCK_MODEL = 'mock-chat-model';
-const MOCK_ENDPOINT = 'http://localhost:5173/mock-llm';
+const MOCK_ENDPOINT = new URL(
+  '/mock-llm',
+  process.env.BASE_URL ?? 'http://localhost:5173'
+).toString();
 const MOCK_API_KEY = 'playwright-test-key';
 const USER_PROMPT = '请用一句话确认 Deep Chat 发送正常';
 const ASSISTANT_REPLY = 'Deep Chat 浏览器发送正常';
@@ -12,6 +15,9 @@ const GENERATED_PROMPT_ID = 'deep-chat-generated-prompt-send-test';
 const GENERATED_PROMPT_MARKER = 'PLAYWRIGHT_GENERATED_PROMPT_LONG_DRAFT';
 const GENERATED_PROMPT_REPLY = 'Prompt 生成链路发送正常';
 const GENERATED_PROMPT = createLongGeneratedPrompt();
+const DECORATED_SKILL_ID = 'amazon-advertising-strategy';
+const DECORATED_SKILL_TITLE = 'Amazon Advertising Strategy 📢';
+const DECORATED_SKILL_VISIBLE_TITLE = 'Amazon Advertising Strategy';
 
 type ControlledLLMStream = {
   endpoint: string;
@@ -21,6 +27,43 @@ type ControlledLLMStream = {
   reply: string;
   secondChunk: string;
   close: () => Promise<void>;
+};
+
+type SubmitButtonPinState = {
+  bottomGap: number;
+  buttonHeight: number;
+  buttonWidth: number;
+  pinned: boolean;
+  pointerEvents: string;
+  rightGap: number;
+};
+
+type SubmitButtonVisualState = {
+  ariaBusy: string | null;
+  ariaDisabled: string | null;
+  ariaLabel: string | null;
+  backgroundColor: string;
+  cursor: string;
+  disabled: boolean;
+  loading: boolean;
+  pointerEvents: string;
+  stopActive: boolean;
+  stopThreadId: string | null;
+  submit: boolean;
+  title: string | null;
+};
+
+type SkillChipVisualState = {
+  backgroundColor: string;
+  borderColor: string;
+  chipMode: string | undefined;
+  cursor: string;
+  hasDismissControl: boolean;
+  height: number;
+  label: string | undefined;
+  skillTitle: string | undefined;
+  visibility: string;
+  width: number;
 };
 
 function createLongGeneratedPrompt(): string {
@@ -244,16 +287,283 @@ async function openDeepChatAndRefreshMockConfig(page: Page): Promise<void> {
   await page.locator('#deep-chat-refresh-config').click();
 }
 
-test('Deep Chat sends a message and renders the assistant response', async ({ page }) => {
+async function getSubmitButtonPinState(page: Page): Promise<SubmitButtonPinState | null> {
+  return page.evaluate(() => {
+    const root = document.querySelector('#deep-chat-view')?.shadowRoot;
+    const button = root?.querySelector<HTMLElement>('.input-button.inside-end');
+    const textInputContainer = root?.querySelector<HTMLElement>('#text-input-container');
+    if (!button || !textInputContainer) {
+      return null;
+    }
+
+    const buttonRect = button.getBoundingClientRect();
+    const textInputRect = textInputContainer.getBoundingClientRect();
+    const style = getComputedStyle(button);
+    const rightGap = Math.round((textInputRect.right - buttonRect.right) * 100) / 100;
+    const bottomGap = Math.round((textInputRect.bottom - buttonRect.bottom) * 100) / 100;
+    const pinned =
+      Math.round(buttonRect.width) === 36 &&
+      Math.round(buttonRect.height) === 36 &&
+      style.display !== 'none' &&
+      style.visibility !== 'hidden' &&
+      buttonRect.left >= textInputRect.left &&
+      buttonRect.right <= textInputRect.right &&
+      buttonRect.top >= textInputRect.top &&
+      buttonRect.bottom <= textInputRect.bottom &&
+      Math.abs(rightGap - 11) <= 2 &&
+      Math.abs(bottomGap - 11) <= 2;
+    return {
+      bottomGap,
+      buttonHeight: Math.round(buttonRect.height),
+      buttonWidth: Math.round(buttonRect.width),
+      pinned,
+      pointerEvents: style.pointerEvents,
+      rightGap,
+    };
+  });
+}
+
+async function isSubmitButtonPinnedToTextInput(page: Page): Promise<boolean> {
+  return (await getSubmitButtonPinState(page))?.pinned ?? false;
+}
+
+async function getSubmitButtonVisualState(page: Page): Promise<SubmitButtonVisualState | null> {
+  return page.evaluate(() => {
+    const button = document
+      .querySelector('#deep-chat-view')
+      ?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+    if (!button) {
+      return null;
+    }
+
+    return {
+      ariaBusy: button.getAttribute('aria-busy'),
+      ariaDisabled: button.getAttribute('aria-disabled'),
+      ariaLabel: button.getAttribute('aria-label'),
+      backgroundColor: getComputedStyle(button).backgroundColor,
+      cursor: getComputedStyle(button).cursor,
+      disabled: button.classList.contains('disabled-button'),
+      loading: button.classList.contains('loading-button'),
+      pointerEvents: getComputedStyle(button).pointerEvents,
+      stopActive: button.hasAttribute('data-deep-chat-stop-active'),
+      stopThreadId: button.getAttribute('data-deep-chat-stop-thread-id'),
+      submit: button.classList.contains('submit-button'),
+      title: button.getAttribute('title'),
+    };
+  });
+}
+
+async function getSkillChipVisualState(
+  page: Page,
+  selector: string
+): Promise<SkillChipVisualState | null> {
+  return page.evaluate(selector => {
+    const chip = document
+      .querySelector('#deep-chat-view')
+      ?.shadowRoot?.querySelector<HTMLElement>(selector);
+    if (!chip) {
+      return null;
+    }
+
+    const style = getComputedStyle(chip);
+    const rect = chip.getBoundingClientRect();
+    return {
+      backgroundColor: style.backgroundColor,
+      borderColor: style.borderColor,
+      chipMode: chip.dataset.chipMode,
+      cursor: style.cursor,
+      hasDismissControl: Boolean(chip.querySelector('[data-action="dismiss-skill-context"]')),
+      height: Math.round(rect.height),
+      label: chip.querySelector('.deep-chat-context-chip__label')?.textContent || undefined,
+      skillTitle: chip.dataset.skillTitle,
+      visibility: style.visibility,
+      width: Math.round(rect.width),
+    };
+  }, selector);
+}
+
+async function hasSkillContextBar(page: Page): Promise<boolean> {
+  return page.evaluate(() => {
+    const root = document.querySelector('#deep-chat-view')?.shadowRoot;
+    return Boolean(
+      document.querySelector('#deep-chat-skill-context-bar') ||
+      root?.querySelector('#deep-chat-skill-context-bar')
+    );
+  });
+}
+
+function waitForStageWidthTransition(page: Page): Promise<void> {
+  return page.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const stage = document.querySelector<HTMLElement>('.deep-chat-stage');
+        if (!stage) {
+          reject(new Error('Deep Chat stage is missing'));
+          return;
+        }
+
+        let firstAnimationFrame: number | null = null;
+        let secondAnimationFrame: number | null = null;
+        let fallbackTimer: number | null = null;
+        let settled = false;
+        const timeout = window.setTimeout(() => {
+          cleanup();
+          reject(new Error('Deep Chat stage did not settle after the viewport change'));
+        }, 1000);
+        const cleanup = (): void => {
+          stage.removeEventListener('transitionend', onTransitionEnd);
+          window.removeEventListener('resize', onWindowResize);
+          if (firstAnimationFrame !== null) {
+            window.cancelAnimationFrame(firstAnimationFrame);
+          }
+          if (secondAnimationFrame !== null) {
+            window.cancelAnimationFrame(secondAnimationFrame);
+          }
+          if (fallbackTimer !== null) {
+            window.clearTimeout(fallbackTimer);
+          }
+          window.clearTimeout(timeout);
+        };
+        const finish = (): void => {
+          if (settled) {
+            return;
+          }
+
+          settled = true;
+          cleanup();
+          resolve();
+        };
+        const onTransitionEnd = (event: TransitionEvent): void => {
+          if (event.target !== stage || event.propertyName !== 'width') {
+            return;
+          }
+
+          finish();
+        };
+        const onWindowResize = (): void => {
+          firstAnimationFrame = window.requestAnimationFrame(() => {
+            secondAnimationFrame = window.requestAnimationFrame(() => {
+              if (!hasVisibleWidthTransition) {
+                finish();
+                return;
+              }
+              const longestTransition = Math.max(...transitionDurations, 0);
+              fallbackTimer = window.setTimeout(finish, longestTransition + 50);
+            });
+          });
+        };
+        const computedStyle = getComputedStyle(stage);
+        const transitionProperties = computedStyle.transitionProperty
+          .split(',')
+          .map(property => property.trim());
+        const transitionDurations = computedStyle.transitionDuration.split(',').map(duration => {
+          const trimmedDuration = duration.trim();
+          const value = Number.parseFloat(trimmedDuration);
+          return trimmedDuration.endsWith('ms') ? value : value * 1000;
+        });
+        const hasVisibleWidthTransition = transitionProperties.some((property, index) => {
+          const duration = transitionDurations[index % transitionDurations.length] || 0;
+          return (property === 'all' || property === 'width') && duration > 1;
+        });
+
+        stage.addEventListener('transitionend', onTransitionEnd);
+        window.addEventListener('resize', onWindowResize, { once: true });
+      })
+  );
+}
+
+async function resizeViewportAndWaitForStageWidthTransition(
+  page: Page,
+  width: number,
+  height: number
+): Promise<void> {
+  const stageTransition = waitForStageWidthTransition(page);
+  await page.setViewportSize({ width, height });
+  await stageTransition;
+}
+
+async function getMobileComposerLayout(page: Page): Promise<{
+  inputWidth: number;
+  mainWidth: number;
+  sidebarWidth: number;
+}> {
+  return page.evaluate(() => {
+    const root = document.querySelector('#deep-chat-view')?.shadowRoot;
+    const textInputContainer = root?.querySelector<HTMLElement>('#text-input-container');
+    const main = document.querySelector<HTMLElement>('#main-content');
+    const sidebar = document.querySelector<HTMLElement>('#dynamic-sidebar');
+
+    return {
+      inputWidth: Math.round(textInputContainer?.getBoundingClientRect().width || 0),
+      mainWidth: Math.round(main?.getBoundingClientRect().width || 0),
+      sidebarWidth: Math.round(sidebar?.getBoundingClientRect().width || 0),
+    };
+  });
+}
+
+test('renders precise empty and sendable states, then sends with the phone-width button', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
   await seedMockProviderStorage(page);
   await mockLLMStream(page, ['Deep Chat ', '浏览器发送正常']);
   await openDeepChatAndRefreshMockConfig(page);
 
-  const requestPromise = page.waitForRequest('**/mock-llm/chat/completions');
   const chatInput = page.locator('#deep-chat-view #text-input');
   await expect(chatInput).toBeVisible();
+  await expect
+    .poll(() => getSubmitButtonVisualState(page))
+    .toMatchObject({
+      ariaBusy: null,
+      ariaDisabled: 'true',
+      ariaLabel: '发送消息',
+      backgroundColor: 'rgb(148, 163, 184)',
+      cursor: 'not-allowed',
+      disabled: true,
+      loading: false,
+      pointerEvents: 'auto',
+      stopActive: false,
+      stopThreadId: null,
+      submit: false,
+      title: '发送消息',
+    });
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+
+  await resizeViewportAndWaitForStageWidthTransition(page, 375, 720);
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+
   await chatInput.fill(USER_PROMPT);
-  await chatInput.press('Enter');
+  await expect
+    .poll(() => getSubmitButtonVisualState(page))
+    .toMatchObject({
+      ariaBusy: null,
+      ariaDisabled: null,
+      ariaLabel: '发送消息',
+      backgroundColor: 'rgb(168, 95, 63)',
+      cursor: 'pointer',
+      disabled: false,
+      loading: false,
+      pointerEvents: 'auto',
+      stopActive: false,
+      stopThreadId: null,
+      submit: true,
+      title: '发送消息',
+    });
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+
+  const requestPromise = page.waitForRequest('**/mock-llm/chat/completions');
+  const submitButton = page.locator('#deep-chat-view .input-button.inside-end');
+  await expect(submitButton).toBeVisible();
+  await submitButton.click();
 
   const request = await requestPromise;
   const payload = request.postDataJSON() as {
@@ -269,6 +579,587 @@ test('Deep Chat sends a message and renders the assistant response', async ({ pa
   await expect(page.locator('#deep-chat-view')).toContainText(ASSISTANT_REPLY, {
     timeout: 10000,
   });
+});
+
+test('keeps unavailable submit controls out of Tab order and sends with Space', async ({
+  page,
+}) => {
+  await seedMockProviderStorage(page);
+  await mockLLMStream(page, ['Space 键发送正常']);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  const chatInput = page.locator('#deep-chat-view #text-input');
+  const submitButton = page.locator('#deep-chat-view .input-button.inside-end');
+  await expect(chatInput).toBeVisible();
+  await expect
+    .poll(() =>
+      submitButton.evaluate(button => ({
+        ariaDisabled: button.getAttribute('aria-disabled'),
+        tabIndex: button.tabIndex,
+      }))
+    )
+    .toEqual({ ariaDisabled: 'true', tabIndex: -1 });
+
+  await chatInput.fill('请通过 Space 键发送此消息');
+  await expect
+    .poll(() => getSubmitButtonVisualState(page))
+    .toMatchObject({
+      ariaDisabled: null,
+      disabled: false,
+      submit: true,
+    });
+  await expect.poll(() => submitButton.evaluate(button => button.tabIndex)).toBe(0);
+  await chatInput.focus();
+  await page.keyboard.press('Tab');
+  await expect(submitButton).toBeFocused();
+  await expect
+    .poll(() =>
+      submitButton.evaluate(button => {
+        const style = getComputedStyle(button);
+        return {
+          focusVisible: button.matches(':focus-visible'),
+          outlineColor: style.outlineColor,
+          outlineStyle: style.outlineStyle,
+          outlineWidth: style.outlineWidth,
+        };
+      })
+    )
+    .toMatchObject({
+      focusVisible: true,
+      outlineColor: 'rgba(168, 95, 63, 0.75)',
+      outlineStyle: 'solid',
+      outlineWidth: '2px',
+    });
+
+  await submitButton.hover();
+  await page.mouse.down();
+  await expect
+    .poll(() => submitButton.evaluate(button => getComputedStyle(button).backgroundColor))
+    .toBe('rgb(111, 57, 37)');
+  await page.mouse.move(0, 0);
+  await page.mouse.up();
+
+  await submitButton.focus();
+  const requestPromise = page.waitForRequest('**/mock-llm/chat/completions');
+  await page.keyboard.press('Space');
+  await requestPromise;
+  await expect(page.locator('#deep-chat-view')).toContainText('Space 键发送正常', {
+    timeout: 10000,
+  });
+});
+
+test('preserves a decorated Skill Chip through send, reload, edit refill, and a narrow viewport', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await seedMockProviderStorage(page);
+  await mockLLMStream(page, ['已收到技能上下文。']);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  await page.locator('#deep-chat-skill-library').click();
+  const applySkill = page.locator(`[data-skill-library-apply="${DECORATED_SKILL_ID}"]`);
+  await expect(applySkill).toHaveCount(1);
+  await applySkill.click();
+
+  const inputChipSelector = '#text-input .deep-chat-context-chip--dismissible';
+  await expect
+    .poll(() => getSkillChipVisualState(page, inputChipSelector))
+    .toMatchObject({
+      backgroundColor: 'rgb(250, 243, 238)',
+      chipMode: 'dismissible',
+      cursor: 'default',
+      hasDismissControl: true,
+      label: DECORATED_SKILL_VISIBLE_TITLE,
+      skillTitle: DECORATED_SKILL_TITLE,
+      visibility: 'visible',
+    });
+  await expect.poll(() => hasSkillContextBar(page)).toBe(false);
+
+  const inputWasRebuilt = await page.evaluate(() => {
+    const chat = document.querySelector('#deep-chat-view') as
+      | (HTMLElement & { onRender?: () => void })
+      | null;
+    const inputBeforeRender = chat?.shadowRoot?.querySelector('#input');
+    chat?.onRender?.();
+    return Boolean(
+      inputBeforeRender && chat?.shadowRoot?.querySelector('#input') !== inputBeforeRender
+    );
+  });
+  expect(inputWasRebuilt).toBe(true);
+  await expect
+    .poll(() => getSkillChipVisualState(page, inputChipSelector))
+    .toMatchObject({
+      chipMode: 'dismissible',
+      hasDismissControl: true,
+      label: DECORATED_SKILL_VISIBLE_TITLE,
+      skillTitle: DECORATED_SKILL_TITLE,
+    });
+  await expect.poll(() => hasSkillContextBar(page)).toBe(false);
+  await expect
+    .poll(() => getSubmitButtonPinState(page), {
+      message: 'the desktop send button should remain inside the rebuilt text input',
+    })
+    .toMatchObject({
+      pinned: true,
+      pointerEvents: 'auto',
+    });
+
+  const requestPromise = page.waitForRequest('**/mock-llm/chat/completions');
+  await page.locator('#deep-chat-view .input-button.inside-end').click();
+  const request = await requestPromise;
+  const payload = request.postDataJSON() as {
+    messages?: Array<{ content?: string; role?: string }>;
+  };
+  const latestMessage = payload.messages?.at(-1);
+  expect(latestMessage).toMatchObject({ role: 'user' });
+  // Wire text keeps the raw title marker for stable Skill identity; the visual Chip label hides emoji.
+  expect(latestMessage?.content).toContain(`「${DECORATED_SKILL_TITLE}」`);
+  expect(latestMessage?.content?.replace(`「${DECORATED_SKILL_TITLE}」`, '').trim()).not.toBe('');
+
+  const staticChipSelector =
+    '.deep-chat-outer-container-role-user .message-bubble .deep-chat-context-chip--static';
+  await expect
+    .poll(() => getSkillChipVisualState(page, staticChipSelector))
+    .toMatchObject({
+      backgroundColor: 'rgb(255, 255, 255)',
+      chipMode: 'static',
+      cursor: 'default',
+      hasDismissControl: false,
+      label: DECORATED_SKILL_VISIBLE_TITLE,
+      skillTitle: DECORATED_SKILL_TITLE,
+      visibility: 'visible',
+    });
+
+  const editButton = page.locator('#deep-chat-view [aria-label="编辑消息"]');
+  await expect(editButton).toHaveCount(1);
+  await editButton.click();
+  await expect
+    .poll(() => getSkillChipVisualState(page, inputChipSelector))
+    .toMatchObject({
+      chipMode: 'dismissible',
+      hasDismissControl: true,
+      label: DECORATED_SKILL_VISIBLE_TITLE,
+      skillTitle: DECORATED_SKILL_TITLE,
+    });
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.locator('#deep-chat-refresh-config').click();
+  await expect
+    .poll(() => getSkillChipVisualState(page, staticChipSelector))
+    .toMatchObject({
+      chipMode: 'static',
+      hasDismissControl: false,
+      label: DECORATED_SKILL_VISIBLE_TITLE,
+      skillTitle: DECORATED_SKILL_TITLE,
+    });
+
+  const reloadedEditButton = page.locator('#deep-chat-view [aria-label="编辑消息"]');
+  await expect(reloadedEditButton).toHaveCount(1);
+  await reloadedEditButton.click();
+  await expect
+    .poll(() => getSkillChipVisualState(page, inputChipSelector))
+    .toMatchObject({
+      chipMode: 'dismissible',
+      hasDismissControl: true,
+      label: DECORATED_SKILL_VISIBLE_TITLE,
+      skillTitle: DECORATED_SKILL_TITLE,
+    });
+
+  await resizeViewportAndWaitForStageWidthTransition(page, 375, 720);
+  await expect
+    .poll(() => getSkillChipVisualState(page, inputChipSelector))
+    .toMatchObject({
+      chipMode: 'dismissible',
+      label: DECORATED_SKILL_VISIBLE_TITLE,
+      skillTitle: DECORATED_SKILL_TITLE,
+      visibility: 'visible',
+    });
+  await expect.poll(() => hasSkillContextBar(page)).toBe(false);
+  const narrowChipBounds = await page.evaluate(() => {
+    const root = document.querySelector('#deep-chat-view')?.shadowRoot;
+    const input = root?.querySelector<HTMLElement>('#text-input');
+    const chip = input?.querySelector<HTMLElement>('.deep-chat-context-chip--dismissible');
+    if (!input || !chip) {
+      return null;
+    }
+
+    const inputRect = input.getBoundingClientRect();
+    const chipRect = chip.getBoundingClientRect();
+    return {
+      chipRight: Math.round(chipRect.right),
+      chipWidth: Math.round(chipRect.width),
+      inputLeft: Math.round(inputRect.left),
+      inputRight: Math.round(inputRect.right),
+    };
+  });
+  expect(narrowChipBounds).not.toBeNull();
+  expect(narrowChipBounds).toMatchObject({ chipWidth: expect.any(Number) });
+  expect(narrowChipBounds?.chipWidth).toBeGreaterThan(0);
+  expect(narrowChipBounds?.chipRight).toBeLessThanOrEqual(narrowChipBounds?.inputRight ?? 0);
+  expect(narrowChipBounds?.chipRight).toBeGreaterThan(narrowChipBounds?.inputLeft ?? 0);
+});
+
+test('keeps the send button pinned when the composer grows to multiple lines', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 720 });
+  await seedMockProviderStorage(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  const chatInput = page.locator('#deep-chat-view #text-input');
+  await expect(chatInput).toBeVisible();
+  await chatInput.fill('第一行输入\n第二行输入\n第三行输入\n第四行输入');
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const textInputContainer = document
+          .querySelector('#deep-chat-view')
+          ?.shadowRoot?.querySelector<HTMLElement>('#text-input-container');
+        return textInputContainer ? textInputContainer.getBoundingClientRect().height > 58 : false;
+      })
+    )
+    .toBe(true);
+  await expect
+    .poll(() => getSubmitButtonVisualState(page))
+    .toMatchObject({
+      ariaBusy: null,
+      ariaDisabled: null,
+      ariaLabel: '发送消息',
+      backgroundColor: 'rgb(168, 95, 63)',
+      cursor: 'pointer',
+      disabled: false,
+      loading: false,
+      pointerEvents: 'auto',
+      stopActive: false,
+      stopThreadId: null,
+      submit: true,
+      title: '发送消息',
+    });
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+});
+
+test('keeps the send button pinned to the text input after each viewport change', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await seedMockProviderStorage(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
+  await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+
+  await resizeViewportAndWaitForStageWidthTransition(page, 768, 720);
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+
+  await resizeViewportAndWaitForStageWidthTransition(page, 375, 720);
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+
+  await resizeViewportAndWaitForStageWidthTransition(page, 768, 720);
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+});
+
+test('keeps the desktop send button inside the text input throughout rail-width transitions', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await seedMockProviderStorage(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  const railToggle = page.locator('#deep-chat-toggle-rail');
+  await expect(railToggle).toBeVisible();
+  await railToggle.click();
+  await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+
+  const transitionSamples = await page.evaluate(
+    () =>
+      new Promise<Array<{ bottomGap: number; rightGap: number; withinInput: boolean }>>(resolve => {
+        const root = document.querySelector('#deep-chat-view')?.shadowRoot;
+        const toggle = document.querySelector<HTMLButtonElement>('#deep-chat-toggle-rail');
+        const button = root?.querySelector<HTMLElement>('.input-button.inside-end');
+        const textInput = root?.querySelector<HTMLElement>('#text-input-container');
+        if (!toggle || !button || !textInput) {
+          throw new Error('Deep Chat desktop rail or composer is missing');
+        }
+
+        const samples: Array<{ bottomGap: number; rightGap: number; withinInput: boolean }> = [];
+        const sample = (): void => {
+          const buttonRect = button.getBoundingClientRect();
+          const inputRect = textInput.getBoundingClientRect();
+          samples.push({
+            bottomGap: Math.round((inputRect.bottom - buttonRect.bottom) * 100) / 100,
+            rightGap: Math.round((inputRect.right - buttonRect.right) * 100) / 100,
+            withinInput:
+              buttonRect.left >= inputRect.left - 0.5 &&
+              buttonRect.right <= inputRect.right + 0.5 &&
+              buttonRect.top >= inputRect.top - 0.5 &&
+              buttonRect.bottom <= inputRect.bottom + 0.5,
+          });
+        };
+
+        toggle.click();
+        let frame = 0;
+        const capture = (): void => {
+          sample();
+          frame += 1;
+          if (frame >= 20) {
+            resolve(samples);
+            return;
+          }
+          window.requestAnimationFrame(capture);
+        };
+        window.requestAnimationFrame(capture);
+      })
+  );
+
+  expect(transitionSamples).toHaveLength(20);
+  expect(transitionSamples.every(sample => sample.withinInput)).toBe(true);
+  expect(
+    transitionSamples.every(
+      sample => Math.abs(sample.rightGap - 11) <= 2 && Math.abs(sample.bottomGap - 11) <= 2
+    )
+  ).toBe(true);
+});
+
+test('keeps the desktop send button inside a non-empty Skill composer after Deep Chat redraws', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await seedMockProviderStorage(page);
+  await mockLLMStream(page, ['技能会话重绘后仍可继续对话。']);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  await page.locator('#deep-chat-skill-library').click();
+  await page.locator(`[data-skill-library-apply="${DECORATED_SKILL_ID}"]`).click();
+  await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+
+  await page.locator('#deep-chat-view .input-button.inside-end').click();
+  await expect(page.locator('#deep-chat-view')).toContainText('技能会话重绘后仍可继续对话。', {
+    timeout: 10000,
+  });
+  await expect.poll(() => hasSkillContextBar(page)).toBe(false);
+
+  const redraw = await page.evaluate(
+    () =>
+      new Promise<{
+        inputWasRebuilt: boolean;
+        samples: Array<{
+          bottomGap: number;
+          pinned: boolean;
+          rightGap: number;
+          withinInput: boolean;
+        }>;
+      }>(resolve => {
+        const chat = document.querySelector('#deep-chat-view') as
+          | (HTMLElement & { onRender?: () => void })
+          | null;
+        const root = chat?.shadowRoot;
+        const inputBeforeRender = root?.querySelector<HTMLElement>('#input');
+        if (!chat || !root || !inputBeforeRender || typeof chat.onRender !== 'function') {
+          throw new Error('Deep Chat redraw path is unavailable');
+        }
+
+        chat.onRender();
+        const inputWasRebuilt = root.querySelector('#input') !== inputBeforeRender;
+        const samples: Array<{
+          bottomGap: number;
+          pinned: boolean;
+          rightGap: number;
+          withinInput: boolean;
+        }> = [];
+        let frame = 0;
+        const capture = (): void => {
+          const button = root.querySelector<HTMLElement>('.input-button.inside-end');
+          const textInput = root.querySelector<HTMLElement>('#text-input-container');
+          if (!button || !textInput) {
+            samples.push({
+              bottomGap: Number.NaN,
+              pinned: false,
+              rightGap: Number.NaN,
+              withinInput: false,
+            });
+          } else {
+            const buttonRect = button.getBoundingClientRect();
+            const inputRect = textInput.getBoundingClientRect();
+            const rightGap = Math.round((inputRect.right - buttonRect.right) * 100) / 100;
+            const bottomGap = Math.round((inputRect.bottom - buttonRect.bottom) * 100) / 100;
+            const withinInput =
+              buttonRect.left >= inputRect.left - 0.5 &&
+              buttonRect.right <= inputRect.right + 0.5 &&
+              buttonRect.top >= inputRect.top - 0.5 &&
+              buttonRect.bottom <= inputRect.bottom + 0.5;
+            samples.push({
+              bottomGap,
+              pinned: withinInput && Math.abs(rightGap - 11) <= 3 && Math.abs(bottomGap - 11) <= 3,
+              rightGap,
+              withinInput,
+            });
+          }
+
+          frame += 1;
+          if (frame >= 20) {
+            resolve({ inputWasRebuilt, samples });
+            return;
+          }
+          window.requestAnimationFrame(capture);
+        };
+        window.requestAnimationFrame(capture);
+      })
+  );
+
+  expect(redraw.inputWasRebuilt).toBe(true);
+  expect(redraw.samples).toHaveLength(20);
+  expect(redraw.samples.every(sample => sample.pinned)).toBe(true);
+});
+
+test('keeps the send button pinned after a reduced-motion viewport change', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await seedMockProviderStorage(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
+  await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+
+  await resizeViewportAndWaitForStageWidthTransition(page, 375, 720);
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+});
+
+test('keeps the app sidebar out of phone-width Deep Chat composer layouts', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 720 });
+  await seedMockProviderStorage(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
+  await expect.poll(() => isSubmitButtonPinnedToTextInput(page)).toBe(true);
+  await expect
+    .poll(async () => {
+      const layout = await getMobileComposerLayout(page);
+      return layout.sidebarWidth === 0 && layout.mainWidth >= 320 && layout.inputWidth >= 260;
+    })
+    .toBe(true);
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+
+  await resizeViewportAndWaitForStageWidthTransition(page, 767, 720);
+  await expect
+    .poll(async () => {
+      const layout = await getMobileComposerLayout(page);
+      return layout.sidebarWidth === 0 && layout.mainWidth >= 700 && layout.inputWidth >= 600;
+    })
+    .toBe(true);
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+
+  await resizeViewportAndWaitForStageWidthTransition(page, 768, 720);
+  await expect
+    .poll(async () => {
+      const layout = await getMobileComposerLayout(page);
+      return layout.sidebarWidth >= 240 && layout.mainWidth >= 500 && layout.inputWidth >= 400;
+    })
+    .toBe(true);
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+});
+
+test('keeps the phone-height composer and send button inside the viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 300 });
+  await seedMockProviderStorage(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  await expect(page.locator('#deep-chat-view #text-input')).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const root = document.querySelector('#deep-chat-view')?.shadowRoot;
+        const textInputContainer = root?.querySelector<HTMLElement>('#text-input-container');
+        const button = root?.querySelector<HTMLElement>('.input-button.inside-end');
+        if (!textInputContainer || !button) {
+          return false;
+        }
+
+        const composer = textInputContainer.getBoundingClientRect();
+        const buttonRect = button.getBoundingClientRect();
+        return (
+          composer.top >= 0 &&
+          composer.bottom <= window.innerHeight &&
+          buttonRect.top >= 0 &&
+          buttonRect.bottom <= window.innerHeight
+        );
+      })
+    )
+    .toBe(true);
+});
+
+test('keeps preflight loading distinct from an active stop control', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await seedMockProviderStorage(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  await page.evaluate(() => {
+    const button = document
+      .querySelector('#deep-chat-view')
+      ?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+    if (!button) {
+      throw new Error('Deep Chat submit button is missing');
+    }
+    button.classList.remove('disabled-button', 'submit-button');
+    button.classList.add('loading-button');
+  });
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const button = document
+          .querySelector('#deep-chat-view')
+          ?.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
+        if (!button) {
+          return null;
+        }
+
+        return {
+          ariaLabel: button.getAttribute('aria-label'),
+          beforeIsStopSquare:
+            getComputedStyle(button, '::before').content === '""' &&
+            getComputedStyle(button, '::before').backgroundColor === 'rgb(255, 255, 255)' &&
+            getComputedStyle(button, '::before').height === '12px' &&
+            getComputedStyle(button, '::before').width === '12px',
+          backgroundColor: getComputedStyle(button).backgroundColor,
+          cursor: getComputedStyle(button).cursor,
+          loading: button.classList.contains('loading-button'),
+          stopActive: button.hasAttribute('data-deep-chat-stop-active'),
+          title: button.getAttribute('title'),
+        };
+      })
+    )
+    .toMatchObject({
+      ariaLabel: '正在准备请求',
+      beforeIsStopSquare: false,
+      backgroundColor: 'rgb(168, 95, 63)',
+      cursor: 'progress',
+      loading: true,
+      stopActive: false,
+      title: '正在准备请求',
+    });
 });
 
 test('continues typewriter output after switching away and back during a stream', async ({
@@ -414,6 +1305,48 @@ test('turns the send button into a stop button and aborts the active response', 
       submitButton.getAttribute('aria-label') === '停止生成'
     );
   });
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const button = document
+            .querySelector('#deep-chat-view')
+            ?.shadowRoot?.querySelector<HTMLElement>(
+              '.input-button.inside-end[data-deep-chat-stop-active]'
+            );
+          return button ? getComputedStyle(button).backgroundColor : null;
+        }),
+      {
+        message: 'stop button should finish its red background transition',
+        timeout: 5000,
+      }
+    )
+    .toBe('rgb(220, 38, 38)');
+  await expect
+    .poll(() => getSubmitButtonVisualState(page))
+    .toMatchObject({
+      ariaBusy: null,
+      ariaDisabled: null,
+      ariaLabel: '停止生成',
+      backgroundColor: 'rgb(220, 38, 38)',
+      cursor: 'pointer',
+      disabled: false,
+      loading: false,
+      pointerEvents: 'auto',
+      stopActive: true,
+      stopThreadId: expect.stringMatching(/.+/),
+      submit: false,
+      title: '停止生成',
+    });
+  await expect
+    .poll(() => getSubmitButtonPinState(page), {
+      message: 'stop button should settle at the text input lower-right corner',
+      timeout: 5000,
+    })
+    .toMatchObject({
+      pinned: true,
+      pointerEvents: 'auto',
+    });
   const stopButtonVisualState = await page.evaluate(() => {
     const root = document.querySelector('#deep-chat-view')?.shadowRoot;
     const submitButton = root?.querySelector<HTMLElement>('.input-button.inside-end');
@@ -423,32 +1356,51 @@ test('turns the send button into a stop button and aborts the active response', 
 
     const rect = submitButton.getBoundingClientRect();
     const style = getComputedStyle(submitButton);
+    const beforeStyle = getComputedStyle(submitButton, '::before');
     const stopIcon = root?.querySelector<HTMLElement>('#stop-icon');
     const loadingIcon = root?.querySelector<HTMLElement>('.loading-submit-button');
+    const submitIcon = root?.querySelector<HTMLElement>('#submit-icon');
 
     return {
       backgroundColor: style.backgroundColor,
       borderRadius: style.borderRadius,
+      beforeBackgroundColor: beforeStyle.backgroundColor,
+      beforeBorderRadius: beforeStyle.borderRadius,
+      beforeDisplay: beforeStyle.display,
+      beforeHeight: beforeStyle.height,
+      beforeWidth: beforeStyle.width,
       height: Math.round(rect.height),
       loadingDisplay: loadingIcon ? getComputedStyle(loadingIcon).display : null,
       stopIconDisplay: stopIcon ? getComputedStyle(stopIcon).display : null,
+      submitIconDisplay: submitIcon ? getComputedStyle(submitIcon).display : null,
       width: Math.round(rect.width),
     };
   });
   expect(stopButtonVisualState).toMatchObject({
     backgroundColor: 'rgb(220, 38, 38)',
     borderRadius: '50%',
+    beforeBackgroundColor: 'rgb(255, 255, 255)',
+    beforeBorderRadius: '3px',
+    beforeDisplay: 'block',
+    beforeHeight: '12px',
+    beforeWidth: '12px',
     height: 36,
     width: 36,
   });
   expect([null, 'none']).toContain(stopButtonVisualState.loadingDisplay);
   expect([null, 'none']).toContain(stopButtonVisualState.stopIconDisplay);
+  expect([null, 'none']).toContain(stopButtonVisualState.submitIconDisplay);
 
   const stopButton = page.locator(
     '#deep-chat-view .input-button.inside-end[data-deep-chat-stop-active]'
   );
   await expect(stopButton).toHaveAttribute('data-deep-chat-stop-thread-id', /.+/);
   await expect(stopButton).toBeVisible();
+  await resizeViewportAndWaitForStageWidthTransition(page, 375, 720);
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
   await stopButton.click();
   releaseHeldRequest();
 
@@ -459,4 +1411,78 @@ test('turns the send button into a stop button and aborts the active response', 
   await expect(page.locator('#deep-chat-thread-list .deep-chat-thread-meta')).not.toContainText(
     '生成中 ·'
   );
+  await expect
+    .poll(() => getSubmitButtonVisualState(page))
+    .toMatchObject({
+      ariaBusy: null,
+      ariaDisabled: 'true',
+      ariaLabel: '发送消息',
+      backgroundColor: 'rgb(148, 163, 184)',
+      cursor: 'not-allowed',
+      disabled: true,
+      loading: false,
+      pointerEvents: 'auto',
+      stopActive: false,
+      stopThreadId: null,
+      submit: false,
+      title: '发送消息',
+    });
+  expect(await getSubmitButtonPinState(page)).toMatchObject({
+    pinned: true,
+    pointerEvents: 'auto',
+  });
+});
+
+test('shows a pressed stop control and stops with Space', async ({ page }) => {
+  await seedMockProviderStorage(page);
+  const { releaseHeldRequest, requestStarted } = await holdLLMRequest(page);
+  await openDeepChatAndRefreshMockConfig(page);
+
+  try {
+    const chatInput = page.locator('#deep-chat-view #text-input');
+    await chatInput.fill('请保持生成中，测试 Space 停止');
+    await chatInput.press('Enter');
+    await requestStarted;
+
+    const stopButton = page.locator(
+      '#deep-chat-view .input-button.inside-end[data-deep-chat-stop-active]'
+    );
+    await expect(stopButton).toBeVisible();
+    await stopButton.focus();
+    await expect
+      .poll(() =>
+        stopButton.evaluate(button => {
+          const style = getComputedStyle(button);
+          return {
+            focusVisible: button.matches(':focus-visible'),
+            outlineColor: style.outlineColor,
+            outlineStyle: style.outlineStyle,
+            outlineWidth: style.outlineWidth,
+          };
+        })
+      )
+      .toMatchObject({
+        focusVisible: true,
+        outlineColor: 'rgba(220, 38, 38, 0.75)',
+        outlineStyle: 'solid',
+        outlineWidth: '2px',
+      });
+
+    await stopButton.hover();
+    await page.mouse.down();
+    await expect
+      .poll(() => stopButton.evaluate(button => getComputedStyle(button).backgroundColor))
+      .toBe('rgb(153, 27, 27)');
+    await page.mouse.move(0, 0);
+    await page.mouse.up();
+
+    await stopButton.focus();
+    await page.keyboard.press('Space');
+    releaseHeldRequest();
+    await expect(page.locator('#deep-chat-view')).toContainText('已停止生成。', {
+      timeout: 10000,
+    });
+  } finally {
+    releaseHeldRequest();
+  }
 });

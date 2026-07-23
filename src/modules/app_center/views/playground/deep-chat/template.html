@@ -77,6 +77,19 @@
           <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
           <span>搜索会话</span>
         </button>
+        <button
+          id="deep-chat-skill-library"
+          class="deep-chat-skill-library-btn"
+          type="button"
+          title="Skill Library"
+          aria-label="Skill Library"
+          aria-haspopup="dialog"
+          aria-controls="deep-chat-skill-library-modal"
+          aria-expanded="false"
+        >
+          <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+          <span class="deep-chat-skill-library-btn__label">Skill Library</span>
+        </button>
       </div>
 
       <div class="deep-chat-thread-list-wrap">
@@ -142,19 +155,6 @@
         </div>
 
         <div class="deep-chat-top-actions">
-          <button
-            id="deep-chat-skill-library"
-            class="deep-chat-skill-library-btn"
-            type="button"
-            title="Skill Library"
-            aria-label="Skill Library"
-            aria-haspopup="dialog"
-            aria-controls="deep-chat-skill-library-modal"
-            aria-expanded="false"
-          >
-            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
-            <span class="deep-chat-skill-library-btn__label">Skill Library</span>
-          </button>
           <details class="deep-chat-tuning-panel">
             <summary title="调试参数" aria-label="调试参数">
               <i class="fas fa-sliders" aria-hidden="true"></i>
@@ -224,26 +224,6 @@
           <i class="fas fa-graduation-cap" aria-hidden="true"></i>
           <span id="deep-chat-skill-load-banner-text">正在载入技能…</span>
         </div>
-        <div
-          id="deep-chat-skill-context-bar"
-          class="deep-chat-skill-context-bar"
-          aria-label="已挂载技能"
-          hidden
-        >
-          <div class="deep-chat-skill-context-bar__head">
-            <span class="deep-chat-skill-context-bar__label">
-              <i class="fas fa-graduation-cap" aria-hidden="true"></i>
-              已挂载技能
-            </span>
-            <span
-              id="deep-chat-skill-context-bar-hint"
-              class="deep-chat-skill-context-bar__hint"
-            ></span>
-            <button id="deep-chat-skill-undo" class="deep-chat-skill-undo" type="button" hidden>
-              撤销移除
-            </button>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -309,11 +289,7 @@
     aria-hidden="true"
     hidden
   >
-    <div
-      class="deep-chat-skill-library-backdrop"
-      data-skill-library-close
-      aria-hidden="true"
-    ></div>
+    <div class="deep-chat-skill-library-backdrop" data-skill-library-close aria-hidden="true"></div>
     <section
       class="deep-chat-skill-library-dialog"
       role="dialog"

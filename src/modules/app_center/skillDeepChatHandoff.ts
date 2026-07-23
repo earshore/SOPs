@@ -1,7 +1,6 @@
 /**
  * Skills 页 → Deep Chat 试用交接
- * 将 skill 全文作为系统提示词载入；会话级挂载由 Context Bar 展示；
- * 输入框草稿仅承载业务数据（不再内嵌会话 Chip）。
+ * 将 skill 全文作为系统提示词载入；控制器在输入框中渲染可移除的会话 Chip。
  */
 
 export interface SkillDeepChatContext {
@@ -55,19 +54,72 @@ export function formatSkillTitleSegment(skillTitle: string): string {
   return `「${skillTitle}」`;
 }
 
+type SkillTitleContext = {
+  skillId?: string;
+  skillTitle: string;
+};
+
+function getContextIdentity(context: SkillTitleContext, index: number): string {
+  return context.skillId?.trim() || `context-${index}`;
+}
+
+function getMatchingContextIds(
+  contexts: ReadonlyArray<SkillTitleContext>,
+  matches: (contextTitle: string) => boolean
+): Set<string> {
+  const ids = new Set<string>();
+  contexts.forEach((context, index) => {
+    const contextTitle = context.skillTitle.trim();
+    if (contextTitle && matches(contextTitle)) {
+      ids.add(getContextIdentity(context, index));
+    }
+  });
+  return ids;
+}
+
+/** 原始「技能名」标记只有在唯一指向一个 Skill 时才可水合。 */
+export function isUnambiguousRawSkillTitle(
+  title: string,
+  contexts: ReadonlyArray<SkillTitleContext>
+): boolean {
+  return getMatchingContextIds(contexts, contextTitle => contextTitle === title).size === 1;
+}
+
+/**
+ * 裸标题既可能来自原始标题，也可能来自去 emoji 后的展示标题。
+ * 只有二者合计仍唯一时，才允许把它转换成 Skill 标记。
+ */
+export function isUnambiguousSkillTitleSurface(
+  title: string,
+  contexts: ReadonlyArray<SkillTitleContext>
+): boolean {
+  return (
+    getMatchingContextIds(
+      contexts,
+      contextTitle => contextTitle === title || displaySkillTitle(contextTitle) === title
+    ).size === 1
+  );
+}
+
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /** 从草稿中移除指定技能标题的 Chip 标记（「技能名」与裸标题） */
-export function stripSkillMarkersFromDraft(draft: string, titles: ReadonlyArray<string>): string {
+export function stripSkillMarkersFromDraft(
+  draft: string,
+  titles: ReadonlyArray<string>,
+  contexts: ReadonlyArray<SkillTitleContext> = titles.map(skillTitle => ({ skillTitle }))
+): string {
   let body = draft || '';
   for (const rawTitle of titles) {
     const title = rawTitle.trim();
     if (!title) continue;
     const segment = formatSkillTitleSegment(title);
     body = body.replace(new RegExp(escapeRegExp(segment), 'g'), '');
-    body = body.replace(new RegExp(`(?<!「)${escapeRegExp(title)}(?!」)`, 'g'), '');
+    if (isUnambiguousSkillTitleSurface(title, contexts)) {
+      body = body.replace(new RegExp(`(^|\\n)${escapeRegExp(title)}(?=\\n|$)`, 'g'), '$1');
+    }
   }
   return body
     .replace(/^\n+/, '')
@@ -87,7 +139,8 @@ export function prefixDraftWithSkillContexts(
   // 先清掉仍在列表中的技能标记，再统一前缀
   let body = stripSkillMarkersFromDraft(
     draft,
-    contexts.map(context => context.skillTitle)
+    contexts.map(context => context.skillTitle),
+    contexts
   );
 
   if (contexts.length === 0) {
@@ -105,29 +158,88 @@ export function prefixDraftWithSkillContexts(
   return normalizeSkillChipDraftText(combined, contexts);
 }
 
+type SkillChipMarkerMaps = {
+  bareMarkers: Map<string, string>;
+  canonicalMarkers: Map<string, string>;
+};
+
+function buildSkillChipMarkerMaps(contexts: ReadonlyArray<SkillTitleContext>): SkillChipMarkerMaps {
+  const canonicalMarkers = new Map<string, string>();
+  const bareMarkers = new Map<string, string>();
+  for (const context of contexts) {
+    const title = context.skillTitle.trim();
+    if (!title) continue;
+    const segment = formatSkillTitleSegment(title);
+    if (isUnambiguousRawSkillTitle(title, contexts)) {
+      canonicalMarkers.set(segment, segment);
+    }
+
+    for (const marker of [title, displaySkillTitle(title)]) {
+      if (isUnambiguousSkillTitleSurface(marker, contexts)) {
+        bareMarkers.set(marker, segment);
+      }
+    }
+  }
+  return { bareMarkers, canonicalMarkers };
+}
+
+function normalizeCanonicalSkillMarkers(
+  text: string,
+  canonicalMarkers: Map<string, string>
+): string {
+  const canonicalPattern = Array.from(canonicalMarkers.keys())
+    .sort((left, right) => right.length - left.length)
+    .map(escapeRegExp)
+    .join('|');
+  if (!canonicalPattern) {
+    return text;
+  }
+  return text.replace(
+    new RegExp(`\\n*(${canonicalPattern})\\n*`, 'g'),
+    (_match, marker: string) => canonicalMarkers.get(marker) || marker
+  );
+}
+
+function normalizeLeadingBareSkillMarkers(text: string, bareMarkers: Map<string, string>): string {
+  const barePattern = Array.from(bareMarkers.keys())
+    .sort((left, right) => right.length - left.length)
+    .map(escapeRegExp)
+    .join('|');
+  if (!barePattern) {
+    return text;
+  }
+
+  const leadingBarePattern = new RegExp(`^(?:[\\t ]*\\n)*[\\t ]*(${barePattern})[\\t ]*(?:\\n+|$)`);
+  let normalizedPrefix = '';
+  let remaining = text;
+  let leadingMatch = remaining.match(leadingBarePattern);
+  while (leadingMatch) {
+    const marker = leadingMatch[1] || '';
+    normalizedPrefix += bareMarkers.get(marker) || marker;
+    remaining = remaining.slice(leadingMatch[0].length);
+    leadingMatch = remaining.match(leadingBarePattern);
+  }
+  return `${normalizedPrefix}${remaining}`;
+}
+
 /**
  * 去掉 Chip 文本段两侧的换行。
  * 浏览器 / deep-chat innerText 会在 contenteditable=false 节点旁注入 \n。
  */
 export function normalizeSkillChipDraftText(
   text: string,
-  contexts: ReadonlyArray<{ skillTitle: string }>
+  contexts: ReadonlyArray<SkillTitleContext>,
+  normalizeLeadingBareTitles = true
 ): string {
   if (!text || contexts.length === 0) {
     return text;
   }
 
-  let next = text;
-  for (const context of contexts) {
-    const title = context.skillTitle.trim();
-    if (!title) continue;
-    const segment = formatSkillTitleSegment(title);
-    const titlePattern = escapeRegExp(title);
-    const segmentPattern = escapeRegExp(segment);
-    next = next.replace(new RegExp(`\\n*${segmentPattern}\\n*`, 'g'), segment);
-    next = next.replace(new RegExp(`\\n*(?<!「)${titlePattern}(?!」)\\n*`, 'g'), segment);
-  }
-  return next;
+  const { bareMarkers, canonicalMarkers } = buildSkillChipMarkerMaps(contexts);
+  const canonicalText = normalizeCanonicalSkillMarkers(text, canonicalMarkers);
+  return normalizeLeadingBareTitles
+    ? normalizeLeadingBareSkillMarkers(canonicalText, bareMarkers)
+    : canonicalText;
 }
 
 /** 代码块语言：脚本/数据类不当作用户试用提示词 */
@@ -197,9 +309,9 @@ function extractMarkdownSection(raw: string, headingPatterns: RegExp[]): string 
 }
 
 /**
- * 可编辑业务草稿（不含技能名 Chip）。
+ * 可编辑业务草稿；控制器会将已挂载技能渲染为可关闭的输入框 Chip。
  * 优先使用 skill 的 Usage Examples；否则回退通用引导。
- * 技能挂载由会话 Context Bar 展示；系统提示词 = skill 全文。
+ * 系统提示词 = skill 全文。
  */
 export function buildSkillDeepChatUserDraft(_skillTitle?: string, skillRaw?: string): string {
   const fromExamples = skillRaw ? extractSkillUsageExamplesDraft(skillRaw) : null;

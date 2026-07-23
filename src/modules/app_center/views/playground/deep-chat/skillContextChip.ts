@@ -7,6 +7,7 @@
 import {
   displaySkillTitle,
   formatSkillTitleSegment,
+  isUnambiguousRawSkillTitle,
   normalizeSkillChipDraftText,
 } from '@/modules/app_center/skillDeepChatHandoff';
 import type { DeepChatSkillContext } from './types';
@@ -90,10 +91,22 @@ export function createSkillContextChip(
   return chip;
 }
 
+function getSkillTitleMarkers(
+  context: DeepChatSkillContext,
+  contexts: DeepChatSkillContext[]
+): string[] {
+  const title = context.skillTitle.trim();
+  if (!title) {
+    return [];
+  }
+
+  return isUnambiguousRawSkillTitle(title, contexts) ? [formatSkillTitleSegment(title)] : [];
+}
+
 function findNextSkillChipMatch(text: string, contexts: DeepChatSkillContext[]): ChipMatch | null {
   let best: ChipMatch | null = null;
   for (const context of contexts) {
-    for (const marker of [formatSkillTitleSegment(context.skillTitle), context.skillTitle]) {
+    for (const marker of getSkillTitleMarkers(context, contexts)) {
       if (!marker) continue;
       const index = text.indexOf(marker);
       if (index < 0) continue;
@@ -129,7 +142,7 @@ export function splitTextIntoChipParts(
 /** 将宿主内 Chip + 文本序列化为纯文本（Chip → 「技能名」） */
 export function serializeChipContainingElement(
   root: HTMLElement,
-  contexts: ReadonlyArray<Pick<DeepChatSkillContext, 'skillTitle'>> = []
+  _contexts: ReadonlyArray<Pick<DeepChatSkillContext, 'skillId' | 'skillTitle'>> = []
 ): string {
   let result = '';
 
@@ -168,17 +181,15 @@ export function serializeChipContainingElement(
   }
 
   const trimmedTail = result.replace(/\n+$/u, match => match.slice(0, 2));
-  return normalizeSkillChipDraftText(trimmedTail, contexts);
+  return trimmedTail;
 }
 
 export function textContainsSkillChipMarker(
   plainText: string,
   contexts: DeepChatSkillContext[]
 ): boolean {
-  return contexts.some(
-    context =>
-      plainText.includes(formatSkillTitleSegment(context.skillTitle)) ||
-      plainText.includes(context.skillTitle)
+  return contexts.some(context =>
+    getSkillTitleMarkers(context, contexts).some(marker => plainText.includes(marker))
   );
 }
 
@@ -205,6 +216,64 @@ export function setContentWithInlineSkillChips(
   }
 }
 
+function isStaticChipExcludedTextNode(node: Text): boolean {
+  return Boolean(node.parentElement?.closest('a, code, pre, script, style, textarea'));
+}
+
+function hydrateStaticSkillChipsInBubble(
+  bubble: HTMLElement,
+  contexts: DeepChatSkillContext[]
+): void {
+  const textNodes: Array<{ node: Text; excluded: boolean }> = [];
+  const collectTextNodes = (node: Node): void => {
+    for (const child of Array.from(node.childNodes)) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        textNodes.push({
+          node: child as Text,
+          excluded: isStaticChipExcludedTextNode(child as Text),
+        });
+        continue;
+      }
+      if (child instanceof HTMLElement && !child.classList.contains(SKILL_CHIP_CLASS)) {
+        collectTextNodes(child);
+      }
+    }
+  };
+  collectTextNodes(bubble);
+
+  let hasLeadingMessageText = false;
+  for (const { node: textNode, excluded } of textNodes) {
+    if (excluded) {
+      hasLeadingMessageText ||= Boolean(textNode.data.trim());
+      continue;
+    }
+
+    const normalized = normalizeSkillChipDraftText(textNode.data, contexts, !hasLeadingMessageText);
+    if (!textContainsSkillChipMarker(normalized, contexts)) {
+      hasLeadingMessageText ||= Boolean(textNode.data.trim());
+      continue;
+    }
+
+    const parts = splitTextIntoChipParts(normalized, contexts);
+    if (!parts.some(part => part.type === 'chip')) {
+      continue;
+    }
+
+    const fragment = bubble.ownerDocument.createDocumentFragment();
+    for (const part of parts) {
+      fragment.appendChild(
+        part.type === 'text'
+          ? bubble.ownerDocument.createTextNode(part.value)
+          : createSkillContextChip(part.context, 'static')
+      );
+    }
+    textNode.replaceWith(fragment);
+    hasLeadingMessageText ||= parts.some(
+      part => part.type === 'text' && Boolean(part.value.trim())
+    );
+  }
+}
+
 /**
  * 将用户消息气泡中的「技能名」水合为 static Chip（无移除 ×）。
  * 已含 Chip 的气泡跳过，避免 MutationObserver 循环。
@@ -225,10 +294,6 @@ export function hydrateUserMessageBubblesWithSkillChips(
     if (bubble.querySelector(`.${SKILL_CHIP_CLASS}`)) {
       continue;
     }
-    const plain = (bubble.innerText || bubble.textContent || '').trim();
-    if (!plain || !textContainsSkillChipMarker(plain, contexts)) {
-      continue;
-    }
-    setContentWithInlineSkillChips(bubble, plain, contexts, 'static');
+    hydrateStaticSkillChipsInBubble(bubble, contexts);
   }
 }

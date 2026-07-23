@@ -83,6 +83,19 @@ describe('skillDeepChatHandoff queue and draft builders', () => {
     expect(prefixDraftWithSkillContexts(cleaned, [])).toBe('业务数据：ASIN');
   });
 
+  it('does not leave a decoration suffix when overlapping Skill titles are prefixed', () => {
+    const contexts = [
+      { skillId: 'plain', skillTitle: 'Amazon Advertising Strategy' },
+      { skillId: 'decorated', skillTitle: 'Amazon Advertising Strategy 📢' },
+    ];
+
+    expect(prefixDraftWithSkillContexts('Amazon Advertising Strategy 📢', contexts)).toBe(
+      `${formatSkillTitleSegment('Amazon Advertising Strategy')}${formatSkillTitleSegment(
+        'Amazon Advertising Strategy 📢'
+      )}`
+    );
+  });
+
   it('skips bash/json usage fences and falls back to generic draft', () => {
     const raw = [
       '# FBA',
@@ -129,9 +142,26 @@ describe('skillDeepChatHandoff chip normalize and system prompt', () => {
       `请根据系统提示词中的 Amazon 技能${segment}方法论，结合我补充的业务数据给出可执行分析。\n\n业务数据：\n（x）`
     );
     expect(normalizeSkillChipDraftText(cleaned, contexts)).toBe(cleaned);
-    expect(normalizeSkillChipDraftText(`技能\n\n${title}\n\n方法论`, contexts)).toBe(
+    expect(normalizeSkillChipDraftText(`技能\n\n${segment}\n\n方法论`, contexts)).toBe(
       `技能${segment}方法论`
     );
+  });
+
+  it('does not canonicalize a bare title when its Skill identity is ambiguous', () => {
+    const contexts = [
+      { skillId: 'plain', skillTitle: 'Amazon Advertising Strategy' },
+      { skillId: 'decorated', skillTitle: 'Amazon Advertising Strategy 📢' },
+    ];
+
+    expect(normalizeSkillChipDraftText('Amazon Advertising Strategy', contexts)).toBe(
+      'Amazon Advertising Strategy'
+    );
+    expect(
+      normalizeSkillChipDraftText(
+        formatSkillTitleSegment('Amazon Advertising Strategy 📢'),
+        contexts
+      )
+    ).toBe(formatSkillTitleSegment('Amazon Advertising Strategy 📢'));
   });
 
   it('builds system prompt from remaining skill contexts', () => {

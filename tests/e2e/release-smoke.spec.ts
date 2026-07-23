@@ -950,33 +950,12 @@ test.describe('release candidate smoke', () => {
       timeout: 15_000,
     });
 
-    // 非空会话会弹出挂载方式；优先点「新建会话」
-    const newSessionBtn = page.getByRole('button', { name: '新建会话' });
-    if (await newSessionBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await newSessionBtn.click();
-    }
-
-    // 挂载成功信号：成功 toast / 列表技能徽标 / 上下文条（任一条即可）
-    await expect
-      .poll(
-        async () => {
-          const toastOk =
-            (await page
-              .locator('#toast-container .toast')
-              .filter({ hasText: /技能|挂载|载入/ })
-              .count()) > 0;
-          const badge = (await page.locator('.deep-chat-thread-skill-badge').count()) > 0;
-          const bar = page.locator('#deep-chat-skill-context-bar');
-          const barPresent =
-            (await bar.count()) > 0 && (await bar.isVisible().catch(() => false));
-          return toastOk || badge || barPresent;
-        },
-        {
-          timeout: 15_000,
-          message: 'skill trial should toast, badge, or show context bar',
-        }
-      )
-      .toBe(true);
+    const inlineSkillChip = page.locator(
+      '#deep-chat-view #text-input .deep-chat-context-chip--dismissible'
+    );
+    await expect(inlineSkillChip).toBeVisible({ timeout: 15_000 });
+    await expect(inlineSkillChip.locator('[data-action="dismiss-skill-context"]')).toHaveCount(1);
+    await expect(page.locator('#deep-chat-skill-context-bar')).toHaveCount(0);
 
     expect(llmRequestUrls, 'Skills trial handoff should not call LLM endpoints').toEqual([]);
     expect(
