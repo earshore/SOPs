@@ -682,26 +682,20 @@ function alignSubmitButtonLayerToTextInput(chat: DeepChatElement): boolean {
   buttonContainer.style.setProperty('pointer-events', 'none', 'important');
   buttonContainer.style.setProperty('z-index', '2', 'important');
 
-  // 用 #input 坐标系把钮放到输入框右下（单行≈居中，多行贴底）
+  // 用 #input 坐标系把钮锚定到输入框右下。横向沿用 CSS 的动态 inset-inline-end：
+  // 它会按 text-input 的 768px 最大宽度在 rail 转场的每帧插值，不能写入静态像素 right。
   const buttonSize = 36;
   const edgePad = 11;
-  const buttonTop = Math.max(
-    0,
-    Math.round(textRect.top - inputRect.top + textRect.height - buttonSize - edgePad)
-  );
-  const buttonLeft = Math.max(
-    0,
-    Math.round(textRect.left - inputRect.left + textRect.width - buttonSize - edgePad)
-  );
+  const buttonBottom = Math.max(0, Math.round(inputRect.bottom - textRect.bottom + edgePad));
   button.style.setProperty('position', 'absolute', 'important');
-  button.style.setProperty('top', `${buttonTop}px`, 'important');
-  button.style.setProperty('left', `${buttonLeft}px`, 'important');
-  button.style.setProperty('right', 'auto', 'important');
-  button.style.setProperty('bottom', 'auto', 'important');
-  button.style.setProperty('inset-block-start', `${buttonTop}px`, 'important');
-  button.style.setProperty('inset-block-end', 'auto', 'important');
-  button.style.setProperty('inset-inline-start', `${buttonLeft}px`, 'important');
-  button.style.setProperty('inset-inline-end', 'auto', 'important');
+  button.style.setProperty('top', 'auto', 'important');
+  button.style.setProperty('bottom', `${buttonBottom}px`, 'important');
+  button.style.setProperty('inset-block-start', 'auto', 'important');
+  button.style.setProperty('inset-block-end', `${buttonBottom}px`, 'important');
+  button.style.removeProperty('left');
+  button.style.removeProperty('right');
+  button.style.removeProperty('inset-inline-start');
+  button.style.removeProperty('inset-inline-end');
   button.style.setProperty('width', `${buttonSize}px`, 'important');
   button.style.setProperty('height', `${buttonSize}px`, 'important');
   button.style.setProperty('margin', '0', 'important');
@@ -718,6 +712,7 @@ function observeSubmitButtonPin(container: HTMLElement, chat: DeepChatElement): 
   const root = chat.shadowRoot;
   const inputArea = root?.querySelector('#input');
   const textContainer = root?.querySelector('#text-input-container');
+  const stage = container.querySelector<HTMLElement>('.deep-chat-stage');
   if (!root || !inputArea || !textContainer) {
     return;
   }
@@ -736,19 +731,7 @@ function observeSubmitButtonPin(container: HTMLElement, chat: DeepChatElement): 
       const isStopActive = Boolean(pending && !pending.isSettled);
       const button = chat.shadowRoot?.querySelector<HTMLElement>('.input-button.inside-end');
       if (button) {
-        const label = isStopActive ? '停止生成' : '发送消息';
-        button.toggleAttribute('data-deep-chat-stop-active', isStopActive);
-        if (isStopActive) {
-          button.setAttribute('data-deep-chat-stop-thread-id', threadStore.activeThreadId);
-        } else if (button.hasAttribute('data-deep-chat-stop-thread-id')) {
-          button.removeAttribute('data-deep-chat-stop-thread-id');
-        }
-        if (button.getAttribute('aria-label') !== label) {
-          button.setAttribute('aria-label', label);
-        }
-        if (button.title !== label) {
-          button.title = label;
-        }
+        syncSubmitButtonMetadata(button, isStopActive);
       }
     } finally {
       aligning = false;
@@ -764,20 +747,55 @@ function observeSubmitButtonPin(container: HTMLElement, chat: DeepChatElement): 
     subtree: true,
   });
 
+  let resizeAnimationFrame: number | null = null;
+  const onWindowResize = (): void => {
+    if (aligning || resizeAnimationFrame !== null) {
+      return;
+    }
+    resizeAnimationFrame = window.requestAnimationFrame(() => {
+      resizeAnimationFrame = window.requestAnimationFrame(() => {
+        resizeAnimationFrame = null;
+        if (!aligning) {
+          alignSubmitButtonLayerToTextInput(chat);
+        }
+      });
+    });
+  };
+  window.addEventListener('resize', onWindowResize);
+
+  const onStageGeometryTransitionEnd = (event: TransitionEvent): void => {
+    if (
+      event.target === stage &&
+      (event.propertyName === 'width' || event.propertyName.startsWith('padding')) &&
+      !aligning
+    ) {
+      alignSubmitButtonLayerToTextInput(chat);
+    }
+  };
+  stage?.addEventListener('transitionend', onStageGeometryTransitionEnd);
+
+  let resizeObserver: ResizeObserver | null = null;
   if (typeof ResizeObserver !== 'undefined') {
-    const resizeObserver = new ResizeObserver(() => {
+    resizeObserver = new ResizeObserver(() => {
       if (!aligning) {
         alignSubmitButtonLayerToTextInput(chat);
       }
     });
     resizeObserver.observe(textContainer);
     resizeObserver.observe(inputArea);
-    const previousDisconnect = submitButtonPinObserver.disconnect.bind(submitButtonPinObserver);
-    submitButtonPinObserver.disconnect = () => {
-      resizeObserver.disconnect();
-      previousDisconnect();
-    };
   }
+
+  const previousDisconnect = submitButtonPinObserver.disconnect.bind(submitButtonPinObserver);
+  submitButtonPinObserver.disconnect = () => {
+    window.removeEventListener('resize', onWindowResize);
+    stage?.removeEventListener('transitionend', onStageGeometryTransitionEnd);
+    if (resizeAnimationFrame !== null) {
+      window.cancelAnimationFrame(resizeAnimationFrame);
+      resizeAnimationFrame = null;
+    }
+    resizeObserver?.disconnect();
+    previousDisconnect();
+  };
 
   realign();
 }
@@ -806,6 +824,32 @@ function setupSubmitStopButtonSync(
   attempts = 10
 ): void {
   clearSubmitStopButtonSync();
+  const onSubmitButtonSpaceIntent = (event: Event): void => {
+    if (!(event instanceof KeyboardEvent) || event.key !== ' ' || event.repeat) {
+      return;
+    }
+
+    const button = getSubmitButtonFromEventPath(event, chat);
+    if (!button) {
+      return;
+    }
+
+    const isStopActive = button.hasAttribute('data-deep-chat-stop-active');
+    const isUnavailableSubmit =
+      !isStopActive &&
+      (button.classList.contains('disabled-button') ||
+        button.classList.contains('loading-button') ||
+        button.getAttribute('aria-disabled') === 'true');
+    if (isUnavailableSubmit) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    (button as HTMLElement).click();
+  };
+
   const onSubmitButtonStopIntent = (event: Event): void => {
     const button = getSubmitButtonFromEventPath(event, chat);
     const threadId =
@@ -819,18 +863,15 @@ function setupSubmitStopButtonSync(
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
-    const replaceChat = event.type !== 'pointerdown';
-    if (stopPendingRequest(threadId, { replaceChat }) && !replaceChat) {
-      window.setTimeout(() => syncPendingRequestView(threadId, { replaceChat: true }), 0);
-    }
+    stopPendingRequest(threadId, { replaceChat: true });
   };
 
-  document.addEventListener('pointerdown', onSubmitButtonStopIntent, true);
+  document.addEventListener('keydown', onSubmitButtonSpaceIntent, true);
   document.addEventListener('click', onSubmitButtonStopIntent, true);
   const root = chat.shadowRoot;
   const pinned = alignSubmitButtonLayerToTextInput(chat);
   if (root) {
-    root.addEventListener('pointerdown', onSubmitButtonStopIntent, true);
+    root.addEventListener('keydown', onSubmitButtonSpaceIntent, true);
     root.addEventListener('click', onSubmitButtonStopIntent, true);
   }
   if ((!root || !pinned) && attempts > 0) {
@@ -842,9 +883,9 @@ function setupSubmitStopButtonSync(
   }
 
   cleanupSubmitStopButtonListener = () => {
-    document.removeEventListener('pointerdown', onSubmitButtonStopIntent, true);
+    document.removeEventListener('keydown', onSubmitButtonSpaceIntent, true);
     document.removeEventListener('click', onSubmitButtonStopIntent, true);
-    root?.removeEventListener('pointerdown', onSubmitButtonStopIntent, true);
+    root?.removeEventListener('keydown', onSubmitButtonSpaceIntent, true);
     root?.removeEventListener('click', onSubmitButtonStopIntent, true);
   };
   observeSubmitButtonPin(container, chat);
@@ -918,6 +959,37 @@ function clearSubmitStopButtonSync(): void {
   }
 }
 
+function getSubmitButtonLabel(button: HTMLElement, isStopActive: boolean): string {
+  if (isStopActive) {
+    return '停止生成';
+  }
+  return button.classList.contains('loading-button') ? '正在准备请求' : '发送消息';
+}
+
+function syncSubmitButtonMetadata(button: HTMLElement, isStopActive: boolean): void {
+  const label = getSubmitButtonLabel(button, isStopActive);
+  const shouldRemoveFromTabOrder =
+    !isStopActive &&
+    (button.classList.contains('disabled-button') || button.classList.contains('loading-button'));
+  const tabIndex = shouldRemoveFromTabOrder ? -1 : 0;
+  button.toggleAttribute('data-deep-chat-stop-active', isStopActive);
+  if (isStopActive) {
+    button.setAttribute('data-deep-chat-stop-thread-id', threadStore.activeThreadId);
+  } else if (button.hasAttribute('data-deep-chat-stop-thread-id')) {
+    button.removeAttribute('data-deep-chat-stop-thread-id');
+  }
+  // deep-chat 切 disabled/submit 时会清掉 aria；只在变更时写入，避免 MutationObserver 死循环
+  if (button.getAttribute('aria-label') !== label) {
+    button.setAttribute('aria-label', label);
+  }
+  if (button.title !== label) {
+    button.title = label;
+  }
+  if (button.tabIndex !== tabIndex) {
+    button.tabIndex = tabIndex;
+  }
+}
+
 function syncSubmitStopButtonState(container: HTMLElement): void {
   const chat = getChat(container);
   if (chat) {
@@ -934,20 +1006,7 @@ function syncSubmitStopButtonState(container: HTMLElement): void {
     return;
   }
 
-  const label = isStopActive ? '停止生成' : '发送消息';
-  button.toggleAttribute('data-deep-chat-stop-active', isStopActive);
-  if (isStopActive) {
-    button.setAttribute('data-deep-chat-stop-thread-id', threadStore.activeThreadId);
-  } else if (button.hasAttribute('data-deep-chat-stop-thread-id')) {
-    button.removeAttribute('data-deep-chat-stop-thread-id');
-  }
-  // deep-chat 切 disabled/submit 时会清掉 aria；只在变更时写入，避免 MutationObserver 死循环
-  if (button.getAttribute('aria-label') !== label) {
-    button.setAttribute('aria-label', label);
-  }
-  if (button.title !== label) {
-    button.title = label;
-  }
+  syncSubmitButtonMetadata(button, isStopActive);
 }
 
 function syncStopOverlayState(container: HTMLElement, _isPending: boolean): void {
