@@ -3,6 +3,7 @@
  */
 
 import { callLLM, type ChatMessage, type LLMOptions } from '@/services/llmService';
+import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { applyToolTargetModel } from '@/services/toolStrategyService';
 import { getRuntimeLlmAnalysisOptions } from '@/services/runtimeStrategyService';
@@ -166,14 +167,20 @@ async function analyzeTarget(
       config.endpoint,
       config.apiKey,
       config.model,
-      {
-        temperature: 0.3,
-        jsonMode: true,
-        maxTokens: getMasterAnalysisTargetMaxTokens(targetId),
-        ...(config.serviceTier && { serviceTier: config.serviceTier }),
-        stream: true,
-        ...getRuntimeLlmAnalysisOptions(),
-      }
+      withStructuredAnalysisOptions(
+        {
+          temperature: 0.3,
+          maxTokens: getMasterAnalysisTargetMaxTokens(targetId),
+          ...(config.serviceTier && { serviceTier: config.serviceTier }),
+          stream: true,
+          ...getRuntimeLlmAnalysisOptions(),
+        },
+        {
+          provider: config.provider,
+          model: config.model,
+          schemaName: `analysis_${targetId}`,
+        }
+      )
     );
 
     logger.debug('[AI分析] 原始响应长度:', response.length, 'AIAnalysisService');

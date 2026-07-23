@@ -6,6 +6,7 @@
 // ================================================================
 
 import { callLLM } from '@/services/llmService';
+import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import { configCenter } from '@/common/config/ConfigCenter';
 import { ApiError, ValidationError } from '@/common/errors/AppError';
 import { TRANSLATE_PROMPT_TEMPLATE } from '../constants/prompts';
@@ -83,13 +84,19 @@ async function callAnalysisLLM(prompt: string, llmConfig: LLMConfig): Promise<st
     llmConfig.endpoint,
     llmConfig.apiKey,
     llmConfig.model,
-    {
-      jsonMode: true,
-      maxTokens: getMasterAnalysisFullReportMaxTokens(),
-      ...(llmConfig.serviceTier && { serviceTier: llmConfig.serviceTier }),
-      stream: true,
-      timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
-    }
+    withStructuredAnalysisOptions(
+      {
+        maxTokens: getMasterAnalysisFullReportMaxTokens(),
+        ...(llmConfig.serviceTier && { serviceTier: llmConfig.serviceTier }),
+        stream: true,
+        timeout: configCenter.get<number>('llm.analysisTimeout') || 120000,
+      },
+      {
+        provider: llmConfig.provider,
+        model: llmConfig.model,
+        schemaName: 'master_analysis_report',
+      }
+    )
   );
 }
 
@@ -195,13 +202,19 @@ export const AnalysisService = {
       llmConfig.endpoint,
       llmConfig.apiKey,
       llmConfig.model,
-      {
-        jsonMode: true,
-        maxTokens: getMasterAnalysisTranslationMaxTokens(),
-        ...(llmConfig.serviceTier && { serviceTier: llmConfig.serviceTier }),
-        stream: true,
-        timeout: configCenter.get<number>('llm.defaultTimeout') || 60000,
-      }
+      withStructuredAnalysisOptions(
+        {
+          maxTokens: getMasterAnalysisTranslationMaxTokens(),
+          ...(llmConfig.serviceTier && { serviceTier: llmConfig.serviceTier }),
+          stream: true,
+          timeout: configCenter.get<number>('llm.defaultTimeout') || 60000,
+        },
+        {
+          provider: llmConfig.provider,
+          model: llmConfig.model,
+          schemaName: 'analysis_translation',
+        }
+      )
     );
 
     try {

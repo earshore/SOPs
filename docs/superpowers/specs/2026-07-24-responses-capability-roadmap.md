@@ -2,78 +2,65 @@
 
 **日期：** 2026-07-24  
 **对照：** [Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses)  
-**状态：** A/B/C + R1–R7 **闭环完成**（产品文本/推理/工具管道子集；Conversations API 等可选增强另列）
+**状态：** **真闭环完成** — 协议子集 + 业务接入 + 实网 probe 证据 + UI 徽章
 
-## 产品边界（当前）
+## 闭环范围
 
-| 能力                                                | 状态     |
-| --------------------------------------------------- | -------- |
-| Text generation                                     | ✅       |
-| Reasoning + summary stream                          | ✅       |
-| `text.format` json_object / json_schema+strict      | ✅       |
-| store / previous_response_id / stream onResponseId  | ✅       |
-| Function tool loop (`executeTool`)                  | ✅ R1    |
-| Built-in tools 透传                                 | ✅ R2    |
-| Deep Chat lastResponseId 链                         | ✅ R3    |
-| 链上 latest-user-only（reasoning items 服务端保留） | ✅ R4    |
-| 设置页 Capability 徽章                              | ✅ R7    |
-| Conversations API 产品化                            | 可选增强 |
+| 层                                                           | 状态                               |
+| ------------------------------------------------------------ | ---------------------------------- |
+| 协议：text / reasoning / structured / tools / vision / chain | ✅                                 |
+| R1 tool loop                                                 | ✅                                 |
+| R2 built-in 透传                                             | ✅                                 |
+| R3–R4 Deep Chat previous_id + latest-user                    | ✅（网关不支持时自动降级）         |
+| R5 json_schema                                               | ✅                                 |
+| R6 实网 probe                                                | ✅ 脚本 + new.hongecb 实测表       |
+| R7 设置徽章                                                  | ✅                                 |
+| **业务：分析 JSON 结构化 options**                           | ✅ `withStructuredAnalysisOptions` |
+| **业务：Deep Chat 只读 tools**                               | ✅ 推理开启时启用                  |
+| Conversations API 产品化                                     | 可选（本网关无 store/previous_id） |
 
-## 闭环交付清单
+## 业务接入
 
-| 阶段  | 交付                                                      | 提交线索      |
-| ----- | --------------------------------------------------------- | ------------- |
-| A/B/C | flags / text.format / store / previous_id 管道 / 设置提示 | `51cae801` 等 |
-| R1    | tool loop                                                 | `cfa03a26`    |
-| R2    | built-in tool types                                       | `bca1c98e`    |
-| R3    | Deep Chat previous_id                                     | `bca1c98e`    |
-| R4    | chain latest-user input                                   | `9f2f0758`    |
-| R5    | json_schema strict                                        | `9f2f0758`    |
-| R6    | `tools/probe-responses-gateway.mjs`                       | `cfa03a26`    |
-| R7    | 设置页徽章                                                | 本提交        |
+### 分析模块
 
-## 使用要点
+`withStructuredAnalysisOptions` 已接入：
 
-### Deep Chat 多轮（responses）
+- `aiAnalysisService` / `parallelAnalysisService`
+- `analysisService`（全量报告 + 翻译）
+- `ppc_search_terms` `llmAnalysisService`
 
-系统设置选 **Responses** → 会话自动 `store` + `previous_response_id`；换模型清空链。
+行为：读取用户 `apiPath`；Responses + structured → soft `jsonSchema` + `jsonMode`；chat → `jsonMode` + `response_format`。
 
-### Tool loop
+### Deep Chat 只读 tools
 
-```ts
-await callLLM(messages, provider, endpoint, key, model, {
-  apiPath: 'responses',
-  tools: [
-    { type: 'function', name: 'lookup', parameters: { type: 'object' } },
-    { type: 'web_search' },
-  ],
-  executeTool: async ({ name, arguments: args }) => JSON.stringify({ ok: true }),
-});
-```
+会话 **启用推理** 且路径/模型支持 tools 时注入：
 
-### json_schema
+- `get_session_summary`
+- `get_active_model`
+- `list_recent_user_questions`
 
-```ts
-jsonSchema: { name: 'result', schema: { type: 'object', ... }, strict: true }
-```
+无密钥、无写入、未知 tool 拒绝。`enableToolLoop: true`（tool 轮 non-stream）。
 
-### Probe
+## 实网 probe（new.hongecb.store / deepseek-v4-flash）
 
 ```bash
-NEW_API_KEY=sk-... node tools/probe-responses-gateway.mjs
+npm run probe:responses
 ```
 
-## 可选后续（非阻塞闭环）
+| Case                    | Result                     |
+| ----------------------- | -------------------------- |
+| plain text              | pass 200                   |
+| reasoning.effort=low    | pass 200                   |
+| text.format json_object | pass 200                   |
+| store=true              | **fail** 400 not supported |
+| previous_response_id    | **fail** 400 not supported |
+| stream SSE              | pass                       |
 
-1. Conversations API 产品 UI
-2. 分析模块默认接 `jsonSchema`
-3. Deep Chat 挂载业务 tools（lookup ASIN 等）
-4. 网关 live probe 表填入 appendix
+客户端：链式 store/previous 失败时清链并重试（无 store）。
 
 ## 代码入口
 
-- `modelCapability/*` — body / parse / tools / loop
-- `llmService.ts` — transport + tool loop + stream id
-- `deep-chat/controller.ts` — lastResponseId
-- `systemSettings.*` — path hint + **capability badges**
-- `tools/probe-responses-gateway.mjs`
+- `structuredAnalysisOptions.ts`
+- `deepChatBusinessTools.ts`
+- `tools/probe-responses-gateway.mjs` · `npm run probe:responses`
+- `systemSettings` capability badges

@@ -14,6 +14,7 @@ import {
   type LLMOptions,
   type LLMStreamMetrics,
 } from '@/services/llmService';
+import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import { LocalDataStore } from '@/services/localDataStore';
 import { StorageService, STORAGE_KEYS, CACHE_PREFIXES } from '@/services/storageService';
 import { applyToolTargetModel, resolveToolTargetModel } from '@/services/toolStrategyService';
@@ -609,30 +610,36 @@ async function executeAnalysisTask(
       messages.map(message => message.content).join('\n')
     );
 
-    // 调用 LLM
+    // 调用 LLM（Responses 路径自动 text.format / soft jsonSchema）
     const response = await callLLM(
       messages,
       config.provider,
       config.endpoint,
       config.apiKey,
       config.model,
-      {
-        temperature: 0.3,
-        jsonMode: true,
-        maxTokens: getMasterAnalysisTargetMaxTokens(task.targetId),
-        ...(config.serviceTier && { serviceTier: config.serviceTier }),
-        stream: true,
-        onFirstResponse: metrics => {
-          task.firstResponseMs = metrics.elapsedMs;
-          onFirstResponse?.(task, metrics);
+      withStructuredAnalysisOptions(
+        {
+          temperature: 0.3,
+          maxTokens: getMasterAnalysisTargetMaxTokens(task.targetId),
+          ...(config.serviceTier && { serviceTier: config.serviceTier }),
+          stream: true,
+          onFirstResponse: metrics => {
+            task.firstResponseMs = metrics.elapsedMs;
+            onFirstResponse?.(task, metrics);
+          },
+          onStreamUpdate: update => {
+            task.streamChunks = update.chunkCount;
+            task.streamedChars = update.content.length;
+          },
+          timeout: getRuntimeLlmAnalysisOptions().timeout,
+          retries: resolveRetryBudget(retryBudget),
         },
-        onStreamUpdate: update => {
-          task.streamChunks = update.chunkCount;
-          task.streamedChars = update.content.length;
-        },
-        timeout: getRuntimeLlmAnalysisOptions().timeout,
-        retries: resolveRetryBudget(retryBudget),
-      }
+        {
+          provider: config.provider,
+          model: config.model,
+          schemaName: `analysis_${task.targetId}`,
+        }
+      )
     );
 
     // 解析、修复并校验结果

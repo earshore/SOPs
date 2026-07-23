@@ -70,6 +70,11 @@ export {
   type ResponsesToolExecutor,
   type ResponsesToolLoopRoundResult,
 } from './responsesToolLoop';
+export {
+  buildLooseAnalysisJsonSchema,
+  withStructuredAnalysisOptions,
+  type StructuredAnalysisContext,
+} from './structuredAnalysisOptions';
 export { readThinkingBudgetTokens } from './mappers';
 export type { ApiPathId, ApiPathOption } from './apiPaths';
 export {

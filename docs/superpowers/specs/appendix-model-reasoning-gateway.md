@@ -91,3 +91,21 @@ For each production model that should expose reasoning UI:
 - Multi-path: `apiPaths.ts` + settings `llm.apiPath` (see multi-protocol design)
 - Responses parity roadmap: `docs/superpowers/specs/2026-07-24-responses-capability-roadmap.md`
 - Responses structured: `text.format` when `supportsStructuredOutput` (not silent chat-only)
+
+## Live Responses probe (2026-07-24)
+
+```bash
+npm run probe:responses
+# NEW_API_KEY=… NEW_API_ENDPOINT=https://new.hongecb.store/v1
+```
+
+| Date       | Model             | Endpoint          | Case                    | Result                                      |
+| ---------- | ----------------- | ----------------- | ----------------------- | ------------------------------------------- |
+| 2026-07-24 | deepseek-v4-flash | new.hongecb.store | plain text              | **pass** 200                                |
+| 2026-07-24 | deepseek-v4-flash | new.hongecb.store | reasoning.effort=low    | **pass** 200                                |
+| 2026-07-24 | deepseek-v4-flash | new.hongecb.store | text.format json_object | **pass** 200                                |
+| 2026-07-24 | deepseek-v4-flash | new.hongecb.store | store=true              | **fail** 400 stored Responses not supported |
+| 2026-07-24 | deepseek-v4-flash | new.hongecb.store | previous_response_id    | **fail** 400 not supported                  |
+| 2026-07-24 | deepseek-v4-flash | new.hongecb.store | stream SSE              | **pass** hasTextDelta                       |
+
+**Client adaptation:** Deep Chat only sends `store`/`previous_response_id` when chaining; on 400 clears chain and retries without them.

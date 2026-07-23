@@ -1,5 +1,6 @@
 import { ValidationError } from '@/common/errors/AppError';
 import { callLLM, type LLMOptions, type LLMStreamMetrics } from '@/services/llmService';
+import { withStructuredAnalysisOptions } from '@/services/modelCapability';
 import { LocalDataStore } from '@/services/localDataStore';
 import { StorageService, STORAGE_KEYS } from '@/services/storageService';
 import { applyToolTargetModel } from '@/services/toolStrategyService';
@@ -268,11 +269,25 @@ async function analyzePpcSearchTermsBatch({
   getRequestConfig,
 }: AnalyzePpcSearchTermsBatchInput): Promise<PpcSearchTermsBatchAnalysisResult> {
   const messages = buildPpcSearchTermsAgentMessages(rows, input.thresholds, input.context);
+  const structured = withStructuredAnalysisOptions(
+    {
+      temperature: 0.1,
+      maxTokens: getPpcSearchTermsLlmMaxTokens(rows.length, runtimeOptions),
+      ...(config.serviceTier && { serviceTier: config.serviceTier }),
+    },
+    {
+      provider: config.provider,
+      model: config.model,
+      schemaName: 'ppc_search_terms_decisions',
+    }
+  );
   const cacheOptions = {
-    temperature: 0.1,
-    jsonMode: true,
-    maxTokens: getPpcSearchTermsLlmMaxTokens(rows.length, runtimeOptions),
-    ...(config.serviceTier && { serviceTier: config.serviceTier }),
+    temperature: 0.1 as number,
+    jsonMode: true as boolean,
+    maxTokens: structured.maxTokens as number,
+    ...(structured.serviceTier ? { serviceTier: structured.serviceTier } : {}),
+    ...(structured.apiPath ? { apiPath: structured.apiPath } : {}),
+    ...(structured.jsonSchema ? { jsonSchema: structured.jsonSchema } : {}),
   };
   const cacheKey = generatePpcSearchTermsBatchCacheKey(config, messages, cacheOptions);
   if (runtimeOptions.enableLlmCache) {

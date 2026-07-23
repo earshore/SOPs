@@ -466,6 +466,7 @@ describe('callLLM streaming', () => {
             },
           },
         ],
+        enableToolLoop: true,
         executeTool: async ({ name, arguments: args }) => {
           expect(name).toBe('add');
           const parsed = JSON.parse(args) as { a: number; b: number };

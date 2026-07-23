@@ -34,6 +34,8 @@
     "xss:fix:dry": "node tools/security/xss-fixer.js --dry-run",
     "security:check": "npm run xss:scan",
     "secret:scan": "tsx tools/secret-leak-scanner.ts",
+    "probe:responses": "node tools/probe-responses-gateway.mjs",
+    "probe:reasoning": "node tools/probe-reasoning-gateway.mjs",
     "security:audit": "tsx tools/security-auditor.ts",
     "lighthouse": "npm run test:performance:gate",
     "lighthouse:local": "npm run test:performance:gate",

@@ -111,9 +111,14 @@ export interface LLMOptions {
   onResponseId?: (responseId: string) => void;
   /**
    * Execute a function tool when Responses returns function_call items.
-   * Enables the agent tool loop (non-stream rounds until final text).
+   * Requires enableToolLoop: true to enter the agent loop (non-stream rounds).
    */
   executeTool?: ResponsesToolExecutor;
+  /**
+   * Explicit opt-in for Responses tool loop. Avoids forcing non-stream on every
+   * call that merely declares tools.
+   */
+  enableToolLoop?: boolean;
   /** Max tool rounds (default 5). */
   maxToolRounds?: number;
   /**
@@ -608,6 +613,7 @@ interface ResolvedLLMOptions {
   visionUserParts?: ResponsesTransportOptions['visionUserParts'];
   onResponseId?: LLMOptions['onResponseId'];
   executeTool?: ResponsesToolExecutor;
+  enableToolLoop?: boolean;
   maxToolRounds?: number;
   jsonSchema?: ResponsesJsonSchemaFormat;
   /** Internal: function_call_output items for next Responses request */
@@ -732,6 +738,7 @@ function resolveLLMOptions(
     visionUserParts: options.visionUserParts,
     onResponseId: options.onResponseId,
     executeTool: options.executeTool,
+    enableToolLoop: options.enableToolLoop,
     maxToolRounds: options.maxToolRounds,
     jsonSchema: options.jsonSchema,
     followUpInputItems: undefined,
@@ -1330,6 +1337,7 @@ function normalizeLLMCallArgs(args: LLMCallArgs): LLMCallRequest {
 
 function shouldUseResponsesToolLoop(options: ResolvedLLMOptions): boolean {
   return (
+    options.enableToolLoop === true &&
     options.apiPath === 'responses' &&
     typeof options.executeTool === 'function' &&
     Array.isArray(options.tools) &&

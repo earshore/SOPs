@@ -14,6 +14,10 @@ import {
   resolveModelCapability,
   shouldShowReasoningControls,
 } from '@/services/modelCapability';
+import {
+  createDeepChatBusinessToolExecutor,
+  DEEP_CHAT_BUSINESS_TOOLS,
+} from './deepChatBusinessTools';
 import { StorageService } from '@/services/storageService';
 import { resolveToolTargetModel } from '@/services/toolStrategyService';
 import { getRuntimeDeepChatOptions } from '@/services/runtimeStrategyService';
@@ -2412,6 +2416,9 @@ function resolveDeepChatResponsesChainOptions(
   apiPath?: ReturnType<typeof normalizeApiPathId>;
   previousResponseId?: string;
   store?: boolean;
+  tools?: unknown[];
+  executeTool?: ReturnType<typeof createDeepChatBusinessToolExecutor>;
+  maxToolRounds?: number;
 } {
   const apiPath = normalizeApiPathId(
     (config as { apiPath?: unknown }).apiPath ??
@@ -2423,22 +2430,36 @@ function resolveDeepChatResponsesChainOptions(
 
   const thread = getActiveThread();
   const previousResponseId =
-    thread.lastResponseModel === model && thread.lastResponseId
-      ? thread.lastResponseId
-      : undefined;
+    thread.lastResponseModel === model && thread.lastResponseId ? thread.lastResponseId : undefined;
 
+  const cap = resolveModelCapability({
+    provider: config.provider,
+    modelId: model,
+    preferredSurface: 'responses',
+  });
+
+  // Read-only business tools when path supports tools AND session reasoning is on
+  // (advanced mode). enableToolLoop forces non-stream tool rounds only when opted in.
+  const reasoningOn = Boolean(getActiveThread().reasoning?.enabled);
+  const toolOptions =
+    cap.supportsTools && reasoningOn
+      ? {
+          tools: DEEP_CHAT_BUSINESS_TOOLS,
+          executeTool: createDeepChatBusinessToolExecutor({
+            getThread: () => getActiveThread(),
+            getModel: () => model,
+            getProvider: () => config.provider,
+          }),
+          enableToolLoop: true,
+          maxToolRounds: 4,
+        }
+      : {};
+
+  // Only request store when chaining; many new-api gateways reject store=true.
   return {
     apiPath,
-    ...(previousResponseId
-      ? {
-          previousResponseId,
-          // Chain needs server-side state on many gateways
-          store: true,
-        }
-      : {
-          // First turn of chain: still store so next turn can attach previous_response_id
-          store: true,
-        }),
+    ...(previousResponseId ? { previousResponseId, store: true } : { store: false }),
+    ...toolOptions,
   };
 }
 
@@ -2451,67 +2472,121 @@ function persistDeepChatResponseId(model: string, responseId: string): void {
   });
 }
 
+function isResponsesChainUnsupportedError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const blob =
+    `${error.message} ${JSON.stringify((error as { response?: unknown }).response ?? '')}`.toLowerCase();
+  return (
+    /previous_response_id|stored responses are not supported|store.*not supported|not support.*store/.test(
+      blob
+    ) ||
+    ((error as { statusCode?: number }).statusCode === 400 && /previous_response|store/.test(blob))
+  );
+}
+
+function clearDeepChatResponseChain(): void {
+  const container = getMountedRenderContainer();
+  if (!container) return;
+  updateActiveThreadFields(container, {
+    lastResponseId: undefined,
+    lastResponseModel: undefined,
+  });
+}
+
+function stripResponsesChainForRetry(
+  chain: ReturnType<typeof resolveDeepChatResponsesChainOptions>
+): ReturnType<typeof resolveDeepChatResponsesChainOptions> {
+  return {
+    apiPath: 'responses',
+    store: false,
+    ...(chain.tools
+      ? {
+          tools: chain.tools,
+          executeTool: chain.executeTool,
+          enableToolLoop: true,
+          maxToolRounds: chain.maxToolRounds,
+        }
+      : {}),
+  };
+}
+
+type DeepChatStreamState = { streamedText: string };
+
+function createDeepChatStreamHandler(
+  pendingRequest: PendingDeepChatRequest,
+  signals: DeepChatSignals,
+  sourceChat: DeepChatElement | null,
+  state: DeepChatStreamState
+): (update: { delta: string; reasoningDelta?: string }) => void {
+  return update => {
+    if (pendingRequest.abortReason) return;
+    if (update.reasoningDelta) {
+      appendPendingDeepChatReasoningText(pendingRequest, update.reasoningDelta);
+    }
+    state.streamedText += update.delta;
+    if (update.delta) {
+      appendPendingAssistantText(pendingRequest, update.delta);
+      void emitPendingAssistantDelta(signals, pendingRequest, sourceChat, update.delta);
+    } else if (update.reasoningDelta) {
+      const container = getMountedRenderContainer();
+      if (container) syncPendingStatus(container);
+    }
+  };
+}
+
 async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<string> {
   const { messages, config, model, signals, sourceChat, controller, pendingRequest } = context;
-  let streamedText = '';
+  const streamState: DeepChatStreamState = { streamedText: '' };
   const reasoningOptions = prepareDeepChatReasoningCallOptions();
-  const responsesChain = resolveDeepChatResponsesChainOptions(config, model);
-  const finalText = await callLLM(
-    messages,
-    config.provider,
-    config.endpoint,
-    config.apiKey,
-    model,
-    {
+  let responsesChain = resolveDeepChatResponsesChainOptions(config, model);
+  const onStreamUpdate = createDeepChatStreamHandler(
+    pendingRequest,
+    signals,
+    sourceChat,
+    streamState
+  );
+
+  const run = (chain: typeof responsesChain) =>
+    callLLM(messages, config.provider, config.endpoint, config.apiKey, model, {
       temperature: sessionTemperature,
       maxTokens: getDeepChatRequestBudgetDefaults().maxOutputTokens,
       ...(config.serviceTier && { serviceTier: config.serviceTier }),
       ...reasoningOptions,
-      ...responsesChain,
+      ...chain,
       modelsEntry: findConfigModelsEntry(config, model),
       retries: 0,
       ...getRuntimeDeepChatOptions(),
       signal: controller.signal,
       stream: true,
-      onResponseId: responseId => {
-        persistDeepChatResponseId(model, responseId);
-      },
-      onStreamUpdate: update => {
-        if (pendingRequest.abortReason) {
-          return;
-        }
-        if (update.reasoningDelta) {
-          appendPendingDeepChatReasoningText(pendingRequest, update.reasoningDelta);
-        }
-        streamedText += update.delta;
-        if (update.delta) {
-          appendPendingAssistantText(pendingRequest, update.delta);
-          void emitPendingAssistantDelta(signals, pendingRequest, sourceChat, update.delta);
-        } else if (update.reasoningDelta) {
-          // Reasoning-only chunk: refresh chrome under generation status
-          const container = getMountedRenderContainer();
-          if (container) {
-            syncPendingStatus(container);
-          }
-        }
-      },
+      onResponseId: (responseId: string) => persistDeepChatResponseId(model, responseId),
+      onStreamUpdate,
+    });
+
+  let finalText: string;
+  try {
+    finalText = await run(responsesChain);
+  } catch (error) {
+    if (!isResponsesChainUnsupportedError(error) || responsesChain.apiPath !== 'responses') {
+      throw error;
     }
-  );
+    clearDeepChatResponseChain();
+    responsesChain = stripResponsesChainForRetry(responsesChain);
+    streamState.streamedText = '';
+    finalText = await run(responsesChain);
+  }
 
   if (pendingRequest.abortReason) {
     const container = getMountedRenderContainer();
-    if (container) {
-      syncPendingStatus(container);
-    }
+    if (container) syncPendingStatus(container);
     return pendingRequest.assistantText.trim();
   }
 
-  if (!streamedText && finalText) {
+  if (!streamState.streamedText && finalText) {
     appendPendingAssistantText(pendingRequest, finalText);
     await emitPendingAssistantDelta(signals, pendingRequest, sourceChat, finalText);
   }
 
-  const assistantText = (finalText || streamedText).trim();
+  const assistantText = (finalText || streamState.streamedText).trim();
   if (!assistantText) {
     throw new ValidationError(
       '模型没有返回任何内容，请稍后重试或检查模型/上下文配置。',
