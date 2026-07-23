@@ -1535,162 +1535,6 @@
   display: none !important;
 }
 
-/*
- * 已挂载技能提示：正式展示时挂入 deep-chat shadow 的 #input 列（见 deepChatStyles）。
- * light DOM 仅作挂载源/回退，默认不占绝对定位，避免与输入框叠层。
- */
-.deep-chat-skill-context-bar {
-  box-sizing: border-box;
-  width: min(768px, 100%);
-  max-width: 100%;
-  margin: 0 auto 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--deep-chat-accent-border, rgba(168, 95, 63, 0.28));
-  border-radius: 1rem;
-  background: #ffffff;
-  color: var(--deep-chat-accent-hover, #8f4f33);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-  overflow: visible;
-}
-
-.deep-chat-skill-context-bar[hidden] {
-  display: none !important;
-}
-
-.deep-chat-skill-context-bar__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem 0.55rem;
-  min-width: 0;
-}
-
-.deep-chat-skill-context-bar__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--deep-chat-accent-active, #6f3925);
-}
-
-.deep-chat-skill-context-bar__hint {
-  min-width: 0;
-  flex: 1 1 8rem;
-  font-size: 0.72rem;
-  font-weight: 500;
-  line-height: 1.35;
-  color: var(--color-slate-500, #64748b);
-}
-
-.deep-chat-skill-context-bar__chips {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* light DOM 回退时也要能看见 Chip（shadow 内样式在 deepChatStyles） */
-.deep-chat-skill-context-bar .deep-chat-context-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.28rem;
-  max-width: min(100%, 14rem);
-  padding: 0.15rem 0.5rem 0.15rem 0.3rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(168, 95, 63, 0.4);
-  background: #faf3ee;
-  color: #6f3925;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1.25;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.deep-chat-skill-context-bar .deep-chat-context-chip__leading {
-  position: relative;
-  flex-shrink: 0;
-  width: 1rem;
-  height: 1rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.deep-chat-skill-context-bar .deep-chat-context-chip__icon {
-  display: inline-flex;
-  color: #a85f3f;
-}
-
-.deep-chat-skill-context-bar .deep-chat-context-chip__label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.deep-chat-skill-context-bar .deep-chat-context-chip__dismiss {
-  position: absolute;
-  inset: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 9999px;
-  background: transparent;
-  color: #8f4f33;
-  cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.deep-chat-skill-context-bar
-  .deep-chat-context-chip--dismissible:hover
-  .deep-chat-context-chip__dismiss,
-.deep-chat-skill-context-bar
-  .deep-chat-context-chip--dismissible:focus-within
-  .deep-chat-context-chip__dismiss {
-  opacity: 1;
-  pointer-events: auto;
-  background: rgba(168, 95, 63, 0.12);
-}
-
-.deep-chat-skill-context-bar
-  .deep-chat-context-chip--dismissible:hover
-  .deep-chat-context-chip__icon,
-.deep-chat-skill-context-bar
-  .deep-chat-context-chip--dismissible:focus-within
-  .deep-chat-context-chip__icon {
-  opacity: 0;
-}
-
-.deep-chat-skill-undo {
-  margin-left: auto;
-  flex-shrink: 0;
-  padding: 0.2rem 0.6rem;
-  border: 1px solid var(--deep-chat-accent-border, rgba(168, 95, 63, 0.28));
-  border-radius: 9999px;
-  background: var(--deep-chat-accent-soft, #faf3ee);
-  color: var(--deep-chat-accent-hover, #8f4f33);
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.deep-chat-skill-undo:hover {
-  background: #fff;
-}
-
-.deep-chat-skill-undo[hidden] {
-  display: none !important;
-}
-
 .deep-chat-thread-skill-badge {
   display: inline-flex;
   align-items: center;
@@ -2260,6 +2104,19 @@
   .deep-chat-select,
   .deep-chat-reset-tuning {
     box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+  }
+}
+
+/* 低高度 / 高缩放：优先保留可操作的输入框与发送钮，避免固定 welcome 留白裁切底部。 */
+@media (max-height: 480px) {
+  .deep-chat-stage {
+    padding: var(--spacing-2, 0.5rem) 0;
+  }
+
+  .deep-chat-wrap {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 58px;
   }
 }
 

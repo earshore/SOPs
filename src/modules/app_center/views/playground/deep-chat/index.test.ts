@@ -54,13 +54,6 @@ const deepChatTemplate = `
         <div id="deep-chat-skill-load-banner" class="deep-chat-skill-load-banner" hidden>
           <span id="deep-chat-skill-load-banner-text">正在载入技能…</span>
         </div>
-        <div id="deep-chat-skill-context-bar" class="deep-chat-skill-context-bar" aria-label="已挂载技能" hidden>
-          <div class="deep-chat-skill-context-bar__head">
-            <span class="deep-chat-skill-context-bar__label">已挂载技能</span>
-            <span id="deep-chat-skill-context-bar-hint" class="deep-chat-skill-context-bar__hint"></span>
-            <button id="deep-chat-skill-undo" class="deep-chat-skill-undo" type="button" hidden>撤销移除</button>
-          </div>
-        </div>
       </section>
       <aside id="deep-chat-prompt-rail">
         <h3 class="deep-chat-panel-title deep-chat-panel-title--prompt">Prompt</h3>
@@ -700,6 +693,7 @@ describe('deep-chat playground template copy', () => {
     expect(template).toContain('aria-label="搜索会话"');
     expect(template).toContain('class="deep-chat-search-bar"');
     expect(template).toContain('data-chat-search-new');
+    expect(template).not.toContain('id="deep-chat-skill-context-bar"');
     expect(template).not.toContain('<span>New Chat</span>');
     expect(template).not.toContain('<span>Search Chats</span>');
     expect(template).not.toContain('>Prompts</h3>');
@@ -1064,19 +1058,21 @@ async function queueProfitSkillAndMount() {
   return { container, unmount, mocks, skillHandoff, userDraft };
 }
 
-describe('deep-chat skill trial context bar render', () => {
-  it('shows skill chips in the input after trial handoff', async () => {
+describe('deep-chat skill trial composer chip', () => {
+  it('keeps the mounted Skill as a dismissible input Chip without a context bar', async () => {
     const { container, unmount, mocks, skillHandoff } = await queueProfitSkillAndMount();
+    const chat = getChat(container);
+    const input = chat.shadowRoot?.querySelector<HTMLElement>('#text-input');
 
-    const bar = container.querySelector<HTMLElement>('#deep-chat-skill-context-bar');
-    const input = getChat(container).shadowRoot?.querySelector('#text-input');
-
-    // 试用后输入框内必须出现 Chip（用户主感知区）
     await vi.waitFor(() => {
       expect(input?.querySelector('.deep-chat-context-chip')?.textContent).toContain('利润测算');
     });
-    expect(bar?.hidden).toBe(false);
-    expect(bar?.querySelector('.deep-chat-context-chip')?.textContent).toContain('利润测算');
+    const dismiss = input?.querySelector<HTMLButtonElement>(
+      '[data-action="dismiss-skill-context"][data-skill-id="profit-calculator"]'
+    );
+    expect(dismiss).not.toBeNull();
+    expect(container.querySelector('#deep-chat-skill-context-bar')).toBeNull();
+    expect(chat.shadowRoot?.querySelector('#deep-chat-skill-context-bar')).toBeNull();
     expect(input?.textContent).toContain('业务数据');
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
@@ -1091,49 +1087,31 @@ describe('deep-chat skill trial context bar render', () => {
     });
     expect(skillHandoff.consumeSkillForDeepChat()).toBeNull();
 
-    const dismiss = input?.querySelector<HTMLButtonElement>(
-      '[data-action="dismiss-skill-context"]'
-    );
-    expect(dismiss).not.toBeNull();
     dismiss?.click();
     await vi.advanceTimersByTimeAsync(50);
 
-    expect(container.querySelector<HTMLElement>('#deep-chat-skill-context-bar')?.hidden).toBe(true);
     expect(input?.querySelector('.deep-chat-context-chip')).toBeNull();
     expect(input?.textContent).toContain('业务数据');
     expect(input?.textContent).not.toContain('利润测算');
-
-    unmount();
-  });
-
-  it('keeps context bar skill chips after reply without requiring empty-input chips', async () => {
-    const { container, unmount } = await queueProfitSkillAndMount();
-    const input = getChat(container).shadowRoot?.querySelector('#text-input');
-    await vi.waitFor(() => {
-      expect(input?.querySelector('.deep-chat-context-chip')).not.toBeNull();
-    });
-
-    getChat(container).connect?.handler(
-      { messages: [{ role: 'user', text: 'Follow-up after skill mount' }] },
-      {
-        onResponse: vi.fn(async () => undefined),
-        onClose: vi.fn(),
-        stopClicked: { listener: vi.fn() },
-      }
+    expect(container.querySelector('#deep-chat-skill-context-bar')).toBeNull();
+    expect(chat.shadowRoot?.querySelector('#deep-chat-skill-context-bar')).toBeNull();
+    expect(container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value).toBe(
+      ''
     );
-    await vi.waitFor(() => {
-      expect(container.querySelector('#deep-chat-thread-list')?.textContent).not.toMatch(
-        /生成中|输出中/
-      );
-    });
-    await vi.advanceTimersByTimeAsync(400);
-
-    const bar =
-      container.querySelector('#deep-chat-skill-context-bar') ||
-      getChat(container).shadowRoot?.querySelector('#deep-chat-skill-context-bar');
-    // 会话技能仍挂着，Context Bar Chip 可见
-    expect(bar?.hasAttribute('hidden')).toBe(false);
-    expect(bar?.querySelector('.deep-chat-context-chip')).not.toBeNull();
+    const persistedStore = mocks.localDataStore.set.mock.calls.at(-1)?.[1] as {
+      threads?: Array<{
+        skillContexts?: Array<{ skillId?: string }>;
+        systemPrompt?: string;
+      }>;
+    };
+    expect(
+      persistedStore.threads?.some(thread =>
+        thread.skillContexts?.some(context => context.skillId === 'profit-calculator')
+      )
+    ).toBe(false);
+    expect(
+      persistedStore.threads?.some(thread => thread.systemPrompt?.includes('Profit Calculator'))
+    ).toBe(false);
 
     unmount();
   });
@@ -1287,19 +1265,14 @@ describe('deep-chat skill trial attach and second handoff', () => {
     expect(mocks.chooseWithModal).not.toHaveBeenCalled();
     await vi.advanceTimersByTimeAsync(200);
     expect(mocks.confirmWithModal).not.toHaveBeenCalled();
-    const barChipText =
-      container.querySelector('#deep-chat-skill-context-bar .deep-chat-context-chip')
-        ?.textContent ||
-      getChat(container).shadowRoot?.querySelector(
-        '#deep-chat-skill-context-bar .deep-chat-context-chip'
-      )?.textContent;
-    expect(barChipText).toContain('第二技能');
     await vi.waitFor(() => {
       expect(
         getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
           ?.textContent
       ).toContain('第二技能');
     });
+    expect(container.querySelector('#deep-chat-skill-context-bar')).toBeNull();
+    expect(getChat(container).shadowRoot?.querySelector('#deep-chat-skill-context-bar')).toBeNull();
     expect(
       container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value
     ).toContain('Second Skill');
@@ -1335,17 +1308,8 @@ describe('deep-chat skill trial attach and second handoff', () => {
     await vi.advanceTimersByTimeAsync(200);
 
     expect(mocks.chooseWithModal).toHaveBeenCalled();
-    const barChips = [
-      ...Array.from(
-        container.querySelectorAll('#deep-chat-skill-context-bar .deep-chat-context-chip')
-      ),
-      ...Array.from(
-        getChat(container).shadowRoot?.querySelectorAll(
-          '#deep-chat-skill-context-bar .deep-chat-context-chip'
-        ) || []
-      ),
-    ].map(el => el.textContent || '');
-    expect(barChips.some(t => t.includes('利润测算') || t.includes('第一技能'))).toBe(true);
+    expect(container.querySelector('#deep-chat-skill-context-bar')).toBeNull();
+    expect(getChat(container).shadowRoot?.querySelector('#deep-chat-skill-context-bar')).toBeNull();
     await vi.waitFor(() => {
       const chipTexts = [
         ...Array.from(
@@ -1363,11 +1327,141 @@ describe('deep-chat skill trial attach and second handoff', () => {
 });
 
 describe('deep-chat skill trial after send', () => {
+  it('keeps a non-message session Chip dock after send and removes the mounted skill from it', async () => {
+    const { container, unmount, mocks, userDraft } = await queueProfitSkillAndMount();
+    const chat = getChat(container);
+    const root = chat.shadowRoot;
+    const input = root?.querySelector<HTMLElement>('#text-input');
+    const onResponse = vi.fn();
+    const onClose = vi.fn();
+
+    // 真实 deep-chat 会在提交时清空 contenteditable；测试替身没有这段内部行为。
+    input!.textContent = '';
+    chat.onInput?.({ content: { text: '', files: [] }, isUser: true });
+    chat.connect?.handler({ text: userDraft }, { onResponse, onClose });
+
+    await vi.waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    const dock = root?.querySelector<HTMLElement>('#deep-chat-session-skill-chip-dock');
+    expect(dock).not.toBeNull();
+    expect(dock?.parentElement).toBe(input?.parentElement);
+    expect(input?.contains(dock!)).toBe(false);
+    expect(input?.textContent).toBe('');
+    const dismiss = dock?.querySelector<HTMLButtonElement>(
+      '[data-action="dismiss-skill-context"][data-skill-id="profit-calculator"]'
+    );
+    expect(dismiss).not.toBeNull();
+
+    dismiss?.click();
+    await vi.waitFor(() => {
+      expect(root?.querySelector('#deep-chat-session-skill-chip-dock')).toBeNull();
+    });
+
+    expect(container.querySelector<HTMLTextAreaElement>('#deep-chat-system-prompt')?.value).toBe(
+      ''
+    );
+
+    // Fields are omitted after dismiss (not written as explicit undefined).
+    const persistedStore = mocks.localDataStore.set.mock.calls.at(-1)?.[1] as {
+      threads?: Array<{
+        skillContexts?: Array<{ skillId?: string }>;
+        systemPrompt?: string;
+      }>;
+    };
+    expect(
+      persistedStore.threads?.some(thread =>
+        thread.skillContexts?.some(context => context.skillId === 'profit-calculator')
+      )
+    ).toBe(false);
+    expect(
+      persistedStore.threads?.some(thread => thread.systemPrompt?.includes('Profit Calculator'))
+    ).toBe(false);
+
+    unmount();
+  });
+
+  it('does not let a delayed skill fill overwrite edits after the input Chip is dismissed', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount } = await importDeepChat();
+    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+    const userDraft = skillHandoff.buildSkillDeepChatUserDraft('利润测算');
+    skillHandoff.queueSkillForDeepChat({
+      skillId: 'profit-calculator',
+      skillTitle: '利润测算',
+      skillRaw: '# Profit Calculator\n\nUse margin tables.',
+      userDraft,
+    });
+
+    await mount(container);
+    await vi.advanceTimersByTimeAsync(20);
+
+    const chat = getChat(container);
+    const input = queryRequired<HTMLElement>(chat.shadowRoot || document, '#text-input');
+    const dismiss = queryRequired<HTMLButtonElement>(
+      input,
+      '[data-action="dismiss-skill-context"][data-skill-id="profit-calculator"]'
+    );
+    dismiss.click();
+    input.textContent = '保留这段刚刚编辑的草稿';
+    chat.onInput?.({ content: { text: input.textContent, files: [] }, isUser: true });
+
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(input.textContent).toBe('保留这段刚刚编辑的草稿');
+    unmount();
+  });
+
+  it('does not let a delayed skill fill write into a newly active thread', async () => {
+    const container = document.createElement('main');
+    document.body.append(container);
+    const { mount, unmount } = await importDeepChat({
+      storedThreadStore: {
+        activeThreadId: 'thread-a',
+        threads: [
+          {
+            id: 'thread-a',
+            title: 'Thread A',
+            messages: [{ role: 'user', text: 'A message', createdAt: 1000 }],
+            draftText: 'A 草稿',
+            createdAt: 1000,
+            updatedAt: 1000,
+          },
+          {
+            id: 'thread-b',
+            title: 'Thread B',
+            messages: [{ role: 'user', text: 'B message', createdAt: 2000 }],
+            draftText: 'B 草稿应保持不变',
+            createdAt: 2000,
+            updatedAt: 2000,
+          },
+        ],
+      },
+    });
+    const skillHandoff = await import('@/modules/app_center/skillDeepChatHandoff');
+    skillHandoff.queueSkillForDeepChat({
+      skillId: 'profit-calculator',
+      skillTitle: '利润测算',
+      skillRaw: '# Profit Calculator\n\nUse margin tables.',
+      userDraft: skillHandoff.buildSkillDeepChatUserDraft('利润测算'),
+    });
+
+    await mount(container);
+    queryRequired<HTMLButtonElement>(container, '[data-thread-id="thread-b"]').click();
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(
+      queryRequired<HTMLElement>(getChat(container).shadowRoot || document, '#text-input').textContent
+    ).toBe('B 草稿应保持不变');
+    unmount();
+  });
+
   it('keeps system prompt after send when skill remains on the session', async () => {
     const { container, unmount, mocks, userDraft } = await queueProfitSkillAndMount();
-    expect(container.querySelector('#deep-chat-skill-context-bar')?.hasAttribute('hidden')).toBe(
-      false
-    );
+    expect(container.querySelector('#deep-chat-skill-context-bar')).toBeNull();
+    expect(getChat(container).shadowRoot?.querySelector('#deep-chat-skill-context-bar')).toBeNull();
     const onResponse = vi.fn();
     const onClose = vi.fn();
     getChat(container).connect?.handler({ text: userDraft }, { onResponse, onClose });
@@ -1789,10 +1883,14 @@ describe('deep-chat playground skill library', () => {
       );
     });
     expect(mocks.navigateToRouteId).not.toHaveBeenCalled();
-    expect(
-      container.querySelector('#deep-chat-skill-context-bar')?.textContent ||
-        document.body.textContent
-    ).toMatch(/利润测算|已挂载/);
+    await vi.waitFor(() => {
+      expect(
+        getChat(container).shadowRoot?.querySelector('#text-input .deep-chat-context-chip')
+          ?.textContent
+      ).toContain('利润测算');
+    });
+    expect(container.querySelector('#deep-chat-skill-context-bar')).toBeNull();
+    expect(getChat(container).shadowRoot?.querySelector('#deep-chat-skill-context-bar')).toBeNull();
 
     unmount();
     expect(document.querySelector('#deep-chat-skill-library-modal')).toBeNull();

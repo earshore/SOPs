@@ -214,31 +214,48 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     cursor: not-allowed !important;
   }
 
-  .input-button.inside-end.loading-button,
+  .input-button.inside-end.loading-button:not([data-deep-chat-stop-active]) {
+    background: var(--deep-chat-accent, #a85f3f) !important;
+    cursor: progress !important;
+    opacity: 0.84 !important;
+  }
+
+  .input-button.inside-end.loading-button[data-deep-chat-stop-active],
   .input-button.inside-end[data-deep-chat-stop-active] {
     background: #dc2626 !important;
     cursor: pointer !important;
     opacity: 1 !important;
   }
 
-  .input-button.inside-end.loading-button:hover,
-  .input-button.inside-end.loading-button:focus-visible,
+  .input-button.inside-end.loading-button[data-deep-chat-stop-active]:hover,
+  .input-button.inside-end.loading-button[data-deep-chat-stop-active]:focus-visible,
   .input-button.inside-end[data-deep-chat-stop-active]:hover,
   .input-button.inside-end[data-deep-chat-stop-active]:focus-visible {
     background: #b91c1c !important;
   }
 
-  /* 生成中统一隐藏原生图标，改用白色方块停止标 */
-  .input-button.inside-end.loading-button #submit-icon,
-  .input-button.inside-end.loading-button .loading-submit-button,
-  .input-button.inside-end.loading-button #stop-icon,
+  .input-button.inside-end[data-deep-chat-stop-active]:focus-visible {
+    outline: 2px solid rgba(220, 38, 38, 0.75) !important;
+    outline-offset: 2px !important;
+  }
+
+  .input-button.inside-end[data-deep-chat-stop-active]:active {
+    background: #991b1b !important;
+  }
+
+  /* 请求预检保留原生 loading 指示；仅可中止的生成态改用白色方块停止标。 */
+  .input-button.inside-end.loading-button:not([data-deep-chat-stop-active]) #submit-icon,
+  .input-button.inside-end.loading-button:not([data-deep-chat-stop-active]) #stop-icon,
+  .input-button.inside-end.loading-button[data-deep-chat-stop-active] #submit-icon,
+  .input-button.inside-end.loading-button[data-deep-chat-stop-active] .loading-submit-button,
+  .input-button.inside-end.loading-button[data-deep-chat-stop-active] #stop-icon,
   .input-button.inside-end[data-deep-chat-stop-active] #submit-icon,
   .input-button.inside-end[data-deep-chat-stop-active] .loading-submit-button,
   .input-button.inside-end[data-deep-chat-stop-active] #stop-icon {
     display: none !important;
   }
 
-  .input-button.inside-end.loading-button::before,
+  .input-button.inside-end.loading-button[data-deep-chat-stop-active]::before,
   .input-button.inside-end[data-deep-chat-stop-active]::before {
     content: '' !important;
     width: 12px !important;
@@ -384,101 +401,6 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     display: none !important;
   }
 
-  /* 已挂载技能提示：输入框上方；Chip 在条内，圆角卡片避免胶囊裁切 */
-  #input > .deep-chat-skill-context-bar {
-    position: relative !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    top: auto !important;
-    z-index: 2 !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 0 0 auto !important;
-    width: min(100%, 768px) !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0.5rem 0.75rem !important;
-    border: 1px solid rgba(168, 95, 63, 0.28) !important;
-    border-radius: 1rem !important;
-    background: linear-gradient(180deg, #ffffff 0%, #fffdfb 100%) !important;
-    color: #8f4f33 !important;
-    box-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.04),
-      0 8px 18px -14px rgba(168, 95, 63, 0.16) !important;
-    transform: none !important;
-    overflow: visible !important;
-  }
-
-  #input > .deep-chat-skill-context-bar[hidden] {
-    display: none !important;
-  }
-
-  #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__head {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 0.4rem 0.55rem !important;
-    min-width: 0 !important;
-  }
-
-  #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__label {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.35rem !important;
-    flex-shrink: 0 !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    line-height: 1.3 !important;
-    color: #6f3925 !important;
-  }
-
-  #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__hint {
-    min-width: 0 !important;
-    flex: 1 1 8rem !important;
-    font-size: 0.72rem !important;
-    font-weight: 500 !important;
-    line-height: 1.35 !important;
-    color: #64748b !important;
-  }
-
-  #input > .deep-chat-skill-context-bar .deep-chat-skill-undo {
-    margin-left: auto !important;
-    flex-shrink: 0 !important;
-    padding: 0.2rem 0.6rem !important;
-    border: 1px solid rgba(168, 95, 63, 0.28) !important;
-    border-radius: 9999px !important;
-    background: #faf3ee !important;
-    color: #8f4f33 !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-  }
-
-  #input > .deep-chat-skill-context-bar .deep-chat-skill-undo[hidden] {
-    display: none !important;
-  }
-
-  #input > .deep-chat-skill-context-bar .deep-chat-skill-context-bar__chips {
-    display: inline-flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 0.35rem !important;
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Context Bar 内 Chip 略放大，避免与条背景糊在一起 */
-  #input > .deep-chat-skill-context-bar .deep-chat-context-chip {
-    font-size: 0.8125rem !important;
-    border: 1px solid rgba(168, 95, 63, 0.4) !important;
-    background: #faf3ee !important;
-    color: #6f3925 !important;
-    box-shadow: 0 1px 2px rgba(111, 57, 37, 0.08) !important;
-  }
-
   #text-input-container {
     box-sizing: border-box !important;
     position: relative !important;
@@ -509,6 +431,33 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     box-shadow:
       0 0 0 3px rgba(168, 95, 63, 0.14),
       0 8px 20px -14px rgba(168, 95, 63, 0.2) !important;
+  }
+
+  /* 发送后仍显示会话技能；Dock 是 text-input 的兄弟节点，不会被 Deep Chat 读进消息。 */
+  #deep-chat-session-skill-chip-dock {
+    display: none !important;
+  }
+
+  @media (min-width: 641px) {
+    #text-input-container.has-session-skill-chip-dock {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+
+    #text-input-container.has-session-skill-chip-dock > #deep-chat-session-skill-chip-dock {
+      display: flex !important;
+      flex: 0 0 auto !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      gap: 0.28rem !important;
+      min-width: 0 !important;
+      padding: 10px 58px 0 14px !important;
+    }
+
+    #text-input-container.has-session-skill-chip-dock > #text-input {
+      width: 100% !important;
+      padding-top: 8px !important;
+    }
   }
 
   #text-input {
@@ -732,6 +681,19 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
       [data-deep-chat-stop-active]
     ):focus-visible {
     background: var(--deep-chat-accent-hover, #8f4f33) !important;
+  }
+
+  .inside-end.input-button:not(.disabled-button):not(.loading-button):not(
+      [data-deep-chat-stop-active]
+    ):focus-visible {
+    outline: 2px solid rgba(168, 95, 63, 0.75) !important;
+    outline-offset: 2px !important;
+  }
+
+  .inside-end.input-button:not(.disabled-button):not(.loading-button):not(
+      [data-deep-chat-stop-active]
+    ):active {
+    background: #6f3925 !important;
   }
 
   .inside-end.disabled-button:hover,
