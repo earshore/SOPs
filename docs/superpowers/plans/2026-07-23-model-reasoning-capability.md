@@ -250,7 +250,7 @@ git commit -m "feat(settings): global reasoning prefs UI and persistence"
 **Interfaces:**
 - Produces: at least one verified pattern OR explicit empty list with comment “enable after new-api probe”
 
-- [ ] **Step 1: Against staging new-api, probe 1–2 reasoning models**
+- [x] **Step 1: Against staging new-api, probe 1–2 reasoning models**
 
 Record request field names and whether disable omits fields or sends false.
 

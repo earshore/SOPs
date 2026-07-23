@@ -1,7 +1,7 @@
 # 模型能力目录与推理控制设计
 
 **日期：** 2026-07-23  
-**状态：** Implemented（P1 全局 + P2 会话覆盖已落地；网关字段仍为 provisional，需 new-api 实测校准）  
+**状态：** Implemented（P1 全局 + P2 会话覆盖 + new-api 实测附录已落地；见 appendix-model-reasoning-gateway.md）  
 **范围：** 模型真实能力发现、推理开关 / 思考强度、系统设置全局默认 + Deep Chat 会话覆盖  
 **非目标（本期）：** 多租户计费、自动 probe 未知模型、全厂商原生协议直连（仅 OpenAI 兼容 + 当前 new-api 中转形态）
 

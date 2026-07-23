@@ -115,4 +115,94 @@ describe('callLLM streaming', () => {
     await expect(responsePromise).resolves.toBe('First second');
     expect(streamUpdate).toHaveBeenCalledTimes(2);
   });
+
+  it('sends reasoning_effort for registry models when prefs are enabled', async () => {
+    const fetchMock = vi.fn(
+      async (_url: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+        void _url;
+        void init;
+        return new Response(
+          JSON.stringify({
+            id: 'chatcmpl-test',
+            object: 'chat.completion',
+            created: 1_700_000_000,
+            model: 'deepseek-v4-flash',
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: 'ok' },
+                finish_reason: 'stop',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'deepseek-v4-flash',
+      {
+        stream: false,
+        retries: 0,
+        reasoningPrefs: { enabled: true, effort: 'low' },
+      }
+    );
+
+    expect(fetchMock).toHaveBeenCalled();
+    const callInit = fetchMock.mock.calls[0]?.[1];
+    expect(callInit).toBeDefined();
+    const body = JSON.parse(String(callInit?.body)) as Record<string, unknown>;
+    expect(body.reasoning_effort).toBe('low');
+    expect(body.model).toBe('deepseek-v4-flash');
+  });
+
+  it('omits reasoning_effort when prefs are disabled', async () => {
+    const fetchMock = vi.fn(
+      async (_url: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+        void _url;
+        void init;
+        return new Response(
+          JSON.stringify({
+            id: 'chatcmpl-test',
+            object: 'chat.completion',
+            created: 1_700_000_000,
+            model: 'deepseek-v4-flash',
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: 'ok' },
+                finish_reason: 'stop',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'deepseek-v4-flash',
+      {
+        stream: false,
+        retries: 0,
+        reasoningPrefs: { enabled: false, effort: 'high' },
+      }
+    );
+
+    const callInit = fetchMock.mock.calls[0]?.[1];
+    expect(callInit).toBeDefined();
+    const body = JSON.parse(String(callInit?.body)) as Record<string, unknown>;
+    expect(body.reasoning_effort).toBeUndefined();
+  });
 });

@@ -25,7 +25,7 @@ describe('MODEL_CAPABILITY_RULES allowlist', () => {
     }
   });
 
-  it('shows controls for o3-mini and hides for unknown and deepseek without mapper', () => {
+  it('shows controls for o3-mini and gateway-verified models; hides unknown and deepseek-r1', () => {
     const o3 = resolveModelCapability(
       { provider: 'new_api', modelId: 'o3-mini' },
       getModelCapabilityRules()
@@ -34,6 +34,21 @@ describe('MODEL_CAPABILITY_RULES allowlist', () => {
     expect(o3.mapRequest?.({ enabled: true, effort: 'medium' })).toEqual({
       reasoning_effort: 'medium',
     });
+
+    const deepseekFlash = resolveModelCapability(
+      { provider: 'new_api', modelId: 'deepseek-v4-flash' },
+      getModelCapabilityRules()
+    );
+    expect(shouldShowReasoningControls(deepseekFlash)).toBe(true);
+    expect(deepseekFlash.mapRequest?.({ enabled: true, effort: 'low' })).toEqual({
+      reasoning_effort: 'low',
+    });
+
+    const grok = resolveModelCapability(
+      { provider: 'new_api', modelId: 'grok-4.5' },
+      getModelCapabilityRules()
+    );
+    expect(shouldShowReasoningControls(grok)).toBe(true);
 
     const unknown = resolveModelCapability(
       { provider: 'new_api', modelId: 'gpt-4o' },

@@ -2,10 +2,11 @@
  * Static model capability rules.
  *
  * Contract:
- * - Only emit mapRequest for narrow, well-known OpenAI-style reasoning ids.
+ * - Only emit mapRequest for narrow, well-known ids verified (or OpenAI o-series contract).
  * - Unknown / ambiguous ids stay fail-closed (no mapRequest → no UI, no request fields).
- * - Field names assume OpenAI-compatible gateways that pass through `reasoning_effort`.
- * - Re-verify against the project new-api before expanding patterns.
+ * - Field names: OpenAI-compatible `reasoning_effort` (live-probed on project new-api 2026-07-23).
+ * - Off: omit fields (mapper returns {}).
+ * - Stream: gateway emits `delta.reasoning_content` (isolated from final content in llmService).
  */
 
 import type { ModelCapabilityRule, ReasoningEffort } from './types';
@@ -36,7 +37,12 @@ function openAiReasoningRule(modelPattern: string, contextWindow: number): Model
 
 /**
  * Narrow allowlist only. Prefer exact ids / tight prefixes over broad globs.
- * DeepSeek-style models are listed as capability tags without mapRequest until gateway-verified.
+ *
+ * Live probe (2026-07-23, new.hongecb.store, key-scoped model list):
+ * - deepseek-v4-flash: 200 with/without reasoning_effort; stream deltas include reasoning_content
+ * - grok-4.5: same field accepted; reasoning_tokens increase with effort
+ * - o-series: not on that token's /models list; keep OpenAI-compatible mapRequest for when catalog includes them
+ * - deepseek-r1 / deepseek-reasoner: not on catalog; no mapRequest (UI hidden) until ids appear
  */
 export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   // OpenAI o-series (common new-api / OpenAI-compatible names)
@@ -51,7 +57,13 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
   openAiReasoningRule('o1-mini-*', 128_000),
   openAiReasoningRule('o3-mini-*', 200_000),
 
-  // Known reasoning models without a verified request mapper yet (UI hidden).
+  // Gateway-verified (2026-07-23 new.hongecb.store)
+  openAiReasoningRule('deepseek-v4-flash', 128_000),
+  openAiReasoningRule('deepseek-v4-flash-*', 128_000),
+  openAiReasoningRule('grok-4.5', 256_000),
+  openAiReasoningRule('grok-4.5-*', 256_000),
+
+  // Known reasoning labels without catalog presence / live mapRequest on this gateway yet
   {
     modelPattern: 'deepseek-r1',
     contextWindow: 128_000,
@@ -60,7 +72,7 @@ export const MODEL_CAPABILITY_RULES: readonly ModelCapabilityRule[] = [
     defaultEffort: 'medium',
     temperatureIgnored: true,
     features: ['reasoning'],
-    // mapRequest intentionally omitted until new-api field is verified
+    // mapRequest omitted until model id appears on project gateway and is re-probed
   },
   {
     modelPattern: 'deepseek-reasoner',
