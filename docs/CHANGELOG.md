@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.11-rc.4] - 2026-07-23
+
+> 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
+> 收口 `v3.0.11-rc.3` 之后的 Deep Chat 发送钮几何、会话 Skill Chip dock 与侧栏 Skill Library 入口。
+> 生产回滚目标为 `v3.0.10` 对应的上一条 Pages 部署。
+> 部署目标：https://sops.hongecb.store
+
+### Added
+
+- Deep Chat：发送后保留非消息态会话 Skill Chip dock（可移除，不进入请求正文）；技能标记水合与多技能 Chip 序列化覆盖加强。
+- E2E：`deep-chat-send` 覆盖视口变化 pin、手机壳侧栏、stop 态过渡与装饰 Skill Chip 全链路。
+
+### Changed
+
+- Deep Chat：Skill Library 入口移到左侧会话栏「搜索会话」下方，与新建/搜索会话按钮统一边框与 hover 视觉。
+- Deep Chat：系统提示随剩余 skillContexts 同步；去掉 Context Bar，改为输入区 Chip / 会话 dock。
+
+### Fixed
+
+- Deep Chat：窗口 resize / stage 宽度过渡后重算发送钮位置，避免错位。
+- Deep Chat：手机宽度下全局侧栏 `max-md:hidden`，主内容与输入区不再被 256px 侧栏挤压。
+- Deep Chat：stop 按钮视觉态等待 CSS transition 完成后再断言，降低 flaky。
+
 ## [3.0.11-rc.3] - 2026-07-22
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
