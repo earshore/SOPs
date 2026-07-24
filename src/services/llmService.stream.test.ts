@@ -878,7 +878,9 @@ describe('callLLM streaming', () => {
       }
     );
 
-    const body = JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body));
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(0);
+    const firstCall = fetchMock.mock.calls[0] as unknown as [unknown, RequestInit];
+    const body = JSON.parse(String(firstCall[1]?.body ?? '{}'));
     expect(body.tools).toHaveLength(1);
     expect(body.tool_choice).toBe('auto');
     expect(body.parallel_tool_calls).toBe(true);

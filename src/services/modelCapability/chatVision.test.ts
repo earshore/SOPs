@@ -16,7 +16,7 @@ describe('chatVision', () => {
       ],
       [{ type: 'input_image', image_url: 'https://x/a.png' }]
     );
-    expect(messages[1].content).toEqual([
+    expect(messages[1]?.content).toEqual([
       { type: 'text', text: 'what is this?' },
       { type: 'image_url', image_url: { url: 'https://x/a.png' } },
     ]);
