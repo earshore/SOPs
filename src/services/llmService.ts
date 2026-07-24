@@ -24,10 +24,10 @@ import {
   extractAnthropicMessagesText,
   extractGeminiGenerateText,
   DEFAULT_MAX_TOOL_ROUNDS,
+  extractAssistantTextFromResponsesOrChat,
   extractResponsesFunctionCalls,
   extractResponsesId,
   extractResponsesIdFromStreamEvent,
-  extractResponsesOutputText,
   extractResponsesReasoningSummary,
   getAnthropicStreamTextDelta,
   getGeminiStreamTextDelta,
@@ -304,7 +304,9 @@ function getReasoningStreamDelta(payload: Record<string, unknown>, surface: ApiS
   if (surface === 'chat_completions') return getChatCompletionsReasoningDelta(payload);
   if (surface === 'anthropic_messages') return getAnthropicReasoningDelta(payload);
   if (surface === 'gemini_generate') return getGeminiReasoningDelta(payload);
-  if (surface === 'responses') return getResponsesReasoningStreamDelta(payload);
+  if (surface === 'responses') {
+    return getResponsesReasoningStreamDelta(payload) || getChatCompletionsReasoningDelta(payload);
+  }
   return '';
 }
 
@@ -327,9 +329,14 @@ function emitResponsesReasoningFromPayload(
   });
 }
 
+/**
+ * Prefer Responses SSE shapes; fall back to chat/completions deltas.
+ * Many OpenAI-compatible gateways accept POST /responses but still stream
+ * `choices[].delta.content` (new-api channel quirks).
+ */
 function getStreamDelta(payload: Record<string, unknown>, surface: ApiSurface): string {
   if (surface === 'responses') {
-    return getResponsesStreamTextDelta(payload);
+    return getResponsesStreamTextDelta(payload) || getChatCompletionsStreamDelta(payload);
   }
   if (surface === 'anthropic_messages') {
     return getAnthropicStreamTextDelta(payload);
@@ -654,6 +661,60 @@ function isResponsesLikePayload(data: Record<string, unknown> | null | undefined
   return false;
 }
 
+/** Gateways sometimes ignore stream:true and return a full Responses JSON body. */
+function tryBufferedResponsesStreamResult(
+  state: OpenAIStreamState,
+  fallbackRecord: Record<string, unknown> | null,
+  apiSurface: ApiSurface
+): OpenAIStreamReadResult | null {
+  if (apiSurface !== 'responses' || state.content || !fallbackRecord) {
+    return null;
+  }
+  if (!isResponsesLikePayload(fallbackRecord)) {
+    return null;
+  }
+
+  const content = extractAssistantTextFromResponsesOrChat(fallbackRecord);
+  const functionCalls = mergeStreamFunctionCalls(
+    state.functionCalls,
+    extractResponsesFunctionCalls(fallbackRecord)
+  );
+  const responseId = extractResponsesId(fallbackRecord);
+  if (responseId && !state.responseIdReported) {
+    state.responseIdReported = true;
+  }
+  return {
+    content,
+    // Do not feed Responses JSON into Chat Completions validators.
+    fallbackJson: null,
+    firstChunkMs: state.firstChunkMs,
+    chunkCount: state.chunkCount,
+    lastResponsesPayload: state.lastResponsesPayload ?? fallbackRecord,
+    functionCalls,
+    reasoningContent: state.reasoningContent,
+  };
+}
+
+/**
+ * Prefer streamed deltas; fall back to terminal payload when gateways only put
+ * final message text on response.completed (no output_text.delta), or when the
+ * body is chat/completions-shaped on a /responses URL.
+ */
+function resolveStreamResultContent(
+  state: OpenAIStreamState,
+  fallbackJson: LLMChatCompletionResponse | null,
+  apiSurface: ApiSurface
+): string {
+  const fromStream = state.content || getCompletionContent(fallbackJson);
+  if (fromStream.trim()) return fromStream;
+  if (apiSurface !== 'responses') return fromStream;
+  if (state.lastResponsesPayload) {
+    const fromTerminal = extractAssistantTextFromResponsesOrChat(state.lastResponsesPayload);
+    if (fromTerminal.trim()) return fromTerminal;
+  }
+  return fromStream;
+}
+
 function createOpenAIStreamResult(
   state: OpenAIStreamState,
   rawText: string,
@@ -662,36 +723,13 @@ function createOpenAIStreamResult(
   const fallbackJson = state.content ? null : parseBufferedJsonCompletion(rawText);
   const fallbackRecord = fallbackJson as unknown as Record<string, unknown> | null;
 
-  // Gateways sometimes ignore stream:true and return a full Responses JSON body.
-  if (
-    apiSurface === 'responses' &&
-    !state.content &&
-    fallbackRecord &&
-    isResponsesLikePayload(fallbackRecord)
-  ) {
-    const content = extractResponsesOutputText(fallbackRecord);
-    const functionCalls = mergeStreamFunctionCalls(
-      state.functionCalls,
-      extractResponsesFunctionCalls(fallbackRecord)
-    );
-    const responseId = extractResponsesId(fallbackRecord);
-    if (responseId && !state.responseIdReported) {
-      state.responseIdReported = true;
-    }
-    return {
-      content,
-      // Do not feed Responses JSON into Chat Completions validators.
-      fallbackJson: null,
-      firstChunkMs: state.firstChunkMs,
-      chunkCount: state.chunkCount,
-      lastResponsesPayload: state.lastResponsesPayload ?? fallbackRecord,
-      functionCalls,
-      reasoningContent: state.reasoningContent,
-    };
+  const bufferedResponses = tryBufferedResponsesStreamResult(state, fallbackRecord, apiSurface);
+  if (bufferedResponses) {
+    return bufferedResponses;
   }
 
   return {
-    content: state.content || getCompletionContent(fallbackJson),
+    content: resolveStreamResultContent(state, fallbackJson, apiSurface),
     fallbackJson,
     firstChunkMs: state.firstChunkMs,
     chunkCount: state.chunkCount,
@@ -1268,7 +1306,7 @@ async function readLLMResponsePayload(
       emitResponsesReasoningFromPayload(data, context.options.onStreamUpdate, requestStartedAt);
       return {
         data: null,
-        content: extractResponsesOutputText(data),
+        content: extractAssistantTextFromResponsesOrChat(data),
         rawResponsesData: data,
       };
     }
@@ -1760,13 +1798,13 @@ async function continueResponsesToolLoopFromRaw(
 ): Promise<string> {
   const executeTool = baseOptions.executeTool;
   if (!executeTool) {
-    return extractResponsesOutputText(raw);
+    return extractAssistantTextFromResponsesOrChat(raw);
   }
 
   const maxRounds = baseOptions.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS;
   let previousResponseId = extractResponsesId(raw) || baseOptions.previousResponseId;
   let followUpInputItems: Array<Record<string, unknown>> | undefined;
-  let lastText = extractResponsesOutputText(raw);
+  let lastText = extractAssistantTextFromResponsesOrChat(raw);
 
   const first = await processToolRoundFromPayload({
     request,
@@ -1860,6 +1898,11 @@ async function callLLMStreamFirstThenToolLoop(
   }
   if (streamed.trim()) {
     return streamed;
+  }
+  // Terminal SSE payload may carry output_text without per-token deltas or tool calls.
+  if (raw) {
+    const fromRaw = extractAssistantTextFromResponsesOrChat(raw).trim();
+    if (fromRaw) return fromRaw;
   }
   return callLLMResponsesToolLoop(request, toolOptions, normalizedEndpoint);
 }

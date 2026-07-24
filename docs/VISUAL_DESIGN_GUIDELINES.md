@@ -501,7 +501,7 @@ Deep Chat（`src/modules/app_center/views/playground/deep-chat/`）是应用中�
 
 实现文件：
 
-- 样式：`src/modules/app_center/views/playground/deep-chat/styles.css`
+- 样式：`src/modules/app_center/views/playground/styles.css`
 - 组件内联样式：`deepChatStyles.ts`（widget 内部 chrome）
 - 交互：`controller.ts`、`skillLibrary.ts`
 

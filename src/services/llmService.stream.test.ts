@@ -610,4 +610,99 @@ describe('callLLM streaming', () => {
     expect(body.input).toBeDefined();
     expect(body.messages).toBeUndefined();
   });
+
+  it('extracts assistant text from response.completed when no output_text.delta events', async () => {
+    const sse = [
+      'data: {"type":"response.created","id":"resp_done_only"}',
+      '',
+      'data: {"type":"response.completed","response":{"id":"resp_done_only","output":[{"type":"message","content":[{"type":"output_text","text":"done-only-text"}]}]}}',
+      '',
+      'data: [DONE]',
+      '',
+    ].join('\n');
+    const fetchMock = vi.fn(async () => new Response(sse, { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'gpt-5.5',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'responses',
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+
+    expect(text).toBe('done-only-text');
+  });
+
+  it('accepts chat/completions SSE shape on /responses path (gateway quirk)', async () => {
+    const sse = [
+      'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"hello "}}]}',
+      '',
+      'data: {"id":"chatcmpl-1","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"world"}}]}',
+      '',
+      'data: [DONE]',
+      '',
+    ].join('\n');
+    const fetchMock = vi.fn(async () => new Response(sse, { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'gpt-5.5',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'responses',
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+
+    expect(text).toBe('hello world');
+  });
+
+  it('extracts non-stream chat/completions body on /responses path', async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            id: 'chatcmpl-2',
+            object: 'chat.completion',
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: 'compat-body' },
+                finish_reason: 'stop',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://new.hongecb.store/v1',
+      'test-key',
+      'gpt-5.5',
+      {
+        stream: false,
+        retries: 0,
+        apiPath: 'responses',
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+
+    expect(text).toBe('compat-body');
+  });
 });

@@ -8,7 +8,10 @@ import {
   extractResponsesFunctionCalls,
   type ResponsesFunctionCall,
 } from './responsesTools';
-import { extractResponsesId, extractResponsesOutputText } from './responsesParse';
+import {
+  extractAssistantTextFromResponsesOrChat,
+  extractResponsesId,
+} from './responsesParse';
 
 export type ResponsesToolExecutor = (call: {
   name: string;
@@ -45,7 +48,7 @@ export async function processResponsesToolRound(
 ): Promise<ResponsesToolLoopRoundResult> {
   const responseId = extractResponsesId(input.responseData);
   const functionCalls = extractResponsesFunctionCalls(input.responseData);
-  const text = extractResponsesOutputText(input.responseData);
+  const text = extractAssistantTextFromResponsesOrChat(input.responseData);
 
   if (functionCalls.length === 0) {
     return {

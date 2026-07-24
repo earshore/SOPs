@@ -144,7 +144,7 @@ function buildModelCapabilityBadges(
       active: cap.supportsPreviousResponseId,
       title: cap.supportsPreviousResponseId
         ? '支持 previous_response_id 多轮（Deep Chat 可链式）'
-        : '当前路径不支持 previous_response_id',
+        : '当前路径不支持 previous_response_id（网关 fail-closed，默认禁用）',
     },
     {
       id: 'builtin',

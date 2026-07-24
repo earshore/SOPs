@@ -243,17 +243,25 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
   syncMountedDeepThinkingChrome();
 
   const assistantText = (finalText || streamState.streamedText).trim();
-  if (!assistantText) {
-    throw new ValidationError(
-      '模型没有返回任何内容，请稍后重试或检查模型/上下文配置。',
-      'DEEP_CHAT_001',
-      'assistantText',
-      assistantText,
-      { module: 'deep-chat', action: 'resolveAssistantText' }
-    );
-  }
-
+  assertDeepChatAssistantText(assistantText, pendingRequest);
   return assistantText;
+}
+
+function assertDeepChatAssistantText(
+  assistantText: string,
+  pendingRequest: PendingDeepChatRequest
+): void {
+  if (assistantText) return;
+  const hadReasoning = Boolean(pendingRequest.reasoningText?.trim());
+  throw new ValidationError(
+    hadReasoning
+      ? '模型完成了推理但未返回可见正文（常见原因：max_output_tokens 过小、网关只推 reasoning、或 /responses 返回了非标准正文格式）。请增大输出上限、关闭推理后重试，或在系统设置将路径改为 chat/completions。'
+      : '模型没有返回任何内容，请稍后重试或检查模型/上下文配置。',
+    'DEEP_CHAT_001',
+    'assistantText',
+    assistantText,
+    { module: 'deep-chat', action: 'resolveAssistantText' }
+  );
 }
 
 export function syncMountedDeepThinkingChrome(): void {

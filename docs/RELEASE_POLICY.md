@@ -45,7 +45,8 @@
 - `v3.0.11-rc.3`（2026-07-22）为生产验证候选：Deep Chat 会话稳定性、发布门禁与 Skill Registry 构建产物优化；**Pre-release**，Latest 仍为 `v3.0.10`。
 - `v3.0.11-rc.4`（2026-07-23）为生产验证候选：Deep Chat 发送钮 pin/手机壳、会话 Skill Chip dock、侧栏 Skill Library；**Pre-release**，Latest 仍为 `v3.0.10`。
 - `v3.0.11-rc.5`（2026-07-23）为生产验证候选：Deep Chat 技能单次执行（发送后消费挂载）；**Pre-release**，Latest 仍为 `v3.0.10`。
-- GA 后不得再发 `v3.0.10-rc.*`；当前 patch 候选为 `v3.0.11-rc.5`，GA 定稿后升 `v3.0.11`；若后续变更体量升 minor 则为 `v3.1.0-rc.1`。
+- `v3.0.11-rc.6`（2026-07-24）为生产验证候选：Deep Chat 包重组 + 深度思考 / 模型能力线；**Pre-release**，Latest 仍为 `v3.0.10`。
+- GA 后不得再发 `v3.0.10-rc.*`；当前 patch 候选为 `v3.0.11-rc.6`，GA 定稿后升 `v3.0.11`；若后续变更体量升 minor 则为 `v3.1.0-rc.1`。
 
 ## 3. 何时创建 GitHub Release
 

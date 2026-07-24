@@ -9,7 +9,6 @@ const ROOT_FILE_WHITELIST = new Set([
   'controller.ts',
   'types.ts',
   'constants.ts',
-  'styles.css',
   'template.html',
   'index.test.ts',
   'package.structure.test.ts',

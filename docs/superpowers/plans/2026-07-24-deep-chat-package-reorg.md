@@ -51,8 +51,8 @@ deep-chat/
 ├── controller.ts                 # 薄编排
 ├── types.ts                      # 跨域共享类型
 ├── constants.ts
-├── styles.css
 ├── template.html
+│   # styles.css lives at playground/styles.css (parent layer)
 ├── package.structure.test.ts     # 结构门禁（由 controller.split.test 升级）
 ├── index.test.ts                 # 集成回归（本计划不强制拆分）
 │

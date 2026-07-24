@@ -74,6 +74,28 @@ export function extractResponsesOutputText(
   return extractResponsesRefusal(data);
 }
 
+/**
+ * Prefer Responses shapes; also accept chat/completions bodies some gateways
+ * return on POST /responses (OpenAI-compatible proxies).
+ */
+export function extractAssistantTextFromResponsesOrChat(
+  data: Record<string, unknown> | null | undefined
+): string {
+  const fromResponses = extractResponsesOutputText(data);
+  if (fromResponses.trim()) return fromResponses;
+  if (!data || typeof data !== 'object') return '';
+
+  const choices = data.choices;
+  if (Array.isArray(choices) && choices[0] && typeof choices[0] === 'object') {
+    const first = choices[0] as Record<string, unknown>;
+    const message = first.message as { content?: unknown } | undefined;
+    if (typeof message?.content === 'string' && message.content.trim()) {
+      return message.content;
+    }
+  }
+  return '';
+}
+
 /** Response id for previous_response_id chaining. */
 export function extractResponsesId(
   data: Record<string, unknown> | null | undefined
