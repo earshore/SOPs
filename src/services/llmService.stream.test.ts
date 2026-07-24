@@ -743,25 +743,150 @@ describe('callLLM streaming', () => {
     ).rejects.toThrow(/max_output_tokens|输出未完成/);
   });
 
-  it('rejects enableToolLoop on chat_completions path', async () => {
-    await expect(
-      callLLM(
-        [{ role: 'user', content: 'hi' }],
-        'new_api',
-        'https://example.test/v1',
-        'k',
-        'deepseek-v4-flash',
-        {
-          stream: false,
-          retries: 0,
-          apiPath: 'chat_completions',
-          enableToolLoop: true,
-          tools: [{ type: 'function', function: { name: 'x', parameters: {} } }],
-          executeTool: async () => 'ok',
-          reasoningPrefs: { enabled: false, effort: 'medium' },
-        }
-      )
-    ).rejects.toMatchObject({ code: 'LLM_TOOLS_PATH_UNSUPPORTED' });
+  it('runs chat_completions tool loop until final text', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(async () => {
+        return new Response(
+          JSON.stringify({
+            id: 'chatcmpl-1',
+            object: 'chat.completion',
+            created: 1,
+            model: 'deepseek-v4-flash',
+            choices: [
+              {
+                index: 0,
+                message: {
+                  role: 'assistant',
+                  content: null,
+                  tool_calls: [
+                    {
+                      id: 'call_1',
+                      type: 'function',
+                      function: { name: 'lookup', arguments: '{"q":"x"}' },
+                    },
+                  ],
+                },
+                finish_reason: 'tool_calls',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      })
+      .mockImplementationOnce(async () => {
+        return new Response(
+          JSON.stringify({
+            id: 'chatcmpl-2',
+            object: 'chat.completion',
+            created: 2,
+            model: 'deepseek-v4-flash',
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: 'final-answer' },
+                finish_reason: 'stop',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://example.test/v1',
+      'k',
+      'deepseek-v4-flash',
+      {
+        stream: false,
+        retries: 0,
+        apiPath: 'chat_completions',
+        enableToolLoop: true,
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'lookup',
+              parameters: { type: 'object', properties: {} },
+            },
+          },
+        ],
+        executeTool: async () => 'tool-result',
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+
+    expect(text).toBe('final-answer');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const secondBody = JSON.parse(String((fetchMock.mock.calls[1]?.[1] as RequestInit).body));
+    expect(secondBody.messages).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ role: 'assistant', tool_calls: expect.any(Array) }),
+        expect.objectContaining({
+          role: 'tool',
+          tool_call_id: 'call_1',
+          content: 'tool-result',
+        }),
+      ])
+    );
+    expect(secondBody.tools).toHaveLength(1);
+  });
+
+  it('posts tools and sampling fields on chat_completions body', async () => {
+    const fetchMock = vi.fn(async () => {
+      return new Response(
+        JSON.stringify({
+          id: 'chatcmpl-x',
+          object: 'chat.completion',
+          created: 1,
+          model: 'deepseek-v4-flash',
+          choices: [
+            {
+              index: 0,
+              message: { role: 'assistant', content: 'ok' },
+              finish_reason: 'stop',
+            },
+          ],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://example.test/v1',
+      'k',
+      'deepseek-v4-flash',
+      {
+        stream: false,
+        retries: 0,
+        apiPath: 'chat_completions',
+        tools: [{ type: 'function', function: { name: 'a', parameters: {} } }],
+        toolChoice: 'auto',
+        parallelToolCalls: true,
+        topP: 0.9,
+        frequencyPenalty: 0.1,
+        stop: ['END'],
+        promptCacheKey: 'cache-1',
+        safetyIdentifier: 'user-hash',
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+
+    const body = JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body));
+    expect(body.tools).toHaveLength(1);
+    expect(body.tool_choice).toBe('auto');
+    expect(body.parallel_tool_calls).toBe(true);
+    expect(body.top_p).toBe(0.9);
+    expect(body.frequency_penalty).toBe(0.1);
+    expect(body.stop).toEqual(['END']);
+    expect(body.prompt_cache_key).toBe('cache-1');
+    expect(body.safety_identifier).toBe('user-hash');
   });
 
   it('throws API_EMPTY_RESPONSE when chat completion content is empty stop', async () => {

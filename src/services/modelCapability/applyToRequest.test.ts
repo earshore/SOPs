@@ -189,6 +189,51 @@ describe('buildChatCompletionsBody', () => {
     expect(body.max_completion_tokens).toBeUndefined();
   });
 
+  it('passes tools, parallel_tool_calls, and vision image_url parts on chat body', () => {
+    const capability = {
+      modelId: 'deepseek-v4-flash',
+      provider: 'new_api',
+      contextWindow: 128_000,
+      apiSurface: 'chat_completions' as const,
+      supportsReasoning: false,
+      reasoningEfforts: [] as const,
+      defaultEffort: 'medium' as const,
+      temperatureIgnored: false,
+      features: [],
+      supportsStructuredOutput: true,
+      supportsTools: true,
+      supportsVision: true,
+      mapRequest: null,
+      source: { registryMatched: true, preferredSurface: 'chat_completions' as const },
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildChatCompletionsBody({
+      model: 'deepseek-v4-flash',
+      messages: [{ role: 'user', content: 'see image' }],
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+      tools: [{ type: 'function', function: { name: 't', parameters: {} } }],
+      toolChoice: 'auto',
+      parallelToolCalls: false,
+      visionUserParts: [{ type: 'input_image', image_url: 'https://x/a.png' }],
+      topP: 0.5,
+    });
+
+    expect(body.tools).toHaveLength(1);
+    expect(body.tool_choice).toBe('auto');
+    expect(body.parallel_tool_calls).toBe(false);
+    expect(body.top_p).toBe(0.5);
+    expect(body.messages).toEqual([
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'see image' },
+          { type: 'image_url', image_url: { url: 'https://x/a.png' } },
+        ],
+      },
+    ]);
+  });
+
   it('prefers response_format json_schema over json_object when structured supported', () => {
     const capability = {
       modelId: 'deepseek-v4-flash',

@@ -86,7 +86,10 @@ export function buildStoredThreadMessages(
     .filter(message => message.role !== 'system')
     .map((message): DeepChatMessage => {
       const role = fromChatRole(message.role);
-      const text = truncateStoredMessage(message.content, options.maxMessageChars);
+      const text = truncateStoredMessage(
+        typeof message.content === 'string' ? message.content : '',
+        options.maxMessageChars
+      );
       const existingMessage = findExistingStoredMessage(
         existingMessages,
         role,

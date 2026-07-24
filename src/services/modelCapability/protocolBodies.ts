@@ -166,7 +166,7 @@ function applyGeminiThinkingConfig(
 export function buildBodyForApiPath(args: {
   pathId: ApiPathId;
   model: string;
-  messages: ChatMessageLike[];
+  messages: ChatMessageLike[] | Array<Record<string, unknown>>;
   temperature?: number;
   maxTokens?: number;
   stream?: boolean;
@@ -178,14 +178,29 @@ export function buildBodyForApiPath(args: {
   store?: boolean;
   tools?: unknown[];
   toolChoice?: unknown;
+  parallelToolCalls?: boolean;
   visionUserParts?: Array<Record<string, unknown>>;
   followUpInputItems?: Array<Record<string, unknown>>;
   jsonSchema?: ResponsesJsonSchemaFormat;
+  topP?: number;
+  frequencyPenalty?: number;
+  presencePenalty?: number;
+  stop?: string | string[];
+  n?: number;
+  seed?: number;
+  logitBias?: Record<string, number>;
+  logprobs?: boolean;
+  topLogprobs?: number;
+  metadata?: Record<string, string>;
+  promptCacheKey?: string;
+  safetyIdentifier?: string;
 }): Record<string, unknown> {
+  const textMessages = args.messages as ChatMessageLike[];
+
   if (args.pathId === 'responses') {
     return buildResponsesBody({
       model: args.model,
-      messages: args.messages,
+      messages: textMessages,
       temperature: args.temperature,
       maxTokens: args.maxTokens,
       stream: args.stream,
@@ -198,6 +213,7 @@ export function buildBodyForApiPath(args: {
       store: args.store,
       tools: normalizeToolsForResponses(args.tools),
       toolChoice: args.toolChoice,
+      parallelToolCalls: args.parallelToolCalls,
       visionUserParts: args.visionUserParts,
       followUpInputItems: args.followUpInputItems,
     });
@@ -205,7 +221,7 @@ export function buildBodyForApiPath(args: {
   if (args.pathId === 'anthropic_messages') {
     return buildAnthropicMessagesBody({
       model: args.model,
-      messages: args.messages,
+      messages: textMessages,
       maxTokens: args.maxTokens,
       stream: args.stream,
       temperature: args.temperature,
@@ -215,7 +231,7 @@ export function buildBodyForApiPath(args: {
   }
   if (args.pathId === 'gemini_generate') {
     return buildGeminiGenerateBody({
-      messages: args.messages,
+      messages: textMessages,
       maxTokens: args.maxTokens,
       temperature: args.temperature,
       jsonMode: args.jsonMode,
@@ -234,5 +250,22 @@ export function buildBodyForApiPath(args: {
     serviceTier: args.serviceTier,
     capability: args.capability,
     reasoning: args.reasoning,
+    tools: args.tools,
+    toolChoice: args.toolChoice,
+    parallelToolCalls: args.parallelToolCalls,
+    visionUserParts: args.visionUserParts,
+    topP: args.topP,
+    frequencyPenalty: args.frequencyPenalty,
+    presencePenalty: args.presencePenalty,
+    stop: args.stop,
+    n: args.n,
+    seed: args.seed,
+    logitBias: args.logitBias,
+    logprobs: args.logprobs,
+    topLogprobs: args.topLogprobs,
+    store: args.store,
+    metadata: args.metadata,
+    promptCacheKey: args.promptCacheKey,
+    safetyIdentifier: args.safetyIdentifier,
   });
 }

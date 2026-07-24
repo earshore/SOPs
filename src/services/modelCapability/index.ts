@@ -84,6 +84,20 @@ export {
   type ResponsesToolLoopRoundResult,
 } from './responsesToolLoop';
 export {
+  appendChatToolRoundMessages,
+  extractChatStreamToolCallDeltas,
+  extractChatToolCallsFromCompletion,
+  extractChatToolCallsFromMessage,
+  mergeChatStreamToolCallDeltas,
+  type ChatFunctionToolCall,
+  type ChatStreamToolCallDelta,
+} from './chatTools';
+export {
+  applyVisionPartsToChatMessages,
+  toChatImageUrlParts,
+  type ChatContentPart,
+} from './chatVision';
+export {
   buildLooseAnalysisJsonSchema,
   withStructuredAnalysisOptions,
   type StructuredAnalysisContext,

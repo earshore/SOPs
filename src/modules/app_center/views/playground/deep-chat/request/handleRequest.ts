@@ -240,7 +240,13 @@ export function normalizeRequestSkillChipMessages(messages: ChatMessage[]): Chat
 
   return messages.map(message =>
     message.role === 'user'
-      ? { ...message, content: normalizeSkillChipDraftText(message.content, contexts) }
+      ? {
+          ...message,
+          content: normalizeSkillChipDraftText(
+            typeof message.content === 'string' ? message.content : '',
+            contexts
+          ),
+        }
       : message
   );
 }

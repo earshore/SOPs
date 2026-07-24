@@ -24,8 +24,11 @@ import {
   extractAnthropicMessagesText,
   extractGeminiGenerateText,
   DEFAULT_MAX_TOOL_ROUNDS,
+  appendChatToolRoundMessages,
   describeResponsesEmptyBody,
   extractAssistantTextFromResponsesOrChat,
+  extractChatStreamToolCallDeltas,
+  extractChatToolCallsFromCompletion,
   extractResponsesFunctionCalls,
   extractResponsesId,
   extractResponsesIdFromStreamEvent,
@@ -36,6 +39,7 @@ import {
   getResponsesStreamTextDelta,
   harvestResponsesReasoningIncrement,
   isResponsesTerminalEvent,
+  mergeChatStreamToolCallDeltas,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
   processResponsesToolRound,
@@ -43,6 +47,7 @@ import {
   resolveModelCapability,
   type ApiPathId,
   type ApiSurface,
+  type ChatFunctionToolCall,
   type ModelsListEntry,
   type ReasoningUserPrefs,
   type ResponsesJsonSchemaFormat,
@@ -57,20 +62,35 @@ import { StorageService } from './storageService';
 // ========================
 
 /**
- * 聊天消息角色
+ * Official chat roles (Create chat completion).
  */
-export type MessageRole = 'system' | 'user' | 'assistant';
+export type MessageRole = 'system' | 'user' | 'assistant' | 'tool' | 'developer';
 
-/**
- * 聊天消息对象
- */
-export interface ChatMessage {
-  role: MessageRole;
-  content: string;
+/** Chat Completions multimodal / text content parts */
+export type ChatContentPart =
+  | { type: 'text'; text: string }
+  | { type: 'image_url'; image_url: { url: string; detail?: 'auto' | 'low' | 'high' } };
+
+export interface ChatToolCall {
+  id: string;
+  type: 'function';
+  function: { name: string; arguments: string };
 }
 
 /**
- * LLM 调用配置选项
+ * Chat message (official Create shape; content may be string, parts, or null with tool_calls).
+ */
+export interface ChatMessage {
+  role: MessageRole;
+  content?: string | ChatContentPart[] | null;
+  name?: string;
+  tool_call_id?: string;
+  tool_calls?: ChatToolCall[];
+  refusal?: string | null;
+}
+
+/**
+ * LLM 调用配置选项 — dual-path Create parity extras.
  */
 export interface LLMOptions {
   /** 温度参数 (0-2)，越低越确定性 */
@@ -106,31 +126,43 @@ export interface LLMOptions {
    * Overrides model preferred surface when set.
    */
   apiPath?: ApiPathId;
-  /** Responses multi-turn / tools / vision extras */
+  /** Multi-turn / tools / vision (chat + responses) */
   previousResponseId?: string;
   store?: boolean;
   tools?: unknown[];
   toolChoice?: unknown;
+  parallelToolCalls?: boolean;
   visionUserParts?: ResponsesTransportOptions['visionUserParts'];
   /** Called with Responses response.id when available (for chaining). */
   onResponseId?: (responseId: string) => void;
   /**
-   * Execute a function tool when Responses returns function_call items.
-   * Requires enableToolLoop: true to enter the agent loop (non-stream rounds).
+   * Execute a function tool when the model returns tool_calls / function_call items.
+   * Requires enableToolLoop: true. Works on chat_completions and responses.
    */
   executeTool?: ResponsesToolExecutor;
   /**
-   * Explicit opt-in for Responses tool loop. Avoids forcing non-stream on every
-   * call that merely declares tools.
+   * Explicit opt-in for tool loop on the active path.
    */
   enableToolLoop?: boolean;
   /** Max tool rounds (default 5). */
   maxToolRounds?: number;
   /**
-   * Responses Structured Outputs (json_schema). Takes precedence over jsonMode json_object.
-   * Requires supportsStructuredOutput on the resolved surface.
+   * Structured Outputs (json_schema). Takes precedence over jsonMode json_object.
    */
   jsonSchema?: ResponsesJsonSchemaFormat;
+  /** Official Create sampling / control */
+  topP?: number;
+  frequencyPenalty?: number;
+  presencePenalty?: number;
+  stop?: string | string[];
+  n?: number;
+  seed?: number;
+  logitBias?: Record<string, number>;
+  logprobs?: boolean;
+  topLogprobs?: number;
+  metadata?: Record<string, string>;
+  promptCacheKey?: string;
+  safetyIdentifier?: string;
 }
 
 export interface LLMStreamMetrics {
@@ -387,6 +419,8 @@ interface OpenAIStreamState {
   lastResponsesPayload?: Record<string, unknown>;
   /** Accumulated function_call items seen on stream/completed events. */
   functionCalls?: import('./modelCapability').ResponsesFunctionCall[];
+  /** Chat Completions stream tool_calls (merged deltas). */
+  chatToolCalls?: ChatFunctionToolCall[];
 }
 
 interface OpenAIStreamLineContext {
@@ -404,6 +438,7 @@ interface OpenAIStreamReadResult {
   chunkCount: number;
   lastResponsesPayload?: Record<string, unknown>;
   functionCalls?: import('./modelCapability').ResponsesFunctionCall[];
+  chatToolCalls?: ChatFunctionToolCall[];
   reasoningContent?: string;
 }
 
@@ -509,6 +544,7 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
   assertStreamPayloadIsOk(payload, data, context.response);
   reportResponsesStreamIdOnce(payload, context);
   harvestResponsesStreamSideChannels(payload, context);
+  harvestChatStreamToolCalls(payload, context);
 
   const delta = getStreamDelta(payload, context.apiSurface);
   const reasoningDelta = resolveStreamReasoningDelta(payload, context);
@@ -517,6 +553,19 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
   }
 
   emitOpenAIStreamUpdate(context, delta, reasoningDelta);
+}
+
+function harvestChatStreamToolCalls(
+  payload: Record<string, unknown>,
+  context: OpenAIStreamLineContext
+): void {
+  if (context.apiSurface !== 'chat_completions') return;
+  const deltas = extractChatStreamToolCallDeltas(payload);
+  if (deltas.length === 0) return;
+  context.state.chatToolCalls = mergeChatStreamToolCallDeltas(
+    context.state.chatToolCalls,
+    deltas
+  );
 }
 
 function collectStreamFunctionCalls(
@@ -743,6 +792,12 @@ function createOpenAIStreamResult(
     return bufferedResponses;
   }
 
+  // Prefer streamed tool_calls; fall back to non-stream shaped buffered JSON.
+  let chatToolCalls = state.chatToolCalls;
+  if ((!chatToolCalls || chatToolCalls.length === 0) && fallbackRecord) {
+    chatToolCalls = extractChatToolCallsFromCompletion(fallbackRecord);
+  }
+
   return {
     content: resolveStreamResultContent(state, fallbackJson, apiSurface),
     fallbackJson,
@@ -750,6 +805,7 @@ function createOpenAIStreamResult(
     chunkCount: state.chunkCount,
     lastResponsesPayload: state.lastResponsesPayload,
     functionCalls: state.functionCalls,
+    chatToolCalls: chatToolCalls?.length ? chatToolCalls : undefined,
     reasoningContent: state.reasoningContent,
   };
 }
@@ -825,12 +881,25 @@ interface ResolvedLLMOptions {
   store?: boolean;
   tools?: unknown[];
   toolChoice?: unknown;
+  parallelToolCalls?: boolean;
   visionUserParts?: ResponsesTransportOptions['visionUserParts'];
   onResponseId?: LLMOptions['onResponseId'];
   executeTool?: ResponsesToolExecutor;
   enableToolLoop?: boolean;
   maxToolRounds?: number;
   jsonSchema?: ResponsesJsonSchemaFormat;
+  topP?: number;
+  frequencyPenalty?: number;
+  presencePenalty?: number;
+  stop?: string | string[];
+  n?: number;
+  seed?: number;
+  logitBias?: Record<string, number>;
+  logprobs?: boolean;
+  topLogprobs?: number;
+  metadata?: Record<string, string>;
+  promptCacheKey?: string;
+  safetyIdentifier?: string;
   /** Internal: function_call_output items for next Responses request */
   followUpInputItems?: Array<Record<string, unknown>>;
 }
@@ -859,6 +928,8 @@ interface LLMResponsePayload {
   rawResponsesData?: Record<string, unknown>;
   /** Function calls harvested from stream terminal events */
   streamFunctionCalls?: import('./modelCapability').ResponsesFunctionCall[];
+  /** Chat Completions tool_calls from stream or non-stream body */
+  chatToolCalls?: ChatFunctionToolCall[];
   streamMetrics?: {
     firstChunkMs?: number;
     chunkCount: number;
@@ -952,12 +1023,25 @@ function resolveLLMOptions(
     store: options.store,
     tools: options.tools,
     toolChoice: options.toolChoice,
+    parallelToolCalls: options.parallelToolCalls,
     visionUserParts: options.visionUserParts,
     onResponseId: options.onResponseId,
     executeTool: options.executeTool,
     enableToolLoop: options.enableToolLoop,
     maxToolRounds: options.maxToolRounds,
     jsonSchema: options.jsonSchema,
+    topP: options.topP,
+    frequencyPenalty: options.frequencyPenalty,
+    presencePenalty: options.presencePenalty,
+    stop: options.stop,
+    n: options.n,
+    seed: options.seed,
+    logitBias: options.logitBias,
+    logprobs: options.logprobs,
+    topLogprobs: options.topLogprobs,
+    metadata: options.metadata,
+    promptCacheKey: options.promptCacheKey,
+    safetyIdentifier: options.safetyIdentifier,
     followUpInputItems: undefined,
   };
 }
@@ -989,13 +1073,61 @@ function assertSafeLLMEndpoint(endpoint: string): void {
   );
 }
 
+/** Flatten official chat content (string | parts | null) to plain text for UI/budget. */
+export function chatContentToPlainText(content: ChatMessage['content']): string {
+  if (content == null) return '';
+  if (typeof content === 'string') return content;
+  if (!Array.isArray(content)) return String(content);
+  return content
+    .map(part => (part && part.type === 'text' && typeof part.text === 'string' ? part.text : ''))
+    .filter(Boolean)
+    .join('\n');
+}
+
+function contentToPlainText(content: ChatMessage['content']): string {
+  return chatContentToPlainText(content);
+}
+
+/**
+ * Chat path: preserve official message shape (parts, tool_calls, tool role).
+ * Other paths: flatten to text roles expected by native body builders.
+ */
 function normalizeMessagesForTransport(
-  messages: ChatMessage[]
-): Array<{ role: string; content: string }> {
-  return messages.map(message => ({
-    role: message.role,
-    content: typeof message.content === 'string' ? message.content : String(message.content ?? ''),
-  }));
+  messages: ChatMessage[],
+  pathId: ApiPathId = 'chat_completions'
+): Array<Record<string, unknown>> {
+  if (pathId === 'chat_completions') {
+    return messages.map(message => {
+      const row: Record<string, unknown> = { role: message.role };
+      if (message.content !== undefined) {
+        row.content = message.content;
+      } else if (!message.tool_calls?.length) {
+        row.content = '';
+      }
+      if (message.name) row.name = message.name;
+      if (message.tool_call_id) row.tool_call_id = message.tool_call_id;
+      if (message.tool_calls?.length) row.tool_calls = message.tool_calls;
+      if (message.refusal !== undefined) row.refusal = message.refusal;
+      return row;
+    });
+  }
+
+  return messages.map(message => {
+    const role =
+      message.role === 'developer'
+        ? 'system'
+        : message.role === 'tool'
+          ? 'user'
+          : message.role === 'assistant'
+            ? 'assistant'
+            : message.role === 'system'
+              ? 'system'
+              : 'user';
+    return {
+      role,
+      content: contentToPlainText(message.content),
+    };
+  });
 }
 
 function extractOutboundReasoningMarker(body: Record<string, unknown>): string | undefined {
@@ -1106,7 +1238,7 @@ function createLLMTransport(args: {
   const body = buildBodyForApiPath({
     pathId,
     model: args.model,
-    messages: normalizeMessagesForTransport(args.messages),
+    messages: normalizeMessagesForTransport(args.messages, pathId),
     temperature: args.options.temperature,
     maxTokens: args.options.maxTokens,
     stream: args.options.stream,
@@ -1118,9 +1250,22 @@ function createLLMTransport(args: {
     store: args.options.store,
     tools: args.options.tools,
     toolChoice: args.options.toolChoice,
+    parallelToolCalls: args.options.parallelToolCalls,
     visionUserParts: args.options.visionUserParts,
     followUpInputItems: args.options.followUpInputItems,
     jsonSchema: args.options.jsonSchema,
+    topP: args.options.topP,
+    frequencyPenalty: args.options.frequencyPenalty,
+    presencePenalty: args.options.presencePenalty,
+    stop: args.options.stop,
+    n: args.options.n,
+    seed: args.options.seed,
+    logitBias: args.options.logitBias,
+    logprobs: args.options.logprobs,
+    topLogprobs: args.options.topLogprobs,
+    metadata: args.options.metadata,
+    promptCacheKey: args.options.promptCacheKey,
+    safetyIdentifier: args.options.safetyIdentifier,
   });
 
   const { fullUrl, pathSuffix } = buildFullApiUrl(args.endpoint, pathId, args.model);
@@ -1331,7 +1476,11 @@ async function readLLMResponsePayload(
     if (context.apiSurface === 'gemini_generate') {
       return { data: null, content: extractGeminiGenerateText(data) };
     }
-    return { data: data as unknown as LLMChatCompletionResponse, content: '' };
+    return {
+      data: data as unknown as LLMChatCompletionResponse,
+      content: '',
+      chatToolCalls: extractChatToolCallsFromCompletion(data),
+    };
   }
 
   const streamResult = await readOpenAIStream(
@@ -1351,6 +1500,7 @@ async function readLLMResponsePayload(
     content: streamResult.content,
     rawResponsesData: streamResult.lastResponsesPayload,
     streamFunctionCalls: streamResult.functionCalls,
+    chatToolCalls: streamResult.chatToolCalls,
     streamMetrics: {
       firstChunkMs: streamResult.firstChunkMs,
       chunkCount: streamResult.chunkCount,
@@ -1603,68 +1753,48 @@ function normalizeLLMCallArgs(args: LLMCallArgs): LLMCallRequest {
 // 核心 API 函数
 // ========================
 
-function shouldUseResponsesToolLoop(options: ResolvedLLMOptions): boolean {
+function hasToolLoopPrerequisites(options: ResolvedLLMOptions): boolean {
   return (
     options.enableToolLoop === true &&
-    options.apiPath === 'responses' &&
     typeof options.executeTool === 'function' &&
     Array.isArray(options.tools) &&
     options.tools.length > 0
   );
 }
 
-/**
- * Tool loop is Responses-only. Fail closed when enableToolLoop is set on other paths
- * so tools are never silently ignored.
- */
-function assertToolsPathSupported(options: ResolvedLLMOptions): void {
+function shouldUseResponsesToolLoop(options: ResolvedLLMOptions): boolean {
+  return hasToolLoopPrerequisites(options) && options.apiPath === 'responses';
+}
+
+/** Official Chat Completions tools multi-round (messages + tool_calls). */
+function shouldUseChatToolLoop(options: ResolvedLLMOptions): boolean {
+  const path = options.apiPath ?? 'chat_completions';
+  return hasToolLoopPrerequisites(options) && path === 'chat_completions';
+}
+
+/** Fail closed when enableToolLoop is set without executor/tools. */
+function assertToolLoopOptions(options: ResolvedLLMOptions): void {
   if (!options.enableToolLoop) {
     return;
   }
-  const path = options.apiPath ?? 'chat_completions';
-  if (path === 'responses') {
-    return;
+  if (typeof options.executeTool !== 'function') {
+    throw new ValidationError(
+      'enableToolLoop 需要提供 executeTool 回调。',
+      'LLM_TOOL_LOOP_MISSING_EXECUTOR',
+      'executeTool',
+      undefined,
+      { module: 'LLMService', action: 'callLLM' }
+    );
   }
-  throw new ValidationError(
-    '工具循环仅支持 Responses 路径。请在系统设置将 API 路径改为 /responses，或关闭业务 tools。',
-    'LLM_TOOLS_PATH_UNSUPPORTED',
-    'apiPath',
-    path,
-    { module: 'LLMService', action: 'callLLM' }
-  );
-}
-
-/** Dev-only: soft tools/vision on non-responses paths are dropped by body builders. */
-function warnSoftToolsOrVisionIgnored(options: ResolvedLLMOptions): void {
-  if (options.enableToolLoop) {
-    return;
+  if (!Array.isArray(options.tools) || options.tools.length === 0) {
+    throw new ValidationError(
+      'enableToolLoop 需要非空 tools 数组。',
+      'LLM_TOOL_LOOP_MISSING_TOOLS',
+      'tools',
+      options.tools,
+      { module: 'LLMService', action: 'callLLM' }
+    );
   }
-  const path = options.apiPath ?? 'chat_completions';
-  if (path === 'responses') {
-    return;
-  }
-  const hasTools = Array.isArray(options.tools) && options.tools.length > 0;
-  const hasVision =
-    Array.isArray(options.visionUserParts) && options.visionUserParts.length > 0;
-  if (!hasTools && !hasVision) {
-    return;
-  }
-  const isDev =
-    typeof import.meta !== 'undefined' &&
-    Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV);
-  if (!isDev) {
-    return;
-  }
-  const bits = [
-    hasTools ? 'tools' : null,
-    hasVision ? 'visionUserParts' : null,
-  ]
-    .filter(Boolean)
-    .join('/');
-  console.warn(
-    `[LLM] ${bits} ignored on apiPath=${path}. Use Responses (apiPath=responses) for tools/vision; ` +
-      `enableToolLoop is only supported on Responses.`
-  );
 }
 
 function buildToolLoopContext(
@@ -2015,6 +2145,132 @@ async function callLLMStreamFirstThenToolLoop(
 }
 
 /**
+ * Chat Completions tool loop: messages → tool_calls → role=tool → next round.
+ */
+async function callLLMChatToolLoop(
+  request: LLMCallRequest,
+  baseOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string
+): Promise<string> {
+  const executeTool = baseOptions.executeTool;
+  if (!executeTool) return '';
+
+  const maxRounds = baseOptions.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS;
+  let messages: ChatMessage[] = [...request.messages];
+  let lastText = '';
+
+  for (let round = 0; round < maxRounds; round++) {
+    const roundOptions: ResolvedLLMOptions = {
+      ...baseOptions,
+      stream: false,
+      enableToolLoop: false,
+    };
+    const roundRequest: LLMCallRequest = { ...request, messages, options: roundOptions };
+    const context = createInitialLLMContext(roundRequest, roundOptions, normalizedEndpoint);
+    const payload = await executeLLMAttemptPayload(context, 0, {
+      timedOut: false,
+      externallyAborted: false,
+    });
+    lastText = getLLMResponseContent(payload);
+    const toolCalls =
+      payload.chatToolCalls?.length
+        ? payload.chatToolCalls
+        : extractChatToolCallsFromCompletion(
+            payload.data as unknown as Record<string, unknown> | null
+          );
+    if (!toolCalls.length) {
+      return lastText;
+    }
+
+    const results: Array<{ callId: string; output: string }> = [];
+    for (const call of toolCalls) {
+      try {
+        const output = await executeTool({
+          name: call.function.name,
+          arguments: call.function.arguments,
+          callId: call.id,
+        });
+        results.push({ callId: call.id, output: String(output ?? '') });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        results.push({
+          callId: call.id,
+          output: JSON.stringify({ error: message }),
+        });
+      }
+    }
+
+    const transportMessages = normalizeMessagesForTransport(messages, 'chat_completions');
+    const nextRecords = appendChatToolRoundMessages(transportMessages, toolCalls, results);
+    messages = nextRecords as unknown as ChatMessage[];
+  }
+
+  return lastText;
+}
+
+/**
+ * Stream-first chat hop: if tool_calls appear, continue non-stream tool loop.
+ */
+async function callLLMChatStreamFirstThenToolLoop(
+  request: LLMCallRequest,
+  baseOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string
+): Promise<string> {
+  const streamOptions: ResolvedLLMOptions = {
+    ...baseOptions,
+    stream: true,
+    enableToolLoop: false,
+  };
+  const context = createInitialLLMContext(request, streamOptions, normalizedEndpoint);
+  const firstPayload = await executeLLMAttemptPayload(context, 0, {
+    timedOut: false,
+    externallyAborted: false,
+  });
+  const streamed = getLLMResponseContent(firstPayload);
+  const toolCalls =
+    firstPayload.chatToolCalls?.length
+      ? firstPayload.chatToolCalls
+      : extractChatToolCallsFromCompletion(
+          firstPayload.data as unknown as Record<string, unknown> | null
+        );
+
+  if (toolCalls.length > 0) {
+    // Seed assistant tool_calls into messages then run remaining non-stream rounds.
+    const executeTool = baseOptions.executeTool!;
+    const results: Array<{ callId: string; output: string }> = [];
+    for (const call of toolCalls) {
+      try {
+        const output = await executeTool({
+          name: call.function.name,
+          arguments: call.function.arguments,
+          callId: call.id,
+        });
+        results.push({ callId: call.id, output: String(output ?? '') });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        results.push({ callId: call.id, output: JSON.stringify({ error: message }) });
+      }
+    }
+    const transportMessages = normalizeMessagesForTransport(
+      request.messages,
+      'chat_completions'
+    );
+    const nextMessages = appendChatToolRoundMessages(
+      transportMessages,
+      toolCalls,
+      results
+    ) as unknown as ChatMessage[];
+    return callLLMChatToolLoop(
+      { ...request, messages: nextMessages },
+      { ...baseOptions, stream: false, enableToolLoop: true },
+      normalizedEndpoint
+    );
+  }
+
+  return streamed;
+}
+
+/**
  * 通用大语言模型调用接口 (带自动重试)
  */
 export async function callLLM(...args: LLMCallArgs): Promise<string> {
@@ -2022,8 +2278,7 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
   const resolvedOptions = resolveLLMOptions(request.options || {}, request.provider, request.model);
   const normalizedEndpoint = resolveProviderEndpoint(request.provider, request.endpoint);
   assertSafeLLMEndpoint(normalizedEndpoint);
-  assertToolsPathSupported(resolvedOptions);
-  warnSoftToolsOrVisionIgnored(resolvedOptions);
+  assertToolLoopOptions(resolvedOptions);
 
   if (shouldUseResponsesToolLoop(resolvedOptions)) {
     // Stream-first preserves 深度思考 / 已完成 chrome; tool loop only when needed.
@@ -2031,6 +2286,13 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
       return callLLMStreamFirstThenToolLoop(request, resolvedOptions, normalizedEndpoint);
     }
     return callLLMResponsesToolLoop(request, resolvedOptions, normalizedEndpoint);
+  }
+
+  if (shouldUseChatToolLoop(resolvedOptions)) {
+    if (resolvedOptions.stream) {
+      return callLLMChatStreamFirstThenToolLoop(request, resolvedOptions, normalizedEndpoint);
+    }
+    return callLLMChatToolLoop(request, resolvedOptions, normalizedEndpoint);
   }
 
   return callLLMWithRetry(request, resolvedOptions, normalizedEndpoint);

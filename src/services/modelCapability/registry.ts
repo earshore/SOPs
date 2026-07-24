@@ -24,10 +24,10 @@ function surfaceOpenAiEffort(opts?: { temperatureIgnored?: boolean }): SurfaceCa
     defaultEffort: 'medium',
     temperatureIgnored: opts?.temperatureIgnored ?? true,
     mapRequest: mapOpenAiReasoningEffort,
-    // json_object via response_format; tools/vision stay Responses-only until chat loop ships
+    // Official Chat Completions Create parity: structured + tools + vision
     supportsStructuredOutput: true,
-    supportsTools: false,
-    supportsVision: false,
+    supportsTools: true,
+    supportsVision: true,
   };
 }
 
@@ -58,6 +58,9 @@ function surfaceAnthropic(): SurfaceCapability {
     defaultEffort: 'medium',
     temperatureIgnored: true,
     mapRequest: mapAnthropicThinking,
+    supportsStructuredOutput: true,
+    supportsTools: true,
+    supportsVision: true,
   };
 }
 
@@ -68,6 +71,9 @@ function surfaceGemini(): SurfaceCapability {
     defaultEffort: 'medium',
     temperatureIgnored: false,
     mapRequest: mapGeminiThinking,
+    supportsStructuredOutput: true,
+    supportsTools: true,
+    supportsVision: true,
   };
 }
 

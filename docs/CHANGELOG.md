@@ -9,13 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Chat Completions 产品子集硬化（上线就绪）：`max_completion_tokens`（OpenAI 推理）、现代响应校验（null content / `tool_calls`）、空正文 `API_EMPTY_RESPONSE`、`response_format.json_schema`、`stream_options.include_usage`、`npm run probe:chat`。
-- 分析链路：`withStructuredAnalysisOptions` 在 **chat** 路径且 surface 支持 structured 时同样注入 soft `jsonSchema`。
+- **双路径官方 Create 全量对齐（chat + responses）**：Chat Completions 支持 tools / tool_choice / parallel_tool_calls、chat tool loop、vision `image_url` parts、采样与身份字段（top_p / penalties / stop / n / seed / logprobs / metadata / prompt_cache_key / safety_identifier 等）、`response_format.json_schema`、`stream_options.include_usage`。
+- `chatTools.ts` / `chatVision.ts`：官方 `tool_calls` 多轮与多模态映射。
+- Spec：`docs/superpowers/specs/2026-07-24-dual-path-full-api-parity.md`。
 
 ### Changed
 
-- API 路径文案：Chat Completions 明确「业务 tools 请用 Responses」；Deep Chat 业务 tools 仍仅 Responses。
-- tools：`enableToolLoop` 非 Responses 路径 fail-closed（`LLM_TOOLS_PATH_UNSUPPORTED`）；dev 下软传 tools/vision 会 `console.warn`。
+- Registry chat surface：`supportsTools` / `supportsVision` = true（与 Responses 并行，非互斥子集）。
+- `enableToolLoop` 在 **chat_completions** 与 **responses** 均可；不再把 tools 锁死在 Responses。
+- API 路径与设置文案：双路径均为官方 Create 能力，fallback 仅为传输降级。
 
 ### Fixed
 

@@ -1,4 +1,4 @@
-import type { ChatMessage } from '@/services/llmService';
+import { chatContentToPlainText, type ChatMessage } from '@/services/llmService';
 import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
 import type { LLMProviderConfig } from '@/types/state';
 
@@ -105,7 +105,9 @@ export function getDeepChatMessageBudgetError(
     return null;
   }
 
-  const oversizedMessage = messages.find(message => message.content.length > maxMessageChars);
+  const oversizedMessage = messages.find(
+    message => chatContentToPlainText(message.content).length > maxMessageChars
+  );
   if (!oversizedMessage) {
     return null;
   }
@@ -160,7 +162,7 @@ function withSessionSystemPrompt(
   sessionSystemPrompt: string
 ): ChatMessage[] {
   const withoutEmptySystem = messages.filter(
-    message => message.role !== 'system' || message.content.trim()
+    message => message.role !== 'system' || chatContentToPlainText(message.content).trim()
   );
   const systemPrompt = sessionSystemPrompt.trim();
 
@@ -200,7 +202,7 @@ function takeNewestMessagesWithinBudget(messages: ChatMessage[], maxChars: numbe
 }
 
 function getMessageCharCount(message: ChatMessage | null): number {
-  return message ? message.content.length : 0;
+  return message ? chatContentToPlainText(message.content).length : 0;
 }
 
 function hasFiniteBudgetLimit(value: number | undefined): value is number {

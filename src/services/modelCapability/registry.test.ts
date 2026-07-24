@@ -82,15 +82,15 @@ describe('multi-protocol flagship catalog', () => {
     expect(cap.supportsStructuredOutput).toBe(true);
   });
 
-  it('declares structured output but not tools/vision on chat_completions surface', () => {
+  it('declares structured output, tools, and vision on chat_completions surface', () => {
     const cap = resolveModelCapability(
       { provider: 'new_api', modelId: 'deepseek-v4-flash', preferredSurface: 'chat_completions' },
       getModelCapabilityRules()
     );
     expect(cap.apiSurface).toBe('chat_completions');
     expect(cap.supportsStructuredOutput).toBe(true);
-    expect(cap.supportsTools).toBe(false);
-    expect(cap.supportsVision).toBe(false);
+    expect(cap.supportsTools).toBe(true);
+    expect(cap.supportsVision).toBe(true);
   });
 
   it('uses anthropic thinking mapper for Claude on anthropic_messages', () => {

@@ -1,4 +1,5 @@
 import { readThinkingBudgetTokens } from './mappers';
+import { applyVisionPartsToChatMessages } from './chatVision';
 import type { EffectiveReasoningPrefs, ResolvedModelCapability } from './types';
 
 export type ChatCompletionsBodyBase = Record<string, unknown> & {
@@ -139,36 +140,95 @@ function applyChatResponseFormat(
   }
 }
 
-/**
- * Full chat/completions body builder used by llmService (and tests).
- */
-export function buildChatCompletionsBody(args: {
-  model: string;
-  messages: unknown;
-  temperature?: number;
-  maxTokens?: number;
-  stream?: boolean;
+/** Optional Create-chat fields beyond core text (official OpenAI parity). */
+export type ChatCompletionsBodyExtras = {
   jsonMode?: boolean;
-  /** Prefer over jsonMode when supportsStructuredOutput */
   jsonSchema?: ResponsesJsonSchemaFormat;
   serviceTier?: string;
-  capability: ResolvedModelCapability;
-  reasoning: EffectiveReasoningPrefs;
-}): Record<string, unknown> {
+  tools?: unknown[];
+  toolChoice?: unknown;
+  parallelToolCalls?: boolean;
+  visionUserParts?: Array<Record<string, unknown>>;
+  topP?: number;
+  frequencyPenalty?: number;
+  presencePenalty?: number;
+  stop?: string | string[];
+  n?: number;
+  seed?: number;
+  logitBias?: Record<string, number>;
+  logprobs?: boolean;
+  topLogprobs?: number;
+  store?: boolean;
+  metadata?: Record<string, string>;
+  promptCacheKey?: string;
+  safetyIdentifier?: string;
+};
+
+function applyChatOptionalCreateFields(
+  body: Record<string, unknown>,
+  args: ChatCompletionsBodyExtras & {
+    capability: Pick<ResolvedModelCapability, 'supportsTools'>;
+  }
+): void {
+  if (args.serviceTier) body.service_tier = args.serviceTier;
+  if (args.topP !== undefined) body.top_p = args.topP;
+  if (args.frequencyPenalty !== undefined) body.frequency_penalty = args.frequencyPenalty;
+  if (args.presencePenalty !== undefined) body.presence_penalty = args.presencePenalty;
+  if (args.stop !== undefined) body.stop = args.stop;
+  if (args.n !== undefined) body.n = args.n;
+  if (args.seed !== undefined) body.seed = args.seed;
+  if (args.logitBias) body.logit_bias = args.logitBias;
+  if (args.logprobs !== undefined) body.logprobs = args.logprobs;
+  if (args.topLogprobs !== undefined) body.top_logprobs = args.topLogprobs;
+  if (args.store !== undefined) body.store = args.store;
+  if (args.metadata) body.metadata = args.metadata;
+  if (args.promptCacheKey) body.prompt_cache_key = args.promptCacheKey;
+  if (args.safetyIdentifier) body.safety_identifier = args.safetyIdentifier;
+
+  // Official tools: pass through when caller supplies them (capability gate optional soft).
+  if (Array.isArray(args.tools) && args.tools.length > 0) {
+    body.tools = args.tools;
+    if (args.toolChoice !== undefined) body.tool_choice = args.toolChoice;
+    if (args.parallelToolCalls !== undefined) {
+      body.parallel_tool_calls = args.parallelToolCalls;
+    }
+  }
+}
+
+/**
+ * Full chat/completions body builder used by llmService (and tests).
+ * Official Create parity: tools, vision, sampling, identity, structured outputs.
+ */
+export function buildChatCompletionsBody(
+  args: {
+    model: string;
+    messages: unknown;
+    temperature?: number;
+    maxTokens?: number;
+    stream?: boolean;
+    capability: ResolvedModelCapability;
+    reasoning: EffectiveReasoningPrefs;
+  } & ChatCompletionsBodyExtras
+): Record<string, unknown> {
+  let messages = args.messages;
+  if (Array.isArray(messages) && args.visionUserParts?.length) {
+    messages = applyVisionPartsToChatMessages(
+      messages as Array<Record<string, unknown>>,
+      args.visionUserParts
+    );
+  }
+
   const base: ChatCompletionsBodyBase = {
     model: args.model,
-    messages: args.messages,
+    messages,
   };
 
   if (args.stream) {
     base.stream = true;
-    // Official stream usage channel (gateways that ignore unknown fields are fine).
     base.stream_options = { include_usage: true };
   }
   applyChatResponseFormat(base, args);
-  if (args.serviceTier) {
-    base.service_tier = args.serviceTier;
-  }
+  applyChatOptionalCreateFields(base, args);
 
   const body = applyReasoningToRequestBody(base, args.capability, args.reasoning, {
     temperature: args.temperature,
@@ -234,6 +294,7 @@ export type ResponsesBodyExtras = {
   store?: boolean;
   tools?: unknown[];
   toolChoice?: unknown;
+  parallelToolCalls?: boolean;
   /** Replace last user message content with multimodal parts. */
   visionUserParts?: Array<Record<string, unknown>>;
   /**
@@ -331,12 +392,16 @@ function applyResponsesToolsFields(
   body: Record<string, unknown>,
   tools: unknown[] | undefined,
   toolChoice: unknown,
-  supportsTools: boolean
+  supportsTools: boolean,
+  parallelToolCalls?: boolean
 ): void {
   if (!tools || tools.length === 0 || !supportsTools) return;
   body.tools = tools;
   if (toolChoice !== undefined) {
     body.tool_choice = toolChoice;
+  }
+  if (parallelToolCalls !== undefined) {
+    body.parallel_tool_calls = parallelToolCalls;
   }
 }
 
@@ -381,6 +446,7 @@ function applyResponsesOptionalFields(
     store?: boolean;
     tools?: unknown[];
     toolChoice?: unknown;
+    parallelToolCalls?: boolean;
   }
 ): void {
   if (args.serviceTier) {
@@ -392,7 +458,13 @@ function applyResponsesOptionalFields(
     body.previous_response_id = prev;
   }
   applyResponsesStoreField(body, args.store, args.capability.supportsStore);
-  applyResponsesToolsFields(body, args.tools, args.toolChoice, args.capability.supportsTools);
+  applyResponsesToolsFields(
+    body,
+    args.tools,
+    args.toolChoice,
+    args.capability.supportsTools,
+    args.parallelToolCalls
+  );
 }
 
 type ResponsesBodyMode = {

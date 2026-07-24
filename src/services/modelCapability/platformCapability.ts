@@ -127,9 +127,9 @@ export const OPENAI_PLATFORM_CAPABILITY_MATRIX: PlatformCapabilityRow[] = [
     id: 'chat.tools',
     area: 'Chat Completions',
     feature: 'function tools + tool loop',
-    status: 'not_in_scope',
-    notes:
-      'Use Responses path; callLLM rejects enableToolLoop outside responses (LLM_TOOLS_PATH_UNSUPPORTED)',
+    status: 'implemented',
+    entry: 'chatTools.ts, llmService callLLMChatToolLoop',
+    notes: 'Official messages tool_calls multi-round; enableToolLoop on chat_completions',
   },
   {
     id: 'chat.empty_body',
@@ -156,8 +156,8 @@ export const OPENAI_PLATFORM_CAPABILITY_MATRIX: PlatformCapabilityRow[] = [
     id: 'chat.vision',
     area: 'Chat Completions',
     feature: 'Multimodal image_url message parts',
-    status: 'not_in_scope',
-    notes: 'Phase C deferred; visionUserParts soft-warn on chat; use Responses',
+    status: 'implemented',
+    entry: 'chatVision.ts applyVisionPartsToChatMessages',
   },
   // --- Multi-protocol ---
   {

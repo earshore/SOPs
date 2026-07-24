@@ -21,8 +21,8 @@ describe('OPENAI_PLATFORM_CAPABILITY_MATRIX', () => {
     expect(row?.status).toBe('implemented');
   });
 
-  it('marks chat tools as not_in_scope (Responses-only product policy)', () => {
+  it('marks chat tools as implemented (dual-path full Create parity)', () => {
     const row = OPENAI_PLATFORM_CAPABILITY_MATRIX.find(r => r.id === 'chat.tools');
-    expect(row?.status).toBe('not_in_scope');
+    expect(row?.status).toBe('implemented');
   });
 });
