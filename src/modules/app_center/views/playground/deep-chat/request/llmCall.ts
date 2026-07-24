@@ -63,12 +63,7 @@ export function prepareDeepChatReasoningCallOptions(): {
   };
 }
 
-export function resolveDeepChatResponsesChainOptions(
-  config: LLMProviderConfig,
-  model: string,
-  /** Optional tool prefs override (tests / explicit callers). Runtime default is fail-closed. */
-  toolPrefs?: { enableBusinessTools?: boolean }
-): {
+type DeepChatChainOptions = {
   apiPath?: ReturnType<typeof normalizeApiPathId>;
   previousResponseId?: string;
   store?: boolean;
@@ -76,7 +71,49 @@ export function resolveDeepChatResponsesChainOptions(
   executeTool?: ReturnType<typeof createDeepChatBusinessToolExecutor>;
   enableToolLoop?: boolean;
   maxToolRounds?: number;
-} {
+};
+
+function buildDeepChatToolOptions(
+  config: LLMProviderConfig,
+  model: string,
+  supportsTools: boolean,
+  toolPrefs?: { enableBusinessTools?: boolean }
+): Pick<DeepChatChainOptions, 'tools' | 'executeTool' | 'enableToolLoop' | 'maxToolRounds'> {
+  if (!supportsTools || !isDeepChatBusinessToolsEnabled(toolPrefs)) {
+    return {};
+  }
+  return {
+    tools: DEEP_CHAT_BUSINESS_TOOLS,
+    executeTool: createDeepChatBusinessToolExecutor({
+      getThread: () => getActiveThread(),
+      getModel: () => model,
+      getProvider: () => config.provider,
+    }),
+    enableToolLoop: true,
+    maxToolRounds: 4,
+  };
+}
+
+function resolveResponsesChainFlags(
+  model: string,
+  cap: ReturnType<typeof resolveModelCapability>
+): Pick<DeepChatChainOptions, 'previousResponseId' | 'store'> {
+  const thread = getActiveThread();
+  const previousResponseId =
+    thread.lastResponseModel === model && thread.lastResponseId ? thread.lastResponseId : undefined;
+  const canChain =
+    Boolean(previousResponseId) &&
+    cap.supportsPreviousResponseId === true &&
+    cap.supportsStore === true;
+  return canChain ? { previousResponseId, store: true } : { store: false };
+}
+
+export function resolveDeepChatResponsesChainOptions(
+  config: LLMProviderConfig,
+  model: string,
+  /** Optional tool prefs override (tests / explicit callers). Runtime default is fail-closed. */
+  toolPrefs?: { enableBusinessTools?: boolean }
+): DeepChatChainOptions {
   const apiPath = normalizeApiPathId(
     (config as { apiPath?: unknown }).apiPath ??
       StorageService.getLLMConfig(config.provider)?.apiPath
@@ -87,45 +124,20 @@ export function resolveDeepChatResponsesChainOptions(
     return { apiPath };
   }
 
-  const thread = getActiveThread();
-  const previousResponseId =
-    thread.lastResponseModel === model && thread.lastResponseId ? thread.lastResponseId : undefined;
-
   const cap = resolveModelCapability({
     provider: config.provider,
     modelId: model,
     preferredSurface: apiPath,
   });
+  const toolOptions = buildDeepChatToolOptions(config, model, cap.supportsTools, toolPrefs);
 
-  // Fail-closed product rule: tools only when capability supports them AND opt-in enabled.
-  // callLLM uses stream-first + tool-loop fallback so 深度思考 chrome is preserved when on.
-  const toolOptions =
-    cap.supportsTools && isDeepChatBusinessToolsEnabled(toolPrefs)
-      ? {
-          tools: DEEP_CHAT_BUSINESS_TOOLS,
-          executeTool: createDeepChatBusinessToolExecutor({
-            getThread: () => getActiveThread(),
-            getModel: () => model,
-            getProvider: () => config.provider,
-          }),
-          enableToolLoop: true,
-          maxToolRounds: 4,
-        }
-      : {};
-
-  // previous_response_id / store only apply to Responses.
   if (apiPath === 'chat_completions') {
     return { apiPath, ...toolOptions };
   }
 
-  // Only request store/previous_id when capability allows (fail-closed registry + gateway).
-  const canChain =
-    Boolean(previousResponseId) &&
-    cap.supportsPreviousResponseId === true &&
-    cap.supportsStore === true;
   return {
     apiPath,
-    ...(canChain ? { previousResponseId, store: true } : { store: false }),
+    ...resolveResponsesChainFlags(model, cap),
     ...toolOptions,
   };
 }

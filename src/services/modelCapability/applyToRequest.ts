@@ -164,35 +164,52 @@ export type ChatCompletionsBodyExtras = {
   safetyIdentifier?: string;
 };
 
+function setIfDefined(body: Record<string, unknown>, key: string, value: unknown): void {
+  if (value !== undefined) {
+    body[key] = value;
+  }
+}
+
+function applyChatSamplingFields(
+  body: Record<string, unknown>,
+  args: ChatCompletionsBodyExtras
+): void {
+  setIfDefined(body, 'service_tier', args.serviceTier);
+  setIfDefined(body, 'top_p', args.topP);
+  setIfDefined(body, 'frequency_penalty', args.frequencyPenalty);
+  setIfDefined(body, 'presence_penalty', args.presencePenalty);
+  setIfDefined(body, 'stop', args.stop);
+  setIfDefined(body, 'n', args.n);
+  setIfDefined(body, 'seed', args.seed);
+  setIfDefined(body, 'logit_bias', args.logitBias);
+  setIfDefined(body, 'logprobs', args.logprobs);
+  setIfDefined(body, 'top_logprobs', args.topLogprobs);
+  setIfDefined(body, 'store', args.store);
+  setIfDefined(body, 'metadata', args.metadata);
+  setIfDefined(body, 'prompt_cache_key', args.promptCacheKey);
+  setIfDefined(body, 'safety_identifier', args.safetyIdentifier);
+}
+
+function applyChatToolsFields(
+  body: Record<string, unknown>,
+  args: ChatCompletionsBodyExtras
+): void {
+  if (!Array.isArray(args.tools) || args.tools.length === 0) {
+    return;
+  }
+  body.tools = args.tools;
+  setIfDefined(body, 'tool_choice', args.toolChoice);
+  setIfDefined(body, 'parallel_tool_calls', args.parallelToolCalls);
+}
+
 function applyChatOptionalCreateFields(
   body: Record<string, unknown>,
   args: ChatCompletionsBodyExtras & {
     capability: Pick<ResolvedModelCapability, 'supportsTools'>;
   }
 ): void {
-  if (args.serviceTier) body.service_tier = args.serviceTier;
-  if (args.topP !== undefined) body.top_p = args.topP;
-  if (args.frequencyPenalty !== undefined) body.frequency_penalty = args.frequencyPenalty;
-  if (args.presencePenalty !== undefined) body.presence_penalty = args.presencePenalty;
-  if (args.stop !== undefined) body.stop = args.stop;
-  if (args.n !== undefined) body.n = args.n;
-  if (args.seed !== undefined) body.seed = args.seed;
-  if (args.logitBias) body.logit_bias = args.logitBias;
-  if (args.logprobs !== undefined) body.logprobs = args.logprobs;
-  if (args.topLogprobs !== undefined) body.top_logprobs = args.topLogprobs;
-  if (args.store !== undefined) body.store = args.store;
-  if (args.metadata) body.metadata = args.metadata;
-  if (args.promptCacheKey) body.prompt_cache_key = args.promptCacheKey;
-  if (args.safetyIdentifier) body.safety_identifier = args.safetyIdentifier;
-
-  // Official tools: pass through when caller supplies them (capability gate optional soft).
-  if (Array.isArray(args.tools) && args.tools.length > 0) {
-    body.tools = args.tools;
-    if (args.toolChoice !== undefined) body.tool_choice = args.toolChoice;
-    if (args.parallelToolCalls !== undefined) {
-      body.parallel_tool_calls = args.parallelToolCalls;
-    }
-  }
+  applyChatSamplingFields(body, args);
+  applyChatToolsFields(body, args);
 }
 
 /**

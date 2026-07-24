@@ -1606,6 +1606,56 @@ async function executeLLMAttemptPayload(
   }
 }
 
+function hasResponsesToolActivity(payload: LLMResponsePayload): boolean {
+  if (payload.streamFunctionCalls?.length) return true;
+  if (!payload.rawResponsesData) return false;
+  return extractResponsesFunctionCalls(payload.rawResponsesData).length > 0;
+}
+
+function throwIfResponsesEmptyBody(
+  context: LLMCallContext,
+  payload: LLMResponsePayload,
+  content: string
+): void {
+  if (context.apiSurface !== 'responses' || content.trim() || hasResponsesToolActivity(payload)) {
+    return;
+  }
+  const specific = describeResponsesEmptyBody(payload.rawResponsesData ?? null);
+  if (!specific) return;
+  throw new ApiError(specific, 'API_EMPTY_RESPONSE', 200, payload.rawResponsesData ?? null, {
+    module: 'LLMService',
+    action: 'callLLM',
+    model: context.model,
+    endpoint: context.normalizedEndpoint,
+  });
+}
+
+function throwIfChatEmptyBody(
+  context: LLMCallContext,
+  payload: LLMResponsePayload,
+  content: string
+): void {
+  if (context.apiSurface !== 'chat_completions' || content.trim()) {
+    return;
+  }
+  const finishReason = getChatCompletionFinishReason(payload.data);
+  if (isToolCallsFinishReason(finishReason)) {
+    return;
+  }
+  throw new ApiError(
+    '模型返回了空正文。请重试、增大 maxTokens，或检查网关 channel。',
+    'API_EMPTY_RESPONSE',
+    200,
+    payload.data,
+    {
+      module: 'LLMService',
+      action: 'callLLM',
+      model: context.model,
+      endpoint: context.normalizedEndpoint,
+    }
+  );
+}
+
 async function executeLLMAttempt(
   context: LLMCallContext,
   attempt: number,
@@ -1613,43 +1663,8 @@ async function executeLLMAttempt(
 ): Promise<string> {
   const payload = await executeLLMAttemptPayload(context, attempt, state);
   const content = getLLMResponseContent(payload);
-  // Surface incomplete / reasoning-only empty bodies as explicit errors (not silent "").
-  if (
-    context.apiSurface === 'responses' &&
-    !content.trim() &&
-    !payload.streamFunctionCalls?.length &&
-    !(
-      payload.rawResponsesData && extractResponsesFunctionCalls(payload.rawResponsesData).length > 0
-    )
-  ) {
-    const specific = describeResponsesEmptyBody(payload.rawResponsesData ?? null);
-    if (specific) {
-      throw new ApiError(specific, 'API_EMPTY_RESPONSE', 200, payload.rawResponsesData ?? null, {
-        module: 'LLMService',
-        action: 'callLLM',
-        model: context.model,
-        endpoint: context.normalizedEndpoint,
-      });
-    }
-  }
-  // Chat path: empty assistant text is a hard error unless the model stopped for tool calls.
-  if (context.apiSurface === 'chat_completions' && !content.trim()) {
-    const finishReason = getChatCompletionFinishReason(payload.data);
-    if (!isToolCallsFinishReason(finishReason)) {
-      throw new ApiError(
-        '模型返回了空正文。请重试、增大 maxTokens，或检查网关 channel。',
-        'API_EMPTY_RESPONSE',
-        200,
-        payload.data,
-        {
-          module: 'LLMService',
-          action: 'callLLM',
-          model: context.model,
-          endpoint: context.normalizedEndpoint,
-        }
-      );
-    }
-  }
+  throwIfResponsesEmptyBody(context, payload, content);
+  throwIfChatEmptyBody(context, payload, content);
   return content;
 }
 
@@ -2236,7 +2251,10 @@ async function callLLMChatStreamFirstThenToolLoop(
 
   if (toolCalls.length > 0) {
     // Seed assistant tool_calls into messages then run remaining non-stream rounds.
-    const executeTool = baseOptions.executeTool!;
+    const executeTool = baseOptions.executeTool;
+    if (!executeTool) {
+      return streamed;
+    }
     const results: Array<{ callId: string; output: string }> = [];
     for (const call of toolCalls) {
       try {

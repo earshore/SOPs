@@ -7,6 +7,44 @@ export type ChatContentPart =
   | { type: 'text'; text: string }
   | { type: 'image_url'; image_url: { url: string; detail?: 'auto' | 'low' | 'high' } };
 
+function isImageDetail(value: unknown): value is 'auto' | 'low' | 'high' {
+  return value === 'auto' || value === 'low' || value === 'high';
+}
+
+function fromChatShapedImagePart(part: Record<string, unknown>): ChatContentPart | null {
+  if (part.type !== 'image_url' || !part.image_url || typeof part.image_url !== 'object') {
+    return null;
+  }
+  const img = part.image_url as { url?: unknown; detail?: unknown };
+  if (typeof img.url !== 'string' || !img.url) return null;
+  return {
+    type: 'image_url',
+    image_url: {
+      url: img.url,
+      ...(isImageDetail(img.detail) ? { detail: img.detail } : {}),
+    },
+  };
+}
+
+function readInputImageUrl(part: Record<string, unknown>): string {
+  if (typeof part.image_url === 'string') return part.image_url;
+  const nested = part.image_url as { url?: string } | undefined;
+  if (typeof nested?.url === 'string') return nested.url;
+  if (typeof part.url === 'string') return part.url;
+  return '';
+}
+
+function fromResponsesInputImage(part: Record<string, unknown>): ChatContentPart | null {
+  if (part.type !== 'input_image') return null;
+  const url = readInputImageUrl(part);
+  if (!url) return null;
+  return { type: 'image_url', image_url: { url } };
+}
+
+function mapOneVisionPart(part: Record<string, unknown>): ChatContentPart | null {
+  return fromChatShapedImagePart(part) ?? fromResponsesInputImage(part);
+}
+
 /**
  * Convert Responses-style or generic vision parts to chat image_url parts.
  */
@@ -17,38 +55,16 @@ export function toChatImageUrlParts(
   const out: ChatContentPart[] = [];
   for (const part of visionUserParts) {
     if (!part || typeof part !== 'object') continue;
-    // Already chat-shaped
-    if (part.type === 'image_url' && part.image_url && typeof part.image_url === 'object') {
-      const img = part.image_url as { url?: unknown; detail?: unknown };
-      if (typeof img.url === 'string' && img.url) {
-        out.push({
-          type: 'image_url',
-          image_url: {
-            url: img.url,
-            ...(img.detail === 'auto' || img.detail === 'low' || img.detail === 'high'
-              ? { detail: img.detail }
-              : {}),
-          },
-        });
-      }
-      continue;
-    }
-    // Responses-style input_image
-    if (part.type === 'input_image') {
-      const url =
-        typeof part.image_url === 'string'
-          ? part.image_url
-          : typeof (part as { image_url?: { url?: string } }).image_url?.url === 'string'
-            ? (part as { image_url: { url: string } }).image_url.url
-            : typeof part.url === 'string'
-              ? part.url
-              : '';
-      if (url) {
-        out.push({ type: 'image_url', image_url: { url } });
-      }
-    }
+    const mapped = mapOneVisionPart(part);
+    if (mapped) out.push(mapped);
   }
   return out;
+}
+
+function userContentToText(content: unknown): string {
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) return '';
+  return String(content ?? '');
 }
 
 /**
@@ -66,12 +82,7 @@ export function applyVisionPartsToChatMessages(
   for (let i = next.length - 1; i >= 0; i--) {
     const row = next[i];
     if (row?.role !== 'user') continue;
-    const text =
-      typeof row.content === 'string'
-        ? row.content
-        : Array.isArray(row.content)
-          ? ''
-          : String(row.content ?? '');
+    const text = userContentToText(row.content);
     const parts: ChatContentPart[] = [];
     if (text.trim()) {
       parts.push({ type: 'text', text });

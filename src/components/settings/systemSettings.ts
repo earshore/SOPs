@@ -98,6 +98,29 @@ function pathIdToBadgeLabel(pathId: ApiPathId): string {
   return 'Chat';
 }
 
+/** Soft path/capability copy under API path select (extracted for complexity). */
+function buildApiPathCapabilityHint(
+  pathId: ApiPathId,
+  registryCap: ResolvedModelCapability
+): string {
+  if (!registryCap.source.registryMatched) {
+    return pathId === 'responses'
+      ? '该模型尚未收录在能力目录：若网关没有 /responses，请求会自动回退到通用对话路径，您不必担心「完全连不上」。'
+      : '';
+  }
+  const preferred = registryCap.apiSurface;
+  if (pathId === 'responses' && preferred !== 'responses') {
+    return `能力目录更常把此模型配在「${preferred}」。您已改选 Responses：请确认中转站已开通该路径；若 404，系统会回退通用对话。`;
+  }
+  if (pathId === 'chat_completions' && preferred === 'responses') {
+    return '此模型目录默认偏好 Responses（推理摘要通道更完整）。Chat Completions 仍支持官方 tools / vision / structured。';
+  }
+  if (pathId === 'chat_completions') {
+    return '当前为 Chat Completions 全量 Create：文本、流式、tools、vision、JSON 结构化均可用。';
+  }
+  return '';
+}
+
 /** R7 badges for settings model row (effective path + capability flags). */
 function buildModelCapabilityBadges(
   pathId: ApiPathId,
@@ -1041,29 +1064,12 @@ const settingsPanelBehavior: SettingsPanelPart = {
     const pathId = normalizeApiPathId(this.llm.apiPath);
     const modelsEntry =
       this.llm.models.find(x => (typeof x === 'string' ? x : x.id) === model) ?? model;
-    // Resolve without user path override → registry preferred surface
     const registryCap = resolveModelCapability({
       provider: this.llm.provider,
       modelId: model,
       modelsEntry,
     });
-    if (!registryCap.source.registryMatched) {
-      if (pathId === 'responses') {
-        return '该模型尚未收录在能力目录：若网关没有 /responses，请求会自动回退到通用对话路径，您不必担心「完全连不上」。';
-      }
-      return '';
-    }
-    const preferred = registryCap.apiSurface;
-    if (pathId === 'responses' && preferred !== 'responses') {
-      return `能力目录更常把此模型配在「${preferred}」。您已改选 Responses：请确认中转站已开通该路径；若 404，系统会回退通用对话。`;
-    }
-    if (pathId === 'chat_completions' && preferred === 'responses') {
-      return '此模型目录默认偏好 Responses（推理摘要通道更完整）。Chat Completions 仍支持官方 tools / vision / structured。';
-    }
-    if (pathId === 'chat_completions') {
-      return '当前为 Chat Completions 全量 Create：文本、流式、tools、vision、JSON 结构化均可用。';
-    }
-    return '';
+    return buildApiPathCapabilityHint(pathId, registryCap);
   },
 
   /** Soft readiness line under the section intro (human, non-blocking). */

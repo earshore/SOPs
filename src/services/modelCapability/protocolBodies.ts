@@ -163,7 +163,7 @@ function applyGeminiThinkingConfig(
   body.thinkingConfig = { thinkingBudget: budget, includeThoughts: true };
 }
 
-export function buildBodyForApiPath(args: {
+export type BuildBodyForApiPathArgs = {
   pathId: ApiPathId;
   model: string;
   messages: ChatMessageLike[] | Array<Record<string, unknown>>;
@@ -194,51 +194,31 @@ export function buildBodyForApiPath(args: {
   metadata?: Record<string, string>;
   promptCacheKey?: string;
   safetyIdentifier?: string;
-}): Record<string, unknown> {
-  const textMessages = args.messages as ChatMessageLike[];
+};
 
-  if (args.pathId === 'responses') {
-    return buildResponsesBody({
-      model: args.model,
-      messages: textMessages,
-      temperature: args.temperature,
-      maxTokens: args.maxTokens,
-      stream: args.stream,
-      jsonMode: args.jsonMode,
-      jsonSchema: args.jsonSchema,
-      serviceTier: args.serviceTier,
-      capability: args.capability,
-      reasoning: args.reasoning,
-      previousResponseId: args.previousResponseId,
-      store: args.store,
-      tools: normalizeToolsForResponses(args.tools),
-      toolChoice: args.toolChoice,
-      parallelToolCalls: args.parallelToolCalls,
-      visionUserParts: args.visionUserParts,
-      followUpInputItems: args.followUpInputItems,
-    });
-  }
-  if (args.pathId === 'anthropic_messages') {
-    return buildAnthropicMessagesBody({
-      model: args.model,
-      messages: textMessages,
-      maxTokens: args.maxTokens,
-      stream: args.stream,
-      temperature: args.temperature,
-      capability: args.capability,
-      reasoning: args.reasoning,
-    });
-  }
-  if (args.pathId === 'gemini_generate') {
-    return buildGeminiGenerateBody({
-      messages: textMessages,
-      maxTokens: args.maxTokens,
-      temperature: args.temperature,
-      jsonMode: args.jsonMode,
-      capability: args.capability,
-      reasoning: args.reasoning,
-    });
-  }
+function buildResponsesBodyFromPathArgs(args: BuildBodyForApiPathArgs): Record<string, unknown> {
+  return buildResponsesBody({
+    model: args.model,
+    messages: args.messages as ChatMessageLike[],
+    temperature: args.temperature,
+    maxTokens: args.maxTokens,
+    stream: args.stream,
+    jsonMode: args.jsonMode,
+    jsonSchema: args.jsonSchema,
+    serviceTier: args.serviceTier,
+    capability: args.capability,
+    reasoning: args.reasoning,
+    previousResponseId: args.previousResponseId,
+    store: args.store,
+    tools: normalizeToolsForResponses(args.tools),
+    toolChoice: args.toolChoice,
+    parallelToolCalls: args.parallelToolCalls,
+    visionUserParts: args.visionUserParts,
+    followUpInputItems: args.followUpInputItems,
+  });
+}
+
+function buildChatBodyFromPathArgs(args: BuildBodyForApiPathArgs): Record<string, unknown> {
   return buildChatCompletionsBody({
     model: args.model,
     messages: args.messages,
@@ -268,4 +248,33 @@ export function buildBodyForApiPath(args: {
     promptCacheKey: args.promptCacheKey,
     safetyIdentifier: args.safetyIdentifier,
   });
+}
+
+export function buildBodyForApiPath(args: BuildBodyForApiPathArgs): Record<string, unknown> {
+  const textMessages = args.messages as ChatMessageLike[];
+  if (args.pathId === 'responses') {
+    return buildResponsesBodyFromPathArgs(args);
+  }
+  if (args.pathId === 'anthropic_messages') {
+    return buildAnthropicMessagesBody({
+      model: args.model,
+      messages: textMessages,
+      maxTokens: args.maxTokens,
+      stream: args.stream,
+      temperature: args.temperature,
+      capability: args.capability,
+      reasoning: args.reasoning,
+    });
+  }
+  if (args.pathId === 'gemini_generate') {
+    return buildGeminiGenerateBody({
+      messages: textMessages,
+      maxTokens: args.maxTokens,
+      temperature: args.temperature,
+      jsonMode: args.jsonMode,
+      capability: args.capability,
+      reasoning: args.reasoning,
+    });
+  }
+  return buildChatBodyFromPathArgs(args);
 }

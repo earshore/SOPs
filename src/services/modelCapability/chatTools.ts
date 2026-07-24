@@ -17,33 +17,35 @@ export interface ChatStreamToolCallDelta {
   function?: { name?: string; arguments?: string };
 }
 
+function stringifyToolArguments(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (value == null) return '';
+  return JSON.stringify(value);
+}
+
+function parseOneToolCall(raw: unknown): ChatFunctionToolCall | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const row = raw as Record<string, unknown>;
+  const fn = row.function as { name?: unknown; arguments?: unknown } | undefined;
+  const id = typeof row.id === 'string' ? row.id : '';
+  const name = typeof fn?.name === 'string' ? fn.name : '';
+  if (!id || !name) return null;
+  return {
+    id,
+    type: 'function',
+    function: { name, arguments: stringifyToolArguments(fn?.arguments) },
+  };
+}
+
 export function extractChatToolCallsFromMessage(
   message: Record<string, unknown> | null | undefined
 ): ChatFunctionToolCall[] {
   if (!message || !Array.isArray(message.tool_calls)) {
     return [];
   }
-  const out: ChatFunctionToolCall[] = [];
-  for (const raw of message.tool_calls) {
-    if (!raw || typeof raw !== 'object') continue;
-    const row = raw as Record<string, unknown>;
-    const fn = row.function as { name?: unknown; arguments?: unknown } | undefined;
-    const id = typeof row.id === 'string' ? row.id : '';
-    const name = typeof fn?.name === 'string' ? fn.name : '';
-    const args =
-      typeof fn?.arguments === 'string'
-        ? fn.arguments
-        : fn?.arguments != null
-          ? JSON.stringify(fn.arguments)
-          : '';
-    if (!id || !name) continue;
-    out.push({
-      id,
-      type: 'function',
-      function: { name, arguments: args },
-    });
-  }
-  return out;
+  return message.tool_calls
+    .map(parseOneToolCall)
+    .filter((call): call is ChatFunctionToolCall => call !== null);
 }
 
 export function extractChatToolCallsFromCompletion(
@@ -57,6 +59,38 @@ export function extractChatToolCallsFromCompletion(
   return extractChatToolCallsFromMessage(message);
 }
 
+function emptyToolCall(): ChatFunctionToolCall {
+  return {
+    id: '',
+    type: 'function',
+    function: { name: '', arguments: '' },
+  };
+}
+
+function applyStreamToolCallDelta(
+  cur: ChatFunctionToolCall,
+  delta: ChatStreamToolCallDelta
+): ChatFunctionToolCall {
+  const next = { ...cur, function: { ...cur.function } };
+  if (typeof delta.id === 'string' && delta.id) next.id = delta.id;
+  if (delta.function?.name) {
+    next.function.name = (next.function.name || '') + delta.function.name;
+  }
+  if (typeof delta.function?.arguments === 'string') {
+    next.function.arguments = (next.function.arguments || '') + delta.function.arguments;
+  }
+  return next;
+}
+
+function sortedToolCallsFromMap(
+  byIndex: Map<number, ChatFunctionToolCall>
+): ChatFunctionToolCall[] {
+  return Array.from(byIndex.entries())
+    .sort((a, b) => a[0] - b[0])
+    .map(([, v]) => v)
+    .filter(c => c.id && c.function.name);
+}
+
 /**
  * Merge SSE delta.tool_calls fragments into complete ChatFunctionToolCall[].
  */
@@ -65,36 +99,18 @@ export function mergeChatStreamToolCallDeltas(
   deltas: ChatStreamToolCallDelta[] | undefined
 ): ChatFunctionToolCall[] {
   const byIndex = new Map<number, ChatFunctionToolCall>();
-  if (existing) {
-    existing.forEach((call, i) => {
-      byIndex.set(i, { ...call, function: { ...call.function } });
-    });
-  }
+  existing?.forEach((call, i) => {
+    byIndex.set(i, { ...call, function: { ...call.function } });
+  });
   if (!Array.isArray(deltas)) {
-    return Array.from(byIndex.entries())
-      .sort((a, b) => a[0] - b[0])
-      .map(([, v]) => v);
+    return sortedToolCallsFromMap(byIndex);
   }
   for (const delta of deltas) {
     const index = typeof delta.index === 'number' ? delta.index : 0;
-    const cur = byIndex.get(index) ?? {
-      id: '',
-      type: 'function' as const,
-      function: { name: '', arguments: '' },
-    };
-    if (typeof delta.id === 'string' && delta.id) cur.id = delta.id;
-    if (delta.function?.name) {
-      cur.function.name = (cur.function.name || '') + delta.function.name;
-    }
-    if (typeof delta.function?.arguments === 'string') {
-      cur.function.arguments = (cur.function.arguments || '') + delta.function.arguments;
-    }
-    byIndex.set(index, cur);
+    const cur = byIndex.get(index) ?? emptyToolCall();
+    byIndex.set(index, applyStreamToolCallDelta(cur, delta));
   }
-  return Array.from(byIndex.entries())
-    .sort((a, b) => a[0] - b[0])
-    .map(([, v]) => v)
-    .filter(c => c.id && c.function.name);
+  return sortedToolCallsFromMap(byIndex);
 }
 
 export function extractChatStreamToolCallDeltas(
