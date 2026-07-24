@@ -12,7 +12,7 @@ import { isDangerousEndpoint, getDangerousEndpoints } from '@/common/config/apiE
 import { configCenter } from '@/common/config/ConfigCenter';
 import { EnvConfig } from '@/common/config/envConfig';
 import { DEFAULT_LLM_PROVIDER_ID, DEFAULT_NEW_API_ENDPOINT } from '@/common/config/llmProviders';
-import { ApiError, NetworkError, SystemError } from '@/common/errors';
+import { ApiError, NetworkError, SystemError, ValidationError } from '@/common/errors';
 import { randomFloat } from '@/common/utils/random';
 // 导入统一的 API 响应类型
 import type { LLMChatCompletionResponse, LLMErrorResponse } from '@/types/api';
@@ -411,7 +411,21 @@ function getCompletionContent(
   completion: LLMChatCompletionResponse | null,
   defaultContent = ''
 ): string {
-  return completion?.choices?.[0]?.message?.content || defaultContent;
+  const raw = completion?.choices?.[0]?.message?.content;
+  if (raw == null) {
+    return defaultContent;
+  }
+  return typeof raw === 'string' ? raw : defaultContent;
+}
+
+function getChatCompletionFinishReason(
+  completion: LLMChatCompletionResponse | null | undefined
+): string | null | undefined {
+  return completion?.choices?.[0]?.finish_reason;
+}
+
+function isToolCallsFinishReason(reason: string | null | undefined): boolean {
+  return reason === 'tool_calls' || reason === 'function_call';
 }
 
 function getStreamData(line: string): string {
@@ -1468,6 +1482,24 @@ async function executeLLMAttempt(
       });
     }
   }
+  // Chat path: empty assistant text is a hard error unless the model stopped for tool calls.
+  if (context.apiSurface === 'chat_completions' && !content.trim()) {
+    const finishReason = getChatCompletionFinishReason(payload.data);
+    if (!isToolCallsFinishReason(finishReason)) {
+      throw new ApiError(
+        '模型返回了空正文。请重试、增大 maxTokens，或检查网关 channel。',
+        'API_EMPTY_RESPONSE',
+        200,
+        payload.data,
+        {
+          module: 'LLMService',
+          action: 'callLLM',
+          model: context.model,
+          endpoint: context.normalizedEndpoint,
+        }
+      );
+    }
+  }
   return content;
 }
 
@@ -1578,6 +1610,27 @@ function shouldUseResponsesToolLoop(options: ResolvedLLMOptions): boolean {
     typeof options.executeTool === 'function' &&
     Array.isArray(options.tools) &&
     options.tools.length > 0
+  );
+}
+
+/**
+ * Tool loop is Responses-only. Fail closed when enableToolLoop is set on other paths
+ * so tools are never silently ignored.
+ */
+function assertToolsPathSupported(options: ResolvedLLMOptions): void {
+  if (!options.enableToolLoop) {
+    return;
+  }
+  const path = options.apiPath ?? 'chat_completions';
+  if (path === 'responses') {
+    return;
+  }
+  throw new ValidationError(
+    '工具循环仅支持 Responses 路径。请在系统设置将 API 路径改为 /responses，或关闭业务 tools。',
+    'LLM_TOOLS_PATH_UNSUPPORTED',
+    'apiPath',
+    path,
+    { module: 'LLMService', action: 'callLLM' }
   );
 }
 
@@ -1936,6 +1989,7 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
   const resolvedOptions = resolveLLMOptions(request.options || {}, request.provider, request.model);
   const normalizedEndpoint = resolveProviderEndpoint(request.provider, request.endpoint);
   assertSafeLLMEndpoint(normalizedEndpoint);
+  assertToolsPathSupported(resolvedOptions);
 
   if (shouldUseResponsesToolLoop(resolvedOptions)) {
     // Stream-first preserves 深度思考 / 已完成 chrome; tool loop only when needed.

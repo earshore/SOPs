@@ -24,6 +24,10 @@ function surfaceOpenAiEffort(opts?: { temperatureIgnored?: boolean }): SurfaceCa
     defaultEffort: 'medium',
     temperatureIgnored: opts?.temperatureIgnored ?? true,
     mapRequest: mapOpenAiReasoningEffort,
+    // json_object via response_format; tools/vision stay Responses-only until chat loop ships
+    supportsStructuredOutput: true,
+    supportsTools: false,
+    supportsVision: false,
   };
 }
 
