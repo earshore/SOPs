@@ -31,17 +31,18 @@ describe('withStructuredAnalysisOptions', () => {
     expect(opts.jsonSchema?.schema).toMatchObject({ type: 'object' });
   });
 
-  it('keeps jsonMode without jsonSchema when path is chat_completions', () => {
+  it('attaches soft jsonSchema on chat_completions when surface supports structured output', () => {
     vi.mocked(StorageService.getLLMConfig).mockReturnValue({
       apiPath: 'chat_completions',
     } as never);
     const opts = withStructuredAnalysisOptions(
       { temperature: 0.2 },
-      { provider: 'new_api', model: 'deepseek-v4-flash' }
+      { provider: 'new_api', model: 'deepseek-v4-flash', schemaName: 'analysis_result' }
     );
     expect(opts.jsonMode).toBe(true);
     expect(opts.apiPath).toBe('chat_completions');
-    expect(opts.jsonSchema).toBeUndefined();
+    expect(opts.jsonSchema?.name).toBe('analysis_result');
+    expect(opts.jsonSchema?.strict).toBe(false);
   });
 
   it('builds safe schema names', () => {

@@ -138,6 +138,27 @@ export const OPENAI_PLATFORM_CAPABILITY_MATRIX: PlatformCapabilityRow[] = [
     status: 'implemented',
     entry: 'llmService.ts executeLLMAttempt',
   },
+  {
+    id: 'chat.json_schema',
+    area: 'Chat Completions',
+    feature: 'response_format json_schema (+ analysis soft schema)',
+    status: 'implemented',
+    entry: 'applyToRequest.ts applyChatResponseFormat, structuredAnalysisOptions.ts',
+  },
+  {
+    id: 'chat.stream_options',
+    area: 'Chat Completions',
+    feature: 'stream_options.include_usage',
+    status: 'implemented',
+    entry: 'applyToRequest.ts buildChatCompletionsBody',
+  },
+  {
+    id: 'chat.vision',
+    area: 'Chat Completions',
+    feature: 'Multimodal image_url message parts',
+    status: 'not_in_scope',
+    notes: 'Phase C deferred; visionUserParts soft-warn on chat; use Responses',
+  },
   // --- Multi-protocol ---
   {
     id: 'path.chat',

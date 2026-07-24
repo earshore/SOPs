@@ -188,6 +188,48 @@ describe('buildChatCompletionsBody', () => {
     expect(body.max_tokens).toBeGreaterThanOrEqual(2000 + 512);
     expect(body.max_completion_tokens).toBeUndefined();
   });
+
+  it('prefers response_format json_schema over json_object when structured supported', () => {
+    const capability = {
+      modelId: 'deepseek-v4-flash',
+      provider: 'new_api',
+      contextWindow: 128_000,
+      apiSurface: 'chat_completions' as const,
+      supportsReasoning: true,
+      reasoningEfforts: ['low', 'medium', 'high'] as const,
+      defaultEffort: 'medium' as const,
+      temperatureIgnored: false,
+      features: ['reasoning'],
+      supportsStructuredOutput: true,
+      mapRequest: null,
+      source: { registryMatched: true, preferredSurface: 'chat_completions' as const },
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildChatCompletionsBody({
+      model: 'deepseek-v4-flash',
+      messages: [{ role: 'user', content: 'hi' }],
+      stream: true,
+      jsonMode: true,
+      jsonSchema: {
+        name: 'analysis_result',
+        schema: { type: 'object', additionalProperties: true },
+        strict: false,
+      },
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+    });
+
+    expect(body.stream).toBe(true);
+    expect(body.stream_options).toEqual({ include_usage: true });
+    expect(body.response_format).toEqual({
+      type: 'json_schema',
+      json_schema: {
+        name: 'analysis_result',
+        schema: { type: 'object', additionalProperties: true },
+        strict: false,
+      },
+    });
+  });
 });
 
 describe('buildResponsesBody', () => {

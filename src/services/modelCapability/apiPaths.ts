@@ -19,14 +19,15 @@ export const API_PATH_OPTIONS: readonly ApiPathOption[] = [
     id: 'chat_completions',
     label: 'Chat Completions',
     pathLabel: '/chat/completions',
-    description: 'OpenAI 兼容 Chat Completions：多数官方与中转默认支持，适合日常分析与对话。',
+    description:
+      'OpenAI 兼容 Chat Completions：多数官方与中转默认支持，适合日常分析与对话。业务 tools / 工具循环请改用 Responses。',
   },
   {
     id: 'responses',
     label: 'Responses',
     pathLabel: '/responses',
     description:
-      'OpenAI Responses API：推理与工具链路更完整；上游不支持时客户端可回退 Chat Completions。',
+      'OpenAI Responses API：推理摘要与 tools 链路更完整（Deep Chat 业务工具仅此路径）；上游不支持时客户端可回退 Chat Completions。',
   },
   {
     id: 'anthropic_messages',

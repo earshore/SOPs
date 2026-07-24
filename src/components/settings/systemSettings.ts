@@ -1058,7 +1058,10 @@ const settingsPanelBehavior: SettingsPanelPart = {
       return `能力目录更常把此模型配在「${preferred}」。您已改选 Responses：请确认中转站已开通该路径；若 404，系统会回退通用对话。`;
     }
     if (pathId === 'chat_completions' && preferred === 'responses') {
-      return '此模型更适合 Responses 路径（推理摘要更完整）。若您更看重兼容性，可继续使用通用对话。';
+      return '此模型更适合 Responses 路径（推理摘要与业务 tools 更完整）。若您更看重兼容性，可继续使用通用对话。';
+    }
+    if (pathId === 'chat_completions') {
+      return '当前为 Chat Completions：文本 / 流式 / JSON 结构化可用。Deep Chat 业务 tools 需切换到 Responses。';
     }
     return '';
   },

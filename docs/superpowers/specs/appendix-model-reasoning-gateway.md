@@ -12,6 +12,22 @@ npm run probe:chat        # plain / max_tokens / max_completion_tokens / json_ob
 npm run probe:responses   # Responses surface matrix
 ```
 
+### probe:chat live matrix (2026-07-24 · new.hongecb.store)
+
+Catalog on key: `deepseek-v4-flash`, `claude-sonnet-4-5-20250929`, `grok-4.5`, `hy3-preview`.  
+Probed preferred subset (deepseek / grok):
+
+| Model | plain | max_tokens | max_completion_tokens | json_object | reasoning_effort=low | stream |
+| ----- | ----- | ---------- | --------------------- | ----------- | -------------------- | ------ |
+| deepseek-v4-flash | OK | OK | OK | OK | OK | OK |
+| grok-4.5 | OK | OK | OK | OK | OK | OK |
+
+Notes:
+
+- Both accept **either** `max_tokens` or `max_completion_tokens` on this gateway (client still prefers completion tokens for OpenAI-reasoning models).
+- Stream SSE received (chunks ≥ 3).
+- Claude / hy3 present on catalog but not in preferred probe slice; re-run with broader filter if channel validation needed (CC-P1-8).
+
 ## Why gateway logs may show no reasoning intensity
 
 Product default is **`reasoningPrefs.enabled: false`**. The mapper returns `{}` when off, so the HTTP body **does not include** `reasoning_effort` at all. That is intentional (fail-closed / no blind fields), not a missing implementation.

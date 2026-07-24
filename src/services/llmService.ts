@@ -1634,6 +1634,39 @@ function assertToolsPathSupported(options: ResolvedLLMOptions): void {
   );
 }
 
+/** Dev-only: soft tools/vision on non-responses paths are dropped by body builders. */
+function warnSoftToolsOrVisionIgnored(options: ResolvedLLMOptions): void {
+  if (options.enableToolLoop) {
+    return;
+  }
+  const path = options.apiPath ?? 'chat_completions';
+  if (path === 'responses') {
+    return;
+  }
+  const hasTools = Array.isArray(options.tools) && options.tools.length > 0;
+  const hasVision =
+    Array.isArray(options.visionUserParts) && options.visionUserParts.length > 0;
+  if (!hasTools && !hasVision) {
+    return;
+  }
+  const isDev =
+    typeof import.meta !== 'undefined' &&
+    Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV);
+  if (!isDev) {
+    return;
+  }
+  const bits = [
+    hasTools ? 'tools' : null,
+    hasVision ? 'visionUserParts' : null,
+  ]
+    .filter(Boolean)
+    .join('/');
+  console.warn(
+    `[LLM] ${bits} ignored on apiPath=${path}. Use Responses (apiPath=responses) for tools/vision; ` +
+      `enableToolLoop is only supported on Responses.`
+  );
+}
+
 function buildToolLoopContext(
   request: LLMCallRequest,
   roundOptions: ResolvedLLMOptions,
@@ -1990,6 +2023,7 @@ export async function callLLM(...args: LLMCallArgs): Promise<string> {
   const normalizedEndpoint = resolveProviderEndpoint(request.provider, request.endpoint);
   assertSafeLLMEndpoint(normalizedEndpoint);
   assertToolsPathSupported(resolvedOptions);
+  warnSoftToolsOrVisionIgnored(resolvedOptions);
 
   if (shouldUseResponsesToolLoop(resolvedOptions)) {
     // Stream-first preserves 深度思考 / 已完成 chrome; tool loop only when needed.

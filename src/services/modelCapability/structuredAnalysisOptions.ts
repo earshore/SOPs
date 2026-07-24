@@ -44,9 +44,9 @@ export function buildLooseAnalysisJsonSchema(name: string): ResponsesJsonSchemaF
 }
 
 /**
- * Merge analysis base options with Responses structured output when available.
+ * Merge analysis base options with structured output when available.
  * - Always sets jsonMode: true
- * - On responses + supportsStructuredOutput: attaches jsonSchema
+ * - On responses or chat_completions + supportsStructuredOutput: attaches jsonSchema
  * - Hydrates apiPath from storage when omitted
  */
 export function withStructuredAnalysisOptions<T extends object>(
@@ -69,7 +69,11 @@ export function withStructuredAnalysisOptions<T extends object>(
     apiPath: pathId,
   } as T & StructuredAnalysisLlmFields;
 
-  if (pathId === 'responses' && cap.supportsStructuredOutput) {
+  // Responses text.format and chat response_format.json_schema when surface supports it.
+  if (
+    (pathId === 'responses' || pathId === 'chat_completions') &&
+    cap.supportsStructuredOutput
+  ) {
     next.jsonSchema =
       ctx.jsonSchema ?? buildLooseAnalysisJsonSchema(ctx.schemaName || 'analysis_result');
   }

@@ -230,6 +230,7 @@ export function buildBodyForApiPath(args: {
     maxTokens: args.maxTokens,
     stream: args.stream,
     jsonMode: args.jsonMode,
+    jsonSchema: args.jsonSchema,
     serviceTier: args.serviceTier,
     capability: args.capability,
     reasoning: args.reasoning,

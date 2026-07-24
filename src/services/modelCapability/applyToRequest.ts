@@ -111,6 +111,35 @@ export function applyReasoningToRequestBody(
 }
 
 /**
+ * Chat Completions structured output: json_schema preferred over json_object.
+ * Official shape: response_format.json_schema.{ name, schema, strict?, description? }
+ */
+function applyChatResponseFormat(
+  body: Record<string, unknown>,
+  args: {
+    jsonMode?: boolean;
+    jsonSchema?: ResponsesJsonSchemaFormat;
+    capability: Pick<ResolvedModelCapability, 'supportsStructuredOutput'>;
+  }
+): void {
+  if (args.jsonSchema?.name && args.jsonSchema.schema && args.capability.supportsStructuredOutput) {
+    body.response_format = {
+      type: 'json_schema',
+      json_schema: {
+        name: args.jsonSchema.name,
+        schema: args.jsonSchema.schema,
+        ...(args.jsonSchema.strict !== undefined ? { strict: args.jsonSchema.strict } : {}),
+        ...(args.jsonSchema.description ? { description: args.jsonSchema.description } : {}),
+      },
+    };
+    return;
+  }
+  if (args.jsonMode) {
+    body.response_format = { type: 'json_object' };
+  }
+}
+
+/**
  * Full chat/completions body builder used by llmService (and tests).
  */
 export function buildChatCompletionsBody(args: {
@@ -120,6 +149,8 @@ export function buildChatCompletionsBody(args: {
   maxTokens?: number;
   stream?: boolean;
   jsonMode?: boolean;
+  /** Prefer over jsonMode when supportsStructuredOutput */
+  jsonSchema?: ResponsesJsonSchemaFormat;
   serviceTier?: string;
   capability: ResolvedModelCapability;
   reasoning: EffectiveReasoningPrefs;
@@ -131,10 +162,10 @@ export function buildChatCompletionsBody(args: {
 
   if (args.stream) {
     base.stream = true;
+    // Official stream usage channel (gateways that ignore unknown fields are fine).
+    base.stream_options = { include_usage: true };
   }
-  if (args.jsonMode) {
-    base.response_format = { type: 'json_object' };
-  }
+  applyChatResponseFormat(base, args);
   if (args.serviceTier) {
     base.service_tier = args.serviceTier;
   }

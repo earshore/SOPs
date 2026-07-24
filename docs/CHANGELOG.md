@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Chat Completions 产品子集硬化（上线就绪）：`max_completion_tokens`（OpenAI 推理）、现代响应校验（null content / `tool_calls`）、空正文 `API_EMPTY_RESPONSE`、`response_format.json_schema`、`stream_options.include_usage`、`npm run probe:chat`。
+- 分析链路：`withStructuredAnalysisOptions` 在 **chat** 路径且 surface 支持 structured 时同样注入 soft `jsonSchema`。
+
+### Changed
+
+- API 路径文案：Chat Completions 明确「业务 tools 请用 Responses」；Deep Chat 业务 tools 仍仅 Responses。
+- tools：`enableToolLoop` 非 Responses 路径 fail-closed（`LLM_TOOLS_PATH_UNSUPPORTED`）；dev 下软传 tools/vision 会 `console.warn`。
+
+### Fixed
+
+- 模型列表 string id 默认 context 与能力目录对齐为 `32768`（单测期望同步）。
+
 ## [3.0.11-rc.6] - 2026-07-24
 
 > 生产验证候选版。GitHub Release 保持 **Pre-release**，Latest 继续指向稳定 GA `v3.0.10`。
