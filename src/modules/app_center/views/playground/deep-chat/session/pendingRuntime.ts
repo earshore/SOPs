@@ -74,7 +74,13 @@ export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessag
     return withoutLivePartial;
   }
 
-  // 占位 AI 槽位；进行中状态只走 chrome（正在生成回复...），不打 toolbar 徽章
+  // 占位 AI 槽位：给 deep-chat 一个 host 挂 深度思考 chrome。
+  // 使用 \u200b 是为了避免空消息被丢弃；remount 后会渲染成空 <p>，
+  // 由 syncLivePlaceholderBubble + CSS .is-live-placeholder 收起，避免空行。
+  // Do NOT attach reasoningDurationSec while in-flight — a 0s value can flash 「已完成 0s」.
+  const durationSec = pendingRequest.isSettled
+    ? getPendingReasoningDurationSec(pendingRequest)
+    : undefined;
   return [
     ...withoutLivePartial,
     {
@@ -82,7 +88,7 @@ export function getThreadDisplayMessages(thread: DeepChatThread): DeepChatMessag
       text: '\u200b',
       createdAt: pendingRequest.startedAt,
       ...(pendingRequest.reasoningText.trim() ? { reasoning: pendingRequest.reasoningText } : {}),
-      reasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
+      ...(typeof durationSec === 'number' ? { reasoningDurationSec: durationSec } : {}),
     },
   ];
 }

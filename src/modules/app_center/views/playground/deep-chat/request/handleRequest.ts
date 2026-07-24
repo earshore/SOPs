@@ -338,6 +338,7 @@ export function ensureStreamingDeepThinkingBlock(
 
   // Collapsed: keep cursor; do not drive the typewriter timer.
   if (!expanded) {
+    body.scrollTop = 0;
     return;
   }
 

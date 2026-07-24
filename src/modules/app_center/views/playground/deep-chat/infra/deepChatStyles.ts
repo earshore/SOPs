@@ -40,6 +40,10 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border: none !important;
     background: transparent !important;
     box-sizing: border-box !important;
+    /* Do not absorb free height in the AI column (prevents tall empty 深度思考 frame) */
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
 
   /* Settled 「已完成」: slight breathing room before formal reply */
@@ -89,6 +93,10 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     width: 100% !important;
     border: none !important;
     background: transparent !important;
+    /* Never absorb free vertical space (was stretching body into a tall empty frame) */
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
 
   .deep-chat-dt-activity-list {
@@ -100,6 +108,9 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     flex-direction: column !important;
     align-items: stretch !important;
     width: 100% !important;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
 
   .deep-chat-dt-activity-meta {
@@ -234,8 +245,15 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     display: none !important;
   }
 
-  /* 深度思考正文：左侧引用竖线（仅展开后可见） */
+  /*
+   * 深度思考正文框 = deep-chat-dt-body（带左侧竖线）
+   * - height: fit-content → 短文只占实际高度，绝不预留大块空白
+   * - max-height: 12.5rem → 长文封顶
+   * - overflow-y: auto → 仅内容超出 max 时出现滚动条
+   * 内层 text 不设限高/滚动，避免测高/flex 误撑。
+   */
   .deep-chat-dt-body {
+    display: block !important;
     width: 100% !important;
     margin: 0.2rem 0 0.15rem !important;
     padding: 0.1rem 0 0.1rem 0.7rem !important;
@@ -243,14 +261,25 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     border-left: 2px solid rgba(148, 163, 184, 0.65) !important;
     background: transparent !important;
     box-sizing: border-box !important;
-  }
-
-  .deep-chat-dt-text {
-    margin: 0 !important;
-    max-height: 12.5rem !important; /* ~200px：超出后滚动 */
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    height: fit-content !important;
+    min-height: 0 !important;
+    max-height: 12.5rem !important; /* ~200px hard cap */
     overflow-x: hidden !important;
     overflow-y: auto !important;
-    padding: 0.05rem 0.15rem 0.2rem 0 !important;
+  }
+
+  /* 内层文字：纯内容高度，禁止被当成滚动框 */
+  .deep-chat-dt-text {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0.05rem 0.15rem 0.1rem 0 !important;
     border: none !important;
     background: transparent !important;
     white-space: pre-wrap !important;
@@ -259,6 +288,7 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     font-size: 11px !important;
     line-height: 1.5 !important;
     color: #64748b !important;
+    box-sizing: border-box !important;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -316,6 +346,30 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     background: transparent !important;
     color: #1e293b !important;
     box-shadow: none !important;
+  }
+
+  /*
+   * Live generation placeholder: history remount injects text "\u200b" so deep-chat
+   * still creates an AI host for 深度思考 chrome. Collapse the empty <p>​</p> so it
+   * does not leave a blank row between toolbar and chrome after page switch.
+   */
+  .message-bubble.ai-message.is-live-placeholder {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+  }
+
+  .message-bubble.ai-message p[data-live-placeholder='true'] {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
   }
 
   .message-bubble.user-message h1,

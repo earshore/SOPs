@@ -8,7 +8,7 @@ import {
   serializeChipContainingElement,
 } from './skillContextChip';
 import type { DeepChatElement, DeepChatMessage, DeepChatSkillContext } from '../types';
-import { getMessageText } from '../infra/utils';
+import { getMessageText, isZwspOnlyText } from '../infra/utils';
 
 /** Live generation progress at toolbar end (正在生成回复 · 已收到 N 字). */
 export const TOOLBAR_LIVE_STATUS_CLASS = 'deep-chat-toolbar-live-status';
@@ -176,7 +176,10 @@ function installOrUpdateMessageToolbar(args: {
   }
   const { bubble, innerContainer, role, content } = nodes;
   const isLiveAi = role === 'ai' && args.outerIndex === args.lastAiOuterIndex;
-  if (!content && !(isLiveAi && args.liveLabel)) {
+  // ZWSP-only is the live placeholder after remount — treat as empty so toolbar
+  // does not sit on a blank row under 深度思考.
+  const meaningfulContent = isZwspOnlyText(content) ? '' : content;
+  if (!meaningfulContent && !(isLiveAi && args.liveLabel)) {
     clearLiveToolbarLabelIfEmpty(args.message, isLiveAi, args.liveLabel);
     return;
   }
@@ -185,7 +188,7 @@ function installOrUpdateMessageToolbar(args: {
     args.storedMessages,
     args.usedStoredMessageIndexes,
     role,
-    content || '\u200b',
+    meaningfulContent || '\u200b',
     // Only the live last AI may lag store text; latest-fallback elsewhere steals 「未完成」.
     { preferLatestFallback: isLiveAi }
   );

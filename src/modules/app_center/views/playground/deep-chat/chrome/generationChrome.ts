@@ -22,6 +22,7 @@ import {
 import { refreshMessageToolbarStatuses } from '../composer/messageToolbar';
 
 import type { DeepChatElement, DeepChatMessage } from '../types';
+import { isZwspOnlyText } from '../infra/utils';
 
 import {
   sessionState,
@@ -156,6 +157,36 @@ export function findMessageBubbleAnchor(host: HTMLElement): HTMLElement | null {
       ].join(', ')
     ) ?? null
   );
+}
+
+/**
+ * Live in-flight AI slot uses `\u200b` so deep-chat still creates a host for chrome.
+ * After page/thread remount, history rehydration renders that as `<p>​</p>` between
+ * toolbar and 深度思考 — collapse it until real assistant text arrives.
+ */
+export function syncLivePlaceholderBubble(
+  host: HTMLElement,
+  pending: PendingDeepChatRequest | null | undefined
+): void {
+  const bubble = host.querySelector<HTMLElement>(
+    ':scope > .message-bubble, .message-bubble.ai-message, .message-bubble'
+  );
+  if (!bubble) return;
+
+  const inFlightPlaceholder =
+    Boolean(pending) &&
+    !pending!.isSettled &&
+    isZwspOnlyText(pending!.displayedAssistantText) &&
+    isZwspOnlyText(bubble.textContent);
+
+  bubble.classList.toggle('is-live-placeholder', inFlightPlaceholder);
+  bubble.querySelectorAll('p').forEach(p => {
+    if (inFlightPlaceholder && isZwspOnlyText(p.textContent)) {
+      p.setAttribute('data-live-placeholder', 'true');
+    } else {
+      p.removeAttribute('data-live-placeholder');
+    }
+  });
 }
 
 /**
@@ -299,9 +330,17 @@ export function syncAllDeepThinkingChrome(container: HTMLElement): void {
           steps: pending.preReplySteps,
         });
         mountSettledDeepThinkingChrome(host, pending.reasoningText, durationSec, uiKey, steps);
+        // Typewriter may still be draining real text — drop ZWSP placeholder styling.
+        syncLivePlaceholderBubble(host, pending);
         return;
       }
+      // In-flight live slot must never keep a previous turn's 「已完成」 chrome.
+      // deep-chat often reuses the last AI host before the loading bubble appears;
+      // leaving is-settled painted causes a flash of 「已完成 0s」 then 深度思考.
+      stripSettledChromeFromHost(host);
       mountStreamingGenerationChrome(host, pending);
+      // Collapse ZWSP-only history bubble after remount (page switch mid-generation).
+      syncLivePlaceholderBubble(host, pending);
       return;
     }
 
@@ -332,6 +371,8 @@ export function syncAllDeepThinkingChrome(container: HTMLElement): void {
     clearStreamingGenerationChrome(chat);
     // Re-attach settled after clearing streaming nodes (observer stays alive).
     hosts.forEach((host, hostIndex) => {
+      // No live request: clear any leftover placeholder collapse class.
+      syncLivePlaceholderBubble(host, null);
       const mapped = resolveStoredAiForHost(hostIndex, hosts.length, storedAi);
       if (mapped && messageHasSettledChrome(mapped.message)) {
         mountSettledChromeForMessage(host, thread.id, mapped.storedIndex, mapped.message);
@@ -400,6 +441,71 @@ export function stopReasoningTypewriter(): void {
   sessionState.reasoningTypewriterTextEl = null;
 }
 
+/** Max height (px) for 深度思考 body before scroll — keep in sync with CSS 12.5rem. */
+export const DEEP_CHAT_DT_BODY_MAX_HEIGHT_PX = 200;
+
+/** @deprecated use DEEP_CHAT_DT_BODY_MAX_HEIGHT_PX */
+export const DEEP_CHAT_DT_TEXT_MAX_HEIGHT_PX = DEEP_CHAT_DT_BODY_MAX_HEIGHT_PX;
+
+/**
+ * Resolve the scroll frame for 深度思考 / activity detail.
+ * Cap + scroll belong on `.deep-chat-dt-body`, not the inner text node.
+ */
+export function resolveDeepChatDtBodyEl(
+  textOrBody: HTMLElement | null | undefined
+): HTMLElement | null {
+  if (!textOrBody) return null;
+  if (textOrBody.classList.contains('deep-chat-dt-body')) {
+    return textOrBody;
+  }
+  const parent = textOrBody.parentElement;
+  if (parent?.classList.contains('deep-chat-dt-body')) {
+    return parent;
+  }
+  return textOrBody.closest('.deep-chat-dt-body');
+}
+
+/**
+ * Keep 深度思考 body scrolled to the latest line while streaming once content
+ * exceeds the CSS max-height. Sizing is pure CSS (height:fit-content + max-height);
+ * do NOT measure body.scrollHeight for capping — a stretched body would false-positive
+ * and leave a tall empty scroll frame while text is still short.
+ */
+export function syncDeepChatDtBodyScrollCap(
+  textOrBody: HTMLElement,
+  maxHeightPx = DEEP_CHAT_DT_BODY_MAX_HEIGHT_PX
+): void {
+  const bodyEl = resolveDeepChatDtBodyEl(textOrBody);
+  if (!bodyEl?.isConnected) return;
+
+  // Clear any legacy class / inline size from older builds.
+  bodyEl.classList.remove('is-scroll-capped');
+  bodyEl.style.height = '';
+  bodyEl.style.minHeight = '';
+  bodyEl.style.maxHeight = '';
+
+  const textEl =
+    bodyEl.querySelector<HTMLElement>('.deep-chat-dt-text') ??
+    (textOrBody.classList.contains('deep-chat-dt-text') ? textOrBody : null);
+
+  // Content height = text node (true glyph box), not the possibly-stretched body.
+  const contentHeight = textEl?.scrollHeight ?? bodyEl.scrollHeight;
+  if (contentHeight > maxHeightPx + 1) {
+    // Stick to bottom so newest reasoning stays visible.
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+  } else {
+    bodyEl.scrollTop = 0;
+  }
+}
+
+/** @deprecated use syncDeepChatDtBodyScrollCap */
+export function syncDeepChatDtTextScrollCap(
+  textOrBody: HTMLElement,
+  maxHeightPx = DEEP_CHAT_DT_BODY_MAX_HEIGHT_PX
+): void {
+  syncDeepChatDtBodyScrollCap(textOrBody, maxHeightPx);
+}
+
 /**
  * Streaming-only typewriter. Reads full text live each tick so collapse→expand
  * and late reasoning chunks keep advancing (no stale snapshot freeze).
@@ -430,7 +536,7 @@ export function scheduleReasoningTypewriter(
         textEl.textContent = full;
       }
       setDisplayed(full.length);
-      textEl.scrollTop = textEl.scrollHeight;
+      syncDeepChatDtBodyScrollCap(textEl);
       // Stay armed: more reasoning may still arrive while expanded.
       // Next uiHooks.ensureStreamingDeepThinkingBlock / resume will restart if full grows.
       sessionState.reasoningTypewriterTimer = null;
@@ -439,7 +545,7 @@ export function scheduleReasoningTypewriter(
     displayed = Math.min(full.length, displayed + REASONING_TYPEWRITER_CHARS);
     setDisplayed(displayed);
     textEl.textContent = full.slice(0, displayed);
-    textEl.scrollTop = textEl.scrollHeight;
+    syncDeepChatDtBodyScrollCap(textEl);
     sessionState.reasoningTypewriterTimer = window.setTimeout(
       run,
       REASONING_TYPEWRITER_INTERVAL_MS
@@ -515,6 +621,7 @@ export function paintOrResumeStreamingReasoning(
     textEl.textContent = full;
     pending.reasoningDisplayedLength = full.length;
     stopReasoningTypewriter();
+    syncDeepChatDtBodyScrollCap(textEl);
     return;
   }
 
@@ -524,6 +631,7 @@ export function paintOrResumeStreamingReasoning(
       textEl.textContent = full;
     }
     pending.reasoningDisplayedLength = full.length;
+    syncDeepChatDtBodyScrollCap(textEl);
     return;
   }
 
@@ -591,6 +699,15 @@ export function getActiveLiveGenerationStatusLabel(): string | null {
  * That thrash + MutationObserver remount freezes the page (edit → resend repro).
  */
 
+/** Remove settled 「已完成」 chrome from a host (live in-flight slot only). */
+export function stripSettledChromeFromHost(host: HTMLElement): void {
+  const chrome = getChromeOnHost(host);
+  if (!chrome) return;
+  if (chrome.classList.contains('is-settled') || chrome.querySelector('.deep-chat-dt-settled')) {
+    chrome.remove();
+  }
+}
+
 export function mountStreamingGenerationChrome(
   host: HTMLElement,
   pending: PendingDeepChatRequest
@@ -600,7 +717,13 @@ export function mountStreamingGenerationChrome(
   const hasActivity = Boolean(pending.preReplySteps?.length);
 
   if (phase === 'waiting' && !hasActivity) {
-    // Do not touch bubble chrome DOM — toolbar owns waiting status.
+    // Toolbar owns waiting status. Clear any stale settled chrome so continue-chat
+    // does not flash 「已完成 0s」 on the live slot before 深度思考 mounts.
+    stripSettledChromeFromHost(host);
+    const existing = getChromeOnHost(host);
+    if (existing?.classList.contains('is-streaming') && !existing.querySelector('.deep-chat-dt-stream')) {
+      existing.remove();
+    }
     ensureWaitingStatusRotateTimer();
     refreshLiveGenerationToolbarStatus();
     return;
@@ -609,13 +732,13 @@ export function mountStreamingGenerationChrome(
   clearWaitingStatusRotateTimer();
 
   if (!liveGenerationPhaseNeedsBubbleChrome(phase, hasReasoning, hasActivity)) {
-    // generating without reasoning: drop stray empty streaming chrome once, idempotently
+    // generating without reasoning: drop stray chrome once, including leftover 已完成
+    stripSettledChromeFromHost(host);
     const existing = getChromeOnHost(host);
     if (
       existing?.classList.contains('is-streaming') &&
       !existing.querySelector('.deep-chat-dt-stream') &&
-      !existing.querySelector('.deep-chat-dt-activity-list') &&
-      !existing.querySelector('.deep-chat-dt-settled')
+      !existing.querySelector('.deep-chat-dt-activity-list')
     ) {
       existing.remove();
     }
@@ -626,6 +749,8 @@ export function mountStreamingGenerationChrome(
   const chrome = ensureGenerationChromeOnHost(host, STREAMING_DT_KEY, 'streaming');
   // Drop settled nodes only on this generating host (history 已完成 stays on earlier hosts)
   chrome.querySelector('.deep-chat-dt-settled')?.remove();
+  chrome.classList.remove('is-settled');
+  chrome.classList.add('is-streaming');
   // Status line no longer sits above the bubble — toolbar end owns it.
   hideStatusInChrome(chrome);
 
@@ -912,6 +1037,14 @@ export function syncActivityListDom(
         options.setExpanded(id, next);
         setToggleExpanded(toggle, next);
         body.hidden = !next;
+        const bodyNode = row!.querySelector<HTMLElement>('.deep-chat-dt-body');
+        if (bodyNode) {
+          if (next) {
+            syncDeepChatDtBodyScrollCap(bodyNode);
+          } else {
+            bodyNode.scrollTop = 0;
+          }
+        }
       });
 
       row.append(toggle, body);
@@ -958,6 +1091,12 @@ export function syncActivityListDom(
     body.hidden = !expanded;
     if (text.textContent !== detail) {
       text.textContent = detail;
+    }
+    // Settled activity rows: fit-content + max-height via CSS; stick scroll if long.
+    if (expanded) {
+      syncDeepChatDtBodyScrollCap(body);
+    } else {
+      body.scrollTop = 0;
     }
   });
 

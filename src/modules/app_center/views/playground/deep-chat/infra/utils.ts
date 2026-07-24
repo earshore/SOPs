@@ -33,6 +33,12 @@ export function truncateText(value: string, maxLength: number): string {
   return value.length > maxLength ? `${value.slice(0, maxLength - 1)}…` : value;
 }
 
+/** True when text is empty or only zero-width placeholders (live AI slot marker). */
+export function isZwspOnlyText(value: string | null | undefined): boolean {
+  if (value == null) return true;
+  return value.replace(/\u200b/g, '').trim().length === 0;
+}
+
 export function formatThreadTime(timestamp: number): string {
   const date = new Date(timestamp);
   if (Number.isNaN(date.getTime())) {
