@@ -98,6 +98,14 @@ export {
   type ChatContentPart,
 } from './chatVision';
 export {
+  deleteChatCompletion,
+  getChatCompletion,
+  getChatCompletionMessages,
+  listChatCompletions,
+  updateChatCompletion,
+  type ChatCompletionsResourceClientOptions,
+} from './chatCompletionsResource';
+export {
   buildLooseAnalysisJsonSchema,
   withStructuredAnalysisOptions,
   type StructuredAnalysisContext,

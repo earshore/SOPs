@@ -159,6 +159,28 @@ export const OPENAI_PLATFORM_CAPABILITY_MATRIX: PlatformCapabilityRow[] = [
     status: 'implemented',
     entry: 'chatVision.ts applyVisionPartsToChatMessages',
   },
+  {
+    id: 'chat.extended_create',
+    area: 'Chat Completions',
+    feature: 'modalities / audio / prediction / web_search_options / user',
+    status: 'implemented',
+    entry: 'applyToRequest.ts applyChatSamplingFields',
+  },
+  {
+    id: 'chat.usage_callback',
+    area: 'Chat Completions',
+    feature: 'onUsage + onCompletion callbacks',
+    status: 'implemented',
+    entry: 'llmService.ts readLLMResponsePayload',
+  },
+  {
+    id: 'chat.resource_crud',
+    area: 'Chat Completions',
+    feature: 'List/Get/Update/Delete/Messages client',
+    status: 'implemented',
+    entry: 'chatCompletionsResource.ts',
+    notes: 'Client HTTP only; durability requires gateway/OpenAI stored completions support',
+  },
   // --- Multi-protocol ---
   {
     id: 'path.chat',

@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **双路径官方 Create 全量对齐（chat + responses）**：Chat Completions 支持 tools / tool_choice / parallel_tool_calls、chat tool loop、vision `image_url` parts、采样与身份字段（top_p / penalties / stop / n / seed / logprobs / metadata / prompt_cache_key / safety_identifier 等）、`response_format.json_schema`、`stream_options.include_usage`。
+- **Chat Completions 真全量 Create 客户端**：在既有 tools / vision / structured / 采样字段之上，补齐 `modalities`、`audio`、`prediction`、`web_search_options`、`user`；`onUsage` / `onCompletion` 回调；stream tool_calls 闭环；CRUD 客户端（list/get/update/delete/messages）。
+- `chatCompletionsResource.ts` + `tools/verify-chat-create-parity.mts` 结构探针。
+- Spec：`docs/superpowers/specs/2026-07-24-chat-completions-true-full-parity.md`（含不可完成项理由）。
+- **双路径官方 Create 对齐（chat + responses）**：tools / tool loop、vision、json_schema、stream_options 等。
 - `chatTools.ts` / `chatVision.ts`：官方 `tool_calls` 多轮与多模态映射。
-- Spec：`docs/superpowers/specs/2026-07-24-dual-path-full-api-parity.md`。
 
 ### Changed
 

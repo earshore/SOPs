@@ -162,6 +162,16 @@ export type ChatCompletionsBodyExtras = {
   metadata?: Record<string, string>;
   promptCacheKey?: string;
   safetyIdentifier?: string;
+  /** Deprecated OpenAI user id; prefer promptCacheKey / safetyIdentifier */
+  user?: string;
+  /** e.g. ["text","audio"] */
+  modalities?: string[];
+  /** Audio output config when modalities includes audio */
+  audio?: Record<string, unknown>;
+  /** Predicted outputs */
+  prediction?: Record<string, unknown>;
+  /** Built-in web search options (OpenAI) */
+  webSearchOptions?: Record<string, unknown>;
 };
 
 function setIfDefined(body: Record<string, unknown>, key: string, value: unknown): void {
@@ -188,6 +198,11 @@ function applyChatSamplingFields(
   setIfDefined(body, 'metadata', args.metadata);
   setIfDefined(body, 'prompt_cache_key', args.promptCacheKey);
   setIfDefined(body, 'safety_identifier', args.safetyIdentifier);
+  setIfDefined(body, 'user', args.user);
+  setIfDefined(body, 'modalities', args.modalities);
+  setIfDefined(body, 'audio', args.audio);
+  setIfDefined(body, 'prediction', args.prediction);
+  setIfDefined(body, 'web_search_options', args.webSearchOptions);
 }
 
 function applyChatToolsFields(

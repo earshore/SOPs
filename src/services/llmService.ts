@@ -163,6 +163,21 @@ export interface LLMOptions {
   metadata?: Record<string, string>;
   promptCacheKey?: string;
   safetyIdentifier?: string;
+  /** Deprecated OpenAI user; prefer promptCacheKey / safetyIdentifier */
+  user?: string;
+  modalities?: string[];
+  audio?: Record<string, unknown>;
+  prediction?: Record<string, unknown>;
+  webSearchOptions?: Record<string, unknown>;
+  /**
+   * Called with official usage object when present (non-stream body or stream_options.include_usage).
+   */
+  onUsage?: (usage: Record<string, unknown>) => void;
+  /**
+   * Called with full chat.completion (or primary choice payload) after parse.
+   * Does not replace the string return of callLLM.
+   */
+  onCompletion?: (completion: Record<string, unknown>) => void;
 }
 
 export interface LLMStreamMetrics {
@@ -180,6 +195,8 @@ export interface LLMStreamUpdate extends LLMStreamMetrics {
   reasoningDelta?: string;
   /** Accumulated reasoning channel text for this request. */
   reasoningContent?: string;
+  /** Stream chunk usage when gateway emits it (often final chunk only). */
+  usage?: Record<string, unknown>;
 }
 
 /**
@@ -404,7 +421,7 @@ function getLLMErrorMessage(errorText: string, fallback: string): string {
 
 type OpenAIStreamOptions = Pick<
   LLMOptions,
-  'onFirstResponse' | 'onStreamUpdate' | 'onResponseId'
+  'onFirstResponse' | 'onStreamUpdate' | 'onResponseId' | 'onUsage'
 > & {
   onStreamActivity?: () => void;
 };
@@ -421,6 +438,8 @@ interface OpenAIStreamState {
   functionCalls?: import('./modelCapability').ResponsesFunctionCall[];
   /** Chat Completions stream tool_calls (merged deltas). */
   chatToolCalls?: ChatFunctionToolCall[];
+  /** Last usage object seen on stream (include_usage). */
+  usage?: Record<string, unknown>;
 }
 
 interface OpenAIStreamLineContext {
@@ -440,6 +459,7 @@ interface OpenAIStreamReadResult {
   functionCalls?: import('./modelCapability').ResponsesFunctionCall[];
   chatToolCalls?: ChatFunctionToolCall[];
   reasoningContent?: string;
+  usage?: Record<string, unknown>;
 }
 
 function getCompletionContent(
@@ -545,6 +565,7 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
   reportResponsesStreamIdOnce(payload, context);
   harvestResponsesStreamSideChannels(payload, context);
   harvestChatStreamToolCalls(payload, context);
+  harvestStreamUsage(payload, context);
 
   const delta = getStreamDelta(payload, context.apiSurface);
   const reasoningDelta = resolveStreamReasoningDelta(payload, context);
@@ -553,6 +574,16 @@ function processOpenAIStreamLine(line: string, context: OpenAIStreamLineContext)
   }
 
   emitOpenAIStreamUpdate(context, delta, reasoningDelta);
+}
+
+function harvestStreamUsage(
+  payload: Record<string, unknown>,
+  context: OpenAIStreamLineContext
+): void {
+  const usage = payload.usage;
+  if (!usage || typeof usage !== 'object') return;
+  context.state.usage = usage as Record<string, unknown>;
+  context.options.onUsage?.(context.state.usage);
 }
 
 function harvestChatStreamToolCalls(
@@ -804,6 +835,7 @@ function createOpenAIStreamResult(
     functionCalls: state.functionCalls,
     chatToolCalls: chatToolCalls?.length ? chatToolCalls : undefined,
     reasoningContent: state.reasoningContent,
+    usage: state.usage,
   };
 }
 
@@ -897,6 +929,13 @@ interface ResolvedLLMOptions {
   metadata?: Record<string, string>;
   promptCacheKey?: string;
   safetyIdentifier?: string;
+  user?: string;
+  modalities?: string[];
+  audio?: Record<string, unknown>;
+  prediction?: Record<string, unknown>;
+  webSearchOptions?: Record<string, unknown>;
+  onUsage?: LLMOptions['onUsage'];
+  onCompletion?: LLMOptions['onCompletion'];
   /** Internal: function_call_output items for next Responses request */
   followUpInputItems?: Array<Record<string, unknown>>;
 }
@@ -1039,6 +1078,13 @@ function resolveLLMOptions(
     metadata: options.metadata,
     promptCacheKey: options.promptCacheKey,
     safetyIdentifier: options.safetyIdentifier,
+    user: options.user,
+    modalities: options.modalities,
+    audio: options.audio,
+    prediction: options.prediction,
+    webSearchOptions: options.webSearchOptions,
+    onUsage: options.onUsage,
+    onCompletion: options.onCompletion,
     followUpInputItems: undefined,
   };
 }
@@ -1263,6 +1309,11 @@ function createLLMTransport(args: {
     metadata: args.options.metadata,
     promptCacheKey: args.options.promptCacheKey,
     safetyIdentifier: args.options.safetyIdentifier,
+    user: args.options.user,
+    modalities: args.options.modalities,
+    audio: args.options.audio,
+    prediction: args.options.prediction,
+    webSearchOptions: args.options.webSearchOptions,
   });
 
   const { fullUrl, pathSuffix } = buildFullApiUrl(args.endpoint, pathId, args.model);
@@ -1473,6 +1524,11 @@ async function readLLMResponsePayload(
     if (context.apiSurface === 'gemini_generate') {
       return { data: null, content: extractGeminiGenerateText(data) };
     }
+    const usage = data.usage;
+    if (usage && typeof usage === 'object') {
+      context.options.onUsage?.(usage as Record<string, unknown>);
+    }
+    context.options.onCompletion?.(data);
     return {
       data: data as unknown as LLMChatCompletionResponse,
       content: '',
@@ -1488,9 +1544,17 @@ async function readLLMResponsePayload(
       onStreamActivity: context.options.onStreamActivity,
       onStreamUpdate: context.options.onStreamUpdate,
       onResponseId: context.options.onResponseId,
+      onUsage: context.options.onUsage,
     },
     context.apiSurface
   );
+
+  if (streamResult.usage) {
+    context.options.onUsage?.(streamResult.usage);
+  }
+  if (streamResult.fallbackJson) {
+    context.options.onCompletion?.(streamResult.fallbackJson as unknown as Record<string, unknown>);
+  }
 
   return {
     data: streamResult.fallbackJson,
@@ -2662,3 +2726,12 @@ export async function callLLMWithConfig(
 ): Promise<string> {
   return callLLM(messages, config.provider, config.endpoint, config.apiKey, config.model, options);
 }
+
+// Chat Completions resource CRUD (stored completions client)
+export {
+  deleteChatCompletion,
+  getChatCompletion,
+  getChatCompletionMessages,
+  listChatCompletions,
+  updateChatCompletion,
+} from './modelCapability/chatCompletionsResource';

@@ -194,6 +194,11 @@ export type BuildBodyForApiPathArgs = {
   metadata?: Record<string, string>;
   promptCacheKey?: string;
   safetyIdentifier?: string;
+  user?: string;
+  modalities?: string[];
+  audio?: Record<string, unknown>;
+  prediction?: Record<string, unknown>;
+  webSearchOptions?: Record<string, unknown>;
 };
 
 function buildResponsesBodyFromPathArgs(args: BuildBodyForApiPathArgs): Record<string, unknown> {
@@ -247,6 +252,11 @@ function buildChatBodyFromPathArgs(args: BuildBodyForApiPathArgs): Record<string
     metadata: args.metadata,
     promptCacheKey: args.promptCacheKey,
     safetyIdentifier: args.safetyIdentifier,
+    user: args.user,
+    modalities: args.modalities,
+    audio: args.audio,
+    prediction: args.prediction,
+    webSearchOptions: args.webSearchOptions,
   });
 }
 
