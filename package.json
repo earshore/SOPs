@@ -36,6 +36,7 @@
     "secret:scan": "tsx tools/secret-leak-scanner.ts",
     "probe:responses": "node tools/probe-responses-gateway.mjs",
     "probe:reasoning": "node tools/probe-reasoning-gateway.mjs",
+    "probe:chat": "node tools/probe-chat-gateway.mjs",
     "security:audit": "tsx tools/security-auditor.ts",
     "lighthouse": "npm run test:performance:gate",
     "lighthouse:local": "npm run test:performance:gate",

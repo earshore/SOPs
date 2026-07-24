@@ -3,7 +3,7 @@
 **日期：** 2026-07-24  
 **对照官方文档：** [Chat](https://developers.openai.com/api/reference/resources/chat) · [Create chat completion](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create)  
 **代码入口：** `src/services/llmService.ts` · `src/services/modelCapability/{apiPaths,applyToRequest,protocolBodies,mappers,registry,resolve}.ts`  
-**状态：** 审计完成 · 待按计划修复
+**状态：** Phase A 已落地（2026-07-24）· 产品子集 **GO**
 
 ---
 
@@ -11,16 +11,16 @@
 
 | 判定维度 | 结论 | 说明 |
 | -------- | ---- | ---- |
-| **SOPs 产品主路径**（文本对话 / 分析 JSON / 推理开关 / 流式） | **有条件可上线（Conditional GO）** | 核心 `POST {base}/chat/completions` 链路完整，单测覆盖较好，网关降级与推理字段 fail-closed 设计清晰 |
+| **SOPs 产品主路径**（文本对话 / 分析 JSON / 推理开关 / 流式） | **GO（产品子集）** | Phase A：校验放宽、max_completion_tokens、tools 路径 fail-closed、空正文诊断、`probe:chat` |
 | **官方 Chat Completions 全量 API 等价** | **不可声称（NO）** | 缺 tools/vision/json_schema/max_completion_tokens/多模态消息等；类型与校验落后于 2024–2026 官方 shape |
 | **默认路径 Grok / DeepSeek 文本** | **接近可上线** | Registry 默认 `chat_completions` + `reasoning_effort`；probe 与单测有实证 |
 | **OpenAI o / GPT-5 走 chat 回退** | **有风险** | 仍发 `max_tokens`（官方标注 deprecated 且与 o 系不兼容）；官方推荐 Responses，本项目默认也是 Responses，但 404 回退会落到 chat |
 | **Deep Chat tools / vision 在 chat 路径** | **未达上线** | `buildChatCompletionsBody` **丢弃** tools/vision；surface 能力位未声明 |
 
 **总评：**  
-以「Amazon 运营平台 + BYOK OpenAI 兼容网关 + 文本分析/对话」为产品边界，**chat/completions 作为默认与兜底路径达到约 75–80% 产品就绪**；  
-以「完整实现官方 chat/completions 资源」为标准，**未达可上线宣称标准**。  
-上线前应完成下方 **P0**，并明确产品不承诺 List/CRUD Completions 与音频等平台能力。
+以「Amazon 运营平台 + BYOK OpenAI 兼容网关 + 文本分析/对话」为产品边界，**Phase A 后产品子集可达上线（GO）**；  
+以「完整实现官方 chat/completions 资源」为标准，仍 **未达全量 API 等价**（tools loop / vision / Completions CRUD 等按产品边界不做或走 Responses）。  
+P0 已在 `feat/chat-completions-hardening` 落地；P1 其余项见路线图 Phase B/C。
 
 官方备注：新项目推荐 [Responses](https://developers.openai.com/api/docs/guides/migrate-to-responses)；Chat Completions 仍为兼容主流网关的关键路径。本项目的多协议设计与此一致。
 

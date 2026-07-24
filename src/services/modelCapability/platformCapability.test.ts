@@ -20,4 +20,9 @@ describe('OPENAI_PLATFORM_CAPABILITY_MATRIX', () => {
     const row = OPENAI_PLATFORM_CAPABILITY_MATRIX.find(r => r.id === 'product.deep_chat.tools');
     expect(row?.status).toBe('implemented');
   });
+
+  it('marks chat tools as not_in_scope (Responses-only product policy)', () => {
+    const row = OPENAI_PLATFORM_CAPABILITY_MATRIX.find(r => r.id === 'chat.tools');
+    expect(row?.status).toBe('not_in_scope');
+  });
 });

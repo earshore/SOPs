@@ -107,13 +107,45 @@ export const OPENAI_PLATFORM_CAPABILITY_MATRIX: PlatformCapabilityRow[] = [
     entry: 'applyToRequest (tool_choice pass-through)',
     notes: 'Not exposed as user preference',
   },
+  // --- Chat Completions product subset ---
+  {
+    id: 'chat.max_completion_tokens',
+    area: 'Chat Completions',
+    feature: 'max_completion_tokens for OpenAI reasoning models',
+    status: 'implemented',
+    entry: 'applyToRequest.ts applyChatMaxOutputTokens',
+    notes: 'Claude/thinking keeps max_tokens; legacy chat keeps max_tokens',
+  },
+  {
+    id: 'chat.response_schema',
+    area: 'Chat Completions',
+    feature: 'Modern response validation (null content, tool_calls finish_reason)',
+    status: 'implemented',
+    entry: 'zodSchemas.ts LLMChatCompletionResponseSchema',
+  },
+  {
+    id: 'chat.tools',
+    area: 'Chat Completions',
+    feature: 'function tools + tool loop',
+    status: 'not_in_scope',
+    notes:
+      'Use Responses path; callLLM rejects enableToolLoop outside responses (LLM_TOOLS_PATH_UNSUPPORTED)',
+  },
+  {
+    id: 'chat.empty_body',
+    area: 'Chat Completions',
+    feature: 'Empty stop body → API_EMPTY_RESPONSE',
+    status: 'implemented',
+    entry: 'llmService.ts executeLLMAttempt',
+  },
   // --- Multi-protocol ---
   {
     id: 'path.chat',
     area: 'Multi-protocol',
     feature: '/v1/chat/completions',
     status: 'implemented',
-    entry: 'apiPaths.ts, protocolBodies',
+    entry: 'apiPaths.ts, protocolBodies, applyToRequest buildChatCompletionsBody',
+    notes: 'Product subset: text/stream/json_object/reasoning_effort; tools require Responses',
   },
   {
     id: 'path.responses',

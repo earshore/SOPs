@@ -4,6 +4,14 @@
 **Status:** Verified (live probe against project new-api; key-scoped model catalog)  
 **Gateway target:** OpenAI-compatible `POST {endpoint}/chat/completions` (SOPs default: `https://new.hongecb.store/v1`)
 
+### Live probes
+
+```bash
+npm run probe:reasoning   # reasoning_effort on/off samples
+npm run probe:chat        # plain / max_tokens / max_completion_tokens / json_object / stream
+npm run probe:responses   # Responses surface matrix
+```
+
 ## Why gateway logs may show no reasoning intensity
 
 Product default is **`reasoningPrefs.enabled: false`**. The mapper returns `{}` when off, so the HTTP body **does not include** `reasoning_effort` at all. That is intentional (fail-closed / no blind fields), not a missing implementation.

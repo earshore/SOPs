@@ -25,6 +25,9 @@
 
 **注入条件：** `apiPath === responses` 且模型 surface `supportsTools`。
 
+**Chat Completions 路径（Phase A 冻结）：** 不在 `/chat/completions` 上实现 tool loop。  
+`enableToolLoop: true` 且路径非 `responses` 时，`callLLM` 抛 `LLM_TOOLS_PATH_UNSUPPORTED`（禁止静默丢弃 tools）。业务 tools 请使用 Responses。
+
 **工具列表（只读、无密钥、无写入）：**
 
 - `get_session_summary`
