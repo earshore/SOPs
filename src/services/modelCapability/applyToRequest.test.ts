@@ -84,7 +84,7 @@ describe('buildChatCompletionsBody', () => {
       reasoningEfforts: ['low', 'medium', 'high'] as const,
       defaultEffort: 'medium' as const,
       temperatureIgnored: true,
-      features: [],
+      features: ['reasoning', 'max_completion_tokens'],
       mapRequest: ({ enabled, effort }: { enabled: boolean; effort: string }) =>
         enabled && effort !== 'off' ? { reasoning_effort: effort } : {},
       source: { registryMatched: true, preferredSurface: 'chat_completions' as const },
@@ -102,6 +102,91 @@ describe('buildChatCompletionsBody', () => {
     expect(body.stream).toBe(true);
     expect(body.temperature).toBeUndefined();
     expect(body.reasoning_effort).toBe('high');
+  });
+
+  it('uses max_completion_tokens for temperatureIgnored reasoning models', () => {
+    const capability = {
+      modelId: 'o3-mini',
+      provider: 'openai',
+      contextWindow: 200_000,
+      apiSurface: 'chat_completions' as const,
+      supportsReasoning: true,
+      reasoningEfforts: ['low', 'medium', 'high'] as const,
+      defaultEffort: 'medium' as const,
+      temperatureIgnored: true,
+      features: ['reasoning', 'max_completion_tokens'],
+      mapRequest: ({ enabled, effort }: { enabled: boolean; effort: string }) =>
+        enabled && effort !== 'off' ? { reasoning_effort: effort } : {},
+      source: { registryMatched: true, preferredSurface: 'chat_completions' as const },
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildChatCompletionsBody({
+      model: 'o3-mini',
+      messages: [{ role: 'user', content: 'hi' }],
+      maxTokens: 256,
+      stream: false,
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+    });
+
+    expect(body.max_completion_tokens).toBe(256);
+    expect(body.max_tokens).toBeUndefined();
+  });
+
+  it('uses max_tokens for non-reasoning chat models', () => {
+    const capability = {
+      modelId: 'gpt-4o-mini',
+      provider: 'openai',
+      contextWindow: 128_000,
+      apiSurface: 'chat_completions' as const,
+      supportsReasoning: false,
+      reasoningEfforts: [] as const,
+      defaultEffort: 'medium' as const,
+      temperatureIgnored: false,
+      features: [],
+      mapRequest: null,
+      source: { registryMatched: false, preferredSurface: 'chat_completions' as const },
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildChatCompletionsBody({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: 'hi' }],
+      maxTokens: 128,
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+    });
+
+    expect(body.max_tokens).toBe(128);
+    expect(body.max_completion_tokens).toBeUndefined();
+  });
+
+  it('keeps max_tokens for Claude thinking models', () => {
+    const capability = {
+      modelId: 'claude-sonnet-4',
+      provider: 'anthropic',
+      contextWindow: 200_000,
+      apiSurface: 'chat_completions' as const,
+      supportsReasoning: true,
+      reasoningEfforts: ['low', 'medium', 'high'] as const,
+      defaultEffort: 'medium' as const,
+      temperatureIgnored: true,
+      features: ['reasoning', 'claude'],
+      mapRequest: () => ({
+        thinking: { type: 'enabled', budget_tokens: 2000 },
+      }),
+      source: { registryMatched: true, preferredSurface: 'chat_completions' as const },
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildChatCompletionsBody({
+      model: 'claude-sonnet-4',
+      messages: [{ role: 'user', content: 'hi' }],
+      maxTokens: 100,
+      capability,
+      reasoning: { enabled: true, effort: 'high' },
+    });
+
+    expect(body.max_tokens).toBeGreaterThanOrEqual(2000 + 512);
+    expect(body.max_completion_tokens).toBeUndefined();
   });
 });
 

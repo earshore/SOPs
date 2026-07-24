@@ -85,10 +85,16 @@ function entry(
 
 /** OpenAI o/gpt reasoning: prefer responses when available, completions as fallback. */
 function openaiReasoning(modelPattern: string, contextWindow: number): ModelCapabilityRule {
-  return entry(modelPattern, contextWindow, 'responses', {
-    responses: surfaceResponses({ temperatureIgnored: true }),
-    chat_completions: surfaceOpenAiEffort({ temperatureIgnored: true }),
-  });
+  return entry(
+    modelPattern,
+    contextWindow,
+    'responses',
+    {
+      responses: surfaceResponses({ temperatureIgnored: true }),
+      chat_completions: surfaceOpenAiEffort({ temperatureIgnored: true }),
+    },
+    ['reasoning', 'max_completion_tokens']
+  );
 }
 
 /** Chat-style models verified on completions (Grok / DeepSeek / Hy3). */

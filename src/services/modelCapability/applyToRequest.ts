@@ -31,6 +31,7 @@ function mergeMapperFields(body: Record<string, unknown>, extra: Record<string, 
 
 /**
  * Ensure max_tokens > thinking.budget_tokens for Anthropic-compatible channels.
+ * Always uses max_tokens (never max_completion_tokens) when thinking is present.
  */
 function ensureMaxTokensAboveThinkingBudget(body: Record<string, unknown>): void {
   const budget = readThinkingBudgetTokens(body);
@@ -38,10 +39,44 @@ function ensureMaxTokensAboveThinkingBudget(body: Record<string, unknown>): void
     return;
   }
   const minMax = budget + 512;
+  delete body.max_completion_tokens;
   const current = typeof body.max_tokens === 'number' ? body.max_tokens : 0;
   if (current < minMax) {
     body.max_tokens = minMax;
   }
+}
+
+/**
+ * Choose max_completion_tokens vs max_tokens for chat/completions.
+ * - Claude / thinking budget → max_tokens only
+ * - OpenAI reasoning (temperatureIgnored or feature flag) → max_completion_tokens only
+ * - Else legacy max_tokens
+ */
+export function applyChatMaxOutputTokens(
+  body: Record<string, unknown>,
+  maxTokens: number | undefined,
+  capability: Pick<ResolvedModelCapability, 'temperatureIgnored' | 'features'>
+): void {
+  if (maxTokens === undefined) {
+    return;
+  }
+  const features = capability.features ?? [];
+  const hasThinking = body.thinking != null && typeof body.thinking === 'object';
+  if (features.includes('claude') || hasThinking) {
+    body.max_tokens = maxTokens;
+    delete body.max_completion_tokens;
+    ensureMaxTokensAboveThinkingBudget(body);
+    return;
+  }
+  const preferCompletionTokens =
+    capability.temperatureIgnored === true || features.includes('max_completion_tokens');
+  if (preferCompletionTokens) {
+    body.max_completion_tokens = maxTokens;
+    delete body.max_tokens;
+    return;
+  }
+  body.max_tokens = maxTokens;
+  delete body.max_completion_tokens;
 }
 
 /**
@@ -97,9 +132,6 @@ export function buildChatCompletionsBody(args: {
   if (args.stream) {
     base.stream = true;
   }
-  if (args.maxTokens !== undefined) {
-    base.max_tokens = args.maxTokens;
-  }
   if (args.jsonMode) {
     base.response_format = { type: 'json_object' };
   }
@@ -107,9 +139,11 @@ export function buildChatCompletionsBody(args: {
     base.service_tier = args.serviceTier;
   }
 
-  return applyReasoningToRequestBody(base, args.capability, args.reasoning, {
+  const body = applyReasoningToRequestBody(base, args.capability, args.reasoning, {
     temperature: args.temperature,
   });
+  applyChatMaxOutputTokens(body, args.maxTokens, args.capability);
+  return body;
 }
 
 /**
