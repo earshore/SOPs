@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Responses Create 字段透传收敛：** `top_p` / `top_logprobs` / `metadata` / `prompt_cache_key` / `safety_identifier` / `user` / `truncation` / `background` / `max_tool_calls` / `include`；探针 `tools/verify-responses-create-parity.mts`。
+- 双轨收敛 Spec：`docs/superpowers/specs/2026-07-25-dual-track-api-convergence.md`。
 - **Chat Completions 真全量 Create 客户端**：在既有 tools / vision / structured / 采样字段之上，补齐 `modalities`、`audio`、`prediction`、`web_search_options`、`user`；`onUsage` / `onCompletion` 回调；stream tool_calls 闭环；CRUD 客户端（list/get/update/delete/messages）。
 - `chatCompletionsResource.ts` + `tools/verify-chat-create-parity.mts` 结构探针。
 - Spec：`docs/superpowers/specs/2026-07-24-chat-completions-true-full-parity.md`（含不可完成项理由）。
