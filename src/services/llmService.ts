@@ -462,6 +462,10 @@ interface OpenAIStreamReadResult {
   usage?: Record<string, unknown>;
 }
 
+/**
+ * Primary-text policy: always use choices[0] for callLLM string return.
+ * When n>1, remaining choices are available only via onCompletion payload.
+ */
 function getCompletionContent(
   completion: LLMChatCompletionResponse | null,
   defaultContent = ''

@@ -8,12 +8,14 @@
 
 `chat/completions` and `responses` are **independent full protocols**. Fallback is transport-only (404/unsupported path), never an excuse to leave chat incomplete.
 
-| Surface | Official target | Fallback role |
-| ------- | --------------- | ------------- |
-| `POST …/chat/completions` | Full Create body + stream/non-stream parse + tools loop | Default / max compatibility |
-| `POST …/responses` | Full product Responses Create (existing + remaining gaps) | Preferred for GPT-5/o when available |
+| Surface                   | Official target                                           | Fallback role                        |
+| ------------------------- | --------------------------------------------------------- | ------------------------------------ |
+| `POST …/chat/completions` | Full Create body + stream/non-stream parse + tools loop   | Default / max compatibility          |
+| `POST …/responses`        | Full product Responses Create (existing + remaining gaps) | Preferred for GPT-5/o when available |
 
-**Out of scope for this sprint (document, do not implement):** Chat Completions CRUD (List/Get/Update/Delete stored completions), Realtime, Batch, Fine-tune, Assistants.
+**Hard blockers (client cannot invent):** Realtime, Batch, Fine-tune, Assistants, Vector store product UI.  
+**CRUD:** thin client wrappers exist (`chatCompletionsResource.ts`); **durability** requires gateway support.  
+**n>1 policy:** `callLLM` returns `choices[0]` text only; full choices via `onCompletion`.
 
 ## Architecture
 
@@ -33,6 +35,7 @@ LLMOptions (shared extras)
 ## Chat Completions Create — required parity
 
 ### Messages
+
 - Roles: `system` | `developer` | `user` | `assistant` | `tool`
 - `content`: `string | null | ContentPart[]`
 - Content parts: `text`, `image_url` (chat shape), future audio deferred to matrix `partial`
@@ -40,6 +43,7 @@ LLMOptions (shared extras)
 - Tool: `tool_call_id`, `content`
 
 ### Request body fields (when set on LLMOptions)
+
 - Core: model, messages, stream, stream_options, temperature, max_completion_tokens / max_tokens policy
 - Structured: response_format json_object | json_schema
 - Tools: tools, tool_choice, parallel_tool_calls
@@ -48,12 +52,14 @@ LLMOptions (shared extras)
 - Reasoning (capability): reasoning_effort / thinking / etc. via mapRequest
 
 ### Response / stream
+
 - choices[0] message content + tool_calls + refusal
 - SSE delta.content + delta.tool_calls accumulation
 - finish_reason tool_calls / stop / length
 - usage when stream_options.include_usage
 
 ### Tool loop (chat)
+
 - enableToolLoop + tools + executeTool works on **chat_completions**
 - Multi-round: append assistant tool_calls message + tool results; re-POST until final text or maxToolRounds
 
@@ -71,16 +77,16 @@ LLMOptions (shared extras)
 
 ## Checkpoints
 
-| CP | Deliverable | Verify |
-| -- | ----------- | ------ |
-| CP1 | ChatMessage + content parts types | unit types + normalizeMessages |
-| CP2 | tools/tool_choice/parallel on chat body | applyToRequest + stream test body assert |
-| CP3 | chat tool loop | llmService.stream.test tool loop on chat path |
-| CP4 | vision parts → chat image_url | applyToRequest test |
-| CP5 | sampling/identity fields | body builder tests |
-| CP6 | unban tools on chat; settings/docs | registry tests + no LLM_TOOLS_PATH_UNSUPPORTED for chat |
-| CP7 | Responses parallel_tool_calls + matrix | tests |
-| CP8 | full unit suite + type-check | **130 tests pass; tsc OK (2026-07-24)** |
+| CP  | Deliverable                             | Verify                                                  |
+| --- | --------------------------------------- | ------------------------------------------------------- |
+| CP1 | ChatMessage + content parts types       | unit types + normalizeMessages                          |
+| CP2 | tools/tool_choice/parallel on chat body | applyToRequest + stream test body assert                |
+| CP3 | chat tool loop                          | llmService.stream.test tool loop on chat path           |
+| CP4 | vision parts → chat image_url           | applyToRequest test                                     |
+| CP5 | sampling/identity fields                | body builder tests                                      |
+| CP6 | unban tools on chat; settings/docs      | registry tests + no LLM_TOOLS_PATH_UNSUPPORTED for chat |
+| CP7 | Responses parallel_tool_calls + matrix  | tests                                                   |
+| CP8 | full unit suite + type-check            | **130 tests pass; tsc OK (2026-07-24)**                 |
 
 ## Non-goals
 

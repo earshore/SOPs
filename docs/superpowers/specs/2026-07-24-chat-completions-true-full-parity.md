@@ -21,7 +21,7 @@
 2. **Create response / stream**
    - Text + tool_calls + stream delta merge + empty-body diagnostics
    - **usage** exposed via `onUsage` callback (stream + non-stream)
-   - **choices** full array available via `onCompletion` optional callback (default still returns primary text)
+   - **choices** full array available via `onCompletion` optional callback; **n>1 policy:** primary string = `choices[0]` only
 3. **Resource CRUD client** (HTTP verbs against `{endpoint}/chat/completions[...]`)
    - GET list, GET by id, POST update, DELETE — thin authenticated client; gateways may 404
 
@@ -86,8 +86,8 @@ npm run lint:warning-gate → 0/0
 
 ### Cannot complete (honest, not deferred work)
 
-| Item | Why |
-| ---- | --- |
+| Item                                | Why                                                                                                |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------- |
 | OpenAI-hosted completion durability | CRUD is **client HTTP** to user BYOK endpoint; non-OpenAI gateways may 404 — cannot invent storage |
-| Realtime / Batch / Fine-tune | Separate APIs, not Chat Completions Create |
-| Seed determinism | Official best-effort; we pass the field only |
+| Realtime / Batch / Fine-tune        | Separate APIs, not Chat Completions Create                                                         |
+| Seed determinism                    | Official best-effort; we pass the field only                                                       |

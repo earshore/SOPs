@@ -930,6 +930,64 @@ describe('callLLM streaming', () => {
     ).rejects.toMatchObject({ code: 'API_EMPTY_RESPONSE' });
   });
 
+  it('invokes onUsage from stream final chunk when usage is present', async () => {
+    const onUsage = vi.fn();
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              id: 'chatcmpl-su',
+              object: 'chat.completion.chunk',
+              choices: [{ index: 0, delta: { content: 'hi' }, finish_reason: null }],
+            })}\n\n`
+          )
+        );
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              id: 'chatcmpl-su',
+              object: 'chat.completion.chunk',
+              choices: [{ index: 0, delta: {}, finish_reason: 'stop' }],
+              usage: { prompt_tokens: 2, completion_tokens: 1, total_tokens: 3 },
+            })}\n\n`
+          )
+        );
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        controller.close();
+      },
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        return new Response(stream, {
+          status: 200,
+          headers: { 'Content-Type': 'text/event-stream' },
+        });
+      })
+    );
+
+    const text = await callLLM(
+      [{ role: 'user', content: 'hi' }],
+      'new_api',
+      'https://example.test/v1',
+      'k',
+      'deepseek-v4-flash',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'chat_completions',
+        onUsage,
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+    expect(text).toBe('hi');
+    expect(onUsage).toHaveBeenCalledWith(
+      expect.objectContaining({ prompt_tokens: 2, total_tokens: 3 })
+    );
+  });
+
   it('invokes onUsage for non-stream chat completion usage', async () => {
     const onUsage = vi.fn();
     const onCompletion = vi.fn();
