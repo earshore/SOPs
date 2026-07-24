@@ -134,6 +134,9 @@ export function describeResponsesEmptyBody(
     return null;
   }
   const status = typeof data.status === 'string' ? data.status : '';
+  if (status === 'in_progress') {
+    return '模型 /responses 返回了 in_progress 且无正文（部分网关在 tools 开启时不完成响应）。请关闭工具后重试，或在系统设置将路径改为 chat/completions。';
+  }
   const incompleteMsg = describeIncompleteEmptyBody(status, readIncompleteReason(data));
   if (incompleteMsg) return incompleteMsg;
   if (extractResponsesReasoningSummary(data).trim() || options?.hadStreamedReasoning) {

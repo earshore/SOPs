@@ -186,6 +186,8 @@ export interface SaveThreadMessagesOptions {
   assistantReasoning?: string;
   /** Whole seconds for settled 「已完成 Xs」 */
   assistantReasoningDurationSec?: number;
+  /** Pre-reply tool/status timeline under 「已完成」 */
+  assistantPreReplySteps?: import('./request/preReplyActivity').PreReplyActivityStep[];
   /** partial 落盘时跳过列表重绘，避免流式过程中 UI 抖动 */
   skipUiRefresh?: boolean;
 }

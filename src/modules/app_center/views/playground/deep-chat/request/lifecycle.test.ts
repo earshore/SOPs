@@ -195,6 +195,8 @@ describe('Deep Chat generation phases', () => {
     expect(liveGenerationPhaseNeedsBubbleChrome('reasoning', true)).toBe(true);
     expect(liveGenerationPhaseNeedsBubbleChrome('generating', true)).toBe(true);
     expect(liveGenerationPhaseNeedsBubbleChrome('settled', false)).toBe(true);
+    // Tool activity before first token still needs bubble chrome
+    expect(liveGenerationPhaseNeedsBubbleChrome('waiting', false, true)).toBe(true);
   });
 
   it('treats first reasoning chunk as leaving waiting (hides 思考中 / 等待模型响应)', () => {

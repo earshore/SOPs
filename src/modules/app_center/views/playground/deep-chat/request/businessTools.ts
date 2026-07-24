@@ -1,22 +1,24 @@
 /**
- * Safe, read-only business tools for Deep Chat on Responses path.
- * No secrets, no writes, no network (except via model tools like web_search if added separately).
+ * Safe business tools for Deep Chat on chat_completions + responses paths.
+ * Includes read-only session tools and client-side web / X search.
  *
- * Product rule: injection is **fail-closed** — tools are not sent on every Responses turn
- * unless explicitly opted in (runtime deepChat.enableBusinessTools === true).
+ * Product rule: injection is **opt-in via runtime** (deepChat.enableBusinessTools).
+ * Default is enabled so search-style questions can complete a tool loop instead of
+ * dumping raw tool syntax as assistant text.
  */
 
 import type { ResponsesToolExecutor } from '@/services/modelCapability';
 import type { DeepChatThread } from '../types';
 import { getDeepChatMessageText } from '../session/conversationContext';
 import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
+import { parseToolArgsObject, runSearchX, runWebSearch } from './webSearch';
 
-/** Fail-closed product default: do not force tools on first-turn /responses replies. */
-export const DEEP_CHAT_BUSINESS_TOOLS_DEFAULT_ENABLED = false;
+/** Default product: tools on so models use native tool_calls instead of text dumps. */
+export const DEEP_CHAT_BUSINESS_TOOLS_DEFAULT_ENABLED = true;
 
 /**
- * Whether Deep Chat may inject read-only business tools on the Responses path.
- * Opt-in only: explicit true enables; missing/false stays off (fail-closed).
+ * Whether Deep Chat may inject business tools.
+ * Explicit prefs override runtime; missing prefs fall back to runtime (default true).
  */
 export function isDeepChatBusinessToolsEnabled(
   prefs?: { enableBusinessTools?: boolean } | null
@@ -27,6 +29,7 @@ export function isDeepChatBusinessToolsEnabled(
   return getRuntimeStrategySettings().deepChat.enableBusinessTools === true;
 }
 
+/** Flat Responses-style tools; chat path normalizes via normalizeToolsForChat. */
 export const DEEP_CHAT_BUSINESS_TOOLS: unknown[] = [
   {
     type: 'function',
@@ -65,6 +68,60 @@ export const DEEP_CHAT_BUSINESS_TOOLS: unknown[] = [
           maximum: 12,
         },
       },
+      additionalProperties: false,
+    },
+  },
+  {
+    type: 'function',
+    name: 'web_search',
+    description:
+      'Search the open web for recent information, news, or facts. Use for general web research. Returns text snippets; always synthesize a final user-facing answer after results.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Search query',
+        },
+        num_results: {
+          type: 'integer',
+          description: 'Hint for how many results to emphasize (1-15)',
+          minimum: 1,
+          maximum: 15,
+        },
+      },
+      required: ['query'],
+      additionalProperties: false,
+    },
+  },
+  {
+    type: 'function',
+    name: 'search_x',
+    description:
+      'Search X (Twitter) discussions and news-like posts about a topic (AI, product launches, etc.). Prefer this when the user asks about X/Twitter. Returns text snippets via web-oriented X search; always synthesize a final answer after results. Do not print raw tool call markup to the user.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Search query / keywords',
+        },
+        limit: {
+          type: 'integer',
+          description: 'Approx how many posts/snippets to emphasize (1-20)',
+          minimum: 1,
+          maximum: 20,
+        },
+        mode: {
+          type: 'string',
+          description: 'Optional mode hint, e.g. Latest',
+        },
+        from_date: {
+          type: 'string',
+          description: 'Optional YYYY-MM-DD lower bound',
+        },
+      },
+      required: ['query'],
       additionalProperties: false,
     },
   },
@@ -124,6 +181,26 @@ export function createDeepChatBusinessToolExecutor(
         .filter(Boolean)
         .slice(-limit);
       return JSON.stringify({ count: users.length, questions: users });
+    }
+
+    if (name === 'web_search') {
+      const args = parseToolArgsObject(argsJson);
+      const query = typeof args.query === 'string' ? args.query : '';
+      const result = await runWebSearch(query);
+      return JSON.stringify(result);
+    }
+
+    if (name === 'search_x') {
+      const args = parseToolArgsObject(argsJson);
+      const query = typeof args.query === 'string' ? args.query : '';
+      const limit =
+        typeof args.limit === 'number' && Number.isFinite(args.limit)
+          ? Math.min(20, Math.max(1, Math.round(args.limit)))
+          : undefined;
+      const mode = typeof args.mode === 'string' ? args.mode : undefined;
+      const from_date = typeof args.from_date === 'string' ? args.from_date : undefined;
+      const result = await runSearchX({ query, limit, mode, from_date });
+      return JSON.stringify(result);
     }
 
     return JSON.stringify({

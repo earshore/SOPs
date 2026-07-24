@@ -3,6 +3,7 @@ import {
   appendChatToolRoundMessages,
   extractChatToolCallsFromCompletion,
   mergeChatStreamToolCallDeltas,
+  normalizeToolsForChat,
 } from './chatTools';
 
 describe('chatTools', () => {
@@ -70,6 +71,33 @@ describe('chatTools', () => {
       role: 'tool',
       tool_call_id: 'call_1',
       content: 'ok',
+    });
+  });
+
+  it('normalizes flat Responses tools to chat function shape', () => {
+    const tools = normalizeToolsForChat([
+      {
+        type: 'function',
+        name: 'search_x',
+        description: 'Search X',
+        parameters: { type: 'object', properties: { query: { type: 'string' } } },
+      },
+      {
+        type: 'function',
+        function: { name: 'already', parameters: {} },
+      },
+    ]);
+    expect(tools?.[0]).toEqual({
+      type: 'function',
+      function: {
+        name: 'search_x',
+        description: 'Search X',
+        parameters: { type: 'object', properties: { query: { type: 'string' } } },
+      },
+    });
+    expect(tools?.[1]).toEqual({
+      type: 'function',
+      function: { name: 'already', parameters: {} },
     });
   });
 });

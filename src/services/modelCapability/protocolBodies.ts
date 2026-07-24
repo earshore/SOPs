@@ -9,6 +9,7 @@ import {
   type ResponsesJsonSchemaFormat,
 } from './applyToRequest';
 import type { ApiPathId } from './apiPaths';
+import { normalizeToolsForChat } from './chatTools';
 import { normalizeToolsForResponses } from './responsesTools';
 
 export type ChatMessageLike = { role: string; content: string };
@@ -249,7 +250,7 @@ function buildChatBodyFromPathArgs(args: BuildBodyForApiPathArgs): Record<string
     serviceTier: args.serviceTier,
     capability: args.capability,
     reasoning: args.reasoning,
-    tools: args.tools,
+    tools: normalizeToolsForChat(args.tools),
     toolChoice: args.toolChoice,
     parallelToolCalls: args.parallelToolCalls,
     visionUserParts: args.visionUserParts,

@@ -1148,6 +1148,221 @@ describe('callLLM streaming', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it('forces a final answer when model keeps returning tool_calls with empty content', async () => {
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              id: 'chatcmpl-loop',
+              object: 'chat.completion.chunk',
+              choices: [
+                {
+                  index: 0,
+                  delta: {
+                    tool_calls: [
+                      {
+                        index: 0,
+                        id: 'call_loop',
+                        type: 'function',
+                        function: { name: 'search_x', arguments: '{"query":"AI"}' },
+                      },
+                    ],
+                  },
+                  finish_reason: 'tool_calls',
+                },
+              ],
+            })}\n\n`
+          )
+        );
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        controller.close();
+      },
+    });
+
+    let hop = 0;
+    const fetchMock = vi.fn(async (_url, init) => {
+      hop += 1;
+      if (hop === 1) {
+        return new Response(stream, {
+          status: 200,
+          headers: { 'Content-Type': 'text/event-stream' },
+        });
+      }
+      const body = JSON.parse(String((init as RequestInit).body));
+      // Last forced round should set tool_choice none
+      if (body.tool_choice === 'none') {
+        return new Response(
+          JSON.stringify({
+            id: 'chatcmpl-final-forced',
+            object: 'chat.completion',
+            created: 3,
+            model: 'deepseek-v4-flash',
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: '' },
+                finish_reason: 'stop',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          id: `chatcmpl-more-${hop}`,
+          object: 'chat.completion',
+          created: hop,
+          model: 'deepseek-v4-flash',
+          choices: [
+            {
+              index: 0,
+              message: {
+                role: 'assistant',
+                content: '',
+                tool_calls: [
+                  {
+                    id: `call_more_${hop}`,
+                    type: 'function',
+                    function: { name: 'search_x', arguments: '{"query":"AI again"}' },
+                  },
+                ],
+              },
+              finish_reason: 'tool_calls',
+            },
+          ],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const text = await callLLM(
+      [{ role: 'user', content: '搜一下AI新闻' }],
+      'new_api',
+      'https://example.test/v1',
+      'k',
+      'deepseek-v4-flash',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'chat_completions',
+        enableToolLoop: true,
+        maxToolRounds: 3,
+        tools: [
+          {
+            type: 'function',
+            function: { name: 'search_x', parameters: { type: 'object' } },
+          },
+        ],
+        executeTool: async () =>
+          JSON.stringify({ resultsText: 'OpenAI news; Claude update; Grok launch' }),
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+
+    expect(text).toMatch(/OpenAI news|工具检索结果|Claude/);
+    expect(text.trim().length).toBeGreaterThan(0);
+  });
+
+  it('recovers when stream dumps text-emitted search_x JSON instead of tool_calls', async () => {
+    const encoder = new TextEncoder();
+    const dump =
+      '正在搜索。\n\n[{"search_x":[{"query":"AI news","limit":5,"mode":"Latest"}]}]';
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              id: 'chatcmpl-text-tool',
+              object: 'chat.completion.chunk',
+              choices: [{ index: 0, delta: { content: dump }, finish_reason: null }],
+            })}\n\n`
+          )
+        );
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              id: 'chatcmpl-text-tool',
+              object: 'chat.completion.chunk',
+              choices: [{ index: 0, delta: {}, finish_reason: 'stop' }],
+            })}\n\n`
+          )
+        );
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        controller.close();
+      },
+    });
+
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(async () => {
+        return new Response(stream, {
+          status: 200,
+          headers: { 'Content-Type': 'text/event-stream' },
+        });
+      })
+      .mockImplementationOnce(async (_url, init) => {
+        const body = JSON.parse(String((init as RequestInit).body));
+        expect(body.messages).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ role: 'tool', tool_call_id: 'text_call_1' }),
+          ])
+        );
+        return new Response(
+          JSON.stringify({
+            id: 'chatcmpl-text-final',
+            object: 'chat.completion',
+            created: 2,
+            model: 'deepseek-v4-flash',
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: 'AI 圈今日要点：…' },
+                finish_reason: 'stop',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const executeTool = vi.fn(async (args: { name: string; arguments: string }) => {
+      expect(args.name).toBe('search_x');
+      expect(args.arguments).toContain('AI news');
+      return JSON.stringify({ resultsText: 'tweet about AI' });
+    });
+
+    const text = await callLLM(
+      [{ role: 'user', content: '搜一下X上关于AI圈有哪些新闻' }],
+      'new_api',
+      'https://example.test/v1',
+      'k',
+      'deepseek-v4-flash',
+      {
+        stream: true,
+        retries: 0,
+        apiPath: 'chat_completions',
+        enableToolLoop: true,
+        tools: [
+          {
+            type: 'function',
+            function: { name: 'search_x', parameters: { type: 'object' } },
+          },
+        ],
+        executeTool,
+        reasoningPrefs: { enabled: false, effort: 'medium' },
+      }
+    );
+
+    expect(executeTool).toHaveBeenCalledTimes(1);
+    expect(text).toBe('AI 圈今日要点：…');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('posts extended Create fields modalities audio prediction web_search user', async () => {
     const fetchMock = vi.fn(async (_url, init) => {
       const body = JSON.parse(String((init as RequestInit).body));

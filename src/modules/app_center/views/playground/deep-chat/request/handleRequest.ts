@@ -113,6 +113,7 @@ export async function handleDeepChatRequest(
       threadId: activeThread.id,
       assistantReasoning: pendingRequest.reasoningText,
       assistantReasoningDurationSec: getPendingReasoningDurationSec(pendingRequest),
+      assistantPreReplySteps: pendingRequest.preReplySteps,
       // Explicitly omit assistantStatus so partial 「未完成」 is cleared in store.
     });
     markPendingDeepChatRequestSettled(pendingRequest);

@@ -23,19 +23,20 @@ function sampleThread(): DeepChatThread {
 }
 
 describe('deepChatBusinessTools', () => {
-  it('fail-closes business tools injection by default (opt-in only)', () => {
-    expect(DEEP_CHAT_BUSINESS_TOOLS_DEFAULT_ENABLED).toBe(false);
+  it('enables business tools by default (explicit false still disables)', () => {
+    expect(DEEP_CHAT_BUSINESS_TOOLS_DEFAULT_ENABLED).toBe(true);
     expect(isDeepChatBusinessToolsEnabled({ enableBusinessTools: false })).toBe(false);
     expect(isDeepChatBusinessToolsEnabled({ enableBusinessTools: true })).toBe(true);
-    expect(isDeepChatBusinessToolsEnabled({})).toBe(false);
   });
 
-  it('exposes only allowlisted tools', () => {
+  it('exposes session + search allowlisted tools', () => {
     const names = DEEP_CHAT_BUSINESS_TOOLS.map(t => (t as { name?: string }).name).filter(Boolean);
     expect(names).toEqual([
       'get_session_summary',
       'get_active_model',
       'list_recent_user_questions',
+      'web_search',
+      'search_x',
     ]);
   });
 
@@ -77,5 +78,43 @@ describe('deepChatBusinessTools', () => {
     });
     const out = JSON.parse(await exec({ name: 'rm_rf', arguments: '{}', callId: 'c' }));
     expect(out.error).toBe('unknown_tool');
+  });
+
+  it('runs search_x / web_search via client search helper', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      new Response('AI industry headlines snippet', {
+        status: 200,
+        headers: { 'Content-Type': 'text/plain' },
+      })) as typeof fetch;
+
+    try {
+      const exec = createDeepChatBusinessToolExecutor({
+        getThread: sampleThread,
+        getModel: () => 'm',
+        getProvider: () => 'p',
+      });
+      const x = JSON.parse(
+        await exec({
+          name: 'search_x',
+          arguments: JSON.stringify({ query: 'AI news', limit: 5, mode: 'Latest' }),
+          callId: 'c-x',
+        })
+      );
+      expect(x.query).toBe('AI news');
+      expect(x.resultsText).toMatch(/AI industry|headlines|snippet|Search/i);
+
+      const web = JSON.parse(
+        await exec({
+          name: 'web_search',
+          arguments: JSON.stringify({ query: 'AI news today' }),
+          callId: 'c-w',
+        })
+      );
+      expect(web.query).toBe('AI news today');
+      expect(typeof web.resultsText).toBe('string');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 });

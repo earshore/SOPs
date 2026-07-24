@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@/services/llmService';
+import type { PreReplyActivityStep } from './preReplyActivity';
 
 export type DeepChatPendingAbortReason = 'stopped' | 'deleted' | 'cleared';
 
@@ -21,6 +22,13 @@ export interface PendingDeepChatRequest {
   reasoningUiExpanded?: boolean;
   /** Streaming typewriter cursor into reasoningText */
   reasoningDisplayedLength?: number;
+  /**
+   * Pre-reply tool/status steps (display-only timeline under 已完成).
+   * Reasoning is merged at paint time; tools are appended as they run.
+   */
+  preReplySteps?: PreReplyActivityStep[];
+  /** Which activity row ids are expanded while streaming */
+  activityUiExpanded?: Record<string, boolean>;
   displayedAssistantText: string;
   startedAt: number;
   updatedAt: number;
@@ -57,9 +65,14 @@ export function getDeepChatGenerationPhase(
  */
 export function liveGenerationPhaseNeedsBubbleChrome(
   phase: DeepChatGenerationPhase,
-  hasReasoningText: boolean
+  hasReasoningText: boolean,
+  hasPreReplyActivity = false
 ): boolean {
   if (phase === 'settled' || phase === 'reasoning') {
+    return true;
+  }
+  // Tool activity before first token still needs chrome (timeline above bubble).
+  if (hasPreReplyActivity) {
     return true;
   }
   if (phase === 'generating' && hasReasoningText) {
@@ -85,6 +98,8 @@ export function createPendingDeepChatRequest(
     conversationMessages: [...conversationMessages],
     assistantText: '',
     reasoningText: '',
+    preReplySteps: [],
+    activityUiExpanded: {},
     displayedAssistantText: '',
     startedAt: now,
     updatedAt: now,

@@ -130,7 +130,8 @@ export const DEFAULT_RUNTIME_STRATEGY_SETTINGS: RuntimeStrategySettings = {
     maxThreadMessageCount: 80,
     maxThreadCount: 30,
     maxPromptDraftCount: 12,
-    enableBusinessTools: false,
+    // Default on so Deep Chat can complete search/tool loops instead of dumping raw tool text.
+    enableBusinessTools: true,
   },
   ppcSearchTerms: {
     batchSize: 80,
@@ -337,8 +338,13 @@ function normalizeDeepChatSettings(
       1,
       100
     ),
-    // Fail-closed: only explicit true opts into Responses business tools.
-    enableBusinessTools: raw.enableBusinessTools === true,
+    // Explicit false disables; missing/undefined keeps product default (true).
+    enableBusinessTools:
+      raw.enableBusinessTools === false
+        ? false
+        : raw.enableBusinessTools === true
+          ? true
+          : defaults.deepChat.enableBusinessTools,
   };
 }
 

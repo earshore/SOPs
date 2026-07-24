@@ -1,5 +1,6 @@
 import type { ChatMessage } from '@/services/llmService';
 import { getRuntimeStrategySettings } from '@/services/runtimeStrategyService';
+import { normalizePreReplyActivitySteps } from '../request/preReplyActivity';
 
 export type DeepChatRole = 'user' | 'ai' | 'assistant' | 'system';
 /**
@@ -21,6 +22,11 @@ export interface DeepChatMessage {
   reasoning?: string;
   /** Generation wall time in whole seconds (for 「已完成 Xs」). */
   reasoningDurationSec?: number;
+  /**
+   * Pre-reply timeline (tools / status) under 「已完成」 — display-only.
+   * Reasoning is also mirrored here for a single collapsible list.
+   */
+  preReplySteps?: import('../request/preReplyActivity').PreReplyActivityStep[];
   createdAt?: number;
   status?: DeepChatMessageStatus;
 }
@@ -33,6 +39,8 @@ export interface BuildStoredThreadMessagesOptions {
   assistantReasoning?: string;
   /** Whole seconds from request start to settle (「已完成 Xs」). */
   assistantReasoningDurationSec?: number;
+  /** Tool / pre-reply activity steps (display-only). */
+  assistantPreReplySteps?: import('../request/preReplyActivity').PreReplyActivityStep[];
   maxMessages?: number;
   maxMessageChars?: number;
 }
@@ -119,6 +127,10 @@ export function buildStoredThreadMessages(
   if (trimmedAssistantText) {
     const reasoning = options.assistantReasoning?.trim();
     const durationSec = options.assistantReasoningDurationSec;
+    const preReplySteps = normalizePreReplyActivitySteps(
+      options.assistantPreReplySteps,
+      options.maxMessageChars
+    );
     storedMessages.push({
       role: 'ai',
       text: truncateStoredMessage(trimmedAssistantText, options.maxMessageChars),
@@ -133,6 +145,7 @@ export function buildStoredThreadMessages(
       ...(typeof durationSec === 'number' && Number.isFinite(durationSec) && durationSec >= 0
         ? { reasoningDurationSec: Math.max(0, Math.round(durationSec)) }
         : {}),
+      ...(preReplySteps ? { preReplySteps } : {}),
     });
   }
 
@@ -182,6 +195,10 @@ function normalizeStoredMessage(
   const durationSec = normalizeReasoningDurationSec(message.reasoningDurationSec);
   const status =
     message.status === 'stopped' || message.status === 'partial' ? message.status : undefined;
+  const preReplySteps = normalizePreReplyActivitySteps(
+    message.preReplySteps,
+    options.maxMessageChars
+  );
   return {
     role: message.role === 'user' ? 'user' : 'ai',
     text,
@@ -189,6 +206,7 @@ function normalizeStoredMessage(
     ...(reasoning ? { reasoning: truncateStoredMessage(reasoning, options.maxMessageChars) } : {}),
     ...(durationSec !== undefined ? { reasoningDurationSec: durationSec } : {}),
     ...(status ? { status } : {}),
+    ...(preReplySteps ? { preReplySteps } : {}),
   };
 }
 

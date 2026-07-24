@@ -10,6 +10,7 @@ import {
   emitPendingAssistantDelta,
   getMountedRenderContainer,
   getRenderContainerForThread,
+  schedulePendingAssistantDisplay,
 } from '../session/pendingRuntime';
 
 import { callLLM } from '@/services/llmService';
@@ -21,12 +22,22 @@ import {
 } from './businessTools';
 import { StorageService } from '@/services/storageService';
 import { getRuntimeDeepChatOptions } from '@/services/runtimeStrategyService';
-import { describeResponsesEmptyBody } from '@/services/modelCapability';
+import {
+  collapseTextEmittedToolCallsForDisplay,
+  describeResponsesEmptyBody,
+  textLooksLikeEmittedToolCalls,
+} from '@/services/modelCapability';
 
 import type { LLMProviderConfig } from '@/types/state';
 
 import { appendPendingDeepChatReasoningText, type PendingDeepChatRequest } from './lifecycle';
 import { getDeepChatRequestBudgetDefaults, resolveDeepChatMaxOutputTokens } from './budget';
+import {
+  formatToolActivityLabel,
+  formatToolArgsDetail,
+  formatToolResultDetail,
+  upsertPreReplyActivityStep,
+} from './preReplyActivity';
 
 import type { DeepChatElement, DeepChatSignals, DeepChatLLMCallContext } from '../types';
 
@@ -73,6 +84,50 @@ type DeepChatChainOptions = {
   maxToolRounds?: number;
 };
 
+function getPendingForActiveThread(): PendingDeepChatRequest | undefined {
+  return sessionState.pendingRequests.get(getActiveThread().id);
+}
+
+function recordToolActivityStart(name: string, argsJson: string, callId: string): void {
+  const pending = getPendingForActiveThread();
+  if (!pending) return;
+  const steps = pending.preReplySteps ?? [];
+  pending.preReplySteps = upsertPreReplyActivityStep(steps, {
+    id: callId || `tool_${steps.length + 1}`,
+    kind: 'tool',
+    label: formatToolActivityLabel(name),
+    detail: formatToolArgsDetail(argsJson),
+    status: 'running',
+    order: steps.length,
+  });
+  pending.updatedAt = Date.now();
+  const container = getMountedRenderContainer();
+  if (container) uiHooks.syncPendingStatus(container);
+}
+
+function recordToolActivityEnd(
+  name: string,
+  callId: string,
+  output: string,
+  status: 'done' | 'error'
+): void {
+  const pending = getPendingForActiveThread();
+  if (!pending) return;
+  const steps = pending.preReplySteps ?? [];
+  const existing = steps.find(s => s.id === callId);
+  pending.preReplySteps = upsertPreReplyActivityStep(steps, {
+    id: callId || `tool_${steps.length + 1}`,
+    kind: 'tool',
+    label: existing?.label || formatToolActivityLabel(name),
+    detail: formatToolResultDetail(output),
+    status,
+    order: existing?.order ?? steps.length,
+  });
+  pending.updatedAt = Date.now();
+  const container = getMountedRenderContainer();
+  if (container) uiHooks.syncPendingStatus(container);
+}
+
 function buildDeepChatToolOptions(
   config: LLMProviderConfig,
   model: string,
@@ -82,15 +137,34 @@ function buildDeepChatToolOptions(
   if (!supportsTools || !isDeepChatBusinessToolsEnabled(toolPrefs)) {
     return {};
   }
+  const baseExecute = createDeepChatBusinessToolExecutor({
+    getThread: () => getActiveThread(),
+    getModel: () => model,
+    getProvider: () => config.provider,
+  });
   return {
     tools: DEEP_CHAT_BUSINESS_TOOLS,
-    executeTool: createDeepChatBusinessToolExecutor({
-      getThread: () => getActiveThread(),
-      getModel: () => model,
-      getProvider: () => config.provider,
-    }),
+    executeTool: async call => {
+      const callId = call.callId || `tool_${Date.now()}`;
+      recordToolActivityStart(call.name, call.arguments, callId);
+      try {
+        const output = await baseExecute({ ...call, callId });
+        recordToolActivityEnd(call.name, callId, String(output ?? ''), 'done');
+        return output;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        recordToolActivityEnd(
+          call.name,
+          callId,
+          JSON.stringify({ error: message }),
+          'error'
+        );
+        throw error;
+      }
+    },
     enableToolLoop: true,
-    maxToolRounds: 4,
+    // Keep short: models often loop tools; last round forces tool_choice=none.
+    maxToolRounds: 3,
   };
 }
 
@@ -268,16 +342,50 @@ export async function callDeepChatLLM(context: DeepChatLLMCallContext): Promise<
     return pendingRequest.assistantText.trim();
   }
 
-  if (!streamState.streamedText && finalText) {
-    appendPendingAssistantText(pendingRequest, finalText);
-    await emitPendingAssistantDelta(signals, pendingRequest, sourceChat, finalText);
+  // Prefer tool-loop final text over streamed tool-syntax dumps.
+  let assistantText = (finalText || streamState.streamedText).trim();
+  if (textLooksLikeEmittedToolCalls(assistantText)) {
+    assistantText = collapseTextEmittedToolCallsForDisplay(assistantText);
+  }
+
+  // Tool-loop / non-stream follow-ups return one blob. Do NOT one-shot onResponse
+  // (that flashes the full answer). Typewrite via pending display drain instead.
+  if (shouldTypewriteFinalAssistantText(streamState.streamedText, assistantText)) {
+    revealAssistantTextWithTypewriter(pendingRequest, assistantText);
   }
 
   syncMountedDeepThinkingChrome();
 
-  const assistantText = (finalText || streamState.streamedText).trim();
   assertDeepChatAssistantText(assistantText, pendingRequest);
   return assistantText;
+}
+
+/**
+ * True when the visible answer was not already token-streamed into the bubble.
+ * Typical after tools: first hop only streams reasoning/tool_calls; final text
+ * arrives as one non-stream string.
+ */
+export function shouldTypewriteFinalAssistantText(
+  streamedText: string,
+  finalAssistantText: string
+): boolean {
+  const final = finalAssistantText.trim();
+  if (!final) return false;
+  const streamed = streamedText.trim();
+  if (!streamed) return true;
+  if (streamed !== final) return true;
+  if (textLooksLikeEmittedToolCalls(streamed)) return true;
+  return false;
+}
+
+/** Restart pending typewriter so a post-tool final answer animates in. */
+export function revealAssistantTextWithTypewriter(
+  pendingRequest: PendingDeepChatRequest,
+  text: string
+): void {
+  pendingRequest.assistantText = text.trim();
+  pendingRequest.displayedAssistantText = '';
+  schedulePendingAssistantDisplay(pendingRequest.threadId);
 }
 
 function assertDeepChatAssistantText(

@@ -14,6 +14,10 @@ import {
   liveGenerationPhaseNeedsBubbleChrome,
   type PendingDeepChatRequest,
 } from '../request/lifecycle';
+import {
+  buildPreReplyActivityTimeline,
+  type PreReplyActivityStep,
+} from '../request/preReplyActivity';
 
 import { refreshMessageToolbarStatuses } from '../composer/messageToolbar';
 
@@ -156,8 +160,8 @@ export function findMessageBubbleAnchor(host: HTMLElement): HTMLElement | null {
 
 /**
  * Reading order before formal reply:
- * 1) 深度思考
- * 2) 正在生成回复…
+ * 1) pre-reply activity timeline (深度思考 + tools)
+ * 2) 正在生成回复… (toolbar)
  * 3) message bubble
  */
 
@@ -184,9 +188,10 @@ export function liveHostHasRequiredGenerationChrome(
 ): boolean {
   const phase = getDeepChatGenerationPhase(pending);
   const hasReasoning = Boolean(pending.reasoningText.trim());
+  const hasActivity = Boolean(pending.preReplySteps?.length);
   // waiting / generating-without-reasoning never mount streaming chrome — requiring
   // `.is-streaming` here caused infinite MutationObserver remount (page freeze on resend).
-  if (!liveGenerationPhaseNeedsBubbleChrome(phase, hasReasoning)) {
+  if (!liveGenerationPhaseNeedsBubbleChrome(phase, hasReasoning, hasActivity)) {
     return true;
   }
   const selector =
@@ -289,7 +294,11 @@ export function syncAllDeepThinkingChrome(container: HTMLElement): void {
         clearWaitingStatusRotateTimer();
         const durationSec = getPendingReasoningDurationSec(pending);
         const uiKey = `${thread.id}:pending-settled:${pending.startedAt}`;
-        mountSettledDeepThinkingChrome(host, pending.reasoningText, durationSec, uiKey);
+        const steps = buildPreReplyActivityTimeline({
+          reasoningText: pending.reasoningText,
+          steps: pending.preReplySteps,
+        });
+        mountSettledDeepThinkingChrome(host, pending.reasoningText, durationSec, uiKey, steps);
         return;
       }
       mountStreamingGenerationChrome(host, pending);
@@ -338,12 +347,20 @@ export function messageHasSettledChrome(message: DeepChatMessage | undefined): b
   if (message.status === 'partial') {
     return (
       Boolean(message.reasoning?.trim()) ||
+      Boolean(message.preReplySteps?.length) ||
       (typeof message.reasoningDurationSec === 'number' &&
         Number.isFinite(message.reasoningDurationSec))
     );
   }
   // Finished AI message: always show 已完成 (duration 0 if unknown).
   return true;
+}
+
+export function resolveMessagePreReplySteps(message: DeepChatMessage): PreReplyActivityStep[] {
+  return buildPreReplyActivityTimeline({
+    reasoningText: message.reasoning,
+    steps: message.preReplySteps,
+  });
 }
 
 export function resolveStoredAiForHost(
@@ -549,6 +566,10 @@ export function getActiveLiveGenerationStatusLabel(): string | null {
     return null;
   }
   const phase = getDeepChatGenerationPhase(pending);
+  const runningTool = pending.preReplySteps?.find(s => s.status === 'running' && s.kind === 'tool');
+  if (runningTool) {
+    return `正在${runningTool.label}…`;
+  }
   if (phase === 'waiting') {
     return getWaitingStatusLabel(pending);
   }
@@ -576,8 +597,9 @@ export function mountStreamingGenerationChrome(
 ): void {
   const phase = getDeepChatGenerationPhase(pending);
   const hasReasoning = Boolean(pending.reasoningText.trim());
+  const hasActivity = Boolean(pending.preReplySteps?.length);
 
-  if (phase === 'waiting') {
+  if (phase === 'waiting' && !hasActivity) {
     // Do not touch bubble chrome DOM — toolbar owns waiting status.
     ensureWaitingStatusRotateTimer();
     refreshLiveGenerationToolbarStatus();
@@ -586,12 +608,13 @@ export function mountStreamingGenerationChrome(
 
   clearWaitingStatusRotateTimer();
 
-  if (!liveGenerationPhaseNeedsBubbleChrome(phase, hasReasoning)) {
+  if (!liveGenerationPhaseNeedsBubbleChrome(phase, hasReasoning, hasActivity)) {
     // generating without reasoning: drop stray empty streaming chrome once, idempotently
     const existing = getChromeOnHost(host);
     if (
       existing?.classList.contains('is-streaming') &&
       !existing.querySelector('.deep-chat-dt-stream') &&
+      !existing.querySelector('.deep-chat-dt-activity-list') &&
       !existing.querySelector('.deep-chat-dt-settled')
     ) {
       existing.remove();
@@ -608,9 +631,38 @@ export function mountStreamingGenerationChrome(
 
   if (phase === 'reasoning' || hasReasoning) {
     uiHooks.ensureStreamingDeepThinkingBlock(chrome, pending.reasoningText, pending);
-    placeGenerationChromeRoot(host, chrome);
   }
+  if (hasActivity) {
+    ensureStreamingActivityList(chrome, pending);
+  }
+  placeGenerationChromeRoot(host, chrome);
   refreshLiveGenerationToolbarStatus();
+}
+
+/** Live tool rows above the bubble (same toggle language as 深度思考). */
+export function ensureStreamingActivityList(
+  chrome: HTMLElement,
+  pending: PendingDeepChatRequest
+): void {
+  const steps = (pending.preReplySteps ?? []).filter(s => s.kind !== 'reasoning');
+  let list = chrome.querySelector<HTMLElement>('.deep-chat-dt-activity-list.is-streaming-list');
+  if (!steps.length) {
+    list?.remove();
+    return;
+  }
+  const doc = chrome.ownerDocument;
+  if (!list) {
+    list = doc.createElement('div');
+    list.className = 'deep-chat-dt-activity-list is-streaming-list';
+    chrome.append(list);
+  }
+  syncActivityListDom(list, steps, {
+    getExpanded: id => Boolean(pending.activityUiExpanded?.[id]),
+    setExpanded: (id, open) => {
+      pending.activityUiExpanded = { ...(pending.activityUiExpanded || {}), [id]: open };
+    },
+    showStatusBadge: true,
+  });
 }
 
 export function refreshLiveGenerationToolbarStatus(): void {
@@ -625,29 +677,40 @@ export function getOrCreateSettledUiState(uiKey: string): {
   doneOpen: boolean;
   deepOpen: boolean;
   displayedLength: number;
+  activityOpen: Record<string, boolean>;
 } {
   let state = sessionState.settledDeepThinkingUi.get(uiKey);
   if (!state) {
-    state = { doneOpen: false, deepOpen: false, displayedLength: 0 };
+    state = { doneOpen: false, deepOpen: false, displayedLength: 0, activityOpen: {} };
     sessionState.settledDeepThinkingUi.set(uiKey, state);
+  }
+  if (!state.activityOpen) {
+    state.activityOpen = {};
   }
   return state;
 }
 
 /**
  * Settled chrome: always show 「已完成 Xs」 after a generation finishes.
- * Nested 「深度思考」 only when reasoning text is non-empty.
+ * Nested activity rows (深度思考 + tools) under the panel — same progressive disclosure.
  */
 
 export function mountSettledDeepThinkingChrome(
   host: HTMLElement,
   reasoningText: string,
   durationSec: number,
-  uiKey: string
+  uiKey: string,
+  activitySteps?: PreReplyActivityStep[]
 ): void {
-  const full = reasoningText.trim();
+  const steps =
+    activitySteps ??
+    buildPreReplyActivityTimeline({
+      reasoningText,
+      steps: undefined,
+    });
   const chrome = ensureGenerationChromeOnHost(host, uiKey, 'settled');
   chrome.querySelector('.deep-chat-dt-stream')?.remove();
+  chrome.querySelector('.deep-chat-dt-activity-list.is-streaming-list')?.remove();
   chrome.querySelector('#' + INLINE_PENDING_STATUS_ID)?.remove();
 
   const doc = host.ownerDocument;
@@ -657,11 +720,12 @@ export function mountSettledDeepThinkingChrome(
     chrome.append(settled);
   }
 
-  // Keep latest text/duration on the node so click handlers stay current after remounts
-  settled.dataset.dtFull = full;
+  // Keep latest model on the node so click handlers stay current after remounts
+  settled.dataset.dtFull = reasoningText.trim();
   settled.dataset.dtDuration = String(Math.max(0, Math.round(durationSec)));
+  settled.dataset.dtSteps = JSON.stringify(steps);
 
-  applySettledDeepThinkingUi(settled, full, durationSec, uiKey);
+  applySettledDeepThinkingUi(settled, reasoningText, durationSec, uiKey, steps);
   placeGenerationChromeRoot(host, chrome);
 }
 
@@ -681,52 +745,48 @@ export function createSettledDeepThinkingDom(doc: Document, uiKey: string): HTML
   donePanel.className = 'deep-chat-dt-done-panel';
   donePanel.hidden = true;
 
-  const deepToggle = doc.createElement('button');
-  deepToggle.type = 'button';
-  deepToggle.className = 'deep-chat-dt-toggle';
-  deepToggle.setAttribute('aria-expanded', 'false');
-  const deepLabel = doc.createElement('span');
-  deepLabel.className = 'deep-chat-dt-label';
-  deepLabel.textContent = '深度思考';
-  deepToggle.append(deepLabel, createChevronIcon(doc));
+  const activityList = doc.createElement('div');
+  activityList.className = 'deep-chat-dt-activity-list is-settled-list';
+  donePanel.append(activityList);
 
-  const deepBody = doc.createElement('div');
-  deepBody.className = 'deep-chat-dt-body';
-  deepBody.hidden = true;
-  const deepText = doc.createElement('pre');
-  deepText.className = 'deep-chat-dt-text';
-  deepBody.append(deepText);
-
-  const readModel = (): { full: string; durationSec: number } => ({
-    full: settled.dataset.dtFull ?? '',
-    durationSec: Number(settled.dataset.dtDuration ?? '0') || 0,
-  });
+  const readModel = (): {
+    full: string;
+    durationSec: number;
+    steps: PreReplyActivityStep[];
+  } => {
+    let steps: PreReplyActivityStep[] = [];
+    try {
+      steps = JSON.parse(settled.dataset.dtSteps || '[]') as PreReplyActivityStep[];
+      if (!Array.isArray(steps)) steps = [];
+    } catch {
+      steps = [];
+    }
+    // Backward compat: only reasoning stored as dtFull
+    if (!steps.length && (settled.dataset.dtFull || '').trim()) {
+      steps = buildPreReplyActivityTimeline({ reasoningText: settled.dataset.dtFull });
+    }
+    return {
+      full: settled.dataset.dtFull ?? '',
+      durationSec: Number(settled.dataset.dtDuration ?? '0') || 0,
+      steps,
+    };
+  };
 
   doneToggle.addEventListener('click', () => {
     const model = readModel();
-    // No nested 深度思考 → 已完成 is display-only (no expand)
-    if (!model.full.trim()) {
+    // No nested activity → 已完成 is display-only (no expand)
+    if (!model.steps.length && !model.full.trim()) {
       return;
     }
     const state = getOrCreateSettledUiState(uiKey);
     state.doneOpen = !state.doneOpen;
     if (!state.doneOpen) {
       state.deepOpen = false;
+      state.activityOpen = {};
     }
-    applySettledDeepThinkingUi(settled, model.full, model.durationSec, uiKey);
+    applySettledDeepThinkingUi(settled, model.full, model.durationSec, uiKey, model.steps);
   });
 
-  deepToggle.addEventListener('click', () => {
-    const model = readModel();
-    if (!model.full.trim()) {
-      return;
-    }
-    const state = getOrCreateSettledUiState(uiKey);
-    state.deepOpen = !state.deepOpen;
-    applySettledDeepThinkingUi(settled, model.full, model.durationSec, uiKey);
-  });
-
-  donePanel.append(deepToggle, deepBody);
   settled.append(doneToggle, donePanel);
   return settled;
 }
@@ -735,64 +795,194 @@ export function applySettledDeepThinkingUi(
   settled: HTMLElement,
   fullText: string,
   durationSec: number,
-  uiKey: string
+  uiKey: string,
+  activitySteps?: PreReplyActivityStep[]
 ): void {
   const state = getOrCreateSettledUiState(uiKey);
-  const nodes = readSettledDeepThinkingNodes(settled);
-  if (!nodes) {
+  const doneToggle = settled.querySelector<HTMLElement>('.deep-chat-dt-done-toggle');
+  const doneLabel = settled.querySelector<HTMLElement>('.deep-chat-dt-done-label');
+  const donePanel = settled.querySelector<HTMLElement>('.deep-chat-dt-done-panel');
+  const activityList = settled.querySelector<HTMLElement>(
+    '.deep-chat-dt-activity-list.is-settled-list'
+  );
+  if (!doneToggle || !doneLabel || !donePanel || !activityList) {
     return;
   }
 
-  const full = fullText.trim();
+  const steps =
+    activitySteps && activitySteps.length
+      ? activitySteps
+      : buildPreReplyActivityTimeline({ reasoningText: fullText });
+  const hasActivity = steps.length > 0;
   const doneLabelText = formatCompletedDurationLabel(durationSec);
   // Only write when changed — avoid childList MutationObserver thrash on remount.
-  if (nodes.doneLabel.textContent !== doneLabelText) {
-    nodes.doneLabel.textContent = doneLabelText;
+  if (doneLabel.textContent !== doneLabelText) {
+    doneLabel.textContent = doneLabelText;
   }
-  nodes.doneToggle.classList.toggle('is-static', !full);
-  const disabled = full ? 'false' : 'true';
-  if (nodes.doneToggle.getAttribute('aria-disabled') !== disabled) {
-    nodes.doneToggle.setAttribute('aria-disabled', disabled);
+  doneToggle.classList.toggle('is-static', !hasActivity);
+  const disabled = hasActivity ? 'false' : 'true';
+  if (doneToggle.getAttribute('aria-disabled') !== disabled) {
+    doneToggle.setAttribute('aria-disabled', disabled);
   }
 
-  // No reasoning channel: show 「已完成 Xs」 only (non-expandable).
-  if (!full) {
+  // No pre-reply activity: show 「已完成 Xs」 only (non-expandable).
+  if (!hasActivity) {
     state.doneOpen = false;
     state.deepOpen = false;
-    setToggleExpanded(nodes.doneToggle, false);
-    nodes.donePanel.hidden = true;
-    nodes.deepToggle.hidden = true;
-    nodes.deepBody.hidden = true;
+    state.activityOpen = {};
+    setToggleExpanded(doneToggle, false);
+    donePanel.hidden = true;
+    activityList.replaceChildren();
     stopReasoningTypewriter();
     return;
   }
 
-  nodes.deepToggle.hidden = false;
-  setToggleExpanded(nodes.doneToggle, state.doneOpen);
-  // Nested hierarchy: 已完成 collapsed → hide entire panel (深度思考 + body).
-  // Only after 已完成 expands can user toggle 深度思考.
+  setToggleExpanded(doneToggle, state.doneOpen);
+  // Nested hierarchy: 已完成 collapsed → hide entire panel (all activity rows).
   if (!state.doneOpen) {
     state.deepOpen = false;
-    nodes.donePanel.hidden = true;
-    setToggleExpanded(nodes.deepToggle, false);
-    nodes.deepBody.hidden = true;
+    donePanel.hidden = true;
     stopReasoningTypewriter();
     return;
   }
 
-  nodes.donePanel.hidden = false;
-  setToggleExpanded(nodes.deepToggle, state.deepOpen);
-  nodes.deepBody.hidden = !state.deepOpen;
-
-  if (!state.deepOpen) {
-    stopReasoningTypewriter();
-    return;
-  }
-
-  // Settled: content is final — always show full text immediately (no typewriter).
+  donePanel.hidden = false;
   stopReasoningTypewriter();
-  nodes.deepText.textContent = full;
-  state.displayedLength = full.length;
+  syncActivityListDom(activityList, steps, {
+    getExpanded: id => Boolean(state.activityOpen[id]),
+    setExpanded: (id, open) => {
+      state.activityOpen = { ...state.activityOpen, [id]: open };
+      // Keep legacy deepOpen in sync when toggling reasoning row
+      if (id === 'reasoning') {
+        state.deepOpen = open;
+      }
+    },
+    showStatusBadge: false,
+  });
+  state.displayedLength = (fullText || '').length;
+}
+
+/**
+ * Render ordered activity rows (depth-thinking style toggles).
+ * Reuses rows by data-step-id to limit MutationObserver thrash.
+ */
+export function syncActivityListDom(
+  list: HTMLElement,
+  steps: PreReplyActivityStep[],
+  options: {
+    getExpanded: (id: string) => boolean;
+    setExpanded: (id: string, open: boolean) => void;
+    showStatusBadge?: boolean;
+  }
+): void {
+  const doc = list.ownerDocument;
+  const seen = new Set<string>();
+
+  steps.forEach((step, index) => {
+    seen.add(step.id);
+    let row = list.querySelector<HTMLElement>(
+      `:scope > .deep-chat-dt-activity[data-step-id="${cssEscapeAttr(step.id)}"]`
+    );
+    if (!row) {
+      row = doc.createElement('div');
+      row.className = 'deep-chat-dt-activity';
+      row.dataset.stepId = step.id;
+
+      const toggle = doc.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'deep-chat-dt-toggle';
+      toggle.setAttribute('aria-expanded', 'false');
+
+      const label = doc.createElement('span');
+      label.className = 'deep-chat-dt-label';
+      const meta = doc.createElement('span');
+      meta.className = 'deep-chat-dt-activity-meta';
+      toggle.append(label, meta, createChevronIcon(doc));
+
+      const body = doc.createElement('div');
+      body.className = 'deep-chat-dt-body';
+      body.hidden = true;
+      const text = doc.createElement('pre');
+      text.className = 'deep-chat-dt-text';
+      body.append(text);
+
+      toggle.addEventListener('click', () => {
+        const id = row!.dataset.stepId || '';
+        const next = !options.getExpanded(id);
+        options.setExpanded(id, next);
+        setToggleExpanded(toggle, next);
+        body.hidden = !next;
+      });
+
+      row.append(toggle, body);
+      list.append(row);
+    }
+
+    // Keep DOM order aligned with timeline
+    const expected = list.children[index];
+    if (expected !== row) {
+      list.insertBefore(row, expected ?? null);
+    }
+
+    const toggle = row.querySelector<HTMLElement>('.deep-chat-dt-toggle');
+    const label = row.querySelector<HTMLElement>('.deep-chat-dt-label');
+    const meta = row.querySelector<HTMLElement>('.deep-chat-dt-activity-meta');
+    const body = row.querySelector<HTMLElement>('.deep-chat-dt-body');
+    const text = row.querySelector<HTMLElement>('.deep-chat-dt-text');
+    if (!toggle || !label || !meta || !body || !text) return;
+
+    if (label.textContent !== step.label) {
+      label.textContent = step.label;
+    }
+    const badge = activityStatusBadge(step.status, options.showStatusBadge === true);
+    if (meta.textContent !== badge) {
+      meta.textContent = badge;
+    }
+    meta.hidden = !badge;
+    row.dataset.status = step.status;
+    row.dataset.kind = step.kind;
+
+    const detail = (step.detail || '').trim();
+    const expandable = Boolean(detail);
+    toggle.classList.toggle('is-static', !expandable);
+    if (!expandable) {
+      options.setExpanded(step.id, false);
+      setToggleExpanded(toggle, false);
+      body.hidden = true;
+      if (text.textContent) text.textContent = '';
+      return;
+    }
+
+    const expanded = options.getExpanded(step.id);
+    setToggleExpanded(toggle, expanded);
+    body.hidden = !expanded;
+    if (text.textContent !== detail) {
+      text.textContent = detail;
+    }
+  });
+
+  // Remove stale rows
+  list.querySelectorAll<HTMLElement>(':scope > .deep-chat-dt-activity').forEach(row => {
+    const id = row.dataset.stepId || '';
+    if (!seen.has(id)) {
+      row.remove();
+    }
+  });
+}
+
+function activityStatusBadge(
+  status: PreReplyActivityStep['status'],
+  show: boolean
+): string {
+  if (!show) return '';
+  if (status === 'running') return '进行中';
+  if (status === 'error') return '失败';
+  return '完成';
+}
+
+function cssEscapeAttr(value: string): string {
+  // Minimal escape for querySelector attribute (ids are call_* / reasoning).
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
 export function readSettledDeepThinkingNodes(settled: HTMLElement): {
@@ -806,9 +996,19 @@ export function readSettledDeepThinkingNodes(settled: HTMLElement): {
   const doneToggle = settled.querySelector<HTMLElement>('.deep-chat-dt-done-toggle');
   const doneLabel = settled.querySelector<HTMLElement>('.deep-chat-dt-done-label');
   const donePanel = settled.querySelector<HTMLElement>('.deep-chat-dt-done-panel');
-  const deepToggle = settled.querySelector<HTMLElement>('.deep-chat-dt-toggle');
-  const deepBody = settled.querySelector<HTMLElement>('.deep-chat-dt-body');
-  const deepText = settled.querySelector<HTMLElement>('.deep-chat-dt-text');
+  // Legacy single-row nodes may be absent after activity-list refactor.
+  const deepToggle =
+    settled.querySelector<HTMLElement>(
+      '.deep-chat-dt-activity[data-kind="reasoning"] .deep-chat-dt-toggle'
+    ) || settled.querySelector<HTMLElement>('.deep-chat-dt-toggle');
+  const deepBody =
+    settled.querySelector<HTMLElement>(
+      '.deep-chat-dt-activity[data-kind="reasoning"] .deep-chat-dt-body'
+    ) || settled.querySelector<HTMLElement>('.deep-chat-dt-body');
+  const deepText =
+    settled.querySelector<HTMLElement>(
+      '.deep-chat-dt-activity[data-kind="reasoning"] .deep-chat-dt-text'
+    ) || settled.querySelector<HTMLElement>('.deep-chat-dt-text');
   if (!doneToggle || !doneLabel || !donePanel || !deepToggle || !deepBody || !deepText) {
     return null;
   }
@@ -919,11 +1119,13 @@ export function mountSettledChromeForMessage(
   message: DeepChatMessage
 ): void {
   const uiKey = buildSettledDtKey(threadId, storedIndex, message);
+  const steps = resolveMessagePreReplySteps(message);
   mountSettledDeepThinkingChrome(
     host,
     message.reasoning ?? '',
     typeof message.reasoningDurationSec === 'number' ? message.reasoningDurationSec : 0,
-    uiKey
+    uiKey,
+    steps
   );
 }
 

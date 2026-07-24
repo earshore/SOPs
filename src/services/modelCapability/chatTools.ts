@@ -146,3 +146,49 @@ export function appendChatToolRoundMessages(
   }
   return next;
 }
+
+/**
+ * Normalize tools to Chat Completions shape:
+ * { type:'function', function: { name, description, parameters } }
+ * Accepts flat Responses shape or already-nested chat shape.
+ */
+export function normalizeToolsForChat(tools: unknown[] | undefined): unknown[] | undefined {
+  if (!tools || tools.length === 0) return tools;
+  return tools.map(tool => {
+    if (!tool || typeof tool !== 'object') return tool;
+    const t = tool as Record<string, unknown>;
+    // Built-ins / non-function: pass through
+    if (t.type && t.type !== 'function') return t;
+    if (t.type === 'function' && t.function && typeof t.function === 'object') {
+      return t;
+    }
+    // Flat Responses-style function tool
+    if (typeof t.name === 'string' && t.name.trim()) {
+      return {
+        type: 'function',
+        function: {
+          name: t.name,
+          ...(typeof t.description === 'string' ? { description: t.description } : {}),
+          ...(t.parameters !== undefined ? { parameters: t.parameters } : {}),
+          ...(typeof t.strict === 'boolean' ? { strict: t.strict } : {}),
+        },
+      };
+    }
+    return tool;
+  });
+}
+
+/** Convert text-emitted tool calls into ChatFunctionToolCall[] with synthetic ids. */
+export function textEmittedToChatToolCalls(
+  calls: Array<{ name: string; arguments: string }>,
+  idPrefix = 'text_call'
+): ChatFunctionToolCall[] {
+  return calls.map((call, index) => ({
+    id: `${idPrefix}_${index + 1}`,
+    type: 'function' as const,
+    function: {
+      name: call.name,
+      arguments: call.arguments || '{}',
+    },
+  }));
+}

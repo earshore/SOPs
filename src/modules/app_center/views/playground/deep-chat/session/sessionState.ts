@@ -70,7 +70,14 @@ export const sessionState = {
   waitingStatusRotateTimer: null as number | null,
   settledDeepThinkingUi: new Map<
     string,
-    { doneOpen: boolean; deepOpen: boolean; displayedLength: number }
+    {
+      doneOpen: boolean;
+      /** @deprecated use activityOpen; kept for 深度思考 single-row compat */
+      deepOpen: boolean;
+      displayedLength: number;
+      /** Which pre-reply activity rows are expanded under 已完成 */
+      activityOpen: Record<string, boolean>;
+    }
   >(),
   draftInputResizeObserver: null as ResizeObserver | null,
   draftInputResizeRetryTimer: null as number | null,

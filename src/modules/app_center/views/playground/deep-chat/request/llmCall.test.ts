@@ -19,6 +19,7 @@ const { sessionState } = await import('../session/sessionState');
 const {
   mapDeepChatEmptyResponsesMessage,
   resolveDeepChatResponsesChainOptions,
+  shouldTypewriteFinalAssistantText,
   stripResponsesChainForRetry,
 } = await import('./llmCall');
 const { isDeepChatBusinessToolsEnabled } = await import('./businessTools');
@@ -41,7 +42,7 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     };
   });
 
-  it('fail-closes store/previous and does not inject tools by default', () => {
+  it('fail-closes store/previous; injects tools by product default', () => {
     const config = {
       provider: 'new_api',
       endpoint: 'https://example.test/v1',
@@ -51,13 +52,28 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     } as LLMProviderConfig;
 
     expect(isDeepChatBusinessToolsEnabled({ enableBusinessTools: false })).toBe(false);
-    expect(isDeepChatBusinessToolsEnabled({})).toBe(false);
 
     const opts = resolveDeepChatResponsesChainOptions(config, 'gpt-5.5');
     expect(opts.apiPath).toBe('responses');
     expect(opts.previousResponseId).toBeUndefined();
     expect(opts.store).toBe(false);
-    // Fail-closed product rule: no tools on every Responses turn unless opted in.
+    // Product default: tools on so search questions complete a tool loop.
+    expect(opts.tools).toBeDefined();
+    expect(opts.enableToolLoop).toBe(true);
+  });
+
+  it('does not inject tools when explicitly disabled', () => {
+    const config = {
+      provider: 'new_api',
+      endpoint: 'https://example.test/v1',
+      apiKey: 'k',
+      model: 'gpt-5.5',
+      apiPath: 'responses',
+    } as LLMProviderConfig;
+
+    const opts = resolveDeepChatResponsesChainOptions(config, 'gpt-5.5', {
+      enableBusinessTools: false,
+    });
     expect(opts.tools).toBeUndefined();
     expect(opts.enableToolLoop).toBeUndefined();
   });
@@ -92,8 +108,9 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     expect(opts.apiPath).toBe('chat_completions');
     expect(opts.previousResponseId).toBeUndefined();
     expect(opts.store).toBeUndefined();
-    // Fail-closed: no tools without opt-in
-    expect(opts.tools).toBeUndefined();
+    // Default tools on for dual-path parity
+    expect(opts.tools).toBeDefined();
+    expect(opts.enableToolLoop).toBe(true);
   });
 
   it('injects business tools on chat_completions when opted in (dual-path parity)', () => {
@@ -139,5 +156,17 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     });
     expect(msg).toMatch(/max_output_tokens|输出未完成/);
     expect(msg).not.toBe('模型没有返回任何内容，请稍后重试或检查模型/上下文配置。');
+  });
+
+  it('typewrites post-tool final blobs but not already-streamed answers', () => {
+    expect(shouldTypewriteFinalAssistantText('', '根据工具结果…')).toBe(true);
+    expect(shouldTypewriteFinalAssistantText('正在搜索', '完整新闻摘要')).toBe(true);
+    expect(shouldTypewriteFinalAssistantText('完整新闻摘要', '完整新闻摘要')).toBe(false);
+    expect(
+      shouldTypewriteFinalAssistantText(
+        '[{"search_x":[{"query":"AI"}]}]',
+        '根据工具结果…'
+      )
+    ).toBe(true);
   });
 });

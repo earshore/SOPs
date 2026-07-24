@@ -193,6 +193,7 @@ export function saveThreadMessages(
       assistantStatus: options.assistantStatus,
       assistantReasoning: options.assistantReasoning,
       assistantReasoningDurationSec: options.assistantReasoningDurationSec,
+      assistantPreReplySteps: options.assistantPreReplySteps,
     }
   );
 

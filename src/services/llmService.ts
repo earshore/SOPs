@@ -42,12 +42,18 @@ import {
   mergeChatStreamToolCallDeltas,
   normalizeApiPathId,
   normalizeReasoningUserPrefs,
+  isResponsesInProgressEmpty,
+  parseTextEmittedToolCalls,
   processResponsesToolRound,
   resolveEffectiveReasoning,
   resolveModelCapability,
+  synthesizeAnswerFromToolOutputs,
+  textEmittedToChatToolCalls,
+  textLooksLikeEmittedToolCalls,
   type ApiPathId,
   type ApiSurface,
   type ChatFunctionToolCall,
+  type CollectedToolOutput,
   type ModelsListEntry,
   type ReasoningUserPrefs,
   type ResponsesJsonSchemaFormat,
@@ -479,7 +485,14 @@ function getCompletionContent(
   if (raw == null) {
     return defaultContent;
   }
-  return typeof raw === 'string' ? raw : defaultContent;
+  if (typeof raw === 'string') {
+    return raw;
+  }
+  // Content parts array (official multimodal shape)
+  if (Array.isArray(raw)) {
+    return chatContentToPlainText(raw as ChatContentPart[]);
+  }
+  return defaultContent;
 }
 
 function getChatCompletionFinishReason(
@@ -1614,6 +1627,21 @@ function createInvalidLLMResponseError(
   );
 }
 
+/**
+ * Coerce gateway quirks before strict validation so tool-loop hops do not
+ * fail closed on missing id/object while still rejecting true garbage.
+ */
+function coerceChatCompletionShape(data: unknown): unknown {
+  if (!data || typeof data !== 'object') return data;
+  const row = data as Record<string, unknown>;
+  if (!Array.isArray(row.choices) || row.choices.length === 0) return data;
+  return {
+    ...row,
+    id: typeof row.id === 'string' && row.id ? row.id : 'chatcmpl-coerced',
+    object: typeof row.object === 'string' && row.object ? row.object : 'chat.completion',
+  };
+}
+
 function assertValidLLMResponse(
   payload: LLMResponsePayload,
   response: Response,
@@ -1633,11 +1661,17 @@ function assertValidLLMResponse(
     return;
   }
 
-  if (!isLLMChatCompletionResponse(data)) {
+  const coerced = coerceChatCompletionShape(data);
+  if (!isLLMChatCompletionResponse(coerced)) {
+    // Recoverable: has choices[0].message even if zod rejects extras — extract text path.
+    const loose = data as { choices?: Array<{ message?: unknown }> };
+    if (loose.choices?.[0]?.message && typeof loose.choices[0].message === 'object') {
+      return;
+    }
     throw createInvalidLLMResponseError('LLM API 返回格式异常', data, response, context);
   }
 
-  if (!hasLLMMessage(data)) {
+  if (!hasLLMMessage(coerced as LLMChatCompletionResponse)) {
     throw createInvalidLLMResponseError(
       `API 返回格式异常: 缺少 choices 或 message 字段`,
       data,
@@ -2088,6 +2122,7 @@ async function runOneResponsesToolRound(args: {
 
 /**
  * Responses agent tool loop: non-stream rounds until no function_call items.
+ * Last round forces tool_choice=none; empty text synthesizes from tool outputs.
  */
 async function callLLMResponsesToolLoop(
   request: LLMCallRequest,
@@ -2101,23 +2136,37 @@ async function callLLMResponsesToolLoop(
   let previousResponseId = baseOptions.previousResponseId;
   let followUpInputItems: Array<Record<string, unknown>> | undefined;
   let lastText = '';
+  const collected: CollectedToolOutput[] = [];
 
   for (let round = 0; round < maxRounds; round++) {
+    const isLastRound = round >= maxRounds - 1;
     const result = await runOneResponsesToolRound({
       request,
-      baseOptions,
+      baseOptions: isLastRound
+        ? { ...baseOptions, toolChoice: 'none', enableToolLoop: true }
+        : baseOptions,
       normalizedEndpoint,
       previousResponseId,
       followUpInputItems,
-      executeTool,
+      executeTool: async call => {
+        const output = await executeTool(call);
+        collected.push({
+          name: call.name,
+          callId: call.callId,
+          output: String(output ?? ''),
+        });
+        return output;
+      },
     });
     lastText = result.lastText;
     previousResponseId = result.previousResponseId;
-    followUpInputItems = result.followUpInputItems;
-    if (result.done) return lastText;
+    followUpInputItems = isLastRound ? undefined : result.followUpInputItems;
+    if (result.done || isLastRound) {
+      return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
+    }
   }
 
-  return lastText;
+  return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
 }
 
 /**
@@ -2135,41 +2184,76 @@ async function continueResponsesToolLoopFromRaw(
     return extractAssistantTextFromResponsesOrChat(raw);
   }
 
+  if (isResponsesInProgressEmpty(raw)) {
+    // deepseek-style stuck body: fall back to plain (no tools) stream once.
+    return callLLMWithRetry(
+      request,
+      {
+        ...baseOptions,
+        stream: true,
+        enableToolLoop: false,
+        tools: undefined,
+        executeTool: undefined,
+        toolChoice: undefined,
+      },
+      normalizedEndpoint
+    );
+  }
+
   const maxRounds = baseOptions.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS;
   let previousResponseId = extractResponsesId(raw) || baseOptions.previousResponseId;
   let followUpInputItems: Array<Record<string, unknown>> | undefined;
   let lastText = extractAssistantTextFromResponsesOrChat(raw);
+  const collected: CollectedToolOutput[] = [];
+
+  const trackingExecutor: ResponsesToolExecutor = async call => {
+    const output = await executeTool(call);
+    collected.push({
+      name: call.name,
+      callId: call.callId,
+      output: String(output ?? ''),
+    });
+    return output;
+  };
 
   const first = await processToolRoundFromPayload({
     request,
     baseOptions,
     raw,
-    executeTool,
+    executeTool: trackingExecutor,
     previousResponseId,
   });
   if (first.done) {
-    return first.lastText || lastText;
+    return (first.lastText || lastText).trim() || synthesizeAnswerFromToolOutputs(collected);
   }
   previousResponseId = first.previousResponseId;
   followUpInputItems = first.followUpInputItems;
   lastText = first.lastText || lastText;
 
   for (let round = 1; round < maxRounds; round++) {
+    const isLastRound = round >= maxRounds - 1;
     const result = await runOneResponsesToolRound({
       request,
-      baseOptions: { ...baseOptions, stream: false, enableToolLoop: true },
+      baseOptions: {
+        ...baseOptions,
+        stream: false,
+        enableToolLoop: true,
+        ...(isLastRound ? { toolChoice: 'none' as const } : {}),
+      },
       normalizedEndpoint,
       previousResponseId,
       followUpInputItems,
-      executeTool,
+      executeTool: trackingExecutor,
     });
     lastText = result.lastText || lastText;
     previousResponseId = result.previousResponseId;
-    followUpInputItems = result.followUpInputItems;
-    if (result.done) return lastText;
+    followUpInputItems = isLastRound ? undefined : result.followUpInputItems;
+    if (result.done || isLastRound) {
+      return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
+    }
   }
 
-  return lastText;
+  return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
 }
 
 function resolveRawFromStreamFirstPayload(
@@ -2202,6 +2286,7 @@ function resolveFunctionCallsFromStreamFirstPayload(
  * Stream-first tool path: keep reasoning/text SSE for Deep Chat UX; if the model
  * only emitted function_call items (empty assistant text), continue tool loop
  * from the first payload (or cold-start non-stream loop when nothing was captured).
+ * Also recovers when models dump tool calls as plain text (XML / JSON arrays).
  */
 async function callLLMStreamFirstThenToolLoop(
   request: LLMCallRequest,
@@ -2227,9 +2312,37 @@ async function callLLMStreamFirstThenToolLoop(
     enableToolLoop: true,
   };
 
+  if (raw && isResponsesInProgressEmpty(raw)) {
+    // Tools unsupported / stuck gateway: plain completion without tools.
+    return callLLMWithRetry(
+      request,
+      {
+        ...baseOptions,
+        stream: true,
+        enableToolLoop: false,
+        tools: undefined,
+        executeTool: undefined,
+        toolChoice: undefined,
+      },
+      normalizedEndpoint
+    );
+  }
+
   if (raw && functionCalls.length > 0) {
     return continueResponsesToolLoopFromRaw(request, toolOptions, normalizedEndpoint, raw);
   }
+
+  // Text-as-tool recovery (responses): model wrote <tool_call> / JSON tools as content.
+  if (baseOptions.executeTool && textLooksLikeEmittedToolCalls(streamed)) {
+    const recovered = await recoverResponsesFromTextToolCalls(
+      request,
+      toolOptions,
+      normalizedEndpoint,
+      streamed
+    );
+    if (recovered !== null) return recovered;
+  }
+
   if (streamed.trim()) {
     return streamed;
   }
@@ -2242,7 +2355,34 @@ async function callLLMStreamFirstThenToolLoop(
 }
 
 /**
+ * When the model dumps tool calls as assistant text, synthesize function_call
+ * items and continue the Responses tool loop (stateless replay).
+ */
+async function recoverResponsesFromTextToolCalls(
+  request: LLMCallRequest,
+  baseOptions: ResolvedLLMOptions,
+  normalizedEndpoint: string,
+  streamed: string
+): Promise<string | null> {
+  if (!baseOptions.executeTool) return null;
+  const textCalls = parseTextEmittedToolCalls(streamed);
+  if (!textCalls.length) return null;
+
+  const raw: Record<string, unknown> = {
+    output: textCalls.map((c, i) => ({
+      type: 'function_call',
+      call_id: `text_call_${i + 1}`,
+      name: c.name,
+      arguments: c.arguments || '{}',
+    })),
+  };
+  return continueResponsesToolLoopFromRaw(request, baseOptions, normalizedEndpoint, raw);
+}
+
+/**
  * Chat Completions tool loop: messages → tool_calls → role=tool → next round.
+ * Last round forces tool_choice=none so models cannot infinite-loop tools.
+ * Empty final text falls back to synthesized tool-result summary.
  */
 async function callLLMChatToolLoop(
   request: LLMCallRequest,
@@ -2255,12 +2395,18 @@ async function callLLMChatToolLoop(
   const maxRounds = baseOptions.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS;
   let messages: ChatMessage[] = [...request.messages];
   let lastText = '';
+  const collected: CollectedToolOutput[] = [];
 
   for (let round = 0; round < maxRounds; round++) {
+    const isLastRound = round >= maxRounds - 1;
     const roundOptions: ResolvedLLMOptions = {
       ...baseOptions,
       stream: false,
       enableToolLoop: false,
+      // Force a visible answer instead of endless tool_calls.
+      ...(isLastRound
+        ? { toolChoice: 'none' as const, tools: baseOptions.tools }
+        : {}),
     };
     const roundRequest: LLMCallRequest = { ...request, messages, options: roundOptions };
     const context = createInitialLLMContext(roundRequest, roundOptions, normalizedEndpoint);
@@ -2269,13 +2415,15 @@ async function callLLMChatToolLoop(
       externallyAborted: false,
     });
     lastText = getLLMResponseContent(payload);
-    const toolCalls = payload.chatToolCalls?.length
-      ? payload.chatToolCalls
-      : extractChatToolCallsFromCompletion(
-          payload.data as unknown as Record<string, unknown> | null
-        );
+    const toolCalls = isLastRound
+      ? []
+      : payload.chatToolCalls?.length
+        ? payload.chatToolCalls
+        : extractChatToolCallsFromCompletion(
+            payload.data as unknown as Record<string, unknown> | null
+          );
     if (!toolCalls.length) {
-      return lastText;
+      return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
     }
 
     const results: Array<{ callId: string; output: string }> = [];
@@ -2286,13 +2434,14 @@ async function callLLMChatToolLoop(
           arguments: call.function.arguments,
           callId: call.id,
         });
-        results.push({ callId: call.id, output: String(output ?? '') });
+        const out = String(output ?? '');
+        results.push({ callId: call.id, output: out });
+        collected.push({ name: call.function.name, callId: call.id, output: out });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        results.push({
-          callId: call.id,
-          output: JSON.stringify({ error: message }),
-        });
+        const out = JSON.stringify({ error: message });
+        results.push({ callId: call.id, output: out });
+        collected.push({ name: call.function.name, callId: call.id, output: out });
       }
     }
 
@@ -2301,11 +2450,12 @@ async function callLLMChatToolLoop(
     messages = nextRecords as unknown as ChatMessage[];
   }
 
-  return lastText;
+  return lastText.trim() || synthesizeAnswerFromToolOutputs(collected);
 }
 
 /**
  * Stream-first chat hop: if tool_calls appear, continue non-stream tool loop.
+ * Also recovers text-emitted tool dumps (JSON / XML) when native tool_calls are empty.
  */
 async function callLLMChatStreamFirstThenToolLoop(
   request: LLMCallRequest,
@@ -2323,11 +2473,16 @@ async function callLLMChatStreamFirstThenToolLoop(
     externallyAborted: false,
   });
   const streamed = getLLMResponseContent(firstPayload);
-  const toolCalls = firstPayload.chatToolCalls?.length
+  let toolCalls = firstPayload.chatToolCalls?.length
     ? firstPayload.chatToolCalls
     : extractChatToolCallsFromCompletion(
         firstPayload.data as unknown as Record<string, unknown> | null
       );
+
+  // Text-as-tool recovery: models sometimes dump tool JSON/XML as content.
+  if (!toolCalls.length && baseOptions.executeTool && textLooksLikeEmittedToolCalls(streamed)) {
+    toolCalls = textEmittedToChatToolCalls(parseTextEmittedToolCalls(streamed));
+  }
 
   if (toolCalls.length > 0) {
     // Seed assistant tool_calls into messages then run remaining non-stream rounds.
@@ -2336,6 +2491,7 @@ async function callLLMChatStreamFirstThenToolLoop(
       return streamed;
     }
     const results: Array<{ callId: string; output: string }> = [];
+    const seedCollected: CollectedToolOutput[] = [];
     for (const call of toolCalls) {
       try {
         const output = await executeTool({
@@ -2343,10 +2499,14 @@ async function callLLMChatStreamFirstThenToolLoop(
           arguments: call.function.arguments,
           callId: call.id,
         });
-        results.push({ callId: call.id, output: String(output ?? '') });
+        const out = String(output ?? '');
+        results.push({ callId: call.id, output: out });
+        seedCollected.push({ name: call.function.name, callId: call.id, output: out });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        results.push({ callId: call.id, output: JSON.stringify({ error: message }) });
+        const out = JSON.stringify({ error: message });
+        results.push({ callId: call.id, output: out });
+        seedCollected.push({ name: call.function.name, callId: call.id, output: out });
       }
     }
     const transportMessages = normalizeMessagesForTransport(request.messages, 'chat_completions');
@@ -2355,11 +2515,12 @@ async function callLLMChatStreamFirstThenToolLoop(
       toolCalls,
       results
     ) as unknown as ChatMessage[];
-    return callLLMChatToolLoop(
+    const finalText = await callLLMChatToolLoop(
       { ...request, messages: nextMessages },
       { ...baseOptions, stream: false, enableToolLoop: true },
       normalizedEndpoint
     );
+    return finalText.trim() || synthesizeAnswerFromToolOutputs(seedCollected);
   }
 
   return streamed;

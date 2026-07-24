@@ -488,7 +488,24 @@ async function importDeepChat(options: ImportOptions = {}) {
   vi.doMock('@/services/localDataStore', () => ({
     LocalDataStore: localDataStore,
   }));
-  vi.doMock('@/services/llmService', () => ({ callLLM }));
+  vi.doMock('@/services/llmService', () => ({
+    callLLM,
+    // Used by request/budget when measuring message size for context trimming.
+    chatContentToPlainText: (content: unknown) => {
+      if (content == null) return '';
+      if (typeof content === 'string') return content;
+      if (Array.isArray(content)) {
+        return content
+          .map(part =>
+            part && typeof part === 'object' && 'text' in part
+              ? String((part as { text?: unknown }).text ?? '')
+              : ''
+          )
+          .join('');
+      }
+      return String(content);
+    },
+  }));
   vi.doMock('@/services/skillRegistry', () => ({
     skillRegistry: {
       ensureInitialized: vi.fn(),

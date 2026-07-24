@@ -89,9 +89,23 @@ export {
   extractChatToolCallsFromCompletion,
   extractChatToolCallsFromMessage,
   mergeChatStreamToolCallDeltas,
+  normalizeToolsForChat,
+  textEmittedToChatToolCalls,
   type ChatFunctionToolCall,
   type ChatStreamToolCallDelta,
 } from './chatTools';
+export {
+  collapseTextEmittedToolCallsForDisplay,
+  parseTextEmittedToolCalls,
+  stripTextEmittedToolCalls,
+  textLooksLikeEmittedToolCalls,
+  type TextEmittedToolCall,
+} from './textToolCalls';
+export {
+  isResponsesInProgressEmpty,
+  synthesizeAnswerFromToolOutputs,
+  type CollectedToolOutput,
+} from './toolLoopFinal';
 export {
   applyVisionPartsToChatMessages,
   toChatImageUrlParts,

@@ -32,13 +32,30 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 0.35rem !important;
+    gap: 0.2rem !important;
     width: 100% !important;
     max-width: min(100%, 42rem) !important;
-    margin: 0 0 0.45rem !important;
+    /* Sit close to the AI message bubble below (mid gap: not airy, not flush) */
+    margin: 0 0 0.2rem !important;
     border: none !important;
     background: transparent !important;
     box-sizing: border-box !important;
+  }
+
+  /* Settled 「已完成」: slight breathing room before formal reply */
+  .deep-chat-generation-chrome.is-settled {
+    gap: 0 !important;
+    margin-bottom: 0.18rem !important;
+  }
+
+  .deep-chat-generation-chrome.is-settled .deep-chat-dt-settled {
+    margin-bottom: 0 !important;
+  }
+
+  .deep-chat-generation-chrome.is-settled .deep-chat-dt-done-toggle {
+    min-height: 24px !important;
+    padding: 0.04rem 0.1rem !important;
+    line-height: 1.3 !important;
   }
 
   /* 状态行（等待 / 正在生成）：挂在 message-toolbar 末尾，不在气泡上方 */
@@ -64,13 +81,55 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   }
 
   .deep-chat-dt-stream,
-  .deep-chat-dt-settled {
+  .deep-chat-dt-settled,
+  .deep-chat-dt-activity-list {
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
     width: 100% !important;
     border: none !important;
     background: transparent !important;
+  }
+
+  .deep-chat-dt-activity-list {
+    gap: 0.05rem !important;
+  }
+
+  .deep-chat-dt-activity {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  .deep-chat-dt-activity-meta {
+    margin-left: auto !important;
+    padding-left: 0.35rem !important;
+    color: #94a3b8 !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+  }
+
+  .deep-chat-dt-activity[data-status='running'] .deep-chat-dt-activity-meta {
+    color: #a85f3f !important;
+  }
+
+  .deep-chat-dt-activity[data-status='error'] .deep-chat-dt-activity-meta {
+    color: #b91c1c !important;
+  }
+
+  .deep-chat-dt-activity .deep-chat-dt-toggle.is-static {
+    cursor: default !important;
+  }
+
+  .deep-chat-dt-activity .deep-chat-dt-toggle.is-static .deep-chat-dt-chevron {
+    display: none !important;
+  }
+
+  /* Nested under 已完成: slightly indent activity rows for hierarchy */
+  .deep-chat-dt-done-panel .deep-chat-dt-activity-list {
+    padding-left: 0.1rem !important;
   }
 
   .deep-chat-dt-toggle,
@@ -167,10 +226,11 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
     padding-left: 0.15rem !important;
   }
 
-  /* Must beat display:flex !important so collapsed 已完成 hides 深度思考 */
+  /* Must beat display:flex !important so collapsed 已完成 hides activity list */
   .deep-chat-dt-done-panel[hidden],
   .deep-chat-dt-body[hidden],
-  .deep-chat-dt-stream[hidden] {
+  .deep-chat-dt-stream[hidden],
+  .deep-chat-dt-activity-list[hidden] {
     display: none !important;
   }
 
@@ -248,6 +308,8 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .message-bubble.ai-message {
     width: 100% !important;
     max-width: 100% !important;
+    margin-top: 0 !important;
+    padding-top: 0.1rem !important;
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
@@ -276,6 +338,10 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .message-bubble.ai-message li {
     font-size: 14px !important;
     line-height: 1.75 !important;
+  }
+
+  .message-bubble.ai-message > :first-child {
+    margin-top: 0 !important;
   }
 
   .message-bubble.ai-message h1,
@@ -427,6 +493,49 @@ export const DEEP_CHAT_AUXILIARY_STYLE = `
   .${MESSAGE_TOOLBAR_CLASS}[data-role="ai"] {
     justify-content: flex-start;
     margin-top: 12px;
+  }
+
+  /* Tool-call dumps: collapsed by default (no open attr). */
+  .deep-chat-tool-call {
+    margin: 0.5rem 0 !important;
+    padding: 0.35rem 0.6rem !important;
+    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    border-radius: 10px !important;
+    background: rgba(248, 250, 252, 0.9) !important;
+    color: #64748b !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+
+  .deep-chat-tool-call > summary {
+    cursor: pointer !important;
+    list-style: none !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    user-select: none !important;
+  }
+
+  .deep-chat-tool-call > summary::-webkit-details-marker {
+    display: none !important;
+  }
+
+  .deep-chat-tool-call > summary::before {
+    content: '▸' !important;
+    display: inline-block !important;
+    margin-right: 0.35rem !important;
+    transition: transform 0.12s ease !important;
+    color: #94a3b8 !important;
+  }
+
+  .deep-chat-tool-call[open] > summary::before {
+    transform: rotate(90deg) !important;
+  }
+
+  .deep-chat-tool-call pre,
+  .deep-chat-tool-call code {
+    font-size: 11px !important;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
   }
 
   .deep-chat-message-time {

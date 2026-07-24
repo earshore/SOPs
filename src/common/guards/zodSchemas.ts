@@ -217,11 +217,13 @@ export const createApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =
 export const LLMMessageSchema = z
   .object({
     role: z.union([z.enum(['system', 'user', 'assistant', 'tool', 'developer']), z.string()]),
-    content: z.union([z.string(), z.null()]).optional(),
+    // Official: string | null | content parts array (some gateways omit / vary).
+    content: z.union([z.string(), z.null(), z.array(z.unknown())]).optional(),
     name: z.string().optional(),
     tool_calls: z.array(z.unknown()).optional(),
     tool_call_id: z.string().optional(),
     refusal: z.union([z.string(), z.null()]).optional(),
+    reasoning_content: z.union([z.string(), z.null()]).optional(),
     function_call: z
       .object({
         name: z.string(),
@@ -241,11 +243,12 @@ export const LLMModelSchema = z.object({
 
 /**
  * LLMChatCompletionResponse Schema — gateways may vary object/extra fields.
+ * id/object optional: some proxies omit them on tool-loop hops.
  */
 export const LLMChatCompletionResponseSchema = z
   .object({
-    id: z.string(),
-    object: z.string(),
+    id: z.string().optional(),
+    object: z.string().optional(),
     created: z.number().optional(),
     model: z.string().optional(),
     choices: z
