@@ -62,9 +62,32 @@ list/get/update/deleteChatCompletion(endpoint, apiKey, ...)
 
 ## Checkpoints
 
-- CP1 Spec committed
-- CP2 Extended Create fields wired end-to-end
-- CP3 onUsage + onCompletion
-- CP4 Stream tool loop test via callLLM
-- CP5 CRUD client + tests
-- CP6 Structural verifier green + unit suite green
+- [x] CP1 Spec committed
+- [x] CP2 Extended Create fields wired end-to-end
+- [x] CP3 onUsage + onCompletion
+- [x] CP4 Stream tool loop test via callLLM
+- [x] CP5 CRUD client + tests
+- [x] CP6 Structural verifier green + unit suite green
+
+## Verification evidence (2026-07-24, main `91fa71a3`)
+
+```text
+npx tsx tools/verify-chat-create-parity.mts
+→ trueFullCreateRequest: true
+→ missingBlocking: []
+→ o3 max_completion_tokens: 256
+
+npm test -- chatCreateParity + chatCompletionsResource + llmService.stream
+→ 26 tests passed
+
+npm run type-check → exit 0
+npm run lint:warning-gate → 0/0
+```
+
+### Cannot complete (honest, not deferred work)
+
+| Item | Why |
+| ---- | --- |
+| OpenAI-hosted completion durability | CRUD is **client HTTP** to user BYOK endpoint; non-OpenAI gateways may 404 — cannot invent storage |
+| Realtime / Batch / Fine-tune | Separate APIs, not Chat Completions Create |
+| Seed determinism | Official best-effort; we pass the field only |
