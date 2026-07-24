@@ -212,12 +212,27 @@ export const createApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =
   });
 
 /**
- * LLMMessage Schema
+ * LLMMessage Schema — modern OpenAI chat shapes (nullable content, tool_calls).
  */
-export const LLMMessageSchema = z.object({
-  role: z.enum(['system', 'user', 'assistant']),
-  content: z.string(),
-});
+export const LLMMessageSchema = z
+  .object({
+    role: z.union([
+      z.enum(['system', 'user', 'assistant', 'tool', 'developer']),
+      z.string(),
+    ]),
+    content: z.union([z.string(), z.null()]).optional(),
+    name: z.string().optional(),
+    tool_calls: z.array(z.unknown()).optional(),
+    tool_call_id: z.string().optional(),
+    refusal: z.union([z.string(), z.null()]).optional(),
+    function_call: z
+      .object({
+        name: z.string(),
+        arguments: z.string(),
+      })
+      .optional(),
+  })
+  .passthrough();
 
 /**
  * LLMModel Schema
@@ -228,29 +243,37 @@ export const LLMModelSchema = z.object({
 });
 
 /**
- * LLMChatCompletionResponse Schema
+ * LLMChatCompletionResponse Schema — gateways may vary object/extra fields.
  */
-export const LLMChatCompletionResponseSchema = z.object({
-  id: z.string(),
-  object: z.literal('chat.completion'),
-  created: z.number(),
-  model: z.string(),
-  choices: z
-    .array(
-      z.object({
-        index: z.number(),
-        message: LLMMessageSchema,
-        finish_reason: z.union([
-          z.literal('stop'),
-          z.literal('length'),
-          z.literal('function_call'),
-          z.literal('content_filter'),
-          z.null(),
-        ]),
-      })
-    )
-    .min(1),
-});
+export const LLMChatCompletionResponseSchema = z
+  .object({
+    id: z.string(),
+    object: z.string(),
+    created: z.number().optional(),
+    model: z.string().optional(),
+    choices: z
+      .array(
+        z
+          .object({
+            index: z.number().optional(),
+            message: LLMMessageSchema,
+            finish_reason: z
+              .union([
+                z.literal('stop'),
+                z.literal('length'),
+                z.literal('tool_calls'),
+                z.literal('function_call'),
+                z.literal('content_filter'),
+                z.null(),
+                z.string(),
+              ])
+              .optional(),
+          })
+          .passthrough()
+      )
+      .min(1),
+  })
+  .passthrough();
 
 /**
  * AmazonProductData Schema

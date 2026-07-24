@@ -67,16 +67,22 @@ export interface PaginatedResponse<T = unknown> {
 // ==================== LLM API 响应类型 ====================
 
 /**
- * LLM 聊天消息
+ * LLM 聊天消息（OpenAI-compatible modern shape）
  */
 export interface LLMMessage {
   /** 角色 */
-  role: 'system' | 'user' | 'assistant';
-  /** 内容 */
-  content: string;
+  role: 'system' | 'user' | 'assistant' | 'tool' | 'developer' | string;
+  /** 内容（tool_calls 时可为 null） */
+  content?: string | null;
   /** 消息名称（可选） */
   name?: string;
-  /** 函数调用（可选） */
+  /** 现代 tool_calls */
+  tool_calls?: unknown[];
+  /** tool 角色回传 id */
+  tool_call_id?: string;
+  /** 拒绝文案 */
+  refusal?: string | null;
+  /** 旧版函数调用（可选） */
   function_call?: {
     name: string;
     arguments: string;
@@ -89,29 +95,39 @@ export interface LLMMessage {
 export interface LLMChatCompletionResponse {
   /** 响应ID */
   id: string;
-  /** 对象类型 */
-  object: 'chat.completion';
+  /** 对象类型（网关可能非严格字面量） */
+  object: string;
   /** 创建时间戳 */
-  created: number;
+  created?: number;
   /** 模型名称 */
-  model: string;
+  model?: string;
   /** 选择列表 */
   choices: Array<{
     /** 索引 */
-    index: number;
+    index?: number;
     /** 消息 */
     message: LLMMessage;
     /** 结束原因 */
-    finish_reason: 'stop' | 'length' | 'function_call' | 'content_filter' | null;
+    finish_reason?:
+      | 'stop'
+      | 'length'
+      | 'tool_calls'
+      | 'function_call'
+      | 'content_filter'
+      | string
+      | null;
+    logprobs?: unknown;
   }>;
   /** 使用情况 */
   usage?: {
     /** 提示词 token 数 */
-    prompt_tokens: number;
+    prompt_tokens?: number;
     /** 完成 token 数 */
-    completion_tokens: number;
+    completion_tokens?: number;
     /** 总 token 数 */
-    total_tokens: number;
+    total_tokens?: number;
+    prompt_tokens_details?: Record<string, unknown>;
+    completion_tokens_details?: Record<string, unknown>;
   };
   /** 系统指纹 */
   system_fingerprint?: string;
@@ -124,26 +140,35 @@ export interface LLMStreamChunk {
   /** 响应ID */
   id: string;
   /** 对象类型 */
-  object: 'chat.completion.chunk';
+  object: string;
   /** 创建时间戳 */
-  created: number;
+  created?: number;
   /** 模型名称 */
-  model: string;
+  model?: string;
   /** 选择列表 */
   choices: Array<{
     /** 索引 */
-    index: number;
+    index?: number;
     /** 增量消息 */
     delta: {
-      role?: 'assistant';
-      content?: string;
+      role?: string;
+      content?: string | null;
+      tool_calls?: unknown[];
       function_call?: {
         name?: string;
         arguments?: string;
       };
+      refusal?: string | null;
     };
     /** 结束原因 */
-    finish_reason: 'stop' | 'length' | 'function_call' | 'content_filter' | null;
+    finish_reason?:
+      | 'stop'
+      | 'length'
+      | 'tool_calls'
+      | 'function_call'
+      | 'content_filter'
+      | string
+      | null;
   }>;
 }
 
