@@ -91,7 +91,28 @@ describe('resolveDeepChatResponsesChainOptions (shipped request path)', () => {
     const opts = resolveDeepChatResponsesChainOptions(config, 'gpt-5.5');
     expect(opts.apiPath).toBe('chat_completions');
     expect(opts.previousResponseId).toBeUndefined();
+    expect(opts.store).toBeUndefined();
+    // Fail-closed: no tools without opt-in
     expect(opts.tools).toBeUndefined();
+  });
+
+  it('injects business tools on chat_completions when opted in (dual-path parity)', () => {
+    const config = {
+      provider: 'new_api',
+      endpoint: 'https://example.test/v1',
+      apiKey: 'k',
+      model: 'deepseek-v4-flash',
+      apiPath: 'chat_completions',
+    } as LLMProviderConfig;
+
+    const opts = resolveDeepChatResponsesChainOptions(config, 'deepseek-v4-flash', {
+      enableBusinessTools: true,
+    });
+    expect(opts.apiPath).toBe('chat_completions');
+    expect(opts.previousResponseId).toBeUndefined();
+    expect(opts.tools).toBeDefined();
+    expect(opts.enableToolLoop).toBe(true);
+    expect(typeof opts.executeTool).toBe('function');
   });
 
   it('stripResponsesChainForRetry keeps tools and forces store false', () => {

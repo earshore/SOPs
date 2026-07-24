@@ -81,7 +81,9 @@ export function resolveDeepChatResponsesChainOptions(
     (config as { apiPath?: unknown }).apiPath ??
       StorageService.getLLMConfig(config.provider)?.apiPath
   );
-  if (apiPath !== 'responses') {
+
+  // Dual-path Create parity: tools on chat_completions and responses (not responses-only).
+  if (apiPath !== 'responses' && apiPath !== 'chat_completions') {
     return { apiPath };
   }
 
@@ -92,7 +94,7 @@ export function resolveDeepChatResponsesChainOptions(
   const cap = resolveModelCapability({
     provider: config.provider,
     modelId: model,
-    preferredSurface: 'responses',
+    preferredSurface: apiPath,
   });
 
   // Fail-closed product rule: tools only when capability supports them AND opt-in enabled.
@@ -110,6 +112,11 @@ export function resolveDeepChatResponsesChainOptions(
           maxToolRounds: 4,
         }
       : {};
+
+  // previous_response_id / store only apply to Responses.
+  if (apiPath === 'chat_completions') {
+    return { apiPath, ...toolOptions };
+  }
 
   // Only request store/previous_id when capability allows (fail-closed registry + gateway).
   const canChain =
