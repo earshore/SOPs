@@ -335,7 +335,7 @@ describe('模型列表同步', () => {
 
     await expect(
       fetchModelsFromApi('new_api', 'https://new.hongecb.store/v1', 'browser-key')
-    ).resolves.toEqual([{ id: 'gpt-5.5', context: 128000, features: [] }]);
+    ).resolves.toEqual([{ id: 'gpt-5.5', context: 32_768, features: [] }]);
 
     expect(global.fetch).toHaveBeenCalledWith(
       'https://new.hongecb.store/v1/models',

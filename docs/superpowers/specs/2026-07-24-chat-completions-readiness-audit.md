@@ -12,7 +12,7 @@
 | 判定维度 | 结论 | 说明 |
 | -------- | ---- | ---- |
 | **SOPs 产品主路径**（文本对话 / 分析 JSON / 推理开关 / 流式） | **GO（产品子集）** | Phase A：校验放宽、max_completion_tokens、tools 路径 fail-closed、空正文诊断、`probe:chat` |
-| **官方 Chat Completions 全量 API 等价** | **不可声称（NO）** | 缺 tools/vision/json_schema/max_completion_tokens/多模态消息等；类型与校验落后于 2024–2026 官方 shape |
+| **官方 Chat Completions 全量 API 等价** | **不可声称（NO）** | 缺 chat tools loop / vision / json_schema / 多模态 messages / Completions CRUD 等；产品子集已硬化 |
 | **默认路径 Grok / DeepSeek 文本** | **接近可上线** | Registry 默认 `chat_completions` + `reasoning_effort`；probe 与单测有实证 |
 | **OpenAI o / GPT-5 走 chat 回退** | **有风险** | 仍发 `max_tokens`（官方标注 deprecated 且与 o 系不兼容）；官方推荐 Responses，本项目默认也是 Responses，但 404 回退会落到 chat |
 | **Deep Chat tools / vision 在 chat 路径** | **未达上线** | `buildChatCompletionsBody` **丢弃** tools/vision；surface 能力位未声明 |
@@ -48,12 +48,12 @@ P0 已在 `feat/chat-completions-hardening` 落地；P1 其余项见路线图 Ph
 | `stream` | ✅ 默认 true | — | |
 | `stream_options` / `include_usage` | ❌ | P1 | 流式无 usage 回传 |
 | `temperature` | ✅ | — | reasoning 模型 `temperatureIgnored` 时省略 |
-| `max_tokens` | ⚠️ 使用中 | **P0** | 官方 **Deprecated**；o 系不兼容；应映射 `max_completion_tokens` |
-| `max_completion_tokens` | ❌ 未发 | **P0** | 官方推荐 |
+| `max_tokens` | ✅ 遗留网关 / Claude | — | 非 OpenAI 推理模型仍用 |
+| `max_completion_tokens` | ✅ OpenAI 推理 chat | — | Phase A：`applyChatMaxOutputTokens` |
 | `response_format` `json_object` | ✅ | — | jsonMode |
 | `response_format` `json_schema` | ❌ chat 路径 | P1 | Responses 有；chat 仅 object |
 | `service_tier` | ✅ 可选 | — | |
-| `tools` / `tool_choice` / `parallel_tool_calls` | ❌ chat body 忽略 | **P0 产品** | Responses 有 tool loop；chat 静默丢弃 |
+| `tools` / `tool_choice` / `parallel_tool_calls` | ❌ chat body 不实现 | **产品冻结 B2** | `enableToolLoop` 非 responses → `LLM_TOOLS_PATH_UNSUPPORTED`；软传 tools 仍忽略 |
 | `reasoning_effort` | ✅ mapper | — | OpenAI / Grok / DeepSeek 兼容 |
 | Claude `thinking` on chat | ✅ mapper | 网关依赖 | channel 可能 400，有文案 |
 | Gemini dual fields on chat | ✅ mapper | 网关依赖 | |
@@ -67,9 +67,9 @@ P0 已在 `feat/chat-completions-hardening` 落地；P1 其余项见路线图 Ph
 | 官方 shape | 本项目 | 严重度 | 备注 |
 | ---------- | ------ | ------ | ---- |
 | `choices[].message.content` string | ✅ | — | |
-| `content: null` + tool_calls | ❌ 校验/类型假设 string | **P0** | Zod `content: z.string()` 会拒合法响应 |
-| `finish_reason: tool_calls` | ❌ 类型仅 `function_call` | **P0** | 落后官方 |
-| `message.tool_calls` | ❌ | P1 | 无 chat tool 闭环 |
+| `content: null` + tool_calls | ✅ 校验放宽 | — | Phase A：Zod nullable + tool_calls finish_reason |
+| `finish_reason: tool_calls` | ✅ | — | Phase A |
+| `message.tool_calls` | ⚠️ 类型接受，无 loop | P1 | 产品 tools 走 Responses |
 | `message.refusal` / annotations | ❌ | P2 | |
 | `usage` + `completion_tokens_details.reasoning_tokens` | ⚠️ 类型弱 | P1 | 未消费 usage |
 | SSE `data: [DONE]` + delta.content | ✅ | — | |
@@ -127,12 +127,12 @@ settings.llm.apiPath (默认 chat_completions)
 
 ### P0 — 上线阻断 / 高概率线上故障
 
-| ID | 债务 | 影响 | 建议修复 |
-| -- | ---- | ---- | -------- |
-| **CC-P0-1** | 始终发送 `max_tokens`，从不发 `max_completion_tokens` | o1/o3/GPT-5 等在官方或严格网关上 400 | 按模型/能力发 `max_completion_tokens`；兼容网关可 dual-write 或探测后切换 |
-| **CC-P0-2** | `LLMChatCompletionResponseSchema` 过严：`content` 必 string、`object` 必 `chat.completion`、`finish_reason` 无 `tool_calls` | 合法响应被 `API_INVALID_RESPONSE` 误杀 | 放宽 Zod/类型：content nullable；finish_reason 增补；object 宽松 |
-| **CC-P0-3** | `options.tools` / vision 在 chat path **静默丢弃** | 用户以为 tools 生效；行为与设置路径不一致 | 要么 chat 实现 tools 子集，要么 resolve 时明确降级并打日志/UI 提示 |
-| **CC-P0-4** | chat surface 能力位全 false（tools/structured/vision） | 设置徽章与真实官方能力不符；功能门闩错误 | 在 registry `chat_completions` surface 声明与产品一致的 flags |
+| ID | 债务 | 状态 | 说明 |
+| -- | ---- | ---- | ---- |
+| **CC-P0-1** | `max_completion_tokens` 策略 | **已修复** | OpenAI 推理 → `max_completion_tokens`；Claude/thinking → `max_tokens` |
+| **CC-P0-2** | 响应 Zod 过严 | **已修复** | nullable content、`tool_calls` finish_reason、object 宽松 |
+| **CC-P0-3** | tools 静默丢弃 | **部分修复** | 硬路径：`enableToolLoop` 非 responses 抛错；软路径：仅 `tools` 仍静默忽略（B2 产品冻结） |
+| **CC-P0-4** | chat surface 能力位 | **已修复** | structured=true；tools/vision=false（诚实） |
 
 ### P1 — 上线后短期应补
 
@@ -142,10 +142,10 @@ settings.llm.apiPath (默认 chat_completions)
 | **CC-P1-2** | 无 `response_format.json_schema` on chat | 与分析 `withStructuredAnalysisOptions` 对齐 |
 | **CC-P1-3** | 消息仅 string；无 image_url / input_audio parts | 多模态产品前实现 content union |
 | **CC-P1-4** | 无 `stream_options: { include_usage: true }` | 成本与用量统计 |
-| **CC-P1-5** | chat 空正文弱于 Responses（无专用 empty 诊断） | 对称 `describeChatEmptyBody` |
-| **CC-P1-6** | 无 `npm run probe:chat` 矩阵 | 覆盖 max_completion_tokens、json_object、stream、reasoning_effort |
-| **CC-P1-7** | 类型 `LLMMessage` / stream delta 缺 tool_calls、refusal | 与官方对齐，避免下游静默丢字段 |
-| **CC-P1-8** | Claude/Gemini 经 chat 的 channel 差异 | 文档 + probe 固化；mapper 可配置 |
+| **CC-P1-5** | chat 空正文弱于 Responses | **已修复（子集）** | 空 stop → `API_EMPTY_RESPONSE`；tool_calls 放行 |
+| **CC-P1-6** | 无 `npm run probe:chat` 矩阵 | **已修复** | `tools/probe-chat-gateway.mjs` |
+| **CC-P1-7** | 类型 `LLMMessage` / stream delta 缺 tool_calls、refusal | **已修复** | `api.d.ts` + Zod |
+| **CC-P1-8** | Claude/Gemini 经 chat 的 channel 差异 | 仍开放 | 文档 + probe 固化；mapper 可配置 |
 
 ### P2 — 增强 / 明确不做
 
@@ -211,16 +211,42 @@ settings.llm.apiPath (默认 chat_completions)
 
 ---
 
-## 7. 验证基线（审计时）
+## 7. 验证基线
+
+### 审计时（实现前）
 
 ```text
 npm test -- --run src/services/modelCapability/applyToRequest.test.ts \
   src/services/modelCapability/apiPaths.test.ts \
   src/services/llmService.stream.test.ts
-→ 3 files / 33 tests passed (2026-07-24)
+→ 3 files / 33 tests passed
 ```
 
-实网：`npm run probe:reasoning`（部分 chat）；`npm run probe:responses`（Responses）。
+### Phase A 闭环验证（2026-07-24，worktree `feat/chat-completions-hardening`）
+
+```text
+npm test -- --run src/services/modelCapability src/services/llmService.stream.test.ts \
+  tests/unit/common/guards/typeGuards.llm.test.ts
+→ 14 files / 99 tests passed
+
+npm test -- --run tests/unit/llmService.test.ts
+→ 23/23 passed（含修正 string 模型默认 context=32768 期望）
+
+npm run type-check
+→ exit 0
+```
+
+实网（需 KEY，本闭环未强制跑）：`npm run probe:chat` · `probe:reasoning` · `probe:responses`。
+
+### 残留债务（明确不阻塞产品子集上线）
+
+| 类 | 项 | 处置 |
+| -- | -- | -- |
+| 产品冻结 | chat tool loop / vision / json_schema on chat | Phase B 或继续走 Responses |
+| 软路径 | 仅传 `tools` 不设 `enableToolLoop` 时 chat 静默忽略 | 可接受；硬路径已 fail-closed |
+| 网关 | Claude/Gemini channel 字段差异 | P1-8 probe 固化 |
+| 流程 | 代码在 worktree 分支，**尚未 merge main** | 集成选项 1/2 |
+| 全量 API | Completions CRUD / audio 等 | out of scope |
 
 ---
 
