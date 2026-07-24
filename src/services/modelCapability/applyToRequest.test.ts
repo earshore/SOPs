@@ -518,6 +518,62 @@ describe('buildResponsesBody', () => {
     ]);
   });
 
+  it('emits official Responses Create pass-through fields when configured', () => {
+    const capability = {
+      modelId: 'gpt-5.5',
+      provider: 'openai',
+      contextWindow: 256_000,
+      apiSurface: 'responses' as const,
+      supportsReasoning: true,
+      reasoningEfforts: ['low', 'medium', 'high'],
+      defaultEffort: 'medium',
+      temperatureIgnored: false,
+      features: [],
+      mapRequest: null,
+      supportsStructuredOutput: true,
+      supportsTools: true,
+      supportsVision: true,
+      supportsPreviousResponseId: false,
+      supportsStore: false,
+      supportsBuiltInTools: true,
+      supportsReasoningSummary: true,
+      source: { registryMatched: true, preferredSurface: 'responses' as const },
+    } as unknown as ResolvedModelCapability;
+
+    const body = buildResponsesBody({
+      model: 'gpt-5.5',
+      messages: [{ role: 'user', content: 'hi' }],
+      temperature: 0.4,
+      maxTokens: 50,
+      stream: false,
+      capability,
+      reasoning: { enabled: false, effort: 'off' },
+      topP: 0.8,
+      topLogprobs: 3,
+      metadata: { k: 'v' },
+      promptCacheKey: 'pcache',
+      safetyIdentifier: 'safe-1',
+      user: 'legacy',
+      truncation: 'auto',
+      background: false,
+      maxToolCalls: 4,
+      include: ['reasoning.encrypted_content'],
+    });
+
+    expect(body.top_p).toBe(0.8);
+    expect(body.top_logprobs).toBe(3);
+    expect(body.metadata).toEqual({ k: 'v' });
+    expect(body.prompt_cache_key).toBe('pcache');
+    expect(body.safety_identifier).toBe('safe-1');
+    expect(body.user).toBe('legacy');
+    expect(body.truncation).toBe('auto');
+    expect(body.background).toBe(false);
+    expect(body.max_tool_calls).toBe(4);
+    expect(body.include).toEqual(['reasoning.encrypted_content']);
+    expect(body.temperature).toBe(0.4);
+    expect(body.store).toBe(false);
+  });
+
   it('R5: text.format json_schema with strict', () => {
     const capability = {
       apiSurface: 'responses' as const,

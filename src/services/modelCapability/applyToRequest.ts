@@ -334,6 +334,17 @@ export type ResponsesBodyExtras = {
    * becomes the sole `input` for the next Responses request.
    */
   followUpInputItems?: Array<Record<string, unknown>>;
+  /** Official Create pass-through (when set). */
+  topP?: number;
+  topLogprobs?: number;
+  metadata?: Record<string, string>;
+  promptCacheKey?: string;
+  safetyIdentifier?: string;
+  user?: string;
+  truncation?: string;
+  background?: boolean;
+  maxToolCalls?: number;
+  include?: string[];
 };
 
 /**
@@ -467,6 +478,35 @@ function applyResponsesTextFormat(
   }
 }
 
+function applyResponsesCreatePassThrough(
+  body: Record<string, unknown>,
+  args: {
+    serviceTier?: string;
+    topP?: number;
+    topLogprobs?: number;
+    metadata?: Record<string, string>;
+    promptCacheKey?: string;
+    safetyIdentifier?: string;
+    user?: string;
+    truncation?: string;
+    background?: boolean;
+    maxToolCalls?: number;
+    include?: string[];
+  }
+): void {
+  setIfDefined(body, 'service_tier', args.serviceTier);
+  setIfDefined(body, 'top_p', args.topP);
+  setIfDefined(body, 'top_logprobs', args.topLogprobs);
+  setIfDefined(body, 'metadata', args.metadata);
+  setIfDefined(body, 'prompt_cache_key', args.promptCacheKey);
+  setIfDefined(body, 'safety_identifier', args.safetyIdentifier);
+  setIfDefined(body, 'user', args.user);
+  setIfDefined(body, 'truncation', args.truncation);
+  setIfDefined(body, 'background', args.background);
+  setIfDefined(body, 'max_tool_calls', args.maxToolCalls);
+  setIfDefined(body, 'include', args.include);
+}
+
 function applyResponsesOptionalFields(
   body: Record<string, unknown>,
   args: {
@@ -479,11 +519,19 @@ function applyResponsesOptionalFields(
     tools?: unknown[];
     toolChoice?: unknown;
     parallelToolCalls?: boolean;
+    topP?: number;
+    topLogprobs?: number;
+    metadata?: Record<string, string>;
+    promptCacheKey?: string;
+    safetyIdentifier?: string;
+    user?: string;
+    truncation?: string;
+    background?: boolean;
+    maxToolCalls?: number;
+    include?: string[];
   }
 ): void {
-  if (args.serviceTier) {
-    body.service_tier = args.serviceTier;
-  }
+  applyResponsesCreatePassThrough(body, args);
   applyResponsesTextFormat(body, args);
   const prev = args.previousResponseId?.trim();
   if (prev && args.capability.supportsPreviousResponseId) {

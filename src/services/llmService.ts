@@ -178,6 +178,11 @@ export interface LLMOptions {
    * Does not replace the string return of callLLM.
    */
   onCompletion?: (completion: Record<string, unknown>) => void;
+  /** Responses Create pass-through */
+  truncation?: string;
+  background?: boolean;
+  maxToolCalls?: number;
+  include?: string[];
 }
 
 export interface LLMStreamMetrics {
@@ -940,6 +945,10 @@ interface ResolvedLLMOptions {
   webSearchOptions?: Record<string, unknown>;
   onUsage?: LLMOptions['onUsage'];
   onCompletion?: LLMOptions['onCompletion'];
+  truncation?: string;
+  background?: boolean;
+  maxToolCalls?: number;
+  include?: string[];
   /** Internal: function_call_output items for next Responses request */
   followUpInputItems?: Array<Record<string, unknown>>;
 }
@@ -1089,6 +1098,10 @@ function resolveLLMOptions(
     webSearchOptions: options.webSearchOptions,
     onUsage: options.onUsage,
     onCompletion: options.onCompletion,
+    truncation: options.truncation,
+    background: options.background,
+    maxToolCalls: options.maxToolCalls,
+    include: options.include,
     followUpInputItems: undefined,
   };
 }
@@ -1318,6 +1331,10 @@ function createLLMTransport(args: {
     audio: args.options.audio,
     prediction: args.options.prediction,
     webSearchOptions: args.options.webSearchOptions,
+    truncation: args.options.truncation,
+    background: args.options.background,
+    maxToolCalls: args.options.maxToolCalls,
+    include: args.options.include,
   });
 
   const { fullUrl, pathSuffix } = buildFullApiUrl(args.endpoint, pathId, args.model);

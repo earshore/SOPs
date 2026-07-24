@@ -199,6 +199,10 @@ export type BuildBodyForApiPathArgs = {
   audio?: Record<string, unknown>;
   prediction?: Record<string, unknown>;
   webSearchOptions?: Record<string, unknown>;
+  truncation?: string;
+  background?: boolean;
+  maxToolCalls?: number;
+  include?: string[];
 };
 
 function buildResponsesBodyFromPathArgs(args: BuildBodyForApiPathArgs): Record<string, unknown> {
@@ -220,6 +224,16 @@ function buildResponsesBodyFromPathArgs(args: BuildBodyForApiPathArgs): Record<s
     parallelToolCalls: args.parallelToolCalls,
     visionUserParts: args.visionUserParts,
     followUpInputItems: args.followUpInputItems,
+    topP: args.topP,
+    topLogprobs: args.topLogprobs,
+    metadata: args.metadata,
+    promptCacheKey: args.promptCacheKey,
+    safetyIdentifier: args.safetyIdentifier,
+    user: args.user,
+    truncation: args.truncation,
+    background: args.background,
+    maxToolCalls: args.maxToolCalls,
+    include: args.include,
   });
 }
 

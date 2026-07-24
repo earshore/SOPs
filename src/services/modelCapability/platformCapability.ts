@@ -103,9 +103,16 @@ export const OPENAI_PLATFORM_CAPABILITY_MATRIX: PlatformCapabilityRow[] = [
     id: 'resp.parallel_tools',
     area: 'Responses',
     feature: 'parallel_tool_calls',
-    status: 'partial',
-    entry: 'applyToRequest (tool_choice pass-through)',
-    notes: 'Not exposed as user preference',
+    status: 'implemented',
+    entry: 'applyToRequest applyResponsesToolsFields',
+    notes: 'Pass-through when tools present; no product UI toggle',
+  },
+  {
+    id: 'resp.create_passthrough',
+    area: 'Responses',
+    feature: 'top_p / metadata / cache keys / truncation / background / max_tool_calls / include',
+    status: 'implemented',
+    entry: 'applyToRequest applyResponsesCreatePassThrough',
   },
   // --- Chat Completions product subset ---
   {
